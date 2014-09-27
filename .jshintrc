@@ -1,0 +1,17 @@
+{
+    "eqnull": true,
+    "loopfunc": true,
+    "sub": true,
+    "globalstrict": true,
+    "globals": {
+        "console": true,
+        "global": true,
+        "module": true,
+        "process": true,
+        "require": true,
+        "Buffer": true,
+        "setTimeout": true,
+        "__dirname": false,
+        "__filename": false
+    }
+}

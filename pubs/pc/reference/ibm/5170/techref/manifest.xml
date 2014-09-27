@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.15.3/manifest.xsl"?>
+<manifest type="document">
+	<title>IBM 5170 Technical Reference</title>
+	<source href="http://minuszerodegrees.net">minuszerodegrees.net</source>
+	<document href="http://minuszerodegrees.net/manuals/IBM_5170_Technical_Reference_1502243_MAR84.pdf">
+		<name>IBM 5170 Technical Reference (March 1984)</name>
+		<cover href="../../static/5170/techref/thumbs/IBM-5170-TECHREF 1.jpeg"/>
+		<page href="#page=48">I/O Address Map</page>
+		<page href="#page=67">CMOS Addresses</page>
+		<page href="#page=165">BIOS Map</page>
+		<page href="#page=169">BIOS Listing</page>
+		<page href="#page=175">TEST.01: X286 Processor Test</page>
+		<page href="#page=177">TEST.02: Verify CMOS Shutdown Byte</page>
+	</document>
+</manifest>

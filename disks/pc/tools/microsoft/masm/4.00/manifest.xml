@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.15.3/manifest.xsl"?>
+<manifest type="software">
+	<title>Microsoft Macro Assember</title>
+	<type>Tool</type>
+	<category>Assembler</category>
+	<author>Microsoft</author>
+	<releaseDate/>
+	<disk id="disk01" href="/disks/pc/tools/microsoft/masm/4.00/MASM-016014-400.json">
+		<name>MS MASM 4.00</name>
+	</disk>
+</manifest>

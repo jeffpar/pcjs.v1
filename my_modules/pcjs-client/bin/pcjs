@@ -1,0 +1,365 @@
+#!/usr/bin/env node
+/**
+ * @fileoverview Implements the PCjs command-line interface
+ * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
+ * @version 1.0
+ * @suppress {missingProperties}
+ * Created 2012-Sep-04
+ *
+ * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
+ *
+ * This file is part of PCjs, which is part of the JavaScript Machines Project (aka JSMachines)
+ * at <http://jsmachines.net/> and <http://pcjs.org/>.
+ *
+ * PCjs is free software: you can redistribute it and/or modify it under the terms of the
+ * GNU General Public License as published by the Free Software Foundation, either version 3
+ * of the License, or (at your option) any later version.
+ *
+ * PCjs is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with PCjs.  If not,
+ * see <http://www.gnu.org/licenses/gpl.html>.
+ *
+ * You are required to include the above copyright notice in every source code file of every
+ * copy or modified version of this work, and to display that copyright notice on every screen
+ * that loads or runs any version of this software (see Computer.sCopyright).
+ *
+ * Some PCjs files also attempt to load external resource files, such as character-image files,
+ * ROM files, and disk image files. Those external resource files are not considered part of the
+ * PCjs program for purposes of the GNU General Public License, and the author does not claim
+ * any copyright as to their contents.
+ */
+
+"use strict";
+
+var path = require("path");
+var fs = require("fs");
+var repl = require("repl");
+var str = require("../../shared/lib/strlib");
+var proc = require("../../shared/lib/proclib");
+
+var fConsole = false;
+var fDebug = false;
+var args = proc.getArgs();
+var argv = args.argv;
+if (argv['console'] !== undefined) fConsole = argv['console'];
+if (argv['debug'] !== undefined) fDebug = argv['debug'];
+
+var lib = path.join(path.dirname(fs.realpathSync(__filename)), "../lib/");
+
+try {
+    var pkg = require(lib + "../../../package.json");
+} catch(err) {
+    console.log(err.message);
+}
+
+/*
+ * We will build an array of components whose names will match the component names used
+ * in a JSON machine definition file; eg:
+ * 
+ *  [
+ *      {name: "panel",
+ *       Create: Panel,
+ *       objects: []
+ *      },
+ *      {name: "chipset":
+ *       Create: ChipSet,
+ *       objects: []
+ *      },
+ *      ...
+ *  ]
+ *  
+ * Every component name comes from the component filename, minus the ".js" extension;
+ * Create is the constructor returned by require().  The only bit of fudging we do is
+ * overriding the constructor for component "cpu" with the constructor for "x86cpu",
+ * because when a "cpu" definition is encountered, it's the "x86cpu" subclass that we
+ * actually want to create, not the "cpu" superclass.
+ * 
+ * TODO: Update the list of ignored (ie, ignorable) components.
+ */
+var Component;
+var dbg;
+var aComponents = [];
+var asComponentsIgnore = ["embed"];
+
+/**
+ * loadComponents(asFiles)
+ * 
+ * @param {Array.<string>} asFiles
+ */
+function loadComponents(asFiles)
+{
+    for (var i = 0; i < asFiles.length; i++) {
+        var sFile = asFiles[i];
+        if (str.getExtension(sFile) != "js") continue;
+        var sName = str.getBaseName(sFile, true);
+        if (asComponentsIgnore.indexOf(sName) >= 0) continue;
+        if (fDebug) console.log(sFile);
+        try {
+            /*
+             * We COULD load ("require") all the files on-demand, because it's only the
+             * browser initialization sequence we want to mimic in loadMachine(), but this
+             * is simpler, and it also gives us direct references to certain components
+             * we'll want to access later (eg, "component" in getComponentByType()).
+             */
+            var fn = require(lib + "../../../" + sFile);
+            if (sName == "x86cpu") {
+                for (var j = 0; j < aComponents.length; j++) {
+                    if (aComponents[j].name == "cpu") {
+                        aComponents[j].Create = fn;
+                        sName = null;
+                        break;
+                    }
+                }
+            }
+            if (sName == "component") {
+                fn.println = function(s, type) {
+                    console.log((type !== undefined? (type + ": ") : "") + (s || ""));
+                };      // jshint ignore:line
+            }
+            if (sName) {
+                aComponents.push({name: sName, Create: fn, objects: []});
+            }
+            if (sName == "defines") {
+                /*
+                 * Enabling component console messages requires setting CONSOLE to true.
+                 */ 
+                if (global.DEBUG !== undefined) {
+                    global.DEBUG = fDebug;
+                    global.CONSOLE = fConsole;
+                }
+            }
+        } catch(err) {
+            console.log(err.message);
+        }
+    }
+}
+
+/**
+ * getComponentByName(sName)
+ * 
+ * @param sName
+ * @return {*}
+ */
+function getComponentByName(sName)
+{
+    for (var i = 0; i < aComponents.length; i++) {
+        if (aComponents[i].name == sName) {
+            return aComponents[i].Create;
+        }
+    }
+    return null;
+}
+
+/**
+ * getComponentByType(sType)
+ *
+ * @param sType
+ * @return {*}
+ */
+function getComponentByType(sType)
+{
+    var component = null;
+    
+    if (!Component) {
+        Component = getComponentByName("component");
+    }
+    if (Component) {
+        component = Component.getComponentByType(sType);
+    }
+    return component;
+}
+
+/**
+ * loadMachine(sFile)
+ * 
+ * @param {string} sFile
+ * @return {Object} representing the machine whose component objects have been loaded into aComponents
+ */
+function loadMachine(sFile)
+{
+    if (fDebug) console.log('loadMachine("' + sFile + '")');
+    
+    /*
+     * Clear any/all saved objects from any previous machine
+     */
+    var i, j;
+    Component = dbg = null;
+    for (i = 0; i < aComponents.length; i++) {
+        aComponents[i].objects = [];
+    }
+    
+    var machine;
+    try {
+        /*
+         * Since our JSON files may contain comments, hex values, and/or other tokens deemed
+         * unacceptable by the JSON Overlords, we can't use require() to load it, as we're able to
+         * do with "package.json".  Also note that require() assumes the same path as that of the
+         * requiring file, whereas fs.readFileSync() assumes the path reported by process.cwd().
+         * 
+         * TODO: Actually, I removed the comments from my sample "machine.json" file, so we should
+         * try to reinstate this code now.
+         *
+         *      var machine = require(lib + "../bin/" +sFile);
+         */
+        var sMachine = fs.readFileSync(sFile, {encoding: "utf8"});
+        sMachine = '(' + sMachine + ')';
+        if (fDebug) console.log(sMachine);
+        machine = eval(sMachine);       // jshint ignore:line
+        if (machine) {
+            /*
+             * Since we have a machine object, we now mimic the initialization sequence that occurs
+             * in the browser, by walking the list of PCjs components we loaded above and looking for
+             * matches.
+             */
+            for (i = 0; i < aComponents.length; i++) {
+                var parms = machine[aComponents[i].name];
+                /*
+                 * If parms is undefined, it means there is no component with that name defined in the
+                 * machine object (NOT that the component has no parms), and therefore we should skip it.
+                 */
+                if (parms === undefined) continue;
+                /*
+                 * If parms is an Array, then we must create an object for each parms element;  and yes,
+                 * I'm relying on the fact that none of my parm objects use a "length" property, as a quick
+                 * and dirty way of differentiating objects from arrays.
+                 */
+                var aParms = parms.length !== undefined? parms : [parms];
+                for (j = 0; j < aParms.length; j++) {
+                    
+                    var obj;
+                    if (fDebug) console.log("creating " + aComponents[i].name + "...");
+                    if (fDebug) console.log(aParms[j]);
+                    
+                    if (aComponents[i].name == "cpu") {
+                        aParms[j]['autoStart'] = false;
+                    }
+                    
+                    try {
+                        obj = new aComponents[i].Create(aParms[j]);
+                    } catch(err) {
+                        console.log("error creating " + aComponents[i].name + ": " + err.message);
+                        continue;
+                    }
+                    
+                    console.log(obj['id'] + " object created");
+                    if (fDebug) {
+                        /*
+                         * TODO: Determine why a simple "console.log(obj)" call fails on the Video object
+                         */
+                        console.log(JSON.stringify(obj));
+                    }
+                    aComponents[i].objects.push(obj);
+                    
+                    if (obj.type == "Debugger") {
+                        dbg = obj;
+                    }
+                }
+            }
+            /*
+             * Return the original machine object only in DEBUG mode
+             */
+            if (!fDebug) machine = true;
+        }
+    } catch(err) {
+        console.log(err.message);
+    }
+    return machine;
+}
+
+/**
+ * doCommand(sCmd)
+ * 
+ * @param {string} sCmd
+ * @return {*}
+ */
+function doCommand(sCmd)
+{
+    var result = false;
+    var aTokens = sCmd.split(' ');
+    
+    switch(aTokens[0]) {
+    case "cwd":
+        result = process.cwd();
+        break;
+    case "load":
+        result = loadMachine(aTokens[1]);
+        break;
+    case "quit":
+        process.exit();
+        result = true;
+        break;
+    default:
+        if (sCmd) {
+            try {
+                if (dbg && !dbg.doCommand(sCmd, true)) {
+                    sCmd = '(' + sCmd + ')';
+                    result = eval(sCmd);        // jshint ignore:line
+                }
+            } catch(err) {
+                console.log(err.message);
+            }
+        }
+        break;
+    }
+    return result;
+}
+
+/**
+ * onCommand(cmd, context, filename, callback)
+ * 
+ * The Node docs (http://nodejs.org/api/repl.html) say that repl.start's "eval" option is:
+ * 
+ *      a function that will be used to eval each given line; defaults to an async wrapper for eval()
+ *      
+ * and it gives this example of such a function:
+ * 
+ *      function eval(cmd, context, filename, callback) {
+ *          callback(null, result);
+ *      }
+ *      
+ * but it defines NEITHER the parameters for the function NOR the parameters for the callback().
+ * 
+ * It's pretty clear that "result" is expected to return whatever "eval()" would return for the expression
+ * in "cmd" (which is always parenthesized in preparation for a call to "eval()"), but it's not clear what
+ * the first callback() parameter (represented by null) is supposed to be.  Should we assume it's an Error
+ * object, in case we want to report an error?
+ * 
+ * @param {string} cmd
+ * @param {Object} context
+ * @param {string} filename
+ * @param {function(Object|null, Object)} callback
+ */
+var onCommand = function (cmd, context, filename, callback)
+{
+    var result = false;
+    var match = cmd.match(/\(\s*(.*)\s*\)/);
+    if (match) {
+        result = doCommand(match[1]);
+    }
+    callback(null, result);
+};
+
+if (pkg) {
+    loadComponents(pkg.pcJSFiles);
+}
+
+/*
+ * Before falling into the REPL, process any command-line (--cmd) commands -- which should eventually include batch files.
+ */
+if (argv['cmd'] !== undefined) {
+    var cmds = argv['cmd'];
+    var aCmds = (typeof cmds == "string"? [cmds] : cmds);
+    for (var i = 0; i < aCmds.length; i++) {
+        doCommand(aCmds[i]);
+    }
+}
+
+repl.start({
+    prompt: "PCjs> ",
+    input: process.stdin,
+    output: process.stdout,
+    eval: onCommand 
+});

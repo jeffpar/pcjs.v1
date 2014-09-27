@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.15.3/manifest.xsl"?>
+<manifest type="document">
+	<title>IBM 5150 Manuals</title>
+	<source href="http://minuszerodegrees.net">minuszerodegrees.net</source>
+	<document href="http://minuszerodegrees.net/manuals/IBM_5150_Technical_Reference_6025005_AUG81.pdf">
+		<name>IBM 5150 Technical Reference (August 1981)</name>
+		<cover href="../../static/5150/techref/thumbs/IBM-5150-TECHREF 1.jpeg"/>
+		<page href="#page=109">Floppy Disk Adapter</page>
+	</document>
+</manifest>

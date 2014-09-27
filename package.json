@@ -1,0 +1,130 @@
+{
+  "name": "pcjs",
+  "version": "1.15.3",
+  "description": "Node-enabled version of JSMachines",
+  "main": "server.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jeffpar/jsmachines.git"
+  },
+  "keywords": [
+    "pcjs",
+    "ibm",
+    "pc",
+    "emulator",
+    "javscript"
+  ],
+  "author": "Jeff Parsons <Jeff@pcjs.org>",
+  "licenses": [
+    {
+      "type": "GPLv3",
+      "url": "http://www.gnu.org/licenses/gpl.html"
+    }
+  ],
+  "bugs": {
+    "url": "https://github.com/jeffpar/jsmachines/issues"
+  },
+  "homepage": "https://github.com/jeffpar/jsmachines",
+  "dependencies": {
+    "express": "~3.4.8",
+    "express-slash": "^1.0.0",
+    "glob": "^3.2.9",
+    "mkdirp": "^0.3.5",
+    "socket.io": "^0.9.16"
+  },
+  "devDependencies": {
+    "grunt": "^0.4.3",
+    "grunt-closure-tools": "^0.9.4",
+    "grunt-contrib-copy": "^0.5.0",
+    "grunt-newer": "^0.6.1",
+    "grunt-run": "^0.2.1",
+    "grunt-contrib-concat": "^0.3.0",
+    "grunt-text-replace": "^0.3.11",
+    "heapdump": "^0.2.7",
+    "xml2js": "^0.4.2",
+    "async": "^0.6.2",
+    "unzip": "^0.1.9",
+    "codepainter": "~0.3.29",
+    "editorconfig": "^0.11.4"
+  },
+  "optionalDependencies": {
+    "serialport": "~1.3.1",
+    "replace": "^0.2.9"
+  },
+  "closureCompilerExterns": [
+    "./my_modules/shared/lib/externs.js"
+  ],
+  "c1pCSSFiles": [
+    "./my_modules/c1pjs-client/templates/components.css"
+  ],
+  "c1pJSFiles": [
+    "./my_modules/shared/lib/defines.js",
+    "./my_modules/shared/lib/dumpapi.js",
+    "./my_modules/shared/lib/reportapi.js",
+    "./my_modules/shared/lib/strlib.js",
+    "./my_modules/shared/lib/usrlib.js",
+    "./my_modules/shared/lib/weblib.js",
+    "./my_modules/shared/lib/component.js",
+    "./my_modules/c1pjs-client/lib/defines.js",
+    "./my_modules/c1pjs-client/lib/panel.js",
+    "./my_modules/c1pjs-client/lib/cpu.js",
+    "./my_modules/c1pjs-client/lib/rom.js",
+    "./my_modules/c1pjs-client/lib/ram.js",
+    "./my_modules/c1pjs-client/lib/keyboard.js",
+    "./my_modules/c1pjs-client/lib/video.js",
+    "./my_modules/c1pjs-client/lib/serial.js",
+    "./my_modules/c1pjs-client/lib/disk.js",
+    "./my_modules/c1pjs-client/lib/debugger.js",
+    "./my_modules/c1pjs-client/lib/computer.js",
+    "./my_modules/shared/lib/embed.js"
+  ],
+  "pcCSSFiles": [
+    "./my_modules/pcjs-client/templates/components.css"
+  ],
+  "pcJSFiles": [
+    "./my_modules/shared/lib/defines.js",
+    "./my_modules/shared/lib/diskapi.js",
+    "./my_modules/shared/lib/dumpapi.js",
+    "./my_modules/shared/lib/reportapi.js",
+    "./my_modules/shared/lib/userapi.js",
+    "./my_modules/shared/lib/strlib.js",
+    "./my_modules/shared/lib/usrlib.js",
+    "./my_modules/shared/lib/weblib.js",
+    "./my_modules/shared/lib/component.js",
+    "./my_modules/pcjs-client/lib/defines.js",
+    "./my_modules/pcjs-client/lib/panel.js",
+    "./my_modules/pcjs-client/lib/bus.js",
+    "./my_modules/pcjs-client/lib/mem.js",
+    "./my_modules/pcjs-client/lib/cpu.js",
+    "./my_modules/pcjs-client/lib/x86.js",
+    "./my_modules/pcjs-client/lib/x86seg.js",
+    "./my_modules/pcjs-client/lib/x86cpu.js",
+    "./my_modules/pcjs-client/lib/x86grps.js",
+    "./my_modules/pcjs-client/lib/x86help.js",
+    "./my_modules/pcjs-client/lib/x86mods.js",
+    "./my_modules/pcjs-client/lib/x86op0f.js",
+    "./my_modules/pcjs-client/lib/x86opxx.js",
+    "./my_modules/pcjs-client/lib/chipset.js",
+    "./my_modules/pcjs-client/lib/rom.js",
+    "./my_modules/pcjs-client/lib/ram.js",
+    "./my_modules/pcjs-client/lib/keyboard.js",
+    "./my_modules/pcjs-client/lib/video.js",
+    "./my_modules/pcjs-client/lib/serial.js",
+    "./my_modules/pcjs-client/lib/mouse.js",
+    "./my_modules/pcjs-client/lib/disk.js",
+    "./my_modules/pcjs-client/lib/fdc.js",
+    "./my_modules/pcjs-client/lib/hdc.js",
+    "./my_modules/pcjs-client/lib/debugger.js",
+    "./my_modules/pcjs-client/lib/state.js",
+    "./my_modules/pcjs-client/lib/computer.js",
+    "./my_modules/shared/lib/embed.js"
+  ]
+}

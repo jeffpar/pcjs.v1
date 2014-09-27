@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.15.3/manifest.xsl"?>
+<manifest type="software">
+	<title>Rogue</title>
+	<version/>
+	<type>Game</type>
+	<category>ASCII Adventure</category>
+	<creator>Michael Toy</creator>
+	<creator>Glenn Wichman</creator>
+	<creationDate>1980</creationDate>
+	<releaseDate>1985</releaseDate>
+	<author>Ken Arnold</author>
+	<author>Jon Lane</author>
+	<author>Michael Toy</author>
+	<disk id="disk01" dir="/apps/pc/1985/rogue/private/" href="/apps/pc/1985/rogue/disk.json">
+		<name>Rogue (1985)</name>
+		<file>MKOPT.EXE</file>
+		<file>ROGUE.COM</file>
+		<file>ROGUE.EXE</file>
+		<file>ROGUE.OPT</file>
+		<file>ROGUE.PIC</file>
+		<file>ROGUE.SCR</file>
+	</disk>
+	<machine href="/configs/pc/machines/5160/cga/640kb/machine.xml" state="/apps/pc/1985/rogue/state.json"/>
+</manifest>

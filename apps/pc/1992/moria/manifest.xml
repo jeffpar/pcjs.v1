@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.15.3/manifest.xsl"?>
+<manifest type="software">
+	<title>The Dungeons of Moria</title>
+	<version>5.5</version>
+	<type>Game</type>
+	<category>ASCII Adventure</category>
+	<creator>
+		<name>Robert Alan Koeneke</name>
+	</creator>
+	<creationDate>March 25, 1983</creationDate>
+	<releaseDate>August 12, 1992</releaseDate>
+	<author>
+		<name>Robert A. Koeneke</name>
+		<position>Student</position>
+		<org>University of Oklahoma</org>
+	</author>
+	<author>
+		<name>Jimmey W. Todd Jr.</name>
+		<position>Student</position>
+		<org>University of Oklahoma</org>
+	</author>
+	<author href="mailto:grabiner@math.harvard.edu">
+		<name>David J. Grabiner</name>
+		<org>Harvard University</org>
+	</author>
+	<author href="mailto:wilson@kithrup.com">
+		<name>James E. Wilson</name>
+		<org>Cygnus Support</org>
+	</author>
+	<contributor>
+		<name>D. G. Kneller</name>
+		<desc>MSDOS Moria port, reduced map display, 16 bit integers</desc>
+	</contributor>
+	<contributor>
+		<name>Christopher J. Stuart</name>
+		<desc>recall, options, inventory, running code, etc.</desc>
+	</contributor>
+	<contributor>
+		<name>Curtis McCauley</name>
+		<desc>Macintosh Moria port for MPW C</desc>
+	</contributor>
+	<contributor>
+		<name>Stephen A. Jacobs</name>
+		<desc>Atari ST Moria port for MW C</desc>
+	</contributor>
+	<contributor>
+		<name>William Setzer</name>
+		<desc>object naming code</desc>
+	</contributor>
+	<contributor>
+		<name>David J. Grabiner</name>
+		<desc>numerous bug reports, consistency checks, etc</desc>
+	</contributor>
+	<contributor>
+		<name>Dan Bernstein</name>
+		<desc>UNIX hangup signal fix, many bug fixes</desc>
+	</contributor>
+	<contributor>
+		<name>Corey Gehman</name>
+		<desc>Amiga Moria port</desc>
+	</contributor>
+	<contributor>
+		<name>Ralph Waters</name>
+		<desc>VMS support code, IBM-PC Turbo C bug fixes</desc>
+	</contributor>
+	<contributor>
+		<name>Johsua Delahunty</name>
+		<desc>VMS support code</desc>
+	</contributor>
+	<contributor>
+		<name>Todd Pierzina</name>
+		<desc>VMS support code</desc>
+	</contributor>
+	<contributor>
+		<name>Joseph Hall</name>
+		<desc>line of sight code, monster compiler</desc>
+	</contributor>
+	<contributor>
+		<name>Eric Vaitl</name>
+		<desc>PC-Curses replacement for Turbo C</desc>
+	</contributor>
+	<contributor>
+		<name>Scott Kolodzieski</name>
+		<desc>Atari ST port for Gnu C</desc>
+	</contributor>
+	<contributor>
+		<name>Hildo Biersma</name>
+		<desc>Atari ST port for Turbo C</desc>
+	</contributor>
+	<contributor>
+		<name>Ben Schreiber</name>
+		<desc>Macintosh port for Think C</desc>
+	</contributor>
+	<disk id="disk01" dir="/apps/pc/1992/moria/bin/" href="/apps/pc/1992/moria/disk.json">
+		<name>Moria 5.5</name>
+		<file>EXP.DOC</file>
+		<file>MORIA.CNF</file>
+		<file>MORIA1.TXT</file>
+		<file>MORIA2.TXT</file>
+		<file>MORIA88.EXE</file>
+		<file>ORIGCMDS.HLP</file>
+		<file>OWIZCMDS.HLP</file>
+		<file>ROGLCMDS.HLP</file>
+		<file>RWIZCMDS.HLP</file>
+		<file>SPELLS.DOC</file>
+		<file>VERSION.HLP</file>
+		<file>WELCOME.HLP</file>
+		<file>SCORES</file>
+	</disk>
+	<machine href="/configs/pc/machines/5160/cga/640kb/machine.xml" state="/apps/pc/1992/moria/state.json"/>
+</manifest>

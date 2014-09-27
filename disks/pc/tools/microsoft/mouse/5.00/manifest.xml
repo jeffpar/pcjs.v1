@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.15.3/manifest.xsl"?>
+<manifest type="software">
+	<title>MS Mouse</title>
+	<version>5.00</version>
+	<type>Tool</type>
+	<category>Mouse Driver</category>
+	<author>Microsoft</author>
+	<releaseDate/>
+	<disk id="disk01" href="/disks/pc/tools/microsoft/mouse/5.00/MSMOUSE-000199-500-DISK1-SYSTEM.json">
+		<name>MS Mouse 5.00 (System)</name>
+	</disk>
+	<disk id="disk02" href="/disks/pc/tools/microsoft/mouse/5.00/MSMOUSE-000199-500-DISK2-PROGRAM.json">
+		<name>MS Mouse 5.00 (Program)</name>
+	</disk>
+</manifest>

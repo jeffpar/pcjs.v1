@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fdc id="fdcNEC" width="360px" pos="left" padleft="8px" padbottom="8px" automount='{A:{name:"PC-DOS 2.00 (Disk 1)",path:"/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json"}, B:{name:"PC-DOS 2.00 (Disk 2)",path:"/disks/pc/dos/ibm/2.00/PCDOS200-DISK2.json"}}'>
+	<control type="list" class="input" binding="listDrives"/>
+	<control type="list" class="input" binding="listDisks">
+		<disk path="">None</disk>
+		<manifest ref="/disks/pc/dos/ibm/1.00/manifest.xml" disk="*"/>
+		<manifest ref="/disks/pc/dos/ibm/1.10/manifest.xml" disk="*"/>
+		<manifest ref="/disks/pc/dos/ibm/2.00/manifest.xml" disk="*"/>
+		<manifest ref="/disks/pc/games/microsoft/adventure/manifest.xml" disk="*"/>
+		<manifest ref="/apps/pc/1981/visicalc/manifest.xml" disk="*"/>
+	</control>
+	<control type="button" class="input" binding="loadDrive">Load</control>
+	<control type="description" class="output" binding="descDisk" padleft="8px"/>
+</fdc>

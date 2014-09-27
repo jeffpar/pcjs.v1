@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.15.3/manifest.xsl"?>
+<manifest type="software">
+	<title>MS BASIC</title>
+	<version/>
+	<type>Tool</type>
+	<category>BASIC Compiler</category>
+	<author>Microsoft</author>
+	<releaseDate/>
+	<disk id="disk01" href="/disks/pc/tools/microsoft/basic/BASCOM536.json">
+		<name>MS BASIC (Compiler v5.36)</name>
+	</disk>
+	<disk id="disk02" href="/disks/pc/tools/microsoft/basic/QUICKBASIC-DISK1.json">
+		<name>MS BASIC (QuickBASIC v2.0)</name>
+	</disk>
+</manifest>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.15.3/manifest.xsl"?>
+<manifest type="software">
+	<title>The Dungeons of Moria</title>
+    <version>4.872</version>
+    <type>Game</type>
+    <category>ASCII Adventure</category>
+	<creator>
+		<name>Robert Alan Koeneke</name>
+	</creator>
+	<creationDate>March 25, 1983</creationDate>
+	<releaseDate>November 1, 1988</releaseDate>
+	<author>
+		<name>D. G. Kneller</name>
+		<desc>MSDOS port</desc>
+	</author>
+	<disk id="disk01" dir="/apps/pc/1988/moria/private/">
+		<name>Moria v4.872</name>
+		<file>CONFIG.DOC</file>
+		<file>GOD</file>
+		<file>MADNESS1</file>
+		<file>MORIA.CNF</file>
+		<file>MORIA.DOC</file>
+		<file>MORIA.EXE</file>
+		<file>MORIA.SCR</file>
+		<file>MORIACHR.DIE</file>
+		<file>ORC2</file>
+		<file>PKZIP.EXE</file>
+	</disk>
+</manifest>

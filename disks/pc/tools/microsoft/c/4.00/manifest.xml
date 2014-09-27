@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.15.3/manifest.xsl"?>
+<manifest type="software">
+	<title>Microsoft C Compiler</title>
+	<version>4.00</version>
+	<type>Tool</type>
+	<category>C Compiler</category>
+	<author>Microsoft</author>
+	<releaseDate/>
+	<disk id="disk01" href="/disks/pc/tools/microsoft/c/4.00/MSC-048014-400-DISK1-COMPILER.json">
+		<name>MS C 4.00 (Disk 1)</name><desc>Compiler</desc>
+	</disk>
+	<disk id="disk02" href="/disks/pc/tools/microsoft/c/4.00/MSC-048014-400-DISK2-UTILITIES.json">
+		<name>MS C 4.00 (Disk 2)</name><desc>Utilities</desc>
+	</disk>
+	<disk id="disk03" href="/disks/pc/tools/microsoft/c/4.00/MSC-048014-400-DISK3-LIBSMALL.json">
+		<name>MS C 4.00 (Disk 3)</name><desc>Small-Model Libs</desc>
+	</disk>
+	<disk id="disk04" href="/disks/pc/tools/microsoft/c/4.00/MSC-048014-400-DISK4-LIBMEDIUM.json">
+		<name>MS C 4.00 (Disk 4)</name><desc>Medium-Model Libs</desc>
+	</disk>
+	<disk id="disk05" href="/disks/pc/tools/microsoft/c/4.00/MSC-048014-400-DISK5-LIBLARGE.json">
+		<name>MS C 4.00 (Disk 5)</name><desc>Large-Model Libs</desc>
+	</disk>
+	<disk id="disk06" href="/disks/pc/tools/microsoft/c/4.00/MSC-048014-400-DISK6-STARTUP.json">
+		<name>MS C 4.00 (Disk 6)</name><desc>Startup Source Code</desc>
+	</disk>
+	<disk id="disk07" href="/disks/pc/tools/microsoft/c/4.00/MSC-048014-400-DISK7-CODEVIEW.json">
+		<name>MS C 4.00 (Disk 7)</name><desc>Learning CodeView</desc>
+	</disk>
+	<disk id="disk08" href="/disks/pc/tools/microsoft/c/4.00/MSC-048014-400-DISK8-DEVKIT.json">
+		<name>MS C 4.00 (Disk 8)</name><desc>Windows DevKit Update</desc>
+	</disk>
+</manifest>

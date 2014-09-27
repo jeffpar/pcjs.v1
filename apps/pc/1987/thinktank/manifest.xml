@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.15.3/manifest.xsl"?>
+<manifest type="software">
+	<title>ThinkTank</title>
+	<version>2.41NP</version>
+	<type>Application</type>
+	<category>Productivity</category>
+	<company>Living Videotext</company>
+	<releaseDate>September 25, 1987</releaseDate>
+	<disk id="disk01" dir="/apps/pc/1987/thinktank/private/" href="/apps/pc/1987/thinktank/disk.json">
+		<name>ThinkTank 2.41NP</name>
+		<file>AUTOEXEC.BAT</file>
+		<file>READ_ME.DB</file>
+		<file>READ_ME.SAV</file>
+		<file>TANK.EXE</file>
+		<file>TANKCLIP.BRD</file>
+		<file>TANKOPTS.DAT</file>
+		<file>TMPLATES</file>
+		<link href="http://outliners.scripting.com/thinkTank2Pc.html">Outliners.com</link>
+	</disk>
+	<machine href="/configs/pc/machines/5160/cga/640kb/machine.xml" state="/apps/pc/1987/thinktank/state.json"/>
+</manifest>

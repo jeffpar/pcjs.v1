@@ -1,0 +1,79 @@
+.component:before, .component:after {
+    content:"";
+    display:table;
+}
+.component:after {
+    clear:both;
+}
+.component {
+    zoom:1; /* For IE 6/7 (trigger hasLayout) */
+    font-size: medium;
+}
+.component .label {
+	margin-bottom: 2px;
+}
+.label.left {
+	float: left;
+	margin-right: 1em;
+	width: 2em;
+}
+.component .container {
+	display: inline-block;
+}
+.controls, .controls div, .controls input, .controls button {
+	float: left;
+	margin: 2px;
+	margin-left: 0px;
+}
+input.value {
+	width: 16em;
+	height: 1em;
+	font-size: medium;
+	border: 1px solid black;
+	line-height: 1em; /* the equivalent of "vertical-align: middle" for single-line elements */ 
+	text-align: right;
+}
+.status, .value {
+	vertical-align: middle; 
+}
+.status span, .value span {
+	font-size: small;
+	vertical-align: 10%;
+}
+.status sup {
+	vertical-align: baseline;
+	position: relative;
+	bottom: .33em;
+}
+.status sub {
+	vertical-align: baseline;
+	position: relative;
+	bottom: -.33em;
+}
+.selector {
+	float: left;
+	border: 1px solid black;
+	background-color: white;
+}
+.selector:before, .selector:after {
+    content:"";
+    display:table;
+}
+.selector:after {
+    clear:both;
+}
+/* For IE 6/7 (trigger hasLayout) */
+.selector {
+    zoom:1;
+}
+.gateSmall, .gateLarge {
+	float: left;
+}
+.gateSmall, .gateSmall img {
+	width: 19px;
+	height: 19px;
+}
+.gateLarge, .gateLarge img {
+	width: 38px;
+	height: 38px;
+}

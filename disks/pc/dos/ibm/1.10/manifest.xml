@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.15.3/manifest.xsl"?>
+<manifest type="software">
+	<title>PC-DOS</title>
+	<version>1.10</version>
+	<type>DOS</type>
+	<category>Operating System</category>
+	<author>IBM/Microsoft</author>
+	<releaseDate/>
+	<disk id="disk01" href="/disks/pc/dos/ibm/1.10/PCDOS110.json" md5="47bfb4371d28cd9e45fb1197f2a70c00" md5json="91086902e08148b50bd1ea1219192751"/>
+</manifest>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fdc id="fdcNEC" width="320px" pos="left" padtop="8px" automount='{A:{name:"PC-DOS 2.00 (Disk 1)",path:"/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json"}, B:{name:"PC-DOS 2.00 (Disk 2)",path:"/disks/pc/dos/ibm/2.00/PCDOS200-DISK2.json"}}'>
+	<control type="list" class="input" binding="listDrives"/>
+	<control type="list" class="input" binding="listDisks">
+		<disk path="">None</disk>
+		<manifest ref="/disks/pc/dos/ibm/2.00/manifest.xml" disk="*"/>
+		<disk path="/disks/pc/win/win101/01-SETUP/">Windows 1.01 (SETUP)</disk>
+		<disk path="/disks/pc/win/win101/02-BUILD/">Windows 1.01 (BUILD)</disk>
+		<disk path="/disks/pc/win/win101/03-UTILITY/">Windows 1.01 (UTILITY)</disk>
+		<disk path="/disks/pc/win/win101/04-APPS/">Windows 1.01 (APPS)</disk>
+		<disk path="/disks/pc/win/win101/05-WRITE/">Windows 1.01 (WRITE)</disk>
+		<disk path="/disks/pc/win/win103/01-SETUP/">Windows 1.03 (SETUP)</disk>
+		<disk path="/disks/pc/win/win103/02-BUILD/">Windows 1.03 (BUILD)</disk>
+		<disk path="/disks/pc/win/win103/03-UTILITY/">Windows 1.03 (UTILITY)</disk>
+		<disk path="/disks/pc/win/win103/04-FONT/">Windows 1.03 (FONT)</disk>
+		<disk path="/disks/pc/win/win103/05-APPS/">Windows 1.03 (APPS)</disk>
+		<disk path="/disks/pc/win/win103/06-WRITE/">Windows 1.03 (WRITE)</disk>
+	</control>
+	<control type="button" class="input" binding="loadDrive">Load Drive</control>
+	<control type="description" class="output" binding="descDisk" padleft="8px"/>
+</fdc>

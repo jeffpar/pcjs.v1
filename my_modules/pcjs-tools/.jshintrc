@@ -1,0 +1,11 @@
+{
+    "globalstrict": true,
+    "sub": true,
+    "globals": {
+        "global": true,
+        "console": true,
+        "module": true,
+        "print": true,
+        "require": true
+    }
+}

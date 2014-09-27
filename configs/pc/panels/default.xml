@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<panel id="panel" pos="center" width="720px" padding="8px">
+	<name>Control Panel</name>
+	<control type="container" class="pcjs-textarea" width="58%" padbottom="8px" padright="8px">
+		<control type="textarea" class="output" binding="print" width="100%" height="260px" pos="relative" padbottom="4px" style="resize:vertical;"/>
+		<control type="container">
+			<control type="text" class="input" binding="debugInput" width="auto"/>
+			<control type="button" class="input" binding="debugEnter">Enter</control>
+			<control type="button" class="input" binding="clear">Clear</control>
+		</control>
+	</control>
+	<control type="container" class="pcjs-registers" width="38%" padleft="8px">
+		<control type="register" class="output" label="AX" binding="AX" width="40px" padright="8px" padbottom="8px">0000</control>
+		<control type="register" class="output" label="BX" binding="BX" width="40px" padright="8px" padbottom="8px">0000</control>
+		<control type="register" class="output" label="CX" binding="CX" width="40px" padright="8px" padbottom="8px">0000</control>
+		<control type="register" class="output" label="DX" binding="DX" width="40px" padright="8px" padbottom="8px">0000</control>
+		<control type="register" class="output" label="SP" binding="SP" width="40px" padright="8px" padbottom="8px">0000</control>
+		<control type="register" class="output" label="BP" binding="BP" width="40px" padright="8px" padbottom="8px">0000</control>
+		<control type="register" class="output" label="SI" binding="SI" width="40px" padright="8px" padbottom="8px">0000</control>
+		<control type="register" class="output" label="DI" binding="DI" width="40px" padright="8px" padbottom="8px">0000</control>
+		<control type="register" class="output" label="DS" binding="DS" width="40px" padright="8px" padbottom="8px">0000</control>
+		<control type="register" class="output" label="ES" binding="ES" width="40px" padright="8px" padbottom="8px">0000</control>
+		<control type="register" class="output" label="SS" binding="SS" width="40px" padright="8px" padbottom="8px">0000</control>
+		<control type="register" class="output" label="CS" binding="CS" width="40px" padright="8px" padbottom="8px">0000</control>
+		<control type="register" class="output" label="IP" binding="IP" width="40px" padright="8px" padbottom="8px">0000</control>
+		<control type="container" width="200px" pos="left">
+			<control type="flag" class="output" label="V" binding="V" width="8px" padright="4px" padbottom="8px">0</control>
+			<control type="flag" class="output" label="D" binding="D" width="8px" padright="4px" padbottom="8px">0</control>
+			<control type="flag" class="output" label="I" binding="I" width="8px" padright="4px" padbottom="8px">0</control>
+			<control type="flag" class="output" label="T" binding="T" width="8px" padright="4px" padbottom="8px">0</control>
+			<control type="flag" class="output" label="S" binding="S" width="8px" padright="4px" padbottom="8px">0</control>
+			<control type="flag" class="output" label="Z" binding="Z" width="8px" padright="4px" padbottom="8px">0</control>
+			<control type="flag" class="output" label="A" binding="A" width="8px" padright="4px" padbottom="8px">0</control>
+			<control type="flag" class="output" label="P" binding="P" width="8px" padright="4px" padbottom="8px">0</control>
+			<control type="flag" class="output" label="C" binding="C" width="8px" padright="4px" padbottom="8px">0</control>
+		</control>
+		<control pos=""/>
+		<control type="description" class="output" padbottom="8px">Speed:</control>
+		<control type="description" class="output" binding="speed" padleft="4px" padbottom="8px">Stopped</control>
+	</control>
+	<control type="container" padleft="8px" padbottom="8px">
+		<control type="button" class="input" binding="run">Run</control>
+		<control type="button" class="input" binding="step">Step</control>
+		<control type="button" class="input" binding="reset">Reset</control>
+		<control type="button" class="input" binding="setSpeed">Fast</control>
+		<control type="button" class="input" binding="save">Save</control>
+	</control>
+</panel>

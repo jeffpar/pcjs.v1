@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.15.3/manifest.xsl"?>
+<manifest type="software">
+	<title>Zork II</title>
+	<version/>
+	<type>Game</type>
+	<category>Text Adventure</category>
+	<author>Infocom</author>
+	<releaseDate/>
+	<machine href="/disks/pc/games/infocom/machine.xml"/>
+	<disk id="disk01" href="/disks/pc/games/infocom/zork2/zork2-readonly.json" md5="6e7de3627c62747ee0f5832aecad579e" md5json="fae9022e4cb5da794916b332ec8a55c3"/>
+</manifest>

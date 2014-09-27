@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.15.3/manifest.xsl"?>
+<manifest type="software">
+	<title>Executive Suite</title>
+	<version/>
+	<type>Game</type>
+	<category>Text Simulation</category>
+	<author>Armonk Corporation</author>
+	<releaseDate>1982</releaseDate>
+	<machine href="/configs/pc/machines/5160/mda/256kb/fake188/machine.xml" state="/apps/pc/1982/esuite/state.json"/>
+	<disk id="disk01" dir="/apps/pc/1982/esuite/private/" href="/apps/pc/1982/esuite/disk.json">
+		<name>Executive Suite (1982)</name>
+		<file>esuite.com</file>
+		<file>game.dat</file>
+		<link href="http://www.mobygames.com/game/executive-suite">MobyGames</link>
+	</disk>
+</manifest>

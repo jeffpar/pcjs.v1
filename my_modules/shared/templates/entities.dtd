@@ -1,0 +1,15 @@
+<!-- author="Jeff Parsons (@jeffpar)" website="http://www.pcjs.org/" created="2012-05-05" modified="2014-02-23" license="http://www.gnu.org/licenses/gpl.html" -->
+<!-- XSLT understands these entities only: lt, gt, apos, quot, and amp. Other useful entities are defined below. -->
+<!-- Alas, Firefox doesn't support loading external entities, so the contents of this file must be pasted into every primary XSL file. -->
+<!ENTITY nbsp   "&#160;">
+<!ENTITY sect   "&#167;">  <!-- OSX: option 6 -->
+<!ENTITY copy   "&#169;">  <!-- OSX: option g -->
+<!ENTITY para   "&#182;">  <!-- OSX: option 7 -->
+<!ENTITY ndash  "&#8211;"> <!-- &#x2013; UTF-8: 0xE2 0x80 0x93; OSX: option - -->
+<!ENTITY mdash  "&#8212;"> <!-- &#x2014; UTF-8: 0xE2 0x80 0x94; OSX: shift option - -->
+<!ENTITY lsquo  "&#8216;"> <!-- OSX: option ] -->
+<!ENTITY rsquo  "&#8217;"> <!-- OSX: shift option ] -->
+<!ENTITY ldquo  "&#8220;"> <!-- &#x201C; UTF-8: 0xE2 0x80 0x9C; OSX: option [ -->
+<!ENTITY rdquo  "&#8221;"> <!-- &#x201D; UTF-8: 0xE2 0x80 0x9D; OSX: shift option [ -->
+<!ENTITY dagger "&#8224;"> <!-- OSX: option t -->
+<!ENTITY Dagger "&#8225;"> <!-- OSX: shift option 7 -->

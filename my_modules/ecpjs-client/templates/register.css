@@ -1,0 +1,25 @@
+.register {
+	float: left;
+}
+.bitBucket {
+	float: left; 
+	width: 19px;
+	height: 38px;
+}
+.bitCell {
+	float: left;
+	width: 19px;
+	height: 19px;
+	margin-right: -1px;
+	margin-bottom: -1px;
+	border: 1px solid black;
+	text-align: center;
+	line-height: 19px; /* the equivalent of "vertical-align: middle" for single-line elements */ 
+}
+.bitCellLeft {
+	border-left: 1px solid black;
+}
+.bitLabel {
+	font-size: xx-small;
+	text-align: center;
+}

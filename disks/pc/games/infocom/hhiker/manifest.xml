@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.15.3/manifest.xsl"?>
+<manifest type="software">
+	<title>The Hitchhiker's Guide to the Galaxy</title>
+	<version/>
+	<type>Game</type>
+	<category>Text Adventure</category>
+	<author>Infocom</author>
+	<releaseDate/>
+	<machine href="/disks/pc/games/infocom/machine.xml"/>
+	<disk id="disk01" href="/disks/pc/games/infocom/hhiker/hhiker-readonly.json" md5="99393c253f1b054cf7c017700a11adea" md5json="9eebc93891ecd41d786dfa1f525f8f05">
+		<name>Hitchhiker's Guide</name>
+	</disk>
+</manifest>

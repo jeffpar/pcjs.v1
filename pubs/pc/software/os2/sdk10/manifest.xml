@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.15.3/manifest.xsl"?>
+<manifest type="document">
+	<title>OS/2 1.0 Programmer's Toolkit</title>
+	<version>1.0</version>
+	<source href="http://os2museum.com">os2museum.com</source>
+	<document href="http://www.os2museum.com/files/docs/os210ptk/os2-1.0-ptk-welcome-1988.pdf">
+		<name>Welcome Leaflet</name>
+	</document>
+	<document href="http://www.os2museum.com/files/docs/os210ptk/os2-1.0-ptk-prgref-1988.pdf">
+		<name id="060060014-100-R00-388">Programmer's Reference</name>
+	</document>
+	<document href="http://www.os2museum.com/files/docs/os210ptk/os2-1.0-ptk-tools-1988.pdf">
+		<name id="060060003-100-R00-388">Programming Tools</name>
+	</document>
+	<document href="http://www.os2museum.com/files/docs/os210ptk/os2-1.0-ptk-lguide-1988.pdf">
+		<name id="060060004-100-R00-388">Programmer's Learning Guide</name>
+	</document>
+</manifest>
