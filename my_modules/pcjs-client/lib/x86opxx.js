@@ -2823,7 +2823,9 @@ var X86OpXX = {
         var nInt = this.getIPByte();
         if (this.checkInterruptNotify(nInt)) {
             X86Help.opHelpINT.call(this, nInt, null, 0);
+            return;
         }
+        this.nStepCycles--;     // we don't need to assess the full cost of nOpCyclesInt, but we need to assess something...
     },
     /**
      * @this {X86CPU}
