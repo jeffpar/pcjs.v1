@@ -72,8 +72,8 @@ var fCache = true;
 var fConsole = false;
 
 /*
- * fServerDebug controls debug console messages; it is false by default and can be enabled using the setOptions()
- * 'debug' property (or from the command-line interface using "--debug").
+ * fServerDebug controls server-related debug features; it is false by default and can be enabled using the
+ * setOptions() 'debug' property (or from the command-line interface using "--debug").
  */
 var fServerDebug = false;
 
@@ -262,8 +262,11 @@ function HTMLOut(sDir, sFile, fRebuild, req, done)
      * of fDebug to simply never cache, instead of always rebuilding the cache.
      * 
      *      if (this.fDebug) this.fRebuild = true;
+     *      
+     * Note that a production server should not need the GORT_REBUILD command, so we accept
+     * it only if fServerDebug is true.
      */
-    if (net.hasParm(net.GORT_COMMAND, net.GORT_REBUILD, req)) {
+    if (fServerDebug && net.hasParm(net.GORT_COMMAND, net.GORT_REBUILD, req)) {
         req.query[net.GORT_COMMAND] = undefined;
         this.fRebuild = true;
     }
@@ -887,9 +890,15 @@ HTMLOut.prototype.getVersion = function(sToken, sIndent, aParms)
 {
     /*
      * Use the same test that processMachines() uses for setting fCompiled: if we're not using compiled code,
-     * then we should be using "current" CSS and template files (as opposed to version-specific template files) as well.
+     * then we should be using "current" CSS and template files (as opposed to version-specific template files).
+     * 
+     * NOTE: I used to create a symlink in each app's "versions" directory (eg, /versions/pcjs/current ->
+     * ../../my_modules/shared/templates), so that when fDebug was true, I could simply insert "current" in
+     * place of a version number.  However, that symlink didn't get added to the repository, and I'm not sure
+     * all operating systems would deal with it properly even if was added, so now I'm treating the "version"
+     * token as the equivalent of a symlink here.
      */
-    this.aTokens[sToken] = this.fDebug? "current" : pkg.version;
+    this.aTokens[sToken] = this.fDebug? "../../my_modules/shared/templates" : pkg.version;
 };
 
 /**
@@ -1431,6 +1440,8 @@ HTMLOut.prototype.getManifestXML = function(sToken, sIndent, aParms)
                                     break;
                                 case "default":
                                     sDefault = matchParams[2];
+                                    break;
+                                default:
                                     break;
                                 }
                             }

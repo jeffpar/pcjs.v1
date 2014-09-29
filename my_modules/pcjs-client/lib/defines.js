@@ -72,34 +72,37 @@ var PREFETCH = false;
 /**
  * @define {boolean}
  *
- * FASTDISABLE turns on memory-function switching to dynamically disable
- * memory accesses whenever the CPU wants to disable spurious memory reads
- * (or stale memory writes, which are worse).  If FASTDISABLE is false, then
- * the code falls back to setting/testing internal OP_NOREAD and OP_NOWRITE
- * CPU opFlags as needed.
+ * FASTDISABLE turns on memory-function switching to dynamically disable memory accesses whenever the CPU wants
+ * to disable spurious memory reads (which are mostly harmless) or stale memory writes (which tend to be destructive
+ * and are NOT mostly harmless).
  * 
- * At the moment, it seems that FASTDISABLE is a bit slower than relying on
- * the OP_NOREAD/OP_NOWRITE flags, so it's turned off.
+ * If FASTDISABLE is false, then the code falls back to setting/testing internal OP_NOREAD and OP_NOWRITE opFlags
+ * as needed.
+ * 
+ * At the moment, it seems that FASTDISABLE is a bit slower than relying on the OP_NOREAD/OP_NOWRITE flags, so it's
+ * turned off; apparently, I was a bit too optimistic calling it "FAST".  But your mileage may vary, depending on the
+ * browser and its version.
  *
- * See the Bus component for details.
+ * See the X86CPU component for details, since it is the CPU, not the underlying Bus or Memory components, that needs
+ * to be able to do this.
  */
 var FASTDISABLE = false;
 
 /**
  * @define {boolean}
  *
- * FATARRAYS is a Closure Compiler compile-time option that allocates 1 number per byte
- * for Memory blocks; wasteful, but slightly faster.
+ * FATARRAYS is a Closure Compiler compile-time option that allocates 1 number per byte for Memory blocks;
+ * wasteful, but potentially slightly faster.
  *
  * See the Memory component for details.
  */
 var FATARRAYS = false;
 
 /**
- * TYPEDARRAYS enables use of typed arrays for Memory blocks. This used to be a compile-time
- * option, but since I've added memory access functions for typed arrays (see Memory.afnTArray),
- * I can turn the support on dynamically now. Originally, I didn't see much of a speed increase
- * over the original (non-typed) implementation, but that will probably change over time.
+ * TYPEDARRAYS enables use of typed arrays for Memory blocks. This used to be a compile-time * option, but since I've
+ * added memory access functions for typed arrays (see Memory.afnTArray), I can turn the support on dynamically now.
+ * Originally, I didn't see much of a speed increase over the original (non-typed) implementation, but that will probably
+ * change over time.
  *
  * See the Memory component for details.
  */

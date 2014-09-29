@@ -50,70 +50,114 @@ and the original machine are available in the [C1Pjs Documentation](/docs/c1pjs/
 
 <!--BEGIN:EXCLUDE-->
 
-Updating PCjs
-===
-
-Developing
+Installing PCjs
 ---
-Let's say you just finished developing, testing and deploying version 1.12.1, and you want to start developing some
-new features for version 1.13.0.  Here are the recommended steps:
- 
-1. Create and switch to a new Git development branch (eg, "node_dev")
-2. Change the version number in [package.json](/package.json) (eg, to "1.13.0")
-3. Run "grunt" (the default task will build fresh "1.13.0" copies of everything under "/versions")
-4. Run "grunt promote" to bump the version in all the site's machine XML files to match (ie, to "1.13.0")
- 
-You may not want to do the last step until you're ready to start testing the new version.  In fact, you may want to
-manually edit the version in only a few machine configuration files for testing, leaving the rest set to the previous
-version to make comparison runs easier, and then run "grunt promote" when the new version is much closer to being
-released.
+The following instructions were written for OS X users.  However, users of other operating systems should have
+no problem following along.
 
-Commit the development branch to GitHub as often as desired.  I probably tend to "over-commit", checking in lots of
-intermediate changes before I finally decide that the new version is "good enough".  But having too much delta history is
-probably better than too little.  Note that the initial "node_dev" commit may not get pushed to GituHub without first
-running:
+Open Terminal and `cd` to a directory where you'd like to install *pcjs*, and run the following commands:
 
-	git push --set-upstream origin node_dev
+	git clone git@github.com:jeffpar/pcjs.git pcjs
+	cd pcjs
+	npm install
+	node server.js
 
-One downside to intermediate commits to GitHub is that compiled versions of the sources (such as those in
-[/docs/pcjs/demos/](/docs/pcjs/demos/)) may keep changing, and those particular commits are pretty useless.
-To temporarily ignore changes to those files:
+Now open a web browser and go to `http://localhost:8088/`.  You're done! 
 
-	cd docs/pcjs/demos
-	git update-index --assume-unchanged components.xsl pc.js pc-dbg.js samples.zip
+It's assumed that the OS X Developer Tools (which include Git) have already been installed, as well as
+Node and NPM.  Node (which now includes NPM) should be downloaded from [nodejs.org](http://nodejs.org/download/).
+
+The current version of Node ([0.10.32](http://nodejs.org/dist/v0.10.32/node-v0.10.32.pkg) at the time of this
+writing) should work fine, but version [0.10.26](http://nodejs.org/dist/v0.10.26/node-v0.10.26.pkg)
+is what's been used to develop and test PCjs so far.
+
+Also, [server.js](server.js) was originally written using [Express](http://expressjs.com/) v3.x.  Since then,
+Express v4.x has been released, but `npm install` will make sure that v3.x is installed locally.
+
+The plan is to eventually move development to a newer version of Node, and migrate the PCjs server to a newer
+version of Express; there's no desire to remain stuck in the past (well, ignoring the fact that PCjs is the
+quintessential "stuck in the past" project), but there's also no urgency to update.
+
+### Building PCjs
+
+Unlike a typical project, where you have to *build* or *configure* or *make* something, PCjs is "ready to run".
+That's because both the compiled and uncompiled versions of PCjs are checked into the project, making deployment
+to a web server easy.
+
+However, in order to build and test PCjs modifications, you'll want to use [Grunt](http://gruntjs.com/) and the
+Grunt tasks defined by [Gruntfile.js](Gruntfile.js).
+
+Although Grunt was installed locally when you ran `npm install`, you'll also want to install the command-line
+interface to Grunt; you can install that locally as well, but it's recommended that you install it globally, with
+the "-g" option:
+
+	sudo npm install grunt-cli -g
+
+Now you can run `grunt` anywhere within the PCjs project to build an updated version.  If no command-line arguments
+are specified, `grunt` runs the "default" task defined by [Gruntfile.js](Gruntfile.js); that task runs Google's
+[Closure Compiler](https://developers.google.com/closure/compiler/) if any of the target files (eg, pc.js, pc-dbg.js,
+etc) are out-of date.
+
+To ensure identical compilation results for everyone, a copy of the Closure Compiler has been checked into the
+[bin](bin/) folder.  This version of Closure Compiler, in turn, requires Java v7.x or later.  Use the following
+commands to confirm that everything is working properly:
+
+	java -version
 	
-To see a list of all files that are marked as "assume-unchanged", use this command:
-
-	git ls-files -v | grep '^[[:lower:]]'
+which should report a version >= 1.7.x; eg:
 	
-The same issue would exist for all new files created under "/versions", but fortunately, those files are ignored until
-you explicitly add them to Git, which you'll want to do just prior to deployment:
+    java version "1.7.0_67"
+    Java(TM) SE Runtime Environment (build 1.7.0_67-b01)
+    Java HotSpot(TM) 64-Bit Server VM (build 24.65-b04, mixed mode)
 
-	git add versions/pcjs/1.13.0/*
-	git add versions/c1pjs/1.13.0/*
-	
-which is when you'll also want to do undo the "assume-unchanged" operation above:
+Then run:
 
-	cd docs/pcjs/demos
-	git update-index --no-assume-unchanged components.xsl pc.js pc-dbg.js samples.zip
+	java -jar bin/compiler.jar --version
 	
-Testing
+which should report:
+
+	Closure Compiler (http://code.google.com/closure/compiler)
+	Version: v20140407
+	Built on: 2014/04/07 14:04
+	
+If you don't have Java installed, it's recommended that you install the JDK (*not* the JRE), because the JRE may not
+update your command-line tools properly.  Note that Java is used *only* by the Closure Compiler; none of the PCjs
+client or server components use Java.
+
+Newer versions of the Closure Compiler should work as well, and at some point, a newer version will be checked into the
+project.
+
+Using PCjs
 ---
-PCjs can now be run from the command-line mode using Node, making it possible to script the application,
+
+### From The Browser
+
+The PCjs web server is little more than a file/directory browser for the PCjs project, plus a collection of APIs.
+
+If a URL corresponds to a PCjs project folder and no "index.html" exists in that folder, the server loads an HTML
+template ([common.html](my_modules/shared/templates/common.html)) and generates an "index.html" for that folder.
+
+The contents of the "index.html" will vary depending on the contents of the folder; for example, if the folder
+contains a README.md, then that file is converted to HTML and embedded in the "index.html".  Similarly, if the folder
+contains a machine XML file, that is embedded as well.
+
+### From The Command-Line
+
+The PCjs client app can also be run from the command-line mode using Node, making it possible to script the application,
 run a series of automated tests, etc:
 
     cd ./my_modules/pcjs-client/bin
     node pcjs
 
-The [pcjs](/my_modules/pcjs-client/bin/pcjs) script in the *bin* directory loads all the PCjs browser scripts listed
-in [package.json](/package.json), and then it starts a Node REPL ("read-eval-print loop").  The REPL handles a few
-special commands (eg, "load", "quit") and passes anything else to the PCjs Debugger component.  If no Debugger component
-has been created yet, or if the Debugger didn't recognize the command, then it's passed on to *eval()*, like a good
-little REPL.
+The [pcjs](my_modules/pcjs-client/bin/pcjs) script in [/my_modules/pcjs-client/bin](my_modules/pcjs-client/bin) loads
+all the PCjs browser scripts listed in [package.json](/package.json), and then it starts a Node REPL ("read-eval-print loop").
+The REPL handles a few special commands (eg, "load", "quit") and passes anything else to the PCjs Debugger component.
+If no Debugger component has been created yet, or if the Debugger didn't recognize the command, then it's passed on to *eval()*,
+like a good little REPL.
 
-Use the "load" command to load a JSON machine configuration file.  A sample [machine.json](/my_modules/pcjs-client/bin/machine.json)
-is provided in the *bin* directory, which is a "JSON-ified" version of the [machine.xml](/configs/pc/machines/5150/mda/64kb/machine.xml)
-displayed on the [pcjs.org](http://www.pcjs.org/) home page.
+Use the "load" command to load a JSON machine configuration file.  A sample [machine.json](my_modules/pcjs-client/bin/machine.json)
+is provided in the *bin* directory, which is a "JSON-ified" version of the [machine.xml](configs/pc/machines/5150/mda/64kb/machine.xml)
+displayed on the [pcjs.org](/) home page.
 
 The command-line loader creates all the JSON-defined machine components in the same order that the browser creates
 XML-defined components.  You can also issue the "load" command directly from the command-line:
@@ -139,65 +183,72 @@ supports *only* JSON machine configuration files.
 I haven't decided whether I'll add support for JSON configuration files to the client, or add some XML-to-JSON conversion
 to the server, or both.
 
-Deploying
+Debugging PCjs
 ---
-I like to use the AWS Elastic Beanstalk web interface to create a new "development" environment ("pcjs-dev") for testing: 
+
+### Server Components
+
+To help test/debug changes to PCjs server components (eg, [DiskDump](my_modules/diskdump/), [HTMLOut](my_modules/htmlout/)),
+you can start the server with some additional options; eg:
+
+	node server.js --logging --console --debug
+	
+The `--logging` option will create a [node.log](/logs/node.log) that records all the HTTP requests, `--debug`
+will generate additional debug-only messages (which will also be logged if `--logging` is enabled), and `--console`
+will replicate any messages to your console as well.
+
+A complete list of command-line options can be found in [server.js](server.js).
+
+### Client Components
+
+A special parameter ("gort") can be appended to the URL to request uncompiled client source files, making problems
+much easier to debug:
+
+	http://localhost:8088/?gort=debug
+
+However, the "gort=debug" parameter is unnecessary if the server was started with `--debug`; the server always
+serves uncompiled files when running in "debug" mode.
+
+Conversely, if the server is running "debug" mode but you want to test a compiled version of PCjs, use:
+
+	http://localhost:8088/?gort=release
+
+and the server will serve compiled JavaScript files, regardless whether the server is running in "debug" or "release"
+mode.
+
+Updating PCjs
+---
+
+### Developing
+
+To start developing features for a new version of PCjs, here are the recommended steps:
  
-1. Save the current production environment ("pcjs-env") as configuration "pcjs-config"
-2. Create a new environment ("pcjs-dev") using the "pcjs-config" configuration
-3. Wait for the new environment ("pcjs-dev") to start (ie, for its health to become "Green")
-4. From Terminal, go to the `~/Sites/pcjs` folder and run `eb branch` followed by `git aws.push`
+1. Change the version number in [package.json](/package.json)
+2. Run the "grunt promote" task to bump the version in all machine XML files
+3. Make changes
+4. Run "grunt" to build new versions of the apps (eg, "/versions/pcjs/1.xx/pc.js")
  
-The `eb branch` command will display:
+However, you may want to skip step #2 until you're ready to start testing the new version.  Depending on the nature
+of your changes, it may be better to manually edit the version number in only a few machine XML files for testing,
+leaving the rest of the XML files pointing to the previous version.  Run "grunt promote" when the new version is much
+closer to being released.
 
-	The current branch is "node_dev".
-	Enter an AWS Elastic Beanstalk environment name (auto-generated value is "pcjs-nodedev-env"): pcjs-dev
-	Do you want to copy the settings from environment "pcjs-env" for the new branch? [y/n]: y
-	
-after which we're ready for `git aws.push` to the new "pcjs-dev" environment.
+### Testing
 
-See the "[Develop, Test, and Deploy](http://docs.aws.amazon.com/elasticbeanstalk/latest/dg/create_deploy_nodejs.sdlc.html)"
-AWS documentation for more details.
+In the course of testing PCjs, there may be stale "index.html" files that prevent you from seeing application
+updates, changes to README.md files, etc.  So, before running Node, you may want to "touch" the default HTML template:
 
-On a local machine, the process is similar.  If this is a "virgin" machine, you must first install Node and NPM;
-see my notes on "[Installing Node (and NPM)](/my_modules/#installing-node-and-npm)" for more details.
-
-Then install and run the PCjs web server files:
-
-	[iMac:~/Sites] git clone git@github.com:jeffpar/jsmachines.git pcjs
-	[iMac:~/Sites] cd pcjs
-	[iMac:~/Sites/pcjs] git checkout node_dev
-	[iMac:~/Sites/pcjs] npm install --production
-	[iMac:~/Sites/pcjs] export PORT=8086 (this is optional)
-	[iMac:~/Sites/pcjs] node server.js
-	
-For a machine that is simply out-of-date, you can do something like this:
-
-	[iMac:~/Sites/pcjs] git pull
-	[iMac:~/Sites/pcjs] npm update --production
-	[iMac:~/Sites/pcjs] export PORT=8086 (this is optional)
-	[iMac:~/Sites/pcjs] node server.js
-	
-In the second scenario, there may be stale "index.html" files that prevent you from seeing the latest versions
-of everything, so before running Node, you may want to do this first:
-
-	[iMac:~/Sites/pcjs] touch my_modules/shared/templates/common.html
+	touch my_modules/shared/templates/common.html
 	
 The [HTMLOut](/my_modules/htmlout/) module compares the timestamp of that template file to the timestamp of any
-"index.html" and will regenerate the latter if it's out-of-date.  There's a TODO to expand that check to include
-the timestamp of any local README.md file, but there are many other factors that contribute to stale "index.html"
-files, so the safest thing to do is touch the [common.html](/my_modules/shared/templates/common.html) template,
-or delete all existing "index.html" files -- either by hand, or by using:
+"index.html" and will regenerate the latter if it's out-of-date.
 
-	[iMac:~/Sites/pcjs] grunt clean
-	
-However, if you included "--production" in your NPM install/update commands, you won't have the necessary grunt
-task files.  You may not even have grunt itself installed, unless you've previously run:
+There's a TODO to expand that check to include the timestamp of any local README.md file, but there are many other
+factors that can contribute to stale "index.html" files, so usually the safest thing to do is "touch" the
+[common.html](/my_modules/shared/templates/common.html) template, or delete all existing "index.html" files, either
+manually or with the Grunt "clean" task:
 
-	[iMac:~/Sites/pcjs] sudo npm install grunt-cli -g
-	
-Stale "index.html" files may be a non-issue on AWS, because it appears to create a completely new directory
-structure when it rebuilds the environment following a `git aws.push` -- but I'm not sure that's always true.
+	grunt clean
 	
 <!--END:EXCLUDE-->
 

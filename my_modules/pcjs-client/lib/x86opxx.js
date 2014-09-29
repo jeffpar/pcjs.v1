@@ -1807,43 +1807,47 @@ var X86OpXX = {
             case 0x7:           // this form of MOV to DS is undocumented on 8086/8088/80186/80188, invalid on 80286 and up
                 temp = this.regDI;
                 break;
+            default:
+                break;
             }
             break;
         }
         X86Mods.aOpModsRegWord[bModRM].call(this, X86Help.opHelpMOV);
         switch (reg) {
-            case 0x0:
-                this.setES(this.regAX);
-                this.regAX = temp;
-                break;
-            case 0x1:
-                this.setCS(this.regCX);
-                this.regCX = temp;
-                break;
-            case 0x2:
-                this.setSS(this.regDX);
-                this.regDX = temp;
-                break;
-            case 0x3:
-                this.setDS(this.regBX);
-                this.regBX = temp;
-                break;
-            case 0x4:
-                this.setES(this.regSP);
-                this.regSP = temp;
-                break;
-            case 0x5:
-                this.setCS(this.regBP);
-                this.regBP = temp;
-                break;
-            case 0x6:
-                this.setSS(this.regSI);
-                this.regSI = temp;
-                break;
-            case 0x7:
-                this.setDS(this.regDI);
-                this.regDI = temp;
-                break;
+        case 0x0:
+            this.setES(this.regAX);
+            this.regAX = temp;
+            break;
+        case 0x1:
+            this.setCS(this.regCX);
+            this.regCX = temp;
+            break;
+        case 0x2:
+            this.setSS(this.regDX);
+            this.regDX = temp;
+            break;
+        case 0x3:
+            this.setDS(this.regBX);
+            this.regBX = temp;
+            break;
+        case 0x4:
+            this.setES(this.regSP);
+            this.regSP = temp;
+            break;
+        case 0x5:
+            this.setCS(this.regBP);
+            this.regBP = temp;
+            break;
+        case 0x6:
+            this.setSS(this.regSI);
+            this.regSI = temp;
+            break;
+        case 0x7:
+            this.setDS(this.regDI);
+            this.regDI = temp;
+            break;
+        default:
+            break;              // there IS no other case, but JavaScript inspections don't know that
         }
     },
     /**

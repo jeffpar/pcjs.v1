@@ -344,6 +344,8 @@ var X86Help = {
             case 0x7:       // BH
                 this.regBX = (this.regBX & 0xff) | (dst << 8);
                 break;
+            default:
+                break;      // there IS no other case, but JavaScript inspections don't know that
             }
             this.nStepCycles -= this.nOpCyclesXchgRR;
         } else {
@@ -390,6 +392,8 @@ var X86Help = {
             case 0x7:       // DI
                 this.regDI = dst;
                 break;
+            default:
+                break;      // there IS no other case, but JavaScript inspections don't know that
             }
             this.nStepCycles -= this.nOpCyclesXchgRR;
         } else {

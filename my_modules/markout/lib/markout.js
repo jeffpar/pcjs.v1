@@ -386,6 +386,7 @@ MarkOut.prototype.convertMD = function(sIndent)
      */
     var aMatch;
     var re = /(^|\n)(  ? ?)([\*+-]|[0-9]+\.)([^\n]*\n)([ \t]+[^\n]*\n|\n)+([ \t]+[^\n]+)/g;
+    //noinspection UnnecessaryLocalVariableJS
     var sMDOrig = sMD;
     while ((aMatch = re.exec(sMDOrig))) {
         var sReplace = aMatch[0].replace(/\n\n/g, "\n\t\n");

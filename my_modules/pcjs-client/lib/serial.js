@@ -316,6 +316,9 @@ SerialPort.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, cont
             serial.sendRBR([charCode]);
         };
         return true;
+    
+    default:
+        break;
     }
     return false;
 };

@@ -439,20 +439,22 @@ Mouse.prototype.clickMouse = function(iButton, fDown) {
     if (this.isActive()) {
         var sDiag;
         switch (iButton) {
-            case 0:
-                if (this.fButton1 != fDown) {
-                    this.fButton1 = fDown;
-                    sDiag = DEBUGGER ? ("mouse button1 " + (fDown ? "dn" : "up")) : null;
-                    this.sendPacket(sDiag);
-                }
-                break;
-            case 2:
-                if (this.fButton2 != fDown) {
-                    this.fButton2 = fDown;
-                    sDiag = DEBUGGER ? ("mouse button2 " + (fDown ? "dn" : "up")) : null;
-                    this.sendPacket(sDiag);
-                }
-                break;
+        case 0:
+            if (this.fButton1 != fDown) {
+                this.fButton1 = fDown;
+                sDiag = DEBUGGER ? ("mouse button1 " + (fDown ? "dn" : "up")) : null;
+                this.sendPacket(sDiag);
+            }
+            break;
+        case 2:
+            if (this.fButton2 != fDown) {
+                this.fButton2 = fDown;
+                sDiag = DEBUGGER ? ("mouse button2 " + (fDown ? "dn" : "up")) : null;
+                this.sendPacket(sDiag);
+            }
+            break;
+        default:
+            break;
         }
     }
 };

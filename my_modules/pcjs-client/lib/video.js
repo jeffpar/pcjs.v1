@@ -3158,6 +3158,8 @@ Video.prototype.getAccess = function()
                 case Card.GRC.DATAROT.XOR:
                     nWriteAccess = Card.ACCESS.WRITE.MODE0XOR;
                     break;
+                default:
+                    break;
                 }
                 card.nDataRotate = regDataRotate & Card.GRC.DATAROT.COUNT;
             }
@@ -3462,6 +3464,8 @@ Video.prototype.checkMode = function(fForce)
                     card.addrBuffer = 0xB8000;
                     card.sizeBuffer = cbBufferText;
                     nMode = (this.nMonitorType == ChipSet.MONITOR.MONO? Video.MODES.CGA_80X25_BW : Video.MODES.CGA_80X25);
+                    break;
+                default:
                     break;
                 }
 
@@ -4531,6 +4535,8 @@ Video.prototype.outGRCData = function(port, bOut, addrFrom)
         break;
     case Card.GRC.BITMASK.INDX:
         this.cardEGA.nBitMapMask = bOut | (bOut << 8) | (bOut << 16) | (bOut << 24);
+        break;
+    default:
         break;
     }
 };

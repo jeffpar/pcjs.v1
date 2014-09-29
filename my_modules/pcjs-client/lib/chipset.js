@@ -1713,12 +1713,14 @@ ChipSet.prototype.toggleSwitch = function(control)
     var asParts = sID.split("-");
     var b = (0x1 << (parseInt(asParts[1], 10) - 1));
     switch (asParts[0]) {
-        case "sw1":
-            this.sw1Init = (this.sw1Init & ~b) | (f? 0 : b);
-            break;
-        case "sw2":
-            this.sw2Init = (this.sw2Init & ~b) | (f? 0 : b);
-            break;
+    case "sw1":
+        this.sw1Init = (this.sw1Init & ~b) | (f? 0 : b);
+        break;
+    case "sw2":
+        this.sw2Init = (this.sw2Init & ~b) | (f? 0 : b);
+        break;
+    default:
+        break;
     }
     this.updateSwitchDesc();
 };
