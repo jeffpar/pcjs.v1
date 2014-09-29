@@ -21,10 +21,10 @@ The JSON-encoded ROM image that PCjs uses ([1984-01-10.json]()) was created usin
 
 	filedump --file=BIOS_5170_10JAN84_U27_6181028_27256_6MHZ.BIN --merge=BIOS_5170_10JAN84_U47_6181029_27256_6MHZ.BIN --output=1984-01-10.json
 
-Similarly, to create a binary ROM image ([1984-01-10.rom]()), add *--format=rom* to the command-line.  These operations can
+Similarly, to create a binary ROM image (1984-01-10.rom), add *--format=rom* to the command-line.  These operations can
 only be performed using the *FileDump* command-line interface; the *FileDump* API does not support the *merge* option.
 
 A MAP file [1984-01-10.map]() exists as well, which is automatically appended to the JSON file when using a ROM input
 file (or JSON output file) with a matching filename.  For example:
 
-> [http://www.pcjs:org/api/v1/dump/?file=/devices/pc/bios/5170/1984-01-10.rom](/api/v1/dump/?file=/devices/pc/bios/5170/1984-01-10.rom)
+	http://www.pcjs.org/api/v1/dump/?file=/devices/pc/bios/5170/1984-01-10.rom

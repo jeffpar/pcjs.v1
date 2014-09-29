@@ -6,8 +6,7 @@ and "document manifests."
 
 To that end, there's a new [/pubs/]() directory for old documents, and [/disks/pc/]() contains more disk images,
 with more on the way.  I have a TON of old diskette images, and it has taken more time to organize them and create
-manifests than I would like.  I have managed to streamline the process somewhat, however, as discussed in
-[/disks/pc/personal/]().
+manifests than I would like.
 
 *[@jeffpar](http://twitter.com/jeffpar)*  
 *June 26, 2014*
