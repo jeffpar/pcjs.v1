@@ -437,13 +437,15 @@ HTMLOut.filter = function(req, res, next)
     var sBaseName = path.basename(req.path);
     var sBaseExt = ((i = sBaseName.lastIndexOf('.')) > 0? sBaseName.substr(i+1) : "");
     var sTrailingChar = req.path.slice(-1);
-    
-    if (asExtsNonServed.indexOf(sBaseExt) >= 0 || asFilesNonServed.indexOf(sBaseName) >= 0) {
-        /*
-         * Mimic the error code+message that express.static() displays for non-existent files/folders.
-         */
-        res.status(404).send("Cannot GET " + req.path);
-        return;
+
+    if (!fServerDebug) {
+        if (asExtsNonServed.indexOf(sBaseExt) >= 0 || asFilesNonServed.indexOf(sBaseName) >= 0) {
+            /*
+             * Mimic the error code+message that express.static() displays for non-existent files/folders.
+             */
+            res.status(404).send("Cannot GET " + req.path);
+            return;
+        }
     }
 
     /*
