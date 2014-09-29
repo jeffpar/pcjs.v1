@@ -50,29 +50,47 @@ and the original machine are available in the [C1Pjs Documentation](/docs/c1pjs/
 
 <!--BEGIN:EXCLUDE-->
 
-Installing PCjs
 ---
+
+Development Notes
+---
+
+The [PCjs repository](https://github.com/jeffpar/pcjs) on GitHub contains everything used to create the [pcjs.org](http://www.pcjs.org/)
+website, including:
+
++ A simple Node-based web server ([server.js](server.js))
++ Custom Node modules used by the web server ([HTMLOut](my_modules/htmlout/), [MarkOut](my_modules/markout/), [DiskDump](my_modules/diskdump/), [FileDump](my_modules/filedump/))
++ An assortment of IBM PC and C1P machine XML files (in [/apps](apps/), [/devices](devices/) and elsewhere)
++ The [PCjs](my_modules/pcjs-client/lib/) and [C1Pjs](my_modules/c1pjs-client/lib/) client applications, both "compiled" and uncompiled
++ A smattering of [PCjs](docs/pcjs/) and [C1Pjs](docs/c1pjs/) documentation, along with [blog posts](blog/), related [publications](pubs/) and more
+
+### Installing PCjs
+
 The following instructions were written for OS X users.  However, users of other operating systems should have
 no problem following along.
 
-Open Terminal and `cd` to a directory where you'd like to install *pcjs*, and run the following commands:
+Open Terminal and `cd` to a directory where you'd like to install PCjs, and run the following commands:
 
 	git clone git@github.com:jeffpar/pcjs.git pcjs
 	cd pcjs
 	npm install
 	node server.js
 
-Now open a web browser and go to `http://localhost:8088/`.  You're done! 
+Now open a web browser and go to `http://localhost:8088/`.  You're done!
+ 
+NOTE: If you just want to run the server and don't plan to do any development, you can reduce the footprint
+slightly by asking NPM to install only "productions" modules:
+ 
+	npm install --production
 
 It's assumed that the OS X Developer Tools (which include Git) have already been installed, as well as
-Node and NPM.  Node (which now includes NPM) should be downloaded from [nodejs.org](http://nodejs.org/download/).
-
+Node and NPM.  Node (which now includes NPM) can be downloaded from [nodejs.org](http://nodejs.org/download/).
 The current version of Node ([0.10.32](http://nodejs.org/dist/v0.10.32/node-v0.10.32.pkg) at the time of this
 writing) should work fine, but version [0.10.26](http://nodejs.org/dist/v0.10.26/node-v0.10.26.pkg)
 is what's been used to develop and test PCjs so far.
 
-Also, [server.js](server.js) was originally written using [Express](http://expressjs.com/) v3.x.  Since then,
-Express v4.x has been released, but `npm install` will make sure that v3.x is installed locally.
+Also, [server.js](server.js) was originally written using [Express](http://expressjs.com/) v3.  Since then,
+Express v4 has been released, but the `npm install` command above will make sure that v3 is installed locally.
 
 The plan is to eventually move development to a newer version of Node, and migrate the PCjs server to a newer
 version of Express; there's no desire to remain stuck in the past (well, ignoring the fact that PCjs is the
@@ -88,23 +106,22 @@ However, in order to build and test PCjs modifications, you'll want to use [Grun
 Grunt tasks defined by [Gruntfile.js](Gruntfile.js).
 
 Although Grunt was installed locally when you ran `npm install`, you'll also want to install the command-line
-interface to Grunt; you can install that locally as well, but it's recommended that you install it globally, with
-the "-g" option:
+interface to Grunt; you can install that locally as well, but it's recommended you install it globally (use "-g"):
 
 	sudo npm install grunt-cli -g
 
 Now you can run `grunt` anywhere within the PCjs project to build an updated version.  If no command-line arguments
 are specified, `grunt` runs the "default" task defined by [Gruntfile.js](Gruntfile.js); that task runs Google's
-[Closure Compiler](https://developers.google.com/closure/compiler/) if any of the target files (eg, pc.js, pc-dbg.js,
-etc) are out-of date.
+[Closure Compiler](https://developers.google.com/closure/compiler/) if any of the target files (eg, pc.js or pc-dbg.js
+in the [/versions](versions/) directory) are out-of date.
 
-To ensure identical compilation results for everyone, a copy of the Closure Compiler has been checked into the
-[bin](bin/) folder.  This version of Closure Compiler, in turn, requires Java v7.x or later.  Use the following
+To ensure consistent compilation results, a copy of the Closure Compiler has been checked into the
+[bin](bin/) folder.  This version of Closure Compiler, in turn, requires Java v7 or later.  Use the following
 commands to confirm that everything is working properly:
 
 	java -version
 	
-which should report a version >= 1.7.x; eg:
+which should report a version >= 1.7; eg:
 	
     java version "1.7.0_67"
     Java(TM) SE Runtime Environment (build 1.7.0_67-b01)
@@ -150,7 +167,7 @@ run a series of automated tests, etc:
     node pcjs
 
 The [pcjs](my_modules/pcjs-client/bin/pcjs) script in [my_modules/pcjs-client/bin](my_modules/pcjs-client/bin) loads
-all the PCjs browser scripts listed in [package.json](/package.json), and then it starts a Node REPL ("read-eval-print loop").
+all the PCjs browser scripts listed in the root [package.json](/package.json) and then starts a Node REPL ("read-eval-print loop").
 The REPL handles a few special commands (eg, "load", "quit") and passes anything else to the PCjs Debugger component.
 If no Debugger component has been created yet, or if the Debugger didn't recognize the command, then it's passed on to *eval()*,
 like a good little REPL.
@@ -197,17 +214,22 @@ The `--logging` option will create a [node.log](/logs/node.log) that records all
 will generate additional debug-only messages (which will also be logged if `--logging` is enabled), and `--console`
 will replicate any messages to your console as well.
 
+If you want server.js to use a different port (the default is 8088), set PORT in your environment before starting
+the server:
+
+	export PORT=80
+
 A complete list of command-line options can be found in [server.js](server.js).
 
 ### Client Components
 
-A special parameter ("gort") can be appended to the URL to request uncompiled client source files, making problems
-much easier to debug:
+A special parameter ("gort") can be appended to the URL to request uncompiled client source files, making PCjs and
+C1Pjs much easier to debug, albeit much slower:
 
 	http://localhost:8088/?gort=debug
 
-However, the "gort=debug" parameter is unnecessary if the server was started with `--debug`; the server always
-serves uncompiled files when running in "debug" mode.
+The "gort=debug" parameter is unnecessary if the server is started with `--debug`; the server always serves uncompiled
+files when running in "debug" mode.
 
 Conversely, if the server is running "debug" mode but you want to test a compiled version of PCjs, use:
 
@@ -223,10 +245,10 @@ Updating PCjs
 
 To start developing features for a new version of PCjs, here are the recommended steps:
  
-1. Change the version number in [package.json](/package.json)
-2. Run the "grunt promote" task to bump the version in all machine XML files
+1. Change the version number in the root [package.json](/package.json)
+2. Run the "grunt promote" task to bump the version in all the machine XML files
 3. Make changes
-4. Run "grunt" to build new versions of the apps (eg, "/versions/pcjs/1.xx/pc.js")
+4. Run "grunt" to build new versions of the apps (eg, "/versions/pcjs/1.xx.yy/pc.js")
  
 However, you may want to skip step #2 until you're ready to start testing the new version.  Depending on the nature
 of your changes, it may be better to manually edit the version number in only a few machine XML files for testing,
