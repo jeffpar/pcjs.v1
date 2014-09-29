@@ -163,7 +163,7 @@ var aMachineFileTypes = {
 };
 
 var asNonDirectories = [
-    "COPYING"
+    "LICENSE"
 ];
 
 /*
@@ -182,7 +182,7 @@ var asNonDirectories = [
  * should now be removed from the project).
  */
 var asFilesNonListed = [
-    "COPYING",
+    "LICENSE",
     "index.html",
     "robots.txt",
     "machine.xml",

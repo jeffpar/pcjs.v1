@@ -68,11 +68,11 @@ of the project that have been published here are free for redistribution and/or 
 of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License,
 or (at your option) any later version.
 
-You are required to include the appropriate copyright notice (e.g., `PCjs v1.13.5 © 2012-2014 by @jeffpar`)
+You are required to include the appropriate copyright notice (e.g., `PCjs v1.15.3 © 2012-2014 by @jeffpar`)
 in every source code file of every copy or modified version of this work, and to display that copyright notice
 on every screen that loads or runs any version of this software.
 
-See [COPYING](/COPYING) for details.
+See [LICENSE](/LICENSE) for details.
 
 ---
 

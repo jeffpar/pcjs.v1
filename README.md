@@ -146,10 +146,10 @@ contains a machine XML file, that is embedded as well.
 The PCjs client app can also be run from the command-line mode using Node, making it possible to script the application,
 run a series of automated tests, etc:
 
-    cd ./my_modules/pcjs-client/bin
+    cd my_modules/pcjs-client/bin
     node pcjs
 
-The [pcjs](my_modules/pcjs-client/bin/pcjs) script in [/my_modules/pcjs-client/bin](my_modules/pcjs-client/bin) loads
+The [pcjs](my_modules/pcjs-client/bin/pcjs) script in [my_modules/pcjs-client/bin](my_modules/pcjs-client/bin) loads
 all the PCjs browser scripts listed in [package.json](/package.json), and then it starts a Node REPL ("read-eval-print loop").
 The REPL handles a few special commands (eg, "load", "quit") and passes anything else to the PCjs Debugger component.
 If no Debugger component has been created yet, or if the Debugger didn't recognize the command, then it's passed on to *eval()*,
@@ -240,12 +240,12 @@ updates, changes to README.md files, etc.  So, before running Node, you may want
 
 	touch my_modules/shared/templates/common.html
 	
-The [HTMLOut](/my_modules/htmlout/) module compares the timestamp of that template file to the timestamp of any
+The [HTMLOut](my_modules/htmlout/) module compares the timestamp of that template file to the timestamp of any
 "index.html" and will regenerate the latter if it's out-of-date.
 
 There's a TODO to expand that check to include the timestamp of any local README.md file, but there are many other
 factors that can contribute to stale "index.html" files, so usually the safest thing to do is "touch" the
-[common.html](/my_modules/shared/templates/common.html) template, or delete all existing "index.html" files, either
+[common.html](my_modules/shared/templates/common.html) template, or delete all existing "index.html" files, either
 manually or with the Grunt "clean" task:
 
 	grunt clean
