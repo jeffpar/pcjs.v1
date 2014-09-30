@@ -82,7 +82,17 @@ NOTE: If you just want to run the server and don't plan to do any development, y
 slightly by asking NPM to install only "productions" modules:
  
 	npm install --production
+	
+If you ever inadvertently run `npm install` without `--production`, you can easily eliminate any unwanted
+"devDependencies" with:
 
+	npm prune --production
+	
+Finally, when installing the project on an AWS server, you have complete control of how Node is launched, but you
+don't have direct control of NPM; the best you can do is set the following AWS "Environment Property":
+
+	NPM_CONFIG_PRODUCTION=true
+	
 It's assumed that the OS X Developer Tools (which include Git) have already been installed, as well as
 Node and NPM.  Node (which now includes NPM) can be downloaded from [nodejs.org](http://nodejs.org/download/).
 The current version of Node ([0.10.32](http://nodejs.org/dist/v0.10.32/node-v0.10.32.pkg) at the time of this
@@ -228,15 +238,27 @@ C1Pjs much easier to debug, albeit much slower:
 
 	http://localhost:8088/?gort=debug
 
-The "gort=debug" parameter is unnecessary if the server is started with `--debug`; the server always serves uncompiled
-files when running in "debug" mode.
+The "gort=debug" command is unnecessary if the server is started with `--debug`; the server always serves uncompiled
+files when running in "debug mode".
 
-Conversely, if the server is running "debug" mode but you want to test a compiled version of PCjs, use:
+Conversely, if the server is running "debug mode" but you want to test a compiled version of PCjs, use:
 
 	http://localhost:8088/?gort=release
 
-and the server will serve compiled JavaScript files, regardless whether the server is running in "debug" or "release"
-mode.
+and the server will serve compiled JavaScript files, regardless whether the server is running in "debug mode" or
+"release mode".
+
+Another useful gort command is "gort=nodebug", which is like "debug" but also sets the client-side **DEBUG** variable
+to *false*, disabling all debug-only runtime checks in the client and allowing the simulation to run much faster:
+
+	http://localhost:8088/?gort=nodebug
+
+Regrettably, the gort command "Klaatu barada nikto" is not yet recognized.  Fortunately, there are no (known) situations
+where PCjs could run amok and destroy the planet.
+
+Other parameters that can be passed via the URL:
+
+- *autostart*: set it to "false" to prevent all machines on the current page from automatically starting
 
 Updating PCjs
 ---
