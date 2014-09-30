@@ -38,8 +38,6 @@ var glob = require("glob");
  * @class exports
  * @property {function(string)} sync
  */
-var mkdirp = require("mkdirp");
-
 var HTTPAPI = require("./httpapi");
 var DumpAPI = require("../../shared/lib/dumpapi");
 var MarkOut = require("../../markout");

@@ -4,13 +4,13 @@ Intel 80286 CPU Documentation
 ### 80286 Errata
 
 * [ARPL Behavior](arpl/)
-* [Coprocessor Operand Beyond Segment Limit](b2_b3_information/#coprocessor-operand-partially-beyond-limit-of-erc-segment)
-* [Instructions Longer than 10 Bytes](long_instructions/)
-* [Loading Null Selector Values Into DS or ES Registers](b2_b3_information/#loading-null-selector-values-into-ds-or-es-registers)
-* [Non-Restartable Protection Violations](b2_b3_information/#non-restartable-protection-violations)
-* [POPF Behavior](b2_b3_information/#popf-behavior)
-* [REP MOVS and REP INS Restartability](rep_restartability/)
-* [Early 80286 Errata of Interest](exceptions_and_early_errata/#early-80286-errata-of-interest)
+* [Coprocessor Operand Beyond Segment Limit](b2_b3_info/#coprocessor-operand-partially-beyond-limit-of-erc-segment)
+* [Instructions Longer than 10 Bytes](extra_prefixes/)
+* [Loading Null Selector Values Into DS or ES Registers](b2_b3_info/#loading-null-selector-values-into-ds-or-es-registers)
+* [Non-Restartable Protection Violations](b2_b3_info/#non-restartable-protection-violations)
+* [POPF Behavior](b2_b3_info/#popf-behavior)
+* [REP MOVS and REP INS Restartability](rep_restart/)
+* [Early 80286 Errata of Interest](early_errata/#early-80286-errata-of-interest)
 
 ### 80286 Undocumented Opcodes
 
@@ -18,11 +18,11 @@ Intel 80286 CPU Documentation
 
 ### 80286 Real-Mode Emulation Notes
 
-* [Executing Real Mode Programs in Protected Mode](executing_real_mode_programs_in_protected_mode/)
-* [Discrepancies from an iAPX 86/88 Using Emulation](executing_real_mode_programs_in_protected_mode/#discrepancies-from-an-iapx-86-88-using-emulation)
-* [Extending the Address Space of Current iAPX 86 Software](executing_real_mode_programs_in_protected_mode/#extending-the-address-space-of-current-iapx-86-software)
-* [Mixing Real Mode and Protected Mode](executing_real_mode_programs_in_protected_mode/#mixing-real-mode-and-protected-mode)
-* [Exceptions from Undefined Opcodes and String Instructions](exceptions_and_early_errata/)
+* [Executing Real Mode Programs in Protected Mode](real_mode/)
+* [Discrepancies from an iAPX 86/88 Using Emulation](real_mode/#discrepancies-from-an-iapx-86-88-using-emulation)
+* [Extending the Address Space of Current iAPX 86 Software](real_mode/#extending-the-address-space-of-current-iapx-86-software)
+* [Mixing Real Mode and Protected Mode](real_mode/#mixing-real-mode-and-protected-mode)
+* [Exceptions from Undefined Opcodes and String Instructions](early_errata/)
 
 ### Assorted Publications
 

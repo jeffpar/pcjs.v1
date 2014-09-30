@@ -963,6 +963,17 @@ HTTPAPI.verifyUserID = function(sUser, res, done)
 };
 
 /**
+ * getUserDir(sUser)
+ *
+ * @param {string} sUser
+ * @return {string}
+ */
+HTTPAPI.getUserDir = function(sUser)
+{
+    return path.join(sServerRoot, "/logs/users/" + /* sUser.substr(0, 2) + "/" + */ sUser);
+};
+
+/**
  * createUserDir(sUser)
  * 
  * TODO: Creation is relatively rare, so I'm lazy and use synchronous calls, but fix this someday. 
@@ -972,7 +983,7 @@ HTTPAPI.verifyUserID = function(sUser, res, done)
  */
 HTTPAPI.createUserDir = function(sUser)
 {
-    var sDir = path.join(sServerRoot, "/logs/users/" + sUser.substr(0, 2) + "/" + sUser);
+    var sDir = HTTPAPI.getUserDir(sUser);
     return (fs.existsSync(sDir) || !!mkdirp.sync(sDir));
 };
 
@@ -987,7 +998,7 @@ HTTPAPI.verifyUserDir = function(sUser, done)
     HTMLOut.logDebug('HTTPAPI.verifyUserDir("' + sUser + '")');
 
     if (sUser) {
-        var sDir = path.join(sServerRoot, "/logs/users/" + sUser.substr(0, 2) + "/" + sUser);
+        var sDir = HTTPAPI.getUserDir(sUser);
         fs.exists(sDir, function(fExists) {
             if (!fExists) {
                 HTTPAPI.verifyUserID(sUser, null, function(iVerified, result, res) {
