@@ -87,10 +87,10 @@ function Debugger(parmsDbg)
          * update aAddrNextData and aAddrNextCode, respectively, when they're done.
          * 
          * The format of all aAddr variables is [off, seg, addr], where seg:off is the segmented
-         * address and addr is the corresponding physical address.  For some segmented addresses
-         * (eg, breakpoint addresses), we pre-compute the physical address and save that in aAddr[2],
-         * so that the breakpoint will still operate as intended even if the mode changes later
-         * (eg, from real-mode to protected-mode).
+         * address and addr is the corresponding physical address (if known).  For certain segmented
+         * addresses (eg, breakpoint addresses), we pre-compute the physical address and save that
+         * in aAddr[2], so that the breakpoint will still operate as intended even if the mode changes
+         * later (eg, from real-mode to protected-mode).
          * 
          * Finally, for TEMPORARY breakpoint addresses, we set aAddr[3] to true, so that they can be
          * automatically cleared when they're hit.
@@ -2112,7 +2112,9 @@ if (DEBUGGER) {
         }
         if (aAddr[1] != null) {
             aAddr[0] += inc;
-            // TODO: Shouldn't we be using the segment (aAddr[1]) limit instead of 0xffff?
+            /*
+             * TODO: Shouldn't we be using the segment (aAddr[1]) limit instead of 0xffff?
+             */
             if (aAddr[0] != (aAddr[0] & 0xffff)) {
                 aAddr[0] = aAddr[0] & 0xffff;
                 aAddr[2] = null;
@@ -2318,6 +2320,7 @@ if (DEBUGGER) {
          * or history data (see checkInstruction), since we might not actually execute the current instruction.
          */
         var fBreak = false;
+        
         /*
          * Map addresses in the top 64Kb (at the top of the 16Mb range) to the top of the 1Mb range.
          * 
@@ -2326,6 +2329,7 @@ if (DEBUGGER) {
          * in the top 16Mb, yet after the first inter-segment JMP, you will be running in the first 1Mb.
          */
         if ((addr & 0xFF0000) == 0xFF0000) addr &= 0x0FFFFF;
+        
         for (var i = 1; i < aBreak.length; i++) {
             var aAddrBreak = aBreak[i];
             if (addr == this.getAddr(aAddrBreak)) {
@@ -2731,9 +2735,8 @@ if (DEBUGGER) {
      * addresses.  If/when we add support for processors with page tables, we will likely adopt the same
      * convention for linear addresses and provide a different syntax (eg, "%%") physical memory references.
      *
-     * Address evaluation and validation (eg, range checks) are no longer performed at this stage, which
-     * is why aAddr variables no longer contain an addr element; computing addr is now performed as-needed
-     * by getAddr(), which will return a negative result (-1) for invalid segments, out-of-range offsets,
+     * Address evaluation and validation (eg, range checks) are no longer performed at this stage.  That's
+     * done later, by getAddr(), which returns a negative result (-1) for invalid segments, out-of-range offsets,
      * etc.  The Debugger's low-level get/set memory functions verify all getAddr() results, but even if an
      * invalid address is passed through to the Bus memory interfaces, the address will simply be masked with
      * Bus.addrLimit; in the case of -1, that will generally refer to the last byte of physical memory.
@@ -2762,7 +2765,7 @@ if (DEBUGGER) {
     
             var iColon = sAddr.indexOf(":");
             if (iColon < 0) {
-                if (addr == null) {
+                if (seg != null) {
                     off = this.parseValue(sAddr);
                 } else {
                     addr = this.parseValue(sAddr);
@@ -2771,6 +2774,7 @@ if (DEBUGGER) {
             else {
                 seg = this.parseValue(sAddr.substring(0, iColon));
                 off = this.parseValue(sAddr.substring(iColon + 1));
+                addr = null;
             }
         }
         return [off, seg, addr];
@@ -4020,8 +4024,8 @@ if (DEBUGGER) {
                             this.aAddrNextCode = this.newAddr(this.cpu.regIP, this.cpu.segCS.sel);
                             break;
                         /*
-                         * I used to alias "PC" to "IP", until I discovered that early (perhaps even ALL?) versions of DEBUG
-                         * treat "PC" as an alias for the 16-bit flags register.  TODO: Add support for "PC" that matches DEBUG.
+                         * I used to alias "PC" to "IP", until I discovered that early (perhaps ALL) versions of
+                         * DEBUG.COM treat "PC" as an alias for the 16-bit flags register.  TODO: Add support for "PC".
                          */
                         case "IP":
                             fIns = true;

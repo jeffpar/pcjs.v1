@@ -72,7 +72,7 @@ if (typeof module !== 'undefined') {
  *      SW2[1-4]    (bits 3-0)  "NNNNxxxx": number of 32Kb blocks of I/O expansion RAM present
  *
  * TODO: There are cryptic references to SW2[5] in the original (5150) TechRef, and apparently the 8255A PPI can
- * be programmed to return it (which we support), but its purpose is unclear to me (see PPI_B_ENABLE_SW2).
+ * be programmed to return it (which we support), but its purpose is unclear to me (see PPI_B.ENABLE_SW2).
  *
  * For example, sw1="01110011" indicates that all SW1 DIP switches are ON, except for SW1[1], SW1[5] and SW1[6],
  * which are OFF. Internally, the order of these bits must reversed (to 11001110) and then inverted (to 00110001)
@@ -480,7 +480,7 @@ ChipSet.TIMER_TICKS_PER_SEC     = 1193181;
  * with the usual 0x99.
  */
 ChipSet.PPI_A = {};                     // this.bPPIA
-ChipSet.PPI_A.PORT              = 0x60; // INPUT: keyboard scan code (PPI_B_CLEAR_KBD must be clear)
+ChipSet.PPI_A.PORT              = 0x60; // INPUT: keyboard scan code (PPI_B.CLEAR_KBD must be clear)
 
 ChipSet.PPI_B = {};                     // this.bPPIB
 ChipSet.PPI_B.PORT              = 0x61; // OUTPUT (although it has to be treated as INPUT, too: the keyboard interrupt handler reads it, OR's PPI_B.CLEAR_KBD, writes it, and then rewrites the original read value)
@@ -496,7 +496,7 @@ ChipSet.PPI_B.CLEAR_KBD         = 0x80; // ALL: clear to enable keyboard scan co
 
 ChipSet.PPI_C = {};                     // this.bPPIC
 ChipSet.PPI_C.PORT              = 0x62; // INPUT (see below)
-ChipSet.PPI_C.SW                = 0x0F; // MODEL_5150: SW2[1-4] or SW2[5], depending on whether PPI_B_ENABLE_SW2 is set or clear; MODEL_5160: SW1[1-4] or SW1[5-8], depending on whether PPI_B_ENABLE_SW_HI is clear or set
+ChipSet.PPI_C.SW                = 0x0F; // MODEL_5150: SW2[1-4] or SW2[5], depending on whether PPI_B.ENABLE_SW2 is set or clear; MODEL_5160: SW1[1-4] or SW1[5-8], depending on whether PPI_B.ENABLE_SW_HI is clear or set
 ChipSet.PPI_C.CASS_DATA_IN      = 0x10;
 ChipSet.PPI_C.TIMER2_OUT        = 0x20;
 ChipSet.PPI_C.IO_CHANNEL_CHK    = 0x40; // used by NMI handler to detect I/O channel errors
@@ -514,7 +514,7 @@ ChipSet.PPI_CTRL.A_MODE         = 0x60;
 /*
  * On the MODEL_5150, the following PPI_SW bits are exposed through PPI_A.
  * 
- * On the MODEL_5160, either the low or high 4 bits are exposed through PPI_C_SW, if PPI_B_ENABLE_SW_HI is clear or set.
+ * On the MODEL_5160, either the low or high 4 bits are exposed through PPI_C_SW, if PPI_B.ENABLE_SW_HI is clear or set.
  */
 ChipSet.PPI_SW = {};
 ChipSet.PPI_SW.FDRIVE = {};
@@ -3289,29 +3289,6 @@ ChipSet.prototype.updateAllTimers = function(fCycleReset)
 };
 
 /**
- * updateSpeaker(bOut)
- *
- * @this {ChipSet}
- * @param {number} bOut
- */
-ChipSet.prototype.updateSpeaker = function(bOut)
-{
-    var fNewSpeaker = !!(bOut & ChipSet.PPI_B.SPK_TIMER2);
-    var fOldSpeaker = !!(this.bPPIB & ChipSet.PPI_B.SPK_TIMER2);
-    this.bPPIB = bOut;
-    if (fNewSpeaker != fOldSpeaker) {
-        /*
-         * Originally, this code didn't catch the "ERROR_BEEP" case @F000:EC34, which first turns both PPI_B_CLK_TIMER2 (0x01)
-         * and PPI_B_SPK_TIMER2 (0x02) off, then turns on only PPI_B_SPK_TIMER2 (0x02), then restores the original port value.
-         * 
-         * So, when the ROM BIOS keyboard buffer got full, we didn't issue a BEEP alert.  I've fixed that by limiting the test
-         * to PPI_B_SPK_TIMER2 and ignoring PPI_B_CLK_TIMER2.
-         */
-        this.setSpeaker(fNewSpeaker);
-    }
-};
-
-/**
  * inPPIA(port, addrFrom)
  * 
  * @this {ChipSet}
@@ -3374,8 +3351,36 @@ ChipSet.prototype.inPPIB = function(port, addrFrom)
 ChipSet.prototype.outPPIB = function(port, bOut, addrFrom)
 {
     this.messagePort(port, bOut, addrFrom, "PPI_B", ChipSet.MESSAGE_CHIPSET);
-    this.updateSpeaker(bOut);
+    this.updatePPIB(bOut);
     if (this.kbd) this.kbd.setEnable((bOut & ChipSet.PPI_B.CLEAR_KBD)? false : true, (bOut & ChipSet.PPI_B.CLK_KBD)? true : false);
+};
+
+/**
+ * updatePPIB(bOut)
+ * 
+ * On MODEL_5170 and up, this updates the "simulated" PPI_B.  The only common (and well-documented) PPI_B bits
+ * across all models are PPI_B.CLK_TIMER2 and PPI_B.SPK_TIMER2, so its possible that this function may need to
+ * limit its updates to just those bits, and move any model-specific requirements back into the appropriate I/O
+ * handlers (PPIB or 8042RWReg).  We'll see.
+ *
+ * @this {ChipSet}
+ * @param {number} bOut
+ */
+ChipSet.prototype.updatePPIB = function(bOut)
+{
+    var fNewSpeaker = !!(bOut & ChipSet.PPI_B.SPK_TIMER2);
+    var fOldSpeaker = !!(this.bPPIB & ChipSet.PPI_B.SPK_TIMER2);
+    this.bPPIB = bOut;
+    if (fNewSpeaker != fOldSpeaker) {
+        /*
+         * Originally, this code didn't catch the "ERROR_BEEP" case @F000:EC34, which first turns both PPI_B.CLK_TIMER2 (0x01)
+         * and PPI_B.SPK_TIMER2 (0x02) off, then turns on only PPI_B.SPK_TIMER2 (0x02), then restores the original port value.
+         * 
+         * So, when the ROM BIOS keyboard buffer got full, we didn't issue a BEEP alert.  I've fixed that by limiting the test
+         * to PPI_B.SPK_TIMER2 and ignoring PPI_B.CLK_TIMER2.
+         */
+        this.setSpeaker(fNewSpeaker);
+    }
 };
 
 /**
@@ -3523,7 +3528,7 @@ ChipSet.prototype.out8042InBuffData = function(port, bOut, addrFrom)
          * Here's some relevant MODEL_5170 ROM BIOS code, "XMIT_8042" (missing from the original MODEL_5170 ROM BIOS listing),
          * which sends a command code in AL to the Keyboard and waits for a response, returning it in AL.  Note that
          * the only "success" exit path from this function involves LOOPing 64K times before finally reading the Keyboard's
-         * response; either the hardware and/or this code seems a bit brain-damaged if that's REALLY what you had to do to get
+         * response; either the hardware and/or this code seems a bit brain-damaged if that's REALLY what you had to do to ensure
          * a valid response....
          * 
          *      F000:1B25 86E0          XCHG     AH,AL
@@ -3624,7 +3629,7 @@ ChipSet.prototype.in8042RWReg = function(port, addrFrom)
 ChipSet.prototype.out8042RWReg = function(port, bOut, addrFrom)
 {
     this.messagePort(port, bOut, addrFrom, "8042_RWREG", ChipSet.MESSAGE_CHIPSET);
-    this.updateSpeaker(bOut);
+    this.updatePPIB(bOut);
 };
 
 /**

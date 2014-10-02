@@ -589,8 +589,8 @@ Keyboard.prototype.resetDevice = function()
 /**
  * setEnable(fEnable, fClock)
  * 
- * This is the ChipSet's primary interface for controlling "Model F" keyboards (ie, those used
- * with MODEL_5150 and MODEL_5160 machines)
+ * This is the ChipSet's primary interface for controlling "Model F" keyboards (ie, those used with
+ * MODEL_5150 and MODEL_5160 machines).  This function is called from the ChipSet's PPI_B output handler.
  * 
  * @this {Keyboard}
  * @param {boolean} fEnable is true if the keyboard interface should be enabled
