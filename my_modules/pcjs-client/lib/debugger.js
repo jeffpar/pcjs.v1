@@ -86,11 +86,11 @@ function Debugger(parmsDbg)
          * or aAddrNextData when no address has been given.  doDump() and doUnassemble(), in turn,
          * update aAddrNextData and aAddrNextCode, respectively, when they're done.
          * 
-         * The format of all aAddr variables is [off, seg], where seg:off is a segmented address if
-         * seg is defined, and off is a physical address if seg is undefined.  For some segmented
-         * addresses (eg, breakpoint addresses), we also pre-compute the physical address and save that
-         * in aAddr[2], so that the breakpoint will still operate as intended even if the mode changes
-         * later (eg, from real-mode to protected-mode).
+         * The format of all aAddr variables is [off, seg, addr], where seg:off is the segmented
+         * address and addr is the corresponding physical address.  For some segmented addresses
+         * (eg, breakpoint addresses), we pre-compute the physical address and save that in aAddr[2],
+         * so that the breakpoint will still operate as intended even if the mode changes later
+         * (eg, from real-mode to protected-mode).
          * 
          * Finally, for TEMPORARY breakpoint addresses, we set aAddr[3] to true, so that they can be
          * automatically cleared when they're hit.
@@ -1491,7 +1491,7 @@ if (DEBUGGER) {
                  * Preallocate dummy Addr (Array) objects in every history slot, so that checkInstruction()
                  * doesn't need to call newAddr() on every instruction check.
                  */
-                this.aOpcodeHistory[i] = [0, 0, 0];
+                this.aOpcodeHistory[i] = [0, null, 0];
             }
             this.iOpcodeHistory = 0;
         }
@@ -1973,7 +1973,7 @@ if (DEBUGGER) {
      * @this {Debugger}
      * @param {Array} aAddr
      * @param {boolean} [fWrite]
-     * @param {number} [cb]
+     * @param {number} [cb] is number of extra bytes to check (0 or 1)
      * @return {number} is the corresponding physical address, or -1 if there's an error
      */
     Debugger.prototype.getAddr = function(aAddr, fWrite, cb)
@@ -1986,15 +1986,11 @@ if (DEBUGGER) {
          */
         var addr = aAddr[2];
         if (addr == null) {
-            if (aAddr[1] == null) {
-                addr = (aAddr[0] <= this.bus.addrLimit? aAddr[0] : -1);
+            var seg = this.getSegment(aAddr[1]);
+            if (!fWrite) {
+                addr = seg.checkRead(aAddr[0], cb || 0, true);
             } else {
-                var seg = this.getSegment(aAddr[1]);
-                if (!fWrite) {
-                    addr = seg.checkRead(aAddr[0], cb || 0, true);
-                } else {
-                    addr = seg.checkWrite(aAddr[0], cb || 0, true);
-                }
+                addr = seg.checkWrite(aAddr[0], cb || 0, true);
             }
         }
         /*
@@ -2020,7 +2016,7 @@ if (DEBUGGER) {
     Debugger.prototype.getByte = function(aAddr, inc)
     {
         var b = 0xff;
-        var addr = this.getAddr(aAddr, false, 1);
+        var addr = this.getAddr(aAddr, false, 0);
         if (addr >= 0) {
             b = this.bus.getByteDirect(addr);
             Component.assert((b == (b & 0xff)), "invalid byte (" + b + ") at address: " + this.hexAddr(aAddr));
@@ -2040,7 +2036,7 @@ if (DEBUGGER) {
     Debugger.prototype.getWord = function(aAddr, inc)
     {
         var w = 0xffff;
-        var addr = this.getAddr(aAddr, false, 2);
+        var addr = this.getAddr(aAddr, false, 1);
         if (addr >= 0) {
             w = this.bus.getWordDirect(addr);
             Component.assert((w == (w & 0xffff)), "invalid word (" + w + ") at address: " + this.hexAddr(aAddr));
@@ -2063,7 +2059,7 @@ if (DEBUGGER) {
      */
     Debugger.prototype.setByte = function(aAddr, b, inc)
     {
-        var addr = this.getAddr(aAddr, true, 1);
+        var addr = this.getAddr(aAddr, true, 0);
         if (addr >= 0) {
             this.bus.setByteDirect(addr, b);
             if (inc !== undefined) this.incAddr(aAddr, inc);
@@ -2081,7 +2077,7 @@ if (DEBUGGER) {
      */
     Debugger.prototype.setWord = function(aAddr, w, inc)
     {
-        var addr = this.getAddr(aAddr, true, 2);
+        var addr = this.getAddr(aAddr, true, 1);
         if (addr >= 0) {
             this.bus.setWordDirect(addr, w);
             if (inc !== undefined) this.incAddr(aAddr, inc);
@@ -2098,24 +2094,29 @@ if (DEBUGGER) {
      */
     Debugger.prototype.hexAddr = function(aAddr)
     {
-        return aAddr[1] == null? ("%" + str.toHex(aAddr[0])) : str.toHexAddr(aAddr[0], aAddr[1]);
+        return aAddr[1] == null? ("%" + str.toHex(aAddr[2])) : str.toHexAddr(aAddr[0], aAddr[1]);
     };
     
     /**
      * incAddr(aAddr, inc)
      * 
      * @this {Debugger}
-     * @param {Array} aAddr containing [off, seg]
+     * @param {Array} aAddr containing [off, seg, addr]
      * @param {number|undefined} inc contains value to increment by (default is 1)
      */
     Debugger.prototype.incAddr = function(aAddr, inc)
     {
         inc = (inc === undefined? 1 : inc);
-        aAddr[0] += inc;
-        if (aAddr[2] != null) aAddr[2] += inc;
-        if (aAddr[0] != (aAddr[0] & 0xffff)) {
-            aAddr[0] = aAddr[0] & 0xffff;
-            aAddr[2] = null;
+        if (aAddr[2] != null) {
+            aAddr[2] += inc;
+        }
+        if (aAddr[1] != null) {
+            aAddr[0] += inc;
+            // TODO: Shouldn't we be using the segment (aAddr[1]) limit instead of 0xffff?
+            if (aAddr[0] != (aAddr[0] & 0xffff)) {
+                aAddr[0] = aAddr[0] & 0xffff;
+                aAddr[2] = null;
+            }
         }
     };
     
@@ -2222,6 +2223,9 @@ if (DEBUGGER) {
     
     /**
      * listBreakpoints(aBreak)
+     * 
+     * TODO: We may need to start listing the physical addresses of breakpoints, because
+     * segmented address can be ambiguous.
      * 
      * @this {Debugger}
      * @param {Array} aBreak
@@ -2348,7 +2352,7 @@ if (DEBUGGER) {
      */
     Debugger.prototype.getInstruction = function(aAddr, sComment, nSequence)
     {
-        var aAddrIns = this.newAddr(aAddr[0], aAddr[1]);
+        var aAddrIns = this.newAddr(aAddr[0], aAddr[1], aAddr[2]);
     
         var bOpcode = this.getByte(aAddr, 1);
         var aOpDesc = this.aaOpDescs[bOpcode];
@@ -2716,8 +2720,8 @@ if (DEBUGGER) {
     /**
      * parseAddr(sAddr, type)
      * 
-     * As discussed above, the format of all aAddr variables is [off, seg]; they represent a segmented
-     * address (seg:off) when seg is defined or a physical address (off) when seg is undefined (or null).
+     * As discussed above, the format of aAddr variables is [off, seg, addr]; they represent a segmented
+     * address (seg:off) when seg is defined or a physical address (addr) when seg is undefined (or null).
      *
      * To create a segmented address, specify two values separated by ":"; for a physical address, use
      * a "%" prefix.  We check for ":" after "%", so if for some strange reason you specify both, the
@@ -2743,13 +2747,14 @@ if (DEBUGGER) {
     {
         var aAddrNext = (type == Debugger.ADDR_DATA? this.aAddrNextData : this.aAddrNextCode);
 
-        var off = aAddrNext[0], seg = aAddrNext[1];
+        var off = aAddrNext[0], seg = aAddrNext[1], addr = aAddrNext[2];
         
         if (sAddr !== undefined) {
             
             if (sAddr.charAt(0) == '%') {
                 sAddr = sAddr.substr(1);
                 seg = null;
+                addr = 0;
             }
             
             var aAddr = this.findSymbolAddr(sAddr);
@@ -2757,14 +2762,18 @@ if (DEBUGGER) {
     
             var iColon = sAddr.indexOf(":");
             if (iColon < 0) {
-                off = this.parseValue(sAddr);
+                if (addr == null) {
+                    off = this.parseValue(sAddr);
+                } else {
+                    addr = this.parseValue(sAddr);
+                }
             }
             else {
                 seg = this.parseValue(sAddr.substring(0, iColon));
                 off = this.parseValue(sAddr.substring(iColon + 1));
             }
         }
-        return [off, seg];
+        return [off, seg, addr];
     };
     
     /**
@@ -3502,7 +3511,7 @@ if (DEBUGGER) {
             }
             iHistory -= n;
             if (iHistory < 0) {
-                if (aHistory[aHistory.length - 1].length) {
+                if (aHistory[aHistory.length - 1][1] != null) {
                     iHistory += aHistory.length;
                 } else {
                     n = iHistory + n;
@@ -3514,10 +3523,10 @@ if (DEBUGGER) {
             }
             while (cLines && iHistory != this.iOpcodeHistory) {
                 var aAddr = aHistory[iHistory];
-                if (!aAddr.length) break;
+                if (aAddr[1] == null) break;
                 /*
                  * We must create a new aAddr from the address we obtained from aHistory, because
-                 * it was a reference, not a copy, and we don't want getInstruction() modifying the original.  
+                 * aAddr was a reference, not a copy, and we don't want getInstruction() modifying the original.  
                  */
                 aAddr = this.newAddr(aAddr[0], aAddr[1], aAddr[2]);
                 this.println(this.getInstruction(aAddr, "history", -n));
@@ -4229,7 +4238,7 @@ if (DEBUGGER) {
             return;
     
         if (n === undefined) n = 1;
-        var aAddrEnd = this.newAddr(this.bus.addrLimit, aAddr[1]);
+        var aAddrEnd = this.newAddr(0xffff, aAddr[1], this.bus.addrLimit);
     
         if (sAddrEnd !== undefined) {
             aAddrEnd = this.parseAddr(sAddrEnd, Debugger.ADDR_CODE);
@@ -4250,7 +4259,7 @@ if (DEBUGGER) {
     
         var fBlank = (aAddr[0] != this.aAddrNextCode[0]);
     
-        while (n-- && aAddr[0] < aAddrEnd[0]) {
+        while (n-- && (aAddr[1] != null? (aAddr[0] < aAddrEnd[0]) : (aAddr[2] < aAddrEnd[2]))) {
             /*
              * I pass nCycles instead of cInstructions to getInstruction() now, to assist with visual
              * verification of the accuracy (or inaccuracy) of instruction cycle counts.

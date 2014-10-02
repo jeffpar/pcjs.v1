@@ -1810,6 +1810,9 @@ X86CPU.prototype.modEAByteDisabled = function(seg, off)
 {
     this.segEA = seg;
     this.offEA = off;
+    /*
+     * TODO: Should this not also set regEA? Optimization or oversight?
+     */
     this.regEAWrite = seg.base + off;
     return 0;
 };
@@ -1909,13 +1912,6 @@ X86CPU.prototype.modEAWordEnabled = function(seg, off)
 X86CPU.prototype.setEAByteEnabled = function(b)
 {
     if (!FASTDISABLE && (this.opFlags & X86.OPFLAG.NOWRITE)) return;
-    /*
-     * TODO: We used to call checkEAWrite(this.segEA, this.offEA, 1), which would simply return
-     * regEAWrite in real-mode (or recalculate the address in prot-mode and verify that it still matched
-     * regEAWrite); determine if there's any value in reinstating that feature with the new X86Seg class.
-     * 
-     *      this.setByte(this.checkEAWrite(this.segEA, this.offEA, 1), b);
-     */
     this.setByte(this.segEA.checkWrite(this.offEA, 1), b);
 };
 
@@ -1928,13 +1924,6 @@ X86CPU.prototype.setEAByteEnabled = function(b)
 X86CPU.prototype.setEAWordEnabled = function(w)
 {
     if (!FASTDISABLE && (this.opFlags & X86.OPFLAG.NOWRITE)) return;
-    /*
-     * TODO: We used to call checkEAWrite(this.segEA, this.offEA, 2), which would simply return
-     * regEAWrite in real-mode (or recalculate the address in prot-mode and verify that it still matched
-     * regEAWrite); determine if there's any value in reinstating that feature with the new X86Seg class.
-     * 
-     *      this.setByte(this.checkEAWrite(this.segEA, this.offEA, 1), b);
-     */
     this.setWord(this.segEA.checkWrite(this.offEA, 2), w);
 };
 

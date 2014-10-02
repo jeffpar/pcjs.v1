@@ -483,7 +483,7 @@ ChipSet.PPI_A = {};                     // this.bPPIA
 ChipSet.PPI_A.PORT              = 0x60; // INPUT: keyboard scan code (PPI_B_CLEAR_KBD must be clear)
 
 ChipSet.PPI_B = {};                     // this.bPPIB
-ChipSet.PPI_B.PORT              = 0x61; // OUTPUT (although it has to be treated as INPUT, too: the keyboard interrupt handler reads it, OR's PPI_B_CLEAR_KBD, writes it, and then rewrites the original read value)
+ChipSet.PPI_B.PORT              = 0x61; // OUTPUT (although it has to be treated as INPUT, too: the keyboard interrupt handler reads it, OR's PPI_B.CLEAR_KBD, writes it, and then rewrites the original read value)
 ChipSet.PPI_B.CLK_TIMER2        = 0x01; // ALL: set to enable clock to TIMER2
 ChipSet.PPI_B.SPK_TIMER2        = 0x02; // ALL: set to connect output of TIMER2 to speaker (MODEL_5150: clear for cassette)
 ChipSet.PPI_B.ENABLE_SW2        = 0x04; // MODEL_5150: set to enable SW2[1-4] through PPI_C.PORT, clear to enable SW2[5]; MODEL_5160: unused (there is no SW2 switch block on the MODEL_5160 motherboard)
@@ -513,6 +513,7 @@ ChipSet.PPI_CTRL.A_MODE         = 0x60;
 
 /*
  * On the MODEL_5150, the following PPI_SW bits are exposed through PPI_A.
+ * 
  * On the MODEL_5160, either the low or high 4 bits are exposed through PPI_C_SW, if PPI_B_ENABLE_SW_HI is clear or set.
  */
 ChipSet.PPI_SW = {};
@@ -542,20 +543,20 @@ ChipSet.PPI_SW.FDRIVE.SHIFT     = 6;
 /*
  * 8042 Keyboard Controller I/O ports (MODEL_5170)
  * 
- * On the MODEL_5170, port 0x60 is treated as KBD_DATA rather than PPI_A (although the 5170 BIOS also refers
- * to it as "PORT_A").  This is the 8042's output buffer and should be read only when KBD_STATUS.OUTBUFF_FULL set.
+ * On the MODEL_5170, port 0x60 is designated KBD_DATA rather than PPI_A, although the BIOS also refers to it
+ * as "PORT_A: 8042 KEYBOARD SCAN/DIAG OUTPUTS").  This is the 8042's output buffer and should be read only when
+ * KBD_STATUS.OUTBUFF_FULL is set.
  * 
- * The MODEL_5170 also uses port 0x61 (PPI_B), which the BIOS refers to as "8042 READ WRITE REGISTER (PORT_B)",
- * but it is not discussed in the MODEL_5170 TechRef's 8042 documentation.  There are brief references to bits 0
- * and 1 (PPI_B.CLK_TIMER2 and PPI_B.SPK_TIMER2), and the BIOS sets bits 3-7 to "DISABLE PARITY CHECKERS"
- * (principally PPI_B.DISABLE_RW_MEM and PPI_B.DISABLE_IO_CHK, which are bits 4 and 5); why the BIOS also sets
- * bits 3 and 6-7 is unclear and undocumented, since it uses 11111100B rather than defined constants.
+ * Similarly, port 0x61 is designated KBD_RWREG rather than PPI_B; the BIOS also refers to it as "PORT_B: 8042
+ * READ WRITE REGISTER", but it is not otherwise discussed in the MODEL_5170 TechRef's 8042 documentation.
+ * There are brief references to bits 0 and 1 (KBD_RWREG.CLK_TIMER2 and KBD_RWREG.SPK_TIMER2), and the BIOS sets
+ * bits 2-7 to "DISABLE PARITY CHECKERS" (principally KBD_RWREG.DISABLE_CHK, which are bits 2 and 3); why the BIOS
+ * also sets bits 4-7 (or if those bits are even settable) is unclear, since it uses 11111100B rather than defined
+ * constants.
  * 
- * The bottom line is, even on a MODEL_5170, PPI_B is still used for speaker control and parity checking.  It's
- * not clear whether that port is managed by the 8042 or independent circuitry.
- * 
- * PPI_B on a MODEL_5170 is also bi-directional: at one point, the BIOS reads bit 5 (PPI_B.DISABLE_RW_MEM) to verify
- * that it's alternating (the BIOS refers to it as "REFRESH_BIT").
+ * The bottom line: on a MODEL_5170, port 0x61 is still used for speaker control and parity checking, so we use
+ * the same register (bPPIB) but install different I/O handlers.  It's also bi-directional: at one point, the BIOS
+ * reads KBD_RWREG.REFRESH_BIT (bit 4) to verify that it's alternating.
  * 
  * PPI_C and PPI_CTRL are neither documented nor used by the MODEL_5170 BIOS, so I'm assuming they're obsolete.
  * 
@@ -565,7 +566,7 @@ ChipSet.PPI_SW.FDRIVE.SHIFT     = 6;
  *      http://halicery.com/8042/8042_INTERN_TXT.htm
  *      http://www.os2museum.com/wp/?p=589 ("IBM PC/AT 8042 Keyboard Controller Commands")
  */
-ChipSet.KBD_DATA = {            // this.b8042OutBuff
+ChipSet.KBD_DATA = {            // this.b8042OutBuff (PPI_A on previous models, still referred to as "PORT A" by the MODEL_5170 BIOS)
     PORT:           0x60
 };
 
@@ -610,6 +611,26 @@ ChipSet.KBD_DATA.OUTPORT = {    // this.b8042OutPort
 ChipSet.KBD_DATA.TESTPORT = {   // generated "on the fly"
     KBD_CLOCK:      0x01,       // keyboard clock (input)
     KBD_DATA:       0x02        // keyboard data (input)
+};
+
+ChipSet.KBD_RWREG = {           // this.bPPIB (since CLK_TIMER2 and SPK_TIMER2 are in both PPI_B and KBD_RWREG)
+    PORT:           0x61,
+    CLK_TIMER2:     0x01,       // set to enable clock to TIMER2
+    SPK_TIMER2:     0x02,       // set to connect output of TIMER2 to speaker
+    DISABLE_CHK:    0x0C,       // set these bits to disable I/O and RAM parity checks, clear them to enable checks
+    REFRESH_BIT:    0x10,       // indicates memory refresh
+    IO_CHK:         0x40,       // indicates I/O check
+    PARITY_CHK:     0x80,       // indicates RAM parity check
+    PARITY_ERR:     0xC0
+};
+
+ChipSet.KBD_DATA.CMD = {        // this.b8042CmdData (KBD_DATA.CMD "data bytes" written to port 0x60, after writing a KBD_CMD byte to port 0x64)
+    PC_COMPAT:      0x40,       // generate IBM PC-compatible scan codes
+    PC_MODE:        0x20,
+    NO_CLOCK:       0x10,       // disable keyboard by driving "clock" line low
+    NO_INHIBIT:     0x08,       // disable inhibit function
+    SYS_FLAG:       0x04,       // this value is propagated to ChipSet.KBD_STATUS.SYS_FLAG 
+    INT_ENABLE:     0x01        // generate an interrupt when the controller places data in the output buffer
 };
 
 ChipSet.KBD_CMD = {             // this.b8042InBuff (on write to port 0x64, interpret this as a CMD)
@@ -1245,12 +1266,13 @@ ChipSet.prototype.initCMOSData = function()
     this.abCMOSData[ChipSet.CMOS_ADDR.EQUIP] = this.sw1 & (ChipSet.PPI_SW.MONITOR.MASK | ChipSet.PPI_SW.COPROC | ChipSet.PPI_SW.FDRIVE.IPL | ChipSet.PPI_SW.FDRIVE.MASK);
 
     /*
-     * TODO: We default all floppy diskette drives to non-High Capacity (double-density) drives, but this will have to change.
+     * TODO: We default all floppy diskette drives to High Capacity, but MODEL_5170 machines will need more control
+     * over settings like this.
      */
     var bDisketteTypes = 0;
     var cDisketteDrives = this.getSW1FloppyDrives();
-    if (cDisketteDrives > 0) bDisketteTypes |= ChipSet.CMOS_FDRIVE.D0_DS;
-    if (cDisketteDrives > 1) bDisketteTypes |= ChipSet.CMOS_FDRIVE.D1_DS;
+    if (cDisketteDrives > 0) bDisketteTypes |= ChipSet.CMOS_FDRIVE.D0_HC;
+    if (cDisketteDrives > 1) bDisketteTypes |= ChipSet.CMOS_FDRIVE.D1_HC;
     this.abCMOSData[ChipSet.CMOS_ADDR.FDRIVE] = bDisketteTypes;
 
     var wBaseMemKb = this.getSWMemorySize();
@@ -2266,7 +2288,10 @@ ChipSet.prototype.advanceDMA = function(channel, fInit)
                                 if (DEBUG) obj.messageDebugger("advanceDMA(" + iDMAChannel + ") ran out of data, assuming 0xff", ChipSet.MESSAGE_DMA);
                                 channel.fWarning = true;
                             }
-                            b = 0xff;                           // TODO: Determine whether to abort, as we do for DMA_MODE_XFER_READ
+                            /*
+                             * TODO: Determine whether to abort, as we do for DMA_MODE_XFER_READ.
+                             */
+                            b = 0xff;
                         }
                         if (!channel.masked) {
                             /*
@@ -3264,6 +3289,29 @@ ChipSet.prototype.updateAllTimers = function(fCycleReset)
 };
 
 /**
+ * updateSpeaker(bOut)
+ *
+ * @this {ChipSet}
+ * @param {number} bOut
+ */
+ChipSet.prototype.updateSpeaker = function(bOut)
+{
+    var fNewSpeaker = !!(bOut & ChipSet.PPI_B.SPK_TIMER2);
+    var fOldSpeaker = !!(this.bPPIB & ChipSet.PPI_B.SPK_TIMER2);
+    this.bPPIB = bOut;
+    if (fNewSpeaker != fOldSpeaker) {
+        /*
+         * Originally, this code didn't catch the "ERROR_BEEP" case @F000:EC34, which first turns both PPI_B_CLK_TIMER2 (0x01)
+         * and PPI_B_SPK_TIMER2 (0x02) off, then turns on only PPI_B_SPK_TIMER2 (0x02), then restores the original port value.
+         * 
+         * So, when the ROM BIOS keyboard buffer got full, we didn't issue a BEEP alert.  I've fixed that by limiting the test
+         * to PPI_B_SPK_TIMER2 and ignoring PPI_B_CLK_TIMER2.
+         */
+        this.setSpeaker(fNewSpeaker);
+    }
+};
+
+/**
  * inPPIA(port, addrFrom)
  * 
  * @this {ChipSet}
@@ -3302,7 +3350,7 @@ ChipSet.prototype.outPPIA = function(port, bOut, addrFrom)
 
 /**
  * inPPIB(port, addrFrom)
- * 
+ *
  * @this {ChipSet}
  * @param {number} port (0x61)
  * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
@@ -3311,18 +3359,13 @@ ChipSet.prototype.outPPIA = function(port, bOut, addrFrom)
 ChipSet.prototype.inPPIB = function(port, addrFrom)
 {
     var b = this.bPPIB;
-    /*
-     * "TEST.09" of the MODEL_5170 BIOS expects the following bit ("REFRESH_BIT") to alternate, so we oblige;
-     * hopefully this won't affect MODEL_5150 or MODEL_5160, because we didn't used to do this.
-     */
-    this.bPPIB ^= ChipSet.PPI_B.DISABLE_RW_MEM;     
     this.messagePort(port, null, addrFrom, "PPI_B", ChipSet.MESSAGE_CHIPSET, b);
     return b;
 };
 
 /**
  * outPPIB(port, bOut, addrFrom)
- * 
+ *
  * @this {ChipSet}
  * @param {number} port (0x61)
  * @param {number} bOut
@@ -3331,19 +3374,7 @@ ChipSet.prototype.inPPIB = function(port, addrFrom)
 ChipSet.prototype.outPPIB = function(port, bOut, addrFrom)
 {
     this.messagePort(port, bOut, addrFrom, "PPI_B", ChipSet.MESSAGE_CHIPSET);
-    var fNewSpeaker = !!(bOut & ChipSet.PPI_B.SPK_TIMER2);
-    var fOldSpeaker = !!(this.bPPIB & ChipSet.PPI_B.SPK_TIMER2);
-    this.bPPIB = bOut;
-    if (fNewSpeaker != fOldSpeaker) {
-        /*
-         * Originally, this code didn't catch the "ERROR_BEEP" case @F000:EC34, which first turns both PPI_B_CLK_TIMER2 (0x01)
-         * and PPI_B_SPK_TIMER2 (0x02) off, then turns on only PPI_B_SPK_TIMER2 (0x02), then restores the original port value.
-         * 
-         * So, when the ROM BIOS keyboard buffer got full, we didn't issue a BEEP alert.  I've fixed that by limiting the test
-         * to PPI_B_SPK_TIMER2 and ignoring PPI_B_CLK_TIMER2.
-         */
-        this.setSpeaker(fNewSpeaker);
-    }
+    this.updateSpeaker(bOut);
     if (this.kbd) this.kbd.setEnable((bOut & ChipSet.PPI_B.CLEAR_KBD)? false : true, (bOut & ChipSet.PPI_B.CLK_KBD)? true : false);
 };
 
@@ -3529,7 +3560,7 @@ ChipSet.prototype.out8042InBuffData = function(port, bOut, addrFrom)
          *      F000:1B65 C3            RET
          *      
          * But WAIT, the FUN doesn't end there.  After this function returns, "KBD_RESET" waits for a Keyboard interrupt
-         * to occur, hoping for a 0xAA scan code as the Keyboard's final response.  "KBD_RESET" also returns CX to the caller,
+         * to occur, hoping for scan code 0xAA as the Keyboard's final response.  "KBD_RESET" also returns CX to the caller,
          * and the caller ("TEST.21") assumes there was no interrupt if CX is zero.
          * 
          *              MOV     AL,0FDH
@@ -3546,7 +3577,8 @@ ChipSet.prototype.out8042InBuffData = function(port, bOut, addrFrom)
          *              ...
          *              
          * However, if [INTR_FLAG] is set immediately, the above code will exit immediately, without ever decrementing CX.
-         * CX can be zero not only if the loop exhausted it, but also if no looping was required!
+         * CX can be zero not only if the loop exhausted it, but also if no looping was required; the latter is not an
+         * error, but "TEST.21" assumes that it is.
          */
         default:
             this.b8042CmdData &= ~ChipSet.KBD_DATA.CMD.NO_CLOCK;
@@ -3556,6 +3588,43 @@ ChipSet.prototype.out8042InBuffData = function(port, bOut, addrFrom)
     }
     this.b8042InBuff = bOut;
     this.b8042Status &= ~ChipSet.KBD_STATUS.CMD_FLAG;
+};
+
+/**
+ * in8042RWReg(port, addrFrom)
+ *
+ * @this {ChipSet}
+ * @param {number} port (0x61)
+ * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @return {number} simulated port value
+ */
+ChipSet.prototype.in8042RWReg = function(port, addrFrom)
+{
+    /*
+     * Normally, we return whatever was last written to this port, but we do need to mask the
+     * two upper-most bits (KBD_RWREG.PARITY_ERR), because we never want to report a parity error.
+     */
+    var b = this.bPPIB & ~ChipSet.KBD_RWREG.PARITY_ERR;
+    this.messagePort(port, null, addrFrom, "8042_RWREG", ChipSet.MESSAGE_CHIPSET, b);
+    /*
+     * "TEST.09" of the MODEL_5170 BIOS expects the following bit ("REFRESH_BIT") to alternate, so we oblige.
+     */
+    this.bPPIB ^= ChipSet.KBD_RWREG.REFRESH_BIT;
+    return b;
+};
+
+/**
+ * out8042RWReg(port, bOut, addrFrom)
+ *
+ * @this {ChipSet}
+ * @param {number} port (0x61)
+ * @param {number} bOut
+ * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ */
+ChipSet.prototype.out8042RWReg = function(port, bOut, addrFrom)
+{
+    this.messagePort(port, bOut, addrFrom, "8042_RWREG", ChipSet.MESSAGE_CHIPSET);
+    this.updateSpeaker(bOut);
 };
 
 /**
@@ -3975,7 +4044,7 @@ ChipSet.aPortInput5150 = {
 
 ChipSet.aPortInput5170 = {
     0x60: ChipSet.prototype.in8042OutBuff,
-    0x61: ChipSet.prototype.inPPIB,
+    0x61: ChipSet.prototype.in8042RWReg,
     0x64: ChipSet.prototype.in8042Status,
     0x70: ChipSet.prototype.inCMOSAddr,
     0x71: ChipSet.prototype.inCMOSData,
@@ -4045,7 +4114,7 @@ ChipSet.aPortOutput5150 = {
 
 ChipSet.aPortOutput5170 = {
     0x60: ChipSet.prototype.out8042InBuffData,
-    0x61: ChipSet.prototype.outPPIB,
+    0x61: ChipSet.prototype.out8042RWReg,
     0x64: ChipSet.prototype.out8042InBuffCmd,
     0x70: ChipSet.prototype.outCMOSAddr,
     0x71: ChipSet.prototype.outCMOSData,

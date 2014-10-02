@@ -162,7 +162,7 @@ X86Seg.loadProt = function loadProt(sel, fSuppress)
  *
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
- * @param {number} cb
+ * @param {number} cb is number of extra bytes to check (0 or 1)
  * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number} corresponding physical address if valid, -1 if not
  */
@@ -179,7 +179,7 @@ X86Seg.checkReadReal = function checkReadReal(off, cb, fSuppress)
  *
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
- * @param {number} cb
+ * @param {number} cb is number of extra bytes to check (0 or 1)
  * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number} corresponding physical address if valid, -1 if not
  */
@@ -193,7 +193,7 @@ X86Seg.checkWriteReal = function checkWriteReal(off, cb, fSuppress)
  *
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
- * @param {number} cb
+ * @param {number} cb is number of extra bytes to check (0 or 1)
  * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number} corresponding physical address if valid, -1 if not
  */
@@ -210,7 +210,7 @@ X86Seg.checkReadProtEnabled = function checkReadProtEnabled(off, cb, fSuppress)
  *
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
- * @param {number} cb
+ * @param {number} cb is number of extra bytes to check (0 or 1)
  * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number} corresponding physical address if valid, -1 if not
  */
@@ -227,7 +227,7 @@ X86Seg.checkReadProtDisabled = function checkReadProtDisabled(off, cb, fSuppress
  *
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
- * @param {number} cb
+ * @param {number} cb is number of extra bytes to check (0 or 1)
  * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number} corresponding physical address if valid, -1 if not
  */
@@ -244,7 +244,7 @@ X86Seg.checkWriteProtEnabled = function checkWriteProtEnabled(off, cb, fSuppress
  *
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
- * @param {number} cb
+ * @param {number} cb is number of extra bytes to check (0 or 1)
  * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number} corresponding physical address if valid, -1 if not
  */

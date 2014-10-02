@@ -260,6 +260,10 @@ Other parameters that can be passed via the URL:
 
 - *autostart*: set it to "false" to prevent all machines on the current page from automatically starting
 
+For example:
+
+	http://localhost:8088/?gort=debug&autostart=false
+
 Updating PCjs
 ---
 
@@ -280,7 +284,7 @@ closer to being released.
 ### Testing
 
 In the course of testing PCjs, there may be stale "index.html" files that prevent you from seeing application
-updates, changes to README.md files, etc.  So, before running Node, you may want to "touch" the default HTML template:
+updates, changes to README.md files, etc.  So before running Node, you may want to "touch" the default HTML template:
 
 	touch my_modules/shared/templates/common.html
 	

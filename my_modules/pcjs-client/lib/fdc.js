@@ -1374,9 +1374,14 @@ FDC.prototype.outFDCControl = function(port, bOut, addrFrom)
 FDC.prototype.intBIOSDiskette = function(addr)
 {
     if (DEBUGGER) {
+        var AL = this.cpu.regAX & 0xff;
+        var AH = this.cpu.regAX >> 8;
+        var CL = this.cpu.regCX & 0xff;
+        var CH = this.cpu.regCX >> 8;
         var DL = this.cpu.regDX & 0xff;
+        var DH = this.cpu.regDX >> 8;
         if (this.dbg && this.dbg.messageEnabled(this.dbg.MESSAGE_FDC) && DL < 0x80) {
-            this.dbg.message("FDC.intBIOS(AX=" + str.toHexWord(this.cpu.regAX) + ",DL=" + str.toHexByte(DL) + ") at " + str.toHexAddr(addr - this.cpu.segCS.base, this.cpu.segCS.sel));
+            this.dbg.message("FDC.intBIOS(AH=" + str.toHexByte(AH) + ",D=" + str.toHexByte(DL) + ",C=" + str.toHexByte(CH) + ",H=" + str.toHexByte(DH) + ",S=" + str.toHexByte(CL) + ",N=" + str.toHexByte(AL) + ") at " + str.toHexAddr(addr - this.cpu.segCS.base, this.cpu.segCS.sel));
             // this.cpu.haltCPU();
             this.cpu.addInterruptReturn(addr, function (fdc, nCycles) {
                 return function onBIOSDisketteReturn(nLevel) {
