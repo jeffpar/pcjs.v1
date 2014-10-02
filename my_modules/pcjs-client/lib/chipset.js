@@ -555,75 +555,91 @@ ChipSet.PPI_SW.FDRIVE.SHIFT     = 6;
  * not clear whether that port is managed by the 8042 or independent circuitry.
  * 
  * PPI_B on a MODEL_5170 is also bi-directional: at one point, the BIOS reads bit 5 (PPI_B.DISABLE_RW_MEM) to verify
- * that it's alternating (the BIOS calls that bit "REFRESH_BIT").
+ * that it's alternating (the BIOS refers to it as "REFRESH_BIT").
  * 
  * PPI_C and PPI_CTRL are neither documented nor used by the MODEL_5170 BIOS, so I'm assuming they're obsolete.
+ * 
+ * NOTE: For more information on the 8042 Controller, including information on undocumented commands, refer to the
+ * documents in /devices/pc/keyboard/, as well as the following websites:
+ * 
+ *      http://halicery.com/8042/8042_INTERN_TXT.htm
+ *      http://www.os2museum.com/wp/?p=589 ("IBM PC/AT 8042 Keyboard Controller Commands")
  */
-ChipSet.KBD_DATA = {};                  // this.b8042OutBuff
-ChipSet.KBD_DATA.PORT           = 0x60;
+ChipSet.KBD_DATA = {            // this.b8042OutBuff
+    PORT:           0x60
+};
 
-ChipSet.KBD_DATA.CMD = {};              // this.b8042CmdData (KBD_DATA.CMD "data bytes" written to port 0x60, after writing a KBD_CMD byte to port 0x64)
-ChipSet.KBD_DATA.CMD.PC_COMPAT  = 0x40; // generate IBM PC-compatible scan codes
-ChipSet.KBD_DATA.CMD.PC_MODE    = 0x20;
-ChipSet.KBD_DATA.CMD.NO_CLOCK   = 0x10; // disable keyboard by driving "clock" line low
-ChipSet.KBD_DATA.CMD.NO_INHIBIT = 0x08; // disable inhibit function
-ChipSet.KBD_DATA.CMD.SYS_FLAG   = 0x04; // this value is propagated to ChipSet.KBD_STATUS.SYS_FLAG 
-ChipSet.KBD_DATA.CMD.INT_ENABLE = 0x01; // generate an interrupt when the controller places data in the output buffer
+ChipSet.KBD_DATA.CMD = {        // this.b8042CmdData (KBD_DATA.CMD "data bytes" written to port 0x60, after writing a KBD_CMD byte to port 0x64)
+    PC_COMPAT:      0x40,       // generate IBM PC-compatible scan codes
+    PC_MODE:        0x20,
+    NO_CLOCK:       0x10,       // disable keyboard by driving "clock" line low
+    NO_INHIBIT:     0x08,       // disable inhibit function
+    SYS_FLAG:       0x04,       // this value is propagated to ChipSet.KBD_STATUS.SYS_FLAG 
+    INT_ENABLE:     0x01        // generate an interrupt when the controller places data in the output buffer
+};
 
-ChipSet.KBD_DATA.SELF_TEST = {};
-ChipSet.KBD_DATA.SELF_TEST.OK   = 0x55;
+ChipSet.KBD_DATA.SELF_TEST = {
+    OK:             0x55
+};
 
-ChipSet.KBD_DATA.INTF_TEST = {};
-ChipSet.KBD_DATA.INTF_TEST.OK   = 0x00;
-ChipSet.KBD_DATA.INTF_TEST.CSLO = 0x01;
-ChipSet.KBD_DATA.INTF_TEST.CSHI = 0x02;
-ChipSet.KBD_DATA.INTF_TEST.DSLO = 0x03;
-ChipSet.KBD_DATA.INTF_TEST.DSHI = 0x04;
+ChipSet.KBD_DATA.INTF_TEST = {  // result of ChipSet.KBD_CMD.INTF_TEST command (0xAB) 
+    OK:             0x00,       // no error
+    KBD_CLOCK_LO:   0x01,       // keyboard clock line stuck low
+    KBD_CLOCK_HI:   0x02,       // keyboard clock line stuck high
+    KBD_DATA_LO:    0x03,       // keyboard data line stuck low
+    KBD_DATA_HI:    0x04        // keyboard data line stuck high
+};
 
-ChipSet.KBD_DATA.INPORT = {};           // this.b8042InPort
-ChipSet.KBD_DATA.INPORT.EN256KB = 0x10; // enable 2nd 256Kb of system board RAM
-ChipSet.KBD_DATA.INPORT.MFG_OFF = 0x20; // manufacturing jumper not installed
-ChipSet.KBD_DATA.INPORT.MONO    = 0x40; // monochrome monitor is primary display
-ChipSet.KBD_DATA.INPORT.KBD_ON  = 0x80; // keyboard unlocked
+ChipSet.KBD_DATA.INPORT = {     // this.b8042InPort
+    UNDEFINED:      0x0F,       // undefined
+    ENABLE_256KB:   0x10,       // enable 2nd 256Kb of system board RAM
+    MFG_OFF:        0x20,       // manufacturing jumper not installed
+    MONO:           0x40,       // monochrome monitor is primary display
+    KBD_ON:         0x80        // keyboard not inhibited
+};
 
-ChipSet.KBD_DATA.OUTPORT = {};          // this.b8042OutPort
-ChipSet.KBD_DATA.OUTPORT.RESET  = 0x01;
-ChipSet.KBD_DATA.OUTPORT.A20    = 0x02;
-ChipSet.KBD_DATA.OUTPORT.OBFULL = 0x10;
-ChipSet.KBD_DATA.OUTPORT.IBEMPTY= 0x20;
-ChipSet.KBD_DATA.OUTPORT.KBCLK  = 0x40;
-ChipSet.KBD_DATA.OUTPORT.KBDATA = 0x80;
+ChipSet.KBD_DATA.OUTPORT = {    // this.b8042OutPort
+    NO_RESET:       0x01,       // set by default
+    A20_ON:         0x02,       // set by default
+    OUTBUFF_FULL:   0x10,       // output buffer full
+    INBUFF_EMPTY:   0x20,       // input buffer empty
+    KBD_CLOCK:      0x40,       // keyboard clock (output)
+    KBD_DATA:       0x80        // keyboard data (output)
+};
 
-ChipSet.KBD_DATA.TESTPORT = {};         // generated "on the fly"
-ChipSet.KBD_DATA.TESTPORT.CLOCK = 0x01;
-ChipSet.KBD_DATA.TESTPORT.DATA  = 0x02;
+ChipSet.KBD_DATA.TESTPORT = {   // generated "on the fly"
+    KBD_CLOCK:      0x01,       // keyboard clock (input)
+    KBD_DATA:       0x02        // keyboard data (input)
+};
 
-ChipSet.KBD_CMD = {};                   // this.b8042InBuff (on write to port 0x64, interpret this as a CMD)
-ChipSet.KBD_CMD.PORT            = 0x64;
-ChipSet.KBD_CMD.READ_CMD        = 0x20;
-ChipSet.KBD_CMD.WRITE_CMD       = 0x60; // followed by a command byte written to KBD_DATA.PORT (see KBD_DATA.CMD) 
-ChipSet.KBD_CMD.SELF_TEST       = 0xAA; // self-test (KBD_DATA.SELF_TEST_OK is placed in the output buffer if no errors)
-ChipSet.KBD_CMD.INTF_TEST       = 0xAB; // interface test
-ChipSet.KBD_CMD.DIAG_DUMP       = 0xAC; // diagnostic dump
-ChipSet.KBD_CMD.DISABLE_KBD     = 0xAD; // disable keyboard
-ChipSet.KBD_CMD.ENABLE_KBD      = 0xAE; // enable keyboard
-ChipSet.KBD_CMD.READ_INPORT     = 0xC0; // read input port and place data in output buffer (use only if output buffer empty)
-ChipSet.KBD_CMD.READ_OUTPORT    = 0xD0; // read output port and place data in output buffer (use only if output buffer empty)
-ChipSet.KBD_CMD.WRITE_OUTPORT   = 0xD1; // next byte written to KBD_DATA.PORT (port 0x60) is placed in the output port (see KBD_DATA.OUTPUT)
-ChipSet.KBD_CMD.READ_TEST       = 0xE0;
-ChipSet.KBD_CMD.PULSE_OUTPORT   = 0xF0; // this is the 1st of 16 commands (0xF0-0xFF) that pulse bits 0-3 of the output port
+ChipSet.KBD_CMD = {             // this.b8042InBuff (on write to port 0x64, interpret this as a CMD)
+    PORT:           0x64,
+    READ_CMD:       0x20,
+    WRITE_CMD:      0x60,       // followed by a command byte written to KBD_DATA.PORT (see KBD_DATA.CMD) 
+    SELF_TEST:      0xAA,       // self-test (KBD_DATA.SELF_TEST_OK is placed in the output buffer if no errors)
+    INTF_TEST:      0xAB,       // interface test
+    DIAG_DUMP:      0xAC,       // diagnostic dump
+    DISABLE_KBD:    0xAD,       // disable keyboard
+    ENABLE_KBD:     0xAE,       // enable keyboard
+    READ_INPORT:    0xC0,       // read input port and place data in output buffer (use only if output buffer empty)
+    READ_OUTPORT:   0xD0,       // read output port and place data in output buffer (use only if output buffer empty)
+    WRITE_OUTPORT:  0xD1,       // next byte written to KBD_DATA.PORT (port 0x60) is placed in the output port (see KBD_DATA.OUTPUT)
+    READ_TEST:      0xE0,
+    PULSE_OUTPORT:  0xF0        // this is the 1st of 16 commands (0xF0-0xFF) that pulse bits 0-3 of the output port
+};
 
-ChipSet.KBD_STATUS = {};                // this.b8042Status (on read from port 0x64)
-ChipSet.KBD_STATUS.PORT         = 0x64;
-ChipSet.KBD_STATUS.OUTBUFF_FULL = 0x01;
-ChipSet.KBD_STATUS.INBUFF_FULL  = 0x02; // set if the controller has received but not yet read data written to the input buffer (not normally set) 
-ChipSet.KBD_STATUS.SYS_FLAG     = 0x04;
-ChipSet.KBD_STATUS.CMD_FLAG     = 0x08; // set on write to KBD_CMD (port 0x64), clear on write to KBD_DATA (port 0x60)
-ChipSet.KBD_STATUS.NO_INHIBIT   = 0x10;
-ChipSet.KBD_STATUS.XMT_TIMEOUT  = 0x20;
-ChipSet.KBD_STATUS.RCV_TIMEOUT  = 0x40;
-ChipSet.KBD_STATUS.PARITY_ERR   = 0x80; // last byte of data received had EVEN parity (ODD parity is normally expected)
-ChipSet.KBD_STATUS.OUTBUFF_DELAY= 0x100;
+ChipSet.KBD_STATUS = {          // this.b8042Status (on read from port 0x64)
+    PORT:           0x64,
+    OUTBUFF_FULL:   0x01,
+    INBUFF_FULL:    0x02,       // set if the controller has received but not yet read data written to the input buffer (not normally set)
+    SYS_FLAG:       0x04,
+    CMD_FLAG:       0x08,       // set on write to KBD_CMD (port 0x64), clear on write to KBD_DATA (port 0x60)
+    NO_INHIBIT:     0x10,
+    XMT_TIMEOUT:    0x20,
+    RCV_TIMEOUT:    0x40,
+    PARITY_ERR:     0x80,       // last byte of data received had EVEN parity (ODD parity is normally expected)
+    OUTBUFF_DELAY:  0x100
+};
 
 /*
  * MC146818A RTC/CMOS Ports (MODEL_5170)
@@ -632,7 +648,7 @@ ChipSet.KBD_STATUS.OUTBUFF_DELAY= 0x100;
  * 
  * The ADDR port also controls NMI: write an address with bit 7 clear to enable NMI or set to disable NMI.
  */
-ChipSet.CMOS_ADDR = {};                 // this.bCMOSAddr
+ChipSet.CMOS_ADDR = {};         // this.bCMOSAddr
 ChipSet.CMOS_ADDR.PORT          = 0x70;
 ChipSet.CMOS_ADDR.RTC_SEC       = 0x00;
 ChipSet.CMOS_ADDR.RTC_SEC_ALRM  = 0x01;
@@ -966,17 +982,17 @@ ChipSet.prototype.reset = function()
          */
         this.b8042Status = ChipSet.KBD_STATUS.NO_INHIBIT;
         this.b8042InBuff = 0;
-        this.b8042CmdData = 0;
+        this.b8042CmdData = ChipSet.KBD_DATA.CMD.NO_CLOCK;
         this.b8042OutBuff = 0;
         
         /*
          * TODO: Provide more control over these 8042 "Input Port" bits (eg, the keyboard lock)
          */
         this.b8042InPort = ChipSet.KBD_DATA.INPORT.MFG_OFF | ChipSet.KBD_DATA.INPORT.KBD_ON;
-        if (this.getSWMemorySize() >= 512) this.b8042InPort |= ChipSet.KBD_DATA.INPORT.EN256KB;
+        if (this.getSWMemorySize() >= 512) this.b8042InPort |= ChipSet.KBD_DATA.INPORT.ENABLE_256KB;
         if (this.getSW1VideoMonitor() == ChipSet.MONITOR.MONO) this.b8042InPort |= ChipSet.KBD_DATA.INPORT.MONO;
 
-        this.b8042OutPort = ChipSet.KBD_DATA.OUTPORT.A20;
+        this.b8042OutPort = ChipSet.KBD_DATA.OUTPORT.NO_RESET | ChipSet.KBD_DATA.OUTPORT.A20_ON;
         this.bCMOSAddr = 0;         // NMI is enabled, since the ChipSet.CMOS_ADDR.NMI_DISABLE bit is not set in bCMOSAddr
         this.abCMOSData = new Array(ChipSet.CMOS_ADDR.TOTAL);
         this.initRTCDate(this.sRTCDate);
@@ -2563,7 +2579,7 @@ ChipSet.prototype.outPICH = function(iPIC, bOut, addrFrom)
          */
         this.cpu.delayINTR();
         /*
-         * Alas, we need an even longer delay for the MODEL_5170's "KBD_RESET" function, which must drop
+         * Alas, we need a longer delay for the MODEL_5170's "KBD_RESET" function (F000:17D2), which must drop
          * into a loop and decrement CX at least once after unmasking the KBD IRQ.  The "KBD_RESET" function on
          * previous models could be handled with a 4-instruction delay provided by the Keyboard.resetDevice() call
          * to setIRR(), but the MODEL_5170 needs a roughly 6-instruction delay after it unmasks the KBD IRQ.
@@ -2659,14 +2675,14 @@ ChipSet.prototype.checkIMR = function(nIRQ)
 /**
  * getIRRVector()
  * 
- * getIRRVector() is called by the CPU whenever PS_IF is set and OP_NOINTR is clear.  Ordinarily, an immediate response would
- * seem perfectly reasonable, but unfortunately, there are places in the ROM BIOS (eg, the "KBD_RESET" function @F000:E688)
- * that enable interrupts but still expect nothing to happen for several more instructions.
+ * getIRRVector() is called by the CPU whenever PS_IF is set and OP_NOINTR is clear.  Ordinarily, an immediate
+ * response would seem perfectly reasonable, but unfortunately, there are places in the original ROM BIOS like
+ * "KBD_RESET" (F000:E688) that enable interrupts but still expect nothing to happen for several more instructions.
  *
- * So, in addition to the two normal responses (an IDT vector #, or -1 indicating no pending interrupts), we must support
- * a third response (-2) that basically means: don't change the CPU interrupt state, just keep calling until we return one
- * of the first two responses.  The number of times we delay our normal response is determined by the component that originally
- * called setIRR with an optional delay parameter.
+ * So, in addition to the two normal responses (an IDT vector #, or -1 indicating no pending interrupts), we must
+ * support a third response (-2) that basically means: don't change the CPU interrupt state, just keep calling until
+ * we return one of the first two responses.  The number of times we delay our normal response is determined by the
+ * component that originally called setIRR with an optional delay parameter.
  * 
  * @this {ChipSet}
  * @param {number} [iPIC]
@@ -2863,7 +2879,7 @@ ChipSet.prototype.outTimer = function(iTimer, bOut, addrFrom)
 ChipSet.prototype.inTimerCtrl = function(port, addrFrom)
 {
     this.messagePort(port, null, addrFrom, "TIMER_CTRL", ChipSet.MESSAGE_TIMER);
-    if (DEBUG) this.messageDebugger("Timer[CTRL]: Read-Back command not supported (yet)", ChipSet.MESSAGE_TIMER);
+    if (DEBUG) this.messageDebugger("TIMER_CTRL: Read-Back command not supported (yet)", ChipSet.MESSAGE_TIMER);
     return null;
 };
 
@@ -3432,17 +3448,11 @@ ChipSet.prototype.outPPICtrl = function(port, bOut, addrFrom)
  */
 ChipSet.prototype.in8042OutBuff = function(port, addrFrom)
 {
-    this.messagePort(port, null, addrFrom, "8042_OUTBUFF", ChipSet.MESSAGE_CHIPSET, this.b8042OutBuff);
-    this.b8042Status &= ~ChipSet.KBD_STATUS.OUTBUFF_FULL;
     var b = this.b8042OutBuff;
+    this.messagePort(port, null, addrFrom, "8042_OUTBUFF", ChipSet.MESSAGE_CHIPSET, b);
+    this.b8042Status &= ~(ChipSet.KBD_STATUS.OUTBUFF_FULL | ChipSet.KBD_STATUS.OUTBUFF_DELAY);
     var bNext = this.kbd && this.kbd.readScanCode(true);
-    if (bNext) {
-        this.b8042OutBuff = bNext;
-        /*
-         * TODO: Determine why setting OUTBUFF_DELAY instead of OUTBUFF_FULL here causes "AA 301-Keyboard Error" during POST
-         */
-        this.b8042Status |= ChipSet.KBD_STATUS.OUTBUFF_FULL;
-    }
+    if (bNext) this.set8042OutBuff(bNext);
     return b;
 };
 
@@ -3472,20 +3482,7 @@ ChipSet.prototype.out8042InBuffData = function(port, bOut, addrFrom)
             break;
 
         case ChipSet.KBD_CMD.WRITE_OUTPORT:
-            this.b8042OutPort = bOut;
-            this.bus.setA20(!!(this.b8042OutPort & ChipSet.KBD_DATA.OUTPORT.A20));
-            if (!(this.b8042OutPort & ChipSet.KBD_DATA.OUTPORT.RESET)) {
-                /*
-                 * Bit 0 of the 8042's output port is connected to RESET.  Normally, it's "pulsed" with the
-                 * KBD_CMD.PULSE_OUTPORT command, so if a RESET is detected via this command, we should try to
-                 * determine if that's what the caller intended.
-                 */
-                if (DEBUG) {
-                    this.messageDebugger("unexpected 8042 output port reset: " + str.toHexByte(this.b8042OutPort));
-                    this.cpu.haltCPU();
-                }
-                this.cpu.resetRegs();
-            }
+            this.set8042OutPort(bOut);
             break;
         
         /*
@@ -3531,8 +3528,8 @@ ChipSet.prototype.out8042InBuffData = function(port, bOut, addrFrom)
          *      F000:1B62 83E901        SUB      CX,0001    ; EXIT WITH SUCCESS (CX != 0)
          *      F000:1B65 C3            RET
          *      
-         * But WAIT, the FUN doesn't end there.  After this function returns, KBD_RESET waits for a Keyboard interrupt
-         * to occur, hoping for a 0xAA scan code as the Keyboard's final response.  KBD_RESET also returns CX to the caller,
+         * But WAIT, the FUN doesn't end there.  After this function returns, "KBD_RESET" waits for a Keyboard interrupt
+         * to occur, hoping for a 0xAA scan code as the Keyboard's final response.  "KBD_RESET" also returns CX to the caller,
          * and the caller ("TEST.21") assumes there was no interrupt if CX is zero.
          * 
          *              MOV     AL,0FDH
@@ -3552,13 +3549,8 @@ ChipSet.prototype.out8042InBuffData = function(port, bOut, addrFrom)
          * CX can be zero not only if the loop exhausted it, but also if no looping was required!
          */
         default:
-            if (this.kbd) {
-                var b  = this.kbd.sendCmd(bOut);
-                if (b >= 0) {
-                    this.b8042OutBuff = b;
-                    this.b8042Status |= ChipSet.KBD_STATUS.OUTBUFF_DELAY;
-                }
-            }
+            this.b8042CmdData &= ~ChipSet.KBD_DATA.CMD.NO_CLOCK;
+            if (this.kbd) this.set8042OutBuff(this.kbd.sendCmd(bOut));
             break;
         }
     }
@@ -3589,9 +3581,9 @@ ChipSet.prototype.in8042Status = function(port, addrFrom)
      * (which is outside the 0xff range of bits we return); when we see KBD_STATUS.OUTBUFF_DELAY,
      * we clear it and set KBD_STATUS.OUTBUFF_FULL, which will be returned on the next read.
      * 
-     * This provides a single-poll delay, so that the aforementioned "flush" won't occur.  If longer
-     * delays are needed down the road, we may need to set a delay count in the upper (hidden) bits
-     * of b8042Status, instead of using a single "OUTBUFF_DELAY" bit.
+     * This provides a single poll delay, so that the aforementioned "flush" won't toss our response.
+     * If longer delays are needed down the road, we may need to set a delay count in the upper (hidden)
+     * bits of b8042Status, instead of using a single "OUTBUFF_DELAY" bit.
      */
     if (this.b8042Status & ChipSet.KBD_STATUS.OUTBUFF_DELAY) {
         this.b8042Status |= ChipSet.KBD_STATUS.OUTBUFF_FULL;
@@ -3630,37 +3622,41 @@ ChipSet.prototype.out8042InBuffCmd = function(port, bOut, addrFrom)
     }
     
     switch (this.b8042InBuff) {
-    /*
-     * No further action is required for this first group of commands; more data is expected via out8042InBuffData().
-     */
     case ChipSet.KBD_CMD.WRITE_CMD:         // 0x60
     case ChipSet.KBD_CMD.WRITE_OUTPORT:     // 0xD1
+        /*
+         * No further action required for this first group of commands; more data is expected via out8042InBuffData()
+         */
         break;
 
     case ChipSet.KBD_CMD.READ_INPORT:       // 0xC0
-        this.b8042OutBuff = this.b8042InPort;
-        this.b8042Status |= ChipSet.KBD_STATUS.OUTBUFF_DELAY;
+        this.set8042OutBuff(this.b8042InPort);
         break;
     
     case ChipSet.KBD_CMD.DISABLE_KBD:       // 0xAD
         this.b8042CmdData |= ChipSet.KBD_DATA.CMD.NO_CLOCK;
+        if (DEBUG) this.messageDebugger("keyboard disabled", ChipSet.MESSAGE_KBD);
+        /*
+         * TODO: Determine where to honor KBD_DATA.CMD.NO_CLOCK; note that the MODEL_5170 BIOS calls "KBD_RESET" (F000:17D2) 
+         * while the keyboard interface is disabled, yet we must still deliver the Keyboard's CMDRES.BATSUCCESS response code.
+         */
         break;
 
     case ChipSet.KBD_CMD.ENABLE_KBD:        // 0xAE
         this.b8042CmdData &= ~ChipSet.KBD_DATA.CMD.NO_CLOCK;
+        if (DEBUG) this.messageDebugger("keyboard re-enabled", ChipSet.MESSAGE_KBD);
         break;
 
     case ChipSet.KBD_CMD.SELF_TEST:         // 0xAA
-        this.b8042OutBuff = ChipSet.KBD_DATA.SELF_TEST.OK;
-        this.b8042Status |= ChipSet.KBD_STATUS.OUTBUFF_DELAY;
+        if (this.kbd) this.kbd.shiftScanCode(true);
+        this.b8042CmdData |= ChipSet.KBD_DATA.CMD.NO_CLOCK;
+        if (DEBUG) this.messageDebugger("keyboard disabled on reset", ChipSet.MESSAGE_KBD);
+        this.set8042OutBuff(ChipSet.KBD_DATA.SELF_TEST.OK);
+        this.set8042OutPort(ChipSet.KBD_DATA.OUTPORT.NO_RESET | ChipSet.KBD_DATA.OUTPORT.A20_ON);
         break;
 
     case ChipSet.KBD_CMD.READ_TEST:         // 0xE0
-        /*
-         * TODO: Do we need to "OR" anything here for KBD_DATA.TESTPORT.DATA?
-         */
-        this.b8042OutBuff = ((this.b8042CmdData & ChipSet.KBD_DATA.CMD.NO_CLOCK)? 0 : ChipSet.KBD_DATA.TESTPORT.CLOCK);
-        this.b8042Status |= ChipSet.KBD_STATUS.OUTBUFF_DELAY;
+        this.set8042OutBuff((this.b8042CmdData & ChipSet.KBD_DATA.CMD.NO_CLOCK)? 0 : ChipSet.KBD_DATA.TESTPORT.KBD_CLOCK);
         break;
         
     case ChipSet.KBD_CMD.PULSE_OUTPORT:     // 0xF0-0xFF
@@ -3675,9 +3671,50 @@ ChipSet.prototype.out8042InBuffCmd = function(port, bOut, addrFrom)
         break;
     
     default:
-        this.messageDebugger("unrecognized 8042 command: " + str.toHexByte(this.b8042InBuff));
-        this.cpu.haltCPU();
+        if (DEBUG && DEBUGGER && this.dbg) {
+            this.dbg.message("unrecognized 8042 command: " + str.toHexByte(this.b8042InBuff));
+            this.cpu.haltCPU();
+        }
         break;
+    }
+};
+
+/**
+ * set8042OutBuff(b)
+ *
+ * @this {ChipSet}
+ * @param {number} b
+ */
+ChipSet.prototype.set8042OutBuff = function(b)
+{
+    if (b >= 0) {
+        this.b8042OutBuff = b;
+        this.b8042Status &= ~ChipSet.KBD_STATUS.OUTBUFF_FULL;
+        this.b8042Status |= ChipSet.KBD_STATUS.OUTBUFF_DELAY;
+    }
+};
+
+/**
+ * set8042OutPort(b)
+ *
+ * @this {ChipSet}
+ * @param {number} b
+ */
+ChipSet.prototype.set8042OutPort = function(b)
+{
+    this.b8042OutPort = b;
+    this.bus.setA20(!!(b & ChipSet.KBD_DATA.OUTPORT.A20_ON));
+    if (!(b & ChipSet.KBD_DATA.OUTPORT.NO_RESET)) {
+        /*
+         * Bit 0 of the 8042's output port is connected to RESET.  Normally, it's "pulsed" with the
+         * KBD_CMD.PULSE_OUTPORT command, so if a RESET is detected via this command, we should try to
+         * determine if that's what the caller intended.
+         */
+        if (DEBUG && DEBUGGER && this.dbg) {
+            this.dbg.message("unexpected 8042 output port reset: " + str.toHexByte(b));
+            this.cpu.haltCPU();
+        }
+        this.cpu.resetRegs();
     }
 };
 

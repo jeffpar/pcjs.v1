@@ -635,6 +635,11 @@ Component.prototype = {
                 if (!this.bindings[sBinding]) {
                     this.bindings[sBinding] = control;
                     control.value = "";         // this was added for Firefox (Safari automatically clears the <textarea> on a page reload, but Firefox does not)
+                    /*
+                     * TODO: Get rid of these Component method overrides, because they're going to cause issues
+                     * if the day ever comes (and it WILL) that we want multiple machines on a single page with their
+                     * own Control Panels.
+                     */
                     Component.println = (function(control) {
                         return function printControl(s, type) {
                             s = (type !== undefined? (type + ": ") : "") + (s || "");

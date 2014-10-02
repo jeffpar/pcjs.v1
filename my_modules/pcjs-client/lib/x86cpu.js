@@ -2248,7 +2248,7 @@ X86CPU.prototype.pushWord = function(w)
  * 
  * ERRATA: I do recall that early revisions of the 8086/8088 failed to suppress hardware interrupts (and
  * possibly also Trap acknowledgements) after an SS load, but that Intel corrected the problem at some point;
- * however, I don't know exactly when that change was made or which IBM PC models may have been affected, if any.
+ * however, I don't know when that change was made or which IBM PC models may have been affected, if any.
  * TODO: More research required.
  *
  * WARNING: There is also a priority consideration here.  On the 8086/8088, hardware interrupts have higher
@@ -2268,7 +2268,7 @@ X86CPU.prototype.checkINTR = function()
     if (!(this.opFlags & X86.OPFLAG.NOINTR)) {
         if ((this.intFlags & X86.INTFLAG.INTR) && (this.regPS & X86.PS.IF)) {
             var nIDT = this.chipset.getIRRVector();
-            if (nIDT != -2) {
+            if (nIDT >= -1) {
                 this.intFlags &= ~X86.INTFLAG.INTR;
                 if (nIDT >= 0) {
                     this.intFlags &= ~X86.INTFLAG.HALT;
@@ -2473,8 +2473,8 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
             if (this.intFlags) {
                 if (this.checkINTR()) {
                     /*
-                     * ASSERT: If it's never possible to have !nMinCycles WITHOUT the Debugger, then all
-                     * we need to check is !nMinCycles.
+                     * ASSERT: If it's never possible to have !nMinCycles WITHOUT the Debugger, then all we need
+                     * to check is !nMinCycles.
                      */
                     if (DEBUGGER && !nMinCycles) {
                         this.opFlags = 0;
@@ -2483,25 +2483,28 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
                 }
                 if (this.intFlags & X86.INTFLAG.HALT) {
                     /*
-                     * Even though we're technically "halted", we still need to keep the cycle count moving;
-                     * otherwise the whole point of staying in the runCPU() loop (ie, to continue calling
-                     * video.updateScreen() from runCPU(), as well as chipset.updateAllTimers() from stepCPU())
-                     * is lost, because both those functions depend on movement in the cycle count.
-                     *
-                     * TODO: Another option here would be to decrement IP and execute the HLT repeatedly,
-                     * but that had a surprisingly bad impact on performance; seems like a better idea would
-                     * be to simply keep pretending that we just executed the remaining nStepCycles, and let
-                     * runCPU() sleep for the remainder of the burst, so that we get some power savings.
+                     * As discussed in opHLT(), the CPU is never REALLY halted by a HLT instruction; instead,
+                     * opHLT() sets X86.INTFLAG.HALT, signalling to us that we're free to end the current burst
+                     * AND that we should not execute any more instructions until checkINTR() indicates a hardware
+                     * interrupt has been requested.
+                     * 
+                     * One downside to this approach is that it *might* appear to the careful observer that we
+                     * executed a full complement of instructions during bursts where X86.INTFLAG.HALT was set,
+                     * when in fact we did not.  However, the steady advance of the overall cycle count, and thus
+                     * the steady series calls to stepCPU(), is needed to ensure that timer updates, video updates,
+                     * etc, all continue to occur at the expected rates.
+                     * 
+                     * If necessary, we can add another bookkeeping cycle counter (eg, one that keeps tracks of the
+                     * number of cycles during which we did not actually execute any instructions).
                      */
-                    // this.advanceIP(-1);
-                    this.nStepCycles -= 2;
+                    this.nStepCycles = 0;
                     this.opFlags = 0;
-                    continue;
+                    break;
                 }
             }
         }
 
-        if (DEBUGGER && this.fDebugCheck && !this.dbg.checkInstruction(this.regEIP)) {
+        if (DEBUGGER && this.fDebugCheck && this.dbg.checkInstruction(this.regEIP)) {
             this.haltCPU();
             break;
         }
@@ -2524,19 +2527,19 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
         
         if (DEBUG) {
             /*
-             * Some opcode helpers are required to temporarily redirect getEAByte/getEAWord or setEAByte/setEAWord to null
-             * functions, effectively disabling a memory read that's unnecessary (or a memory write that could be destructive).
-             * However, they weren't originally required to restore those memory functions when they were done; we would
-             * simply reset all the memory functions here, after every single instruction.
+             * Some opcode helpers are required to temporarily redirect getEAByte/getEAWord or setEAByte/setEAWord
+             * to null functions, effectively disabling a memory read that's unnecessary (or a memory write that could
+             * be destructive).  However, they weren't originally required to restore those memory functions when they
+             * were done; we would simply reset all the memory functions here, after every single instruction.
              * 
-             * That's no longer the case.  Those opcode helpers (or their callers) are now required to restore the memory
-             * access functions to their defaults, so that we don't have to waste time resetting them here, on every instruction.
-             * The DEBUG-only verifyMemoryEnabled() simply confirms that everyone's doing their job. 
+             * That's no longer the case.  Those opcode helpers (or their callers) are now required to restore the
+             * memory access functions to their defaults, so that we don't have to waste time resetting them here, on
+             * every instruction.  The DEBUG-only verifyMemoryEnabled() simply confirms that everyone's doing their job. 
              */
             this.verifyMemoryEnabled();
             
             /*
-             * Make sure every instruction is assessing a cycle cost, and that the cost is a net positive. 
+             * Make sure that every instruction is assessing a cycle cost, and that the cost is a net positive. 
              */
             if (this.nStepCycles >= this.nSnapCycles && !(this.opFlags & X86.OPFLAG.PREFIXES)) {
                 this.println("cycle miscount: " + (this.nSnapCycles - this.nStepCycles));

@@ -3192,45 +3192,34 @@ var X86OpXX = {
      * @this {X86CPU}
      *
      * op=0xF4 (hlt)
-     *
-     * WARNING: Because other components "thrive" on the CPU's runCPU() loop notifications,
-     * (eg, the Video component's blinking elements, and the Chipset component's timers),
-     * we can't really stop.  What we do instead is set INTFLAG.HALT and "wait" for INTFLAG.INTR
-     * to be set; since stepCPU() is already monitoring intFlags, this INTFLAG.HALT bit doesn't
-     * impact performance.
-     *
-     * All stepCPU() has to do when INTFLAG.HALT is set is advance the cycle count without
-     * advancing the program counter.  That continues indefinitely until stepCPU() finally detects
-     * and acknowledges a INTFLAG.INTR notification, at which point INTFLAG.HALT is cleared.
      */
     opHLT: function() {
+        /*
+         * The CPU is never REALLY halted by a HLT instruction; instead, by setting X86.INTFLAG.HALT,
+         * we are signalling to stepCPU() that it's free to end the current burst AND that it should not
+         * execute any more instructions until checkINTR() indicates a hardware interrupt is requested.
+         */
         this.intFlags |= X86.INTFLAG.HALT;
         this.nStepCycles -= 2;
         /*
-         * We halt the machine only if a Debugger is present AND Debugger checks are enabled (eg,
-         * one or more breakpoints are set, or the global DEBUG flag is set, etc), on the theory that
-         * whoever's using the Debugger might like to see halts; we also halt the machine if interrupts
-         * have been disabled, since that means it's dead in the water (we have no NMI generation
-         * mechanism at the moment).
-         * 
-         * Otherwise, HLT is treated like any other instruction.
+         * If a Debugger is present AND Debugger checks are enabled (eg, one or more breakpoints are set,
+         * or the global DEBUG flag is set, etc), then we REALLY halt the CPU, on the theory that whoever's
+         * using the Debugger would like to see HLTs.
          */
         if (DEBUGGER && this.dbg && this.dbg.checksEnabled(true)) {
             this.advanceIP(-1);     // this is purely for the Debugger's benefit, to show the HLT
             this.haltCPU();
             return;
         }
+        /*
+         * We also REALLY halt the machine if interrupts have been disabled, since that means it's dead
+         * in the water (we have no NMI generation mechanism at the moment).
+         */
         if (!this.getIF()) {
             if (DEBUGGER && this.dbg) this.advanceIP(-1);
             this.haltCPU();
          // return;
         }
-        /*
-         * Per my discussion of waitCPU() in cpu.js, this seems rather pointless, so I don't call it anymore.
-         * If you re-enable this, make sure you re-enable the return statement above, too.
-         *
-        this.waitCPU();
-         */
     },
     /**
      * @this {X86CPU}

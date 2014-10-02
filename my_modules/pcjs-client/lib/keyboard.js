@@ -582,7 +582,7 @@ Keyboard.prototype.resetDevice = function()
      * TODO: There's more to reset, like LED indicators, default type rate, and emptying the scan code buffer.
      */
     this.messageDebugger("keyboard reset", true);
-    this.abScanBuffer = [0xAA];
+    this.abScanBuffer = [Keyboard.CMDRES.BATSUCCESS];
     if (this.chipset) this.chipset.setIRR(ChipSet.IRQ.KBD, 4);
 };
 
@@ -638,6 +638,8 @@ Keyboard.prototype.sendCmd = function(bCmd)
         b = Keyboard.CMDRES.ACK;
         this.resetDevice();
         break;
+    default:
+        break;
     }
     return b;
 };
@@ -648,7 +650,7 @@ Keyboard.prototype.sendCmd = function(bCmd)
  * This is the ChipSet's interface for reading scan codes.
  *
  * @this {Keyboard}
- * @param {boolean} [fShift]
+ * @param {boolean} [fShift] is used by the MODEL_5170 8042 Keyboard Controller (supersedes the old setEnable() interface)
  * @return {number} next scan code, or 0 if none
  */
 Keyboard.prototype.readScanCode = function(fShift)
@@ -663,23 +665,32 @@ Keyboard.prototype.readScanCode = function(fShift)
 };
 
 /**
- * shiftScanCode()
+ * shiftScanCode(fFlush)
  * 
- * This is the ChipSet's interface to advance scan codes.
+ * This is the ChipSet's interface to advance (or flush) scan codes.
  * 
  * @this {Keyboard}
+ * @param {boolean} [fFlush] is true to completely flush the keyboard buffer
  */
-Keyboard.prototype.shiftScanCode = function()
+Keyboard.prototype.shiftScanCode = function(fFlush)
 {
     if (this.abScanBuffer.length > 0) {
-        /*
-         * The keyboard interrupt service routine toggles the enable bit after reading a scan code, so
-         * presumably this is the proper point at which to shift the last scan code out, and then assert
-         * another interrupt if more scan codes exist.
-         */
-        this.abScanBuffer.shift();
-        if (this.abScanBuffer.length > 0) {
-            if (this.chipset) this.chipset.setIRR(ChipSet.IRQ.KBD);
+        if (fFlush) {
+            /*
+             * This is now called after receipt of an 8042 self-test command, to ensure we don't
+             * overwrite the self-test response byte with left-over scan codes.
+             */
+            this.abScanBuffer = [];
+        } else {
+            /*
+             * The keyboard interrupt service routine toggles the enable bit after reading a scan code, so
+             * presumably this is the proper point at which to shift the last scan code out, and then assert
+             * another interrupt if more scan codes exist.
+             */
+            this.abScanBuffer.shift();
+            if (this.abScanBuffer.length > 0) {
+                if (this.chipset) this.chipset.setIRR(ChipSet.IRQ.KBD);
+            }
         }
     }
 };

@@ -43,6 +43,11 @@ var DumpAPI = require("../../shared/lib/dumpapi");
 /**
  * FileDump()
  *
+ * TODO: Consider adding a "map" option that allows the user to supply a MAP filename (via a "map" API parameter
+ * or a "--map" command-line option), which in turn triggers a call to loadMap().  Note that loadMap() will need
+ * to be a bit more general and use a worker function that calls either net.getFile() or fs.readFile(), similar
+ * to what our loadFile() function already does.
+ * 
  * @constructor
  * @param {string|undefined} sFormat should be one of "json"|"data"|"hex"|"bytes"|"rom" (see the FORMAT constants)
  * @param {boolean|string|undefined} fComments enables comments and other readability enhancements in the JSON output

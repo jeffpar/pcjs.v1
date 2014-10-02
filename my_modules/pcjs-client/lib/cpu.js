@@ -250,7 +250,16 @@ CPU.prototype.powerUp = function(data, fRepower)
         /*
          * Give the Debugger a chance to do/print something once we've powered up (TODO: Review the necessity of this)
          */
-        if (DEBUGGER && this.dbg) this.dbg.init();
+        if (DEBUGGER && this.dbg) {
+            this.dbg.init();
+        } else {
+            /*
+             * TODO: Once we get rid of those nasty Component method overrides, this test will have to be revised as well
+             */
+            if (Component.controlPrint) {
+                this.warning("No debugger detected");
+            }
+        }
     }
     this.fPowered = true;
     if (!this.autoStart() && this.dbg) {
@@ -1080,27 +1089,6 @@ CPU.prototype.updateCPU = function()
     this.displayVideo();
     this.displayStatus();
 };
-
-/**
- * waitCPU()
- * 
- * Similar to haltCPU() with regard to how it resets various cycle countdown values, but the CPU
- * remains in a "running" state, without yielding.
- *
- * TODO: This was originally used by opHLT(), but this seems rather pointless in hindsight, because
- * this call will only end the current stepCPU() iteration; we'll immediately go back into stepCPU(),
- * except that X86.INTFLAG.HALT will be set, so we won't execute any more instructions, not even opHLT(),
- * until a hardware interrupt is acknowledged.  However, it would still be nice if we could reduce CPU
- * overhead while in a halted state.
- *
- * @this {CPU}
- *
-CPU.prototype.waitCPU = function()
-{
-    this.nBurstCycles -= this.nStepCycles;
-    this.nStepCycles = 0;               // this will break us out of stepCPU()
-};
- */
 
 /**
  * yieldCPU()

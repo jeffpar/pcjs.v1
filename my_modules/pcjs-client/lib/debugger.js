@@ -132,14 +132,12 @@ function Debugger(parmsDbg)
         this.clearBreakpoints();
     
         /*
-         * Instead of pre-allocating these arrays, we wait until the reset() function is called.
-         * These arrays are updated in checkInstruction(), but the CPU will never actually call it
-         * unless checksEnabled() returns true, and that won't happen until one or more breakpoints
-         * have been set.  This ensures that, by default, the CPU runs as fast as possible.
+         * Execution history is allocated by initHistory() whenever checksEnabled() conditions change.
+         * Execution history is updated whenever the CPU calls checkInstruction(), which will happen only
+         * when checksEnabled() returns true (eg, whenever one or more breakpoints have been set).
+         * This ensures that, by default, the CPU runs as fast as possible.
          */
-        this.iStepHistory = 0;
-        this.aStepHistory = [];
-        this.aaOpcodeFreqs = [];
+        this.initHistory();
 
         /*
          * Message categories supported by the messageEnabled() function and other assorted message
@@ -516,22 +514,25 @@ if (DEBUGGER) {
      * Based on the active CPU model, we make every effort to execute and disassemble this (and every other)
      * opcode appropriately, by setting the opcode's entry in aaOpDescs accordingly.  0x0F defaults to the 8086
      * entry: aOpDescPopCS.
+     * 
+     * Note that we do NOT modify aaOpDescs directly; this.aaOpDescs is a reference to it if the processor
+     * is an 8086, otherwise we make a copy of the array and THEN modify it. 
      */
     Debugger.aOpDescPopCS     = [Debugger.INS.POP,  Debugger.TYPE_CS   | Debugger.TYPE_OUT];
     Debugger.aOpDescUndefined = [Debugger.INS.NONE, Debugger.TYPE_NONE];
     Debugger.aOpDesc0F        = [Debugger.INS.OP0F, Debugger.TYPE_WORD | Debugger.TYPE_BOTH];
     
     /*
-     * The aaOpDescs array is indexed by opcode, and each element is a sub-array (aOpDesc)
-     * that describes the corresponding opcode. The sub-elements are as follows:
+     * The aaOpDescs array is indexed by opcode, and each element is a sub-array (aOpDesc) that describes
+     * the corresponding opcode. The sub-elements are as follows:
      *
      *      [0]: {number} of the opcode name (see INS.*)
      *      [1]: {number} containing the destination operand descriptor bit(s)
      *      [2]: {number} containing the source operand descriptor bit(s)
      *
-     * These sub-elements are all optional. If [0] is not present, the opcode is undefined;
-     * if [1] is not present (or contains zero), the opcode has no (or only implied) operands; 
-     * and if [2] is not present, the opcode has only a single operand.
+     * These sub-elements are all optional. If [0] is not present, the opcode is undefined; if [1] is not
+     * present (or contains zero), the opcode has no (or only implied) operands; and if [2] is not present,
+     * the opcode has only a single operand.
      */
     Debugger.aaOpDescs = [
     /* 0x00 */ [Debugger.INS.ADD,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
@@ -1114,10 +1115,12 @@ if (DEBUGGER) {
         this.hdc = cmp.getComponentByType("HDC");
         if (MAXDEBUG) this.chipset = cmp.getComponentByType("ChipSet");
         
+        this.aaOpDescs = Debugger.aaOpDescs;
         if (this.cpu.model >= X86.MODEL_80186) {
-            Debugger.aaOpDescs[0x0F] = Debugger.aOpDescUndefined;
+            this.aaOpDescs = Debugger.aaOpDescs.slice();
+            this.aaOpDescs[0x0F] = Debugger.aOpDescUndefined;
             if (this.cpu.model >= X86.MODEL_80286) {
-                Debugger.aaOpDescs[0x0F] = Debugger.aOpDesc0F;
+                this.aaOpDescs[0x0F] = Debugger.aOpDesc0F;
             }            
         }
         
@@ -1459,7 +1462,47 @@ if (DEBUGGER) {
         // this.doHelp();
         this.println("Type ? for list of debugger commands");
     };
-    
+
+    /**
+     * initHistory()
+     * 
+     * This function is intended to be called by the constructor, reset(), addBreakpoint(), findBreakpoint()
+     * and any other function that changes the checksEnabled() criteria used to decide whether checkInstruction()
+     * should be called.
+     * 
+     * That is, if the history arrays need to be allocated and haven't already been allocated, then allocate them,
+     * and if the arrays are no longer needed, then deallocate them.
+     *
+     * @this {Debugger}
+     */
+    Debugger.prototype.initHistory = function()
+    {
+        var i;
+        if (!this.checksEnabled()) {
+            this.iOpcodeHistory = 0;
+            this.aOpcodeHistory = [];
+            this.aaOpcodeCounts = [];
+            return;
+        }
+        if (!this.aOpcodeHistory || !this.aOpcodeHistory.length) {
+            this.aOpcodeHistory = new Array(10000);
+            for (i = 0; i < this.aOpcodeHistory.length; i++) {
+                /*
+                 * Preallocate dummy Addr (Array) objects in every history slot, so that checkInstruction()
+                 * doesn't need to call newAddr() on every instruction check.
+                 */
+                this.aOpcodeHistory[i] = [0, 0, 0];
+            }
+            this.iOpcodeHistory = 0;
+        }
+        if (!this.aaOpcodeCounts || !this.aaOpcodeCounts.length) {
+            this.aaOpcodeCounts = new Array(256);
+            for (i = 0; i < this.aaOpcodeCounts.length; i++) {
+                this.aaOpcodeCounts[i] = [i, 0];
+            }
+        }
+    };
+
     /**
      * runCPU(fOnClick)
      * 
@@ -1625,19 +1668,7 @@ if (DEBUGGER) {
      */
     Debugger.prototype.reset = function(fQuiet)
     {
-        var i;
-        if (!this.aStepHistory.length) {
-            this.aStepHistory = new Array(10000);
-        }
-        for (i = 0; i < this.aStepHistory.length; i++) {
-            this.aStepHistory[i] = [];
-        }
-        if (!this.aaOpcodeFreqs.length) {
-            this.aaOpcodeFreqs = new Array(256);
-        }
-        for (i = 0; i < this.aaOpcodeFreqs.length; i++) {
-            this.aaOpcodeFreqs[i] = [i, 0];
-        }
+        this.initHistory();
         this.cInstructions = 0;
         this.nCycles = 0;
         this.aAddrNextCode = this.newAddr(this.cpu.regIP, this.cpu.segCS.sel);
@@ -1651,7 +1682,7 @@ if (DEBUGGER) {
         this.clearTempBreakpoint();
         if (!fQuiet) this.updateStatus();
     };
-    
+
     /**
      * save()
      *
@@ -1798,29 +1829,39 @@ if (DEBUGGER) {
      * @this {Debugger}
      * @param {number} addr
      * @param {boolean} [fSkipBP] is true to skip breakpoint check
-     * @return {boolean} true to proceed, false to halt
+     * @return {boolean} true if breakpoint hit, false if not
      */
     Debugger.prototype.checkInstruction = function(addr, fSkipBP)
     {
-        var fBreak = false;
         /*
          * Assert that general-purpose register contents remain within their respective ranges;
          * this isn't intended to be complete, just a spot-check.
          */
         Component.assert(!(this.cpu.regAX & ~0xffff) && !(this.cpu.regBX & ~0xffff) && !(this.cpu.regCX & ~0xffff) && !(this.cpu.regDX & ~0xffff), "register out of bounds");
     
-        if (!fSkipBP && this.checkBreakpoint(addr, this.aBreakExec))
-            fBreak = true;
-        else {
-            this.cInstructions++;
-            var bOpcode = this.bus.getByteDirect(addr);
-            this.aaOpcodeFreqs[bOpcode][1]++;
-            this.aStepHistory[this.iStepHistory++] = this.newAddr(this.cpu.regIP, this.cpu.segCS.sel);
-            if (this.iStepHistory == this.aStepHistory.length) {
-                this.iStepHistory = 0;
-            }
+        if (!fSkipBP && this.checkBreakpoint(addr, this.aBreakExec)) {
+            return true;
         }
-        return !fBreak;
+        
+        this.cInstructions++;
+        var bOpcode = this.bus.getByteDirect(addr);
+        this.aaOpcodeCounts[bOpcode][1]++;
+        
+        /*
+         * This is a good example of what NOT to do in a high-frequency function, and defeats
+         * the entire purpose of preallocating and preinitializing the history array in initHistory():
+         * 
+         *      this.aOpcodeHistory[this.iOpcodeHistory] = this.newAddr(this.cpu.regIP, this.cpu.segCS.sel, addr);
+         *      
+         * As the name implies, newAddr() returns a new "Addr" (Array) object every time it's called.
+         */
+        var a = this.aOpcodeHistory[this.iOpcodeHistory];
+        a[0] = this.cpu.regIP;
+        a[1] = this.cpu.segCS.sel;
+        a[2] = addr;
+        if (++this.iOpcodeHistory == this.aOpcodeHistory.length) this.iOpcodeHistory = 0;
+        
+        return false;
     };
     
     /**
@@ -1835,12 +1876,11 @@ if (DEBUGGER) {
      */
     Debugger.prototype.checkMemoryRead = function(addr)
     {
-        var fBreak = false;
         if (this.checkBreakpoint(addr, this.aBreakRead)) {
             this.cpu.haltCPU(true);
-            fBreak = true;
+            return true;
         }
-        return fBreak;
+        return false;
     };
     
     /**
@@ -1855,12 +1895,11 @@ if (DEBUGGER) {
      */
     Debugger.prototype.checkMemoryWrite = function(addr)
     {
-        var fBreak = false;
         if (this.checkBreakpoint(addr, this.aBreakWrite)) {
             this.cpu.haltCPU(true);
-            fBreak = true;
+            return true;
         }
-        return fBreak;
+        return false;
     };
 
     /**
@@ -2081,16 +2120,17 @@ if (DEBUGGER) {
     };
     
     /**
-     * newAddr(off, seg)
+     * newAddr(off, seg, addr)
      * 
      * @this {Debugger}
      * @param {number} off
      * @param {number} seg
-     * @return {Array} containing [off, seg]
+     * @param {number} [addr] is the physical address, if known 
+     * @return {Array} containing [off, seg, addr]
      */
-    Debugger.prototype.newAddr = function(off, seg)
+    Debugger.prototype.newAddr = function(off, seg, addr)
     {
-        return [off, seg];
+        return [off, seg, addr];
     };
     
     /**
@@ -2141,6 +2181,7 @@ if (DEBUGGER) {
                 this.bus.addMemoryBreakpoint(this.getAddr(aAddr), aBreak == this.aBreakWrite);
             }
             if (!fTemp) this.println("breakpoint enabled: " + this.hexAddr(aAddr) + " (" + aBreak[0] + ")");
+            this.initHistory();
             return true;
         }
         return false;
@@ -2169,6 +2210,7 @@ if (DEBUGGER) {
                         this.bus.removeMemoryBreakpoint(addr, aBreak == this.aBreakWrite);
                     }
                     if (!aAddrBreak[3]) this.println("breakpoint cleared: " + this.hexAddr(aAddrBreak) + " (" + aBreak[0] + ")");
+                    this.initHistory();
                     break;
                 }
                 this.println("breakpoint exists: " + this.hexAddr(aAddrBreak) + " (" + aBreak[0] + ")");
@@ -2309,7 +2351,7 @@ if (DEBUGGER) {
         var aAddrIns = this.newAddr(aAddr[0], aAddr[1]);
     
         var bOpcode = this.getByte(aAddr, 1);
-        var aOpDesc = Debugger.aaOpDescs[bOpcode];
+        var aOpDesc = this.aaOpDescs[bOpcode];
         var iIns = aOpDesc[0];
         var bModRM = -1;
         
@@ -3399,10 +3441,10 @@ if (DEBUGGER) {
         }
         var i;
         var cData = 0;
-        if (this.aaOpcodeFreqs) {
+        if (this.aaOpcodeCounts) {
             if (sParm == "clear") {
-                for (i = 0; i < this.aaOpcodeFreqs.length; i++)
-                    this.aaOpcodeFreqs[i] = [i, 0];
+                for (i = 0; i < this.aaOpcodeCounts.length; i++)
+                    this.aaOpcodeCounts[i] = [i, 0];
                 this.println("frequency data cleared");
                 cData++;
             }
@@ -3411,15 +3453,15 @@ if (DEBUGGER) {
                 cData++;
             }
             else {
-                var aaSortedOpcodeFreqs = this.aaOpcodeFreqs.slice();
-                aaSortedOpcodeFreqs.sort(function(p, q) {
+                var aaSortedOpcodeCounts = this.aaOpcodeCounts.slice();
+                aaSortedOpcodeCounts.sort(function(p, q) {
                     return q[1] - p[1];
                 });
-                for (i = 0; i < aaSortedOpcodeFreqs.length; i++) {
-                    var bOpcode = aaSortedOpcodeFreqs[i][0];
-                    var cFreq = aaSortedOpcodeFreqs[i][1];
+                for (i = 0; i < aaSortedOpcodeCounts.length; i++) {
+                    var bOpcode = aaSortedOpcodeCounts[i][0];
+                    var cFreq = aaSortedOpcodeCounts[i][1];
                     if (cFreq) {
-                        this.println((Debugger.asIns[Debugger.aaOpDescs[bOpcode][0]] + "  ").substr(0, 5) + " (" + str.toHexByte(bOpcode) + "): " + cFreq + " times");
+                        this.println((Debugger.asIns[this.aaOpDescs[bOpcode][0]] + "  ").substr(0, 5) + " (" + str.toHexByte(bOpcode) + "): " + cFreq + " times");
                         cData++;
                     }
                 }
@@ -3446,8 +3488,8 @@ if (DEBUGGER) {
         }
         var sMore = "";
         var cLines = 10;
-        var iHistory = this.iStepHistory;
-        var aHistory = this.aStepHistory;
+        var iHistory = this.iOpcodeHistory;
+        var aHistory = this.aOpcodeHistory;
         if (aHistory !== undefined) {
             var n = (sCount === undefined? this.nextHistory : parseInt(sCount, 10));
             if (isNaN(n))
@@ -3470,14 +3512,14 @@ if (DEBUGGER) {
             if (sCount !== undefined) {
                 this.println(n + " instructions earlier:");
             }
-            while (cLines && iHistory != this.iStepHistory) {
+            while (cLines && iHistory != this.iOpcodeHistory) {
                 var aAddr = aHistory[iHistory];
                 if (!aAddr.length) break;
                 /*
                  * We must create a new aAddr from the address we obtained from aHistory, because
                  * it was a reference, not a copy, and we don't want getInstruction() modifying the original.  
                  */
-                aAddr = this.newAddr(aAddr[0], aAddr[1]);
+                aAddr = this.newAddr(aAddr[0], aAddr[1], aAddr[2]);
                 this.println(this.getInstruction(aAddr, "history", -n));
                 if (++iHistory == aHistory.length) iHistory = 0;
                 this.nextHistory = --n;
