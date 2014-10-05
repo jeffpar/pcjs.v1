@@ -2268,7 +2268,7 @@ Video.prototype.reset = function()
      * on the EGA's own switch settings instead.
      */
     if (this.chipset) {
-        nMonitorType = this.chipset.getSW1VideoMonitor();
+        nMonitorType = this.chipset.getSWVideoMonitor();
     }
 
     var fEGA = false;

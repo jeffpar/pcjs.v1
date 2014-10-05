@@ -1518,14 +1518,15 @@ if (DEBUGGER) {
     };
     
     /**
-     * stepCPU(nCycles, fRegs)
+     * stepCPU(nCycles, fRegs, fUpdateCPU)
      * 
      * @this {Debugger}
      * @param {number} nCycles (0 for one instruction without checking breakpoints)
      * @param {boolean} [fRegs] is true to display registers after step (default is false)
+     * @param {boolean} [fUpdateCPU] is false to disable calls to updateCPU() (default is true)
      * @return {boolean}
      */
-    Debugger.prototype.stepCPU = function(nCycles, fRegs)
+    Debugger.prototype.stepCPU = function(nCycles, fRegs, fUpdateCPU)
     {
         if (!this.isCPUAvail()) return false;
     
@@ -1556,9 +1557,11 @@ if (DEBUGGER) {
     
         /*
          * Because we called cpu.stepCPU() and not cpu.runCPU(), we must nudge the cpu's update code,
-         * and then update our own state.
+         * and then update our own state.  Normally, the only time fUpdateCPU will be false is when doStep()
+         * is calling us in a loop, in which case it will perform its own updateCPU() when it's done. 
          */
-        this.cpu.updateCPU();
+        if (fUpdateCPU !== false) this.cpu.updateCPU();
+        
         this.updateStatus(!fRegs);
         return (this.nCycles > 0);
     };
@@ -1593,7 +1596,6 @@ if (DEBUGGER) {
         if (fStep || this.fProcStep == 1)
             this.doUnassemble();
         else {
-            // if (fStep === false) this.println();
             this.doRegisters();
         }
     };
@@ -1768,7 +1770,9 @@ if (DEBUGGER) {
                 if (this.nCycles) {
                     var msTotal = ms - this.msStart;
                     var nCyclesPerSecond = (msTotal > 0? Math.round(this.nCycles * 1000 / msTotal) : 0);
-                    sStopped += " (" + this.cInstructions + " ops, " + this.nCycles + " cycles, " + msTotal + "ms, " + nCyclesPerSecond + "hz)";
+                    sStopped += " (";
+                    if (this.checksEnabled()) sStopped += this.cInstructions + " ops, ";
+                    sStopped += this.nCycles + " cycles, " + msTotal + " ms, " + nCyclesPerSecond + " hz)";
                     if (MAXDEBUG && this.chipset) {
                         var i, c, n;
                         for (i = 0; i < this.chipset.acInterrupts.length; i++) {
@@ -4069,7 +4073,9 @@ if (DEBUGGER) {
                 this.println("updated registers:");
             }
         }
-        this.println(this.getRegStr(fProt));
+        
+        this.println('\n' + this.getRegStr(fProt));
+        
         if (fIns) {
             this.aAddrNextCode = this.newAddr(this.cpu.regIP, this.cpu.segCS.sel);
             this.doUnassemble(this.hexAddr(this.aAddrNextCode));
@@ -4219,9 +4225,15 @@ if (DEBUGGER) {
         web.onCountRepeat(
             count,
             function onCountStep() {
-                return dbg.setBusy(true) && dbg.stepCPU(nCycles, fRegs);
+                return dbg.setBusy(true) && dbg.stepCPU(nCycles, fRegs, false);
             },
             function onCountStepComplete() {
+                /*
+                 * We explicitly called stepCPU() with fUpdateCPU === false, because repeatedly
+                 * calling updateCPU() is very slow, so once the repeat count has been exhausted,
+                 * we need to perform a final updateCPU().
+                 */
+                dbg.cpu.updateCPU();
                 dbg.setBusy(false);
             }
         );

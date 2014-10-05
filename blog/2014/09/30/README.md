@@ -1,9 +1,9 @@
 My (JavaScript) Coding Conventions
 ---
 
-Some ramblings about my JavaScript coding conventions.  This is not an attempt to change anyone's mind
-about anything, just an explanation of why things are they way they are (and will be more useful once PCjs
-moves from a private to a public GitHub repository).
+Some ramblings about my JavaScript coding conventions.  This is not an attempt to convince anyone of
+anything, just an explanation of why things are they way they are (and which will be more useful once PCjs
+moves from a private to a public GitHub repository in the near future).
 
 ### Tabs vs. Spaces
 
@@ -41,10 +41,10 @@ within a given file at least.
 
 I still tend to follow Charles Simonyi's "[Hungarian](http://en.wikipedia.org/wiki/Hungarian_notation)" naming
 conventions -- or rather, a naming convention loosely inspired by Hungarian.  I know lots of people sneer at
-those conventions and think they're useless, and all I can say is, they're wrong: they are not useless to ME.
+those conventions or simply think they're useless, and all I can say is, they're wrong: they are not useless to *me*.
 
 I admit they may be useless to anyone who has a phenomenal memory and can remember that an obscure variable named
-"foo" was initialized with a string or a number, or whose IDE can answer that question with the press of a key (or two),
+"foo" was initialized with a string or a number, or whose IDE can answer the question with the press of a key (or two),
 but for me, with my non-phenomenal memory and lazy fingers, I prefer being able to simply look at a variable to
 immediately know what *type* of data it contains, if nothing else.
 
@@ -139,7 +139,7 @@ And finally, speaking of warnings, I've had to tell PhpStorm to "shut up" about 
 - “throw” of exception caught locally
 
 I acknowledge those those features can introduce bugs if you're not careful, so I make sure I'm careful.  I don't
-subscribe to the dogmatic approach that others (eg, the author of JSHint) take about so-called "risky" features.
+subscribe to the dogmatic approach that others (eg, the author of JSLint) take about so-called "risky" features.
 I agree that it's always a good idea to walk to the crosswalk before crossing a street, but I don't agree that it's
 *never* a good idea to cross in the middle sometimes, too.
 

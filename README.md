@@ -52,11 +52,11 @@ and the original machine are available in the [C1Pjs Documentation](/docs/c1pjs/
 
 ---
 
-Development Notes
+Developer Notes
 ---
 
-The [PCjs repository](https://github.com/jeffpar/pcjs) on GitHub contains everything used to create the [pcjs.org](http://www.pcjs.org/)
-website, including:
+The [PCjs repository](https://github.com/jeffpar/pcjs) on GitHub contains everything needed to start a local
+copy of the [PCjs web server](http://www.pcjs.org/) and run PCjs simulations:
 
 + A simple Node-based web server ([server.js](server.js))
 + Custom Node modules used by the web server ([HTMLOut](my_modules/htmlout/), [MarkOut](my_modules/markout/), [DiskDump](my_modules/diskdump/), [FileDump](my_modules/filedump/))
@@ -64,37 +64,46 @@ website, including:
 + The [PCjs](my_modules/pcjs-client/lib/) and [C1Pjs](my_modules/c1pjs-client/lib/) client applications, both "compiled" and uncompiled
 + A smattering of [PCjs](docs/pcjs/) and [C1Pjs](docs/c1pjs/) documentation, along with [blog posts](blog/), related [publications](pubs/) and more
 
+The PCjs web server is *not* required to run most PCjs simulations.  Any web server (Node, Apache, Nginx, etc)
+that can serve the necessary JavaScript files to your browser will work.  However, instructions for doing
+that are beyond the scope of this "Quick Start" document.  Also, it is possible to create simulations that require
+access to PCjs web server APIs; however, none of the simulations in the repository should require API access.
+
 ### Installing PCjs
 
 The following instructions were written for OS X users.  However, users of other operating systems should have
-no problem following along.
+no problem following along.  There are some prerequisites:
 
-Open Terminal and `cd` to a directory where you'd like to install PCjs, and run the following commands:
+- Git (included with OS X Developer Tools; separate download required for Windows)
+- Python (used by NPM and included with OS X; separate download required for Windows)
+- Node with NPM (download an appropriate installation package from [nodejs.org](http://nodejs.org/download/))
+
+Once you have the prerequisites, open a command-line window, `cd` to the directory where you'd like to install PCjs,
+and type the following commands:
 
 	git clone git@github.com:jeffpar/pcjs.git pcjs
 	cd pcjs
 	npm install
 	node server.js
 
-Now open a web browser and go to `http://localhost:8088/`.  You're done!
+Now open a web browser and go to `http://localhost:8088/`.  Done!
  
-NOTE: If you just want to run the server and don't plan to do any development, you can reduce the footprint
-slightly by asking NPM to install only "productions" modules:
+If you just want to launch the web server or don't plan to do any development, you can reduce the
+footprint slightly by asking NPM to install only "productions" modules (which can also eliminate some
+errors if, for example, you neglected to install Python):
  
 	npm install --production
 	
-If you ever inadvertently run `npm install` without `--production`, you can easily eliminate any unwanted
-"devDependencies" with:
+If you ever inadvertently run `npm install` without `--production`, you can easily uninstall all the
+"devDependencies" listed in [package.json](package.json) with this command:
 
 	npm prune --production
 	
-Finally, when installing the project on an AWS server, you have complete control of how Node is launched, but you
-don't have direct control of NPM; the best you can do is set the following AWS "Environment Property":
+Finally, when installing on an AWS server, although you have complete control over how Node is launched, you
+don't have direct control over NPM; the best you can do is set the following AWS "Environment Property":
 
 	NPM_CONFIG_PRODUCTION=true
 	
-It's assumed that the OS X Developer Tools (which include Git) have already been installed, as well as
-Node and NPM.  Node (which now includes NPM) can be downloaded from [nodejs.org](http://nodejs.org/download/).
 The current version of Node ([0.10.32](http://nodejs.org/dist/v0.10.32/node-v0.10.32.pkg) at the time of this
 writing) should work fine, but version [0.10.26](http://nodejs.org/dist/v0.10.26/node-v0.10.26.pkg)
 is what's been used to develop and test PCjs so far.

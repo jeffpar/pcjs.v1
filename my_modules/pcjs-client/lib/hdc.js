@@ -1228,49 +1228,51 @@ HDC.prototype.doCmd = function() {
      * processed in the first group, and all the rest should be processed in the second group. 
      */
     switch (bCmd) {
-        case HDC.REG_DATA.CMD.REQUEST_SENSE:        // 0x03
-            this.beginResult(drive? drive.errorCode : HDC.REG_DATA.ERR.NOT_READY);
-            this.pushResult(b1);
-            this.pushResult(b2);
-            this.pushResult(b3);
-            /*
-             * Although not terribly clear from IBM's "Fixed Disk Adapter" documentation,
-             * a data "status byte" also follows the 4 "sense bytes".  Interestingly, The HDC BIOS
-             * checks that data status byte for REG_DATA.STATUS_ERROR, but I have to wonder if it
-             * would have ever been set for this command....
-             *
-             * The whole point of the HDC.REG_DATA.CMD.REQUEST_SENSE command is to obtain details about a
-             * previous error, so if HDC.REG_DATA.CMD.REQUEST_SENSE itself reports an error, what would that mean?
-             */
-            this.pushResult(HDC.REG_DATA.STATUS_OK | bDrive);
-            bCmd = -1;                              // mark the command as complete
-            break;
-        case HDC.REG_DATA.CMD.INIT_DRIVE:           // 0x0C
-            /*
-             * Pop off all the extra "Initialize Drive Characteristics" bytes and store them,
-             * for the benefit of other functions, like verifyDrive().
-             */
-            var i = 0;
-            while ((bParm = this.popCmd()) >= 0) {
-                if (drive && i < drive.abDriveParms.length) {
-                    drive.abDriveParms[i++] = bParm;
-                }
+    case HDC.REG_DATA.CMD.REQUEST_SENSE:        // 0x03
+        this.beginResult(drive? drive.errorCode : HDC.REG_DATA.ERR.NOT_READY);
+        this.pushResult(b1);
+        this.pushResult(b2);
+        this.pushResult(b3);
+        /*
+         * Although not terribly clear from IBM's "Fixed Disk Adapter" documentation,
+         * a data "status byte" also follows the 4 "sense bytes".  Interestingly, The HDC BIOS
+         * checks that data status byte for REG_DATA.STATUS_ERROR, but I have to wonder if it
+         * would have ever been set for this command....
+         *
+         * The whole point of the HDC.REG_DATA.CMD.REQUEST_SENSE command is to obtain details about a
+         * previous error, so if HDC.REG_DATA.CMD.REQUEST_SENSE itself reports an error, what would that mean?
+         */
+        this.pushResult(HDC.REG_DATA.STATUS_OK | bDrive);
+        bCmd = -1;                              // mark the command as complete
+        break;
+    case HDC.REG_DATA.CMD.INIT_DRIVE:           // 0x0C
+        /*
+         * Pop off all the extra "Initialize Drive Characteristics" bytes and store them,
+         * for the benefit of other functions, like verifyDrive().
+         */
+        var i = 0;
+        while ((bParm = this.popCmd()) >= 0) {
+            if (drive && i < drive.abDriveParms.length) {
+                drive.abDriveParms[i++] = bParm;
             }
-            if (drive) this.verifyDrive(drive);
-            bDataStatus = HDC.REG_DATA.STATUS_OK;
-            if (!drive && this.iDriveAllowFail == iDrive) {
-                this.iDriveAllowFail = -1;
-                if (DEBUG) this.messageDebugger("HDC.doCmd(): fake failure triggered");
-                bDataStatus = HDC.REG_DATA.STATUS_ERROR;
-            }
-            this.beginResult(bDataStatus | bDrive);
-            bCmd = -1;                              // mark the command as complete
-            break;
-        case HDC.REG_DATA.CMD.RAM_DIAGNOSTIC:       // 0xE0
-        case HDC.REG_DATA.CMD.CTL_DIAGNOSTIC:       // 0xE4
-            this.beginResult(HDC.REG_DATA.STATUS_OK | bDrive);
-            bCmd = -1;                              // mark the command as complete
-            break;
+        }
+        if (drive) this.verifyDrive(drive);
+        bDataStatus = HDC.REG_DATA.STATUS_OK;
+        if (!drive && this.iDriveAllowFail == iDrive) {
+            this.iDriveAllowFail = -1;
+            if (DEBUG) this.messageDebugger("HDC.doCmd(): fake failure triggered");
+            bDataStatus = HDC.REG_DATA.STATUS_ERROR;
+        }
+        this.beginResult(bDataStatus | bDrive);
+        bCmd = -1;                              // mark the command as complete
+        break;
+    case HDC.REG_DATA.CMD.RAM_DIAGNOSTIC:       // 0xE0
+    case HDC.REG_DATA.CMD.CTL_DIAGNOSTIC:       // 0xE4
+        this.beginResult(HDC.REG_DATA.STATUS_OK | bDrive);
+        bCmd = -1;                              // mark the command as complete
+        break;
+    default:
+        break;
     }
 
     if (bCmd >= 0) {
@@ -1286,46 +1288,46 @@ HDC.prototype.doCmd = function() {
             drive.senseCode = 0;
         }
         switch (bCmd) {
-            case HDC.REG_DATA.CMD.TEST_READY:       // 0x00
-                this.beginResult(HDC.REG_DATA.STATUS_OK | bDrive);
-                break;
-            case HDC.REG_DATA.CMD.RECALIBRATE:      // 0x01
-                drive.bControl = bControl;
-                if (DEBUG) this.messageDebugger("HDC.doCmd(): drive " + iDrive + " control byte: 0x" + str.toHexByte(bControl));
-                this.beginResult(HDC.REG_DATA.STATUS_OK | bDrive);
-                break;
-            case HDC.REG_DATA.CMD.READ_VERIFY:      // 0x05
-                /*
-                 * This is a non-DMA operation, so we simply pretend everything is OK for now; TODO: Revisit.
-                 */
-                this.beginResult(HDC.REG_DATA.STATUS_OK | bDrive);
-                break;
-            case HDC.REG_DATA.CMD.READ_DATA:        // 0x08
-                this.doRead(drive, function(bStatus) {
-                    hdc.beginResult(bStatus | bDrive);
-                });
-                break;
-            case HDC.REG_DATA.CMD.WRITE_DATA:       // 0x0A
-                /*
-                 * QUESTION: The IBM TechRef (p1-188) implies that bCount is used as part of HDC.REG_DATA.CMD.WRITE_DATA command,
-                 * but it is omitted from the HDC.REG_DATA.CMD.READ_DATA command.  Is that correct?  Note that, as far as the length
-                 * of the transfer is concerned, we rely exclusively on the DMA controller being programmed with the
-                 * appropriate byte count.
-                 */
-                this.doWrite(drive, function(bStatus) {
-                    hdc.beginResult(bStatus | bDrive);
-                });
-                break;
-            case HDC.REG_DATA.CMD.WRITE_BUFFER:     // 0x0F
-                this.doWriteToBuffer(drive, function(bStatus) {
-                    hdc.beginResult(bStatus | bDrive);
-                });
-                break;
-            default:
-                if (DEBUG) this.messageDebugger((bCmd < 0? "HDC.doCmd(): invalid drive" : "unsupported operation") + " (command=0x" + str.toHexByte(bCmdOrig) + ",drive=" + iDrive + ")");
-                this.beginResult(HDC.REG_DATA.STATUS_ERROR | bDrive);
-                if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(this.dbg.MESSAGE_HDC) && bCmd >= 0) this.cpu.haltCPU();
-                break;
+        case HDC.REG_DATA.CMD.TEST_READY:       // 0x00
+            this.beginResult(HDC.REG_DATA.STATUS_OK | bDrive);
+            break;
+        case HDC.REG_DATA.CMD.RECALIBRATE:      // 0x01
+            drive.bControl = bControl;
+            if (DEBUG) this.messageDebugger("HDC.doCmd(): drive " + iDrive + " control byte: 0x" + str.toHexByte(bControl));
+            this.beginResult(HDC.REG_DATA.STATUS_OK | bDrive);
+            break;
+        case HDC.REG_DATA.CMD.READ_VERIFY:      // 0x05
+            /*
+             * This is a non-DMA operation, so we simply pretend everything is OK for now; TODO: Revisit.
+             */
+            this.beginResult(HDC.REG_DATA.STATUS_OK | bDrive);
+            break;
+        case HDC.REG_DATA.CMD.READ_DATA:        // 0x08
+            this.doRead(drive, function(bStatus) {
+                hdc.beginResult(bStatus | bDrive);
+            });
+            break;
+        case HDC.REG_DATA.CMD.WRITE_DATA:       // 0x0A
+            /*
+             * QUESTION: The IBM TechRef (p1-188) implies that bCount is used as part of HDC.REG_DATA.CMD.WRITE_DATA command,
+             * but it is omitted from the HDC.REG_DATA.CMD.READ_DATA command.  Is that correct?  Note that, as far as the length
+             * of the transfer is concerned, we rely exclusively on the DMA controller being programmed with the
+             * appropriate byte count.
+             */
+            this.doWrite(drive, function(bStatus) {
+                hdc.beginResult(bStatus | bDrive);
+            });
+            break;
+        case HDC.REG_DATA.CMD.WRITE_BUFFER:     // 0x0F
+            this.doWriteToBuffer(drive, function(bStatus) {
+                hdc.beginResult(bStatus | bDrive);
+            });
+            break;
+        default:
+            if (DEBUG) this.messageDebugger((bCmd < 0? "HDC.doCmd(): invalid drive" : "unsupported operation") + " (command=0x" + str.toHexByte(bCmdOrig) + ",drive=" + iDrive + ")");
+            this.beginResult(HDC.REG_DATA.STATUS_ERROR | bDrive);
+            if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(this.dbg.MESSAGE_HDC) && bCmd >= 0) this.cpu.haltCPU();
+            break;
         }
     }
 };

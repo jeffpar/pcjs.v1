@@ -152,7 +152,7 @@ Component.subclass(Component, CPU);
  */
 CPU.YIELDS_PER_SECOND         = 30;
 CPU.VIDEO_UPDATES_PER_SECOND  = 60;     // WARNING: if you change this, beware of side-effects in the Video component
-CPU.STATUS_UPDATES_PER_SECOND = 5;
+CPU.STATUS_UPDATES_PER_SECOND = 2;
 
 /**
  * initBus(cmp, bus, cpu, dbg)

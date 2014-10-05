@@ -44,7 +44,7 @@ an *href* value to the &lt;disk&gt; section that was used to create the image:
         <link href="http://www.bricklin.com/history/vclicense.htm">VisiCalc License</link>
     </disk>
 
-The PCjs "diskdump" module is used to create all our pre-generated JSON-encoded disk images.  In the above example, a
+The PCjs DiskDump module is used to create all our pre-generated JSON-encoded disk images.  In the above example, a
 pre-generated disk image could be created from the command-line with either the "--dir" option (which will traverse all
 subdirectories as well): 
 
@@ -54,6 +54,6 @@ or with the "--path" option, which specifies either a single file or a set files
 
 	node diskdump "--path=./apps/pc/1981/visicalc/bin/vc.com;../readme.md" --format=json --output=./apps/pc/1981/visicalc/disk.json
 	
-or via the PCjs server's "diskdump" API:
+or via the PCjs server's DiskDump API:
 
 	http://www.pcjs.org/api/v1/dump?path=/apps/pc/1981/visicalc/bin/vc.com&format=json

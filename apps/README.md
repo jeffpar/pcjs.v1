@@ -68,7 +68,7 @@ using the following API request:
 
 	http://www.pcjs.org/api/v1/dump?path=/apps/pc/1981/visicalc/bin/VC.COM;../README.md&format=json
 
-The PCjs `diskdump` module processes the dump request and generates a JSON-encoded DOS 2.x-compatible disk image
+The PCjs DiskDump module processes the dump request and generates a JSON-encoded DOS 2.x-compatible disk image
 containing all the specified files.
 
 However, to avoid the PCjs web server re-generating the same disk image for every user-initiated disk load, we

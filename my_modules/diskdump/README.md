@@ -6,7 +6,7 @@ commented JSON, and IMG files).
 Building images from folders/files
 ---
 I finally ported the code in [convdisk.php](/bin/convdisk.php) that creates disk images
-from the contents of local files/folders, which you can now access via the *diskdump* API.
+from the contents of local files/folders, which you can now access via the *DiskDump* API.
 
 For example:
 
