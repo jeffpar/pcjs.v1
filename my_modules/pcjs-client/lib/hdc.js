@@ -106,57 +106,6 @@ function HDC(parmsHDC) {
 Component.subclass(Component, HDC);
 
 /*
- * HDC BIOS interrupts, functions, and other parameters
- */
-HDC.BIOS = {};
-HDC.BIOS.DISK_INT = 0x13;
-
-HDC.BIOS.DISK_CMD = {};
-HDC.BIOS.DISK_CMD.RESET             = 0x00;
-HDC.BIOS.DISK_CMD.GET_STATUS        = 0x01;
-HDC.BIOS.DISK_CMD.READ_SECTORS      = 0x02;
-HDC.BIOS.DISK_CMD.WRITE_SECTORS     = 0x03;
-HDC.BIOS.DISK_CMD.VERIFY_SECTORS    = 0x04;
-HDC.BIOS.DISK_CMD.FORMAT_TRACK      = 0x05;
-HDC.BIOS.DISK_CMD.FORMAT_BAD        = 0x06;
-HDC.BIOS.DISK_CMD.FORMAT_DRIVE      = 0x07;
-HDC.BIOS.DISK_CMD.GET_DRIVEPARMS    = 0x08;
-HDC.BIOS.DISK_CMD.SET_DRIVEPARMS    = 0x09;
-HDC.BIOS.DISK_CMD.READ_LONG         = 0x0A;
-HDC.BIOS.DISK_CMD.WRITE_LONG        = 0x0B;
-HDC.BIOS.DISK_CMD.SEEK              = 0x0C;
-HDC.BIOS.DISK_CMD.ALT_RESET         = 0x0D;
-HDC.BIOS.DISK_CMD.READ_BUFFER       = 0x0E;
-HDC.BIOS.DISK_CMD.WRITE_BUFFER      = 0x0F;
-HDC.BIOS.DISK_CMD.TEST_READY        = 0x10;
-HDC.BIOS.DISK_CMD.RECALIBRATE       = 0x11;
-HDC.BIOS.DISK_CMD.RAM_DIAGNOSTIC    = 0x12;
-HDC.BIOS.DISK_CMD.DRV_DIAGNOSTIC    = 0x13;
-HDC.BIOS.DISK_CMD.CTL_DIAGNOSTIC    = 0x14;
-
-/*
- * When the HDC BIOS overwrites the ROM BIOS INT 0x13 address, it saves the original INT 0x13 address
- * in the INT 0x40 vector.  The HDC BIOS's plan was simple, albeit slightly flawed: assign fixed disks
- * drive numbers >= 0x80, and whenever someone calls INT 0x13 with a drive number < 0x80, invoke the
- * original INT 0x13 diskette code via INT 0x40 and return via RET 2.
- * 
- * Unfortunately, not all original INT 0x13 functions required a drive number in DL (eg, the "reset"
- * function, where AH=0).  And the HDC BIOS knew this, which is why, in the case of the "reset" function,
- * the HDC BIOS performs BOTH an INT 0x40 diskette reset AND an HDC reset -- it can't be sure which
- * controller the caller really wants to reset.
- * 
- * An unfortunate side-effect of this behavior: when the HDC BIOS is initialized for the first time, it may
- * issue several resets internally, depending on whether there are 0, 1 or 2 hard disks installed, and each
- * of those resets also triggers completely useless diskette resets, each wasting up to two seconds waiting
- * for the FDC to interrupt.  The FDC tries to interrupt, but it can't, because at this early stage of
- * ROM BIOS initialization, IRQ_FDC hasn't been unmasked yet.
- * 
- * My work-around: have the HDC component hook INT 0x40, and every time an INT 0x40 is issued with AH=0 and
- * IRQ_FDC masked, eat the INT 0x40 interrupt.
- */
-HDC.BIOS.DISKETTE_INT = 0x40;
-
-/*
  * HDC defaults, in case drive parameters weren't specified
  */
 HDC.DEFAULT_DRIVE_NAME = "Hard Drive";
@@ -329,6 +278,41 @@ if (DEBUG) {
         0xE6: "Write Long"
     };
 }
+
+/*
+ * HDC BIOS interrupts, functions, and other parameters
+ */
+HDC.BIOS = {};
+HDC.BIOS.DISK_INT = 0x13;
+
+HDC.BIOS.DISK_CMD = {};
+HDC.BIOS.DISK_CMD.RESET             = 0x00;
+HDC.BIOS.DISK_CMD.GET_STATUS        = 0x01;
+HDC.BIOS.DISK_CMD.READ_SECTORS      = 0x02;
+HDC.BIOS.DISK_CMD.WRITE_SECTORS     = 0x03;
+HDC.BIOS.DISK_CMD.VERIFY_SECTORS    = 0x04;
+HDC.BIOS.DISK_CMD.FORMAT_TRACK      = 0x05;
+HDC.BIOS.DISK_CMD.FORMAT_BAD        = 0x06;
+HDC.BIOS.DISK_CMD.FORMAT_DRIVE      = 0x07;
+HDC.BIOS.DISK_CMD.GET_DRIVEPARMS    = 0x08;
+HDC.BIOS.DISK_CMD.SET_DRIVEPARMS    = 0x09;
+HDC.BIOS.DISK_CMD.READ_LONG         = 0x0A;
+HDC.BIOS.DISK_CMD.WRITE_LONG        = 0x0B;
+HDC.BIOS.DISK_CMD.SEEK              = 0x0C;
+HDC.BIOS.DISK_CMD.ALT_RESET         = 0x0D;
+HDC.BIOS.DISK_CMD.READ_BUFFER       = 0x0E;
+HDC.BIOS.DISK_CMD.WRITE_BUFFER      = 0x0F;
+HDC.BIOS.DISK_CMD.TEST_READY        = 0x10;
+HDC.BIOS.DISK_CMD.RECALIBRATE       = 0x11;
+HDC.BIOS.DISK_CMD.RAM_DIAGNOSTIC    = 0x12;
+HDC.BIOS.DISK_CMD.DRV_DIAGNOSTIC    = 0x13;
+HDC.BIOS.DISK_CMD.CTL_DIAGNOSTIC    = 0x14;
+
+/*
+ * When the HDC BIOS overwrites the ROM BIOS INT 0x13 address, it saves the original INT 0x13 address
+ * in the INT 0x40 vector.
+ */
+HDC.BIOS.DISKETTE_INT = 0x40;
 
 /**
  * setBinding(sHTMLClass, sHTMLType, sBinding, control)
@@ -1068,7 +1052,7 @@ HDC.prototype.outHDCPulse = function(port, bOut, addrFrom) {
      */
     this.regPulse = bOut;
     /*
-     * The HDC BIOS "COMMAND" function (@C800:0562) waits for these ALL status bits after writing to both regPulse
+     * The HDC BIOS "COMMAND" function (@ C800:0562) waits for these ALL status bits after writing to both regPulse
      * and regPattern, so we must oblige it.
      */
     /*
@@ -1108,25 +1092,28 @@ HDC.prototype.outHDCNoise = function(port, bOut, addrFrom) {
 /**
  * intBIOSDisk(addr)
  *
- * NOTE: This function tries to differentiate HDC requests from FDC requests, by whether the INT 0x13 drive number in DL is >= 0x80
+ * NOTE: This function differentiates HDC requests from FDC requests, based on whether the INT 0x13 drive number
+ * in DL is >= 0x80.
  *
- * HACK: The HDC BIOS code for both INT 0x13/AH=0x00 and INT 0x13/AH=0x09 calls "INIT_DRV" @C800:0427, which is hard-coded
- * to issue the HDC.REG_DATA.CMD.INIT_DRIVE command for BOTH drives 0 and 1 (aka drive numbers 0x80 and 0x81), regardless of
- * the drive number specified in DL; this means that the HDC.REG_DATA.CMD.INIT_DRIVE command must always succeed for drive 1
- * if it also succeeds for drive 0 -- even if there is no drive 1.  Bizarre, but OK, whatever.
+ * HACK: The HDC BIOS code for both INT 0x13/AH=0x00 and INT 0x13/AH=0x09 calls "INIT_DRV" @ C800:0427, which is
+ * hard-coded to issue the HDC.REG_DATA.CMD.INIT_DRIVE command for BOTH drives 0 and 1 (aka drive numbers 0x80 and
+ * 0x81), regardless of the drive number specified in DL; this means that the HDC.REG_DATA.CMD.INIT_DRIVE command
+ * must always succeed for drive 1 if it also succeeds for drive 0 -- even if there is no drive 1.  Bizarre, but OK,
+ * whatever.
  *
- * So assuming we a have drive 0, when the power-on diagnostics in "DISK_SETUP" @C800:0003 call INT 0x13/AH=0x09 @C800:00DB
- * for drive 0, it must succeed.  No problem. But when "DISK_SETUP" starts probing for additional drives, it first issues
- * INT 0x13/AH=0x00, followed by INT 0x13/AH=0x11, and finally INT 0x13/AH=0x09.  If the first (AH=0x00) or third (AH=0x09)
- * INT 0x13 fails, it quickly moves on (ie, it jumps to "POD_DONE").  But as we just discussed, both those operations call "INIT_DRV",
- * which can't return an error.  This means the only function that can return an error in this context is the recalibrate function
- * (AH=0x11).  That sucks, because the way the HDC BIOS is written, it will loop for anywhere from 1.5 seconds to 25 seconds
- * (depending on whether the controller is part of the "System Unit" or not; see port 0x213), attempting to recalibrate drive 1
- * until it finally times out.
+ * So assuming we a have drive 0, when the power-on diagnostics in "DISK_SETUP" @ C800:0003 call INT 0x13/AH=0x09
+ * @ C800:00DB for drive 0, it must succeed.  No problem.  But when "DISK_SETUP" starts probing for additional drives,
+ * it first issues INT 0x13/AH=0x00, followed by INT 0x13/AH=0x11, and finally INT 0x13/AH=0x09.  If the first
+ * (AH=0x00) or third (AH=0x09) INT 0x13 fails, it quickly moves on (ie, it jumps to "POD_DONE").  But as we just
+ * discussed, both those operations call "INIT_DRV", which can't return an error.  This means the only function that
+ * can return an error in this context is the recalibrate function (AH=0x11).  That sucks, because the way the HDC
+ * BIOS is written, it will loop for anywhere from 1.5 seconds to 25 seconds (depending on whether the controller
+ * is part of the "System Unit" or not; see port 0x213), attempting to recalibrate drive 1 until it finally times out.
  *
- * Normally, you'll only experience the 1.5 second delay, but even so, it's a ridiculous waste of time and a lot of useless
- * INT 0x13 calls.  So I monitor INT 0x13/AH=0x00 for DL >= 0x80 and set a special HDC.REG_DATA.CMD.INIT_DRIVE override flag
- * (iDriveAllowFail) that will allow that command to fail, and in theory, make the the HDC BIOS "DISK_SETUP" code much more efficient.
+ * Normally, you'll only experience the 1.5 second delay, but even so, it's a ridiculous waste of time and a lot of
+ * useless INT 0x13 calls.  So I monitor INT 0x13/AH=0x00 for DL >= 0x80 and set a special HDC.REG_DATA.CMD.INIT_DRIVE
+ * override flag (iDriveAllowFail) that will allow that command to fail, and in theory, make the the HDC BIOS
+ * "DISK_SETUP" code much more efficient.
  * 
  * @this {HDC}
  * @param {number} addr
@@ -1135,16 +1122,16 @@ HDC.prototype.outHDCNoise = function(port, bOut, addrFrom) {
 HDC.prototype.intBIOSDisk = function(addr) {
     var AH = this.cpu.regAX >> 8;
     var DL = this.cpu.regDX & 0xff;
-    if (!AH && DL > 0x80) {
-        this.iDriveAllowFail = DL - 0x80;
-    }
+    if (!AH && DL > 0x80) this.iDriveAllowFail = DL - 0x80;
     if (DEBUGGER) {
         if (this.dbg && this.dbg.messageEnabled(this.dbg.MESSAGE_HDC) && DL >= 0x80) {
             this.dbg.message("HDC.intBIOSDisk(AX=" + str.toHexWord(this.cpu.regAX) + ",DL=" + str.toHexByte(DL) + ") at " + str.toHexAddr(addr - this.cpu.segCS.base, this.cpu.segCS.sel));
             // this.cpu.haltCPU();
             this.cpu.addInterruptReturn(addr, function (hdc, nCycles) {
                 return function onBIOSDiskReturn(nLevel) {
-                    hdc.intBIOSDiskReturn(nCycles, nLevel);
+                    nCycles = hdc.cpu.getCycles() - nCycles;
+                    hdc.messageDebugger("HDC.intBIOSDisk(" + nLevel + "): C=" + (hdc.cpu.getCF()? 1 : 0) + " (cycles=" + nCycles + ")");
+                    // if (DEBUG && nCycles > 10000) hdc.cpu.haltCPU();
                 };
             }(this, this.cpu.getCycles()));
         }
@@ -1153,26 +1140,29 @@ HDC.prototype.intBIOSDisk = function(addr) {
 };
 
 /**
- * intBIOSDiskReturn(nCycles, nLevel)
- * 
- * @this {HDC}
- * @param {number} nCycles
- * @param {number} nLevel
- */
-HDC.prototype.intBIOSDiskReturn = function(nCycles, nLevel) {
-    if (DEBUGGER) {
-        nCycles = this.cpu.getCycles() - nCycles;
-        this.messageDebugger("HDC.intBIOSDiskReturn(" + nLevel + "): C=" + (this.cpu.getCF()? 1 : 0) + " (cycles=" + nCycles + ")");
-        // if (DEBUG && nCycles > 10000) this.cpu.haltCPU();
-    }
-};
-
-/**
  * intBIOSDiskette(addr)
  *
- * Every time an INT 0x40 is issued with AH=0 and IRQ_FDC masked, eat the INT 0x40 interrupt.
+ * When the HDC BIOS overwrites the ROM BIOS INT 0x13 address, it saves the original INT 0x13 address
+ * in the INT 0x40 vector.  This function intercepts calls to that vector to work around a minor nuisance.
+ * 
+ * The HDC BIOS's plan was simple, albeit slightly flawed: assign fixed disks drive numbers >= 0x80,
+ * and whenever someone calls INT 0x13 with a drive number < 0x80, invoke the original INT 0x13 diskette
+ * code via INT 0x40 and return via RET 2.
  *
- * For more details on why this is necessary, see the definition of HDC.BIOS.DISKETTE_INT (above)
+ * Unfortunately, not all original INT 0x13 functions required a drive number in DL (eg, the "reset"
+ * function, where AH=0).  And the HDC BIOS knew this, which is why, in the case of the "reset" function,
+ * the HDC BIOS performs BOTH an INT 0x40 diskette reset AND an HDC reset -- it can't be sure which
+ * controller the caller really wants to reset.
+ *
+ * An unfortunate side-effect of this behavior: when the HDC BIOS is initialized for the first time, it may
+ * issue several resets internally, depending on whether there are 0, 1 or 2 hard disks installed, and each
+ * of those resets also triggers completely useless diskette resets, each wasting up to two seconds waiting
+ * for the FDC to interrupt.  The FDC tries to interrupt, but it can't, because at this early stage of
+ * ROM BIOS initialization, IRQ_FDC hasn't been unmasked yet.
+ *
+ * My work-around: have the HDC component hook INT 0x40, and every time an INT 0x40 is issued with AH=0 and
+ * IRQ_FDC masked, bypass the INT 0x40 interrupt.  This is as close as PCjs has come to patching any BIOS code
+ * (something I refuse to do), and even here, I'm not doing it out of necessity, just annoyance.
  * 
  * @this {HDC}
  * @param {number} addr

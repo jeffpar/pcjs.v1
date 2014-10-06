@@ -72,7 +72,7 @@ if (typeof module !== 'undefined') {
  *      SW2[1-4]    (bits 3-0)  "NNNNxxxx": number of 32Kb blocks of I/O expansion RAM present
  *
  * TODO: There are cryptic references to SW2[5] in the original (5150) TechRef, and apparently the 8255A PPI can
- * be programmed to return it (which we support), but its purpose is unclear to me (see PPI_B.ENABLE_SW2).
+ * be programmed to return it (which we support), but its purpose remains unclear to me (see PPI_B.ENABLE_SW2).
  *
  * For example, sw1="01110011" indicates that all SW1 DIP switches are ON, except for SW1[1], SW1[5] and SW1[6],
  * which are OFF. Internally, the order of these bits must reversed (to 11001110) and then inverted (to 00110001)
@@ -150,7 +150,7 @@ function ChipSet(parmsChipSet)
     this.model = (this.model !== undefined? parseInt(this.model, 10) : ChipSet.MODEL_5150);
 
     /*
-     * Given that the ROM BIOS is hard-coded to load boot sectors @0000:7C00, the minimum amount of system RAM
+     * Given that the ROM BIOS is hard-coded to load boot sectors @ 0000:7C00, the minimum amount of system RAM
      * required to boot is therefore 32Kb.  Whether that's actually enough to run any or all versions of PC-DOS is
      * a separate question.  FYI, with only 16Kb, the ROM BIOS will still try to boot, and fail miserably.
      */
@@ -178,6 +178,9 @@ function ChipSet(parmsChipSet)
     this.cDMACs = this.cPICs = 1;
     if (this.model >= ChipSet.MODEL_5170) {
         this.cDMACs = this.cPICs = 2;
+        /*
+         * Initialize minimal support for the MODEL_5170's HFCOMBO card (see ChipSet.HFCOMBO below for details)
+         */
         this.regsHFCombo = {
             bCtrl:      0x00,   // port 0x1F4
             bStatus:    0x7F    // port 0x1F7
@@ -657,7 +660,7 @@ ChipSet.KBC.STATUS = {          // this.b8042Status (on read from port 0x64)
  * The ADDR port also controls NMI: write an address with bit 7 clear to enable NMI or set to disable NMI.
  */
 ChipSet.CMOS = {};
-ChipSet.CMOS.ADDR = {};         // this.bCMOSAddr
+ChipSet.CMOS.ADDR = {};                 // this.bCMOSAddr
 ChipSet.CMOS.ADDR.PORT          = 0x70;
 ChipSet.CMOS.ADDR.RTC_SEC       = 0x00;
 ChipSet.CMOS.ADDR.RTC_SEC_ALRM  = 0x01;
@@ -732,8 +735,8 @@ ChipSet.CMOS.DIAG.RESERVED      = 0x03;
 
 ChipSet.FDRIVE = {                      // abCMOSData[ChipSet.CMOS.ADDR.FDRIVE] values (drive 0 value in high nibble, drive 1 value in low nibble)
     NONE:   0,                          // no drive
-    DSDD:   1,                          // double-sided double-density drive (48 TPI, 40-track, 360Kb max)
-    DSHC:   2                           // double-sided high-capacity drive (96 TPI, 80-track, 1.2Mb max)
+    DSDD:   1,                          // double-sided double-density drive (48 TPI, 40 tracks, 360Kb max)
+    DSHD:   2                           // double-sided high-density drive (96 TPI, 80 tracks, 1.2Mb max)
 };
 
 /*
@@ -803,30 +806,37 @@ ChipSet.COPROC.PORT_CLEAR       = 0xF0; // clear the coprocessor's "busy" state
 ChipSet.COPROC.PORT_RESET       = 0xF1; // reset the coprocessor
 
 /*
- * Ports used by MODEL_5170 BIOS for "Combo Hard File/Diskette Card" check (@F000:144C)
+ * Ports used by MODEL_5170 BIOS for "Combo Hard File/Diskette Card" check (@ F000:144C)
  * 
  * The ChipSet component provides minimal boot-time support for the "IBM Personal Computer
  * AT Fixed Disk and Diskette Drive Adapter", aka the HFCOMBO card, until we're able to fork
  * the HDC component into a new HDCombo component to deal with the "Fixed Disk" portion
  * of the HFCOMBO card.  Fortunately, the "Diskette Drive Adapter" portion of the card is
- * quite compatible with the existing FDC component, so that component can be used as-is,
- * with minor tweaks.
+ * extremely compatible with the existing FDC component, so that component can be used as-is,
+ * with only minor tweaks.
  * 
  * Initially, we intercepted reads for HFCOMBO's STATUS port simply to reduce boot time;
- * otherwise, our default "unknown port" response of 0xFF would maximize boot delay.  To solve
- * that, the STATUS port simply needs to return a byte with bit 7 clear, so that the BIOS
- * will then attempt to write/read the CTRL port.
+ * otherwise, the default "unknown port" response of 0xFF would lengthen boot time.  To solve
+ * that, the STATUS port simply needed to return a byte with bit 7 clear, so that the BIOS
+ * would then attempt to write/read the CTRL port.
  * 
  * Next, we initially treated the HFCOMBO's CTRL port as an "unknown port", because again,
  * we didn't need HDC support and it didn't seem to affect FDC support.  But it turns out
  * that FDC support IS affected, because if the BIOS doesn't set the "DUAL" bit (bit 0) of the
  * "HFCNTRL" byte at 40:8F, then when it comes time later to report the diskette drive type,
- * the "DISK_TYPE" function (@F000:273D) will branch to one of two almost-identical blocks of
- * code -- specifically, the block that disallows diskette drive types >= 2 instead of >= 3.
+ * the "DISK_TYPE" function (@ F000:273D) will branch to one of two almost-identical blocks of
+ * code -- specifically, the block that disallows diskette drive types >= 2 (ChipSet.FDRIVE.DSDD)
+ * instead of >= 3 (ChipSet.FDRIVE.DSHD).
  */
 ChipSet.HFCOMBO = {};
 ChipSet.HFCOMBO.CTRL    = {PORT: 0x1F4};
 ChipSet.HFCOMBO.STATUS  = {PORT: 0x1F7};
+
+/*
+ * ChipSet-related BIOS interrupts, functions, and other parameters
+ */
+ChipSet.BIOS = {};
+ChipSet.BIOS.RTC = 0x1A;
 
 /**
  * @this {ChipSet}
@@ -884,16 +894,11 @@ ChipSet.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.dbg = dbg;
     this.cmp = cmp;
     this.kbd = cmp.getComponentByType("Keyboard");
-    if (DEBUGGER && dbg) {
-        var chipset = this;
-        dbg.messageInit(ChipSet);
-        dbg.messageDump(ChipSet.MESSAGE_PIC, function onDumpPIC() {
-            chipset.dumpPIC();
-        });
-        dbg.messageDump(ChipSet.MESSAGE_TIMER, function onDumpTimer() {
-            chipset.dumpTimer();
-        });
-    }
+    /*
+     * This divisor is invariant, so we calculate it as soon as we're able to query the CPU's base speed.
+     */
+    this.nTicksDivisor = Math.round(cpu.getCyclesPerSecond() / ChipSet.TIMER_TICKS_PER_SEC);
+    
     bus.addPortInputTable(this, ChipSet.aPortInput);
     bus.addPortOutputTable(this, ChipSet.aPortOutput);
     if (this.model < ChipSet.MODEL_5170) {
@@ -903,10 +908,25 @@ ChipSet.prototype.initBus = function(cmp, bus, cpu, dbg)
         bus.addPortInputTable(this, ChipSet.aPortInput5170);
         bus.addPortOutputTable(this, ChipSet.aPortOutput5170);
     }
-    /*
-     * This divisor is invariant, so we calculate it as soon as we're able to query the CPU's base speed.
-     */
-    this.nTicksDivisor = Math.round(cpu.getCyclesPerSecond() / ChipSet.TIMER_TICKS_PER_SEC);
+    if (DEBUGGER) {
+        if (dbg) {
+            var chipset = this;
+            dbg.messageInit(ChipSet);
+            dbg.messageDump(ChipSet.MESSAGE_PIC, function onDumpPIC()
+            {
+                chipset.dumpPIC();
+            });
+            dbg.messageDump(ChipSet.MESSAGE_TIMER, function onDumpTimer()
+            {
+                chipset.dumpTimer();
+            });
+            dbg.messageDump(ChipSet.MESSAGE_CHIPSET, function onDumpCMOS()
+            {
+                chipset.dumpCMOS();
+            });
+        }
+        cpu.addInterruptNotify(ChipSet.BIOS.RTC, this, this.intBIOSRTC);
+    }
 };
 
 /**
@@ -1075,8 +1095,10 @@ ChipSet.prototype.initRTCDate = function(sDate)
     this.abCMOSData[ChipSet.CMOS.ADDR.RTC_WEEK_DAY] = date.getDay() + 1;
     this.abCMOSData[ChipSet.CMOS.ADDR.RTC_MONTH_DAY] = date.getDate();
     this.abCMOSData[ChipSet.CMOS.ADDR.RTC_MONTH] = date.getMonth() + 1;
-    this.abCMOSData[ChipSet.CMOS.ADDR.RTC_YEAR] = date.getFullYear() % 100;
-    
+    var nYear = date.getFullYear();
+    this.abCMOSData[ChipSet.CMOS.ADDR.RTC_YEAR] = nYear % 100;
+    var nCentury = (nYear / 100);
+    this.abCMOSData[ChipSet.CMOS.ADDR.CENTURY_DATE] = (nCentury % 10) | ((nCentury / 10) << 4); 
     this.nCyclesCMOSLastUpdate = -1;
     
     this.abCMOSData[ChipSet.CMOS.ADDR.RTC_STATUSA] = 0x26;                          // hard-coded default; refer to ChipSet.CMOS.STATUSA.DV and ChipSet.CMOS.STATUSA.RS
@@ -1652,7 +1674,7 @@ ChipSet.prototype.getSWFloppyDrives = function(fInit)
  *
  * @this {ChipSet}
  * @param {number} iDrive (0-based)
- * @return {number} one of the ChipSet.FDRIVE values (ie, NONE: 0, DSDD: 1, DSHC: 2) 
+ * @return {number} one of the ChipSet.FDRIVE values (ie, NONE: 0, DSDD: 1, DSHD: 2) 
  */
 ChipSet.prototype.getSWFloppyDriveType = function(iDrive)
 {
@@ -1660,7 +1682,7 @@ ChipSet.prototype.getSWFloppyDriveType = function(iDrive)
      * TODO: For MODEL_5170, we default all floppy drive types to High Capacity, but more control would be nice.
      */
     if (iDrive < this.getSWFloppyDrives()) {
-        return (this.model < ChipSet.MODEL_5170? ChipSet.FDRIVE.DSDD : ChipSet.FDRIVE.DSHC);
+        return (this.model < ChipSet.MODEL_5170? ChipSet.FDRIVE.DSDD : ChipSet.FDRIVE.DSHD);
     }
     return ChipSet.FDRIVE.NONE;
 };
@@ -1850,6 +1872,27 @@ ChipSet.prototype.dumpTimer = function()
 };
 
 /**
+ * dumpCMOS()
+ *
+ * @this {ChipSet}
+ */
+ChipSet.prototype.dumpCMOS = function()
+{
+    if (DEBUGGER) {
+        var sDump = "";
+        for (var p in ChipSet.CMOS.ADDR) {
+            var iCMOS = ChipSet.CMOS.ADDR[p];
+            if (iCMOS >= 0 && iCMOS < ChipSet.CMOS.ADDR.MASK) {
+                var b = (iCMOS <= ChipSet.CMOS.ADDR.RTC_STATUSD? this.getRTCByte(iCMOS) : this.abCMOSData[iCMOS]);
+                if (sDump) sDump += '\n';
+                sDump += str.pad(p + "(" + str.toHexByte(iCMOS) + "):", 19) + str.toHexByte(b);
+            }
+        }
+        this.dbg.message(sDump);
+    }
+};
+
+/**
  * inDMAChannelAddr(iDMAC, iChannel, port, addrFrom)
  * 
  * @this {ChipSet}
@@ -1948,13 +1991,13 @@ ChipSet.prototype.outDMAChannelCount = function(iDMAC, iChannel, port, bOut, add
  * Bits 4–7 are set whenever their corresponding channel is requesting service."
  *
  * TRIVIA: This hook wasn't installed when I was testing with the MODEL_5150 ROM BIOS, and it
- * didn't matter, but the MODEL_5160 ROM BIOS checks it several times, including @F000:E156, where
+ * didn't matter, but the MODEL_5160 ROM BIOS checks it several times, including @ F000:E156, where
  * it verifies that TIMER1 didn't request service on channel 0.
  */
 ChipSet.prototype.inDMAStatus = function(iDMAC, port, addrFrom)
 {
     /*
-     * HACK: Unlike the MODEL_5150, the MODEL_5160 ROM BIOS checks DMA channel 0 for TC (@F000:E4DF)
+     * HACK: Unlike the MODEL_5150, the MODEL_5160 ROM BIOS checks DMA channel 0 for TC (@ F000:E4DF)
      * after running a number of unrelated tests, since enough time would have passed for channel 0 to
      * have reached TC at least once.  So I simply OR in a hard-coded TC bit for channel 0 every time
      * status is read.  
@@ -2855,9 +2898,9 @@ ChipSet.prototype.outTimer = function(iTimer, bOut, addrFrom)
         }
         
         /*
-         * HACK to detect lower-than-normal initial timer counts and reduce the length of CPU bursts using
+         * HACK to detect lower-than-normal initial timer counts and reduce the length of CPU bursts, using
          * cpu.setBurstDivisor().  Alternatively, the CPU could ask us for a cycle limit, via getTimerCycleLimit(),
-         * prior to starting a new burst, but for now, this hack actually performs better (see "BASICA DONKEY.BAS").
+         * prior to starting a new burst, but this seems to perform better (see "BASICA DONKEY.BAS").
          */
         if (iTimer == ChipSet.TIMER0.INDEX) {
             var countInit = this.getTimerInit(ChipSet.TIMER0.INDEX);
@@ -2874,21 +2917,12 @@ ChipSet.prototype.outTimer = function(iTimer, bOut, addrFrom)
             /*
              * HACK to satisfy the quick h/w interrupt turn-around expected by the ROM BIOS when it sets TIMER0 to a
              * low test count (0x16); since we typically don't update any of the timers until after we've finished a
-             * burst of CPU cycles, we originally solved that particular problem by forcing a h/w interrupt to be
-             * simulated immediately, by reducing the starting cycle count for TIMER0 to an earlier point in time and
-             * then immediately calling updateTimer().
+             * burst of CPU cycles, we reduce the current burst cycle count, so that the burst will end at roughly the
+             * same time a timer interrupt is expected.  Note that in some cases, if the number of cycles remaining
+             * in the current burst is less than the target, this will have the effect of *lengthening* the current
+             * burst instead of shortening it, but stepCPU() should be OK with that.
              * 
-             *  if (bOut == 0x16) {
-             *      timer.nStartCycles -= 4 * bOut;     // used a multiplier of 4 since there were always 4 cycles per tick
-             *      this.updateTimer(iTimer);
-             *  }
-             *  
-             * However, a cleaner solution is to reduce the current burst cycle count instead, so that a timer interrupt
-             * will be simulated at the appropriate time, rather than immediately.  Note that in some cases, if the number
-             * of cycles remaining in the current burst is less than the target, this will have the effect of *lengthening*
-             * the current burst instead of shortening it, but stepCPU() should be OK with that.
-             * 
-             * Also notice how this complements the setBurstDivisor() HACK above: while that code is concerned with how
+             * Notice how this complements the setBurstDivisor() HACK above: while that code is concerned with how
              * to deal with low timer counts prior to starting new bursts, here we're concerned with low timer counts
              * (in particular, single-byte LSB counts) programmed in the middle of a burst.
              * 
@@ -2950,14 +2984,14 @@ ChipSet.prototype.outTimerCtrl = function(port, bOut, addrFrom)
         this.setTimerMode(iTimer, bcd, mode, rw);
         
         /*
-         * The 5150 ROM BIOS code @F000:E285 ("TEST.7") would fail after a warm boot (eg, after a CTRL-ALT-DEL) because
+         * The 5150 ROM BIOS code @ F000:E285 ("TEST.7") would fail after a warm boot (eg, after a CTRL-ALT-DEL) because
          * it assumed that no TIMER0 interrupt would occur between the point it unmasked the TIMER0 interrupt and the
          * point it started reprogramming TIMER0.
          * 
-         * Similarly, the 5160 ROM BIOS @F000:E35D ("8253 TIMER CHECKOUT") would fail after initializing the EGA BIOS,
+         * Similarly, the 5160 ROM BIOS @ F000:E35D ("8253 TIMER CHECKOUT") would fail after initializing the EGA BIOS,
          * because the EGA BIOS uses TIMER0 during its diagnostics; as in the previous example, by the time the 8253
          * test code runs later, there's now a pending TIMER0 interrupt, which triggers an interrupt as soon as IRQ0 is
-         * unmasked @F000:E364.
+         * unmasked @ F000:E364.
          * 
          * After looking at this problem at bit more closely the second time around (while debugging the EGA BIOS),
          * it turns out I missed an important 8253 feature: whenever a new MODE0 control word OR a new MODE0 count
@@ -2969,7 +3003,7 @@ ChipSet.prototype.outTimerCtrl = function(port, bOut, addrFrom)
         if (iTimer == ChipSet.TIMER0.INDEX) this.clearIRR(ChipSet.IRQ.TIMER0);
         
         /*
-         * Another TIMER0 HACK: The "CASSETTE DATA WRAP TEST" @F000:E51E occasionally reports an error when the second of
+         * Another TIMER0 HACK: The "CASSETTE DATA WRAP TEST" @ F000:E51E occasionally reports an error when the second of
          * two TIMER0 counts it latches is greater than the first.  You would think the ROM BIOS would expect this, since
          * TIMER0 can reload its count at any time.  Is the ROM BIOS assuming that TIMER0 was initialized sufficiently
          * recently that this should never happen?  I'm not sure, but for now, let's try resetting TIMER0's count immediately
@@ -3203,7 +3237,7 @@ ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
         }
         /*
          * Early implementation of this mode was minimal because when using this mode, the ROM BIOS simply wanted
-         * to see the count changing; it wasn't looking for interrupts.  See ROM BIOS "TEST.03" code @F000:E0DE,
+         * to see the count changing; it wasn't looking for interrupts.  See ROM BIOS "TEST.03" code @ F000:E0DE,
          * where TIMER1 is programmed for MODE2, LSB (the same settings, incidentally, used immediately afterward
          * for TIMER1 in conjunction with DMA channel 0 memory refreshes).
          * 
@@ -3383,7 +3417,7 @@ ChipSet.prototype.updatePPIB = function(bOut)
     this.bPPIB = bOut;
     if (fNewSpeaker != fOldSpeaker) {
         /*
-         * Originally, this code didn't catch the "ERROR_BEEP" case @F000:EC34, which first turns both PPI_B.CLK_TIMER2 (0x01)
+         * Originally, this code didn't catch the "ERROR_BEEP" case @ F000:EC34, which first turns both PPI_B.CLK_TIMER2 (0x01)
          * and PPI_B.SPK_TIMER2 (0x02) off, then turns on only PPI_B.SPK_TIMER2 (0x02), then restores the original port value.
          * 
          * So, when the ROM BIOS keyboard buffer got full, we didn't issue a BEEP alert.  I've fixed that by limiting the test
@@ -3948,6 +3982,53 @@ ChipSet.prototype.inHFCStatus = function(port, addrFrom)
     var b = this.regsHFCombo.bStatus;
     this.messagePort(port, null, addrFrom, "HFC_STATUS", ChipSet.MESSAGE_CHIPSET, b);
     return b;
+};
+
+/**
+ * intBIOSRTC(addr)
+ *
+ * INT 0x1A Quick Reference:
+ *
+ *      AH
+ *      ----
+ *      0x00    Get current clock count in CX:DX 
+ *      0x01    Set current clock count from CX:DX
+ *      0x02    Get real-time clock using BCD (CH=hours, CL=minutes, DH=seconds)
+ *      0x03    Set real-time clock using BCD (CH=hours, CL=minutes, DH=seconds, DL=1 if Daylight Savings Time option)
+ *      0x04    Get real-time date using BCD (CH=century, CL=year, DH=month, DL=day)
+ *      0x05    Set real-time date using BCD (CH=century, CL=year, DH=month, DL=day)
+ *      0x06    Set alarm using BCD (CH=hours, CL=minutes, DH=seconds)
+ *      0x07    Reset alarm
+ *
+ * @this {ChipSet}
+ * @param {number} addr
+ * @return {boolean} true to proceed with the INT 0x1A software interrupt, false to skip
+ */
+ChipSet.prototype.intBIOSRTC = function(addr)
+{
+    if (DEBUGGER) {
+        var AH = this.cpu.regAX >> 8;
+        if (this.dbg && this.dbg.messageEnabled(this.dbg.MESSAGE_CHIPSET)) {
+            this.dbg.message("ChipSet.intBIOSRTC(AH=" + str.toHexByte(AH) + ") at " + str.toHexAddr(addr - this.cpu.segCS.base, this.cpu.segCS.sel));
+            this.cpu.addInterruptReturn(addr, function(chipset, nCycles) {
+                return function onBIOSRTCReturn(nLevel) {
+                    nCycles = chipset.cpu.getCycles() - nCycles;
+                    var sResult = "C=" + (chipset.cpu.getCF()? 1 : 0);
+                    var CL = chipset.cpu.regDX & 0xff;
+                    var CH = chipset.cpu.regDX >> 8;
+                    var DL = chipset.cpu.regDX & 0xff;
+                    var DH = chipset.cpu.regDX >> 8;
+                    if (AH == 0x02 || AH == 0x03) {
+                        sResult += " CH(hour)=" + str.toHexWord(CH) + " CL(min)=" + str.toHexByte(CL) + " DH(sec)=" + str.toHexByte(DH);
+                    } else if (AH == 0x04 || AH == 0x05) {
+                        sResult += " CX(year)=" + str.toHexWord(chipset.cpu.regCX) + " DH(month)=" + str.toHexByte(DH) + " DL(day)=" + str.toHexByte(DL);
+                    } 
+                    chipset.messageDebugger("ChipSet.intBIOSRTC(" + nLevel + "): " + sResult + " (cycles=" + nCycles + ")");
+                };
+            }(this, this.cpu.getCycles()));
+        }
+    }
+    return true;
 };
 
 /**

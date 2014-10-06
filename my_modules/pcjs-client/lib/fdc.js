@@ -74,15 +74,15 @@ if (typeof module !== 'undefined') {
  *                                  
  *      MF      FM or MFM Mode          0 selects FM mode and 1 selects MFM (MFM is selected only if it is implemented)
  *      
- *      MT      Multitrack              1 selects multitrack operation (Both HD0 and HD1 will be read or written)
+ *      MT      Multitrack              1 selects multitrack operation (both HD0 and HD1 will be read or written)
  *      
  *      N       Number                  the number of data bytes written in a sector
  *      
- *      NCN     New Cylinder            the new cylinder number for a seek operation
+ *      NCN     New Cylinder            the new cylinder number for a Seek operation
  *      
  *      ND      Non-Data Mode           indicates an operation in the non-data mode
  *      
- *      PCN     Present Cylinder Number the cylinder number at the completion of a Sense interrupt status command
+ *      PCN     Present Cylinder Number the cylinder number at the completion of a Sense Interrupt Status command
  *                                      (present position of the head)
  *                                      
  *      R       Record                  the sector number to be read or written
@@ -183,19 +183,13 @@ function FDC(parmsFDC) {
 
 Component.subclass(Component, FDC);
 
-/*
- * FDC BIOS interrupts, functions, and other parameters
- */
-FDC.BIOS = {};
-FDC.BIOS.DISKETTE_INT = 0x13;
-
 FDC.DEFAULT_DRIVE_NAME = "Floppy Drive";
 
 /*
  * FDC Digital Output Register (DOR) (0x3F2, write-only)
  * 
- * NOTE: Reportedly, a drive's MOTOR bit had to be ON before the the drive could be selected, so outFDCOutput()
- * verifies that.  Also, motor start time for early model drives was 500ms, but we make no attempt to simulate that.
+ * NOTE: Reportedly, a drive's MOTOR had to be ON before the drive could be selected; however, outFDCOutput() no
+ * longer verifies that.  Also, motor start time for original drives was 500ms, but we make no attempt to simulate that.
  * 
  * On the MODEL_5170 "PC AT Fixed Disk and Diskette Drive Adapter", this port is called the Digital Output Register
  * or DOR.  It uses the same bit definitions as the original FDC Output Register, except that only two diskette drives
@@ -357,6 +351,12 @@ FDC.aCmdSeqs = {
     0x0D: {cbWrite: 6, cbRead: 7, name: "FORMAT"},
     0x0F: {cbWrite: 3, cbRead: 0, name: "SEEK"}
 };
+
+/*
+ * FDC BIOS interrupts, functions, and other parameters
+ */
+FDC.BIOS = {};
+FDC.BIOS.DISKETTE_INT = 0x13;
 
 /**
  * setBinding(sHTMLClass, sHTMLType, sBinding, control)
@@ -538,7 +538,7 @@ FDC.prototype.powerUp = function(data, fRepower)
             for (iDrive = 0; iDrive < this.nDrives; iDrive++) {
                 var drive = this.aDrives[iDrive];
                 drive.bType = this.chipset.getSWFloppyDriveType(iDrive);
-                if (drive.bType == ChipSet.FDRIVE.DSHC) {
+                if (drive.bType == ChipSet.FDRIVE.DSHD) {
                     drive.nCylinders = 80;
                 }
             }
@@ -1363,14 +1363,14 @@ FDC.prototype.outFDCOutput = function(port, bOut, addrFrom)
      * MODEL_5170 boot code.  Here's why:
      * 
      * Unlike previous models, the MODEL_5170 BIOS probes all installed diskette drives to determine drive type;
-     * ie, DSDD (40-track) or DSHC (80-track).  So if there are two drives, the last selected drive will be drive 1.
-     * Immediately before booting, the BIOS issues an INT 0x3/AH=0 reset, which writes regOutput two times: first
+     * ie, DSDD (40-track) or DSHD (80-track).  So if there are two drives, the last selected drive will be drive 1.
+     * Immediately before booting, the BIOS issues an INT 0x13/AH=0 reset, which writes regOutput two times: first
      * with FDC.REG_OUTPUT.ENABLE clear, and then with it set.  However, both times, it ALSO loads the last selected
-     * drive # into regOutput's "drive select" bits.
+     * drive number into regOutput's "drive select" bits.
      * 
      * If we switched our selected drive to match regOutput, then the ST0 value we returned on an INT_STATUS command
      * following the regOutput reset operation would indicate drive 1 instead of drive 0.  But the BIOS requires
-     * the ST0 result from the INT_STATUS command ALWAYS be 0xC0, not 0xC1, so the controller must not be propagating
+     * the ST0 result from the INT_STATUS command ALWAYS be 0xC0 (not 0xC1), so the controller must not be propagating
      * regOutput's "drive select" bits in the way I originally assumed. 
      */
     // var iDrive = bOut & FDC.REG_OUTPUT.DS;
@@ -1483,26 +1483,28 @@ FDC.prototype.outFDCControl = function(port, bOut, addrFrom)
 /**
  * intBIOSDiskette(addr)
  *
- * NOTE: This function tries to differentiate FDC requests from HDC requests, by whether the INT 0x13 drive number in DL is < 0x80;
- * however, not all INT 0x13 functions required a drive number in DL, and not all callers supplied one.
+ * NOTE: This function tries to differentiate FDC requests from HDC requests, by whether the INT 0x13 drive number
+ * in DL is < 0x80; however, not all INT 0x13 functions required a drive number in DL, and not all callers supplied one.
  *
  * INT 0x13 Quick Reference:
  *
- *      AH: 0x00    Reset
- *          0x01    Get status (from last operation)
- *          0x02    Read sectors
- *          0x03    Write sectors
- *          0x04    Verify sectors
- *          0x05    Format track
+ *      AH
+ *      ----
+ *      0x00    Reset
+ *      0x01    Get status (from last operation)
+ *      0x02    Read sectors
+ *      0x03    Write sectors
+ *      0x04    Verify sectors
+ *      0x05    Format track
  *
  * For Read, Write, Verify and Format commands:
  *
- *      DL: drive number (0-3 allowed, value checked)
- *      DH: head number (0-1 allowed, not value checked)
- *      CH: track number (0-39 allowed, not value checked [which is good, because high-density diskettes go up to 80 tracks])
- *      CL: sector number (1-8 allowed, not value checked [which is good, because support for 9-sector tracks was later added])
- *      AL: number of sectors (max of 8, not value checked)
- *      ES:BX: sector buffer
+ *      DL      drive number (0-3 allowed, value checked)
+ *      DH      head number (0-1 allowed, not value checked)
+ *      CH      track number (0-39 allowed, not value checked [which is good, because high-density diskettes go up to 80 tracks])
+ *      CL      sector number (1-8 allowed, not value checked [which is good, because support for 9-sector tracks was later added])
+ *      AL      number of sectors (max of 8, not value checked)
+ *      ES:BX   sector buffer
  *
  * @this {FDC}
  * @param {number} addr
@@ -1522,28 +1524,14 @@ FDC.prototype.intBIOSDiskette = function(addr)
             // this.cpu.haltCPU();
             this.cpu.addInterruptReturn(addr, function (fdc, nCycles) {
                 return function onBIOSDisketteReturn(nLevel) {
-                    fdc.intBIOSDisketteReturn(nCycles, nLevel);
+                    nCycles = fdc.cpu.getCycles() - nCycles;
+                    fdc.messageDebugger("FDC.intBIOS(" + nLevel + "): C=" + (fdc.cpu.getCF()? 1 : 0) + " (cycles=" + nCycles + ")");
+                    // if (DEBUG && nCycles > 10000) fdc.cpu.haltCPU();
                 };
             }(this, this.cpu.getCycles()));
         }
     }
     return true;
-};
-
-/**
- * intBIOSDisketteReturn(nCycles, nLevel)
- *
- * @this {FDC}
- * @param {number} nCycles
- * @param {number} nLevel
- */
-FDC.prototype.intBIOSDisketteReturn = function(nCycles, nLevel)
-{
-    if (DEBUGGER) {
-        nCycles = this.cpu.getCycles() - nCycles;
-        this.messageDebugger("FDC.intBIOSReturn(" + nLevel + "): C=" + (this.cpu.getCF()? 1 : 0) + " (cycles=" + nCycles + ")");
-        // if (DEBUG && nCycles > 10000) this.cpu.haltCPU();
-    }
 };
 
 /**
@@ -1622,11 +1610,12 @@ FDC.prototype.doCmd = function()
         drive = this.aDrives[this.iDrive];
         drive.bCylinder = drive.bCylinderSeek = 0;
         drive.resCode = FDC.REG_DATA.RES.SEEK_END | FDC.REG_DATA.RES.TRACK0;
-        this.beginResult();                     // no results are provided; this command is typically followed by FDC.REG_DATA.CMD.INT_STATUS
+        this.beginResult();                     // no results provided; this command is typically followed by FDC.REG_DATA.CMD.INT_STATUS
         fIRQ = true;
         break;
     case FDC.REG_DATA.CMD.INT_STATUS:           // 0x08 (SENSE INTERRUPT STATUS)
         drive = this.aDrives[this.iDrive];
+        drive.bHead = 0;                        // this command is documented as ALWAYS returning a head address of 0 in ST0; see pushST0()
         this.beginResult();
         this.pushST0(drive);
         this.pushResult(drive.bCylinder, "PCN");// no interrupt is generated by this command, so fIRQ should remain false
@@ -1784,7 +1773,7 @@ FDC.prototype.pushResult = function(bResult, name)
  */
 FDC.prototype.pushST0 = function(drive)
 {
-    this.pushResult(drive.iDrive | drive.bHead | (drive.resCode & FDC.REG_DATA.RES.ST0), "ST0");
+    this.pushResult(drive.iDrive | (drive.bHead << 2) | (drive.resCode & FDC.REG_DATA.RES.ST0), "ST0");
 };
 
 /**
@@ -1889,7 +1878,8 @@ FDC.prototype.doRead = function(drive)
 {
     /*
      * With only NOT_READY and INCOMPLETE set, an empty drive causes DOS to report "General Failure";
-     * with the addition of NO_DATA, DOS reports "Sector not found".
+     * with the addition of NO_DATA, DOS reports "Sector not found".  The traditional "Drive not ready"
+     * error message is not triggered by anything we return here, but simply by BIOS commands timing out.
      */
     drive.resCode = FDC.REG_DATA.RES.NOT_READY | FDC.REG_DATA.RES.INCOMPLETE;
 
