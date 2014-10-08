@@ -1258,7 +1258,7 @@ var X86OpXX = {
         }
         if (nReps--) {
             var addrFrom = this.regEIP - nDelta - 1;
-            var w = this.bus.checkPortInputNotify(this.regDX, addrFrom) | (this.bus.checkPortInputNotify((this.regDX + 1) & 0xffff, addrFrom) << 8);
+            var w = this.bus.checkPortInputNotify(this.regDX, addrFrom) | (this.bus.checkPortInputNotify(this.regDX, addrFrom) << 8);
             this.setSOWord(this.segES, this.regDI, w);
             this.regDI = (this.regDI + ((this.regPS & X86.PS.DF)? -2 : 2)) & 0xffff;
             this.nStepCycles -= nCycles;
@@ -1350,7 +1350,7 @@ var X86OpXX = {
             this.regCX -= nDelta;
             var addrFrom = this.regEIP - nDelta - 1;
             this.bus.checkPortOutputNotify(this.regDX, w & 0xff, addrFrom);
-            this.bus.checkPortOutputNotify((this.regDX + 1) & 0xffff, w >> 8, addrFrom);
+            this.bus.checkPortOutputNotify(this.regDX, w >> 8, addrFrom);
             if (nReps) {
                 /*
                  * We have to back up to the prefix byte(s), not just to the string instruction,
@@ -2728,7 +2728,7 @@ var X86OpXX = {
     /**
      * @this {X86CPU}
      *
-     * Here's the pseudo-code from /pubs/pc/programming/80286_and_80287_Programmers_Reference_Manual_1987.pdf, p.B-40 (p.250):
+     * Here's the pseudo-code from http://www.pcjs.org/pubs/pc/reference/intel/80286/progref, p.B-40 (p.250):
      * 
      *      LEVEL := LEVEL MOD 32
      *      Push BP

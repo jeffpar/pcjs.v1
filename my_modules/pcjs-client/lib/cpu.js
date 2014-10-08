@@ -262,9 +262,7 @@ CPU.prototype.powerUp = function(data, fRepower)
         }
     }
     this.fPowered = true;
-    if (!this.autoStart() && this.dbg) {
-        this.dbg.updateStatus();
-    }
+    if (!this.autoStart() && this.dbg) this.dbg.updateStatus();
     this.updateCPU();
     return true;
 };

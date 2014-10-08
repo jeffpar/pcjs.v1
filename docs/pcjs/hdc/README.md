@@ -32,6 +32,25 @@ Attributes
 	The 'path' property is optional; if omitted, an empty disk matching the specified drive type will be created
 	(10mb in the case of drive type 3).
 	
+ * *type* (optional)
+ 
+	Should be set to one of:
+	
+	 * *'xt'*: PC XT Xebec controller emulation
+	 * *'at'*: PC AT Western Digital controller emulation
+	
+	Also, make sure the appropriate ROM is installed.
+	
+	For the Xebec (*'xt'*) controller, you should install the Xebec ROM; eg:
+	
+		<rom id="romHDC" addr="0xc8000" size="0x2000" file="/devices/pc/hdc/ibm-xebec-1982.json"/>
+
+	For the Western Digital (*'at'*) controller, use a Model 5170 (or newer) ROM module; eg:
+
+		<rom id="romBIOS" addr="0xf0000" size="0x10000" alias="0xff0000" file="/devices/pc/bios/5170/1984-01-10.json"/>
+
+	The default *type* setting is *'xt'*.
+
  * Also supports the attributes of *[Component](/docs/pcjs/component/)*.
 
 Bindings

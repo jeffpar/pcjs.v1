@@ -503,7 +503,7 @@ SerialPort.prototype.advanceRBR = function() {
  * 
  * @this {SerialPort}
  * @param {number} port (0x3F8 or 0x2F8)
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number} simulated port value
  */
 SerialPort.prototype.inRBR = function(port, addrFrom) {
@@ -519,7 +519,7 @@ SerialPort.prototype.inRBR = function(port, addrFrom) {
  * 
  * @this {SerialPort}
  * @param {number} port (0x3F9 or 0x2F9)
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number} simulated port value
  */
 SerialPort.prototype.inIER = function(port, addrFrom) {
@@ -533,7 +533,7 @@ SerialPort.prototype.inIER = function(port, addrFrom) {
  * 
  * @this {SerialPort}
  * @param {number} port (0x3FA or 0x2FA)
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number} simulated port value
  */
 SerialPort.prototype.inIIR = function(port, addrFrom) {
@@ -547,7 +547,7 @@ SerialPort.prototype.inIIR = function(port, addrFrom) {
  * 
  * @this {SerialPort}
  * @param {number} port (0x3FB or 0x2FB)
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number} simulated port value
  */
 SerialPort.prototype.inLCR = function(port, addrFrom) {
@@ -561,7 +561,7 @@ SerialPort.prototype.inLCR = function(port, addrFrom) {
  * 
  * @this {SerialPort}
  * @param {number} port (0x3FC or 0x2FC)
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number} simulated port value
  */
 SerialPort.prototype.inMCR = function(port, addrFrom) {
@@ -575,7 +575,7 @@ SerialPort.prototype.inMCR = function(port, addrFrom) {
  * 
  * @this {SerialPort}
  * @param {number} port (0x3FD or 0x2FD)
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number} simulated port value
  */
 SerialPort.prototype.inLSR = function(port, addrFrom) {
@@ -589,7 +589,7 @@ SerialPort.prototype.inLSR = function(port, addrFrom) {
  * 
  * @this {SerialPort}
  * @param {number} port (0x3FE or 0x2FE)
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number} simulated port value
  */
 SerialPort.prototype.inMSR = function(port, addrFrom) {
@@ -604,7 +604,7 @@ SerialPort.prototype.inMSR = function(port, addrFrom) {
  * @this {SerialPort}
  * @param {number} port (0x3F8 or 0x2F8)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to write the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
  */
 SerialPort.prototype.outTHR = function(port, bOut, addrFrom) {
     this.messagePort(port, bOut, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLL" : "THR");
@@ -628,7 +628,7 @@ SerialPort.prototype.outTHR = function(port, bOut, addrFrom) {
  * @this {SerialPort}
  * @param {number} port (0x3F9 or 0x2F9)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to write the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
  */
 SerialPort.prototype.outIER = function(port, bOut, addrFrom) {
     this.messagePort(port, bOut, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLM" : "IER");
@@ -645,7 +645,7 @@ SerialPort.prototype.outIER = function(port, bOut, addrFrom) {
  * @this {SerialPort}
  * @param {number} port (0x3FB or 0x2FB)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to write the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
  */
 SerialPort.prototype.outLCR = function(port, bOut, addrFrom) {
     this.messagePort(port, bOut, addrFrom, "LCR");
@@ -658,7 +658,7 @@ SerialPort.prototype.outLCR = function(port, bOut, addrFrom) {
  * @this {SerialPort}
  * @param {number} port (0x3FC or 0x2FC)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to write the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
  */
 SerialPort.prototype.outMCR = function(port, bOut, addrFrom) {
     var bPrev = this.bMCR;

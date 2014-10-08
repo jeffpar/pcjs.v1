@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.15.3/machine.xsl"?>
-<machine id="ibm5150" class="pc" border="1" width="740px" pos="center" style="background-color:#FAEBD7">
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.15.4/machine.xsl"?>
+<machine id="ibm5150" class="pc" border="1" pos="center" style="background-color:#FAEBD7">
 	<name pos="center">IBM PC Model 5150 with Monochrome Display</name>
 	<computer id="pc-mda-64k" name="IBM PC" resume="1"/>
 	<ram id="ramLow" addr="0x00000"/>
 	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pc/basic/ibm-basic-1.00.json"/>
 	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pc/bios/5150/1981-04-24.json"/>
-	<video id="videoMDA" screenwidth="720" screenheight="350" scale="true" charset="/devices/pc/video/ibm-mda-cga.json" pos="center" width="720px" padding="8px">
+	<video id="videoMDA" screenwidth="720" screenheight="350" scale="true" charset="/devices/pc/video/ibm-mda-cga.json" pos="center" padding="8px">
 		<name>Monochrome Display</name>
 	</video>
 	<cpu id="cpu8088" model="8088" autostart="true"/>
 	<keyboard ref="/configs/pc/keyboards/minimal-functions.xml"/>
 	<debugger id="debugger"/>
-	<panel ref="/configs/pc/panels/default.xml"/>
+	<panel ref="/configs/pc/panels/wide.xml"/>
 	<fdc ref="/configs/pc/disks/samples.xml" width="280px"/>
 	<chipset id="chipset" model="5150" sw1="01000001" sw2="11110000" pos="left" padleft="8px" padbottom="8px">
 		<control type="switches" class="input" label="SW1" binding="sw1" left="0px"/>

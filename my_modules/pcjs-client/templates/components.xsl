@@ -692,10 +692,16 @@
 				<xsl:otherwise/>
 			</xsl:choose>
 		</xsl:variable>
+		<xsl:variable name="type">
+			<xsl:choose>
+				<xsl:when test="@type"><xsl:value-of select="@type"/></xsl:when>
+				<xsl:otherwise>xt</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">hdc</xsl:with-param>
-			<xsl:with-param name="parms">,drives:'<xsl:value-of select="$drives"/>'</xsl:with-param>
+			<xsl:with-param name="parms">,drives:'<xsl:value-of select="$drives"/>',type:'<xsl:value-of select="$type"/>'</xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 

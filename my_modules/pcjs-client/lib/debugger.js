@@ -1562,7 +1562,7 @@ if (DEBUGGER) {
          */
         if (fUpdateCPU !== false) this.cpu.updateCPU();
         
-        this.updateStatus(!fRegs);
+        this.updateStatus(fRegs, false);
         return (this.nCycles > 0);
     };
     
@@ -1580,23 +1580,27 @@ if (DEBUGGER) {
     };
     
     /**
-     * updateStatus(fStep)
+     * updateStatus(fRegs, fCompact)
      * 
      * @this {Debugger}
-     * @param {boolean|undefined} [fStep]
+     * @param {boolean} [fRegs] (default is true)
+     * @param {boolean} [fCompact] (default is true)
      */
-    Debugger.prototype.updateStatus = function(fStep)
+    Debugger.prototype.updateStatus = function(fRegs, fCompact)
     {
+        if (fRegs === undefined) fRegs = true;
+        if (fCompact === undefined) fCompact = true;
+
         this.aAddrNextCode = this.newAddr(this.cpu.regIP, this.cpu.segCS.sel);
         /*
          * this.fProcStep used to be a simple boolean, but now it's 0 (or undefined)
          * if inactive, 1 if stepping over an instruction without a register dump, or 2
          * if stepping over an instruction with a register dump. 
          */
-        if (fStep || this.fProcStep == 1)
+        if (!fRegs || this.fProcStep == 1)
             this.doUnassemble();
         else {
-            this.doRegisters();
+            this.doRegisters(null, fCompact);
         }
     };
     
@@ -1800,7 +1804,7 @@ if (DEBUGGER) {
                 }
                 this.println(sStopped);
             }
-            this.updateStatus();
+            this.updateStatus(true, this.fProcStep != 2);
             this.setFocus();
             this.clearTempBreakpoint(this.cpu.regEIP);
         }
@@ -2431,6 +2435,12 @@ if (DEBUGGER) {
             }
             else if (typeMode == Debugger.TYPE_IMPSEG) {
                 sOperand = Debugger.asRegs[((type & Debugger.TYPE_IREG) >> 8) + 16];
+            }
+            else if (typeMode == Debugger.TYPE_DSSI) {
+                sOperand = "DS:[SI]";
+            }
+            else if (typeMode == Debugger.TYPE_ESDI) {
+                sOperand = "ES:[DI]";
             }
             if (!sOperand.length) {
                 sOperand = "type(" + str.toHexWord(type) + ")";
@@ -3507,7 +3517,7 @@ if (DEBUGGER) {
         var cLines = 10;
         var iHistory = this.iOpcodeHistory;
         var aHistory = this.aOpcodeHistory;
-        if (aHistory !== undefined) {
+        if (aHistory.length) {
             var n = (sCount === undefined? this.nextHistory : parseInt(sCount, 10));
             if (isNaN(n))
                 n = cLines;
@@ -3630,7 +3640,7 @@ if (DEBUGGER) {
             this.println("\ninput commands:");
             this.println("\ti [p]\tread port [p]");
             /*
-             * NOTE: Regarding this warning, it might be nice if we had an "Unchecked" version of
+             * NOTE: Regarding this warning, it might be nice if we had an "unchecked" version of
              * bus.checkPortInputNotify(), since all Debugger memory accesses are unchecked, too.
              * 
              * All port I/O handlers ARE aware when the Debugger is calling (addrFrom is undefined),
@@ -3921,12 +3931,13 @@ if (DEBUGGER) {
     };
     
     /**
-     * doRegisters(asArgs)
+     * doRegisters(asArgs, fCompact)
      * 
      * @this {Debugger}
      * @param {Array.<string>} [asArgs]
+     * @param {boolean} [fCompact]
      */
-    Debugger.prototype.doRegisters = function(asArgs)
+    Debugger.prototype.doRegisters = function(asArgs, fCompact)
     {
         if (asArgs && asArgs[1] == "?") {
             this.println("\nregister commands:");
@@ -3937,7 +3948,7 @@ if (DEBUGGER) {
             return;
         }
         var fIns = true, fProt;
-        if (asArgs !== undefined && asArgs.length > 1) {
+        if (asArgs != null && asArgs.length > 1) {
             var sReg = asArgs[1];
             if (sReg == 'p') {
                 /*
@@ -4074,7 +4085,7 @@ if (DEBUGGER) {
             }
         }
         
-        this.println('\n' + this.getRegStr(fProt));
+        this.println((fCompact? '' : '\n') + this.getRegStr(fProt));
         
         if (fIns) {
             this.aAddrNextCode = this.newAddr(this.cpu.regIP, this.cpu.segCS.sel);

@@ -180,6 +180,7 @@ RAM.prototype.reset = function() {
             if (MAXDEBUG) this.status("ROM BIOS memory test has been disabled");
             this.bus.setWordDirect(ROM.BIOS.RESET_FLAG, ROM.BIOS.RESET_FLAG_WARMBOOT);
         }
+        if (this.chipset) this.chipset.addCMOSMemory(this.addrRAM, this.sizeRAM);
     } else {
         this.error("No RAM allocated");
     }

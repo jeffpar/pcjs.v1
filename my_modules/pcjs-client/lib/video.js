@@ -4100,8 +4100,24 @@ Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
             if (x < xDirty) xDirty = x;
             for (var iPixel = 0; iPixel < nPixelsPerCell; iPixel++) {
                 var dwPixel = data & 0x80808080;
+                /*
+                 * JavaScript Alert: if adwMemory contains a 32-bit value such as -1526726656, and then we mask it
+                 * with 0x80808080, we end up with -2147483648, which in a perfect 32-bit world, would be equivalent
+                 * to 0x80000000, which means that when we look up "Video.aEGADWToByte[0x80000000]", we should get
+                 * the entry containing 0x8.  But no, in JavaScript, since the original value was negative, it
+                 * still contains a sign bit above the lower 32 bits, which masking with 0x80808080 apparently doesn't
+                 * eliminate (perhaps the mask is sign-extended as well, since there are 52 "significand" bits
+                 * in JavaScript numbers).  Anyway, this can be confirmed by looking at dwPixel.toString(16), which
+                 * returns "-80000000".  The solution is to check for a negative dwPixel and make it positive.
+                 */
+                if (dwPixel < 0) dwPixel = -dwPixel;
+                /*
+                 * It's a good thing I had this assertion, which quickly caught the aforementioned problem.
+                 * Moreover, since assertions don't fix problems (only catch them, and only in DEBUG builds), I'm
+                 * now insuring that bPixel will always default to 0 if an undefined value ever slips through again.
+                 */
                 Component.assert(Video.aEGADWToByte[dwPixel] !== undefined);
-                var bPixel = Video.aEGADWToByte[dwPixel];
+                var bPixel = Video.aEGADWToByte[dwPixel] || 0;
                 this.setPixel(this.imageScreenBuffer, x++, y, aPixelColors[bPixel]);
                 data <<= 1;
             }
@@ -4131,7 +4147,7 @@ Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
  *
  * @this {Video}
  * @param {number} port (0x3B4)
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number}
  */
 Video.prototype.inMDAIndx = function(port, addrFrom)
@@ -4145,7 +4161,7 @@ Video.prototype.inMDAIndx = function(port, addrFrom)
  * @this {Video}
  * @param {number} port (0x3B4)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  */
 Video.prototype.outMDAIndx = function(port, bOut, addrFrom)
 {
@@ -4157,7 +4173,7 @@ Video.prototype.outMDAIndx = function(port, bOut, addrFrom)
  *
  * @this {Video}
  * @param {number} port (0x3B5)
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number|undefined}
  */
 Video.prototype.inMDAData = function(port, addrFrom)
@@ -4171,7 +4187,7 @@ Video.prototype.inMDAData = function(port, addrFrom)
  * @this {Video}
  * @param {number} port (0x3B5)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  */
 Video.prototype.outMDAData = function(port, bOut, addrFrom)
 {
@@ -4183,7 +4199,7 @@ Video.prototype.outMDAData = function(port, bOut, addrFrom)
  *
  * @this {Video}
  * @param {number} port (0x3B8)
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number}
  */
 Video.prototype.inMDAMode = function(port, addrFrom)
@@ -4197,7 +4213,7 @@ Video.prototype.inMDAMode = function(port, addrFrom)
  * @this {Video}
  * @param {number} port (0x3B8)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  */
 Video.prototype.outMDAMode = function(port, bOut, addrFrom)
 {
@@ -4209,7 +4225,7 @@ Video.prototype.outMDAMode = function(port, bOut, addrFrom)
  *
  * @this {Video}
  * @param {number} port (0x3BA)
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number}
  */
 Video.prototype.inMDAStatus = function(port, addrFrom)
@@ -4223,7 +4239,7 @@ Video.prototype.inMDAStatus = function(port, addrFrom)
  * @this {Video}
  * @param {number} port (0x3BA or 0x3DA)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  *
  * NOTE: While this port also existed on the MDA and CGA, it existed only as an INPUT port, not an OUTPUT port.
  */
@@ -4238,7 +4254,7 @@ Video.prototype.outFeat = function(port, bOut, addrFrom)
  *
  * @this {Video}
  * @param {number} port (0x3C0)
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number}
  */
 Video.prototype.inATC = function(port, addrFrom)
@@ -4255,7 +4271,7 @@ Video.prototype.inATC = function(port, addrFrom)
  * @this {Video}
  * @param {number} port (0x3C0)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  */
 Video.prototype.outATC = function(port, bOut, addrFrom)
 {
@@ -4289,7 +4305,7 @@ Video.prototype.outATC = function(port, bOut, addrFrom)
  *
  * @this {Video}
  * @param {number} port (0x3C2)
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number}
  */
 Video.prototype.inStatus0 = function(port, addrFrom)
@@ -4309,7 +4325,7 @@ Video.prototype.inStatus0 = function(port, addrFrom)
  * @this {Video}
  * @param {number} port (0x3C2)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  */
 Video.prototype.outMisc = function(port, bOut, addrFrom)
 {
@@ -4323,7 +4339,7 @@ Video.prototype.outMisc = function(port, bOut, addrFrom)
  *
  * @this {Video}
  * @param {number} port (0x3C4)
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number}
  */
 Video.prototype.inSEQIndx = function(port, addrFrom)
@@ -4339,7 +4355,7 @@ Video.prototype.inSEQIndx = function(port, addrFrom)
  * @this {Video}
  * @param {number} port (0x3C4)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  */
 Video.prototype.outSEQIndx = function(port, bOut, addrFrom)
 {
@@ -4352,7 +4368,7 @@ Video.prototype.outSEQIndx = function(port, bOut, addrFrom)
  *
  * @this {Video}
  * @param {number} port (0x3C5)
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number}
  */
 Video.prototype.inSEQData = function(port, addrFrom)
@@ -4368,7 +4384,7 @@ Video.prototype.inSEQData = function(port, addrFrom)
  * @this {Video}
  * @param {number} port (0x3C5)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  */
 Video.prototype.outSEQData = function(port, bOut, addrFrom)
 {
@@ -4386,7 +4402,7 @@ Video.prototype.outSEQData = function(port, bOut, addrFrom)
  *
  * @this {Video}
  * @param {number} port (0x3CC)
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number}
  */
 Video.prototype.inGRCPos1 = function(port, addrFrom)
@@ -4408,7 +4424,7 @@ Video.prototype.inGRCPos1 = function(port, addrFrom)
  * @this {Video}
  * @param {number} port (0x3CC)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  */
 Video.prototype.outGRCPos1 = function(port, bOut, addrFrom)
 {
@@ -4421,7 +4437,7 @@ Video.prototype.outGRCPos1 = function(port, bOut, addrFrom)
  *
  * @this {Video}
  * @param {number} port (0x3CA)
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number}
  */
 Video.prototype.inGRCPos2 = function(port, addrFrom)
@@ -4442,7 +4458,7 @@ Video.prototype.inGRCPos2 = function(port, addrFrom)
  * @this {Video}
  * @param {number} port (0x3CA)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  */
 Video.prototype.outGRCPos2 = function(port, bOut, addrFrom)
 {
@@ -4455,7 +4471,7 @@ Video.prototype.outGRCPos2 = function(port, bOut, addrFrom)
  *
  * @this {Video}
  * @param {number} port (0x3CE)
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number}
  */
 Video.prototype.inGRCIndx = function(port, addrFrom)
@@ -4471,7 +4487,7 @@ Video.prototype.inGRCIndx = function(port, addrFrom)
  * @this {Video}
  * @param {number} port (0x3CE)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  */
 Video.prototype.outGRCIndx = function(port, bOut, addrFrom)
 {
@@ -4484,7 +4500,7 @@ Video.prototype.outGRCIndx = function(port, bOut, addrFrom)
  *
  * @this {Video}
  * @param {number} port (0x3CF)
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number}
  */
 Video.prototype.inGRCData = function(port, addrFrom)
@@ -4500,7 +4516,7 @@ Video.prototype.inGRCData = function(port, addrFrom)
  * @this {Video}
  * @param {number} port (0x3CF)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  */
 Video.prototype.outGRCData = function(port, bOut, addrFrom)
 {
@@ -4546,7 +4562,7 @@ Video.prototype.outGRCData = function(port, bOut, addrFrom)
  *
  * @this {Video}
  * @param {number} port (0x3D4)
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number}
  */
 Video.prototype.inCGAIndx = function(port, addrFrom)
@@ -4560,7 +4576,7 @@ Video.prototype.inCGAIndx = function(port, addrFrom)
  * @this {Video}
  * @param {number} port (0x3D4)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  */
 Video.prototype.outCGAIndx = function(port, bOut, addrFrom)
 {
@@ -4572,7 +4588,7 @@ Video.prototype.outCGAIndx = function(port, bOut, addrFrom)
  *
  * @this {Video}
  * @param {number} port (0x3D5)
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number|undefined}
  */
 Video.prototype.inCGAData = function(port, addrFrom)
@@ -4586,7 +4602,7 @@ Video.prototype.inCGAData = function(port, addrFrom)
  * @this {Video}
  * @param {number} port (0x3D5)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  */
 Video.prototype.outCGAData = function(port, bOut, addrFrom)
 {
@@ -4598,7 +4614,7 @@ Video.prototype.outCGAData = function(port, bOut, addrFrom)
  *
  * @this {Video}
  * @param {number} port (0x3D8)
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number}
  */
 Video.prototype.inCGAMode = function(port, addrFrom)
@@ -4612,7 +4628,7 @@ Video.prototype.inCGAMode = function(port, addrFrom)
  * @this {Video}
  * @param {number} port (0x3D8)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  */
 Video.prototype.outCGAMode = function(port, bOut, addrFrom)
 {
@@ -4624,7 +4640,7 @@ Video.prototype.outCGAMode = function(port, bOut, addrFrom)
  *
  * @this {Video}
  * @param {number} port (0x3D9)
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number}
  */
 Video.prototype.inCGAColor = function(port, addrFrom)
@@ -4640,7 +4656,7 @@ Video.prototype.inCGAColor = function(port, addrFrom)
  * @this {Video}
  * @param {number} port (0x3D9)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  */
 Video.prototype.outCGAColor = function(port, bOut, addrFrom)
 {
@@ -4660,7 +4676,7 @@ Video.prototype.outCGAColor = function(port, bOut, addrFrom)
  *
  * @this {Video}
  * @param {number} port (0x3DA)
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number}
  */
 Video.prototype.inCGAStatus = function(port, addrFrom)
@@ -4673,7 +4689,7 @@ Video.prototype.inCGAStatus = function(port, addrFrom)
  *
  * @this {Video}
  * @param {Object} card
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number}
  */
 Video.prototype.inCRTCIndx = function(card, addrFrom)
@@ -4689,7 +4705,7 @@ Video.prototype.inCRTCIndx = function(card, addrFrom)
  * @this {Video}
  * @param {Object} card
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  */
 Video.prototype.outCRTCIndx = function(card, bOut, addrFrom)
 {
@@ -4703,7 +4719,7 @@ Video.prototype.outCRTCIndx = function(card, bOut, addrFrom)
  *
  * @this {Video}
  * @param {Object} card
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number|undefined}
  */
 Video.prototype.inCRTCData = function(card, addrFrom)
@@ -4720,7 +4736,7 @@ Video.prototype.inCRTCData = function(card, addrFrom)
  * @this {Video}
  * @param {Object} card
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  */
 Video.prototype.outCRTCData = function(card, bOut, addrFrom)
 {
@@ -4752,7 +4768,7 @@ Video.prototype.outCRTCData = function(card, bOut, addrFrom)
  *
  * @this {Video}
  * @param {Object} card
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number}
  */
 Video.prototype.inCardMode = function(card, addrFrom)
@@ -4768,7 +4784,7 @@ Video.prototype.inCardMode = function(card, addrFrom)
  * @this {Video}
  * @param {Object} card
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  */
 Video.prototype.outCardMode = function(card, bOut, addrFrom)
 {
@@ -4787,7 +4803,7 @@ Video.prototype.outCardMode = function(card, bOut, addrFrom)
  *
  * @this {Video}
  * @param {Object} card
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number}
  */
 Video.prototype.inCardStatus = function(card, addrFrom)

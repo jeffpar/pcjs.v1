@@ -107,7 +107,7 @@ if (typeof module !== 'undefined') {
  *      2F0-2F7         Reserved
  *      2F8-2FF         Asynchronous Communications (Secondary)         [see the SerialPort component]
  *      300-31F         Prototype Card
- *      320-32F         Hard Drive Controller                           [see the HDC component]
+ *      320-32F         Hard Drive Controller (XTC)                     [see the HDC component]
  *      378-37F         Printer
  *      380-38C [2]     SDLC Communications
  *      380-389 [2]     Binary Synchronous Communications (Secondary)
@@ -132,6 +132,7 @@ if (typeof module !== 'undefined') {
  *          071         CMOS Data                                       ChipSet.CMOS.DATA.PORT
  *          0F0         Coprocessor Clear Busy (output 0x00)
  *          0F1         Coprocessor Reset (output 0x00)
+ *      1F0-1F7         Hard Drive Controller (ATC)                     [see the HDC component]
  *          
  * [3] Port 0x70 doubles as the NMI Mask Register: output a CMOS address with bit 7 clear to enable NMI
  * or with bit 7 set to disable NMI (apparently the inverse of the older NMI Mask Register at port 0xA0).
@@ -150,7 +151,7 @@ function ChipSet(parmsChipSet)
     this.model = (this.model !== undefined? parseInt(this.model, 10) : ChipSet.MODEL_5150);
 
     /*
-     * Given that the ROM BIOS is hard-coded to load boot sectors @ 0000:7C00, the minimum amount of system RAM
+     * Given that the ROM BIOS is hard-coded to load boot sectors @0000:7C00, the minimum amount of system RAM
      * required to boot is therefore 32Kb.  Whether that's actually enough to run any or all versions of PC-DOS is
      * a separate question.  FYI, with only 16Kb, the ROM BIOS will still try to boot, and fail miserably.
      */
@@ -178,13 +179,6 @@ function ChipSet(parmsChipSet)
     this.cDMACs = this.cPICs = 1;
     if (this.model >= ChipSet.MODEL_5170) {
         this.cDMACs = this.cPICs = 2;
-        /*
-         * Initialize minimal support for the MODEL_5170's HFCOMBO card (see ChipSet.HFCOMBO below for details)
-         */
-        this.regsHFCombo = {
-            bCtrl:      0x00,   // port 0x1F4
-            bStatus:    0x7F    // port 0x1F7
-        };
     }
     this.fScaleTimers = parmsChipSet['scaleTimers'] || false;
     this.sRTCDate = parmsChipSet['rtcDate'];
@@ -213,7 +207,14 @@ function ChipSet(parmsChipSet)
             if (DEBUG) this.log("webkitAudioContext not available");
         }
     }
-
+    
+    /*
+     * I used to defer ChipSet's reset() to powerUp(), which then gave us the option of doing either
+     * reset() OR restore(), instead of both.  However, on MODEL_5170 machines, the initial CMOS data
+     * needs to be created earlier, so that if/when the HDC calls setCMOSDriveType(), we'll be ready.
+     */
+    this.reset();
+    
     this.setReady();
 }
 
@@ -241,7 +242,7 @@ ChipSet.MONITOR.EGAEMULATION    = 5;    // Enhanced Color Display (5154) in Emul
  *  8237A DMA Controller (DMAC) I/O ports
  * 
  *  MODEL_5150 and up uses DMA channel 0 for memory refresh cycles and channel 2 for the FDC
- *  MODEL_5160 and up uses DMA channel 3 for HDC transfers
+ *  MODEL_5160 and up uses DMA channel 3 for HDC transfers (XTC only)
  *  MODEL_5170 and up contain *two* DMA Controllers, which we refer to as DMA0 and DMA1; channel 4
  *  on DMA1 is used to "cascade" channels 0-3 from DMA0, so only channels 5-7 are available on DMA1 
  *  
@@ -325,7 +326,7 @@ ChipSet.DMA_MODE.MODE_BLOCK     = 0x80;
 ChipSet.DMA_MODE.MODE_CASCADE   = 0xC0;
 
 ChipSet.DMA_FDC = 0x02;                 // DMA channel assigned to the Floppy Drive Controller (FDC)
-ChipSet.DMA_HDC = 0x03;                 // DMA channel assigned to the Hard Drive Controller (HDC)
+ChipSet.DMA_HDC = 0x03;                 // DMA channel assigned to the Hard Drive Controller (HDC; XTC only)
 
 /*
  * 8259A Programmable Interrupt Controller (PIC) I/O ports
@@ -416,8 +417,8 @@ ChipSet.PIC_LO.OCW3_SMM_CMD     = 0x60;
  *      highest priority (IRQ9 is the highest) and IRQ3 through IRQ7 having the lowest priority (IRQ7 is
  *      the lowest).
  *      
- *      Interrupt 13 is used on the system board and is not available on the I/O channel.  Interrupt 8 is
- *      used for the real-time clock."
+ *      Interrupt 13 (IRQ.COPROC) is used on the system board and is not available on the I/O channel.
+ *      Interrupt 8 (IRQ.RTC) is used for the real-time clock."
  *      
  * This priority scheme is a byproduct of IRQ8 through IRQ15 (slave PIC interrupts) being tied to IRQ2 of
  * the master PIC.  As a result, the two other system board interrupts, IRQ0 and IRQ1, continue to have the
@@ -429,13 +430,13 @@ ChipSet.IRQ.KBD                 = 0x01;
 ChipSet.IRQ.SLAVE               = 0x02;
 ChipSet.IRQ.COM2                = 0x03;
 ChipSet.IRQ.COM1                = 0x04;
-ChipSet.IRQ.HDC                 = 0x05; // MODEL_5160 uses this for the HDC; MODEL_5170 designates it for LPT2
+ChipSet.IRQ.XTC                 = 0x05; // MODEL_5160 uses this for its HDC; MODEL_5170 designates it for LPT2
 ChipSet.IRQ.FDC                 = 0x06;
 ChipSet.IRQ.LPT1                = 0x07;
 ChipSet.IRQ.RTC                 = 0x08;
 ChipSet.IRQ.IRQ2                = 0x09;
 ChipSet.IRQ.COPROC              = 0x0D;
-ChipSet.IRQ.ATHDC               = 0x0E; // MODEL_5170 uses this for the HDC
+ChipSet.IRQ.ATC                 = 0x0E; // MODEL_5170 uses this for its HDC
 
 /*
  * 8253 Programmable Interval Timer (PIT) I/O ports 
@@ -678,7 +679,7 @@ ChipSet.CMOS.ADDR.RTC_STATUSC   = 0x0C;
 ChipSet.CMOS.ADDR.RTC_STATUSD   = 0x0D;
 ChipSet.CMOS.ADDR.DIAG          = 0x0E;
 ChipSet.CMOS.ADDR.SHUTDOWN      = 0x0F;
-ChipSet.CMOS.ADDR.FDRIVE        = 0x10; // drive 0 ChipSet.FDRIVE in high nibble, drive 1 ChipSet.FDRIVE value in low nibble
+ChipSet.CMOS.ADDR.FDRIVE        = 0x10;
 ChipSet.CMOS.ADDR.HDRIVE        = 0x12;
 ChipSet.CMOS.ADDR.EQUIP         = 0x14;
 ChipSet.CMOS.ADDR.BASEMEM_LO    = 0x15;
@@ -733,37 +734,21 @@ ChipSet.CMOS.DIAG.HDRIVEFAIL    = 0x08; // bit 3: 1 indicates hard drive control
 ChipSet.CMOS.DIAG.TIMEFAIL      = 0x04; // bit 2: 1 indicates time failure
 ChipSet.CMOS.DIAG.RESERVED      = 0x03;
 
-ChipSet.FDRIVE = {                      // abCMOSData[ChipSet.CMOS.ADDR.FDRIVE] values (drive 0 value in high nibble, drive 1 value in low nibble)
-    NONE:   0,                          // no drive
-    DSDD:   1,                          // double-sided double-density drive (48 TPI, 40 tracks, 360Kb max)
-    DSHD:   2                           // double-sided high-density drive (96 TPI, 80 tracks, 1.2Mb max)
+ChipSet.FDRIVE = {                      // abCMOSData[ChipSet.CMOS.ADDR.FDRIVE]
+    D0_MASK:    0xF0,                   // Drive 0 type in high nibble
+    D1_MASK:    0x0F,                   // Drive 1 type in lower nibble
+    NONE:       0,                      // no drive
+    DSDD:       1,                      // double-sided double-density drive (48 TPI, 40 tracks, 360Kb max)
+    DSHD:       2                       // double-sided high-density drive (96 TPI, 80 tracks, 1.2Mb max)
 };
 
-/*
- * The following HDRIVE types are supported by the MODEL_5170, where C is Cylinders, H is Heads,
- * WP is Write Pre-Comp, and LZ is Landing Zone.
- * 
- * Type    C    H   WP   LZ
- * ----  ---   --  ---  ---
- *   1   306    4  128  305
- *   2   615    4  300  615
- *   3   615    6  300  615
- *   4   940    8  512  940
- *   5   940    6  512  940
- *   6   615    4   no  615
- *   7   462    8  256  511
- *   8   733    5   no  733
- *   9   900   15  no8  901
- *  10   820    3   no  820
- *  11   855    5   no  855
- *  12   855    7   no  855
- *  13   306    8  128  319
- *  14   733    7   no  733
- *  15  (reserved--all zeros)
- */
-ChipSet.CMOS.HDRIVE = {};               // abCMOSData[ChipSet.CMOS.ADDR.HDRIVE]
-ChipSet.CMOS.HDRIVE.D0          = 0xF0;
-ChipSet.CMOS.HDRIVE.D1          = 0x0F;
+ChipSet.CMOS.HDRIVE = {                 // abCMOSData[ChipSet.CMOS.ADDR.HDRIVE]
+    D0_MASK:    0xF0,                   // Drive 0 type in high nibble
+    D1_MASK:    0x0F                    // Drive 1 type in lower nibble
+    /*
+     * HDRIVE types are defined by table in the HDC component, which uses setCMOSDriveType() to update the CMOS 
+     */
+};
 
 /*
  * The CMOS equipment flags use the same format as the older PPI equipment flags
@@ -804,33 +789,6 @@ ChipSet.NMI.DISABLE             = 0x00;
 ChipSet.COPROC = {};                    // TODO: Define a variable for this
 ChipSet.COPROC.PORT_CLEAR       = 0xF0; // clear the coprocessor's "busy" state
 ChipSet.COPROC.PORT_RESET       = 0xF1; // reset the coprocessor
-
-/*
- * Ports used by MODEL_5170 BIOS for "Combo Hard File/Diskette Card" check (@ F000:144C)
- * 
- * The ChipSet component provides minimal boot-time support for the "IBM Personal Computer
- * AT Fixed Disk and Diskette Drive Adapter", aka the HFCOMBO card, until we're able to fork
- * the HDC component into a new HDCombo component to deal with the "Fixed Disk" portion
- * of the HFCOMBO card.  Fortunately, the "Diskette Drive Adapter" portion of the card is
- * extremely compatible with the existing FDC component, so that component can be used as-is,
- * with only minor tweaks.
- * 
- * Initially, we intercepted reads for HFCOMBO's STATUS port simply to reduce boot time;
- * otherwise, the default "unknown port" response of 0xFF would lengthen boot time.  To solve
- * that, the STATUS port simply needed to return a byte with bit 7 clear, so that the BIOS
- * would then attempt to write/read the CTRL port.
- * 
- * Next, we initially treated the HFCOMBO's CTRL port as an "unknown port", because again,
- * we didn't need HDC support and it didn't seem to affect FDC support.  But it turns out
- * that FDC support IS affected, because if the BIOS doesn't set the "DUAL" bit (bit 0) of the
- * "HFCNTRL" byte at 40:8F, then when it comes time later to report the diskette drive type,
- * the "DISK_TYPE" function (@ F000:273D) will branch to one of two almost-identical blocks of
- * code -- specifically, the block that disallows diskette drive types >= 2 (ChipSet.FDRIVE.DSDD)
- * instead of >= 3 (ChipSet.FDRIVE.DSHD).
- */
-ChipSet.HFCOMBO = {};
-ChipSet.HFCOMBO.CTRL    = {PORT: 0x1F4};
-ChipSet.HFCOMBO.STATUS  = {PORT: 0x1F7};
 
 /*
  * ChipSet-related BIOS interrupts, functions, and other parameters
@@ -939,12 +897,8 @@ ChipSet.prototype.initBus = function(cmp, bus, cpu, dbg)
  */
 ChipSet.prototype.powerUp = function(data, fRepower)
 {
-    if (!fRepower) {
-        if (!data || !this.restore) {
-            this.reset();
-        } else {
-            if (!this.restore(data)) return false;
-        }
+    if (!fRepower && data) {
+        if (!this.restore(data)) return false;
     }
     return true;
 };
@@ -1038,6 +992,7 @@ ChipSet.prototype.reset = function()
         this.abCMOSData = new Array(ChipSet.CMOS.ADDR.TOTAL);
         this.initRTCDate(this.sRTCDate);
         this.initCMOSData();
+        
         /*
          * TODO: Data below here has not yet been added to the save/restore state; when we're done adding new data,
          * make sure it all gets added.
@@ -1081,8 +1036,9 @@ ChipSet.prototype.initRTCDate = function(sDate)
 {
     /*
      * NOTE: I've already been burned once by a JavaScript library function that did NOT treat an undefined
-     * parameter the same as no parameter (eg, the async parameter in xmlHTTP.open() in IE), so I'm taking no
-     * chances here: if sDate is undefined, then explicitly call Date() with no parameters. 
+     * parameter (ie, a parameter === undefined) the same as an omitted parameter (eg, the async parameter in
+     * xmlHTTP.open() in IE), so I'm taking no chances here: if sDate is undefined, then explicitly call Date()
+     * with no parameters. 
      */
     var date = sDate? new Date(sDate) : new Date();
     
@@ -1289,21 +1245,99 @@ ChipSet.prototype.initCMOSData = function()
 
     this.abCMOSData[ChipSet.CMOS.ADDR.FDRIVE] = (this.getSWFloppyDriveType(0) << 4) | this.getSWFloppyDriveType(1);
 
+    /*
+     * We allow both memory totals to start at zero now, and rely on the RAM component to call addCMOSMemory()
+     * to update the total(s) as appropriate.
+     *
     var wBaseMemKb = this.getSWMemorySize();
     this.abCMOSData[ChipSet.CMOS.ADDR.BASEMEM_LO] = wBaseMemKb & 0xff;
     this.abCMOSData[ChipSet.CMOS.ADDR.BASEMEM_HI] = wBaseMemKb >> 8;
+     */
     
     /*
      * The final step is calculating the CMOS checksum, which we then store into the CMOS as a courtesy, so that the
      * user doesn't get unnecessary CMOS errors.
      */
-    var wChecksum = this.getCMOSChecksum();
-    this.abCMOSData[ChipSet.CMOS.ADDR.CHKSUM_LO] = wChecksum & 0xff;
-    this.abCMOSData[ChipSet.CMOS.ADDR.CHKSUM_HI] = wChecksum >> 8;
+    this.updateCMOSChecksum();
 };
 
 /**
- * getCMOSChecksum()
+ * setCMOSByte(iCMOS, b)
+ *
+ * This is ONLY for use by components that need to update CMOS configuration bytes to match their internal configuration.
+ *
+ * @this {ChipSet}
+ * @param {number} iCMOS
+ * @param {number} b
+ * @return {boolean} true if successful, false if not (eg, CMOS not initialized yet, or no CMOS on this machine)
+ */
+ChipSet.prototype.setCMOSByte = function(iCMOS, b)
+{
+    if (this.abCMOSData) {
+        Component.assert(iCMOS >= ChipSet.CMOS.ADDR.FDRIVE && iCMOS < ChipSet.CMOS.ADDR.CHKSUM_HI);
+        this.abCMOSData[iCMOS] = b;
+        this.updateCMOSChecksum();
+        return true;
+    }
+    return false;
+};
+
+/**
+ * addCMOSMemory(addr, size)
+ *
+ * This is ONLY for use by the RAM component, to dynamically update the CMOS memory configuration.
+ *
+ * @this {ChipSet}
+ * @param {number} addr (if 0, BASEMEM_LO/BASEMEM_HI is updated; if >= 0x100000, then EXTMEM_LO/EXTMEM_HI is updated)
+ * @param {number} size (in bytes; we convert to Kb)
+ * @return {boolean} true if successful, false if not (eg, CMOS not initialized yet, or no CMOS on this machine)
+ */
+ChipSet.prototype.addCMOSMemory = function(addr, size)
+{
+    if (this.abCMOSData) {
+        var iCMOS = (addr < 0x100000? ChipSet.CMOS.ADDR.BASEMEM_LO : ChipSet.CMOS.ADDR.EXTMEM_LO);
+        var wKb = this.abCMOSData[iCMOS] | (this.abCMOSData[iCMOS+1] << 8);
+        wKb += (size >> 10);
+        this.abCMOSData[iCMOS] = wKb & 0xff;
+        this.abCMOSData[iCMOS+1] = wKb >> 8;
+        this.updateCMOSChecksum();
+        return true;
+    }
+    return false;
+};
+
+/**
+ * setCMOSDriveType(iDrive, bType)
+ *
+ * This is ONLY for use by the HDC component, to update the CMOS drive configuration to match HDC's internal configuration.
+ * 
+ * TODO: Extend this to support FDC drive updates, so that FDC can eventually specify diskette drive types
+ * (ie, DSDD or DSHD) in the same way that HDC does; currently, MODEL_5170 diskette drives always default to DSHD
+ * (see getSWFloppyDriveType()).
+ *
+ * @this {ChipSet}
+ * @param {number} iDrive
+ * @param {number} bType
+ * @return {boolean} true if successful, false if not (eg, CMOS not initialized yet, or no CMOS on this machine)
+ */
+ChipSet.prototype.setCMOSDriveType = function(iDrive, bType)
+{
+    if (this.abCMOSData) {
+        var b = this.abCMOSData[ChipSet.CMOS.ADDR.HDRIVE];
+        Component.assert(bType > 0 && bType < 0xf);
+        if (iDrive) {
+            b = (b & ChipSet.CMOS.HDRIVE.D0_MASK) | bType;
+        } else {
+            b = (b & ChipSet.CMOS.HDRIVE.D1_MASK) | (bType << 4);
+        }
+        this.setCMOSByte(ChipSet.CMOS.ADDR.HDRIVE, b);
+        return true;
+    }
+    return false;
+};
+
+/**
+ * updateCMOSChecksum()
  * 
  * This sums all the CMOS bytes from 0x10-0x2D, creating a 16-bit checksum.  That's a total of 30 (unsigned) 8-bit
  * values which could sum to at most 30*255 or 7650 (0x1DE2).  Since there's no way that can overflow 16 bits, we don't
@@ -1312,15 +1346,15 @@ ChipSet.prototype.initCMOSData = function()
  * WARNING: The IBM PC AT TechRef, p.1-53 (p.75) claims that the checksum is on bytes 0x10-0x20, but that's simply wrong.
  * 
  * @this {ChipSet}
- * @return {number} 16-bit checksum of CMOS bytes 0x10-0x2D
  */
-ChipSet.prototype.getCMOSChecksum = function()
+ChipSet.prototype.updateCMOSChecksum = function()
 {
     var wChecksum = 0;
     for (var iCMOS = ChipSet.CMOS.ADDR.FDRIVE; iCMOS < ChipSet.CMOS.ADDR.CHKSUM_HI; iCMOS++) {
         wChecksum += this.abCMOSData[iCMOS];
     }
-    return wChecksum;
+    this.abCMOSData[ChipSet.CMOS.ADDR.CHKSUM_LO] = wChecksum & 0xff;
+    this.abCMOSData[ChipSet.CMOS.ADDR.CHKSUM_HI] = wChecksum >> 8;
 };
 
 /**
@@ -1679,7 +1713,7 @@ ChipSet.prototype.getSWFloppyDrives = function(fInit)
 ChipSet.prototype.getSWFloppyDriveType = function(iDrive)
 {
     /*
-     * TODO: For MODEL_5170, we default all floppy drive types to High Capacity, but more control would be nice.
+     * TODO: For MODEL_5170, we default all floppy drive types to DSHD, but more control would be nice.
      */
     if (iDrive < this.getSWFloppyDrives()) {
         return (this.model < ChipSet.MODEL_5170? ChipSet.FDRIVE.DSDD : ChipSet.FDRIVE.DSHD);
@@ -1899,7 +1933,7 @@ ChipSet.prototype.dumpCMOS = function()
  * @param {number} iDMAC
  * @param {number} iChannel
  * @param {number} port
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  * @return {number} simulated port value
  */
 ChipSet.prototype.inDMAChannelAddr = function(iDMAC, iChannel, port, addrFrom)
@@ -1920,7 +1954,7 @@ ChipSet.prototype.inDMAChannelAddr = function(iDMAC, iChannel, port, addrFrom)
  * @param {number} iChannel
  * @param {number} port
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  */
 ChipSet.prototype.outDMAChannelAddr = function outDMAChannelAddr(iDMAC, iChannel, port, bOut, addrFrom)
 {
@@ -1938,7 +1972,7 @@ ChipSet.prototype.outDMAChannelAddr = function outDMAChannelAddr(iDMAC, iChannel
  * @param {number} iDMAC
  * @param {number} iChannel
  * @param {number} port
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  * @return {number} simulated port value
  */
 ChipSet.prototype.inDMAChannelCount = function(iDMAC, iChannel, port, addrFrom)
@@ -1959,7 +1993,7 @@ ChipSet.prototype.inDMAChannelCount = function(iDMAC, iChannel, port, addrFrom)
  * @param {number} iChannel (ports 0x01, 0x03, 0x05, 0x07)
  * @param {number} port
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  */
 ChipSet.prototype.outDMAChannelCount = function(iDMAC, iChannel, port, bOut, addrFrom)
 {
@@ -1976,7 +2010,7 @@ ChipSet.prototype.outDMAChannelCount = function(iDMAC, iChannel, port, bOut, add
  * @this {ChipSet}
  * @param {number} iDMAC
  * @param {number} port
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  * @return {number} simulated port value
  *
  * From the 8237A spec:
@@ -1991,13 +2025,13 @@ ChipSet.prototype.outDMAChannelCount = function(iDMAC, iChannel, port, bOut, add
  * Bits 4–7 are set whenever their corresponding channel is requesting service."
  *
  * TRIVIA: This hook wasn't installed when I was testing with the MODEL_5150 ROM BIOS, and it
- * didn't matter, but the MODEL_5160 ROM BIOS checks it several times, including @ F000:E156, where
+ * didn't matter, but the MODEL_5160 ROM BIOS checks it several times, including @F000:E156, where
  * it verifies that TIMER1 didn't request service on channel 0.
  */
 ChipSet.prototype.inDMAStatus = function(iDMAC, port, addrFrom)
 {
     /*
-     * HACK: Unlike the MODEL_5150, the MODEL_5160 ROM BIOS checks DMA channel 0 for TC (@ F000:E4DF)
+     * HACK: Unlike the MODEL_5150, the MODEL_5160 ROM BIOS checks DMA channel 0 for TC (@F000:E4DF)
      * after running a number of unrelated tests, since enough time would have passed for channel 0 to
      * have reached TC at least once.  So I simply OR in a hard-coded TC bit for channel 0 every time
      * status is read.  
@@ -2016,7 +2050,7 @@ ChipSet.prototype.inDMAStatus = function(iDMAC, port, addrFrom)
  * @param {number} iDMAC
  * @param {number} port
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  */
 ChipSet.prototype.outDMACmd = function(iDMAC, port, bOut, addrFrom)
 {
@@ -2031,7 +2065,7 @@ ChipSet.prototype.outDMACmd = function(iDMAC, port, bOut, addrFrom)
  * @param {number} iDMAC
  * @param {number} port
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  *
  * From the 8237A spec:
  *
@@ -2066,7 +2100,7 @@ ChipSet.prototype.outDMAReq = function(iDMAC, port, bOut, addrFrom)
  * @param {number} iDMAC
  * @param {number} port
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  */
 ChipSet.prototype.outDMAMask = function(iDMAC, port, bOut, addrFrom)
 {
@@ -2085,7 +2119,7 @@ ChipSet.prototype.outDMAMask = function(iDMAC, port, bOut, addrFrom)
  * @param {number} iDMAC
  * @param {number} port
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  */
 ChipSet.prototype.outDMAMode = function(iDMAC, port, bOut, addrFrom)
 {
@@ -2101,7 +2135,7 @@ ChipSet.prototype.outDMAMode = function(iDMAC, port, bOut, addrFrom)
  * @param {number} iDMAC
  * @param {number} port
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  *
  * Any write to this port simply resets the controller's "first/last flip-flop", which determines whether the even or odd byte
  * of a DMA address or count register will be accessed next.
@@ -2119,7 +2153,7 @@ ChipSet.prototype.outDMAIndex = function(iDMAC, port, bOut, addrFrom)
  * @param {number} iDMAC
  * @param {number} port
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  */
 ChipSet.prototype.outDMAClear = function(iDMAC, port, bOut, addrFrom)
 {
@@ -2140,7 +2174,7 @@ ChipSet.prototype.outDMAClear = function(iDMAC, port, bOut, addrFrom)
  * @param {number} iDMAC
  * @param {number} iChannel
  * @param {number} port
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  * @return {number} simulated port value
  */
 ChipSet.prototype.inDMAPageReg = function(iDMAC, iChannel, port, addrFrom)
@@ -2158,7 +2192,7 @@ ChipSet.prototype.inDMAPageReg = function(iDMAC, iChannel, port, addrFrom)
  * @param {number} iChannel
  * @param {number} port
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  */
 ChipSet.prototype.outDMAPageReg = function(iDMAC, iChannel, port, bOut, addrFrom)
 {
@@ -2172,7 +2206,7 @@ ChipSet.prototype.outDMAPageReg = function(iDMAC, iChannel, port, bOut, addrFrom
  * @this {ChipSet}
  * @param {number} iSpare
  * @param {number} port
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  * @return {number} simulated port value
  */
 ChipSet.prototype.inDMAPageSpare = function(iSpare, port, addrFrom)
@@ -2189,7 +2223,7 @@ ChipSet.prototype.inDMAPageSpare = function(iSpare, port, addrFrom)
  * @param {number} iSpare
  * @param {number} port
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  */
 ChipSet.prototype.outDMAPageSpare = function(iSpare, port, bOut, addrFrom)
 {
@@ -2459,7 +2493,7 @@ ChipSet.prototype.updateDMA = function(channel)
  * 
  * @this {ChipSet}
  * @param {number} iPIC
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  * @return {number} simulated port value
  */
 ChipSet.prototype.inPICL = function(iPIC, addrFrom)
@@ -2489,7 +2523,7 @@ ChipSet.prototype.inPICL = function(iPIC, addrFrom)
  * @this {ChipSet}
  * @param {number} iPIC
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  */
 ChipSet.prototype.outPICL = function(iPIC, bOut, addrFrom)
 {
@@ -2617,7 +2651,7 @@ ChipSet.prototype.outPICL = function(iPIC, bOut, addrFrom)
  * 
  * @this {ChipSet}
  * @param {number} iPIC
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  * @return {number} simulated port value
  */
 ChipSet.prototype.inPICH = function(iPIC, addrFrom)
@@ -2634,7 +2668,7 @@ ChipSet.prototype.inPICH = function(iPIC, addrFrom)
  * @this {ChipSet}
  * @param {number} iPIC
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  */
 ChipSet.prototype.outPICH = function(iPIC, bOut, addrFrom)
 {
@@ -2837,7 +2871,7 @@ ChipSet.prototype.getIRRVector = function(iPIC)
  * 
  * @this {ChipSet}
  * @param {number} iTimer (ports 0x40, 0x41, 0x42)
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  * @return {number} simulated port value
  */
 ChipSet.prototype.inTimer = function(iTimer, addrFrom)
@@ -2860,7 +2894,7 @@ ChipSet.prototype.inTimer = function(iTimer, addrFrom)
  * @this {ChipSet}
  * @param {number} iTimer (ports 0x40, 0x41, 0x42)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  */
 ChipSet.prototype.outTimer = function(iTimer, bOut, addrFrom)
 {
@@ -2942,7 +2976,7 @@ ChipSet.prototype.outTimer = function(iTimer, bOut, addrFrom)
  * 
  * @this {ChipSet}
  * @param {number} port (0x43)
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  * @return {number|null} simulated port value
  */
 ChipSet.prototype.inTimerCtrl = function(port, addrFrom)
@@ -2958,7 +2992,7 @@ ChipSet.prototype.inTimerCtrl = function(port, addrFrom)
  * @this {ChipSet}
  * @param {number} port (0x43)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  */
 ChipSet.prototype.outTimerCtrl = function(port, bOut, addrFrom)
 {
@@ -2984,14 +3018,14 @@ ChipSet.prototype.outTimerCtrl = function(port, bOut, addrFrom)
         this.setTimerMode(iTimer, bcd, mode, rw);
         
         /*
-         * The 5150 ROM BIOS code @ F000:E285 ("TEST.7") would fail after a warm boot (eg, after a CTRL-ALT-DEL) because
+         * The 5150 ROM BIOS code @F000:E285 ("TEST.7") would fail after a warm boot (eg, after a CTRL-ALT-DEL) because
          * it assumed that no TIMER0 interrupt would occur between the point it unmasked the TIMER0 interrupt and the
          * point it started reprogramming TIMER0.
          * 
-         * Similarly, the 5160 ROM BIOS @ F000:E35D ("8253 TIMER CHECKOUT") would fail after initializing the EGA BIOS,
+         * Similarly, the 5160 ROM BIOS @F000:E35D ("8253 TIMER CHECKOUT") would fail after initializing the EGA BIOS,
          * because the EGA BIOS uses TIMER0 during its diagnostics; as in the previous example, by the time the 8253
          * test code runs later, there's now a pending TIMER0 interrupt, which triggers an interrupt as soon as IRQ0 is
-         * unmasked @ F000:E364.
+         * unmasked @F000:E364.
          * 
          * After looking at this problem at bit more closely the second time around (while debugging the EGA BIOS),
          * it turns out I missed an important 8253 feature: whenever a new MODE0 control word OR a new MODE0 count
@@ -3003,7 +3037,7 @@ ChipSet.prototype.outTimerCtrl = function(port, bOut, addrFrom)
         if (iTimer == ChipSet.TIMER0.INDEX) this.clearIRR(ChipSet.IRQ.TIMER0);
         
         /*
-         * Another TIMER0 HACK: The "CASSETTE DATA WRAP TEST" @ F000:E51E occasionally reports an error when the second of
+         * Another TIMER0 HACK: The "CASSETTE DATA WRAP TEST" @F000:E51E occasionally reports an error when the second of
          * two TIMER0 counts it latches is greater than the first.  You would think the ROM BIOS would expect this, since
          * TIMER0 can reload its count at any time.  Is the ROM BIOS assuming that TIMER0 was initialized sufficiently
          * recently that this should never happen?  I'm not sure, but for now, let's try resetting TIMER0's count immediately
@@ -3237,7 +3271,7 @@ ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
         }
         /*
          * Early implementation of this mode was minimal because when using this mode, the ROM BIOS simply wanted
-         * to see the count changing; it wasn't looking for interrupts.  See ROM BIOS "TEST.03" code @ F000:E0DE,
+         * to see the count changing; it wasn't looking for interrupts.  See ROM BIOS "TEST.03" code @F000:E0DE,
          * where TIMER1 is programmed for MODE2, LSB (the same settings, incidentally, used immediately afterward
          * for TIMER1 in conjunction with DMA channel 0 memory refreshes).
          * 
@@ -3337,7 +3371,7 @@ ChipSet.prototype.updateAllTimers = function(fCycleReset)
  * 
  * @this {ChipSet}
  * @param {number} port (0x60)
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  * @return {number} simulated port value
  */
 ChipSet.prototype.inPPIA = function(port, addrFrom)
@@ -3361,7 +3395,7 @@ ChipSet.prototype.inPPIA = function(port, addrFrom)
  * @this {ChipSet}
  * @param {number} port (0x60)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  */
 ChipSet.prototype.outPPIA = function(port, bOut, addrFrom)
 {
@@ -3374,7 +3408,7 @@ ChipSet.prototype.outPPIA = function(port, bOut, addrFrom)
  *
  * @this {ChipSet}
  * @param {number} port (0x61)
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  * @return {number} simulated port value
  */
 ChipSet.prototype.inPPIB = function(port, addrFrom)
@@ -3390,7 +3424,7 @@ ChipSet.prototype.inPPIB = function(port, addrFrom)
  * @this {ChipSet}
  * @param {number} port (0x61)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  */
 ChipSet.prototype.outPPIB = function(port, bOut, addrFrom)
 {
@@ -3417,7 +3451,7 @@ ChipSet.prototype.updatePPIB = function(bOut)
     this.bPPIB = bOut;
     if (fNewSpeaker != fOldSpeaker) {
         /*
-         * Originally, this code didn't catch the "ERROR_BEEP" case @ F000:EC34, which first turns both PPI_B.CLK_TIMER2 (0x01)
+         * Originally, this code didn't catch the "ERROR_BEEP" case @F000:EC34, which first turns both PPI_B.CLK_TIMER2 (0x01)
          * and PPI_B.SPK_TIMER2 (0x02) off, then turns on only PPI_B.SPK_TIMER2 (0x02), then restores the original port value.
          * 
          * So, when the ROM BIOS keyboard buffer got full, we didn't issue a BEEP alert.  I've fixed that by limiting the test
@@ -3432,7 +3466,7 @@ ChipSet.prototype.updatePPIB = function(bOut)
  * 
  * @this {ChipSet}
  * @param {number} port (0x62)
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  * @return {number} simulated port value
  */
 ChipSet.prototype.inPPIC = function(port, addrFrom)
@@ -3481,7 +3515,7 @@ ChipSet.prototype.inPPIC = function(port, addrFrom)
  * @this {ChipSet}
  * @param {number} port (0x62)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  */
 ChipSet.prototype.outPPIC = function(port, bOut, addrFrom)
 {
@@ -3494,7 +3528,7 @@ ChipSet.prototype.outPPIC = function(port, bOut, addrFrom)
  * 
  * @this {ChipSet}
  * @param {number} port (0x63)
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  * @return {number} simulated port value
  */
 ChipSet.prototype.inPPICtrl = function(port, addrFrom)
@@ -3510,7 +3544,7 @@ ChipSet.prototype.inPPICtrl = function(port, addrFrom)
  * @this {ChipSet}
  * @param {number} port (0x63)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to write the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to write the specified port)
  */
 ChipSet.prototype.outPPICtrl = function(port, bOut, addrFrom)
 {
@@ -3523,7 +3557,7 @@ ChipSet.prototype.outPPICtrl = function(port, bOut, addrFrom)
  *
  * @this {ChipSet}
  * @param {number} port (0x60)
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  * @return {number} simulated port value
  */
 ChipSet.prototype.in8042OutBuff = function(port, addrFrom)
@@ -3546,7 +3580,7 @@ ChipSet.prototype.in8042OutBuff = function(port, addrFrom)
  * @this {ChipSet}
  * @param {number} port (0x60)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to write the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to write the specified port)
  */
 ChipSet.prototype.out8042InBuffData = function(port, bOut, addrFrom)
 {
@@ -3644,7 +3678,7 @@ ChipSet.prototype.out8042InBuffData = function(port, bOut, addrFrom)
  *
  * @this {ChipSet}
  * @param {number} port (0x61)
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  * @return {number} simulated port value
  */
 ChipSet.prototype.in8042RWReg = function(port, addrFrom)
@@ -3668,7 +3702,7 @@ ChipSet.prototype.in8042RWReg = function(port, addrFrom)
  * @this {ChipSet}
  * @param {number} port (0x61)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  */
 ChipSet.prototype.out8042RWReg = function(port, bOut, addrFrom)
 {
@@ -3681,7 +3715,7 @@ ChipSet.prototype.out8042RWReg = function(port, bOut, addrFrom)
  *
  * @this {ChipSet}
  * @param {number} port (0x64)
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  * @return {number} simulated port value
  */
 ChipSet.prototype.in8042Status = function(port, addrFrom)
@@ -3720,7 +3754,7 @@ ChipSet.prototype.in8042Status = function(port, addrFrom)
  * @this {ChipSet}
  * @param {number} port (0x64)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to write the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to write the specified port)
  */
 ChipSet.prototype.out8042InBuffCmd = function(port, bOut, addrFrom)
 {
@@ -3841,7 +3875,7 @@ ChipSet.prototype.set8042OutPort = function(b)
  *
  * @this {ChipSet}
  * @param {number} port (0x70)
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  * @return {number} simulated port value
  */
 ChipSet.prototype.inCMOSAddr = function(port, addrFrom)
@@ -3856,7 +3890,7 @@ ChipSet.prototype.inCMOSAddr = function(port, addrFrom)
  * @this {ChipSet}
  * @param {number} port (0x70)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to write the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to write the specified port)
  */
 ChipSet.prototype.outCMOSAddr = function(port, bOut, addrFrom)
 {
@@ -3870,7 +3904,7 @@ ChipSet.prototype.outCMOSAddr = function(port, bOut, addrFrom)
  *
  * @this {ChipSet}
  * @param {number} port (0x71)
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  * @return {number} simulated port value
  */
 ChipSet.prototype.inCMOSData = function(port, addrFrom)
@@ -3887,7 +3921,7 @@ ChipSet.prototype.inCMOSData = function(port, addrFrom)
  * @this {ChipSet}
  * @param {number} port (0x71)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to write the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to write the specified port)
  */
 ChipSet.prototype.outCMOSData = function(port, bOut, addrFrom)
 {
@@ -3901,7 +3935,7 @@ ChipSet.prototype.outCMOSData = function(port, bOut, addrFrom)
  *
  * @this {ChipSet}
  * @param {number} port (0x80)
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  * @return {number} simulated port value
  */
 ChipSet.prototype.inMFGData = function(port, addrFrom)
@@ -3916,7 +3950,7 @@ ChipSet.prototype.inMFGData = function(port, addrFrom)
  * @this {ChipSet}
  * @param {number} port (0x80)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to write the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to write the specified port)
  */
 ChipSet.prototype.outMFGData = function(port, bOut, addrFrom)
 {
@@ -3932,56 +3966,12 @@ ChipSet.prototype.outMFGData = function(port, bOut, addrFrom)
  * @this {ChipSet}
  * @param {number} port (0xA0)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to write the specified port)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to write the specified port)
  */
 ChipSet.prototype.outNMI = function(port, bOut, addrFrom)
 {
     this.messagePort(port, bOut, addrFrom, "NMI", ChipSet.MESSAGE_CHIPSET);
     this.bNMI = bOut;
-};
-
-/**
- * inHFCCtrl(port, addrFrom)
- *
- * @this {ChipSet}
- * @param {number} port (0x1F4)
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
- * @return {number} simulated port value
- */
-ChipSet.prototype.inHFCCtrl = function(port, addrFrom)
-{
-    var b = this.regsHFCombo.bCtrl;
-    this.messagePort(port, null, addrFrom, "HFC_CTRL", ChipSet.MESSAGE_CHIPSET, b);
-    return b;
-};
-
-/**
- * outHFCCtrl(port, bOut, addrFrom)
- *
- * @this {ChipSet}
- * @param {number} port (0x1F4)
- * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to write the specified port)
- */
-ChipSet.prototype.outHFCCtrl = function(port, bOut, addrFrom)
-{
-    this.messagePort(port, bOut, addrFrom, "HFC_CTRL", ChipSet.MESSAGE_CHIPSET);
-    this.regsHFCombo.bCtrl = bOut;
-};
-
-/**
- * inHFCStatus(port, addrFrom)
- *
- * @this {ChipSet}
- * @param {number} port (0x1F7)
- * @param {number|undefined} addrFrom (not defined if the Debugger is trying to read the specified port)
- * @return {number} simulated port value
- */
-ChipSet.prototype.inHFCStatus = function(port, addrFrom)
-{
-    var b = this.regsHFCombo.bStatus;
-    this.messagePort(port, null, addrFrom, "HFC_STATUS", ChipSet.MESSAGE_CHIPSET, b);
-    return b;
 };
 
 /**
@@ -4210,9 +4200,7 @@ ChipSet.aPortInput5170 = {
     0xCA: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAChannelCount(ChipSet.DMA1.INDEX, 2, port, addrFrom); },
     0xCC: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAChannelAddr(ChipSet.DMA1.INDEX, 3, port, addrFrom); },
     0xCE: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAChannelCount(ChipSet.DMA1.INDEX, 3, port, addrFrom); },
-    0xD0: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAStatus(ChipSet.DMA1.INDEX, port, addrFrom); },
-   0x1F4: ChipSet.prototype.inHFCCtrl,          // refer to comments regarding HFCOMBO.CTRL
-   0x1F7: ChipSet.prototype.inHFCStatus         // refer to comments regarding HFCOMBO.STATUS
+    0xD0: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAStatus(ChipSet.DMA1.INDEX, port, addrFrom); }
 };
 
 /*
@@ -4286,8 +4274,7 @@ ChipSet.aPortOutput5170 = {
     0xD4: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAMask(ChipSet.DMA1.INDEX, port, bOut, addrFrom); },
     0xD6: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAMode(ChipSet.DMA1.INDEX, port, bOut, addrFrom); },
     0xD8: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAIndex(ChipSet.DMA1.INDEX, port, bOut, addrFrom); },
-    0xDA: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAClear(ChipSet.DMA1.INDEX, port, bOut, addrFrom); },
-    0x1F4: ChipSet.prototype.outHFCCtrl         // refer to comments regarding HFCOMBO.CTRL
+    0xDA: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAClear(ChipSet.DMA1.INDEX, port, bOut, addrFrom); }
 };
 
 /**

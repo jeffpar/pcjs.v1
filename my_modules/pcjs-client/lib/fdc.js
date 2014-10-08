@@ -679,8 +679,8 @@ FDC.prototype.initController = function(data)
     var dataDrives = data[i++];
 
     /*
-     * Initialize the disk history (if available) before initializing the drives,
-     * so that any disk deltas can be applied to disk images that are already loaded. 
+     * Initialize the disk history (if available) before initializing the drives, so that any disk deltas can be
+     * applied to disk images that are already loaded. 
      */
     var aDiskHistory = data[i++];
     if (aDiskHistory != null) this.aDiskHistory = aDiskHistory;
@@ -1334,7 +1334,7 @@ FDC.prototype.updateDiskHistory = function(sDisketteName, sDiskettePath, disk)
  * @this {FDC}
  * @param {number} port (0x3F2, output only)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  */
 FDC.prototype.outFDCOutput = function(port, bOut, addrFrom)
 {
@@ -1384,7 +1384,7 @@ FDC.prototype.outFDCOutput = function(port, bOut, addrFrom)
  *
  * @this {FDC}
  * @param {number} port (0x3F4, input only)
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number} simulated port value
  */
 FDC.prototype.inFDCStatus = function(port, addrFrom)
@@ -1398,7 +1398,7 @@ FDC.prototype.inFDCStatus = function(port, addrFrom)
  *
  * @this {FDC}
  * @param {number} port (0x3F5, input/output)
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number} simulated port value
  */
 FDC.prototype.inFDCData = function(port, addrFrom)
@@ -1427,7 +1427,7 @@ FDC.prototype.inFDCData = function(port, addrFrom)
  * @this {FDC}
  * @param {number} port (0x3F5, input/output)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  */
 FDC.prototype.outFDCData = function(port, bOut, addrFrom)
 {
@@ -1452,7 +1452,7 @@ FDC.prototype.outFDCData = function(port, bOut, addrFrom)
  *
  * @this {FDC}
  * @param {number} port (0x3F7, input only, MODEL_5170 only)
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number} simulated port value
  */
 FDC.prototype.inFDCInput = function(port, addrFrom)
@@ -1472,66 +1472,12 @@ FDC.prototype.inFDCInput = function(port, addrFrom)
  * @this {FDC}
  * @param {number} port (0x3F7, output only, MODEL_5170 only)
  * @param {number} bOut
- * @param {number|undefined} addrFrom (not defined whenever the Debugger tries to read the specified port)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  */
 FDC.prototype.outFDCControl = function(port, bOut, addrFrom)
 {
     this.messagePort(port, bOut, addrFrom, "CONTROL");
     this.regControl  = bOut;
-};
-
-/**
- * intBIOSDiskette(addr)
- *
- * NOTE: This function tries to differentiate FDC requests from HDC requests, by whether the INT 0x13 drive number
- * in DL is < 0x80; however, not all INT 0x13 functions required a drive number in DL, and not all callers supplied one.
- *
- * INT 0x13 Quick Reference:
- *
- *      AH
- *      ----
- *      0x00    Reset
- *      0x01    Get status (from last operation)
- *      0x02    Read sectors
- *      0x03    Write sectors
- *      0x04    Verify sectors
- *      0x05    Format track
- *
- * For Read, Write, Verify and Format commands:
- *
- *      DL      drive number (0-3 allowed, value checked)
- *      DH      head number (0-1 allowed, not value checked)
- *      CH      track number (0-39 allowed, not value checked [which is good, because high-density diskettes go up to 80 tracks])
- *      CL      sector number (1-8 allowed, not value checked [which is good, because support for 9-sector tracks was later added])
- *      AL      number of sectors (max of 8, not value checked)
- *      ES:BX   sector buffer
- *
- * @this {FDC}
- * @param {number} addr
- * @return {boolean} true to proceed with the INT 0x13 software interrupt, false to skip
- */
-FDC.prototype.intBIOSDiskette = function(addr)
-{
-    if (DEBUGGER) {
-        var AL = this.cpu.regAX & 0xff;
-        var AH = this.cpu.regAX >> 8;
-        var CL = this.cpu.regCX & 0xff;
-        var CH = this.cpu.regCX >> 8;
-        var DL = this.cpu.regDX & 0xff;
-        var DH = this.cpu.regDX >> 8;
-        if (this.dbg && this.dbg.messageEnabled(this.dbg.MESSAGE_FDC) && DL < 0x80) {
-            this.dbg.message("FDC.intBIOS(AH=" + str.toHexByte(AH) + ",D=" + str.toHexByte(DL) + ",C=" + str.toHexByte(CH) + ",H=" + str.toHexByte(DH) + ",S=" + str.toHexByte(CL) + ",N=" + str.toHexByte(AL) + ") at " + str.toHexAddr(addr - this.cpu.segCS.base, this.cpu.segCS.sel));
-            // this.cpu.haltCPU();
-            this.cpu.addInterruptReturn(addr, function (fdc, nCycles) {
-                return function onBIOSDisketteReturn(nLevel) {
-                    nCycles = fdc.cpu.getCycles() - nCycles;
-                    fdc.messageDebugger("FDC.intBIOS(" + nLevel + "): C=" + (fdc.cpu.getCF()? 1 : 0) + " (cycles=" + nCycles + ")");
-                    // if (DEBUG && nCycles > 10000) fdc.cpu.haltCPU();
-                };
-            }(this, this.cpu.getCycles()));
-        }
-    }
-    return true;
 };
 
 /**
@@ -2084,6 +2030,60 @@ FDC.prototype.writeFormat = function(drive, b)
     }
     if (drive.cSectorsFormatted >= drive.bSectorEnd) b = -1;
     return b;
+};
+
+/**
+ * intBIOSDiskette(addr)
+ *
+ * NOTE: This function tries to differentiate FDC requests from HDC requests, by whether the INT 0x13 drive number
+ * in DL is < 0x80; however, not all INT 0x13 functions required a drive number in DL, and not all callers supplied one.
+ *
+ * INT 0x13 Quick Reference:
+ *
+ *      AH
+ *      ----
+ *      0x00    Reset
+ *      0x01    Get status (from last operation)
+ *      0x02    Read sectors
+ *      0x03    Write sectors
+ *      0x04    Verify sectors
+ *      0x05    Format track
+ *
+ * For Read, Write, Verify and Format commands:
+ *
+ *      DL      drive number (0-3 allowed, value checked)
+ *      DH      head number (0-1 allowed, not value checked)
+ *      CH      track number (0-39 allowed, not value checked [which is good, because high-density diskettes go up to 80 tracks])
+ *      CL      sector number (1-8 allowed, not value checked [which is good, because support for 9-sector tracks was later added])
+ *      AL      number of sectors (max of 8, not value checked)
+ *      ES:BX   sector buffer
+ *
+ * @this {FDC}
+ * @param {number} addr
+ * @return {boolean} true to proceed with the INT 0x13 software interrupt, false to skip
+ */
+FDC.prototype.intBIOSDiskette = function(addr)
+{
+    if (DEBUGGER) {
+        var AL = this.cpu.regAX & 0xff;
+        var AH = this.cpu.regAX >> 8;
+        var CL = this.cpu.regCX & 0xff;
+        var CH = this.cpu.regCX >> 8;
+        var DL = this.cpu.regDX & 0xff;
+        var DH = this.cpu.regDX >> 8;
+        if (this.dbg && this.dbg.messageEnabled(this.dbg.MESSAGE_FDC) && DL < 0x80) {
+            this.dbg.message("FDC.intBIOS(AH=" + str.toHexByte(AH) + ",D=" + str.toHexByte(DL) + ",C=" + str.toHexByte(CH) + ",H=" + str.toHexByte(DH) + ",S=" + str.toHexByte(CL) + ",N=" + str.toHexByte(AL) + ") at " + str.toHexAddr(addr - this.cpu.segCS.base, this.cpu.segCS.sel));
+            // this.cpu.haltCPU();
+            this.cpu.addInterruptReturn(addr, function (fdc, nCycles) {
+                return function onBIOSDisketteReturn(nLevel) {
+                    nCycles = fdc.cpu.getCycles() - nCycles;
+                    fdc.messageDebugger("FDC.intBIOS(" + nLevel + "): C=" + (fdc.cpu.getCF()? 1 : 0) + " (cycles=" + nCycles + ")");
+                    // if (DEBUG && nCycles > 10000) fdc.cpu.haltCPU();
+                };
+            }(this, this.cpu.getCycles()));
+        }
+    }
+    return true;
 };
 
 /**

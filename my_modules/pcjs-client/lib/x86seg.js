@@ -123,9 +123,15 @@ X86Seg.loadProt = function loadProt(sel, fSuppress)
          */
         this.cpu.nStepCycles -= 15;
         
+        /*
+         * TODO: Use (direct) Bus memory interfaces instead of (indirect) CPU memory interfaces here?
+         */
         var limit = this.cpu.getWord(offDT + X86.DESC.LIMIT.OFFSET);
         var acc = this.cpu.getWord(offDT + X86.DESC.ACC.OFFSET);
         var base = this.cpu.getWord(offDT + X86.DESC.BASE.OFFSET) | ((acc & X86.DESC.ACC.BASE1623) << 16);
+        
+        Component.assert(this.cpu.getWord(offDT + 0x06) == 0);
+        
         /*
          * For LSL (which uses fSuppress), we must support X86.DESC.ACC.TYPE.SEG as well as TSS and LDT.
          */

@@ -25,6 +25,7 @@ Model 5160 Machine Configurations include:
 * [IBM PC XT, CGA "Server Array" Demo](/configs/pc/machines/5160/cga/256kb/array/)
 * [IBM PC XT, EGA, 256K, 10Mb Drive, Debugger](/configs/pc/machines/5160/ega/256kb/debugger/)
 * [IBM PC XT, EGA, 640K, 10Mb Drive, Debugger](/configs/pc/machines/5160/ega/640kb/debugger/)
+* [IBM PC XT, EGA, 640K, Windows 1.01](/configs/pc/machines/5160/ega/640kb/win101/)
 * [IBM PC XT, EGA "Server Array" Demo](/configs/pc/machines/5160/ega/640kb/array/)
 
 Model 5170 Machine Configurations include:
