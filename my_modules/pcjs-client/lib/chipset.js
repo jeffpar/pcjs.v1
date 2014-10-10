@@ -46,11 +46,13 @@ if (typeof module !== 'undefined') {
  *
  * The ChipSet component has the following component-specific (parmsChipSet) properties:
  *
- *      model:          "5150", "5160", "5170", etc (should correspond to a ChipSet.MODEL_* constant)
- *      scaleTimers:    true to divide timer cycle counts by the CPU's cycle multiplier (default is false)
- *      sound:          true to enable (experimental) sound support (default); false to disable
+ *      model:          5150, 5160 or 5170 (should correspond to a ChipSet.MODEL_* constant)
  *      sw1:            8-character binary string representing the SW1 DIP switches (SW1[1-8])
  *      sw2:            8-character binary string representing the SW2 DIP switches (SW2[1-8]) (MODEL_5150 only)
+ *      sound:          true to enable (experimental) sound support (default); false to disable
+ *      scaleTimers:    true to divide timer cycle counts by the CPU's cycle multiplier (default is false)
+ *      fdrives:        0-4 floppy drives (default is 2 if no sw1 value provided)
+ *      monitor:        none|tv|color|mono (default is mono if no sw1 value provided) 
  *      rtcDate:        optional RTC date to be used on resets; use the ISO 8601 format; eg: "2011-10-10T14:48:00"
  *
  * The conventions used for the sw1 and sw2 strings are that the left-most character represents DIP switch [1],
@@ -63,9 +65,9 @@ if (typeof module !== 'undefined') {
  *
  *      SW1[1]    (bit 0)     "0xxxxxxx" (1):  IPL,  "1xxxxxxx" (0):  No IPL
  *      SW1[2]    (bit 1)     reserved
- *      SW1[3,4]  (bits 3-2)  "xx11xxxx" (00): 16Kb, "xx10xxxx" (01): 32Kb,  "xx01xxxx" (10): 48Kb,  "xx00xxxx" (11): 64Kb
- *      SW1[5,6]  (bits 5-4)  "xxxx11xx" (00): none, "xxxx10xx" (01): CGA40, "xxxx01xx" (10): CGA80, "xxxx00xx" (11): MDA80
- *      SW1[7,8]  (bits 7-6)  "xxxxxx11" (00): 1 FD, "xxxxxx10" (01): 2 FD,  "xxxxxx01" (10): 3 FD,  "xxxxxx00" (11): 4 FD
+ *      SW1[3,4]  (bits 3-2)  "xx11xxxx" (00): 16Kb, "xx01xxxx" (01): 32Kb,  "xx10xxxx" (10): 48Kb,  "xx00xxxx" (11): 64Kb
+ *      SW1[5,6]  (bits 5-4)  "xxxx11xx" (00): none, "xxxx01xx" (01): tv,    "xxxx10xx" (10): color, "xxxx00xx" (11): mono
+ *      SW1[7,8]  (bits 7-6)  "xxxxxx11" (00): 1 FD, "xxxxxx01" (01): 2 FD,  "xxxxxx10" (10): 3 FD,  "xxxxxx00" (11): 4 FD
  *      
  * Note: FD refers to floppy drive, and IPL refers to an "Initial Program Load" floppy drive.
  *
@@ -149,14 +151,44 @@ function ChipSet(parmsChipSet)
 
     this.model = parmsChipSet['model'];
     this.model = (this.model !== undefined? parseInt(this.model, 10) : ChipSet.MODEL_5150);
-
+    
     /*
+     * SW1 describes the number of floppy drives, the amount of base memory, the primary monitor type,
+     * and (on the MODEL_5160) whether or not a coprocessor is installed.  If no SW1 settings are provided,
+     * we look for individual 'fdrives' and 'monitor' settings and build a default SW1 value.
+     * 
+     * TODO: Get rid of reliance on SW1 for MODEL_5170 and later; omitting it now results in a BIOS warning:
+     * 
+     *      ' 162-System Options Not Set-(Run SETUP)'
+     *      
+     *      ' (RESUME = "F1" KEY)'
+     *      
+     * The defaults below select max memory, monochrome monitor (EGA monitor for MODEL_5170), and two floppies.
+     * Don't get too excited about "max memory" either: on a MODEL_5150, the max was 64Kb, and on a MODEL_5160,
+     * the max was 256Kb.  However, the RAM component is free to install as much base memory as it likes,
+     * overriding the SW1 memory setting.
+     *
      * Given that the ROM BIOS is hard-coded to load boot sectors @0000:7C00, the minimum amount of system RAM
      * required to boot is therefore 32Kb.  Whether that's actually enough to run any or all versions of PC-DOS is
      * a separate question.  FYI, with only 16Kb, the ROM BIOS will still try to boot, and fail miserably.
      */
-    this.sw1Init = this.parseSwitches(parmsChipSet['sw1'], ChipSet.PPI_SW.MEMORY.X4 | ChipSet.PPI_SW.MONITOR.MDA);
-
+    this.sw1Init = 0; 
+    var sw1 = parmsChipSet['sw1'];
+    if (sw1) {
+        this.sw1Init = this.parseSwitches(sw1, ChipSet.PPI_SW.MEMORY.X4 | ChipSet.PPI_SW.MONITOR.MONO);
+    } else {
+        var nDrives = parmsChipSet['fdrives'] || 2;
+        if (nDrives) {
+            this.sw1Init |= ChipSet.PPI_SW.FDRIVE.IPL;
+            nDrives--;
+            this.sw1Init |= ((nDrives & 0x3) << ChipSet.PPI_SW.FDRIVE.SHIFT);
+        }
+        var sMonitor = parmsChipSet['monitor'] || (this.model < ChipSet.MODEL_5170? "mono" : "ega");
+        if (sMonitor && ChipSet.aMonitorSwitches[sMonitor] !== undefined) {
+            this.sw1Init |= (ChipSet.aMonitorSwitches[sMonitor] << ChipSet.PPI_SW.MONITOR.SHIFT);
+        }
+    }
+                
     /*
      * SW2 describes the number of 32Kb blocks of I/O expansion RAM that's present in the system. The MODEL_5150 ROM BIOS
      * only checked/supported the first four switches, so the maximum amount of additional RAM specifiable was 15 * 32Kb,
@@ -168,11 +200,10 @@ function ChipSet(parmsChipSet)
      * supported on the motherboard) is the "size" parameter of the RAM component.  NOTE: If you use the "size" parameter,
      * you will not be able to dynamically alter the memory configuration; the RAM component will ignore any changes to SW1.
      */
-    this.sw2Init = this.parseSwitches(parmsChipSet['sw2'], 0);
+    this.sw2Init = this.parseSwitches(parmsChipSet['sw2'] || "11110000", 0);
 
     /*
-     * The SW1 memory switches specify a multiplier; the number of Kb that they multiply is model-dependent:
-     * 16Kb on a MODEL_5150, 64Kb otherwise.
+     * The SW1 memory setting is actually just a multiplier: it's multiplied by 16Kb on a MODEL_5150, 64Kb otherwise.
      */
     this.kbSW = (this.model == ChipSet.MODEL_5150? 16 : 64);
 
@@ -180,6 +211,7 @@ function ChipSet(parmsChipSet)
     if (this.model >= ChipSet.MODEL_5170) {
         this.cDMACs = this.cPICs = 2;
     }
+    
     this.fScaleTimers = parmsChipSet['scaleTimers'] || false;
     this.sRTCDate = parmsChipSet['rtcDate'];
 
@@ -232,11 +264,23 @@ ChipSet.MODEL_5170 = 5170;
  */
 ChipSet.MONITOR = {};
 ChipSet.MONITOR.NONE            = 0;
-ChipSet.MONITOR.TV              = 1;    // TV (lower resolution; not currently supported)
+ChipSet.MONITOR.TV              = 1;    // Composite monitor (lower resolution; no support)
 ChipSet.MONITOR.COLOR           = 2;    // Color Display (5153)
 ChipSet.MONITOR.MONO            = 3;    // Monochrome Display (5151)
 ChipSet.MONITOR.EGACOLOR        = 4;    // Enhanced Color Display (5154) in High-Res Mode
 ChipSet.MONITOR.EGAEMULATION    = 5;    // Enhanced Color Display (5154) in Emulation Mode
+
+/*
+ * Lookup table for converting ChipSet "monitor" parameter into the corresponding SW1 switch bits
+ * (they must be shifted left by ChipSet.PPI_SW.MONITOR.SHIFT before OR'ing them into sw1/sw1Init).
+ */
+ChipSet.aMonitorSwitches = {
+    "none": 0x0,
+    "tv":   0x1,
+    "color":0x2,
+    "mono": 0x3,
+    "ega":  0x0
+};
 
 /*
  *  8237A DMA Controller (DMAC) I/O ports
@@ -385,6 +429,9 @@ ChipSet.PIC_HI.ICW4_MASTER      = 0x04;
 ChipSet.PIC_HI.ICW4_BUFFERED    = 0x08;
 ChipSet.PIC_HI.ICW4_FULLY_NESTED= 0x10;
 
+/*
+ * Definitions for Operation Command Words (OCW1, OCW2 and OCW3)
+ */
 ChipSet.PIC_HI.OCW1_IMR         = 0xFF;
 
 ChipSet.PIC_LO.OCW2             = 0x00; // bit 3 (PIC_LO.OCW3) and bit 4 (ChipSet.PIC_LO.ICW1) are clear in an OCW2 command byte
@@ -536,9 +583,9 @@ ChipSet.PPI_SW.MEMORY.X4        = 0x0C;
 ChipSet.PPI_SW.MEMORY.MASK      = 0x0C;
 ChipSet.PPI_SW.MEMORY.SHIFT     = 2;
 ChipSet.PPI_SW.MONITOR = {};
-ChipSet.PPI_SW.MONITOR.CGA40    = 0x10;
-ChipSet.PPI_SW.MONITOR.CGA80    = 0x20;
-ChipSet.PPI_SW.MONITOR.MDA      = 0x30;
+ChipSet.PPI_SW.MONITOR.TV       = 0x10;
+ChipSet.PPI_SW.MONITOR.COLOR    = 0x20;
+ChipSet.PPI_SW.MONITOR.MONO     = 0x30;
 ChipSet.PPI_SW.MONITOR.MASK     = 0x30;
 ChipSet.PPI_SW.MONITOR.SHIFT    = 4;
 ChipSet.PPI_SW.FDRIVE.ONE       = 0x00; // 1 floppy drive attached (or 0 drives if PPI_SW.FDRIVE_IPL is not set -- MODEL_5150 only)
@@ -574,83 +621,84 @@ ChipSet.PPI_SW.FDRIVE.SHIFT     = 6;
  *      http://halicery.com/8042/8042_INTERN_TXT.htm
  *      http://www.os2museum.com/wp/?p=589 ("IBM PC/AT 8042 Keyboard Controller Commands")
  */
-ChipSet.KBC = {};
-ChipSet.KBC.DATA = {            // this.b8042OutBuff (PPI_A on previous models, still referred to as "PORT A" by the MODEL_5170 BIOS)
-    PORT:           0x60,
-    SELF_TEST: {                // result of ChipSet.KBC.CMD.SELF_TEST command (0xAA)
-        OK:         0x55
+ChipSet.KBC = {
+    DATA: {                     // this.b8042OutBuff (PPI_A on previous models, still referred to as "PORT A" by the MODEL_5170 BIOS)
+        PORT:           0x60,
+        CMD: {                  // this.b8042CmdData (KBD_DATA.CMD "data bytes" written to port 0x60, after writing a KBD_CMD byte to port 0x64)
+            PC_COMPAT:  0x40,   // generate IBM PC-compatible scan codes
+            PC_MODE:    0x20,
+            NO_CLOCK:   0x10,   // disable keyboard by driving "clock" line low
+            NO_INHIBIT: 0x08,   // disable inhibit function
+            SYS_FLAG:   0x04,   // this value is propagated to ChipSet.KBC.STATUS.SYS_FLAG 
+            INT_ENABLE: 0x01    // generate an interrupt when the controller places data in the output buffer
+        },
+        SELF_TEST: {            // result of ChipSet.KBC.CMD.SELF_TEST command (0xAA)
+            OK:         0x55
+        },
+        INTF_TEST: {            // result of ChipSet.KBC.CMD.INTF_TEST command (0xAB)
+            OK:         0x00,   // no error
+            CLOCK_LO:   0x01,   // keyboard clock line stuck low
+            CLOCK_HI:   0x02,   // keyboard clock line stuck high
+            DATA_LO:    0x03,   // keyboard data line stuck low
+            DATA_HI:    0x04    // keyboard data line stuck high
+        }
     },
-    INTF_TEST: {                // result of ChipSet.KBC.CMD.INTF_TEST command (0xAB)
-        OK:         0x00,       // no error
-        CLOCK_LO:   0x01,       // keyboard clock line stuck low
-        CLOCK_HI:   0x02,       // keyboard clock line stuck high
-        DATA_LO:    0x03,       // keyboard data line stuck low
-        DATA_HI:    0x04        // keyboard data line stuck high
+    INPORT: {                   // this.b8042InPort
+        UNDEFINED:      0x0F,   // undefined
+        ENABLE_256KB:   0x10,   // enable 2nd 256Kb of system board RAM
+        MFG_OFF:        0x20,   // manufacturing jumper not installed
+        MONO:           0x40,   // monochrome monitor is primary display
+        KBD_ON:         0x80    // keyboard not inhibited
+    },
+    OUTPORT: {                  // this.b8042OutPort
+        NO_RESET:       0x01,   // set by default
+        A20_ON:         0x02,   // set by default
+        OUTBUFF_FULL:   0x10,   // output buffer full
+        INBUFF_EMPTY:   0x20,   // input buffer empty
+        KBD_CLOCK:      0x40,   // keyboard clock (output)
+        KBD_DATA:       0x80    // keyboard data (output)
+    },
+    TESTPORT: {                 // generated "on the fly"
+        KBD_CLOCK:      0x01,   // keyboard clock (input)
+        KBD_DATA:       0x02    // keyboard data (input)
+    },
+    RWREG: {                    // this.bPPIB (since CLK_TIMER2 and SPK_TIMER2 are in both PPI_B and KBD_RWREG)
+        PORT:           0x61,
+        CLK_TIMER2:     0x01,   // set to enable clock to TIMER2
+        SPK_TIMER2:     0x02,   // set to connect output of TIMER2 to speaker
+        DISABLE_CHK:    0x0C,   // set these bits to disable I/O and RAM parity checks, clear them to enable checks
+        REFRESH_BIT:    0x10,   // indicates memory refresh
+        IO_CHK:         0x40,   // indicates I/O check
+        PARITY_CHK:     0x80,   // indicates RAM parity check
+        PARITY_ERR:     0xC0
+    },
+    CMD: {                      // this.b8042InBuff (on write to port 0x64, interpret this as a CMD)
+        PORT:           0x64,
+        READ_CMD:       0x20,
+        WRITE_CMD:      0x60,   // followed by a command byte written to KBD_DATA.PORT (see KBD_DATA.CMD) 
+        SELF_TEST:      0xAA,   // self-test (KBD_DATA.SELF_TEST_OK is placed in the output buffer if no errors)
+        INTF_TEST:      0xAB,   // interface test
+        DIAG_DUMP:      0xAC,   // diagnostic dump
+        DISABLE_KBD:    0xAD,   // disable keyboard
+        ENABLE_KBD:     0xAE,   // enable keyboard
+        READ_INPORT:    0xC0,   // read input port and place data in output buffer (use only if output buffer empty)
+        READ_OUTPORT:   0xD0,   // read output port and place data in output buffer (use only if output buffer empty)
+        WRITE_OUTPORT:  0xD1,   // next byte written to KBD_DATA.PORT (port 0x60) is placed in the output port (see KBD_DATA.OUTPUT)
+        READ_TEST:      0xE0,
+        PULSE_OUTPORT:  0xF0    // this is the 1st of 16 commands (0xF0-0xFF) that pulse bits 0-3 of the output port
+    },
+    STATUS: {                   // this.b8042Status (on read from port 0x64)
+        PORT:           0x64,
+        OUTBUFF_FULL:   0x01,
+        INBUFF_FULL:    0x02,   // set if the controller has received but not yet read data written to the input buffer (not normally set)
+        SYS_FLAG:       0x04,
+        CMD_FLAG:       0x08,   // set on write to KBD_CMD (port 0x64), clear on write to KBD_DATA (port 0x60)
+        NO_INHIBIT:     0x10,
+        XMT_TIMEOUT:    0x20,
+        RCV_TIMEOUT:    0x40,
+        PARITY_ERR:     0x80,   // last byte of data received had EVEN parity (ODD parity is normally expected)
+        OUTBUFF_DELAY:  0x100
     }
-};
-ChipSet.KBC.DATA.CMD = {        // this.b8042CmdData (KBD_DATA.CMD "data bytes" written to port 0x60, after writing a KBD_CMD byte to port 0x64)
-    PC_COMPAT:      0x40,       // generate IBM PC-compatible scan codes
-    PC_MODE:        0x20,
-    NO_CLOCK:       0x10,       // disable keyboard by driving "clock" line low
-    NO_INHIBIT:     0x08,       // disable inhibit function
-    SYS_FLAG:       0x04,       // this value is propagated to ChipSet.KBC.STATUS.SYS_FLAG 
-    INT_ENABLE:     0x01        // generate an interrupt when the controller places data in the output buffer
-};
-ChipSet.KBC.INPORT = {          // this.b8042InPort
-    UNDEFINED:      0x0F,       // undefined
-    ENABLE_256KB:   0x10,       // enable 2nd 256Kb of system board RAM
-    MFG_OFF:        0x20,       // manufacturing jumper not installed
-    MONO:           0x40,       // monochrome monitor is primary display
-    KBD_ON:         0x80        // keyboard not inhibited
-};
-ChipSet.KBC.OUTPORT = {         // this.b8042OutPort
-    NO_RESET:       0x01,       // set by default
-    A20_ON:         0x02,       // set by default
-    OUTBUFF_FULL:   0x10,       // output buffer full
-    INBUFF_EMPTY:   0x20,       // input buffer empty
-    KBD_CLOCK:      0x40,       // keyboard clock (output)
-    KBD_DATA:       0x80        // keyboard data (output)
-};
-ChipSet.KBC.TESTPORT = {        // generated "on the fly"
-    KBD_CLOCK:      0x01,       // keyboard clock (input)
-    KBD_DATA:       0x02        // keyboard data (input)
-};
-ChipSet.KBC.RWREG = {           // this.bPPIB (since CLK_TIMER2 and SPK_TIMER2 are in both PPI_B and KBD_RWREG)
-    PORT:           0x61,
-    CLK_TIMER2:     0x01,       // set to enable clock to TIMER2
-    SPK_TIMER2:     0x02,       // set to connect output of TIMER2 to speaker
-    DISABLE_CHK:    0x0C,       // set these bits to disable I/O and RAM parity checks, clear them to enable checks
-    REFRESH_BIT:    0x10,       // indicates memory refresh
-    IO_CHK:         0x40,       // indicates I/O check
-    PARITY_CHK:     0x80,       // indicates RAM parity check
-    PARITY_ERR:     0xC0
-};
-ChipSet.KBC.CMD = {             // this.b8042InBuff (on write to port 0x64, interpret this as a CMD)
-    PORT:           0x64,
-    READ_CMD:       0x20,
-    WRITE_CMD:      0x60,       // followed by a command byte written to KBD_DATA.PORT (see KBD_DATA.CMD) 
-    SELF_TEST:      0xAA,       // self-test (KBD_DATA.SELF_TEST_OK is placed in the output buffer if no errors)
-    INTF_TEST:      0xAB,       // interface test
-    DIAG_DUMP:      0xAC,       // diagnostic dump
-    DISABLE_KBD:    0xAD,       // disable keyboard
-    ENABLE_KBD:     0xAE,       // enable keyboard
-    READ_INPORT:    0xC0,       // read input port and place data in output buffer (use only if output buffer empty)
-    READ_OUTPORT:   0xD0,       // read output port and place data in output buffer (use only if output buffer empty)
-    WRITE_OUTPORT:  0xD1,       // next byte written to KBD_DATA.PORT (port 0x60) is placed in the output port (see KBD_DATA.OUTPUT)
-    READ_TEST:      0xE0,
-    PULSE_OUTPORT:  0xF0        // this is the 1st of 16 commands (0xF0-0xFF) that pulse bits 0-3 of the output port
-};
-ChipSet.KBC.STATUS = {          // this.b8042Status (on read from port 0x64)
-    PORT:           0x64,
-    OUTBUFF_FULL:   0x01,
-    INBUFF_FULL:    0x02,       // set if the controller has received but not yet read data written to the input buffer (not normally set)
-    SYS_FLAG:       0x04,
-    CMD_FLAG:       0x08,       // set on write to KBD_CMD (port 0x64), clear on write to KBD_DATA (port 0x60)
-    NO_INHIBIT:     0x10,
-    XMT_TIMEOUT:    0x20,
-    RCV_TIMEOUT:    0x40,
-    PARITY_ERR:     0x80,       // last byte of data received had EVEN parity (ODD parity is normally expected)
-    OUTBUFF_DELAY:  0x100
 };
 
 /*
@@ -660,103 +708,103 @@ ChipSet.KBC.STATUS = {          // this.b8042Status (on read from port 0x64)
  * 
  * The ADDR port also controls NMI: write an address with bit 7 clear to enable NMI or set to disable NMI.
  */
-ChipSet.CMOS = {};
-ChipSet.CMOS.ADDR = {};                 // this.bCMOSAddr
-ChipSet.CMOS.ADDR.PORT          = 0x70;
-ChipSet.CMOS.ADDR.RTC_SEC       = 0x00;
-ChipSet.CMOS.ADDR.RTC_SEC_ALRM  = 0x01;
-ChipSet.CMOS.ADDR.RTC_MIN       = 0x02;
-ChipSet.CMOS.ADDR.RTC_MIN_ALRM  = 0x03;
-ChipSet.CMOS.ADDR.RTC_HOUR      = 0x04;
-ChipSet.CMOS.ADDR.RTC_HOUR_ALRM = 0x05;
-ChipSet.CMOS.ADDR.RTC_WEEK_DAY  = 0x06;
-ChipSet.CMOS.ADDR.RTC_MONTH_DAY = 0x07;
-ChipSet.CMOS.ADDR.RTC_MONTH     = 0x08;
-ChipSet.CMOS.ADDR.RTC_YEAR      = 0x09;
-ChipSet.CMOS.ADDR.RTC_STATUSA   = 0x0A;
-ChipSet.CMOS.ADDR.RTC_STATUSB   = 0x0B;
-ChipSet.CMOS.ADDR.RTC_STATUSC   = 0x0C;
-ChipSet.CMOS.ADDR.RTC_STATUSD   = 0x0D;
-ChipSet.CMOS.ADDR.DIAG          = 0x0E;
-ChipSet.CMOS.ADDR.SHUTDOWN      = 0x0F;
-ChipSet.CMOS.ADDR.FDRIVE        = 0x10;
-ChipSet.CMOS.ADDR.HDRIVE        = 0x12;
-ChipSet.CMOS.ADDR.EQUIP         = 0x14;
-ChipSet.CMOS.ADDR.BASEMEM_LO    = 0x15;
-ChipSet.CMOS.ADDR.BASEMEM_HI    = 0x16; // the BASEMEM values indicate the total Kb of base memory, up to 0x280 (640Kb)
-ChipSet.CMOS.ADDR.EXTMEM_LO     = 0x17;
-ChipSet.CMOS.ADDR.EXTMEM_HI     = 0x18; // the EXTMEM values indicate the total Kb of extended memory, up to 0x3C00 (15Mb)
-ChipSet.CMOS.ADDR.CHKSUM_HI     = 0x2E;
-ChipSet.CMOS.ADDR.CHKSUM_LO     = 0x2F; // CMOS bytes included in the checksum calculation: 0x10-0x2D
-ChipSet.CMOS.ADDR.EXTMEM2_LO    = 0x30;
-ChipSet.CMOS.ADDR.EXTMEM2_HI    = 0x31;
-ChipSet.CMOS.ADDR.CENTURY_DATE  = 0x32; // BCD value for the current century (eg, 0x19 for 20th century, 0x20 for 21st century)
-ChipSet.CMOS.ADDR.BOOT_INFO     = 0x33; // 0x80 if 128Kb expansion memory installed, 0x40 if Setup Utility wants an initial setup message 
-ChipSet.CMOS.ADDR.MASK          = 0x3F;
-ChipSet.CMOS.ADDR.TOTAL         = 0x40;
-ChipSet.CMOS.ADDR.NMI_DISABLE   = 0x80;
-
-ChipSet.CMOS.DATA = {};                 // this.abCMOSData
-ChipSet.CMOS.DATA.PORT          = 0x71;
-
-ChipSet.CMOS.STATUSA = {};              // abCMOSData[ChipSet.CMOS.ADDR.RTC_STATUSA]
-ChipSet.CMOS.STATUSA.UIP        = 0x80; // bit 7: 1 indicates Update-In-Progress, 0 indicates date/time ready to read
-ChipSet.CMOS.STATUSA.DV         = 0x70; // bits 6-4 (DV2-DV0) are programmed to 010 to select a 32.768Khz time base
-ChipSet.CMOS.STATUSA.RS         = 0x0F; // bits 3-0 (RS3-RS0) are programmed to 0110 to select a 976.562us interrupt rate
-
-ChipSet.CMOS.STATUSB = {};              // abCMOSData[ChipSet.CMOS.ADDR.RTC_STATUSB]
-ChipSet.CMOS.STATUSB.SET        = 0x80; // bit 7: 1 to set any/all of the 14 time-bytes
-ChipSet.CMOS.STATUSB.PIE        = 0x40; // bit 6: 1 for Periodic Interrupt Enable
-ChipSet.CMOS.STATUSB.AIE        = 0x20; // bit 5: 1 for Alarm Interrupt Enable
-ChipSet.CMOS.STATUSB.UIE        = 0x10; // bit 4: 1 for Update-Ended Interrupt Enable
-ChipSet.CMOS.STATUSB.SQWE       = 0x08; // bit 3: 1 for Square Wave Enabled (as set by the STATUSA rate selection bits)
-ChipSet.CMOS.STATUSB.BINARY     = 0x04; // bit 2: 1 for binary Date Mode, 0 for BCD Date Mode
-ChipSet.CMOS.STATUSB.HOUR24     = 0x02; // bit 1: 1 for 24-hour mode, 0 for 12-hour mode
-ChipSet.CMOS.STATUSB.DST        = 0x01; // bit 0: 1 for Daylight Savings Time enabled
-
-ChipSet.CMOS.STATUSC = {};              // abCMOSData[ChipSet.CMOS.ADDR.RTC_STATUSC] TODO: Does reading this register clear these interrupt conditions? (see F000:01C6 in the MODEL_5170 BIOS)
-ChipSet.CMOS.STATUSC.IRQF       = 0x80; // bit 7
-ChipSet.CMOS.STATUSC.PF         = 0x40; // bit 6: 1 indicates Periodic Interrupt
-ChipSet.CMOS.STATUSC.AF         = 0x20; // bit 5: 1 indicates Alarm Interrupt
-ChipSet.CMOS.STATUSC.UF         = 0x10; // bit 4: 1 indicates Update-Ended Interrupt
-ChipSet.CMOS.STATUSC.RESERVED   = 0x0F;
-
-ChipSet.CMOS.STATUSD = {};              // abCMOSData[ChipSet.CMOS.ADDR.RTC_STATUSD]
-ChipSet.CMOS.STATUSD.VRB        = 0x80; // bit 7: 1 indicates Valid RAM Bit (0 implies power was and/or is lost)
-ChipSet.CMOS.STATUSD.RESERVED   = 0x7F;
-
-ChipSet.CMOS.DIAG = {};                 // abCMOSData[ChipSet.CMOS.ADDR.DIAG]
-ChipSet.CMOS.DIAG.RTCFAIL       = 0x80; // bit 7: 1 indicates RTC lost power
-ChipSet.CMOS.DIAG.CHKSUMFAIL    = 0x40; // bit 6: 1 indicates bad CMOS checksum
-ChipSet.CMOS.DIAG.CONFIGFAIL    = 0x20; // bit 5: 1 indicates bad CMOS configuration info
-ChipSet.CMOS.DIAG.MEMSIZEFAIL   = 0x10; // bit 4: 1 indicates memory size miscompare
-ChipSet.CMOS.DIAG.HDRIVEFAIL    = 0x08; // bit 3: 1 indicates hard drive controller or drive init failure
-ChipSet.CMOS.DIAG.TIMEFAIL      = 0x04; // bit 2: 1 indicates time failure
-ChipSet.CMOS.DIAG.RESERVED      = 0x03;
-
-ChipSet.FDRIVE = {                      // abCMOSData[ChipSet.CMOS.ADDR.FDRIVE]
-    D0_MASK:    0xF0,                   // Drive 0 type in high nibble
-    D1_MASK:    0x0F,                   // Drive 1 type in lower nibble
-    NONE:       0,                      // no drive
-    DSDD:       1,                      // double-sided double-density drive (48 TPI, 40 tracks, 360Kb max)
-    DSHD:       2                       // double-sided high-density drive (96 TPI, 80 tracks, 1.2Mb max)
-};
-
-ChipSet.CMOS.HDRIVE = {                 // abCMOSData[ChipSet.CMOS.ADDR.HDRIVE]
-    D0_MASK:    0xF0,                   // Drive 0 type in high nibble
-    D1_MASK:    0x0F                    // Drive 1 type in lower nibble
+ChipSet.CMOS = {
+    ADDR: {                     // this.bCMOSAddr
+        PORT:           0x70,
+        RTC_SEC:        0x00,
+        RTC_SEC_ALRM:   0x01,
+        RTC_MIN:        0x02,
+        RTC_MIN_ALRM:   0x03,
+        RTC_HOUR:       0x04,
+        RTC_HOUR_ALRM:  0x05,
+        RTC_WEEK_DAY:   0x06,
+        RTC_MONTH_DAY:  0x07,
+        RTC_MONTH:      0x08,
+        RTC_YEAR:       0x09,
+        RTC_STATUSA:    0x0A,
+        RTC_STATUSB:    0x0B,
+        RTC_STATUSC:    0x0C,
+        RTC_STATUSD:    0x0D,
+        DIAG:           0x0E,
+        SHUTDOWN:       0x0F,
+        FDRIVE:         0x10,
+        HDRIVE:         0x12,
+        EQUIP:          0x14,
+        BASEMEM_LO:     0x15,
+        BASEMEM_HI:     0x16,   // the BASEMEM values indicate the total Kb of base memory, up to 0x280 (640Kb)
+        EXTMEM_LO:      0x17,
+        EXTMEM_HI:      0x18,   // the EXTMEM values indicate the total Kb of extended memory, up to 0x3C00 (15Mb)
+        CHKSUM_HI:      0x2E,
+        CHKSUM_LO:      0x2F,   // CMOS bytes included in the checksum calculation: 0x10-0x2D
+        EXTMEM2_LO:     0x30,
+        EXTMEM2_HI:     0x31,
+        CENTURY_DATE:   0x32,   // BCD value for the current century (eg, 0x19 for 20th century, 0x20 for 21st century)
+        BOOT_INFO:      0x33,   // 0x80 if 128Kb expansion memory installed, 0x40 if Setup Utility wants an initial setup message 
+        MASK:           0x3F,
+        TOTAL:          0x40,
+        NMI_DISABLE:    0x80
+    },
+    DATA: {                     // this.abCMOSData
+        PORT:           0x71
+    },
+    STATUSA: {                  // abCMOSData[ChipSet.CMOS.ADDR.RTC_STATUSA]
+        UIP:            0x80,   // bit 7: 1 indicates Update-In-Progress, 0 indicates date/time ready to read
+        DV:             0x70,   // bits 6-4 (DV2-DV0) are programmed to 010 to select a 32.768Khz time base
+        RS:             0x0F    // bits 3-0 (RS3-RS0) are programmed to 0110 to select a 976.562us interrupt rate
+    },
+    STATUSB: {                  // abCMOSData[ChipSet.CMOS.ADDR.RTC_STATUSB]
+        SET:            0x80,   // bit 7: 1 to set any/all of the 14 time-bytes
+        PIE:            0x40,   // bit 6: 1 for Periodic Interrupt Enable
+        AIE:            0x20,   // bit 5: 1 for Alarm Interrupt Enable
+        UIE:            0x10,   // bit 4: 1 for Update-Ended Interrupt Enable
+        SQWE:           0x08,   // bit 3: 1 for Square Wave Enabled (as set by the STATUSA rate selection bits)
+        BINARY:         0x04,   // bit 2: 1 for binary Date Mode, 0 for BCD Date Mode
+        HOUR24:         0x02,   // bit 1: 1 for 24-hour mode, 0 for 12-hour mode
+        DST:            0x01    // bit 0: 1 for Daylight Savings Time enabled
+    },
+    STATUSC: {                  // abCMOSData[ChipSet.CMOS.ADDR.RTC_STATUSC] TODO: Does reading this register clear these interrupt conditions? (see F000:01C6 in the MODEL_5170 BIOS)
+        IRQF:           0x80,   // bit 7
+        PF:             0x40,   // bit 6: 1 indicates Periodic Interrupt
+        AF:             0x20,   // bit 5: 1 indicates Alarm Interrupt
+        UF:             0x10,   // bit 4: 1 indicates Update-Ended Interrupt
+        RESERVED:       0x0F
+    },
+    STATUSD: {                  // abCMOSData[ChipSet.CMOS.ADDR.RTC_STATUSD]
+        VRB:            0x80,   // bit 7: 1 indicates Valid RAM Bit (0 implies power was and/or is lost)
+        RESERVED:       0x7F
+    },
+    DIAG: {                     // abCMOSData[ChipSet.CMOS.ADDR.DIAG]
+        RTCFAIL:        0x80,   // bit 7: 1 indicates RTC lost power
+        CHKSUMFAIL:     0x40,   // bit 6: 1 indicates bad CMOS checksum
+        CONFIGFAIL:     0x20,   // bit 5: 1 indicates bad CMOS configuration info
+        MEMSIZEFAIL:    0x10,   // bit 4: 1 indicates memory size miscompare
+        HDRIVEFAIL:     0x08,   // bit 3: 1 indicates hard drive controller or drive init failure
+        TIMEFAIL:       0x04,   // bit 2: 1 indicates time failure
+        RESERVED:       0x03
+    },
+    FDRIVE: {                   // abCMOSData[ChipSet.CMOS.ADDR.FDRIVE]
+        D0_MASK:        0xF0,   // Drive 0 type in high nibble
+        D1_MASK:        0x0F,   // Drive 1 type in lower nibble
+        NONE:           0,      // no drive
+        DSDD:           1,      // double-sided double-density drive (48 TPI, 40 tracks, 360Kb max)
+        DSHD:           2       // double-sided high-density drive (96 TPI, 80 tracks, 1.2Mb max)
+    },
     /*
      * HDRIVE types are defined by table in the HDC component, which uses setCMOSDriveType() to update the CMOS 
      */
+    HDRIVE: {                   // abCMOSData[ChipSet.CMOS.ADDR.HDRIVE]
+        D0_MASK:        0xF0,   // Drive 0 type in high nibble
+        D1_MASK:        0x0F    // Drive 1 type in lower nibble
+    },
+    /*
+     * The CMOS equipment flags use the same format as the older PPI equipment flags
+     */
+    EQUIP: {                    // abCMOSData[ChipSet.CMOS.ADDR.EQUIP]
+        MONITOR:        ChipSet.PPI_SW.MONITOR,         // PPI_SW.MONITOR.MASK == 0x30
+        COPROC:         ChipSet.PPI_SW.COPROC,          // PPI_SW.COPROC == 0x02
+        FDRIVE:         ChipSet.PPI_SW.FDRIVE           // PPI_SW.FDRIVE.IPL == 0x01 and PPI_SW.FDRIVE.MASK = 0xC0
+    }
 };
-
-/*
- * The CMOS equipment flags use the same format as the older PPI equipment flags
- */
-ChipSet.CMOS.EQUIP = {};                // abCMOSData[ChipSet.CMOS.ADDR.EQUIP]
-ChipSet.CMOS.EQUIP.MONITOR      = ChipSet.PPI_SW.MONITOR;       // PPI_SW.MONITOR.MASK == 0x30
-ChipSet.CMOS.EQUIP.COPROC       = ChipSet.PPI_SW.COPROC;        // PPI_SW.COPROC == 0x02
-ChipSet.CMOS.EQUIP.FDRIVE       = ChipSet.PPI_SW.FDRIVE;        // PPI_SW.FDRIVE.IPL == 0x01 and PPI_SW.FDRIVE.MASK = 0xC0
 
 /*
  * Manufacturing Test Ports (MODEL_5170)
@@ -772,29 +820,33 @@ ChipSet.CMOS.EQUIP.FDRIVE       = ChipSet.PPI_SW.FDRIVE;        // PPI_SW.FDRIVE
  * with manufacturing test ("MFG_TST") code which, if enabled, writes to other DMA page registers,
  * perhaps treating them as scratch registers.
  */
-ChipSet.MFG = {};                       // this.bMFGData
-ChipSet.MFG.PORT                = 0x80;
+ChipSet.MFG = {                 // this.bMFGData
+    PORT:               0x80
+};
 
 /*
  * NMI Mask Register (MODEL_5150 and MODEL_5160 only)
  */
-ChipSet.NMI = {};                       // this.bNMI
-ChipSet.NMI.PORT                = 0xA0;
-ChipSet.NMI.ENABLE              = 0x80;
-ChipSet.NMI.DISABLE             = 0x00;
+ChipSet.NMI = {                 // this.bNMI
+    PORT:               0xA0,
+    ENABLE:             0x80,
+    DISABLE:            0x00
+};
 
 /*
  * Coprocessor Control Registers (MODEL_5170)
  */
-ChipSet.COPROC = {};                    // TODO: Define a variable for this
-ChipSet.COPROC.PORT_CLEAR       = 0xF0; // clear the coprocessor's "busy" state
-ChipSet.COPROC.PORT_RESET       = 0xF1; // reset the coprocessor
+ChipSet.COPROC = {              // TODO: Define a variable for this
+    PORT_CLEAR:         0xF0,   // clear the coprocessor's "busy" state
+    PORT_RESET:         0xF1    // reset the coprocessor
+};
 
 /*
  * ChipSet-related BIOS interrupts, functions, and other parameters
  */
-ChipSet.BIOS = {};
-ChipSet.BIOS.RTC = 0x1A;
+ChipSet.BIOS = {
+    RTC_INT:            0x1A
+};
 
 /**
  * @this {ChipSet}
@@ -883,7 +935,7 @@ ChipSet.prototype.initBus = function(cmp, bus, cpu, dbg)
                 chipset.dumpCMOS();
             });
         }
-        cpu.addInterruptNotify(ChipSet.BIOS.RTC, this, this.intBIOSRTC);
+        cpu.addInterruptNotify(ChipSet.BIOS.RTC_INT, this, this.intBIOSRTC);
     }
 };
 
@@ -897,8 +949,12 @@ ChipSet.prototype.initBus = function(cmp, bus, cpu, dbg)
  */
 ChipSet.prototype.powerUp = function(data, fRepower)
 {
-    if (!fRepower && data) {
-        if (!this.restore(data)) return false;
+    if (!fRepower) {
+        if (!data) {
+            this.reset();
+        } else {
+            if (!this.restore(data)) return false;
+        }
     }
     return true;
 };
@@ -923,8 +979,8 @@ ChipSet.prototype.powerDown = function(fSave)
 ChipSet.prototype.reset = function()
 {
     /*
-     * We propagate the sw?Init values to sw? at reset; the user only gets
-     * to tweak sw?Init, which we don't want to take effect until the next reset.
+     * We propagate the sw1Init/sw2Init values to sw1/sw2 at reset; the user is only
+     * allowed to tweak sw1Init/sw2Init, which doesn't take effect until the next reset.
      */
     var i;
     this.sw1 = this.sw1Init;
@@ -963,7 +1019,7 @@ ChipSet.prototype.reset = function()
     this.bNMI = ChipSet.NMI.DISABLE;// tracks writes to the NMI Mask Register
     
     /*
-     * State introduced by the MODEL_5170
+     * ChipSet state introduced by the MODEL_5170
      */
     if (this.model >= ChipSet.MODEL_5170) {
         /*
@@ -988,17 +1044,25 @@ ChipSet.prototype.reset = function()
         if (this.getSWVideoMonitor() == ChipSet.MONITOR.MONO) this.b8042InPort |= ChipSet.KBC.INPORT.MONO;
 
         this.b8042OutPort = ChipSet.KBC.OUTPORT.NO_RESET | ChipSet.KBC.OUTPORT.A20_ON;
-        this.bCMOSAddr = 0;         // NMI is enabled, since the ChipSet.CMOS.ADDR.NMI_DISABLE bit is not set in bCMOSAddr
-        this.abCMOSData = new Array(ChipSet.CMOS.ADDR.TOTAL);
-        this.initRTCDate(this.sRTCDate);
-        this.initCMOSData();
-        
-        /*
-         * TODO: Data below here has not yet been added to the save/restore state; when we're done adding new data,
-         * make sure it all gets added.
-         */
+
         this.bMFGData = 0;
         this.abDMAPageSpare = new Array(7);
+        
+        this.bCMOSAddr = 0;         // NMI is enabled, since the ChipSet.CMOS.ADDR.NMI_DISABLE bit is not set in bCMOSAddr
+        
+        /*
+         * Now that we call reset() from the ChipSet constructor, enabling other components can to update
+         * their CMOS information, we must not allow a reset() from powerUp() to toss that information, so
+         * we allocate abCMOSData only if it hasn't already been allocated.
+         */
+        if (!this.abCMOSData) this.abCMOSData = new Array(ChipSet.CMOS.ADDR.TOTAL);
+        this.initRTCDate(this.sRTCDate);
+        
+        /*
+         * initCMOSData() will initialize a variety of "legacy" CMOS bytes, but it will NOT overwrite any memory
+         * size or hard drive type information that might have been set, via addCMOSMemory() or setCMOSDriveType(). 
+         */
+        this.initCMOSData();
     }
 
     if (DEBUGGER && MAXDEBUG) {
@@ -1041,6 +1105,25 @@ ChipSet.prototype.initRTCDate = function(sDate)
      * with no parameters. 
      */
     var date = sDate? new Date(sDate) : new Date();
+    
+    /*
+     * Example of a valid Date string:
+     * 
+     *      2014-10-01T08:00:00-0700
+     *      
+     * Example of an INVALID Date string:
+     * 
+     *      2014-10-01T08:00:00PST
+     *      
+     * In the second example, the Date object is invalid, but it wasn't obvious (to me) how to detect that.
+     * So here's a test from StackOverflow (http://stackoverflow.com/questions/1353684/detecting-an-invalid-date-date-instance-in-javascript).
+     */
+    if (Object.prototype.toString.call(date) !== "[object Date]" || isNaN(date.getTime())) {
+        date = new Date();
+        this.println("CMOS date invalid (" + sDate + "), using " + date);
+    } else if (sDate) {
+        this.println("CMOS date: " + date);
+    }
     
     this.abCMOSData[ChipSet.CMOS.ADDR.RTC_SEC] = date.getSeconds();
     this.abCMOSData[ChipSet.CMOS.ADDR.RTC_SEC_ALRM] = 0;
@@ -1171,7 +1254,7 @@ ChipSet.prototype.updateRTCDate = function()
     var nCyclesUpdate = this.cpu.getCycles(this.fScaleTimers);
     
     /*
-     * If nCyclesCMOSLastUpdate hasn't been properly set yet (ie, if this is our first updateRTCDate() call),
+     * If nCyclesCMOSLastUpdate hasn't been set yet (ie, if this is our first updateRTCDate() call),
      * then do nothing except initialize nCyclesCMOSLastUpdate. 
      */
     if (this.nCyclesCMOSLastUpdate >= 0) {
@@ -1224,36 +1307,20 @@ ChipSet.prototype.updateRTCDate = function()
 ChipSet.prototype.initCMOSData = function()
 {
     /*
-     * Make sure all the "checksummed" CMOS bytes get initialized (not just the handful we set below) to ensure
+     * Make sure all the "checksummed" CMOS bytes are initialized (not just the handful we set below) to ensure
      * that the checksum will be valid.
      */
     for (var iCMOS = ChipSet.CMOS.ADDR.DIAG; iCMOS < ChipSet.CMOS.ADDR.CHKSUM_HI; iCMOS++) {
-        this.abCMOSData[iCMOS] = 0;
+        if (this.abCMOSData[iCMOS] === undefined) this.abCMOSData[iCMOS] = 0;
     }
 
     /*
      * We propagate all compatible "legacy" SW1 bits to the CMOS_EQUIP byte using the old SW masks, but any further
      * access to CMOS_ADDR.EQUIP should use the new CMOS_EQUIP flags (eg, CMOS_EQUIP.COPROC, CMOS_EQUIP.MONITOR.CGA80, etc).
-     * 
-     * TODO: Consider more generic ChipSet parameters to specify equipment settings, so that newer models like MODEL_5170
-     * don't have to rely on these legacy switch settings.  In fact, switch settings should NEVER be required; we should be
-     * setting defaults to automatically match the rest of the machine's hardware specification.  However, that's probably
-     * incomplete; for example, does the FDC component have a way of specifying the number of drives, and do we honor that?
-     * I think not....
      */
     this.abCMOSData[ChipSet.CMOS.ADDR.EQUIP] = this.sw1 & (ChipSet.PPI_SW.MONITOR.MASK | ChipSet.PPI_SW.COPROC | ChipSet.PPI_SW.FDRIVE.IPL | ChipSet.PPI_SW.FDRIVE.MASK);
-
     this.abCMOSData[ChipSet.CMOS.ADDR.FDRIVE] = (this.getSWFloppyDriveType(0) << 4) | this.getSWFloppyDriveType(1);
 
-    /*
-     * We allow both memory totals to start at zero now, and rely on the RAM component to call addCMOSMemory()
-     * to update the total(s) as appropriate.
-     *
-    var wBaseMemKb = this.getSWMemorySize();
-    this.abCMOSData[ChipSet.CMOS.ADDR.BASEMEM_LO] = wBaseMemKb & 0xff;
-    this.abCMOSData[ChipSet.CMOS.ADDR.BASEMEM_HI] = wBaseMemKb >> 8;
-     */
-    
     /*
      * The final step is calculating the CMOS checksum, which we then store into the CMOS as a courtesy, so that the
      * user doesn't get unnecessary CMOS errors.
@@ -1285,7 +1352,7 @@ ChipSet.prototype.setCMOSByte = function(iCMOS, b)
 /**
  * addCMOSMemory(addr, size)
  *
- * This is ONLY for use by the RAM component, to dynamically update the CMOS memory configuration.
+ * For use by the RAM component, to dynamically update the CMOS memory configuration.
  *
  * @this {ChipSet}
  * @param {number} addr (if 0, BASEMEM_LO/BASEMEM_HI is updated; if >= 0x100000, then EXTMEM_LO/EXTMEM_HI is updated)
@@ -1309,7 +1376,7 @@ ChipSet.prototype.addCMOSMemory = function(addr, size)
 /**
  * setCMOSDriveType(iDrive, bType)
  *
- * This is ONLY for use by the HDC component, to update the CMOS drive configuration to match HDC's internal configuration.
+ * For use by the HDC component, to update the CMOS drive configuration to match HDC's internal configuration.
  * 
  * TODO: Extend this to support FDC drive updates, so that FDC can eventually specify diskette drive types
  * (ie, DSDD or DSHD) in the same way that HDC does; currently, MODEL_5170 diskette drives always default to DSHD
@@ -1376,7 +1443,7 @@ ChipSet.prototype.save = function()
     if (this.model >= ChipSet.MODEL_5170) {
         state.set(5, [this.b8042Status, this.b8042InBuff, this.b8042CmdData,
                       this.b8042OutBuff, this.b8042InPort, this.b8042OutPort]);
-        state.set(6, [this.bCMOSAddr, this.abCMOSData, this.nCyclesCMOSLastUpdate]);
+        state.set(6, [this.bMFGData, this.abDMAPageSpare, this.bCMOSAddr, this.abCMOSData, this.nCyclesCMOSLastUpdate]);
     }
     return state.data();
 };
@@ -1439,9 +1506,11 @@ ChipSet.prototype.restore = function(data)
     a = data[6];
     if (a) {
         Component.assert(this.model >= ChipSet.MODEL_5170);
-        this.bCMOSAddr = a[0];
-        this.abCMOSData = a[1];
-        this.nCyclesCMOSLastUpdate = a[2];
+        this.bMFGData = a[0];
+        this.abDMAPageSpare = a[1];
+        this.bCMOSAddr = a[2];
+        this.abCMOSData = a[3];
+        this.nCyclesCMOSLastUpdate = a[4];
     }
     return true;
 };
@@ -1914,13 +1983,10 @@ ChipSet.prototype.dumpCMOS = function()
 {
     if (DEBUGGER) {
         var sDump = "";
-        for (var p in ChipSet.CMOS.ADDR) {
-            var iCMOS = ChipSet.CMOS.ADDR[p];
-            if (iCMOS >= 0 && iCMOS < ChipSet.CMOS.ADDR.MASK) {
-                var b = (iCMOS <= ChipSet.CMOS.ADDR.RTC_STATUSD? this.getRTCByte(iCMOS) : this.abCMOSData[iCMOS]);
-                if (sDump) sDump += '\n';
-                sDump += str.pad(p + "(" + str.toHexByte(iCMOS) + "):", 19) + str.toHexByte(b);
-            }
+        for (var iCMOS = 0; iCMOS < ChipSet.CMOS.ADDR.TOTAL; iCMOS++) {
+            var b = (iCMOS <= ChipSet.CMOS.ADDR.RTC_STATUSD? this.getRTCByte(iCMOS) : this.abCMOSData[iCMOS]);
+            if (sDump) sDump += '\n';
+            sDump += "CMOS[0x" + str.toHexByte(iCMOS) + "]: 0x" + str.toHexByte(b);
         }
         this.dbg.message(sDump);
     }
@@ -2137,8 +2203,8 @@ ChipSet.prototype.outDMAMode = function(iDMAC, port, bOut, addrFrom)
  * @param {number} bOut
  * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  *
- * Any write to this port simply resets the controller's "first/last flip-flop", which determines whether the even or odd byte
- * of a DMA address or count register will be accessed next.
+ * Any write to this port simply resets the controller's "first/last flip-flop", which determines whether
+ * the even or odd byte of a DMA address or count register will be accessed next.
  */
 ChipSet.prototype.outDMAIndex = function(iDMAC, port, bOut, addrFrom)
 {

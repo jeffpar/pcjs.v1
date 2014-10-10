@@ -1003,7 +1003,7 @@ if (DEBUGGER) {
     /*
      * DOS interrupts, for tracing DOS operations
      */
-    Debugger.INT_DOS_CALL = 0x21;
+    Debugger.DOS_INT = 0x21;
     
     Debugger.aDOSFuncDesc = {
         0x00: "terminate program",
@@ -1124,7 +1124,7 @@ if (DEBUGGER) {
             }            
         }
         
-        this.cpu.addInterruptNotify(Debugger.INT_DOS_CALL, this, this.intDOSCall);
+        this.cpu.addInterruptNotify(Debugger.DOS_INT, this, this.intDOSCall);
         
         this.setReady();
         

@@ -22,7 +22,7 @@ Attributes
 ---
  * *model* (required)
 
-	The IBM PC model number to simulate (must be either 5150 or 5160).
+	The IBM PC model number to simulate (must be 5150, 5160 or 5170).
 
  * *sw1* (optional): A binary string representing DIP switches #1 through #8 for the SW1 switch block on the IBM PC motherboard, as follows:
 
@@ -56,6 +56,31 @@ Attributes
  * *sound* (optional)
 
 	*true* (default) to enable sound, assuming the browser supports **webkitAudioContext**, or *false* to disable sound.
+
+ * *scaletimers* (optional)
+
+	*false* (default) to update timers in sync with CPU speed, *true* to scale timer updates to match real-world time.
+
+ * *fdrives* (optional)
+
+	If no *sw1* setting is provided, *fdrives* specifies the number of floppy drives installed (0-4 for models 5150 and 5160, 0-2 for model 5170);
+	default is 2.
+
+ * *monitor* (optional)
+
+	If no *sw1* setting is provided, *monitor* specifies the primary monitor type, and should be one of:
+
+	* "none"
+	* "tv"
+	* "color"
+	* "mono"
+	* "ega"
+
+ * *rtcdate* (optional)
+
+	Allows a specific startup date and time (model 5170 only); the *rtcdate* string must be of the form:
+	
+		yyyy-mm-ddThh:mm:ss
 
  * Also supports the attributes of *[Component](/docs/pcjs/component/)*.
 

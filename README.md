@@ -66,8 +66,8 @@ copy of the [PCjs web server](http://www.pcjs.org/) and run PCjs simulations:
 
 The PCjs web server is *not* required to run most PCjs simulations.  Any web server (Node, Apache, Nginx, etc)
 that can serve the necessary JavaScript files to your browser will work.  However, instructions for doing
-that are beyond the scope of this "Quick Start" document.  Also, it is possible to create simulations that require
-access to PCjs web server APIs; however, none of the simulations in the repository should require API access.
+that are beyond the scope of this "Quick Start" document.  And while it is possible to create simulations that
+require access to PCjs web server APIs, none of the simulations in the repository should require API access.
 
 ### Installing PCjs
 

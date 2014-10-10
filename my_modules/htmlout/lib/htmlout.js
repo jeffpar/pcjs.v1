@@ -180,7 +180,7 @@ var asNonDirectories = [
  * should now be removed from the project).
  */
 var asFilesNonListed = [
-    "LICENSE",
+//  "LICENSE",
     "index.html",
     "robots.txt",
     "machine.xml",
@@ -196,27 +196,28 @@ var asExtsNonServed = [
     "sh"
 ];
 
+var asDirsNonServed = [
+    "bin",
+    "debug",
+    "lib",
+    "logs",
+    "my_modules",
+    "node_modules",
+    "tests",
+    "tmp",
+    "users",
+    "iisnode"           // Azure/IISNode-specific
+];
+
 var asFilesNonServed = [
     "README.md",
     "Gruntfile.js",
     "server.js",
     "npm-shrinkwrap.json",
     "package.json",
-    "bin",
-    "debug",
-    "lib",
-    "logs",
     "makefile",
-    "my_modules",
-    "node_modules",
     "node.log",
-    "src",              // use this for any non-GPL'ed source code
-    "tests",
-    "todo",             // where I store my own personal "to-do" lists
-    "tmp",
-    "users",
     "users.log",
-    "iisnode",          // Azure/IISNode-specific
     "IISNode.yml",      // Azure/IISNode-specific
     "web.config"        // Azure/IISNode-specific
 ];
@@ -264,7 +265,7 @@ function HTMLOut(sDir, sFile, fRebuild, req, done)
      * Note that a production server should not need the GORT_REBUILD command, so we accept
      * it only if fServerDebug is true.
      */
-    if (fServerDebug && net.hasParm(net.GORT_COMMAND, net.GORT_REBUILD, req)) {
+    if (net.hasParm(net.GORT_COMMAND, net.GORT_REBUILD, req)) {
         req.query[net.GORT_COMMAND] = undefined;
         this.fRebuild = true;
     }
@@ -436,8 +437,20 @@ HTMLOut.filter = function(req, res, next)
     var sBaseExt = ((i = sBaseName.lastIndexOf('.')) > 0? sBaseName.substr(i+1) : "");
     var sTrailingChar = req.path.slice(-1);
 
-    if (!fServerDebug) {
+    if (!fServerDebug && !net.hasParm(net.GORT_COMMAND, net.GORT_DEBUG, this.req)) {
+        var fNonServed = false;
         if (asExtsNonServed.indexOf(sBaseExt) >= 0 || asFilesNonServed.indexOf(sBaseName) >= 0) {
+            fNonServed = true;
+        } else {
+            var asDirs = req.path.split('/');
+            for (i = 0; i < asDirs.length; i++) {
+                if (asDirsNonServed.indexOf(asDirs[i]) >= 0) {
+                    fNonServed = true;
+                    break;
+                }
+            }
+        }
+        if (fNonServed) {
             /*
              * Mimic the error code+message that express.static() displays for non-existent files/folders.
              */

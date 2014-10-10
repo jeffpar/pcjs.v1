@@ -1,9 +1,8 @@
 My (JavaScript) Coding Conventions
 ---
 
-Some ramblings about my JavaScript coding conventions.  This is not an attempt to convince anyone of
-anything, just an explanation of why things are they way they are (and which will be more useful once PCjs
-moves from a private to a public GitHub repository in the near future).
+Here are some ramblings about my JavaScript coding conventions.  This is not an attempt to convince anyone of
+anything, just an explanation of why things are they way they are.
 
 ### Tabs vs. Spaces
 
@@ -14,50 +13,101 @@ usually screw up the formatting, which I find annoying when I'm debugging.  XML 
 are usually reformatted by the browser anyway, so in those cases, I opt for smaller files and use real tabs.
 
 Note that most of the JavaScript delivered by a PCjs production server will have been compiled by Google's
-Closure Compiler, which completely eliminates all non-essential whitespace, so this is really a development
+Closure Compiler, which completely eliminates all non-essential whitespace, so this is just a development
 preference, with little to no impact on production files.
 
 Regardless of the choice of tab character however, I almost always use 4-column tab stops, except in legacy .asm
 files, where 8-column tab stops were the norm.
 
-I've noticed that 2-column tab stops have recently become popular, especially in Node projects;
-NPM, for example, will rewrite package.json files, replacing my 4-column spacing with 2-column spacing.
-I don't fight that trend -- I just ignore it.
+I've noticed that 2-column tab stops have recently become popular, especially in Node projects; NPM, for example,
+will rewrite package.json files, replacing my 4-column spacing with 2-column spacing.  I don't fight that trend -- I
+just ignore it.
+
+### Constants
+
+Property names with all UPPER-CASE letters (with optional numbers and/or underscores) represent constants.
+
+I originally adopted this rule in part because it's a popular C language convention, but also because it
+made it easy to write a preprocessing script (see the PCjs Grunt task "prepjs") that replaced all such property
+references with the corresponding property values and then removed the original property definitions.
+Of course, this convention also depended on the properties never being modified *or* enumerated.
+  
+I later discovered that Google's Closure Compiler does an excellent job of automatically inlining properties
+that are never modified or enumerated, so the "prepjs" preprocessing script is no longer used, but I've stuck
+with the UPPER-CASE convention.
+
+I don't bother with JSDoc *@const* annotations, because 1) the project contains far too many constants, 2)
+all the constants are already effectively annotated by virtue of being UPPER-CASE, and 3) there is no noticeable
+improvement in the Closure Compiler's inlining capability with the addition of *@const*.
+
+All constants associated with a component are normally attached to the component's constructor; ie, as properties of
+the constructor.  If you think of a JavaScript constructor as a "class', then constants attached to the constructor
+can be thought of as "class constants".
+
+For example, the ChipSet component, which manages (among other things) Programmable Interrupt Controllers or PICs,
+*could* define the constant for an EOI command like this:
+
+	ChipSet.EOI = 0x20;                     // non-specific EOI (end-of-interrupt)
+	
+but since the EOI command is actually one of a number Operation Command Words (specifically, OCW2), I include an
+"OCW2_" prefix in the constant name:
+
+	ChipSet.OCW2_EOI = 0x20;                // non-specific EOI (end-of-interrupt)
+	
+and since I also like to group constants that are associated with a particular register or port, and since I don't
+want the ChipSet constructor becoming littered with property constants, I first define a "constant object"; in this
+case, **PIC_LO**:
+
+	ChipSet.PIC_LO = {};
+	ChipSet.PIC_LO.OCW2_EOI = 0x20;         // non-specific EOI (end-of-interrupt)
+	ChipSet.PIC_LO.OCW2_EOI_SPEC = 0x60;    // specific EOI
+	ChipSet.PIC_LO.OCW2_EOI_ROT = 0xA0;     // rotate on non-specific EOI
+	ChipSet.PIC_LO.OCW2_EOI_ROTSPEC = 0xE0; // rotate on specific EOI
+
+Also, by defining constants using the "long form" above, rather than the more conventional "short form" (ie, standard
+Object notation):
+ 
+	ChipSet.PIC_LO = {
+		OCW2_EOI:           0x20,           // non-specific EOI (end-of-interrupt)
+		OCW2_EOI_SPEC:      0x60,           // specific EOI
+		OCW2_EOI_ROT:       0xA0,           // rotate on non-specific EOI
+		OCW2_EOI_ROTSPEC:   0xE0            // rotate on specific EOI
+	};
+
+the code follows a more traditional, C-like style (think *#define*).  It's also easier to preprocess code that
+uses the "long form."  But again, since the Closure Compiler already does a good job of inlining, it's no longer
+necessary to use the "long form", which is why you'll see newer code using more conventional Object notation to
+define class constants.
 
 ### Braces and Parentheses
 
-Most of my opening braces appear at the end of the line containing the associated "if", "while", "for", "switch",
-"function" etc, preceded by a single space.  And most of my opening parentheses are also preceded by a single space,
-except when following "function" or a function name, in which case there is NO space.  This is just an historical
-preference, dating back to my BASIC and C programming days; it's not that those preferences matter anymore, it's just
-that I see no reason to change them.
+Most opening braces appear at the end of the line containing the associated "if", "while", "for", "switch",
+"function", etc, preceded by a single space.  And most opening parentheses are also preceded by a single space,
+except when following "function" or a function name, in which case there is NO space.
 
-Sometimes I break these conventions though.  For example, for all the top-level (documented) functions in a
-module, I'll often move the opening brace of the function body to its own line, because I feel that the extra
-whitespace makes the code a bit more readable.  It may sometimes depend on my mood, but I do try to be consistent
-within a given file at least.
+There's always the occasional exception.  For example, the opening brace of all the top-level (documented)
+functions in a module may appear on its own line, because the extra whitespace can make the code a bit more
+readable.
+
+It's also important to be aware of JavaScript's automatic semicolon insertion feature and the associated danger of
+putting an opening brace below a *return* statement that wants to return an object literal.  As long as you (and
+your IDE) are aware of that specific danger, there's no need to be dogmatic about opening braces.
 
 ### Variable Names
 
 I still tend to follow Charles Simonyi's "[Hungarian](http://en.wikipedia.org/wiki/Hungarian_notation)" naming
-conventions -- or rather, a naming convention loosely inspired by Hungarian.  I know lots of people sneer at
-those conventions or simply think they're useless, and all I can say is, they're wrong: they are not useless to *me*.
+conventions -- or rather, a naming convention loosely inspired by Hungarian.
 
-I admit they may be useless to anyone who has a phenomenal memory and can remember that an obscure variable named
-"foo" was initialized with a string or a number, or whose IDE can answer the question with the press of a key (or two),
-but for me, with my non-phenomenal memory and lazy fingers, I prefer being able to simply look at a variable to
-immediately know what *type* of data it contains, if nothing else.
-
-I rarely name a string or numeric variable something vague like "foo."  At worst, I would name it "sFoo" if it
-was a string or "iFoo" if it was a number (or possibly "nFoo" or "cFoo" if it represented a total of Foos or a
-counter of Foos).  And if a string or numeric variable has a very short-term use, I'll probably just name it "s"
-or "i" (or "n").
+For example, if I need a string or numeric variable representing a "thing," I will name it "sThing" if it's a
+string or "iThing" if it's a number (or possibly "nThings" if it represents a total of Things or or "cThings"
+if it's a counter of Things).  If a string or numeric variable has a very short-term use, I'll probably just name
+it "s" or "i".
 
 As I mention [below](./#quotation-marks), I still tend to distinguish single characters from strings too,
 which means I may sometimes prefix character variables with "ch" and character counters with "cch".
 
-Of course, these letter prefixes like "s" and "n" are irrelevant if you already give your variables meaningful
-names like "nameOfPerson" or "numberOfPeople".  And that's fine -- I do that sometimes, too.  But in general,
+Of course, variable name prefixes like "s" and "n" are irrelevant if you've already given your variables meaningful
+names like "nameOfPerson" or "numberOfPeople".  And that's fine -- I sometimes do that as well.  But in general,
 I still prefer variable names like "sPerson" and "nPeople".
 
 I don't try to come up with special prefixes for Objects.  If there's a Person object, for example, I'll probably
@@ -67,7 +117,7 @@ of anything else, I usually don't bother with anything more than an "a" prefix.
 
 ### Quotation Marks
 
-Coming from a long C background, I prefer to use double-quotes around multi-character strings and single quotes
+Because of my C background, I prefer to use double-quotes around multi-character strings and single quotes
 around single-character strings.  While the reasons for doing so are largely historical and currently irrelevant,
 characters are STILL the building blocks of strings, and even the JavaScript String class contains methods that
 deal with individual characters (eg, charCodeAt() and fromCharCode()).  So for any code that deals explicitly with
@@ -108,30 +158,22 @@ restrictions/features don't exist.
 
 ### JSDoc
 
-I've taken a great deal of care to "[JSDoc](http://usejsdoc.org/)-ify" nearly all my JavaScript code, not
+Most of the PCjs code is documented with [JSDoc](http://usejsdoc.org/) annotations -- not
 because I want to be able to generate documentation (although that's something to think about), but because
-it's the only way to tell both Google's Closure Compiler and my IDE exactly what data types are passed around.
+it's the only way to tell both the Closure Compiler and my IDE exactly what data types are passed around.
 The goals are to minimize the number of "code inspection" warnings in the IDE and produce warning-free
 compilations.
 
-In order to use the Closure Compiler's ADVANCED_OPTIMIZATIONS option and get maximum performance
-(and maximum "minification", a form of "uglification"), every function and its parameters needs to
-be fully typed; otherwise, the Compiler generates way too many warnings/errors -- at least, that was the
-case when I first started using it a couple of years ago.
+In order to use the Closure Compiler's ADVANCED_OPTIMIZATIONS option and get maximum performance (and maximum
+"minification", a form of "uglification"), every function and its parameters needs to be fully typed; otherwise,
+the Compiler generates way too many warnings/errors -- at least, that was the case when I first started using
+it a couple of years ago.
 
-So, I've adopted a zero-tolerance policy for warnings: nothing gets checked in if the Closure Compiler
-generates even a single warning.
+I've adopted a zero-tolerance policy for warnings: nothing gets checked in if the Closure Compiler generates even
+a single warning.
 
-Unfortunately, I'm not sure the [JSDoc](http://usejsdoc.org/) folks and the
-[Closure Compiler](https://developers.google.com/closure/compiler/docs/js-for-compiler) are totally in sync on
-everything.  And then there's [PhpStorm](http://www.jetbrains.com/phpstorm/webhelp/creating-jsdoc-comments.html),
-whose code inspections occasionally fail; sometimes a bogus code inspection warning can be fixed with some
-additional JSDoc @name or @class annotations, but not always.
- 
-In any case, the subset of variable and function type declarations I use works pretty well across the board;
-I ignore code inspection warnings in the IDE, as long as they are clearly erroneous (or clearly innocuous).
-
-And finally, speaking of warnings, I've had to tell PhpStorm to "shut up" about a few:
+And finally, speaking of warnings, I've had to tell [PhpStorm](http://www.jetbrains.com/phpstorm/) to "shut up"
+about a few:
 
 - Unfiltered for…in loop
 - Bitwise operator usage

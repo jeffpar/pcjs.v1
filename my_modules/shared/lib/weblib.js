@@ -424,8 +424,8 @@ web.getURLParameters = function(sParms)
     if (window) {       // an alternative to "if (typeof module === 'undefined')" if require("defines") has been invoked
         if (!sParms) {
             /*
-             * Note that window.location.href returns the entire URL, whereas window.location.search returns
-             * only the parameters, if any (starting with the '?', which we skip over with a substr() call).
+             * Note that window.location.href returns the entire URL, whereas window.location.search
+             * returns only the parameters, if any (starting with the '?', which we skip over with a substr() call).
              */
             sParms = window.location.search.substr(1);        
         }

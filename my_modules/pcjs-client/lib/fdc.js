@@ -538,7 +538,7 @@ FDC.prototype.powerUp = function(data, fRepower)
             for (iDrive = 0; iDrive < this.nDrives; iDrive++) {
                 var drive = this.aDrives[iDrive];
                 drive.bType = this.chipset.getSWFloppyDriveType(iDrive);
-                if (drive.bType == ChipSet.FDRIVE.DSHD) {
+                if (drive.bType == ChipSet.CMOS.FDRIVE.DSHD) {
                     drive.nCylinders = 80;
                 }
             }
@@ -826,7 +826,7 @@ FDC.prototype.initDrive = function(drive, iDrive, data)
      * To simulate this, bCylinder is now treated as the "physical" cylinder (since that's how it's ALWAYS been used here),
      * and bCylinderSeek will now track (pun intended) the "logical" cylinder that's programmed via SEEK commands.
      */
-    drive.bType = ChipSet.FDRIVE.DSDD;      // default; updated later once we have the actual ChipSet object
+    drive.bType = ChipSet.CMOS.FDRIVE.DSDD; // default; updated later once we have the actual ChipSet object
     drive.bHead = data[i++];
     drive.bCylinderSeek = data[i++];        // the data[] slot where we used to store drive.nHeads (or -1)
     drive.bCylinder = data[i++];

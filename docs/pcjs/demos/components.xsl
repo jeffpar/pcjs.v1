@@ -8,7 +8,7 @@
 
 	<xsl:variable name="MACHINECLASS">pc</xsl:variable>
 	<xsl:variable name="APPCLASS">pcjs</xsl:variable>
-	<xsl:variable name="APPVERSION">1.15.3</xsl:variable>
+	<xsl:variable name="APPVERSION">1.15.4</xsl:variable>
 	<xsl:variable name="SITEHOST">www.pcjs.org</xsl:variable>
 
 	<xsl:template name="componentStyles">
@@ -548,13 +548,13 @@
 		<xsl:variable name="sw1">
 			<xsl:choose>
 				<xsl:when test="@sw1"><xsl:value-of select="@sw1"/></xsl:when>
-				<xsl:otherwise>11110011</xsl:otherwise>
+				<xsl:otherwise/>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:variable name="sw2">
 			<xsl:choose>
 				<xsl:when test="@sw2"><xsl:value-of select="@sw2"/></xsl:when>
-				<xsl:otherwise>11110000</xsl:otherwise>
+				<xsl:otherwise/>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:variable name="sound">
@@ -569,6 +569,18 @@
 				<xsl:otherwise>false</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
+		<xsl:variable name="fdrives">
+			<xsl:choose>
+				<xsl:when test="@fdrives"><xsl:value-of select="@fdrives"/></xsl:when>
+				<xsl:otherwise>0</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
+		<xsl:variable name="monitor">
+			<xsl:choose>
+				<xsl:when test="@monitor"><xsl:value-of select="@monitor"/></xsl:when>
+				<xsl:otherwise/>
+			</xsl:choose>
+		</xsl:variable>
 		<xsl:variable name="rtcdate">
 			<xsl:choose>
 				<xsl:when test="@rtcdate"><xsl:value-of select="@rtcdate"/></xsl:when>
@@ -578,7 +590,7 @@
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">chipset</xsl:with-param>
-			<xsl:with-param name="parms">,model:'<xsl:value-of select="$model"/>',scaleTimers:<xsl:value-of select="$scaletimers"/>,sw1:'<xsl:value-of select="$sw1"/>',sw2:'<xsl:value-of select="$sw2"/>',sound:<xsl:value-of select="$sound"/>,rtcDate:'<xsl:value-of select="$rtcdate"/>'</xsl:with-param>
+			<xsl:with-param name="parms">,model:'<xsl:value-of select="$model"/>',scaleTimers:<xsl:value-of select="$scaletimers"/>,sw1:'<xsl:value-of select="$sw1"/>',sw2:'<xsl:value-of select="$sw2"/>',sound:<xsl:value-of select="$sound"/>,fdrives:<xsl:value-of select="$fdrives"/>,monitor:'<xsl:value-of select="$monitor"/>',rtcDate:'<xsl:value-of select="$rtcdate"/>'</xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 
@@ -690,10 +702,16 @@
 				<xsl:otherwise/>
 			</xsl:choose>
 		</xsl:variable>
+		<xsl:variable name="type">
+			<xsl:choose>
+				<xsl:when test="@type"><xsl:value-of select="@type"/></xsl:when>
+				<xsl:otherwise>xt</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">hdc</xsl:with-param>
-			<xsl:with-param name="parms">,drives:'<xsl:value-of select="$drives"/>'</xsl:with-param>
+			<xsl:with-param name="parms">,drives:'<xsl:value-of select="$drives"/>',type:'<xsl:value-of select="$type"/>'</xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 

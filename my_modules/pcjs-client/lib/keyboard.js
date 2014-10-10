@@ -1050,7 +1050,7 @@ Keyboard.prototype.keyEvent = function(event, fDown)
         /*
          * HACK for simulating Ctrl-Break using Ctrl-Del (Mac) / Ctrl-Backspace (Windows)
          */
-        if (keyCode == Keyboard.KEYCODE.DELETE && (this.bitsShift & Keyboard.STATE.CTRL)) {
+        if (keyCode == Keyboard.KEYCODE.DELETE && (this.bitsShift & (Keyboard.STATE.CTRL|Keyboard.STATE.ALT)) == Keyboard.STATE.CTRL) {
             keyCode = Keyboard.CHARCODE.CTRLBREAK;
         }
         /*

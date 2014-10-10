@@ -31,6 +31,7 @@ Model 5160 Machine Configurations include:
 Model 5170 Machine Configurations include:
 
 * [IBM PC AT, EGA, 640K, Debugger](/configs/pc/machines/5170/ega/640kb/debugger/)
+* [IBM PC AT, EGA, 1152Kb, 20Mb Drive, Debugger](/configs/pc/machines/5170/ega/1152kb/debugger/)
 
 These Machine Configurations also include a "Soft Keyboard":
 
