@@ -1013,6 +1013,7 @@ HTMLOut.prototype.getDirList = function(sToken, sIndent, aParms)
                     if (sBaseName.indexOf("-debug") > 0) continue;
                     if (asExtsNonServed.indexOf(sExt) >= 0) continue;
                     if (asExtsNonListed.indexOf(sExt) >= 0) continue;
+                    if (asDirsNonServed.indexOf(sBaseName) >= 0) continue;
                     if (asFilesNonServed.indexOf(sBaseName) >= 0) continue;
                     if (asFilesNonListed.indexOf(sBaseName) >= 0) continue;
                 } else {
