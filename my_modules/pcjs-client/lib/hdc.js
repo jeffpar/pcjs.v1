@@ -202,7 +202,7 @@ HDC.aDriveTypes = [
  * 
  * Without the "DUAL" bit set, when it came time later to report the diskette drive type, the "DISK_TYPE" function
  * (@F000:273D) would branch to one of two almost-identical blocks of code -- specifically, a block that disallowed
- * diskette drive types >= 2 (ChipSet.FDRIVE.DSDD) instead of >= 3 (ChipSet.FDRIVE.DSHD).
+ * diskette drive types >= 2 (ChipSet.CMOS.FDRIVE.DSDD) instead of >= 3 (ChipSet.CMOS.FDRIVE.DSHD).
  * 
  * In other words, the "Fixed Disk" portion of the HFCOMBO controller has to be present and operational if the user
  * wants to use high-capacity (80-track) diskettes with "Diskette Drive" portion of the controller.  This may not be

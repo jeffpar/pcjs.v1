@@ -196,28 +196,26 @@ var asExtsNonServed = [
     "sh"
 ];
 
-var asDirsNonServed = [
+var asFilesNonServed = [
+    "README.md",
+    "Gruntfile.js",
+    "netlib.js",
+    "npm-shrinkwrap.json",
+    "package.json",
+    "server.js",
     "bin",
     "debug",
     "lib",
     "logs",
+    "makefile",
     "my_modules",
     "node_modules",
+    "node.log",
     "tests",
     "tmp",
     "users",
-    "iisnode"           // Azure/IISNode-specific
-];
-
-var asFilesNonServed = [
-    "README.md",
-    "Gruntfile.js",
-    "server.js",
-    "npm-shrinkwrap.json",
-    "package.json",
-    "makefile",
-    "node.log",
     "users.log",
+    "iisnode",          // Azure/IISNode-specific
     "IISNode.yml",      // Azure/IISNode-specific
     "web.config"        // Azure/IISNode-specific
 ];
@@ -265,7 +263,7 @@ function HTMLOut(sDir, sFile, fRebuild, req, done)
      * Note that a production server should not need the GORT_REBUILD command, so we accept
      * it only if fServerDebug is true.
      */
-    if (net.hasParm(net.GORT_COMMAND, net.GORT_REBUILD, req)) {
+    if (fServerDebug && net.hasParm(net.GORT_COMMAND, net.GORT_REBUILD, req)) {
         req.query[net.GORT_COMMAND] = undefined;
         this.fRebuild = true;
     }
@@ -437,20 +435,8 @@ HTMLOut.filter = function(req, res, next)
     var sBaseExt = ((i = sBaseName.lastIndexOf('.')) > 0? sBaseName.substr(i+1) : "");
     var sTrailingChar = req.path.slice(-1);
 
-    if (!fServerDebug && !net.hasParm(net.GORT_COMMAND, net.GORT_DEBUG, this.req)) {
-        var fNonServed = false;
+    if (!fServerDebug && !net.hasParm(net.GORT_COMMAND, net.GORT_DEBUG, req)) {
         if (asExtsNonServed.indexOf(sBaseExt) >= 0 || asFilesNonServed.indexOf(sBaseName) >= 0) {
-            fNonServed = true;
-        } else {
-            var asDirs = req.path.split('/');
-            for (i = 0; i < asDirs.length; i++) {
-                if (asDirsNonServed.indexOf(asDirs[i]) >= 0) {
-                    fNonServed = true;
-                    break;
-                }
-            }
-        }
-        if (fNonServed) {
             /*
              * Mimic the error code+message that express.static() displays for non-existent files/folders.
              */
@@ -1013,7 +999,6 @@ HTMLOut.prototype.getDirList = function(sToken, sIndent, aParms)
                     if (sBaseName.indexOf("-debug") > 0) continue;
                     if (asExtsNonServed.indexOf(sExt) >= 0) continue;
                     if (asExtsNonListed.indexOf(sExt) >= 0) continue;
-                    if (asDirsNonServed.indexOf(sBaseName) >= 0) continue;
                     if (asFilesNonServed.indexOf(sBaseName) >= 0) continue;
                     if (asFilesNonListed.indexOf(sBaseName) >= 0) continue;
                 } else {

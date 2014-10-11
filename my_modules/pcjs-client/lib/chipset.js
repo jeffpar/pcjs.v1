@@ -1777,7 +1777,7 @@ ChipSet.prototype.getSWFloppyDrives = function(fInit)
  *
  * @this {ChipSet}
  * @param {number} iDrive (0-based)
- * @return {number} one of the ChipSet.FDRIVE values (ie, NONE: 0, DSDD: 1, DSHD: 2) 
+ * @return {number} one of the ChipSet.CMOS.FDRIVE values (ie, NONE: 0, DSDD: 1, DSHD: 2) 
  */
 ChipSet.prototype.getSWFloppyDriveType = function(iDrive)
 {
@@ -1785,9 +1785,9 @@ ChipSet.prototype.getSWFloppyDriveType = function(iDrive)
      * TODO: For MODEL_5170, we default all floppy drive types to DSHD, but more control would be nice.
      */
     if (iDrive < this.getSWFloppyDrives()) {
-        return (this.model < ChipSet.MODEL_5170? ChipSet.FDRIVE.DSDD : ChipSet.FDRIVE.DSHD);
+        return (this.model < ChipSet.MODEL_5170? ChipSet.CMOS.FDRIVE.DSDD : ChipSet.CMOS.FDRIVE.DSHD);
     }
-    return ChipSet.FDRIVE.NONE;
+    return ChipSet.CMOS.FDRIVE.NONE;
 };
 
 /**
