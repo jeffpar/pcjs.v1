@@ -1,8 +1,8 @@
-My (JavaScript) Coding Conventions
+PCjs Coding Conventions
 ---
 
-Here are some ramblings about my JavaScript coding conventions.  This is not an attempt to convince anyone of
-anything, just an explanation of why things are they way they are.
+Some ramblings about the JavaScript coding conventions used for PCjs.  This is not an attempt to convince anyone of
+anything, just an explanation of why things are the way they are.
 
 ### Tabs vs. Spaces
 
