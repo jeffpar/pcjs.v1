@@ -731,7 +731,7 @@ HTMLOut.prototype.setData = function(err, sData, sFile, fTemplate)
     var link;
     var reLinks = /(<a[^>]*?\shref=)(['"])([^'"]*)(\2[^>]*>)/gi;
     while ((link = reLinks.exec(this.sTemplate))) {
-        var sReplacement = link[1] + link[2] + net.encodeURL(link[3], this.req, fServerDebug) +  link[4];
+        var sReplacement = link[1] + link[2] + net.encodeURL(link[3], this.req, this.fDebug) +  link[4];
         this.sHTML = this.sHTML.replace(link[0], sReplacement);
     }
 
@@ -995,7 +995,7 @@ HTMLOut.prototype.getDirList = function(sToken, sIndent, aParms)
                 }
                 var sExt = (iExt > 0? sBaseName.substr(iExt+1) : "");
 
-                if (!fServerDebug) {
+                if (!obj.fDebug) {
                     if (sBaseName.indexOf("-debug") > 0) continue;
                     if (asExtsNonServed.indexOf(sExt) >= 0) continue;
                     if (asExtsNonListed.indexOf(sExt) >= 0) continue;
@@ -1033,7 +1033,7 @@ HTMLOut.prototype.getDirList = function(sToken, sIndent, aParms)
                     fDir = true;
                     sURL += '/';
                 }
-                sURL = net.encodeURL(sURL, obj.req, fServerDebug);
+                sURL = net.encodeURL(sURL, obj.req, obj.fDebug);
 
                 /*
                  * Here's where we add some code to massage disk image links: if this is a ".json" file in the
@@ -1483,7 +1483,7 @@ HTMLOut.prototype.getManifestXML = function(sToken, sIndent, aParms)
                                     match = matchNode[2].match('<cover[^>]*href="([^"]*)"');
                                     if (match && match[1].indexOf("static/") >= 0) {
                                         matchCover = match[1];
-                                        if (fServerDebug) {
+                                        if (obj.fDebug) {
                                             sNodeLink = matchCover.replace("/thumbs/", '/').replace(/ ?[0-9]*\.(jpeg|jpg)/, ".pdf");
                                         }
                                     }
@@ -1492,7 +1492,7 @@ HTMLOut.prototype.getManifestXML = function(sToken, sIndent, aParms)
                                         if (str.endsWith(sNodeLink, ".json") && sNodeLink.indexOf("/disks/") === 0) {
                                             sOnClick = obj.genOnClick(sNodeLink);
                                         }
-                                        sNodeValue = '<a href="' + net.encodeURL(sNodeLink, obj.req, fServerDebug) + '"' + sOnClick + '>' + sNodeValue + '</a>';
+                                        sNodeValue = '<a href="' + net.encodeURL(sNodeLink, obj.req, obj.fDebug) + '"' + sOnClick + '>' + sNodeValue + '</a>';
                                     }
 
                                     var sItemPages = "";
@@ -1510,7 +1510,7 @@ HTMLOut.prototype.getManifestXML = function(sToken, sIndent, aParms)
                                                     sPageLink = matchCover.replace("/thumbs/", '/pages/').replace(/( ?)[0-9]*\.(jpeg|jpg)/, "$1" + match[1] + ".pdf");
                                                 }
                                             }
-                                            sPageName = '<a href="' + net.encodeURL(sPageLink, obj.req, fServerDebug) + '" target="_blank">' + sPageName + '</a>';
+                                            sPageName = '<a href="' + net.encodeURL(sPageLink, obj.req, obj.fDebug) + '" target="_blank">' + sPageName + '</a>';
                                         }
                                         sItemPages += sIndent + '\t\t\t<li>' + sPageName + '</li>\n';
                                     }
