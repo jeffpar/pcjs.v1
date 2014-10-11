@@ -181,7 +181,12 @@ var asNonDirectories = [
  */
 var asFilesNonListed = [
 //  "LICENSE",
+    "Gruntfile.js",
+    "npm-shrinkwrap.json",
+    "package.json",
+    "server.js",
     "index.html",
+    "README.md",
     "robots.txt",
     "machine.xml",
     "manifest.xml",
@@ -197,12 +202,6 @@ var asExtsNonServed = [
 ];
 
 var asFilesNonServed = [
-    "README.md",
-    "Gruntfile.js",
-    "netlib.js",
-    "npm-shrinkwrap.json",
-    "package.json",
-    "server.js",
     "bin",
     "debug",
     "lib",
