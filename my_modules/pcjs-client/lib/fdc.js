@@ -1116,14 +1116,25 @@ FDC.prototype.loadDiskette = function(iDrive, sDisketteName, sDiskettePath, fAut
  *
  * @this {FDC}
  * @param {Object} drive
- * @param {Disk} disk is set if the disk was successfully mounted, null if not
+ * @param {Disk} disk is set if the disk was successfully loaded, null if not
  * @param {string} sDisketteName
  * @param {string} sDiskettePath
  */
 FDC.prototype.mountDiskette = function(drive, disk, sDisketteName, sDiskettePath)
 {
     drive.fBusy = false;
-    if ((drive.disk = disk)) {
+    
+    /*
+     * We shouldn't mount the diskette unless the drive is able to handle it; for example, DSDD (40-track)
+     * drives cannot read DSHD (80-track) diskettes.
+     */
+    if (disk && disk.aDiskData.length > drive.nCylinders) {
+        this.notice("Diskette \"" + sDisketteName + "\" too large for drive " + String.fromCharCode(0x41 + drive.iDrive));
+        disk = null;
+    }
+    
+    if (disk) {
+        drive.disk = disk;
         drive.sDisketteName = sDisketteName;
         drive.sDiskettePath = sDiskettePath;
         this.addDiskHistory(sDisketteName, sDiskettePath, disk);
@@ -1145,12 +1156,14 @@ FDC.prototype.mountDiskette = function(drive, disk, sDisketteName, sDiskettePath
          * WARNING: This conversion of drive number to drive letter, starting with A:, is very simplistic
          * and will not match the drive mappings that DOS ultimately uses (ie, for drives beyond B:).
          */
-        this.notice("Mounted disk \"" + sDisketteName + "\" in drive " + String.fromCharCode(0x41 + drive.iDrive), drive.fAutoMount);
+        this.notice("Mounted diskette \"" + sDisketteName + "\" in drive " + String.fromCharCode(0x41 + drive.iDrive), drive.fAutoMount);
     }
+    
     if (drive.fAutoMount) {
         drive.fAutoMount = false;
         if (!--this.cAutoMount) this.setReady();
     }
+    
     this.displayDiskette(drive.iDrive);
 };
 

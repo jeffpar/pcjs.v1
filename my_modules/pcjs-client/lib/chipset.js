@@ -1055,8 +1055,10 @@ ChipSet.prototype.reset = function()
          * their CMOS information, we must not allow a reset() from powerUp() to toss that information, so
          * we allocate abCMOSData only if it hasn't already been allocated.
          */
-        if (!this.abCMOSData) this.abCMOSData = new Array(ChipSet.CMOS.ADDR.TOTAL);
-        this.initRTCDate(this.sRTCDate);
+        if (!this.abCMOSData) {
+            this.abCMOSData = new Array(ChipSet.CMOS.ADDR.TOTAL);
+            this.initRTCDate(this.sRTCDate);
+        }
         
         /*
          * initCMOSData() will initialize a variety of "legacy" CMOS bytes, but it will NOT overwrite any memory
@@ -1511,6 +1513,15 @@ ChipSet.prototype.restore = function(data)
         this.bCMOSAddr = a[2];
         this.abCMOSData = a[3];
         this.nCyclesCMOSLastUpdate = a[4];
+        /*
+         * TODO: Decide whether restore() should faithfully preserve the RTC date/time that save() saved,
+         * or always reinitialize the date/time, or give the user (or the machine configuration) the option.
+         * 
+         * For now, we're always reinitializing the RTC date.  Alternatively, we could selectively update
+         * the CMOS bytes above, instead of overwriting them all, in which case this extra call to initRTCDate()
+         * could be avoided.
+         */
+        this.initRTCDate();
     }
     return true;
 };
