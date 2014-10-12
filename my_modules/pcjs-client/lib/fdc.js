@@ -153,7 +153,7 @@ function FDC(parmsFDC) {
                  */
                 this.pAutoMount = eval("(" + parmsFDC['autoMount'] + ")");
             } catch (e) {
-                this.error("FDC auto-mount error: " + e.message + " (" + parmsFDC['autoMount'] + ")");
+                Component.error("FDC auto-mount error: " + e.message + " (" + parmsFDC['autoMount'] + ")");
                 this.pAutoMount = null;
             }
         }
@@ -395,7 +395,7 @@ FDC.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
                                 try {
                                     dataValue = eval("({" + sValue + "})");
                                 } catch (e) {
-                                    fdc.error("FDC option error: " + (e.message || e));
+                                    Component.error("FDC option error: " + (e.message || e));
                                 }
                             }
                             var sDesc = dataValue['desc'];
@@ -744,6 +744,10 @@ FDC.prototype.saveController = function()
 
 /**
  * initDrive(drive, iDrive, data)
+ *
+ * TODO: Consider a separate Drive class that both FDC and HDC can use, since there's a lot of commonality
+ * between the drive objects created by both controllers.  This will clean up overall drive management and allow
+ * us to factor out some common Drive methods (eg, advanceSector()).
  * 
  * @this {FDC}
  * @param {Object} drive
@@ -1933,8 +1937,7 @@ FDC.prototype.doFormat = function(drive)
  * NOTE: Since the FDC isn't aware of the extent of the transfer, all readByte() can do is return bytes
  * until the current track (or, in the case of a multi-track request, the current cylinder) has been exhausted.
  *
- * TODO: Research the requirements, if any, for multi-track I/O and determine what if anything needs to be
- * done.  At the very least, if it must be supported, there would need to be some head-incrementing somewhere.
+ * TODO: Research the requirements, if any, for multi-track I/O and determine what else needs to be done.
  *
  * @this {FDC}
  * @param {Object} drive
@@ -1958,7 +1961,11 @@ FDC.prototype.readByte = function(drive, done)
                 break;
             }
             drive.ibSector = 0;
-            drive.bSector++;
+            /*
+             * We "pre-advance" bSector et al now, instead of waiting to advance it right before the seek().
+             * This allows the initial call to readByte() to perform a seek without triggering an unwanted advance.
+             */
+            this.advanceSector(drive);
         } while (true);
     }
     done(b, false);
@@ -1981,8 +1988,7 @@ FDC.prototype.readByte = function(drive, done)
  * NOTE: Since the FDC isn't aware of the extent of the transfer, all writeByte() can do is accept bytes
  * until the current track (or, in the case of a multi-track request, the current cylinder) has been exhausted.
  *
- * TODO: Research the requirements, if any, for multi-track I/O and determine what if anything needs to be
- * done.  At the very least, if it must be supported, there would need to be some head-incrementing somewhere.
+ * TODO: Research the requirements, if any, for multi-track I/O and determine what else needs to be done.
  *
  * @this {FDC}
  * @param {Object} drive
@@ -2010,9 +2016,38 @@ FDC.prototype.writeByte = function(drive, b)
             break;
         }
         drive.ibSector = 0;
-        drive.bSector++;
+        /*
+         * We "pre-advance" bSector et al now, instead of waiting to advance it right before the seek().
+         * This allows the initial call to writeByte() to perform a seek without triggering an unwanted advance.
+         */
+        this.advanceSector(drive);
     } while (true);
     return b;
+};
+
+/**
+ * advanceSector(drive)
+ *
+ * This increments the sector number; when the sector number reaches drive.nSectors on the current track, we
+ * increment drive.bHead and reset drive.bSector, and when drive.bHead reaches drive.nHeads, we reset drive.bHead
+ * and increment drive.bCylinder.
+ *
+ * @this {FDC}
+ * @param {Object} drive
+ */
+FDC.prototype.advanceSector = function(drive)
+{
+    Component.assert(drive.bCylinder < drive.nCylinders);
+    drive.bSector++;
+    var bSectorStart = 1;
+    if (drive.bSector >= drive.nSectors + bSectorStart) {
+        drive.bSector = bSectorStart;
+        drive.bHead++;
+        if (drive.bHead >= drive.nHeads) {
+            drive.bHead = 0;
+            drive.bCylinder++;
+        }
+    }
 };
 
 /**
@@ -2085,9 +2120,9 @@ FDC.prototype.intBIOSDiskette = function(addr)
         var DL = this.cpu.regDX & 0xff;
         var DH = this.cpu.regDX >> 8;
         if (this.dbg && this.dbg.messageEnabled(this.dbg.MESSAGE_FDC) && DL < 0x80) {
-            this.dbg.message("FDC.intBIOS(AH=" + str.toHexByte(AH) + ",D=" + str.toHexByte(DL) + ",C=" + str.toHexByte(CH) + ",H=" + str.toHexByte(DH) + ",S=" + str.toHexByte(CL) + ",N=" + str.toHexByte(AL) + ") at " + str.toHexAddr(addr - this.cpu.segCS.base, this.cpu.segCS.sel));
+            this.dbg.message("\nFDC.intBIOS(AH=" + str.toHexByte(AH) + ",D=" + str.toHexByte(DL) + ",C=" + str.toHexByte(CH) + ",H=" + str.toHexByte(DH) + ",S=" + str.toHexByte(CL) + ",N=" + str.toHexByte(AL) + ") at " + str.toHexAddr(addr - this.cpu.segCS.base, this.cpu.segCS.sel));
             // this.cpu.haltCPU();
-            this.cpu.addInterruptReturn(addr, function (fdc, nCycles) {
+            this.cpu.addInterruptReturn(addr, function(fdc, nCycles) {
                 return function onBIOSDisketteReturn(nLevel) {
                     nCycles = fdc.cpu.getCycles() - nCycles;
                     fdc.messageDebugger("FDC.intBIOS(" + nLevel + "): C=" + (fdc.cpu.getCF()? 1 : 0) + " (cycles=" + nCycles + ")");

@@ -480,7 +480,7 @@ Bus.prototype.restoreMemory = function(a)
              * configuration since it was last saved (the most likely explanation) or there's some internal
              * inconsistency (eg, the block size is wrong).
              */
-            this.error("Unable to restore memory block " + iBlock);
+            Component.error("Unable to restore memory block " + iBlock);
             return false;
         }
     }
@@ -554,7 +554,7 @@ Bus.prototype.addPortInputNotify = function(start, end, component, fn)
     if (fn !== undefined) {
         for (var port = start; port <= end; port++) {
             if (this.aPortInputNotify[port] !== undefined) {
-                this.warning("Input port " + str.toHexWord(port) + " registered by " + this.aPortInputNotify[port][0].id + ", ignoring " + component.id);
+                Component.warning("Input port " + str.toHexWord(port) + " registered by " + this.aPortInputNotify[port][0].id + ", ignoring " + component.id);
                 continue;
             }
             this.aPortInputNotify[port] = [component, fn, false, false];
@@ -674,7 +674,7 @@ Bus.prototype.addPortOutputNotify = function(start, end, component, fn)
     if (fn !== undefined) {
         for (var port = start; port <= end; port++) {
             if (this.aPortOutputNotify[port] !== undefined) {
-                this.warning("Output port " + str.toHexWord(port) + " registered by " + this.aPortOutputNotify[port][0].id + ", ignoring " + component.id);
+                Component.warning("Output port " + str.toHexWord(port) + " registered by " + this.aPortOutputNotify[port][0].id + ", ignoring " + component.id);
                 continue;
             }
             this.aPortOutputNotify[port] = [component, fn, false, false];
@@ -764,7 +764,7 @@ Bus.prototype.removePortOutputNotify = function(start, end, component, fn)
  */
 Bus.prototype.reportError = function(op, addr, size)
 {
-    this.error("Memory block error (" + op + "," + str.toHex(addr) + "," + str.toHex(size) + ")");
+    Component.error("Memory block error (" + op + "," + str.toHex(addr) + "," + str.toHex(size) + ")");
     return false;
 };
 

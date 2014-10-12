@@ -71,7 +71,10 @@ var fConsole = false;
 
 /*
  * fServerDebug controls server-related debug features; it is false by default and can be enabled using the
- * setOptions() 'debug' property (or from the command-line interface using "--debug").
+ * setOptions() 'debug' property (or from the server's command-line interface using "--debug").
+ * 
+ * This used to be named fDebug, which was fine, but it has been renamed to make the distinction between the
+ * server's debug state (fServerDebug) and the debug state of HTMLOut instances (this.fDebug) clearer.
  */
 var fServerDebug = false;
 
@@ -475,7 +478,7 @@ HTMLOut.filter = function(req, res, next)
                          * and adding an Etag, unless we ALSO change the req.method from "GET" to something else.
                          * Supposedly, we could also use app.disable('etag'), but I'm not sure that would prevent
                          * Express from changing the status code, and I'm tired of testing work-arounds for this
-                         * irritating behavior in Safari.
+                         * irritating behavior.
                          */
                         req.method = "NONE";
                         res.set("Content-Type", "application/xml");
@@ -485,6 +488,10 @@ HTMLOut.filter = function(req, res, next)
                 return;
             }
         }
+    }
+    
+    if (asNonDirectories.indexOf(sBaseName) >= 0) {
+        res.set("Content-Type", "text/plain");
     }
 
     /*
@@ -681,6 +688,7 @@ HTMLOut.setRoot = function(sRoot)
 /**
  * loadFile()
  *
+ * @this {HTMLOut}
  * @param {string} sFile
  * @param {boolean} fTemplate
  */
@@ -700,6 +708,7 @@ HTMLOut.prototype.loadFile = function(sFile, fTemplate)
  * 
  * Records the given HTML template and immediately parses it.
  *
+ * @this {HTMLOut}
  * @param {Error} err
  * @param {string} sData
  * @param {string} sFile
@@ -741,6 +750,7 @@ HTMLOut.prototype.setData = function(err, sData, sFile, fTemplate)
 /**
  * findTokens()
  *
+ * @this {HTMLOut}
  * @param {RegExp} reTokens
  */
 HTMLOut.prototype.findTokens = function(reTokens)
@@ -794,6 +804,8 @@ HTMLOut.prototype.findTokens = function(reTokens)
 
 /**
  * replaceTokens()
+ *
+ * @this {HTMLOut}
  */
 HTMLOut.prototype.replaceTokens = function()
 {
@@ -866,6 +878,7 @@ HTMLOut.prototype.replaceTokens = function()
  * 
  * aParms[0], if present, is used as the preferred title for the home page 
  *
+ * @this {HTMLOut}
  * @param {string} sToken
  * @param {string} [sIndent]
  * @param {Array.<string>} [aParms]
@@ -880,6 +893,7 @@ HTMLOut.prototype.getTitle = function(sToken, sIndent, aParms)
  *
  * Returns the current version in "package.json".
  *
+ * @this {HTMLOut}
  * @param {string} sToken
  * @param {string} [sIndent]
  * @param {Array.<string>} [aParms]
@@ -902,6 +916,7 @@ HTMLOut.prototype.getVersion = function(sToken, sIndent, aParms)
 /**
  * getPath(sToken, sIndent, aParms)
  *
+ * @this {HTMLOut}
  * @param {string} sToken
  * @param {string} [sIndent]
  * @param {Array.<string>} [aParms]
@@ -914,6 +929,7 @@ HTMLOut.prototype.getPath = function(sToken, sIndent, aParms)
 /**
  * getPCPath(sToken, sIndent, aParms)
  *
+ * @this {HTMLOut}
  * @param {string} sToken
  * @param {string} [sIndent]
  * @param {Array.<string>} [aParms]
@@ -941,6 +957,7 @@ HTMLOut.prototype.getPCPath = function(sToken, sIndent, aParms)
  *          <a href="/apps/">[apps]</a>
  *      </li>
  *
+ * @this {HTMLOut}
  * @param {string} sToken
  * @param {string} [sIndent]
  * @param {Array.<string>} [aParms]
@@ -962,8 +979,8 @@ HTMLOut.prototype.getDirList = function(sToken, sIndent, aParms)
             asFiles.push("..");
             
             /*
-             * For sorting purposes, I want all folders ending in "kb" and beginning with one or two
-             * digits to sort as if they all began with THREE digits (ie, with leading zeros as needed).
+             * For sorting purposes, I want all folders ending in "kb" and beginning with one to three
+             * digits to sort as if they all began with FOUR digits (ie, with leading zeros as needed).
              * But I don't want to change the folder names that are ultimately displayed.  So instead,
              * I pad those names with slashes, since a leading slash will sort much like a leading zero
              * without being a valid filename character, meaning we can trim away those leading slashes
@@ -1002,7 +1019,7 @@ HTMLOut.prototype.getDirList = function(sToken, sIndent, aParms)
                     if (asFilesNonListed.indexOf(sBaseName) >= 0) continue;
                 } else {
                     /*
-                     * Even when the server's in Debug mode, there are some files it makes no sense to list....
+                     * Even when the server's in Debug mode, there are some files it makes no sense to list.
                      */
                     if (sBaseName == "index.html") continue;
                 }
@@ -1073,6 +1090,7 @@ HTMLOut.prototype.getDirList = function(sToken, sIndent, aParms)
  *
  * Return the current year.
  *
+ * @this {HTMLOut}
  * @param {string} sToken
  * @param {string} [sIndent]
  * @param {Array.<string>} [aParms]
@@ -1087,6 +1105,7 @@ HTMLOut.prototype.getYear = function(sToken, sIndent, aParms)
  *
  * If we're in the "blog" folder, then enumerate all available blog entries and create a rendering of blog excerpts.
  *
+ * @this {HTMLOut}
  * @param {string} sToken
  * @param {string} [sIndent]
  * @param {Array.<string>} [aParms]
@@ -1189,7 +1208,7 @@ HTMLOut.prototype.getBlog = function(sToken, sIndent, aParms)
                                 for (var i = 0; i < aExcerpts.length; i++) {
                                     sExcerpts += aExcerpts[i].excerpt + "\n\n";
                                 }
-                                var mExcerpts = new MarkOut(sExcerpts, sIndent, obj.req, aParms, obj.fDebug, fServerDebug);
+                                var mExcerpts = new MarkOut(sExcerpts, sIndent, obj.req, aParms, obj.fDebug);
                                 obj.aTokens[sToken] = mExcerpts.convertMD("    ").trim();
                                 obj.replaceTokens();
                             }
@@ -1222,7 +1241,8 @@ HTMLOut.prototype.getBlog = function(sToken, sIndent, aParms)
  * Some wrinkles have been added to the above: getManifestXML() can alternatively call getMachineXML()
  * with a specific machine XML file, which would have had the potential to bypass getReadMe() altogether, so
  * getMachineXML() may now call getReadMe() -- which must NOT call getMachineXML() back whenever that happens. 
- * 
+ *
+ * @this {HTMLOut}
  * @param {string} sToken
  * @param {string} [sIndent]
  * @param {Array.<string>} [aParms]
@@ -1240,6 +1260,7 @@ HTMLOut.prototype.getDefault = function(sToken, sIndent, aParms)
  *
  * If the HTML file specified by aParms[0] exists, insert its contents into the current HTML document.
  *
+ * @this {HTMLOut}
  * @param {string} sToken
  * @param {string} [sIndent]
  * @param {Array.<string>} [aParms]
@@ -1280,6 +1301,7 @@ HTMLOut.prototype.getHTMLFile = function(sToken, sIndent, aParms)
  *
  * If "machine.xml" exists in the current directory, open it and determine if embedding it makes sense.
  *
+ * @this {HTMLOut}
  * @param {string} sToken
  * @param {string} [sIndent]
  * @param {Array.<string>|null} [aParms]
@@ -1343,7 +1365,7 @@ HTMLOut.prototype.getMachineXML = function(sToken, sIndent, aParms, sXMLFile, sS
                     sMachineDef += (sStateFile? ":" + sStateFile : "");
                     
                     s = '[Embedded ' + sMachineClass + '](' + sXMLFile + ' "' + sMachineDef + '")';
-                    var m = new MarkOut(s, sIndent, obj.req, null, obj.fDebug, fServerDebug);
+                    var m = new MarkOut(s, sIndent, obj.req, null, obj.fDebug);
                     s = m.convertMD("    ").trim();
 
                     obj.processMachines(m.getMachines(), function doneProcessXMLMachines() {
@@ -1388,6 +1410,7 @@ HTMLOut.prototype.getMachineXML = function(sToken, sIndent, aParms, sXMLFile, sS
  *
  * If "manifest.xml" exists in the current directory, open it and embed it.
  *
+ * @this {HTMLOut}
  * @param {string} sToken
  * @param {string} [sIndent]
  * @param {Array.<string>} [aParms]
@@ -1574,7 +1597,8 @@ HTMLOut.prototype.getManifestXML = function(sToken, sIndent, aParms)
  * getReadMe(sToken, sIndent, aParms, sPrevious)
  *
  * If a "README.md" exists in the current directory, open it, convert it, and prepare for replacement.
- * 
+ *
+ * @this {HTMLOut}
  * @param {string} sToken
  * @param {string} [sIndent]
  * @param {Array.<string>} [aParms]
@@ -1607,7 +1631,7 @@ HTMLOut.prototype.getReadMe = function(sToken, sIndent, aParms, sPrevious)
                 obj.getMachineXML(sToken, sIndent);     // we don't pass along aParms, because those are for Markdown files only
             }
         } else {
-            var m = new MarkOut(s, sIndent, obj.req, aParms, obj.fDebug, fServerDebug);
+            var m = new MarkOut(s, sIndent, obj.req, aParms, obj.fDebug);
             s = m.convertMD("    ").trim();
             /*
              * If the Markdown document begins with a heading, stuff that into the <title> tag;
@@ -1644,6 +1668,7 @@ HTMLOut.prototype.getReadMe = function(sToken, sIndent, aParms, sPrevious)
 /**
  * getSocketScripts(sToken, sIndent, aParms)
  *
+ * @this {HTMLOut}
  * @param {string} sToken
  * @param {string} [sIndent]
  * @param {Array.<string>} [aParms]
@@ -1658,6 +1683,7 @@ HTMLOut.prototype.getSocketScripts = function(sToken, sIndent, aParms)
  *
  * Generate a random string of words, purely for entertainment purposes (eg, something in honor of "ADVENT").
  *
+ * @this {HTMLOut}
  * @param {string} [sIndent]
  * @return {string}
  */
@@ -1699,9 +1725,9 @@ HTMLOut.prototype.getRandomString = function(sIndent)
  *
  * Additional properties can include:
  *
- *      'compiled' (eg, true or false); if not defined, then we choose a value based on any Gort command,
- *      or failing that, the internal fServerDebug setting
+ *      'compiled' (eg, true or false); if not defined, we choose a value based on the module's fDebug setting
  *
+ * @this {HTMLOut}
  * @param {Array} aMachines is an array of objects containing information about each machine on the current page
  * @param {function()} done
  */
@@ -1785,6 +1811,7 @@ HTMLOut.prototype.processMachines = function(aMachines, done)
 /**
  * addFilesToHTML(asFiles)
  *
+ * @this {HTMLOut}
  * @param {Array.<string>} asFiles is a list of CSS and/or JS files to include in the HTML 
  * @param {string} [sScriptEmbed] is an optional script to embed in the <body> (after any JS files listed above)
  */
@@ -1841,7 +1868,8 @@ HTMLOut.prototype.addFilesToHTML = function(asFiles, sScriptEmbed)
 
 /**
  * genOnClick(sURL)
- * 
+ *
+ * @this {HTMLOut}
  * @param {string} sURL
  * @param {string} [sFormat] (default is DumpAPI.FORMAT.IMG)
  * @return {string}

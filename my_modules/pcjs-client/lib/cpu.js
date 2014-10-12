@@ -254,11 +254,15 @@ CPU.prototype.powerUp = function(data, fRepower)
             this.dbg.init();
         } else {
             /*
-             * TODO: Once we get rid of those nasty Component method overrides, this test will have to be revised as well
+             * The Computer (this.cmp) knows if there's a Control Panel (this.cmp.panel), and the Control Panel
+             * knows if there's a "print" control (this.cmp.panel.controlPrint), and if there IS a "print" control
+             * but no debugger, the machine is probably misconfigured (most likely, the page simply neglected to
+             * load the Debugger component).
+             * 
+             * However, we don't actually need to check all that; it's always safe use println(), regardless whether
+             * a Control Panel with a "print" control is present or not.
              */
-            if (Component.controlPrint) {
-                this.warning("No debugger detected");
-            }
+            this.println("No debugger detected");
         }
     }
     this.fPowered = true;

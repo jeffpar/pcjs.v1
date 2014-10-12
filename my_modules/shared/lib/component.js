@@ -114,6 +114,7 @@ function Component(type, parms, constructor)
      *
     if (this.initStep) this.initStep(parms);
      */
+    
     this.fnReady = null;
     this.fReady = false;
     this.fBusy = this.fBusyCancel = false;
@@ -244,12 +245,14 @@ Component.add = function(component)
 Component.log = function(s, type)
 {
     if (DEBUG) {
-        var msElapsed, sMsg = (type? (type + ": ") : "") + (s || "");
-        if (Component.msStart === undefined) {
-            Component.msStart = usr.getTime();
+        if (s) {
+            var msElapsed, sMsg = (type? (type + ": ") : "") + s;
+            if (Component.msStart === undefined) {
+                Component.msStart = usr.getTime();
+            }
+            msElapsed = usr.getTime() - Component.msStart;
+            console.log(msElapsed + "ms: " + sMsg.replace(/\n/g, " "));
         }
-        msElapsed = usr.getTime() - Component.msStart;
-        console.log(sMsg? (msElapsed + "ms: " + sMsg.replace(/\n/g, " ")) : "");
     }
 };
 
@@ -266,13 +269,10 @@ Component.assert = function(f, s)
 {
     if (DEBUG) {
         if (!f) {
-            if (!s) {
-                /*
-                 * TODO: An accompanying source file/line number/function call would be nice, if there was a browser-independent way....
-                 */
-                s = "assertion failure";
-            }
-            Component.log(s);
+            /*
+             * TODO: An accompanying source file/line number/function call would be nice, if there was a browser-independent way....
+             */
+            Component.log(s || "assertion failure");
             throw new Error(s);
         }
     }
@@ -363,7 +363,7 @@ Component.getComponents = function(idRelated)
         if ((i = idRelated.indexOf('.')) > 0)
             idRelated = idRelated.substr(0, i + 1);
         else
-            idRelated = undefined;
+            idRelated = "";
     }
     for (i = 0; i < Component.all.length; i++) {
         var component = Component.all[i];
@@ -427,7 +427,7 @@ Component.getComponentByType = function(sType, idRelated, componentPrev)
             if ((i = idRelated.indexOf('.')) > 0) {
                 idRelated = idRelated.substr(0, i + 1);
             } else {
-                idRelated = undefined;
+                idRelated = "";
             }
         }
         for (i = 0; i < Component.all.length; i++) {
@@ -605,10 +605,7 @@ Component.prototype = {
     /**
      * setBinding(sHTMLClass, sHTMLType, sBinding, control)
      * 
-     * Component's setBinding() method is intended to be overridden by subclasses.  The only
-     * exception is the Panel component, which passes two special bindings ("clear" and "print")
-     * back to us if no one else accepted them, so that we can redirect all println() requests
-     * to those controls.
+     * Component's setBinding() method is intended to be overridden by subclasses.
      *
      * @this {Component}
      * @param {string|null} sHTMLClass is the class of the HTML control (eg, "input", "output")
@@ -619,67 +616,63 @@ Component.prototype = {
      */
     setBinding: function(sHTMLClass, sHTMLType, sBinding, control) {
         switch (sBinding) {
-            case "clear":
-                if (!this.bindings[sBinding]) {
-                    this.bindings[sBinding] = control;
-                    control.onclick = (function(component) {
-                        return function() {
-                            if (component.bindings['print']) {
-                                component.bindings['print'].value = "";
-                            }
-                        };
-                    }(this));
-                }
-                return true;
-            case "print":
-                if (!this.bindings[sBinding]) {
-                    this.bindings[sBinding] = control;
-                    control.value = "";         // this was added for Firefox (Safari automatically clears the <textarea> on a page reload, but Firefox does not)
-                    /*
-                     * TODO: Get rid of these Component method overrides, because they're going to cause issues
-                     * if the day ever comes (and it WILL) that we want multiple machines on a single page with their
-                     * own Control Panels.
-                     */
-                    Component.println = (function(control) {
-                        return function printControl(s, type) {
-                            s = (type !== undefined? (type + ": ") : "") + (s || "");
-                            if (!DEBUG) {       // in non-DEBUG builds, prevent the <textarea> from getting too large, otherwise printing becomes slower and slower
-                                if (control.value.length > 8192) {
-                                    control.value = control.value.substr(control.value.length - 4096);
-                                }
-                            }
-                            control.value += s + "\n";
-                            control.scrollTop = control.scrollHeight;
-                            if (DEBUG) console.log(s);
-                        };
-                    }(control));
-                    /*
-                     * Override Component.notice() with a replacement function that eliminates the web.alertUser() call 
-                     */
-                    Component.notice = function(s, fPrintOnly, id) {
-                        Component.println(s, "notice", id);
+        case "clear":
+            if (!this.bindings[sBinding]) {
+                this.bindings[sBinding] = control;
+                control.onclick = (function(component) {
+                    return function clearPanel() {
+                        if (component.bindings['print']) {
+                            component.bindings['print'].value = "";
+                        }
                     };
-                    /*
-                     * HACK: Save this particular HTML element so that the Debugger can access it, too
-                     */
-                    Component.controlPrint = control;
-                }
-                return true;
-            default:
+                }(this));
+            }
+            return true;
+        case "print":
+            if (!this.bindings[sBinding]) {
+                this.bindings[sBinding] = control;
                 /*
-                 * Now that we're giving the Panel component multiple shots at binding its controls,
-                 * to relax initialization dependencies, we need to chill when unrecognized requests come in.
-                 *
-                 if (sHTMLClass == "input") {
-                    control.onclick = function() {
-                        Component.println("unsupported " + sHTMLType + ": " + sBinding);
-                    };
-                 }
-                 this.log("setBinding(\"" + sHTMLClass + "\",\"" + sHTMLType + "\",\"" + sBinding + "\"): unrecognized binding");
+                 * HACK: Save this particular HTML element so that the Debugger can access it, too
                  */
-                break;
+                this.controlPrint = control;
+                /*
+                 * This was added for Firefox (Safari automatically clears the <textarea> on a page reload,
+                 * but Firefox does not).
+                 */
+                control.value = "";
+                this.println = (function(control) {
+                    return function printPanel(s, type) {
+                        s = (type !== undefined? (type + ": ") : "") + (s || "");
+                        /*
+                         * In non-DEBUG builds, prevent the <textarea> from getting too large;
+                         * otherwise, printing becomes slower and slower.
+                         */
+                        if (!DEBUG) {
+                            if (control.value.length > 8192) {
+                                control.value = control.value.substr(control.value.length - 4096);
+                            }
+                        }
+                        control.value += s + "\n";
+                        control.scrollTop = control.scrollHeight;
+                        if (DEBUG) console.log(s);
+                    };
+                }(control));
+                /**
+                 * Override this.notice() with a replacement function that eliminates the web.alertUser() call 
+                 * 
+                 * @this {Component}
+                 * @param {string} s
+                 * @param {boolean} [fPrintOnly]
+                 * @param {string} [id]
+                 */
+                this.notice = function noticePanel(s, fPrintOnly, id) {
+                    this.println(s, "notice", id);
+                };
+            }
+            return true;
+        default:
+            return false;
         }
-        return false;
     },
     /**
      * log(s, type)
@@ -695,7 +688,9 @@ Component.prototype = {
      * @param {string} [type] is the message type
      */
     log: function(s, type) {
-        if (DEBUG) Component.log(s, type || this.id || this.type);
+        if (DEBUG) {
+            Component.log(s, type || this.id || this.type);
+        }
     },
     /**
      * println(s, type)
@@ -724,9 +719,9 @@ Component.prototype = {
     /**
      * notice(s, fPrintOnly)
      * 
-     * notice() is like println() but implies a need for user notification, which means calling log() isn't good enough, so we alert() as well;
-     * however, if Component.println() is overridden, Component.notice will be replaced with the same override, on the assumption that the override
-     * is taking care of user notification.
+     * notice() is like println() but implies a need for user notification, which means calling log() isn't good enough,
+     * so we alert() as well; however, if Component.println() is overridden, Component.notice will be replaced with the
+     * same override, on the assumption that the override is taking care of alerting the user.
      *
      * @this {Component}
      * @param {string} s is the message text
@@ -735,24 +730,6 @@ Component.prototype = {
      */
     notice: function(s, fPrintOnly, id) {
         Component.notice(s, fPrintOnly, id || this.id);
-    },
-    /**
-     * warning(s)
-     * 
-     * @this {Component}
-     * @param {string} s describes the warning
-     */
-    warning: function(s) {
-        Component.warning(s);
-    },
-    /**
-     * error(s)
-     * 
-     * @this {Component}
-     * @param {string} s describes the error; an alert() is displayed as well
-     */
-    error: function(s) {
-        Component.error(s);
     },
     /**
      * setError(s)

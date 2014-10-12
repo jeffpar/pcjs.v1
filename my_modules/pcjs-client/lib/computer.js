@@ -139,15 +139,15 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
     this.sUserID = this.queryUserID();
 
     /*
-     * Find the appropriate CPU (and the Debugger, if any)
+     * Find the appropriate CPU (and Debugger and Control Panel, if any)
      */
     this.cpu = Component.getComponentByType("CPU", this.id);
     if (!this.cpu) {
         Component.error("Unable to find CPU component");
         return;
     }
-    
     this.dbg = Component.getComponentByType("Debugger", this.id);
+    this.panel = Component.getComponentByType("Panel", this.id);
 
     /*
      * Initialize the Bus component
@@ -160,6 +160,20 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
     var aComponents = Component.getComponents(this.id);
     for (var iComponent = 0; iComponent < aComponents.length; iComponent++) {
         var component = aComponents[iComponent];
+        /*
+         * I can think of many "cleaner" ways for the Control Panel component to pass its
+         * notice(), println(), etc, overrides on to all the other components, but it's just
+         * too darn convenient to slam those overrides into the components directly.
+         *
+         * Adding more initBus() parameters was another option, but that function is already
+         * looking a bit unwieldy, and Control Panel functionality is a little far afield
+         * from Bus initialization.
+         */
+        if (this.panel && this.panel.controlPrint) {
+            component.notice = this.panel.notice;
+            component.println = this.panel.println;
+            component.controlPrint = this.panel.controlPrint;
+        }
         if (component.initBus) component.initBus(this, this.bus, this.cpu, this.dbg);
     }
 
@@ -557,7 +571,7 @@ Computer.prototype.powerRestore = function(component, stateComputer, fRepower, f
              */
             if (!component.powerUp(data, fRepower)) {
                 if (data) {
-                    this.error("Unable to restore state for " + component.type);
+                    Component.error("Unable to restore state for " + component.type);
                     /*
                      * If this is a resume error for a machine that also has a predefined state
                      * AND we're not restoring from that state, then throw away the current state,
@@ -1179,6 +1193,7 @@ Computer.init = function()
             
             var eComputer = aeComputers[iComputer];
             var parmsComputer = Component.getComponentParms(eComputer);
+            
             /*
              * We set fSuspended in the Computer constructor because we want to "power up" the
              * computer ourselves, after any/all bindings are in place.

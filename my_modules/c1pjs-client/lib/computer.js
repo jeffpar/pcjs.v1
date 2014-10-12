@@ -270,6 +270,29 @@ C1PComputer.init = function()
 
         var component;
         var modules = {};
+
+        /*
+         * Let's see if the Control Panel is installed (NOTE: its ID must be "panel", and only one per machine is supported); 
+         * the Panel needs our setPower() notifications, and this relieves us from having an explicit <module> entry for type="panel". 
+         */
+        var panel = Component.getComponentByID('panel', parmsComputer['id']);
+        if (panel) {
+            modules['panel'] = [panel];
+            /*
+             * Iterate through all the other components and update their print methods if the Control Panel has provided overrides.
+             */
+            if (panel.controlPrint) {
+                var aComponents = Component.getComponents(parmsComputer['id']);
+                for (var iComponent = 0; iComponent < aComponents.length; iComponent++) {
+                    component = aComponents[iComponent];
+                    if (component == panel) continue;
+                    component.notice = panel.notice;
+                    component.println = panel.println;
+                    component.controlPrint = panel.controlPrint;
+                }
+            }
+        }
+
         var abMemory;
         var addrStart = 0, addrEnd = 0;
         
@@ -324,15 +347,6 @@ C1PComputer.init = function()
             if (component.setBuffer) {
                 component.setBuffer(abMemory, addrStart, addrEnd, modules['cpu'][0]);
             }
-        }
-        
-        /*
-         * Let's see if the Control Panel is installed (NOTE: its ID must be "panel", and only one per machine is supported); 
-         * the Panel needs our setPower() notifications, and this relieves us from having an explicit <module> entry for type="panel". 
-         */
-        component = Component.getComponentByID('panel', parmsComputer['id']);
-        if (component) {
-            modules['panel'] = [component];
         }
         
         var computer = new C1PComputer(parmsComputer, modules);

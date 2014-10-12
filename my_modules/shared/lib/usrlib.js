@@ -67,7 +67,7 @@ usr.binarySearch = function(a, v, fnCompare) {
 
 /**
  * binaryInsert(a, v, fnCompare)
- * 
+ *
  * If element v already exists in array a, the array is unchanged (we don't allow duplicates); otherwise, the
  * element is inserted into the array at the appropriate index.
  *
@@ -151,7 +151,7 @@ usr.aMonthDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
  *      i:  minutes, with leading zeros (00,...,59)
  *      j:  day of the month, without leading zeros (1,...,31)
  *      l:  day of the week ("Sunday",...,"Saturday")
- *      m:	month, with leading zeros (01,...,12)
+ *      m:  month, with leading zeros (01,...,12)
  *      s:  seconds, with leading zeros (00,...,59)
  *      F:  month ("January",...,"December")
  *      H:  hour in 24-hour format, with leading zeros (00,...,23)

@@ -74,8 +74,8 @@ if (typeof module !== 'undefined') {
  * supported in theory, but in practice, they're not.
  *
  * NOTE: Since Memory blocks are low-level objects that have no UI requirements, they do not
- * inherit from the Component class; so, if you want to use print(), for example, you must
- * rely on class methods like Component.println() rather than object methods like this.println().
+ * inherit from the Component class; so, if you want to use println(), for example, you must
+ * use the methods in the Debugger class.
  *
  * Because Memory blocks now allow us to have a "sparse" address space, we could choose to
  * take the memory hit of allocating 4K arrays per block, where each element stores only one byte,
@@ -160,10 +160,6 @@ Memory.prototype = {
      * @return {number}
      */
     readNone: function(off) {
-        /*
-         * This can happen so frequently that the browser can't come up for air, so it's best to do this only under special circumstances...
-         */
-        // if (DEBUG) Component.println("readNone(" + str.toHexWord(this.addr + off) + ")");
         return 0;
     },
     /**
@@ -174,10 +170,6 @@ Memory.prototype = {
      * @param {number} v (could be either a byte or word value, since we use the same handler for both kinds of accesses)
      */
     writeNone: function(off, v) {
-        /*
-         * This can happen so frequently that the browser can't come up for air, so it's best to do this only under special circumstances...
-         */
-        // if (DEBUG) Component.println("writeNone(" + str.toHexWord(this.addr + off) + "): " + str.toHexWord(v));
     },
     /**
      * readByteTArray(off)
@@ -537,13 +529,13 @@ Memory.prototype = {
                 if (this.cReadBreakpoints++ === 0) {
                     this.setReadAccess(Memory.afnVerify);
                 }
-                if (DEBUG) Component.println("read breakpoint added to memory block " + str.toHex(this.addr));
+                if (DEBUG) this.dbg.println("read breakpoint added to memory block " + str.toHex(this.addr));
             }
             else {
                 if (this.cWriteBreakpoints++ === 0) {
                     this.setWriteAccess(Memory.afnVerify);
                 }
-                if (DEBUG) Component.println("write breakpoint added to memory block " + str.toHex(this.addr));
+                if (DEBUG) this.dbg.println("write breakpoint added to memory block " + str.toHex(this.addr));
             }
         }
     },
@@ -559,14 +551,14 @@ Memory.prototype = {
             if (!fWrite) {
                 if (--this.cReadBreakpoints === 0) {
                     this.resetReadAccess();
-                    if (DEBUG) Component.println("all read breakpoints removed from memory block " + str.toHex(this.addr));
+                    if (DEBUG) this.dbg.println("all read breakpoints removed from memory block " + str.toHex(this.addr));
                 }
                 Component.assert(this.cReadBreakpoints >= 0);
             }
             else {
                 if (--this.cWriteBreakpoints === 0) {
                     this.resetWriteAccess();
-                    if (DEBUG) Component.println("all write breakpoints removed from memory block " + str.toHex(this.addr));
+                    if (DEBUG) this.dbg.println("all write breakpoints removed from memory block " + str.toHex(this.addr));
                 }
                 Component.assert(this.cWriteBreakpoints >= 0);
             }

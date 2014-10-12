@@ -182,7 +182,7 @@ RAM.prototype.reset = function() {
         }
         if (this.chipset) this.chipset.addCMOSMemory(this.addrRAM, this.sizeRAM);
     } else {
-        this.error("No RAM allocated");
+        Component.error("No RAM allocated");
     }
 };
 

@@ -809,7 +809,7 @@ C1PDiskController.prototype.loadDisk = function(sDiskName, sDiskData, nErrorCode
              * to its trackNum index, but just in case that wasn't intended, we're going to mention it. 
              */
             if (iTrackNum != iTrack) {
-                this.warning("track " + iTrackNum + " out of order (expected " + iTrack + ")");
+                Component.warning("track " + iTrackNum + " out of order (expected " + iTrack + ")");
             }
             /*
              * For each track, we start with an empty trackData array and "push" (ie, append) all the

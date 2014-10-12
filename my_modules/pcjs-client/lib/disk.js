@@ -613,10 +613,10 @@ Disk.prototype.onLoadDisk = function(sDiskFile, sDiskData, nErrorCode, sDiskPath
             }
 
             if (!aDiskData.length) {
-                this.error("Empty disk image: " + this.sDiskName);
+                Component.error("Empty disk image: " + this.sDiskName);
             }
             else if (aDiskData.length == 1) {
-                this.error(aDiskData[0]);
+                Component.error(aDiskData[0]);
             }
             /*
              * aDiskData is an array of cylinders, each of which is an array of heads, each of which
@@ -731,7 +731,7 @@ Disk.prototype.onLoadDisk = function(sDiskFile, sDiskData, nErrorCode, sDiskPath
                 disk = this;
             }
         } catch (e) {
-            this.error("Disk image error: " + e.message);
+            Component.error("Disk image error: " + e.message);
         }
     }
     if (this.fnNotify) {

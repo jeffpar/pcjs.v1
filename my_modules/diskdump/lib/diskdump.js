@@ -731,7 +731,8 @@ DiskDump.readFile = function(sPath, sEncoding, done)
 
 /**
  * isExcluded(sName)
- * 
+ *
+ * @this {DiskDump}
  * @param {string} sName is the basename of a file under consideration
  * @return {boolean} is true if the file should be excluded, false if not 
  */
@@ -752,6 +753,7 @@ DiskDump.prototype.isExcluded = function(sName)
  * object creation from any I/O that the object may perform, to ensure that a callback can never
  * be called before the caller has actually received the newly created object.
  *
+ * @this {DiskDump}
  * @param {function(Error)} done
  */
 DiskDump.prototype.loadFile = function(done)
@@ -774,6 +776,7 @@ DiskDump.prototype.loadFile = function(done)
  *
  * Records the loaded disk data buffer
  *
+ * @this {DiskDump}
  * @param {Error} err
  * @param {Buffer|string} buf
  * @param {function(Error)} done
@@ -818,6 +821,7 @@ DiskDump.prototype.setData = function(err, buf, done)
 /**
  * dumpLine(nIndent, sLine, sComment)
  *
+ * @this {DiskDump}
  * @param {number} [nIndent] is the relative number of characters to indent the given line (0 if none)
  * @param {string} [sLine] is the given line
  * @param {string} [sComment] is an optional comment to append to the line, if comment output is enabled
@@ -840,6 +844,7 @@ DiskDump.prototype.dumpLine = function(nIndent, sLine, sComment)
 /**
  * dumpProp(sKey, value, fLast)
  *
+ * @this {DiskDump}
  * @param {string} sKey
  * @param {number|string|null} value
  * @param {boolean} [fLast]
@@ -857,6 +862,7 @@ DiskDump.prototype.dumpProp = function(sKey, value, fLast)
 /**
  * dumpBuffer(sKey, buf, len, cbItem, offData)
  *
+ * @this {DiskDump}
  * @param {string|null} sKey is name of buffer data element
  * @param {Buffer} buf is a Buffer containing the bytes to dump
  * @param {number} len is the number of bytes to dump
@@ -908,6 +914,7 @@ DiskDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offData)
  *
  * Dumps track data for an OSI disk track
  *
+ * @this {DiskDump}
  * @param {string} sTrackSig
  * @param {number} nTrackNum
  * @param {number} nTrackType
@@ -932,6 +939,7 @@ DiskDump.prototype.dumpTrackOSI = function(sTrackSig, nTrackNum, nTrackType, nTr
  *
  * Dumps sector data for an OSI disk sector
  *
+ * @this {DiskDump}
  * @param {number|null} nSectorSig
  * @param {number} nSectorNum
  * @param {number} nSectorPages
@@ -968,6 +976,7 @@ DiskDump.prototype.dumpSectorOSI = function(nSectorSig, nSectorNum, nSectorPages
  * NOTE: The C1Pjs Simulator doesn't support this feature (yet), which is why
  * trimSector() isn't used when dumping OSI disk images.
  *
+ * @this {DiskDump}
  * @param {Buffer} buf
  * @param {number} len
  * @return {Array} containing [dwPattern, cbBuffer]
@@ -1018,7 +1027,8 @@ DiskDump.ATTR_ARCHIVE     = 0x20;
 
 /**
  * validateTime(dateTime)
- * 
+ *
+ * @this {DiskDump}
  * @param {Date} dateTime
  * @return {boolean} true if date/time modified, false if not 
  */
@@ -1062,6 +1072,7 @@ DiskDump.prototype.validateTime = function(dateTime)
 /**
  * buildData(cb)
  *
+ * @this {DiskDump}
  * @param {number} cb
  * @param {Array.<number>} [abInit]
  * @return {Array.<number>} of bytes zero-initialized
@@ -1078,6 +1089,7 @@ DiskDump.prototype.buildData = function(cb, abInit)
 /**
  * copyData(ab)
  *
+ * @this {DiskDump}
  * @param {number} offDisk
  * @param {Array.<number>} ab
  * @return {number} number of bytes written
@@ -1091,7 +1103,8 @@ DiskDump.prototype.copyData = function(offDisk, ab)
 
 /**
  * addManifestInfo(fileInfo)
- * 
+ *
+ * @this {DiskDump}
  * @param {Object} fileInfo
  */
 DiskDump.prototype.addManifestInfo = function(fileInfo)
@@ -1105,6 +1118,7 @@ DiskDump.prototype.addManifestInfo = function(fileInfo)
  * Returns an array (aFiles) via the done() callback, where each entry is a fileInfo object.
  * If fileInfo refers to a subdirectory, then FILE_SIZE is -1 and FILE_DATA entry is another aFiles array.
  *
+ * @this {DiskDump}
  * @param {string} sDir is a fully-qualified directory name
  * @param {boolean} [fRoot] should be true for the first directory read
  * @param {function(Error,Array)} done
@@ -1234,6 +1248,7 @@ DiskDump.prototype.readDir = function(sDir, fRoot, done)
  * NOTE: sPath begins fully-qualified (see this.sDiskPath), but if any of the intermediate entries contains paths,
  * it's our responsibility to join them with sServerRoot.
  *
+ * @this {DiskDump}
  * @param {string} sPath contains series of semi-colon-separated files (local or remote)
  * @param {function(Error,Array)} done
  */
@@ -1356,6 +1371,7 @@ DiskDump.prototype.readPath = function(sPath, done)
 /**
  * buildName(sFile)
  *
+ * @this {DiskDump}
  * @param {string} sFile is the basename of a file
  * @return {string} containing a corresponding FAT-compatible filename
  */
@@ -1391,6 +1407,7 @@ DiskDump.prototype.buildName = function(sFile)
  * NOTE: When fileInfo is returned, there will be no FILE_PATH property, which means
  * don't go looking for a corresponding entry in the host file system, because there isn't one.
  *
+ * @this {DiskDump}
  * @param {string} [sDir]
  * @return {Object|null} fileInfo (or null if no suitable volume label)
  */
@@ -1433,6 +1450,7 @@ DiskDump.prototype.buildVolLabel = function(sDir)
 /**
  * buildFAT(abFAT, aFiles, iCluster, cbCluster)
  *
+ * @this {DiskDump}
  * @param {Array.<number>} abFAT
  * @param {Array} aFiles
  * @param {number} iCluster
@@ -1476,6 +1494,7 @@ DiskDump.prototype.buildFAT = function(abFAT, aFiles, iCluster, cbCluster)
 /**
  * buildFATEntry(abFat, iFat, v)
  *
+ * @this {DiskDump}
  * @param {Array.<number>} abFAT
  * @param {number} iFAT
  * @param {number} v
@@ -1501,6 +1520,7 @@ DiskDump.prototype.buildFATEntry = function(abFAT, iFAT, v)
 /**
  * buildDir(abDir, aFiles, dateMod, iCluster, iParentCluster)
  *
+ * @this {DiskDump}
  * @param {Array.<number>} abDir
  * @param {Array} aFiles
  * @param {Date} [dateMod]
@@ -1537,6 +1557,7 @@ DiskDump.prototype.buildDir = function(abDir, aFiles, dateMod, iCluster, iParent
  *
  * TODO: Create constants that define the various directory entry fields, including the overall size (32 bytes).
  *
+ * @this {DiskDump}
  * @param {Array.<number>} ab contains the bytes of a directory
  * @param {number} off is the offset within ab to build the next directory entry
  * @param {string} sFile is the file name
@@ -1621,6 +1642,7 @@ DiskDump.prototype.buildDirEntry = function(ab, off, sFile, cbFile, bAttr, dateM
 /**
  * buildClusters(aFiles, offDisk, cbCluster, iParentCluster, done)
  *
+ * @this {DiskDump}
  * @param {Array} aFiles
  * @param {number} offDisk
  * @param {number} cbCluster
@@ -1706,6 +1728,7 @@ DiskDump.prototype.buildClusters = function(aFiles, offDisk, cbCluster, iParentC
 /**
  * buildImage()
  *
+ * @this {DiskDump}
  * @param {boolean} fDir
  * @param {function(Error)} done
  */
@@ -1740,6 +1763,7 @@ DiskDump.prototype.buildImage = function(fDir, done)
  * calculated total data and found a BPB we think will accommodate it.  So, the code below
  * will still have to be prepared for running out of disk space.  This is just a good estimate.
  *
+ * @this {DiskDump}
  * @param {Array} aFiles
  * @return {number} of bytes required for all files, including all subdirectories
  */
@@ -1765,6 +1789,7 @@ DiskDump.prototype.calcFileSizes = function(aFiles)
 /**
  * buildMBR(cHeads, cSectorsPerTrack, cbSector, cTotalSectors)
  *
+ * @this {DiskDump}
  * @param {number} cHeads
  * @param {number} cSectorsPerTrack
  * @param {number} cbSector
@@ -1835,6 +1860,7 @@ DiskDump.prototype.buildMBR = function(cHeads, cSectorsPerTrack, cbSector, cTota
  * Note, however, that even if this function returns true, you won't receive the buffer until
  * all the writes to have it have finished.
  *
+ * @this {DiskDump}
  * @param {Array} aFiles
  * @param {function(Error)} done
  * @return {boolean} true if disk allocation successful, false if not
@@ -1996,6 +2022,7 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
  *
  * Converts the disk image data to JSON.
  *
+ * @this {DiskDump}
  * @return {string|null} containing a JSON representation of the disk image, or null if unrecognized/malformed
  */
 DiskDump.prototype.convertToJSON = function()
@@ -2288,6 +2315,7 @@ DiskDump.prototype.convertToJSON = function()
  * each containing an array of tracks.  It's largely just a matter of reversing the meaning of the two outermost array
  * elements, here and in the C1Pjs disk module.
  *
+ * @this {DiskDump}
  * @return {string|null} containing a JSON representation of the disk image, or null if unrecognized/malformed
  */
 DiskDump.prototype.convertOSIDiskToJSON = function()
@@ -2406,6 +2434,7 @@ DiskDump.prototype.convertOSIDiskToJSON = function()
  * TODO: Consider creating a caching mechanism for these requests (ie, stash a limited number of these
  * disk images under /tmp, using a name based on a hash of the source path).
  *
+ * @this {DiskDump}
  * @return {Buffer|null} containing the disk image's raw data, or null if no data available (or parse error)
  */
 DiskDump.prototype.convertToIMG = function()

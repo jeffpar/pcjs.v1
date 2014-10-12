@@ -157,12 +157,6 @@ function ChipSet(parmsChipSet)
      * and (on the MODEL_5160) whether or not a coprocessor is installed.  If no SW1 settings are provided,
      * we look for individual 'fdrives' and 'monitor' settings and build a default SW1 value.
      * 
-     * TODO: Get rid of reliance on SW1 for MODEL_5170 and later; omitting it now results in a BIOS warning:
-     * 
-     *      ' 162-System Options Not Set-(Run SETUP)'
-     *      
-     *      ' (RESUME = "F1" KEY)'
-     *      
      * The defaults below select max memory, monochrome monitor (EGA monitor for MODEL_5170), and two floppies.
      * Don't get too excited about "max memory" either: on a MODEL_5150, the max was 64Kb, and on a MODEL_5160,
      * the max was 256Kb.  However, the RAM component is free to install as much base memory as it likes,
@@ -2566,14 +2560,14 @@ ChipSet.prototype.updateDMA = function(channel)
 };
 
 /**
- * inPICL(iPIC, addrFrom)
+ * inPICLo(iPIC, addrFrom)
  * 
  * @this {ChipSet}
  * @param {number} iPIC
  * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  * @return {number} simulated port value
  */
-ChipSet.prototype.inPICL = function(iPIC, addrFrom)
+ChipSet.prototype.inPICLo = function(iPIC, addrFrom)
 {
     var b = 0;
     var pic = this.aPICs[iPIC];
@@ -2595,14 +2589,14 @@ ChipSet.prototype.inPICL = function(iPIC, addrFrom)
 };
 
 /**
- * outPICL(iPIC, bOut, addrFrom)
+ * outPICLo(iPIC, bOut, addrFrom)
  * 
  * @this {ChipSet}
  * @param {number} iPIC
  * @param {number} bOut
  * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  */
-ChipSet.prototype.outPICL = function(iPIC, bOut, addrFrom)
+ChipSet.prototype.outPICLo = function(iPIC, bOut, addrFrom)
 {
     var pic = this.aPICs[iPIC];
     this.messagePort(pic.port, bOut, addrFrom, "PIC" + iPIC, ChipSet.MESSAGE_PIC);
@@ -2613,7 +2607,7 @@ ChipSet.prototype.outPICL = function(iPIC, bOut, addrFrom)
         pic.nICW = 0;
         pic.aICW[pic.nICW++] = bOut;
         /*
-         * I used to do the rest of this initialization in outPICH(), once all the ICW commands had been received,
+         * I used to do the rest of this initialization in outPICHi(), once all the ICW commands had been received,
          * but a closer reading of the 8259A spec indicates that that should happen now, on receipt on ICW1.
          * 
          * Also, on p.10 of that spec, it says "The Interrupt Mask Register is cleared".  I originally took that to
@@ -2711,7 +2705,7 @@ ChipSet.prototype.outPICL = function(iPIC, bOut, addrFrom)
         }
     } else {
         /*
-         * This must be an OCW3 request. If it's a "Read Register" command (PIC_LO.OCW3_READ_CMD), inPICL() will take care it. 
+         * This must be an OCW3 request. If it's a "Read Register" command (PIC_LO.OCW3_READ_CMD), inPICLo() will take care it. 
          *
          * TODO: If OCW3 specified a "Poll" command (PIC_LO.OCW3_POLL_CMD) or a "Special Mask Mode" command (PIC_LO.OCW3_SMM_CMD),
          * that's unfortunate, because I don't support them yet.
@@ -2724,14 +2718,14 @@ ChipSet.prototype.outPICL = function(iPIC, bOut, addrFrom)
 };
 
 /**
- * inPICH(iPIC, addrFrom)
+ * inPICHi(iPIC, addrFrom)
  * 
  * @this {ChipSet}
  * @param {number} iPIC
  * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  * @return {number} simulated port value
  */
-ChipSet.prototype.inPICH = function(iPIC, addrFrom)
+ChipSet.prototype.inPICHi = function(iPIC, addrFrom)
 {
     var pic = this.aPICs[iPIC];
     var b = pic.bIMR;
@@ -2740,14 +2734,14 @@ ChipSet.prototype.inPICH = function(iPIC, addrFrom)
 };
 
 /**
- * outPICH(iPIC, bOut, addrFrom)
+ * outPICHi(iPIC, bOut, addrFrom)
  * 
  * @this {ChipSet}
  * @param {number} iPIC
  * @param {number} bOut
  * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  */
-ChipSet.prototype.outPICH = function(iPIC, bOut, addrFrom)
+ChipSet.prototype.outPICHi = function(iPIC, bOut, addrFrom)
 {
     var pic = this.aPICs[iPIC];
     this.messagePort(pic.port+1, bOut, addrFrom, "PIC" + iPIC, ChipSet.MESSAGE_PIC);
@@ -4230,8 +4224,8 @@ ChipSet.aPortInput = {
     0x06: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAChannelAddr(ChipSet.DMA0.INDEX, 3, port, addrFrom); },
     0x07: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAChannelCount(ChipSet.DMA0.INDEX, 3, port, addrFrom); },
     0x08: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAStatus(ChipSet.DMA0.INDEX, port, addrFrom); },
-    0x20: /** @this {ChipSet} */ function(port, addrFrom) { return this.inPICL(ChipSet.PIC0.INDEX, addrFrom); },
-    0x21: /** @this {ChipSet} */ function(port, addrFrom) { return this.inPICH(ChipSet.PIC0.INDEX, addrFrom); },
+    0x20: /** @this {ChipSet} */ function(port, addrFrom) { return this.inPICLo(ChipSet.PIC0.INDEX, addrFrom); },
+    0x21: /** @this {ChipSet} */ function(port, addrFrom) { return this.inPICHi(ChipSet.PIC0.INDEX, addrFrom); },
     0x40: /** @this {ChipSet} */ function(port, addrFrom) { return this.inTimer(ChipSet.TIMER0.INDEX, addrFrom); },
     0x41: /** @this {ChipSet} */ function(port, addrFrom) { return this.inTimer(ChipSet.TIMER1.INDEX, addrFrom); },
     0x42: /** @this {ChipSet} */ function(port, addrFrom) { return this.inTimer(ChipSet.TIMER2.INDEX, addrFrom); },
@@ -4267,8 +4261,8 @@ ChipSet.aPortInput5170 = {
     0x8D: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAPageSpare(5, port, addrFrom); },
     0x8E: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAPageSpare(6, port, addrFrom); },
     0x8F: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAPageReg(ChipSet.DMA1.INDEX, 0, port, addrFrom); },
-    0xA0: /** @this {ChipSet} */ function(port, addrFrom) { return this.inPICL(ChipSet.PIC1.INDEX, addrFrom); },
-    0xA1: /** @this {ChipSet} */ function(port, addrFrom) { return this.inPICH(ChipSet.PIC1.INDEX, addrFrom); },
+    0xA0: /** @this {ChipSet} */ function(port, addrFrom) { return this.inPICLo(ChipSet.PIC1.INDEX, addrFrom); },
+    0xA1: /** @this {ChipSet} */ function(port, addrFrom) { return this.inPICHi(ChipSet.PIC1.INDEX, addrFrom); },
     0xC0: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAChannelAddr(ChipSet.DMA1.INDEX, 0, port, addrFrom); },
     0xC2: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAChannelCount(ChipSet.DMA1.INDEX, 0, port, addrFrom); },
     0xC4: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAChannelAddr(ChipSet.DMA1.INDEX, 1, port, addrFrom); },
@@ -4298,8 +4292,8 @@ ChipSet.aPortOutput = {
     0x0B: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAMode(ChipSet.DMA0.INDEX, port, bOut, addrFrom); },
     0x0C: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAIndex(ChipSet.DMA0.INDEX, port, bOut, addrFrom); },
     0x0D: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAClear(ChipSet.DMA0.INDEX, port, bOut, addrFrom); },
-    0x20: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outPICL(ChipSet.PIC0.INDEX, bOut, addrFrom); },
-    0x21: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outPICH(ChipSet.PIC0.INDEX, bOut, addrFrom); },
+    0x20: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outPICLo(ChipSet.PIC0.INDEX, bOut, addrFrom); },
+    0x21: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outPICHi(ChipSet.PIC0.INDEX, bOut, addrFrom); },
     0x40: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outTimer(ChipSet.TIMER0.INDEX, bOut, addrFrom); },
     0x41: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outTimer(ChipSet.TIMER1.INDEX, bOut, addrFrom); },
     0x42: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outTimer(ChipSet.TIMER2.INDEX, bOut, addrFrom); },
@@ -4336,8 +4330,8 @@ ChipSet.aPortOutput5170 = {
     0x8D: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAPageSpare(5, port, bOut, addrFrom); },
     0x8E: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAPageSpare(6, port, bOut, addrFrom); },
     0x8F: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAPageReg(ChipSet.DMA1.INDEX, 0, port, bOut, addrFrom); },
-    0xA0: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outPICL(ChipSet.PIC1.INDEX, bOut, addrFrom); },
-    0xA1: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outPICH(ChipSet.PIC1.INDEX, bOut, addrFrom); },
+    0xA0: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outPICLo(ChipSet.PIC1.INDEX, bOut, addrFrom); },
+    0xA1: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outPICHi(ChipSet.PIC1.INDEX, bOut, addrFrom); },
     0xC0: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAChannelAddr(ChipSet.DMA1.INDEX, 0, port, bOut, addrFrom); },
     0xC2: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAChannelCount(ChipSet.DMA1.INDEX, 0, port, bOut, addrFrom); },
     0xC4: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAChannelAddr(ChipSet.DMA1.INDEX, 1, port, bOut, addrFrom); },

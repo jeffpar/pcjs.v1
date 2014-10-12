@@ -1,8 +1,7 @@
 PCjs Coding Conventions
 ---
 
-Some ramblings about the JavaScript coding conventions used for PCjs.  This is not an attempt to convince anyone of
-anything, just an explanation of why things are the way they are.
+Here are a few highlights of the (evolving) JavaScript coding conventions used in PCjs.
 
 ### Tabs vs. Spaces
 
@@ -78,6 +77,33 @@ the code follows a more traditional, C-like style (think *#define*).  It's also 
 uses the "long form."  But again, since the Closure Compiler already does a good job of inlining, it's no longer
 necessary to use the "long form", which is why you'll see newer code using more conventional Object notation to
 define class constants.
+
+### DEBUG vs. RELEASE
+
+While we're talking about constants, it's important to be aware of constants that are not scoped to
+any particular component.
+
+In [/my_modules/shared/lib/defines.js](/my_modules/shared/lib/defines.js), **DEBUG** is set to **TRUE**,
+enabling all debug-only code by default.  It is also declared as a *@define* so that the Closure Compiler can
+override it, setting it to **FALSE** and disabling debug-only code.
+
+To ensure that debug-only code is not simply *disabled* but also *removed*, the code should be wrapped with:
+
+	if (DEBUG) {
+		[code to be removed by the Closure Compiler]
+	}
+
+In many cases, the compiler is able to completely remove calls to debug-only class methods; eg:
+
+	Component.assert(off >= 0 && off < this.cb);
+
+However, calls to debug-only instance methods seem to be more problematic, so all such calls are wrapped; eg:
+
+	if (DEBUG) this.log('load("' + sFileURL + '")');
+
+There are a number of other important shared constants in [/my_modules/shared/lib/defines.js](/my_modules/shared/lib/defines.js)
+and PCjs-specific constants in [/my_modules/pcjs-client/lib/defines.js](/my_modules/pcjs-client/lib/defines.js); refer
+to those files for more information.
 
 ### Braces and Parentheses
 

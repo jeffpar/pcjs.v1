@@ -67,7 +67,8 @@ Component.subclass(Component, Panel);
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-Panel.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control) {
+Panel.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
+{
     if (this.cmp && this.cmp.setBinding(sHTMLClass, sHTMLType, sBinding, control)) return true;
     if (this.cpu && this.cpu.setBinding(sHTMLClass, sHTMLType, sBinding, control)) return true;
     if (this.kbd && this.kbd.setBinding(sHTMLClass, sHTMLType, sBinding, control)) return true;
@@ -84,7 +85,8 @@ Panel.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control) 
  * @param {X86CPU} cpu
  * @param {Debugger} dbg
  */
-Panel.prototype.initBus = function(cmp, bus, cpu, dbg) {
+Panel.prototype.initBus = function(cmp, bus, cpu, dbg)
+{
     this.cmp = cmp;
     this.cpu = cpu;
     this.dbg = dbg;
@@ -99,7 +101,8 @@ Panel.prototype.initBus = function(cmp, bus, cpu, dbg) {
  * @param {boolean} [fRepower]
  * @return {boolean} true if successful, false if failure
  */
-Panel.prototype.powerUp = function(data, fRepower) {
+Panel.prototype.powerUp = function(data, fRepower)
+{
     if (!fRepower) {
         Panel.init();
     }
@@ -113,7 +116,8 @@ Panel.prototype.powerUp = function(data, fRepower) {
  * @param {boolean} fSave
  * @return {Object|boolean}
  */
-Panel.prototype.powerDown = function(fSave) {
+Panel.prototype.powerDown = function(fSave)
+{
     return true;
 };
 

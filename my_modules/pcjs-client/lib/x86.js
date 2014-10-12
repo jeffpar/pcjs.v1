@@ -37,15 +37,15 @@ var X86 = {
     /*
      * CPU model numbers
      */
-	MODEL_8086:     8086,
-	MODEL_8088:     8088,
-	MODEL_80186:    80186,
-	MODEL_80188:    80188,
-	MODEL_80286:    80286,
+    MODEL_8086:     8086,
+    MODEL_8088:     8088,
+    MODEL_80186:    80186,
+    MODEL_80188:    80188,
+    MODEL_80286:    80286,
     /*
      * Processor Status flag definitions (stored in regPS)
      */
-	PS: {
+    PS: {
         CF:     0x0001,     // bit 0: Carry flag
         BIT1:   0x0002,     // bit 1: reserved, always set
         PF:     0x0004,     // bit 2: Parity flag
@@ -124,23 +124,23 @@ var X86 = {
     },
     /*
      * Processor Exception Interrupts
-     * 
+     *
      * Of the following exceptions, all are designed to be restartable, except for 0x08 and 0x09 (and 0x0D
      * after an attempt to write to a read-only segment).
-     * 
+     *
      * Error codes are pushed onto the stack for 0x08 (always 0) and 0x0A through 0x0D.
-     * 
+     *
      * Priority: Instruction exception, TRAP, NMI, Processor Extension Segment Overrun, and finally INTR.
-     * 
+     *
      * All exceptions can also occur in real-mode, except where noted.  A GP_FAULT in real-mode can be triggered
      * by "any memory reference instruction that attempts to reference [a] 16-bit word at offset 0FFFFH".
      *
      * Interrupts beyond 0x10 (up through 0x1F) are reserved for future exceptions.
-     * 
+     *
      * Implementation Detail: For any opcode we know must generate a UD_FAULT interrupt, we invoke opInvalid().
      * We reserve the term "undefined" for opcodes that require further investigation, and we invoke opUndefined()
      * in those cases until an opcode's behavior has been defined; at that point, it's either valid or invalid.
-     * 
+     *
      * As for "illegal", that's a silly (and redundant) term in this context, so we don't use it.  Similarly,
      * the term "undocumented" should be limited to operations that are valid but that Intel did not document.
      */
@@ -195,7 +195,7 @@ var X86 = {
     /*
      * Bit values for opFlags, which are all reset to zero prior to each instruction
      */
-	OPFLAG: {
+    OPFLAG: {
         NOREAD:     0x0001,
         NOWRITE:    0x0002,
         NOINTR:     0x0004,     // indicates a segreg has been set, or a prefix, or an STI (delay INTR acknowledgement)
@@ -221,9 +221,9 @@ var X86 = {
      */
     OPCODE: {
         ES:         0x26,       // opES()
-		CS:         0x2E,       // opCS()
-		SS:         0x36,       // opSS()
-		DS:         0x3E,       // opDS()
+        CS:         0x2E,       // opCS()
+        SS:         0x36,       // opSS()
+        DS:         0x3E,       // opDS()
         PUSHSP:     0x54,
         PUSHA:      0x60,
         POPA:       0x61,
@@ -239,31 +239,31 @@ var X86 = {
         OUTSW:      0x6F,
         ENTER:      0xC8,
         LEAVE:      0xC9,
-		CALLF:      0x9A,       // opCALLf()
-		MOVSB:      0xA4,       // opMOVSb()
-		MOVSW:      0xA5,       // opMOVSw()
-		CMPSB:      0xA6,
-		CMPSW:      0xA7,
-		STOSB:      0xAA,
-		STOSW:      0xAB,
-		LODSB:      0xAC,
-		LODSW:      0xAD,
-		SCASB:      0xAE,
-		SCASW:      0xAF,
-		INT3:       0xCC,
-		INTn:       0xCD,
-		INTO:       0xCE,
+        CALLF:      0x9A,       // opCALLf()
+        MOVSB:      0xA4,       // opMOVSb()
+        MOVSW:      0xA5,       // opMOVSw()
+        CMPSB:      0xA6,
+        CMPSW:      0xA7,
+        STOSB:      0xAA,
+        STOSW:      0xAB,
+        LODSB:      0xAC,
+        LODSW:      0xAD,
+        SCASB:      0xAE,
+        SCASW:      0xAF,
+        INT3:       0xCC,
+        INTn:       0xCD,
+        INTO:       0xCE,
         LOOPNZ:     0xE0,
         LOOPZ:      0xE1,
         LOOP:       0xE2,
-		CALL:       0xE8,
+        CALL:       0xE8,
         JMP:        0xE9,       // JMP opcode (2-byte displacement)
         JMPS:       0xEB,       // JMP opcode (1-byte displacement)
-		LOCK:       0xF0,
-		REPNZ:      0xF2,
-		REPZ:       0xF3,
-		CALLW:      0x10FF,
-		CALLDW:     0x18FF,
+        LOCK:       0xF0,
+        REPNZ:      0xF2,
+        REPZ:       0xF3,
+        CALLW:      0x10FF,
+        CALLDW:     0x18FF,
         UD2:        0x0B0F      // UD2 (invalid opcode guaranteed to generate UD_FAULT on all post-8086 processors)
     }
 };
@@ -288,9 +288,9 @@ X86.PS.SET =        (X86.PS.BIT1 | X86.PS.IOPL | X86.PS.NT | X86.PS.BIT15);
 /*
  * getPS() brings all the direct and indirect flags together, and setPS() performs the
  * reverse, setting all the corresponding "result registers" to match the indirect flags.
- * 
+ *
  * These "result registers" are created/reset by an initial call to setPS(0); they include:
- * 
+ *
  *      this.resultSize (must be set to one of: SIZE_BYTE or SIZE_WORD)
  *      this.resultValue
  *      this.resultParitySign

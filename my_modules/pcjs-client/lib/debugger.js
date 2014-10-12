@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements the PCjs Debugger component.
+     * @fileoverview Implements the PCjs Debugger component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
  * @suppress {missingProperties}
@@ -1562,7 +1562,7 @@ if (DEBUGGER) {
          */
         if (fUpdateCPU !== false) this.cpu.updateCPU();
         
-        this.updateStatus(fRegs, false);
+        this.updateStatus(fRegs || false, false);
         return (this.nCycles > 0);
     };
     
@@ -2846,8 +2846,8 @@ if (DEBUGGER) {
                     value = this.cpu.segSS.sel;
                     break;
                 /*
-                 * I used to alias "PC" to "IP", until I discovered that early (perhaps even ALL?) versions of DEBUG
-                 * treat "PC" as an alias for the 16-bit flags register.  TODO: Add support for "PC" that matches DEBUG.
+                 * I used to alias "PC" to "IP", until I discovered that early (perhaps even ALL?) versions of DEBUG.COM
+                 * treat "PC" as an alias for the 16-bit flags register.  TODO: Add support for "PC".
                  */
                 case "IP":
                     value = this.cpu.regIP;
@@ -3283,9 +3283,10 @@ if (DEBUGGER) {
      */
     Debugger.prototype.doClear = function(sCmd)
     {
-        if (Component.controlPrint) {
-            Component.controlPrint.value = "";
-        }
+        /*
+         * TODO: There should be a clear() component method that the Control Panel overrides to perform this function.
+         */
+        if (this.controlPrint) this.controlPrint.value = "";
     };
     
     /**
@@ -4275,7 +4276,7 @@ if (DEBUGGER) {
                 /*
                  * Limiting the amount of disassembled code to 256 bytes in non-DEBUG builds is partly to
                  * prevent the user from wedging the browser by dumping too many lines, but also a recognition
-                 * that, in non-DEBUG builds, Component.println() keeps print output buffer truncated to 8Kb anyway.
+                 * that, in non-DEBUG builds, this.println() keeps print output buffer truncated to 8Kb anyway.
                  */
                 this.println("range too large");
                 return;

@@ -221,11 +221,11 @@ ROM.prototype.onLoadROM = function(sROMFile, sROMData, nErrorCode)
             this.aSymbols = rom['symbols'];
 
             if (!this.abROM.length) {
-                this.error("Empty ROM: " + sROMFile);
+                Component.error("Empty ROM: " + sROMFile);
                 return;
             }
             else if (this.abROM.length == 1) {
-                this.error(this.abROM[0]);
+                Component.error(this.abROM[0]);
                 return;
             }
         } catch (e) {

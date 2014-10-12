@@ -54,7 +54,7 @@ if (typeof module !== 'undefined') {
  *
  *      drives: an array of driveConfig objects, each containing 'name', 'path', 'size' and 'type' properties
  *      type:   either 'xt' (for the PC XT Xebec controller) or 'at' (for the PC AT Western Digital controller)
- *      
+ *
  * The 'type' parameter defaults to 'xt'.  All ports for the PC XT controller are referred to as XTC ports,
  * and similarly, all PC AT controller ports are referred to as ATC ports.
  *
@@ -70,7 +70,7 @@ if (typeof module !== 'undefined') {
  *      Diagnostic write tests will destroy any data on this cylinder."
  *
  * Does FDISK insure that the last cylinder is reserved?  I'm sure we'll eventually find out.
- * 
+ *
  * @constructor
  * @extends Component
  * @param {Object} parmsHDC
@@ -98,10 +98,10 @@ function HDC(parmsHDC) {
              * any disk image "path" properties to process) will take care of the rest.
              */
         } catch (e) {
-            this.error("HDC drive configuration error: " + e.message + " (" + parmsHDC['drives'] + ")");
+            Component.error("HDC drive configuration error: " + e.message + " (" + parmsHDC['drives'] + ")");
         }
     }
-    
+
     /*
      * Set fATC (AT Controller flag) according to the 'type' parameter.  This in turn determines other
      * defaults.  For example, the default XT drive type is 3 (for a 10Mb disk drive), whereas the default
@@ -110,7 +110,7 @@ function HDC(parmsHDC) {
     this.fATC = (parmsHDC['type'] == "at");
     this.iHDC = this.fATC? 1 : 0;
     this.iDriveTypeDefault = this.fATC? 2 : 3;
-    
+
     /*
      * The remainder of HDC initialization now takes place in our initBus() handler
      */
@@ -125,12 +125,12 @@ HDC.DEFAULT_DRIVE_NAME = "Hard Drive";
 
 /*
  * Each of the following DriveType entries contain (up to) 4 values:
- * 
+ *
  *      [0]: total cylinders
  *      [1]: total heads
  *      [2]: total sectors/tracks (optional; default is 17)
  *      [3]: total bytes/sector (optional; default is 512)
- *      
+ *
  * verifyDrive() attempts to confirm that these values agree with the programmed drive characteristics.
  */
 HDC.aDriveTypes = [
@@ -143,10 +143,10 @@ HDC.aDriveTypes = [
     /*
      * Sadly, drive types differ across controller models (XTC drive types don't match ATC drive types),
      * so aDriveTypes must first be indexed by a controller index (this.iHDC).
-     * 
+     *
      * The following is a more complete description of the drive types supported by the MODEL_5170, where C is
      * Cylinders, H is Heads, WP is Write Pre-Comp, and LZ is Landing Zone (in practice, we don't need WP or LZ).  
-     * 
+     *
      * Type    C    H   WP   LZ
      * ----  ---   --  ---  ---
      *   1   306    4  128  305
@@ -185,29 +185,29 @@ HDC.aDriveTypes = [
 
 /*
  * ATC (AT Controller) Registers
- * 
+ *
  * The "IBM Personal Computer AT Fixed Disk and Diskette Drive Adapter", aka the HFCOMBO card, contains what we refer
  * to here as the ATC (AT Controller).  Even though that card contains both Fixed Disk and Diskette Drive controllers,
  * this component (HDC) still deals only with the "Fixed Disk" portion.  Fortunately, the "Diskette Drive Adapter"
  * portion of the card is compatible with the existing FDC component, so that component continues to be responsible
  * for all diskette operations.
- * 
+ *
  * ATC ports default to their primary addresses; secondary port addresses are 0x80 lower (eg, 0x170 instead of 0x1F0).
- * 
+ *
  * It's important to know that the MODEL_5170 BIOS has a special relationship with the "Combo Hard File/Diskette
  * (HFCOMBO) Card" (see @F000:144C).  Initially, the ChipSet component intercepted reads for HFCOMBO's STATUS port
  * and returned the BUSY bit clear to reduce boot time; however, it turned out that was also a prerequisite for the
  * BIOS to write test patterns to the CYLLO port and set the "DUAL" bit (bit 0) of the "HFCNTRL" byte at 40:8Fh if
  * those CYLLO operations succeeded (now that the HDC is "ATC-aware", those ChipSet port intercepts have been removed).
- * 
+ *
  * Without the "DUAL" bit set, when it came time later to report the diskette drive type, the "DISK_TYPE" function
  * (@F000:273D) would branch to one of two almost-identical blocks of code -- specifically, a block that disallowed
  * diskette drive types >= 2 (ChipSet.CMOS.FDRIVE.DSDD) instead of >= 3 (ChipSet.CMOS.FDRIVE.DSHD).
- * 
+ *
  * In other words, the "Fixed Disk" portion of the HFCOMBO controller has to be present and operational if the user
  * wants to use high-capacity (80-track) diskettes with "Diskette Drive" portion of the controller.  This may not be
  * immediately obvious to anyone creating a 5170 machine configuration with the FDC component but no HDC component.
- * 
+ *
  * TODO: Investigate what a MODEL_5170 can do, if anything, with diskettes if an "HFCOMBO card" was NOT installed
  * (eg, was there Diskette-only Controller that could be installed, and if so, did it support high-capacity diskettes?)
  * Also, consider making the FDC component able to detect when the HDC is missing and provide the same minimal HFCOMBO
@@ -246,7 +246,7 @@ HDC.ATC = {
         DRIVE_MASK: 0x10,
         SET_MASK:   0xE0,
         SET_BITS:   0xA0        // for whatever reason, these bits must always be set
-    },     
+    },
     STATUS: {                   // this.regStatus (read-only; reading clears IRQ.ATC)
         PORT:       0x1F7,
         BUSY:       0x80,       // if this is set, no other STATUS bits are valid
@@ -258,7 +258,7 @@ HDC.ATC = {
         INDEX:      0x02,       // set once for every revolution of the disk
         ERROR:      0x01        // set when the previous command ended in an error; one or more bits are set in the ERROR register (the next command to the controller resets the ERROR bit)
     },
-    COMMAND:{                   // this.regCommand (write-only) 
+    COMMAND:{                   // this.regCommand (write-only)
         PORT:       0x1F7,
         RESTORE:    0x10,       // low nibble x 500us equal stepping rate (except for 0, which corresponds to 35us) (aka RECALIBRATE)
         READ_DATA:  0x20,       // also supports NO_RETRIES and WITH_ECC
@@ -280,9 +280,9 @@ HDC.ATC = {
 
 /*
  * XTC Data Register (0x320, read-write)
- * 
+ *
  * Writes to this register are discussed below; see HDC Commands.
- * 
+ *
  * Reads from this register after a command has been executed retrieve a "status byte",
  * which must NOT be confused with the Status Register (see below).  This data "status byte"
  * contains only two bits of interest: XTC_DATA.STATUS_ERROR and XTC_DATA.STATUS_UNIT.
@@ -296,7 +296,7 @@ HDC.XTC.DATA.STATUS_UNIT    = 0x20;     // logical unit number of the drive
 
 /*
  * XTC Status Register (0x321, read-only)
- * 
+ *
  * WARNING: The IBM Technical Reference Manual *badly* confuses the XTC_DATA "status byte" (above)
  * that the controller sends following an HDC.XTC.DATA.CMD operation with the Status Register (below).
  * In fact, it's so badly confused that it completely fails to document any of the Status Register
@@ -313,11 +313,11 @@ HDC.XTC.STATUS.INTERRUPT    = 0x20;     // HDC BIOS: interrupt bit
 
 /*
  * XTC Config Register (0x322, read-only)
- * 
+ *
  * This register is used to read HDC card switch settings that defined the "Drive Type" for
  * drives 0 and 1.  SW[1],SW[2] (for drive 0) and SW[3],SW[4] (for drive 1) are set as follows:
- * 
- *      ON,  ON     Drive Type 0   (306 cylinders, 2 heads) 
+ *
+ *      ON,  ON     Drive Type 0   (306 cylinders, 2 heads)
  *      ON,  OFF    Drive Type 1   (375 cylinders, 8 heads)
  *      OFF, ON     Drive Type 2   (306 cylinders, 6 heads)
  *      OFF, OFF    Drive Type 3   (306 cylinders, 4 heads)
@@ -325,21 +325,21 @@ HDC.XTC.STATUS.INTERRUPT    = 0x20;     // HDC BIOS: interrupt bit
 
 /*
  * XTC Commands, as issued to XTC_DATA
- * 
+ *
  * Commands are multi-byte sequences sent to XTC_DATA, starting with a XTC_DATA.CMD byte,
  * and followed by 5 more bytes, for a total of 6 bytes, which collectively are called a
  * Device Control Block (DCB).  Not all commands use all 6 bytes, but all 6 bytes must be present;
  * unused bytes are simply ignored.
- * 
+ *
  *      XTC_DATA.CMD    (3-bit class code, 5-bit operation code)
  *      XTC_DATA.HEAD   (1-bit drive number, 5-bit head number)
  *      XTC_DATA.CLSEC  (upper bits of 10-bit cylinder number, 6-bit sector number)
  *      XTC_DATA.CH     (lower bits of 10-bit cylinder number)
  *      XTC_DATA.COUNT  (8-bit interleave or block count)
  *      XTC_DATA.CTRL   (8-bit control field)
- *      
+ *
  * One command, HDC.XTC.DATA.CMD.INIT_DRIVE, must include 8 additional bytes following the DCB:
- * 
+ *
  *      maximum number of cylinders (high)
  *      maximum number of cylinders (low)
  *      maximum number of heads
@@ -348,7 +348,7 @@ HDC.XTC.STATUS.INTERRUPT    = 0x20;     // HDC BIOS: interrupt bit
  *      start write precompensation cylinder (high)
  *      start write precompensation cylinder (low)
  *      maximum ECC data burst length
- *      
+ *
  * Note that the 3 word values above are stored in "big-endian" format (high byte followed by low byte),
  * rather than the more typical "little-endian" format (low byte followed by high byte).
  */
@@ -378,26 +378,26 @@ HDC.XTC.DATA.CMD = {
  * HDC error conditions, as returned in byte 0 of the (4) bytes returned by the Request Sense Status command
  */
 HDC.XTC.DATA.ERR = {
-	NONE:           0x00,
-	NO_INDEX:       0x01,       // no index signal detected
-	SEEK_INCOMPLETE:0x02,       // no seek-complete signal
-	WRITE_FAULT:    0x03,
-	NOT_READY:      0x04,       // after the controller selected the drive, the drive did not respond with a ready signal
-	NO_TRACK:       0x06,       // after stepping the max number of cylinders, the controller did not receive the track 00 signal from the drive
-	STILL_SEEKING:  0x08,
-	ECC_ID_ERROR:   0x10,
-	ECC_DATA_ERROR: 0x11,
-	NO_ADDR_MARK:   0x12,
-	NO_SECTOR:      0x14,
-	BAD_SEEK:       0x15,       // seek error: the cylinder and/or head address did not compare with the expected target address
-	ECC_CORRECTABLE:0x18,       // correctable data error
-	BAD_TRACK:      0x19,
-	BAD_CMD:        0x20,
-	BAD_DISK_ADDR:  0x21,
-	RAM:            0x30,
-	CHECKSUM:       0x31,
-	POLYNOMIAL:     0x32,
-	MASK:           0x3F
+    NONE:           0x00,
+    NO_INDEX:       0x01,       // no index signal detected
+    SEEK_INCOMPLETE:0x02,       // no seek-complete signal
+    WRITE_FAULT:    0x03,
+    NOT_READY:      0x04,       // after the controller selected the drive, the drive did not respond with a ready signal
+    NO_TRACK:       0x06,       // after stepping the max number of cylinders, the controller did not receive the track 00 signal from the drive
+    STILL_SEEKING:  0x08,
+    ECC_ID_ERROR:   0x10,
+    ECC_DATA_ERROR: 0x11,
+    NO_ADDR_MARK:   0x12,
+    NO_SECTOR:      0x14,
+    BAD_SEEK:       0x15,       // seek error: the cylinder and/or head address did not compare with the expected target address
+    ECC_CORRECTABLE:0x18,       // correctable data error
+    BAD_TRACK:      0x19,
+    BAD_CMD:        0x20,
+    BAD_DISK_ADDR:  0x21,
+    RAM:            0x30,
+    CHECKSUM:       0x31,
+    POLYNOMIAL:     0x32,
+    MASK:           0x3F
 };
 
 HDC.XTC.DATA.SENSE = {
@@ -406,8 +406,8 @@ HDC.XTC.DATA.SENSE = {
 
 /*
  * HDC Command Sequences
- * 
- * Unlike the FDC, all the HDC commands have fixed-length command request sequences (well, OK, except for 
+ *
+ * Unlike the FDC, all the HDC commands have fixed-length command request sequences (well, OK, except for
  * HDC.XTC.DATA.CMD.INIT_DRIVE) and fixed-length response sequences (well, OK, except for HDC.XTC.DATA.CMD.REQUEST_SENSE),
  * so a table of byte-lengths isn't much use, but having names for all the commands is still handy for debugging.
  */
@@ -482,7 +482,7 @@ HDC.BIOS.DISK_CMD = {
 
 /**
  * setBinding(sHTMLClass, sHTMLType, sBinding, control)
- * 
+ *
  * @this {HDC}
  * @param {string|null} sHTMLClass is the class of the HTML control (eg, "input", "output")
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
@@ -500,7 +500,7 @@ HDC.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
 
 /**
  * initBus(cmp, bus, cpu, dbg)
- * 
+ *
  * @this {HDC}
  * @param {Computer} cmp
  * @param {Bus} bus
@@ -522,17 +522,17 @@ HDC.prototype.initBus = function(cmp, bus, cpu, dbg)
 
     bus.addPortInputTable(this, this.fATC? HDC.aATCPortInput : HDC.aXTCPortInput);
     bus.addPortOutputTable(this, this.fATC? HDC.aATCPortOutput : HDC.aXTCPortOutput);
-    
+
     if (DEBUGGER) {
         cpu.addInterruptNotify(HDC.BIOS.DISK_INT, this, this.intBIOSDisk);
         cpu.addInterruptNotify(HDC.BIOS.DISKETTE_INT, this, this.intBIOSDiskette);
     }
-    
+
     /*
      * The following code used to be performed in the HDC constructor, but now we need to wait for information
      * about the Computer to be available (eg, getMachineID() and getUserID()) before we start loading and/or
      * connecting to disk images.
-     * 
+     *
      * If we didn't need auto-mount support, we could defer controller initialization until we received a powerUp()
      * notification, at which point reset() would call initController(), or restore() would restore the controller;
      * in that case, all we'd need to do here is call setReady().
@@ -558,7 +558,7 @@ HDC.prototype.powerUp = function(data, fRepower)
             if (this.cmp.fReload) {
                 /*
                  * If the computer's fReload flag is set, we're required to toss all currently
-                 * loaded disks and remount all disks specified in the auto-mount configuration. 
+                 * loaded disks and remount all disks specified in the auto-mount configuration.
                  */
                 this.autoMount(true);
             }
@@ -571,7 +571,7 @@ HDC.prototype.powerUp = function(data, fRepower)
 
 /**
  * powerDown(fSave, fShutdown)
- * 
+ *
  * @this {HDC}
  * @param {boolean} fSave
  * @param {boolean} [fShutdown]
@@ -584,7 +584,7 @@ HDC.prototype.powerDown = function(fSave, fShutdown)
 
 /**
  * getMachineID()
- * 
+ *
  * @return {string}
  */
 HDC.prototype.getMachineID = function()
@@ -604,7 +604,7 @@ HDC.prototype.getUserID = function()
 
 /**
  * reset()
- * 
+ *
  * @this {HDC}
  */
 HDC.prototype.reset = function()
@@ -618,7 +618,7 @@ HDC.prototype.reset = function()
 
 /**
  * save()
- * 
+ *
  * This implements save support for the HDC component.
  *
  * @this {HDC}
@@ -633,7 +633,7 @@ HDC.prototype.save = function()
 
 /**
  * restore(data)
- * 
+ *
  * This implements restore support for the HDC component.
  *
  * @this {HDC}
@@ -647,7 +647,7 @@ HDC.prototype.restore = function(data)
 
 /**
  * initController(data, fReset)
- * 
+ *
  * @this {HDC}
  * @param {Array} [data]
  * @param {boolean} [fReset] true if a machine reset (not just a controller reset)
@@ -657,16 +657,16 @@ HDC.prototype.initController = function(data, fReset)
 {
     var i = 0;
     var fSuccess = true;
-    
+
     /*
      * At this point, it's worth calling into question my decision to NOT split the HDC component into separate XTC
      * and ATC components, given all the differences, and given that I'm about to write some "if (ATC) else (XTC) ..."
      * code.  And all I can say in my defense is, yes, it's definitely worth calling that into question.
-     * 
+     *
      * However, there's also some common code, mostly in the area of disk management rather than controller management,
      * and if the components were split, then I'd have to create a third component for that common code (although again,
      * disk management probably belongs in its own component anyway).
-     * 
+     *
      * However, let's not forget that since my overall plan is to have only one PCjs "binary", everything's going to end
      * up in the same bucket anyway, so let's not be too obsessive about organizational details.  As long as the number
      * of these conditionals is small and they're not performance-critical, this seems much ado about nothing.
@@ -743,7 +743,7 @@ HDC.prototype.initController = function(data, fReset)
 
 /**
  * saveController()
- * 
+ *
  * @this {HDC}
  * @return {Array}
  */
@@ -778,7 +778,11 @@ HDC.prototype.saveController = function()
 
 /**
  * initDrive(iDrive, drive, driveConfig, data, fReset)
- * 
+ *
+ * TODO: Consider a separate Drive class that both FDC and HDC can use, since there's a lot of commonality
+ * between the drive objects created by both controllers.  This will clean up overall drive management and allow
+ * us to factor out some common Drive methods (eg, advanceSector()).
+ *
  * @this {HDC}
  * @param {number} iDrive
  * @param {Object} drive
@@ -805,10 +809,10 @@ HDC.prototype.initDrive = function(iDrive, drive, driveConfig, data, fReset)
     drive.senseCode = data[i++];
     drive.fRemovable = data[i++];
     drive.abDriveParms = data[i++];         // captures drive parameters programmed via HDC.XTC.DATA.CMD.INIT_DRIVE
-    
+
     /*
      * TODO: Make abSector a DWORD array rather than a BYTE array (we could even allocate a Memory block for it);
-     * alternatively, eliminate the buffer entirely and re-establish a reference to the appropriate Disk sector object. 
+     * alternatively, eliminate the buffer entirely and re-establish a reference to the appropriate Disk sector object.
      */
     drive.abSector = data[i++];
 
@@ -832,7 +836,7 @@ HDC.prototype.initDrive = function(iDrive, drive, driveConfig, data, fReset)
      * any specific disk image, or create an empty (purely local) disk image.
      */
     drive.mode = driveConfig['mode'] || (drive.path? DiskAPI.MODE.PRELOAD : DiskAPI.MODE.LOCAL);
-    
+
     /*
      * On-demand I/O of raw disk images is supported only if there's a valid user ID; fall back to an empty
      * local disk image if there's not.
@@ -843,7 +847,7 @@ HDC.prototype.initDrive = function(iDrive, drive, driveConfig, data, fReset)
 
     drive.type = driveConfig['type'];
     if (drive.type === undefined || HDC.aDriveTypes[this.iHDC][drive.type] === undefined) drive.type = this.iDriveTypeDefault;
-    
+
     var driveType = HDC.aDriveTypes[this.iHDC][drive.type];
     drive.nSectors = driveType[2] || 17;    // sectors/track
     drive.cbSector = driveType[3] || 512;   // bytes/sector (default is 512 if unspecified in the table)
@@ -854,10 +858,10 @@ HDC.prototype.initDrive = function(iDrive, drive, driveConfig, data, fReset)
     if (fReset && this.chipset) {
         this.chipset.setCMOSDriveType(iDrive, drive.type);
     }
-    
+
     /*
      * The next group of properties are set by user requests to load/unload disk images.
-     * 
+     *
      * NOTE: I now avoid reinitializing drive.disk in order to retain any previously mounted disk across resets.
      */
     if (drive.disk === undefined) {
@@ -893,7 +897,7 @@ HDC.prototype.initDrive = function(iDrive, drive, driveConfig, data, fReset)
 
 /**
  * saveDrives()
- * 
+ *
  * @this {HDC}
  * @return {Array}
  */
@@ -909,7 +913,7 @@ HDC.prototype.saveDrives = function()
 
 /**
  * saveDrive(drive)
- * 
+ *
  * @this {HDC}
  * @return {Array}
  */
@@ -935,7 +939,7 @@ HDC.prototype.saveDrive = function(drive)
 
 /**
  * copyDrive(iDrive)
- * 
+ *
  * @this {HDC}
  * @param {number} iDrive
  * @return {Object|undefined} (undefined if the requested drive does not exist)
@@ -960,7 +964,7 @@ HDC.prototype.copyDrive = function(iDrive)
  * Normally, we'd rely on the drive characteristics programmed via the HDC.XTC.DATA.CMD.INIT_DRIVE
  * command, but if an explicit drive type is specified, then we use the characteristics (geometry)
  * associated with that type.
- * 
+ *
  * @this {HDC}
  * @param {Object} drive
  * @param {number} [type] to create a disk of the specified type, if no disk exists yet
@@ -974,7 +978,7 @@ HDC.prototype.verifyDrive = function(drive, type)
              * If the caller wants us to use the programmed drive parameters, we use those,
              * but if there aren't any drive parameters (yet), then use default parameters based
              * on drive.type.
-             * 
+             *
              * We used to do the last step ONLY if there was no drive.path -- otherwise, we'd waste
              * time creating an empty disk if autoMount() was going to load an image from drive.path;
              * but hopefully the Disk component is smarter now.
@@ -1026,7 +1030,7 @@ HDC.prototype.verifyDrive = function(drive, type)
  * until the current track (or, in the case of a multi-track request, the current cylinder) has been exhausted.
  *
  * Since seekDrive() is for use with non-DMA requests, we use nBytes to specify the length of the entire transfer.
- * 
+ *
  * @this {HDC}
  * @param {Object} drive
  * @param {number} iSector (a "logical" sector number, relative to the entire disk, NOT a physical sector number)
@@ -1039,7 +1043,7 @@ HDC.prototype.seekDrive = function(drive, iSector, nSectors)
         var aDiskInfo = drive.disk.info();
         var nCylinders = aDiskInfo[0];
         /*
-         * If nCylinders is zero, we probably have an empty disk image, awaiting initialization (see verifyDrive()) 
+         * If nCylinders is zero, we probably have an empty disk image, awaiting initialization (see verifyDrive())
          */
         if (nCylinders) {
             var nHeads = aDiskInfo[1];
@@ -1060,7 +1064,7 @@ HDC.prototype.seekDrive = function(drive, iSector, nSectors)
                 /*
                  * NOTE: We don't set nSectorEnd, as an HDC command would, but it's irrelevant, because we don't actually
                  * do anything with nSectorEnd at this point.  Perhaps someday, when we faithfully honor/restrict requests
-                 * to a single track (or a single cylinder, in the case of multi-track requests). 
+                 * to a single track (or a single cylinder, in the case of multi-track requests).
                  */
                 drive.errorCode = HDC.XTC.DATA.ERR.NONE;
                 /*
@@ -1076,7 +1080,7 @@ HDC.prototype.seekDrive = function(drive, iSector, nSectors)
 
 /**
  * autoMount(fRemount)
- * 
+ *
  * @this {HDC}
  * @param {boolean} [fRemount] is true if we're remounting all auto-mounted disks
  * @return {boolean} true if one or more disk images are being auto-mounted, false if none
@@ -1101,7 +1105,7 @@ HDC.prototype.autoMount = function(fRemount)
 
 /**
  * loadDisk(iDrive, sDiskName, sDiskPath, fAutoMount)
- * 
+ *
  * @this {HDC}
  * @param {number} iDrive
  * @param {string} sDiskName
@@ -1129,9 +1133,9 @@ HDC.prototype.loadDisk = function(iDrive, sDiskName, sDiskPath, fAutoMount)
 
 /**
  * mountDisk(drive, disk, sDiskName, sDiskPath)
- * 
+ *
  * This is a callback issued by the Disk component once its own mount() operation has finished.
- * 
+ *
  * @this {HDC}
  * @param {Object} drive
  * @param {Disk} disk is set if the disk was successfully mounted, null if not
@@ -1162,7 +1166,7 @@ HDC.prototype.mountDisk = function(drive, disk, sDiskName, sDiskPath)
  *
  * NOTE: At the moment, we support only auto-mounts; there is no user interface for selecting hard disk images,
  * let alone unloading them, so there is currently no need for the following function.
- * 
+ *
  * @this {HDC}
  * @param {number} iDrive
  *
@@ -1179,7 +1183,7 @@ HDC.prototype.mountDisk = function(drive, disk, sDiskName, sDiskPath)
 
 /**
  * intXTCData(port, addrFrom)
- * 
+ *
  * @this {HDC}
  * @param {number} port (0x320)
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
@@ -1204,7 +1208,7 @@ HDC.prototype.inXTCData = function(port, addrFrom)
 
 /**
  * outXTCData(port, bOut, addrFrom)
- * 
+ *
  * @this {HDC}
  * @param {number} port (0x320)
  * @param {number} bOut
@@ -1238,7 +1242,7 @@ HDC.prototype.outXTCData = function(port, bOut, addrFrom)
 
 /**
  * inXTCStatus(port, addrFrom)
- * 
+ *
  * @this {HDC}
  * @param {number} port (0x321)
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
@@ -1261,7 +1265,7 @@ HDC.prototype.inXTCStatus = function(port, addrFrom)
 
 /**
  * outXTCReset(port, bOut, addrFrom)
- * 
+ *
  * @this {HDC}
  * @param {number} port (0x321)
  * @param {number} bOut
@@ -1271,7 +1275,7 @@ HDC.prototype.outXTCReset = function(port, bOut, addrFrom)
 {
     this.messagePort(port, bOut, addrFrom, "RESET");
     /*
-     * Not sure what to do with this value, and the value itself may be "don't care", but we'll save it anyway. 
+     * Not sure what to do with this value, and the value itself may be "don't care", but we'll save it anyway.
      */
     this.regReset = bOut;
     if (this.chipset) this.chipset.clearIRR(ChipSet.IRQ.XTC);
@@ -1280,7 +1284,7 @@ HDC.prototype.outXTCReset = function(port, bOut, addrFrom)
 
 /**
  * inXTCConfig(port, addrFrom)
- * 
+ *
  * @this {HDC}
  * @param {number} port (0x322)
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
@@ -1294,7 +1298,7 @@ HDC.prototype.inXTCConfig = function(port, addrFrom)
 
 /**
  * outXTCPulse(port, bOut, addrFrom)
- * 
+ *
  * @this {HDC}
  * @param {number} port (0x322)
  * @param {number} bOut
@@ -1304,7 +1308,7 @@ HDC.prototype.outXTCPulse = function(port, bOut, addrFrom)
 {
     this.messagePort(port, bOut, addrFrom, "PULSE");
     /*
-     * Not sure what to do with this value, and the value itself may be "don't care", but we'll save it anyway. 
+     * Not sure what to do with this value, and the value itself may be "don't care", but we'll save it anyway.
      */
     this.regPulse = bOut;
     /*
@@ -1321,7 +1325,7 @@ HDC.prototype.outXTCPulse = function(port, bOut, addrFrom)
 
 /**
  * outXTCPattern(port, bOut, addrFrom)
- * 
+ *
  * @this {HDC}
  * @param {number} port (0x323)
  * @param {number} bOut
@@ -1335,7 +1339,7 @@ HDC.prototype.outXTCPattern = function(port, bOut, addrFrom)
 
 /**
  * outXTCNoise(port, bOut, addrFrom)
- * 
+ *
  * @this {HDC}
  * @param {number} port (0x327, 0x32B or 0x32F)
  * @param {number} bOut
@@ -1358,13 +1362,13 @@ HDC.prototype.inATCData = function(port, addrFrom)
 {
     var bIn = -1;
     var fSuppress = false;
-    
+
     if (this.drive) {
         /*
-         * messagePort() calls, if enabled, can be too overwhelming for this port, so limit them to the first byte. 
+         * messagePort() calls, if enabled, can be too overwhelming for this port, so limit them to the first byte.
          */
         fSuppress = (this.drive.ibSector > 0);
-        
+
         /*
          * We use the synchronous form of readByte() at this point because we have no choice; an I/O instruction
          * has just occurred and cannot be delayed.  The good news is that doATCommand() should have already primed
@@ -1373,7 +1377,7 @@ HDC.prototype.inATCData = function(port, addrFrom)
          */
         bIn = this.readByte(this.drive);
         Component.assert(bIn >= 0);
-        
+
         /*
          * Now that we've supplied a full sector of data, see if the caller's expecting additional sectors;
          * if so, prime the pump again.  The caller should not poll us again until another interrupt's been delivered.
@@ -1397,7 +1401,7 @@ HDC.prototype.inATCData = function(port, addrFrom)
                         /*
                          * TODO: It would be nice to be a bit more specific about the error (if any) that just occurred.
                          * Consult drive.errorCode (it uses older XTC error codes, but mapping those codes should be trivial).
-                         */ 
+                         */
                          hdc.regStatus = HDC.ATC.STATUS.ERROR;
                          hdc.regError = HDC.ATC.ERROR.NO_CHS;
                         if (DEBUG) hdc.messageDebugger("HDC.inATCData(): read failed");
@@ -1424,10 +1428,10 @@ HDC.prototype.inATCData = function(port, addrFrom)
 HDC.prototype.outATCData = function(port, bOut, addrFrom)
 {
     /*
-     * messagePort() calls, if enabled, can be too overwhelming for this port, so limit them to the first byte. 
+     * messagePort() calls, if enabled, can be too overwhelming for this port, so limit them to the first byte.
      */
     if (!this.drive || this.drive.ibSector == 0) this.messagePort(port, bOut, addrFrom, "DATA");
-    
+
     if (this.drive) {
         if (this.drive.nBytes >= this.drive.cbSector) {
             if (this.writeByte(this.drive, bOut) < 0) {
@@ -1497,7 +1501,7 @@ HDC.prototype.outATCWPreC = function(port, bOut, addrFrom)
 
 /**
  * inATCSecCnt(port, addrFrom)
- * 
+ *
  * @this {HDC}
  * @param {number} port (0x1F2)
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
@@ -1688,7 +1692,7 @@ HDC.prototype.doATCommand = function()
     var nCylinder = this.regCylLo | ((this.regCylHi & HDC.ATC.CYLHI.MASK) << 8);
     var nSector = this.regSecNum;
     var nSectors = this.regSecCnt;
-    
+
     this.drive = null;
     this.regError = 0;
     this.regStatus = HDC.ATC.STATUS.READY | HDC.ATC.STATUS.SEEK_OK;
@@ -1709,7 +1713,7 @@ HDC.prototype.doATCommand = function()
          * Since the ATC doesn't use DMA, we must now set some additional Drive state for the benefit of any
          * follow-up I/O instructions.  For example, any subsequent inATCData() and outATCData() calls need to
          * know which drive to talk to ("this.drive"), to issue their own readByte() and writeByte() calls.
-         * 
+         *
          * The XTC didn't need this, because it used doRead(), doWrite(), doFormat() helper functions, which
          * reset the current drive's "sector" and "errorCode" properties themselves and then used DMA functions
          * that delivered drive data with direct calls to readByte() and writeByte().
@@ -1722,9 +1726,9 @@ HDC.prototype.doATCommand = function()
     if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(this.dbg.MESSAGE_PORT | this.dbg.MESSAGE_HDC)) {
         this.dbg.message("HDC.doATCommand(" + str.toHexByte(bCmd) + "): " + HDC.aATCCommands[bCmd]);
     }
-    
+
     switch (bCmd & HDC.ATC.COMMAND.MASK) {
-    
+
     case HDC.ATC.COMMAND.READ_DATA:
         /*
          * We're using a call to readByte() that disables auto-increment, so that once we've got the first
@@ -1782,7 +1786,7 @@ HDC.prototype.doATCommand = function()
         this.regError = HDC.ATC.DIAG.NO_ERROR;
         fInterrupt = true;
         break;
-        
+
     case HDC.ATC.COMMAND.SETPARMS:
         /*
          * The documentation implies that the only parameters this command really affects are the number
@@ -1794,7 +1798,7 @@ HDC.prototype.doATCommand = function()
          *      CYL:    0x100 (256, uh, what?)
          *      SECNUM:  0x0C (12, uh, what?)
          *      DRVHD:   0xA3 (max head of 0x03, for 4 total heads)
-         * 
+         *
          * The importance of SECCNT (nSectors) and DRVHD (nHeads) is controlling how multi-sector operations
          * advance to the next sector; see advanceSector().
          */
@@ -1804,28 +1808,28 @@ HDC.prototype.doATCommand = function()
         drive.nSectors = nSectors;
         fInterrupt = true;
         break;
-        
+
     default:
         if (DEBUG) this.messageDebugger("HDC.doATCommand(" + str.toHexByte(this.regCommand) + "): " + (bCmd < 0? ("invalid drive (" + iDrive + ")") : "unsupported operation"));
         if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(this.dbg.MESSAGE_HDC) && bCmd >= 0) this.cpu.haltCPU();
         break;
     }
-    
+
     if (fInterrupt && this.chipset) this.chipset.setIRR(ChipSet.IRQ.ATC);
 };
 
 /**
  * doXTCommand()
- * 
+ *
  * Handles XTC (XT Controller) commands
- * 
+ *
  * @this {HDC}
  */
-HDC.prototype.doXTCommand = function() 
+HDC.prototype.doXTCommand = function()
 {
     var hdc = this;
     this.regDataIndex = 0;
-    
+
     var bCmd = this.popCmd();
     var bCmdOrig = bCmd;
     var b1 = this.popCmd();
@@ -1853,12 +1857,12 @@ HDC.prototype.doXTCommand = function()
      * I tried to save normal command processing from having to deal with invalid drives,
      * but the HDC BIOS initializes both drive 0 AND drive 1 on a HDC.XTC.DATA.CMD.INIT_DRIVE command,
      * and apparently that particular command has no problem with non-existent drives.
-     * 
+     *
      * So I've separated the commands into two groups: drive-ambivalent commands should be
-     * processed in the first group, and all the rest should be processed in the second group. 
+     * processed in the first group, and all the rest should be processed in the second group.
      */
     switch (bCmd) {
-    
+
     case HDC.XTC.DATA.CMD.REQUEST_SENSE:        // 0x03
         this.beginResult(drive? drive.errorCode : HDC.XTC.DATA.ERR.NOT_READY);
         this.pushResult(b1);
@@ -1875,7 +1879,7 @@ HDC.prototype.doXTCommand = function()
         this.pushResult(HDC.XTC.DATA.STATUS_OK | bDrive);
         bCmd = -1;                              // mark the command as complete
         break;
-    
+
     case HDC.XTC.DATA.CMD.INIT_DRIVE:           // 0x0C
         /*
          * Pop off all the extra "Initialize Drive Characteristics" bytes and store them, for the benefit of
@@ -1897,13 +1901,13 @@ HDC.prototype.doXTCommand = function()
         this.beginResult(bDataStatus | bDrive);
         bCmd = -1;                              // mark the command as complete
         break;
-    
+
     case HDC.XTC.DATA.CMD.RAM_DIAGNOSTIC:       // 0xE0
     case HDC.XTC.DATA.CMD.CTL_DIAGNOSTIC:       // 0xE4
         this.beginResult(HDC.XTC.DATA.STATUS_OK | bDrive);
         bCmd = -1;                              // mark the command as complete
         break;
-    
+
     default:
         break;
     }
@@ -1924,26 +1928,26 @@ HDC.prototype.doXTCommand = function()
         case HDC.XTC.DATA.CMD.TEST_READY:       // 0x00
             this.beginResult(HDC.XTC.DATA.STATUS_OK | bDrive);
             break;
-        
+
         case HDC.XTC.DATA.CMD.RECALIBRATE:      // 0x01
             drive.bControl = bControl;
             if (DEBUG) this.messageDebugger("HDC.doXTCommand(): drive " + iDrive + " control byte: 0x" + str.toHexByte(bControl));
             this.beginResult(HDC.XTC.DATA.STATUS_OK | bDrive);
             break;
-        
+
         case HDC.XTC.DATA.CMD.READ_VERF:        // 0x05
             /*
              * This is a non-DMA operation, so we simply pretend everything is OK for now.  TODO: Revisit.
              */
             this.beginResult(HDC.XTC.DATA.STATUS_OK | bDrive);
             break;
-        
+
         case HDC.XTC.DATA.CMD.READ_DATA:        // 0x08
             this.doRead(drive, function(bStatus) {
                 hdc.beginResult(bStatus | bDrive);
             });
             break;
-        
+
         case HDC.XTC.DATA.CMD.WRITE_DATA:       // 0x0A
             /*
              * QUESTION: The IBM TechRef (p.1-188) implies that bCount is used as part of HDC.XTC.DATA.CMD.WRITE_DATA command,
@@ -1954,13 +1958,13 @@ HDC.prototype.doXTCommand = function()
                 hdc.beginResult(bStatus | bDrive);
             });
             break;
-        
+
         case HDC.XTC.DATA.CMD.WRITE_BUFFER:     // 0x0F
             this.doWriteToBuffer(drive, function(bStatus) {
                 hdc.beginResult(bStatus | bDrive);
             });
             break;
-        
+
         default:
             if (DEBUG) this.messageDebugger("HDC.doXTCommand(" + str.toHexByte(bCmdOrig) + "): " + (bCmd < 0? ("invalid drive (" + iDrive + ")") : "unsupported operation"));
             this.beginResult(HDC.XTC.DATA.STATUS_ERROR | bDrive);
@@ -1972,11 +1976,11 @@ HDC.prototype.doXTCommand = function()
 
 /**
  * popCmd()
- * 
+ *
  * @this {HDC}
  * @return {number}
  */
-HDC.prototype.popCmd = function() 
+HDC.prototype.popCmd = function()
 {
     var bCmd = -1;
     var bCmdIndex = this.regDataIndex;
@@ -1991,14 +1995,14 @@ HDC.prototype.popCmd = function()
 
 /**
  * beginResult(bResult)
- * 
+ *
  * @this {HDC}
  * @param {number} [bResult]
  */
 HDC.prototype.beginResult = function(bResult)
 {
     this.regDataIndex = this.regDataTotal = 0;
-    
+
     if (bResult !== undefined) {
         if (DEBUG) this.messageDebugger("HDC.beginResult(0x" + str.toHexByte(bResult) + ")");
         this.pushResult(bResult);
@@ -2014,7 +2018,7 @@ HDC.prototype.beginResult = function(bResult)
 
 /**
  * pushResult(bResult)
- * 
+ *
  * @this {HDC}
  * @param {number} bResult
  */
@@ -2116,7 +2120,7 @@ HDC.prototype.doRead = function(drive, done)
     if (DEBUG) this.messageDebugger("HDC.doRead(" + drive.wCylinder + ":" + drive.bHead + ":" + drive.bSector + ")");
 
     // if (DEBUG) this.messageDebugger("HDC.doRead(head=" + str.toHexByte(drive.bHead) + ",cyl=" + str.toHexWord(drive.wCylinder) + ",sec=" + str.toHexByte(drive.bSector) + ")");
-    
+
     if (drive.disk) {
         drive.sector = null;
         if (this.chipset) {
@@ -2132,7 +2136,7 @@ HDC.prototype.doRead = function(drive, done)
                 if (!fComplete) {
                     /*
                      * If an incomplete request wasn't triggered by an explicit error, then let's make explicit
-                     * (ie, revert to the default failure code that we originally set above). 
+                     * (ie, revert to the default failure code that we originally set above).
                      */
                     if (drive.errorCode == HDC.XTC.DATA.ERR.NONE) {
                         drive.errorCode = HDC.XTC.DATA.ERR.NOT_READY;
@@ -2148,7 +2152,7 @@ HDC.prototype.doRead = function(drive, done)
 
 /**
  * doWrite(drive, done)
- * 
+ *
  * @this {HDC}
  * @param {Object} drive
  * @param {function(number)} done (dataStatus is XTC.DATA.STATUS_OK or XTC.DATA.STATUS_ERROR; if error, then drive.errorCode should be set as well)
@@ -2160,7 +2164,7 @@ HDC.prototype.doWrite = function(drive, done)
     if (DEBUG) this.messageDebugger("HDC.doWrite(" + drive.wCylinder + ":" + drive.bHead + ":" + drive.bSector + ")");
 
     // if (DEBUG) this.messageDebugger("HDC.doWrite(head=" + str.toHexByte(drive.bHead) + ",cyl=" + str.toHexWord(drive.wCylinder) + ",sec=" + str.toHexByte(drive.bSector) + ")");
-    
+
     if (drive.disk) {
         drive.sector = null;
         if (this.chipset) {
@@ -2176,7 +2180,7 @@ HDC.prototype.doWrite = function(drive, done)
                 if (!fComplete) {
                     /*
                      * If an incomplete request wasn't triggered by an explicit error, then let's make explicit
-                     * (ie, revert to the default failure code that we originally set above). 
+                     * (ie, revert to the default failure code that we originally set above).
                      */
                     if (drive.errorCode == HDC.XTC.DATA.ERR.NONE) {
                         drive.errorCode = HDC.XTC.DATA.ERR.NOT_READY;
@@ -2199,7 +2203,7 @@ HDC.prototype.doWrite = function(drive, done)
 
 /**
  * doWriteToBuffer(drive, done)
- * 
+ *
  * @this {HDC}
  * @param {Object} drive
  * @param {function(number)} done (dataStatus is XTC.DATA.STATUS_OK or XTC.DATA.STATUS_ERROR; if error, then drive.errorCode should be set as well)
@@ -2207,9 +2211,9 @@ HDC.prototype.doWrite = function(drive, done)
 HDC.prototype.doWriteToBuffer = function(drive, done)
 {
     drive.errorCode = HDC.XTC.DATA.ERR.NOT_READY;
-    
+
     if (DEBUG) this.messageDebugger("HDC.doWriteToBuffer()");
-    
+
     if (!drive.abSector || drive.abSector.length != drive.nBytes) {
         drive.abSector = new Array(drive.nBytes);
     }
@@ -2227,7 +2231,7 @@ HDC.prototype.doWriteToBuffer = function(drive, done)
             if (!fComplete) {
                 /*
                  * If an incomplete request wasn't triggered by an explicit error, then let's make explicit
-                 * (ie, revert to the default failure code that we originally set above). 
+                 * (ie, revert to the default failure code that we originally set above).
                  */
                 if (drive.errorCode == HDC.XTC.DATA.ERR.NONE) {
                     drive.errorCode = HDC.XTC.DATA.ERR.NOT_READY;
@@ -2251,7 +2255,7 @@ HDC.prototype.doWriteToBuffer = function(drive, done)
  *      drive.bFiller (fill byte)
  *
  * and we expect the DMA controller to provide C, H, R and N (ie, 4 bytes) for each sector to be formatted.
- * 
+ *
  * @this {HDC}
  * @param {Object} drive
  * @param {function(number)} done (dataStatus is XTC.DATA.STATUS_OK or XTC.DATA.STATUS_ERROR; if error, then drive.errorCode should be set as well)
@@ -2259,9 +2263,9 @@ HDC.prototype.doWriteToBuffer = function(drive, done)
 HDC.prototype.doFormat = function(drive, done)
 {
     drive.errorCode = HDC.XTC.DATA.ERR.NOT_READY;
-    
+
     // if (DEBUG) this.messageDebugger("HDC.doFormat()");
-    
+
     if (drive.disk) {
         drive.sector = null;
         if (this.chipset) {
@@ -2281,7 +2285,7 @@ HDC.prototype.doFormat = function(drive, done)
                 if (!fComplete) {
                     /*
                      * If an incomplete request wasn't triggered by an explicit error, then let's make explicit
-                     * (ie, revert to the default failure code that we originally set above). 
+                     * (ie, revert to the default failure code that we originally set above).
                      */
                     if (drive.errorCode == HDC.XTC.DATA.ERR.NONE) {
                         drive.errorCode = HDC.XTC.DATA.ERR.NOT_READY;
@@ -2322,14 +2326,14 @@ HDC.prototype.doFormat = function(drive, done)
 HDC.prototype.readByte = function(drive, done, fAutoInc)
 {
     var b = -1;
-    
+
     if (drive.errorCode) {
         if (done) done(b, false);
         return b;
     }
-    
+
     var inc = (fAutoInc !== false? 1 : 0);
-    
+
     if (drive.sector) {
         b = drive.disk.read(drive.sector, drive.ibSector);
         drive.ibSector += inc;
@@ -2338,7 +2342,7 @@ HDC.prototype.readByte = function(drive, done, fAutoInc)
             return b;
         }
     }
-    
+
     /*
      * Locate the next sector, and then try reading again.
      *
@@ -2366,7 +2370,7 @@ HDC.prototype.readByte = function(drive, done, fAutoInc)
             }
             done(b, fAsync);
         });
-    }    
+    }
     return b;
 };
 
@@ -2431,24 +2435,25 @@ HDC.prototype.writeByte = function(drive, b)
  * This increments the sector number; when the sector number reaches drive.nSectors on the current track, we
  * increment drive.bHead and reset drive.bSector, and when drive.bHead reaches drive.nHeads, we reset drive.bHead
  * and increment drive.wCylinder.
- * 
+ *
  * One wrinkle is that the ATC uses 1-based sector numbers (bSectorBias is 0), whereas the XTC uses 0-based sector
  * numbers (bSectorBias is 1).  Thus, the correct "reset" value for bSector is (1 - bSectorBias), and the correct
  * limit for bSector is (nSectors + bSectorStart).
- * 
+ *
+ * @this {HDC}
  * @param {Object} drive
  */
 HDC.prototype.advanceSector = function(drive)
 {
+    Component.assert(drive.wCylinder < drive.nCylinders);
     drive.bSector++;
     var bSectorStart = (1 - drive.bSectorBias);
     if (drive.bSector >= drive.nSectors + bSectorStart) {
         drive.bSector = bSectorStart;
-        drive.bHeads++;
-        if (drive.bHeads >= drive.nHeads) {
-            drive.bHeads = 0;
+        drive.bHead++;
+        if (drive.bHead >= drive.nHeads) {
+            drive.bHead = 0;
             drive.wCylinder++;
-            Component.assert(drive.wCylinder < drive.nCylinders);
         }
     }
 };
@@ -2461,7 +2466,7 @@ HDC.prototype.advanceSector = function(drive)
  *
  * TODO: Support for HDC.XTC.DATA.CMD.READ_BUFFER is missing, and support for HDC.XTC.DATA.CMD.WRITE_BUFFER may not be complete;
  * tests required.
- * 
+ *
  * @this {HDC}
  * @param {Object} drive
  * @param {number} b containing next byte to write
@@ -2473,7 +2478,7 @@ HDC.prototype.writeBuffer = function(drive, b)
         drive.abSector[drive.ibSector++] = b;
     } else {
         /*
-         * TODO: Determine the proper error code to return here. 
+         * TODO: Determine the proper error code to return here.
          */
         drive.errorCode = HDC.XTC.DATA.ERR.NO_SECTOR;
         b = -1;
@@ -2483,7 +2488,7 @@ HDC.prototype.writeBuffer = function(drive, b)
 
 /**
  * writeFormat(drive, b)
- * 
+ *
  * @this {HDC}
  * @param {Object} drive
  * @param {number} b containing a format command byte
@@ -2503,7 +2508,7 @@ HDC.prototype.writeFormat = function(drive, b)
         if (DEBUG) this.messageDebugger("HDC.writeFormat(" + drive.wCylinder + ":" + drive.bHead + ":" + drive.bSector + ":" + drive.nBytes + ")");
 
         // if (DEBUG) this.messageDebugger("HDC.writeFormat(head=" + str.toHexByte(drive.bHead) + ",cyl=" + str.toHexWord(drive.wCylinder) + ",sec=" + str.toHexByte(drive.bSector) + ",len=" + str.toHexWord(drive.nBytes) + ")");
-        
+
         for (var i = 0; i < drive.nBytes; i++) {
             if (this.writeByte(drive, drive.bFiller) < 0) {
                 return -1;
@@ -2609,7 +2614,7 @@ HDC.prototype.intBIOSDiskette = function(addr)
  * messageDebugger(sMessage)
  *
  * This is a combination of the Debugger's messageEnabled(MESSAGE_HDC) and message() functions, for convenience.
- * 
+ *
  * @this {HDC}
  * @param {string} sMessage is any caller-defined message string
  */
@@ -2626,7 +2631,7 @@ HDC.prototype.messageDebugger = function(sMessage)
  * messagePort(port, bOut, addrFrom, name, bIn)
  *
  * This is an internal version of the Debugger's messagePort() function, for convenience.
- * 
+ *
  * @this {HDC}
  * @param {number} port
  * @param {number|null} bOut if an output operation

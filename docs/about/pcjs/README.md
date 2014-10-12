@@ -2,7 +2,8 @@ About PCjs
 ---
 
 PCjs is a IBM PC and PC XT simulator written entirely in JavaScript.  It's designed to load and run extremely
-fast, it works well in all modern web browsers (both desktop and mobile), and it's easy to customize.
+fast, it works well in all modern web browsers (both desktop and mobile), and it's easy to customize.  It is part of
+the [PCjs Project](https://github.com/jeffpar/pcjs), an open source project on [GitHub](http://github.com/).
 
 Check out the [Demos](/#demos) on the home page, and all the other PCjs [Application](/apps/pc/), [Boot Disk](/disks/pc/)
 and [Machine](/configs/pc/machines/) demos, including an IBM PC XT "[Server Array](/configs/pc/machines/5160/cga/256kb/array/)"
@@ -36,18 +37,19 @@ Chrome or Firefox for other platforms.
 
 ### Future
 
-More hardware suport is targeted for version 1.20.0, including:
+More hardware support is targeted for version 1.15, including:
 
 + Complete EGA emulation
 + 80286 CPU emulation
 + PC AT hardware emulation
 
-Limited EGA emulation is currently available as of version 1.14.0. 
+Limited EGA emulation is currently available as of version 1.14.
 
 ### History
 
-+ v1.14.0 introduced limited EGA emulation, as discussed on our [Blog](/blog/2014/07/30/).
-+ v1.13.0 introduced manifest files that describe software packages that can be used with PCjs. 
++ v1.15 introduced PC AT (Model 5170) emulation, as discussed on our [Blog](/blog/2014/09/13/).
++ v1.14 introduced limited EGA emulation, as discussed on our [Blog](/blog/2014/07/30/).
++ v1.13 introduced manifest files that describe software packages that can be used with PCjs. 
 More information on software manifests is available [here](/apps/).
 + v1.12.1 coincided with the first release of the new PCjs web server running on [Node.js](http://nodejs.org).
 The new server includes ROM and disk image conversion APIs, as well as a [Markdown](http://daringfireball.net/projects/markdown/syntax)

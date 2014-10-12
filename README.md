@@ -2,8 +2,8 @@ The Original IBM PC in Your Browser
 ---
 
 Welcome to [pcjs.org](http://www.pcjs.org/) and [PCjs](/docs/about/pcjs/), the first IBM PC simulation to run in your
-web browser without any plugins.  It was added to the [JavaScript Machines](/docs/about/) project in Fall 2012.
-The project now includes:
+web browser without any plugins.  It was added to the [JavaScript Machines](/docs/about/) project in Fall 2012, and is
+now part of the [PCjs Project](https://github.com/jeffpar/pcjs) on [GitHub](https://github.com/).  The project now includes:
 
 * [PCjs](/docs/about/pcjs/), a simulation of the original IBM PC (circa 1981)
 * [C1Pjs](/docs/c1pjs/), a simulation of the OSI Challenger 1P (circa 1978)
@@ -60,14 +60,21 @@ copy of the [PCjs web server](http://www.pcjs.org/) and run PCjs simulations:
 
 + A simple Node-based web server ([server.js](server.js))
 + Custom Node modules used by the web server ([HTMLOut](my_modules/htmlout/), [MarkOut](my_modules/markout/), [DiskDump](my_modules/diskdump/), [FileDump](my_modules/filedump/))
-+ An assortment of IBM PC and C1P machine XML files (in [/apps](apps/), [/devices](devices/) and elsewhere)
++ An assortment of IBM PC and C1P machine XML files (in [/apps](apps/), [/configs](configs/), [/disks](disks/) and elsewhere)
 + The [PCjs](my_modules/pcjs-client/lib/) and [C1Pjs](my_modules/c1pjs-client/lib/) client applications, both "compiled" and uncompiled
 + A smattering of [PCjs](docs/pcjs/) and [C1Pjs](docs/c1pjs/) documentation, along with [blog posts](blog/), related [publications](pubs/) and more
 
+Aside from the [PCjs](my_modules/pcjs-client/lib/) and [C1Pjs](my_modules/c1pjs-client/lib/) applications,
+[DiskDump](my_modules/diskdump/) is another important module.  Originally created to dump existing disk images as JSON,
+**DiskDump** has evolved into a full-featured disk image generator, capable of creating PC-compatible diskette *and*
+hard disk images from either lists *or* directories of files (including all subdirectories), and supports both
+command-line and web interfaces.
+
 The PCjs web server is *not* required to run most PCjs simulations.  Any web server (Node, Apache, Nginx, etc)
 that can serve the necessary JavaScript files to your browser will work.  However, instructions for doing
-that are beyond the scope of this "Quick Start" document.  And while it is possible to create simulations that
-require access to PCjs web server APIs, none of the simulations in the repository should require API access.
+that are beyond the scope of this document (see future document).  The PCjs web server does provide disk and file
+APIs that simulations can take advantage of, but none of the simulations currently checked into the repository
+should require API access.
 
 ### Installing PCjs
 
@@ -242,23 +249,24 @@ A complete list of command-line options can be found in [server.js](server.js).
 
 ### Client Components
 
-A special parameter ("gort") can be appended to the URL to request uncompiled client source files, making PCjs and
-C1Pjs much easier to debug, albeit much slower:
+A special command parameter ("gort") can be appended to the URL to request uncompiled client source files, making PCjs
+and C1Pjs much easier to debug, albeit much slower:
 
 	http://localhost:8088/?gort=debug
 
 The "gort=debug" command is unnecessary if the server is started with `--debug`; the server always serves uncompiled
-files when running in "debug mode".
+files when running in debug mode.
 
-Conversely, if the server is running "debug mode" but you want to test a compiled version of PCjs, use:
+Conversely, if the server is running debug mode but you want to test a compiled version of PCjs, use:
 
 	http://localhost:8088/?gort=release
 
-and the server will serve compiled JavaScript files, regardless whether the server is running in "debug mode" or
-"release mode".
+and the server will serve compiled JavaScript files, regardless whether the server is running in debug mode or
+release mode.
 
-Another useful gort command is "gort=nodebug", which is like "debug" but also sets the client-side **DEBUG** variable
-to *false*, disabling all debug-only runtime checks in the client and allowing the simulation to run much faster:
+Another useful gort command is "gort=nodebug", which is like "gort=debug" but also sets the client-side **DEBUG**
+variable to *false*, disabling all debug-only runtime checks in the client and allowing the simulation to run much
+faster:
 
 	http://localhost:8088/?gort=nodebug
 
@@ -285,7 +293,9 @@ To start developing features for a new version of PCjs, here are the recommended
 3. Make changes
 4. Run "grunt" to build new versions of the apps (eg, "/versions/pcjs/1.xx.yy/pc.js")
  
-However, you may want to skip step #2 until you're ready to start testing the new version.  Depending on the nature
+You might also want to check out the blog post on [PCjs Coding Conventions](/blog/2014/09/30/).
+
+You may also want to skip step #2 until you're ready to start testing the new version.  Depending on the nature
 of your changes, it may be better to manually edit the version number in only a few machine XML files for testing,
 leaving the rest of the XML files pointing to the previous version.  Run "grunt promote" when the new version is much
 closer to being released.
@@ -309,9 +319,22 @@ manually or with the Grunt "clean" task:
 	
 <!--END:EXCLUDE-->
 
+License
+---
+The [PCjs Project](https://github.com/jeffpar/pcjs) is now an open source project on [GitHub](http://github.com/).
+All published portions are free for redistribution and/or modification under the terms of the
+[GNU General Public License](/LICENSE) as published by the Free Software Foundation, either version 3 of the License,
+or (at your option) any later version.
+
+You are required to include the appropriate copyright notice (e.g., `PCjs v1.15.4 © 2012-2014 by @jeffpar`)
+in every source code file of every copy or modified version of this work, and to display that copyright notice
+on every screen that loads or runs any version of this software.
+
+See [LICENSE](/LICENSE) for details.
+
 More Information
 ---
-Learn more about the [JavaScript Machines](/docs/about/) project and [PCjs](/docs/about/pcjs/).  To
+Learn more about the [JavaScript Machines](/docs/about/) Project and [PCjs](/docs/about/pcjs/).  To
 create your own PCjs machines, see the [Documentation](/docs/pcjs/) for details.
 
 If you have questions or run into any problems, you're welcome to [tweet](http://twitter.com/jeffpar) or

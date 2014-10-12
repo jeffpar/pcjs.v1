@@ -93,10 +93,9 @@ var sDefaultFile = "./README.md";
  * @param {string|null} [sIndent] sets the overall indentation of the document
  * @param {Object} [req] is the web server's (ie, Express) request object, if any
  * @param {Array.<string>|null} [aParms] is an array of overrides to use (see below)
- * @param {boolean} [fDebug] turns on debugging features (eg, debug comments)
- * @param {boolean} [fServerDebug] turns on server debug features (eg, special URL encoding rules)
+ * @param {boolean} [fDebug] turns on debugging features (eg, debug comments, special URL encodings, etc)
  */
-function MarkOut(sMD, sIndent, req, aParms, fDebug, fServerDebug)
+function MarkOut(sMD, sIndent, req, aParms, fDebug)
 {
     this.sMD = sMD;
     this.sIndent = (sIndent || "");
@@ -109,7 +108,6 @@ function MarkOut(sMD, sIndent, req, aParms, fDebug, fServerDebug)
         this.sClassImageLabel = this.sClassImage + "-label";
     }
     this.fDebug = fDebug;
-    this.fServerDebug = fServerDebug;
     this.sHTML = null;
     this.aIDs = [];         // this keeps tracks of auto-generated ID attributes for page elements, to insure uniqueness
     this.aMachines = [];    // this keeps tracks of embedded machines on the page
@@ -242,6 +240,7 @@ MarkOut.setOptions = function(options)
  * and make sure all the pre-requisites are in place (eg, CSS file and scripts in the HTML document's
  * header).
  *
+ * @this {MarkOut}
  * @param {Object} infoMachine
  */
 MarkOut.prototype.addMachine = function(infoMachine)
@@ -252,6 +251,7 @@ MarkOut.prototype.addMachine = function(infoMachine)
 /**
  * getMachines()
  *
+ * @this {MarkOut}
  * @return {Array} of objects containing information about each machine defined by the document
  */
 MarkOut.prototype.getMachines = function()
@@ -266,7 +266,8 @@ MarkOut.prototype.getMachines = function()
  * that's not a letter or a digit to a hyphen (-), and stripping all leading and trailing hyphens from
  * the result.  Furthermore, if the generated ID is not unique (among the set of ALL generated IDs),
  * then no ID is produced.
- * 
+ *
+ * @this {MarkOut}
  * @param {string} sText
  * @returns {string|null} converts the given text to a unique ID (or null if resulting ID was not unique)
  */
@@ -301,6 +302,7 @@ MarkOut.aHTMLEntities = {
 /**
  * convertMD()
  *
+ * @this {MarkOut}
  * @param {string} [sIndent] sets the indentation of HTML elements within the document
  */
 MarkOut.prototype.convertMD = function(sIndent)
@@ -414,6 +416,7 @@ MarkOut.prototype.convertMD = function(sIndent)
  * If your text may contain some block markers (ie, double-linefeeds), or headers (either "Atx-style"
  * or "Setext-style) that require the insertion of double-linefeed block markers, then call this function.
  *
+ * @this {MarkOut}
  * @param {string} sMD
  * @param {string} [sIndent]
  */
@@ -478,6 +481,7 @@ MarkOut.prototype.convertMDBlocks = function(sMD, sIndent)
 /**
  * convertMDBlock(sBlock, sIndent)
  *
+ * @this {MarkOut}
  * @param {string} sBlock
  * @param {string} [sIndent]
  */
@@ -623,6 +627,7 @@ MarkOut.prototype.convertMDBlock = function(sBlock, sIndent)
  * Markdown apparently treats equivalently), I automatically use a list style that omits bullets.
  * So, if you REALLY want bullets, use "-" or "+".
  *
+ * @this {MarkOut}
  * @param {string} sBlock
  * @param {string} sIndent
  * @return {string}
@@ -688,6 +693,7 @@ MarkOut.prototype.convertMDList = function(sBlock, sIndent)
  * galleries, which are nothing more than paragraphs containing a series of image links), so this
  * code is disabled for now.
  *
+ * @this {MarkOut}
  * @param {string} s
  * @return {string}
  */
@@ -720,6 +726,7 @@ MarkOut.prototype.convertMDLines = function(s)
  * 
  * TODO: Consider adding support for "reference"-style Markdown links.
  *
+ * @this {MarkOut}
  * @param {string} sBlock
  * @return {string}
  */
@@ -748,7 +755,7 @@ MarkOut.prototype.convertMDLinks = function(sBlock)
             sType = "id";       // using the "name" attribute is deprecated as well
             sURL = sURL.substr(1);
         } else {
-            sURL = net.encodeURL(sURL, this.req, this.fServerDebug);
+            sURL = net.encodeURL(sURL, this.req, this.fDebug);
         }
         sBlock = str.replaceAll(aMatch[0], '<' + sTag +  ' ' + sType + '="' + sURL + '"' + sTitle + '>' + sText + '</' + sTag + '>', sBlock);
     }
@@ -758,6 +765,7 @@ MarkOut.prototype.convertMDLinks = function(sBlock)
 /**
  * convertMDImageLinks(sBlock)
  *
+ * @this {MarkOut}
  * @param {string} sBlock
  * @param {string} sIndent
  * @return {string}
@@ -778,7 +786,7 @@ MarkOut.prototype.convertMDImageLinks = function(sBlock, sIndent)
     var sBlockOrig = sBlock;
     var re = /!\[(.*?)\]\((.*?)(?:\s*"(.*?)"\)|\))/g;
     while ((aMatch = re.exec(sBlockOrig))) {
-        var sImage = '<img src="' + net.encodeURL(aMatch[2], this.req, this.fServerDebug) + '" alt="' + aMatch[1] + '"';
+        var sImage = '<img src="' + net.encodeURL(aMatch[2], this.req, this.fDebug) + '" alt="' + aMatch[1] + '"';
         if (aMatch[3]) {
             /*
              * The format of the special "link:" syntax is:
@@ -814,10 +822,10 @@ MarkOut.prototype.convertMDImageLinks = function(sBlock, sIndent)
                  * The assumption here is that if we have "static" thumbs, then we should also have full "static"
                  * copies as well.
                  */
-                if (aMatch[2].indexOf("static/") >= 0 && sURL.indexOf("://") > 0 && (this.fServerDebug || net.hasParm(net.REVEAL_COMMAND, net.REVEAL_PDFS, this.req))) {
+                if (aMatch[2].indexOf("static/") >= 0 && sURL.indexOf("://") > 0 && (this.fDebug || net.hasParm(net.REVEAL_COMMAND, net.REVEAL_PDFS, this.req))) {
                     sURL = aMatch[2].replace("/thumbs/", "/").replace(" 1.jpeg", ".pdf").replace(".jpg", ".pdf");
                 }
-                sURL = net.encodeURL(sURL, this.req, this.fServerDebug);
+                sURL = net.encodeURL(sURL, this.req, this.fDebug);
                 if (asParts[iPart] == "nogallery") {
                     fNoGallery = true;
                     iPart++;
@@ -862,6 +870,7 @@ MarkOut.prototype.convertMDImageLinks = function(sBlock, sIndent)
 /**
  * convertMDMachineLinks(sBlock)
  *
+ * @this {MarkOut}
  * @param {string} sBlock
  * @return {string}
  */
@@ -992,6 +1001,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
  * Also, for reasons noted in the code below, we don't support emphasis in the middle
  * of words.
  *
+ * @this {MarkOut}
  * @param {string} sBlock
  * @return {string}
  */
@@ -1031,6 +1041,7 @@ MarkOut.prototype.convertMDEmphasis = function(sBlock)
 /**
  * addIndent(sIndent)
  *
+ * @this {MarkOut}
  * @param {string|undefined} sIndent
  * @return {string} previous indent
  */
@@ -1044,6 +1055,7 @@ MarkOut.prototype.addIndent = function(sIndent)
 /**
  * subIndent(sIndent)
  *
+ * @this {MarkOut}
  * @param {string|undefined} sIndent
  */
 MarkOut.prototype.subIndent = function(sIndent)
@@ -1064,6 +1076,7 @@ MarkOut.prototype.subIndent = function(sIndent)
  * This is used purely (at the moment) for debugging purposes, so that we can clearly see
  * what our simplistic Markdown parser is parsing at each stage.
  *
+ * @this {MarkOut}
  * @param {string} sLabel
  * @param {string} sText
  * @return {string}
@@ -1080,6 +1093,7 @@ MarkOut.prototype.encodeComment = function(sLabel, sText)
  * This is used purely (at the moment) for debugging purposes, so that we can clearly see
  * what our simplistic Markdown parser is parsing at each stage.
  *
+ * @this {MarkOut}
  * @param {string} sText
  * @return {string}
  *

@@ -47,7 +47,7 @@ var DumpAPI = require("../../shared/lib/dumpapi");
  * or a "--map" command-line option), which in turn triggers a call to loadMap().  Note that loadMap() will need
  * to be a bit more general and use a worker function that calls either net.getFile() or fs.readFile(), similar
  * to what our loadFile() function already does.
- * 
+ *
  * @constructor
  * @param {string|undefined} sFormat should be one of "json"|"data"|"hex"|"bytes"|"rom" (see the FORMAT constants)
  * @param {boolean|string|undefined} fComments enables comments and other readability enhancements in the JSON output
@@ -67,7 +67,7 @@ function FileDump(sFormat, fComments, fDecimal, sServerRoot)
     this.buf = null;
     /*
      * TODO: Decide what to do with this usage info; we can't use it as a default, because setting this.json
-     * causes outputFile() to ignore this.buf indiscriminately (ie, it breaks non-JSON output modes). 
+     * causes outputFile() to ignore this.buf indiscriminately (ie, it breaks non-JSON output modes).
      */
     this.json = ""; // "[\n  /**\n   * " + FileDump.sAPIURL + " " + FileDump.sCopyright + "\n   * " + FileDump.sUsage + "\n   */\n]";
 }
@@ -101,24 +101,24 @@ FileDump.sUsage = "Usage: " + FileDump.sAPIURL + "?" + DumpAPI.QUERY.FILE + "=({
  *      text format that consists entirely of 2-character hex values (deprecated), and "bytes" is a JSON-like format
  *      that also uses hex values (but with "0x" prefixes) and is normally used only when comments are enabled (use
  *      --decimal to force decimal byte output).
- *      
+ *
  *      When a second file is "merged", the first file sets all even bytes and the second file sets all odd bytes.
  *      In fact, any number of files can be merged: if there are N files, file #1 sets bytes at "offset mod N == 0",
  *      file #2 sets all bytes at "offset mod N == 1", and file #N sets all bytes at "offset mod N == N - 1".
  *
  *      Note that command-line arguments, if any, are not validated.  For example, argv['comments'] may be any of
  *      boolean, string, or undefined, since the user may have typed "--comments" or "--comments=foo" or nothing at all.
- *      
+ *
  * Examples
  * ---
  *      filedump --file=devices/pc/video/ibm-ega.rom --format=bytes --decimal
- *      
+ *
  * Notes
  * ---
  *      Originally, we had to specify `--format=bytes` because the onLoadROM() code in rom.js assumed the data was
  *      always byte-sized, but it has since been updated to support dword arrays, so the default format ("json")
  *      works fine as well.  Also, `--decimal` reduces the size of the output file significantly.
- *      
+ *
  *      If there's a ".map" file (eg, "ibm-ega.map"), it's automatically loaded and appended to the ROM data as a
  *      "symbols" property; we may want to consider an option to disable the processing of map files, but for now, the
  *      simple answer is: if you don't want one, don't create one.
@@ -131,29 +131,29 @@ FileDump.CLI = function()
         console.log("usage: filedump --file=({path}|{URL}) [--merge=({path}|{url})] [--format=(json|data|hex|bytes|rom)] [--comments] [--decimal] [--output={path}] [--overwrite]");
         return;
     }
-    
+
     var argv = args.argv;
     var sFile = argv['file'];
     if (!sFile) {
         FileDump.logError(new Error("no filename specified"));
         return;
     }
-    
+
     var sOutputFile = argv['output'];
     if (typeof sOutputFile != "string") {
         FileDump.logError(new Error("bad or missing output filename"));
         return;
     }
-    
+
     if (sOutputFile && sOutputFile.charAt(0) != '/') sOutputFile = path.join(process.cwd(), sOutputFile);
     var fOverwrite = argv['overwrite'];
-    
+
     var sFormat = FileDump.validateFormat(argv['format']);
     if (sFormat === false) {
         FileDump.logError(new Error("unrecognized format"));
         return;
     }
-    
+
     var sMergeFile, asMergeFiles = [];
     var file = new FileDump(sFormat, argv['comments'], argv['decimal']);
     if (argv['merge']) {
@@ -227,6 +227,7 @@ FileDump.validateFormat = function(sFormat)
  * object creation from any I/O that the object may perform, to ensure that a callback can never
  * be called before the caller has actually received the newly created object.
  *
+ * @this {FileDump}
  * @param {string} sFile
  * @param {number} iStart
  * @param {number} nSkip
@@ -241,10 +242,10 @@ FileDump.prototype.loadFile = function(sFile, iStart, nSkip, done)
      */
     var obj = this;
     var sFilePath = net.isRemote(sFile)? sFile : path.join(this.sServerRoot, sFile);
-    
+
     if (!this.sFilePath) this.sFilePath = sFilePath;
     if (this.fDebug) console.log("loadFile(" + sFilePath + "," + iStart + "," + nSkip + ")");
-    
+
     if (net.isRemote(sFilePath)) {
         net.getFile(sFilePath, null, function(err, status, buf) {
             if (err) {
@@ -273,6 +274,7 @@ FileDump.prototype.loadFile = function(sFile, iStart, nSkip, done)
  *
  * Records the given file data in the FileDump's buffer
  *
+ * @this {FileDump}
  * @param {Buffer} buf
  * @param {number} iStart
  * @param {number} nSkip
@@ -299,6 +301,7 @@ FileDump.prototype.setData = function(buf, iStart, nSkip)
 /**
  * dumpLine(nIndent, sLine, sComment)
  *
+ * @this {FileDump}
  * @param {number} [nIndent] is the relative number of characters to indent the given line (0 if none)
  * @param {string} [sLine] is the given line
  * @param {string} [sComment] is an optional comment to append to the line, if comment output is enabled
@@ -322,6 +325,7 @@ FileDump.prototype.dumpLine = function(nIndent, sLine, sComment)
 /**
  * dumpBuffer(sKey, buf, len, cbItem, offData)
  *
+ * @this {FileDump}
  * @param {string|null} sKey is name of buffer data element
  * @param {Buffer} buf is a Buffer containing the bytes to dump
  * @param {number} len is the number of bytes to dump
@@ -334,7 +338,7 @@ FileDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offData)
     var chOpen = '', chClose = '', chSep = ' ', sHexPrefix = "";
 
     this.sKey = sKey;
-    
+
     if (this.sFormat != DumpAPI.FORMAT.HEX) {
         chOpen = '['; chClose = ']'; chSep = ','; sHexPrefix = "0x";
     }
@@ -385,6 +389,7 @@ FileDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offData)
  *
  * NOTE: Since ".map" files are an internal construct, I support only local map files (for now)
  *
+ * @this {FileDump}
  * @param {string} sFilePath
  * @param {function(Error,string)} done
  */
@@ -413,13 +418,13 @@ FileDump.prototype.loadMap = function(sFilePath, done)
                 }
                 else {
                     // console.log("add this to obj.json:\n" + str);
-    
+
                     /*
                      * Parse MAP data into a set of properties; for example, if the .map file contains:
                      *
-                     *           0320	=   HF_PORT
+                     *           0320   =   HF_PORT
                      *      0000:0034   4   HDISK_INT
-                     *		0040:0042   1   CMD_BLOCK
+                     *      0040:0042   1   CMD_BLOCK
                      *           0003   @   DISK_SETUP
                      *      0000:004C   4   ORG_VECTOR
                      *           0028   .   MOV AX,WORD PTR ORG_VECTOR ;GET DISKETTE VECTOR
@@ -436,26 +441,26 @@ FileDump.prototype.loadMap = function(sFilePath, done)
                      *
                      * then we should produce the following corresponding JSON:
                      *
-                     *		{
-                     *			"HF_PORT": {
-                     *				"v":800
-                     *			},
-                     *			"HDISK_INT": {
-                     *				"b":4, "s":0, "o":52
-                     *			},
-                     *			"ORG_VECTOR": {
-                     *				"b":4, "s":0, "o":76
-                     *			},
-                     *			"CMD_BLOCK": {
-                     *				"b":1, "s":64, "o":66
-                     *			},
-                     *			"DISK_SETUP": {
-                     *				"o":3
-                     *			},
-                     *			".40": {
-                     *				"o":64, "a":"MOV AX,WORD PTR ORG_VECTOR ;GET DISKETTE VECTOR"
-                     *			}
-                     *		}
+                     *      {
+                     *          "HF_PORT": {
+                     *              "v":800
+                     *          },
+                     *          "HDISK_INT": {
+                     *              "b":4, "s":0, "o":52
+                     *          },
+                     *          "ORG_VECTOR": {
+                     *              "b":4, "s":0, "o":76
+                     *          },
+                     *          "CMD_BLOCK": {
+                     *              "b":1, "s":64, "o":66
+                     *          },
+                     *          "DISK_SETUP": {
+                     *              "o":3
+                     *          },
+                     *          ".40": {
+                     *              "o":64, "a":"MOV AX,WORD PTR ORG_VECTOR ;GET DISKETTE VECTOR"
+                     *          }
+                     *      }
                      *
                      * where "v" is the value of an absolute (unsized) value; "b" is either 1, 2, 4 or undefined; "s" is either a hard-coded
                      * segment or undefined; and "o" is the offset of an symbol.  Also, if the symbol is not entirely upper-case, then we
@@ -562,8 +567,10 @@ FileDump.prototype.loadMap = function(sFilePath, done)
 
 /**
  * buildJSON()
- * 
+ *
  * Common code between the API helper (convertToJSON()) and the command-line helper (convertToFile()).
+ *
+ * @this {FileDump}
  */
 FileDump.prototype.buildJSON = function()
 {
@@ -586,6 +593,7 @@ FileDump.prototype.buildJSON = function()
  *
  * Converts the data buffer to JSON.
  *
+ * @this {FileDump}
  * @param {function(Error,string)} done
  */
 FileDump.prototype.convertToJSON = function(done)
@@ -599,6 +607,7 @@ FileDump.prototype.convertToJSON = function(done)
  *
  * Converts the data buffer to JSON, as appropriate.
  *
+ * @this {FileDump}
  * @param {string} sOutputFile
  * @param {boolean} fOverwrite
  */
@@ -621,16 +630,17 @@ FileDump.prototype.convertToFile = function(sOutputFile, fOverwrite)
 
 /**
  * outputFile(sOutputFile, fOverwrite)
- * 
+ *
+ * @this {FileDump}
  * @param {string} sOutputFile
  * @param {boolean} fOverwrite
  */
 FileDump.prototype.outputFile = function(sOutputFile, fOverwrite)
 {
     var data = this.json || this.buf;
-    
+
     var sFormat = this.sFormat.toUpperCase();
-    
+
     if (sOutputFile) {
         try {
             if (fs.existsSync(sOutputFile) && !fOverwrite) {

@@ -118,8 +118,8 @@ X86Seg.loadProt = function loadProt(sel, fSuppress)
         
         /*
          * TODO: This is only the first of many steps toward accurately counting cycles in protected mode;
-         * I simply noticed that "POP segreg" takes 5 cycles in real mode and 20 in protected mode, so I'm
-         * starting with a 15-cycle penalty.  Obviously the penalty will be much greater when the load fails.
+         * I simply noted that "POP segreg" takes 5 cycles in real mode and 20 in protected mode, so I'm
+         * starting with a 15-cycle difference.  Obviously the difference will be much greater when the load fails.
          */
         this.cpu.nStepCycles -= 15;
         

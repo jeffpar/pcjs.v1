@@ -14,7 +14,7 @@ global *Buffer* object, as indicated by:
 	/* global Buffer: false */
 
 And [weblib.js](weblib.js) is appropriate only for client modules, because it contains code that relies on the
-brower's global *window* object, as indicated by:
+browser's global *window* object, as indicated by:
 
 	/* global window: true */
 
@@ -25,4 +25,4 @@ when running within Node, allowing any other code to test the existence of *wind
 	
 instead of:
 
-	if (typeof window !== 'undefined') {...}
+	if (typeof window !== "undefined") {...}

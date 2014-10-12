@@ -2329,8 +2329,8 @@ var X86OpXX = {
         }
         if (nReps--) {
             /*
-             * NOTE: Storing a word imposes another 4-cycle penalty on the 8088, so consider that if you think the
-             * cycle times here are too high.
+             * NOTE: Storing a word imposes another 4-cycle penalty on the 8088, so consider that
+             * if you think the cycle times here are too high.
              */
             this.setSOWord(this.segES, this.regDI, this.regAX);
             this.regDI = (this.regDI + ((this.regPS & X86.PS.DF)? -2 : 2)) & 0xffff;

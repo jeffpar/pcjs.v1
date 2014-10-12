@@ -45,7 +45,7 @@
  * decodeURI()          Decodes a URI
  * decodeURIComponent() Decodes a URI component
  * encodeURI()          Encodes a URI
- * encodeURIComponent()	Encodes a URI component
+ * encodeURIComponent() Encodes a URI component
  * escape()             Deprecated in version 1.5. Use encodeURI() or encodeURIComponent() instead
  * eval()               Evaluates a string and executes it as if it was script code
  * isFinite()           Determines whether a value is a finite, legal number
@@ -55,7 +55,7 @@
  * parseInt()           Parses a string and returns an integer
  * String()             Converts an object's value to a string
  * unescape()           Deprecated in version 1.5. Use decodeURI() or decodeURIComponent() instead
- * 
+ *
  * And according to http://www.w3schools.com/jsref/obj_window.asp, these are the properties and functions
  * of the *window* object.
  *
@@ -86,7 +86,7 @@
  * self                 Returns the current window
  * status               Sets or returns the text in the statusbar of a window
  * top                  Returns the topmost browser window
- *  
+ *
  * Method               Description
  * ---
  * alert()              Displays an alert box with a message and an OK button
@@ -122,7 +122,7 @@
  * We must defer loading the Component module until the function(s) requiring it are
  * called; otherwise, we create an initialization cycle in which Component requires weblib
  * and weblib requires Component.
- * 
+ *
  * In an ideal world, weblib would not be dependent on Component, but we really want to use
  * its logging functions.
  */
@@ -155,16 +155,16 @@ var web = {};
  */
 web.loadResource = function(sURL, fAsync, data, componentNotify, fnNotify, pNotify)
 {
-    fAsync = !!fAsync;          // ensure that fAsync is a valid boolean (Internet Explorer xmlHTTP functions insist on it)  
+    fAsync = !!fAsync;          // ensure that fAsync is a valid boolean (Internet Explorer xmlHTTP functions insist on it)
     if (typeof module !== 'undefined') {
         /*
          * We don't even need to load Component, because we can't use any of the code below
          * within Node anyway.  Instead, we must hand this request off to our network library.
-         * 
+         *
          *      if (!Component) Component = require("./component");
          */
         var net = require("./netlib");
-        return net.loadResource(sURL, fAsync, data, componentNotify, fnNotify, pNotify); 
+        return net.loadResource(sURL, fAsync, data, componentNotify, fnNotify, pNotify);
     }
     var nErrorCode = 0;
     var sURLData = null;
@@ -312,7 +312,7 @@ web.confirmUser = function(sPrompt)
 
 /**
  * promptUser()
- * 
+ *
  * @param {string} sPrompt
  * @param {string} [sDefault]
  * @returns {string|null}
@@ -330,7 +330,7 @@ web.promptUser = function(sPrompt, sDefault)
  * getLocalStorageItem(sKey)
  *
  * Returns the requested key value, or null if the key does not exist, or undefined if localStorage is not available
- * 
+ *
  * @param {string} sKey
  * @return {string|null|undefined} sValue
  */
@@ -345,7 +345,7 @@ web.getLocalStorageItem = function(sKey)
 
 /**
  * setLocalStorageItem(sKey, sValue)
- * 
+ *
  * @param {string} sKey
  * @param {string} sValue
  * return {boolean} true if localStorage is available, false if not
@@ -427,13 +427,13 @@ web.getURLParameters = function(sParms)
              * Note that window.location.href returns the entire URL, whereas window.location.search
              * returns only the parameters, if any (starting with the '?', which we skip over with a substr() call).
              */
-            sParms = window.location.search.substr(1);        
+            sParms = window.location.search.substr(1);
         }
         var match;
         var pl = /\+/g;     // RegExp for replacing addition symbol with a space
         var search = /([^&=]+)=?([^&]*)/g;
         var decode = function(s) { return decodeURIComponent(s.replace(pl, " ")); };
-        
+
         while ((match = search.exec(sParms))) {
             aParms[decode(match[1])] = decode(match[2]);
         }
@@ -482,7 +482,7 @@ web.onCountRepeat = function(n, fn, fnComplete, msDelay)
 web.onClickRepeat = function(e, msDelay, msRepeat, fn)
 {
     var ms = 0, timer = null, fIgnoreMouseEvents = false;
-    
+
     var fnRepeat = function doClickRepeat() {
         if (fn(ms === msRepeat)) {
             timer = setTimeout(fnRepeat, ms);
@@ -628,7 +628,7 @@ web.enablePageEvents = function(fEnable)
 
 /**
  * sendPageEvent(sEvent)
- * 
+ *
  * This allows us to manually trigger page events.
  *
  * @param {string} sEvent (one of 'init', 'show' or 'exit')

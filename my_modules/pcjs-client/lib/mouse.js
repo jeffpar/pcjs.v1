@@ -228,7 +228,7 @@ Mouse.prototype.powerUp = function(data, fRepower) {
                 var componentScreen = this.cmp.getComponentByType("Video");
                 if (componentScreen) this.canvasScreen = componentScreen.getCanvas();
             } else {
-                this.warning(this.id + ": " + this.sAdapterType + " " + this.idAdapter + " unavailable");
+                Component.warning(this.id + ": " + this.sAdapterType + " " + this.idAdapter + " unavailable");
             }
         }
         if (this.fActive) {

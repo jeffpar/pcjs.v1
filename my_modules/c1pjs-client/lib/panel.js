@@ -56,19 +56,19 @@ Component.subclass(Component, C1PPanel);
  * component that doesn't recognize the specified binding should simply ignore it.
  *
  * @this {C1PPanel}
- * @param {string|null} c is the class of the HTML control (eg, "input", "output")
- * @param {string|null} t is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea")
- * @param {string} s is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
- * @param {Object} e is the HTML control DOM object (eg, HTMLButtonElement)
+ * @param {string|null} sHTMLClass is the class of the HTML control (eg, "input", "output")
+ * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
+ * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
+ * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-C1PPanel.prototype.setBinding = function(c, t, s, e)
+C1PPanel.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
 {
-    if (this.cmp && this.cmp.setBinding(c, t, s, e)) return true;
-    if (this.cpu && this.cpu.setBinding(c, t, s, e)) return true;
-    if (this.kbd && this.kbd.setBinding(c, t, s, e)) return true;
-    if (DEBUGGER && this.dbg && this.dbg.setBinding(c, t, s, e)) return true;
-    return Component.prototype.setBinding.call(this, c, t, s, e);
+    if (this.cmp && this.cmp.setBinding(sHTMLClass, sHTMLType, sBinding, control)) return true;
+    if (this.cpu && this.cpu.setBinding(sHTMLClass, sHTMLType, sBinding, control)) return true;
+    if (this.kbd && this.kbd.setBinding(sHTMLClass, sHTMLType, sBinding, control)) return true;
+    if (DEBUGGER && this.dbg && this.dbg.setBinding(sHTMLClass, sHTMLType, sBinding, control)) return true;
+    return Component.prototype.setBinding.call(this, sHTMLClass, sHTMLType, sBinding, control);
 };
 
 /**

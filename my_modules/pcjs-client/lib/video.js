@@ -2478,11 +2478,11 @@ Video.prototype.onLoadSetFonts = function(sFontFile, sFontData, nErrorCode)
         var abFontData = eval("(" + sFontData + ")");
 
         if (!abFontData.length) {
-            this.error("Empty font ROM image: " + sFontFile);
+            Component.error("Empty font ROM image: " + sFontFile);
             return;
         }
         else if (abFontData.length == 1) {
-            this.error(abFontData[0]);
+            Component.error(abFontData[0]);
             return;
         }
         /*
