@@ -755,10 +755,13 @@ CPU.prototype.setSpeed = function(nMultiplier, fOnClick)
          */
         if (this.mhz/this.mhzTarget < 0.8) nMultiplier = 1;
         this.nCyclesMultiplier = nMultiplier;
-        this.mhzTarget = this.mhzDefault * this.nCyclesMultiplier;
-        var sSpeed = this.getSpeedTarget();
-        if (this.bindings["setSpeed"]) this.bindings["setSpeed"].innerHTML = sSpeed;
-        this.println("target speed: " + sSpeed);
+        var mhz = this.mhzDefault * this.nCyclesMultiplier;
+        if (this.mhzTarget != mhz) {
+            this.mhzTarget = mhz;
+            var sSpeed = this.getSpeedTarget();
+            if (this.bindings["setSpeed"]) this.bindings["setSpeed"].innerHTML = sSpeed;
+            this.println("target speed: " + sSpeed);
+        }
         if (fOnClick) this.setFocus();
     }
     this.addCycles(this.nRunCycles);

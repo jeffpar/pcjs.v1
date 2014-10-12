@@ -99,14 +99,19 @@ var FASTDISABLE = false;
 var FATARRAYS = false;
 
 /**
- * TYPEDARRAYS enables use of typed arrays for Memory blocks. This used to be a compile-time * option, but since I've
+ * @define {boolean}
+ * 
+ * TYPEDARRAYS enables use of typed arrays for Memory blocks. This used to be a compile-time-only option, but since I've
  * added memory access functions for typed arrays (see Memory.afnTypedArray), I can turn the support on dynamically now.
  * Originally, I didn't see much of a speed increase over the original (non-typed) implementation, but that will probably
  * change over time.
  *
  * See the Memory component for details.
+ * 
+ * UPDATE (Oct 2014): Time has passed, and TypedArray support is still measurably slower than the default Memory implementation,
+ * so it's turned off by default for now.
  */
-var TYPEDARRAYS = (typeof ArrayBuffer !== 'undefined');
+var TYPEDARRAYS = false; // (typeof ArrayBuffer !== 'undefined');
 
 if (typeof module !== 'undefined') {
     global.PCJSCLASS = PCJSCLASS;
