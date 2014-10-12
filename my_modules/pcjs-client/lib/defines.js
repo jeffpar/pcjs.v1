@@ -106,7 +106,7 @@ var FATARRAYS = false;
  *
  * See the Memory component for details.
  */
-var TYPEDARRAYS = (typeof window.ArrayBuffer !== 'undefined');
+var TYPEDARRAYS = (typeof ArrayBuffer !== 'undefined');
 
 if (typeof module !== 'undefined') {
     global.PCJSCLASS = PCJSCLASS;

@@ -133,16 +133,16 @@ function Memory(addr, size, fReadOnly, controller) {
      * know how to deal with this simple 1-1 mapping of addresses to bytes and words.
      */
     if (TYPEDARRAYS) {
-        this.buffer = new window.ArrayBuffer(size);
+        this.buffer = new ArrayBuffer(size);
         /**
          * @type {DataView}
          */
-        this.dv = new window.DataView(this.buffer, 0, size);
+        this.dv = new DataView(this.buffer, 0, size);
         /*
          * We could also use dv.getUint8() and dv.setUint8(), but using ab[] to get/set bytes
          * in this.buffer is more convenient and presents no "endianness" issues.
          */
-        this.ab = new window.Uint8Array(this.buffer, 0, size);
+        this.ab = new Uint8Array(this.buffer, 0, size);
         this.setAccess(Memory.afnTypedArray);
     } else {
         if (FATARRAYS) {

@@ -989,10 +989,10 @@ HTMLOut.prototype.getDirList = function(sToken, sIndent, aParms)
              * Why does this work? The ASCII value of '0' is 48, whereas the ASCII value of '/' is 47,
              * so there are no intervening characters that could sort differently.
              */
-            var re = /^([0-9]?[0-9])kb$/i;
+            var re = /^([0-9]+)(kb|mb)$/i;
             for (var i = 0; i < asFiles.length; i++) {
                 var match = re.exec(asFiles[i]);
-                if (match) asFiles[i] = "//".substr(0, 3 - match[1].length) + asFiles[i];
+                if (match) asFiles[i] = "///".substr(0, 4 - match[1].length) + asFiles[i];
             }
             asFiles.sort();
             

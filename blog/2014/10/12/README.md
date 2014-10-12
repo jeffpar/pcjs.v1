@@ -3,12 +3,12 @@ PCjs Released on GitHub
 I've decided the time has come to make the [PCjs Project](https://github.com/jeffpar/pcjs) an open source project on
 [GitHub](http://github.com/).
 
-This doesn't mean I'm done with PCjs -- not by a long shot.  But I promised to release it on GitHub by the end of
+This doesn't mean PCjs is done -- not by a long shot.  But I promised to release it on GitHub by the end of
 the year, which is fast approaching, and I didn't really want to do this in December.
 
 I feel I've made pretty good progress on my goals for the year -- primarily EGA and PC AT support.  PC AT machines
 can boot and run in real-mode now, but there's still a lot of protected-mode work to do.  The big remaining goal for
-the year is to boot OS/2 1.0.
+this year is to boot OS/2 1.0.
 
 There are also a lot of rough edges left to polish.  Holes in EGA emulation remain to be filled (support for dynamically
 loaded fonts is one of the bigger ones).  And the PC AT Keyboard, along with the 8042 and Hard Disk controllers, are all
