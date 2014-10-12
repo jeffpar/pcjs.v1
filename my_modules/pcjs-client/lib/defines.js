@@ -100,7 +100,7 @@ var FATARRAYS = false;
 
 /**
  * TYPEDARRAYS enables use of typed arrays for Memory blocks. This used to be a compile-time * option, but since I've
- * added memory access functions for typed arrays (see Memory.afnTArray), I can turn the support on dynamically now.
+ * added memory access functions for typed arrays (see Memory.afnTypedArray), I can turn the support on dynamically now.
  * Originally, I didn't see much of a speed increase over the original (non-typed) implementation, but that will probably
  * change over time.
  *

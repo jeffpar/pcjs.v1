@@ -281,7 +281,11 @@ Component.assert = function(f, s)
 /**
  * Component.println(s, type, id)
  * 
- * For non-diagnostic output, which some components override in order to make their output visible in their own way.
+ * For non-diagnostic messages, which components may override to control the destination/appearance of their output.
+ * 
+ * Components that inherit from this class should use the instance method, this.println(), rather than Component.println(),
+ * because if a Control Panel is loaded, it will override only the instance method, not the class method (overriding the class
+ * method would improperly affect any other machines loaded on the same page).
  *
  * @param {string} [s] is the message text
  * @param {string} [type] is the message type
@@ -297,9 +301,7 @@ Component.println = function(s, type, id)
 /**
  * Component.notice(s, fPrintOnly, id)
  * 
- * notice() is like println() but implies a need for user notification, which means calling log() isn't good enough,
- * so we alert() as well; however, if Component.println() is overridden, Component.notice will be replaced with the same
- * override, on the assumption that the override is taking care of all user notifications.
+ * notice() is like println() but implies a need for user notification, so we alert() as well.
  *
  * @param {string} s is the message text
  * @param {boolean} [fPrintOnly]
@@ -694,9 +696,12 @@ Component.prototype = {
     },
     /**
      * println(s, type)
-     * 
-     * For non-diagnostic output, which some components override in order to make their output visible in their own way.
      *
+     * For non-diagnostic messages, which components may override to control the destination/appearance of their output.
+     *
+     * Components using this.println() should wait until after their constructor has run to display any messages, because
+     * if a Control Panel has been loaded, its override will not take effect until its own constructor has run.
+     * 
      * @this {Component}
      * @param {string} [s] is the message text
      * @param {string} [type] is the message type
@@ -719,9 +724,9 @@ Component.prototype = {
     /**
      * notice(s, fPrintOnly)
      * 
-     * notice() is like println() but implies a need for user notification, which means calling log() isn't good enough,
-     * so we alert() as well; however, if Component.println() is overridden, Component.notice will be replaced with the
-     * same override, on the assumption that the override is taking care of alerting the user.
+     * notice() is like println() but implies a need for user notification, so we alert() as well; however, if this.println()
+     * is overridden, this.notice will be replaced with a similar override, on the assumption that the override is taking care
+     * of alerting the user.
      *
      * @this {Component}
      * @param {string} s is the message text

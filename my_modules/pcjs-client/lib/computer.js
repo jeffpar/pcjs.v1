@@ -147,7 +147,6 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
         return;
     }
     this.dbg = Component.getComponentByType("Debugger", this.id);
-    this.panel = Component.getComponentByType("Panel", this.id);
 
     /*
      * Initialize the Bus component
@@ -155,25 +154,33 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
     this.bus = new Bus({'id': this.idMachine + '.bus', 'buswidth': this.nBusWidth}, this.cpu, this.dbg);
 
     /*
-     * Iterate through all the other components and call their initBus() handler, if any
+     * Iterate through all the components and connect them to the Control Panel, if any 
      */
+    var iComponent, component;
     var aComponents = Component.getComponents(this.id);
-    for (var iComponent = 0; iComponent < aComponents.length; iComponent++) {
-        var component = aComponents[iComponent];
-        /*
-         * I can think of many "cleaner" ways for the Control Panel component to pass its
-         * notice(), println(), etc, overrides on to all the other components, but it's just
-         * too darn convenient to slam those overrides into the components directly.
-         *
-         * Adding more initBus() parameters was another option, but that function is already
-         * looking a bit unwieldy, and Control Panel functionality is a little far afield
-         * from Bus initialization.
-         */
-        if (this.panel && this.panel.controlPrint) {
+    this.panel = Component.getComponentByType("Panel", this.id);
+    
+    if (this.panel && this.panel.controlPrint) {
+        for (iComponent = 0; iComponent < aComponents.length; iComponent++) {
+            component = aComponents[iComponent];
+            /*
+             * I can think of many "cleaner" ways for the Control Panel component to pass its
+             * notice(), println(), etc, overrides on to all the other components, but it's just
+             * too darn convenient to slam those overrides into the components directly.
+             */
             component.notice = this.panel.notice;
             component.println = this.panel.println;
             component.controlPrint = this.panel.controlPrint;
         }
+    }
+
+    this.println("PREFETCH: " + PREFETCH + ", TYPEDARRAYS: " + TYPEDARRAYS);
+
+    /*
+     * Iterate through all the components again and call their initBus() handler, if any
+     */
+    for (iComponent = 0; iComponent < aComponents.length; iComponent++) {
+        component = aComponents[iComponent];
         if (component.initBus) component.initBus(this, this.bus, this.cpu, this.dbg);
     }
 
@@ -188,7 +195,7 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
     }
 
     /*
-     * 'state' is a new property that allows a state file to be specified independent of the 'resume' feature;
+     * The Computer 'state' property allows a state file to be specified independent of the 'resume' feature;
      * previously, you could only use 'resume' to load a state file -- which we still support, but loading a state
      * file that way prevents the machine's state from being saved, since we always resume from the 'resume' file.
      * 

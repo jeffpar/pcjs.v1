@@ -55,8 +55,12 @@ if (typeof module !== 'undefined') {
 }
 /**
  * @class DataView
+ * @property {function(number,boolean):number} getUint8
+ * @property {function(number,number,boolean)} setUint8
  * @property {function(number,boolean):number} getUint16
  * @property {function(number,number,boolean)} setUint16
+ * @property {function(number,boolean):number} getInt32
+ * @property {function(number,number,boolean)} setInt32
  */
 
 /**
@@ -130,13 +134,16 @@ function Memory(addr, size, fReadOnly, controller) {
      */
     if (TYPEDARRAYS) {
         this.buffer = new window.ArrayBuffer(size);
-        this.ab = new window.Uint8Array(this.buffer, 0, size);
         /**
          * @type {DataView}
          */
         this.dv = new window.DataView(this.buffer, 0, size);
-        this.adw = new window.Int32Array(this.buffer, 0, size >> 2);
-        this.setAccess(Memory.afnTArray);
+        /*
+         * We could also use dv.getUint8() and dv.setUint8(), but using ab[] to get/set bytes
+         * in this.buffer is more convenient and presents no "endianness" issues.
+         */
+        this.ab = new window.Uint8Array(this.buffer, 0, size);
+        this.setAccess(Memory.afnTypedArray);
     } else {
         if (FATARRAYS) {
             this.ab = new Array(size);
@@ -172,47 +179,47 @@ Memory.prototype = {
     writeNone: function(off, v) {
     },
     /**
-     * readByteTArray(off)
+     * readByteTypedArray(off)
      * 
      * @this {Memory}
      * @param {number} off
      * @return {number}
      */
-    readByteTArray: function(off) {
+    readByteTypedArray: function(off) {
         Component.assert(off >= 0 && off < this.cb);
         return this.ab[off];
     },
     /**
-     * readWordTArray(off)
+     * readWordTypedArray(off)
      * 
      * @this {Memory}
      * @param {number} off
      * @return {number}
      */
-    readWordTArray: function(off) {
+    readWordTypedArray: function(off) {
         Component.assert(off >= 0 && off < this.cb - 1);
         return this.dv.getUint16(off, true);
     },
     /**
-     * writeByteTArray(off, b)
+     * writeByteTypedArray(off, b)
      * 
      * @this {Memory}
      * @param {number} off
      * @param {number} b
      */
-    writeByteTArray: function(off, b) {
+    writeByteTypedArray: function(off, b) {
         Component.assert(off >= 0 && off < this.cb && (b & 0xff) == b);
         this.ab[off] = b;
         this.fDirty = true;
     },
     /**
-     * writeWordTArray(off, w)
+     * writeWordTypedArray(off, w)
      * 
      * @this {Memory}
      * @param {number} off
      * @param {number} w
      */
-    writeWordTArray: function(off, w) {
+    writeWordTypedArray: function(off, w) {
         Component.assert(off >= 0 && off < this.cb - 1 && (w & 0xffff) == w);
         this.dv.setUint16(off, w, true);
         this.fDirty = true;
@@ -229,7 +236,7 @@ Memory.prototype = {
         if (FATARRAYS) {
             return this.ab[off];
         }
-        return ((this.adw[off >> 2] >> ((off & 0x3) << 3)) & 0xff);
+        return ((this.adw[off >> 2] >>> ((off & 0x3) << 3)) & 0xff);
     },
     /**
      * readWordMemory(off)
@@ -246,7 +253,7 @@ Memory.prototype = {
         var w;
         var idw = off >> 2;
         var nShift = (off & 0x3) << 3;
-        var dw = (this.adw[idw] >> nShift);
+        var dw = (this.adw[idw] >>> nShift);
         if (nShift < 24) {
             w = dw & 0xffff;
         } else {
@@ -317,9 +324,6 @@ Memory.prototype = {
      */
     readWordVerify: function(off) {
         if (DEBUGGER) {
-            /*
-             * Shut up, JSHint -- I don't need to make the second call if the first returned true.
-             */
             this.dbg.checkMemoryRead(this.addr + off) || this.dbg.checkMemoryRead(this.addr + off + 1);     // jshint ignore:line
         }
         return this.readWordDirect(off);
@@ -344,9 +348,6 @@ Memory.prototype = {
      */
     writeWordVerify: function(off, w) {
         if (DEBUGGER) {
-            /*
-             * Shut up, JSHint -- I don't need to make the second call if the first returned true.
-             */
             this.dbg.checkMemoryWrite(this.addr + off) || this.dbg.checkMemoryWrite(this.addr + off + 1);   // jshint ignore:line
         }
         this.writeWordDirect(off, w);
@@ -378,19 +379,18 @@ Memory.prototype = {
         }
         else if (TYPEDARRAYS) {
             /*
-             * While it might seem that we could get away with returning "this.adw", the fact that
-             * it's a Int32Array rather than a normal Array causes problems with the way JSON.stringify()
-             * and JSON.parse() interpret these buffers in State.store() and State.parse(): basically, the
-             * buffers are deserialized as Objects rather than Arrays, so they lack a "length" property,
-             * and then we get confused.
+             * It might be tempting to just return a copy of Int32Array(this.buffer, 0, this.cb >> 2),
+             * but we can't be sure of the "endianness" of an Int32Array -- which would be OK if the array
+             * was always saved/restored on the same machine, but there's no guarantee of that, either.
+             * So we use getInt32() and require little-endian values.
              * 
-             * Rather than trying to solve that problem on the deserialization side, we solve it here by
-             * ensuring the caller always gets an Array (which also ensures consistency in our serialization
-             * format).
+             * Moreover, an Int32Array isn't treated by JSON.stringify() and JSON.parse() exactly like
+             * a normal array; it's serialized as an Object rather than an Array, so it lacks a "length"
+             * property and causes problems for State.store() and State.parse().
              */
             adw = new Array(this.cb >> 2);
             for (i = 0; i < adw.length; i++) {
-                adw[i] = this.adw[i];
+                adw[i] = this.dv.getInt32(i << 2, true);
             }
         }
         else {
@@ -426,8 +426,8 @@ Memory.prototype = {
                     off += 4;
                 }
             } else if (TYPEDARRAYS) {
-                for (i = 0; i < this.adw.length; i++) {
-                    this.adw[i] = adw[i];
+                for (i = 0; i < adw.length; i++) {
+                    this.dv.setInt32(i << 2, adw[i], true);
                 }
             } else {
                 this.adw = adw;
@@ -570,7 +570,7 @@ Memory.afnMemory = [Memory.prototype.readByteMemory, Memory.prototype.readWordMe
 Memory.afnVerify = [Memory.prototype.readByteVerify, Memory.prototype.readWordVerify, Memory.prototype.writeByteVerify, Memory.prototype.writeWordVerify];
 
 if (TYPEDARRAYS) {
-    Memory.afnTArray = [Memory.prototype.readByteTArray, Memory.prototype.readWordTArray, Memory.prototype.writeByteTArray, Memory.prototype.writeWordTArray];
+    Memory.afnTypedArray = [Memory.prototype.readByteTypedArray, Memory.prototype.readWordTypedArray, Memory.prototype.writeByteTypedArray, Memory.prototype.writeWordTypedArray];
 }
 
 if (typeof APP_PCJS !== 'undefined') APP_PCJS.Memory = Memory;
