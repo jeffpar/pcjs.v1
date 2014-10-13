@@ -5,6 +5,7 @@ Here you'll find sample Machine Configurations for all the IBM PC models that PC
 
 * [Model 5150](/configs/pc/machines/5150/)
 * [Model 5160](/configs/pc/machines/5160/)
+* [Model 5170](/configs/pc/machines/5170/)
 
 Model 5150 Machine Configurations include:
 
@@ -30,8 +31,9 @@ Model 5160 Machine Configurations include:
 
 Model 5170 Machine Configurations include:
 
-* [IBM PC AT, EGA, 640K, Debugger](/configs/pc/machines/5170/ega/640kb/debugger/)
-* [IBM PC AT, EGA, 1152Kb, 20Mb Drive, Debugger](/configs/pc/machines/5170/ega/1152kb/debugger/)
+* [IBM PC AT (6Mhz), EGA, 640K, Debugger](/configs/pc/machines/5170/ega/640kb/rev1/)
+* [IBM PC AT (6Mhz), EGA, 1152Kb, 20Mb Drive, Debugger](/configs/pc/machines/5170/ega/1152kb/rev1/)
+* [IBM PC AT (8Mhz), EGA, 1152Kb, 20Mb Drive, Debugger](/configs/pc/machines/5170/ega/1152kb/rev3/)
 
 These Machine Configurations also include a "Soft Keyboard":
 

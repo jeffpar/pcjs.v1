@@ -1043,7 +1043,7 @@ ChipSet.prototype.reset = function()
         this.abDMAPageSpare = new Array(7);
         
         this.bCMOSAddr = 0;         // NMI is enabled, since the ChipSet.CMOS.ADDR.NMI_DISABLE bit is not set in bCMOSAddr
-        
+
         /*
          * Now that we call reset() from the ChipSet constructor, enabling other components can to update
          * their CMOS information, we must not allow a reset() from powerUp() to toss that information, so
@@ -1051,8 +1051,9 @@ ChipSet.prototype.reset = function()
          */
         if (!this.abCMOSData) {
             this.abCMOSData = new Array(ChipSet.CMOS.ADDR.TOTAL);
-            this.initRTCDate(this.sRTCDate);
         }
+
+        this.initRTCDate(this.sRTCDate);
         
         /*
          * initCMOSData() will initialize a variety of "legacy" CMOS bytes, but it will NOT overwrite any memory

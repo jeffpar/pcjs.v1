@@ -579,8 +579,20 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
         } else if (disk.fDir === undefined) {
             sParm = "img";
         }
-        var sXMLDisk = '\t<disk id="' + sIDDisk + '"' + (sParm? ' ' + sParm + '="' + sDiskPath + '"' : '') + ' href="' + sOutputFile + '"' + (md5Disk? ' md5="' + md5Disk + '"' : '') + (md5JSON? ' md5json="' + md5JSON + '"' : '') + '>\n';
-        sName = null;
+        
+        /*
+         * Build a "size" attribute with the total disk size in bytes and a "chs" attribute that describes the disk geometry; eg:
+         * 
+         *      size="368640" chs="40:2:9"
+         */
+        var size = 0, sCHS = "";
+        if (disk.dataDisk) {
+            sCHS = disk.dataDisk.length + ':' + disk.dataDisk[0].length + ':' + disk.dataDisk[0][0].length;
+            size = disk.dataDisk.length * disk.dataDisk[0].length * disk.dataDisk[0][0].length * disk.dataDisk[0][0][0].length;
+        }
+        var sXMLDisk = '\t<disk id="' + sIDDisk + '"' + (size? ' size="' + size + '"' : '') + (sCHS? ' chs="' + sCHS + '"' : '') + (sParm? ' ' + sParm + '="' + sDiskPath + '"' : '') + ' href="' + sOutputFile + '"' + (md5Disk? ' md5="' + md5Disk + '"' : '') + (md5JSON? ' md5json="' + md5JSON + '"' : '') + '>\n';
+        
+        sName = "";
         if (sMatchDisk && (match = sMatchDisk.match(/<name>([^>]*)<\/name>/))) {
             sName = match[1];
         }
@@ -2103,7 +2115,7 @@ DiskDump.prototype.convertToJSON = function()
              * size.  I also check the first byte for an Intel JMP opcode (0xEB is JMP with a 1-byte displacement, and
              * 0xE9 is JMP with a 2-byte displacement).  What else?
              */
-            if ((bByte0 == X86.OPCODE.JMP16 || bByte0 == X86.OPCODE.JMP8) && cbSectorBPB == cbSector) {
+            if ((bByte0 == X86.OPCODE.JMP || bByte0 == X86.OPCODE.JMPS) && cbSectorBPB == cbSector) {
                 var nHeadsBPB = this.bufDisk.readUInt16LE(offBootSector + DiskDump.BPB.HEAD_TOTAL);
                 var nSectorsTotalBPB = this.bufDisk.readUInt16LE(offBootSector + DiskDump.BPB.SECTOR_TOTAL);
                 var nSectorsPerTrackBPB = this.bufDisk.readUInt16LE(offBootSector + DiskDump.BPB.TRACK_SECS);
@@ -2581,7 +2593,7 @@ DiskDump.prototype.convertToIMG = function()
                  */
                 var bByte0 = buf.readUInt8(DiskDump.BPB.JMP_OPCODE);
                 var cbSectorBPB = buf.readUInt16LE(DiskDump.BPB.SECTOR_BYTES);
-                if ((bByte0 == X86.OPCODE.JMP16 || bByte0 == X86.OPCODE.JMP8) && cbSectorBPB == 512) {
+                if ((bByte0 == X86.OPCODE.JMP || bByte0 == X86.OPCODE.JMPS) && cbSectorBPB == 512) {
                     /*
                      * Overwrite the OEM string with our own, so that people know how the image originated
                      */

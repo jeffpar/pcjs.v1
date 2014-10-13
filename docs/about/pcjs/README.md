@@ -1,7 +1,7 @@
 About PCjs
 ---
 
-PCjs is a IBM PC and PC XT simulator written entirely in JavaScript.  It's designed to load and run extremely
+PCjs is a IBM PC/XT/AT simulator written entirely in JavaScript.  It's designed to load and run extremely
 fast, it works well in all modern web browsers (both desktop and mobile), and it's easy to customize.  It is part of
 the [PCjs Project](https://github.com/jeffpar/pcjs), an open source project on [GitHub](http://github.com/).
 
@@ -11,7 +11,7 @@ featuring multiple PCs running side-by-side.
 
 ### Features
 
-+ Build your own IBM PC and IBM PC XT simulations using simple XML machine configuration files.
++ Build your own IBM PC, PC XT, and PC AT simulations using simple XML machine configuration files.
 You decide how much RAM you want, how many disk drives, which disk images to include (and which should be
 pre-loaded), what kind of video adapter (MDA, CGA or EGA), serial ports, mouse, and more. See the
 [Documentation](/docs/pcjs/) for details.
@@ -37,13 +37,11 @@ Chrome or Firefox for other platforms.
 
 ### Future
 
-More hardware support is targeted for version 1.15, including:
+The following features are targeted for version 1.16:
 
-+ Complete EGA emulation
-+ 80286 CPU emulation
-+ PC AT hardware emulation
-
-Limited EGA emulation is currently available as of version 1.14.
++ Improved EGA compatibility
++ 80286 protected-mode support
++ Improvements to PC AT hardware emulation
 
 ### History
 

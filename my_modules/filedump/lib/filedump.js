@@ -81,6 +81,10 @@ FileDump.sCopyright = "© 2012-2014 by Jeff Parsons (@jeffpar)";
 FileDump.sNotice = FileDump.sAPIURL + " " + FileDump.sCopyright;
 FileDump.sUsage = "Usage: " + FileDump.sAPIURL + "?" + DumpAPI.QUERY.FILE + "=({path}|{URL})&" + DumpAPI.QUERY.FORMAT + "=(json|data|hex|bytes|rom)";
 
+FileDump.asBadExts = [
+    "js", "log"
+];
+
 /*
  * Class methods
  */
@@ -134,8 +138,8 @@ FileDump.CLI = function()
 
     var argv = args.argv;
     var sFile = argv['file'];
-    if (!sFile) {
-        FileDump.logError(new Error("no filename specified"));
+    if (!sFile || FileDump.asBadExts.indexOf(str.getExtension(sFile)) >= 0) {
+        FileDump.logError(new Error("bad or missing input filename"));
         return;
     }
 

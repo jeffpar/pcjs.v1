@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.15.4/machine.xsl"?>
+<machine id="ibm5170" class="pc" border="1" pos="center" style="background-color:#FAEBD7">
+	<name>IBM PC AT (Rev 3), 128Kb EGA, 1152Kb RAM, 20Mb Hard Disk</name>
+	<computer id="at-ega-1152k" name="IBM PC AT" buswidth="24"/>
+	<cpu id="cpu286" model="80286" cycles="8000000" comment="Rev 3 system configured for 8Mhz"/>
+	<ram id="ramLow" addr="0x00000" test="true" size="0xa0000" comment="ROM BIOS memory test has been disabled"/>
+	<ram id="ramExt" addr="0x100000" size="0x80000" comment=""/>
+	<rom id="romEGA" addr="0xc0000" size="0x4000" file="/devices/pc/video/ibm-ega.json" notify="videoEGA"/>
+	<rom id="romBIOS" addr="0xf0000" size="0x10000" alias="0xff0000" file="/devices/pc/bios/5170/1985-11-15.json"/>
+	<video id="videoEGA" model="ega" memory="0x20000" screenwidth="640" screenheight="350" pos="center" padding="8px">
+		<name>Enhanced Color Display</name>
+	</video>
+	<keyboard ref="/configs/pc/keyboards/minimal-functions.xml"/>
+	<debugger id="debugger" messages="" commands=""/>
+	<panel ref="/configs/pc/panels/wide.xml"/>
+	<fdc ref="/configs/pc/disks/library.xml" automount='{A: {name: "PC-DOS 3.00 (Disk 1)", path: "/disks/pc/dos/ibm/3.00/PCDOS300-DISK1.json"}, B: {name: "PC-DOS 3.00 (Disk 2)", path: "/disks/pc/dos/ibm/3.00/PCDOS300-DISK2.json"}}'/>
+	<hdc id="hdcAT" type="at" drives='[{name:"20Mb Hard Disk",type:2}]'/>
+	<chipset id="chipset" model="5170" rtcdate="2014-10-01T08:00:00-0700"/>
+	<serial id="com1" adapter="1" binding="print"/>
+	<serial id="com2" adapter="2"/>
+	<mouse serial="com2"/>
+</machine>

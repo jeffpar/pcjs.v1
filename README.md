@@ -1,14 +1,14 @@
-The Original IBM PC in Your Browser
+PCjs: The Original IBM PC in Your Browser
 ---
 
 Welcome to [pcjs.org](http://www.pcjs.org/) and [PCjs](/docs/about/pcjs/), the first IBM PC simulation to run in your
 web browser without any plugins.  It was added to the [JavaScript Machines](/docs/about/) project in Fall 2012, and is
-now part of the [PCjs Project](https://github.com/jeffpar/pcjs) on [GitHub](https://github.com/).  The project now includes:
+now part of the [PCjs Project](https://github.com/jeffpar/pcjs) on [GitHub](https://github.com/).  The project includes:
 
 * [PCjs](/docs/about/pcjs/), a simulation of the original IBM PC (circa 1981)
 * [C1Pjs](/docs/c1pjs/), a simulation of the OSI Challenger 1P (circa 1978)
 
-All our simulations are written entirely in JavaScript.  No Flash, Java or other plugins are required.
+All the simulations are written entirely in JavaScript.  No Flash, Java or other plugins are required.
 Supported browsers include recent versions of Internet Explorer (v9.0 or later), Safari, Chrome, Firefox and various
 mobile browsers.
 
@@ -326,9 +326,12 @@ All published portions are free for redistribution and/or modification under the
 [GNU General Public License](/LICENSE) as published by the Free Software Foundation, either version 3 of the License,
 or (at your option) any later version.
 
-You are required to include the appropriate copyright notice (e.g., `PCjs v1.15.4 © 2012-2014 by @jeffpar`)
-in every source code file of every copy or modified version of this work, and to display that copyright notice
-on every screen that loads or runs any version of this software.
+You are required to include a current copyright notice, with a link to [http://pcjs.org](), such as:
+
+> [PCjs](http://pcjs.org) © 2012-2014 by [@jeffpar](mailto:Jeff@pcjs.org)
+
+in every source code file of every copy or modified version of this work, and to display that notice on every screen
+that loads or runs any version of this software.
 
 See [LICENSE](/LICENSE) for details.
 
@@ -337,5 +340,5 @@ More Information
 Learn more about the [JavaScript Machines](/docs/about/) Project and [PCjs](/docs/about/pcjs/).  To
 create your own PCjs machines, see the [Documentation](/docs/pcjs/) for details.
 
-If you have questions or run into any problems, you're welcome to [tweet](http://twitter.com/jeffpar) or
+If you have questions or run into any problems, feel free to [tweet](http://twitter.com/jeffpar) or
 [email](mailto:Jeff@pcjs.org).

@@ -272,7 +272,8 @@ Component.assert = function(f, s)
             /*
              * TODO: An accompanying source file/line number/function call would be nice, if there was a browser-independent way....
              */
-            Component.log(s || "assertion failure");
+            if (!s) s = "assertion failure";
+            Component.log(s);
             throw new Error(s);
         }
     }
