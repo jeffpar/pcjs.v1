@@ -1198,7 +1198,7 @@ var X86OpXX = {
         /*
          * NOTE: 5 + 4n is the cycle time for the 80286; the 80186/80188 has different values: 14 cycles for
          * an unrepeated INS, and 8 + 8n for a repeated INS.  However, accurate cycle times for the 80186/80188 is
-         * low priority. TODO: Fix this someday.
+         * low priority.
          */
         var nCycles = 5;
         
@@ -1244,7 +1244,7 @@ var X86OpXX = {
         /*
          * NOTE: 5 + 4n is the cycle time for the 80286; the 80186/80188 has different values: 14 cycles for
          * an unrepeated INS, and 8 + 8n for a repeated INS.  However, accurate cycle times for the 80186/80188 is
-         * low priority. TODO: Fix this someday.
+         * low priority.
          */
         var nCycles = 5;
 
@@ -1288,7 +1288,7 @@ var X86OpXX = {
         /*
          * NOTE: 5 + 4n is the cycle time for the 80286; the 80186/80188 has different values: 14 cycles for
          * an unrepeated INS, and 8 + 8n for a repeated INS.  However, accurate cycle times for the 80186/80188 is
-         * low priority. TODO: Fix this someday.
+         * low priority.
          */
         var nCycles = 5;
 
@@ -1331,7 +1331,7 @@ var X86OpXX = {
         /*
          * NOTE: 5 + 4n is the cycle time for the 80286; the 80186/80188 has different values: 14 cycles for
          * an unrepeated INS, and 8 + 8n for a repeated INS.  However, accurate cycle times for the 80186/80188 is
-         * low priority. TODO: Fix this someday.
+         * low priority.
          */
         var nCycles = 5;
 
@@ -2753,7 +2753,7 @@ var X86OpXX = {
         /*
          * NOTE: 11 is the minimum cycle time for the 80286; the 80186/80188 has different cycle times: 15, 25 and
          * 22 + 16 * (bLevel - 1) for bLevel 0, 1 and > 1, respectively.  However, accurate cycle times for the 80186/80188
-         * is low priority. TODO: Fix this someday.
+         * is low priority.
          */
         this.nStepCycles -= 11;
         this.pushWord(this.regBP);
@@ -2781,7 +2781,7 @@ var X86OpXX = {
         this.regBP = this.popWord();
         /*
          * NOTE: 5 is the cycle time for the 80286; the 80186/80188 has a cycle time of 8.  However, accurate cycle
-         * counts for the 80186/80188 is low priority. TODO: Fix this someday.
+         * counts for the 80186/80188 is low priority.
          */
         this.nStepCycles -= 5;
     },

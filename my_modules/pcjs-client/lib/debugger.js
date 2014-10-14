@@ -2781,6 +2781,7 @@ if (DEBUGGER) {
             if (iColon < 0) {
                 if (seg != null) {
                     off = this.parseValue(sAddr);
+                    addr = null;
                 } else {
                     addr = this.parseValue(sAddr);
                 }

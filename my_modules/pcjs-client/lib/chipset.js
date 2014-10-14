@@ -53,7 +53,7 @@ if (typeof module !== 'undefined') {
  *      scaleTimers:    true to divide timer cycle counts by the CPU's cycle multiplier (default is false)
  *      fdrives:        0-4 floppy drives (default is 2 if no sw1 value provided)
  *      monitor:        none|tv|color|mono (default is mono if no sw1 value provided) 
- *      rtcDate:        optional RTC date to be used on resets; use the ISO 8601 format; eg: "2011-10-10T14:48:00"
+ *      rtcDate:        optional RTC date to be used on resets; use the ISO 8601 format; eg: "2014-10-01T08:00:00-0700"
  *
  * The conventions used for the sw1 and sw2 strings are that the left-most character represents DIP switch [1],
  * the right-most character represents DIP switch [8], and "1" means the DIP switch is ON and "0" means it is OFF.
@@ -78,7 +78,7 @@ if (typeof module !== 'undefined') {
  *
  * For example, sw1="01110011" indicates that all SW1 DIP switches are ON, except for SW1[1], SW1[5] and SW1[6],
  * which are OFF. Internally, the order of these bits must reversed (to 11001110) and then inverted (to 00110001)
- * to yield the value that the 8255A PPI returns. Reading the final value right-to-left, 00110001 indicates an
+ * to yield the value that the 8255A PPI returns.  Reading the final value right-to-left, 00110001 indicates an
  * IPL floppy drive, 1X of RAM (where X is 16Kb on a MODEL_5150 and 64Kb on a MODEL_5160), MDA, and 1 floppy drive.
  *
  * WARNING: It is possible to set SW1 to indicate more memory than the RAM component has been configured to provide.
@@ -247,33 +247,41 @@ function ChipSet(parmsChipSet)
 Component.subclass(Component, ChipSet);
 
 /*
- *  Supported Models
+ * Supported Models
+ * 
+ * Unless otherwise noted, all BIOS references refer to the *original* BIOS released with each model
  */
-ChipSet.MODEL_5150 = 5150;
-ChipSet.MODEL_5160 = 5160;
-ChipSet.MODEL_5170 = 5170;
+ChipSet.MODEL_5150      = 5150;         // used in reference to the 1st 5150 BIOS, dated Apr 24, 1981
+ChipSet.MODEL_5160      = 5160;         // used in reference to the 1st 5160 BIOS, dated Nov 8, 1982
+ChipSet.MODEL_5170      = 5170;         // used in reference to the 1st 5170 BIOS, dated Jan 10, 1984
+/*
+ * The following are fake model numbers, used only to document issues/features of note in later BIOS revisions
+ */
+ChipSet.MODEL_5170_REV2 = 5170.2;       // used in reference to the 2nd 5170 BIOS, dated Jun 10, 1985
+ChipSet.MODEL_5170_REV3 = 5170.3;       // used in reference to the 3rd 5170 BIOS, dated Nov 15, 1985
 
 /*
  * Values returned by ChipSet.getSWVideoMonitor()
  */
-ChipSet.MONITOR = {};
-ChipSet.MONITOR.NONE            = 0;
-ChipSet.MONITOR.TV              = 1;    // Composite monitor (lower resolution; no support)
-ChipSet.MONITOR.COLOR           = 2;    // Color Display (5153)
-ChipSet.MONITOR.MONO            = 3;    // Monochrome Display (5151)
-ChipSet.MONITOR.EGACOLOR        = 4;    // Enhanced Color Display (5154) in High-Res Mode
-ChipSet.MONITOR.EGAEMULATION    = 5;    // Enhanced Color Display (5154) in Emulation Mode
+ChipSet.MONITOR = {
+    NONE:               0,
+    TV:                 1,  // Composite monitor (lower resolution; no support)
+    COLOR:              2,  // Color Display (5153)
+    MONO:               3,  // Monochrome Display (5151)
+    EGACOLOR:           4,  // Enhanced Color Display (5154) in High-Res Mode
+    EGAEMULATION:       6   // Enhanced Color Display (5154) in Emulation Mode
+};
 
 /*
- * Lookup table for converting ChipSet "monitor" parameter into the corresponding SW1 switch bits
+ * Lookup table for converting ChipSet "monitor" values into the corresponding SW1 switch bits
  * (they must be shifted left by ChipSet.PPI_SW.MONITOR.SHIFT before OR'ing them into sw1/sw1Init).
  */
 ChipSet.aMonitorSwitches = {
-    "none": 0x0,
-    "tv":   0x1,
-    "color":0x2,
-    "mono": 0x3,
-    "ega":  0x0
+    "none":             0x0,
+    "tv":               0x1,
+    "color":            0x2,
+    "mono":             0x3,
+    "ega":              0x0
 };
 
 /*
@@ -289,92 +297,100 @@ ChipSet.aMonitorSwitches = {
  *  For FDC DMA notes, refer to:        http://wiki.osdev.org/ISA_DMA
  *  For general DMA notes, refer to:    http://www.freebsd.org/doc/en/books/developers-handbook/dma.html
  */
-ChipSet.DMA0 = {};
-ChipSet.DMA0.INDEX = 0;
-ChipSet.DMA0.PORT_CH0_ADDR      = 0x00; // OUT: starting address        IN: current address
-ChipSet.DMA0.PORT_CH0_COUNT     = 0x01; // OUT: starting word count     IN: remaining word count
-ChipSet.DMA0.PORT_CH1_ADDR      = 0x02; // OUT: starting address        IN: current address
-ChipSet.DMA0.PORT_CH1_COUNT     = 0x03; // OUT: starting word count     IN: remaining word count
-ChipSet.DMA0.PORT_CH2_ADDR      = 0x04; // OUT: starting address        IN: current address
-ChipSet.DMA0.PORT_CH2_COUNT     = 0x05; // OUT: starting word count     IN: remaining word count
-ChipSet.DMA0.PORT_CH3_ADDR      = 0x06; // OUT: starting address        IN: current address
-ChipSet.DMA0.PORT_CH3_COUNT     = 0x07; // OUT: starting word count     IN: remaining word count
-ChipSet.DMA0.PORT_CMD_STATUS    = 0x08; // OUT: command register        IN: status register
-ChipSet.DMA0.PORT_REQUEST       = 0x09;
-ChipSet.DMA0.PORT_MASK          = 0x0A;
-ChipSet.DMA0.PORT_MODE          = 0x0B;
-ChipSet.DMA0.PORT_CLEAR_FF      = 0x0C;
-ChipSet.DMA0.PORT_MASTER_CLR    = 0x0D;
-ChipSet.DMA0.PORT_CLEAR_MASK    = 0x0E; // TODO: Provide handlers
-ChipSet.DMA0.PORT_ALL_MASK      = 0x0F; // TODO: Provide handlers
-ChipSet.DMA0.PORT_CH2_PAGE      = 0x81; // OUT: DMA channel 2 page register
-ChipSet.DMA0.PORT_CH3_PAGE      = 0x82; // OUT: DMA channel 3 page register
-ChipSet.DMA0.PORT_CH1_PAGE      = 0x83; // OUT: DMA channel 1 page register
-ChipSet.DMA0.PORT_CH0_PAGE      = 0x87; // OUT: DMA channel 0 page register (unusable; See "The Inside Out" book, p.246)
+ChipSet.DMA0 = {
+    INDEX:              0,
+    PORT: {
+        CH0_ADDR:       0x00,   // OUT: starting address        IN: current address
+        CH0_COUNT:      0x01,   // OUT: starting word count     IN: remaining word count
+        CH1_ADDR:       0x02,   // OUT: starting address        IN: current address
+        CH1_COUNT:      0x03,   // OUT: starting word count     IN: remaining word count
+        CH2_ADDR:       0x04,   // OUT: starting address        IN: current address
+        CH2_COUNT:      0x05,   // OUT: starting word count     IN: remaining word count
+        CH3_ADDR:       0x06,   // OUT: starting address        IN: current address
+        CH3_COUNT:      0x07,   // OUT: starting word count     IN: remaining word count
+        CMD_STATUS:     0x08,   // OUT: command register        IN: status register
+        REQUEST:        0x09,
+        MASK:           0x0A,
+        MODE:           0x0B,
+        CLEAR_FF:       0x0C,
+        MASTER_CLR:     0x0D,
+        CLEAR_MASK:     0x0E,   // TODO: Provide handlers
+        ALL_MASK:       0x0F,   // TODO: Provide handlers
+        CH2_PAGE:       0x81,   // OUT: DMA channel 2 page register
+        CH3_PAGE:       0x82,   // OUT: DMA channel 3 page register
+        CH1_PAGE:       0x83,   // OUT: DMA channel 1 page register
+        CH0_PAGE:       0x87    // OUT: DMA channel 0 page register (unusable; See "The Inside Out" book, p.246)
+    }
+};    
+ChipSet.DMA1 = {
+    INDEX:              1,
+    PORT: {
+        CH6_PAGE:       0x89,   // OUT: DMA channel 6 page register (MODEL_5170)
+        CH7_PAGE:       0x8A,   // OUT: DMA channel 7 page register (MODEL_5170)
+        CH5_PAGE:       0x8B,   // OUT: DMA channel 5 page register (MODEL_5170)
+        CH4_PAGE:       0x8F,   // OUT: DMA channel 4 page register (MODEL_5170; unusable; aka "refresh" page register?)
+        CH4_ADDR:       0xC0,   // OUT: starting address        IN: current address
+        CH4_COUNT:      0xC2,   // OUT: starting word count     IN: remaining word count
+        CH5_ADDR:       0xC4,   // OUT: starting address        IN: current address
+        CH5_COUNT:      0xC6,   // OUT: starting word count     IN: remaining word count
+        CH6_ADDR:       0xC8,   // OUT: starting address        IN: current address
+        CH6_COUNT:      0xCA,   // OUT: starting word count     IN: remaining word count
+        CH7_ADDR:       0xCC,   // OUT: starting address        IN: current address
+        CH7_COUNT:      0xCE,   // OUT: starting word count     IN: remaining word count
+        CMD_STATUS:     0xD0,   // OUT: command register        IN: status register
+        REQUEST:        0xD2,
+        MASK:           0xD4,
+        MODE:           0xD6,
+        CLEAR_FF:       0xD8,
+        MASTER_CLR:     0xDA,
+        CLEAR_MASK:     0xDC,   // TODO: Provide handlers
+        ALL_MASK:       0xDE    // TODO: Provide handlers
+    }
+};
 
-ChipSet.DMA1 = {};
-ChipSet.DMA1.INDEX = 1;
-ChipSet.DMA1.PORT_CH6_PAGE      = 0x89; // OUT: DMA channel 6 page register (MODEL_5170)
-ChipSet.DMA1.PORT_CH7_PAGE      = 0x8A; // OUT: DMA channel 7 page register (MODEL_5170)
-ChipSet.DMA1.PORT_CH5_PAGE      = 0x8B; // OUT: DMA channel 5 page register (MODEL_5170)
-ChipSet.DMA1.PORT_CH4_PAGE      = 0x8F; // OUT: DMA channel 4 page register (MODEL_5170; unusable; aka "refresh" page register?)
-ChipSet.DMA1.PORT_CH4_ADDR      = 0xC0; // OUT: starting address        IN: current address
-ChipSet.DMA1.PORT_CH4_COUNT     = 0xC2; // OUT: starting word count     IN: remaining word count
-ChipSet.DMA1.PORT_CH5_ADDR      = 0xC4; // OUT: starting address        IN: current address
-ChipSet.DMA1.PORT_CH5_COUNT     = 0xC6; // OUT: starting word count     IN: remaining word count
-ChipSet.DMA1.PORT_CH6_ADDR      = 0xC8; // OUT: starting address        IN: current address
-ChipSet.DMA1.PORT_CH6_COUNT     = 0xCA; // OUT: starting word count     IN: remaining word count
-ChipSet.DMA1.PORT_CH7_ADDR      = 0xCC; // OUT: starting address        IN: current address
-ChipSet.DMA1.PORT_CH7_COUNT     = 0xCE; // OUT: starting word count     IN: remaining word count
-ChipSet.DMA1.PORT_CMD_STATUS    = 0xD0; // OUT: command register        IN: status register
-ChipSet.DMA1.PORT_REQUEST       = 0xD2;
-ChipSet.DMA1.PORT_MASK          = 0xD4;
-ChipSet.DMA1.PORT_MODE          = 0xD6;
-ChipSet.DMA1.PORT_CLEAR_FF      = 0xD8;
-ChipSet.DMA1.PORT_MASTER_CLR    = 0xDA;
-ChipSet.DMA1.PORT_CLEAR_MASK    = 0xDC; // TODO: Provide handlers
-ChipSet.DMA1.PORT_ALL_MASK      = 0xDE; // TODO: Provide handlers
+ChipSet.DMA_CMD = {
+    M2M_ENABLE:         0x01,
+    CH0HOLD_ENABLE:     0x02,
+    CTRL_DISABLE:       0x04,
+    COMP_TIMING:        0x08,
+    ROT_PRIORITY:       0x10,
+    EXT_WRITE_SEL:      0x20,
+    DREQ_ACTIVE_LO:     0x40,
+    DACK_ACTIVE_HI:     0x80
+};
 
-ChipSet.DMA_CMD = {};
-ChipSet.DMA_CMD.M2M_ENABLE      = 0x01;
-ChipSet.DMA_CMD.CH0HOLD_ENABLE  = 0x02;
-ChipSet.DMA_CMD.CTRL_DISABLE    = 0x04;
-ChipSet.DMA_CMD.COMP_TIMING     = 0x08;
-ChipSet.DMA_CMD.ROT_PRIORITY    = 0x10;
-ChipSet.DMA_CMD.EXT_WRITE_SEL   = 0x20;
-ChipSet.DMA_CMD.DREQ_ACTIVE_LO  = 0x40;
-ChipSet.DMA_CMD.DACK_ACTIVE_HI  = 0x80;
+ChipSet.DMA_MASK = {
+    CHANNEL:            0x03,
+    CHANNEL_SET:        0x04
+};
 
-ChipSet.DMA_MASK = {};
-ChipSet.DMA_MASK.CHANNEL        = 0x03;
-ChipSet.DMA_MASK.CHANNEL_SET    = 0x04;
+ChipSet.DMA_MODE = {
+    CHANNEL:            0x03,
+    XFER:               0x0C,
+    XFER_VERIFY:        0x00,
+    XFER_WRITE:         0x04,
+    XFER_READ:          0x08,
+    AUTOINIT:           0x10,
+    DECREMENT:          0x20,
+    MODE:               0xC0,
+    MODE_DEMAND:        0x00,
+    MODE_SINGLE:        0x40,
+    MODE_BLOCK:         0x80,
+    MODE_CASCADE:       0xC0
+};
 
-ChipSet.DMA_MODE = {};
-ChipSet.DMA_MODE.CHANNEL        = 0x03;
-ChipSet.DMA_MODE.XFER           = 0x0C;
-ChipSet.DMA_MODE.XFER_VERIFY    = 0x00;
-ChipSet.DMA_MODE.XFER_WRITE     = 0x04;
-ChipSet.DMA_MODE.XFER_READ      = 0x08;
-ChipSet.DMA_MODE.AUTOINIT       = 0x10;
-ChipSet.DMA_MODE.DECREMENT      = 0x20;
-ChipSet.DMA_MODE.MODE           = 0xC0;
-ChipSet.DMA_MODE.MODE_DEMAND    = 0x00;
-ChipSet.DMA_MODE.MODE_SINGLE    = 0x40;
-ChipSet.DMA_MODE.MODE_BLOCK     = 0x80;
-ChipSet.DMA_MODE.MODE_CASCADE   = 0xC0;
-
-ChipSet.DMA_FDC = 0x02;                 // DMA channel assigned to the Floppy Drive Controller (FDC)
-ChipSet.DMA_HDC = 0x03;                 // DMA channel assigned to the Hard Drive Controller (HDC; XTC only)
+ChipSet.DMA_FDC       = 0x02;   // DMA channel assigned to the Floppy Drive Controller (FDC)
+ChipSet.DMA_HDC       = 0x03;   // DMA channel assigned to the Hard Drive Controller (HDC; XTC only)
 
 /*
  * 8259A Programmable Interrupt Controller (PIC) I/O ports
  * 
  * Internal registers:
  * 
- *      ICW1    Initialization Command Word 1 (sent to port ChipSet.PIC.PORT_LO)
- *      ICW2    Initialization Command Word 2 (sent to port ChipSet.PIC.PORT_HI)
- *      ICW3    Initialization Command Word 3 (sent to port ChipSet.PIC.PORT_HI)
- *      ICW4    Initialization Command Word 4 (sent to port ChipSet.PIC.PORT_HI)
+ *      ICW1    Initialization Command Word 1 (sent to port ChipSet.PIC_LO)
+ *      ICW2    Initialization Command Word 2 (sent to port ChipSet.PIC_HI)
+ *      ICW3    Initialization Command Word 3 (sent to port ChipSet.PIC_HI)
+ *      ICW4    Initialization Command Word 4 (sent to port ChipSet.PIC_HI)
  *      IMR     Interrupt Mask Register
  *      IRR     Interrupt Request Register
  *      ISR     Interrupt Service Register
@@ -397,56 +413,53 @@ ChipSet.DMA_HDC = 0x03;                 // DMA channel assigned to the Hard Driv
  * TODO: Consider support for level-triggered PIC interrupts, even though the original IBM PCs
  * (up through MODEL_5170) used only edge-triggered interrupts.
  */
-ChipSet.PIC0 = {};                      // all models: the "master" PIC
-ChipSet.PIC0.INDEX              = 0;
-ChipSet.PIC0.PORT_LO            = 0x20;
-ChipSet.PIC0.PORT_HI            = 0x21;
+ChipSet.PIC0 = {                // all models: the "master" PIC
+    INDEX:              0,
+    PORT_LO:            0x20,
+    PORT_HI:            0x21
+};
 
-ChipSet.PIC1 = {};                      // MODEL_5170 and up: the "slave" PIC
-ChipSet.PIC1.INDEX              = 1;
-ChipSet.PIC1.PORT_LO            = 0xA0;
-ChipSet.PIC1.PORT_HI            = 0xA1;
+ChipSet.PIC1 = {                // MODEL_5170 and up: the "slave" PIC
+    INDEX:              1,
+    PORT_LO:            0xA0,
+    PORT_HI:            0xA1
+};
 
-ChipSet.PIC_LO = {};
-ChipSet.PIC_LO.ICW1             = 0x10; // set means ICW1
-ChipSet.PIC_LO.ICW1_ICW4        = 0x01; // ICW4 needed (otherwise ICW4 must be sent)
-ChipSet.PIC_LO.ICW1_SNGL        = 0x02; // single PIC (and therefore no ICW3; otherwise there is another "cascaded" PIC)
-ChipSet.PIC_LO.ICW1_ADI         = 0x04; // call address interval is 4 (otherwise 8; presumably ignored in 8086/8088 mode)
-ChipSet.PIC_LO.ICW1_LTIM        = 0x08; // level-triggered interrupt mode (otherwise edge-triggered mode, which is what PCs use)
+ChipSet.PIC_LO = {              // ChipSet.PIC1.PORT_LO or ChipSet.PIC2.PORT_LO
+    ICW1:               0x10,   // set means ICW1
+    ICW1_ICW4:          0x01,   // ICW4 needed (otherwise ICW4 must be sent)
+    ICW1_SNGL:          0x02,   // single PIC (and therefore no ICW3; otherwise there is another "cascaded" PIC)
+    ICW1_ADI:           0x04,   // call address interval is 4 (otherwise 8; presumably ignored in 8086/8088 mode)
+    ICW1_LTIM:          0x08,   // level-triggered interrupt mode (otherwise edge-triggered mode, which is what PCs use)
+    OCW2:               0x00,   // bit 3 (PIC_LO.OCW3) and bit 4 (ChipSet.PIC_LO.ICW1) are clear in an OCW2 command byte
+    OCW2_IR_LVL:        0x07,
+    OCW2_OP_MASK:       0xE0,   // of the following valid OCW2 operations, the first 4 are EOI commands (all have ChipSet.PIC_LO.OCW2_EOI set)
+    OCW2_EOI:           0x20,   // non-specific EOI (end-of-interrupt)
+    OCW2_EOI_SPEC:      0x60,   // specific EOI
+    OCW2_EOI_ROT:       0xA0,   // rotate on non-specific EOI
+    OCW2_EOI_ROTSPEC:   0xE0,   // rotate on specific EOI
+    OCW2_SET_ROTAUTO:   0x80,   // set rotate in automatic EOI mode
+    OCW2_CLR_ROTAUTO:   0x00,   // clear rotate in automatic EOI mode
+    OCW2_SET_PRI:       0xC0,   // bits 0-2 specify the lowest priority interrupt
+    OCW3:               0x08,   // bit 3 (PIC_LO.OCW3) is set and bit 4 (PIC_LO.ICW1) clear in an OCW3 command byte (bit 7 should be clear, too)
+    OCW3_READ_IRR:      0x02,   // read IRR register
+    OCW3_READ_ISR:      0x03,   // read ISR register
+    OCW3_READ_CMD:      0x03,
+    OCW3_POLL_CMD:      0x04,   // poll
+    OCW3_SMM_RESET:     0x40,   // special mask mode: reset
+    OCW3_SMM_SET:       0x60,   // special mask mode: set
+    OCW3_SMM_CMD:       0x60
+};
 
-ChipSet.PIC_HI = {};
-ChipSet.PIC_HI.ICW2_VECTOR      = 0xF8; // starting vector number (bits 0-2 are effectively treated as zeros in 8086/8088 mode)
-
-ChipSet.PIC_HI.ICW4_8086        = 0x01;
-ChipSet.PIC_HI.ICW4_AUTO_EOI    = 0x02;
-ChipSet.PIC_HI.ICW4_MASTER      = 0x04;
-ChipSet.PIC_HI.ICW4_BUFFERED    = 0x08;
-ChipSet.PIC_HI.ICW4_FULLY_NESTED= 0x10;
-
-/*
- * Definitions for Operation Command Words (OCW1, OCW2 and OCW3)
- */
-ChipSet.PIC_HI.OCW1_IMR         = 0xFF;
-
-ChipSet.PIC_LO.OCW2             = 0x00; // bit 3 (PIC_LO.OCW3) and bit 4 (ChipSet.PIC_LO.ICW1) are clear in an OCW2 command byte
-ChipSet.PIC_LO.OCW2_IR_LVL      = 0x07;
-ChipSet.PIC_LO.OCW2_OP_MASK     = 0xE0; // of the following valid OCW2 operations, the first 4 are EOI commands (all have ChipSet.PIC_LO.OCW2_EOI set)
-ChipSet.PIC_LO.OCW2_EOI         = 0x20; // non-specific EOI (end-of-interrupt)
-ChipSet.PIC_LO.OCW2_EOI_SPEC    = 0x60; // specific EOI
-ChipSet.PIC_LO.OCW2_EOI_ROT     = 0xA0; // rotate on non-specific EOI
-ChipSet.PIC_LO.OCW2_EOI_ROTSPEC = 0xE0; // rotate on specific EOI
-ChipSet.PIC_LO.OCW2_SET_ROTAUTO = 0x80; // set rotate in automatic EOI mode
-ChipSet.PIC_LO.OCW2_CLR_ROTAUTO = 0x00; // clear rotate in automatic EOI mode
-ChipSet.PIC_LO.OCW2_SET_PRI     = 0xC0; // bits 0-2 specify the lowest priority interrupt
-
-ChipSet.PIC_LO.OCW3             = 0x08; // bit 3 (PIC_LO.OCW3) is set and bit 4 (PIC_LO.ICW1) clear in an OCW3 command byte (bit 7 should be clear, too)
-ChipSet.PIC_LO.OCW3_READ_IRR    = 0x02; // read IRR register
-ChipSet.PIC_LO.OCW3_READ_ISR    = 0x03; // read ISR register
-ChipSet.PIC_LO.OCW3_READ_CMD    = 0x03;
-ChipSet.PIC_LO.OCW3_POLL_CMD    = 0x04; // poll
-ChipSet.PIC_LO.OCW3_SMM_RESET   = 0x40; // special mask mode: reset
-ChipSet.PIC_LO.OCW3_SMM_SET     = 0x60; // special mask mode: set
-ChipSet.PIC_LO.OCW3_SMM_CMD     = 0x60;
+ChipSet.PIC_HI = {              // ChipSet.PIC1.PORT_HI or ChipSet.PIC2.PORT_HI
+    ICW2_VECTOR:        0xF8,   // starting vector number (bits 0-2 are effectively treated as zeros in 8086/8088 mode)
+    ICW4_8086:          0x01,
+    ICW4_AUTO_EOI:      0x02,
+    ICW4_MASTER:        0x04,
+    ICW4_BUFFERED:      0x08,
+    ICW4_FULLY_NESTED:  0x10,
+    OCW1_IMR:           0xFF
+};
 
 /*
  * The priorities of IRQs 0-7 are normally high to low, unless the master PIC has been reprogrammed.
@@ -465,57 +478,62 @@ ChipSet.PIC_LO.OCW3_SMM_CMD     = 0x60;
  * the master PIC.  As a result, the two other system board interrupts, IRQ0 and IRQ1, continue to have the
  * highest priority, by default.
  */
-ChipSet.IRQ = {};
-ChipSet.IRQ.TIMER0              = 0x00;
-ChipSet.IRQ.KBD                 = 0x01;
-ChipSet.IRQ.SLAVE               = 0x02;
-ChipSet.IRQ.COM2                = 0x03;
-ChipSet.IRQ.COM1                = 0x04;
-ChipSet.IRQ.XTC                 = 0x05; // MODEL_5160 uses this for its HDC; MODEL_5170 designates it for LPT2
-ChipSet.IRQ.FDC                 = 0x06;
-ChipSet.IRQ.LPT1                = 0x07;
-ChipSet.IRQ.RTC                 = 0x08;
-ChipSet.IRQ.IRQ2                = 0x09;
-ChipSet.IRQ.COPROC              = 0x0D;
-ChipSet.IRQ.ATC                 = 0x0E; // MODEL_5170 uses this for its HDC
+ChipSet.IRQ = {
+    TIMER0:             0x00,
+    KBD:                0x01,
+    SLAVE:              0x02,
+    COM2:               0x03,
+    COM1:               0x04,
+    XTC:                0x05,   // MODEL_5160 uses this for its HDC; MODEL_5170 designates it for LPT2
+    FDC:                0x06,
+    LPT1:               0x07,
+    RTC:                0x08,
+    IRQ2:               0x09,
+    COPROC:             0x0D,
+    ATC:                0x0E    // MODEL_5170 uses this for its HDC
+};
 
 /*
  * 8253 Programmable Interval Timer (PIT) I/O ports 
  */
-ChipSet.TIMER0 = {};
-ChipSet.TIMER0.INDEX            = 0;
-ChipSet.TIMER0.PORT             = 0x40; // used for time-of-day (prior to MODEL_5170)
+ChipSet.TIMER0 = {
+    INDEX:              0,
+    PORT:               0x40    // used for time-of-day (prior to MODEL_5170)
+};
 
-ChipSet.TIMER1 = {};
-ChipSet.TIMER1.INDEX            = 1;
-ChipSet.TIMER1.PORT             = 0x41; // used for memory refresh   
+ChipSet.TIMER1 = {
+    INDEX:              1,
+    PORT:               0x41    // used for memory refresh
+};
 
-ChipSet.TIMER2 = {};
-ChipSet.TIMER2.INDEX            = 2;
-ChipSet.TIMER2.PORT             = 0x42; // used speaker tone generation
+ChipSet.TIMER2 = {
+    INDEX:              2,
+    PORT:               0x42    // used speaker tone generation
+};
 
-ChipSet.TIMER_CTRL = {};
-ChipSet.TIMER_CTRL.PORT         = 0x43; // write-only control register (use the Read-Back command to get status)
-ChipSet.TIMER_CTRL.BCD          = 0x01;
-ChipSet.TIMER_CTRL.MODE         = 0x0E;
-ChipSet.TIMER_CTRL.MODE0        = 0x00; // interrupt on terminal count
-ChipSet.TIMER_CTRL.MODE1        = 0x02; // programmable one-shot
-ChipSet.TIMER_CTRL.MODE2        = 0x04; // rate generator
-ChipSet.TIMER_CTRL.MODE3        = 0x06; // square wave generator
-ChipSet.TIMER_CTRL.MODE4        = 0x08; // software-triggered strobe
-ChipSet.TIMER_CTRL.MODE5        = 0x0A; // hardware-triggered strobe
-ChipSet.TIMER_CTRL.RW           = 0x30;
-ChipSet.TIMER_CTRL.RW_LATCH     = 0x00;
-ChipSet.TIMER_CTRL.RW_LSB       = 0x10;
-ChipSet.TIMER_CTRL.RW_MSB       = 0x20;
-ChipSet.TIMER_CTRL.RW_BOTH      = 0x30;
-ChipSet.TIMER_CTRL.SC           = 0xC0;
-ChipSet.TIMER_CTRL.SC_CTR0      = 0x00;
-ChipSet.TIMER_CTRL.SC_CTR1      = 0x40;
-ChipSet.TIMER_CTRL.SC_CTR2      = 0x80;
-ChipSet.TIMER_CTRL.SC_BACK      = 0xC0;
+ChipSet.TIMER_CTRL = {
+    PORT:               0x43,   // write-only control register (use the Read-Back command to get status)
+    BCD:                0x01,
+    MODE:               0x0E,
+    MODE0:              0x00,   // interrupt on terminal count
+    MODE1:              0x02,   // programmable one-shot
+    MODE2:              0x04,   // rate generator
+    MODE3:              0x06,   // square wave generator
+    MODE4:              0x08,   // software-triggered strobe
+    MODE5:              0x0A,   // hardware-triggered strobe
+    RW:                 0x30,
+    RW_LATCH:           0x00,
+    RW_LSB:             0x10,
+    RW_MSB:             0x20,
+    RW_BOTH:            0x30,
+    SC:                 0xC0,
+    SC_CTR0:            0x00,
+    SC_CTR1:            0x40,
+    SC_CTR2:            0x80,
+    SC_BACK:            0xC0
+};
 
-ChipSet.TIMER_TICKS_PER_SEC     = 1193181;
+ChipSet.TIMER_TICKS_PER_SEC = 1193181;
 
 /*
  * 8255A Programmable Peripheral Interface (PPI) I/O ports, for Cassette/Speaker/Keyboard/SW1/etc
@@ -524,88 +542,95 @@ ChipSet.TIMER_TICKS_PER_SEC     = 1193181;
  * and PPI_B.PORT is an OUTPUT port.
  * 
  * However, the MODEL_5160 ROM BIOS initially writes 0x89 instead, making PPI_A.PORT an OUTPUT port.
- * However, I'm guessing that's just some sort of "diagnostic mode" operation, because all it writes
- * to PPI_A.PORT are a series of "checkpoint" values (ie, 0x01, 0x02, and 0x03) before updating PPI_CTRL.PORT
- * with the usual 0x99.
+ * I'm guessing that's just part of some "diagnostic mode", because all it writes to PPI_A.PORT are a series
+ * of "checkpoint" values (ie, 0x01, 0x02, and 0x03) before updating PPI_CTRL.PORT with the usual 0x99.
  */
-ChipSet.PPI_A = {};                     // this.bPPIA
-ChipSet.PPI_A.PORT              = 0x60; // INPUT: keyboard scan code (PPI_B.CLEAR_KBD must be clear)
+ChipSet.PPI_A = {               // this.bPPIA
+    PORT:               0x60    // INPUT: keyboard scan code (PPI_B.CLEAR_KBD must be clear)
+};
 
-ChipSet.PPI_B = {};                     // this.bPPIB
-ChipSet.PPI_B.PORT              = 0x61; // OUTPUT (although it has to be treated as INPUT, too: the keyboard interrupt handler reads it, OR's PPI_B.CLEAR_KBD, writes it, and then rewrites the original read value)
-ChipSet.PPI_B.CLK_TIMER2        = 0x01; // ALL: set to enable clock to TIMER2
-ChipSet.PPI_B.SPK_TIMER2        = 0x02; // ALL: set to connect output of TIMER2 to speaker (MODEL_5150: clear for cassette)
-ChipSet.PPI_B.ENABLE_SW2        = 0x04; // MODEL_5150: set to enable SW2[1-4] through PPI_C.PORT, clear to enable SW2[5]; MODEL_5160: unused (there is no SW2 switch block on the MODEL_5160 motherboard)
-ChipSet.PPI_B.CASS_MOTOR_OFF    = 0x08; // MODEL_5150: cassette motor off
-ChipSet.PPI_B.ENABLE_SW_HI      = 0x08; // MODEL_5160: clear to read SW1[1-4], set to read SW1[5-8]
-ChipSet.PPI_B.DISABLE_RW_MEM    = 0x10; // ALL: clear to enable RAM parity check, set to disable
-ChipSet.PPI_B.DISABLE_IO_CHK    = 0x20; // ALL: clear to enable I/O channel check, set to disable
-ChipSet.PPI_B.CLK_KBD           = 0x40; // ALL: clear to force keyboard clock low
-ChipSet.PPI_B.CLEAR_KBD         = 0x80; // ALL: clear to enable keyboard scan codes (MODEL_5150: set to enable SW1 through PPI_A.PORT)
+ChipSet.PPI_B = {               // this.bPPIB
+    PORT:               0x61,   // OUTPUT (although it has to be treated as INPUT, too: the keyboard interrupt handler reads it, OR's PPI_B.CLEAR_KBD, writes it, and then rewrites the original read value)
+    CLK_TIMER2:         0x01,   // ALL: set to enable clock to TIMER2
+    SPK_TIMER2:         0x02,   // ALL: set to connect output of TIMER2 to speaker (MODEL_5150: clear for cassette)
+    ENABLE_SW2:         0x04,   // MODEL_5150: set to enable SW2[1-4] through PPI_C.PORT, clear to enable SW2[5]; MODEL_5160: unused (there is no SW2 switch block on the MODEL_5160 motherboard)
+    CASS_MOTOR_OFF:     0x08,   // MODEL_5150: cassette motor off
+    ENABLE_SW_HI:       0x08,   // MODEL_5160: clear to read SW1[1-4], set to read SW1[5-8]
+    DISABLE_RW_MEM:     0x10,   // ALL: clear to enable RAM parity check, set to disable
+    DISABLE_IO_CHK:     0x20,   // ALL: clear to enable I/O channel check, set to disable
+    CLK_KBD:            0x40,   // ALL: clear to force keyboard clock low
+    CLEAR_KBD:          0x80    // ALL: clear to enable keyboard scan codes (MODEL_5150: set to enable SW1 through PPI_A.PORT)
+};
 
-ChipSet.PPI_C = {};                     // this.bPPIC
-ChipSet.PPI_C.PORT              = 0x62; // INPUT (see below)
-ChipSet.PPI_C.SW                = 0x0F; // MODEL_5150: SW2[1-4] or SW2[5], depending on whether PPI_B.ENABLE_SW2 is set or clear; MODEL_5160: SW1[1-4] or SW1[5-8], depending on whether PPI_B.ENABLE_SW_HI is clear or set
-ChipSet.PPI_C.CASS_DATA_IN      = 0x10;
-ChipSet.PPI_C.TIMER2_OUT        = 0x20;
-ChipSet.PPI_C.IO_CHANNEL_CHK    = 0x40; // used by NMI handler to detect I/O channel errors
-ChipSet.PPI_C.RW_PARITY_CHK     = 0x80; // used by NMI handler to detect R/W memory parity errors
+ChipSet.PPI_C = {               // this.bPPIC
+    PORT:               0x62,   // INPUT (see below)
+    SW:                 0x0F,   // MODEL_5150: SW2[1-4] or SW2[5], depending on whether PPI_B.ENABLE_SW2 is set or clear; MODEL_5160: SW1[1-4] or SW1[5-8], depending on whether PPI_B.ENABLE_SW_HI is clear or set
+    CASS_DATA_IN:       0x10,
+    TIMER2_OUT:         0x20,
+    IO_CHANNEL_CHK:     0x40,   // used by NMI handler to detect I/O channel errors
+    RW_PARITY_CHK:      0x80    // used by NMI handler to detect R/W memory parity errors
+};
 
-ChipSet.PPI_CTRL = {};                  // this.bPPICtrl
-ChipSet.PPI_CTRL.PORT           = 0x63; // OUTPUT: initialized to 0x99, defining PPI_A and PPI_C as INPUT and PPI_B as OUTPUT
-ChipSet.PPI_CTRL.A_IN           = 0x10;
-ChipSet.PPI_CTRL.B_IN           = 0x02;
-ChipSet.PPI_CTRL.C_IN_LO        = 0x01;
-ChipSet.PPI_CTRL.C_IN_HI        = 0x08;
-ChipSet.PPI_CTRL.B_MODE         = 0x04;
-ChipSet.PPI_CTRL.A_MODE         = 0x60;
+ChipSet.PPI_CTRL = {            // this.bPPICtrl
+    PORT:               0x63,   // OUTPUT: initialized to 0x99, defining PPI_A and PPI_C as INPUT and PPI_B as OUTPUT
+    A_IN:               0x10,
+    B_IN:               0x02,
+    C_IN_LO:            0x01,
+    C_IN_HI:            0x08,
+    B_MODE:             0x04,
+    A_MODE:             0x60
+};
 
 /*
  * On the MODEL_5150, the following PPI_SW bits are exposed through PPI_A.
  * 
  * On the MODEL_5160, either the low or high 4 bits are exposed through PPI_C.SW, if PPI_B.ENABLE_SW_HI is clear or set.
  */
-ChipSet.PPI_SW = {};
-ChipSet.PPI_SW.FDRIVE = {};
-ChipSet.PPI_SW.FDRIVE.IPL       = 0x01; // MODEL_5150: IPL ("Initial Program Load") floppy drive attached; MODEL_5160: "Loop on POST"
-ChipSet.PPI_SW.COPROC           = 0x02; // MODEL_5150: reserved; MODEL_5160: coprocessor installed
-ChipSet.PPI_SW.MEMORY = {};
-ChipSet.PPI_SW.MEMORY.X1        = 0x00; // MODEL_5150: "X" is 16Kb; MODEL_5160: "X" is 64Kb
-ChipSet.PPI_SW.MEMORY.X2        = 0x04;
-ChipSet.PPI_SW.MEMORY.X3        = 0x08;
-ChipSet.PPI_SW.MEMORY.X4        = 0x0C;
-ChipSet.PPI_SW.MEMORY.MASK      = 0x0C;
-ChipSet.PPI_SW.MEMORY.SHIFT     = 2;
-ChipSet.PPI_SW.MONITOR = {};
-ChipSet.PPI_SW.MONITOR.TV       = 0x10;
-ChipSet.PPI_SW.MONITOR.COLOR    = 0x20;
-ChipSet.PPI_SW.MONITOR.MONO     = 0x30;
-ChipSet.PPI_SW.MONITOR.MASK     = 0x30;
-ChipSet.PPI_SW.MONITOR.SHIFT    = 4;
-ChipSet.PPI_SW.FDRIVE.ONE       = 0x00; // 1 floppy drive attached (or 0 drives if PPI_SW.FDRIVE_IPL is not set -- MODEL_5150 only)
-ChipSet.PPI_SW.FDRIVE.TWO       = 0x40; // 2 floppy drives attached
-ChipSet.PPI_SW.FDRIVE.THREE     = 0x80; // 3 floppy drives attached
-ChipSet.PPI_SW.FDRIVE.FOUR      = 0xC0; // 4 floppy drives attached
-ChipSet.PPI_SW.FDRIVE.MASK      = 0xC0;
-ChipSet.PPI_SW.FDRIVE.SHIFT     = 6;
+ChipSet.PPI_SW = {
+    FDRIVE: {
+        IPL:            0x01,   // MODEL_5150: IPL ("Initial Program Load") floppy drive attached; MODEL_5160: "Loop on POST"
+        ONE:            0x00,   // 1 floppy drive attached (or 0 drives if PPI_SW.FDRIVE_IPL is not set -- MODEL_5150 only)
+        TWO:            0x40,   // 2 floppy drives attached
+        THREE:          0x80,   // 3 floppy drives attached
+        FOUR:           0xC0,   // 4 floppy drives attached
+        MASK:           0xC0,
+        SHIFT:          6
+    },
+    COPROC:             0x02,   // MODEL_5150: reserved; MODEL_5160: coprocessor installed
+    MEMORY: {
+        X1:             0x00,   // MODEL_5150: "X" is 16Kb; MODEL_5160: "X" is 64Kb
+        X2:             0x04,
+        X3:             0x08,
+        X4:             0x0C,
+        MASK:           0x0C,
+        SHIFT:          2
+    },
+    MONITOR: {
+        TV:             0x10,
+        COLOR:          0x20,
+        MONO:           0x30,
+        MASK:           0x30,
+        SHIFT:          4
+    }
+};
 
 /*
  * 8042 Keyboard Controller I/O ports (MODEL_5170)
  * 
- * On the MODEL_5170, port 0x60 is designated KBD_DATA rather than PPI_A, although the BIOS also refers to it
+ * On the MODEL_5170, port 0x60 is designated KBC.DATA rather than PPI_A, although the BIOS also refers to it
  * as "PORT_A: 8042 KEYBOARD SCAN/DIAG OUTPUTS").  This is the 8042's output buffer and should be read only when
- * KBD_STATUS.OUTBUFF_FULL is set.
+ * KBC.STATUS.OUTBUFF_FULL is set.
  * 
- * Similarly, port 0x61 is designated KBD_RWREG rather than PPI_B; the BIOS also refers to it as "PORT_B: 8042
+ * Similarly, port 0x61 is designated KBC.RWREG rather than PPI_B; the BIOS also refers to it as "PORT_B: 8042
  * READ WRITE REGISTER", but it is not otherwise discussed in the MODEL_5170 TechRef's 8042 documentation.
- * There are brief references to bits 0 and 1 (KBD_RWREG.CLK_TIMER2 and KBD_RWREG.SPK_TIMER2), and the BIOS sets
- * bits 2-7 to "DISABLE PARITY CHECKERS" (principally KBD_RWREG.DISABLE_CHK, which are bits 2 and 3); why the BIOS
+ * There are brief references to bits 0 and 1 (KBC.RWREG.CLK_TIMER2 and KBC.RWREG.SPK_TIMER2), and the BIOS sets
+ * bits 2-7 to "DISABLE PARITY CHECKERS" (principally KBC.RWREG.DISABLE_CHK, which are bits 2 and 3); why the BIOS
  * also sets bits 4-7 (or if those bits are even settable) is unclear, since it uses 11111100B rather than defined
  * constants.
  * 
  * The bottom line: on a MODEL_5170, port 0x61 is still used for speaker control and parity checking, so we use
  * the same register (bPPIB) but install different I/O handlers.  It's also bi-directional: at one point, the BIOS
- * reads KBD_RWREG.REFRESH_BIT (bit 4) to verify that it's alternating.
+ * reads KBC.RWREG.REFRESH_BIT (bit 4) to verify that it's alternating.
  * 
  * PPI_C and PPI_CTRL don't seem to be documented or used by the MODEL_5170 BIOS, so I'm assuming they're obsolete.
  * 
@@ -618,7 +643,7 @@ ChipSet.PPI_SW.FDRIVE.SHIFT     = 6;
 ChipSet.KBC = {
     DATA: {                     // this.b8042OutBuff (PPI_A on previous models, still referred to as "PORT A" by the MODEL_5170 BIOS)
         PORT:           0x60,
-        CMD: {                  // this.b8042CmdData (KBD_DATA.CMD "data bytes" written to port 0x60, after writing a KBD_CMD byte to port 0x64)
+        CMD: {                  // this.b8042CmdData (KBC.DATA.CMD "data bytes" written to port 0x60, after writing a KBC.CMD byte to port 0x64)
             PC_COMPAT:  0x40,   // generate IBM PC-compatible scan codes
             PC_MODE:    0x20,
             NO_CLOCK:   0x10,   // disable keyboard by driving "clock" line low
@@ -656,7 +681,7 @@ ChipSet.KBC = {
         KBD_CLOCK:      0x01,   // keyboard clock (input)
         KBD_DATA:       0x02    // keyboard data (input)
     },
-    RWREG: {                    // this.bPPIB (since CLK_TIMER2 and SPK_TIMER2 are in both PPI_B and KBD_RWREG)
+    RWREG: {                    // this.bPPIB (since CLK_TIMER2 and SPK_TIMER2 are in both PPI_B and KBC.RWREG)
         PORT:           0x61,
         CLK_TIMER2:     0x01,   // set to enable clock to TIMER2
         SPK_TIMER2:     0x02,   // set to connect output of TIMER2 to speaker
@@ -669,15 +694,15 @@ ChipSet.KBC = {
     CMD: {                      // this.b8042InBuff (on write to port 0x64, interpret this as a CMD)
         PORT:           0x64,
         READ_CMD:       0x20,
-        WRITE_CMD:      0x60,   // followed by a command byte written to KBD_DATA.PORT (see KBD_DATA.CMD) 
-        SELF_TEST:      0xAA,   // self-test (KBD_DATA.SELF_TEST_OK is placed in the output buffer if no errors)
+        WRITE_CMD:      0x60,   // followed by a command byte written to KBC.DATA.PORT (see KBC.DATA.CMD) 
+        SELF_TEST:      0xAA,   // self-test (KBC.DATA.SELF_TEST.OK is placed in the output buffer if no errors)
         INTF_TEST:      0xAB,   // interface test
         DIAG_DUMP:      0xAC,   // diagnostic dump
         DISABLE_KBD:    0xAD,   // disable keyboard
         ENABLE_KBD:     0xAE,   // enable keyboard
         READ_INPORT:    0xC0,   // read input port and place data in output buffer (use only if output buffer empty)
         READ_OUTPORT:   0xD0,   // read output port and place data in output buffer (use only if output buffer empty)
-        WRITE_OUTPORT:  0xD1,   // next byte written to KBD_DATA.PORT (port 0x60) is placed in the output port (see KBD_DATA.OUTPUT)
+        WRITE_OUTPORT:  0xD1,   // next byte written to KBC.DATA.PORT (port 0x60) is placed in the output port (see KBC.DATA.OUTPUT)
         READ_TEST:      0xE0,
         PULSE_OUTPORT:  0xF0    // this is the 1st of 16 commands (0xF0-0xFF) that pulse bits 0-3 of the output port
     },
@@ -686,7 +711,7 @@ ChipSet.KBC = {
         OUTBUFF_FULL:   0x01,
         INBUFF_FULL:    0x02,   // set if the controller has received but not yet read data written to the input buffer (not normally set)
         SYS_FLAG:       0x04,
-        CMD_FLAG:       0x08,   // set on write to KBD_CMD (port 0x64), clear on write to KBD_DATA (port 0x60)
+        CMD_FLAG:       0x08,   // set on write to KBC.CMD (port 0x64), clear on write to KBC.DATA (port 0x60)
         NO_INHIBIT:     0x10,
         XMT_TIMEOUT:    0x20,
         RCV_TIMEOUT:    0x40,
@@ -1018,8 +1043,8 @@ ChipSet.prototype.reset = function()
     if (this.model >= ChipSet.MODEL_5170) {
         /*
          * The 8042 input buffer is treated as a "command byte" when written via port 0x64 and as a "data byte"
-         * when written via port 0x60.  So, whenever the KBD_CMD.WRITE_CMD "command byte" is written to the input
-         * buffer, the subsequent command data byte is saved in b8042CmdData.  Similarly, for KBD_CMD.WRITE_OUTPORT,
+         * when written via port 0x60.  So, whenever the KBC.CMD.WRITE_CMD "command byte" is written to the input
+         * buffer, the subsequent command data byte is saved in b8042CmdData.  Similarly, for KBC.CMD.WRITE_OUTPORT,
          * the subsequent data byte is saved in b8042OutPort.
          *
          * TODO: Consider a UI for the Keyboard INHIBIT switch.  By default, our keyboard is never inhibited
@@ -1105,13 +1130,13 @@ ChipSet.prototype.initRTCDate = function(sDate)
     
     /*
      * Example of a valid Date string:
-     * 
+     *
      *      2014-10-01T08:00:00-0700
-     *      
+     *
      * Example of an INVALID Date string:
-     * 
+     *
      *      2014-10-01T08:00:00PST
-     *      
+     *
      * In the second example, the Date object is invalid, but it wasn't obvious (to me) how to detect that.
      * So here's a test from StackOverflow (http://stackoverflow.com/questions/1353684/detecting-an-invalid-date-date-instance-in-javascript).
      */
@@ -2895,7 +2920,7 @@ ChipSet.prototype.getIRRVector = function(iPIC)
          *
          * This process is similar to the search performed by non-specific EOIs, except those apply only to a single
          * PIC (which is why a slave interrupt must be EOI'ed twice: once for the slave PIC and again for the master),
-         * whereas here we must search across all PICS.
+         * whereas here we must search across all PICs.
          */
         var nIRL = pic.bIRLow + 1;
         while (true) {
@@ -3307,7 +3332,7 @@ ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
          * For the original MODEL_5170, the number of cycles per tick is approximately 6,000,000 / 1,193,181,
          * or 5.028575, so we can no longer always divide cycles by 4 with a simple right-shift by 2.  The proper
          * divisor (eg, 4 for MODEL_5150 and MODEL_5160, 5 for MODEL_5170, etc) is nTicksDivisor, which initBus()
-         * calculates using on the base CPU speed returned by cpu.getCyclesPerSecond().
+         * calculates using the base CPU speed returned by cpu.getCyclesPerSecond().
          */
         var ticks = ((nCycles - timer.nStartCycles) / this.nTicksDivisor) | 0;
 
@@ -3646,8 +3671,8 @@ ChipSet.prototype.in8042OutBuff = function(port, addrFrom)
  * out8042InBuffData(port, bOut, addrFrom)
  * 
  * This writes to the 8042's input buffer; using this port (ie, 0x60 instead of 0x64) designates the
- * the byte as a KBD_DATA.CMD "data byte".  Before clearing KBD_STATUS.CMD_FLAG, however, we see if it's set,
- * and then based on the previous KBD_CMD "command byte", we do whatever needs to be done with this "data byte".
+ * the byte as a KBC.DATA.CMD "data byte".  Before clearing KBC.STATUS.CMD_FLAG, however, we see if it's set,
+ * and then based on the previous KBC.CMD "command byte", we do whatever needs to be done with this "data byte".
  *
  * @this {ChipSet}
  * @param {number} port (0x60)
@@ -3662,9 +3687,7 @@ ChipSet.prototype.out8042InBuffData = function(port, bOut, addrFrom)
         switch (this.b8042InBuff) {
         
         case ChipSet.KBC.CMD.WRITE_CMD:
-            this.b8042CmdData = bOut;
-            Component.assert(ChipSet.KBC.DATA.CMD.SYS_FLAG === ChipSet.KBC.STATUS.SYS_FLAG);
-            this.b8042Status = (this.b8042Status & ~ChipSet.KBC.STATUS.SYS_FLAG) | (bOut & ChipSet.KBC.DATA.CMD.SYS_FLAG);
+            this.set8042CmdData(bOut);
             break;
 
         case ChipSet.KBC.CMD.WRITE_OUTPORT:
@@ -3736,7 +3759,7 @@ ChipSet.prototype.out8042InBuffData = function(port, bOut, addrFrom)
          * error, but "TEST.21" assumes that it is.
          */
         default:
-            this.b8042CmdData &= ~ChipSet.KBC.DATA.CMD.NO_CLOCK;
+            this.set8042CmdData(this.b8042CmdData & ~ChipSet.KBC.DATA.CMD.NO_CLOCK);
             if (this.kbd) this.set8042OutBuff(this.kbd.sendCmd(bOut));
             break;
         }
@@ -3757,14 +3780,39 @@ ChipSet.prototype.in8042RWReg = function(port, addrFrom)
 {
     /*
      * Normally, we return whatever was last written to this port, but we do need to mask the
-     * two upper-most bits (KBD_RWREG.PARITY_ERR), because we never want to report a parity error.
+     * two upper-most bits (KBC.RWREG.PARITY_ERR), as those are output-only bits used to signal
+     * parity errors.
+     *
+     * Also, "TEST.09" of the MODEL_5170 BIOS expects the REFRESH_BIT to alternate, so we used to
+     * do this:
+     * 
+     *      this.bPPIB ^= ChipSet.KBC.RWREG.REFRESH_BIT;
+     *
+     * However, the MODEL_5170_REV3 BIOS not only checks REFRESH_BIT in "TEST.09", but includes
+     * an additional test right before "TEST.11A", which requires the bit change "a bit less"
+     * frequently.
+     * 
+     * QUESTION: Did IBM throw in this additional REFRESH_BIT test in an attempt to either tie
+     * their revised BIOS to their own hardware OR to insure that the processor was running at a
+     * "condoned" speed?  Note that this new test sets CX to zero, and at the end of the test
+     * (@F000:05B8), CX must be in the narrow range of 0xF600 through 0xF9FD.
+     * 
+     * So now we tie the state of the REFRESH_BIT to bit 6 of the current CPU cycle count,
+     * effectively toggling the bit after every 64 cycles, or roughly every 4th read, and yielding
+     * a count of 0xF815 in CX, safely within the required range.  I also confirmed that using
+     * the next highest bit (bit 7) created too much of a delay (CX was 0xF015).
+     * 
+     * NOTE: the "WAITF" function @F000:1A3A relies on REFRESH_BIT to achieve a "FIXED TIME WAIT",
+     * where CX is a "COUNT OF 15.085737us INTERVALS TO WAIT".  By toggling REFRESH_BIT every 64
+     * cycles, on an 8Mhz CPU that can do 8 cycles in 1us, 64 cycles represents 8us, so this might
+     * be 7us too fast?  But I think we're close enough.
      */
-    var b = this.bPPIB & ~ChipSet.KBC.RWREG.PARITY_ERR;
-    this.messagePort(port, null, addrFrom, "8042_RWREG", ChipSet.MESSAGE_CHIPSET, b);
+    var b = this.bPPIB & ~(ChipSet.KBC.RWREG.PARITY_ERR | ChipSet.KBC.RWREG.REFRESH_BIT) | ((this.cpu.getCycles() & 0x40)? ChipSet.KBC.RWREG.REFRESH_BIT : 0);
     /*
-     * "TEST.09" of the MODEL_5170 BIOS expects the following bit ("REFRESH_BIT") to alternate, so we oblige.
+     * Thanks to the WAITF function, this has become a very "busy" port, so let's not generate messages
+     * unless both MESSAGE_CHIPSET *and* MESSAGE_LOG are set.
      */
-    this.bPPIB ^= ChipSet.KBC.RWREG.REFRESH_BIT;
+    this.messagePort(port, null, addrFrom, "8042_RWREG", ChipSet.MESSAGE_CHIPSET | ChipSet.MESSAGE_LOG, b);
     return b;
 };
 
@@ -3796,14 +3844,14 @@ ChipSet.prototype.in8042Status = function(port, addrFrom)
     var b = this.b8042Status & 0xff;
     /*
      * There's code in the 5170 BIOS (F000:03BF) that writes an 8042 command (0xAA), waits for
-     * KBD_STATUS.INBUFF_FULL to go clear (which it always is, because we always accept commands
-     * immediately), then checks KBD_STATUS.OUTBUFF_FULL and performs a "flush" on port 0x60 if
-     * it's set, then waits for KBD_STATUS.OUTBUFF_FULL *again*.  Unfortunately, the "flush" throws
+     * KBC.STATUS.INBUFF_FULL to go clear (which it always is, because we always accept commands
+     * immediately), then checks KBC.STATUS.OUTBUFF_FULL and performs a "flush" on port 0x60 if
+     * it's set, then waits for KBC.STATUS.OUTBUFF_FULL *again*.  Unfortunately, the "flush" throws
      * away our response if we respond immediately.
      * 
-     * So now when out8042InBuffCmd() has a response, it sets KBD_STATUS.OUTBUFF_DELAY instead
-     * (which is outside the 0xff range of bits we return); when we see KBD_STATUS.OUTBUFF_DELAY,
-     * we clear it and set KBD_STATUS.OUTBUFF_FULL, which will be returned on the next read.
+     * So now when out8042InBuffCmd() has a response, it sets KBC.STATUS.OUTBUFF_DELAY instead
+     * (which is outside the 0xff range of bits we return); when we see KBC.STATUS.OUTBUFF_DELAY,
+     * we clear it and set KBC.STATUS.OUTBUFF_FULL, which will be returned on the next read.
      * 
      * This provides a single poll delay, so that the aforementioned "flush" won't toss our response.
      * If longer delays are needed down the road, we may need to set a delay count in the upper (hidden)
@@ -3820,7 +3868,7 @@ ChipSet.prototype.in8042Status = function(port, addrFrom)
  * out8042InBuffCmd(port, bOut, addrFrom)
  *
  * This writes to the 8042's input buffer; using this port (ie, 0x64 instead of 0x60) designates the
- * the byte as a "command byte".  We immediately set KBD_STATUS.CMD_FLAG, and then see if we can act upon
+ * the byte as a "command byte".  We immediately set KBC.STATUS.CMD_FLAG, and then see if we can act upon
  * the command immediately (some commands requires us to wait for a "data byte").
  *
  * @this {ChipSet}
@@ -3840,7 +3888,7 @@ ChipSet.prototype.out8042InBuffCmd = function(port, bOut, addrFrom)
     if (this.b8042InBuff >= ChipSet.KBC.CMD.PULSE_OUTPORT) {
         bPulseBits = (this.b8042InBuff ^ 0xf);
         /*
-         * Now that we have isolated the bit(s) to pulse, map all pulse commands to KBD_CMD.PULSE_OUTPORT 
+         * Now that we have isolated the bit(s) to pulse, map all pulse commands to KBC.CMD.PULSE_OUTPORT 
          */
         this.b8042InBuff = ChipSet.KBC.CMD.PULSE_OUTPORT;
     }
@@ -3858,22 +3906,23 @@ ChipSet.prototype.out8042InBuffCmd = function(port, bOut, addrFrom)
         break;
     
     case ChipSet.KBC.CMD.DISABLE_KBD:       // 0xAD
-        this.b8042CmdData |= ChipSet.KBC.DATA.CMD.NO_CLOCK;
+        this.set8042CmdData(this.b8042CmdData | ChipSet.KBC.DATA.CMD.NO_CLOCK);
         if (DEBUG) this.messageDebugger("keyboard disabled", ChipSet.MESSAGE_KBD);
         /*
-         * TODO: Determine where to honor KBD_DATA.CMD.NO_CLOCK; note that the MODEL_5170 BIOS calls "KBD_RESET" (F000:17D2) 
-         * while the keyboard interface is disabled, yet we must still deliver the Keyboard's CMDRES.BATSUCCESS response code.
+         * NOTE: The MODEL_5170 BIOS calls "KBD_RESET" (F000:17D2) while the keyboard interface is disabled,
+         * yet we must still deliver the Keyboard's CMDRES.BATSUCCESS response code?  Seems like an odd thing for
+         * a "disabled interface" to do.
          */
         break;
 
     case ChipSet.KBC.CMD.ENABLE_KBD:        // 0xAE
-        this.b8042CmdData &= ~ChipSet.KBC.DATA.CMD.NO_CLOCK;
+        this.set8042CmdData(this.b8042CmdData & ~ChipSet.KBC.DATA.CMD.NO_CLOCK);
         if (DEBUG) this.messageDebugger("keyboard re-enabled", ChipSet.MESSAGE_KBD);
         break;
 
     case ChipSet.KBC.CMD.SELF_TEST:         // 0xAA
         if (this.kbd) this.kbd.shiftScanCode(true);
-        this.b8042CmdData |= ChipSet.KBC.DATA.CMD.NO_CLOCK;
+        this.set8042CmdData(this.b8042CmdData | ChipSet.KBC.DATA.CMD.NO_CLOCK);
         if (DEBUG) this.messageDebugger("keyboard disabled on reset", ChipSet.MESSAGE_KBD);
         this.set8042OutBuff(ChipSet.KBC.DATA.SELF_TEST.OK);
         this.set8042OutPort(ChipSet.KBC.OUTPORT.NO_RESET | ChipSet.KBC.OUTPORT.A20_ON);
@@ -3900,6 +3949,39 @@ ChipSet.prototype.out8042InBuffCmd = function(port, bOut, addrFrom)
             this.cpu.haltCPU();
         }
         break;
+    }
+};
+
+/**
+ * set8042CmdData(b)
+ *
+ * @this {ChipSet}
+ * @param {number} b
+ */
+ChipSet.prototype.set8042CmdData = function(b)
+{
+    this.b8042CmdData = b;
+    Component.assert(ChipSet.KBC.DATA.CMD.SYS_FLAG === ChipSet.KBC.STATUS.SYS_FLAG);
+    this.b8042Status = (this.b8042Status & ~ChipSet.KBC.STATUS.SYS_FLAG) | (b & ChipSet.KBC.DATA.CMD.SYS_FLAG);
+    if (this.kbd) {
+        /*
+         * This seems to be what the doctor ordered for the MODEL_5170_REV3 BIOS @F000:0A6D, where it
+         * sends ChipSet.KBC.CMD.WRITE_CMD to port 0x64, followed by 0x4D to port 0x60, which clears NO_CLOCK
+         * and enables the keyboard.  The BIOS then waits for OUTBUFF_FULL to be set, at which point it seems
+         * to be anticipating an 0xAA response in the output buffer.
+         * 
+         * And indeed, if we call the original MODEL_5150/MODEL_5160 setEnable() Keyboard interface here,
+         * and both the data and clock lines have transitioned high (ie, both parameters are true), then it
+         * will call resetDevice(), generating a Keyboard.CMDRES.BATSUCCESS response.
+         * 
+         * This agrees with my understanding of what happens when the 8042 toggles the clock line high
+         * (ie, clears NO_CLOCK): the TechRef's "Basic Assurance Test" section says that when the Keyboard is
+         * powered on, it performs the BAT, and then when the clock and data lines go high, the keyboard sends
+         * a completion code (eg, 0xAA for success, or 0xFC or something else for failure).
+         */
+        if (this.kbd.setEnable(!!(b & ChipSet.KBC.DATA.CMD.NO_INHIBIT), !(b & ChipSet.KBC.DATA.CMD.NO_CLOCK))) {
+            this.set8042OutBuff(this.kbd.readScanCode(true));
+        }
     }
 };
 
@@ -3931,7 +4013,7 @@ ChipSet.prototype.set8042OutPort = function(b)
     if (!(b & ChipSet.KBC.OUTPORT.NO_RESET)) {
         /*
          * Bit 0 of the 8042's output port is connected to RESET.  Normally, it's "pulsed" with the
-         * KBD_CMD.PULSE_OUTPORT command, so if a RESET is detected via this command, we should try to
+         * KBC.CMD.PULSE_OUTPORT command, so if a RESET is detected via this command, we should try to
          * determine if that's what the caller intended.
          */
         if (DEBUG && DEBUGGER && this.dbg) {

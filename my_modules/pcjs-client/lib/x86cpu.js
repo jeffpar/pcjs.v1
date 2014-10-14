@@ -558,7 +558,9 @@ X86CPU.prototype.initProcessor = function()
     if (this.model >= X86.MODEL_80186) {
         /*
          * TODO: I don't go out of my way to make 80186/80188 cycle times accurate, since no IBM PC models used
-         * those processors; beyond this point, my real priority is the 80286.  But we may revisit the 80186 someday.
+         * those processors; beyond this point, my real priority is the 80286.  But we may revisit the 80186 someday;
+         * instruction handlers that contain "hard-coded" 80286 cycle times include: opINSb, opINSw, opOUTSb,
+         * opOUTSw, opENTER, and opLEAVE.
          */
         this.nShiftCountMask = 0x1f;        // on newer processors, all shift counts are MOD 32
         
@@ -582,7 +584,7 @@ X86CPU.prototype.initProcessor = function()
         this.aOps[0xC0]             = X86OpXX.opGRP2ab;
         this.aOps[0xC1]             = X86OpXX.opGRP2aw;
         this.aOps[X86.OPCODE.ENTER] = X86OpXX.opENTER;
-        this.aOps[X86.OPCODE.ENTER] = X86OpXX.opLEAVE;
+        this.aOps[X86.OPCODE.LEAVE] = X86OpXX.opLEAVE;
         this.aOps[0xF1]             = X86OpXX.opINT1;
         X86Grps.aOpGRP4b[0x07]      = X86Grps.opGrpInvalid;
         X86Grps.aOpGRP4w[0x07]      = X86Grps.opGrpInvalid;

@@ -45,7 +45,7 @@ if (typeof module !== 'undefined') {
 }
 
 /*
- * FDC Terms
+ * FDC Terms (see FDC.TERMS)
  *
  *      C       Cylinder Number         the current or selected cylinder number
  *      
@@ -78,7 +78,7 @@ if (typeof module !== 'undefined') {
  *      
  *      N       Number                  the number of data bytes written in a sector
  *      
- *      NCN     New Cylinder            the new cylinder number for a Seek operation
+ *      NCN     New Cylinder Number     the new cylinder number for a Seek operation
  *      
  *      ND      Non-Data Mode           indicates an operation in the non-data mode
  *      
@@ -185,6 +185,31 @@ Component.subclass(Component, FDC);
 
 FDC.DEFAULT_DRIVE_NAME = "Floppy Drive";
 
+if (DEBUG) {
+    FDC.TERMS = {
+        C:   "C",       // Cylinder Number
+        D:   "D",       // Data (eg, pattern to be written to a sector)
+        H:   "H",       // Head Address
+        R:   "R",       // Record (ie, sector number to be read or written)
+        N:   "N",       // Number (ie, number of data bytes to write)
+        DS:  "DS",      // Drive Select
+        SC:  "SC",      // Sectors per Cylinder
+        DTL: "DTL",     // Data Length
+        EOT: "EOT",     // End of Track
+        GPL: "GPL",     // Gap Length
+        HLT: "HLT",     // Head Load Time
+        NCN: "NCN",     // New Cylinder Number
+        PCN: "PCN",     // Present Cylinder Number
+        SRT: "SRT",     // Stepping Rate
+        ST0: "ST0",     // Status Register 0
+        ST1: "ST1",     // Status Register 1
+        ST2: "ST2",     // Status Register 2
+        ST3: "ST3"      // Status Register 3
+    }
+} else {
+    FDC.TERMS = {};
+}
+
 /*
  * FDC Digital Output Register (DOR) (0x3F2, write-only)
  * 
@@ -279,11 +304,11 @@ FDC.REG_CONTROL.RATEUNUSED  = 0x03;
 FDC.REG_DATA.CMD = {};
 FDC.REG_DATA.CMD.READ_TRACK     = 0x02;
 FDC.REG_DATA.CMD.SPECIFY        = 0x03;
-FDC.REG_DATA.CMD.DRIVE_STATUS   = 0x04;
+FDC.REG_DATA.CMD.SENSE_DRIVE    = 0x04;
 FDC.REG_DATA.CMD.WRITE_DATA     = 0x05;
 FDC.REG_DATA.CMD.READ_DATA      = 0x06;
 FDC.REG_DATA.CMD.RECALIBRATE    = 0x07;
-FDC.REG_DATA.CMD.INT_STATUS     = 0x08;     // this command is used to clear the FDC interrupt following the clearing/setting of FDC.REG_OUTPUT.ENABLE
+FDC.REG_DATA.CMD.SENSE_INT      = 0x08;     // this command is used to clear the FDC interrupt following the clearing/setting of FDC.REG_OUTPUT.ENABLE
 FDC.REG_DATA.CMD.WRITE_DEL_DATA = 0x09;
 FDC.REG_DATA.CMD.READ_ID        = 0x0A;
 FDC.REG_DATA.CMD.READ_DEL_DATA  = 0x0C;
@@ -338,18 +363,35 @@ FDC.REG_DATA.RES.ST3          = 0xFF000000;
 /*
  * FDC Command Sequences
  * 
- * For each command, cbWrite indicates the total number of bytes in the command request sequence,
- * including the first (command) byte; cbRead indicates total number of bytes in the response sequence.
+ * For each command, cbReq indicates the total number of bytes in the command request sequence,
+ * including the first (command) byte; cbRes indicates total number of bytes in the response sequence.
  */
-FDC.aCmdSeqs = {
-    0x03: {cbWrite: 3, cbRead: 0, name: "SPECIFY"},
-    0x04: {cbWrite: 2, cbRead: 1, name: "DRIVE_STATUS"},
-    0x05: {cbWrite: 9, cbRead: 7, name: "WRITE_DATA"},
-    0x06: {cbWrite: 9, cbRead: 7, name: "READ_DATA"},
-    0x07: {cbWrite: 2, cbRead: 0, name: "RECALIBRATE"},
-    0x08: {cbWrite: 1, cbRead: 2, name: "INT_STATUS"},
-    0x0D: {cbWrite: 6, cbRead: 7, name: "FORMAT"},
-    0x0F: {cbWrite: 3, cbRead: 0, name: "SEEK"}
+if (DEBUG) {
+    FDC.CMDS = {
+        SPECIFY:      "SPECIFY",
+        SENSE_DRIVE:  "SENSE DRIVE",
+        WRITE_DATA:   "WRITE DATA",
+        READ_DATA:    "READ DATA",
+        RECALIBRATE:  "RECALIBRATE",
+        SENSE_INT:    "SENSE INTERRUPT",
+        READ_ID:      "READ ID",
+        FORMAT:       "FORMAT",
+        SEEK:         "SEEK"
+    }
+} else {
+    FDC.CMDS = {};
+}
+
+FDC.aCmdInfo = {
+    0x03: {cbReq: 3, cbRes: 0, name: FDC.CMDS.SPECIFY},
+    0x04: {cbReq: 2, cbRes: 1, name: FDC.CMDS.SENSE_DRIVE},
+    0x05: {cbReq: 9, cbRes: 7, name: FDC.CMDS.WRITE_DATA},
+    0x06: {cbReq: 9, cbRes: 7, name: FDC.CMDS.READ_DATA},
+    0x07: {cbReq: 2, cbRes: 0, name: FDC.CMDS.RECALIBRATE},
+    0x08: {cbReq: 1, cbRes: 2, name: FDC.CMDS.SENSE_INT},
+    0x0A: {cbReq: 2, cbRes: 7, name: FDC.CMDS.READ_ID},
+    0x0D: {cbReq: 6, cbRes: 7, name: FDC.CMDS.FORMAT},
+    0x0F: {cbReq: 3, cbRes: 0, name: FDC.CMDS.SEEK}
 };
 
 /*
@@ -649,7 +691,7 @@ FDC.prototype.initController = function(data)
     }
     
     /*
-     * Selected drive (from reOutput), which can only be selected if its motor is on (see regOutput).
+     * Selected drive (from regOutput), which can only be selected if its motor is on (see regOutput).
      */
     this.iDrive = data[i++];
     i++;                        // unused slot (if reused, bias by +4, since it was formerly a unit #)
@@ -806,7 +848,7 @@ FDC.prototype.initDrive = function(drive, iDrive, data)
      * The next group of properties are set by various FDC command sequences.
      *
      * We initialize this.iDrive (above) and drive.bHead and drive.bCylinder (below) to zero, but leave the rest undefined,
-     * awaiting their first FDC command.  We do this because the initial INT_STATUS command returns a PCN, which will also
+     * awaiting their first FDC command.  We do this because the initial SENSE_INT command returns a PCN, which will also
      * be undefined unless we have at least zeroed both the current drive and the "present" cylinder on that drive.
      * 
      * Alternatively, I could make PCN a global FDC variable.  That may be closer to how the actual hardware operates,
@@ -819,7 +861,7 @@ FDC.prototype.initDrive = function(drive, iDrive, data)
      * 
      * Here's how it works: the BIOS seeks to track 48 (which is fine on an 80-track 1.2Mb high-capacity drive, but 9 tracks
      * too far on a 40-track 360Kb double-density drive), then seeks to track 10, and then seeks in single-track increments
-     * up to 10 more times until the DRIVE_STATUS command returns ST3 with the TRACK0 bit set.
+     * up to 10 more times until the SENSE_DRIVE command returns ST3 with the TRACK0 bit set.
      *
      * This implies that SEEK isn't really seeking to a specified cylinder, but rather it is calculating a delta from
      * the previous cylinder to the specified cylinder, and stepping over that number of tracks.  Which means that SEEK
@@ -1363,8 +1405,9 @@ FDC.prototype.outFDCOutput = function(port, bOut, addrFrom)
          * still updating this.iDrive below based on the "drive select" bits in regOutput, we would want
          * to make sure those bits now match what initController() set.  But since we no longer do that
          * (see below), this is no longer needed either.
+         *
+         *      bOut = (bOut & ~FDC.REG_OUTPUT.DS) | this.iDrive;
          */
-        // bOut = (bOut & ~FDC.REG_OUTPUT.DS) | this.iDrive;
     }
     else if (!(this.regOutput & FDC.REG_OUTPUT.ENABLE)) {
         /*
@@ -1385,14 +1428,14 @@ FDC.prototype.outFDCOutput = function(port, bOut, addrFrom)
      * with FDC.REG_OUTPUT.ENABLE clear, and then with it set.  However, both times, it ALSO loads the last selected
      * drive number into regOutput's "drive select" bits.
      * 
-     * If we switched our selected drive to match regOutput, then the ST0 value we returned on an INT_STATUS command
+     * If we switched our selected drive to match regOutput, then the ST0 value we returned on an SENSE_INT command
      * following the regOutput reset operation would indicate drive 1 instead of drive 0.  But the BIOS requires
-     * the ST0 result from the INT_STATUS command ALWAYS be 0xC0 (not 0xC1), so the controller must not be propagating
+     * the ST0 result from the SENSE_INT command ALWAYS be 0xC0 (not 0xC1), so the controller must not be propagating
      * regOutput's "drive select" bits in the way I originally assumed. 
+     *
+     *      var iDrive = bOut & FDC.REG_OUTPUT.DS;
+     *      if (bOut & (FDC.REG_OUTPUT.MOTOR_D0 << iDrive)) this.iDrive = iDrive;
      */
-    // var iDrive = bOut & FDC.REG_OUTPUT.DS;
-    // if (bOut & (FDC.REG_OUTPUT.MOTOR_D0 << iDrive)) this.iDrive = iDrive;
-    
     this.regOutput = bOut;
 };
 
@@ -1455,13 +1498,16 @@ FDC.prototype.outFDCData = function(port, bOut, addrFrom)
     }
     var bCmd = this.regDataArray[0];
     var bCmdMasked = bCmd & FDC.REG_DATA.CMD.MASK;
-    if (FDC.aCmdSeqs[bCmdMasked] !== undefined) {
-        if (this.regDataTotal >= FDC.aCmdSeqs[bCmdMasked].cbWrite) {
+    if (FDC.aCmdInfo[bCmdMasked] !== undefined) {
+        if (this.regDataTotal >= FDC.aCmdInfo[bCmdMasked].cbReq) {
             this.doCmd();
         }
         return;
     }
-    if (DEBUG) this.messageDebugger("unsupported FDC command: " + str.toHexByte(bCmd));
+    if (DEBUG) {
+        this.messageDebugger("unsupported FDC command: " + str.toHexByte(bCmd));
+        if (DEBUGGER) this.cpu.haltCPU();
+    }
 };
 
 /**
@@ -1524,35 +1570,40 @@ FDC.prototype.doCmd = function()
     var bCmdMasked = bCmd & FDC.REG_DATA.CMD.MASK;
     
     switch (bCmdMasked) {
-    case FDC.REG_DATA.CMD.SPECIFY:              // 0x03
-        this.popSRT();                          // SRT and HUT (encodings?)
-        this.popHLT();                          // HLT and ND (encodings?)
-        this.beginResult();                     // no results are provided by this command, and fIRQ should remain false
+    case FDC.REG_DATA.CMD.SPECIFY:                      // 0x03
+        this.popSRT();                                  // SRT and HUT (encodings?)
+        this.popHLT();                                  // HLT and ND (encodings?)
+        this.beginResult();
+        /*
+         * No results are provided by this command, and fIRQ should remain false
+         */
         break;
-    case FDC.REG_DATA.CMD.DRIVE_STATUS:         // 0x04 (SENSE DRIVE STATUS)
-        bDrive = this.popCmd("DS");
+    
+    case FDC.REG_DATA.CMD.SENSE_DRIVE:                  // 0x04
+        bDrive = this.popCmd(FDC.TERMS.DS);
         bHeadSelect = (bDrive >> 2) & 0x1;
         this.iDrive = (bDrive & 0x3);
         drive = this.aDrives[this.iDrive];
         this.beginResult();
         this.pushST3(drive);
         break;
-    case FDC.REG_DATA.CMD.WRITE_DATA:           // 0x05
-    case FDC.REG_DATA.CMD.READ_DATA:            // 0x06
-        bDrive = this.popCmd("DS");
+    
+    case FDC.REG_DATA.CMD.WRITE_DATA:                   // 0x05
+    case FDC.REG_DATA.CMD.READ_DATA:                    // 0x06
+        bDrive = this.popCmd(FDC.TERMS.DS);
         bHeadSelect = (bDrive >> 2) & 0x1;
         this.iDrive = (bDrive & 0x3);
         drive = this.aDrives[this.iDrive];
         drive.bHead = bHeadSelect;
-        drive.bCylinder = this.popCmd("C");     // C
-        bHead = this.popCmd("H");               // H
+        drive.bCylinder = this.popCmd(FDC.TERMS.C);     // C
+        bHead = this.popCmd(FDC.TERMS.H);               // H
         Component.assert(bHead == bHeadSelect);
-        drive.bSector = this.popCmd("R");       // R
-        n = this.popCmd("N");                   // N
-        drive.nBytes = 128 << n;                // 0 => 128, 1 => 256, 2 => 512, 3 => 1024
-        drive.bSectorEnd = this.popCmd("EOT");  // EOT (final sector number on a cylinder)
-        this.popCmd("GPL");                     // GPL (spacing between sectors, excluding VCO Sync Field; 3)
-        this.popCmd("DTL");                     // DTL (when N is 0, DTL stands for the data length to read out or write into the sector)
+        drive.bSector = this.popCmd(FDC.TERMS.R);       // R
+        n = this.popCmd(FDC.TERMS.N);                   // N
+        drive.nBytes = 128 << n;                        // 0 => 128, 1 => 256, 2 => 512, 3 => 1024
+        drive.bSectorEnd = this.popCmd(FDC.TERMS.EOT);  // EOT (final sector number on a cylinder)
+        this.popCmd(FDC.TERMS.GPL);                     // GPL (spacing between sectors, excluding VCO Sync Field; 3)
+        this.popCmd(FDC.TERMS.DTL);                     // DTL (when N is 0, DTL stands for the data length to read out or write into the sector)
         if (bCmdMasked == FDC.REG_DATA.CMD.READ_DATA)
             this.doRead(drive);
         else
@@ -1561,52 +1612,108 @@ FDC.prototype.doCmd = function()
         this.pushST0(drive);
         this.pushST1(drive);
         this.pushST2(drive);
-        this.pushResult(drive.bCylinder, "C");
-        this.pushResult(drive.bHead, "H");
-        this.pushResult(drive.bSector, "R");
-        this.pushResult(n, "N");
+        this.pushResult(drive.bCylinder, FDC.TERMS.C);
+        this.pushResult(drive.bHead, FDC.TERMS.H);
+        this.pushResult(drive.bSector, FDC.TERMS.R);
+        this.pushResult(n, FDC.TERMS.N);
         fIRQ = true;
         break;
-    case FDC.REG_DATA.CMD.RECALIBRATE:          // 0x07
-        bDrive = this.popCmd("DS");
+    
+    case FDC.REG_DATA.CMD.RECALIBRATE:                  // 0x07
+        bDrive = this.popCmd(FDC.TERMS.DS);
         this.iDrive = (bDrive & 0x3);
         drive = this.aDrives[this.iDrive];
         drive.bCylinder = drive.bCylinderSeek = 0;
         drive.resCode = FDC.REG_DATA.RES.SEEK_END | FDC.REG_DATA.RES.TRACK0;
-        this.beginResult();                     // no results provided; this command is typically followed by FDC.REG_DATA.CMD.INT_STATUS
+        this.beginResult();                             // no results provided; this command is typically followed by FDC.REG_DATA.CMD.SENSE_INT
         fIRQ = true;
         break;
-    case FDC.REG_DATA.CMD.INT_STATUS:           // 0x08 (SENSE INTERRUPT STATUS)
+    
+    case FDC.REG_DATA.CMD.SENSE_INT:                    // 0x08
         drive = this.aDrives[this.iDrive];
-        drive.bHead = 0;                        // this command is documented as ALWAYS returning a head address of 0 in ST0; see pushST0()
+        drive.bHead = 0;                                // this command is documented as ALWAYS returning a head address of 0 in ST0; see pushST0()
         this.beginResult();
         this.pushST0(drive);
-        this.pushResult(drive.bCylinder, "PCN");// no interrupt is generated by this command, so fIRQ should remain false
+        this.pushResult(drive.bCylinder, FDC.TERMS.PCN);
+        /*
+         * For some strange reason, the "DISK_RESET" function in the MODEL_5170_REV3 BIOS resets the
+         * adapter and then issues FOUR -- that's right, not ONE but FOUR -- SENSE INTERRUPT STATUS commands
+         * in a row, and expects ST0 to contain a different drive number after each command (first 0, then 1,
+         * then 2, and finally 3).  What makes this doubly weird is SENSE INTERRUPT STATUS (unlike SENSE
+         * DRIVE STATUS) is a drive-agnostic command.
+         * 
+         * Didn't the original PC AT "HFCOMBO" controller limit support to TWO diskette drives max?
+         * And even if the PC AT supported other FDC controllers that DID support up to FOUR diskette drives,
+         * why should "DISK_RESET" hard-code a 4-drive loop?
+         * 
+         * Well, whatever.  All this head-scratching doesn't change the fact that I apparently have to
+         * "auto-increment" the internal drive number (this.iDrive) after each SENSE INTERRUPT STATUS command.
+         */
+        this.iDrive = (this.iDrive + 1) & 0x3;
+        /*
+         * No interrupt is generated by this command, so fIRQ should remain false.
+         */
         break;
-    case FDC.REG_DATA.CMD.FORMAT_TRACK:         // 0x0D
-        bDrive = this.popCmd("DS");
+    
+    case FDC.REG_DATA.CMD.READ_ID:                      // 0x0A
+        /*
+         * This command is used by "SETUP_DBL" in the MODEL_5170_REV3 BIOS to determine if a double-density
+         * (40-track) diskette has been inserted in a high-density (80-track) drive; ie, whether "double stepping"
+         * is required, since only 40 of the 80 possible "steps" are valid for a double-density diskette.
+         * 
+         * To start, we'll focus on making this work in the normal case (80-track diskette in 80-track drive).
+         */
+        bDrive = this.popCmd(FDC.TERMS.DS);
         bHeadSelect = (bDrive >> 2) & 0x1;
         this.iDrive = (bDrive & 0x3);
         drive = this.aDrives[this.iDrive];
         drive.bHead = bHeadSelect;
-        n = this.popCmd("N");                   // N
-        drive.nBytes = 128 << n;                // 0 => 128, 1 => 256, 2 => 512, 3 => 1024 (bytes/sector)
-        drive.bSectorEnd = this.popCmd("SC");   // SC (sectors/track)
-        this.popCmd("GPL");                     // GPL (spacing between sectors, excluding VCO Sync Field; 3)
-        drive.bFiller = this.popCmd("D");       // D (filler byte)
+        drive.bSector = 1;
+        n = 0;
+        drive.resCode = FDC.REG_DATA.RES.NONE;
+        if (drive.disk && (drive.sector = drive.disk.seek(drive.bCylinder, drive.bHead, drive.bSector))) {
+            n = drive.sector.length;
+        } else {
+            /*
+             * TODO: Determine the appropriate response code(s) for the possible errors that can occur here.
+             */
+            drive.resCode = FDC.REG_DATA.RES.NO_DATA | FDC.REG_DATA.RES.INCOMPLETE;
+        }
+        this.pushST0(drive);
+        this.pushST1(drive);
+        this.pushST2(drive);
+        this.pushResult(drive.bCylinder, FDC.TERMS.C);
+        this.pushResult(drive.bHead, FDC.TERMS.H);
+        this.pushResult(drive.bSector, FDC.TERMS.R);
+        this.pushResult(n, FDC.TERMS.N);
+        fIRQ = true;
+        break;
+    
+    case FDC.REG_DATA.CMD.FORMAT_TRACK:                 // 0x0D
+        bDrive = this.popCmd(FDC.TERMS.DS);
+        bHeadSelect = (bDrive >> 2) & 0x1;
+        this.iDrive = (bDrive & 0x3);
+        drive = this.aDrives[this.iDrive];
+        drive.bHead = bHeadSelect;
+        n = this.popCmd(FDC.TERMS.N);                   // N
+        drive.nBytes = 128 << n;                        // 0 => 128, 1 => 256, 2 => 512, 3 => 1024 (bytes/sector)
+        drive.bSectorEnd = this.popCmd(FDC.TERMS.SC);   // SC (sectors/track)
+        this.popCmd(FDC.TERMS.GPL);                     // GPL (spacing between sectors, excluding VCO Sync Field; 3)
+        drive.bFiller = this.popCmd(FDC.TERMS.D);       // D (filler byte)
         this.doFormat(drive);
         this.beginResult();
         this.pushST0(drive);
         this.pushST1(drive);
         this.pushST2(drive);
-        this.pushResult(drive.bCylinder, "C");
-        this.pushResult(drive.bHead, "H");
-        this.pushResult(drive.bSector, "R");
-        this.pushResult(n, "N");
+        this.pushResult(drive.bCylinder, FDC.TERMS.C);
+        this.pushResult(drive.bHead, FDC.TERMS.H);
+        this.pushResult(drive.bSector, FDC.TERMS.R);
+        this.pushResult(n, FDC.TERMS.N);
         fIRQ = true;
         break;
-    case FDC.REG_DATA.CMD.SEEK:                 // 0x0F
-        bDrive = this.popCmd("DS");
+    
+    case FDC.REG_DATA.CMD.SEEK:                         // 0x0F
+        bDrive = this.popCmd(FDC.TERMS.DS);
         bHeadSelect = (bDrive >> 2) & 0x1;
         this.iDrive = (bDrive & 0x3);
         drive = this.aDrives[this.iDrive];
@@ -1620,7 +1727,7 @@ FDC.prototype.doCmd = function()
          * allowed to exceed the physical boundaries of the drive (ie, never lower than 0, and never greater
          * than or equal to nCylinders).
          */
-        bCylinder = this.popCmd("NCN");
+        bCylinder = this.popCmd(FDC.TERMS.NCN);
         drive.bCylinder += bCylinder - drive.bCylinderSeek;
         if (drive.bCylinder < 0) drive.bCylinder = 0;
         if (drive.bCylinder >= drive.nCylinders) drive.bCylinder = drive.nCylinders - 1;
@@ -1634,11 +1741,15 @@ FDC.prototype.doCmd = function()
         if (drive.bCylinder == 0) {
             drive.resCode |= FDC.REG_DATA.RES.TRACK0;
         }
-        this.beginResult();                     // like FDC.REG_DATA.CMD.RECALIBRATE, no results are provided 
+        this.beginResult();                             // like FDC.REG_DATA.CMD.RECALIBRATE, no results are provided 
         fIRQ = true;
         break;
+    
     default:
-        if (DEBUG) this.messageDebugger("FDC operation unsupported (command=0x: " + str.toHexByte(bCmd) + ")");
+        if (DEBUG) {
+            this.messageDebugger("FDC operation unsupported (command=0x: " + str.toHexByte(bCmd) + ")");
+            if (DEBUGGER) this.cpu.haltCPU();
+        }
         break;
     }
 
@@ -1649,7 +1760,7 @@ FDC.prototype.doCmd = function()
      * an interrupt is supposed to occur, signaling the beginning of the Result Phase.  Once the first byte of the
      * result has been read, the interrupt is cleared (see inFDCData).
      * 
-     * TODO: Technically, interrupt request status should be cleared by the FDC.REG_DATA.CMD.INT_STATUS command; in fact,
+     * TODO: Technically, interrupt request status should be cleared by the FDC.REG_DATA.CMD.SENSE_INT command; in fact,
      * if that command is issued and no interrupt was pending, then FDC.REG_DATA.RES.INVALID should be returned (via ST0).
      */
     if (this.regOutput & FDC.REG_OUTPUT.INT_ENABLE) {
@@ -1672,7 +1783,7 @@ FDC.prototype.popCmd = function(name)
     var bCmd = this.regDataArray[this.regDataIndex];
     if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled((this.regDataIndex > 0? this.dbg.MESSAGE_PORT : 0) | this.dbg.MESSAGE_FDC)) {
         var bCmdMasked = bCmd & FDC.REG_DATA.CMD.MASK;
-        if (!name && !this.regDataIndex && FDC.aCmdSeqs[bCmdMasked]) name = FDC.aCmdSeqs[bCmdMasked].name;
+        if (!name && !this.regDataIndex && FDC.aCmdInfo[bCmdMasked]) name = FDC.aCmdInfo[bCmdMasked].name;
         this.dbg.message("FDC.CMD[" + (name || this.regDataIndex) + "]: 0x" + str.toHexByte(bCmd));
     }
     this.regDataIndex++;
@@ -1688,8 +1799,8 @@ FDC.prototype.popCmd = function(name)
  */
 FDC.prototype.popHLT = function()
 {
-    this.popCmd("HLT");
- // this.nHLT = this.popCmd("HLT");
+    this.popCmd(FDC.TERMS.HLT);
+ // this.nHLT = this.popCmd(FDC.TERMS.HLT);
 };
 
 /**
@@ -1701,8 +1812,8 @@ FDC.prototype.popHLT = function()
  */
 FDC.prototype.popSRT = function()
 {
-    this.popCmd("SRT");
- // this.nSRT = this.popCmd("SRT");
+    this.popCmd(FDC.TERMS.SRT);
+ // this.nSRT = this.popCmd(FDC.TERMS.SRT);
 };
 
 /**
@@ -1736,7 +1847,7 @@ FDC.prototype.pushResult = function(bResult, name)
  */
 FDC.prototype.pushST0 = function(drive)
 {
-    this.pushResult(drive.iDrive | (drive.bHead << 2) | (drive.resCode & FDC.REG_DATA.RES.ST0), "ST0");
+    this.pushResult(drive.iDrive | (drive.bHead << 2) | (drive.resCode & FDC.REG_DATA.RES.ST0), FDC.TERMS.ST0);
 };
 
 /**
@@ -1747,7 +1858,7 @@ FDC.prototype.pushST0 = function(drive)
  */
 FDC.prototype.pushST1 = function(drive)
 {
-    this.pushResult((drive.resCode & FDC.REG_DATA.RES.ST1) >>> 8, "ST1");
+    this.pushResult((drive.resCode & FDC.REG_DATA.RES.ST1) >>> 8, FDC.TERMS.ST1);
 };
 
 /**
@@ -1758,7 +1869,7 @@ FDC.prototype.pushST1 = function(drive)
  */
 FDC.prototype.pushST2 = function(drive)
 {
-    this.pushResult((drive.resCode & FDC.REG_DATA.RES.ST2) >>> 16, "ST2");
+    this.pushResult((drive.resCode & FDC.REG_DATA.RES.ST2) >>> 16, FDC.TERMS.ST2);
 };
 
 /**
@@ -1769,7 +1880,7 @@ FDC.prototype.pushST2 = function(drive)
  */
 FDC.prototype.pushST3 = function(drive)
 {
-    this.pushResult((drive.resCode & FDC.REG_DATA.RES.ST3) >>> 24, "ST3");
+    this.pushResult((drive.resCode & FDC.REG_DATA.RES.ST3) >>> 24, FDC.TERMS.ST3);
 };
 
 /**
@@ -2120,13 +2231,11 @@ FDC.prototype.intBIOSDiskette = function(addr)
         var DL = this.cpu.regDX & 0xff;
         var DH = this.cpu.regDX >> 8;
         if (this.dbg && this.dbg.messageEnabled(this.dbg.MESSAGE_FDC) && DL < 0x80) {
-            this.dbg.message("\nFDC.intBIOS(AH=" + str.toHexByte(AH) + ",D=" + str.toHexByte(DL) + ",C=" + str.toHexByte(CH) + ",H=" + str.toHexByte(DH) + ",S=" + str.toHexByte(CL) + ",N=" + str.toHexByte(AL) + ") at " + str.toHexAddr(addr - this.cpu.segCS.base, this.cpu.segCS.sel));
-            // this.cpu.haltCPU();
+            this.dbg.message("\nFDC.intBIOS(AH=" + str.toHexByte(AH) + ",drv=" + str.toHexByte(DL) + ",cyl=" + str.toHexByte(CH) + ",hd=" + str.toHexByte(DH) + ",sec=" + str.toHexByte(CL) + ",num=" + str.toHexByte(AL) + ") at " + str.toHexAddr(addr - this.cpu.segCS.base, this.cpu.segCS.sel));
             this.cpu.addInterruptReturn(addr, function(fdc, nCycles) {
                 return function onBIOSDisketteReturn(nLevel) {
                     nCycles = fdc.cpu.getCycles() - nCycles;
                     fdc.messageDebugger("FDC.intBIOS(" + nLevel + "): C=" + (fdc.cpu.getCF()? 1 : 0) + " (cycles=" + nCycles + ")");
-                    // if (DEBUG && nCycles > 10000) fdc.cpu.haltCPU();
                 };
             }(this, this.cpu.getCycles()));
         }

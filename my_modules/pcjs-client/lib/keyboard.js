@@ -117,14 +117,15 @@ Keyboard.CMD.ECHO           = 0xEE;
 Keyboard.CMD.SETLEDS        = 0xED;
 
 Keyboard.CMDRES = {};
-Keyboard.CMDRES.RESEND      = 0xFE;
-Keyboard.CMDRES.ACK         = 0xFA;
 Keyboard.CMDRES.OVERRUN     = 0x00;
-Keyboard.CMDRES.DIAGFAIL    = 0xFD;
-Keyboard.CMDRES.BREAKPREFIX = 0xF0;
+Keyboard.CMDRES.LOADTEST    = 0x65;     // this is an undocumented "LOAD MANUFACTURING TEST REQUEST" response code
 Keyboard.CMDRES.BATSUCCESS  = 0xAA;     // Basic Assurance Test (BAT) completed successfully 
-Keyboard.CMDRES.BATFAIL     = 0xFC;     // Basic Assurance Test (BAT) failed 
 Keyboard.CMDRES.ECHO        = 0xEE;
+Keyboard.CMDRES.BREAKPREFIX = 0xF0;
+Keyboard.CMDRES.ACK         = 0xFA;
+Keyboard.CMDRES.BATFAIL     = 0xFC;     // Basic Assurance Test (BAT) failed 
+Keyboard.CMDRES.DIAGFAIL    = 0xFD;
+Keyboard.CMDRES.RESEND      = 0xFE;
 
 /*
  * Keyboard keyCodes I must pay particular attention to...
@@ -587,37 +588,46 @@ Keyboard.prototype.resetDevice = function()
 };
 
 /**
- * setEnable(fEnable, fClock)
+ * setEnable(fData, fClock)
  * 
- * This is the ChipSet's primary interface for controlling "Model F" keyboards (ie, those used with
- * MODEL_5150 and MODEL_5160 machines).  This function is called from the ChipSet's PPI_B output handler.
+ * This is the ChipSet's primary interface for toggling keyboard "data" and "clock" lines.
+ * For MODEL_5150 and MODEL_5160 machines, this function is called from the ChipSet's PPI_B
+ * output handler.  For MODEL_5170 machines, this function is called when selected KBC.CMD
+ * "data bytes" have been written.
  * 
  * @this {Keyboard}
- * @param {boolean} fEnable is true if the keyboard interface should be enabled
- * @param {boolean} fClock is true if the keyboard's simulated clock line should go "high"
+ * @param {boolean} fData is true if the keyboard simulated data line should be enabled
+ * @param {boolean} fClock is true if the keyboard's simulated clock line should be enabled
+ * @return {boolean} true if keyboard was re-enabled, false if not (or no change)
  */
-Keyboard.prototype.setEnable = function(fEnable, fClock)
+Keyboard.prototype.setEnable = function(fData, fClock)
 {
+    var fReset = false;
     if (this.fClock !== fClock) {
-        if (DEBUG) this.messageDebugger("keyboard clock changing to " + fClock, true);
+        if (DEBUG) this.messageDebugger("keyboard clock line changing to " + fClock, true);
         /*
-         * Toggling the clock line low and then high signals a "reset", which we acknowledge when enabled
+         * Toggling the clock line low and then high signals a "reset", which we acknowledge once the
+         * data line is high as well.
          */
         this.fClock = this.fResetOnEnable = fClock;
     }
-    if (this.fEnable !== fEnable) {
-        if (DEBUG) this.messageDebugger("keyboard enable changing to " + fEnable, true);
-        this.fEnable = fEnable;
-        if (fEnable) {
-            if (this.fResetOnEnable) {
-                this.resetDevice();
-                this.fResetOnEnable = false;
-            }
-            else {
-                this.shiftScanCode();
-            }
+    if (this.fData !== fData) {
+        if (DEBUG) this.messageDebugger("keyboard data line changing to " + fData, true);
+        this.fData = fData;
+        /*
+         * TODO: Review this code; it was added during the early days of MODEL_5150 testing and may not be
+         * *exactly* what's called for here.
+         */
+        if (fData && !this.fResetOnEnable) {
+            this.shiftScanCode();
         }
     }
+    if (this.fData && this.fResetOnEnable) {
+        this.resetDevice();
+        this.fResetOnEnable = false;
+        fReset = true;
+    }
+    return fReset;
 };
 
 /**
@@ -625,7 +635,7 @@ Keyboard.prototype.setEnable = function(fEnable, fClock)
  *
  * This is the ChipSet's primary interface for controlling "Model M" keyboards (ie, those used
  * with MODEL_5170 machines).  Commands are delivered through the ChipSet's 8042 Keyboard Controller.
- *
+ * 
  * @this {Keyboard}
  * @param {number} bCmd should be one of the Keyboard.CMD.* command codes (Model M keyboards only)
  * @return {number} response should be one of the Keyboard.CMDRES.* response codes, or -1 if unrecognized
@@ -708,7 +718,7 @@ Keyboard.prototype.powerUp = function(data, fRepower)
     if (!fRepower) {
         /*
          * TODO: Save/restore support for Keyboard is the barest minimum.  In fact, originally, I wasn't
-         * saving/restoring anything, and that was OK, but if we don't at least re-initialize fClock/fEnable,
+         * saving/restoring anything, and that was OK, but if we don't at least re-initialize fClock/fData,
          * we can get a spurious reset following a restore.  In an ideal world, we might choose to save/restore
          * abScanBuffer as well, but realistically, I think it's going to be safer to always start with an
          * empty buffer--and who's going to notice anyway?
@@ -828,7 +838,7 @@ Keyboard.prototype.initState = function(data)
     var i = 0;
     if (data === undefined) data = [];
     this.fClock = data[i++];
-    this.fEnable = data[i];
+    this.fData = data[i];
     return true;
 };
 
@@ -843,7 +853,7 @@ Keyboard.prototype.saveState = function()
     var i = 0;
     var data = [];
     data[i++] = this.fClock;
-    data[i] = this.fEnable;
+    data[i] = this.fData;
     return data;
 };
 

@@ -1642,6 +1642,27 @@ HDC.prototype.outATCDrvHd = function(port, bOut, addrFrom)
 {
     this.messagePort(port, bOut, addrFrom, "DRVHD");
     this.regDrvHd = bOut;
+    /*
+     * The MODEL_5170_REV3 BIOS (see "POST2_CHK_HF2" @F000:14FC) probes for a 2nd hard drive when the number
+     * of configured hard drives is something other than 2, using INT 0x13/AH=0x10.  This in turn calls the
+     * BIOS "TST_RDY" function, which selects the drive in this register (see DRIVE_MASK), and then immediately
+     * expects regStatus to reflect success or failure.
+     * 
+     * We were always returning success, because no ATC command was actually issued, and so the user would
+     * always get a spurious CMOS configuration error: "System Options Not Set-(Run SETUP)".
+     * 
+     * So now we update regStatus here.  I'm not sure which status bits are normally set to indicate failure,
+     * but it should be sufficient to set or clear the READY bit according to whether the drive exists or not.
+     * 
+     * TODO: Dig into the ATC documentation some more, and determine what other situations, if any, regStatus
+     * needs to be updated.
+     */
+    var iDrive = (this.regDrvHd & HDC.ATC.DRVHD.DRIVE_MASK? 1 : 0);
+    if (this.aDrives[iDrive]) {
+        this.regStatus |= HDC.ATC.STATUS.READY;
+    } else {
+        this.regStatus &= ~HDC.ATC.STATUS.READY;
+    }
 };
 
 /**
@@ -2558,12 +2579,10 @@ HDC.prototype.intBIOSDisk = function(addr)
     if (DEBUGGER) {
         if (this.dbg && this.dbg.messageEnabled(this.dbg.MESSAGE_HDC) && DL >= 0x80) {
             this.dbg.message("HDC.intBIOSDisk(AX=" + str.toHexWord(this.cpu.regAX) + ",DL=" + str.toHexByte(DL) + ") at " + str.toHexAddr(addr - this.cpu.segCS.base, this.cpu.segCS.sel));
-            // this.cpu.haltCPU();
             this.cpu.addInterruptReturn(addr, function (hdc, nCycles) {
                 return function onBIOSDiskReturn(nLevel) {
                     nCycles = hdc.cpu.getCycles() - nCycles;
                     hdc.messageDebugger("HDC.intBIOSDisk(" + nLevel + "): C=" + (hdc.cpu.getCF()? 1 : 0) + " (cycles=" + nCycles + ")");
-                    // if (DEBUG && nCycles > 10000) hdc.cpu.haltCPU();
                 };
             }(this, this.cpu.getCycles()));
         }

@@ -1968,31 +1968,15 @@ Video.prototype.intBIOSVideo = function(addr)
     if (DEBUGGER) {
         if (this.dbg && this.dbg.messageEnabled(this.dbg.MESSAGE_VIDEO)) {
             this.dbg.message("Video.intBIOS(AX=" + str.toHexWord(this.cpu.regAX) + ") at " + str.toHexAddr(addr - this.cpu.segCS.base, this.cpu.segCS.sel));
-            // this.cpu.haltCPU();
             this.cpu.addInterruptReturn(addr, function (video, nCycles) {
                 return function onBIOSVideoReturn(nLevel) {
-                    video.intBIOSVideoReturn(nCycles, nLevel);
+                    nCycles = video.cpu.getCycles() - nCycles;
+                    video.messageDebugger("Video.intBIOSReturn(" + nLevel + ") (cycles=" + nCycles + ")");
                 };
             }(this, this.cpu.getCycles()));
         }
     }
     return true;
-};
-
-/**
- * intBIOSVideoReturn(nCycles, nLevel)
- *
- * @this {Video}
- * @param {number} nCycles
- * @param {number} nLevel
- */
-Video.prototype.intBIOSVideoReturn = function(nCycles, nLevel)
-{
-    if (DEBUGGER) {
-        nCycles = this.cpu.getCycles() - nCycles;
-        this.messageDebugger("Video.intBIOSReturn(" + nLevel + ") (cycles=" + nCycles + ")");
-        // if (DEBUG && nCycles > 10000) this.cpu.haltCPU();
-    }
 };
 
 /**
