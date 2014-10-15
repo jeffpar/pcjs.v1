@@ -452,10 +452,13 @@ if (DEBUG) {
  * in the INT 0x40 vector.
  */
 HDC.BIOS = {
-    DISK_INT:       0x13,
-    DISKETTE_INT:   0x40
+    INT_DISK:       0x13,
+    INT_DISKETTE:   0x40
 };
 
+/*
+ * NOTE: These are useful values for reference, but they're not actually used for anything at the moment. 
+ */
 HDC.BIOS.DISK_CMD = {
     RESET:          0x00,
     GET_STATUS:     0x01,
@@ -524,8 +527,8 @@ HDC.prototype.initBus = function(cmp, bus, cpu, dbg)
     bus.addPortOutputTable(this, this.fATC? HDC.aATCPortOutput : HDC.aXTCPortOutput);
 
     if (DEBUGGER) {
-        cpu.addInterruptNotify(HDC.BIOS.DISK_INT, this, this.intBIOSDisk);
-        cpu.addInterruptNotify(HDC.BIOS.DISKETTE_INT, this, this.intBIOSDiskette);
+        cpu.addIntNotify(HDC.BIOS.INT_DISK, this, this.intBIOSDisk);
+        cpu.addIntNotify(HDC.BIOS.INT_DISKETTE, this, this.intBIOSDiskette);
     }
 
     /*
@@ -2578,11 +2581,10 @@ HDC.prototype.intBIOSDisk = function(addr)
     if (!AH && DL > 0x80) this.iDriveAllowFail = DL - 0x80;
     if (DEBUGGER) {
         if (this.dbg && this.dbg.messageEnabled(this.dbg.MESSAGE_HDC) && DL >= 0x80) {
-            this.dbg.message("HDC.intBIOSDisk(AX=" + str.toHexWord(this.cpu.regAX) + ",DL=" + str.toHexByte(DL) + ") at " + str.toHexAddr(addr - this.cpu.segCS.base, this.cpu.segCS.sel));
-            this.cpu.addInterruptReturn(addr, function (hdc, nCycles) {
+            this.dbg.messageInt(HDC.BIOS.INT_DISK, addr);
+            this.cpu.addIntReturn(addr, function (hdc, nCycles) {
                 return function onBIOSDiskReturn(nLevel) {
-                    nCycles = hdc.cpu.getCycles() - nCycles;
-                    hdc.messageDebugger("HDC.intBIOSDisk(" + nLevel + "): C=" + (hdc.cpu.getCF()? 1 : 0) + " (cycles=" + nCycles + ")");
+                    hdc.dbg.messageIntReturn(HDC.BIOS.INT_DISK, nLevel, hdc.cpu.getCycles() - nCycles);
                 };
             }(this, this.cpu.getCycles()));
         }

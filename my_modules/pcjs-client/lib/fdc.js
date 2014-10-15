@@ -397,8 +397,9 @@ FDC.aCmdInfo = {
 /*
  * FDC BIOS interrupts, functions, and other parameters
  */
-FDC.BIOS = {};
-FDC.BIOS.DISKETTE_INT = 0x13;
+FDC.BIOS = {
+    INT_DISKETTE:   0x13
+};
 
 /**
  * setBinding(sHTMLClass, sHTMLType, sBinding, control)
@@ -547,7 +548,7 @@ FDC.prototype.initBus = function(cmp, bus, cpu, dbg)
 
     bus.addPortInputTable(this, FDC.aPortInput);
     bus.addPortOutputTable(this, FDC.aPortOutput);
-    if (DEBUGGER) cpu.addInterruptNotify(FDC.BIOS.DISKETTE_INT, this, this.intBIOSDiskette);
+    if (DEBUGGER) cpu.addIntNotify(FDC.BIOS.INT_DISKETTE, this, this.intBIOSDiskette);
 };
 
 /**
@@ -2224,18 +2225,12 @@ FDC.prototype.writeFormat = function(drive, b)
 FDC.prototype.intBIOSDiskette = function(addr)
 {
     if (DEBUGGER) {
-        var AL = this.cpu.regAX & 0xff;
-        var AH = this.cpu.regAX >> 8;
-        var CL = this.cpu.regCX & 0xff;
-        var CH = this.cpu.regCX >> 8;
         var DL = this.cpu.regDX & 0xff;
-        var DH = this.cpu.regDX >> 8;
         if (this.dbg && this.dbg.messageEnabled(this.dbg.MESSAGE_FDC) && DL < 0x80) {
-            this.dbg.message("\nFDC.intBIOS(AH=" + str.toHexByte(AH) + ",drv=" + str.toHexByte(DL) + ",cyl=" + str.toHexByte(CH) + ",hd=" + str.toHexByte(DH) + ",sec=" + str.toHexByte(CL) + ",num=" + str.toHexByte(AL) + ") at " + str.toHexAddr(addr - this.cpu.segCS.base, this.cpu.segCS.sel));
-            this.cpu.addInterruptReturn(addr, function(fdc, nCycles) {
+            this.dbg.messageInt(FDC.BIOS.INT_DISKETTE, addr);
+            this.cpu.addIntReturn(addr, function(fdc, nCycles) {
                 return function onBIOSDisketteReturn(nLevel) {
-                    nCycles = fdc.cpu.getCycles() - nCycles;
-                    fdc.messageDebugger("FDC.intBIOS(" + nLevel + "): C=" + (fdc.cpu.getCF()? 1 : 0) + " (cycles=" + nCycles + ")");
+                    fdc.dbg.messageIntReturn(FDC.BIOS.INT_DISKETTE, nLevel, fdc.cpu.getCycles() - nCycles);
                 };
             }(this, this.cpu.getCycles()));
         }

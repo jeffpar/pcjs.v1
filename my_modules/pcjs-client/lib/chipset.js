@@ -237,7 +237,8 @@ function ChipSet(parmsChipSet)
     /*
      * I used to defer ChipSet's reset() to powerUp(), which then gave us the option of doing either
      * reset() OR restore(), instead of both.  However, on MODEL_5170 machines, the initial CMOS data
-     * needs to be created earlier, so that if/when the HDC calls setCMOSDriveType(), we'll be ready.
+     * needs to be created earlier, so that when other components are initializing their state (eg, when
+     * HDC calls setCMOSDriveType() or RAM calls addCMOSMemory()), the CMOS will be ready to take their calls.
      */
     this.reset();
     
@@ -597,11 +598,11 @@ ChipSet.PPI_SW = {
         SHIFT:          6
     },
     COPROC:             0x02,   // MODEL_5150: reserved; MODEL_5160: coprocessor installed
-    MEMORY: {
-        X1:             0x00,   // MODEL_5150: "X" is 16Kb; MODEL_5160: "X" is 64Kb
-        X2:             0x04,
-        X3:             0x08,
-        X4:             0x0C,
+    MEMORY: {                   // MODEL_5150: "X" is 16Kb; MODEL_5160: "X" is 64Kb
+        X1:             0x00,   // 16Kb or 64Kb
+        X2:             0x04,   // 32Kb or 128Kb
+        X3:             0x08,   // 48Kb or 192Kb
+        X4:             0x0C,   // 64Kb or 256Kb
         MASK:           0x0C,
         SHIFT:          2
     },
@@ -864,7 +865,7 @@ ChipSet.COPROC = {              // TODO: Define a variable for this
  * ChipSet-related BIOS interrupts, functions, and other parameters
  */
 ChipSet.BIOS = {
-    RTC_INT:            0x1A
+    INT_RTC:            0x1A
 };
 
 /**
@@ -949,12 +950,12 @@ ChipSet.prototype.initBus = function(cmp, bus, cpu, dbg)
             {
                 chipset.dumpTimer();
             });
-            dbg.messageDump(ChipSet.MESSAGE_CHIPSET, function onDumpCMOS()
+            dbg.messageDump(ChipSet.MESSAGE_CMOS, function onDumpCMOS()
             {
                 chipset.dumpCMOS();
             });
         }
-        cpu.addInterruptNotify(ChipSet.BIOS.RTC_INT, this, this.intBIOSRTC);
+        cpu.addIntNotify(ChipSet.BIOS.INT_RTC, this, this.intBIOSRTC);
     }
 };
 
@@ -970,7 +971,7 @@ ChipSet.prototype.powerUp = function(data, fRepower)
 {
     if (!fRepower) {
         if (!data) {
-            this.reset();
+            this.reset(true);
         } else {
             if (!this.restore(data)) return false;
         }
@@ -991,11 +992,12 @@ ChipSet.prototype.powerDown = function(fSave)
 };
 
 /**
- * reset()
+ * reset(fSoft)
  * 
  * @this {ChipSet}
+ * @param {boolean} [fSoft] is true if "soft" reset, otherwise "hard" reset (see below for details)
  */
-ChipSet.prototype.reset = function()
+ChipSet.prototype.reset = function(fSoft)
 {
     /*
      * We propagate the sw1Init/sw2Init values to sw1/sw2 at reset; the user is only
@@ -1070,13 +1072,12 @@ ChipSet.prototype.reset = function()
         this.bCMOSAddr = 0;         // NMI is enabled, since the ChipSet.CMOS.ADDR.NMI_DISABLE bit is not set in bCMOSAddr
 
         /*
-         * Now that we call reset() from the ChipSet constructor, enabling other components can to update
-         * their CMOS information, we must not allow a reset() from powerUp() to toss that information, so
-         * we allocate abCMOSData only if it hasn't already been allocated.
+         * Now that we call reset() from the ChipSet constructor, enabling other components to update
+         * their own CMOS information as needed, we must distinguish between the initial ("hard") reset
+         * and any later ("soft") resets (eg, from powerUp() calls), and make sure the latter preserves
+         * existing CMOS information.
          */
-        if (!this.abCMOSData) {
-            this.abCMOSData = new Array(ChipSet.CMOS.ADDR.TOTAL);
-        }
+        if (!fSoft) this.abCMOSData = new Array(ChipSet.CMOS.ADDR.TOTAL);
 
         this.initRTCDate(this.sRTCDate);
         
@@ -2458,7 +2459,7 @@ ChipSet.prototype.advanceDMA = function(channel, fInit)
             var addr = (channel.bPage << 16) | (channel.addrCurrent[1] << 8) | channel.addrCurrent[0];
             if (DEBUG && DEBUGGER && channel.sAddrDebug === null) {
                 channel.sAddrDebug = str.toHex(addr >> 4, 4) + ":" + str.toHex(addr & 0xf, 4);
-                if (this.dbg && this.dbg.messageEnabled(this.dbg.MESSAGE_DMA | (iDMAChannel == ChipSet.DMA_FDC? this.dbg.MESSAGE_FDC : (iDMAChannel == ChipSet.DMA_HDC? this.dbg.MESSAGE_HDC : this.dbg.MESSAGE_LOG))) && channel.xfer != ChipSet.DMA_MODE.XFER_WRITE) {
+                if (this.dbg && this.dbg.messageEnabled(ChipSet.MESSAGE_DMA | (iDMAChannel == ChipSet.DMA_FDC? ChipSet.MESSAGE_FDC : (iDMAChannel == ChipSet.DMA_HDC? ChipSet.MESSAGE_HDC : ChipSet.MESSAGE_LOG))) && channel.xfer != ChipSet.DMA_MODE.XFER_WRITE) {
                     this.dbg.message("advanceDMA(" + iDMAChannel + ") transferring " + channel.cbDebug + " bytes from " + channel.sAddrDebug);
                     this.dbg.doDump("db", channel.sAddrDebug, "l" + Math.floor((channel.cbDebug + 15) / 16));
                 }
@@ -2568,7 +2569,7 @@ ChipSet.prototype.updateDMA = function(channel)
         channel.component = channel.obj = null;
     }
 
-    if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(this.dbg.MESSAGE_DMA | (iDMAChannel == ChipSet.DMA_FDC? this.dbg.MESSAGE_FDC : (iDMAChannel == ChipSet.DMA_HDC? this.dbg.MESSAGE_HDC : this.dbg.MESSAGE_LOG))) && channel.xfer == ChipSet.DMA_MODE.XFER_WRITE && channel.sAddrDebug) {
+    if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(ChipSet.MESSAGE_DMA | (iDMAChannel == ChipSet.DMA_FDC? ChipSet.MESSAGE_FDC : (iDMAChannel == ChipSet.DMA_HDC? ChipSet.MESSAGE_HDC : ChipSet.MESSAGE_LOG))) && channel.xfer == ChipSet.DMA_MODE.XFER_WRITE && channel.sAddrDebug) {
         this.dbg.message("updateDMA(" + iDMAChannel + ") transferred " + channel.cbDebug + " bytes to " + channel.sAddrDebug);
         this.dbg.doDump("db", channel.sAddrDebug, "l" + Math.floor((channel.cbDebug + 15) / 16));
     }
@@ -3438,7 +3439,7 @@ ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
             }
         }
 
-        if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(this.dbg.MESSAGE_TIMER)) {
+        if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(ChipSet.MESSAGE_TIMER)) {
             this.log("TIMER" + iTimer + " count: " + count + ", ticks: " + ticks + ", fired: " + (fFired? "true" : "false"));
         }
 
@@ -3602,7 +3603,7 @@ ChipSet.prototype.inPPIC = function(port, addrFrom)
      * The ROM BIOS polls this port incessantly during its memory tests, checking for memory parity errors
      * (which of course we never report), so we further restrict these port messages to MESSAGE_MEM.
      */
-    this.messagePort(port, null, addrFrom, "PPI_C", ChipSet.MESSAGE_MEM | ChipSet.MESSAGE_CHIPSET, b);
+    this.messagePort(port, null, addrFrom, "PPI_C", ChipSet.MESSAGE_CHIPSET | ChipSet.MESSAGE_MEM, b);
     return b;
 };
 
@@ -3660,7 +3661,7 @@ ChipSet.prototype.outPPICtrl = function(port, bOut, addrFrom)
 ChipSet.prototype.in8042OutBuff = function(port, addrFrom)
 {
     var b = this.b8042OutBuff;
-    this.messagePort(port, null, addrFrom, "8042_OUTBUFF", ChipSet.MESSAGE_CHIPSET, b);
+    this.messagePort(port, null, addrFrom, "8042_OUTBUFF", ChipSet.MESSAGE_8042, b);
     this.b8042Status &= ~(ChipSet.KBC.STATUS.OUTBUFF_FULL | ChipSet.KBC.STATUS.OUTBUFF_DELAY);
     var bNext = this.kbd && this.kbd.readScanCode(true);
     if (bNext) this.set8042OutBuff(bNext);
@@ -3681,7 +3682,7 @@ ChipSet.prototype.in8042OutBuff = function(port, addrFrom)
  */
 ChipSet.prototype.out8042InBuffData = function(port, bOut, addrFrom)
 {
-    this.messagePort(port, bOut, addrFrom, "8042_INBUF.DATA", ChipSet.MESSAGE_CHIPSET);
+    this.messagePort(port, bOut, addrFrom, "8042_INBUF.DATA", ChipSet.MESSAGE_8042);
     
     if (this.b8042Status & ChipSet.KBC.STATUS.CMD_FLAG) {
         switch (this.b8042InBuff) {
@@ -3790,29 +3791,24 @@ ChipSet.prototype.in8042RWReg = function(port, addrFrom)
      *
      * However, the MODEL_5170_REV3 BIOS not only checks REFRESH_BIT in "TEST.09", but includes
      * an additional test right before "TEST.11A", which requires the bit change "a bit less"
-     * frequently.
+     * frequently.  This new test sets CX to zero, and at the end of the test (@F000:05B8), CX
+     * must be in the narrow range of 0xF600 through 0xF9FD.
      * 
-     * QUESTION: Did IBM throw in this additional REFRESH_BIT test in an attempt to either tie
-     * their revised BIOS to their own hardware OR to insure that the processor was running at a
-     * "condoned" speed?  Note that this new test sets CX to zero, and at the end of the test
-     * (@F000:05B8), CX must be in the narrow range of 0xF600 through 0xF9FD.
+     * In fact, the new "WAITF" function @F000:1A3A tells us exactly how frequently REFRESH_BIT
+     * is expected to change now.  That function performs a "FIXED TIME WAIT", where CX is a
+     * "COUNT OF 15.085737us INTERVALS TO WAIT".
      * 
-     * So now we tie the state of the REFRESH_BIT to bit 6 of the current CPU cycle count,
-     * effectively toggling the bit after every 64 cycles, or roughly every 4th read, and yielding
-     * a count of 0xF815 in CX, safely within the required range.  I also confirmed that using
-     * the next highest bit (bit 7) created too much of a delay (CX was 0xF015).
-     * 
-     * NOTE: the "WAITF" function @F000:1A3A relies on REFRESH_BIT to achieve a "FIXED TIME WAIT",
-     * where CX is a "COUNT OF 15.085737us INTERVALS TO WAIT".  By toggling REFRESH_BIT every 64
-     * cycles, on an 8Mhz CPU that can do 8 cycles in 1us, 64 cycles represents 8us, so this might
-     * be 7us too fast?  But I think we're close enough.
+     * So we now tie the state of the REFRESH_BIT to bit 6 of the current CPU cycle count,
+     * effectively toggling the bit after every 64 cycles.  On an 8Mhz CPU that can do 8 cycles
+     * in 1us, 64 cycles represents 8us, so that might be a bit fast for "WAITF", but bit 6 
+     * is the only choice that also satisfies the pre-"TEST.11A" test as well.
      */
     var b = this.bPPIB & ~(ChipSet.KBC.RWREG.PARITY_ERR | ChipSet.KBC.RWREG.REFRESH_BIT) | ((this.cpu.getCycles() & 0x40)? ChipSet.KBC.RWREG.REFRESH_BIT : 0);
     /*
      * Thanks to the WAITF function, this has become a very "busy" port, so let's not generate messages
-     * unless both MESSAGE_CHIPSET *and* MESSAGE_LOG are set.
+     * unless both MESSAGE_8042 *and* MESSAGE_LOG are set.
      */
-    this.messagePort(port, null, addrFrom, "8042_RWREG", ChipSet.MESSAGE_CHIPSET | ChipSet.MESSAGE_LOG, b);
+    this.messagePort(port, null, addrFrom, "8042_RWREG", ChipSet.MESSAGE_8042 | ChipSet.MESSAGE_LOG, b);
     return b;
 };
 
@@ -3826,7 +3822,7 @@ ChipSet.prototype.in8042RWReg = function(port, addrFrom)
  */
 ChipSet.prototype.out8042RWReg = function(port, bOut, addrFrom)
 {
-    this.messagePort(port, bOut, addrFrom, "8042_RWREG", ChipSet.MESSAGE_CHIPSET);
+    this.messagePort(port, bOut, addrFrom, "8042_RWREG", ChipSet.MESSAGE_8042);
     this.updatePPIB(bOut);
 };
 
@@ -3840,7 +3836,7 @@ ChipSet.prototype.out8042RWReg = function(port, bOut, addrFrom)
  */
 ChipSet.prototype.in8042Status = function(port, addrFrom)
 {
-    this.messagePort(port, null, addrFrom, "8042_STATUS", ChipSet.MESSAGE_CHIPSET, this.b8042Status);
+    this.messagePort(port, null, addrFrom, "8042_STATUS", ChipSet.MESSAGE_8042, this.b8042Status);
     var b = this.b8042Status & 0xff;
     /*
      * There's code in the 5170 BIOS (F000:03BF) that writes an 8042 command (0xAA), waits for
@@ -3878,7 +3874,7 @@ ChipSet.prototype.in8042Status = function(port, addrFrom)
  */
 ChipSet.prototype.out8042InBuffCmd = function(port, bOut, addrFrom)
 {
-    this.messagePort(port, bOut, addrFrom, "8042_INBUFF.CMD", ChipSet.MESSAGE_CHIPSET);
+    this.messagePort(port, bOut, addrFrom, "8042_INBUFF.CMD", ChipSet.MESSAGE_8042);
     Component.assert(!(this.b8042Status & ChipSet.KBC.STATUS.INBUFF_FULL));
     this.b8042InBuff = bOut;
     
@@ -4034,7 +4030,7 @@ ChipSet.prototype.set8042OutPort = function(b)
  */
 ChipSet.prototype.inCMOSAddr = function(port, addrFrom)
 {
-    this.messagePort(port, null, addrFrom, "CMOS_ADDR", ChipSet.MESSAGE_CHIPSET, this.bCMOSAddr);
+    this.messagePort(port, null, addrFrom, "CMOS_ADDR", ChipSet.MESSAGE_CMOS, this.bCMOSAddr);
     return this.bCMOSAddr;
 };
 
@@ -4048,7 +4044,7 @@ ChipSet.prototype.inCMOSAddr = function(port, addrFrom)
  */
 ChipSet.prototype.outCMOSAddr = function(port, bOut, addrFrom)
 {
-    this.messagePort(port, bOut, addrFrom, "CMOS_ADDR", ChipSet.MESSAGE_CHIPSET);
+    this.messagePort(port, bOut, addrFrom, "CMOS_ADDR", ChipSet.MESSAGE_CMOS);
     this.bCMOSAddr = bOut;
     this.bNMI = (bOut & ChipSet.CMOS.ADDR.NMI_DISABLE)? ChipSet.NMI.DISABLE : ChipSet.NMI.ENABLE;
 };
@@ -4065,7 +4061,7 @@ ChipSet.prototype.inCMOSData = function(port, addrFrom)
 {
     var bAddr = this.bCMOSAddr & ChipSet.CMOS.ADDR.MASK;
     var bIn = (bAddr <= ChipSet.CMOS.ADDR.RTC_STATUSD? this.getRTCByte(bAddr) : this.abCMOSData[bAddr]);
-    this.messagePort(port, null, addrFrom, "CMOS_DATA[" + str.toHexByte(bAddr) + "]", ChipSet.MESSAGE_CHIPSET, bIn);
+    this.messagePort(port, null, addrFrom, "CMOS_DATA[" + str.toHexByte(bAddr) + "]", ChipSet.MESSAGE_CMOS, bIn);
     return bIn;
 };
 
@@ -4080,7 +4076,7 @@ ChipSet.prototype.inCMOSData = function(port, addrFrom)
 ChipSet.prototype.outCMOSData = function(port, bOut, addrFrom)
 {
     var bAddr = this.bCMOSAddr & ChipSet.CMOS.ADDR.MASK;
-    this.messagePort(port, bOut, addrFrom, "CMOS_DATA[" + str.toHexByte(bAddr) + "]", ChipSet.MESSAGE_CHIPSET);
+    this.messagePort(port, bOut, addrFrom, "CMOS_DATA[" + str.toHexByte(bAddr) + "]", ChipSet.MESSAGE_CMOS);
     this.abCMOSData[bAddr] = (bAddr <= ChipSet.CMOS.ADDR.RTC_STATUSD? this.setRTCByte(bAddr, bOut) : bOut);
 };
 
@@ -4152,22 +4148,22 @@ ChipSet.prototype.intBIOSRTC = function(addr)
 {
     if (DEBUGGER) {
         var AH = this.cpu.regAX >> 8;
-        if (this.dbg && this.dbg.messageEnabled(this.dbg.MESSAGE_CHIPSET)) {
-            this.dbg.message("ChipSet.intBIOSRTC(AH=" + str.toHexByte(AH) + ") at " + str.toHexAddr(addr - this.cpu.segCS.base, this.cpu.segCS.sel));
-            this.cpu.addInterruptReturn(addr, function(chipset, nCycles) {
+        if (this.dbg && this.dbg.messageEnabled(ChipSet.MESSAGE_RTC)) {
+            this.dbg.messageInt(ChipSet.BIOS.INT_RTC, addr);
+            this.cpu.addIntReturn(addr, function(chipset, nCycles) {
                 return function onBIOSRTCReturn(nLevel) {
                     nCycles = chipset.cpu.getCycles() - nCycles;
-                    var sResult = "C=" + (chipset.cpu.getCF()? 1 : 0);
+                    var sResult;
                     var CL = chipset.cpu.regDX & 0xff;
                     var CH = chipset.cpu.regDX >> 8;
                     var DL = chipset.cpu.regDX & 0xff;
                     var DH = chipset.cpu.regDX >> 8;
                     if (AH == 0x02 || AH == 0x03) {
-                        sResult += " CH(hour)=" + str.toHexWord(CH) + " CL(min)=" + str.toHexByte(CL) + " DH(sec)=" + str.toHexByte(DH);
+                        sResult = " CH(hour)=" + str.toHexWord(CH) + " CL(min)=" + str.toHexByte(CL) + " DH(sec)=" + str.toHexByte(DH);
                     } else if (AH == 0x04 || AH == 0x05) {
-                        sResult += " CX(year)=" + str.toHexWord(chipset.cpu.regCX) + " DH(month)=" + str.toHexByte(DH) + " DL(day)=" + str.toHexByte(DL);
+                        sResult = " CX(year)=" + str.toHexWord(chipset.cpu.regCX) + " DH(month)=" + str.toHexByte(DH) + " DL(day)=" + str.toHexByte(DL);
                     } 
-                    chipset.messageDebugger("ChipSet.intBIOSRTC(" + nLevel + "): " + sResult + " (cycles=" + nCycles + ")");
+                    chipset.dbg.messageIntReturn(ChipSet.BIOS.INT_RTC, nLevel, nCycles, sResult);
                 };
             }(this, this.cpu.getCycles()));
         }

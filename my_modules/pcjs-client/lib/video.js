@@ -1901,8 +1901,9 @@ Video.cardSpecs[Video.CARDS.EGA] = ["EGA", Card.CGA.CRTC.INDX.PORT, 0xB8000, 0x0
 /*
  * BIOS video interrupts, modes, and other parameters
  */
-Video.BIOS = {};
-Video.BIOS.VIDEO_INT = 0x10;
+Video.BIOS = {
+    INT_VIDEO:      0x10
+};
 
 /**
  * initBus(cmp, bus, cpu, dbg)
@@ -1932,7 +1933,7 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
     
     if (DEBUGGER && dbg) {
         var video = this;
-        this.cpu.addInterruptNotify(Video.BIOS.VIDEO_INT, this, this.intBIOSVideo);
+        this.cpu.addIntNotify(Video.BIOS.INT_VIDEO, this, this.intBIOSVideo);
         dbg.messageDump(dbg.MESSAGE_VIDEO, function onDumpVideo(sParm) {
             video.dumpVideo(sParm);
         });
@@ -1967,11 +1968,10 @@ Video.prototype.intBIOSVideo = function(addr)
 {
     if (DEBUGGER) {
         if (this.dbg && this.dbg.messageEnabled(this.dbg.MESSAGE_VIDEO)) {
-            this.dbg.message("Video.intBIOS(AX=" + str.toHexWord(this.cpu.regAX) + ") at " + str.toHexAddr(addr - this.cpu.segCS.base, this.cpu.segCS.sel));
-            this.cpu.addInterruptReturn(addr, function (video, nCycles) {
+            this.dbg.messageInt(Video.BIOS.INT_VIDEO, addr);
+            this.cpu.addIntReturn(addr, function (video, nCycles) {
                 return function onBIOSVideoReturn(nLevel) {
-                    nCycles = video.cpu.getCycles() - nCycles;
-                    video.messageDebugger("Video.intBIOSReturn(" + nLevel + ") (cycles=" + nCycles + ")");
+                    video.dbg.messageIntReturn(Video.BIOS.INT_VIDEO, nLevel, video.cpu.getCycles() - nCycles);
                 };
             }(this, this.cpu.getCycles()));
         }

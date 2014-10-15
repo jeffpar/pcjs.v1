@@ -1,5 +1,5 @@
 /**
-     * @fileoverview Implements the PCjs Debugger component.
+ * @fileoverview Implements the PCjs Debugger component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
  * @suppress {missingProperties}
@@ -138,56 +138,21 @@ function Debugger(parmsDbg)
          * This ensures that, by default, the CPU runs as fast as possible.
          */
         this.initHistory();
+        
+        /*
+         * Initialize Debugger message support
+         */
+        this.messageInit(this, parmsDbg['messages'], true);
 
         /*
-         * Message categories supported by the messageEnabled() function and other assorted message
-         * functions. Each category has a corresponding bit value that can be combined (ie, OR'ed) as
-         * needed.  The Debugger's message command ("m") is used to turn message categories on and off,
-         * like so:
-         * 
-         *      m port on
-         *      m port off
-         *      ...
-         *      
-         * Every caller of messageInit() receives all the MESSAGE_* properties as bit values; for example,
-         * after ChipSet calls messageInit(ChipSet), ChipSet.MESSAGE_MEM will be 0x0001, and so on.
-         * 
-         * We also call messageInit() on behalf the current Debugger instance so that other components have
-         * the option of accessing the properties indirectly (eg, this.dbg.MESSAGE_MEM), since the Debugger
-         * component is not a required component.
-         * 
-         * WARNING: The order of these categories can be rearranged, alphabetized, etc, as long as the bit
-         * values aren't changed; otherwise, you risk breaking saved Debugger states (not a huge concern,
-         * just something to be aware of).
+         * This object is filled in by updateRegValues() whenever we need a fresh snapshot.
          */
-        this.msgCategories = {
-            MESSAGE_MEM:    {bit: 0x00000001, op: "mem"},
-            MESSAGE_PORT:   {bit: 0x00000002, op: "port"},
-            MESSAGE_DMA:    {bit: 0x00000004, op: "dma"},
-            MESSAGE_PIC:    {bit: 0x00000008, op: "pic"},
-            MESSAGE_TIMER:  {bit: 0x00000010, op: "timer"},
-            MESSAGE_KBD:    {bit: 0x00000020, op: "keyboard"},
-            MESSAGE_VIDEO:  {bit: 0x00000040, op: "video"},
-            MESSAGE_FDC:    {bit: 0x00000080, op: "fdc"},
-            MESSAGE_HDC:    {bit: 0x00000100, op: "hdc"},
-            MESSAGE_DISK:   {bit: 0x00000200, op: "disk"},
-            MESSAGE_SERIAL: {bit: 0x00000400, op: "serial"},
-            MESSAGE_SPEAKER:{bit: 0x00000800, op: "speaker"},
-            MESSAGE_CHIPSET:{bit: 0x00001000, op: "chipset"},   // ie, ChipSet ports (PPI, NMI, etc)
-            MESSAGE_STATE:  {bit: 0x00002000, op: "state"},
-            MESSAGE_MOUSE:  {bit: 0x00004000, op: "mouse"},
-            MESSAGE_CMP:    {bit: 0x00008000, op: "computer"},
-            MESSAGE_DOS:    {bit: 0x00010000, op: "dos"},
-            MESSAGE_LOG:    {bit: 0x00020000, op: "log"},
-            /*
-             * Now we're into message actions rather than message types; for example, turning "halt"
-             * on or off doesn't enable "halt" messages, but rather halts the CPU on any other message.
-             */
-            MESSAGE_HALT:   {bit: 0x00040000, op: "halt"}
+        this.aRegValues = {
+            "AL":0, "CL":0, "DL":0, "BL":0, "AH":0, "CH":0, "DH":0, "BH":0,
+            "AX":0, "CX":0, "DX":0, "BX":0, "SP":0, "BP":0, "SI":0, "DI":0,
+            "ES":0, "CS":0, "SS":0, "DS":0, "IP":0
         };
 
-        this.messageInit(this, parmsDbg['messages']);
-    
         /*
          * The instruction trace buffer is a lightweight logging mechanism with minimal impact
          * on the browser (unlike printing to either console.log or an HTML control, which can
@@ -207,27 +172,6 @@ function Debugger(parmsDbg)
 
 if (DEBUGGER) {
 
-    /**
-     * @class Debugger
-     * @property {number} MESSAGE_MEM
-     * @property {number} MESSAGE_PORT
-     * @property {number} MESSAGE_DMA
-     * @property {number} MESSAGE_PIC
-     * @property {number} MESSAGE_TIMER
-     * @property {number} MESSAGE_KBD
-     * @property {number} MESSAGE_VIDEO
-     * @property {number} MESSAGE_FDC
-     * @property {number} MESSAGE_HDC
-     * @property {number} MESSAGE_DISK
-     * @property {number} MESSAGE_SERIAL
-     * @property {number} MESSAGE_SPEAKER
-     * @property {number} MESSAGE_CHIPSET
-     * @property {number} MESSAGE_STATE
-     * @property {number} MESSAGE_MOUSE
-     * @property {number} MESSAGE_LOG
-     * @property {number} MESSAGE_DOS
-     */
-        
     Component.subclass(Component, Debugger);
     
     Debugger.aCommands = {
@@ -469,7 +413,87 @@ if (DEBUGGER) {
     Debugger.TYPE_186   = (Debugger.CPU_186 << 14);
     Debugger.TYPE_286   = (Debugger.CPU_286 << 14);
     Debugger.TYPE_386   = (Debugger.CPU_386 << 14);
-    
+
+    /**
+     * @class Debugger
+     * @property {Object} MESSAGES
+     * @property {number} MESSAGE_MEM
+     * @property {number} MESSAGE_PORT
+     * @property {number} MESSAGE_DMA
+     * @property {number} MESSAGE_PIC
+     * @property {number} MESSAGE_TIMER
+     * @property {number} MESSAGE_CMOS
+     * @property {number} MESSAGE_RTC
+     * @property {number} MESSAGE_8042
+     * @property {number} MESSAGE_CHIPSET
+     * @property {number} MESSAGE_KBD
+     * @property {number} MESSAGE_VIDEO
+     * @property {number} MESSAGE_FDC
+     * @property {number} MESSAGE_HDC
+     * @property {number} MESSAGE_DISK
+     * @property {number} MESSAGE_SERIAL
+     * @property {number} MESSAGE_SPEAKER
+     * @property {number} MESSAGE_STATE
+     * @property {number} MESSAGE_MOUSE
+     * @property {number} MESSAGE_CMP
+     * @property {number} MESSAGE_CPU
+     * @property {number} MESSAGE_DOS
+     * @property {number} MESSAGE_INT
+     * @property {number} MESSAGE_LOG
+     */
+
+    /*
+     * Message categories supported by the messageEnabled() function and other assorted message
+     * functions. Each category has a corresponding bit value that can be combined (ie, OR'ed) as
+     * needed.  The Debugger's message command ("m") is used to turn message categories on and off,
+     * like so:
+     * 
+     *      m port on
+     *      m port off
+     *      ...
+     *      
+     * Every caller of messageInit() receives all the MESSAGE_* properties as bit values; for example,
+     * after ChipSet calls messageInit(ChipSet), ChipSet.MESSAGE_MEM will be 0x0001, and so on.
+     * 
+     * We also call messageInit() on behalf the current Debugger instance so that other components have
+     * the option of accessing the properties indirectly (eg, this.dbg.MESSAGE_MEM), since the Debugger
+     * component is not a required component.
+     * 
+     * NOTE: The order of these categories can be rearranged, alphabetized, etc, as desired; just be
+     * aware that changing the bit values could break saved Debugger states (not a huge concern, just
+     * something to be aware of).
+     */
+    Debugger.MESSAGES = {
+        MESSAGE_MEM:    {BIT: 0x00000001, OP: "mem"},
+        MESSAGE_PORT:   {BIT: 0x00000002, OP: "port"},
+        MESSAGE_DMA:    {BIT: 0x00000004, OP: "dma"},
+        MESSAGE_PIC:    {BIT: 0x00000008, OP: "pic"},
+        MESSAGE_TIMER:  {BIT: 0x00000010, OP: "timer"},
+        MESSAGE_CMOS:   {BIT: 0x00000020, OP: "cmos"},
+        MESSAGE_RTC:    {BIT: 0x00000040, OP: "rtc"},
+        MESSAGE_8042:   {BIT: 0x00000080, OP: "8042"},
+        MESSAGE_CHIPSET:{BIT: 0x00000100, OP: "chipset"},   // ie, anything else in ChipSet besides DMA, PIC, TIMER, CMOS, RTC and 8042
+        MESSAGE_KBD:    {BIT: 0x00000200, OP: "keyboard"},
+        MESSAGE_VIDEO:  {BIT: 0x00000400, OP: "video"},
+        MESSAGE_FDC:    {BIT: 0x00000800, OP: "fdc"},
+        MESSAGE_HDC:    {BIT: 0x00001000, OP: "hdc"},
+        MESSAGE_DISK:   {BIT: 0x00002000, OP: "disk"},
+        MESSAGE_SERIAL: {BIT: 0x00004000, OP: "serial"},
+        MESSAGE_SPEAKER:{BIT: 0x00008000, OP: "speaker"},
+        MESSAGE_STATE:  {BIT: 0x00010000, OP: "state"},
+        MESSAGE_MOUSE:  {BIT: 0x00020000, OP: "mouse"},
+        MESSAGE_CMP:    {BIT: 0x00040000, OP: "computer"},
+        MESSAGE_CPU:    {BIT: 0x00080000, OP: "cpu"},
+        MESSAGE_DOS:    {BIT: 0x00100000, OP: "dos"},
+        MESSAGE_INT:    {BIT: 0x00200000, OP: "int"},
+        MESSAGE_LOG:    {BIT: 0x01000000, OP: "log"},
+        /*
+         * Now we turn to message actions rather than message types; for example, setting "halt"
+         * on or off doesn't enable "halt" messages, but rather halts the CPU on any above message.
+         */
+        MESSAGE_HALT:   {BIT: 0x10000000, OP: "halt"}
+    };
+
     /*
      * Instruction trace categories supported by the traceLog() function.  The Debugger's info
      * command ("n") is used to turn trace categories on and off, like so:
@@ -873,7 +897,7 @@ if (DEBUGGER) {
         [Debugger.INS.RCR,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE | Debugger.TYPE_BOTH | Debugger.TYPE_286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
         [Debugger.INS.SHL,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE | Debugger.TYPE_BOTH | Debugger.TYPE_286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
         [Debugger.INS.SHR,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE | Debugger.TYPE_BOTH | Debugger.TYPE_286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-        Debugger.aOpDescUndefined,
+         Debugger.aOpDescUndefined,
         [Debugger.INS.SAR,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE | Debugger.TYPE_BOTH | Debugger.TYPE_286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN]
       ],
       [
@@ -884,7 +908,7 @@ if (DEBUGGER) {
         [Debugger.INS.RCR,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH | Debugger.TYPE_286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
         [Debugger.INS.SHL,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH | Debugger.TYPE_286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
         [Debugger.INS.SHR,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH | Debugger.TYPE_286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-        Debugger.aOpDescUndefined,
+         Debugger.aOpDescUndefined,
         [Debugger.INS.SAR,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH | Debugger.TYPE_286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN]
       ],
       [
@@ -895,7 +919,7 @@ if (DEBUGGER) {
         [Debugger.INS.RCR,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE | Debugger.TYPE_BOTH, Debugger.TYPE_ONE | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
         [Debugger.INS.SHL,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE | Debugger.TYPE_BOTH, Debugger.TYPE_ONE | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
         [Debugger.INS.SHR,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE | Debugger.TYPE_BOTH, Debugger.TYPE_ONE | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-        Debugger.aOpDescUndefined,
+         Debugger.aOpDescUndefined,
         [Debugger.INS.SAR,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE | Debugger.TYPE_BOTH, Debugger.TYPE_ONE | Debugger.TYPE_BYTE | Debugger.TYPE_IN]
       ],
       [
@@ -906,7 +930,7 @@ if (DEBUGGER) {
         [Debugger.INS.RCR,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_ONE | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
         [Debugger.INS.SHL,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_ONE | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
         [Debugger.INS.SHR,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_ONE | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-        Debugger.aOpDescUndefined,
+         Debugger.aOpDescUndefined,
         [Debugger.INS.SAR,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_ONE | Debugger.TYPE_BYTE | Debugger.TYPE_IN]
       ],
       [
@@ -917,7 +941,7 @@ if (DEBUGGER) {
         [Debugger.INS.RCR,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE | Debugger.TYPE_BOTH, Debugger.TYPE_IMPREG | Debugger.TYPE_CL | Debugger.TYPE_IN],
         [Debugger.INS.SHL,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE | Debugger.TYPE_BOTH, Debugger.TYPE_IMPREG | Debugger.TYPE_CL | Debugger.TYPE_IN],
         [Debugger.INS.SHR,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE | Debugger.TYPE_BOTH, Debugger.TYPE_IMPREG | Debugger.TYPE_CL | Debugger.TYPE_IN],
-        Debugger.aOpDescUndefined,
+         Debugger.aOpDescUndefined,
         [Debugger.INS.SAR,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE | Debugger.TYPE_BOTH, Debugger.TYPE_IMPREG | Debugger.TYPE_CL | Debugger.TYPE_IN]
       ],
       [
@@ -928,13 +952,13 @@ if (DEBUGGER) {
         [Debugger.INS.RCR,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_IMPREG | Debugger.TYPE_CL | Debugger.TYPE_IN],
         [Debugger.INS.SHL,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_IMPREG | Debugger.TYPE_CL | Debugger.TYPE_IN],
         [Debugger.INS.SHR,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_IMPREG | Debugger.TYPE_CL | Debugger.TYPE_IN],
-        Debugger.aOpDescUndefined,
+         Debugger.aOpDescUndefined,
         [Debugger.INS.SAR,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_IMPREG | Debugger.TYPE_CL | Debugger.TYPE_IN]
       ],
       [
         /* GRP3B */
         [Debugger.INS.TEST, Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_IN,   Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-        Debugger.aOpDescUndefined,
+         Debugger.aOpDescUndefined,
         [Debugger.INS.NOT,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH],
         [Debugger.INS.NEG,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH],
         [Debugger.INS.MUL,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
@@ -945,7 +969,7 @@ if (DEBUGGER) {
       [
         /* GRP3W */
         [Debugger.INS.TEST, Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_IN,   Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-        Debugger.aOpDescUndefined,
+         Debugger.aOpDescUndefined,
         [Debugger.INS.NOT,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH],
         [Debugger.INS.NEG,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH],
         [Debugger.INS.MUL,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
@@ -957,12 +981,12 @@ if (DEBUGGER) {
         /* GRP4B */
         [Debugger.INS.INC,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH],
         [Debugger.INS.DEC,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH],
-        Debugger.aOpDescUndefined,
-        Debugger.aOpDescUndefined,
-        Debugger.aOpDescUndefined,
-        Debugger.aOpDescUndefined,
-        Debugger.aOpDescUndefined,
-        Debugger.aOpDescUndefined
+         Debugger.aOpDescUndefined,
+         Debugger.aOpDescUndefined,
+         Debugger.aOpDescUndefined,
+         Debugger.aOpDescUndefined,
+         Debugger.aOpDescUndefined,
+         Debugger.aOpDescUndefined
       ],
       [
         /* GRP4W */
@@ -973,7 +997,7 @@ if (DEBUGGER) {
         [Debugger.INS.JMP,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
         [Debugger.INS.JMP,  Debugger.TYPE_MODRM | Debugger.TYPE_FARP  | Debugger.TYPE_IN],
         [Debugger.INS.PUSH, Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-        Debugger.aOpDescUndefined
+         Debugger.aOpDescUndefined
       ],
       [ /* OP0F */ ],
       [
@@ -984,8 +1008,8 @@ if (DEBUGGER) {
         [Debugger.INS.LTR,  Debugger.TYPE_MODRM | Debugger.TYPE_WORD | Debugger.TYPE_IN],
         [Debugger.INS.VERR, Debugger.TYPE_MODRM | Debugger.TYPE_WORD | Debugger.TYPE_IN],
         [Debugger.INS.VERW, Debugger.TYPE_MODRM | Debugger.TYPE_WORD | Debugger.TYPE_IN],
-        Debugger.aOpDescUndefined,
-        Debugger.aOpDescUndefined
+         Debugger.aOpDescUndefined,
+         Debugger.aOpDescUndefined
       ],
       [
         /* GRP7 */
@@ -994,107 +1018,136 @@ if (DEBUGGER) {
         [Debugger.INS.LGDT, Debugger.TYPE_MODRM | Debugger.TYPE_WORD | Debugger.TYPE_IN],
         [Debugger.INS.LIDT, Debugger.TYPE_MODRM | Debugger.TYPE_WORD | Debugger.TYPE_IN],
         [Debugger.INS.SMSW, Debugger.TYPE_MODRM | Debugger.TYPE_WORD | Debugger.TYPE_OUT],
-        Debugger.aOpDescUndefined,
+         Debugger.aOpDescUndefined,
         [Debugger.INS.LMSW, Debugger.TYPE_MODRM | Debugger.TYPE_WORD | Debugger.TYPE_IN],
-        Debugger.aOpDescUndefined
+         Debugger.aOpDescUndefined
       ]
     ];
     
     /*
-     * DOS interrupts, for tracing DOS operations
+     * Information regarding interrupts of interest
      */
-    Debugger.DOS_INT = 0x21;
+    Debugger.INT_DOS = 0x21;
     
-    Debugger.aDOSFuncDesc = {
-        0x00: "terminate program",
-        0x01: "read character (AL>) from STDIN with echo",
-        0x02: "write character (<DL) to STDOUT",
-        0x03: "read character (AL>) from STDAUX",                                         // eg, COM1
-        0x04: "write character (<DL) to STDAUX",                                          // eg, COM1
-        0x05: "write character (<DL) to STDPRN",                                          // eg, LPT1
-        0x06: "direct console output (or input if DL=FF)",
-        0x07: "direct console input without echo",
-        0x08: "read character (AL>) from STDIN without echo",
-        0x09: "write $-terminated string (<DS:DX) to STDOUT",
-        0x0A: "buffered input (DS:DX>)",                                                  // byte 0 is maximum chars, byte 1 is number of previous characters, byte 2 is number of characters read
-        0x0B: "get STDIN status",
-        0x0C: "flush buffer and read STDIN",                                              // AL is a function # (0x01, 0x06, 0x07, 0x08, or 0x0A) 
-        0x0D: "disk reset",
-        0x0E: "select default drive (<DL)",                                               // returns # of available drives in AL
-        0x0F: "open file using FCB (<DS:DX)",                                             // DS:DX -> unopened File Control Block
-        0x10: "close file using FCB (<DS:DX)",
-        0x11: "find first matching file using FCB (<DS:DX)",
-        0x12: "find next matching file using FCB (<DS:DX)",
-        0x13: "delete file using FCB (<DS:DX)",
-        0x14: "sequential read from file using FCB (<DS:DX)",
-        0x15: "sequential write to file using FCB (<DS:DX)",
-        0x16: "create or truncate file using FCB (<DS:DX)",
-        0x17: "rename file using FCB (<DS:DX)",
-        0x19: "get current default drive (AL>)",
-        0x1A: "set disk transfer area address (DTA<DS:DX)",
-        0x1B: "get allocation information for default drive",
-        0x1C: "get allocation information for specific drive (<DL)",
-        0x1F: "get drive parameter block for default drive",
-        0x21: "read random record from file using FCB (<DS:DX)",
-        0x22: "write random record to file using FCB (<DS:DX)",
-        0x23: "get file size using FCB (<DS:DX)",
-        0x24: "set random record number for FCB (<DS:DX)",
-        0x25: "set address (<DS:DX) of interrupt vector (<AL)",
-        0x26: "create new program segment prefix (PSP) at segment (<DX)",
-        0x27: "random block read from file using FCB (<DS:DX)",
-        0x28: "random block write to file using FCB (<DS:DX)",
-        0x29: "parse filename (<DS:SI) into FCB (<ES:DI) using (<AL)",
-        0x2A: "get system date (year>CX, mon>DH, day>DL)",
-        0x2B: "set system date (year<CX, mon<DH, day<DL)",
-        0x2C: "get system time (hour>CH, min>CL, sec>DH, hundredths>DL)",
-        0x2D: "set system time (hour<CH, min<CL, sec<DH, hundredths<DL)",
-        0x2E: "set verify flag (<AL)",
-        0x2F: "get disk transfer area address (DTA>ES:BX)",                               // DOS 2.00+
-        0x30: "get DOS version (major>AL, minor>AH)",
-        0x31: "terminate and stay resident",
-        0x32: "get drive parameter block (DPB>DS:BX) for drive (<DL)",
-        0x33: "extended break check",
-        0x34: "get address (ES:BX>) of InDOS flag",
-        0x35: "get address (ES:BX>) of interrupt vector (<AL)",
-        0x36: "get free disk space of drive (<DL)",
-        0x37: "get/set (AL=0/1) switch character (DL)",
-        0x38: "get country-specific information",
-        0x39: "create subdirectory (<DS:DX)",
-        0x3A: "remove subdirectory (<DS:DX)",
-        0x3B: "set current directory (<DS:DX)",
-        0x3C: "create or truncate file (<DS:DX) with attributes (<CX)",
-        0x3D: "open existing file (<DS:DX) with mode (<AL)",
-        0x3E: "close file (<BX)",
-        0x3F: "read (<CX) bytes from file (<BX) into buffer (<DS:DX)",
-        0x40: "write (<CX) bytes to file (<BX) from buffer (<DS:DX)",
-        0x41: "delete file (<DS:DX)",
-        0x42: "set position (<CX:DX) of file (<BX) relative to (<AL)",
-        0x43: "get/set (AL=0/1) attributes (CX) of file (<DS:DX)",
-        0x44: "get device information (IOCTL)",
-        0x45: "duplicate file handle (<BX)",
-        0x46: "force file handle (<CX) to duplicate file handle (<BX)",
-        0x47: "get current directory (DS:SI>) for drive (<DL)",
-        0x48: "allocate memory segment with (<BX) paragraphs",
-        0x49: "free memory segment (<ES)",
-        0x4A: "resize memory segment (<ES) to (<BX) paragraphs",
-        0x4B: "load program (<DS:DX) using parameter block (<ES:BX)",
-        0x4C: "terminate with return code (<AL)",
-        0x4D: "get return code (AL>)",
-        0x4E: "find first matching file (<DS:DX) with attributes (<CX)",
-        0x4F: "find next matching file",
-        0x50: "set current PSP (<BX)",
-        0x51: "get current PSP (BX>)",
-        0x52: "get system variables (ES:BX>)",
-        0x53: "translate BPB (<DS:SI) to DPB (ES:BP>)",
-        0x54: "get verify flag (AL>)",
-        0x55: "create child PSP at segment (<DX)",
-        0x56: "rename file (<DS:DX) to name (<ES:DI)",
-        0x57: "get/set (AL=0/1) file date (DX>) and time (CX>)",
-        0x58: "get/set (AL=0/1) memory allocation strategy",                              // DOS 2.11+
-        0x59: "get extended error information",                                           // DOS 3.00+
-        0x5A: "create temporary file (<DS:DX) with attributes (<CX)",                     // DOS 3.00+
-        0x5B: "create file (<DS:DX) with attributes (<CX)",                               // DOS 3.00+ (doesn't truncate existing files like 0x3C)
-        0x5C: "lock/unlock (AL=0/1) file (<BX) region (<CX:DX) length (<SI:DI)"           // DOS 3.00+
+    Debugger.INT_FUNCS = {
+        0x13: {
+            0x00: "disk reset",
+            0x01: "get status",
+            0x02: "read drive DL, cyl CH, head DH, sec CL, AL total",
+            0x03: "write drive DL, cyl CH, head DH, sec CL, AL total",
+            0x04: "verify drive DL, cyl CH, head DH, sec CL, AL total",
+            0x05: "format drive DL",
+            0x08: "read drive DL parameters",
+            0x15: "get drive DL DASD type",
+            0x16: "get drive DL change line status",
+            0x17: "set drive DL DASD type",
+            0x18: "set drive DL media type"
+        },
+        0x15: {
+            0x80: "open device",
+            0x81: "close device",
+            0x82: "program termination",
+            0x83: "wait CX:DXus for event",
+            0x84: "joystick support",
+            0x85: "SYSREQ pressed",
+            0x86: "wait CX:DXus",
+            0x87: "move block (CX words)",
+            0x88: "get extended memory size",
+            0x89: "processor to virtual mode",
+            0x90: "device busy loop",
+            0x91: "interrupt complete flag set"
+        },
+        0x21: {
+            0x00: "terminate program",
+            0x01: "read character (al) from stdin with echo",
+            0x02: "write character DL to stdout",
+            0x03: "read character (al) from stdaux",                            // eg, COM1
+            0x04: "write character DL to stdaux",                               // eg, COM1
+            0x05: "write character DL to stdprn",                               // eg, LPT1
+            0x06: "direct console output (input if DL=FF)",
+            0x07: "direct console input without echo",
+            0x08: "read character (al) from stdin without echo",
+            0x09: "write $-terminated string DS:DX to stdout",
+            0x0A: "buffered input (ds:dx)",                                     // byte 0 is maximum chars, byte 1 is number of previous characters, byte 2 is number of characters read
+            0x0B: "get stdin status",
+            0x0C: "flush buffer and read stdin",                                // AL is a function # (0x01, 0x06, 0x07, 0x08, or 0x0A) 
+            0x0D: "disk reset",
+            0x0E: "select default drive DL",                                    // returns # of available drives in AL
+            0x0F: "open file using fcb DS:DX",                                  // DS:DX -> unopened File Control Block
+            0x10: "close file using fcb DS:DX",
+            0x11: "find first matching file using fcb DS:DX",
+            0x12: "find next matching file using fcb DS:DX",
+            0x13: "delete file using fcb DS:DX",
+            0x14: "sequential read from file using fcb DS:DX",
+            0x15: "sequential write to file using fcb DS:DX",
+            0x16: "create or truncate file using fcb DS:DX",
+            0x17: "rename file using fcb DS:DX",
+            0x19: "get current default drive (al)",
+            0x1A: "set disk transfer area (dta) DS:DX",
+            0x1B: "get allocation information for default drive",
+            0x1C: "get allocation information for specific drive DL",
+            0x1F: "get drive parameter block for default drive",
+            0x21: "read random record from file using fcb DS:DX",
+            0x22: "write random record to file using fcb DS:DX",
+            0x23: "get file size using fcb DS:DX",
+            0x24: "set random record number for fcb DS:DX",
+            0x25: "set address DS:DX of interrupt vector AL",
+            0x26: "create new program segment prefix (psp) at segment DX",
+            0x27: "random block read from file using fcb DS:DX",
+            0x28: "random block write to file using fcb DS:DX",
+            0x29: "parse filename DS:SI into fcb ES:DI using AL",
+            0x2A: "get system date (year=cx, mon=dh, day=dl)",
+            0x2B: "set system date (year=CX, mon=DH, day=DL)",
+            0x2C: "get system time (hour=ch, min=cl, sec=dh, 100ths=dl)",
+            0x2D: "set system time (hour=CH, min=CL, sec=DH, 100ths=DL)",
+            0x2E: "set verify flag AL",
+            0x2F: "get disk transfer area address (es:bx)",                     // DOS 2.00+
+            0x30: "get DOS version (al=major, ah=minor)",
+            0x31: "terminate and stay resident",
+            0x32: "get drive parameter block (dpb=ds:bx) for drive DL",
+            0x33: "extended break check",
+            0x34: "get address (es:bx) of InDOS flag",
+            0x35: "get address (es:bx) of interrupt vector AL",
+            0x36: "get free disk space of drive DL",
+            0x37: "get(0)/set(1) switch character DL (AL)",
+            0x38: "get country-specific information",
+            0x39: "create subdirectory DS:DX",
+            0x3A: "remove subdirectory DS:DX",
+            0x3B: "set current directory DS:DX",
+            0x3C: "create or truncate file DS:DX with attributes CX",
+            0x3D: "open existing file DS:DX with mode AL",
+            0x3E: "close file BX",
+            0x3F: "read CX bytes from file BX into buffer DS:DX",
+            0x40: "write CX bytes to file BX from buffer DS:DX",
+            0x41: "delete file DS:DX",
+            0x42: "set position CX:DX of file BX relative to AL",
+            0x43: "get(0)/set(1) attributes CX of file DS:DX (AL)",
+            0x44: "get device information (IOCTL)",
+            0x45: "duplicate file handle BX",
+            0x46: "force file handle CX to duplicate file handle BX",
+            0x47: "get current directory (ds:si) for drive DL",
+            0x48: "allocate memory segment with BX paragraphs",
+            0x49: "free memory segment ES",
+            0x4A: "resize memory segment ES to BX paragraphs",
+            0x4B: "load program DS:DX using parameter block ES:BX",
+            0x4C: "terminate with return code AL",
+            0x4D: "get return code (al)",
+            0x4E: "find first matching file DS:DX with attributes CX",
+            0x4F: "find next matching file",
+            0x50: "set current psp BX",
+            0x51: "get current psp (bx)",
+            0x52: "get system variables (es:bx)",
+            0x53: "translate bpb DS:SI to dpb (es:bp)",
+            0x54: "get verify flag (al)",
+            0x55: "create child psp at segment DX",
+            0x56: "rename file DS:DX to name ES:DI",
+            0x57: "get(0)/set(1) file date DX and time CX (AL)",
+            0x58: "get(0)/set(1) memory allocation strategy (AL)",              // DOS 2.11+
+            0x59: "get extended error information",                             // DOS 3.00+
+            0x5A: "create temporary file DS:DX with attributes CX",             // DOS 3.00+
+            0x5B: "create file DS:DX with attributes CX",                       // DOS 3.00+ (doesn't truncate existing files like 0x3C)
+            0x5C: "lock(0)/unlock(1) file BX region CX:DX length SI:DI (AL)"    // DOS 3.00+
+        }
     };
 
     /**
@@ -1124,7 +1177,7 @@ if (DEBUGGER) {
             }            
         }
         
-        this.cpu.addInterruptNotify(Debugger.DOS_INT, this, this.intDOSCall);
+        this.cpu.addIntNotify(Debugger.INT_DOS, this, this.intDOSCall);
         
         this.setReady();
         
@@ -1235,21 +1288,23 @@ if (DEBUGGER) {
     };
     
     /**
-     * messageInit(o, sEnable)
+     * messageInit(o, sEnable, fDebugger)
      * 
      * @this {Debugger}
      * @param {Object} o
      * @param {string} [sEnable] contains zero or more message categories to enable, separated by '|' or ';'
+     * @param {boolean} [fDebugger] is true to perform Debugger-specific initialization (eg, array of dumpers)
      */
-    Debugger.prototype.messageInit = function(o, sEnable)
+    Debugger.prototype.messageInit = function(o, sEnable, fDebugger)
     {
+        if (fDebugger) this.afnDumpers = [];
         var bitsEnable = 0;
         var aEnable = this.parseCommand(sEnable);
-        for (var m in this.msgCategories) {
-            o[m] = this.msgCategories[m].bit;
-            if (aEnable.indexOf(this.msgCategories[m].op) >= 0) {
-                bitsEnable |= this.msgCategories[m].bit;
-                this.println(this.msgCategories[m].op + " messages enabled");
+        for (var m in Debugger.MESSAGES) {
+            o[m] = Debugger.MESSAGES[m].BIT;
+            if (aEnable.indexOf(Debugger.MESSAGES[m].OP) >= 0) {
+                bitsEnable |= Debugger.MESSAGES[m].BIT;
+                this.println(Debugger.MESSAGES[m].OP + " messages enabled");
             }
         }
         if (this.bitsMessageEnabled === undefined) this.bitsMessageEnabled = 0;
@@ -1266,9 +1321,9 @@ if (DEBUGGER) {
      */
     Debugger.prototype.messageDump = function(bitMessage, fnDumper)
     {
-        for (var m in this.msgCategories) {
-            if (bitMessage == this.msgCategories[m].bit) {
-                this.msgCategories[m].fnDumper = fnDumper;
+        for (var m in Debugger.MESSAGES) {
+            if (bitMessage == Debugger.MESSAGES[m].BIT) {
+                this.afnDumpers[m] = fnDumper;
                 return true;
             }
         }
@@ -1291,6 +1346,70 @@ if (DEBUGGER) {
     };
     
     /**
+     * updateRegValues()
+     * 
+     * @this {Debugger}
+     */
+    Debugger.prototype.updateRegValues = function() {
+        var cpu = this.cpu;
+        var asRegs = Debugger.asRegs;
+        this.aRegValues[asRegs[0]] = str.toHexByte(cpu.regAX & 0xff);
+        this.aRegValues[asRegs[1]] = str.toHexByte(cpu.regCX & 0xff);
+        this.aRegValues[asRegs[2]] = str.toHexByte(cpu.regDX & 0xff);
+        this.aRegValues[asRegs[3]] = str.toHexByte(cpu.regBX & 0xff);
+        this.aRegValues[asRegs[4]] = str.toHexByte(cpu.regAX >> 8);
+        this.aRegValues[asRegs[5]] = str.toHexByte(cpu.regCX >> 8);
+        this.aRegValues[asRegs[6]] = str.toHexByte(cpu.regDX >> 8);
+        this.aRegValues[asRegs[7]] = str.toHexByte(cpu.regBX >> 8);
+        this.aRegValues[asRegs[8]] = str.toHexWord(cpu.regAX);
+        this.aRegValues[asRegs[9]] = str.toHexWord(cpu.regCX);
+        this.aRegValues[asRegs[10]] = str.toHexWord(cpu.regDX);
+        this.aRegValues[asRegs[11]] = str.toHexWord(cpu.regBX);
+        this.aRegValues[asRegs[12]] = str.toHexWord(cpu.regSP);
+        this.aRegValues[asRegs[13]] = str.toHexWord(cpu.regBP);
+        this.aRegValues[asRegs[14]] = str.toHexWord(cpu.regSI);
+        this.aRegValues[asRegs[15]] = str.toHexWord(cpu.regDI);
+        this.aRegValues[asRegs[16]] = str.toHexWord(cpu.segES.sel);
+        this.aRegValues[asRegs[17]] = str.toHexWord(cpu.segCS.sel);
+        this.aRegValues[asRegs[18]] = str.toHexWord(cpu.segSS.sel);
+        this.aRegValues[asRegs[19]] = str.toHexWord(cpu.segDS.sel);
+        this.aRegValues[asRegs[20]] = str.toHexWord(cpu.regIP);
+    };
+    
+    /**
+     * messageInt(nInt, addr)
+     *
+     * @this {Debugger}
+     * @param {number} nInt
+     * @param {number} addr
+     */
+    Debugger.prototype.messageInt = function(nInt, addr)
+    {
+        var AH = this.cpu.regAX >> 8;
+        var aFuncs = Debugger.INT_FUNCS[nInt];
+        var sFunc = (aFuncs && aFuncs[AH]) || "";
+        if (sFunc) {
+            this.updateRegValues();
+            sFunc = " " + str.replaceArray(this.aRegValues, sFunc);
+        }
+        this.message("INT 0x" + str.toHexByte(nInt) + ": AH=" + str.toHexByte(AH) + " at " + str.toHexAddr(addr - this.cpu.segCS.base, this.cpu.segCS.sel) + sFunc);
+    };
+
+    /**
+     * messageIntReturn(nInt, nLevel, nCycles)
+     *
+     * @this {Debugger}
+     * @param {number} nInt
+     * @param {number} nLevel
+     * @param {number} nCycles
+     * @param {string} [sResult]
+     */
+    Debugger.prototype.messageIntReturn = function(nInt, nLevel, nCycles, sResult)
+    {
+        this.message("INT 0x" + str.toHexByte(nInt) + "(" + nLevel + "): C=" + (this.cpu.getCF()? 1 : 0) + (sResult || "") + " (cycles=" + nCycles + ")");
+    };
+
+    /**
      * messageMem(component, addr, fWrite, addrFrom, name, bitsMessage)
      *
      * NOTE: Not currently used
@@ -1306,7 +1425,7 @@ if (DEBUGGER) {
     Debugger.prototype.messageMem = function(component, addr, fWrite, addrFrom, name, bitsMessage)
      {
         if (!bitsMessage) bitsMessage = 0;
-        bitsMessage |= this.msgCategories.MESSAGE_MEM.bit;
+        bitsMessage |= Debugger.MESSAGES.MESSAGE_MEM.BIT;
         if (addrFrom == null || (this.bitsMessageEnabled & bitsMessage) == bitsMessage) {
             var b = this.bus.getByteDirect(addr);
             this.message(component.idComponent + "." + (fWrite? "setByte" : "getByte") + "(0x" + str.toHexAddr(addr) + ")" + (addrFrom != null? (" at " + str.toHexAddr(addrFrom)) : "") + ": " + (name? (name + "=") : "") + str.toHexByte(b));
@@ -1329,7 +1448,7 @@ if (DEBUGGER) {
     Debugger.prototype.messagePort = function(component, port, bOut, addrFrom, name, bitsMessage, bIn)
     {
         if (!bitsMessage) bitsMessage = 0;
-        bitsMessage |= this.msgCategories.MESSAGE_PORT.bit;
+        bitsMessage |= Debugger.MESSAGES.MESSAGE_PORT.BIT;
         if (addrFrom == null || (this.bitsMessageEnabled & bitsMessage) == bitsMessage) {
             var segFrom = null;
             if (addrFrom != null) {
@@ -1351,7 +1470,7 @@ if (DEBUGGER) {
         this.println(sMessage);             // + " (" + this.cpu.getCycles() + " cycles)"
         
         if (this.cpu) {
-            if (this.bitsMessageEnabled & this.msgCategories.MESSAGE_HALT.bit) {
+            if (this.bitsMessageEnabled & Debugger.MESSAGES.MESSAGE_HALT.BIT) {
                 this.cpu.haltCPU();
             }
             /*
@@ -1427,28 +1546,7 @@ if (DEBUGGER) {
      */
     Debugger.prototype.intDOSCall = function(addr)
     {
-        var AH = this.cpu.regAX >> 8;
-        if (this.messageEnabled(this.MESSAGE_DOS)) {
-
-            /*
-             * TODO: Replace "<" and ">" specifiers in the DOS function descriptors with actual register value(s)
-             */
-            var sFuncDesc = Debugger.aDOSFuncDesc[AH];
-            sFuncDesc = sFuncDesc? ": " + sFuncDesc.replace(/\((<|>)/g, "(") : "";
-
-            this.message("INT 0x21: AH=" + str.toHexByte(AH) + " at " + str.toHexAddr(addr - this.cpu.segCS.base, this.cpu.segCS.sel) + sFuncDesc);
-            
-            /*
-             * Use this code to halt the CPU and/or catch the interrupt's return....
-             * 
-            this.cpu.haltCPU();
-            this.cpu.addInterruptReturn(addr, function(dbg, nCycles) {
-                return function onDOSCallReturn(nLevel) {
-                    dbg.intDOSCallReturn(nCycles, nLevel);
-                };
-            }(this, this.cpu.getCycles()));
-             */
-        }
+        if (this.messageEnabled(this.MESSAGE_DOS)) this.messageInt(Debugger.INT_DOS, addr);
         return true;
     };
     
@@ -1459,7 +1557,6 @@ if (DEBUGGER) {
      */
     Debugger.prototype.init = function()
     {
-        // this.doHelp();
         this.println("Type ? for list of debugger commands");
     };
 
@@ -1825,7 +1922,7 @@ if (DEBUGGER) {
      */
     Debugger.prototype.checksEnabled = function(fBreak)
     {
-        return ((DEBUG && !fBreak)? true : (this.aBreakExec.length > 1 /* || this.aBreakRead.length > 1 || this.aBreakWrite.length > 1 */));
+        return ((DEBUG && !fBreak)? true : (this.aBreakExec.length > 1 || this.messageEnabled(this.MESSAGE_INT) /* || this.aBreakRead.length > 1 || this.aBreakWrite.length > 1 */));
     };
     
     /**
@@ -1851,31 +1948,39 @@ if (DEBUGGER) {
             return true;
         }
         
-        this.cInstructions++;
-        var bOpcode = this.bus.getByteDirect(addr);
-        this.aaOpcodeCounts[bOpcode][1]++;
-        
         /*
-         * This is a good example of what NOT to do in a high-frequency function, and defeats
-         * the entire purpose of preallocating and preinitializing the history array in initHistory():
-         * 
-         *      this.aOpcodeHistory[this.iOpcodeHistory] = this.newAddr(this.cpu.regIP, this.cpu.segCS.sel, addr);
-         *      
-         * As the name implies, newAddr() returns a new "Addr" (Array) object every time it's called.
+         * The rest of the instruction tracking logic can only be performed if initHistory() has allocated
+         * the necessary data structures; note that there is no explicit UI for enabling/disabling history,
+         * other than adding/removing breakpoints, simply because it's breakpoints that trigger the call to
+         * checkInstruction() -- well, OK, and a few other things now, like enabling MESSAGE_INT messages.
          */
-        var a = this.aOpcodeHistory[this.iOpcodeHistory];
-        a[0] = this.cpu.regIP;
-        a[1] = this.cpu.segCS.sel;
-        a[2] = addr;
-        if (++this.iOpcodeHistory == this.aOpcodeHistory.length) this.iOpcodeHistory = 0;
-        
+        if (this.aaOpcodeCounts.length) {
+            
+            this.cInstructions++;
+            var bOpcode = this.bus.getByteDirect(addr);
+            this.aaOpcodeCounts[bOpcode][1]++;
+            
+            /*
+             * This is a good example of what NOT to do in a high-frequency function, and defeats
+             * the entire purpose of preallocating and preinitializing the history array in initHistory():
+             * 
+             *      this.aOpcodeHistory[this.iOpcodeHistory] = this.newAddr(this.cpu.regIP, this.cpu.segCS.sel, addr);
+             *      
+             * As the name implies, newAddr() returns a new "Addr" (Array) object every time it's called.
+             */
+            var a = this.aOpcodeHistory[this.iOpcodeHistory];
+            a[0] = this.cpu.regIP;
+            a[1] = this.cpu.segCS.sel;
+            a[2] = addr;
+            if (++this.iOpcodeHistory == this.aOpcodeHistory.length) this.iOpcodeHistory = 0;
+        }
         return false;
     };
     
     /**
      * checkMemoryRead(addr)
      *
-     * This "check" function is called by the CPU to inform us that a memory read occurred, giving us an
+     * This "check" function is called by a Memory block to inform us that a memory read occurred, giving us an
      * opportunity to track the read if we want, and look for a matching "read" breakpoint, if any.
      * 
      * @this {Debugger}
@@ -1894,7 +1999,7 @@ if (DEBUGGER) {
     /**
      * checkMemoryWrite(addr)
      *
-     * This "check" function is called by the CPU to inform us that a memory write occurred, giving us an
+     * This "check" function is called by a Memory block to inform us that a memory write occurred, giving us an
      * opportunity to track the write if we want, and look for a matching "write" breakpoint, if any.
      * 
      * @this {Debugger}
@@ -1913,7 +2018,7 @@ if (DEBUGGER) {
     /**
      * checkPortInput(port, bIn)
      *
-     * This "check" function is called by the CPU to inform us that port input occurred.
+     * This "check" function is called by the Bus component to inform us that port input occurred.
      *
      * @this {Debugger}
      * @param {number} port
@@ -1933,7 +2038,7 @@ if (DEBUGGER) {
     /**
      * checkPortOutput(port, bOut)
      *
-     * This "check" function is called by the CPU to inform us that port output occurred.
+     * This "check" function is called by the Bus component to inform us that port output occurred.
      *
      * @this {Debugger}
      * @param {number} port
@@ -2753,7 +2858,7 @@ if (DEBUGGER) {
      * done later, by getAddr(), which returns a negative result (-1) for invalid segments, out-of-range offsets,
      * etc.  The Debugger's low-level get/set memory functions verify all getAddr() results, but even if an
      * invalid address is passed through to the Bus memory interfaces, the address will simply be masked with
-     * Bus.addrLimit; in the case of -1, that will generally refer to the last byte of physical memory.
+     * Bus.addrLimit; in the case of -1, that will generally refer to the last byte of physical address space.
      * 
      * @this {Debugger}
      * @param {string|undefined} sAddr
@@ -2847,8 +2952,8 @@ if (DEBUGGER) {
                     value = this.cpu.segSS.sel;
                     break;
                 /*
-                 * I used to alias "PC" to "IP", until I discovered that early (perhaps even ALL?) versions of DEBUG.COM
-                 * treat "PC" as an alias for the 16-bit flags register.  TODO: Add support for "PC".
+                 * I used to alias "PC" to "IP", until I discovered that early (perhaps even ALL) versions of DEBUG.COM
+                 * treat "PC" as an alias for the 16-bit flags register.  TODO: Add support for "PC" as the flags register.
                  */
                 case "IP":
                     value = this.cpu.regIP;
@@ -3303,10 +3408,10 @@ if (DEBUGGER) {
         var m;
         if (sAddr == "?") {
             var sDumpers = "symbols";
-            for (m in this.msgCategories) {
-                if (this.msgCategories[m].fnDumper !== undefined) {
+            for (m in Debugger.MESSAGES) {
+                if (this.afnDumpers[m]) {
                     if (sDumpers.length) sDumpers += ",";
-                    sDumpers = sDumpers + this.msgCategories[m].op;
+                    sDumpers = sDumpers + Debugger.MESSAGES[m].OP;
                 }
             }
             sDumpers += ",state";
@@ -3325,9 +3430,14 @@ if (DEBUGGER) {
             this.dumpSymbols();
             return;
         }
-        for (m in this.msgCategories) {
-            if (sAddr == this.msgCategories[m].op) {
-                this.msgCategories[m].fnDumper(sLen);
+        for (m in Debugger.MESSAGES) {
+            if (sAddr == Debugger.MESSAGES[m].OP) {
+                var fnDumper = this.afnDumpers[m];
+                if (fnDumper) {
+                    fnDumper(sLen);
+                } else {
+                    this.println("no dump registered for " + sAddr);
+                }
                 return;
             }
         }
@@ -3802,9 +3912,9 @@ if (DEBUGGER) {
                 fCriteria = false;
                 sCategory = null;
             } else {
-                for (m in this.msgCategories) {
-                    if (sCategory == this.msgCategories[m].op) {
-                        bitsMessage = this.msgCategories[m].bit;
+                for (m in Debugger.MESSAGES) {
+                    if (sCategory == Debugger.MESSAGES[m].OP) {
+                        bitsMessage = Debugger.MESSAGES[m].BIT;
                         fCriteria = !!(this.bitsMessageEnabled & bitsMessage);
                         break;
                     }
@@ -3831,14 +3941,14 @@ if (DEBUGGER) {
          */
         var n = 0;
         var sCategories = "";
-        for (m in this.msgCategories) {
-            if (!sCategory || sCategory == this.msgCategories[m].op) {
-                var bitMessage = this.msgCategories[m].bit;
+        for (m in Debugger.MESSAGES) {
+            if (!sCategory || sCategory == Debugger.MESSAGES[m].OP) {
+                var bitMessage = Debugger.MESSAGES[m].BIT;
                 var fEnabled = !!(this.bitsMessageEnabled & bitMessage);
                 if (fCriteria !== null && fCriteria != fEnabled) continue;
                 if (sCategories) sCategories += ",";
                 if (!(++n % 10)) sCategories += "\n\t";     // jshint ignore:line
-                sCategories += this.msgCategories[m].op;
+                sCategories += Debugger.MESSAGES[m].OP;
             }
         }
         
@@ -4121,13 +4231,8 @@ if (DEBUGGER) {
      */
     Debugger.prototype.doProcStep = function(sCmd)
     {
-        var fRegs = (sCmd == "pr"? 1 : 0);
-        /*
-         * TODO: Add some UI for setting fCallStep (I used to set it to !fRegs, but no one's
-         * going to understand why "p" steps over CALL instructions but "pr" does not; that's
-         * behavior that was simply convenient for code I was debugging at one time).
-         */
         var fCallStep = true;
+        var fRegs = (sCmd == "pr"? 1 : 0);
         /*
          * Set up the value for this.fProcStep (ie, 1 or 2) depending on whether the user wants
          * a subsequent register dump ("pr") or not ("p").

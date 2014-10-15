@@ -443,12 +443,13 @@ var X86Help = {
      * @param {number} [nError]
      */
     opHelpFault: function(nFault, nError) {
-        if (this.dbg) {
+        if (DEBUGGER && this.dbg) {
             /*
-             * By using Debugger.message(), you have the option of setting "m halt on" and halting on messages
-             * like this.
+             * NOTE: By using Debugger.message(), we have the option of setting "m halt on" and halting on messages like this.
              */
-            this.dbg.message("Fault 0x" + str.toHexByte(nFault) + (nError != null? " (0x" + str.toHexWord(nError) + ")" : "") + " on opcode 0x" + str.toHexByte(this.bus.getByteDirect(this.regEIP)) + " at " + str.toHexAddr(this.regIP, this.segCS.sel));
+            if (this.dbg.messageEnabled(this.dbg.MESSAGE_CPU)) {
+                this.dbg.message("Fault 0x" + str.toHexByte(nFault) + (nError != null? " (0x" + str.toHexWord(nError) + ")" : "") + " on opcode 0x" + str.toHexByte(this.bus.getByteDirect(this.regEIP)) + " at " + str.toHexAddr(this.regIP, this.segCS.sel));
+            }
         }
         if (this.model >= X86.MODEL_80186) {
             this.setIP(this.opEA - this.segCS.base);

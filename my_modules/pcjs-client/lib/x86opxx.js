@@ -1288,7 +1288,7 @@ var X86OpXX = {
         /*
          * NOTE: 5 + 4n is the cycle time for the 80286; the 80186/80188 has different values: 14 cycles for
          * an unrepeated INS, and 8 + 8n for a repeated INS.  However, accurate cycle times for the 80186/80188 is
-         * low priority.
+         * low priority. TODO: Fix this someday.
          */
         var nCycles = 5;
 
@@ -1331,7 +1331,7 @@ var X86OpXX = {
         /*
          * NOTE: 5 + 4n is the cycle time for the 80286; the 80186/80188 has different values: 14 cycles for
          * an unrepeated INS, and 8 + 8n for a repeated INS.  However, accurate cycle times for the 80186/80188 is
-         * low priority.
+         * low priority. TODO: Fix this someday.
          */
         var nCycles = 5;
 
@@ -2753,7 +2753,7 @@ var X86OpXX = {
         /*
          * NOTE: 11 is the minimum cycle time for the 80286; the 80186/80188 has different cycle times: 15, 25 and
          * 22 + 16 * (bLevel - 1) for bLevel 0, 1 and > 1, respectively.  However, accurate cycle times for the 80186/80188
-         * is low priority.
+         * is low priority. TODO: Fix this someday.
          */
         this.nStepCycles -= 11;
         this.pushWord(this.regBP);
@@ -2781,7 +2781,7 @@ var X86OpXX = {
         this.regBP = this.popWord();
         /*
          * NOTE: 5 is the cycle time for the 80286; the 80186/80188 has a cycle time of 8.  However, accurate cycle
-         * counts for the 80186/80188 is low priority.
+         * counts for the 80186/80188 is low priority. TODO: Fix this someday.
          */
         this.nStepCycles -= 5;
     },
@@ -2794,7 +2794,7 @@ var X86OpXX = {
         var n = this.getIPWord();
         this.setCSIP(this.popWord(), this.popWord());
         this.regSP = (this.regSP + n) & 0xffff;
-        if (this.cInterruptReturn) this.checkInterruptReturn(this.regEIP);
+        if (this.cIntReturn) this.checkIntReturn(this.regEIP);
         this.nStepCycles -= this.nOpCyclesRetFn;
     },
     /**
@@ -2821,7 +2821,7 @@ var X86OpXX = {
      */
     opINTn: function() {
         var nInt = this.getIPByte();
-        if (this.checkInterruptNotify(nInt)) {
+        if (this.checkIntNotify(nInt)) {
             X86Help.opHelpINT.call(this, nInt, null, 0);
             return;
         }
@@ -2847,7 +2847,7 @@ var X86OpXX = {
     opIRET: function() {
         this.setCSIP(this.popWord(), this.popWord());
         this.setPS(this.popWord());
-        if (this.cInterruptReturn) this.checkInterruptReturn(this.regEIP);
+        if (this.cIntReturn) this.checkIntReturn(this.regEIP);
         /*
          * NOTE: I'm assuming that neither POPF nor IRET are required to set NOINTR like STI does.
          */
