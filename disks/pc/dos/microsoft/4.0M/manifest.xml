@@ -8,13 +8,13 @@
 	<author>Microsoft</author>
 	<releaseDate/>
 	<machine href="/configs/pc/machines/5160/cga/640kb/dos400m/machine.xml"/>
-	<disk id="disk01" href="/disks/pc/dos/microsoft/4.0M/MSDOS400M-DISK1.json" md5="6349c61a7c74b0872a918d130c8080a4" md5json="e9db9a543fc26b5fc6c7c03586eb05b2">
+	<disk id="disk01" size="368640" chs="40:2:9" img="private/MSDOS400M-DISK1.img" href="/disks/pc/dos/microsoft/4.0M/MSDOS400M-DISK1.json" md5="6349c61a7c74b0872a918d130c8080a4" md5json="e9db9a543fc26b5fc6c7c03586eb05b2">
 		<name>MS-DOS 4.0M (Disk 1)</name>
 	</disk>
-	<disk id="disk02" href="/disks/pc/dos/microsoft/4.0M/MSDOS400M-DISK2.json" md5="37c5bbad4ff5bcc0b6394dbdb8f9e918" md5json="b1bff9bd059994ef8f3937664b4f917d">
+	<disk id="disk02" size="368640" chs="40:2:9" img="private/MSDOS400M-DISK2.img" href="/disks/pc/dos/microsoft/4.0M/MSDOS400M-DISK2.json" md5="37c5bbad4ff5bcc0b6394dbdb8f9e918" md5json="b1bff9bd059994ef8f3937664b4f917d">
 		<name>MS-DOS 4.0M (Disk 2)</name>
 	</disk>
-	<other id="disk03" href="/disks/pc/dos/microsoft/4.0M/MSDOS400M-DISK2-UNPATCHED.json" md5="ef8d829d5ac38765640ad646fb386950" md5json="e6be9bbd90139fc3ef3739a95f32b664">
+	<other id="disk03" size="368640" chs="40:2:9" img="private/MSDOS400M-DISK2-UNPATCHED.img" href="/disks/pc/dos/microsoft/4.0M/MSDOS400M-DISK2-UNPATCHED.json" md5="ef8d829d5ac38765640ad646fb386950" md5json="e6be9bbd90139fc3ef3739a95f32b664">
 		<name>Disk 2 with unpatched LINK.EXE</name>
 	</other>
 	<notes>The designation "4.0M" is not an official version number; we use it only to differentiate this version of MS-DOS from the "non-multitasking" version.</notes>

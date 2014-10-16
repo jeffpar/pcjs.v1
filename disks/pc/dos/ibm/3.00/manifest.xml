@@ -7,10 +7,10 @@
 	<category>Operating System</category>
 	<author>IBM/Microsoft</author>
 	<releaseDate/>
-	<disk id="disk01" href="/disks/pc/dos/ibm/3.00/PCDOS300-DISK1.json" md5="34e5385569c85e1f024b23adcd26527d" md5json="14e55feee1cada82cdd5a8189ca6b8a5">
+	<disk id="disk01" size="368640" chs="40:2:9" img="private/PCDOS300-DISK1.img" href="/disks/pc/dos/ibm/3.00/PCDOS300-DISK1.json" md5="34e5385569c85e1f024b23adcd26527d" md5json="14e55feee1cada82cdd5a8189ca6b8a5">
 		<name>PC-DOS 3.00 (Disk 1)</name>
 	</disk>
-	<disk id="disk02" href="/disks/pc/dos/ibm/3.00/PCDOS300-DISK2.json" md5="64d385860e3d90d52ec50ba56b1141f1" md5json="c65181e4dad3ab26e623698a21b22e22">
+	<disk id="disk02" size="368640" chs="40:2:9" img="private/PCDOS300-DISK2.img" href="/disks/pc/dos/ibm/3.00/PCDOS300-DISK2.json" md5="64d385860e3d90d52ec50ba56b1141f1" md5json="c65181e4dad3ab26e623698a21b22e22">
 		<name>PC-DOS 3.00 (Disk 2)</name>
 	</disk>
 </manifest>

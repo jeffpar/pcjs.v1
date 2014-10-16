@@ -12,8 +12,8 @@
 	<releaseDate>December 16, 1981</releaseDate>
 	<license href="http://www.bricklin.com/history/vclicense.htm">Lotus Development</license>
 	<machine href="/configs/pc/machines/5150/mda/64kb/machine.xml" state="/apps/pc/1981/visicalc/state.json"/>
-	<disk id="disk01" dir="/apps/pc/1981/visicalc/private/" href="/apps/pc/1981/visicalc/disk.json">
-		<file>VC.COM</file>
+	<disk id="disk01" size="163840" chs="40:1:8" dir="private/" href="/apps/pc/1981/visicalc/disk.json" md5="61494f998d5fb0e31e7b8bd99f1cc588" md5json="3ad82ed815725e6bd786f92a4714e84f">
+		<file size="27520" time="1981-12-16 23:00:00" attr="0x20" md5="28997dfedb2440c6054d8be835be8634">VC.COM</file>
 		<file dir="../">README.md</file>
 		<link href="http://www.bricklin.com/history/vclicense.htm">VisiCalc License</link>
 	</disk>

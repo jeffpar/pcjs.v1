@@ -2,7 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.15.4/manifest.xsl"?>
 <manifest type="software">
 	<title>Turbo Pascal</title>
-	<disk id="disk01" href="/disks/pc/tools/borland/pascal/3.0/TURBO30.json" md5="b1243614e885cb2a16047cff1adcb00b" md5json="672b78ada3c22756676b71fdf83c23af">
+	<disk id="disk01" size="368640" chs="40:2:9" img="private/TURBO30.img" href="/disks/pc/tools/borland/pascal/3.0/TURBO30.json" md5="b1243614e885cb2a16047cff1adcb00b" md5json="672b78ada3c22756676b71fdf83c23af">
 		<name>Turbo Pascal 3.0</name>
 	</disk>
 </manifest>

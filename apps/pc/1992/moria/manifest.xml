@@ -92,21 +92,21 @@
 		<name>Ben Schreiber</name>
 		<desc>Macintosh port for Think C</desc>
 	</contributor>
-	<disk id="disk01" dir="/apps/pc/1992/moria/bin/" href="/apps/pc/1992/moria/disk.json">
+	<disk id="disk01" size="368640" chs="40:2:9" dir="private/bin/" href="/apps/pc/1992/moria/disk.json" md5="da0023280238bc2ee9053ad2b9548816" md5json="1473be159bb5f9001db31c06b3a366c1">
 		<name>Moria 5.5</name>
-		<file>EXP.DOC</file>
-		<file>MORIA.CNF</file>
-		<file>MORIA1.TXT</file>
-		<file>MORIA2.TXT</file>
-		<file>MORIA88.EXE</file>
-		<file>ORIGCMDS.HLP</file>
-		<file>OWIZCMDS.HLP</file>
-		<file>ROGLCMDS.HLP</file>
-		<file>RWIZCMDS.HLP</file>
-		<file>SPELLS.DOC</file>
-		<file>VERSION.HLP</file>
-		<file>WELCOME.HLP</file>
-		<file>SCORES</file>
+		<file size="6074" time="1992-11-01 23:15:36" attr="0x20" md5="078aca44b845ee8a787a324c1e827200">EXP.DOC</file>
+		<file size="2560" time="1992-11-01 23:15:36" attr="0x20" md5="a5c8620efd0dc841956f9cdc2e46220a">MORIA.CNF</file>
+		<file size="49267" time="1992-11-01 23:15:36" attr="0x20" md5="32c9f15c70256f540f531675ad0e217f">MORIA1.TXT</file>
+		<file size="57606" time="1992-11-01 23:15:36" attr="0x20" md5="deba369b3434ca2d38b0b5a01a6f6720">MORIA2.TXT</file>
+		<file size="160588" time="1992-11-01 23:15:42" attr="0x20" md5="abcd15c840cacc04ac18cd4818901a30">MORIA88.EXE</file>
+		<file size="2852" time="1992-11-01 23:15:42" attr="0x20" md5="fae30fdd85dfbe8cdfab5eb122539f12">ORIGCMDS.HLP</file>
+		<file size="376" time="1992-11-01 23:15:42" attr="0x20" md5="1e568cf3719cc40cca1d85711c962911">OWIZCMDS.HLP</file>
+		<file size="3049" time="1992-11-01 23:15:42" attr="0x20" md5="d58526b722f335e4db1616e52d7fb533">ROGLCMDS.HLP</file>
+		<file size="376" time="1992-11-01 23:15:42" attr="0x20" md5="1e343c31d9600d000a9aec76aa774448">RWIZCMDS.HLP</file>
+		<file size="0" time="2014-04-12 12:05:43" attr="0x20">SCORES</file>
+		<file size="11474" time="1992-11-01 23:15:44" attr="0x20" md5="d977c21b4510a07b64b117def34d9d3c">SPELLS.DOC</file>
+		<file size="2193" time="1992-11-01 23:15:44" attr="0x20" md5="cac18aa1420a33b231295f468c360f96">VERSION.HLP</file>
+		<file size="423" time="1992-11-01 23:15:44" attr="0x20" md5="07fdaebf594f9b34d54544c2b6aa36d8">WELCOME.HLP</file>
 	</disk>
 	<machine href="/configs/pc/machines/5160/cga/640kb/machine.xml" state="/apps/pc/1992/moria/state.json"/>
 </manifest>

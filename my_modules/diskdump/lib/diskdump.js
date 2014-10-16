@@ -368,22 +368,23 @@ DiskDump.CLI = function()
         if (sOutputFile && sOutputFile.charAt(0) != '/') sOutputFile = path.join(process.cwd(), sOutputFile);
 
         var fOverwrite = argv['overwrite'];
+        var sManifestTitle = argv['title'];
         
         if (sDiskPath) {
             var disk = new DiskDump(sDiskPath, asExclude, argv['format'], argv['comments'], argv['mbhd'], sServerRoot, sManifestFile);
             if (sDir) {
                 disk.buildImage(true, function(err) {
-                    DiskDump.outputDisk(err, disk, sDiskPath, sOutputFile, fOverwrite);
+                    DiskDump.outputDisk(err, disk, sDiskPath, sOutputFile, fOverwrite, sManifestTitle);
                 });
             }
             else if (sDisk) {
                 disk.loadFile(function(err) {
-                    DiskDump.outputDisk(err, disk, sDiskPath, sOutputFile, fOverwrite);
+                    DiskDump.outputDisk(err, disk, sDiskPath, sOutputFile, fOverwrite, sManifestTitle);
                 });
             }
             else if (sPath) {
                 disk.buildImage(false, function(err) {
-                    DiskDump.outputDisk(err, disk, sDiskPath, sOutputFile, fOverwrite);
+                    DiskDump.outputDisk(err, disk, sDiskPath, sOutputFile, fOverwrite, sManifestTitle);
                 });
             }
         } else {
@@ -401,15 +402,16 @@ DiskDump.CLI = function()
 };
 
 /**
- * outputDisk(err, disk, sDiskPath, sOutputFile, fOverwrite)
+ * outputDisk(err, disk, sDiskPath, sOutputFile, fOverwrite, sManifestTitle)
  *
  * @param {Error} err
  * @param {DiskDump} disk
  * @param {string} sDiskPath
  * @param {string} sOutputFile
  * @param {boolean} fOverwrite
+ * @param {string} [sManifestTitle]
  */
-DiskDump.outputDisk = function(err, disk, sDiskPath, sOutputFile, fOverwrite)
+DiskDump.outputDisk = function(err, disk, sDiskPath, sOutputFile, fOverwrite, sManifestTitle)
 {
     if (!err) {
         /*
@@ -444,7 +446,7 @@ DiskDump.outputDisk = function(err, disk, sDiskPath, sOutputFile, fOverwrite)
                     if (disk.bufDisk) {
                         md5Disk = crypto.createHash('md5').update(disk.bufDisk).digest('hex');
                     }
-                    fUnchanged = DiskDump.updateManifest(disk, disk.sManifestFile, sDiskPath, sOutputFile, true, md5Disk, md5JSON);
+                    fUnchanged = DiskDump.updateManifest(disk, disk.sManifestFile, sDiskPath, sOutputFile, true, sManifestTitle, md5Disk, md5JSON);
                 }
                 
                 try {
@@ -500,7 +502,7 @@ DiskDump.getManifestAttr = function(sID, sTag)
 };
 
 /**
- * updateManifest(disk, sManifestFile, sDiskPath, sOutputFile, fOverwrite, md5Disk, md5JSON)
+ * updateManifest(disk, sManifestFile, sDiskPath, sOutputFile, fOverwrite, sTitle, md5Disk, md5JSON)
  * 
  * This function reports a change if EITHER the md5Disk value does not match the original
  * "md5" value recorded in the manifest OR the manifest itself has changed.  If md5JSON is
@@ -514,27 +516,32 @@ DiskDump.getManifestAttr = function(sID, sTag)
  * @param {string} sDiskPath
  * @param {string} sOutputFile
  * @param {boolean} fOverwrite
+ * @param {string} [sTitle]
  * @param {string} [md5Disk] for the entire disk image
  * @param {string} [md5JSON] for the entire JSON-encoded disk image, if any
  * @return {boolean|undefined} true if disk has changed, false if not, undefined if unknown
  */
-DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, fOverwrite, md5Disk, md5JSON)
+DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, fOverwrite, sTitle, md5Disk, md5JSON)
 {
-    var fUnchanged, fExists = false, sXML, sName, err = null; 
+    var fUnchanged, fExists = false, sXML, err = null; 
     var sMatchDisk = null, sIDDisk = null, sMD5Disk = null, sMD5JSON = null;
     
     try {
         sXML = fs.readFileSync(sManifestFile, {encoding: "utf8"});
         fExists = true;
     } catch(e) {
-        sName = str.getBaseName(disk.sDiskPath);
-        if (sName) {
-            sName = sName.charAt(0).toUpperCase() + sName.substr(1);
+        var sPrefix = "";
+        if (!sTitle) {
+            sTitle = str.getBaseName(disk.sDiskPath);
+            if (sTitle) {
+                sTitle = sTitle.charAt(0).toUpperCase() + sTitle.substr(1);
+            }
+            sPrefix = ' type="prefix"';
         }
         sXML = '<?xml version="1.0" encoding="UTF-8"?>\n';
         sXML += '<?xml-stylesheet type="text/xsl" href="/versions/pcjs/' + pkg.version + '/manifest.xsl"?>\n';
         sXML += '<manifest type="software">\n';
-        sXML += '\t<title type="prefix">' + sName + '</title>\n';
+        sXML += '\t<title' + sPrefix + '>' + sTitle + '</title>\n';
         sXML += '</manifest>';
     }
     
@@ -592,7 +599,7 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
         }
         var sXMLDisk = '\t<disk id="' + sIDDisk + '"' + (size? ' size="' + size + '"' : '') + (sCHS? ' chs="' + sCHS + '"' : '') + (sParm? ' ' + sParm + '="' + sDiskPath + '"' : '') + ' href="' + sOutputFile + '"' + (md5Disk? ' md5="' + md5Disk + '"' : '') + (md5JSON? ' md5json="' + md5JSON + '"' : '') + '>\n';
         
-        sName = "";
+        var sName = "";
         if (sMatchDisk && (match = sMatchDisk.match(/<name>([^>]*)<\/name>/))) {
             sName = match[1];
         }

@@ -1,4 +1,8 @@
-These disk images are from the [jsmachines.net](http://jsmachines.net/) software collection.  Help us grow!
+Microsoft C Compiler v4.00
+---
 
-*[@jeffpar](mailto:Jeff@pcjs.org)*  
-*February 7, 2014*
+[Manifest](manifest.xml) updated using:
+
+	find -L private -name "*" -type f -exec node ../../../../../../my_modules/diskdump/bin/diskdump --format=json --output=. --manifest --disk={} \;
+
+The original diskettes are not part of the repository/website.

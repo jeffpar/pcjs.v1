@@ -7,5 +7,5 @@
 	<category>Operating System</category>
 	<author>IBM/Microsoft</author>
 	<releaseDate/>
-	<disk id="disk01" href="/disks/pc/dos/ibm/1.00/PCDOS100.json" md5="73c919cecadf002a7124b7e8bfe3b5ba" md5json="7f014057d7af74d3c22e1cd10443defe"/>
+	<disk id="disk01" size="163840" chs="40:1:8" img="private/PCDOS100.img" href="/disks/pc/dos/ibm/1.00/PCDOS100.json" md5="73c919cecadf002a7124b7e8bfe3b5ba" md5json="7f014057d7af74d3c22e1cd10443defe"/>
 </manifest>

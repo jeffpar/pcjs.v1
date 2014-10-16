@@ -7,22 +7,22 @@
 	<category>Word Processor</category>
 	<author>Microsoft</author>
 	<releaseDate/>
-	<disk id="disk01" href="/disks/pc/apps/microsoft/word/3.0/WORD30-DISK1-PROGRAM.json" md5="97f9cea388a2732089936334fcc63c96" md5json="b713ad3dd4eee3f6dd2abf048dc2daad">
+	<disk id="disk01" size="368640" chs="40:2:9" img="private/WORD30-DISK1-PROGRAM.img" href="/disks/pc/apps/microsoft/word/3.0/WORD30-DISK1-PROGRAM.json" md5="97f9cea388a2732089936334fcc63c96" md5json="b713ad3dd4eee3f6dd2abf048dc2daad">
 		<name>MS Word 3.0 (Disk 1)</name>
 	</disk>
-	<disk id="disk02" href="/disks/pc/apps/microsoft/word/3.0/WORD30-DISK2-SPELL.json" md5="7935e208cbe47b20aa63d6bbda9c53f8" md5json="d8136eeb67df7832a1f0e26c7868bfe8">
+	<disk id="disk02" size="368640" chs="40:2:9" img="private/WORD30-DISK2-SPELL.img" href="/disks/pc/apps/microsoft/word/3.0/WORD30-DISK2-SPELL.json" md5="7935e208cbe47b20aa63d6bbda9c53f8" md5json="d8136eeb67df7832a1f0e26c7868bfe8">
 		<name>MS Word 3.0 (Disk 2)</name>
 	</disk>
-	<disk id="disk03" href="/disks/pc/apps/microsoft/word/3.0/WORD30-DISK3-UTILITIES.json" md5="8e95a1700ab66f71af6f148dffa4bf39" md5json="dfb026f66699710775159a97474984dc">
+	<disk id="disk03" size="368640" chs="40:2:9" img="private/WORD30-DISK3-UTILITIES.img" href="/disks/pc/apps/microsoft/word/3.0/WORD30-DISK3-UTILITIES.json" md5="8e95a1700ab66f71af6f148dffa4bf39" md5json="dfb026f66699710775159a97474984dc">
 		<name>MS Word 3.0 (Disk 3)</name>
 	</disk>
-	<disk id="disk04" href="/disks/pc/apps/microsoft/word/3.0/WORD30-DISK4-PRINTER.json" md5="a15131fe73097ac52bcc15beeba451f3" md5json="9814f88a83af26649d1e9e0c7292102c">
+	<disk id="disk04" size="368640" chs="40:2:9" img="private/WORD30-DISK4-PRINTER.img" href="/disks/pc/apps/microsoft/word/3.0/WORD30-DISK4-PRINTER.json" md5="a15131fe73097ac52bcc15beeba451f3" md5json="9814f88a83af26649d1e9e0c7292102c">
 		<name>MS Word 3.0 (Disk 4)</name>
 	</disk>
-	<disk id="disk05" href="/disks/pc/apps/microsoft/word/3.0/WORD30-DISK5-LEARNMOU.json" md5="6343da623cd8d1b7b7613174df4d0b6f" md5json="a194294aec182ee668c2b295ad17c471">
+	<disk id="disk05" size="368640" chs="40:2:9" img="private/WORD30-DISK5-LEARNMOU.img" href="/disks/pc/apps/microsoft/word/3.0/WORD30-DISK5-LEARNMOU.json" md5="6343da623cd8d1b7b7613174df4d0b6f" md5json="a194294aec182ee668c2b295ad17c471">
 		<name>MS Word 3.0 (Disk 5)</name>
 	</disk>
-	<disk id="disk06" href="/disks/pc/apps/microsoft/word/3.0/WORD30-DISK6-LEARNKBD-ERRORS.json" md5="ee4dead3e8b40347e40824e16cf65d9b" md5json="464f5b6884a6817c3ea40ee1242bb384">
+	<disk id="disk06" size="368640" chs="40:2:9" img="private/WORD30-DISK6-LEARNKBD-ERRORS.img" href="/disks/pc/apps/microsoft/word/3.0/WORD30-DISK6-LEARNKBD-ERRORS.json" md5="ee4dead3e8b40347e40824e16cf65d9b" md5json="464f5b6884a6817c3ea40ee1242bb384">
 		<name>MS Word 3.0 (Disk 6)</name>
 	</disk>
 </manifest>
