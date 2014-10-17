@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/c1pjs/1.15.4/machine.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/c1pjs/1.15.5/machine.xsl"?>
 <machine id="c1psim" class="c1p" border="1" width="100%" style="background-color:#FAEBD7">
 	<name>OSI Challenger 1P (32Kb) with Disk Support</name>
 	<computer id="c1p" name="Challenger 1P">

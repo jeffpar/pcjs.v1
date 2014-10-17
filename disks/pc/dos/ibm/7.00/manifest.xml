@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.15.5/manifest.xsl"?>
+<manifest type="software">
+	<title>PC-DOS</title>
+	<version>7.00</version>
+	<type>DOS</type>
+	<category>Operating System</category>
+	<author>IBM</author>
+	<disk id="disk01" size="1474560" chs="80:2:18" img="private/PCDOS700-DISK1.img" href="/disks/pc/dos/ibm/7.00/PCDOS700-DISK1.json" md5="2a3736d2acbb7730965b7cb6d3f16d00" md5json="97fc896b5679dabbadfa13ed6a1dc681">
+		<name>PC-DOS 7.00 (Disk 1)</name>
+	</disk>
+</manifest>

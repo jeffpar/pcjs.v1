@@ -47,7 +47,7 @@ var str = require("../../shared/lib/strlib");
 var usr = require("../../shared/lib/usrlib");
 
 /**
- * @class exports 
+ * @class exports
  * @property {string} name
  * @property {string} version
  * @property {Array.<string>} c1pCSSFiles
@@ -72,7 +72,7 @@ var fConsole = false;
 /*
  * fServerDebug controls server-related debug features; it is false by default and can be enabled using the
  * setOptions() 'debug' property (or from the server's command-line interface using "--debug").
- * 
+ *
  * This used to be named fDebug, which was fine, but it has been renamed to make the distinction between the
  * server's debug state (fServerDebug) and the debug state of HTMLOut instances (this.fDebug) clearer.
  */
@@ -81,7 +81,7 @@ var fServerDebug = false;
 /*
  * logFile is set by server.js using the setOptions() 'logfile' property, if the server has turned on
  * logging.  This allows us to "mingle" our logConsole() output with the server's log (typically "./logs/node.log").
- * 
+ *
  * The same "mingled" messages will also appear on the console if fConsole has been turned on as well
  * (using "--console" from our own command-line interface, or via the setOptions() 'console' property).
  */
@@ -167,12 +167,16 @@ var asNonDirectories = [
     "LICENSE"
 ];
 
+var asExtsPlainText = [
+    "map"
+];
+
 /*
  * When we're generating file listings for a directory (ie, getDirList()), we exclude
  * all files/folders in BOTH of the following arrays.  However, if someone knows/guesses
  * the name of a non-listed file that does not appear in the non-served set, we're OK
  * with serving it to them.
- * 
+ *
  * EXAMPLE: If you put "lib" in the non-listed set, then folders containing a "lib" won't
  * list it, but if you enter a URL to a "lib", its contents will be listed; whereas if you
  * put "lib" in the non-served set, then neither it NOR its contents will be listed.
@@ -197,7 +201,7 @@ var asFilesNonListed = [
 ];
 
 var asExtsNonListed = [
- // "json"              // let's allow these after all (so that people can download disk images)  
+ // "json"              // let's allow these after all (so that people can download disk images)
 ];
 
 var asExtsNonServed = [
@@ -224,7 +228,7 @@ var asFilesNonServed = [
 
 /**
  * HTMLOut()
- * 
+ *
  * Load (building or rebuilding as needed) a default HTML document ("index.html")
  * for the specified directory (which corresponds to req.path).  sFile is the name
  * of a specific template file to start with, but in most cases, callers will pass
@@ -254,14 +258,14 @@ function HTMLOut(sDir, sFile, fRebuild, req, done)
     this.sTemplate = null;
     this.aTokens = {};
     this.fRandomize = false;
-    
+
     /*
      * Since we now pass fDebug to the MarkOut module, which may generate some debug
      * info in the final output that we wouldn't want to cache, I've changed the behavior
      * of fDebug to simply never cache, instead of always rebuilding the cache.
-     * 
+     *
      *      if (this.fDebug) this.fRebuild = true;
-     *      
+     *
      * Note that a production server should not need the GORT_REBUILD command, so we accept
      * it only if fServerDebug is true.
      */
@@ -430,7 +434,7 @@ HTMLOut.filter = function(req, res, next)
     HTMLOut.logDebug('HTMLOut.filter("' + req.url + '")');
 
     if (HTTPAPI.redirect(req, res, next)) return;
-    
+
     var i;
     var sPath = path.join(sServerRoot, req.path);
     var sBaseName = path.basename(req.path);
@@ -452,12 +456,12 @@ HTMLOut.filter = function(req, res, next)
      * "index.html" documents, which we resolved by setting fSendDefault to true, so that we would always send
      * it ourselves, along with an "ok" (200) response code, instead of letting the Express next() function
      * handle it with a "not modified" (304) response code.
-     * 
+     *
      * However, the problem also extends to any XML files that we serve to an initial Safari request
      * (eg, the machine.xml and manifest.xml files that we style as web pages).  Safari includes
      * "Cache-Control max-age=0" in the request, and if the response is "Cache-Control public, max-age=0"
      * along with a 304 response code, Safari may once again display a blank page.
-     * 
+     *
      * This problem appears limited to the initial resource request for a particular URL.  When these XML
      * files are requested by Safari while loading another web page, Safari's caching logic is different
      * (eg, it doesn't include the same "Cache-Control" setting).
@@ -489,19 +493,19 @@ HTMLOut.filter = function(req, res, next)
             }
         }
     }
-    
-    if (asNonDirectories.indexOf(sBaseName) >= 0) {
+
+    if (asNonDirectories.indexOf(sBaseName) >= 0 || asExtsPlainText.indexOf(sBaseExt) >= 0) {
         res.set("Content-Type", "text/plain");
     }
 
     /*
      * Next, check for API requests (eg, "/api/v1/dump?disk=/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json&format=img")
-     * 
+     *
      * We perform this before the trailing-slash-redirect check below, because we don't require our API endpoints to
      * have a trailing slash.
      */
     if (HTTPAPI.filterAPI(req, res, next)) return;
-    
+
     /*
      * If sBaseName contains a file extension, I want to save some time by assuming it's NOT a directory.
      * I simplistically check for a file extension by checking merely for the presence of a period ("dot").
@@ -578,7 +582,7 @@ HTMLOut.filter = function(req, res, next)
 
 /**
  * logConsole(s)
- * 
+ *
  * By using this instead of console.log(), we can eliminate the constant checks for fConsole (although
  * doing those checks might save some unnecessary string concatenation when fConsole is false), and we get
  * the added benefit of optionally being able to log all our messages to the server's log file.
@@ -626,15 +630,15 @@ HTMLOut.logError = function(err, fForce)
  * setOptions(options) is used by the Express web server to set module options
  *
  * Supported options include:
- * 
+ *
  *      'cache'     fCache
  *      'console'   fConsole
  *      'debug'     fServerDebug
- *      'logfile'   logFile   
+ *      'logfile'   logFile
  *      'rebuild'   fRebuild
  *      'senddef'   fSendDefault
  *      'sockets'   fSockets
- *      
+ *
  * Note that an option must be explicitly set in order to override the option's default value
  * (see fCache, fConsole, fServerDebug, fRebuild and fSockets, respectively).
  *
@@ -705,7 +709,7 @@ HTMLOut.prototype.loadFile = function(sFile, fTemplate)
 
 /**
  * setData(err, sData)
- * 
+ *
  * Records the given HTML template and immediately parses it.
  *
  * @this {HTMLOut}
@@ -875,8 +879,8 @@ HTMLOut.prototype.replaceTokens = function()
 
 /**
  * getTitle(sToken, sIndent, aParms)
- * 
- * aParms[0], if present, is used as the preferred title for the home page 
+ *
+ * aParms[0], if present, is used as the preferred title for the home page
  *
  * @this {HTMLOut}
  * @param {string} sToken
@@ -903,7 +907,7 @@ HTMLOut.prototype.getVersion = function(sToken, sIndent, aParms)
     /*
      * Use the same test that processMachines() uses for setting fCompiled: if we're not using compiled code,
      * then we should be using "current" CSS and template files (as opposed to version-specific template files).
-     * 
+     *
      * NOTE: I used to create a symlink in each app's "versions" directory (eg, /versions/pcjs/current ->
      * ../../my_modules/shared/templates), so that when fDebug was true, I could simply insert "current" in
      * place of a version number.  However, that symlink didn't get added to the repository, and I'm not sure
@@ -938,7 +942,7 @@ HTMLOut.prototype.getPCPath = function(sToken, sIndent, aParms)
 {
     /*
      * SIDEBAR: We must use a regular expression to replace all forward slashes with backslashes, because
-     * the string form of JavaScript's replace() method replaces only the FIRST occurrence of the search string. 
+     * the string form of JavaScript's replace() method replaces only the FIRST occurrence of the search string.
      */
     var s = this.req.path.replace(/\//g, "\\").toUpperCase();
     /*
@@ -977,7 +981,7 @@ HTMLOut.prototype.getDirList = function(sToken, sIndent, aParms)
              * (ie, path.join() returns obj.req.path unmodified), we will discard the entry at that point.
              */
             asFiles.push("..");
-            
+
             /*
              * For sorting purposes, I want all folders ending in "kb" and beginning with one to three
              * digits to sort as if they all began with FOUR digits (ie, with leading zeros as needed).
@@ -985,7 +989,7 @@ HTMLOut.prototype.getDirList = function(sToken, sIndent, aParms)
              * I pad those names with slashes, since a leading slash will sort much like a leading zero
              * without being a valid filename character, meaning we can trim away those leading slashes
              * with impunity after the sort is done.
-             * 
+             *
              * Why does this work? The ASCII value of '0' is 48, whereas the ASCII value of '/' is 47,
              * so there are no intervening characters that could sort differently.
              */
@@ -995,7 +999,7 @@ HTMLOut.prototype.getDirList = function(sToken, sIndent, aParms)
                 if (match) asFiles[i] = "///".substr(0, 4 - match[1].length) + asFiles[i];
             }
             asFiles.sort();
-            
+
             for (var iFile = 0; iFile < asFiles.length; iFile++) {
                 var sBaseName = asFiles[iFile].replace(/\//g, "");
 
@@ -1025,7 +1029,7 @@ HTMLOut.prototype.getDirList = function(sToken, sIndent, aParms)
                 }
 
                 /*
-                 * If path.join() returns obj.req.path unmodified, we treat that as a sign we're at 
+                 * If path.join() returns obj.req.path unmodified, we treat that as a sign we're at
                  * sServerRoot (ie, that sFile is ".." and there is no parent), so we discard the entry.
                  *
                  * IISNode hack: path.join() may return paths with backslashes, so convert back to slashes.
@@ -1055,15 +1059,15 @@ HTMLOut.prototype.getDirList = function(sToken, sIndent, aParms)
                  * Here's where we add some code to massage disk image links: if this is a ".json" file in the
                  * /disks folders OR the basename contains "disk", then transform the link into one that will
                  * return an ".img" file when clicked (adapted from the code in browseFolder() in transform.php).
-                 * 
+                 *
                  * We assume someone accessing/downloading such a file would rather have it in its original binary
-                 * form rather than its JSON-ified form (which is all we typically check into the project). 
+                 * form rather than its JSON-ified form (which is all we typically check into the project).
                  */
                 var sOnClick = "";
                 if (sExt == DumpAPI.FORMAT.JSON && (sURL.indexOf("/disks/") === 0 || sBaseName.indexOf("disk") >= 0)) {
                     sOnClick = obj.genOnClick(sURL);
                 }
-                
+
                 /*
                  * The following code would similarly convert any links to ".img" files to a JSON stream, but I'm
                  * not sure we really need to support the reverse of the above.
@@ -1075,7 +1079,7 @@ HTMLOut.prototype.getDirList = function(sToken, sIndent, aParms)
 
                 sBaseName = '\\' + sBaseName.toUpperCase();
              // if (fDir) sBaseName = sBaseName + '\\';
-                
+
                 sList += sIndent + '\t<li><a href="' + sURL + '"' + sOnClick + '>' + sBaseName + '</a></li>\n';
             }
             if (sList) sList = '<ul class="common-list">\n' + sIndent + '\t' + sList.trim() + '\n' + sIndent + '</ul>';
@@ -1228,19 +1232,19 @@ HTMLOut.prototype.getBlog = function(sToken, sIndent, aParms)
  * getDefault(sToken, sIndent, aParms)
  *
  * Process whatever default document(s) are appropriate for the folder being requested.
- * 
+ *
  * getBlog() gets first crack; if we're in a blog folder, it will display the appropriate blog entries.
  * If getBlog() declines the request, we move on to getManifestXML(), because we have some folders where
  * there's BOTH a manifest and a README, such as /apps/pc/1981/visicalc, and we want the manifest to take
  * priority.  getManifestXML() will, in turn, pass the request on to getReadMe(), which will, in turn,
  * pass the request on to getMachineXML().
- * 
+ *
  * If getMachineXML() declines as well, then getRandomString() is called, which is kinda useless, but better
  * than nothing (well, maybe).
- * 
+ *
  * Some wrinkles have been added to the above: getManifestXML() can alternatively call getMachineXML()
  * with a specific machine XML file, which would have had the potential to bypass getReadMe() altogether, so
- * getMachineXML() may now call getReadMe() -- which must NOT call getMachineXML() back whenever that happens. 
+ * getMachineXML() may now call getReadMe() -- which must NOT call getMachineXML() back whenever that happens.
  *
  * @this {HTMLOut}
  * @param {string} sToken
@@ -1363,7 +1367,7 @@ HTMLOut.prototype.getMachineXML = function(sToken, sIndent, aParms, sXMLFile, sS
                     var sMachineDef = sMachineClass + "js:" + sMachineID + ":" + sStyleSheet.replace("machine.xsl", "components.xsl");
                     sMachineDef += (sXML.indexOf("<debugger") > 0? ":*:debugger" : ":*:none");
                     sMachineDef += (sStateFile? ":" + sStateFile : "");
-                    
+
                     s = '[Embedded ' + sMachineClass + '](' + sXMLFile + ' "' + sMachineDef + '")';
                     var m = new MarkOut(s, sIndent, obj.req, null, obj.fDebug);
                     s = m.convertMD("    ").trim();
@@ -1375,7 +1379,7 @@ HTMLOut.prototype.getMachineXML = function(sToken, sIndent, aParms, sXMLFile, sS
                 }
             }
         }
-        
+
         /*
          * If we're still here, one of the following happened:
          *
@@ -1399,7 +1403,7 @@ HTMLOut.prototype.getMachineXML = function(sToken, sIndent, aParms, sXMLFile, sS
             obj.getReadMe(sToken, sIndent, aParms, null);
             return;
         }
-        
+
         obj.aTokens[sToken] = obj.getRandomString(sIndent);
         obj.replaceTokens();
     });
@@ -1471,7 +1475,7 @@ HTMLOut.prototype.getManifestXML = function(sToken, sIndent, aParms)
                                 var fMatch = false;
                                 var reNodes = new RegExp('<' + sNode + '([^>]*)>([\\s\\S]*?)</' + sNode + '>', "g");
                                 while ((matchNode = reNodes.exec(sXML))) {
-                                    
+
                                     var sNodeDesc = "", sNodeValue = matchNode[2];
                                     match = sNodeValue.match("<desc[^>]*>(.*?)</desc>");
                                     if (match) {
@@ -1480,7 +1484,7 @@ HTMLOut.prototype.getManifestXML = function(sToken, sIndent, aParms)
                                         match = sNodeValue.match("<org[^>]*>(.*?)</org>");
                                         if (match) sNodeDesc = match[1];
                                     }
-                                    
+
                                     match = sNodeValue.match("<name[^>]*>(.*?)</name>");
                                     if (match) {
                                         sNodeValue = match[1];
@@ -1490,7 +1494,7 @@ HTMLOut.prototype.getManifestXML = function(sToken, sIndent, aParms)
                                         }
                                         sNodeValue = sDefault;
                                     }
-                                    
+
                                     if (!sNodeValue) continue;
                                     if (sNode == "name") sName = sNodeValue;
                                     if (sNode == "version") sVersion = sNodeValue;
@@ -1555,7 +1559,7 @@ HTMLOut.prototype.getManifestXML = function(sToken, sIndent, aParms)
                                 }
                             }
                         }
-                        
+
                         sListItems = '<h4><a href="' + sManifestXMLFile + '">' + sHeading + '</a></h4>\n' + sIndent + '<ul class="common-list-data">\n' + sListItems + sIndent + '</ul>\n';
                         obj.aTokens["<!-- pcjs:manifest -->"] = sListItems;
 
@@ -1574,7 +1578,7 @@ HTMLOut.prototype.getManifestXML = function(sToken, sIndent, aParms)
                             return;
                         }
                     }
-                    
+
                     /*
                      * If we're still here, then there was either a problem reading the manifest XSL file,
                      * or the manifest XML file didn't contain a machine reference.  For now, we fall back to
@@ -1622,9 +1626,9 @@ HTMLOut.prototype.getReadMe = function(sToken, sIndent, aParms, sPrevious)
              *
              *      s = HTMLOut.logError(err);
              *
-             * we now try some fallbacks, like checking for a "machine.xml" -- but only if sPrevious is not defined. 
+             * we now try some fallbacks, like checking for a "machine.xml" -- but only if sPrevious is not defined.
              */
-            if (sPrevious !== undefined) {              // this means we were called from getMachineXML(), so it's the end of road 
+            if (sPrevious !== undefined) {              // this means we were called from getMachineXML(), so it's the end of road
                 obj.aTokens[sToken] = sPrevious;
                 obj.replaceTokens();
             } else {
@@ -1640,7 +1644,7 @@ HTMLOut.prototype.getReadMe = function(sToken, sIndent, aParms, sPrevious)
              */
             var match = s.match(/^\s*<h([0-9])[^>]*>([^<]*)<\/h\1>/);
             if (match) {
-                obj.sHTML = obj.sHTML.replace(/(<title[^>]*>)([^\|]*)\|[^<]*(<\/title>)/, "$1$2| " + match[2] + "$3");                    
+                obj.sHTML = obj.sHTML.replace(/(<title[^>]*>)([^\|]*)\|[^<]*(<\/title>)/, "$1$2| " + match[2] + "$3");
             }
             /*
              * We need to query the MarkOut object for any machine definitions that the current "readme"
@@ -1765,7 +1769,7 @@ HTMLOut.prototype.processMachines = function(aMachines, done)
             /*
              * SIDEBAR: Why the "slice()"?  It's a handy way to create a copy of the array, and we need a copy,
              * because if it turns out we need to "cut out" some of the files below (using splice), we don't want that
-             * affecting the original array. 
+             * affecting the original array.
              */
             if ((asFiles = aMachineFiles[sClass].slice())) {
                 var i;
@@ -1812,7 +1816,7 @@ HTMLOut.prototype.processMachines = function(aMachines, done)
  * addFilesToHTML(asFiles)
  *
  * @this {HTMLOut}
- * @param {Array.<string>} asFiles is a list of CSS and/or JS files to include in the HTML 
+ * @param {Array.<string>} asFiles is a list of CSS and/or JS files to include in the HTML
  * @param {string} [sScriptEmbed] is an optional script to embed in the <body> (after any JS files listed above)
  */
 HTMLOut.prototype.addFilesToHTML = function(asFiles, sScriptEmbed)

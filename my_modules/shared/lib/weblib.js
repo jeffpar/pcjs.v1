@@ -338,7 +338,13 @@ web.getLocalStorageItem = function(sKey)
 {
     var sValue;
     if (window) {
-        sValue = window.localStorage.getItem(sKey);
+        try {
+            /*
+             * A try/catch block is required, because if the user has disabled localStorage, some browsers feel the need
+             * to throw an exception on any attempt to access it, even when using "typeof".
+             */
+            sValue = window.localStorage.getItem(sKey);
+        } catch(e) {}
     }
     return sValue;
 };
@@ -353,8 +359,14 @@ web.getLocalStorageItem = function(sKey)
 web.setLocalStorageItem = function(sKey, sValue)
 {
     if (window) {
-        window.localStorage.setItem(sKey, sValue);
-        return true;
+        try {
+            /*
+             * A try/catch block is required, because if the user has disabled localStorage, some browsers feel the need
+             * to throw an exception on any attempt to access it, even when using "typeof".
+             */
+            window.localStorage.setItem(sKey, sValue);
+            return true;
+        } catch(e) {}
     }
     return false;
 };
@@ -400,7 +412,7 @@ web.isUserAgent = function(s)
         var userAgent = web.getUserAgent();
         /*
          * Here's one case where we have to be careful with Component, because when isUserAgent() is called by
-         * the init code below, component.js hasn't been loaded yet.  The simplest solution is to remove the call.  
+         * the init code below, component.js hasn't been loaded yet.  The simplest solution is to remove the call.
          *
          *      if (Component) Component.log("agent: " + userAgent);
          *

@@ -38,7 +38,7 @@ if (typeof module !== 'undefined') {
 
 /**
  * State(component, sVersion, sSuffix)
- * 
+ *
  * @constructor
  * @param {Component} component
  * @param {string} [sVersion] is used to append a major version number to the key
@@ -61,7 +61,7 @@ function State(component, sVersion, sSuffix) {
 
 /**
  * State.key(component, sVersion, sSuffix)
- * 
+ *
  * This encapsulates the key generation code.
  *
  * @param {Component} component
@@ -83,16 +83,26 @@ State.key = function(component, sVersion, sSuffix) {
 
 /**
  * State.localStorage()
- * 
+ *
+ * TODO: State's localStorage calls should probably be moved to wrappers in weblib.js, for consistency.
+ *
  * @return {boolean} true if localStorage available, false if not
  */
 State.localStorage = function() {
-    return window.localStorage? true : false;
+    try {
+        /*
+         * A try/catch block is required, because if the user has disabled localStorage, some browsers feel the need
+         * to throw an exception on any attempt to access it, even when using "typeof".
+         */
+        return typeof window.localStorage !== 'undefined';
+    } catch(e) {
+        return false;
+    }
 };
 
 /**
  * State.compress(aSrc)
- * 
+ *
  * @param {Array.<number>|null} aSrc
  * @return {Array.<number>|null} is either the original array (aSrc), or a smaller array of "count, value" pairs (aComp)
  */
@@ -117,9 +127,9 @@ State.compress = function(aSrc) {
 
 /**
  * State.decompress(aComp)
- * 
+ *
  * @param {Array.<number>} aComp
- * @param {number} nLength is expected length of decompressed data 
+ * @param {number} nLength is expected length of decompressed data
  * @return {Array.<number>}
  */
 State.decompress = function(aComp, nLength) {
@@ -139,13 +149,13 @@ State.decompress = function(aComp, nLength) {
 
 /**
  * State.compressEvenOdd(aSrc)
- * 
+ *
  * This is a very simple variation on compress() that compresses all the EVEN elements of aSrc first, followed by all the ODD
  * elements.  This tends to work better on EGA video memory, because when odd/even addressing is enabled (eg, for text
  * modes), the DWORD values tend to alternate, which is the worst case for compress(), but the best case for compressEvenOdd().
- * 
+ *
  * One wrinkle we support: if the first element is uninitialized, then we assume the entire array is undefined, and return an
- * empty compressed array.  Conversely, decompressEvenOdd() will take an empty compressed array and return an uninitialized array. 
+ * empty compressed array.  Conversely, decompressEvenOdd() will take an empty compressed array and return an uninitialized array.
  *
  * @param {Array.<number>|null} aSrc
  * @return {Array.<number>|null} is either the original array (aSrc), or a smaller array of "count, value" pairs (aComp)
@@ -173,7 +183,7 @@ State.compressEvenOdd = function(aSrc) {
 
 /**
  * State.decompressEvenOdd(aComp, nLength)
- * 
+ *
  * This is the counterpart to compressEvenOdd().  Note that because there's nothing in the compressed sequence that differentiates
  * a compress() sequence from a compressEvenOdd() sequence, you simply have to be consistent -- if you used even/odd compression, then
  * you must use even/odd decompression.
@@ -209,7 +219,7 @@ State.prototype = {
     constructor: State,
     /**
      * set(id, data)
-     * 
+     *
      * @this {State}
      * @param {number|string} id
      * @param {Object|string} data
@@ -219,7 +229,7 @@ State.prototype = {
     },
     /**
      * get(id)
-     * 
+     *
      * @this {State}
      * @param {number|string} id
      * @return {Object|string|null}
@@ -229,7 +239,7 @@ State.prototype = {
     },
     /**
      * value()
-     * 
+     *
      * @this {State}
      * @return {string}
      *
@@ -240,7 +250,7 @@ State.prototype = {
     },
     /**
      * data()
-     * 
+     *
      * @this {State}
      * @return {Object}
      */
@@ -249,7 +259,7 @@ State.prototype = {
     },
     /**
      * load(s)
-     * 
+     *
      * @this {State}
      * @param {Object|string|null} [s]
      * @return {boolean} true if state exists in localStorage, false if not
@@ -282,7 +292,7 @@ State.prototype = {
     },
     /**
      * parse()
-     * 
+     *
      * @this {State}
      * @return {boolean} true if successful, false if error
      *
@@ -302,7 +312,7 @@ State.prototype = {
     },
     /**
      * store()
-     * 
+     *
      * @this {State}
      * @return {boolean} true if successful, false if error
      */
@@ -317,8 +327,8 @@ State.prototype = {
                 /*
                  * WARNING: Because browsers tend to disable all alerts() during an "unload" operation,
                  * it's unlikely anyone will ever see the "quota" errors that occur at this point.  Need to
-                 * think of some way to notify the user that there's a problem, and offer a way of cleaning up
-                 * old states.
+                 * think of some way to notify the user that there's a problem, and offer a way of cleaning
+                 * up old states.
                  */
                 Component.log(e.message || e, "error");
                 Component.error("Unable to store " + s.length + " bytes in browser local storage");
@@ -329,7 +339,7 @@ State.prototype = {
     },
     /**
      * toString()
-     * 
+     *
      * We can't know whether this might be called before parse() or after parse(), so we check.
      * If before, then this[this.id] will still be in string form; if after, it will be an Object.
      *
@@ -342,7 +352,7 @@ State.prototype = {
     },
     /**
      * unload(parms)
-     * 
+     *
      * @this {State}
      * @param {Object} [parms]
      *
@@ -357,7 +367,7 @@ State.prototype = {
     },
     /**
      * clear(fAll)
-     * 
+     *
      * @this {State}
      * @param {boolean} [fAll] true to unconditionally clear ALL localStorage for the current domain
      *
@@ -368,12 +378,10 @@ State.prototype = {
         this.unload();
         if (State.localStorage()) {
             var i = 0;
-            // var fRemoved = false;
             while (i < window.localStorage.length) {
                 var key = window.localStorage.key(i++);
                 if (key && (fAll || key.substr(0, this.key.length) == this.key)) {
                     window.localStorage.removeItem(key);
-                    // fRemoved = true;
                     if (DEBUG) this.messageDebugger("localStorage(" + key + ") removed");
                     i = 0;
                 }
@@ -382,7 +390,7 @@ State.prototype = {
     },
     /**
      * messageDebugger(sMessage)
-     * 
+     *
      * @this {State}
      * @param {string} sMessage is any caller-defined message string
      *
