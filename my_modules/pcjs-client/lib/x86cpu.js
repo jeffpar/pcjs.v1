@@ -59,7 +59,7 @@ if (typeof module !== 'undefined') {
  * This extends the CPU class and passes any remaining parmsCPU properties to the
  * CPU class constructor, along with a default speed (cycles per second) based on the
  * specified (or default) CPU model number.
- * 
+ *
  * The X86CPU class was initially written to simulate a 8086/8088 microprocessor, although
  * over time it is evolving to support newer microprocessors (for example, limited
  * support for 80186/80188 instructions can already be conditionally enabled).
@@ -80,7 +80,7 @@ if (typeof module !== 'undefined') {
  * All that being said, this does not change the primary goal: to produce as accurate
  * a simulation as possible, within the limits of what JavaScript allows and how
  * precisely/predictably it behaves.
- * 
+ *
  * @constructor
  * @extends CPU
  * @param {Object} parmsCPU
@@ -88,7 +88,7 @@ if (typeof module !== 'undefined') {
 function X86CPU(parmsCPU) {
 
     this.model = parmsCPU['model'] || X86.MODEL_8088;
-    
+
     var nCyclesDefault = 0;
     switch(this.model) {
     default:
@@ -103,7 +103,7 @@ function X86CPU(parmsCPU) {
     CPU.call(this, parmsCPU, nCyclesDefault);
 
     /*
-     * Initialize processor operation to match the requested model 
+     * Initialize processor operation to match the requested model
      */
     this.initProcessor();
 
@@ -138,7 +138,7 @@ function X86CPU(parmsCPU) {
      * or not RETF or IRET instructions need to bother calling checkIntReturn().
      */
     this.cIntReturn = 0;
-    
+
     /*
      * A variety of stepCPU() state variables that don't strictly need to be initialized before the first
      * stepCPU() call, but it's good form to do so.
@@ -265,63 +265,63 @@ X86CPU.prototype.setAddressMask = function(addrMask)
 
 /**
  * initProcessor()
- * 
+ *
  * This isolates 80186/80188/80286 support, so that it can be selectively enabled/tested.
  *
  * Here's a summary of 80186/80188 differences according to "AP-186: Introduction to the 80186
  * Microprocessor, March 1983" (pp.55-56).  "The iAPX 86,88 and iAPX 186,188 User's Manual Programmer's
  * Reference", p.3-38, apparently contains the same information, but I've not seen that document.
- * 
+ *
  * Undefined Opcodes:
- * 
+ *
  *      When the opcodes 63H, 64H, 65H, 66H, 67H, F1H, FEH/xx111xxxB and FFH/xx111xxxB are executed,
  *      the 80186 will execute an illegal [invalid] instruction exception, interrupt 0x06.
  *      The 8086 will ignore the opcode.
- *      
+ *
  * 0FH opcode:
- * 
+ *
  *      When the opcode 0FH is encountered, the 8086 will execute a POP CS, while the 80186 will
  *      execute an illegal [invalid] instruction exception, interrupt 0x06.
- *      
+ *
  * Word Write at Offset FFFFH:
- * 
+ *
  *      When a word write is performed at offset FFFFH in a segment, the 8086 will write one byte
  *      at offset FFFFH, and the other at offset 0, while the 80186 will write one byte at offset
  *      FFFFH, and the other at offset 10000H (one byte beyond the end of the segment). One byte segment
  *      underflow will also occur (on the 80186) if a stack PUSH is executed and the Stack Pointer
  *      contains the value 1.
- *      
+ *
  * Shift/Rotate by Value Greater Then [sic] 31:
- * 
+ *
  *      Before the 80186 performs a shift or rotate by a value (either in the CL register, or by an
  *      immediate value) it ANDs the value with 1FH, limiting the number of bits rotated to less than 32.
  *      The 8086 does not do this.
- *      
+ *
  * LOCK prefix:
- * 
+ *
  *      The 8086 activates its LOCK signal immediately after executing the LOCK prefix. The 80186 does
  *      not activate the LOCK signal until the processor is ready to begin the data cycles associated
  *      with the LOCKed instruction.
- *      
+ *
  * Interrupted String Move Instructions:
- * 
+ *
  *      If an 8086 is interrupted during the execution of a repeated string move instruction, the return
  *      value it will push on the stack will point to the last prefix instruction before the string move
  *      instruction. If the instruction had more than one prefix (e.g., a segment override prefix in
  *      addition to the repeat prefix), it will not be re-executed upon returning from the interrupt.
  *      The 80186 will push the value of the first prefix to the repeated instruction, so long as prefixes
  *      are not repeated, allowing the string instruction to properly resume.
- *      
+ *
  * Conditions causing divide error with an integer divide:
- * 
+ *
  *      The 8086 will cause a divide error whenever the absolute value of the quotient is greater then
  *      [sic] 7FFFH (for word operations) or if the absolute value of the quotient is greater than 7FH
  *      (for byte operations). The 80186 has expanded the range of negative numbers allowed as a quotient
  *      by 1 to include 8000H and 80H. These numbers represent the most negative numbers representable
  *      using 2's complement arithmetic (equaling -32768 and -128 in decimal, respectively).
- *      
+ *
  * ESC Opcode:
- * 
+ *
  *      The 80186 may be programmed to cause an interrupt type 7 whenever an ESCape instruction (used for
  *      co-processors like the 8087) is executed. The 8086 has no such provision. Before the 80186 performs
  *      this trap, it must be programmed to do so. [The details of this "programming" are not included.]
@@ -330,18 +330,18 @@ X86CPU.prototype.setAddressMask = function(addrMask)
  * Appendix C, p.C-1 (p.329):
  *
  *   1. Add Six Interrupt Vectors
- *  
+ *
  *      The 80286 adds six interrupts which arise only if the 8086 program has a hidden bug. These interrupts
  *      occur only for instructions which were undefined on the 8086/8088 or if a segment wraparound is attempted.
  *      It is recommended that you add an interrupt handler to the 8086 software that is to be run on the 80286,
  *      which will treat these interrupts as invalid operations.
- *  
+ *
  *      This additional software does not significantly effect the existing 8086 software because the interrupts
  *      do not normally occur and should not already have been used since they are in the interrupt group reserved
  *      by Intel. [Note to Intel: IBM caaaaaaan't hear you].
- *  
+ *
  *   2. Do not Rely on 8086/8088 Instruction Clock Counts
- *  
+ *
  *      The 80286 takes fewer clocks for most instructions than the 8086/8088. The areas to look into are delays
  *      between I/0 operations, and assumed delays in 8086/8088 operating in parallel with an 8087.
  *
@@ -350,90 +350,90 @@ X86CPU.prototype.setAddressMask = function(addrMask)
  *      Any interrupt on the 80286 will always leave the saved CS:IP value pointing at the beginning of the
  *      instruction that failed (including prefixes). On the 8086, the CS:IP value saved for a divide exception
  *      points at the next instruction.
- *      
+ *
  *   4. Use Interrupt 16 (0x10) for Numeric Exceptions
- *   
+ *
  *      Any 80287 system must use interrupt vector 16 for the numeric error interrupt. If an 8086/8087 or 8088/8087
  *      system uses another vector for the 8087 interrupt, both vectors should point at the numeric error interrupt
  *      handler.
- *      
+ *
  *   5. Numeric Exception Handlers Should allow Prefixes
- *   
+ *
  *      The saved CS:IP value in the NPX environment save area will point at any leading prefixes before an ESC
  *      instruction. On 8086/8088 systems, this value points only at the ESC instruction.
- *      
+ *
  *   6. Do Not Attempt Undefined 8086/8088 Operations
- *   
+ *
  *      Instructions like POP CS or MOV CS,op will either cause exception 6 (undefined opcode) or perform a protection
  *      setup operation like LIDT on the 80286. Undefined bit encodings for bits 5-3 of the second byte of POP MEM
  *      or PUSH MEM will cause exception 13 on the 80286.
- *      
+ *
  *   7. Place a Far JMP Instruction at FFFF0H
- *   
+ *
  *      After reset, CS:IP = F000:FFF0 on the 80286 (versus FFFF:0000 on the 8086/8088). This change was made to allow
  *      sufficient code space to enter protected mode without reloading CS. Placing a far JMP instruction at FFFF0H
  *      will avoid this difference. Note that the BOOTSTRAP option of LOC86 will automatically generate this jump
  *      instruction.
- *      
+ *
  *   8. Do not Rely on the Value Written by PUSH SP
- *   
+ *
  *      The 80286 will push a different value on the stack for PUSH SP than the 8086/8088. If the value pushed is
  *      important [and when would it NOT be???], replace PUSH SP instructions with the following three instructions:
- *      
+ *
  *          PUSH    BP
  *          MOV     BP,SP
  *          XCHG    BP,[BP]
- *          
+ *
  *      This code functions as the 8086/8088 PUSH SP instruction on the 80286.
- *      
+ *
  *   9. Do not Shift or Rotate by More than 31 Bits
- *   
+ *
  *      The 80286 masks all shift/rotate counts to the low 5 bits. This MOD 32 operation limits the count to a maximum
  *      of 31 bits. With this change, the longest shift/rotate instruction is 39 clocks. Without this change, the longest
  *      shift/rotate instruction would be 264 clocks, which delays interrupt response until the instruction completes
  *      execution.
- *      
+ *
  *  10. Do not Duplicate Prefixes
- *  
+ *
  *      The 80286 sets an instruction length limit of 10 bytes. The only way to violate this limit is by duplicating
  *      a prefix two or more times before an instruction. Exception 6 occurs if the instruction length limit is violated.
  *      The 8086/8088 has no instruction length limit.
- *      
+ *
  *  11. Do not Rely on Odd 8086/8088 LOCK Characteristics
- *  
+ *
  *      The LOCK prefix and its corresponding output signal should only be used to prevent other bus masters from
  *      interrupting a data movement operation. The 80286 will always assert LOCK during an XCHG instruction with memory
  *      (even if the LOCK prefix was not used). LOCK should only be used with the XCHG, MOV, MOVS, INS, and OUTS instructions.
- *      
+ *
  *      The 80286 LOCK signal will not go active during an instruction prefetch.
- *      
+ *
  *  12. Do not Single Step External Interrupt Handlers
- *  
+ *
  *      The priority of the 80286 single step interrupt is different from that of the 8086/8088. This change was made
  *      to prevent an external interrupt from being single-stepped if it occurs while single stepping through a program.
  *      The 80286 single step interrupt has higher priority than any external interrupt.
- *      
+ *
  *      The 80286 will still single step through an interrupt handler invoked by INT instructions or an instruction
  *      exception.
- *      
+ *
  *  13. Do not Rely on IDIV Exceptions for Quotients of 80H or 8000H
- *  
+ *
  *      The 80286 can generate the largest negative number as a quotient for IDIV instructions. The 8086 will instead
  *      cause exception O.
- *      
+ *
  *  14. Do not Rely on NMI Interrupting NMI Handlers
- *  
+ *
  *      After an NMI is recognized, the NMI input and processor extension limit error interrupt is masked until the
  *      first IRET instruction is executed.
- *      
+ *
  *  15. The NPX error signal does not pass through an interrupt controller (an 8087 INT signal does). Any interrupt
  *      controller-oriented instructions for the 8087 may have to be deleted.
- *  
+ *
  *  16. If any real-mode program relies on address space wrap-around (e.g., FFF0:0400=0000:0300), then external hardware
  *      should be used to force the upper 4 addresses to zero during real mode.
- *      
+ *
  *  17. Do not use I/O ports 00F8-00FFH. These are reserved for controlling 80287 and future processor extensions.
- * 
+ *
  * @this {X86CPU}
  */
 X86CPU.prototype.initProcessor = function()
@@ -441,7 +441,7 @@ X86CPU.prototype.initProcessor = function()
     this.PS_SET = X86.PS.SET;
     this.OPFLAG_NOINTR8086 = X86.OPFLAG.NOINTR;
     this.nShiftCountMask = 0xff;            // on an 8086/8088, there effectively is NO mask
-    
+
     /*
      * TODO: Make sure all segment overrides impose an additional 2-cycle penalty
      */
@@ -453,11 +453,11 @@ X86CPU.prototype.initProcessor = function()
     this.nEACyclesBaseDisp           = 9;   // base or index + displacement
     this.nEACyclesBaseIndexDisp      = 11;  // base + index + displacement (BP+DI+n and BX+SI+n)
     this.nEACyclesBaseIndexDispExtra = 12;  // base + index + displacement (BP+SI+n and BX+DI+n require an extra cycle)
-    
+
     this.nOpCyclesAAA       = 4;            // AAA, AAS, DAA, DAS, TEST acc,imm
     this.nOpCyclesAAD       = 60;
     this.nOpCyclesAAM       = 83;
-    this.nOpCyclesArithRR   = 3;            // ADC, ADD, AND, OR, SBB, SUB, XOR and CMP reg,reg cycle time    
+    this.nOpCyclesArithRR   = 3;            // ADC, ADD, AND, OR, SBB, SUB, XOR and CMP reg,reg cycle time
     this.nOpCyclesArithRM   = 9;            // ADC, ADD, AND, OR, SBB, SUB, and XOR reg,mem (and CMP mem,reg) cycle time
     this.nOpCyclesArithMR   = 16;           // ADC, ADD, AND, OR, SBB, SUB, and XOR mem,reg cycle time
     this.nOpCyclesArithMID  = 1;            // ADC, ADD, AND, OR, SBB, SUB, XOR and CMP mem,imm cycle delta
@@ -467,7 +467,7 @@ X86CPU.prototype.initProcessor = function()
     this.nOpCyclesCallWM    = 21;
     this.nOpCyclesCallDM    = 37;
     this.nOpCyclesCLI       = 2;
-    this.nOpCyclesCompareRM = 9;            // CMP reg,mem cycle time (same as nOpCyclesArithRM on an 8086 but not on a 80286) 
+    this.nOpCyclesCompareRM = 9;            // CMP reg,mem cycle time (same as nOpCyclesArithRM on an 8086 but not on a 80286)
     this.nOpCyclesCWD       = 5;
     this.nOpCyclesBound     = 33;           // N/A if 8086/8088, 33-35 if 80186/80188 (TODO: Determine what the range means for an 80186/80188)
     this.nOpCyclesInP       = 10;
@@ -561,7 +561,7 @@ X86CPU.prototype.initProcessor = function()
     this.nOpCyclesXLAT      = 11;
 
     this.aOps = X86OpXX.aOps.slice();       // make a copy of aOps before modifying it
-    
+
     if (this.model >= X86.MODEL_80186) {
         /*
          * TODO: I don't go out of my way to make 80186/80188 cycle times accurate, since no IBM PC models used
@@ -570,7 +570,7 @@ X86CPU.prototype.initProcessor = function()
          * opOUTSw, opENTER, and opLEAVE.
          */
         this.nShiftCountMask = 0x1f;        // on newer processors, all shift counts are MOD 32
-        
+
         this.aOps[0x0F]             = X86Help.opInvalid;
         this.aOps[X86.OPCODE.PUSHA] = X86OpXX.opPUSHA;
         this.aOps[X86.OPCODE.POPA]  = X86OpXX.opPOPA;
@@ -595,15 +595,15 @@ X86CPU.prototype.initProcessor = function()
         this.aOps[0xF1]             = X86OpXX.opINT1;
         X86Grps.aOpGRP4b[0x07]      = X86Grps.opGrpInvalid;
         X86Grps.aOpGRP4w[0x07]      = X86Grps.opGrpInvalid;
-        
+
         if (this.model >= X86.MODEL_80286) {
             this.PS_SET = X86.PS.BIT1;      // on the 80286, only BIT1 of Processor Status (flags) is always set
             this.OPFLAG_NOINTR8086 = 0;     // used with instructions that should *not* set NOINTR on an 80286 (eg, non-SS segment loads)
-            
+
             this.aOps[0x0F] = X86OpXX.op0F;
             this.aOps[X86.OPCODE.ARPL]  = X86OpXX.opARPL;
             this.aOps[X86.OPCODE.PUSHSP]= X86OpXX.op286PUSHSP;
-            
+
             this.nWordCyclePenalty           = 0;
             this.nEACyclesBase               = 0;
             this.nEACyclesDisp               = 0;
@@ -612,7 +612,7 @@ X86CPU.prototype.initProcessor = function()
             this.nEACyclesBaseDisp           = 0;
             this.nEACyclesBaseIndexDisp      = 1;
             this.nEACyclesBaseIndexDispExtra = 1;
-            
+
             this.nOpCyclesAAA       = 3;
             this.nOpCyclesAAD       = 14;
             this.nOpCyclesAAM       = 16;
@@ -658,7 +658,7 @@ X86CPU.prototype.initProcessor = function()
             this.nOpCyclesMovMR     = 5;
             this.nOpCyclesMovRI     = 2;
             this.nOpCyclesMovMI     = 3;
-            this.nOpCyclesMovAM     = 5;    // this is actually slower than the MOD/RM form of MOV AX,mem (see nOpCyclesMovRM) 
+            this.nOpCyclesMovAM     = 5;    // this is actually slower than the MOD/RM form of MOV AX,mem (see nOpCyclesMovRM)
             this.nOpCyclesMovMA     = 3;
             this.nOpCyclesDivBR     = 14;
             this.nOpCyclesDivWR     = 22;
@@ -746,9 +746,9 @@ X86CPU.prototype.reset = function()
  *      DS/ES/SS = 0x0000
  *
  * It is silent as to whether the remaining registers are initialized to any particular values.
- * 
+ *
  * According to the "80286 and 80287 Programmer's Reference Manual", these 80286 registers are reset:
- * 
+ *
  *      PS  = 0x0002
  *      MSW = 0xFFF0
  *      IP  = 0xFFF0
@@ -777,7 +777,7 @@ X86CPU.prototype.resetRegs = function()
     this.regBP = 0;
     this.regSI = 0;
     this.regDI = 0;
-    
+
     /*
      * NOTE: Even though the MSW and IDTR are 80286-specific, we initialize them for ALL CPUs, so that
      * functions like X86Help.opHelpINT() can use the same code for both.  The 8086/8088 have no direct way
@@ -786,7 +786,7 @@ X86CPU.prototype.resetRegs = function()
     this.regMSW = X86.MSW.SET;
     this.addrIDT = 0; this.addrIDTLimit = 0x03FF;
     this.descIDT = {off: 0, sel: 0, acc: 0, maskPS: -1};
-    
+
     /*
      * Segment registers used to be defined as separate variables (eg, regCS and regCS0 stored the
      * segment number and base physical address, respectively), but all segment registers are now defined
@@ -801,12 +801,12 @@ X86CPU.prototype.resetRegs = function()
 
     /*
      * Assorted 80286-specific registers.  The GDTR and IDTR registers are stored as the following pieces:
-     * 
+     *
      *      GDTR:   addrGDT (24 bits) and addrGDTLimit (24 bits)
      *      IDTR:   addrIDT (24 bits) and addrIDTLimit (24 bits)
-     *      
+     *
      * while the LDTR and TR are stored as special segment registers: segLDT and segTSS.
-     *      
+     *
      * In addition to different CS:IP reset values, the CS base address must be set to the top of the 16Mb
      * address space rather than the top of the first 1Mb (which is why the MODEL_5170 ROM must be addressable
      * at both 0x0F0000 and 0xFF0000; see the ROM component's "alias" parameter).
@@ -819,7 +819,7 @@ X86CPU.prototype.resetRegs = function()
         this.setCSIP(0xFFF0, 0xF000);                   // in real-mode, 0xF000 defaults the CS base address to 0x0F0000
         this.segCS.setBase(0xFF0000);                   // which is why we must manually adjust the CS base address to 0xFF0000
     }
-    
+
     /*
      * This resets the Processor Status flags (regPS), along with all the internal "result registers".
      */
@@ -829,12 +829,12 @@ X86CPU.prototype.resetRegs = function()
      * Now that all the segment registers have been created, it's safe to set the current addressing mode.
      */
     this.setProtMode();
-    
+
     /*
      * intFlags contains some internal "flags" that we use to indicate whether a hardware interrupt (INTFLAG.INTR) or
      * Trap software interrupt (INTR.TRAP) has been requested, as well as when we're in a "HLT" state (INTFLAG.HALT)
      * that requires us to wait for a hardware interrupt (INTFLAG.INTR) before continuing execution.
-     * 
+     *
      * intFlags must be cleared only by checkINTR(), whereas opFlags must be cleared prior to every CPU operation.
      */
     this.intFlags = X86.INTFLAG.NONE;
@@ -843,7 +843,7 @@ X86CPU.prototype.resetRegs = function()
      * The following are internal "registers" that are used to capture intermediate values inside selected helper
      * functions and use them if they've been modified (or are known to always change); for example, the MUL and DIV
      * instructions perform calculations that must be propagated to specific registers (eg, AX and/or DX), which
-     * the ModRM decoder functions don't know about.  We initialize them here mainly for documentation purposes. 
+     * the ModRM decoder functions don't know about.  We initialize them here mainly for documentation purposes.
      */
     this.regMD16 = this.regMD32 = -1;
 
@@ -866,7 +866,7 @@ X86CPU.prototype.resetRegs = function()
 
 /**
  * getChecksum()
- * 
+ *
  * @this {X86CPU}
  * @return {number} a 32-bit summation of key elements of the current CPU state (used by the CPU checksum code)
  */
@@ -879,7 +879,7 @@ X86CPU.prototype.getChecksum = function()
 
 /**
  * addIntNotify(nInt, component, fn)
- * 
+ *
  * Add an software interrupt notification handler to the CPU's list of such handlers.
  *
  * @this {X86CPU}
@@ -901,9 +901,9 @@ X86CPU.prototype.addIntNotify = function(nInt, component, fn)
 /**
  * checkIntNotify(nInt)
  *
- * NOTE: This is called ONLY for "INT N" instructions -- not "INTO" or breakpoint or single-step interrupts 
+ * NOTE: This is called ONLY for "INT N" instructions -- not "INTO" or breakpoint or single-step interrupts
  * or divide exception interrupts, or hardware interrupts, or any simulation of an interrupt (eg, "PUSHF/CALLF").
- * 
+ *
  * @this {X86CPU}
  * @param {number} nInt
  * @return {boolean} true if software interrupt may proceed, false if software interrupt should be skipped
@@ -915,10 +915,7 @@ X86CPU.prototype.checkIntNotify = function(nInt)
      * speed, check fDebugCheck first.
      */
     if (DEBUGGER && this.fDebugCheck) {
-        /*
-         * TODO: Filtering out the hard-coded interrupt numbers below should be optional; this is very quick-and-dirty.
-         */
-        if (nInt < 0x20 && nInt != 0x10 && nInt != 0x16 && nInt != 0x1C && this.dbg.messageEnabled(this.dbg.MESSAGE_INT)) {
+        if (this.dbg.messageEnabled(this.dbg.MESSAGE_INT)) {
             this.dbg.messageInt(nInt, this.regEIP);
             this.addIntReturn(this.regEIP, function(cpu, nCycles) {
                 return function onIntReturn(nLevel) {
@@ -940,7 +937,7 @@ X86CPU.prototype.checkIntNotify = function(nInt)
 
 /**
  * addIntReturn(addr, fn)
- * 
+ *
  * Add a return notification handler to the CPU's list of such handlers.
  *
  * When fn(n) is called, it's passed a "software interrupt level", which will normally be 0,
@@ -966,10 +963,10 @@ X86CPU.prototype.addIntReturn = function(addr, fn)
 
 /**
  * checkIntReturn(addr)
- * 
+ *
  * It is expected (though not required) that callers will check cIntReturn and avoid calling
  * this function if the count is zero.
- * 
+ *
  * @this {X86CPU}
  * @param {number} addr is a physical (non-segmented) address
  */
@@ -984,13 +981,13 @@ X86CPU.prototype.checkIntReturn = function(addr)
 
 /**
  * setProtMode(fProt)
- * 
+ *
  * Update any opcode handlers that operate significantly differently in real-mode vs. protected-mode, and
  * notify all the segment registers about the mode change as well -- but only those that are "bi-modal"; internal
  * segment registers like segLDT and segTSS do not need to be notified, because they cannot be accessed in real-mode
  * (ie, LLDT, LTR, SLDT, STR are invalid instructions in real-mode, and are among the opcode handlers that we
  * update here).
- * 
+ *
  * @this {X86CPU}
  * @param {boolean} [fProt] (use the current MSW PE bit if not specified)
  */
@@ -1012,9 +1009,9 @@ X86CPU.prototype.setProtMode = function(fProt)
 
 /**
  * saveProtMode()
- * 
+ *
  * Save CPU state related to protected-mode, for save()
- * 
+ *
  * @this {X86CPU}
  * @return {Array}
  */
@@ -1052,9 +1049,9 @@ X86CPU.prototype.restoreProtMode = function(a)
  * save()
  *
  * This implements save support for the X86 component.
- * 
+ *
  * UPDATES: The current speed multiplier from getSpeed() is now saved in data group #3, so that your speed is preserved.
- * 
+ *
  * @this {X86CPU}
  * @return {Object}
  */
@@ -1073,7 +1070,7 @@ X86CPU.prototype.save = function()
  * restore(data)
  *
  * This implements restore support for the X86 component.
- * 
+ *
  * @this {X86CPU}
  * @param {Object} data
  * @return {boolean} true if restore successful, false if not
@@ -1152,7 +1149,7 @@ X86CPU.prototype.verifyMemoryEnabled = function()
 
 /**
  * getSeg(sName)
- * 
+ *
  * @param {string} sName
  * @return {Array}
  */
@@ -1235,7 +1232,7 @@ X86CPU.prototype.loadIDTEntry = function(nIDT)
  * (ie, suppresses h/w interrupts for one instruction).  Instructions that "JMP" or "CALL" or "INT" or "IRET" a new
  * value into CS are always accompanied by a new IP value, so they use setCSIP() instead, which does NOT suppress
  * h/w interrupts.
- * 
+ *
  * @this {X86CPU}
  * @param {number} sel
  */
@@ -1248,7 +1245,7 @@ X86CPU.prototype.setCS = function(sel)
 
 /**
  * setDS(sel)
- * 
+ *
  * @this {X86CPU}
  * @param {number} sel
  */
@@ -1260,7 +1257,7 @@ X86CPU.prototype.setDS = function(sel)
 
 /**
  * setSS(sel)
- * 
+ *
  * @this {X86CPU}
  * @param {number} sel
  */
@@ -1272,7 +1269,7 @@ X86CPU.prototype.setSS = function(sel)
 
 /**
  * setES(sel)
- * 
+ *
  * @this {X86CPU}
  * @param {number} sel
  */
@@ -1290,7 +1287,7 @@ X86CPU.prototype.setES = function(sel)
  *
  * In fact, for performance reasons, it's preferable to increment regIP yourself,
  * but you can also call advanceIP() if speed is not important.
- * 
+ *
  * @this {X86CPU}
  * @param {number} off
  */
@@ -1309,11 +1306,11 @@ X86CPU.prototype.setIP = function(off)
  *
  * NOTE: Unlike setIP(), which is often passed a computation, the offsets passed to setCSIP() are strictly
  * 16-bit values, so there's never any need to mask them with 0xffff (although it doesn't hurt to assert that).
- * 
+ *
  * As an aside, this function is called setCSIP() instead of setCSIP() to reflect the order of the parameters
  * (IP value first, CS value second), which matches the order that CS:IP values are normally stored in memory,
  * allowing us to make calls like this:
- * 
+ *
  *      this.setCSIP(this.popWord(), this.popWord());
  *
  * @this {X86CPU}
@@ -1329,7 +1326,7 @@ X86CPU.prototype.setCSIP = function(off, sel)
 
 /**
  * advanceIP(inc)
- * 
+ *
  * @this {X86CPU}
  * @param {number} inc (may be +/-)
  */
@@ -1341,7 +1338,7 @@ X86CPU.prototype.advanceIP = function(inc)
 
 /**
  * getCF()
- * 
+ *
  * @this {X86CPU}
  * @return {number}
  */
@@ -1352,7 +1349,7 @@ X86CPU.prototype.getCF = function()
 
 /**
  * getPF()
- * 
+ *
  * @this {X86CPU}
  * @return {number}
  */
@@ -1363,7 +1360,7 @@ X86CPU.prototype.getPF = function()
 
 /**
  * getAF()
- * 
+ *
  * @this {X86CPU}
  * @return {number}
  */
@@ -1374,7 +1371,7 @@ X86CPU.prototype.getAF = function()
 
 /**
  * getZF()
- * 
+ *
  * @this {X86CPU}
  * @return {number}
  */
@@ -1385,7 +1382,7 @@ X86CPU.prototype.getZF = function()
 
 /**
  * getSF()
- * 
+ *
  * @this {X86CPU}
  * @return {number}
  */
@@ -1396,7 +1393,7 @@ X86CPU.prototype.getSF = function()
 
 /**
  * getOF()
- * 
+ *
  * @this {X86CPU}
  * @return {number}
  */
@@ -1407,7 +1404,7 @@ X86CPU.prototype.getOF = function()
 
 /**
  * getTF()
- * 
+ *
  * @this {X86CPU}
  * @return {number}
  */
@@ -1418,7 +1415,7 @@ X86CPU.prototype.getTF = function()
 
 /**
  * getIF()
- * 
+ *
  * @this {X86CPU}
  * @return {number}
  */
@@ -1429,7 +1426,7 @@ X86CPU.prototype.getIF = function()
 
 /**
  * getDF()
- * 
+ *
  * @this {X86CPU}
  * @return {number}
  */
@@ -1440,7 +1437,7 @@ X86CPU.prototype.getDF = function()
 
 /**
  * clearCF()
- * 
+ *
  * @this {X86CPU}
  */
 X86CPU.prototype.clearCF = function()
@@ -1450,7 +1447,7 @@ X86CPU.prototype.clearCF = function()
 
 /**
  * clearPF()
- * 
+ *
  * @this {X86CPU}
  */
 X86CPU.prototype.clearPF = function()
@@ -1460,7 +1457,7 @@ X86CPU.prototype.clearPF = function()
 
 /**
  * clearAF()
- * 
+ *
  * @this {X86CPU}
  */
 X86CPU.prototype.clearAF = function()
@@ -1470,7 +1467,7 @@ X86CPU.prototype.clearAF = function()
 
 /**
  * clearZF()
- * 
+ *
  * @this {X86CPU}
  */
 X86CPU.prototype.clearZF = function()
@@ -1480,7 +1477,7 @@ X86CPU.prototype.clearZF = function()
 
 /**
  * clearSF()
- * 
+ *
  * @this {X86CPU}
  */
 X86CPU.prototype.clearSF = function()
@@ -1493,7 +1490,7 @@ X86CPU.prototype.clearSF = function()
 
 /**
  * clearIF()
- * 
+ *
  * @this {X86CPU}
  */
 X86CPU.prototype.clearIF = function()
@@ -1503,7 +1500,7 @@ X86CPU.prototype.clearIF = function()
 
 /**
  * clearDF()
- * 
+ *
  * @this {X86CPU}
  */
 X86CPU.prototype.clearDF = function()
@@ -1513,7 +1510,7 @@ X86CPU.prototype.clearDF = function()
 
 /**
  * clearOF()
- * 
+ *
  * @this {X86CPU}
  */
 X86CPU.prototype.clearOF = function()
@@ -1524,7 +1521,7 @@ X86CPU.prototype.clearOF = function()
 
 /**
  * setCF()
- * 
+ *
  * @this {X86CPU}
  */
 X86CPU.prototype.setCF = function()
@@ -1534,7 +1531,7 @@ X86CPU.prototype.setCF = function()
 
 /**
  * setPF()
- * 
+ *
  * @this {X86CPU}
  */
 X86CPU.prototype.setPF = function()
@@ -1544,7 +1541,7 @@ X86CPU.prototype.setPF = function()
 
 /**
  * setAF()
- * 
+ *
  * @this {X86CPU}
  */
 X86CPU.prototype.setAF = function()
@@ -1554,7 +1551,7 @@ X86CPU.prototype.setAF = function()
 
 /**
  * setZF()
- * 
+ *
  * @this {X86CPU}
  */
 X86CPU.prototype.setZF = function()
@@ -1564,7 +1561,7 @@ X86CPU.prototype.setZF = function()
 
 /**
  * setSF()
- * 
+ *
  * @this {X86CPU}
  */
 X86CPU.prototype.setSF = function()
@@ -1577,7 +1574,7 @@ X86CPU.prototype.setSF = function()
 
 /**
  * setIF()
- * 
+ *
  * @this {X86CPU}
  */
 X86CPU.prototype.setIF = function()
@@ -1587,7 +1584,7 @@ X86CPU.prototype.setIF = function()
 
 /**
  * setDF()
- * 
+ *
  * @this {X86CPU}
  */
 X86CPU.prototype.setDF = function()
@@ -1597,7 +1594,7 @@ X86CPU.prototype.setDF = function()
 
 /**
  * setOF()
- * 
+ *
  * @this {X86CPU}
  */
 X86CPU.prototype.setOF = function()
@@ -1608,7 +1605,7 @@ X86CPU.prototype.setOF = function()
 
 /**
  * getPS()
- * 
+ *
  * @this {X86CPU}
  * @return {number}
  */
@@ -1619,7 +1616,7 @@ X86CPU.prototype.getPS = function()
 
 /**
  * setPS(regPS)
- * 
+ *
  * @this {X86CPU}
  * @param {number} regPS
  */
@@ -1648,7 +1645,7 @@ X86CPU.prototype.setPS = function(regPS)
 
 /**
  * traceLog(prop, dst, src, flagsIn, flagsOut, result)
- * 
+ *
  * @this {X86CPU}
  * @param {string} prop
  * @param {number} dst
@@ -1666,7 +1663,7 @@ X86CPU.prototype.traceLog = function(prop, dst, src, flagsIn, flagsOut, result)
 
 /**
  * setBinding(sHTMLClass, sHTMLType, sBinding, control)
- * 
+ *
  * @this {X86CPU}
  * @param {string|null} sHTMLClass is the class of the HTML control (eg, "input", "output")
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
@@ -1737,7 +1734,7 @@ X86CPU.prototype.getWord = function(addr)
     var iBlock = (addr & this.addrMask) >> this.blockShift;
     /*
      * On the 8088, it takes 4 cycles to read the additional byte REGARDLESS whether the address is odd or even.
-     * 
+     *
      * TODO: For the 8086, the penalty is actually "(addr & 0x1) << 2" (4 additional cycles only when the address is odd).
      */
     this.nStepCycles -= this.nWordCyclePenalty;
@@ -1772,7 +1769,7 @@ X86CPU.prototype.setWord = function(addr, w)
     var iBlock = (addr & this.addrMask) >> this.blockShift;
     /*
      * On the 8088, it takes 4 cycles to write the additional byte REGARDLESS whether the address is odd or even.
-     * 
+     *
      * TODO: For the 8086, the penalty is actually "(addr & 0x1) << 2" (4 additional cycles only when the address is odd).
      */
     this.nStepCycles -= this.nWordCyclePenalty;
@@ -2142,7 +2139,7 @@ X86CPU.prototype.advancePrefetch = function(inc)
  * getIPByte()
  *
  * NOTE: We don't need to mask the incoming regEIP, because regEIP is always masked after update.
- * 
+ *
  * @this {X86CPU}
  * @return {number} byte at the current IP; IP advanced by 1
  */
@@ -2157,7 +2154,7 @@ X86CPU.prototype.getIPByte = function()
  * getIPDisp()
  *
  * NOTE: We don't need to mask the incoming regEIP, because regEIP is always masked after update.
- * 
+ *
  * @this {X86CPU}
  * @return {number} sign-extended value from the byte at the current IP; IP advanced by 1
  */
@@ -2172,7 +2169,7 @@ X86CPU.prototype.getIPDisp = function()
  * getIPWord()
  *
  * NOTE: We don't need to mask the incoming regEIP, because regEIP is always masked after update.
- * 
+ *
  * @this {X86CPU}
  * @return {number} word at the current IP; IP advanced by 2
  */
@@ -2185,7 +2182,7 @@ X86CPU.prototype.getIPWord = function()
 
 /**
  * popWord()
- * 
+ *
  * @this {X86CPU}
  * @return {number} word popped from the current SP; SP increased by 2
  */
@@ -2198,7 +2195,7 @@ X86CPU.prototype.popWord = function()
 
 /**
  * pushWord(w)
- * 
+ *
  * @this {X86CPU}
  * @param {number} w is the word (16-bit) value to push at current SP; SP decreased by 2
  */
@@ -2239,28 +2236,28 @@ X86CPU.prototype.pushWord = function(w)
  * intFlags has been overloaded with the INTFLAG.TRAP bit as well, since the acknowledgment of h/w interrupts
  * and the Trap flag are similar; they must both honor the NOINTR suppression flag, and stepCPU() shouldn't
  * have to check multiple variables when deciding whether to simulate an interrupt.
- * 
+ *
  * This function also includes a check for the new async INTFLAG.DMA flag, which is triggered by a ChipSet call
  * to setDMA().  This DMA flag actually has nothing to do with interrupts; it's simply an expedient way to
  * piggy-back on the CPU's execution logic, to help drive async DMA requests.
- * 
+ *
  * Originally, DMA requests (eg, FDC or HDC I/O operations) were all handled synchronously, since no actual
  * I/O was required to satisfy the request; from the CPU's perspective, this meant our DMA hardware was
  * incredibly fast.  However, with the introduction of remote disk connections, some actual I/O may be required;
  * in practice, this means that the FIRST byte requested as part of a DMA operation may require a callback to
  * finish, while all remaining bytes will be retrieved during subsequent checkINTR() calls -- unless additional
  * remote I/O operations are required to complete the DMA operation.
- * 
+ *
  * As a result, the CPU will run slightly slower while an async DMA request is in progress, but the slowdown
  * should be negligible.  The downside is that this slowdown will be in effect for the entire duration of the
  * I/O (ie, even while we're waiting for the remote I/O to finish), so the ChipSet component should avoid
  * calling setDMA() whenever possible.
- * 
+ *
  * TODO: While comparing SYMDEB tracing in both PCjs and VMware, I noticed that after single-stepping
  * ANY segment-load instruction, SYMDEB would get control immediately after that instruction in VMware,
  * whereas I delay acknowledgment of the Trap flag until the *following* instruction, so in PCjs, SYMDEB
  * doesn't get control until the following instruction.  I think PCjs behavior is correct, at least for SS.
- * 
+ *
  * ERRATA: I do recall that early revisions of the 8086/8088 failed to suppress hardware interrupts (and
  * possibly also Trap acknowledgements) after an SS load, but that Intel corrected the problem at some point;
  * however, I don't know when that change was made or which IBM PC models may have been affected, if any.
@@ -2313,7 +2310,7 @@ X86CPU.prototype.checkINTR = function()
  * This is how the PIC component simulates raising the INTFLAG.INTR signal.  We will honor the request
  * only if we have a reference back to the ChipSet component.  The CPU will then "respond" by calling
  * checkINTR() and request the corresponding interrupt vector from the ChipSet.
- * 
+ *
  * @this {X86CPU}
  * @param {boolean} fRaise is true to raise INTFLAG.INTR, false to lower
  */
@@ -2343,7 +2340,7 @@ X86CPU.prototype.updateINTR = function(fRaise)
  *
  * I'm assuming this never happens in practice because the PIC isn't that fast.  But for us to
  * guarantee that, we need to provide this function to the ChipSet component.
- * 
+ *
  * @this {X86CPU}
  */
 X86CPU.prototype.delayINTR = function()
@@ -2353,7 +2350,7 @@ X86CPU.prototype.delayINTR = function()
 
 /**
  * displayStatus()
- * 
+ *
  * @this {X86CPU}
  */
 X86CPU.prototype.displayStatus = function()
@@ -2423,7 +2420,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
     this.fComplete = true;
 
     /*
-     * fDebugCheck is true if we need to "check" every instruction with the Debugger.  The Debugger will 
+     * fDebugCheck is true if we need to "check" every instruction with the Debugger.  The Debugger will
      * call cpu.stepCPU(n) with n == 0 if it's executing only ONE instruction (ie, the user just clicked the
      * "Step" button, or they've issued a "t" or "t1" command).  Otherwise, it will call with n == 1
      * (ie, the user is holding the "Step" button, or they've issued a "t#" command where # > 1).
@@ -2450,7 +2447,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
      * NOTE: I have moved updateAllTimers() from runCPU() to here.  The effect is exactly the same, except
      * that this placement also insures that if the Debugger is doing a lot of single-stepping, all the timers
      * will still get updated.
-     *  
+     *
      * In a typical PC configuration, the timer(s) should be updated a MINIMUM of 18.2 times per second,
      * otherwise there's no way to guarantee the standard 18.2 interrupts per second (and in fact, our update
      * frequency should probably be a bit higher, otherwise the delivery of timer interrupts may be rather
@@ -2465,11 +2462,11 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
      * to allow Debugger interactions to affect the behavior of the virtual machine in ANY way, but I'm making
      * this small concession to avoid the occasional and sometimes unexpected Debugger command that ends up
      * stepping into a hardware interrupt service routine (ISR).
-     * 
+     *
      * Note that this is similar to the problem discussed in checkINTR() regarding the priority of external h/w
      * interrupts vs. Trap interrupts, but they require different solutions, because our Debugger operates
      * independently of the CPU.
-     * 
+     *
      * One exception I make here is when you've asked the Debugger to display PIC messages, the idea being that
      * if you're watching the PIC that closely, then you want to hardware interrupts to occur regardless.
      */
@@ -2502,13 +2499,13 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
                      * opHLT() sets X86.INTFLAG.HALT, signalling to us that we're free to end the current burst
                      * AND that we should not execute any more instructions until checkINTR() indicates a hardware
                      * interrupt has been requested.
-                     * 
+                     *
                      * One downside to this approach is that it *might* appear to the careful observer that we
                      * executed a full complement of instructions during bursts where X86.INTFLAG.HALT was set,
                      * when in fact we did not.  However, the steady advance of the overall cycle count, and thus
                      * the steady series calls to stepCPU(), is needed to ensure that timer updates, video updates,
                      * etc, all continue to occur at the expected rates.
-                     * 
+                     *
                      * If necessary, we can add another bookkeeping cycle counter (eg, one that keeps tracks of the
                      * number of cycles during which we did not actually execute any instructions).
                      */
@@ -2530,31 +2527,31 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
             this.nBusCycles = 0;
             this.nSnapCycles = this.nStepCycles;
         }
-        
+
         this.aOps[this.getIPByte()].call(this);
-        
+
         if (PREFETCH) {
             var nSpareCycles = (this.nSnapCycles - this.nStepCycles) - this.nBusCycles;
             if (nSpareCycles >= 4) {
                 this.fillPrefetch(nSpareCycles >> 2);   // for every 4 spare cycles, fetch 1 instruction byte
             }
         }
-        
+
         if (DEBUG) {
             /*
              * Some opcode helpers are required to temporarily redirect getEAByte/getEAWord or setEAByte/setEAWord
              * to null functions, effectively disabling a memory read that's unnecessary (or a memory write that could
              * be destructive).  However, they weren't originally required to restore those memory functions when they
              * were done; we would simply reset all the memory functions here, after every single instruction.
-             * 
+             *
              * That's no longer the case.  Those opcode helpers (or their callers) are now required to restore the
              * memory access functions to their defaults, so that we don't have to waste time resetting them here, on
-             * every instruction.  The DEBUG-only verifyMemoryEnabled() simply confirms that everyone's doing their job. 
+             * every instruction.  The DEBUG-only verifyMemoryEnabled() simply confirms that everyone's doing their job.
              */
             this.verifyMemoryEnabled();
-            
+
             /*
-             * Make sure that every instruction is assessing a cycle cost, and that the cost is a net positive. 
+             * Make sure that every instruction is assessing a cycle cost, and that the cost is a net positive.
              */
             if (this.nStepCycles >= this.nSnapCycles && !(this.opFlags & X86.OPFLAG.PREFIXES)) {
                 this.println("cycle miscount: " + (this.nSnapCycles - this.nStepCycles));

@@ -48,22 +48,22 @@ if (typeof module !== 'undefined') {
  * FDC Terms (see FDC.TERMS)
  *
  *      C       Cylinder Number         the current or selected cylinder number
- *      
+ *
  *      D       Data                    the data pattern to be written to a sector
- *      
+ *
  *      DS      Drive Select            the selected driver number encoded the same as bits 0 and 1 of the Digital Output
  *                                      Register (DOR); eg, DS0, DS1, DS2, or DS3
- *                                      
+ *
  *      DTL     Data Length             when N is 00, DTL is the data length to be read from or written to a sector
- *      
+ *
  *      EOT     End Of Track            the final sector number on a cylinder
- *      
+ *
  *      GPL     Gap Length              the length of gap 3 (spacing between sectors excluding the VCO synchronous field)
- *      
+ *
  *      H       Head Address            the head number, either 0 or 1, as specified in the ID field
- *      
+ *
  *      HD      Head                    the selected head number, 0 or 1 (H = HD in all command words)
- *      
+ *
  *      HLT     Head Load Time          the head load time in the selected drive (2 to 256 milliseconds in 2-millisecond
  *                                      increments for the 1.2M-byte drive and 4 to 512 milliseconds in 4 millisecond increments
  *                                      for the 320K-byte drive)
@@ -71,30 +71,30 @@ if (typeof module !== 'undefined') {
  *      HUT     Head Unload Time        the head unload time after a read or write operation (0 to 240 milliseconds in
  *                                      16-millisecond increments for the 1.2M-byte drive and 0 to 480 milliseconds in
  *                                      32-millisecond increments for the 320K-byte drive)
- *                                  
+ *
  *      MF      FM or MFM Mode          0 selects FM mode and 1 selects MFM (MFM is selected only if it is implemented)
- *      
+ *
  *      MT      Multitrack              1 selects multitrack operation (both HD0 and HD1 will be read or written)
- *      
+ *
  *      N       Number                  the number of data bytes written in a sector
- *      
+ *
  *      NCN     New Cylinder Number     the new cylinder number for a Seek operation
- *      
+ *
  *      ND      Non-Data Mode           indicates an operation in the non-data mode
- *      
+ *
  *      PCN     Present Cylinder Number the cylinder number at the completion of a Sense Interrupt Status command
  *                                      (present position of the head)
- *                                      
+ *
  *      R       Record                  the sector number to be read or written
- *      
+ *
  *      SC      Sectors Per Cylinder    the number of sectors per cylinder
- *      
+ *
  *      SK      Skip                    this stands for skip deleted-data address mark
- *      
+ *
  *      SRT     Stepping Rate           this 4 bit byte indicates the stepping rate for the diskette drive as follows:
  *                                      1.2M-Byte Diskette Drive: 1111=1ms, 1110=2ms, 1101=3ms
  *                                      320K-Byte Diskette Drive: 1111=2ms, 1110=4ms, 1101=6ms
- *                                      
+ *
  *      STP     STP Scan Test           if STP is 1, the data in contiguous sectors is compared with the data sent
  *                                      by the processor during a scan operation; if STP is 2, then alternate sections
  *                                      are read and compared
@@ -162,23 +162,21 @@ function FDC(parmsFDC) {
     /*
      * The following array keeps track of every disk image we've ever mounted.  Each entry in the
      * array is another array whose elements are:
-     * 
+     *
      *      [0]: name of disk
      *      [1]: path of disk
      *      [2]: array of deltas, uninitialized until the disk is unmounted and/or all state is saved
-     *      
+     *
      * See functions addDiskHistory() and updateDiskHistory().
      */
     this.aDiskHistory = [];
 
     /*
-     * If we didn't need auto-mount support, we could defer controller initialization until we received a powerUp() notification,
-     * at which point reset() would call initController(), or restore() would restore the controller; in that case, all we'd need
-     * to do here is call setReady().
+     * The remainder of FDC initialization now takes place in our initBus() handler, largely because we
+     * want initController() to have access to the ChipSet component, so that it can query switches and/or CMOS
+     * settings that determine the number of drives and their characteristics (eg, 40-track vs. 80-track),
+     * which it can then pass on to initDrive().
      */
-    this.initController();
-
-    if (!this.autoMount()) this.setReady();
 }
 
 Component.subclass(Component, FDC);
@@ -212,10 +210,10 @@ if (DEBUG) {
 
 /*
  * FDC Digital Output Register (DOR) (0x3F2, write-only)
- * 
+ *
  * NOTE: Reportedly, a drive's MOTOR had to be ON before the drive could be selected; however, outFDCOutput() no
  * longer verifies that.  Also, motor start time for original drives was 500ms, but we make no attempt to simulate that.
- * 
+ *
  * On the MODEL_5170 "PC AT Fixed Disk and Diskette Drive Adapter", this port is called the Digital Output Register
  * or DOR.  It uses the same bit definitions as the original FDC Output Register, except that only two diskette drives
  * are supported, hence bit 1 is always 0 (ie, FDC.REG_OUTPUT.DS2 and FDC.REG_OUTPUT.DS3 are not supported) and bits
@@ -237,7 +235,7 @@ FDC.REG_OUTPUT.MOTOR_D3     = 0x80;     // reserved on the MODEL_5170
 
 /*
  * FDC Main Status Register (0x3F4, read-only)
- * 
+ *
  * On the MODEL_5170 "PC AT Fixed Disk and Diskette Drive Adapter", bits 2 and 3 are reserved, since that adapter
  * supported a maximum of two diskette drives.
  */
@@ -260,7 +258,7 @@ FDC.REG_DATA.PORT           = 0x3F5;
 
 /*
  * FDC Digital Input Register (0x3F7, read-only, MODEL_5170 only)
- * 
+ *
  * Bit 7 indicates a diskette change (the MODEL_5170 introduced change-line support).  Bits 0-6 are for the selected
  * hard disk drive, so this port must be shared with the HDC; bits 0-6 are valid for 50 microseconds after a write to
  * the Drive Head Register.
@@ -278,7 +276,7 @@ FDC.REG_INPUT.DISK_CHANGE   = 0x80;     // Diskette Change
 
 /*
  * FDC Diskette Control Register (0x3F7, write-only, MODEL_5170 only)
- * 
+ *
  * Only bits 0-1 are used; bits 2-7 are reserved.
  */
 FDC.REG_CONTROL = {};
@@ -290,14 +288,14 @@ FDC.REG_CONTROL.RATEUNUSED  = 0x03;
 
 /*
  * FDC Commands
- * 
+ *
  * NOTE: FDC command bytes need to be masked with FDC.REG_DATA.CMD.MASK before comparing to the values below, since a
  * number of commands use the following additional bits as follows:
- *  
+ *
  *      SK (0x20): Skip Deleted Data Address Mark
  *      MF (0x40): Modified Frequency Modulation (as opposed to FM or Frequency Modulation)
  *      MT (0x80): multi-track operation (ie, data processed under both head 0 and head 1)
- *      
+ *
  * We don't support MT (Multi-Track) operations at this time, and the MF and SK designations cannot be supported as long
  * as our diskette images contain only the original data bytes without any formatting information.
  */
@@ -324,8 +322,8 @@ FDC.REG_DATA.CMD.MT             = 0x80;     // MT (Multi-Track; ie, data under b
 
 /*
  * FDC status/error results, generally assigned according to the corresponding ST0, ST1, ST2 or ST3 status bit.
- * 
- * TODO: Determine when EQUIP_CHECK is *really* set; "77 step pulses" sounds suspiciously like a typo. 
+ *
+ * TODO: Determine when EQUIP_CHECK is *really* set; "77 step pulses" sounds suspiciously like a typo.
  */
 FDC.REG_DATA.RES = {};
 FDC.REG_DATA.RES.NONE         = 0x00000000; // ST0 (IC): Normal termination of command (NT)
@@ -362,7 +360,7 @@ FDC.REG_DATA.RES.ST3          = 0xFF000000;
 
 /*
  * FDC Command Sequences
- * 
+ *
  * For each command, cbReq indicates the total number of bytes in the command request sequence,
  * including the first (command) byte; cbRes indicates total number of bytes in the response sequence.
  */
@@ -451,7 +449,7 @@ FDC.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
                 };
             }(this, control);
             return true;
-    
+
         case "descDisk":
         case "listDrives":
             this.bindings[sBinding] = control;
@@ -467,7 +465,7 @@ FDC.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
                 };
             }(this, control);
             return true;
-    
+
         case "loadDrive":
             this.bindings[sBinding] = control;
             control.onclick = function(fdc) {
@@ -482,7 +480,7 @@ FDC.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
                             return;
                         }
                         var sDisketteName = controlDisks.options[controlDisks.selectedIndex].text;
-                        
+
                         /*
                          * If the special path of "?" is selected, then we want to prompt the user for a URL.  Oh, and
                          * make sure we pass an empty string as the 2nd parameter to prompt(), so that IE won't display
@@ -499,7 +497,7 @@ FDC.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
                             sDisketteName = str.getBaseName(sDiskettePath);
                             fdc.println("Attempting to load " + sDiskettePath + " as \"" + sDisketteName + "\"");
                         }
-                        
+
                         while (fdc.loadDiskette(iDrive, sDisketteName, sDiskettePath, false)) {
                             if (!window.confirm("Click OK to reload the original disk.\n(WARNING: All disk changes will be discarded)")) {
                                 return;
@@ -546,9 +544,18 @@ FDC.prototype.initBus = function(cmp, bus, cpu, dbg)
 
     this.chipset = cmp.getComponentByType("ChipSet");
 
+    /*
+     * If we didn't need auto-mount support, we could defer controller initialization until we received a powerUp() notification,
+     * at which point reset() would call initController(), or restore() would restore the controller; in that case, all we'd need
+     * to do here is call setReady().
+     */
+    this.initController();
+
     bus.addPortInputTable(this, FDC.aPortInput);
     bus.addPortOutputTable(this, FDC.aPortOutput);
     if (DEBUGGER) cpu.addIntNotify(FDC.BIOS.INT_DISKETTE, this, this.intBIOSDiskette);
+
+    if (!this.autoMount()) this.setReady();
 };
 
 /**
@@ -567,7 +574,7 @@ FDC.prototype.powerUp = function(data, fRepower)
             if (this.cmp.fReload) {
                 /*
                  * If the computer's fReload flag is set, we're required to toss all currently
-                 * loaded disks and remount all disks specified in the auto-mount configuration. 
+                 * loaded disks and remount all disks specified in the auto-mount configuration.
                  */
                 this.unloadAllDrives(true);
                 this.autoMount(true);
@@ -575,41 +582,29 @@ FDC.prototype.powerUp = function(data, fRepower)
         } else {
             if (!this.restore(data)) return false;
         }
-        if (this.chipset) {
-            var iDrive;
-            this.nDrives = this.chipset.getSWFloppyDrives();
-            for (iDrive = 0; iDrive < this.nDrives; iDrive++) {
-                var drive = this.aDrives[iDrive];
-                drive.bType = this.chipset.getSWFloppyDriveType(iDrive);
-                if (drive.bType == ChipSet.CMOS.FDRIVE.DSHD) {
-                    drive.nCylinders = 80;
-                }
+        /*
+         * Populate the HTML controls to match the actual (well, um, specified) number of floppy drives.
+         */
+        var controlDrives;
+        if ((controlDrives = this.bindings['listDrives'])) {
+            while (controlDrives.firstChild) {
+                controlDrives.removeChild(controlDrives.firstChild);
             }
-            /*
-             * Now that we finally have the SW1 settings, we can populate the HTML control
-             * to match the actual (well, um, specified) number of floppy drives in the system.
-             */
-            var controlDrives;
-            if ((controlDrives = this.bindings['listDrives'])) {
-                while (controlDrives.firstChild) {
-                    controlDrives.removeChild(controlDrives.firstChild);
-                }
-                controlDrives.innerHTML = "";
-                for (iDrive = 0; iDrive < this.nDrives; iDrive++) {
-                    var controlOption = window.document.createElement("option");
-                    controlOption['value'] = iDrive;
-                    /*
-                     * TODO: This conversion of drive number to drive letter, starting with A:, is very simplistic
-                     * and will NOT match the drive mappings that DOS ultimately uses.  We'll need to spiff this up at
-                     * some point.
-                     */
-                    controlOption.innerHTML = String.fromCharCode(0x41 + iDrive) + ":";
-                    controlDrives.appendChild(controlOption);
-                }
-                if (this.nDrives > 0) {
-                    controlDrives.value = "0";
-                    this.displayDiskette(0);
-                }
+            controlDrives.innerHTML = "";
+            for (var iDrive = 0; iDrive < this.nDrives; iDrive++) {
+                var controlOption = window.document.createElement("option");
+                controlOption['value'] = iDrive;
+                /*
+                 * TODO: This conversion of drive number to drive letter, starting with A:, is very simplistic
+                 * and will NOT match the drive mappings that DOS ultimately uses.  We'll need to spiff this up at
+                 * some point.
+                 */
+                controlOption.innerHTML = String.fromCharCode(0x41 + iDrive) + ":";
+                controlDrives.appendChild(controlOption);
+            }
+            if (this.nDrives > 0) {
+                controlDrives.value = "0";
+                this.displayDiskette(0);
             }
         }
     }
@@ -684,36 +679,36 @@ FDC.prototype.restore = function(data)
  */
 FDC.prototype.initController = function(data)
 {
-    var i = 0;
+    var i = 0, iDrive;
     var fSuccess = true;
-    
+
     if (data === undefined) {
         data = [0, 0, FDC.REG_STATUS.RQM, new Array(9), 0, 0, 0, []];
     }
-    
+
     /*
      * Selected drive (from regOutput), which can only be selected if its motor is on (see regOutput).
      */
     this.iDrive = data[i++];
     i++;                        // unused slot (if reused, bias by +4, since it was formerly a unit #)
-    
+
     /*
      * Defaults to FDC.REG_STATUS.RQM set (ready for command) and FDC.REG_STATUS.READ_DATA clear (data direction
      * is from processor to the FDC Data Register).
      */
     this.regStatus = data[i++];
-    
+
     /*
      * There can be up to 9 command bytes, and 7 result bytes, so 9 data registers are sufficient for communicating
      * in both directions (hence, the new Array(9) default above).
      */
     this.regDataArray = data[i++];
-    
+
     /*
      * Determines the next data byte to be received.
      */
     this.regDataIndex = data[i++];
-    
+
     /*
      * Determines the next data byte to be sent (internally, we use regDataIndex to read data bytes, up to this total).
      */
@@ -723,35 +718,46 @@ FDC.prototype.initController = function(data)
 
     /*
      * Initialize the disk history (if available) before initializing the drives, so that any disk deltas can be
-     * applied to disk images that are already loaded. 
+     * applied to disk images that are already loaded.
      */
     var aDiskHistory = data[i++];
     if (aDiskHistory != null) this.aDiskHistory = aDiskHistory;
 
-    /*
-     * We allocate the maximum number of drives; we won't know the actual number of drives until we're able to query
-     * the SW1 switch settings.
-     */
     if (this.aDrives === undefined) {
-        this.nDrives = 0;               // this will be set later to the number of ACTUAL drives
+        this.nDrives = 4;                       // default to the maximum number of drives
+        if (this.chipset) this.nDrives = this.chipset.getSWFloppyDrives();
+        /*
+         * I would prefer to allocate only nDrives, but as discussed in the handling of the FDC.REG_DATA.CMD.SENSE_INT
+         * command, we're faced with situations where the controller must respond to any drive in the range 0-3, regardless
+         * how many drives are actually installed.  We still rely upon nDrives to determine the number of drives displayed
+         * to the user, however.
+         */
         this.aDrives = new Array(4);
     }
-    for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
-        if (this.aDrives[iDrive] === undefined) {
-            this.aDrives[iDrive] = {};
-        }
+
+    for (iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
         var drive = this.aDrives[iDrive];
+        if (drive === undefined) {
+            drive = this.aDrives[iDrive] = {};
+            drive.bType = this.chipset.getSWFloppyDriveType(iDrive);
+            drive.nCylinders = 40;
+            drive.nSectors = 9;
+            if (drive.bType == ChipSet.CMOS.FDRIVE.DSHD) {
+                drive.nCylinders = 80;
+                drive.nSectors = 18;            // 15 for 1.2Mb diskettes, 18 for 1.44Mb diskettes, 8/9 for everything else
+            }
+        }
         if (!this.initDrive(drive, iDrive, dataDrives[iDrive])) {
             fSuccess = false;
         }
     }
-    
+
     /*
      * regInput and regControl (port 0x3F7) were not present on controllers prior to MODEL_5170, which is why
      * we don't include initializers for them in the default data array; we could eliminate them on older models,
      * but we don't have access to the model info right now, and there's no real cost to always including them
      * in the FDC state.
-     * 
+     *
      * The bigger compatibility question is whether to always include hooks for them (see aPortInput and aPortOutput).
      */
     this.regInput = data[i++] || 0;                             // TODO: Determine if we should default to FDC.REG_INPUT.DISK_CHANGE instead of 0
@@ -791,7 +797,7 @@ FDC.prototype.saveController = function()
  * TODO: Consider a separate Drive class that both FDC and HDC can use, since there's a lot of commonality
  * between the drive objects created by both controllers.  This will clean up overall drive management and allow
  * us to factor out some common Drive methods (eg, advanceSector()).
- * 
+ *
  * @this {FDC}
  * @param {Object} drive
  * @param {number} iDrive
@@ -802,7 +808,7 @@ FDC.prototype.initDrive = function(drive, iDrive, data)
 {
     var i = 0;
     var fSuccess = true;
-    
+
     drive.iDrive = iDrive;
 
     if (data === undefined) {
@@ -816,16 +822,12 @@ FDC.prototype.initDrive = function(drive, iDrive, data)
     if (typeof data[1] == "boolean") {
         /*
          * Note that when no data is provided (eg, when the controller is being reinitialized), we now take
-         * care to use drive.nCylinders as the default, falling back to a 40-track maximum ONLY when the drive
-         * hasn't been initialized.  This preserves whatever maximum the powerUp() function may have obtained
-         * from the ChipSet component.
-         * 
-         * TODO: We may need to make a similar accommodation for drive.nHeads and drive.nSectors down the road;
-         * they currently default to a maximum of 2 heads (see above) and 9 sectors/track (see below). 
+         * care to preserve any drive defaults that initController() already obtained for us, falling back to
+         * bare minimums only when all else has failed.
          */
-        data[1] = [FDC.DEFAULT_DRIVE_NAME, drive.nCylinders || 40, data[3], 9, 512, data[1]];
+        data[1] = [FDC.DEFAULT_DRIVE_NAME, drive.nCylinders || 40, drive.nHeads || data[3], drive.nSectors || 9, drive.cbSector || 512, data[1]];
     }
-    
+
     /*
      * resCode used to be an FDC global, but in order to insulate FDC state from the operation of various functions
      * that operate on drive objects (eg, readByte and writeByte), I've made it a per-drive variable.  This choice,
@@ -833,13 +835,13 @@ FDC.prototype.initDrive = function(drive, iDrive, data)
      * approach, as long as it doesn't expose any incompatibilities that any software actually cares about.
      */
     drive.resCode = data[i++];
-    
+
     /*
      * Some additional drive properties/defaults that are largely for the Disk component's benefit.
      */
     drive.name = data[i][0];
     drive.nCylinders = data[i][1];          // cylinders
-    drive.nHeads = data[i][2];              // heads/cylinders              
+    drive.nHeads = data[i][2];              // heads/cylinders
     drive.nSectors = data[i][3];            // sectors/track
     drive.cbSector = data[i][4];            // bytes/sector
     drive.fRemovable = data[i][5];
@@ -851,15 +853,15 @@ FDC.prototype.initDrive = function(drive, iDrive, data)
      * We initialize this.iDrive (above) and drive.bHead and drive.bCylinder (below) to zero, but leave the rest undefined,
      * awaiting their first FDC command.  We do this because the initial SENSE_INT command returns a PCN, which will also
      * be undefined unless we have at least zeroed both the current drive and the "present" cylinder on that drive.
-     * 
+     *
      * Alternatively, I could make PCN a global FDC variable.  That may be closer to how the actual hardware operates,
      * but I'm using per-drive variables so that the FDC component can be a good client to both the CPU and other components.
-     * 
+     *
      * COMPATIBILITY ALERT: The MODEL_5170 BIOS ("DSKETTE_SETUP") attempts to discern the drive type (double-density vs.
      * high-capacity) by "slapping" the heads around.  Literally (it uses a constant named "TRK_SLAP" equal to 48).
      * After seeking to "TRK_SLAP", the BIOS performs a series of seeks, looking for the precise point where the heads
      * return to track 0.
-     * 
+     *
      * Here's how it works: the BIOS seeks to track 48 (which is fine on an 80-track 1.2Mb high-capacity drive, but 9 tracks
      * too far on a 40-track 360Kb double-density drive), then seeks to track 10, and then seeks in single-track increments
      * up to 10 more times until the SENSE_DRIVE command returns ST3 with the TRACK0 bit set.
@@ -869,11 +871,10 @@ FDC.prototype.initDrive = function(drive, iDrive, data)
      * is updating a "logical" cylinder number, not the "physical" (actual) cylinder number.  Presumably a RECALIBRATE
      * command will bring the logical and physical values into sync, but once an out-of-bounds cylinder is requested, they
      * will be out of sync.
-     * 
+     *
      * To simulate this, bCylinder is now treated as the "physical" cylinder (since that's how it's ALWAYS been used here),
      * and bCylinderSeek will now track (pun intended) the "logical" cylinder that's programmed via SEEK commands.
      */
-    drive.bType = ChipSet.CMOS.FDRIVE.DSDD; // default; updated later once we have the actual ChipSet object
     drive.bHead = data[i++];
     drive.bCylinderSeek = data[i++];        // the data[] slot where we used to store drive.nHeads (or -1)
     drive.bCylinder = data[i++];
@@ -885,10 +886,10 @@ FDC.prototype.initDrive = function(drive, iDrive, data)
     drive.bSector = data[i++];
     drive.bSectorEnd = data[i++];           // aka EOT
     drive.nBytes = data[i++];
-    
+
     /*
      * The next group of properties are set by user requests to load/unload diskette images.
-     * 
+     *
      * NOTE: I now avoid reinitializing drive.disk in order to retain any previously mounted diskette across resets.
      *
      *    drive.disk = null;                // when a "disk" is "inserted" into the "drive", this is a Disk object
@@ -911,7 +912,7 @@ FDC.prototype.initDrive = function(drive, iDrive, data)
         /*
          * If loadDiskette() must actually mount a *different* disk image at this late stage (ie, if it returns false),
          * then we must mark ourselves as "not ready" again, and add another "wait for ready" test in Computer before
-         * finally powering the CPU.  Otherwise, go ahead and restore any deltas to the current image.  
+         * finally powering the CPU.  Otherwise, go ahead and restore any deltas to the current image.
          */
         if (this.loadDiskette(iDrive, sDisketteName, sDiskettePath, true)) {
             if (drive.disk) {
@@ -986,9 +987,9 @@ FDC.prototype.saveDrive = function(drive)
      * Now we deviate from the 1.01a save format: instead of next storing all the deltas for the
      * currently mounted disk (if any), we store only the name and path of the currently mounted disk
      * (if any).  Deltas for ALL disks, both currently mounted and previously mounted, are stored later.
-     * 
+     *
      *      data[i++] = drive.disk? drive.disk.save() : null;
-     * 
+     *
      * To indicate this deviation, we store neither a null nor a delta array, but Computer.VERSION_102;
      * if that value is not present, then the restore code will know it's dealing with a pre-v1.02 state.
      */
@@ -1080,7 +1081,7 @@ FDC.prototype.seekDrive = function(drive, iSector, nSectors)
             /*
              * NOTE: We don't set bSectorEnd, as an FDC command would, but it's irrelevant, because we don't actually
              * do anything with bSectorEnd at this point.  Perhaps someday, when we faithfully honor/restrict requests
-             * to a single track (or a single cylinder, in the case of multi-track requests). 
+             * to a single track (or a single cylinder, in the case of multi-track requests).
              */
             drive.resCode = FDC.REG_DATA.RES.NONE;
             /*
@@ -1170,7 +1171,7 @@ FDC.prototype.loadDiskette = function(iDrive, sDisketteName, sDiskettePath, fAut
 FDC.prototype.mountDiskette = function(drive, disk, sDisketteName, sDiskettePath)
 {
     drive.fBusy = false;
-    
+
     /*
      * We shouldn't mount the diskette unless the drive is able to handle it; for example, DSDD (40-track)
      * drives cannot read DSHD (80-track) diskettes.
@@ -1179,23 +1180,23 @@ FDC.prototype.mountDiskette = function(drive, disk, sDisketteName, sDiskettePath
         this.notice("Diskette \"" + sDisketteName + "\" too large for drive " + String.fromCharCode(0x41 + drive.iDrive));
         disk = null;
     }
-    
+
     if (disk) {
         drive.disk = disk;
         drive.sDisketteName = sDisketteName;
         drive.sDiskettePath = sDiskettePath;
         this.addDiskHistory(sDisketteName, sDiskettePath, disk);
-        
+
         /*
          * Clearly, a successful mount implies a disk change, and I suppose that, technically, an *unsuccessful*
          * mount should imply the same, but what would the real-world analog be?  Inserting a piece of cardboard
          * instead of an actual diskette?  In any case, if we can do the user a favor by pretending (as far as the
          * disk change line is concerned) that an unsuccessful mount never happened, let's do it.
-         * 
+         *
          * Successful unmounts are a different story, however; those *do* trigger a change. See unloadDrive().
          */
         this.regInput |= FDC.REG_INPUT.DISK_CHANGE;
-        
+
         /*
          * With the addition of notify(), users are now "alerted" whenever a diskette has finished loading;
          * notify() is selective about its output, using print() if a print window is open, alert() otherwise.
@@ -1205,12 +1206,12 @@ FDC.prototype.mountDiskette = function(drive, disk, sDisketteName, sDiskettePath
          */
         this.notice("Mounted diskette \"" + sDisketteName + "\" in drive " + String.fromCharCode(0x41 + drive.iDrive), drive.fAutoMount);
     }
-    
+
     if (drive.fAutoMount) {
         drive.fAutoMount = false;
         if (!--this.cAutoMount) this.setReady();
     }
-    
+
     this.displayDiskette(drive.iDrive);
 };
 
@@ -1283,9 +1284,9 @@ FDC.prototype.unloadDrive = function(iDrive, fAutoUnload, fQuiet)
         drive.sDisketteName = "";
         drive.sDiskettePath = "";
         drive.disk = null;
-        
+
         this.regInput |= FDC.REG_INPUT.DISK_CHANGE;
-        
+
         /*
          * WARNING: This conversion of drive number to drive letter, starting with A:, is very simplistic
          * and is not guaranteed to match the drive mapping that DOS ultimately uses.
@@ -1422,17 +1423,17 @@ FDC.prototype.outFDCOutput = function(port, bOut, addrFrom)
      * This no longer updates the internally selected drive (this.iDrive) based on regOutput, because (a) there seems
      * to be no point, as all drive-related commands include their own "drive select" bits, and (b) it breaks the
      * MODEL_5170 boot code.  Here's why:
-     * 
+     *
      * Unlike previous models, the MODEL_5170 BIOS probes all installed diskette drives to determine drive type;
      * ie, DSDD (40-track) or DSHD (80-track).  So if there are two drives, the last selected drive will be drive 1.
      * Immediately before booting, the BIOS issues an INT 0x13/AH=0 reset, which writes regOutput two times: first
      * with FDC.REG_OUTPUT.ENABLE clear, and then with it set.  However, both times, it ALSO loads the last selected
      * drive number into regOutput's "drive select" bits.
-     * 
+     *
      * If we switched our selected drive to match regOutput, then the ST0 value we returned on an SENSE_INT command
      * following the regOutput reset operation would indicate drive 1 instead of drive 0.  But the BIOS requires
      * the ST0 result from the SENSE_INT command ALWAYS be 0xC0 (not 0xC1), so the controller must not be propagating
-     * regOutput's "drive select" bits in the way I originally assumed. 
+     * regOutput's "drive select" bits in the way I originally assumed.
      *
      *      var iDrive = bOut & FDC.REG_OUTPUT.DS;
      *      if (bOut & (FDC.REG_OUTPUT.MOTOR_D0 << iDrive)) this.iDrive = iDrive;
@@ -1493,7 +1494,7 @@ FDC.prototype.inFDCData = function(port, addrFrom)
 FDC.prototype.outFDCData = function(port, bOut, addrFrom)
 {
     this.messagePort(port, bOut, addrFrom, "DATA[" + this.regDataTotal + "]");
-    
+
     if (this.regDataTotal < this.regDataArray.length) {
         this.regDataArray[this.regDataTotal++] = bOut;
     }
@@ -1561,15 +1562,15 @@ FDC.prototype.doCmd = function()
      * The only command bit of possible interest down the road might be the FDC.REG_DATA.CMD.MT (Multi-Track); the rest relate
      * to storage format details that we cannot emulate as long as our diskette images contain nothing more than sector
      * data without any formatting data.
-     * 
-     * Similarly, we ignore parameters like SRT, HUT, HLT and the like, since our "motors" don't require physical delays; 
+     *
+     * Similarly, we ignore parameters like SRT, HUT, HLT and the like, since our "motors" don't require physical delays;
      * however, if timing issues become compatibility issues, we'll have to revisit those delays.  In any case, the maximum
      * speed of the simulation will still be limited by various spin-loops in the ROM BIOS that wait prescribed times, so even
      * with infinitely fast hardware, the simulation will never run as fast as it theoretically could, unless we opt to identify
      * those spin-loops and either patch them or skip over them.
      */
     var bCmdMasked = bCmd & FDC.REG_DATA.CMD.MASK;
-    
+
     switch (bCmdMasked) {
     case FDC.REG_DATA.CMD.SPECIFY:                      // 0x03
         this.popSRT();                                  // SRT and HUT (encodings?)
@@ -1579,7 +1580,7 @@ FDC.prototype.doCmd = function()
          * No results are provided by this command, and fIRQ should remain false
          */
         break;
-    
+
     case FDC.REG_DATA.CMD.SENSE_DRIVE:                  // 0x04
         bDrive = this.popCmd(FDC.TERMS.DS);
         bHeadSelect = (bDrive >> 2) & 0x1;
@@ -1588,7 +1589,7 @@ FDC.prototype.doCmd = function()
         this.beginResult();
         this.pushST3(drive);
         break;
-    
+
     case FDC.REG_DATA.CMD.WRITE_DATA:                   // 0x05
     case FDC.REG_DATA.CMD.READ_DATA:                    // 0x06
         bDrive = this.popCmd(FDC.TERMS.DS);
@@ -1619,7 +1620,7 @@ FDC.prototype.doCmd = function()
         this.pushResult(n, FDC.TERMS.N);
         fIRQ = true;
         break;
-    
+
     case FDC.REG_DATA.CMD.RECALIBRATE:                  // 0x07
         bDrive = this.popCmd(FDC.TERMS.DS);
         this.iDrive = (bDrive & 0x3);
@@ -1629,7 +1630,7 @@ FDC.prototype.doCmd = function()
         this.beginResult();                             // no results provided; this command is typically followed by FDC.REG_DATA.CMD.SENSE_INT
         fIRQ = true;
         break;
-    
+
     case FDC.REG_DATA.CMD.SENSE_INT:                    // 0x08
         drive = this.aDrives[this.iDrive];
         drive.bHead = 0;                                // this command is documented as ALWAYS returning a head address of 0 in ST0; see pushST0()
@@ -1642,11 +1643,11 @@ FDC.prototype.doCmd = function()
          * in a row, and expects ST0 to contain a different drive number after each command (first 0, then 1,
          * then 2, and finally 3).  What makes this doubly weird is SENSE INTERRUPT STATUS (unlike SENSE
          * DRIVE STATUS) is a drive-agnostic command.
-         * 
+         *
          * Didn't the original PC AT "HFCOMBO" controller limit support to TWO diskette drives max?
          * And even if the PC AT supported other FDC controllers that DID support up to FOUR diskette drives,
          * why should "DISK_RESET" hard-code a 4-drive loop?
-         * 
+         *
          * Well, whatever.  All this head-scratching doesn't change the fact that I apparently have to
          * "auto-increment" the internal drive number (this.iDrive) after each SENSE INTERRUPT STATUS command.
          */
@@ -1655,13 +1656,13 @@ FDC.prototype.doCmd = function()
          * No interrupt is generated by this command, so fIRQ should remain false.
          */
         break;
-    
+
     case FDC.REG_DATA.CMD.READ_ID:                      // 0x0A
         /*
          * This command is used by "SETUP_DBL" in the MODEL_5170_REV3 BIOS to determine if a double-density
          * (40-track) diskette has been inserted in a high-density (80-track) drive; ie, whether "double stepping"
          * is required, since only 40 of the 80 possible "steps" are valid for a double-density diskette.
-         * 
+         *
          * To start, we'll focus on making this work in the normal case (80-track diskette in 80-track drive).
          */
         bDrive = this.popCmd(FDC.TERMS.DS);
@@ -1689,7 +1690,7 @@ FDC.prototype.doCmd = function()
         this.pushResult(n, FDC.TERMS.N);
         fIRQ = true;
         break;
-    
+
     case FDC.REG_DATA.CMD.FORMAT_TRACK:                 // 0x0D
         bDrive = this.popCmd(FDC.TERMS.DS);
         bHeadSelect = (bDrive >> 2) & 0x1;
@@ -1712,7 +1713,7 @@ FDC.prototype.doCmd = function()
         this.pushResult(n, FDC.TERMS.N);
         fIRQ = true;
         break;
-    
+
     case FDC.REG_DATA.CMD.SEEK:                         // 0x0F
         bDrive = this.popCmd(FDC.TERMS.DS);
         bHeadSelect = (bDrive >> 2) & 0x1;
@@ -1723,10 +1724,10 @@ FDC.prototype.doCmd = function()
          * As discussed in initDrive(), we can no longer simply set bCylinder to the specified NCN;
          * instead, we must calculate the delta between bCylinderSeek and the NCN, and adjust bCylinder
          * by that amount.  Then we simply move the NCN into bCylinderSeek without any range checking.
-         * 
-         * Since bCylinder is now expressly defined as the "physical" cylinder number, it must never be
-         * allowed to exceed the physical boundaries of the drive (ie, never lower than 0, and never greater
-         * than or equal to nCylinders).
+         *
+         * Since bCylinder is now expressly defined as the "physical" cylinder number, it must never
+         * be allowed to exceed the physical boundaries of the drive (ie, never lower than 0, and never
+         * greater than or equal to nCylinders).
          */
         bCylinder = this.popCmd(FDC.TERMS.NCN);
         drive.bCylinder += bCylinder - drive.bCylinderSeek;
@@ -1742,10 +1743,10 @@ FDC.prototype.doCmd = function()
         if (drive.bCylinder == 0) {
             drive.resCode |= FDC.REG_DATA.RES.TRACK0;
         }
-        this.beginResult();                             // like FDC.REG_DATA.CMD.RECALIBRATE, no results are provided 
+        this.beginResult();                             // like FDC.REG_DATA.CMD.RECALIBRATE, no results are provided
         fIRQ = true;
         break;
-    
+
     default:
         if (DEBUG) {
             this.messageDebugger("FDC operation unsupported (command=0x: " + str.toHexByte(bCmd) + ")");
@@ -1760,7 +1761,7 @@ FDC.prototype.doCmd = function()
      * After the Execution Phase (eg, DMA Terminal Count has occurred, or the EOT sector has been read/written),
      * an interrupt is supposed to occur, signaling the beginning of the Result Phase.  Once the first byte of the
      * result has been read, the interrupt is cleared (see inFDCData).
-     * 
+     *
      * TODO: Technically, interrupt request status should be cleared by the FDC.REG_DATA.CMD.SENSE_INT command; in fact,
      * if that command is issued and no interrupt was pending, then FDC.REG_DATA.RES.INVALID should be returned (via ST0).
      */
@@ -2014,9 +2015,9 @@ FDC.prototype.doWrite = function(drive)
 FDC.prototype.doFormat = function(drive)
 {
     drive.resCode = FDC.REG_DATA.RES.NOT_READY | FDC.REG_DATA.RES.INCOMPLETE;
-    
+
     //if (DEBUG) this.messageDebugger("doFormat()");
-    
+
     if (drive.disk) {
         drive.sector = null;
         drive.resCode = FDC.REG_DATA.RES.NONE;
@@ -2186,7 +2187,7 @@ FDC.prototype.writeFormat = function(drive, b)
                 return -1;
             }
         }
-        drive.cSectorsFormatted++; 
+        drive.cSectorsFormatted++;
     }
     if (drive.cSectorsFormatted >= drive.bSectorEnd) b = -1;
     return b;
@@ -2276,7 +2277,7 @@ FDC.prototype.messagePort = function(port, bOut, addrFrom, name, bIn)
 
 /*
  * Port input notification table
- * 
+ *
  * TODO: Even though port 0x3F7 was not present on controllers prior to MODEL_5170, I'm taking the easy
  * way out and always emulating it.  So, consider an FDC parameter to disable that feature for stricter compatibility.
  */
@@ -2288,7 +2289,7 @@ FDC.aPortInput = {
 
 /*
  * Port output notification table
- * 
+ *
  * TODO: Even though port 0x3F7 was not present on controllers prior to MODEL_5170, I'm taking the easy
  * way out and always emulating it.  So, consider an FDC parameter to disable that feature for stricter compatibility.
  */

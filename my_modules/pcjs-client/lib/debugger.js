@@ -49,7 +49,7 @@ if (DEBUGGER) {
 
 /**
  * Debugger(parmsDbg)
- * 
+ *
  * @constructor
  * @extends Component
  * @param {Object} parmsDbg
@@ -57,7 +57,7 @@ if (DEBUGGER) {
  * The Debugger component supports the following optional (parmsDbg) properties:
  *
  *      commands: string containing zero or more commands, separated by ';'
- *      
+ *
  *      messages: string containing zero or more message categories to enable;
  *      multiple categories must be separated by '|' or ';'.  Parsed by messageInit().
  *
@@ -67,62 +67,62 @@ if (DEBUGGER) {
 function Debugger(parmsDbg)
 {
     if (DEBUGGER) {
-        
+
         Component.call(this, "Debugger", parmsDbg, Debugger);
-    
+
         /*
          * These keep track of instruction activity, but only when tracing or when Debugger checks
          * have been enabled (eg, one or more breakpoints have been set).
-         * 
+         *
          * They are zeroed by the reset() notification handler.  cInstructions is advanced by
          * stepCPU() and checkInstruction() calls.  nCycles is updated by every stepCPU() or stop()
          * call and simply represents the number of cycles performed by the last run of instructions.
          */
         this.nCycles = -1;
         this.cInstructions = -1;
-    
+
         /*
          * Most commands that require an address call parseAddr(), which defaults to aAddrNextCode
          * or aAddrNextData when no address has been given.  doDump() and doUnassemble(), in turn,
          * update aAddrNextData and aAddrNextCode, respectively, when they're done.
-         * 
+         *
          * The format of all aAddr variables is [off, seg, addr], where seg:off is the segmented
          * address and addr is the corresponding physical address (if known).  For certain segmented
          * addresses (eg, breakpoint addresses), we pre-compute the physical address and save that
          * in aAddr[2], so that the breakpoint will still operate as intended even if the mode changes
          * later (eg, from real-mode to protected-mode).
-         * 
+         *
          * Finally, for TEMPORARY breakpoint addresses, we set aAddr[3] to true, so that they can be
          * automatically cleared when they're hit.
          */
         this.aAddrNextCode = [0, 0];
         this.aAddrNextData = [0, 0];
-    
+
         /*
          * When Enter is pressed on an empty input buffer, we default to the previous command,
          * which is preserved here.
          */
         this.prevCmd = null;
-    
+
         /*
          * fAssemble is true when "assemble mode" is active, false when not.
          */
         this.fAssemble = false;
         this.aAddrAssemble = [0, 0];
-    
+
         /*
          * aSymbolTable is an array of 4-element arrays, one per ROM or other chunk of address space.
          * Each 4-element arrays contains:
-         * 
+         *
          *      [0]: addr
          *      [1]: size
          *      [2]: aSymbols
          *      [3]: aOffsetPairs
-         *      
+         *
          * See addSymbols() for more details, since that's how callers add sets of symbols to the table.
          */
         this.aSymbolTable = [];
-    
+
         /*
          * clearBreakpoints() initializes the breakpoints lists: aBreakExec is a list of addresses
          * to halt on whenever attempting to execute an instruction at the corresponding address,
@@ -130,7 +130,7 @@ function Debugger(parmsDbg)
          * respectively, occurs at the corresponding address.
          */
         this.clearBreakpoints();
-    
+
         /*
          * Execution history is allocated by initHistory() whenever checksEnabled() conditions change.
          * Execution history is updated whenever the CPU calls checkInstruction(), which will happen only
@@ -138,7 +138,7 @@ function Debugger(parmsDbg)
          * This ensures that, by default, the CPU runs as fast as possible.
          */
         this.initHistory();
-        
+
         /*
          * Initialize Debugger message support
          */
@@ -164,7 +164,7 @@ function Debugger(parmsDbg)
         if (DEBUG) {
             this.traceInit();
         }
-        
+
         this.sInitCommands = parmsDbg['commands'];
 
     }   // endif DEBUGGER
@@ -173,7 +173,7 @@ function Debugger(parmsDbg)
 if (DEBUGGER) {
 
     Component.subclass(Component, Debugger);
-    
+
     Debugger.aCommands = {
         '?':     "help",
         'a [#]': "assemble",
@@ -194,16 +194,16 @@ if (DEBUGGER) {
         'u [#]': "unassemble",
         'x':     "execution options"
     };
-    
+
     /*
      * Address types for parseAddr(), to help choose between aAddrNextCode and aAddrNextData
      */
     Debugger.ADDR_CODE = 1;
     Debugger.ADDR_DATA = 2;
-    
+
     /*
      * Instruction ordinals (indexes into Debugger.asIns)
-     * 
+     *
      * (And yes, there are a number of non-8086/8088 instructions in the following tables;
      * if I decide to expand CPU support, even if it's just to broaden real-mode support on a simulated
      * 286 or 386, then I might as well leave some of that support in place, since the impact is minimal).
@@ -236,7 +236,7 @@ if (DEBUGGER) {
         GRP1W:  192, GRP1SW: 193, GRP2B: 194, GRP2W:  195, GRP2B1: 196, GRP2W1:  197, GRP2BC: 198, GRP2WC: 199,
         GRP3B:  200, GRP3W:  201, GRP4B: 202, GRP4W:  203, OP0F:   204, GRP6:    205, GRP7:   206
     };
-    
+
     /*
      * Instruction names, indexed by instruction ordinal (above)
      */
@@ -266,13 +266,13 @@ if (DEBUGGER) {
         "SS:",    "STC",    "STD",   "STI",    "STOSB",  "STOSW",   "STR",    "SUB",
         "TEST",   "VERR",   "VERW",  "WAIT",   "XCHG",   "XLAT",    "XOR"
     ];
-    
+
     Debugger.CPU_86 = 0;
     Debugger.CPU_186 = 1;
     Debugger.CPU_286 = 2;
     Debugger.CPU_386 = 3;
     Debugger.CPU = Debugger.CPU_86;     // current CPU definition
-    
+
     /*
      * ModRM masks and definitions
      */
@@ -292,13 +292,13 @@ if (DEBUGGER) {
     Debugger.REG_BP = 0x0D;
     Debugger.REG_SI = 0x0E;
     Debugger.REG_DI = 0x0F;
-    
+
     Debugger.asRegs = [
         "AL", "CL", "DL", "BL", "AH", "CH", "DH", "BH",
         "AX", "CX", "DX", "BX", "SP", "BP", "SI", "DI",
         "ES", "CS", "SS", "DS", "IP"
     ];
-    
+
     Debugger.REG_ES         = 0x00;     // bits 0-1 are standard SegReg encodings
     Debugger.REG_CS         = 0x01;
     Debugger.REG_SS         = 0x02;
@@ -306,12 +306,12 @@ if (DEBUGGER) {
     Debugger.REG_FS         = 0x04;
     Debugger.REG_GS         = 0x05;
     Debugger.REG_UNKNOWN    = 0x00;
-    
+
     Debugger.MOD_NODISP     = 0x00;     // use RM below, no displacement
     Debugger.MOD_DISP8      = 0x01;     // use RM below + 8-bit displacement
     Debugger.MOD_DISP16     = 0x02;     // use RM below + 16-bit displacement
     Debugger.MOD_REGISTER   = 0x03;     // use REG above
-    
+
     Debugger.RM_BXSI        = 0x00;
     Debugger.RM_BXDI        = 0x01;
     Debugger.RM_BPSI        = 0x02;
@@ -321,11 +321,11 @@ if (DEBUGGER) {
     Debugger.RM_BP          = 0x06;
     Debugger.RM_IMMOFF      = Debugger.RM_BP;       // only if MOD_NODISP
     Debugger.RM_BX          = 0x07;
-    
+
     Debugger.asRM = [
         "BX+SI", "BX+DI", "BP+SI", "BP+DI", "SI", "DI", "BP", "BX"
     ];
-    
+
     /*
      * Operand type descriptor masks and definitions
      *
@@ -336,7 +336,7 @@ if (DEBUGGER) {
     Debugger.TYPE_MODE      = 0x00F0;   // mode field
     Debugger.TYPE_IREG      = 0x0F00;   // implied register field
     Debugger.TYPE_OTHER     = 0xF000;   // "other" field
-    
+
     /*
      * TYPE_SIZE values.  Note that some of the values (eg, TYPE_WORDIB
      * and TYPE_WORDIW) imply the presence of a third operand, for those
@@ -354,7 +354,7 @@ if (DEBUGGER) {
     Debugger.TYPE_WORDIB    = 0x0009;   //     two source operands (eg, IMUL)
     Debugger.TYPE_WORDIW    = 0x000A;   //     two source operands (eg, IMUL)
     Debugger.TYPE_PREFIX    = 0x000F;   //     (treat similarly to TYPE_NONE)
-    
+
     /*
      * TYPE_MODE values.  Note that order is somewhat important, as all values implying
      * the presence of a ModRM byte are assumed to be >= TYPE_MODRM.
@@ -375,7 +375,7 @@ if (DEBUGGER) {
     Debugger.TYPE_CTLREG    = 0x00D0;   // (C) Reg selects control register
     Debugger.TYPE_DBGREG    = 0x00E0;   // (D) Reg selects debug register
     Debugger.TYPE_TSTREG    = 0x00F0;   // (T) Reg selects test register
-    
+
     /*
      * TYPE_IREG values, based on the REG_* constants.
      * For convenience, they include TYPE_IMPREG or TYPE_IMPSEG as appropriate.
@@ -402,7 +402,7 @@ if (DEBUGGER) {
     Debugger.TYPE_DS = (Debugger.REG_DS << 8 | Debugger.TYPE_IMPSEG | Debugger.TYPE_WORD);
     Debugger.TYPE_FS = (Debugger.REG_FS << 8 | Debugger.TYPE_IMPSEG | Debugger.TYPE_WORD);
     Debugger.TYPE_GS = (Debugger.REG_GS << 8 | Debugger.TYPE_IMPSEG | Debugger.TYPE_WORD);
-    
+
     /*
      * TYPE_OTHER bit definitions
      */
@@ -447,18 +447,18 @@ if (DEBUGGER) {
      * functions. Each category has a corresponding bit value that can be combined (ie, OR'ed) as
      * needed.  The Debugger's message command ("m") is used to turn message categories on and off,
      * like so:
-     * 
+     *
      *      m port on
      *      m port off
      *      ...
-     *      
+     *
      * Every caller of messageInit() receives all the MESSAGE_* properties as bit values; for example,
      * after ChipSet calls messageInit(ChipSet), ChipSet.MESSAGE_MEM will be 0x0001, and so on.
-     * 
+     *
      * We also call messageInit() on behalf the current Debugger instance so that other components have
      * the option of accessing the properties indirectly (eg, this.dbg.MESSAGE_MEM), since the Debugger
      * component is not a required component.
-     * 
+     *
      * NOTE: The order of these categories can be rearranged, alphabetized, etc, as desired; just be
      * aware that changing the bit values could break saved Debugger states (not a huge concern, just
      * something to be aware of).
@@ -497,11 +497,11 @@ if (DEBUGGER) {
     /*
      * Instruction trace categories supported by the traceLog() function.  The Debugger's info
      * command ("n") is used to turn trace categories on and off, like so:
-     * 
+     *
      *      n shl on
      *      n shl off
      *      ...
-     *      
+     *
      * Note that there are usually multiple entries for each category (one for each supported operand size);
      * all matching entries are enabled or disabled as a group.
      */
@@ -525,27 +525,27 @@ if (DEBUGGER) {
         DIVW:   {ins: Debugger.INS.DIV,  size: 32}, // dst is 32-bit (DX:AX), src is 16-bit (operand), result is 32-bit (DX:AX, remainder:quotient)
         IDIVW:  {ins: Debugger.INS.IDIV, size: 32}  // dst is 32-bit (DX:AX), src is 16-bit (operand), result is 32-bit (DX:AX, remainder:quotient)
     };
-    
+
     Debugger.TRACE_LIMIT = 100000;
 
     /*
      * Opcode 0x0F has a distinguished history:
-     * 
+     *
      *      On the 8086, it functioned as POP CS
      *      On the 80186, it generated an illegal opcode (UD_FAULT) exception
      *      On the 80286, it introduced a series of new (and growing) two-byte opcodes
-     *      
+     *
      * Based on the active CPU model, we make every effort to execute and disassemble this (and every other)
      * opcode appropriately, by setting the opcode's entry in aaOpDescs accordingly.  0x0F defaults to the 8086
      * entry: aOpDescPopCS.
-     * 
+     *
      * Note that we do NOT modify aaOpDescs directly; this.aaOpDescs is a reference to it if the processor
-     * is an 8086, otherwise we make a copy of the array and THEN modify it. 
+     * is an 8086, otherwise we make a copy of the array and THEN modify it.
      */
     Debugger.aOpDescPopCS     = [Debugger.INS.POP,  Debugger.TYPE_CS   | Debugger.TYPE_OUT];
     Debugger.aOpDescUndefined = [Debugger.INS.NONE, Debugger.TYPE_NONE];
     Debugger.aOpDesc0F        = [Debugger.INS.OP0F, Debugger.TYPE_WORD | Debugger.TYPE_BOTH];
-    
+
     /*
      * The aaOpDescs array is indexed by opcode, and each element is a sub-array (aOpDesc) that describes
      * the corresponding opcode. The sub-elements are as follows:
@@ -567,7 +567,7 @@ if (DEBUGGER) {
     /* 0x05 */ [Debugger.INS.ADD,  Debugger.TYPE_AX    | Debugger.TYPE_BOTH,   Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0x06 */ [Debugger.INS.PUSH, Debugger.TYPE_ES    | Debugger.TYPE_IN],
     /* 0x07 */ [Debugger.INS.POP,  Debugger.TYPE_ES    | Debugger.TYPE_OUT],
-    
+
     /* 0x08 */ [Debugger.INS.OR,   Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
     /* 0x09 */ [Debugger.INS.OR,   Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0x0A */ [Debugger.INS.OR,   Debugger.TYPE_REG   | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
@@ -576,7 +576,7 @@ if (DEBUGGER) {
     /* 0x0D */ [Debugger.INS.OR,   Debugger.TYPE_AX    | Debugger.TYPE_BOTH,   Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0x0E */ [Debugger.INS.PUSH, Debugger.TYPE_CS    | Debugger.TYPE_IN],
     /* 0x0F */ Debugger.aOpDescPopCS,
-    
+
     /* 0x10 */ [Debugger.INS.ADC,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
     /* 0x11 */ [Debugger.INS.ADC,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0x12 */ [Debugger.INS.ADC,  Debugger.TYPE_REG   | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
@@ -585,7 +585,7 @@ if (DEBUGGER) {
     /* 0x15 */ [Debugger.INS.ADC,  Debugger.TYPE_AX    | Debugger.TYPE_BOTH,   Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0x16 */ [Debugger.INS.PUSH, Debugger.TYPE_SS    | Debugger.TYPE_IN],
     /* 0x17 */ [Debugger.INS.POP,  Debugger.TYPE_SS    | Debugger.TYPE_OUT],
-    
+
     /* 0x18 */ [Debugger.INS.SBB,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
     /* 0x19 */ [Debugger.INS.SBB,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0x1A */ [Debugger.INS.SBB,  Debugger.TYPE_REG   | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
@@ -594,7 +594,7 @@ if (DEBUGGER) {
     /* 0x1D */ [Debugger.INS.SBB,  Debugger.TYPE_AX    | Debugger.TYPE_BOTH,   Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0x1E */ [Debugger.INS.PUSH, Debugger.TYPE_DS    | Debugger.TYPE_IN],
     /* 0x1F */ [Debugger.INS.POP,  Debugger.TYPE_DS    | Debugger.TYPE_OUT],
-    
+
     /* 0x20 */ [Debugger.INS.AND,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
     /* 0x21 */ [Debugger.INS.AND,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0x22 */ [Debugger.INS.AND,  Debugger.TYPE_REG   | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
@@ -603,7 +603,7 @@ if (DEBUGGER) {
     /* 0x25 */ [Debugger.INS.AND,  Debugger.TYPE_AX    | Debugger.TYPE_BOTH,   Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0x26 */ [Debugger.INS.ES,   Debugger.TYPE_PREFIX],
     /* 0x27 */ [Debugger.INS.DAA],
-    
+
     /* 0x28 */ [Debugger.INS.SUB,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
     /* 0x29 */ [Debugger.INS.SUB,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0x2A */ [Debugger.INS.SUB,  Debugger.TYPE_REG   | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
@@ -612,7 +612,7 @@ if (DEBUGGER) {
     /* 0x2D */ [Debugger.INS.SUB,  Debugger.TYPE_AX    | Debugger.TYPE_BOTH,   Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0x2E */ [Debugger.INS.CS,   Debugger.TYPE_PREFIX],
     /* 0x2F */ [Debugger.INS.DAS],
-    
+
     /* 0x30 */ [Debugger.INS.XOR,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
     /* 0x31 */ [Debugger.INS.XOR,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0x32 */ [Debugger.INS.XOR,  Debugger.TYPE_REG   | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
@@ -621,7 +621,7 @@ if (DEBUGGER) {
     /* 0x35 */ [Debugger.INS.XOR,  Debugger.TYPE_AX    | Debugger.TYPE_BOTH,   Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0x36 */ [Debugger.INS.SS,   Debugger.TYPE_PREFIX],
     /* 0x37 */ [Debugger.INS.AAA],
-    
+
     /* 0x38 */ [Debugger.INS.CMP,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_IN,   Debugger.TYPE_REG   | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
     /* 0x39 */ [Debugger.INS.CMP,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_IN,   Debugger.TYPE_REG   | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0x3A */ [Debugger.INS.CMP,  Debugger.TYPE_REG   | Debugger.TYPE_BYTE  | Debugger.TYPE_IN,   Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
@@ -630,7 +630,7 @@ if (DEBUGGER) {
     /* 0x3D */ [Debugger.INS.CMP,  Debugger.TYPE_AX    | Debugger.TYPE_IN,     Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0x3E */ [Debugger.INS.DS,   Debugger.TYPE_PREFIX],
     /* 0x3F */ [Debugger.INS.AAS],
-    
+
     /* 0x40 */ [Debugger.INS.INC,  Debugger.TYPE_AX | Debugger.TYPE_BOTH],
     /* 0x41 */ [Debugger.INS.INC,  Debugger.TYPE_CX | Debugger.TYPE_BOTH],
     /* 0x42 */ [Debugger.INS.INC,  Debugger.TYPE_DX | Debugger.TYPE_BOTH],
@@ -639,7 +639,7 @@ if (DEBUGGER) {
     /* 0x45 */ [Debugger.INS.INC,  Debugger.TYPE_BP | Debugger.TYPE_BOTH],
     /* 0x46 */ [Debugger.INS.INC,  Debugger.TYPE_SI | Debugger.TYPE_BOTH],
     /* 0x47 */ [Debugger.INS.INC,  Debugger.TYPE_DI | Debugger.TYPE_BOTH],
-    
+
     /* 0x48 */ [Debugger.INS.DEC,  Debugger.TYPE_AX | Debugger.TYPE_BOTH],
     /* 0x49 */ [Debugger.INS.DEC,  Debugger.TYPE_CX | Debugger.TYPE_BOTH],
     /* 0x4A */ [Debugger.INS.DEC,  Debugger.TYPE_DX | Debugger.TYPE_BOTH],
@@ -648,7 +648,7 @@ if (DEBUGGER) {
     /* 0x4D */ [Debugger.INS.DEC,  Debugger.TYPE_BP | Debugger.TYPE_BOTH],
     /* 0x4E */ [Debugger.INS.DEC,  Debugger.TYPE_SI | Debugger.TYPE_BOTH],
     /* 0x4F */ [Debugger.INS.DEC,  Debugger.TYPE_DI | Debugger.TYPE_BOTH],
-    
+
     /* 0x50 */ [Debugger.INS.PUSH, Debugger.TYPE_AX | Debugger.TYPE_IN],
     /* 0x51 */ [Debugger.INS.PUSH, Debugger.TYPE_CX | Debugger.TYPE_IN],
     /* 0x52 */ [Debugger.INS.PUSH, Debugger.TYPE_DX | Debugger.TYPE_IN],
@@ -657,7 +657,7 @@ if (DEBUGGER) {
     /* 0x55 */ [Debugger.INS.PUSH, Debugger.TYPE_BP | Debugger.TYPE_IN],
     /* 0x56 */ [Debugger.INS.PUSH, Debugger.TYPE_SI | Debugger.TYPE_IN],
     /* 0x57 */ [Debugger.INS.PUSH, Debugger.TYPE_DI | Debugger.TYPE_IN],
-    
+
     /* 0x58 */ [Debugger.INS.POP,  Debugger.TYPE_AX | Debugger.TYPE_OUT],
     /* 0x59 */ [Debugger.INS.POP,  Debugger.TYPE_CX | Debugger.TYPE_OUT],
     /* 0x5A */ [Debugger.INS.POP,  Debugger.TYPE_DX | Debugger.TYPE_OUT],
@@ -666,7 +666,7 @@ if (DEBUGGER) {
     /* 0x5D */ [Debugger.INS.POP,  Debugger.TYPE_BP | Debugger.TYPE_OUT],
     /* 0x5E */ [Debugger.INS.POP,  Debugger.TYPE_SI | Debugger.TYPE_OUT],
     /* 0x5F */ [Debugger.INS.POP,  Debugger.TYPE_DI | Debugger.TYPE_OUT],
-    
+
     /* 0x60 */ [Debugger.INS.PUSHA, Debugger.TYPE_NONE | Debugger.TYPE_286],
     /* 0x61 */ [Debugger.INS.POPA,  Debugger.TYPE_NONE | Debugger.TYPE_286],
     /* 0x62 */ [Debugger.INS.BOUND, Debugger.TYPE_REG  | Debugger.TYPE_VWORD | Debugger.TYPE_IN | Debugger.TYPE_286, Debugger.TYPE_MEM   | Debugger.TYPE_2WORDD | Debugger.TYPE_IN],
@@ -675,7 +675,7 @@ if (DEBUGGER) {
     /* 0x65 */ [Debugger.INS.GS,    Debugger.TYPE_NONE | Debugger.TYPE_386],
     /* 0x66 */ [Debugger.INS.OSIZE, Debugger.TYPE_NONE | Debugger.TYPE_386],
     /* 0x67 */ [Debugger.INS.ASIZE, Debugger.TYPE_NONE | Debugger.TYPE_386],
-    
+
     /* 0x68 */ [Debugger.INS.PUSH, Debugger.TYPE_IMM  | Debugger.TYPE_VWORD | Debugger.TYPE_IN   | Debugger.TYPE_286],
     /* 0x69 */ [Debugger.INS.IMUL, Debugger.TYPE_REG  | Debugger.TYPE_WORD  | Debugger.TYPE_BOTH | Debugger.TYPE_286,   Debugger.TYPE_MODRM | Debugger.TYPE_WORDIW | Debugger.TYPE_IN],
     /* 0x6A */ [Debugger.INS.PUSH, Debugger.TYPE_IMM  | Debugger.TYPE_SBYTE | Debugger.TYPE_IN   | Debugger.TYPE_286],
@@ -684,7 +684,7 @@ if (DEBUGGER) {
     /* 0x6D */ [Debugger.INS.INS,  Debugger.TYPE_ESDI | Debugger.TYPE_VWORD | Debugger.TYPE_OUT  | Debugger.TYPE_286,   Debugger.TYPE_DX    | Debugger.TYPE_IN],
     /* 0x6E */ [Debugger.INS.OUTS, Debugger.TYPE_DX   | Debugger.TYPE_IN    | Debugger.TYPE_286,   Debugger.TYPE_DSSI | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
     /* 0x6F */ [Debugger.INS.OUTS, Debugger.TYPE_DX   | Debugger.TYPE_IN    | Debugger.TYPE_286,   Debugger.TYPE_DSSI | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-    
+
     /* 0x70 */ [Debugger.INS.JO,   Debugger.TYPE_IMMREL | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
     /* 0x71 */ [Debugger.INS.JNO,  Debugger.TYPE_IMMREL | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
     /* 0x72 */ [Debugger.INS.JC,   Debugger.TYPE_IMMREL | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
@@ -693,7 +693,7 @@ if (DEBUGGER) {
     /* 0x75 */ [Debugger.INS.JNZ,  Debugger.TYPE_IMMREL | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
     /* 0x76 */ [Debugger.INS.JBE,  Debugger.TYPE_IMMREL | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
     /* 0x77 */ [Debugger.INS.JNBE, Debugger.TYPE_IMMREL | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-    
+
     /* 0x78 */ [Debugger.INS.JS,   Debugger.TYPE_IMMREL | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
     /* 0x79 */ [Debugger.INS.JNS,  Debugger.TYPE_IMMREL | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
     /* 0x7A */ [Debugger.INS.JP,   Debugger.TYPE_IMMREL | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
@@ -702,7 +702,7 @@ if (DEBUGGER) {
     /* 0x7D */ [Debugger.INS.JGE,  Debugger.TYPE_IMMREL | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
     /* 0x7E */ [Debugger.INS.JLE,  Debugger.TYPE_IMMREL | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
     /* 0x7F */ [Debugger.INS.JG,   Debugger.TYPE_IMMREL | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-    
+
     /* 0x80 */ [Debugger.INS.GRP1B, Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_IMM   | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
     /* 0x81 */ [Debugger.INS.GRP1W, Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_IMM   | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0x82 */ [Debugger.INS.GRP1B, Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_IMM   | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
@@ -711,7 +711,7 @@ if (DEBUGGER) {
     /* 0x85 */ [Debugger.INS.TEST,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_IN,   Debugger.TYPE_REG   | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0x86 */ [Debugger.INS.XCHG,  Debugger.TYPE_REG   | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH],
     /* 0x87 */ [Debugger.INS.XCHG,  Debugger.TYPE_REG   | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH],
-    
+
     /* 0x88 */ [Debugger.INS.MOV,  Debugger.TYPE_MODRM  | Debugger.TYPE_BYTE  | Debugger.TYPE_OUT,  Debugger.TYPE_REG    | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
     /* 0x89 */ [Debugger.INS.MOV,  Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_OUT,  Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0x8A */ [Debugger.INS.MOV,  Debugger.TYPE_REG    | Debugger.TYPE_BYTE  | Debugger.TYPE_OUT,  Debugger.TYPE_MODRM  | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
@@ -720,7 +720,7 @@ if (DEBUGGER) {
     /* 0x8D */ [Debugger.INS.LEA,  Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_OUT,  Debugger.TYPE_MEM    | Debugger.TYPE_VWORD],
     /* 0x8E */ [Debugger.INS.MOV,  Debugger.TYPE_SEGREG | Debugger.TYPE_WORD  | Debugger.TYPE_OUT,  Debugger.TYPE_MODRM  | Debugger.TYPE_WORD  | Debugger.TYPE_IN],
     /* 0x8F */ [Debugger.INS.POP,  Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_OUT],
-    
+
     /* 0x90 */ [Debugger.INS.NOP],
     /* 0x91 */ [Debugger.INS.XCHG, Debugger.TYPE_AX | Debugger.TYPE_BOTH, Debugger.TYPE_CX | Debugger.TYPE_BOTH],
     /* 0x92 */ [Debugger.INS.XCHG, Debugger.TYPE_AX | Debugger.TYPE_BOTH, Debugger.TYPE_DX | Debugger.TYPE_BOTH],
@@ -729,7 +729,7 @@ if (DEBUGGER) {
     /* 0x95 */ [Debugger.INS.XCHG, Debugger.TYPE_AX | Debugger.TYPE_BOTH, Debugger.TYPE_BP | Debugger.TYPE_BOTH],
     /* 0x96 */ [Debugger.INS.XCHG, Debugger.TYPE_AX | Debugger.TYPE_BOTH, Debugger.TYPE_SI | Debugger.TYPE_BOTH],
     /* 0x97 */ [Debugger.INS.XCHG, Debugger.TYPE_AX | Debugger.TYPE_BOTH, Debugger.TYPE_DI | Debugger.TYPE_BOTH],
-    
+
     /* 0x98 */ [Debugger.INS.CBW],
     /* 0x99 */ [Debugger.INS.CWD],
     /* 0x9A */ [Debugger.INS.CALL, Debugger.TYPE_IMM | Debugger.TYPE_FARP | Debugger.TYPE_IN],
@@ -738,7 +738,7 @@ if (DEBUGGER) {
     /* 0x9D */ [Debugger.INS.POPF],
     /* 0x9E */ [Debugger.INS.SAHF],
     /* 0x9F */ [Debugger.INS.LAHF],
-    
+
     /* 0xA0 */ [Debugger.INS.MOV,   Debugger.TYPE_AL     | Debugger.TYPE_OUT,    Debugger.TYPE_IMMOFF | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
     /* 0xA1 */ [Debugger.INS.MOV,   Debugger.TYPE_AX     | Debugger.TYPE_OUT,    Debugger.TYPE_IMMOFF | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0xA2 */ [Debugger.INS.MOV,   Debugger.TYPE_IMMOFF | Debugger.TYPE_BYTE  | Debugger.TYPE_OUT,     Debugger.TYPE_AL    | Debugger.TYPE_IN],
@@ -747,7 +747,7 @@ if (DEBUGGER) {
     /* 0xA5 */ [Debugger.INS.MOVSW, Debugger.TYPE_ESDI   | Debugger.TYPE_VWORD | Debugger.TYPE_OUT,     Debugger.TYPE_DSSI  | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0xA6 */ [Debugger.INS.CMPSB, Debugger.TYPE_ESDI   | Debugger.TYPE_BYTE  | Debugger.TYPE_IN,      Debugger.TYPE_DSSI  | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
     /* 0xA7 */ [Debugger.INS.CMPSW, Debugger.TYPE_ESDI   | Debugger.TYPE_VWORD | Debugger.TYPE_IN,      Debugger.TYPE_DSSI  | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-    
+
     /* 0xA8 */ [Debugger.INS.TEST,  Debugger.TYPE_AL   | Debugger.TYPE_IN,     Debugger.TYPE_IMM  | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
     /* 0xA9 */ [Debugger.INS.TEST,  Debugger.TYPE_AX   | Debugger.TYPE_IN,     Debugger.TYPE_IMM  | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0xAA */ [Debugger.INS.STOSB, Debugger.TYPE_ESDI | Debugger.TYPE_BYTE  | Debugger.TYPE_OUT,   Debugger.TYPE_AL    | Debugger.TYPE_IN],
@@ -756,7 +756,7 @@ if (DEBUGGER) {
     /* 0xAD */ [Debugger.INS.LODSW, Debugger.TYPE_AX   | Debugger.TYPE_OUT,    Debugger.TYPE_DSSI | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0xAE */ [Debugger.INS.SCASB, Debugger.TYPE_AL   | Debugger.TYPE_IN,     Debugger.TYPE_ESDI | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
     /* 0xAF */ [Debugger.INS.SCASW, Debugger.TYPE_AX   | Debugger.TYPE_IN,     Debugger.TYPE_ESDI | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-    
+
     /* 0xB0 */ [Debugger.INS.MOV, Debugger.TYPE_AL | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
     /* 0xB1 */ [Debugger.INS.MOV, Debugger.TYPE_CL | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
     /* 0xB2 */ [Debugger.INS.MOV, Debugger.TYPE_DL | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
@@ -765,7 +765,7 @@ if (DEBUGGER) {
     /* 0xB5 */ [Debugger.INS.MOV, Debugger.TYPE_CH | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
     /* 0xB6 */ [Debugger.INS.MOV, Debugger.TYPE_DH | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
     /* 0xB7 */ [Debugger.INS.MOV, Debugger.TYPE_BH | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-    
+
     /* 0xB8 */ [Debugger.INS.MOV, Debugger.TYPE_AX | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0xB9 */ [Debugger.INS.MOV, Debugger.TYPE_CX | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0xBA */ [Debugger.INS.MOV, Debugger.TYPE_DX | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
@@ -774,7 +774,7 @@ if (DEBUGGER) {
     /* 0xBD */ [Debugger.INS.MOV, Debugger.TYPE_BP | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0xBE */ [Debugger.INS.MOV, Debugger.TYPE_SI | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0xBF */ [Debugger.INS.MOV, Debugger.TYPE_DI | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-    
+
     /* 0xC0 */ [Debugger.INS.GRP2B, Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH | Debugger.TYPE_186, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
     /* 0xC1 */ [Debugger.INS.GRP2W, Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH | Debugger.TYPE_186, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
     /* 0xC2 */ [Debugger.INS.RET,   Debugger.TYPE_IMM   | Debugger.TYPE_WORD  | Debugger.TYPE_IN],
@@ -783,7 +783,7 @@ if (DEBUGGER) {
     /* 0xC5 */ [Debugger.INS.LDS,   Debugger.TYPE_REG   | Debugger.TYPE_VWORD | Debugger.TYPE_OUT, Debugger.TYPE_MEM | Debugger.TYPE_FARP  | Debugger.TYPE_IN],
     /* 0xC6 */ [Debugger.INS.MOV,   Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
     /* 0xC7 */ [Debugger.INS.MOV,   Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-    
+
     /* 0xC8 */ [Debugger.INS.ENTER, Debugger.TYPE_IMM   | Debugger.TYPE_WORD  | Debugger.TYPE_IN | Debugger.TYPE_286,  Debugger.TYPE_IMM   | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
     /* 0xC9 */ [Debugger.INS.LEAVE, Debugger.TYPE_NONE  | Debugger.TYPE_286],
     /* 0xCA */ [Debugger.INS.RETF,  Debugger.TYPE_IMM   | Debugger.TYPE_WORD  | Debugger.TYPE_IN],
@@ -792,7 +792,7 @@ if (DEBUGGER) {
     /* 0xCD */ [Debugger.INS.INT,   Debugger.TYPE_IMM   | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
     /* 0xCE */ [Debugger.INS.INTO],
     /* 0xCF */ [Debugger.INS.IRET],
-    
+
     /* 0xD0 */ [Debugger.INS.GRP2B1, Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_ONE    | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
     /* 0xD1 */ [Debugger.INS.GRP2W1, Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_ONE    | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
     /* 0xD2 */ [Debugger.INS.GRP2BC, Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_IMPREG | Debugger.TYPE_CL |   Debugger.TYPE_IN],
@@ -801,7 +801,7 @@ if (DEBUGGER) {
     /* 0xD5 */ [Debugger.INS.AAD,    Debugger.TYPE_IMM   | Debugger.TYPE_BYTE],
     /* 0xD6 */ [Debugger.INS.GBP],
     /* 0xD7 */ [Debugger.INS.XLAT],
-    
+
     /* 0xD8 */ [Debugger.INS.ESC, Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0xD9 */ [Debugger.INS.ESC, Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0xDA */ [Debugger.INS.ESC, Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
@@ -810,7 +810,7 @@ if (DEBUGGER) {
     /* 0xDD */ [Debugger.INS.ESC, Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0xDE */ [Debugger.INS.ESC, Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0xDF */ [Debugger.INS.ESC, Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-    
+
     /* 0xE0 */ [Debugger.INS.LOOPNZ, Debugger.TYPE_IMMREL | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
     /* 0xE1 */ [Debugger.INS.LOOPZ,  Debugger.TYPE_IMMREL | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
     /* 0xE2 */ [Debugger.INS.LOOP,   Debugger.TYPE_IMMREL | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
@@ -819,7 +819,7 @@ if (DEBUGGER) {
     /* 0xE5 */ [Debugger.INS.IN,     Debugger.TYPE_AX     | Debugger.TYPE_OUT,   Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
     /* 0xE6 */ [Debugger.INS.OUT,    Debugger.TYPE_IMM    | Debugger.TYPE_BYTE | Debugger.TYPE_IN,   Debugger.TYPE_AL   | Debugger.TYPE_IN],
     /* 0xE7 */ [Debugger.INS.OUT,    Debugger.TYPE_IMM    | Debugger.TYPE_BYTE | Debugger.TYPE_IN,   Debugger.TYPE_AX   | Debugger.TYPE_IN],
-    
+
     /* 0xE8 */ [Debugger.INS.CALL, Debugger.TYPE_IMMREL | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0xE9 */ [Debugger.INS.JMP,  Debugger.TYPE_IMMREL | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
     /* 0xEA */ [Debugger.INS.JMP,  Debugger.TYPE_IMM    | Debugger.TYPE_FARP  | Debugger.TYPE_IN],
@@ -828,7 +828,7 @@ if (DEBUGGER) {
     /* 0xED */ [Debugger.INS.IN,   Debugger.TYPE_AX     | Debugger.TYPE_OUT,    Debugger.TYPE_DX | Debugger.TYPE_IN],
     /* 0xEE */ [Debugger.INS.OUT,  Debugger.TYPE_DX     | Debugger.TYPE_IN,     Debugger.TYPE_AL | Debugger.TYPE_IN],
     /* 0xEF */ [Debugger.INS.OUT,  Debugger.TYPE_DX     | Debugger.TYPE_IN,     Debugger.TYPE_AX | Debugger.TYPE_IN],
-    
+
     /* 0xF0 */ [Debugger.INS.LOCK,  Debugger.TYPE_PREFIX],
     /* 0xF1 */ [Debugger.INS.NONE],
     /* 0xF2 */ [Debugger.INS.REPNZ, Debugger.TYPE_PREFIX],
@@ -837,7 +837,7 @@ if (DEBUGGER) {
     /* 0xF5 */ [Debugger.INS.CMC],
     /* 0xF6 */ [Debugger.INS.GRP3B, Debugger.TYPE_MODRM | Debugger.TYPE_BYTE |  Debugger.TYPE_BOTH],
     /* 0xF7 */ [Debugger.INS.GRP3W, Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH],
-    
+
     /* 0xF8 */ [Debugger.INS.CLC],
     /* 0xF9 */ [Debugger.INS.STC],
     /* 0xFA */ [Debugger.INS.CLI],
@@ -1023,21 +1023,21 @@ if (DEBUGGER) {
          Debugger.aOpDescUndefined
       ]
     ];
-    
+
     /*
      * Information regarding interrupts of interest
      */
     Debugger.INT_DOS = 0x21;
-    
+
     Debugger.INT_FUNCS = {
         0x13: {
             0x00: "disk reset",
             0x01: "get status",
-            0x02: "read drive DL, cyl CH, head DH, sec CL, AL total",
-            0x03: "write drive DL, cyl CH, head DH, sec CL, AL total",
-            0x04: "verify drive DL, cyl CH, head DH, sec CL, AL total",
-            0x05: "format drive DL",
-            0x08: "read drive DL parameters",
+            0x02: "read drive DL CH:DH:CL:AL into ES:BX",
+            0x03: "write drive DL CH:DH:CL:AL from ES:BX",
+            0x04: "verify drive DL CH:DH:CL:AL",
+            0x05: "format drive DL using ES:BX",
+            0x08: "read drive DL parameters into ES:DI",
             0x15: "get drive DL DASD type",
             0x16: "get drive DL change line status",
             0x17: "set drive DL DASD type",
@@ -1070,7 +1070,7 @@ if (DEBUGGER) {
             0x09: "write $-terminated string DS:DX to stdout",
             0x0A: "buffered input (ds:dx)",                                     // byte 0 is maximum chars, byte 1 is number of previous characters, byte 2 is number of characters read
             0x0B: "get stdin status",
-            0x0C: "flush buffer and read stdin",                                // AL is a function # (0x01, 0x06, 0x07, 0x08, or 0x0A) 
+            0x0C: "flush buffer and read stdin",                                // AL is a function # (0x01, 0x06, 0x07, 0x08, or 0x0A)
             0x0D: "disk reset",
             0x0E: "select default drive DL",                                    // returns # of available drives in AL
             0x0F: "open file using fcb DS:DX",                                  // DS:DX -> unopened File Control Block
@@ -1152,7 +1152,7 @@ if (DEBUGGER) {
 
     /**
      * initBus(bus, cpu, dbg)
-     * 
+     *
      * @this {Debugger}
      * @param {Computer} cmp
      * @param {Bus} bus
@@ -1167,30 +1167,30 @@ if (DEBUGGER) {
         this.fdc = cmp.getComponentByType("FDC");
         this.hdc = cmp.getComponentByType("HDC");
         if (MAXDEBUG) this.chipset = cmp.getComponentByType("ChipSet");
-        
+
         this.aaOpDescs = Debugger.aaOpDescs;
         if (this.cpu.model >= X86.MODEL_80186) {
             this.aaOpDescs = Debugger.aaOpDescs.slice();
             this.aaOpDescs[0x0F] = Debugger.aOpDescUndefined;
             if (this.cpu.model >= X86.MODEL_80286) {
                 this.aaOpDescs[0x0F] = Debugger.aOpDesc0F;
-            }            
+            }
         }
-        
+
         this.cpu.addIntNotify(Debugger.INT_DOS, this, this.intDOSCall);
-        
+
         this.setReady();
-        
+
         if (this.sInitCommands) {
             var a = this.parseCommand(this.sInitCommands);
             delete this.sInitCommands;
             for (var s in a) this.doCommand(a[s]);
         }
     };
-    
+
     /**
      * setBinding(sHTMLClass, sHTMLType, sBinding, control)
-     * 
+     *
      * @this {Debugger}
      * @param {string|null} sHTMLClass is the class of the HTML control (eg, "input", "output")
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
@@ -1221,7 +1221,7 @@ if (DEBUGGER) {
                      * The following preventDefault() hack seems to be necessary only for IE; IE insists on giving
                      * focus to the debugEnter control after we've processed the Enter key above (keyCode == 13)
                      * for the debugInput control.  This hack allows focus to remain with debugInput.
-                     * 
+                     *
                      * NOTE: In IE9, I was able to resolve this problem (or so I thought) by forcing focus back to the
                      * debugInput control (eg, "control.focus()") but that wasn't working in IE10.  Here's hoping this
                      * also works in IE9 until I have a chance to test it.
@@ -1230,7 +1230,7 @@ if (DEBUGGER) {
                 }
             };
             return true;
-    
+
         case "debugEnter":
             this.bindings[sBinding] = control;
             web.onClickRepeat(
@@ -1240,7 +1240,7 @@ if (DEBUGGER) {
                     if (dbg.controlDebug) {
                         var s = dbg.controlDebug.value;
                         /*
-                         *  NOTE: If we wanted to use the debugEnter button to repeatedly enter the same command, it 
+                         *  NOTE: If we wanted to use the debugEnter button to repeatedly enter the same command, it
                          *  used to be the case that we couldn't clear the command string.  That's apparently no longer true.
                          */
                         dbg.controlDebug.value = "";
@@ -1253,7 +1253,7 @@ if (DEBUGGER) {
                 }
             );
             return true;
-    
+
         case "step":
             this.bindings[sBinding] = control;
             web.onClickRepeat(
@@ -1270,26 +1270,26 @@ if (DEBUGGER) {
                 }
             );
             return true;
-    
+
         default:
             break;
         }
         return false;
     };
-    
+
     /**
      * setFocus()
-     * 
+     *
      * @this {Debugger}
      */
     Debugger.prototype.setFocus = function()
     {
         if (this.controlDebug) this.controlDebug.focus();
     };
-    
+
     /**
      * messageInit(o, sEnable, fDebugger)
-     * 
+     *
      * @this {Debugger}
      * @param {Object} o
      * @param {string} [sEnable] contains zero or more message categories to enable, separated by '|' or ';'
@@ -1310,10 +1310,10 @@ if (DEBUGGER) {
         if (this.bitsMessageEnabled === undefined) this.bitsMessageEnabled = 0;
         this.bitsMessageEnabled |= bitsEnable;
     };
-    
+
     /**
      * messageDump(bitMessage, fnDumper)
-     * 
+     *
      * @this {Debugger}
      * @param {number} bitMessage is one Debugger MESSAGE_* category flag
      * @param {function(string)} fnDumper is a function the Debugger can use to dump data for that category
@@ -1329,13 +1329,13 @@ if (DEBUGGER) {
         }
         return false;
     };
-    
+
     /**
      * messageEnabled(bitsMessage)
      *
      * NOTE: If the caller specifies multiple MESSAGE category flags, then ALL the corresponding flags
      * in the Debugger's bitsMessageEnabled variable must be enabled as well, else the result will be false.
-     * 
+     *
      * @this {Debugger}
      * @param {number} bitsMessage is one or more Debugger MESSAGE_* category flag(s)
      * @return {boolean} true if message category is enabled, false if not
@@ -1344,10 +1344,10 @@ if (DEBUGGER) {
     {
         return ((this.bitsMessageEnabled & bitsMessage) === bitsMessage);
     };
-    
+
     /**
      * updateRegValues()
-     * 
+     *
      * @this {Debugger}
      */
     Debugger.prototype.updateRegValues = function() {
@@ -1375,7 +1375,7 @@ if (DEBUGGER) {
         this.aRegValues[asRegs[19]] = str.toHexWord(cpu.segDS.sel);
         this.aRegValues[asRegs[20]] = str.toHexWord(cpu.regIP);
     };
-    
+
     /**
      * messageInt(nInt, addr)
      *
@@ -1385,14 +1385,19 @@ if (DEBUGGER) {
      */
     Debugger.prototype.messageInt = function(nInt, addr)
     {
-        var AH = this.cpu.regAX >> 8;
-        var aFuncs = Debugger.INT_FUNCS[nInt];
-        var sFunc = (aFuncs && aFuncs[AH]) || "";
-        if (sFunc) {
-            this.updateRegValues();
-            sFunc = " " + str.replaceArray(this.aRegValues, sFunc);
+        /*
+         * TODO: Filtering of interrupt numbers below should be user-definable; this is very quick-and-dirty.
+         */
+        if (nInt < 0x20 && nInt != 0x10 && nInt != 0x15 && nInt != 0x16 && nInt != 0x1C) {
+            var AH = this.cpu.regAX >> 8;
+            var aFuncs = Debugger.INT_FUNCS[nInt];
+            var sFunc = (aFuncs && aFuncs[AH]) || "";
+            if (sFunc) {
+                this.updateRegValues();
+                sFunc = " " + str.replaceArray(this.aRegValues, sFunc);
+            }
+            this.message("INT 0x" + str.toHexByte(nInt) + ": AH=" + str.toHexByte(AH) + " at " + str.toHexAddr(addr - this.cpu.segCS.base, this.cpu.segCS.sel) + sFunc);
         }
-        this.message("INT 0x" + str.toHexByte(nInt) + ": AH=" + str.toHexByte(AH) + " at " + str.toHexAddr(addr - this.cpu.segCS.base, this.cpu.segCS.sel) + sFunc);
     };
 
     /**
@@ -1413,7 +1418,7 @@ if (DEBUGGER) {
      * messageMem(component, addr, fWrite, addrFrom, name, bitsMessage)
      *
      * NOTE: Not currently used
-     * 
+     *
      * @this {Debugger}
      * @param {Component} component
      * @param {number} addr
@@ -1432,10 +1437,10 @@ if (DEBUGGER) {
         }
     };
      */
-    
+
     /**
      * messagePort(component, port, bOut, addrFrom, name, bitsMessage, bIn)
-     * 
+     *
      * @this {Debugger}
      * @param {Component} component
      * @param {number} port
@@ -1458,17 +1463,17 @@ if (DEBUGGER) {
             this.message(component.idComponent + "." + (bOut != null? "outPort" : "inPort") + "(0x" + str.toHexWord(port) + "," + (name? name : "unknown") + (bOut != null? ",0x" + str.toHexByte(bOut) : "") + ")" + (bIn != null? (": 0x" + str.toHexByte(bIn)) : "") + (addrFrom != null? (" at " + str.toHexAddr(addrFrom, segFrom)) : ""));
         }
     };
-    
+
     /**
      * message(sMessage)
-     * 
+     *
      * @this {Debugger}
      * @param {string} sMessage is any caller-defined message string
      */
     Debugger.prototype.message = function(sMessage)
     {
         this.println(sMessage);             // + " (" + this.cpu.getCycles() + " cycles)"
-        
+
         if (this.cpu) {
             if (this.bitsMessageEnabled & Debugger.MESSAGES.MESSAGE_HALT.BIT) {
                 this.cpu.haltCPU();
@@ -1477,17 +1482,17 @@ if (DEBUGGER) {
              * We have no idea what the frequency of println() calls might be; all we know is that they easily
              * screw up the CPU's careful assumptions about cycles per burst.  So we need call yieldCPU() after
              * every message, to effectively end the current burst and start fresh.
-             * 
+             *
              * TODO: See CPU.calcStartTime() for a discussion of why we might want to call yieldCPU() *before*
              * we display the message.
              */
             this.cpu.yieldCPU();
         }
     };
-    
+
     /**
      * traceInit()
-     * 
+     *
      * @this {Debugger}
      */
     Debugger.prototype.traceInit = function()
@@ -1501,10 +1506,10 @@ if (DEBUGGER) {
             this.aTraceBuffer = [];     // we now defer TRACE_LIMIT allocation until the first traceLog() call
         }
     };
-    
+
     /**
      * traceLog(prop, dst, src, flagsIn, flagsOut, result)
-     * 
+     *
      * @this {Debugger}
      * @param {string} prop
      * @param {number} dst
@@ -1525,7 +1530,7 @@ if (DEBUGGER) {
                 if (this.iTraceBuffer >= this.aTraceBuffer.length) {
                     /*
                      * Instead of wrapping the buffer, we're going to turn all tracing off.
-                     * 
+                     *
                      *      this.iTraceBuffer = 0;
                      */
                     for (prop in this.traceEnabled) {
@@ -1536,10 +1541,10 @@ if (DEBUGGER) {
             }
         }
     };
-    
+
     /**
      * intDOSCall(addr)
-     * 
+     *
      * @this {Debugger}
      * @param {number} addr
      * @return {boolean} true to proceed with the INT 0x21 software interrupt, false to skip (but we NEVER skip)
@@ -1549,10 +1554,10 @@ if (DEBUGGER) {
         if (this.messageEnabled(this.MESSAGE_DOS)) this.messageInt(Debugger.INT_DOS, addr);
         return true;
     };
-    
+
     /**
      * init()
-     * 
+     *
      * @this {Debugger}
      */
     Debugger.prototype.init = function()
@@ -1562,11 +1567,11 @@ if (DEBUGGER) {
 
     /**
      * initHistory()
-     * 
+     *
      * This function is intended to be called by the constructor, reset(), addBreakpoint(), findBreakpoint()
      * and any other function that changes the checksEnabled() criteria used to decide whether checkInstruction()
      * should be called.
-     * 
+     *
      * That is, if the history arrays need to be allocated and haven't already been allocated, then allocate them,
      * and if the arrays are no longer needed, then deallocate them.
      *
@@ -1602,7 +1607,7 @@ if (DEBUGGER) {
 
     /**
      * runCPU(fOnClick)
-     * 
+     *
      * @this {Debugger}
      * @param {boolean} [fOnClick] is true if called from a click handler that might have stolen focus
      * @return {boolean} true if run request successful, false if not
@@ -1613,10 +1618,10 @@ if (DEBUGGER) {
         this.cpu.runCPU(fOnClick);
         return true;
     };
-    
+
     /**
      * stepCPU(nCycles, fRegs, fUpdateCPU)
-     * 
+     *
      * @this {Debugger}
      * @param {number} nCycles (0 for one instruction without checking breakpoints)
      * @param {boolean} [fRegs] is true to display registers after step (default is false)
@@ -1626,7 +1631,7 @@ if (DEBUGGER) {
     Debugger.prototype.stepCPU = function(nCycles, fRegs, fUpdateCPU)
     {
         if (!this.isCPUAvail()) return false;
-    
+
         this.nCycles = 0;
         do {
             if (!nCycles) {
@@ -1651,21 +1656,21 @@ if (DEBUGGER) {
                 this.cpu.setError(e.message || e);
             }
         } while (this.cpu.opFlags & X86.OPFLAG.PREFIXES);
-    
+
         /*
          * Because we called cpu.stepCPU() and not cpu.runCPU(), we must nudge the cpu's update code,
          * and then update our own state.  Normally, the only time fUpdateCPU will be false is when doStep()
-         * is calling us in a loop, in which case it will perform its own updateCPU() when it's done. 
+         * is calling us in a loop, in which case it will perform its own updateCPU() when it's done.
          */
         if (fUpdateCPU !== false) this.cpu.updateCPU();
-        
+
         this.updateStatus(fRegs || false, false);
         return (this.nCycles > 0);
     };
-    
+
     /**
      * haltCPU()
-     * 
+     *
      * @this {Debugger}
      */
     Debugger.prototype.haltCPU = function()
@@ -1675,10 +1680,10 @@ if (DEBUGGER) {
          */
         this.cpu.haltCPU();
     };
-    
+
     /**
      * updateStatus(fRegs, fCompact)
-     * 
+     *
      * @this {Debugger}
      * @param {boolean} [fRegs] (default is true)
      * @param {boolean} [fCompact] (default is true)
@@ -1692,7 +1697,7 @@ if (DEBUGGER) {
         /*
          * this.fProcStep used to be a simple boolean, but now it's 0 (or undefined)
          * if inactive, 1 if stepping over an instruction without a register dump, or 2
-         * if stepping over an instruction with a register dump. 
+         * if stepping over an instruction with a register dump.
          */
         if (!fRegs || this.fProcStep == 1)
             this.doUnassemble();
@@ -1700,12 +1705,12 @@ if (DEBUGGER) {
             this.doRegisters(null, fCompact);
         }
     };
-    
+
     /**
      * isCPUAvail()
      *
      * Make sure the CPU is ready (finished initializing), not busy (already running), and not in an error state.
-     * 
+     *
      * @this {Debugger}
      * @return {boolean}
      */
@@ -1721,7 +1726,7 @@ if (DEBUGGER) {
             return false;
         return !this.cpu.isError();
     };
-    
+
     /**
      * powerUp(data, fRepower)
      *
@@ -1746,10 +1751,10 @@ if (DEBUGGER) {
         }
         return true;
     };
-    
+
     /**
      * powerDown(fSave, fShutdown)
-     * 
+     *
      * @this {Debugger}
      * @param {boolean} fSave
      * @param {boolean} [fShutdown]
@@ -1760,12 +1765,12 @@ if (DEBUGGER) {
         if (fShutdown) this.println(fSave? "suspending" : "shutting down");
         return fSave && this.save? this.save() : true;
     };
-    
+
     /**
      * reset(fQuiet)
      *
      * This is a notification handler, called by the Computer, to inform us of a reset.
-     * 
+     *
      * @this {Debugger}
      * @param {boolean} fQuiet (true only when called from our own powerUp handler)
      */
@@ -1790,7 +1795,7 @@ if (DEBUGGER) {
      * save()
      *
      * This implements (very rudimentary) save support for the Debugger component.
-     * 
+     *
      * @this {Debugger}
      * @return {Object}
      */
@@ -1802,12 +1807,12 @@ if (DEBUGGER) {
         state.set(2, [this.prevCmd, this.fAssemble, this.bitsMessageEnabled]);
         return state.data();
     };
-    
+
     /**
      * restore(data)
      *
      * This implements (very rudimentary) restore support for the Debugger component.
-     * 
+     *
      * @this {Debugger}
      * @param {Object} data
      * @return {boolean} true if successful, false if failure
@@ -1826,7 +1831,7 @@ if (DEBUGGER) {
                  * at least in situations where I've changed the initial state, if I want to diagnose something.
                  * Perhaps I should save/restore both the initial and current bitsMessageEnabled, and if the initial
                  * values don't agree, then leave the current value alone.
-                 * 
+                 *
                  * But, it's much easier to just leave bitsMessageEnabled alone whenever it already contains set bits.
                  */
                 this.bitsMessageEnabled = data[i][2];
@@ -1834,12 +1839,12 @@ if (DEBUGGER) {
         }
         return true;
     };
-    
+
     /**
      * start(ms, nCycles)
      *
      * This is a notification handler, called by the Computer, to inform us the CPU has started.
-     * 
+     *
      * @this {Debugger}
      * @param {number} ms
      * @param {number} nCycles
@@ -1851,12 +1856,12 @@ if (DEBUGGER) {
         this.msStart = ms;
         this.nCyclesStart = nCycles;
     };
-    
+
     /**
      * stop(ms, nCycles)
      *
      * This is a notification handler, called by the Computer, to inform us the CPU has now stopped.
-     * 
+     *
      * @this {Debugger}
      * @param {number} ms
      * @param {number} nCycles
@@ -1906,16 +1911,16 @@ if (DEBUGGER) {
             this.clearTempBreakpoint(this.cpu.regEIP);
         }
     };
-    
+
     /**
      * checksEnabled(fBreak)
      *
      * This "check" function is called by the CPU; we indicate whether or not every instruction needs to be checked.
-     * 
+     *
      * Originally, this returned true even when there were only read and/or write breakpoints, but those breakpoints
      * no longer require the intervention of checkInstruction(); the Bus component automatically swaps in/out appropriate
      * functions to deal with those breakpoints in the appropriate memory blocks.  So I've simplified the test below.
-     * 
+     *
      * @this {Debugger}
      * @param {boolean} [fBreak] is true if the caller really wants to break (default is false)
      * @return {boolean} true if every instruction needs to pass through checkInstruction(), false if not
@@ -1924,13 +1929,13 @@ if (DEBUGGER) {
     {
         return ((DEBUG && !fBreak)? true : (this.aBreakExec.length > 1 || this.messageEnabled(this.MESSAGE_INT) /* || this.aBreakRead.length > 1 || this.aBreakWrite.length > 1 */));
     };
-    
+
     /**
      * checkInstruction(addr, fSkipBP)
      *
      * This "check" function is called by the CPU to inform us about the next instruction to be executed,
      * giving us an opportunity to look for "exec" breakpoints and update opcode frequencies and instruction history.
-     * 
+     *
      * @this {Debugger}
      * @param {number} addr
      * @param {boolean} [fSkipBP] is true to skip breakpoint check
@@ -1943,11 +1948,11 @@ if (DEBUGGER) {
          * this isn't intended to be complete, just a spot-check.
          */
         Component.assert(!(this.cpu.regAX & ~0xffff) && !(this.cpu.regBX & ~0xffff) && !(this.cpu.regCX & ~0xffff) && !(this.cpu.regDX & ~0xffff), "register out of bounds");
-    
+
         if (!fSkipBP && this.checkBreakpoint(addr, this.aBreakExec)) {
             return true;
         }
-        
+
         /*
          * The rest of the instruction tracking logic can only be performed if initHistory() has allocated
          * the necessary data structures; note that there is no explicit UI for enabling/disabling history,
@@ -1955,17 +1960,17 @@ if (DEBUGGER) {
          * checkInstruction() -- well, OK, and a few other things now, like enabling MESSAGE_INT messages.
          */
         if (this.aaOpcodeCounts.length) {
-            
+
             this.cInstructions++;
             var bOpcode = this.bus.getByteDirect(addr);
             this.aaOpcodeCounts[bOpcode][1]++;
-            
+
             /*
              * This is a good example of what NOT to do in a high-frequency function, and defeats
              * the entire purpose of preallocating and preinitializing the history array in initHistory():
-             * 
+             *
              *      this.aOpcodeHistory[this.iOpcodeHistory] = this.newAddr(this.cpu.regIP, this.cpu.segCS.sel, addr);
-             *      
+             *
              * As the name implies, newAddr() returns a new "Addr" (Array) object every time it's called.
              */
             var a = this.aOpcodeHistory[this.iOpcodeHistory];
@@ -1976,13 +1981,13 @@ if (DEBUGGER) {
         }
         return false;
     };
-    
+
     /**
      * checkMemoryRead(addr)
      *
      * This "check" function is called by a Memory block to inform us that a memory read occurred, giving us an
      * opportunity to track the read if we want, and look for a matching "read" breakpoint, if any.
-     * 
+     *
      * @this {Debugger}
      * @param {number} addr
      * @return {boolean} true if breakpoint hit, false if not
@@ -1995,13 +2000,13 @@ if (DEBUGGER) {
         }
         return false;
     };
-    
+
     /**
      * checkMemoryWrite(addr)
      *
      * This "check" function is called by a Memory block to inform us that a memory write occurred, giving us an
      * opportunity to track the write if we want, and look for a matching "write" breakpoint, if any.
-     * 
+     *
      * @this {Debugger}
      * @param {number} addr
      * @return {boolean} true if breakpoint hit, false if not
@@ -2054,15 +2059,15 @@ if (DEBUGGER) {
         this.cpu.haltCPU(true);
         return true;
     };
-    
+
     /**
      * getSegment(sel)
-     * 
+     *
      * If the selector matches that of any of the CPU segment registers, then return the CPU's segment
      * register, instead of creating our own dummy segment register.  This makes it possible for us to
      * see what the CPU is seeing at certain critical junctures, such as after an LMSW instruction has
      * switched the processor from real to protected mode.
-     * 
+     *
      * @param {number} sel
      * @return {X86Seg} seg
      */
@@ -2079,7 +2084,7 @@ if (DEBUGGER) {
         seg.load(sel, true);
         return seg;
     };
-    
+
     /**
      * getAddr(aAddr, fWrite, cb)
      *
@@ -2115,7 +2120,7 @@ if (DEBUGGER) {
 
     /**
      * getByte(aAddr, inc)
-     * 
+     *
      * getByte() should be used for all Debugger memory reads (eg, doDump, doUnassemble), to ensure
      * all notification handlers are bypassed for physical addresses; for segmented addresses, we must
      * use the CPU's X86Seg load() logic, but we don't call the CPU's getSOByte() or getByte() functions,
@@ -2137,10 +2142,10 @@ if (DEBUGGER) {
         }
         return b;
     };
-    
+
     /**
      * getWord(aAddr, inc)
-     * 
+     *
      * @this {Debugger}
      * @param {Array} aAddr
      * @param {number} [inc]
@@ -2157,10 +2162,10 @@ if (DEBUGGER) {
         }
         return w;
     };
-    
+
     /**
      * setByte(aAddr, b, inc)
-     * 
+     *
      * setByte() should be used for all Debugger memory writes (eg, doAssemble, doEdit), to insure
      * all memory notification handlers are bypassed; in addition, we want the Debugger to be able to
      * change the contents of the simulated ROM images.
@@ -2179,10 +2184,10 @@ if (DEBUGGER) {
             this.cpu.updateCPU();
         }
     };
-    
+
     /**
      * setWord(aAddr, w, inc)
-     * 
+     *
      * @this {Debugger}
      * @param {Array} aAddr
      * @param {number} w
@@ -2197,10 +2202,10 @@ if (DEBUGGER) {
             this.cpu.updateCPU();
         }
     };
-    
+
     /**
      * hexAddr(aAddr)
-     * 
+     *
      * @this {Debugger}
      * @param {Array} aAddr containing [off, seg]
      * @return {string} the hex representation of the address
@@ -2209,10 +2214,10 @@ if (DEBUGGER) {
     {
         return aAddr[1] == null? ("%" + str.toHex(aAddr[2])) : str.toHexAddr(aAddr[0], aAddr[1]);
     };
-    
+
     /**
      * incAddr(aAddr, inc)
-     * 
+     *
      * @this {Debugger}
      * @param {Array} aAddr containing [off, seg, addr]
      * @param {number|undefined} inc contains value to increment by (default is 1)
@@ -2234,24 +2239,24 @@ if (DEBUGGER) {
             }
         }
     };
-    
+
     /**
      * newAddr(off, seg, addr)
-     * 
+     *
      * @this {Debugger}
      * @param {number} off
      * @param {number} seg
-     * @param {number} [addr] is the physical address, if known 
+     * @param {number} [addr] is the physical address, if known
      * @return {Array} containing [off, seg, addr]
      */
     Debugger.prototype.newAddr = function(off, seg, addr)
     {
         return [off, seg, addr];
     };
-    
+
     /**
      * clearBreakpoints()
-     * 
+     *
      * @this {Debugger}
      */
     Debugger.prototype.clearBreakpoints = function()
@@ -2271,10 +2276,10 @@ if (DEBUGGER) {
         }
         this.aBreakWrite = ["write"];
     };
-    
+
     /**
      * addBreakpoint(aBreak, aAddr, fTemp)
-     * 
+     *
      * @this {Debugger}
      * @param {Array} aBreak
      * @param {Array} aAddr
@@ -2302,10 +2307,10 @@ if (DEBUGGER) {
         }
         return false;
     };
-    
+
     /**
      * findBreakpoint(aBreak, aAddr, fRemove)
-     * 
+     *
      * @this {Debugger}
      * @param {Array} aBreak
      * @param {Array} aAddr
@@ -2335,13 +2340,13 @@ if (DEBUGGER) {
         }
         return fFound;
     };
-    
+
     /**
      * listBreakpoints(aBreak)
-     * 
+     *
      * TODO: We may need to start listing the physical addresses of breakpoints, because
      * segmented address can be ambiguous.
-     * 
+     *
      * @this {Debugger}
      * @param {Array} aBreak
      * @return {number} of breakpoints listed, 0 if none
@@ -2356,11 +2361,11 @@ if (DEBUGGER) {
 
     /**
      * redoBreakpoints()
-     * 
+     *
      * This function is for the Memory component: whenever the Bus allocates a new Memory block, it calls
      * the block's setDebugInfo() method, which clears the memory block's breakpoint counts.  setDebugInfo(),
      * in turn, must call this function to re-apply any existing breakpoints to that block.
-     * 
+     *
      * This ensures that, even if a memory region is remapped (which creates new Memory blocks in the process),
      * any breakpoints that were previously applied to that region will still work.
      *
@@ -2386,7 +2391,7 @@ if (DEBUGGER) {
 
     /**
      * setTempBreakpoint(aAddr)
-     * 
+     *
      * @this {Debugger}
      * @param {Array} aAddr of new temp breakpoint
      */
@@ -2394,10 +2399,10 @@ if (DEBUGGER) {
     {
         this.addBreakpoint(this.aBreakExec, aAddr, true);
     };
-    
+
     /**
      * clearTempBreakpoint(addr)
-     * 
+     *
      * @this {Debugger}
      * @param {number|undefined} [addr] clear all temp breakpoints if no address specified
      */
@@ -2416,10 +2421,10 @@ if (DEBUGGER) {
             }
         }
     };
-    
+
     /**
      * checkBreakpoint(addr, aBreak, fTemp)
-     * 
+     *
      * @this {Debugger}
      * @param {number} addr
      * @param {Array} aBreak
@@ -2433,16 +2438,16 @@ if (DEBUGGER) {
          * or history data (see checkInstruction), since we might not actually execute the current instruction.
          */
         var fBreak = false;
-        
+
         /*
          * Map addresses in the top 64Kb (at the top of the 16Mb range) to the top of the 1Mb range.
-         * 
+         *
          * The fact that those two 64Kb regions are aliases of each other on an 80286 is a pain in the BUTT,
          * because any CS-based breakpoint you set immediately after a CPU reset will have a physical address
          * in the top 16Mb, yet after the first inter-segment JMP, you will be running in the first 1Mb.
          */
         if ((addr & 0xFF0000) == 0xFF0000) addr &= 0x0FFFFF;
-        
+
         for (var i = 1; i < aBreak.length; i++) {
             var aAddrBreak = aBreak[i];
             if (addr == this.getAddr(aAddrBreak)) {
@@ -2457,10 +2462,10 @@ if (DEBUGGER) {
         }
         return fBreak;
     };
-    
+
     /**
      * getInstruction(aAddr, sComment, nSequence)
-     * 
+     *
      * @this {Debugger}
      * @param {Array} aAddr (updated to next instruction)
      * @param {string} [sComment] is an associated comment
@@ -2470,12 +2475,12 @@ if (DEBUGGER) {
     Debugger.prototype.getInstruction = function(aAddr, sComment, nSequence)
     {
         var aAddrIns = this.newAddr(aAddr[0], aAddr[1], aAddr[2]);
-    
+
         var bOpcode = this.getByte(aAddr, 1);
         var aOpDesc = this.aaOpDescs[bOpcode];
         var iIns = aOpDesc[0];
         var bModRM = -1;
-        
+
         if (iIns == Debugger.INS.OP0F) {
             var b = this.getByte(aAddr, 1);
             aOpDesc = Debugger.aaOp0FDescs[b] || Debugger.aOpDescUndefined;
@@ -2487,7 +2492,7 @@ if (DEBUGGER) {
             bModRM = this.getByte(aAddr, 1);
             aOpDesc = Debugger.aaGrpDescs[iIns - Debugger.asIns.length][(bModRM >> 3) & 0x7];
         }
-    
+
         var cOperands = 2;
         var sOperands = "";
         if (bOpcode >= X86.OPCODE.MOVSB && bOpcode <= X86.OPCODE.CMPSW || bOpcode >= X86.OPCODE.STOSB && bOpcode <= X86.OPCODE.SCASW) {
@@ -2553,7 +2558,7 @@ if (DEBUGGER) {
             if (sOperands.length > 0) sOperands += ",";
             sOperands += sOperand;
         }
-    
+
         var sLine = this.hexAddr(aAddrIns) + " ";
         var sBytes = "";
         do {
@@ -2562,7 +2567,7 @@ if (DEBUGGER) {
         sLine += (sBytes + "            ").substr(0, 14);
         sLine += (Debugger.asIns[aOpDesc[0]] + "       ").substr(0, 8);
         if (sOperands) sLine += " " + sOperands;
-    
+
         if (sComment) {
             sLine += "                         ";
             sLine = sLine.substr(0, 50);
@@ -2576,10 +2581,10 @@ if (DEBUGGER) {
         }
         return sLine;
     };
-    
+
     /**
      * getImmediateOperand(type, aAddr)
-     * 
+     *
      * @this {Debugger}
      * @param {number} type
      * @param {Array} aAddr
@@ -2615,10 +2620,10 @@ if (DEBUGGER) {
         }
         return sOperand;
     };
-    
+
     /**
      * getRegOperand(bReg, type, aAddr)
-     * 
+     *
      * @this {Debugger}
      * @param {number} bReg
      * @param {number} type
@@ -2633,7 +2638,7 @@ if (DEBUGGER) {
             bReg += 8;
         return Debugger.asRegs[bReg];
     };
-    
+
     /**
      * getModRMOperand(bModRM, type, aAddr)
      *
@@ -2678,10 +2683,10 @@ if (DEBUGGER) {
         }
         return sOperand;
     };
-    
+
     /**
      * parseInstruction(sOp, sOperand, addr)
-     * 
+     *
      * This generally requires an exact match of both the operation code (sOp) and mode operand
      * (sOperand) against the aOps[] and aOpMods[] arrays, respectively; however, the regular
      * expression built from aOpMods and stored in regexOpModes does relax the matching criteria
@@ -2731,10 +2736,10 @@ if (DEBUGGER) {
         this.println("not supported yet");
         return aOpBytes;
     };
-    
+
     /**
      * getFlagStr(sFlag)
-     * 
+     *
      * @this {Debugger}
      * @param {string} sFlag
      * @return {string} value of flag
@@ -2807,7 +2812,7 @@ if (DEBUGGER) {
 
     /**
      * getRegStr(fProt)
-     * 
+     *
      * @this {Debugger}
      * @param {boolean} [fProt]
      * @return {string}
@@ -2839,10 +2844,10 @@ if (DEBUGGER) {
         }
         return s;
     };
-    
+
     /**
      * parseAddr(sAddr, type)
-     * 
+     *
      * As discussed above, the format of aAddr variables is [off, seg, addr]; they represent a segmented
      * address (seg:off) when seg is defined or a physical address (addr) when seg is undefined (or null).
      *
@@ -2859,7 +2864,7 @@ if (DEBUGGER) {
      * etc.  The Debugger's low-level get/set memory functions verify all getAddr() results, but even if an
      * invalid address is passed through to the Bus memory interfaces, the address will simply be masked with
      * Bus.addrLimit; in the case of -1, that will generally refer to the last byte of physical address space.
-     * 
+     *
      * @this {Debugger}
      * @param {string|undefined} sAddr
      * @param {number|undefined} type is the address segment type, in case sAddr doesn't specify a segment
@@ -2870,18 +2875,18 @@ if (DEBUGGER) {
         var aAddrNext = (type == Debugger.ADDR_DATA? this.aAddrNextData : this.aAddrNextCode);
 
         var off = aAddrNext[0], seg = aAddrNext[1], addr = aAddrNext[2];
-        
+
         if (sAddr !== undefined) {
-            
+
             if (sAddr.charAt(0) == '%') {
                 sAddr = sAddr.substr(1);
                 seg = null;
                 addr = 0;
             }
-            
+
             var aAddr = this.findSymbolAddr(sAddr);
             if (aAddr && aAddr.length) return aAddr;
-    
+
             var iColon = sAddr.indexOf(":");
             if (iColon < 0) {
                 if (seg != null) {
@@ -2899,10 +2904,10 @@ if (DEBUGGER) {
         }
         return [off, seg, addr];
     };
-    
+
     /**
      * parseValue(sValue, sName)
-     * 
+     *
      * @this {Debugger}
      * @param {string|undefined} sValue
      * @param {string} [sName] is the name of the value, if any
@@ -2968,7 +2973,7 @@ if (DEBUGGER) {
         }
         return value;
     };
-    
+
     /**
      * addSymbols(addr, size, aSymbols)
      *
@@ -2982,9 +2987,9 @@ if (DEBUGGER) {
      *      "o": the offset of the symbol within the associated address space
      *      "l": the original-case version of the symbol, present only if it wasn't originally upper-case
      *      "a": annotation for the specified offset; eg, the original assembly language, with optional comment
-     *      
+     *
      * To that list of properties, we also add:
-     * 
+     *
      *      "p": the physical address (calculated whenever both "s" and "o" properties are defined)
      *
      * Note that values for any "v", "b", "s" and "o" properties are unquoted decimal values, and the values
@@ -3039,7 +3044,7 @@ if (DEBUGGER) {
      * it's quite likely that the MAP file already ordered all its symbols in offset order, but since they're
      * hand-edited files, we can't assume that.  This insures that findSymbolAtAddr()'s binarySearch() will operate
      * properly.
-     * 
+     *
      * @this {Debugger}
      * @param {number} addr is the physical address of the region where the given symbols are located
      * @param {number} size is the size of the region, in bytes
@@ -3072,13 +3077,13 @@ if (DEBUGGER) {
         }
         this.aSymbolTable.push([addr, size, aSymbols, aOffsetPairs]);
     };
-    
+
     /**
      * dumpSymbols()
      *
      * TODO: Add "numerical" and "alphabetical" dump options. This is simply dumping them in whatever
      * order they appeared in the original MAP file.
-     * 
+     *
      * @this {Debugger}
      */
     Debugger.prototype.dumpSymbols = function()
@@ -3100,12 +3105,12 @@ if (DEBUGGER) {
             }
         }
     };
-    
+
     /**
      * findSymbolAddr(sSymbol)
      *
      * Search aSymbolTable for sSymbol, and if found, return an aAddr (using the same format as parseAddr())
-     * 
+     *
      * @this {Debugger}
      * @param {string} sSymbol
      * @return {Array|null} a valid aAddr if a valid symbol, an empty aAddr if an unknown symbol, or null if not a symbol
@@ -3146,15 +3151,15 @@ if (DEBUGGER) {
         }
         return aAddr;
     };
-    
+
     /**
      * findSymbolAtAddr(aAddr, fNearest)
      *
      * Search aSymbolTable for aAddr, and return an Array for the corresponding symbol (empty if not found).
-     * 
+     *
      * If fNearest is true, and no exact match was found, then the Array returned will contain TWO sets of
      * entries: [0]-[3] will refer to closest preceding symbol, and [4]-[7] will refer to the closest subsequent symbol.
-     * 
+     *
      * @this {Debugger}
      * @param {Array} aAddr
      * @param {boolean} [fNearest]
@@ -3188,15 +3193,15 @@ if (DEBUGGER) {
         }
         return aSymbol;
     };
-    
+
     /**
      * returnSymbol(iTable, iOffset, aSymbol)
-     * 
+     *
      * Helper function for findSymbolAtAddr().
-     * 
+     *
      * @param {number} iTable
      * @param {number} iOffset
-     * @param {Array} aSymbol is updated with the specified symbol, if it exists 
+     * @param {Array} aSymbol is updated with the specified symbol, if it exists
      */
     Debugger.prototype.returnSymbol = function(iTable, iOffset, aSymbol)
     {
@@ -3216,10 +3221,10 @@ if (DEBUGGER) {
         aSymbol.push(symbol['a']);
         aSymbol.push(symbol['c']);
     };
-    
+
     /**
      * doHelp()
-     * 
+     *
      * @this {Debugger}
      */
     Debugger.prototype.doHelp = function()
@@ -3231,10 +3236,10 @@ if (DEBUGGER) {
         if (!this.checksEnabled()) s += "\nnote: frequency/history disabled if no exec breakpoints";
         this.println(s);
     };
-    
+
     /**
      * doAssemble(asArgs)
-     * 
+     *
      * This always receives the complete argument array, where the order of the arguments is:
      *
      *      [0]: the assemble command (assumed to be "a")
@@ -3286,23 +3291,23 @@ if (DEBUGGER) {
             this.println(this.getInstruction(this.aAddrAssemble));
         }
     };
-    
+
     /**
      * doBreak(sCmd, sAddr)
-     * 
+     *
      * As the "help" output below indicates, the following breakpoint commands are supported:
-     * 
+     *
      *      bp [a]  set exec breakpoint on physical addr [a]
      *      br [a]  set read breakpoint on physical addr [a]
      *      bw [a]  set write breakpoint on physical addr [a]
      *      bc [a]  clear breakpoint on physical addr [a] (use "*" for all breakpoints)
      *      bl      list breakpoints
-     * 
+     *
      * to which we have recently added the following I/O breakpoint commands:
-     * 
+     *
      *      bi [p]  toggle input breakpoint on port [p] (use "*" for all input ports)
      *      bo [p]  toggle output breakpoint on port [p] (use "*" for all output ports)
-     *      
+     *
      * These two new commands operate as toggles so that if "*" is used to trap all input (or output),
      * you can also use these commands to NOT trap specific ports.
      *
@@ -3380,10 +3385,10 @@ if (DEBUGGER) {
         }
         this.println("unknown breakpoint command: " + sParm);
     };
-    
+
     /**
      * doClear(sCmd)
-     * 
+     *
      * @this {Debugger}
      * @param {string} sCmd (eg, "cls" or "clear")
      */
@@ -3394,10 +3399,10 @@ if (DEBUGGER) {
          */
         if (this.controlPrint) this.controlPrint.value = "";
     };
-    
+
     /**
      * doDump(sCmd, sAddr, sLen)
-     * 
+     *
      * @this {Debugger}
      * @param {string} sCmd
      * @param {string|undefined} sAddr
@@ -3447,7 +3452,7 @@ if (DEBUGGER) {
         if (sCmd == "ds") {
             /*
              * We used to call:
-             * 
+             *
              *      var seg = new X86Seg(this.cpu);
              *      if (seg.load(aAddr[0], true) >= 0) { ... }
              *
@@ -3541,10 +3546,10 @@ if (DEBUGGER) {
         if (sDump) this.println(sDump);
         this.aAddrNextData = aAddr;
     };
-    
+
     /**
      * doEdit(asArgs)
-     * 
+     *
      * @this {Debugger}
      * @param {Array.<string>} asArgs
      */
@@ -3564,10 +3569,10 @@ if (DEBUGGER) {
             this.setByte(aAddr, b, 1);
         }
     };
-    
+
     /**
      * doFreqs(sParm)
-     * 
+     *
      * @this {Debugger}
      * @param {string|undefined} sParm
      */
@@ -3610,12 +3615,12 @@ if (DEBUGGER) {
             this.println("no frequency data available");
         }
     };
-    
+
     /**
      * doHalt(sCount)
      *
      * If the CPU is running and no count is provided, then we simply haltCPU(); otherwise we treat this as a history command.
-     * 
+     *
      * @this {Debugger}
      * @param {string|undefined} sCount is the number of instructions to rewind to (default is 10)
      */
@@ -3656,7 +3661,7 @@ if (DEBUGGER) {
                 if (aAddr[1] == null) break;
                 /*
                  * We must create a new aAddr from the address we obtained from aHistory, because
-                 * aAddr was a reference, not a copy, and we don't want getInstruction() modifying the original.  
+                 * aAddr was a reference, not a copy, and we don't want getInstruction() modifying the original.
                  */
                 aAddr = this.newAddr(aAddr[0], aAddr[1], aAddr[2]);
                 this.println(this.getInstruction(aAddr, "history", -n));
@@ -3670,10 +3675,10 @@ if (DEBUGGER) {
             this.nextHistory = undefined;
         }
     };
-    
+
     /**
      * doInfo(asArgs)
-     * 
+     *
      * Prints the contents of the Debugger's instruction trace buffer.
      *
      * Examples:
@@ -3682,7 +3687,7 @@ if (DEBUGGER) {
      *      n shl on
      *      n shl off
      *      n dump 100
-     *      
+     *
      * @this {Debugger}
      * @param {Array.<string>} asArgs
      * @return {boolean} true only if the instruction info command ("n") is supported
@@ -3739,10 +3744,10 @@ if (DEBUGGER) {
         }
         return false;
     };
-    
+
     /**
      * doInput(sPort)
-     * 
+     *
      * @this {Debugger}
      * @param {string|undefined} sPort
      */
@@ -3754,7 +3759,7 @@ if (DEBUGGER) {
             /*
              * NOTE: Regarding this warning, it might be nice if we had an "unchecked" version of
              * bus.checkPortInputNotify(), since all Debugger memory accesses are unchecked, too.
-             * 
+             *
              * All port I/O handlers ARE aware when the Debugger is calling (addrFrom is undefined),
              * but changing them all to be non-destructive would take time, and situations where you
              * actually want to affect the hardware state are just as likely as not....
@@ -3768,10 +3773,10 @@ if (DEBUGGER) {
             this.println(str.toHexWord(port) + ": " + str.toHexByte(data));
         }
     };
-    
+
     /**
      * doLoad(asArgs)
-     * 
+     *
      * The format of this command mirrors the DOS DEBUG "L" command:
      *
      *      l [address] [drive #] [sector #] [# sectors]
@@ -3794,9 +3799,9 @@ if (DEBUGGER) {
             this.println("\tln [address] lists symbol(s) nearest to address");
             return;
         }
-    
+
         var aAddr = [], iDrive, iSector = 0, nSectors = 0;
-    
+
         var fJSON = false;
         if (asArgs[1] == "json") {
             fJSON = true;
@@ -3816,7 +3821,7 @@ if (DEBUGGER) {
                 return;
             }
         }
-        
+
         iDrive = this.parseValue(asArgs[2], "drive #");
         if (iDrive === undefined) return;
         if (!fJSON) {
@@ -3825,14 +3830,14 @@ if (DEBUGGER) {
             nSectors = this.parseValue(asArgs[4], "# of sectors");
             if (nSectors === undefined) nSectors = 1;
         }
-    
+
         /*
          * We choose the disk controller very simplistically: FDC for drives 0 or 1, and HDC for drives 2
          * and up, unless no HDC is present, in which case we assume FDC for all drive numbers.
-         * 
+         *
          * Both controllers must obviously support the same interfaces; ie, copyDrive(), seekDrive(),
          * and readByte().  We also rely on the disk property to determine whether the drive is "loaded".
-         * 
+         *
          * In the case of the HDC, if the drive is valid, then by definition it is also "loaded", since an HDC
          * drive and its disk are inseparable; it's certainly possible that its disk object may be empty at
          * this point, but that will only affect whether the read succeeds or not.
@@ -3886,10 +3891,10 @@ if (DEBUGGER) {
             this.println("disk controller not present");
         }
     };
-    
+
     /**
      * doMessages(asArgs)
-     * 
+     *
      * @this {Debugger}
      * @param {Array.<string>} asArgs
      */
@@ -3899,7 +3904,7 @@ if (DEBUGGER) {
         var fCriteria = null;
         var sCategory = asArgs[1];
         if (sCategory == "?") sCategory = undefined;
-        
+
         if (sCategory !== undefined) {
             var bitsMessage = 0;
             if (sCategory == "all") {
@@ -3935,7 +3940,7 @@ if (DEBUGGER) {
                 }
             }
         }
-        
+
         /*
          * Display those message categories that match the current criteria (on or off)
          */
@@ -3951,17 +3956,17 @@ if (DEBUGGER) {
                 sCategories += Debugger.MESSAGES[m].OP;
             }
         }
-        
+
         if (sCategory === undefined) {
             this.println("\nmessage commands:\n\tm [category] [on|off]\tturn categories on/off");
         }
 
         this.println((fCriteria !== null? (fCriteria? "messages on:  " : "messages off: ") : "message categories:\n\t") + (sCategories || "none"));
     };
-    
+
     /**
      * doExecOptions(asArgs)
-     * 
+     *
      * @this {Debugger}
      * @param {Array.<string>} asArgs
      */
@@ -4011,10 +4016,10 @@ if (DEBUGGER) {
                 break;
         }
     };
-    
+
     /**
      * doOutput(sPort, sData)
-     * 
+     *
      * @this {Debugger}
      * @param {string|undefined} sPort
      * @param {string|undefined} sData
@@ -4027,7 +4032,7 @@ if (DEBUGGER) {
             /*
              * NOTE: Regarding this warning, it might be nice if we had an "Unchecked" version of
              * bus.checkPortOutputNotify(), since all Debugger memory accesses are unchecked, too.
-             * 
+             *
              * All port I/O handlers ARE aware when the Debugger is calling (addrFrom is undefined),
              * but changing them all to be non-destructive would take time, and situations where you
              * actually want to affect the hardware state are just as likely as not....
@@ -4041,10 +4046,10 @@ if (DEBUGGER) {
             this.bus.checkPortOutputNotify(port, data);
         }
     };
-    
+
     /**
      * doRegisters(asArgs, fCompact)
-     * 
+     *
      * @this {Debugger}
      * @param {Array.<string>} [asArgs]
      * @param {boolean} [fCompact]
@@ -4065,7 +4070,7 @@ if (DEBUGGER) {
             if (sReg == 'p') {
                 /*
                  * If the CPU has not defined addrGDT, then there are no protected-mode registers
-                 * 
+                 *
                  * TODO: Come up with a more formal way of determining the CPU's support for protected-mode,
                  * and/or report an error.
                  */
@@ -4196,18 +4201,18 @@ if (DEBUGGER) {
                 this.println("updated registers:");
             }
         }
-        
+
         this.println((fCompact? '' : '\n') + this.getRegStr(fProt));
-        
+
         if (fIns) {
             this.aAddrNextCode = this.newAddr(this.cpu.regIP, this.cpu.segCS.sel);
             this.doUnassemble(this.hexAddr(this.aAddrNextCode));
         }
     };
-    
+
     /**
      * doRun(sAddr)
-     * 
+     *
      * @this {Debugger}
      * @param {string} sAddr
      */
@@ -4222,10 +4227,10 @@ if (DEBUGGER) {
             this.println('cpu not available, "g" command ignored');
         }
     };
-    
+
     /**
      * doProcStep(sCmd)
-     * 
+     *
      * @this {Debugger}
      * @param {string} [sCmd] "p" or "pr"
      */
@@ -4326,10 +4331,10 @@ if (DEBUGGER) {
             this.println("step in progress");
         }
     };
-    
+
     /**
      * doStep(sCmd, sCount)
-     * 
+     *
      * @this {Debugger}
      * @param {string} [sCmd] "t" or "tr"
      * @param {string} [sCount] # of instructions to step
@@ -4356,10 +4361,10 @@ if (DEBUGGER) {
             }
         );
     };
-    
+
     /**
      * doUnassemble(sAddr, sAddrEnd, n)
-     * 
+     *
      * @this {Debugger}
      * @param {string} [sAddr]
      * @param {string} [sAddrEnd]
@@ -4370,10 +4375,10 @@ if (DEBUGGER) {
         var aAddr = this.parseAddr(sAddr, Debugger.ADDR_CODE);
         if (aAddr[0] == null)
             return;
-    
+
         if (n === undefined) n = 1;
         var aAddrEnd = this.newAddr(0xffff, aAddr[1], this.bus.addrLimit);
-    
+
         if (sAddrEnd !== undefined) {
             aAddrEnd = this.parseAddr(sAddrEnd, Debugger.ADDR_CODE);
             if (aAddrEnd[0] == null || aAddrEnd[0] < aAddr[0])
@@ -4390,9 +4395,9 @@ if (DEBUGGER) {
             aAddrEnd[0]++;
             n = -1;
         }
-    
+
         var fBlank = (aAddr[0] != this.aAddrNextCode[0]);
-    
+
         while (n-- && (aAddr[1] != null? (aAddr[0] < aAddrEnd[0]) : (aAddr[2] < aAddrEnd[2]))) {
             /*
              * I pass nCycles instead of cInstructions to getInstruction() now, to assist with visual
@@ -4428,10 +4433,10 @@ if (DEBUGGER) {
             fBlank = false;
         }
     };
-    
+
     /**
      * parseCommand(sCmd, fSave)
-     * 
+     *
      * @this {Debugger}
      * @param {string|undefined} sCmd
      * @param {boolean} [fSave] is true to save the command, false if not
@@ -4452,10 +4457,10 @@ if (DEBUGGER) {
         }
         return a;
     };
-    
+
     /**
      * doCommand(sCmd, fQuiet)
-     * 
+     *
      * @this {Debugger}
      * @param {string} sCmd
      * @param {boolean} [fQuiet]
@@ -4464,7 +4469,7 @@ if (DEBUGGER) {
     Debugger.prototype.doCommand = function(sCmd, fQuiet)
     {
         var result = true;
-        
+
         if (!sCmd.length) {
             if (this.fAssemble) {
                 this.println("ended assemble @" + this.hexAddr(this.aAddrAssemble));
@@ -4472,18 +4477,18 @@ if (DEBUGGER) {
                 this.fAssemble = false;
             }
         }
-        
+
         sCmd = sCmd.toLowerCase();
-        
+
         if (this.isReady() && !this.isBusy(true) && sCmd.length > 0) {
-    
+
             if (this.fAssemble) {
                 sCmd = "a " + this.hexAddr(this.aAddrAssemble) + " " + sCmd;
             }
             else {
                 /*
                  * Process any "whole word" commands here first (eg, "reset").
-                 * 
+                 *
                  * For all other commands, if they lack a space between the command and argument portions,
                  * insert a space before the first non-alpha character, so that split() will have the desired effect.
                  */
@@ -4507,7 +4512,7 @@ if (DEBUGGER) {
             }
 
             var asArgs = sCmd.split(" ");
-    
+
             switch (asArgs[0].charAt(0)) {
                 case "a":
                     this.doAssemble(asArgs);
@@ -4576,7 +4581,7 @@ if (DEBUGGER) {
         }
         return result;
     };
-    
+
     /**
      * Debugger.init()
      *
@@ -4597,7 +4602,7 @@ if (DEBUGGER) {
             Component.bindComponentControls(dbg, eDbg, PCJSCLASS);
         }
     };
-    
+
     /*
      * Initialize every Debugger module on the page (as IF there's ever going to be more than one ;-))
      */
