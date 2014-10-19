@@ -1033,9 +1033,9 @@ if (DEBUGGER) {
         0x13: {
             0x00: "disk reset",
             0x01: "get status",
-            0x02: "read drive DL CH:DH:CL:AL into ES:BX",
-            0x03: "write drive DL CH:DH:CL:AL from ES:BX",
-            0x04: "verify drive DL CH:DH:CL:AL",
+            0x02: "read drive DL (CH:DH:CL:AL) into ES:BX",
+            0x03: "write drive DL (CH:DH:CL:AL) from ES:BX",
+            0x04: "verify drive DL (CH:DH:CL:AL)",
             0x05: "format drive DL using ES:BX",
             0x08: "read drive DL parameters into ES:DI",
             0x15: "get drive DL DASD type",
@@ -1388,7 +1388,7 @@ if (DEBUGGER) {
         /*
          * TODO: Filtering of interrupt numbers below should be user-definable; this is very quick-and-dirty.
          */
-        if (nInt < 0x20 && nInt != 0x10 && nInt != 0x15 && nInt != 0x16 && nInt != 0x1C) {
+        if (nInt < 0x20 && nInt != 0x10 && nInt != 0x15 && nInt != 0x16 && nInt != 0x1A && nInt != 0x1C) {
             var AH = this.cpu.regAX >> 8;
             var aFuncs = Debugger.INT_FUNCS[nInt];
             var sFunc = (aFuncs && aFuncs[AH]) || "";
@@ -1411,7 +1411,12 @@ if (DEBUGGER) {
      */
     Debugger.prototype.messageIntReturn = function(nInt, nLevel, nCycles, sResult)
     {
-        this.message("INT 0x" + str.toHexByte(nInt) + "(" + nLevel + "): C=" + (this.cpu.getCF()? 1 : 0) + (sResult || "") + " (cycles=" + nCycles + ")");
+        /*
+         * TODO: Filtering of interrupt numbers below should be user-definable; this is very quick-and-dirty.
+         */
+        if (nInt < 0x20 && nInt != 0x10 && nInt != 0x15 && nInt != 0x16 && nInt != 0x1A && nInt != 0x1C) {
+            this.message("INT 0x" + str.toHexByte(nInt) + "(" + nLevel + "): C=" + (this.cpu.getCF()? 1 : 0) + (sResult || "") + " (cycles=" + nCycles + ")");
+        }
     };
 
     /**
