@@ -34,9 +34,9 @@
 "use strict";
 
 if (typeof module !== 'undefined') {
-    var X86 = require("./x86");
-    var X86Help = require("./x86help");
-    var Debugger = require("./debugger");
+    var X86         = require("./x86");
+    var X86Help     = require("./x86help");
+    var Debugger    = require("./debugger");
 }
 
 var X86Grps = {
@@ -66,7 +66,7 @@ var X86Grps = {
     /**
      * NOTE: Notice that some of the simpler math functions could get away with updating resultSize before
      * the calculation, but here the calculation depends on the incoming carry value.
-     * 
+     *
      * @this {X86CPU}
      * @param {number} dst
      * @param {number} src
@@ -82,7 +82,7 @@ var X86Grps = {
     /**
      * NOTE: Notice that some of the simpler math functions could get away with updating resultSize before
      * the calculation, but here the calculation depends on the incoming carry value.
-     * 
+     *
      * @this {X86CPU}
      * @param {number} dst
      * @param {number} src
@@ -169,7 +169,7 @@ var X86Grps = {
     /**
      * NOTE: Notice that some of the simpler math functions could get away with updating resultSize before
      * the calculation, but here the calculation depends on the incoming carry value.
-     * 
+     *
      * @this {X86CPU}
      * @param {number} dst
      * @param {number} src
@@ -185,7 +185,7 @@ var X86Grps = {
     /**
      * NOTE: Notice that some of the simpler math functions could get away with updating resultSize before
      * the calculation, but here the calculation depends on the incoming carry value.
-     * 
+     *
      * @this {X86CPU}
      * @param {number} dst
      * @param {number} src
@@ -296,7 +296,7 @@ var X86Grps = {
      * operand size of the last operation.  And since only 2 of the 6 arithmetic flags need to change, that tips the scales
      * in favor of leaving resultSize alone.  However, the previous code that worked so hard to update resultSize is still
      * here, commented out; it works, but it's less efficient.
-     * 
+     *
      * @this {X86CPU}
      * @param {number} result (untruncated, so that we can inspect it for CARRY and OVERFLOW)
      * @param {number} size
@@ -497,7 +497,7 @@ var X86Grps = {
      * and/or code that depends on them, I'll continue setting PS_AF and PS_OF "normally".
      *
      * See also: AND, OR, TEST, and XOR (those instructions leave AUXCARRY "undefined" as well).
-     * 
+     *
      * @this {X86CPU}
      * @param {number} dst
      * @param {number} src (1 or CL, or an immediate byte for 80186/80188 and up)
@@ -522,7 +522,7 @@ var X86Grps = {
      * AUXCARRY (PS_AF), AUXCARRY isn't properly set on a real 8086/8088; its value is
      * documented as "undefined."  Similarly, OVERFLOW (PS_OF) is documented as "undefined"
      * for shifts > 1.  See opGrpSHLb() for more details.
-     * 
+     *
      * @this {X86CPU}
      * @param {number} dst
      * @param {number} src (1 or CL, or an immediate byte for 80186/80188 and up)
@@ -547,7 +547,7 @@ var X86Grps = {
      * AUXCARRY (PS_AF), AUXCARRY isn't properly set on a real 8086/8088; its value is
      * documented as "undefined."  Similarly, OVERFLOW (PS_OF) is documented as "undefined"
      * for shifts > 1.  See opGrpSHLb() for more details.
-     * 
+     *
      * @this {X86CPU}
      * @param {number} dst
      * @param {number} src (1 or CL, or an immediate byte for 80186/80188 and up)
@@ -572,7 +572,7 @@ var X86Grps = {
      * AUXCARRY (PS_AF), AUXCARRY isn't properly set on a real 8086/8088; its value is
      * documented as "undefined."  Similarly, OVERFLOW (PS_OF) is documented as "undefined"
      * for shifts > 1.  See opGrpSHLb() for more details.
-     * 
+     *
      * @this {X86CPU}
      * @param {number} dst
      * @param {number} src (1 or CL, or an immediate byte for 80186/80188 and up)
@@ -597,7 +597,7 @@ var X86Grps = {
      * AUXCARRY (PS_AF), AUXCARRY isn't properly set on a real 8086/8088; its value is
      * documented as "undefined."  Similarly, OVERFLOW (PS_OF) is documented as "undefined"
      * for shifts > 1.  See opGrpSHLb() for more details.
-     * 
+     *
      * @this {X86CPU}
      * @param {number} dst
      * @param {number} src (1 or CL, or an immediate byte for 80186/80188 and up)
@@ -623,7 +623,7 @@ var X86Grps = {
      * AUXCARRY (PS_AF), AUXCARRY isn't properly set on a real 8086/8088; its value is
      * documented as "undefined."  Similarly, OVERFLOW (PS_OF) is documented as "undefined"
      * for shifts > 1.  See opGrpSHLb() for more details.
-     * 
+     *
      * @this {X86CPU}
      * @param {number} dst
      * @param {number} src (1 or CL, or an immediate byte for 80186/80188 and up)
@@ -739,7 +739,7 @@ var X86Grps = {
         }
         /*
          * Multiply/divide instructions specify only a single operand, which the decoders pass to us
-         * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX). 
+         * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX).
          * However, src is technically an output, and dst is merely an input (which is why we must return
          * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
          */
@@ -783,7 +783,7 @@ var X86Grps = {
         }
         /*
          * Multiply/divide instructions specify only a single operand, which the decoders pass to us
-         * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX). 
+         * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX).
          * However, src is technically an output, and dst is merely an input (which is why we must return
          * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
          */
@@ -822,7 +822,7 @@ var X86Grps = {
         this.resultSize = X86.RESULT.SIZE_BYTE;
         /*
          * Multiply/divide instructions specify only a single operand, which the decoders pass to us
-         * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX). 
+         * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX).
          * However, src is technically an output, and dst is merely an input (which is why we must return
          * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
          */
@@ -836,7 +836,7 @@ var X86Grps = {
      * @param {number} dst
      * @param {number} src (null)
      * @return {number} (we return dst unchanged, since it's actually AX that's modified)
-     * 
+     *
      * TODO: Implement the following difference, from "AP-186: Introduction to the 80186 Microprocessor, March 1983":
      *
      *      "The 8086 will cause a divide error whenever the absolute value of the quotient is greater then 7FFFH
@@ -869,7 +869,7 @@ var X86Grps = {
         this.resultSize = X86.RESULT.SIZE_BYTE;
         /*
          * Multiply/divide instructions specify only a single operand, which the decoders pass to us
-         * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX). 
+         * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX).
          * However, src is technically an output, and dst is merely an input (which is why we must return
          * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
          */
@@ -900,7 +900,7 @@ var X86Grps = {
         }
         /*
          * Multiply/divide instructions specify only a single operand, which the decoders pass to us
-         * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX). 
+         * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX).
          * However, src is technically an output, and dst is merely an input (which is why we must return
          * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
          */
@@ -914,15 +914,15 @@ var X86Grps = {
      * lower 16 bits (carry clear) and when the upper 16 bits contain significant bits (carry set).  The latter
      * will occur whenever a positive result is > 32767 (0x00007fff) and whenever a negative result is < -32768
      * (0xffff8000).
-     * 
+     *
      * Example 1: 256 * 64 = 16384 (0x00004000): carry is clear
      * Example 2: 256 * 128 = 32768 (0x00008000): carry is set (the sign bit no longer fits in the lower 16 bits)
      * Example 3: 256 * -128 (0xff80) = -32768 (0xffff8000): carry is clear (the sign bit *still* fits in the lower 16 bits)
      * Example 4: 256 * -256 (0xff00) = -65536 (0xffff0000): carry is set (the sign bit no longer fits in the lower 16 bits)
-     * 
+     *
      * An earlier version of this function assumed it simply needed to check bit 15 of the result to determine carry,
      * which was completely broken.
-     * 
+     *
      * @this {X86CPU}
      * @param {number} dst
      * @param {number} src (null)
@@ -945,7 +945,7 @@ var X86Grps = {
         }
         /*
          * Multiply/divide instructions specify only a single operand, which the decoders pass to us
-         * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX). 
+         * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX).
          * However, src is technically an output, and dst is merely an input (which is why we must return
          * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
          */
@@ -970,7 +970,7 @@ var X86Grps = {
         }
         /*
          * Detect small divisor (quotient overflow)
-         * 
+         *
          * WARNING: We CANNOT simply do "src = (this.regDX << 16) | this.regAX", because if bit 15 of DX
          * is set, JavaScript will create a negative 32-bit number.  So we instead use non-bit-wise operators
          * to force JavaScript to create a floating-point value that won't suffer from 32-bit-math side-effects.
@@ -990,7 +990,7 @@ var X86Grps = {
         this.resultSize = X86.RESULT.SIZE_WORD;
         /*
          * Multiply/divide instructions specify only a single operand, which the decoders pass to us
-         * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX). 
+         * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX).
          * However, src is technically an output, and dst is merely an input (which is why we must return
          * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
          */
@@ -1040,7 +1040,7 @@ var X86Grps = {
         this.resultSize = X86.RESULT.SIZE_WORD;
         /*
          * Multiply/divide instructions specify only a single operand, which the decoders pass to us
-         * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX). 
+         * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX).
          * However, src is technically an output, and dst is merely an input (which is why we must return
          * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
          */
@@ -1258,7 +1258,7 @@ var X86Grps = {
 /*
  * A word (or two) on instruction groups (eg, GRP1, GRP2), which are groups of instructions that
  * use a mod/reg/rm byte, where the reg field of that byte selects a function rather than a register.
- * 
+ *
  * I start with the groupings used by Intel's "Pentium Processor User's Manual (Volume 3: Architecture
  * and Programming Manual)", but I deviate slightly, mostly by subdividing their groups with the use
  * of suffixes:
@@ -1275,7 +1275,7 @@ var X86Grps = {
  *      0x0F,0x01   Grp7        GRP7 (SGDT, SIDT, LGDT, LIDT, SMSW, LMSW, INVLPG)   Group G
  *      0x0F,0xBA   Grp8        GRP8 (BT, BTS, BTR, BTC)                            Group H
  *      0x0F,0xC7   Grp9        GRP9 (CMPXCH)                                       (N/A, 80386 and up?)
- *      
+ *
  * My only serious deviation is Grp5, which I refer to as GRP4w, because it contains word forms of
  * the INC and DEC instructions found in GRP4b.  Granted, GRP4w also contains versions of the CALL,
  * JMP and PUSH instructions, which are not in GRP4b, but there's nothing in GRP4b that conflicts with

@@ -50,8 +50,8 @@
 "use strict";
 
 if (typeof module !== 'undefined') {
-    var str = require("../../shared/lib/strlib");
-    var Component = require("../../shared/lib/component");
+    var str         = require("../../shared/lib/strlib");
+    var Component   = require("../../shared/lib/component");
 }
 /**
  * @class DataView
@@ -70,7 +70,7 @@ if (typeof module !== 'undefined') {
  * block-granular starting address and an address range equal to bus.blockSize; however,
  * the size of any given Memory object's underlying buffer can be either zero or bus.blockSize;
  * memory read/write functions for empty (buffer-less) blocks are mapped to readNone/writeNone.
- * 
+ *
  * The Bus allocates empty blocks for the entire address space during initialization, so that
  * any reads/writes to undefined addresses will have no effect.  Later, the ROM and RAM
  * components will ask the Bus to allocate memory for specific ranges, and the Bus will allocate
@@ -90,7 +90,7 @@ if (typeof module !== 'undefined') {
  * consumption.  Using TYPEDARRAYS is probably best, although not all JavaScript implementations
  * support them (IE9 is probably the only real outlier: it lacks typed arrays but otherwise has
  * all the necessary HTML5 support).
- * 
+ *
  * @constructor
  * @param {number} addr of block (must be some multiple of bus.blockSize)
  * @param {number} [size] of block's buffer in bytes (0 for none); must be a multiple of 4
@@ -107,13 +107,13 @@ function Memory(addr, size, fReadOnly, controller) {
 
     /*
      * For empty memory blocks, all we need to do is ensure all access functions
-     * are mapped to "none" handlers. 
+     * are mapped to "none" handlers.
      */
     if (!size) {
         this.setAccess();
         return;
     }
-    
+
     /*
      * When a controller is specified, the controller must provide a buffer,
      * via getMemoryBuffer(), and memory access functions, via getMemoryAccess().
@@ -126,7 +126,7 @@ function Memory(addr, size, fReadOnly, controller) {
         this.setAccess(controller.getMemoryAccess());
         return;
     }
-    
+
     /*
      * This is the normal case: allocate a buffer that provides 8 bits of data per address;
      * no controller is required because our default memory access functions (see afnMemory)
@@ -161,7 +161,7 @@ Memory.prototype = {
     constructor: Memory,
     /**
      * readNone(off)
-     * 
+     *
      * @this {Memory}
      * @param {number} off
      * @return {number}
@@ -174,7 +174,7 @@ Memory.prototype = {
     },
     /**
      * writeNone(off, v)
-     * 
+     *
      * @this {Memory}
      * @param {number} off
      * @param {number} v (could be either a byte or word value, since we use the same handler for both kinds of accesses)
@@ -186,7 +186,7 @@ Memory.prototype = {
     },
     /**
      * readByteTypedArray(off)
-     * 
+     *
      * @this {Memory}
      * @param {number} off
      * @return {number}
@@ -197,7 +197,7 @@ Memory.prototype = {
     },
     /**
      * readWordTypedArray(off)
-     * 
+     *
      * @this {Memory}
      * @param {number} off
      * @return {number}
@@ -208,7 +208,7 @@ Memory.prototype = {
     },
     /**
      * writeByteTypedArray(off, b)
-     * 
+     *
      * @this {Memory}
      * @param {number} off
      * @param {number} b
@@ -220,7 +220,7 @@ Memory.prototype = {
     },
     /**
      * writeWordTypedArray(off, w)
-     * 
+     *
      * @this {Memory}
      * @param {number} off
      * @param {number} w
@@ -232,7 +232,7 @@ Memory.prototype = {
     },
     /**
      * readByteMemory(off)
-     * 
+     *
      * @this {Memory}
      * @param {number} off
      * @return {number}
@@ -246,7 +246,7 @@ Memory.prototype = {
     },
     /**
      * readWordMemory(off)
-     * 
+     *
      * @this {Memory}
      * @param {number} off
      * @return {number}
@@ -269,7 +269,7 @@ Memory.prototype = {
     },
     /**
      * writeByteMemory(off, b)
-     * 
+     *
      * @this {Memory}
      * @param {number} off
      * @param {number} b
@@ -287,7 +287,7 @@ Memory.prototype = {
     },
     /**
      * writeWordMemory(off, w)
-     * 
+     *
      * @this {Memory}
      * @param {number} off
      * @param {number} w
@@ -312,7 +312,7 @@ Memory.prototype = {
     },
     /**
      * readByteVerify(off)
-     * 
+     *
      * @this {Memory}
      * @param {number} off
      * @return {number}
@@ -323,7 +323,7 @@ Memory.prototype = {
     },
     /**
      * readWordVerify(off)
-     * 
+     *
      * @this {Memory}
      * @param {number} off
      * @return {number}
@@ -336,7 +336,7 @@ Memory.prototype = {
     },
     /**
      * writeByteVerify(off, b)
-     * 
+     *
      * @this {Memory}
      * @param {number} off
      * @param {number} b
@@ -347,7 +347,7 @@ Memory.prototype = {
     },
     /**
      * writeWordVerify(off, w)
-     * 
+     *
      * @this {Memory}
      * @param {number} off
      * @param {number} w
@@ -366,7 +366,7 @@ Memory.prototype = {
      *
      * Memory blocks with custom memory controllers do NOT save their contents;
      * that's the responsibility of the controller component.
-     * 
+     *
      * @this {Memory}
      * @return {Array|Int32Array|null}
      */
@@ -389,7 +389,7 @@ Memory.prototype = {
              * but we can't be sure of the "endianness" of an Int32Array -- which would be OK if the array
              * was always saved/restored on the same machine, but there's no guarantee of that, either.
              * So we use getInt32() and require little-endian values.
-             * 
+             *
              * Moreover, an Int32Array isn't treated by JSON.stringify() and JSON.parse() exactly like
              * a normal array; it's serialized as an Object rather than an Array, so it lacks a "length"
              * property and causes problems for State.store() and State.parse().
@@ -411,7 +411,7 @@ Memory.prototype = {
      * used by Bus.restoreMemory(), which is called by X86CPU.restore(), after all other
      * components have been restored and thus all Memory blocks have been allocated
      * by their respective components.
-     * 
+     *
      * @this {Memory}
      * @param {Array|null} adw
      * @return {boolean} true if successful, false if block size mismatch
@@ -445,7 +445,7 @@ Memory.prototype = {
     },
     /**
      * setAccess(afn)
-     * 
+     *
      * @this {Memory}
      * @param {Array.<function()>} [afn]
      * @param {boolean} [fDirect]
@@ -458,7 +458,7 @@ Memory.prototype = {
     },
     /**
      * setReadAccess(afn, fDirect)
-     * 
+     *
      * @this {Memory}
      * @param {Array.<function()>} afn
      * @param {boolean} [fDirect]
@@ -473,7 +473,7 @@ Memory.prototype = {
     },
     /**
      * setWriteAccess(afn, fDirect)
-     * 
+     *
      * @this {Memory}
      * @param {Array.<function()>} afn
      * @param {boolean} [fDirect]
@@ -488,7 +488,7 @@ Memory.prototype = {
     },
     /**
      * resetReadAccess()
-     * 
+     *
      * @this {Memory}
      */
     resetReadAccess: function() {
@@ -497,7 +497,7 @@ Memory.prototype = {
     },
     /**
      * resetWriteAccess()
-     * 
+     *
      * @this {Memory}
      */
     resetWriteAccess: function() {
@@ -506,7 +506,7 @@ Memory.prototype = {
     },
     /**
      * setDebugInfo(cpu, dbg, addr, size)
-     * 
+     *
      * @this {Memory}
      * @param {X86CPU|Component} cpu
      * @param {Debugger|Component} dbg
@@ -524,7 +524,7 @@ Memory.prototype = {
     },
     /**
      * addBreakpoint(off, fWrite)
-     * 
+     *
      * @this {Memory}
      * @param {number} off
      * @param {boolean} fWrite
@@ -547,7 +547,7 @@ Memory.prototype = {
     },
     /**
      * removeBreakpoint(off, fWrite)
-     * 
+     *
      * @this {Memory}
      * @param {number} off
      * @param {boolean} fWrite

@@ -34,12 +34,12 @@
 "use strict";
 
 if (typeof module !== 'undefined') {
-    var Component = require("../../shared/lib/component");
-    var X86 = require("./x86");
-    var X86Grps = require("./x86grps");
-    var X86Help = require("./x86help");
-    var X86Mods = require("./x86mods");
-    var X86Op0F = require("./x86op0f");
+    var Component   = require("../../shared/lib/component");
+    var X86         = require("./x86");
+    var X86Grps     = require("./x86grps");
+    var X86Help     = require("./x86help");
+    var X86Mods     = require("./x86mods");
+    var X86Op0F     = require("./x86op0f");
 }
 
 var X86OpXX = {
@@ -1194,14 +1194,14 @@ var X86OpXX = {
     opINSb: function() {
         var nReps = 1;
         var nDelta = 0;
-        
+
         /*
          * NOTE: 5 + 4n is the cycle time for the 80286; the 80186/80188 has different values: 14 cycles for
          * an unrepeated INS, and 8 + 8n for a repeated INS.  However, accurate cycle times for the 80186/80188 is
          * low priority.
          */
         var nCycles = 5;
-        
+
         /*
          * The (normal) REP prefix, if used, is REPNZ (0xf2), but either one works....
          */
@@ -1210,7 +1210,7 @@ var X86OpXX = {
             nDelta = 1;
             if (this.opPrefixes & X86.OPFLAG.REPEAT) nCycles = 4;
         }
-        
+
         if (nReps--) {
             var b = this.bus.checkPortInputNotify(this.regDX, this.regEIP - nDelta - 1);
             this.setSOByte(this.segES, this.regDI, b);
@@ -1240,7 +1240,7 @@ var X86OpXX = {
     opINSw: function() {
         var nReps = 1;
         var nDelta = 0;
-        
+
         /*
          * NOTE: 5 + 4n is the cycle time for the 80286; the 80186/80188 has different values: 14 cycles for
          * an unrepeated INS, and 8 + 8n for a repeated INS.  However, accurate cycle times for the 80186/80188 is
@@ -1278,13 +1278,13 @@ var X86OpXX = {
      * @this {X86CPU}
      *
      * NOTE: Segment overrides are ignored for this instruction, so we must use segDS instead of segData.
-     * 
+     *
      * op=0x6E (outsb) (80186/80188 and up)
      */
     opOUTSb: function() {
         var nReps = 1;
         var nDelta = 0;
-        
+
         /*
          * NOTE: 5 + 4n is the cycle time for the 80286; the 80186/80188 has different values: 14 cycles for
          * an unrepeated INS, and 8 + 8n for a repeated INS.  However, accurate cycle times for the 80186/80188 is
@@ -1327,7 +1327,7 @@ var X86OpXX = {
     opOUTSw: function() {
         var nReps = 1;
         var nDelta = 0;
-        
+
         /*
          * NOTE: 5 + 4n is the cycle time for the 80286; the 80186/80188 has different values: 14 cycles for
          * an unrepeated INS, and 8 + 8n for a repeated INS.  However, accurate cycle times for the 80186/80188 is
@@ -1647,15 +1647,15 @@ var X86OpXX = {
          * If the second operand is a register, then the ModeRegByte decoder must use separate "get" and
          * "set" assignments, otherwise instructions like "XCHG DH,DL" will end up using a stale DL instead of
          * our updated DL.
-         * 
+         *
          * To be clear, a single assignment like this will fail:
-         * 
+         *
          *      opModeRegByteF2: function(fn) {
          *          this.regDX = (this.regDX & 0xff) | (fn.call(this, this.regDX >> 8, this.regDX & 0xff) << 8);
          *      }
          *
          * which is why all affected decoders now use separate assignments; eg:
-         * 
+         *
          *      opModeRegByteF2: function(fn) {
          *          var b = fn.call(this, this.regDX >> 8, this.regDX & 0xff);
          *          this.regDX = (this.regDX & 0xff) | (b << 8);
@@ -1981,7 +1981,7 @@ var X86OpXX = {
     },
     /**
      * @this {X86CPU}
-     * 
+     *
      * op=0x9B (wait)
      */
     opWAIT: function() {
@@ -2019,7 +2019,7 @@ var X86OpXX = {
     opSAHF: function() {
         /*
          * NOTE: While it make LOOK more efficient to do this:
-         * 
+         *
          *      this.setPS((this.getPS() & ~X86.PS.SAHF) | ((this.regAX >> 8) & X86.PS.SAHF));
          *
          * the call to getPS() forces all the "indirect" flags to be resolved first, and then the call
@@ -2729,7 +2729,7 @@ var X86OpXX = {
      * @this {X86CPU}
      *
      * Here's the pseudo-code from http://www.pcjs.org/pubs/pc/reference/intel/80286/progref, p.B-40 (p.250):
-     * 
+     *
      *      LEVEL := LEVEL MOD 32
      *      Push BP
      *      Set a temporary value FRAME_PTR := SP
@@ -2742,7 +2742,7 @@ var X86OpXX = {
      *      End if
      *      BP := FRAME_PTR
      *      SP := SP - first operand
-     *      
+     *
      * TODO: Verify that this pseudo-code is identical on the 80186/80188 (eg, is LEVEL MOD 32 performed in both instances?)
      *
      * op=0xC8 (enter imm16,imm8) (80186/80188 and up)
@@ -2771,7 +2771,7 @@ var X86OpXX = {
     },
     /**
      * @this {X86CPU}
-     * 
+     *
      * Set SP to BP, then pop BP
      *
      * op=0xC9 (leave) (80186/80188 and up)
@@ -3359,7 +3359,7 @@ var X86OpXX = {
 
 /*
  * This 256-entry array of opcode functions is at the heart of the CPU engine: stepCPU(n).
- * 
+ *
  * It might be worth trying a switch() statement instead, to see how the performance compares,
  * but I suspect that would vary quite a bit across JavaScript engines; for now, I'm putting my
  * money on array lookup.
@@ -3405,7 +3405,7 @@ X86OpXX.aOps = [
     /*
      * On all processors, opcode groups 0x80 and 0x82 perform identically (0x82 opcodes sign-extend their
      * immediate data, but since both 0x80 and 0x82 are byte operations, the sign extension has no effect).
-     * 
+     *
      * WARNING: Intel's "Pentium Processor User's Manual (Volume 3: Architecture and Programming Manual)" refers
      * to opcode 0x82 as a "reserved" instruction, but also cryptically refers to it as "MOVB AL,imm".  This is
      * assumed to be an error in the manual, because as far as I know, 0x82 has always mirrored 0x80.

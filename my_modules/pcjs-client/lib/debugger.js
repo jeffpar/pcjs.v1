@@ -35,15 +35,15 @@
 
 if (DEBUGGER) {
     if (typeof module !== 'undefined') {
-        var str = require("../../shared/lib/strlib");
-        var usr = require("../../shared/lib/usrlib");
-        var web = require("../../shared/lib/weblib");
-        var Component = require("../../shared/lib/component");
-        var Bus = require("./bus");
-        var State = require("./state");
-        var CPU = require("./cpu");
-        var X86 = require("./x86");
-        var X86Seg = require("./x86seg");
+        var str         = require("../../shared/lib/strlib");
+        var usr         = require("../../shared/lib/usrlib");
+        var web         = require("../../shared/lib/weblib");
+        var Component   = require("../../shared/lib/component");
+        var Bus         = require("./bus");
+        var State       = require("./state");
+        var CPU         = require("./cpu");
+        var X86         = require("./x86");
+        var X86Seg      = require("./x86seg");
     }
 }
 

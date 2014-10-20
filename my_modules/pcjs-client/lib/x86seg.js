@@ -34,17 +34,17 @@
 "use strict";
 
 if (typeof module !== 'undefined') {
-    var X86 = require("./x86");
-    var X86Help = require("./x86help");
+    var X86         = require("./x86");
+    var X86Help     = require("./x86help");
 }
 
 /**
  * X86Seg(cpu, sName)
- * 
+ *
  * @constructor
  * @param {X86CPU} cpu
  * @param {string} [sName] segment name
- * @param {boolean} [fProt] true if segment register used exclusively in protected-mode 
+ * @param {boolean} [fProt] true if segment register used exclusively in protected-mode
  */
 function X86Seg(cpu, sName, fProt)
 {
@@ -64,7 +64,7 @@ function X86Seg(cpu, sName, fProt)
 
 /**
  * loadReal(sel, fSuppress)
- * 
+ *
  * This is the default real-mode load() function.
  *
  * @this {X86Seg}
@@ -84,7 +84,7 @@ X86Seg.loadReal = function loadReal(sel, fSuppress)
  *
  * This replaces the segment's default load() function whenever the segment is notified (eg, by the CPU's setProtMode()
  * function) the processor is now in protected-mode.
- * 
+ *
  * Segments in protected-mode are referenced by selectors, which are indexes into descriptor tables (GDT, LDT, IDT) whose
  * descriptors are 4-word (8-byte) entries:
  *
@@ -92,7 +92,7 @@ X86Seg.loadReal = function loadReal(sel, fSuppress)
  *      word 1: base address low
  *      word 2: base address high (0-7), segment type (8-11), descriptor type (12), DPL (13-14), present bit (15)
  *      word 3: used only on 80386 and up (should be set to zero for upward compatibility)
- *      
+ *
  * See X86.DESC for offset and bit definitions.
  *
  * @this {X86Seg}
@@ -115,23 +115,23 @@ X86Seg.loadProt = function loadProt(sel, fSuppress)
     if (offDT + 7 <= addrDTLimit) {
         this.checkRead = X86Seg.checkReadProtEnabled;
         this.checkWrite = X86Seg.checkWriteProtEnabled;
-        
+
         /*
          * TODO: This is only the first of many steps toward accurately counting cycles in protected mode;
          * I simply noted that "POP segreg" takes 5 cycles in real mode and 20 in protected mode, so I'm
          * starting with a 15-cycle difference.  Obviously the difference will be much greater when the load fails.
          */
         this.cpu.nStepCycles -= 15;
-        
+
         /*
          * TODO: Use (direct) Bus memory interfaces instead of (indirect) CPU memory interfaces here?
          */
         var limit = this.cpu.getWord(offDT + X86.DESC.LIMIT.OFFSET);
         var acc = this.cpu.getWord(offDT + X86.DESC.ACC.OFFSET);
         var base = this.cpu.getWord(offDT + X86.DESC.BASE.OFFSET) | ((acc & X86.DESC.ACC.BASE1623) << 16);
-        
+
         Component.assert(this.cpu.getWord(offDT + 0x06) == 0);
-        
+
         /*
          * For LSL (which uses fSuppress), we must support X86.DESC.ACC.TYPE.SEG as well as TSS and LDT.
          */
@@ -271,7 +271,7 @@ X86Seg.checkWriteProtDisabled = function checkWriteProtDisabled(off, cb, fSuppre
  *
  * Early versions of PCjs saved only segment selectors, since that's all that mattered in real-mode;
  * newer versions need to save/restore the entire segment object.
- * 
+ *
  * @this {X86Seg}
  * @return {Array}
  */
@@ -285,7 +285,7 @@ X86Seg.prototype.save = function()
  *
  * Early versions of PCjs saved only segment selectors, since that's all that mattered in real-mode;
  * newer versions need to save/restore the entire segment object.
- * 
+ *
  * @this {X86Seg}
  * @param {Array|number} a
  */
@@ -305,12 +305,12 @@ X86Seg.prototype.restore = function(a)
 
 /**
  * setBase(addr)
- * 
+ *
  * This is used in unusual situations where the base must be set independently; normally, the base
  * is set according to the selector provided to load(), but there are a few cases where setBase() is
  * required (eg, in resetRegs() where the 80286 wants the real-mode CS selector to be 0xF000 but the
  * CS base must be 0xFF0000, and LOADALL).
- * 
+ *
  * @this {X86Seg}
  * @param {number} addr
  */

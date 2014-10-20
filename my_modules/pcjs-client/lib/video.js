@@ -96,13 +96,13 @@
 "use strict";
 
 if (typeof module !== 'undefined') {
-    var str = require("../../shared/lib/strlib");
-    var web = require("../../shared/lib/weblib");
-    var DumpAPI = require("../../shared/lib/dumpapi");
-    var Component = require("../../shared/lib/component");
-    var ChipSet = require("./chipset");
-    var Keyboard = require("./keyboard");
-    var State = require("./state");
+    var str         = require("../../shared/lib/strlib");
+    var web         = require("../../shared/lib/weblib");
+    var DumpAPI     = require("../../shared/lib/dumpapi");
+    var Component   = require("../../shared/lib/component");
+    var ChipSet     = require("./chipset");
+    var Keyboard    = require("./keyboard");
+    var State       = require("./state");
 }
 
 /**
@@ -130,9 +130,9 @@ if (typeof module !== 'undefined') {
  *      charRows: number of character rows
  *      fontROM: path to .rom file (or a JSON representation) that defines the character set
  *      screenColor: background color of the screen window (default is black)
- *      
+ *
  * An EGA may specify the following additional properties:
- * 
+ *
  *      switches: string representing EGA switches (see "SW1-SW4" documentation below)
  *      memory: the size of the EGA's on-board memory (overrides EGA's Video.cardSpecs)
  *
@@ -175,7 +175,7 @@ function Video(parmsVideo, canvas, context, textarea)
      */
     this.model = parmsVideo['model'];
     this.cbMemory = 0;
-    
+
     if (this.model == "ega") {
         this.sEGASW = parmsVideo['switches'];
         this.cbMemory = parmsVideo['memory'] || 0;      // zero means fallback to the cardSpec's default size
@@ -215,7 +215,7 @@ function Video(parmsVideo, canvas, context, textarea)
     this.fDoubleFont = Math.round(this.cxScreen / this.nDefaultCols) >= 12;
 
     this.fTouchScreen = parmsVideo['touchScreen'];
-    
+
     this.canvasScreen = canvas;
     this.contextScreen = context;
     this.textareaScreen = textarea;
@@ -229,13 +229,13 @@ function Video(parmsVideo, canvas, context, textarea)
      */
     this.addrBuffer = this.sizeBuffer = 0;
 
-    /* 
+    /*
      * aFonts is an array of font objects (ie, arrays) indexed by FONT ID.  Font characters are
      * arranged in 16x16 grids, with one grid per canvas object in the aCanvas array of each font object.
-     * 
+     *
      * Each element is a Font object that describes the font size and provides bitmaps for all the font
      * color permutations.  aFonts.length will be non-zero if ANY fonts are loaded, but do NOT assume
-     * that EVERY font has been loaded; check for the existence of a font by checking for its unique ID 
+     * that EVERY font has been loaded; check for the existence of a font by checking for its unique ID
      * within this sparse array.
      */
     this.aFonts = [];
@@ -249,10 +249,10 @@ function Video(parmsVideo, canvas, context, textarea)
     /*
      * Since I've not found clear documentation on a reliable way to check whether a particular DOM element
      * (other than the BODY element) has focus at any given time, I've added onfocus() and onblur() handlers
-     * to the canvas to maintain my own focus state. 
+     * to the canvas to maintain my own focus state.
      */
     this.fHasFocus = false;
-    
+
     var video = this;
     if (this.canvasScreen) {
         this.canvasScreen.onfocus = function onFocusCanvas() {
@@ -298,11 +298,11 @@ function Video(parmsVideo, canvas, context, textarea)
 
 Component.subclass(Component, Video);
 
-Video.TRAPALL = true;           // monitor all I/O by default (not just deltas) 
+Video.TRAPALL = true;           // monitor all I/O by default (not just deltas)
 
 /*
  * Supported Cards
- * 
+ *
  * Note that we choose IDs that match the default font ID for each card as well, just for consistency.
  */
 Video.CARDS = {};
@@ -312,22 +312,22 @@ Video.CARDS.EGA = 5;
 
 /*
  * Supported Monitors
- * 
+ *
  * The MDA monitor displays 350 lines of vertical resolution, 720 lines of horizontal resolution, and refreshes
  * at ~50Hz.  The CGA monitor displays 200 lines vertically, 640 horizontally, and refreshes at ~60Hz.
- * 
+ *
  * Based on actual MDA timings (see http://diylab.atwebpages.com/pressureDev.htm), the total horizontal
  * period (drawing a line and retracing) is ~54.25uSec (1000000uSec / 18432) and the horizontal retrace interval
  * is about 15% of that, or ~8.14uSec.  Vertical sync occurs once every 370 horizontal periods.  Of those 370,
  * only 354 represent actively drawn lines (and of those, only 350 are visible); the remaining 16 horizontal
- * periods, or 4% of the 370 total, represent the vertical retrace interval. 
- * 
+ * periods, or 4% of the 370 total, represent the vertical retrace interval.
+ *
  * I don't have similar numbers for the CGA or EGA, so for now, I assume similar percentages; ie, 15% of
  * the horizontal period will represent horizontal retrace, and 4% of the vertical pixel maximum (262) will
  * represent vertical retrace.  However, 24% of the CGA's 262 vertical maximum represents non-visible lines,
  * whereas only 5% of the MDA's 370 maximum represents non-visible lines; is there really that much "overscan"
  * on the CGA?
- * 
+ *
  * For each monitor type, there's a Video.monitorSpecs object that describes the horizontal and vertical
  * timings, along with my assumptions about the percentage of time that drawing is "active" within those periods,
  * and then based on the selected monitor type, I compute the number of CPU cycles that each period lasts,
@@ -335,7 +335,7 @@ Video.CARDS.EGA = 5;
  * retrace status flags can be quickly calculated.
  *
  * For reference, here are some important numbers to know (from https://github.com/reenigne/reenigne/blob/master/8088/cga/register_values.txt):
- * 
+ *
  *              CGA          MDA
  *  Pixel clock 14.318 MHz   16.257 MHz (aka "maximum video bandwidth", as IBM Tech Refs sometimes call it)
  *  Horizontal  15.700 KHz   18.432 KHz (aka "horizontal drive", as IBM Tech Refs sometimes call it)
@@ -405,22 +405,22 @@ Video.monitorSpecs[ChipSet.MONITOR.EGACOLOR] = {
 
 /*
  * EGA Miscellaneous ports and SW1-Sw4
- * 
+ *
  * The Card.MISC.CLK_SELECT bits determine which of the EGA board's 4 configuration switches are
  * returned via Card.STATUS0.SWSENSE (when SWSENSE is zero, the switch is closed):
- * 
+ *
  *      0xC: return SW1
  *      0x8: return SW2
  *      0x4: return SW3
  *      0x0: return SW4
- *      
+ *
  * These 4 bits are also copied to the byte at 40:88h by the EGA BIOS, where bit 0 is SW1, bit 1 is SW2,
  * bit 2 is SW3 and bit 3 is SW4.  Our switch settings come from bEGASW, which in turn comes from sEGASW,
  * which in turn comes from the "switches" property passed to the Video component, if any.
- * 
+ *
  * As usual, the switch settings are reversed in both direction and sense from the switch settings; the
  * good news, however, is that we can use the parseSwitches() method in the ChipSet component to parse them.
- * 
+ *
  * The set of valid EGA switch values, after conversion, is stored in the table below.  For each value,
  * there is an array that defines the corresponding monitor type(s) for the EGA adapter and any secondary
  * adapter.  The third value is a boolean indicating whether the EGA is the primary adapter.
@@ -442,7 +442,7 @@ Video.aEGAMonitorSwitches = {
 
 /*
  * Supported Modes
- * 
+ *
  * Although this component is designed to be a video hardware emulation, not a "BIOS simulation", we DO
  * look for changes to the hardware state that correspond to standard BIOS mode settings, so our internal
  * mode setting will normally match the current BIOS mode.  Since 99.9% of applications use only standard
@@ -450,7 +450,7 @@ Video.aEGAMonitorSwitches = {
  * we simply use common, familiar values wherever it makes sense to do so.  We do have some "BIOS awareness",
  * (eg, when we look for a ROM-based font, or when we're trying to ensure all the BIOS diagnostics pass),
  * but for the most part, we are treating the BIOS as just another (ROM-based) application.
- * 
+ *
  * As we expand support to include more programmable cards like the EGA, it becomes quite easy for the card
  * to enter a "mode" that has no BIOS counterpart (eg, non-standard combinations of frame buffer address,
  * memory access modes, fonts, display regions, etc).  Our hardware emulation routines will cope with those
@@ -475,23 +475,23 @@ Video.MODES.UNKNOWN          = 0xFF;
 
 /*
  * Supported Fonts
- * 
+ *
  * Once we've finished loading the standard 8K font file, aFonts[] should contain one or more of the
  * fonts listed below.  For the standard MDA/CGA font ROM, the first (MDA) font resides in the first 4K,
  * and the second and third (CGA) fonts reside in the two 2K halves of the second 4K.
- * 
+ *
  * It may seem odd that the cell size for FONT_CGAD is *larger* than the cell size for FONT_CGA,
  * since 40-column mode is actually lower resolution, but since we don't shrink the window when we shrink
  * the mode, the characters must be drawn larger, and they look better if we don't have to scale them.
- * 
+ *
  * From the IBM EGA Manual (p.5):
- * 
+ *
  *     "In alphanumeric modes, characters are formed from one of two ROM (Read Only Memory) character
  *      generators on the adapter. One character generator defines 7x9 characters in a 9x14 character box.
  *      For Enhanced Color Display support, the 9x14 character set is modified to provide an 8x14 character set.
  *      The second character generator defines 7x7 characters in an 8x8 character box. These generators contain
  *      dot patterns for 256 different characters. The character sets are identical to those provided by the
- *      IBM Monochrome Display Adapter and the IBM Color/Graphics Monitor Adapter." 
+ *      IBM Monochrome Display Adapter and the IBM Color/Graphics Monitor Adapter."
  */
 Video.FONTS = {};
 Video.FONTS.MDA     = 1;        // 9x14 monochrome font
@@ -503,19 +503,19 @@ Video.FONTS.EGAD    = 10;       // 18x28 color font (this is the 9x14 EGA font d
 
 /*
  * For each video mode, we need to know the following pieces of information:
- * 
+ *
  *      0: # of columns (nCols)
  *      1: # of rows (nRows)
  *      2: # cells per word (nCellsPerWord: # of characters or pixels per word)
  *      3: # bytes of visible screen padding, if any (used for CGA graphics modes only)
  *      4: font ID (nFont: undefined if graphics mode)
- *      
+ *
  * By calculating ([0] * [1]) / [2], we obtain the number of 16-bit words that mode actively displays;
  * for example, the amount of visible memory used by mode 0x04 is (320 * 200) / 4, or 16000.
- *      
+ *
  * The MODES.CGA_40X25 modes specify FONT_CGA instead of FONT_CGAD because we don't automatically
  * load the FONT_CGAD unless the screen is large enough to accommodate it (see the fDoubleFont calculation).
- * 
+ *
  * To compensate, we have code in setDimensions() that automatically switches to FONT_CGAD if it's loaded AND
  * the cell size warrants the larger font.  We could hard-code FONT_CGAD here, but then we'd always load it,
  * and it might not always be the best fit.
@@ -527,8 +527,8 @@ Video.aModeParms[Video.MODES.CGA_320X200]       = [320, 200,  8, 192];          
 Video.aModeParms[Video.MODES.CGA_640X200]       = [640, 200, 16, 192];                              // 0x06
 Video.aModeParms[Video.MODES.MDA_80X25]         = [ 80,  25,  1,   0, Video.FONTS.MDA];             // 0x07
 Video.aModeParms[Video.MODES.EGA_320X200]       = [320, 200, 16];                                   // 0x0D
-Video.aModeParms[Video.MODES.EGA_640X200]       = [640, 200, 16];                                   // 0x0E 
-Video.aModeParms[Video.MODES.EGA_640X350_MONO]  = [640, 350, 16];                                   // 0x0F 
+Video.aModeParms[Video.MODES.EGA_640X200]       = [640, 200, 16];                                   // 0x0E
+Video.aModeParms[Video.MODES.EGA_640X350_MONO]  = [640, 350, 16];                                   // 0x0F
 Video.aModeParms[Video.MODES.EGA_640X350]       = [640, 350, 16];                                   // 0x10
 
 Video.aModeParms[Video.MODES.CGA_40X25_BW]      = Video.aModeParms[Video.MODES.CGA_40X25];          // 0x01
@@ -537,13 +537,13 @@ Video.aModeParms[Video.MODES.CGA_320X200_BW]    = Video.aModeParms[Video.MODES.C
 
 /*
  * MDA attribute byte definitions
- * 
+ *
  * For MDA, only the following group of ATTR definitions are supported; any FGND/BGND value combinations
  * outside this group will be treated as "normal" (ATTR_FGND_WHITE | ATTR_BGND_BLACK).
- * 
+ *
  * NOTE: Assuming MDA.MODE.BLINK_ENABLE is set (which the ROM BIOS sets by default), ATTR_BGND_BLINK will
  * cause the *foreground* element of the cell to blink, even though it is part of the *background* attribute bits.
- * 
+ *
  * Regarding blink rate, characters are supposed to blink every 16 vertical frames, which amounts to .26667 blinks
  * per second, assuming a 60Hz vertical refresh rate.  So roughly every 267ms, we need to take care of any blinking
  * characters.  updateScreen() maintains a global count (cBlinkVisible) of blinking characters, to simplify the
@@ -564,7 +564,7 @@ Video.ATTRS.DRAW_CURSOR = 0x200;        // this is an internal attribute bit, in
 /*
  * Here's a "cheat sheet" for attribute byte combinations that the IBM MDA could have supported.  The original (Aug 1981)
  * IBM Tech Ref is very terse and implies that only those marked with * are actually supported.
- * 
+ *
  *     *0x00: non-display                       ATTR_FGND_BLACK |                    ATTR_BGND_BLACK
  *     *0x01: underline                         ATTR_FGND_ULINE |                    ATTR_BGND_BLACK
  *     *0x07: normal (white on black)           ATTR_FGND_WHITE |                    ATTR_BGND_BLACK
@@ -576,29 +576,29 @@ Video.ATTRS.DRAW_CURSOR = 0x200;        // this is an internal attribute bit, in
  *      0x89: blinking bright underline         ATTR_FGND_ULINE | ATTR_FGND_BRIGHT | ATTR_BGND_BLINK (or dim background if blink disabled)
  *    **0x8F: blinking bold                     ATTR_FGND_WHITE | ATTR_FGND_BRIGHT | ATTR_BGND_BLINK (or dim background if blink disabled)
  *    **0xF0: blinking reverse                  ATTR_FGND_WHITE | ATTR_FGND_BRIGHT | ATTR_BGND_BLINK (or bright background if blink disabled)
- *  
+ *
  * Unsupported attributes reportedly display as "normal" (ATTR_FGND_WHITE | ATTR_BGND_BLACK).  However, precisely which
  * attributes are unsupported on the MDA varies depending on the source. Some sources (eg, the IBM Tech Ref) imply that
  * only those marked by * are supported, while others (eg, some--but not all--Peter Norton guides) include those marked
  * by **, and still others include ALL the combinations listed above.
- * 
+ *
  * Furthermore, according to http://www.seasip.info/VintagePC/mda.html:
- * 
+ *
  *      Attributes 0x00, 0x08, 0x80 and 0x88 display as black space;
  *      Attribute 0x78 displays as dark green on green; depending on the monitor, there may be a green "halo" where the dark and bright bits meet;
  *      Attribute 0xF0 displays as a blinking version of 0x70 if blink enabled, and black on bright green otherwise;
  *      Attribute 0xF8 displays as a blinking version of 0x78 if blink enabled, and as dark green on bright green otherwise.
- * 
+ *
  * However, I'm rather skeptical about supporting 0x78 and 0xF8, until I see some evidence that "bright black" actually
  * produced dark green on IBM equipment; it also doesn't sound like a combination many people would have used.  I'll probably
  * treat all of 0x08, 0x80 and 0x88 the same as 0x00, only because it seems logical (they're all "black on black" combinations
  * with only BRIGHT and/or BLINK bits set). Beyond that, I'll likely treat any other combination not listed in the above cheat
  * sheet as "normal".
- * 
+ *
  * All the discrepancies/disagreements I've found are probably due in part to the proliferation of IBM and non-IBM MDA
  * cards, combined with IBM and non-IBM monochrome monitors, and people assuming that their non-IBM card and/or monitor
  * behaved exactly like the original IBM equipment, which probably wasn't true in all cases.
- * 
+ *
  * I would like to limit my MDA display support to EXACTLY everything that the IBM MDA supported and nothing more, but
  * since there will be combinations that will logically "fall out" unless I specifically exclude them, it's very likely
  * this implementation will end up being a superset.
@@ -697,9 +697,9 @@ Video.aEGADWToByte[0x80808080] = 0xf;
  *
  * Creates an object representing an initial video card state;
  * can also restore a video card from state data created by saveCard().
- * 
+ *
  * See new Card().
- * 
+ *
  * @constructor
  * @param {Video} [video]
  * @param {number} [iCard] (see Video.CARDS.*)
@@ -713,14 +713,14 @@ function Card(video, iCard, data, cbMemory)
      * so we need to detect that case and continue indicating that the card is not present.
      */
     if (iCard !== undefined && (!data || data.length)) {
-        
+
         var specs = Video.cardSpecs[iCard];
         var nMonitorType = video.nMonitorType || specs[5];
 
         if (!data || data.length < 6) {
             data = [false, 0, null, null, 0, new Array(Card.CRTC.TOTAL_REGS)];
         }
-        
+
         /*
          * If a Debugger is present, we want to stash a bit more info in each Card.
          */
@@ -729,11 +729,11 @@ function Card(video, iCard, data, cbMemory)
             this.type = specs[0];
             this.port = specs[1];
         }
-        
+
         this.iCard = iCard;
         this.addrBuffer = specs[2];     // default (physical) frame buffer address
         this.sizeBuffer = specs[3];     // default frame buffer length (this is the total size, not the current visible size; this.cbScreen is calculated on the fly to reflect the latter)
-        
+
         /*
          * If no memory size is specified, then setMode() will use addMemory() to automatically add enough
          * memory blocks to cover the frame buffer specified above; otherwise, it instructs addMemory() to call
@@ -742,16 +742,16 @@ function Card(video, iCard, data, cbMemory)
          * the underlying memory.
          */
         this.cbMemory = cbMemory || specs[4];
-        
+
         /*
          * All of our cardSpec frame buffer sizes are based on the default text mode (eg, 4Kb for an MDA, 16Kb for
          * a CGA), but for a card with 64Kb or more of memory (ie, any EGA card), the default text mode frame buffer
-         * size should be dynamically recalculated as the smaller of: cbMemory divided by 4, or 32Kb. 
+         * size should be dynamically recalculated as the smaller of: cbMemory divided by 4, or 32Kb.
          */
         if (this.cbMemory >= 0x10000 && this.addrBuffer >= 0xB0000) {
             this.sizeBuffer = Math.min(this.cbMemory >> 2, 0x8000);
         }
-        
+
         this.fActive   = data[0];
         this.modeReg   = data[1];       // see MDA.MODE* or CGA.MODE_* (use (MDA.MODE.HIRES | MDA.MODE.VIDEO_ENABLE | MDA.MODE.BLINK_ENABLE) if you want to test blinking immediately after the initial power-on reset)
         this.colorReg  = data[2];       // see CGA.COLOR.* (undefined on MDA)
@@ -761,15 +761,15 @@ function Card(video, iCard, data, cbMemory)
         this.aCRTCRegs = data[5];
         this.nCRTCRegs = Card.CRTC.TOTAL_REGS;
         this.asCRTCRegs = DEBUGGER? Card.CRTC.REGS : [];
-        
+
         if (iCard == Video.CARDS.EGA) {
             this.nCRTCRegs = Card.CRTC.EGA.TOTAL_REGS;
             this.asCRTCRegs = DEBUGGER? Card.CRTC.EGA_REGS : [];
             this.initEGA(data[6], nMonitorType);
         }
-        
+
         var monitorSpecs = Video.monitorSpecs[nMonitorType] || Video.monitorSpecs[ChipSet.MONITOR.MONO];
-        
+
         var nCyclesPerSecond = video.cpu.getCyclesPerSecond();      // eg, 4772727
         this.nCyclesHorzPeriod = (nCyclesPerSecond / monitorSpecs.nHorzPeriodsPerSec) | 0;
         this.nCyclesHorzActive = (this.nCyclesHorzPeriod * monitorSpecs.percentHorzActive / 100) | 0;
@@ -850,12 +850,12 @@ Card.CGA.PRESET_PEN.PORT    = 0x3DC;
 
 /*
  * Common CRT hardware registers, accessed via Card.XXA.CRTC.INDX.PORT and Card.XXA.CRTC.DATA.PORT
- * 
+ *
  * NOTE: In this implementation, because we have to make at least two of the registers readable (CURSOR_ADDR_HI and CURSOR_ADDR_LO),
  * we end up making ALL the registers readable, otherwise we would have to explicitly block any register marked write-only.  I don't
  * think making the CRT registers fully readable presents any serious compatibility issues, and it actually offers some benefits
  * (eg, improved debugging).
- * 
+ *
  * However, some things are broken: the (readable) light pen registers on the EGA are overloaded as (writable) vertical retrace
  * registers, so the vertical retrace registers cannot actually be read that way.  I'm sure the VGA solved that problem, but I haven't
  * looked into it yet.
@@ -877,7 +877,7 @@ Card.CRTC.CURSOR_START.INDX     = 0x0A;
 Card.CRTC.CURSOR_START.MASK     = 0x1F;
 /*
  * I don't entirely understand these cursor blink control bits.  Here's what the MC6845 datasheet says:
- * 
+ *
  *      Bit 5 is the blink timing control.  When bit 5 is low, the blink frequency is 1/16 of the vertical field rate,
  *      and when bit 5 is high, the blink frequency is 1/32 of the vertical field rate.  Bit 6 is used to enable a blink.
  */
@@ -902,12 +902,12 @@ Card.CRTC.EGA.VERT_BLANK_START  = 0x15;
 Card.CRTC.EGA.VERT_BLANK_END    = 0x16;
 Card.CRTC.EGA.MODE_CTRL = {};
 Card.CRTC.EGA.MODE_CTRL.INDX    = 0x17;
-Card.CRTC.EGA.MODE_CTRL.CMS     = 0x01;     // Compatibility Mode Support (CGA A13 control) 
+Card.CRTC.EGA.MODE_CTRL.CMS     = 0x01;     // Compatibility Mode Support (CGA A13 control)
 Card.CRTC.EGA.MODE_CTRL.SRSC    = 0x02;     // Select Row Scan Counter
 Card.CRTC.EGA.MODE_CTRL.HRS     = 0x04;     // Horizontal Retrace Select
 Card.CRTC.EGA.MODE_CTRL.CBT     = 0x08;     // Count By Two
 Card.CRTC.EGA.MODE_CTRL.OC      = 0x10;     // Output Control
-Card.CRTC.EGA.MODE_CTRL.AW      = 0x20;     // Address Wrap (in Word mode, 1 maps A15 to A0 and 0 maps A13; use the latter when only 64Kb is installed)   
+Card.CRTC.EGA.MODE_CTRL.AW      = 0x20;     // Address Wrap (in Word mode, 1 maps A15 to A0 and 0 maps A13; use the latter when only 64Kb is installed)
 Card.CRTC.EGA.MODE_CTRL.BM      = 0x40;     // Byte Mode (1 selects Byte Mode; 0 selects Word Mode)
 Card.CRTC.EGA.MODE_CTRL.HR      = 0x80;     // Hardware Reset
 Card.CRTC.EGA.LINE_COMPARE      = 0x18;
@@ -933,7 +933,7 @@ Card.STATUS1 = {};
 Card.STATUS1.PORT           = 0x3DA;
 /*
  * STATUS1 diagnostic bits 5 and 4 are set according to the Card.ATC.PLANES.MUX bits:
- * 
+ *
  *      MUX     Bit 5   Bit 4
  *      ---     ----    ----
  *      00:     Red     Blue
@@ -945,12 +945,12 @@ Card.STATUS1.DIAGNOSTIC     = 0x30;     // these bits are controlled by the Card
 
 /*
  * EGA Attribute Controller (ATC) ports
- * 
+ *
  * The current ATC INDX value is stored in cardEGA.iATCReg (including the Card.ATC.INDX_ENABLE bit), and the
  * ATC DATA values are stored in cardEGA.aATCRegs.  Also, the state of the ATC INDX/DATA flip-flop is stored in fATCData.
- * 
+ *
  * Note that the ATC palette registers (0x0-0xf) all use the following 6 bit assignments, with bits 6 and 7 unused:
- * 
+ *
  *      0: Blue
  *      1: Green
  *      2: Red
@@ -1003,7 +1003,7 @@ Card.MISC.VERT_POLARITY     = 0x80;     // 0 selects positive vertical retrace
 /*
  * The EGA BIOS writes 0x1 to Card.FEAT_CTRL.BITS and reads Card.STATUS0.FEAT, then writes 0x2 to
  * Card.FEAT_CTRL.BITS and reads Card.STATUS0.FEAT.  The bits from the first and second reads are shifted
- * into the high nibble of the byte at 40:88h. 
+ * into the high nibble of the byte at 40:88h.
  */
 Card.FEAT_CTRL = {};
 Card.FEAT_CTRL.PORT         = 0x3DA;    // or 0x3BA; write-only (other than the two bits below, the rest are reserved and/or unused)
@@ -1098,7 +1098,7 @@ Card.GRC.MODE.EVENODD       = 0x10;
 Card.GRC.MODE.SHIFT         = 0x20;
 Card.GRC.MISC = {};
 Card.GRC.MISC.INDX          = 0x06;     // MISCELLANEOUS
-Card.GRC.MISC.GRAPHICS      = 0x01;     // set for graphics mode addressing, clear for text mode addressing 
+Card.GRC.MISC.GRAPHICS      = 0x01;     // set for graphics mode addressing, clear for text mode addressing
 Card.GRC.MISC.CHAIN         = 0x02;     // set for odd/even planes selected with odd/even values of the processor AO bit
 Card.GRC.MISC.MAPMEM        = 0x0C;     //
 Card.GRC.MISC.MAPA0128      = 0x00;     //
@@ -1115,18 +1115,18 @@ if (DEBUGGER) Card.GRC.REGS = ["SRESET","ESRESET","COLRCMP","DATAROT","READMAP",
 
 /*
  * EGA Memory Access Functions
- * 
+ *
  * Here's where we define all the getMemoryAccess() functions that know how to deal with "planar" EGA memory,
  * which consists of 32-bit values for every byte of address space, allowing us to internally store plane 0
- * bytes in bits 0-7, plane 1 bytes in bits 8-15, plane 2 bytes in bits 16-23, and plane 3 bytes in bits 24-31. 
- * 
+ * bytes in bits 0-7, plane 1 bytes in bits 8-15, plane 2 bytes in bits 16-23, and plane 3 bytes in bits 24-31.
+ *
  * All our functions have slightly more overhead than the standard Bus memory access functions, because the
  * offset (off) parameter is block-relative, which we must transform into a buffer-relative offset.  Fortunately,
  * all our Memory objects know this and have already recorded their buffer-relative offset in "this.offset".
  *
  * Also, the EGA includes a set of latches, one for each plane, which must be updated on most reads/writes;
  * we rely on the Memory object's "this.controller" property to give us access to the Card's state.
- * 
+ *
  * And we take a little extra time to conditionally set fDirty on writes, meaning if a write did not actually
  * change the value of the memory, we will not set fDirty.  The default write functions in mem.js don't take that
  * performance hit, but here, it may be worthwhile, because if it results in fewer dirty blocks, display updates
@@ -1135,10 +1135,10 @@ if (DEBUGGER) Card.GRC.REGS = ["SRESET","ESRESET","COLRCMP","DATAROT","READMAP",
  * Note that we don't have to worry about dealing with word accesses that straddle block boundaries, because
  * the Bus component automatically breaks those accesses into separate byte requests.  Similarly, byte and word
  * values for the write functions have already been pre-masked by the Bus component to 8 and 16 bits, respectively.
- * 
+ *
  * My motto: Be paranoid, but also be careful not to do any more work than you absolutely have to.
  *
- * 
+ *
  * CGA Emulation on the EGA
  *
  * Modes 4/5 (320x200 low-res graphics) emulate the same buffer format that the CGA uses.  To recap: 1 byte contains
@@ -1146,27 +1146,27 @@ if (DEBUGGER) Card.GRC.REGS = ["SRESET","ESRESET","COLRCMP","DATAROT","READMAP",
  * Moreover, all even rows are stored in the first 8K of the frame buffer (at 0xB8000), and all odd rows are stored
  * in the second 8K (at 0xBA000).  Of each 8K, only 8000 (0x1F40) bytes are used (80 bytes X 100 rows); the remaining
  * 192 bytes of each 8K are unused.
- * 
+ *
  * For these modes, the EGA's GRC.MODE is programmed with 0x30: Card.GRC.MODE.EVENODD and Card.GRC.MODE.SHIFT.
  * The latter claims to work by forming each 2-bit pixel with even bits from plane 0 and odd bits from plane 1;
  * however, I'm unclear how that works if even bytes are only written to plane 0 and odd bytes are only written to
  * plane 1, as Card.GRC.MODE.EVENODD implies, because plane 0 would never have any bits for the odd bytes, and
  * plane 1 would never have any bits for the even bytes.  Clearly, I'm missing something.
  *
- *  
+ *
  * Even/Odd Memory Access Functions
- * 
+ *
  * The "EVENODD" functions deal with the EGA's default text-mode addressing, where every EVEN address is mapped to
  * plane 0 (and plane 2) and every ODD address is mapped to plane 1 (and plane 3).  This occurs when SEQ.MODE.SEQUENTIAL
  * is clear (and GRC.MODE.EVENODD is set), turning address bit 0 (A0) into a "plane select" bit.  Whether A0 is
  * also used as a memory address bit depends on CRTC.MODE_CTRL.BM: if it's set, then we're in "Byte Mode" and A0 is
  * used as-is; if it's clear, then we're in "Word Mode", and either A15 (when CRTC.MODE_CTRL.AW is set) or A13
  * (when CRTC.MODE_CTRL.AW is clear, typically when only 64Kb of EGA memory is installed) is substituted for A0.
- * 
+ *
  * Note that A13 remains clear until addresses reach 8K, at which point we've spanned 32Kb of EGA memory, so it makes
  * sense to propagate A13 to A0 at that point, so that the next 8K of addresses start using ODD instead of EVEN bytes,
  * and no memory is wasted on a 64Kb EGA card.
- * 
+ *
  * These functions, however, don't yet deal with all those subtleties: A0 is currently used only as a "plane select"
  * bit and set to zero for addressing purposes, meaning that only the EVEN bytes in EGA memory will ever be used.
  */
@@ -1251,7 +1251,7 @@ Card.ACCESS.readByteMode0EvenOdd = function readByteMode0EvenOdd(off)
 
 /**
  * readByteMode1(off)
- * 
+ *
  * @this {Memory}
  * @param {number} off
  * @return {number}
@@ -1531,25 +1531,25 @@ Card.ACCESS.afn[Card.ACCESS.WRITE.MODE2XOR] = Card.ACCESS.writeByteMode2Xor;
 
 /**
  * initEGA(data)
- * 
+ *
  * Another one of my frustrations with JSON is that it encodes empty arrays with non-zero lengths as
  * arrays of nulls, which means that any uninitialized register arrays whose elements were all originally
  * undefined come back via the JSON round-trip as *initialized* arrays whose elements are now all null.
- * 
+ *
  * I'm a bit surprised, because Crockford would want us to always use the '===' operator to determine whether
  * an element is initialized (eg, 'aReg[i] === undefined'), but because of this JSON stupidity, I would have
- * to change all such tests to 'aReg[i] === undefined || aReg[i] === null'.  Great.  
- * 
+ * to change all such tests to 'aReg[i] === undefined || aReg[i] === null'.  Great.
+ *
  * The solution is to change such comparisons to 'aReg[i] == null' because undefined is coerced to null but
  * numeric values are not.  Crockford refers to '==' as an "evil" operator, but yet it's OK for JSON to
  * effectively treat 'undefined' the same as 'null'?  Give me a break!
- * 
+ *
  * [What do I mean by "another" frustration?  Let me talk to you some day about disallowing hex constants,
  * or insisting that property names be quoted, for starters.  I think it's fine for JSON.stringify() to
  * produce output that adheres to those rules by default -- although some stringify() options to control
  * how "portable" the output is would be nice -- but refusing to let JSON.parse() parse objects that are,
  * in fact, perfectly parseable, is just JSON being a dick.]
- * 
+ *
  * @this {Card}
  * @param {Array|undefined} data
  * @param {number} nMonitorType
@@ -1596,7 +1596,7 @@ Card.prototype.initEGA = function(data, nMonitorType)
     this.asATCRegs  = DEBUGGER? Card.ATC.REGS : [];
     this.status0    = data[3];      // aka STATUS0 (not to be confused with this.statusReg, which the EGA refers to as STATUS1)
     this.miscReg    = data[4];
-    this.featReg    = data[5];      // for feature control bits, see Card.FEAT_CTRL.BITS; for feature status bits, see Card.STATUS0.FEAT 
+    this.featReg    = data[5];      // for feature control bits, see Card.FEAT_CTRL.BITS; for feature status bits, see Card.STATUS0.FEAT
     this.iSEQReg    = data[6];
     this.aSEQRegs   = data[7];
     this.asSEQRegs  = DEBUGGER? Card.SEQ.REGS : [];
@@ -1613,14 +1613,14 @@ Card.prototype.initEGA = function(data, nMonitorType)
         this.adwMemory = State.decompressEvenOdd(this.adwMemory, cdw);
     }
     this.setMemoryAccess(data[15]);
-    
+
     /*
      * nReadMapShift must perfectly track how the GRC.READMAP register is programmed, so that Card.ACCESS.READ.MODE0
      * memory read functions read the appropriate plane.  This default is not terribly critical, unless Card.ACCESS.WRITE.MODE0
      * is chosen as our default AND you want the screen randomizer to work.
      */
     this.nReadMapShift  = data[16];
-    
+
     /*
      * Similarly, nWriteMapMask must perfectly track how the SEQ.MAPMASK register is programmed, so that memory write
      * functions write the appropriate plane(s).  Again, this default is not terribly critical, unless Card.ACCESS.WRITE.MODE0
@@ -1638,7 +1638,7 @@ Card.prototype.initEGA = function(data, nMonitorType)
 
 /**
  * saveCard()
- * 
+ *
  * @this {Card}
  * @return {Array}
  */
@@ -1662,7 +1662,7 @@ Card.prototype.saveCard = function()
 
 /**
  * saveEGA()
- * 
+ *
  * @this {Card}
  * @return {Array}
  */
@@ -1709,16 +1709,16 @@ Card.prototype.dumpCard = function()
          * Start with registers that are common to all cards....
          */
         this.dumpRegs("CRTC", this.iCRTCReg, this.aCRTCRegs, this.asCRTCRegs);
-    
+
         if (this.iCard == Video.CARDS.MDA || this.iCard == Video.CARDS.CGA) {
             this.dumpRegs(" MODEREG", this.modeReg);
             this.dumpRegs(" STATUS1", this.statusReg);
         }
-    
+
         if (this.iCard == Video.CARDS.CGA) {
             this.dumpRegs("   COLOR", this.colorReg);
         }
-    
+
         if (this.iCard == Video.CARDS.EGA) {
             this.dbg.message(" ATCDATA: " + this.fATCData);
             this.dumpRegs(" ATC", this.iATCReg, this.aATCRegs, this.asATCRegs);
@@ -1773,7 +1773,7 @@ Card.prototype.dumpBuffer = function(sParm)
  *
  * Since we don't pre-allocate the register arrays (eg, ATC, CRTC, GRC, etc) on a Card, we can't
  * rely on their array length, so we instead rely on the number of register names supplied in asRegs.
- * 
+ *
  * @this {Card}
  * @param {string} sName
  * @param {number} iReg
@@ -1819,7 +1819,7 @@ Card.prototype.getMemoryBuffer = function(addr)
  * getMemoryAccess()
  *
  * Return the last set of memory access functions recorded by setMemoryAccess().
- * 
+ *
  * @this {Card}
  * @return {Array.<function()>}
  */
@@ -1834,7 +1834,7 @@ Card.prototype.getMemoryAccess = function()
  * This transforms the memory access value that getAccess() returns into the best available set of
  * memory access functions, which are then returned via getMemoryAccess() to any memory blocks we allocate
  * or modify.
- * 
+ *
  * @this {Card}
  * @param {number|undefined} nAccess
  */
@@ -1869,26 +1869,26 @@ Card.prototype.setMemoryAccess = function(nAccess)
 
 /*
  * Card Specifications
- * 
+ *
  * We support dynamically switching between MDA and CGA cards by simply flipping switches on
  * the virtual SW1 switch block and resetting the machine.  However, I'm not sure I'll support
  * dynamically switching the EGA card the same way; there's certainly no UI for it at this point.
- * 
+ *
  * For each supported card, there is a cardSpec array that the Card class uses to initialize the
  * card's defaults:
- * 
+ *
  *      [0]: card descriptor
  *      [1]: default CRTC port address
  *      [2]: default frame buffer address
  *      [3]: default frame buffer size
  *      [4]: total on-board memory (if no "memory" parm was specified)
  *      [5]: default monitor type
- *      
+ *
  * If total on-board memory is zero, then addMemory() will simply add the specified frame buffer
  * to the address space; otherwise, we will allocate an internal buffer (adwMemory) and tell addMemory()
  * to map it to the frame buffer address.  The latter approach gives us total control over the buffer;
  * refer to getMemoryAccess().
- * 
+ *
  * TODO: Consider allocating our own buffer for all video cards, not just EGA.  For MDA/CGA, I'm not sure
  * it would offer any benefits, other than allowing our internal update functions, like updateScreen(),
  * to access the buffer directly, instead of going through the Bus memory interface.
@@ -1907,10 +1907,10 @@ Video.BIOS = {
 
 /**
  * initBus(cmp, bus, cpu, dbg)
- * 
+ *
  * This is a notification issued by the Computer component, after all the other components (notably the CPU)
  * have had a chance to initialize.
- * 
+ *
  * @this {Video}
  * @param {Computer} cmp
  * @param {Bus} bus
@@ -1922,15 +1922,15 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.bus = bus;
     this.cpu = cpu;
     this.dbg = dbg;
-    
+
     bus.addPortInputTable(this, Video.aPortInput);
     bus.addPortOutputTable(this, Video.aPortOutput);
-    
+
     if (this.model == "ega") {
         bus.addPortInputTable(this, Video.aEGAPortInput);
         bus.addPortOutputTable(this, Video.aEGAPortOutput);
     }
-    
+
     if (DEBUGGER && dbg) {
         var video = this;
         this.cpu.addIntNotify(Video.BIOS.INT_VIDEO, this, this.intBIOSVideo);
@@ -1938,7 +1938,7 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
             video.dumpVideo(sParm);
         });
     }
-    
+
     /*
      * If we have an associated keyboard, then ensure that the keyboard will be notified whenever
      * the canvas gets focus and receives input.
@@ -1947,13 +1947,13 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
     if (this.kbd && this.canvasScreen) {
         this.kbd.setBinding("input", this.textareaScreen? "textarea" : "canvas", "kbd", this.textareaScreen || this.canvasScreen);
     }
-    
+
     this.bEGASW = 0x9;          // our default "switches" setting (see aEGAMonitorSwitches)
     this.chipset = cmp.getComponentByType("ChipSet");
     if (this.chipset && this.sEGASW) {
         this.bEGASW = this.chipset.parseSwitches(this.sEGASW, this.bEGASW);
     }
-    
+
     if (this.kbd && this.fTouchScreen) this.captureTouch();
 };
 
@@ -2018,9 +2018,9 @@ Video.prototype.setFocus = function()
 
 /**
  * getCanvas()
- * 
+ *
  * This is an interface used by the Mouse component, so that it can invoke capture/release mouse events from the screen element.
- * 
+ *
  * @this {Video}
  * @return {Object|undefined}
  */
@@ -2031,7 +2031,7 @@ Video.prototype.getCanvas = function()
 
 /**
  * captureTouch()
- * 
+ *
  * @this {Video}
  */
 Video.prototype.captureTouch = function()
@@ -2080,7 +2080,7 @@ Video.prototype.captureTouch = function()
 
 /**
  * onFocusChange(fFocus)
- * 
+ *
  * @this {Video}
  * @param {boolean} fFocus is true if gaining focus, false if losing it
  */
@@ -2098,7 +2098,7 @@ Video.prototype.releaseTouch = function()
 
 /**
  * onTouchStart(event)
- * 
+ *
  * @this {Video}
  * @param {Event} event object from a 'touch' event
  */
@@ -2110,7 +2110,7 @@ Video.prototype.onTouchStart = function(event)
 
 /**
  * onTouchMove(event)
- * 
+ *
  * @this {Video}
  * @param {Event} event object from a 'touch' event
  */
@@ -2122,7 +2122,7 @@ Video.prototype.onTouchMove = function(event)
 
 /**
  * onTouchEnd(event)
- * 
+ *
  * @this {Video}
  * @param {Event} event object from a 'touch' event
  */
@@ -2133,7 +2133,7 @@ Video.prototype.onTouchEnd = function(event)
 
 /**
  * processTouchEvent(event, fStart)
- * 
+ *
  * @this {Video}
  * @param {Event} event object from a 'touch' event
  * @param {boolean} fStart if this is a 'touchstart' event
@@ -2145,7 +2145,7 @@ Video.prototype.processTouchEvent = function(event, fStart)
      * My thinking here is that if the canvas does NOT yet have focus, then we should actually SKIP
      * the usual preventDefault() call, so that everything the user has come to expect (eg, activation of
      * the soft keyboard) will work as before.
-     * 
+     *
      * The process of touching the canvas means it should ultimately receive focus, and as long as it
      * retains focus, preventDefault() will always be called.
      */
@@ -2153,7 +2153,7 @@ Video.prototype.processTouchEvent = function(event, fStart)
     /*
      * Touch coordinates (that is, the pageX and pageY properties) are relative to the page, so to make
      * them relative to the canvas, we must subtract the canvas's left and top positions.  This Apple web page:
-     * 
+     *
      *      https://developer.apple.com/library/safari/documentation/AudioVideo/Conceptual/HTML-canvas-guide/AddingMouseandTouchControlstoCanvas/AddingMouseandTouchControlstoCanvas.html
      *
      * makes it sound simple, but it turns out we have to walk the canvas' entire "parentage" of DOM elements
@@ -2203,7 +2203,7 @@ Video.prototype.processTouchEvent = function(event, fStart)
 
 /**
  * powerUp(data, fRepower)
- * 
+ *
  * @this {Video}
  * @param {Object|null} data
  * @param {boolean} [fRepower]
@@ -2223,10 +2223,10 @@ Video.prototype.powerUp = function(data, fRepower)
 
 /**
  * powerDown(fSave)
- * 
+ *
  * This is where we might add some method of blanking the display, without the disturbing the video
  * buffer contents, and blocking all further updates to the display.
- * 
+ *
  * @this {Video}
  * @param {boolean} fSave
  * @return {Object|boolean}
@@ -2238,14 +2238,14 @@ Video.prototype.powerDown = function(fSave)
 
 /**
  * reset()
- * 
+ *
  * @this {Video}
  */
 Video.prototype.reset = function()
 {
     var fRandomize = true;
     var nMonitorType = ChipSet.MONITOR.NONE;
-    
+
     /*
      * We'll ask the ChipSet what SW1 indicates for monitor type, but we may override it if a specific
      * video card model is set.  For EGA, SW1 is supposed to be set to indicate NO monitor, and we rely
@@ -2302,7 +2302,7 @@ Video.prototype.reset = function()
      * We need to call buildFonts() *after* the card(s) are initialized but *before* setMode() is called.
      */
     this.buildFonts();
-    
+
     this.nMode = null;
     this.nModeDefault = (nMonitorType == ChipSet.MONITOR.MONO? Video.MODES.MDA_80X25 : Video.MODES.CGA_80X25);
 
@@ -2318,18 +2318,18 @@ Video.prototype.reset = function()
          * as a way of testing whether our font(s) were successfully loaded.  It's assumed
          * that our default display mode is a text mode, and that since this is a reset,
          * the CRTC.START_ADDR registers are zero as well.
-         * 
+         *
          * If this is an MDA device, then the buffer should reside at 0xB0000 through 0xB0FFF,
          * for a total length of 4Kb (0x1000), where every even byte contains a character code,
          * and every odd byte contains an attribute code.  See the ATTR bit definitions above for
          * applicable color, intensity, and blink values.  On a CGA device, the buffer resides
          * at 0xB8000 through 0xBBFFF, for a total length of 16Kb.
-         *      
+         *
          * Note that the only valid MDA display mode (7) is the 80x25 text mode, which uses 4000
          * bytes (2000 character bytes + 2000 attribute bytes), not all 4096 bytes; addrScreenLimit
          * reflects the visible limit, not the physical limit.  Also, as noted in updateScreen(),
          * this simplistic calculation of the extent of visible screen memory is valid only for
-         * text modes; in general, it's safer to use cardActive.sizeBuffer as the extent.  
+         * text modes; in general, it's safer to use cardActive.sizeBuffer as the extent.
          */
         var addrScreenLimit = this.cardActive.addrBuffer + this.cbScreen;
         for (var addrScreen = this.cardActive.addrBuffer; addrScreen < addrScreenLimit; addrScreen += 2) {
@@ -2365,7 +2365,7 @@ Video.prototype.enableEGA = function()
 {
     if (!(this.cardEGA.miscReg & Card.MISC.IO_SELECT)) {
         this.cardMono = this.cardEGA;
-        this.cardColor = this.cardCGA;  // this is done mainly to siphon away any CGA I/O 
+        this.cardColor = this.cardCGA;  // this is done mainly to siphon away any CGA I/O
     } else {
         this.cardMono = this.cardMDA;   // similarly, this is done to siphon away any MDA I/O
         this.cardColor = this.cardEGA;
@@ -2374,9 +2374,9 @@ Video.prototype.enableEGA = function()
 
 /**
  * save()
- * 
+ *
  * This implements save support for the Video component.
- * 
+ *
  * @this {Video}
  * @return {Object}
  */
@@ -2392,9 +2392,9 @@ Video.prototype.save = function()
 
 /**
  * restore(data)
- * 
+ *
  * This implements restore support for the Video component.
- * 
+ *
  * @this {Video}
  * @param {Object} data
  * @return {boolean} true if successful, false if failure
@@ -2409,7 +2409,7 @@ Video.prototype.restore = function(data)
     this.cardActive = null;
     this.cardMono = this.cardMDA = new Card(this, Video.CARDS.MDA, data[0]);
     this.cardColor = this.cardCGA = new Card(this, Video.CARDS.CGA, data[1]);
-    
+
     /*
      * If no EGA was originally initialized, then cardEGA will remain uninitialized.
      */
@@ -2426,10 +2426,10 @@ Video.prototype.restore = function(data)
      * setMode() will also take care of mapping the appropriate video buffer.  So, after restore() has
      * finished, we call checkMode(), because the current video mode (nMode) is determined by the
      * active card state.
-     * 
+     *
      * Unfortunately, that creates a chicken-and-egg problem, since I just said I didn't want to select
      * the active card here.
-     * 
+     *
      * So, we'll add some "cop-out" code to checkMode(): if there's no active card, then fall-back
      * to the last known video mode (nMode) and force a call to setMode().
      *
@@ -2476,7 +2476,7 @@ Video.prototype.onLoadSetFonts = function(sFontFile, sFontData, nErrorCode)
         if (abFontData.length == 8192) {
             /*
              * Here are the first few rows of MDA font data, at the 0K and 2K boundaries:
-             * 
+             *
              *      00000000  00 00 00 00 00 00 00 00  00 00 7e 81 a5 81 81 bd  |..........~.....|
              *      00000010  00 00 7e ff db ff ff c3  00 00 00 36 7f 7f 7f 7f  |..~........6....|
              *      ...
@@ -2485,7 +2485,7 @@ Video.prototype.onLoadSetFonts = function(sFontFile, sFontData, nErrorCode)
              *
              * 8 bytes of data from a row in each of the 2K chunks are combined to form a 8-bit wide character with
              * a maximum height of 16 bits.  Assembling the bits for character 0x01 (a happy face), we observe the following:
-             * 
+             *
              *      0 0 0 0 0 0 0 0  <== 00 from offset 0x0008
              *      0 0 0 0 0 0 0 0  <== 00 from offset 0x0009
              *      0 1 1 1 1 1 1 0  <== 7e from offset 0x000A
@@ -2505,24 +2505,24 @@ Video.prototype.onLoadSetFonts = function(sFontFile, sFontData, nErrorCode)
              *
              *  In the second 2K chunk, we observe that the last two bytes of every font cell definition are zero;
              *  this confirms our understanding that MDA font cell size is 8x14.
-             *  
+             *
              *  Finally, there's the issue of screen cell size, which is actually 9x14 on the MDA.  We compensate for that
              *  by building a 9x14 font, even though there's only 8x14 bits of data. As http://www.seasip.info/VintagePC/mda.html
              *  explains:
-             *  
+             *
              *      "For characters C0h-DFh, the ninth pixel column is a duplicate of the eighth; for others, it's blank."
-             *      
+             *
              *  This last point is confirmed by "The IBM Personal Computer From The Inside Out", p.295:
-             *  
+             *
              *      "Another unique feature of the monochrome adapter is a set of line-drawing and area-fill characters that give
              *      continuous lines and filled areas. This is unusual for a display with a 9x14 character box because the character
              *      generator provides a row only eight dots wide. On most displays, a blank 9th dot is then inserted between characters.
              *      On the monochrome display, there is circuitry that duplicates the 8th dot into the 9th dot position for characters
              *      whose ASCII codes are 0xB0 through 0xDF."
-             *      
+             *
              *  The only question is: is the range actually 0xC0-0xDF, or 0xB0-0xDF???  I'll assume the latter, since 0xB0 is where
              *  the line-drawing/area-fill characters appear to begin.
-             *  
+             *
              *  The CGA font is part of the same ROM.  In fact, there are TWO CGA fonts in the ROM: a thin 5x7 "single dot" font
              *  located at offset 0x1000, and a thick 7x7 "double dot" font at offset 0x1800.  The latter is the default font,
              *  unless overridden by a jumper setting on the CGA card, so it is our default CGA font as well (although someday we
@@ -2591,7 +2591,7 @@ Video.prototype.onROMLoad = function(abROM)
 
 /**
  * getCardColors(nBitsPerPixel)
- * 
+ *
  * @param {number} [nBitsPerPixel]
  * @returns {Array}
  */
@@ -2605,22 +2605,22 @@ Video.prototype.getCardColors = function(nBitsPerPixel)
         this.aRGB[1] = Video.aCGAColors[Video.ATTRS.FGND_WHITE];
         return this.aRGB;
     }
-    
+
     if (nBitsPerPixel == 2) {
         /*
          * Of the 4 colors returned, the first color comes from colorReg and the other 3 come from one of
          * the two hard-coded CGA color sets:
-         * 
+         *
          *      Color Set 1             Color Set 2
          *      -----------             -----------
          *      Background (0x00)       Background (0x00)
          *      Green      (0x12)       Cyan       (0x13)
          *      Red        (0x14)       Magenta    (0x15)
          *      Brown      (0x16)       White      (0x17)
-         *      
+         *
          * The numbers in parentheses are the EGA ATC palette register values that the EGA BIOS uses for each
          * color set; on an EGA, I synthesize a fake CGA colorReg value, until I figure out exactly how the EGA
-         * simulates the CGA color palette.  TODO: Figure it out. 
+         * simulates the CGA color palette.  TODO: Figure it out.
          */
         var colorReg = this.cardActive.colorReg;
         if (this.cardActive === this.cardEGA) {
@@ -2636,7 +2636,7 @@ Video.prototype.getCardColors = function(nBitsPerPixel)
         }
         return this.aRGB;
     }
-    
+
     if (this.cardColor === this.cardCGA) {
         /*
          * There's no need to update this.aRGB if we simply want to return a hard-coded set of 16 colors.
@@ -2645,7 +2645,7 @@ Video.prototype.getCardColors = function(nBitsPerPixel)
     }
 
     Component.assert(this.cardColor === this.cardEGA);
-    
+
     var aRegs = (this.cardEGA.aATCRegs[15] != null? this.cardEGA.aATCRegs : Video.aEGAPalDef);
     for (var i = 0; i < this.aRGB.length; i++) {
         var b = aRegs[i] || 0;
@@ -2662,11 +2662,11 @@ Video.prototype.getCardColors = function(nBitsPerPixel)
  *
  * To support partial font rebuilds (required for the EGA), we now preserve the original font data (abFontData),
  * font offsets (aFontOffsets), and font character width (8 for the EGA, undefined for the MDA/CGA).
- * 
+ *
  * TODO: Ultimately, we want to have exactly one dedicated font for the EGA, the data for which we'll read directly
  * from plane 2 of video memory, instead of relying on the original font data in ROM.  Relying on the ROM data was
  * originally just a crutch to help get EGA support bootstrapped.
- * 
+ *
  * Also, for the MDA/CGA, we should be discarding the font data after the first buildFonts() call, because we
  * should not need to ever rebuild the fonts for those cards (both their font patterns and colors were hard-coded).
  *
@@ -2684,57 +2684,57 @@ Video.prototype.setFontData = function(abFontData, aFontOffsets, cxFontChar)
 
 /**
  * buildFonts()
- * 
+ *
  * buildFonts() is called whenever the Video component is reset or restored; we used to build the fonts as soon
  * as the ROM containing them was loaded, and then throw away the underlying font data, but with the EGA's ability
  * to change the color of any font, font building must now be deferred until the reset or restore notifications,
  * ensuring we have access to all the colors the card is currently programmed to use.
- * 
+ *
  * We're also called whenever EGA palette registers are modified, since one or more fonts will likely need
  * to be rebuilt (this is because our fonts contain pre-rendered images of all glyphs for all 16 active colors).
  * Calls to buildFonts() should not be expensive though: the underlying createFont() function rebuilds a font only
  * if its color has actually changed.
- * 
+ *
  * TODO: We should avoid rebuilding fonts when palette registers change in graphics modes.  More importantly, our
  * font code is still written with the assumption that, like the MDA/CGA, the underlying font data never changes.
  * The EGA, however, stores its fonts in plane 2, which means fonts are dynamic; this needs to be fixed.
- * 
+ *
  * Supporting dynamic EGA fonts should not be hard though.  We can get rid of abFontData and simply build a
  * temporary snapshot of all the font bytes in plane 2 of the EGA's video buffer (adwMemory), and pass that on to
  * buildFont() instead.  We'll also need to either invalidate the existing font's color (to trigger a rebuild) or
  * pass a new "force rebuild" flag.
- * 
+ *
  * Once that's done, an added benefit will be that we can build just the font(s) that have been loaded into plane 2,
  * instead of the multitude of fonts that we now build on a just-in-case basis (eg, the MDA font, the 8x8 CGA font
  * for 43-line mode, and so on).
- * 
+ *
  * @this {Video}
  * @return {boolean} true if any or all fonts were (re)built, false if nothing changed
  */
 Video.prototype.buildFonts = function()
 {
     var fChanges = false;
-    
+
     /*
      * There's no point building any fonts if (a) we're in a non-windowed (eg, command-line) environment or
      * (b) no font data was loaded.
      */
     if (window && this.abFontData) {
-        
+
         var offSplit = this.cxFontChar? 0 : 0x0800;
         var cxChar = this.cxFontChar? this.cxFontChar : 9;
-        
+
         if (this.buildFont(Video.FONTS.MDA, this.aFontOffsets[0], offSplit, cxChar, 14, this.abFontData, Video.aMDAColors, Video.aMDAColorMap)) {
             fChanges = true;
         }
-        
+
         var aRGBColors = this.getCardColors();
         offSplit = 0x0000;
         cxChar = this.cxFontChar? this.cxFontChar : 8;
         if (this.buildFont(Video.FONTS.CGA, this.aFontOffsets[1], offSplit, cxChar, 8, this.abFontData, aRGBColors)) {
             fChanges = true;
         }
-        
+
         if (this.cxFontChar) {
             if (this.buildFont(Video.FONTS.EGA, this.aFontOffsets[0], 0, this.cxFontChar, 14, this.abFontData, aRGBColors)) {
                 fChanges = true;
@@ -2748,7 +2748,7 @@ Video.prototype.buildFonts = function()
  * buildFont(nFont, offData, offSplit, cxChar, cyChar, abFontData, aRGBColors, aColorMap)
  *
  * This is a wrapper for createFont() which also takes care loading double-size fonts when fDoubleFont is set.
- * 
+ *
  * @this {Video}
  * @param {number} nFont
  * @param {number} offData is the offset of the font data
@@ -2848,17 +2848,17 @@ Video.prototype.createFontColor = function(font, iColor, rgbColor, nDouble, offD
     /*
      * Now we're ready to create a 16x16 character grid for the specified color.  Note that all
      * the character bits are opaque (alpha=0xff) while all the surrounding bits are transparent
-     * (alpha=0x00, as specified in the 4th byte of rgbOff). 
+     * (alpha=0x00, as specified in the 4th byte of rgbOff).
      *
      * Originally, I created 256 ImageData objects, using context.createImageData(cxChar,cyChar),
      * then setting its pixels to match those of an individual character, and then drawing characters
      * with contextFont.putImageData().  But putImageData() is relatively slow....
-     * 
+     *
      * Now I create a new canvas, with dimensions that allow me to arrange all 256 characters in an
      * 16x16 grid -- much like the "chargen.png" bitmap used in the C1Pjs version of the Video component.
      * Then drawing becomes much the same as before, because it turns out that drawImage() accepts either
      * an image object OR a canvas object.
-     * 
+     *
      * This also yields better performance, since drawImage() is much faster than putImageData().
      * We still have to use putImageData() to build the font canvas, but that's a one-time operation.
      */
@@ -2927,7 +2927,7 @@ Video.prototype.createFontColor = function(font, iColor, rgbColor, nDouble, offD
         this.contextScreen.drawImage(canvasFont, 0, iColor*(font.cyCell<<4), canvasFont.width>>2, font.cyCell<<4, iColor*(font.cxCell<<2), 0, canvasFont.width>>2, font.cyCell<<4);
     }
      */
-    
+
     font.aCanvas[iColor] = canvasFont;
 };
 
@@ -2968,15 +2968,15 @@ Video.prototype.checkBlink = function()
              * At this point, we can either fire up our own timer (doBlink), or rely on updateScreen()
              * being called by the CPU at a regular rate (eg, CPU.VIDEO_UPDATES_PER_SECOND = 60) and advance
              * cBlinks at the start of updateScreen() accordingly.
-             * 
+             *
              * doBlink() wants to increment cBlinks every 266ms.  On the other hand, if updateScreen() is being
              * called 60 times per second, that's about once every 16ms, so if every 16th updateScreen() increments
              * cBlinks, cBlinks should advance at the same rate.
-             * 
+             *
              * The only downside to relying on the CPU driving our blink count is that whenever the CPU is halted
              * (eg, by the PCjs debugger) all blinking stops -- all characters with the blink attribute AND the cursor.
-             * 
-             * But we can simply say that when we halt, we mean "halt everything" (ie, call it a feature). 
+             *
+             * But we can simply say that when we halt, we mean "halt everything" (ie, call it a feature).
              *
              *      this.doBlink(true);
              */
@@ -3008,7 +3008,7 @@ Video.prototype.checkBlink = function()
 Video.prototype.checkCursor = function()
 {
     /*
-     * The "hardware cursor" is never visible in graphics modes. 
+     * The "hardware cursor" is never visible in graphics modes.
      */
     if (!this.nFont) return false;
 
@@ -3036,7 +3036,7 @@ Video.prototype.checkCursor = function()
      * One way of disabling the cursor is to set bit 5 (Card.CRTC.CURSOR_START.BLINKOFF) of the CRTC.CURSOR_START flags;
      * another way is setting bCursorStart > bCursorEnd (unless it's an EGA, in which case we must actually draw a
      * "split block" cursor instead).
-     * 
+     *
      * TODO: Verify whether the second test (bCursorStart > bCursorMax) should also result in a hidden cursor;
      * ThinkTank sets both start and end values to 0x0f, which doesn't make sense on a CGA, where the max is 0x07.
      */
@@ -3058,7 +3058,7 @@ Video.prototype.checkCursor = function()
     /*
      * yCursor and cyCursor are no longer scaled at this point, because the necessary scaling will depend on whether we're
      * drawing the cursor to the on-screen or off-screen buffer, and updateChar() is in the best position to determine that.
-     * 
+     *
      * We also record cyCursorCell, the hardware cell height, since we'll need to know what the yCursor and cyCursor values
      * are relative to when it's time to scale them.
      */
@@ -3193,11 +3193,11 @@ Video.prototype.setAccess = function(nAccess)
 {
     var card = this.cardActive;
     if (nAccess != null && card && nAccess != card.nAccess) {
-        
+
         if (DEBUG) this.messageDebugger("setAccess(0x" + str.toHexWord(nAccess) + ")");
-        
+
         card.setMemoryAccess(nAccess);
-        
+
         /*
          * Note that setMemoryAccess() can fail, in which case it will an report error, indicating either a
          * misconfiguration or some sort of internal inconsistency; in any case, there's not much we can do about
@@ -3211,7 +3211,7 @@ Video.prototype.setAccess = function(nAccess)
 
 /**
  * setDimensions()
- * 
+ *
  * @this {Video}
  */
 Video.prototype.setDimensions = function()
@@ -3234,9 +3234,9 @@ Video.prototype.setDimensions = function()
              * When an EGA is connected to a CGA monitor, the old aModeParms table is correct: we must
              * use the hard-coded 8x8 "CGA_80" font.  But when it's connected to an EGA monitor, we want
              * to use the 9x14 "EGA" color font instead.
-             * 
+             *
              * TODO: Can an EGA with a monochrome monitor be programmed for 43-line mode as well?  If so,
-             * then we'll need to load another MDA font variation, because we only load an 9x14 font for MDA.  
+             * then we'll need to load another MDA font variation, because we only load an 9x14 font for MDA.
              */
             if (this.cardActive === this.cardEGA && this.nFont == Video.FONTS.CGA) {
                 if (this.cardEGA.aCRTCRegs[Card.CRTC.MAX_SCAN_LINE] == 7) {
@@ -3269,7 +3269,7 @@ Video.prototype.setDimensions = function()
      * If no fonts were successfully loaded, there's no point in initializing the remaining drawing parameters.
      */
     if (!this.aFonts.length) return;
-    
+
     this.cxScreenCell = Math.floor(this.cxScreen / this.nCols);
     this.cyScreenCell = Math.floor(this.cyScreen / this.nRows);
 
@@ -3279,17 +3279,17 @@ Video.prototype.setDimensions = function()
      * fScaleFont setting: if it's false, we draw the characters as-is, with a border if the characters
      * are smaller than the cells; and if fScaleFont is true, we simply tell drawImage to draw the
      * characters to fit.
-     * 
+     *
      * WARNING: The only problem with fScaleFont is that any stretching or shrinking tends to be accompanied
      * by subpixel artifacts along the boundaries of the font images.  Definitely annoying, and apparently
      * there are no standard mechanisms for turning that behavior off. So, for now, I've "neutered" the
      * fScaleFont test slightly, by adding the "nCols == 80" test that prevents scaling from kicking in for
      * 40-column modes.
-     * 
+     *
      * Also, whether scaling or not, if it makes sense to use a "doubled" font, we'll switch the font as
      * well.  Note that the doubled font for any existing font also has an ID that is double the existing ID,
      * making it easy to check for the existence of a font's "double" (shift the ID left by 1).
-     * 
+     *
      * TODO: Since we now use an off-screen buffer for ALL modes, both text and graphics, we should
      * revisit changes that were made to work around subpixel artifacts; those should no longer be an issue.
      */
@@ -3318,12 +3318,12 @@ Video.prototype.setDimensions = function()
                 this.cyScreenCell = font.cyCell;
             }
         }
-        
+
         /*
          * In text modes, we have the option of setting all the *ScreenBuffer variables to null instead of
          * allocating them, because updateChar(), as currently written, is capable of writing characters to
          * either an off-screen or on-screen context.
-         * 
+         *
          *      this.imageScreenBuffer = this.canvasScreenBuffer = this.contextScreenBuffer = null;
          */
         this.cxBuffer = this.cyBuffer = 0;
@@ -3336,10 +3336,10 @@ Video.prototype.setDimensions = function()
          * CGA graphics modes have their "cells" (pixels) split evenly across two halves of the video buffer, with
          * EVEN scan lines in the first half and ODD scan lines in the second half, so unlike text modes, we can't set a
          * limit of what's visible on-screen to "columns * rows", so the screen limit is set to match the buffer limit.
-         * 
+         *
          * In addition, updateScreen() requires an off-screen imageData buffer that matches the size of the entire screen,
          * so that updateScreen() can set all pixels that have changed and then update the screen with a single drawImage().
-         * 
+         *
          * An alternative approach, with a smaller footprint, would be to allocate an off-screen buffer large enough for a
          * single scan line, and redraw one scan line at a time, but given how EVEN and ODD scan lines are spread across the
          * entire buffer, it's not clear there would be enough unchanged scan lines on average to make that approach faster.
@@ -3366,7 +3366,7 @@ Video.prototype.setDimensions = function()
     this.xScreenOffset = this.yScreenOffset = 0;
     this.cxScreenOffset = this.cxScreen;
     this.cyScreenOffset = this.cyScreen;
-    
+
     var cxBorder = this.cxScreen - (this.nCols * this.cxScreenCell);
     var cyBorder = this.cyScreen - (this.nRows * this.cyScreenCell);
     if (cxBorder > 0) {
@@ -3417,7 +3417,7 @@ Video.prototype.checkMode = function(fForce)
              * The sizeBuffer we choose reflects the amount of physical address space that all 4 planes
              * of EGA memory normally span, NOT the total amount of EGA memory.  So for a 64Kb EGA card,
              * we would set card.sizeBuffer to 16Kb (0x4000).
-             * 
+             *
              * TODO: Need to take into account modes that "chain" planes together (eg, mode 0x0F, and
              * presumably mode 0x10, on an EGA card with only 64Kb).
              */
@@ -3484,7 +3484,7 @@ Video.prototype.checkMode = function(fForce)
             /*
              * NOTE: For the CGA, we precondition any mode change on CGA.MODE.VIDEO_ENABLE being set, otherwise
              * we'll get spoofed by the ROM BIOS scroll code, which waits for vertical retrace and then turns CGA.MODE.VIDEO_ENABLE
-             * off, using a hard-coded mode value (0x25) that does NOT necessarily match the the CGA video mode currently in effect.   
+             * off, using a hard-coded mode value (0x25) that does NOT necessarily match the the CGA video mode currently in effect.
              */
             if (!(card.modeReg & Card.CGA.MODE.GRAPHIC_SEL)) {
                 nMode = ((card.modeReg & Card.CGA.MODE._80X25)? Video.MODES.CGA_80X25 : Video.MODES.CGA_40X25);
@@ -3502,7 +3502,7 @@ Video.prototype.checkMode = function(fForce)
      * changes will be moot until the setAccess() call that follows.  Basically, whenever both memory mapping AND access
      * functions are changing, the memory will be in an inconsistent state until both setMode() and setAccess() are
      * finished.
-     * 
+     *
      * The setMode() call takes precedence; if we called setAccess() first, it might attempt to modify memory access
      * functions based on the card's addrBuffer setting, and if that doesn't match what's currently mapped, assertions
      * will be triggered (probably not fatal, but it would defeat the point of the assertions).
@@ -3516,10 +3516,10 @@ Video.prototype.checkMode = function(fForce)
 
 /**
  * setMode(nMode, fForce)
- * 
+ *
  * Set fForce to true to update the mode regardless of previous mode, or false to perform a normal update
  * that bypasses updateScreen() but still calls initCellCache().
- * 
+ *
  * @this {Video}
  * @param {number|null} nMode
  * @param {boolean|undefined} [fForce] is set when checkMode() wants to force a mode update
@@ -3528,29 +3528,29 @@ Video.prototype.checkMode = function(fForce)
 Video.prototype.setMode = function(nMode, fForce)
 {
     if (nMode != null && (nMode != this.nMode || fForce)) {
-        
+
         if (DEBUG) this.messageDebugger("setMode(0x" + str.toHexWord(nMode) + (fForce? ",force" : "") + ")");
-    
+
         this.cUpdates = 0;      // count updateScreen() calls as a means of driving blink updates
         this.nMode = nMode;
-    
+
         /*
          * On an EGA, it's CRITICAL that a reset() invalidate cardActive, to ensure that the code below
          * releases the previous frame buffer and installs a new one, even if there was no change in the
          * frame buffer address or size, because otherwise the Memory blocks installed at the frame buffer
          * address may still be using blocks of the EGA's previous memory buffer.
-         * 
+         *
          * When the EGA is reinitialized, a new memory buffer (adwMemory) is allocated (see initEGA()), and
          * this is where the mapping of that EGA memory buffer to the frame buffer occurs.  Other cards
          * (MDA or CGA) don't allocate/manage their own memory buffer, but even then, it's still a good idea
          * to always force this operation (eg, in case a switch setting changed the active video card).
          */
         var card = this.cardActive || (nMode == Video.MODES.MDA_80X25? this.cardMono : this.cardColor);
-        
+
         if (card != this.cardActive || card.addrBuffer != this.addrBuffer || card.sizeBuffer != this.sizeBuffer) {
-            
+
             this.removeCursor();
-            
+
             if (this.addrBuffer) {
                 if (!this.bus.removeMemory(this.addrBuffer, this.sizeBuffer)) {
                     /*
@@ -3560,13 +3560,13 @@ Video.prototype.setMode = function(nMode, fForce)
                 }
                 if (this.cardActive) this.cardActive.fActive = false;
             }
-            
+
             this.cardActive = card;
             card.fActive = true;
-            
+
             this.addrBuffer = card.addrBuffer;
             this.sizeBuffer = card.sizeBuffer;
-            
+
             var controller = (card === this.cardEGA? card : null);
             if (!this.bus.addMemory(card.addrBuffer, card.sizeBuffer, false, controller)) {
                 /*
@@ -3575,9 +3575,9 @@ Video.prototype.setMode = function(nMode, fForce)
                 return false;
             }
         }
-        
+
         this.setDimensions();
-        
+
         if (fForce !== false) {
             this.updateScreen(true);
         } else {
@@ -3589,7 +3589,7 @@ Video.prototype.setMode = function(nMode, fForce)
 
 /**
  * setPixel(imageData, x, y, rgb)
- * 
+ *
  * Worker function used by createFontColor() and updateScreen() (graphics modes only).
  *
  * @this {Video}
@@ -3609,7 +3609,7 @@ Video.prototype.setPixel = function(imageData, x, y, rgb)
 
 /**
  * initCellCache(fNew)
- * 
+ *
  * Invalidates the contents of our internal cell cache.
  *
  * @this {Video}
@@ -3631,16 +3631,16 @@ Video.prototype.initCellCache = function(fNew)
     for (var iCell = 0; iCell < nCells; iCell++) {
         this.aCellCache[iCell] = -1;        // invalidate every cell of our internal cell cache (-1 is an invalid cell value)
     }
-    this.cBlinkVisible = -1;                // also invalidate the visible blinking character count, to force updateScreen() to recount  
+    this.cBlinkVisible = -1;                // also invalidate the visible blinking character count, to force updateScreen() to recount
 };
 
 /**
  * doBlink()
- * 
+ *
  * This function is obsolete, now that the checkBlink() function is called on every updateScreen()
  * and checkCursor() call.  updateScreen() is driven by the CPU timer, so piggy-backing on that to
- * drive blink updates seems preferable to having another active timer in the system. 
- * 
+ * drive blink updates seems preferable to having another active timer in the system.
+ *
  * @this {Video}
  * @param {boolean} [fStart]
  *
@@ -3686,7 +3686,7 @@ Video.prototype.initCellCache = function(fNew)
 Video.prototype.updateChar = function(col, row, data, context)
 {
     /*
-     * The caller MUST promise this.nFont is defined, and that the font in this.aFonts[this.nFont] has been loaded. 
+     * The caller MUST promise this.nFont is defined, and that the font in this.aFonts[this.nFont] has been loaded.
      */
     var bChar = data & 0xff;
     var bAttr = data >> 8;
@@ -3748,12 +3748,12 @@ Video.prototype.updateChar = function(col, row, data, context)
          *      this.contextScreen.moveTo(xDst, yDst + this.yCursor);
          *      this.contextScreen.lineTo(xDst + this.cxScreenCell, yDst + this.yCursor);
          *      this.contextScreen.stroke();
-         *      
+         *
          * Also, note that we're scaling the yCursor and cyCursor values here, instead of in checkCursor(), because
          * this is where we have all the required information: in the first case (off-screen buffer), the scaling must
          * be based on the font cell size (cxCell, cyCell), whereas in the second case (on-screen buffer), the scaling
          * must be based on the screen cell size (cxScreenCell,cyScreenCell).
-         * 
+         *
          * yCursor and cyCursor are actual hardware values, both relative to another hardware value: cyCursorCell.
          */
         var yCursor = this.yCursor;
@@ -3778,7 +3778,7 @@ Video.prototype.updateChar = function(col, row, data, context)
 
 /**
  * updateScreen(fForce)
- * 
+ *
  * Propagates the video buffer to the cell cache and updates the window with any changes.  Forced updates
  * are generally internal updates triggered by an I/O operation or other state change, while non-forced updates
  * are the periodic updates coming from the CPU.
@@ -3796,7 +3796,7 @@ Video.prototype.updateScreen = function(fForce)
      * The Computer component maintains an fPowered setting on our behalf, so we use it.
      */
     if (!this.fPowered) return;
-    
+
     /*
      * If the card's video signal is disabled (eg, during a mode change), then skip the update,
      * unless fForce is set.
@@ -3810,9 +3810,9 @@ Video.prototype.updateScreen = function(fForce)
             if (this.cardActive.modeReg & Card.CGA.MODE.VIDEO_ENABLE) fEnabled = true;
         }
     }
-    
+
     if (!fEnabled && !fForce) return;
-    
+
     if (fForce) {
         this.initCellCache(true);
     }
@@ -3827,7 +3827,7 @@ Video.prototype.updateScreen = function(fForce)
     /*
      * If cBlinks is "enabled" (ie, >= 0), then advance it once every 16 updateScreen() calls
      * (assuming an updateScreen() frequency of 60 per second; see CPU.VIDEO_UPDATES_PER_SECOND).
-     * 
+     *
      * We assume that the CPU is calling us whenever fForce is undefined.
      */
     var fBlinkUpdate = false;
@@ -3843,19 +3843,19 @@ Video.prototype.updateScreen = function(fForce)
      * Calculate the VISIBLE start of screen memory (addrScreen), not merely the PHYSICAL start,
      * as well as the extent of it (cbScreen) and use those values for all addressing operations
      * to follow.  FYI, in these calculations, offScreen does not refer to "off-screen" memory,
-     * but rather the "offset" of the start of visible screen memory. 
+     * but rather the "offset" of the start of visible screen memory.
      */
     var addrScreen = this.cardActive.addrBuffer;
     var addrScreenLimit = addrScreen + this.cardActive.sizeBuffer;
     var offScreen = (this.cardActive.aCRTCRegs[Card.CRTC.START_ADDR_HI] << 8) + this.cardActive.aCRTCRegs[Card.CRTC.START_ADDR_LO];
-    
+
     /*
      * Any screen (aka "page") offset must be doubled for text modes, due to the attribute bytes.
      *
      * TODO: Come up with a more robust method of deciding when any screen offset should be doubled.
      */
     if (this.nFont) offScreen <<= 1;
-    
+
     addrScreen += offScreen;
     var cbScreen = this.cbScreen;
     if (addrScreen + cbScreen > addrScreenLimit) {
@@ -3876,7 +3876,7 @@ Video.prototype.updateScreen = function(fForce)
      * AND there are no visible blinking characters (as of the last updateScreen) AND there is
      * no visible cursor, then we're done; simply return.  Otherwise, if there's only a blinking
      * cursor, then update JUST that one cell.
-     * 
+     *
      * When dealing with blinking characters, note that we need to run through the entire buffer
      * ONLY if the low bits of the blink count just transitioned to 2 or 0; hence, we could return if
      * the blink count was ODD.  But we'd still have to worry about the cursor, so it's simpler to blow
@@ -3893,7 +3893,7 @@ Video.prototype.updateScreen = function(fForce)
         }
         // else if (this.cBlinks & 0x1) return;
     }
-    
+
     if (this.nFont) {
         /*
          * This is the text-mode update case.  We're required to FIRST verify that the current font
@@ -3914,7 +3914,7 @@ Video.prototype.updateScreen = function(fForce)
 
 /**
  * updateScreenText(addrScreen, addrScreenLimit, iCell, nCells)
- * 
+ *
  * @param addrScreen
  * @param addrScreenLimit
  * @param iCell
@@ -3923,14 +3923,14 @@ Video.prototype.updateScreen = function(fForce)
 Video.prototype.updateScreenText = function(addrScreen, addrScreenLimit, iCell, nCells)
 {
     var addr, data, dataCache, cUpdated = 0;
-    
+
     /*
      * If MDA.MODE.BLINK_ENABLE is set and a cell's blink bit is set, then if (cBlinks & 0x2) != 0,
      * we want the foreground element of the cell to be drawn; otherwise we don't.  So every 16-bit
      * data word we pull from the video buffer will be supplemented with our own special attribute bit
      * (ATTRS.DRAW_FGND = 0x100) accordingly; and to simplify the drawing code, we will also mask the
      * blink bit from the cell's attribute bits.
-     * 
+     *
      * If MDA.MODE.BLINK_ENABLE is clear, then we always set ATTRS.DRAW_FGND and never mask the blink
      * bit in a cell's attributes bits, since it's actually an intensity bit in that case.
      */
@@ -3973,7 +3973,7 @@ Video.prototype.updateScreenText = function(addrScreen, addrScreenLimit, iCell, 
 
 /**
  * updateScreenGraphicsCGA(addrScreen, addrScreenLimit)
- * 
+ *
  * @param addrScreen
  * @param addrScreenLimit
  */
@@ -3990,7 +3990,7 @@ Video.prototype.updateScreenGraphicsCGA = function(addrScreen, addrScreenLimit)
     var wPixelMask = (nPixelsPerCell == 16? 0x10000 : 0x30000);
     var nPixelShift = (nPixelsPerCell == 16? 1 : 2);
     var aPixelColors = this.getCardColors(nPixelShift);
-    
+
     var x = 0, y = 0;
     var xDirty = this.nCols, xMaxDirty = 0, yDirty = this.nRows, yMaxDirty = 0;
     while (addr < addrScreenLimit) {
@@ -4068,7 +4068,7 @@ Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
     var iCell = 0, nPixelsPerCell = 8;
     var aPixelColors = this.getCardColors();
     var adwMemory = this.cardActive.adwMemory;
-    
+
     var x = 0, y = 0;
     var xDirty = this.nCols, xMaxDirty = 0, yDirty = this.nRows, yMaxDirty = 0;
     while (addr < addrScreenLimit) {
@@ -4116,7 +4116,7 @@ Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
         }
     }
     /*
-     * For a fascinating discussion of the best way to update the screen canvas at this point, see updateScreenGraphicsCGA(). 
+     * For a fascinating discussion of the best way to update the screen canvas at this point, see updateScreenGraphicsCGA().
      */
     if (xDirty < this.nCols) {
         var cxDirty = xMaxDirty - xDirty;
@@ -4297,7 +4297,7 @@ Video.prototype.inStatus0 = function(port, addrFrom)
     var iBit = 3 - ((this.cardEGA.miscReg & Card.MISC.CLK_SELECT) >> 2);    // this is the desired SW # (0-3)
     var bSWBit = (this.bEGASW & (1 << iBit)) << (Card.STATUS0.SWSENSE_SHIFT - iBit);
     var b = ((this.cardEGA.status0 & ~Card.STATUS0.SWSENSE) | bSWBit);
-    /* 
+    /*
      * TODO: Figure out where Card.STATUS0.FEAT bits should come from....
      */
     this.cardEGA.status0 = b;
@@ -4529,7 +4529,7 @@ Video.prototype.outGRCData = function(port, bOut, addrFrom)
         break;
     case Card.GRC.MISC.INDX:
         this.checkMode(false);
-        break;  
+        break;
     case Card.GRC.COLRDC.INDX:
         this.cardEGA.nColorDontCare = Video.aEGAByteToDW[(bOut & 0xf) ^ 0xf] & 0x80808080;
         break;
@@ -4733,7 +4733,7 @@ Video.prototype.outCRTCData = function(card, bOut, addrFrom)
          * During mode changes on the EGA, all the CRTC regs are typically programmed in sequence,
          * and if that's all that's happening with Card.CRTC.MAX_SCAN_LINE, then we don't want to treat
          * it special; let the mode change be detected normally (eg, when the GRC regs are written later).
-         * 
+         *
          * On the other hand, if this was an out-of-sequence write to Card.CRTC.MAX_SCAN_LINE, then
          * yes, we want to force setMode() to call setDimensions(), which is key to setting the proper
          * number of screen rows.
@@ -4819,26 +4819,26 @@ Video.prototype.inCardStatus = function(card, addrFrom)
     if (card === this.cardEGA) {
         /*
          * STATUS1 diagnostic bits 5 and 4 are set according to the Card.ATC.PLANES.MUX bits:
-         * 
+         *
          *      MUX     Bit 5   Bit 4
          *      ---     ----    ----
          *      00:     Red     Blue
          *      01:     SecBlue Green
          *      10:     SecRed  SecGreen
          *      11:     unused  unused
-         *      
+         *
          * Depending on where we are in the horizontal and vertical periods (which can be inferred from the
          * same elapsed cycle count that we used to simulate the retrace bits above), we could extract 4 bits
          * from a corresponding region of the video buffer, "and" them with Card.ATC.PLANES.MASK, use
          * that to index into the palette registers (cardEGA.aATCRegs), and use the resulting palette register
          * bits to set these diagnostics bits.  However, that's all rather tedious, and the process of extracting
          * 4 appropriate bits from the video buffer varies depending on the video mode.
-         * 
+         *
          * Why are we even considering this?  Because the EGA BIOS diagnostic code draws a bright reverse-video
          * line of text blocks across the top of the screen, writes 0x3F to palette register 0x0f, and then
          * monitors the STATUS1 diagnostic bits, waiting for those palette bits to show up.  It turns out, however,
          * that we can easily fool the EGA BIOS by simply toggling the diagnostic bits.  So we take the easy way out.
-         * 
+         *
          * TODO: Faithful emulation of these bits is certainly doable, so consider doing it at some point.
          */
         b |= ((card.statusReg & Card.STATUS1.DIAGNOSTIC) ^ Card.STATUS1.DIAGNOSTIC);
@@ -4852,7 +4852,7 @@ Video.prototype.inCardStatus = function(card, addrFrom)
         /*
          * On the MDA/CGA, to satisfy ROM BIOS testing ("TEST.10"), it's sufficient to do a simple toggle of
          * bits 0 and 3 on every read.
-         * 
+         *
          * Also, according to http://www.seasip.info/VintagePC/mda.html, on an MDA, bits 7-4 are always ON and bits 2-1
          * are always OFF, hence the "OR" of 0xf0.
          */
@@ -4889,7 +4889,7 @@ Video.prototype.dumpVideo = function(sParm)
  * messageDebugger(sMessage)
  *
  * This is a combination of the Debugger's messageEnabled(MESSAGE_VIDEO) and message() functions, for convenience.
- * 
+ *
  * @this {Video}
  * @param {boolean} [fForce] to display the message regardless of the MESSAGE_VIDEO setting, provided the Debugger is loaded
  * @param {string} sMessage is any caller-defined message string
@@ -4907,7 +4907,7 @@ Video.prototype.messageDebugger = function(sMessage, fForce)
  * messagePort(port, bOut, addrFrom, name, bIn)
  *
  * This is an internal version of the Debugger's messagePort() function, for convenience.
- * 
+ *
  * @this {Video}
  * @param {number} port
  * @param {number|null} bOut if an output operation
@@ -4924,7 +4924,7 @@ Video.prototype.messagePort = function(port, bOut, addrFrom, name, bIn)
 
 /*
  * Port input/output notification tables
- * 
+ *
  * TODO: I added some "duplicate" entries for the MDA because, according to docs I'd read, MDA ports are
  * decoded at multiple addresses.  However, if this is important, then it should be verified and implemented
  * consistently (eg, for CGA as well).  For now, I'm decoding only the standard port addresses.
@@ -4975,7 +4975,7 @@ Video.aEGAPortInput = {
 Video.aEGAPortOutput = {
     0x3BA: Video.prototype.outFeat,
     0x3C0: Video.prototype.outATC,
-    0x3C1: Video.prototype.outATC,              // the EGA BIOS writes to this port (see C000:0416), implying that 0x3C0 and 0x3C1 both decode the same register 
+    0x3C1: Video.prototype.outATC,              // the EGA BIOS writes to this port (see C000:0416), implying that 0x3C0 and 0x3C1 both decode the same register
     0x3C2: Video.prototype.outMisc,             // FYI, since this overlaps with STATUS0.PORT, there's currently no way for the Debugger to read the Misc register
     0x3C4: Video.prototype.outSEQIndx,
     0x3C5: Video.prototype.outSEQData,
@@ -5002,17 +5002,17 @@ Video.init = function()
     for (var iVideo = 0; iVideo < aeVideo.length; iVideo++) {
         var eVideo = aeVideo[iVideo];
         var parmsVideo = Component.getComponentParms(eVideo);
-        
+
         var eCanvas = window.document.createElement("canvas");
         if (eCanvas === undefined) {
             eVideo.innerHTML = "<br/>Missing &lt;canvas&gt; support; try a new web browser.";
             return;
         }
-        
+
         eCanvas.setAttribute("class", PCJSCLASS + "-canvas");
         eCanvas.setAttribute("width", parmsVideo['screenWidth']);
         eCanvas.setAttribute("height", parmsVideo['screenHeight']);
-        
+
         /*
          * As noted in keyboard.js, the keyboard on an iOS device pops up with the SHIFT key depressed,
          * which is not the initial keyboard state that the Keyboard component expects. I originally tried
@@ -5029,12 +5029,12 @@ Video.init = function()
          * HACK: A canvas style of "auto" provides for excellent responsive canvas scaling in EVERY browser
          * except IE9/IE10, so I recalculate the appropriate CSS height every time the parent DIV is resized;
          * IE11 works without this hack, so we take advantage of the fact that IE11 doesn't report itself as "MSIE".
-         * 
+         *
          * Also, make sure the parent DIV also has a style of "auto"; normally, it has no explicit height, but
          * sometimes we'll preset it to a height (eg, "350px") for design purposes.
          */
         eCanvas.style.height = eVideo.style.height = "auto";
-        
+
         if (web.getUserAgent().indexOf("MSIE") >= 0) {
             eCanvas.style.height = (((eVideo.clientWidth * parmsVideo['screenHeight']) / parmsVideo['screenWidth']) | 0) + "px";
             eVideo.onresize = function(eParent, eChild, cx, cy) {
@@ -5044,23 +5044,23 @@ Video.init = function()
             }(eVideo, eCanvas, parmsVideo['screenWidth'], parmsVideo['screenHeight']);      // jshint ignore:line
         }
         eVideo.appendChild(eCanvas);
-        
+
         /*
          * HACK: Android-based browsers (eg, the Kindle Fire browser, the Chrome browser) don't honor the
          * "contenteditable" attribute; that is, when the canvas receives focus, they don't activate the on-screen
          * keyboard.  So my fallback is to create a transparent textarea on top of the canvas.
-         * 
+         *
          * We depend upon the containing DIV (and/or its parent DIV) to have a style of "position:relative" (which
          * all elements of class "pcjs-container" should have) so that we can position the textarea using absolute
          * coordinates.  Also, we don't want the textarea to be visible, but we must use "opacity:0" instead of
          * "visibility:hidden", because the latter prevents the element from receiving events.
-         * 
+         *
          * UPDATE: Unfortunately, Android keyboards like to compose whole words before transmitting any of the
          * intervening characters; our textarea's keyDown/keyUp event handlers DO receive intervening key events,
          * but their keyCode and charCode properties are ZERO.  Virtually the only usable key event we receive is
          * the Enter key, which makes this hack useless.  Android users will have to use machines that display
          * their own on-screen keyboard, or use an external keyboard.
-         * 
+         *
          * See this Chromium issue for more information: https://code.google.com/p/chromium/issues/detail?id=118639
          *
         var eTextArea = window.document.createElement("textarea");
@@ -5069,13 +5069,13 @@ Video.init = function()
          *
          * The following test failed as well.  You can clearly see the overlaid semi-transparent password-enabled
          * input field, but none of the input characters are passed along, with the exception of the "Go" (Enter) key.
-         * 
+         *
         var eInput = window.document.createElement("input");
         eInput.setAttribute("type", "password");
         eInput.setAttribute("style", "position:absolute; left:0; top:0; width:100%; height:100%; opacity:0.5");
         eVideo.appendChild(eInput);
          */
-        
+
         /*
          * Now we can create the Video object, record it, and wire it up to the associated document elements.
          */
@@ -5084,7 +5084,7 @@ Video.init = function()
 
         /*
          * Bind any video-specific controls (eg, the Refresh button). There are no essential controls, however;
-         * even the "Refresh" button is just a diagnostic tool, to ensure that the screen contents are up-to-date. 
+         * even the "Refresh" button is just a diagnostic tool, to ensure that the screen contents are up-to-date.
          */
         Component.bindComponentControls(video, eVideo, PCJSCLASS);
     }

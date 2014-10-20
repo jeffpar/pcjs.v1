@@ -34,10 +34,10 @@
 "use strict";
 
 if (typeof module !== 'undefined') {
-    var web = require("../../shared/lib/weblib");
-    var Component = require("../../shared/lib/component");
-    var ChipSet = require("./chipset");
-    var State = require("./state");
+    var web         = require("../../shared/lib/weblib");
+    var Component   = require("../../shared/lib/component");
+    var ChipSet     = require("./chipset");
+    var State       = require("./state");
 }
 
 /**
@@ -57,7 +57,7 @@ if (typeof module !== 'undefined') {
  *
  * DOS typically names the Primary adapter "COM1" and the Secondary adapter "COM2", but I prefer
  * to stick to adapter numbers, since not all operating systems follow those naming conventions.
- * 
+ *
  * @constructor
  * @extends Component
  * @param {Object} parmsSerial
@@ -82,7 +82,7 @@ function SerialPort(parmsSerial) {
 
     /**
      * controlIOBuffer is a DOM element, if any, bound to the port (currently for output purposes only; see echoByte())
-     * 
+     *
      * @type {Object}
      */
     this.controlIOBuffer = null;
@@ -98,12 +98,12 @@ function SerialPort(parmsSerial) {
  * property {number} portBase
  * property {number} nIRQ
  * property {Object} controlIOBuffer is a DOM element, if any, bound to the port (for rudimentary output; see echoByte())
- * 
+ *
  * NOTE: This class declaration started as a way of informing the code inspector of the controlIOBuffer property,
  * which remained undefined until a setBinding() call set it later, but I've since decided that explicitly
  * initializing such properties in the constructor is a better way to go -- even though it's more code -- because
  * JavaScript compilers are supposed to be happier when the underlying object structures aren't constantly changing.
- * 
+ *
  * Besides, I'm not sure I want to get into documenting every property this way, for this or any/every other class,
  * let alone getting into which ones should be considered private or protected, because PCjs isn't really a library
  * for third-party apps.
@@ -113,10 +113,10 @@ Component.subclass(Component, SerialPort);
 
 /*
  * Internal name used for the I/O buffer control, if any, that we bind to the SerialPort.
- * 
+ *
  * Alternatively, if SerialPort wants to use another component's control (eg, the Panel's
  * "print" control), it can specify the name of that control with the 'binding' property.
- * 
+ *
  * For that binding to succeed, we also need to know the target component; for now, that's
  * been hard-coded to "Panel", in part because that's one of the few components we can rely
  * upon initializing before we do, but it would be a simple matter to include a component type
@@ -126,11 +126,11 @@ SerialPort.sIOBuffer = "buffer";
 
 /*
  * 8250 I/O register offsets (add these to a I/O base address to obtain an I/O port address)
- * 
+ *
  * NOTE: DLL.REG and DLM.REG form a 16-bit divisor into a clock input frequency of 1.8432Mhz.  The following
  * values should be used for the corresponding baud rates.  Rates above 9600 are discouraged by the IBM Tech Ref,
  * but rates as high as 128000 are listed on the NS8250A data sheet.
- * 
+ *
  *      Divisor     Rate        Percent Error
  *      0x0900      50
  *      0x0600      75
@@ -142,7 +142,7 @@ SerialPort.sIOBuffer = "buffer";
  *      0x0060      1200
  *      0x0040      1800
  *      0x003A      2000        0.69%
- *      0x0030      2400 
+ *      0x0030      2400
  *      0x0020      3600
  *      0x0018      4800
  *      0x0010      7200
@@ -173,7 +173,7 @@ SerialPort.IER.UNUSED       = 0xF0;     // always zero
 
 /*
  * Interrupt ID Register (IIR.REG, offset 2)
- * 
+ *
  * All interrupt conditions cleared by reading the corresponding register (or, in the case of IRR_INT_THR, writing a new value to THR.REG)
  */
 SerialPort.IIR = {};
@@ -216,7 +216,7 @@ SerialPort.MCR.UNUSED       = 0xE0;     // always zero
 
 /*
  * Line Status Register (LSR.REG, offset 5)
- * 
+ *
  * NOTE: I've seen different specs for the LSR_TSRE.  I'm following the IBM Tech Ref's lead here, but the data sheet I have calls it TEMT
  * instead of TSRE, and claims that it is set whenever BOTH the THR and TSR are empty, and clear whenever EITHER the THR or TSR contain data.
  */
@@ -247,7 +247,7 @@ SerialPort.MSR.RLSD         = 0x80;     // complement of the RLSD (Received Line
 
 /**
  * attachMouse(id, mouse)
- * 
+ *
  * @this {SerialPort}
  * @param {string} id
  * @param {Mouse} mouse component
@@ -265,7 +265,7 @@ SerialPort.prototype.attachMouse = function(id, mouse) {
  * syncMouse()
  *
  * NOTE: This is probably obsolete, but the Mouse component still might discover a need for it.  See Mouse.powerUp().
- * 
+ *
  * @this {SerialPort}
  *
 SerialPort.prototype.syncMouse = function() {
@@ -275,7 +275,7 @@ SerialPort.prototype.syncMouse = function() {
 
 /**
  * setBinding(sHTMLClass, sHTMLType, sBinding, control)
- * 
+ *
  * @this {SerialPort}
  * @param {string|null} sHTMLClass is the class of the HTML control (eg, "input", "output")
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
@@ -291,7 +291,7 @@ SerialPort.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, cont
         /*
          * By establishing an onkeypress handler here, we make it possible for DOS commands like
          * "CTTY COM1" to more or less work (use "CTTY CON" to restore control to the DOS console).
-         * 
+         *
          * WARNING: This isn't really a supported feature yet; very much a work-in-progress.
          */
         control.onkeydown = function onKeyDownSerial(event) {
@@ -316,7 +316,7 @@ SerialPort.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, cont
             serial.sendRBR([charCode]);
         };
         return true;
-    
+
     default:
         break;
     }
@@ -325,7 +325,7 @@ SerialPort.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, cont
 
 /**
  * initBus(cmp, bus, cpu, dbg)
- * 
+ *
  * @this {SerialPort}
  * @param {Computer} cmp
  * @param {Bus} bus
@@ -347,7 +347,7 @@ SerialPort.prototype.initBus = function(cmp, bus, cpu, dbg) {
 
 /**
  * powerUp(data, fRepower)
- * 
+ *
  * @this {SerialPort}
  * @param {Object|null} data
  * @param {boolean} [fRepower]
@@ -366,7 +366,7 @@ SerialPort.prototype.powerUp = function(data, fRepower) {
 
 /**
  * powerDown(fSave)
- * 
+ *
  * @this {SerialPort}
  * @param {boolean} fSave
  * @return {Object|boolean}
@@ -377,7 +377,7 @@ SerialPort.prototype.powerDown = function(fSave) {
 
 /**
  * reset()
- * 
+ *
  * @this {SerialPort}
  */
 SerialPort.prototype.reset = function() {
@@ -388,7 +388,7 @@ SerialPort.prototype.reset = function() {
  * save()
  *
  * This implements save support for the SerialPort component.
- * 
+ *
  * @this {SerialPort}
  * @return {Object}
  */
@@ -402,7 +402,7 @@ SerialPort.prototype.save = function() {
  * restore(data)
  *
  * This implements restore support for the SerialPort component.
- * 
+ *
  * @this {SerialPort}
  * @param {Object} data
  * @return {boolean} true if successful, false if failure
@@ -413,7 +413,7 @@ SerialPort.prototype.restore = function(data) {
 
 /**
  * initState(data)
- * 
+ *
  * @this {SerialPort}
  * @param {Array} [data]
  * @return {boolean} true if successful, false if failure
@@ -454,7 +454,7 @@ SerialPort.prototype.initState = function(data) {
 
 /**
  * saveRegisters()
- * 
+ *
  * @this {SerialPort}
  * @return {Array}
  */
@@ -476,7 +476,7 @@ SerialPort.prototype.saveRegisters = function() {
 
 /**
  * sendRBR(ab)
- * 
+ *
  * @this {SerialPort}
  * @param {Array} ab is an array of bytes to propagate to the bRBR (Receiver Buffer Register)
  */
@@ -487,7 +487,7 @@ SerialPort.prototype.sendRBR = function(ab) {
 
 /**
  * advanceRBR()
- * 
+ *
  * @this {SerialPort}
  */
 SerialPort.prototype.advanceRBR = function() {
@@ -500,7 +500,7 @@ SerialPort.prototype.advanceRBR = function() {
 
 /**
  * inRBR(port, addrFrom)
- * 
+ *
  * @this {SerialPort}
  * @param {number} port (0x3F8 or 0x2F8)
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
@@ -516,7 +516,7 @@ SerialPort.prototype.inRBR = function(port, addrFrom) {
 
 /**
  * inIER(port, addrFrom)
- * 
+ *
  * @this {SerialPort}
  * @param {number} port (0x3F9 or 0x2F9)
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
@@ -530,7 +530,7 @@ SerialPort.prototype.inIER = function(port, addrFrom) {
 
 /**
  * inIIR(port, addrFrom)
- * 
+ *
  * @this {SerialPort}
  * @param {number} port (0x3FA or 0x2FA)
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
@@ -544,7 +544,7 @@ SerialPort.prototype.inIIR = function(port, addrFrom) {
 
 /**
  * inLCR(port, addrFrom)
- * 
+ *
  * @this {SerialPort}
  * @param {number} port (0x3FB or 0x2FB)
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
@@ -558,7 +558,7 @@ SerialPort.prototype.inLCR = function(port, addrFrom) {
 
 /**
  * inMCR(port, addrFrom)
- * 
+ *
  * @this {SerialPort}
  * @param {number} port (0x3FC or 0x2FC)
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
@@ -572,7 +572,7 @@ SerialPort.prototype.inMCR = function(port, addrFrom) {
 
 /**
  * inLSR(port, addrFrom)
- * 
+ *
  * @this {SerialPort}
  * @param {number} port (0x3FD or 0x2FD)
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
@@ -586,7 +586,7 @@ SerialPort.prototype.inLSR = function(port, addrFrom) {
 
 /**
  * inMSR(port, addrFrom)
- * 
+ *
  * @this {SerialPort}
  * @param {number} port (0x3FE or 0x2FE)
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
@@ -600,7 +600,7 @@ SerialPort.prototype.inMSR = function(port, addrFrom) {
 
 /**
  * outTHR(port, bOut, addrFrom)
- * 
+ *
  * @this {SerialPort}
  * @param {number} port (0x3F8 or 0x2F8)
  * @param {number} bOut
@@ -624,7 +624,7 @@ SerialPort.prototype.outTHR = function(port, bOut, addrFrom) {
 
 /**
  * outIER(port, bOut, addrFrom)
- * 
+ *
  * @this {SerialPort}
  * @param {number} port (0x3F9 or 0x2F9)
  * @param {number} bOut
@@ -641,7 +641,7 @@ SerialPort.prototype.outIER = function(port, bOut, addrFrom) {
 
 /**
  * outLCR(port, bOut, addrFrom)
- * 
+ *
  * @this {SerialPort}
  * @param {number} port (0x3FB or 0x2FB)
  * @param {number} bOut
@@ -654,7 +654,7 @@ SerialPort.prototype.outLCR = function(port, bOut, addrFrom) {
 
 /**
  * outMCR(port, bOut, addrFrom)
- * 
+ *
  * @this {SerialPort}
  * @param {number} port (0x3FC or 0x2FC)
  * @param {number} bOut
@@ -671,7 +671,7 @@ SerialPort.prototype.outMCR = function(port, bOut, addrFrom) {
 
 /**
  * updateIRR()
- * 
+ *
  * @this {SerialPort}
  */
 SerialPort.prototype.updateIRR = function() {
@@ -691,7 +691,7 @@ SerialPort.prototype.updateIRR = function() {
 
 /**
  * echoByte(b)
- * 
+ *
  * @this {SerialPort}
  * @param {number} b
  * @return {boolean} true if echoed, false if not
@@ -715,7 +715,7 @@ SerialPort.prototype.echoByte = function(b) {
  * messageDebugger(sMessage)
  *
  * This is a combination of the Debugger's messageEnabled(MESSAGE_SERIAL) and message() functions, for convenience.
- * 
+ *
  * @this {SerialPort}
  * @param {string} sMessage is any caller-defined message string
  */
@@ -731,7 +731,7 @@ SerialPort.prototype.messageDebugger = function(sMessage) {
  * messagePort(port, bOut, addrFrom, name, bIn)
  *
  * This is an internal version of the Debugger's messagePort() function, for convenience.
- * 
+ *
  * @this {SerialPort}
  * @param {number} port
  * @param {number|null} bOut if an output operation

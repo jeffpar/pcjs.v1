@@ -34,7 +34,7 @@
 "use strict";
 
 if (typeof module !== 'undefined') {
-    var X86 = require("./x86");
+    var X86         = require("./x86");
 }
 
 var X86Mods = {
@@ -15350,7 +15350,7 @@ var X86Mods = {
      * mod=11 (reg:dst)  reg=110 (afnGrp[6])  r/m=100 (SP)
      */
     opModGrpWordF4: function(afnGrp, fnSrc) {
-        this.opFlags |= X86.OPFLAG.PUSHSP;  // we limit this hack to the only ModRM function that calls opGrpPUSHw() with SP 
+        this.opFlags |= X86.OPFLAG.PUSHSP;  // we limit this hack to the only ModRM function that calls opGrpPUSHw() with SP
         this.regSP = afnGrp[6].call(this, this.regSP, fnSrc.call(this));
     },
     /**

@@ -34,15 +34,15 @@
 "use strict";
 
 if (typeof module !== 'undefined') {
-    var str = require("../../shared/lib/strlib");
-    var Component = require("../../shared/lib/component");
-    var Memory = require("./mem");
-    var State = require("./state");
+    var str         = require("../../shared/lib/strlib");
+    var Component   = require("../../shared/lib/component");
+    var Memory      = require("./mem");
+    var State       = require("./state");
 }
 
 /**
  * Bus(cpu, dbg)
- * 
+ *
  * The Bus component manages "physical" memory and I/O address spaces.
  *
  * The Bus component has no UI elements, so it does not require an init() handler,
@@ -81,7 +81,7 @@ function Bus(parmsBus, cpu, dbg)
 
     /*
      * Compute all the Bus memory block addressing values that we rely on, based on the width of the bus.
-     * 
+     *
      * Regarding this.blockTotal, we want to avoid address-overflow-detection expressions like:
      *
      *      iBlock < this.blockTotal? iBlock : 0
@@ -106,12 +106,12 @@ function Bus(parmsBus, cpu, dbg)
      *      this.blockLimit     Bus.BLOCK.LIMIT     0xfff
      *      this.blockTotal     Bus.BLOCK.TOTAL     ((this.addrLimit + this.blockSize) / this.blockSize) | 0
      *      this.blockMask      Bus.BLOCK.MASK      (this.blockTotal - 1)   (ie, 0xff)
-     *      
+     *
      * Note that the blockShift calculation below chooses a 4Kb physical memory block size for a 20-bit bus
      * (1Mb address space) and a 16Kb physical memory block for a 24-bit bus (16Mb address space).  This yields
      * a 256-block array for the smaller bus and a 1024-block array for the larger bus.  If we left the block
      * size at 4Kb in all cases, we'd end up with a 4096-block array for an 80286, which seems a bit excessive.
-     * 
+     *
      * I can't think of any reason why a coarser block granularity (of 16Kb) should hurt anything, other than
      * wasting a little memory for ROMs smaller than the block size.  Realize that this is strictly a physical
      * memory implementation detail, which should have no bearing on segment or page granularity of any future
@@ -138,11 +138,11 @@ function Bus(parmsBus, cpu, dbg)
      * WARNING: Unlike the (old) read and write memory notification functions, these support only one
      * pair of input/output functions per port.  A more sophisticated architecture could support a list
      * of chained functions across multiple components, but I doubt that will be necessary here.
-     * 
+     *
      * UPDATE: The Debugger now piggy-backs on these arrays to indicate ports for which it wants notification
      * of I/O.  In those cases, the registered component/function elements may or may not be set, but the following
      * additional element will be set:
-     * 
+     *
      *      [2]: true to break on I/O, false to ignore I/O
      *
      * The false case is important if fPortInputBreakAll and/or fPortOutputBreakAll is set, because it allows the
@@ -163,7 +163,7 @@ Component.subclass(Component, Bus);
 
 /**
  * initMemory()
- * 
+ *
  * Allocate enough (empty) Memory blocks to span the entire physical address space.
  *
  * @this {Bus}
@@ -192,7 +192,7 @@ Bus.prototype.reset = function()
 
 /**
  * addMemory(addr, size, fReadOnly, controller)
- * 
+ *
  * Adds new Memory blocks to the specified address range.  Any Memory blocks previously
  * added to that range must first be removed via removeMemory(); otherwise, you'll get
  * an allocation conflict error.  Moreover, the address range must start at a block-granular
@@ -228,7 +228,7 @@ Bus.prototype.addMemory = function(addr, size, fReadOnly, controller)
 
 /**
  * cleanMemory(addr, size)
- * 
+ *
  * @this {Bus}
  * @param {number} addr
  * @param {number} size
@@ -318,7 +318,7 @@ Bus.prototype.setMemoryAccess = function(addr, size, afn)
  * removeMemory(addr, size)
  *
  * Replaces every block in the specified address range with empty Memory blocks that will ignore all reads/writes.
- * 
+ *
  * @this {Bus}
  * @param {number} addr
  * @param {number} size
@@ -410,7 +410,7 @@ Bus.prototype.setWordDirect = function(addr, w)
  * All dirty blocks will be stored in a single array, as pairs of block numbers and data arrays, like so:
  *
  *      [iBlock0, [dw0, dw1, ...], iBlock1, [dw0, dw1, ...], ...]
- *      
+ *
  * In a normal 4Kb block, there will be 1K DWORD values in the data array.  Remember that each DWORD is a signed 32-bit
  * integer (because they are formed using bit-wise operator rather than floating-point math operators), so don't be
  * surprised to see negative numbers in the data.
@@ -459,7 +459,7 @@ Bus.prototype.saveMemory = function()
  * component to be restored, all those blocks (and their attributes) should be in place now.
  *
  * See saveMemory() for a description of how the memory block contents are saved.
- * 
+ *
  * @this {Bus}
  * @param {Array} a
  * @return {boolean} true if successful, false if not
@@ -490,7 +490,7 @@ Bus.prototype.restoreMemory = function(a)
 
 /**
  * addMemoryBreakpoint(addr, fWrite)
- * 
+ *
  * @this {Bus}
  * @param {number} addr
  * @param {boolean} fWrite is true for a memory write breakpoint, false for a memory read breakpoint
@@ -505,7 +505,7 @@ Bus.prototype.addMemoryBreakpoint = function(addr, fWrite)
 
 /**
  * removeMemoryBreakpoint(addr, fWrite)
- * 
+ *
  * @this {Bus}
  * @param {number} addr
  * @param {boolean} fWrite is true for a memory write breakpoint, false for a memory read breakpoint
@@ -540,7 +540,7 @@ Bus.prototype.addPortInputBreak = function(port)
 
 /**
  * addPortInputNotify(start, end, component, fn)
- * 
+ *
  * Add a port input-notification handler to the list of such handlers.
  *
  * @this {Bus}
@@ -565,7 +565,7 @@ Bus.prototype.addPortInputNotify = function(start, end, component, fn)
 
 /**
  * addPortInputTable(component, table, offset)
- * 
+ *
  * Add port input-notification handlers from the specified table (a batch version of addPortInputNotify)
  *
  * @this {Bus}
@@ -578,7 +578,7 @@ Bus.prototype.addPortInputTable = function(component, table, offset)
     if (offset === undefined) offset = 0;
     for (var port in table) {
         /*
-         * JavaScript coerces property keys to strings, so we use parseInt() to coerce them back to numbers. 
+         * JavaScript coerces property keys to strings, so we use parseInt() to coerce them back to numbers.
          */
         port = parseInt(port, 10);
         this.addPortInputNotify(port + offset, port + offset, component, table[port]);
@@ -587,7 +587,7 @@ Bus.prototype.addPortInputTable = function(component, table, offset)
 
 /**
  * checkPortInputNotify(port, addrFrom)
- * 
+ *
  * @this {Bus}
  * @param {number} port
  * @param {number} [addrFrom] is the EIP value at the time of the input
@@ -619,7 +619,7 @@ Bus.prototype.checkPortInputNotify = function(port, addrFrom)
 
 /**
  * removePortInputNotify(start, end, component, fn)
- * 
+ *
  * Remove a port input-notification handler from the list of such handlers (to be ENABLED later if needed)
  *
  * @this {Bus}
@@ -660,7 +660,7 @@ Bus.prototype.addPortOutputBreak = function(port)
 
 /**
  * addPortOutputNotify(start, end, component, fn)
- * 
+ *
  * Add a port output-notification handler to the list of such handlers.
  *
  * @this {Bus}
@@ -685,7 +685,7 @@ Bus.prototype.addPortOutputNotify = function(start, end, component, fn)
 
 /**
  * addPortOutputTable(component, table, offset)
- * 
+ *
  * Add port output-notification handlers from the specified table (a batch version of addPortOutputNotify)
  *
  * @this {Bus}
@@ -698,7 +698,7 @@ Bus.prototype.addPortOutputTable = function(component, table, offset)
     if (offset === undefined) offset = 0;
     for (var port in table) {
         /*
-         * JavaScript converts property keys to strings (brilliant), so we use parseInt() to convert them back to numbers. 
+         * JavaScript converts property keys to strings (brilliant), so we use parseInt() to convert them back to numbers.
          */
         port = parseInt(port, 10);
         this.addPortOutputNotify(port + offset, port + offset, component, table[port]);
@@ -707,7 +707,7 @@ Bus.prototype.addPortOutputTable = function(component, table, offset)
 
 /**
  * checkPortOutputNotify(port, bOut, addrFrom)
- * 
+ *
  * @this {Bus}
  * @param {number} port
  * @param {number} bOut
@@ -734,7 +734,7 @@ Bus.prototype.checkPortOutputNotify = function(port, bOut, addrFrom)
 
 /**
  * removePortOutputNotify(start, end, component, fn)
- * 
+ *
  * Remove a port output-notification handler from the list of such handlers (to be ENABLED later if needed)
  *
  * @this {Bus}

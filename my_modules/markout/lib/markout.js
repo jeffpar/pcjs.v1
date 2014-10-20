@@ -35,30 +35,30 @@
  *
  * TODO: Consider adding support for GFM-style tables, as described [here](https://help.github.com/articles/github-flavored-markdown#tables);
  * this would be nice for a Markdown-based ASCII table, for example.
- * 
+ *
  * TODO: Consider adding support for GFM-style strike-through, as described [here](https://help.github.com/articles/github-flavored-markdown#strikethrough)
- * 
+ *
  * TODO: Consider adding support for anything in the Markdown spec that we don't currently support (but only features that I might actually want to use).
  */
 
 "use strict";
 
-var path = require("path");
-var net = require("../../shared/lib/netlib");
-var proc = require("../../shared/lib/proclib");
-var str = require("../../shared/lib/strlib");
+var path    = require("path");
+var net     = require("../../shared/lib/netlib");
+var proc    = require("../../shared/lib/proclib");
+var str     = require("../../shared/lib/strlib");
 
 /**
  * @class exports
  * @property {string} name
  * @property {string} version
  */
-var pkg = require("../../../package.json");
+var pkg     = require("../../../package.json");
 
 /**
  * fConsole controls diagnostic messages; it is false by default and can be overridden using the
  * setOptions() 'console' property.
- * 
+ *
  * @type {boolean}
  */
 var fConsole = false;
@@ -123,7 +123,7 @@ function MarkOut(sMD, sIndent, req, aParms, fDebug)
 
 /**
  * CLI()
- * 
+ *
  * Provides a command-line interface for the markout module
  *
  * Usage:
@@ -147,7 +147,7 @@ MarkOut.CLI = function()
 {
     var fs = require("fs");
     var path = require("path");
-    
+
     var fDebug = false;
     var args = proc.getArgs();
 
@@ -261,7 +261,7 @@ MarkOut.prototype.getMachines = function()
 
 /**
  * generateID(sText)
- * 
+ *
  * Generate an ID from the given text, by basically converting it to lower case, converting anything
  * that's not a letter or a digit to a hyphen (-), and stripping all leading and trailing hyphens from
  * the result.  Furthermore, if the generated ID is not unique (among the set of ALL generated IDs),
@@ -315,7 +315,7 @@ MarkOut.prototype.convertMD = function(sIndent)
      * to replace any \r\n sequences with \n.
      */
     sMD = str.replaceArray(MarkOut.aHTMLEntities, sMD).replace(/\r\n/g, "\n").replace(/\r/g, "\n");
-    
+
     /*
      * Before performing the original comment-elimination step, a new step has been added that
      * allows blocks of Markdown to be excluded from the Markout process (eg, build instructions
@@ -399,7 +399,7 @@ MarkOut.prototype.convertMD = function(sIndent)
      * Ready to convert all blocks now.
      */
     sMD = this.convertMDBlocks(sMD, sIndent);
-    
+
     /*
      * Post-processing hacks go here.  First off, we would like all <pre>...</pre><pre>...</pre> sequences
      * to become one single (unified) <pre> sequence.
@@ -435,13 +435,13 @@ MarkOut.prototype.convertMDBlocks = function(sMD, sIndent)
 
     sMD = str.replaceArray({"<h######":"<h6", "<h#####":"<h5", "<h####":"<h4", "<h###":"<h3", "<h##":"<h2", "<h#":"<h1"}, sMD);
     sMD = str.replaceArray({"h######>":"h6>", "h#####>":"h5>", "h####>":"h4>", "h###>":"h3>", "h##>":"h2>", "h#>":"h1>"}, sMD);
-    
+
     /*
      * Convert all "Setext-style headers" (ie, series of equal-signs or dashes) to their <h#> equivalents.
      */
     sMD = sMD.replace(/([^\n]+)\n([=-])[=-]*(\n|$)/g, "<h$2>$1</h$2>\n\n");
     sMD = str.replaceArray({"h=>":"h1>", "h->":"h2>"}, sMD);
-    
+
     /*
      * Auto-generate IDs for headings
      */
@@ -710,20 +710,20 @@ MarkOut.prototype.convertMDLines = function(s)
  * we strip the '#' and use the remainder of the link as the name of the anchor.  To reference a named
  * anchor from another link, you have to specify a path with '#' and the anchor name appended, in order
  * to distinguish an anchor name from an anchor reference.
- * 
+ *
  * Note that the need for named anchors is somewhat diminished now that I automatically generate IDs for
  * all heading tags (eg, <h1>); refer to the generateID() function that's used in convertMDBlocks().
- * 
+ *
  * Another extension to Markdown that I've added is detecting empty parentheses alongside a likely URL,
  * and automatically converting it to a link; eg:
- * 
+ *
  *      [http://www.ascii-code.com/]()
- *      
+ *
  * Also, if a URL contains any asterisks, we replace them with the current version number from "package.json".
  *
  * I prefer this solution over GFM's "autolinking" solution, which is too "loosey-goosey" for my taste
  * (see https://help.github.com/articles/github-flavored-markdown#url-autolinking).
- * 
+ *
  * TODO: Consider adding support for "reference"-style Markdown links.
  *
  * @this {MarkOut}
@@ -794,11 +794,11 @@ MarkOut.prototype.convertMDImageLinks = function(sBlock, sIndent)
              *      link:url[:width[:height]]
              *
              * If "link:" is specified, a URL is required, but image width and height are optional.
-             * 
+             *
              * Alternatively:
-             * 
+             *
              *      link:url:nogallery[:width[:height]]
-             *      
+             *
              * to disable the automatic "gallery-ification" of image links (an optional width and height
              * can still follow).
              */
@@ -814,11 +814,11 @@ MarkOut.prototype.convertMDImageLinks = function(sBlock, sIndent)
                  * If the image link (aMatch[2]) contains "static/" but the sURL is external, AND we're in
                  * "reveal mode", then transform sURL into a "static/" URL as well; encodeURL() will take care
                  * of the rest of the transformation.
-                 * 
+                 *
                  * This feature is used with READMEs like /pubs/pc/programming/README.md, where normally we
                  * want to link to documents stored on sites like archive.org, minuszerodegrees.net or bitsavers,
                  * unless you're in "reveal mode", in which case we'll serve up our own "backup copies".
-                 * 
+                 *
                  * The assumption here is that if we have "static" thumbs, then we should also have full "static"
                  * copies as well.
                  */
@@ -908,7 +908,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
      * We don't have the XML file open here, and I don't think it's worth the hit to open it.
      * Besides, the XML config file isn't necessarily on the same server (although whenever this
      * script is being used, it very likely is).
-     * 
+     *
      * TODO: Consider cracking open the XML file anyway, even though the Markdown module is supposed
      * to be non-blocking; I'd like to be smarter about defaults (eg, specifying "debugger" when the
      * XML file clearly needs it).
@@ -926,7 +926,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
         var sMachineFunc = "embed" + sMachine;
         var sMachineClass = sMachine.toLowerCase();
         var aMachineParms = aMatch[4].split(':');
-        var sMachineMessage = "(If you see this message, " + sMachine + "js may still be loading)";
+        var sMachineMessage = "(If you see this message, " + sMachine + "js is still loading, or JavaScript has been disabled)";
 
         var sMachineID = aMachineParms[0];
         var sMachineXSLFile = aMachineParms[1] || "";
@@ -957,11 +957,11 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
 
         /*
          * Now that we're providing all of the following machine information to addMachine(), we don't
-         * need to install the machine embed code here; processMachines() in HTMLOut will take care of that now. 
+         * need to install the machine embed code here; processMachines() in HTMLOut will take care of that now.
          *
         sReplacement += this.sIndent + '<script type="text/javascript">\n' + this.sIndent + 'window.' + sMachineFunc + '("' + sMachineID + '","' + sMachineXMLFile + '","' + sMachineXSLFile + '");\n' + this.sIndent + '</script>';
          */
-        
+
         sBlock = sBlock.replace(aMatch[0], sReplacement);
         reMachines.lastIndex = 0;       // reset lastIndex, since we just modified the string that reMachines is iterating over
         cMatches++;
@@ -987,17 +987,17 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
 
 /**
  * convertMDEmphasis(sBlock)
- * 
+ *
  * We look for sequences like **strength**, __strength__, *emphasis* and _emphasis_;
  * we convert the stronger (double-character) forms first, followed by the weaker
  * (single-character) forms, since we don't want to misconstrue the former as containing
  * the latter.
- * 
+ *
  * Also, standard Markdown says that "if you surround an * or _ with spaces, it’ll be
  * treated as a literal asterisk or underscore."  Well, we don't.  You can already escape
  * special characters with a backslash to make them literal, so I don't feel like
  * complicating the RegExps below to accommodate a syntax I don't use or want to support.
- * 
+ *
  * Also, for reasons noted in the code below, we don't support emphasis in the middle
  * of words.
  *
@@ -1009,17 +1009,17 @@ MarkOut.prototype.convertMDEmphasis = function(sBlock)
 {
     /*
      * Standard Markdown allows * or _ in the middle of a word, as in:
-     * 
+     *
      *      un*frigging*believable
-     *      
+     *
      * but we do not.  That's because a Markdown link like:
-     * 
+     *
      *      [my_modules](/my_modules/)
-     *      
+     *
      * would otherwise be misconstrued as containing emphasis (and it doesn't
      * matter whether we process emphasis BEFORE or AFTER links -- an HTML link
      * poses the same problem as a Markdown link).
-     * 
+     *
      * To resolve this, I require something non-alphanumeric to both precede AND
      * follow the emphasis characters.  I would expect that "something" to normally
      * be whitespace, but we make it a bit more flexible, so that you can do things

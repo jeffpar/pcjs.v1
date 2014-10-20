@@ -51,19 +51,19 @@
 
 /*
  * Client/Server Disk I/O
- *  
+ *
  * To support large disks without consuming large amounts of client-side memory, and to push
  * client-side disk changes back the server, we need a DiskIO API that can be used in place of
  * the DiskDump API.
- *  
+ *
  * Use of the DiskIO API and any associated disk images must be tightly coupled to per-user
  * storage and specific machine configurations, to prevent the disk images from being corrupted
  * by inconsistent I/O operations.  Our basic User API (userapi.js) already provides some
  * per-user storage that we can use to get the design rolling.
- * 
+ *
  * The DiskIO API must also provide the ability to create new (empty) hard disk images in per-user
  * storage and automatically associate them with the machine configurations that requested them.
- * 
+ *
  * Principles
  * ---
  * Originally, when the Disk class was given a disk image to load and mount, it would request the
@@ -71,84 +71,84 @@
  * for larger disks -- let's just say anything stored on the server as an IMG file -- we'd prefer
  * to interact with that disk using "On-Demand I/O".  Any IMG file on the same server as the PCjs
  * application should be a candidate for on-demand access.
- * 
+ *
  * On-Demand I/O means that nothing is initially transferred from the server.  As sectors are
  * requested by the PCjs machine, PCjs requests them from the server, and maintains an MRU cache
  * of sectors, periodically discarding the least-used clean sectors above a certain memory limit.
  * Dirty sectors (ie, those that the PCjs machine has written to) must be periodically sent
  * back to the server and then marked as clean, so that they can be discarded like any other
  * sector.
- * 
+ *
  * We also support "local" init-only disk images, which means that dirty sectors are never sent
  * back to the server and are instead retained by the client for the lifetime of the app; such
  * images are "read-only" as far as the server is concerned, but "read-write" as far as the client
  * is concerned.  Reloading/restarting an app with an "local" disk will return the disk to its
- * initial state. 
- * 
+ * initial state.
+ *
  * Practice
  * ---
  * Let's first look at what we *already* do for the HDC component:
- * 
+ *
  *  1) Creating new (empty) disk images
  *  2) Pre-loading pre-built JSON-encoded disk images (converting them to JSON on the fly as needed)
- *  
+ *
  * An example of #1 is in /configs/pc/machines/5160/cga/256kb/demo/machine.xml:
- * 
+ *
  *      <hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",type:3}]'/>
- *      
+ *
  * and an example of #2 is in /configs/pc/disks/fixed/win101.xml:
- * 
+ *
  *      <hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",path:"/disks/pc/fixed/win101/10mb.json",type:3}]'/>
  *
  * The HDC component expects an array of drive entries.  Array position determines drive numbering
  * (the first entry is drive 0, the second is drive 1, etc), and each entry contains the following
  * properties:
- * 
+ *
  *      'name': user-friendly name for the disk, if any
  *      'path': URL of the disk image, if any
  *      'type': a drive type
- * 
+ *
  * Of those properties, only 'type' is required, which provides an index into an HDC "Drive Type"
  * table that determines disk geometry and therefore disk size.  As we add support for larger disks and
  * newer disk controllers, the 'type' parameter will be superseded by either a user-defined 'geometry'
  * parameter that will define number of heads, cylinders, tracks, sectors per track, and (max) bytes per
  * sector, or perhaps a generic 'size' parameter that leaves geometry choices to the HDC component,
  * which will then pass those decisions on to the Disk component.
- * 
+ *
  * We will enable on-demand I/O for a disk image with a new 'mode' parameter that looks like:
- * 
+ *
  *      'mode': one of "local", "preload", "demandrw", "demandro"
- * 
+ *
  * "preload" means the disk image will be completely preloaded, exactly as before; "demandrw" enables
  * full on-demand I/O support; and "demandro" enables on-demand I/O for reads only (all writes are retained
  * and never written back to the server).
- * 
+ *
  * "ro" will be the fallback for "rw" unless TWO other important criteria are met: 1) the user has a
  * private user key, and therefore per-user storage; and 2) the disk image 'path' contains an asterisk (*)
  * that the server can internally remap to a directory in the user's storage; eg:
- * 
+ *
  *      'path': <asterisk>/10mb.img (path components following the asterisk are optional)
- *      
+ *
  * If the disk image does not already exist, it will be created (but not formatted).
- * 
+ *
  * This preserves the promise that EVERYTHING a user does within a PCjs machine is private (ie, not
  * visible to any other PCjs users).  I don't want to be in the business of saving any user machine
  * states or disk changes, but at least those operations are limited to users who have asked for (and
  * received) a private user key.
- * 
+ *
  * Another important consideration at this stage is dealing with multiple machines writing to the same
  * disk image; even though we're limiting the "demandrw" mode to per-user images, a single user may still
  * inadvertently start up multiple machines that refer to the same disk image.
- * 
+ *
  * So, every PCjs machine needs to generate a unique token and include that token with every Disk I/O API
  * operation, so that the server can revoke a previous machine's "rw" access to a disk image when a new
  * machine requests "rw" access to the same disk image.
- * 
+ *
  * From the client's perspective, revocation can be quietly dealt with by reverting to "demandro" mode;
  * that client becomes stuck with all their dirty sectors until they can reclaim "rw" access, which should
  * only happen if no intervening writes to the disk image on the server have occurred (if I bother allowing
  * reclamation at all).
- * 
+ *
  * The real challenge here is avoiding revocation of a machine that still has critical changes to commit,
  * but since we can't even solve the problem of a user closing their browser at an inopportune time
  * and potentially leaving a disk image in an inconsistent state, premature revocation is the least of
@@ -159,12 +159,12 @@
 "use strict";
 
 if (typeof module !== 'undefined') {
-    var str = require("../../shared/lib/strlib");
-    var usr = require("../../shared/lib/usrlib");
-    var web = require("../../shared/lib/weblib");
-    var DiskAPI = require("../../shared/lib/diskapi");
-    var DumpAPI = require("../../shared/lib/dumpapi");
-    var Component = require("../../shared/lib/component");
+    var str         = require("../../shared/lib/strlib");
+    var usr         = require("../../shared/lib/usrlib");
+    var web         = require("../../shared/lib/weblib");
+    var DiskAPI     = require("../../shared/lib/diskapi");
+    var DumpAPI     = require("../../shared/lib/dumpapi");
+    var Component   = require("../../shared/lib/component");
 }
 
 /**
@@ -177,7 +177,7 @@ if (typeof module !== 'undefined') {
  * @property {number} iHead
  * @property {number} iModify
  * @property {number} cModify
- * 
+ *
  * Every Sector object (once loaded and fully parsed) should have ALL of the following named properties:
  *
  *      'sector':   sector number
@@ -186,7 +186,7 @@ if (typeof module !== 'undefined') {
  *      'pattern':  dword pattern to use for empty or partial sectors (or null if sector still needs to be loaded)
  *
  * initSector() also sets the following properties, to help us quickly identify its location within aDiskData:
- * 
+ *
  *      iCylinder
  *      iHead
  *
@@ -195,7 +195,7 @@ if (typeof module !== 'undefined') {
  *      iModify:    index of first modified dword in sector
  *      cModify:    number of modified dwords in sector
  *      fDirty:     true if sector is dirty, false if clean (or cleaning in progress)
- *      
+ *
  * fDirty is used in conjunction with "demandrw" disks; it is set to true whenever the sector is modified, and is
  * set to false whenever the sector has been sent to the server.  If the server write succeeds and fDirty is still
  * false, then the sector modifications are removed (cModify is set to zero).  If the write succeeds but fDirty was
@@ -203,7 +203,7 @@ if (typeof module !== 'undefined') {
  * in place (since we don't keep track of more than one modification range within a sector).  And if the write failed,
  * then fDirty is set back to true and again all modifications remain in place; the best we can do is schedule another
  * write attempt.
- * 
+ *
  * TODO: Perhaps we should also maintain a failure count and stop trying to write sectors that reach a certain
  * threshold.  Error-handling, as usual, is the thorniest problem.
  */
@@ -223,7 +223,7 @@ if (typeof module !== 'undefined') {
  *
  * This means, for example, that all references to "track[iSector].data" must actually appear as
  * "track[iSector]['data']".
- * 
+ *
  * @constructor
  * @extends Component
  * @param {HDC|FDC} controller
@@ -233,13 +233,13 @@ if (typeof module !== 'undefined') {
 function Disk(controller, drive, mode)
 {
     Component.call(this, "Disk", {'id': controller.idMachine + ".disk" + Disk.nDisks++}, Disk);
-    
+
     this.controller = controller;
     this.cmp = controller.cmp;
     this.dbg = controller.dbg;
     this.drive = drive;
     this.mode = mode;
-    
+
     /*
      * We pull out a number of drive properties that we may or may not need as defaults
      */
@@ -258,11 +258,11 @@ function Disk(controller, drive, mode)
 
     /*
      * The following dirty sector and timer properties are used only with fOnDemand disks,
-     * assuming fRemote was successfully set. 
+     * assuming fRemote was successfully set.
      */
     this.aDirtySectors = [];
     this.aDirtyTimestamps = [];         // this array is parallel to aDirtySectors
-    this.timerWrite = null;             // REMOTE_WRITE_DELAY timer in effect, if any 
+    this.timerWrite = null;             // REMOTE_WRITE_DELAY timer in effect, if any
     this.msTimerWrite = 0;              // the time that the write timer, if any, is set to fire
     this.fWriteInProgress = false;
 
@@ -276,12 +276,12 @@ function Disk(controller, drive, mode)
  * @property {number} 2 contains iSector
  * @property {number} 3 contains nSectors
  * @property {boolean} 4 contains fAsync
- * @property {function(nErrorCode:number,fAsync:boolean)} 5 contains done  
+ * @property {function(nErrorCode:number,fAsync:boolean)} 5 contains done
  */
 
 /**
  * The default number of milliseconds to wait before writing a dirty sector back to a remote disk image
- * 
+ *
  * @const {number}
  */
 Disk.REMOTE_WRITE_DELAY = 2000;         // 2-second delay
@@ -295,7 +295,7 @@ Component.subclass(Component, Disk);
 
 /**
  * initBus(cmp, bus, cpu, dbg)
- * 
+ *
  * We have no real interest in this notification, other than to obtain a reference to the Debugger
  * for every disk loaded BEFORE the initBus() phase; any disk loaded AFTER that point will get its Debugger
  * reference, if any, from the disk controller passed to the Disk() constructor.
@@ -315,7 +315,7 @@ Disk.prototype.initBus = function(cmp, bus, cpu, dbg) {
  *
  * As with powerDown(), our sole concern here is for REMOTE disks: if a powerDown() call disconnected an
  * "on-demand" disk, we need to get reconnected.  Calling our own load() function should get the job done.
- * 
+ *
  * The HDC component could have triggered this as well, but its powerUp() function only calls autoMount()
  * in case of page (ie, application) reload, which is fine for local disks but insufficient for remote disks,
  * which have a server connection that must re-established.
@@ -339,14 +339,14 @@ Disk.prototype.powerUp = function(data, fRepower) {
  *
  * Our sole concern here is for REMOTE disks, making sure any unwritten changes get flushed to
  * the server during a shutdown.  No local state is ever returned, so fSave is ignored.
- * 
+ *
  * Local disks are managed by the controller (ie, FDC or HDC) that mounted them; the controller's
  * powerDown() handler will take care of calling save() as needed.
- * 
+ *
  * TODO: Consider taking responsibility for saving the state of local disks as well; the only reason
  * the controllers still take care of them is historical, because this component originally didn't
  * exist, and even after it was created, it didn't originally receive powerDown() notifications.
- * 
+ *
  * @this {Disk}
  * @param {boolean} fSave
  * @param {boolean} [fShutdown]
@@ -385,7 +385,7 @@ Disk.prototype.powerDown = function(fSave, fShutdown)
 
 /**
  * create()
- * 
+ *
  * Initializes the disk contents according to the current drive mode and parameters.
  */
 Disk.prototype.create = function()
@@ -407,7 +407,7 @@ Disk.prototype.create = function()
                      * Now that our read() and write() functions can deal with unallocated data
                      * arrays, and can read/write the specified pattern on-the-fly, we no longer need
                      * to pre-allocate and pre-initialize the 'data' array.
-                     * 
+                     *
                      * For "local" disks, we can assume a 'pattern' of 0, but for "demandrw" and "demandro"
                      * disks, 'pattern' is set to null, as yet another indication that I/O is required to load
                      * the sector from the server (or to write it back to the server).
@@ -429,12 +429,12 @@ Disk.prototype.create = function()
  * TODO: Figure out how we can strongly type fnNotify, because the Closure Compiler has issues with:
  *
  *      param {function(Component,Object,Disk,string,string)} fnNotify
- *      
+ *
  * Also, while we're at it, learn if there are ways to:
- * 
+ *
  *      1) declare a function taking NO parameters (ie, generate a warning if any parameters are specified)
  *      2) declare a type for a function's return value
- * 
+ *
  * @this {Disk}
  * @param {string} sDiskName
  * @param {string} sDiskPath
@@ -443,7 +443,7 @@ Disk.prototype.create = function()
 Disk.prototype.load = function(sDiskName, sDiskPath, fnNotify)
 {
     var sDiskURL = sDiskPath;
-    
+
     /*
      * We could use this.log() as well, but it wouldn't also log which component initiated the load.
      */
@@ -452,7 +452,7 @@ Disk.prototype.load = function(sDiskName, sDiskPath, fnNotify)
         this.controller.log(sMessage);
         this.messageDebugger(sMessage);
     }
-    
+
     this.sDiskName = sDiskName;
     this.sDiskPath = sDiskPath;
     this.fnNotify = fnNotify;
@@ -484,16 +484,16 @@ Disk.prototype.load = function(sDiskName, sDiskPath, fnNotify)
                  * disk BPBs, you'll always get a standard PC XT 10mb disk image, so if the 'file' or 'dir' contains
                  * more than 10mb of data, the request will fail.  Ultimately, I want to honor the controller's
                  * driveConfig 'size' parm, or to match the capacity required by the driveConfig 'type' parameter.
-                 * 
+                 *
                  * If a 'disk' is specified, we pass mbhd=0, because the actual size will depend on the image.
                  * However, I don't currently have any .DSK or .IMG files containing hard disk images; those formats
                  * were really intended for floppy disk images.  If I never create any hard disk image files, then
                  * we can simply eliminate sSizeParm in the 'disk' case.
-                 * 
+                 *
                  * Added more extensions to the list of paths-treated-as-disk-images, so that URLs to files located here:
-                 * 
+                 *
                  *      ftp://ftp.oldskool.org/pub/TOPBENCH/dskimage/
-                 *      
+                 *
                  * can be used as-is.  TODO: There's a TODO in netlib.getFile() regarding remote support that needs
                  * to be resolved first; DiskDump relies on that function for its remote requests, and it currently
                  * supports only HTTP.
@@ -513,10 +513,10 @@ Disk.prototype.load = function(sDiskName, sDiskPath, fnNotify)
 
 /**
  * onLoadDisk(sDiskFile, sDiskData, nErrorCode, sDiskPath)
- * 
+ *
  * This function was originally called mount().  If the mount is successful, we pass the Disk object to the
  * caller's fnNotify handler; otherwise, we pass null.
- * 
+ *
  * @this {Disk}
  * @param {string} sDiskFile
  * @param {string} sDiskData
@@ -578,18 +578,18 @@ Disk.prototype.onLoadDisk = function(sDiskFile, sDiskData, nErrorCode, sDiskPath
              * eval().  In particular, the 10Mb disk image we use for the Windows 1.01 demo config fails in
              * IE9 with an "Out of memory" exception.  One work-around would be to chop the data into chunks
              * (perhaps one track per chunk, using regular expressions) and then manually re-assemble it.
-             * 
+             *
              * However, it turns out that using JSON.parse(sDiskData) instead of eval("(" + sDiskData + ")")
              * is a much easier fix. The only drawback is that we must first quote any unquoted property names
              * and remove any comments, because while eval() was cool with them, JSON.parse() is more particular;
              * the following RegExp replacements take care of those requirements.
-             * 
+             *
              * The use of hex values is something else that eval() was OK with, but JSON.parse() is not, and
              * while I've stopped using hex values in DumpAPI responses (at least when "format=json" is specified),
              * I can't guarantee they won't show up in "legacy" images, and there's no simple RegExp replacement
              * for transforming hex values into decimal values, so I cop out and fall back to eval() if I detect
              * any hex prefixes ("0x") in the sequence.  Ditto for error messages, which appear like so:
-             * 
+             *
              *      ["unrecognized disk path: test.img"]
              */
             var aDiskData;
@@ -622,18 +622,18 @@ Disk.prototype.onLoadDisk = function(sDiskFile, sDiskData, nErrorCode, sDiskPath
              * aDiskData is an array of cylinders, each of which is an array of heads, each of which
              * is an array of sector objects.  The format does not impose any limitations on number of
              * cylinders, number of heads, or number of bytes in any of the sector object byte-arrays.
-             * 
+             *
              * WARNING: All accesses to sector object properties must be via their string names, not their
              * "dot" names, otherwise code will break after it's been processed by the Closure Compiler.
-             * 
+             *
              * Sector object properties include:
-             * 
+             *
              *      'sector'    the sector number (1-based, not required to be sequential)
              *      'length'    the byte-length (ie, formatted length) of the sector
              *      'data'      the dword-array containing the sector data
              *      'pattern'   if the dword-array length is less than 'length'/4, this value must be used
              *                  to pad out the sector; if no 'pattern' is specified, it's assumed to be zero
-             *                  
+             *
              * We still support the older JSON encoding, where sector data was encoded as an array of 'bytes'
              * rather than a dword 'data' array.  However, our support is strictly limited to an on-the-fly
              * conversion to a forward-compatible 'data' array.
@@ -698,27 +698,27 @@ Disk.prototype.onLoadDisk = function(sDiskFile, sDiskData, nErrorCode, sDiskPath
                             }
                             /*
                              * The current sector should now have ALL the properties of a proper Sector object; ie:
-                             * 
+                             *
                              *      'sector':   sector number
                              *      'length':   size of the sector, in bytes
                              *      'data':     array of dwords
                              *      'pattern':  dword pattern to use for empty or partial sectors
-                             *      
+                             *
                              * In addition, we will maintain the following information on a per-sector basis,
                              * as sectors are modified:
-                             * 
+                             *
                              *      iModify:    index of first modified dword in sector
                              *      cModify:    number of modified dwords in sector
                              *      fDirty:     true if sector is dirty, false if clean (or cleaning in progress)
-                             *      
+                             *
                              * And for the disk as a whole, we maintain a checksum of the original unmodified data:
-                             * 
+                             *
                              *      dwChecksum: summation of all dwords in all non-empty sectors
                              */
                             this.initSector(sector, iCylinder, iHead);
                             /*
                              * Pattern-filling of sectors is deferred until absolutely necessary (eg, when a sector is
-                             * being written).  So all we need to do at this point is checksum all the initial sector data. 
+                             * being written).  So all we need to do at this point is checksum all the initial sector data.
                              */
                             for (var idw = 0; idw < adw.length; idw++) {
                                 dwChecksum = (dwChecksum + adw[idw]) & 0xffffffff;
@@ -741,7 +741,7 @@ Disk.prototype.onLoadDisk = function(sDiskFile, sDiskData, nErrorCode, sDiskPath
 
 /**
  * initSector(sector, iCylinder, iHead, iSector, cbSector, dwPattern)
- * 
+ *
  * @param {Object} sector
  * @param {number} iCylinder
  * @param {number} iHead
@@ -779,7 +779,7 @@ Disk.prototype.onLoadParseSectors = function(sURLName, sURLData, nErrorCode, sec
         var iSector = sectorInfo[2];
         var nSectors = sectorInfo[3];
         fAsync = sectorInfo[4];
-        
+
         if (DEBUG) this.messageDebugger("Disk.onLoadParseSectors(" + iCylinder + ":" + iHead + ":" + iSector + ":" + nSectors + ")");
 
         var abData = JSON.parse(sURLData);
@@ -788,10 +788,10 @@ Disk.prototype.onLoadParseSectors = function(sURLName, sURLData, nErrorCode, sec
             /*
              * We call seek with fWrite == true to prevent seek() from triggering another call
              * to readRemoteSectors() and endlessly recursing.  That also forces seek() to:
-             * 
+             *
              *  1) zero the sector's 'pattern'
              *  2) disable warning about reading an uninitialized sector
-             *  
+             *
              * We KNOW this is an uninitialized sector, because we're about to initialize it.
              */
             var sector = this.seek(iCylinder, iHead, iSector, true);
@@ -814,11 +814,11 @@ Disk.prototype.onLoadParseSectors = function(sURLName, sURLData, nErrorCode, sec
 
 /**
  * connectRemoteDisk(sDiskPath)
- * 
+ *
  * Unlike disconnect(), we don't issue the connect request ourselves; instead, we piggyback on the existing
  * preload code in load() to establish the connection.  That, in turn, will trigger a call to mount(), which
  * will check fOnDemand and set fRemote if the connection was successful.
- * 
+ *
  * @this {Disk}
  * @param {string} sDiskPath
  * @return {string} is the URL connection string required to connect to sDiskPath
@@ -836,7 +836,7 @@ Disk.prototype.connectRemoteDisk = function(sDiskPath)
 
 /**
  * readRemoteSectors(iCylinder, iHead, iSector, nSectors, done)
- * 
+ *
  * @param {number} iCylinder
  * @param {number} iHead
  * @param {number} iSector
@@ -847,7 +847,7 @@ Disk.prototype.connectRemoteDisk = function(sDiskPath)
 Disk.prototype.readRemoteSectors = function(iCylinder, iHead, iSector, cbSector, nSectors, done)
 {
     if (DEBUG) this.messageDebugger("Disk.readRemoteSectors(" + iCylinder + ":" + iHead + ":" + iSector + ":" + nSectors + "," + cbSector + ")");
-    
+
     if (this.fRemote) {
         var sParms = DiskAPI.QUERY.ACTION + '=' + DiskAPI.ACTION.READ;
         sParms += '&' + DiskAPI.QUERY.VOLUME + '=' + this.sDiskPath;
@@ -868,12 +868,12 @@ Disk.prototype.readRemoteSectors = function(iCylinder, iHead, iSector, cbSector,
  * Writes to a remote disk are performed on a timer-driven basis.  When a sector is modified for the first time,
  * a reference to that sector is "pushed" onto (ie, appended to the end of) aDirtySectors, and if aDirtySectors was
  * originally empty, then a REMOTE_WRITE_DELAY timer is set.
- * 
+ *
  * When the timer fires, the first batch of contiguous sectors is sent off the server, and when the server responds
  * (ie, when cleanDirtySectors() is called), if the response indicates success, every sector that was sent is marked
  * clean -- unless one or more writes to the sector occurred in the meantime, which we track through a per-sector
- * fDirty flag. 
- * 
+ * fDirty flag.
+ *
  * @param {number} iCylinder
  * @param {number} iHead
  * @param {number} iSector
@@ -885,7 +885,7 @@ Disk.prototype.readRemoteSectors = function(iCylinder, iHead, iSector, cbSector,
 Disk.prototype.writeRemoteSectors = function(iCylinder, iHead, iSector, nSectors, abSectors, fAsync)
 {
     if (DEBUG) this.messageDebugger("Disk.writeRemoteSectors(" + iCylinder + ":" + iHead + ":" + iSector + ":" + nSectors + ")");
-    
+
     if (this.fRemote) {
         var data = {};
         this.fWriteInProgress = true;
@@ -904,7 +904,7 @@ Disk.prototype.writeRemoteSectors = function(iCylinder, iHead, iSector, nSectors
 
 /**
  * disconnectRemoteDisk()
- * 
+ *
  * This is called by our powerDown() notification handler.  If fRemote is true, we issue the disconnect request and
  * then immediately set fRemote to false; we don't wait for (or test) the response.
  *
@@ -928,7 +928,7 @@ Disk.prototype.disconnectRemoteDisk = function()
  *
  * Mark the specified sector as dirty, add it to the queue (aDirtySectors) if not already added,
  * and establish a timeout handler (findDirtySectors) if not already established.
- * 
+ *
  * A freshly dirtied sector should sit in the queue for a short period of time (eg, 2 seconds)
  * before we attempt to write it; that is, a REMOTE_WRITE_DELAY timer should start ticking again
  * for any sector that is rewritten.  However, there will be exceptions; for example, when a sector
@@ -961,7 +961,7 @@ Disk.prototype.queueDirtySector = function(sector, fAsync)
  *
  * If a timer is already active, make sure it's still valid (ie, the time the timer is scheduled to fire is
  * >= the timestamp of the next dirty sector + REMOTE_WRITE_DELAY); if not, cancel the timer and start a new one.
- * 
+ *
  * @return {boolean} true if write timer set, false if not
  */
 Disk.prototype.updateWriteTimer = function()
@@ -1050,7 +1050,7 @@ Disk.prototype.onWriteCleanSectors = function(sURLName, sURLData, nErrorCode, se
     var nSectors = sectorInfo[3];
     var fAsync = sectorInfo[4];
     this.fWriteInProgress = false;
-    
+
     if (iCylinder >= 0 && iCylinder < this.aDiskData.length && iHead >= 0 && iHead < this.aDiskData[iCylinder].length) {
         for (var i = iSector - 1; nSectors-- > 0 && i >= 0 && i < this.aDiskData[iCylinder][iHead].length; i++) {
             var sector = this.aDiskData[iCylinder][iHead][i];
@@ -1071,7 +1071,7 @@ Disk.prototype.onWriteCleanSectors = function(sURLName, sURLData, nErrorCode, se
 
 /**
  * info()
- * 
+ *
  * @this {Disk}
  * @return {Array} containing: [nCylinders, nHeads, nSectorsPerTrack, nBytesPerSector]
  */
@@ -1079,7 +1079,7 @@ Disk.prototype.info = function()
 {
     if (!this.aDiskData.length) {
         return [0, 0, 0, 0];
-    } 
+    }
     return [this.aDiskData.length, this.aDiskData[0].length, this.aDiskData[0][0].length, this.aDiskData[0][0][0]['length']];
 };
 
@@ -1091,7 +1091,7 @@ Disk.prototype.info = function()
  * Sectors that were initially compressed should remain compressed unless/until they were modified.
  *
  * TODO: Check sectors (or at least modified sectors) to see if they can be recompressed.
- * 
+ *
  * @this {Disk}
  * @return {string} containing the entire disk image as JSON-encoded data
  */
@@ -1104,7 +1104,7 @@ Disk.prototype.dump = function()
      * back again during mount() -- or whenever JSON.parse() is used instead of eval().  But I still remove
      * them temporarily, so that any remaining property names (eg, "iModify", "cModify", "fDirty") can
      * easily be stripped out, by virtue of their being the only quoted properties left.  We then "requote"
-     * all the property names that remain. 
+     * all the property names that remain.
      */
     s = s.replace(/"(sector|length|data|pattern)":/gm, "$1:");
     /*
@@ -1124,17 +1124,17 @@ Disk.prototype.dump = function()
  * properties.  That code used to be in the FDC component, where it was perfectly reasonable
  * to access those properties.  We need a cleaner interface back to the drive, similar to the
  * info() interface we provide to the controller.
- * 
+ *
  * Whether or not the "dynamic reconfiguration" feature itself is perfectly reasonable is,
  * of course, a separate question.
- * 
+ *
  * @this {Disk}
  * @param {number} iCylinder
  * @param {number} iHead
  * @param {number} iSector
  * @param {boolean} [fWrite]
  * @param {function(Object,boolean)} [done]
- * @return {Object|null} is the requested sector, or null if not found (or not available yet) 
+ * @return {Object|null} is the requested sector, or null if not found (or not available yet)
  */
 Disk.prototype.seek = function(iCylinder, iHead, iSector, fWrite, done)
 {
@@ -1181,7 +1181,7 @@ Disk.prototype.seek = function(iCylinder, iHead, iSector, fWrite, done)
                             this.readRemoteSectors(iCylinder, iHead, iSector, drive.cbSector, nSectors, function onReadRemoteComplete(err, fAsync) {
                                 if (err) sector = null;
                                 // noinspection JSReferencingMutableVariableFromClosure
-                                done(sector, fAsync);           
+                                done(sector, fAsync);
                             });
                             return null;
                         } else {
@@ -1205,7 +1205,7 @@ Disk.prototype.seek = function(iCylinder, iHead, iSector, fWrite, done)
 
 /**
  * fill(sector, ab, off)
- * 
+ *
  * @param {Object} sector
  * @param {*} ab (technically, this should be typed as Array.<number> but I'm having trouble coercing JSON.parse() to that)
  * @param {number} off
@@ -1251,7 +1251,7 @@ Disk.prototype.toBytes = function(sector)
 
 /**
  * read(sector, ibSector, fCompare)
- * 
+ *
  * @this {Disk}
  * @param {Object} sector (returned from a previous seek)
  * @param {number} ibSector a byte index within the given sector
@@ -1261,7 +1261,7 @@ Disk.prototype.toBytes = function(sector)
 Disk.prototype.read = function(sector, ibSector, fCompare)
 {
     var b = -1;
-    
+
     if (DEBUG && !ibSector && !fCompare) this.messageDebugger("Disk.read(" + this.controller.id + ":" + this.drive.iDrive + "," + sector.iCylinder + ":" + sector.iHead + ":" + sector['sector'] + ")");
 
     if (ibSector < sector['length']) {
@@ -1275,7 +1275,7 @@ Disk.prototype.read = function(sector, ibSector, fCompare)
 
 /**
  * write(sector, ibSector, b)
- * 
+ *
  * @this {Disk}
  * @param {Object} sector (returned from a previous seek)
  * @param {number} ibSector a byte index within the given sector
@@ -1286,7 +1286,7 @@ Disk.prototype.write = function(sector, ibSector, b)
 {
     if (this.fWriteProtected)
         return false;
-    
+
     if (DEBUG && !ibSector) this.messageDebugger("Disk.write(" + this.controller.id + ":" + this.drive.iDrive + "," + sector.iCylinder + ":" + sector.iHead + ":" + sector['sector'] + ")");
 
     if (ibSector < sector['length']) {
@@ -1299,7 +1299,7 @@ Disk.prototype.write = function(sector, ibSector, b)
              * Ensure every byte up to the specified byte is properly initialized.
              */
             for (var i = adw.length; i <= idw; i++) adw[i] = dwPattern;
-            
+
             if (!sector.cModify) {
                 sector.iModify = idw;
                 sector.cModify = 1;
@@ -1330,7 +1330,7 @@ Disk.prototype.write = function(sector, ibSector, b)
  *      [iCylinder, iHead, iSector, iModify, [...]]
  *
  * where [...] is an array of modified dword(s) in the corresponding sector.
- * 
+ *
  * @this {Disk}
  * @return {Array} of modified sectors
  */
@@ -1373,7 +1373,7 @@ Disk.prototype.save = function()
  *      [iCylinder, iHead, iSector, iModify, [...]]
  *
  * where [...] is an array of modified dword(s) in the corresponding sector.
- * 
+ *
  * @this {Disk}
  * @param {Array} deltas
  * @return {number} 0 if no changes applied, -1 if an error occurred, otherwise the number of sectors modified
@@ -1382,7 +1382,7 @@ Disk.prototype.restore = function(deltas)
 {
     /*
      * If deltas is undefined, that's not necessarily an error;  the controller may simply be (re)initializing
-     * itself (although neither controller should be calling restore() under those conditions anymore). 
+     * itself (although neither controller should be calling restore() under those conditions anymore).
      */
     var nChanges = 0;
     var sReason = "unsupported restore format";
@@ -1426,7 +1426,7 @@ Disk.prototype.restore = function(deltas)
              * Note the buried test for write-protection.  Yes, an invariant condition should be tested
              * outside the loop, not inside, but (a) it's a trivial test, (b) the test should never fail
              * because save() should never generate any mods for a write-protected disk, and (c) it
-             * centralizes all the failure conditions we're currently checking (which, admittedly, ain't much).  
+             * centralizes all the failure conditions we're currently checking (which, admittedly, ain't much).
              */
             if (iCylinder >= this.aDiskData.length || iHead >= this.aDiskData[iCylinder].length || iSector >= this.aDiskData[iCylinder][iHead].length) {
                 sReason = "sector " + iCylinder + ":" + iHead + ":" + iSector + " out of range (" + nChanges + " changes applied)";
@@ -1471,7 +1471,7 @@ Disk.prototype.restore = function(deltas)
  * messageDebugger(sMessage)
  *
  * This is a combination of the Debugger's messageEnabled(MESSAGE_DISK) and message() functions, for convenience.
- * 
+ *
  * @this {Disk}
  * @param {string} sMessage is any caller-defined message string
  */

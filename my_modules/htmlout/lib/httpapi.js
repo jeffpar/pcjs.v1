@@ -32,24 +32,24 @@
 
 "use strict";
 
-var fs = require("fs");
-var path = require("path");
+var fs          = require("fs");
+var path        = require("path");
 
 /**
  * @class exports
  * @property {function(string)} sync
  */
-var mkdirp = require("mkdirp");
+var mkdirp      = require("mkdirp");
 
-var DiskAPI = require("../../shared/lib/diskapi");
-var DumpAPI = require("../../shared/lib/dumpapi");
-var DiskDump = require("../../diskdump");
-var FileDump = require("../../filedump");
-var UserAPI = require("../../shared/lib/userapi");
-var ReportAPI = require("../../shared/lib/reportapi");
-var net = require("../../shared/lib/netlib");
-var str = require("../../shared/lib/strlib");
-var usr = require("../../shared/lib/usrlib");
+var DiskAPI     = require("../../shared/lib/diskapi");
+var DumpAPI     = require("../../shared/lib/dumpapi");
+var UserAPI     = require("../../shared/lib/userapi");
+var ReportAPI   = require("../../shared/lib/reportapi");
+var net         = require("../../shared/lib/netlib");
+var str         = require("../../shared/lib/strlib");
+var usr         = require("../../shared/lib/usrlib");
+var DiskDump    = require("../../diskdump");
+var FileDump    = require("../../filedump");
 
 /**
  * @type {HTMLOut}
@@ -59,7 +59,7 @@ var HTMLOut;
 /**
  * sServerRoot is the root directory of the web server; it can (and should) be overridden using by the Express
  * web server using setRoot().
- * 
+ *
  * @type {string}
  */
 var sServerRoot = "";
@@ -70,7 +70,7 @@ var sServerRoot = "";
  * the entries on the left-hand side should contain trailing slashes.
  *
  * FYI, here's what the jsmachines.net .htaccess contained before we retired its Apache webserver:
- * 
+ *
  *     Redirect permanent /c1p /docs/c1pjs/
  *     Redirect permanent /c1pjs /docs/c1pjs/
  *     Redirect permanent /pc /docs/pcjs/
@@ -118,10 +118,10 @@ var externalRedirects = {
  * and continue until a match is found, at which point the okens =cement is performed and comparisons stop;
  * we could make the replacement process "additive", by continuing comparisons/replacements until the
  * end is reached, but let's not, unless there's an actual need.
- * 
+ *
  * In fact, until I find a compelling need for any of these redirects, I'm going to disable them, so that we
  * don't waste time running RegExp tests on every server request.
- * 
+ *
  * Feel free to use subgroups on the left-hand side, and references to them (eg, $1, $2, etc) on the right.
  */
 var internalRedirects = {
@@ -238,7 +238,7 @@ HTTPAPI.filterAPI = function(req, res, next)
 
 /**
  * hasAPICommand(req, asCommands)
- * 
+ *
  * @param {Object} req
  * @param {Array.<string>} asCommands (eg, DumpAPI.asDiskCommands or DumpAPI.asFileCommands)
  * @returns {Array|null}
@@ -256,7 +256,7 @@ HTTPAPI.hasAPICommand = function(req, asCommands)
 
 /**
  * initUserVolume(vol, fd, cbInit)
- * 
+ *
  * @param {Object} vol
  * @param {number} fd
  * @param {number} cbInit
@@ -326,7 +326,7 @@ HTTPAPI.openUserVolume = function(sPath, sMachine, sUser, sMode, cbInit, done)
          * and return DiskAPI.FAIL.REVOKED; otherwise, there's no real protection of volume
          * integrity here.  One of the challenges will be ensuring the list of revoked machine
          * IDs doesn't grow without bound.
-         * 
+         *
          * When revoking, we should also be able to reuse the current vol by simply updating its
          * machine ID; there's no need to close and re-open the file (although assuming revocation
          * is a rare occurrence, it shouldn't much matter).
@@ -338,17 +338,17 @@ HTTPAPI.openUserVolume = function(sPath, sMachine, sUser, sMode, cbInit, done)
             return;
         }
     }
-    
+
     if (!vol) {
         vol = {fd: null, mode: sMode, path: sPath, machine: sMachine};
         userVolumes[sUser] = vol;
     }
-    
+
     var nResponse = 200;
     var sResponse = null;
 
     if (!vol.fd) {
-        
+
         HTMLOut.logDebug('HTMLOut.openUserVolume("' + sPath + '")');
 
         fs.open(sPath, "r+", function(err, fd) {
@@ -406,9 +406,9 @@ HTTPAPI.readUserVolume = function(sPath, fd, aCHS, aAddr, done)
 {
     var pos = (aAddr[0] * (aCHS[1] * aCHS[2] * aCHS[3])) + (aAddr[1] * (aCHS[2] * aCHS[3])) + ((aAddr[2] - 1) * aCHS[3]);
     var len = (aAddr[3] * aCHS[3]);
-    
+
     HTMLOut.logDebug('HTMLOut.readUserVolume("' + sPath + '"): pos: ' + pos + ', len: ' + len);
-    
+
     var buf = new Buffer(len);
     fs.read(fd, buf, 0, len, pos, function(err, cbRead, buffer) {
         var nResponse = 200;
@@ -423,7 +423,7 @@ HTTPAPI.readUserVolume = function(sPath, fd, aCHS, aAddr, done)
         /*
          * Replace the preceding line with this if you want to test how well the client deals with long I/O delays (eg, 10 seconds)
          *
-        setTimeout(function() {         
+        setTimeout(function() {
             HTMLOut.logDebug("HTTPAPI.readUserVolume(): responding after 10000ms delay");
             done(nResponse, sResponse);
         }, 10000);
@@ -519,7 +519,7 @@ HTTPAPI.closeUserVolume = function(sPath, sMachine, sUser, done)
 
 /**
  * parseDiskValues(s, aDefaults)
- * 
+ *
  * @param {string} s
  * @param {Array.<number>} a
  * @returns {Array.<number>}
@@ -546,7 +546,7 @@ HTTPAPI.parseDiskValues = function(s, a)
 HTTPAPI.processDiskAPI = function(req, res)
 {
     /*
-     * For every volume, we must maintain the active machine+user that currently has access. 
+     * For every volume, we must maintain the active machine+user that currently has access.
      */
     var nResponse = 400;                                // default to "Bad Request"
     var reqParms = req.method == "GET"? req.query : req.body;
@@ -598,7 +598,7 @@ HTTPAPI.processDiskAPI = function(req, res)
                                      * Without the addition of "no-store", Chrome will assume that a previous response to
                                      * a previously seen URL can be re-used without hitting the server again, which would be
                                      * bad if the requested sector(s) had been written in the meantime.
-                                     * 
+                                     *
                                      * Perhaps I should be using different HTTP verbs, or perhaps I should switch to sockets,
                                      * but in the meantime, this is absolutely necessary.
                                      */
@@ -642,7 +642,7 @@ HTTPAPI.processDiskAPI = function(req, res)
         });
         return true;
     }
-    
+
     res.status(nResponse).send(DiskAPI.FAIL.BADVOL);
     return true;
 };
@@ -659,7 +659,7 @@ HTTPAPI.processDumpAPI = function(req, res)
     var aCommand;
     var nResponse = 400;                // default to "Bad Request"
     var sDisk, sFile, sFormat, fComments;
-    
+
     if ((aCommand = HTTPAPI.hasAPICommand(req, DumpAPI.asDiskCommands))) {
 
         sDisk = aCommand[1];
@@ -669,11 +669,11 @@ HTTPAPI.processDumpAPI = function(req, res)
          * Allowing ".." in a path component is risky, unless we're running locally...
          */
         if (sDisk.indexOf("..") < 0 || req.app.settings.port == 8088) {
-    
+
             sFormat = req.query[DumpAPI.QUERY.FORMAT] || DumpAPI.FORMAT.JSON;
             fComments = (req.query[DumpAPI.QUERY.COMMENTS]? true : false);
             var mbHD = req.query[DumpAPI.QUERY.MBHD];
-    
+
             /*
              * TODO: Consider adding support for DiskDump's "exclusion" option to the API interface
              * (the command-line interface supports it).
@@ -692,7 +692,7 @@ HTTPAPI.processDumpAPI = function(req, res)
         }
     }
     else if ((aCommand = HTTPAPI.hasAPICommand(req, DumpAPI.asFileCommands))) {
-    
+
         sFile = aCommand[1];
         HTMLOut.logDebug('HTTPAPI.processDumpAPI("' + sFile + '"): type=' + aCommand[0]);
 
@@ -700,7 +700,7 @@ HTTPAPI.processDumpAPI = function(req, res)
          * Allowing ".." in a path component is too risky, unless we're running locally.
          */
         if (sFile.indexOf("..") < 0 || req.app.settings.port == 8088) {
-    
+
             sFormat = req.query[DumpAPI.QUERY.FORMAT] || DumpAPI.FORMAT.JSON;
             fComments = (req.query[DumpAPI.QUERY.COMMENTS]? true : false);
             var fDecimal;
@@ -730,7 +730,7 @@ HTTPAPI.processDumpAPI = function(req, res)
 
 /**
  * dumpDisk(err, disk, res)
- * 
+ *
  * @param {Error} err
  * @param {DiskDump} disk
  * @param {Object} res
@@ -794,7 +794,7 @@ HTTPAPI.processReportAPI = function(req, res)
     var sUser = req.body[ReportAPI.QUERY.USER];
     var sType = req.body[ReportAPI.QUERY.TYPE];
     var sData = req.body[ReportAPI.QUERY.DATA];
-    
+
     HTMLOut.logDebug('HTTPAPI.processReportAPI("' + sApp + '"): ver=' + sVer + ', url=' + sURL + ', type=' + sType);
 
     if (sApp && sVer && sType == ReportAPI.TYPE.BUG && sData) {
@@ -879,7 +879,7 @@ HTTPAPI.createUserID = function(sUser, res)
              */
             if (iVerified == 1 || iVerified <= 0 && asUsers[0] == net.GORT_COMMAND) {
                 HTTPAPI.verifyUserID(asUsers[1], res, function doneVerifyUserID(iVerified, resultSecond, res) {
-                    
+
                     HTMLOut.logDebug('HTTPAPI.doneVerifyUserID("' + asUsers[1] + '"): ' + iVerified);
 
                     if (iVerified <= 0) {
@@ -906,15 +906,15 @@ HTTPAPI.createUserID = function(sUser, res)
 
 /**
  * verifyUserID(sUser, res, done)
- * 
+ *
  * If a done() handler is specified, the first parameter it receives is iVerified, which
  * will be -1 if the "users.log" file hasn't been initialized yet, 0 if the key doesn't exist,
  * or a positive number representing the line number at which the key appears.
- * 
+ *
  * Moreover, when a done() handler is provided, it simply passes the response object (res) to
  * done(), which must actually send the response, based on the provided result; this function sends
  * a response only if done() is NOT provided.
- * 
+ *
  * @param {string} sUser
  * @param {Object} res is an Express response object (http://expressjs.com/api.html#res.status)
  * @param {function(number, Object, Object)} [done]
@@ -923,7 +923,7 @@ HTTPAPI.createUserID = function(sUser, res)
 HTTPAPI.verifyUserID = function(sUser, res, done)
 {
     HTMLOut.logDebug('HTTPAPI.verifyUserID("' + sUser + '")');
-    
+
     /*
      * If a colon separator is present, this is an implicit REQ.CREATE call
      * (in fact, at present, PCjs does not issue any explicit REQ.CREATE calls).
@@ -934,7 +934,7 @@ HTTPAPI.verifyUserID = function(sUser, res, done)
     var iVerified = -1;
     var sUserFile = path.join(sServerRoot, "/logs/users.log");
     fs.readFile(sUserFile, {encoding: "utf8"}, function doneReadUserIDs(err, sData) {
-        
+
         var sResCode = UserAPI.CODE.FAIL;
         var sResData = UserAPI.FAIL.VERIFY;
         if (err) {
@@ -975,8 +975,8 @@ HTTPAPI.getUserDir = function(sUser)
 
 /**
  * createUserDir(sUser)
- * 
- * TODO: Creation is relatively rare, so I'm lazy and use synchronous calls, but fix this someday. 
+ *
+ * TODO: Creation is relatively rare, so I'm lazy and use synchronous calls, but fix this someday.
  *
  * @param {string} sUser
  * @return {boolean} true if successful, false if not
@@ -1054,7 +1054,7 @@ HTTPAPI.loadUserData = function(sUser, sState, res)
                              * Without the addition of "no-store", Chrome (and perhaps other browsers) will assume that
                              * a previous response to a previously seen URL can be re-used without hitting the server
                              * again, which would be bad if the requested state has been modified in the meantime.
-                             * 
+                             *
                              * Here's the scenario: the user loads a web page with a machine that uses server-side state,
                              * the user changes the state of that machine and switches away from the machine (eg, clicks
                              * a link to a different page), which causes the state to be updated on the server; then they

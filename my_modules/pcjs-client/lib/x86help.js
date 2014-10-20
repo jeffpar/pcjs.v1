@@ -34,8 +34,8 @@
 "use strict";
 
 if (typeof module !== 'undefined') {
-    var X86 = require("./x86");
-    var Debugger = require("./debugger");
+    var X86         = require("./x86");
+    var Debugger    = require("./debugger");
 }
 
 var X86Help = {
@@ -127,14 +127,14 @@ var X86Help = {
      * @param {number} dst
      * @param {number} src
      * @return {number}
-     * 
+     *
      * 80286_and_80287_Programmers_Reference_Manual_1987.pdf, p.B-44 (p.254) notes that:
-     * 
+     *
      *      "The low 16 bits of the product of a 16-bit signed multiply are the same as those of an
      *      unsigned multiply. The three operand IMUL instruction can be used for unsigned operands as well."
-     *      
+     *
      * However, we still sign-extend the operands before multiplying, making it easier to range-check the result.
-     * 
+     *
      * (80186/80188 and up)
      */
     opHelpIMUL16: function(dst, src) {
@@ -237,8 +237,8 @@ var X86Help = {
         if (wIndex < wLower || wIndex > wUpper) {
             /*
              * The INT 0x05 handler must be called with CS:IP pointing to the BOUND instruction.
-             * 
-             * TODO: Determine the cycle impact when a BOUND exception is triggered, over and above nOpCyclesBound. 
+             *
+             * TODO: Determine the cycle impact when a BOUND exception is triggered, over and above nOpCyclesBound.
              */
             this.setIP(this.opEA - this.segCS.base);
             X86Help.opHelpINT.call(this, X86.EXCEPTION.BOUND_ERR, null, 0);
@@ -273,7 +273,7 @@ var X86Help = {
         /*
          * Currently, segVER.load() will return an error only if the selector is beyond the bounds of the
          * descriptor table or the descriptor is not for a segment.
-         * 
+         *
          * TODO: This instruction's 80286 documentation does not discuss conforming code segments; determine
          * if we need a special check for them.
          */
@@ -297,7 +297,7 @@ var X86Help = {
         /*
          * Currently, segVER.load() will return an error only if the selector is beyond the bounds of the
          * descriptor table or the descriptor is not for a segment.
-         * 
+         *
          * TODO: LSL is explicitly documented as ALSO requiring a non-null selector, so we check X86.SEL.MASK;
          * are there any other instructions that were, um, less explicit but also require a non-null selector?
          */

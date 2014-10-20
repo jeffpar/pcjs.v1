@@ -53,11 +53,11 @@
  * The PCjs JavaScript files do have some initialization-order dependencies.
  * If you load the files individually, it's recommended that you load them in
  * the same order that they're compiled.
- * 
+ *
  * Generally speaking, component.js should be first, computer.js should be
  * last (of the files based on component.js), and panel.js should be listed
  * early so that the Control Panel is ready as soon as possible.
- * 
+ *
  * Another recent ordering requirement is that rom.js must be loaded before
  * ram.js; this was true before, but now it's required, because I'm starting
  * to add ROM BIOS Data Area definitions to rom.js, and since the data area
@@ -67,19 +67,19 @@
 "use strict";
 
 if (typeof module !== 'undefined') {
-    var str = require("../../shared/lib/strlib");
-    var usr = require("../../shared/lib/usrlib");
-    var web = require("../../shared/lib/weblib");
-    var UserAPI = require("../../shared/lib/userapi");
-    var ReportAPI = require("../../shared/lib/reportapi");
-    var Component = require("../../shared/lib/component");
-    var Bus = require("./bus");
-    var State = require("./state");
+    var str         = require("../../shared/lib/strlib");
+    var usr         = require("../../shared/lib/usrlib");
+    var web         = require("../../shared/lib/weblib");
+    var UserAPI     = require("../../shared/lib/userapi");
+    var ReportAPI   = require("../../shared/lib/reportapi");
+    var Component   = require("../../shared/lib/component");
+    var Bus         = require("./bus");
+    var State       = require("./state");
 }
 
 /**
  * Computer(parmsComputer, parmsMachine, fSuspended)
- * 
+ *
  * @constructor
  * @extends Component
  * @param {Object} parmsComputer
@@ -93,7 +93,7 @@ if (typeof module !== 'undefined') {
  *      20 is the minimum (and the default), which implies 8086/8088 real-mode addressing,
  *      while 24 is required for 80286 protected-mode addressing.  This value is passed
  *      directly through to the Bus component; see that component for more details.
- *      
+ *
  *      resume: one of the Computer.RESUME constants, which are as follows:
  *          '0' if resume disabled (default)
  *          '1' if enabled without prompting
@@ -102,7 +102,7 @@ if (typeof module !== 'undefined') {
  *          or a string containing the path of a predefined JSON-encoded state
  *
  *      state: the path to JSON-encoded state file (see details regarding 'state' below)
- *      
+ *
  * If a predefined state is supplied AND it's successfully loaded, then resume behavior
  * defaults to '1' (ie, resume enabled without prompting).
  *
@@ -154,12 +154,12 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
     this.bus = new Bus({'id': this.idMachine + '.bus', 'buswidth': this.nBusWidth}, this.cpu, this.dbg);
 
     /*
-     * Iterate through all the components and connect them to the Control Panel, if any 
+     * Iterate through all the components and connect them to the Control Panel, if any
      */
     var iComponent, component;
     var aComponents = Component.getComponents(this.id);
     this.panel = Component.getComponentByType("Panel", this.id);
-    
+
     if (this.panel && this.panel.controlPrint) {
         for (iComponent = 0; iComponent < aComponents.length; iComponent++) {
             component = aComponents[iComponent];
@@ -198,7 +198,7 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
      * The Computer 'state' property allows a state file to be specified independent of the 'resume' feature;
      * previously, you could only use 'resume' to load a state file -- which we still support, but loading a state
      * file that way prevents the machine's state from being saved, since we always resume from the 'resume' file.
-     * 
+     *
      * The other wrinkle is on the restore side: we need to IGNORE the 'state' property if a saved state now exists.
      * So we have to peek at localStorage, and unfortunately, the only way to "peek" is to actually load the data,
      * but we're not ready to use it yet, so powerUp() has been changed to use any existing stateComputer that we've
@@ -210,7 +210,7 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
      */
     var fAllowResume;
     var sState = Component.parmsURL && Component.parmsURL['state'] || (fAllowResume = true) && parmsComputer['state'];
-    
+
     if (sState) {
         sStatePath = this.sStatePath = sState;
         if (!fAllowResume) {
@@ -229,7 +229,7 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
 
     /*
      * If sStatePath is set, we must use it.  But if there's no sStatePath AND resume is set,
-     * then we have the option of resuming from a server-side state, assuming a valid USERID. 
+     * then we have the option of resuming from a server-side state, assuming a valid USERID.
      */
     if (!sStatePath && this.resume) {
         sStatePath = this.getServerStatePath();
@@ -241,7 +241,7 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
     } else {
         web.loadResource(sStatePath, true, null, this, this.onLoadSetReady);
     }
-    
+
     if (!fSuspended) {
         /*
          * Power "up" the computer, giving every component the opportunity to reset or restore itself.
@@ -317,7 +317,7 @@ Computer.prototype.getUserID = function()
 
 /**
  * onLoadSetReady(sStateFile, sStateData, nErrorCode)
- * 
+ *
  * @this {Computer}
  * @param {string} sStateFile
  * @param {string} sStateData
@@ -327,7 +327,7 @@ Computer.prototype.onLoadSetReady = function(sStateFile, sStateData, nErrorCode)
 {
     if (!nErrorCode) {
         this.sStateData = sStateData;
-        if (DEBUG) this.messageDebugger("loaded state file " + sStateFile.replace(this.sUserID || "xxx", "xxx")); 
+        if (DEBUG) this.messageDebugger("loaded state file " + sStateFile.replace(this.sUserID || "xxx", "xxx"));
     } else {
         this.sResumePath = null;
         this.fServerState = false;
@@ -338,7 +338,7 @@ Computer.prototype.onLoadSetReady = function(sStateFile, sStateData, nErrorCode)
 
 /**
  * wait(fn, parms)
- * 
+ *
  * wait() waits until every component is ready (including ourselves, the last component we check),
  * then calls the specified Computer method.
  *
@@ -376,7 +376,7 @@ Computer.prototype.wait = function(fn, parms)
  * validateState(stateComputer)
  *
  * NOTE: We clear() stateValidate only when there's no stateComputer.
- * 
+ *
  * @this {Computer}
  * @param {State|null} [stateComputer]
  * @return {boolean} true if state passes validation, false if not
@@ -403,7 +403,7 @@ Computer.prototype.validateState = function(stateComputer)
  * powerOn(resume)
  *
  * Power every component "up", applying any previously available state information.
- * 
+ *
  * @this {Computer}
  * @param {number} [resume] is a valid RESUME value; default is this.resume
  */
@@ -455,7 +455,7 @@ Computer.prototype.powerOn = function(resume)
                             stateComputer.load(sData);
                         } else {
                             /*
-                             * A missing (or not yet created) state file is no cause for alarm, but other errors might be 
+                             * A missing (or not yet created) state file is no cause for alarm, but other errors might be
                              */
                             if (sCode == UserAPI.CODE.FAIL && sData != UserAPI.FAIL.NOSTATE) {
                                 this.notice("Error: " + sData);
@@ -529,7 +529,7 @@ Computer.prototype.powerOn = function(resume)
 
 /**
  * powerRestore(component, stateComputer, fRepower, fRestore)
- * 
+ *
  * @this {Computer}
  * @param {Component} component
  * @param {State} stateComputer
@@ -550,7 +550,7 @@ Computer.prototype.powerRestore = function(component, stateComputer, fRepower, f
                      * This is a hack that makes it possible for a machine whose ID has been
                      * supplemented with a suffix (a single letter or digit) to find object IDs
                      * in states created from a machine without the suffix.
-                     * 
+                     *
                      * For example, if a state file was created from a machine with ID "ibm5160"
                      * but the current machine is "ibm5160a", this attempts a second lookup with
                      * "ibm5160", enabling us to find objects that match the original machine ID
@@ -565,7 +565,7 @@ Computer.prototype.powerRestore = function(component, stateComputer, fRepower, f
              * string comes back, something went wrong.  By explicitly eliminating "string" data,
              * the Closure Compiler stops complaining that we might be passing strings to our
              * powerUp() functions (even though we know we're not).
-             * 
+             *
              * TODO: Determine if there's some way to coerce the Closure Compiler into treating
              * data as Object or null, without having to include this runtime check.  An assert
              * would be a good idea, but this is overkill.
@@ -629,7 +629,7 @@ Computer.prototype.powerRestore = function(component, stateComputer, fRepower, f
  * powerFinish(aParms)
  *
  * This is nothing more than a continuation of powerOn(), giving us the option of calling wait() one more time.
- * 
+ *
  * @this {Computer}
  * @param {Array} aParms containing [stateComputer, resume, fRestore]
  */
@@ -676,7 +676,7 @@ Computer.prototype.powerFinish = function(aParms)
 
 /**
  * powerReport(stateComputer)
- * 
+ *
  * @this {Computer}
  * @param {State} stateComputer
  */
@@ -712,7 +712,7 @@ Computer.prototype.powerReport = function(stateComputer)
  *
  * As it stands, the worst that happens is any manually mounted disk images might have to be manually remounted,
  * which doesn't seem like a huge problem.
- * 
+ *
  * @this {Computer}
  * @param {boolean} fSave
  * @param {boolean} [fShutdown] is true if the machine is being shut down
@@ -809,9 +809,9 @@ Computer.prototype.powerOff = function(fSave, fShutdown)
             sState = stateComputer.toString();
         }
     }
-    
+
     if (fShutdown) this.fPowered = false;
-    
+
     return sState;
 };
 
@@ -819,11 +819,11 @@ Computer.prototype.powerOff = function(fSave, fShutdown)
  * reset()
  *
  * Notify all (other) components with a reset() method that the Computer is being reset.
- * 
+ *
  * NOTE: We'd like to reset the Bus first (due to the importance of the A20 line), but since we
  * allocated the Bus object ourselves, after all the other components were allocated, it ends
  * up near the end of Component's list of components.  Hence the special case for this.bus below.
- * 
+ *
  * @this {Computer}
  */
 Computer.prototype.reset = function()
@@ -846,10 +846,10 @@ Computer.prototype.reset = function()
  * start(ms, nCycles)
  *
  * Notify all (other) components with a start() method that the CPU has started.
- * 
+ *
  * Note that we're called by runCPU(), which is why we exclude the CPU component,
  * as well as ourselves.
- * 
+ *
  * @this {Computer}
  * @param {number} ms
  * @param {number} nCycles
@@ -892,7 +892,7 @@ Computer.prototype.stop = function(ms, nCycles)
 
 /**
  * setBinding(sHTMLClass, sHTMLType, sBinding, control)
- * 
+ *
  * @this {Computer}
  * @param {string|null} sHTMLClass is the class of the HTML control (eg, "input", "output")
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
@@ -942,7 +942,7 @@ Computer.prototype.resetUserID = function()
 
 /**
  * queryUserID(fPrompt)
- * 
+ *
  * @param {boolean} [fPrompt]
  * @returns {string|null|undefined}
  */
@@ -968,7 +968,7 @@ Computer.prototype.queryUserID = function(fPrompt)
 
 /**
  * verifyUserID(sUserID)
- * 
+ *
  * @this {Computer}
  * @param {string} sUserID
  * @return {string} validated user ID, or null if error
@@ -1002,7 +1002,7 @@ Computer.prototype.verifyUserID = function(sUserID)
 
 /**
  * getServerStatePath()
- * 
+ *
  * @this {Computer}
  * @return {string|null} sStatePath (null if no localStorage or no USERID stored in localStorage)
  */
@@ -1020,7 +1020,7 @@ Computer.prototype.getServerStatePath = function()
 
 /**
  * saveServerState(sUserID, sState)
- * 
+ *
  * @param {string} sUserID
  * @param {string|null} sState
  */
@@ -1054,7 +1054,7 @@ Computer.prototype.saveServerState = function(sUserID, sState)
 
 /**
  * storeServerState(sUserID, sState, fSync)
- * 
+ *
  * @this {Computer}
  * @param {string} sUserID
  * @param {string} sState
@@ -1095,7 +1095,7 @@ Computer.prototype.storeServerState = function(sUserID, sState, fSync)
 
 /**
  * onReset()
- * 
+ *
  * @this {Computer}
  */
 Computer.prototype.onReset = function()
@@ -1117,7 +1117,7 @@ Computer.prototype.onReset = function()
          * and rely on all the components to reset themselves to their default state.  The components with
          * the greatest burden here are FDC and HDC, which must rely on the fReload flag to determine whether
          * or not to unload/reload all their original auto-mounted disk images.
-         * 
+         *
          * However, if we started with a predefined state (ie, sStatePath is set), we take this shortcut, because
          * we don't (yet) have code in place to gracefully reload the initial state (requires calling loadResource()
          * again); alternatively, we could avoid throwing that state away, but it seems better to save the memory.
@@ -1139,7 +1139,7 @@ Computer.prototype.onReset = function()
 
 /**
  * getComponentByType(sType, componentPrev)
- * 
+ *
  * @this {Computer}
  * @param {string} sType
  * @param {Component} [componentPrev] of previously returned component, if any
@@ -1188,19 +1188,19 @@ Computer.prototype.messageDebugger = function(sMessage, fForce)
 Computer.init = function()
 {
     var aeMachines = Component.getElementsByClass(window.document, PCJSCLASS + "-machine");
-    
+
     for (var iMachine = 0; iMachine < aeMachines.length; iMachine++) {
-        
+
         var eMachine = aeMachines[iMachine];
         var parmsMachine = Component.getComponentParms(eMachine);
 
         var aeComputers = Component.getElementsByClass(eMachine, PCJSCLASS, "computer");
-    
+
         for (var iComputer = 0; iComputer < aeComputers.length; iComputer++) {
-            
+
             var eComputer = aeComputers[iComputer];
             var parmsComputer = Component.getComponentParms(eComputer);
-            
+
             /*
              * We set fSuspended in the Computer constructor because we want to "power up" the
              * computer ourselves, after any/all bindings are in place.
@@ -1208,7 +1208,7 @@ Computer.init = function()
             var computer = new Computer(parmsComputer, parmsMachine, true);
 
             if (DEBUG) computer.messageDebugger("onInit(" + computer.fPowered + ")");
-            
+
             /*
              * For now, all we support are "reset" and "save" buttons. We may eventually add a "power"
              * button to manually suspend/resume the machine.  An "erase" button was also considered, but
@@ -1216,7 +1216,7 @@ Computer.init = function()
              * might be redundant now.
              */
             Component.bindComponentControls(computer, eComputer, PCJSCLASS);
-    
+
             /*
              * Power "up" the computer, giving every component the opportunity to reset or restore itself.
              */
@@ -1238,7 +1238,7 @@ Computer.show = function()
         if (computer) {
 
             if (DEBUG) computer.messageDebugger("onShow(" + computer.fInitialized + "," + computer.fPowered + ")");
-            
+
             if (computer.fInitialized && !computer.fPowered) {
                 /**
                  * Repower the computer, notifying every component to continue running as-is.
@@ -1285,7 +1285,7 @@ Computer.exit = function()
         if (computer) {
 
             if (DEBUG) computer.messageDebugger("onExit(" + computer.fPowered + ")");
-            
+
             if (computer.fPowered) {
                 /**
                  * Power "down" the computer, giving every component an opportunity to save its state,

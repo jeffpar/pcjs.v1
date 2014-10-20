@@ -16,7 +16,7 @@ when the keyboard's "clock" line is toggled (see *set8042CmdData()* in [chipset.
 a 40-track diskette).
 + The BIOS Diskette Reset function does something odd after resetting the Floppy Disk Controller: it
 issues not one but *four* "SENSE INTERRUPT STATUS" commands to the FDC, and expects each response to
-return an incrementally larger drive number.  I found this a bit mystifying, considering that the IBM's
+return an incrementally larger drive number.  I found this a bit mystifying, considering that IBM's
 own FDC/HDC "combo card" supports a maximum of *two* diskette drives.  But, there's no point in arguing
 with a BIOS that's almost 30 years old.
 + The BIOS attempts to detect what its authors must have considered a common problem: failure to run SETUP
@@ -28,22 +28,22 @@ to discover that the ATC had this behavior, and now I'm wondering how many other
 immediate "STATUS" register updates.
 
 This PCjs release also fixes a problem reported by a user: if you disable **localStorage** support in your
-browser, previous versions would fault.  I knew that every browser that supports PCjs also supports
-**localStorage**, but I didn't consider what might happen if a user had decided to turn it off.
+browser, previous versions of PCjs would fault.  While every browser that supports PCjs also supports
+**localStorage**, I didn't consider what might happen if a user decided to turn it off.
 
 The only downside to turning off **localStorage** is that none of your PCjs machines will be able save/restore
-their state when you leave/return to the page, so they will always reboot.
+their state when you leave/return to the page; they will always reboot.
 
 Browser's don't always refer to the **localStorage** feature by its actual name, either.  For example, in
 Chrome, the setting that enables/disables **localStorage** is hidden under "Advanced Settings" => "Privacy" =>
-"Content Settings" => "Cookies" => "Allow local data to be set (recommended)".  Which is a little misleading
-and annoying, because **localStorage** != **cookie**.
+"Content Settings" => "Cookies" => "Allow local data to be set (recommended)".  Which is somewhat misleading
+and a little annoying, because **localStorage** is *not* a **cookie**.
 
 PCjs *never* sets any cookies.  Cookies are bits of data that your browser saves and then automatically sends
-off to the server every time you make a request.  **localStorage** is nothing more than local storage.  Granted,
-a JavaScript application could certainly abuse it and send it around like a cookie, but PCjs doesn't do that.
-The only exception is when PCjs detects a problem, and even then, you must first agree to submit your machine's
-state as part of the bug report.
+off to the server every time you make a request.  **localStorage** is nothing more than local storage; it is
+*not* automatically sent anywhere.  Granted, a JavaScript application could abuse it and send it around like a
+cookie, but PCjs does *not* do that; the only exception is when PCjs detects a problem, and even then, you must
+first agree to submit your machine's state as part of the bug report.
 
 *[@jeffpar](http://twitter.com/jeffpar)*  
 *October 17, 2014*

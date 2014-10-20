@@ -34,9 +34,9 @@
 "use strict";
 
 if (typeof module !== 'undefined') {
-    var str = require("../../shared/lib/strlib");
-    var usr = require("../../shared/lib/usrlib");
-    var Component = require("../../shared/lib/component");
+    var str         = require("../../shared/lib/strlib");
+    var usr         = require("../../shared/lib/usrlib");
+    var Component   = require("../../shared/lib/component");
 }
 
 /**
@@ -46,9 +46,9 @@ if (typeof module !== 'undefined') {
  *
  *      cycles: the machine's base cycles per second; the X86CPU constructor will
  *      provide us with a default (based on the CPU model) to use as a fallback
- *      
+ *
  *      multiplier: base cycle multiplier; default is 1
- *      
+ *
  *      autoStart: true to automatically start, false to not, or null (default)
  *      to make the autoStart decision based on whether or not a Debugger is
  *      installed (if there's no Debugger AND no "Run" button, then auto-start,
@@ -82,7 +82,7 @@ function CPU(parmsCPU, nCyclesDefault)
     var nMultiplier = parmsCPU['multiplier'] || 1;
 
     this.nCyclesPerSecond = nCycles;
-    
+
     /*
      * nCyclesMultiplier replaces the old "speed" variable (0, 1, 2) and eliminates the need for
      * the constants (SPEED_SLOW, SPEED_FAST and SPEED_MAX).  The UI simply doubles the multiplier
@@ -113,7 +113,7 @@ function CPU(parmsCPU, nCyclesDefault)
      * Get checksum parameters, if any. runCPU() behavior is not affected until fChecksum
      * is true, which won't happen until resetChecksum() is called with nCyclesChecksumInterval
      * ("csInterval") set to a positive value.
-     * 
+     *
      * As above, any of these parameters can also be set with the Debugger's execution options
      * command ("x"); for example, "x cs int 5000" will set nCyclesChecksumInterval to 5000
      * and call resetChecksum().
@@ -126,7 +126,7 @@ function CPU(parmsCPU, nCyclesDefault)
 
     var cpu = this;
     this.onRunTimeout = function() { cpu.runCPU(); };
-    
+
     this.setReady();
 }
 
@@ -156,7 +156,7 @@ CPU.STATUS_UPDATES_PER_SECOND = 2;
 
 /**
  * initBus(cmp, bus, cpu, dbg)
- * 
+ *
  * @this {CPU}
  * @param {Computer} cmp
  * @param {Bus} bus
@@ -170,7 +170,7 @@ CPU.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.cmp = cmp;
     /*
      * Attach the Video component to the CPU, so that the CPU can periodically update
-     * the video display via displayVideo(), as cycles permit. 
+     * the video display via displayVideo(), as cycles permit.
      */
     var video = cmp.getComponentByType("Video");
     if (video) {
@@ -184,7 +184,7 @@ CPU.prototype.initBus = function(cmp, bus, cpu, dbg)
     /*
      * Attach the ChipSet component to the CPU, so that it can obtain the IDT vector number of
      * pending hardware interrupts, in response to ChipSet's updateINTR() notifications.
-     * 
+     *
      * We must also call chipset.updateAllTimers() periodically; stepCPU() takes care of that.
      */
     this.chipset = cmp.getComponentByType("ChipSet");
@@ -195,7 +195,7 @@ CPU.prototype.initBus = function(cmp, bus, cpu, dbg)
  * reset()
  *
  * This is a placeholder for reset (overridden by the X86CPU component).
- * 
+ *
  * @this {CPU}
  */
 CPU.prototype.reset = function()
@@ -206,7 +206,7 @@ CPU.prototype.reset = function()
  * save()
  *
  * This is a placeholder for save support (overridden by the X86CPU component).
- * 
+ *
  * @this {CPU}
  * @return {Object|null}
  */
@@ -219,7 +219,7 @@ CPU.prototype.save = function()
  * restore(data)
  *
  * This is a placeholder for restore support (overridden by the X86CPU component).
- * 
+ *
  * @this {CPU}
  * @param {Object} data
  * @return {boolean} true if restore successful, false if not
@@ -258,7 +258,7 @@ CPU.prototype.powerUp = function(data, fRepower)
              * knows if there's a "print" control (this.cmp.panel.controlPrint), and if there IS a "print" control
              * but no debugger, the machine is probably misconfigured (most likely, the page simply neglected to
              * load the Debugger component).
-             * 
+             *
              * However, we don't actually need to check all that; it's always safe use println(), regardless whether
              * a Control Panel with a "print" control is present or not.
              */
@@ -273,7 +273,7 @@ CPU.prototype.powerUp = function(data, fRepower)
 
 /**
  * powerDown(fSave)
- * 
+ *
  * @this {CPU}
  * @param {boolean} fSave
  * @return {Object|boolean}
@@ -286,7 +286,7 @@ CPU.prototype.powerDown = function(fSave)
 
 /**
  * autoStart()
- * 
+ *
  * @this {CPU}
  * @return {boolean} true if started, false if not
  */
@@ -335,9 +335,9 @@ CPU.prototype.isRunning = function()
 
 /**
  * getChecksum()
- * 
+ *
  * This will be implemented by the X86CPU component.
- * 
+ *
  * @this {CPU}
  * @return {number} a 32-bit summation of key elements of the current CPU state (used by the CPU checksum code)
  */
@@ -352,7 +352,7 @@ CPU.prototype.getChecksum = function()
  * If checksum generation is enabled (fChecksum is true), this resets the running 32-bit checksum and the
  * cycle counter that will trigger the next displayChecksum(); called by resetCycles(), which is called whenever
  * the CPU is reset or restored.
- * 
+ *
  * @this {CPU}
  * @return {boolean} true if checksum generation enabled, false if not
  */
@@ -378,7 +378,7 @@ CPU.prototype.resetChecksum = function()
  * number of cycles (1), effectively limiting execution to a single instruction, and then we're called with
  * the exact number cycles that were actually executed.  This should give us instruction-granular checksums
  * at precise intervals that are 100% repeatable.
- * 
+ *
  * @this {CPU}
  * @param {number} nCycles
  */
@@ -409,11 +409,11 @@ CPU.prototype.updateChecksum = function(nCycles)
 
 /**
  * displayChecksum()
- * 
+ *
  * When checksum generation is enabled (fChecksum is true), this is called to provide a crude log of all
  * checksums generated at the specified cycle intervals, as specified by the "csStart" and "csInterval" parmsCPU
  * properties).
- * 
+ *
  * @this {CPU}
  */
 CPU.prototype.displayChecksum = function()
@@ -473,7 +473,7 @@ CPU.prototype.displayVideo = function()
 
 /**
  * setBinding(sHTMLClass, sHTMLType, sBinding, control)
- * 
+ *
  * @this {CPU}
  * @param {string|null} sHTMLClass is the class of the HTML control (eg, "input", "output")
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
@@ -539,7 +539,7 @@ CPU.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
  * A divisor greater than 1 (the default) does NOT require us to yield more frequently or update the screen
  * more frequently; it only means that stepCPU() must be called more frequently, with correspondingly smaller burst
  * cycles, because stepCPU() is responsible for updating all the timers ONCE, each time it's called.
- * 
+ *
  * @this {CPU}
  * @param {number} nDivisor
  */
@@ -652,12 +652,12 @@ CPU.prototype.getCycles = function(fScaled)
          *
          * but that speed will fluctuate somewhat: large fluctuations at first, but increasingly smaller
          * fluctuations after each burst of instructions that runCPU() executes.
-         * 
+         *
          * Alternatively, we can scale the cycle count by the multiplier, which is good in that the
          * multiplier doesn't vary once the user changes it, but a potential downside is that the
          * multiplier might be set too high, resulting in a target speed that's higher than the effective
          * speed is able to reach.
-         * 
+         *
          * Also, if multipliers were always limited to a power-of-two, then this could be calculated
          * with a simple shift.  However, only the "setSpeed" UI binding limits it that way; the Debugger
          * interface allows any value, as does the CPU "multiplier" parmsCPU property (from the machine's
@@ -717,9 +717,9 @@ CPU.prototype.getSpeed = function() {
  */
 CPU.prototype.getSpeedCurrent = function() {
     /*
-     * TODO: Has toFixed() been "fixed" in all browsers (eg, IE) to return a rounded value now? 
+     * TODO: Has toFixed() been "fixed" in all browsers (eg, IE) to return a rounded value now?
      */
-    return ((this.fRunning && this.mhz)? (this.mhz.toFixed(2) + "Mhz") : "Stopped"); 
+    return ((this.fRunning && this.mhz)? (this.mhz.toFixed(2) + "Mhz") : "Stopped");
 };
 
 /**
@@ -730,14 +730,14 @@ CPU.prototype.getSpeedCurrent = function() {
  */
 CPU.prototype.getSpeedTarget = function() {
     /*
-     * TODO: Has toFixed() been "fixed" in all browsers (eg, IE) to return a rounded value now? 
+     * TODO: Has toFixed() been "fixed" in all browsers (eg, IE) to return a rounded value now?
      */
     return this.mhzTarget.toFixed(2) + "Mhz";
 };
 
 /**
  * setSpeed(nMultiplier, fOnClick)
- * 
+ *
  * @this {CPU}
  * @param {number} [nMultiplier] is the new proposed multiplier (reverts to 1 if the target was too high)
  * @param {boolean} [fOnClick] is true if called from a click handler that might have stolen focus
@@ -774,7 +774,7 @@ CPU.prototype.setSpeed = function(nMultiplier, fOnClick)
 
 /**
  * calcSpeed(nCycles, msElapsed)
- * 
+ *
  * @this {CPU}
  * @param {number} nCycles
  * @param {number} msElapsed
@@ -793,7 +793,7 @@ CPU.prototype.calcSpeed = function(nCycles, msElapsed)
 
 /**
  * calcStartTime()
- * 
+ *
  * @this {CPU}
  */
 CPU.prototype.calcStartTime = function()
@@ -808,22 +808,22 @@ CPU.prototype.calcStartTime = function()
      * Try to detect situations where the browser may have throttled us, such as when the user switches
      * to a different tab; in those situations, Chrome and Safari may restrict setTimeout() callbacks
      * to roughly one per second.
-     * 
+     *
      * Another scenario: the user resizes the browser window.  setTimeout() callbacks are not throttled,
      * but there can still be enough of a lag between the callbacks that CPU speed will be noticeably
      * erratic if we don't compensate for it here.
-     * 
+     *
      * We can detect throttling/lagging by verifying that msEndThisRun (which was set at the end of the
      * previous run and includes any requested sleep time) is comparable to the current msStartThisRun;
      * if the delta is significant, we compensate by bumping msRunStart forward by that delta.
-     * 
+     *
      * This shouldn't be triggered when the Debugger halts the CPU, because setSpeed() -- which is called
      * whenever the CPU starts running again -- zeroes msEndThisRun.
-     * 
+     *
      * This also won't do anything about other internal delays; for example, Debugger message() calls.
      * By the time the message() function has called yieldCPU(), the cost of the message has already been
      * incurred, so it will be end up being charged against the instruction(s) that triggered them.
-     * 
+     *
      * TODO: Consider calling yieldCPU() sooner from message(), so that it can arrange for the msEndThisRun
      * "snapshot" to occur sooner; it's unclear, however, whether that will really improve the CPU's ability
      * to hit its target speed, since you would expect any instruction that displays a message to be an
@@ -849,14 +849,14 @@ CPU.prototype.calcStartTime = function()
 
 /**
  * calcRemainingTime()
- * 
+ *
  * @this {CPU}
  * @return {number}
  */
 CPU.prototype.calcRemainingTime = function()
 {
     this.msEndThisRun = usr.getTime();
-    
+
     var msYield = this.msPerYield;
     if (this.nCyclesThisRun) {
         /*
@@ -906,7 +906,7 @@ CPU.prototype.calcRemainingTime = function()
 
     /*
      * Last but not least, update nRecalcCycles, so that when runCPU() starts up again and calls calcStartTime(),
-     * it'll be ready to decide if calcCycles() should be called again.  
+     * it'll be ready to decide if calcCycles() should be called again.
      */
     this.nRecalcCycles += this.nCyclesThisRun;
 
@@ -920,7 +920,7 @@ CPU.prototype.calcRemainingTime = function()
 
 /**
  * runCPU(fOnClick)
- * 
+ *
  * @this {CPU}
  * @param {boolean} [fOnClick] is true if called from a click handler that might have stolen focus
  */
@@ -953,7 +953,7 @@ CPU.prototype.runCPU = function(fOnClick)
     try {
         do {
             var nCyclesPerBurst = this.fChecksum? 1 : Math.round(this.nCyclesPerBurst / this.nBurstDivisor);
-            
+
             /*
              * This is an alternative to ChipSet calling setBurstDivisor().  Unfortunately, this doesn't seem
              * to work as well as setBurstDivisor(); for some reason, the smaller bursts that the burst divisor
@@ -965,7 +965,7 @@ CPU.prototype.runCPU = function(fOnClick)
              *      nCyclesPerBurst = nCyclesTimer0;
              *  }
              */
-            
+
             /*
              * nCyclesPerBurst is how many cycles we WANT to run on each iteration of stepCPU(), but it may run
              * significantly less (or slightly more, since we can't execute partial instructions).
@@ -1015,7 +1015,7 @@ CPU.prototype.runCPU = function(fOnClick)
 
 /**
  * setBurstCycles(nCycles)
- * 
+ *
  * This function is used by the ChipSet component whenever a very low timer count is set,
  * in anticipation of the timer requiring an update sooner than the normal nCyclesPerYield
  * period in runCPU() would normally provide.
@@ -1046,7 +1046,7 @@ CPU.prototype.setBurstCycles = function(nCycles)
  *
  * This similar to yieldCPU(), but it doesn't need to zero nCyclesNextYield to break out of runCPU();
  * it simply needs to clear fRunning (well, "simply" may be oversimplifying a bit....)
- * 
+ *
  * @this {CPU}
  * @param {boolean} [fComplete]
  */
@@ -1067,7 +1067,7 @@ CPU.prototype.haltCPU = function(fComplete)
 
 /**
  * stepCPU(nMinCycles)
- * 
+ *
  * This will be implemented by the X86CPU component.
  *
  * @this {CPU}
@@ -1086,7 +1086,7 @@ CPU.prototype.stepCPU = function(nMinCycles)
  * stepCPU() -- needed to have more control over when these updates are performed.  However, for
  * other callers of stepCPU(), such as the Debugger, the combination of stepCPU() + updateCPU()
  * provides the old behavior.
- * 
+ *
  * @this {CPU}
  */
 CPU.prototype.updateCPU = function()
@@ -1097,7 +1097,7 @@ CPU.prototype.updateCPU = function()
 
 /**
  * yieldCPU()
- * 
+ *
  * Similar to haltCPU() with regard to how it resets various cycle countdown values, but the CPU
  * remains in a "running" state.
  *

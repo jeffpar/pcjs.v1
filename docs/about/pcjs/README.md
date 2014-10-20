@@ -45,8 +45,8 @@ The following features are targeted for version 1.16:
 
 ### History
 
-+ v1.15 introduced PC AT (Model 5170) emulation, as discussed on our [Blog](/blog/2014/09/13/).
-+ v1.14 introduced limited EGA emulation, as discussed on our [Blog](/blog/2014/07/30/).
++ v1.15 introduced PC AT (Model 5170) emulation, as discussed in the [blog](/blog/2014/09/13/).
++ v1.14 introduced limited EGA emulation, as discussed in the [blog](/blog/2014/07/30/).
 + v1.13 introduced manifest files that describe software packages that can be used with PCjs. 
 More information on software manifests is available [here](/apps/).
 + v1.12.1 coincided with the first release of the new PCjs web server running on [Node.js](http://nodejs.org).

@@ -36,17 +36,17 @@
 
 "use strict";
 
-var fs = require("fs");
-var path = require("path");
-var http = require("http");
-var mkdirp = require("mkdirp");
-var crypto = require("crypto");
-var net = require("../../shared/lib/netlib");
-var proc = require("../../shared/lib/proclib");
-var str = require("../../shared/lib/strlib");
-var usr = require("../../shared/lib/usrlib");
+var fs      = require("fs");
+var path    = require("path");
+var http    = require("http");
+var mkdirp  = require("mkdirp");
+var crypto  = require("crypto");
+var net     = require("../../shared/lib/netlib");
+var proc    = require("../../shared/lib/proclib");
+var str     = require("../../shared/lib/strlib");
+var usr     = require("../../shared/lib/usrlib");
 var DumpAPI = require("../../shared/lib/dumpapi");
-var X86 = require("../../pcjs-client/lib/x86");
+var X86     = require("../../pcjs-client/lib/x86");
 
 /**
  * @class exports
@@ -73,7 +73,7 @@ var fNormalize = true;
  *
  * TODO: Honor the caller's mbHD size. At the moment, any hard disk build request translates to 10Mb,
  * since we rely on a "canned" BPB in aDefaultBPBs.
- * 
+ *
  * TODO: If sServerRoot is set, make sure the final sDiskPath refers to something in either /apps/ or /disks/,
  * to prevent random enumeration of other server resources.
  *
@@ -114,7 +114,7 @@ function DiskDump(sDiskPath, asExclude, sFormat, fComments, mbHD, sServerRoot, s
     /*
      * If we have to enumerate one or more files during the buildImage() process, this array
      * will save them, in case the caller wants to query that information later, in updateManifest().
-     * 
+     *
      * Originally, I thought each saved entry would be a subset of what the fileInfo objects contain,
      * but it turns out I pretty much need everything.  This, in turn, means that some of the original
      * buildImage() functions could simply use this.aManifestInfo, instead of their own aFiles array,
@@ -196,7 +196,7 @@ DiskDump.MY_OEM_STRING = "PCJS.ORG";
 
 /**
  * The BPBs that buildImage() currently supports; these BPBs should be in order of smallest to largest capacity,
- * to help insure we don't select a disk format larger than necessary. 
+ * to help insure we don't select a disk format larger than necessary.
  */
 DiskDump.aDefaultBPBs = [
   [                             // define BPB for 160Kb diskette
@@ -279,7 +279,7 @@ DiskDump.aDefaultBPBs = [
  *      diskdump --dir={directory} [--format=json|data|hex|bytes|img] [--comments] [--output={file}]
  *      diskdump --disk={disk image} [--format=json|data|hex|bytes|img] [--comments] [--output={file}]
  *      diskdump --path={file[;file]...} [--format=json|data|hex|bytes|img] [--comments] [--output={file}]
- *      
+ *
  *      NOTE: --img is permitted as an alias for --disk
  *
  * Arguments
@@ -290,9 +290,9 @@ DiskDump.aDefaultBPBs = [
  *
  *      Note that command-line arguments, if any, are not validated.  For example, argv['comments'] may be any of
  *      boolean, string, or undefined, since the user may have typed "--comments" or "--comments=foo" or nothing at all.
- *      
+ *
  *      Additional command-line arguments include:
- *      
+ *
  *          --mbhd={number}: requests a hard disk image with the given number of megabytes (eg, 10 for a 10mb image)
  *          --exclude={filename}: specifies a filename that should be excluded from the image; repeat as often as needed
  *          --overwrite: allows the --output option to overwrite an existing file; default is to NOT overwrite
@@ -320,7 +320,7 @@ DiskDump.CLI = function()
 
         var sDiskPath = null, sServerRoot = "";
         var sDir = argv['dir'], sDisk = (argv['disk'] || argv['img']), sPath = argv['path'];
-        
+
         if (typeof sDir == "string") {
             sDiskPath = sDir;
         }
@@ -345,7 +345,7 @@ DiskDump.CLI = function()
         if (sManifestFile && sManifestFile.charAt(0) != '/') {
             sManifestFile = path.join(process.cwd(), sManifestFile);
         }
-        
+
         var sOutput = "";
         var sOutputFile = argv['output'];
         if (typeof sOutputFile == "string" && !str.endsWith(sOutputFile, ".img") && !str.endsWith(sOutputFile, ".json")) {
@@ -362,14 +362,14 @@ DiskDump.CLI = function()
                 }
             } else {
                 sOutput = "disk";
-            } 
+            }
             sOutputFile = sOutput + '.' + argv['format'];
         }
         if (sOutputFile && sOutputFile.charAt(0) != '/') sOutputFile = path.join(process.cwd(), sOutputFile);
 
         var fOverwrite = argv['overwrite'];
         var sManifestTitle = argv['title'];
-        
+
         if (sDiskPath) {
             var disk = new DiskDump(sDiskPath, asExclude, argv['format'], argv['comments'], argv['mbhd'], sServerRoot, sManifestFile);
             if (sDir) {
@@ -394,7 +394,7 @@ DiskDump.CLI = function()
     else {
         console.log("usage: diskdump --dir={dir}|--disk={disk}|--path={file}[;{file}...] [--format=json|data|hex|bytes|img] [--comments] [--output={file}] [--manifest={file}]");
     }
-    
+
     if (err) {
         DiskDump.logError(err);
         process.exit(1);
@@ -432,9 +432,9 @@ DiskDump.outputDisk = function(err, disk, sDiskPath, sOutputFile, fOverwrite, sM
             }
         }
         if (data) {
-            
+
             var cbDisk = (disk.bufDisk? disk.bufDisk.length : data.length);
-            
+
             if (sOutputFile) {
 
                 var fUnchanged;
@@ -448,7 +448,7 @@ DiskDump.outputDisk = function(err, disk, sDiskPath, sOutputFile, fOverwrite, sM
                     }
                     fUnchanged = DiskDump.updateManifest(disk, disk.sManifestFile, sDiskPath, sOutputFile, true, sManifestTitle, md5Disk, md5JSON);
                 }
-                
+
                 try {
                     if (fUnchanged) {
                         console.log(sOutputFile + " unchanged");
@@ -468,7 +468,7 @@ DiskDump.outputDisk = function(err, disk, sDiskPath, sOutputFile, fOverwrite, sM
             } else {
                 /*
                  * We'll dump JSON to the console, but not a raw disk buffer; we could add an option to
-                 * "stringify" buffers, but if that's what the caller wants, they should use "--format=json". 
+                 * "stringify" buffers, but if that's what the caller wants, they should use "--format=json".
                  */
                 if (typeof data == "string") {
                     console.log(data);
@@ -480,7 +480,7 @@ DiskDump.outputDisk = function(err, disk, sDiskPath, sOutputFile, fOverwrite, sM
             err = new Error("unable to convert " + disk.sDiskPath);
         }
     }
-    
+
     if (err) {
         DiskDump.logError(err);
         process.exit(1);
@@ -489,7 +489,7 @@ DiskDump.outputDisk = function(err, disk, sDiskPath, sOutputFile, fOverwrite, sM
 
 /**
  * getManifestAttr(sID, sTag)
- * 
+ *
  * @param sID
  * @param sTag
  * @return {string|null}
@@ -503,14 +503,14 @@ DiskDump.getManifestAttr = function(sID, sTag)
 
 /**
  * updateManifest(disk, sManifestFile, sDiskPath, sOutputFile, fOverwrite, sTitle, md5Disk, md5JSON)
- * 
+ *
  * This function reports a change if EITHER the md5Disk value does not match the original
  * "md5" value recorded in the manifest OR the manifest itself has changed.  If md5JSON is
  * also provided, we require that to match as well.
- * 
+ *
  * Since this function is for command-line use only, we use *Sync functions, so that we can
  * return the results immediately.
- * 
+ *
  * @param {DiskDump} disk
  * @param {string} sManifestFile
  * @param {string} sDiskPath
@@ -523,9 +523,9 @@ DiskDump.getManifestAttr = function(sID, sTag)
  */
 DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, fOverwrite, sTitle, md5Disk, md5JSON)
 {
-    var fUnchanged, fExists = false, sXML, err = null; 
+    var fUnchanged, fExists = false, sXML, err = null;
     var sMatchDisk = null, sIDDisk = null, sMD5Disk = null, sMD5JSON = null;
-    
+
     try {
         sXML = fs.readFileSync(sManifestFile, {encoding: "utf8"});
         fExists = true;
@@ -544,7 +544,7 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
         sXML += '\t<title' + sPrefix + '>' + sTitle + '</title>\n';
         sXML += '</manifest>';
     }
-    
+
     var i = sOutputFile.indexOf("/disks/");
     if (i > 0) {
         sOutputFile = sOutputFile.substr(i);
@@ -562,7 +562,7 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
         sMD5Disk = DiskDump.getManifestAttr("md5", match[1]);
         sMD5JSON = DiskDump.getManifestAttr("md5json", match[1]);
     }
-    
+
     if (!sIDDisk) {
         for (i = 1; i < 1000; i++) {
             sIDDisk = i.toString();
@@ -574,7 +574,7 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
             err = new Error("manifest already contains " + i + " disks");
         }
     }
-    
+
     if (!err) {
         /*
          * Thanks to buildImage(), fDir is true if a "dir" parameter was provided, false if a "path" parameter was provided,
@@ -586,10 +586,10 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
         } else if (disk.fDir === undefined) {
             sParm = "img";
         }
-        
+
         /*
          * Build a "size" attribute with the total disk size in bytes and a "chs" attribute that describes the disk geometry; eg:
-         * 
+         *
          *      size="368640" chs="40:2:9"
          */
         var size = 0, sCHS = "";
@@ -598,7 +598,7 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
             size = disk.dataDisk.length * disk.dataDisk[0].length * disk.dataDisk[0][0].length * disk.dataDisk[0][0][0].length;
         }
         var sXMLDisk = '\t<disk id="' + sIDDisk + '"' + (size? ' size="' + size + '"' : '') + (sCHS? ' chs="' + sCHS + '"' : '') + (sParm? ' ' + sParm + '="' + sDiskPath + '"' : '') + ' href="' + sOutputFile + '"' + (md5Disk? ' md5="' + md5Disk + '"' : '') + (md5JSON? ' md5json="' + md5JSON + '"' : '') + '>\n';
-        
+
         var sName = "";
         if (sMatchDisk && (match = sMatchDisk.match(/<name>([^>]*)<\/name>/))) {
             sName = match[1];
@@ -618,7 +618,7 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
             var fileInfo = disk.aManifestInfo[i];
             if (fileInfo.FILE_SIZE < 0) continue;       // ignore non-file entries
             var sDir = path.dirname(fileInfo.FILE_PATH) + '/';
-            if (sBaseDir === null) sBaseDir = sDir; 
+            if (sBaseDir === null) sBaseDir = sDir;
             sAttrs += ' size="' + fileInfo.FILE_SIZE + '"';
             sAttrs += ' time="' + usr.formatDate("Y-m-d H:i:s", fileInfo.FILE_TIME) + '"';
             sAttrs += ' attr="0x' + fileInfo.FILE_ATTR.toString(16) + '"';
@@ -713,7 +713,7 @@ DiskDump.getStat = function(sPath, done)
 
 /**
  * readFile(sPath, sEncoding, done)
- * 
+ *
  * An alternative to fs.readFile() that handles supported remote files, in addition to local files
  *
  * @param {string} sPath
@@ -753,7 +753,7 @@ DiskDump.readFile = function(sPath, sEncoding, done)
  *
  * @this {DiskDump}
  * @param {string} sName is the basename of a file under consideration
- * @return {boolean} is true if the file should be excluded, false if not 
+ * @return {boolean} is true if the file should be excluded, false if not
  */
 DiskDump.prototype.isExcluded = function(sName)
 {
@@ -818,7 +818,7 @@ DiskDump.prototype.setData = function(err, buf, done)
          * with comments, so if the caller has requested comments, we immediately convert the
          * JSON to a Buffer and throw the JSON away.  The next convertToJSON() call will take care
          * of the rest.
-         * 
+         *
          * We could also move this functionality into its own function, or wait until the
          * caller actually calls convertToJSON() -- although if the caller inadvertently calls
          * convertToJSON() multiple times, you don't want to be regenerating the JSON every time.
@@ -1049,7 +1049,7 @@ DiskDump.ATTR_ARCHIVE     = 0x20;
  *
  * @this {DiskDump}
  * @param {Date} dateTime
- * @return {boolean} true if date/time modified, false if not 
+ * @return {boolean} true if date/time modified, false if not
  */
 DiskDump.prototype.validateTime = function(dateTime)
 {
@@ -1067,7 +1067,7 @@ DiskDump.prototype.validateTime = function(dateTime)
          * nothing that in PC-DOS 2.0, I observed a date with the largest possible year value (127) displayed as
          * "12-31-:7" (an ASCII ':' is the next highest character after '0').  While that DOES distinguish the year
          * 2007 from the year 2107, we probably shouldn't allow any year > 2099, to eliminate confusion.
-         * 
+         *
          * In fact, it might be worth setting the upper limit to 2079, otherwise a date like "12-31-81" is ambiguous
          * (it could mean 1981 or 2081).  But I'll stick to a limit of 2099 for now.
          */
@@ -1168,19 +1168,19 @@ DiskDump.prototype.readDir = function(sDir, fRoot, done)
             done(err, null);
             return;
         }
-        
+
         /*
          * Sorting file names now (since they're just strings) is easier/faster than sorting the filtered
          * aFiles array later (which would require the use of a compare function), so we do the sort now; it
          * has no bearing on the outcome.  Note that the lack of a stable sort in JavaScript also has no
          * bearing, because we're sorting on name, and every name is different.
-         * 
+         *
          * However, it's not entirely clear whether this is strictly necessary.  I think the variations in
          * file name order that I was originally seeing may have simply been due to out-of-order fs.stat()
          * calls, because I used to call addManifestInfo() in the callback.
          */
         // if (fNormalize) asFiles.sort();
-        
+
         for (iFile = 0; iFile < asFiles.length; iFile++) {
             var sFileName = asFiles[iFile];
             /*
@@ -1201,7 +1201,7 @@ DiskDump.prototype.readDir = function(sDir, fRoot, done)
             fileInfo.FILE_NAME = obj.buildName(sFileName);
             fileInfo.FILE_PATH = sFilePath;
             aFiles.push(fileInfo);
-            
+
             /*
              * We add the fileInfo objects to the aManifestInfo array NOW, because the fs.stat() callbacks may
              * occur out-of-order.  The only downside is that non-file entries can now appear in the array, which
@@ -1209,7 +1209,7 @@ DiskDump.prototype.readDir = function(sDir, fRoot, done)
              */
             obj.addManifestInfo(fileInfo);
         }
-        
+
         var errSave = null;
         for (iFile = 0; iFile < aFiles.length; iFile++) {
             if (!aFiles[iFile].FILE_PATH) continue;
@@ -1332,7 +1332,7 @@ DiskDump.prototype.readPath = function(sPath, done)
     var obj = this;
     var cCallbacks = 0;
     var errSave = null;
-    
+
     for (iFile = 0; iFile < aFiles.length; iFile++) {
         if (!aFiles[iFile].FILE_PATH) continue;
         (function readPathEntry(fileInfo) {
@@ -1341,7 +1341,7 @@ DiskDump.prototype.readPath = function(sPath, done)
             /*
              * TODO: See if we can eliminate some of the unfortunate redundancy between the code
              * below and the very similar code in readDir(), such as the "README.md" pre-processing.
-             * 
+             *
              * However, in this case, because we want readPath() to support both local and remote
              * paths, we call DiskDump.readFile() instead of fs.readFile().
              */
@@ -1897,15 +1897,15 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
      */
     var cbMax = (this.mbHD? this.mbHD * 1024 * 1024 : 1440 * 1024);
     var cbTotal = this.calcFileSizes(aFiles);
-    
+
     if (fDebug) console.log("total calculated size for " + aFiles.length + " files/folders: " + cbTotal + " bytes (0x" + str.toHex(cbTotal) + ")");
-    
+
     if (cbTotal >= cbMax) {
         err = new Error("file(s) too large (" + cbTotal + " bytes total, " + cbMax + " bytes maximum)");
         done(err);
         return false;
     }
-    
+
     var abBoot, cbSector, cSectorsPerCluster, cbCluster, cFATs, cFATSectors;
     var cRootEntries, cRootSectors, cTotalSectors, cSectorsPerTrack, cHeads, cDataSectors, cbAvail;
 
@@ -2027,7 +2027,7 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
     offDisk += cClusters * cSectorsPerCluster * cbSector;
 
     if (fDebug) console.log(offDisk + " bytes written, " + cbDisk + " bytes available");
-    
+
     if (offDisk > cbDisk) {
         err = new Error("too much data for disk image (" + cClusters + " clusters required)");
         done(err);
@@ -2064,17 +2064,17 @@ DiskDump.prototype.convertToJSON = function()
     try {
         var cbDiskData = this.bufDisk.length;
         // console.log("length of buffer: " + cbDiskData);
-    
+
         var nHeads = 0;
         var nCylinders = 0;
         var nSectorsPerTrack = 0;
-    
+
         var aTracks = [];                   // track array (used only for disk images with track tables)
         var iTrack, cbTrack, offTrack, bufTrack, bufSector;
-    
+
         var cbSector = 512;                 // default sector size
         var offBootSector = 0;
-    
+
         if (cbDiskData >= 3000000) {        // arbitrary threshold between diskette image sizes and hard disk image sizes
             /*
              * In this case, the first sector should be an MBR; find the active partition entry,
@@ -2093,10 +2093,10 @@ DiskDump.prototype.convertToJSON = function()
              * other reserved sectors.
              */
         }
-    
+
         var bByte0 = this.bufDisk.readUInt8(offBootSector + DiskDump.BPB.JMP_OPCODE);
         var cbSectorBPB = this.bufDisk.readUInt16LE(offBootSector + DiskDump.BPB.SECTOR_BYTES);
-    
+
         /*
          * These checks are not only necessary for DOS 1.x diskette images (and other pre-BPB images),
          * but also non-DOS diskette images (eg, CPM-86 diskettes).
@@ -2134,7 +2134,7 @@ DiskDump.prototype.convertToJSON = function()
                 }
             }
         }
-    
+
         if (!nHeads) {
             /*
              * Next, check for a DSK header (an old private format I used to use, which begins with either 0x00 (read-write) or 0x01 (write-protected),
@@ -2180,7 +2180,7 @@ DiskDump.prototype.convertToJSON = function()
                 }
             }
         }
-    
+
         if (nHeads) {
             /*
              * Output the disk data as an array of cylinders, each containing an array of tracks (one track per head),
@@ -2194,9 +2194,9 @@ DiskDump.prototype.convertToJSON = function()
                 json = this.dumpLine(2, "[", "DiskDump of " + this.sDiskPath + " via " + DiskDump.sNotice);
             }
             for (var iCylinder=0; iCylinder < nCylinders; iCylinder++) {
-    
+
                 // if (fDebug) console.log("dumping cylinder " + iCylinder);
-    
+
                 var aHeads;
                 if (this.fJSONNative) {
                     aHeads = new Array(nHeads);
@@ -2206,9 +2206,9 @@ DiskDump.prototype.convertToJSON = function()
                 }
                 var offHead = 0;
                 for (var iHead=0; iHead < nHeads; iHead++) {
-    
+
                     // if (fDebug) console.log("  dumping head " + iHead);
-    
+
                     if (aTracks.length) {
                         var aTrack = aTracks[iTrack++];
                         nSectorsPerTrack = aTrack[0];
@@ -2218,9 +2218,9 @@ DiskDump.prototype.convertToJSON = function()
                     } else {
                         bufTrack = this.bufDisk.slice(offTrack + offHead, offTrack + offHead + cbTrack);
                     }
-    
+
                     // if (fDebug) console.log("  track buffer length: " + bufTrack.length);
-    
+
                     var aSectors;
                     if (this.fJSONNative) {
                         aSectors = new Array(nSectorsPerTrack);
@@ -2228,13 +2228,13 @@ DiskDump.prototype.convertToJSON = function()
                     } else {
                         json += this.dumpLine(2, "[", "head:" + this.sJSONWhitespace + iHead + ", track:" + this.sJSONWhitespace + iCylinder);
                     }
-    
+
                     for (var iSector=1, offSector=0; offSector < cbTrack; iSector++, offSector += cbSector) {
-    
+
                         var sector = {};
-    
+
                         // if (fDebug) console.log("    dumping sector " + iSector);
-    
+
                         bufSector = bufTrack.slice(offSector, offSector + cbSector);
                         if (this.fJSONNative) {
                             sector['sector'] = iSector;
@@ -2304,7 +2304,7 @@ DiskDump.prototype.convertToJSON = function()
 
 /**
  * convertOSIDiskToJSON()
- * 
+ *
  * This is called when we detect a "CW" signature at offset 0x900 of bufDisk, so we'll try parsing the data
  * as an OSI disk image, and output the data in JSON as an array of heads, each containing an array of tracks,
  * like so:
@@ -2344,7 +2344,7 @@ DiskDump.prototype.convertOSIDiskToJSON = function()
         var iTrack = 0;
         var offTrack = 0;
         var cbTrack = 0x900;                // this is the raw track length for a 40-track 5.25-inch disk image
-    
+
         if (this.fJSONNative) {
             json = "";
         } else {
@@ -2352,7 +2352,7 @@ DiskDump.prototype.convertOSIDiskToJSON = function()
         }
         json += this.dumpLine(2, "[");
         json += this.dumpLine(2, "[");      // begin array of heads
-    
+
         while (true) {
             var bufSector;
             var bufTrack = this.bufDisk.slice(offTrack, offTrack + cbTrack);
@@ -2449,7 +2449,7 @@ DiskDump.prototype.convertOSIDiskToJSON = function()
  * convertToIMG()
  *
  * Converts the disk image data to a Buffer.
- * 
+ *
  * TODO: Consider creating a caching mechanism for these requests (ie, stash a limited number of these
  * disk images under /tmp, using a name based on a hash of the source path).
  *
@@ -2507,7 +2507,7 @@ DiskDump.prototype.convertToIMG = function()
          * sectors per track, etc).
          */
         var buf = null;
-        
+
         try {
             /*
              * We need to be prepared for any number of errors due to malformed data; in fact, it's entirely
@@ -2518,10 +2518,10 @@ DiskDump.prototype.convertToIMG = function()
             var nHeads = this.dataDisk[0].length;
             var nSectorsPerTrack = this.dataDisk[0][0].length;
             var cbDisk = nCylinders * nHeads * nSectorsPerTrack * 512;
-    
+
             var off = 0;
             buf = new Buffer(cbDisk);
-    
+
             /*
              * WARNING: Buffers are NOT zero-initialized, so we need explicitly fill it with zeros (this seems to
              * be a reversal in the trend to zero buffers, when security concerns used to trump performance concerns).
@@ -2596,7 +2596,7 @@ DiskDump.prototype.convertToIMG = function()
             }
             if (buf.length < 3000000) {         // arbitrary threshold between diskette image sizes and hard disk image sizes
                 /*
-                 * Mimic the BPB test in convertToJSON(), because we don't want to blast an OEM string into non-DOS diskette images 
+                 * Mimic the BPB test in convertToJSON(), because we don't want to blast an OEM string into non-DOS diskette images
                  */
                 var bByte0 = buf.readUInt8(DiskDump.BPB.JMP_OPCODE);
                 var cbSectorBPB = buf.readUInt16LE(DiskDump.BPB.SECTOR_BYTES);
@@ -2611,7 +2611,7 @@ DiskDump.prototype.convertToIMG = function()
             DiskDump.logError(err);
             return null;
         }
-        
+
         this.bufDisk = buf;
     }
     return this.bufDisk;

@@ -34,12 +34,12 @@
 "use strict";
 
 if (typeof module !== 'undefined') {
-    var str = require("../../shared/lib/strlib");
-    var web = require("../../shared/lib/weblib");
-    var Component = require("../../shared/lib/component");
-    var ChipSet = require("./chipset");
-    var State = require("./state");
-    var CPU = require("./cpu");
+    var str         = require("../../shared/lib/strlib");
+    var web         = require("../../shared/lib/weblib");
+    var Component   = require("../../shared/lib/component");
+    var ChipSet     = require("./chipset");
+    var State       = require("./state");
+    var CPU         = require("./cpu");
 }
 
 /**
@@ -57,7 +57,7 @@ if (typeof module !== 'undefined') {
  *
  * Its main purpose is to receive binding requests for various keyboard events,
  * and to use those events to simulate the PC's keyboard hardware.
- * 
+ *
  * @constructor
  * @extends Component
  * @param {Object} parmsKbd
@@ -119,11 +119,11 @@ Keyboard.CMD.SETLEDS        = 0xED;
 Keyboard.CMDRES = {};
 Keyboard.CMDRES.OVERRUN     = 0x00;
 Keyboard.CMDRES.LOADTEST    = 0x65;     // this is an undocumented "LOAD MANUFACTURING TEST REQUEST" response code
-Keyboard.CMDRES.BATSUCCESS  = 0xAA;     // Basic Assurance Test (BAT) completed successfully 
+Keyboard.CMDRES.BATSUCCESS  = 0xAA;     // Basic Assurance Test (BAT) completed successfully
 Keyboard.CMDRES.ECHO        = 0xEE;
 Keyboard.CMDRES.BREAKPREFIX = 0xF0;
 Keyboard.CMDRES.ACK         = 0xFA;
-Keyboard.CMDRES.BATFAIL     = 0xFC;     // Basic Assurance Test (BAT) failed 
+Keyboard.CMDRES.BATFAIL     = 0xFC;     // Basic Assurance Test (BAT) failed
 Keyboard.CMDRES.DIAGFAIL    = 0xFD;
 Keyboard.CMDRES.RESEND      = 0xFE;
 
@@ -280,7 +280,7 @@ Keyboard.aButtonCodes = {
  * For example, Safari on iOS devices will not generate up/down events for shift keys, and for other keys,
  * the up/down events are usually generated after the actual press is complete, and in rapid succession,
  * which doesn't always give the simulation enough time to detect the key.
- * 
+ *
  * The other problem (which is more of a problem with keyboards like the C1P than any IBM keyboards) is
  * that the shift/modifier state for a character on the "source" keyboard may not match the shift/modifier
  * state for the same character on the "target" keyboard.  And since this code is inherited from C1Pjs,
@@ -424,7 +424,7 @@ Keyboard.aCharCodes[Keyboard.CHARCODE.CTRLALTDEL]=0x53 + (Keyboard.CHARCODE.CTRL
 
 /**
  * setBinding(sHTMLClass, sHTMLType, sBinding, control)
- * 
+ *
  * @this {Keyboard}
  * @param {string|null} sHTMLClass is the class of the HTML control (eg, "input", "output")
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
@@ -444,7 +444,7 @@ Keyboard.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, contro
      *
      * However, it's also possible for the keyboard XML definition to define a control that serves
      * a similar purpose; eg:
-     * 
+     *
      *      <control class="input" type="text" binding="kbd" width="2em">Kbd</control>
      *
      * The latter is purely experimental, while we work on finding ways to trigger the soft keyboard on
@@ -508,7 +508,7 @@ Keyboard.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, contro
 
 /**
  * findBinding(bKey, t, fDown)
- * 
+ *
  * @this {Keyboard}
  * @param {number} bKey
  * @param {string} t is the type of control (eg, "button" or "key")
@@ -533,7 +533,7 @@ Keyboard.prototype.findBinding = function(bKey, t, fDown)
 
 /**
  * initBus(cmp, bus, cpu, dbg)
- * 
+ *
  * @this {Keyboard}
  * @param {Computer} cmp
  * @param {Bus} bus
@@ -551,7 +551,7 @@ Keyboard.prototype.initBus = function(cmp, bus, cpu, dbg)
 
 /**
  * setModel(nModel)
- * 
+ *
  * @this {Keyboard}
  * @param {number} nModel
  */
@@ -561,7 +561,7 @@ Keyboard.prototype.setModel = function(nModel)
 
 /**
  * setReady()
- * 
+ *
  * @this {Keyboard}
  */
 Keyboard.prototype.setReady = function()
@@ -574,7 +574,7 @@ Keyboard.prototype.setReady = function()
 
 /**
  * resetDevice()
- * 
+ *
  * @this {Keyboard}
  */
 Keyboard.prototype.resetDevice = function()
@@ -589,12 +589,12 @@ Keyboard.prototype.resetDevice = function()
 
 /**
  * setEnable(fData, fClock)
- * 
+ *
  * This is the ChipSet's primary interface for toggling keyboard "data" and "clock" lines.
  * For MODEL_5150 and MODEL_5160 machines, this function is called from the ChipSet's PPI_B
  * output handler.  For MODEL_5170 machines, this function is called when selected KBC.CMD
  * "data bytes" have been written.
- * 
+ *
  * @this {Keyboard}
  * @param {boolean} fData is true if the keyboard simulated data line should be enabled
  * @param {boolean} fClock is true if the keyboard's simulated clock line should be enabled
@@ -635,7 +635,7 @@ Keyboard.prototype.setEnable = function(fData, fClock)
  *
  * This is the ChipSet's primary interface for controlling "Model M" keyboards (ie, those used
  * with MODEL_5170 machines).  Commands are delivered through the ChipSet's 8042 Keyboard Controller.
- * 
+ *
  * @this {Keyboard}
  * @param {number} bCmd should be one of the Keyboard.CMD.* command codes (Model M keyboards only)
  * @return {number} response should be one of the Keyboard.CMDRES.* response codes, or -1 if unrecognized
@@ -656,7 +656,7 @@ Keyboard.prototype.sendCmd = function(bCmd)
 
 /**
  * readScanCode(fShift)
- * 
+ *
  * This is the ChipSet's interface for reading scan codes.
  *
  * @this {Keyboard}
@@ -676,9 +676,9 @@ Keyboard.prototype.readScanCode = function(fShift)
 
 /**
  * shiftScanCode(fFlush)
- * 
+ *
  * This is the ChipSet's interface to advance (or flush) scan codes.
- * 
+ *
  * @this {Keyboard}
  * @param {boolean} [fFlush] is true to completely flush the keyboard buffer
  */
@@ -736,7 +736,7 @@ Keyboard.prototype.powerUp = function(data, fRepower)
 
 /**
  * powerDown(fSave)
- * 
+ *
  * @this {Keyboard}
  * @param {boolean} fSave
  * @return {Object|boolean}
@@ -748,7 +748,7 @@ Keyboard.prototype.powerDown = function(fSave)
 
 /**
  * reset()
- * 
+ *
  * @this {Keyboard}
  */
 Keyboard.prototype.reset = function()
@@ -801,7 +801,7 @@ Keyboard.prototype.reset = function()
  * save()
  *
  * This implements save support for the Keyboard component.
- * 
+ *
  * @this {Keyboard}
  * @return {Object}
  */
@@ -816,7 +816,7 @@ Keyboard.prototype.save = function()
  * restore(data)
  *
  * This implements restore support for the Keyboard component.
- * 
+ *
  * @this {Keyboard}
  * @param {Object} data
  * @return {boolean} true if successful, false if failure
@@ -828,7 +828,7 @@ Keyboard.prototype.restore = function(data)
 
 /**
  * initState(data)
- * 
+ *
  * @this {Keyboard}
  * @param {Array} [data]
  * @return {boolean} true if successful, false if failure
@@ -844,7 +844,7 @@ Keyboard.prototype.initState = function(data)
 
 /**
  * saveState()
- * 
+ *
  * @this {Keyboard}
  * @return {Array}
  */
@@ -859,7 +859,7 @@ Keyboard.prototype.saveState = function()
 
 /**
  * setSoftKeyState(control, f)
- * 
+ *
  * @this {Keyboard}
  * @param {Object} control is an HTML control DOM object
  * @param {boolean} f is true if the key represented by e should be "on", false if "off"
@@ -877,7 +877,7 @@ Keyboard.prototype.setSoftKeyState = function(control, f)
  *
  * Just as 0xAA is a special scan code response to a software reset, 0xFF is a special scan code response
  * to an internal buffer overrun.  I try to simulate both.
- * 
+ *
  * @this {Keyboard}
  * @param {number} bScan
  * @param {boolean} [fRepeat]
@@ -917,7 +917,7 @@ Keyboard.prototype.addScanCode = function(bScan, fRepeat)
 
 /**
  * calcReleaseDelay(fRepeat)
- * 
+ *
  * Attempts to scale our default "release" delay appropriately for the current CPU speed.
  *
  * Note that if the effective CPU speed exceeds 16Mhz, it becomes very difficult to rely on timer-driven key events
@@ -947,7 +947,7 @@ Keyboard.prototype.calcReleaseDelay = function(fRepeat)
 
 /**
  * autoClear(notCharCode)
- * 
+ *
  * @this {Keyboard}
  * @param {number} [notCharCode]
  */
@@ -963,7 +963,7 @@ Keyboard.prototype.autoClear = function(notCharCode)
 
 /**
  * injectKeys(sKeyCodes, msDelay)
- * 
+ *
  * @this {Keyboard}
  * @param {string} sKeyCodes
  * @param {number|undefined} [msDelay] is an optional injection delay (default is msInjectDelay)
@@ -977,7 +977,7 @@ Keyboard.prototype.injectKeys = function(sKeyCodes, msDelay)
 
 /**
  * injectKeysFromBuffer(msDelay)
- * 
+ *
  * @this {Keyboard}
  * @param {number} msDelay is the delay between injected keys
  */
@@ -1004,7 +1004,7 @@ Keyboard.prototype.injectKeysFromBuffer = function(msDelay)
 
 /**
  * keyEvent(event, fDown)
- * 
+ *
  * @this {Keyboard}
  * @param {Object} event
  * @param {boolean} fDown is true if called for a keyDown event, false if called for a keyUp event
@@ -1070,7 +1070,7 @@ Keyboard.prototype.keyEvent = function(event, fDown)
          * which also generates "down" and "up" events (LOTS of "down" events for that matter),
          * but no "press" event.  The C1P has no TAB key, so it's safe to completely ignore,
          * hence the code below, but a PC does, so I need to simulate it.
-         * 
+         *
          *      fPass = fAutoClear = false;
          *
          * I don't get keyPress events for ESC (why?) and I never want the browser to act on DELETE
@@ -1117,10 +1117,10 @@ Keyboard.prototype.keyEvent = function(event, fDown)
              * "up" events, so that keys will repeat immediately when released/pressed repeatedly (most
              * noticeable with the Enter key), or set fAutoClear to false to ensure that polling apps have
              * enough time to see every key press.
-             * 
+             *
              * I've decided that the former is more important than the latter, so if polling apps are still
              * missing keystrokes, then perhaps nCyclesThreshold needs to be supplemented in some way.
-             * 
+             *
              *      fAutoClear = false;
              */
         }
@@ -1161,7 +1161,7 @@ Keyboard.prototype.keyEvent = function(event, fDown)
  *
  * We've stopped relying on keyPress for keyboard emulation purposes, but it's still handy to hook and monitor
  * when debugging.
- * 
+ *
  * @this {Keyboard}
  * @param {Object} event
  * @return {boolean} true to pass the event along, false to consume it
@@ -1184,12 +1184,12 @@ Keyboard.prototype.keyPress = function(event)
         /*
          * Unlike Safari and Chrome, Firefox doesn't seem to honor our "consume" request for the "down" DELETE keyEvent,
          * so we must ALSO check for the DELETE key here, and again "consume" it.  Ditto for TAB.
-         * 
+         *
          * In fact, this is just one example of a larger Firefox problem (see https://bugzilla.mozilla.org/show_bug.cgi?id=501496).
          * Basically, Firefox is not honoring our consumption of keyDown events, and generates keyPress events anyway.
          * This causes us grief for various CTRL and ALT combinations, resulting in duplicate key presses.
          * So, I'm going to try to fix this below, by setting fPass to true if either of those modifier keys is currently down;
-         * if they're not, then we'll continue with the original code that sets fPass based on the return value from keyPressSimulate(). 
+         * if they're not, then we'll continue with the original code that sets fPass based on the return value from keyPressSimulate().
          */
         fPass = false;
     } else {
@@ -1210,7 +1210,7 @@ Keyboard.prototype.keyPress = function(event)
 
 /**
  * keyPressSimulate(charCode)
- * 
+ *
  * @this {Keyboard}
  * @param {number} charCode
  * @param {boolean} [fQuickRelease] is true to simulate the press and release immediately
@@ -1232,10 +1232,10 @@ Keyboard.prototype.keyPressSimulate = function(charCode, fQuickRelease)
          * and execute a LOT of instructions between delivery of the keyPress event and the "keyTimeout"
          * event, and since JavaScript events (including timeouts) are delivered synchronously, it might
          * take too long for the "keyTimeout" event to arrive.
-         * 
+         *
          * Why don't we ALWAYS do this?  Because at normal CPU speeds, we want to faithfully simulate how
          * long a key is held, so that features like auto-repeat work properly.
-         * 
+         *
          * TODO: The above is probably more true for C1Pjs (where some of this code came from) than PCjs,
          * so revisit these assumptions.  The fact that I had to add the fQuickRelease parameter suggests
          * that it's time to review/overhaul this code.
@@ -1265,7 +1265,7 @@ Keyboard.prototype.keyPressSimulate = function(charCode, fQuickRelease)
 
 /**
  * keyEventSimulate(charCode, fDown, simCode)
- * 
+ *
  * @this {Keyboard}
  * @param {number} charCode
  * @param {boolean} fDown
@@ -1353,7 +1353,7 @@ Keyboard.prototype.keyEventSimulate = function(charCode, fDown, simCode)
  * messageDebugger(sMessage, fPort)
  *
  * This is a combination of the Debugger's messageEnabled(MESSAGE_KBD) and message() functions, for convenience.
- * 
+ *
  * @this {Keyboard}
  * @param {string} sMessage is any caller-defined message string
  * @param {boolean} [fPort] is true if the message is port-related, false if not

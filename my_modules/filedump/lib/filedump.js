@@ -32,12 +32,12 @@
 
 "use strict";
 
-var fs = require("fs");
-var path = require("path");
-var mkdirp = require("mkdirp");
-var net = require("../../shared/lib/netlib");
-var proc = require("../../shared/lib/proclib");
-var str = require("../../shared/lib/strlib");
+var fs      = require("fs");
+var path    = require("path");
+var mkdirp  = require("mkdirp");
+var net     = require("../../shared/lib/netlib");
+var proc    = require("../../shared/lib/proclib");
+var str     = require("../../shared/lib/strlib");
 var DumpAPI = require("../../shared/lib/dumpapi");
 
 /**
@@ -661,7 +661,7 @@ FileDump.prototype.outputFile = function(sOutputFile, fOverwrite)
     } else {
         /*
          * We'll dump JSON to the console, but not a raw file buffer; we could add an option to
-         * "stringify" buffers, but if that's what the caller wants, they should use "--format=json". 
+         * "stringify" buffers, but if that's what the caller wants, they should use "--format=json".
          */
         if (typeof data == "string") {
             console.log(data);

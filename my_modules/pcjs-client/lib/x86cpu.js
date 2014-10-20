@@ -34,19 +34,19 @@
 "use strict";
 
 if (typeof module !== 'undefined') {
-    var str = require("../../shared/lib/strlib");
-    var web = require("../../shared/lib/weblib");
-    var Component = require("../../shared/lib/component");
-    var Bus = require("./bus");
-    var State = require("./state");
-    var CPU = require("./cpu");
-    var X86 = require("./x86");
-    var X86Seg = require("./x86seg");
-    var X86Grps = require("./x86grps");
-    var X86Help = require("./x86help");
-    var X86Mods = require("./x86mods");
-    var X86OpXX = require("./x86opxx");
-    var X86Op0F = require("./x86op0f");
+    var str         = require("../../shared/lib/strlib");
+    var web         = require("../../shared/lib/weblib");
+    var Component   = require("../../shared/lib/component");
+    var Bus         = require("./bus");
+    var State       = require("./state");
+    var CPU         = require("./cpu");
+    var X86         = require("./x86");
+    var X86Seg      = require("./x86seg");
+    var X86Grps     = require("./x86grps");
+    var X86Help     = require("./x86help");
+    var X86Mods     = require("./x86mods");
+    var X86OpXX     = require("./x86opxx");
+    var X86Op0F     = require("./x86op0f");
 }
 
 /**

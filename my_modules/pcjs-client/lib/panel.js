@@ -4,7 +4,7 @@
  * @version 1.0
  * @suppress {missingProperties}
  * Created 2012-Jun-19
- * 
+ *
  * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
  *
  * This file is part of PCjs, which is part of the JavaScript Machines Project (aka JSMachines)
@@ -34,15 +34,15 @@
 "use strict";
 
 if (typeof module !== 'undefined') {
-    var web = require("../../shared/lib/weblib");
-    var Component = require("../../shared/lib/component");
+    var web         = require("../../shared/lib/weblib");
+    var Component   = require("../../shared/lib/component");
 }
 
 /**
  * Panel(parmsPanel)
  *
  * The Panel component has no required (parmsPanel) properties.
- * 
+ *
  * @constructor
  * @extends Component
  * @param {Object} parmsPanel
@@ -55,7 +55,7 @@ Component.subclass(Component, Panel);
 
 /**
  * setBinding(sHTMLClass, sHTMLType, sBinding, control)
- * 
+ *
  * The Panel doesn't have any bindings of its own; it passes along all binding requests to
  * the Computer, CPU, Keyboard and Debugger components. The order shouldn't matter, since any
  * component that doesn't recognize the specified binding should simply ignore it.
@@ -95,7 +95,7 @@ Panel.prototype.initBus = function(cmp, bus, cpu, dbg)
 
 /**
  * powerUp(data, fRepower)
- * 
+ *
  * @this {Panel}
  * @param {Object|null} data
  * @param {boolean} [fRepower]
@@ -111,7 +111,7 @@ Panel.prototype.powerUp = function(data, fRepower)
 
 /**
  * powerDown(fSave)
- * 
+ *
  * @this {Panel}
  * @param {boolean} fSave
  * @return {Object|boolean}
@@ -123,19 +123,19 @@ Panel.prototype.powerDown = function(fSave)
 
 /**
  * Panel.init()
- *  
+ *
  * This function operates on every element (e) of class "panel", and initializes
  * all the necessary HTML to construct the Panel module(s) as spec'ed.
  *
  * Note that each element (e) of class "panel" is expected to have a "data-value"
  * attribute containing the same JSON-encoded parameters that the Panel constructor
  * expects.
- *  
+ *
  * NOTE: Unlike most other component init() functions, this one is designed to be
  * called multiple times: once at load time, so that we can binding our print()
  * function to the panel's output control ASAP, and again when the Computer component
  * is verifying that all components are ready and invoking their setPower() functions.
- *  
+ *
  * Our setPower() method gives us a second opportunity to notify any components that
  * that might care (eg, CPU, Keyboard, and Debugger) that we have some controls they
  * might want to use.

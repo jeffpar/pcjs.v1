@@ -34,11 +34,11 @@
 "use strict";
 
 if (typeof module !== 'undefined') {
-    var str = require("../../shared/lib/strlib");
-    var web = require("../../shared/lib/weblib");
-    var Component = require("../../shared/lib/component");
-    var SerialPort = require("./serial");
-    var State = require("./state");
+    var str         = require("../../shared/lib/strlib");
+    var web         = require("../../shared/lib/weblib");
+    var Component   = require("../../shared/lib/component");
+    var SerialPort  = require("./serial");
+    var State       = require("./state");
 }
 
 /**
@@ -64,7 +64,7 @@ if (typeof module !== 'undefined') {
  * TODO: Just out of curiosity, verify that the Microsoft Bus Mouse used ports 0x23D and 0x23F,
  * because I saw Windows v1.01 probing those ports immediately prior to probing COM2 (and then COM1)
  * for a serial mouse.
- * 
+ *
  * @constructor
  * @extends Component
  * @param {Object} parmsMouse
@@ -83,14 +83,14 @@ function Mouse(parmsMouse) {
 
 /*
  * From http://paulbourke.net/dataformats/serialmouse:
- * 
+ *
  *      The old MicroSoft serial mouse, while no longer in general use, can be employed to provide a low cost input device,
  *      for example, coupling the internal mechanism to other moving objects. The serial protocol for the mouse is:
  *
  *          1200 baud, 7 bit, 1 stop bit, no parity.
  *
  *      The pinout of the connector follows the standard serial interface, as shown below:
- *      
+ *
  *          Pin     Abbr    Description
  *          1       DCD     Data Carrier Detect
  *          2       RD      Receive Data            [serial data from mouse to host]
@@ -101,7 +101,7 @@ function Mouse(parmsMouse) {
  *          7       RTS     Request To Send         [used to provide positive voltage to mouse]
  *          8       CTS     Clear To Send
  *          9       RI      Ring
- *          
+ *
  *      Every time the mouse changes state (moved or button pressed) a three byte "packet" is sent to the serial interface.
  *      For reasons known only to the engineers, the data is arranged as follows, most notably the two high order bits for the
  *      x and y coordinates share the first byte with the button status.
@@ -110,16 +110,16 @@ function Mouse(parmsMouse) {
  *          1st byte    1   LB  RB  Y7  Y6  X7  X6
  *          2nd byte    0   X5  X4  X3  X2  X1  X0
  *          3rd byte    0   Y5  Y4  Y3  Y2  Y1  Y0
- *          
+ *
  *      where:
- *      
+ *
  *          LB is the state of the left button, 1 = pressed, 0 = released.
  *          RB is the state of the right button, 1 = pressed, 0 = released
  *          X0-7 is movement of the mouse in the X direction since the last packet. Positive movement is toward the right.
  *          Y0-7 is movement of the mouse in the Y direction since the last packet. Positive movement is back, toward the user.
- *          
+ *
  * From http://www.kryslix.com/nsfaq/Q.12.html:
- * 
+ *
  *      The Microsoft serial mouse is the most popular 2-button mouse. It is supported by all major operating systems.
  *      The maximum tracking rate for a Microsoft mouse is 40 reports/second * 127 counts per report, in other words, 5080 counts
  *      per second. The most common range for mice is is 100 to 400 CPI (counts per inch) but can be up to 1000 CPI. A 100 CPI mouse
@@ -141,12 +141,12 @@ function Mouse(parmsMouse) {
  *      (0x4D, ASCII 'M').
  *
  *      Serial data parameters: 1200bps, 7 data bits, 1 stop bit
- *      
+ *
  *      Data is sent in 3 byte packets for each event (a button is pressed or released, or the mouse moves):
- *      
+ *
  *                  D7  D6  D5  D4  D3  D2  D1  D0
  *          Byte 1  X   1   LB  RB  Y7  Y6  X7  X6
- *          Byte 2  X   0   X5  X4  X3  X2  X1  X0      
+ *          Byte 2  X   0   X5  X4  X3  X2  X1  X0
  *          Byte 3  X   0   Y5  Y4  Y3  Y2  Y1  Y0
  *
  *      LB is the state of the left button (1 means down).
@@ -161,7 +161,7 @@ Component.subclass(Component, Mouse);
 
 /**
  * initBus(cmp, bus, cpu, dbg)
- * 
+ *
  * @this {Mouse}
  * @param {Computer} cmp
  * @param {Bus} bus
@@ -180,7 +180,7 @@ Mouse.prototype.initBus = function(cmp, bus, cpu, dbg) {
 
 /**
  * isActive()
- * 
+ *
  * @this {Mouse}
  * @return {boolean} true if active, false if not
  */
@@ -214,10 +214,10 @@ Mouse.prototype.powerUp = function(data, fRepower) {
                          * on the adapter's state, which is why I envisioned a subsequent syncMouse() call.  And you would want
                          * to do that as a separate call, not as part of attachMouse(), because componentAdapter isn't
                          * set until attachMouse() returns.
-                         * 
+                         *
                          * However, syncMouse() seems unnecessary, given that SerialPort initializes its MCR to an "inactive"
                          * state, and even when restoring a previous state, if we've done our job properly, both SerialPort and Mouse
-                         * should be restored in sync, making any explicit attempt at sync'ing unnecessary (or so I hope). 
+                         * should be restored in sync, making any explicit attempt at sync'ing unnecessary (or so I hope).
                          */
                         // this.componentAdapter.syncMouse();
                         break;
@@ -242,7 +242,7 @@ Mouse.prototype.powerUp = function(data, fRepower) {
 
 /**
  * powerDown(fSave)
- * 
+ *
  * @this {Mouse}
  * @param {boolean} fSave
  * @return {Object|boolean}
@@ -253,7 +253,7 @@ Mouse.prototype.powerDown = function(fSave) {
 
 /**
  * reset()
- * 
+ *
  * @this {Mouse}
  */
 Mouse.prototype.reset = function() {
@@ -264,7 +264,7 @@ Mouse.prototype.reset = function() {
  * save()
  *
  * This implements save support for the Mouse component.
- * 
+ *
  * @this {Mouse}
  * @return {Object}
  */
@@ -278,7 +278,7 @@ Mouse.prototype.save = function() {
  * restore(data)
  *
  * This implements restore support for the Mouse component.
- * 
+ *
  * @this {Mouse}
  * @param {Object} data
  * @return {boolean} true if successful, false if failure
@@ -289,7 +289,7 @@ Mouse.prototype.restore = function(data) {
 
 /**
  * initState(data)
- * 
+ *
  * @this {Mouse}
  * @param {Array} [data]
  * @return {boolean} true if successful, false if failure
@@ -310,7 +310,7 @@ Mouse.prototype.initState = function(data) {
 
 /**
  * saveState()
- * 
+ *
  * @this {Mouse}
  * @return {Array}
  */
@@ -333,7 +333,7 @@ Mouse.prototype.saveState = function() {
  *
  * NOTE: addEventListener() wasn't supported in IE until IE9, but that's OK, because IE9 is the
  * oldest IE we support anyway (since older versions of IE lacked complete HTML5/canvas support).
- * 
+ *
  * @this {Mouse}
  * @param {Object} control from the HTML DOM (eg, the canvas for the simulated screen)
  */
@@ -365,13 +365,13 @@ Mouse.prototype.captureMouse = function(control) {
             this.fCaptured = true;
         }
         /*
-         * None of these tricks seemed to work for IE10, so I'm giving up hiding the browser's mouse pointer in IE for now.  
+         * None of these tricks seemed to work for IE10, so I'm giving up hiding the browser's mouse pointer in IE for now.
          *
          *      control['style']['cursor'] = "url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjbQg61aAAAADUlEQVQYV2P4//8/IwAI/QL/+TZZdwAAAABJRU5ErkJggg=='), url('/versions/images/current/blank.cur'), none";
-         *      
+         *
          * Setting the cursor style to "none" may not be a standard, but it works in Safari, Firefox and Chrome, so that's pretty
          * good for a non-standard!
-         * 
+         *
          * TODO: The reference to '/versions/images/current/blank.cur' is also problematic for anyone who might want
          * to run this app from a different server, so think about that as well.
          */
@@ -385,7 +385,7 @@ Mouse.prototype.captureMouse = function(control) {
  * TODO: Use removeEventListener() if fCaptured, to clean up our handlers; since I'm currently using
  * anonymous functions, and since I'm not seeing any compelling reason to remove the handlers once they've
  * been established, it's less code to leave them in place.
- * 
+ *
  * @this {Mouse}
  * @param {Object} control from the HTML DOM
  */
@@ -408,7 +408,7 @@ Mouse.prototype.releaseMouse = function(control) {
  * but I don't think they're available in all browsers.  screenX and screenY would work as well.
  *
  * Anyway, all I care about are deltas.  For now.
- * 
+ *
  * @this {Mouse}
  * @param {Object} event object from a 'mousemove' event (specifically, a MouseEvent object)
  */
@@ -430,7 +430,7 @@ Mouse.prototype.moveMouse = function(event) {
 
 /**
  * clickMouse(iButton, fDown)
- * 
+ *
  * @this {Mouse}
  * @param {number} iButton is 0 for fButton1 (the LEFT button), 2 for fButton2 (the RIGHT button)
  * @param {boolean} fDown
@@ -470,7 +470,7 @@ Mouse.prototype.clickMouse = function(iButton, fDown) {
  *      Byte 1  X   1   LB  RB  Y7  Y6  X7  X6
  *      Byte 2  X   0   X5  X4  X3  X2  X1  X0
  *      Byte 3  X   0   Y5  Y4  Y3  Y2  Y1  Y0
- * 
+ *
  * @this {Mouse}
  * @param {string|null} [sDiag] diagnostic message
  * @param {number} [xDiag] original x-coordinate (optional; for diagnostic use only)
@@ -499,7 +499,7 @@ Mouse.prototype.sendPacket = function(sDiag, xDiag, yDiag) {
  * sitting in the RBR), and then writes 0x0B to the MCR (DTR on, RTS on).  This last step is consistent with making
  * the mouse "active", but it is NOT consistent with "toggling DTR", so I conclude that a reset is ALSO sufficient
  * for sending the identification byte.  Right or wrong, this gets the ball rolling for Windows v1.01.
- * 
+ *
  * @this {Mouse}
  * @param {number} bMCR
  */
@@ -532,7 +532,7 @@ Mouse.prototype.notifyMCR = function(bMCR) {
              * At the very least, Windows will have (re)masked the serial port's IRQ, so what does it matter?  Not much,
              * I just would have preferred that fActive properly reflect whether we should continue dispatching mouse
              * events, displaying MESSAGE_MOUSE messages, etc.
-             * 
+             *
              * We could ask the ChipSet component to notify the SerialPort component whenever its IRQ is masked/unmasked,
              * and then have the SerialPort pass that notification on to us, but I'm assuming that in the real world,
              * a mouse device that's still powered may still send event data to the serial port, and if there was software
@@ -550,7 +550,7 @@ Mouse.prototype.notifyMCR = function(bMCR) {
  * messageDebugger(sMessage)
  *
  * This is a combination of the Debugger's messageEnabled(MESSAGE_MOUSE) and message() functions, for convenience.
- * 
+ *
  * @this {Mouse}
  * @param {string} sMessage is any caller-defined message string
  */

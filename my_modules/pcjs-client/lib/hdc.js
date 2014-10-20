@@ -34,13 +34,13 @@
 "use strict";
 
 if (typeof module !== 'undefined') {
-    var str = require("../../shared/lib/strlib");
-    var web = require("../../shared/lib/weblib");
-    var DiskAPI = require("../../shared/lib/diskapi");
-    var Component = require("../../shared/lib/component");
-    var ChipSet = require("./chipset");
-    var Disk = require("./disk");
-    var State = require("./state");
+    var str         = require("../../shared/lib/strlib");
+    var web         = require("../../shared/lib/weblib");
+    var DiskAPI     = require("../../shared/lib/diskapi");
+    var Component   = require("../../shared/lib/component");
+    var ChipSet     = require("./chipset");
+    var Disk        = require("./disk");
+    var State       = require("./state");
 }
 
 /**
@@ -145,7 +145,7 @@ HDC.aDriveTypes = [
      * so aDriveTypes must first be indexed by a controller index (this.iHDC).
      *
      * The following is a more complete description of the drive types supported by the MODEL_5170, where C is
-     * Cylinders, H is Heads, WP is Write Pre-Comp, and LZ is Landing Zone (in practice, we don't need WP or LZ).  
+     * Cylinders, H is Heads, WP is Write Pre-Comp, and LZ is Landing Zone (in practice, we don't need WP or LZ).
      *
      * Type    C    H   WP   LZ
      * ----  ---   --  ---  ---
@@ -457,7 +457,7 @@ HDC.BIOS = {
 };
 
 /*
- * NOTE: These are useful values for reference, but they're not actually used for anything at the moment. 
+ * NOTE: These are useful values for reference, but they're not actually used for anything at the moment.
  */
 HDC.BIOS.DISK_CMD = {
     RESET:          0x00,
@@ -865,7 +865,7 @@ HDC.prototype.initDrive = function(iDrive, drive, driveConfig, data, fReset)
     /*
      * The next group of properties are set by user requests to load/unload disk images.
      *
-     * NOTE: I now avoid reinitializing drive.disk in order to retain any previously mounted disk across resets.
+     * We no longer reinitialize drive.disk, in order to retain previously mounted disk across resets.
      */
     if (drive.disk === undefined) {
         drive.disk = null;
@@ -1235,7 +1235,7 @@ HDC.prototype.outXTCData = function(port, bOut, addrFrom)
     }
     if (this.regDataTotal >= cbCmd) {
         /*
-         * It's essential that XTC.STATUS.IOMODE be set here, at least after the final 8-byte HDC.XTC.DATA.CMD.INIT_DRIVE sequence.  
+         * It's essential that XTC.STATUS.IOMODE be set here, at least after the final 8-byte HDC.XTC.DATA.CMD.INIT_DRIVE sequence.
          */
         this.regStatus |= HDC.XTC.STATUS.IOMODE;
         this.regStatus &= ~HDC.XTC.STATUS.REQ;
@@ -1650,13 +1650,13 @@ HDC.prototype.outATCDrvHd = function(port, bOut, addrFrom)
      * of configured hard drives is something other than 2, using INT 0x13/AH=0x10.  This in turn calls the
      * BIOS "TST_RDY" function, which selects the drive in this register (see DRIVE_MASK), and then immediately
      * expects regStatus to reflect success or failure.
-     * 
+     *
      * We were always returning success, because no ATC command was actually issued, and so the user would
      * always get a spurious CMOS configuration error: "System Options Not Set-(Run SETUP)".
-     * 
+     *
      * So now we update regStatus here.  I'm not sure which status bits are normally set to indicate failure,
      * but it should be sufficient to set or clear the READY bit according to whether the drive exists or not.
-     * 
+     *
      * TODO: Dig into the ATC documentation some more, and determine what other situations, if any, regStatus
      * needs to be updated.
      */

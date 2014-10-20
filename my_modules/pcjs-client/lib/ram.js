@@ -34,9 +34,9 @@
 "use strict";
 
 if (typeof module !== 'undefined') {
-    var web = require("../../shared/lib/weblib");
-    var Component = require("../../shared/lib/component");
-    var ROM = require("./rom");
+    var web         = require("../../shared/lib/weblib");
+    var Component   = require("../../shared/lib/component");
+    var ROM         = require("./rom");
 }
 
 /**
@@ -49,7 +49,7 @@ if (typeof module !== 'undefined') {
  *
  * NOTE: We make a note of the specified size, but no memory is initially allocated
  * for the RAM until the Computer component calls setPower().
- * 
+ *
  * @constructor
  * @extends Component
  * @param {Object} parmsRAM
@@ -69,7 +69,7 @@ Component.subclass(Component, RAM);
 
 /**
  * initBus(cmp, bus, cpu, dbg)
- * 
+ *
  * @this {RAM}
  * @param {Computer} cmp
  * @param {Bus} bus
@@ -113,7 +113,7 @@ RAM.prototype.powerUp = function(data, fRepower) {
 
 /**
  * powerDown(fSave)
- * 
+ *
  * @this {RAM}
  * @param {boolean} fSave
  * @return {Object|boolean}
@@ -146,7 +146,7 @@ RAM.prototype.powerDown = function(fSave) {
  * object was not given a specific size (see fInstalled).  If there are other RAM objects in the system,
  * they must necessarily specify a non-conflicting, non-zero start address, in which case their sizeRAM
  * value will never be affected by the ChipSet settings.
- * 
+ *
  * @this {RAM}
  */
 RAM.prototype.reset = function() {

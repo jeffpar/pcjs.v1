@@ -34,10 +34,10 @@
 "use strict";
 
 if (typeof module !== 'undefined') {
-    var str = require("../../shared/lib/strlib");
-    var web = require("../../shared/lib/weblib");
-    var DumpAPI = require("../../shared/lib/dumpapi");
-    var Component = require("../../shared/lib/component");
+    var str         = require("../../shared/lib/strlib");
+    var web         = require("../../shared/lib/weblib");
+    var DumpAPI     = require("../../shared/lib/dumpapi");
+    var Component   = require("../../shared/lib/component");
 }
 
 /**
@@ -56,7 +56,7 @@ if (typeof module !== 'undefined') {
  *
  * Also, while the size parameter may seem redundant, I consider it useful to confirm that the ROM you received
  * is the ROM you expected.
- * 
+ *
  * @constructor
  * @extends Component
  * @param {Object} parmsROM
@@ -109,11 +109,11 @@ ROM.BIOS.RESET_FLAG_WARMBOOT = 0x1234;  // value stored at ROM.BIOS.RESET_FLAG t
 /*
  * NOTE: There's currently no need for this component to have a reset() function, since
  * once the ROM data is loaded, it can't be changed, so there's nothing to reinitialize.
- * 
+ *
  * OK, well, I take that back, because the Debugger, if installed, has the ability to modify
  * ROM contents, so in that case, having a reset() function that restores the original ROM data
  * might be useful; then again, it might not, depending on what you're trying to debug.
- * 
+ *
  * If we do add reset(), then we'll want to change copyROM() to hang onto the original
  * ROM data; currently, we release it after copying it into the read-only memory allocated
  * via bus.addMemory().
@@ -121,7 +121,7 @@ ROM.BIOS.RESET_FLAG_WARMBOOT = 0x1234;  // value stored at ROM.BIOS.RESET_FLAG t
 
 /**
  * initBus(cmp, bus, cpu, dbg)
- * 
+ *
  * @this {ROM}
  * @param {Computer} cmp
  * @param {Bus} bus
@@ -166,7 +166,7 @@ ROM.prototype.powerUp = function(data, fRepower)
  * this function.  But it doesn't hurt anything, and maybe we'll use our state to save something
  * useful down the road, like user-defined symbols (ie, symbols that the Debugger may have
  * created, above and beyond those symbols we automatically loaded, if any, along with the ROM).
- * 
+ *
  * @this {ROM}
  * @param {boolean} fSave
  * @return {Object|boolean}
@@ -178,7 +178,7 @@ ROM.prototype.powerDown = function(fSave)
 
 /**
  * onLoadROM(sROMFile, sROMData, nErrorCode)
- * 
+ *
  * @this {ROM}
  * @param {string} sROMFile
  * @param {string} sROMData
@@ -198,7 +198,7 @@ ROM.prototype.onLoadROM = function(sROMFile, sROMData, nErrorCode)
             var rom = eval("(" + sROMData + ")");
             var ab = rom['bytes'];
             var adw = rom['data'];
-            
+
             if (ab) {
                 this.abROM = ab;
             }
@@ -304,7 +304,7 @@ ROM.prototype.copyROM = function()
 
 /**
  * addROM(addr)
- * 
+ *
  * If addr is null or undefined, then it's presumably an unused addrROMAlias, which we simply ignore (it's not
  * considered a failure condition).
  *

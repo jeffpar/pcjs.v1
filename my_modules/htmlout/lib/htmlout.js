@@ -41,10 +41,10 @@ var glob = require("glob");
 var HTTPAPI = require("./httpapi");
 var DumpAPI = require("../../shared/lib/dumpapi");
 var MarkOut = require("../../markout");
-var net = require("../../shared/lib/netlib");
-var proc = require("../../shared/lib/proclib");
-var str = require("../../shared/lib/strlib");
-var usr = require("../../shared/lib/usrlib");
+var net     = require("../../shared/lib/netlib");
+var proc    = require("../../shared/lib/proclib");
+var str     = require("../../shared/lib/strlib");
+var usr     = require("../../shared/lib/usrlib");
 
 /**
  * @class exports

@@ -34,14 +34,14 @@
 "use strict";
 
 if (typeof module !== 'undefined') {
-    var str = require("../../shared/lib/strlib");
-    var web = require("../../shared/lib/weblib");
-    var DiskAPI = require("../../shared/lib/diskapi");
-    var Component = require("../../shared/lib/component");
-    var ChipSet = require("./chipset");
-    var Disk = require("./disk");
-    var Computer = require("./computer");
-    var State = require("./state");
+    var str         = require("../../shared/lib/strlib");
+    var web         = require("../../shared/lib/weblib");
+    var DiskAPI     = require("../../shared/lib/diskapi");
+    var Component   = require("../../shared/lib/component");
+    var ChipSet     = require("./chipset");
+    var Disk        = require("./disk");
+    var Computer    = require("./computer");
+    var State       = require("./state");
 }
 
 /*
@@ -738,6 +738,13 @@ FDC.prototype.initController = function(data)
     for (iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
         var drive = this.aDrives[iDrive];
         if (drive === undefined) {
+            /*
+             * The first time each drive is initialized, obtain its type (from switches or CMOS) and the physical limits
+             * of the drive (ie, max tracks and max sectors/track).  As for max heads, initDrive() assumes that all drives
+             * have two heads, and in any case, there's no way to configure/specify a single-sided floppy drive.
+             *
+             * TODO: Provide a configuration option for single-sided drives, in case someone really wants to simulate that.
+             */
             drive = this.aDrives[iDrive] = {};
             drive.bType = this.chipset.getSWFloppyDriveType(iDrive);
             drive.nCylinders = 40;
@@ -823,7 +830,7 @@ FDC.prototype.initDrive = function(drive, iDrive, data)
         /*
          * Note that when no data is provided (eg, when the controller is being reinitialized), we now take
          * care to preserve any drive defaults that initController() already obtained for us, falling back to
-         * bare minimums only when all else has failed.
+         * bare minimums only when all else fails.
          */
         data[1] = [FDC.DEFAULT_DRIVE_NAME, drive.nCylinders || 40, drive.nHeads || data[3], drive.nSectors || 9, drive.cbSector || 512, data[1]];
     }
@@ -845,6 +852,18 @@ FDC.prototype.initDrive = function(drive, iDrive, data)
     drive.nSectors = data[i][3];            // sectors/track
     drive.cbSector = data[i][4];            // bytes/sector
     drive.fRemovable = data[i][5];
+    /*
+     * If we have current media parameters, restore them; otherwise, default to the drive's physical parameters.
+     */
+    if (drive.nDiskCylinders = data[i][6]) {
+        drive.nDiskHeads = data[i][7];
+        drive.nDiskSectors = data[i][8];
+    } else {
+        drive.nDiskCylinders = drive.nCylinders;
+        drive.nDiskHeads = drive.nHeads;
+        drive.nDiskSectors = drive.nSectors;
+
+    }
     i++;
 
     /*
@@ -888,11 +907,7 @@ FDC.prototype.initDrive = function(drive, iDrive, data)
     drive.nBytes = data[i++];
 
     /*
-     * The next group of properties are set by user requests to load/unload diskette images.
-     *
-     * NOTE: I now avoid reinitializing drive.disk in order to retain any previously mounted diskette across resets.
-     *
-     *    drive.disk = null;                // when a "disk" is "inserted" into the "drive", this is a Disk object
+     * We no longer reinitialize drive.disk, in order to retain previously mounted diskette across resets.
      */
 
     /*
@@ -971,7 +986,7 @@ FDC.prototype.saveDrive = function(drive)
     var i = 0;
     var data = [];
     data[i++] = drive.resCode;
-    data[i++] = [drive.name, drive.nCylinders, drive.nHeads, drive.nSectors, drive.cbSector, drive.fRemovable];
+    data[i++] = [drive.name, drive.nCylinders, drive.nHeads, drive.nSectors, drive.cbSector, drive.fRemovable, drive.nDiskCylinders, drive.nDiskHeads, drive.nDiskSectors];
     data[i++] = drive.bHead;
     /*
      * We used to store drive.nHeads in the next slot, but now we store bCylinderSeek,
@@ -1170,15 +1185,20 @@ FDC.prototype.loadDiskette = function(iDrive, sDisketteName, sDiskettePath, fAut
  */
 FDC.prototype.mountDiskette = function(drive, disk, sDisketteName, sDiskettePath)
 {
+    var aDiskInfo;
+
     drive.fBusy = false;
 
-    /*
-     * We shouldn't mount the diskette unless the drive is able to handle it; for example, DSDD (40-track)
-     * drives cannot read DSHD (80-track) diskettes.
-     */
-    if (disk && disk.aDiskData.length > drive.nCylinders) {
-        this.notice("Diskette \"" + sDisketteName + "\" too large for drive " + String.fromCharCode(0x41 + drive.iDrive));
-        disk = null;
+    if (disk) {
+        /*
+         * We shouldn't mount the diskette unless the drive is able to handle it; for example, DSDD (40-track)
+         * drives cannot read DSHD (80-track) diskettes.
+         */
+        aDiskInfo = disk.info();
+        if (disk && aDiskInfo[0] > drive.nCylinders || aDiskInfo[1] > drive.nHeads || aDiskInfo[2] > drive.nSectors) {
+            this.notice("Diskette \"" + sDisketteName + "\" too large for drive " + String.fromCharCode(0x41 + drive.iDrive));
+            disk = null;
+        }
     }
 
     if (disk) {
@@ -1205,6 +1225,13 @@ FDC.prototype.mountDiskette = function(drive, disk, sDisketteName, sDiskettePath
          * and will not match the drive mappings that DOS ultimately uses (ie, for drives beyond B:).
          */
         this.notice("Mounted diskette \"" + sDisketteName + "\" in drive " + String.fromCharCode(0x41 + drive.iDrive), drive.fAutoMount);
+
+        /*
+         * Update the drive's current media parameters to match the disk's.
+         */
+        drive.nDiskCylinders = aDiskInfo[0];
+        drive.nDiskHeads = aDiskInfo[1];
+        drive.nDiskSectors = aDiskInfo[2];
     }
 
     if (drive.fAutoMount) {
@@ -2141,8 +2168,8 @@ FDC.prototype.writeByte = function(drive, b)
 /**
  * advanceSector(drive)
  *
- * This increments the sector number; when the sector number reaches drive.nSectors on the current track, we
- * increment drive.bHead and reset drive.bSector, and when drive.bHead reaches drive.nHeads, we reset drive.bHead
+ * This increments the sector number; when the sector number reaches drive.nDiskSectors on the current track, we
+ * increment drive.bHead and reset drive.bSector, and when drive.bHead reaches drive.nDiskHeads, we reset drive.bHead
  * and increment drive.bCylinder.
  *
  * @this {FDC}
@@ -2150,13 +2177,13 @@ FDC.prototype.writeByte = function(drive, b)
  */
 FDC.prototype.advanceSector = function(drive)
 {
-    Component.assert(drive.bCylinder < drive.nCylinders);
+    Component.assert(drive.bCylinder < drive.nDiskCylinders);
     drive.bSector++;
     var bSectorStart = 1;
-    if (drive.bSector >= drive.nSectors + bSectorStart) {
+    if (drive.bSector >= drive.nDiskSectors + bSectorStart) {
         drive.bSector = bSectorStart;
         drive.bHead++;
-        if (drive.bHead >= drive.nHeads) {
+        if (drive.bHead >= drive.nDiskHeads) {
             drive.bHead = 0;
             drive.bCylinder++;
         }

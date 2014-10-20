@@ -34,10 +34,10 @@
 "use strict";
 
 if (typeof module !== 'undefined') {
-    var X86 = require("./x86");
-    var X86Grps = require("./x86grps");
-    var X86Help = require("./x86help");
-    var X86Mods = require("./x86mods");
+    var X86         = require("./x86");
+    var X86Grps     = require("./x86grps");
+    var X86Help     = require("./x86help");
+    var X86Mods     = require("./x86mods");
 }
 
 var X86Op0F = {
@@ -149,10 +149,10 @@ var X86Op0F = {
                 /*
                  * For VERR, if the code segment is readable and conforming, the descriptor privilege level
                  * (DPL) can be any value.
-                 * 
+                 *
                  * Otherwise, DPL must be greater than or equal to (have less or the same privilege as) both the
                  * current privilege level and the selector's RPL.
-                 * 
+                 *
                  * TODO: Consider making a CPL (current privilege level) variable that tracks segCS.sel, so that we
                  * don't have to mask segCS.sel every time.
                  */
@@ -187,7 +187,7 @@ var X86Op0F = {
                 /*
                  * DPL must be greater than or equal to (have less or the same privilege as) both the current
                  * privilege level and the selector's RPL.
-                 * 
+                 *
                  * TODO: Consider making a CPL (current privilege level) variable that tracks segCS.sel, so that we
                  * don't have to mask segCS.sel every time.
                  */
@@ -261,8 +261,8 @@ var X86Op0F = {
      * opLIDT(dst, src)
      *
      * The 80286 LIDT instruction expects a 40-bit operand: a 16-bit limit, followed by a 24-bit address;
-     * the ModRM decoder has already supplied the first word of the operand (in dst), which corresponds to the 
-     * limit, so we must fetch the remaining 24 bits ourselves. 
+     * the ModRM decoder has already supplied the first word of the operand (in dst), which corresponds to the
+     * limit, so we must fetch the remaining 24 bits ourselves.
      *
      * @this {X86CPU}
      * @param {number} dst
@@ -273,7 +273,7 @@ var X86Op0F = {
         if (this.regEA < 0) {
             X86Help.opInvalid.call(this);
         } else {
-            this.addrIDT = this.getWord(this.regEA + 2) | (this.getByte(this.regEA + 4) << 16); 
+            this.addrIDT = this.getWord(this.regEA + 2) | (this.getByte(this.regEA + 4) << 16);
             this.addrIDTLimit = this.addrIDT + dst;
             if (FASTDISABLE) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
             this.nStepCycles -= 12;
@@ -389,7 +389,7 @@ X86Op0F.aOps0F = [
  * the instructions in GRP6 and GRP7 only read their dst operand (eg, LLDT), which means the ModRM helper function
  * must insure that setEAWord() is disabled, while others only write their dst operand (eg, SLDT), which means that
  * getEAWord() should be disabled *prior* to calling the ModRM helper function.  This latter case requires that
- * we decode the reg field of the ModRM byte before dispatching.  
+ * we decode the reg field of the ModRM byte before dispatching.
  */
 X86Op0F.aOpGRP6Prot = [
     X86Op0F.opSLDT,         X86Op0F.opSTR,          X86Op0F.opLLDT,         X86Op0F.opLTR,          // 0x0F,0x00(reg=0x0-0x3)
