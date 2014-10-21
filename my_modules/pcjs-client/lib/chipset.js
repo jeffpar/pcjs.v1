@@ -942,16 +942,13 @@ ChipSet.prototype.initBus = function(cmp, bus, cpu, dbg)
         if (dbg) {
             var chipset = this;
             dbg.messageInit(ChipSet);
-            dbg.messageDump(ChipSet.MESSAGE_PIC, function onDumpPIC()
-            {
+            dbg.messageDump(ChipSet.MESSAGE_PIC, function onDumpPIC() {
                 chipset.dumpPIC();
             });
-            dbg.messageDump(ChipSet.MESSAGE_TIMER, function onDumpTimer()
-            {
+            dbg.messageDump(ChipSet.MESSAGE_TIMER, function onDumpTimer() {
                 chipset.dumpTimer();
             });
-            dbg.messageDump(ChipSet.MESSAGE_CMOS, function onDumpCMOS()
-            {
+            dbg.messageDump(ChipSet.MESSAGE_CMOS, function onDumpCMOS() {
                 chipset.dumpCMOS();
             });
         }
@@ -4252,15 +4249,11 @@ ChipSet.prototype.setSpeaker = function(fOn)
 ChipSet.prototype.messageDebugger = function(sMessage, bitsMessage, nIRQ)
 {
     if (DEBUGGER && this.dbg) {
-        if (bitsMessage == null) {
-            bitsMessage = ChipSet.MESSAGE_CHIPSET;
-        }
+        if (bitsMessage == null) bitsMessage = ChipSet.MESSAGE_CHIPSET;
         if (nIRQ !== undefined) {
             bitsMessage |= (nIRQ == ChipSet.IRQ.TIMER0? ChipSet.MESSAGE_TIMER : (nIRQ == ChipSet.IRQ.KBD? ChipSet.MESSAGE_KBD : (nIRQ == ChipSet.IRQ.FDC? ChipSet.MESSAGE_FDC : 0)));
         }
-        if (this.dbg.messageEnabled(bitsMessage)) {
-            this.dbg.message(sMessage);
-        }
+        if (this.dbg.messageEnabled(bitsMessage)) this.dbg.message(sMessage);
     }
 };
 
@@ -4283,9 +4276,7 @@ ChipSet.prototype.messageDebugger = function(sMessage, bitsMessage, nIRQ)
 ChipSet.prototype.messagePort = function(port, bOut, addrFrom, name, bitsMessage, bIn)
 {
     if (DEBUGGER && this.dbg) {
-        if (bitsMessage == null) {
-            bitsMessage = ChipSet.MESSAGE_CHIPSET;
-        }
+        if (bitsMessage == null) bitsMessage = ChipSet.MESSAGE_CHIPSET;
         this.dbg.messagePort(this, port, bOut, addrFrom, name, bitsMessage, bIn);
     }
 };

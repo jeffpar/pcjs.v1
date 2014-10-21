@@ -527,6 +527,7 @@ HDC.prototype.initBus = function(cmp, bus, cpu, dbg)
     bus.addPortOutputTable(this, this.fATC? HDC.aATCPortOutput : HDC.aXTCPortOutput);
 
     if (DEBUGGER) {
+        if (dbg) dbg.messageInit(HDC);
         cpu.addIntNotify(HDC.BIOS.INT_DISK, this, this.intBIOSDisk);
         cpu.addIntNotify(HDC.BIOS.INT_DISKETTE, this, this.intBIOSDiskette);
     }
@@ -1747,9 +1748,7 @@ HDC.prototype.doATCommand = function()
         this.drive = drive;
     }
 
-    if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(this.dbg.MESSAGE_PORT | this.dbg.MESSAGE_HDC)) {
-        this.dbg.message("HDC.doATCommand(" + str.toHexByte(bCmd) + "): " + HDC.aATCCommands[bCmd]);
-    }
+    if (DEBUG) this.messageDebugger("HDC.doATCommand(" + str.toHexByte(bCmd) + "): " + HDC.aATCCommands[bCmd], HDC.MESSAGE_PORT | HDC.MESSAGE_HDC);
 
     switch (bCmd & HDC.ATC.COMMAND.MASK) {
 
@@ -1835,7 +1834,7 @@ HDC.prototype.doATCommand = function()
 
     default:
         if (DEBUG) this.messageDebugger("HDC.doATCommand(" + str.toHexByte(this.regCommand) + "): " + (bCmd < 0? ("invalid drive (" + iDrive + ")") : "unsupported operation"));
-        if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(this.dbg.MESSAGE_HDC) && bCmd >= 0) this.cpu.haltCPU();
+        if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(HDC.MESSAGE_HDC) && bCmd >= 0) this.cpu.haltCPU();
         break;
     }
 
@@ -1992,7 +1991,7 @@ HDC.prototype.doXTCommand = function()
         default:
             if (DEBUG) this.messageDebugger("HDC.doXTCommand(" + str.toHexByte(bCmdOrig) + "): " + (bCmd < 0? ("invalid drive (" + iDrive + ")") : "unsupported operation"));
             this.beginResult(HDC.XTC.DATA.STATUS_ERROR | bDrive);
-            if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(this.dbg.MESSAGE_HDC) && bCmd >= 0) this.cpu.haltCPU();
+            if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(HDC.MESSAGE_HDC) && bCmd >= 0) this.cpu.haltCPU();
             break;
         }
     }
@@ -2010,9 +2009,7 @@ HDC.prototype.popCmd = function()
     var bCmdIndex = this.regDataIndex;
     if (bCmdIndex < this.regDataTotal) {
         bCmd = this.regDataArray[this.regDataIndex++];
-        if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled((bCmdIndex > 0? this.dbg.MESSAGE_PORT : 0) | this.dbg.MESSAGE_HDC)) {
-            this.dbg.message("HDC.CMD[" + bCmdIndex + "]: 0x" + str.toHexByte(bCmd) + (!bCmdIndex && HDC.aXTCCommands[bCmd]? (" (" + HDC.aXTCCommands[bCmd] + ")") : ""));
-        }
+        if (DEBUG) this.messageDebugger("HDC.CMD[" + bCmdIndex + "]: 0x" + str.toHexByte(bCmd) + (!bCmdIndex && HDC.aXTCCommands[bCmd]? (" (" + HDC.aXTCCommands[bCmd] + ")") : ""), (bCmdIndex > 0? HDC.MESSAGE_PORT : 0) | HDC.MESSAGE_HDC);
     }
     return bCmd;
 };
@@ -2048,7 +2045,7 @@ HDC.prototype.beginResult = function(bResult)
  */
 HDC.prototype.pushResult = function(bResult)
 {
-    if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled((this.regDataTotal > 0? this.dbg.MESSAGE_PORT : 0) | this.dbg.MESSAGE_HDC)) this.dbg.message("HDC.RES[" + this.regDataTotal + "]: 0x" + str.toHexByte(bResult));
+    if (DEBUG) this.messageDebugger("HDC.RES[" + this.regDataTotal + "]: 0x" + str.toHexByte(bResult), (this.regDataTotal > 0? HDC.MESSAGE_PORT : 0) | HDC.MESSAGE_HDC);
     this.regDataArray[this.regDataTotal++] = bResult;
 };
 
@@ -2580,7 +2577,7 @@ HDC.prototype.intBIOSDisk = function(addr)
     var DL = this.cpu.regDX & 0xff;
     if (!AH && DL > 0x80) this.iDriveAllowFail = DL - 0x80;
     if (DEBUGGER) {
-        if (this.dbg && this.dbg.messageEnabled(this.dbg.MESSAGE_HDC) && DL >= 0x80) {
+        if (this.dbg && (this.dbg.messageEnabled(HDC.MESSAGE_HDC) || this.dbg.messageEnabled(HDC.MESSAGE_INT)) && DL >= 0x80) {
             this.dbg.messageInt(HDC.BIOS.INT_DISK, addr);
             this.cpu.addIntReturn(addr, function (hdc, nCycles) {
                 return function onBIOSDiskReturn(nLevel) {
@@ -2632,19 +2629,19 @@ HDC.prototype.intBIOSDiskette = function(addr)
 };
 
 /**
- * messageDebugger(sMessage)
+ * messageDebugger(sMessage, bitsMessage)
  *
  * This is a combination of the Debugger's messageEnabled(MESSAGE_HDC) and message() functions, for convenience.
  *
  * @this {HDC}
  * @param {string} sMessage is any caller-defined message string
+ * @param {number} [bitsMessage] is one or more Debugger MESSAGE_* category flag(s)
  */
-HDC.prototype.messageDebugger = function(sMessage)
+HDC.prototype.messageDebugger = function(sMessage, bitsMessage)
 {
     if (DEBUGGER && this.dbg) {
-        if (this.dbg.messageEnabled(this.dbg.MESSAGE_HDC)) {
-            this.dbg.message(sMessage);
-        }
+        if (bitsMessage == null) bitsMessage = HDC.MESSAGE_HDC;
+        if (this.dbg.messageEnabled(bitsMessage)) this.dbg.message(sMessage);
     }
 };
 
@@ -2662,9 +2659,7 @@ HDC.prototype.messageDebugger = function(sMessage)
  */
 HDC.prototype.messagePort = function(port, bOut, addrFrom, name, bIn)
 {
-    if (DEBUGGER && this.dbg) {
-        this.dbg.messagePort(this, port, bOut, addrFrom, name, this.dbg.MESSAGE_HDC, bIn);
-    }
+    if (DEBUGGER && this.dbg) this.dbg.messagePort(this, port, bOut, addrFrom, name, HDC.MESSAGE_HDC, bIn);
 };
 
 /*

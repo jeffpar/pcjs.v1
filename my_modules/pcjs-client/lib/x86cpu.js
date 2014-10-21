@@ -910,11 +910,19 @@ X86CPU.prototype.addIntNotify = function(nInt, component, fn)
  */
 X86CPU.prototype.checkIntNotify = function(nInt)
 {
-    /*
-     * Enabling MESSAGE_INT messages is one of the criteria that's also included in fDebugCheck, so for maximum
-     * speed, check fDebugCheck first.
-     */
-    if (DEBUGGER && this.fDebugCheck) {
+    var aNotify = this.aIntNotify[nInt];
+    if (aNotify !== undefined) {
+        for (var i = 0; i < aNotify.length; i++) {
+            if (!aNotify[i][1].call(aNotify[i][0], this.regEIP)) {
+                return false;
+            }
+        }
+    }
+    else if (DEBUGGER && this.fDebugCheck) {
+        /*
+         * Enabling MESSAGE_INT messages is one of the criteria that's also included in fDebugCheck, so for maximum
+         * speed, we check fDebugCheck first.
+         */
         if (this.dbg.messageEnabled(this.dbg.MESSAGE_INT)) {
             this.dbg.messageInt(nInt, this.regEIP);
             this.addIntReturn(this.regEIP, function(cpu, nCycles) {
@@ -922,14 +930,6 @@ X86CPU.prototype.checkIntNotify = function(nInt)
                     cpu.dbg.messageIntReturn(nInt, nLevel, cpu.getCycles() - nCycles);
                 };
             }(this, this.getCycles()));
-        }
-    }
-    var aNotify = this.aIntNotify[nInt];
-    if (aNotify !== undefined) {
-        for (var i = 0; i < aNotify.length; i++) {
-            if (!aNotify[i][1].call(aNotify[i][0], this.regEIP)) {
-                return false;
-            }
         }
     }
     return true;
