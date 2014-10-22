@@ -659,6 +659,7 @@ Disk.prototype.onLoadDisk = function(sDiskFile, sDiskData, nErrorCode, sDiskPath
                     for (var iHead = 0; iHead < aDiskData[iCylinder].length; iHead++) {
                         for (var iSector = 0; iSector < aDiskData[iCylinder][iHead].length; iSector++) {
                             var sector = aDiskData[iCylinder][iHead][iSector];
+                            if (!sector) continue;          // non-standard (eg, XDF) disk images may have "unused" (null) sectors
                             var length = sector['length'];
                             if (length === undefined) {     // provide backward-compatibility with older JSON...
                                 length = sector['length'] = 512;
@@ -1156,7 +1157,7 @@ Disk.prototype.seek = function(iCylinder, iHead, iSector, fWrite, done)
         }
         if (track) {
             for (i = 0; i < track.length; i++) {
-                if (track[i]['sector'] == iSector) {
+                if (track[i] && track[i]['sector'] == iSector) {
                     /*
                      * If the sector's pattern is null, then this sector's true contents have not yet
                      * been fetched from the server.

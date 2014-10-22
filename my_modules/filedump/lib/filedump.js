@@ -75,7 +75,6 @@ function FileDump(sFormat, fComments, fDecimal, sServerRoot)
 /*
  * Class constants
  */
-
 FileDump.sAPIURL = "http://www.pcjs.org" + DumpAPI.ENDPOINT;
 FileDump.sCopyright = "© 2012-2014 by Jeff Parsons (@jeffpar)";
 FileDump.sNotice = FileDump.sAPIURL + " " + FileDump.sCopyright;

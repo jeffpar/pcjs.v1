@@ -1369,7 +1369,7 @@ HDC.prototype.inATCData = function(port, addrFrom)
 
     if (this.drive) {
         /*
-         * messagePort() calls, if enabled, can be too overwhelming for this port, so limit them to the first byte.
+         * messagePort() calls, if enabled, can be overwhelming for this port, so limit them to the first byte.
          */
         fSuppress = (this.drive.ibSector > 0);
 
@@ -1388,6 +1388,7 @@ HDC.prototype.inATCData = function(port, addrFrom)
          */
         if (this.drive.ibSector == this.drive.cbSector) {
             this.drive.nBytes -= this.drive.cbSector;
+            this.regSecCnt = (this.regSecCnt - 1) & 0xff;
             /*
              * TODO: If the WITH_ECC bit is set in the READ_DATA command, then we need to support "stuffing" 4
              * additional bytes into the inATCData() stream.  And we must first set DATA_REQ in the STATUS register.
@@ -1398,7 +1399,7 @@ HDC.prototype.inATCData = function(port, addrFrom)
                     if (b >= 0) {
                         if (hdc.chipset) hdc.chipset.setIRR(ChipSet.IRQ.ATC);
                         /*
-                         * I shouldn't have to set BUSY again, because it should still be set, no?
+                         * I shouldn't have to set BUSY (or DATA_REQ) again, because it should still be set, no?
                          */
                         Component.assert(!!(hdc.regStatus & HDC.ATC.STATUS.BUSY));
                     } else {
@@ -1432,7 +1433,7 @@ HDC.prototype.inATCData = function(port, addrFrom)
 HDC.prototype.outATCData = function(port, bOut, addrFrom)
 {
     /*
-     * messagePort() calls, if enabled, can be too overwhelming for this port, so limit them to the first byte.
+     * messagePort() calls, if enabled, can be overwhelming for this port, so limit them to the first byte.
      */
     if (!this.drive || this.drive.ibSector == 0) this.messagePort(port, bOut, addrFrom, "DATA");
 
@@ -1449,10 +1450,11 @@ HDC.prototype.outATCData = function(port, bOut, addrFrom)
             }
             else if (this.drive.ibSector == this.drive.cbSector) {
                 this.drive.nBytes -= this.drive.cbSector;
+                this.regSecCnt = (this.regSecCnt - 1) & 0xff;
                 if (this.chipset) this.chipset.setIRR(ChipSet.IRQ.ATC);
                 if (this.drive.nBytes >= this.drive.cbSector) {
                     /*
-                     * I shouldn't have to set BUSY again, because it should still be set, no?
+                     * I shouldn't have to set BUSY (or DATA_REQ) again, because it should still be set, no?
                      */
                     Component.assert(!!(this.regStatus & HDC.ATC.STATUS.BUSY));
                 } else {
@@ -1716,7 +1718,7 @@ HDC.prototype.doATCommand = function()
     var nHead = this.regDrvHd & HDC.ATC.DRVHD.HEAD_MASK;
     var nCylinder = this.regCylLo | ((this.regCylHi & HDC.ATC.CYLHI.MASK) << 8);
     var nSector = this.regSecNum;
-    var nSectors = this.regSecCnt;
+    var nSectors = this.regSecCnt || 256;
 
     this.drive = null;
     this.regError = 0;
@@ -1818,8 +1820,8 @@ HDC.prototype.doATCommand = function()
          *
          *      WPREC:   0x4B
          *      SECCNT:  0x11 (for 17 sectors per track)
-         *      CYL:    0x100 (256, uh, what?)
-         *      SECNUM:  0x0C (12, uh, what?)
+         *      CYL:    0x100 (256 -- uh, what?)
+         *      SECNUM:  0x0C (12 -- uh, what?)
          *      DRVHD:   0xA3 (max head of 0x03, for 4 total heads)
          *
          * The importance of SECCNT (nSectors) and DRVHD (nHeads) is controlling how multi-sector operations
@@ -2373,9 +2375,7 @@ HDC.prototype.readByte = function(drive, done, fAutoInc)
      */
     if (done) {
         var hdc = this;
-        drive.disk.seek(drive.wCylinder, drive.bHead, drive.bSector +
-        drive.bSectorBias, false, function (sector, fAsync)
-        {
+        drive.disk.seek(drive.wCylinder, drive.bHead, drive.bSector + drive.bSectorBias, false, function(sector, fAsync) {
             var b = -1;
             if ((drive.sector = sector)) {
                 drive.ibSector = 0;
@@ -2577,7 +2577,7 @@ HDC.prototype.intBIOSDisk = function(addr)
     var DL = this.cpu.regDX & 0xff;
     if (!AH && DL > 0x80) this.iDriveAllowFail = DL - 0x80;
     if (DEBUGGER) {
-        if (this.dbg && (this.dbg.messageEnabled(HDC.MESSAGE_HDC) || this.dbg.messageEnabled(HDC.MESSAGE_INT)) && DL >= 0x80) {
+        if (this.dbg && this.dbg.messageEnabled(HDC.MESSAGE_HDC | HDC.MESSAGE_INT) && DL >= 0x80) {
             this.dbg.messageInt(HDC.BIOS.INT_DISK, addr);
             this.cpu.addIntReturn(addr, function (hdc, nCycles) {
                 return function onBIOSDiskReturn(nLevel) {

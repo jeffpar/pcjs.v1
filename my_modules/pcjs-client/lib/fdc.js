@@ -1195,10 +1195,14 @@ FDC.prototype.mountDiskette = function(drive, disk, sDisketteName, sDiskettePath
     if (disk) {
         /*
          * We shouldn't mount the diskette unless the drive is able to handle it; for example, DSDD (40-track)
-         * drives cannot read DSHD (80-track) diskettes.
+         * drives cannot read DSHD (80-track) diskettes.  However, I no longer require that the diskette's
+         * sectors/track fall within the drive's standard maximum, because XDF diskettes use 19 physical sectors/track
+         * on the first cylinder (1 more than the typical 18 sectors/track found on 1.44Mb diskettes) but declare
+         * a larger logical size (23 512-byte sectors/track) to reflect the actual capacity of XDF tracks beyond the
+         * first cylinder (ie, one 8Kb sector, one 2Kb sector, one 1Kb sector, and one 512-byte sector).
          */
         aDiskInfo = disk.info();
-        if (disk && aDiskInfo[0] > drive.nCylinders || aDiskInfo[1] > drive.nHeads || aDiskInfo[2] > drive.nSectors) {
+        if (disk && aDiskInfo[0] > drive.nCylinders || aDiskInfo[1] > drive.nHeads /* || aDiskInfo[2] > drive.nSectors */) {
             this.notice("Diskette \"" + sDisketteName + "\" too large for drive " + String.fromCharCode(0x41 + drive.iDrive));
             disk = null;
         }
@@ -2255,7 +2259,7 @@ FDC.prototype.intBIOSDiskette = function(addr)
 {
     if (DEBUGGER) {
         var DL = this.cpu.regDX & 0xff;
-        if (this.dbg && (this.dbg.messageEnabled(FDC.MESSAGE_FDC) || this.dbg.messageEnabled(FDC.MESSAGE_INT)) && DL < 0x80) {
+        if (this.dbg && this.dbg.messageEnabled(FDC.MESSAGE_FDC | FDC.MESSAGE_INT) && DL < 0x80) {
             this.dbg.messageInt(FDC.BIOS.INT_DISKETTE, addr);
             this.cpu.addIntReturn(addr, function(fdc, nCycles) {
                 return function onBIOSDisketteReturn(nLevel) {

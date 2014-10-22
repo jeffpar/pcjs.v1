@@ -2062,18 +2062,14 @@ DiskDump.prototype.convertToJSON = function()
 
     var json = null;
     try {
-        var cbDiskData = this.bufDisk.length;
-        // console.log("length of buffer: " + cbDiskData);
-
         var nHeads = 0;
         var nCylinders = 0;
         var nSectorsPerTrack = 0;
-
         var aTracks = [];                   // track array (used only for disk images with track tables)
         var iTrack, cbTrack, offTrack, bufTrack, bufSector;
-
         var cbSector = 512;                 // default sector size
         var offBootSector = 0;
+        var cbDiskData = this.bufDisk.length;
 
         if (cbDiskData >= 3000000) {        // arbitrary threshold between diskette image sizes and hard disk image sizes
             /*
@@ -2109,6 +2105,7 @@ DiskDump.prototype.convertToJSON = function()
          * but at some point, we'll need to perform more general calculations to properly deal with ANY disk
          * image whose logical format doesn't agree with its physical structure.
          */
+        var fXDF = false;
         var oDisketteFormat = DiskDump.DisketteFormats[cbDiskData];
         if (oDisketteFormat) {
             nHeads = oDisketteFormat[0];
@@ -2131,30 +2128,58 @@ DiskDump.prototype.convertToJSON = function()
                     nHeads = nHeadsBPB;
                     nCylinders = Math.floor(nSectorsTotalBPB / nSectorsPerCylinderBPB);
                     nSectorsPerTrack = nSectorsPerTrackBPB;
+                    /*
+                     * OK, great, the disk appears to contain a valid BPB.  But so do XDF disk images, which are
+                     * diskette images with tracks containing:
+                     * 
+                     *      1 8Kb sector (equivalent of 16 512-byte sectors)
+                     *      1 2Kb sector (equivalent of 4 512-byte sectors)
+                     *      1 1Kb sector (equivalent of 2 512-byte sectors)
+                     *      1 512-byte sector (equivalent of, um, 1 512-byte sector)
+                     *
+                     * for a total of the equivalent of 23 512-byte sectors, or 11776 (0x2E00) bytes per track.
+                     * For an 80-track diskette with 2 sides, that works out to a total of 3680 512-byte sectors,
+                     * or 1884160 bytes, or 1.84Mb, which is the exact size of the (only) XDF diskette images we
+                     * currently support.
+                     * 
+                     * Moreover, the first two tracks (ie, the first cylinder) contain only 19 sectors, rather than
+                     * 23, but the XDF format still pads those tracks with 4 unused sectors.
+                     * 
+                     * So, data for the first track contains 1 boot sector ending at 512 (0x200), 11 FAT sectors
+                     * ending at 6144 (0x1800), and 7 "micro-disk" sectors ending at 9728 (0x2600).  Then there's
+                     * 4 sectors (probably of "garbage") that end at 11776 (0x2E00).
+                     * 
+                     * Data for the second track contains 7 root directory sectors ending at 15360 (0x3C00), followed
+                     * by disk data.
+                     * 
+                     * For more details, check out this very helpful article: http://www.os2museum.com/wp/the-xdf-diskette-format/
+                     */
+                    if (nSectorsTotalBPB == 3680) fXDF = true;
                 }
             }
         }
 
         if (!nHeads) {
             /*
-             * Next, check for a DSK header (an old private format I used to use, which begins with either 0x00 (read-write) or 0x01 (write-protected),
-             * followed by 7 more bytes):
+             * Next, check for a DSK header (an old private format I used to use, which begins with either
+             * 0x00 (read-write) or 0x01 (write-protected), followed by 7 more bytes):
              *
              *      0x01: # heads (1 byte)
              *      0x02: # cylinders (2 bytes)
              *      0x04: # sectors/track (2 bytes)
              *      0x06: # bytes/sector (2 bytes)
              *
-             * which may be followed by an array of track table entries if the words at 0x04 and 0x06 are zero.  If the track table exists, each
-             * entry contains the following:
+             * which may be followed by an array of track table entries if the words at 0x04 and 0x06 are zero.
+             * If the track table exists, each entry contains the following:
              *
              *      0x00: # sectors/track (2 bytes)
              *      0x02: # bytes/sector (2 bytes)
              *      0x04: file offset of track data (4 bytes)
              *
-             * TODO: Our JSON disk format doesn't explicitly support a write-protect indicator.  Instead, we include the string "write-protected"
-             * as a comment in the first line of the JSON data as a work-around. If the FDC component sees that comment string, it will honor it, but
-             * the FDC needs to provide its own user-controlled write-protection mechanism, too.
+             * TODO: Our JSON disk format doesn't explicitly support a write-protect indicator.  Instead, we
+             * (used to) include the string "write-protected" as a comment in the first line of the JSON data
+             * as a work-around, and if the FDC component sees that comment string, it will honor it; however,
+             * we now prefer that read-only disk images simply include a "-readonly" suffix in the filename.
              */
             if (!(bByte0 & 0xFE)) {
                 var cbSectorDSK = this.bufDisk.readUInt16LE(offBootSector + 0x06);
@@ -2195,8 +2220,6 @@ DiskDump.prototype.convertToJSON = function()
             }
             for (var iCylinder=0; iCylinder < nCylinders; iCylinder++) {
 
-                // if (fDebug) console.log("dumping cylinder " + iCylinder);
-
                 var aHeads;
                 if (this.fJSONNative) {
                     aHeads = new Array(nHeads);
@@ -2206,8 +2229,6 @@ DiskDump.prototype.convertToJSON = function()
                 }
                 var offHead = 0;
                 for (var iHead=0; iHead < nHeads; iHead++) {
-
-                    // if (fDebug) console.log("  dumping head " + iHead);
 
                     if (aTracks.length) {
                         var aTrack = aTracks[iTrack++];
@@ -2219,8 +2240,6 @@ DiskDump.prototype.convertToJSON = function()
                         bufTrack = this.bufDisk.slice(offTrack + offHead, offTrack + offHead + cbTrack);
                     }
 
-                    // if (fDebug) console.log("  track buffer length: " + bufTrack.length);
-
                     var aSectors;
                     if (this.fJSONNative) {
                         aSectors = new Array(nSectorsPerTrack);
@@ -2229,24 +2248,30 @@ DiskDump.prototype.convertToJSON = function()
                         json += this.dumpLine(2, "[", "head:" + this.sJSONWhitespace + iHead + ", track:" + this.sJSONWhitespace + iCylinder);
                     }
 
-                    for (var iSector=1, offSector=0; offSector < cbTrack; iSector++, offSector += cbSector) {
+                    var cbSectorThisTrack = cbSector;
+                    var nSectorsThisTrack = nSectorsPerTrack;
+                    if (fXDF) nSectorsThisTrack = (iCylinder? 4 : 19);
+                    
+                    for (var iSector=1, offSector=0; iSector <= nSectorsThisTrack && offSector < cbTrack; iSector++, offSector += cbSectorThisTrack) {
 
                         var sector = {};
-
-                        // if (fDebug) console.log("    dumping sector " + iSector);
-
-                        bufSector = bufTrack.slice(offSector, offSector + cbSector);
+                        
+                        if (fXDF && iCylinder) cbSectorThisTrack = (iSector == 1? 8192 : (iSector == 2? 2048 : (iSector == 3? 1024 : 512)));
+                        
+                        bufSector = bufTrack.slice(offSector, offSector + cbSectorThisTrack);
+                        
                         if (this.fJSONNative) {
                             sector['sector'] = iSector;
-                            sector['length'] = cbSector;
+                            sector['length'] = cbSectorThisTrack;
                         } else {
                             json += (iSector == 1? this.dumpLine(2, "{") : "");
                             json += this.dumpLine(0, '"sector":' + this.sJSONWhitespace + iSector + ",");
-                            json += this.dumpLine(0, '"length":' + this.sJSONWhitespace + cbSector + ",");
+                            json += this.dumpLine(0, '"length":' + this.sJSONWhitespace + cbSectorThisTrack + ",");
                         }
-                        var aTrim = this.trimSector(bufSector, cbSector);
+                        
+                        var aTrim = this.trimSector(bufSector, cbSectorThisTrack);
                         var dwPattern = aTrim[0];
-                        var cbBuffer = cbSector;
+                        var cbBuffer = cbSectorThisTrack;
                         if (dwPattern !== null) {
                             cbBuffer = aTrim[1];
                             if (this.fJSONNative) {
@@ -2255,6 +2280,7 @@ DiskDump.prototype.convertToJSON = function()
                                 json += this.dumpLine(0, '"pattern":' + this.sJSONWhitespace + dwPattern + ",");
                             }
                         }
+                        
                         if (this.fJSONNative) {
                             var dataSector = [];
                             sector['data'] = dataSector;
@@ -2266,17 +2292,19 @@ DiskDump.prototype.convertToJSON = function()
                             if (this.sFormat == DumpAPI.FORMAT.BYTES) {
                                 json += this.dumpBuffer("bytes", bufSector, cbBuffer, 1, offSector);
                             } else {
-                                // TODO: Assert that sFormat is FORMAT_JSON or FORMAT_DATA (both use the same dword format)
+                                /*
+                                 * TODO: Assert that sFormat is FORMAT_JSON or FORMAT_DATA (both use the same dword format)
+                                 */
                                 json += this.dumpBuffer("data", bufSector, cbBuffer, 4, offSector);
                             }
-                            json += (iSector < nSectorsPerTrack? this.dumpLine(0, "},{") : this.dumpLine(-2, "}"));
+                            json += (iSector < nSectorsThisTrack? this.dumpLine(0, "},{") : this.dumpLine(-2, "}"));
                         }
                     }
-                    if (!this.fJSONNative) json += this.dumpLine(-2, "]" + (iHead+1 == nHeads? "" : ","));              // end of head {iHead}, track {iCylinder}
-                    offHead += cbTrack;
+                    if (!this.fJSONNative) json += this.dumpLine(-2, "]" + (iHead+1 == nHeads? "" : ","));
+                    offHead += cbTrack;         // end of head {iHead}, track {iCylinder}
                 }
-                offTrack += offHead;
-                if (!this.fJSONNative) json += this.dumpLine(-2, "]" + (iCylinder+1 == nCylinders? "" : ","));          // end of cylinder {iCylinder}
+                if (!this.fJSONNative) json += this.dumpLine(-2, "]" + (iCylinder+1 == nCylinders? "" : ","));
+                offTrack += offHead;            // end of cylinder {iCylinder}
             }
             /*
              * Here's where we could output the following comment:
