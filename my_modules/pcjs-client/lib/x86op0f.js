@@ -210,9 +210,44 @@ var X86Op0F = {
         if (this.regEA < 0) {
             X86Help.opInvalid.call(this);
         } else {
-            this.setWord(this.regEA + 2, this.addrGDT);
-            this.setByte(this.regEA + 4, this.addrGDT >> 16);
+            /*
+             * We don't need to setWord() the first word of the operand, because the ModRM group decoder that calls
+             * us does that automatically with the value we return (dst).
+             */
             dst = this.addrGDTLimit - this.addrGDT;
+            this.setWord(this.regEA + 2, this.addrGDT);
+            /*
+             * We previously left the 6th byte of the target operand "undefined".  But it turns out we have to set
+             * it to *something*, because there's processor detection in PC-DOS 7.0 (at least in the SETUP portion)
+             * that looks like this:
+             *
+             *      145E:4B84 9C            PUSHF
+             *      145E:4B85 55            PUSH     BP
+             *      145E:4B86 8BEC          MOV      BP,SP
+             *      145E:4B88 B80000        MOV      AX,0000
+             *      145E:4B8B 50            PUSH     AX
+             *      145E:4B8C 9D            POPF
+             *      145E:4B8D 9C            PUSHF
+             *      145E:4B8E 58            POP      AX
+             *      145E:4B8F 2500F0        AND      AX,F000
+             *      145E:4B92 3D00F0        CMP      AX,F000
+             *      145E:4B95 7511          JNZ      4BA8
+             *      145E:4BA8 C8060000      ENTER    0006,00
+             *      145E:4BAC 0F0146FA      SGDT     [BP-06]
+             *      145E:4BB0 807EFFFF      CMP      [BP-01],FF
+             *      145E:4BB4 C9            LEAVE
+             *      145E:4BB5 BA8603        MOV      DX,0386
+             *      145E:4BB8 7503          JNZ      4BBD
+             *      145E:4BBA BA8602        MOV      DX,0286
+             *      145E:4BBD 89163004      MOV      [0430],DX
+             *      145E:4BC1 5D            POP      BP
+             *      145E:4BC2 9D            POPF
+             *      145E:4BC3 CB            RETF
+             *
+             * This code is expecting SGDT on an 80286 to set the 6th "undefined" byte to 0xFF.  So we use setWord()
+             * instead of setByte() and force the upper byte to 0xFF.  TODO: Remove the 0xFF00 on post-80286 processors.
+             */
+            this.setWord(this.regEA + 4, 0xFF00 | (this.addrGDT >> 16));
             this.nStepCycles -= 11;
         }
         return dst;
@@ -227,9 +262,17 @@ var X86Op0F = {
         if (this.regEA < 0) {
             X86Help.opInvalid.call(this);
         } else {
-            this.setWord(this.regEA + 2, this.addrIDT);
-            this.setByte(this.regEA + 4, this.addrIDT >> 16);
+            /*
+             * We don't need to setWord() the first word of the operand, because the ModRM group decoder that calls
+             * us does that automatically with the value we return (dst).
+             */
             dst = this.addrIDTLimit - this.addrIDT;
+            this.setWord(this.regEA + 2, this.addrIDT);
+            /*
+             * As with SGDT, the 6th byte is technically "undefined" on an 80286, but given that SGDT now sets it to 0xFF,
+             * we mimic SGDT.
+             */
+            this.setWord(this.regEA + 4, 0xFF00 | (this.addrIDT >> 16));
             this.nStepCycles -= 12;
         }
         return dst;

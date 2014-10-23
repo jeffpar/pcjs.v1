@@ -778,7 +778,7 @@ DiskDump.prototype.isExcluded = function(sName)
 DiskDump.prototype.loadFile = function(done)
 {
     /*
-     * When the 'encoding' property of the 'options' object is null (or when the 'options'
+     * When the 'encoding' property of the 'options' object is null (or the 'options'
      * object is omitted altogether), the callback's 2nd parameter will be a Buffer object
      * rather than a String.
      */
@@ -2128,10 +2128,11 @@ DiskDump.prototype.convertToJSON = function()
                     nHeads = nHeadsBPB;
                     nCylinders = Math.floor(nSectorsTotalBPB / nSectorsPerCylinderBPB);
                     nSectorsPerTrack = nSectorsPerTrackBPB;
+
                     /*
                      * OK, great, the disk appears to contain a valid BPB.  But so do XDF disk images, which are
                      * diskette images with tracks containing:
-                     * 
+                     *
                      *      1 8Kb sector (equivalent of 16 512-byte sectors)
                      *      1 2Kb sector (equivalent of 4 512-byte sectors)
                      *      1 1Kb sector (equivalent of 2 512-byte sectors)
@@ -2140,19 +2141,19 @@ DiskDump.prototype.convertToJSON = function()
                      * for a total of the equivalent of 23 512-byte sectors, or 11776 (0x2E00) bytes per track.
                      * For an 80-track diskette with 2 sides, that works out to a total of 3680 512-byte sectors,
                      * or 1884160 bytes, or 1.84Mb, which is the exact size of the (only) XDF diskette images we
-                     * currently support.
-                     * 
-                     * Moreover, the first two tracks (ie, the first cylinder) contain only 19 sectors, rather than
-                     * 23, but the XDF format still pads those tracks with 4 unused sectors.
-                     * 
+                     * currently (try to) support.
+                     *
+                     * Moreover, the first two tracks (ie, the first cylinder) contain only 19 sectors each,
+                     * rather than 23, but the XDF format still pads those tracks with 4 unused sectors.
+                     *
                      * So, data for the first track contains 1 boot sector ending at 512 (0x200), 11 FAT sectors
                      * ending at 6144 (0x1800), and 7 "micro-disk" sectors ending at 9728 (0x2600).  Then there's
-                     * 4 sectors (probably of "garbage") that end at 11776 (0x2E00).
-                     * 
+                     * 4 sectors (presumably of "garbage") that end at 11776 (0x2E00).
+                     *
                      * Data for the second track contains 7 root directory sectors ending at 15360 (0x3C00), followed
                      * by disk data.
-                     * 
-                     * For more details, check out this very helpful article: http://www.os2museum.com/wp/the-xdf-diskette-format/
+                     *
+                     * For more details, check out this helpful article: http://www.os2museum.com/wp/the-xdf-diskette-format/
                      */
                     if (nSectorsTotalBPB == 3680) fXDF = true;
                 }
@@ -2248,27 +2249,78 @@ DiskDump.prototype.convertToJSON = function()
                         json += this.dumpLine(2, "[", "head:" + this.sJSONWhitespace + iHead + ", track:" + this.sJSONWhitespace + iCylinder);
                     }
 
+                    /*
+                     * For most disks, the size of every sector and the number of sectors/track are consistent, and the
+                     * sector number encoded in every sector (nSector) matches the 1-based sector index (iSector) we use
+                     * to "track" our progress through the current track.  However, for XDF disk images, the above is
+                     * NOT true beyond cylinder 0, which is why we have all these *ThisTrack variables, which would otherwise
+                     * be unnecessary.
+                     */
                     var cbSectorThisTrack = cbSector;
                     var nSectorsThisTrack = nSectorsPerTrack;
+
+                    /*
+                     * Notes regarding XDF track layouts, from http://forum.kryoflux.com/viewtopic.php?f=3&t=234:
+                     *
+                     *      Track 0, side 0: 19x512 bytes per sector, with standard numbering for the first 8 sectors, then custom numbering
+                     *      Track 0, side 1: 19x512 bytes per sector, with interleaved sector numbering 0x81...0x93
+                     *
+                     *      Track 1 and up, side 0, 4 sectors per track:
+                     *      1x1024, 1x512, 1x2048, 1x8192 bytes per sector (0x83, 0x82, 084, 0x86 as sector numbers)
+                     *
+                     *      Track 1 and up, side 1, 4 sectors per track:
+                     *      1x2048, 1x512, 1x1024, 1x8192 bytes per sector (0x84, 0x82, 083, 0x86 as sector numbers)
+                     *
+                     * Notes regarding the order in which XDF sectors are read (from http://mail.netbridge.at/cgi-bin/info2www?(fdutils)XDF),
+                     * where each position column represents a (roughly) 128-byte section of the track:
+                     *
+                     *          1         2         3         4
+                     * 1234567890123456789012345678901234567890 (position)
+                     * ----------------------------------------
+                     * 6633332244444446666666666666666666666666 (side 0)
+                     * 6666444444422333366666666666666666666666 (side 1)
+                     *
+                     * where 2's contain a 512-byte sector, 3's contain a 1Kb sector, 4's contains a 2Kb sector, and 6's contain an 8Kb sector.
+                     *
+                     * Reading all the data on an XDF cylinder occurs in the following order, from the specified start to end positions:
+                     *
+                     *     sector    head   start     end
+                     *          3       0       3       7
+                     *          4       0       9      16
+                     *          6       1      18       5 (1st wrap around)
+                     *          2       0       7       9
+                     *          2       1      12      14
+                     *          6       0      16       3 (2nd wrap around)
+                     *          4       1       5      12
+                     *          3       1      14      18
+                     */
                     if (fXDF) nSectorsThisTrack = (iCylinder? 4 : 19);
-                    
+
                     for (var iSector=1, offSector=0; iSector <= nSectorsThisTrack && offSector < cbTrack; iSector++, offSector += cbSectorThisTrack) {
 
                         var sector = {};
-                        
-                        if (fXDF && iCylinder) cbSectorThisTrack = (iSector == 1? 8192 : (iSector == 2? 2048 : (iSector == 3? 1024 : 512)));
-                        
+                        var nSector = iSector;
+
+                        if (fXDF && iCylinder) {
+                            if (!iHead) {
+                                cbSectorThisTrack = (iSector == 1? 1024 : (iSector == 2? 512 : (iSector == 3? 2048 : 8192)));
+                            } else {
+                                cbSectorThisTrack = (iSector == 1? 8192 : (iSector == 2? 2048 : (iSector == 3? 1024 : 512)));
+                            }
+                            nSector = (cbSectorThisTrack == 512? 2 : (cbSectorThisTrack == 1024? 3 : (cbSectorThisTrack == 2048? 4 : 6)));
+                        }
+
                         bufSector = bufTrack.slice(offSector, offSector + cbSectorThisTrack);
-                        
+
                         if (this.fJSONNative) {
-                            sector['sector'] = iSector;
+                            sector['sector'] = nSector;
                             sector['length'] = cbSectorThisTrack;
                         } else {
                             json += (iSector == 1? this.dumpLine(2, "{") : "");
-                            json += this.dumpLine(0, '"sector":' + this.sJSONWhitespace + iSector + ",");
+                            json += this.dumpLine(0, '"sector":' + this.sJSONWhitespace + nSector + ",");
                             json += this.dumpLine(0, '"length":' + this.sJSONWhitespace + cbSectorThisTrack + ",");
                         }
-                        
+
                         var aTrim = this.trimSector(bufSector, cbSectorThisTrack);
                         var dwPattern = aTrim[0];
                         var cbBuffer = cbSectorThisTrack;
@@ -2280,7 +2332,7 @@ DiskDump.prototype.convertToJSON = function()
                                 json += this.dumpLine(0, '"pattern":' + this.sJSONWhitespace + dwPattern + ",");
                             }
                         }
-                        
+
                         if (this.fJSONNative) {
                             var dataSector = [];
                             sector['data'] = dataSector;
@@ -2307,12 +2359,14 @@ DiskDump.prototype.convertToJSON = function()
                 offTrack += offHead;            // end of cylinder {iCylinder}
             }
             /*
-             * Here's where we could output the following comment:
+             * Here's where I used to output the following comment:
              *
              *      // write-protected
              *
              * as the first line of the JSON stream if the disk was marked write-protected (ie, if (bByte0 & 0x1) != 0).
-             * But I'd rather folks just name their JSON disk images with a "-readonly" suffix (another, better, work-around).
+             *
+             * But since that makes JSON.parse() sad, the preferred solution is to name read-only JSON disk images with a
+             * "-readonly" suffix.
              */
             if (this.fJSONNative) {
                 json = JSON.stringify(this.dataDisk);
@@ -2338,7 +2392,7 @@ DiskDump.prototype.convertToJSON = function()
  * like so:
  *
  *    [ [ {
- *          trackSig:'CW',
+ *          trackSig:"CW",
  *          trackNum:0x01,
  *          trackType:0x58,
  *          trackLoad:0xnnnn,
@@ -2346,21 +2400,21 @@ DiskDump.prototype.convertToJSON = function()
  *            { sectorSig:0x76,
  *              sectorNum:0x01,
  *              sectorPages:0x01,
- *              sectorEndSig:'GS',
+ *              sectorEndSig:"GS",
  *              sectorData: [0x52,0x41,0x43,0x4b,...]
  *            },...
  *          ]
  *        },
  *        {
- *          trackSig:'CW',
+ *          trackSig:"CW",
  *          ...
  *        }
  *    ] ]
  *
  * TODO: If we ever add support for OSI drives/disk images with more than one head, we should change the disk image
  * format to match that used by DOS disk images and PCjs; ie, an array of cylinders, each containing an array of heads,
- * each containing an array of tracks.  It's largely just a matter of reversing the meaning of the two outermost array
- * elements, here and in the C1Pjs disk module.
+ * each containing an array of tracks.  It's largely just a matter of swapping the two outermost array elements, both
+ * here and in the C1Pjs disk module.
  *
  * @this {DiskDump}
  * @return {string|null} containing a JSON representation of the disk image, or null if unrecognized/malformed

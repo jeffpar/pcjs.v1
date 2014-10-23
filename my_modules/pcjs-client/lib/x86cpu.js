@@ -812,7 +812,10 @@ X86CPU.prototype.resetRegs = function()
      * at both 0x0F0000 and 0xFF0000; see the ROM component's "alias" parameter).
      */
     if (this.model >= X86.MODEL_80286) {
-        this.addrGDT = this.addrGDTLimit = 0;           // GDTR
+        /*
+         * TODO: Verify what the 80286 actually sets addrGDT and addrGDTLimit to on reset (or if it leaves them alone).
+         */
+        this.addrGDT = 0; this.addrGDTLimit = 0xFFFF;   // GDTR
         this.segLDT = new X86Seg(this, "LDT", true);    // LDTR
         this.segTSS = new X86Seg(this, "TSS", true);    // TR
         this.segVER = new X86Seg(this, "VER", true);    // a scratch segment register for VERR and VERW instructions

@@ -1346,7 +1346,7 @@ Disk.prototype.save = function()
             for (var iHead = 0; iHead < aDiskData[iCylinder].length; iHead++) {
                 for (var iSector = 0; iSector < aDiskData[iCylinder][iHead].length; iSector++) {
                     var sector = aDiskData[iCylinder][iHead][iSector];
-                    if (sector.cModify) {
+                    if (sector && sector.cModify) {
                         var mods = [], n = 0;
                         var iModify = sector.iModify, iModifyLimit = sector.iModify + sector.cModify;
                         while (iModify < iModifyLimit) {
@@ -1443,6 +1443,7 @@ Disk.prototype.restore = function(deltas)
             var mods = mod[m++];
             var iModifyLimit = iModify + mods.length;
             var sector = this.aDiskData[iCylinder][iHead][iSector];
+            if (!sector) continue;
             /*
              * Since write() now deals with empty/partial sectors, we no longer need to completely "inflate" the sector prior
              * to applying modifications.  So let's just make sure that the sector is "inflated" up to iModify.
