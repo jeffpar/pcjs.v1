@@ -48,7 +48,8 @@ if (typeof module !== 'undefined') {
  *
  * The HDC component simulates an STC-506/412 interface to an IBM-compatible fixed disk drive. The first
  * such drive was a 10Mb 5.25-inch drive containing two platters and 4 heads. Data spanned 306 cylinders
- * for a total of 1224 tracks, with 17 sectors/track and 512 bytes/sector.
+ * for a total of 1224 tracks, with 17 sectors/track and 512 bytes/sector.  Support has since been expanded
+ * to include the original PC AT Western Digital controller.
  *
  * HDC supports the following component-specific properties:
  *
@@ -90,7 +91,7 @@ function HDC(parmsHDC) {
         try {
             /*
              * The most likely source of any exception will be right here, where we're parsing
-             * the JSON-encoded disk data.
+             * the JSON-encoded drive data.
              */
             this.aDriveConfigs = eval("(" + parmsHDC['drives'] + ")");
             /*
@@ -202,7 +203,7 @@ HDC.aDriveTypes = [
  *
  * Without the "DUAL" bit set, when it came time later to report the diskette drive type, the "DISK_TYPE" function
  * (@F000:273D) would branch to one of two almost-identical blocks of code -- specifically, a block that disallowed
- * diskette drive types >= 2 (ChipSet.CMOS.FDRIVE.DSDD) instead of >= 3 (ChipSet.CMOS.FDRIVE.DSHD).
+ * diskette drive types >= 2 (ChipSet.CMOS.FDRIVE.FD360) instead of >= 3 (ChipSet.CMOS.FDRIVE.FD1200).
  *
  * In other words, the "Fixed Disk" portion of the HFCOMBO controller has to be present and operational if the user
  * wants to use high-capacity (80-track) diskettes with "Diskette Drive" portion of the controller.  This may not be

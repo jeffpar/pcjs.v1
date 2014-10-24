@@ -18,7 +18,7 @@ capabilities can be found in the [Documentation](/docs/).
 
 ### Emulating the Challenger 1P
 
-The first **JSMachines** simulation was [C1Pjs](/docs/c1pjs/), a simulation of the
+The first JavaScript Machines simulation was [C1Pjs](/docs/c1pjs/), a simulation of the
 Challenger 1P, which was a 6502-based microcomputer introduced by Ohio Scientific in 1978.
 
 C1Pjs v1.0 was released in July 2012, first on ecpsim.org and cpusim.org, then on [jsmachines.net](http://jsmachines.net/c1pjs),
@@ -30,24 +30,24 @@ at [osiweb.org](http://osiweb.org/).
 
 ### Emulating the IBM PC
 
-The next **JSMachines** simulation was [PCjs](/docs/about/pcjs/), which simulates the original IBM PC, IBM PC XT,
+The next JavaScript Machines simulation was [PCjs](/docs/about/pcjs/), which simulates the original IBM PC, IBM PC XT,
 and IBM PC AT.
 
 [PCjs](/docs/about/pcjs/) emulates the Intel 8088 and 80286 CPUs, as well as IBM Monochrome Display Adapter (MDA),
 Color Graphics Adapter (CGA), and Enhanced Graphics Adapter (EGA) video cards, along with assorted motherboard and
 expansion bus components.  It also includes an optional Debugger and a user-configurable Control Panel.
 
-PCjs v1.0 was released on [jsmachines.net](http://jsmachines.net/) in late 2012, and the **JSMachines** project,
+PCjs v1.0 was released on [jsmachines.net](http://jsmachines.net/) in late 2012, and the JavaScript Machines Project,
 with its second full-featured machine emulation, was launched.
 
 Read [About PCjs](/docs/about/pcjs/) to learn more about its history, features, and upcoming improvements.
 
 ---
 
-### Migrating to Node.js
+### Migrating to Node: The PCjs Project
 
-The **JSMachines** project was migrated to a [Node.js](http://nodejs.org) web server ([pcjs.org](http://www.pcjs.org/))
-in 2014.
+The JavaScript Machines Project was migrated to a [Node.js](http://nodejs.org) web server ([pcjs.org](http://www.pcjs.org/))
+in 2014, and became the PCjs Project.
 
 The goals included:
 

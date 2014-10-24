@@ -51,9 +51,9 @@ if (typeof module !== 'undefined') {
  *      sw2:            8-character binary string representing the SW2 DIP switches (SW2[1-8]) (MODEL_5150 only)
  *      sound:          true to enable (experimental) sound support (default); false to disable
  *      scaleTimers:    true to divide timer cycle counts by the CPU's cycle multiplier (default is false)
- *      fdrives:        0-4 floppy drives (default is 2 if no sw1 value provided)
- *      monitor:        none|tv|color|mono (default is mono if no sw1 value provided)
- *      rtcDate:        optional RTC date to be used on resets; use the ISO 8601 format; eg: "2014-10-01T08:00:00-0700"
+ *      floppies:       array of floppy drive sizes in Kb (default is "[360, 360]" if no sw1 value provided)
+ *      monitor:        none|tv|color|mono (if no sw1 value provided, default is "ega" for 5170, "mono" otherwise)
+ *      rtcDate:        optional RTC date/time (in GMT) to use on reset; use the ISO 8601 format; eg: "2014-10-01T08:00:00"
  *
  * The conventions used for the sw1 and sw2 strings are that the left-most character represents DIP switch [1],
  * the right-most character represents DIP switch [8], and "1" means the DIP switch is ON and "0" means it is OFF.
@@ -155,7 +155,7 @@ function ChipSet(parmsChipSet)
     /*
      * SW1 describes the number of floppy drives, the amount of base memory, the primary monitor type,
      * and (on the MODEL_5160) whether or not a coprocessor is installed.  If no SW1 settings are provided,
-     * we look for individual 'fdrives' and 'monitor' settings and build a default SW1 value.
+     * we look for individual 'floppies' and 'monitor' settings and build a default SW1 value.
      *
      * The defaults below select max memory, monochrome monitor (EGA monitor for MODEL_5170), and two floppies.
      * Don't get too excited about "max memory" either: on a MODEL_5150, the max was 64Kb, and on a MODEL_5160,
@@ -171,7 +171,10 @@ function ChipSet(parmsChipSet)
     if (sw1) {
         this.sw1Init = this.parseSwitches(sw1, ChipSet.PPI_SW.MEMORY.X4 | ChipSet.PPI_SW.MONITOR.MONO);
     } else {
-        var nDrives = parmsChipSet['fdrives'] || 2;
+        this.aFloppyDrives = [360, 360];
+        var aFloppyDrives = parmsChipSet['floppies'];
+        if (aFloppyDrives && aFloppyDrives.length !== undefined) this.aFloppyDrives = aFloppyDrives;
+        var nDrives = this.aFloppyDrives.length;
         if (nDrives) {
             this.sw1Init |= ChipSet.PPI_SW.FDRIVE.IPL;
             nDrives--;
@@ -806,8 +809,16 @@ ChipSet.CMOS = {
         D0_MASK:        0xF0,   // Drive 0 type in high nibble
         D1_MASK:        0x0F,   // Drive 1 type in lower nibble
         NONE:           0,      // no drive
-        DSDD:           1,      // double-sided double-density drive (48 TPI, 40 tracks, 360Kb max)
-        DSHD:           2       // double-sided high-density drive (96 TPI, 80 tracks, 1.2Mb max)
+        /*
+         * There's at least one floppy drive type that IBM didn't bother defining a CMOS drive type for:
+         * single-sided drives that were only capable of storing 160Kb (or 180Kb when using 9 sectors/track).
+         * So, as you can see in getSWFloppyDriveType(), we lump all standard diskette capacities <= 360Kb
+         * into the FD360 bucket.
+         */
+        FD360:          1,      // 5.25-inch double-sided double-density (DSDD 48TPI) drive: 40 tracks, 9 sectors/track, 360Kb max
+        FD1200:         2,      // 5.25-inch double-sided high-density (DSHD 96TPI) drive: 80 tracks, 15 sectors/track, 1200Kb max
+        FD720:          3,      // 3.5-inch drive capable of storing 80 tracks and up to 9 sectors/track, 720Kb max
+        FD1440:         4       // 3.5-inch drive capable of storing 80 tracks and up to 18 sectors/track, 1440Kb max
     },
     /*
      * HDRIVE types are defined by table in the HDC component, which uses setCMOSDriveType() to update the CMOS
@@ -1129,14 +1140,17 @@ ChipSet.prototype.initRTCDate = function(sDate)
     /*
      * Example of a valid Date string:
      *
-     *      2014-10-01T08:00:00-0700
+     *      2014-10-01T08:00:00 (interpreted as GMT, resulting in "Wed Oct 01 2014 01:00:00 GMT-0700 (PDT)")
      *
-     * Example of an INVALID Date string:
+     * Examples of INVALID Date strings:
      *
      *      2014-10-01T08:00:00PST
+     *      2014-10-01T08:00:00-0700 (actually, this DOES work in Chrome, but NOT in Safari)
      *
-     * In the second example, the Date object is invalid, but it wasn't obvious (to me) how to detect that.
-     * So here's a test from StackOverflow (http://stackoverflow.com/questions/1353684/detecting-an-invalid-date-date-instance-in-javascript).
+     * In the case of INVALID Date strings, the Date object is invalid, but there's no obvious test for an "invalid"
+     * object, so I've adapted the following test from StackOverflow.
+     *
+     * See http://stackoverflow.com/questions/1353684/detecting-an-invalid-date-date-instance-in-javascript
      */
     if (Object.prototype.toString.call(date) !== "[object Date]" || isNaN(date.getTime())) {
         date = new Date();
@@ -1398,9 +1412,11 @@ ChipSet.prototype.addCMOSMemory = function(addr, size)
  *
  * For use by the HDC component, to update the CMOS drive configuration to match HDC's internal configuration.
  *
- * TODO: Extend this to support FDC drive updates, so that FDC can eventually specify diskette drive types
- * (ie, DSDD or DSHD) in the same way that HDC does; currently, MODEL_5170 diskette drives always default to DSHD
- * (see getSWFloppyDriveType()).
+ * TODO: Consider extending this to support FDC drive updates, so that the FDC can specify diskette drive types
+ * (ie, FD360 or FD1200) in the same way that HDC does.  However, historically, the ChipSet has been responsible for
+ * floppy drive configuration, at least in terms of *number* of drives, through the use of SW1 settings, and we've
+ * continued that tradition with the addition of the ChipSet 'floppies' parameter, which allows both the number *and*
+ * capacity of drives to be specified with a simple array (eg, [360, 360] for two 360Kb drives).
  *
  * @this {ChipSet}
  * @param {number} iDrive
@@ -1806,17 +1822,53 @@ ChipSet.prototype.getSWFloppyDrives = function(fInit)
  *
  * @this {ChipSet}
  * @param {number} iDrive (0-based)
- * @return {number} one of the ChipSet.CMOS.FDRIVE values (ie, NONE: 0, DSDD: 1, DSHD: 2)
+ * @return {number} one of the ChipSet.CMOS.FDRIVE.FD* values (FD360, FD1200, etc)
  */
 ChipSet.prototype.getSWFloppyDriveType = function(iDrive)
 {
-    /*
-     * TODO: For MODEL_5170, we default all floppy drive types to DSHD, but more control would be nice.
-     */
     if (iDrive < this.getSWFloppyDrives()) {
-        return (this.model < ChipSet.MODEL_5170? ChipSet.CMOS.FDRIVE.DSDD : ChipSet.CMOS.FDRIVE.DSHD);
+        if (!this.aFloppyDrives) {
+            return ChipSet.CMOS.FDRIVE.FD360;
+        }
+        if (iDrive < this.aFloppyDrives.length) {
+            switch(this.aFloppyDrives[iDrive]) {
+            case 160:
+            case 180:
+            case 320:
+            case 360:
+                return ChipSet.CMOS.FDRIVE.FD360;
+            case 720:
+                return ChipSet.CMOS.FDRIVE.FD720;
+            case 1200:
+                return ChipSet.CMOS.FDRIVE.FD1200;
+            case 1440:
+                return ChipSet.CMOS.FDRIVE.FD1440;
+            }
+        }
+        Component.assert(false);        // we should never get here (else something is out of out sync)
     }
     return ChipSet.CMOS.FDRIVE.NONE;
+};
+
+/**
+ * getSWFloppyDriveSize(iDrive)
+ *
+ * @this {ChipSet}
+ * @param {number} iDrive (0-based)
+ * @return {number} capacity of drive in Kb (eg, 360, 1200, 1440, etc), or 0 if none
+ */
+ChipSet.prototype.getSWFloppyDriveSize = function(iDrive)
+{
+    if (iDrive < this.getSWFloppyDrives()) {
+        if (!this.aFloppyDrives) {
+            return 360;
+        }
+        if (iDrive < this.aFloppyDrives.length) {
+            return this.aFloppyDrives[iDrive];
+        }
+        Component.assert(false);        // we should never get here (else something is out of out sync)
+    }
+    return 0;
 };
 
 /**

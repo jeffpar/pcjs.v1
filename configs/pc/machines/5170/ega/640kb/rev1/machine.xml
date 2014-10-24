@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.15.6/machine.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.15.7/machine.xsl"?>
 <machine id="ibm5170" class="pc" border="1" pos="center" style="background-color:#FAEBD7">
 	<name>IBM PC AT, 128K EGA, 640K RAM</name>
 	<computer id="at-ega-640k" name="IBM PC AT" buswidth="24"/>
 	<cpu id="cpu286" model="80286"/>
-	<ram id="ramLow" addr="0x00000" size="0xa0000" comment="0xa0000 (640Kb) size overrides SW1"/>
+	<ram id="ramLow" addr="0x00000" size="0xa0000"/>
 	<rom id="romEGA" addr="0xc0000" size="0x4000" file="/devices/pc/video/ibm-ega.json" notify="videoEGA"/>
 	<rom id="romBIOS" addr="0xf0000" size="0x10000" alias="0xff0000" file="/devices/pc/bios/5170/1984-01-10.json"/>
 	<video id="videoEGA" model="ega" memory="0x20000" screenwidth="640" screenheight="350" pos="center" padding="8px">
@@ -14,10 +14,7 @@
 	<debugger id="debugger" messages="" commands=""/>
 	<panel ref="/configs/pc/panels/wide.xml"/>
 	<fdc ref="/configs/pc/disks/library.xml" automount='{A: {name: "PC-DOS 3.00 (Disk 1)", path: "/disks/pc/dos/ibm/3.00/PCDOS300-DISK1.json"}, B: {name: "PC-DOS 3.00 (Disk 2)", path: "/disks/pc/dos/ibm/3.00/PCDOS300-DISK2.json"}}'/>
-	<chipset id="chipset" model="5170" sw1="01001101" pos="left" padleft="8px" padbottom="8px">
-		<control type="switches" class="input" label="SW1" binding="sw1" left="0px"/>
-		<control type="description" class="output" binding="swdesc" left="0px"/>
-	</chipset>
+	<chipset id="chipset" model="5170" floppies="[1200,1200]"/>
 	<serial id="com1" adapter="1" binding="print"/>
 	<serial id="com2" adapter="2"/>
 	<mouse serial="com2"/>

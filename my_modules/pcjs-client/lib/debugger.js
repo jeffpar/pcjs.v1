@@ -4203,7 +4203,8 @@ if (DEBUGGER) {
                     return;
                 }
                 this.cpu.updateCPU();
-                this.println("updated registers:");
+                this.println("\nupdated registers:");
+                fCompact = true;
             }
         }
 

@@ -61,10 +61,10 @@ Attributes
 
 	*false* (default) to update timers in sync with CPU speed, *true* to scale timer updates to match real-world time.
 
- * *fdrives* (optional)
+ * *floppies* (optional)
 
-	If no *sw1* setting is provided, *fdrives* specifies the number of floppy drives installed (0-4 for models 5150 and 5160, 0-2 for model 5170);
-	default is 2.
+	If no *sw1* setting is provided, *floppies* may be used to specify an array of floppy drive capacities;
+	eg, [360, 360] for two 360Kb drives; default is none.
 
  * *monitor* (optional)
 

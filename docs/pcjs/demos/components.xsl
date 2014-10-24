@@ -8,7 +8,7 @@
 
 	<xsl:variable name="MACHINECLASS">pc</xsl:variable>
 	<xsl:variable name="APPCLASS">pcjs</xsl:variable>
-	<xsl:variable name="APPVERSION">1.15.6</xsl:variable>
+	<xsl:variable name="APPVERSION">1.15.7</xsl:variable>
 	<xsl:variable name="SITEHOST">www.pcjs.org</xsl:variable>
 
 	<xsl:template name="componentStyles">
@@ -569,10 +569,10 @@
 				<xsl:otherwise>false</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
-		<xsl:variable name="fdrives">
+		<xsl:variable name="floppies">
 			<xsl:choose>
-				<xsl:when test="@fdrives"><xsl:value-of select="@fdrives"/></xsl:when>
-				<xsl:otherwise>0</xsl:otherwise>
+				<xsl:when test="@floppies"><xsl:value-of select="@floppies"/></xsl:when>
+				<xsl:otherwise>{}</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
 		<xsl:variable name="monitor">
@@ -590,7 +590,7 @@
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">chipset</xsl:with-param>
-			<xsl:with-param name="parms">,model:'<xsl:value-of select="$model"/>',scaleTimers:<xsl:value-of select="$scaletimers"/>,sw1:'<xsl:value-of select="$sw1"/>',sw2:'<xsl:value-of select="$sw2"/>',sound:<xsl:value-of select="$sound"/>,fdrives:<xsl:value-of select="$fdrives"/>,monitor:'<xsl:value-of select="$monitor"/>',rtcDate:'<xsl:value-of select="$rtcdate"/>'</xsl:with-param>
+			<xsl:with-param name="parms">,model:'<xsl:value-of select="$model"/>',scaleTimers:<xsl:value-of select="$scaletimers"/>,sw1:'<xsl:value-of select="$sw1"/>',sw2:'<xsl:value-of select="$sw2"/>',sound:<xsl:value-of select="$sound"/>,floppies:<xsl:value-of select="$floppies"/>,monitor:'<xsl:value-of select="$monitor"/>',rtcDate:'<xsl:value-of select="$rtcdate"/>'</xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 

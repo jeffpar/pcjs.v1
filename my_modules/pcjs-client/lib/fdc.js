@@ -742,19 +742,34 @@ FDC.prototype.initController = function(data)
         var drive = this.aDrives[iDrive];
         if (drive === undefined) {
             /*
-             * The first time each drive is initialized, obtain its type (from switches or CMOS) and the physical limits
-             * of the drive (ie, max tracks and max sectors/track).  As for max heads, initDrive() assumes that all drives
-             * have two heads, and in any case, there's no way to configure/specify a single-sided floppy drive.
-             *
-             * TODO: Provide a configuration option for single-sided drives, in case someone really wants to simulate that.
+             * The first time each drive is initialized, we query its capacity (based on switches or CMOS) and set
+             * the drive's physical limits accordingly (ie, max tracks, max heads, and max sectors/track).
              */
             drive = this.aDrives[iDrive] = {};
-            drive.bType = this.chipset.getSWFloppyDriveType(iDrive);
-            drive.nCylinders = 40;
-            drive.nSectors = 9;
-            if (drive.bType == ChipSet.CMOS.FDRIVE.DSHD) {
+            var nKb = (this.chipset? this.chipset.getSWFloppyDriveSize(iDrive) : 0);
+            switch(nKb) {
+            case 160:
+            case 180:
+                drive.nHeads = 1;       // required for single-sided drives only (all others default to double-sided)
+                /* falls through */
+            case 320:
+            case 360:
+            default:                    // drives that don't have a recognized capacity default to 360
+                drive.nCylinders = 40;
+                drive.nSectors = 9;     // drives capable of writing 8 sectors/track can also write 9 sectors/track
+                break;
+            case 720:
                 drive.nCylinders = 80;
-                drive.nSectors = 18;            // 15 for 1.2Mb diskettes, 18 for 1.44Mb diskettes, 8/9 for everything else
+                drive.nSectors = 9;
+                break;
+            case 1200:
+                drive.nCylinders = 80;
+                drive.nSectors = 15;
+                break;
+            case 1440:
+                drive.nCylinders = 80;
+                drive.nSectors = 18;
+                break;
             }
         }
         if (!this.initDrive(drive, iDrive, dataDrives[iDrive])) {
@@ -1194,8 +1209,8 @@ FDC.prototype.mountDiskette = function(drive, disk, sDisketteName, sDiskettePath
 
     if (disk) {
         /*
-         * We shouldn't mount the diskette unless the drive is able to handle it; for example, DSDD (40-track)
-         * drives cannot read DSHD (80-track) diskettes.  However, I no longer require that the diskette's
+         * We shouldn't mount the diskette unless the drive is able to handle it; for example, FD360 (40-track)
+         * drives cannot read FD1200 (80-track) diskettes.  However, I no longer require that the diskette's
          * sectors/track fall within the drive's standard maximum, because XDF diskettes use 19 physical sectors/track
          * on the first cylinder (1 more than the typical 18 sectors/track found on 1.44Mb diskettes) but declare
          * a larger logical size (23 512-byte sectors/track) to reflect the actual capacity of XDF tracks beyond the
@@ -1459,7 +1474,7 @@ FDC.prototype.outFDCOutput = function(port, bOut, addrFrom)
      * MODEL_5170 boot code.  Here's why:
      *
      * Unlike previous models, the MODEL_5170 BIOS probes all installed diskette drives to determine drive type;
-     * ie, DSDD (40-track) or DSHD (80-track).  So if there are two drives, the last selected drive will be drive 1.
+     * ie, FD360 (40-track) or FD1200 (80-track).  So if there are two drives, the last selected drive will be drive 1.
      * Immediately before booting, the BIOS issues an INT 0x13/AH=0 reset, which writes regOutput two times: first
      * with FDC.REG_OUTPUT.ENABLE clear, and then with it set.  However, both times, it ALSO loads the last selected
      * drive number into regOutput's "drive select" bits.

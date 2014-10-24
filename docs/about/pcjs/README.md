@@ -51,8 +51,8 @@ The following features are targeted for version 1.16:
 More information on software manifests is available [here](/apps/).
 + v1.12.1 coincided with the first release of the new PCjs web server running on [Node.js](http://nodejs.org).
 The new server includes ROM and disk image conversion APIs, as well as a [Markdown](http://daringfireball.net/projects/markdown/syntax)
-module that supports link extensions for embedding C1Pjs and PCjs machine files in **JSMachines** README.md documents
-and automatically converts them into web pages.
+module that supports link extensions for embedding C1Pjs and PCjs machine files in Markdown documents
+and automatically converts "README.md" files into "index.html" web pages.
 + v1.11 improved the *embedPC()* and *embedC1P()* functions, so now you can embed XML machine configuration files
 that reference other configuration files, such as an external [Keyboard](/docs/pcjs/keyboard/) or
 [Control Panel](/docs/pcjs/panel/) XML layout.  It does this by building the entire XML configuration internally,

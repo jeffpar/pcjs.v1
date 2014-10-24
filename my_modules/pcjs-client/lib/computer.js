@@ -174,7 +174,7 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
         }
     }
 
-    this.println("PREFETCH: " + PREFETCH + ", TYPEDARRAYS: " + TYPEDARRAYS);
+    if (DEBUG) this.println("PREFETCH: " + PREFETCH + ", TYPEDARRAYS: " + TYPEDARRAYS);
 
     /*
      * Iterate through all the components again and call their initBus() handler, if any
