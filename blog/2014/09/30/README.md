@@ -5,7 +5,7 @@ Here are a few highlights of the (evolving) JavaScript coding conventions used i
 
 ### Tabs vs. Spaces
 
-I've configured my IDE ([PhpStorm](http://www.jetbrains.com/phpstorm/)) to NEVER use tab characters in .js files
+I've configured my IDE ([WebStorm](http://www.jetbrains.com/webstorm/)) to NEVER use tab characters in .js files
 (spaces only) and to ALWAYS use tab characters in almost every other type of text file.  This is largely because
 when a web browser displays a JavaScript file (either in the main window or in the Developer Tools window), tabs
 usually screw up the formatting, which I find annoying when I'm debugging.  XML files, on the other hand,
@@ -198,7 +198,7 @@ it a couple of years ago.
 I've adopted a zero-tolerance policy for warnings: nothing gets checked in if the Closure Compiler generates even
 a single warning.
 
-And finally, speaking of warnings, I've had to tell [PhpStorm](http://www.jetbrains.com/phpstorm/) to "shut up"
+And finally, speaking of warnings, I've had to tell [WebStorm](http://www.jetbrains.com/webstorm/) to "shut up"
 about a few:
 
 - Unfiltered for…in loop

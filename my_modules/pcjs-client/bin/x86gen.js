@@ -39,22 +39,22 @@ try {
      * function (an alias for console.log).  If JSC is running us instead,
      * then this will fail (there is neither a global NOR a console object),
      * but that's OK, because print() is a built-in function.
-     * 
+     *
      * TODO: Find a cleaner way of doing this, and while you're at it, alias
      * Node's process.argv to JSC's "arguments" array, and Node's process.exit()
      * to JSC's quit().
      */
-    global.print = console.log;
+    var print = console.log;
 } catch(err) {}
 
 /*
  * I'm going to start by creating 4 sets of "mod,reg,r/m" aka OpMod tables:
- * 
+ *
  *      Set 0: mod,r/m is dst, size is byte, dispatch table is aOpModMemByte
  *      Set 1: mod,r/m is dst, size is word, dispatch table is aOpModMemWord
  *      Set 2: reg is dst,     size is byte, dispatch table is aOpModRegByte
  *      Set 3: reg is dst,     size is word, dispatch table is aOpModRegWord
- *      
+ *
  * See p. 3-41 of "The 8086 Book" for more details.
  */
 
@@ -354,8 +354,8 @@ function genMode(d, w, mrm, sGroup, sRO) {
      * The 8086/8088 cycle counts below come from p.3-48 of "The 8086 Book", where it discusses EA
      * ("effective address") calculations and the number of execution cycles required for each type
      * of calculation.
-     * 
-     * 
+     *
+     *
      */
     var fInline = true;
     var nCycles = null;
@@ -607,7 +607,7 @@ function genMode(d, w, mrm, sGroup, sRO) {
 
     if (sGroup) {
         /*
-         * Use this to generate ModRM decoders that accept an array (ie, "group") of functions, and pass along an implied argument as well 
+         * Use this to generate ModRM decoders that accept an array (ie, "group") of functions, and pass along an implied argument as well
          */
         if (sRO && reg != 7) {
             sOpMod = "opMod" + (sGroup? sGroup : aDst[d]) + aSize[w] + toHex(mrm, 2);

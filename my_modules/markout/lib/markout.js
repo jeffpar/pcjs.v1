@@ -926,7 +926,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
         var sMachineFunc = "embed" + sMachine;
         var sMachineClass = sMachine.toLowerCase();
         var aMachineParms = aMatch[4].split(':');
-        var sMachineMessage = "(If you see this message, " + sMachine + "js is still loading, or JavaScript has been disabled)";
+        var sMachineMessage = "Waiting for " + sMachine + "js to start";
 
         var sMachineID = aMachineParms[0];
         var sMachineXSLFile = aMachineParms[1] || "";

@@ -38,7 +38,7 @@ either the *merge* option or the appending of MAP data.  For the moment, the API
 
 ---
 
-IBM PC AT (Model 5170) BIOS, Second Version
+IBM PC AT (Model 5170) BIOS ("Rev 2")
 ---
 [1985-06-10.json]() contains the second IBM PC AT BIOS, dated June 10, 1985, which expanded hard disk support from 15 to 23 drive types,
 fixed some bugs, and added support for 720Kb 3.5-inch floppy diskette drives.
@@ -68,7 +68,7 @@ The JSON-encoded ROM image that PCjs uses was created using the *FileDump* comma
 
 ---
 
-IBM PC AT (Model 5170) BIOS, Third Version
+IBM PC AT (Model 5170) BIOS ("Rev 3")
 ---
 [1985-11-15.json]() contains the third (and last) IBM PC AT BIOS, dated November 15, 1985, which added support for 101-key keyboards and 1.44Mb floppy
 diskette drives.

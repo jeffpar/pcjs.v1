@@ -39,15 +39,15 @@ try {
      * function (an alias for console.log).  If JSC is running us instead,
      * then this will fail (there is neither a global NOR a console object),
      * but that's OK, because print() is a built-in function.
-     * 
+     *
      * TODO: Find a cleaner way of doing this, and while you're at it, alias
      * Node's process.argv to JSC's "arguments" array, and Node's process.exit()
      * to JSC's quit().
-     * 
+     *
      * UPDATE: Node *must* be used to run this test, because JSC's support for
      * typed arrays is incomplete.
      */
-    global.print = console.log;
+    var print = console.log;
 } catch(err) {}
 
 function toHex(v, len) {

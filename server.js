@@ -45,14 +45,14 @@
 
 "use strict";
 
-var fs = require("fs");
-var path = require("path");
-var http = require("http");
-var express = require("express");
-var slash = require("express-slash");
+var fs       = require("fs");
+var path     = require("path");
+var http     = require("http");
+var express  = require("express");
+var slash    = require("express-slash");
 
-var proclib = require("./my_modules/shared/lib/proclib");
-var args = proclib.getArgs();
+var proclib  = require("./my_modules/shared/lib/proclib");
+var args     = proclib.getArgs();
 
 var fCache   = (args.argv['cache']   === undefined? true  : args.argv['cache']);
 var fConsole = (args.argv['console'] === undefined? false : args.argv['console']);
@@ -61,14 +61,14 @@ var fLogging = (args.argv['logging'] === undefined? false : args.argv['logging']
 var fRebuild = (args.argv['rebuild'] === undefined? false : args.argv['rebuild']);
 var fSockets = (args.argv['sockets'] === undefined? false : args.argv['sockets']);
 
-var sServerRoot = __dirname;
-var HTMLOut = require("./my_modules/htmlout");
+var HTMLOut  = require("./my_modules/htmlout");
 
+var sServerRoot = __dirname;
 HTMLOut.setRoot(sServerRoot);
 
 /*
  * In a production environment, you probably want to leave the 'console',
- * 'debug' and 'rebuild' options OFF, which is why we warn if they're enabled. 
+ * 'debug' and 'rebuild' options OFF, which is why we warn if they're enabled.
  */
 if (fConsole || fDebug || fRebuild) console.log("warning: non-production options enabled");
 HTMLOut.setOptions({'cache': fCache, 'console': fConsole, 'debug': fDebug, 'rebuild': fRebuild, 'sockets': fSockets});
@@ -94,7 +94,7 @@ app.use(express.favicon(path.join(sServerRoot, "./versions/images/current/favico
  *
  * NOTE: use {flags: 'a'} to open in append mode instead of write mode.  The latter is the default,
  * so that a simple server restart will generate a new log file.
- * 
+ *
  * TODO: Consider some simple rotation scheme to retain at least a few previous log files.
  */
 if (fLogging) {
@@ -133,7 +133,7 @@ var server = http.createServer(app).listen(app.get('port'), function() {
  */
 if (fSockets) {
     var io = require('socket.io').listen(server);
-    
+
     io.sockets.on('connection', function(socket) {
         if (fConsole) console.log('A new user connected!');
         socket.emit('info', { msg: 'The world is round, there is no up or down.' });

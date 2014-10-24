@@ -245,7 +245,8 @@ var X86Op0F = {
              *      145E:4BC3 CB            RETF
              *
              * This code is expecting SGDT on an 80286 to set the 6th "undefined" byte to 0xFF.  So we use setWord()
-             * instead of setByte() and force the upper byte to 0xFF.  TODO: Remove the 0xFF00 on post-80286 processors.
+             * instead of setByte() and force the upper byte to 0xFF.  TODO: Remove the 0xFF00 below on post-80286
+             * processors; also, this behavior may be unique to real-mode.
              */
             this.setWord(this.regEA + 4, 0xFF00 | (this.addrGDT >> 16));
             this.nStepCycles -= 11;
@@ -269,8 +270,9 @@ var X86Op0F = {
             dst = this.addrIDTLimit - this.addrIDT;
             this.setWord(this.regEA + 2, this.addrIDT);
             /*
-             * As with SGDT, the 6th byte is technically "undefined" on an 80286, but given that SGDT now sets it to 0xFF,
-             * we mimic SGDT.
+             * As with SGDT, the 6th byte is technically "undefined" on an 80286, but we now set it to 0xFF, for the
+             * same reasons discussed in SGDT (above).  TODO: Remove the 0xFF00 below on post-80286 processors; also,
+             * this behavior may be unique to real-mode.
              */
             this.setWord(this.regEA + 4, 0xFF00 | (this.addrIDT >> 16));
             this.nStepCycles -= 12;

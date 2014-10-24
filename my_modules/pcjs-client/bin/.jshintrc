@@ -5,7 +5,6 @@
         "global": true,
         "console": true,
         "module": true,
-        "print": true,
         "require": true
     }
 }
