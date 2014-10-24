@@ -12,7 +12,7 @@ All the simulations are written entirely in JavaScript.  No Flash, Java or other
 Supported browsers include recent versions of Internet Explorer (v9.0 or later), Safari, Chrome, Firefox and various
 mobile browsers.
 
-[[Embedded IBM PC]](/configs/pc/machines/5150/mda/64kb/ "PCjs:ibm5150")
+[Embedded IBM PC](/configs/pc/machines/5150/mda/64kb/ "PCjs:ibm5150")
 
 The [simulation](/configs/pc/machines/5150/mda/64kb/) above features an Intel 8088 running at 4.77Mhz,
 with 64Kb of RAM and an IBM Monochrome Display Adapter.  For more control, there are also
@@ -46,7 +46,7 @@ Below is the [OSI Challenger C1P](/docs/c1pjs/), another simulation in the JavaS
 It simulates Ohio Scientific's 6502-based microcomputer, released in 1978.  More details about this simulation
 and the original machine are available in the [C1Pjs Documentation](/docs/c1pjs/).
 
-[[Embedded OSI Challenger C1P]](/configs/c1p/machines/8kb/large/ "C1Pjs:demoC1P")
+[Embedded OSI Challenger C1P](/configs/c1p/machines/8kb/large/ "C1Pjs:demoC1P")
 
 <!--BEGIN:EXCLUDE-->
 
