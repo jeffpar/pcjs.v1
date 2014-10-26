@@ -319,7 +319,11 @@ CPU.prototype.setFocus = function()
  */
 CPU.prototype.isPowered = function()
 {
-    return this.fPowered;
+    if (!this.fPowered) {
+        this.println(this.toString() + " not powered");
+        return false;
+    }
+    return true;
 };
 
 /**

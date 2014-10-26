@@ -1536,19 +1536,21 @@ Card.ACCESS.afn[Card.ACCESS.WRITE.MODE2XOR] = Card.ACCESS.writeByteMode2Xor;
  * arrays of nulls, which means that any uninitialized register arrays whose elements were all originally
  * undefined come back via the JSON round-trip as *initialized* arrays whose elements are now all null.
  *
- * I'm a bit surprised, because Crockford would want us to always use the '===' operator to determine whether
- * an element is initialized (eg, 'aReg[i] === undefined'), but because of this JSON stupidity, I would have
- * to change all such tests to 'aReg[i] === undefined || aReg[i] === null'.  Great.
+ * I'm a bit surprised, because JavaScript purists want us to use the '===' operator to determine
+ * whether an element is initialized (eg, 'aReg[i] === undefined'), but because of this JSON stupidity,
+ * that would require all such tests to become 'aReg[i] === undefined || aReg[i] === null'.  Great.
  *
- * The solution is to change such comparisons to 'aReg[i] == null' because undefined is coerced to null but
- * numeric values are not.  Crockford refers to '==' as an "evil" operator, but yet it's OK for JSON to
- * effectively treat 'undefined' the same as 'null'?  Give me a break!
+ * The simple solution is to change such comparisons to 'aReg[i] == null', because undefined is coerced
+ * to null, whereas numeric values are not.
+ *
+ * Someday, perhaps a purist can explain to me why the coercion of '==' is evil, but JSON's coercion of
+ * 'undefined' values to 'null' values is not.
  *
  * [What do I mean by "another" frustration?  Let me talk to you some day about disallowing hex constants,
- * or insisting that property names be quoted, for starters.  I think it's fine for JSON.stringify() to
- * produce output that adheres to those rules by default -- although some stringify() options to control
- * how "portable" the output is would be nice -- but refusing to let JSON.parse() parse objects that are,
- * in fact, perfectly parseable, is just JSON being a dick.]
+ * or insisting that property names be quoted, or refusing to allow comments.  I think it's fine for
+ * JSON.stringify() to produce output that adheres to rules like that -- although some parameters to control
+ * the output would be nice -- but refusing to let JSON.parse() parse objects that are, in fact, perfectly
+ * parseable, is just JSON being a dick.]
  *
  * @this {Card}
  * @param {Array|undefined} data
@@ -1571,7 +1573,7 @@ Card.prototype.initEGA = function(data, nMonitorType)
             /*10*/  0,
             /*11*/  new Array(Card.GRC.TOTAL_REGS),
             /*12*/  0,
-            /*13*/  this.cbMemory,
+            /*13*/  [this.addrBuffer, this.sizeBuffer, this.cbMemory],
             /*14*/  new Array(this.cbMemory >> 2),      // divide cbMemory by 4 since this is an array of DWORDs (8 bits for each of 4 planes)
             /*
              * Card.ACCESS.WRITE.MODE0 by itself is a pretty good default, but if we choose to "randomize" the screen with
@@ -1586,7 +1588,9 @@ Card.prototype.initEGA = function(data, nMonitorType)
             /*19*/  0xffffffff,
             /*20*/  0,
             /*21*/  0xffffffff,
-            /*22*/  0
+            /*22*/  0,
+            /*23*/  0,
+            /*24*/  0
         ];
     }
 
@@ -1606,7 +1610,25 @@ Card.prototype.initEGA = function(data, nMonitorType)
     this.aGRCRegs   = data[11];
     this.asGRCRegs  = DEBUGGER? Card.GRC.REGS : [];
     this.latches    = data[12];
-    Component.assert(this.cbMemory === data[13]);
+
+    /*
+     * Since we originally neglected to save/restore the card's active frame buffer address and length,
+     * we're now stashing all that information in data[13].  So if we're presented with an old data entry
+     * that contains only the card's memory size, fix it up.
+     *
+     * TODO: This code just creates the required array; the correct frame buffer address and length would
+     * still need to be calculated from the current GRC registers; checkMode() knows how to do that, but I'm
+     * not prepared to shoehorn in a call to checkMode() here, and potentially create more issues, for an
+     * old problem that will eventually disappear anyway.
+     */
+    var a = data[13];
+    if (typeof a == "number") {
+        a = [this.addrBuffer, this.sizeBuffer, a];
+    }
+    this.addrBuffer = a[0];
+    this.sizeBuffer = a[1];
+    Component.assert(this.cbMemory === a[2]);
+
     var cdw = this.cbMemory >> 2;
     this.adwMemory  = data[14];
     if (this.adwMemory && this.adwMemory.length < cdw) {
@@ -1682,7 +1704,7 @@ Card.prototype.saveEGA = function()
     data[10] = this.iGRCReg;
     data[11] = this.aGRCRegs;
     data[12] = this.latches;
-    data[13] = this.cbMemory;
+    data[13] = [this.addrBuffer, this.sizeBuffer, this.cbMemory];
     data[14] = State.compressEvenOdd(this.adwMemory);
     data[15] = this.nAccess;
     data[16] = this.nReadMapShift;
@@ -3552,6 +3574,9 @@ Video.prototype.setMode = function(nMode, fForce)
             this.removeCursor();
 
             if (this.addrBuffer) {
+
+                if (DEBUG) this.messageDebugger("setMode(" + nMode + "): removing 0x" + str.toHex(this.sizeBuffer) + " bytes from 0x" + str.toHex(this.addrBuffer));
+
                 if (!this.bus.removeMemory(this.addrBuffer, this.sizeBuffer)) {
                     /*
                      * TODO: Force this failure case and see how well the Video component deals with it.
@@ -3567,7 +3592,10 @@ Video.prototype.setMode = function(nMode, fForce)
             this.addrBuffer = card.addrBuffer;
             this.sizeBuffer = card.sizeBuffer;
 
+            if (DEBUG) this.messageDebugger("setMode(" + nMode + "): adding 0x" + str.toHex(this.sizeBuffer) + " bytes to 0x" + str.toHex(this.addrBuffer));
+
             var controller = (card === this.cardEGA? card : null);
+
             if (!this.bus.addMemory(card.addrBuffer, card.sizeBuffer, false, controller)) {
                 /*
                  * TODO: Force this failure case and see how well the Video component deals with it.
@@ -4088,17 +4116,17 @@ Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
                  * JavaScript Alert: if adwMemory contains a 32-bit value such as -1526726656, and then we mask it
                  * with 0x80808080, we end up with -2147483648, which in a perfect 32-bit world, would be equivalent
                  * to 0x80000000, which means that when we look up "Video.aEGADWToByte[0x80000000]", we should get
-                 * the entry containing 0x8.  But no, in JavaScript, since the original value was negative, it
-                 * still contains a sign bit above the lower 32 bits, which masking with 0x80808080 apparently doesn't
-                 * eliminate (perhaps the mask is sign-extended as well, since there are 52 "significand" bits
-                 * in JavaScript numbers).  Anyway, this can be confirmed by looking at dwPixel.toString(16), which
-                 * returns "-80000000".  The solution is to check for a negative dwPixel and make it positive.
+                 * the entry containing 0x8.  But no, in JavaScript, since the original value was negative, the
+                 * masked value is still negative, because there are 52 "significand" bits in JavaScript numbers,
+                 * whereas bit-wise operations operate ONLY on the low 32 bits.
+                 *
+                 * This can be confirmed by looking at dwPixel.toString(16), which returns "-80000000".  The solution
+                 * is to check for a negative dwPixel and make it positive.
                  */
                 if (dwPixel < 0) dwPixel = -dwPixel;
                 /*
-                 * It's a good thing I had this assertion, which quickly caught the aforementioned problem.
-                 * Moreover, since assertions don't fix problems (only catch them, and only in DEBUG builds), I'm
-                 * now insuring that bPixel will always default to 0 if an undefined value ever slips through again.
+                 * Since assertions don't fix problems (only catch them, and only in DEBUG builds), I'm also insuring
+                 * that bPixel will always default to 0 if an undefined value ever slips through again.
                  */
                 Component.assert(Video.aEGADWToByte[dwPixel] !== undefined);
                 var bPixel = Video.aEGADWToByte[dwPixel] || 0;

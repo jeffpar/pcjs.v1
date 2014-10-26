@@ -191,6 +191,29 @@ Bus.prototype.reset = function()
 };
 
 /**
+ * powerUp(data, fRepower)
+ *
+ * We don't need a powerDown() handler, because for largely historical reasons, our state (including the A20 state)
+ * is saved by saveMemory().
+ *
+ * However, we do need a powerUp() handler, because on resumable machines, the Computer's onReset() function calls
+ * everyone's powerUp() handler rather than their reset() handler.
+ *
+ * TODO: Perhaps Computer should be smarter: if there's no powerUp() handler, then fallback to the reset() handler.
+ * In that case, however, we'd either need to remove the powerUp() stub in Component, or detect the existence of the stub.
+ *
+ * @this {Bus}
+ * @param {Object|null} data (always null because we supply no powerDown() handler)
+ * @param {boolean} [fRepower]
+ * @return {boolean} true if successful, false if failure
+ */
+Bus.prototype.powerUp = function(data, fRepower)
+{
+    if (!fRepower) this.reset();
+    return true;
+};
+
+/**
  * addMemory(addr, size, fReadOnly, controller)
  *
  * Adds new Memory blocks to the specified address range.  Any Memory blocks previously

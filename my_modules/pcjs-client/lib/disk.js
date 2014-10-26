@@ -234,6 +234,12 @@ function Disk(controller, drive, mode)
 {
     Component.call(this, "Disk", {'id': controller.idMachine + ".disk" + Disk.nDisks++}, Disk);
 
+    /*
+     * Route all non-Debugger messages (eg, notice() and println() calls) through
+     * this.controller (eg, controller.notice() and controller.println()), because
+     * the Computer component is unaware of any Disk objects and therefore will not
+     * set up the usual overrides when a Control Panel is installed.
+     */
     this.controller = controller;
     this.cmp = controller.cmp;
     this.dbg = controller.dbg;
@@ -311,6 +317,20 @@ Disk.prototype.initBus = function(cmp, bus, cpu, dbg) {
 };
 
 /**
+ * isRemote()
+ *
+ * @this {Disk}
+ * @return {boolean} true if remote disk, false if not
+ */
+Disk.prototype.isRemote = function() {
+    /*
+     * Ironically, we can't rely on fRemote, because that is cleared and set across disconnect and
+     * reconnect operations.  fOnDemand is the next best thing.
+     */
+    return this.fOnDemand;
+};
+
+/**
  * powerUp(data, fRepower)
  *
  * As with powerDown(), our sole concern here is for REMOTE disks: if a powerDown() call disconnected an
@@ -318,7 +338,7 @@ Disk.prototype.initBus = function(cmp, bus, cpu, dbg) {
  *
  * The HDC component could have triggered this as well, but its powerUp() function only calls autoMount()
  * in case of page (ie, application) reload, which is fine for local disks but insufficient for remote disks,
- * which have a server connection that must re-established.
+ * which have a server connection that must be re-established.
  *
  * @this {Disk}
  * @param {Object|null} data
@@ -328,10 +348,27 @@ Disk.prototype.initBus = function(cmp, bus, cpu, dbg) {
 Disk.prototype.powerUp = function(data, fRepower) {
     if (!fRepower) {
         if (this.fOnDemand && !this.fRemote) {
-            this.load(this.sDiskName, this.sDiskPath);
+            this.setReady(false);
+            this.load(this.sDiskName, this.sDiskPath, this.donePowerUp, this);
         }
     }
     return true;
+};
+
+/**
+ * donePowerUp(drive, disk, sDiskName, sDiskPath)
+ *
+ * This is a callback issued by the Disk component once the load() from powerUp() has finished.
+ *
+ * @this {HDC}
+ * @param {Object} drive
+ * @param {Disk} disk is set if the disk was successfully mounted, null if not
+ * @param {string} sDiskName
+ * @param {string} sDiskPath
+ */
+Disk.prototype.donePowerUp = function(drive, disk, sDiskName, sDiskPath)
+{
+    this.setReady(true);
 };
 
 /**
@@ -371,14 +408,14 @@ Disk.prototype.powerDown = function(fSave, fShutdown)
         }
         while ((response = this.findDirtySectors(false))) {
             if ((nErrorCode = response[0])) {
-                this.notice('Unable to save "' + this.sDiskName + '" (error ' + nErrorCode + ')');
+                this.controller.notice('Unable to save "' + this.sDiskName + '" (error ' + nErrorCode + ')');
                 break;
             }
         }
         if (fShutdown) {
             this.disconnectRemoteDisk();
         }
-        if (!nErrorCode) this.notice(this.sDiskName + " saved");
+        if (!nErrorCode) this.controller.notice(this.sDiskName + " saved");
     }
     return true;
 };
@@ -424,7 +461,7 @@ Disk.prototype.create = function()
 };
 
 /**
- * load(sDiskName, sDiskPath, fnNotify)
+ * load(sDiskName, sDiskPath, fnNotify, controller)
  *
  * TODO: Figure out how we can strongly type fnNotify, because the Closure Compiler has issues with:
  *
@@ -439,13 +476,14 @@ Disk.prototype.create = function()
  * @param {string} sDiskName
  * @param {string} sDiskPath
  * @param {function(...)} [fnNotify]
+ * @param {Component} [controller]
  */
-Disk.prototype.load = function(sDiskName, sDiskPath, fnNotify)
+Disk.prototype.load = function(sDiskName, sDiskPath, fnNotify, controller)
 {
     var sDiskURL = sDiskPath;
 
     /*
-     * We could use this.log() as well, but it wouldn't also log which component initiated the load.
+     * We could use this.log() as well, but it wouldn't display which component initiated the load.
      */
     if (DEBUG) {
         var sMessage = 'Disk.load("' + sDiskName + '","' + sDiskPath + '")';
@@ -453,9 +491,17 @@ Disk.prototype.load = function(sDiskName, sDiskPath, fnNotify)
         this.messageDebugger(sMessage);
     }
 
+    Component.assert(!this.fnNotify);
+
+    if (this.fnNotify) {
+        if (DEBUG) this.controller.log('too many load requests for "' + sDiskName + '" (' + sDiskPath + ')');
+        return;
+    }
+
     this.sDiskName = sDiskName;
     this.sDiskPath = sDiskPath;
     this.fnNotify = fnNotify;
+    this.controllerNotify = controller || this.controller;
 
     /*
      * If there's an occurrence of API_ENDPOINT anywhere in the path, we assume we can use it as-is;
@@ -508,11 +554,11 @@ Disk.prototype.load = function(sDiskName, sDiskPath, fnNotify)
             }
         }
     }
-    web.loadResource(sDiskURL, true, null, this, this.onLoadDisk, sDiskPath);
+    web.loadResource(sDiskURL, true, null, this, this.doneLoad, sDiskPath);
 };
 
 /**
- * onLoadDisk(sDiskFile, sDiskData, nErrorCode, sDiskPath)
+ * doneLoad(sDiskFile, sDiskData, nErrorCode, sDiskPath)
  *
  * This function was originally called mount().  If the mount is successful, we pass the Disk object to the
  * caller's fnNotify handler; otherwise, we pass null.
@@ -523,7 +569,7 @@ Disk.prototype.load = function(sDiskName, sDiskPath, fnNotify)
  * @param {number} nErrorCode (response from server if anything other than 200)
  * @param {string} sDiskPath (passed through from load() to loadResource())
  */
-Disk.prototype.onLoadDisk = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
+Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
 {
     var disk = null;
     this.fWriteProtected = false;
@@ -531,24 +577,24 @@ Disk.prototype.onLoadDisk = function(sDiskFile, sDiskData, nErrorCode, sDiskPath
 
     if (this.fOnDemand) {
         if (!nErrorCode) {
-            if (DEBUG) this.messageDebugger('Disk.onLoadDisk("' + sDiskFile + '","' + sDiskPath + '")');
+            if (DEBUG) this.messageDebugger('Disk.doneLoad("' + sDiskFile + '","' + sDiskPath + '")');
             this.fRemote = true;
             disk = this;
         } else {
-            this.notice('Unable to connect to disk "' + sDiskPath + '" (error ' + nErrorCode + ': ' + sDiskData + ')', fPrintOnly);
+            this.controller.notice('Unable to connect to disk "' + sDiskPath + '" (error ' + nErrorCode + ': ' + sDiskData + ')', fPrintOnly);
         }
     }
     else if (nErrorCode) {
         /*
-         * This can happen for innocuous reasons, such as the user switching away too quickly,
-         * forcing the request to be cancelled.  And unfortunately, the browser cancels XMLHttpRequest
-         * requests BEFORE it notifies any page event handlers, so if the Computer's being powered down,
-         * we won't know that yet.  For now, we rely on the lack of a specific error (nErrorCode < 0), and
-         * suppress the notify() alert if there's no specific error AND the computer is not powered up yet.
+         * This can happen for innocuous reasons, such as the user switching away too quickly, forcing
+         * the request to be cancelled.  And unfortunately, the browser cancels XMLHttpRequest requests
+         * BEFORE it notifies any page event handlers, so if the Computer's being powered down, we won't know
+         * that yet.  For now, we rely on the lack of a specific error (nErrorCode < 0), and suppress the
+         * notify() alert if there's no specific error AND the computer is not powered up yet.
          */
-        this.notice("Unable to load disk \"" + this.sDiskName + "\" (error " + nErrorCode + ")", fPrintOnly);
+        this.controller.notice("Unable to load disk \"" + this.sDiskName + "\" (error " + nErrorCode + ")", fPrintOnly);
     } else {
-        if (DEBUG) this.messageDebugger('Disk.onLoadDisk("' + sDiskFile + '","' + sDiskPath + '")');
+        if (DEBUG) this.messageDebugger('Disk.doneLoad("' + sDiskFile + '","' + sDiskPath + '")');
         try {
             /*
              * The following code was a hack to turn on write-protection for a disk image if there was
@@ -735,8 +781,10 @@ Disk.prototype.onLoadDisk = function(sDiskFile, sDiskData, nErrorCode, sDiskPath
             Component.error("Disk image error: " + e.message);
         }
     }
+
     if (this.fnNotify) {
-        this.fnNotify.call(this.controller, this.drive, disk, this.sDiskName, this.sDiskPath);
+        this.fnNotify.call(this.controllerNotify, this.drive, disk, this.sDiskName, this.sDiskPath);
+        this.fnNotify = null;
     }
 };
 
@@ -1462,7 +1510,7 @@ Disk.prototype.restore = function(deltas)
         }
     }
     if (nChanges < 0) {
-        this.notice("unable to restore disk '" + this.sDiskName + ": " + sReason);
+        this.controller.notice("unable to restore disk '" + this.sDiskName + ": " + sReason);
     } else {
         if (DEBUG) this.messageDebugger('Disk.restore("' + this.sDiskName + '"): restored ' + nChanges + ' change(s)');
     }

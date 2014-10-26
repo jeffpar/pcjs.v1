@@ -174,7 +174,7 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
         }
     }
 
-    if (DEBUG) this.println("PREFETCH: " + PREFETCH + ", TYPEDARRAYS: " + TYPEDARRAYS);
+    if (DEBUG) this.messageDebugger("PREFETCH: " + PREFETCH + ", TYPEDARRAYS: " + TYPEDARRAYS);
 
     /*
      * Iterate through all the components again and call their initBus() handler, if any
@@ -368,7 +368,7 @@ Computer.prototype.wait = function(fn, parms)
             return;
         }
     }
-    if (MAXDEBUG) this.println("Computer.wait(ready)");
+    if (DEBUG) this.messageDebugger("Computer.wait(ready)");
     fn.call(this, parms);
 };
 
@@ -393,7 +393,7 @@ Computer.prototype.validateState = function(stateComputer)
             fValid = false;
             if (!stateComputer) stateValidate.clear();
         } else {
-            if (MAXDEBUG) this.println("Last state: " + sTimestampComputer + " (validate: " + sTimestampValidate + ")");
+            if (DEBUG) this.messageDebugger("Last state: " + sTimestampComputer + " (validate: " + sTimestampValidate + ")");
         }
     }
     return fValid;
@@ -410,10 +410,10 @@ Computer.prototype.validateState = function(stateComputer)
 Computer.prototype.powerOn = function(resume)
 {
     if (resume === undefined) {
-        resume = (this.sStateData? Computer.RESUME_AUTO : this.resume);
+        resume = this.resume || (this.sStateData? Computer.RESUME_AUTO : Computer.RESUME_NONE);
     }
 
-    if (MAXDEBUG) this.println("Computer.powerOn(" + (resume == Computer.RESUME_REPOWER ? "repower" : (resume ? "resume" : "")) + ")");
+    if (DEBUG) this.messageDebugger("Computer.powerOn(" + (resume == Computer.RESUME_REPOWER ? "repower" : (resume ? "resume" : "")) + ")");
 
     var fRepower = false;
     var fRestore = false;
@@ -435,17 +435,23 @@ Computer.prototype.powerOn = function(resume)
             if (this.stateFailSafe.load()) {
                 this.powerReport(stateComputer);
                 /*
-                 * We already know resume is something other then RESUME_NONE, so we'll go ahead and bump it all the way to
-                 * RESUME_PROMPT, so that the user will be prompted, and if the user declines to restore, the state will be removed.
+                 * We already know resume is something other than RESUME_NONE, so we'll go ahead and bump it
+                 * all the way to RESUME_PROMPT, so that the user will be prompted, and if the user declines to
+                 * restore, the state will be removed.
                  */
                 resume = Computer.RESUME_PROMPT;
+                /*
+                 * To ensure that the set() below succeeds, we need to call unload(), otherwise it may fail
+                 * with a "read only" error (eg, "TypeError: Cannot assign to read only property 'timestamp'").
+                 */
+                this.stateFailSafe.unload();
             }
 
             this.stateFailSafe.set(Computer.STATE_TIMESTAMP, usr.getTimestamp());
             this.stateFailSafe.store();
 
             var fValidate = this.resume && !this.fServerState;
-            if (resume == Computer.RESUME_AUTO || web.confirmUser("Click OK to restore previous " + Computer.sAppName + " machine state.")) {
+            if (resume == Computer.RESUME_AUTO || web.confirmUser("Click OK to restore the previous " + Computer.sAppName + " machine state, or CANCEL to reset the machine.")) {
                 fRestore = stateComputer.parse();
                 if (fRestore) {
                     var sCode = stateComputer.get(UserAPI.RES.CODE);
@@ -521,10 +527,10 @@ Computer.prototype.powerOn = function(resume)
     var aParms = [stateComputer, resume, fRestore];
 
     if (resume != Computer.RESUME_REPOWER) {
-        this.wait(this.powerFinish, aParms);
+        this.wait(this.donePowerOn, aParms);
         return;
     }
-    this.powerFinish(aParms);
+    this.donePowerOn(aParms);
 };
 
 /**
@@ -540,8 +546,11 @@ Computer.prototype.powerOn = function(resume)
 Computer.prototype.powerRestore = function(component, stateComputer, fRepower, fRestore)
 {
     if (!component.fPowered) {
+
         component.fPowered = true;
+
         if (component.powerUp) {
+
             var data = null;
             if (fRestore) {
                 data = stateComputer.get(component.id);
@@ -559,6 +568,7 @@ Computer.prototype.powerRestore = function(component, stateComputer, fRepower, f
                     data = stateComputer.get(component.id.replace(/[a-z0-9]\./i, '.'));
                 }
             }
+
             /*
              * State.get() will return whatever was originally passed to State.set() (eg, an
              * Object or a string), but components are supposed to store only Objects, so if a
@@ -571,50 +581,51 @@ Computer.prototype.powerRestore = function(component, stateComputer, fRepower, f
              * would be a good idea, but this is overkill.
              */
             if (typeof data === "string") data = null;
+
             /*
              * If computer is null, this is simply a repower notification, which most components
              * don't do anything with.  Exceptions include: CPU (since it may be halted) and Video
              * (since its screen may be "turned off").
              */
-            if (!component.powerUp(data, fRepower)) {
-                if (data) {
-                    Component.error("Unable to restore state for " + component.type);
+            if (!component.powerUp(data, fRepower) && data) {
+
+                Component.error("Unable to restore state for " + component.type);
+                /*
+                 * If this is a resume error for a machine that also has a predefined state
+                 * AND we're not restoring from that state, then throw away the current state,
+                 * prevent any new state from being created, and then force a reload, which will
+                 * hopefully restore us to the functioning predefined state.
+                 *
+                 * TODO: Considering doing this in ALL cases, not just in situations where a
+                 * 'state' exists but we're not actually resuming from it.
+                 */
+                if (this.sStatePath && !this.sStateData) {
+                    stateComputer.clear();
+                    this.resume = Computer.RESUME_NONE;
+                    web.reloadPage();
+                } else {
                     /*
-                     * If this is a resume error for a machine that also has a predefined state
-                     * AND we're not restoring from that state, then throw away the current state,
-                     * prevent any new state from being created, and then force a reload, which will
-                     * hopefully restore us to the functioning predefined state.
-                     *
-                     * TODO: Considering doing this in ALL cases, not just in situations where a
-                     * 'state' exists but we're not actually resuming from it.
+                     * In all other cases, we set fRestoreError, which should trigger a call to
+                     * powerReport() and then delete the offending state.
                      */
-                    if (this.sStatePath && !this.sStateData) {
-                        stateComputer.clear();
-                        this.resume = Computer.RESUME_NONE;
-                        web.reloadPage();
-                    } else {
-                        /*
-                         * In all other cases, we set fRestoreError, which should trigger a call to
-                         * powerReport() and then delete the offending state.
-                         */
-                        this.fRestoreError = true;
-                    }
-                    /*
-                     * Any failure triggers an automatic to call powerUp() again, without any state,
-                     * in the hopes that the component can recover by performing a reset.
-                     */
-                    component.powerUp(null);
-                    /*
-                     * We also disable the rest of the restore operation, because it's not clear
-                     * the remaining state information can be trusted;  the machine is already in an
-                     * inconsistent state, so we're not likely to make things worse, and the only
-                     * alternative (starting over and performing a state-less reset) isn't likely to make
-                     * the user any happier.  But, we'll see... we need some experience with the code.
-                     */
-                    fRestore = false;
+                    this.fRestoreError = true;
                 }
+                /*
+                 * Any failure triggers an automatic to call powerUp() again, without any state,
+                 * in the hopes that the component can recover by performing a reset.
+                 */
+                component.powerUp(null);
+                /*
+                 * We also disable the rest of the restore operation, because it's not clear
+                 * the remaining state information can be trusted;  the machine is already in an
+                 * inconsistent state, so we're not likely to make things worse, and the only
+                 * alternative (starting over and performing a state-less reset) isn't likely to make
+                 * the user any happier.  But, we'll see... we need some experience with the code.
+                 */
+                fRestore = false;
             }
         }
+
         if (!fRepower && component.comment) {
             var asComments = component.comment.split("|");
             for (var i = 0; i < asComments.length; i++) {
@@ -626,20 +637,20 @@ Computer.prototype.powerRestore = function(component, stateComputer, fRepower, f
 };
 
 /**
- * powerFinish(aParms)
+ * donePowerOn(aParms)
  *
  * This is nothing more than a continuation of powerOn(), giving us the option of calling wait() one more time.
  *
  * @this {Computer}
  * @param {Array} aParms containing [stateComputer, resume, fRestore]
  */
-Computer.prototype.powerFinish = function(aParms)
+Computer.prototype.donePowerOn = function(aParms)
 {
     var stateComputer = aParms[0];
     var fRepower = (aParms[1] < 0);
     var fRestore = aParms[2];
 
-    if (DEBUG && this.fPowered) this.println("Computer.powerFinish(): redundant");
+    if (DEBUG && this.fPowered) this.messageDebugger("Computer.donePowerOn(): redundant");
 
     this.fPowered = true;
 
@@ -682,7 +693,7 @@ Computer.prototype.powerFinish = function(aParms)
  */
 Computer.prototype.powerReport = function(stateComputer)
 {
-    if (web.confirmUser("There may be a problem with " + Computer.sAppName + ".\nClick OK to send your " + Computer.sAppName + " machine state to http://" + SITEHOST + ".")) {
+    if (web.confirmUser("There may be a problem with your " + Computer.sAppName + " machine.\n\nTo help us diagnose it, click OK to send this " + Computer.sAppName + " machine state to http://" + SITEHOST + ".")) {
         web.sendReport(Computer.sAppName, Computer.sAppVer, this.url, this.getUserID(), ReportAPI.TYPE.BUG, stateComputer.toString());
     }
 };
@@ -723,7 +734,7 @@ Computer.prototype.powerOff = function(fSave, fShutdown)
     var data;
     var sState = "none";
 
-    if (MAXDEBUG) this.println("Computer.powerOff(" + (fSave ? "save" : "nosave") + (fShutdown ? ",shutdown" : "") + ")");
+    if (DEBUG) this.messageDebugger("Computer.powerOff(" + (fSave ? "save" : "nosave") + (fShutdown ? ",shutdown" : "") + ")");
 
     var stateComputer = new State(this, Computer.sAppVer);
     var stateValidate = new State(this, Computer.sAppVer, Computer.STATE_VALIDATE);
@@ -976,7 +987,7 @@ Computer.prototype.queryUserID = function(fPrompt)
 Computer.prototype.verifyUserID = function(sUserID)
 {
     this.sUserID = null;
-    if (DEBUG) this.log("verifyUserID(" + sUserID + ")");
+    if (DEBUG) this.messageDebugger("verifyUserID(" + sUserID + ")");
     var sRequest = web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.VERIFY + '&' + UserAPI.QUERY.USER + '=' + sUserID;
     var response = web.loadResource(sRequest);
     var nErrorCode = response[0];
@@ -986,16 +997,16 @@ Computer.prototype.verifyUserID = function(sUserID)
             response = eval("(" + sResponse + ")");
             if (response.code && response.code == UserAPI.CODE.OK) {
                 web.setLocalStorageItem(Computer.STATE_USERID, response.data);
-                if (DEBUG) this.println(Computer.STATE_USERID + " updated: " + response.data);
+                if (DEBUG) this.messageDebugger(Computer.STATE_USERID + " updated: " + response.data);
                 this.sUserID = response.data;
             } else {
-                if (DEBUG) this.println(response.code + ": " + response.data);
+                if (DEBUG) this.messageDebugger(response.code + ": " + response.data);
             }
         } catch (e) {
             Component.error(e.message + " (" + sResponse + ")");
         }
     } else {
-        if (DEBUG) this.println("invalid response (error " + nErrorCode + ")");
+        if (DEBUG) this.messageDebugger("invalid response (error " + nErrorCode + ")");
     }
     return this.sUserID;
 };
@@ -1010,10 +1021,10 @@ Computer.prototype.getServerStatePath = function()
 {
     var sStatePath = null;
     if (this.sUserID) {
-        if (MAXDEBUG) this.println(Computer.STATE_USERID + " for load: " + this.sUserID);
+        if (DEBUG) this.messageDebugger(Computer.STATE_USERID + " for load: " + this.sUserID);
         sStatePath = web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.LOAD + '&' + UserAPI.QUERY.USER + '=' + this.sUserID + '&' + UserAPI.QUERY.STATE + '=' + State.key(this, Computer.sAppVer);
     } else {
-        if (MAXDEBUG) this.println(Computer.STATE_USERID + " unavailable");
+        if (DEBUG) this.messageDebugger(Computer.STATE_USERID + " unavailable");
     }
     return sStatePath;
 };
@@ -1033,7 +1044,7 @@ Computer.prototype.saveServerState = function(sUserID, sState)
      * tend to blow off alerts() and the like when closing down.
      */
     if (sState) {
-        if (DEBUG) this.println("size of server state: " + sState.length + " bytes");
+        if (DEBUG) this.messageDebugger("size of server state: " + sState.length + " bytes");
         var response = this.storeServerState(sUserID, sState, true);
         if (response && response[UserAPI.RES.CODE] == UserAPI.CODE.OK) {
             this.notice("Machine state saved to server");
@@ -1048,7 +1059,7 @@ Computer.prototype.saveServerState = function(sUserID, sState)
             this.resetUserID();
         }
     } else {
-        if (DEBUG) this.println("no state to store");
+        if (DEBUG) this.messageDebugger("no state to store");
     }
 };
 
@@ -1063,7 +1074,7 @@ Computer.prototype.saveServerState = function(sUserID, sState)
  */
 Computer.prototype.storeServerState = function(sUserID, sState, fSync)
 {
-    if (MAXDEBUG) this.println(Computer.STATE_USERID + " for store: " + sUserID);
+    if (DEBUG) this.messageDebugger(Computer.STATE_USERID + " for store: " + sUserID);
     /*
      * TODO: Determine whether or not any browsers cancel our request if we're called during a browser "shutdown" event,
      * and whether or not it matters if we do an async request (currently, we're not, to try to ensure the request goes through).
@@ -1087,7 +1098,7 @@ Computer.prototype.storeServerState = function(sUserID, sState, fSync)
             }
             sResponse = '{"' + UserAPI.RES.CODE + '":' + response[0] + ',"' + UserAPI.RES.DATA + '":"' + sResponse + '"}';
         }
-        if (MAXDEBUG) this.println(sResponse);
+        if (DEBUG) this.messageDebugger(sResponse);
         return JSON.parse(sResponse);
     }
     return null;
@@ -1110,7 +1121,7 @@ Computer.prototype.onReset = function()
      * wants to clutter the UI with confusing options. ;-)
      */
     if (this.resume && !this.sResumePath) {
-        var fSave = (this.resume == Computer.RESUME_AUTO || !web.confirmUser("Click OK to reset the " + Computer.sAppName + " machine state.\n(WARNING: All disk changes will be discarded)"));
+        var fSave = (this.resume == Computer.RESUME_AUTO || !web.confirmUser("Click OK to save the " + Computer.sAppName + " machine state.\n\nWARNING: If you CANCEL, all disk changes will be discarded."));
         this.powerOff(fSave, true);
         /*
          * Forcing the page to reload is an expedient option, but ugly. It's preferable to call powerOn()

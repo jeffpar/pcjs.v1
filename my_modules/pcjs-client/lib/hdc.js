@@ -651,14 +651,14 @@ HDC.prototype.restore = function(data)
 };
 
 /**
- * initController(data, fReset)
+ * initController(data, fHard)
  *
  * @this {HDC}
  * @param {Array} [data]
- * @param {boolean} [fReset] true if a machine reset (not just a controller reset)
+ * @param {boolean} [fHard] true if a machine reset (not just a controller reset)
  * @return {boolean} true if successful, false if failure
  */
-HDC.prototype.initController = function(data, fReset)
+HDC.prototype.initController = function(data, fHard)
 {
     var i = 0;
     var fSuccess = true;
@@ -730,7 +730,7 @@ HDC.prototype.initController = function(data, fReset)
         }
         var drive = this.aDrives[iDrive];
         var driveConfig = this.aDriveConfigs[iDrive];
-        if (!this.initDrive(iDrive, drive, driveConfig, dataDrives[iDrive], fReset)) {
+        if (!this.initDrive(iDrive, drive, driveConfig, dataDrives[iDrive], fHard)) {
             fSuccess = false;
         }
         /*
@@ -782,7 +782,7 @@ HDC.prototype.saveController = function()
 };
 
 /**
- * initDrive(iDrive, drive, driveConfig, data, fReset)
+ * initDrive(iDrive, drive, driveConfig, data, fHard)
  *
  * TODO: Consider a separate Drive class that both FDC and HDC can use, since there's a lot of commonality
  * between the drive objects created by both controllers.  This will clean up overall drive management and allow
@@ -793,10 +793,10 @@ HDC.prototype.saveController = function()
  * @param {Object} drive
  * @param {Object} driveConfig (contains one or more of the following properties: 'name', 'path', 'size', 'type')
  * @param {Array} [data]
- * @param {boolean} [fReset] true if a machine reset (not just a controller reset)
+ * @param {boolean} [fHard] true if a machine reset (not just a controller reset)
  * @return {boolean} true if successful, false if failure
  */
-HDC.prototype.initDrive = function(iDrive, drive, driveConfig, data, fReset)
+HDC.prototype.initDrive = function(iDrive, drive, driveConfig, data, fHard)
 {
     var i = 0;
     var fSuccess = true;
@@ -860,7 +860,7 @@ HDC.prototype.initDrive = function(iDrive, drive, driveConfig, data, fReset)
     /*
      * On a full machine reset, pass the current drive type to setCMOSDriveType() (a no-op on pre-CMOS machines)
      */
-    if (fReset && this.chipset) {
+    if (fHard && this.chipset) {
         this.chipset.setCMOSDriveType(iDrive, drive.type);
     }
 
@@ -1093,9 +1093,21 @@ HDC.prototype.seekDrive = function(drive, iSector, nSectors)
 HDC.prototype.autoMount = function(fRemount)
 {
     if (!fRemount) this.cAutoMount = 0;
+
     for (var iDrive = 0; iDrive < this.aDrives.length; iDrive++) {
         var drive = this.aDrives[iDrive];
         if (drive.name && drive.path) {
+
+            if (fRemount && drive.disk && drive.disk.isRemote()) {
+                /*
+                 * The Disk component has its own logic for remounting remote disks, so skip this disk.
+                 *
+                 * TODO: Consider rewriting how ALL disks are automounted/remounted, now that the Disk component
+                 * is receiving its own powerDown() and powerUp() notifications (originally, it didn't receive them).
+                 */
+                continue;
+            }
+
             if (!this.loadDisk(iDrive, drive.name, drive.path, true) && fRemount)
                 this.setReady(false);
             continue;
@@ -1132,14 +1144,14 @@ HDC.prototype.loadDisk = function(iDrive, sDiskName, sDiskPath, fAutoMount)
         this.messageDebugger("loading " + sDiskName);
     }
     var disk = drive.disk || new Disk(this, drive, drive.mode);
-    disk.load(sDiskName, sDiskPath, this.mountDisk);
+    disk.load(sDiskName, sDiskPath, this.doneLoadDisk);
     return false;
 };
 
 /**
- * mountDisk(drive, disk, sDiskName, sDiskPath)
+ * doneLoadDisk(drive, disk, sDiskName, sDiskPath)
  *
- * This is a callback issued by the Disk component once its own mount() operation has finished.
+ * This is a callback issued by the Disk component once the load() operation has finished.
  *
  * @this {HDC}
  * @param {Object} drive
@@ -1147,7 +1159,7 @@ HDC.prototype.loadDisk = function(iDrive, sDiskName, sDiskPath, fAutoMount)
  * @param {string} sDiskName
  * @param {string} sDiskPath
  */
-HDC.prototype.mountDisk = function(drive, disk, sDiskName, sDiskPath)
+HDC.prototype.doneLoadDisk = function onHDCLoadNotify(drive, disk, sDiskName, sDiskPath)
 {
     drive.fBusy = false;
     if ((drive.disk = disk)) {

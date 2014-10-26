@@ -1186,14 +1186,14 @@ FDC.prototype.loadDiskette = function(iDrive, sDisketteName, sDiskettePath, fAut
             this.messageDebugger("loading diskette '" + sDisketteName + "'");
         }
         var disk = new Disk(this, drive, DiskAPI.MODE.PRELOAD);
-        disk.load(sDisketteName, sDiskettePath, this.mountDiskette);
+        disk.load(sDisketteName, sDiskettePath, this.doneLoadDiskette);
         return false;
     }
     return true;
 };
 
 /**
- * mountDiskette(drive, disk, sDisketteName, sDiskettePath)
+ * doneLoadDiskette(drive, disk, sDisketteName, sDiskettePath)
  *
  * @this {FDC}
  * @param {Object} drive
@@ -1201,7 +1201,7 @@ FDC.prototype.loadDiskette = function(iDrive, sDisketteName, sDiskettePath, fAut
  * @param {string} sDisketteName
  * @param {string} sDiskettePath
  */
-FDC.prototype.mountDiskette = function(drive, disk, sDisketteName, sDiskettePath)
+FDC.prototype.doneLoadDiskette = function onFDCLoadNotify(drive, disk, sDisketteName, sDiskettePath)
 {
     var aDiskInfo;
 

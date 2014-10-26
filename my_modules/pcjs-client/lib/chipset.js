@@ -243,7 +243,7 @@ function ChipSet(parmsChipSet)
      * needs to be created earlier, so that when other components are initializing their state (eg, when
      * HDC calls setCMOSDriveType() or RAM calls addCMOSMemory()), the CMOS will be ready to take their calls.
      */
-    this.reset();
+    this.reset(true);
 
     this.setReady();
 }
@@ -979,7 +979,7 @@ ChipSet.prototype.powerUp = function(data, fRepower)
 {
     if (!fRepower) {
         if (!data) {
-            this.reset(true);
+            this.reset();
         } else {
             if (!this.restore(data)) return false;
         }
@@ -1000,12 +1000,12 @@ ChipSet.prototype.powerDown = function(fSave)
 };
 
 /**
- * reset(fSoft)
+ * reset(fHard)
  *
  * @this {ChipSet}
- * @param {boolean} [fSoft] is true if "soft" reset, otherwise "hard" reset (see below for details)
+ * @param {boolean} [fHard] true if a machine reset (not just a soft reset)
  */
-ChipSet.prototype.reset = function(fSoft)
+ChipSet.prototype.reset = function(fHard)
 {
     /*
      * We propagate the sw1Init/sw2Init values to sw1/sw2 at reset; the user is only
@@ -1085,7 +1085,7 @@ ChipSet.prototype.reset = function(fSoft)
          * and any later ("soft") resets (eg, from powerUp() calls), and make sure the latter preserves
          * existing CMOS information.
          */
-        if (!fSoft) this.abCMOSData = new Array(ChipSet.CMOS.ADDR.TOTAL);
+        if (fHard) this.abCMOSData = new Array(ChipSet.CMOS.ADDR.TOTAL);
 
         this.initRTCDate(this.sRTCDate);
 
@@ -1341,10 +1341,19 @@ ChipSet.prototype.updateRTCDate = function()
 ChipSet.prototype.initCMOSData = function()
 {
     /*
+     * On all reset() calls, the RAM component(s) will (re)add their totals, so we have to make sure that
+     * the addition always starts with 0.  That also means that ChipSet must always be initialized before RAM.
+     */
+    var iCMOS;
+    for (iCMOS = ChipSet.CMOS.ADDR.BASEMEM_LO; iCMOS <= ChipSet.CMOS.ADDR.EXTMEM_HI; iCMOS++) {
+        this.abCMOSData[iCMOS] = 0;
+    }
+
+    /*
      * Make sure all the "checksummed" CMOS bytes are initialized (not just the handful we set below) to ensure
      * that the checksum will be valid.
      */
-    for (var iCMOS = ChipSet.CMOS.ADDR.DIAG; iCMOS < ChipSet.CMOS.ADDR.CHKSUM_HI; iCMOS++) {
+    for (iCMOS = ChipSet.CMOS.ADDR.DIAG; iCMOS < ChipSet.CMOS.ADDR.CHKSUM_HI; iCMOS++) {
         if (this.abCMOSData[iCMOS] === undefined) this.abCMOSData[iCMOS] = 0;
     }
 

@@ -225,7 +225,11 @@ State.prototype = {
      * @param {Object|string} data
      */
     set: function(id, data) {
-        this[this.id][id] = data;
+        try {
+            this[this.id][id] = data;
+        } catch(e) {
+            Component.log(e.message)
+        }
     },
     /**
      * get(id)
