@@ -22,7 +22,7 @@
 					<li><a href="/">Home</a></li>
 					<li><a href="/apps/pc/">Apps</a></li>
 					<li><a href="/disks/pc/">Disks</a></li>
-					<li><a href="/configs/pc/machines/">Machines</a></li>
+					<li><a href="/configs/">Machines</a></li>
 					<li><a href="/docs/pcjs/">Docs</a></li>
 					<li><a href="/pubs/">Pubs</a></li>
 					<li><a href="/blog/">Blog</a></li>
