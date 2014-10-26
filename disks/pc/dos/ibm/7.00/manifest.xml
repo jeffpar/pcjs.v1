@@ -12,16 +12,16 @@
 	<disk id="disk01" size="1474560" chs="80:2:18" img="private/PCDOS700-DISK1.img" href="/disks/pc/dos/ibm/7.00/PCDOS700-DISK1.json" md5="2a3736d2acbb7730965b7cb6d3f16d00" md5json="97fc896b5679dabbadfa13ed6a1dc681">
 		<name>PC-DOS 7.00 (SETUP Disk 1)</name>
 	</disk>
-	<disk id="disk02" size="1884160" chs="80:2:23" img="private/PCDOS700-DISK2.xdf" href="/disks/pc/dos/ibm/7.00/PCDOS700-DISK2.json" md5="b21b98aca8fafbdd1a7b9db77e7dc60d" md5json="95b075274808e24f6e67fc05d999ff01">
+	<disk id="disk02" size="1884160" chs="80:2:23" img="private/PCDOS700-DISK2.xdf" href="/disks/pc/dos/ibm/7.00/PCDOS700-DISK2.json" md5="b21b98aca8fafbdd1a7b9db77e7dc60d" md5json="92b3d5032235a3a7271aa80d58cf073c">
 		<name>PC-DOS 7.00 (SETUP Disk 2)</name>
 	</disk>
-	<disk id="disk03" size="1884160" chs="80:2:23" img="private/PCDOS700-DISK3.xdf" href="/disks/pc/dos/ibm/7.00/PCDOS700-DISK3.json" md5="e45111515901b951dc5ff33434b47a0a" md5json="7bae36688f85046d2564b0240b931117">
+	<disk id="disk03" size="1884160" chs="80:2:23" img="private/PCDOS700-DISK3.xdf" href="/disks/pc/dos/ibm/7.00/PCDOS700-DISK3.json" md5="e45111515901b951dc5ff33434b47a0a" md5json="c0736bcae64adc9d901be1abe3f45b20">
 		<name>PC-DOS 7.00 (SETUP Disk 3)</name>
 	</disk>
-	<disk id="disk04" size="1884160" chs="80:2:23" img="private/PCDOS700-DISK4.xdf" href="/disks/pc/dos/ibm/7.00/PCDOS700-DISK4.json" md5="1ea1b92938a40cbb5089c30c86165c7a" md5json="ecf1eb5628c30f0c766c44395ce38c0d">
+	<disk id="disk04" size="1884160" chs="80:2:23" img="private/PCDOS700-DISK4.xdf" href="/disks/pc/dos/ibm/7.00/PCDOS700-DISK4.json" md5="1ea1b92938a40cbb5089c30c86165c7a" md5json="4daa0fa7ddea76cd25f781de790f6e92">
 		<name>PC-DOS 7.00 (SETUP Disk 4)</name>
 	</disk>
-	<disk id="disk05" size="1884160" chs="80:2:23" img="private/PCDOS700-DISK5.xdf" href="/disks/pc/dos/ibm/7.00/PCDOS700-DISK5.json" md5="e613544f161d0857fc3adf6a13eb9371" md5json="aaf6eca0bf684565e935f3121e8ff705">
+	<disk id="disk05" size="1884160" chs="80:2:23" img="private/PCDOS700-DISK5.xdf" href="/disks/pc/dos/ibm/7.00/PCDOS700-DISK5.json" md5="e613544f161d0857fc3adf6a13eb9371" md5json="db19c311f807b70f43efcc9d59a313dd">
 		<name>PC-DOS 7.00 (SETUP Disk 5)</name>
 	</disk>
 </manifest>

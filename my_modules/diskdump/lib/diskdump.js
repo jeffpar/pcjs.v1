@@ -79,14 +79,15 @@ var fNormalize = true;
  *
  * @constructor
  * @param {string|Array} sDiskPath
- * @param {Array|null|undefined} asExclude contains filename exclusions, if any
- * @param {string|undefined} sFormat is the output format, one of "json"|"data"|"hex"|"bytes"|"img"
- * @param {boolean|string|undefined} fComments enables comments and other readability enhancements in the JSON output
- * @param {string|undefined} mbHD specifies a hard disk size, in megabytes, when building a new image
+ * @param {Array|null} [asExclude] contains filename exclusions, if any
+ * @param {string} [sFormat] is the output format, one of "json"|"data"|"hex"|"bytes"|"img"
+ * @param {boolean|string} [fComments] enables comments and other readability enhancements in the JSON output
+ * @param {string} [mbHD] specifies a hard disk size, in megabytes, when building a new image
  * @param {string|null} [sServerRoot]
  * @param {string} [sManifestFile]
+ * @param {Object} [argv] optional (experimental) arguments, if any
  */
-function DiskDump(sDiskPath, asExclude, sFormat, fComments, mbHD, sServerRoot, sManifestFile)
+function DiskDump(sDiskPath, asExclude, sFormat, fComments, mbHD, sServerRoot, sManifestFile, argv)
 {
     /*
      * I used to set this.sServerRoot to "sServerRoot || process.cwd()", but in reality, the
@@ -103,6 +104,7 @@ function DiskDump(sDiskPath, asExclude, sFormat, fComments, mbHD, sServerRoot, s
     this.nJSONIndent = 0;
     this.fJSONComments = fComments;
     this.sJSONWhitespace = (this.fJSONComments? " " : "");
+    this.fXDFSupport = (argv && argv['xdf']);
 
     /*
      * The dump operation itself doesn't care about sManifestFile, but we DO need some indication
@@ -296,6 +298,8 @@ DiskDump.aDefaultBPBs = [
  *          --mbhd={number}: requests a hard disk image with the given number of megabytes (eg, 10 for a 10mb image)
  *          --exclude={filename}: specifies a filename that should be excluded from the image; repeat as often as needed
  *          --overwrite: allows the --output option to overwrite an existing file; default is to NOT overwrite
+ *          --manifest[={filename}]: update the specified manifest.xml file with details about the disk image
+ *          --xdf: enable support for XDF-formatted disk images (experimental)
  *
  * Examples
  * ---
@@ -371,7 +375,7 @@ DiskDump.CLI = function()
         var sManifestTitle = argv['title'];
 
         if (sDiskPath) {
-            var disk = new DiskDump(sDiskPath, asExclude, argv['format'], argv['comments'], argv['mbhd'], sServerRoot, sManifestFile);
+            var disk = new DiskDump(sDiskPath, asExclude, argv['format'], argv['comments'], argv['mbhd'], sServerRoot, sManifestFile, argv);
             if (sDir) {
                 disk.buildImage(true, function(err) {
                     DiskDump.outputDisk(err, disk, sDiskPath, sOutputFile, fOverwrite, sManifestTitle);
@@ -2105,7 +2109,7 @@ DiskDump.prototype.convertToJSON = function()
          * but at some point, we'll need to perform more general calculations to properly deal with ANY disk
          * image whose logical format doesn't agree with its physical structure.
          */
-        var fXDF = false;
+        var fXDFOutput = false;
         var oDisketteFormat = DiskDump.DisketteFormats[cbDiskData];
         if (oDisketteFormat) {
             nHeads = oDisketteFormat[0];
@@ -2144,18 +2148,21 @@ DiskDump.prototype.convertToJSON = function()
                      * currently (try to) support.
                      *
                      * Moreover, the first two tracks (ie, the first cylinder) contain only 19 sectors each,
-                     * rather than 23, but the XDF format still pads those tracks with 4 unused sectors.
+                     * rather than 23, but XDF disk images still pads those tracks with 4 unused sectors.
                      *
                      * So, data for the first track contains 1 boot sector ending at 512 (0x200), 11 FAT sectors
                      * ending at 6144 (0x1800), and 7 "micro-disk" sectors ending at 9728 (0x2600).  Then there's
-                     * 4 sectors (presumably of "garbage") that end at 11776 (0x2E00).
+                     * 4 (useless?) sectors that end at 11776 (0x2E00).
                      *
                      * Data for the second track contains 7 root directory sectors ending at 15360 (0x3C00), followed
                      * by disk data.
                      *
                      * For more details, check out this helpful article: http://www.os2museum.com/wp/the-xdf-diskette-format/
                      */
-                    if (nSectorsTotalBPB == 3680) fXDF = true;
+                    if (nSectorsTotalBPB == 3680 && this.fXDFSupport) {
+                        DiskDump.logWarning("XDF diskette detected, experimental XDF output enabled");
+                        fXDFOutput = true;
+                    }
                 }
             }
         }
@@ -2294,14 +2301,14 @@ DiskDump.prototype.convertToJSON = function()
                      *          4       1       5      12
                      *          3       1      14      18
                      */
-                    if (fXDF) nSectorsThisTrack = (iCylinder? 4 : 19);
+                    if (fXDFOutput) nSectorsThisTrack = (iCylinder? 4 : 19);
 
                     for (var iSector=1, offSector=0; iSector <= nSectorsThisTrack && offSector < cbTrack; iSector++, offSector += cbSectorThisTrack) {
 
                         var sector = {};
                         var nSector = iSector;
 
-                        if (fXDF && iCylinder) {
+                        if (fXDFOutput && iCylinder) {
                             if (!iHead) {
                                 cbSectorThisTrack = (iSector == 1? 1024 : (iSector == 2? 512 : (iSector == 3? 2048 : 8192)));
                             } else {
