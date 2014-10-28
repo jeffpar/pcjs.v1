@@ -1388,7 +1388,7 @@ if (DEBUGGER) {
         /*
          * TODO: Filtering of interrupt numbers below should be user-definable; this is very quick-and-dirty.
          */
-        if (nInt < 0x20 && nInt != 0x10 && nInt != 0x15 && nInt != 0x16 && nInt != 0x1A && nInt != 0x1C) {
+        if (nInt != 0x10 && nInt != 0x15 && nInt != 0x16 && nInt != 0x1A && nInt != 0x1C) {
             var AH = this.cpu.regAX >> 8;
             var aFuncs = Debugger.INT_FUNCS[nInt];
             var sFunc = (aFuncs && aFuncs[AH]) || "";
@@ -1556,7 +1556,7 @@ if (DEBUGGER) {
      */
     Debugger.prototype.intDOSCall = function(addr)
     {
-        if (this.messageEnabled(this.MESSAGE_DOS)) this.messageInt(Debugger.INT_DOS, addr);
+        if (this.messageEnabled(this.MESSAGE_DOS | this.MESSAGE_INT)) this.messageInt(Debugger.INT_DOS, addr);
         return true;
     };
 
@@ -4485,19 +4485,36 @@ if (DEBUGGER) {
         }
 
         sCmd = sCmd.toLowerCase();
-
         if (this.isReady() && !this.isBusy(true) && sCmd.length > 0) {
-
             if (this.fAssemble) {
                 sCmd = "a " + this.hexAddr(this.aAddrAssemble) + " " + sCmd;
             }
             else {
                 /*
-                 * Process any "whole word" commands here first (eg, "reset").
+                 * Process any "whole" commands here first (eg, "debug", "nodebug", "reset", etc.)
                  *
                  * For all other commands, if they lack a space between the command and argument portions,
                  * insert a space before the first non-alpha character, so that split() will have the desired effect.
                  */
+
+                /*
+                 * These commands work great, except that they won't compile, and in fact, I don't WANT them in the
+                 * compiled version, but putting them inside (!COMPILED) doesn't help, so I must disable them for now.
+                 *
+                if (!COMPILED) {
+                    if (sCmd == "debug") {
+                        DEBUG = true;
+                        this.println("DEBUG checks on");
+                        return true;
+                    }
+                    else if (sCmd == "nodebug") {
+                        DEBUG = false;
+                        this.println("DEBUG checks off");
+                        return true;
+                    }
+                }
+                 */
+
                 var ch, ch0, i;
                 switch (sCmd) {
                 case "reset":
@@ -4518,71 +4535,70 @@ if (DEBUGGER) {
             }
 
             var asArgs = sCmd.split(" ");
-
             switch (asArgs[0].charAt(0)) {
-                case "a":
-                    this.doAssemble(asArgs);
-                    break;
-                case "b":
-                    this.doBreak(asArgs[0], asArgs[1]);
-                    break;
-                case "c":
-                    this.doClear(asArgs[0]);
-                    break;
-                case "d":
-                    this.doDump(asArgs[0], asArgs[1], asArgs[2]);
-                    break;
-                case "e":
-                    this.doEdit(asArgs);
-                    break;
-                case "f":
-                    this.doFreqs(asArgs[1]);
-                    break;
-                case "g":
-                    this.doRun(asArgs[1]);
-                    break;
-                case "h":
-                    this.doHalt(asArgs[1]);
-                    break;
-                case "i":
-                    this.doInput(asArgs[1]);
-                    break;
-                case "l":
-                    this.doLoad(asArgs);
-                    break;
-                case "m":
-                    this.doMessages(asArgs);
-                    break;
-                case "o":
-                    this.doOutput(asArgs[1], asArgs[2]);
-                    break;
-                case "p":
-                case "pr":
-                    this.doProcStep(asArgs[0]);
-                    break;
-                case "r":
-                    this.doRegisters(asArgs);
-                    break;
-                case "t":
-                case "tr":
-                    this.doStep(asArgs[0], asArgs[1]);
-                    break;
-                case "u":
-                    this.doUnassemble(asArgs[1], asArgs[2], 8);
-                    break;
-                case "x":
-                    this.doExecOptions(asArgs);
-                    break;
-                case "?":
-                    this.doHelp();
-                    break;
-                case "n":
-                    if (this.doInfo(asArgs)) break;
-                    /* falls through */
-                default:
-                    if (!fQuiet) this.println("unknown command: " + sCmd);
-                    result = false;
-                    break;
+            case "a":
+                this.doAssemble(asArgs);
+                break;
+            case "b":
+                this.doBreak(asArgs[0], asArgs[1]);
+                break;
+            case "c":
+                this.doClear(asArgs[0]);
+                break;
+            case "d":
+                this.doDump(asArgs[0], asArgs[1], asArgs[2]);
+                break;
+            case "e":
+                this.doEdit(asArgs);
+                break;
+            case "f":
+                this.doFreqs(asArgs[1]);
+                break;
+            case "g":
+                this.doRun(asArgs[1]);
+                break;
+            case "h":
+                this.doHalt(asArgs[1]);
+                break;
+            case "i":
+                this.doInput(asArgs[1]);
+                break;
+            case "l":
+                this.doLoad(asArgs);
+                break;
+            case "m":
+                this.doMessages(asArgs);
+                break;
+            case "o":
+                this.doOutput(asArgs[1], asArgs[2]);
+                break;
+            case "p":
+            case "pr":
+                this.doProcStep(asArgs[0]);
+                break;
+            case "r":
+                this.doRegisters(asArgs);
+                break;
+            case "t":
+            case "tr":
+                this.doStep(asArgs[0], asArgs[1]);
+                break;
+            case "u":
+                this.doUnassemble(asArgs[1], asArgs[2], 8);
+                break;
+            case "x":
+                this.doExecOptions(asArgs);
+                break;
+            case "?":
+                this.doHelp();
+                break;
+            case "n":
+                if (this.doInfo(asArgs)) break;
+                /* falls through */
+            default:
+                if (!fQuiet) this.println("unknown command: " + sCmd);
+                result = false;
+                break;
             }
         }
         return result;

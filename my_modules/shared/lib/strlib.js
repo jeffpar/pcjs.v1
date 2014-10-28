@@ -54,7 +54,7 @@ str.isValidInt = function(s, base)
 
 /**
  * parseInt(s, base)
- * 
+ *
  * This is a wrapper around the built-in parseInt() function, which recognizes certain prefixes (eg,
  * '$' or "0x" for hex) and suffixes (eg, 'h' for hex or '.' for decimal), and then calls isValidInt()
  * to ensure we don't get partial values (see isValidInt() for details).
@@ -107,7 +107,7 @@ str.parseInt = function(s, base)
  * NOTE: The following work-around (adapted from code found on StackOverflow) would be another solution,
  * taking care of negative values, zero-padding, and upper-casing, but not undefined/NaN values:
  *
- *      s = (n < 0? (0xffffffff + n + 1) : n).toString(16);
+ *      s = (n < 0? n + 0x100000000 : n).toString(16);
  *      s = "00000000".substr(0, 8 - s.length) + s;
  *      s = s.substr(0, cch).toUpperCase();
  *
@@ -172,16 +172,16 @@ str.toHexWord = function(w)
 str.toHexAddr = function(off, sel)
 {
     if (sel !== undefined) {
-        return str.toHexWord(sel) + ":" + str.toHexWord(off);   
+        return str.toHexWord(sel) + ":" + str.toHexWord(off);
     }
     return str.toHex(off);
 };
 
 /**
  * getBaseName(sFileName, fStripExt)
- * 
+ *
  * This is a poor-man's version of Node's path.basename(), which Node-only components should use instead.
- * 
+ *
  * Note that fStripExt can be used to strip ANY extension, whereas path.basename() will strip the extension only
  * if it matches the second parameter (eg, path.basename("/foo/bar/baz/asdf/quux.html", ".html") returns "quux").
  *
@@ -260,7 +260,7 @@ str.escapeHTML = function(sHTML)
 
 /**
  * replaceAll(sFind, sReplace, s)
- * 
+ *
  * @param {string} sFind
  * @param {string} sReplace
  * @param {string} s
@@ -284,7 +284,16 @@ str.replaceArray = function(a, s)
 {
     var sMatch = "";
     for (var k in a) {
-        k = k.replace(/([\\\[\]\*\{}\(\)\.\+\?])/g, "\\$1");
+        /*
+         * As noted in:
+         *
+         *      http://www.regexguru.com/2008/04/escape-characters-only-when-necessary/
+         *
+         * inside character classes, only backslash, caret, hyphen and the closing bracket need to be
+         * escaped.  And in fact, if you ensure that the closing bracket is first, the caret is not first,
+         * and the hyphen is last, you can avoid escaping those as well.
+         */
+        k = k.replace(/([\\[\]*{}().+?])/g, "\\$1");
         sMatch += (sMatch? '|' : '') + k;
     }
     return s.replace(new RegExp('(' + sMatch + ')', "g"), function(m) {
@@ -294,7 +303,7 @@ str.replaceArray = function(a, s)
 
 /**
  * pad(s, cch)
- * 
+ *
  * Note that the maximum amount of padding currently supported is 40 spaces.
  *
  * @param {string} s is a string
@@ -308,7 +317,7 @@ str.pad = function(s, cch)
 
 /**
  * trim(s)
- * 
+ *
  * @param {string} s
  * @returns {string}
  */

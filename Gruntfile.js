@@ -121,10 +121,10 @@ module.exports = function(grunt) {
      * @property {Array.<string>} closureCompilerExterns
      */
     var pkg = grunt.file.readJSON("package.json");
-    
+
     var tmpC1Pjs = "./tmp/c1pjs/" + pkg.version + "/c1p.js";
     var tmpPCjs = "./tmp/pcjs/" + pkg.version + "/pc.js";
-    
+
     grunt.initConfig({
         pkg: pkg,               // pass the "package.json" object to initConfig() as a property, too
         manifester: {
@@ -171,9 +171,9 @@ module.exports = function(grunt) {
                     banner: '"use strict";\n\n',
                     process: function(src, filepath) {
                         return "// " + filepath + "\n" +
-                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1').replace(/if\s*\(typeof\s+(module|APP_PCJS)\s*!==\s*(['"])undefined\2\)\s*(\{[^\}]*\}|[^\n]*)(\n|$)/g, '');
+                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1').replace(/if\s*\(typeof\s+(module|APP_PCJS)\s*!==\s*(['"])undefined\2\)\s*(\{[^}]*}|[^\n]*)(\n|$)/g, '');
                     }
-                }             
+                }
             },
             "tmp-pcjs": {
                 src: pkg.pcJSFiles,
@@ -182,7 +182,7 @@ module.exports = function(grunt) {
                     banner: '"use strict";\n\n',
                     process: function(src, filepath) {
                         return "// " + filepath + "\n" +
-                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1').replace(/if\s*\(typeof\s+(module|APP_PCJS)\s*!==\s*(['"])undefined\2\)\s*(\{[^\}]*\}|[^\n]*)(\n|$)/g, '');
+                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1').replace(/if\s*\(typeof\s+(module|APP_PCJS)\s*!==\s*(['"])undefined\2\)\s*(\{[^}]*}|[^\n]*)(\n|$)/g, '');
                     }
                 }
             }
@@ -386,7 +386,7 @@ module.exports = function(grunt) {
                 ],
                 options: {
                     process: function(content, srcPath) {
-                        return content.replace(/\/versions\/\{\$APPCLASS\}\/\{\$APPVERSION\}\//g, "");
+                        return content.replace(/\/versions\/\{\$APPCLASS}\/\{\$APPVERSION}\//g, "");
                     }
                 }
             }
@@ -438,9 +438,9 @@ module.exports = function(grunt) {
     grunt.loadTasks("my_modules/grunts/prepjs/tasks");
 
     grunt.registerTask("preCompiler", grunt.option("rebuild")? ["concat:tmp-c1pjs", "concat:tmp-pcjs"] : ["newer:concat:tmp-c1pjs", "newer:concat:tmp-pcjs"]);
-    
+
     grunt.registerTask("compile", ["preCompiler", "closureCompiler", "replace:fix_source_maps"]);
-    
+
     grunt.registerTask('nocompile', function(target) {
         if (!target) {
             grunt.task.run(["concat:c1p.js", "concat:c1p-dbg.js", "concat:pc.js", "concat:pc-dbg.js"]);

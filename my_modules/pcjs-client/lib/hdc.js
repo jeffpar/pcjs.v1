@@ -218,20 +218,21 @@ HDC.ATC = {
     DATA:   { PORT: 0x1F0},     // no register (read-write)
     DIAG:   {                   // this.regError (read-only)
         PORT:       0x1F1,
-        NO_ERROR:   0x01,
-        CTRL_ERROR: 0x02,
-        SEC_ERROR:  0x03,
-        ECC_ERROR:  0x04,
-        PROC_ERROR: 0x05
+        NO_ERROR:    0x01,
+        CTRL_ERROR:  0x02,
+        SEC_ERROR:   0x03,
+        ECC_ERROR:   0x04,
+        PROC_ERROR:  0x05
     },
     ERROR: {                    // this.regError (read-only)
         PORT:       0x1F1,
-        NO_DAM:     0x01,       // Data Address Mark (DAM) not found
-        NO_TRK0:    0x02,       // Track 0 not detected
-        CMD_ABORT:  0x04,       // Aborted Command
-        NO_CHS:     0x10,       // ID field with the specified C:H:S not found
-        ECC_ERR:    0x40,       // Data ECC Error
-        BAD_BLOCK:  0x80        // Bad Block Detect
+        NONE:        0x00,
+        NO_DAM:      0x01,      // Data Address Mark (DAM) not found
+        NO_TRK0:     0x02,      // Track 0 not detected
+        CMD_ABORT:   0x04,      // Aborted Command
+        NO_CHS:      0x10,      // ID field with the specified C:H:S not found
+        ECC_ERR:     0x40,      // Data ECC Error
+        BAD_BLOCK:   0x80       // Bad Block Detect
     },
     WPREC:  { PORT: 0x1F1},     // this.regWPreC (write-only)
     SECCNT: { PORT: 0x1F2},     // this.regSecCnt (read-write; 0 implies a 256-sector request)
@@ -239,39 +240,46 @@ HDC.ATC = {
     CYLLO:  { PORT: 0x1F4},     // this.regCylLo (read-write; all 8 bits are used)
     CYLHI:  {                   // this.regCylHi (read-write; only bits 0-1 are used, for a total of 10 bits, or 1024 max cylinders)
         PORT:       0x1F5,
-        MASK:       0x03
+        MASK:        0x03
     },
     DRVHD:  {                   // this.regDrvHd (read-write)
         PORT:       0x1F6,
-        HEAD_MASK:  0x0F,       // set this to the max number of heads before issuing a SET PARAMETERS command
-        DRIVE_MASK: 0x10,
-        SET_MASK:   0xE0,
-        SET_BITS:   0xA0        // for whatever reason, these bits must always be set
+        HEAD_MASK:   0x0F,      // set this to the max number of heads before issuing a SET PARAMETERS command
+        DRIVE_MASK:  0x10,
+        SET_MASK:    0xE0,
+        SET_BITS:    0xA0       // for whatever reason, these bits must always be set
     },
     STATUS: {                   // this.regStatus (read-only; reading clears IRQ.ATC)
         PORT:       0x1F7,
-        BUSY:       0x80,       // if this is set, no other STATUS bits are valid
-        READY:      0x40,       // if this is set (along with the SEEK_OK bit), the drive is ready to read/write/seek again
-        WFAULT:     0x20,       // write fault
-        SEEK_OK:    0x10,       // seek operation complete
-        DATA_REQ:   0x08,       // indicates that "the sector buffer requires servicing during a Read or Write command. If either bit 7 (BUSY) or this bit is active, a command is being executed. Upon receipt of any command, this bit is reset."
-        CORRECTED:  0x04,
-        INDEX:      0x02,       // set once for every revolution of the disk
-        ERROR:      0x01        // set when the previous command ended in an error; one or more bits are set in the ERROR register (the next command to the controller resets the ERROR bit)
+        BUSY:        0x80,      // if this is set, no other STATUS bits are valid
+        READY:       0x40,      // if this is set (along with the SEEK_OK bit), the drive is ready to read/write/seek again
+        WFAULT:      0x20,      // write fault
+        SEEK_OK:     0x10,      // seek operation complete
+        DATA_REQ:    0x08,      // indicates that "the sector buffer requires servicing during a Read or Write command. If either bit 7 (BUSY) or this bit is active, a command is being executed. Upon receipt of any command, this bit is reset."
+        CORRECTED:   0x04,
+        INDEX:       0x02,      // set once for every revolution of the disk
+        ERROR:       0x01       // set when the previous command ended in an error; one or more bits are set in the ERROR register (the next command to the controller resets the ERROR bit)
     },
-    COMMAND:{                   // this.regCommand (write-only)
+    COMMAND: {                  // this.regCommand (write-only)
         PORT:       0x1F7,
-        RESTORE:    0x10,       // low nibble x 500us equal stepping rate (except for 0, which corresponds to 35us) (aka RECALIBRATE)
-        READ_DATA:  0x20,       // also supports NO_RETRIES and WITH_ECC
-        WRITE_DATA: 0x30,       // also supports NO_RETRIES and WITH_ECC
-        READ_VERF:  0x40,       // also supports NO_RETRIES
-        FORMAT_TRK: 0x50,
-        SEEK:       0x70,       // low nibble x 500us equal stepping rate (except for 0, which corresponds to 35us)
-        DIAGNOSE:   0x90,
-        SETPARMS:   0x91,
-        NO_RETRIES: 0x01,
-        WITH_ECC:   0x02,
-        MASK:       0xF0
+        RESTORE:     0x10,      // low nibble x 500us equal stepping rate (except for 0, which corresponds to 35us) (aka RECALIBRATE)
+        READ_DATA:   0x20,      // also supports NO_RETRIES and WITH_ECC
+        WRITE_DATA:  0x30,      // also supports NO_RETRIES and WITH_ECC
+        READ_VERF:   0x40,      // also supports NO_RETRIES
+        FORMAT_TRK:  0x50,
+        SEEK:        0x70,      // low nibble x 500us equal stepping rate (except for 0, which corresponds to 35us)
+        DIAGNOSE:    0x90,
+        SETPARMS:    0x91,
+        NO_RETRIES:  0x01,
+        WITH_ECC:    0x02,
+        MASK:        0xF0
+    },
+    FDR: {                      // this.regFDR
+        PORT:       0x3F6,
+        INT_DISABLE: 0x02,      // a logical 0 enables fixed disk interrupts
+        RESET:       0x04,      // a logical 1 enables reset fixed disk function
+        HS3:         0x08,      // a logical 1 enables head select 3 (a logical 0 enables reduced write current)
+        RESERVED:    0xF1
     }
 };
 
@@ -692,6 +700,7 @@ HDC.prototype.initController = function(data, fHard)
         this.regDrvHd   = data[i++];
         this.regStatus  = data[i++];
         this.regCommand = data[i++];
+        this.regFDR     = data[i++];
         /*
          * Additional state is maintained by the Drive object (eg, abSector, ibSector)
          */
@@ -766,6 +775,7 @@ HDC.prototype.saveController = function()
         data[i++] = this.regDrvHd;
         data[i++] = this.regStatus;
         data[i++] = this.regCommand;
+        data[i++] = this.regFDR;
     } else {
         data[i++] = this.regConfig;
         data[i++] = this.regStatus;
@@ -1410,7 +1420,7 @@ HDC.prototype.inATCData = function(port, addrFrom)
                 var hdc = this;
                 this.readByte(this.drive, function(b, fAsync) {
                     if (b >= 0) {
-                        if (hdc.chipset) hdc.chipset.setIRR(ChipSet.IRQ.ATC);
+                        hdc.setATCIRR();
                         /*
                          * I shouldn't have to set BUSY (or DATA_REQ) again, because it should still be set, no?
                          */
@@ -1464,7 +1474,7 @@ HDC.prototype.outATCData = function(port, bOut, addrFrom)
             else if (this.drive.ibSector == this.drive.cbSector) {
                 this.drive.nBytes -= this.drive.cbSector;
                 this.regSecCnt = (this.regSecCnt - 1) & 0xff;
-                if (this.chipset) this.chipset.setIRR(ChipSet.IRQ.ATC);
+                this.setATCIRR();
                 if (this.drive.nBytes >= this.drive.cbSector) {
                     /*
                      * I shouldn't have to set BUSY (or DATA_REQ) again, because it should still be set, no?
@@ -1716,6 +1726,28 @@ HDC.prototype.outATCCommand = function(port, bOut, addrFrom)
 };
 
 /**
+ * outATCFDR(port, bOut, addrFrom)
+ *
+ * This is referred to in IBM's docs as the "Fixed Disk Register" (write-only)
+ *
+ * @this {HDC}
+ * @param {number} port (0x3F6)
+ * @param {number} bOut
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
+ */
+HDC.prototype.outATCFDR = function(port, bOut, addrFrom)
+{
+    this.messagePort(port, bOut, addrFrom, "FDR");
+    /*
+     * I'm not really sure if I should set HDC.ATC.DIAG.NO_ERROR in regError after *every* write where
+     * HDC.ATC.FDR.RESET is clear, or only after it has transitioned from set to clear; since the BIOS only
+     * requires the latter, I'm going to be conservative and restrict regError updates to the latter.
+     */
+    if ((this.regFDR & HDC.ATC.FDR.RESET) && !(bOut & HDC.ATC.FDR.RESET)) this.regError = HDC.ATC.DIAG.NO_ERROR;
+    this.regFDR = bOut;
+};
+
+/**
  * doATCommand()
  *
  * Handles ATC (AT Controller) commands
@@ -1734,7 +1766,7 @@ HDC.prototype.doATCommand = function()
     var nSectors = this.regSecCnt || 256;
 
     this.drive = null;
-    this.regError = 0;
+    this.regError = HDC.ATC.ERROR.NONE;
     this.regStatus = HDC.ATC.STATUS.READY | HDC.ATC.STATUS.SEEK_OK;
 
     var drive = this.aDrives[iDrive];
@@ -1775,7 +1807,7 @@ HDC.prototype.doATCommand = function()
          */
         this.readByte(drive, function(b, fAsync) {
             if (b >= 0 && hdc.chipset) {
-                hdc.chipset.setIRR(ChipSet.IRQ.ATC);
+                hdc.setATCIRR();
                 /*
                  * As with the WRITE_DATA command, I'm not sure which of BUSY and DATA_REQ (or both)
                  * should be set here, so I'm setting both of them for now.
@@ -1793,16 +1825,16 @@ HDC.prototype.doATCommand = function()
         break;
 
     case HDC.ATC.COMMAND.WRITE_DATA:
-        if (hdc.chipset) {
-            hdc.chipset.setIRR(ChipSet.IRQ.ATC);
+        if (this.chipset) {
+            this.setATCIRR();
             /*
              * I know that DATA_REQ must be set at this point, but I'm not sure about BUSY; so I'm
              * setting both of them for now.
              */
-            hdc.regStatus = HDC.ATC.STATUS.BUSY | HDC.ATC.STATUS.DATA_REQ;
+            this.regStatus = HDC.ATC.STATUS.BUSY | HDC.ATC.STATUS.DATA_REQ;
         } else {
-            hdc.regStatus = HDC.ATC.STATUS.ERROR;
-            hdc.regError = HDC.ATC.ERROR.CMD_ABORT;
+            this.regStatus = HDC.ATC.STATUS.ERROR;
+            this.regError = HDC.ATC.ERROR.CMD_ABORT;
         }
         break;
 
@@ -1853,7 +1885,19 @@ HDC.prototype.doATCommand = function()
         break;
     }
 
-    if (fInterrupt && this.chipset) this.chipset.setIRR(ChipSet.IRQ.ATC);
+    if (fInterrupt) this.setATCIRR();
+};
+
+/**
+ * setATCIRR()
+ *
+ * Raise the ATC's IRQ, provided ATC interrupts are enabled.
+ *
+ * @this {HDC}
+ */
+HDC.prototype.setATCIRR = function()
+{
+    if (this.chipset && !(this.regFDR & HDC.ATC.FDR.INT_DISABLE)) this.chipset.setIRR(ChipSet.IRQ.ATC);
 };
 
 /**
@@ -2723,7 +2767,8 @@ HDC.aATCPortOutput = {
     0x1F4:  HDC.prototype.outATCCylLo,
     0x1F5:  HDC.prototype.outATCCylHi,
     0x1F6:  HDC.prototype.outATCDrvHd,
-    0x1F7:  HDC.prototype.outATCCommand
+    0x1F7:  HDC.prototype.outATCCommand,
+    0x3F6:  HDC.prototype.outATCFDR
 };
 
 /**

@@ -198,7 +198,7 @@ DiskDump.MY_OEM_STRING = "PCJS.ORG";
 
 /**
  * The BPBs that buildImage() currently supports; these BPBs should be in order of smallest to largest capacity,
- * to help insure we don't select a disk format larger than necessary.
+ * to help ensure we don't select a disk format larger than necessary.
  */
 DiskDump.aDefaultBPBs = [
   [                             // define BPB for 160Kb diskette
@@ -396,7 +396,7 @@ DiskDump.CLI = function()
         }
     }
     else {
-        console.log("usage: diskdump --dir={dir}|--disk={disk}|--path={file}[;{file}...] [--format=json|data|hex|bytes|img] [--comments] [--output={file}] [--manifest={file}]");
+        console.log("usage: diskdump --dir={dir}|--disk={disk}|--path={file}[;{file}...] [--format=json|data|hex|bytes|img] [--comments] [--output={file}] [--manifest={file}] [--xdf]");
     }
 
     if (err) {

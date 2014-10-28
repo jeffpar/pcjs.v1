@@ -257,6 +257,13 @@ FDC.REG_DATA = {};
 FDC.REG_DATA.PORT           = 0x3F5;
 
 /*
+ * FDC "Fixed Disk" Register (0x3F6, write-only)
+ *
+ * Since this register's functions are all specific to the Hard Disk Controller, see the HDC component for details.
+ * The fact that this HDC register is in the middle of the FDC I/O port range is an oddity of the "HFCOMBO" controller.
+ */
+
+/*
  * FDC Digital Input Register (0x3F7, read-only, MODEL_5170 only)
  *
  * Bit 7 indicates a diskette change (the MODEL_5170 introduced change-line support).  Bits 0-6 are for the selected
@@ -850,7 +857,17 @@ FDC.prototype.initDrive = function(drive, iDrive, data)
          * care to preserve any drive defaults that initController() already obtained for us, falling back to
          * bare minimums only when all else fails.
          */
-        data[1] = [FDC.DEFAULT_DRIVE_NAME, drive.nCylinders || 40, drive.nHeads || data[3], drive.nSectors || 9, drive.cbSector || 512, data[1]];
+        data[1] = [
+            FDC.DEFAULT_DRIVE_NAME, // a[0]
+            drive.nCylinders || 40, // a[1]
+            drive.nHeads || data[3],// a[2]
+            drive.nSectors || 9,    // a[3]
+            drive.cbSector || 512,  // a[4]
+            data[1],                // a[5]
+            drive.nDiskCylinders,   // a[6]
+            drive.nDiskHeads,       // a[7]
+            drive.nDiskSectors      // a[8]
+        ];
     }
 
     /*
@@ -864,25 +881,24 @@ FDC.prototype.initDrive = function(drive, iDrive, data)
     /*
      * Some additional drive properties/defaults that are largely for the Disk component's benefit.
      */
-    drive.name = data[i][0];
-    drive.nCylinders = data[i][1];          // cylinders
-    drive.nHeads = data[i][2];              // heads/cylinders
-    drive.nSectors = data[i][3];            // sectors/track
-    drive.cbSector = data[i][4];            // bytes/sector
-    drive.fRemovable = data[i][5];
+    var a = data[i++];
+    drive.name = a[0];
+    drive.nCylinders = a[1];          // cylinders
+    drive.nHeads = a[2];              // heads/cylinders
+    drive.nSectors = a[3];            // sectors/track
+    drive.cbSector = a[4];            // bytes/sector
+    drive.fRemovable = a[5];
     /*
      * If we have current media parameters, restore them; otherwise, default to the drive's physical parameters.
      */
-    if (drive.nDiskCylinders = data[i][6]) {
-        drive.nDiskHeads = data[i][7];
-        drive.nDiskSectors = data[i][8];
+    if (drive.nDiskCylinders = a[6]) {
+        drive.nDiskHeads = a[7];
+        drive.nDiskSectors = a[8];
     } else {
         drive.nDiskCylinders = drive.nCylinders;
         drive.nDiskHeads = drive.nHeads;
         drive.nDiskSectors = drive.nSectors;
-
     }
-    i++;
 
     /*
      * The next group of properties are set by various FDC command sequences.

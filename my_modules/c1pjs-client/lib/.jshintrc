@@ -10,7 +10,7 @@
         "APPNAME": false,
         "APPVERSION": false,
         "SITEHOST": false,
-        "DEBUG": false,
+        "DEBUG": true,
         "MAXDEBUG": false,
         "C1PJSCLASS": true,
         "DEBUGGER": true,
