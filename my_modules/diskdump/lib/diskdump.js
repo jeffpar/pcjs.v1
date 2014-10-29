@@ -2582,8 +2582,6 @@ DiskDump.prototype.convertOSIDiskToJSON = function()
  */
 DiskDump.prototype.convertToIMG = function()
 {
-    DiskDump.logConsole("convertToIMG()");
-
     if (!this.bufDisk) {
 
         if (!this.dataDisk) {
@@ -2720,7 +2718,7 @@ DiskDump.prototype.convertToIMG = function()
                     }
                 }
             }
-            if (buf.length < 3000000) {         // arbitrary threshold between diskette image sizes and hard disk image sizes
+            if (!fDebug && buf.length < 3000000) {      // arbitrary size threshold between diskette images and hard disk images
                 /*
                  * Mimic the BPB test in convertToJSON(), because we don't want to blast an OEM string into non-DOS diskette images
                  */
