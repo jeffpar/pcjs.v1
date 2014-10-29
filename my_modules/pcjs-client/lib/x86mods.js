@@ -47,7 +47,7 @@ var X86Mods = {
     opModMemByte00: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)), this.regAX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -58,7 +58,7 @@ var X86Mods = {
     opModMemByte01: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)), this.regAX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -69,7 +69,7 @@ var X86Mods = {
     opModMemByte02: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)), this.regAX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -80,7 +80,7 @@ var X86Mods = {
     opModMemByte03: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)), this.regAX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -91,7 +91,7 @@ var X86Mods = {
     opModMemByte04: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regSI), this.regAX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -102,7 +102,7 @@ var X86Mods = {
     opModMemByte05: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regDI), this.regAX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -113,7 +113,7 @@ var X86Mods = {
     opModMemByte06: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.getIPWord()), this.regAX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -124,7 +124,7 @@ var X86Mods = {
     opModMemByte07: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regBX), this.regAX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -135,7 +135,7 @@ var X86Mods = {
     opModMemByte08: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)), this.regCX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -146,7 +146,7 @@ var X86Mods = {
     opModMemByte09: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)), this.regCX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -157,7 +157,7 @@ var X86Mods = {
     opModMemByte0A: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)), this.regCX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -168,7 +168,7 @@ var X86Mods = {
     opModMemByte0B: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)), this.regCX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -179,7 +179,7 @@ var X86Mods = {
     opModMemByte0C: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regSI), this.regCX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -190,7 +190,7 @@ var X86Mods = {
     opModMemByte0D: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regDI), this.regCX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -201,7 +201,7 @@ var X86Mods = {
     opModMemByte0E: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.getIPWord()), this.regCX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -212,7 +212,7 @@ var X86Mods = {
     opModMemByte0F: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regBX), this.regCX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -223,7 +223,7 @@ var X86Mods = {
     opModMemByte10: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)), this.regDX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -234,7 +234,7 @@ var X86Mods = {
     opModMemByte11: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)), this.regDX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -245,7 +245,7 @@ var X86Mods = {
     opModMemByte12: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)), this.regDX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -256,7 +256,7 @@ var X86Mods = {
     opModMemByte13: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)), this.regDX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -267,7 +267,7 @@ var X86Mods = {
     opModMemByte14: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regSI), this.regDX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -278,7 +278,7 @@ var X86Mods = {
     opModMemByte15: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regDI), this.regDX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -289,7 +289,7 @@ var X86Mods = {
     opModMemByte16: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.getIPWord()), this.regDX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -300,7 +300,7 @@ var X86Mods = {
     opModMemByte17: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regBX), this.regDX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -311,7 +311,7 @@ var X86Mods = {
     opModMemByte18: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)), this.regBX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -322,7 +322,7 @@ var X86Mods = {
     opModMemByte19: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)), this.regBX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -333,7 +333,7 @@ var X86Mods = {
     opModMemByte1A: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)), this.regBX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -344,7 +344,7 @@ var X86Mods = {
     opModMemByte1B: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)), this.regBX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -355,7 +355,7 @@ var X86Mods = {
     opModMemByte1C: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regSI), this.regBX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -366,7 +366,7 @@ var X86Mods = {
     opModMemByte1D: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regDI), this.regBX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -377,7 +377,7 @@ var X86Mods = {
     opModMemByte1E: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.getIPWord()), this.regBX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -388,7 +388,7 @@ var X86Mods = {
     opModMemByte1F: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regBX), this.regBX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -399,7 +399,7 @@ var X86Mods = {
     opModMemByte20: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)), this.regAX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -410,7 +410,7 @@ var X86Mods = {
     opModMemByte21: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)), this.regAX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -421,7 +421,7 @@ var X86Mods = {
     opModMemByte22: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)), this.regAX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -432,7 +432,7 @@ var X86Mods = {
     opModMemByte23: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)), this.regAX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -443,7 +443,7 @@ var X86Mods = {
     opModMemByte24: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regSI), this.regAX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -454,7 +454,7 @@ var X86Mods = {
     opModMemByte25: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regDI), this.regAX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -465,7 +465,7 @@ var X86Mods = {
     opModMemByte26: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.getIPWord()), this.regAX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -476,7 +476,7 @@ var X86Mods = {
     opModMemByte27: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regBX), this.regAX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -487,7 +487,7 @@ var X86Mods = {
     opModMemByte28: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)), this.regCX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -498,7 +498,7 @@ var X86Mods = {
     opModMemByte29: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)), this.regCX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -509,7 +509,7 @@ var X86Mods = {
     opModMemByte2A: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)), this.regCX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -520,7 +520,7 @@ var X86Mods = {
     opModMemByte2B: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)), this.regCX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -531,7 +531,7 @@ var X86Mods = {
     opModMemByte2C: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regSI), this.regCX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -542,7 +542,7 @@ var X86Mods = {
     opModMemByte2D: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regDI), this.regCX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -553,7 +553,7 @@ var X86Mods = {
     opModMemByte2E: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.getIPWord()), this.regCX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -564,7 +564,7 @@ var X86Mods = {
     opModMemByte2F: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regBX), this.regCX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -575,7 +575,7 @@ var X86Mods = {
     opModMemByte30: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)), this.regDX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -586,7 +586,7 @@ var X86Mods = {
     opModMemByte31: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)), this.regDX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -597,7 +597,7 @@ var X86Mods = {
     opModMemByte32: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)), this.regDX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -608,7 +608,7 @@ var X86Mods = {
     opModMemByte33: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)), this.regDX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -619,7 +619,7 @@ var X86Mods = {
     opModMemByte34: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regSI), this.regDX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -630,7 +630,7 @@ var X86Mods = {
     opModMemByte35: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regDI), this.regDX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -641,7 +641,7 @@ var X86Mods = {
     opModMemByte36: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.getIPWord()), this.regDX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -652,7 +652,7 @@ var X86Mods = {
     opModMemByte37: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regBX), this.regDX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -663,7 +663,7 @@ var X86Mods = {
     opModMemByte38: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)), this.regBX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -674,7 +674,7 @@ var X86Mods = {
     opModMemByte39: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)), this.regBX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -685,7 +685,7 @@ var X86Mods = {
     opModMemByte3A: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)), this.regBX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -696,7 +696,7 @@ var X86Mods = {
     opModMemByte3B: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)), this.regBX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -707,7 +707,7 @@ var X86Mods = {
     opModMemByte3C: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regSI), this.regBX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -718,7 +718,7 @@ var X86Mods = {
     opModMemByte3D: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regDI), this.regBX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -729,7 +729,7 @@ var X86Mods = {
     opModMemByte3E: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.getIPWord()), this.regBX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -740,7 +740,7 @@ var X86Mods = {
     opModMemByte3F: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regBX), this.regBX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -751,7 +751,7 @@ var X86Mods = {
     opModMemByte40: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), this.regAX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -762,7 +762,7 @@ var X86Mods = {
     opModMemByte41: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), this.regAX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -773,7 +773,7 @@ var X86Mods = {
     opModMemByte42: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), this.regAX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -784,7 +784,7 @@ var X86Mods = {
     opModMemByte43: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), this.regAX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -795,7 +795,7 @@ var X86Mods = {
     opModMemByte44: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), this.regAX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -806,7 +806,7 @@ var X86Mods = {
     opModMemByte45: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), this.regAX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -817,7 +817,7 @@ var X86Mods = {
     opModMemByte46: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), this.regAX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -828,7 +828,7 @@ var X86Mods = {
     opModMemByte47: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), this.regAX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -839,7 +839,7 @@ var X86Mods = {
     opModMemByte48: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), this.regCX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -850,7 +850,7 @@ var X86Mods = {
     opModMemByte49: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), this.regCX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -861,7 +861,7 @@ var X86Mods = {
     opModMemByte4A: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), this.regCX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -872,7 +872,7 @@ var X86Mods = {
     opModMemByte4B: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), this.regCX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -883,7 +883,7 @@ var X86Mods = {
     opModMemByte4C: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), this.regCX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -894,7 +894,7 @@ var X86Mods = {
     opModMemByte4D: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), this.regCX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -905,7 +905,7 @@ var X86Mods = {
     opModMemByte4E: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), this.regCX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -916,7 +916,7 @@ var X86Mods = {
     opModMemByte4F: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), this.regCX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -927,7 +927,7 @@ var X86Mods = {
     opModMemByte50: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), this.regDX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -938,7 +938,7 @@ var X86Mods = {
     opModMemByte51: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), this.regDX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -949,7 +949,7 @@ var X86Mods = {
     opModMemByte52: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), this.regDX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -960,7 +960,7 @@ var X86Mods = {
     opModMemByte53: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), this.regDX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -971,7 +971,7 @@ var X86Mods = {
     opModMemByte54: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), this.regDX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -982,7 +982,7 @@ var X86Mods = {
     opModMemByte55: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), this.regDX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -993,7 +993,7 @@ var X86Mods = {
     opModMemByte56: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), this.regDX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1004,7 +1004,7 @@ var X86Mods = {
     opModMemByte57: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), this.regDX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1015,7 +1015,7 @@ var X86Mods = {
     opModMemByte58: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), this.regBX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -1026,7 +1026,7 @@ var X86Mods = {
     opModMemByte59: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), this.regBX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -1037,7 +1037,7 @@ var X86Mods = {
     opModMemByte5A: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), this.regBX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -1048,7 +1048,7 @@ var X86Mods = {
     opModMemByte5B: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), this.regBX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -1059,7 +1059,7 @@ var X86Mods = {
     opModMemByte5C: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), this.regBX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1070,7 +1070,7 @@ var X86Mods = {
     opModMemByte5D: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), this.regBX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1081,7 +1081,7 @@ var X86Mods = {
     opModMemByte5E: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), this.regBX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1092,7 +1092,7 @@ var X86Mods = {
     opModMemByte5F: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), this.regBX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1103,7 +1103,7 @@ var X86Mods = {
     opModMemByte60: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), this.regAX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -1114,7 +1114,7 @@ var X86Mods = {
     opModMemByte61: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), this.regAX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -1125,7 +1125,7 @@ var X86Mods = {
     opModMemByte62: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), this.regAX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -1136,7 +1136,7 @@ var X86Mods = {
     opModMemByte63: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), this.regAX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -1147,7 +1147,7 @@ var X86Mods = {
     opModMemByte64: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), this.regAX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1158,7 +1158,7 @@ var X86Mods = {
     opModMemByte65: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), this.regAX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1169,7 +1169,7 @@ var X86Mods = {
     opModMemByte66: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), this.regAX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1180,7 +1180,7 @@ var X86Mods = {
     opModMemByte67: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), this.regAX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1191,7 +1191,7 @@ var X86Mods = {
     opModMemByte68: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), this.regCX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -1202,7 +1202,7 @@ var X86Mods = {
     opModMemByte69: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), this.regCX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -1213,7 +1213,7 @@ var X86Mods = {
     opModMemByte6A: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), this.regCX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -1224,7 +1224,7 @@ var X86Mods = {
     opModMemByte6B: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), this.regCX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -1235,7 +1235,7 @@ var X86Mods = {
     opModMemByte6C: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), this.regCX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1246,7 +1246,7 @@ var X86Mods = {
     opModMemByte6D: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), this.regCX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1257,7 +1257,7 @@ var X86Mods = {
     opModMemByte6E: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), this.regCX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1268,7 +1268,7 @@ var X86Mods = {
     opModMemByte6F: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), this.regCX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1279,7 +1279,7 @@ var X86Mods = {
     opModMemByte70: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), this.regDX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -1290,7 +1290,7 @@ var X86Mods = {
     opModMemByte71: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), this.regDX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -1301,7 +1301,7 @@ var X86Mods = {
     opModMemByte72: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), this.regDX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -1312,7 +1312,7 @@ var X86Mods = {
     opModMemByte73: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), this.regDX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -1323,7 +1323,7 @@ var X86Mods = {
     opModMemByte74: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), this.regDX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1334,7 +1334,7 @@ var X86Mods = {
     opModMemByte75: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), this.regDX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1345,7 +1345,7 @@ var X86Mods = {
     opModMemByte76: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), this.regDX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1356,7 +1356,7 @@ var X86Mods = {
     opModMemByte77: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), this.regDX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1367,7 +1367,7 @@ var X86Mods = {
     opModMemByte78: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), this.regBX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -1378,7 +1378,7 @@ var X86Mods = {
     opModMemByte79: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), this.regBX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -1389,7 +1389,7 @@ var X86Mods = {
     opModMemByte7A: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), this.regBX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -1400,7 +1400,7 @@ var X86Mods = {
     opModMemByte7B: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), this.regBX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -1411,7 +1411,7 @@ var X86Mods = {
     opModMemByte7C: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), this.regBX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1422,7 +1422,7 @@ var X86Mods = {
     opModMemByte7D: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), this.regBX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1433,7 +1433,7 @@ var X86Mods = {
     opModMemByte7E: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), this.regBX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1444,7 +1444,7 @@ var X86Mods = {
     opModMemByte7F: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), this.regBX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1455,7 +1455,7 @@ var X86Mods = {
     opModMemByte80: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), this.regAX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -1466,7 +1466,7 @@ var X86Mods = {
     opModMemByte81: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), this.regAX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -1477,7 +1477,7 @@ var X86Mods = {
     opModMemByte82: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), this.regAX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -1488,7 +1488,7 @@ var X86Mods = {
     opModMemByte83: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), this.regAX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -1499,7 +1499,7 @@ var X86Mods = {
     opModMemByte84: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), this.regAX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1510,7 +1510,7 @@ var X86Mods = {
     opModMemByte85: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), this.regAX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1521,7 +1521,7 @@ var X86Mods = {
     opModMemByte86: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), this.regAX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1532,7 +1532,7 @@ var X86Mods = {
     opModMemByte87: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), this.regAX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1543,7 +1543,7 @@ var X86Mods = {
     opModMemByte88: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), this.regCX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -1554,7 +1554,7 @@ var X86Mods = {
     opModMemByte89: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), this.regCX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -1565,7 +1565,7 @@ var X86Mods = {
     opModMemByte8A: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), this.regCX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -1576,7 +1576,7 @@ var X86Mods = {
     opModMemByte8B: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), this.regCX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -1587,7 +1587,7 @@ var X86Mods = {
     opModMemByte8C: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), this.regCX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1598,7 +1598,7 @@ var X86Mods = {
     opModMemByte8D: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), this.regCX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1609,7 +1609,7 @@ var X86Mods = {
     opModMemByte8E: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), this.regCX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1620,7 +1620,7 @@ var X86Mods = {
     opModMemByte8F: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), this.regCX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1631,7 +1631,7 @@ var X86Mods = {
     opModMemByte90: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), this.regDX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -1642,7 +1642,7 @@ var X86Mods = {
     opModMemByte91: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), this.regDX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -1653,7 +1653,7 @@ var X86Mods = {
     opModMemByte92: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), this.regDX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -1664,7 +1664,7 @@ var X86Mods = {
     opModMemByte93: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), this.regDX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -1675,7 +1675,7 @@ var X86Mods = {
     opModMemByte94: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), this.regDX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1686,7 +1686,7 @@ var X86Mods = {
     opModMemByte95: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), this.regDX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1697,7 +1697,7 @@ var X86Mods = {
     opModMemByte96: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), this.regDX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1708,7 +1708,7 @@ var X86Mods = {
     opModMemByte97: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), this.regDX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1719,7 +1719,7 @@ var X86Mods = {
     opModMemByte98: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), this.regBX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -1730,7 +1730,7 @@ var X86Mods = {
     opModMemByte99: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), this.regBX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -1741,7 +1741,7 @@ var X86Mods = {
     opModMemByte9A: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), this.regBX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -1752,7 +1752,7 @@ var X86Mods = {
     opModMemByte9B: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), this.regBX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -1763,7 +1763,7 @@ var X86Mods = {
     opModMemByte9C: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), this.regBX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1774,7 +1774,7 @@ var X86Mods = {
     opModMemByte9D: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), this.regBX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1785,7 +1785,7 @@ var X86Mods = {
     opModMemByte9E: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), this.regBX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1796,7 +1796,7 @@ var X86Mods = {
     opModMemByte9F: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), this.regBX & 0xff);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1807,7 +1807,7 @@ var X86Mods = {
     opModMemByteA0: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), this.regAX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -1818,7 +1818,7 @@ var X86Mods = {
     opModMemByteA1: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), this.regAX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -1829,7 +1829,7 @@ var X86Mods = {
     opModMemByteA2: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), this.regAX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -1840,7 +1840,7 @@ var X86Mods = {
     opModMemByteA3: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), this.regAX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -1851,7 +1851,7 @@ var X86Mods = {
     opModMemByteA4: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), this.regAX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1862,7 +1862,7 @@ var X86Mods = {
     opModMemByteA5: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), this.regAX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1873,7 +1873,7 @@ var X86Mods = {
     opModMemByteA6: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), this.regAX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1884,7 +1884,7 @@ var X86Mods = {
     opModMemByteA7: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), this.regAX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1895,7 +1895,7 @@ var X86Mods = {
     opModMemByteA8: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), this.regCX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -1906,7 +1906,7 @@ var X86Mods = {
     opModMemByteA9: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), this.regCX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -1917,7 +1917,7 @@ var X86Mods = {
     opModMemByteAA: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), this.regCX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -1928,7 +1928,7 @@ var X86Mods = {
     opModMemByteAB: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), this.regCX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -1939,7 +1939,7 @@ var X86Mods = {
     opModMemByteAC: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), this.regCX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1950,7 +1950,7 @@ var X86Mods = {
     opModMemByteAD: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), this.regCX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1961,7 +1961,7 @@ var X86Mods = {
     opModMemByteAE: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), this.regCX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1972,7 +1972,7 @@ var X86Mods = {
     opModMemByteAF: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), this.regCX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -1983,7 +1983,7 @@ var X86Mods = {
     opModMemByteB0: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), this.regDX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -1994,7 +1994,7 @@ var X86Mods = {
     opModMemByteB1: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), this.regDX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -2005,7 +2005,7 @@ var X86Mods = {
     opModMemByteB2: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), this.regDX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -2016,7 +2016,7 @@ var X86Mods = {
     opModMemByteB3: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), this.regDX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -2027,7 +2027,7 @@ var X86Mods = {
     opModMemByteB4: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), this.regDX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -2038,7 +2038,7 @@ var X86Mods = {
     opModMemByteB5: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), this.regDX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -2049,7 +2049,7 @@ var X86Mods = {
     opModMemByteB6: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), this.regDX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -2060,7 +2060,7 @@ var X86Mods = {
     opModMemByteB7: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), this.regDX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -2071,7 +2071,7 @@ var X86Mods = {
     opModMemByteB8: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), this.regBX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -2082,7 +2082,7 @@ var X86Mods = {
     opModMemByteB9: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), this.regBX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -2093,7 +2093,7 @@ var X86Mods = {
     opModMemByteBA: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), this.regBX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -2104,7 +2104,7 @@ var X86Mods = {
     opModMemByteBB: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), this.regBX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -2115,7 +2115,7 @@ var X86Mods = {
     opModMemByteBC: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), this.regBX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -2126,7 +2126,7 @@ var X86Mods = {
     opModMemByteBD: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), this.regBX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -2137,7 +2137,7 @@ var X86Mods = {
     opModMemByteBE: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), this.regBX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -2148,7 +2148,7 @@ var X86Mods = {
     opModMemByteBF: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), this.regBX >> 8);
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -2159,7 +2159,7 @@ var X86Mods = {
     opModMemWord00: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)), this.regAX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -2170,7 +2170,7 @@ var X86Mods = {
     opModMemWord01: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)), this.regAX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -2181,7 +2181,7 @@ var X86Mods = {
     opModMemWord02: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)), this.regAX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -2192,7 +2192,7 @@ var X86Mods = {
     opModMemWord03: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)), this.regAX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -2203,7 +2203,7 @@ var X86Mods = {
     opModMemWord04: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regSI), this.regAX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -2214,7 +2214,7 @@ var X86Mods = {
     opModMemWord05: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regDI), this.regAX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -2225,7 +2225,7 @@ var X86Mods = {
     opModMemWord06: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.getIPWord()), this.regAX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -2236,7 +2236,7 @@ var X86Mods = {
     opModMemWord07: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regBX), this.regAX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -2247,7 +2247,7 @@ var X86Mods = {
     opModMemWord08: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)), this.regCX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -2258,7 +2258,7 @@ var X86Mods = {
     opModMemWord09: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)), this.regCX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -2269,7 +2269,7 @@ var X86Mods = {
     opModMemWord0A: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)), this.regCX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -2280,7 +2280,7 @@ var X86Mods = {
     opModMemWord0B: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)), this.regCX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -2291,7 +2291,7 @@ var X86Mods = {
     opModMemWord0C: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regSI), this.regCX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -2302,7 +2302,7 @@ var X86Mods = {
     opModMemWord0D: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regDI), this.regCX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -2313,7 +2313,7 @@ var X86Mods = {
     opModMemWord0E: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.getIPWord()), this.regCX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -2324,7 +2324,7 @@ var X86Mods = {
     opModMemWord0F: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regBX), this.regCX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -2335,7 +2335,7 @@ var X86Mods = {
     opModMemWord10: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)), this.regDX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -2346,7 +2346,7 @@ var X86Mods = {
     opModMemWord11: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)), this.regDX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -2357,7 +2357,7 @@ var X86Mods = {
     opModMemWord12: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)), this.regDX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -2368,7 +2368,7 @@ var X86Mods = {
     opModMemWord13: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)), this.regDX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -2379,7 +2379,7 @@ var X86Mods = {
     opModMemWord14: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regSI), this.regDX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -2390,7 +2390,7 @@ var X86Mods = {
     opModMemWord15: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regDI), this.regDX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -2401,7 +2401,7 @@ var X86Mods = {
     opModMemWord16: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.getIPWord()), this.regDX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -2412,7 +2412,7 @@ var X86Mods = {
     opModMemWord17: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regBX), this.regDX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -2423,7 +2423,7 @@ var X86Mods = {
     opModMemWord18: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)), this.regBX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -2434,7 +2434,7 @@ var X86Mods = {
     opModMemWord19: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)), this.regBX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -2445,7 +2445,7 @@ var X86Mods = {
     opModMemWord1A: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)), this.regBX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -2456,7 +2456,7 @@ var X86Mods = {
     opModMemWord1B: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)), this.regBX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -2467,7 +2467,7 @@ var X86Mods = {
     opModMemWord1C: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regSI), this.regBX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -2478,7 +2478,7 @@ var X86Mods = {
     opModMemWord1D: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regDI), this.regBX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -2489,7 +2489,7 @@ var X86Mods = {
     opModMemWord1E: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.getIPWord()), this.regBX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -2500,7 +2500,7 @@ var X86Mods = {
     opModMemWord1F: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regBX), this.regBX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -2511,7 +2511,7 @@ var X86Mods = {
     opModMemWord20: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)), this.regSP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -2522,7 +2522,7 @@ var X86Mods = {
     opModMemWord21: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)), this.regSP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -2533,7 +2533,7 @@ var X86Mods = {
     opModMemWord22: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)), this.regSP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -2544,7 +2544,7 @@ var X86Mods = {
     opModMemWord23: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)), this.regSP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -2555,7 +2555,7 @@ var X86Mods = {
     opModMemWord24: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regSI), this.regSP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -2566,7 +2566,7 @@ var X86Mods = {
     opModMemWord25: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regDI), this.regSP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -2577,7 +2577,7 @@ var X86Mods = {
     opModMemWord26: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.getIPWord()), this.regSP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -2588,7 +2588,7 @@ var X86Mods = {
     opModMemWord27: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regBX), this.regSP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -2599,7 +2599,7 @@ var X86Mods = {
     opModMemWord28: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)), this.regBP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -2610,7 +2610,7 @@ var X86Mods = {
     opModMemWord29: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)), this.regBP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -2621,7 +2621,7 @@ var X86Mods = {
     opModMemWord2A: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)), this.regBP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -2632,7 +2632,7 @@ var X86Mods = {
     opModMemWord2B: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)), this.regBP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -2643,7 +2643,7 @@ var X86Mods = {
     opModMemWord2C: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regSI), this.regBP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -2654,7 +2654,7 @@ var X86Mods = {
     opModMemWord2D: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regDI), this.regBP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -2665,7 +2665,7 @@ var X86Mods = {
     opModMemWord2E: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.getIPWord()), this.regBP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -2676,7 +2676,7 @@ var X86Mods = {
     opModMemWord2F: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regBX), this.regBP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -2687,7 +2687,7 @@ var X86Mods = {
     opModMemWord30: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)), this.regSI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -2698,7 +2698,7 @@ var X86Mods = {
     opModMemWord31: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)), this.regSI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -2709,7 +2709,7 @@ var X86Mods = {
     opModMemWord32: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)), this.regSI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -2720,7 +2720,7 @@ var X86Mods = {
     opModMemWord33: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)), this.regSI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -2731,7 +2731,7 @@ var X86Mods = {
     opModMemWord34: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regSI), this.regSI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -2742,7 +2742,7 @@ var X86Mods = {
     opModMemWord35: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regDI), this.regSI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -2753,7 +2753,7 @@ var X86Mods = {
     opModMemWord36: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.getIPWord()), this.regSI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -2764,7 +2764,7 @@ var X86Mods = {
     opModMemWord37: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regBX), this.regSI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -2775,7 +2775,7 @@ var X86Mods = {
     opModMemWord38: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)), this.regDI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -2786,7 +2786,7 @@ var X86Mods = {
     opModMemWord39: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)), this.regDI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -2797,7 +2797,7 @@ var X86Mods = {
     opModMemWord3A: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)), this.regDI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -2808,7 +2808,7 @@ var X86Mods = {
     opModMemWord3B: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)), this.regDI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -2819,7 +2819,7 @@ var X86Mods = {
     opModMemWord3C: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regSI), this.regDI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -2830,7 +2830,7 @@ var X86Mods = {
     opModMemWord3D: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regDI), this.regDI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -2841,7 +2841,7 @@ var X86Mods = {
     opModMemWord3E: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.getIPWord()), this.regDI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -2852,7 +2852,7 @@ var X86Mods = {
     opModMemWord3F: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regBX), this.regDI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -2863,7 +2863,7 @@ var X86Mods = {
     opModMemWord40: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), this.regAX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -2874,7 +2874,7 @@ var X86Mods = {
     opModMemWord41: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), this.regAX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -2885,7 +2885,7 @@ var X86Mods = {
     opModMemWord42: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), this.regAX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -2896,7 +2896,7 @@ var X86Mods = {
     opModMemWord43: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), this.regAX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -2907,7 +2907,7 @@ var X86Mods = {
     opModMemWord44: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), this.regAX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -2918,7 +2918,7 @@ var X86Mods = {
     opModMemWord45: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), this.regAX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -2929,7 +2929,7 @@ var X86Mods = {
     opModMemWord46: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), this.regAX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -2940,7 +2940,7 @@ var X86Mods = {
     opModMemWord47: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), this.regAX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -2951,7 +2951,7 @@ var X86Mods = {
     opModMemWord48: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), this.regCX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -2962,7 +2962,7 @@ var X86Mods = {
     opModMemWord49: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), this.regCX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -2973,7 +2973,7 @@ var X86Mods = {
     opModMemWord4A: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), this.regCX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -2984,7 +2984,7 @@ var X86Mods = {
     opModMemWord4B: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), this.regCX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -2995,7 +2995,7 @@ var X86Mods = {
     opModMemWord4C: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), this.regCX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3006,7 +3006,7 @@ var X86Mods = {
     opModMemWord4D: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), this.regCX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3017,7 +3017,7 @@ var X86Mods = {
     opModMemWord4E: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), this.regCX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3028,7 +3028,7 @@ var X86Mods = {
     opModMemWord4F: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), this.regCX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3039,7 +3039,7 @@ var X86Mods = {
     opModMemWord50: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), this.regDX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -3050,7 +3050,7 @@ var X86Mods = {
     opModMemWord51: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), this.regDX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -3061,7 +3061,7 @@ var X86Mods = {
     opModMemWord52: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), this.regDX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -3072,7 +3072,7 @@ var X86Mods = {
     opModMemWord53: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), this.regDX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -3083,7 +3083,7 @@ var X86Mods = {
     opModMemWord54: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), this.regDX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3094,7 +3094,7 @@ var X86Mods = {
     opModMemWord55: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), this.regDX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3105,7 +3105,7 @@ var X86Mods = {
     opModMemWord56: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), this.regDX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3116,7 +3116,7 @@ var X86Mods = {
     opModMemWord57: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), this.regDX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3127,7 +3127,7 @@ var X86Mods = {
     opModMemWord58: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), this.regBX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -3138,7 +3138,7 @@ var X86Mods = {
     opModMemWord59: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), this.regBX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -3149,7 +3149,7 @@ var X86Mods = {
     opModMemWord5A: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), this.regBX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -3160,7 +3160,7 @@ var X86Mods = {
     opModMemWord5B: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), this.regBX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -3171,7 +3171,7 @@ var X86Mods = {
     opModMemWord5C: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), this.regBX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3182,7 +3182,7 @@ var X86Mods = {
     opModMemWord5D: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), this.regBX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3193,7 +3193,7 @@ var X86Mods = {
     opModMemWord5E: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), this.regBX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3204,7 +3204,7 @@ var X86Mods = {
     opModMemWord5F: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), this.regBX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3215,7 +3215,7 @@ var X86Mods = {
     opModMemWord60: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), this.regSP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -3226,7 +3226,7 @@ var X86Mods = {
     opModMemWord61: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), this.regSP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -3237,7 +3237,7 @@ var X86Mods = {
     opModMemWord62: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), this.regSP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -3248,7 +3248,7 @@ var X86Mods = {
     opModMemWord63: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), this.regSP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -3259,7 +3259,7 @@ var X86Mods = {
     opModMemWord64: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), this.regSP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3270,7 +3270,7 @@ var X86Mods = {
     opModMemWord65: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), this.regSP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3281,7 +3281,7 @@ var X86Mods = {
     opModMemWord66: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), this.regSP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3292,7 +3292,7 @@ var X86Mods = {
     opModMemWord67: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), this.regSP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3303,7 +3303,7 @@ var X86Mods = {
     opModMemWord68: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), this.regBP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -3314,7 +3314,7 @@ var X86Mods = {
     opModMemWord69: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), this.regBP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -3325,7 +3325,7 @@ var X86Mods = {
     opModMemWord6A: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), this.regBP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -3336,7 +3336,7 @@ var X86Mods = {
     opModMemWord6B: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), this.regBP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -3347,7 +3347,7 @@ var X86Mods = {
     opModMemWord6C: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), this.regBP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3358,7 +3358,7 @@ var X86Mods = {
     opModMemWord6D: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), this.regBP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3369,7 +3369,7 @@ var X86Mods = {
     opModMemWord6E: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), this.regBP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3380,7 +3380,7 @@ var X86Mods = {
     opModMemWord6F: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), this.regBP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3391,7 +3391,7 @@ var X86Mods = {
     opModMemWord70: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), this.regSI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -3402,7 +3402,7 @@ var X86Mods = {
     opModMemWord71: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), this.regSI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -3413,7 +3413,7 @@ var X86Mods = {
     opModMemWord72: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), this.regSI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -3424,7 +3424,7 @@ var X86Mods = {
     opModMemWord73: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), this.regSI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -3435,7 +3435,7 @@ var X86Mods = {
     opModMemWord74: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), this.regSI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3446,7 +3446,7 @@ var X86Mods = {
     opModMemWord75: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), this.regSI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3457,7 +3457,7 @@ var X86Mods = {
     opModMemWord76: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), this.regSI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3468,7 +3468,7 @@ var X86Mods = {
     opModMemWord77: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), this.regSI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3479,7 +3479,7 @@ var X86Mods = {
     opModMemWord78: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), this.regDI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -3490,7 +3490,7 @@ var X86Mods = {
     opModMemWord79: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), this.regDI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -3501,7 +3501,7 @@ var X86Mods = {
     opModMemWord7A: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), this.regDI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -3512,7 +3512,7 @@ var X86Mods = {
     opModMemWord7B: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), this.regDI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -3523,7 +3523,7 @@ var X86Mods = {
     opModMemWord7C: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), this.regDI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3534,7 +3534,7 @@ var X86Mods = {
     opModMemWord7D: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), this.regDI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3545,7 +3545,7 @@ var X86Mods = {
     opModMemWord7E: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), this.regDI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3556,7 +3556,7 @@ var X86Mods = {
     opModMemWord7F: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), this.regDI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3567,7 +3567,7 @@ var X86Mods = {
     opModMemWord80: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), this.regAX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -3578,7 +3578,7 @@ var X86Mods = {
     opModMemWord81: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), this.regAX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -3589,7 +3589,7 @@ var X86Mods = {
     opModMemWord82: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), this.regAX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -3600,7 +3600,7 @@ var X86Mods = {
     opModMemWord83: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), this.regAX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -3611,7 +3611,7 @@ var X86Mods = {
     opModMemWord84: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), this.regAX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3622,7 +3622,7 @@ var X86Mods = {
     opModMemWord85: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), this.regAX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3633,7 +3633,7 @@ var X86Mods = {
     opModMemWord86: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), this.regAX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3644,7 +3644,7 @@ var X86Mods = {
     opModMemWord87: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), this.regAX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3655,7 +3655,7 @@ var X86Mods = {
     opModMemWord88: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), this.regCX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -3666,7 +3666,7 @@ var X86Mods = {
     opModMemWord89: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), this.regCX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -3677,7 +3677,7 @@ var X86Mods = {
     opModMemWord8A: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), this.regCX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -3688,7 +3688,7 @@ var X86Mods = {
     opModMemWord8B: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), this.regCX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -3699,7 +3699,7 @@ var X86Mods = {
     opModMemWord8C: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), this.regCX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3710,7 +3710,7 @@ var X86Mods = {
     opModMemWord8D: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), this.regCX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3721,7 +3721,7 @@ var X86Mods = {
     opModMemWord8E: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), this.regCX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3732,7 +3732,7 @@ var X86Mods = {
     opModMemWord8F: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), this.regCX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3743,7 +3743,7 @@ var X86Mods = {
     opModMemWord90: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), this.regDX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -3754,7 +3754,7 @@ var X86Mods = {
     opModMemWord91: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), this.regDX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -3765,7 +3765,7 @@ var X86Mods = {
     opModMemWord92: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), this.regDX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -3776,7 +3776,7 @@ var X86Mods = {
     opModMemWord93: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), this.regDX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -3787,7 +3787,7 @@ var X86Mods = {
     opModMemWord94: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), this.regDX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3798,7 +3798,7 @@ var X86Mods = {
     opModMemWord95: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), this.regDX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3809,7 +3809,7 @@ var X86Mods = {
     opModMemWord96: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), this.regDX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3820,7 +3820,7 @@ var X86Mods = {
     opModMemWord97: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), this.regDX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3831,7 +3831,7 @@ var X86Mods = {
     opModMemWord98: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), this.regBX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -3842,7 +3842,7 @@ var X86Mods = {
     opModMemWord99: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), this.regBX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -3853,7 +3853,7 @@ var X86Mods = {
     opModMemWord9A: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), this.regBX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -3864,7 +3864,7 @@ var X86Mods = {
     opModMemWord9B: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), this.regBX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -3875,7 +3875,7 @@ var X86Mods = {
     opModMemWord9C: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), this.regBX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3886,7 +3886,7 @@ var X86Mods = {
     opModMemWord9D: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), this.regBX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3897,7 +3897,7 @@ var X86Mods = {
     opModMemWord9E: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), this.regBX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3908,7 +3908,7 @@ var X86Mods = {
     opModMemWord9F: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), this.regBX);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3919,7 +3919,7 @@ var X86Mods = {
     opModMemWordA0: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), this.regSP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -3930,7 +3930,7 @@ var X86Mods = {
     opModMemWordA1: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), this.regSP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -3941,7 +3941,7 @@ var X86Mods = {
     opModMemWordA2: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), this.regSP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -3952,7 +3952,7 @@ var X86Mods = {
     opModMemWordA3: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), this.regSP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -3963,7 +3963,7 @@ var X86Mods = {
     opModMemWordA4: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), this.regSP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3974,7 +3974,7 @@ var X86Mods = {
     opModMemWordA5: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), this.regSP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3985,7 +3985,7 @@ var X86Mods = {
     opModMemWordA6: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), this.regSP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -3996,7 +3996,7 @@ var X86Mods = {
     opModMemWordA7: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), this.regSP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -4007,7 +4007,7 @@ var X86Mods = {
     opModMemWordA8: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), this.regBP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -4018,7 +4018,7 @@ var X86Mods = {
     opModMemWordA9: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), this.regBP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -4029,7 +4029,7 @@ var X86Mods = {
     opModMemWordAA: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), this.regBP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -4040,7 +4040,7 @@ var X86Mods = {
     opModMemWordAB: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), this.regBP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -4051,7 +4051,7 @@ var X86Mods = {
     opModMemWordAC: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), this.regBP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -4062,7 +4062,7 @@ var X86Mods = {
     opModMemWordAD: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), this.regBP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -4073,7 +4073,7 @@ var X86Mods = {
     opModMemWordAE: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), this.regBP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -4084,7 +4084,7 @@ var X86Mods = {
     opModMemWordAF: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), this.regBP);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -4095,7 +4095,7 @@ var X86Mods = {
     opModMemWordB0: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), this.regSI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -4106,7 +4106,7 @@ var X86Mods = {
     opModMemWordB1: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), this.regSI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -4117,7 +4117,7 @@ var X86Mods = {
     opModMemWordB2: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), this.regSI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -4128,7 +4128,7 @@ var X86Mods = {
     opModMemWordB3: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), this.regSI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -4139,7 +4139,7 @@ var X86Mods = {
     opModMemWordB4: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), this.regSI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -4150,7 +4150,7 @@ var X86Mods = {
     opModMemWordB5: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), this.regSI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -4161,7 +4161,7 @@ var X86Mods = {
     opModMemWordB6: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), this.regSI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -4172,7 +4172,7 @@ var X86Mods = {
     opModMemWordB7: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), this.regSI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -4183,7 +4183,7 @@ var X86Mods = {
     opModMemWordB8: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), this.regDI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -4194,7 +4194,7 @@ var X86Mods = {
     opModMemWordB9: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), this.regDI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -4205,7 +4205,7 @@ var X86Mods = {
     opModMemWordBA: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), this.regDI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -4216,7 +4216,7 @@ var X86Mods = {
     opModMemWordBB: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), this.regDI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -4227,7 +4227,7 @@ var X86Mods = {
     opModMemWordBC: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), this.regDI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -4238,7 +4238,7 @@ var X86Mods = {
     opModMemWordBD: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), this.regDI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -4249,7 +4249,7 @@ var X86Mods = {
     opModMemWordBE: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), this.regDI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -4260,7 +4260,7 @@ var X86Mods = {
     opModMemWordBF: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), this.regDI);
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -4271,7 +4271,7 @@ var X86Mods = {
     opModRegByte00: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -4282,7 +4282,7 @@ var X86Mods = {
     opModRegByte01: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -4293,7 +4293,7 @@ var X86Mods = {
     opModRegByte02: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -4304,7 +4304,7 @@ var X86Mods = {
     opModRegByte03: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -4315,7 +4315,7 @@ var X86Mods = {
     opModRegByte04: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segData, this.regSI));
         this.regAX = (this.regAX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -4326,7 +4326,7 @@ var X86Mods = {
     opModRegByte05: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segData, this.regDI));
         this.regAX = (this.regAX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -4337,7 +4337,7 @@ var X86Mods = {
     opModRegByte06: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segData, this.getIPWord()));
         this.regAX = (this.regAX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -4348,7 +4348,7 @@ var X86Mods = {
     opModRegByte07: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segData, this.regBX));
         this.regAX = (this.regAX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -4359,7 +4359,7 @@ var X86Mods = {
     opModRegByte08: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -4370,7 +4370,7 @@ var X86Mods = {
     opModRegByte09: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -4381,7 +4381,7 @@ var X86Mods = {
     opModRegByte0A: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -4392,7 +4392,7 @@ var X86Mods = {
     opModRegByte0B: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -4403,7 +4403,7 @@ var X86Mods = {
     opModRegByte0C: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segData, this.regSI));
         this.regCX = (this.regCX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -4414,7 +4414,7 @@ var X86Mods = {
     opModRegByte0D: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segData, this.regDI));
         this.regCX = (this.regCX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -4425,7 +4425,7 @@ var X86Mods = {
     opModRegByte0E: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segData, this.getIPWord()));
         this.regCX = (this.regCX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -4436,7 +4436,7 @@ var X86Mods = {
     opModRegByte0F: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segData, this.regBX));
         this.regCX = (this.regCX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -4447,7 +4447,7 @@ var X86Mods = {
     opModRegByte10: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -4458,7 +4458,7 @@ var X86Mods = {
     opModRegByte11: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -4469,7 +4469,7 @@ var X86Mods = {
     opModRegByte12: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -4480,7 +4480,7 @@ var X86Mods = {
     opModRegByte13: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -4491,7 +4491,7 @@ var X86Mods = {
     opModRegByte14: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segData, this.regSI));
         this.regDX = (this.regDX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -4502,7 +4502,7 @@ var X86Mods = {
     opModRegByte15: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segData, this.regDI));
         this.regDX = (this.regDX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -4513,7 +4513,7 @@ var X86Mods = {
     opModRegByte16: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segData, this.getIPWord()));
         this.regDX = (this.regDX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -4524,7 +4524,7 @@ var X86Mods = {
     opModRegByte17: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segData, this.regBX));
         this.regDX = (this.regDX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -4535,7 +4535,7 @@ var X86Mods = {
     opModRegByte18: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -4546,7 +4546,7 @@ var X86Mods = {
     opModRegByte19: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -4557,7 +4557,7 @@ var X86Mods = {
     opModRegByte1A: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -4568,7 +4568,7 @@ var X86Mods = {
     opModRegByte1B: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -4579,7 +4579,7 @@ var X86Mods = {
     opModRegByte1C: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segData, this.regSI));
         this.regBX = (this.regBX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -4590,7 +4590,7 @@ var X86Mods = {
     opModRegByte1D: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segData, this.regDI));
         this.regBX = (this.regBX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -4601,7 +4601,7 @@ var X86Mods = {
     opModRegByte1E: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segData, this.getIPWord()));
         this.regBX = (this.regBX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -4612,7 +4612,7 @@ var X86Mods = {
     opModRegByte1F: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segData, this.regBX));
         this.regBX = (this.regBX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -4623,7 +4623,7 @@ var X86Mods = {
     opModRegByte20: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -4634,7 +4634,7 @@ var X86Mods = {
     opModRegByte21: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -4645,7 +4645,7 @@ var X86Mods = {
     opModRegByte22: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -4656,7 +4656,7 @@ var X86Mods = {
     opModRegByte23: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -4667,7 +4667,7 @@ var X86Mods = {
     opModRegByte24: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segData, this.regSI));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -4678,7 +4678,7 @@ var X86Mods = {
     opModRegByte25: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segData, this.regDI));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -4689,7 +4689,7 @@ var X86Mods = {
     opModRegByte26: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segData, this.getIPWord()));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -4700,7 +4700,7 @@ var X86Mods = {
     opModRegByte27: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segData, this.regBX));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -4711,7 +4711,7 @@ var X86Mods = {
     opModRegByte28: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -4722,7 +4722,7 @@ var X86Mods = {
     opModRegByte29: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -4733,7 +4733,7 @@ var X86Mods = {
     opModRegByte2A: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -4744,7 +4744,7 @@ var X86Mods = {
     opModRegByte2B: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -4755,7 +4755,7 @@ var X86Mods = {
     opModRegByte2C: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segData, this.regSI));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -4766,7 +4766,7 @@ var X86Mods = {
     opModRegByte2D: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segData, this.regDI));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -4777,7 +4777,7 @@ var X86Mods = {
     opModRegByte2E: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segData, this.getIPWord()));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -4788,7 +4788,7 @@ var X86Mods = {
     opModRegByte2F: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segData, this.regBX));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -4799,7 +4799,7 @@ var X86Mods = {
     opModRegByte30: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -4810,7 +4810,7 @@ var X86Mods = {
     opModRegByte31: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -4821,7 +4821,7 @@ var X86Mods = {
     opModRegByte32: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -4832,7 +4832,7 @@ var X86Mods = {
     opModRegByte33: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -4843,7 +4843,7 @@ var X86Mods = {
     opModRegByte34: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segData, this.regSI));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -4854,7 +4854,7 @@ var X86Mods = {
     opModRegByte35: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segData, this.regDI));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -4865,7 +4865,7 @@ var X86Mods = {
     opModRegByte36: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segData, this.getIPWord()));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -4876,7 +4876,7 @@ var X86Mods = {
     opModRegByte37: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segData, this.regBX));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -4887,7 +4887,7 @@ var X86Mods = {
     opModRegByte38: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -4898,7 +4898,7 @@ var X86Mods = {
     opModRegByte39: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -4909,7 +4909,7 @@ var X86Mods = {
     opModRegByte3A: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -4920,7 +4920,7 @@ var X86Mods = {
     opModRegByte3B: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -4931,7 +4931,7 @@ var X86Mods = {
     opModRegByte3C: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segData, this.regSI));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -4942,7 +4942,7 @@ var X86Mods = {
     opModRegByte3D: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segData, this.regDI));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -4953,7 +4953,7 @@ var X86Mods = {
     opModRegByte3E: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segData, this.getIPWord()));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -4964,7 +4964,7 @@ var X86Mods = {
     opModRegByte3F: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segData, this.regBX));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -4975,7 +4975,7 @@ var X86Mods = {
     opModRegByte40: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -4986,7 +4986,7 @@ var X86Mods = {
     opModRegByte41: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -4997,7 +4997,7 @@ var X86Mods = {
     opModRegByte42: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -5008,7 +5008,7 @@ var X86Mods = {
     opModRegByte43: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -5019,7 +5019,7 @@ var X86Mods = {
     opModRegByte44: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5030,7 +5030,7 @@ var X86Mods = {
     opModRegByte45: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5041,7 +5041,7 @@ var X86Mods = {
     opModRegByte46: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5052,7 +5052,7 @@ var X86Mods = {
     opModRegByte47: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5063,7 +5063,7 @@ var X86Mods = {
     opModRegByte48: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -5074,7 +5074,7 @@ var X86Mods = {
     opModRegByte49: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -5085,7 +5085,7 @@ var X86Mods = {
     opModRegByte4A: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -5096,7 +5096,7 @@ var X86Mods = {
     opModRegByte4B: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -5107,7 +5107,7 @@ var X86Mods = {
     opModRegByte4C: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5118,7 +5118,7 @@ var X86Mods = {
     opModRegByte4D: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5129,7 +5129,7 @@ var X86Mods = {
     opModRegByte4E: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5140,7 +5140,7 @@ var X86Mods = {
     opModRegByte4F: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5151,7 +5151,7 @@ var X86Mods = {
     opModRegByte50: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -5162,7 +5162,7 @@ var X86Mods = {
     opModRegByte51: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -5173,7 +5173,7 @@ var X86Mods = {
     opModRegByte52: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -5184,7 +5184,7 @@ var X86Mods = {
     opModRegByte53: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -5195,7 +5195,7 @@ var X86Mods = {
     opModRegByte54: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5206,7 +5206,7 @@ var X86Mods = {
     opModRegByte55: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5217,7 +5217,7 @@ var X86Mods = {
     opModRegByte56: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5228,7 +5228,7 @@ var X86Mods = {
     opModRegByte57: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5239,7 +5239,7 @@ var X86Mods = {
     opModRegByte58: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -5250,7 +5250,7 @@ var X86Mods = {
     opModRegByte59: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -5261,7 +5261,7 @@ var X86Mods = {
     opModRegByte5A: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -5272,7 +5272,7 @@ var X86Mods = {
     opModRegByte5B: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -5283,7 +5283,7 @@ var X86Mods = {
     opModRegByte5C: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5294,7 +5294,7 @@ var X86Mods = {
     opModRegByte5D: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5305,7 +5305,7 @@ var X86Mods = {
     opModRegByte5E: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5316,7 +5316,7 @@ var X86Mods = {
     opModRegByte5F: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5327,7 +5327,7 @@ var X86Mods = {
     opModRegByte60: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -5338,7 +5338,7 @@ var X86Mods = {
     opModRegByte61: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -5349,7 +5349,7 @@ var X86Mods = {
     opModRegByte62: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -5360,7 +5360,7 @@ var X86Mods = {
     opModRegByte63: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -5371,7 +5371,7 @@ var X86Mods = {
     opModRegByte64: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5382,7 +5382,7 @@ var X86Mods = {
     opModRegByte65: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5393,7 +5393,7 @@ var X86Mods = {
     opModRegByte66: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5404,7 +5404,7 @@ var X86Mods = {
     opModRegByte67: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5415,7 +5415,7 @@ var X86Mods = {
     opModRegByte68: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -5426,7 +5426,7 @@ var X86Mods = {
     opModRegByte69: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -5437,7 +5437,7 @@ var X86Mods = {
     opModRegByte6A: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -5448,7 +5448,7 @@ var X86Mods = {
     opModRegByte6B: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -5459,7 +5459,7 @@ var X86Mods = {
     opModRegByte6C: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5470,7 +5470,7 @@ var X86Mods = {
     opModRegByte6D: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5481,7 +5481,7 @@ var X86Mods = {
     opModRegByte6E: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5492,7 +5492,7 @@ var X86Mods = {
     opModRegByte6F: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5503,7 +5503,7 @@ var X86Mods = {
     opModRegByte70: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -5514,7 +5514,7 @@ var X86Mods = {
     opModRegByte71: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -5525,7 +5525,7 @@ var X86Mods = {
     opModRegByte72: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -5536,7 +5536,7 @@ var X86Mods = {
     opModRegByte73: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -5547,7 +5547,7 @@ var X86Mods = {
     opModRegByte74: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5558,7 +5558,7 @@ var X86Mods = {
     opModRegByte75: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5569,7 +5569,7 @@ var X86Mods = {
     opModRegByte76: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5580,7 +5580,7 @@ var X86Mods = {
     opModRegByte77: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5591,7 +5591,7 @@ var X86Mods = {
     opModRegByte78: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -5602,7 +5602,7 @@ var X86Mods = {
     opModRegByte79: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -5613,7 +5613,7 @@ var X86Mods = {
     opModRegByte7A: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -5624,7 +5624,7 @@ var X86Mods = {
     opModRegByte7B: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -5635,7 +5635,7 @@ var X86Mods = {
     opModRegByte7C: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5646,7 +5646,7 @@ var X86Mods = {
     opModRegByte7D: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5657,7 +5657,7 @@ var X86Mods = {
     opModRegByte7E: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5668,7 +5668,7 @@ var X86Mods = {
     opModRegByte7F: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5679,7 +5679,7 @@ var X86Mods = {
     opModRegByte80: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -5690,7 +5690,7 @@ var X86Mods = {
     opModRegByte81: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -5701,7 +5701,7 @@ var X86Mods = {
     opModRegByte82: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -5712,7 +5712,7 @@ var X86Mods = {
     opModRegByte83: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -5723,7 +5723,7 @@ var X86Mods = {
     opModRegByte84: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5734,7 +5734,7 @@ var X86Mods = {
     opModRegByte85: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5745,7 +5745,7 @@ var X86Mods = {
     opModRegByte86: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5756,7 +5756,7 @@ var X86Mods = {
     opModRegByte87: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5767,7 +5767,7 @@ var X86Mods = {
     opModRegByte88: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -5778,7 +5778,7 @@ var X86Mods = {
     opModRegByte89: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -5789,7 +5789,7 @@ var X86Mods = {
     opModRegByte8A: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -5800,7 +5800,7 @@ var X86Mods = {
     opModRegByte8B: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -5811,7 +5811,7 @@ var X86Mods = {
     opModRegByte8C: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5822,7 +5822,7 @@ var X86Mods = {
     opModRegByte8D: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5833,7 +5833,7 @@ var X86Mods = {
     opModRegByte8E: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5844,7 +5844,7 @@ var X86Mods = {
     opModRegByte8F: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5855,7 +5855,7 @@ var X86Mods = {
     opModRegByte90: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -5866,7 +5866,7 @@ var X86Mods = {
     opModRegByte91: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -5877,7 +5877,7 @@ var X86Mods = {
     opModRegByte92: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -5888,7 +5888,7 @@ var X86Mods = {
     opModRegByte93: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -5899,7 +5899,7 @@ var X86Mods = {
     opModRegByte94: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5910,7 +5910,7 @@ var X86Mods = {
     opModRegByte95: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5921,7 +5921,7 @@ var X86Mods = {
     opModRegByte96: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5932,7 +5932,7 @@ var X86Mods = {
     opModRegByte97: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5943,7 +5943,7 @@ var X86Mods = {
     opModRegByte98: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -5954,7 +5954,7 @@ var X86Mods = {
     opModRegByte99: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -5965,7 +5965,7 @@ var X86Mods = {
     opModRegByte9A: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -5976,7 +5976,7 @@ var X86Mods = {
     opModRegByte9B: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -5987,7 +5987,7 @@ var X86Mods = {
     opModRegByte9C: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -5998,7 +5998,7 @@ var X86Mods = {
     opModRegByte9D: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -6009,7 +6009,7 @@ var X86Mods = {
     opModRegByte9E: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -6020,7 +6020,7 @@ var X86Mods = {
     opModRegByte9F: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -6031,7 +6031,7 @@ var X86Mods = {
     opModRegByteA0: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -6042,7 +6042,7 @@ var X86Mods = {
     opModRegByteA1: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -6053,7 +6053,7 @@ var X86Mods = {
     opModRegByteA2: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -6064,7 +6064,7 @@ var X86Mods = {
     opModRegByteA3: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -6075,7 +6075,7 @@ var X86Mods = {
     opModRegByteA4: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -6086,7 +6086,7 @@ var X86Mods = {
     opModRegByteA5: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -6097,7 +6097,7 @@ var X86Mods = {
     opModRegByteA6: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -6108,7 +6108,7 @@ var X86Mods = {
     opModRegByteA7: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -6119,7 +6119,7 @@ var X86Mods = {
     opModRegByteA8: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -6130,7 +6130,7 @@ var X86Mods = {
     opModRegByteA9: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -6141,7 +6141,7 @@ var X86Mods = {
     opModRegByteAA: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -6152,7 +6152,7 @@ var X86Mods = {
     opModRegByteAB: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -6163,7 +6163,7 @@ var X86Mods = {
     opModRegByteAC: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -6174,7 +6174,7 @@ var X86Mods = {
     opModRegByteAD: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -6185,7 +6185,7 @@ var X86Mods = {
     opModRegByteAE: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -6196,7 +6196,7 @@ var X86Mods = {
     opModRegByteAF: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -6207,7 +6207,7 @@ var X86Mods = {
     opModRegByteB0: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -6218,7 +6218,7 @@ var X86Mods = {
     opModRegByteB1: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -6229,7 +6229,7 @@ var X86Mods = {
     opModRegByteB2: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -6240,7 +6240,7 @@ var X86Mods = {
     opModRegByteB3: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -6251,7 +6251,7 @@ var X86Mods = {
     opModRegByteB4: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -6262,7 +6262,7 @@ var X86Mods = {
     opModRegByteB5: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -6273,7 +6273,7 @@ var X86Mods = {
     opModRegByteB6: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -6284,7 +6284,7 @@ var X86Mods = {
     opModRegByteB7: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -6295,7 +6295,7 @@ var X86Mods = {
     opModRegByteB8: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -6306,7 +6306,7 @@ var X86Mods = {
     opModRegByteB9: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -6317,7 +6317,7 @@ var X86Mods = {
     opModRegByteBA: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -6328,7 +6328,7 @@ var X86Mods = {
     opModRegByteBB: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -6339,7 +6339,7 @@ var X86Mods = {
     opModRegByteBC: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -6350,7 +6350,7 @@ var X86Mods = {
     opModRegByteBD: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -6361,7 +6361,7 @@ var X86Mods = {
     opModRegByteBE: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -6372,7 +6372,7 @@ var X86Mods = {
     opModRegByteBF: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -7022,7 +7022,7 @@ var X86Mods = {
      */
     opModRegWord00: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -7032,7 +7032,7 @@ var X86Mods = {
      */
     opModRegWord01: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -7042,7 +7042,7 @@ var X86Mods = {
      */
     opModRegWord02: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -7052,7 +7052,7 @@ var X86Mods = {
      */
     opModRegWord03: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -7062,7 +7062,7 @@ var X86Mods = {
      */
     opModRegWord04: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segData, this.regSI));
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -7072,7 +7072,7 @@ var X86Mods = {
      */
     opModRegWord05: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segData, this.regDI));
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -7082,7 +7082,7 @@ var X86Mods = {
      */
     opModRegWord06: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segData, this.getIPWord()));
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -7092,7 +7092,7 @@ var X86Mods = {
      */
     opModRegWord07: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segData, this.regBX));
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -7102,7 +7102,7 @@ var X86Mods = {
      */
     opModRegWord08: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -7112,7 +7112,7 @@ var X86Mods = {
      */
     opModRegWord09: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -7122,7 +7122,7 @@ var X86Mods = {
      */
     opModRegWord0A: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -7132,7 +7132,7 @@ var X86Mods = {
      */
     opModRegWord0B: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -7142,7 +7142,7 @@ var X86Mods = {
      */
     opModRegWord0C: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segData, this.regSI));
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -7152,7 +7152,7 @@ var X86Mods = {
      */
     opModRegWord0D: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segData, this.regDI));
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -7162,7 +7162,7 @@ var X86Mods = {
      */
     opModRegWord0E: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segData, this.getIPWord()));
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -7172,7 +7172,7 @@ var X86Mods = {
      */
     opModRegWord0F: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segData, this.regBX));
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -7182,7 +7182,7 @@ var X86Mods = {
      */
     opModRegWord10: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -7192,7 +7192,7 @@ var X86Mods = {
      */
     opModRegWord11: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -7202,7 +7202,7 @@ var X86Mods = {
      */
     opModRegWord12: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -7212,7 +7212,7 @@ var X86Mods = {
      */
     opModRegWord13: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -7222,7 +7222,7 @@ var X86Mods = {
      */
     opModRegWord14: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segData, this.regSI));
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -7232,7 +7232,7 @@ var X86Mods = {
      */
     opModRegWord15: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segData, this.regDI));
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -7242,7 +7242,7 @@ var X86Mods = {
      */
     opModRegWord16: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segData, this.getIPWord()));
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -7252,7 +7252,7 @@ var X86Mods = {
      */
     opModRegWord17: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segData, this.regBX));
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -7262,7 +7262,7 @@ var X86Mods = {
      */
     opModRegWord18: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -7272,7 +7272,7 @@ var X86Mods = {
      */
     opModRegWord19: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -7282,7 +7282,7 @@ var X86Mods = {
      */
     opModRegWord1A: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -7292,7 +7292,7 @@ var X86Mods = {
      */
     opModRegWord1B: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -7302,7 +7302,7 @@ var X86Mods = {
      */
     opModRegWord1C: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segData, this.regSI));
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -7312,7 +7312,7 @@ var X86Mods = {
      */
     opModRegWord1D: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segData, this.regDI));
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -7322,7 +7322,7 @@ var X86Mods = {
      */
     opModRegWord1E: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segData, this.getIPWord()));
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -7332,7 +7332,7 @@ var X86Mods = {
      */
     opModRegWord1F: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segData, this.regBX));
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -7342,7 +7342,7 @@ var X86Mods = {
      */
     opModRegWord20: function(fn) {
         this.regSP = fn.call(this, this.regSP, this.getEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -7352,7 +7352,7 @@ var X86Mods = {
      */
     opModRegWord21: function(fn) {
         this.regSP = fn.call(this, this.regSP, this.getEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -7362,7 +7362,7 @@ var X86Mods = {
      */
     opModRegWord22: function(fn) {
         this.regSP = fn.call(this, this.regSP, this.getEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -7372,7 +7372,7 @@ var X86Mods = {
      */
     opModRegWord23: function(fn) {
         this.regSP = fn.call(this, this.regSP, this.getEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -7382,7 +7382,7 @@ var X86Mods = {
      */
     opModRegWord24: function(fn) {
         this.regSP = fn.call(this, this.regSP, this.getEAWord(this.segData, this.regSI));
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -7392,7 +7392,7 @@ var X86Mods = {
      */
     opModRegWord25: function(fn) {
         this.regSP = fn.call(this, this.regSP, this.getEAWord(this.segData, this.regDI));
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -7402,7 +7402,7 @@ var X86Mods = {
      */
     opModRegWord26: function(fn) {
         this.regSP = fn.call(this, this.regSP, this.getEAWord(this.segData, this.getIPWord()));
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -7412,7 +7412,7 @@ var X86Mods = {
      */
     opModRegWord27: function(fn) {
         this.regSP = fn.call(this, this.regSP, this.getEAWord(this.segData, this.regBX));
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -7422,7 +7422,7 @@ var X86Mods = {
      */
     opModRegWord28: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -7432,7 +7432,7 @@ var X86Mods = {
      */
     opModRegWord29: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -7442,7 +7442,7 @@ var X86Mods = {
      */
     opModRegWord2A: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -7452,7 +7452,7 @@ var X86Mods = {
      */
     opModRegWord2B: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -7462,7 +7462,7 @@ var X86Mods = {
      */
     opModRegWord2C: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segData, this.regSI));
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -7472,7 +7472,7 @@ var X86Mods = {
      */
     opModRegWord2D: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segData, this.regDI));
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -7482,7 +7482,7 @@ var X86Mods = {
      */
     opModRegWord2E: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segData, this.getIPWord()));
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -7492,7 +7492,7 @@ var X86Mods = {
      */
     opModRegWord2F: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segData, this.regBX));
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -7502,7 +7502,7 @@ var X86Mods = {
      */
     opModRegWord30: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -7512,7 +7512,7 @@ var X86Mods = {
      */
     opModRegWord31: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -7522,7 +7522,7 @@ var X86Mods = {
      */
     opModRegWord32: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -7532,7 +7532,7 @@ var X86Mods = {
      */
     opModRegWord33: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -7542,7 +7542,7 @@ var X86Mods = {
      */
     opModRegWord34: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segData, this.regSI));
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -7552,7 +7552,7 @@ var X86Mods = {
      */
     opModRegWord35: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segData, this.regDI));
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -7562,7 +7562,7 @@ var X86Mods = {
      */
     opModRegWord36: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segData, this.getIPWord()));
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -7572,7 +7572,7 @@ var X86Mods = {
      */
     opModRegWord37: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segData, this.regBX));
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -7582,7 +7582,7 @@ var X86Mods = {
      */
     opModRegWord38: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -7592,7 +7592,7 @@ var X86Mods = {
      */
     opModRegWord39: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -7602,7 +7602,7 @@ var X86Mods = {
      */
     opModRegWord3A: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -7612,7 +7612,7 @@ var X86Mods = {
      */
     opModRegWord3B: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -7622,7 +7622,7 @@ var X86Mods = {
      */
     opModRegWord3C: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segData, this.regSI));
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -7632,7 +7632,7 @@ var X86Mods = {
      */
     opModRegWord3D: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segData, this.regDI));
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -7642,7 +7642,7 @@ var X86Mods = {
      */
     opModRegWord3E: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segData, this.getIPWord()));
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -7652,7 +7652,7 @@ var X86Mods = {
      */
     opModRegWord3F: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segData, this.regBX));
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -7662,7 +7662,7 @@ var X86Mods = {
      */
     opModRegWord40: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -7672,7 +7672,7 @@ var X86Mods = {
      */
     opModRegWord41: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -7682,7 +7682,7 @@ var X86Mods = {
      */
     opModRegWord42: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -7692,7 +7692,7 @@ var X86Mods = {
      */
     opModRegWord43: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -7702,7 +7702,7 @@ var X86Mods = {
      */
     opModRegWord44: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -7712,7 +7712,7 @@ var X86Mods = {
      */
     opModRegWord45: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -7722,7 +7722,7 @@ var X86Mods = {
      */
     opModRegWord46: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -7732,7 +7732,7 @@ var X86Mods = {
      */
     opModRegWord47: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -7742,7 +7742,7 @@ var X86Mods = {
      */
     opModRegWord48: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -7752,7 +7752,7 @@ var X86Mods = {
      */
     opModRegWord49: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -7762,7 +7762,7 @@ var X86Mods = {
      */
     opModRegWord4A: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -7772,7 +7772,7 @@ var X86Mods = {
      */
     opModRegWord4B: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -7782,7 +7782,7 @@ var X86Mods = {
      */
     opModRegWord4C: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -7792,7 +7792,7 @@ var X86Mods = {
      */
     opModRegWord4D: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -7802,7 +7802,7 @@ var X86Mods = {
      */
     opModRegWord4E: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -7812,7 +7812,7 @@ var X86Mods = {
      */
     opModRegWord4F: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -7822,7 +7822,7 @@ var X86Mods = {
      */
     opModRegWord50: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -7832,7 +7832,7 @@ var X86Mods = {
      */
     opModRegWord51: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -7842,7 +7842,7 @@ var X86Mods = {
      */
     opModRegWord52: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -7852,7 +7852,7 @@ var X86Mods = {
      */
     opModRegWord53: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -7862,7 +7862,7 @@ var X86Mods = {
      */
     opModRegWord54: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -7872,7 +7872,7 @@ var X86Mods = {
      */
     opModRegWord55: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -7882,7 +7882,7 @@ var X86Mods = {
      */
     opModRegWord56: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -7892,7 +7892,7 @@ var X86Mods = {
      */
     opModRegWord57: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -7902,7 +7902,7 @@ var X86Mods = {
      */
     opModRegWord58: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -7912,7 +7912,7 @@ var X86Mods = {
      */
     opModRegWord59: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -7922,7 +7922,7 @@ var X86Mods = {
      */
     opModRegWord5A: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -7932,7 +7932,7 @@ var X86Mods = {
      */
     opModRegWord5B: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -7942,7 +7942,7 @@ var X86Mods = {
      */
     opModRegWord5C: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -7952,7 +7952,7 @@ var X86Mods = {
      */
     opModRegWord5D: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -7962,7 +7962,7 @@ var X86Mods = {
      */
     opModRegWord5E: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -7972,7 +7972,7 @@ var X86Mods = {
      */
     opModRegWord5F: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -7982,7 +7982,7 @@ var X86Mods = {
      */
     opModRegWord60: function(fn) {
         this.regSP = fn.call(this, this.regSP, this.getEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -7992,7 +7992,7 @@ var X86Mods = {
      */
     opModRegWord61: function(fn) {
         this.regSP = fn.call(this, this.regSP, this.getEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -8002,7 +8002,7 @@ var X86Mods = {
      */
     opModRegWord62: function(fn) {
         this.regSP = fn.call(this, this.regSP, this.getEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -8012,7 +8012,7 @@ var X86Mods = {
      */
     opModRegWord63: function(fn) {
         this.regSP = fn.call(this, this.regSP, this.getEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -8022,7 +8022,7 @@ var X86Mods = {
      */
     opModRegWord64: function(fn) {
         this.regSP = fn.call(this, this.regSP, this.getEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8032,7 +8032,7 @@ var X86Mods = {
      */
     opModRegWord65: function(fn) {
         this.regSP = fn.call(this, this.regSP, this.getEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8042,7 +8042,7 @@ var X86Mods = {
      */
     opModRegWord66: function(fn) {
         this.regSP = fn.call(this, this.regSP, this.getEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8052,7 +8052,7 @@ var X86Mods = {
      */
     opModRegWord67: function(fn) {
         this.regSP = fn.call(this, this.regSP, this.getEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8062,7 +8062,7 @@ var X86Mods = {
      */
     opModRegWord68: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -8072,7 +8072,7 @@ var X86Mods = {
      */
     opModRegWord69: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -8082,7 +8082,7 @@ var X86Mods = {
      */
     opModRegWord6A: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -8092,7 +8092,7 @@ var X86Mods = {
      */
     opModRegWord6B: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -8102,7 +8102,7 @@ var X86Mods = {
      */
     opModRegWord6C: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8112,7 +8112,7 @@ var X86Mods = {
      */
     opModRegWord6D: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8122,7 +8122,7 @@ var X86Mods = {
      */
     opModRegWord6E: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8132,7 +8132,7 @@ var X86Mods = {
      */
     opModRegWord6F: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8142,7 +8142,7 @@ var X86Mods = {
      */
     opModRegWord70: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -8152,7 +8152,7 @@ var X86Mods = {
      */
     opModRegWord71: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -8162,7 +8162,7 @@ var X86Mods = {
      */
     opModRegWord72: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -8172,7 +8172,7 @@ var X86Mods = {
      */
     opModRegWord73: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -8182,7 +8182,7 @@ var X86Mods = {
      */
     opModRegWord74: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8192,7 +8192,7 @@ var X86Mods = {
      */
     opModRegWord75: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8202,7 +8202,7 @@ var X86Mods = {
      */
     opModRegWord76: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8212,7 +8212,7 @@ var X86Mods = {
      */
     opModRegWord77: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8222,7 +8222,7 @@ var X86Mods = {
      */
     opModRegWord78: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -8232,7 +8232,7 @@ var X86Mods = {
      */
     opModRegWord79: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -8242,7 +8242,7 @@ var X86Mods = {
      */
     opModRegWord7A: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -8252,7 +8252,7 @@ var X86Mods = {
      */
     opModRegWord7B: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -8262,7 +8262,7 @@ var X86Mods = {
      */
     opModRegWord7C: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8272,7 +8272,7 @@ var X86Mods = {
      */
     opModRegWord7D: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8282,7 +8282,7 @@ var X86Mods = {
      */
     opModRegWord7E: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8292,7 +8292,7 @@ var X86Mods = {
      */
     opModRegWord7F: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8302,7 +8302,7 @@ var X86Mods = {
      */
     opModRegWord80: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -8312,7 +8312,7 @@ var X86Mods = {
      */
     opModRegWord81: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -8322,7 +8322,7 @@ var X86Mods = {
      */
     opModRegWord82: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -8332,7 +8332,7 @@ var X86Mods = {
      */
     opModRegWord83: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -8342,7 +8342,7 @@ var X86Mods = {
      */
     opModRegWord84: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8352,7 +8352,7 @@ var X86Mods = {
      */
     opModRegWord85: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8362,7 +8362,7 @@ var X86Mods = {
      */
     opModRegWord86: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8372,7 +8372,7 @@ var X86Mods = {
      */
     opModRegWord87: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8382,7 +8382,7 @@ var X86Mods = {
      */
     opModRegWord88: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -8392,7 +8392,7 @@ var X86Mods = {
      */
     opModRegWord89: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -8402,7 +8402,7 @@ var X86Mods = {
      */
     opModRegWord8A: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -8412,7 +8412,7 @@ var X86Mods = {
      */
     opModRegWord8B: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -8422,7 +8422,7 @@ var X86Mods = {
      */
     opModRegWord8C: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8432,7 +8432,7 @@ var X86Mods = {
      */
     opModRegWord8D: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8442,7 +8442,7 @@ var X86Mods = {
      */
     opModRegWord8E: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8452,7 +8452,7 @@ var X86Mods = {
      */
     opModRegWord8F: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8462,7 +8462,7 @@ var X86Mods = {
      */
     opModRegWord90: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -8472,7 +8472,7 @@ var X86Mods = {
      */
     opModRegWord91: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -8482,7 +8482,7 @@ var X86Mods = {
      */
     opModRegWord92: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -8492,7 +8492,7 @@ var X86Mods = {
      */
     opModRegWord93: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -8502,7 +8502,7 @@ var X86Mods = {
      */
     opModRegWord94: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8512,7 +8512,7 @@ var X86Mods = {
      */
     opModRegWord95: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8522,7 +8522,7 @@ var X86Mods = {
      */
     opModRegWord96: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8532,7 +8532,7 @@ var X86Mods = {
      */
     opModRegWord97: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8542,7 +8542,7 @@ var X86Mods = {
      */
     opModRegWord98: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -8552,7 +8552,7 @@ var X86Mods = {
      */
     opModRegWord99: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -8562,7 +8562,7 @@ var X86Mods = {
      */
     opModRegWord9A: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -8572,7 +8572,7 @@ var X86Mods = {
      */
     opModRegWord9B: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -8582,7 +8582,7 @@ var X86Mods = {
      */
     opModRegWord9C: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8592,7 +8592,7 @@ var X86Mods = {
      */
     opModRegWord9D: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8602,7 +8602,7 @@ var X86Mods = {
      */
     opModRegWord9E: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8612,7 +8612,7 @@ var X86Mods = {
      */
     opModRegWord9F: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8622,7 +8622,7 @@ var X86Mods = {
      */
     opModRegWordA0: function(fn) {
         this.regSP = fn.call(this, this.regSP, this.getEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -8632,7 +8632,7 @@ var X86Mods = {
      */
     opModRegWordA1: function(fn) {
         this.regSP = fn.call(this, this.regSP, this.getEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -8642,7 +8642,7 @@ var X86Mods = {
      */
     opModRegWordA2: function(fn) {
         this.regSP = fn.call(this, this.regSP, this.getEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -8652,7 +8652,7 @@ var X86Mods = {
      */
     opModRegWordA3: function(fn) {
         this.regSP = fn.call(this, this.regSP, this.getEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -8662,7 +8662,7 @@ var X86Mods = {
      */
     opModRegWordA4: function(fn) {
         this.regSP = fn.call(this, this.regSP, this.getEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8672,7 +8672,7 @@ var X86Mods = {
      */
     opModRegWordA5: function(fn) {
         this.regSP = fn.call(this, this.regSP, this.getEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8682,7 +8682,7 @@ var X86Mods = {
      */
     opModRegWordA6: function(fn) {
         this.regSP = fn.call(this, this.regSP, this.getEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8692,7 +8692,7 @@ var X86Mods = {
      */
     opModRegWordA7: function(fn) {
         this.regSP = fn.call(this, this.regSP, this.getEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8702,7 +8702,7 @@ var X86Mods = {
      */
     opModRegWordA8: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -8712,7 +8712,7 @@ var X86Mods = {
      */
     opModRegWordA9: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -8722,7 +8722,7 @@ var X86Mods = {
      */
     opModRegWordAA: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -8732,7 +8732,7 @@ var X86Mods = {
      */
     opModRegWordAB: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -8742,7 +8742,7 @@ var X86Mods = {
      */
     opModRegWordAC: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8752,7 +8752,7 @@ var X86Mods = {
      */
     opModRegWordAD: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8762,7 +8762,7 @@ var X86Mods = {
      */
     opModRegWordAE: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8772,7 +8772,7 @@ var X86Mods = {
      */
     opModRegWordAF: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8782,7 +8782,7 @@ var X86Mods = {
      */
     opModRegWordB0: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -8792,7 +8792,7 @@ var X86Mods = {
      */
     opModRegWordB1: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -8802,7 +8802,7 @@ var X86Mods = {
      */
     opModRegWordB2: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -8812,7 +8812,7 @@ var X86Mods = {
      */
     opModRegWordB3: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -8822,7 +8822,7 @@ var X86Mods = {
      */
     opModRegWordB4: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8832,7 +8832,7 @@ var X86Mods = {
      */
     opModRegWordB5: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8842,7 +8842,7 @@ var X86Mods = {
      */
     opModRegWordB6: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8852,7 +8852,7 @@ var X86Mods = {
      */
     opModRegWordB7: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8862,7 +8862,7 @@ var X86Mods = {
      */
     opModRegWordB8: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -8872,7 +8872,7 @@ var X86Mods = {
      */
     opModRegWordB9: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -8882,7 +8882,7 @@ var X86Mods = {
      */
     opModRegWordBA: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -8892,7 +8892,7 @@ var X86Mods = {
      */
     opModRegWordBB: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -8902,7 +8902,7 @@ var X86Mods = {
      */
     opModRegWordBC: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8912,7 +8912,7 @@ var X86Mods = {
      */
     opModRegWordBD: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8922,7 +8922,7 @@ var X86Mods = {
      */
     opModRegWordBE: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -8932,7 +8932,7 @@ var X86Mods = {
      */
     opModRegWordBF: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)));
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -9520,7 +9520,7 @@ var X86Mods = {
     opModGrpByte00: function(afnGrp, fnSrc) {
         var b = afnGrp[0].call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -9532,7 +9532,7 @@ var X86Mods = {
     opModGrpByte01: function(afnGrp, fnSrc) {
         var b = afnGrp[0].call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -9544,7 +9544,7 @@ var X86Mods = {
     opModGrpByte02: function(afnGrp, fnSrc) {
         var b = afnGrp[0].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -9556,7 +9556,7 @@ var X86Mods = {
     opModGrpByte03: function(afnGrp, fnSrc) {
         var b = afnGrp[0].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -9568,7 +9568,7 @@ var X86Mods = {
     opModGrpByte04: function(afnGrp, fnSrc) {
         var b = afnGrp[0].call(this, this.modEAByte(this.segData, this.regSI), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -9580,7 +9580,7 @@ var X86Mods = {
     opModGrpByte05: function(afnGrp, fnSrc) {
         var b = afnGrp[0].call(this, this.modEAByte(this.segData, this.regDI), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -9592,7 +9592,7 @@ var X86Mods = {
     opModGrpByte06: function(afnGrp, fnSrc) {
         var b = afnGrp[0].call(this, this.modEAByte(this.segData, this.getIPWord()), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -9604,7 +9604,7 @@ var X86Mods = {
     opModGrpByte07: function(afnGrp, fnSrc) {
         var b = afnGrp[0].call(this, this.modEAByte(this.segData, this.regBX), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -9616,7 +9616,7 @@ var X86Mods = {
     opModGrpByte08: function(afnGrp, fnSrc) {
         var b = afnGrp[1].call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -9628,7 +9628,7 @@ var X86Mods = {
     opModGrpByte09: function(afnGrp, fnSrc) {
         var b = afnGrp[1].call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -9640,7 +9640,7 @@ var X86Mods = {
     opModGrpByte0A: function(afnGrp, fnSrc) {
         var b = afnGrp[1].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -9652,7 +9652,7 @@ var X86Mods = {
     opModGrpByte0B: function(afnGrp, fnSrc) {
         var b = afnGrp[1].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -9664,7 +9664,7 @@ var X86Mods = {
     opModGrpByte0C: function(afnGrp, fnSrc) {
         var b = afnGrp[1].call(this, this.modEAByte(this.segData, this.regSI), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -9676,7 +9676,7 @@ var X86Mods = {
     opModGrpByte0D: function(afnGrp, fnSrc) {
         var b = afnGrp[1].call(this, this.modEAByte(this.segData, this.regDI), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -9688,7 +9688,7 @@ var X86Mods = {
     opModGrpByte0E: function(afnGrp, fnSrc) {
         var b = afnGrp[1].call(this, this.modEAByte(this.segData, this.getIPWord()), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -9700,7 +9700,7 @@ var X86Mods = {
     opModGrpByte0F: function(afnGrp, fnSrc) {
         var b = afnGrp[1].call(this, this.modEAByte(this.segData, this.regBX), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -9712,7 +9712,7 @@ var X86Mods = {
     opModGrpByte10: function(afnGrp, fnSrc) {
         var b = afnGrp[2].call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -9724,7 +9724,7 @@ var X86Mods = {
     opModGrpByte11: function(afnGrp, fnSrc) {
         var b = afnGrp[2].call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -9736,7 +9736,7 @@ var X86Mods = {
     opModGrpByte12: function(afnGrp, fnSrc) {
         var b = afnGrp[2].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -9748,7 +9748,7 @@ var X86Mods = {
     opModGrpByte13: function(afnGrp, fnSrc) {
         var b = afnGrp[2].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -9760,7 +9760,7 @@ var X86Mods = {
     opModGrpByte14: function(afnGrp, fnSrc) {
         var b = afnGrp[2].call(this, this.modEAByte(this.segData, this.regSI), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -9772,7 +9772,7 @@ var X86Mods = {
     opModGrpByte15: function(afnGrp, fnSrc) {
         var b = afnGrp[2].call(this, this.modEAByte(this.segData, this.regDI), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -9784,7 +9784,7 @@ var X86Mods = {
     opModGrpByte16: function(afnGrp, fnSrc) {
         var b = afnGrp[2].call(this, this.modEAByte(this.segData, this.getIPWord()), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -9796,7 +9796,7 @@ var X86Mods = {
     opModGrpByte17: function(afnGrp, fnSrc) {
         var b = afnGrp[2].call(this, this.modEAByte(this.segData, this.regBX), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -9808,7 +9808,7 @@ var X86Mods = {
     opModGrpByte18: function(afnGrp, fnSrc) {
         var b = afnGrp[3].call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -9820,7 +9820,7 @@ var X86Mods = {
     opModGrpByte19: function(afnGrp, fnSrc) {
         var b = afnGrp[3].call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -9832,7 +9832,7 @@ var X86Mods = {
     opModGrpByte1A: function(afnGrp, fnSrc) {
         var b = afnGrp[3].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -9844,7 +9844,7 @@ var X86Mods = {
     opModGrpByte1B: function(afnGrp, fnSrc) {
         var b = afnGrp[3].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -9856,7 +9856,7 @@ var X86Mods = {
     opModGrpByte1C: function(afnGrp, fnSrc) {
         var b = afnGrp[3].call(this, this.modEAByte(this.segData, this.regSI), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -9868,7 +9868,7 @@ var X86Mods = {
     opModGrpByte1D: function(afnGrp, fnSrc) {
         var b = afnGrp[3].call(this, this.modEAByte(this.segData, this.regDI), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -9880,7 +9880,7 @@ var X86Mods = {
     opModGrpByte1E: function(afnGrp, fnSrc) {
         var b = afnGrp[3].call(this, this.modEAByte(this.segData, this.getIPWord()), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -9892,7 +9892,7 @@ var X86Mods = {
     opModGrpByte1F: function(afnGrp, fnSrc) {
         var b = afnGrp[3].call(this, this.modEAByte(this.segData, this.regBX), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -9904,7 +9904,7 @@ var X86Mods = {
     opModGrpByte20: function(afnGrp, fnSrc) {
         var b = afnGrp[4].call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -9916,7 +9916,7 @@ var X86Mods = {
     opModGrpByte21: function(afnGrp, fnSrc) {
         var b = afnGrp[4].call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -9928,7 +9928,7 @@ var X86Mods = {
     opModGrpByte22: function(afnGrp, fnSrc) {
         var b = afnGrp[4].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -9940,7 +9940,7 @@ var X86Mods = {
     opModGrpByte23: function(afnGrp, fnSrc) {
         var b = afnGrp[4].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -9952,7 +9952,7 @@ var X86Mods = {
     opModGrpByte24: function(afnGrp, fnSrc) {
         var b = afnGrp[4].call(this, this.modEAByte(this.segData, this.regSI), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -9964,7 +9964,7 @@ var X86Mods = {
     opModGrpByte25: function(afnGrp, fnSrc) {
         var b = afnGrp[4].call(this, this.modEAByte(this.segData, this.regDI), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -9976,7 +9976,7 @@ var X86Mods = {
     opModGrpByte26: function(afnGrp, fnSrc) {
         var b = afnGrp[4].call(this, this.modEAByte(this.segData, this.getIPWord()), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -9988,7 +9988,7 @@ var X86Mods = {
     opModGrpByte27: function(afnGrp, fnSrc) {
         var b = afnGrp[4].call(this, this.modEAByte(this.segData, this.regBX), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -10000,7 +10000,7 @@ var X86Mods = {
     opModGrpByte28: function(afnGrp, fnSrc) {
         var b = afnGrp[5].call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -10012,7 +10012,7 @@ var X86Mods = {
     opModGrpByte29: function(afnGrp, fnSrc) {
         var b = afnGrp[5].call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -10024,7 +10024,7 @@ var X86Mods = {
     opModGrpByte2A: function(afnGrp, fnSrc) {
         var b = afnGrp[5].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -10036,7 +10036,7 @@ var X86Mods = {
     opModGrpByte2B: function(afnGrp, fnSrc) {
         var b = afnGrp[5].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -10048,7 +10048,7 @@ var X86Mods = {
     opModGrpByte2C: function(afnGrp, fnSrc) {
         var b = afnGrp[5].call(this, this.modEAByte(this.segData, this.regSI), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -10060,7 +10060,7 @@ var X86Mods = {
     opModGrpByte2D: function(afnGrp, fnSrc) {
         var b = afnGrp[5].call(this, this.modEAByte(this.segData, this.regDI), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -10072,7 +10072,7 @@ var X86Mods = {
     opModGrpByte2E: function(afnGrp, fnSrc) {
         var b = afnGrp[5].call(this, this.modEAByte(this.segData, this.getIPWord()), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -10084,7 +10084,7 @@ var X86Mods = {
     opModGrpByte2F: function(afnGrp, fnSrc) {
         var b = afnGrp[5].call(this, this.modEAByte(this.segData, this.regBX), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -10096,7 +10096,7 @@ var X86Mods = {
     opModGrpByte30: function(afnGrp, fnSrc) {
         var b = afnGrp[6].call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -10108,7 +10108,7 @@ var X86Mods = {
     opModGrpByte31: function(afnGrp, fnSrc) {
         var b = afnGrp[6].call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -10120,7 +10120,7 @@ var X86Mods = {
     opModGrpByte32: function(afnGrp, fnSrc) {
         var b = afnGrp[6].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -10132,7 +10132,7 @@ var X86Mods = {
     opModGrpByte33: function(afnGrp, fnSrc) {
         var b = afnGrp[6].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -10144,7 +10144,7 @@ var X86Mods = {
     opModGrpByte34: function(afnGrp, fnSrc) {
         var b = afnGrp[6].call(this, this.modEAByte(this.segData, this.regSI), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -10156,7 +10156,7 @@ var X86Mods = {
     opModGrpByte35: function(afnGrp, fnSrc) {
         var b = afnGrp[6].call(this, this.modEAByte(this.segData, this.regDI), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -10168,7 +10168,7 @@ var X86Mods = {
     opModGrpByte36: function(afnGrp, fnSrc) {
         var b = afnGrp[6].call(this, this.modEAByte(this.segData, this.getIPWord()), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -10180,7 +10180,7 @@ var X86Mods = {
     opModGrpByte37: function(afnGrp, fnSrc) {
         var b = afnGrp[6].call(this, this.modEAByte(this.segData, this.regBX), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -10192,7 +10192,7 @@ var X86Mods = {
     opModGrpByte38: function(afnGrp, fnSrc) {
         var b = afnGrp[7].call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -10204,7 +10204,7 @@ var X86Mods = {
     opModGrpByte39: function(afnGrp, fnSrc) {
         var b = afnGrp[7].call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -10216,7 +10216,7 @@ var X86Mods = {
     opModGrpByte3A: function(afnGrp, fnSrc) {
         var b = afnGrp[7].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -10228,7 +10228,7 @@ var X86Mods = {
     opModGrpByte3B: function(afnGrp, fnSrc) {
         var b = afnGrp[7].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -10240,7 +10240,7 @@ var X86Mods = {
     opModGrpByte3C: function(afnGrp, fnSrc) {
         var b = afnGrp[7].call(this, this.modEAByte(this.segData, this.regSI), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -10252,7 +10252,7 @@ var X86Mods = {
     opModGrpByte3D: function(afnGrp, fnSrc) {
         var b = afnGrp[7].call(this, this.modEAByte(this.segData, this.regDI), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -10264,7 +10264,7 @@ var X86Mods = {
     opModGrpByte3E: function(afnGrp, fnSrc) {
         var b = afnGrp[7].call(this, this.modEAByte(this.segData, this.getIPWord()), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -10276,7 +10276,7 @@ var X86Mods = {
     opModGrpByte3F: function(afnGrp, fnSrc) {
         var b = afnGrp[7].call(this, this.modEAByte(this.segData, this.regBX), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -10288,7 +10288,7 @@ var X86Mods = {
     opModGrpByte40: function(afnGrp, fnSrc) {
         var b = afnGrp[0].call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -10300,7 +10300,7 @@ var X86Mods = {
     opModGrpByte41: function(afnGrp, fnSrc) {
         var b = afnGrp[0].call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -10312,7 +10312,7 @@ var X86Mods = {
     opModGrpByte42: function(afnGrp, fnSrc) {
         var b = afnGrp[0].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -10324,7 +10324,7 @@ var X86Mods = {
     opModGrpByte43: function(afnGrp, fnSrc) {
         var b = afnGrp[0].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -10336,7 +10336,7 @@ var X86Mods = {
     opModGrpByte44: function(afnGrp, fnSrc) {
         var b = afnGrp[0].call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -10348,7 +10348,7 @@ var X86Mods = {
     opModGrpByte45: function(afnGrp, fnSrc) {
         var b = afnGrp[0].call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -10360,7 +10360,7 @@ var X86Mods = {
     opModGrpByte46: function(afnGrp, fnSrc) {
         var b = afnGrp[0].call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -10372,7 +10372,7 @@ var X86Mods = {
     opModGrpByte47: function(afnGrp, fnSrc) {
         var b = afnGrp[0].call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -10384,7 +10384,7 @@ var X86Mods = {
     opModGrpByte48: function(afnGrp, fnSrc) {
         var b = afnGrp[1].call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -10396,7 +10396,7 @@ var X86Mods = {
     opModGrpByte49: function(afnGrp, fnSrc) {
         var b = afnGrp[1].call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -10408,7 +10408,7 @@ var X86Mods = {
     opModGrpByte4A: function(afnGrp, fnSrc) {
         var b = afnGrp[1].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -10420,7 +10420,7 @@ var X86Mods = {
     opModGrpByte4B: function(afnGrp, fnSrc) {
         var b = afnGrp[1].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -10432,7 +10432,7 @@ var X86Mods = {
     opModGrpByte4C: function(afnGrp, fnSrc) {
         var b = afnGrp[1].call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -10444,7 +10444,7 @@ var X86Mods = {
     opModGrpByte4D: function(afnGrp, fnSrc) {
         var b = afnGrp[1].call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -10456,7 +10456,7 @@ var X86Mods = {
     opModGrpByte4E: function(afnGrp, fnSrc) {
         var b = afnGrp[1].call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -10468,7 +10468,7 @@ var X86Mods = {
     opModGrpByte4F: function(afnGrp, fnSrc) {
         var b = afnGrp[1].call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -10480,7 +10480,7 @@ var X86Mods = {
     opModGrpByte50: function(afnGrp, fnSrc) {
         var b = afnGrp[2].call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -10492,7 +10492,7 @@ var X86Mods = {
     opModGrpByte51: function(afnGrp, fnSrc) {
         var b = afnGrp[2].call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -10504,7 +10504,7 @@ var X86Mods = {
     opModGrpByte52: function(afnGrp, fnSrc) {
         var b = afnGrp[2].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -10516,7 +10516,7 @@ var X86Mods = {
     opModGrpByte53: function(afnGrp, fnSrc) {
         var b = afnGrp[2].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -10528,7 +10528,7 @@ var X86Mods = {
     opModGrpByte54: function(afnGrp, fnSrc) {
         var b = afnGrp[2].call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -10540,7 +10540,7 @@ var X86Mods = {
     opModGrpByte55: function(afnGrp, fnSrc) {
         var b = afnGrp[2].call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -10552,7 +10552,7 @@ var X86Mods = {
     opModGrpByte56: function(afnGrp, fnSrc) {
         var b = afnGrp[2].call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -10564,7 +10564,7 @@ var X86Mods = {
     opModGrpByte57: function(afnGrp, fnSrc) {
         var b = afnGrp[2].call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -10576,7 +10576,7 @@ var X86Mods = {
     opModGrpByte58: function(afnGrp, fnSrc) {
         var b = afnGrp[3].call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -10588,7 +10588,7 @@ var X86Mods = {
     opModGrpByte59: function(afnGrp, fnSrc) {
         var b = afnGrp[3].call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -10600,7 +10600,7 @@ var X86Mods = {
     opModGrpByte5A: function(afnGrp, fnSrc) {
         var b = afnGrp[3].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -10612,7 +10612,7 @@ var X86Mods = {
     opModGrpByte5B: function(afnGrp, fnSrc) {
         var b = afnGrp[3].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -10624,7 +10624,7 @@ var X86Mods = {
     opModGrpByte5C: function(afnGrp, fnSrc) {
         var b = afnGrp[3].call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -10636,7 +10636,7 @@ var X86Mods = {
     opModGrpByte5D: function(afnGrp, fnSrc) {
         var b = afnGrp[3].call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -10648,7 +10648,7 @@ var X86Mods = {
     opModGrpByte5E: function(afnGrp, fnSrc) {
         var b = afnGrp[3].call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -10660,7 +10660,7 @@ var X86Mods = {
     opModGrpByte5F: function(afnGrp, fnSrc) {
         var b = afnGrp[3].call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -10672,7 +10672,7 @@ var X86Mods = {
     opModGrpByte60: function(afnGrp, fnSrc) {
         var b = afnGrp[4].call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -10684,7 +10684,7 @@ var X86Mods = {
     opModGrpByte61: function(afnGrp, fnSrc) {
         var b = afnGrp[4].call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -10696,7 +10696,7 @@ var X86Mods = {
     opModGrpByte62: function(afnGrp, fnSrc) {
         var b = afnGrp[4].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -10708,7 +10708,7 @@ var X86Mods = {
     opModGrpByte63: function(afnGrp, fnSrc) {
         var b = afnGrp[4].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -10720,7 +10720,7 @@ var X86Mods = {
     opModGrpByte64: function(afnGrp, fnSrc) {
         var b = afnGrp[4].call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -10732,7 +10732,7 @@ var X86Mods = {
     opModGrpByte65: function(afnGrp, fnSrc) {
         var b = afnGrp[4].call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -10744,7 +10744,7 @@ var X86Mods = {
     opModGrpByte66: function(afnGrp, fnSrc) {
         var b = afnGrp[4].call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -10756,7 +10756,7 @@ var X86Mods = {
     opModGrpByte67: function(afnGrp, fnSrc) {
         var b = afnGrp[4].call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -10768,7 +10768,7 @@ var X86Mods = {
     opModGrpByte68: function(afnGrp, fnSrc) {
         var b = afnGrp[5].call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -10780,7 +10780,7 @@ var X86Mods = {
     opModGrpByte69: function(afnGrp, fnSrc) {
         var b = afnGrp[5].call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -10792,7 +10792,7 @@ var X86Mods = {
     opModGrpByte6A: function(afnGrp, fnSrc) {
         var b = afnGrp[5].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -10804,7 +10804,7 @@ var X86Mods = {
     opModGrpByte6B: function(afnGrp, fnSrc) {
         var b = afnGrp[5].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -10816,7 +10816,7 @@ var X86Mods = {
     opModGrpByte6C: function(afnGrp, fnSrc) {
         var b = afnGrp[5].call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -10828,7 +10828,7 @@ var X86Mods = {
     opModGrpByte6D: function(afnGrp, fnSrc) {
         var b = afnGrp[5].call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -10840,7 +10840,7 @@ var X86Mods = {
     opModGrpByte6E: function(afnGrp, fnSrc) {
         var b = afnGrp[5].call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -10852,7 +10852,7 @@ var X86Mods = {
     opModGrpByte6F: function(afnGrp, fnSrc) {
         var b = afnGrp[5].call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -10864,7 +10864,7 @@ var X86Mods = {
     opModGrpByte70: function(afnGrp, fnSrc) {
         var b = afnGrp[6].call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -10876,7 +10876,7 @@ var X86Mods = {
     opModGrpByte71: function(afnGrp, fnSrc) {
         var b = afnGrp[6].call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -10888,7 +10888,7 @@ var X86Mods = {
     opModGrpByte72: function(afnGrp, fnSrc) {
         var b = afnGrp[6].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -10900,7 +10900,7 @@ var X86Mods = {
     opModGrpByte73: function(afnGrp, fnSrc) {
         var b = afnGrp[6].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -10912,7 +10912,7 @@ var X86Mods = {
     opModGrpByte74: function(afnGrp, fnSrc) {
         var b = afnGrp[6].call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -10924,7 +10924,7 @@ var X86Mods = {
     opModGrpByte75: function(afnGrp, fnSrc) {
         var b = afnGrp[6].call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -10936,7 +10936,7 @@ var X86Mods = {
     opModGrpByte76: function(afnGrp, fnSrc) {
         var b = afnGrp[6].call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -10948,7 +10948,7 @@ var X86Mods = {
     opModGrpByte77: function(afnGrp, fnSrc) {
         var b = afnGrp[6].call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -10960,7 +10960,7 @@ var X86Mods = {
     opModGrpByte78: function(afnGrp, fnSrc) {
         var b = afnGrp[7].call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -10972,7 +10972,7 @@ var X86Mods = {
     opModGrpByte79: function(afnGrp, fnSrc) {
         var b = afnGrp[7].call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -10984,7 +10984,7 @@ var X86Mods = {
     opModGrpByte7A: function(afnGrp, fnSrc) {
         var b = afnGrp[7].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -10996,7 +10996,7 @@ var X86Mods = {
     opModGrpByte7B: function(afnGrp, fnSrc) {
         var b = afnGrp[7].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -11008,7 +11008,7 @@ var X86Mods = {
     opModGrpByte7C: function(afnGrp, fnSrc) {
         var b = afnGrp[7].call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11020,7 +11020,7 @@ var X86Mods = {
     opModGrpByte7D: function(afnGrp, fnSrc) {
         var b = afnGrp[7].call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11032,7 +11032,7 @@ var X86Mods = {
     opModGrpByte7E: function(afnGrp, fnSrc) {
         var b = afnGrp[7].call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11044,7 +11044,7 @@ var X86Mods = {
     opModGrpByte7F: function(afnGrp, fnSrc) {
         var b = afnGrp[7].call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11056,7 +11056,7 @@ var X86Mods = {
     opModGrpByte80: function(afnGrp, fnSrc) {
         var b = afnGrp[0].call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -11068,7 +11068,7 @@ var X86Mods = {
     opModGrpByte81: function(afnGrp, fnSrc) {
         var b = afnGrp[0].call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -11080,7 +11080,7 @@ var X86Mods = {
     opModGrpByte82: function(afnGrp, fnSrc) {
         var b = afnGrp[0].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -11092,7 +11092,7 @@ var X86Mods = {
     opModGrpByte83: function(afnGrp, fnSrc) {
         var b = afnGrp[0].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -11104,7 +11104,7 @@ var X86Mods = {
     opModGrpByte84: function(afnGrp, fnSrc) {
         var b = afnGrp[0].call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11116,7 +11116,7 @@ var X86Mods = {
     opModGrpByte85: function(afnGrp, fnSrc) {
         var b = afnGrp[0].call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11128,7 +11128,7 @@ var X86Mods = {
     opModGrpByte86: function(afnGrp, fnSrc) {
         var b = afnGrp[0].call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11140,7 +11140,7 @@ var X86Mods = {
     opModGrpByte87: function(afnGrp, fnSrc) {
         var b = afnGrp[0].call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11152,7 +11152,7 @@ var X86Mods = {
     opModGrpByte88: function(afnGrp, fnSrc) {
         var b = afnGrp[1].call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -11164,7 +11164,7 @@ var X86Mods = {
     opModGrpByte89: function(afnGrp, fnSrc) {
         var b = afnGrp[1].call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -11176,7 +11176,7 @@ var X86Mods = {
     opModGrpByte8A: function(afnGrp, fnSrc) {
         var b = afnGrp[1].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -11188,7 +11188,7 @@ var X86Mods = {
     opModGrpByte8B: function(afnGrp, fnSrc) {
         var b = afnGrp[1].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -11200,7 +11200,7 @@ var X86Mods = {
     opModGrpByte8C: function(afnGrp, fnSrc) {
         var b = afnGrp[1].call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11212,7 +11212,7 @@ var X86Mods = {
     opModGrpByte8D: function(afnGrp, fnSrc) {
         var b = afnGrp[1].call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11224,7 +11224,7 @@ var X86Mods = {
     opModGrpByte8E: function(afnGrp, fnSrc) {
         var b = afnGrp[1].call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11236,7 +11236,7 @@ var X86Mods = {
     opModGrpByte8F: function(afnGrp, fnSrc) {
         var b = afnGrp[1].call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11248,7 +11248,7 @@ var X86Mods = {
     opModGrpByte90: function(afnGrp, fnSrc) {
         var b = afnGrp[2].call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -11260,7 +11260,7 @@ var X86Mods = {
     opModGrpByte91: function(afnGrp, fnSrc) {
         var b = afnGrp[2].call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -11272,7 +11272,7 @@ var X86Mods = {
     opModGrpByte92: function(afnGrp, fnSrc) {
         var b = afnGrp[2].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -11284,7 +11284,7 @@ var X86Mods = {
     opModGrpByte93: function(afnGrp, fnSrc) {
         var b = afnGrp[2].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -11296,7 +11296,7 @@ var X86Mods = {
     opModGrpByte94: function(afnGrp, fnSrc) {
         var b = afnGrp[2].call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11308,7 +11308,7 @@ var X86Mods = {
     opModGrpByte95: function(afnGrp, fnSrc) {
         var b = afnGrp[2].call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11320,7 +11320,7 @@ var X86Mods = {
     opModGrpByte96: function(afnGrp, fnSrc) {
         var b = afnGrp[2].call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11332,7 +11332,7 @@ var X86Mods = {
     opModGrpByte97: function(afnGrp, fnSrc) {
         var b = afnGrp[2].call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11344,7 +11344,7 @@ var X86Mods = {
     opModGrpByte98: function(afnGrp, fnSrc) {
         var b = afnGrp[3].call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -11356,7 +11356,7 @@ var X86Mods = {
     opModGrpByte99: function(afnGrp, fnSrc) {
         var b = afnGrp[3].call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -11368,7 +11368,7 @@ var X86Mods = {
     opModGrpByte9A: function(afnGrp, fnSrc) {
         var b = afnGrp[3].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -11380,7 +11380,7 @@ var X86Mods = {
     opModGrpByte9B: function(afnGrp, fnSrc) {
         var b = afnGrp[3].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -11392,7 +11392,7 @@ var X86Mods = {
     opModGrpByte9C: function(afnGrp, fnSrc) {
         var b = afnGrp[3].call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11404,7 +11404,7 @@ var X86Mods = {
     opModGrpByte9D: function(afnGrp, fnSrc) {
         var b = afnGrp[3].call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11416,7 +11416,7 @@ var X86Mods = {
     opModGrpByte9E: function(afnGrp, fnSrc) {
         var b = afnGrp[3].call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11428,7 +11428,7 @@ var X86Mods = {
     opModGrpByte9F: function(afnGrp, fnSrc) {
         var b = afnGrp[3].call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11440,7 +11440,7 @@ var X86Mods = {
     opModGrpByteA0: function(afnGrp, fnSrc) {
         var b = afnGrp[4].call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -11452,7 +11452,7 @@ var X86Mods = {
     opModGrpByteA1: function(afnGrp, fnSrc) {
         var b = afnGrp[4].call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -11464,7 +11464,7 @@ var X86Mods = {
     opModGrpByteA2: function(afnGrp, fnSrc) {
         var b = afnGrp[4].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -11476,7 +11476,7 @@ var X86Mods = {
     opModGrpByteA3: function(afnGrp, fnSrc) {
         var b = afnGrp[4].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -11488,7 +11488,7 @@ var X86Mods = {
     opModGrpByteA4: function(afnGrp, fnSrc) {
         var b = afnGrp[4].call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11500,7 +11500,7 @@ var X86Mods = {
     opModGrpByteA5: function(afnGrp, fnSrc) {
         var b = afnGrp[4].call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11512,7 +11512,7 @@ var X86Mods = {
     opModGrpByteA6: function(afnGrp, fnSrc) {
         var b = afnGrp[4].call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11524,7 +11524,7 @@ var X86Mods = {
     opModGrpByteA7: function(afnGrp, fnSrc) {
         var b = afnGrp[4].call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11536,7 +11536,7 @@ var X86Mods = {
     opModGrpByteA8: function(afnGrp, fnSrc) {
         var b = afnGrp[5].call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -11548,7 +11548,7 @@ var X86Mods = {
     opModGrpByteA9: function(afnGrp, fnSrc) {
         var b = afnGrp[5].call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -11560,7 +11560,7 @@ var X86Mods = {
     opModGrpByteAA: function(afnGrp, fnSrc) {
         var b = afnGrp[5].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -11572,7 +11572,7 @@ var X86Mods = {
     opModGrpByteAB: function(afnGrp, fnSrc) {
         var b = afnGrp[5].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -11584,7 +11584,7 @@ var X86Mods = {
     opModGrpByteAC: function(afnGrp, fnSrc) {
         var b = afnGrp[5].call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11596,7 +11596,7 @@ var X86Mods = {
     opModGrpByteAD: function(afnGrp, fnSrc) {
         var b = afnGrp[5].call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11608,7 +11608,7 @@ var X86Mods = {
     opModGrpByteAE: function(afnGrp, fnSrc) {
         var b = afnGrp[5].call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11620,7 +11620,7 @@ var X86Mods = {
     opModGrpByteAF: function(afnGrp, fnSrc) {
         var b = afnGrp[5].call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11632,7 +11632,7 @@ var X86Mods = {
     opModGrpByteB0: function(afnGrp, fnSrc) {
         var b = afnGrp[6].call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -11644,7 +11644,7 @@ var X86Mods = {
     opModGrpByteB1: function(afnGrp, fnSrc) {
         var b = afnGrp[6].call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -11656,7 +11656,7 @@ var X86Mods = {
     opModGrpByteB2: function(afnGrp, fnSrc) {
         var b = afnGrp[6].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -11668,7 +11668,7 @@ var X86Mods = {
     opModGrpByteB3: function(afnGrp, fnSrc) {
         var b = afnGrp[6].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -11680,7 +11680,7 @@ var X86Mods = {
     opModGrpByteB4: function(afnGrp, fnSrc) {
         var b = afnGrp[6].call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11692,7 +11692,7 @@ var X86Mods = {
     opModGrpByteB5: function(afnGrp, fnSrc) {
         var b = afnGrp[6].call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11704,7 +11704,7 @@ var X86Mods = {
     opModGrpByteB6: function(afnGrp, fnSrc) {
         var b = afnGrp[6].call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11716,7 +11716,7 @@ var X86Mods = {
     opModGrpByteB7: function(afnGrp, fnSrc) {
         var b = afnGrp[6].call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11728,7 +11728,7 @@ var X86Mods = {
     opModGrpByteB8: function(afnGrp, fnSrc) {
         var b = afnGrp[7].call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -11740,7 +11740,7 @@ var X86Mods = {
     opModGrpByteB9: function(afnGrp, fnSrc) {
         var b = afnGrp[7].call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -11752,7 +11752,7 @@ var X86Mods = {
     opModGrpByteBA: function(afnGrp, fnSrc) {
         var b = afnGrp[7].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -11764,7 +11764,7 @@ var X86Mods = {
     opModGrpByteBB: function(afnGrp, fnSrc) {
         var b = afnGrp[7].call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -11776,7 +11776,7 @@ var X86Mods = {
     opModGrpByteBC: function(afnGrp, fnSrc) {
         var b = afnGrp[7].call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11788,7 +11788,7 @@ var X86Mods = {
     opModGrpByteBD: function(afnGrp, fnSrc) {
         var b = afnGrp[7].call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11800,7 +11800,7 @@ var X86Mods = {
     opModGrpByteBE: function(afnGrp, fnSrc) {
         var b = afnGrp[7].call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -11812,7 +11812,7 @@ var X86Mods = {
     opModGrpByteBF: function(afnGrp, fnSrc) {
         var b = afnGrp[7].call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAByte(b);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -12528,7 +12528,7 @@ var X86Mods = {
     opModGrpWord00: function(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -12540,7 +12540,7 @@ var X86Mods = {
     opModGrpWord01: function(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -12552,7 +12552,7 @@ var X86Mods = {
     opModGrpWord02: function(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -12564,7 +12564,7 @@ var X86Mods = {
     opModGrpWord03: function(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -12576,7 +12576,7 @@ var X86Mods = {
     opModGrpWord04: function(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWord(this.segData, this.regSI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -12588,7 +12588,7 @@ var X86Mods = {
     opModGrpWord05: function(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWord(this.segData, this.regDI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -12600,7 +12600,7 @@ var X86Mods = {
     opModGrpWord06: function(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWord(this.segData, this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -12612,7 +12612,7 @@ var X86Mods = {
     opModGrpWord07: function(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWord(this.segData, this.regBX), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -12624,7 +12624,7 @@ var X86Mods = {
     opModGrpWord08: function(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -12636,7 +12636,7 @@ var X86Mods = {
     opModGrpWord09: function(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -12648,7 +12648,7 @@ var X86Mods = {
     opModGrpWord0A: function(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -12660,7 +12660,7 @@ var X86Mods = {
     opModGrpWord0B: function(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -12672,7 +12672,7 @@ var X86Mods = {
     opModGrpWord0C: function(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWord(this.segData, this.regSI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -12684,7 +12684,7 @@ var X86Mods = {
     opModGrpWord0D: function(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWord(this.segData, this.regDI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -12696,7 +12696,7 @@ var X86Mods = {
     opModGrpWord0E: function(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWord(this.segData, this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -12708,7 +12708,7 @@ var X86Mods = {
     opModGrpWord0F: function(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWord(this.segData, this.regBX), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -12720,7 +12720,7 @@ var X86Mods = {
     opModGrpWord10: function(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -12732,7 +12732,7 @@ var X86Mods = {
     opModGrpWord11: function(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -12744,7 +12744,7 @@ var X86Mods = {
     opModGrpWord12: function(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -12756,7 +12756,7 @@ var X86Mods = {
     opModGrpWord13: function(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -12768,7 +12768,7 @@ var X86Mods = {
     opModGrpWord14: function(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWord(this.segData, this.regSI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -12780,7 +12780,7 @@ var X86Mods = {
     opModGrpWord15: function(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWord(this.segData, this.regDI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -12792,7 +12792,7 @@ var X86Mods = {
     opModGrpWord16: function(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWord(this.segData, this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -12804,7 +12804,7 @@ var X86Mods = {
     opModGrpWord17: function(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWord(this.segData, this.regBX), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -12816,7 +12816,7 @@ var X86Mods = {
     opModGrpWord18: function(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -12828,7 +12828,7 @@ var X86Mods = {
     opModGrpWord19: function(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -12840,7 +12840,7 @@ var X86Mods = {
     opModGrpWord1A: function(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -12852,7 +12852,7 @@ var X86Mods = {
     opModGrpWord1B: function(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -12864,7 +12864,7 @@ var X86Mods = {
     opModGrpWord1C: function(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWord(this.segData, this.regSI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -12876,7 +12876,7 @@ var X86Mods = {
     opModGrpWord1D: function(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWord(this.segData, this.regDI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -12888,7 +12888,7 @@ var X86Mods = {
     opModGrpWord1E: function(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWord(this.segData, this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -12900,7 +12900,7 @@ var X86Mods = {
     opModGrpWord1F: function(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWord(this.segData, this.regBX), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -12912,7 +12912,7 @@ var X86Mods = {
     opModGrpWord20: function(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -12924,7 +12924,7 @@ var X86Mods = {
     opModGrpWord21: function(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -12936,7 +12936,7 @@ var X86Mods = {
     opModGrpWord22: function(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -12948,7 +12948,7 @@ var X86Mods = {
     opModGrpWord23: function(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -12960,7 +12960,7 @@ var X86Mods = {
     opModGrpWord24: function(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWord(this.segData, this.regSI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -12972,7 +12972,7 @@ var X86Mods = {
     opModGrpWord25: function(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWord(this.segData, this.regDI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -12984,7 +12984,7 @@ var X86Mods = {
     opModGrpWord26: function(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWord(this.segData, this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -12996,7 +12996,7 @@ var X86Mods = {
     opModGrpWord27: function(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWord(this.segData, this.regBX), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -13008,7 +13008,7 @@ var X86Mods = {
     opModGrpWord28: function(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -13020,7 +13020,7 @@ var X86Mods = {
     opModGrpWord29: function(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -13032,7 +13032,7 @@ var X86Mods = {
     opModGrpWord2A: function(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -13044,7 +13044,7 @@ var X86Mods = {
     opModGrpWord2B: function(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -13056,7 +13056,7 @@ var X86Mods = {
     opModGrpWord2C: function(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWord(this.segData, this.regSI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -13068,7 +13068,7 @@ var X86Mods = {
     opModGrpWord2D: function(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWord(this.segData, this.regDI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -13080,7 +13080,7 @@ var X86Mods = {
     opModGrpWord2E: function(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWord(this.segData, this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -13092,7 +13092,7 @@ var X86Mods = {
     opModGrpWord2F: function(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWord(this.segData, this.regBX), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -13104,7 +13104,7 @@ var X86Mods = {
     opModGrpWord30: function(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -13116,7 +13116,7 @@ var X86Mods = {
     opModGrpWord31: function(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -13128,7 +13128,7 @@ var X86Mods = {
     opModGrpWord32: function(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -13140,7 +13140,7 @@ var X86Mods = {
     opModGrpWord33: function(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -13152,7 +13152,7 @@ var X86Mods = {
     opModGrpWord34: function(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWord(this.segData, this.regSI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -13164,7 +13164,7 @@ var X86Mods = {
     opModGrpWord35: function(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWord(this.segData, this.regDI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -13176,7 +13176,7 @@ var X86Mods = {
     opModGrpWord36: function(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWord(this.segData, this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -13188,7 +13188,7 @@ var X86Mods = {
     opModGrpWord37: function(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWord(this.segData, this.regBX), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -13200,7 +13200,7 @@ var X86Mods = {
     opModGrpWord38: function(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -13212,7 +13212,7 @@ var X86Mods = {
     opModGrpWord39: function(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -13224,7 +13224,7 @@ var X86Mods = {
     opModGrpWord3A: function(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
      * @this {X86CPU}
@@ -13236,7 +13236,7 @@ var X86Mods = {
     opModGrpWord3B: function(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndex;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
      * @this {X86CPU}
@@ -13248,7 +13248,7 @@ var X86Mods = {
     opModGrpWord3C: function(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWord(this.segData, this.regSI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -13260,7 +13260,7 @@ var X86Mods = {
     opModGrpWord3D: function(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWord(this.segData, this.regDI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -13272,7 +13272,7 @@ var X86Mods = {
     opModGrpWord3E: function(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWord(this.segData, this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
      * @this {X86CPU}
@@ -13284,7 +13284,7 @@ var X86Mods = {
     opModGrpWord3F: function(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWord(this.segData, this.regBX), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBase;
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
      * @this {X86CPU}
@@ -13296,7 +13296,7 @@ var X86Mods = {
     opModGrpWord40: function(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -13308,7 +13308,7 @@ var X86Mods = {
     opModGrpWord41: function(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -13320,7 +13320,7 @@ var X86Mods = {
     opModGrpWord42: function(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -13332,7 +13332,7 @@ var X86Mods = {
     opModGrpWord43: function(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -13344,7 +13344,7 @@ var X86Mods = {
     opModGrpWord44: function(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -13356,7 +13356,7 @@ var X86Mods = {
     opModGrpWord45: function(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -13368,7 +13368,7 @@ var X86Mods = {
     opModGrpWord46: function(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -13380,7 +13380,7 @@ var X86Mods = {
     opModGrpWord47: function(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -13392,7 +13392,7 @@ var X86Mods = {
     opModGrpWord48: function(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -13404,7 +13404,7 @@ var X86Mods = {
     opModGrpWord49: function(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -13416,7 +13416,7 @@ var X86Mods = {
     opModGrpWord4A: function(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -13428,7 +13428,7 @@ var X86Mods = {
     opModGrpWord4B: function(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -13440,7 +13440,7 @@ var X86Mods = {
     opModGrpWord4C: function(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -13452,7 +13452,7 @@ var X86Mods = {
     opModGrpWord4D: function(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -13464,7 +13464,7 @@ var X86Mods = {
     opModGrpWord4E: function(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -13476,7 +13476,7 @@ var X86Mods = {
     opModGrpWord4F: function(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -13488,7 +13488,7 @@ var X86Mods = {
     opModGrpWord50: function(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -13500,7 +13500,7 @@ var X86Mods = {
     opModGrpWord51: function(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -13512,7 +13512,7 @@ var X86Mods = {
     opModGrpWord52: function(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -13524,7 +13524,7 @@ var X86Mods = {
     opModGrpWord53: function(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -13536,7 +13536,7 @@ var X86Mods = {
     opModGrpWord54: function(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -13548,7 +13548,7 @@ var X86Mods = {
     opModGrpWord55: function(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -13560,7 +13560,7 @@ var X86Mods = {
     opModGrpWord56: function(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -13572,7 +13572,7 @@ var X86Mods = {
     opModGrpWord57: function(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -13584,7 +13584,7 @@ var X86Mods = {
     opModGrpWord58: function(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -13596,7 +13596,7 @@ var X86Mods = {
     opModGrpWord59: function(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -13608,7 +13608,7 @@ var X86Mods = {
     opModGrpWord5A: function(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -13620,7 +13620,7 @@ var X86Mods = {
     opModGrpWord5B: function(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -13632,7 +13632,7 @@ var X86Mods = {
     opModGrpWord5C: function(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -13644,7 +13644,7 @@ var X86Mods = {
     opModGrpWord5D: function(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -13656,7 +13656,7 @@ var X86Mods = {
     opModGrpWord5E: function(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -13668,7 +13668,7 @@ var X86Mods = {
     opModGrpWord5F: function(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -13680,7 +13680,7 @@ var X86Mods = {
     opModGrpWord60: function(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -13692,7 +13692,7 @@ var X86Mods = {
     opModGrpWord61: function(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -13704,7 +13704,7 @@ var X86Mods = {
     opModGrpWord62: function(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -13716,7 +13716,7 @@ var X86Mods = {
     opModGrpWord63: function(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -13728,7 +13728,7 @@ var X86Mods = {
     opModGrpWord64: function(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -13740,7 +13740,7 @@ var X86Mods = {
     opModGrpWord65: function(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -13752,7 +13752,7 @@ var X86Mods = {
     opModGrpWord66: function(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -13764,7 +13764,7 @@ var X86Mods = {
     opModGrpWord67: function(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -13776,7 +13776,7 @@ var X86Mods = {
     opModGrpWord68: function(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -13788,7 +13788,7 @@ var X86Mods = {
     opModGrpWord69: function(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -13800,7 +13800,7 @@ var X86Mods = {
     opModGrpWord6A: function(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -13812,7 +13812,7 @@ var X86Mods = {
     opModGrpWord6B: function(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -13824,7 +13824,7 @@ var X86Mods = {
     opModGrpWord6C: function(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -13836,7 +13836,7 @@ var X86Mods = {
     opModGrpWord6D: function(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -13848,7 +13848,7 @@ var X86Mods = {
     opModGrpWord6E: function(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -13860,7 +13860,7 @@ var X86Mods = {
     opModGrpWord6F: function(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -13872,7 +13872,7 @@ var X86Mods = {
     opModGrpWord70: function(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -13884,7 +13884,7 @@ var X86Mods = {
     opModGrpWord71: function(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -13896,7 +13896,7 @@ var X86Mods = {
     opModGrpWord72: function(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -13908,7 +13908,7 @@ var X86Mods = {
     opModGrpWord73: function(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -13920,7 +13920,7 @@ var X86Mods = {
     opModGrpWord74: function(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -13932,7 +13932,7 @@ var X86Mods = {
     opModGrpWord75: function(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -13944,7 +13944,7 @@ var X86Mods = {
     opModGrpWord76: function(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -13956,7 +13956,7 @@ var X86Mods = {
     opModGrpWord77: function(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -13968,7 +13968,7 @@ var X86Mods = {
     opModGrpWord78: function(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -13980,7 +13980,7 @@ var X86Mods = {
     opModGrpWord79: function(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -13992,7 +13992,7 @@ var X86Mods = {
     opModGrpWord7A: function(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -14004,7 +14004,7 @@ var X86Mods = {
     opModGrpWord7B: function(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -14016,7 +14016,7 @@ var X86Mods = {
     opModGrpWord7C: function(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14028,7 +14028,7 @@ var X86Mods = {
     opModGrpWord7D: function(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14040,7 +14040,7 @@ var X86Mods = {
     opModGrpWord7E: function(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14052,7 +14052,7 @@ var X86Mods = {
     opModGrpWord7F: function(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14064,7 +14064,7 @@ var X86Mods = {
     opModGrpWord80: function(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -14076,7 +14076,7 @@ var X86Mods = {
     opModGrpWord81: function(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -14088,7 +14088,7 @@ var X86Mods = {
     opModGrpWord82: function(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -14100,7 +14100,7 @@ var X86Mods = {
     opModGrpWord83: function(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -14112,7 +14112,7 @@ var X86Mods = {
     opModGrpWord84: function(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14124,7 +14124,7 @@ var X86Mods = {
     opModGrpWord85: function(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14136,7 +14136,7 @@ var X86Mods = {
     opModGrpWord86: function(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14148,7 +14148,7 @@ var X86Mods = {
     opModGrpWord87: function(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14160,7 +14160,7 @@ var X86Mods = {
     opModGrpWord88: function(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -14172,7 +14172,7 @@ var X86Mods = {
     opModGrpWord89: function(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -14184,7 +14184,7 @@ var X86Mods = {
     opModGrpWord8A: function(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -14196,7 +14196,7 @@ var X86Mods = {
     opModGrpWord8B: function(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -14208,7 +14208,7 @@ var X86Mods = {
     opModGrpWord8C: function(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14220,7 +14220,7 @@ var X86Mods = {
     opModGrpWord8D: function(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14232,7 +14232,7 @@ var X86Mods = {
     opModGrpWord8E: function(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14244,7 +14244,7 @@ var X86Mods = {
     opModGrpWord8F: function(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14256,7 +14256,7 @@ var X86Mods = {
     opModGrpWord90: function(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -14268,7 +14268,7 @@ var X86Mods = {
     opModGrpWord91: function(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -14280,7 +14280,7 @@ var X86Mods = {
     opModGrpWord92: function(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -14292,7 +14292,7 @@ var X86Mods = {
     opModGrpWord93: function(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -14304,7 +14304,7 @@ var X86Mods = {
     opModGrpWord94: function(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14316,7 +14316,7 @@ var X86Mods = {
     opModGrpWord95: function(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14328,7 +14328,7 @@ var X86Mods = {
     opModGrpWord96: function(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14340,7 +14340,7 @@ var X86Mods = {
     opModGrpWord97: function(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14352,7 +14352,7 @@ var X86Mods = {
     opModGrpWord98: function(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -14364,7 +14364,7 @@ var X86Mods = {
     opModGrpWord99: function(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -14376,7 +14376,7 @@ var X86Mods = {
     opModGrpWord9A: function(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -14388,7 +14388,7 @@ var X86Mods = {
     opModGrpWord9B: function(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -14400,7 +14400,7 @@ var X86Mods = {
     opModGrpWord9C: function(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14412,7 +14412,7 @@ var X86Mods = {
     opModGrpWord9D: function(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14424,7 +14424,7 @@ var X86Mods = {
     opModGrpWord9E: function(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14436,7 +14436,7 @@ var X86Mods = {
     opModGrpWord9F: function(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14448,7 +14448,7 @@ var X86Mods = {
     opModGrpWordA0: function(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -14460,7 +14460,7 @@ var X86Mods = {
     opModGrpWordA1: function(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -14472,7 +14472,7 @@ var X86Mods = {
     opModGrpWordA2: function(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -14484,7 +14484,7 @@ var X86Mods = {
     opModGrpWordA3: function(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -14496,7 +14496,7 @@ var X86Mods = {
     opModGrpWordA4: function(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14508,7 +14508,7 @@ var X86Mods = {
     opModGrpWordA5: function(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14520,7 +14520,7 @@ var X86Mods = {
     opModGrpWordA6: function(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14532,7 +14532,7 @@ var X86Mods = {
     opModGrpWordA7: function(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14544,7 +14544,7 @@ var X86Mods = {
     opModGrpWordA8: function(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -14556,7 +14556,7 @@ var X86Mods = {
     opModGrpWordA9: function(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -14568,7 +14568,7 @@ var X86Mods = {
     opModGrpWordAA: function(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -14580,7 +14580,7 @@ var X86Mods = {
     opModGrpWordAB: function(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -14592,7 +14592,7 @@ var X86Mods = {
     opModGrpWordAC: function(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14604,7 +14604,7 @@ var X86Mods = {
     opModGrpWordAD: function(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14616,7 +14616,7 @@ var X86Mods = {
     opModGrpWordAE: function(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14628,7 +14628,7 @@ var X86Mods = {
     opModGrpWordAF: function(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14640,7 +14640,7 @@ var X86Mods = {
     opModGrpWordB0: function(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -14652,7 +14652,7 @@ var X86Mods = {
     opModGrpWordB1: function(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -14664,7 +14664,7 @@ var X86Mods = {
     opModGrpWordB2: function(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -14676,7 +14676,7 @@ var X86Mods = {
     opModGrpWordB3: function(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -14688,7 +14688,7 @@ var X86Mods = {
     opModGrpWordB4: function(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14700,7 +14700,7 @@ var X86Mods = {
     opModGrpWordB5: function(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14712,7 +14712,7 @@ var X86Mods = {
     opModGrpWordB6: function(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14724,7 +14724,7 @@ var X86Mods = {
     opModGrpWordB7: function(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14736,7 +14736,7 @@ var X86Mods = {
     opModGrpWordB8: function(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -14748,7 +14748,7 @@ var X86Mods = {
     opModGrpWordB9: function(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -14760,7 +14760,7 @@ var X86Mods = {
     opModGrpWordBA: function(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
      * @this {X86CPU}
@@ -14772,7 +14772,7 @@ var X86Mods = {
     opModGrpWordBB: function(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
      * @this {X86CPU}
@@ -14784,7 +14784,7 @@ var X86Mods = {
     opModGrpWordBC: function(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14796,7 +14796,7 @@ var X86Mods = {
     opModGrpWordBD: function(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14808,7 +14808,7 @@ var X86Mods = {
     opModGrpWordBE: function(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}
@@ -14820,7 +14820,7 @@ var X86Mods = {
     opModGrpWordBF: function(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.nEACyclesBaseDisp;
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
      * @this {X86CPU}

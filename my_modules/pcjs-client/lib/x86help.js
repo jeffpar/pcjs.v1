@@ -46,7 +46,7 @@ var X86Help = {
      * @return {number} dst (updated value, from src)
      */
     opHelpMOV: function(dst, src) {
-        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.nOpCyclesMovRR : this.nOpCyclesMovRM) : this.nOpCyclesMovMR);
+        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesMovRR : this.CYCLES.nOpCyclesMovRM) : this.CYCLES.nOpCyclesMovMR);
         return src;
     },
     /**
@@ -67,7 +67,7 @@ var X86Help = {
     opHelpTESTb: function(dst, src) {
         this.resultValue = this.resultParitySign = this.resultAuxOverflow = dst & src;
         this.resultSize = X86.RESULT.SIZE_BYTE;
-        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.nOpCyclesTestRR : this.nOpCyclesTestRM) : this.nOpCyclesTestRM);
+        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesTestRR : this.CYCLES.nOpCyclesTestRM) : this.CYCLES.nOpCyclesTestRM);
         if (FASTDISABLE) this.setEAByte = this.setEAByteDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
@@ -80,7 +80,7 @@ var X86Help = {
     opHelpTESTw: function(dst, src) {
         this.resultValue = this.resultParitySign = this.resultAuxOverflow = dst & src;
         this.resultSize = X86.RESULT.SIZE_WORD;
-        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.nOpCyclesTestRR : this.nOpCyclesTestRM) : this.nOpCyclesTestRM);
+        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesTestRR : this.CYCLES.nOpCyclesTestRM) : this.CYCLES.nOpCyclesTestRM);
         if (FASTDISABLE) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
@@ -180,7 +180,7 @@ var X86Help = {
             X86Help.opUndefined.call(this);
             return dst;
         }
-        this.nStepCycles -= this.nOpCyclesLEA;
+        this.nStepCycles -= this.CYCLES.nOpCyclesLEA;
         return this.regEA;
     },
     /**
@@ -195,7 +195,7 @@ var X86Help = {
             return dst;
         }
         this.setDS(this.getWord(this.regEA + 2));
-        this.nStepCycles -= this.nOpCyclesLS;
+        this.nStepCycles -= this.CYCLES.nOpCyclesLS;
         return src;
     },
     /**
@@ -210,7 +210,7 @@ var X86Help = {
             return dst;
         }
         this.setES(this.getWord(this.regEA + 2));
-        this.nStepCycles -= this.nOpCyclesLS;
+        this.nStepCycles -= this.CYCLES.nOpCyclesLS;
         return src;
     },
     /**
@@ -233,7 +233,7 @@ var X86Help = {
         var wIndex = (dst << 16) >> 16;
         var wLower = (this.getWord(this.regEA) << 16) >> 16;
         var wUpper = (this.getWord(this.regEA + 2) << 16) >> 16;
-        this.nStepCycles -= this.nOpCyclesBound;
+        this.nStepCycles -= this.CYCLES.nOpCyclesBound;
         if (wIndex < wLower || wIndex > wUpper) {
             /*
              * The INT 0x05 handler must be called with CS:IP pointing to the BOUND instruction.
@@ -347,7 +347,7 @@ var X86Help = {
             default:
                 break;      // there IS no other case, but JavaScript inspections don't know that
             }
-            this.nStepCycles -= this.nOpCyclesXchgRR;
+            this.nStepCycles -= this.CYCLES.nOpCyclesXchgRR;
         } else {
             /*
              * This is a case where the ModRM decoder that's calling us didn't know it should have called modEAByte()
@@ -355,7 +355,7 @@ var X86Help = {
              */
             this.regEAWrite = this.regEA;
             this.setEAByte(dst);
-            this.nStepCycles -= this.nOpCyclesXchgRM;
+            this.nStepCycles -= this.CYCLES.nOpCyclesXchgRM;
         }
         return src;
     },
@@ -395,7 +395,7 @@ var X86Help = {
             default:
                 break;      // there IS no other case, but JavaScript inspections don't know that
             }
-            this.nStepCycles -= this.nOpCyclesXchgRR;
+            this.nStepCycles -= this.CYCLES.nOpCyclesXchgRR;
         } else {
             /*
              * This is a case where the ModRM decoder that's calling us didn't know it should have called modEAByte()
@@ -403,7 +403,7 @@ var X86Help = {
              */
             this.regEAWrite = this.regEA;
             this.setEAWord(dst);
-            this.nStepCycles -= this.nOpCyclesXchgRM;
+            this.nStepCycles -= this.CYCLES.nOpCyclesXchgRM;
         }
         return src;
     },
@@ -421,7 +421,7 @@ var X86Help = {
             this.pushWord(this.regIP);
             if (nError != null) this.pushWord(nError);
             this.setCSIP(this.descIDT.off, this.descIDT.sel);
-            this.nStepCycles -= this.nOpCyclesInt + nCycles;
+            this.nStepCycles -= this.CYCLES.nOpCyclesInt + nCycles;
         }
         /*
          * TODO: Now what?

@@ -49,7 +49,7 @@ var X86Grps = {
     opGrpADDb: function(dst, src) {
         this.resultAuxOverflow = dst ^ src;
         this.resultSize = X86.RESULT.SIZE_BYTE;
-        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.nOpCyclesArithRR : this.nOpCyclesArithRM) : this.nOpCyclesArithMR);
+        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
         return (this.resultValue = this.resultParitySign = dst + src) & 0xff;
     },
     /**
@@ -60,7 +60,7 @@ var X86Grps = {
      */
     opGrpORb: function(dst, src) {
         this.resultSize = X86.RESULT.SIZE_BYTE;
-        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.nOpCyclesArithRR : this.nOpCyclesArithRM) : this.nOpCyclesArithMR);
+        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
         return (this.resultValue = this.resultParitySign = this.resultAuxOverflow = dst | src) & 0xff;
     },
     /**
@@ -76,7 +76,7 @@ var X86Grps = {
         this.resultAuxOverflow = dst ^ src;
         this.resultValue = this.resultParitySign = dst + src + ((this.resultValue & this.resultSize)? 1 : 0);
         this.resultSize = X86.RESULT.SIZE_BYTE;
-        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.nOpCyclesArithRR : this.nOpCyclesArithRM) : this.nOpCyclesArithMR);
+        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
         return this.resultValue & 0xff;
     },
     /**
@@ -92,7 +92,7 @@ var X86Grps = {
         this.resultAuxOverflow = dst ^ src;
         this.resultValue = this.resultParitySign = dst - src - ((this.resultValue & this.resultSize)? 1 : 0);
         this.resultSize = X86.RESULT.SIZE_BYTE;
-        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.nOpCyclesArithRR : this.nOpCyclesArithRM) : this.nOpCyclesArithMR);
+        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
         return this.resultValue & 0xff;
     },
     /**
@@ -103,7 +103,7 @@ var X86Grps = {
      */
     opGrpANDb: function(dst, src) {
         this.resultSize = X86.RESULT.SIZE_BYTE;
-        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.nOpCyclesArithRR : this.nOpCyclesArithRM) : this.nOpCyclesArithMR);
+        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
         return (this.resultValue = this.resultParitySign = this.resultAuxOverflow = dst & src) & 0xff;
     },
     /**
@@ -115,7 +115,7 @@ var X86Grps = {
     opGrpSUBb: function(dst, src) {
         this.resultAuxOverflow = dst ^ src;
         this.resultSize = X86.RESULT.SIZE_BYTE;
-        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.nOpCyclesArithRR : this.nOpCyclesArithRM) : this.nOpCyclesArithMR);
+        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
         return (this.resultValue = this.resultParitySign = dst - src) & 0xff;
     },
     /**
@@ -126,7 +126,7 @@ var X86Grps = {
      */
     opGrpXORb: function(dst, src) {
         this.resultSize = X86.RESULT.SIZE_BYTE;
-        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.nOpCyclesArithRR : this.nOpCyclesArithRM) : this.nOpCyclesArithMR);
+        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
         return (this.resultValue = this.resultParitySign = this.resultAuxOverflow = dst ^ src) & 0xff;
     },
     /**
@@ -139,7 +139,7 @@ var X86Grps = {
         this.resultAuxOverflow = dst ^ src;
         this.resultSize = X86.RESULT.SIZE_BYTE;
         this.resultValue = this.resultParitySign = dst - src;
-        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.nOpCyclesArithRR : this.nOpCyclesCompareRM) : this.nOpCyclesArithRM);
+        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesCompareRM) : this.CYCLES.nOpCyclesArithRM);
         if (FASTDISABLE) this.setEAByte = this.setEAByteDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
@@ -152,7 +152,7 @@ var X86Grps = {
     opGrpADDw: function(dst, src) {
         this.resultAuxOverflow = dst ^ src;
         this.resultSize = X86.RESULT.SIZE_WORD;
-        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.nOpCyclesArithRR : this.nOpCyclesArithRM) : this.nOpCyclesArithMR);
+        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
         return (this.resultValue = this.resultParitySign = dst + src) & 0xffff;
     },
     /**
@@ -163,7 +163,7 @@ var X86Grps = {
      */
     opGrpORw: function(dst, src) {
         this.resultSize = X86.RESULT.SIZE_WORD;
-        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.nOpCyclesArithRR : this.nOpCyclesArithRM) : this.nOpCyclesArithMR);
+        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
         return (this.resultValue = this.resultParitySign = this.resultAuxOverflow = dst | src) & 0xffff;
     },
     /**
@@ -179,7 +179,7 @@ var X86Grps = {
         this.resultAuxOverflow = dst ^ src;
         this.resultValue = this.resultParitySign = dst + src + ((this.resultValue & this.resultSize)? 1 : 0);
         this.resultSize = X86.RESULT.SIZE_WORD;
-        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.nOpCyclesArithRR : this.nOpCyclesArithRM) : this.nOpCyclesArithMR);
+        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
         return this.resultValue & 0xffff;
     },
     /**
@@ -195,7 +195,7 @@ var X86Grps = {
         this.resultAuxOverflow = dst ^ src;
         this.resultValue = this.resultParitySign = dst - src - ((this.resultValue & this.resultSize)? 1 : 0);
         this.resultSize = X86.RESULT.SIZE_WORD;
-        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.nOpCyclesArithRR : this.nOpCyclesArithRM) : this.nOpCyclesArithMR);
+        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
         return this.resultValue & 0xffff;
     },
     /**
@@ -206,7 +206,7 @@ var X86Grps = {
      */
     opGrpANDw: function(dst, src) {
         this.resultSize = X86.RESULT.SIZE_WORD;
-        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.nOpCyclesArithRR : this.nOpCyclesArithRM) : this.nOpCyclesArithMR);
+        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
         return (this.resultValue = this.resultParitySign = this.resultAuxOverflow = dst & src) & 0xffff;
     },
     /**
@@ -218,7 +218,7 @@ var X86Grps = {
     opGrpSUBw: function(dst, src) {
         this.resultAuxOverflow = dst ^ src;
         this.resultSize = X86.RESULT.SIZE_WORD;
-        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.nOpCyclesArithRR : this.nOpCyclesArithRM) : this.nOpCyclesArithMR);
+        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
         return (this.resultValue = this.resultParitySign = dst - src) & 0xffff;
     },
     /**
@@ -229,7 +229,7 @@ var X86Grps = {
      */
     opGrpXORw: function(dst, src) {
         this.resultSize = X86.RESULT.SIZE_WORD;
-        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.nOpCyclesArithRR : this.nOpCyclesArithRM) : this.nOpCyclesArithMR);
+        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
         return (this.resultValue = this.resultParitySign = this.resultAuxOverflow = dst ^ src) & 0xffff;
     },
     /**
@@ -242,7 +242,7 @@ var X86Grps = {
         this.resultAuxOverflow = dst ^ src;
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.resultValue = this.resultParitySign = dst - src;
-        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.nOpCyclesArithRR : this.nOpCyclesCompareRM) : this.nOpCyclesArithRM);
+        this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesCompareRM) : this.CYCLES.nOpCyclesArithRM);
         if (FASTDISABLE) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
@@ -253,7 +253,7 @@ var X86Grps = {
      * @return {number} dst (updated value, from src)
      */
     opGrpPOPw: function(dst, src) {
-        this.nStepCycles -= (this.regEAWrite < 0? this.nOpCyclesPopReg : this.nOpCyclesPopMem);
+        this.nStepCycles -= (this.regEAWrite < 0? this.CYCLES.nOpCyclesPopReg : this.CYCLES.nOpCyclesPopMem);
         return src;
     },
     /**
@@ -263,7 +263,7 @@ var X86Grps = {
      * @return {number} dst (updated value, from src)
      */
     opGrpMOVImm: function(dst, src) {
-        this.nStepCycles -= (this.regEAWrite < 0? this.nOpCyclesMovRI : this.nOpCyclesMovMI);
+        this.nStepCycles -= (this.regEAWrite < 0? this.CYCLES.nOpCyclesMovRI : this.CYCLES.nOpCyclesMovMI);
         return src;
     },
     /**
@@ -654,7 +654,7 @@ var X86Grps = {
         src = this.getIPByte();
         this.resultValue = this.resultParitySign = this.resultAuxOverflow = dst & src;
         this.resultSize = X86.RESULT.SIZE_BYTE;
-        this.nStepCycles -= (this.regEA < 0? this.nOpCyclesTestRI : this.nOpCyclesTestMI);
+        this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesTestRI : this.CYCLES.nOpCyclesTestMI);
         if (FASTDISABLE) this.setEAByte = this.setEAByteDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
@@ -668,7 +668,7 @@ var X86Grps = {
         src = this.getIPWord();
         this.resultValue = this.resultParitySign = this.resultAuxOverflow = dst & src;
         this.resultSize = X86.RESULT.SIZE_WORD;
-        this.nStepCycles -= (this.regEA < 0? this.nOpCyclesTestRI : this.nOpCyclesTestMI);
+        this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesTestRI : this.CYCLES.nOpCyclesTestMI);
         if (FASTDISABLE) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
@@ -679,7 +679,7 @@ var X86Grps = {
      * @return {number}
      */
     opGrpNOTb: function(dst, src) {
-        this.nStepCycles -= (this.regEA < 0? this.nOpCyclesNegR : this.nOpCyclesNegM);
+        this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesNegR : this.CYCLES.nOpCyclesNegM);
         return dst ^ 0xff;
     },
     /**
@@ -689,7 +689,7 @@ var X86Grps = {
      * @return {number}
      */
     opGrpNOTw: function(dst, src) {
-        this.nStepCycles -= (this.regEA < 0? this.nOpCyclesNegR : this.nOpCyclesNegM);
+        this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesNegR : this.CYCLES.nOpCyclesNegM);
         return dst ^ 0xffff;
     },
     /**
@@ -702,7 +702,7 @@ var X86Grps = {
         src = 0;
         this.resultAuxOverflow = dst ^ src;
         this.resultSize = X86.RESULT.SIZE_BYTE;
-        this.nStepCycles -= (this.regEA < 0? this.nOpCyclesNegR : this.nOpCyclesNegM);
+        this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesNegR : this.CYCLES.nOpCyclesNegM);
         return (this.resultValue = this.resultParitySign = src - dst) & 0xff;
     },
     /**
@@ -715,7 +715,7 @@ var X86Grps = {
         src = 0;
         this.resultAuxOverflow = dst ^ src;
         this.resultSize = X86.RESULT.SIZE_WORD;
-        this.nStepCycles -= (this.regEA < 0? this.nOpCyclesNegR : this.nOpCyclesNegM);
+        this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesNegR : this.CYCLES.nOpCyclesNegM);
         return (this.resultValue = this.resultParitySign = src - dst) & 0xffff;
     },
     /**
@@ -744,7 +744,7 @@ var X86Grps = {
          * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
          */
         if (DEBUG && DEBUGGER) this.traceLog('MULB', src, dst, null, this.getPS(), this.regMD16);
-        this.nStepCycles -= (this.regEA < 0? this.nOpCyclesMulBR : this.nOpCyclesMulBM);
+        this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesMulBR : this.CYCLES.nOpCyclesMulBM);
         if (FASTDISABLE) this.setEAByte = this.setEAByteDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
@@ -788,7 +788,7 @@ var X86Grps = {
          * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
          */
         if (DEBUG && DEBUGGER) this.traceLog('IMULB', src, dst, null, this.getPS(), this.regMD16);
-        this.nStepCycles -= (this.regEA < 0? this.nOpCyclesIMulBR : this.nOpCyclesIMulBM);
+        this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesIMulBR : this.CYCLES.nOpCyclesIMulBM);
         if (FASTDISABLE) this.setEAByte = this.setEAByteDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
@@ -827,7 +827,7 @@ var X86Grps = {
          * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
          */
         if (DEBUG && DEBUGGER) this.traceLog('DIVB', src, dst, null, this.getPS(), this.regMD16);
-        this.nStepCycles -= (this.regEA < 0? this.nOpCyclesDivBR : this.nOpCyclesDivBM);
+        this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesDivBR : this.CYCLES.nOpCyclesDivBM);
         if (FASTDISABLE) this.setEAByte = this.setEAByteDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
@@ -874,7 +874,7 @@ var X86Grps = {
          * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
          */
         if (DEBUG && DEBUGGER) this.traceLog('IDIVB', src, dst, null, this.getPS(), this.regMD16);
-        this.nStepCycles -= (this.regEA < 0? this.nOpCyclesIDivBR : this.nOpCyclesIDivBM);
+        this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesIDivBR : this.CYCLES.nOpCyclesIDivBM);
         if (FASTDISABLE) this.setEAByte = this.setEAByteDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
@@ -905,7 +905,7 @@ var X86Grps = {
          * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
          */
         if (DEBUG && DEBUGGER) this.traceLog('MULW', src, dst, null, this.getPS(), this.regMD16 | (this.regMD32 << 16));
-        this.nStepCycles -= (this.regEA < 0? this.nOpCyclesMulWR : this.nOpCyclesMulWM);
+        this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesMulWR : this.CYCLES.nOpCyclesMulWM);
         if (FASTDISABLE) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
@@ -950,7 +950,7 @@ var X86Grps = {
          * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
          */
         if (DEBUG && DEBUGGER) this.traceLog('IMULW', src, dst, null, this.getPS(), this.regMD16 | (this.regMD32 << 16));
-        this.nStepCycles -= (this.regEA < 0? this.nOpCyclesIMulWR : this.nOpCyclesIMulWM);
+        this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesIMulWR : this.CYCLES.nOpCyclesIMulWM);
         if (FASTDISABLE) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
@@ -995,7 +995,7 @@ var X86Grps = {
          * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
          */
         if (DEBUG && DEBUGGER) this.traceLog('DIVW', src, dst, null, this.getPS(), this.regMD16 | (this.regMD32 << 16));
-        this.nStepCycles -= (this.regEA < 0? this.nOpCyclesDivWR : this.nOpCyclesDivWM);
+        this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesDivWR : this.CYCLES.nOpCyclesDivWM);
         if (FASTDISABLE) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
@@ -1045,7 +1045,7 @@ var X86Grps = {
          * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
          */
         if (DEBUG && DEBUGGER) this.traceLog('IDIVW', src, dst, null, this.getPS(), this.regMD16 | (this.regMD32 << 16));
-        this.nStepCycles -= (this.regEA < 0? this.nOpCyclesIDivWR : this.nOpCyclesIDivWM);
+        this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesIDivWR : this.CYCLES.nOpCyclesIDivWM);
         if (FASTDISABLE) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
@@ -1060,7 +1060,7 @@ var X86Grps = {
         dst = (this.resultParitySign = dst + 1) & 0xff;
         this.resultValue = dst | (((this.resultValue & this.resultSize)? 1 : 0) << 8);
         this.resultSize = X86.RESULT.SIZE_BYTE;
-        this.nStepCycles -= (this.regEA < 0? this.nOpCyclesIncR : this.nOpCyclesIncM);
+        this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesIncR : this.CYCLES.nOpCyclesIncM);
         return dst;
     },
     /**
@@ -1074,7 +1074,7 @@ var X86Grps = {
         dst = (this.resultParitySign = dst - 1) & 0xff;
         this.resultValue = dst | (((this.resultValue & this.resultSize)? 1 : 0) << 8);
         this.resultSize = X86.RESULT.SIZE_BYTE;
-        this.nStepCycles -= (this.regEA < 0? this.nOpCyclesIncR : this.nOpCyclesIncM);
+        this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesIncR : this.CYCLES.nOpCyclesIncM);
         return dst;
     },
     /**
@@ -1088,7 +1088,7 @@ var X86Grps = {
         dst = (this.resultParitySign = dst + 1) & 0xffff;
         this.resultValue = dst | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
-        this.nStepCycles -= (this.regEA < 0? this.nOpCyclesIncR : this.nOpCyclesIncM);
+        this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesIncR : this.CYCLES.nOpCyclesIncM);
         return dst;
     },
     /**
@@ -1102,7 +1102,7 @@ var X86Grps = {
         dst = (this.resultParitySign = dst - 1) & 0xffff;
         this.resultValue = dst | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
-        this.nStepCycles -= (this.regEA < 0? this.nOpCyclesIncR : this.nOpCyclesIncM);
+        this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesIncR : this.CYCLES.nOpCyclesIncM);
         return dst;
     },
     /**
@@ -1114,7 +1114,7 @@ var X86Grps = {
     opGrpCALLw: function(dst, src) {
         this.pushWord(this.regIP);
         this.setIP(dst);
-        this.nStepCycles -= (this.regEA < 0? this.nOpCyclesCallWR : this.nOpCyclesCallWM);
+        this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesCallWR : this.CYCLES.nOpCyclesCallWM);
         if (FASTDISABLE) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
@@ -1131,7 +1131,7 @@ var X86Grps = {
         this.pushWord(this.segCS.sel);
         this.pushWord(this.regIP);
         this.setCSIP(dst, this.getWord(this.regEA + 2));
-        this.nStepCycles -= this.nOpCyclesCallDM;
+        this.nStepCycles -= this.CYCLES.nOpCyclesCallDM;
         if (FASTDISABLE) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
@@ -1143,7 +1143,7 @@ var X86Grps = {
      */
     opGrpJMPw: function(dst, src) {
         this.setIP(dst);
-        this.nStepCycles -= (this.regEA < 0? this.nOpCyclesJmpWR : this.nOpCyclesJmpWM);
+        this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesJmpWR : this.CYCLES.nOpCyclesJmpWM);
         if (FASTDISABLE) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
@@ -1158,7 +1158,7 @@ var X86Grps = {
             return X86Grps.opGrpUndefined.call(this, dst, src);
         }
         this.setCSIP(dst, this.getWord(this.regEA + 2));
-        this.nStepCycles -= this.nOpCyclesJmpDM;
+        this.nStepCycles -= this.CYCLES.nOpCyclesJmpDM;
         if (FASTDISABLE) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
@@ -1183,7 +1183,7 @@ var X86Grps = {
             if (this.model < X86.MODEL_80286) w = dst;
         }
         this.pushWord(w);
-        this.nStepCycles -= (this.regEA < 0? this.nOpCyclesPushReg : this.nOpCyclesPushMem);
+        this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesPushReg : this.CYCLES.nOpCyclesPushMem);
         /*
          * The PUSH is the only write that needs to occur; dst was the source operand and does not need to be rewritten.
          */
@@ -1195,7 +1195,7 @@ var X86Grps = {
      * @return {number}
      */
     opGrp2Count1: function() {
-        this.nStepCycles -= (this.regEA < 0? 2 : this.nOpCyclesShift1M);
+        this.nStepCycles -= (this.regEA < 0? 2 : this.CYCLES.nOpCyclesShift1M);
         return 1;
     },
     /**
@@ -1204,7 +1204,7 @@ var X86Grps = {
      */
     opGrp2CountCL: function() {
         var count = this.regCX & this.nShiftCountMask;
-        this.nStepCycles -= (this.regEA < 0? this.nOpCyclesShiftCR : this.nOpCyclesShiftCM) + (count << this.nOpCyclesShiftCS);
+        this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesShiftCR : this.CYCLES.nOpCyclesShiftCM) + (count << this.CYCLES.nOpCyclesShiftCS);
         return count;
     },
     /**
@@ -1213,7 +1213,7 @@ var X86Grps = {
      */
     opGrp2CountImm: function() {
         var count = this.getIPByte();
-        this.nStepCycles -= (this.regEA < 0? this.nOpCyclesShiftCR : this.nOpCyclesShiftCM) + (count << this.nOpCyclesShiftCS);
+        this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesShiftCR : this.CYCLES.nOpCyclesShiftCM) + (count << this.CYCLES.nOpCyclesShiftCS);
         return count;
     },
     /**

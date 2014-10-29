@@ -167,6 +167,238 @@ function X86CPU(parmsCPU) {
 
 Component.subclass(CPU, X86CPU);
 
+X86CPU.CYCLES_8088 = {
+    nWordCyclePenalty:          4,      // NOTE: accurate for the 8088/80188 only (on the 8086/80186, it applies to odd addresses only)
+    nEACyclesBase:              5,      // base or index only (BX, BP, SI or DI)
+    nEACyclesDisp:              6,      // displacement only
+    nEACyclesBaseIndex:         7,      // base + index (BP+DI and BX+SI)
+    nEACyclesBaseIndexExtra:    8,      // base + index (BP+SI and BX+DI require an extra cycle)
+    nEACyclesBaseDisp:          9,      // base or index + displacement
+    nEACyclesBaseIndexDisp:     11,     // base + index + displacement (BP+DI+n and BX+SI+n)
+    nEACyclesBaseIndexDispExtra:12,     // base + index + displacement (BP+SI+n and BX+DI+n require an extra cycle)
+    nOpCyclesAAA:               4,      // AAA, AAS, DAA, DAS, TEST acc,imm
+    nOpCyclesAAD:               60,
+    nOpCyclesAAM:               83,
+    nOpCyclesArithRR:           3,      // ADC, ADD, AND, OR, SBB, SUB, XOR and CMP reg,reg cycle time
+    nOpCyclesArithRM:           9,      // ADC, ADD, AND, OR, SBB, SUB, and XOR reg,mem (and CMP mem,reg) cycle time
+    nOpCyclesArithMR:           16,     // ADC, ADD, AND, OR, SBB, SUB, and XOR mem,reg cycle time
+    nOpCyclesArithMID:          1,      // ADC, ADD, AND, OR, SBB, SUB, XOR and CMP mem,imm cycle delta
+    nOpCyclesCall:              19,
+    nOpCyclesCallF:             28,
+    nOpCyclesCallWR:            16,
+    nOpCyclesCallWM:            21,
+    nOpCyclesCallDM:            37,
+    nOpCyclesCLI:               2,
+    nOpCyclesCompareRM:         9,      // CMP reg,mem cycle time (same as nOpCyclesArithRM on an 8086 but not on a 80286)
+    nOpCyclesCWD:               5,
+    nOpCyclesBound:             33,     // N/A if 8086/8088, 33-35 if 80186/80188 (TODO: Determine what the range means for an 80186/80188)
+    nOpCyclesInP:               10,
+    nOpCyclesInDX:              8,
+    nOpCyclesIncR:              3,      // INC reg, DEC reg
+    nOpCyclesIncM:              15,     // INC mem, DEC mem
+    nOpCyclesInt:               51,
+    nOpCyclesInt3D:             1,
+    nOpCyclesIntOD:             2,
+    nOpCyclesIntOFall:          4,
+    nOpCyclesIRet:              32,
+    nOpCyclesJmp:               15,
+    nOpCyclesJmpF:              15,
+    nOpCyclesJmpC:              16,
+    nOpCyclesJmpCFall:          4,
+    nOpCyclesJmpWR:             11,
+    nOpCyclesJmpWM:             18,
+    nOpCyclesJmpDM:             24,
+    nOpCyclesLAHF:              4,      // LAHF, SAHF, MOV reg,imm
+    nOpCyclesLEA:               2,
+    nOpCyclesLS:                16,     // LDS, LES
+    nOpCyclesLoop:              17,     // LOOP, LOOPNZ
+    nOpCyclesLoopZ:             18,     // LOOPZ, JCXZ
+    nOpCyclesLoopNZ:            19,     // LOOPNZ
+    nOpCyclesLoopFall:          5,      // LOOP
+    nOpCyclesLoopZFall:         6,      // LOOPZ, JCXZ
+    nOpCyclesMovRR:             2,
+    nOpCyclesMovRM:             8,
+    nOpCyclesMovMR:             9,
+    nOpCyclesMovRI:             10,
+    nOpCyclesMovMI:             10,
+    nOpCyclesMovAM:             10,
+    nOpCyclesMovMA:             10,
+    nOpCyclesDivBR:             80,     // range of 80-90
+    nOpCyclesDivWR:             144,    // range of 144-162
+    nOpCyclesDivBM:             86,     // range of 86-96
+    nOpCyclesDivWM:             154,    // range of 154-172
+    nOpCyclesIDivBR:            101,    // range of 101-112
+    nOpCyclesIDivWR:            165,    // range of 165-184
+    nOpCyclesIDivBM:            107,    // range of 107-118
+    nOpCyclesIDivWM:            171,    // range of 171-190
+    nOpCyclesMulBR:             70,     // range of 70-77
+    nOpCyclesMulWR:             113,    // range of 113-118
+    nOpCyclesMulBM:             76,     // range of 76-83
+    nOpCyclesMulWM:             124,    // range of 124-139
+    nOpCyclesIMulBR:            80,     // range of 80-98
+    nOpCyclesIMulWR:            128,    // range of 128-154
+    nOpCyclesIMulBM:            86,     // range of 86-104
+    nOpCyclesIMulWM:            134,    // range of 134-160
+    nOpCyclesNegR:              3,      // NEG reg, NOT reg
+    nOpCyclesNegM:              16,     // NEG mem, NOT mem
+    nOpCyclesOutP:              10,
+    nOpCyclesOutDX:             8,
+    nOpCyclesPopAll:            51,     // N/A if 8086/8088, 51 if 80186, 83 if 80188 (TODO: Verify)
+    nOpCyclesPopReg:            8,
+    nOpCyclesPopMem:            17,
+    nOpCyclesPushAll:           36,     // N/A if 8086/8088, 36 if 80186, 68 if 80188 (TODO: Verify)
+    nOpCyclesPushReg:           11,     // NOTE: "The 8086 Book" claims this is 10, but it's an outlier....
+    nOpCyclesPushMem:           16,
+    nOpCyclesPushSeg:           10,
+    nOpCyclesPrefix:            2,
+    nOpCyclesCmpS:              18,
+    nOpCyclesCmpSr0:            9-2,    // reduced by nOpCyclesPrefix
+    nOpCyclesCmpSrn:            17-2,   // reduced by nOpCyclesPrefix
+    nOpCyclesLodS:              12,
+    nOpCyclesLodSr0:            9-2,    // reduced by nOpCyclesPrefix
+    nOpCyclesLodSrn:            13-2,   // reduced by nOpCyclesPrefix
+    nOpCyclesMovS:              18,
+    nOpCyclesMovSr0:            9-2,    // reduced by nOpCyclesPrefix
+    nOpCyclesMovSrn:            17-2,   // reduced by nOpCyclesPrefix
+    nOpCyclesScaS:              15,
+    nOpCyclesScaSr0:            9-2,    // reduced by nOpCyclesPrefix
+    nOpCyclesScaSrn:            15-2,   // reduced by nOpCyclesPrefix
+    nOpCyclesStoS:              11,
+    nOpCyclesStoSr0:            9-2,    // reduced by nOpCyclesPrefix
+    nOpCyclesStoSrn:            10-2,   // reduced by nOpCyclesPrefix
+    nOpCyclesRet:               8,
+    nOpCyclesRetn:              12,
+    nOpCyclesRetF:              18,
+    nOpCyclesRetFn:             17,
+    nOpCyclesShift1M:           15,     // ROL/ROR/RCL/RCR/SHL/SHR/SAR reg,1
+    nOpCyclesShiftCR:           8,      // ROL/ROR/RCL/RCR/SHL/SHR/SAR reg,CL
+    nOpCyclesShiftCM:           20,     // ROL/ROR/RCL/RCR/SHL/SHR/SAR mem,CL
+    nOpCyclesShiftCS:           2,      // this is the left-shift value used to convert the count to the cycle cost
+    nOpCyclesTestRR:            3,
+    nOpCyclesTestRM:            9,
+    nOpCyclesTestRI:            5,
+    nOpCyclesTestMI:            11,
+    nOpCyclesXchgRR:            4,
+    nOpCyclesXchgRM:            17,
+    nOpCyclesXLAT:              11
+};
+
+X86CPU.CYCLES_80286 = {
+    nWordCyclePenalty:          0,
+    nEACyclesBase:              0,
+    nEACyclesDisp:              0,
+    nEACyclesBaseIndex:         0,
+    nEACyclesBaseIndexExtra:    0,
+    nEACyclesBaseDisp:          0,
+    nEACyclesBaseIndexDisp:     1,
+    nEACyclesBaseIndexDispExtra:1,
+    nOpCyclesAAA:               3,
+    nOpCyclesAAD:               14,
+    nOpCyclesAAM:               16,
+    nOpCyclesArithRR:           2,
+    nOpCyclesArithRM:           7,
+    nOpCyclesArithMR:           7,
+    nOpCyclesArithMID:          0,
+    nOpCyclesCall:              7,      // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesCallF:             13,     // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesCallWR:            7,      // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesCallWM:            11,     // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesCallDM:            16,     // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesCLI:               3,
+    nOpCyclesCompareRM:         6,
+    nOpCyclesCWD:               2,
+    nOpCyclesBound:             13,
+    nOpCyclesInP:               5,
+    nOpCyclesInDX:              5,
+    nOpCyclesIncR:              2,
+    nOpCyclesIncM:              7,
+    nOpCyclesInt:               23,     // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesInt3D:             0,
+    nOpCyclesIntOD:             1,
+    nOpCyclesIntOFall:          3,
+    nOpCyclesIRet:              17,     // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesJmp:               7,      // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesJmpF:              11,     // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesJmpC:              7,      // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesJmpCFall:          3,
+    nOpCyclesJmpWR:             7,      // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesJmpWM:             11,     // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesJmpDM:             15,     // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesLAHF:              2,
+    nOpCyclesLEA:               3,
+    nOpCyclesLS:                7,
+    nOpCyclesLoop:              8,      // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesLoopZ:             8,      // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesLoopNZ:            8,      // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesLoopFall:          4,
+    nOpCyclesLoopZFall:         4,
+    nOpCyclesMovRR:             2,      // this is actually the same as the 8086...
+    nOpCyclesMovRM:             3,
+    nOpCyclesMovMR:             5,
+    nOpCyclesMovRI:             2,
+    nOpCyclesMovMI:             3,
+    nOpCyclesMovAM:             5,      // this is actually slower than the MOD/RM form of MOV AX,mem (see nOpCyclesMovRM)
+    nOpCyclesMovMA:             3,
+    nOpCyclesDivBR:             14,
+    nOpCyclesDivWR:             22,
+    nOpCyclesDivBM:             17,
+    nOpCyclesDivWM:             25,
+    nOpCyclesIDivBR:            17,
+    nOpCyclesIDivWR:            25,
+    nOpCyclesIDivBM:            20,
+    nOpCyclesIDivWM:            28,
+    nOpCyclesMulBR:             13,
+    nOpCyclesMulWR:             21,
+    nOpCyclesMulBM:             16,
+    nOpCyclesMulWM:             24,
+    nOpCyclesIMulBR:            13,
+    nOpCyclesIMulWR:            21,
+    nOpCyclesIMulBM:            16,
+    nOpCyclesIMulWM:            24,
+    nOpCyclesNegR:              2,
+    nOpCyclesNegM:              7,
+    nOpCyclesOutP:              5,
+    nOpCyclesOutDX:             5,
+    nOpCyclesPopAll:            19,
+    nOpCyclesPopReg:            5,
+    nOpCyclesPopMem:            5,
+    nOpCyclesPushAll:           17,
+    nOpCyclesPushReg:           3,
+    nOpCyclesPushMem:           5,
+    nOpCyclesPushSeg:           3,
+    nOpCyclesPrefix:            0,
+    nOpCyclesCmpS:              8,
+    nOpCyclesCmpSr0:            5,
+    nOpCyclesCmpSrn:            9,
+    nOpCyclesLodS:              5,
+    nOpCyclesLodSr0:            5,
+    nOpCyclesLodSrn:            4,
+    nOpCyclesMovS:              5,
+    nOpCyclesMovSr0:            5,
+    nOpCyclesMovSrn:            4,
+    nOpCyclesScaS:              7,
+    nOpCyclesScaSr0:            5,
+    nOpCyclesScaSrn:            8,
+    nOpCyclesStoS:              3,
+    nOpCyclesStoSr0:            4,
+    nOpCyclesStoSrn:            3,
+    nOpCyclesRet:               11,     // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesRetn:              11,     // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesRetF:              15,     // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesRetFn:             15,     // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesShift1M:           7,
+    nOpCyclesShiftCR:           5,
+    nOpCyclesShiftCM:           8,
+    nOpCyclesShiftCS:           0,
+    nOpCyclesTestRR:            2,
+    nOpCyclesTestRM:            6,
+    nOpCyclesTestRI:            3,
+    nOpCyclesTestMI:            6,
+    nOpCyclesXchgRR:            3,
+    nOpCyclesXchgRM:            5,
+    nOpCyclesXLAT:              5
+};
+
 /**
  * Memory Simulation Notes
  *
@@ -442,123 +674,7 @@ X86CPU.prototype.initProcessor = function()
     this.OPFLAG_NOINTR8086 = X86.OPFLAG.NOINTR;
     this.nShiftCountMask = 0xff;            // on an 8086/8088, there effectively is NO mask
 
-    /*
-     * TODO: Make sure all segment overrides impose an additional 2-cycle penalty
-     */
-    this.nWordCyclePenalty           = 4;   // NOTE: accurate for the 8088/80188 only (on the 8086/80186, it applies to odd addresses only)
-    this.nEACyclesBase               = 5;   // base or index only (BX, BP, SI or DI)
-    this.nEACyclesDisp               = 6;   // displacement only
-    this.nEACyclesBaseIndex          = 7;   // base + index (BP+DI and BX+SI)
-    this.nEACyclesBaseIndexExtra     = 8;   // base + index (BP+SI and BX+DI require an extra cycle)
-    this.nEACyclesBaseDisp           = 9;   // base or index + displacement
-    this.nEACyclesBaseIndexDisp      = 11;  // base + index + displacement (BP+DI+n and BX+SI+n)
-    this.nEACyclesBaseIndexDispExtra = 12;  // base + index + displacement (BP+SI+n and BX+DI+n require an extra cycle)
-
-    this.nOpCyclesAAA       = 4;            // AAA, AAS, DAA, DAS, TEST acc,imm
-    this.nOpCyclesAAD       = 60;
-    this.nOpCyclesAAM       = 83;
-    this.nOpCyclesArithRR   = 3;            // ADC, ADD, AND, OR, SBB, SUB, XOR and CMP reg,reg cycle time
-    this.nOpCyclesArithRM   = 9;            // ADC, ADD, AND, OR, SBB, SUB, and XOR reg,mem (and CMP mem,reg) cycle time
-    this.nOpCyclesArithMR   = 16;           // ADC, ADD, AND, OR, SBB, SUB, and XOR mem,reg cycle time
-    this.nOpCyclesArithMID  = 1;            // ADC, ADD, AND, OR, SBB, SUB, XOR and CMP mem,imm cycle delta
-    this.nOpCyclesCall      = 19;
-    this.nOpCyclesCallF     = 28;
-    this.nOpCyclesCallWR    = 16;
-    this.nOpCyclesCallWM    = 21;
-    this.nOpCyclesCallDM    = 37;
-    this.nOpCyclesCLI       = 2;
-    this.nOpCyclesCompareRM = 9;            // CMP reg,mem cycle time (same as nOpCyclesArithRM on an 8086 but not on a 80286)
-    this.nOpCyclesCWD       = 5;
-    this.nOpCyclesBound     = 33;           // N/A if 8086/8088, 33-35 if 80186/80188 (TODO: Determine what the range means for an 80186/80188)
-    this.nOpCyclesInP       = 10;
-    this.nOpCyclesInDX      = 8;
-    this.nOpCyclesIncR      = 3;            // INC reg, DEC reg
-    this.nOpCyclesIncM      = 15;           // INC mem, DEC mem
-    this.nOpCyclesInt       = 51;
-    this.nOpCyclesInt3D     = 1;
-    this.nOpCyclesIntOD     = 2;
-    this.nOpCyclesIntOFall  = 4;
-    this.nOpCyclesIRet      = 32;
-    this.nOpCyclesJmp       = 15;
-    this.nOpCyclesJmpF      = 15;
-    this.nOpCyclesJmpC      = 16;
-    this.nOpCyclesJmpCFall  = 4;
-    this.nOpCyclesJmpWR     = 11;
-    this.nOpCyclesJmpWM     = 18;
-    this.nOpCyclesJmpDM     = 24;
-    this.nOpCyclesLAHF      = 4;            // LAHF, SAHF, MOV reg,imm
-    this.nOpCyclesLEA       = 2;
-    this.nOpCyclesLS        = 16;           // LDS, LES
-    this.nOpCyclesLoop      = 17;           // LOOP, LOOPNZ
-    this.nOpCyclesLoopZ     = 18;           // LOOPZ, JCXZ
-    this.nOpCyclesLoopNZ    = 19;           // LOOPNZ
-    this.nOpCyclesLoopFall  = 5;            // LOOP
-    this.nOpCyclesLoopZFall = 6;            // LOOPZ, JCXZ
-    this.nOpCyclesMovRR     = 2;
-    this.nOpCyclesMovRM     = 8;
-    this.nOpCyclesMovMR     = 9;
-    this.nOpCyclesMovRI     = 10;
-    this.nOpCyclesMovMI     = 10;
-    this.nOpCyclesMovAM     = 10;
-    this.nOpCyclesMovMA     = 10;
-    this.nOpCyclesDivBR     = 80;           // range of 80-90
-    this.nOpCyclesDivWR     = 144;          // range of 144-162
-    this.nOpCyclesDivBM     = 86;           // range of 86-96
-    this.nOpCyclesDivWM     = 154;          // range of 154-172
-    this.nOpCyclesIDivBR    = 101;          // range of 101-112
-    this.nOpCyclesIDivWR    = 165;          // range of 165-184
-    this.nOpCyclesIDivBM    = 107;          // range of 107-118
-    this.nOpCyclesIDivWM    = 171;          // range of 171-190
-    this.nOpCyclesMulBR     = 70;           // range of 70-77
-    this.nOpCyclesMulWR     = 113;          // range of 113-118
-    this.nOpCyclesMulBM     = 76;           // range of 76-83
-    this.nOpCyclesMulWM     = 124;          // range of 124-139
-    this.nOpCyclesIMulBR    = 80;           // range of 80-98
-    this.nOpCyclesIMulWR    = 128;          // range of 128-154
-    this.nOpCyclesIMulBM    = 86;           // range of 86-104
-    this.nOpCyclesIMulWM    = 134;          // range of 134-160
-    this.nOpCyclesNegR      = 3;            // NEG reg, NOT reg
-    this.nOpCyclesNegM      = 16;           // NEG mem, NOT mem
-    this.nOpCyclesOutP      = 10;
-    this.nOpCyclesOutDX     = 8;
-    this.nOpCyclesPopAll    = 51;           // N/A if 8086/8088, 51 if 80186, 83 if 80188 (TODO: Verify)
-    this.nOpCyclesPopReg    = 8;
-    this.nOpCyclesPopMem    = 17;
-    this.nOpCyclesPushAll   = 36;           // N/A if 8086/8088, 36 if 80186, 68 if 80188 (TODO: Verify)
-    this.nOpCyclesPushReg   = 11;           // NOTE: "The 8086 Book" claims this is 10, but it's an outlier....
-    this.nOpCyclesPushMem   = 16;
-    this.nOpCyclesPushSeg   = 10;
-    this.nOpCyclesPrefix    = 2;
-    this.nOpCyclesCmpS      = 18;
-    this.nOpCyclesCmpSr0    = 9  - this.nOpCyclesPrefix;
-    this.nOpCyclesCmpSrn    = 17 - this.nOpCyclesPrefix;
-    this.nOpCyclesLodS      = 12;
-    this.nOpCyclesLodSr0    = 9  - this.nOpCyclesPrefix;
-    this.nOpCyclesLodSrn    = 13 - this.nOpCyclesPrefix;
-    this.nOpCyclesMovS      = 18;
-    this.nOpCyclesMovSr0    = 9  - this.nOpCyclesPrefix;
-    this.nOpCyclesMovSrn    = 17 - this.nOpCyclesPrefix;
-    this.nOpCyclesScaS      = 15;
-    this.nOpCyclesScaSr0    = 9  - this.nOpCyclesPrefix;
-    this.nOpCyclesScaSrn    = 15 - this.nOpCyclesPrefix;
-    this.nOpCyclesStoS      = 11;
-    this.nOpCyclesStoSr0    = 9  - this.nOpCyclesPrefix;
-    this.nOpCyclesStoSrn    = 10 - this.nOpCyclesPrefix;
-    this.nOpCyclesRet       = 8;
-    this.nOpCyclesRetn      = 12;
-    this.nOpCyclesRetF      = 18;
-    this.nOpCyclesRetFn     = 17;
-    this.nOpCyclesShift1M   = 15;           // ROL/ROR/RCL/RCR/SHL/SHR/SAR reg,1
-    this.nOpCyclesShiftCR   = 8;            // ROL/ROR/RCL/RCR/SHL/SHR/SAR reg,CL
-    this.nOpCyclesShiftCM   = 20;           // ROL/ROR/RCL/RCR/SHL/SHR/SAR mem,CL
-    this.nOpCyclesShiftCS   = 2;            // this is the left-shift value used to convert the count to the cycle cost
-    this.nOpCyclesTestRR    = 3;
-    this.nOpCyclesTestRM    = 9;
-    this.nOpCyclesTestRI    = 5;
-    this.nOpCyclesTestMI    = 11;
-    this.nOpCyclesXchgRR    = 4;
-    this.nOpCyclesXchgRM    = 17;
-    this.nOpCyclesXLAT      = 11;
+    this.CYCLES = (this.model >= X86.MODEL_80286? X86CPU.CYCLES_80286 : X86CPU.CYCLES_8088);
 
     this.aOps = X86OpXX.aOps.slice();       // make a copy of aOps before modifying it
 
@@ -570,7 +686,6 @@ X86CPU.prototype.initProcessor = function()
          * opOUTSw, opENTER, and opLEAVE.
          */
         this.nShiftCountMask = 0x1f;        // on newer processors, all shift counts are MOD 32
-
         this.aOps[0x0F]             = X86Help.opInvalid;
         this.aOps[X86.OPCODE.PUSHA] = X86OpXX.opPUSHA;
         this.aOps[X86.OPCODE.POPA]  = X86OpXX.opPOPA;
@@ -599,125 +714,9 @@ X86CPU.prototype.initProcessor = function()
         if (this.model >= X86.MODEL_80286) {
             this.PS_SET = X86.PS.BIT1;      // on the 80286, only BIT1 of Processor Status (flags) is always set
             this.OPFLAG_NOINTR8086 = 0;     // used with instructions that should *not* set NOINTR on an 80286 (eg, non-SS segment loads)
-
             this.aOps[0x0F] = X86OpXX.op0F;
             this.aOps[X86.OPCODE.ARPL]  = X86OpXX.opARPL;
             this.aOps[X86.OPCODE.PUSHSP]= X86OpXX.op286PUSHSP;
-
-            this.nWordCyclePenalty           = 0;
-            this.nEACyclesBase               = 0;
-            this.nEACyclesDisp               = 0;
-            this.nEACyclesBaseIndex          = 0;
-            this.nEACyclesBaseIndexExtra     = 0;
-            this.nEACyclesBaseDisp           = 0;
-            this.nEACyclesBaseIndexDisp      = 1;
-            this.nEACyclesBaseIndexDispExtra = 1;
-
-            this.nOpCyclesAAA       = 3;
-            this.nOpCyclesAAD       = 14;
-            this.nOpCyclesAAM       = 16;
-            this.nOpCyclesArithRR   = 2;
-            this.nOpCyclesArithRM   = 7;
-            this.nOpCyclesArithMR   = 7;
-            this.nOpCyclesArithMID  = 0;
-            this.nOpCyclesCall      = 7;    // on the 80286, this ALSO includes the number of bytes in the target instruction
-            this.nOpCyclesCallF     = 13;   // on the 80286, this ALSO includes the number of bytes in the target instruction
-            this.nOpCyclesCallWR    = 7;    // on the 80286, this ALSO includes the number of bytes in the target instruction
-            this.nOpCyclesCallWM    = 11;   // on the 80286, this ALSO includes the number of bytes in the target instruction
-            this.nOpCyclesCallDM    = 16;   // on the 80286, this ALSO includes the number of bytes in the target instruction
-            this.nOpCyclesCLI       = 3;
-            this.nOpCyclesCompareRM = 6;
-            this.nOpCyclesCWD       = 2;
-            this.nOpCyclesBound     = 13;
-            this.nOpCyclesInP       = 5;
-            this.nOpCyclesInDX      = 5;
-            this.nOpCyclesIncR      = 2;
-            this.nOpCyclesIncM      = 7;
-            this.nOpCyclesInt       = 23;   // on the 80286, this ALSO includes the number of bytes in the target instruction
-            this.nOpCyclesInt3D     = 0;
-            this.nOpCyclesIntOD     = 1;
-            this.nOpCyclesIntOFall  = 3;
-            this.nOpCyclesIRet      = 17;   // on the 80286, this ALSO includes the number of bytes in the target instruction
-            this.nOpCyclesJmp       = 7;    // on the 80286, this ALSO includes the number of bytes in the target instruction
-            this.nOpCyclesJmpF      = 11;   // on the 80286, this ALSO includes the number of bytes in the target instruction
-            this.nOpCyclesJmpC      = 7;    // on the 80286, this ALSO includes the number of bytes in the target instruction
-            this.nOpCyclesJmpCFall  = 3;
-            this.nOpCyclesJmpWR     = 7;    // on the 80286, this ALSO includes the number of bytes in the target instruction
-            this.nOpCyclesJmpWM     = 11;   // on the 80286, this ALSO includes the number of bytes in the target instruction
-            this.nOpCyclesJmpDM     = 15;   // on the 80286, this ALSO includes the number of bytes in the target instruction
-            this.nOpCyclesLAHF      = 2;
-            this.nOpCyclesLEA       = 3;
-            this.nOpCyclesLS        = 7;
-            this.nOpCyclesLoop      = 8;    // on the 80286, this ALSO includes the number of bytes in the target instruction
-            this.nOpCyclesLoopZ     = 8;    // on the 80286, this ALSO includes the number of bytes in the target instruction
-            this.nOpCyclesLoopNZ    = 8;    // on the 80286, this ALSO includes the number of bytes in the target instruction
-            this.nOpCyclesLoopFall  = 4;
-            this.nOpCyclesLoopZFall = 4;
-            this.nOpCyclesMovRR     = 2;    // this is actually the same as the 8086...
-            this.nOpCyclesMovRM     = 3;
-            this.nOpCyclesMovMR     = 5;
-            this.nOpCyclesMovRI     = 2;
-            this.nOpCyclesMovMI     = 3;
-            this.nOpCyclesMovAM     = 5;    // this is actually slower than the MOD/RM form of MOV AX,mem (see nOpCyclesMovRM)
-            this.nOpCyclesMovMA     = 3;
-            this.nOpCyclesDivBR     = 14;
-            this.nOpCyclesDivWR     = 22;
-            this.nOpCyclesDivBM     = 17;
-            this.nOpCyclesDivWM     = 25;
-            this.nOpCyclesIDivBR    = 17;
-            this.nOpCyclesIDivWR    = 25;
-            this.nOpCyclesIDivBM    = 20;
-            this.nOpCyclesIDivWM    = 28;
-            this.nOpCyclesMulBR     = 13;
-            this.nOpCyclesMulWR     = 21;
-            this.nOpCyclesMulBM     = 16;
-            this.nOpCyclesMulWM     = 24;
-            this.nOpCyclesIMulBR    = 13;
-            this.nOpCyclesIMulWR    = 21;
-            this.nOpCyclesIMulBM    = 16;
-            this.nOpCyclesIMulWM    = 24;
-            this.nOpCyclesNegR      = 2;
-            this.nOpCyclesNegM      = 7;
-            this.nOpCyclesOutP      = 5;
-            this.nOpCyclesOutDX     = 5;
-            this.nOpCyclesPopAll    = 19;
-            this.nOpCyclesPopReg    = 5;
-            this.nOpCyclesPopMem    = 5;
-            this.nOpCyclesPushAll   = 17;
-            this.nOpCyclesPushReg   = 3;
-            this.nOpCyclesPushMem   = 5;
-            this.nOpCyclesPushSeg   = 3;
-            this.nOpCyclesPrefix    = 0;
-            this.nOpCyclesCmpS      = 8;
-            this.nOpCyclesCmpSr0    = 5;
-            this.nOpCyclesCmpSrn    = 9;
-            this.nOpCyclesLodS      = 5;
-            this.nOpCyclesLodSr0    = 5;
-            this.nOpCyclesLodSrn    = 4;
-            this.nOpCyclesMovS      = 5;
-            this.nOpCyclesMovSr0    = 5;
-            this.nOpCyclesMovSrn    = 4;
-            this.nOpCyclesScaS      = 7;
-            this.nOpCyclesScaSr0    = 5;
-            this.nOpCyclesScaSrn    = 8;
-            this.nOpCyclesStoS      = 3;
-            this.nOpCyclesStoSr0    = 4;
-            this.nOpCyclesStoSrn    = 3;
-            this.nOpCyclesRet       = 11;   // on the 80286, this ALSO includes the number of bytes in the target instruction
-            this.nOpCyclesRetn      = 11;   // on the 80286, this ALSO includes the number of bytes in the target instruction
-            this.nOpCyclesRetF      = 15;   // on the 80286, this ALSO includes the number of bytes in the target instruction
-            this.nOpCyclesRetFn     = 15;   // on the 80286, this ALSO includes the number of bytes in the target instruction
-            this.nOpCyclesShift1M   = 7;
-            this.nOpCyclesShiftCR   = 5;
-            this.nOpCyclesShiftCM   = 8;
-            this.nOpCyclesShiftCS   = 0;
-            this.nOpCyclesTestRR    = 2;
-            this.nOpCyclesTestRM    = 6;
-            this.nOpCyclesTestRI    = 3;
-            this.nOpCyclesTestMI    = 6;
-            this.nOpCyclesXchgRR    = 3;
-            this.nOpCyclesXchgRM    = 5;
-            this.nOpCyclesXLAT      = 5;
         }
     }
 };
@@ -1740,7 +1739,7 @@ X86CPU.prototype.getWord = function(addr)
      *
      * TODO: For the 8086, the penalty is actually "(addr & 0x1) << 2" (4 additional cycles only when the address is odd).
      */
-    this.nStepCycles -= this.nWordCyclePenalty;
+    this.nStepCycles -= this.CYCLES.nWordCyclePenalty;
     if (off != this.blockLimit) {
         return this.aMemBlocks[iBlock].readWord(off);
     }
@@ -1775,7 +1774,7 @@ X86CPU.prototype.setWord = function(addr, w)
      *
      * TODO: For the 8086, the penalty is actually "(addr & 0x1) << 2" (4 additional cycles only when the address is odd).
      */
-    this.nStepCycles -= this.nWordCyclePenalty;
+    this.nStepCycles -= this.CYCLES.nWordCyclePenalty;
     if (off != this.blockLimit) {
         this.aMemBlocks[iBlock].writeWord(off, w & 0xffff);
         return;
