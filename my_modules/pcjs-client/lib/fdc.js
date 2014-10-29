@@ -1620,7 +1620,7 @@ FDC.prototype.doCmd = function()
     var fIRQ = false;
     this.regDataIndex = 0;
     var bCmd = this.popCmd();
-    var drive, bDrive, bHeadSelect, bHead, bCylinder, n;
+    var drive, bDrive, bHead, c, h, r, n;
 
     /*
      * NOTE: We currently ignore the FDC.REG_DATA.CMD.SK, FDC.REG_DATA.CMD.MF and FDC.REG_DATA.CMD.MT bits of every command.
@@ -1648,7 +1648,7 @@ FDC.prototype.doCmd = function()
 
     case FDC.REG_DATA.CMD.SENSE_DRIVE:                  // 0x04
         bDrive = this.popCmd(FDC.TERMS.DS);
-        bHeadSelect = (bDrive >> 2) & 0x1;
+        bHead = (bDrive >> 2) & 0x1;
         this.iDrive = (bDrive & 0x3);
         drive = this.aDrives[this.iDrive];
         this.beginResult();
@@ -1657,15 +1657,19 @@ FDC.prototype.doCmd = function()
 
     case FDC.REG_DATA.CMD.WRITE_DATA:                   // 0x05
     case FDC.REG_DATA.CMD.READ_DATA:                    // 0x06
-        bDrive = this.popCmd(FDC.TERMS.DS);
-        bHeadSelect = (bDrive >> 2) & 0x1;
-        this.iDrive = (bDrive & 0x3);
+        bDrive = this.popCmd(FDC.TERMS.DS);             // Drive Select
+        bHead = (bDrive >> 2) & 0x1;                    // isolate HD (Head Select) bits
+        this.iDrive = (bDrive & 0x3);                   // isolate DS (Drive Select, aka Unit Select) bits
         drive = this.aDrives[this.iDrive];
-        drive.bHead = bHeadSelect;
-        drive.bCylinder = this.popCmd(FDC.TERMS.C);     // C
-        bHead = this.popCmd(FDC.TERMS.H);               // H
-        Component.assert(bHead == bHeadSelect);
-        drive.bSector = this.popCmd(FDC.TERMS.R);       // R
+        drive.bHead = bHead;
+        c = drive.bCylinder = this.popCmd(FDC.TERMS.C); // C
+        h = this.popCmd(FDC.TERMS.H);                   // H
+        /*
+         * Controller docs say that H should always match HD, so I assert that, but what if someone
+         * made a mistake and didn't program them identically -- what would happen?  Which should we honor?
+         */
+        Component.assert(h == bHead);
+        r = drive.bSector = this.popCmd(FDC.TERMS.R);   // R
         n = this.popCmd(FDC.TERMS.N);                   // N
         drive.nBytes = 128 << n;                        // 0 => 128, 1 => 256, 2 => 512, 3 => 1024
         drive.bSectorEnd = this.popCmd(FDC.TERMS.EOT);  // EOT (final sector number on a cylinder)
@@ -1675,14 +1679,7 @@ FDC.prototype.doCmd = function()
             this.doRead(drive);
         else
             this.doWrite(drive);
-        this.beginResult();
-        this.pushST0(drive);
-        this.pushST1(drive);
-        this.pushST2(drive);
-        this.pushResult(drive.bCylinder, FDC.TERMS.C);
-        this.pushResult(drive.bHead, FDC.TERMS.H);
-        this.pushResult(drive.bSector, FDC.TERMS.R);
-        this.pushResult(n, FDC.TERMS.N);
+        this.pushResults(drive, bCmd, bHead, c, h, r, n);
         fIRQ = true;
         break;
 
@@ -1731,11 +1728,12 @@ FDC.prototype.doCmd = function()
          * To start, we'll focus on making this work in the normal case (80-track diskette in 80-track drive).
          */
         bDrive = this.popCmd(FDC.TERMS.DS);
-        bHeadSelect = (bDrive >> 2) & 0x1;
+        bHead = (bDrive >> 2) & 0x1;
         this.iDrive = (bDrive & 0x3);
         drive = this.aDrives[this.iDrive];
-        drive.bHead = bHeadSelect;
-        drive.bSector = 1;
+        c = drive.bCylinder;
+        h = drive.bHead = bHead;
+        r = drive.bSector = 1;
         n = 0;
         drive.resCode = FDC.REG_DATA.RES.NONE;
         if (drive.disk && (drive.sector = drive.disk.seek(drive.bCylinder, drive.bHead, drive.bSector))) {
@@ -1746,45 +1744,34 @@ FDC.prototype.doCmd = function()
              */
             drive.resCode = FDC.REG_DATA.RES.NO_DATA | FDC.REG_DATA.RES.INCOMPLETE;
         }
-        this.pushST0(drive);
-        this.pushST1(drive);
-        this.pushST2(drive);
-        this.pushResult(drive.bCylinder, FDC.TERMS.C);
-        this.pushResult(drive.bHead, FDC.TERMS.H);
-        this.pushResult(drive.bSector, FDC.TERMS.R);
-        this.pushResult(n, FDC.TERMS.N);
+        this.pushResults(drive, bCmd, bHead, c, h, r, n);
         fIRQ = true;
         break;
 
     case FDC.REG_DATA.CMD.FORMAT_TRACK:                 // 0x0D
         bDrive = this.popCmd(FDC.TERMS.DS);
-        bHeadSelect = (bDrive >> 2) & 0x1;
+        bHead = (bDrive >> 2) & 0x1;
         this.iDrive = (bDrive & 0x3);
         drive = this.aDrives[this.iDrive];
-        drive.bHead = bHeadSelect;
+        c = drive.bCylinder;
+        h = drive.bHead = bHead;
+        r = 1;
         n = this.popCmd(FDC.TERMS.N);                   // N
         drive.nBytes = 128 << n;                        // 0 => 128, 1 => 256, 2 => 512, 3 => 1024 (bytes/sector)
         drive.bSectorEnd = this.popCmd(FDC.TERMS.SC);   // SC (sectors/track)
         this.popCmd(FDC.TERMS.GPL);                     // GPL (spacing between sectors, excluding VCO Sync Field; 3)
         drive.bFiller = this.popCmd(FDC.TERMS.D);       // D (filler byte)
         this.doFormat(drive);
-        this.beginResult();
-        this.pushST0(drive);
-        this.pushST1(drive);
-        this.pushST2(drive);
-        this.pushResult(drive.bCylinder, FDC.TERMS.C);
-        this.pushResult(drive.bHead, FDC.TERMS.H);
-        this.pushResult(drive.bSector, FDC.TERMS.R);
-        this.pushResult(n, FDC.TERMS.N);
+        this.pushResults(drive, bCmd, bHead, c, h, r, n);
         fIRQ = true;
         break;
 
     case FDC.REG_DATA.CMD.SEEK:                         // 0x0F
         bDrive = this.popCmd(FDC.TERMS.DS);
-        bHeadSelect = (bDrive >> 2) & 0x1;
+        bHead = (bDrive >> 2) & 0x1;
         this.iDrive = (bDrive & 0x3);
         drive = this.aDrives[this.iDrive];
-        drive.bHead = bHeadSelect;
+        drive.bHead = bHead;
         /*
          * As discussed in initDrive(), we can no longer simply set bCylinder to the specified NCN;
          * instead, we must calculate the delta between bCylinderSeek and the NCN, and adjust bCylinder
@@ -1794,11 +1781,11 @@ FDC.prototype.doCmd = function()
          * be allowed to exceed the physical boundaries of the drive (ie, never lower than 0, and never
          * greater than or equal to nCylinders).
          */
-        bCylinder = this.popCmd(FDC.TERMS.NCN);
-        drive.bCylinder += bCylinder - drive.bCylinderSeek;
+        c = this.popCmd(FDC.TERMS.NCN);
+        drive.bCylinder += c - drive.bCylinderSeek;
         if (drive.bCylinder < 0) drive.bCylinder = 0;
         if (drive.bCylinder >= drive.nCylinders) drive.bCylinder = drive.nCylinders - 1;
-        drive.bCylinderSeek = bCylinder;
+        drive.bCylinderSeek = c;
         drive.resCode = FDC.REG_DATA.RES.SEEK_END;
         /*
          * TODO: To properly support ALL the ST3 result bits (not just TRACK0), we need a resCode
@@ -1838,6 +1825,50 @@ FDC.prototype.doCmd = function()
 };
 
 /**
+ * pushResults(drive, bCmd, bHead, c, h, r, n)
+ *
+ * @param {Object} drive
+ * @param {number} bCmd
+ * @param {number} bHead
+ * @param {number} c
+ * @param {number} h
+ * @param {number} r
+ * @param {number} n
+ */
+FDC.prototype.pushResults = function(drive, bCmd, bHead, c, h, r, n)
+{
+    this.beginResult();
+    this.pushST0(drive);
+    this.pushST1(drive);
+    this.pushST2(drive);
+    /*
+     * NOTE: I used to set the following C/H/R/N results using the values that advanceSector() had "advanced"
+     * them to, which seemed logical but was technically incorrect.  For non-multi-track reads, they should match
+     * the programmed C/H/R/N values, except when EOT has been reached, in which case C = C + 1 and R = 1.
+     *
+     * For multi-track, the LSB of H should be complemented whenever EOT has been reached, which I "informally"
+     * detect by testing if the drive's current bCylinder and/or bHead positions advanced to a new cylinder or head,
+     * and apparently, C should never be advanced if H was initially 0.
+     *
+     * I don't do strict EOT comparisons here or elsewhere, because it allows the controller to work with a wider
+     * range of disks (eg, "fake" XDF disk images that contain 23 512-byte sectors/track).
+     */
+    var i = 0;
+    if (c != drive.bCylinder || h != drive.bHead) {
+        i = r = 1;
+    }
+    if (bCmd & FDC.REG_DATA.CMD.MT) {
+        h ^= i;
+        if (!bHead) i = 0;
+    }
+    c += i;
+    this.pushResult(c, FDC.TERMS.C);                // formerly drive.bCylinder
+    this.pushResult(h, FDC.TERMS.H);                // formerly drive.bHead
+    this.pushResult(r, FDC.TERMS.R);                // formerly drive.bSector
+    this.pushResult(n, FDC.TERMS.N);
+};
+
+/**
  * popCmd(name)
  *
  * @this {FDC}
@@ -1848,7 +1879,7 @@ FDC.prototype.popCmd = function(name)
 {
     Component.assert((!this.regDataIndex || name !== undefined) && this.regDataIndex < this.regDataTotal);
     var bCmd = this.regDataArray[this.regDataIndex];
-    if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled((this.regDataIndex > 0? FDC.MESSAGE_PORT : 0) | FDC.MESSAGE_FDC)) {
+    if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(FDC.MESSAGE_FDC)) {
         var bCmdMasked = bCmd & FDC.REG_DATA.CMD.MASK;
         if (!name && !this.regDataIndex && FDC.aCmdInfo[bCmdMasked]) name = FDC.aCmdInfo[bCmdMasked].name;
         this.dbg.message("FDC.CMD[" + (name || this.regDataIndex) + "]: 0x" + str.toHexByte(bCmd));
@@ -1902,7 +1933,7 @@ FDC.prototype.beginResult = function()
  */
 FDC.prototype.pushResult = function(bResult, name)
 {
-    if (DEBUG) this.messageDebugger("FDC.RES[" + (name || this.regDataTotal) + "]: 0x" + str.toHexByte(bResult), FDC.MESSAGE_PORT | FDC.MESSAGE_FDC);
+    if (DEBUG) this.messageDebugger("FDC.RES[" + (name || this.regDataTotal) + "]: 0x" + str.toHexByte(bResult), FDC.MESSAGE_FDC);
     this.regDataArray[this.regDataTotal++] = bResult;
 };
 

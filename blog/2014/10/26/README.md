@@ -18,8 +18,10 @@ To verify, type the following into any JavaScript REPL (eg, Node):
 	-1526726656
 	> n &= 0x80808080
 	-2147483648
-	> n.toString(16)
-	'-80000000'
+	> n == 0x80000000
+    false
+	> n == -0x80000000
+	true
 
 So the notion that bitwise operators yield 32-bit results isn't exactly right; the sign (bit 31) of every 32-bit
 result is always extended into the entire 52 "significand" bits of the underlying 64-bit float.  And it's
@@ -42,19 +44,19 @@ an operation as innocuous-looking as:
 	> n.toString(16)
     '-80000000'
 
-Viola: instant negative number!  To continue the fun, now "or" one into bit 0:
+Viola: instant negative number!  To continue the fun, set bit 0 of 0x80000000, which should give you 0x80000001:
 
 	> n |= 1
 	-2147483647
 	> n.toString(16)
 	'-7fffffff'
 	
-Viola: all low 32 bits have instantly flipped!
+WTF?  Have all the low 32 bits flipped instead?
 
 Actually, no, this time, I'm pulling your leg.  The low 32 bits of the internal value are exactly what you would
-expect: 0x80000001 (the internal representation looks more like 0xFFFFF80000001).  The toString() method is
-just a little misleading.  As the MDN docs explain, for a negative number, toString() returns the positive
-representation of the number, preceded by a - sign, *not* the "two's complement" of the number.
+expect: 0x80000001 (the internal representation is more like 0xFFFFF80000001).  But as the [MDN Docs](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/toString)
+explain, for a negative number, toString() returns the positive representation of the number, preceded by a - sign,
+*not* the "two's complement" of the number.
  
 *[@jeffpar](http://twitter.com/jeffpar)*  
 *October 26, 2014*

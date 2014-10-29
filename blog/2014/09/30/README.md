@@ -125,7 +125,7 @@ I still tend to follow Charles Simonyi's "[Hungarian](http://en.wikipedia.org/wi
 conventions -- or rather, a naming convention loosely inspired by Hungarian.
 
 For example, if I need a string or numeric variable representing a "thing," I will name it "sThing" if it's a
-string or "iThing" if it's a number (or possibly "nThings" if it represents a total of Things or or "cThings"
+string or "iThing" if it's a number (or possibly "nThings" if it represents a total of Things or "cThings"
 if it's a counter of Things).  If a string or numeric variable has a very short-term use, I'll probably just name
 it "s" or "i".
 
