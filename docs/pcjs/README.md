@@ -1,7 +1,7 @@
 PCjs Documentation
 ---
 
-[PCjs](/docs/about/pcjs/) is a full-featured IBM PC and PC XT simulator written entirely in JavaScript.
+[PCjs](/docs/about/pcjs/) is a full-featured IBM PC, PC XT and PC AT emulator written entirely in JavaScript.
 
 [IBM PC Model 5150](/configs/pc/machines/5150/mda/64kb/ "PCjs:ibm5150")
 
@@ -38,7 +38,7 @@ Here's a simple machine XML file that includes an 8088 CPU and 16Kb of RAM:
 
 However, that machine isn't usable, since it lacks a keyboard, screen, or any code (ROMs) to execute.
 
-A simple machine definition that's actually usable might look like:
+A simple machine definition that actually works might look like:
 
 	<machine id="ibm" class="pc" width="720px">
 		<computer id="pc" name="IBM PC"/>

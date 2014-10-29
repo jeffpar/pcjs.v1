@@ -45,7 +45,7 @@ if (typeof module !== 'undefined') {
  * We now support asynchronous XML and XSL file loads; simply set fAsync (below) to true.
  *
  * NOTE: For that support to work, we have to keep track of the number of machines on the page
- * (ie, how many embedMachine() calls were issued), reduce the count once the XML for each machine
+ * (ie, how many embedMachine() calls were issued), reduce the count as each machine XML file
  * is fully transformed into HTML, and when the count finally returns to zero, notify all the
  * machine component init() handlers.
  *
@@ -57,7 +57,7 @@ var cMachines = 0;
 var fAsync = true;
 
 /**
- * loadXML(sFile, idMachine, sStateFile, fResolve, done)
+ * loadXML(sFile, idMachine, sStateFile, fResolve, display, done)
  *
  * This is the preferred way to load all XML and XSL files. It uses loadResource()
  * to load them as strings, which parseXML() can massage before parsing/transforming them.
@@ -84,22 +84,24 @@ var fAsync = true;
  * @param {string|null|undefined} idMachine
  * @param {string|null|undefined} sStateFile
  * @param {boolean} fResolve is true to resolve any "ref" attributes
+ * @param {function(string)} display
  * @param {function(string,Object)} done (string contains the unparsed XML string data, and Object contains a parsed XML object)
  */
-function loadXML(sXMLFile, idMachine, sStateFile, fResolve, done)
+function loadXML(sXMLFile, idMachine, sStateFile, fResolve, display, done)
 {
     var doneLoadXML = function(sURLName, sXML, nErrorCode) {
         if (nErrorCode) {
             done(sXML, null);
             return;
         }
-        parseXML(sXML, sXMLFile, idMachine, sStateFile, fResolve, done);
+        parseXML(sXML, sXMLFile, idMachine, sStateFile, fResolve, display, done);
     };
+    display("Loading " + sXMLFile + "...");
     web.loadResource(sXMLFile, fAsync, null, null, doneLoadXML);
 }
 
 /**
- * parseXML(sXML, sXMLFile, idMachine, sStateFile, fResolve, done)
+ * parseXML(sXML, sXMLFile, idMachine, sStateFile, fResolve, display, done)
  *
  * Generates an XML document from an XML string. This function also provides a work-around for XSLT's
  * lack of support for the document() function (at least on some browsers), by replacing every reference
@@ -110,9 +112,10 @@ function loadXML(sXMLFile, idMachine, sStateFile, fResolve, done)
  * @param {string|null|undefined} idMachine
  * @param {string|null|undefined} sStateFile
  * @param {boolean} fResolve is true to resolve any "ref" attributes; default is false
+ * @param {function(string)} display
  * @param {function(string,Object)} done (string contains the unparsed XML string data, and Object contains a parsed XML object)
  */
-function parseXML(sXML, sXMLFile, idMachine, sStateFile, fResolve, done)
+function parseXML(sXML, sXMLFile, idMachine, sStateFile, fResolve, display, done)
 {
     var buildXML = function(sXML, sError) {
         if (sError) {
@@ -165,7 +168,7 @@ function parseXML(sXML, sXMLFile, idMachine, sStateFile, fResolve, done)
     };
     if (sXML) {
         if (fResolve) {
-            resolveXML(sXML, buildXML);
+            resolveXML(sXML, display, buildXML);
             return;
         }
         buildXML(sXML, null);
@@ -175,7 +178,7 @@ function parseXML(sXML, sXMLFile, idMachine, sStateFile, fResolve, done)
 }
 
 /**
- * resolveXML(sXML, done)
+ * resolveXML(sXML, display, done)
  *
  * Replaces every tag with a "ref" attribute with the contents of the corresponding file.
  *
@@ -184,9 +187,10 @@ function parseXML(sXML, sXMLFile, idMachine, sStateFile, fResolve, done)
  * and 3) requiring the "ref" tag to be self-closing.
  *
  * @param {string} sXML
+ * @param {function(string)} display
  * @param {function(string,(string|null))} done (the first string contains the resolved XML data, the second is for any error message)
  */
-function resolveXML(sXML, done)
+function resolveXML(sXML, display, done)
 {
     var matchRef;
     var reRef = /<([a-z]+)\s+ref="(.*?)"(.*?)\/>/g;
@@ -249,9 +253,10 @@ function resolveXML(sXML, done)
 
             sXML = sXML.replace(matchRef[0], sXMLRef);
 
-            resolveXML(sXML, done);
+            resolveXML(sXML, display, done);
         };
 
+        display("Loading " + sRefFile + "...");
         web.loadResource(sRefFile, fAsync, null, null, doneReadXML);
         return;
     }
@@ -273,7 +278,7 @@ function resolveXML(sXML, done)
  */
 function embedMachine(sName, sVersion, idElement, sXMLFile, sXSLFile, sStateFile)
 {
-    var eMachine, fSuccess = true;
+    var eMachine, eWarning, fSuccess = true;
 
     cMachines++;
 
@@ -286,9 +291,15 @@ function embedMachine(sName, sVersion, idElement, sXMLFile, sXSLFile, sStateFile
 
     var displayError = function(sError) {
         Component.log(sError);
-        if (eMachine) {
+        displayMessage("Error: " + sError);
+        if (fSuccess) doneMachine();
+        fSuccess = false;
+    };
+
+    var displayMessage = function(sMessage) {
+        if (eWarning === undefined) {
             /*
-             * Our MarkOut module (in convertMDMachineLinks()) creates machine containers that look like this:
+             * Our MarkOut module (in convertMDMachineLinks()) creates machine containers that look like:
              *
              *      <div id="' + sMachineID + '" class="machine-placeholder"><p>Embedded PC</p><p class="machine-warning"></p></div>
              *
@@ -299,11 +310,10 @@ function embedMachine(sName, sVersion, idElement, sXMLFile, sXSLFile, sStateFile
              * Note that it is the HTMLOut module (in processMachines()) that ultimately decides which scripts to
              * include and then generates the embedPC() and/or embedC1P() calls.
              */
-            var aeError = Component.getElementsByClass(eMachine, "machine-warning");
-            if (aeError[0]) aeError[0].innerHTML = "Error: " + str.escapeHTML(sError);
+            var aeWarning = (eMachine && Component.getElementsByClass(eMachine, "machine-warning"));
+            eWarning = (aeWarning && aeWarning[0]) || null;
         }
-        if (fSuccess) doneMachine();
-        fSuccess = false;
+        if (eWarning) eWarning.innerHTML = str.escapeHTML(sMessage);
     };
 
     try {
@@ -341,6 +351,7 @@ function embedMachine(sName, sVersion, idElement, sXMLFile, sXSLFile, sStateFile
                          * "components.xsl" and not a "machine.xsl", because the latter will not produce valid
                          * embeddable HTML (and is the most common cause of failure at this final stage).
                          */
+                        displayMessage("Processing " + sXMLFile + "...");
                         if (window.ActiveXObject || "ActiveXObject" in window) {        // second test is required for IE11 on Windows 8.1
                             var sFragment = xml['transformNode'](xsl);
                             if (sFragment) {
@@ -373,15 +384,15 @@ function embedMachine(sName, sVersion, idElement, sXMLFile, sXSLFile, sStateFile
                     }
                 };
                 if (xml) {
-                    loadXML(sXSLFile, null, null, false, transformXML);
+                    loadXML(sXSLFile, null, null, false, displayMessage, transformXML);
                 } else {
                     displayError("failed to load XML file: " + sXMLFile);
                 }
             };
             if (sXMLFile.substr(0, 1) != "<") {
-                loadXML(sXMLFile, idElement, sStateFile, true, loadXSL);
+                loadXML(sXMLFile, idElement, sStateFile, true, displayMessage, loadXSL);
             } else {
-                parseXML(sXMLFile, null, idElement, sStateFile, false, loadXSL);
+                parseXML(sXMLFile, null, idElement, sStateFile, false, displayMessage, loadXSL);
             }
         } else {
             displayError("failed to find machine element: " + idElement);
