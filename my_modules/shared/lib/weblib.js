@@ -147,7 +147,7 @@ var web = {};
  *
  * @param {string} sURL
  * @param {boolean} [fAsync] is true for an asynchronous request
- * @param {Object|null} [data] for a POST request (default is a GET request)
+ * @param {Object} [data] for a POST request (default is a GET request)
  * @param {Component} [componentNotify]
  * @param {function(...)} [fnNotify]
  * @param {number|string|null|Object|Array} [pNotify] optional fnNotify info parameter
@@ -174,13 +174,14 @@ web.loadResource = function(sURL, fAsync, data, componentNotify, fnNotify, pNoti
         xmlHTTP.onreadystatechange = function() {
             if (xmlHTTP.readyState === 4) {
                 /*
-                 * The following line is recommended for WebKit, as a work-around to prevent the handler firing multiple
+                 * The following line was recommended for WebKit, as a work-around to prevent the handler firing multiple
                  * times when debugging.  Unfortunately, that's not the only XMLHttpRequest problem that occurs when
                  * debugging, so I think the WebKit problem is deeper than that.  When we have multiple XMLHttpRequests
                  * pending, any debugging activity means most of them simply get dropped on floor, so what may actually be
                  * happening are mis-notifications rather than redundant notifications.
-                 */
+                 *
                 xmlHTTP.onreadystatechange = undefined;
+                 */
                 sURLData = xmlHTTP.responseText;
                 if (xmlHTTP.status == 200) {
                     Component.log("xmlHTTP.onreadystatechange(" + sURL + "): returned " + sURLData.length + " bytes");
@@ -189,7 +190,13 @@ web.loadResource = function(sURL, fAsync, data, componentNotify, fnNotify, pNoti
                     nErrorCode = xmlHTTP.status || -1;
                     Component.log("xmlHTTP.onreadystatechange(" + sURL + "): error code " + nErrorCode);
                 }
-                if (componentNotify && fnNotify) fnNotify.call(componentNotify, sURLName, sURLData, nErrorCode, pNotify);
+                if (fnNotify) {
+                    if (!componentNotify) {
+                        fnNotify(sURLName, sURLData, nErrorCode, pNotify);
+                    } else {
+                        fnNotify.call(componentNotify, sURLName, sURLData, nErrorCode, pNotify);
+                    }
+                }
             }
         };
     }
@@ -219,7 +226,13 @@ web.loadResource = function(sURL, fAsync, data, componentNotify, fnNotify, pNoti
             nErrorCode = xmlHTTP.status || -1;
             Component.log("web.loadResource(" + sURL + "): error code " + nErrorCode);
         }
-        if (componentNotify && fnNotify) fnNotify.call(componentNotify, sURLName, sURLData, nErrorCode, pNotify);
+        if (fnNotify) {
+            if (!componentNotify) {
+                fnNotify(sURLName, sURLData, nErrorCode, pNotify);
+            } else {
+                fnNotify.call(componentNotify, sURLName, sURLData, nErrorCode, pNotify);
+            }
+        }
         response = [nErrorCode, sURLData];
     }
     return response;
@@ -327,6 +340,49 @@ web.promptUser = function(sPrompt, sDefault)
 };
 
 /**
+ * fLocalStorage
+ *
+ * true if localStorage support exists, is enabled, and works; "falsey" otherwise
+ *
+ * @type {boolean|undefined}
+ */
+web.fLocalStorage;
+
+/**
+ * hasLocalStorage
+ *
+ * true if localStorage support exists, is enabled, and works; false otherwise
+ *
+ * @return {boolean}
+ */
+web.hasLocalStorage = function() {
+    if (web.fLocalStorage === undefined) {
+        var f;
+        var sTest = 'PCjs.localStorage';
+        try {
+            window.localStorage.setItem(sTest, sTest);
+            f = (window.localStorage.getItem(sTest) === sTest);
+            window.localStorage.removeItem(sTest);
+        } catch(e) {
+            web.logLocalStorageError(e);
+            f = false;
+        }
+        web.fLocalStorage = f;
+    }
+    return web.fLocalStorage;
+};
+
+/**
+ * logLocalStorageError(e)
+ *
+ * @param {Error} e is an exception
+ */
+web.logLocalStorageError = function(e)
+{
+    Component.log(e.message, "localStorage error");
+};
+
+/**
  * getLocalStorageItem(sKey)
  *
  * Returns the requested key value, or null if the key does not exist, or undefined if localStorage is not available
@@ -337,14 +393,10 @@ web.promptUser = function(sPrompt, sDefault)
 web.getLocalStorageItem = function(sKey)
 {
     var sValue;
-    if (window) {
-        try {
-            /*
-             * A try/catch block is required, because if the user has disabled localStorage, some browsers feel the need
-             * to throw an exception on any attempt to access it, even when using "typeof".
-             */
-            sValue = window.localStorage.getItem(sKey);
-        } catch(e) {}
+    try {
+        sValue = window.localStorage.getItem(sKey);
+    } catch(e) {
+        web.logLocalStorageError(e);
     }
     return sValue;
 };
@@ -354,21 +406,49 @@ web.getLocalStorageItem = function(sKey)
  *
  * @param {string} sKey
  * @param {string} sValue
- * return {boolean} true if localStorage is available, false if not
+ * @return {boolean} true if localStorage is available, false if not
  */
 web.setLocalStorageItem = function(sKey, sValue)
 {
-    if (window) {
-        try {
-            /*
-             * A try/catch block is required, because if the user has disabled localStorage, some browsers feel the need
-             * to throw an exception on any attempt to access it, even when using "typeof".
-             */
-            window.localStorage.setItem(sKey, sValue);
-            return true;
-        } catch(e) {}
+    try {
+        window.localStorage.setItem(sKey, sValue);
+        return true;
+    } catch(e) {
+        web.logLocalStorageError(e);
     }
     return false;
+};
+
+/**
+ * removeLocalStorageItem(sKey)
+ *
+ * @param {string} sKey
+ */
+web.removeLocalStorageItem = function(sKey)
+{
+    try {
+        window.localStorage.removeItem(sKey);
+    } catch(e) {
+        web.logLocalStorageError(e);
+    }
+};
+
+/**
+ * getLocalStorageKeys()
+ *
+ * @return {Array}
+ */
+web.getLocalStorageKeys = function()
+{
+    var a = [];
+    try {
+        for (var i = 0, c = window.localStorage.length; i < c; i++) {
+            a.push(window.localStorage.key(i));
+        }
+    } catch(e) {
+        web.logLocalStorageError(e);
+    }
+    return a;
 };
 
 /**
@@ -545,6 +625,7 @@ web.aPageEventHandlers = {
     'exit': []          // list of window 'onunload' handlers (although we prefer to use 'onbeforeunload' if possible)
 };
 
+web.fPageReady = false; // set once the browser's first page initialization has occurred
 web.fPageEventsEnabled = true;
 
 /**
@@ -635,6 +716,11 @@ web.doPageEvent = function(afn)
  */
 web.enablePageEvents = function(fEnable)
 {
+    if (!web.fPageEventsEnabled && fEnable) {
+        web.fPageEventsEnabled = true;
+        if (web.fPageReady) web.sendPageEvent('init');
+        return;
+    }
     web.fPageEventsEnabled = fEnable;
 };
 
@@ -652,7 +738,7 @@ web.sendPageEvent = function(sEvent)
     }
 };
 
-web.onPageEvent('onload', function onPageLoad() { web.doPageEvent(web.aPageEventHandlers['init']); });
+web.onPageEvent('onload', function onPageLoad() { web.fPageReady = true; web.doPageEvent(web.aPageEventHandlers['init']); });
 web.onPageEvent('onpageshow', function onPageShow() { web.doPageEvent(web.aPageEventHandlers['show']); });
 web.onPageEvent(web.isUserAgent("Opera") || web.isUserAgent("iOS")? 'onunload' : 'onbeforeunload', function onPageUnload() { web.doPageEvent(web.aPageEventHandlers['exit']); });
 

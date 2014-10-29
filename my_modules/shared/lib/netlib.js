@@ -93,7 +93,7 @@ net.hasParm = function(sParm, sValue, req)
  *
  * Propagates any "special" query parameters (as listed in asPropagate) from the given
  * request object (req) to the given URL (sURL).
- * 
+ *
  * We do not modify an sURL that already contains a '?' OR that begins with a protocol
  * (eg, http:, mailto:, etc), in order to keep this function simple, since it's only for
  * debugging purposes anyway.  I also considered blowing off any URLs with a '#' for the
@@ -221,7 +221,7 @@ net.getStat = function(sURL, done)
  * @param {string} sURL is the source file
  * @param {string|null} sEncoding is the encoding to assume, if any
  * @param {function(Error,number,(string|Buffer))} done receives an Error, an HTTP status code, and a Buffer (if any)
- * 
+ *
  * TODO: Add support for FTP? HTTPS? Anything else?
  */
 net.getFile = function(sURL, sEncoding, done)
@@ -230,11 +230,11 @@ net.getFile = function(sURL, sEncoding, done)
      * Buffer objects are a fixed size, so my choices are: 1) call getStat() first, hope it returns
      * the true size, and then preallocate a buffer; or 2) create a new, larger buffer every time a new
      * chunk arrives.  The latter seems best.
-     * 
+     *
      * However, if an encoding is given, we'll simply concatenate all the data into a String and return
      * that instead.  Note that the incoming data is always a Buffer, but concatenation with a String
      * performs an implied "toString()" on the Buffer.
-     * 
+     *
      * WARNING: Even when an encoding is provided, we don't make any attempt to verify that the incoming
      * data matches that encoding.
      */
@@ -312,7 +312,7 @@ net.downloadFile = function(sURL, sFile, done)
             /*
              * TODO: We should try to update the file's modification time to match the 'last-modified'
              * response header value, if any.
-             * 
+             *
              * TODO: Decide what to do when res.statusCode is actually an error code (eg, 404), because
              * in such cases, the file content will likely just be an HTML error page.
              */
@@ -353,6 +353,7 @@ net.loadResource = function(sURL, fAsync, data, componentNotify, fnNotify, pNoti
         if (!sServerRoot) {
             sServerRoot = path.join(path.dirname(fs.realpathSync(__filename)), "../../../");
         }
+        var sBaseName = str.getBaseName(sURL);
         var sFile = path.join(sServerRoot, sURL);
         if (fAsync) {
             fs.readFile(sFile, {encoding: "utf8"}, function(err, s) {
@@ -363,7 +364,13 @@ net.loadResource = function(sURL, fAsync, data, componentNotify, fnNotify, pNoti
                     sResponse = s;
                     nErrorCode = 0;
                 }
-                if (componentNotify && fnNotify) fnNotify.call(componentNotify, str.getBaseName(sURL), sResponse, nErrorCode, pNotify);
+                if (fnNotify) {
+                    if (!componentNotify) {
+                        fnNotify(sBaseName, sResponse, nErrorCode, pNotify);
+                    } else {
+                        fnNotify.call(componentNotify, sBaseName, sResponse, nErrorCode, pNotify);
+                    }
+                }
             });
             return [];
         } else {
@@ -376,7 +383,13 @@ net.loadResource = function(sURL, fAsync, data, componentNotify, fnNotify, pNoti
                  */
                 console.log(err.message);
             }
-            if (componentNotify && fnNotify) fnNotify.call(componentNotify, str.getBaseName(sURL), sResponse, nErrorCode, pNotify);
+            if (fnNotify) {
+                if (!componentNotify) {
+                    fnNotify(sBaseName, sResponse, nErrorCode, pNotify);
+                } else {
+                    fnNotify.call(componentNotify, sBaseName, sResponse, nErrorCode, pNotify);
+                }
+            }
         }
     }
     return [nErrorCode, sResponse];

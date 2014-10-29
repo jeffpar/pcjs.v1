@@ -33,6 +33,7 @@
 "use strict";
 
 if (typeof module !== 'undefined') {
+    var web       = require("./../../shared/lib/weblib");
     var Component = require("./../../shared/lib/component");
 }
 
@@ -79,25 +80,6 @@ State.key = function(component, sVersion, sSuffix) {
         key += "." + sSuffix;
     }
     return key;
-};
-
-/**
- * State.localStorage()
- *
- * TODO: State's localStorage calls should probably be moved to wrappers in weblib.js, for consistency.
- *
- * @return {boolean} true if localStorage available, false if not
- */
-State.localStorage = function() {
-    try {
-        /*
-         * A try/catch block is required, because if the user has disabled localStorage, some browsers feel the need
-         * to throw an exception on any attempt to access it, even when using "typeof".
-         */
-        return typeof window.localStorage !== 'undefined';
-    } catch(e) {
-        return false;
-    }
 };
 
 /**
@@ -269,7 +251,7 @@ State.prototype = {
      * @return {boolean} true if state exists in localStorage, false if not
      *
      * WARNING: Make sure you follow this call with either a call to parse() or unload(),
-     * because any stringified data we've loaded isn't usable until it's been parsed.
+     * because any stringified data that we've loaded isn't usable until it's been parsed.
      */
     load: function(s) {
         if (s) {
@@ -283,8 +265,8 @@ State.prototype = {
              */
             return true;
         }
-        if (State.localStorage()) {
-            s = window.localStorage.getItem(this.key);
+        if (web.hasLocalStorage()) {
+            s = web.getLocalStorageItem(this.key);
             if (s) {
                 this[this.id] = s;
                 this.fLoaded = true;
@@ -322,19 +304,17 @@ State.prototype = {
      */
     store: function() {
         var fSuccess = true;
-        if (State.localStorage()) {
+        if (web.hasLocalStorage()) {
             var s = JSON.stringify(this[this.id]);
-            try {
-                window.localStorage.setItem(this.key, s);
+            if (web.setLocalStorageItem(this.key, s)) {
                 if (DEBUG) this.messageDebugger("localStorage(" + this.key + "): " + s.length + " bytes stored");
-            } catch (e) {
+            } else {
                 /*
                  * WARNING: Because browsers tend to disable all alerts() during an "unload" operation,
                  * it's unlikely anyone will ever see the "quota" errors that occur at this point.  Need to
                  * think of some way to notify the user that there's a problem, and offer a way of cleaning
                  * up old states.
                  */
-                Component.log(e.message || e, "error");
                 Component.error("Unable to store " + s.length + " bytes in browser local storage");
                 fSuccess = false;
             }
@@ -380,15 +360,14 @@ State.prototype = {
      */
     clear: function(fAll) {
         this.unload();
-        if (State.localStorage()) {
-            var i = 0;
-            while (i < window.localStorage.length) {
-                var key = window.localStorage.key(i++);
-                if (key && (fAll || key.substr(0, this.key.length) == this.key)) {
-                    window.localStorage.removeItem(key);
-                    if (DEBUG) this.messageDebugger("localStorage(" + key + ") removed");
-                    i = 0;
-                }
+        var aKeys = web.getLocalStorageKeys();
+        for (var i = 0; i < aKeys.length; i++) {
+            var sKey = aKeys[i];
+            if (sKey && (fAll || sKey.substr(0, this.key.length) == this.key)) {
+                web.removeLocalStorageItem(sKey);
+                if (DEBUG) this.messageDebugger("localStorage(" + sKey + ") removed");
+                aKeys.splice(i, 1);
+                i = 0;
             }
         }
     },
