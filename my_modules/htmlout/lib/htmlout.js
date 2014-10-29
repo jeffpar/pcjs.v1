@@ -657,6 +657,7 @@ HTMLOut.setOptions = function(options)
     }
     if (options['logfile'] !== undefined) {
         logFile = options['logfile'];
+        HTTPAPI.setLogFile(logFile);
     }
     if (options['rebuild'] !== undefined) {
         fRebuild = options['rebuild'];

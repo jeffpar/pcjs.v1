@@ -55,13 +55,24 @@ var X86     = require("../../pcjs-client/lib/x86");
  */
 var pkg = require("../../../package.json");
 
-/**
- * fDebug controls internal debug console messages; it is false by default but can be enabled from the command-line
+/*
+ * fConsole controls console messages; it is false by default but is enable by the CLI interface.
+ */
+var fConsole = false;
+
+/*
+ * fDebug controls debug console messages; it is false by default but can be enabled from the command-line
  * using "--debug".
  */
 var fDebug = false;
 
-/**
+/*
+ * logFile is passed from the web server through HTMLOut to us, allowing us to "mingle" our logConsole()
+ * output with the server's log (typically "./logs/node.log").
+ */
+var logFile = null;
+
+/*
  * fNormalize attempts to enforce consistency across multiple dump requests, including the order of files within every
  * directory, the use of hard-coded volume label timestamps, etc.  And since I assume that normalization is a wonderful
  * thing, I don't provide any UI for turning it off.
@@ -148,6 +159,15 @@ function DiskDump(sDiskPath, asExclude, sFormat, fComments, mbHD, sServerRoot, s
     this.jsonDisk = "";
     this.dataDisk = undefined;
 }
+
+/**
+ * setLogFile(file)
+ *
+ * @param {Object} file
+ */
+DiskDump.setLogFile = function(file) {
+    logFile = file;
+};
 
 /*
  * Class constants
@@ -312,14 +332,16 @@ DiskDump.CLI = function()
     var err = null;
     var args = proc.getArgs();
 
+    fConsole = true;
+
     if (args.argc) {
         var argv = args.argv;
 
         if (argv['debug'] !== undefined) fDebug = argv['debug'];
 
         if (fDebug) {
-            console.log("cwd: " + process.cwd());
-            console.log("args: " + JSON.stringify(argv));
+            DiskDump.logConsole("cwd: " + process.cwd());
+            DiskDump.logConsole("args: " + JSON.stringify(argv));
         }
 
         var sDiskPath = null, sServerRoot = "";
@@ -396,7 +418,7 @@ DiskDump.CLI = function()
         }
     }
     else {
-        console.log("usage: diskdump --dir={dir}|--disk={disk}|--path={file}[;{file}...] [--format=json|data|hex|bytes|img] [--comments] [--output={file}] [--manifest={file}] [--xdf]");
+        DiskDump.logConsole("usage: diskdump --dir={dir}|--disk={disk}|--path={file}[;{file}...] [--format=json|data|hex|bytes|img] [--comments] [--output={file}] [--manifest={file}] [--xdf]");
     }
 
     if (err) {
@@ -455,15 +477,15 @@ DiskDump.outputDisk = function(err, disk, sDiskPath, sOutputFile, fOverwrite, sM
 
                 try {
                     if (fUnchanged) {
-                        console.log(sOutputFile + " unchanged");
+                        DiskDump.logConsole(sOutputFile + " unchanged");
                     } else {
                         if (fs.existsSync(sOutputFile) && !fOverwrite) {
-                            console.log(sOutputFile + " exists, use --overwrite to rewrite");
+                            DiskDump.logConsole(sOutputFile + " exists, use --overwrite to rewrite");
                         } else {
                             var sDirName = path.dirname(sOutputFile);
                             if (!fs.existsSync(sDirName)) mkdirp.sync(sDirName);
                             fs.writeFileSync(sOutputFile, data);
-                            console.log(cbDisk + "-byte disk image saved to " + sOutputFile);
+                            DiskDump.logConsole(cbDisk + "-byte disk image saved to " + sOutputFile);
                         }
                     }
                 } catch(e) {
@@ -475,9 +497,9 @@ DiskDump.outputDisk = function(err, disk, sDiskPath, sOutputFile, fOverwrite, sM
                  * "stringify" buffers, but if that's what the caller wants, they should use "--format=json".
                  */
                 if (typeof data == "string") {
-                    console.log(data);
+                    DiskDump.logConsole(data);
                 } else {
-                    console.log("specify --output={file} to save " + cbDisk + "-byte disk image");
+                    DiskDump.logConsole("specify --output={file} to save " + cbDisk + "-byte disk image");
                 }
             }
         } else {
@@ -647,22 +669,35 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
             if (fOverwrite || !fExists) {
                 try {
                     fs.writeFileSync(sManifestFile, sXML);
-                    console.log(sManifestFile + " updated");
+                    DiskDump.logConsole(sManifestFile + " updated");
                 } catch(e) {
                     err = e;
                 }
             } else {
-                console.log(sManifestFile + " exists, use --overwrite to rewrite");
-                if (fDebug) console.log(sXML);
+                DiskDump.logConsole(sManifestFile + " exists, use --overwrite to rewrite");
+                if (fDebug) DiskDump.logConsole(sXML);
             }
         } else {
-            console.log(sManifestFile + " unchanged");
+            DiskDump.logConsole(sManifestFile + " unchanged");
             fUnchanged = (!md5Disk || !sMD5Disk || (md5Disk == sMD5Disk && (!md5JSON || md5JSON == sMD5JSON)));
         }
     }
 
     DiskDump.logError(err);
     return fUnchanged;
+};
+
+/**
+ * logConsole(s)
+ *
+ * @param {string} s
+ * @return {string}
+ */
+DiskDump.logConsole = function(s)
+{
+    if (fConsole) console.log(s);
+    if (logFile) logFile.write(s + "\n");
+    return s;
 };
 
 /**
@@ -678,7 +713,7 @@ DiskDump.logError = function(err)
     var sError = "";
     if (err) {
         sError = "diskdump error: " + err.message;
-        console.log(sError);
+        DiskDump.logConsole(sError);
     }
     return sError;
 };
@@ -696,7 +731,7 @@ DiskDump.logWarning = function(s)
     var sWarning = "";
     if (s) {
         sWarning = "diskdump warning: " + s;
-        console.log(sWarning);
+        DiskDump.logConsole(sWarning);
     }
     return sWarning;
 };
@@ -732,7 +767,7 @@ DiskDump.readFile = function(sPath, sEncoding, done)
          *
          net.getStat(sPath, function(err, stats) {
             if (!err) {
-                console.log(stats);
+                DiskDump.logConsole(stats);
             } else {
                 DiskDump.logError(err);
             }
@@ -807,7 +842,7 @@ DiskDump.prototype.loadFile = function(done)
 DiskDump.prototype.setData = function(err, buf, done)
 {
     if (err) {
-        DiskDump.logError(err);  // console.log("unable to read " + this.sDiskPath);
+        DiskDump.logError(err);  // DiskDump.logConsole("unable to read " + this.sDiskPath);
         done(err);
         return;
     }
@@ -1015,7 +1050,7 @@ DiskDump.prototype.trimSector = function(buf, len)
         dwPattern = buf.readInt32LE(off);
         while ((off -= cbPattern) >= 0) {
             var dw = buf.readInt32LE(off);
-            // if (fDebug) console.log("0x" + str.toHex(off) + ": comparing 0x" + str.toHex(dw) + " to pattern 0x" + str.toHex(dwPattern));
+            // if (fDebug) DiskDump.logConsole("0x" + str.toHex(off) + ": comparing 0x" + str.toHex(dw) + " to pattern 0x" + str.toHex(dwPattern));
             if (dw != dwPattern) break;
             cbTrim += cbPattern;
         }
@@ -1498,7 +1533,7 @@ DiskDump.prototype.buildFAT = function(abFAT, aFiles, iCluster, cbCluster)
             while (cFileClusters-- > 0) {
                 var iNextCluster = iCluster + 1;
                 if (!cFileClusters) iNextCluster = 0xFFF;
-                // if (fDebug) console.log(aFiles[iFile].FILE_NAME + ": setting cluster entry " + iCluster + " to 0x" + str.toHexWord(iNextCluster));
+                // if (fDebug) DiskDump.logConsole(aFiles[iFile].FILE_NAME + ": setting cluster entry " + iCluster + " to 0x" + str.toHexWord(iNextCluster));
                 this.buildFATEntry(abFAT, iCluster++, iNextCluster);
             }
         }
@@ -1566,7 +1601,7 @@ DiskDump.prototype.buildDir = function(abDir, aFiles, dateMod, iCluster, iParent
     }
     for (var iFile = 0; iFile < aFiles.length; iFile++) {
         if (aFiles[iFile].FILE_CLUS === undefined) {
-            if (fDebug) console.log("file " + aFiles[iFile].FILE_NAME + " missing cluster, skipping");
+            if (fDebug) DiskDump.logConsole("file " + aFiles[iFile].FILE_NAME + " missing cluster, skipping");
             continue;
         }
         offDir += this.buildDirEntry(abDir, offDir, aFiles[iFile].FILE_NAME, aFiles[iFile].FILE_SIZE, aFiles[iFile].FILE_ATTR, aFiles[iFile].FILE_TIME, aFiles[iFile].FILE_CLUS);
@@ -1694,9 +1729,9 @@ DiskDump.prototype.buildClusters = function(aFiles, offDisk, cbCluster, iParentC
                 (function readClusters(file, cb, off) {
                     fs.readFile(file.FILE_PATH, function doneReadClusters(err, buf) {
                         if (!err) {
-                            if (fDebug && cb != buf.length) console.log(file.FILE_NAME + ": initial size (" + cb + ") does not match actual size (" + buf.length + ")");
+                            if (fDebug && cb != buf.length) DiskDump.logConsole(file.FILE_NAME + ": initial size (" + cb + ") does not match actual size (" + buf.length + ")");
                             buf.copy(obj.bufDisk, off);
-                            if (fDebug) console.log("0x" + str.toHex(off) + ": 0x" + str.toHex(buf.length) + " bytes written for " + file.FILE_PATH);
+                            if (fDebug) DiskDump.logConsole("0x" + str.toHex(off) + ": 0x" + str.toHex(buf.length) + " bytes written for " + file.FILE_PATH);
                             if (obj.sManifestFile) file.FILE_MD5 = crypto.createHash('md5').update(buf).digest('hex');
                         }
                         if (!--obj.cWritesPending) done(err);
@@ -1716,7 +1751,7 @@ DiskDump.prototype.buildClusters = function(aFiles, offDisk, cbCluster, iParentC
         }
         if (bufData) {
             bufData.copy(this.bufDisk, offDisk);
-            if (fDebug) console.log("0x" + str.toHex(offDisk) + ": 0x" + str.toHex(bufData.length) + " bytes IMMEDIATELY written for " + aFiles[iFile].FILE_PATH);
+            if (fDebug) DiskDump.logConsole("0x" + str.toHex(offDisk) + ": 0x" + str.toHex(bufData.length) + " bytes IMMEDIATELY written for " + aFiles[iFile].FILE_PATH);
         }
         offDisk += cbData;
         cClusters += ((cbData / cbCluster) | 0);
@@ -1732,11 +1767,11 @@ DiskDump.prototype.buildClusters = function(aFiles, offDisk, cbCluster, iParentC
         for (iFile = 0; iFile < aFiles.length; iFile++) {
             var cb = aFiles[iFile].FILE_SIZE;
             if (cb < 0) {
-                if (fDebug) console.log("0x" + str.toHex(offDisk) + ": buildClusters()");
+                if (fDebug) DiskDump.logConsole("0x" + str.toHex(offDisk) + ": buildClusters()");
                 var cSubClusters = this.buildClusters(aFiles[iFile].FILE_DATA, offDisk, cbCluster, aFiles[iFile].FILE_CLUS, iLevel + 1, done);
                 cClusters += cSubClusters;
                 offDisk += cSubClusters * cbCluster;
-                if (fDebug) console.log("0x" + str.toHex(offDisk) + ": buildClusters() returned, writing " + cSubClusters + " clusters");
+                if (fDebug) DiskDump.logConsole("0x" + str.toHex(offDisk) + ": buildClusters() returned, writing " + cSubClusters + " clusters");
             }
         }
     }
@@ -1902,7 +1937,7 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
     var cbMax = (this.mbHD? this.mbHD * 1024 * 1024 : 1440 * 1024);
     var cbTotal = this.calcFileSizes(aFiles);
 
-    if (fDebug) console.log("total calculated size for " + aFiles.length + " files/folders: " + cbTotal + " bytes (0x" + str.toHex(cbTotal) + ")");
+    if (fDebug) DiskDump.logConsole("total calculated size for " + aFiles.length + " files/folders: " + cbTotal + " bytes (0x" + str.toHex(cbTotal) + ")");
 
     if (cbTotal >= cbMax) {
         err = new Error("file(s) too large (" + cbTotal + " bytes total, " + cbMax + " bytes maximum)");
@@ -2030,7 +2065,7 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
     var cClusters = this.buildClusters(aFiles, offDisk, cbCluster, 0, 0, done);
     offDisk += cClusters * cSectorsPerCluster * cbSector;
 
-    if (fDebug) console.log(offDisk + " bytes written, " + cbDisk + " bytes available");
+    if (fDebug) DiskDump.logConsole(offDisk + " bytes written, " + cbDisk + " bytes available");
 
     if (offDisk > cbDisk) {
         err = new Error("too much data for disk image (" + cClusters + " clusters required)");
@@ -2058,7 +2093,7 @@ DiskDump.prototype.convertToJSON = function()
      * TODO: Decide if we want to retain this usage info:
      */
     if (!this.bufDisk) {
-        // console.log("no data available in disk image");
+        // DiskDump.logConsole("no data available in disk image");
         // this.jsonDisk = "[ /* no data */ ]";
         this.jsonDisk = "[\n  /**\n   * " + DiskDump.sNotice + "\n   * " + DiskDump.sUsage + "\n   */\n]";
         return this.jsonDisk;
@@ -2547,6 +2582,8 @@ DiskDump.prototype.convertOSIDiskToJSON = function()
  */
 DiskDump.prototype.convertToIMG = function()
 {
+    DiskDump.logConsole("convertToIMG()");
+
     if (!this.bufDisk) {
 
         if (!this.dataDisk) {

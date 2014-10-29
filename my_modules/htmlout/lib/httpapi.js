@@ -65,6 +65,11 @@ var HTMLOut;
 var sServerRoot = "";
 
 /*
+ * logFile is set by HTMLOut, allowing us to "mingle" our output with the server's log (typically "./logs/node.log").
+ */
+var logFile = null;
+
+/*
  * Entries in this table are matched first, as-is, to req.path (no string or RegExp compare involved);
  * we do, however, strip any trailing slash from the incoming path before doing the lookup, so none of
  * the entries on the left-hand side should contain trailing slashes.
@@ -139,6 +144,16 @@ function HTTPAPI(out, sRoot) {
     HTMLOut = out;
     sServerRoot = sRoot;
 }
+
+/**
+ * setLogFile(file)
+ *
+ * @param {Object} file
+ */
+HTTPAPI.setLogFile = function(file)  {
+    logFile = file;
+    DiskDump.setLogFile(file);
+};
 
 /**
  * @class Volume
