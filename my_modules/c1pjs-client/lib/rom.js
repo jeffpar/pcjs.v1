@@ -63,13 +63,13 @@ function C1PROM(parmsROM)
          * we ask our server-side ROM image converter to return the corresponding JSON-encoded data,
          * in compact form (ie, minimal whitespace, no ASCII data comments, etc).
          */
-        var sFileExt = str.getExtension(this.sImage); 
+        var sFileExt = str.getExtension(this.sImage);
         if (sFileExt != "json" && sFileExt != "hex") {
             /**
              * TODO: This code was using a deprecated parameter (compact=1); make sure things still work.
-             * 
+             *
              * TODO: Convert this code to use the new shared File API definitions and weblib functions; eg:
-             * 
+             *
              *      sFileURL = web.getHost() + DumpAPI.ENDPOINT + "?" + DumpAPI.QUERY.FILE + "=" + this.sImage;
              */
             sFileURL = "http://" + window.location.host + "/api/v1/dump?file=" + this.sImage;
@@ -154,7 +154,7 @@ C1PROM.prototype.setByte = function(addr, addrFrom)
 C1PROM.prototype.convertImage = function(sImageName, sImageData, nErrorCode)
 {
     if (nErrorCode) {
-        this.println("ROM load error (" + nErrorCode + ")");
+        this.println("Error loading ROM \"" + sImageName + "\" (" + nErrorCode + ")");
         return;
     }
     if (sImageData[0] == "[") {
@@ -168,7 +168,7 @@ C1PROM.prototype.convertImage = function(sImageName, sImageData, nErrorCode)
             //
             // System exceptions throw an object with a message property, whereas exceptions I throw myself do not (they're just strings)
             //
-            this.println("ROM data error: " + (e.message || e));
+            this.println("Error processing ROM \"" + sImageName + "\": " + (e.message || e));
             return;
         }
     }
@@ -192,7 +192,7 @@ C1PROM.prototype.convertImage = function(sImageName, sImageData, nErrorCode)
 C1PROM.prototype.copyImage = function()
 {
     /*
-     * The Computer object may give us the address of the ROM image before we've finished downloading the image, 
+     * The Computer object may give us the address of the ROM image before we've finished downloading the image,
      * so both setBuffer() and convertImage() call copyImage(), which in turn will copy the image ONLY when both
      * pieces are in place.  At that point, the component becomes "ready", in much the same way that other components
      * (eg, CPU and Screen) become "ready" when all their prerequisites are satisfied.

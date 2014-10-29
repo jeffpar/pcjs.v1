@@ -180,10 +180,14 @@ web.loadResource = function(sURL, fAsync, data, componentNotify, fnNotify, pNoti
                  * pending, any debugging activity means most of them simply get dropped on floor, so what may actually be
                  * happening are mis-notifications rather than redundant notifications.
                  *
-                xmlHTTP.onreadystatechange = undefined;
+                 *      xmlHTTP.onreadystatechange = undefined;
                  */
                 sURLData = xmlHTTP.responseText;
-                if (xmlHTTP.status == 200) {
+                /*
+                 * The normal "success" case is an HTTP status code of 200, but when testing with files loaded
+                 * from the local file system (ie, when using the "file:" protocol), we have to be a bit more "flexible".
+                 */
+                if (xmlHTTP.status == 200 || !xmlHTTP.status && sURLData.length && web.getHostProtocol() == "file:") {
                     Component.log("xmlHTTP.onreadystatechange(" + sURL + "): returned " + sURLData.length + " bytes");
                 }
                 else {
@@ -282,6 +286,16 @@ web.getHost = function()
 web.getHostURL = function()
 {
     return (window? window.location.href : null);
+};
+
+/**
+ * getHostProtocol()
+ *
+ * @return {string}
+ */
+web.getHostProtocol = function()
+{
+    return (window? window.location.protocol : "file:");
 };
 
 /**
