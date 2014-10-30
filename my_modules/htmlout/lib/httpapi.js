@@ -120,7 +120,7 @@ var externalRedirects = {
 
 /*
  * Entries in this table are matched next, using a RegExp comparison; comparisons start with the first entry
- * and continue until a match is found, at which point the okens =cement is performed and comparisons stop;
+ * and continue until a match is found, at which point the replacement is performed and comparisons stop;
  * we could make the replacement process "additive", by continuing comparisons/replacements until the
  * end is reached, but let's not, unless there's an actual need.
  *

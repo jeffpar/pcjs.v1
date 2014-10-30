@@ -164,7 +164,9 @@ var aMachineFileTypes = {
 };
 
 var asNonDirectories = [
-    "LICENSE"
+    "COPYING",
+    "LICENSE",
+    "README"
 ];
 
 var asExtsPlainText = [

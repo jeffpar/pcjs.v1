@@ -1,6 +1,6 @@
 {
   "name": "pcjs",
-  "version": "1.15.7",
+  "version": "1.15.8",
   "description": "Node-enabled version of PCjs",
   "main": "server.js",
   "directories": {
