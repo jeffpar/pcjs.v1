@@ -74,7 +74,7 @@ JavaScript files to your browser will work.  However, instructions for doing tha
 In fact, you can run PCjs simulations without a web server at all, using the "file:" protocol instead of "http:".
 However, most of the machine configurations require additional resource files (ROMs, disk images, etc), which are
 included in the project, but unless all the resource files are moved into a single directory (as they are in these
-[Demos]((/docs/pcjs/demos/), your browser will probably be unable to load all of them, due to security restrictions.
+[Demos](/docs/pcjs/demos/), your browser will probably be unable to load all of them, due to security restrictions.
 Using the bundled web server is the preferred solution.
 
 Aside from the [PCjs](my_modules/pcjs-client/lib/) and [C1Pjs](my_modules/c1pjs-client/lib/) applications,
