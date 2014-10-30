@@ -158,7 +158,7 @@ Remember that PC and PC XT machines supported only 160Kb diskettes (on any versi
 320Kb diskettes (on PC-DOS 1.1 and higher), and 180Kb and 360Kb diskettes (on PC-DOS 2.0 and higher).
 
 The 1.2Mb diskette format was introduced with the PC AT, and 720Kb and 1.44Mb diskette formats were
-introduced with the 8Mhz PC AT and PS/2 models.  So, when using any of these larger formats, be sure you're
+supported later on 8Mhz PC AT and PS/2 models.  So, when using any of these larger formats, be sure you're
 also using a compatible machine configuration.
 
 Learn more about PCjs disk images [here](/disks/).

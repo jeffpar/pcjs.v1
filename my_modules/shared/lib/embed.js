@@ -91,6 +91,7 @@ function loadXML(sXMLFile, idMachine, sStateFile, fResolve, display, done)
 {
     var doneLoadXML = function(sURLName, sXML, nErrorCode) {
         if (nErrorCode) {
+            if (!sXML) sXML = "unable to load " + sXMLFile + " (" + nErrorCode + ")";
             done(sXML, null);
             return;
         }
@@ -311,7 +312,7 @@ function embedMachine(sName, sVersion, idElement, sXMLFile, sXSLFile, sStateFile
              * include and then generates the embedPC() and/or embedC1P() calls.
              */
             var aeWarning = (eMachine && Component.getElementsByClass(eMachine, "machine-warning"));
-            eWarning = (aeWarning && aeWarning[0]) || null;
+            eWarning = (aeWarning && aeWarning[0]) || eMachine;
         }
         if (eWarning) eWarning.innerHTML = str.escapeHTML(sMessage);
     };
