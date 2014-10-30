@@ -165,10 +165,7 @@ C1PROM.prototype.convertImage = function(sImageName, sImageData, nErrorCode)
              */
             this.abImage = eval("(" + sImageData + ")");
         } catch (e) {
-            //
-            // System exceptions throw an object with a message property, whereas exceptions I throw myself do not (they're just strings)
-            //
-            this.println("Error processing ROM \"" + sImageName + "\": " + (e.message || e));
+            this.println("Error processing ROM \"" + sImageName + "\": " + e.message);
             return;
         }
     }

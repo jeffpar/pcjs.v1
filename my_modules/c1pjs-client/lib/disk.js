@@ -109,14 +109,14 @@
  *
  *      PIA Data Register A Lines       PIA Data Register B Lines
  *      -------------------------       -------------------------
- *      IHD - Index Hole Detect         HLD - Head Load      
- *      SD2 - Select Drive 2 (Drive B)  LCS - Low Current Select   
- *      WP  - Write Protected           SD1 - Select Drive 1       
- *      RDY2- Drive 2 Ready             FR  - Fault Reset          
- *      SHD - Sector Hole Detect        ST  - Step                 
- *      FD  - Fault Detected            STI - Step In              
- *      TZD - Track Zero Detected       EE  - Enable Erase         
- *      RDY1- Drive 1 Ready             WE  - Write Enable         
+ *      IHD - Index Hole Detect         HLD - Head Load
+ *      SD2 - Select Drive 2 (Drive B)  LCS - Low Current Select
+ *      WP  - Write Protected           SD1 - Select Drive 1
+ *      RDY2- Drive 2 Ready             FR  - Fault Reset
+ *      SHD - Sector Hole Detect        ST  - Step
+ *      FD  - Fault Detected            STI - Step In
+ *      TZD - Track Zero Detected       EE  - Enable Erase
+ *      RDY1- Drive 1 Ready             WE  - Write Enable
  *
  * NOTE: The PIA bit assignments above agree with those described, albeit somewhat less clearly,
  * in http://www.osiweb.org/osiweb/misc/osi-hardware.txt, under "Model 475 Floppy disk system with
@@ -136,12 +136,12 @@
  * Disk Formats (from http://osi.marks-lab.com/files/winOSI/old-source-V1.2/Disk_io.cpp):
  *
  *      5.25" disk, 40 tracks, 8 sectors/track, 256 bytes/sector, 11 bits/byte (8E1) = 80K/disk.
- *      
+ *
  *      NOTE: 8E1 refers to "8 data bits, even parity, 1 stop bit," plus an implied start bit.
  *
  *      OSI uses 8E1 to give a max unformatted capacity of 2272 bytes per track (see below).
  *      However other bit encodings (8N1) could give up to 2500 bytes/track.
- *      
+ *
  *      NOTE: 8N1 refers to "8 data bits, no parity, 1 stop bit," plus an implied start bit.
  *
  *      The standard speed for 5.25" drives is 300rpm. Thus one rotation of the disk is 200ms.
@@ -186,7 +186,7 @@
  *      There can be any mixture of various length sectors. The total page count can not
  *      exceed 8 pages (8*256) if more than one sector is on a track. Each sector is written
  *      in the following format:
- *      
+ *
  *          previous sector length (4 if none before) times 800 microseconds of delay
  *          sector start code $76
  *          sector number in binary
@@ -199,7 +199,7 @@
  *      2 sectors (1 & 2) on track 12 hold the directory information.
  *      Each entry requires 8 bytes. There are a total of 64 entries. The entries are
  *      formatted as follows:
- *      
+ *
  *          0-5 ASCII 6 character filename
  *          6 BCD first track of file
  *          7 BCD Last track of file
@@ -219,7 +219,7 @@ function C1PDiskController(parmsDC)
     Component.call(this, "C1PDiskController", parmsDC);
 
     this.fPower = false;
-    
+
     /*
      * Our DiskController simulates the combination of an MC6820 PIA and an MC6850 ACIA.
      * This image of an OSI 470 Controller Board (http://osi.marks-lab.com/boards/images/OSI470.jpg)
@@ -266,7 +266,7 @@ function C1PDiskController(parmsDC)
     this.PDB_SD1    = 0x20;     // OUTPUT:  0 = Select Drive 1
  // this.PDB_LCS    = 0x40;     // OUTPUT:  0 = Low Current Select (set to 1)
  // this.PDB_HLD    = 0x80;     // OUTPUT:  0 = Head Load (head on disk)
-    
+
     /*
      * Next, definitions for the MC6850 ACIA.
      *
@@ -282,7 +282,7 @@ function C1PDiskController(parmsDC)
      *      111     0x1C        8 bits, odd parity, 1 stop bit
      *
      * And here are all the possible CTRL_TCTL (Transmit Control) values:
-     * 
+     *
      *      00      0x00        RTS=Low, Transmitting Interrupt Disabled
      *      01      0x20        RTS=Low, Transmitting Interrupt Enabled
      *      10      0x40        RTS=High, Transmitting Interrupt Disabled
@@ -290,7 +290,7 @@ function C1PDiskController(parmsDC)
      */
     this.PORT_CTRL = 0x10;  // ACIA Control Register (WRITE-only)
     this.PORT_STAT = 0x10;  // ACIA Status Register (READ-only)
-    this.PORT_DATA = 0x11;  // ACIA Data Register (Transmit Data Register on WRITE, Receive Data Register on READ) 
+    this.PORT_DATA = 0x11;  // ACIA Data Register (Transmit Data Register on WRITE, Receive Data Register on READ)
 
     this.CTRL_CDIV  = 0x03; // Counter Divide (CR1,CR0) [OSI sets both, performing a "Master Reset", then immediately clears both, for a divide ratio of 1]
  // this.CTRL_WSEL  = 0x1C; // Word Select (CR4,CR3,CR2), determining word length, parity and stop bits [OSI selects 0x18 for "8 bits, even parity, 1 stop bit"]
@@ -305,7 +305,7 @@ function C1PDiskController(parmsDC)
  // this.STAT_OVRN  = 0x20; // Receiver Overrun (ie, one or more characters in the data stream were lost due to not being read from the Receive Data Register in time)
  // this.STAT_PE    = 0x40; // Parity Error (ie, the number of highs (ones) in the character does not agree with the preselected odd or even parity)
  // this.STAT_IRQ   = 0x80; // Interrupt Request (ie, state of the IRQ output; cleared by a read operation to the Receive Data Register or a write operation to the Transmit Data Register)
-    
+
     /*
      * Last but not least, some internal state definitions and hard-coded assumptions
      */
@@ -314,68 +314,68 @@ function C1PDiskController(parmsDC)
 
     this.MAXTRACKS_5INCH = 40;
  // this.MAXTRACKS_8INCH = 77;
-    
+
     /*
      * Some random OS-65D notes
-     * 
+     *
      * Version 3.3 Initialization Code
      * -------------------------------
-     * 
+     *
      * The following code (where X is 0x00):
-     * 
+     *
      *      2217 8E 01 F4  STX $F401
      *      221A 8E 00 F4  STX $F400
      *      221D 8E 03 F4  STX $F403
-     *      
+     *
      * is intended to reset a Printer PIA located at 0xF400.
-     * 
+     *
      * It then takes a detour to "SET KEYBOARD SOUND GENERATOR TO LOWEST FREQUENCY (192.753 HZ)"
      * with X set to 0xFF; the sound generator is supposed to be turned off a bit later, presumably
      * at the same time it sets "64 char/line" mode -- well, that's what v3.2 did anyway.
-     * 
+     *
      *      2220 CA        DEX
      *      2221 8E 01 DF  STX $DF01
-     *      
+     *
      * While X is still 0xFF, it continues initializing the Printer PIA:
-     * 
+     *
      *      2224 8E 02 F4  STX $F402
-     *      
+     *
      * Then the code fiddles a bit with a mystery serial port (perhaps the "Model 430B Cassette & Analog I/O"
      * interface?)
-     * 
+     *
      *      2227 AD 06 FB  LDA $FB06
      *      222A 8E 05 FB  STX $FB05
-     *      
+     *
      * And then it's back to more Printer PIA initialization:
-     * 
+     *
      *      222D A9 04     LDA #$04
      *      222F 8D 01 F4  STA $F401
      *      2232 8D 03 F4  STA $F403
      *
      * Then it does some disk resetting (with A still 0x04 and Y set to 0x00):
-     * 
+     *
      *      2235 8C 01 C0  STY $C001
      *      2238 A0 40     LDY #$40 ;'@'
      *      223A 8C 00 C0  STY $C000
      *      223D 8D 01 C0  STA $C001
      *
      * This code supposedly selects DRIVE 1:
-     * 
+     *
      *      2240 A9 01     LDA #$01
      *      2242 20 C6 29  JSR $29C6
-     *      
+     *
      * Then it "resets" and "sets" the TERMINAL ACIA.  Note that the C1P serial port is addressed
      * at 0xF000-0xF0FF, and the C1P has ROM mapped to 0xF800-0xFFFF, so we know nothing of the serial
      * port mentioned above at 0xFBxx, nor this terminal ACIA port at 0xFCxx.
-     *  
+     *
      *      2245 A9 03     LDA #$03
      *      2247 8D 00 FC  STA $FC00
      *      224A A0 11     LDY #$11
      *      224C 8C 00 FC  STY $FC00
-     *      
+     *
      * Next, there's some code to "SET CA-10X 16 WAY SERIAL BOARD" at 0xCF00-0xCF1F; again, something
      * we know nothing about:
-     * 
+     *
      *      224F A2 1E     LDX #$1E
      *      2251 9D 00 CF  STA $CF00,X
      *      2254 98        TYA
@@ -387,7 +387,7 @@ function C1PDiskController(parmsDC)
      *
      * Then it clears 8 pages of video memory (ie, it simply ASSUMES that this is a Model 540 video board
      * with 2K of video memory):
-     * 
+     *
      *      225E A2 08     LDX #$08
      *      2260 A9 D0     LDA #$D0
      *      2262 85 FF     STA $FF
@@ -403,7 +403,7 @@ function C1PDiskController(parmsDC)
      *
      * Then it performs a memory test, starting with a high page of 0xBF, and stores the highest page of
      * available RAM at 0x2300:
-     * 
+     *
      *      2276 A0 BF     LDY #$BF
      *      2278 20 EC 22  JSR $22EC
      *      227B F0 03     BEQ $2280
@@ -413,7 +413,7 @@ function C1PDiskController(parmsDC)
      *
      * Now it checks for "SERIAL OR VIDEO (EITHER 65-A OR 65-V PROM)" (the byte at 0xFE01 on a C1P is 0x28,
      * so X will be 2, implying "VIDEO"):
-     * 
+     *
      *      2283 A2 01     LDX #$01
      *      2285 AD 01 FE  LDA $FE01
      *      2288 F0 01     BEQ $228B
@@ -424,7 +424,7 @@ function C1PDiskController(parmsDC)
      * and then store X at 0xDE00, effectively forcing the video board into "64 char/line" mode -- which was
      * originally EXACTLY what I was looking for in the video emulation component.  But v3.3 doesn't do that.
      * Here's what it does instead:
-     * 
+     *
      *      228F A2 00     LDX #$00
      *      2291 8E 80 DC  STX $DC80
      *
@@ -686,9 +686,9 @@ C1PDiskController.prototype.setBinding = function(c, t, s, e)
                     if (sFilePath.substr(sFilePath.length-5) != ".json") {
                         /*
                          * TODO: This code was using a deprecated parameter (compact=1); make sure things still work.
-                         * 
+                         *
                          * TODO: Convert this code to use the new shared Disk API definitions and weblib functions; eg:
-                         * 
+                         *
                          *      sDiskURL = web.getHost() + DumpAPI.ENDPOINT + "?" + DumpAPI.QUERY.DISK + "=" + sDiskPath;
                          */
                         sFileURL = "http://" + window.location.host + "/api/v1/dump?disk=" + sFilePath;
@@ -728,7 +728,7 @@ C1PDiskController.prototype.setBuffer = function(abMemory, start, end, cpu)
  * @this {C1PDiskController}
  * @param {boolean} fOn
  * @param {C1PComputer} cmp
- * 
+ *
  * We need We make a note of the Computer component, so that we can invoke its reset() method whenever we need to
  * simulate a warm start, and we query the Keyboard component so that we can use its injectKeys() function.
  */
@@ -745,12 +745,12 @@ C1PDiskController.prototype.setPower = function(fOn, cmp)
  * @param {string} sDiskName
  * @param {string} sDiskData
  * @param {number} nErrorCode (response from server if anything other than 200)
- * 
+ *
  * NOTE: Although I've expanded the JSON disk-image format to support multiple heads (ie, platters or disk surfaces),
  * this controller implementation currently supports only single-head drives, and therefore only single-sided images.
  * So, if the image contains more than one entry in head data array, all we use is the first entry; data for any remaining
  * heads is discarded.
- * 
+ *
  * WARNING: The disk-image format should match that used by PCjs, where the image is an array of cylinders, each of which
  * is an array of heads.  That's also more typical, because it maintains the original data's physical locality.
  */
@@ -802,11 +802,11 @@ C1PDiskController.prototype.loadDisk = function(sDiskName, sDiskData, nErrorCode
              * start with the most egregious, and worry about the rest later.
              */
             if ((iTrackNum = track['trackNum']) === undefined || sectors === undefined) {
-                throw("track " + iTrack + " missing data");
+                throw new Error("track " + iTrack + " missing data");
             }
             /*
              * WARNING: We allow out-of-order tracks, because we store each track's data according
-             * to its trackNum index, but just in case that wasn't intended, we're going to mention it. 
+             * to its trackNum index, but just in case that wasn't intended, we're going to mention it.
              */
             if (iTrackNum != iTrack) {
                 Component.warning("track " + iTrackNum + " out of order (expected " + iTrack + ")");
@@ -815,12 +815,12 @@ C1PDiskController.prototype.loadDisk = function(sDiskName, sDiskData, nErrorCode
              * For each track, we start with an empty trackData array and "push" (ie, append) all the
              * sector data onto it. Most of the data is already in byte form and can simply use Array.push(),
              * but there is also some metadata (signatures, types, lengths, etc), for which we have assorted
-             * helpers below: pushBCD, pushBin, and pushSig. 
+             * helpers below: pushBCD, pushBin, and pushSig.
              */
             var trackData = [], sector, sectorData, i;
             if (!iTrackNum) {
                 sector = sectors[0];
-                sectorData = sector['sectorData']; 
+                sectorData = sector['sectorData'];
                 this.pushBin(trackData, track, 'trackLoad', 2);
                 this.pushBin(trackData, sector, 'sectorPages');
                 for (i = 0; i < sectorData.length; i++) {
@@ -833,7 +833,7 @@ C1PDiskController.prototype.loadDisk = function(sDiskName, sDiskData, nErrorCode
                 this.pushBin(trackData, track, 'trackType');
                 for (var iSector=0; iSector < sectors.length; iSector++) {
                     sector = sectors[iSector];
-                    sectorData = sector['sectorData']; 
+                    sectorData = sector['sectorData'];
                     this.pushBin(trackData, sector, 'sectorSig');
                     this.pushBin(trackData, sector, 'sectorNum');
                     this.pushBin(trackData, sector, 'sectorPages');
@@ -854,10 +854,7 @@ C1PDiskController.prototype.loadDisk = function(sDiskName, sDiskData, nErrorCode
         this.aDrives[0].aTracks = aTracks;
         this.println("mount of " + sDiskName + " complete");
     } catch (e) {
-        //
-        // System exceptions throw an object with a message property, whereas exceptions I throw myself do not (they're just strings)
-        //
-        this.println("disk data error: " + (e.message || e));
+        this.println("disk data error: " + e.message);
     }
 };
 
@@ -871,7 +868,7 @@ C1PDiskController.prototype.pushBCD = function(a, o, k)
 {
     var n = o[k];
     if (n === undefined) {
-        throw("missing bcd value: " + k);
+        throw new Error("missing bcd value: " + k);
     }
     var bcd = (Math.floor(n / 10) << 4) | (n % 10);
     a.push(bcd);
@@ -888,7 +885,7 @@ C1PDiskController.prototype.pushBin = function(a, o, k, cb)
 {
     var n = o[k];
     if (n === undefined) {
-        throw("missing binary value: " + k);
+        throw new Error("missing binary value: " + k);
     }
     if (cb == 2) {
         a.push((n >> 8) & 0xff);
@@ -906,7 +903,7 @@ C1PDiskController.prototype.pushSig = function(a, o, k)
 {
     var s = o[k];
     if (s === undefined) {
-        throw("missing signature: " + k);
+        throw new Error("missing signature: " + k);
     }
     for (var i=0; i < s.length; i++) {
         a.push(s.charCodeAt(i));
@@ -1128,7 +1125,7 @@ C1PDiskController.prototype.updatePDA = function(bPDA)
     if (this.iDriveSelect >= 0) {
 
         if (this.aDrives[this.iDriveSelect].aTracks.length) {
-            
+
             var drive = this.aDrives[this.iDriveSelect];
 
             if (drive.fProtected) {
@@ -1173,9 +1170,9 @@ C1PDiskController.prototype.updatePDB = function(bPDB)
         this.setSelectedDrive(this.regPDA.bits, bPDB);
 
     if (this.iDriveSelect >= 0 && this.iDriveSelect < this.aDrives.length) {
-        
+
         var drive = this.aDrives[this.iDriveSelect];
-        
+
         if (drive.aTracks.length) {
             /*
              * Is PDB_ST transitioning from 1 to 0?

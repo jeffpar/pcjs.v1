@@ -4476,130 +4476,134 @@ if (DEBUGGER) {
     {
         var result = true;
 
-        if (!sCmd.length) {
-            if (this.fAssemble) {
-                this.println("ended assemble @" + this.hexAddr(this.aAddrAssemble));
-                this.aAddrNextCode = this.aAddrAssemble;
-                this.fAssemble = false;
-            }
-        }
-
-        sCmd = sCmd.toLowerCase();
-        if (this.isReady() && !this.isBusy(true) && sCmd.length > 0) {
-            if (this.fAssemble) {
-                sCmd = "a " + this.hexAddr(this.aAddrAssemble) + " " + sCmd;
-            }
-            else {
-                /*
-                 * Process any "whole" commands here first (eg, "debug", "nodebug", "reset", etc.)
-                 *
-                 * For all other commands, if they lack a space between the command and argument portions,
-                 * insert a space before the first non-alpha character, so that split() will have the desired effect.
-                 */
-
-                /*
-                 * These commands work great, except that they won't compile, and in fact, I don't WANT them in the
-                 * compiled version, but putting them inside (!COMPILED) doesn't help, so I must disable them for now.
-                 *
-                if (!COMPILED) {
-                    if (sCmd == "debug") {
-                        DEBUG = true;
-                        this.println("DEBUG checks on");
-                        return true;
-                    }
-                    else if (sCmd == "nodebug") {
-                        DEBUG = false;
-                        this.println("DEBUG checks off");
-                        return true;
-                    }
+        try {
+            if (!sCmd.length) {
+                if (this.fAssemble) {
+                    this.println("ended assemble @" + this.hexAddr(this.aAddrAssemble));
+                    this.aAddrNextCode = this.aAddrAssemble;
+                    this.fAssemble = false;
                 }
-                 */
+            }
+            sCmd = sCmd.toLowerCase();
+            if (this.isReady() && !this.isBusy(true) && sCmd.length > 0) {
+                if (this.fAssemble) {
+                    sCmd = "a " + this.hexAddr(this.aAddrAssemble) + " " + sCmd;
+                }
+                else {
+                    /*
+                     * Process any "whole" commands here first (eg, "debug", "nodebug", "reset", etc.)
+                     *
+                     * For all other commands, if they lack a space between the command and argument portions,
+                     * insert a space before the first non-alpha character, so that split() will have the desired effect.
+                     */
 
-                var ch, ch0, i;
-                switch (sCmd) {
-                case "reset":
-                    if (this.cmp) this.cmp.reset();
-                    return true;
-                default:
-                    ch0 = sCmd.charAt(0);
-                    for (i = 1; i < sCmd.length; i++) {
-                        ch = sCmd.charAt(i);
-                        if (ch == " ") break;
-                        if (ch0 == "r" || ch < "a" || ch > "z") {
-                            sCmd = sCmd.substring(0, i) + " " + sCmd.substring(i);
-                            break;
+                    /*
+                     * These commands work great, except that they won't compile, and in fact, I don't WANT them in the
+                     * compiled version, but putting them inside (!COMPILED) doesn't help, so I must disable them for now.
+                     *
+                    if (!COMPILED) {
+                        if (sCmd == "debug") {
+                            DEBUG = true;
+                            this.println("DEBUG checks on");
+                            return true;
+                        }
+                        else if (sCmd == "nodebug") {
+                            DEBUG = false;
+                            this.println("DEBUG checks off");
+                            return true;
                         }
                     }
+                     */
+
+                    var ch, ch0, i;
+                    switch (sCmd) {
+                    case "reset":
+                        if (this.cmp) this.cmp.reset();
+                        return true;
+                    default:
+                        ch0 = sCmd.charAt(0);
+                        for (i = 1; i < sCmd.length; i++) {
+                            ch = sCmd.charAt(i);
+                            if (ch == " ") break;
+                            if (ch0 == "r" || ch < "a" || ch > "z") {
+                                sCmd = sCmd.substring(0, i) + " " + sCmd.substring(i);
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }
+
+                var asArgs = sCmd.split(" ");
+                switch (asArgs[0].charAt(0)) {
+                case "a":
+                    this.doAssemble(asArgs);
+                    break;
+                case "b":
+                    this.doBreak(asArgs[0], asArgs[1]);
+                    break;
+                case "c":
+                    this.doClear(asArgs[0]);
+                    break;
+                case "d":
+                    this.doDump(asArgs[0], asArgs[1], asArgs[2]);
+                    break;
+                case "e":
+                    this.doEdit(asArgs);
+                    break;
+                case "f":
+                    this.doFreqs(asArgs[1]);
+                    break;
+                case "g":
+                    this.doRun(asArgs[1]);
+                    break;
+                case "h":
+                    this.doHalt(asArgs[1]);
+                    break;
+                case "i":
+                    this.doInput(asArgs[1]);
+                    break;
+                case "l":
+                    this.doLoad(asArgs);
+                    break;
+                case "m":
+                    this.doMessages(asArgs);
+                    break;
+                case "o":
+                    this.doOutput(asArgs[1], asArgs[2]);
+                    break;
+                case "p":
+                case "pr":
+                    this.doProcStep(asArgs[0]);
+                    break;
+                case "r":
+                    this.doRegisters(asArgs);
+                    break;
+                case "t":
+                case "tr":
+                    this.doStep(asArgs[0], asArgs[1]);
+                    break;
+                case "u":
+                    this.doUnassemble(asArgs[1], asArgs[2], 8);
+                    break;
+                case "x":
+                    this.doExecOptions(asArgs);
+                    break;
+                case "?":
+                    this.doHelp();
+                    break;
+                case "n":
+                    if (this.doInfo(asArgs)) break;
+                    /* falls through */
+                default:
+                    if (!fQuiet) this.println("unknown command: " + sCmd);
+                    result = false;
                     break;
                 }
             }
-
-            var asArgs = sCmd.split(" ");
-            switch (asArgs[0].charAt(0)) {
-            case "a":
-                this.doAssemble(asArgs);
-                break;
-            case "b":
-                this.doBreak(asArgs[0], asArgs[1]);
-                break;
-            case "c":
-                this.doClear(asArgs[0]);
-                break;
-            case "d":
-                this.doDump(asArgs[0], asArgs[1], asArgs[2]);
-                break;
-            case "e":
-                this.doEdit(asArgs);
-                break;
-            case "f":
-                this.doFreqs(asArgs[1]);
-                break;
-            case "g":
-                this.doRun(asArgs[1]);
-                break;
-            case "h":
-                this.doHalt(asArgs[1]);
-                break;
-            case "i":
-                this.doInput(asArgs[1]);
-                break;
-            case "l":
-                this.doLoad(asArgs);
-                break;
-            case "m":
-                this.doMessages(asArgs);
-                break;
-            case "o":
-                this.doOutput(asArgs[1], asArgs[2]);
-                break;
-            case "p":
-            case "pr":
-                this.doProcStep(asArgs[0]);
-                break;
-            case "r":
-                this.doRegisters(asArgs);
-                break;
-            case "t":
-            case "tr":
-                this.doStep(asArgs[0], asArgs[1]);
-                break;
-            case "u":
-                this.doUnassemble(asArgs[1], asArgs[2], 8);
-                break;
-            case "x":
-                this.doExecOptions(asArgs);
-                break;
-            case "?":
-                this.doHelp();
-                break;
-            case "n":
-                if (this.doInfo(asArgs)) break;
-                /* falls through */
-            default:
-                if (!fQuiet) this.println("unknown command: " + sCmd);
-                result = false;
-                break;
-            }
+        } catch(e) {
+            this.println("debugger sad: " + e.message);
+            result = false;
         }
         return result;
     };

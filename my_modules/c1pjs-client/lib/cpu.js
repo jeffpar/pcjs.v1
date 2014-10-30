@@ -1035,7 +1035,7 @@ C1PCPU.prototype.calcRemainingTime = function()
 
     /*
      * Last but not least, update nRecalcCycles, so that when run() starts up again and calls calcStartTime(),
-     * it'll be ready to decide if calcCycles() should be called again.  
+     * it'll be ready to decide if calcCycles() should be called again.
      */
     this.nRecalcCycles += this.nCyclesThisRun;
 
@@ -1114,10 +1114,7 @@ C1PCPU.prototype.run = function()
         this.halt();
         this.update();
         this.setBusy(false);
-        //
-        // System exceptions throw an object with a message property, whereas exceptions I throw myself do not (they're just strings)
-        //
-        this.setError(e.message || e);
+        this.setError(e.message);
         return;
     }
     setTimeout(function(cpu) { return function() {cpu.run();}; }(this), this.calcRemainingTime());
@@ -1533,7 +1530,7 @@ C1PCPU.prototype.addBCD = function(reg, mem)
     /*
      * Adjust the result. NOTE: The extra AND'ing and ADD'ing isn't necessary if we want to
      * assume that ONLY valid BCD digits will be added, but we probably shouldn't assume that.
-     * NOTE: We use an OR instead of an ADD at the end because it's logically equivalent and faster. 
+     * NOTE: We use an OR instead of an ADD at the end because it's logically equivalent and faster.
      */
     if (r >= 0x0A) r = ((r + 0x06) & 0x0f) | 0x10;
 

@@ -717,8 +717,12 @@ web.onExit = function(fn)
 web.doPageEvent = function(afn)
 {
     if (web.fPageEventsEnabled) {
-        for (var i = 0; i < afn.length; i++) {
-            afn[i]();
+        try {
+            for (var i = 0; i < afn.length; i++) {
+                afn[i]();
+            }
+        } catch(e) {
+            Component.notice("An unexpected exception occurred:\n\n" + e.message + "\n\nPlease send this information to Jeff@pcjs.org. Thanks.");
         }
     }
 };
