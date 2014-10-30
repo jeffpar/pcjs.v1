@@ -1,7 +1,7 @@
 Build Tools
 ---
 This is where all the server-side PHP code used to reside.  I've since deleted that code from the project,
-because it's all been ported to JavaScript as a collection [Node modules](/my_modules/).
+because it's all been ported to JavaScript as a collection of [Node modules](/my_modules/).
 
 All that remains here is the version of Google's Closure Compiler (and its associated [README](README)) that I use
 to build the client-side JavaScript files -- not because I have any attachment to this particular version, but because
