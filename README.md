@@ -69,13 +69,13 @@ The project includes:
 + A smattering of [PCjs](docs/pcjs/) and [C1Pjs](docs/c1pjs/) documentation, along with [blog posts](blog/), related [publications](pubs/) and more
 
 The bundled web server is not strictly required.  Any web server (Node, Apache, Nginx, etc) that can serve the necessary
-JavaScript files to your browser will work.  However, instructions for doing that are beyond the scope of this document
-(see future document).
+JavaScript files to your browser will work.  However, instructions for doing that are beyond the scope of this introduction.
 
 In fact, you can run PCjs simulations without a web server at all, using the "file:" protocol instead of "http:".
 However, most of the machine configurations require additional resource files (ROMs, disk images, etc), which are
-included in the project, but unless all the resource files are moved into a single directory, your browser will probably
-be unable to load all of them, due to security restrictions.  Using the bundled web server is the preferred solution.
+included in the project, but unless all the resource files are moved into a single directory (as they are in these
+[Demos]((/docs/pcjs/demos/), your browser will probably be unable to load all of them, due to security restrictions.
+Using the bundled web server is the preferred solution.
 
 Aside from the [PCjs](my_modules/pcjs-client/lib/) and [C1Pjs](my_modules/c1pjs-client/lib/) applications,
 [DiskDump](my_modules/diskdump/) is another important module.  Originally created to dump existing disk images as JSON,
