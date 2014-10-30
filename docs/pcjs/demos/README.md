@@ -19,6 +19,6 @@ the "file:" or "http:" protocol.
 
 Have fun!
 
-[IBM PC](sample3b.xml "PCjs:sample3")
+[IBM PC using sample3b.xml](sample3b.xml "PCjs:sample3")
 
 [Return to [PCjs Documentation](..)]

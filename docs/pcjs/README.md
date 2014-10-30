@@ -2,6 +2,7 @@ PCjs Documentation
 ---
 
 [PCjs](/docs/about/pcjs/) is a full-featured IBM PC, PC XT and PC AT emulator written entirely in JavaScript.
+After you've read the Documentation, play with the [Demos](demos/).
 
 [IBM PC Model 5150](/configs/pc/machines/5150/mda/64kb/ "PCjs:ibm5150")
 
@@ -125,7 +126,7 @@ In fact, the [sample3b](/docs/pcjs/demos/sample3b.html) demo (with [XML file](/d
 does just that, using JSON dumps created from [sample3a](/docs/pcjs/demos/sample3a.html) after starting VisiCalc.
 See the *state* attribute on the [Computer](/docs/pcjs/computer/) component for more information on state files.
 
-### Running PCjs On Your Own Website
+### Running PCjs On Your Own Server
 			
 All of the demos described above are available for [download](/docs/pcjs/demos/).
 
@@ -138,13 +139,16 @@ If you have (or find) an IMG disk image file on a server, [pcjs.org](http://www.
 
 For example, let's say you found a disk image online:
 
-	http://www.pcjs.org/disks/pc/dos/ibm/1.00/PCDOS100.img
+	http://static.pcjs.org/disks/pc/dos/ibm/1.00/PCDOS100.img
 
 To convert it to a PCjs-compatible JSON format, use the following command:
 
-	http://www.pcjs.org/api/v1/dump?disk=http://www.pcjs.org/disks/pc/dos/ibm/1.00/PCDOS100.img&format=json
+	http://www.pcjs.org/api/v1/dump?disk=http://static.pcjs.org/disks/pc/dos/ibm/1.00/PCDOS100.img&format=json
 
 Save the resulting JSON file to a folder on your server, and then update your machine XML file(s) to use that file.
+If necessary, you can also reverse the process, converting a JSON disk image back into an IMG file:
+
+	http://www.pcjs.org/api/v1/dump?disk=http://www.pcjs.org/disks/pc/dos/ibm/1.00/PCDOS100.json&format=img
 
 Although PCjs will accept IMG disk image files, it must call the [DiskDump API](/api/v1/dump)
 to convert the image every time it's loaded, so it's *much* faster and more efficient to use pre-converted
@@ -152,6 +156,9 @@ JSON-encoded disk images.
 
 Remember that PC and PC XT machines supported only 160Kb diskettes (on any version of PC-DOS),
 320Kb diskettes (on PC-DOS 1.1 and higher), and 180Kb and 360Kb diskettes (on PC-DOS 2.0 and higher).
+
 The 1.2Mb diskette format was introduced with the PC AT, and 720Kb and 1.44Mb diskette formats were
-introduced with the PS/2; those formats will be supported in a future release of PCjs, when the necessary
-hardware support has been added.
+introduced with the 8Mhz PC AT and PS/2 models.  So, when using any of these larger formats, be sure you're
+also using a compatible machine configuration.
+
+Learn more about PCjs disk images [here](/disks/).
