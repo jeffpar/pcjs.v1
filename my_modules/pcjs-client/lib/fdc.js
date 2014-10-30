@@ -2,7 +2,6 @@
  * @fileoverview Implements the PCjs Floppy Drive Controller (FDC) component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
- * @suppress {missingProperties}
  * Created 2012-Aug-09
  *
  * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
@@ -561,7 +560,6 @@ FDC.prototype.initBus = function(cmp, bus, cpu, dbg)
     bus.addPortInputTable(this, FDC.aPortInput);
     bus.addPortOutputTable(this, FDC.aPortOutput);
     if (DEBUGGER) {
-        if (dbg) dbg.messageInit(FDC);
         cpu.addIntNotify(FDC.BIOS.INT_DISKETTE, this, this.intBIOSDiskette);
     }
 
@@ -1879,7 +1877,7 @@ FDC.prototype.popCmd = function(name)
 {
     Component.assert((!this.regDataIndex || name !== undefined) && this.regDataIndex < this.regDataTotal);
     var bCmd = this.regDataArray[this.regDataIndex];
-    if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(FDC.MESSAGE_FDC)) {
+    if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE_FDC)) {
         var bCmdMasked = bCmd & FDC.REG_DATA.CMD.MASK;
         if (!name && !this.regDataIndex && FDC.aCmdInfo[bCmdMasked]) name = FDC.aCmdInfo[bCmdMasked].name;
         this.dbg.message("FDC.CMD[" + (name || this.regDataIndex) + "]: 0x" + str.toHexByte(bCmd));
@@ -1933,7 +1931,7 @@ FDC.prototype.beginResult = function()
  */
 FDC.prototype.pushResult = function(bResult, name)
 {
-    if (DEBUG) this.messageDebugger("FDC.RES[" + (name || this.regDataTotal) + "]: 0x" + str.toHexByte(bResult), FDC.MESSAGE_FDC);
+    if (DEBUG) this.messageDebugger("FDC.RES[" + (name || this.regDataTotal) + "]: 0x" + str.toHexByte(bResult), Debugger.MESSAGE_FDC);
     this.regDataArray[this.regDataTotal++] = bResult;
 };
 
@@ -2321,7 +2319,7 @@ FDC.prototype.intBIOSDiskette = function(addr)
 {
     if (DEBUGGER) {
         var DL = this.cpu.regDX & 0xff;
-        if (this.dbg && this.dbg.messageEnabled(FDC.MESSAGE_FDC | FDC.MESSAGE_INT) && DL < 0x80) {
+        if (this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE_FDC | Debugger.MESSAGE_INT) && DL < 0x80) {
             this.dbg.messageInt(FDC.BIOS.INT_DISKETTE, addr);
             this.cpu.addIntReturn(addr, function(fdc, nCycles) {
                 return function onBIOSDisketteReturn(nLevel) {
@@ -2345,7 +2343,7 @@ FDC.prototype.intBIOSDiskette = function(addr)
 FDC.prototype.messageDebugger = function(sMessage, bitsMessage)
 {
     if (DEBUGGER && this.dbg) {
-        if (bitsMessage == null) bitsMessage = FDC.MESSAGE_FDC;
+        if (bitsMessage == null) bitsMessage = Debugger.MESSAGE_FDC;
         if (this.dbg.messageEnabled(bitsMessage)) this.dbg.message(sMessage);
     }
 };
@@ -2364,7 +2362,7 @@ FDC.prototype.messageDebugger = function(sMessage, bitsMessage)
  */
 FDC.prototype.messagePort = function(port, bOut, addrFrom, name, bIn)
 {
-    if (DEBUGGER && this.dbg) this.dbg.messagePort(this, port, bOut, addrFrom, name, FDC.MESSAGE_FDC, bIn);
+    if (DEBUGGER && this.dbg) this.dbg.messagePort(this, port, bOut, addrFrom, name, Debugger.MESSAGE_FDC, bIn);
 };
 
 /*

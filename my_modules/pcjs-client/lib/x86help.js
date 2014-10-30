@@ -2,7 +2,6 @@
  * @fileoverview Implements PCjs 8086 opcode helpers.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
- * @suppress {missingProperties}
  * Created 2012-Sep-05
  *
  * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
@@ -447,7 +446,7 @@ var X86Help = {
             /*
              * NOTE: By using Debugger.message(), we have the option of setting "m halt on" and halting on messages like this.
              */
-            if (this.dbg.messageEnabled(this.dbg.MESSAGE_CPU)) {
+            if (this.dbg.messageEnabled(Debugger.MESSAGE_CPU)) {
                 this.dbg.message("Fault 0x" + str.toHexByte(nFault) + (nError != null? " (0x" + str.toHexWord(nError) + ")" : "") + " on opcode 0x" + str.toHexByte(this.bus.getByteDirect(this.regEIP)) + " at " + str.toHexAddr(this.regIP, this.segCS.sel));
             }
         }

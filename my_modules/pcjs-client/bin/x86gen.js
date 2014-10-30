@@ -2,7 +2,6 @@
  * @fileoverview This file generates PCjs 8086 mode-byte decoders.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
- * @suppress {missingProperties}
  * Created 2012-Sep-08
  *
  * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>

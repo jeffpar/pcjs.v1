@@ -2,7 +2,6 @@
  * @fileoverview Implements PCjs 8086 opcode decoding.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
- * @suppress {missingProperties}
  * Created 2012-Sep-05
  *
  * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>

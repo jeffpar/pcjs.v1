@@ -2,7 +2,6 @@
  * @fileoverview Implements the PCjs "physical" Memory component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
- * @suppress {missingProperties}
  * Created 2012-Sep-04
  *
  * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
@@ -167,7 +166,7 @@ Memory.prototype = {
      * @return {number}
      */
     readNone: function(off) {
-        if (DEBUGGER && this.dbg.messageEnabled(this.dbg.MESSAGE_MEM) && !off) {
+        if (DEBUGGER && this.dbg.messageEnabled(Debugger.MESSAGE_MEM) && !off) {
             this.dbg.message("attempt to read invalid block %" + str.toHex(this.addr) + " from " + str.toHexAddr(this.cpu.regIP, this.cpu.segCS.sel));
         }
         return 0;
@@ -180,7 +179,7 @@ Memory.prototype = {
      * @param {number} v (could be either a byte or word value, since we use the same handler for both kinds of accesses)
      */
     writeNone: function(off, v) {
-        if (DEBUGGER && this.dbg.messageEnabled(this.dbg.MESSAGE_MEM) && !off) {
+        if (DEBUGGER && this.dbg.messageEnabled(Debugger.MESSAGE_MEM) && !off) {
             this.dbg.message("attempt to write 0x" + str.toHexWord(v) + " to invalid block %" + str.toHex(this.addr) + " from " + str.toHexAddr(this.cpu.regIP, this.cpu.segCS.sel));
         }
     },

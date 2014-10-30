@@ -2,7 +2,6 @@
  * @fileoverview Implements the PCjs Hard Drive Controller (HDC) component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
- * @suppress {missingProperties}
  * Created 2012-Nov-26
  *
  * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
@@ -536,7 +535,6 @@ HDC.prototype.initBus = function(cmp, bus, cpu, dbg)
     bus.addPortOutputTable(this, this.fATC? HDC.aATCPortOutput : HDC.aXTCPortOutput);
 
     if (DEBUGGER) {
-        if (dbg) dbg.messageInit(HDC);
         cpu.addIntNotify(HDC.BIOS.INT_DISK, this, this.intBIOSDisk);
         cpu.addIntNotify(HDC.BIOS.INT_DISKETTE, this, this.intBIOSDiskette);
     }
@@ -1795,7 +1793,7 @@ HDC.prototype.doATCommand = function()
         this.drive = drive;
     }
 
-    if (DEBUG) this.messageDebugger("HDC.doATCommand(" + str.toHexByte(bCmd) + "): " + HDC.aATCCommands[bCmd], HDC.MESSAGE_PORT | HDC.MESSAGE_HDC);
+    if (DEBUG) this.messageDebugger("HDC.doATCommand(" + str.toHexByte(bCmd) + "): " + HDC.aATCCommands[bCmd], Debugger.MESSAGE_PORT | Debugger.MESSAGE_HDC);
 
     switch (bCmd & HDC.ATC.COMMAND.MASK) {
 
@@ -1881,7 +1879,7 @@ HDC.prototype.doATCommand = function()
 
     default:
         if (DEBUG) this.messageDebugger("HDC.doATCommand(" + str.toHexByte(this.regCommand) + "): " + (bCmd < 0? ("invalid drive (" + iDrive + ")") : "unsupported operation"));
-        if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(HDC.MESSAGE_HDC) && bCmd >= 0) this.cpu.haltCPU();
+        if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE_HDC) && bCmd >= 0) this.cpu.haltCPU();
         break;
     }
 
@@ -2050,7 +2048,7 @@ HDC.prototype.doXTCommand = function()
         default:
             if (DEBUG) this.messageDebugger("HDC.doXTCommand(" + str.toHexByte(bCmdOrig) + "): " + (bCmd < 0? ("invalid drive (" + iDrive + ")") : "unsupported operation"));
             this.beginResult(HDC.XTC.DATA.STATUS_ERROR | bDrive);
-            if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(HDC.MESSAGE_HDC) && bCmd >= 0) this.cpu.haltCPU();
+            if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE_HDC) && bCmd >= 0) this.cpu.haltCPU();
             break;
         }
     }
@@ -2068,7 +2066,7 @@ HDC.prototype.popCmd = function()
     var bCmdIndex = this.regDataIndex;
     if (bCmdIndex < this.regDataTotal) {
         bCmd = this.regDataArray[this.regDataIndex++];
-        if (DEBUG) this.messageDebugger("HDC.CMD[" + bCmdIndex + "]: 0x" + str.toHexByte(bCmd) + (!bCmdIndex && HDC.aXTCCommands[bCmd]? (" (" + HDC.aXTCCommands[bCmd] + ")") : ""), (bCmdIndex > 0? HDC.MESSAGE_PORT : 0) | HDC.MESSAGE_HDC);
+        if (DEBUG) this.messageDebugger("HDC.CMD[" + bCmdIndex + "]: 0x" + str.toHexByte(bCmd) + (!bCmdIndex && HDC.aXTCCommands[bCmd]? (" (" + HDC.aXTCCommands[bCmd] + ")") : ""), (bCmdIndex > 0? Debugger.MESSAGE_PORT : 0) | Debugger.MESSAGE_HDC);
     }
     return bCmd;
 };
@@ -2104,7 +2102,7 @@ HDC.prototype.beginResult = function(bResult)
  */
 HDC.prototype.pushResult = function(bResult)
 {
-    if (DEBUG) this.messageDebugger("HDC.RES[" + this.regDataTotal + "]: 0x" + str.toHexByte(bResult), (this.regDataTotal > 0? HDC.MESSAGE_PORT : 0) | HDC.MESSAGE_HDC);
+    if (DEBUG) this.messageDebugger("HDC.RES[" + this.regDataTotal + "]: 0x" + str.toHexByte(bResult), (this.regDataTotal > 0? Debugger.MESSAGE_PORT : 0) | Debugger.MESSAGE_HDC);
     this.regDataArray[this.regDataTotal++] = bResult;
 };
 
@@ -2634,7 +2632,7 @@ HDC.prototype.intBIOSDisk = function(addr)
     var DL = this.cpu.regDX & 0xff;
     if (!AH && DL > 0x80) this.iDriveAllowFail = DL - 0x80;
     if (DEBUGGER) {
-        if (this.dbg && this.dbg.messageEnabled(HDC.MESSAGE_HDC | HDC.MESSAGE_INT) && DL >= 0x80) {
+        if (this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE_HDC | Debugger.MESSAGE_INT) && DL >= 0x80) {
             this.dbg.messageInt(HDC.BIOS.INT_DISK, addr);
             this.cpu.addIntReturn(addr, function (hdc, nCycles) {
                 return function onBIOSDiskReturn(nLevel) {
@@ -2697,7 +2695,7 @@ HDC.prototype.intBIOSDiskette = function(addr)
 HDC.prototype.messageDebugger = function(sMessage, bitsMessage)
 {
     if (DEBUGGER && this.dbg) {
-        if (bitsMessage == null) bitsMessage = HDC.MESSAGE_HDC;
+        if (bitsMessage == null) bitsMessage = Debugger.MESSAGE_HDC;
         if (this.dbg.messageEnabled(bitsMessage)) this.dbg.message(sMessage);
     }
 };
@@ -2716,7 +2714,7 @@ HDC.prototype.messageDebugger = function(sMessage, bitsMessage)
  */
 HDC.prototype.messagePort = function(port, bOut, addrFrom, name, bIn)
 {
-    if (DEBUGGER && this.dbg) this.dbg.messagePort(this, port, bOut, addrFrom, name, HDC.MESSAGE_HDC, bIn);
+    if (DEBUGGER && this.dbg) this.dbg.messagePort(this, port, bOut, addrFrom, name, Debugger.MESSAGE_HDC, bIn);
 };
 
 /*

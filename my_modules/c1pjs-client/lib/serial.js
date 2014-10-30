@@ -2,7 +2,6 @@
  * @fileoverview This file implements the C1Pjs SerialPort component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
- * @suppress {missingProperties}
  * Created 2012-Jul-01
  *
  * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
@@ -47,7 +46,7 @@ function C1PSerialPort(parmsSerial)
 
     this.fPower = false;
     this.fDemo = parmsSerial['demo'];
-    
+
     this.STATUS_NONE = 0x00;
     this.STATUS_DATA = 0x01;    // indicates data available
 
@@ -155,7 +154,7 @@ C1PSerialPort.prototype.setBuffer = function(abMemory, start, end, cpu)
  * @this {C1PSerialPort}
  * @param {boolean} fOn
  * @param {C1PComputer} cmp
- * 
+ *
  * We make a note of the Computer component, so that we can invoke its reset() method whenever we need to
  * simulate a warm start, and we query the Keyboard component so that we can use its injectKeys() function.
  */

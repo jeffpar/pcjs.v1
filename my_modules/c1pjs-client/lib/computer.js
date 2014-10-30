@@ -2,7 +2,6 @@
  * @fileoverview This file implements the C1Pjs Computer component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
- * @suppress {missingProperties}
  * Created 2012-Jun-15
  *
  * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
@@ -53,7 +52,7 @@
  * The C1Pjs JavaScript files do have some initialization-order dependencies.
  * If you load the files individually, it's recommended that you load them in
  * the same order that they're compiled (see above).
- * 
+ *
  * Generally speaking, component.js should be first, computer.js should be
  * last (of the files based on component.js), and panel.js should be listed
  * early so that the Control Panel is ready as soon as possible.
@@ -74,13 +73,13 @@
  * play nice and use only its assigned section of abMemory -- and pretend it's an array
  * of bytes, when in fact it's an array of floating-point values (the only primitive
  * numeric data type that JavaScript provides).
- *  
+ *
  * This component also insures that all the other components are ready; in particular,
  * this means that the ROM and Video components have finished loading their resources
  * and are ready for operation.  Other components become ready as soon as we call their
  * setBuffer() method (eg, CPU, RAM, Keyboard, Debugger, SerialPort, DiskController), and
  * others, like Panel, become ready even earlier, at the end of their initialization.
- *  
+ *
  * Once every component has indicated it's ready, we call its setPower() notification
  * function (if it has one; it's optional).  We call the CPU's setPower() function last,
  * so that the CPU is assured that all other components are ready and "powered".
@@ -91,7 +90,7 @@
 function C1PComputer(parmsComputer, modules)
 {
     Component.call(this, "C1PComputer", parmsComputer);
-    
+
     this.modules = modules;
 }
 
@@ -126,7 +125,7 @@ C1PComputer.prototype.reset = function(fPowerOn)
 
 /**
  * @this {C1PComputer}
- * 
+ *
  * Called by the CPU to notify all component start() handlers
  */
 C1PComputer.prototype.start = function()
@@ -146,7 +145,7 @@ C1PComputer.prototype.start = function()
  * @this {C1PComputer}
  * @param {number} msStart
  * @param {number} nCycles
- * 
+ *
  * Called by the CPU to notify all component stop() handlers
  */
 C1PComputer.prototype.stop = function(msStart, nCycles)
@@ -191,7 +190,7 @@ C1PComputer.prototype.setBinding = function(c, t, s, e)
  * @this {C1PComputer}
  * @param {string} sType
  * @return {Component}
- * 
+ *
  * NOTE: If there are multiple components for a given type, we may need to provide a means of discriminating.
  */
 C1PComputer.prototype.getComponentByType = function(sType)
@@ -232,11 +231,11 @@ C1PComputer.power = function(computer)
             }
         }
     }
-    
+
     /*
      * The entire computer is finally ready; we call our own setReady() for completeness, not because any
      * other component actually cares when we're ready.
-     */ 
+     */
     computer.setReady();
 
     computer.println(C1PComputer.sAppName + " v" + C1PComputer.sAppVer + "\n" + C1PComputer.sCopyright);
@@ -273,13 +272,13 @@ C1PComputer.init = function()
 
         var abMemory;
         var addrStart = 0, addrEnd = 0;
-        
+
         for (var iAddr=0; iAddr < parmsComputer['modules'].length; iAddr++) {
             var addrInfo = parmsComputer['modules'][iAddr];
             /*
              * The first address range (ie, the CPU range) must specify the range for the entire
              * address space (abMemory), which we allocate and zero-initialize.
-             * 
+             *
              * NOTE: We might consider doing what the Video component does on first reset: initializing
              * the entire memory buffer to random values.  However, a constant (eg, 0xA5) might be
              * more useful, acting as a crude indicator of memory the client code hasn't written yet.
@@ -308,7 +307,7 @@ C1PComputer.init = function()
                 return;
             }
         }
-        
+
         if (abMemory === undefined) {
             Component.error("<module type=\"cpu\"> definition must appear first in the <computer> specification");
             return;
@@ -317,7 +316,7 @@ C1PComputer.init = function()
         /*
          * Let's see if the Debugger is installed (NOTE: its ID must be "debugger", and only one per machine is supported);
          * the Debugger needs our setBuffer(), setPower() and reset() notifications, and this relieves us from having an explicit
-         * <module> entry for type="debugger". 
+         * <module> entry for type="debugger".
          */
         component = Component.getComponentByID('debugger', parmsComputer['id']);
         if (component) {
@@ -326,12 +325,12 @@ C1PComputer.init = function()
                 component.setBuffer(abMemory, addrStart, addrEnd, modules['cpu'][0]);
             }
         }
-        
+
         var computer = new C1PComputer(parmsComputer, modules);
 
         /*
-         * Let's see if the Control Panel is installed (NOTE: its ID must be "panel", and only one per machine is supported); 
-         * the Panel needs our setPower() notifications, and this relieves us from having an explicit <module> entry for type="panel". 
+         * Let's see if the Control Panel is installed (NOTE: its ID must be "panel", and only one per machine is supported);
+         * the Panel needs our setPower() notifications, and this relieves us from having an explicit <module> entry for type="panel".
          */
         var panel = Component.getComponentByID('panel', parmsComputer['id']);
         if (panel) {
@@ -355,7 +354,7 @@ C1PComputer.init = function()
          *  We may eventually add a "Power" button, but for now, all we have is a "Reset" button
          */
         Component.bindComponentControls(computer, eComputer, C1PJSCLASS);
-        
+
         /*
          * "Power" the computer automatically
          */

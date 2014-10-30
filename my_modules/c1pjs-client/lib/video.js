@@ -2,7 +2,6 @@
  * @fileoverview This file implements the C1Pjs Video component
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
- * @suppress {missingProperties}
  * Created 2012-Jun-15
  *
  * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
@@ -35,7 +34,7 @@
 
 /**
  * C1PVideo(parmsVideo, eCanvas, context, imgChars)
- * 
+ *
  * The Video component can be configured with the following (parmsVideo) properties:
  *
  *      model: model number (one of: 540 or 600; 600 is the default)
@@ -56,7 +55,7 @@
  * must be given to it by the Computer object.  We allocate a separate buffer, called
  * the screen buffer, into which we periodically copy the contents of the video buffer
  * via updateScreen(); any differences between the two buffers are then rendered in the
- * associated window, via updateWindow(). 
+ * associated window, via updateWindow().
  *
  * When updateScreen() finds a byte in the screen buffer must be redisplayed, it converts
  * the offset of that byte into a (col,row) character position for the updateWindow() function,
@@ -71,7 +70,7 @@
  * columns, the practical maximum is 24 rows x 24 columns; the last 4 rows of the video buffer
  * are never used, and while content scrolls through the top 4 lines of the buffer, it is never
  * assumed that you can see the top 4 lines.
- *  
+ *
  * This is partially confirmed by the "C1P Character Graphics Reference Manual", p3, which says
  * that the "the visible character field consists of 25 lines of 25 columns" and that the "first
  * visible character in the upper left of the screen is accessed via address 53379," or 0xD083,
@@ -79,66 +78,66 @@
  * regarding "25 lines of 25 columns" seems to be off by one in both dimensions.  And why would
  * they say that the first visible address is 0xD083 instead of 0xD085?  An indentation of 5 bytes,
  * rather than 3, would be more consistent with how the C1P ROMs use video memory.
- *  
+ *
  * Model 540 Video Board vs. Model 600 "Superboard II"
  * ---------------------------------------------------
  * This emulation was originally written for the Model 600 "Superboard II" (eg, Challenger 1P).
  * Support for the Model 540 video board (as used in the Challenger II-4P and II-8P) was added
  * later.
- *  
+ *
  * NOTE: When Model 540 video emulation is enabled, Model 542 keyboard emulation must also be
  * enabled, because the former always came with the latter keyboard interface; this is why when
  * we call this.setModel(540), we must also notify the Keyboard via kbd.setModel(542).
- *  
+ *
  * Key features/differences of the Model 540 video board include:
- *  
+ *
  *      2K (8 pages) of video memory located at 0xD000-0xD7FF
  *      Two display modes: 32 rows x 64 cols (default on power up), and 32 rows x 32 cols
  *      64 bytes per screen row, regardless which display mode is selected
  *      The following options can be selected via WRITE to port address 0xDE00:
  *          Bit 0: clear to enable 32/64 mode (default on power up), set to enable 32/32
  *          Bit 1: 1=tone on (542 keyboard)
- *          Bit 2: 1=color on (Rev. B only?) 
+ *          Bit 2: 1=color on (Rev. B only?)
  *          bit 3: 1=enable 38-40Khz AC Home control output (Rev. B only?)
  *      Video timing counter status via READ from port address 0xDE00:
  *          Bit 7: 0 for 1/120 second, then 1 for 1/120 second, based on video clock (60Hz)
- *          
+ *
  * @constructor
  * @extends Component
  */
 function C1PVideo(parmsVideo, eCanvas, context, imgChars)
 {
     Component.call(this, "C1PVideo", parmsVideo);
-    
+
     this.nDefaultModel = parmsVideo['model'];
     this.nDefaultCols = parmsVideo['charCols'];
     this.nDefaultRows = parmsVideo['charRows'];
-    
+
     this.cxScreen = parmsVideo['screenWidth'];
     this.cyScreen = parmsVideo['screenHeight'];
-    
+
     /*
      * These (source) character dimensions are tentative, and may not even be provided,
      * but they will become definitive once imgChars has finished loading and setReady() is called.
      */
     this.cxChar = parmsVideo['charWidth'];
     this.cyChar = parmsVideo['charHeight'];
-    
+
     /*
      * This is a preliminary call to setDimensions(), to initialize default screen buffer and
      * window dimensions.  A more extensive call to setDimensions() will take place when setModel()
      * is called later, from reset() and possibly via the tripGuard() handler.
-     * 
+     *
      * This preliminary call merely establishes a default screen buffer size, so that when
-     * setBuffer() is called, it's able to verify the assigned address space is at least as big 
+     * setBuffer() is called, it's able to verify the assigned address space is at least as big
      * as the screen buffer.
      */
     this.setDimensions();
-    
+
     this.eCanvas = eCanvas;
     this.context = context;
     this.imgChars = imgChars;
-    
+
     /*
      * QUESTION: Does this video port exist only on the Model 540?
      */
@@ -155,7 +154,7 @@ Component.subclass(Component, C1PVideo);
 C1PVideo.prototype.reset = function(fPowerOn)
 {
     this.setModel(this.nDefaultModel);
-    
+
     if (this.abMem) {
         /*
          * Let's treat every reset like a power-cycle, just for fun.
@@ -245,7 +244,7 @@ C1PVideo.prototype.setDimensions = function(nCols, nRows, iRowTop, nRowsVisible)
 
 /**
  * @this {C1PVideo}
- * 
+ *
  * cxScreen and cyScreen give us the overall dimensions of the destination surface.  Dividing that by the number of
  * columns and rows yields a target cell size (cxCharDst,cyCharDst), which may or may not map 1-1 to the source cell size
  * (cxChar,cyChar).
@@ -283,7 +282,7 @@ C1PVideo.prototype.setModel = function(nModel)
              * buffer range, not the FIRST byte, which has the same effect but with the
              * added benefit of deferring any screen update until after the "Model 540"
              * screen initialization code has completely blanked the entire 2K buffer,
-             * avoiding a brief flicker of unsightly characters.  
+             * avoiding a brief flicker of unsightly characters.
              */
             this.addrGuard = this.offVideoLimit + this.cbScreen - 1;
             this.cpu.addWriteNotify(this.addrGuard, this.addrGuard, this, this.tripGuard);
@@ -315,7 +314,7 @@ C1PVideo.prototype.setPower = function(fOn, cmp)
         /*
          * If we have an associated keyboard, then ensure that the keyboard will be notified whenever
          * the canvas gets focus and receives input.
-         * 
+         *
          * Also, when simulating a Model 540 video board, we need to access to the Keyboard component due
          * to some shared I/O responsibilities; ie, bit 1 of the video control port at 0xDE00 enables whatever
          * tone has been selected via the keyboard frequency port at 0xDF01 (frequency == 49152/n, where n
@@ -340,7 +339,7 @@ C1PVideo.prototype.setPower = function(fOn, cmp)
 
 /**
  * @this {C1PVideo}
- * 
+ *
  * cxChar and cyChar are the source cell size. Originally, those values came strictly from the parmsVideo
  * 'charWidth' and 'charHeight' properties. Now, if those aren't defined (which is normally the case now),
  * then we infer the source cell size from the dimensions of imgChars, which is expected to be a 16x16 array of
@@ -372,7 +371,7 @@ C1PVideo.prototype.getByte = function(addr, addrFrom)
      * The only documented READ bit in addrVideoPort is bit 7, which is supposed to alternate between
      * 0 and 1 every 1/120 of a second.  There's no way we're going to add special code to the emulator to update
      * this stupid byte every 8,333 cycles (assuming 1Mhz operation), so clearly we're going to fake it.
-     * 
+     *
      * Faking it means that any polling code will unavoidably get a stale value the FIRST time it reads bit 7.
      * However, we can still do a pretty good job of faking any EXTENSIVE polling: get the number of cycles
      * executed so far, divide that by 8333, floor the quotient, and then set/clear bit 7 according to whether the
@@ -410,7 +409,7 @@ C1PVideo.prototype.tripGuard = function(addr, addrFrom)
         /*
          * The CPU has just written to the guard address we established just beyond the video buffer's 1K boundary,
          * implying that the system thinks we have a 2K buffer instead.  So we bump our model to 540, bump the
-         * associated keyboard model to 542, and remove this guard handler. 
+         * associated keyboard model to 542, and remove this guard handler.
          */
         this.setModel(540);
         if (this.kbd) this.kbd.setModel(542);
@@ -431,7 +430,7 @@ C1PVideo.prototype.initScreen = function()
 
 /**
  * updateScreen() updates the screen buffer from the video buffer and updates the window with any changes.
- * 
+ *
  * @this {C1PVideo}
  * @return {boolean}
  *
@@ -474,19 +473,19 @@ C1PVideo.prototype.writeByte = function(offset, b)
 
 /**
  * updateWindow() updates a particular position (row,col) in the associated window with the given byte (b)
- * 
+ *
  * @this {C1PVideo}
  * @param {number} col
  * @param {number} row
  * @param {number} b
- * @return {boolean} true if successful, false if not 
- * 
+ * @return {boolean} true if successful, false if not
+ *
  * I originally used (screenWidth,screenHeight) == (512,448) and (cols,rows) == (32,32) and (cxChar,cyChar) == (16,16),
  * and I simply copied the source cells 1-to-1 to the destination (16,16), knowing that we would never try to display more
  * than 28 rows (the last 4 rows of the 32 possible rows were never used to display any content).  However, I should still
  * have ignored any attempt to draw past row 28 (aka screenHeight 448).  I now perform row clipping and biasing, according
  * to the first visible row (iRowTop) and total visible rows (nRowsVisible).
- * 
+ *
  * Moreover, I no longer copy the source cell images to the destination 1-to-1.  I calculate (cxCharDst,cyCharDst) separately
  * (see setDrawingDimensions).  And I no longer assume that (cxChar,cyChar) are (16,16); once the source image file has finished
  * loading, I calculate (cxChar,cyChar) based on the size of image file (see setReady).  I made this change when I created
@@ -527,7 +526,7 @@ C1PVideo.init = function()
     for (var iVideo=0; iVideo < aeVideo.length; iVideo++) {
         var eVideo = aeVideo[iVideo];
         var parmsVideo = Component.getComponentParms(eVideo);
-        
+
         /*
          * As noted in keyboard.js, the keyboard on an iOS device pops up with the SHIFT key depressed,
          * which is not the initial keyboard state that the C1P expects. I originally tried to fix that by
@@ -545,7 +544,7 @@ C1PVideo.init = function()
         eCanvas.setAttribute("class", C1PJSCLASS + "-canvas");
         eCanvas.setAttribute("width", parmsVideo['screenWidth']);
         eCanvas.setAttribute("height", parmsVideo['screenHeight']);
-        
+
         eCanvas.setAttribute("contenteditable", "true");
         eCanvas.setAttribute("autocapitalize", "off");
         eCanvas.setAttribute("autocorrect", "off");
@@ -569,7 +568,7 @@ C1PVideo.init = function()
 
         /*
          * Now we can create the Video object, record it, and wire it up to the associated document elements.
-         * 
+         *
          * Regarding "new Image()", see https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement.Image:
          *
          *      This constructor exists for historical reasons only and returns an HTMLImageElement instance just as
@@ -577,7 +576,7 @@ C1PVideo.init = function()
          */
         var imgCharSet = new Image();
         var contextVideo = eCanvas.getContext("2d");
-        var video = new C1PVideo(parmsVideo, eCanvas, contextVideo, imgCharSet); 
+        var video = new C1PVideo(parmsVideo, eCanvas, contextVideo, imgCharSet);
         imgCharSet.onload = function(video, sCharSet) {
             return function() {
                 if (DEBUG) video.log("onload(): finished loading " + sCharSet);
@@ -588,7 +587,7 @@ C1PVideo.init = function()
 
         /*
          * Bind any video-specific controls (eg, the Refresh button). There are no essential controls, however;
-         * even the "Refresh" button is just a diagnostic tool, to verify that the screen contents are up-to-date. 
+         * even the "Refresh" button is just a diagnostic tool, to verify that the screen contents are up-to-date.
          */
         Component.bindComponentControls(video, eVideo, C1PJSCLASS);
     }

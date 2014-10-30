@@ -2,7 +2,6 @@
  * @fileoverview Implements the PCjs Keyboard component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
- * @suppress {missingProperties}
  * Created 2012-Jun-20
  *
  * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
@@ -1361,7 +1360,7 @@ Keyboard.prototype.keyEventSimulate = function(charCode, fDown, simCode)
 Keyboard.prototype.messageDebugger = function(sMessage, fPort)
 {
     if (DEBUGGER && this.dbg) {
-        if (this.dbg.messageEnabled(this.dbg.MESSAGE_KBD | (fPort ? this.dbg.MESSAGE_PORT : 0))) {
+        if (this.dbg.messageEnabled(Debugger.MESSAGE_KBD | (fPort ? Debugger.MESSAGE_PORT : 0))) {
             this.dbg.message(sMessage);
         }
     }

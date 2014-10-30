@@ -2,7 +2,6 @@
  * @fileoverview Implements disk image support for both FDC and HDC.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
- * @suppress {missingProperties}
  * Created 2012-Nov-26
  *
  * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
@@ -685,7 +684,7 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
              * conversion to a forward-compatible 'data' array.
              */
             else {
-                if (MAXDEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(this.dbg.MESSAGE_DISK)) {
+                if (MAXDEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE_DISK)) {
                     var sCylinders = aDiskData.length + " track" + (aDiskData.length > 1 ? "s" : "");
                     var nHeads = aDiskData[0].length;
                     var sHeads = nHeads + " head" + (nHeads > 1 ? "s" : "");
@@ -1528,7 +1527,7 @@ Disk.prototype.restore = function(deltas)
 Disk.prototype.messageDebugger = function(sMessage)
 {
     if (DEBUGGER && this.dbg) {
-        if (this.dbg.messageEnabled(this.dbg.MESSAGE_DISK)) {
+        if (this.dbg.messageEnabled(Debugger.MESSAGE_DISK)) {
             this.dbg.message(sMessage);
         }
     }

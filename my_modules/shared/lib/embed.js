@@ -2,7 +2,6 @@
  * @fileoverview C1Pjs and PCjs embedding functionality.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
- * @suppress {missingProperties}
  * Created 2012-Aug-28
  *
  * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
@@ -140,10 +139,10 @@ function parseXML(sXML, sXMLFile, idMachine, sStateFile, fResolve, display, done
          * browsers do that, that's not helpful.
          *
          * The best I can do at this stage (assuming web.loadResource() didn't drop any error information on the floor)
-         * is verify that the requested resource "looks like" valid XML (in other words, it begins with a "<").
+         * is verify that the requested resource "looks like" valid XML (in other words, it begins with a '<').
          */
         var xmlDoc = null;
-        if (sXML.indexOf("<") === 0) {
+        if (sXML.charAt(0) == '<') {
             try {
                 if (window.ActiveXObject || "ActiveXObject" in window) {        // second test is required for IE11 on Windows 8.1
                     /*
@@ -154,7 +153,7 @@ function parseXML(sXML, sXMLFile, idMachine, sStateFile, fResolve, display, done
                     }
                     xmlDoc = new window.ActiveXObject("Microsoft.XMLDOM");
                     xmlDoc.async = false;
-                    xmlDoc.loadXML(sXML);
+                    xmlDoc['loadXML'](sXML);
                 } else {
                     xmlDoc = (new window.DOMParser()).parseFromString(sXML, "text/xml");
                 }
@@ -390,7 +389,7 @@ function embedMachine(sName, sVersion, idElement, sXMLFile, sXSLFile, sStateFile
                     displayError("failed to load XML file: " + sXMLFile);
                 }
             };
-            if (sXMLFile.substr(0, 1) != "<") {
+            if (sXMLFile.charAt(0) != '<') {
                 loadXML(sXMLFile, idElement, sStateFile, true, displayMessage, loadXSL);
             } else {
                 parseXML(sXMLFile, null, idElement, sStateFile, false, displayMessage, loadXSL);

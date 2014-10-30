@@ -2,7 +2,6 @@
  * @fileoverview This file implements the C1Pjs Panel component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
- * @suppress {missingProperties}
  * Created 2012-Jun-19
  *
  * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
@@ -44,7 +43,7 @@
 function C1PPanel(parmsPanel)
 {
     Component.call(this, "C1PPanel", parmsPanel);
-    
+
     this.fPower = false;
 }
 
@@ -90,19 +89,19 @@ C1PPanel.prototype.setPower = function(fOn, cmp)
 
 /**
  * C1PPanel.init()
- *  
+ *
  * This function operates on every element (e) of class "panel", and initializes
  * all the necessary HTML to construct the Panel module(s) as spec'ed.
  *
  * Note that each element (e) of class "panel" is expected to have a "data-value"
  * attribute containing the same JSON-encoded parameters that the Panel constructor
  * expects.
- *  
+ *
  * NOTE: Unlike most other component init() functions, this one is designed to be
  * called multiple times: once at load time, so that we can binding our print()
  * function to the panel's output control ASAP, and again when the Computer component
  * is verifying that all components are ready and invoking their setPower() functions.
- *  
+ *
  * Our setPower() method gives us a second opportunity to notify any components that
  * that might care (eg, CPU, Keyboard, and Debugger) that we have some controls they
  * might want to use.

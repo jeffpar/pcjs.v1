@@ -2,7 +2,6 @@
  * @fileoverview Implements the PCjs Mouse component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
- * @suppress {missingProperties}
  * Created 2012-Jul-01
  *
  * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
@@ -173,9 +172,6 @@ Mouse.prototype.initBus = function(cmp, bus, cpu, dbg) {
     this.bus = bus;
     this.cpu = cpu;
     this.dbg = dbg;
-    if (DEBUGGER && dbg) {
-        dbg.messageInit(Mouse);
-    }
 };
 
 /**
@@ -556,7 +552,7 @@ Mouse.prototype.notifyMCR = function(bMCR) {
  */
 Mouse.prototype.messageDebugger = function(sMessage) {
     if (DEBUGGER && this.dbg) {
-        if (this.dbg.messageEnabled(this.dbg.MESSAGE_MOUSE)) {
+        if (this.dbg.messageEnabled(Debugger.MESSAGE_MOUSE)) {
             this.dbg.message(sMessage);
         }
     }

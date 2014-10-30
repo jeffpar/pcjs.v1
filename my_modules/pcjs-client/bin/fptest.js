@@ -2,7 +2,6 @@
  * @fileoverview This file tests raw floating point access using typed arrays.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
- * @suppress {missingProperties}
  * Created 2014-Aug-20
  *
  * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>

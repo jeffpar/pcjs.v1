@@ -2,7 +2,6 @@
  * @fileoverview Implements PCjs 8086/8088 CPU logic.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
- * @suppress {missingProperties}
  * Created 2012-Sep-05
  *
  * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
@@ -925,7 +924,7 @@ X86CPU.prototype.checkIntNotify = function(nInt)
          * Enabling MESSAGE_INT messages is one of the criteria that's also included in fDebugCheck, so for maximum
          * speed, we check fDebugCheck first.
          */
-        if (this.dbg.messageEnabled(this.dbg.MESSAGE_INT)) {
+        if (this.dbg.messageEnabled(Debugger.MESSAGE_INT)) {
             this.dbg.messageInt(nInt, this.regEIP);
             this.addIntReturn(this.regEIP, function(cpu, nCycles) {
                 return function onIntReturn(nLevel) {
@@ -2472,7 +2471,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
      * One exception I make here is when you've asked the Debugger to display PIC messages, the idea being that
      * if you're watching the PIC that closely, then you want to hardware interrupts to occur regardless.
      */
-    if (!nMinCycles && this.dbg && !this.dbg.messageEnabled(this.dbg.MESSAGE_PIC)) this.opFlags |= X86.OPFLAG.NOINTR;
+    if (!nMinCycles && this.dbg && !this.dbg.messageEnabled(Debugger.MESSAGE_PIC)) this.opFlags |= X86.OPFLAG.NOINTR;
 
     do {
         var opPrefixes = this.opFlags & X86.OPFLAG.PREFIXES;
@@ -2579,7 +2578,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
 X86CPU.prototype.messageDebugger = function(sMessage)
 {
     if (DEBUGGER && this.dbg) {
-        if (this.dbg.messageEnabled(this.dbg.MESSAGE_MEM)) {
+        if (this.dbg.messageEnabled(Debugger.MESSAGE_MEM)) {
             this.dbg.message(sMessage);
         }
     }

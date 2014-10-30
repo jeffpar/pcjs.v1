@@ -2,7 +2,6 @@
  * @fileoverview Implements the PCjs CPU component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
- * @suppress {missingProperties}
  * Created 2012-Sep-04
  *
  * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
@@ -914,7 +913,7 @@ CPU.prototype.calcRemainingTime = function()
      */
     this.nRecalcCycles += this.nCyclesThisRun;
 
-    if (DEBUG && this.dbg && this.dbg.messageEnabled(this.dbg.MESSAGE_LOG) && msRemainsThisRun) {
+    if (DEBUG && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE_LOG) && msRemainsThisRun) {
         this.dbg.message("at " + this.msEndThisRun + "ms, calcRemainingTime returned " + msRemainsThisRun + "ms to sleep");
     }
 

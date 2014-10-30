@@ -2,7 +2,6 @@
  * @fileoverview Implements the PCjs Debugger component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
- * @suppress {missingProperties}
  * Created 2012-Jun-21
  *
  * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
@@ -59,7 +58,7 @@ if (DEBUGGER) {
  *      commands: string containing zero or more commands, separated by ';'
  *
  *      messages: string containing zero or more message categories to enable;
- *      multiple categories must be separated by '|' or ';'.  Parsed by messageInit().
+ *      multiple categories must be separated by '|' or ';'.  Parsed by initMessages().
  *
  * The Debugger component is an optional component that implements a variety of user
  * commands for controlling the CPU, dumping and editing memory, etc.
@@ -142,7 +141,7 @@ function Debugger(parmsDbg)
         /*
          * Initialize Debugger message support
          */
-        this.messageInit(this, parmsDbg['messages'], true);
+        this.initMessages(parmsDbg['messages']);
 
         /*
          * This object is filled in by updateRegValues() whenever we need a fresh snapshot.
@@ -169,6 +168,31 @@ function Debugger(parmsDbg)
 
     }   // endif DEBUGGER
 }
+
+Debugger.MESSAGE_MEM     = 0x00000001;
+Debugger.MESSAGE_PORT    = 0x00000002;
+Debugger.MESSAGE_DMA     = 0x00000004;
+Debugger.MESSAGE_PIC     = 0x00000008;
+Debugger.MESSAGE_TIMER   = 0x00000010;
+Debugger.MESSAGE_CMOS    = 0x00000020;
+Debugger.MESSAGE_RTC     = 0x00000040;
+Debugger.MESSAGE_8042    = 0x00000080;
+Debugger.MESSAGE_CHIPSET = 0x00000100;
+Debugger.MESSAGE_KBD     = 0x00000200;
+Debugger.MESSAGE_VIDEO   = 0x00000400;
+Debugger.MESSAGE_FDC     = 0x00000800;
+Debugger.MESSAGE_HDC     = 0x00001000;
+Debugger.MESSAGE_DISK    = 0x00002000;
+Debugger.MESSAGE_SERIAL  = 0x00004000;
+Debugger.MESSAGE_SPEAKER = 0x00008000;
+Debugger.MESSAGE_STATE   = 0x00010000;
+Debugger.MESSAGE_MOUSE   = 0x00020000;
+Debugger.MESSAGE_CMP     = 0x00040000;
+Debugger.MESSAGE_CPU     = 0x00080000;
+Debugger.MESSAGE_DOS     = 0x00100000;
+Debugger.MESSAGE_INT     = 0x00200000;
+Debugger.MESSAGE_LOG     = 0x01000000;
+Debugger.MESSAGE_HALT    = 0x10000000;
 
 if (DEBUGGER) {
 
@@ -414,34 +438,6 @@ if (DEBUGGER) {
     Debugger.TYPE_286   = (Debugger.CPU_286 << 14);
     Debugger.TYPE_386   = (Debugger.CPU_386 << 14);
 
-    /**
-     * @class Debugger
-     * @property {Object} MESSAGES
-     * @property {number} MESSAGE_MEM
-     * @property {number} MESSAGE_PORT
-     * @property {number} MESSAGE_DMA
-     * @property {number} MESSAGE_PIC
-     * @property {number} MESSAGE_TIMER
-     * @property {number} MESSAGE_CMOS
-     * @property {number} MESSAGE_RTC
-     * @property {number} MESSAGE_8042
-     * @property {number} MESSAGE_CHIPSET
-     * @property {number} MESSAGE_KBD
-     * @property {number} MESSAGE_VIDEO
-     * @property {number} MESSAGE_FDC
-     * @property {number} MESSAGE_HDC
-     * @property {number} MESSAGE_DISK
-     * @property {number} MESSAGE_SERIAL
-     * @property {number} MESSAGE_SPEAKER
-     * @property {number} MESSAGE_STATE
-     * @property {number} MESSAGE_MOUSE
-     * @property {number} MESSAGE_CMP
-     * @property {number} MESSAGE_CPU
-     * @property {number} MESSAGE_DOS
-     * @property {number} MESSAGE_INT
-     * @property {number} MESSAGE_LOG
-     */
-
     /*
      * Message categories supported by the messageEnabled() function and other assorted message
      * functions. Each category has a corresponding bit value that can be combined (ie, OR'ed) as
@@ -452,46 +448,39 @@ if (DEBUGGER) {
      *      m port off
      *      ...
      *
-     * Every caller of messageInit() receives all the MESSAGE_* properties as bit values; for example,
-     * after ChipSet calls messageInit(ChipSet), ChipSet.MESSAGE_MEM will be 0x0001, and so on.
-     *
-     * We also call messageInit() on behalf the current Debugger instance so that other components have
-     * the option of accessing the properties indirectly (eg, this.dbg.MESSAGE_MEM), since the Debugger
-     * component is not a required component.
-     *
      * NOTE: The order of these categories can be rearranged, alphabetized, etc, as desired; just be
      * aware that changing the bit values could break saved Debugger states (not a huge concern, just
      * something to be aware of).
      */
     Debugger.MESSAGES = {
-        MESSAGE_MEM:    {BIT: 0x00000001, OP: "mem"},
-        MESSAGE_PORT:   {BIT: 0x00000002, OP: "port"},
-        MESSAGE_DMA:    {BIT: 0x00000004, OP: "dma"},
-        MESSAGE_PIC:    {BIT: 0x00000008, OP: "pic"},
-        MESSAGE_TIMER:  {BIT: 0x00000010, OP: "timer"},
-        MESSAGE_CMOS:   {BIT: 0x00000020, OP: "cmos"},
-        MESSAGE_RTC:    {BIT: 0x00000040, OP: "rtc"},
-        MESSAGE_8042:   {BIT: 0x00000080, OP: "8042"},
-        MESSAGE_CHIPSET:{BIT: 0x00000100, OP: "chipset"},   // ie, anything else in ChipSet besides DMA, PIC, TIMER, CMOS, RTC and 8042
-        MESSAGE_KBD:    {BIT: 0x00000200, OP: "keyboard"},
-        MESSAGE_VIDEO:  {BIT: 0x00000400, OP: "video"},
-        MESSAGE_FDC:    {BIT: 0x00000800, OP: "fdc"},
-        MESSAGE_HDC:    {BIT: 0x00001000, OP: "hdc"},
-        MESSAGE_DISK:   {BIT: 0x00002000, OP: "disk"},
-        MESSAGE_SERIAL: {BIT: 0x00004000, OP: "serial"},
-        MESSAGE_SPEAKER:{BIT: 0x00008000, OP: "speaker"},
-        MESSAGE_STATE:  {BIT: 0x00010000, OP: "state"},
-        MESSAGE_MOUSE:  {BIT: 0x00020000, OP: "mouse"},
-        MESSAGE_CMP:    {BIT: 0x00040000, OP: "computer"},
-        MESSAGE_CPU:    {BIT: 0x00080000, OP: "cpu"},
-        MESSAGE_DOS:    {BIT: 0x00100000, OP: "dos"},
-        MESSAGE_INT:    {BIT: 0x00200000, OP: "int"},
-        MESSAGE_LOG:    {BIT: 0x01000000, OP: "log"},
+        "mem":      Debugger.MESSAGE_MEM,
+        "port":     Debugger.MESSAGE_PORT,
+        "dma":      Debugger.MESSAGE_DMA,
+        "pic":      Debugger.MESSAGE_PIC,
+        "timer":    Debugger.MESSAGE_TIMER,
+        "cmos":     Debugger.MESSAGE_CMOS,
+        "rtc":      Debugger.MESSAGE_RTC,
+        "8042":     Debugger.MESSAGE_8042,
+        "chipset":  Debugger.MESSAGE_CHIPSET,   // ie, anything else in ChipSet besides DMA, PIC, TIMER, CMOS, RTC and 8042
+        "keyboard": Debugger.MESSAGE_KBD,
+        "video":    Debugger.MESSAGE_VIDEO,
+        "fdc":      Debugger.MESSAGE_FDC,
+        "hdc":      Debugger.MESSAGE_HDC,
+        "disk":     Debugger.MESSAGE_DISK,
+        "serial":   Debugger.MESSAGE_SERIAL,
+        "speaker":  Debugger.MESSAGE_SPEAKER,
+        "state":    Debugger.MESSAGE_STATE,
+        "mouse":    Debugger.MESSAGE_MOUSE,
+        "computer": Debugger.MESSAGE_CMP,
+        "cpu":      Debugger.MESSAGE_CPU,
+        "dos":      Debugger.MESSAGE_DOS,
+        "int":      Debugger.MESSAGE_INT,
+        "log":      Debugger.MESSAGE_LOG,
         /*
          * Now we turn to message actions rather than message types; for example, setting "halt"
          * on or off doesn't enable "halt" messages, but rather halts the CPU on any above message.
          */
-        MESSAGE_HALT:   {BIT: 0x10000000, OP: "halt"}
+        "halt":     Debugger.MESSAGE_HALT
     };
 
     /*
@@ -1288,27 +1277,24 @@ if (DEBUGGER) {
     };
 
     /**
-     * messageInit(o, sEnable, fDebugger)
+     * initMessages(sEnable)
      *
      * @this {Debugger}
-     * @param {Object} o
-     * @param {string} [sEnable] contains zero or more message categories to enable, separated by '|' or ';'
-     * @param {boolean} [fDebugger] is true to perform Debugger-specific initialization (eg, array of dumpers)
+     * @param {string|undefined} sEnable contains zero or more message categories to enable, separated by '|' or ';'
      */
-    Debugger.prototype.messageInit = function(o, sEnable, fDebugger)
+    Debugger.prototype.initMessages = function(sEnable)
     {
-        if (fDebugger) this.afnDumpers = [];
-        var bitsEnable = 0;
+        this.afnDumpers = [];
+        this.bitsMessageEnabled = 0;
         var aEnable = this.parseCommand(sEnable);
-        for (var m in Debugger.MESSAGES) {
-            o[m] = Debugger.MESSAGES[m].BIT;
-            if (aEnable.indexOf(Debugger.MESSAGES[m].OP) >= 0) {
-                bitsEnable |= Debugger.MESSAGES[m].BIT;
-                this.println(Debugger.MESSAGES[m].OP + " messages enabled");
+        if (aEnable.length) {
+            for (var m in Debugger.MESSAGES) {
+                if (aEnable.indexOf(m) >= 0) {
+                    this.bitsMessageEnabled |= Debugger.MESSAGES[m];
+                    this.println(m + " messages enabled");
+                }
             }
         }
-        if (this.bitsMessageEnabled === undefined) this.bitsMessageEnabled = 0;
-        this.bitsMessageEnabled |= bitsEnable;
     };
 
     /**
@@ -1322,7 +1308,7 @@ if (DEBUGGER) {
     Debugger.prototype.messageDump = function(bitMessage, fnDumper)
     {
         for (var m in Debugger.MESSAGES) {
-            if (bitMessage == Debugger.MESSAGES[m].BIT) {
+            if (bitMessage == Debugger.MESSAGES[m]) {
                 this.afnDumpers[m] = fnDumper;
                 return true;
             }
@@ -1435,7 +1421,7 @@ if (DEBUGGER) {
     Debugger.prototype.messageMem = function(component, addr, fWrite, addrFrom, name, bitsMessage)
      {
         if (!bitsMessage) bitsMessage = 0;
-        bitsMessage |= Debugger.MESSAGES.MESSAGE_MEM.BIT;
+        bitsMessage |= Debugger.MESSAGES_MEM;
         if (addrFrom == null || (this.bitsMessageEnabled & bitsMessage) == bitsMessage) {
             var b = this.bus.getByteDirect(addr);
             this.message(component.idComponent + "." + (fWrite? "setByte" : "getByte") + "(0x" + str.toHexAddr(addr) + ")" + (addrFrom != null? (" at " + str.toHexAddr(addrFrom)) : "") + ": " + (name? (name + "=") : "") + str.toHexByte(b));
@@ -1458,7 +1444,7 @@ if (DEBUGGER) {
     Debugger.prototype.messagePort = function(component, port, bOut, addrFrom, name, bitsMessage, bIn)
     {
         if (!bitsMessage) bitsMessage = 0;
-        bitsMessage |= Debugger.MESSAGES.MESSAGE_PORT.BIT;
+        bitsMessage |= Debugger.MESSAGE_PORT;
         if (addrFrom == null || (this.bitsMessageEnabled & bitsMessage) == bitsMessage) {
             var segFrom = null;
             if (addrFrom != null) {
@@ -1480,7 +1466,7 @@ if (DEBUGGER) {
         this.println(sMessage);             // + " (" + this.cpu.getCycles() + " cycles)"
 
         if (this.cpu) {
-            if (this.bitsMessageEnabled & Debugger.MESSAGES.MESSAGE_HALT.BIT) {
+            if (this.bitsMessageEnabled & Debugger.MESSAGE_HALT) {
                 this.cpu.haltCPU();
             }
             /*
@@ -1556,7 +1542,7 @@ if (DEBUGGER) {
      */
     Debugger.prototype.intDOSCall = function(addr)
     {
-        if (this.messageEnabled(this.MESSAGE_DOS | this.MESSAGE_INT)) this.messageInt(Debugger.INT_DOS, addr);
+        if (this.messageEnabled(Debugger.MESSAGE_DOS | Debugger.MESSAGE_INT)) this.messageInt(Debugger.INT_DOS, addr);
         return true;
     };
 
@@ -1932,7 +1918,7 @@ if (DEBUGGER) {
      */
     Debugger.prototype.checksEnabled = function(fBreak)
     {
-        return ((DEBUG && !fBreak)? true : (this.aBreakExec.length > 1 || this.messageEnabled(this.MESSAGE_INT) /* || this.aBreakRead.length > 1 || this.aBreakWrite.length > 1 */));
+        return ((DEBUG && !fBreak)? true : (this.aBreakExec.length > 1 || this.messageEnabled(Debugger.MESSAGE_INT) /* || this.aBreakRead.length > 1 || this.aBreakWrite.length > 1 */));
     };
 
     /**
@@ -2917,7 +2903,6 @@ if (DEBUGGER) {
      * @param {string|undefined} sValue
      * @param {string} [sName] is the name of the value, if any
      * @return {number|undefined} numeric value, or undefined if sValue is either undefined or invalid
-     * @suppress {checkTypes}
      */
     Debugger.prototype.parseValue = function(sValue, sName)
     {
@@ -3421,7 +3406,7 @@ if (DEBUGGER) {
             for (m in Debugger.MESSAGES) {
                 if (this.afnDumpers[m]) {
                     if (sDumpers.length) sDumpers += ",";
-                    sDumpers = sDumpers + Debugger.MESSAGES[m].OP;
+                    sDumpers = sDumpers + m;
                 }
             }
             sDumpers += ",state";
@@ -3441,7 +3426,7 @@ if (DEBUGGER) {
             return;
         }
         for (m in Debugger.MESSAGES) {
-            if (sAddr == Debugger.MESSAGES[m].OP) {
+            if (sAddr == m) {
                 var fnDumper = this.afnDumpers[m];
                 if (fnDumper) {
                     fnDumper(sLen);
@@ -3923,8 +3908,8 @@ if (DEBUGGER) {
                 sCategory = null;
             } else {
                 for (m in Debugger.MESSAGES) {
-                    if (sCategory == Debugger.MESSAGES[m].OP) {
-                        bitsMessage = Debugger.MESSAGES[m].BIT;
+                    if (sCategory == m) {
+                        bitsMessage = Debugger.MESSAGES[m];
                         fCriteria = !!(this.bitsMessageEnabled & bitsMessage);
                         break;
                     }
@@ -3952,13 +3937,13 @@ if (DEBUGGER) {
         var n = 0;
         var sCategories = "";
         for (m in Debugger.MESSAGES) {
-            if (!sCategory || sCategory == Debugger.MESSAGES[m].OP) {
-                var bitMessage = Debugger.MESSAGES[m].BIT;
+            if (!sCategory || sCategory == m) {
+                var bitMessage = Debugger.MESSAGES[m];
                 var fEnabled = !!(this.bitsMessageEnabled & bitMessage);
                 if (fCriteria !== null && fCriteria != fEnabled) continue;
                 if (sCategories) sCategories += ",";
                 if (!(++n % 10)) sCategories += "\n\t";     // jshint ignore:line
-                sCategories += Debugger.MESSAGES[m].OP;
+                sCategories += m;
             }
         }
 

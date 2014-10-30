@@ -2,7 +2,6 @@
  * @fileoverview Implements the PCjs Video component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
- * @suppress {missingProperties}
  * Created 2012-Jun-15
  *
  * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
@@ -1955,9 +1954,8 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
 
     if (DEBUGGER && dbg) {
         var video = this;
-        dbg.messageInit(Video);
         this.cpu.addIntNotify(Video.BIOS.INT_VIDEO, this, this.intBIOSVideo);
-        dbg.messageDump(Video.MESSAGE_VIDEO, function onDumpVideo(sParm) {
+        dbg.messageDump(Debugger.MESSAGE_VIDEO, function onDumpVideo(sParm) {
             video.dumpVideo(sParm);
         });
     }
@@ -1990,7 +1988,7 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
 Video.prototype.intBIOSVideo = function(addr)
 {
     if (DEBUGGER) {
-        if (this.dbg && this.dbg.messageEnabled(Video.MESSAGE_VIDEO | Video.MESSAGE_INT)) {
+        if (this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE_VIDEO | Debugger.MESSAGE_INT)) {
             this.dbg.messageInt(Video.BIOS.INT_VIDEO, addr);
             this.cpu.addIntReturn(addr, function (video, nCycles) {
                 return function onBIOSVideoReturn(nLevel) {
@@ -3743,7 +3741,7 @@ Video.prototype.updateChar = function(col, row, data, context)
         this.contextScreen.fillRect(xDst, yDst, this.cxScreenCell, this.cyScreenCell);
     }
 
-    if (MAXDEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Video.MESSAGE_VIDEO | Video.MESSAGE_LOG)) {
+    if (MAXDEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE_VIDEO | Debugger.MESSAGE_LOG)) {
         this.log("updateCharBgnd(" + col + "," + row + "," + bChar + "): filled " + xDst + "," + yDst);
     }
 
@@ -3754,7 +3752,7 @@ Video.prototype.updateChar = function(col, row, data, context)
         var xSrcFgnd = (bChar & 0xf) * font.cxCell;
         var ySrcFgnd = (bChar >> 4) * font.cyCell;
 
-        if (MAXDEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Video.MESSAGE_VIDEO | Video.MESSAGE_LOG)) {
+        if (MAXDEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE_VIDEO | Debugger.MESSAGE_LOG)) {
             this.log("updateCharFgnd(" + col + "," + row + "," + bChar + "): draw from " + xSrcFgnd + "," + ySrcFgnd + " (" + font.cxCell + "," + font.cyCell + ") to " + xDst + "," + yDst);
         }
 
@@ -4927,7 +4925,7 @@ Video.prototype.dumpVideo = function(sParm)
 Video.prototype.messageDebugger = function(sMessage, fForce)
 {
     if (DEBUGGER && this.dbg) {
-        if (fForce || this.dbg.messageEnabled(Video.MESSAGE_VIDEO)) {
+        if (fForce || this.dbg.messageEnabled(Debugger.MESSAGE_VIDEO)) {
             this.dbg.message(sMessage);
         }
     }
@@ -4948,7 +4946,7 @@ Video.prototype.messageDebugger = function(sMessage, fForce)
 Video.prototype.messagePort = function(port, bOut, addrFrom, name, bIn)
 {
     if (DEBUGGER && this.dbg) {
-        this.dbg.messagePort(this, port, bOut, addrFrom, name, Video.MESSAGE_VIDEO, bIn);
+        this.dbg.messagePort(this, port, bOut, addrFrom, name, Debugger.MESSAGE_VIDEO, bIn);
     }
 };
 

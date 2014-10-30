@@ -2,7 +2,6 @@
  * @fileoverview This file implements the C1Pjs DiskController component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
- * @suppress {missingProperties}
  * Created 2012-Aug-09
  *
  * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>

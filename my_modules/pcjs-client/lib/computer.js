@@ -2,7 +2,6 @@
  * @fileoverview Implements the PCjs Computer component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
- * @suppress {missingProperties}
  * Created 2012-Jun-15
  *
  * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
@@ -1186,7 +1185,7 @@ Computer.prototype.getComponentByType = function(sType, componentPrev)
 Computer.prototype.messageDebugger = function(sMessage, fForce)
 {
     if (DEBUGGER && this.dbg) {
-        if (fForce || this.dbg.messageEnabled(this.dbg.MESSAGE_CMP)) this.dbg.message(sMessage);
+        if (fForce || this.dbg.messageEnabled(Debugger.MESSAGE_CMP)) this.dbg.message(sMessage);
     }
 };
 

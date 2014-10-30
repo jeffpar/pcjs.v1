@@ -2,7 +2,6 @@
  * @fileoverview Implements PCjs X86 Segment objects
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
- * @suppress {missingProperties}
  * Created 2014-Sep-10
  *
  * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>

@@ -2,7 +2,6 @@
  * @fileoverview This file implements the C1Pjs Debugger component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
- * @suppress {missingProperties}
  * Created 2012-Jun-21
  *
  * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
@@ -35,12 +34,12 @@
 
 /**
  * C1PDebugger(parmsDbg)
- * 
+ *
  * The C1PDebugger component has no required (parmsDbg) properties.
  *
  * The C1PDebugger component is an optional component that implements a variety of user
  * commands for controlling the CPU, dumping and editing memory, etc.
- * 
+ *
  * @constructor
  * @extends Component
  */
@@ -49,7 +48,7 @@ function C1PDebugger(parmsDbg)
     if (DEBUGGER) {
 
         Component.call(this, "C1PDebugger", parmsDbg);
-    
+
         /*
          * This keeps track of instruction activity, but only when tracing or when
          * Debugger checks have been enabled (eg, one or more breakpoints have been set).
@@ -58,25 +57,25 @@ function C1PDebugger(parmsDbg)
          * We set it here to -1 to indicate that the CPU has not yet initialized us.
          */
         this.cIns = -1;
-    
+
         /*
          * Some commands, like the dump (d) command, start at nextAddr when no address
          * is given (and they also update nextAddr when they're done).
          */
         this.nextAddr = 0;
-    
+
         /*
          * When Enter is pressed on an empty input buffer, we default to the previous
          * command, which is preserved here.
          */
         this.prevCmd = null;
-    
+
         /*
          * fAssemble is true when "assemble mode" is active, false when not.
          */
         this.fAssemble = false;
         this.addrAssembleNext = 0;
-    
+
         /*
          * Initialize the lists of breakpoint addresses.  aExecBreak is a list (Array) of addresses
          * to halt at whenever attempting to execute an instruction at the corresponding address,
@@ -84,7 +83,7 @@ function C1PDebugger(parmsDbg)
          * respectively, occurs at the corresponding address.
          */
         this.clearBreakpoints();
-    
+
         /*
          * Instead of pre-allocating these arrays, we wait until our reset() function is called.
          * These arrays are updated in checkInstruction(), but the CPU will never actually call it
@@ -94,7 +93,7 @@ function C1PDebugger(parmsDbg)
         this.iStepHistory = 0;
         this.aStepHistory = [];
         this.aaOpcodeFreqs = [];
-    
+
         /*
          * This "info" buffer is a lightweight logging mechanism that has minimal impact on the
          * browser (unlike printing to either window.console.log or an HTML control, which can make
@@ -106,7 +105,7 @@ function C1PDebugger(parmsDbg)
             this.iInfoBuffer = 0;
             this.aInfoBuffer = new Array(10000);
         }
-    
+
         /*
          * Message categories supported by the message() function; they are designed to be combined
          * (ie, OR'ed) as needed.  The Debugger's "option" command is used to turn message categories
@@ -131,7 +130,7 @@ function C1PDebugger(parmsDbg)
             'disk':     this.MESSAGE_DISK,
             'serial':   this.MESSAGE_SERIAL
         };
-    
+
         /*
          * The aaOperations array is indexed by opcode, and each element is a sub-array that
          * describes the corresponding opcode. The sub-elements are as follows:
@@ -202,7 +201,7 @@ function C1PDebugger(parmsDbg)
         this.OP_TYA = 55;
         this.OP_SIM = 56;
         this.OP_DB  = 57;
-    
+
         this.aOpCodes = [
             "ADC","AND","ASL","BCC","BCS","BEQ","BIT","BMI",
             "BNE","BPL","BRK","BVC","BVS","CLC","CLD","CLI",
@@ -213,13 +212,13 @@ function C1PDebugger(parmsDbg)
             "STX","STY","TAX","TAY","TSX","TXA","TXS","TYA",
             "SIM",".DB"
         ];
-    
+
         this.aOpSimCodes = [
             "HLT", "MSG"
         ];
-    
+
         this.setOpModes(true);
-    
+
         this.aaOperations = [
             /* 0x00 */ [this.OP_BRK],
             /* 0x01 */ [this.OP_ORA, 1, this.MODE_INDX],
@@ -657,7 +656,7 @@ if (DEBUGGER) {
 
         var sRegEx = "";
         var iMode, sMode;
-        
+
         if (fClassic) {
             this.aOpModes = [
                             "A",            // MODE_ACC
@@ -986,7 +985,7 @@ if (DEBUGGER) {
          * NOTE: We keep track of zero-page writes mainly as a reminder to look into whether it makes sense
          * for the CPU to calculate zero-page EAs using a different variable (eg, regEAWriteZP instead of regEAWrite),
          * because write-notification handlers never care about page zero accesses, and while write breakpoints *may*
-         * care, it may not be worth the cost of tracking writes to page zero if there's an associated perf penalty. 
+         * care, it may not be worth the cost of tracking writes to page zero if there's an associated perf penalty.
          */
         if (!(addr & 0xff00))
             this.cWritesZP++;
@@ -1207,7 +1206,7 @@ if (DEBUGGER) {
 
     /**
      * @this {C1PDebugger}
-     * @param {number} addr to compare to addrTempBP; the latter is cleared if there's a match  
+     * @param {number} addr to compare to addrTempBP; the latter is cleared if there's a match
      */
     C1PDebugger.prototype.clearTempBreakpoint = function(addr)
     {
@@ -1517,7 +1516,6 @@ if (DEBUGGER) {
      * @this {C1PDebugger}
      * @param {string|undefined} [sAddr]
      * @return {number|undefined}
-     * @suppress {checkTypes}
      */
     C1PDebugger.prototype.getUserAddr = function(sAddr)
     {
@@ -1843,7 +1841,7 @@ if (DEBUGGER) {
     };
 
     /**
-     * Prints the contents of the Debugger's "info" buffer (filled by calls like cpu.dbg.info()) 
+     * Prints the contents of the Debugger's "info" buffer (filled by calls like cpu.dbg.info())
      * @this {C1PDebugger}
      * @param {string|undefined} sCount
      * @return {boolean|undefined} true only if the "info" command is supported
@@ -2127,7 +2125,7 @@ if (DEBUGGER) {
                 sCmd = dbg.prevCmd;
         }
         if (dbg.isReady() && !dbg.isBusy(true) && sCmd.length > 0) {
-    
+
             if (dbg.fAssemble) {
                 sCmd = "a " + str.toHexWord(dbg.addrAssembleNext) + " " + sCmd;
             }
@@ -2139,10 +2137,10 @@ if (DEBUGGER) {
                 var ch = sCmd.charAt(0).toLowerCase();
                 sCmd = ch + " " + sCmd.substr(1);
             }
-    
+
             var asArgs = sCmd.split(" ");
             dbg.prevCmd = asArgs[0];
-    
+
             switch(asArgs[0].toLowerCase()) {
             case "a":
                 dbg.doAssemble(asArgs);
@@ -2189,14 +2187,14 @@ if (DEBUGGER) {
                 break;
             case "i":
                 if (dbg.doInfo(asArgs[1])) break;
-                /* falls through */   
+                /* falls through */
             default:
                 dbg.println("unknown command: " + sCmd);
                 break;
             }
         }
     };
-    
+
     /**
      * C1PDebugger.init()
      *
@@ -2217,7 +2215,7 @@ if (DEBUGGER) {
             Component.bindComponentControls(dbg, eDbg, C1PJSCLASS);
         }
     };
-    
+
     /*
      * Initialize every Debugger module on the page (as IF there's ever going to be more than one ;-))
      */

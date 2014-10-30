@@ -2,7 +2,6 @@
  * @fileoverview Implements the PCjs SerialPort component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
- * @suppress {missingProperties}
  * Created 2012-Jul-01
  *
  * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
@@ -337,9 +336,6 @@ SerialPort.prototype.initBus = function(cmp, bus, cpu, dbg) {
     this.cpu = cpu;
     this.dbg = dbg;
     this.chipset = cmp.getComponentByType("ChipSet");
-    if (DEBUGGER && dbg) {
-        dbg.messageInit(SerialPort);
-    }
     bus.addPortInputTable(this, SerialPort.aPortInput, this.portBase);
     bus.addPortOutputTable(this, SerialPort.aPortOutput, this.portBase);
     this.setReady();
@@ -721,7 +717,7 @@ SerialPort.prototype.echoByte = function(b) {
  */
 SerialPort.prototype.messageDebugger = function(sMessage) {
     if (DEBUGGER && this.dbg) {
-        if (this.dbg.messageEnabled(this.dbg.MESSAGE_SERIAL)) {
+        if (this.dbg.messageEnabled(Debugger.MESSAGE_SERIAL)) {
             this.dbg.message(sMessage);
         }
     }
@@ -741,7 +737,7 @@ SerialPort.prototype.messageDebugger = function(sMessage) {
  */
 SerialPort.prototype.messagePort = function(port, bOut, addrFrom, name, bIn) {
     if (DEBUGGER && this.dbg) {
-        this.dbg.messagePort(this, port, bOut, addrFrom, name, this.dbg.MESSAGE_SERIAL, bIn);
+        this.dbg.messagePort(this, port, bOut, addrFrom, name, Debugger.MESSAGE_SERIAL, bIn);
     }
 };
 

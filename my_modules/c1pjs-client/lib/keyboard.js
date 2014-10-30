@@ -2,7 +2,6 @@
  * @fileoverview This file implements the C1Pjs Keyboard component.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
- * @suppress {missingProperties}
  * Created 2012-Jun-20
  *
  * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
@@ -327,7 +326,7 @@ C1PKeyboard.prototype.reset = function()
      *
      * Like bitsShift, this 8x8 array (8 byte values, each with 8 bits) represents
      * the physical state of the keyboard, encoded in C1P format; the C1P won't
-     * actually see data this until updateMemory() decides it's time to propagate it.  
+     * actually see data this until updateMemory() decides it's time to propagate it.
      */
     this.abKbdCols = [this.BIT_SHIFTLOCK,0x00,0x00,0x00,0x00,0x00,0x00,0x00];
 
@@ -539,7 +538,7 @@ C1PKeyboard.prototype.setReady = function()
 
 /**
  * calcReleaseDelay(fRepeat
- * 
+ *
  * This attempts to scale our default "release" delay appropriately for the current CPU speed.
  *
  * Note that if the effective CPU speed exceeds 16Mhz, it becomes very difficult to rely on timer-driven key events
@@ -631,7 +630,7 @@ C1PKeyboard.prototype.injectKeysFromBuffer = function(msDelay)
          *
          * UPDATE: Even though keyPressSimulate() currently has some code to do this automatically now,
          * it's really intended as a work-around for a SHIFT-related problem on iOS devices only, so
-         * we can't rely on that in the general case. 
+         * we can't rely on that in the general case.
          */
         if (ch >= 0x41 && ch <= 0x5A)
             ch += 0x20;
@@ -711,7 +710,7 @@ C1PKeyboard.prototype.keyEvent = function(event, fDown)
          * browser will see it and give focus to the next control. But the "down" side is that
          * that no "press" event will be generated.  This puts it in the same category as ESC,
          * which also generates "down" and "up" events (LOTS of "down" events for that matter),
-         * but no "press" event.  However, the C1P has no TAB key, so it's safe to completely ignore. 
+         * but no "press" event.  However, the C1P has no TAB key, so it's safe to completely ignore.
          */
         fPass = fAutoClear = false;
     }
