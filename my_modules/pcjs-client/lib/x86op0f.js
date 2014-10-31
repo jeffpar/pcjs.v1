@@ -125,7 +125,6 @@ var X86Op0F = {
      */
     opLOADALL: function() {
         X86Help.opHelpLMSW.call(this, this.getWord(0x806));
-        this.setPS(this.getWord(0x818));
         this.regDI = this.getWord(0x826);
         this.regSI = this.getWord(0x828);
         this.regBP = this.getWord(0x82A);
@@ -143,6 +142,7 @@ var X86Op0F = {
         X86Seg.loadDesc.call(this.segSS, this.getWord(0x820), 0x842);
         X86Seg.loadDesc.call(this.segDS, this.getWord(0x81E), 0x848);
         this.nCPL = this.segCS.level;
+        this.setPS(this.getWord(0x818));
         this.setIP(this.getWord(0x81A));
         /*
          * TODO: The bytes at 0x851 and 0x85D "should be zeroes", but do we rely on that, or should we load zeroes ourselves?
