@@ -985,7 +985,7 @@ var X86OpXX = {
      *
      * op=0x54 (push SP)
      */
-    opPUSHSP: function() {
+    opPUSHSP8086: function() {
         var w = (this.regSP - 2) & 0xffff;
         this.pushWord(w);
         this.nStepCycles -= this.CYCLES.nOpCyclesPushReg;
@@ -995,7 +995,7 @@ var X86OpXX = {
      *
      * op=0x54 (push SP)
      */
-    op286PUSHSP: function() {
+    opPUSHSP: function() {
         this.pushWord(this.regSP);
         this.nStepCycles -= this.CYCLES.nOpCyclesPushReg;
     },
@@ -3385,7 +3385,7 @@ X86OpXX.aOps = [
     X86OpXX.opDECAX,        X86OpXX.opDECCX,        X86OpXX.opDECDX,        X86OpXX.opDECBX,        // 0x48-0x4B
     X86OpXX.opDECSP,        X86OpXX.opDECBP,        X86OpXX.opDECSI,        X86OpXX.opDECDI,        // 0x4C-0x4F
     X86OpXX.opPUSHAX,       X86OpXX.opPUSHCX,       X86OpXX.opPUSHDX,       X86OpXX.opPUSHBX,       // 0x50-0x53
-    X86OpXX.opPUSHSP,       X86OpXX.opPUSHBP,       X86OpXX.opPUSHSI,       X86OpXX.opPUSHDI,       // 0x54-0x57
+    X86OpXX.opPUSHSP8086,   X86OpXX.opPUSHBP,       X86OpXX.opPUSHSI,       X86OpXX.opPUSHDI,       // 0x54-0x57
     X86OpXX.opPOPAX,        X86OpXX.opPOPCX,        X86OpXX.opPOPDX,        X86OpXX.opPOPBX,        // 0x58-0x5B
     X86OpXX.opPOPSP,        X86OpXX.opPOPBP,        X86OpXX.opPOPSI,        X86OpXX.opPOPDI,        // 0x5C-0x5F
     /*

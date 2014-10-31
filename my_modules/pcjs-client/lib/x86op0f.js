@@ -83,6 +83,79 @@ var X86Op0F = {
         X86Mods.aOpModsRegWord[this.getIPByte()].call(this, X86Help.opHelpLSL);
     },
     /**
+     * opLOADALL()
+     *
+     * From the "Undocumented iAPX 286 Test Instruction" document at http://www.pcjs.org/pubs/pc/reference/intel/80286/loadall/:
+     *
+     *  Physical Address (Hex)        Associated CPU Register
+     *          800-805                        None
+     *          806-807                        MSW
+     *          808-815                        None
+     *          816-817                        TR
+     *          818-819                        Flag word
+     *          81A-81B                        IP
+     *          81C-81D                        LDT
+     *          81E-81F                        DS
+     *          820-821                        SS
+     *          822-823                        CS
+     *          824-825                        ES
+     *          826-827                        DI
+     *          828-829                        SI
+     *          82A-82B                        BP
+     *          82C-82D                        SP
+     *          82E-82F                        BX
+     *          830-831                        DX
+     *          832-833                        CX
+     *          834-835                        AX
+     *          836-83B                        ES descriptor cache
+     *          83C-841                        CS descriptor cache
+     *          842-847                        SS descriptor cache
+     *          848-84D                        DS descriptor cache
+     *          84E-853                        GDTR
+     *          854-859                        LDT descriptor cache
+     *          85A-85F                        IDTR
+     *          860-865                        TSS descriptor cache
+     *
+     * Oddly, the above document gives two contradictory cycle counts for LOADALL: 190 and 195.  I'll go with 195, for
+     * no particular reason.
+     *
+     * @this {X86CPU}
+     *
+     * op=0x0F,0x05 (loadall)
+     */
+    opLOADALL: function() {
+        X86Help.opHelpLMSW.call(this, this.getWord(0x806));
+        this.setPS(this.getWord(0x818));
+        this.regDI = this.getWord(0x826);
+        this.regSI = this.getWord(0x828);
+        this.regBP = this.getWord(0x82A);
+        this.regSP = this.getWord(0x82C);
+        this.regBX = this.getWord(0x82E);
+        this.regDX = this.getWord(0x830);
+        this.regCX = this.getWord(0x832);
+        this.regAX = this.getWord(0x834);
+        /*
+         * loadDesc() is an X86Seg class method that we must use to force the specified descriptor to be loaded;
+         * since the processor might still be in real-mode, we can't use normal segment register instance methods.
+         */
+        X86Seg.loadDesc.call(this.segES, this.getWord(0x824), 0x836);
+        X86Seg.loadDesc.call(this.segCS, this.getWord(0x822), 0x83C);
+        X86Seg.loadDesc.call(this.segSS, this.getWord(0x820), 0x842);
+        X86Seg.loadDesc.call(this.segDS, this.getWord(0x81E), 0x848);
+        this.nCPL = this.segCS.level;
+        this.setIP(this.getWord(0x81A));
+        /*
+         * TODO: The bytes at 0x851 and 0x85D "should be zeroes", but do we rely on that, or should we load zeroes ourselves?
+         */
+        this.addrGDT = this.getWord(0x84E) | (this.getWord(0x850) << 16);
+        this.addrGDTLimit = this.addrGDT + this.getWord(0x852);
+        this.segLDT.loadDesc(this.getWord(0x81C), 0x854);
+        this.addrIDT = this.getWord(0x85A) | (this.getWord(0x85C) << 16);
+        this.addrIDTLimit = this.addrIDT + this.getWord(0x85E);
+        this.segTSS.loadDesc(this.getWord(0x816), 0x860);
+        this.nStepCycles -= 195;
+    },
+    /**
      * @this {X86CPU}
      * @param {number} dst
      * @param {number} src (null)
@@ -244,8 +317,9 @@ var X86Op0F = {
              *      145E:4BC3 CB            RETF
              *
              * This code is expecting SGDT on an 80286 to set the 6th "undefined" byte to 0xFF.  So we use setWord()
-             * instead of setByte() and force the upper byte to 0xFF.  TODO: Remove the 0xFF00 below on post-80286
-             * processors; also, this behavior may be unique to real-mode.
+             * instead of setByte() and force the upper byte to 0xFF.
+             *
+             * TODO: Remove the 0xFF00 below on post-80286 processors; also, determine whether this behavior is unique to real-mode.
              */
             this.setWord(this.regEA + 4, 0xFF00 | (this.addrGDT >> 16));
             this.nStepCycles -= 11;
@@ -270,8 +344,9 @@ var X86Op0F = {
             this.setWord(this.regEA + 2, this.addrIDT);
             /*
              * As with SGDT, the 6th byte is technically "undefined" on an 80286, but we now set it to 0xFF, for the
-             * same reasons discussed in SGDT (above).  TODO: Remove the 0xFF00 below on post-80286 processors; also,
-             * this behavior may be unique to real-mode.
+             * same reasons discussed in SGDT (above).
+             *
+             * TODO: Remove the 0xFF00 below on post-80286 processors; also, determine whether this behavior is unique to real-mode.
              */
             this.setWord(this.regEA + 4, 0xFF00 | (this.addrIDT >> 16));
             this.nStepCycles -= 12;
@@ -341,17 +416,8 @@ var X86Op0F = {
      * @return {number}
      */
     opLMSW: function(dst, src) {
-        this.regMSW = (this.regMSW & X86.MSW.SET) | (dst & ~X86.MSW.SET);
-        this.nStepCycles -= (3 + (this.regEA < 0? 0 : 3));
-        /*
-         * Since the 80286 did not allow you to disable protected-mode (ie, return to real-mode) by
-         * CLEARING the X86.MSW.PE bit, we need only check for the bit being SET.  And the only functions
-         * that call setProtMode() are resetRegs() and this function, so there's no danger of the mode
-         * getting out of sync with the X86.MSW.PE bit.
-         */
-        if (this.regMSW & X86.MSW.PE) {
-            this.setProtMode(true);
-        }
+        X86Help.opHelpLMSW.call(this, dst);
+        this.nStepCycles -= (this.regEA < 0? 3 : 6);
         if (FASTDISABLE) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     }
@@ -359,7 +425,7 @@ var X86Op0F = {
 
 X86Op0F.aOps0F = [
     X86Op0F.opGRP6,         X86Op0F.opGRP7,         X86Op0F.opLAR,          X86Op0F.opLSL,          // 0x00-0x03
-    X86Help.opUndefined,    X86Help.opUndefined,    X86Help.opUndefined,    X86Help.opUndefined,    // 0x04-0x07
+    X86Help.opUndefined,    X86Op0F.opLOADALL,      X86Help.opUndefined,    X86Help.opUndefined,    // 0x04-0x07
     /*
      * On all processors (except the 8086/8088, of course), 0x0F,0x0B is also referred to as "UD2": an
      * instruction guaranteed to raise a #UD (Invalid Opcode) exception (INT 0x06) on all future x86 processors.

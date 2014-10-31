@@ -19,7 +19,7 @@ iAPX 86 real mode programs.
 All CPU registers (including LDTR, TR, GDTR, IDTR, and MSW) are loaded from memory by this instruction.
 The normally hidden descriptor cache registers for the ES, DS, SS, CS, TR, and LDT registers are also loaded.
 LOADALL may be executed in either real address mode or protected mode (CPL must be 0). Any attempt to execute
-LOADALL at any privilege level other than 0 in protected rode causes exception 13 with an error code of 0.
+LOADALL at any privilege level other than 0 in protected mode causes exception 13 with an error code of 0.
 
 LOADALL allows direct control over the base, limit, and access rights associated with each segment register.
 These values are kept in the descriptor cache registers which are normally hidden from programs. In protected mode,

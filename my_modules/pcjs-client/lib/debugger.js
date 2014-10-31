@@ -2828,7 +2828,7 @@ if (DEBUGGER) {
              this.getFlagStr("S") + this.getFlagStr("Z") + this.getFlagStr("A") + this.getFlagStr("P") + this.getFlagStr("C");
         if (fProt) {
             s += " MS=" + str.toHexWord(this.cpu.regMSW) + '\n' +
-                this.getDTRStr("LD", this.cpu.segLDT.sel, this.cpu.segLDT.base, this.cpu.segLDT.limit) + ' ' +
+                this.getDTRStr("LD", this.cpu.segLDT.sel, this.cpu.segLDT.base, this.cpu.segLDT.base + this.cpu.segLDT.limit) + ' ' +
                 this.getDTRStr("GD", null, this.cpu.addrGDT, this.cpu.addrGDTLimit) + ' ' +
                 this.getDTRStr("ID", null, this.cpu.addrIDT, this.cpu.addrIDTLimit) + "  TR=" + str.toHexWord(this.cpu.segTSS.sel) +
                 " A20=" + (this.bus.getA20()? "ON" : "OFF");
@@ -2948,7 +2948,7 @@ if (DEBUGGER) {
                     break;
                 /*
                  * I used to alias "PC" to "IP", until I discovered that early (perhaps even ALL) versions of DEBUG.COM
-                 * treat "PC" as an alias for the 16-bit flags register.  TODO: Add support for "PC" as the flags register.
+                 * treat "PC" as an alias for the 16-bit flags register.  So for purposes of parseValue(), "PC" has been removed.
                  */
                 case "IP":
                     value = this.cpu.regIP;
@@ -4082,105 +4082,130 @@ if (DEBUGGER) {
                 }
                 var w = parseInt(sValue, 16);
                 if (!isNaN(w)) {
-                    switch (sReg.toUpperCase()) {
-                        case "AL":
-                            this.cpu.regAX = (this.cpu.regAX & 0xff00) | (w & 0xff);
-                            break;
-                        case "AH":
-                            this.cpu.regAX = (this.cpu.regAX & 0x00ff) | ((w << 8) & 0xff);
-                            break;
-                        case "AX":
-                            this.cpu.regAX = (w & 0xffff);
-                            break;
-                        case "BL":
-                            this.cpu.regBX = (this.cpu.regBX & 0xff00) | (w & 0xff);
-                            break;
-                        case "BH":
-                            this.cpu.regBX = (this.cpu.regBX & 0x00ff) | ((w << 8) & 0xff);
-                            break;
-                        case "BX":
-                            this.cpu.regBX = (w & 0xffff);
-                            break;
-                        case "CL":
-                            this.cpu.regCX = (this.cpu.regCX & 0xff00) | (w & 0xff);
-                            break;
-                        case "CH":
-                            this.cpu.regCX = (this.cpu.regCX & 0x00ff) | ((w << 8) & 0xff);
-                            break;
-                        case "CX":
-                            this.cpu.regCX = (w & 0xffff);
-                            break;
-                        case "DL":
-                            this.cpu.regDX = (this.cpu.regDX & 0xff00) | (w & 0xff);
-                            break;
-                        case "DH":
-                            this.cpu.regDX = (this.cpu.regDX & 0x00ff) | ((w << 8) & 0xff);
-                            break;
-                        case "DX":
-                            this.cpu.regDX = (w & 0xffff);
-                            break;
-                        case "SP":
-                            this.cpu.regSP = (w & 0xffff);
-                            break;
-                        case "BP":
-                            this.cpu.regBP = (w & 0xffff);
-                            break;
-                        case "SI":
-                            this.cpu.regSI = (w & 0xffff);
-                            break;
-                        case "DI":
-                            this.cpu.regDI = (w & 0xffff);
-                            break;
-                        case "DS":
-                            this.cpu.setDS(w);
-                            break;
-                        case "ES":
-                            this.cpu.setES(w);
-                            break;
-                        case "SS":
-                            this.cpu.setSS(w);
-                            break;
-                        case "CS":
-                            fIns = true;
-                            this.cpu.setCS(w);
-                            this.aAddrNextCode = this.newAddr(this.cpu.regIP, this.cpu.segCS.sel);
-                            break;
-                        /*
-                         * I used to alias "PC" to "IP", until I discovered that early (perhaps ALL) versions of
-                         * DEBUG.COM treat "PC" as an alias for the 16-bit flags register.  TODO: Add support for "PC".
-                         */
-                        case "IP":
-                            fIns = true;
-                            this.cpu.setIP(w);
-                            this.aAddrNextCode = this.newAddr(this.cpu.regIP, this.cpu.segCS.sel);
-                            break;
-                        case "C":
-                            if (w) this.cpu.setCF(); else this.cpu.clearCF();
-                            break;
-                        case "P":
-                            if (w) this.cpu.setPF(); else this.cpu.clearPF();
-                            break;
-                        case "A":
-                            if (w) this.cpu.setAF(); else this.cpu.clearAF();
-                            break;
-                        case "Z":
-                            if (w) this.cpu.setZF(); else this.cpu.clearZF();
-                            break;
-                        case "S":
-                            if (w) this.cpu.setSF(); else this.cpu.clearSF();
-                            break;
-                        case "I":
-                            if (w) this.cpu.setIF(); else this.cpu.clearIF();
-                            break;
-                        case "D":
-                            if (w) this.cpu.setDF(); else this.cpu.clearDF();
-                            break;
-                        case "V":
-                            if (w) this.cpu.setOF(); else this.cpu.clearOF();
-                            break;
-                        default:
+                    sReg = sReg.toUpperCase();
+                    switch (sReg) {
+                    case "AL":
+                        this.cpu.regAX = (this.cpu.regAX & 0xff00) | (w & 0xff);
+                        break;
+                    case "AH":
+                        this.cpu.regAX = (this.cpu.regAX & 0x00ff) | ((w << 8) & 0xff);
+                        break;
+                    case "AX":
+                        this.cpu.regAX = (w & 0xffff);
+                        break;
+                    case "BL":
+                        this.cpu.regBX = (this.cpu.regBX & 0xff00) | (w & 0xff);
+                        break;
+                    case "BH":
+                        this.cpu.regBX = (this.cpu.regBX & 0x00ff) | ((w << 8) & 0xff);
+                        break;
+                    case "BX":
+                        this.cpu.regBX = (w & 0xffff);
+                        break;
+                    case "CL":
+                        this.cpu.regCX = (this.cpu.regCX & 0xff00) | (w & 0xff);
+                        break;
+                    case "CH":
+                        this.cpu.regCX = (this.cpu.regCX & 0x00ff) | ((w << 8) & 0xff);
+                        break;
+                    case "CX":
+                        this.cpu.regCX = (w & 0xffff);
+                        break;
+                    case "DL":
+                        this.cpu.regDX = (this.cpu.regDX & 0xff00) | (w & 0xff);
+                        break;
+                    case "DH":
+                        this.cpu.regDX = (this.cpu.regDX & 0x00ff) | ((w << 8) & 0xff);
+                        break;
+                    case "DX":
+                        this.cpu.regDX = (w & 0xffff);
+                        break;
+                    case "SP":
+                        this.cpu.regSP = (w & 0xffff);
+                        break;
+                    case "BP":
+                        this.cpu.regBP = (w & 0xffff);
+                        break;
+                    case "SI":
+                        this.cpu.regSI = (w & 0xffff);
+                        break;
+                    case "DI":
+                        this.cpu.regDI = (w & 0xffff);
+                        break;
+                    case "DS":
+                        this.cpu.setDS(w);
+                        break;
+                    case "ES":
+                        this.cpu.setES(w);
+                        break;
+                    case "SS":
+                        this.cpu.setSS(w);
+                        break;
+                    case "CS":
+                        fIns = true;
+                        this.cpu.setCS(w);
+                        this.aAddrNextCode = this.newAddr(this.cpu.regIP, this.cpu.segCS.sel);
+                        break;
+                    case "IP":
+                        fIns = true;
+                        this.cpu.setIP(w);
+                        this.aAddrNextCode = this.newAddr(this.cpu.regIP, this.cpu.segCS.sel);
+                        break;
+                    /*
+                     * I used to alias "PC" to "IP", until I discovered that early (perhaps ALL) versions of
+                     * DEBUG.COM treat "PC" as an alias for the 16-bit flags register.
+                     */
+                    case "PC":
+                        this.cpu.setPS(w);
+                        break;
+                    case "C":
+                        if (w) this.cpu.setCF(); else this.cpu.clearCF();
+                        break;
+                    case "P":
+                        if (w) this.cpu.setPF(); else this.cpu.clearPF();
+                        break;
+                    case "A":
+                        if (w) this.cpu.setAF(); else this.cpu.clearAF();
+                        break;
+                    case "Z":
+                        if (w) this.cpu.setZF(); else this.cpu.clearZF();
+                        break;
+                    case "S":
+                        if (w) this.cpu.setSF(); else this.cpu.clearSF();
+                        break;
+                    case "I":
+                        if (w) this.cpu.setIF(); else this.cpu.clearIF();
+                        break;
+                    case "D":
+                        if (w) this.cpu.setDF(); else this.cpu.clearDF();
+                        break;
+                    case "V":
+                        if (w) this.cpu.setOF(); else this.cpu.clearOF();
+                        break;
+                    default:
+                        var fUnknown = true;
+                        if (this.cpu.model >= X86.MODEL_80286) {
+                            fUnknown = false;
+                            switch(sReg){
+                            case "MS":
+                                X86Help.opHelpLMSW(w);
+                                break;
+                            case "TR":
+                                this.cpu.segTSS.load(w);
+                                break;
+                            /*
+                             * TODO: Add support for GDTR (addr and limit), IDTR (addr and limit), and perhaps
+                             * even the ability to edit descriptor information associated with each segment register.
+                             */
+                            default:
+                                fUnknown = true;
+                                break;
+                            }
+                        }
+                        if (fUnknown) {
                             this.println("unknown register: " + sReg);
                             return;
+                        }
                     }
                 }
                 else {

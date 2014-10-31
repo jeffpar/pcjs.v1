@@ -671,7 +671,7 @@ X86CPU.prototype.initProcessor = function()
 {
     this.PS_SET = X86.PS.SET;
     this.OPFLAG_NOINTR8086 = X86.OPFLAG.NOINTR;
-    this.nShiftCountMask = 0xff;            // on an 8086/8088, there effectively is NO mask
+    this.nShiftCountMask = 0xff;            // on an 8086/8088, all shift counts are used as-is
 
     this.CYCLES = (this.model >= X86.MODEL_80286? X86CPU.CYCLES_80286 : X86CPU.CYCLES_8088);
 
@@ -715,7 +715,7 @@ X86CPU.prototype.initProcessor = function()
             this.OPFLAG_NOINTR8086 = 0;     // used with instructions that should *not* set NOINTR on an 80286 (eg, non-SS segment loads)
             this.aOps[0x0F] = X86OpXX.op0F;
             this.aOps[X86.OPCODE.ARPL]  = X86OpXX.opARPL;
-            this.aOps[X86.OPCODE.PUSHSP]= X86OpXX.op286PUSHSP;
+            this.aOps[X86.OPCODE.PUSHSP]= X86OpXX.opPUSHSP;
         }
     }
 };
@@ -760,6 +760,9 @@ X86CPU.prototype.reset = function()
  * which takes both an offset and a segment, or setIP(), whichever is appropriate; in unusual cases where only
  * segCS is changing (eg, undocumented 8086 opcodes), use setCS().
  *
+ * On the 80286, another "register" that mirrors segCS is nCPL: whenever CS is updated, nCPL is updated
+ * with the CS selector's access level.
+ *
  * The other segment registers (DS, SS and ES) have similar setters (for segDS, segSS and segES), but those
  * functions do not mirror any special segment:offset values in the same way that regEIP mirrors CS:IP.
  *
@@ -784,6 +787,7 @@ X86CPU.prototype.resetRegs = function()
     this.regMSW = X86.MSW.SET;
     this.addrIDT = 0; this.addrIDTLimit = 0x03FF;
     this.descIDT = {off: 0, sel: 0, acc: 0, maskPS: -1};
+    this.nIOPL = 0;                                     // this should be set before the first setPS() call
 
     /*
      * Segment registers used to be defined as separate variables (eg, regCS and regCS0 stored the
@@ -795,7 +799,7 @@ X86CPU.prototype.resetRegs = function()
     this.segSS = new X86Seg(this, "SS");
     this.segES = new X86Seg(this, "ES");
     this.segZERO = new X86Seg(this, "ZERO");
-    this.setCSIP(0, 0xFFFF);
+    this.setCSIP(0, 0xFFFF);                            // this should be called before the first setPS() call
 
     /*
      * Assorted 80286-specific registers.  The GDTR and IDTR registers are stored as the following pieces:
@@ -822,7 +826,8 @@ X86CPU.prototype.resetRegs = function()
     }
 
     /*
-     * This resets the Processor Status flags (regPS), along with all the internal "result registers".
+     * This resets the Processor Status flags (regPS), along with all the internal "result registers";
+     * we've taken care to ensure that both nCPL and nIOPL are initialized before this first setPS() call.
      */
     this.setPS(0);
 
@@ -1019,7 +1024,7 @@ X86CPU.prototype.setProtMode = function(fProt)
 X86CPU.prototype.saveProtMode = function()
 {
     if (this.addrGDT != null) {
-        return [this.regMSW, this.addrGDT, this.addrGDTLimit, this.addrIDT, this.addrIDTLimit, this.segLDT.save(), this.segTSS.save()];
+        return [this.regMSW, this.addrGDT, this.addrGDTLimit, this.addrIDT, this.addrIDTLimit, this.segLDT.save(), this.segTSS.save(), this.nIOPL];
     }
     return null;
 };
@@ -1042,6 +1047,8 @@ X86CPU.prototype.restoreProtMode = function(a)
         this.addrIDTLimit = a[4];
         this.segLDT.restore(a[5]);
         this.segTSS.restore(a[6]);
+        this.nIOPL = a[7];
+        this.nCPL = this.segCS.level;
         this.setProtMode();
     }
 };
@@ -1059,8 +1066,8 @@ X86CPU.prototype.restoreProtMode = function(a)
 X86CPU.prototype.save = function()
 {
     var state = new State(this);
-    state.set(0, [this.regAX, this.regBX, this.regCX, this.regDX, this.regSP, this.regBP, this.regSI, this.regDI]);
-    state.set(1, [this.regIP, this.segCS.save(), this.segDS.save(), this.segSS.save(), this.segES.save(), this.getPS(), this.saveProtMode()]);
+    state.set(0, [this.regAX, this.regBX, this.regCX, this.regDX, this.regSP, this.regBP, this.regSI, this.regDI, this.nIOPL]);
+    state.set(1, [this.regIP, this.segCS.save(), this.segDS.save(), this.segSS.save(), this.segES.save(), this.saveProtMode(), this.getPS()]);
     state.set(2, [this.segData.sName, this.segStack.sName, this.opFlags, this.opPrefixes, this.intFlags, this.regEA, this.regEAWrite]);
     state.set(3, [this.nBurstDivisor, this.nTotalCycles, this.getSpeed()]);
     state.set(4, this.bus.saveMemory());
@@ -1088,13 +1095,14 @@ X86CPU.prototype.restore = function(data)
     this.regBP = a[5];
     this.regSI = a[6];
     this.regDI = a[7];
+    this.nIOPL = a[8] || 0;
     a = data[1];
     this.segCS.restore(a[1]);
     this.segDS.restore(a[2]);
     this.segSS.restore(a[3]);
     this.segES.restore(a[4]);
-    this.setPS(a[5]);
-    this.restoreProtMode(a[6]);
+    this.restoreProtMode(a[5]);
+    this.setPS(a[6]);
     this.setIP(a[0]);
     a = data[2];
     this.segData = this.getSeg(a[0]);
@@ -1240,6 +1248,7 @@ X86CPU.prototype.loadIDTEntry = function(nIDT)
 X86CPU.prototype.setCS = function(sel)
 {
     this.regEIP = this.segCS.load(sel) + this.regIP;
+    this.nCPL = this.segCS.level;
     this.opFlags |= this.OPFLAG_NOINTR8086;
     if (PREFETCH) this.flushPrefetch(this.regEIP);
 };
@@ -1308,9 +1317,8 @@ X86CPU.prototype.setIP = function(off)
  * NOTE: Unlike setIP(), which is often passed a computation, the offsets passed to setCSIP() are strictly
  * 16-bit values, so there's never any need to mask them with 0xffff (although it doesn't hurt to assert that).
  *
- * As an aside, this function is called setCSIP() instead of setCSIP() to reflect the order of the parameters
- * (IP value first, CS value second), which matches the order that CS:IP values are normally stored in memory,
- * allowing us to make calls like this:
+ * And even though this function is called setCSIP(), please note the order of the parameters is IP,CS,
+ * which matches the order that CS:IP values are normally stored in memory, allowing us to make calls like:
  *
  *      this.setCSIP(this.popWord(), this.popWord());
  *
@@ -1322,6 +1330,7 @@ X86CPU.prototype.setCSIP = function(off, sel)
 {
     Component.assert((off & 0xffff) == off);
     this.regEIP = this.segCS.load(sel) + (this.regIP = off);
+    this.nCPL = this.segCS.level;
     if (PREFETCH) this.flushPrefetch(this.regEIP);
 };
 
@@ -1623,14 +1632,30 @@ X86CPU.prototype.getPS = function()
  */
 X86CPU.prototype.setPS = function(regPS)
 {
-    this.resultSize = X86.RESULT.SIZE_BYTE;         // NOTE: We could have chosen SIZE_WORD, too; the choice here seems irrelevant
+    this.resultSize = X86.RESULT.SIZE_BYTE;         // NOTE: We could have chosen SIZE_WORD, too; it's irrelevant
     this.resultValue = this.resultParitySign = this.resultAuxOverflow = 0;
+
     if (regPS & X86.PS.CF) this.setCF();
     if (!(regPS & X86.PS.PF)) this.resultParitySign |= 0x1;
     if (regPS & X86.PS.AF) this.resultAuxOverflow |= X86.RESULT.AUXOVF_AF;
     if (!(regPS & X86.PS.ZF)) this.clearZF();
     if (regPS & X86.PS.SF) this.setSF();
     if (regPS & X86.PS.OF) this.setOF();
+
+    /*
+     * Since PS.IOPL and PS.IF are part of PS.DIRECT, we need to take care of any 80286-specific checks before
+     * setting the PS.DIRECT bits.  Specifically, PS.IOPL is unchanged if CPL > 0, and PS.IF is unchanged if CPL > IOPL.
+     */
+    if (!this.nCPL) {
+        this.nIOPL = (regPS & X86.PS.IOPL.MASK) >> X86.PS.IOPL.SHIFT;           // IOPL allowed to change
+        if (this.nIOPL && !(this.regMSW & X86.MSW.PE)) this.nIOPL = 0;          // effective IOPL remains 0
+    } else {
+        regPS = (regPS & ~X86.PS.IOPL.MASK) | (this.regPS & X86.PS.IOPL.MASK);  // IOPL not allowed to change
+    }
+    if (this.nCPL > this.nIOPL) {
+        regPS = (regPS & ~X86.PS.IF) | (this.regPS & X86.PS.IF);                // IF not allowed to change
+    }
+
     this.regPS = (this.regPS & ~X86.PS.DIRECT) | (regPS & X86.PS.DIRECT) | this.PS_SET;
 
     /*

@@ -427,6 +427,31 @@ var X86Help = {
          */
     },
     /**
+     * opHelpLMSW(w)
+     *
+     * Factored out of x86op0f.js, since both opLMSW and opLOADALL are capable of loading a new MSW.
+     * The caller is responsible for assessing the appropriate cycle cost.
+     *
+     * @this {X86CPU}
+     * @param {number} w
+     */
+    opHelpLMSW: function(w) {
+        /*
+         * This instruction is always allowed to set MSW.PE, but it cannot clear MSW.PE once set;
+         * therefore, we always OR the previous value of MSW.PE into the new value before loading.
+         */
+        w |= (this.regMSW & X86.MSW.PE);
+        this.regMSW = (this.regMSW & X86.MSW.SET) | (w & ~X86.MSW.SET);
+        /*
+         * Since the 80286 cannot return to real-mode via this instruction, the only transition we
+         * must worry about is to protected-mode.  And don't worry, there's no harm calling setProtMode()
+         * if the CPU is already in protected-mode (we could certainly optimize the call out in that
+         * case, but this instruction isn't used frequently enough to warrant it).
+         */
+        if (this.regMSW & X86.MSW.PE) this.setProtMode(true);
+
+    },
+    /**
      * @this {X86CPU}
      */
     opHelpDIVOverflow: function() {

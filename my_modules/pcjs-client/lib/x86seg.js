@@ -75,6 +75,7 @@ X86Seg.loadReal = function loadReal(sel, fSuppress)
 {
     this.sel = sel;
     this.limit = 0xffff;        // TODO: Consider NOT setting the limit field in real-mode (unless it's required for, say, LOADALL support?)
+    this.level = 0;
     return this.base = sel << 4;
 };
 
@@ -110,51 +111,64 @@ X86Seg.loadProt = function loadProt(sel, fSuppress)
         addrDT = this.cpu.segLDT.base;
         addrDTLimit = this.cpu.segLDT.limit;
     }
-    var offDT = addrDT + (sel & X86.SEL.MASK);
-    if (offDT + 7 <= addrDTLimit) {
-        this.checkRead = X86Seg.checkReadProtEnabled;
-        this.checkWrite = X86Seg.checkWriteProtEnabled;
-
+    var offDesc = addrDT + (sel & X86.SEL.MASK);
+    if (offDesc + 7 <= addrDTLimit) {
         /*
          * TODO: This is only the first of many steps toward accurately counting cycles in protected mode;
          * I simply noted that "POP segreg" takes 5 cycles in real mode and 20 in protected mode, so I'm
          * starting with a 15-cycle difference.  Obviously the difference will be much greater when the load fails.
          */
         this.cpu.nStepCycles -= 15;
+        return X86Seg.loadDesc.call(this, sel, offDesc, true);
+    }
+    return -1;
+};
 
-        /*
-         * TODO: Use (direct) Bus memory interfaces instead of (indirect) CPU memory interfaces here?
-         */
-        var limit = this.cpu.getWord(offDT + X86.DESC.LIMIT.OFFSET);
-        var acc = this.cpu.getWord(offDT + X86.DESC.ACC.OFFSET);
-        var base = this.cpu.getWord(offDT + X86.DESC.BASE.OFFSET) | ((acc & X86.DESC.ACC.BASE1623) << 16);
+/**
+ * loadDesc(sel, offDesc, fProt)
+ *
+ * @this {X86Seg}
+ * @param {number} sel containing a selector
+ * @param {number} offDesc is the physical address of a descriptor
+ * @param {boolean} [fProt] is true if protected-mode, false if real-mode, undefined if TBD
+ * @return {number} base address of selected segment, or -1 if error
+ */
+X86Seg.loadDesc = function(sel, offDesc, fProt)
+{
+    var limit = this.cpu.getWord(offDesc + X86.DESC.LIMIT.OFFSET);
+    var acc = this.cpu.getWord(offDesc + X86.DESC.ACC.OFFSET);
+    var base = this.cpu.getWord(offDesc + X86.DESC.BASE.OFFSET) | ((acc & X86.DESC.ACC.BASE1623) << 16);
 
-        Component.assert(this.cpu.getWord(offDT + 0x06) == 0);
+    Component.assert(this.cpu.getWord(offDesc + 0x06) == 0);
 
-        /*
-         * For LSL (which uses fSuppress), we must support X86.DESC.ACC.TYPE.SEG as well as TSS and LDT.
-         */
-        var accType = (acc & X86.DESC.ACC.TYPE.MASK);
-        if (accType & X86.DESC.ACC.TYPE.SEG) {
+    fProt = this.setProt(fProt);
+
+    /*
+     * For LSL (which uses fSuppress), we must support X86.DESC.ACC.TYPE.SEG as well as TSS and LDT.
+     */
+    var accType = (acc & X86.DESC.ACC.TYPE.MASK);
+
+    if (accType & X86.DESC.ACC.TYPE.SEG) {
+        if (fProt) {
             if ((accType & X86.DESC.ACC.TYPE.CODE_READABLE) == X86.DESC.ACC.TYPE.CODE) {
                 this.checkWrite = X86Seg.checkReadProtDisabled;
             }
             if ((accType & X86.DESC.ACC.TYPE.CODE) || !(accType & X86.DESC.ACC.TYPE.WRITEABLE)) {
                 this.checkWrite = X86Seg.checkWriteProtDisabled;
             }
-            this.sel = sel;
-            this.limit = limit;
-            this.acc = acc;
-            this.level = (acc & X86.DESC.ACC.LEVEL.MASK) >> X86.DESC.ACC.LEVEL.SHIFT;
-            return this.base = base;
         }
-        else if (accType && accType <= X86.DESC.ACC.TYPE.TSS_BUSY) {
-            this.sel = sel;
-            this.limit = limit;
-            this.acc = acc;
-            this.level = (acc & X86.DESC.ACC.LEVEL.MASK) >> X86.DESC.ACC.LEVEL.SHIFT;
-            return this.base = base;
-        }
+        this.sel = sel;
+        this.limit = limit;
+        this.acc = acc;
+        this.level = (acc & X86.DESC.ACC.LEVEL.MASK) >> X86.DESC.ACC.LEVEL.SHIFT;
+        return this.base = base;
+    }
+    else if (accType && accType <= X86.DESC.ACC.TYPE.TSS_BUSY) {
+        this.sel = sel;
+        this.limit = limit;
+        this.acc = acc;
+        this.level = (acc & X86.DESC.ACC.LEVEL.MASK) >> X86.DESC.ACC.LEVEL.SHIFT;
+        return this.base = base;
     }
     return -1;
 };
@@ -321,8 +335,12 @@ X86Seg.prototype.setBase = function(addr)
 /**
  * setProt(fProt)
  *
+ * This must be used to ensure that the segment register's state (ie, load and check methods) matches
+ * the current operating mode (real or protected).
+ *
  * @this {X86Seg}
  * @param {boolean} [fProt]
+ * @return {boolean}
  */
 X86Seg.prototype.setProt = function(fProt)
 {
@@ -338,6 +356,7 @@ X86Seg.prototype.setProt = function(fProt)
         this.checkRead = X86Seg.checkReadReal;
         this.checkWrite = X86Seg.checkWriteReal;
     }
+    return fProt;
 };
 
 if (typeof module !== 'undefined') module.exports = X86Seg;

@@ -57,7 +57,10 @@ var X86 = {
         IF:     0x0200,     // bit 9: Interrupt flag
         DF:     0x0400,     // bit 10: Direction flag
         OF:     0x0800,     // bit 11: Overflow flag
-        IOPL:   0x3000,     //  12-13: I/O Privilege Level, always set on 8086/80186, clear on 80286
+        IOPL: {
+         MASK:  0x3000,     //  12-13: I/O Privilege Level (always set on 8086/80186, clear on 80286)
+         SHIFT: 12
+        },
         NT:     0x4000,     // bit 14: Nested Task flag, always set on 8086/80186, clear on 80286
         BIT15:  0x8000      // bit 15: reserved, always set on 8086/80186, clear otherwise
     },
@@ -200,7 +203,7 @@ var X86 = {
         NOINTR:     0x0004,     // indicates a segreg has been set, or a prefix, or an STI (delay INTR acknowledgement)
         SEG:        0x0010,
         LOCK:       0x0020,
-        REPZ:       0x0040,     // repeat while Z (NOTE: this value MUST match PS_ZF; see opCMPSb/opCMPSw/opSCASb/opSCASw)
+        REPZ:       0x0040,     // repeat while Z (NOTE: this value MUST match PS.ZF; see opCMPSb/opCMPSw/opSCASb/opSCASw)
         REPNZ:      0x0080,     // repeat while NZ
         REPEAT:     0x0100,     // this indicates that an instruction is being repeated (ie, some iteration AFTER the first)
         PUSHSP:     0x0200      // the SP register is potentially being referenced by a PUSH SP opcode, adjustment may be required
@@ -279,10 +282,13 @@ X86.PS.DIRECT =     (X86.PS.TF | X86.PS.IF | X86.PS.DF);
 X86.PS.INDIRECT =   (X86.PS.CF | X86.PS.PF | X86.PS.AF | X86.PS.ZF | X86.PS.SF | X86.PS.OF);
 
 /*
- * NOTE: This is the default for 8086/8088; other processors must tweak these bits before
- * calling setPS().  TODO: Verify that PS_1 was always set on reset, even on the 8086/8088.
+ * NOTE: These are the default "always set" PS bits for the 8086/8088; other processors must
+ * adjust these bits accordingly.  The final adjusted value is then stored in the X86CPU object
+ * as "this.PS_SET"; setPS() must use that value, NOT this one.
+ *
+ * TODO: Verify that PS.BIT1 was always set on reset, even on the 8086/8088.
  */
-X86.PS.SET =        (X86.PS.BIT1 | X86.PS.IOPL | X86.PS.NT | X86.PS.BIT15);
+X86.PS.SET =        (X86.PS.BIT1 | X86.PS.IOPL.MASK | X86.PS.NT | X86.PS.BIT15);
 
 /*
  * getPS() brings all the direct and indirect flags together, and setPS() performs the
@@ -295,7 +301,7 @@ X86.PS.SET =        (X86.PS.BIT1 | X86.PS.IOPL | X86.PS.NT | X86.PS.BIT15);
  *      this.resultParitySign
  *      this.resultAuxOverflow
  *
- * PS_SAHF is a subset of the arithmetic flags, and refers only to those flags that the
+ * PS.SAHF is a subset of the arithmetic flags, and refers only to those flags that the
  * SAHF and LAHF "8080 legacy" opcodes affect.
  */
 X86.PS.SAHF =       (X86.PS.CF | X86.PS.PF | X86.PS.AF | X86.PS.ZF | X86.PS.SF);

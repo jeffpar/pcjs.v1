@@ -32,8 +32,4 @@
 
 "use strict";
 
-/*
- * Unless we declare "module", even code like "if (typeof module === 'undefined') ..." is disallowed by the compiler.
- */
-var module;
 var webkitAudioContext;
