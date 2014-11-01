@@ -21,4 +21,5 @@
 		<item ref="/sites/www.osiweb.org/programs/basic/OsiBas/spacewar.bas">SPACEWAR</item>
 	</control>
 	<control type="button" class="input" binding="loadSerial">Load File</control>
+	<control type="file" class="input" label="Upload File:" binding="uploadSerial"/>
 </serial>

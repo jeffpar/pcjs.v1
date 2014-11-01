@@ -285,6 +285,9 @@
 				<xsl:when test="@type = 'heading'">
 					<div><xsl:value-of select="."/></div>
 				</xsl:when>
+				<xsl:when test="@type = 'file'">
+					<input class="{$APPCLASS}-{@class}" type="file" data-value="{$type},{$binding}"/>
+				</xsl:when>
 				<xsl:when test="@type = 'separator'">
 					<hr/>
 				</xsl:when>

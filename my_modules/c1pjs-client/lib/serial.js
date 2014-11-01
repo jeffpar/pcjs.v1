@@ -124,6 +124,19 @@ C1PSerialPort.prototype.setBinding = function(c, t, s, e)
             };
         }(this);
         return true;
+    case "uploadSerial":
+        this.bindings[s] = e;
+        var serial = this;
+        e.addEventListener('change', function () {
+            var file = e.files[0];
+            var reader = new FileReader();
+            reader.onload = function () {
+                // serial.println("uploading " + file.name + "...");
+                serial.loadFile(file.name, reader.result, 0);
+            };
+            reader.readAsText(file);
+        });
+        return true;
     default:
         break;
     }
