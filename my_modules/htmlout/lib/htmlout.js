@@ -1747,12 +1747,20 @@ HTMLOut.prototype.processMachines = function(aMachines, done)
         HTMLOut.logDebug('HTMLOut.processMachines(' + JSON.stringify(infoMachine) + ')');
 
         var sClass = infoMachine['class'];                      // aka the machine class
+
         var sVersion = infoMachine['version'];
         if (sVersion === undefined) sVersion = "*";             // default to newest version
+
         var fDebugger = infoMachine['debugger'];
         if (fDebugger === undefined) fDebugger = false;         // default to no debugger
+
         var fCompiled = infoMachine['compiled'];
         if (fCompiled === undefined) fCompiled = !this.fDebug;
+        if (sVersion == "*") {
+            sVersion = pkg.version;
+        } else {
+            fCompiled = true;                                   // use of a specific version requires using the compiled version
+        }
         var fNoDebug = !fCompiled && net.hasParm(net.GORT_COMMAND, net.GORT_NODEBUG, this.req);
 
         var sScriptEmbed = "";
@@ -1764,8 +1772,8 @@ HTMLOut.prototype.processMachines = function(aMachines, done)
         if (fCompiled) {
             var sScriptFolder = sClass + "js";                  // aka the app class
             var sScriptFile = sClass + (fDebugger? "-dbg" : "") + ".js";
-            asFiles.push("/versions/" + sScriptFolder + "/" + pkg.version + "/components.css");
-            asFiles.push("/versions/" + sScriptFolder + "/" + pkg.version + "/" + sScriptFile);
+            asFiles.push("/versions/" + sScriptFolder + "/" + sVersion + "/components.css");
+            asFiles.push("/versions/" + sScriptFolder + "/" + sVersion + "/" + sScriptFile);
             this.addFilesToHTML(asFiles, sScriptEmbed);
         }
         else {

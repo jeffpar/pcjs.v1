@@ -1124,7 +1124,7 @@ Computer.prototype.onReset = function()
          * I used to bypass the prompt if this.resume == Computer.RESUME_AUTO, setting fSave to true automatically,
          * but that gives the user no means of resetting a resumable machine that contains errors in its resume state.
          */
-        var fSave = (/* this.resume == Computer.RESUME_AUTO || */ !web.confirmUser("Click OK to save the " + Computer.sAppName + " machine state.\n\nWARNING: If you CANCEL, all disk changes will be discarded."));
+        var fSave = (/* this.resume == Computer.RESUME_AUTO || */ web.confirmUser("Click OK to save changes to this " + Computer.sAppName + " machine.\n\nWARNING: If you CANCEL, all disk changes will be discarded."));
         this.powerOff(fSave, true);
         /*
          * Forcing the page to reload is an expedient option, but ugly. It's preferable to call powerOn()

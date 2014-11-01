@@ -202,7 +202,7 @@ if (DEBUGGER) {
         '?':     "help",
         'a [#]': "assemble",
         'b [#]': "breakpoint",
-        'c':     "clear window",
+        'c':     "clear output",
         'd [#]': "dump memory",
         'e [#]': "edit memory",
         'f':     "frequencies",
@@ -216,7 +216,9 @@ if (DEBUGGER) {
         'r':     "dump/edit registers",
         't [#]': "step instruction(s)",
         'u [#]': "unassemble",
-        'x':     "execution options"
+        'x':     "execution options",
+        'reset': "reset computer",
+        'ver':   "display version"
     };
 
     /*
@@ -4188,7 +4190,7 @@ if (DEBUGGER) {
                             fUnknown = false;
                             switch(sReg){
                             case "MS":
-                                X86Help.opHelpLMSW(w);
+                                X86Help.opHelpLMSW.call(this.cpu, w);
                                 break;
                             case "TR":
                                 this.cpu.segTSS.load(w);
@@ -4529,6 +4531,9 @@ if (DEBUGGER) {
                     switch (sCmd) {
                     case "reset":
                         if (this.cmp) this.cmp.reset();
+                        return true;
+                    case "ver":
+                        this.println((APPNAME || "PCjs") + " version " + APPVERSION + " (" + (COMPILED? "release" : (DEBUG? "debug" : "nodebug")) + (PREFETCH? ",prefetch" : "") + (TYPEDARRAYS? ",typedarrays" : (FATARRAYS? ",fatarrays" : "")) + ")");
                         return true;
                     default:
                         ch0 = sCmd.charAt(0);

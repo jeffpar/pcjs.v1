@@ -414,7 +414,13 @@ Disk.prototype.powerDown = function(fSave, fShutdown)
         if (fShutdown) {
             this.disconnectRemoteDisk();
         }
-        if (!nErrorCode) this.controller.notice(this.sDiskName + " saved");
+        /*
+         * I only report that changes to the disk have been "saved" if fSave is true, to avoid confusing
+         * users who might not understand the difference between discarding local changes (which should restore
+         * all diskettes to their original state) and discarding remote changes (which could leave the remote disk
+         * in a bad state).
+         */
+        if (!nErrorCode && fSave) this.controller.notice(this.sDiskName + " saved");
     }
     return true;
 };

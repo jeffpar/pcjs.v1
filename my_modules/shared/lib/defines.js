@@ -40,12 +40,12 @@ var APPNAME = "";               // this @define is overridden by the Closure Com
 /**
  * @define {string}
  */
-var APPVERSION = "1.0.0";       // this @define is overridden by the Closure Compiler with the version in package.json
+var APPVERSION = "1.x.x";       // this @define is overridden by the Closure Compiler with the version in package.json
 
 /**
  * @define {string}
  */
-var SITEHOST = "pcjs:8088";     // this @define is overridden by the Closure Compiler with "www.pcjs.org"
+var SITEHOST = "localhost:8088";// this @define is overridden by the Closure Compiler with "www.pcjs.org"
 
 /**
  * @define {boolean}

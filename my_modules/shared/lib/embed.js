@@ -301,7 +301,7 @@ function embedMachine(sName, sVersion, idElement, sXMLFile, sXSLFile, sStateFile
             /*
              * Our MarkOut module (in convertMDMachineLinks()) creates machine containers that look like:
              *
-             *      <div id="' + sMachineID + '" class="machine-placeholder"><p>Embedded PC</p><p class="machine-warning"></p></div>
+             *      <div id="' + sMachineID + '" class="machine-placeholder"><p>Embedded PC</p><p class="machine-warning">...</p></div>
              *
              * with the "machine-warning" paragraph pre-populated with a warning message that the user will
              * see if nothing at all happens.  But hopefully, in the normal case (and especially the error case),
@@ -321,7 +321,7 @@ function embedMachine(sName, sVersion, idElement, sXMLFile, sXSLFile, sStateFile
         if (eMachine) {
             var sAppClass = sName.toLowerCase();        // eg, "pcjs" or "c1pjs"
             if (!sXSLFile) {
-                if (DEBUG && sVersion == "1.0.0") {
+                if (DEBUG && sVersion == "1.x.x") {
                     sXSLFile = "/my_modules/" + sAppClass + "-client/templates/components.xsl";
                 } else {
                     sXSLFile = "/versions/" + sAppClass + "/" + sVersion + "/components.xsl";
