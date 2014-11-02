@@ -36,6 +36,7 @@ if (typeof module !== 'undefined') {
     var str         = require("../../shared/lib/strlib");
     var usr         = require("../../shared/lib/usrlib");
     var Component   = require("../../shared/lib/component");
+    var Debugger    = require("./debugger");
 }
 
 /**

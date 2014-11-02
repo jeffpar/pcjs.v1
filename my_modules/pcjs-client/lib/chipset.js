@@ -38,6 +38,7 @@ if (typeof module !== 'undefined') {
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
     var State       = require("./state");
+    var Debugger    = require("./debugger");
 }
 
 /**

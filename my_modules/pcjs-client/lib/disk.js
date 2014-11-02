@@ -164,6 +164,7 @@ if (typeof module !== 'undefined') {
     var DiskAPI     = require("../../shared/lib/diskapi");
     var DumpAPI     = require("../../shared/lib/dumpapi");
     var Component   = require("../../shared/lib/component");
+    var Debugger    = require("./debugger");
 }
 
 /**

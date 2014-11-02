@@ -102,6 +102,7 @@ if (typeof module !== 'undefined') {
     var ChipSet     = require("./chipset");
     var Keyboard    = require("./keyboard");
     var State       = require("./state");
+    var Debugger    = require("./debugger");
 }
 
 /**

@@ -41,6 +41,7 @@ if (typeof module !== 'undefined') {
     var Disk        = require("./disk");
     var Computer    = require("./computer");
     var State       = require("./state");
+    var Debugger    = require("./debugger");
 }
 
 /*

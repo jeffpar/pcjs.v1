@@ -67,7 +67,7 @@ function X86Seg(cpu, sName, fProt)
 /**
  * loadReal(sel, fSuppress)
  *
- * This is the default real-mode load() function.
+ * The default segment load() function for real-mode.
  *
  * @this {X86Seg}
  * @param {number} sel
@@ -77,7 +77,7 @@ function X86Seg(cpu, sName, fProt)
 X86Seg.loadReal = function loadReal(sel, fSuppress)
 {
     this.sel = sel;
-    this.limit = 0xffff;        // TODO: Consider NOT setting the limit field in real-mode (unless it's required for, say, LOADALL support?)
+    this.limit = 0xffff;
     this.cpl = this.dpl = 0;
     return this.base = sel << 4;
 };
@@ -85,8 +85,8 @@ X86Seg.loadReal = function loadReal(sel, fSuppress)
 /**
  * loadProt(sel, fSuppress)
  *
- * This replaces the segment's default load() function whenever the segment is notified (eg, by the CPU's setProtMode()
- * function) the processor is now in protected-mode.
+ * This replaces the segment's default load() function whenever the segment is notified via updateAccess() by the
+ * CPU's setProtMode() that the processor is now in protected-mode.
  *
  * Segments in protected-mode are referenced by selectors, which are indexes into descriptor tables (GDT, LDT, IDT) whose
  * descriptors are 4-word (8-byte) entries:

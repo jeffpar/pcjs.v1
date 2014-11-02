@@ -46,6 +46,7 @@ if (typeof module !== 'undefined') {
     var X86Mods     = require("./x86mods");
     var X86OpXX     = require("./x86opxx");
     var X86Op0F     = require("./x86op0f");
+    var Debugger    = require("./debugger");
 }
 
 /**

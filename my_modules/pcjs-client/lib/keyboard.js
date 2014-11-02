@@ -39,6 +39,7 @@ if (typeof module !== 'undefined') {
     var ChipSet     = require("./chipset");
     var State       = require("./state");
     var CPU         = require("./cpu");
+    var Debugger    = require("./debugger");
 }
 
 /**

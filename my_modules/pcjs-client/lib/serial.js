@@ -36,6 +36,7 @@ if (typeof module !== 'undefined') {
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
     var ChipSet     = require("./chipset");
+    var Debugger    = require("./debugger");
     var State       = require("./state");
 }
 

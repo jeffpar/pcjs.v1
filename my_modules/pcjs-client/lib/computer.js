@@ -74,6 +74,7 @@ if (typeof module !== 'undefined') {
     var Component   = require("../../shared/lib/component");
     var Bus         = require("./bus");
     var State       = require("./state");
+    var Debugger    = require("./debugger");
 }
 
 /**
