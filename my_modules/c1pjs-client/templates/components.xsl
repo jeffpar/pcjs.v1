@@ -9,7 +9,7 @@
 
 	<xsl:variable name="MACHINECLASS">c1p</xsl:variable>
 	<xsl:variable name="APPCLASS">c1pjs</xsl:variable>
-	<xsl:variable name="APPVERSION">1.0.0</xsl:variable>
+	<xsl:variable name="APPVERSION">1.x.x</xsl:variable>
 	<xsl:variable name="SITEHOST">www.pcjs.org</xsl:variable>
 
 	<xsl:template name="componentStyles">

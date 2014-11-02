@@ -57,8 +57,8 @@ function C1PCPU(parmsCPU)
     Component.call(this, "C1PCPU", parmsCPU);
 
     this.clearRegs();
-    this.fPower = false;
-    this.fRunning = false;
+    this.aFlags.fPowered = false;
+    this.aFlags.fRunning = false;
     this.fAutoStart = parmsCPU["autoStart"];
 
     /*
@@ -482,7 +482,7 @@ Component.subclass(Component, C1PCPU);
  */
 C1PCPU.prototype.reset = function(fPowerOn)
 {
-    if (this.fRunning)
+    if (this.aFlags.fRunning)
         this.halt();
     this.clearRegs();
     this.regPC = this.getWord(this.VECTOR_RESET);
@@ -516,7 +516,7 @@ C1PCPU.prototype.setBinding = function(c, t, s, e)
             this.bindings[s] = e;
             e.onclick = function(cpu) {
                 return function() {
-                    if (!cpu.fRunning)
+                    if (!cpu.aFlags.fRunning)
                         cpu.run();
                     else
                         cpu.halt();
@@ -579,7 +579,7 @@ C1PCPU.prototype.setBuffer = function(abMemory, start, end)
  */
 C1PCPU.prototype.setPower = function(fOn, cmp)
 {
-    if (fOn && !this.fPower) {
+    if (fOn && !this.aFlags.fPowered) {
         this.cmp = cmp;
         /*
          * Attach the Debugger, if any, to the CPU, so that the CPU can periodically
@@ -607,7 +607,7 @@ C1PCPU.prototype.setPower = function(fOn, cmp)
                 };
             }(video);
         }
-        this.fPower = true;
+        this.aFlags.fPowered = true;
         this.reset(true);
         this.update();
     }
@@ -880,7 +880,7 @@ C1PCPU.prototype.displayStatus = function()
  */
 C1PCPU.prototype.isRunning = function()
 {
-    return this.fRunning;
+    return this.aFlags.fRunning;
 };
 
 /**
@@ -1051,7 +1051,7 @@ C1PCPU.prototype.run = function()
         if (this.cmp) this.cmp.stop(this.msRunStart, this.nRunCycles);
         return;
     }
-    if (!this.fRunning) {
+    if (!this.aFlags.fRunning) {
         /*
          *  setSpeed() without a speed parameter leaves the selected speed in place, but also resets the
          *  cycle counter and timestamp for the current series of run() calls, calculates the maximum number
@@ -1060,7 +1060,7 @@ C1PCPU.prototype.run = function()
          */
         this.setSpeed();
         if (this.cmp) this.cmp.start();
-        this.fRunning = true;
+        this.aFlags.fRunning = true;
         if (this.bindings["run"]) this.bindings["run"].innerHTML = "Halt";
         this.setFocus();
     }
@@ -1107,7 +1107,7 @@ C1PCPU.prototype.run = function()
                 this.nCyclesNextYield += this.nCyclesPerYield;
                 break;
             }
-        } while (this.fRunning);
+        } while (this.aFlags.fRunning);
     }
     catch (e) {
         this.halt();
@@ -1268,8 +1268,8 @@ C1PCPU.prototype.halt = function()
     this.isBusy(true);
     this.nBurstCycles -= this.nStepCycles;
     this.nStepCycles = 0;
-    if (this.fRunning) {
-        this.fRunning = false;
+    if (this.aFlags.fRunning) {
+        this.aFlags.fRunning = false;
         if (this.bindings["run"]) this.bindings["run"].innerHTML = "Run";
     }
 };
@@ -1303,7 +1303,7 @@ C1PCPU.prototype.update = function()
  */
 C1PCPU.prototype.getCycles = function()
 {
-    return (this.fRunning? this.nRunCycles + this.nBurstCycles - this.nStepCycles : 0);
+    return (this.aFlags.fRunning? this.nRunCycles + this.nBurstCycles - this.nStepCycles : 0);
 };
 
 /**

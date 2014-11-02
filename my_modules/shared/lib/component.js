@@ -46,7 +46,7 @@
  * It's not that I'm trying to write "portable JavaScript", but some of this code was ported from C code
  * I'd written about 14 years earlier, and portability is good, so I see no reason to rewrite code to make
  * it less portable.
- * 
+ *
  * UPDATE: I've since switched to JSHint, which seems to have more reasonable defaults.
  */
 
@@ -62,7 +62,7 @@ if (typeof module !== 'undefined') {
 
 /**
  * Component(type, parms, constructor)
- * 
+ *
  * @constructor
  * @param {string} type
  * @param {Object} [parms]
@@ -83,7 +83,7 @@ if (typeof module !== 'undefined') {
 function Component(type, parms, constructor)
 {
     this.type = type;
-    
+
     if (!parms) {
         parms = {'id': "", 'name': ""};
     }
@@ -110,19 +110,23 @@ function Component(type, parms, constructor)
     this[type] = constructor;
 
     /*
-     * TODO: Decide how to reintegrate this code into the components that still want it.... 
+     * TODO: Decide how to reintegrate this code into the components that still want it....
      *
     if (this.initStep) this.initStep(parms);
      */
-    
+    this.aFlags = {
+        fReady: false,
+        fBusy: false,
+        fBusyCancel: false,
+        fPowered: false,
+        fError: false
+    };
+
     this.fnReady = null;
-    this.fReady = false;
-    this.fBusy = this.fBusyCancel = false;
-    this.fPowered = false;
     this.clearError();
     this.bindings = {};
     this.dbg = null;                    // by default, no connection to a Debugger
-    
+
     this.getMachineNum();               // once again, make the function appear used
 
     Component.add(this);
@@ -139,10 +143,10 @@ Component.parmsURL = web.getURLParameters();
 
 /**
  * Component.inherit(p)
- * 
+ *
  * Returns a newly created object that inherits properties from the prototype object p.
  * It uses the ECMAScript 5 function Object.create() if it is defined, and otherwise falls back to an older technique.
- * 
+ *
  * See: Flanagan, David (2011-04-18). JavaScript: The Definitive Guide: The Definitive Guide (Kindle Locations 9854-9903). OReilly Media - A. Kindle Edition (Example 6-1)
  *
  * @param {Object} p
@@ -167,10 +171,10 @@ Component.inherit = function(p)
 
 /**
  * Component.extend(o, p)
- * 
+ *
  * Copies the enumerable properties of p to o and returns o.
  * If o and p have a property by the same name, o's property is overwritten.
- * 
+ *
  * See: Flanagan, David (2011-04-18). JavaScript: The Definitive Guide: The Definitive Guide (Kindle Locations 9854-9903). OReilly Media - A. Kindle Edition (Example 6-2)
  *
  * @param {Object} o
@@ -221,7 +225,7 @@ Component.all = [];
 
 /**
  * Component.add(component)
- * 
+ *
  * @param {Component} component
  */
 Component.add = function(component)
@@ -236,7 +240,7 @@ Component.add = function(component)
 
 /**
  * Component.log(s, type)
- * 
+ *
  * For diagnostic output only.
  *
  * @param {string} [s] is the message text
@@ -258,7 +262,7 @@ Component.log = function(s, type)
 
 /**
  * Component.assert(f, s)
- * 
+ *
  * Used to verify conditions that must be true (for DEBUG builds only; compiled builds should automatically have all
  * references to Component.assert() removed).
  *
@@ -281,9 +285,9 @@ Component.assert = function(f, s)
 
 /**
  * Component.println(s, type, id)
- * 
+ *
  * For non-diagnostic messages, which components may override to control the destination/appearance of their output.
- * 
+ *
  * Components that inherit from this class should use the instance method, this.println(), rather than Component.println(),
  * because if a Control Panel is loaded, it will override only the instance method, not the class method (overriding the class
  * method would improperly affect any other machines loaded on the same page).
@@ -301,7 +305,7 @@ Component.println = function(s, type, id)
 
 /**
  * Component.notice(s, fPrintOnly, id)
- * 
+ *
  * notice() is like println() but implies a need for user notification, so we alert() as well.
  *
  * @param {string} s is the message text
@@ -318,7 +322,7 @@ Component.notice = function(s, fPrintOnly, id)
 
 /**
  * Component.warning(s)
- * 
+ *
  * @param {string} s describes the warning
  */
 Component.warning = function(s)
@@ -331,7 +335,7 @@ Component.warning = function(s)
 
 /**
  * Component.error(s)
- * 
+ *
  * @param {string} s describes the error; an alert() is displayed as well
  */
 Component.error = function(s)
@@ -344,7 +348,7 @@ Component.error = function(s)
 
 /**
  * Component.getComponents(idRelated)
- * 
+ *
  * We could store components as properties of an 'all' object, using the component's ID,
  * and change this linear lookup into a property lookup, but some components may have no ID.
  *
@@ -357,7 +361,7 @@ Component.getComponents = function(idRelated)
     var aComponents = [];
     /*
      * getComponentByID(id, idRelated)
-     * 
+     *
      * If idRelated is provided, we check it for a machine prefix, and use any
      * existing prefix to constrain matches to IDs with the same prefix, in order to
      * avoid matching components belonging to other machines.
@@ -379,7 +383,7 @@ Component.getComponents = function(idRelated)
 
 /**
  * Component.getComponentByID(id, idRelated)
- * 
+ *
  * We could store components as properties of an 'all' object, using the component's ID,
  * and change this linear lookup into a property lookup, but some components may have no ID.
  *
@@ -411,7 +415,7 @@ Component.getComponentByID = function(id, idRelated)
 
 /**
  * Component.getComponentByType(sType, idRelated, componentPrev)
- * 
+ *
  * @param {string} sType of the desired component
  * @param {string} [idRelated] of related component
  * @param {Component} [componentPrev] of previously returned component, if any
@@ -449,7 +453,7 @@ Component.getComponentByType = function(sType, idRelated, componentPrev)
 
 /**
  * Component.getComponentParms(element)
- * 
+ *
  * @param {Object} element from the DOM
  */
 Component.getComponentParms = function(element)
@@ -476,7 +480,7 @@ Component.getComponentParms = function(element)
 
 /**
  * Component.bindExternalControl(component, sControl, sBinding, sType)
- * 
+ *
  * @param {Component} component
  * @param {string} sControl
  * @param {string} sBinding
@@ -498,7 +502,7 @@ Component.bindExternalControl = function(component, sControl, sBinding, sType)
 
 /**
  * Component.bindComponentControls(component, element, sAppClass)
- * 
+ *
  * @param {Component} component
  * @param {Object} element from the DOM
  * @param {string} sAppClass
@@ -544,9 +548,9 @@ Component.bindComponentControls = function(component, element, sAppClass)
 
 /**
  * Component.getElementsByClass(element, sClass, sObjClass)
- * 
+ *
  * This is a cross-browser helper function, since not all browser's support getElementsByClassName()
- * 
+ *
  * TODO: This should probably be moved into weblib.js at some point, along with the control binding functions above,
  * to keep all the browser-related code together.
  *
@@ -583,7 +587,7 @@ Component.prototype = {
     constructor: Component,
     /**
      * toString()
-     * 
+     *
      * @this {Component}
      * @return {string}
      */
@@ -592,7 +596,7 @@ Component.prototype = {
     },
     /**
      * getMachineNum()
-     * 
+     *
      * @this {Component}
      * @return {number} unique machine number
      */
@@ -607,7 +611,7 @@ Component.prototype = {
     },
     /**
      * setBinding(sHTMLClass, sHTMLType, sBinding, control)
-     * 
+     *
      * Component's setBinding() method is intended to be overridden by subclasses.
      *
      * @this {Component}
@@ -661,8 +665,8 @@ Component.prototype = {
                     };
                 }(control));
                 /**
-                 * Override this.notice() with a replacement function that eliminates the web.alertUser() call 
-                 * 
+                 * Override this.notice() with a replacement function that eliminates the web.alertUser() call
+                 *
                  * @this {Component}
                  * @param {string} s
                  * @param {boolean} [fPrintOnly]
@@ -679,12 +683,12 @@ Component.prototype = {
     },
     /**
      * log(s, type)
-     * 
+     *
      * For diagnostic output only.
-     * 
+     *
      * WARNING: Even though this function's body is completely wrapped in DEBUG, that won't prevent the Closure Compiler
      * from including it, so all calls must still be prefixed with "if (DEBUG) ....".  For this reason, the class method,
-     * Component.log(), is preferred, because the compiler IS smart enough to remove those calls. 
+     * Component.log(), is preferred, because the compiler IS smart enough to remove those calls.
      *
      * @this {Component}
      * @param {string} [s] is the message text
@@ -702,7 +706,7 @@ Component.prototype = {
      *
      * Components using this.println() should wait until after their constructor has run to display any messages, because
      * if a Control Panel has been loaded, its override will not take effect until its own constructor has run.
-     * 
+     *
      * @this {Component}
      * @param {string} [s] is the message text
      * @param {string} [type] is the message type
@@ -713,7 +717,7 @@ Component.prototype = {
     },
     /**
      * status(s)
-     * 
+     *
      * status() is like println() but it also includes information about the component (ie, the component ID),
      * which is why there is no corresponding Component.status() function.
      *
@@ -724,7 +728,7 @@ Component.prototype = {
     },
     /**
      * notice(s, fPrintOnly)
-     * 
+     *
      * notice() is like println() but implies a need for user notification, so we alert() as well; however, if this.println()
      * is overridden, this.notice will be replaced with a similar override, on the assumption that the override is taking care
      * of alerting the user.
@@ -739,36 +743,36 @@ Component.prototype = {
     },
     /**
      * setError(s)
-     * 
+     *
      * Set a fatal error condition
      *
      * @this {Component}
      * @param {string} s describes a fatal error condition
      */
     setError: function(s) {
-        this.fError = true;
+        this.aFlags.fError = true;
         this.notice("Fatal error: " + s);
     },
     /**
      * clearError()
-     * 
+     *
      * Clear any fatal error condition
      *
      * @this {Component}
      */
     clearError: function() {
-        this.fError = false;
+        this.aFlags.fError = false;
     },
     /**
      * isError()
-     * 
+     *
      * Report any fatal error condition
      *
      * @this {Component}
      * @return {boolean} true if a fatal error condition exists, false if not
      */
     isError: function() {
-        if (this.fError) {
+        if (this.aFlags.fError) {
             this.println(this.toString() + " error");
             return true;
         }
@@ -776,7 +780,7 @@ Component.prototype = {
     },
     /**
      * isReady(fnReady)
-     * 
+     *
      * Return the "ready" state of the component; if the component is not ready, it will queue the optional
      * notification function, otherwise it will immediately call the notification function, if any, without queuing it.
      *
@@ -789,27 +793,27 @@ Component.prototype = {
      */
     isReady: function(fnReady) {
         if (fnReady) {
-            if (this.fReady) {
+            if (this.aFlags.fReady) {
                 fnReady();
             } else {
                 if (DEBUG) this.log("NOT ready");
                 this.fnReady = fnReady;
             }
         }
-        return this.fReady;
+        return this.aFlags.fReady;
     },
     /**
      * setReady(fReady)
-     * 
+     *
      * Set the "ready" state of the component to true, and call any queued notification functions.
      *
      * @this {Component}
      * @param {boolean} [fReady] is assumed to indicate "ready" unless EXPLICITLY set to false
      */
     setReady: function(fReady) {
-        if (!this.fError) {
-            this.fReady = (fReady !== false);
-            if (this.fReady) {
+        if (!this.aFlags.fError) {
+            this.aFlags.fReady = (fReady !== false);
+            if (this.aFlags.fReady) {
                 if (DEBUG || this.name) this.log("ready");
                 var fnReady = this.fnReady;
                 this.fnReady = null;
@@ -819,7 +823,7 @@ Component.prototype = {
     },
     /**
      * isBusy(fCancel)
-     * 
+     *
      * Return the "busy" state of the component
      *
      * @this {Component}
@@ -827,18 +831,18 @@ Component.prototype = {
      * @return {boolean} true if "busy", false if not
      */
     isBusy: function(fCancel) {
-        if (this.fBusy) {
+        if (this.aFlags.fBusy) {
             if (fCancel) {
-                this.fBusyCancel = true;
+                this.aFlags.fBusyCancel = true;
             } else if (fCancel === undefined) {
                 this.println(this.toString() + " busy");
             }
         }
-        return this.fBusy;
+        return this.aFlags.fBusy;
     },
     /**
      * setBusy(fBusy)
-     * 
+     *
      * Update the current busy state; if an fCancel request is pending, it will be honored now.
      *
      * @this {Component}
@@ -846,19 +850,19 @@ Component.prototype = {
      * @return {boolean}
      */
     setBusy: function(fBusy) {
-        if (this.fBusyCancel) {
-            if (this.fBusy) {
-                this.fBusy = false;
+        if (this.aFlags.fBusyCancel) {
+            if (this.aFlags.fBusy) {
+                this.aFlags.fBusy = false;
             }
-            this.fBusyCancel = false;
+            this.aFlags.fBusyCancel = false;
             return false;
         }
-        if (this.fError) {
+        if (this.aFlags.fError) {
             this.println(this.toString() + " error");
             return false;
         }
-        this.fBusy = fBusy;
-        return this.fBusy;
+        this.aFlags.fBusy = fBusy;
+        return this.aFlags.fBusy;
     },
     /**
      * powerUp(fSave)
@@ -869,7 +873,7 @@ Component.prototype = {
      * @return {boolean} true if successful, false if failure
      */
     powerUp: function(data, fRepower) {
-        this.fPowered = true;
+        this.aFlags.fPowered = true;
         return true;
     },
     /**
@@ -881,7 +885,7 @@ Component.prototype = {
      * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
      */
     powerDown: function(fSave, fShutdown) {
-        if (fShutdown) this.fPowered = false;
+        if (fShutdown) this.aFlags.fPowered = false;
         return true;
     }
 };

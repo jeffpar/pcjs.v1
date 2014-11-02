@@ -939,8 +939,8 @@ Keyboard.prototype.calcReleaseDelay = function(fRepeat)
      * handler, otherwise doing things like pressing ENTER repeatedly will result in sluggish behavior
      * (because you can generally press/release/repress keys faster than they will auto-repeat).
      */
-    var msDelay = (fRepeat ? this.msReleaseRepeat : this.msReleaseDelay);
-    if (this.cpu && this.cpu.mhz) msDelay /= this.cpu.mhz;
+    var msDelay = (fRepeat? this.msReleaseRepeat : this.msReleaseDelay);
+    if (this.cpu && this.cpu.aCounts.mhz) msDelay /= this.cpu.aCounts.mhz;
     return msDelay;
 };
 

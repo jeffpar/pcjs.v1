@@ -3820,9 +3820,9 @@ Video.prototype.updateChar = function(col, row, data, context)
 Video.prototype.updateScreen = function(fForce)
 {
     /*
-     * The Computer component maintains an fPowered setting on our behalf, so we use it.
+     * The Computer component maintains the fPowered setting on our behalf, so we use it.
      */
-    if (!this.fPowered) return;
+    if (!this.aFlags.fPowered) return;
 
     /*
      * If the card's video signal is disabled (eg, during a mode change), then skip the update,

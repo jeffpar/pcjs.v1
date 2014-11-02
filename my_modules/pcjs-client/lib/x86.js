@@ -75,7 +75,7 @@ var X86 = {
         SET:    0xfff0      // on the 80286, these are always set (TODO: Verify)
     },
     SEL: {
-        LEVEL:  0x0003,     // selector privilege level (0-3)
+        RPL:    0x0003,     // requested privilege level (0-3)
         LDT:    0x0004,     // table indicator (0: GDT, 1: LDT)
         MASK:   0xfff8      // table index
     },
@@ -91,37 +91,48 @@ var X86 = {
             BASE1623: 0x00ff,
             MASK:     0xff00,
             TYPE: {
-                MASK:       0x1f00,
-                SEG:        0x1000,
+                MASK:                       0x1f00,
+                SEG:                        0x1000,
+                NONSEG:                     0x0f00,
                 /*
-                 * The rest of these apply only when SEG is set
+                 * The following bits apply only when SEG is set
                  */
-                ACCESSED:   0x0100,
-                READABLE:   0x0200, // CODE: set if readable, clear if execute-only
-                WRITEABLE:  0x0200, // DATA: set if writable, clear if read-only
-                CONFORMING: 0x0400, // CODE: set if conforming, clear if not
-                EXPDOWN:    0x0400, // DATA: set if expand-down, clear if not
-                CODE:       0x0800, // set for CODE, clear for DATA
-                CODE_READABLE:            0x0A00, // both CODE and READABLE
-                CODE_CONFORMING:          0x0C00, // both CODE and CONFORMING
-                CODE_CONFORMING_READABLE: 0x0E00, // all of CODE and CONFORMING and READABLE
+                CODE:                       0x0800, // set for CODE, clear for DATA
+                ACCESSED:                   0x0100, // set if accessed, clear if not accessed
+                READABLE:                   0x0200, // CODE: set if readable, clear if exec-only
+                WRITEABLE:                  0x0200, // DATA: set if writable, clear if read-only
+                CONFORMING:                 0x0400, // CODE: set if conforming, clear if not
+                EXPDOWN:                    0x0400, // DATA: set if expand-down, clear if not
                 /*
-                 * The rest of these apply only when SEG is clear
+                 * The following are all the possible (valid) types (well, except for the variations
+                 * of DATA and CODE where the ACCESSED bit (0x0100) may also be set)
                  */
-                TSS:        0x0100,
-                LDT:        0x0200,
-                TSS_LDT:    0x0300,
-                TSS_BUSY:   0x0300,
-                GATE_CALL:  0x0400,
-                GATE_TASK:  0x0500,
-                GATE_INT:   0x0600,
-                GATE_TRAP:  0x0700
+                TSS:                        0x0100,
+                LDT:                        0x0200,
+                TSS_LDT:                    0x0300,
+                TSS_BUSY:                   0x0300,
+                GATE_CALL:                  0x0400,
+                GATE_TASK:                  0x0500,
+                GATE_INT:                   0x0600,
+                GATE_TRAP:                  0x0700,
+                DATA_READONLY:              0x1000,
+                DATA_WRITEABLE:             0x1200,
+                DATA_EXPDOWN_READONLY:      0x1400,
+                DATA_EXPDOWN_WRITEABLE:     0x1600,
+                CODE_EXECONLY:              0x1800,
+                CODE_READABLE:              0x1a00,
+                CODE_CONFORMING_EXECONLY:   0x1c00,
+                CODE_CONFORMING_READABLE:   0x1e00
             },
-            LEVEL: {
+            DPL: {
                 MASK:  0x6000,
                 SHIFT: 13
             },
             PRESENT:  0x8000
+        },
+        EXT: {              // descriptor extension word (reserved on the 80286; "must be zero")
+            OFFSET:   0x6,
+            MASK:     0xffff
         }
     },
     /*
