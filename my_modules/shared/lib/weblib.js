@@ -535,9 +535,13 @@ web.isUserAgent = function(s)
 {
     if (window) {
         var userAgent = web.getUserAgent();
-        web.log("agent: " + userAgent);
         /*
-         * Yes, it would be pointless to use the conditional (?) operator below, if not for the Google Closure
+         * Here's one case where we have to be careful with Component, because when isUserAgent() is called by
+         * the init code below, component.js hasn't been loaded yet.  The simple solution for now is to remove the call.
+         *
+         *      web.log("agent: " + userAgent);
+         *
+         * And yes, it would be pointless to use the conditional (?) operator below, if not for the Google Closure
          * Compiler (v20130823) failing to detect the entire expression as a boolean.
          */
         return (s == "iOS" && userAgent.match(/(iPod|iPhone|iPad)/) && userAgent.match(/AppleWebKit/) || s == "MSIE" && userAgent.match(/(MSIE|Trident)/) || (userAgent.indexOf(s) >= 0))? true : false;
