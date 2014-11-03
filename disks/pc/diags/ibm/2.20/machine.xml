@@ -13,7 +13,7 @@
 		<control type="button" class="input" binding="run">Run</control>
 		<control type="button" class="input" binding="reset">Reset</control>
 	</cpu>
-	<keyboard ref="/configs/pc/keyboards/minimal.xml"/>
+	<keyboard ref="/devices/pc/keyboard/minimal.xml"/>
 	<fdc id="fdcNEC" automount='{A: {name: "IBM Advanced Diagnostics", path: "/disks/pc/diags/ibm/2.20/5150_5155_5160_ADVDIAG_220.json"}}' pos="right">
 		<control type="list" class="input" binding="listDrives"/>
 		<control type="list" class="input" binding="listDisks">

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.15.8/machine.xsl"?>
+<machine id="ibm5150" class="pc" border="1" width="980px" pos="center" style="background-color:#FAEBD7">
+	<name pos="center">IBM PC (Model 5150), CGA, 64K</name>
+	<computer id="pc-cga-64k" name="IBM PC" state="/devices/pc/machine/5150/cga/64kb/donkey/state.json"/>
+	<ram id="ramLow" addr="0x00000"/>
+	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pc/basic/ibm-basic-1.00.json"/>
+	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pc/bios/5150/1981-04-24.json"/>
+	<video id="videoCGA" screenwidth="960" screenheight="400" scale="true" charset="/devices/pc/video/ibm-mda-cga.json" width="960px" padding="8px">
+		<name>Color Display</name>
+	</video>
+	<cpu id="cpu8088" model="8088" autostart="true" padleft="8px">
+		<control type="button" class="input" binding="run">Run</control>
+		<control type="button" class="input" binding="reset">Reset</control>
+	</cpu>
+	<keyboard ref="/devices/pc/keyboard/minimal.xml"/>
+	<fdc ref="/disks/pc/samples.xml" pos="right"/>
+	<chipset id="chipset" model="5150" sw1="01001001" sw2="11110000"/>
+</machine>

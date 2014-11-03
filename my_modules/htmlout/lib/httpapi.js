@@ -90,7 +90,7 @@ var logFile = null;
  *     Redirect permanent /videos/pcjs/ /disks/pc/dos/microsoft/4.0M/
  *     RedirectMatch permanent /demos/pc/.* /configs/pc/machines/
  */
-var externalRedirects = {
+var aExternalRedirects = {
     "/c1p":                                                     "/docs/c1pjs/",
     "/c1pjs":                                                   "/docs/c1pjs/",
     "/pc":                                                      "/docs/about/pcjs/",
@@ -118,20 +118,21 @@ var externalRedirects = {
     "/videos/pcjs":                                             "/configs/pc/machines/5160/cga/640kb/dos400m/"
 };
 
+var aExternalRedirectPatterns = {
+    "^/configs/pc/machines/(.*)":                               "/devices/pc/machine/$1"
+};
+
 /*
  * Entries in this table are matched next, using a RegExp comparison; comparisons start with the first entry
  * and continue until a match is found, at which point the replacement is performed and comparisons stop;
  * we could make the replacement process "additive", by continuing comparisons/replacements until the
  * end is reached, but let's not, unless there's an actual need.
  *
- * In fact, until I find a compelling need for any of these redirects, I'm going to disable them, so that we
- * don't waste time running RegExp tests on every server request.
- *
  * Feel free to use subgroups on the left-hand side, and references to them (eg, $1, $2, etc) on the right.
  */
-var internalRedirects = {
-//    "^/apps/pc/visicalc/":  "/apps/pc/1981/visicalc/",
-//    "^/demos/pc/.*":        "/configs/pc/machines/"
+var aInternalRedirectPatterns = {
+//  "^/apps/pc/visicalc/":      "/apps/pc/1981/visicalc/",
+//  "^/demos/pc/.*":            "/configs/pc/machines/"
 };
 
 /**
@@ -181,6 +182,7 @@ var userVolumes = {};
  */
 HTTPAPI.redirect = function(req, res, next)
 {
+    var re;
     var sPath = req.path;
     if (sPath.slice(-1) == '/') sPath = sPath.slice(0, -1);
 
@@ -190,15 +192,23 @@ HTTPAPI.redirect = function(req, res, next)
         return true;
     }
 
-    if (externalRedirects[sPath] !== undefined) {
-        res.redirect(301, externalRedirects[sPath]);
+    if (aExternalRedirects[sPath] !== undefined) {
+        res.redirect(301, aExternalRedirects[sPath]);
         return true;
     }
 
-    for (sPath in internalRedirects) {
+    for (sPath in aExternalRedirectPatterns) {
+        re = new RegExp(sPath);
+        if (re.exec(req.url)) {
+            res.redirect(301, req.url.replace(re, aExternalRedirectPatterns[sPath]));
+            return true;
+        }
+    }
+
+    for (sPath in aInternalRedirectPatterns) {
         var re = new RegExp(sPath);
         if (re.exec(req.url)) {
-            req.url = req.url.replace(re, internalRedirects[sPath]);
+            req.url = req.url.replace(re, aInternalRedirectPatterns[sPath]);
             break;
         }
     }

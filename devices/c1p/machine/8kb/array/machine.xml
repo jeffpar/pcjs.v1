@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/c1pjs/1.15.8/outline.xsl"?>
+<outline>
+	<title>Challenger 1P (8Kb) "Server Array"</title>
+	<machine id="OSI1" ref="/devices/c1p/machine/8kb/small/machine.xml"/>
+	<machine id="OSI2" ref="/devices/c1p/machine/8kb/small/machine.xml"/>
+	<machine id="OSI3" ref="/devices/c1p/machine/8kb/small/machine.xml"/>
+	<machine id="OSI4" ref="/devices/c1p/machine/8kb/small/machine.xml"/>
+	<machine id="OSI5" ref="/devices/c1p/machine/8kb/small/machine.xml"/>
+	<machine id="OSI6" ref="/devices/c1p/machine/8kb/small/machine.xml"/>
+	<machine id="OSI7" ref="/devices/c1p/machine/8kb/small/machine.xml"/>
+	<machine id="OSI8" ref="/devices/c1p/machine/8kb/small/machine.xml"/>
+	<machine id="OSI9" ref="/devices/c1p/machine/8kb/small/machine.xml"/>
+</outline>

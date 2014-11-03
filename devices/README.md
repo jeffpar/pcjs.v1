@@ -1,3 +1,4 @@
-Device Resource Files
+Device Configurations
 ---
-Copies of device resources (principally ROM images) are stored here.
+
+Browse [IBM PC](/devices/pc/machine/) and [Challenger 1P](/devices/c1p/machine/) machine configurations.

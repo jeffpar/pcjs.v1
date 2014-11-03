@@ -91,11 +91,11 @@
  *  1) Creating new (empty) disk images
  *  2) Pre-loading pre-built JSON-encoded disk images (converting them to JSON on the fly as needed)
  *
- * An example of #1 is in /configs/pc/machines/5160/cga/256kb/demo/machine.xml:
+ * An example of #1 is in /devices/pc/machine/5160/cga/256kb/demo/machine.xml:
  *
  *      <hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",type:3}]'/>
  *
- * and an example of #2 is in /configs/pc/disks/fixed/win101.xml:
+ * and an example of #2 is in /disks/pc/fixed/win101.xml:
  *
  *      <hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",path:"/disks/pc/fixed/win101/10mb.json",type:3}]'/>
  *

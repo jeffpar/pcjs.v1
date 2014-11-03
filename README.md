@@ -12,11 +12,11 @@ All the simulations are written entirely in JavaScript.  No Flash, Java or other
 Supported browsers include recent versions of Internet Explorer (v9.0 or later), Safari, Chrome, Firefox and various
 mobile browsers.
 
-[Embedded IBM PC](/configs/pc/machines/5150/mda/64kb/ "PCjs:ibm5150")
+[Embedded IBM PC](/devices/pc/machine/5150/mda/64kb/ "PCjs:ibm5150")
 
-The [simulation](/configs/pc/machines/5150/mda/64kb/) above features an Intel 8088 running at 4.77Mhz,
+The [simulation](/devices/pc/machine/5150/mda/64kb/) above features an Intel 8088 running at 4.77Mhz,
 with 64Kb of RAM and an IBM Monochrome Display Adapter.  For more control, there are also
-[Control Panel](/configs/pc/machines/5150/mda/64kb/debugger/) and [Soft Keyboard](/configs/pc/machines/5150/mda/64kb/softkbd/)
+[Control Panel](/devices/pc/machine/5150/mda/64kb/debugger/) and [Soft Keyboard](/devices/pc/machine/5150/mda/64kb/softkbd/)
 configurations, featuring the built-in PCjs Debugger.  For even greater control, build your own PC. The
 [PCjs Documentation](/docs/pcjs/) will help you get started.
 
@@ -28,17 +28,17 @@ Demos
 ---
 Some pre-configured machines are shown below, ready to run BASIC, DOS, Windows 1.01, and assorted non-DOS software.
 
-![IBM PC running DONKEY.BAS](/configs/pc/machines/5150/cga/64kb/donkey/thumbnail.jpg "link:/configs/pc/machines/5150/cga/64kb/donkey/:200:100")
-![IBM PC XT w/CGA, 10Mb Hard Drive](/configs/pc/machines/5160/cga/256kb/demo/thumbnail.jpg "link:/configs/pc/machines/5160/cga/256kb/demo/:200:100")
-![IBM PC XT w/CGA, Windows 1.01](/configs/pc/machines/5160/cga/256kb/win101/thumbnail.jpg "link:/configs/pc/machines/5160/cga/256kb/win101/:200:100")
-![IBM PC XT w/EGA, Windows 1.01](/configs/pc/machines/5160/ega/640kb/win101/thumbnail.jpg "link:/configs/pc/machines/5160/ega/640kb/win101/:200:100")
+![IBM PC running DONKEY.BAS](/devices/pc/machine/5150/cga/64kb/donkey/thumbnail.jpg "link:/devices/pc/machine/5150/cga/64kb/donkey/:200:100")
+![IBM PC XT w/CGA, 10Mb Hard Drive](/devices/pc/machine/5160/cga/256kb/demo/thumbnail.jpg "link:/devices/pc/machine/5160/cga/256kb/demo/:200:100")
+![IBM PC XT w/CGA, Windows 1.01](/devices/pc/machine/5160/cga/256kb/win101/thumbnail.jpg "link:/devices/pc/machine/5160/cga/256kb/win101/:200:100")
+![IBM PC XT w/EGA, Windows 1.01](/devices/pc/machine/5160/ega/640kb/win101/thumbnail.jpg "link:/devices/pc/machine/5160/ega/640kb/win101/:200:100")
 ![IBM PC w/MDA, CP/M-86](/disks/pc/cpm/thumbnail.jpg "link:/disks/pc/cpm/:200:100")
 ![IBM PC w/MDA, Microsoft Adventure](/disks/pc/games/microsoft/adventure/thumbnail.jpg "link:/disks/pc/games/microsoft/adventure/:200:100")
 ![IBM PC w/CGA, Zork I](/disks/pc/games/infocom/zork1/thumbnail.jpg "link:/disks/pc/games/infocom/zork1/:200:100")
 
-Check out the rest of the PCjs [Application](/apps/pc/), [Boot Disk](/disks/pc/) and [Machine](/configs/pc/machines/)
-demos, including the [IBM PC XT "Server Array"](/configs/pc/machines/5160/cga/256kb/array/) and
-[Windows 1.01 "Server Array"](/configs/pc/machines/5160/ega/640kb/array/) demos of multiple PCs running side-by-side.
+Check out the rest of the PCjs [Application](/apps/pc/), [Boot Disk](/disks/pc/) and [Machine](/devices/pc/machine/)
+demos, including the [IBM PC XT "Server Array"](/devices/pc/machine/5160/cga/256kb/array/) and
+[Windows 1.01 "Server Array"](/devices/pc/machine/5160/ega/640kb/array/) demos of multiple PCs running side-by-side.
 
 C1Pjs
 ---
@@ -46,7 +46,7 @@ Below is the [OSI Challenger C1P](/docs/c1pjs/), another simulation in the JavaS
 It simulates Ohio Scientific's 6502-based microcomputer, released in 1978.  More details about this simulation
 and the original machine are available in the [C1Pjs Documentation](/docs/c1pjs/).
 
-[Embedded OSI Challenger C1P](/configs/c1p/machines/8kb/large/ "C1Pjs:demoC1P")
+[Embedded OSI Challenger C1P](/devices/c1p/machine/8kb/large/ "C1Pjs:demoC1P")
 
 <!--BEGIN:EXCLUDE-->
 
@@ -64,7 +64,7 @@ The project includes:
 
 + A simple Node-based web server ([server.js](server.js))
 + Custom Node modules used by the web server ([HTMLOut](my_modules/htmlout/), [MarkOut](my_modules/markout/), [DiskDump](my_modules/diskdump/), [FileDump](my_modules/filedump/))
-+ An assortment of IBM PC and C1P machine XML files (see [/apps](apps/), [/configs](configs/) and [/disks](disks/))
++ An assortment of IBM PC and C1P machine XML files (see [/apps](apps/), [/devices](devices/) and [/disks](disks/))
 + The [PCjs](my_modules/pcjs-client/lib/) and [C1Pjs](my_modules/c1pjs-client/lib/) client applications, both "compiled" and uncompiled
 + A smattering of [PCjs](docs/pcjs/) and [C1Pjs](docs/c1pjs/) documentation, along with [blog posts](blog/), related [publications](pubs/) and more
 
@@ -206,7 +206,7 @@ If no Debugger component has been created yet, or if the Debugger didn't recogni
 like a good little REPL.
 
 Use the "load" command to load a JSON machine configuration file.  A sample [machine.json](my_modules/pcjs-client/bin/machine.json)
-is provided in the *bin* directory, which is a "JSON-ified" version of the [machine.xml](configs/pc/machines/5150/mda/64kb/machine.xml)
+is provided in the *bin* directory, which is a "JSON-ified" version of the [machine.xml](devices/pc/machine/5150/mda/64kb/machine.xml)
 displayed on the [pcjs.org](/) home page.
 
 The command-line loader creates all the JSON-defined machine components in the same order that the browser creates

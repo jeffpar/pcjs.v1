@@ -1,6 +1,6 @@
 Embedding The C1Pjs Simulator
 ===
-[Challenger 1P](/configs/c1p/machines/8kb/embed/ "C1Pjs:c1pDemo")
+[Challenger 1P](/devices/c1p/machine/8kb/embed/ "C1Pjs:c1pDemo")
 
 If you want to read as little as possible, then just paste the following code onto a web page:
 
@@ -11,7 +11,7 @@ If you want to read as little as possible, then just paste the following code on
 	<script type="text/javascript">
 		window.embedC1P(
 			"myC1P",
-			"http://www.pcjs.org/configs/c1p/machines/8kb/embed/machine.xml",
+			"http://www.pcjs.org/devices/c1p/machine/8kb/embed/machine.xml",
 			"http://www.pcjs.org/versions/c1pjs/1.15.3/components.xsl"
 		);
 	</script>
@@ -30,7 +30,7 @@ displayed *above* the video display instead of *below*. There's an extensive set
 to any of the elements below to style and position them, including the usual *style* attribute, but at present,
 there's no documentation beyond the sample XML files and the default [XML stylesheet](/versions/c1pjs/1.15.3/components.xsl).
 
-The example at the top of this page uses an [XML file](/configs/c1p/machines/8kb/embed/machine.xml) that looks like:
+The example at the top of this page uses an [XML file](/devices/c1p/machine/8kb/embed/machine.xml) that looks like:
 
 		<?xml version="1.0" encoding="UTF-8"?>
 		<machine id="OSI" class="c1pjs" border="1" width="272px" pos="right" padleft="16px" padright="16px" padbottom="16px">
@@ -47,8 +47,8 @@ The example at the top of this page uses an [XML file](/configs/c1p/machines/8kb
 			<cpu id="cpu6502"/>
 			<ram id="ram8K" size="0x2000"/>
 			<rom id="romNull" size="0x8000"/>
-			<rom id="romBasic" size="0x2000" image="http://www.pcjs.org/devices/c1p/roms/basic-gcpatch.hex"/>
-			<rom id="romSystem" size="0x0800" image="http://www.pcjs.org/devices/c1p/roms/system.hex"/>
+			<rom id="romBasic" size="0x2000" image="http://www.pcjs.org/devices/c1p/rom/basic-gcpatch.hex"/>
+			<rom id="romSystem" size="0x0800" image="http://www.pcjs.org/devices/c1p/rom/system.hex"/>
 			<video id="video" screenwidth="256" screenheight="192" cols="32" rows="32"
 				charset="http://www.pcjs.org/devices/c1p/video/chargen1x.png" padtop="8px" padleft="8px" padbottom="8px"/>
 			<keyboard id="keyboard" pos="center">
@@ -64,19 +64,19 @@ top of the file:
 
 		<?xml-stylesheet type="text/xsl" href="http://www.pcjs.org/versions/c1pjs/1.15.3/machine.xsl"?>
 
-For example, here's a self-starting [machine.xml](/configs/c1p/machines/8kb/large/machine.xml) configuration.
+For example, here's a self-starting [machine.xml](/devices/c1p/machine/8kb/large/machine.xml) configuration.
 After it loads, use your browser's "View Source" command and you'll see that it's very similar to the
-[XML example](/configs/c1p/machines/8kb/embed/machine.xml) above.
+[XML example](/devices/c1p/machine/8kb/embed/machine.xml) above.
 
 Want to embed *multiple* simulators on a single page? No problem. Each **&lt;machine&gt;** element simply needs
-a unique *id* attribute. Take a look at [array.xml](/configs/c1p/machines/8kb/array/) for an example.
+a unique *id* attribute. Take a look at [array.xml](/devices/c1p/machine/8kb/array/) for an example.
 
 Step 2: Make sure you have all the necessary resource files
 ---
 In the above XML file, the ROM and Video components refer to additional resources:
 
-- 8K BASIC ROM image @ http://www.pcjs.org/devices/c1p/roms/basic-gcpatch.hex
-- 2K SYSTEM ROM image @ http://www.pcjs.org/devices/c1p/roms/system.hex
+- 8K BASIC ROM image @ http://www.pcjs.org/devices/c1p/rom/basic-gcpatch.hex
+- 2K SYSTEM ROM image @ http://www.pcjs.org/devices/c1p/rom/system.hex
 - 256-Character Generator image @ http://www.pcjs.org/devices/c1p/video/chargen1x.png
 
 The URLs for those resource files can omit the server name if they're on the same server as the web page.
@@ -99,7 +99,7 @@ such as samples.xml:
 				...
 			</computer>
 			...
-			<disk ref="http://www.pcjs.org/configs/c1p/disks/samples.xml"/>
+			<disk ref="http://www.pcjs.org/apps/c1p/samples.xml"/>
 			...
 		</machine>
 
@@ -119,11 +119,11 @@ definition XML file:
 			</computer>
 			...
 			<debugger id="debugger"/>
-			<panel ref="http://www.pcjs.org/configs/c1p/panels/default.xml"/>
+			<panel ref="http://www.pcjs.org/devices/c1p/panel/default.xml"/>
 			...
 		</machine>
 
-The [Panel](/configs/c1p/panels/default.xml) XML file included above defines a variety of buttons and
+The [Panel](/devices/c1p/panel/default.xml) XML file included above defines a variety of buttons and
 input/output controls that are bound to the CPU and Debugger components according to their *binding*
 attributes.
 

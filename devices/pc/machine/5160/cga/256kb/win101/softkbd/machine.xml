@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.15.8/machine.xsl"?>
+<machine id="ibm5160" class="pc" border="1" pos="center" width="1000px" style="background-color:white">
+	<name>IBM PC XT (Model 5160), CGA, 256K, WIN101</name>
+	<computer id="xt-cga-256k" name="IBM PC XT"/>
+	<cpu id="cpu8088" model="8088" autostart="true"/>
+	<ram id="ramLow" addr="0x00000" test="false"/>
+	<rom id="romHDC" addr="0xc8000" size="0x2000" file="/devices/pc/hdc/ibm-xebec-1982.json"/>
+	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pc/basic/ibm-basic-1.10.json"/>
+	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pc/bios/5160/1982-11-08.json"/>
+	<video id="videoCGA" screenwidth="960" screenheight="400" scale="true" charset="/devices/pc/video/ibm-mda-cga.json" pos="center" width="960px" padding="8px">
+		<name>Color Display</name>
+	</video>
+	<keyboard ref="/devices/pc/keyboard/us83.xml"/>
+	<debugger id="debugger"/>
+	<panel ref="/devices/pc/panel/wide.xml"/>
+	<fdc ref="/disks/pc/library.xml" width="320px"/>
+	<chipset id="chipset" model="5160" sw1="01001001" pos="left" padleft="8px" padbottom="8px">
+		<control type="switches" class="input" label="SW1" binding="sw1" left="0px"/>
+		<control type="description" class="output" binding="swdesc" left="0px"/>
+	</chipset>
+	<hdc ref="/disks/pc/fixed/win101.xml"/>
+	<serial id="com1" adapter="1" binding="print"/>
+	<serial id="com2" adapter="2"/>
+	<mouse serial="com2"/>
+</machine>

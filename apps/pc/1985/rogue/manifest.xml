@@ -21,5 +21,5 @@
 		<file size="16391" time="1985-03-25 16:53:10" attr="0x20" md5="afb883b611c35f79f2a5168365349ba7">ROGUE.PIC</file>
 		<file size="0" time="1995-08-26 12:11:38" attr="0x20">ROGUE.SCR</file>
 	</disk>
-	<machine href="/configs/pc/machines/5160/cga/640kb/machine.xml" state="/apps/pc/1985/rogue/state.json"/>
+	<machine href="/devices/pc/machine/5160/cga/640kb/machine.xml" state="/apps/pc/1985/rogue/state.json"/>
 </manifest>

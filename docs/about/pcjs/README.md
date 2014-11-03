@@ -6,7 +6,7 @@ fast, it works well in all modern web browsers (both desktop and mobile), and it
 the [PCjs Project](https://github.com/jeffpar/pcjs), an open source project on [GitHub](http://github.com/).
 
 Check out the [Demos](/#demos) on the home page, and all the other PCjs [Application](/apps/pc/), [Boot Disk](/disks/pc/)
-and [Machine](/configs/pc/machines/) demos, including an IBM PC XT "[Server Array](/configs/pc/machines/5160/cga/256kb/array/)"
+and [Machine](/devices/pc/machine/) demos, including an IBM PC XT "[Server Array](/devices/pc/machine/5160/cga/256kb/array/)"
 featuring multiple PCs running side-by-side.
 
 ### Features
@@ -60,7 +60,7 @@ rather than relying on XSLT's *document()* function, which doesn't seem to work 
 + v1.10 fixed embedding in Internet Explorer 11 (Microsoft removed "MSIE" from their default user-agent string).
 The ability to embed multiple PCs on a single web page is now supported as well.
 + v1.08 added soft-keyboard support, which isn't quite finished (sticky-shift and auto-repeat will be added in a future
-version), but it's good enough for use on iPads.  Browse [IBM PC Machine Configurations](/configs/pc/machines/) for
+version), but it's good enough for use on iPads.  Browse [IBM PC Machine Configurations](/devices/pc/machine/) for
 machines that include a soft-keyboard.
 + v1.06c added support for user-defined diskette images.  Select "User-defined URL..." from the diskette list and click
 "Load".  See **Creating PCjs-Compatible Disk Images** in the [PCjs Documentation](/docs/pcjs/) for more information

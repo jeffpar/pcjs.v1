@@ -7,7 +7,7 @@
 	<category>Operating System</category>
 	<author>Microsoft</author>
 	<releaseDate/>
-	<machine href="/configs/pc/machines/5160/cga/640kb/dos400m/machine.xml"/>
+	<machine href="/devices/pc/machine/5160/cga/640kb/dos400m/machine.xml"/>
 	<disk id="disk01" size="368640" chs="40:2:9" img="private/MSDOS400M-DISK1.img" href="/disks/pc/dos/microsoft/4.0M/MSDOS400M-DISK1.json" md5="6349c61a7c74b0872a918d130c8080a4" md5json="e9db9a543fc26b5fc6c7c03586eb05b2">
 		<name>MS-DOS 4.0M (Disk 1)</name>
 	</disk>

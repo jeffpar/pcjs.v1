@@ -520,7 +520,7 @@ HTMLOut.filter = function(req, res, next)
      * crack at the URL and redirect with a trailing slash as appropriate.
      *
      * This isn't just a cosmetic issue, because without "strict routing" and the "express-slash" module,
-     * URLs like "http://localhost:9126/configs/pc/machines/5150/mda/64kb/debugger" will cause problems for
+     * URLs like "http://localhost:8088/devices/pc/machine/5150/mda/64kb/debugger" will cause problems for
      * client-side JavaScript when it tries to do an XMLHttpRequest with a relative filename (eg, "machine.xml");
      * that request will fetch the "machine.xml" in the parent directory instead of the "debugger" directory.
      *
@@ -1392,7 +1392,7 @@ HTMLOut.prototype.getMachineXML = function(sToken, sIndent, aParms, sXMLFile, sS
          *
          * But, instead of displaying a cryptic error message inside our beautiful HTML template, eg:
          *
-         *      htmlout error: ENOENT, open '/Users/Jeff/Sites/pcjs/configs/pc/machines/5160/cga/256kb/win101/debugger/machine.xml'
+         *      htmlout error: ENOENT, open '/Users/Jeff/Sites/pcjs/devices/pc/machine/5160/cga/256kb/win101/debugger/machine.xml'
          *
          * we have one more fallback: a random string!  Less useful, but more entertaining.  Well, maybe not even that.
          *
@@ -1623,7 +1623,7 @@ HTMLOut.prototype.getReadMe = function(sToken, sIndent, aParms, sPrevious)
             /*
              * Instead of displaying a cryptic error message inside our beautiful HTML template, eg:
              *
-             *      htmlout error: ENOENT, open '/Users/Jeff/Sites/pcjs/configs/pc/machines/5160/cga/256kb/win101/debugger/README.md'
+             *      htmlout error: ENOENT, open '/Users/Jeff/Sites/pcjs/devices/pc/machine/5160/cga/256kb/win101/debugger/README.md'
              *
              * which is all this will give us:
              *

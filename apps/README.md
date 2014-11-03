@@ -41,7 +41,7 @@ described by &lt;file&gt; entries in its [manifest](/apps/pc/1981/visicalc/manif
 		<category>Productivity</category>
 		<company>Software Arts</company>
     	<releaseDate>December 16, 1981</releaseDate>
-		<machine href="/configs/pc/machines/5150/mda/64kb/machine.xml" state="/apps/pc/1981/visicalc/state.json"/>
+		<machine href="/devices/pc/machine/5150/mda/64kb/machine.xml" state="/apps/pc/1981/visicalc/state.json"/>
 		<disk id="disk" dir="/apps/pc/1981/visicalc/bin/">
 			<file>VC.COM</file>
 			<file dir="../">README.md</file>
@@ -51,13 +51,13 @@ described by &lt;file&gt; entries in its [manifest](/apps/pc/1981/visicalc/manif
 
 Since this [manifest](/apps/pc/1981/visicalc/manifest.xml) also contains a &lt;machine&gt; entry,
 the default manifest stylesheet will automatically load and launch the associated
-[PCjs machine](/configs/pc/machines/5150/mda/64kb/machine.xml).  The machine will boot or resume according
+[PCjs machine](/devices/pc/machine/5150/mda/64kb/machine.xml).  The machine will boot or resume according
 to its own &lt;[computer](/docs/pcjs/computer/)&gt; settings, unless the manifest overrides the machine's
 default state with its own *state* setting; eg:
 
-	<machine href="/configs/pc/machines/5150/mda/64kb/machine.xml" state="/apps/pc/1981/visicalc/state.json"/>
+	<machine href="/devices/pc/machine/5150/mda/64kb/machine.xml" state="/apps/pc/1981/visicalc/state.json"/>
 
-The machine.xml file, in turn, refers to a [sample set](/configs/pc/disks/samples.xml) of disk images, one of which is:
+The machine.xml file, in turn, refers to a [sample set](/disks/pc/samples.xml) of disk images, one of which is:
  
 	<manifest ref="/apps/pc/1981/visicalc/manifest.xml" disk="*"/>
  	

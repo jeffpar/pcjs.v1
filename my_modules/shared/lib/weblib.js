@@ -284,7 +284,7 @@ web.loadResource = function(sURL, fAsync, data, componentNotify, fnNotify, pNoti
  *
  * @param {string} sApp (eg, "PCjs")
  * @param {string} sVer (eg, "1.02")
- * @param {string} sURL (eg, "/configs/pc/machines/5150/mda/64kb/index.xml")
+ * @param {string} sURL (eg, "/devices/pc/machine/5150/mda/64kb/machine.xml")
  * @param {string} sUser (ie, the user key, if any)
  * @param {string} sType (eg, "bug"); one of ReportAPI.TYPE.*
  * @param {string} sReport (eg, unparsed state data)

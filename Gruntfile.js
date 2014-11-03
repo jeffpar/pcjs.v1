@@ -415,7 +415,7 @@ module.exports = function(grunt) {
                 ]
             },
             "promote_to_version": {
-                src: ["apps/**/*.xml", "configs/**/*.xml", "disks/**/*.xml", "pubs/**/*.xml"],
+                src: ["apps/**/*.xml", "devices/**/*.xml", "disks/**/*.xml", "pubs/**/*.xml"],
                 overwrite: true,
                 replacements: [
                     {

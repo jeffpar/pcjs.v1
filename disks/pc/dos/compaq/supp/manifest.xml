@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.15.8/manifest.xsl"?>
+<manifest type="software">
+	<title>COMPAQ</title>
+	<disk id="disk01" size="368640" chs="40:2:9" img="private/COMPAQ-DESKPRO386-SUPP-1986-08-08.img" href="/disks/pc/dos/compaq/supp/COMPAQ-DESKPRO386-SUPP-1986-08-08.json" md5="2bd655ae5568ac27807aeb7bf1ea046d" md5json="6b43800deab66bde7a860fe9b5cd4e9f">
+		<name>COMPAQ DESKPRO 386 (1986)</name>
+	</disk>
+</manifest>

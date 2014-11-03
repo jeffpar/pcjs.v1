@@ -16,7 +16,7 @@
 		<control type="button" class="input" binding="ctrl-alt-del">CTRL-ALT-DEL</control>
 	</keyboard>
 	<debugger id="debugger"/>
-	<panel ref="/configs/pc/panels/default.xml"/>
+	<panel ref="/devices/pc/panel/default.xml"/>
 	<fdc id="fdcNEC" automount='{A: {name: "Zork I", path: "/disks/pc/games/infocom/zork1/zork1-readonly.json"}}' pos="left" padleft="8px">
 		<control type="list" class="input" binding="listDrives"></control>
 		<control type="list" class="input" binding="listDisks">

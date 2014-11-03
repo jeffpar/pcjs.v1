@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/c1pjs/1.15.8/machine.xsl"?>
+<machine id="c1psim" class="c1p" border="1" width="100%" style="background-color:#FAEBD7;padding-bottom:8px">
+	<name>OSI Challenger 1P (32Kb) with Disk Support</name>
+	<computer id="c1p" name="Challenger 1P">
+		<module type="cpu" refid="cpu6502" start="0x0000" end="0xffff"/>
+		<module type="ram" refid="ram32K" start="0x0000" end="0x7fff"/>
+		<module type="rom" refid="romNull" start="0x8000" end="0x9fff"/>
+		<module type="rom" refid="romBasic" start="0xa000" end="0xbfff"/>
+		<module type="disk" refid="disk" start="0xc000" end="0xc0ff"/>
+		<module type="video" refid="video" start="0xd000" end="0xd7ff"/>
+		<module type="keyboard" refid="keyboard" start="0xdf00" end="0xdfff"/>
+		<module type="serial" refid="serialPort" start="0xf000" end="0xf0ff"/>
+		<module type="rom" refid="romSystem" start="0xf800" end="0xffff"/>
+	</computer>
+	<cpu id="cpu6502"/>
+	<debugger id="debugger"/>
+	<ram id="ram32K" size="0x8000"/>
+	<rom id="romNull" size="0x2000"/>
+	<rom id="romBasic" size="0x2000" image="/devices/c1p/rom/basic-gcpatch.hex"/>
+	<rom id="romSystem" size="0x0800" image="/devices/c1p/rom/system.hex"/>
+	<video id="video" screenwidth="512" screenheight="384" cols="32" rows="32" charset="/devices/c1p/video/chargen2x.png" width="512px" padding="8px">
+		<name>Video Display</name>
+	</video>
+	<keyboard id="keyboard" padleft="8px">
+		<control type="button" class="input" binding="ctrl-c">CTRL-C</control>
+		<control type="button" class="input" binding="ctrl-o">CTRL-O</control>
+		<control type="button" class="input" binding="break">BREAK</control>
+	</keyboard>
+	<serial ref="/apps/c1p/samples.xml"/>
+	<disk ref="/disks/c1p/samples.xml"/>
+	<panel ref="/devices/c1p/panel/default.xml"/>
+</machine>

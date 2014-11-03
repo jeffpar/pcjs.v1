@@ -13,7 +13,7 @@
 		<control type="button" class="input" binding="run">Run</control>
 		<control type="button" class="input" binding="reset">Reset</control>
 	</cpu>
-	<keyboard ref="/configs/pc/keyboards/minimal.xml"/>
-	<fdc ref="/configs/pc/disks/samples.xml" automount='{A: {name: "Microsoft Adventure", path: "/disks/pc/games/microsoft/adventure/adventure-1981.json"}}' pos="right"/>
+	<keyboard ref="/devices/pc/keyboard/minimal.xml"/>
+	<fdc ref="/disks/pc/samples.xml" automount='{A: {name: "Microsoft Adventure", path: "/disks/pc/games/microsoft/adventure/adventure-1981.json"}}' pos="right"/>
 	<chipset id="chipset" model="5150" sw1="01000001" sw2="11110000"/>
 </machine>

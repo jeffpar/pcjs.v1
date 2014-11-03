@@ -3,9 +3,9 @@ CACHE MANIFEST
 /versions/pcjs/1.13.6/manifest.xsl
 /versions/pcjs/1.13.6/common.xsl
 /versions/pcjs/1.13.6/components.xsl
-/configs/pc/machines/5160/cga/640kb/machine.xml
-/configs/pc/keyboards/minimal-f1-f10.xml
-/configs/pc/disks/library.xml
+/devices/pc/machine/5160/cga/640kb/machine.xml
+/devices/pc/keyboard/minimal-f1-f10.xml
+/disks/pc/library.xml
 /disks/pc/dos/microsoft/3.20/manifest.xml
 /disks/pc/dos/microsoft/4.0M/manifest.xml
 /disks/pc/tools/microsoft/BASIC/manifest.xml

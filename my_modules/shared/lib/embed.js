@@ -129,7 +129,7 @@ function parseXML(sXML, sXMLFile, idMachine, sStateFile, fResolve, display, done
         }
         /*
          * If the resource we requested is not really an XML file (or the file didn't exist and the server simply returned
-         * a message like "Cannot GET /configs/pc/machines/5150/cga/64kb/donkey/index.xml"), we'd like to display a more
+         * a message like "Cannot GET /devices/pc/machine/5150/cga/64kb/donkey/machine.xml"), we'd like to display a more
          * meaningful message, because the XML DOM parsers will blithely return a document that contains nothing useful; eg:
          *
          *      This page contains the following errors:error on line 1 at column 1:

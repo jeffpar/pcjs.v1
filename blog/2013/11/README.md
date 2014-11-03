@@ -20,7 +20,7 @@ syntax, which is more than sufficient to handle all the site's **README.md** fil
 have used a third-party Markdown library, but this was more educational, and it was easy to add extra features,
 like the ability to embed JavaScript machines with a single Markdown-style link; eg:
 
-	[IBM PC](/configs/pc/machines/5150/mda/64kb/ "PCjs:ibm5150")
+	[IBM PC](/devices/pc/machine/5150/mda/64kb/ "PCjs:ibm5150")
 
 The script takes care of the rest, adding the appropriate stylesheets and PCjs scripts automatically.
 
@@ -28,7 +28,7 @@ I had more grandiose plans, including a command-line prompt written in JavaScrip
 navigate the site exactly as you would an IBM PC hard drive from a "DOS prompt", and I may try something
 like that later, but don't hold your breath.
 
-I've tried to improve the organization of all the [Machine Configuration Files](/configs/pc/machines/) as well.
+I've tried to improve the organization of all the [Machine Configuration Files](/devices/pc/machine/) as well.
 The variety of configurations was getting out of hand.  It's a bit tidier now, but there's still room for
 improvement.
 
