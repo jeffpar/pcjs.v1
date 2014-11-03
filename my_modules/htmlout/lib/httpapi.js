@@ -99,6 +99,7 @@ var aExternalRedirects = {
     "/configs/c1p/machines/array":                              "/configs/c1p/machines/8kb/array/",
     "/configs/c1p/machines/array.xml":                          "/configs/c1p/machines/8kb/array/",
     "/configs/c1p/machines/machine.xml":                        "/configs/c1p/machines/8kb/large/",
+    "/configs/pc/disks":                                        "/disks/pc/",
     "/configs/pc/machines/5150/mda/demo/pc-mda-64k.xml":        "/configs/pc/machines/5150/mda/64kb/",
     "/configs/pc/machines/5150/cga/donkey/pc-cga-64k.xml":      "/configs/pc/machines/5150/cga/64kb/donkey/",
     "/configs/pc/machines/5150/cga/donkey/pc-dbg-64k.xml":      "/configs/pc/machines/5150/cga/64kb/donkey/debugger/",
@@ -119,6 +120,7 @@ var aExternalRedirects = {
 };
 
 var aExternalRedirectPatterns = {
+    "^/configs/c1p/machines/(.*)":                              "/devices/c1p/machine/$1",
     "^/configs/pc/machines/(.*)":                               "/devices/pc/machine/$1"
 };
 
