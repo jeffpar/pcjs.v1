@@ -2718,7 +2718,12 @@ DiskDump.prototype.convertToIMG = function()
                     }
                 }
             }
-            if (!fDebug && buf.length < 3000000) {      // arbitrary size threshold between diskette images and hard disk images
+            /*
+             * Since there's no way (and rightly so) of setting fDebug via the API, I've added the check for
+             * fJSONComments as another way of disabling "branding" via the API; requesting an IMG file with comments
+             * is otherwise a nonsensical request.
+             */
+            if (!fDebug && !this.fJSONComments && buf.length < 3000000) {   // arbitrary size threshold between diskette images and hard disk images
                 /*
                  * Mimic the BPB test in convertToJSON(), because we don't want to blast an OEM string into non-DOS diskette images
                  */

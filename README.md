@@ -251,6 +251,10 @@ If you want server.js to use a different port (the default is 8088), set PORT in
 the server:
 
 	export PORT=80
+	
+or add `--port` to your command-line:
+
+	node server.js --logging --console --debug --port=80
 
 A complete list of command-line options can be found in [server.js](server.js).
 
