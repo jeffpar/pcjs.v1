@@ -75,7 +75,7 @@ HTMLOut.setOptions({'cache': fCache, 'console': fConsole, 'debug': fDebug, 'rebu
 
 var app = express();
 app.enable("strict routing");
-app.set('port', process.env.PORT || 8088);
+app.set('port', process.env.PORT || args.argv['port'] || 8088);
 
 /*
  * I already include the following in the <head> tag of my HTML documents:
