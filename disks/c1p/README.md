@@ -1,4 +1,4 @@
-Challenger 1P Disk Sets
+Challenger 1P Disks
 ---
 
-An assortment of Challenger 1P Disk Sets, for use by [C1P Machine Configurations](/devices/c1p/machine/).
+An assortment of Challenger 1P Disk Images, for use by [C1P Machine Configurations](/devices/c1p/machine/).

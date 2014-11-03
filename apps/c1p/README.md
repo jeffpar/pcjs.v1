@@ -1,4 +1,4 @@
-Challenger 1P Serial Program Sets
+Challenger 1P Applications
 ---
 
 The C1P serial port has no configurable hardware features.  However, there is a "demo" property that can

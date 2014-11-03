@@ -9,7 +9,7 @@
 	<video id="videoMDA" screenwidth="720" screenheight="350" scale="true" charset="/devices/pc/video/ibm-mda-cga.json" padding="8px">
 		<name>Monochrome Display</name>
 	</video>
-	<cpu id="cpu8088" model="8088" autostart="true" pos="left" padleft="8px">
+	<cpu id="cpu8088" model="8088" autostart="true" pos="left" padleft="8px" padbottom="8px">
 		<control type="button" class="input" binding="run">Run</control>
 		<control type="button" class="input" binding="reset">Reset</control>
 	</cpu>
