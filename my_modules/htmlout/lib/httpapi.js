@@ -96,27 +96,27 @@ var aExternalRedirects = {
     "/pc":                                                      "/docs/about/pcjs/",
     "/pcjs":                                                    "/docs/about/pcjs/",
     "/configs/c1p/embed":                                       "/docs/c1pjs/embed/",
-    "/configs/c1p/machines/array":                              "/configs/c1p/machines/8kb/array/",
-    "/configs/c1p/machines/array.xml":                          "/configs/c1p/machines/8kb/array/",
-    "/configs/c1p/machines/machine.xml":                        "/configs/c1p/machines/8kb/large/",
+    "/configs/c1p/machines/array":                              "/devices/c1p/machine/8kb/array/",
+    "/configs/c1p/machines/array.xml":                          "/devices/c1p/machine/8kb/array/",
+    "/configs/c1p/machines/machine.xml":                        "/devices/c1p/machine/8kb/large/",
     "/configs/pc/disks":                                        "/disks/pc/",
-    "/configs/pc/machines/5150/mda/demo/pc-mda-64k.xml":        "/configs/pc/machines/5150/mda/64kb/",
-    "/configs/pc/machines/5150/cga/donkey/pc-cga-64k.xml":      "/configs/pc/machines/5150/cga/64kb/donkey/",
-    "/configs/pc/machines/5150/cga/donkey/pc-dbg-64k.xml":      "/configs/pc/machines/5150/cga/64kb/donkey/debugger/",
-    "/configs/pc/machines/5160/cga/demo":                       "/configs/pc/machines/5160/cga/256kb/demo/",
-    "/configs/pc/machines/5160/cga/demo/xt-cga-256k.xml":       "/configs/pc/machines/5160/cga/256kb/demo/",
-    "/configs/pc/machines/5160/cga/demo/xt-dbg-256k.xml":       "/configs/pc/machines/5160/cga/256kb/demo/debugger/",
-    "/configs/pc/machines/5160/cga/win101/xt-cga-win101.xml":   "/configs/pc/machines/5160/cga/256kb/win101/",
-    "/configs/pc/machines/5160/cga/machine-512k-win101.xml":    "/configs/pc/machines/5160/cga/512kb/win101/softkbd/",
+    "/configs/pc/machines/5150/mda/demo/pc-mda-64k.xml":        "/devices/pc/machine/5150/mda/64kb/",
+    "/configs/pc/machines/5150/cga/donkey/pc-cga-64k.xml":      "/devices/pc/machine/5150/cga/64kb/donkey/",
+    "/configs/pc/machines/5150/cga/donkey/pc-dbg-64k.xml":      "/devices/pc/machine/5150/cga/64kb/donkey/debugger/",
+    "/configs/pc/machines/5160/cga/demo":                       "/devices/pc/machine/5160/cga/256kb/demo/",
+    "/configs/pc/machines/5160/cga/demo/xt-cga-256k.xml":       "/devices/pc/machine/5160/cga/256kb/demo/",
+    "/configs/pc/machines/5160/cga/demo/xt-dbg-256k.xml":       "/devices/pc/machine/5160/cga/256kb/demo/debugger/",
+    "/configs/pc/machines/5160/cga/win101/xt-cga-win101.xml":   "/devices/pc/machine/5160/cga/256kb/win101/",
+    "/configs/pc/machines/5160/cga/machine-512k-win101.xml":    "/devices/pc/machine/5160/cga/512kb/win101/softkbd/",
     "/demos/c1p/embed.html":                                    "/docs/c1pjs/embed/",
-    "/demos/c1p/embed.xml":                                     "/configs/c1p/machines/8kb/embed/machine.xml",
-    "/demos/pc/cga":                                            "/configs/pc/machines/5150/cga/",
-    "/demos/pc/donkey/pc-cga-64k.xml":                          "/configs/pc/machines/5150/cga/64kb/donkey/",
-    "/demos/pc/cga-win101":                                     "/configs/pc/machines/5160/cga/256kb/win101/",
-    "/demos/pc/cga-win101/xt-cga-win101.xml":                   "/configs/pc/machines/5160/cga/256kb/win101/",
-    "/devices/c1p/array.xml":                                   "/configs/c1p/machines/8kb/array/",
-    "/devices/pc/5160/cga/machine-dos400m.xml":                 "/configs/pc/machines/5160/cga/640kb/dos400m/",
-    "/videos/pcjs":                                             "/configs/pc/machines/5160/cga/640kb/dos400m/"
+    "/demos/c1p/embed.xml":                                     "/devices/c1p/machine/8kb/embed/machine.xml",
+    "/demos/pc/cga":                                            "/devices/pc/machine/5150/cga/",
+    "/demos/pc/donkey/pc-cga-64k.xml":                          "/devices/pc/machine/5150/cga/64kb/donkey/",
+    "/demos/pc/cga-win101":                                     "/devices/pc/machine/5160/cga/256kb/win101/",
+    "/demos/pc/cga-win101/xt-cga-win101.xml":                   "/devices/pc/machine/5160/cga/256kb/win101/",
+    "/devices/c1p/array.xml":                                   "/devices/c1p/machine/8kb/array/",
+    "/devices/pc/5160/cga/machine-dos400m.xml":                 "/devices/pc/machine/5160/cga/640kb/dos400m/",
+    "/videos/pcjs":                                             "/devices/pc/machine/5160/cga/640kb/dos400m/"
 };
 
 var aExternalRedirectPatterns = {
@@ -134,7 +134,7 @@ var aExternalRedirectPatterns = {
  */
 var aInternalRedirectPatterns = {
 //  "^/apps/pc/visicalc/":      "/apps/pc/1981/visicalc/",
-//  "^/demos/pc/.*":            "/configs/pc/machines/"
+//  "^/demos/pc/.*":            "/devices/pc/machine/"
 };
 
 /**
