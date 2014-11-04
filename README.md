@@ -103,7 +103,7 @@ and type the following commands:
 Now open a web browser and go to `http://localhost:8088/`.  Done!
  
 If you just want to launch the web server or don't plan to do any development, you can reduce the
-footprint slightly by asking NPM to install only "productions" modules (which can also eliminate some
+footprint slightly by asking NPM to install only "production" modules (which can also eliminate some
 errors if, for example, you neglected to install Python):
  
 	npm install --production
@@ -114,7 +114,7 @@ If you ever inadvertently run `npm install` without `--production`, you can easi
 	npm prune --production
 	
 Finally, when installing on an AWS server, although you have complete control over how Node is launched, you
-don't have direct control over NPM; the best you can do is set the following AWS "Environment Property":
+don't have direct control over NPM; I think the best you can do is set the following AWS "Environment Property":
 
 	NPM_CONFIG_PRODUCTION=true
 	
@@ -149,7 +149,7 @@ are specified, `grunt` runs the "default" task defined by [Gruntfile.js](Gruntfi
 in the [/versions](versions/) directory) are out-of date.
 
 To ensure consistent compilation results, a copy of the Closure Compiler has been checked into the
-[bin](bin/) folder.  This version of Closure Compiler, in turn, requires Java v7 or later.  Use the following
+[/bin](bin/) folder.  This version of Closure Compiler, in turn, requires Java v7 or later.  Use the following
 commands to confirm that everything is working properly:
 
 	java -version
@@ -268,7 +268,7 @@ and C1Pjs much easier to debug, albeit much slower:
 The "gort=debug" command is unnecessary if the server is started with `--debug`; the server always serves uncompiled
 files when running in debug mode.
 
-Conversely, if the server is running debug mode but you want to test a compiled version of PCjs, use:
+Conversely, if the server is in debug mode but you want to test a compiled version of PCjs, use:
 
 	http://localhost:8088/?gort=release
 
@@ -302,7 +302,7 @@ To start developing features for a new version of PCjs, here are the recommended
 1. Change the version number in the root [package.json](/package.json)
 2. Run the "grunt promote" task to bump the version in all the machine XML files
 3. Make changes
-4. Run "grunt" to build new versions of the apps (eg, "/versions/pcjs/1.xx.yy/pc.js")
+4. Run "grunt" to build new versions of the apps (eg, "/versions/pcjs/1.x.x/pc.js")
  
 You might also want to check out the blog post on [PCjs Coding Conventions](/blog/2014/09/30/).
 

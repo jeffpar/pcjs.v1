@@ -103,7 +103,8 @@ if (typeof module !== 'undefined') {
 /**
  * FDC(parmsFDC)
  *
- * The FDC component simulates an NEC PD765A, and has one component-specific property:
+ * The FDC component simulates a NEC µPD765A or Intel 8272A compatible floppy disk controller, and has one
+ * component-specific property:
  *
  *      autoMount: one or more JSON-encoded objects, each containing 'name' and 'path' properties
  *

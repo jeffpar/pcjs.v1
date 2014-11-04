@@ -73,19 +73,19 @@ var PREFETCH = false;
  * @define {boolean}
  *
  * EAFUNCS enables dynamic function switching whenever the CPU needs to disable one or both EA (Effective Address)
- * memory functions for an instruction that doesn't observe the normal "read/modify/write" behavior.  The goal is to
- * avoid useless memory reads (which are mostly harmless) and stale memory writes (which are mostly destructive).
+ * memory functions for a ModRM instruction that doesn't observe the normal "read/modify/write" behavior.  The goal
+ * is to avoid useless memory reads (which are mostly harmless) and stale memory writes (which are mostly destructive).
  *
- * If EAFUNCS is false, then the CPU falls back to setting/testing internal OP_NOREAD and OP_NOWRITE opFlags
- * as needed.  At the moment, it seems that "EAFUNCS mode" is a bit slower than "EATESTS mode", which relies on the
- * bits in opFlags, so EAFUNCS is turned off; however, your mileage may vary, depending on the browser and its vintage.
+ * If EAFUNCS is false, then the CPU falls back to setting/testing internal OP_NOREAD and OP_NOWRITE opFlags as
+ * needed.  At the moment, it seems that "EAFUNCS mode" is a bit slower than "EATESTS mode", so EAFUNCS is turned off;
+ * however, your mileage may vary, depending on the browser and its vintage.
  */
 var EAFUNCS = false;
 
 /**
  * @define {boolean}
  *
- * FATARRAYS is a Closure Compiler compile-time option that allocates a normal Array of numbers for each Memory block,
+ * FATARRAYS is a Closure Compiler compile-time option that allocates an Array of numbers for every Memory block,
  * where each a number represents ONE byte; very wasteful, but potentially slightly faster.
  *
  * See the Memory component for details.
@@ -96,10 +96,10 @@ var FATARRAYS = false;
  * @define {boolean}
  *
  * TYPEDARRAYS enables use of typed arrays for Memory blocks.  This used to be a compile-time-only option, but I've
- * added memory access functions for typed arrays (see Memory.afnTypedArray), so the support CAN be enabled dynamically.
+ * added Memory access functions for typed arrays (see Memory.afnTypedArray), so support can be enabled dynamically.
  *
- * However, TYPEDARRAYS has always been slightly slower than the original DWORDS implementation (which uses a normal Array
- * of numbers that stores 32 bits, or 4 consecutive bytes, per number), so TYPEDARRAYS is completely disabled for now.
+ * However, TYPEDARRAYS has always been slightly slower than the original DWORDS implementation (which uses an Array
+ * of numbers that stores 32 bits -- 4 consecutive bytes -- per number), so TYPEDARRAYS is completely disabled for now.
  *
  * See the Memory component for details.
  */

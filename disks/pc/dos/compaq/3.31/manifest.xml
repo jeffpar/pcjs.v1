@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.15.8/manifest.xsl"?>
+<manifest type="software">
+	<title>MS-DOS</title>
+	<version>3.31</version>
+	<type>DOS</type>
+	<category>Operating System</category>
+	<author>Compaq/Microsoft</author>
+	<releaseDate/>
+	<machine href="/devices/pc/machine/5170/ega/1152kb/rev3/machine.xml"/>
+	<disk id="disk01" size="368640" chs="40:2:9" img="private/COMPAQ-DOS331-DIAG.img" href="/disks/pc/dos/compaq/3.31/COMPAQ-DOS331-DIAG.json" md5="6fc3678180e8d8c2ff5e1c3d99f14d08" md5json="a5e0a418db4fe09c13cfd86635753a05">
+		<name>COMPAQ DOS 3.31 (DIAG)</name>
+	</disk>
+</manifest>
