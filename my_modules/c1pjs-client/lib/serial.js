@@ -125,21 +125,28 @@ C1PSerialPort.prototype.setBinding = function(c, t, s, e)
         }(this);
         return true;
     case "uploadSerial":
-        this.bindings[s] = e;
-        var serial = this;
-        e.onsubmit = function (event) {
-            var file = event.currentTarget[1].files[0];
+        // Check for availability of FileReader
+        if (window.FileReader && window.File && window.FileList && window.Blob ) {
+            var serial = this;
+            this.bindings[s] = e;
+            e.onsubmit = function (event) {
+                var file = event.currentTarget[1].files[0];
 
-            var reader = new FileReader();
-            reader.onload = function () {
-                // serial.println("uploading " + file.name + "...");
-                serial.loadFile(file.name, reader.result, 0);
+                var reader = new FileReader();
+                reader.onload = function () {
+                    // serial.println("uploading " + file.name + "...");
+                    serial.loadFile(file.name, reader.result, 0);
+                };
+                reader.readAsText(file);
+
+                // Prevent reloading of web page after form submission
+                return false;
             };
-            reader.readAsText(file);
-
-            // Prevent reloading of web page after form submission
-            return false;
-        };
+        }
+        else {
+            this.println("FileReader support not available, disabling local file upload");
+            e.parentNode.removeChild(e);
+        }
         return true;
     default:
         break;
