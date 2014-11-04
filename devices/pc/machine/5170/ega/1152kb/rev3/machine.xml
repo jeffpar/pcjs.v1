@@ -19,4 +19,5 @@
 	<chipset id="chipset" model="5170" floppies="[1440,1200]"/>
 	<serial id="com1" adapter="1" binding="print"/>
 	<serial id="com2" adapter="2"/>
+	<mouse serial="com2"/>
 </machine>
