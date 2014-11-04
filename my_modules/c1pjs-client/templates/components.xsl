@@ -286,7 +286,12 @@
 					<div><xsl:value-of select="."/></div>
 				</xsl:when>
 				<xsl:when test="@type = 'file'">
-					<input class="{$APPCLASS}-{@class}" type="file" data-value="{$type},{$binding}"/>
+					<form class="{$APPCLASS}-{@class}" data-value="{$type},{$binding}">
+						<fieldset>
+							<input type="file"/>
+							<input type="submit" value="Load Local File" />
+						</fieldset>
+					</form>
 				</xsl:when>
 				<xsl:when test="@type = 'separator'">
 					<hr/>

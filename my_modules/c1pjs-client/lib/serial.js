@@ -127,15 +127,19 @@ C1PSerialPort.prototype.setBinding = function(c, t, s, e)
     case "uploadSerial":
         this.bindings[s] = e;
         var serial = this;
-        e.addEventListener('change', function () {
-            var file = e.files[0];
+        e.onsubmit = function (event) {
+            var file = event.currentTarget[1].files[0];
+
             var reader = new FileReader();
             reader.onload = function () {
                 // serial.println("uploading " + file.name + "...");
                 serial.loadFile(file.name, reader.result, 0);
             };
             reader.readAsText(file);
-        });
+
+            // Prevent reloading of web page after form submission
+            return false;
+        };
         return true;
     default:
         break;

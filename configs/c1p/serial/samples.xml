@@ -10,5 +10,5 @@
 		<item ref="/apps/c1p/BASIC/OSI/SAMPLE6.BAS">PRESIDENTS</item>
 	</control>
 	<control type="button" class="input" binding="loadSerial">Load File</control>
-	<control type="file" class="input" label="Load Local File:" binding="uploadSerial"/>
+	<control type="file" class="input" binding="uploadSerial"/>
 </serial>
