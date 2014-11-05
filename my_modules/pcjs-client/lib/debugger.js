@@ -169,30 +169,31 @@ function Debugger(parmsDbg)
     }   // endif DEBUGGER
 }
 
-Debugger.MESSAGE_MEM     = 0x00000001;
-Debugger.MESSAGE_PORT    = 0x00000002;
-Debugger.MESSAGE_DMA     = 0x00000004;
-Debugger.MESSAGE_PIC     = 0x00000008;
-Debugger.MESSAGE_TIMER   = 0x00000010;
-Debugger.MESSAGE_CMOS    = 0x00000020;
-Debugger.MESSAGE_RTC     = 0x00000040;
-Debugger.MESSAGE_8042    = 0x00000080;
-Debugger.MESSAGE_CHIPSET = 0x00000100;
-Debugger.MESSAGE_KBD     = 0x00000200;
-Debugger.MESSAGE_VIDEO   = 0x00000400;
-Debugger.MESSAGE_FDC     = 0x00000800;
-Debugger.MESSAGE_HDC     = 0x00001000;
-Debugger.MESSAGE_DISK    = 0x00002000;
-Debugger.MESSAGE_SERIAL  = 0x00004000;
-Debugger.MESSAGE_SPEAKER = 0x00008000;
-Debugger.MESSAGE_STATE   = 0x00010000;
-Debugger.MESSAGE_MOUSE   = 0x00020000;
-Debugger.MESSAGE_CMP     = 0x00040000;
-Debugger.MESSAGE_CPU     = 0x00080000;
-Debugger.MESSAGE_DOS     = 0x00100000;
-Debugger.MESSAGE_INT     = 0x00200000;
-Debugger.MESSAGE_LOG     = 0x01000000;
-Debugger.MESSAGE_HALT    = 0x10000000;
+Debugger.MESSAGE_MEM      = 0x00000001;
+Debugger.MESSAGE_PORT     = 0x00000002;
+Debugger.MESSAGE_DMA      = 0x00000004;
+Debugger.MESSAGE_PIC      = 0x00000008;
+Debugger.MESSAGE_TIMER    = 0x00000010;
+Debugger.MESSAGE_CMOS     = 0x00000020;
+Debugger.MESSAGE_RTC      = 0x00000040;
+Debugger.MESSAGE_8042     = 0x00000080;
+Debugger.MESSAGE_CHIPSET  = 0x00000100;
+Debugger.MESSAGE_KBD      = 0x00000200;
+Debugger.MESSAGE_KEYS     = 0x00000400;
+Debugger.MESSAGE_VIDEO    = 0x00000800;
+Debugger.MESSAGE_FDC      = 0x00001000;
+Debugger.MESSAGE_HDC      = 0x00002000;
+Debugger.MESSAGE_DISK     = 0x00004000;
+Debugger.MESSAGE_SERIAL   = 0x00008000;
+Debugger.MESSAGE_SPEAKER  = 0x00010000;
+Debugger.MESSAGE_STATE    = 0x00020000;
+Debugger.MESSAGE_MOUSE    = 0x00040000;
+Debugger.MESSAGE_COMPUTER = 0x00080000;
+Debugger.MESSAGE_CPU      = 0x00100000;
+Debugger.MESSAGE_DOS      = 0x00200000;
+Debugger.MESSAGE_INT      = 0x00400000;
+Debugger.MESSAGE_LOG      = 0x01000000;
+Debugger.MESSAGE_HALT     = 0x10000000;
 
 if (DEBUGGER) {
 
@@ -464,7 +465,8 @@ if (DEBUGGER) {
         "rtc":      Debugger.MESSAGE_RTC,
         "8042":     Debugger.MESSAGE_8042,
         "chipset":  Debugger.MESSAGE_CHIPSET,   // ie, anything else in ChipSet besides DMA, PIC, TIMER, CMOS, RTC and 8042
-        "keyboard": Debugger.MESSAGE_KBD,
+        "kbd":      Debugger.MESSAGE_KBD,
+        "keys":     Debugger.MESSAGE_KEYS,
         "video":    Debugger.MESSAGE_VIDEO,
         "fdc":      Debugger.MESSAGE_FDC,
         "hdc":      Debugger.MESSAGE_HDC,
@@ -473,14 +475,14 @@ if (DEBUGGER) {
         "speaker":  Debugger.MESSAGE_SPEAKER,
         "state":    Debugger.MESSAGE_STATE,
         "mouse":    Debugger.MESSAGE_MOUSE,
-        "computer": Debugger.MESSAGE_CMP,
+        "computer": Debugger.MESSAGE_COMPUTER,
         "cpu":      Debugger.MESSAGE_CPU,
         "dos":      Debugger.MESSAGE_DOS,
         "int":      Debugger.MESSAGE_INT,
         "log":      Debugger.MESSAGE_LOG,
         /*
          * Now we turn to message actions rather than message types; for example, setting "halt"
-         * on or off doesn't enable "halt" messages, but rather halts the CPU on any above message.
+         * on or off doesn't enable "halt" messages, but rather halts the CPU on any message above.
          */
         "halt":     Debugger.MESSAGE_HALT
     };

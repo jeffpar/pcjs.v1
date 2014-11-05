@@ -753,7 +753,7 @@ web.doPageEvent = function(afn)
                 afn[i]();
             }
         } catch(e) {
-            web.notice("An unexpected exception occurred:\n\n" + e.message + "\n\nPlease send this information to Jeff@pcjs.org. Thanks.");
+            web.notice("An unexpected exception occurred:\n\n" + e.message + "\n\nPlease send this information to support@pcjs.org. Thanks.");
         }
     }
 };

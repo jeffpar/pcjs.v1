@@ -78,7 +78,6 @@ Component.subclass(Component, RAM);
 RAM.prototype.initBus = function(cmp, bus, cpu, dbg) {
     this.bus = bus;
     this.cpu = cpu;
-    this.cmp = cmp;
     this.chipset = cmp.getComponentByType("ChipSet");
     this.setReady();
 };

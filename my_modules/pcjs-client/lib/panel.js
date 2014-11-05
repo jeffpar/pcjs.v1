@@ -72,6 +72,9 @@ Panel.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
     if (this.cpu && this.cpu.setBinding(sHTMLClass, sHTMLType, sBinding, control)) return true;
     if (this.kbd && this.kbd.setBinding(sHTMLClass, sHTMLType, sBinding, control)) return true;
     if (DEBUGGER && this.dbg && this.dbg.setBinding(sHTMLClass, sHTMLType, sBinding, control)) return true;
+    /*
+     * TODO: Determine how to declare this superclass method in order to avoid a type warning
+     */
     return Component.prototype.setBinding.call(this, sHTMLClass, sHTMLType, sBinding, control);
 };
 

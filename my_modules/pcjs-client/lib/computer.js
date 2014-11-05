@@ -964,7 +964,7 @@ Computer.prototype.queryUserID = function(fPrompt)
         sUserID = web.getLocalStorageItem(Computer.STATE_USERID);
         if (sUserID !== undefined) {
             if (!sUserID && fPrompt) {
-                sUserID = web.promptUser("To save machine states on the pcjs.org server, you need a user ID (email Jeff@pcjs.org).\n\nOnce you have an ID, enter it below.");
+                sUserID = web.promptUser("To save machine states on the pcjs.org server, you need a user ID (email support@pcjs.org).\n\nOnce you have an ID, enter it below.");
                 if (sUserID) {
                     sUserID = this.verifyUserID(sUserID);
                     if (!sUserID) this.notice("Your user ID has not been approved.");
@@ -1177,7 +1177,7 @@ Computer.prototype.getComponentByType = function(sType, componentPrev)
 /**
  * messageDebugger(sMessage, fForce)
  *
- * This is a combination of the Debugger's messageEnabled(MESSAGE_CMP) and message() functions, for convenience.
+ * This is a combination of the Debugger's messageEnabled(MESSAGE_COMPUTER) and message() functions, for convenience.
  *
  * @this {Computer}
  * @param {string} sMessage is any caller-defined message string
@@ -1186,7 +1186,7 @@ Computer.prototype.getComponentByType = function(sType, componentPrev)
 Computer.prototype.messageDebugger = function(sMessage, fForce)
 {
     if (DEBUGGER && this.dbg) {
-        if (fForce || this.dbg.messageEnabled(Debugger.MESSAGE_CMP)) this.dbg.message(sMessage);
+        if (fForce || this.dbg.messageEnabled(Debugger.MESSAGE_COMPUTER)) this.dbg.message(sMessage);
     }
 };
 

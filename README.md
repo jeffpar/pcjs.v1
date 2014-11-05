@@ -62,11 +62,11 @@ operation.
 
 The project includes:
 
-+ A simple Node-based web server ([server.js](server.js))
-+ Custom Node modules used by the web server ([HTMLOut](my_modules/htmlout/), [MarkOut](my_modules/markout/), [DiskDump](my_modules/diskdump/), [FileDump](my_modules/filedump/))
-+ An assortment of IBM PC and C1P machine XML files (see [/apps](apps/), [/devices](devices/) and [/disks](disks/))
-+ The [PCjs](my_modules/pcjs-client/lib/) and [C1Pjs](my_modules/c1pjs-client/lib/) client applications, both "compiled" and uncompiled
-+ A smattering of [PCjs](docs/pcjs/) and [C1Pjs](docs/c1pjs/) documentation, along with [blog posts](blog/), related [publications](pubs/) and more
+- A simple Node-based web server ([server.js](server.js))
+- Custom Node modules used by the web server ([HTMLOut](my_modules/htmlout/), [MarkOut](my_modules/markout/), [DiskDump](my_modules/diskdump/), [FileDump](my_modules/filedump/))
+- A variety of IBM PC and C1P configuration and resource files (see [/apps](apps/), [/devices](devices/) and [/disks](disks/))
+- The [PCjs](my_modules/pcjs-client/lib/) and [C1Pjs](my_modules/c1pjs-client/lib/) client applications, both "compiled" and uncompiled
+- A smattering of [PCjs](docs/pcjs/) and [C1Pjs](docs/c1pjs/) documentation, along with [blog posts](blog/), related [publications](pubs/) and more
 
 The bundled web server is not strictly required.  Any web server (Node, Apache, Nginx, etc) that can serve the necessary
 JavaScript files to your browser will work.  However, instructions for doing that are beyond the scope of this introduction.
@@ -77,11 +77,10 @@ included in the project, but unless all the resource files are moved into a sing
 [Demos](/docs/pcjs/demos/)), your browser will probably be unable to load all of them, due to security restrictions.
 Using the bundled web server is the preferred solution.
 
-Aside from the [PCjs](my_modules/pcjs-client/lib/) and [C1Pjs](my_modules/c1pjs-client/lib/) applications,
-[DiskDump](my_modules/diskdump/) is another important module.  Originally created to dump existing disk images as JSON,
-**DiskDump** has evolved into a full-featured disk image generator, capable of creating PC-compatible diskette *and*
-hard disk images from either lists *or* directories of files (including all subdirectories), and supports both
-command-line and web interfaces.
+The project includes a large selection of disk images, and a powerful [DiskDump](my_modules/diskdump/) utility that
+runs on both the client and server, featuring a command-line interface (CLI) and web server API.  Originally created to dump
+existing disk images as JSON, **DiskDump** has evolved into a full-featured disk image generator, capable of creating PC-compatible
+diskette *and* hard disk images from either lists *or* directories of files (including all subdirectories).
 
 ### Installing PCjs
 

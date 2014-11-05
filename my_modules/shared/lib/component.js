@@ -127,8 +127,6 @@ function Component(type, parms, constructor)
     this.bindings = {};
     this.dbg = null;                    // by default, no connection to a Debugger
 
-    this.getMachineNum();               // once again, make the function appear used
-
     Component.add(this);
 }
 
@@ -533,7 +531,7 @@ Component.bindComponentControls = function(component, element, sAppClass)
                         if (parms && parms['binding']) {
                             component.setBinding(sClass, parms['type'], parms['binding'], control);
                         } else {
-                            Component.log('Component.bindComponentControls("' + component.toString() + '"): no binding info for ' + parms['type'], "warning");
+                            Component.log('Component.bindComponentControls("' + component.toString() + '"): missing binding' + (parms? ' for ' + parms['type'] : ''), "warning");
                         }
                         aClasses = [];
                         break;

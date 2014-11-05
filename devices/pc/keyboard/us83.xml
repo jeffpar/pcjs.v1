@@ -40,10 +40,10 @@
 		<control type="key" class="input" binding="[" width="34px" top="42px" left="570px">[ {</control>
 		<control type="key" class="input" binding="]" width="34px" top="42px" left="612px">] }</control>
 		<control type="key" class="input" binding="enter" height="76px" width="46px" top="42px" left="654px"><br/>Enter</control>
-		<control type="key" class="input" binding="home" width="34px" top="42px" left="708px">7</control>
-		<control type="key" class="input" binding="up-arrow" width="34px" top="42px" left="750px">8</control>
-		<control type="key" class="input" binding="page-up" width="34px" top="42px" left="792px">9</control>
-		<control type="key" class="input" binding="num-minus" width="34px" top="42px" left="834px">-</control>
+		<control type="key" class="input" binding="num-home" width="34px" top="42px" left="708px">7</control>
+		<control type="key" class="input" binding="num-up" width="34px" top="42px" left="750px">8</control>
+		<control type="key" class="input" binding="num-pgup" width="34px" top="42px" left="792px">9</control>
+		<control type="key" class="input" binding="num-sub" width="34px" top="42px" left="834px">-</control>
 		<control type="key" class="input" binding="ctrl" width="46px" top="84px" left="96px">Ctrl</control>
 		<control type="key" class="input" binding="a" width="34px" top="84px" left="150px">A</control>
 		<control type="key" class="input" binding="s" width="34px" top="84px" left="192px">S</control>
@@ -55,14 +55,14 @@
 		<control type="key" class="input" binding="k" width="34px" top="84px" left="444px">K</control>
 		<control type="key" class="input" binding="l" width="34px" top="84px" left="486px">L</control>
 		<control type="key" class="input" binding=";" width="34px" top="84px" left="528px">; :</control>
-		<control type="key" class="input" binding="squote" width="34px" top="84px" left="570px">' "</control>
-		<control type="key" class="input" binding="bquote" width="34px" top="84px" left="612px">` ~</control>
-		<control type="key" class="input" binding="left-arrow" width="34px" top="84px" left="708px">4</control>
-		<control type="key" class="input" binding="center" width="34px" top="84px" left="750px">5</control>
-		<control type="key" class="input" binding="right-arrow" width="34px" top="84px" left="792px">6</control>
-		<control type="key" class="input" binding="num-plus" height="118px" width="34px" top="84px" left="834px"><br/>+</control>
-		<control type="key" class="input" binding="lshift" width="46px" top="126px" left="96px">Shift</control>
-		<control type="key" class="input" binding="bslash" width="34px" top="126px" left="150px">\ |</control>
+		<control type="key" class="input" binding="quote" width="34px" top="84px" left="570px">' "</control>
+		<control type="key" class="input" binding="`" width="34px" top="84px" left="612px">` ~</control>
+		<control type="key" class="input" binding="num-left" width="34px" top="84px" left="708px">4</control>
+		<control type="key" class="input" binding="num-center" width="34px" top="84px" left="750px">5</control>
+		<control type="key" class="input" binding="num-right" width="34px" top="84px" left="792px">6</control>
+		<control type="key" class="input" binding="num-add" height="118px" width="34px" top="84px" left="834px"><br/>+</control>
+		<control type="key" class="input" binding="shift" width="46px" top="126px" left="96px">Shift</control>
+		<control type="key" class="input" binding="\\" width="34px" top="126px" left="150px">\ |</control>
 		<control type="key" class="input" binding="z" width="34px" top="126px" left="192px">Z</control>
 		<control type="key" class="input" binding="x" width="34px" top="126px" left="234px">X</control>
 		<control type="key" class="input" binding="c" width="34px" top="126px" left="276px">C</control>
@@ -73,15 +73,15 @@
 		<control type="key" class="input" binding="," width="34px" top="126px" left="486px">, &lt;</control>
 		<control type="key" class="input" binding="." width="34px" top="126px" left="528px">. &gt;</control>
 		<control type="key" class="input" binding="/" width="34px" top="126px" left="570px">/ ?</control>
-		<control type="key" class="input" binding="rshift" width="46px" top="126px" left="612px">Shift</control>
+		<control type="key" class="input" binding="right-shift" width="46px" top="126px" left="612px">Shift</control>
 		<control type="key" class="input" binding="prtsc" width="34px" top="126px" left="666px">PrtSc</control>
-		<control type="key" class="input" binding="end" width="34px" top="126px" left="708px">1</control>
-		<control type="key" class="input" binding="down-arrow" width="34px" top="126px" left="750px">2</control>
-		<control type="key" class="input" binding="page-down" width="34px" top="126px" left="792px">3</control>
+		<control type="key" class="input" binding="num-end" width="34px" top="126px" left="708px">1</control>
+		<control type="key" class="input" binding="num-down" width="34px" top="126px" left="750px">2</control>
+		<control type="key" class="input" binding="num-pgdn" width="34px" top="126px" left="792px">3</control>
 		<control type="key" class="input" binding="alt" width="46px" top="168px" left="96px">Alt</control>
 		<control type="key" class="input" binding="space" width="434px" top="168px" left="150px">Space</control>
 		<control type="key" class="input" binding="caps-lock" width="66px" top="168px" left="592px">Caps</control>
-		<control type="key" class="input" binding="ins" width="76px" top="168px" left="666px">Ins</control>
-		<control type="key" class="input" binding="del" width="76px" top="168px" left="750px">Del</control>
+		<control type="key" class="input" binding="num-ins" width="76px" top="168px" left="666px">Ins</control>
+		<control type="key" class="input" binding="num-del" width="76px" top="168px" left="750px">Del</control>
 	</control>
 </keyboard>
