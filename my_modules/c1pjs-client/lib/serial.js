@@ -129,6 +129,16 @@ C1PSerialPort.prototype.setBinding = function(c, t, s, e)
         if (window.FileReader && window.File && window.FileList && window.Blob ) {
             var serial = this;
             this.bindings[s] = e;
+
+            // Enable "Load Local File" button only if a file is actually selected
+            e.addEventListener('change', function () {
+                var fieldset = e.children[0];
+                var files = fieldset.children[0].files;
+                var submit = fieldset.children[1];
+
+                submit.disabled = (files.length == 0);
+            });
+
             e.onsubmit = function (event) {
                 var file = event.currentTarget[1].files[0];
 

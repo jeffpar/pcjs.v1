@@ -289,7 +289,7 @@
 					<form class="{$APPCLASS}-{@class}" data-value="{$type},{$binding}">
 						<fieldset>
 							<input type="file"/>
-							<input type="submit" value="Load Local File" />
+							<input type="submit" value="Load Local File" disabled="true"/>
 						</fieldset>
 					</form>
 				</xsl:when>
