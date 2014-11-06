@@ -145,7 +145,7 @@ C1PSerialPort.prototype.setBinding = function(c, t, s, e)
                 var reader = new FileReader();
                 reader.onload = function () {
                     // serial.println("uploading " + file.name + "...");
-                    serial.loadFile(file.name, reader.result, 0);
+                    serial.loadFile(file.name, reader.result.toString(), 0);
                 };
                 reader.readAsText(file);
 
