@@ -84,12 +84,13 @@ if (typeof module !== 'undefined') {
  * Because Memory blocks now allow us to have a "sparse" address space, we could choose to
  * take the memory hit of allocating 4K arrays per block, where each element stores only one byte,
  * instead of the more frugal but slightly slower approach of allocating arrays of 32-bit dwords
- * and shifting/masking bytes/words to/from dwords; in theory, byte accesses would be faster and
- * word accesses somewhat less faster.  However, preliminary testing of that feature (FATARRAYS)
- * did not yield significantly faster performance, so it is OFF by default to minimize our memory
- * consumption.  Using TYPEDARRAYS is probably best, although not all JavaScript implementations
- * support them (IE9 is probably the only real outlier: it lacks typed arrays but otherwise has
- * all the necessary HTML5 support).
+ * (DWORDARRAYS) and shifting/masking bytes/words to/from dwords; in theory, byte accesses would
+ * be faster and word accesses somewhat less faster.
+ *
+ * However, preliminary testing of that feature (FATARRAYS) did not yield significantly faster
+ * performance, so it is OFF by default to minimize our memory consumption.  Using TYPEDARRAYS is
+ * probably best, although not all JavaScript implementations support them (IE9 is probably the
+ * only real outlier: it lacks typed arrays but otherwise has all the necessary HTML5 support).
  *
  * @constructor
  * @param {number} addr of block (must be some multiple of bus.blockSize)

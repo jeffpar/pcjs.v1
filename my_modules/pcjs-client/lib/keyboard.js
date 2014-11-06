@@ -124,19 +124,22 @@ Keyboard.CMD = {
  */
 Keyboard.CMDRES = {
     OVERRUN:    0x00,
-    LOAD_TEST:  0x65,     // undocumented "LOAD MANUFACTURING TEST REQUEST" response code
-    BAT_SUCC:   0xAA,     // Basic Assurance Test (BAT) completed successfully
+    LOAD_TEST:  0x65,   // undocumented "LOAD MANUFACTURING TEST REQUEST" response code
+    BAT_SUCC:   0xAA,   // Basic Assurance Test (BAT) completed successfully
     ECHO:       0xEE,
-    BREAK_PREF: 0xF0,
+    BREAK_PREF: 0xF0,   // break prefix
     ACK:        0xFA,
-    BAT_FAIL:   0xFC,     // Basic Assurance Test (BAT) failed
+    BAT_FAIL:   0xFC,   // Basic Assurance Test (BAT) failed
     DIAG_FAIL:  0xFD,
     RESEND:     0xFE
 };
 
 /**
- * TODO: Determine what we can do to get ALL constants like these inlined (enum doesn't seem to be getting
- * the job done); the basic problem seems to be caused by referencing the properties with quotes.
+ * Alphanumeric and other common (printable) ASCII codes.
+ *
+ * TODO: Determine what we can do to get ALL constants like these inlined (enum doesn't seem to
+ * get the job done); the problem seems to be limited to property references that use quotes, which
+ * is why I've 'unquoted' as many of them as possible.
  *
  * @enum {number}
  */
@@ -156,7 +159,15 @@ Keyboard.ASCII = {
 };
 
 /**
- * Browser keyCodes we must pay particular attention to.
+ * Browser keyCodes we must pay particular attention to.  For the most part, these are
+ * non-alphanumeric or function keys, some which may require special treatment (eg,
+ * preventDefault() if returning false on the initial keyDown event is insufficient).
+ *
+ * keyCodes for most common ASCII keys can simply use the appropriate ASCII code above.
+ *
+ * Most of these represent non-ASCII keys (eg, the LEFT arrow key), yet for some reason,
+ * browsers defined them using ASCII codes (eg, the LEFT arrow key uses the ASCII code
+ * for '%' or 37).  This conflict is discussed further in the definition of aButtonCodes below.
  *
  * @enum {number}
  */
@@ -194,20 +205,25 @@ Keyboard.KEYCODE = {
     /* 0x7A */  F11:        122,
     /* 0x7B */  F12:        123,
     //
-    // This is a bias we add to browser keyCodes that we want to handle on "down" rather than "press"
+    // ONDOWN is a bias we add to browser keyCodes that we want to handle on "down" rather than "press".
+    //
+    // Note that these biases use what I'll call "Decimal Coded Binary" or DCB (the reverse of BCD),
+    // where decimal digits are used to represent binary bit values, which can be added together without
+    // affecting neighboring digits as long as you stick to 1, 2 or 4 in any given column.
     //
     ONDOWN:                 1000,
     //
-    // This is a bias we add to browser keyCodes that need to check for a "right" location (default is "left")
+    // ONRIGHT is a bias we add to browser keyCodes that need to check for a "right" location (default is "left")
     //
     ONRIGHT:                2000,
     //
-    // This is a bias we add to create fake keyCodes that correspond to special keystroke sequences
+    // FAKE is a bias we add to signal these are fake keyCodes corresponding to internal keystroke combinations.
+    // The actual values are for internal use only and merely need to be unique and used consistently.
     //
     FAKE:                   4000,
     FAKE_CTRLC:             4003,
-    FAKE_CTRLBREAK:         4101,
-    FAKE_CTRLALTDEL:        4102
+    FAKE_CTRLBREAK:         4063,
+    FAKE_CTRLALTDEL:        4081
 };
 
 /**
@@ -255,15 +271,16 @@ Keyboard.STATEKEYS = {
 };
 
 /**
- * Browsers brilliantly define keyCodes for non-ASCII keys (eg, 37 for the LEFT arrow key) with
- * values that overlap ASCII keyCodes (eg, 37 is also the ASCII code for '%'), which unnecessarily
- * complicates life for keyDown/keyPress/keyUp handlers, all of which receive a keyCode property,
- * but which does NOT always contain the same value for the same key press.
+ * In a perfect world, each one of our "button" codes would map to a unique browser keyCode.
  *
- * We solve the problem by adding an ONDOWN bias to all these particular keyCodes, and then make
- * sure we store these keyCodes in aKeyCodes with the same bias.  ONDOWN is also a signal to our
- * keyCode handlers that the key in question should be handled during keyDown, not keyPress, often
- * because they don't generate a keyPress event anyway.
+ * However, because most of these codes are for non-ASCII keys, which browsers brilliantly
+ * map to ASCII keyCodes that conflict with *actual* ASCII keys, we must add an ONDOWN bias
+ * to all these particular keyCodes, and make sure we store these keyCodes in our aKeyCodes
+ * lookup table with the same bias.
+ *
+ * The good news is that ONDOWN also serves as a signal to our keyCode handlers that the key
+ * in question should be handled during keyDown (not keyPress), since most if not all of these
+ * non-alphanumeric keys don't generate a keyPress event anyway.
  *
  * @enum {number}
  */
@@ -298,19 +315,21 @@ Keyboard.aButtonCodes = {
 };
 
 /**
- * Define "soft keyboard" identifiers for all possible keys, based on their primary (unshifted) character
- * or function.  This also serves as a definition of all supported scan codes.
+ * Define identifiers for all possible keys, based on their primary (unshifted) character or function.
+ * This also serves as a definition of all supported scan codes, making it possible to create full-featured
+ * "soft keyboards".
  *
- * One exception to the above rule is 'prtsc': on the original IBM 83-key and 84-key keyboards, its primary
- * (unshifted) character was '*', but on 101-key keyboards, it became a separate key ('prtsc', now labeled
- * 'Print Screen'), as did the num-pad '*' ('num-mul'), so 'prtsc' seems worthy of an exception to the rule.
+ * One exception to the (unshifted) rule above is 'prtsc': on the original IBM 83-key and 84-key keyboards,
+ * its primary (unshifted) character was '*', but on 101-key keyboards, it became a separate key ('prtsc',
+ * now labeled "Print Screen"), as did the num-pad '*' ('num-mul'), so 'prtsc' seems worthy of an exception
+ * to the rule.
  *
  * On 83-key and 84-key keyboards, 'ctrl'+'num-lock' triggered a "pause" operation and 'ctrl'+'scroll-lock'
- * triggered a "break" operation (I'm using double-quotes to describe the operations and single-quotes to
- * describe the keys).
+ * triggered a "break" operation.
  *
- * On 101-key keyboards, IBM decided to move both those special operations to a new 'pause' key, alongside
- * the dedicated 'prtsc' ('Print Screen') key.  Those keys behaved as follows:
+ * On 101-key keyboards, IBM decided to move both those special operations to a new 'pause' ("Pause/Break")
+ * key, near the new dedicated 'prtsc' ("Print Screen/SysRq") key -- and to drop the "e" from "SysReq".
+ * Those keys behave as follows:
  *
  *      When 'pause' is pressed alone, it generates 0xe1 0x1d 0x45 0xe1 0x9d 0xc5 on make (nothing on break),
  *      which essentially simulates the make-and-break of the 'ctrl' and 'num-lock' keys (ignoring the 0xe1),
@@ -774,7 +793,7 @@ Keyboard.prototype.resetDevice = function()
      */
     this.messageDebugger("keyboard reset", Debugger.MESSAGE_PORT);
     this.abScanBuffer = [Keyboard.CMDRES.BAT_SUCC];
-    if (this.chipset) this.chipset.setIRR(ChipSet.IRQ.KBD, 4);
+    if (this.chipset) this.chipset.notifyKbdData(true);
 };
 
 /**
@@ -847,7 +866,8 @@ Keyboard.prototype.sendCmd = function(bCmd)
 /**
  * readScanCode(fShift)
  *
- * This is the ChipSet's interface for reading scan codes.
+ * This is the ChipSet's interface for reading scan codes.  This also doubles as the ChipSet's interface for checking
+ * whether or not any data is available.
  *
  * @this {Keyboard}
  * @param {boolean} [fShift] is used by the MODEL_5170 8042 Keyboard Controller (supersedes the old setEnable() interface)
@@ -889,7 +909,7 @@ Keyboard.prototype.shiftScanCode = function(fFlush)
              */
             this.abScanBuffer.shift();
             if (this.abScanBuffer.length > 0) {
-                if (this.chipset) this.chipset.setIRR(ChipSet.IRQ.KBD);
+                if (this.chipset) this.chipset.notifyKbdData(true);
             }
         }
     }
@@ -950,7 +970,7 @@ Keyboard.prototype.reset = function()
     /*
      * The physical (not virtual) state of various shift keys.
      *
-     * QUESTION: In JavaScript, how do you query initial key states?
+     * TODO: Determine how (or whether) we can query the browser's initial key states.
      */
     this.bitsShift = 0;
 
@@ -960,15 +980,13 @@ Keyboard.prototype.reset = function()
     this.abScanBuffer = [];
 
     /*
-     * When a key "down" is simulated on behalf of some keyCode, I save
-     * the timer object responsible for simulating the key "up" here, so that
-     * if I detect the actual key going up sooner, I can cancel the timer and
-     * simulate the "up" immediately.  Similarly, if another press for the same
-     * key arrives before last one expired (eg, auto-repeat), I need to cancel
-     * the previous timer for that key before setting another.
+     * When a key "down" is simulated on behalf of some keyCode, I save the timer object responsible for
+     * simulating the key "up" here, so that if I detect the actual key going up sooner, I can cancel the
+     * timer and simulate the "up" immediately.  Similarly, if another press for the same key arrives before
+     * last one expired (eg, auto-repeat), I need to cancel the previous timer for that key before setting another.
      *
-     * NOTE: If this is anything other than an initial reset, then we need to
-     * make sure there are no outstanding timers before we blow the array away.
+     * NOTE: If this is anything other than an initial reset, then we need to make sure there are no outstanding
+     * timers before we blow the array away.
      */
     if (this.aKeyTimers) {
         for (var i in this.aKeyTimers) {
@@ -981,8 +999,7 @@ Keyboard.prototype.reset = function()
     this.prevKeyDown = 0;
 
     /*
-     * Make sure the auto-injection buffer is empty, too (an injection could have been
-     * in progress on any reset after the first).
+     * Make sure the auto-injection buffer is empty (an injection could have been in progress on any reset after the first).
      */
     this.sInjectBuffer = "";
 };
@@ -1065,8 +1082,8 @@ Keyboard.prototype.setSoftKeyState = function(control, f)
  *
  * An actual IBM keyboard will only buffer up to 20 scan codes, so we impose the same limit here.
  *
- * Just as 0xAA is a special scan code response to a software reset, 0xFF is a special scan code response
- * to an internal buffer overrun.  I try to simulate both.
+ * Just as 0xAA is a special scan code response to a software reset, 0xFF is a special scan code response to
+ * an internal buffer overrun.  I try to simulate both.  TODO: Define and document these limits and special codes.
  *
  * @this {Keyboard}
  * @param {number} bScan
@@ -1093,7 +1110,7 @@ Keyboard.prototype.addScanCode = function(bScan, fRepeat)
             this.messageDebugger("scan code 0x" + str.toHexByte(bScan) + " buffered");
             this.abScanBuffer.push(bScan);
             if (this.abScanBuffer.length == 1) {
-                if (this.chipset) this.chipset.setIRR(ChipSet.IRQ.KBD);
+                if (this.chipset) this.chipset.notifyKbdData(true);
             }
             this.findBinding(bKey, "key", fDown);
             return;

@@ -3005,7 +3005,9 @@ ChipSet.prototype.getIRRVector = function(iPIC)
                 }
 
                 var nIRQ = pic.nIRQBase + nIRL;
-                if (DEBUG) this.messageDebugger("getIRRVector(): IRQ " + nIRQ + " going into service", Debugger.MESSAGE_PIC, nIRQ);
+                if (DEBUG) {
+                    this.messageDebugger("getIRRVector(): IRQ " + nIRQ + " interrupting @" + str.toHexAddr(this.cpu.regIP, this.cpu.segCS.sel) + " stack=" + str.toHexAddr(this.cpu.regSP, this.cpu.segSS.sel), 0, nIRQ);
+                }
                 if (MAXDEBUG && DEBUGGER) {
                     this.acInterrupts[nIRQ]++;
                 }
@@ -4013,6 +4015,7 @@ ChipSet.prototype.out8042InBuffCmd = function(port, bOut, addrFrom)
  */
 ChipSet.prototype.set8042CmdData = function(b)
 {
+    var bClockWasEnabled = !(this.b8042CmdData & ChipSet.KBC.DATA.CMD.NO_CLOCK);
     this.b8042CmdData = b;
     Component.assert(ChipSet.KBC.DATA.CMD.SYS_FLAG === ChipSet.KBC.STATUS.SYS_FLAG);
     this.b8042Status = (this.b8042Status & ~ChipSet.KBC.STATUS.SYS_FLAG) | (b & ChipSet.KBC.DATA.CMD.SYS_FLAG);
@@ -4032,8 +4035,12 @@ ChipSet.prototype.set8042CmdData = function(b)
          * powered on, it performs the BAT, and then when the clock and data lines go high, the keyboard sends
          * a completion code (eg, 0xAA for success, or 0xFC or something else for failure).
          */
-        if (this.kbd.setEnable(!!(b & ChipSet.KBC.DATA.CMD.NO_INHIBIT), !(b & ChipSet.KBC.DATA.CMD.NO_CLOCK))) {
+        var bClockEnabled = !(b & ChipSet.KBC.DATA.CMD.NO_CLOCK);
+        if (this.kbd.setEnable(!!(b & ChipSet.KBC.DATA.CMD.NO_INHIBIT), bClockEnabled)) {
             this.set8042OutBuff(this.kbd.readScanCode(true));
+        }
+        if (!bClockWasEnabled && bClockEnabled && this.kbd.readScanCode()) {
+            this.notifyKbdData(true);
         }
     }
 };
@@ -4074,6 +4081,103 @@ ChipSet.prototype.set8042OutPort = function(b)
             this.cpu.haltCPU();
         }
         this.cpu.resetRegs();
+    }
+};
+
+/**
+ * notifyKbdData(fAvail)
+ *
+ * Previously, the Keyboard would simply call setIRR() when it had some data for the keyboard controller.
+ * Now the interface is a little more nuanced, giving the ChipSet/8042 the opportunity to decide when to
+ * raise IRQ.KBD.
+ *
+ * If there's an 8042, we check (this.b8042CmdData & ChipSet.KBC.DATA.CMD.NO_CLOCK); if NO_CLOCK is clear,
+ * we can raise the IRQ immediately.  Well, not quite immediately....
+ *
+ * Notes regarding the MODEL_5170 (eg, /devices/pc/machine/5170/ega/1152kb/rev3/machine.xml):
+ *
+ * The "Rev3" BIOS, dated 11-Nov-1985, contains the following code in the keyboard interrupt handler at K26A:
+ *
+ *      F000:3704 FA            CLI
+ *      F000:3705 B020          MOV      AL,20
+ *      F000:3707 E620          OUT      20,AL
+ *      F000:3709 B0AE          MOV      AL,AE
+ *      F000:370B E88D02        CALL     SHIP_IT
+ *      F000:370E FA            CLI                     <-- window of opportunity
+ *      F000:370F 07            POP      ES
+ *      F000:3710 1F            POP      DS
+ *      F000:3711 5F            POP      DI
+ *      F000:3712 5E            POP      SI
+ *      F000:3713 5A            POP      DX
+ *      F000:3714 59            POP      CX
+ *      F000:3715 5B            POP      BX
+ *      F000:3716 58            POP      AX
+ *      F000:3717 5D            POP      BP
+ *      F000:3718 CF            IRET
+ *
+ * and SHIP_IT looks like this:
+ *
+ *      F000:399B 50            PUSH     AX
+ *      F000:399C FA            CLI
+ *      F000:399D 2BC9          SUB      CX,CX
+ *      F000:399F E464          IN       AL,64
+ *      F000:39A1 A802          TEST     AL,02
+ *      F000:39A3 E0FA          LOOPNZ   399F
+ *      F000:39A5 58            POP      AX
+ *      F000:39A6 E664          OUT      64,AL
+ *      F000:39A8 FB            STI
+ *      F000:39A9 C3            RET
+ *
+ * This code *appears* to be trying to ensure that another keyboard interrupt won't occur until after the IRET,
+ * but sadly, it looks to me like the CLI following the call to SHIP_IT is too late.  SHIP_IT should have been
+ * written with PUSHF/CLI and POPF intro/outro sequences, thereby honoring the first CLI at the top of K26A and
+ * eliminating the need for the second CLI (@F000:370E).
+ *
+ * Of course, in REAL LIFE, this was probably never a problem, because the 8042 probably wasn't fast enough to
+ * generate another interrupt so soon after receiving the ChipSet.KBC.CMD.ENABLE_KBD command.  In my case, I ran
+ * into this problem by 1) turning on "kbd" Debugger messages and 2) rapidly typing lots of keys.  The Debugger
+ * messages bogged the machine down enough for me to hit the "window of opportunity", generating this message in
+ * PC-DOS 3.20:
+ *
+ *      "FATAL: Internal Stack Failure, System Halted."
+ *
+ * and halting the system @0070:0923 (JMP 0923).
+ *
+ * That wasn't the only spot in the BIOS where I hit this problem; here's another "window of opportunity":
+ *
+ *      F000:3975 FA            CLI
+ *      F000:3976 B020          MOV      AL,20
+ *      F000:3978 E620          OUT      20,AL
+ *      F000:397A B0AE          MOV      AL,AE
+ *      F000:397C E81C00        CALL     SHIP_IT
+ *      F000:397F B80291        MOV      AX,9102        <-- window of opportunity
+ *      F000:3982 CD15          INT      15
+ *      F000:3984 80269600FC    AND      [0096],FC
+ *      F000:3989 E982FD        JMP      370E
+ *
+ * In this second, lengthier, example, I counted about 60 instructions being executed from the EOI @F000:3978 to
+ * the final IRET @F000:3718, most of them in the INT 0x15 handler.  So, I'm going to double that count to 120
+ * instructions, just to be safe, and pass that along to every setIRR() call we make here.
+ *
+ * @this {ChipSet}
+ * @param {boolean} fAvail is true if the Keyboard has data to send, false if not
+ */
+ChipSet.prototype.notifyKbdData = function(fAvail)
+{
+    if (this.model < ChipSet.MODEL_5170) {
+        /*
+         * TODO: Should we be checking bPPI for PPI_B.CLK_KBD on these older machines, before called setIRR()?
+         */
+        this.setIRR(ChipSet.IRQ.KBD, 4);
+    }
+    else {
+        if (!(this.b8042CmdData & ChipSet.KBC.DATA.CMD.NO_CLOCK) && fAvail) {
+            /*
+             * A delay of 4 instructions was originally requested as part of the the Keyboard's resetDevice()
+             * response, but a much larger delay (120) is now needed for MODEL_5170 machines, per the discussion above.
+             */
+            this.setIRR(ChipSet.IRQ.KBD, 120);
+        }
     }
 };
 
@@ -4311,7 +4415,7 @@ ChipSet.prototype.messageDebugger = function(sMessage, bitsMessage, nIRQ)
     if (DEBUGGER && this.dbg) {
         if (bitsMessage == null) bitsMessage = Debugger.MESSAGE_CHIPSET;
         if (nIRQ !== undefined) {
-            bitsMessage |= (nIRQ == ChipSet.IRQ.TIMER0? Debugger.MESSAGE_TIMER : (nIRQ == ChipSet.IRQ.KBD? Debugger.MESSAGE_KBD : (nIRQ == ChipSet.IRQ.FDC? Debugger.MESSAGE_FDC : 0)));
+            bitsMessage |= (nIRQ == ChipSet.IRQ.TIMER0? Debugger.MESSAGE_TIMER : (nIRQ == ChipSet.IRQ.KBD? Debugger.MESSAGE_KBD : (nIRQ == ChipSet.IRQ.FDC? Debugger.MESSAGE_FDC : Debugger.MESSAGE_PIC)));
         }
         if (this.dbg.messageEnabled(bitsMessage)) this.dbg.message(sMessage);
     }

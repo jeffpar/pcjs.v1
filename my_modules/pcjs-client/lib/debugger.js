@@ -3806,9 +3806,18 @@ if (DEBUGGER) {
             if (fListSymbols) {
                 var aSymbol = this.findSymbolAtAddr(aAddr, true);
                 if (aSymbol.length) {
-                    if (aSymbol[0]) this.println(str.toHexWord(aSymbol[1]) + ": " + aSymbol[0]);
-                    if (aSymbol.length > 4) {
-                        if (aSymbol[4]) this.println(str.toHexWord(aSymbol[5]) + ": " + aSymbol[4]);
+                    var nDelta, sDelta;
+                    if (aSymbol[0]) {
+                        sDelta = "";
+                        nDelta = aAddr[0] - aSymbol[1];
+                        if (nDelta) sDelta = " + " + str.toHexWord(nDelta);
+                        this.println(aSymbol[0] + " (" + str.toHexAddr(aSymbol[1], aAddr[1]) + ")" + sDelta);
+                    }
+                    if (aSymbol.length > 4 && aSymbol[4]) {
+                        sDelta = "";
+                        nDelta = aSymbol[5] - aAddr[0];
+                        if (nDelta) sDelta = " - " + str.toHexWord(nDelta);
+                        this.println(aSymbol[4] + " (" + str.toHexAddr(aSymbol[5], aAddr[1]) + ")" + sDelta);
                     }
                 } else {
                     this.println("no symbols");
@@ -4419,11 +4428,12 @@ if (DEBUGGER) {
 
         var fBlank = (aAddr[0] != this.aAddrNextCode[0]);
 
-        while (n-- && (aAddr[1] != null? (aAddr[0] < aAddrEnd[0]) : (aAddr[2] < aAddrEnd[2]))) {
+        while (n && (aAddr[1] != null? (aAddr[0] < aAddrEnd[0]) : (aAddr[2] < aAddrEnd[2]))) {
             /*
              * I pass nCycles instead of cInstructions to getInstruction() now, to assist with visual
              * verification of the accuracy (or inaccuracy) of instruction cycle counts.
              */
+            n--;
             var bOpcode = this.getByte(aAddr);
             /*
              * We don't want to leave the disassembly ending with a prefix, especially now that stepCPU(0) continues
@@ -4453,6 +4463,7 @@ if (DEBUGGER) {
             this.aAddrNextCode = aAddr;
             fBlank = false;
         }
+        if (n) this.println("end of memory");
     };
 
     /**
@@ -4536,7 +4547,7 @@ if (DEBUGGER) {
                         if (this.cmp) this.cmp.reset();
                         return true;
                     case "ver":
-                        this.println((APPNAME || "PCjs") + " version " + APPVERSION + " (" + (COMPILED? "release" : (DEBUG? "debug" : "nodebug")) + (PREFETCH? ",prefetch" : ",noprefetch") + (EAFUNCS? "eafuncs" : ",eatests") + (TYPEDARRAYS? ",typedarrays" : (FATARRAYS? ",fatarrays" : ",dwords")) + ")");
+                        this.println((APPNAME || "PCjs") + " version " + APPVERSION + " (" + (COMPILED? "release" : (DEBUG? "debug" : "nodebug")) + (PREFETCH? ",prefetch" : ",noprefetch") + (EAFUNCS? "eafuncs" : ",eatests") + (TYPEDARRAYS? ",typedarrays" : (FATARRAYS? ",fatarrays" : ",dwordarrays")) + ")");
                         return true;
                     default:
                         ch0 = sCmd.charAt(0);

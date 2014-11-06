@@ -396,19 +396,19 @@ module.exports = function(grunt) {
             }
         },
         run: {
-            "delete_indexes": {
+            "delete-indexes": {
                 options: {cwd: "."},
                 cmd: "./my_modules/htmlout/bin/delete_indexes.sh",
                 args: []
             },
-            "zipify_demos": {
+            "zipify-demos": {
                 options: {cwd: "docs/pcjs/demos"},
                 cmd: "./zip.sh",
                 args: ["v" + pkg.version + ".zip"]
             }
         },
         replace: {
-            "fix_source_maps": {
+            "fix-source-maps": {
                 src: ["./tmp/c1pjs/" + pkg.version + "/c1p*.map", "./tmp/pcjs/" + pkg.version + "/pc*.map"],
                 overwrite: true,
                 replacements: [
@@ -418,7 +418,7 @@ module.exports = function(grunt) {
                     }
                 ]
             },
-            "promote_to_version": {
+            "promote-to-version": {
                 src: ["apps/**/*.xml", "devices/**/*.xml", "disks/**/*.xml", "pubs/**/*.xml"],
                 overwrite: true,
                 replacements: [
@@ -443,7 +443,7 @@ module.exports = function(grunt) {
 
     grunt.registerTask("preCompiler", grunt.option("rebuild")? ["concat:tmp-c1pjs", "concat:tmp-pcjs"] : ["newer:concat:tmp-c1pjs", "newer:concat:tmp-pcjs"]);
 
-    grunt.registerTask("compile", ["preCompiler", "closureCompiler", "replace:fix_source_maps"]);
+    grunt.registerTask("compile", ["preCompiler", "closureCompiler", "replace:fix-source-maps"]);
 
     grunt.registerTask('nocompile', function(target) {
         if (!target) {
@@ -452,9 +452,9 @@ module.exports = function(grunt) {
             grunt.task.run("concat:" + target);
         }
     });
-    grunt.registerTask("promote", ["replace:promote_to_version"]);
-    grunt.registerTask("clean", ["run:delete_indexes"]);
-    grunt.registerTask("copyFiles", grunt.option("rebuild")? ["copy"] : ["newer:copy"]);
-    grunt.registerTask("default-osx", ["compile", "copyFiles", "run:zipify_demos"]);
-    grunt.registerTask("default", ["compile", "copyFiles"]);
+    grunt.registerTask("promote", ["replace:promote-to-version"]);
+    grunt.registerTask("clean", ["run:delete-indexes"]);
+    grunt.registerTask("copyfiles", grunt.option("rebuild")? ["copy"] : ["newer:copy"]);
+    grunt.registerTask("default-osx", ["compile", "copyfiles", "run:zipify-demos"]);
+    grunt.registerTask("default", ["compile", "copyfiles"]);
 };
