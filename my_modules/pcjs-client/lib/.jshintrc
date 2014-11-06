@@ -15,7 +15,7 @@
         "PCJSCLASS": true,
         "DEBUGGER": true,
         "PREFETCH": true,
-        "FASTDISABLE": true,
+        "EAFUNCS": true,
         "FATARRAYS": true,
         "TYPEDARRAYS": true,
         "Component": true,

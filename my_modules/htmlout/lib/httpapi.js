@@ -90,32 +90,38 @@ var logFile = null;
  *     Redirect permanent /videos/pcjs/ /disks/pc/dos/microsoft/4.0M/
  *     RedirectMatch permanent /demos/pc/.* /configs/pc/machines/
  */
-var externalRedirects = {
+var aExternalRedirects = {
     "/c1p":                                                     "/docs/c1pjs/",
     "/c1pjs":                                                   "/docs/c1pjs/",
     "/pc":                                                      "/docs/about/pcjs/",
     "/pcjs":                                                    "/docs/about/pcjs/",
     "/configs/c1p/embed":                                       "/docs/c1pjs/embed/",
-    "/configs/c1p/machines/array":                              "/configs/c1p/machines/8kb/array/",
-    "/configs/c1p/machines/array.xml":                          "/configs/c1p/machines/8kb/array/",
-    "/configs/c1p/machines/machine.xml":                        "/configs/c1p/machines/8kb/large/",
-    "/configs/pc/machines/5150/mda/demo/pc-mda-64k.xml":        "/configs/pc/machines/5150/mda/64kb/",
-    "/configs/pc/machines/5150/cga/donkey/pc-cga-64k.xml":      "/configs/pc/machines/5150/cga/64kb/donkey/",
-    "/configs/pc/machines/5150/cga/donkey/pc-dbg-64k.xml":      "/configs/pc/machines/5150/cga/64kb/donkey/debugger/",
-    "/configs/pc/machines/5160/cga/demo":                       "/configs/pc/machines/5160/cga/256kb/demo/",
-    "/configs/pc/machines/5160/cga/demo/xt-cga-256k.xml":       "/configs/pc/machines/5160/cga/256kb/demo/",
-    "/configs/pc/machines/5160/cga/demo/xt-dbg-256k.xml":       "/configs/pc/machines/5160/cga/256kb/demo/debugger/",
-    "/configs/pc/machines/5160/cga/win101/xt-cga-win101.xml":   "/configs/pc/machines/5160/cga/256kb/win101/",
-    "/configs/pc/machines/5160/cga/machine-512k-win101.xml":    "/configs/pc/machines/5160/cga/512kb/win101/softkbd/",
+    "/configs/c1p/machines/array":                              "/devices/c1p/machine/8kb/array/",
+    "/configs/c1p/machines/array.xml":                          "/devices/c1p/machine/8kb/array/",
+    "/configs/c1p/machines/machine.xml":                        "/devices/c1p/machine/8kb/large/",
+    "/configs/pc/disks":                                        "/disks/pc/",
+    "/configs/pc/machines/5150/mda/demo/pc-mda-64k.xml":        "/devices/pc/machine/5150/mda/64kb/",
+    "/configs/pc/machines/5150/cga/donkey/pc-cga-64k.xml":      "/devices/pc/machine/5150/cga/64kb/donkey/",
+    "/configs/pc/machines/5150/cga/donkey/pc-dbg-64k.xml":      "/devices/pc/machine/5150/cga/64kb/donkey/debugger/",
+    "/configs/pc/machines/5160/cga/demo":                       "/devices/pc/machine/5160/cga/256kb/demo/",
+    "/configs/pc/machines/5160/cga/demo/xt-cga-256k.xml":       "/devices/pc/machine/5160/cga/256kb/demo/",
+    "/configs/pc/machines/5160/cga/demo/xt-dbg-256k.xml":       "/devices/pc/machine/5160/cga/256kb/demo/debugger/",
+    "/configs/pc/machines/5160/cga/win101/xt-cga-win101.xml":   "/devices/pc/machine/5160/cga/256kb/win101/",
+    "/configs/pc/machines/5160/cga/machine-512k-win101.xml":    "/devices/pc/machine/5160/cga/512kb/win101/softkbd/",
     "/demos/c1p/embed.html":                                    "/docs/c1pjs/embed/",
-    "/demos/c1p/embed.xml":                                     "/configs/c1p/machines/8kb/embed/machine.xml",
-    "/demos/pc/cga":                                            "/configs/pc/machines/5150/cga/",
-    "/demos/pc/donkey/pc-cga-64k.xml":                          "/configs/pc/machines/5150/cga/64kb/donkey/",
-    "/demos/pc/cga-win101":                                     "/configs/pc/machines/5160/cga/256kb/win101/",
-    "/demos/pc/cga-win101/xt-cga-win101.xml":                   "/configs/pc/machines/5160/cga/256kb/win101/",
-    "/devices/c1p/array.xml":                                   "/configs/c1p/machines/8kb/array/",
-    "/devices/pc/5160/cga/machine-dos400m.xml":                 "/configs/pc/machines/5160/cga/640kb/dos400m/",
-    "/videos/pcjs":                                             "/configs/pc/machines/5160/cga/640kb/dos400m/"
+    "/demos/c1p/embed.xml":                                     "/devices/c1p/machine/8kb/embed/machine.xml",
+    "/demos/pc/cga":                                            "/devices/pc/machine/5150/cga/",
+    "/demos/pc/donkey/pc-cga-64k.xml":                          "/devices/pc/machine/5150/cga/64kb/donkey/",
+    "/demos/pc/cga-win101":                                     "/devices/pc/machine/5160/cga/256kb/win101/",
+    "/demos/pc/cga-win101/xt-cga-win101.xml":                   "/devices/pc/machine/5160/cga/256kb/win101/",
+    "/devices/c1p/array.xml":                                   "/devices/c1p/machine/8kb/array/",
+    "/devices/pc/5160/cga/machine-dos400m.xml":                 "/devices/pc/machine/5160/cga/640kb/dos400m/",
+    "/videos/pcjs":                                             "/devices/pc/machine/5160/cga/640kb/dos400m/"
+};
+
+var aExternalRedirectPatterns = {
+    "^/configs/c1p/machines/(.*)":                              "/devices/c1p/machine/$1",
+    "^/configs/pc/machines/(.*)":                               "/devices/pc/machine/$1"
 };
 
 /*
@@ -124,14 +130,11 @@ var externalRedirects = {
  * we could make the replacement process "additive", by continuing comparisons/replacements until the
  * end is reached, but let's not, unless there's an actual need.
  *
- * In fact, until I find a compelling need for any of these redirects, I'm going to disable them, so that we
- * don't waste time running RegExp tests on every server request.
- *
  * Feel free to use subgroups on the left-hand side, and references to them (eg, $1, $2, etc) on the right.
  */
-var internalRedirects = {
-//    "^/apps/pc/visicalc/":  "/apps/pc/1981/visicalc/",
-//    "^/demos/pc/.*":        "/configs/pc/machines/"
+var aInternalRedirectPatterns = {
+//  "^/apps/pc/visicalc/":      "/apps/pc/1981/visicalc/",
+//  "^/demos/pc/.*":            "/devices/pc/machine/"
 };
 
 /**
@@ -181,6 +184,7 @@ var userVolumes = {};
  */
 HTTPAPI.redirect = function(req, res, next)
 {
+    var re;
     var sPath = req.path;
     if (sPath.slice(-1) == '/') sPath = sPath.slice(0, -1);
 
@@ -190,15 +194,23 @@ HTTPAPI.redirect = function(req, res, next)
         return true;
     }
 
-    if (externalRedirects[sPath] !== undefined) {
-        res.redirect(301, externalRedirects[sPath]);
+    if (aExternalRedirects[sPath] !== undefined) {
+        res.redirect(301, aExternalRedirects[sPath]);
         return true;
     }
 
-    for (sPath in internalRedirects) {
+    for (sPath in aExternalRedirectPatterns) {
+        re = new RegExp(sPath);
+        if (re.exec(req.url)) {
+            res.redirect(301, req.url.replace(re, aExternalRedirectPatterns[sPath]));
+            return true;
+        }
+    }
+
+    for (sPath in aInternalRedirectPatterns) {
         var re = new RegExp(sPath);
         if (re.exec(req.url)) {
-            req.url = req.url.replace(re, internalRedirects[sPath]);
+            req.url = req.url.replace(re, aInternalRedirectPatterns[sPath]);
             break;
         }
     }

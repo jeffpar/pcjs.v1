@@ -169,30 +169,31 @@ function Debugger(parmsDbg)
     }   // endif DEBUGGER
 }
 
-Debugger.MESSAGE_MEM     = 0x00000001;
-Debugger.MESSAGE_PORT    = 0x00000002;
-Debugger.MESSAGE_DMA     = 0x00000004;
-Debugger.MESSAGE_PIC     = 0x00000008;
-Debugger.MESSAGE_TIMER   = 0x00000010;
-Debugger.MESSAGE_CMOS    = 0x00000020;
-Debugger.MESSAGE_RTC     = 0x00000040;
-Debugger.MESSAGE_8042    = 0x00000080;
-Debugger.MESSAGE_CHIPSET = 0x00000100;
-Debugger.MESSAGE_KBD     = 0x00000200;
-Debugger.MESSAGE_VIDEO   = 0x00000400;
-Debugger.MESSAGE_FDC     = 0x00000800;
-Debugger.MESSAGE_HDC     = 0x00001000;
-Debugger.MESSAGE_DISK    = 0x00002000;
-Debugger.MESSAGE_SERIAL  = 0x00004000;
-Debugger.MESSAGE_SPEAKER = 0x00008000;
-Debugger.MESSAGE_STATE   = 0x00010000;
-Debugger.MESSAGE_MOUSE   = 0x00020000;
-Debugger.MESSAGE_CMP     = 0x00040000;
-Debugger.MESSAGE_CPU     = 0x00080000;
-Debugger.MESSAGE_DOS     = 0x00100000;
-Debugger.MESSAGE_INT     = 0x00200000;
-Debugger.MESSAGE_LOG     = 0x01000000;
-Debugger.MESSAGE_HALT    = 0x10000000;
+Debugger.MESSAGE_MEM      = 0x00000001;
+Debugger.MESSAGE_PORT     = 0x00000002;
+Debugger.MESSAGE_DMA      = 0x00000004;
+Debugger.MESSAGE_PIC      = 0x00000008;
+Debugger.MESSAGE_TIMER    = 0x00000010;
+Debugger.MESSAGE_CMOS     = 0x00000020;
+Debugger.MESSAGE_RTC      = 0x00000040;
+Debugger.MESSAGE_8042     = 0x00000080;
+Debugger.MESSAGE_CHIPSET  = 0x00000100;
+Debugger.MESSAGE_KBD      = 0x00000200;
+Debugger.MESSAGE_KEYS     = 0x00000400;
+Debugger.MESSAGE_VIDEO    = 0x00000800;
+Debugger.MESSAGE_FDC      = 0x00001000;
+Debugger.MESSAGE_HDC      = 0x00002000;
+Debugger.MESSAGE_DISK     = 0x00004000;
+Debugger.MESSAGE_SERIAL   = 0x00008000;
+Debugger.MESSAGE_SPEAKER  = 0x00010000;
+Debugger.MESSAGE_STATE    = 0x00020000;
+Debugger.MESSAGE_MOUSE    = 0x00040000;
+Debugger.MESSAGE_COMPUTER = 0x00080000;
+Debugger.MESSAGE_CPU      = 0x00100000;
+Debugger.MESSAGE_DOS      = 0x00200000;
+Debugger.MESSAGE_INT      = 0x00400000;
+Debugger.MESSAGE_LOG      = 0x01000000;
+Debugger.MESSAGE_HALT     = 0x10000000;
 
 if (DEBUGGER) {
 
@@ -235,62 +236,62 @@ if (DEBUGGER) {
      * 286 or 386, then I might as well leave some of that support in place, since the impact is minimal).
      */
     Debugger.INS = {
-        NONE:   0,   AAA:    1,   AAD:   2,   AAM:    3,   AAS:    4,   ADC:     5,   ADD:    6,   AND:    7,
-        ARPL:   8,   ASIZE:  9,   BOUND: 10,  BSF:    11,  BSR:    12,  BT:      13,  BTC:    14,  BTR:    15,
-        BTS:    16,  CALL:   17,  CBW:   18,  CLC:    19,  CLD:    20,  CLI:     21,  CLTS:   22,  CMC:    23,
-        CMP:    24,  CMPSB:  25,  CMPSW: 26,  CS:     27,  CWD:    28,  DAA:     29,  DAS:    30,  DEC:    31,
-        DIV:    32,  DS:     33,  ENTER: 34,  ES:     35,  ESC:    36,  FADD:    37,  FBLD:   38,  FBSTP:  39,
-        FCOM:   40,  FCOMP:  41,  FDIV:  42,  FDIVR:  43,  FIADD:  44,  FICOM:   45,  FICOMP: 46,  FIDIV:  47,
-        FIDIVR: 48,  FILD:   49,  FIMUL: 50,  FIST:   51,  FISTP:  52,  FISUB:   53,  FISUBR: 54,  FLD:    55,
-        FLDCW:  56,  FLDENV: 57,  FMUL:  58,  FNSAVE: 59,  FNSTCW: 60,  FNSTENV: 61,  FNSTSW: 62,  FRSTOR: 63,
-        FS:     64,  FST:    65,  FSTP:  66,  FSUB:   67,  FSUBR:  68,  GBP:     69,  GS:     70,  HLT:    71,
-        IDIV:   72,  IMUL:   73,  IN:    74,  INC:    75,  INS:    76,  INT:     77,  INT3:   78,  INTO:   79,
-        IRET:   80,  JBE:    81,  JC:    82,  JCXZ:   83,  JG:     84,  JGE:     85,  JL:     86,  JLE:    87,
-        JMP:    88,  JNBE:   89,  JNC:   90,  JNO:    91,  JNP:    92,  JNS:     93,  JNZ:    94,  JO:     95,
-        JP:     96,  JS:     97,  JZ:    98,  LAHF:   99,  LAR:    100, LDS:     101, LEA:    102, LEAVE:  103,
-        LES:    104, LFS:    105, LGDT:  106, LGS:    107, LIDT:   108, LLDT:    109, LMSW:   110, LOCK:   111,
-        LODSB:  112, LODSW:  113, LOOP:  114, LOOPNZ: 115, LOOPZ:  116, LSL:     117, LSS:    118, LTR:    119,
-        MOV:    120, MOVSB:  121, MOVSW: 122, MOVSX:  123, MOVZX:  124, MUL:     125, NEG:    126, NOP:    127,
-        NOT:    128, OR:     129, OSIZE: 130, OUT:    131, OUTS:   132, POP:     133, POPA:   134, POPF:   135,
-        PUSH:   136, PUSHA:  137, PUSHF: 138, RCL:    139, RCR:    140, REPNZ:   141, REPZ:   142, RET:    143,
-        RETF:   144, ROL:    145, ROR:   146, SAHF:   147, SAR:    148, SBB:     149, SCASB:  150, SCASW:  151,
-        SETBE:  152, SETC:   153, SETG:  154, SETGE:  155, SETL:   156, SETLE:   157, SETNBE: 158, SETNC:  159,
-        SETNO:  160, SETNP:  161, SETNS: 162, SETNZ:  163, SETO:   164, SETP:    165, SETS:   166, SETZ:   167,
-        SGDT:   168, SHL:    169, SHLD:  170, SHR:    171, SHRD:   172, SIDT:    173, SLDT:   174, SMSW:   175,
-        SS:     176, STC:    177, STD:   178, STI:    179, STOSB:  180, STOSW:   181, STR:    182, SUB:    183,
-        TEST:   184, VERR:   185, VERW:  186, WAIT:   187, XCHG:   188, XLAT:    189, XOR:    190, GRP1B:  191,
-        GRP1W:  192, GRP1SW: 193, GRP2B: 194, GRP2W:  195, GRP2B1: 196, GRP2W1:  197, GRP2BC: 198, GRP2WC: 199,
-        GRP3B:  200, GRP3W:  201, GRP4B: 202, GRP4W:  203, OP0F:   204, GRP6:    205, GRP7:   206
+        NONE:   0,   AAA:    1,   AAD:    2,   AAM:    3,   AAS:    4,   ADC:    5,   ADD:    6,   AND:    7,
+        ARPL:   8,   ASIZE:  9,   BOUND:  10,  BSF:    11,  BSR:    12,  BT:     13,  BTC:    14,  BTR:    15,
+        BTS:    16,  CALL:   17,  CBW:    18,  CLC:    19,  CLD:    20,  CLI:    21,  CLTS:   22,  CMC:    23,
+        CMP:    24,  CMPSB:  25,  CMPSW:  26,  CS:     27,  CWD:    28,  DAA:    29,  DAS:    30,  DEC:    31,
+        DIV:    32,  DS:     33,  ENTER:  34,  ES:     35,  ESC:    36,  FADD:   37,  FBLD:   38,  FBSTP:  39,
+        FCOM:   40,  FCOMP:  41,  FDIV:   42,  FDIVR:  43,  FIADD:  44,  FICOM:  45,  FICOMP: 46,  FIDIV:  47,
+        FIDIVR: 48,  FILD:   49,  FIMUL:  50,  FIST:   51,  FISTP:  52,  FISUB:  53,  FISUBR: 54,  FLD:    55,
+        FLDCW:  56,  FLDENV: 57,  FMUL:   58,  FNSAVE: 59,  FNSTCW: 60,  FNSTENV:61,  FNSTSW: 62,  FRSTOR: 63,
+        FS:     64,  FST:    65,  FSTP:   66,  FSUB:   67,  FSUBR:  68,  GBP:    69,  GS:     70,  HLT:    71,
+        IDIV:   72,  IMUL:   73,  IN:     74,  INC:    75,  INS:    76,  INT:    77,  INT3:   78,  INTO:   79,
+        IRET:   80,  JBE:    81,  JC:     82,  JCXZ:   83,  JG:     84,  JGE:    85,  JL:     86,  JLE:    87,
+        JMP:    88,  JNBE:   89,  JNC:    90,  JNO:    91,  JNP:    92,  JNS:    93,  JNZ:    94,  JO:     95,
+        JP:     96,  JS:     97,  JZ:     98,  LAHF:   99,  LAR:    100, LDS:    101, LEA:    102, LEAVE:  103,
+        LES:    104, LFS:    105, LGDT:   106, LGS:    107, LIDT:   108, LLDT:   109, LMSW:   110, LOADALL:111,
+        LOCK:   112, LODSB:  113, LODSW:  114, LOOP:   115, LOOPNZ: 116, LOOPZ:  117, LSL:    118, LSS:    119,
+        LTR:    120, MOV:    121, MOVSB:  122, MOVSW:  123, MOVSX:  124, MOVZX:  125, MUL:    126, NEG:    127,
+        NOP:    128, NOT:    129, OR:     130, OSIZE:  131, OUT:    132, OUTS:   133, POP:    134, POPA:   135,
+        POPF:   136, PUSH:   137, PUSHA:  138, PUSHF:  139, RCL:    140, RCR:    141, REPNZ:  142, REPZ:   143,
+        RET:    144, RETF:   145, ROL:    146, ROR:    147, SAHF:   148, SAR:    149, SBB:    150, SCASB:  151,
+        SCASW:  152, SETBE:  153, SETC:   154, SETG:   155, SETGE:  156, SETL:   157, SETLE:  158, SETNBE: 159,
+        SETNC:  160, SETNO:  161, SETNP:  162, SETNS:  163, SETNZ:  164, SETO:   165, SETP:   166, SETS:   167,
+        SETZ:   168, SGDT:   169, SHL:    170, SHLD:   171, SHR:    172, SHRD:   173, SIDT:   174, SLDT:   175,
+        SMSW:   176, SS:     177, STC:    178, STD:    179, STI:    180, STOSB:  181, STOSW:  182, STR:    183,
+        SUB:    184, TEST:   185, VERR:   186, VERW:   187, WAIT:   188, XCHG:   189, XLAT:   190, XOR:    191,
+        GRP1B:  192, GRP1W:  193, GRP1SW: 194, GRP2B:  195, GRP2W:  196, GRP2B1: 197, GRP2W1: 198, GRP2BC: 199,
+        GRP2WC: 200, GRP3B:  201, GRP3W:  202, GRP4B:  203, GRP4W:  204, OP0F:   205, GRP6:   206, GRP7:   207
     };
 
     /*
      * Instruction names, indexed by instruction ordinal (above)
      */
     Debugger.asIns = [
-        "DB",     "AAA",    "AAD",   "AAM",    "AAS",    "ADC",     "ADD",    "AND",
-        "ARPL",   "AS:",    "BOUND", "BSF",    "BSR",    "BT",      "BTC",    "BTR",
-        "BTS",    "CALL",   "CBW",   "CLC",    "CLD",    "CLI",     "CLTS",   "CMC",
-        "CMP",    "CMPSB",  "CMPSW", "CS:",    "CWD",    "DAA",     "DAS",    "DEC",
-        "DIV",    "DS:",    "ENTER", "ES:",    "ESC",    "FADD",    "FBLD",   "FBSTP",
-        "FCOM",   "FCOMP",  "FDIV",  "FDIVR",  "FIADD",  "FICOM",   "FICOMP", "FIDIV",
-        "FIDIVR", "FILD",   "FIMUL", "FIST",   "FISTP",  "FISUB",   "FISUBR", "FLD",
-        "FLDCW",  "FLDENV", "FMUL",  "FNSAVE", "FNSTCW", "FNSTENV", "FNSTSW", "FRSTOR",
-        "FS:",    "FST",    "FSTP",  "FSUB",   "FSUBR",  "GBP",     "GS:",    "HLT",
-        "IDIV",   "IMUL",   "IN",    "INC",    "INS",    "INT",     "INT3",   "INTO",
-        "IRET",   "JBE",    "JC",    "JCXZ",   "JG",     "JGE",     "JL",     "JLE",
-        "JMP",    "JNBE",   "JNC",   "JNO",    "JNP",    "JNS",     "JNZ",    "JO",
-        "JP",     "JS",     "JZ",    "LAHF",   "LAR",    "LDS",     "LEA",    "LEAVE",
-        "LES",    "LFS",    "LGDT",  "LGS",    "LIDT",   "LLDT",    "LMSW",   "LOCK",
-        "LODSB",  "LODSW",  "LOOP",  "LOOPNZ", "LOOPZ",  "LSL",     "LSS",    "LTR",
-        "MOV",    "MOVSB",  "MOVSW", "MOVSX",  "MOVZX",  "MUL",     "NEG",    "NOP",
-        "NOT",    "OR",     "OS:",   "OUT",    "OUTS",   "POP",     "POPA",   "POPF",
-        "PUSH",   "PUSHA",  "PUSHF", "RCL",    "RCR",    "REPNZ",   "REPZ",   "RET",
-        "RETF",   "ROL",    "ROR",   "SAHF",   "SAR",    "SBB",     "SCASB",  "SCASW",
-        "SETBE",  "SETC",   "SETG",  "SETGE",  "SETL",   "SETLE",   "SETNBE", "SETNC",
-        "SETNO",  "SETNP",  "SETNS", "SETNZ",  "SETO",   "SETP",    "SETS",   "SETZ",
-        "SGDT",   "SHL",    "SHLD",  "SHR",    "SHRD",   "SIDT",    "SLDT",   "SMSW",
-        "SS:",    "STC",    "STD",   "STI",    "STOSB",  "STOSW",   "STR",    "SUB",
-        "TEST",   "VERR",   "VERW",  "WAIT",   "XCHG",   "XLAT",    "XOR"
+        "DB",     "AAA",    "AAD",    "AAM",    "AAS",    "ADC",    "ADD",    "AND",
+        "ARPL",   "AS:",    "BOUND",  "BSF",    "BSR",    "BT",     "BTC",    "BTR",
+        "BTS",    "CALL",   "CBW",    "CLC",    "CLD",    "CLI",    "CLTS",   "CMC",
+        "CMP",    "CMPSB",  "CMPSW",  "CS:",    "CWD",    "DAA",    "DAS",    "DEC",
+        "DIV",    "DS:",    "ENTER",  "ES:",    "ESC",    "FADD",   "FBLD",   "FBSTP",
+        "FCOM",   "FCOMP",  "FDIV",   "FDIVR",  "FIADD",  "FICOM",  "FICOMP", "FIDIV",
+        "FIDIVR", "FILD",   "FIMUL",  "FIST",   "FISTP",  "FISUB",  "FISUBR", "FLD",
+        "FLDCW",  "FLDENV", "FMUL",   "FNSAVE", "FNSTCW", "FNSTENV","FNSTSW", "FRSTOR",
+        "FS:",    "FST",    "FSTP",   "FSUB",   "FSUBR",  "GBP",    "GS:",    "HLT",
+        "IDIV",   "IMUL",   "IN",     "INC",    "INS",    "INT",    "INT3",   "INTO",
+        "IRET",   "JBE",    "JC",     "JCXZ",   "JG",     "JGE",    "JL",     "JLE",
+        "JMP",    "JNBE",   "JNC",    "JNO",    "JNP",    "JNS",    "JNZ",    "JO",
+        "JP",     "JS",     "JZ",     "LAHF",   "LAR",    "LDS",    "LEA",    "LEAVE",
+        "LES",    "LFS",    "LGDT",   "LGS",    "LIDT",   "LLDT",   "LMSW",   "LOADALL",
+        "LOCK",   "LODSB",  "LODSW",  "LOOP",   "LOOPNZ", "LOOPZ",  "LSL",    "LSS",
+        "LTR",    "MOV",    "MOVSB",  "MOVSW",  "MOVSX",  "MOVZX",  "MUL",    "NEG",
+        "NOP",    "NOT",    "OR",     "OS:",    "OUT",    "OUTS",   "POP",    "POPA",
+        "POPF",   "PUSH",   "PUSHA",  "PUSHF",  "RCL",    "RCR",    "REPNZ",  "REPZ",
+        "RET",    "RETF",   "ROL",    "ROR",    "SAHF",   "SAR",    "SBB",    "SCASB",
+        "SCASW",  "SETBE",  "SETC",   "SETG",   "SETGE",  "SETL",   "SETLE",  "SETNBE",
+        "SETNC",  "SETNO",  "SETNP",  "SETNS",  "SETNZ",  "SETO",   "SETP",   "SETS",
+        "SETZ",   "SGDT",   "SHL",    "SHLD",   "SHR",    "SHRD",   "SIDT",   "SLDT",
+        "SMSW",   "SS:",    "STC",    "STD",    "STI",    "STOSB",  "STOSW",  "STR",
+        "SUB",    "TEST",   "VERR",   "VERW",   "WAIT",   "XCHG",   "XLAT",   "XOR"
     ];
 
     Debugger.CPU_86 = 0;
@@ -464,7 +465,8 @@ if (DEBUGGER) {
         "rtc":      Debugger.MESSAGE_RTC,
         "8042":     Debugger.MESSAGE_8042,
         "chipset":  Debugger.MESSAGE_CHIPSET,   // ie, anything else in ChipSet besides DMA, PIC, TIMER, CMOS, RTC and 8042
-        "keyboard": Debugger.MESSAGE_KBD,
+        "kbd":      Debugger.MESSAGE_KBD,
+        "keys":     Debugger.MESSAGE_KEYS,
         "video":    Debugger.MESSAGE_VIDEO,
         "fdc":      Debugger.MESSAGE_FDC,
         "hdc":      Debugger.MESSAGE_HDC,
@@ -473,14 +475,14 @@ if (DEBUGGER) {
         "speaker":  Debugger.MESSAGE_SPEAKER,
         "state":    Debugger.MESSAGE_STATE,
         "mouse":    Debugger.MESSAGE_MOUSE,
-        "computer": Debugger.MESSAGE_CMP,
+        "computer": Debugger.MESSAGE_COMPUTER,
         "cpu":      Debugger.MESSAGE_CPU,
         "dos":      Debugger.MESSAGE_DOS,
         "int":      Debugger.MESSAGE_INT,
         "log":      Debugger.MESSAGE_LOG,
         /*
          * Now we turn to message actions rather than message types; for example, setting "halt"
-         * on or off doesn't enable "halt" messages, but rather halts the CPU on any above message.
+         * on or off doesn't enable "halt" messages, but rather halts the CPU on any message above.
          */
         "halt":     Debugger.MESSAGE_HALT
     };
@@ -524,7 +526,7 @@ if (DEBUGGER) {
      *
      *      On the 8086, it functioned as POP CS
      *      On the 80186, it generated an illegal opcode (UD_FAULT) exception
-     *      On the 80286, it introduced a series of new (and growing) two-byte opcodes
+     *      On the 80286, it introduced a new (and growing) series of two-byte opcodes
      *
      * Based on the active CPU model, we make every effort to execute and disassemble this (and every other)
      * opcode appropriately, by setting the opcode's entry in aaOpDescs accordingly.  0x0F defaults to the 8086
@@ -840,10 +842,11 @@ if (DEBUGGER) {
     ];
 
     Debugger.aaOp0FDescs = {
-        0x00: [Debugger.INS.GRP6, Debugger.TYPE_MODRM | Debugger.TYPE_WORD |  Debugger.TYPE_BOTH],
-        0x01: [Debugger.INS.GRP7, Debugger.TYPE_MODRM | Debugger.TYPE_WORD |  Debugger.TYPE_BOTH],
-        0x02: [Debugger.INS.LAR,  Debugger.TYPE_REG   | Debugger.TYPE_WORD |  Debugger.TYPE_IN | Debugger.TYPE_286,   Debugger.TYPE_MEM  | Debugger.TYPE_WORD | Debugger.TYPE_IN],
-        0x03: [Debugger.INS.LSL,  Debugger.TYPE_REG   | Debugger.TYPE_WORD |  Debugger.TYPE_IN | Debugger.TYPE_286,   Debugger.TYPE_MEM  | Debugger.TYPE_WORD | Debugger.TYPE_IN]
+        0x00: [Debugger.INS.GRP6,    Debugger.TYPE_MODRM | Debugger.TYPE_WORD |  Debugger.TYPE_BOTH],
+        0x01: [Debugger.INS.GRP7,    Debugger.TYPE_MODRM | Debugger.TYPE_WORD |  Debugger.TYPE_BOTH],
+        0x02: [Debugger.INS.LAR,     Debugger.TYPE_REG   | Debugger.TYPE_WORD |  Debugger.TYPE_IN | Debugger.TYPE_286,   Debugger.TYPE_MEM  | Debugger.TYPE_WORD | Debugger.TYPE_IN],
+        0x03: [Debugger.INS.LSL,     Debugger.TYPE_REG   | Debugger.TYPE_WORD |  Debugger.TYPE_IN | Debugger.TYPE_286,   Debugger.TYPE_MEM  | Debugger.TYPE_WORD | Debugger.TYPE_IN],
+        0x05: [Debugger.INS.LOADALL, Debugger.TYPE_286]
     };
 
     Debugger.aaGrpDescs = [
@@ -1778,8 +1781,8 @@ if (DEBUGGER) {
          * it here, so that if the CPU is reset while running, we can prevent stop()
          * from unnecessarily dumping the CPU state.
          */
-        if (this.fRunning !== undefined && !fQuiet) this.println("reset");
-        this.fRunning = false;
+        if (this.aFlags.fRunning !== undefined && !fQuiet) this.println("reset");
+        this.aFlags.fRunning = false;
         this.clearTempBreakpoint();
         if (!fQuiet) this.updateStatus();
     };
@@ -1845,7 +1848,7 @@ if (DEBUGGER) {
     Debugger.prototype.start = function(ms, nCycles)
     {
         if (!this.fProcStep) this.println("running");
-        this.fRunning = true;
+        this.aFlags.fRunning = true;
         this.msStart = ms;
         this.nCyclesStart = nCycles;
     };
@@ -1861,8 +1864,8 @@ if (DEBUGGER) {
      */
     Debugger.prototype.stop = function(ms, nCycles)
     {
-        if (this.fRunning) {
-            this.fRunning = false;
+        if (this.aFlags.fRunning) {
+            this.aFlags.fRunning = false;
             this.nCycles = nCycles - this.nCyclesStart;
             if (!this.fProcStep) {
                 var sStopped = "stopped";
@@ -2565,11 +2568,11 @@ if (DEBUGGER) {
             sLine += "                         ";
             sLine = sLine.substr(0, 50);
             sLine += ";";
-            if (!this.cpu.fChecksum) {
+            if (!this.cpu.aFlags.fChecksum) {
                 sLine += sComment + (nSequence != null? '=' + nSequence.toString() : "");
             } else {
                 var nCycles = this.cpu.getCycles();
-                sLine += "cycles=" + nCycles.toString() + " cs=" + str.toHex(this.cpu.nChecksum);
+                sLine += "cycles=" + nCycles.toString() + " cs=" + str.toHex(this.cpu.aCounts.nChecksum);
             }
         }
         return sLine;
@@ -3495,7 +3498,7 @@ if (DEBUGGER) {
                             break;
                         }
                     }
-                    s += ",dpl" + ((seg.acc >> X86.DESC.ACC.LEVEL.SHIFT) & X86.DESC.ACC.LEVEL.MASK);
+                    s += ",dpl" + ((seg.acc >> X86.DESC.ACC.DPL.SHIFT) & X86.DESC.ACC.DPL.MASK);
                     s += (seg.acc & X86.DESC.ACC.PRESENT)? ",present" : ",not present";
                 } else {
                     // We must be in real-mode, where selectors have no access bytes
@@ -3618,7 +3621,7 @@ if (DEBUGGER) {
      */
     Debugger.prototype.doHalt = function(sCount)
     {
-        if (this.fRunning && sCount === undefined) {
+        if (this.aFlags.fRunning && sCount === undefined) {
             this.haltCPU();
             return;
         }
@@ -3713,11 +3716,11 @@ if (DEBUGGER) {
                 } while (cLines && i != this.iTraceBuffer);
                 if (!sDump) sDump = "nothing to dump";
                 this.println(sDump);
-                this.println("msPerYield: " + this.cpu.msPerYield);
-                this.println("nCyclesPerBurst: " + this.cpu.nCyclesPerBurst);
-                this.println("nCyclesPerYield: " + this.cpu.nCyclesPerYield);
-                this.println("nCyclesPerVideoUpdate: " + this.cpu.nCyclesPerVideoUpdate);
-                this.println("nCyclesPerStatusUpdate: " + this.cpu.nCyclesPerStatusUpdate);
+                this.println("msPerYield: " + this.cpu.aCounts.msPerYield);
+                this.println("nCyclesPerBurst: " + this.cpu.aCounts.nCyclesPerBurst);
+                this.println("nCyclesPerYield: " + this.cpu.aCounts.nCyclesPerYield);
+                this.println("nCyclesPerVideoUpdate: " + this.cpu.aCounts.nCyclesPerVideoUpdate);
+                this.println("nCyclesPerStatusUpdate: " + this.cpu.aCounts.nCyclesPerStatusUpdate);
             } else {
                 var fEnable = (sEnable == "on");
                 for (var prop in this.traceEnabled) {
@@ -3980,13 +3983,13 @@ if (DEBUGGER) {
                 }
                 switch (asArgs[2]) {
                     case "int":
-                        this.cpu.nCyclesChecksumInterval = nCycles;
+                        this.cpu.aCounts.nCyclesChecksumInterval = nCycles;
                         break;
                     case "start":
-                        this.cpu.nCyclesChecksumStart = nCycles;
+                        this.cpu.aCounts.nCyclesChecksumStart = nCycles;
                         break;
                     case "stop":
-                        this.cpu.nCyclesChecksumStop = nCycles;
+                        this.cpu.aCounts.nCyclesChecksumStop = nCycles;
                         break;
                     default:
                         this.println("unknown cs option");
@@ -3995,7 +3998,7 @@ if (DEBUGGER) {
                 if (nCycles !== undefined) {
                     this.cpu.resetChecksum();
                 }
-                this.println("checksums " + (this.cpu.fChecksum? "enabled" : "disabled"));
+                this.println("checksums " + (this.cpu.aFlags.fChecksum? "enabled" : "disabled"));
                 break;
             case "sp":
                 if (asArgs[2] !== undefined) {
@@ -4533,7 +4536,7 @@ if (DEBUGGER) {
                         if (this.cmp) this.cmp.reset();
                         return true;
                     case "ver":
-                        this.println((APPNAME || "PCjs") + " version " + APPVERSION + " (" + (COMPILED? "release" : (DEBUG? "debug" : "nodebug")) + (PREFETCH? ",prefetch" : "") + (TYPEDARRAYS? ",typedarrays" : (FATARRAYS? ",fatarrays" : "")) + ")");
+                        this.println((APPNAME || "PCjs") + " version " + APPVERSION + " (" + (COMPILED? "release" : (DEBUG? "debug" : "nodebug")) + (PREFETCH? ",prefetch" : ",noprefetch") + (EAFUNCS? "eafuncs" : ",eatests") + (TYPEDARRAYS? ",typedarrays" : (FATARRAYS? ",fatarrays" : ",dwords")) + ")");
                         return true;
                     default:
                         ch0 = sCmd.charAt(0);

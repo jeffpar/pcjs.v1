@@ -40,7 +40,7 @@ Example
 ---
 	<keyboard id="keyboard" model="us83"/>
 
-See [/devices/pc/keyboard/us83.xml](/configs/pc/keyboards/us83.xml) for an example that provides a complete "soft keyboard".
+See [/devices/pc/keyboard/us83.xml](/devices/pc/keyboard/us83.xml) for an example that provides a complete "soft keyboard".
 
 Output
 ---

@@ -44,7 +44,7 @@ function C1PPanel(parmsPanel)
 {
     Component.call(this, "C1PPanel", parmsPanel);
 
-    this.fPower = false;
+    this.aFlags.fPowered = false;
 }
 
 Component.subclass(Component, C1PPanel);
@@ -77,8 +77,8 @@ C1PPanel.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, contro
  */
 C1PPanel.prototype.setPower = function(fOn, cmp)
 {
-    if (fOn && !this.fPower) {
-        this.fPower = true;
+    if (fOn && !this.aFlags.fPowered) {
+        this.aFlags.fPowered = true;
         this.cmp = cmp;
         this.cpu = cmp.getComponentByType("cpu");
         this.kbd = cmp.getComponentByType("keyboard");

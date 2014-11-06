@@ -74,6 +74,7 @@ if (typeof module !== 'undefined') {
     var Component   = require("../../shared/lib/component");
     var Bus         = require("./bus");
     var State       = require("./state");
+    var Debugger    = require("./debugger");
 }
 
 /**
@@ -123,11 +124,11 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
 
     Component.call(this, "Computer", parmsComputer, Computer);
 
-    this.fPowered = false;
+    this.aFlags.fPowered = false;
     this.nBusWidth = parmsComputer['buswidth'];
     this.resume = Computer.RESUME_NONE;
     this.sStateData = null;
-    this.fServerState = this.fSave = false;
+    this.fServerState = false;
     this.url = parmsMachine? parmsMachine['url'] : null;
 
     /*
@@ -544,9 +545,9 @@ Computer.prototype.powerOn = function(resume)
  */
 Computer.prototype.powerRestore = function(component, stateComputer, fRepower, fRestore)
 {
-    if (!component.fPowered) {
+    if (!component.aFlags.fPowered) {
 
-        component.fPowered = true;
+        component.aFlags.fPowered = true;
 
         if (component.powerUp) {
 
@@ -649,9 +650,9 @@ Computer.prototype.donePowerOn = function(aParms)
     var fRepower = (aParms[1] < 0);
     var fRestore = aParms[2];
 
-    if (DEBUG && this.fPowered) this.messageDebugger("Computer.donePowerOn(): redundant");
+    if (DEBUG && this.aFlags.fPowered) this.messageDebugger("Computer.donePowerOn(): redundant");
 
-    this.fPowered = true;
+    this.aFlags.fPowered = true;
 
     if (!this.fInitialized) {
         this.println(Computer.sAppName + " v" + Computer.sAppVer + "\n" + Computer.sCopyright + "\n" + Computer.LICENSE);
@@ -754,7 +755,7 @@ Computer.prototype.powerOff = function(fSave, fShutdown)
         data = this.cpu.powerDown(fSave, fShutdown);
         if (typeof data === "object") stateComputer.set(this.cpu.id, data);
         if (fShutdown) {
-            this.cpu.fPowered = false;
+            this.cpu.aFlags.fPowered = false;
             if (data === false) sState = null;
         }
     }
@@ -762,13 +763,13 @@ Computer.prototype.powerOff = function(fSave, fShutdown)
     var aComponents = Component.getComponents(this.id);
     for (var iComponent = 0; iComponent < aComponents.length; iComponent++) {
         var component = aComponents[iComponent];
-        if (component.fPowered) {
+        if (component.aFlags.fPowered) {
             if (component.powerDown) {
                 data = component.powerDown(fSave, fShutdown);
                 if (typeof data === "object") stateComputer.set(component.id, data);
             }
             if (fShutdown) {
-                component.fPowered = false;
+                component.aFlags.fPowered = false;
                 if (data === false) sState = null;
             }
         }
@@ -820,7 +821,7 @@ Computer.prototype.powerOff = function(fSave, fShutdown)
         }
     }
 
-    if (fShutdown) this.fPowered = false;
+    if (fShutdown) this.aFlags.fPowered = false;
 
     return sState;
 };
@@ -963,7 +964,7 @@ Computer.prototype.queryUserID = function(fPrompt)
         sUserID = web.getLocalStorageItem(Computer.STATE_USERID);
         if (sUserID !== undefined) {
             if (!sUserID && fPrompt) {
-                sUserID = web.promptUser("To save machine states on the pcjs.org server, you need a user ID (email Jeff@pcjs.org).\n\nOnce you have an ID, enter it below.");
+                sUserID = web.promptUser("To save machine states on the pcjs.org server, you need a user ID (email support@pcjs.org).\n\nOnce you have an ID, enter it below.");
                 if (sUserID) {
                     sUserID = this.verifyUserID(sUserID);
                     if (!sUserID) this.notice("Your user ID has not been approved.");
@@ -1176,7 +1177,7 @@ Computer.prototype.getComponentByType = function(sType, componentPrev)
 /**
  * messageDebugger(sMessage, fForce)
  *
- * This is a combination of the Debugger's messageEnabled(MESSAGE_CMP) and message() functions, for convenience.
+ * This is a combination of the Debugger's messageEnabled(MESSAGE_COMPUTER) and message() functions, for convenience.
  *
  * @this {Computer}
  * @param {string} sMessage is any caller-defined message string
@@ -1185,7 +1186,7 @@ Computer.prototype.getComponentByType = function(sType, componentPrev)
 Computer.prototype.messageDebugger = function(sMessage, fForce)
 {
     if (DEBUGGER && this.dbg) {
-        if (fForce || this.dbg.messageEnabled(Debugger.MESSAGE_CMP)) this.dbg.message(sMessage);
+        if (fForce || this.dbg.messageEnabled(Debugger.MESSAGE_COMPUTER)) this.dbg.message(sMessage);
     }
 };
 
@@ -1221,7 +1222,7 @@ Computer.init = function()
              */
             var computer = new Computer(parmsComputer, parmsMachine, true);
 
-            if (DEBUG) computer.messageDebugger("onInit(" + computer.fPowered + ")");
+            if (DEBUG) computer.messageDebugger("onInit(" + computer.aFlags.fPowered + ")");
 
             /*
              * For now, all we support are "reset" and "save" buttons. We may eventually add a "power"
@@ -1251,9 +1252,9 @@ Computer.show = function()
         var computer = Component.getComponentByType("Computer", parmsComputer['id']);
         if (computer) {
 
-            if (DEBUG) computer.messageDebugger("onShow(" + computer.fInitialized + "," + computer.fPowered + ")");
+            if (DEBUG) computer.messageDebugger("onShow(" + computer.fInitialized + "," + computer.aFlags.fPowered + ")");
 
-            if (computer.fInitialized && !computer.fPowered) {
+            if (computer.fInitialized && !computer.aFlags.fPowered) {
                 /**
                  * Repower the computer, notifying every component to continue running as-is.
                  */
@@ -1298,9 +1299,9 @@ Computer.exit = function()
         var computer = Component.getComponentByType("Computer", parmsComputer['id']);
         if (computer) {
 
-            if (DEBUG) computer.messageDebugger("onExit(" + computer.fPowered + ")");
+            if (DEBUG) computer.messageDebugger("onExit(" + computer.aFlags.fPowered + ")");
 
-            if (computer.fPowered) {
+            if (computer.aFlags.fPowered) {
                 /**
                  * Power "down" the computer, giving every component an opportunity to save its state,
                  * but only if 'resume' has been set AND there is no valid resume path (because if a valid resume

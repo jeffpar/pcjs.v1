@@ -12,11 +12,11 @@ All the simulations are written entirely in JavaScript.  No Flash, Java or other
 Supported browsers include recent versions of Internet Explorer (v9.0 or later), Safari, Chrome, Firefox and various
 mobile browsers.
 
-[Embedded IBM PC](/configs/pc/machines/5150/mda/64kb/ "PCjs:ibm5150")
+[Embedded IBM PC](/devices/pc/machine/5150/mda/64kb/ "PCjs:ibm5150")
 
-The [simulation](/configs/pc/machines/5150/mda/64kb/) above features an Intel 8088 running at 4.77Mhz,
+The [simulation](/devices/pc/machine/5150/mda/64kb/) above features an Intel 8088 running at 4.77Mhz,
 with 64Kb of RAM and an IBM Monochrome Display Adapter.  For more control, there are also
-[Control Panel](/configs/pc/machines/5150/mda/64kb/debugger/) and [Soft Keyboard](/configs/pc/machines/5150/mda/64kb/softkbd/)
+[Control Panel](/devices/pc/machine/5150/mda/64kb/debugger/) and [Soft Keyboard](/devices/pc/machine/5150/mda/64kb/softkbd/)
 configurations, featuring the built-in PCjs Debugger.  For even greater control, build your own PC. The
 [PCjs Documentation](/docs/pcjs/) will help you get started.
 
@@ -28,17 +28,17 @@ Demos
 ---
 Some pre-configured machines are shown below, ready to run BASIC, DOS, Windows 1.01, and assorted non-DOS software.
 
-![IBM PC running DONKEY.BAS](/configs/pc/machines/5150/cga/64kb/donkey/thumbnail.jpg "link:/configs/pc/machines/5150/cga/64kb/donkey/:200:100")
-![IBM PC XT w/CGA, 10Mb Hard Drive](/configs/pc/machines/5160/cga/256kb/demo/thumbnail.jpg "link:/configs/pc/machines/5160/cga/256kb/demo/:200:100")
-![IBM PC XT w/CGA, Windows 1.01](/configs/pc/machines/5160/cga/256kb/win101/thumbnail.jpg "link:/configs/pc/machines/5160/cga/256kb/win101/:200:100")
-![IBM PC XT w/EGA, Windows 1.01](/configs/pc/machines/5160/ega/640kb/win101/thumbnail.jpg "link:/configs/pc/machines/5160/ega/640kb/win101/:200:100")
+![IBM PC running DONKEY.BAS](/devices/pc/machine/5150/cga/64kb/donkey/thumbnail.jpg "link:/devices/pc/machine/5150/cga/64kb/donkey/:200:100")
+![IBM PC XT w/CGA, 10Mb Hard Drive](/devices/pc/machine/5160/cga/256kb/demo/thumbnail.jpg "link:/devices/pc/machine/5160/cga/256kb/demo/:200:100")
+![IBM PC XT w/CGA, Windows 1.01](/devices/pc/machine/5160/cga/256kb/win101/thumbnail.jpg "link:/devices/pc/machine/5160/cga/256kb/win101/:200:100")
+![IBM PC XT w/EGA, Windows 1.01](/devices/pc/machine/5160/ega/640kb/win101/thumbnail.jpg "link:/devices/pc/machine/5160/ega/640kb/win101/:200:100")
 ![IBM PC w/MDA, CP/M-86](/disks/pc/cpm/thumbnail.jpg "link:/disks/pc/cpm/:200:100")
 ![IBM PC w/MDA, Microsoft Adventure](/disks/pc/games/microsoft/adventure/thumbnail.jpg "link:/disks/pc/games/microsoft/adventure/:200:100")
 ![IBM PC w/CGA, Zork I](/disks/pc/games/infocom/zork1/thumbnail.jpg "link:/disks/pc/games/infocom/zork1/:200:100")
 
-Check out the rest of the PCjs [Application](/apps/pc/), [Boot Disk](/disks/pc/) and [Machine](/configs/pc/machines/)
-demos, including the [IBM PC XT "Server Array"](/configs/pc/machines/5160/cga/256kb/array/) and
-[Windows 1.01 "Server Array"](/configs/pc/machines/5160/ega/640kb/array/) demos of multiple PCs running side-by-side.
+Check out the rest of the PCjs [Application](/apps/pc/), [Boot Disk](/disks/pc/) and [Machine](/devices/pc/machine/)
+demos, including the [IBM PC XT "Server Array"](/devices/pc/machine/5160/cga/256kb/array/) and
+[Windows 1.01 "Server Array"](/devices/pc/machine/5160/ega/640kb/array/) demos of multiple PCs running side-by-side.
 
 C1Pjs
 ---
@@ -46,7 +46,7 @@ Below is the [OSI Challenger C1P](/docs/c1pjs/), another simulation in the JavaS
 It simulates Ohio Scientific's 6502-based microcomputer, released in 1978.  More details about this simulation
 and the original machine are available in the [C1Pjs Documentation](/docs/c1pjs/).
 
-[Embedded OSI Challenger C1P](/configs/c1p/machines/8kb/large/ "C1Pjs:demoC1P")
+[Embedded OSI Challenger C1P](/devices/c1p/machine/8kb/large/ "C1Pjs:demoC1P")
 
 <!--BEGIN:EXCLUDE-->
 
@@ -62,11 +62,11 @@ operation.
 
 The project includes:
 
-+ A simple Node-based web server ([server.js](server.js))
-+ Custom Node modules used by the web server ([HTMLOut](my_modules/htmlout/), [MarkOut](my_modules/markout/), [DiskDump](my_modules/diskdump/), [FileDump](my_modules/filedump/))
-+ An assortment of IBM PC and C1P machine XML files (see [/apps](apps/), [/configs](configs/) and [/disks](disks/))
-+ The [PCjs](my_modules/pcjs-client/lib/) and [C1Pjs](my_modules/c1pjs-client/lib/) client applications, both "compiled" and uncompiled
-+ A smattering of [PCjs](docs/pcjs/) and [C1Pjs](docs/c1pjs/) documentation, along with [blog posts](blog/), related [publications](pubs/) and more
+- A simple Node-based web server ([server.js](server.js))
+- Custom Node modules used by the web server ([HTMLOut](my_modules/htmlout/), [MarkOut](my_modules/markout/), [DiskDump](my_modules/diskdump/), [FileDump](my_modules/filedump/))
+- A variety of IBM PC and C1P configuration and resource files (see [/apps](apps/), [/devices](devices/) and [/disks](disks/))
+- The [PCjs](my_modules/pcjs-client/lib/) and [C1Pjs](my_modules/c1pjs-client/lib/) client applications, both "compiled" and uncompiled
+- A smattering of [PCjs](docs/pcjs/) and [C1Pjs](docs/c1pjs/) documentation, along with [blog posts](blog/), related [publications](pubs/) and more
 
 The bundled web server is not strictly required.  Any web server (Node, Apache, Nginx, etc) that can serve the necessary
 JavaScript files to your browser will work.  However, instructions for doing that are beyond the scope of this introduction.
@@ -77,11 +77,10 @@ included in the project, but unless all the resource files are moved into a sing
 [Demos](/docs/pcjs/demos/)), your browser will probably be unable to load all of them, due to security restrictions.
 Using the bundled web server is the preferred solution.
 
-Aside from the [PCjs](my_modules/pcjs-client/lib/) and [C1Pjs](my_modules/c1pjs-client/lib/) applications,
-[DiskDump](my_modules/diskdump/) is another important module.  Originally created to dump existing disk images as JSON,
-**DiskDump** has evolved into a full-featured disk image generator, capable of creating PC-compatible diskette *and*
-hard disk images from either lists *or* directories of files (including all subdirectories), and supports both
-command-line and web interfaces.
+The project includes a large selection of disk images, and a powerful [DiskDump](my_modules/diskdump/) utility that
+runs on both the client and server, featuring a command-line interface (CLI) and web server API.  Originally created to dump
+existing disk images as JSON, **DiskDump** has evolved into a full-featured disk image generator, capable of creating PC-compatible
+diskette *and* hard disk images from either lists *or* directories of files (including all subdirectories).
 
 ### Installing PCjs
 
@@ -103,7 +102,7 @@ and type the following commands:
 Now open a web browser and go to `http://localhost:8088/`.  Done!
  
 If you just want to launch the web server or don't plan to do any development, you can reduce the
-footprint slightly by asking NPM to install only "productions" modules (which can also eliminate some
+footprint slightly by asking NPM to install only "production" modules (which can also eliminate some
 errors if, for example, you neglected to install Python):
  
 	npm install --production
@@ -114,7 +113,7 @@ If you ever inadvertently run `npm install` without `--production`, you can easi
 	npm prune --production
 	
 Finally, when installing on an AWS server, although you have complete control over how Node is launched, you
-don't have direct control over NPM; the best you can do is set the following AWS "Environment Property":
+don't have direct control over NPM; I think the best you can do is set the following AWS "Environment Property":
 
 	NPM_CONFIG_PRODUCTION=true
 	
@@ -149,7 +148,7 @@ are specified, `grunt` runs the "default" task defined by [Gruntfile.js](Gruntfi
 in the [/versions](versions/) directory) are out-of date.
 
 To ensure consistent compilation results, a copy of the Closure Compiler has been checked into the
-[bin](bin/) folder.  This version of Closure Compiler, in turn, requires Java v7 or later.  Use the following
+[/bin](bin/) folder.  This version of Closure Compiler, in turn, requires Java v7 or later.  Use the following
 commands to confirm that everything is working properly:
 
 	java -version
@@ -206,7 +205,7 @@ If no Debugger component has been created yet, or if the Debugger didn't recogni
 like a good little REPL.
 
 Use the "load" command to load a JSON machine configuration file.  A sample [machine.json](my_modules/pcjs-client/bin/machine.json)
-is provided in the *bin* directory, which is a "JSON-ified" version of the [machine.xml](configs/pc/machines/5150/mda/64kb/machine.xml)
+is provided in the *bin* directory, which is a "JSON-ified" version of the [machine.xml](devices/pc/machine/5150/mda/64kb/machine.xml)
 displayed on the [pcjs.org](/) home page.
 
 The command-line loader creates all the JSON-defined machine components in the same order that the browser creates
@@ -251,6 +250,10 @@ If you want server.js to use a different port (the default is 8088), set PORT in
 the server:
 
 	export PORT=80
+	
+or add `--port` to your command-line:
+
+	node server.js --logging --console --debug --port=80
 
 A complete list of command-line options can be found in [server.js](server.js).
 
@@ -264,7 +267,7 @@ and C1Pjs much easier to debug, albeit much slower:
 The "gort=debug" command is unnecessary if the server is started with `--debug`; the server always serves uncompiled
 files when running in debug mode.
 
-Conversely, if the server is running debug mode but you want to test a compiled version of PCjs, use:
+Conversely, if the server is in debug mode but you want to test a compiled version of PCjs, use:
 
 	http://localhost:8088/?gort=release
 
@@ -298,7 +301,7 @@ To start developing features for a new version of PCjs, here are the recommended
 1. Change the version number in the root [package.json](/package.json)
 2. Run the "grunt promote" task to bump the version in all the machine XML files
 3. Make changes
-4. Run "grunt" to build new versions of the apps (eg, "/versions/pcjs/1.xx.yy/pc.js")
+4. Run "grunt" to build new versions of the apps (eg, "/versions/pcjs/1.x.x/pc.js")
  
 You might also want to check out the blog post on [PCjs Coding Conventions](/blog/2014/09/30/).
 
@@ -333,12 +336,12 @@ All published portions are free for redistribution and/or modification under the
 [GNU General Public License](/LICENSE) as published by the Free Software Foundation, either version 3 of the License,
 or (at your option) any later version.
 
-You are required to include a current copyright notice, with a link to [http://pcjs.org](), such as:
+You are required to include the following copyright notice, with a link to [http://pcjs.org]():
 
 > [PCjs](http://pcjs.org) © 2012-2014 by [Jeff Parsons](mailto:Jeff@pcjs.org) ([@jeffpar](http://twitter.com/jeffpar))
 
-in every source code file of every copy or modified version of this work, and to display that notice on every screen
-that loads or runs any version of this software.
+in every source code file of every copy or modified version of this work, and to display that notice on every web page
+or computer that runs any version of this software.
 
 See [LICENSE](/LICENSE) for details.
 

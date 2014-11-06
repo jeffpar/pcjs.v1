@@ -51,6 +51,7 @@
 if (typeof module !== 'undefined') {
     var str         = require("../../shared/lib/strlib");
     var Component   = require("../../shared/lib/component");
+    var Debugger    = require("./debugger");
 }
 /**
  * @class DataView

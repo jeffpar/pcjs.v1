@@ -64,7 +64,7 @@ var DEBUGGER = true;            // this @define is overridden by the Closure Com
  * @define {boolean}
  *
  * PREFETCH enables the use of a prefetch queue.
- * 
+ *
  * See the Bus component for details.
  */
 var PREFETCH = false;
@@ -72,27 +72,21 @@ var PREFETCH = false;
 /**
  * @define {boolean}
  *
- * FASTDISABLE turns on memory-function switching to dynamically disable memory accesses whenever the CPU wants
- * to disable spurious memory reads (which are mostly harmless) or stale memory writes (which tend to be destructive
- * and are NOT mostly harmless).
- * 
- * If FASTDISABLE is false, then the code falls back to setting/testing internal OP_NOREAD and OP_NOWRITE opFlags
- * as needed.
- * 
- * At the moment, it seems that FASTDISABLE is a bit slower than relying on the OP_NOREAD/OP_NOWRITE flags, so it's
- * turned off; apparently, I was a bit too optimistic calling it "FAST".  But your mileage may vary, depending on the
- * browser and its version.
+ * EAFUNCS enables dynamic function switching whenever the CPU needs to disable one or both EA (Effective Address)
+ * memory functions for a ModRM instruction that doesn't observe the normal "read/modify/write" behavior.  The goal
+ * is to avoid useless memory reads (which are mostly harmless) and stale memory writes (which are mostly destructive).
  *
- * See the X86CPU component for details, since it is the CPU, not the underlying Bus or Memory components, that needs
- * to be able to do this.
+ * If EAFUNCS is false, then the CPU falls back to setting/testing internal OP_NOREAD and OP_NOWRITE opFlags as
+ * needed.  At the moment, it seems that "EAFUNCS mode" is a bit slower than "EATESTS mode", so EAFUNCS is turned off;
+ * however, your mileage may vary, depending on the browser and its vintage.
  */
-var FASTDISABLE = false;
+var EAFUNCS = false;
 
 /**
  * @define {boolean}
  *
- * FATARRAYS is a Closure Compiler compile-time option that allocates 1 number per byte for Memory blocks;
- * wasteful, but potentially slightly faster.
+ * FATARRAYS is a Closure Compiler compile-time option that allocates an Array of numbers for every Memory block,
+ * where each a number represents ONE byte; very wasteful, but potentially slightly faster.
  *
  * See the Memory component for details.
  */
@@ -100,16 +94,14 @@ var FATARRAYS = false;
 
 /**
  * @define {boolean}
- * 
- * TYPEDARRAYS enables use of typed arrays for Memory blocks. This used to be a compile-time-only option, but since I've
- * added memory access functions for typed arrays (see Memory.afnTypedArray), I can turn the support on dynamically now.
- * Originally, I didn't see much of a speed increase over the original (non-typed) implementation, but that will probably
- * change over time.
+ *
+ * TYPEDARRAYS enables use of typed arrays for Memory blocks.  This used to be a compile-time-only option, but I've
+ * added Memory access functions for typed arrays (see Memory.afnTypedArray), so support can be enabled dynamically.
+ *
+ * However, TYPEDARRAYS has always been slightly slower than the original DWORDS implementation (which uses an Array
+ * of numbers that stores 32 bits -- 4 consecutive bytes -- per number), so TYPEDARRAYS is completely disabled for now.
  *
  * See the Memory component for details.
- * 
- * UPDATE (Oct 2014): Time has passed, and TypedArray support is still measurably slower than the default Memory implementation,
- * so it's turned off by default for now.
  */
 var TYPEDARRAYS = false; // (typeof ArrayBuffer !== 'undefined');
 
@@ -117,7 +109,7 @@ if (typeof module !== 'undefined') {
     global.PCJSCLASS = PCJSCLASS;
     global.DEBUGGER = DEBUGGER;
     global.PREFETCH = PREFETCH;
-    global.FASTDISABLE = FASTDISABLE;
+    global.EAFUNCS = EAFUNCS;
     global.FATARRAYS = FATARRAYS;
     global.TYPEDARRAYS = TYPEDARRAYS;
     /*

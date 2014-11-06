@@ -89,6 +89,7 @@
     position: absolute;
     height: 34px;
     line-height: 34px; /* the equivalent of "vertical-align: middle" for single-line elements */
+    background-color: #ffffff;
 }
 .pcjs-reference {
     float: left;

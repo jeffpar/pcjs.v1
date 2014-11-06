@@ -1,19 +1,31 @@
 DiskDump
 ===
-Module (and command-line utility) for converting disk images to/from various formats (eg, JSON,
-commented JSON, and IMG files). 
 
-Building images from folders/files
+**DiskDump** is a Node module with both a command-line interface and a web server API for converting disk images
+to/from various formats (eg, JSON files, JSON files with comments, IMG disk images, etc). 
+
+Building Disk Images from Folders/Files
 ---
-I finally ported the code in [convdisk.php](/bin/convdisk.php) that creates disk images
-from the contents of local files/folders, which you can now access via the *DiskDump* API.
+In addition to converting disk images to/from JSON, DiskDump can also create disk images from the contents of local
+files/folders.
 
-For example:
+For example, from the root directory of the project, you could run:
 
-	http://www.pcjs.org/api/v1/dump?path=/apps/pc/1981/visicalc/bin/vc.com;../README.md&format=json
+	node my_modules/diskdump/bin/diskdump --path="apps/pc/1981/visicalc/README.md" --format=img --output=disk.img
+
+to produce a `disk.img` containing one file, "README.md", which you could then mount on your local operating
+system *or* inside a PCjs machine.
+
+To make the disk image more useful, you might want to download a copy of [VisiCalc](http://www.bricklin.com/history/vcexecutable.htm)
+into that folder as well, so that you could then run:
+
+	node my_modules/diskdump/bin/diskdump --path="apps/pc/1981/visicalc/vc.com;README.md" --format=img --output=disk.img
+
+to produce a `disk.img` containing both "VC.COM" and "README.md".  In fact, this is exactly how the
+[disk.json](/apps/pc/1981/visicalc/disk.json) stored in the [VisiCalc](/apps/pc/1981/visicalc/) folder was generated.
+
+The equivalent web server API request would look like:
+
+	http://localhost:8088/api/v1/dump?path=/apps/pc/1981/visicalc/vc.com;README.md&format=img
 	
-would be equivalent to the older PHP script operation:
-
-	http://jsmachines.net/bin/convdisk.php?file=/apps/pc/1981/visicalc/bin/vc.com&format=json&download=true
- 
-These commands produce a "disk.json", a copy of which is stored at [/apps/pc/1981/visicalc](/apps/pc/1981/visicalc/).
+DiskDump is a port of the original [JavaScript Machines](http://jsmachines.net/) **convdisk.php** utility.

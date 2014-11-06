@@ -17,11 +17,11 @@ files.
 
 [*machine.xsl*](machine.xsl) is an XML stylesheet that takes things a step further and transforms a machine XML
 into a stand-alone HTML document, which also includes all necessary compiled scripts (eg, c1p.js, c1p-dbg.js,
-pc.js or pc-dbg.js).  Most machine XML files explcitly link to this stylesheet, so that simply loading the XML
+pc.js or pc-dbg.js).  Most machine XML files explicitly link to this stylesheet, so that simply loading the XML
 file in your web browser creates a working virtual machine.
 
 [*manifest.xsl*](manifest.xsl) is an XML stylesheet that renders a software manifest XML file into a standalone
-document; it may even contain a referene to a machine XML file.
+document; it may even contain a reference to a machine XML file.
 
 [*document.xsl*](document.xsl) is a collection of XSL templates used exclusively by [*outline.xsl*](outline.xsl),
 which is a more grandiose version of [*machine.xsl*](machine.xsl), designed to support XML-based documentation

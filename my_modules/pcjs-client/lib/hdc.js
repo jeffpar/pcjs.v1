@@ -40,6 +40,7 @@ if (typeof module !== 'undefined') {
     var ChipSet     = require("./chipset");
     var Disk        = require("./disk");
     var State       = require("./state");
+    var Debugger    = require("./debugger");
 }
 
 /**
@@ -2430,22 +2431,26 @@ HDC.prototype.readByte = function(drive, done, fAutoInc)
      */
     if (done) {
         var hdc = this;
-        drive.disk.seek(drive.wCylinder, drive.bHead, drive.bSector + drive.bSectorBias, false, function(sector, fAsync) {
-            var b = -1;
-            if ((drive.sector = sector)) {
-                drive.ibSector = 0;
-                /*
-                 * We "pre-advance" bSector et al now, instead of waiting to advance it right before the seek().
-                 * This allows the initial call to readByte() to perform a seek without triggering an unwanted advance.
-                 */
-                hdc.advanceSector(drive);
-                b = drive.disk.read(drive.sector, drive.ibSector);
-                drive.ibSector += inc;
-            } else {
-                drive.errorCode = HDC.XTC.DATA.ERR.NO_SECTOR;
-            }
-            done(b, fAsync);
-        });
+        if (drive.disk) {
+            drive.disk.seek(drive.wCylinder, drive.bHead, drive.bSector + drive.bSectorBias, false, function(sector, fAsync) {
+                if ((drive.sector = sector)) {
+                    drive.ibSector = 0;
+                    /*
+                     * We "pre-advance" bSector et al now, instead of waiting to advance it right before the seek().
+                     * This allows the initial call to readByte() to perform a seek without triggering an unwanted advance.
+                     */
+                    hdc.advanceSector(drive);
+                    b = drive.disk.read(drive.sector, drive.ibSector);
+                    drive.ibSector += inc;
+                } else {
+                    drive.errorCode = HDC.XTC.DATA.ERR.NO_SECTOR;
+                }
+                done(b, fAsync);
+            });
+            return b;
+        }
+        drive.errorCode = HDC.XTC.DATA.ERR.NO_SECTOR;
+        done(b, false);
     }
     return b;
 };
@@ -2487,9 +2492,11 @@ HDC.prototype.writeByte = function(drive, b)
          * hence the bSectorBias below.  I could change how sector numbers are stored in the image,
          * but it seems preferable to keep the image format consistent and controller-independent.
          */
-        drive.disk.seek(drive.wCylinder, drive.bHead, drive.bSector + drive.bSectorBias, true, function(sector, fAsync) {
-            drive.sector = sector;
-        });
+        if (drive.disk) {
+            drive.disk.seek(drive.wCylinder, drive.bHead, drive.bSector + drive.bSectorBias, true, function(sector, fAsync) {
+                drive.sector = sector;
+            });
+        }
         if (!drive.sector) {
             drive.errorCode = HDC.XTC.DATA.ERR.NO_SECTOR;
             b = -1;

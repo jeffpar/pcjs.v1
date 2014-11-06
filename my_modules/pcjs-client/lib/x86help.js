@@ -67,7 +67,7 @@ var X86Help = {
         this.resultValue = this.resultParitySign = this.resultAuxOverflow = dst & src;
         this.resultSize = X86.RESULT.SIZE_BYTE;
         this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesTestRR : this.CYCLES.nOpCyclesTestRM) : this.CYCLES.nOpCyclesTestRM);
-        if (FASTDISABLE) this.setEAByte = this.setEAByteDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+        if (EAFUNCS) this.setEAByte = this.setEAByteDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
     /**
@@ -80,7 +80,7 @@ var X86Help = {
         this.resultValue = this.resultParitySign = this.resultAuxOverflow = dst & src;
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesTestRR : this.CYCLES.nOpCyclesTestRM) : this.CYCLES.nOpCyclesTestRM);
-        if (FASTDISABLE) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+        if (EAFUNCS) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
     /**
@@ -242,7 +242,7 @@ var X86Help = {
             this.setIP(this.opEA - this.segCS.base);
             X86Help.opHelpINT.call(this, X86.EXCEPTION.BOUND_ERR, null, 0);
         }
-        if (FASTDISABLE) this.setEAByte = this.setEAByteDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+        if (EAFUNCS) this.setEAByte = this.setEAByteDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
     /**
@@ -253,8 +253,8 @@ var X86Help = {
      */
     opHelpARPL: function(dst, src) {
         this.nStepCycles -= (10 + (this.regEA < 0? 0 : 1));
-        if ((dst & X86.SEL.LEVEL) < (src & X86.SEL.LEVEL)) {
-            dst = (dst & ~X86.SEL.LEVEL) | (src & X86.SEL.LEVEL);
+        if ((dst & X86.SEL.RPL) < (src & X86.SEL.RPL)) {
+            dst = (dst & ~X86.SEL.RPL) | (src & X86.SEL.RPL);
             this.setZF();
             return dst;
         }
@@ -277,7 +277,7 @@ var X86Help = {
          * if we need a special check for them.
          */
         if (this.segVER.load(src, true) >= 0) {
-            if (this.segVER.level >= (this.segCS.sel & X86.SEL.LEVEL) && this.segVER.level >= (src & X86.SEL.LEVEL)) {
+            if (this.segVER.dpl >= this.segCS.cpl && this.segVER.dpl >= (src & X86.SEL.RPL)) {
                 this.setZF();
                 return this.segVER.acc & X86.DESC.ACC.MASK;
             }
@@ -288,10 +288,13 @@ var X86Help = {
     /**
      * @this {X86CPU}
      * @param {number} dst
-     * @param {number} src
+     * @param {number} src (the selector)
      * @return {number}
      */
     opHelpLSL: function(dst, src) {
+        /*
+         * TODO: Is this an invalid operation if regEAWrite is set?  dst is required to be a register.
+         */
         this.nStepCycles -= (14 + (this.regEA < 0? 0 : 2));
         /*
          * Currently, segVER.load() will return an error only if the selector is beyond the bounds of the
@@ -301,8 +304,8 @@ var X86Help = {
          * are there any other instructions that were, um, less explicit but also require a non-null selector?
          */
         if ((src & X86.SEL.MASK) && this.segVER.load(src, true) >= 0) {
-            var fConforming = ((this.segVER.acc & X86.DESC.ACC.TYPE.CODE_CONFORMING) == X86.DESC.ACC.TYPE.CODE_CONFORMING);
-            if ((fConforming || this.segVER.level >= (this.segCS.sel & X86.SEL.LEVEL)) && this.segVER.level >= (src & X86.SEL.LEVEL)) {
+            var fConforming = ((this.segVER.acc & X86.DESC.ACC.TYPE.CODE_CONFORMING_EXECONLY) == X86.DESC.ACC.TYPE.CODE_CONFORMING_EXECONLY);
+            if ((fConforming || this.segVER.dpl >= this.segCS.cpl) && this.segVER.dpl >= (src & X86.SEL.RPL)) {
                 this.setZF();
                 return this.segVER.limit;
             }
@@ -465,8 +468,9 @@ var X86Help = {
      * @this {X86CPU}
      * @param {number} nFault
      * @param {number} [nError]
+     * @param {boolean} [fHalt] will halt the CPU if true *and* a Debugger is loaded
      */
-    opHelpFault: function(nFault, nError) {
+    opHelpFault: function(nFault, nError, fHalt) {
         if (DEBUGGER && this.dbg) {
             /*
              * NOTE: By using Debugger.message(), we have the option of setting "m halt on" and halting on messages like this.
@@ -474,6 +478,7 @@ var X86Help = {
             if (this.dbg.messageEnabled(Debugger.MESSAGE_CPU)) {
                 this.dbg.message("Fault 0x" + str.toHexByte(nFault) + (nError != null? " (0x" + str.toHexWord(nError) + ")" : "") + " on opcode 0x" + str.toHexByte(this.bus.getByteDirect(this.regEIP)) + " at " + str.toHexAddr(this.regIP, this.segCS.sel));
             }
+            if (fHalt) this.haltCPU();
         }
         if (this.model >= X86.MODEL_80186) {
             this.setIP(this.opEA - this.segCS.base);

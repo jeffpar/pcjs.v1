@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.15.8/machine.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.15.9/machine.xsl"?>
 <machine id="ibm5150" class="pc" border="1" pos="center" style="background-color:#FAEBD7">
 	<name pos="center">IBM PC (Model 5150) running Microsoft Adventure</name>
 	<computer id="msadv-mda-64k" name="IBM PC" resume="1"/>
@@ -13,7 +13,7 @@
 		<control type="button" class="input" binding="run">Run</control>
 		<control type="button" class="input" binding="reset">Reset</control>
 	</cpu>
-	<keyboard ref="/configs/pc/keyboards/minimal.xml"/>
-	<fdc ref="/configs/pc/disks/samples.xml" automount='{A: {name: "Microsoft Adventure", path: "/disks/pc/games/microsoft/adventure/adventure-1981.json"}}' pos="right"/>
+	<keyboard ref="/devices/pc/keyboard/minimal.xml"/>
+	<fdc ref="/disks/pc/samples.xml" automount='{A: {name: "Microsoft Adventure", path: "/disks/pc/games/microsoft/adventure/adventure-1981.json"}}' pos="right"/>
 	<chipset id="chipset" model="5150" sw1="01000001" sw2="11110000"/>
 </machine>

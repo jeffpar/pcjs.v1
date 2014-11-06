@@ -102,6 +102,7 @@ if (typeof module !== 'undefined') {
     var ChipSet     = require("./chipset");
     var Keyboard    = require("./keyboard");
     var State       = require("./state");
+    var Debugger    = require("./debugger");
 }
 
 /**
@@ -2209,15 +2210,15 @@ Video.prototype.processTouchEvent = function(event, fStart)
      */
     if (/* xThird == 1 && */ yThird != 1) {
         if (!yThird) {
-            this.kbd.keyPressSimulate(Keyboard.CHARCODE.U_ARROW, true);
+            this.kbd.keyPressSimulate(Keyboard.KEYCODE.UP, true);
         } else {
-            this.kbd.keyPressSimulate(Keyboard.CHARCODE.D_ARROW, true);
+            this.kbd.keyPressSimulate(Keyboard.KEYCODE.DOWN, true);
         }
     } else if (/* yThird == 1 && */ xThird != 1) {
         if (!xThird) {
-            this.kbd.keyPressSimulate(Keyboard.CHARCODE.L_ARROW, true);
+            this.kbd.keyPressSimulate(Keyboard.KEYCODE.LEFT, true);
         } else {
-            this.kbd.keyPressSimulate(Keyboard.CHARCODE.R_ARROW, true);
+            this.kbd.keyPressSimulate(Keyboard.KEYCODE.RIGHT, true);
         }
     }
 };
@@ -3820,9 +3821,9 @@ Video.prototype.updateChar = function(col, row, data, context)
 Video.prototype.updateScreen = function(fForce)
 {
     /*
-     * The Computer component maintains an fPowered setting on our behalf, so we use it.
+     * The Computer component maintains the fPowered setting on our behalf, so we use it.
      */
-    if (!this.fPowered) return;
+    if (!this.aFlags.fPowered) return;
 
     /*
      * If the card's video signal is disabled (eg, during a mode change), then skip the update,
@@ -5085,9 +5086,9 @@ Video.init = function()
          *
          * UPDATE: Unfortunately, Android keyboards like to compose whole words before transmitting any of the
          * intervening characters; our textarea's keyDown/keyUp event handlers DO receive intervening key events,
-         * but their keyCode and charCode properties are ZERO.  Virtually the only usable key event we receive is
-         * the Enter key, which makes this hack useless.  Android users will have to use machines that display
-         * their own on-screen keyboard, or use an external keyboard.
+         * but their keyCode property is ZERO.  Virtually the only usable key event we receive is the Enter key,
+         * which makes this hack useless.  Android users will have to use machines that display their own on-screen
+         * keyboard, or use an external keyboard.
          *
          * See this Chromium issue for more information: https://code.google.com/p/chromium/issues/detail?id=118639
          *

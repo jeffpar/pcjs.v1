@@ -33,6 +33,7 @@
 "use strict";
 
 if (typeof module !== 'undefined') {
+    var str         = require("../../shared/lib/strlib");
     var X86         = require("./x86");
     var X86Help     = require("./x86help");
 }
@@ -52,9 +53,11 @@ function X86Seg(cpu, sName, fProt)
     this.base = 0;
     this.limit = 0xffff;
     this.acc = 0;
-    this.level = 0;
+    this.fCode = (sName == "CS");
     this.sName = sName;
-    this.setProt(fProt);
+    this.cpl = 0;
+    this.dpl = 0;
+    this.updateAccess(fProt);
 }
 
 /*
@@ -64,26 +67,26 @@ function X86Seg(cpu, sName, fProt)
 /**
  * loadReal(sel, fSuppress)
  *
- * This is the default real-mode load() function.
+ * The default segment load() function for real-mode.
  *
  * @this {X86Seg}
- * @param {number} sel containing a selector
+ * @param {number} sel
  * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number} base address of selected segment, or -1 if error
  */
 X86Seg.loadReal = function loadReal(sel, fSuppress)
 {
     this.sel = sel;
-    this.limit = 0xffff;        // TODO: Consider NOT setting the limit field in real-mode (unless it's required for, say, LOADALL support?)
-    this.level = 0;
+    this.limit = 0xffff;
+    this.cpl = this.dpl = 0;
     return this.base = sel << 4;
 };
 
 /**
  * loadProt(sel, fSuppress)
  *
- * This replaces the segment's default load() function whenever the segment is notified (eg, by the CPU's setProtMode()
- * function) the processor is now in protected-mode.
+ * This replaces the segment's default load() function whenever the segment is notified via updateAccess() by the
+ * CPU's setProtMode() that the processor is now in protected-mode.
  *
  * Segments in protected-mode are referenced by selectors, which are indexes into descriptor tables (GDT, LDT, IDT) whose
  * descriptors are 4-word (8-byte) entries:
@@ -96,7 +99,7 @@ X86Seg.loadReal = function loadReal(sel, fSuppress)
  * See X86.DESC for offset and bit definitions.
  *
  * @this {X86Seg}
- * @param {number} sel containing a selector
+ * @param {number} sel
  * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number} base address of selected segment, or -1 if error
  */
@@ -111,70 +114,21 @@ X86Seg.loadProt = function loadProt(sel, fSuppress)
         addrDT = this.cpu.segLDT.base;
         addrDTLimit = this.cpu.segLDT.limit;
     }
-    var offDesc = addrDT + (sel & X86.SEL.MASK);
-    if (offDesc + 7 <= addrDTLimit) {
+    var addrDesc = addrDT + (sel & X86.SEL.MASK);
+    if (addrDesc + 7 <= addrDTLimit) {
         /*
          * TODO: This is only the first of many steps toward accurately counting cycles in protected mode;
          * I simply noted that "POP segreg" takes 5 cycles in real mode and 20 in protected mode, so I'm
          * starting with a 15-cycle difference.  Obviously the difference will be much greater when the load fails.
          */
         this.cpu.nStepCycles -= 15;
-        return X86Seg.loadDesc.call(this, sel, offDesc, true);
+        return this.loadDesc8(sel, addrDesc);
     }
     return -1;
 };
 
 /**
- * loadDesc(sel, offDesc, fProt)
- *
- * @this {X86Seg}
- * @param {number} sel containing a selector
- * @param {number} offDesc is the physical address of a descriptor
- * @param {boolean} [fProt] is true if protected-mode, false if real-mode, undefined if TBD
- * @return {number} base address of selected segment, or -1 if error
- */
-X86Seg.loadDesc = function(sel, offDesc, fProt)
-{
-    var limit = this.cpu.getWord(offDesc + X86.DESC.LIMIT.OFFSET);
-    var acc = this.cpu.getWord(offDesc + X86.DESC.ACC.OFFSET);
-    var base = this.cpu.getWord(offDesc + X86.DESC.BASE.OFFSET) | ((acc & X86.DESC.ACC.BASE1623) << 16);
-
-    Component.assert(this.cpu.getWord(offDesc + 0x06) == 0);
-
-    fProt = this.setProt(fProt);
-
-    /*
-     * For LSL (which uses fSuppress), we must support X86.DESC.ACC.TYPE.SEG as well as TSS and LDT.
-     */
-    var accType = (acc & X86.DESC.ACC.TYPE.MASK);
-
-    if (accType & X86.DESC.ACC.TYPE.SEG) {
-        if (fProt) {
-            if ((accType & X86.DESC.ACC.TYPE.CODE_READABLE) == X86.DESC.ACC.TYPE.CODE) {
-                this.checkWrite = X86Seg.checkReadProtDisabled;
-            }
-            if ((accType & X86.DESC.ACC.TYPE.CODE) || !(accType & X86.DESC.ACC.TYPE.WRITEABLE)) {
-                this.checkWrite = X86Seg.checkWriteProtDisabled;
-            }
-        }
-        this.sel = sel;
-        this.limit = limit;
-        this.acc = acc;
-        this.level = (acc & X86.DESC.ACC.LEVEL.MASK) >> X86.DESC.ACC.LEVEL.SHIFT;
-        return this.base = base;
-    }
-    else if (accType && accType <= X86.DESC.ACC.TYPE.TSS_BUSY) {
-        this.sel = sel;
-        this.limit = limit;
-        this.acc = acc;
-        this.level = (acc & X86.DESC.ACC.LEVEL.MASK) >> X86.DESC.ACC.LEVEL.SHIFT;
-        return this.base = base;
-    }
-    return -1;
-};
-
-/**
- * checkReadReal(off, cb)
+ * checkReadReal(off, cb, fSuppress)
  *
  * TODO: Invoke X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT) if off is 0xffff and cb is 1;
  * also, whether or not the opHelpFault() call should include an error code, since this is happening in real-mode.
@@ -191,7 +145,7 @@ X86Seg.checkReadReal = function checkReadReal(off, cb, fSuppress)
 };
 
 /**
- * checkWriteReal(off, cb)
+ * checkWriteReal(off, cb, fSuppress)
  *
  * TODO: Invoke X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT) if off is 0xffff and cb is 1;
  * also, whether or not the opHelpFault() call should include an error code, since this is happening in real-mode.
@@ -208,7 +162,7 @@ X86Seg.checkWriteReal = function checkWriteReal(off, cb, fSuppress)
 };
 
 /**
- * checkReadProtEnabled(off, cb)
+ * checkReadProtEnabled(off, cb, fSuppress)
  *
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
@@ -225,7 +179,7 @@ X86Seg.checkReadProtEnabled = function checkReadProtEnabled(off, cb, fSuppress)
 };
 
 /**
- * checkReadProtDisabled(off, cb)
+ * checkReadProtDisabled(off, cb, fSuppress)
  *
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
@@ -242,7 +196,7 @@ X86Seg.checkReadProtDisabled = function checkReadProtDisabled(off, cb, fSuppress
 };
 
 /**
- * checkWriteProtEnabled(off, cb)
+ * checkWriteProtEnabled(off, cb, fSuppress)
  *
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
@@ -259,7 +213,7 @@ X86Seg.checkWriteProtEnabled = function checkWriteProtEnabled(off, cb, fSuppress
 };
 
 /**
- * checkWriteProtDisabled(off, cb)
+ * checkWriteProtDisabled(off, cb, fSuppress)
  *
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
@@ -280,40 +234,88 @@ X86Seg.checkWriteProtDisabled = function checkWriteProtDisabled(off, cb, fSuppre
  */
 
 /**
- * save()
+ * loadDesc6(sel, addrDesc)
  *
- * Early versions of PCjs saved only segment selectors, since that's all that mattered in real-mode;
- * newer versions need to save/restore the entire segment object.
+ * Used to load a protected-mode selector that refers to a 6-byte descriptor "cache" (LOADALL) entry:
+ *
+ *      word 0: base address low
+ *      word 1: base address high (0-7), segment type (8-11), descriptor type (12), DPL (13-14), present bit (15)
+ *      word 2: segment limit (0-15)
  *
  * @this {X86Seg}
- * @return {Array}
+ * @param {number} sel is the selector
+ * @param {number} addrDesc is the offset
+ * @return {number} base address of selected segment, or -1 if error
  */
-X86Seg.prototype.save = function()
+X86Seg.prototype.loadDesc6 = function(sel, addrDesc)
 {
-    return [this.sel, this.base, this.limit, this.acc, this.level, this.sName];
+    var acc = this.cpu.getWord(addrDesc + 2);
+    var base = this.cpu.getWord(addrDesc + 0) | ((acc & 0xff) << 16);
+    var limit = this.cpu.getWord(addrDesc + 4);
+
+    if (DEBUG) {
+        this.cpu.messageDebugger("loadDesc6(" + this.sName + "): base=" + str.toHex(base) + " limit=" + str.toHexWord(limit) + " acc=" + str.toHexWord(acc));
+    }
+
+    this.sel = sel;
+    this.base = base;
+    this.limit = limit;
+    this.acc = acc & X86.DESC.ACC.MASK;
+    this.updateAccess();
+
+    return base;
 };
 
 /**
- * restore(a)
+ * loadDesc8(sel, addrDesc)
  *
- * Early versions of PCjs saved only segment selectors, since that's all that mattered in real-mode;
- * newer versions need to save/restore the entire segment object.
+ * Used to load a protected-mode selector that refers to an 8-byte descriptor table (GDT, LDT, IDT) entry:
+ *
+ *      word 0: segment limit (0-15)
+ *      word 1: base address low
+ *      word 2: base address high (0-7), segment type (8-11), descriptor type (12), DPL (13-14), present bit (15)
+ *      word 3: used only on 80386 and up (should be set to zero for upward compatibility)
+ *
+ * See X86.DESC for offset and bit definitions.
  *
  * @this {X86Seg}
- * @param {Array|number} a
+ * @param {number} sel is the selector
+ * @param {number} addrDesc is the offset
+ * @return {number} base address of selected segment, or -1 if error
  */
-X86Seg.prototype.restore = function(a)
+X86Seg.prototype.loadDesc8 = function(sel, addrDesc)
 {
-    if (typeof a == "number") {
-        this.load(a);
-    } else {
-        this.sel   = a[0];
-        this.base  = a[1];
-        this.limit = a[2];
-        this.acc   = a[3];
-        this.level = a[4];
-        this.sName = a[5];
+    var limit = this.cpu.getWord(addrDesc + X86.DESC.LIMIT.OFFSET);
+    var acc = this.cpu.getWord(addrDesc + X86.DESC.ACC.OFFSET);
+    var base = this.cpu.getWord(addrDesc + X86.DESC.BASE.OFFSET) | ((acc & X86.DESC.ACC.BASE1623) << 16);
+    var ext = (DEBUG? this.cpu.getWord(addrDesc + X86.DESC.EXT.OFFSET) : 0);
+
+    if (DEBUG) {
+        this.cpu.messageDebugger("loadDesc8(" + this.sName + "): base=" + str.toHex(base) + " limit=" + str.toHexWord(limit) + " acc=" + str.toHexWord(acc) + (ext? " ext=" + str.toHexWord(ext) : ""));
+        Component.assert(!ext);
     }
+
+    /*
+     * For LSL (which uses fSuppress), we must support X86.DESC.ACC.TYPE.SEG as well as TSS and LDT.
+     */
+    var accType;
+    if ((acc & X86.DESC.ACC.TYPE.SEG) || (accType = (acc & X86.DESC.ACC.TYPE.MASK)) && accType <= X86.DESC.ACC.TYPE.TSS_BUSY) {
+        this.sel = sel;
+        this.base = base;
+        this.limit = limit;
+        /*
+         * Note that bits 0-7 of acc will usually contain the BASE1623 bits from the descriptor entry,
+         * but it doesn't matter, because the only acc bits we pay attention to are bits 8-15; however,
+         * to keep things tidy, we zero bits 0-7.  Perhaps we'll find other (internal) uses for those bits.
+         */
+        this.acc = acc & X86.DESC.ACC.MASK;
+        this.type = acc & X86.DESC.ACC.TYPE.MASK;
+        this.updateAccess();
+    }
+    else {
+        base = -1;
+    }
+    return base;
 };
 
 /**
@@ -333,16 +335,55 @@ X86Seg.prototype.setBase = function(addr)
 };
 
 /**
- * setProt(fProt)
+ * save()
  *
- * This must be used to ensure that the segment register's state (ie, load and check methods) matches
- * the current operating mode (real or protected).
+ * Early versions of PCjs saved only segment selectors, since that's all that mattered in real-mode;
+ * newer versions need to save/restore the entire segment object.
  *
  * @this {X86Seg}
- * @param {boolean} [fProt]
+ * @return {Array}
+ */
+X86Seg.prototype.save = function()
+{
+    return [this.sel, this.base, this.limit, this.acc, this.fCode, this.sName, this.cpl, this.dpl];
+};
+
+/**
+ * restore(a)
+ *
+ * Early versions of PCjs saved only segment selectors, since that's all that mattered in real-mode;
+ * newer versions need to save/restore the entire segment object.
+ *
+ * @this {X86Seg}
+ * @param {Array|number} a
+ */
+X86Seg.prototype.restore = function(a)
+{
+    if (typeof a == "number") {
+        this.load(a);
+    } else {
+        this.sel    = a[0];
+        this.base   = a[1];
+        this.limit  = a[2];
+        this.acc    = a[3];
+        this.fCode  = a[4];
+        this.sName  = a[5];
+        this.cpl    = a[6];
+        this.dpl    = a[7];
+    }
+};
+
+/**
+ * updateAccess(fProt)
+ *
+ * Ensures that the segment register's access (ie, load and check methods) matches the specified (or current)
+ * operating mode (real or protected).
+ *
+ * @this {X86Seg}
+ * @param {boolean} [fProt] true for protected-mode access, false for real-mode access, undefined for current mode
  * @return {boolean}
  */
-X86Seg.prototype.setProt = function(fProt)
+X86Seg.prototype.updateAccess = function(fProt)
 {
     if (fProt === undefined) {
         fProt = !!(this.cpu.regMSW & X86.MSW.PE);
@@ -351,10 +392,27 @@ X86Seg.prototype.setProt = function(fProt)
         this.load = X86Seg.loadProt;
         this.checkRead = X86Seg.checkReadProtEnabled;
         this.checkWrite = X86Seg.checkWriteProtEnabled;
+        if (this.acc & X86.DESC.ACC.TYPE.SEG) {
+            /*
+             * If the READABLE bit of CODE_READABLE is not set, then disallow reads
+             */
+            if ((this.acc & X86.DESC.ACC.TYPE.CODE_READABLE) == X86.DESC.ACC.TYPE.CODE_EXECONLY) {
+                this.checkWrite = X86Seg.checkReadProtDisabled;
+            }
+            /*
+             * If the CODE bit is set, or the the WRITEABLE bit is not set, then disallow writes
+             */
+            if ((this.acc & X86.DESC.ACC.TYPE.CODE) || !(this.acc & X86.DESC.ACC.TYPE.WRITEABLE)) {
+                this.checkWrite = X86Seg.checkWriteProtDisabled;
+            }
+        }
+        this.cpl = this.sel & X86.SEL.RPL;
+        this.dpl = (this.acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
     } else {
         this.load = X86Seg.loadReal;
         this.checkRead = X86Seg.checkReadReal;
         this.checkWrite = X86Seg.checkWriteReal;
+        this.cpl = this.dpl = 0;
     }
     return fProt;
 };

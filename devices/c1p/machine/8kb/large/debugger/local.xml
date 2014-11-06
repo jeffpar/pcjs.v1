@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="../../../../../../versions/c1pjs/1.15.8/machine.xsl"?>
+<machine id="c1p8kb" class="c1p" border="1" width="100%" style="background-color:#FAEBD7;padding-bottom:8px">
+	<name>OSI Challenger 1P (8Kb) with Debugger</name>
+	<computer id="c1p" name="Challenger 1P">
+		<module type="cpu" refid="cpu6502" start="0x0000" end="0xffff"/>
+		<module type="ram" refid="ram8K" start="0x0000" end="0x1fff"/>
+		<module type="rom" refid="romNull" start="0x2000" end="0x9fff"/>
+		<module type="rom" refid="romBasic" start="0xa000" end="0xbfff"/>
+		<module type="video" refid="video" start="0xd000" end="0xd3ff"/>
+		<module type="keyboard" refid="keyboard" start="0xdf00" end="0xdfff"/>
+		<module type="serial" refid="serialPort" start="0xf000" end="0xf0ff"/>
+		<module type="rom" refid="romSystem" start="0xf800" end="0xffff"/>
+	</computer>
+	<cpu id="cpu6502"/>
+	<debugger id="debugger"/>
+	<ram id="ram8K" size="0x2000"/>
+	<rom id="romNull" size="0x8000"/>
+	<rom id="romBasic" size="0x2000" image="../../../../rom/basic-gcpatch.hex"/>
+	<rom id="romSystem" size="0x0800" image="../../../../rom/system.hex"/>
+	<video id="video" screenwidth="512" screenheight="384" cols="32" rows="32" charset="../../../../video/chargen2x.png" width="512px" padding="8px">
+		<name>Video Display</name>
+	</video>
+	<keyboard id="keyboard" padleft="8px">
+		<control type="button" class="input" binding="ctrl-c">CTRL-C</control>
+		<control type="button" class="input" binding="ctrl-o">CTRL-O</control>
+		<control type="button" class="input" binding="break">BREAK</control>
+	</keyboard>
+	<serial id="serialPort" pos="left" padleft="8px">
+		<control type="list" class="input" binding="listSerial">
+			<item ref="../../../../../../apps/c1p/BASIC/OSI/POKER.BAS">POKER</item>
+			<item ref="../../../../../../apps/c1p/BASIC/OSI/SAMPLE1.BAS">BASIC MATH</item>
+			<item ref="../../../../../../apps/c1p/BASIC/OSI/SAMPLE2.BAS">CHECKING</item>
+			<item ref="../../../../../../apps/c1p/BASIC/OSI/SAMPLE3.BAS">TRIG TUTOR</item>
+			<item ref="../../../../../../apps/c1p/BASIC/OSI/SAMPLE4.BAS">STAR WARS</item>
+			<item ref="../../../../../../apps/c1p/BASIC/OSI/SAMPLE5.BAS">COUNTER</item>
+			<item ref="../../../../../../apps/c1p/BASIC/OSI/SAMPLE6.BAS">PRESIDENTS</item>
+		</control>
+		<control type="button" class="input" binding="loadSerial">Load File</control>
+	</serial>
+	<panel ref="../../../../panel/default.xml"/>
+</machine>

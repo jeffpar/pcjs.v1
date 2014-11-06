@@ -36,6 +36,7 @@ if (typeof module !== 'undefined') {
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
     var ChipSet     = require("./chipset");
+    var Debugger    = require("./debugger");
     var State       = require("./state");
 }
 
@@ -299,7 +300,7 @@ SerialPort.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, cont
              * BACKSPACE from being interpreted by the browser as a "Back" operation.
              */
             event = event || window.event;
-            var keyCode = event.charCode || event.keyCode;
+            var keyCode = event.keyCode;
             if (keyCode === 8) {
                 if (event.preventDefault) event.preventDefault();
                 serial.sendRBR([keyCode]);
@@ -307,12 +308,12 @@ SerialPort.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, cont
         };
         control.onkeypress = function onKeyPressSerial(event) {
             /*
-             * Browser-independent charCode extraction (refer to keyPress() and the other key
+             * Browser-independent keyCode extraction (refer to keyPress() and the other key
              * event handlers in keyboard.js).
              */
             event = event || window.event;
-            var charCode = event.which || event.keyCode;
-            serial.sendRBR([charCode]);
+            var keyCode = event.which || event.keyCode;
+            serial.sendRBR([keyCode]);
         };
         return true;
 

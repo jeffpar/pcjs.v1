@@ -48,10 +48,10 @@ var X86Op0F = {
     opGRP6: function() {
         var bModRM = this.getIPByte();
         if ((bModRM & 0x38) < 0x10) {   // possible reg values: 0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, 0x38
-            if (FASTDISABLE) this.modEAWord = this.modEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOREAD;
+            if (EAFUNCS) this.modEAWord = this.modEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOREAD;
         }
         X86Mods.aOpModsGrpWord[bModRM].call(this, X86Op0F.aOpGRP6, X86Grps.opGrpNoSrc);
-        if (FASTDISABLE) { this.modEAWord = this.modEAWordEnabled; this.setEAWord = this.setEAWordEnabled; }
+        if (EAFUNCS) { this.modEAWord = this.modEAWordEnabled; this.setEAWord = this.setEAWordEnabled; }
     },
     /**
      * @this {X86CPU}
@@ -61,10 +61,10 @@ var X86Op0F = {
     opGRP7: function() {
         var bModRM = this.getIPByte();
         if (!(bModRM & 0x10)) {
-            if (FASTDISABLE) this.modEAWord = this.modEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOREAD;
+            if (EAFUNCS) this.modEAWord = this.modEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOREAD;
         }
         X86Mods.aOpModsGrpWord[bModRM].call(this, X86Op0F.aOpGRP7, X86Grps.opGrpNoSrc);
-        if (FASTDISABLE) { this.modEAWord = this.modEAWordEnabled; this.setEAWord = this.setEAWordEnabled; }
+        if (EAFUNCS) { this.modEAWord = this.modEAWordEnabled; this.setEAWord = this.setEAWordEnabled; }
     },
     /**
      * @this {X86CPU}
@@ -124,6 +124,10 @@ var X86Op0F = {
      * op=0x0F,0x05 (loadall)
      */
     opLOADALL: function() {
+        if (this.segCS.cpl) {
+            X86Help.opHelpFault.call(this, X86.EXCEPTION.GP_FAULT, 0, true);
+            return;
+        }
         X86Help.opHelpLMSW.call(this, this.getWord(0x806));
         this.regDI = this.getWord(0x826);
         this.regSI = this.getWord(0x828);
@@ -133,26 +137,21 @@ var X86Op0F = {
         this.regDX = this.getWord(0x830);
         this.regCX = this.getWord(0x832);
         this.regAX = this.getWord(0x834);
-        /*
-         * loadDesc() is an X86Seg class method that we must use to force the specified descriptor to be loaded;
-         * since the processor might still be in real-mode, we can't use normal segment register instance methods.
-         */
-        X86Seg.loadDesc.call(this.segES, this.getWord(0x824), 0x836);
-        X86Seg.loadDesc.call(this.segCS, this.getWord(0x822), 0x83C);
-        X86Seg.loadDesc.call(this.segSS, this.getWord(0x820), 0x842);
-        X86Seg.loadDesc.call(this.segDS, this.getWord(0x81E), 0x848);
-        this.nCPL = this.segCS.level;
+        this.segES.loadDesc6(this.getWord(0x824), 0x836);
+        this.segCS.loadDesc6(this.getWord(0x822), 0x83C);
+        this.segSS.loadDesc6(this.getWord(0x820), 0x842);
+        this.segDS.loadDesc6(this.getWord(0x81E), 0x848);
         this.setPS(this.getWord(0x818));
         this.setIP(this.getWord(0x81A));
         /*
-         * TODO: The bytes at 0x851 and 0x85D "should be zeroes", but do we rely on that, or should we load zeroes ourselves?
+         * TODO: The bytes at 0x851 and 0x85D "should be zeroes", but do we rely on that, or do we load zeros ourselves?
          */
         this.addrGDT = this.getWord(0x84E) | (this.getWord(0x850) << 16);
         this.addrGDTLimit = this.addrGDT + this.getWord(0x852);
-        this.segLDT.loadDesc(this.getWord(0x81C), 0x854);
+        this.segLDT.loadDesc6(this.getWord(0x81C), 0x854);
         this.addrIDT = this.getWord(0x85A) | (this.getWord(0x85C) << 16);
         this.addrIDTLimit = this.addrIDT + this.getWord(0x85E);
-        this.segTSS.loadDesc(this.getWord(0x816), 0x860);
+        this.segTSS.loadDesc6(this.getWord(0x816), 0x860);
         this.nStepCycles -= 195;
     },
     /**
@@ -182,7 +181,7 @@ var X86Op0F = {
      * @return {number}
      */
     opLLDT: function(dst, src) {
-        if (FASTDISABLE) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+        if (EAFUNCS) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         this.segLDT.load(dst);
         this.nStepCycles -= (17 + (this.regEA < 0? 0 : 2));
         return dst;
@@ -194,7 +193,7 @@ var X86Op0F = {
      * @return {number}
      */
     opLTR: function(dst, src) {
-        if (FASTDISABLE) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+        if (EAFUNCS) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         this.segTSS.load(dst);
         this.nStepCycles -= (17 + (this.regEA < 0? 0 : 2));
         return dst;
@@ -206,7 +205,7 @@ var X86Op0F = {
      * @return {number}
      */
     opVERR: function(dst, src) {
-        if (FASTDISABLE) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+        if (EAFUNCS) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         /*
          * Currently, segVER.load() will return an error only if the selector is beyond the bounds of the
          * descriptor table or the descriptor is not for a segment.
@@ -224,12 +223,9 @@ var X86Op0F = {
                  *
                  * Otherwise, DPL must be greater than or equal to (have less or the same privilege as) both the
                  * current privilege level and the selector's RPL.
-                 *
-                 * TODO: Consider making a CPL (current privilege level) variable that tracks segCS.sel, so that we
-                 * don't have to mask segCS.sel every time.
                  */
-                if ((this.segVER.acc & X86.DESC.ACC.TYPE.CODE_CONFORMING) == X86.DESC.ACC.TYPE.CODE_CONFORMING ||
-                    this.segVER.level >= (this.segCS.sel & X86.SEL.LEVEL) && this.segVER.level >= (dst & X86.SEL.LEVEL)) {
+                if (this.segVER.dpl >= this.segCS.cpl && this.segVER.dpl >= (dst & X86.SEL.RPL) ||
+                    (this.segVER.acc & X86.DESC.ACC.TYPE.CODE_CONFORMING_EXECONLY) == X86.DESC.ACC.TYPE.CODE_CONFORMING_EXECONLY) {
                     this.setZF();
                     return dst;
                 }
@@ -245,7 +241,7 @@ var X86Op0F = {
      * @return {number}
      */
     opVERW: function(dst, src) {
-        if (FASTDISABLE) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+        if (EAFUNCS) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         /*
          * Currently, segVER.load() will return an error only if the selector is beyond the bounds of the
          * descriptor table or the descriptor is not for a segment.
@@ -259,11 +255,8 @@ var X86Op0F = {
                 /*
                  * DPL must be greater than or equal to (have less or the same privilege as) both the current
                  * privilege level and the selector's RPL.
-                 *
-                 * TODO: Consider making a CPL (current privilege level) variable that tracks segCS.sel, so that we
-                 * don't have to mask segCS.sel every time.
                  */
-                if (this.segVER.level >= (this.segCS.sel & X86.SEL.LEVEL) && this.segVER.level >= (dst & X86.SEL.LEVEL)) {
+                if (this.segVER.dpl >= this.segCS.cpl && this.segVER.dpl >= (dst & X86.SEL.RPL)) {
                     this.setZF();
                     return dst;
                 }
@@ -371,7 +364,7 @@ var X86Op0F = {
         } else {
             this.addrGDT = this.getWord(this.regEA + 2) | (this.getByte(this.regEA + 4) << 16);
             this.addrGDTLimit = this.addrGDT + dst;
-            if (FASTDISABLE) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+            if (EAFUNCS) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
             this.nStepCycles -= 11;
         }
         return dst;
@@ -394,7 +387,7 @@ var X86Op0F = {
         } else {
             this.addrIDT = this.getWord(this.regEA + 2) | (this.getByte(this.regEA + 4) << 16);
             this.addrIDTLimit = this.addrIDT + dst;
-            if (FASTDISABLE) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+            if (EAFUNCS) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
             this.nStepCycles -= 12;
         }
         return dst;
@@ -418,7 +411,7 @@ var X86Op0F = {
     opLMSW: function(dst, src) {
         X86Help.opHelpLMSW.call(this, dst);
         this.nStepCycles -= (this.regEA < 0? 3 : 6);
-        if (FASTDISABLE) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+        if (EAFUNCS) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     }
 };

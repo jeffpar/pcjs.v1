@@ -9,7 +9,7 @@
 
 	<xsl:variable name="MACHINECLASS">pc</xsl:variable>
 	<xsl:variable name="APPCLASS">pcjs</xsl:variable>
-	<xsl:variable name="APPVERSION">1.0.0</xsl:variable>
+	<xsl:variable name="APPVERSION">1.x.x</xsl:variable>
 	<xsl:variable name="SITEHOST">www.pcjs.org</xsl:variable>
 
 	<xsl:template name="componentStyles">
@@ -27,7 +27,7 @@
 	</xsl:template>
 
 	<xsl:template name="machine">
-		<xsl:param name="href">/configs/pc/machines/5150/mda/64kb/index.xml</xsl:param>
+		<xsl:param name="href">/devices/pc/machine/5150/mda/64kb/machine.xml</xsl:param>
 		<xsl:param name="state" select="''"/>
 		<xsl:variable name="componentFile"><xsl:value-of select="$rootDir"/><xsl:value-of select="$href"/></xsl:variable>
 		<xsl:apply-templates select="document($componentFile)/machine">

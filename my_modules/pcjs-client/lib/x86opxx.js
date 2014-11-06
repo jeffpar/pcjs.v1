@@ -651,7 +651,7 @@ var X86OpXX = {
      */
     opCMPmb: function() {
         X86Mods.aOpModsMemByte[this.getIPByte()].call(this, X86Grps.opGrpCMPb);
-        if (FASTDISABLE) this.setEAByte = this.setEAByteEnabled;
+        if (EAFUNCS) this.setEAByte = this.setEAByteEnabled;
     },
     /**
      * @this {X86CPU}
@@ -660,7 +660,7 @@ var X86OpXX = {
      */
     opCMPmw: function() {
         X86Mods.aOpModsMemWord[this.getIPByte()].call(this, X86Grps.opGrpCMPw);
-        if (FASTDISABLE) this.setEAWord = this.setEAWordEnabled;
+        if (EAFUNCS) this.setEAWord = this.setEAWordEnabled;
     },
     /**
      * @this {X86CPU}
@@ -669,7 +669,7 @@ var X86OpXX = {
      */
     opCMPrb: function() {
         X86Mods.aOpModsRegByte[this.getIPByte()].call(this, X86Grps.opGrpCMPb);
-        if (FASTDISABLE) this.setEAByte = this.setEAByteEnabled;
+        if (EAFUNCS) this.setEAByte = this.setEAByteEnabled;
     },
     /**
      * @this {X86CPU}
@@ -678,7 +678,7 @@ var X86OpXX = {
      */
     opCMPrw: function() {
         X86Mods.aOpModsRegWord[this.getIPByte()].call(this, X86Grps.opGrpCMPw);
-        if (FASTDISABLE) this.setEAWord = this.setEAWordEnabled;
+        if (EAFUNCS) this.setEAWord = this.setEAWordEnabled;
     },
     /**
      * @this {X86CPU}
@@ -687,7 +687,7 @@ var X86OpXX = {
      */
     opCMPALb: function() {
         this.regAX = (this.regAX & ~0xff) | X86Grps.opGrpCMPb.call(this, this.regAX & 0xff, this.getIPByte());
-        if (FASTDISABLE) this.setEAByte = this.setEAByteEnabled;
+        if (EAFUNCS) this.setEAByte = this.setEAByteEnabled;
         /*
          * In the absence of any EA calculations, opGrpCMPb() will deduct nOpCyclesArithRR, and for all CPUs through
          * the 80286, we need deduct only one more cycle.
@@ -701,7 +701,7 @@ var X86OpXX = {
      */
     opCMPAXw: function() {
         this.regAX = X86Grps.opGrpCMPw.call(this, this.regAX, this.getIPWord());
-        if (FASTDISABLE) this.setEAWord = this.setEAWordEnabled;
+        if (EAFUNCS) this.setEAWord = this.setEAWordEnabled;
         /*
          * In the absence of any EA calculations, opGrpCMPw() will deduct nOpCyclesArithRR, and for all CPUs through
          * the 80286, we need deduct only one more cycle.
@@ -1592,7 +1592,7 @@ var X86OpXX = {
      */
     opGRP1b: function() {
         X86Mods.aOpModsGrpByte[this.getIPByte()].call(this, X86Grps.aOpGRP1b, this.getIPByte);
-        if (FASTDISABLE) this.setEAByte = this.setEAByteEnabled;
+        if (EAFUNCS) this.setEAByte = this.setEAByteEnabled;
         this.nStepCycles -= (this.regEAWrite < 0? 1 : this.CYCLES.nOpCyclesArithMID);
     },
     /**
@@ -1602,7 +1602,7 @@ var X86OpXX = {
      */
     opGRP1w: function() {
         X86Mods.aOpModsGrpWord[this.getIPByte()].call(this, X86Grps.aOpGRP1w, this.getIPWord);
-        if (FASTDISABLE) this.setEAWord = this.setEAWordEnabled;
+        if (EAFUNCS) this.setEAWord = this.setEAWordEnabled;
         this.nStepCycles -= (this.regEAWrite < 0? 1 : this.CYCLES.nOpCyclesArithMID);
     },
     /**
@@ -1612,7 +1612,7 @@ var X86OpXX = {
      */
     opGRP1sw: function() {
         X86Mods.aOpModsGrpWord[this.getIPByte()].call(this, X86Grps.aOpGRP1w, this.getIPDisp);
-        if (FASTDISABLE) this.setEAWord = this.setEAWordEnabled;
+        if (EAFUNCS) this.setEAWord = this.setEAWordEnabled;
         this.nStepCycles -= (this.regEAWrite < 0? 1 : this.CYCLES.nOpCyclesArithMID);
     },
     /**
@@ -1622,7 +1622,7 @@ var X86OpXX = {
      */
     opTESTrb: function() {
         X86Mods.aOpModsMemByte[this.getIPByte()].call(this, X86Help.opHelpTESTb);
-        if (FASTDISABLE) this.setEAByte = this.setEAByteEnabled;
+        if (EAFUNCS) this.setEAByte = this.setEAByteEnabled;
     },
     /**
      * @this {X86CPU}
@@ -1631,7 +1631,7 @@ var X86OpXX = {
      */
     opTESTrw: function() {
         X86Mods.aOpModsMemWord[this.getIPByte()].call(this, X86Help.opHelpTESTw);
-        if (FASTDISABLE) this.setEAWord = this.setEAWordEnabled;
+        if (EAFUNCS) this.setEAWord = this.setEAWordEnabled;
     },
     /**
      * @this {X86CPU}
@@ -1682,9 +1682,9 @@ var X86OpXX = {
         /*
          * Like other MOV operations, the destination does not need to be read, just written.
          */
-        if (FASTDISABLE) this.modEAByte = this.modEAByteDisabled; else this.opFlags |= X86.OPFLAG.NOREAD;
+        if (EAFUNCS) this.modEAByte = this.modEAByteDisabled; else this.opFlags |= X86.OPFLAG.NOREAD;
         X86Mods.aOpModsMemByte[this.getIPByte()].call(this, X86Help.opHelpMOV);
-        if (FASTDISABLE) this.modEAByte = this.modEAByteEnabled;
+        if (EAFUNCS) this.modEAByte = this.modEAByteEnabled;
     },
     /**
      * @this {X86CPU}
@@ -1695,9 +1695,9 @@ var X86OpXX = {
         /*
          * Like other MOV operations, the destination does not need to be read, just written.
          */
-        if (FASTDISABLE) this.modEAWord = this.modEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOREAD;
+        if (EAFUNCS) this.modEAWord = this.modEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOREAD;
         X86Mods.aOpModsMemWord[this.getIPByte()].call(this, X86Help.opHelpMOV);
-        if (FASTDISABLE) this.modEAWord = this.modEAWordEnabled;
+        if (EAFUNCS) this.modEAWord = this.modEAWordEnabled;
     },
     /**
      * @this {X86CPU}
@@ -1747,9 +1747,9 @@ var X86OpXX = {
         /*
          * Like other MOV operations, the destination does not need to be read, just written.
          */
-        if (FASTDISABLE) this.modEAWord = this.modEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOREAD;
+        if (EAFUNCS) this.modEAWord = this.modEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOREAD;
         X86Mods.aOpModsMemWord[bModRM].call(this, X86Help.opHelpMOVSegSrc);
-        if (FASTDISABLE) this.modEAWord = this.modEAWordEnabled;
+        if (EAFUNCS) this.modEAWord = this.modEAWordEnabled;
     },
     /**
      * @this {X86CPU}
@@ -1757,10 +1757,10 @@ var X86OpXX = {
      * op=0x8D (lea reg,rm)
      */
     opLEA: function() {
-        if (FASTDISABLE) this.getEAWord = this.getEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOREAD;
+        if (EAFUNCS) this.getEAWord = this.getEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOREAD;
         this.segData = this.segStack = this.segZERO;    // we can't have the EA calculation, if any, "polluted" by segment arithmetic
         X86Mods.aOpModsRegWord[this.getIPByte()].call(this, X86Help.opHelpLEA);
-        if (FASTDISABLE) this.getEAWord = this.getEAWordEnabled;
+        if (EAFUNCS) this.getEAWord = this.getEAWordEnabled;
     },
     /**
      * @this {X86CPU}
@@ -1858,9 +1858,9 @@ var X86OpXX = {
         /*
          * Like other MOV operations, the destination does not need to be read, just written.
          */
-        if (FASTDISABLE) this.modEAWord = this.modEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOREAD;
+        if (EAFUNCS) this.modEAWord = this.modEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOREAD;
         X86Mods.aOpModsGrpWord[this.getIPByte()].call(this, X86Grps.aOpGrpPOPw, this.popWord);
-        if (FASTDISABLE) this.modEAWord = this.modEAWordEnabled;
+        if (EAFUNCS) this.modEAWord = this.modEAWordEnabled;
     },
     /**
      * @this {X86CPU}
@@ -2198,7 +2198,7 @@ var X86OpXX = {
                 this.advanceIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
                 this.opFlags |= X86.OPFLAG.REPEAT;
             }
-            if (FASTDISABLE) this.setEAByte = this.setEAByteEnabled;
+            if (EAFUNCS) this.setEAByte = this.setEAByteEnabled;
         }
     },
     /**
@@ -2246,7 +2246,7 @@ var X86OpXX = {
                 this.advanceIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
                 this.opFlags |= X86.OPFLAG.REPEAT;
             }
-            if (FASTDISABLE) this.setEAWord = this.setEAWordEnabled;
+            if (EAFUNCS) this.setEAWord = this.setEAWordEnabled;
         }
     },
     /**
@@ -2453,7 +2453,7 @@ var X86OpXX = {
                 this.advanceIP(-2);             // this instruction does not support segment overrides
                 this.opFlags |= X86.OPFLAG.REPEAT;
             }
-            if (FASTDISABLE) this.setEAByte = this.setEAByteEnabled;
+            if (EAFUNCS) this.setEAByte = this.setEAByteEnabled;
         }
     },
     /**
@@ -2493,7 +2493,7 @@ var X86OpXX = {
                 this.advanceIP(-2);             // this instruction does not support segment overrides
                 this.opFlags |= X86.OPFLAG.REPEAT;
             }
-            if (FASTDISABLE) this.setEAWord = this.setEAWordEnabled;
+            if (EAFUNCS) this.setEAWord = this.setEAWordEnabled;
         }
     },
     /**
@@ -2707,9 +2707,9 @@ var X86OpXX = {
         /*
          * Like other MOV operations, the destination does not need to be read, just written.
          */
-        if (FASTDISABLE) this.modEAByte = this.modEAByteDisabled; else this.opFlags |= X86.OPFLAG.NOREAD;
+        if (EAFUNCS) this.modEAByte = this.modEAByteDisabled; else this.opFlags |= X86.OPFLAG.NOREAD;
         X86Mods.aOpModsGrpByte[this.getIPByte()].call(this, X86Grps.aOpGrpMOVImm, this.getIPByte);
-        if (FASTDISABLE) this.modEAByte = this.modEAByteEnabled;
+        if (EAFUNCS) this.modEAByte = this.modEAByteEnabled;
     },
     /**
      * @this {X86CPU}
@@ -2720,9 +2720,9 @@ var X86OpXX = {
         /*
          * Like other MOV operations, the destination does not need to be read, just written.
          */
-        if (FASTDISABLE) this.modEAWord = this.modEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOREAD;
+        if (EAFUNCS) this.modEAWord = this.modEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOREAD;
         X86Mods.aOpModsGrpWord[this.getIPByte()].call(this, X86Grps.aOpGrpMOVImm, this.getIPWord);
-        if (FASTDISABLE) this.modEAWord = this.modEAWordEnabled;
+        if (EAFUNCS) this.modEAWord = this.modEAWordEnabled;
     },
     /**
      * @this {X86CPU}
@@ -3253,7 +3253,7 @@ var X86OpXX = {
         this.regMD16 = -1;
         X86Mods.aOpModsGrpByte[this.getIPByte()].call(this, X86Grps.aOpGRP3b, X86Grps.opGrpNoSrc);
         if (this.regMD16 >= 0) this.regAX = this.regMD16;
-        if (FASTDISABLE) this.setEAByte = this.setEAByteEnabled;
+        if (EAFUNCS) this.setEAByte = this.setEAByteEnabled;
     },
     /**
      * @this {X86CPU}
@@ -3280,7 +3280,7 @@ var X86OpXX = {
             this.regAX = this.regMD16;
             this.regDX = this.regMD32;
         }
-        if (FASTDISABLE) this.setEAWord = this.setEAWordEnabled;
+        if (EAFUNCS) this.setEAWord = this.setEAWordEnabled;
     },
     /**
      * @this {X86CPU}
@@ -3352,7 +3352,7 @@ var X86OpXX = {
      */
     opGRP4w: function() {
         X86Mods.aOpModsGrpWord[this.getIPByte()].call(this, X86Grps.aOpGRP4w, X86Grps.opGrpNoSrc);
-        if (FASTDISABLE) this.setEAWord = this.setEAWordEnabled;
+        if (EAFUNCS) this.setEAWord = this.setEAWordEnabled;
     }
 };
 

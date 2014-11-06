@@ -1,7 +1,7 @@
 The 8Mhz IBM PC AT 5170 
 ---
-I just added my first [IBM PC AT "Rev 3"](/configs/pc/machines/5170/ega/1152kb/rev3/) machine configuration
-to the list of [IBM PC Machine Configurations](/configs/pc/machines/), and not surprisingly, the new machine
+I just added my first [IBM PC AT "Rev 3"](/devices/pc/machine/5170/ega/1152kb/rev3/) machine configuration
+to the list of [IBM PC Machine Configurations](/devices/pc/machine/), and not surprisingly, the new machine
 fails to boot.
 
 I call it "Rev 3" because it uses the 3rd [ROM BIOS](/devices/pc/bios/5170/) that IBM released for the PC AT,

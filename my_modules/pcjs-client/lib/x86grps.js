@@ -139,7 +139,7 @@ var X86Grps = {
         this.resultSize = X86.RESULT.SIZE_BYTE;
         this.resultValue = this.resultParitySign = dst - src;
         this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesCompareRM) : this.CYCLES.nOpCyclesArithRM);
-        if (FASTDISABLE) this.setEAByte = this.setEAByteDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+        if (EAFUNCS) this.setEAByte = this.setEAByteDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
     /**
@@ -242,7 +242,7 @@ var X86Grps = {
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.resultValue = this.resultParitySign = dst - src;
         this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesCompareRM) : this.CYCLES.nOpCyclesArithRM);
-        if (FASTDISABLE) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+        if (EAFUNCS) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
     /**
@@ -654,7 +654,7 @@ var X86Grps = {
         this.resultValue = this.resultParitySign = this.resultAuxOverflow = dst & src;
         this.resultSize = X86.RESULT.SIZE_BYTE;
         this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesTestRI : this.CYCLES.nOpCyclesTestMI);
-        if (FASTDISABLE) this.setEAByte = this.setEAByteDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+        if (EAFUNCS) this.setEAByte = this.setEAByteDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
     /**
@@ -668,7 +668,7 @@ var X86Grps = {
         this.resultValue = this.resultParitySign = this.resultAuxOverflow = dst & src;
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesTestRI : this.CYCLES.nOpCyclesTestMI);
-        if (FASTDISABLE) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+        if (EAFUNCS) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
     /**
@@ -744,7 +744,7 @@ var X86Grps = {
          */
         if (DEBUG && DEBUGGER) this.traceLog('MULB', src, dst, null, this.getPS(), this.regMD16);
         this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesMulBR : this.CYCLES.nOpCyclesMulBM);
-        if (FASTDISABLE) this.setEAByte = this.setEAByteDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+        if (EAFUNCS) this.setEAByte = this.setEAByteDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
     /**
@@ -788,7 +788,7 @@ var X86Grps = {
          */
         if (DEBUG && DEBUGGER) this.traceLog('IMULB', src, dst, null, this.getPS(), this.regMD16);
         this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesIMulBR : this.CYCLES.nOpCyclesIMulBM);
-        if (FASTDISABLE) this.setEAByte = this.setEAByteDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+        if (EAFUNCS) this.setEAByte = this.setEAByteDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
     /**
@@ -827,7 +827,7 @@ var X86Grps = {
          */
         if (DEBUG && DEBUGGER) this.traceLog('DIVB', src, dst, null, this.getPS(), this.regMD16);
         this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesDivBR : this.CYCLES.nOpCyclesDivBM);
-        if (FASTDISABLE) this.setEAByte = this.setEAByteDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+        if (EAFUNCS) this.setEAByte = this.setEAByteDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
     /**
@@ -874,7 +874,7 @@ var X86Grps = {
          */
         if (DEBUG && DEBUGGER) this.traceLog('IDIVB', src, dst, null, this.getPS(), this.regMD16);
         this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesIDivBR : this.CYCLES.nOpCyclesIDivBM);
-        if (FASTDISABLE) this.setEAByte = this.setEAByteDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+        if (EAFUNCS) this.setEAByte = this.setEAByteDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
     /**
@@ -905,7 +905,7 @@ var X86Grps = {
          */
         if (DEBUG && DEBUGGER) this.traceLog('MULW', src, dst, null, this.getPS(), this.regMD16 | (this.regMD32 << 16));
         this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesMulWR : this.CYCLES.nOpCyclesMulWM);
-        if (FASTDISABLE) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+        if (EAFUNCS) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
     /**
@@ -950,7 +950,7 @@ var X86Grps = {
          */
         if (DEBUG && DEBUGGER) this.traceLog('IMULW', src, dst, null, this.getPS(), this.regMD16 | (this.regMD32 << 16));
         this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesIMulWR : this.CYCLES.nOpCyclesIMulWM);
-        if (FASTDISABLE) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+        if (EAFUNCS) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
     /**
@@ -995,7 +995,7 @@ var X86Grps = {
          */
         if (DEBUG && DEBUGGER) this.traceLog('DIVW', src, dst, null, this.getPS(), this.regMD16 | (this.regMD32 << 16));
         this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesDivWR : this.CYCLES.nOpCyclesDivWM);
-        if (FASTDISABLE) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+        if (EAFUNCS) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
     /**
@@ -1045,7 +1045,7 @@ var X86Grps = {
          */
         if (DEBUG && DEBUGGER) this.traceLog('IDIVW', src, dst, null, this.getPS(), this.regMD16 | (this.regMD32 << 16));
         this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesIDivWR : this.CYCLES.nOpCyclesIDivWM);
-        if (FASTDISABLE) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+        if (EAFUNCS) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
     /**
@@ -1114,7 +1114,7 @@ var X86Grps = {
         this.pushWord(this.regIP);
         this.setIP(dst);
         this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesCallWR : this.CYCLES.nOpCyclesCallWM);
-        if (FASTDISABLE) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+        if (EAFUNCS) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
     /**
@@ -1131,7 +1131,7 @@ var X86Grps = {
         this.pushWord(this.regIP);
         this.setCSIP(dst, this.getWord(this.regEA + 2));
         this.nStepCycles -= this.CYCLES.nOpCyclesCallDM;
-        if (FASTDISABLE) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+        if (EAFUNCS) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
     /**
@@ -1143,7 +1143,7 @@ var X86Grps = {
     opGrpJMPw: function(dst, src) {
         this.setIP(dst);
         this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesJmpWR : this.CYCLES.nOpCyclesJmpWM);
-        if (FASTDISABLE) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+        if (EAFUNCS) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
     /**
@@ -1158,7 +1158,7 @@ var X86Grps = {
         }
         this.setCSIP(dst, this.getWord(this.regEA + 2));
         this.nStepCycles -= this.CYCLES.nOpCyclesJmpDM;
-        if (FASTDISABLE) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+        if (EAFUNCS) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
     /**
@@ -1186,7 +1186,7 @@ var X86Grps = {
         /*
          * The PUSH is the only write that needs to occur; dst was the source operand and does not need to be rewritten.
          */
-        if (FASTDISABLE) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+        if (EAFUNCS) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
     /**

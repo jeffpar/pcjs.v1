@@ -38,6 +38,7 @@ if (typeof module !== 'undefined') {
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
     var State       = require("./state");
+    var Debugger    = require("./debugger");
 }
 
 /**
@@ -3959,23 +3960,23 @@ ChipSet.prototype.out8042InBuffCmd = function(port, bOut, addrFrom)
 
     case ChipSet.KBC.CMD.DISABLE_KBD:       // 0xAD
         this.set8042CmdData(this.b8042CmdData | ChipSet.KBC.DATA.CMD.NO_CLOCK);
-        if (DEBUG) this.messageDebugger("keyboard disabled", Debugger.MESSAGE_KBD);
+        if (DEBUG) this.messageDebugger("keyboard disabled", Debugger.MESSAGE_KBD | Debugger.MESSAGE_PORT);
         /*
          * NOTE: The MODEL_5170 BIOS calls "KBD_RESET" (F000:17D2) while the keyboard interface is disabled,
-         * yet we must still deliver the Keyboard's CMDRES.BATSUCCESS response code?  Seems like an odd thing for
+         * yet we must still deliver the Keyboard's CMDRES.BAT_SUCC response code?  Seems like an odd thing for
          * a "disabled interface" to do.
          */
         break;
 
     case ChipSet.KBC.CMD.ENABLE_KBD:        // 0xAE
         this.set8042CmdData(this.b8042CmdData & ~ChipSet.KBC.DATA.CMD.NO_CLOCK);
-        if (DEBUG) this.messageDebugger("keyboard re-enabled", Debugger.MESSAGE_KBD);
+        if (DEBUG) this.messageDebugger("keyboard re-enabled", Debugger.MESSAGE_KBD | Debugger.MESSAGE_PORT);
         break;
 
     case ChipSet.KBC.CMD.SELF_TEST:         // 0xAA
         if (this.kbd) this.kbd.shiftScanCode(true);
         this.set8042CmdData(this.b8042CmdData | ChipSet.KBC.DATA.CMD.NO_CLOCK);
-        if (DEBUG) this.messageDebugger("keyboard disabled on reset", Debugger.MESSAGE_KBD);
+        if (DEBUG) this.messageDebugger("keyboard disabled on reset", Debugger.MESSAGE_KBD | Debugger.MESSAGE_PORT);
         this.set8042OutBuff(ChipSet.KBC.DATA.SELF_TEST.OK);
         this.set8042OutPort(ChipSet.KBC.OUTPORT.NO_RESET | ChipSet.KBC.OUTPORT.A20_ON);
         break;
@@ -4024,7 +4025,7 @@ ChipSet.prototype.set8042CmdData = function(b)
          *
          * And indeed, if we call the original MODEL_5150/MODEL_5160 setEnable() Keyboard interface here,
          * and both the data and clock lines have transitioned high (ie, both parameters are true), then it
-         * will call resetDevice(), generating a Keyboard.CMDRES.BATSUCCESS response.
+         * will call resetDevice(), generating a Keyboard.CMDRES.BAT_SUCC response.
          *
          * This agrees with my understanding of what happens when the 8042 toggles the clock line high
          * (ie, clears NO_CLOCK): the TechRef's "Basic Assurance Test" section says that when the Keyboard is

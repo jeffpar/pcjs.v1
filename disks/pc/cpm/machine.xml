@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.15.8/machine.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.15.9/machine.xsl"?>
 <machine id="ibm5150" class="pc" border="1" width="740px" pos="center" style="background-color:#FAEBD7">
 	<name pos="center">IBM PC (Model 5150) running CP/M-86</name>
 	<computer id="cpm-mda-64k" name="IBM PC" resume="1"/>
@@ -9,11 +9,11 @@
 	<video id="videoMDA" screenwidth="720" screenheight="350" scale="true" charset="/devices/pc/video/ibm-mda-cga.json" padding="8px">
 		<name>Monochrome Display</name>
 	</video>
-	<cpu id="cpu8088" model="8088" autostart="true" pos="left" padleft="8px">
+	<cpu id="cpu8088" model="8088" autostart="true" pos="left" padleft="8px" padbottom="8px">
 		<control type="button" class="input" binding="run">Run</control>
 		<control type="button" class="input" binding="reset">Reset</control>
 	</cpu>
-	<keyboard ref="/configs/pc/keyboards/minimal.xml"/>
+	<keyboard ref="/devices/pc/keyboard/minimal.xml"/>
 	<fdc id="fdcNEC" automount='{A: {name: "CP/M-86 (Disk 1)", path: "/disks/pc/cpm/cpm86-disk1.json"}, B: {name: "CP/M-86 (Disk 2)", path: "/disks/pc/cpm/cpm86-disk2.json"}}' pos="right">
 		<control type="list" class="input" binding="listDrives"/>
 		<control type="list" class="input" binding="listDisks">

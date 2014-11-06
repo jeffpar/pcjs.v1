@@ -118,14 +118,6 @@
 
 /* global window: true, setTimeout: false, clearTimeout: false, SITEHOST: false */
 
-/*
- * We must defer loading the Component module until the function(s) requiring it are
- * called; otherwise, we create an initialization cycle in which Component requires weblib
- * and weblib requires Component.
- *
- * In an ideal world, weblib would not be dependent on Component, but we really want to use
- * its logging functions.
- */
 if (typeof module !== 'undefined') {
     var Component;
     require("./defines");
@@ -134,6 +126,49 @@ if (typeof module !== 'undefined') {
 }
 
 var web = {};
+
+/*
+ * We must defer loading the Component module until the function(s) requiring it are
+ * called; otherwise, we create an initialization cycle in which Component requires weblib
+ * and weblib requires Component.
+ *
+ * In an ideal world, weblib would not be dependent on Component, but we really want to use
+ * its I/O functions.  The simplest solution is to create wrapper functions.
+ */
+
+/**
+ * log(s, type)
+ *
+ * For diagnostic output only.  DEBUG must be true (or "--debug" specified via the command-line)
+ * for Component.log() to display anything.
+ *
+ * @param {string} [s] is the message text
+ * @param {string} [type] is the message type
+ */
+web.log = function(s, type)
+{
+    if (typeof module !== 'undefined') {
+        if (!Component) Component = require("./component");
+    }
+    Component.log(s, type);
+};
+
+/**
+ * notice(s, fPrintOnly, id)
+ *
+ * If Component.notice() calls web.alertUser(), it will fall back to web.log() if all else fails.
+ *
+ * @param {string} s is the message text
+ * @param {boolean} [fPrintOnly]
+ * @param {string} [id] is the caller's ID, if any
+ */
+web.notice = function(s, fPrintOnly, id)
+{
+    if (typeof module !== 'undefined') {
+        if (!Component) Component = require("./component");
+    }
+    Component.notice(s, fPrintOnly, id);
+};
 
 /**
  * loadResource(sURL, fAsync, data, componentNotify, fnNotify, pNotify)
@@ -188,11 +223,11 @@ web.loadResource = function(sURL, fAsync, data, componentNotify, fnNotify, pNoti
                  * from the local file system (ie, when using the "file:" protocol), we have to be a bit more "flexible".
                  */
                 if (xmlHTTP.status == 200 || !xmlHTTP.status && sURLData.length && web.getHostProtocol() == "file:") {
-                    Component.log("xmlHTTP.onreadystatechange(" + sURL + "): returned " + sURLData.length + " bytes");
+                    web.log("xmlHTTP.onreadystatechange(" + sURL + "): returned " + sURLData.length + " bytes");
                 }
                 else {
                     nErrorCode = xmlHTTP.status || -1;
-                    Component.log("xmlHTTP.onreadystatechange(" + sURL + "): error code " + nErrorCode);
+                    web.log("xmlHTTP.onreadystatechange(" + sURL + "): error code " + nErrorCode);
                 }
                 if (fnNotify) {
                     if (!componentNotify) {
@@ -212,12 +247,12 @@ web.loadResource = function(sURL, fAsync, data, componentNotify, fnNotify, pNoti
             sData += p + '=' + encodeURIComponent(data[p]);
         }
         sData = sData.replace(/%20/g, '+');
-        Component.log("web.loadResource(POST " + sURL + "): " + sData.length + " bytes");
+        web.log("web.loadResource(POST " + sURL + "): " + sData.length + " bytes");
         xmlHTTP.open("POST", sURL, fAsync);
         xmlHTTP.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         xmlHTTP.send(sData);
     } else {
-        Component.log("web.loadResource(GET " + sURL + ")");
+        web.log("web.loadResource(GET " + sURL + ")");
         xmlHTTP.open("GET", sURL, fAsync);
         xmlHTTP.send();
     }
@@ -225,10 +260,10 @@ web.loadResource = function(sURL, fAsync, data, componentNotify, fnNotify, pNoti
     if (!fAsync) {
         sURLData = xmlHTTP.responseText;
         if (xmlHTTP.status == 200) {
-            Component.log("web.loadResource(" + sURL + "): returned " + sURLData.length + " bytes");
+            web.log("web.loadResource(" + sURL + "): returned " + sURLData.length + " bytes");
         } else {
             nErrorCode = xmlHTTP.status || -1;
-            Component.log("web.loadResource(" + sURL + "): error code " + nErrorCode);
+            web.log("web.loadResource(" + sURL + "): error code " + nErrorCode);
         }
         if (fnNotify) {
             if (!componentNotify) {
@@ -249,7 +284,7 @@ web.loadResource = function(sURL, fAsync, data, componentNotify, fnNotify, pNoti
  *
  * @param {string} sApp (eg, "PCjs")
  * @param {string} sVer (eg, "1.02")
- * @param {string} sURL (eg, "/configs/pc/machines/5150/mda/64kb/index.xml")
+ * @param {string} sURL (eg, "/devices/pc/machine/5150/mda/64kb/machine.xml")
  * @param {string} sUser (ie, the user key, if any)
  * @param {string} sType (eg, "bug"); one of ReportAPI.TYPE.*
  * @param {string} sReport (eg, unparsed state data)
@@ -315,11 +350,7 @@ web.getUserAgent = function()
  */
 web.alertUser = function(sMessage)
 {
-    if (window) {
-        window.alert(sMessage);
-    } else {
-        console.log(sMessage);
-    }
+    if (window) window.alert(sMessage); else web.log(sMessage);
 };
 
 /**
@@ -393,7 +424,7 @@ web.hasLocalStorage = function() {
  */
 web.logLocalStorageError = function(e)
 {
-    Component.log(e.message, "localStorage error");
+    web.log(e.message, "localStorage error");
 };
 
 /**
@@ -506,9 +537,9 @@ web.isUserAgent = function(s)
         var userAgent = web.getUserAgent();
         /*
          * Here's one case where we have to be careful with Component, because when isUserAgent() is called by
-         * the init code below, component.js hasn't been loaded yet.  The simplest solution is to remove the call.
+         * the init code below, component.js hasn't been loaded yet.  The simple solution for now is to remove the call.
          *
-         *      if (Component) Component.log("agent: " + userAgent);
+         *      web.log("agent: " + userAgent);
          *
          * And yes, it would be pointless to use the conditional (?) operator below, if not for the Google Closure
          * Compiler (v20130823) failing to detect the entire expression as a boolean.
@@ -596,7 +627,7 @@ web.onClickRepeat = function(e, msDelay, msRepeat, fn)
         }
     };
     e.onmousedown = function() {
-        // Component.println("onMouseDown()");
+        // web.log("onMouseDown()");
         if (!fIgnoreMouseEvents) {
             if (!timer) {
                 ms = msDelay;
@@ -605,21 +636,21 @@ web.onClickRepeat = function(e, msDelay, msRepeat, fn)
         }
     };
     e.ontouchstart = function() {
-        // Component.println("onTouchStart()");
+        // web.log("onTouchStart()");
         if (!timer) {
             ms = msDelay;
             fnRepeat();
         }
     };
     e.onmouseup = e.onmouseout = function() {
-        // Component.println("onMouseUp()/onMouseOut()");
+        // web.log("onMouseUp()/onMouseOut()");
         if (timer) {
             clearTimeout(timer);
             timer = null;
         }
     };
     e.ontouchend = e.ontouchcancel = function() {
-        // Component.println("onTouchEnd()/onTouchCancel()");
+        // web.log("onTouchEnd()/onTouchCancel()");
         if (timer) {
             clearTimeout(timer);
             timer = null;
@@ -722,7 +753,7 @@ web.doPageEvent = function(afn)
                 afn[i]();
             }
         } catch(e) {
-            Component.notice("An unexpected exception occurred:\n\n" + e.message + "\n\nPlease send this information to Jeff@pcjs.org. Thanks.");
+            web.notice("An unexpected exception occurred:\n\n" + e.message + "\n\nPlease send this information to support@pcjs.org. Thanks.");
         }
     }
 };

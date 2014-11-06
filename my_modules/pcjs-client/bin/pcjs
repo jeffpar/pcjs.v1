@@ -245,12 +245,6 @@ function loadMachine(sFile)
                     }
                     
                     console.log(obj['id'] + " object created");
-                    if (fDebug) {
-                        /*
-                         * TODO: Determine why a simple "console.log(obj)" call fails on the Video object
-                         */
-                        console.log(JSON.stringify(obj));
-                    }
                     aComponents[i].objects.push(obj);
                     
                     if (obj.type == "Debugger") {

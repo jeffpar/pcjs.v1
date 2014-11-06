@@ -880,7 +880,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
      * Before we call convertMDLinks() to process any normal Markdown-style links, we first
      * look for our own special flavor of "machine" Markdown links; ie:
      *
-     *      [IBM PC](/configs/pc/foo/ "PCjs:demoPC:stylesheet:version:options:state")
+     *      [IBM PC](/devices/pc/machine/5150/mda/64kb/ "PCjs:demoPC:stylesheet:version:options:state")
      *
      * where a special title attribute triggers generation of an embedded machine rather than
      * a link.  Use "PCjs" or "C1Pjs" to automatically include the latest version of either
@@ -888,7 +888,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
      * If you need to use the script with the built-in Debugger (ie, either "pc-dbg.js" or
      * "c1p-dbg.js"), then include "debugger" in the list of comma-delimited options, as in:
      *
-     *      [IBM PC](/configs/pc/foo/ "PCjs:demoPC:::debugger")
+     *      [IBM PC](/devices/pc/machine/5150/mda/64kb/ "PCjs:demoPC:::debugger")
      *
      * If the link ends with a slash, then it's an implied reference to a "machine.xml".
      *

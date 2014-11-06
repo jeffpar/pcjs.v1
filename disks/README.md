@@ -1,6 +1,6 @@
 Disk Archives
 ---
-Browse [IBM PC](pc/) and [Challenger 1P](c1p/) disk images.
+Browse [IBM PC](pc/) and [Challenger 1P](c1p/) disk archives.
 
 ### PCjs Disk Image Formats
 

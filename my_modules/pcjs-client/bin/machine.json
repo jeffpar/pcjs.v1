@@ -87,5 +87,5 @@
     "name": "",
     "messages": ""
   },
-  "xml": "/configs/pc/machines/5150/mda/64kb/machine.xml"
+  "xml": "/devices/pc/machine/5150/mda/64kb/machine.xml"
 }

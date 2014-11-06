@@ -46,6 +46,7 @@ if (typeof module !== 'undefined') {
     var X86Mods     = require("./x86mods");
     var X86OpXX     = require("./x86opxx");
     var X86Op0F     = require("./x86op0f");
+    var Debugger    = require("./debugger");
 }
 
 /**
@@ -143,14 +144,14 @@ function X86CPU(parmsCPU) {
      * stepCPU() call, but it's good form to do so.
      */
     this.nBurstCycles = 0;
-    this.fComplete = this.fDebugCheck = false;
+    this.aFlags.fComplete = this.aFlags.fDebugCheck = false;
 
     /*
      * We're just declaring aMemBlocks and associated Bus parameters here; they'll be initialized by initMemory()
      * when the Bus is initialized.
      */
     this.aMemBlocks = [];
-    this.addrLimit = this.addrMask = this.blockShift = this.blockLimit = this.blockMask = 0;
+    this.addrMemMask = this.blockShift = this.blockLimit = this.blockMask = 0;
 
     /*
      * Establish all the default get/set functions for accessing memory; see this function for details.
@@ -467,7 +468,7 @@ X86CPU.PREFETCH.MASK   = 0x7;      // (X86CPU.PREFETCH.ARRAY - 1)
 X86CPU.prototype.initMemory = function(aMemBlocks, addrLimit, blockShift, blockLimit, blockMask)
 {
     this.aMemBlocks = aMemBlocks;
-    this.addrLimit = this.addrMask = addrLimit;
+    this.addrMemMask = addrLimit;
     this.blockShift = blockShift;
     this.blockLimit = blockLimit;
     this.blockMask = blockMask;
@@ -491,7 +492,7 @@ X86CPU.prototype.initMemory = function(aMemBlocks, addrLimit, blockShift, blockL
  */
 X86CPU.prototype.setAddressMask = function(addrMask)
 {
-    this.addrMask = addrMask;
+    this.addrMemMask = addrMask;
 };
 
 /**
@@ -727,7 +728,7 @@ X86CPU.prototype.initProcessor = function()
  */
 X86CPU.prototype.reset = function()
 {
-    if (this.fRunning) this.haltCPU();
+    if (this.aFlags.fRunning) this.haltCPU();
     this.resetRegs();
     this.resetCycles();
     this.clearError();      // clear any fatal error/exception that setError() may have flagged
@@ -759,9 +760,6 @@ X86CPU.prototype.reset = function()
  * modified, regEIP must be updated as well.  So, when setting segCS or regIP, you should always use setCSIP(),
  * which takes both an offset and a segment, or setIP(), whichever is appropriate; in unusual cases where only
  * segCS is changing (eg, undocumented 8086 opcodes), use setCS().
- *
- * On the 80286, another "register" that mirrors segCS is nCPL: whenever CS is updated, nCPL is updated
- * with the CS selector's access level.
  *
  * The other segment registers (DS, SS and ES) have similar setters (for segDS, segSS and segES), but those
  * functions do not mirror any special segment:offset values in the same way that regEIP mirrors CS:IP.
@@ -827,7 +825,7 @@ X86CPU.prototype.resetRegs = function()
 
     /*
      * This resets the Processor Status flags (regPS), along with all the internal "result registers";
-     * we've taken care to ensure that both nCPL and nIOPL are initialized before this first setPS() call.
+     * we've taken care to ensure that both segCS.cpl and nIOPL are initialized before this first setPS() call.
      */
     this.setPS(0);
 
@@ -924,7 +922,7 @@ X86CPU.prototype.checkIntNotify = function(nInt)
             }
         }
     }
-    else if (DEBUGGER && this.fDebugCheck) {
+    else if (DEBUGGER && this.aFlags.fDebugCheck) {
         /*
          * Enabling MESSAGE_INT messages is one of the criteria that's also included in fDebugCheck, so for maximum
          * speed, we check fDebugCheck first.
@@ -1007,10 +1005,10 @@ X86CPU.prototype.setProtMode = function(fProt)
     } else {
         X86Op0F.aOpGRP6 = X86Op0F.aOpGRP6Real;
     }
-    this.segCS.setProt(fProt);
-    this.segDS.setProt(fProt);
-    this.segSS.setProt(fProt);
-    this.segES.setProt(fProt);
+    this.segCS.updateAccess(fProt);
+    this.segDS.updateAccess(fProt);
+    this.segSS.updateAccess(fProt);
+    this.segES.updateAccess(fProt);
 };
 
 /**
@@ -1048,7 +1046,6 @@ X86CPU.prototype.restoreProtMode = function(a)
         this.segLDT.restore(a[5]);
         this.segTSS.restore(a[6]);
         this.nIOPL = a[7];
-        this.nCPL = this.segCS.level;
         this.setProtMode();
     }
 };
@@ -1122,7 +1119,7 @@ X86CPU.prototype.restore = function(data)
 /**
  * setMemoryEnabled()
  *
- * Set the default EA memory access functions (enabled vs. disabled).  When FASTDISABLE is true, assorted
+ * Set the default EA memory access functions (enabled vs. disabled).  When EAFUNCS is true, assorted
  * CPU opcode functions override the default functions whenever a CPU operation needs to temporarily disable the
  * "get" of a source operand (or the "set" of a destination operand, as in the case of a CMP instruction).
  *
@@ -1248,7 +1245,6 @@ X86CPU.prototype.loadIDTEntry = function(nIDT)
 X86CPU.prototype.setCS = function(sel)
 {
     this.regEIP = this.segCS.load(sel) + this.regIP;
-    this.nCPL = this.segCS.level;
     this.opFlags |= this.OPFLAG_NOINTR8086;
     if (PREFETCH) this.flushPrefetch(this.regEIP);
 };
@@ -1330,7 +1326,6 @@ X86CPU.prototype.setCSIP = function(off, sel)
 {
     Component.assert((off & 0xffff) == off);
     this.regEIP = this.segCS.load(sel) + (this.regIP = off);
-    this.nCPL = this.segCS.level;
     if (PREFETCH) this.flushPrefetch(this.regEIP);
 };
 
@@ -1646,13 +1641,13 @@ X86CPU.prototype.setPS = function(regPS)
      * Since PS.IOPL and PS.IF are part of PS.DIRECT, we need to take care of any 80286-specific checks before
      * setting the PS.DIRECT bits.  Specifically, PS.IOPL is unchanged if CPL > 0, and PS.IF is unchanged if CPL > IOPL.
      */
-    if (!this.nCPL) {
+    if (!this.segCS.cpl) {
         this.nIOPL = (regPS & X86.PS.IOPL.MASK) >> X86.PS.IOPL.SHIFT;           // IOPL allowed to change
         if (this.nIOPL && !(this.regMSW & X86.MSW.PE)) this.nIOPL = 0;          // effective IOPL remains 0
     } else {
         regPS = (regPS & ~X86.PS.IOPL.MASK) | (this.regPS & X86.PS.IOPL.MASK);  // IOPL not allowed to change
     }
-    if (this.nCPL > this.nIOPL) {
+    if (this.segCS.cpl > this.nIOPL) {
         regPS = (regPS & ~X86.PS.IF) | (this.regPS & X86.PS.IF);                // IF not allowed to change
     }
 
@@ -1744,7 +1739,7 @@ X86CPU.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
  */
 X86CPU.prototype.getByte = function(addr)
 {
-    return this.aMemBlocks[(addr & this.addrMask) >> this.blockShift].readByte(addr & this.blockLimit);
+    return this.aMemBlocks[(addr & this.addrMemMask) >> this.blockShift].readByte(addr & this.blockLimit);
 };
 
 /**
@@ -1757,7 +1752,7 @@ X86CPU.prototype.getByte = function(addr)
 X86CPU.prototype.getWord = function(addr)
 {
     var off = addr & this.blockLimit;
-    var iBlock = (addr & this.addrMask) >> this.blockShift;
+    var iBlock = (addr & this.addrMemMask) >> this.blockShift;
     /*
      * On the 8088, it takes 4 cycles to read the additional byte REGARDLESS whether the address is odd or even.
      *
@@ -1779,7 +1774,7 @@ X86CPU.prototype.getWord = function(addr)
  */
 X86CPU.prototype.setByte = function(addr, b)
 {
-    this.aMemBlocks[(addr & this.addrMask) >> this.blockShift].writeByte(addr & this.blockLimit, b & 0xff);
+    this.aMemBlocks[(addr & this.addrMemMask) >> this.blockShift].writeByte(addr & this.blockLimit, b & 0xff);
 };
 
 /**
@@ -1792,7 +1787,7 @@ X86CPU.prototype.setByte = function(addr, b)
 X86CPU.prototype.setWord = function(addr, w)
 {
     var off = addr & this.blockLimit;
-    var iBlock = (addr & this.addrMask) >> this.blockShift;
+    var iBlock = (addr & this.addrMemMask) >> this.blockShift;
     /*
      * On the 8088, it takes 4 cycles to write the additional byte REGARDLESS whether the address is odd or even.
      *
@@ -1815,7 +1810,7 @@ X86CPU.prototype.setWord = function(addr, w)
  * @param {number} off is a segment-relative offset
  * @return {number}
  *
-X86CPU.prototype.getEAByteDisabled = function(seg, off)
+X86CPU.prototype.getEAByteDisabled = function getEAByteDisabled(seg, off)
 {
     this.segEA = seg;
     this.offEA = off;
@@ -1836,7 +1831,7 @@ X86CPU.prototype.getEAByteDisabled = function(seg, off)
  * @param {number} off is a segment-relative offset
  * @return {number}
  */
-X86CPU.prototype.getEAWordDisabled = function(seg, off)
+X86CPU.prototype.getEAWordDisabled = function getEAWordDisabled(seg, off)
 {
     this.segEA = seg;
     this.offEA = off;
@@ -1855,7 +1850,7 @@ X86CPU.prototype.getEAWordDisabled = function(seg, off)
  * @param {number} off is a segment-relative offset
  * @return {number}
  */
-X86CPU.prototype.modEAByteDisabled = function(seg, off)
+X86CPU.prototype.modEAByteDisabled = function modEADisabled(seg, off)
 {
     this.segEA = seg;
     this.offEA = off;
@@ -1874,7 +1869,7 @@ X86CPU.prototype.modEAWordDisabled = X86CPU.prototype.modEAByteDisabled;
  * @this {X86CPU}
  * @param {number} w is the word (16-bit) value to write (ignored)
  */
-X86CPU.prototype.setEAByteDisabled = function(w)
+X86CPU.prototype.setEAByteDisabled = function setEAByteDisabled(w)
 {
 };
 
@@ -1884,7 +1879,7 @@ X86CPU.prototype.setEAByteDisabled = function(w)
  * @this {X86CPU}
  * @param {number} w is the word (16-bit) value to write (ignored)
  */
-X86CPU.prototype.setEAWordDisabled = function(w)
+X86CPU.prototype.setEAWordDisabled = function setEAWordDisabled(w)
 {
 };
 
@@ -1896,11 +1891,11 @@ X86CPU.prototype.setEAWordDisabled = function(w)
  * @param {number} off is a segment-relative offset
  * @return {number} byte (8-bit) value at that address
  */
-X86CPU.prototype.getEAByteEnabled = function(seg, off)
+X86CPU.prototype.getEAByteEnabled = function getEAByteEnabled(seg, off)
 {
     this.segEA = seg;
     this.regEA = seg.checkRead(this.offEA = off, 0);
-    if (!FASTDISABLE && (this.opFlags & X86.OPFLAG.NOREAD)) return 0;
+    if (!EAFUNCS && (this.opFlags & X86.OPFLAG.NOREAD)) return 0;
     return this.getByte(this.regEA);
 };
 
@@ -1912,11 +1907,11 @@ X86CPU.prototype.getEAByteEnabled = function(seg, off)
  * @param {number} off is a segment-relative offset
  * @return {number} word (16-bit) value at that address
  */
-X86CPU.prototype.getEAWordEnabled = function(seg, off)
+X86CPU.prototype.getEAWordEnabled = function getEAWordEnabled(seg, off)
 {
     this.segEA = seg;
     this.regEA = seg.checkRead(this.offEA = off, 1);
-    if (!FASTDISABLE && (this.opFlags & X86.OPFLAG.NOREAD)) return 0;
+    if (!EAFUNCS && (this.opFlags & X86.OPFLAG.NOREAD)) return 0;
     return this.getWord(this.regEA);
 };
 
@@ -1928,11 +1923,11 @@ X86CPU.prototype.getEAWordEnabled = function(seg, off)
  * @param {number} off is a segment-relative offset
  * @return {number} byte (8-bit) value at that address
  */
-X86CPU.prototype.modEAByteEnabled = function(seg, off)
+X86CPU.prototype.modEAByteEnabled = function modEAByteEnabled(seg, off)
 {
     this.segEA = seg;
     this.regEAWrite = this.regEA = seg.checkRead(this.offEA = off, 0);
-    if (!FASTDISABLE && (this.opFlags & X86.OPFLAG.NOREAD)) return 0;
+    if (!EAFUNCS && (this.opFlags & X86.OPFLAG.NOREAD)) return 0;
     return this.getByte(this.regEA);
 };
 
@@ -1944,11 +1939,11 @@ X86CPU.prototype.modEAByteEnabled = function(seg, off)
  * @param {number} off is a segment-relative offset
  * @return {number} word (16-bit) value at that address
  */
-X86CPU.prototype.modEAWordEnabled = function(seg, off)
+X86CPU.prototype.modEAWordEnabled = function modEAWordEnabled(seg, off)
 {
     this.segEA = seg;
     this.regEAWrite = this.regEA = seg.checkRead(this.offEA = off, 1);
-    if (!FASTDISABLE && (this.opFlags & X86.OPFLAG.NOREAD)) return 0;
+    if (!EAFUNCS && (this.opFlags & X86.OPFLAG.NOREAD)) return 0;
     return this.getWord(this.regEA);
 };
 
@@ -1958,9 +1953,9 @@ X86CPU.prototype.modEAWordEnabled = function(seg, off)
  * @this {X86CPU}
  * @param {number} b is the byte (8-bit) value to write
  */
-X86CPU.prototype.setEAByteEnabled = function(b)
+X86CPU.prototype.setEAByteEnabled = function setEAByteEnabled(b)
 {
-    if (!FASTDISABLE && (this.opFlags & X86.OPFLAG.NOWRITE)) return;
+    if (!EAFUNCS && (this.opFlags & X86.OPFLAG.NOWRITE)) return;
     this.setByte(this.segEA.checkWrite(this.offEA, 1), b);
 };
 
@@ -1970,9 +1965,9 @@ X86CPU.prototype.setEAByteEnabled = function(b)
  * @this {X86CPU}
  * @param {number} w is the word (16-bit) value to write
  */
-X86CPU.prototype.setEAWordEnabled = function(w)
+X86CPU.prototype.setEAWordEnabled = function setEAWordEnabled(w)
 {
-    if (!FASTDISABLE && (this.opFlags & X86.OPFLAG.NOWRITE)) return;
+    if (!EAFUNCS && (this.opFlags & X86.OPFLAG.NOWRITE)) return;
     this.setWord(this.segEA.checkWrite(this.offEA, 2), w);
 };
 
@@ -2047,7 +2042,7 @@ X86CPU.prototype.setSOWord = function(seg, off, w)
  */
 X86CPU.prototype.getBytePrefetch = function(addr)
 {
-    if (!FASTDISABLE && (this.opFlags & X86.OPFLAG.NOREAD)) return 0;
+    if (!EAFUNCS && (this.opFlags & X86.OPFLAG.NOREAD)) return 0;
     var b;
     if (!this.cbPrefetchQueued) {
         if (MAXDEBUG) Component.assert(addr == this.addrPrefetchHead, "X86CPU.getBytePrefetch(" + str.toHex(addr) + "): invalid head address (" + str.toHex(this.addrPrefetchHead) + ")");
@@ -2059,10 +2054,10 @@ X86CPU.prototype.getBytePrefetch = function(addr)
          * with side-effects we may not want, and in any case, while it seemed to improve Safari's performance slightly,
          * it did nothing for the oddball Chrome performance I'm seeing with PREFETCH enabled.
          *
-         *      b = this.aMemBlocks[(addr & this.addrMask) >> this.blockShift].readByte(addr & this.blockLimit);
+         *      b = this.aMemBlocks[(addr & this.addrMemMask) >> this.blockShift].readByte(addr & this.blockLimit);
          *      this.nBusCycles += 4;
          *      this.cbPrefetchValid = 0;
-         *      this.addrPrefetchHead = (addr + 1) & this.addrMask;
+         *      this.addrPrefetchHead = (addr + 1) & this.addrMemMask;
          *      return b;
          */
     }
@@ -2107,10 +2102,10 @@ X86CPU.prototype.fillPrefetch = function(n)
 {
     while (n-- > 0 && this.cbPrefetchQueued < X86CPU.PREFETCH.QUEUE) {
         var addr = this.addrPrefetchHead;
-        var b = this.aMemBlocks[(addr & this.addrMask) >> this.blockShift].readByte(addr & this.blockLimit);
+        var b = this.aMemBlocks[(addr & this.addrMemMask) >> this.blockShift].readByte(addr & this.blockLimit);
         this.aPrefetch[this.iPrefetchHead] = b | (addr << 8);
         if (MAXDEBUG) this.messageDebugger("     fillPrefetch[" + this.iPrefetchHead + "]: " + str.toHex(addr) + ":" + str.toHexByte(b));
-        this.addrPrefetchHead = (addr + 1) & this.addrMask;
+        this.addrPrefetchHead = (addr + 1) & this.addrMemMask;
         this.iPrefetchHead = (this.iPrefetchHead + 1) & X86CPU.PREFETCH.MASK;
         this.cbPrefetchQueued++;
         /*
@@ -2443,7 +2438,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
      * Debugger is single-stepping (even when performing multiple single-steps), fRunning is never set,
      * so haltCPU() would have no effect as far as the Debugger is concerned.
      */
-    this.fComplete = true;
+    this.aFlags.fComplete = true;
 
     /*
      * fDebugCheck is true if we need to "check" every instruction with the Debugger.  The Debugger will
@@ -2460,7 +2455,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
      * minimum number of cycles to process: one and only one instruction will execute, since every (valid)
      * instruction consumes at least 1 cycle.
      */
-    this.fDebugCheck = (DEBUGGER && nMinCycles && this.dbg && this.dbg.checksEnabled());
+    var fDebugCheck = this.aFlags.fDebugCheck = (DEBUGGER && nMinCycles && this.dbg && this.dbg.checksEnabled());
 
     /*
      * We move the minimum cycle count to nStepCycles (the number of cycles left to step), so that other
@@ -2542,7 +2537,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
             }
         }
 
-        if (DEBUGGER && this.fDebugCheck && this.dbg.checkInstruction(this.regEIP)) {
+        if (DEBUGGER && fDebugCheck && this.dbg.checkInstruction(this.regEIP)) {
             this.haltCPU();
             break;
         }
@@ -2589,7 +2584,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
 
     } while (this.nStepCycles > 0);
 
-    return (this.fComplete? this.nBurstCycles - this.nStepCycles : (this.fComplete === undefined? 0 : -1));
+    return (this.aFlags.fComplete? this.nBurstCycles - this.nStepCycles : (this.aFlags.fComplete === undefined? 0 : -1));
 };
 
 /**
@@ -2603,7 +2598,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
 X86CPU.prototype.messageDebugger = function(sMessage)
 {
     if (DEBUGGER && this.dbg) {
-        if (this.dbg.messageEnabled(Debugger.MESSAGE_MEM)) {
+        if (this.dbg.messageEnabled(Debugger.MESSAGE_CPU)) {
             this.dbg.message(sMessage);
         }
     }

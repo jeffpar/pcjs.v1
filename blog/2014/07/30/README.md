@@ -1,8 +1,8 @@
 EGA Support
 ---
 PCjs v1.14.0 now includes basic EGA support.  It emulates the EGA hardware well enough to pass the IBM EGA BIOS
-diagnostics and run [Windows 1.01](/configs/pc/machines/5160/ega/640kb/win101/) in color.  Check out our
-[Windows 1.01 "Server Array"](/configs/pc/machines/5160/ega/640kb/array/) demo.
+diagnostics and run [Windows 1.01](/devices/pc/machine/5160/ega/640kb/win101/) in color.  Check out our
+[Windows 1.01 "Server Array"](/devices/pc/machine/5160/ega/640kb/array/) demo.
 
 ![Windows 1.01 "Server Array" Demo](/blog/2014/07/30/win101-array-demo-small.jpg "link:/blog/2014/07/30/win101-array-demo.jpg")
 

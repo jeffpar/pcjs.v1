@@ -91,11 +91,11 @@
  *  1) Creating new (empty) disk images
  *  2) Pre-loading pre-built JSON-encoded disk images (converting them to JSON on the fly as needed)
  *
- * An example of #1 is in /configs/pc/machines/5160/cga/256kb/demo/machine.xml:
+ * An example of #1 is in /devices/pc/machine/5160/cga/256kb/demo/machine.xml:
  *
  *      <hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",type:3}]'/>
  *
- * and an example of #2 is in /configs/pc/disks/fixed/win101.xml:
+ * and an example of #2 is in /disks/pc/fixed/win101.xml:
  *
  *      <hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",path:"/disks/pc/fixed/win101/10mb.json",type:3}]'/>
  *
@@ -164,6 +164,7 @@ if (typeof module !== 'undefined') {
     var DiskAPI     = require("../../shared/lib/diskapi");
     var DumpAPI     = require("../../shared/lib/dumpapi");
     var Component   = require("../../shared/lib/component");
+    var Debugger    = require("./debugger");
 }
 
 /**
@@ -578,7 +579,7 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
 {
     var disk = null;
     this.fWriteProtected = false;
-    var fPrintOnly = (nErrorCode < 0 && this.cmp && !this.cmp.fPowered);
+    var fPrintOnly = (nErrorCode < 0 && this.cmp && !this.cmp.aFlags.fPowered);
 
     if (this.fOnDemand) {
         if (!nErrorCode) {

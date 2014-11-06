@@ -1,7 +1,7 @@
 The IBM PC AT: Alive and Booting
 ---
 
-My first IBM PC AT (Model 5170) [Test Configuration](/configs/pc/machines/5170/ega/640kb/debugger/) finally
+My first IBM PC AT (Model 5170) [Test Configuration](/devices/pc/machine/5170/ega/640kb/rev1/) finally
 boots to a PC-DOS prompt.  The configuration uses the original [IBM Model 5170 ROM BIOS](/devices/pc/bios/5170/),
 dated January 10, 1984.
  

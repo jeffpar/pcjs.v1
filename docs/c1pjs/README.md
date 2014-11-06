@@ -5,9 +5,9 @@ C1Pjs is a JavaScript simulation of the Challenger 1P, an 8-bit 6502-based micro
 manufactured by Ohio Scientific in 1978.  The base configuration included 4Kb of RAM and an
 8Kb BASIC-in-ROM from Microsoft.  Below is a simulation of the 8Kb model.
 
-[OSI Challenger C1P](/configs/c1p/machines/8kb/large/debugger/ "C1Pjs:c1p8kb:::debugger")
+[OSI Challenger C1P](/devices/c1p/machine/8kb/large/debugger/ "C1Pjs:c1p8kb:::debugger")
 
-More sample [C1P machine configurations](/configs/c1p/machines/) are available, as well as
+More sample [C1P machine configurations](/devices/c1p/machine/) are available, as well as
 information on [customizing and embedding](embed/) your own configurations.
 
 ### Using C1Pjs
@@ -105,7 +105,7 @@ in those situations, the speed controls will have no effect.
 
 > Want to embed the C1Pjs Simulator on your own web page? Everything you need to know is explained [here](embed/).
 You can even launch multiple simulations on a single page; check out the C1P "Server Array"
-[demo](/configs/c1p/machines/8kb/array/).
+[demo](/devices/c1p/machine/8kb/array/).
 
 ### Implementation
 

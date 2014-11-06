@@ -37,7 +37,7 @@ Example
 		</control>
 	</panel>
 
-See [/configs/pc/panels/default.xml](/configs/pc/panels/default.xml) for a more complete example.
+See [/devices/pc/panel/default.xml](/devices/pc/panel/default.xml) for a more complete example.
 
 Output
 ---

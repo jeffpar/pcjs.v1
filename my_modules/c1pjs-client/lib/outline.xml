@@ -18,8 +18,8 @@
 			<cpu id="cpu6502"/>
 			<ram id="ram8K" size="0x2000"/>
 			<rom id="romNull" size="0x8000"/>
-			<rom id="romBasic" size="0x2000" image="/devices/c1p/roms/basic-gcpatch.hex"/>
-			<rom id="romSystem" size="0x0800" image="/devices/c1p/roms/system.hex"/>
+			<rom id="romBasic" size="0x2000" image="/devices/c1p/rom/basic-gcpatch.hex"/>
+			<rom id="romSystem" size="0x0800" image="/devices/c1p/rom/system.hex"/>
 			<video id="video" screenwidth="256" screenheight="192" cols="32" rows="32" charset="/devices/c1p/video/chargen1x.png" padding="8px"/>
 			<keyboard id="keyboard">
 				<control type="button" class="input" binding="ctrl-c">CTRL-C</control>
@@ -53,8 +53,8 @@
 		    the "bindings" that connect the components to the visual elements.</p>
 		<p>Here are some working examples:
 		    <ul>
-		        <li><a href="/configs/c1p/machines/8kb/large/debugger/">Challenger 1P w/Debugger</a></li>
-		        <li><a href="/configs/c1p/machines/8kb/array/">Challenger 1P "Server Array" Demo</a></li>
+		        <li><a href="/devices/c1p/machine/8kb/large/debugger/">Challenger 1P w/Debugger</a></li>
+		        <li><a href="/devices/c1p/machine/8kb/array/">Challenger 1P "Server Array" Demo</a></li>
 		  	</ul>
 		    </p>
 		<p>Here's what a machine definition XML file typically looks like:
@@ -75,8 +75,8 @@
 		<lt/>cpu id="cpu6502"/<gt/>
 		<lt/>ram id="ram8K" size="0x2000"/<gt/>
 		<lt/>rom id="romNull" size="0x8000"/<gt/>
-		<lt/>rom id="romBasic" size="0x2000" image="/devices/c1p/roms/basic-gcpatch.hex"/<gt/>
-		<lt/>rom id="romSystem" size="0x0800" image="/devices/c1p/roms/system.hex"/<gt/>
+		<lt/>rom id="romBasic" size="0x2000" image="/devices/c1p/rom/basic-gcpatch.hex"/<gt/>
+		<lt/>rom id="romSystem" size="0x0800" image="/devices/c1p/rom/system.hex"/<gt/>
 		<lt/>video id="video" screenwidth="256" screenheight="192" cols="32" rows="32"
                 charset="/devices/c1p/video/chargen1x.png" width="256px" padding="8px"/<gt/>
 		<lt/>keyboard id="keyboard"<gt/>
