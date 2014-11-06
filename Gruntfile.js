@@ -170,8 +170,8 @@ module.exports = function(grunt) {
                 options: {
                     banner: '"use strict";\n\n',
                     process: function(src, filepath) {
-                        return "// " + filepath + "\r\n\r\n" +
-                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1').replace(/[ \t]*if\s*\(typeof\s+(module|APP_PCJS)\s*!==\s*(['"])undefined\2\)\s*(\{[^}]*}|[^\n]*)(\n|$)/g, '');
+                        return "// " + filepath + "\n\n" +
+                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1').replace(/[ \t]*if\s*\(typeof\s+(module|APP_PCJS)\s*!==\s*(['"])undefined\2\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '');
                     }
                 }
             },
@@ -181,8 +181,8 @@ module.exports = function(grunt) {
                 options: {
                     banner: '"use strict";\n\n',
                     process: function(src, filepath) {
-                        return "// " + filepath + "\r\n\r\n" +
-                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1').replace(/[ \t]*if\s*\(typeof\s+(module|APP_PCJS)\s*!==\s*(['"])undefined\2\)\s*(\{[^}]*}|[^\n]*)(\n|$)/g, '');
+                        return "// " + filepath + "\n\n" +
+                            src.replace(/(^|\n)[ \t]*(['"])use strict\2;?\s*/g, '$1').replace(/[ \t]*if\s*\(typeof\s+(module|APP_PCJS)\s*!==\s*(['"])undefined\2\)\s*(\{[^}]*}|[^\n]*)(\n|$)/gm, '');
                     }
                 }
             }
