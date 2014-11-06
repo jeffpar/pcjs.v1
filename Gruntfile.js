@@ -455,5 +455,6 @@ module.exports = function(grunt) {
     grunt.registerTask("promote", ["replace:promote_to_version"]);
     grunt.registerTask("clean", ["run:delete_indexes"]);
     grunt.registerTask("copyFiles", grunt.option("rebuild")? ["copy"] : ["newer:copy"]);
-    grunt.registerTask("default", ["compile", "copyFiles", "run:zipify_demos"]);
+    grunt.registerTask("default-osx", ["compile", "copyFiles", "run:zipify_demos"]);
+    grunt.registerTask("default", ["compile", "copyFiles"]);
 };
