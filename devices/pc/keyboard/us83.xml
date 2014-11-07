@@ -23,7 +23,7 @@
 		<control type="key" class="input" binding="0" width="34px" top="0px" left="528px">0 )</control>
 		<control type="key" class="input" binding="-" width="34px" top="0px" left="570px">- _</control>
 		<control type="key" class="input" binding="=" width="34px" top="0px" left="612px">= +</control>
-		<control type="key" class="input" binding="backspace" width="46px" top="0px" left="654px">Back</control>
+		<control type="key" class="input" binding="bs" width="46px" top="0px" left="654px">Back</control>
 		<control type="key" class="input" binding="num-lock" width="76px" top="0px" left="708px">Num</control>
 		<control type="key" class="input" binding="scroll-lock" width="76px" top="0px" left="792px">Scroll</control>
 		<control type="key" class="input" binding="tab" width="46px" top="42px" left="96px">Tab</control>
