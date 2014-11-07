@@ -4087,9 +4087,9 @@ ChipSet.prototype.set8042OutPort = function(b)
 /**
  * notifyKbdData(fAvail)
  *
- * Previously, the Keyboard would simply call setIRR() when it had some data for the keyboard controller.
- * Now the interface is a little more nuanced, giving the ChipSet/8042 the opportunity to decide when to
- * raise IRQ.KBD.
+ * In the old days of PCjs, the Keyboard component would simply call setIRR() when it had some data for the
+ * keyboard controller.  However, that was completely inappropriate.  The sole responsibility of the Keyboard
+ * is to emulate an actual keyboard and notify us whenever it has some data; it doesn't mess with IRQ lines.
  *
  * If there's an 8042, we check (this.b8042CmdData & ChipSet.KBC.DATA.CMD.NO_CLOCK); if NO_CLOCK is clear,
  * we can raise the IRQ immediately.  Well, not quite immediately....
@@ -4166,7 +4166,7 @@ ChipSet.prototype.notifyKbdData = function(fAvail)
 {
     if (this.model < ChipSet.MODEL_5170) {
         /*
-         * TODO: Should we be checking bPPI for PPI_B.CLK_KBD on these older machines, before called setIRR()?
+         * TODO: Should we be checking bPPI for PPI_B.CLK_KBD on these older machines, before calling setIRR()?
          */
         this.setIRR(ChipSet.IRQ.KBD, 4);
     }

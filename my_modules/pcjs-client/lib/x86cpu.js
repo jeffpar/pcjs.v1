@@ -924,11 +924,10 @@ X86CPU.prototype.checkIntNotify = function(nInt)
     }
     else if (DEBUGGER && this.aFlags.fDebugCheck) {
         /*
-         * Enabling MESSAGE_INT messages is one of the criteria that's also included in fDebugCheck, so for maximum
-         * speed, we check fDebugCheck first.
+         * Enabling MESSAGE_INT messages is one of the criteria that's also included in fDebugCheck,
+         * so for maximum speed, we check fDebugCheck first.
          */
-        if (this.dbg.messageEnabled(Debugger.MESSAGE_INT)) {
-            this.dbg.messageInt(nInt, this.regEIP);
+        if (this.dbg.messageEnabled(Debugger.MESSAGE_INT) && this.dbg.messageInt(nInt, this.regEIP)) {
             this.addIntReturn(this.regEIP, function(cpu, nCycles) {
                 return function onIntReturn(nLevel) {
                     cpu.dbg.messageIntReturn(nInt, nLevel, cpu.getCycles() - nCycles);
