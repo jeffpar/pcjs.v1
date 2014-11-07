@@ -92,7 +92,7 @@ no problem following along.  There are some prerequisites:
 
 Some additional (optional) tools are also recommended:
 
-- Python (included with OS X; separate download required for [Windows](https://www.python.org/downloads/windows/)
+- Python (included with OS X; separate download required for [Windows](https://www.python.org/downloads/windows/))
 - GitHub (useful for getting Git set up on [Windows](https://windows.github.com/); also available for [OS X](https://mac.github.com/)) 
 
 Once you have the prerequisites, open a command-line window, `cd` to the directory where you'd like to install PCjs,
