@@ -84,12 +84,16 @@ diskette *and* hard disk images from either lists *or* directories of files (inc
 
 ### Installing PCjs
 
-The following instructions were written for OS X users.  However, users of other operating systems should have
+The following instructions were originally written for OS X.  However, users of other operating systems should have
 no problem following along.  There are some prerequisites:
 
-- Git (included with OS X Developer Tools; separate download required for Windows)
-- Python (used by NPM and included with OS X; separate download required for Windows)
-- Node with NPM (download an appropriate installation package from [nodejs.org](http://nodejs.org/download/))
+- Node with NPM (download an installation package for your OS from [nodejs.org](http://nodejs.org/download/))
+- Git (included with OS X Developer Tools; separate download required for [Windows](http://git-scm.com/download/win))
+
+Some additional (optional) tools are also recommended:
+
+- Python (included with OS X; separate download required for [Windows](https://www.python.org/downloads/windows/)
+- GitHub (useful for getting Git set up on [Windows](https://windows.github.com/); also available for [OS X](https://mac.github.com/)) 
 
 Once you have the prerequisites, open a command-line window, `cd` to the directory where you'd like to install PCjs,
 and type the following commands:
@@ -99,7 +103,7 @@ and type the following commands:
 	npm install
 	node server.js
 
-Now open a web browser and go to `http://localhost:8088/`.  Done!
+Now open a web browser and go to `http://localhost:8088/`.  You're done!
  
 If you just want to launch the web server or don't plan to do any development, you can reduce the
 footprint slightly by asking NPM to install only "production" modules (which can also eliminate some
@@ -138,9 +142,10 @@ However, in order to build and test PCjs modifications, you'll want to use [Grun
 Grunt tasks defined by [Gruntfile.js](Gruntfile.js).
 
 Although Grunt was installed locally when you ran `npm install`, you'll also want to install the command-line
-interface to Grunt; you can install that locally as well, but it's recommended you install it globally (use "-g"):
+interface to Grunt. You can install that locally as well, but it's recommended you install it globally with `-g`;
+OS X users may also need to preface this command with `sudo`:
 
-	sudo npm install grunt-cli -g
+	npm install grunt-cli -g
 
 Now you can run `grunt` anywhere within the PCjs project to build an updated version.  If no command-line arguments
 are specified, `grunt` runs the "default" task defined by [Gruntfile.js](Gruntfile.js); that task runs Google's
