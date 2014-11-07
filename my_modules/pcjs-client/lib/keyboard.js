@@ -102,39 +102,6 @@ function Keyboard(parmsKbd) {
 Component.subclass(Component, Keyboard);
 
 /**
- * Commands that can be sent to the Keyboard via the 8042; see sendCmd()
- *
- * @enum {number}
- */
-Keyboard.CMD = {
-    RESET:      0xFF,
-    RESEND:     0xFE,
-    DEF_ON:     0xF6,
-    DEF_OFF:    0xF5,
-    ENABLE:     0xF4,
-    SET_RATE:   0xF3,
-    ECHO:       0xEE,
-    SET_LEDS:   0xED
-};
-
-/**
- * Command responses returned to the Keyboard via the 8042; see sendCmd()
- *
- * @enum {number}
- */
-Keyboard.CMDRES = {
-    OVERRUN:    0x00,
-    LOAD_TEST:  0x65,   // undocumented "LOAD MANUFACTURING TEST REQUEST" response code
-    BAT_SUCC:   0xAA,   // Basic Assurance Test (BAT) completed successfully
-    ECHO:       0xEE,
-    BREAK_PREF: 0xF0,   // break prefix
-    ACK:        0xFA,
-    BAT_FAIL:   0xFC,   // Basic Assurance Test (BAT) failed
-    DIAG_FAIL:  0xFD,
-    RESEND:     0xFE
-};
-
-/**
  * Alphanumeric and other common (printable) ASCII codes.
  *
  * TODO: Determine what we can do to get ALL constants like these inlined (enum doesn't seem to
@@ -144,6 +111,7 @@ Keyboard.CMDRES = {
  * @enum {number}
  */
 Keyboard.ASCII = {
+    CTRLA: 1, CTRLZ: 26,
     ' ': 32,    '!': 33,    '"': 34,    '#': 35,    '$': 36,    '%': 37,    '&': 38,    "'": 39,
     '(': 40,    ')': 41,    '*': 42,    '+': 43,    ',': 44,    '-': 45,    '.': 46,    '/': 47,
     '0': 48,    '1': 49,    '2': 50,    '3': 51,    '4': 52,    '5': 53,    '6': 54,    '7': 55,
@@ -227,8 +195,8 @@ Keyboard.KEYCODE = {
 };
 
 /**
- * The set of values that a browser may store in the 'location' property of a
- * keyboard event object which we also support.
+ * The set of values that a browser may store in the 'location' property of a keyboard event object
+ * which we also support.
  *
  * @enum {number}
  */
@@ -239,8 +207,8 @@ Keyboard.LOCATION = {
 };
 
 /**
- * These "shift key" states are stored in bitsShift, as well as in aKeyCodes;
- * note that the right-hand versions of selected shift bits are shifted 1 bit right.
+ * These internal "shift key" states are stored in bitsShift, as well as in aKeyCodes; note that the
+ * right-hand versions of selected shift bits are shifted 1 bit right.
  *
  * @enum {number}
  */
@@ -265,9 +233,10 @@ Keyboard.STATE = {
  * @enum {number}
  */
 Keyboard.STATEKEYS = {
-    0x10:       Keyboard.STATE.SHIFT,
-    0x11:       Keyboard.STATE.CTRL,
-    0x12:       Keyboard.STATE.ALT
+    16:         Keyboard.STATE.SHIFT,
+    17:         Keyboard.STATE.CTRL,
+    18:         Keyboard.STATE.ALT,
+    20:         Keyboard.STATE.CAPSLOCK
 };
 
 /**
@@ -367,7 +336,7 @@ Keyboard.aSoftCodes = {
     /* 11 */    '0':            0x0b,
     /* 12 */    '-':            0x0c,
     /* 13 */    '=':            0x0d,
-    /* 14 */    'backspace':    0x0e,
+    /* 14 */    'bs':           0x0e,
     /* 15 */    'tab':          0x0f,
     /* 16 */    'q':            0x10,
     /* 17 */    'w':            0x11,
@@ -462,7 +431,7 @@ Keyboard.aSoftCodes = {
 };
 
 /**
- * This array is used by keyEventSimulate() to lookup a given keyCode and convert it to a scan code
+ * This array is used by keySimulateUpDown() to lookup a given keyCode and convert it to a scan code
  * (lower byte) plus any required shift key states (upper bytes).
  *
  * Using keyCodes from keyPress events proved to be more robust than using keyCodes from keyDown and
@@ -474,7 +443,7 @@ Keyboard.aSoftCodes = {
  * The other problem (which is more of a problem with keyboards like the C1P than any IBM keyboards) is
  * that the shift/modifier state for a character on the "source" keyboard may not match the shift/modifier
  * state for the same character on the "target" keyboard.  And since this code is inherited from C1Pjs,
- * we've inherited the same solution: keyEventSimulate() has the ability to "undo" any states in bitsShift
+ * we've inherited the same solution: keySimulateUpDown() has the ability to "undo" any states in bitsShift
  * that conflict with the state(s) required for the character in question.
  *
  * @enum {number}
@@ -505,7 +474,7 @@ Keyboard.aKeyCodes[Keyboard.ASCII['-']]   = Keyboard.aSoftCodes['-'];
 Keyboard.aKeyCodes[Keyboard.ASCII['_']]   = Keyboard.aSoftCodes['-'] | (Keyboard.STATE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII['=']]   = Keyboard.aSoftCodes['='];
 Keyboard.aKeyCodes[Keyboard.ASCII['+']]   = Keyboard.aSoftCodes['='] | (Keyboard.STATE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.KEYCODE.BS    + Keyboard.KEYCODE.ONDOWN] =  Keyboard.aSoftCodes['backspace'];
+Keyboard.aKeyCodes[Keyboard.KEYCODE.BS    + Keyboard.KEYCODE.ONDOWN] =  Keyboard.aSoftCodes['bs'];
 Keyboard.aKeyCodes[Keyboard.KEYCODE.TAB   + Keyboard.KEYCODE.ONDOWN] =  Keyboard.aSoftCodes['tab'];
 Keyboard.aKeyCodes[Keyboard.ASCII.q]      = Keyboard.aSoftCodes['q'];
 Keyboard.aKeyCodes[Keyboard.ASCII.Q]      = Keyboard.aSoftCodes['q'] | (Keyboard.STATE.SHIFT << 8);
@@ -581,7 +550,7 @@ Keyboard.aKeyCodes[Keyboard.ASCII['>']]   = Keyboard.aSoftCodes['.'] | (Keyboard
 Keyboard.aKeyCodes[Keyboard.ASCII['/']]   = Keyboard.aSoftCodes['/'];
 Keyboard.aKeyCodes[Keyboard.ASCII['?']]   = Keyboard.aSoftCodes['/'] | (Keyboard.STATE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.KEYCODE.SHIFT + Keyboard.KEYCODE.ONDOWN +  Keyboard.KEYCODE.ONRIGHT] = Keyboard.aSoftCodes['right-shift'];
-// TBD: 0x37 ('prtsc') goes here
+// TODO: 0x37 ('prtsc')
 Keyboard.aKeyCodes[Keyboard.KEYCODE.ALT   + Keyboard.KEYCODE.ONDOWN] =  Keyboard.aSoftCodes['alt'];
 Keyboard.aKeyCodes[Keyboard.ASCII[' ']]   = Keyboard.aSoftCodes['space'];
 Keyboard.aKeyCodes[Keyboard.KEYCODE.CAPSLOCK+Keyboard.KEYCODE.ONDOWN]=  Keyboard.aSoftCodes['caps-lock'];
@@ -595,7 +564,7 @@ Keyboard.aKeyCodes[Keyboard.KEYCODE.F7    + Keyboard.KEYCODE.ONDOWN] =  Keyboard
 Keyboard.aKeyCodes[Keyboard.KEYCODE.F8    + Keyboard.KEYCODE.ONDOWN] =  Keyboard.aSoftCodes['f8'];
 Keyboard.aKeyCodes[Keyboard.KEYCODE.F9    + Keyboard.KEYCODE.ONDOWN] =  Keyboard.aSoftCodes['f9'];
 Keyboard.aKeyCodes[Keyboard.KEYCODE.F10   + Keyboard.KEYCODE.ONDOWN] =  Keyboard.aSoftCodes['f10'];
-// TBD: 0x45 ('num-lock') and 0x46 ('scroll-lock') go here
+// TODO: 0x45 ('num-lock'), 0x46 ('scroll-lock'), 0x4a ('num-sub') and 0x4e ('num-add')
 Keyboard.aKeyCodes[Keyboard.KEYCODE.HOME  + Keyboard.KEYCODE.ONDOWN] =  Keyboard.aSoftCodes['num-home'];
 Keyboard.aKeyCodes[Keyboard.KEYCODE.UP    + Keyboard.KEYCODE.ONDOWN] =  Keyboard.aSoftCodes['num-up'];
 Keyboard.aKeyCodes[Keyboard.KEYCODE.PGUP  + Keyboard.KEYCODE.ONDOWN] =  Keyboard.aSoftCodes['num-pgup'];
@@ -606,28 +575,89 @@ Keyboard.aKeyCodes[Keyboard.KEYCODE.DOWN  + Keyboard.KEYCODE.ONDOWN] =  Keyboard
 Keyboard.aKeyCodes[Keyboard.KEYCODE.PGDN  + Keyboard.KEYCODE.ONDOWN] =  Keyboard.aSoftCodes['num-pgdn'];
 Keyboard.aKeyCodes[Keyboard.KEYCODE.INS   + Keyboard.KEYCODE.ONDOWN] =  Keyboard.aSoftCodes['num-ins'];
 Keyboard.aKeyCodes[Keyboard.KEYCODE.DEL   + Keyboard.KEYCODE.ONDOWN] =  Keyboard.aSoftCodes['num-del'];
-// TBD for all keyboards: 'num-add', 'num-sub'
-// TBD for 101-key keyboards: 'num-mul', 'num-div', 'num-enter', the stand-alone arrow keys, etc.
+/*
+ * Entries beyond this point are for keys that existed only on 101-key keyboards (well, except for 'sysreq',
+ * which also existed on the 84-key keyboard), which ALSO means that these keys essentially did not exist
+ * for a MODEL_5150 or MODEL_5160 machine, because those machines could use only 83-key keyboards.  Remember
+ * that IBM machines and IBM keyboards are our reference point here, so while there were undoubtedly 5150/5160
+ * clones that could use newer keyboards, as well as 3rd-party keyboards that could work with older machines,
+ * support for non-IBM configurations is left for another day.
+ *
+ * TODO: The only relevance of newer keyboards to older machines is the fact that you're likely using a newer
+ * keyboard with your browser, which raises the question of what to do with newer keys that older machines
+ * wouldn't understand.  I don't attempt to filter out any of the entries below based on machine model, but
+ * it's likely that I should.
+ */
+// TODO: 'num-mul', 'num-div', 'num-enter', the stand-alone arrow keys, etc.
+Keyboard.aKeyCodes[Keyboard.KEYCODE.F11   + Keyboard.KEYCODE.ONDOWN] =  Keyboard.aSoftCodes['f11'];
+Keyboard.aKeyCodes[Keyboard.KEYCODE.F12   + Keyboard.KEYCODE.ONDOWN] =  Keyboard.aSoftCodes['f12'];
+
 Keyboard.aKeyCodes[Keyboard.KEYCODE.FAKE_CTRLC]      = Keyboard.aSoftCodes['c'] + (Keyboard.STATE.CTRL << 8);
 Keyboard.aKeyCodes[Keyboard.KEYCODE.FAKE_CTRLBREAK]  = Keyboard.aSoftCodes['scroll-lock'] + (Keyboard.STATE.CTRL << 8);
 Keyboard.aKeyCodes[Keyboard.KEYCODE.FAKE_CTRLALTDEL] = Keyboard.aSoftCodes['num-del'] + (Keyboard.STATE.CTRL << 8) + (Keyboard.STATE.ALT << 16);
 
 /**
- * Options for keyEventSimulate()
+ * keySimulateUpDown() origin codes (useful only for debugging)
  *
  * @enum {number}
  */
 Keyboard.SIMCODE = {
     KEYPRESS:   0,
     KEYRELEASE: 1,
-    KEYEVENT:   2,
+    KEYUPDOWN:  2,
     KEYTIMEOUT: 3,
     AUTOCLEAR:  4
 };
 
 if (DEBUGGER) {
-    Keyboard.aSimCodeDescs = ["keyPress", "keyRelease", "keyEvent", "keyTimeout", "autoClear"];
+    Keyboard.aSimCodeDescs = ["keyPress", "keyRelease", "keyUpDown", "keyTimeout", "autoClear"];
 }
+
+/**
+ * Commands that can be sent to the Keyboard via the 8042; see sendCmd()
+ *
+ * @enum {number}
+ */
+Keyboard.CMD = {
+    RESET:      0xFF,
+    RESEND:     0xFE,
+    DEF_ON:     0xF6,
+    DEF_OFF:    0xF5,
+    ENABLE:     0xF4,
+    SET_RATE:   0xF3,
+    ECHO:       0xEE,
+    SET_LEDS:   0xED
+};
+
+/**
+ * Command responses returned to the Keyboard via the 8042; see sendCmd()
+ *
+ * @enum {number}
+ */
+Keyboard.CMDRES = {
+    OVERRUN:    0x00,
+    LOAD_TEST:  0x65,   // undocumented "LOAD MANUFACTURING TEST REQUEST" response code
+    BAT_SUCC:   0xAA,   // Basic Assurance Test (BAT) completed successfully
+    ECHO:       0xEE,
+    BREAK_PREF: 0xF0,   // break prefix
+    ACK:        0xFA,
+    BAT_FAIL:   0xFC,   // Basic Assurance Test (BAT) failed
+    DIAG_FAIL:  0xFD,
+    RESEND:     0xFE,
+    BUFF_FULL:  0xFF    // TODO: Verify this response code (is it just for older 83-key keyboards?)
+};
+
+/*
+ * Other scan code definitions (ie, not defined in aSoftCodes)
+ */
+Keyboard.SCAN = {
+    MAKE:       0x7f,
+    BREAK:      0x80
+};
+
+Keyboard.LIMIT = {
+    MAXSCANS:   20      // TODO: Verify this limit for newer keyboards (84-key and up)
+};
 
 /**
  * setBinding(sHTMLClass, sHTMLType, sBinding, control)
@@ -666,13 +696,13 @@ Keyboard.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, contro
         case "kbd":
             this.bindings[id] = control;
             control.onkeydown = function onKeyDownKeyboard(event) {
-                return kbd.keyEvent(event, true);
+                return kbd.keyUpDown(event, true);
             };
             control.onkeypress = function onKeyPressKeyboard(event) {
                 return kbd.keyPress(event);
             };
             control.onkeyup = function onKeyUpKeyboard(event) {
-                return kbd.keyEvent(event, false);
+                return kbd.keyUpDown(event, false);
             };
             return true;
         default:
@@ -682,7 +712,7 @@ Keyboard.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, contro
                     return function onClickKeyboard(event) {
                         if (DEBUG) kbd.println(sKey + " clicked");
                         if (kbd.cpu) kbd.cpu.setFocus();
-                        return !kbd.keyPressSimulate(keyCode);
+                        return !kbd.keySimulatePress(keyCode);
                     };
                 }(this, sBinding, Keyboard.aButtonCodes[sBinding]);
                 return true;
@@ -697,7 +727,7 @@ Keyboard.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, contro
                     return function onMouseOrTouchUpKeyboard(event) {
                         kbd.addScanCode(bScan);
                     };
-                }(this, sBinding, Keyboard.aSoftCodes[sBinding] | 0x80);
+                }(this, sBinding, Keyboard.aSoftCodes[sBinding] | Keyboard.SCAN.BREAK);
                 if ('ontouchstart' in window) {
                     control.ontouchstart = fnDown;
                     control.ontouchend = fnUp;
@@ -1080,18 +1110,13 @@ Keyboard.prototype.setSoftKeyState = function(control, f)
 /**
  * addScanCode(bScan, fRepeat)
  *
- * An actual IBM keyboard will only buffer up to 20 scan codes, so we impose the same limit here.
- *
- * Just as 0xAA is a special scan code response to a software reset, 0xFF is a special scan code response to
- * an internal buffer overrun.  I try to simulate both.  TODO: Define and document these limits and special codes.
- *
  * @this {Keyboard}
  * @param {number} bScan
  * @param {boolean} [fRepeat]
  */
 Keyboard.prototype.addScanCode = function(bScan, fRepeat)
 {
-    var bKey = bScan & 0x7f;
+    var bKey = bScan & Keyboard.SCAN.MAKE;
     var fDown = (bKey == bScan);
     /*
      * Prepare for the possibility that our reset() function may not have been called yet.
@@ -1101,7 +1126,7 @@ Keyboard.prototype.addScanCode = function(bScan, fRepeat)
      * as a result of calls from any of the key event handlers established by setBinding().
      */
     if (this.abScanBuffer) {
-        if (this.abScanBuffer.length < 20) {
+        if (this.abScanBuffer.length < Keyboard.LIMIT.MAXSCANS) {
             if (!fDown && !this.aScanCodesActive[bKey] || fDown && this.aScanCodesActive[bKey] && !fRepeat) {
                 if (MAXDEBUG) this.messageDebugger("scan code 0x" + str.toHexByte(bScan) + " redundant");
                 return;
@@ -1115,8 +1140,8 @@ Keyboard.prototype.addScanCode = function(bScan, fRepeat)
             this.findBinding(bKey, "key", fDown);
             return;
         }
-        if (this.abScanBuffer.length == 20) {
-            this.abScanBuffer.push(0xFF);
+        if (this.abScanBuffer.length == Keyboard.LIMIT.MAXSCANS) {
+            this.abScanBuffer.push(Keyboard.CMDRES.BUFF_FULL);
         }
         this.messageDebugger("scan code buffer overflow");
     }
@@ -1143,7 +1168,7 @@ Keyboard.prototype.calcReleaseDelay = function(fRepeat)
      * with the virtual machine's auto-repeat behavior. msReleaseDelay is the initial delay, msReleaseRepeat
      * is the subsequent delay.
      *
-     * Unfortunately, with a large initial delay, we need to enable the auto-clear code in the keyEvent()
+     * Unfortunately, with a large initial delay, we need to enable the auto-clear code in the keyUpDown()
      * handler, otherwise doing things like pressing ENTER repeatedly will result in sluggish behavior
      * (because you can generally press/release/repress keys faster than they will auto-repeat).
      */
@@ -1164,7 +1189,7 @@ Keyboard.prototype.autoClear = function(notKeyCode)
         if (DEBUG) this.messageDebugger("autoClear(" + this.prevCharDown + ")");
         Component.assert(this.aKeyTimers[this.prevCharDown]);
         clearTimeout(this.aKeyTimers[this.prevCharDown]);
-        this.keyEventSimulate(this.prevCharDown, false, Keyboard.SIMCODE.AUTOCLEAR);
+        this.keySimulateUpDown(this.prevCharDown, false, Keyboard.SIMCODE.AUTOCLEAR);
     }
 };
 
@@ -1198,7 +1223,7 @@ Keyboard.prototype.injectKeysFromBuffer = function(msDelay)
         if (ch == 0x0a) ch = 0x0d;
 
         this.sInjectBuffer = this.sInjectBuffer.substr(1);
-        this.keyPressSimulate(ch);
+        this.keySimulatePress(ch);
     }
     if (this.sInjectBuffer.length > 0) {
         setTimeout(function (kbd) {
@@ -1210,14 +1235,14 @@ Keyboard.prototype.injectKeysFromBuffer = function(msDelay)
 };
 
 /**
- * keyEvent(event, fDown)
+ * keyUpDown(event, fDown)
  *
  * @this {Keyboard}
  * @param {Object} event
  * @param {boolean} fDown is true for a keyDown event, false for a keyUp event
  * @return {boolean} true to pass the event along, false to consume it
  */
-Keyboard.prototype.keyEvent = function(event, fDown)
+Keyboard.prototype.keyUpDown = function(event, fDown)
 {
     var fPass;
     var fAutoClear = !fDown;
@@ -1244,12 +1269,12 @@ Keyboard.prototype.keyEvent = function(event, fDown)
                  * when getting unlocked--which is exactly what I want, even though that may seem a little
                  * counter-intuitive (since the key itself actually went down AND up for each event).
                  */
-                fPass = this.keyPressSimulate(keyCodeSim);
+                fPass = this.keySimulatePress(keyCodeSim);
             } else {
                 fAutoClear = false;
             }
         } else {
-            if (keyCode == Keyboard.KEYCODE.TAB || keyCode == Keyboard.KEYCODE.ESC || keyCode == Keyboard.KEYCODE.BS) {
+            if (keyCode == Keyboard.KEYCODE.BS || keyCode == Keyboard.KEYCODE.TAB || keyCode == Keyboard.KEYCODE.ESC) {
                 /*
                  * HACK for simulating Ctrl-Break using Ctrl-Del (Mac) / Ctrl-Backspace (Windows)
                  */
@@ -1266,14 +1291,23 @@ Keyboard.prototype.keyEvent = function(event, fDown)
                  *
                  *      fPass = fAutoClear = false;
                  *
-                 * I don't get keyPress events for ESC (why?) and I never want the browser to act on DELETE
-                 * (which does double-duty as the "Back" button and leaves the current page), so I have to
-                 * simulate them now.
+                 * I don't get keyPress events for ESC (why?) and I never want the browser to act on BS
+                 * (which does double-duty as the "Back" button and leaves the current page), so I have
+                 * to simulate them now.
                  *
                  * Note that I call the "press" simulate method and NOT the "event" simulate method, because
                  * the former takes care of simulating both individual "down" and "up" events.
                  */
-                fPass = (fDown? !this.keyPressSimulate(keyCodeSim) : false);
+                fPass = (fDown? !this.keySimulatePress(keyCodeSim) : false);
+            } else {
+                /*
+                 * No effect, at least in IE9....
+                 *
+                if (keyCode == Keyboard.KEYCODE.F1 || keyCode == Keyboard.KEYCODE.F11 || keyCode == Keyboard.KEYCODE.F12) {
+                    this.println("preventDefault()");
+                    event.preventDefault();
+                }
+                 */
             }
         }
     }
@@ -1293,12 +1327,12 @@ Keyboard.prototype.keyEvent = function(event, fDown)
          * not create mappings for).
          */
         else if (event.altKey || event.ctrlKey) {
-            if (keyCode >= 0x41 && keyCode <= 0x5A) {
+            if (keyCode >= Keyboard.ASCII.A && keyCode <= Keyboard.ASCII.Z) {
                 /*
                  * Convert "upper-case" letter combinations into "lower-case" combinations, so
-                 * that keyEventSimulate() doesn't think it also needs to simulate a SHIFT key, too.
+                 * that keySimulateUpDown() doesn't think it also needs to simulate a SHIFT key, too.
                  */
-                keyCodeSim += 0x20;
+                keyCodeSim += (Keyboard.ASCII.a - Keyboard.ASCII.A);
             }
             // if (DEBUG) this.messageDebugger("ALT event: keyCode " + keyCode);
         }
@@ -1346,7 +1380,7 @@ Keyboard.prototype.keyEvent = function(event, fDown)
     }
 
     if (fPass === undefined) {
-        fPass = !this.keyEventSimulate(keyCodeSim, fDown, Keyboard.SIMCODE.KEYEVENT);
+        fPass = !this.keySimulateUpDown(keyCodeSim, fDown, Keyboard.SIMCODE.KEYUPDOWN);
     }
 
     if (DEBUG) this.messageDebugger(/*(fDown?"\n":"") +*/ "key" + (fDown? "Down" : "Up") + "(" + keyCode + "): " + (fPass? "pass" : "consume"), Debugger.MESSAGE_KEYS);
@@ -1355,9 +1389,6 @@ Keyboard.prototype.keyEvent = function(event, fDown)
 
 /**
  * keyPress(event)
- *
- * We've stopped relying on keyPress for keyboard emulation purposes, but it's still handy to hook and monitor
- * when debugging.
  *
  * @this {Keyboard}
  * @param {Object} event
@@ -1376,14 +1407,14 @@ Keyboard.prototype.keyPress = function(event)
 
     if (keyCode == Keyboard.KEYCODE.BS || keyCode == Keyboard.KEYCODE.TAB) {
         /*
-         * Unlike Safari and Chrome, Firefox doesn't seem to honor our "consume" request for the "down" DELETE keyEvent,
-         * so we must ALSO check for the DELETE key here, and again "consume" it.  Ditto for TAB.
+         * Unlike Safari and Chrome, Firefox doesn't seem to honor our "consume" request for the "down" BS keyEvent,
+         * so we must ALSO check for the BS key here, and again "consume" it.  Ditto for TAB.
          *
-         * In fact, this is just one example of a larger Firefox problem (see https://bugzilla.mozilla.org/show_bug.cgi?id=501496).
+         * This is just one example of a larger Firefox problem (see https://bugzilla.mozilla.org/show_bug.cgi?id=501496).
          * Basically, Firefox is not honoring our consumption of keyDown events, and generates keyPress events anyway.
-         * This causes us grief for various CTRL and ALT combinations, resulting in duplicate key presses.
-         * So, I'm going to try to fix this below, by setting fPass to true if either of those modifier keys is currently down;
-         * if they're not, then we'll continue with the original code that sets fPass based on the return value from keyPressSimulate().
+         * This causes us grief for various CTRL and ALT combinations, resulting in duplicate key presses.  So, I'm going
+         * to try to fix this below, by setting fPass to true if either of those modifier keys is currently down;
+         * if they're not, then we'll continue with the original code that sets fPass based on the return from keySimulatePress().
          */
         fPass = false;
     } else {
@@ -1394,7 +1425,7 @@ Keyboard.prototype.keyPress = function(event)
             if (this.bitsShift & (Keyboard.STATE.CTRL | Keyboard.STATE.ALT))
                 fPass = false;
             else
-                fPass = !this.keyPressSimulate(keyCode);
+                fPass = !this.keySimulatePress(keyCode);
         }
     }
 
@@ -1403,14 +1434,14 @@ Keyboard.prototype.keyPress = function(event)
 };
 
 /**
- * keyPressSimulate(keyCode)
+ * keySimulatePress(keyCode)
  *
  * @this {Keyboard}
  * @param {number} keyCode
  * @param {boolean} [fQuickRelease] is true to simulate the press and release immediately
  * @return {boolean} true if successfully simulated, false if unrecognized/unsupported key
  */
-Keyboard.prototype.keyPressSimulate = function(keyCode, fQuickRelease)
+Keyboard.prototype.keySimulatePress = function(keyCode, fQuickRelease)
 {
     var fSimulated = false;
 
@@ -1419,7 +1450,7 @@ Keyboard.prototype.keyPressSimulate = function(keyCode, fQuickRelease)
      */
     this.autoClear(keyCode);
 
-    if (this.keyEventSimulate(keyCode, true, Keyboard.SIMCODE.KEYPRESS)) {
+    if (this.keySimulateUpDown(keyCode, true, Keyboard.SIMCODE.KEYPRESS)) {
         /*
          * If fQuickRelease is set, we switch to an alternate approach, which is to immediately queue a
          * "release" event as well.  I used to also do this at high speeds, because the CPU could get lucky
@@ -1435,7 +1466,7 @@ Keyboard.prototype.keyPressSimulate = function(keyCode, fQuickRelease)
          * that it's time to review/overhaul this code.
          */
         if (fQuickRelease /* || this.cpu.speed == CPU.SPEED_MAX */) {
-            this.keyEventSimulate(keyCode, false, Keyboard.SIMCODE.KEYRELEASE);
+            this.keySimulateUpDown(keyCode, false, Keyboard.SIMCODE.KEYRELEASE);
         }
         else {
             var fRepeat = false;
@@ -1445,20 +1476,20 @@ Keyboard.prototype.keyPressSimulate = function(keyCode, fQuickRelease)
             }
             var msDelay = this.calcReleaseDelay(fRepeat);
             this.aKeyTimers[this.prevCharDown = keyCode] = setTimeout(function (kbd) {
-                return function onKeyPressSimulateTimeout() {
-                    kbd.keyEventSimulate(keyCode, false, Keyboard.SIMCODE.KEYTIMEOUT);
+                return function onkeySimulatePressTimeout() {
+                    kbd.keySimulateUpDown(keyCode, false, Keyboard.SIMCODE.KEYTIMEOUT);
                 };
             }(this), msDelay);
-            if (DEBUG) this.messageDebugger("keyPressSimulate(" + keyCode + "): setTimeout()");
+            if (DEBUG) this.messageDebugger("keySimulatePress(" + keyCode + "): setTimeout()");
         }
         fSimulated = true;
     }
-    if (DEBUG) this.messageDebugger("keyPressSimulate(" + keyCode + "): " + (fSimulated? "true" : "false"));
+    if (DEBUG) this.messageDebugger("keySimulatePress(" + keyCode + "): " + (fSimulated? "true" : "false"), Debugger.MESSAGE_KEYS);
     return fSimulated;
 };
 
 /**
- * keyEventSimulate(keyCode, fDown, simCode)
+ * keySimulateUpDown(keyCode, fDown, simCode)
  *
  * @this {Keyboard}
  * @param {number} keyCode
@@ -1466,7 +1497,7 @@ Keyboard.prototype.keyPressSimulate = function(keyCode, fQuickRelease)
  * @param {number} simCode indicates the origin of the event
  * @return {boolean} true if successfully simulated, false if unrecognized/unsupported key
  */
-Keyboard.prototype.keyEventSimulate = function(keyCode, fDown, simCode)
+Keyboard.prototype.keySimulateUpDown = function(keyCode, fDown, simCode)
 {
     var fSimulated = false;
 
@@ -1483,10 +1514,11 @@ Keyboard.prototype.keyEventSimulate = function(keyCode, fDown, simCode)
          * and this bit of code relieves us from having to explicitly define every CTRL-letter
          * possibility in aKeyCodes.
          *
-         * TODO: Support for CTRL-anything-else (as well as ALT-anything-else) is still TBD.
+         * TODO: Support for CTRL-anything-else (including CTRL-SHIFT-anything else) as well
+         * as ALT-anything-else (including CTRL-ALT, SHIFT-ALT, or CTRL-SHIFT-ALT) is still TBD.
          */
-        if (keyCode >= 0x01 && keyCode <= 0x1A) {
-            keyCode += 0x40;
+        if (keyCode >= Keyboard.ASCII.CTRLA && keyCode <= Keyboard.ASCII.CTRLZ) {
+            keyCode += (Keyboard.ASCII.A - Keyboard.ASCII.CTRLA);
             wCode = (Keyboard.aKeyCodes[keyCode] & 0xff) | (Keyboard.STATE.CTRL << 8);
         }
     }
@@ -1496,39 +1528,40 @@ Keyboard.prototype.keyEventSimulate = function(keyCode, fDown, simCode)
          * Hack to transform the IBM "BACKSPACE" key (which we normally map to KEYCODE_DELETE) to the IBM "DEL" key
          * whenever both CTRL and ALT are pressed as well, so that it's easier to simulate that old favorite: CTRL-ALT-DEL
          */
-        if (wCode == 0x0E) {
+        if (wCode == Keyboard.aSoftCodes['bs']) {
             if ((this.bitsShift & (Keyboard.STATE.CTRL | Keyboard.STATE.ALT)) == (Keyboard.STATE.CTRL | Keyboard.STATE.ALT)) {
-                wCode = 0x53;
+                wCode = Keyboard.aSoftCodes['num-del'];
             }
         }
 
+        var bCode = wCode & 0xff;
+        var fAlpha = (keyCode >= Keyboard.ASCII.A && keyCode <= Keyboard.ASCII.Z || keyCode >= Keyboard.ASCII.a && keyCode <= Keyboard.ASCII.z);
         var abScanCodes = [];
-        abScanCodes.push((wCode & 0xff) | (fDown? 0 : 0x80));
+        abScanCodes.push(bCode | (fDown? 0 : Keyboard.SCAN.BREAK));
 
         while (wCode >>= 8) {
             var bScan = 0;
             var bShift = wCode & 0xff;
             if (bShift == Keyboard.STATE.SHIFT) {
-                /*
-                 * TODO: The fact that CAPSLOCK is currently set affects only letters....
-                 */
-                if (!(this.bitsShift & (Keyboard.STATE.SHIFT | Keyboard.STATE.RSHIFT | Keyboard.STATE.CAPSLOCK))) {
-                    bScan = 0x2A;
+                if (!(this.bitsShift & (Keyboard.STATE.SHIFT | Keyboard.STATE.RSHIFT))) {
+                    if (!(this.bitsShift & Keyboard.STATE.CAPSLOCK) || !fAlpha) {
+                        bScan = Keyboard.aSoftCodes['shift'];
+                    }
                 }
             } else if (bShift == Keyboard.STATE.CTRL) {
                 if (!(this.bitsShift & (Keyboard.STATE.CTRL | Keyboard.STATE.RCTRL))) {
-                    bScan = 0x1D;
+                    bScan = Keyboard.aSoftCodes['ctrl'];
                 }
             } else if (bShift == Keyboard.STATE.ALT) {
                 if (!(this.bitsShift & (Keyboard.STATE.ALT | Keyboard.STATE.RALT))) {
-                    bScan = 0x38;
+                    bScan = Keyboard.aSoftCodes['alt'];
                 }
             }
             if (bScan) {
                 if (fDown)
                     abScanCodes.unshift(bScan);
                 else
-                    abScanCodes.push(bScan | 0x80);
+                    abScanCodes.push(bScan | Keyboard.SCAN.BREAK);
             }
         }
 
@@ -1538,7 +1571,7 @@ Keyboard.prototype.keyEventSimulate = function(keyCode, fDown, simCode)
 
         fSimulated = true;
     }
-    if (DEBUG && DEBUGGER) this.messageDebugger("keyEventSimulate(" + keyCode + "," + (fDown? "down" : "up") + "," + Keyboard.aSimCodeDescs[simCode] + "): " + (fSimulated? "true" : "false"));
+    if (DEBUG && DEBUGGER) this.messageDebugger("keySimulateUpDown(" + keyCode + "," + (fDown? "down" : "up") + "," + Keyboard.aSimCodeDescs[simCode] + "): " + (fSimulated? "true" : "false"), Debugger.MESSAGE_KEYS);
     return fSimulated;
 };
 

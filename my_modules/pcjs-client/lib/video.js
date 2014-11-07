@@ -2210,15 +2210,15 @@ Video.prototype.processTouchEvent = function(event, fStart)
      */
     if (/* xThird == 1 && */ yThird != 1) {
         if (!yThird) {
-            this.kbd.keyPressSimulate(Keyboard.KEYCODE.UP, true);
+            this.kbd.keySimulatePress(Keyboard.KEYCODE.UP, true);
         } else {
-            this.kbd.keyPressSimulate(Keyboard.KEYCODE.DOWN, true);
+            this.kbd.keySimulatePress(Keyboard.KEYCODE.DOWN, true);
         }
     } else if (/* yThird == 1 && */ xThird != 1) {
         if (!xThird) {
-            this.kbd.keyPressSimulate(Keyboard.KEYCODE.LEFT, true);
+            this.kbd.keySimulatePress(Keyboard.KEYCODE.LEFT, true);
         } else {
-            this.kbd.keyPressSimulate(Keyboard.KEYCODE.RIGHT, true);
+            this.kbd.keySimulatePress(Keyboard.KEYCODE.RIGHT, true);
         }
     }
 };

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# This script was created for the Grunt "delete_indexes" task in /Gruntfile.js; it lives here
+# This script was created for the Grunt "delete-indexes" task in /Gruntfile.js; it lives here
 # because htmlout is the module responsible for "littering" the project with "index.html" files,
 # therefore it bears responsibility for cleaning them up.  This is its "poor man's" solution.
 #
