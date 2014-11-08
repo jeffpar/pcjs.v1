@@ -1186,7 +1186,7 @@ Computer.prototype.getComponentByType = function(sType, componentPrev)
 Computer.prototype.messageDebugger = function(sMessage, fForce)
 {
     if (DEBUGGER && this.dbg) {
-        if (fForce || this.dbg.messageEnabled(Debugger.MESSAGE_COMPUTER)) this.dbg.message(sMessage);
+        if (fForce || this.dbg.messageEnabled(Debugger.MESSAGE.COMPUTER)) this.dbg.message(sMessage);
     }
 };
 

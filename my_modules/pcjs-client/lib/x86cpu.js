@@ -922,12 +922,12 @@ X86CPU.prototype.checkIntNotify = function(nInt)
             }
         }
     }
-    else if (DEBUGGER && this.aFlags.fDebugCheck) {
-        /*
-         * Enabling MESSAGE_INT messages is one of the criteria that's also included in fDebugCheck,
-         * so for maximum speed, we check fDebugCheck first.
-         */
-        if (this.dbg.messageEnabled(Debugger.MESSAGE_INT) && this.dbg.messageInt(nInt, this.regEIP)) {
+    /*
+     * The enabling of MESSAGE_INT messages is one of the criteria that's also included in the Debugger's
+     * checksEnabled() function, and therefore in fDebugCheck, so for maximum speed, we check fDebugCheck first.
+     */
+    if (DEBUGGER && this.aFlags.fDebugCheck) {
+        if (this.dbg.messageEnabled(Debugger.MESSAGE.INT) && this.dbg.messageInt(nInt, this.regEIP)) {
             this.addIntReturn(this.regEIP, function(cpu, nCycles) {
                 return function onIntReturn(nLevel) {
                     cpu.dbg.messageIntReturn(nInt, nLevel, cpu.getCycles() - nCycles);
@@ -2490,7 +2490,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
      * One exception I make here is when you've asked the Debugger to display PIC messages, the idea being that
      * if you're watching the PIC that closely, then you want to hardware interrupts to occur regardless.
      */
-    if (!nMinCycles && this.dbg && !this.dbg.messageEnabled(Debugger.MESSAGE_PIC)) this.opFlags |= X86.OPFLAG.NOINTR;
+    if (!nMinCycles && this.dbg && !this.dbg.messageEnabled(Debugger.MESSAGE.PIC)) this.opFlags |= X86.OPFLAG.NOINTR;
 
     do {
         var opPrefixes = this.opFlags & X86.OPFLAG.PREFIXES;
@@ -2597,7 +2597,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
 X86CPU.prototype.messageDebugger = function(sMessage)
 {
     if (DEBUGGER && this.dbg) {
-        if (this.dbg.messageEnabled(Debugger.MESSAGE_CPU)) {
+        if (this.dbg.messageEnabled(Debugger.MESSAGE.CPU)) {
             this.dbg.message(sMessage);
         }
     }

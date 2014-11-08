@@ -400,13 +400,6 @@ FDC.aCmdInfo = {
     0x0F: {cbReq: 3, cbRes: 0, name: FDC.CMDS.SEEK}
 };
 
-/*
- * FDC BIOS interrupts, functions, and other parameters
- */
-FDC.BIOS = {
-    INT_DISKETTE:   0x13
-};
-
 /**
  * setBinding(sHTMLClass, sHTMLType, sBinding, control)
  *
@@ -561,9 +554,6 @@ FDC.prototype.initBus = function(cmp, bus, cpu, dbg)
 
     bus.addPortInputTable(this, FDC.aPortInput);
     bus.addPortOutputTable(this, FDC.aPortOutput);
-    if (DEBUGGER) {
-        cpu.addIntNotify(FDC.BIOS.INT_DISKETTE, this, this.intBIOSDiskette);
-    }
 
     if (!this.autoMount()) this.setReady();
 };
@@ -1879,7 +1869,7 @@ FDC.prototype.popCmd = function(name)
 {
     Component.assert((!this.regDataIndex || name !== undefined) && this.regDataIndex < this.regDataTotal);
     var bCmd = this.regDataArray[this.regDataIndex];
-    if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE_FDC)) {
+    if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE.FDC)) {
         var bCmdMasked = bCmd & FDC.REG_DATA.CMD.MASK;
         if (!name && !this.regDataIndex && FDC.aCmdInfo[bCmdMasked]) name = FDC.aCmdInfo[bCmdMasked].name;
         this.dbg.message("FDC.CMD[" + (name || this.regDataIndex) + "]: 0x" + str.toHexByte(bCmd));
@@ -1933,7 +1923,7 @@ FDC.prototype.beginResult = function()
  */
 FDC.prototype.pushResult = function(bResult, name)
 {
-    if (DEBUG) this.messageDebugger("FDC.RES[" + (name || this.regDataTotal) + "]: 0x" + str.toHexByte(bResult), Debugger.MESSAGE_FDC);
+    if (DEBUG) this.messageDebugger("FDC.RES[" + (name || this.regDataTotal) + "]: 0x" + str.toHexByte(bResult), Debugger.MESSAGE.FDC);
     this.regDataArray[this.regDataTotal++] = bResult;
 };
 
@@ -2288,52 +2278,6 @@ FDC.prototype.writeFormat = function(drive, b)
 };
 
 /**
- * intBIOSDiskette(addr)
- *
- * NOTE: This function tries to differentiate FDC requests from HDC requests, by whether the INT 0x13 drive number
- * in DL is < 0x80; however, not all INT 0x13 functions required a drive number in DL, and not all callers supplied one.
- *
- * INT 0x13 Quick Reference:
- *
- *      AH
- *      ----
- *      0x00    Reset
- *      0x01    Get status (from last operation)
- *      0x02    Read sectors
- *      0x03    Write sectors
- *      0x04    Verify sectors
- *      0x05    Format track
- *
- * For Read, Write, Verify and Format commands:
- *
- *      DL      drive number (0-3 allowed, value checked)
- *      DH      head number (0-1 allowed, not value checked)
- *      CH      track number (0-39 allowed, not value checked [which is good, because high-density diskettes go up to 80 tracks])
- *      CL      sector number (1-8 allowed, not value checked [which is good, because support for 9-sector tracks was later added])
- *      AL      number of sectors (max of 8, not value checked)
- *      ES:BX   sector buffer
- *
- * @this {FDC}
- * @param {number} addr
- * @return {boolean} true to proceed with the INT 0x13 software interrupt, false to skip
- */
-FDC.prototype.intBIOSDiskette = function(addr)
-{
-    if (DEBUGGER) {
-        var DL = this.cpu.regDX & 0xff;
-        if (this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE_FDC | Debugger.MESSAGE_INT) && DL < 0x80) {
-            this.dbg.messageInt(FDC.BIOS.INT_DISKETTE, addr);
-            this.cpu.addIntReturn(addr, function(fdc, nCycles) {
-                return function onBIOSDisketteReturn(nLevel) {
-                    fdc.dbg.messageIntReturn(FDC.BIOS.INT_DISKETTE, nLevel, fdc.cpu.getCycles() - nCycles);
-                };
-            }(this, this.cpu.getCycles()));
-        }
-    }
-    return true;
-};
-
-/**
  * messageDebugger(sMessage, bitsMessage)
  *
  * This is a combination of the Debugger's messageEnabled(MESSAGE_FDC) and message() functions, for convenience.
@@ -2345,7 +2289,7 @@ FDC.prototype.intBIOSDiskette = function(addr)
 FDC.prototype.messageDebugger = function(sMessage, bitsMessage)
 {
     if (DEBUGGER && this.dbg) {
-        if (bitsMessage == null) bitsMessage = Debugger.MESSAGE_FDC;
+        if (bitsMessage == null) bitsMessage = Debugger.MESSAGE.FDC;
         if (this.dbg.messageEnabled(bitsMessage)) this.dbg.message(sMessage);
     }
 };
@@ -2364,7 +2308,7 @@ FDC.prototype.messageDebugger = function(sMessage, bitsMessage)
  */
 FDC.prototype.messagePort = function(port, bOut, addrFrom, name, bIn)
 {
-    if (DEBUGGER && this.dbg) this.dbg.messagePort(this, port, bOut, addrFrom, name, Debugger.MESSAGE_FDC, bIn);
+    if (DEBUGGER && this.dbg) this.dbg.messagePort(this, port, bOut, addrFrom, name, Debugger.MESSAGE.FDC, bIn);
 };
 
 /*

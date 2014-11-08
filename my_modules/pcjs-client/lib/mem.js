@@ -168,7 +168,7 @@ Memory.prototype = {
      * @return {number}
      */
     readNone: function(off) {
-        if (DEBUGGER && this.dbg.messageEnabled(Debugger.MESSAGE_MEM) && !off) {
+        if (DEBUGGER && this.dbg.messageEnabled(Debugger.MESSAGE.MEM) && !off) {
             this.dbg.message("attempt to read invalid block %" + str.toHex(this.addr) + " from " + str.toHexAddr(this.cpu.regIP, this.cpu.segCS.sel));
         }
         return 0;
@@ -181,7 +181,7 @@ Memory.prototype = {
      * @param {number} v (could be either a byte or word value, since we use the same handler for both kinds of accesses)
      */
     writeNone: function(off, v) {
-        if (DEBUGGER && this.dbg.messageEnabled(Debugger.MESSAGE_MEM) && !off) {
+        if (DEBUGGER && this.dbg.messageEnabled(Debugger.MESSAGE.MEM) && !off) {
             this.dbg.message("attempt to write 0x" + str.toHexWord(v) + " to invalid block %" + str.toHex(this.addr) + " from " + str.toHexAddr(this.cpu.regIP, this.cpu.segCS.sel));
         }
     },

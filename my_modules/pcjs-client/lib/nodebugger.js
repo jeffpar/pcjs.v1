@@ -46,6 +46,8 @@
 DEBUGGER = false;
 
 /*
- * We still need a Debugger "stub" object, so that attempts to reference Debugger constants won't trigger exceptions.
+ * We still need some Debugger "stub" objects, so that attempts to reference Debugger constants won't trigger exceptions.
  */
-var Debugger = {};
+var Debugger = {
+    MESSAGE: {}
+};

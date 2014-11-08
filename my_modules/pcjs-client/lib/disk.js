@@ -691,7 +691,7 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
              * conversion to a forward-compatible 'data' array.
              */
             else {
-                if (MAXDEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE_DISK)) {
+                if (MAXDEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE.DISK)) {
                     var sCylinders = aDiskData.length + " track" + (aDiskData.length > 1 ? "s" : "");
                     var nHeads = aDiskData[0].length;
                     var sHeads = nHeads + " head" + (nHeads > 1 ? "s" : "");
@@ -1534,7 +1534,7 @@ Disk.prototype.restore = function(deltas)
 Disk.prototype.messageDebugger = function(sMessage)
 {
     if (DEBUGGER && this.dbg) {
-        if (this.dbg.messageEnabled(Debugger.MESSAGE_DISK)) {
+        if (this.dbg.messageEnabled(Debugger.MESSAGE.DISK)) {
             this.dbg.message(sMessage);
         }
     }

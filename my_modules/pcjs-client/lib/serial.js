@@ -152,16 +152,17 @@ SerialPort.sIOBuffer = "buffer";
  *      0x0002      56000       2.86%
  *      0x0001      128000
  */
-SerialPort.RBR = {REG: 0};              // Receiver Buffer Register (read)
 SerialPort.DLL = {REG: 0};              // Divisor Latch LSB (only when SerialPort.LCR.DLAB is set)
 SerialPort.THR = {REG: 0};              // Transmitter Holding Register (write)
-SerialPort.DLM = {REG: 1};              // Divisor Latch MSB (only when SerialPort.LCR.DLAB is set)
-SerialPort.SCR = {REG: 7};              // Scratch Register
-
 SerialPort.DL_DEFAULT       = 0x180;    // we select an arbitrary default Divisor Latch equivalent to 300 baud
 
 /*
- * Interrupt Enable Register (IER.REG, offset 1)
+ * Receiver Buffer Register (RBR.REG, offset 0; eg, 0x3F8 or 0x2F8)
+ */
+SerialPort.RBR = {REG: 0};              // (read)
+
+/*
+ * Interrupt Enable Register (IER.REG, offset 1; eg, 0x3F9 or 0x2F9)
  */
 SerialPort.IER = {};
 SerialPort.IER.REG          = 1;        // Interrupt Enable Register
@@ -171,8 +172,10 @@ SerialPort.IER.LSR_DELTA    = 0x04;
 SerialPort.IER.MSR_DELTA    = 0x08;
 SerialPort.IER.UNUSED       = 0xF0;     // always zero
 
+SerialPort.DLM = {REG: 1};              // Divisor Latch MSB (only when SerialPort.LCR.DLAB is set)
+
 /*
- * Interrupt ID Register (IIR.REG, offset 2)
+ * Interrupt ID Register (IIR.REG, offset 2; eg, 0x3FA or 0x2FA)
  *
  * All interrupt conditions cleared by reading the corresponding register (or, in the case of IRR_INT_THR, writing a new value to THR.REG)
  */
@@ -187,7 +190,7 @@ SerialPort.IIR.INT_BITS     = 0x06;
 SerialPort.IIR.UNUSED       = 0xF8;     // always zero (the ROM BIOS relies on these bits "floating to 1" when no SerialPort is present)
 
 /*
- * Line Control Register (LCR.REG, offset 3)
+ * Line Control Register (LCR.REG, offset 3; eg, 0x3FB or 0x2FB)
  */
 SerialPort.LCR = {};
 SerialPort.LCR.REG          = 3;        // Line Control Register
@@ -203,7 +206,7 @@ SerialPort.LCR.BREAK        = 0x40;     // if set, serial output (SOUT) signal i
 SerialPort.LCR.DLAB         = 0x80;     // Divisor Latch Access Bit; if set, DLL.REG and DLM.REG can be read or written
 
 /*
- * Modem Control Register (MCR.REG, offset 4)
+ * Modem Control Register (MCR.REG, offset 4; eg, 0x3FC or 0x2FC)
  */
 SerialPort.MCR = {};
 SerialPort.MCR.REG          = 4;        // Modem Control Register
@@ -215,7 +218,7 @@ SerialPort.MCR.LOOPBACK     = 0x10;     // when set, enables loop-back mode
 SerialPort.MCR.UNUSED       = 0xE0;     // always zero
 
 /*
- * Line Status Register (LSR.REG, offset 5)
+ * Line Status Register (LSR.REG, offset 5; eg, 0x3FD or 0x2FD)
  *
  * NOTE: I've seen different specs for the LSR_TSRE.  I'm following the IBM Tech Ref's lead here, but the data sheet I have calls it TEMT
  * instead of TSRE, and claims that it is set whenever BOTH the THR and TSR are empty, and clear whenever EITHER the THR or TSR contain data.
@@ -232,7 +235,7 @@ SerialPort.LSR.TSRE         = 0x40;     // Transmitter Shift Register Empty (set
 SerialPort.LSR.UNUSED       = 0x80;     // always zero
 
 /*
- * Modem Status Register (MSR.REG, offset 6)
+ * Modem Status Register (MSR.REG, offset 6; eg, 0x3FE or 0x2FE)
  */
 SerialPort.MSR = {};
 SerialPort.MSR.REG          = 6;        // Modem Status Register
@@ -244,6 +247,11 @@ SerialPort.MSR.CTS          = 0x10;     // when set, the modem or data set is re
 SerialPort.MSR.DSR          = 0x20;     // when set, the modem or data set is ready to establish link (complement of the Data Set Ready input signal)
 SerialPort.MSR.RI           = 0x40;     // complement of the RI (Ring Indicator) input
 SerialPort.MSR.RLSD         = 0x80;     // complement of the RLSD (Received Line Signal Detect) input
+
+/*
+ * Scratch Register (SCR.REG, offset 7; eg, 0x3FF or 0x2FF)
+ */
+SerialPort.SCR = {REG: 7};
 
 /**
  * attachMouse(id, mouse)
@@ -718,7 +726,7 @@ SerialPort.prototype.echoByte = function(b) {
  */
 SerialPort.prototype.messageDebugger = function(sMessage) {
     if (DEBUGGER && this.dbg) {
-        if (this.dbg.messageEnabled(Debugger.MESSAGE_SERIAL)) {
+        if (this.dbg.messageEnabled(Debugger.MESSAGE.SERIAL)) {
             this.dbg.message(sMessage);
         }
     }
@@ -738,7 +746,7 @@ SerialPort.prototype.messageDebugger = function(sMessage) {
  */
 SerialPort.prototype.messagePort = function(port, bOut, addrFrom, name, bIn) {
     if (DEBUGGER && this.dbg) {
-        this.dbg.messagePort(this, port, bOut, addrFrom, name, Debugger.MESSAGE_SERIAL, bIn);
+        this.dbg.messagePort(this, port, bOut, addrFrom, name, Debugger.MESSAGE.SERIAL, bIn);
     }
 };
 

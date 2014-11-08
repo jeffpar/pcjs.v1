@@ -381,7 +381,7 @@ State.prototype = {
      */
     messageDebugger: function(sMessage) {
         if (DEBUGGER && this.dbg) {
-            if (this.dbg.messageEnabled(Debugger.MESSAGE_STATE)) this.dbg.message(sMessage);
+            if (this.dbg.messageEnabled(Debugger.MESSAGE.STATE)) this.dbg.message(sMessage);
         }
     }
 };

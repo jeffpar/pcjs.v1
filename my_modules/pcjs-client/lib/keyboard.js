@@ -917,7 +917,7 @@ Keyboard.prototype.resetDevice = function()
     /*
      * TODO: There's more to reset, like LED indicators, default type rate, and emptying the scan code buffer.
      */
-    this.messageDebugger("keyboard reset", Debugger.MESSAGE_PORT);
+    this.messageDebugger("keyboard reset", Debugger.MESSAGE.PORT);
     this.abScanBuffer = [Keyboard.CMDRES.BAT_SUCC];
     if (this.chipset) this.chipset.notifyKbdData(true);
 };
@@ -939,7 +939,7 @@ Keyboard.prototype.setEnable = function(fData, fClock)
 {
     var fReset = false;
     if (this.fClock !== fClock) {
-        if (DEBUG) this.messageDebugger("keyboard clock line changing to " + fClock, Debugger.MESSAGE_PORT);
+        if (DEBUG) this.messageDebugger("keyboard clock line changing to " + fClock, Debugger.MESSAGE.PORT);
         /*
          * Toggling the clock line low and then high signals a "reset", which we acknowledge once the
          * data line is high as well.
@@ -947,7 +947,7 @@ Keyboard.prototype.setEnable = function(fData, fClock)
         this.fClock = this.fResetOnEnable = fClock;
     }
     if (this.fData !== fData) {
-        if (DEBUG) this.messageDebugger("keyboard data line changing to " + fData, Debugger.MESSAGE_PORT);
+        if (DEBUG) this.messageDebugger("keyboard data line changing to " + fData, Debugger.MESSAGE.PORT);
         this.fData = fData;
         /*
          * TODO: Review this code; it was added during the early days of MODEL_5150 testing and may not be
@@ -1480,7 +1480,7 @@ Keyboard.prototype.keyUpDown = function(event, fDown)
         fPass = !this.keySimulateUpDown(keyCodeSim, fDown, Keyboard.SIMCODE.KEYUPDOWN);
     }
 
-    if (DEBUG) this.messageDebugger(/*(fDown?"\n":"") +*/ "key" + (fDown? "Down" : "Up") + "(" + keyCode + "): " + (fPass? "pass" : "consume"), Debugger.MESSAGE_KEYS);
+    if (DEBUG) this.messageDebugger(/*(fDown?"\n":"") +*/ "key" + (fDown? "Down" : "Up") + "(" + keyCode + "): " + (fPass? "pass" : "consume"), Debugger.MESSAGE.KEYS);
     return fPass;
 };
 
@@ -1518,7 +1518,7 @@ Keyboard.prototype.keyPress = function(event)
         if (this.bitsShift & Keyboard.STATE.COMMAND)
             this.bitsShift &= ~Keyboard.STATE.COMMAND;
         else {
-            // if (DEBUG && event.altKey) this.messageDebugger("ALT press: keyCode " + keyCode, Debugger.MESSAGE_KEYS);
+            // if (DEBUG && event.altKey) this.messageDebugger("ALT press: keyCode " + keyCode, Debugger.MESSAGE.KEYS);
             if (this.bitsShift & (Keyboard.STATE.CTRL | Keyboard.STATE.ALT))
                 fPass = false;
             else
@@ -1526,7 +1526,7 @@ Keyboard.prototype.keyPress = function(event)
         }
     }
 
-    if (DEBUG) this.messageDebugger("keyPress(" + keyCode + "): " + (fPass? "pass" : "consume"), Debugger.MESSAGE_KEYS);
+    if (DEBUG) this.messageDebugger("keyPress(" + keyCode + "): " + (fPass? "pass" : "consume"), Debugger.MESSAGE.KEYS);
     return fPass;
 };
 
@@ -1581,7 +1581,7 @@ Keyboard.prototype.keySimulatePress = function(keyCode, fQuickRelease)
         }
         fSimulated = true;
     }
-    if (DEBUG) this.messageDebugger("keySimulatePress(" + keyCode + "): " + (fSimulated? "true" : "false"), Debugger.MESSAGE_KEYS);
+    if (DEBUG) this.messageDebugger("keySimulatePress(" + keyCode + "): " + (fSimulated? "true" : "false"), Debugger.MESSAGE.KEYS);
     return fSimulated;
 };
 
@@ -1666,7 +1666,7 @@ Keyboard.prototype.keySimulateUpDown = function(keyCode, fDown, simCode)
 
         fSimulated = true;
     }
-    if (DEBUG && DEBUGGER) this.messageDebugger("keySimulateUpDown(" + keyCode + "," + (fDown? "down" : "up") + "," + Keyboard.aSimCodeDescs[simCode] + "): " + (fSimulated? "true" : "false"), Debugger.MESSAGE_KEYS);
+    if (DEBUG && DEBUGGER) this.messageDebugger("keySimulateUpDown(" + keyCode + "," + (fDown? "down" : "up") + "," + Keyboard.aSimCodeDescs[simCode] + "): " + (fSimulated? "true" : "false"), Debugger.MESSAGE.KEYS);
     return fSimulated;
 };
 
@@ -1682,8 +1682,8 @@ Keyboard.prototype.keySimulateUpDown = function(keyCode, fDown, simCode)
 Keyboard.prototype.messageDebugger = function(sMessage, bitsMessage)
 {
     if (DEBUGGER && this.dbg) {
-        if (bitsMessage == null) bitsMessage = Debugger.MESSAGE_KBD;
-        if (bitsMessage == Debugger.MESSAGE_PORT) bitsMessage |= Debugger.MESSAGE_KBD;
+        if (bitsMessage == null) bitsMessage = Debugger.MESSAGE.KBD;
+        if (bitsMessage == Debugger.MESSAGE.PORT) bitsMessage |= Debugger.MESSAGE.KBD;
         if (this.dbg.messageEnabled(bitsMessage)) this.dbg.message(sMessage);
     }
 };

@@ -159,6 +159,8 @@ function Mouse(parmsMouse) {
 
 Component.subclass(Component, Mouse);
 
+Mouse.ID_SERIAL = 0x4D;
+
 /**
  * initBus(cmp, bus, cpu, dbg)
  *
@@ -182,7 +184,7 @@ Mouse.prototype.initBus = function(cmp, bus, cpu, dbg) {
  * @return {boolean} true if active, false if not
  */
 Mouse.prototype.isActive = function() {
-    return this.fActive && (this.cpu ? this.cpu.isRunning() : false);
+    return this.fActive && (this.cpu? this.cpu.isRunning() : false);
 };
 
 /**
@@ -245,7 +247,7 @@ Mouse.prototype.powerUp = function(data, fRepower) {
  * @return {Object|boolean}
  */
 Mouse.prototype.powerDown = function(fSave) {
-    return fSave && this.save ? this.save() : true;
+    return fSave && this.save? this.save() : true;
 };
 
 /**
@@ -439,14 +441,14 @@ Mouse.prototype.clickMouse = function(iButton, fDown) {
         case 0:
             if (this.fButton1 != fDown) {
                 this.fButton1 = fDown;
-                sDiag = DEBUGGER ? ("mouse button1 " + (fDown ? "dn" : "up")) : null;
+                sDiag = DEBUGGER? ("mouse button1 " + (fDown? "dn" : "up")) : null;
                 this.sendPacket(sDiag);
             }
             break;
         case 2:
             if (this.fButton2 != fDown) {
                 this.fButton2 = fDown;
-                sDiag = DEBUGGER ? ("mouse button2 " + (fDown ? "dn" : "up")) : null;
+                sDiag = DEBUGGER? ("mouse button2 " + (fDown? "dn" : "up")) : null;
                 this.sendPacket(sDiag);
             }
             break;
@@ -474,10 +476,10 @@ Mouse.prototype.clickMouse = function(iButton, fDown) {
  * @param {number} [yDiag] original y-coordinate (optional; for diagnostic use only)
  */
 Mouse.prototype.sendPacket = function(sDiag, xDiag, yDiag) {
-    var b1 = 0x40 | (this.fButton1 ? 0x20 : 0) | (this.fButton2 ? 0x10 : 0) | ((this.yDelta & 0xC0) >> 4) | ((this.xDelta & 0xC0) >> 6);
+    var b1 = 0x40 | (this.fButton1? 0x20 : 0) | (this.fButton2? 0x10 : 0) | ((this.yDelta & 0xC0) >> 4) | ((this.xDelta & 0xC0) >> 6);
     var b2 = this.xDelta & 0x3F;
     var b3 = this.yDelta & 0x3F;
-    this.messageDebugger((sDiag ? (sDiag + ": ") : "") + (yDiag !== undefined ? ("mouse (" + xDiag + "," + yDiag + "): ") : "") + "serial packet [" + str.toHexByte(b1) + "," + str.toHexByte(b2) + "," + str.toHexByte(b3) + "]");
+    this.messageDebugger((sDiag? (sDiag + ": ") : "") + (yDiag !== undefined? ("mouse (" + xDiag + "," + yDiag + "): ") : "") + "serial packet [" + str.toHexByte(b1) + "," + str.toHexByte(b2) + "," + str.toHexByte(b3) + "]");
     this.componentAdapter.sendRBR([b1, b2, b3]);
     this.xDelta = this.yDelta = 0;
 };
@@ -489,7 +491,7 @@ Mouse.prototype.sendPacket = function(sDiag, xDiag, yDiag) {
  *
  * During normal serial mouse operation, both RTS and DTR must be "positive".
  *
- * Setting RTS "negative" for 100ms resets the mouse.  Toggling DTR requests an identification byte (0x4D).
+ * Setting RTS "negative" for 100ms resets the mouse.  Toggling DTR requests an identification byte (ID_SERIAL).
  *
  * NOTES: The above 3rd-party information notwithstanding, I've observed that Windows v1.01 initially writes 0x01
  * to the MCR (DTR on, RTS off), spins in a loop that reads the RBR (probably to avoid a bogus identification byte
@@ -515,7 +517,27 @@ Mouse.prototype.notifyMCR = function(bMCR) {
                 fIdentify = true;
             }
             if (fIdentify) {
-                this.componentAdapter.sendRBR([0x4D]);
+                /*
+                 * HEADS UP: Everything I'd read about the (original) Microsoft Serial Mouse "reset" protocol says
+                 * that the device sends a single byte (0x4D aka 'M').  It's not surprising to think that newer mice
+                 * might send additional bytes, but you would think that newer mouse drivers (eg, MOUSE.COM v8.20)
+                 * would always be able to deal with mice that sent only one byte.
+                 *
+                 * You would be wrong.  On an INT 0x33 reset, the v8.20 driver looks for an 'M', then it waits for
+                 * another byte (0x42 aka 'B').  If it doesn't receive a 'B', it will accept another 'M'.  But if it
+                 * receives something else (or nothing at all), it will spend a long time waiting for it, and then
+                 * return an error.
+                 *
+                 * It's entirely possible that I've done something wrong and inadvertently "tricked" MOUSE.COM into
+                 * using the wrong detection logic.  But given the other problems I've seen in MOUSE.COM v8.20, including
+                 * its failure to properly terminate-and-stay-resident when its initial INT 0x33 reset returns an error,
+                 * I'm not in the mood to give it the benefit of the doubt.
+                 *
+                 * So, anyway, I solve the terminate-and-stay-resident bug in MOUSE.COM v8.20 by feeding it *two* ID_SERIAL
+                 * bytes on a reset.  This doesn't seem to adversely affect serial mouse emulation for Windows 1.01, so
+                 * I'm calling this good enough for now.
+                 */
+                this.componentAdapter.sendRBR([Mouse.ID_SERIAL, Mouse.ID_SERIAL]);
                 this.messageDebugger("serial mouse ID sent");
             }
             this.captureMouse(this.canvasScreen);
@@ -553,8 +575,8 @@ Mouse.prototype.notifyMCR = function(bMCR) {
  */
 Mouse.prototype.messageDebugger = function(sMessage) {
     if (DEBUGGER && this.dbg) {
-        if (this.dbg.messageEnabled(Debugger.MESSAGE_MOUSE)) {
-            this.dbg.message(sMessage);
+        if (this.dbg.messageEnabled(Debugger.MESSAGE.MOUSE)) {
+            this.dbg.message(sMessage + " @" + str.toHexAddr(this.cpu.regIP, this.cpu.segCS.sel));
         }
     }
 };

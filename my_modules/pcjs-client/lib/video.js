@@ -1920,13 +1920,6 @@ Video.cardSpecs[Video.CARDS.MDA] = ["MDA", Card.MDA.CRTC.INDX.PORT, 0xB0000, 0x0
 Video.cardSpecs[Video.CARDS.CGA] = ["CGA", Card.CGA.CRTC.INDX.PORT, 0xB8000, 0x04000, 0, ChipSet.MONITOR.COLOR];
 Video.cardSpecs[Video.CARDS.EGA] = ["EGA", Card.CGA.CRTC.INDX.PORT, 0xB8000, 0x04000, 0x10000, ChipSet.MONITOR.EGACOLOR];
 
-/*
- * BIOS video interrupts, modes, and other parameters
- */
-Video.BIOS = {
-    INT_VIDEO:      0x10
-};
-
 /**
  * initBus(cmp, bus, cpu, dbg)
  *
@@ -1955,8 +1948,7 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
 
     if (DEBUGGER && dbg) {
         var video = this;
-        this.cpu.addIntNotify(Video.BIOS.INT_VIDEO, this, this.intBIOSVideo);
-        dbg.messageDump(Debugger.MESSAGE_VIDEO, function onDumpVideo(sParm) {
+        dbg.messageDump(Debugger.MESSAGE.VIDEO, function onDumpVideo(sParm) {
             video.dumpVideo(sParm);
         });
     }
@@ -1977,28 +1969,6 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
     }
 
     if (this.kbd && this.fTouchScreen) this.captureTouch();
-};
-
-/**
- * intBIOSVideo(addr)
- *
- * @this {Video}
- * @param {number} addr
- * @return {boolean} true to proceed with the INT 0x10 software interrupt, false to skip
- */
-Video.prototype.intBIOSVideo = function(addr)
-{
-    if (DEBUGGER) {
-        if (this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE_VIDEO | Debugger.MESSAGE_INT)) {
-            this.dbg.messageInt(Video.BIOS.INT_VIDEO, addr);
-            this.cpu.addIntReturn(addr, function (video, nCycles) {
-                return function onBIOSVideoReturn(nLevel) {
-                    video.dbg.messageIntReturn(Video.BIOS.INT_VIDEO, nLevel, video.cpu.getCycles() - nCycles);
-                };
-            }(this, this.cpu.getCycles()));
-        }
-    }
-    return true;
 };
 
 /**
@@ -3742,7 +3712,7 @@ Video.prototype.updateChar = function(col, row, data, context)
         this.contextScreen.fillRect(xDst, yDst, this.cxScreenCell, this.cyScreenCell);
     }
 
-    if (MAXDEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE_VIDEO | Debugger.MESSAGE_LOG)) {
+    if (MAXDEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE.VIDEO | Debugger.MESSAGE.LOG)) {
         this.log("updateCharBgnd(" + col + "," + row + "," + bChar + "): filled " + xDst + "," + yDst);
     }
 
@@ -3753,7 +3723,7 @@ Video.prototype.updateChar = function(col, row, data, context)
         var xSrcFgnd = (bChar & 0xf) * font.cxCell;
         var ySrcFgnd = (bChar >> 4) * font.cyCell;
 
-        if (MAXDEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE_VIDEO | Debugger.MESSAGE_LOG)) {
+        if (MAXDEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE.VIDEO | Debugger.MESSAGE.LOG)) {
             this.log("updateCharFgnd(" + col + "," + row + "," + bChar + "): draw from " + xSrcFgnd + "," + ySrcFgnd + " (" + font.cxCell + "," + font.cyCell + ") to " + xDst + "," + yDst);
         }
 
@@ -4926,7 +4896,7 @@ Video.prototype.dumpVideo = function(sParm)
 Video.prototype.messageDebugger = function(sMessage, fForce)
 {
     if (DEBUGGER && this.dbg) {
-        if (fForce || this.dbg.messageEnabled(Debugger.MESSAGE_VIDEO)) {
+        if (fForce || this.dbg.messageEnabled(Debugger.MESSAGE.VIDEO)) {
             this.dbg.message(sMessage);
         }
     }
@@ -4947,7 +4917,7 @@ Video.prototype.messageDebugger = function(sMessage, fForce)
 Video.prototype.messagePort = function(port, bOut, addrFrom, name, bIn)
 {
     if (DEBUGGER && this.dbg) {
-        this.dbg.messagePort(this, port, bOut, addrFrom, name, Debugger.MESSAGE_VIDEO, bIn);
+        this.dbg.messagePort(this, port, bOut, addrFrom, name, Debugger.MESSAGE.VIDEO, bIn);
     }
 };
 

@@ -475,7 +475,7 @@ var X86Help = {
             /*
              * NOTE: By using Debugger.message(), we have the option of setting "m halt on" and halting on messages like this.
              */
-            if (this.dbg.messageEnabled(Debugger.MESSAGE_CPU)) {
+            if (this.dbg.messageEnabled(Debugger.MESSAGE.CPU)) {
                 this.dbg.message("Fault 0x" + str.toHexByte(nFault) + (nError != null? " (0x" + str.toHexWord(nError) + ")" : "") + " on opcode 0x" + str.toHexByte(this.bus.getByteDirect(this.regEIP)) + " at " + str.toHexAddr(this.regIP, this.segCS.sel));
             }
             if (fHalt) this.haltCPU();
