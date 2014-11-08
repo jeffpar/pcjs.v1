@@ -226,7 +226,7 @@ module.exports = function(grunt) {
                     // jscomp_off: ["checkTypes", "fileoverviewTags"],
                     // summary_detail_level: 3,
                     // formatting: "PRETTY_PRINT --debug",
-                    output_wrapper: "'(function(){%output%})();'"
+                    output_wrapper: "\"(function(){%output%})();\""
                 },
 
                 // [OPTIONAL] Set exec method options
@@ -261,8 +261,8 @@ module.exports = function(grunt) {
                     // create_source_map: "./tmp/c1pjs/"  + pkg.version + "/c1p.map",
                     define: ["\"APPNAME='C1Pjs'\"", "\"APPVERSION='" + pkg.version + "'\"", "DEBUGGER=false",
                              "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "MAXDEBUG=false"],
-                    // output_wrapper: "'(function(){%output%})();//@ sourceMappingURL=/tmp/c1pjs/" + pkg.version + "/c1p.map'"
-                    output_wrapper: "'(function(){%output%})();'"
+                    // output_wrapper: "\"(function(){%output%})();//@ sourceMappingURL=/tmp/c1pjs/" + pkg.version + "/c1p.map\""
+                    output_wrapper: "\"(function(){%output%})();\""
                 },
                 // src: pkg.c1pJSFiles,
                 src: tmpC1Pjs,
@@ -273,8 +273,8 @@ module.exports = function(grunt) {
                     // create_source_map: "./tmp/c1pjs/"  + pkg.version + "/c1p-dbg.map",
                     define: ["\"APPNAME='C1Pjs'\"", "\"APPVERSION='" + pkg.version + "'\"",
                              "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "MAXDEBUG=false"],
-                    // output_wrapper: "'(function(){%output%})();//@ sourceMappingURL=/tmp/c1pjs/" + pkg.version + "/c1p-dbg.map'"
-                    output_wrapper: "'(function(){%output%})();'"
+                    // output_wrapper: "\"(function(){%output%})();//@ sourceMappingURL=/tmp/c1pjs/" + pkg.version + "/c1p-dbg.map\""
+                    output_wrapper: "\"(function(){%output%})();\""
                 },
                 // src: pkg.c1pJSFiles,
                 src: tmpC1Pjs,
@@ -285,8 +285,8 @@ module.exports = function(grunt) {
                     // create_source_map: "./tmp/pcjs/"  + pkg.version + "/pc.map",
                     define: ["\"APPNAME='PCjs'\"", "\"APPVERSION='" + pkg.version + "'\"", "DEBUGGER=false",
                              "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "MAXDEBUG=false"],
-                    // output_wrapper: "'(function(){%output%})();//@ sourceMappingURL=/tmp/pcjs/" + pkg.version + "/pc.map'"
-                    output_wrapper: "'(function(){%output%})();'"
+                    // output_wrapper: "\"(function(){%output%})();//@ sourceMappingURL=/tmp/pcjs/" + pkg.version + "/pc.map\""
+                    output_wrapper: "\"(function(){%output%})();\""
                 },
                 // src: pkg.pcJSFiles,
                 src: tmpPCjs,
@@ -300,8 +300,8 @@ module.exports = function(grunt) {
                     // create_source_map: "./tmp/pcjs/"  + pkg.version + "/pc-dbg.map",
                     define: ["\"APPNAME='PCjs'\"", "\"APPVERSION='" + pkg.version + "'\"",
                              "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "MAXDEBUG=false"],
-                    // output_wrapper: "'(function(){%output%})();//@ sourceMappingURL=/tmp/pcjs/" + pkg.version + "/pc-dbg.map'"
-                    output_wrapper: "'(function(){%output%})();'"
+                    // output_wrapper: "\"(function(){%output%})();//@ sourceMappingURL=/tmp/pcjs/" + pkg.version + "/pc-dbg.map\""
+                    output_wrapper: "\"(function(){%output%})();\""
                 },
                 // src: pkg.pcJSFiles,
                 src: tmpPCjs,
