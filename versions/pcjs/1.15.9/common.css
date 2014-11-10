@@ -122,6 +122,7 @@ pre a, code a {
     width: 140px;
     padding-bottom: 20px;
     overflow: hidden;
+    white-space: nowrap;
     word-wrap: break-word;
 }
 .common-list {
@@ -227,6 +228,7 @@ pre a, code a {
 
     .common-sidebar {
         width: 100%;
+        white-space: normal;
     }
     .common-list {
         padding-left: 0;

@@ -355,6 +355,14 @@
 				<xsl:when test="@type = 'heading'">
 					<div><xsl:value-of select="."/></div>
 				</xsl:when>
+				<xsl:when test="@type = 'file'">
+					<form class="{$APPCLASS}-{@class}" data-value="{$type},{$binding}">
+						<fieldset class="{$APPCLASS}-fieldset">
+							<input type="file"/>
+							<input type="submit" value="Mount" disabled="true"/>
+						</fieldset>
+					</form>
+				</xsl:when>
 				<xsl:when test="@type = 'separator'">
 					<hr/>
 				</xsl:when>

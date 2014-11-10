@@ -14,7 +14,7 @@
 	<keyboard ref="/devices/pc/keyboard/minimal.xml"/>
 	<debugger id="debugger"/>
 	<panel ref="/devices/pc/panel/default.xml"/>
-	<fdc id="fdcNEC" width="280px" pos="left" padleft="8px" automount='{A:{name:"PC-DOS 2.00 (Disk 1)",path:"/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json"}, B:{name:"Executive Suite (1982)",path:"/apps/pc/1982/esuite/disk.json"}}'>
+	<fdc id="fdcNEC" width="280px" pos="left" padleft="8px" padbottom="8px" automount='{A:{name:"PC-DOS 2.00 (Disk 1)",path:"/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json"}, B:{name:"Executive Suite (1982)",path:"/apps/pc/1982/esuite/disk.json"}}'>
 		<control type="list" class="input" binding="listDrives"/>
 		<control type="list" class="input" binding="listDisks">
 			<disk path="">None</disk>

@@ -1554,7 +1554,7 @@ Disk.prototype.restore = function(deltas)
              * just as well, since v1.01 also failed to properly deal with situations where the user mounted different diskette(s)
              * prior to exiting (hopefully fixed in v1.02).
              */
-            else if (aDiskInfo[1] != null && aDiskInfo[1] != this.dwChecksum) {
+            else if (aDiskInfo[1] != null && this.dwChecksum != null && aDiskInfo[1] != this.dwChecksum) {
                 sReason = "original checksum (" + aDiskInfo[1] + ") differs from current checksum (" + this.dwChecksum + ")";
                 nChanges = -1;
             }
