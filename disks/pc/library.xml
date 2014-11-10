@@ -42,6 +42,7 @@
 		<manifest ref="/apps/pc/1987/thinktank/manifest.xml" disk="disk01"/>
 		<manifest ref="/apps/pc/1992/moria/manifest.xml" disk="disk01"/>
 	</control>
-	<control type="button" class="input" binding="loadDrive">Load</control>
-	<control type="description" class="output" binding="descDisk" padleft="8px"/>
+	<control type="button" class="input" binding="loadDrive" padright="8px">Download</control>
+	<control type="description" class="output" binding="descDisk" padright="8px"/>
+	<control type="file" class="input" binding="mountDrive"/>
 </fdc>

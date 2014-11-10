@@ -501,7 +501,7 @@ FDC.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
             };
         }
         else {
-            if (DEBUG) this.log("FileReader support not available, Mount disabled");
+            if (DEBUG) this.log("Local file support not available");
             control.parentNode.removeChild(control);
         }
         return true;

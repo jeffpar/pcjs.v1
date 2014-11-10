@@ -15,7 +15,7 @@
 		<control type="button" class="input" binding="reset">Reset</control>
 	</cpu>
 	<keyboard ref="/devices/pc/keyboard/minimal-f1-f10.xml"/>
-	<fdc ref="/disks/pc/samples.xml" width="400px"/>
+	<fdc ref="/disks/pc/samples.xml" pos="right"/>
 	<chipset id="chipset" model="5160" sw1="01001001"/>
 	<hdc ref="/disks/pc/fixed/win101.xml"/>
 	<serial id="com1" adapter="1" binding="print"/>

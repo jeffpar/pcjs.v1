@@ -9,6 +9,6 @@
 		<item ref="/apps/c1p/BASIC/OSI/SAMPLE5.BAS">COUNTER</item>
 		<item ref="/apps/c1p/BASIC/OSI/SAMPLE6.BAS">PRESIDENTS</item>
 	</control>
-	<control type="button" class="input" binding="loadSerial">Load</control>
+	<control type="button" class="input" binding="loadSerial">Download</control>
 	<control type="file" class="input" binding="mountSerial" style="padding-left:16px"/>
 </serial>
