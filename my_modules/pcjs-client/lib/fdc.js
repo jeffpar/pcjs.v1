@@ -143,19 +143,19 @@ function FDC(parmsFDC) {
     this['dmaWrite'] = this.dmaWrite;
     this['dmaFormat'] = this.dmaFormat;
 
-    this.configAutoMount = null;
+    this.configMount = null;
     if (parmsFDC['autoMount']) {
-        this.configAutoMount = parmsFDC['autoMount'];
-        if (typeof this.configAutoMount == "string") {
+        this.configMount = parmsFDC['autoMount'];
+        if (typeof this.configMount == "string") {
             try {
                 /*
                  * The most likely source of any exception will be right here, where we're parsing
                  * the JSON-encoded diskette data.
                  */
-                this.configAutoMount = eval("(" + parmsFDC['autoMount'] + ")");
+                this.configMount = eval("(" + parmsFDC['autoMount'] + ")");
             } catch (e) {
                 Component.error("FDC auto-mount error: " + e.message + " (" + parmsFDC['autoMount'] + ")");
-                this.configAutoMount = null;
+                this.configMount = null;
             }
         }
     }
@@ -419,15 +419,8 @@ FDC.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
     case "listDisks":
         this.bindings[sBinding] = control;
 
-        var addControlOption = function(sValue, sDisplay) {
-            var controlOption;
-            controlOption = window.document.createElement("option");
-            controlOption['value'] = sValue;
-            controlOption.innerHTML = sDisplay;
-            control.appendChild(controlOption);
-        };
-
-        addControlOption("?", "Remote Disk");
+        this.addDiskette("Local Disk", "?");
+        this.addDiskette("Remote Disk", "??");
 
         control.onchange = function onChangeListDisks(event) {
             var controlDesc = fdc.bindings["descDisk"];
@@ -477,15 +470,15 @@ FDC.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
         };
         return true;
 
-    case "loadLocal":
+    case "mountDrive":
         /*
          * Check for availability of FileReader
          */
-        if (window.FileReader && window.File && window.FileList && window.Blob ) {
+        if (window.FileReader && window.File && window.FileList) {
             this.bindings[sBinding] = control;
 
             /*
-             * Enable "Load Local File" button only if a file is actually selected
+             * Enable "Mount" button only if a file is actually selected
              */
             control.addEventListener('change', function() {
                 var fieldset = control.children[0];
@@ -508,7 +501,7 @@ FDC.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
             };
         }
         else {
-            this.println("FileReader support not available, disabling local file load");
+            if (DEBUG) this.log("FileReader support not available, Mount disabled");
             control.parentNode.removeChild(control);
         }
         return true;
@@ -824,6 +817,7 @@ FDC.prototype.initDrive = function(drive, iDrive, data)
     var fSuccess = true;
 
     drive.iDrive = iDrive;
+    drive.fBusy = drive.fLocal = false;
 
     if (data === undefined) {
         /*
@@ -937,15 +931,26 @@ FDC.prototype.initDrive = function(drive, iDrive, data)
     }
 
     var deltas = data[i++];
-    if (deltas === Computer.VERSION_102) {
+    if (typeof deltas == "boolean") {
+        var fLocal = deltas;
         var sDisketteName = data[i++];
         var sDiskettePath = data[i];
         /*
-         * If loadDiskette() must actually mount a *different* disk image at this late stage (ie, if it returns false),
-         * then we must mark ourselves as "not ready" again, and add another "wait for ready" test in Computer before
-         * finally powering the CPU.  Otherwise, go ahead and restore any deltas to the current image.
+         * If we're restoring a local disk image, then the entire disk contents should be captured in aDiskHistory,
+         * so all we have to do is mount a blank diskette and let disk.restore() do the rest; ie, there's nothing to
+         * "load" (it's a purely synchronous operation).
+         *
+         * Otherwise, we must call loadDiskette(); in the common case, loadDiskette() will have already "auto-mounted"
+         * the diskette, so it will return true, and then we restore any deltas to the current image.
+         *
+         * However, if loadDiskette() returns false, then it has initiated the load for a *different* disk image,
+         * so we must mark ourselves as "not ready" again, and add another "wait for ready" test in Computer before
+         * finally powering the CPU.
          */
-        if (this.loadDiskette(iDrive, sDisketteName, sDiskettePath, true)) {
+        if (fLocal) {
+            this.mountDiskette(iDrive, sDisketteName, sDiskettePath);
+        }
+        else if (this.loadDiskette(iDrive, sDisketteName, sDiskettePath, true)) {
             if (drive.disk) {
                 this.addDiskHistory(sDisketteName, sDiskettePath, drive.disk);
             }
@@ -1021,10 +1026,10 @@ FDC.prototype.saveDrive = function(drive)
      *
      *      data[i++] = drive.disk? drive.disk.save() : null;
      *
-     * To indicate this deviation, we store neither a null nor a delta array, but Computer.VERSION_102;
-     * if that value is not present, then the restore code will know it's dealing with a pre-v1.02 state.
+     * To indicate this deviation, we store neither a null nor a delta array, but a boolean (fLocal);
+     * if that boolean is not present, then the restore code will know it's dealing with a pre-v1.02 state.
      */
-    data[i++] = Computer.VERSION_102;
+    data[i++] = drive.fLocal;
     data[i++] = drive.sDisketteName;
     data[i] = drive.sDiskettePath;
     return data;
@@ -1135,9 +1140,9 @@ FDC.prototype.seekDrive = function(drive, iSector, nSectors)
 FDC.prototype.autoMount = function(fRemount)
 {
     if (!fRemount) this.cAutoMount = 0;
-    if (this.configAutoMount) {
-        for (var sDrive in this.configAutoMount) {
-            var configDrive = this.configAutoMount[sDrive];
+    if (this.configMount) {
+        for (var sDrive in this.configMount) {
+            var configDrive = this.configMount[sDrive];
             if (configDrive['name'] && configDrive['path']) {
                 /*
                  * WARNING: This conversion of drive letter to drive number, starting with A:, is very simplistic
@@ -1175,7 +1180,7 @@ FDC.prototype.loadSelectedDrive = function(sDisketteName, sDiskettePath, file)
             return;
         }
         /*
-         * If the special path of "?" is selected, then we want to prompt the user for a URL.  Oh, and
+         * If the special path of "??" is selected, then we want to prompt the user for a URL.  Oh, and
          * make sure we pass an empty string as the 2nd parameter to prompt(), so that IE won't display
          * "undefined" -- because after all, undefined and "undefined" are EXACTLY the same thing, right?
          *
@@ -1183,7 +1188,7 @@ FDC.prototype.loadSelectedDrive = function(sDisketteName, sDiskettePath, file)
          * I should do, like dynamically updating "listDisks" to include new entries, and adding new entries
          * to the save/restore data.
          */
-        if (sDiskettePath == "?") {
+        if (sDiskettePath == "??") {
             sDiskettePath = window.prompt("Enter the URL of a remote disk image.", "") || "";
             if (!sDiskettePath) return;
             sDisketteName = str.getBaseName(sDiskettePath);
@@ -1210,6 +1215,23 @@ FDC.prototype.loadSelectedDrive = function(sDisketteName, sDiskettePath, file)
         return;
     }
     this.notice("Nothing to load");
+};
+
+/**
+ * mountDiskette(iDrive, sDisketteName, sDiskettePath)
+ *
+ * @this {FDC}
+ * @param {number} iDrive
+ * @param {string} sDisketteName
+ * @param {string} sDiskettePath
+ */
+FDC.prototype.mountDiskette = function(iDrive, sDisketteName, sDiskettePath)
+{
+    var drive = this.aDrives[iDrive];
+    this.unloadDrive(iDrive, true, true);
+    drive.fLocal = true;
+    var disk = new Disk(this, drive, DiskAPI.MODE.PRELOAD);
+    this.doneLoadDiskette(drive, disk, sDisketteName, sDiskettePath);
 };
 
 /**
@@ -1240,6 +1262,7 @@ FDC.prototype.loadDiskette = function(iDrive, sDisketteName, sDiskettePath, fAut
             this.cAutoMount++;
             this.messageDebugger("loading diskette '" + sDisketteName + "'");
         }
+        drive.fLocal = !!file;
         var disk = new Disk(this, drive, DiskAPI.MODE.PRELOAD);
         disk.load(sDisketteName, sDiskettePath, file, this.doneLoadDiskette);
         return false;
@@ -1282,7 +1305,27 @@ FDC.prototype.doneLoadDiskette = function onFDCLoadNotify(drive, disk, sDiskette
         drive.disk = disk;
         drive.sDisketteName = sDisketteName;
         drive.sDiskettePath = sDiskettePath;
+
+        /*
+         * Adding local disk image names to the disk list seems like a nice idea, but it's too confusing,
+         * because then it looks like the "Load" button should be able to (re)load them, and that can NEVER
+         * happen, for security reasons; local disk images can ONLY be loaded via the "Mount" button after
+         * the user has selected them via the "Choose File" button.
+         *
+         *      this.addDiskette(sDisketteName, sDiskettePath);
+         *
+         * So we're going to take a different approach: when displayDiskette() is asked to display the name
+         * of a local disk image, it will map all such disks to "Local Disk", and any attempt to "Load" such
+         * a disk, will essentially result in a "Disk not found" error.
+         */
+
         this.addDiskHistory(sDisketteName, sDiskettePath, disk);
+
+        /*
+         * For a local disk (ie, one loaded via mountDiskette()), the disk.restore() performed by addDiskHistory()
+         * may have altered the disk geometry, so refresh the disk info.
+         */
+        aDiskInfo = disk.info();
 
         /*
          * Clearly, a successful mount implies a disk change, and I suppose that, technically, an *unsuccessful*
@@ -1310,6 +1353,9 @@ FDC.prototype.doneLoadDiskette = function onFDCLoadNotify(drive, disk, sDiskette
         drive.nDiskHeads = aDiskInfo[1];
         drive.nDiskSectors = aDiskInfo[2];
     }
+    else {
+        drive.fLocal = false;
+    }
 
     if (drive.fAutoMount) {
         drive.fAutoMount = false;
@@ -1317,6 +1363,26 @@ FDC.prototype.doneLoadDiskette = function onFDCLoadNotify(drive, disk, sDiskette
     }
 
     this.displayDiskette(drive.iDrive);
+};
+
+/**
+ * addDiskette(sName, sPath)
+ *
+ * @param {string} sName
+ * @param {string} sPath
+ */
+FDC.prototype.addDiskette = function(sName, sPath)
+{
+    var controlDisks = this.bindings["listDisks"];
+    if (controlDisks) {
+        for (var i = 0; i < controlDisks.options.length; i++) {
+            if (controlDisks.options[i].value == sPath) return;
+        }
+        var controlOption = window.document.createElement("option");
+        controlOption['value'] = sPath;
+        controlOption.innerHTML = sName;
+        controlDisks.appendChild(controlOption);
+    }
 };
 
 /**
@@ -1344,9 +1410,10 @@ FDC.prototype.displayDiskette = function(iDrive, fUpdateDrive)
              */
             var i;
             var iDriveSelected = parseInt(controlDrives.value, 10);
+            var sTargetPath = (drive.fLocal? "?" : drive.sDiskettePath);
             if (!isNaN(iDriveSelected) && iDriveSelected == iDrive) {
                 for (i = 0; i < controlDisks.options.length; i++) {
-                    if (controlDisks.options[i].value == drive.sDiskettePath) {
+                    if (controlDisks.options[i].value == sTargetPath) {
                         if (controlDisks.selectedIndex != i) {
                             controlDisks.selectedIndex = i;
                         }
@@ -1388,6 +1455,7 @@ FDC.prototype.unloadDrive = function(iDrive, fAutoUnload, fQuiet)
         drive.sDisketteName = "";
         drive.sDiskettePath = "";
         drive.disk = null;
+        drive.fLocal = false;
 
         this.regInput |= FDC.REG_INPUT.DISK_CHANGE;
 
@@ -1435,6 +1503,7 @@ FDC.prototype.unloadAllDrives = function(fDiscard)
 FDC.prototype.addDiskHistory = function(sDisketteName, sDiskettePath, disk)
 {
     var i;
+    Component.assert(!!sDiskettePath);
     for (i = 0; i < this.aDiskHistory.length; i++) {
         if (this.aDiskHistory[i][1] == sDiskettePath) {
             var nChanges = disk.restore(this.aDiskHistory[i][2]);

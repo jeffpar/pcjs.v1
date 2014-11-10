@@ -358,7 +358,7 @@
 				</xsl:when>
 				<xsl:when test="@type = 'file'">
 					<form class="{$APPCLASS}-{@class}" data-value="{$type},{$binding}">
-						<fieldset>
+						<fieldset class="{$APPCLASS}-fieldset">
 							<input type="file"/>
 							<input type="submit" value="Mount" disabled="true"/>
 						</fieldset>

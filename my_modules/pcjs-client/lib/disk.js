@@ -243,23 +243,18 @@ function Disk(controller, drive, mode)
     this.cmp = controller.cmp;
     this.dbg = controller.dbg;
     this.drive = drive;
-    this.mode = mode;
 
     /*
      * We pull out a number of drive properties that we may or may not need as defaults
      */
     this.sDiskName = drive.name;
-    this.nCylinders = drive.nCylinders;
-    this.nHeads = drive.nHeads;
-    this.nSectors = drive.nSectors;
-    this.cbSector = drive.cbSector;
     this.fRemovable = drive.fRemovable;
     this.fOnDemand = this.fRemote = false;
 
     /*
      * Initialize the disk contents
      */
-    this.create();
+    this.create(mode, drive.nCylinders, drive.nHeads, drive.nSectors, drive.cbSector);
 
     /*
      * The following dirty sector and timer properties are used only with fOnDemand disks,
@@ -428,10 +423,21 @@ Disk.prototype.powerDown = function(fSave, fShutdown)
 /**
  * create()
  *
+ * @param {string} mode
+ * @param {number} nCylinders
+ * @param {number} nHeads
+ * @param {number} nSectors
+ * @param {number} cbSector
+ *
  * Initializes the disk contents according to the current drive mode and parameters.
  */
-Disk.prototype.create = function()
+Disk.prototype.create = function(mode, nCylinders, nHeads, nSectors, cbSector)
 {
+    this.mode = mode;
+    this.nCylinders = nCylinders;
+    this.nHeads = nHeads;
+    this.nSectors = nSectors;
+    this.cbSector = cbSector;
     this.aDiskData = [];
     /*
      * If the drive is using PRELOAD mode, then it will use the load()/mount() process to initialize the disk contents;
@@ -462,7 +468,7 @@ Disk.prototype.create = function()
         }
         this.aDiskData = aCylinders;
     }
-    this.dwChecksum = 0;
+    this.dwChecksum = null;
 };
 
 /**
@@ -577,42 +583,43 @@ Disk.prototype.load = function(sDiskName, sDiskPath, file, fnNotify, controller)
 
 /**
  *
- * build(buffer, fDirty)
+ * build(buffer, fModified)
  *
  * Builds a disk image from an ArrayBuffer (eg, from a FileReader object), rather than from JSON-encoded data.
  *
  * @this {Disk}
  * @param {?} buffer (we KNOW this is an ArrayBuffer, but we can't seem to convince the Closure Compiler)
- * @param {boolean} [fDirty] is true if we should mark the entire disk dirty (to ensure that we save/restore it)
+ * @param {boolean} [fModified] is true if we should mark the entire disk modified (to ensure that we save/restore it)
  */
-Disk.prototype.build = function(buffer, fDirty)
+Disk.prototype.build = function(buffer, fModified)
 {
     var disk;
     var cbDiskData = buffer? buffer.byteLength : 0;
     var disketteFormat = DiskAPI.DISKETTE_FORMATS[cbDiskData];
 
     if (disketteFormat) {
+        this.nCylinders = disketteFormat[0];
+        this.nHeads = disketteFormat[1];
+        this.nSectors = disketteFormat[2];
+        this.cbSector = 512;
+
+        var cdw = this.cbSector >> 2, dwPattern = 0, dwChecksum = 0;
         var ib = 0;
-        var dwChecksum = 0;
-        var cbSector = 512, dwPattern = 0;
         var dv = new DataView(buffer, 0, cbDiskData);
-        this.aDiskData = new Array(disketteFormat[0]);
+
+        this.aDiskData = new Array(this.nCylinders);
         for (var iCylinder = 0; iCylinder < this.aDiskData.length; iCylinder++) {
-            var cylinder = this.aDiskData[iCylinder] = new Array(disketteFormat[1]);
+            var cylinder = this.aDiskData[iCylinder] = new Array(this.nHeads);
             for (var iHead = 0; iHead < cylinder.length; iHead++) {
-                var head = cylinder[iHead] = new Array(disketteFormat[2]);
+                var head = cylinder[iHead] = new Array(this.nSectors);
                 for (var iSector = 0; iSector < head.length; iSector++) {
-                    var sector = this.initSector(null, iCylinder, iHead, iSector + 1, cbSector, dwPattern);
-                    var cdw = cbSector >> 2;
+                    var sector = this.initSector(null, iCylinder, iHead, iSector + 1, this.cbSector, dwPattern);
                     var adw = sector['data'];
                     for (var idw = 0; idw < cdw; idw++, ib += 4) {
                         var dw = adw[idw] = dv.getInt32(ib, true);
                         dwChecksum = (dwChecksum + dw) & 0xffffffff;
                     }
-                    if (fDirty) {
-                        sector.cModify = cdw;
-                        sector.fDirty = true;
-                    }
+                    if (fModified) sector.cModify = cdw;
                     head[iSector] = sector;
                 }
             }
@@ -772,11 +779,17 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
                  * This includes detecting sector data in older formats (eg, the OLD array of 'bytes' instead
                  * of the NEW 'data' array of dwords) and converting them on-the-fly to the current format.
                  */
+                this.nCylinders = aDiskData.length;
+                this.nHeads = aDiskData[0].length;
+                this.nSectors = aDiskData[0][0].length;
+                var sector = aDiskData[0][0][0];
+                this.cbSector = (sector && sector['length']) || 512;
+
                 var dwChecksum = 0;
-                for (var iCylinder = 0; iCylinder < aDiskData.length; iCylinder++) {
-                    for (var iHead = 0; iHead < aDiskData[iCylinder].length; iHead++) {
-                        for (var iSector = 0; iSector < aDiskData[iCylinder][iHead].length; iSector++) {
-                            var sector = aDiskData[iCylinder][iHead][iSector];
+                for (var iCylinder = 0; iCylinder < this.nCylinders; iCylinder++) {
+                    for (var iHead = 0; iHead < this.nHeads; iHead++) {
+                        for (var iSector = 0; iSector < this.nSectors; iSector++) {
+                            sector = aDiskData[iCylinder][iHead][iSector];
                             if (!sector) continue;          // non-standard (eg, XDF) disk images may have "unused" (null) sectors
                             var length = sector['length'];
                             if (length === undefined) {     // provide backward-compatibility with older JSON...
@@ -1443,7 +1456,7 @@ Disk.prototype.write = function(sector, ibSector, b)
  *
  * The first array entry contains some disk information:
  *
- *      [sDiskPath, dwChecksum]
+ *      [sDiskPath, dwChecksum, nCylinders, nHeads, nSectors, cbSector]
  *
  * Each subsequent entry in the returned array contains the following:
  *
@@ -1458,7 +1471,7 @@ Disk.prototype.save = function()
 {
     var i = 0;
     var deltas = [];
-    deltas[i++] = [this.sDiskPath, this.dwChecksum];
+    deltas[i++] = [this.sDiskPath, this.dwChecksum, this.nCylinders, this.nHeads, this.nSectors, this.cbSector];
     if (!this.fRemote && !this.fWriteProtected) {
         var aDiskData = this.aDiskData;
         for (var iCylinder = 0; iCylinder < aDiskData.length; iCylinder++) {
@@ -1486,7 +1499,7 @@ Disk.prototype.save = function()
  *
  * The first array entry contains some disk information:
  *
- *      [sDiskPath, dwChecksum]
+ *      [sDiskPath, dwChecksum, nCylinders, nHeads, nSectors, cbSector]
  *
  * Each subsequent entry in the supplied array contains the following:
  *
@@ -1514,16 +1527,34 @@ Disk.prototype.restore = function(deltas)
      * checking aDiskData is still a good idea, be aware that it won't necessarily avoid redundant error messages
      * (at least in the case of HDC).
      */
-    if (this.aDiskData.length && deltas && deltas.length > 0) {
+    if (deltas && deltas.length > 0) {
+
         var i = 0;
         var aDiskInfo = deltas[i++];
+
         if (aDiskInfo && aDiskInfo.length >= 2) {
+            /*
+             * Before getting to the checksum, we have to deal with a new situation: restoring an uninitialized
+             * disk image from a complete set of deltas.  And that is only possible if the disk was saved with the
+             * original disk geometry.
+             */
+            if (!this.aDiskData.length && aDiskInfo.length >= 6) {
+                this.create(DiskAPI.MODE.LOCAL, aDiskInfo[2], aDiskInfo[3], aDiskInfo[4], aDiskInfo[5]);
+                /*
+                 * TODO: Consider setting a flag here that we can check at the end of the restore() function
+                 * that indicates we should recalculate dwChecksum, because we currently have an inconsistency
+                 * between local disks that are mounted via build() and the same disks that are "remounted"
+                 * later by this code; the former has the correct checksum, while the latter has a null checksum.
+                 *
+                 * As you can see below, we currently deal with this by simply ignoring null checksums....
+                 */
+            }
             /*
              * v1.01 failed to indicate an error if either one of these failure conditions occurred.  Although maybe that's
              * just as well, since v1.01 also failed to properly deal with situations where the user mounted different diskette(s)
              * prior to exiting (hopefully fixed in v1.02).
              */
-            if (aDiskInfo[1] != this.dwChecksum) {
+            else if (aDiskInfo[1] != null && aDiskInfo[1] != this.dwChecksum) {
                 sReason = "original checksum (" + aDiskInfo[1] + ") differs from current checksum (" + this.dwChecksum + ")";
                 nChanges = -1;
             }
@@ -1536,6 +1567,9 @@ Disk.prototype.restore = function(deltas)
             }
              */
         }
+
+        if (!this.aDiskData.length) nChanges = -1;
+
         while (i < deltas.length && nChanges >= 0) {
             var m = 0;
             var mod = deltas[i++];
@@ -1580,6 +1614,7 @@ Disk.prototype.restore = function(deltas)
             nChanges++;
         }
     }
+
     if (nChanges < 0) {
         this.controller.notice("unable to restore disk '" + this.sDiskName + ": " + sReason);
     } else {

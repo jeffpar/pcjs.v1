@@ -286,10 +286,10 @@
 					<div><xsl:value-of select="."/></div>
 				</xsl:when>
 				<xsl:when test="@type = 'file'">
-					<form class="{$APPCLASS}-{@class}" data-value="{$type},{$binding}">
-						<fieldset>
+					<form class="{$APPCLASS}-{@class}" style="{$border}{$width}{$height}{$style}" data-value="{$type},{$binding}">
+						<fieldset class="{$APPCLASS}-fieldset">
 							<input type="file"/>
-							<input type="submit" value="Load Local File" disabled="true"/>
+							<input type="submit" value="Mount" disabled="true"/>
 						</fieldset>
 					</form>
 				</xsl:when>

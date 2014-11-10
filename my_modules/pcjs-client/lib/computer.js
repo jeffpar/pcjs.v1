@@ -263,14 +263,6 @@ Computer.sAppVer = APPVERSION;
 Computer.sCopyright = "Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>";
 
 /*
- * Version 1.02 marks the addition of "disk history" to the FDC, so that as diskettes are mounted,
- * modified, unmounted, and then later remounted, all previous modifications can be restored. This
- * same disk history has also been added to the save/restore data as of v1.02, so any save/restore
- * code sensitive to that change must include a reference to VERSION_102.
- */
-Computer.VERSION_102 = 102;
-
-/*
  * I think it's a good idea to also display a GPL notice, putting people on notice that even
  * the "compiled" source code has all the same GPL requirements as the uncompiled source code.
  */

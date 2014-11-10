@@ -33,6 +33,11 @@
     font-family: Monaco, monospace;
     font-size: x-small;
 }
+.c1pjs-fieldset {
+    border: none;
+    margin: 0;
+    padding: 0;
+}
 .c1pjs-flag {
     font-family: "Lucida Console", monospace;
     font-size: small;

@@ -128,15 +128,15 @@ C1PSerialPort.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, c
         };
         return true;
 
-    case "uploadSerial":
+    case "mountSerial":
         /*
          * Check for availability of FileReader
          */
-        if (window.FileReader && window.File && window.FileList && window.Blob) {
+        if (window.FileReader && window.File && window.FileList) {
             this.bindings[sBinding] = control;
 
             /*
-             * Enable "Load Local File" button only if a file is actually selected
+             * Enable "Mount" button only if a file is actually selected
              */
             control.addEventListener('change', function() {
                 var fieldset = control.children[0];
@@ -150,7 +150,7 @@ C1PSerialPort.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, c
 
                 var reader = new FileReader();
                 reader.onload = function() {
-                    // serial.println("loading " + file.name + "...");
+                    // serial.println("mounting " + file.name + "...");
                     serial.loadFile(file.name, reader.result.toString(), 0);
                 };
                 reader.readAsText(file);
@@ -162,7 +162,7 @@ C1PSerialPort.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, c
             };
         }
         else {
-            this.println("FileReader support not available, disabling local file load");
+            if (DEBUG) this.log("FileReader support not available, Mount disabled");
             control.parentNode.removeChild(control);
         }
         return true;
