@@ -38,12 +38,12 @@
 		<name>MS Word 5.0 (Printers 2)</name>
 	</disk>
 	<disk id="disk11" size="368640" chs="40:2:9" img="private/WORD50-LEARNKBD.img" href="/disks/pc/apps/microsoft/word/5.0/WORD50-LEARNKBD.json" md5="d8aa737b6b3f1bfa982fbee8d6493c69" md5json="83fd5275f77367742880f5af60fa2281">
-		<name>MS Word 5.0 (Learning Keyboard)</name>
+		<name>MS Word 5.0 (Learning Kbd)</name>
 	</disk>
 	<disk id="disk12" size="368640" chs="40:2:9" img="private/WORD50-LEARNMOU.img" href="/disks/pc/apps/microsoft/word/5.0/WORD50-LEARNMOU.json" md5="d63043c19c860498798ecb8470a1d24a" md5json="d7dcfbe52791d2fee7ae70c51bbec48f">
 		<name>MS Word 5.0 (Learning Mouse)</name>
 	</disk>
 	<disk id="disk13" size="368640" chs="40:2:9" img="private/WORD50-LEARNADV.img" href="/disks/pc/apps/microsoft/word/5.0/WORD50-LEARNADV.json" md5="e23e15685bd2c5b2eb0ec16a162683cd" md5json="8bfd4ebc182253ebcea2d3b8afae095d">
-		<name>MS Word 5.0 (Learning Advanced)</name>
+		<name>MS Word 5.0 (Learning Adv)</name>
 	</disk>
 </manifest>
