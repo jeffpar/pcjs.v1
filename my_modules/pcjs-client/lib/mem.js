@@ -135,9 +135,6 @@ function Memory(addr, size, fReadOnly, controller) {
      */
     if (TYPEDARRAYS) {
         this.buffer = new ArrayBuffer(size);
-        /**
-         * @type {DataView}
-         */
         this.dv = new DataView(this.buffer, 0, size);
         /*
          * We could also use dv.getUint8() and dv.setUint8(), but using ab[] to get/set bytes

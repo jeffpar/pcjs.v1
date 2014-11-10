@@ -72,4 +72,38 @@ var DiskAPI = {
     }
 };
 
+/*
+ * Common (supported) diskette formats
+ */
+DiskAPI.DISKETTE_FORMATS = {
+    163840:  [40,1,8],          // media type 0xFE: 40 cylinders, 1 head (single-sided),   8 sectors/track, ( 320 total sectors x 512 bytes/sector ==  163840)
+    184320:  [40,1,9],          // media type 0xFC: 40 cylinders, 1 head (single-sided),   9 sectors/track, ( 360 total sectors x 512 bytes/sector ==  184320)
+    327680:  [40,2,8],          // media type 0xFF: 40 cylinders, 2 heads (double-sided),  8 sectors/track, ( 640 total sectors x 512 bytes/sector ==  327680)
+    368640:  [40,2,9],          // media type 0xFD: 40 cylinders, 2 heads (double-sided),  9 sectors/track, ( 720 total sectors x 512 bytes/sector ==  368640)
+    737280:  [80,2,9],          // media type 0xF9: 80 cylinders, 2 heads (double-sided),  9 sectors/track, (1440 total sectors x 512 bytes/sector ==  737280)
+    1228800: [80,2,15],         // media type 0xF9: 80 cylinders, 2 heads (double-sided), 15 sectors/track, (2400 total sectors x 512 bytes/sector == 1228800)
+    1474560: [80,2,18],         // media type 0xF0: 80 cylinders, 2 heads (double-sided), 18 sectors/track, (2880 total sectors x 512 bytes/sector == 1474560)
+    2949120: [80,2,36]          // media type 0xF0: 80 cylinders, 2 heads (double-sided), 36 sectors/track, (5760 total sectors x 512 bytes/sector == 2949120)
+};
+
+/*
+ * BIOS Parameter Block (BPB) offsets in DOS-compatible boot sectors
+ */
+DiskAPI.BPB = {
+    JMP_OPCODE:     0x00,       // 1 byte for a JMP opcode, followed by a 1 or 2-byte offset
+    OEM_STRING:     0x03,       // 8 bytes
+    SECTOR_BYTES:   0x0B,       // 2 bytes: bytes per sector (eg, 0x200 or 512)
+    CLUSTER_SECS:   0x0D,       // 1 byte: sectors per cluster (eg, 1)
+    RESERVED_SECS:  0x0E,       // 2 bytes: reserved sectors; ie, # sectors preceding the first FAT--usually just the boot sector (eg, 1)
+    FAT_TOTAL:      0x10,       // 1 byte: FAT copies (eg, 2)
+    ROOT_ENTRIES:   0x11,       // 2 bytes: root directory entries (eg, 0x40 or 64) 0x40 * 0x20 = 0x800 (1 sector is 0x200 bytes, total of 4 sectors)
+    SECTOR_TOTAL:   0x13,       // 2 bytes: number of sectors (eg, 0x140 or 320)
+    MEDIA_TYPE:     0x15,       // 1 byte: media type (eg, 0xFF: 320Kb, 0xFE: 160Kb, 0xFD: 360Kb, 0xFC: 180Kb)
+    FAT_SECS:       0x16,       // 2 bytes: sectors per FAT (eg, 1)
+    TRACK_SECS:     0x18,       // 2 bytes: sectors per track (eg, 8)
+    HEAD_TOTAL:     0x1A,       // 2 bytes: number of heads (eg, 1)
+    HIDDEN_SECS:    0x1C,       // 4 bytes: number of hidden sectors (always 0 for non-partitioned media)
+    LARGE_SECS:     0x20        // 4 bytes: number of sectors if SECTOR_TOTAL is zero
+};
+
 if (typeof module !== 'undefined') module.exports = DiskAPI;

@@ -657,21 +657,23 @@ C1PDiskController.prototype.resetDrive = function(iDrive, iDriveType, nMaxTracks
 
 /**
  * @this {C1PDiskController}
- * @param {string|null} c is the class of the HTML control (eg, "input", "output")
- * @param {string|null} t is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea")
- * @param {string} s is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "listDisk")
- * @param {Object} e is the HTML control DOM object (eg, HTMLButtonElement)
+ * @param {string|null} sHTMLClass is the class of the HTML control (eg, "input", "output")
+ * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea")
+ * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "listDisk")
+ * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-C1PDiskController.prototype.setBinding = function(c, t, s, e)
+C1PDiskController.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
 {
-    switch(s) {
+    switch(sBinding) {
+
     case "listDisk":
-        this.bindings[s] = e;
+        this.bindings[sBinding] = control;
         return true;
+
     case "loadDisk":
-        this.bindings[s] = e;
-        e.onclick = function(controller) {
+        this.bindings[sBinding] = control;
+        control.onclick = function(controller) {
             return function() {
                 if (controller.bindings["listDisk"]) {
                     var sFilePath = controller.bindings["listDisk"].value;
@@ -698,6 +700,7 @@ C1PDiskController.prototype.setBinding = function(c, t, s, e)
             };
         }(this);
         return true;
+
     default:
         break;
     }

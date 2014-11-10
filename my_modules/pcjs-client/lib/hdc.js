@@ -1151,7 +1151,7 @@ HDC.prototype.loadDisk = function(iDrive, sDiskName, sDiskPath, fAutoMount)
         this.messageDebugger("loading " + sDiskName);
     }
     var disk = drive.disk || new Disk(this, drive, drive.mode);
-    disk.load(sDiskName, sDiskPath, this.doneLoadDisk);
+    disk.load(sDiskName, sDiskPath, null, this.doneLoadDisk);
     return false;
 };
 

@@ -45,6 +45,7 @@ var net     = require("../../shared/lib/netlib");
 var proc    = require("../../shared/lib/proclib");
 var str     = require("../../shared/lib/strlib");
 var usr     = require("../../shared/lib/usrlib");
+var DiskAPI = require("../../shared/lib/diskapi");
 var DumpAPI = require("../../shared/lib/dumpapi");
 var X86     = require("../../pcjs-client/lib/x86");
 
@@ -176,38 +177,6 @@ DiskDump.sAPIURL = "http://www.pcjs.org" + DumpAPI.ENDPOINT;
 DiskDump.sCopyright = "© 2012-2014 by Jeff Parsons (@jeffpar)";
 DiskDump.sNotice = DiskDump.sAPIURL + " " + DiskDump.sCopyright;
 DiskDump.sUsage = "Usage: " + DiskDump.sAPIURL + "?" + DumpAPI.QUERY.PATH + "={url}&amp;" + DumpAPI.QUERY.FORMAT + "=json|data|hex|bytes|img";
-
-/*
- * TODO: The following descriptions of common disk data structures should be moved to a common (shared) module,
- * so that client code (eg, PCjs components) can access them, too (eg, something like /my_modules/shared/lib/bpbdefs.js)
- */
-DiskDump.DisketteFormats = {
-    163840:  [1,40,8],  // media type 0xFE: 1 head (single-sided),  40 cylinders,  8 sectors/track, ( 320 total sectors x 512 bytes/sector ==  163840)
-    184320:  [1,40,9],  // media type 0xFC: 1 head (single-sided),  40 cylinders,  9 sectors/track, ( 360 total sectors x 512 bytes/sector ==  184320)
-    327680:  [2,40,8],  // media type 0xFF: 2 heads (double-sided), 40 cylinders,  8 sectors/track, ( 640 total sectors x 512 bytes/sector ==  327680)
-    368640:  [2,40,9],  // media type 0xFD: 2 heads (double-sided), 40 cylinders,  9 sectors/track, ( 720 total sectors x 512 bytes/sector ==  368640)
-    737280:  [2,80,9],  // media type 0xF9: 2 heads (double-sided), 80 cylinders,  9 sectors/track, (1440 total sectors x 512 bytes/sector ==  737280)
-    1228800: [2,80,15], // media type 0xF9: 2 heads (double-sided), 80 cylinders, 15 sectors/track, (2400 total sectors x 512 bytes/sector == 1228800)
-    1474560: [2,80,18], // media type 0xF0: 2 heads (double-sided), 80 cylinders, 18 sectors/track, (2880 total sectors x 512 bytes/sector == 1474560)
-    2949120: [2,80,36]  // media type 0xF0: 2 heads (double-sided), 80 cylinders, 36 sectors/track, (5760 total sectors x 512 bytes/sector == 2949120)
-};
-
-DiskDump.BPB = {
-    JMP_OPCODE:     0x00,       // 1 byte for a JMP opcode, followed by a 1 or 2-byte offset
-    OEM_STRING:     0x03,       // 8 bytes
-    SECTOR_BYTES:   0x0B,       // 2 bytes: bytes per sector (eg, 0x200 or 512)
-    CLUSTER_SECS:   0x0D,       // 1 byte: sectors per cluster (eg, 1)
-    RESERVED_SECS:  0x0E,       // 2 bytes: reserved sectors; ie, # sectors preceding the first FAT--usually just the boot sector (eg, 1)
-    FAT_TOTAL:      0x10,       // 1 byte: FAT copies (eg, 2)
-    ROOT_ENTRIES:   0x11,       // 2 bytes: root directory entries (eg, 0x40 or 64) 0x40 * 0x20 = 0x800 (1 sector is 0x200 bytes, total of 4 sectors)
-    SECTOR_TOTAL:   0x13,       // 2 bytes: number of sectors (eg, 0x140 or 320)
-    MEDIA_TYPE:     0x15,       // 1 byte: media type (eg, 0xFF: 320Kb, 0xFE: 160Kb, 0xFD: 360Kb, 0xFC: 180Kb)
-    FAT_SECS:       0x16,       // 2 bytes: sectors per FAT (eg, 1)
-    TRACK_SECS:     0x18,       // 2 bytes: sectors per track (eg, 8)
-    HEAD_TOTAL:     0x1A,       // 2 bytes: number of heads (eg, 1)
-    HIDDEN_SECS:    0x1C,       // 4 bytes: number of hidden sectors (always 0 for non-partitioned media)
-    LARGE_SECS:     0x20        // 4 bytes: number of sectors if SECTOR_TOTAL is zero
-};
 
 /*
  * MY_VOL_LABEL is our default label, used whenever a more suitable label (eg, based on the disk image's folder name)
@@ -2129,8 +2098,8 @@ DiskDump.prototype.convertToJSON = function()
              */
         }
 
-        var bByte0 = this.bufDisk.readUInt8(offBootSector + DiskDump.BPB.JMP_OPCODE);
-        var cbSectorBPB = this.bufDisk.readUInt16LE(offBootSector + DiskDump.BPB.SECTOR_BYTES);
+        var bByte0 = this.bufDisk.readUInt8(offBootSector + DiskAPI.BPB.JMP_OPCODE);
+        var cbSectorBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.SECTOR_BYTES);
 
         /*
          * These checks are not only necessary for DOS 1.x diskette images (and other pre-BPB images),
@@ -2145,11 +2114,11 @@ DiskDump.prototype.convertToJSON = function()
          * image whose logical format doesn't agree with its physical structure.
          */
         var fXDFOutput = false;
-        var oDisketteFormat = DiskDump.DisketteFormats[cbDiskData];
-        if (oDisketteFormat) {
-            nHeads = oDisketteFormat[0];
-            nCylinders = oDisketteFormat[1];
-            nSectorsPerTrack = oDisketteFormat[2];
+        var disketteFormat = DiskAPI.DISKETTE_FORMATS[cbDiskData];
+        if (disketteFormat) {
+            nCylinders = disketteFormat[0];
+            nHeads = disketteFormat[1];
+            nSectorsPerTrack = disketteFormat[2];
         }
         else {
             /*
@@ -2159,10 +2128,13 @@ DiskDump.prototype.convertToJSON = function()
              * 0xE9 is JMP with a 2-byte displacement).  What else?
              */
             if ((bByte0 == X86.OPCODE.JMP || bByte0 == X86.OPCODE.JMPS) && cbSectorBPB == cbSector) {
-                var nHeadsBPB = this.bufDisk.readUInt16LE(offBootSector + DiskDump.BPB.HEAD_TOTAL);
-                var nSectorsTotalBPB = this.bufDisk.readUInt16LE(offBootSector + DiskDump.BPB.SECTOR_TOTAL);
-                var nSectorsPerTrackBPB = this.bufDisk.readUInt16LE(offBootSector + DiskDump.BPB.TRACK_SECS);
+
+                var nHeadsBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.HEAD_TOTAL);
+                var nSectorsTotalBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.SECTOR_TOTAL);
+                var nSectorsPerTrackBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.TRACK_SECS);
+
                 if (nSectorsPerTrackBPB && nHeadsBPB) {
+
                     var nSectorsPerCylinderBPB = nSectorsPerTrackBPB * nHeadsBPB;
                     nHeads = nHeadsBPB;
                     nCylinders = Math.floor(nSectorsTotalBPB / nSectorsPerCylinderBPB);
@@ -2727,13 +2699,13 @@ DiskDump.prototype.convertToIMG = function()
                 /*
                  * Mimic the BPB test in convertToJSON(), because we don't want to blast an OEM string into non-DOS diskette images
                  */
-                var bByte0 = buf.readUInt8(DiskDump.BPB.JMP_OPCODE);
-                var cbSectorBPB = buf.readUInt16LE(DiskDump.BPB.SECTOR_BYTES);
+                var bByte0 = buf.readUInt8(DiskAPI.BPB.JMP_OPCODE);
+                var cbSectorBPB = buf.readUInt16LE(DiskAPI.BPB.SECTOR_BYTES);
                 if ((bByte0 == X86.OPCODE.JMP || bByte0 == X86.OPCODE.JMPS) && cbSectorBPB == 512) {
                     /*
                      * Overwrite the OEM string with our own, so that people know how the image originated
                      */
-                    buf.write(DiskDump.MY_OEM_STRING, DiskDump.BPB.OEM_STRING, DiskDump.MY_OEM_STRING.length);
+                    buf.write(DiskDump.MY_OEM_STRING, DiskAPI.BPB.OEM_STRING, DiskDump.MY_OEM_STRING.length);
                 }
             }
         } catch(err) {

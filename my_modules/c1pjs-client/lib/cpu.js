@@ -502,19 +502,19 @@ C1PCPU.prototype.reset = function(fPowerOn)
 
 /**
  * @this {C1PCPU}
- * @param {string|null} c is the class of the HTML control (eg, "input", "output")
- * @param {string|null} t is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea")
- * @param {string} s is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "run")
- * @param {Object} e is the HTML control DOM object (eg, HTMLButtonElement)
+ * @param {string|null} sHTMLClass is the class of the HTML control (eg, "input", "output")
+ * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea")
+ * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "run")
+ * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-C1PCPU.prototype.setBinding = function(c, t, s, e)
+C1PCPU.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
 {
     var fBound = false;
-    switch(s) {
+    switch(sBinding) {
         case "run":
-            this.bindings[s] = e;
-            e.onclick = function(cpu) {
+            this.bindings[sBinding] = control;
+            control.onclick = function(cpu) {
                 return function() {
                     if (!cpu.aFlags.fRunning)
                         cpu.run();
@@ -527,12 +527,12 @@ C1PCPU.prototype.setBinding = function(c, t, s, e)
         case "A": case "X": case "Y": case "S": case "PC":
         case "C": case "Z": case "I": case "D": case "B": case "V": case "N":
         case "speed":
-            this.bindings[s] = e;
+            this.bindings[sBinding] = control;
             fBound = true;
             break;
         case "setSpeed":
-            this.bindings[s] = e;
-            e.onclick = function(cpu) {
+            this.bindings[sBinding] = control;
+            control.onclick = function(cpu) {
                 return function() {
                     var speed = (cpu.speed >= cpu.SPEED_MAX? cpu.SPEED_SLOW : cpu.speed+1);
                     cpu.setSpeed(speed, true);

@@ -35,14 +35,13 @@
  *
  *      1) creating an empty disk: create()
  *      2) loading a disk image: load()
- *      3) mounting a disk image: mount()
- *      4) getting disk information: info()
- *      5) dumping disk contents: dump()
- *      6) seeking a disk sector: seek()
- *      7) reading data from a sector: read()
- *      8) writing data to a sector: write()
- *      9) save disk deltas: save()
- *     10) restore disk deltas: restore()
+ *      3) getting disk information: info()
+ *      4) dumping disk contents: dump()
+ *      5) seeking a disk sector: seek()
+ *      6) reading data from a sector: read()
+ *      7) writing data to a sector: write()
+ *      8) save disk deltas: save()
+ *      9) restore disk deltas: restore()
  *
  *  More functionality may be factored out of the FDC and HDC components later and moved here, to
  *  further reduce some of the duplication between them, but the above functionality is a good start.
@@ -349,7 +348,7 @@ Disk.prototype.powerUp = function(data, fRepower) {
     if (!fRepower) {
         if (this.fOnDemand && !this.fRemote) {
             this.setReady(false);
-            this.load(this.sDiskName, this.sDiskPath, this.donePowerUp, this);
+            this.load(this.sDiskName, this.sDiskPath, null, this.donePowerUp, this);
         }
     }
     return true;
@@ -467,11 +466,15 @@ Disk.prototype.create = function()
 };
 
 /**
- * load(sDiskName, sDiskPath, fnNotify, controller)
+ * load(sDiskName, sDiskPath, file, fnNotify)
  *
  * TODO: Figure out how we can strongly type fnNotify, because the Closure Compiler has issues with:
  *
  *      param {function(Component,Object,Disk,string,string)} fnNotify
+ *
+ * for:
+ *
+ *     this.fnNotify.call(this.controller, this.drive, disk, this.sDiskName, this.sDiskPath);
  *
  * Also, while we're at it, learn if there are ways to:
  *
@@ -481,10 +484,11 @@ Disk.prototype.create = function()
  * @this {Disk}
  * @param {string} sDiskName
  * @param {string} sDiskPath
+ * @param {File} [file] is set if there's an associated File object
  * @param {function(...)} [fnNotify]
  * @param {Component} [controller]
  */
-Disk.prototype.load = function(sDiskName, sDiskPath, fnNotify, controller)
+Disk.prototype.load = function(sDiskName, sDiskPath, file, fnNotify, controller)
 {
     var sDiskURL = sDiskPath;
 
@@ -497,8 +501,6 @@ Disk.prototype.load = function(sDiskName, sDiskPath, fnNotify, controller)
         this.messageDebugger(sMessage);
     }
 
-    Component.assert(!this.fnNotify);
-
     if (this.fnNotify) {
         if (DEBUG) this.controller.log('too many load requests for "' + sDiskName + '" (' + sDiskPath + ')');
         return;
@@ -508,6 +510,16 @@ Disk.prototype.load = function(sDiskName, sDiskPath, fnNotify, controller)
     this.sDiskPath = sDiskPath;
     this.fnNotify = fnNotify;
     this.controllerNotify = controller || this.controller;
+
+    if (file) {
+        var disk = this;
+        var reader = new FileReader();
+        reader.onload = function() {
+            disk.build(reader.result, true);
+        };
+        reader.readAsArrayBuffer(file);
+        return;
+    }
 
     /*
      * If there's an occurrence of API_ENDPOINT anywhere in the path, we assume we can use it as-is;
@@ -561,6 +573,60 @@ Disk.prototype.load = function(sDiskName, sDiskPath, fnNotify, controller)
         }
     }
     web.loadResource(sDiskURL, true, null, this, this.doneLoad, sDiskPath);
+};
+
+/**
+ *
+ * build(buffer, fDirty)
+ *
+ * Builds a disk image from an ArrayBuffer (eg, from a FileReader object), rather than from JSON-encoded data.
+ *
+ * @this {Disk}
+ * @param {?} buffer (we KNOW this is an ArrayBuffer, but we can't seem to convince the Closure Compiler)
+ * @param {boolean} [fDirty] is true if we should mark the entire disk dirty (to ensure that we save/restore it)
+ */
+Disk.prototype.build = function(buffer, fDirty)
+{
+    var disk;
+    var cbDiskData = buffer? buffer.byteLength : 0;
+    var disketteFormat = DiskAPI.DISKETTE_FORMATS[cbDiskData];
+
+    if (disketteFormat) {
+        var ib = 0;
+        var dwChecksum = 0;
+        var cbSector = 512, dwPattern = 0;
+        var dv = new DataView(buffer, 0, cbDiskData);
+        this.aDiskData = new Array(disketteFormat[0]);
+        for (var iCylinder = 0; iCylinder < this.aDiskData.length; iCylinder++) {
+            var cylinder = this.aDiskData[iCylinder] = new Array(disketteFormat[1]);
+            for (var iHead = 0; iHead < cylinder.length; iHead++) {
+                var head = cylinder[iHead] = new Array(disketteFormat[2]);
+                for (var iSector = 0; iSector < head.length; iSector++) {
+                    var sector = this.initSector(null, iCylinder, iHead, iSector + 1, cbSector, dwPattern);
+                    var cdw = cbSector >> 2;
+                    var adw = sector['data'];
+                    for (var idw = 0; idw < cdw; idw++, ib += 4) {
+                        var dw = adw[idw] = dv.getInt32(ib, true);
+                        dwChecksum = (dwChecksum + dw) & 0xffffffff;
+                    }
+                    if (fDirty) {
+                        sector.cModify = cdw;
+                        sector.fDirty = true;
+                    }
+                    head[iSector] = sector;
+                }
+            }
+        }
+        this.dwChecksum = dwChecksum;
+        disk = this;
+    } else {
+        this.notice("Unrecognized diskette format (" + cbDiskData + " bytes)");
+    }
+
+    if (this.fnNotify) {
+        this.fnNotify.call(this.controller, this.drive, disk, this.sDiskName, this.sDiskPath);
+        this.fnNotify = null;
+    }
 };
 
 /**
@@ -749,27 +815,12 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
                                 }
                                 delete sector['bytes'];
                             }
-                            /*
-                             * The current sector should now have ALL the properties of a proper Sector object; ie:
-                             *
-                             *      'sector':   sector number
-                             *      'length':   size of the sector, in bytes
-                             *      'data':     array of dwords
-                             *      'pattern':  dword pattern to use for empty or partial sectors
-                             *
-                             * In addition, we will maintain the following information on a per-sector basis,
-                             * as sectors are modified:
-                             *
-                             *      iModify:    index of first modified dword in sector
-                             *      cModify:    number of modified dwords in sector
-                             *      fDirty:     true if sector is dirty, false if clean (or cleaning in progress)
-                             *
-                             * And for the disk as a whole, we maintain a checksum of the original unmodified data:
-                             *
-                             *      dwChecksum: summation of all dwords in all non-empty sectors
-                             */
                             this.initSector(sector, iCylinder, iHead);
                             /*
+                             * For the disk as a whole, we maintain a checksum of the original unmodified data:
+                             *
+                             *      dwChecksum: summation of all dwords in all non-empty sectors
+                             *
                              * Pattern-filling of sectors is deferred until absolutely necessary (eg, when a sector is
                              * being written).  So all we need to do at this point is checksum all the initial sector data.
                              */
@@ -796,6 +847,20 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
 
 /**
  * initSector(sector, iCylinder, iHead, iSector, cbSector, dwPattern)
+ *
+ * Ensures every sector has ALL the properties of a proper Sector object; ie:
+ *
+ *      'sector':   sector number
+ *      'length':   size of the sector, in bytes
+ *      'data':     array of dwords
+ *      'pattern':  dword pattern to use for empty or partial sectors (null for unread remote sectors)
+ *
+ * In addition, we will maintain the following information on a per-sector basis,
+ * as sectors are modified:
+ *
+ *      iModify:    index of first modified dword in sector
+ *      cModify:    number of modified dwords in sector
+ *      fDirty:     true if sector is dirty, false if clean (or cleaning in progress)
  *
  * @param {Object} sector
  * @param {number} iCylinder

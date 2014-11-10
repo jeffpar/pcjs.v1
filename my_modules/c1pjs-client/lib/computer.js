@@ -163,18 +163,18 @@ C1PComputer.prototype.stop = function(msStart, nCycles)
 
 /**
  * @this {C1PComputer}
- * @param {string|null} c is the class of the HTML control (eg, "input", "output")
- * @param {string|null} t is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea")
- * @param {string} s is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
- * @param {Object} e is the HTML control DOM object (eg, HTMLButtonElement)
+ * @param {string|null} sHTMLClass is the class of the HTML control (eg, "input", "output")
+ * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea")
+ * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
+ * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-C1PComputer.prototype.setBinding = function(c, t, s, e)
+C1PComputer.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
 {
-    switch(s) {
+    switch(sBinding) {
     case "reset":
-        this.bindings[s] = e;
-        e.onclick = function(computer) {
+        this.bindings[sBinding] = control;
+        control.onclick = function(computer) {
             return function() {
                 computer.reset();
             };

@@ -100,64 +100,73 @@ C1PSerialPort.prototype.start = function()
 
 /**
  * @this {C1PSerialPort}
- * @param {string|null} c is the class of the HTML control (eg, "input", "output")
- * @param {string|null} t is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea")
- * @param {string} s is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "listSerial")
- * @param {Object} e is the HTML control DOM object (eg, HTMLButtonElement)
+ * @param {string|null} sHTMLClass is the class of the HTML control (eg, "input", "output")
+ * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea")
+ * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "listSerial")
+ * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-C1PSerialPort.prototype.setBinding = function(c, t, s, e)
+C1PSerialPort.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
 {
-    switch(s) {
-    case "listSerial":
-        this.bindings[s] = e;
-        return true;
-    case "loadSerial":
-        this.bindings[s] = e;
-        e.onclick = function(serial) {
-            return function() {
-                if (serial.bindings["listSerial"]) {
-                    var sFile = serial.bindings["listSerial"].value;
-                    // serial.println("loading " + sFile + "...");
-                    web.loadResource(sFile, true, null, serial, serial.loadFile);
-                }
-            };
-        }(this);
-        return true;
-    case "uploadSerial":
-        // Check for availability of FileReader
-        if (window.FileReader && window.File && window.FileList && window.Blob ) {
-            var serial = this;
-            this.bindings[s] = e;
+    var serial = this;
 
-            // Enable "Load Local File" button only if a file is actually selected
-            e.addEventListener('change', function () {
-                var fieldset = e.children[0];
+    switch(sBinding) {
+
+    case "listSerial":
+        this.bindings[sBinding] = control;
+        return true;
+
+    case "loadSerial":
+        this.bindings[sBinding] = control;
+
+        control.onclick = function(event) {
+            if (serial.bindings["listSerial"]) {
+                var sFile = serial.bindings["listSerial"].value;
+                // serial.println("loading " + sFile + "...");
+                web.loadResource(sFile, true, null, serial, serial.loadFile);
+            }
+        };
+        return true;
+
+    case "uploadSerial":
+        /*
+         * Check for availability of FileReader
+         */
+        if (window.FileReader && window.File && window.FileList && window.Blob) {
+            this.bindings[sBinding] = control;
+
+            /*
+             * Enable "Load Local File" button only if a file is actually selected
+             */
+            control.addEventListener('change', function() {
+                var fieldset = control.children[0];
                 var files = fieldset.children[0].files;
                 var submit = fieldset.children[1];
-
                 submit.disabled = (files.length == 0);
             });
 
-            e.onsubmit = function (event) {
+            control.onsubmit = function(event) {
                 var file = event.currentTarget[1].files[0];
 
                 var reader = new FileReader();
-                reader.onload = function () {
-                    // serial.println("uploading " + file.name + "...");
+                reader.onload = function() {
+                    // serial.println("loading " + file.name + "...");
                     serial.loadFile(file.name, reader.result.toString(), 0);
                 };
                 reader.readAsText(file);
 
-                // Prevent reloading of web page after form submission
+                /*
+                 * Prevent reloading of web page after form submission
+                 */
                 return false;
             };
         }
         else {
-            this.println("FileReader support not available, disabling local file upload");
-            e.parentNode.removeChild(e);
+            this.println("FileReader support not available, disabling local file load");
+            control.parentNode.removeChild(control);
         }
         return true;
+
     default:
         break;
     }

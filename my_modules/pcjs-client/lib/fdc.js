@@ -143,19 +143,19 @@ function FDC(parmsFDC) {
     this['dmaWrite'] = this.dmaWrite;
     this['dmaFormat'] = this.dmaFormat;
 
-    this.pAutoMount = null;
+    this.configAutoMount = null;
     if (parmsFDC['autoMount']) {
-        this.pAutoMount = parmsFDC['autoMount'];
-        if (typeof this.pAutoMount == "string") {
+        this.configAutoMount = parmsFDC['autoMount'];
+        if (typeof this.configAutoMount == "string") {
             try {
                 /*
                  * The most likely source of any exception will be right here, where we're parsing
                  * the JSON-encoded diskette data.
                  */
-                this.pAutoMount = eval("(" + parmsFDC['autoMount'] + ")");
+                this.configAutoMount = eval("(" + parmsFDC['autoMount'] + ")");
             } catch (e) {
                 Component.error("FDC auto-mount error: " + e.message + " (" + parmsFDC['autoMount'] + ")");
-                this.pAutoMount = null;
+                this.configAutoMount = null;
             }
         }
     }
@@ -412,117 +412,109 @@ FDC.aCmdInfo = {
  */
 FDC.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
 {
+    var fdc = this;
+
     switch (sBinding) {
-        case "listDisks":
-            this.bindings[sBinding] = control;
-            /*
-             * Add the special path of "?" to the list, which will prompt the user for a URL.
-             */
-            var controlOption = window.document.createElement("option");
-            controlOption['value'] = "?";
-            controlOption.innerHTML = "User-defined URL...";
+
+    case "listDisks":
+        this.bindings[sBinding] = control;
+
+        var addControlOption = function(sValue, sDisplay) {
+            var controlOption;
+            controlOption = window.document.createElement("option");
+            controlOption['value'] = sValue;
+            controlOption.innerHTML = sDisplay;
             control.appendChild(controlOption);
-            /*
-             * Now add an 'onchange' handler.
-             */
-            control.onchange = function(fdc, controlDisks) {
-                return function onChangeListDisks() {
-                    var controlDesc = fdc.bindings["descDisk"];
-                    if (controlDesc) {
-                        var controlOption = controlDisks.options[controlDisks.selectedIndex];
-                        if (controlOption) {
-                            var dataValue = {};
-                            var sValue = controlOption.getAttribute("data-value");
-                            if (sValue) {
-                                try {
-                                    dataValue = eval("({" + sValue + "})");
-                                } catch (e) {
-                                    Component.error("FDC option error: " + (e.message || e));
-                                }
-                            }
-                            var sDesc = dataValue['desc'];
-                            if (sDesc === undefined) sDesc = "";
-                            var sHRef = dataValue['href'];
-                            if (sHRef !== undefined) sDesc = "<a href=\"" + sHRef + "\" target=\"_blank\">" + sDesc + "</a>";
-                            controlDesc.innerHTML = sDesc;
-                        }
+        };
+
+        addControlOption("?", "Remote Disk");
+
+        control.onchange = function onChangeListDisks(event) {
+            var controlDesc = fdc.bindings["descDisk"];
+            var controlOption = control.options[control.selectedIndex];
+            if (controlDesc && controlOption) {
+                var dataValue = {};
+                var sValue = controlOption.getAttribute("data-value");
+                if (sValue) {
+                    try {
+                        dataValue = eval("({" + sValue + "})");
+                    } catch (e) {
+                        Component.error("FDC option error: " + e.message);
                     }
-                };
-            }(this, control);
-            return true;
+                }
+                var sDesc = dataValue['desc'];
+                if (sDesc === undefined) sDesc = "";
+                var sHRef = dataValue['href'];
+                if (sHRef !== undefined) sDesc = "<a href=\"" + sHRef + "\" target=\"_blank\">" + sDesc + "</a>";
+                controlDesc.innerHTML = sDesc;
+            }
+        };
+        return true;
 
-        case "descDisk":
-        case "listDrives":
+    case "descDisk":
+    case "listDrives":
+        this.bindings[sBinding] = control;
+        /*
+         * I tried going with onclick instead of onchange, so that if you wanted to confirm what's
+         * loaded in a particular drive, you could click the drive control without having to change it.
+         * However, that doesn't seem to work for all browsers, so I've reverted to onchange.
+         */
+        control.onchange = function onChangeListDrives(event) {
+            var iDrive = str.parseInt(control.value, 10);
+            if (iDrive != null) fdc.displayDiskette(iDrive);
+        };
+        return true;
+
+    case "loadDrive":
+        this.bindings[sBinding] = control;
+        control.onclick = function onClickLoadDrive(event) {
+            var controlDisks = fdc.bindings["listDisks"];
+            if (controlDisks) {
+                var sDisketteName = controlDisks.options[controlDisks.selectedIndex].text;
+                var sDiskettePath = controlDisks.value;
+                fdc.loadSelectedDrive(sDisketteName, sDiskettePath);
+            }
+        };
+        return true;
+
+    case "loadLocal":
+        /*
+         * Check for availability of FileReader
+         */
+        if (window.FileReader && window.File && window.FileList && window.Blob ) {
             this.bindings[sBinding] = control;
+
             /*
-             * I tried going with onclick instead of onchange, so that if you wanted to confirm what's
-             * loaded in a particular drive, you could click the drive control without having to change it.
-             * However, that doesn't seem to work for all browsers, so I've reverted to onchange.
+             * Enable "Load Local File" button only if a file is actually selected
              */
-            control.onchange = function(fdc, controlDrives) {
-                return function onChangeListDrives() {
-                    var iDrive = parseInt(controlDrives.value, 10);
-                    if (!isNaN(iDrive)) fdc.displayDiskette(iDrive);
-                };
-            }(this, control);
-            return true;
+            control.addEventListener('change', function() {
+                var fieldset = control.children[0];
+                var files = fieldset.children[0].files;
+                var submit = fieldset.children[1];
+                submit.disabled = (files.length == 0);
+            });
 
-        case "loadDrive":
-            this.bindings[sBinding] = control;
-            control.onclick = function(fdc) {
-                return function onClickLoadDrive() {
-                    var iDrive;
-                    var controlDisks = fdc.bindings["listDisks"];
-                    var controlDrives = fdc.bindings["listDrives"];
-                    if (controlDisks && controlDrives && !isNaN(iDrive = parseInt(controlDrives.value, 10)) && iDrive >= 0 && iDrive < fdc.aDrives.length) {
-                        var sDiskettePath = controlDisks.value;
-                        if (!sDiskettePath) {
-                            fdc.unloadDrive(iDrive);
-                            return;
-                        }
-                        var sDisketteName = controlDisks.options[controlDisks.selectedIndex].text;
+            control.onsubmit = function(event) {
+                var file = event.currentTarget[1].files[0];
+                if (file) {
+                    var sDiskettePath = file.name;
+                    var sDisketteName = str.getBaseName(sDiskettePath, true);
+                    fdc.loadSelectedDrive(sDisketteName, sDiskettePath, file);
+                }
+                /*
+                 * Prevent reloading of web page after form submission
+                 */
+                return false;
+            };
+        }
+        else {
+            this.println("FileReader support not available, disabling local file load");
+            control.parentNode.removeChild(control);
+        }
+        return true;
 
-                        /*
-                         * If the special path of "?" is selected, then we want to prompt the user for a URL.  Oh, and
-                         * make sure we pass an empty string as the 2nd parameter to prompt(), so that IE won't display
-                         * "undefined" -- because after all, undefined and "undefined" are EXACTLY the same thing, right?
-                         *
-                         * TODO: This is literally all I've done to support external disk images. There's probably more
-                         * I should do, like dynamically updating "listDisks" to include new entries, and adding new entries
-                         * to the save/restore data.
-                         */
-                        if (sDiskettePath == "?") {
-                            sDiskettePath = window.prompt("Enter the URL of a disk image to load.", "");
-                            if (!sDiskettePath)
-                                return;
-                            sDisketteName = str.getBaseName(sDiskettePath);
-                            fdc.println("Attempting to load " + sDiskettePath + " as \"" + sDisketteName + "\"");
-                        }
-
-                        while (fdc.loadDiskette(iDrive, sDisketteName, sDiskettePath, false)) {
-                            if (!window.confirm("Click OK to reload the original disk.\n(WARNING: All disk changes will be discarded)")) {
-                                return;
-                            }
-                            /*
-                             * So here's the story: loadDiskette() returned true, which it does ONLY if the specified disk is already
-                             * mounted, AND the user clicked OK to reload the original disk image.  So we must toss any history we have
-                             * for the disk, unload it, and then loop back around to loadDiskette().
-                             *
-                             * loadDiskette() should NEVER return true the second time, since no disk is loaded. In other words, this
-                             * isn't really a loop so much as a one-time retry operation.
-                             */
-                            fdc.removeDiskHistory(sDisketteName, sDiskettePath);
-                            fdc.unloadDrive(iDrive, false, true);
-                        }
-                        return;
-                    }
-                    fdc.notice("Nothing to load");
-                };
-            }(this);
-            return true;
-
-        default:
-            break;
+    default:
+        break;
     }
     return false;
 };
@@ -1143,17 +1135,17 @@ FDC.prototype.seekDrive = function(drive, iSector, nSectors)
 FDC.prototype.autoMount = function(fRemount)
 {
     if (!fRemount) this.cAutoMount = 0;
-    if (this.pAutoMount) {
-        for (var sDrive in this.pAutoMount) {
-            var pDriveConfig = this.pAutoMount[sDrive];
-            if (pDriveConfig['name'] && pDriveConfig['path']) {
+    if (this.configAutoMount) {
+        for (var sDrive in this.configAutoMount) {
+            var configDrive = this.configAutoMount[sDrive];
+            if (configDrive['name'] && configDrive['path']) {
                 /*
                  * WARNING: This conversion of drive letter to drive number, starting with A:, is very simplistic
                  * and is not guaranteed to match the drive mapping that DOS ultimately uses.
                  */
                 var iDrive = sDrive.charCodeAt(0) - 0x41;
                 if (iDrive >= 0 && iDrive < this.aDrives.length) {
-                    if (!this.loadDiskette(iDrive, pDriveConfig['name'], pDriveConfig['path'], true) && fRemount)
+                    if (!this.loadDiskette(iDrive, configDrive['name'], configDrive['path'], true) && fRemount)
                         this.setReady(false);
                     continue;
                 }
@@ -1165,18 +1157,75 @@ FDC.prototype.autoMount = function(fRemount)
 };
 
 /**
- * loadDiskette(iDrive, sDisketteName, sDiskettePath, fAutoMount)
+ * loadSelectedDrive(sDisketteName, sDiskettePath, file)
+ *
+ * @this {FDC}
+ * @param {string} sDisketteName
+ * @param {string} sDiskettePath
+ * @param {File} [file] is set if there's an associated File object
+ */
+FDC.prototype.loadSelectedDrive = function(sDisketteName, sDiskettePath, file)
+{
+    var iDrive;
+    var controlDrives = this.bindings["listDrives"];
+    if (controlDrives && !isNaN(iDrive = parseInt(controlDrives.value, 10)) && iDrive >= 0 && iDrive < this.aDrives.length) {
+
+        if (!sDiskettePath) {
+            this.unloadDrive(iDrive);
+            return;
+        }
+        /*
+         * If the special path of "?" is selected, then we want to prompt the user for a URL.  Oh, and
+         * make sure we pass an empty string as the 2nd parameter to prompt(), so that IE won't display
+         * "undefined" -- because after all, undefined and "undefined" are EXACTLY the same thing, right?
+         *
+         * TODO: This is literally all I've done to support remote disk images. There's probably more
+         * I should do, like dynamically updating "listDisks" to include new entries, and adding new entries
+         * to the save/restore data.
+         */
+        if (sDiskettePath == "?") {
+            sDiskettePath = window.prompt("Enter the URL of a remote disk image.", "") || "";
+            if (!sDiskettePath) return;
+            sDisketteName = str.getBaseName(sDiskettePath);
+            this.println("Attempting to load " + sDiskettePath + " as \"" + sDisketteName + "\"");
+        }
+
+        this.println("loading disk " + sDiskettePath + "...");
+
+        while (this.loadDiskette(iDrive, sDisketteName, sDiskettePath, false, file)) {
+            if (!window.confirm("Click OK to reload the original disk.\n(WARNING: All disk changes will be discarded)")) {
+                return;
+            }
+            /*
+             * So here's the story: loadDiskette() returned true, which it does ONLY if the specified disk is already
+             * mounted, AND the user clicked OK to reload the original disk image.  So we must toss any history we have
+             * for the disk, unload it, and then loop back around to loadDiskette().
+             *
+             * loadDiskette() should NEVER return true the second time, since no disk is loaded. In other words,
+             * this isn't really a loop so much as a one-time retry operation.
+             */
+            this.removeDiskHistory(sDisketteName, sDiskettePath);
+            this.unloadDrive(iDrive, false, true);
+        }
+        return;
+    }
+    this.notice("Nothing to load");
+};
+
+/**
+ * loadDiskette(iDrive, sDisketteName, sDiskettePath, fAutoMount, file)
  *
  * NOTE: If sDiskettePath is already loaded in the drive, nothing needs to be done.
  *
  * @this {FDC}
- * @param {number} iDrive (pre-validated)
+ * @param {number} iDrive
  * @param {string} sDisketteName
- * @param {string|null} sDiskettePath
- * @param {boolean} fAutoMount
+ * @param {string} sDiskettePath
+ * @param {boolean} [fAutoMount]
+ * @param {File} [file] is set if there's an associated File object
  * @return {boolean} true if diskette (already) loaded, false if queued up (or busy)
  */
-FDC.prototype.loadDiskette = function(iDrive, sDisketteName, sDiskettePath, fAutoMount)
+FDC.prototype.loadDiskette = function(iDrive, sDisketteName, sDiskettePath, fAutoMount, file)
 {
     var drive = this.aDrives[iDrive];
     if (sDiskettePath && drive.sDiskettePath != sDiskettePath) {
@@ -1192,7 +1241,7 @@ FDC.prototype.loadDiskette = function(iDrive, sDisketteName, sDiskettePath, fAut
             this.messageDebugger("loading diskette '" + sDisketteName + "'");
         }
         var disk = new Disk(this, drive, DiskAPI.MODE.PRELOAD);
-        disk.load(sDisketteName, sDiskettePath, this.doneLoadDiskette);
+        disk.load(sDisketteName, sDiskettePath, file, this.doneLoadDiskette);
         return false;
     }
     return true;

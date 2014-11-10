@@ -388,38 +388,38 @@ C1PKeyboard.prototype.reset = function()
 
 /**
  * @this {C1PKeyboard}
- * @param {string|null} c is the class of the HTML control (eg, "input", "output")
- * @param {string|null} t is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea")
- * @param {string} s is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "esc", "ctrl-c")
- * @param {Object} e is the HTML control DOM object (eg, HTMLButtonElement)
+ * @param {string|null} sHTMLClass is the class of the HTML control (eg, "input", "output")
+ * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea")
+ * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "esc", "ctrl-c")
+ * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-C1PKeyboard.prototype.setBinding = function(c, t, s, e)
+C1PKeyboard.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
 {
     /*
      * I want to bind to the first caller (ie, the Screen), not subsequent ones (eg, the Panel)
      */
-    if (this.bindings[s] === undefined) {
-        switch(s) {
+    if (this.bindings[sBinding] === undefined) {
+        switch(sBinding) {
         case "keyDown":
-            this.bindings[s] = e;
-            e.onkeydown = function(kbd) {
+            this.bindings[sBinding] = control;
+            control.onkeydown = function(kbd) {
                 return function(event) {
                     return kbd.keyEvent(event, true);
                 };
             }(this);
             return true;
         case "keyPress":
-            this.bindings[s] = e;
-            e.onkeypress = function(kbd) {
+            this.bindings[sBinding] = control;
+            control.onkeypress = function(kbd) {
                 return function(event) {
                     return kbd.keyPress(event);
                 };
             }(this);
             return true;
         case "keyUp":
-            this.bindings[s] = e;
-            e.onkeyup = function(kbd) {
+            this.bindings[sBinding] = control;
+            control.onkeyup = function(kbd) {
                 return function(event) {
                     return kbd.keyEvent(event, false);
                 };
@@ -436,8 +436,8 @@ C1PKeyboard.prototype.setBinding = function(c, t, s, e)
              * other injected keys, I'll need to avoid clearing the injection buffer on a reset;
              * currently, reset() resets everything.
              */
-            this.bindings[s] = e;
-            e.onclick = function(kbd) {
+            this.bindings[sBinding] = control;
+            control.onclick = function(kbd) {
                 return function(event) {
                     if (DEBUG) kbd.println("keyPressSimulate(break)");
                     if (kbd.cmp) kbd.cmp.reset(true);
@@ -445,15 +445,15 @@ C1PKeyboard.prototype.setBinding = function(c, t, s, e)
             }(this);
             return true;
         default:
-            if (this.aButtonCodeMap[s] !== undefined) {
-                this.bindings[s] = e;
-                e.onclick = function(kbd, sButton, charCode) {
+            if (this.aButtonCodeMap[sBinding] !== undefined) {
+                this.bindings[sBinding] = control;
+                control.onclick = function(kbd, sButton, charCode) {
                     return function(event) {
                         if (DEBUG) kbd.println("keyPressSimulate(" + sButton + ")");
                         if (kbd.cpu) kbd.cpu.setFocus();
                         return !kbd.keyPressSimulate(charCode);
                     };
-                }(this, s, this.aButtonCodeMap[s]);
+                }(this, sBinding, this.aButtonCodeMap[sBinding]);
                 return true;
             }
             break;
