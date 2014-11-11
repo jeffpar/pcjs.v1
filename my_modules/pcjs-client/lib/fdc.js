@@ -474,7 +474,7 @@ FDC.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
         /*
          * Check for availability of FileReader
          */
-        if (window.FileReader && window.File && window.FileList) {
+        if (window && 'FileReader' in window) {
             this.bindings[sBinding] = control;
 
             /*
