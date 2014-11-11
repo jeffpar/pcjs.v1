@@ -331,7 +331,7 @@ FDC.REG_DATA.CMD.MT             = 0x80;     // MT (Multi-Track; ie, data under b
 /*
  * FDC status/error results, generally assigned according to the corresponding ST0, ST1, ST2 or ST3 status bit.
  *
- * TODO: Determine when EQUIP_CHECK is *really* set; "77 step pulses" sounds suspiciously like a typo.
+ * TODO: Determine when EQUIP_CHECK is *really* set; also, "77 step pulses" sounds suspiciously like a typo.
  */
 FDC.REG_DATA.RES = {};
 FDC.REG_DATA.RES.NONE         = 0x00000000; // ST0 (IC): Normal termination of command (NT)
@@ -1852,7 +1852,7 @@ FDC.prototype.doCmd = function()
             /*
              * TODO: Determine the appropriate response code(s) for the possible errors that can occur here.
              */
-            drive.resCode = FDC.REG_DATA.RES.NO_DATA | FDC.REG_DATA.RES.INCOMPLETE;
+            drive.resCode = FDC.REG_DATA.RES.NOT_READY | FDC.REG_DATA.RES.INCOMPLETE;
         }
         this.pushResults(drive, bCmd, bHead, c, h, r, n);
         fIRQ = true;
