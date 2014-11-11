@@ -1181,6 +1181,12 @@ FDC.prototype.loadSelectedDrive = function(sDisketteName, sDiskettePath, file)
             this.unloadDrive(iDrive);
             return;
         }
+
+        if (sDiskettePath == "?") {
+            this.notice("Use 'Load' to load local disks");
+            return;
+        }
+
         /*
          * If the special path of "??" is selected, then we want to prompt the user for a URL.  Oh, and
          * make sure we pass an empty string as the 2nd parameter to prompt(), so that IE won't display
@@ -1233,7 +1239,7 @@ FDC.prototype.mountDiskette = function(iDrive, sDisketteName, sDiskettePath)
     this.unloadDrive(iDrive, true, true);
     drive.fLocal = true;
     var disk = new Disk(this, drive, DiskAPI.MODE.PRELOAD);
-    this.doneLoadDiskette(drive, disk, sDisketteName, sDiskettePath);
+    this.doneLoadDiskette(drive, disk, sDisketteName, sDiskettePath, true);
 };
 
 /**
@@ -1273,15 +1279,16 @@ FDC.prototype.loadDiskette = function(iDrive, sDisketteName, sDiskettePath, fAut
 };
 
 /**
- * doneLoadDiskette(drive, disk, sDisketteName, sDiskettePath)
+ * doneLoadDiskette(drive, disk, sDisketteName, sDiskettePath, fAutoMount)
  *
  * @this {FDC}
  * @param {Object} drive
  * @param {Disk} disk is set if the disk was successfully loaded, null if not
  * @param {string} sDisketteName
  * @param {string} sDiskettePath
+ * @param {boolean} [fAutoMount]
  */
-FDC.prototype.doneLoadDiskette = function onFDCLoadNotify(drive, disk, sDisketteName, sDiskettePath)
+FDC.prototype.doneLoadDiskette = function onFDCLoadNotify(drive, disk, sDisketteName, sDiskettePath, fAutoMount)
 {
     var aDiskInfo;
 
@@ -1346,7 +1353,7 @@ FDC.prototype.doneLoadDiskette = function onFDCLoadNotify(drive, disk, sDiskette
          * WARNING: This conversion of drive number to drive letter, starting with A:, is very simplistic
          * and will not match the drive mappings that DOS ultimately uses (ie, for drives beyond B:).
          */
-        this.notice("Mounted diskette \"" + sDisketteName + "\" in drive " + String.fromCharCode(0x41 + drive.iDrive), drive.fAutoMount);
+        this.notice("Mounted diskette \"" + sDisketteName + "\" in drive " + String.fromCharCode(0x41 + drive.iDrive), drive.fAutoMount || fAutoMount);
 
         /*
          * Update the drive's current media parameters to match the disk's.
