@@ -51,7 +51,7 @@ var http     = require("http");
 var express  = require("express");
 var slash    = require("express-slash");
 
-var proclib  = require("./my_modules/shared/lib/proclib");
+var proclib  = require("./modules/shared/lib/proclib");
 var args     = proclib.getArgs();
 
 var fCache   = (args.argv['cache']   === undefined? true  : args.argv['cache']);
@@ -61,7 +61,7 @@ var fLogging = (args.argv['logging'] === undefined? false : args.argv['logging']
 var fRebuild = (args.argv['rebuild'] === undefined? false : args.argv['rebuild']);
 var fSockets = (args.argv['sockets'] === undefined? false : args.argv['sockets']);
 
-var HTMLOut  = require("./my_modules/htmlout");
+var HTMLOut  = require("./modules/htmlout");
 
 var sServerRoot = __dirname;
 HTMLOut.setRoot(sServerRoot);

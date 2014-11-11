@@ -62,7 +62,7 @@ Pre-generated disk images are preferred to dynamically-generated images, and you
         <link href="http://www.bricklin.com/history/vclicense.htm">VisiCalc License</link>
     </disk>
 
-The PCjs [DiskDump](/my_modules/diskdump/) module is used to create all our pre-generated JSON-encoded disk images.
+The PCjs [DiskDump](/modules/diskdump/) module is used to create all our pre-generated JSON-encoded disk images.
 In the above example, a pre-generated disk image could be created from the command-line with either the "--dir" option
 (which will traverse all subdirectories as well): 
 

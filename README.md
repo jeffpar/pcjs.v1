@@ -63,9 +63,9 @@ operation.
 The project includes:
 
 - A simple Node-based web server ([server.js](server.js))
-- Custom Node modules used by the web server ([HTMLOut](my_modules/htmlout/), [MarkOut](my_modules/markout/), [DiskDump](my_modules/diskdump/), [FileDump](my_modules/filedump/))
+- Custom Node modules used by the web server ([HTMLOut](modules/htmlout/), [MarkOut](modules/markout/), [DiskDump](modules/diskdump/), [FileDump](modules/filedump/))
 - A variety of IBM PC and C1P configuration and resource files (see [/apps](apps/), [/devices](devices/) and [/disks](disks/))
-- The [PCjs](my_modules/pcjs-client/lib/) and [C1Pjs](my_modules/c1pjs-client/lib/) client applications, both "compiled" and uncompiled
+- The [PCjs](modules/pcjs/lib/) and [C1Pjs](modules/c1pjs/lib/) client applications, both "compiled" and uncompiled
 - A smattering of [PCjs](docs/pcjs/) and [C1Pjs](docs/c1pjs/) documentation, along with [blog posts](blog/), related [publications](pubs/) and more
 
 The bundled web server is not strictly required.  Any web server (Node, Apache, Nginx, etc) that can serve the necessary
@@ -77,7 +77,7 @@ included in the project, but unless all the resource files are moved into a sing
 [Demos](/docs/pcjs/demos/)), your browser will probably be unable to load all of them, due to security restrictions.
 Using the bundled web server is the preferred solution.
 
-The project includes a large selection of disk images, and a powerful [DiskDump](my_modules/diskdump/) utility that
+The project includes a large selection of disk images, and a powerful [DiskDump](modules/diskdump/) utility that
 runs on both the client and server, featuring a command-line interface (CLI) and web server API.  Originally created to dump
 existing disk images as JSON, **DiskDump** has evolved into a full-featured disk image generator, capable of creating PC-compatible
 diskette *and* hard disk images from either lists *or* directories of files (including all subdirectories).
@@ -189,7 +189,7 @@ Using PCjs
 The PCjs web server is little more than a file/directory browser for the PCjs project, plus a collection of APIs.
 
 If a URL corresponds to a PCjs project folder and no "index.html" exists in that folder, the server loads an HTML
-template ([common.html](my_modules/shared/templates/common.html)) and generates an "index.html" for that folder.
+template ([common.html](modules/shared/templates/common.html)) and generates an "index.html" for that folder.
 
 The contents of the "index.html" will vary depending on the contents of the folder; for example, if the folder
 contains a README.md, then that file is converted to HTML and embedded in the "index.html".  Similarly, if the folder
@@ -200,16 +200,16 @@ contains a machine XML file, that is embedded as well.
 The PCjs client app can also be run from the command-line mode using Node, making it possible to script the application,
 run a series of automated tests, etc:
 
-    cd my_modules/pcjs-client/bin
+    cd modules/pcjs/bin
     node pcjs
 
-The [pcjs](my_modules/pcjs-client/bin/pcjs) script in [my_modules/pcjs-client/bin](my_modules/pcjs-client/bin) loads
+The [pcjs](modules/pcjs/bin/pcjs) script in [modules/pcjs/bin](modules/pcjs/bin) loads
 all the PCjs browser scripts listed in the root [package.json](/package.json) and then starts a Node REPL ("read-eval-print loop").
 The REPL handles a few special commands (eg, "load", "quit") and passes anything else to the PCjs Debugger component.
 If no Debugger component has been created yet, or if the Debugger didn't recognize the command, then it's passed on to *eval()*,
 like a good little REPL.
 
-Use the "load" command to load a JSON machine configuration file.  A sample [machine.json](my_modules/pcjs-client/bin/machine.json)
+Use the "load" command to load a JSON machine configuration file.  A sample [machine.json](modules/pcjs/bin/machine.json)
 is provided in the *bin* directory, which is a "JSON-ified" version of the [machine.xml](devices/pc/machine/5150/mda/64kb/machine.xml)
 displayed on the [pcjs.org](/) home page.
 
@@ -242,7 +242,7 @@ Debugging PCjs
 
 ### Server Components
 
-To help test/debug changes to PCjs server components (eg, [DiskDump](my_modules/diskdump/), [HTMLOut](my_modules/htmlout/)),
+To help test/debug changes to PCjs server components (eg, [DiskDump](modules/diskdump/), [HTMLOut](modules/htmlout/)),
 you can start the server with some additional options; eg:
 
 	node server.js --logging --console --debug
@@ -320,14 +320,14 @@ closer to being released.
 In the course of testing PCjs, there may be stale "index.html" files that prevent you from seeing application
 updates, changes to README.md files, etc.  So before running Node, you may want to "touch" the default HTML template:
 
-	touch my_modules/shared/templates/common.html
+	touch modules/shared/templates/common.html
 	
-The [HTMLOut](my_modules/htmlout/) module compares the timestamp of that template file to the timestamp of any
+The [HTMLOut](modules/htmlout/) module compares the timestamp of that template file to the timestamp of any
 "index.html" and will regenerate the latter if it's out-of-date.
 
 There's a TODO to expand that check to include the timestamp of any local README.md file, but there are many other
 factors that can contribute to stale "index.html" files, so usually the safest thing to do is "touch" the
-[common.html](my_modules/shared/templates/common.html) template, or delete all existing "index.html" files, either
+[common.html](modules/shared/templates/common.html) template, or delete all existing "index.html" files, either
 manually or with the Grunt "clean" task:
 
 	grunt clean

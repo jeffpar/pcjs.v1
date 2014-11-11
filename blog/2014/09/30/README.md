@@ -83,7 +83,7 @@ define class constants.
 While we're talking about constants, it's important to be aware of constants that are not scoped to
 any particular component.
 
-In [/my_modules/shared/lib/defines.js](/my_modules/shared/lib/defines.js), **DEBUG** is set to **TRUE**,
+In [/modules/shared/lib/defines.js](/modules/shared/lib/defines.js), **DEBUG** is set to **TRUE**,
 enabling all debug-only code by default.  It is also declared as a *@define* so that the Closure Compiler can
 override it, setting it to **FALSE** and disabling debug-only code.
 
@@ -101,8 +101,8 @@ However, calls to debug-only instance methods seem to be more problematic, so al
 
 	if (DEBUG) this.log('load("' + sFileURL + '")');
 
-There are a number of other important shared constants in [/my_modules/shared/lib/defines.js](/my_modules/shared/lib/defines.js)
-and PCjs-specific constants in [/my_modules/pcjs-client/lib/defines.js](/my_modules/pcjs-client/lib/defines.js); refer
+There are a number of other important shared constants in [/modules/shared/lib/defines.js](/modules/shared/lib/defines.js)
+and PCjs-specific constants in [/modules/pcjs/lib/defines.js](/modules/pcjs/lib/defines.js); refer
 to those files for more information.
 
 ### Braces and Parentheses

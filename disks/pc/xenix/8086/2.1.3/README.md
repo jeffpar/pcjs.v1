@@ -14,4 +14,4 @@ Manifest Details
 
 [Manifest](manifest.xml) update using:
 
-	find -L private -name "*" -type f -exec node ../../../../../my_modules/diskdump/bin/diskdump --format=json --output=. --manifest --title="SCO Xenix 8086 Operating System v2.1.3" --disk={} \;
+	find -L private -name "*" -type f -exec node ../../../../../modules/diskdump/bin/diskdump --format=json --output=. --manifest --title="SCO Xenix 8086 Operating System v2.1.3" --disk={} \;

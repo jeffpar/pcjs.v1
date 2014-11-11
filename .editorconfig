@@ -12,7 +12,7 @@ indent_style = tab
 indent_size = 8
 trim_trailing_whitespace = true
 
-[my_modules/**.js]
+[modules/**.js]
 indent_style = space
 indent_size = 4
 trim_trailing_whitespace = true

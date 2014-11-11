@@ -77,7 +77,7 @@
  * I added the "prepjs" task to perform the same constant inlining that my old PHP script "inline.php"
  * used to do as part of the old "jsmachines.net" build process.  Unfortunately, Grunt appears to be
  * a real memory hog, and so "prepjs" had to be disabled until I could resolve that issue (see my notes
- * in "my_modules/grunts/prepjs/tasks/prepjs.js" for details).
+ * in "modules/grunts/prepjs/tasks/prepjs.js" for details).
  *
  * With the current version of the Closure Compiler, I don't see any measurable performance benefit
  * to doing my own inlining, but I still wanted to port the code, partly in case I discover some benefit
@@ -312,7 +312,7 @@ module.exports = function(grunt) {
             "c1pxsl": {
                 files: [
                     {
-                        cwd: "./my_modules/shared/templates/",
+                        cwd: "./modules/shared/templates/",
                         src: ["common.css", "common.xsl", "document.css", "document.xsl", "machine.xsl", "manifest.xsl", "outline.xsl"],
                         dest: "versions/c1pjs/<%= pkg.version %>/",
                         expand: true
@@ -330,7 +330,7 @@ module.exports = function(grunt) {
             "pcxsl": {
                 files: [
                     {
-                        cwd: "./my_modules/shared/templates/",
+                        cwd: "./modules/shared/templates/",
                         src: ["common.css", "common.xsl", "document.css", "document.xsl", "machine.xsl", "manifest.xsl", "outline.xsl"],
                         dest: "versions/pcjs/<%= pkg.version %>/",
                         expand: true
@@ -348,7 +348,7 @@ module.exports = function(grunt) {
             "c1pjs": {
                 files: [
                     {
-                        cwd: "./my_modules/c1pjs-client/templates/",
+                        cwd: "./modules/c1pjs/templates/",
                         src: ["components.*"],
                         dest: "versions/c1pjs/<%= pkg.version %>/",
                         expand: true
@@ -365,7 +365,7 @@ module.exports = function(grunt) {
             "pcjs": {
                 files: [
                     {
-                        cwd: "./my_modules/pcjs-client/templates/",
+                        cwd: "./modules/pcjs/templates/",
                         src: ["components.*"],
                         dest: "versions/pcjs/<%= pkg.version %>/",
                         expand: true
@@ -398,7 +398,7 @@ module.exports = function(grunt) {
         run: {
             "delete-indexes": {
                 options: {cwd: "."},
-                cmd: "./my_modules/htmlout/bin/delete_indexes.sh",
+                cmd: "./modules/htmlout/bin/delete_indexes.sh",
                 args: []
             },
             "zipify-demos": {
@@ -438,8 +438,8 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks("grunt-run");
     grunt.loadNpmTasks("grunt-text-replace");
 
-    grunt.loadTasks("my_modules/grunts/manifester/tasks");
-    grunt.loadTasks("my_modules/grunts/prepjs/tasks");
+    grunt.loadTasks("modules/grunts/manifester/tasks");
+    grunt.loadTasks("modules/grunts/prepjs/tasks");
 
     grunt.registerTask("preCompiler", grunt.option("rebuild")? ["concat:tmp-c1pjs", "concat:tmp-pcjs"] : ["newer:concat:tmp-c1pjs", "newer:concat:tmp-pcjs"]);
 
