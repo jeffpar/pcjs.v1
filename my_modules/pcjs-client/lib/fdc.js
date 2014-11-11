@@ -931,6 +931,8 @@ FDC.prototype.initDrive = function(drive, iDrive, data)
     }
 
     var deltas = data[i++];
+    if (deltas == 102) deltas = false;      // v1.02 backward-compatibility
+
     if (typeof deltas == "boolean") {
         var fLocal = deltas;
         var sDisketteName = data[i++];

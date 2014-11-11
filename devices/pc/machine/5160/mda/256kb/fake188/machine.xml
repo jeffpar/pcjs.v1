@@ -14,7 +14,7 @@
 		<control type="button" class="input" binding="run">Run</control>
 	</cpu>
 	<keyboard ref="/devices/pc/keyboard/minimal.xml"/>
-	<fdc id="fdcNEC" width="360px" pos="left" padleft="8px" padbottom="8px" automount='{A:{name:"PC-DOS 2.00 (Disk 1)",path:"/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json"}, B:{name:"Executive Suite (1982)",path:"/apps/pc/1982/esuite/disk.json"}}'>
+	<fdc id="fdcNEC" pos="right" padleft="8px" padbottom="8px" automount='{A:{name:"PC-DOS 2.00 (Disk 1)",path:"/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json"}, B:{name:"Executive Suite (1982)",path:"/apps/pc/1982/esuite/disk.json"}}'>
 		<control type="list" class="input" binding="listDrives"/>
 		<control type="list" class="input" binding="listDisks">
 			<disk path="">None</disk>
@@ -25,8 +25,9 @@
 			<manifest ref="/apps/pc/1981/visicalc/manifest.xml" disk="*"/>
 			<manifest ref="/apps/pc/1982/esuite/manifest.xml" disk="*"/>
 		</control>
-		<control type="button" class="input" binding="loadDrive">Load</control>
-		<control type="description" class="output" binding="descDisk" padleft="8px"/>
+		<control type="button" class="input" binding="loadDrive" padright="8px">Download</control>
+		<control type="description" class="output" binding="descDisk" padright="8px"/>
+		<control type="file" class="input" binding="mountDrive"/>
 	</fdc>
 	<chipset id="chipset" model="5160" sw1="01000001"/>
 	<hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",type:3}]'/>

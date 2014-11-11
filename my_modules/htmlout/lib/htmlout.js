@@ -166,11 +166,15 @@ var aMachineFileTypes = {
 var asNonDirectories = [
     "COPYING",
     "LICENSE",
-    "README"
+    "README",
+    "makefile"
 ];
 
 var asExtsPlainText = [
-    "map"
+    "65v",
+    "bas",
+    "map",
+    "txt"
 ];
 
 /*
@@ -215,7 +219,6 @@ var asFilesNonServed = [
     "debug",
     "lib",
     "logs",
-    "makefile",
     "my_modules",
     "node_modules",
     "node.log",
@@ -440,7 +443,7 @@ HTMLOut.filter = function(req, res, next)
     var i;
     var sPath = path.join(sServerRoot, req.path);
     var sBaseName = path.basename(req.path);
-    var sBaseExt = ((i = sBaseName.lastIndexOf('.')) > 0? sBaseName.substr(i+1) : "");
+    var sBaseExt = ((i = sBaseName.lastIndexOf('.')) > 0? sBaseName.substr(i+1) : "").toLowerCase();
     var sTrailingChar = req.path.slice(-1);
 
     if (!fServerDebug && !net.hasParm(net.GORT_COMMAND, net.GORT_DEBUG, req)) {
@@ -531,7 +534,7 @@ HTMLOut.filter = function(req, res, next)
      * folders with trailing slashes.
      */
     if (asNonDirectories.indexOf(sBaseName) < 0) {
-        if (sTrailingChar != '/' || sBaseName.match(/\.[^0-9]+[^Ma-z]?$/)) {
+        if (sTrailingChar != '/') {
             HTMLOut.logDebug('HTMLOut.filter("' + sBaseName + '"): passing static file request to next()');
             next();
             return;
@@ -1052,7 +1055,7 @@ HTMLOut.prototype.getDirList = function(sToken, sIndent, aParms)
                 var fDir = false;
                 if (sURL == '/' || sBaseName == "..") {
                     fDir = true;
-                } else if (asNonDirectories.indexOf(sBaseName) < 0 && (iExt < 0 || sBaseName.match(/\.[0-9]+[Ma-z]?$/))) {
+                } else if (asNonDirectories.indexOf(sBaseName) < 0 && (iExt < 0 || sBaseName.match(/\.[0-9]+[Ma-c]?$/))) {
                     fDir = true;
                     sURL += '/';
                 }

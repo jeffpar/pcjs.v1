@@ -25,8 +25,9 @@
 			<manifest ref="/apps/pc/1981/visicalc/manifest.xml" disk="*"/>
 			<manifest ref="/apps/pc/1982/esuite/manifest.xml" disk="*"/>
 		</control>
-		<control type="button" class="input" binding="loadDrive">Load</control>
+		<control type="button" class="input" binding="loadDrive">Download</control>
 		<control type="description" class="output" binding="descDisk" padleft="8px"/>
+		<control type="file" class="input" binding="mountDrive" padtop="8px"/>
 	</fdc>
 	<chipset id="chipset" model="5160" sw1="01000001"/>
 	<hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",type:3}]'/>
