@@ -551,7 +551,7 @@ Keyboard.aSoftCodes = {
  * @enum {number}
  */
 Keyboard.aKeyCodes = {};
-Keyboard.aKeyCodes[Keyboard.KEYCODE.ESC   + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.ONE;
+Keyboard.aKeyCodes[Keyboard.KEYCODE.ESC   + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.ESC;
 Keyboard.aKeyCodes[Keyboard.ASCII['1']]   = Keyboard.SCANCODE.ONE;
 Keyboard.aKeyCodes[Keyboard.ASCII['!']]   = Keyboard.SCANCODE.ONE    | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII['2']]   = Keyboard.SCANCODE.TWO;
