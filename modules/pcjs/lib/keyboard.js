@@ -415,12 +415,12 @@ Keyboard.SCANCODE = {
  *      TODO: Implement the above behaviors.
  *
  * All key identifiers must be quotable using single-quotes, because that's how components.xsl will encode them
- * in the "data-value" attribute of the corresponding HTML control.  Which, in turn, is why the single-quote
+ * *inside* the "data-value" attribute of the corresponding HTML control.  Which, in turn, is why the single-quote
  * key is defined as 'quote' rather than "'".  Similarly, if there was unshifted "double-quote" key, it could
- * not be called '"', because XML files must quote all their bindings using double-quotes.
+ * not be called '"', because components.xsl quotes the *entire* "data-value" attribute using double-quotes.
  *
  * In the (informal) numbering of keys below, two keys are deliberately numbered 84, reflecting the fact that
- * the 'sysreq' key was added to the 84-key keyboard but then dropped from the 101-key keyboard.
+ * the 'sysreq' key was added to the 84-key keyboard but then dropped from the 101-key keyboard as a stand-alone key.
  *
  * @enum {number}
  */
@@ -553,51 +553,51 @@ Keyboard.aSoftCodes = {
 Keyboard.aKeyCodes = {};
 Keyboard.aKeyCodes[Keyboard.KEYCODE.ESC   + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.ONE;
 Keyboard.aKeyCodes[Keyboard.ASCII['1']]   = Keyboard.SCANCODE.ONE;
-Keyboard.aKeyCodes[Keyboard.ASCII['!']]   = Keyboard.SCANCODE.ONE |    (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII['!']]   = Keyboard.SCANCODE.ONE    | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII['2']]   = Keyboard.SCANCODE.TWO;
-Keyboard.aKeyCodes[Keyboard.ASCII['@']]   = Keyboard.SCANCODE.TWO |    (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII['@']]   = Keyboard.SCANCODE.TWO    | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII['3']]   = Keyboard.SCANCODE.THREE;
-Keyboard.aKeyCodes[Keyboard.ASCII['#']]   = Keyboard.SCANCODE.THREE |  (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII['#']]   = Keyboard.SCANCODE.THREE  | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII['4']]   = Keyboard.SCANCODE.FOUR;
-Keyboard.aKeyCodes[Keyboard.ASCII['$']]   = Keyboard.SCANCODE.FOUR |   (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII['$']]   = Keyboard.SCANCODE.FOUR   | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII['5']]   = Keyboard.SCANCODE.FIVE;
-Keyboard.aKeyCodes[Keyboard.ASCII['%']]   = Keyboard.SCANCODE.FIVE |   (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII['%']]   = Keyboard.SCANCODE.FIVE   | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII['6']]   = Keyboard.SCANCODE.SIX;
-Keyboard.aKeyCodes[Keyboard.ASCII['^']]   = Keyboard.SCANCODE.SIX |    (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII['^']]   = Keyboard.SCANCODE.SIX    | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII['7']]   = Keyboard.SCANCODE.SEVEN;
-Keyboard.aKeyCodes[Keyboard.ASCII['&']]   = Keyboard.SCANCODE.SEVEN |  (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII['&']]   = Keyboard.SCANCODE.SEVEN  | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII['8']]   = Keyboard.SCANCODE.EIGHT;
-Keyboard.aKeyCodes[Keyboard.ASCII['*']]   = Keyboard.SCANCODE.EIGHT |  (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII['*']]   = Keyboard.SCANCODE.EIGHT  | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII['9']]   = Keyboard.SCANCODE.NINE;
-Keyboard.aKeyCodes[Keyboard.ASCII['(']]   = Keyboard.SCANCODE.NINE |   (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII['(']]   = Keyboard.SCANCODE.NINE   | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII['0']]   = Keyboard.SCANCODE.ZERO;
-Keyboard.aKeyCodes[Keyboard.ASCII[')']]   = Keyboard.SCANCODE.ZERO |   (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII[')']]   = Keyboard.SCANCODE.ZERO   | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII['-']]   = Keyboard.SCANCODE.DASH;
-Keyboard.aKeyCodes[Keyboard.ASCII['_']]   = Keyboard.SCANCODE.DASH |   (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII['_']]   = Keyboard.SCANCODE.DASH   | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII['=']]   = Keyboard.SCANCODE.EQUALS;
 Keyboard.aKeyCodes[Keyboard.ASCII['+']]   = Keyboard.SCANCODE.EQUALS | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.KEYCODE.BS    + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.BS;
 Keyboard.aKeyCodes[Keyboard.KEYCODE.TAB   + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.TAB;
 Keyboard.aKeyCodes[Keyboard.ASCII.q]      = Keyboard.SCANCODE.Q;
-Keyboard.aKeyCodes[Keyboard.ASCII.Q]      = Keyboard.SCANCODE.Q | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII.Q]      = Keyboard.SCANCODE.Q      | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII.w]      = Keyboard.SCANCODE.W;
-Keyboard.aKeyCodes[Keyboard.ASCII.W]      = Keyboard.SCANCODE.W | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII.W]      = Keyboard.SCANCODE.W      | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII.e]      = Keyboard.SCANCODE.E;
-Keyboard.aKeyCodes[Keyboard.ASCII.E]      = Keyboard.SCANCODE.E | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII.E]      = Keyboard.SCANCODE.E      | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII.r]      = Keyboard.SCANCODE.R;
-Keyboard.aKeyCodes[Keyboard.ASCII.R]      = Keyboard.SCANCODE.R | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII.R]      = Keyboard.SCANCODE.R      | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII.t]      = Keyboard.SCANCODE.T;
-Keyboard.aKeyCodes[Keyboard.ASCII.T]      = Keyboard.SCANCODE.T | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII.T]      = Keyboard.SCANCODE.T      | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII.y]      = Keyboard.SCANCODE.Y;
-Keyboard.aKeyCodes[Keyboard.ASCII.Y]      = Keyboard.SCANCODE.Y | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII.Y]      = Keyboard.SCANCODE.Y      | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII.u]      = Keyboard.SCANCODE.U;
-Keyboard.aKeyCodes[Keyboard.ASCII.U]      = Keyboard.SCANCODE.U | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII.U]      = Keyboard.SCANCODE.U      | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII.i]      = Keyboard.SCANCODE.I;
-Keyboard.aKeyCodes[Keyboard.ASCII.I]      = Keyboard.SCANCODE.I | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII.I]      = Keyboard.SCANCODE.I      | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII.o]      = Keyboard.SCANCODE.O;
-Keyboard.aKeyCodes[Keyboard.ASCII.O]      = Keyboard.SCANCODE.O | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII.O]      = Keyboard.SCANCODE.O      | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII.p]      = Keyboard.SCANCODE.P;
-Keyboard.aKeyCodes[Keyboard.ASCII.P]      = Keyboard.SCANCODE.P | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII.P]      = Keyboard.SCANCODE.P      | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII['[']]   = Keyboard.SCANCODE.LBRACK;
 Keyboard.aKeyCodes[Keyboard.ASCII['{']]   = Keyboard.SCANCODE.LBRACK | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII[']']]   = Keyboard.SCANCODE.RBRACK;
@@ -605,53 +605,53 @@ Keyboard.aKeyCodes[Keyboard.ASCII['}']]   = Keyboard.SCANCODE.RBRACK | (Keyboard
 Keyboard.aKeyCodes[Keyboard.KEYCODE.CR]   = Keyboard.SCANCODE.ENTER;
 Keyboard.aKeyCodes[Keyboard.KEYCODE.CTRL  + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.CTRL;
 Keyboard.aKeyCodes[Keyboard.ASCII.a]      = Keyboard.SCANCODE.A;
-Keyboard.aKeyCodes[Keyboard.ASCII.A]      = Keyboard.SCANCODE.A | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII.A]      = Keyboard.SCANCODE.A      | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII.s]      = Keyboard.SCANCODE.S;
-Keyboard.aKeyCodes[Keyboard.ASCII.S]      = Keyboard.SCANCODE.S | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII.S]      = Keyboard.SCANCODE.S      | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII.d]      = Keyboard.SCANCODE.D;
-Keyboard.aKeyCodes[Keyboard.ASCII.D]      = Keyboard.SCANCODE.D | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII.D]      = Keyboard.SCANCODE.D      | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII.f]      = Keyboard.SCANCODE.F;
-Keyboard.aKeyCodes[Keyboard.ASCII.F]      = Keyboard.SCANCODE.F | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII.F]      = Keyboard.SCANCODE.F      | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII.g]      = Keyboard.SCANCODE.G;
-Keyboard.aKeyCodes[Keyboard.ASCII.G]      = Keyboard.SCANCODE.G | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII.G]      = Keyboard.SCANCODE.G      | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII.h]      = Keyboard.SCANCODE.H;
-Keyboard.aKeyCodes[Keyboard.ASCII.H]      = Keyboard.SCANCODE.H | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII.H]      = Keyboard.SCANCODE.H      | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII.j]      = Keyboard.SCANCODE.J;
-Keyboard.aKeyCodes[Keyboard.ASCII.J]      = Keyboard.SCANCODE.J | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII.J]      = Keyboard.SCANCODE.J      | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII.k]      = Keyboard.SCANCODE.K;
-Keyboard.aKeyCodes[Keyboard.ASCII.K]      = Keyboard.SCANCODE.K | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII.K]      = Keyboard.SCANCODE.K      | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII.l]      = Keyboard.SCANCODE.L;
-Keyboard.aKeyCodes[Keyboard.ASCII.L]      = Keyboard.SCANCODE.L | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII.L]      = Keyboard.SCANCODE.L      | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII[';']]   = Keyboard.SCANCODE.SEMI;
-Keyboard.aKeyCodes[Keyboard.ASCII[':']]   = Keyboard.SCANCODE.SEMI |   (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII[':']]   = Keyboard.SCANCODE.SEMI   | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII["'"]]   = Keyboard.SCANCODE.QUOTE;
-Keyboard.aKeyCodes[Keyboard.ASCII['"']]   = Keyboard.SCANCODE.QUOTE |  (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII['"']]   = Keyboard.SCANCODE.QUOTE  | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII['`']]   = Keyboard.SCANCODE.BQUOTE;
 Keyboard.aKeyCodes[Keyboard.ASCII['~']]   = Keyboard.SCANCODE.BQUOTE | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.KEYCODE.SHIFT + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.SHIFT;
 Keyboard.aKeyCodes[Keyboard.ASCII['\\']]  = Keyboard.SCANCODE.BSLASH;
 Keyboard.aKeyCodes[Keyboard.ASCII['|']]   = Keyboard.SCANCODE.BSLASH | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII.z]      = Keyboard.SCANCODE.Z;
-Keyboard.aKeyCodes[Keyboard.ASCII.Z]      = Keyboard.SCANCODE.Z | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII.Z]      = Keyboard.SCANCODE.Z      | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII.x]      = Keyboard.SCANCODE.X;
-Keyboard.aKeyCodes[Keyboard.ASCII.X]      = Keyboard.SCANCODE.X | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII.X]      = Keyboard.SCANCODE.X      | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII.c]      = Keyboard.SCANCODE.C;
-Keyboard.aKeyCodes[Keyboard.ASCII.C]      = Keyboard.SCANCODE.C | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII.C]      = Keyboard.SCANCODE.C      | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII.v]      = Keyboard.SCANCODE.V;
-Keyboard.aKeyCodes[Keyboard.ASCII.V]      = Keyboard.SCANCODE.V | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII.V]      = Keyboard.SCANCODE.V      | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII.b]      = Keyboard.SCANCODE.B;
-Keyboard.aKeyCodes[Keyboard.ASCII.B]      = Keyboard.SCANCODE.B | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII.B]      = Keyboard.SCANCODE.B      | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII.n]      = Keyboard.SCANCODE.N;
-Keyboard.aKeyCodes[Keyboard.ASCII.N]      = Keyboard.SCANCODE.N | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII.N]      = Keyboard.SCANCODE.N      | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII.m]      = Keyboard.SCANCODE.M;
-Keyboard.aKeyCodes[Keyboard.ASCII.M]      = Keyboard.SCANCODE.M | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII.M]      = Keyboard.SCANCODE.M      | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII[',']]   = Keyboard.SCANCODE.COMMA;
-Keyboard.aKeyCodes[Keyboard.ASCII['<']]   = Keyboard.SCANCODE.COMMA |  (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.ASCII['<']]   = Keyboard.SCANCODE.COMMA  | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII['.']]   = Keyboard.SCANCODE.PERIOD;
 Keyboard.aKeyCodes[Keyboard.ASCII['>']]   = Keyboard.SCANCODE.PERIOD | (Keyboard.SCANCODE.SHIFT << 8);
 Keyboard.aKeyCodes[Keyboard.ASCII['/']]   = Keyboard.SCANCODE.SLASH;
-Keyboard.aKeyCodes[Keyboard.ASCII['?']]   = Keyboard.SCANCODE.SLASH |  (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.KEYCODE.SHIFT + Keyboard.KEYCODE.ONDOWN +  Keyboard.KEYCODE.ONRIGHT] = Keyboard.SCANCODE.RSHIFT;
+Keyboard.aKeyCodes[Keyboard.ASCII['?']]   = Keyboard.SCANCODE.SLASH  | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.aKeyCodes[Keyboard.KEYCODE.SHIFT + Keyboard.KEYCODE.ONDOWN  +  Keyboard.KEYCODE.ONRIGHT] = Keyboard.SCANCODE.RSHIFT;
 // TODO: 0x37 ('prtsc')
 Keyboard.aKeyCodes[Keyboard.KEYCODE.ALT   + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.ALT;
 Keyboard.aKeyCodes[Keyboard.ASCII[' ']]   = Keyboard.SCANCODE.SPACE;
@@ -685,13 +685,13 @@ Keyboard.aKeyCodes[Keyboard.KEYCODE.DEL   + Keyboard.KEYCODE.ONDOWN] =  Keyboard
  * clones that could use newer keyboards, as well as 3rd-party keyboards that could work with older machines,
  * support for non-IBM configurations is left for another day.
  *
- * TODO: The only relevance of newer keyboards to older machines is the fact that you're likely using a newer
+ * TODO: The only relevance of newer keyboards to older machines is the fact that you're probably using a newer
  * keyboard with your browser, which raises the question of what to do with newer keys that older machines
- * wouldn't understand.  I don't attempt to filter out any of the entries below based on machine model, but
- * it's likely that I should.
+ * wouldn't understand.  I don't attempt to filter out any of the entries below based on machine model, but that
+ * would seem like a wise thing to do.
  *
- * TODO: Add entries for 'num-mul', 'num-div', 'num-enter', the stand-alone arrow keys, etc, AND at
- * the same time, add support for multi-byte codes (eg, 0xe01c).
+ * TODO: Add entries for 'num-mul', 'num-div', 'num-enter', the stand-alone arrow keys, etc, AND at the same time,
+ * make sure that keys with multi-byte sequences (eg, 0xe0 0x1c) work properly.
  */
 Keyboard.aKeyCodes[Keyboard.KEYCODE.F11   + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.F11;
 Keyboard.aKeyCodes[Keyboard.KEYCODE.F12   + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.F12;

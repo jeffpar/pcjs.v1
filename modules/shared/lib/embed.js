@@ -413,6 +413,7 @@ function embedMachine(sName, sVersion, idElement, sXMLFile, sXSLFile, sStateFile
  */
 function embedC1P(idElement, sXMLFile, sXSLFile)
 {
+    if (fAsync) web.enablePageEvents(false);
     return embedMachine("C1Pjs", APPVERSION, idElement, sXMLFile, sXSLFile);
 }
 
@@ -427,6 +428,7 @@ function embedC1P(idElement, sXMLFile, sXSLFile)
  */
 function embedPC(idElement, sXMLFile, sXSLFile, sStateFile)
 {
+    if (fAsync) web.enablePageEvents(false);
     return embedMachine("PCjs", APPVERSION, idElement, sXMLFile, sXSLFile, sStateFile);
 }
 
@@ -444,5 +446,3 @@ if (APPNAME == "C1Pjs") {
 
 window['enableEvents'] = web.enablePageEvents;
 window['sendEvent'] = web.sendPageEvent;
-
-if (fAsync) web.enablePageEvents(false);
