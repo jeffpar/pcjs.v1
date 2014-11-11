@@ -738,8 +738,11 @@ HTMLOut.prototype.setData = function(err, sData, sFile, fTemplate)
 
     /*
      * Copy the HTML template, and then start finding/replacing tokens.
+     *
+     * We cheat slightly and insert one of those tokens right now, because otherwise
+     * the template file itself would not render correctly in your web browser.
      */
-    this.sTemplate = sData;
+    this.sTemplate = sData.replace("/modules/shared/templates/common.css", "/versions/pcjs/<!-- pcjs:version -->/common.css");
     this.sHTML = this.sTemplate;
 
     /*
