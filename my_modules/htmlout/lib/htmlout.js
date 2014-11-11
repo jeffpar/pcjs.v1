@@ -203,7 +203,8 @@ var asFilesNonListed = [
     "robots.txt",
     "machine.xml",
     "manifest.xml",
-    "cache.manifest"
+    "cache.manifest",
+    "my_modules"
 ];
 
 var asExtsNonListed = [
@@ -217,11 +218,11 @@ var asExtsNonServed = [
 var asFilesNonServed = [
     "bin",
     "debug",
+    "grunts",
     "lib",
     "logs",
-    "my_modules",
-    "node_modules",
     "node.log",
+    "node_modules",
     "tests",
     "tmp",
     "users",
@@ -1055,6 +1056,7 @@ HTMLOut.prototype.getDirList = function(sToken, sIndent, aParms)
                 var fDir = false;
                 if (sURL == '/' || sBaseName == "..") {
                     fDir = true;
+                    if (sURL != '/') sURL += '/';
                 } else if (asNonDirectories.indexOf(sBaseName) < 0 && (iExt < 0 || sBaseName.match(/\.[0-9]+[Ma-c]?$/))) {
                     fDir = true;
                     sURL += '/';
