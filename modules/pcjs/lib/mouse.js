@@ -69,15 +69,16 @@ if (typeof module !== 'undefined') {
  * @extends Component
  * @param {Object} parmsMouse
  */
-function Mouse(parmsMouse) {
-
+function Mouse(parmsMouse)
+{
     Component.call(this, "Mouse", parmsMouse, Mouse);
 
     this.idAdapter = parmsMouse['serial'];
     if (this.idAdapter) {
         this.sAdapterType = "SerialPort";
     }
-    this.fActive = false;
+    this.setActive(false);
+    this.fLocked = false;
     this.setReady();
 }
 
@@ -170,11 +171,13 @@ Mouse.ID_SERIAL = 0x4D;
  * @param {X86CPU} cpu
  * @param {Debugger} dbg
  */
-Mouse.prototype.initBus = function(cmp, bus, cpu, dbg) {
+Mouse.prototype.initBus = function(cmp, bus, cpu, dbg)
+{
     this.cmp = cmp;
     this.bus = bus;
     this.cpu = cpu;
     this.dbg = dbg;
+    this.video = this.cmp.getComponentByType("Video");
 };
 
 /**
@@ -183,8 +186,28 @@ Mouse.prototype.initBus = function(cmp, bus, cpu, dbg) {
  * @this {Mouse}
  * @return {boolean} true if active, false if not
  */
-Mouse.prototype.isActive = function() {
+Mouse.prototype.isActive = function()
+{
     return this.fActive && (this.cpu? this.cpu.isRunning() : false);
+};
+
+/**
+ * setActive(fActive)
+ *
+ * @this {Mouse}
+ * @param {boolean} fActive is true if active, false if not
+ */
+Mouse.prototype.setActive = function(fActive)
+{
+    this.fActive = fActive;
+    /*
+     * It's currently not possible to automatically lock the pointer outside the context of a user action
+     * (eg, a button or canvas click), so this code is for naught.
+     *
+     *      if (this.video) this.video.notifyPointerActive(fActive);
+     *
+     * We now rely on similar code in clickMouse().
+     */
 };
 
 /**
@@ -195,7 +218,8 @@ Mouse.prototype.isActive = function() {
  * @param {boolean} [fRepower]
  * @return {boolean} true if successful, false if failure
  */
-Mouse.prototype.powerUp = function(data, fRepower) {
+Mouse.prototype.powerUp = function(data, fRepower)
+{
     if (!fRepower) {
         if (!data || !this.restore) {
             this.reset();
@@ -224,8 +248,7 @@ Mouse.prototype.powerUp = function(data, fRepower) {
                 }
             }
             if (this.componentAdapter) {
-                var componentScreen = this.cmp.getComponentByType("Video");
-                if (componentScreen) this.canvasScreen = componentScreen.getCanvas();
+                if (this.video) this.canvasScreen = this.video.getCanvas(this);
             } else {
                 Component.warning(this.id + ": " + this.sAdapterType + " " + this.idAdapter + " unavailable");
             }
@@ -246,7 +269,8 @@ Mouse.prototype.powerUp = function(data, fRepower) {
  * @param {boolean} fSave
  * @return {Object|boolean}
  */
-Mouse.prototype.powerDown = function(fSave) {
+Mouse.prototype.powerDown = function(fSave)
+{
     return fSave && this.save? this.save() : true;
 };
 
@@ -255,7 +279,8 @@ Mouse.prototype.powerDown = function(fSave) {
  *
  * @this {Mouse}
  */
-Mouse.prototype.reset = function() {
+Mouse.prototype.reset = function()
+{
     this.initState();
 };
 
@@ -267,7 +292,8 @@ Mouse.prototype.reset = function() {
  * @this {Mouse}
  * @return {Object}
  */
-Mouse.prototype.save = function() {
+Mouse.prototype.save = function()
+{
     var state = new State(this);
     state.set(0, this.saveState());
     return state.data();
@@ -282,7 +308,8 @@ Mouse.prototype.save = function() {
  * @param {Object} data
  * @return {boolean} true if successful, false if failure
  */
-Mouse.prototype.restore = function(data) {
+Mouse.prototype.restore = function(data)
+{
     return this.initState(data[0]);
 };
 
@@ -293,10 +320,11 @@ Mouse.prototype.restore = function(data) {
  * @param {Array} [data]
  * @return {boolean} true if successful, false if failure
  */
-Mouse.prototype.initState = function(data) {
+Mouse.prototype.initState = function(data)
+{
     var i = 0;
     if (data === undefined) data = [false, -1, -1, 0, 0, false, false, 0];
-    this.fActive = data[i++];
+    this.setActive(data[i++]);
     this.xMouse = data[i++];
     this.yMouse = data[i++];
     this.xDelta = data[i++];
@@ -313,7 +341,8 @@ Mouse.prototype.initState = function(data) {
  * @this {Mouse}
  * @return {Array}
  */
-Mouse.prototype.saveState = function() {
+Mouse.prototype.saveState = function()
+{
     var i = 0;
     var data = [];
     data[i++] = this.fActive;
@@ -328,6 +357,17 @@ Mouse.prototype.saveState = function() {
 };
 
 /**
+ * notifyPointerLocked()
+ *
+ * @this {Mouse}
+ * @param {boolean} fLocked
+ */
+Mouse.prototype.notifyPointerLocked = function(fLocked)
+{
+    this.fLocked = fLocked;
+};
+
+/**
  * captureMouse(control)
  *
  * NOTE: addEventListener() wasn't supported in IE until IE9, but that's OK, because IE9 is the
@@ -336,7 +376,8 @@ Mouse.prototype.saveState = function() {
  * @this {Mouse}
  * @param {Object} control from the HTML DOM (eg, the canvas for the simulated screen)
  */
-Mouse.prototype.captureMouse = function(control) {
+Mouse.prototype.captureMouse = function(control)
+{
     if (control) {
         var mouse = this;
         if (!this.fCaptured) {
@@ -388,7 +429,8 @@ Mouse.prototype.captureMouse = function(control) {
  * @this {Mouse}
  * @param {Object} control from the HTML DOM
  */
-Mouse.prototype.releaseMouse = function(control) {
+Mouse.prototype.releaseMouse = function(control)
+{
     if (control) {
         control['style']['cursor'] = "auto";
     }
@@ -406,20 +448,31 @@ Mouse.prototype.releaseMouse = function(control) {
  * client-area coordinates.  In fact, layerX and layerY are probably closer to what I really want,
  * but I don't think they're available in all browsers.  screenX and screenY would work as well.
  *
- * Anyway, all I care about are deltas.  For now.
+ * This is because all we care about are deltas.  We record clientX and clientY (as xMouse and yMouse)
+ * merely to calculate xDelta and yDelta.
  *
  * @this {Mouse}
  * @param {Object} event object from a 'mousemove' event (specifically, a MouseEvent object)
  */
-Mouse.prototype.moveMouse = function(event) {
+Mouse.prototype.moveMouse = function(event)
+{
     if (this.isActive()) {
         if (this.xMouse < 0 || this.yMouse < 0) {
             this.xMouse = event.clientX;
             this.yMouse = event.clientY;
         }
-        this.xDelta = event.clientX - this.xMouse;
-        this.yDelta = event.clientY - this.yMouse;
+        if (this.fLocked) {
+            this.xDelta = event['movementX'] || event['mozMovementX'] || event['webkitMovementX'] || 0;
+            this.yDelta = event['movementY'] || event['mozMovementY'] || event['webkitMovementY'] || 0;
+        } else {
+            this.xDelta = event.clientX - this.xMouse;
+            this.yDelta = event.clientY - this.yMouse;
+        }
         if (this.xDelta || this.yDelta) {
+            /*
+             * As sendPacket() indicates, the x and y coordinates we pass below are for diagnostic purposes
+             * only.  sendPacket() really only cares about xDelta and yDelta, which it then zeroes on completion.
+             */
             this.sendPacket(null, event.clientX, event.clientY);
         }
         this.xMouse = event.clientX;
@@ -434,8 +487,18 @@ Mouse.prototype.moveMouse = function(event) {
  * @param {number} iButton is 0 for fButton1 (the LEFT button), 2 for fButton2 (the RIGHT button)
  * @param {boolean} fDown
  */
-Mouse.prototype.clickMouse = function(iButton, fDown) {
+Mouse.prototype.clickMouse = function(iButton, fDown)
+{
     if (this.isActive()) {
+        if (this.fLocked === false) {
+            /*
+             * If there's no support for automatic pointer locking in the Video component, then notifyPointerActive()
+             * will return false, and we will set fLocked to null, ensuring that we never attempt this again.
+             */
+            if (!this.video || !this.video.notifyPointerActive(true)) {
+                this.fLocked = null;
+            }
+        }
         var sDiag;
         switch (iButton) {
         case 0:
@@ -475,7 +538,8 @@ Mouse.prototype.clickMouse = function(iButton, fDown) {
  * @param {number} [xDiag] original x-coordinate (optional; for diagnostic use only)
  * @param {number} [yDiag] original y-coordinate (optional; for diagnostic use only)
  */
-Mouse.prototype.sendPacket = function(sDiag, xDiag, yDiag) {
+Mouse.prototype.sendPacket = function(sDiag, xDiag, yDiag)
+{
     var b1 = 0x40 | (this.fButton1? 0x20 : 0) | (this.fButton2? 0x10 : 0) | ((this.yDelta & 0xC0) >> 4) | ((this.xDelta & 0xC0) >> 6);
     var b2 = this.xDelta & 0x3F;
     var b3 = this.yDelta & 0x3F;
@@ -502,7 +566,8 @@ Mouse.prototype.sendPacket = function(sDiag, xDiag, yDiag) {
  * @this {Mouse}
  * @param {number} bMCR
  */
-Mouse.prototype.notifyMCR = function(bMCR) {
+Mouse.prototype.notifyMCR = function(bMCR)
+{
     var fActive = ((bMCR & (SerialPort.MCR.DTR | SerialPort.MCR.RTS)) == (SerialPort.MCR.DTR | SerialPort.MCR.RTS));
     if (fActive) {
         if (!this.fActive) {
@@ -541,7 +606,7 @@ Mouse.prototype.notifyMCR = function(bMCR) {
                 this.messageDebugger("serial mouse ID sent");
             }
             this.captureMouse(this.canvasScreen);
-            this.fActive = fActive;
+            this.setActive(fActive);
         }
     } else {
         if (this.fActive) {
@@ -559,7 +624,7 @@ Mouse.prototype.notifyMCR = function(bMCR) {
              */
             this.messageDebugger("serial mouse inactive");
             this.releaseMouse(this.canvasScreen);
-            this.fActive = fActive;
+            this.setActive(fActive);
         }
     }
     this.bMCR = bMCR;
@@ -573,7 +638,8 @@ Mouse.prototype.notifyMCR = function(bMCR) {
  * @this {Mouse}
  * @param {string} sMessage is any caller-defined message string
  */
-Mouse.prototype.messageDebugger = function(sMessage) {
+Mouse.prototype.messageDebugger = function(sMessage)
+{
     if (DEBUGGER && this.dbg) {
         if (this.dbg.messageEnabled(Debugger.MESSAGE.MOUSE)) {
             this.dbg.message(sMessage + " @" + str.toHexAddr(this.cpu.regIP, this.cpu.segCS.sel));
@@ -591,7 +657,8 @@ Mouse.prototype.messageDebugger = function(sMessage) {
  * attribute containing the same JSON-encoded parameters that the Mouse constructor
  * expects.
  */
-Mouse.init = function() {
+Mouse.init = function()
+{
     var aeMouse = Component.getElementsByClass(window.document, PCJSCLASS, "mouse");
     for (var iMouse = 0; iMouse < aeMouse.length; iMouse++) {
         var eMouse = aeMouse[iMouse];

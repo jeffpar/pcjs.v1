@@ -65,6 +65,7 @@ function Keyboard(parmsKbd) {
     Component.call(this, "Keyboard", parmsKbd, Keyboard);
 
     this.nDefaultModel = parmsKbd['model'];
+    this.fEscapeDisabled = false;
 
     /*
      * There are multiple ways that scan codes can be injected into the machine: button events,
@@ -533,7 +534,7 @@ Keyboard.aSoftCodes = {
 };
 
 /**
- * This array is used by keySimulateUpDown() to lookup a given keyCode and convert it to a scan code
+ * This array is used by keySimulateUpOrDown() to lookup a given keyCode and convert it to a scan code
  * (lower byte) plus any required shift key states (upper bytes).
  *
  * Using keyCodes from keyPress events proved to be more robust than using keyCodes from keyDown and
@@ -545,7 +546,7 @@ Keyboard.aSoftCodes = {
  * The other problem (which is more of a problem with keyboards like the C1P than any IBM keyboards) is
  * that the shift/modifier state for a character on the "source" keyboard may not match the shift/modifier
  * state for the same character on the "target" keyboard.  And since this code is inherited from C1Pjs,
- * we've inherited the same solution: keySimulateUpDown() has the ability to "undo" any states in bitsShift
+ * we've inherited the same solution: keySimulateUpOrDown() has the ability to "undo" any states in bitsShift
  * that conflict with the state(s) required for the character in question.
  *
  * @enum {number}
@@ -701,7 +702,7 @@ Keyboard.aKeyCodes[Keyboard.KEYCODE.FAKE_CTRLBREAK]  = Keyboard.SCANCODE.SCROLL_
 Keyboard.aKeyCodes[Keyboard.KEYCODE.FAKE_CTRLALTDEL] = Keyboard.SCANCODE.NUM_DEL + (Keyboard.SCANCODE.CTRL << 8) + (Keyboard.SCANCODE.ALT << 16);
 
 /**
- * keySimulateUpDown() origin codes (useful only for debugging)
+ * keySimulateUpOrDown() origin codes (useful only for debugging)
  *
  * @enum {number}
  */
@@ -879,6 +880,19 @@ Keyboard.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.cpu = cpu;
     this.dbg = dbg;
     this.chipset = cmp.getComponentByType("ChipSet");
+};
+
+/**
+ * notifyEscape(fDisabled)
+ *
+ * When ESC is used by the browser to disable pointer lock, this gives us the option of mapping a different key to ESC.
+ *
+ * @this {Keyboard}
+ * @param {boolean} fDisabled
+ */
+Keyboard.prototype.notifyEscape = function(fDisabled)
+{
+    this.fEscapeDisabled = fDisabled;
 };
 
 /**
@@ -1285,7 +1299,7 @@ Keyboard.prototype.autoClear = function(notKeyCode)
         if (DEBUG) this.messageDebugger("autoClear(" + this.prevCharDown + ")");
         Component.assert(this.aKeyTimers[this.prevCharDown]);
         clearTimeout(this.aKeyTimers[this.prevCharDown]);
-        this.keySimulateUpDown(this.prevCharDown, false, Keyboard.SIMCODE.AUTOCLEAR);
+        this.keySimulateUpOrDown(this.prevCharDown, false, Keyboard.SIMCODE.AUTOCLEAR);
     }
 };
 
@@ -1427,7 +1441,7 @@ Keyboard.prototype.keyUpDown = function(event, fDown)
             if (keyCode >= Keyboard.ASCII.A && keyCode <= Keyboard.ASCII.Z) {
                 /*
                  * Convert "upper-case" letter combinations into "lower-case" combinations, so
-                 * that keySimulateUpDown() doesn't think it also needs to simulate a SHIFT key, too.
+                 * that keySimulateUpOrDown() doesn't think it also needs to simulate a SHIFT key, too.
                  */
                 keyCodeSim += (Keyboard.ASCII.a - Keyboard.ASCII.A);
             }
@@ -1477,7 +1491,7 @@ Keyboard.prototype.keyUpDown = function(event, fDown)
     }
 
     if (fPass === undefined) {
-        fPass = !this.keySimulateUpDown(keyCodeSim, fDown, Keyboard.SIMCODE.KEYUPDOWN);
+        fPass = !this.keySimulateUpOrDown(keyCodeSim, fDown, Keyboard.SIMCODE.KEYUPDOWN);
     }
 
     if (DEBUG) this.messageDebugger(/*(fDown?"\n":"") +*/ "key" + (fDown? "Down" : "Up") + "(" + keyCode + "): " + (fPass? "pass" : "consume"), Debugger.MESSAGE.KEYS);
@@ -1515,14 +1529,16 @@ Keyboard.prototype.keyPress = function(event)
          */
         fPass = false;
     } else {
-        if (this.bitsShift & Keyboard.STATE.COMMAND)
+        if (this.bitsShift & Keyboard.STATE.COMMAND) {
             this.bitsShift &= ~Keyboard.STATE.COMMAND;
-        else {
+        } else {
             // if (DEBUG && event.altKey) this.messageDebugger("ALT press: keyCode " + keyCode, Debugger.MESSAGE.KEYS);
-            if (this.bitsShift & (Keyboard.STATE.CTRL | Keyboard.STATE.ALT))
+            if (this.bitsShift & (Keyboard.STATE.CTRL | Keyboard.STATE.ALT)) {
                 fPass = false;
-            else
+            } else {
+                if (this.fEscapeDisabled && keyCode == Keyboard.ASCII['`']) keyCode = Keyboard.KEYCODE.ESC;
                 fPass = !this.keySimulatePress(keyCode);
+            }
         }
     }
 
@@ -1547,7 +1563,7 @@ Keyboard.prototype.keySimulatePress = function(keyCode, fQuickRelease)
      */
     this.autoClear(keyCode);
 
-    if (this.keySimulateUpDown(keyCode, true, Keyboard.SIMCODE.KEYPRESS)) {
+    if (this.keySimulateUpOrDown(keyCode, true, Keyboard.SIMCODE.KEYPRESS)) {
         /*
          * If fQuickRelease is set, we switch to an alternate approach, which is to immediately queue a
          * "release" event as well.  I used to also do this at high speeds, because the CPU could get lucky
@@ -1563,7 +1579,7 @@ Keyboard.prototype.keySimulatePress = function(keyCode, fQuickRelease)
          * that it's time to review/overhaul this code.
          */
         if (fQuickRelease /* || this.cpu.speed == CPU.SPEED_MAX */) {
-            this.keySimulateUpDown(keyCode, false, Keyboard.SIMCODE.KEYRELEASE);
+            this.keySimulateUpOrDown(keyCode, false, Keyboard.SIMCODE.KEYRELEASE);
         }
         else {
             var fRepeat = false;
@@ -1574,7 +1590,7 @@ Keyboard.prototype.keySimulatePress = function(keyCode, fQuickRelease)
             var msDelay = this.calcReleaseDelay(fRepeat);
             this.aKeyTimers[this.prevCharDown = keyCode] = setTimeout(function (kbd) {
                 return function onkeySimulatePressTimeout() {
-                    kbd.keySimulateUpDown(keyCode, false, Keyboard.SIMCODE.KEYTIMEOUT);
+                    kbd.keySimulateUpOrDown(keyCode, false, Keyboard.SIMCODE.KEYTIMEOUT);
                 };
             }(this), msDelay);
             if (DEBUG) this.messageDebugger("keySimulatePress(" + keyCode + "): setTimeout()");
@@ -1586,7 +1602,7 @@ Keyboard.prototype.keySimulatePress = function(keyCode, fQuickRelease)
 };
 
 /**
- * keySimulateUpDown(keyCode, fDown, simCode)
+ * keySimulateUpOrDown(keyCode, fDown, simCode)
  *
  * @this {Keyboard}
  * @param {number} keyCode
@@ -1594,7 +1610,7 @@ Keyboard.prototype.keySimulatePress = function(keyCode, fQuickRelease)
  * @param {number} simCode indicates the origin of the event
  * @return {boolean} true if successfully simulated, false if unrecognized/unsupported key
  */
-Keyboard.prototype.keySimulateUpDown = function(keyCode, fDown, simCode)
+Keyboard.prototype.keySimulateUpOrDown = function(keyCode, fDown, simCode)
 {
     var fSimulated = false;
 
@@ -1666,7 +1682,7 @@ Keyboard.prototype.keySimulateUpDown = function(keyCode, fDown, simCode)
 
         fSimulated = true;
     }
-    if (DEBUG && DEBUGGER) this.messageDebugger("keySimulateUpDown(" + keyCode + "," + (fDown? "down" : "up") + "," + Keyboard.aSimCodeDescs[simCode] + "): " + (fSimulated? "true" : "false"), Debugger.MESSAGE.KEYS);
+    if (DEBUG && DEBUGGER) this.messageDebugger("keySimulateUpOrDown(" + keyCode + "," + (fDown? "down" : "up") + "," + Keyboard.aSimCodeDescs[simCode] + "): " + (fSimulated? "true" : "false"), Debugger.MESSAGE.KEYS);
     return fSimulated;
 };
 

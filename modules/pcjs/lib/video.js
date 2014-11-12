@@ -30,68 +30,6 @@
  * any copyright as to their contents.
  */
 
-/*
- * MDA/CGA Support
- *
- * This component implements a combination of the MDA and CGA cards, with the ability to
- * dynamically switch between the two, by simply toggling the SW1 motherboard switch settings
- * and resetting the virtual machine. As a result, this component always installs I/O port
- * handlers for both MDA and CGA, regardless which card is initially active.
- *
- * Since there's a lot of similarity between the two cards (eg, their text-mode video buffer
- * format, and their use of the 6845 CRT controller), since the MDA ROM contains the fonts
- * used by both devices, and since the same ROM BIOS supports both (in fact, the BIOS rather
- * indiscriminately initializes both, regardless which is actually installed), I decided to
- * use the same component to emulate both devices.  Note that it was possible for an IBM PC
- * to have both an MDA and CGA running in the same machine, so if that's something we want to
- * support later, it can be done by instantiating this component twice, with some additional
- * properties to force each instance to register only those I/O ports belonging to its specific
- * configuration.
- *
- * While supporting both devices is mostly a convenience, it also creates a few inconveniences.
- * For one, the MDA prefers a native window size of 720x350, as it supports only one video mode,
- * 80x25, with a 9x14 cell size.  The CGA, on the other hand, has an 8x8 cell size, so when using
- * an MDA-size window, an 80x25 CGA screen will end up with 40-pixel borders on the left and right,
- * and 75-pixel borders on the top and bottom.  The result is a rather tiny CGA font surrounded
- * by lots of wasted space, so it's best to turn on font scaling (see the "scale" property) and
- * go with a larger window size of, say, 960x400 (50% larger in width, 100% larger in height).
- *
- * I've also added support for font-doubling in createFont().  We use the 8x8 font for 80-column
- * modes and the "doubled" 16x16 font for 40-column modes OR whenever the screen is large enough
- * to use the 16x16 font, since font rendering without scaling provides the sharpest results.
- * In fact, there's special logic in setDimensions() to ignore fScaleFont in certain cases (eg,
- * 40-column modes, to improve sharpness and avoid stretching the font beyond readability).
- *
- * Graphics modes, on the other hand, are always scaled to the window size. Pixels are captured
- * in an off-screen buffer, which is then drawn to match the size of the virtual display window.
- *
- * TODO: Whenever there are borders, they should be filled with the CGA's overscan colors.  However,
- * in the case of graphics modes (and text modes whenever font scaling is enabled), we don't reserve
- * any space for borders, so if borders are important, explicit support will be required.
- */
-
-/*
- * EGA Support
- *
- * EGA support piggy-backs on the existing MDA/CGA support.  All the existing MDA/CGA port handlers
- * now refer to either cardMono or cardColor (instead of directly to cardMDA or cardCGA), enabling
- * the handlers to be redirected to cardMDA, cardCGA or cardEGA as appropriate.
- *
- * Note that an MDA card supported only a Monochrome Display and a CGA card supported only a Color
- * Display (well, OK, *or* a TV monitor, which we don't currently support), but the EGA is much
- * more flexible: the Enhanced Color Display was the preferred display, but the EGA also supported
- * older displays; a Color Display on EGA wasn't ideal (same low resolutions but with more colors),
- * but the EGA also brought high-resolution graphics to Monochrome displays, which was nice.  Anyway,
- * while all those EGA/monitor combinations will be nice to support, our virtual display support
- * will focus initially on the Enhanced Color Display.
- *
- * TODO: Add support for jumpers P1 and P3 (see EGA TechRef p.85).  P1 selects either 5-color-output
- * for a CGA monitor or 6-color-output for an EGA monitor; we would presumably use this only to
- * control certain assumptions about the virtual display's capabilities (ie, Color Display vs. Enhanced
- * Color Display).  P3 can switch all the I/O ports from 0x3nn to 0x2nn; the default is 0x3nn, and
- * that's the only port range the EGA ROM supports as well.
- */
-
 "use strict";
 
 if (typeof module !== 'undefined') {
@@ -130,6 +68,7 @@ if (typeof module !== 'undefined') {
  *      charRows: number of character rows
  *      fontROM: path to .rom file (or a JSON representation) that defines the character set
  *      screenColor: background color of the screen window (default is black)
+ *      autoLock: true to (attempt to) automatically lock the mouse to the canvas (default is false)
  *
  * An EGA may specify the following additional properties:
  *
@@ -221,6 +160,13 @@ function Video(parmsVideo, canvas, context, textarea)
     this.textareaScreen = textarea;
 
     /*
+     * If a Mouse exists, we'll be notified when it requests our canvas, and we make a note of it
+     * so that if lockPointer() is ever invoked, we can notify the Mouse.
+     */
+    this.mouse = null;
+    this.fAutoLock = parmsVideo['autoLock'];
+
+    /*
      * Originally, setMode() would map/unmap the video buffer ONLY when the active card changed,
      * because as long as an MDA or CGA remained active, its video buffer never changed.  However,
      * since the EGA can change its video buffer on the fly, setMode() must also compare the card's
@@ -254,13 +200,29 @@ function Video(parmsVideo, canvas, context, textarea)
     this.fHasFocus = false;
 
     var video = this;
-    if (this.canvasScreen) {
-        this.canvasScreen.onfocus = function onFocusCanvas() {
+    if (canvas) {
+        canvas.onfocus = function onFocusCanvas() {
             return video.onFocusChange(true);
         };
-        this.canvasScreen.onblur = function onBlurCanvas() {
+        canvas.onblur = function onBlurCanvas() {
             return video.onFocusChange(false);
         };
+        canvas.lockPointer = canvas['requestPointerLock'] || canvas['mozRequestPointerLock'] || canvas['webkitRequestPointerLock'];
+        canvas.unlockPointer = canvas['exitPointerLock'] || canvas['mozExitPointerLock'] || canvas['webkitExitPointerLock'];
+        var onPointerLockChange = function() {
+            var fLocked = (
+            document['pointerLockElement'] === video.canvasScreen ||
+            document['mozPointerLockElement'] === video.canvasScreen ||
+            document['webkitPointerLockElement'] === video.canvasScreen);
+            video.notifyPointerLocked(fLocked);
+        };
+        if ('onpointerlockchange' in document) {
+            document.addEventListener('pointerlockchange', onPointerLockChange, false);
+        } else if ('onmozpointerlockchange' in document) {
+            document.addEventListener('mozpointerlockchange', onPointerLockChange, false);
+        } else if ('onwebkitpointerlockchange' in document) {
+            document.addEventListener('webkitpointerlockchange', onPointerLockChange, false);
+        }
     }
 
     /*
@@ -299,6 +261,66 @@ function Video(parmsVideo, canvas, context, textarea)
 Component.subclass(Component, Video);
 
 Video.TRAPALL = true;           // monitor all I/O by default (not just deltas)
+
+/*
+ * MDA/CGA Support
+ *
+ * This component implements a combination of the MDA and CGA cards, with the ability to
+ * dynamically switch between the two, by simply toggling the SW1 motherboard switch settings
+ * and resetting the virtual machine. As a result, this component always installs I/O port
+ * handlers for both MDA and CGA, regardless which card is initially active.
+ *
+ * Since there's a lot of similarity between the two cards (eg, their text-mode video buffer
+ * format, and their use of the 6845 CRT controller), since the MDA ROM contains the fonts
+ * used by both devices, and since the same ROM BIOS supports both (in fact, the BIOS rather
+ * indiscriminately initializes both, regardless which is actually installed), I decided to
+ * use the same component to emulate both devices.  Note that it was possible for an IBM PC
+ * to have both an MDA and CGA running in the same machine, so if that's something we want to
+ * support later, it can be done by instantiating this component twice, with some additional
+ * properties to force each instance to register only those I/O ports belonging to its specific
+ * configuration.
+ *
+ * While supporting both devices is mostly a convenience, it also creates a few inconveniences.
+ * For one, the MDA prefers a native window size of 720x350, as it supports only one video mode,
+ * 80x25, with a 9x14 cell size.  The CGA, on the other hand, has an 8x8 cell size, so when using
+ * an MDA-size window, an 80x25 CGA screen will end up with 40-pixel borders on the left and right,
+ * and 75-pixel borders on the top and bottom.  The result is a rather tiny CGA font surrounded
+ * by lots of wasted space, so it's best to turn on font scaling (see the "scale" property) and
+ * go with a larger window size of, say, 960x400 (50% larger in width, 100% larger in height).
+ *
+ * I've also added support for font-doubling in createFont().  We use the 8x8 font for 80-column
+ * modes and the "doubled" 16x16 font for 40-column modes OR whenever the screen is large enough
+ * to use the 16x16 font, since font rendering without scaling provides the sharpest results.
+ * In fact, there's special logic in setDimensions() to ignore fScaleFont in certain cases (eg,
+ * 40-column modes, to improve sharpness and avoid stretching the font beyond readability).
+ *
+ * Graphics modes, on the other hand, are always scaled to the window size. Pixels are captured
+ * in an off-screen buffer, which is then drawn to match the size of the virtual display window.
+ *
+ * TODO: Whenever there are borders, they should be filled with the CGA's overscan colors.  However,
+ * in the case of graphics modes (and text modes whenever font scaling is enabled), we don't reserve
+ * any space for borders, so if borders are important, explicit support will be required.
+ *
+ * EGA Support
+ *
+ * EGA support piggy-backs on the existing MDA/CGA support.  All the existing MDA/CGA port handlers
+ * now refer to either cardMono or cardColor (instead of directly to cardMDA or cardCGA), enabling
+ * the handlers to be redirected to cardMDA, cardCGA or cardEGA as appropriate.
+ *
+ * Note that an MDA card supported only a Monochrome Display and a CGA card supported only a Color
+ * Display (well, OK, *or* a TV monitor, which we don't currently support), but the EGA is much
+ * more flexible: the Enhanced Color Display was the preferred display, but the EGA also supported
+ * older displays; a Color Display on EGA wasn't ideal (same low resolutions but with more colors),
+ * but the EGA also brought high-resolution graphics to Monochrome displays, which was nice.  Anyway,
+ * while all those EGA/monitor combinations will be nice to support, our virtual display support
+ * will focus initially on the Enhanced Color Display.
+ *
+ * TODO: Add support for jumpers P1 and P3 (see EGA TechRef p.85).  P1 selects either 5-color-output
+ * for a CGA monitor or 6-color-output for an EGA monitor; we would presumably use this only to
+ * control certain assumptions about the virtual display's capabilities (ie, Color Display vs. Enhanced
+ * Color Display).  P3 can switch all the I/O ports from 0x3nn to 0x2nn; the default is 0x3nn, and
+ * that's the only port range the EGA ROM supports as well.
+ */
 
 /*
  * Supported Cards
@@ -1984,7 +2006,23 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
 Video.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
 {
     var video = this;
+    var canvas, lockPointer;
+
     switch (sBinding) {
+
+    case "lockPointer":
+        this.bindings[sBinding] = control;
+        if (this.canvasScreen && this.canvasScreen.lockPointer) {
+            control.onclick = function onClickLockPointer() {
+                if (DEBUG) video.messageDebugger("lockPointer()");
+                video.lockPointer(true);
+            };
+        } else {
+            if (DEBUG) this.log("Pointer Lock API not available");
+            control.parentNode.removeChild(control);
+        }
+        return true;
+
     case "refresh":
         this.bindings[sBinding] = control;
         control.onclick = function onClickRefresh() {
@@ -1992,6 +2030,7 @@ Video.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
             video.updateScreen(true);
         };
         return true;
+
     default:
         break;
     }
@@ -2014,11 +2053,71 @@ Video.prototype.setFocus = function()
  * This is an interface used by the Mouse component, so that it can invoke capture/release mouse events from the screen element.
  *
  * @this {Video}
+ * @param {Mouse} [mouse]
  * @return {Object|undefined}
  */
-Video.prototype.getCanvas = function()
+Video.prototype.getCanvas = function(mouse)
 {
+    this.mouse = mouse;
     return this.canvasScreen;
+};
+
+/**
+ * lockPointer()
+ *
+ * TODO: Consider relabeling the "Lock Pointer" button for the duration of the lock.
+ *
+ * @this {Video}
+ * @param {boolean} fLock
+ * @return {boolean} true if request successful, false if not (eg, failed OR not supported)
+ */
+Video.prototype.lockPointer = function(fLock)
+{
+    if (this.canvasScreen) {
+        if (fLock) {
+            if (this.canvasScreen.lockPointer) {
+                this.canvasScreen.lockPointer();
+                this.mouse.notifyPointerLocked(true);
+                return true;
+            }
+        } else {
+            if (this.canvasScreen.unlockPointer) {
+                this.canvasScreen.unlockPointer();
+                this.mouse.notifyPointerLocked(false);
+                return true;
+            }
+        }
+    }
+    return false;
+};
+
+/**
+ * notifyPointerActive(fActive)
+ *
+ * @this {Video}
+ * @param {boolean} fActive
+ * @return {boolean} true if autolock enabled AND pointer lock supported, false if not
+ */
+Video.prototype.notifyPointerActive = function(fActive)
+{
+    if (this.fAutoLock) {
+        return this.lockPointer(fActive);
+    }
+    return false;
+};
+
+/**
+ * notifyPointerLocked(fLocked)
+ *
+ * @this {Video}
+ * @param {boolean} fLocked
+ */
+Video.prototype.notifyPointerLocked = function(fLocked)
+{
+    if (this.mouse) {
+        this.mouse.notifyPointerLocked(fLocked);
+        if (this.kbd) this.kbd.notifyEscape(fLocked);
+    }
 };
 
 /**

@@ -8,7 +8,7 @@
 
 	<xsl:variable name="MACHINECLASS">pc</xsl:variable>
 	<xsl:variable name="APPCLASS">pcjs</xsl:variable>
-	<xsl:variable name="APPVERSION">1.15.9</xsl:variable>
+	<xsl:variable name="APPVERSION">1.16.0</xsl:variable>
 	<xsl:variable name="SITEHOST">www.pcjs.org</xsl:variable>
 
 	<xsl:template name="componentStyles">
@@ -195,6 +195,12 @@
 				<xsl:apply-templates select="name" mode="component"/>
 			</xsl:if>
 			<div class="{$APPCLASS}-container" style="{$border}{$style}">
+				<xsl:if test="$component = 'machine'">
+					<xsl:apply-templates select="menu" mode="machine"/>
+				</xsl:if>
+				<xsl:if test="$component != 'machine'">
+					<xsl:apply-templates select="menu" mode="component"/>
+				</xsl:if>
 				<xsl:if test="$class != '' and $component != 'machine'">
 					<div class="{$APPCLASS}-{$class}-object" data-value="id:'{$id}',name:'{$name}'{$comment}{$parms}"> </div>
 				</xsl:if>
@@ -233,6 +239,14 @@
 
 	<xsl:template match="name" mode="component">
 		<div class="{$APPCLASS}-name"><xsl:apply-templates/></div>
+	</xsl:template>
+
+	<xsl:template match="menu" mode="component">
+		<xsl:apply-templates mode="component"/>
+	</xsl:template>
+
+	<xsl:template match="title" mode="component">
+		<div class="{$APPCLASS}-menu"><xsl:apply-templates/></div>
 	</xsl:template>
 
 	<xsl:template match="control" mode="component">
@@ -477,6 +491,9 @@
 	</xsl:template>
 
 	<xsl:template match="name">
+	</xsl:template>
+
+	<xsl:template match="title">
 	</xsl:template>
 
 	<xsl:template match="control">
@@ -882,10 +899,16 @@
 				<xsl:otherwise>false</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
+		<xsl:variable name="autoLock">
+			<xsl:choose>
+				<xsl:when test="@autolock"><xsl:value-of select="@autolock"/></xsl:when>
+				<xsl:otherwise>false</xsl:otherwise>
+			</xsl:choose>
+		</xsl:variable>
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">video</xsl:with-param>
-			<xsl:with-param name="parms">,model:'<xsl:value-of select="$model"/>',mode:<xsl:value-of select="$mode"/>,screenWidth:<xsl:value-of select="$screenWidth"/>,screenHeight:<xsl:value-of select="$screenHeight"/>,memory:<xsl:value-of select="$memory"/>,switches:'<xsl:value-of select="$switches"/>',scale:<xsl:value-of select="$scale"/>,charCols:<xsl:value-of select="$charCols"/>,charRows:<xsl:value-of select="$charRows"/>,fontROM:'<xsl:value-of select="$fontROM"/>',screenColor:'<xsl:value-of select="$screenColor"/>',touchScreen:<xsl:value-of select="$touchScreen"/></xsl:with-param>
+			<xsl:with-param name="parms">,model:'<xsl:value-of select="$model"/>',mode:<xsl:value-of select="$mode"/>,screenWidth:<xsl:value-of select="$screenWidth"/>,screenHeight:<xsl:value-of select="$screenHeight"/>,memory:<xsl:value-of select="$memory"/>,switches:'<xsl:value-of select="$switches"/>',scale:<xsl:value-of select="$scale"/>,charCols:<xsl:value-of select="$charCols"/>,charRows:<xsl:value-of select="$charRows"/>,fontROM:'<xsl:value-of select="$fontROM"/>',screenColor:'<xsl:value-of select="$screenColor"/>',touchScreen:<xsl:value-of select="$touchScreen"/>,autoLock:<xsl:value-of select="$autoLock"/></xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 

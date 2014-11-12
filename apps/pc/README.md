@@ -11,6 +11,8 @@ Below are selected demos of classic IBM PC applications running on [PCjs](/docs/
 
 More software is available in the [IBM PC Disk Archive](/disks/pc/).  
 
+<!--BEGIN:EXCLUDE-->
+
 ### Developer Notes: How To Produce A Demo
 
 We'll use the [VisiCalc Demo](1981/visicalc/) as an example.  First you must choose a machine configuration.
@@ -54,3 +56,5 @@ the &lt;machine&gt; entry in the [Manifest](1981/visicalc/manifest.xml):
 
 It's important to use a state file *only* with the machine configuration it was created with; in this case, we're OK,
 because the only difference between the two chosen Model 5150 machines is the addition of the Debugger.
+
+<!--END:EXCLUDE-->

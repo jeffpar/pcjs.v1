@@ -14,10 +14,13 @@
 .pcjs-embed:after {
     clear:both;
 }
-.pcjs-name {
+.pcjs-name, .pcjs-menu {
     clear: both;
     font-weight: bold;
     padding-bottom: 4px;
+}
+.pcjs-menu {
+    float: left;
 }
 .pcjs-canvas {
     width: 100%;

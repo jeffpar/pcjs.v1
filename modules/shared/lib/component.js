@@ -498,6 +498,8 @@ Component.bindExternalControl = function(component, sControl, sBinding, sType)
     }
 };
 
+if (window && !window.document.ELEMENT_NODE) window.document.ELEMENT_NODE = 1;
+
 /**
  * Component.bindComponentControls(component, element, sAppClass)
  *
@@ -887,10 +889,5 @@ Component.prototype = {
         return true;
     }
 };
-
-/*
- * TODO: What was this work-around for? I forget....
- */
-if (window && !window.document.ELEMENT_NODE) window.document.ELEMENT_NODE = 1;
 
 if (typeof module !== 'undefined') module.exports = Component;

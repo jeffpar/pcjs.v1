@@ -954,7 +954,11 @@ FDC.prototype.initDrive = function(drive, iDrive, data)
         }
         else if (this.loadDiskette(iDrive, sDisketteName, sDiskettePath, true)) {
             if (drive.disk) {
-                this.addDiskHistory(sDisketteName, sDiskettePath, drive.disk);
+                if (sDiskettePath) {
+                    this.addDiskHistory(sDisketteName, sDiskettePath, drive.disk);
+                } else {
+                    if (DEBUG) Component.warning("Disk '" + (drive.disk.sDiskName || sDisketteName) + "' not recorded properly in drive " + iDrive);
+                }
             }
         } else {
             this.setReady(false);
@@ -1034,6 +1038,9 @@ FDC.prototype.saveDrive = function(drive)
     data[i++] = drive.fLocal;
     data[i++] = drive.sDisketteName;
     data[i] = drive.sDiskettePath;
+    if (DEBUG && !drive.sDiskettePath && drive.disk && drive.disk.sDiskPath) {
+        Component.warning("Disk '" + drive.disk.sDiskName + "' not saved properly in drive " + drive.iDrive);
+    }
     return data;
 };
 
@@ -1520,7 +1527,7 @@ FDC.prototype.addDiskHistory = function(sDisketteName, sDiskettePath, disk)
             return;
         }
     }
-    if (DEBUG) this.messageDebugger("disk '" + sDisketteName + "' added to history (" + sDiskettePath + ")");
+    if (DEBUG) this.messageDebugger("disk '" + sDisketteName + "' added to history (nothing to restore)");
     this.aDiskHistory[i] = [sDisketteName, sDiskettePath, []];
 };
 
