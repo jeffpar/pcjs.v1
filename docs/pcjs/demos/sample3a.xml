@@ -8,7 +8,9 @@
 	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="1981-04-24.json"/>
 	<keyboard id="keyboard"/>
 	<video id="videoMDA" screenwidth="720" screenheight="350" charset="ibm-mda-cga.json">
-		<name pos="center">Monochrome Display</name>
+		<menu>
+			<title>Monochrome Display</title>
+		</menu>
 	</video>
 	<panel id="panel" padtop="8px">
 		<name>Control Panel</name>

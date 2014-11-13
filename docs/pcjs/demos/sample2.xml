@@ -6,7 +6,9 @@
 	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="1981-04-24.json"/>
 	<keyboard id="keyboard"/>
 	<video id="videoMDA" screenwidth="720" screenheight="350" charset="ibm-mda-cga.json">
-		<name>Monochrome Display</name>
+		<menu>
+			<title>Monochrome Display</title>
+		</menu>
 	</video>
 	<cpu id="cpu8088" model="8088" autostart="true" pos="left">
 		<control type="button" class="input" binding="run">Run</control>
