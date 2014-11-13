@@ -541,7 +541,7 @@ Keyboard.aSoftCodes = {
  * keyUp events, in part because of differences in the way browsers generate the keyDown and keyUp events.
  * For example, Safari on iOS devices will not generate up/down events for shift keys, and for other keys,
  * the up/down events are usually generated after the actual press is complete, and in rapid succession,
- * which doesn't always give the simulation enough time to detect the key.
+ * which doesn't always give a simulation (eg, C1Pjs) enough time to detect the key.
  *
  * The other problem (which is more of a problem with keyboards like the C1P than any IBM keyboards) is
  * that the shift/modifier state for a character on the "source" keyboard may not match the shift/modifier
@@ -697,12 +697,12 @@ Keyboard.aKeyCodes[Keyboard.KEYCODE.DEL   + Keyboard.KEYCODE.ONDOWN] =  Keyboard
 Keyboard.aKeyCodes[Keyboard.KEYCODE.F11   + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.F11;
 Keyboard.aKeyCodes[Keyboard.KEYCODE.F12   + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.F12;
 
-Keyboard.aKeyCodes[Keyboard.KEYCODE.FAKE_CTRLC]      = Keyboard.SCANCODE.C + (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.aKeyCodes[Keyboard.KEYCODE.FAKE_CTRLC]      = Keyboard.SCANCODE.C           | (Keyboard.SCANCODE.CTRL << 8);
 Keyboard.aKeyCodes[Keyboard.KEYCODE.FAKE_CTRLBREAK]  = Keyboard.SCANCODE.SCROLL_LOCK | (Keyboard.SCANCODE.CTRL << 8);
-Keyboard.aKeyCodes[Keyboard.KEYCODE.FAKE_CTRLALTDEL] = Keyboard.SCANCODE.NUM_DEL + (Keyboard.SCANCODE.CTRL << 8) + (Keyboard.SCANCODE.ALT << 16);
+Keyboard.aKeyCodes[Keyboard.KEYCODE.FAKE_CTRLALTDEL] = Keyboard.SCANCODE.NUM_DEL     | (Keyboard.SCANCODE.CTRL << 8) | (Keyboard.SCANCODE.ALT << 16);
 
 /**
- * keySimulateUpOrDown() origin codes (useful only for debugging)
+ * keySimulateUpOrDown() codes (for diagnostic purposes only)
  *
  * @enum {number}
  */
@@ -1108,9 +1108,9 @@ Keyboard.prototype.reset = function()
     this.initState();
 
     /*
-     * The physical (not virtual) state of various shift keys.
+     * The physical (not virtual) state of various shift/lock keys.
      *
-     * TODO: Determine how (or whether) we can query the browser's initial key states.
+     * TODO: Determine how (or whether) we can query the browser's initial shift/lock key states.
      */
     this.bitsShift = 0;
 

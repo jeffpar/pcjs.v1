@@ -9,7 +9,9 @@
 	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pc/basic/ibm-basic-1.10.json"/>
 	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pc/bios/5160/1982-11-08.json"/>
 	<video id="videoCGA" screenwidth="960" screenheight="400" scale="true" charset="/devices/pc/video/ibm-mda-cga.json" pos="center" width="960px" padding="8px">
-		<name>Color Display</name>
+		<menu>
+			<title>Color Display</title>
+		</menu>
 	</video>
 	<keyboard ref="/devices/pc/keyboard/us83.xml"/>
 	<debugger id="debugger"/>
