@@ -2012,6 +2012,7 @@ Video.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
 
     case "lockPointer":
         this.bindings[sBinding] = control;
+        this.sLockMessage = control.innerHTML;
         if (this.canvasScreen && this.canvasScreen.lockPointer) {
             control.onclick = function onClickLockPointer() {
                 if (DEBUG) video.messageDebugger("lockPointer()");
@@ -2065,8 +2066,6 @@ Video.prototype.getCanvas = function(mouse)
 /**
  * lockPointer()
  *
- * TODO: Consider relabeling the "Lock Pointer" button for the duration of the lock.
- *
  * @this {Video}
  * @param {boolean} fLock
  * @return {boolean} true if request successful, false if not (eg, failed OR not supported)
@@ -2118,6 +2117,8 @@ Video.prototype.notifyPointerLocked = function(fLocked)
         this.mouse.notifyPointerLocked(fLocked);
         if (this.kbd) this.kbd.notifyEscape(fLocked);
     }
+    var control = this.bindings["lockPointer"];
+    if (control) control.innerHTML = (fLocked? "Press Esc to Unlock Pointer" : this.sLockMessage);
 };
 
 /**

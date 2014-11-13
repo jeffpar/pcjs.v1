@@ -2399,9 +2399,8 @@ X86CPU.prototype.displayStatus = function()
     this.displayReg("I", (regPS & X86.PS.IF)? 1 : 0, 1);
     this.displayReg("D", (regPS & X86.PS.DF)? 1 : 0, 1);
     this.displayReg("O", (regPS & X86.PS.OF)? 1 : 0, 1);
-    if (this.bindings["speed"]) {
-        this.bindings["speed"].innerHTML = this.getSpeedCurrent();
-    }
+    var controlSpeed = this.bindings["speed"];
+    if (controlSpeed) controlSpeed.innerHTML = this.getSpeedCurrent();
 };
 
 /**

@@ -764,7 +764,8 @@ CPU.prototype.setSpeed = function(nMultiplier, fOnClick)
         if (this.aCounts.mhzTarget != mhz) {
             this.aCounts.mhzTarget = mhz;
             var sSpeed = this.getSpeedTarget();
-            if (this.bindings["setSpeed"]) this.bindings["setSpeed"].innerHTML = sSpeed;
+            var controlSpeed = this.bindings["setSpeed"];
+            if (controlSpeed) controlSpeed.innerHTML = sSpeed;
             this.println("target speed: " + sSpeed);
         }
         if (fOnClick) this.setFocus();
@@ -947,7 +948,8 @@ CPU.prototype.runCPU = function(fOnClick)
         if (this.cmp) this.cmp.start(this.aCounts.msStartRun, this.getCycles());
         this.aFlags.fRunning = true;
         if (this.chipset) this.chipset.setSpeaker();
-        if (this.bindings["run"]) this.bindings["run"].innerHTML = "Halt";
+        var controlRun = this.bindings["run"];
+        if (controlRun) controlRun.innerHTML = "Halt";
         if (fOnClick) this.setFocus();
     }
     /*
@@ -1065,7 +1067,8 @@ CPU.prototype.haltCPU = function(fComplete)
     if (this.aFlags.fRunning) {
         this.aFlags.fRunning = false;
         if (this.chipset) this.chipset.setSpeaker();
-        if (this.bindings["run"]) this.bindings["run"].innerHTML = "Run";
+        var controlRun = this.bindings["run"];
+        if (controlRun) controlRun.innerHTML = "Run";
     }
     this.aFlags.fComplete = fComplete;
 };

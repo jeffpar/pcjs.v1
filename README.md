@@ -290,7 +290,8 @@ where PCjs could run amok and destroy the planet.
 
 Other parameters that can be passed via the URL:
 
-- *autostart*: set it to "false" to prevent all machines on the current page from automatically starting
+- *autostart*: set it to "true" to allow all machines to start normally, "false" to prevent all machines from starting,
+or "no" to prevent all machines from starting *unless* they have no "Run" button.
 
 For example:
 
