@@ -397,7 +397,7 @@ ChipSet.DMA_MODE = {
     MODE_CASCADE:       0xC0
 };
 
-ChipSet.DMA_REFRESH   = 0x00;   // DMA channel assigned to the Floppy Drive Controller (FDC)
+ChipSet.DMA_REFRESH   = 0x00;   // DMA channel assigned to memory refresh
 ChipSet.DMA_FDC       = 0x02;   // DMA channel assigned to the Floppy Drive Controller (FDC)
 ChipSet.DMA_HDC       = 0x03;   // DMA channel assigned to the Hard Drive Controller (HDC; XTC only)
 
@@ -1579,6 +1579,8 @@ ChipSet.prototype.restore = function(data)
     return true;
 };
 
+ChipSet.aDMAControllerInit = [0, null, null, 0, new Array(4)];
+
 /**
  * initDMAController(iDMAC, aState)
  *
@@ -1588,20 +1590,23 @@ ChipSet.prototype.restore = function(data)
  */
 ChipSet.prototype.initDMAController = function(iDMAC, aState)
 {
-    var controller = this.aDMACs[iDMAC] = {};
-    if (!aState || aState.length != 5) {
-        aState = [0, undefined, undefined, 0, []];
-    }
-    controller.bStatus = aState[0];
-    controller.bCmd = aState[1];
-    controller.bReq = aState[2];
-    controller.bIndex = aState[3];
+    var controller = this.aDMACs[iDMAC];
+    if (!controller) controller = {
+        aChannels: new Array(4)
+    };
+    var a = aState && aState.length == 5? aState : ChipSet.aDMAControllerInit;
+    controller.bStatus = a[0];
+    controller.bCmd = a[1];
+    controller.bReq = a[2];
+    controller.bIndex = a[3];
     controller.nChannelBase = iDMAC << 2;
-    controller.aChannels = new Array(4);
     for (var iChannel = 0; iChannel < controller.aChannels.length; iChannel++) {
-        this.initDMAChannel(controller, iChannel, aState[4][iChannel]);
+        this.initDMAChannel(controller, iChannel, a[4][iChannel]);
     }
+    this.aDMACs[iDMAC] = controller;
 };
+
+ChipSet.aDMAChannelInit = [true, [0,0], [0,0], [0,0], [0,0]];
 
 /**
  * initDMAChannel(controller, iChannel, aState)
@@ -1613,29 +1618,40 @@ ChipSet.prototype.initDMAController = function(iDMAC, aState)
  */
 ChipSet.prototype.initDMAChannel = function(controller, iChannel, aState)
 {
-    var channel = controller.aChannels[iChannel] = {};
-    if (aState === undefined || aState.length != 8) {
-        aState = [true, [], [], [], []];
+    var a = ChipSet.aDMAChannelInit;
+    var channel = controller.aChannels[iChannel];
+    if (!channel) {
+        Component.assert(!aState);
+        channel = {
+            masked: true,
+            addrInit: [0,0],
+            countInit: [0,0],
+            addrCurrent: [0,0],
+            countCurrent: [0,0]
+        };
+    } else {
+        if (aState && aState.length == 8) a = aState;
+        channel.masked = a[0];
+        channel.addrInit[0] = a[1][0]; channel.addrInit[1] = a[1][1];
+        channel.countInit[0] = a[2][0];  channel.countInit[1] = a[2][1];
+        channel.addrCurrent[0] = a[3][0]; channel.addrCurrent[1] = a[3][1];
+        channel.countCurrent[0] = a[4][0]; channel.countCurrent[1] = a[4][1];
+        channel.mode = a[5];
+        channel.bPage = a[6];
+        // a[7] is deprecated
     }
     channel.controller = controller;
     channel.iChannel = iChannel;
-    channel.masked = aState[0];
-    channel.addrInit = aState[1];
-    channel.countInit = aState[2];
-    channel.addrCurrent = aState[3];
-    channel.countCurrent = aState[4];
-    channel.mode = aState[5];
-    channel.bPage = aState[6];
-    // aState[7] is deprecated
-    this.initDMAFunction(channel, aState[8], aState[9]);
+    this.initDMAFunction(channel, a[8], a[9]);
+    controller.aChannels[iChannel] = channel;
 };
 
 /**
  * initDMAFunction(channel)
  *
  * @param {Object} channel
- * @param {Component|string} component
- * @param {string} sFunction
+ * @param {Component|string|undefined} component
+ * @param {string|undefined} sFunction
  * @param {Object} [obj]
  * @return {*}
  */
@@ -1704,6 +1720,8 @@ ChipSet.prototype.saveDMAChannels = function(controller)
     return data;
 };
 
+ChipSet.aPICInit = [0, new Array(4)];
+
 /**
  * initPIC(iPIC, aState)
  *
@@ -1714,20 +1732,20 @@ ChipSet.prototype.saveDMAChannels = function(controller)
  */
 ChipSet.prototype.initPIC = function(iPIC, port, aState)
 {
-    var pic = this.aPICs[iPIC] = {};
-    if (!aState || aState.length != 8) {
-        aState = [0, [undefined, undefined, undefined, undefined]];
-    }
+    var pic = this.aPICs[iPIC];
+    if (!pic) pic = {};
+    var a = aState && aState.length == 8? aState : ChipSet.aPICInit;
     pic.port = port;
     pic.nIRQBase = iPIC << 3;
-    pic.nDelay = aState[0];
-    pic.aICW = aState[1];
-    pic.nICW = aState[2];
-    pic.bIMR = aState[3];
-    pic.bIRR = aState[4];
-    pic.bISR = aState[5];
-    pic.bIRLow = aState[6];
-    pic.bOCW3 = aState[7];
+    pic.nDelay = a[0];
+    pic.aICW = a[1];
+    pic.nICW = a[2];
+    pic.bIMR = a[3];
+    pic.bIRR = a[4];
+    pic.bISR = a[5];
+    pic.bIRLow = a[6];
+    pic.bOCW3 = a[7];
+    this.aPICs[iPIC] = pic;
 };
 
 /**
@@ -1755,6 +1773,8 @@ ChipSet.prototype.savePICs = function()
     return data;
 };
 
+ChipSet.aTimerInit = [[0,0], [0,0], [0,0], [0,0]];
+
 /**
  * initTimer(iTimer, aState)
  *
@@ -1764,23 +1784,28 @@ ChipSet.prototype.savePICs = function()
  */
 ChipSet.prototype.initTimer = function(iTimer, aState)
 {
-    var timer = this.aTimers[iTimer] = {};
-    if (aState === undefined || aState.length != 13) {
-        aState = [ [0,0], [0,0], [0,0], [0,0] ];
-    }
-    timer.countInit = aState[0];
-    timer.countStart = aState[1];
-    timer.countCurrent = aState[2];
-    timer.countLatched = aState[3];
-    timer.bcd = aState[4];
-    timer.mode = aState[5];
-    timer.rw = aState[6];
-    timer.countIndex = aState[7];
-    timer.countBytes = aState[8];
-    timer.fOUT = aState[9];
-    timer.fLatched = aState[10];
-    timer.fCounting = aState[11];
-    timer.nStartCycles = aState[12];
+    var timer = this.aTimers[iTimer];
+    if (!timer) timer = {
+        countInit: [0,0],
+        countStart: [0,0],
+        countCurrent: [0,0],
+        countLatched: [0,0]
+    };
+    var a = aState && aState.length == 13? aState : ChipSet.aTimerInit;
+    timer.countInit[0] = a[0][0]; timer.countInit[1] = a[0][1];
+    timer.countStart[0] = a[1][0]; timer.countStart[1] = a[1][1];
+    timer.countCurrent[0] = a[2][0]; timer.countCurrent[1] = a[2][1];
+    timer.countLatched[0] = a[3][0]; timer.countLatched[1] = a[3][1];
+    timer.bcd = a[4];
+    timer.mode = a[5];
+    timer.rw = a[6];
+    timer.countIndex = a[7];
+    timer.countBytes = a[8];
+    timer.fOUT = a[9];
+    timer.fLatched = a[10];
+    timer.fCounting = a[11];
+    timer.nStartCycles = a[12];
+    this.aTimers[iTimer] = timer;
 };
 
 /**
