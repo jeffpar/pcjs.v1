@@ -230,8 +230,7 @@ function ChipSet(parmsChipSet)
     this.fSpeaker = false;
     if (parmsChipSet['sound']) {
         if (window && 'webkitAudioContext' in window) {
-            // noinspection JSPotentiallyInvalidConstructorUsage
-            this.contextAudio = new webkitAudioContext();
+            this.contextAudio = new window['webkitAudioContext']();
         } else {
             if (DEBUG) this.log("webkitAudioContext not available");
         }
@@ -291,15 +290,18 @@ ChipSet.aMonitorSwitches = {
 /*
  *  8237A DMA Controller (DMAC) I/O ports
  *
- *  MODEL_5150 and up uses DMA channel 0 for memory refresh cycles and channel 2 for the FDC
- *  MODEL_5160 and up uses DMA channel 3 for HDC transfers (XTC only)
- *  MODEL_5170 and up contain *two* DMA Controllers, which we refer to as DMA0 and DMA1; channel 4
- *  on DMA1 is used to "cascade" channels 0-3 from DMA0, so only channels 5-7 are available on DMA1
+ *  MODEL_5150 and up uses DMA channel 0 for memory refresh cycles and channel 2 for the FDC.
  *
- *  QUESTION: Why does the MODEL_5150 ROM BIOS set the page register for channel 1 (port 0x83) to zero?
+ *  MODEL_5160 and up uses DMA channel 3 for HDC transfers (XTC only).
  *
- *  For FDC DMA notes, refer to:        http://wiki.osdev.org/ISA_DMA
- *  For general DMA notes, refer to:    http://www.freebsd.org/doc/en/books/developers-handbook/dma.html
+ *  DMA0 refers to the original DMA controller found on all models, and DMA1 refers to the additional
+ *  controller found on MODEL_5170 and up; channel 4 on DMA1 is used to "cascade" channels 0-3 from DMA0,
+ *  so only channels 5-7 are available on DMA1.
+ *
+ *  For FDC DMA notes, refer to http://wiki.osdev.org/ISA_DMA
+ *  For general DMA notes, refer to http://www.freebsd.org/doc/en/books/developers-handbook/dma.html
+ *
+ *  TODO: Determine why the MODEL_5150 ROM BIOS sets the page register for channel 1 (port 0x83) to zero
  */
 ChipSet.DMA0 = {
     INDEX:              0,
@@ -316,10 +318,10 @@ ChipSet.DMA0 = {
         REQUEST:        0x09,
         MASK:           0x0A,
         MODE:           0x0B,
-        CLEAR_FF:       0x0C,
-        MASTER_CLR:     0x0D,
-        CLEAR_MASK:     0x0E,   // TODO: Provide handlers
-        ALL_MASK:       0x0F,   // TODO: Provide handlers
+        RESET_FF:       0x0C,   // reset flip-flop
+        MASTER_CLEAR:   0x0D,   // master clear
+        MASK_CLEAR:     0x0E,   // TODO: Provide handlers
+        MASK_ALL:       0x0F,   // TODO: Provide handlers
         CH2_PAGE:       0x81,   // OUT: DMA channel 2 page register
         CH3_PAGE:       0x82,   // OUT: DMA channel 3 page register
         CH1_PAGE:       0x83,   // OUT: DMA channel 1 page register
@@ -345,10 +347,10 @@ ChipSet.DMA1 = {
         REQUEST:        0xD2,
         MASK:           0xD4,
         MODE:           0xD6,
-        CLEAR_FF:       0xD8,
-        MASTER_CLR:     0xDA,
-        CLEAR_MASK:     0xDC,   // TODO: Provide handlers
-        ALL_MASK:       0xDE    // TODO: Provide handlers
+        RESET_FF:       0xD8,   // reset flip-flop
+        MASTER_CLEAR:   0xDA,   // master clear
+        MASK_CLEAR:     0xDC,   // TODO: Provide handlers
+        MASK_ALL:       0xDE    // TODO: Provide handlers
     }
 };
 
@@ -363,6 +365,18 @@ ChipSet.DMA_CMD = {
     DACK_ACTIVE_HI:     0x80
 };
 
+ChipSet.DMA_STATUS = {
+    CH0_TC:             0x01,   // Channel 0 has reached Terminal Count (TC)
+    CH1_TC:             0x02,   // Channel 1 has reached Terminal Count (TC)
+    CH2_TC:             0x04,   // Channel 2 has reached Terminal Count (TC)
+    CH3_TC:             0x08,   // Channel 3 has reached Terminal Count (TC)
+    ALL_TC:             0x0f,   // all TC bits are cleared whenever DMA_STATUS is read
+    CH0_REQ:            0x10,   // Channel 0 DMA requested
+    CH1_REQ:            0x20,   // Channel 1 DMA requested
+    CH2_REQ:            0x40,   // Channel 2 DMA requested
+    CH3_REQ:            0x80    // Channel 3 DMA requested
+};
+
 ChipSet.DMA_MASK = {
     CHANNEL:            0x03,
     CHANNEL_SET:        0x04
@@ -375,7 +389,7 @@ ChipSet.DMA_MODE = {
     XFER_WRITE:         0x04,
     XFER_READ:          0x08,
     AUTOINIT:           0x10,
-    DECREMENT:          0x20,
+    DECREMENT:          0x20,   // clear for INCREMENT
     MODE:               0xC0,
     MODE_DEMAND:        0x00,
     MODE_SINGLE:        0x40,
@@ -383,6 +397,7 @@ ChipSet.DMA_MODE = {
     MODE_CASCADE:       0xC0
 };
 
+ChipSet.DMA_REFRESH   = 0x00;   // DMA channel assigned to the Floppy Drive Controller (FDC)
 ChipSet.DMA_FDC       = 0x02;   // DMA channel assigned to the Floppy Drive Controller (FDC)
 ChipSet.DMA_HDC       = 0x03;   // DMA channel assigned to the Hard Drive Controller (HDC; XTC only)
 
@@ -519,7 +534,7 @@ ChipSet.TIMER_CTRL = {
     PORT:               0x43,   // write-only control register (use the Read-Back command to get status)
     BCD:                0x01,
     MODE:               0x0E,
-    MODE0:              0x00,   // interrupt on terminal count
+    MODE0:              0x00,   // interrupt on Terminal Count (TC)
     MODE1:              0x02,   // programmable one-shot
     MODE2:              0x04,   // rate generator
     MODE3:              0x06,   // square wave generator
@@ -945,6 +960,9 @@ ChipSet.prototype.initBus = function(cmp, bus, cpu, dbg)
     if (DEBUGGER) {
         if (dbg) {
             var chipset = this;
+            /*
+             * TODO: Add more "dumpers" (eg, for DMA, RTC, 8042, etc)
+             */
             dbg.messageDump(Debugger.MESSAGE.PIC, function onDumpPIC() {
                 chipset.dumpPIC();
             });
@@ -1571,7 +1589,9 @@ ChipSet.prototype.restore = function(data)
 ChipSet.prototype.initDMAController = function(iDMAC, aState)
 {
     var controller = this.aDMACs[iDMAC] = {};
-    if (!aState || aState.length != 5) aState = [0, undefined, undefined, 0, []];
+    if (!aState || aState.length != 5) {
+        aState = [0, undefined, undefined, 0, []];
+    }
     controller.bStatus = aState[0];
     controller.bCmd = aState[1];
     controller.bReq = aState[2];
@@ -1645,14 +1665,14 @@ ChipSet.prototype.saveDMAControllers = function()
 {
     var data = [];
     for (var iDMAC = 0; iDMAC < this.aDMACs; iDMAC++) {
-        var a = [];
         var controller = this.aDMACs[iDMAC];
-        a[0] = controller.bStatus;
-        a[1] = controller.bCmd;
-        a[2] = controller.bReq;
-        a[3] = controller.bIndex;
-        a[4] = this.saveDMAChannels(controller);
-        data[iDMAC] = a;
+        data[iDMAC] = [
+            controller.bStatus,
+            controller.bCmd,
+            controller.bReq,
+            controller.bIndex,
+            this.saveDMAChannels(controller)
+        ];
     }
     return data;
 };
@@ -1668,18 +1688,18 @@ ChipSet.prototype.saveDMAChannels = function(controller)
 {
     var data = [];
     for (var iChannel = 0; iChannel < controller.aChannels.length; iChannel++) {
-        var a = [];
         var channel = controller.aChannels[iChannel];
-        a[0] = channel.masked;
-        a[1] = channel.addrInit;
-        a[2] = channel.countInit;
-        a[3] = channel.addrCurrent;
-        a[4] = channel.countCurrent;
-        a[5] = channel.mode;
-        a[6] = channel.bPage;
-        a[8] = channel.sDevice;
-        a[9] = channel.sFunction;
-        data[iChannel] = a;
+        data[iChannel] = [
+            channel.masked,
+            channel.addrInit,
+            channel.countInit,
+            channel.addrCurrent,
+            channel.countCurrent,
+            channel.mode,
+            channel.bPage,
+            channel.sDevice,
+            channel.sFunction
+        ];
     }
     return data;
 };
@@ -1695,7 +1715,9 @@ ChipSet.prototype.saveDMAChannels = function(controller)
 ChipSet.prototype.initPIC = function(iPIC, port, aState)
 {
     var pic = this.aPICs[iPIC] = {};
-    if (!aState || aState.length != 8) aState = [0, [undefined, undefined, undefined, undefined]];
+    if (!aState || aState.length != 8) {
+        aState = [0, [undefined, undefined, undefined, undefined]];
+    }
     pic.port = port;
     pic.nIRQBase = iPIC << 3;
     pic.nDelay = aState[0];
@@ -1718,17 +1740,17 @@ ChipSet.prototype.savePICs = function()
 {
     var data = [];
     for (var iPIC = 0; iPIC < this.aPICs.length; iPIC++) {
-        var a = [];
         var pic = this.aPICs[iPIC];
-        a[0] = pic.nDelay;
-        a[1] = pic.aICW;
-        a[2] = pic.nICW;
-        a[3] = pic.bIMR;
-        a[4] = pic.bIRR;
-        a[5] = pic.bISR;
-        a[6] = pic.bIRLow;
-        a[7] = pic.bOCW3;
-        data[iPIC] = a;
+        data[iPIC] = [
+            pic.nDelay,
+            pic.aICW,
+            pic.nICW,
+            pic.bIMR,
+            pic.bIRR,
+            pic.bISR,
+            pic.bIRLow,
+            pic.bOCW3
+        ];
     }
     return data;
 };
@@ -1744,7 +1766,7 @@ ChipSet.prototype.initTimer = function(iTimer, aState)
 {
     var timer = this.aTimers[iTimer] = {};
     if (aState === undefined || aState.length != 13) {
-        aState = [ [], [], [], [] ];
+        aState = [ [0,0], [0,0], [0,0], [0,0] ];
     }
     timer.countInit = aState[0];
     timer.countStart = aState[1];
@@ -1771,22 +1793,22 @@ ChipSet.prototype.saveTimers = function()
 {
     var data = [];
     for (var iTimer = 0; iTimer < this.aTimers.length; iTimer++) {
-        var a = [];
         var timer = this.aTimers[iTimer];
-        a[0] = timer.countInit;
-        a[1] = timer.countStart;
-        a[2] = timer.countCurrent;
-        a[3] = timer.countLatched;
-        a[4] = timer.bcd;
-        a[5] = timer.mode;
-        a[6] = timer.rw;
-        a[7] = timer.countIndex;
-        a[8] = timer.countBytes;
-        a[9] = timer.fOUT;
-        a[10] = timer.fLatched;
-        a[11] = timer.fCounting;
-        a[12] = timer.nStartCycles;
-        data[iTimer] = a;
+        data[iTimer] = [
+            timer.countInit,
+            timer.countStart,
+            timer.countCurrent,
+            timer.countLatched,
+            timer.bcd,
+            timer.mode,
+            timer.rw,
+            timer.countIndex,
+            timer.countBytes,
+            timer.fOUT,
+            timer.fLatched,
+            timer.fCounting,
+            timer.nStartCycles
+        ];
     }
     return data;
 };
@@ -2080,7 +2102,7 @@ ChipSet.prototype.dumpCMOS = function()
  * @this {ChipSet}
  * @param {number} iDMAC
  * @param {number} iChannel
- * @param {number} port
+ * @param {number} port (0x00, 0x02, 0x04, 0x06 for DMAC 0, 0xC0, 0xC4, 0xC8, 0xCC for DMAC 1)
  * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  * @return {number} simulated port value
  */
@@ -2089,8 +2111,25 @@ ChipSet.prototype.inDMAChannelAddr = function(iDMAC, iChannel, port, addrFrom)
     var controller = this.aDMACs[iDMAC];
     var channel = controller.aChannels[iChannel];
     var b = channel.addrCurrent[controller.bIndex];
-    controller.bIndex ^= 0x1;
     this.messagePort(port, null, addrFrom, "DMA" + iDMAC + ".CHANNEL" + iChannel + ".ADDR[" + controller.bIndex + "]", Debugger.MESSAGE.DMA, b);
+    controller.bIndex ^= 0x1;
+    /*
+     * Technically, aTimers[ChipSet.TIMER1.INDEX].fOut is what drives DMA requests for DMA channel 0 (ChipSet.DMA_REFRESH),
+     * every 15us, once the BIOS has initialized the channel's "mode" with MODE_SINGLE, INCREMENT, AUTOINIT, and XFER_READ (0x58)
+     * and initialized TIMER1 appropriately.
+     *
+     * However, we don't need to be that particular.  Simply simulate an ever-increasing address after every read of the full DMA channel 0 address.
+     */
+    if (!iDMAC && iChannel == ChipSet.DMA_REFRESH && !controller.bIndex) {
+        channel.addrCurrent[0]++;
+        if (channel.addrCurrent[0] > 0xff) {
+            channel.addrCurrent[0] = 0;
+            channel.addrCurrent[1]++;
+            if (channel.addrCurrent[1] > 0xff) {
+                channel.addrCurrent[1] = 0;
+            }
+        }
+    }
     return b;
 };
 
@@ -2100,7 +2139,7 @@ ChipSet.prototype.inDMAChannelAddr = function(iDMAC, iChannel, port, addrFrom)
  * @this {ChipSet}
  * @param {number} iDMAC
  * @param {number} iChannel
- * @param {number} port
+ * @param {number} port (0x00, 0x02, 0x04, 0x06 for DMAC 0, 0xC0, 0xC4, 0xC8, 0xCC for DMAC 1)
  * @param {number} bOut
  * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  */
@@ -2119,7 +2158,7 @@ ChipSet.prototype.outDMAChannelAddr = function outDMAChannelAddr(iDMAC, iChannel
  * @this {ChipSet}
  * @param {number} iDMAC
  * @param {number} iChannel
- * @param {number} port
+ * @param {number} port (0x01, 0x03, 0x05, 0x07 for DMAC 0, 0xC2, 0xC6, 0xCA, 0xCE for DMAC 1)
  * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  * @return {number} simulated port value
  */
@@ -2128,8 +2167,29 @@ ChipSet.prototype.inDMAChannelCount = function(iDMAC, iChannel, port, addrFrom)
     var controller = this.aDMACs[iDMAC];
     var channel = controller.aChannels[iChannel];
     var b = channel.countCurrent[controller.bIndex];
-    controller.bIndex ^= 0x1;
     this.messagePort(port, null, addrFrom, "DMA" + iDMAC + ".CHANNEL" + iChannel + ".COUNT[" + controller.bIndex + "]", Debugger.MESSAGE.DMA, b);
+    controller.bIndex ^= 0x1;
+    /*
+     * Technically, aTimers[ChipSet.TIMER1.INDEX].fOut is what drives DMA requests for DMA channel 0 (ChipSet.DMA_REFRESH),
+     * every 15us, once the BIOS has initialized the channel's "mode" with MODE_SINGLE, INCREMENT, AUTOINIT, and XFER_READ (0x58)
+     * and initialized TIMER1 appropriately.
+     *
+     * However, we don't need to be that particular.  Simply simulate an ever-decreasing count after every read of the full DMA channel 0 count.
+     */
+    if (!iDMAC && iChannel == ChipSet.DMA_REFRESH && !controller.bIndex) {
+        channel.countCurrent[0]--;
+        if (channel.countCurrent[0] < 0) {
+            channel.countCurrent[0] = 0xff;
+            channel.countCurrent[1]--;
+            if (channel.countCurrent[1] < 0) {
+                channel.countCurrent[1] = 0xff;
+                /*
+                 * This is the logical point to indicate Terminal Count (TC), but again, there's no need to be
+                 * so particular; inDMAStatus() has its own logic for periodically signalling TC.
+                 */
+            }
+        }
+    }
     return b;
 };
 
@@ -2139,7 +2199,7 @@ ChipSet.prototype.inDMAChannelCount = function(iDMAC, iChannel, port, addrFrom)
  * @this {ChipSet}
  * @param {number} iDMAC
  * @param {number} iChannel (ports 0x01, 0x03, 0x05, 0x07)
- * @param {number} port
+ * @param {number} port (0x01, 0x03, 0x05, 0x07 for DMAC 0, 0xC2, 0xC6, 0xCA, 0xCE for DMAC 1)
  * @param {number} bOut
  * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  */
@@ -2155,17 +2215,11 @@ ChipSet.prototype.outDMAChannelCount = function(iDMAC, iChannel, port, bOut, add
 /**
  * inDMAStatus(iDMAC, port, addrFrom)
  *
- * @this {ChipSet}
- * @param {number} iDMAC
- * @param {number} port
- * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
- * @return {number} simulated port value
- *
  * From the 8237A spec:
  *
  * "The Status register is available to be read out of the 8237A by the microprocessor.
  * It contains information about the status of the devices at this point. This information includes
- * which channels have reached a terminal count and which channels have pending DMA requests.
+ * which channels have reached Terminal Count (TC) and which channels have pending DMA requests.
  *
  * Bits 0–3 are set every time a TC is reached by that channel or an external EOP is applied.
  * These bits are cleared upon Reset and on each Status Read.
@@ -2175,6 +2229,12 @@ ChipSet.prototype.outDMAChannelCount = function(iDMAC, iChannel, port, bOut, add
  * TRIVIA: This hook wasn't installed when I was testing with the MODEL_5150 ROM BIOS, and it
  * didn't matter, but the MODEL_5160 ROM BIOS checks it several times, including @F000:E156, where
  * it verifies that TIMER1 didn't request service on channel 0.
+ *
+ * @this {ChipSet}
+ * @param {number} iDMAC
+ * @param {number} port (0x08 for DMAC 0, 0xD0 for DMAC 1)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
+ * @return {number} simulated port value
  */
 ChipSet.prototype.inDMAStatus = function(iDMAC, port, addrFrom)
 {
@@ -2185,8 +2245,8 @@ ChipSet.prototype.inDMAStatus = function(iDMAC, port, addrFrom)
      * status is read.
      */
     var controller = this.aDMACs[iDMAC];
-    var b = controller.bStatus | 0x1;
-    controller.bStatus &= ~0xf;
+    var b = controller.bStatus | ChipSet.DMA_STATUS.CH0_TC;
+    controller.bStatus &= ~ChipSet.DMA_STATUS.ALL_TC;
     this.messagePort(port, null, addrFrom, "DMA" + iDMAC + ".STATUS", Debugger.MESSAGE.DMA, b);
     return b;
 };
@@ -2196,7 +2256,7 @@ ChipSet.prototype.inDMAStatus = function(iDMAC, port, addrFrom)
  *
  * @this {ChipSet}
  * @param {number} iDMAC
- * @param {number} port
+ * @param {number} port (0x08 for DMAC 0, 0xD0 for DMAC 1)
  * @param {number} bOut
  * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  */
@@ -2209,12 +2269,6 @@ ChipSet.prototype.outDMACmd = function(iDMAC, port, bOut, addrFrom)
 /**
  * outDMAReq(iDMAC, port, bOut, addrFrom)
  *
- * @this {ChipSet}
- * @param {number} iDMAC
- * @param {number} port
- * @param {number} bOut
- * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
- *
  * From the 8237A spec:
  *
  * "The 8237A can respond to requests for DMA service which are initiated by software as well as by a DREQ.
@@ -2224,6 +2278,12 @@ ChipSet.prototype.outDMACmd = function(iDMAC, port, bOut, addrFrom)
  *
  * To set or reset a bit the software loads the proper form of the data word.... In order to make a software request,
  * the channel must be in Block Mode."
+ *
+ * @this {ChipSet}
+ * @param {number} iDMAC
+ * @param {number} port (0x09 for DMAC 0, 0xD2 for DMAC 1)
+ * @param {number} bOut
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  */
 ChipSet.prototype.outDMAReq = function(iDMAC, port, bOut, addrFrom)
 {
@@ -2246,7 +2306,7 @@ ChipSet.prototype.outDMAReq = function(iDMAC, port, bOut, addrFrom)
  *
  * @this {ChipSet}
  * @param {number} iDMAC
- * @param {number} port
+ * @param {number} port (0x0A for DMAC 0, 0xD4 for DMAC 1)
  * @param {number} bOut
  * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  */
@@ -2256,7 +2316,7 @@ ChipSet.prototype.outDMAMask = function(iDMAC, port, bOut, addrFrom)
     this.messagePort(port, bOut, addrFrom, "DMA" + iDMAC + ".MASK", Debugger.MESSAGE.DMA);
     var iChannel = bOut & ChipSet.DMA_MASK.CHANNEL;
     var channel = controller.aChannels[iChannel];
-    channel.masked = (bOut & ChipSet.DMA_MASK.CHANNEL_SET? true : false);
+    channel.masked = !!(bOut & ChipSet.DMA_MASK.CHANNEL_SET);
     if (!channel.masked) this.requestDMA(controller.nChannelBase + iChannel);
 };
 
@@ -2265,7 +2325,7 @@ ChipSet.prototype.outDMAMask = function(iDMAC, port, bOut, addrFrom)
  *
  * @this {ChipSet}
  * @param {number} iDMAC
- * @param {number} port
+ * @param {number} port (0x0B for DMAC 0, 0xD6 for DMAC 1)
  * @param {number} bOut
  * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  */
@@ -2277,37 +2337,39 @@ ChipSet.prototype.outDMAMode = function(iDMAC, port, bOut, addrFrom)
 };
 
 /**
- * outDMAIndex(iDMAC, port, bOut, addrFrom)
+ * outDMAResetFF(iDMAC, port, bOut, addrFrom)
  *
  * @this {ChipSet}
  * @param {number} iDMAC
- * @param {number} port
+ * @param {number} port (0x0C for DMAC 0, 0xD8 for DMAC 1)
  * @param {number} bOut
  * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  *
  * Any write to this port simply resets the controller's "first/last flip-flop", which determines whether
  * the even or odd byte of a DMA address or count register will be accessed next.
  */
-ChipSet.prototype.outDMAIndex = function(iDMAC, port, bOut, addrFrom)
+ChipSet.prototype.outDMAResetFF = function(iDMAC, port, bOut, addrFrom)
 {
-    this.messagePort(port, bOut, addrFrom, "DMA" + iDMAC + ".INDEX", Debugger.MESSAGE.DMA);
+    this.messagePort(port, bOut, addrFrom, "DMA" + iDMAC + ".RESET_FF", Debugger.MESSAGE.DMA);
     this.aDMACs[iDMAC].bIndex = 0;
 };
 
 /**
- * outDMAClear(iDMAC, port, bOut, addrFrom)
+ * outDMAMasterClear(iDMAC, port, bOut, addrFrom)
  *
  * @this {ChipSet}
  * @param {number} iDMAC
- * @param {number} port
+ * @param {number} port (0x0D for DMAC 0, 0xDA for DMAC 1)
  * @param {number} bOut
  * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  */
-ChipSet.prototype.outDMAClear = function(iDMAC, port, bOut, addrFrom)
+ChipSet.prototype.outDMAMasterClear = function(iDMAC, port, bOut, addrFrom)
 {
-    this.messagePort(port, bOut, addrFrom, "DMA" + iDMAC + ".CLEAR", Debugger.MESSAGE.DMA);
+    this.messagePort(port, bOut, addrFrom, "DMA" + iDMAC + ".MASTER_CLEAR", Debugger.MESSAGE.DMA);
     /*
      * The value written to this port doesn't matter; any write triggers a "master clear" operation
+     *
+     * TODO: Can't we just call initDMAController(), which would also take care of clearing controller.bStatus?
      */
     var controller = this.aDMACs[iDMAC];
     for (var i = 0; i < controller.aChannels.length; i++) {
@@ -4517,8 +4579,8 @@ ChipSet.aPortOutput = {
     0x09: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAReq(ChipSet.DMA0.INDEX, port, bOut, addrFrom); },
     0x0A: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAMask(ChipSet.DMA0.INDEX, port, bOut, addrFrom); },
     0x0B: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAMode(ChipSet.DMA0.INDEX, port, bOut, addrFrom); },
-    0x0C: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAIndex(ChipSet.DMA0.INDEX, port, bOut, addrFrom); },
-    0x0D: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAClear(ChipSet.DMA0.INDEX, port, bOut, addrFrom); },
+    0x0C: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAResetFF(ChipSet.DMA0.INDEX, port, bOut, addrFrom); },
+    0x0D: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAMasterClear(ChipSet.DMA0.INDEX, port, bOut, addrFrom); },
     0x20: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outPICLo(ChipSet.PIC0.INDEX, bOut, addrFrom); },
     0x21: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outPICHi(ChipSet.PIC0.INDEX, bOut, addrFrom); },
     0x40: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outTimer(ChipSet.TIMER0.INDEX, bOut, addrFrom); },
@@ -4571,8 +4633,8 @@ ChipSet.aPortOutput5170 = {
     0xD2: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAReq(ChipSet.DMA1.INDEX, port, bOut, addrFrom); },
     0xD4: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAMask(ChipSet.DMA1.INDEX, port, bOut, addrFrom); },
     0xD6: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAMode(ChipSet.DMA1.INDEX, port, bOut, addrFrom); },
-    0xD8: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAIndex(ChipSet.DMA1.INDEX, port, bOut, addrFrom); },
-    0xDA: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAClear(ChipSet.DMA1.INDEX, port, bOut, addrFrom); }
+    0xD8: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAResetFF(ChipSet.DMA1.INDEX, port, bOut, addrFrom); },
+    0xDA: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAMasterClear(ChipSet.DMA1.INDEX, port, bOut, addrFrom); }
 };
 
 /**

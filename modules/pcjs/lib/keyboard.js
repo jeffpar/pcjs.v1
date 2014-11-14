@@ -807,7 +807,7 @@ Keyboard.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, contro
                 this.bindings[id] = control;
                 control.onclick = function(kbd, sKey, keyCode) {
                     return function onClickKeyboard(event) {
-                        if (DEBUG) kbd.println(sKey + " clicked");
+                        if (DEBUG) kbd.messageDebugger(sKey + " clicked", Debugger.MESSAGE.KEYS);
                         if (kbd.cpu) kbd.cpu.setFocus();
                         return !kbd.keySimulatePress(keyCode);
                     };

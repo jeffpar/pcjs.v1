@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.16.0/machine.xsl"?>
-<machine id="ibm5150" class="pc" border="1" width="740px" pos="center" style="background-color:#FAEBD7">
+<machine id="ibm5150" class="pc" border="1" pos="center" style="background-color:#FAEBD7">
 	<name pos="center">IBM PC (Model 5150) running IBM Advanced Diagnostics 2.20</name>
 	<computer id="pc-mda-64k" name="IBM PC"/>
 	<ram id="ramLow" addr="0x00000"/>
@@ -16,7 +16,9 @@
 		<control type="button" class="input" binding="reset">Reset</control>
 	</cpu>
 	<keyboard ref="/devices/pc/keyboard/minimal.xml"/>
-	<fdc id="fdcNEC" automount='{A: {name: "IBM Advanced Diagnostics", path: "/disks/pc/diags/ibm/2.20/5150_5155_5160_ADVDIAG_220.json"}}' pos="right">
+	<debugger id="debugger"/>
+	<panel ref="/devices/pc/panel/wide.xml"/>
+	<fdc id="fdcNEC" pos="left" padleft="8px" automount='{A: {name: "IBM Advanced Diagnostics", path: "/disks/pc/diags/ibm/2.20/5150_5155_5160_ADVDIAG_220.json"}}'>
 		<control type="list" class="input" binding="listDrives"/>
 		<control type="list" class="input" binding="listDisks">
 			<disk path="">None</disk>

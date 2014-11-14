@@ -70,7 +70,7 @@ In the above example, a pre-generated disk image could be created from the comma
 	
 or with the "--path" option, which specifies either a single file or a set files separated by semi-colons:
 
-	node diskdump "--path=./apps/pc/1981/visicalc/bin/vc.com;../readme.md" --format=json --output=./apps/pc/1981/visicalc/disk.json
+	node diskdump --path="./apps/pc/1981/visicalc/bin/vc.com;../readme.md" --format=json --output=./apps/pc/1981/visicalc/disk.json
 	
 or via the PCjs server's DiskDump API:
 
