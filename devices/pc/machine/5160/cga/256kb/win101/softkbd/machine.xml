@@ -8,12 +8,7 @@
 	<rom id="romHDC" addr="0xc8000" size="0x2000" file="/devices/pc/hdc/ibm-xebec-1982.json"/>
 	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pc/basic/ibm-basic-1.10.json"/>
 	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pc/bios/5160/1982-11-08.json"/>
-	<video id="videoCGA" screenwidth="960" screenheight="400" scale="true" autolock="true" charset="/devices/pc/video/ibm-mda-cga.json" pos="center" width="960px" padding="8px">
-		<menu>
-			<title>Color Display</title>
-			<control type="button" class="input" binding="lockPointer" pos="right">Lock Pointer</control>
-		</menu>
-	</video>
+	<video ref="/devices/pc/video/video-cga-lock.xml"/>
 	<keyboard ref="/devices/pc/keyboard/us83.xml"/>
 	<debugger id="debugger"/>
 	<panel ref="/devices/pc/panel/wide.xml"/>

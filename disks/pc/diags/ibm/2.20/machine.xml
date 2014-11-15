@@ -6,14 +6,7 @@
 	<ram id="ramLow" addr="0x00000"/>
 	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pc/basic/ibm-basic-1.00.json"/>
 	<rom id="romBIOS"  addr="0xfe000" size="0x2000" file="/devices/pc/bios/5150/1981-04-24.json"/>
-	<video id="videoMDA" screenwidth="720" screenheight="350" scale="true" charset="/devices/pc/video/ibm-mda-cga.json" padding="8px">
-		<menu>
-			<title>Monochrome Display</title>
-			<control type="led" class="output" label="Scroll" binding="scroll-lock" pos="right" padleft="8px"/>
-			<control type="led" class="output" label="Num" binding="num-lock" pos="right" padleft="8px"/>
-			<control type="led" class="output" label="Caps" binding="caps-lock" pos="right" padleft="8px"/>
-		</menu>
-	</video>
+	<video ref="/devices/pc/video/video-mda.xml"/>
 	<cpu id="cpu8088" model="8088" autostart="true" pos="left" padleft="8px" padbottom="8px">
 		<control type="button" class="input" binding="run">Run</control>
 		<control type="button" class="input" binding="reset">Reset</control>
