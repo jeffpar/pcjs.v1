@@ -9,6 +9,9 @@
 	<video id="videoMDA" screenwidth="720" screenheight="350" scale="true" charset="/devices/pc/video/ibm-mda-cga.json" padding="8px">
 		<menu>
 			<title>Monochrome Display</title>
+			<control type="led" class="output" label="Scroll" binding="scroll-lock" pos="right" padleft="8px"/>
+			<control type="led" class="output" label="Num" binding="num-lock" pos="right" padleft="8px"/>
+			<control type="led" class="output" label="Caps" binding="caps-lock" pos="right" padleft="8px"/>
 		</menu>
 	</video>
 	<cpu id="cpu8088" model="8088" autostart="true" pos="left" padleft="8px" padbottom="8px">
@@ -22,6 +25,7 @@
 		<control type="list" class="input" binding="listDrives"/>
 		<control type="list" class="input" binding="listDisks">
 			<disk path="">None</disk>
+			<manifest ref="/disks/pc/dos/ibm/2.00/manifest.xml" disk="*"/>
 			<manifest ref="/disks/pc/diags/ibm/2.20/manifest.xml" disk="*"/>
 		</control>
 		<control type="button" class="input" binding="loadDrive">Load Drive</control>

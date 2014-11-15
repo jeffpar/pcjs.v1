@@ -173,6 +173,12 @@ function FDC(parmsFDC) {
     this.aDiskHistory = [];
 
     /*
+     * If setBinding() sees a binding for loading local disks, it will set this flag, and then initBus()
+     * can intelligently update the "listDisks" control accordingly.
+     */
+    this.fLocalDisks = false;
+
+    /*
      * The remainder of FDC initialization now takes place in our initBus() handler, largely because we
      * want initController() to have access to the ChipSet component, so that it can query switches and/or CMOS
      * settings that determine the number of drives and their characteristics (eg, 40-track vs. 80-track),
@@ -419,9 +425,6 @@ FDC.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
     case "listDisks":
         this.bindings[sBinding] = control;
 
-        this.addDiskette("Local Disk", "?");
-        this.addDiskette("Remote Disk", "??");
-
         control.onchange = function onChangeListDisks(event) {
             var controlDesc = fdc.bindings["descDisk"];
             var controlOption = control.options[control.selectedIndex];
@@ -475,6 +478,7 @@ FDC.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
          * Check for availability of FileReader
          */
         if (window && 'FileReader' in window) {
+            this.fLocalDisks = true;
             this.bindings[sBinding] = control;
 
             /*
@@ -539,6 +543,11 @@ FDC.prototype.initBus = function(cmp, bus, cpu, dbg)
 
     bus.addPortInputTable(this, FDC.aPortInput);
     bus.addPortOutputTable(this, FDC.aPortOutput);
+
+    if (this.fLocalDisks) {
+        this.addDiskette("Local Disk", "?");
+    }
+    this.addDiskette("Remote Disk", "??");
 
     if (!this.autoMount()) this.setReady();
 };
@@ -1190,7 +1199,7 @@ FDC.prototype.loadSelectedDrive = function(sDisketteName, sDiskettePath, file)
         }
 
         if (sDiskettePath == "?") {
-            this.notice("Use 'Load' to load local disks");
+            this.notice('Use "Choose File" and "Load" to select and load a local disk.');
             return;
         }
 

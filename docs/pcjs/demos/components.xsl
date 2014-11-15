@@ -377,6 +377,9 @@
 						</fieldset>
 					</form>
 				</xsl:when>
+				<xsl:when test="@type = 'led'">
+					<div class="{$APPCLASS}-{@class} {$APPCLASS}-{@type}" data-value="{$type},{$binding}"><xsl:value-of select="."/></div>
+				</xsl:when>
 				<xsl:when test="@type = 'separator'">
 					<hr/>
 				</xsl:when>

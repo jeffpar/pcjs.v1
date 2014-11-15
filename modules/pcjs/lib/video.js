@@ -87,8 +87,9 @@ if (typeof module !== 'undefined') {
  * or setPixel().
  *
  * Thanks to the CPU's new block-based memory manager that allows us to sparse-allocate memory
- * in 4K increments, updateScreen() can also ask the CPU for the "dirty" state of all the blocks
- * underlying the video buffer, bypassing the update completely if the buffer is still clean.
+ * (in 4Kb increments on 20-bit buses, 16Kb increments on 24-bit buses), updateScreen()
+ * can also ask the CPU for the "dirty" state of all the blocks underlying the video buffer,
+ * bypassing the update completely if the buffer is still clean.
  *
  * Unfortunately, that optimization is defeated if our count of active blink elements is non-zero,
  * because we must rescan the entire buffer to locate and redraw them all; I'm assuming for now
@@ -499,8 +500,8 @@ Video.MODES.UNKNOWN          = 0xFF;
  * Supported Fonts
  *
  * Once we've finished loading the standard 8K font file, aFonts[] should contain one or more of the
- * fonts listed below.  For the standard MDA/CGA font ROM, the first (MDA) font resides in the first 4K,
- * and the second and third (CGA) fonts reside in the two 2K halves of the second 4K.
+ * fonts listed below.  For the standard MDA/CGA font ROM, the first (MDA) font resides in the first 4Kb,
+ * and the second and third (CGA) fonts reside in the two 2K halves of the second 4Kb.
  *
  * It may seem odd that the cell size for FONT_CGAD is *larger* than the cell size for FONT_CGA,
  * since 40-column mode is actually lower resolution, but since we don't shrink the window when we shrink
@@ -1018,7 +1019,7 @@ Card.MISC.IO_SELECT         = 0x01;     // 0 sets CRT ports to 0x3Bn, 1 sets CRT
 Card.MISC.ENABLE_RAM        = 0x02;     // 0 disables video RAM, 1 enables
 Card.MISC.CLK_SELECT        = 0x0C;     // 0x0: 14Mhz I/O clock, 0x4: 16Mhz on-board clock, 0x8: external clock, 0xC: unused
 Card.MISC.DISABLE_DRV       = 0x10;     // 0 activates internal video drivers, 1 activates feature connector direct drive outputs
-Card.MISC.PAGE_ODD_EVEN     = 0x20;     // 0 selects the low 64K page of video RAM for text modes, 1 selects the high page
+Card.MISC.PAGE_ODD_EVEN     = 0x20;     // 0 selects the low 64Kb page of video RAM for text modes, 1 selects the high page
 Card.MISC.HORZ_POLARITY     = 0x40;     // 0 selects positive horizontal retrace
 Card.MISC.VERT_POLARITY     = 0x80;     // 0 selects positive vertical retrace
 
@@ -1981,6 +1982,9 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
      */
     this.kbd = cmp.getComponentByType("Keyboard");
     if (this.kbd && this.canvasScreen) {
+        for (var s in this.bindings) {
+            if (s.indexOf("lock") > 0) this.kbd.setBinding("input", "led", s, this.bindings[s]);
+        }
         this.kbd.setBinding("input", this.textareaScreen? "textarea" : "canvas", "kbd", this.textareaScreen || this.canvasScreen);
     }
 
@@ -2008,32 +2012,39 @@ Video.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
     var video = this;
     var canvas, lockPointer;
 
-    switch (sBinding) {
+    if (!this.bindings[sBinding]) {
 
-    case "lockPointer":
+        /*
+         * We now save every binding that comes in, so that if there are bindings for "caps-lock' and the like,
+         * we can forward them to the Keyboard.
+         */
         this.bindings[sBinding] = control;
-        this.sLockMessage = control.innerHTML;
-        if (this.canvasScreen && this.canvasScreen.lockPointer) {
-            control.onclick = function onClickLockPointer() {
-                if (DEBUG) video.messageDebugger("lockPointer()");
-                video.lockPointer(true);
+
+        switch (sBinding) {
+
+        case "lockPointer":
+            this.sLockMessage = control.innerHTML;
+            if (this.canvasScreen && this.canvasScreen.lockPointer) {
+                control.onclick = function onClickLockPointer() {
+                    if (DEBUG) video.messageDebugger("lockPointer()");
+                    video.lockPointer(true);
+                };
+            } else {
+                if (DEBUG) this.log("Pointer Lock API not available");
+                control.parentNode.removeChild(control);
+            }
+            return true;
+
+        case "refresh":
+            control.onclick = function onClickRefresh() {
+                if (DEBUG) video.messageDebugger("refreshScreen()");
+                video.updateScreen(true);
             };
-        } else {
-            if (DEBUG) this.log("Pointer Lock API not available");
-            control.parentNode.removeChild(control);
+            return true;
+
+        default:
+            break;
         }
-        return true;
-
-    case "refresh":
-        this.bindings[sBinding] = control;
-        control.onclick = function onClickRefresh() {
-            if (DEBUG) video.messageDebugger("refreshScreen()");
-            video.updateScreen(true);
-        };
-        return true;
-
-    default:
-        break;
     }
     return false;
 };

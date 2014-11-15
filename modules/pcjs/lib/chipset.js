@@ -150,7 +150,7 @@ function ChipSet(parmsChipSet)
     Component.call(this, "ChipSet", parmsChipSet, ChipSet);
 
     this.model = parmsChipSet['model'];
-    this.model = (this.model !== undefined? parseInt(this.model, 10) : ChipSet.MODEL_5150);
+    this.model = (this.model? parseInt(this.model, 10) : ChipSet.MODEL_5150);
 
     /*
      * SW1 describes the number of floppy drives, the amount of base memory, the primary monitor type,
@@ -173,7 +173,7 @@ function ChipSet(parmsChipSet)
     } else {
         this.aFloppyDrives = [360, 360];
         var aFloppyDrives = parmsChipSet['floppies'];
-        if (aFloppyDrives && aFloppyDrives.length !== undefined) this.aFloppyDrives = aFloppyDrives;
+        if (aFloppyDrives && aFloppyDrives.length) this.aFloppyDrives = aFloppyDrives;
         var nDrives = this.aFloppyDrives.length;
         if (nDrives) {
             this.sw1Init |= ChipSet.PPI_SW.FDRIVE.IPL;
@@ -1030,19 +1030,23 @@ ChipSet.prototype.reset = function(fHard)
      * DMA Controller initialization
      */
     this.aDMACs = new Array(this.cDMACs);
-    for (i = 0; i < this.cDMACs; i++) this.initDMAController(i);
+    for (i = 0; i < this.cDMACs; i++) {
+        this.initDMAController(i);
+    }
 
     /*
      * PIC initialization
      */
     this.aPICs = new Array(this.cPICs);
     this.initPIC(ChipSet.PIC0.INDEX, ChipSet.PIC0.PORT_LO);
-    if (this.cPICs > 1) this.initPIC(ChipSet.PIC1.INDEX, ChipSet.PIC1.PORT_LO);
+    if (this.cPICs > 1) {
+        this.initPIC(ChipSet.PIC1.INDEX, ChipSet.PIC1.PORT_LO);
+    }
 
     /*
      * Timer initialization
      */
-    this.bTimerCtrl = undefined;    // tracks writes to port 0x43
+    this.bTimerCtrl = null;         // tracks writes to port 0x43
     this.aTimers = new Array(3);
     for (i = 0; i < this.aTimers.length; i++) {
         this.initTimer(i);
@@ -1051,10 +1055,10 @@ ChipSet.prototype.reset = function(fHard)
     /*
      * PPI and other misc ports
      */
-    this.bPPIA = undefined;         // tracks writes to port 0x60, in case PPI_CTRL.A_IN is not set
-    this.bPPIB = undefined;         // tracks writes to port 0x61, in case PPI_CTRL.B_IN is not set
-    this.bPPIC = undefined;         // tracks writes to port 0x62, in case PPI_CTRL.C_IN_LO or PPI_CTRL.C_IN_HI is not set
-    this.bPPICtrl = undefined;      // tracks writes to port 0x63 (eg, 0x99); read-only
+    this.bPPIA = null;              // tracks writes to port 0x60, in case PPI_CTRL.A_IN is not set
+    this.bPPIB = null;              // tracks writes to port 0x61, in case PPI_CTRL.B_IN is not set
+    this.bPPIC = null;              // tracks writes to port 0x62, in case PPI_CTRL.C_IN_LO or PPI_CTRL.C_IN_HI is not set
+    this.bPPICtrl = null;           // tracks writes to port 0x63 (eg, 0x99); read-only
     this.bNMI = ChipSet.NMI.DISABLE;// tracks writes to the NMI Mask Register
 
     /*
@@ -1522,20 +1526,17 @@ ChipSet.prototype.restore = function(data)
     this.sw2 = a[3];
 
     a = data[1];
-    this.aDMACs = new Array(this.cDMACs);
     for (i = 0; i < this.cDMACs; i++) {
         this.initDMAController(i, a.length == 1? a[0][i] : a);
     }
 
     a = data[2];
-    this.aPICs = new Array(this.cPICs);
     for (i = 0; i < this.cPICs; i++) {
         this.initPIC(i, i === 0? ChipSet.PIC0.PORT_LO : ChipSet.PIC1.PORT_LO, a[0][i]);
     }
 
     a = data[3];
     this.bTimerCtrl = a[0];
-    this.aTimers = new Array(3);
     for (i = 0; i < this.aTimers.length; i++) {
         this.initTimer(i, a[1][i]);
     }
@@ -1591,9 +1592,12 @@ ChipSet.aDMAControllerInit = [0, null, null, 0, new Array(4)];
 ChipSet.prototype.initDMAController = function(iDMAC, aState)
 {
     var controller = this.aDMACs[iDMAC];
-    if (!controller) controller = {
-        aChannels: new Array(4)
-    };
+    if (!controller) {
+        Component.assert(!aState);
+        controller = {
+            aChannels: new Array(4)
+        };
+    }
     var a = aState && aState.length == 5? aState : ChipSet.aDMAControllerInit;
     controller.bStatus = a[0];
     controller.bCmd = a[1];
@@ -1618,28 +1622,25 @@ ChipSet.aDMAChannelInit = [true, [0,0], [0,0], [0,0], [0,0]];
  */
 ChipSet.prototype.initDMAChannel = function(controller, iChannel, aState)
 {
-    var a = ChipSet.aDMAChannelInit;
     var channel = controller.aChannels[iChannel];
     if (!channel) {
         Component.assert(!aState);
         channel = {
-            masked: true,
             addrInit: [0,0],
             countInit: [0,0],
             addrCurrent: [0,0],
             countCurrent: [0,0]
         };
-    } else {
-        if (aState && aState.length == 8) a = aState;
-        channel.masked = a[0];
-        channel.addrInit[0] = a[1][0]; channel.addrInit[1] = a[1][1];
-        channel.countInit[0] = a[2][0];  channel.countInit[1] = a[2][1];
-        channel.addrCurrent[0] = a[3][0]; channel.addrCurrent[1] = a[3][1];
-        channel.countCurrent[0] = a[4][0]; channel.countCurrent[1] = a[4][1];
-        channel.mode = a[5];
-        channel.bPage = a[6];
-        // a[7] is deprecated
     }
+    var a = aState && aState.length == 8? aState : ChipSet.aDMAChannelInit;
+    channel.masked = a[0];
+    channel.addrInit[0] = a[1][0]; channel.addrInit[1] = a[1][1];
+    channel.countInit[0] = a[2][0];  channel.countInit[1] = a[2][1];
+    channel.addrCurrent[0] = a[3][0]; channel.addrCurrent[1] = a[3][1];
+    channel.countCurrent[0] = a[4][0]; channel.countCurrent[1] = a[4][1];
+    channel.mode = a[5];
+    channel.bPage = a[6];
+    // a[7] is deprecated
     channel.controller = controller;
     channel.iChannel = iChannel;
     this.initDMAFunction(channel, a[8], a[9]);
@@ -1650,8 +1651,8 @@ ChipSet.prototype.initDMAChannel = function(controller, iChannel, aState)
  * initDMAFunction(channel)
  *
  * @param {Object} channel
- * @param {Component|string|undefined} component
- * @param {string|undefined} sFunction
+ * @param {Component|string} [component]
+ * @param {string} [sFunction]
  * @param {Object} [obj]
  * @return {*}
  */
@@ -1723,7 +1724,7 @@ ChipSet.prototype.saveDMAChannels = function(controller)
 ChipSet.aPICInit = [0, new Array(4)];
 
 /**
- * initPIC(iPIC, aState)
+ * initPIC(iPIC, port, aState)
  *
  * @this {ChipSet}
  * @param {number} iPIC
@@ -1733,12 +1734,16 @@ ChipSet.aPICInit = [0, new Array(4)];
 ChipSet.prototype.initPIC = function(iPIC, port, aState)
 {
     var pic = this.aPICs[iPIC];
-    if (!pic) pic = {};
+    if (!pic) {
+        pic = {
+            aICW:   [null,null,null,null]
+        };
+    }
     var a = aState && aState.length == 8? aState : ChipSet.aPICInit;
     pic.port = port;
     pic.nIRQBase = iPIC << 3;
     pic.nDelay = a[0];
-    pic.aICW = a[1];
+    pic.aICW[0] = a[1][0]; pic.aICW[1] = a[1][1]; pic.aICW[2] = a[1][2]; pic.aICW[3] = a[1][3];
     pic.nICW = a[2];
     pic.bIMR = a[3];
     pic.bIRR = a[4];
@@ -1785,12 +1790,14 @@ ChipSet.aTimerInit = [[0,0], [0,0], [0,0], [0,0]];
 ChipSet.prototype.initTimer = function(iTimer, aState)
 {
     var timer = this.aTimers[iTimer];
-    if (!timer) timer = {
-        countInit: [0,0],
-        countStart: [0,0],
-        countCurrent: [0,0],
-        countLatched: [0,0]
-    };
+    if (!timer) {
+        timer = {
+            countInit: [0,0],
+            countStart: [0,0],
+            countCurrent: [0,0],
+            countLatched: [0,0]
+        };
+    }
     var a = aState && aState.length == 13? aState : ChipSet.aTimerInit;
     timer.countInit[0] = a[0][0]; timer.countInit[1] = a[0][1];
     timer.countStart[0] = a[1][0]; timer.countStart[1] = a[1][1];
@@ -1842,7 +1849,7 @@ ChipSet.prototype.saveTimers = function()
  * getSWMemorySize(fInit)
  *
  * @this {ChipSet}
- * @param {boolean|undefined} [fInit] is true for init switch value(s) only, current value(s) otherwise
+ * @param {boolean} [fInit] is true for init switch value(s) only, current value(s) otherwise
  * @return {number} number of Kb of specified memory (NOT necessarily the same as installed memory; see RAM component)
  */
 ChipSet.prototype.getSWMemorySize = function(fInit)
@@ -1856,7 +1863,7 @@ ChipSet.prototype.getSWMemorySize = function(fInit)
  * getSWFloppyDrives(fInit)
  *
  * @this {ChipSet}
- * @param {boolean|undefined} [fInit] is true for init switch value(s) only, current value(s) otherwise
+ * @param {boolean} [fInit] is true for init switch value(s) only, current value(s) otherwise
  * @return {number} number of floppy drives specified by SW1 (range is 0 to 4)
  */
 ChipSet.prototype.getSWFloppyDrives = function(fInit)
@@ -1923,7 +1930,7 @@ ChipSet.prototype.getSWFloppyDriveSize = function(iDrive)
  * getSWVideoMonitor(fInit)
  *
  * @this {ChipSet}
- * @param {boolean|undefined} [fInit] is true for init switch value(s) only, current value(s) otherwise
+ * @param {boolean} [fInit] is true for init switch value(s) only, current value(s) otherwise
  * @return {number} one of ChipSet.MONITOR.*
  */
 ChipSet.prototype.getSWVideoMonitor = function(fInit)
@@ -1956,7 +1963,7 @@ ChipSet.prototype.addSwitches = function(s, control, n, v, oTips)
     var aeCells = Component.getElementsByClass(control, sCellClass);
     var sTip = null;
     for (i = 0; i < aeCells.length; i++) {
-        if (oTips !== undefined && oTips[i] !== undefined) {
+        if (oTips != null && oTips[i] != null) {
             sTip = oTips[i];
         }
         if (sTip) aeCells[i].setAttribute("title", sTip);
@@ -1992,7 +1999,7 @@ ChipSet.prototype.getSwitch = function(control)
  *
  * @this {ChipSet}
  * @param {Object} control is an HTML control DOM object
- * @param {boolean} f is true if the switch represented by e should be "on", false if "off"
+ * @param {boolean} f is true if the switch represented by control should be "on", false if "off"
  */
 ChipSet.prototype.setSwitch = function(control, f)
 {
@@ -2047,12 +2054,12 @@ ChipSet.prototype.updateSwitchDesc = function()
         2: "Color",
         3: "Monochrome"
     };
-    if (controlDesc !== undefined) {
+    if (controlDesc != null) {
         var sHTML = "";
         sHTML += this.getSWMemorySize(true) + "Kb";
         sHTML += ", " + asMonitorTypes[this.getSWVideoMonitor(true)] + " Monitor";
         sHTML += ", " + this.getSWFloppyDrives(true) + " Floppy Drives";
-        if (this.sw1 !== undefined && this.sw1 != this.sw1Init || this.sw2 !== undefined && this.sw2 != this.sw2Init)
+        if (this.sw1 != null && this.sw1 != this.sw1Init || this.sw2 != null && this.sw2 != this.sw2Init)
             sHTML += " (Reset required)";
         controlDesc.innerHTML = sHTML;
     }
@@ -2092,7 +2099,7 @@ ChipSet.prototype.dumpTimer = function()
             var timer = this.aTimers[iTimer];
             var sDump = "TIMER" + iTimer + ":";
             var count = 0;
-            if (timer.countBytes !== undefined) {
+            if (timer.countBytes != null) {
                 for (var i = 0; i <= timer.countBytes; i++) {
                     count |= (timer.countCurrent[i] << (i * 8));
                 }
@@ -2735,7 +2742,7 @@ ChipSet.prototype.inPICLo = function(iPIC, addrFrom)
 {
     var b = 0;
     var pic = this.aPICs[iPIC];
-    if (pic.bOCW3 !== undefined) {
+    if (pic.bOCW3 != null) {
         var bReadReg = pic.bOCW3 & ChipSet.PIC_LO.OCW3_READ_CMD;
         switch (bReadReg) {
             case ChipSet.PIC_LO.OCW3_READ_IRR:
@@ -3425,7 +3432,7 @@ ChipSet.prototype.resetTimerIndex = function(iTimer)
  *      0: Time-of-Day interrupt (~18.2 interrupts/second)
  *      1: DMA refresh
  *      2: Sound/Cassette
- * @param {boolean|undefined} [fCycleReset] is true if a cycle-count reset is about to occur
+ * @param {boolean} [fCycleReset] is true if a cycle-count reset is about to occur
  * @return {Object} timer
  */
 ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
@@ -3593,7 +3600,7 @@ ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
  * updateAllTimers(fCycleReset)
  *
  * @this {ChipSet}
- * @param {boolean|undefined} [fCycleReset] is true if a cycle-count reset is about to occur
+ * @param {boolean} [fCycleReset] is true if a cycle-count reset is about to occur
  */
 ChipSet.prototype.updateAllTimers = function(fCycleReset)
 {
@@ -4483,7 +4490,7 @@ ChipSet.prototype.setSpeaker = function(fOn)
  * @this {ChipSet}
  * @param {string} sMessage is any caller-defined message string
  * @param {number} [bitsMessage] is one or more Debugger MESSAGE_* category flag(s)
- * @param {number|undefined} [nIRQ] if the message is associated with a particular IRQ #
+ * @param {number} [nIRQ] if the message is associated with a particular IRQ #
  *
  * This is a combination of the Debugger's messageEnabled() and message() functions, for convenience.
  *

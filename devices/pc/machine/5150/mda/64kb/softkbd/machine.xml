@@ -10,6 +10,9 @@
 	<video id="videoMDA" screenwidth="720" screenheight="350" scale="true" charset="/devices/pc/video/ibm-mda-cga.json" pos="center" padding="8px">
 		<menu>
 			<title>Monochrome Display</title>
+			<control type="led" class="output" label="Scroll" binding="scroll-lock" pos="right" padleft="8px"/>
+			<control type="led" class="output" label="Num" binding="num-lock" pos="right" padleft="8px"/>
+			<control type="led" class="output" label="Caps" binding="caps-lock" pos="right" padleft="8px"/>
 		</menu>
 	</video>
 	<keyboard ref="/devices/pc/keyboard/us83.xml"/>

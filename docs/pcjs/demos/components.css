@@ -94,6 +94,16 @@
     line-height: 34px;
     background-color: #ffffff;
 }
+.pcjs-led {
+    float: left;
+    width: 8px;
+    height: 8px;
+    margin: 4px;
+    border: 1px solid black;
+    text-align: center;
+    line-height: 19px;
+    background-color: #000000;
+}
 .pcjs-reference {
     float: left;
     font-size: x-small;

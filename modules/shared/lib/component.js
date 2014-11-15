@@ -509,21 +509,21 @@ if (window && !window.document.ELEMENT_NODE) window.document.ELEMENT_NODE = 1;
  */
 Component.bindComponentControls = function(component, element, sAppClass)
 {
-    var iControl, aeControls;
-    aeControls = Component.getElementsByClass(element.parentNode, sAppClass + "-control");
-    for (iControl = 0; iControl < aeControls.length; iControl++) {
-        var iNode, aeChildNodes;
-        aeChildNodes = aeControls[iControl].childNodes;
-        for (iNode = 0; iNode < aeChildNodes.length; iNode++) {
+    var aeControls = Component.getElementsByClass(element.parentNode, sAppClass + "-control");
+
+    for (var iControl = 0; iControl < aeControls.length; iControl++) {
+
+        var aeChildNodes = aeControls[iControl].childNodes;
+
+        for (var iNode = 0; iNode < aeChildNodes.length; iNode++) {
             var control = aeChildNodes[iNode];
             if (control.nodeType !== window.document.ELEMENT_NODE) {
                 continue;
             }
             var sClass = control.getAttribute("class");
             if (!sClass) continue;
-            var iClass, aClasses;
-            aClasses = sClass.split(" ");
-            for (iClass = 0; iClass < aClasses.length; iClass++) {
+            var aClasses = sClass.split(" ");
+            for (var iClass = 0; iClass < aClasses.length; iClass++) {
                 var parms;
                 sClass = aClasses[iClass];
                 switch (sClass) {
@@ -535,7 +535,7 @@ Component.bindComponentControls = function(component, element, sAppClass)
                         } else {
                             Component.log('Component.bindComponentControls("' + component.toString() + '"): missing binding' + (parms? ' for ' + parms['type'] : ''), "warning");
                         }
-                        aClasses = [];
+                        iClass = aClasses.length;
                         break;
                     default:
                         // Component.log("Component.bindComponentControls(" + component.toString() + "): unrecognized control class \"" + sClass + "\"", "warning");
