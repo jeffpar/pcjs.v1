@@ -399,11 +399,12 @@ FileDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offData)
 FileDump.prototype.loadMap = function(sFilePath, done)
 {
     /*
-     * The HEX format doesn't support MAP files.  For all other (JSON) formats, we assume that the JSON
+     * The BYTES and HEX formats don't support MAP files, because the clients expect those format requests
+     * to return an Array of bytes, not an Object.  For all other (JSON) formats, we assume that the JSON
      * is "unwrapped" at this point, and that even if loadMap() doesn't find a map file, it will still wrap
      * the resulting JSON with braces.
      */
-    if (this.sFormat != DumpAPI.FORMAT.HEX) {
+    if (this.sFormat != DumpAPI.FORMAT.BYTES && this.sFormat != DumpAPI.FORMAT.HEX) {
         var obj = this;
         var sMapPath = sFilePath.replace(/\.(rom|json)$/, ".map");
         if (str.endsWith(sMapPath, ".map")) {
