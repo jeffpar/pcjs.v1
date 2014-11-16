@@ -63,15 +63,8 @@ function C1PROM(parmsROM)
          * in compact form (ie, minimal whitespace, no ASCII data comments, etc).
          */
         var sFileExt = str.getExtension(this.sImage);
-        if (sFileExt != "json" && sFileExt != "hex") {
-            /**
-             * TODO: This code was using a deprecated parameter (compact=1); make sure things still work.
-             *
-             * TODO: Convert this code to use the new shared File API definitions and weblib functions; eg:
-             *
-             *      sFileURL = web.getHost() + DumpAPI.ENDPOINT + "?" + DumpAPI.QUERY.FILE + "=" + this.sImage;
-             */
-            sFileURL = "http://" + window.location.host + "/api/v1/dump?file=" + this.sImage;
+        if (sFileExt != DumpAPI.FORMAT.JSON && sFileExt != DumpAPI.FORMAT.HEX) {
+            sFileURL = web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sImage + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES;
         }
         web.loadResource(sFileURL, true, null, this, this.convertImage);
     }
@@ -156,13 +149,18 @@ C1PROM.prototype.convertImage = function(sImageName, sImageData, nErrorCode)
         this.println("Error loading ROM \"" + sImageName + "\" (" + nErrorCode + ")");
         return;
     }
-    if (sImageData[0] == "[") {
+    if (sImageData.charAt(0) == "[" || sImageData.charAt(0) == "{") {
         try {
             /*
-             * The most likely source of any exception will be right here, where we're parsing
-             * the JSON-encoded ROM data.
+             * The most likely source of any exception will be here: parsing the JSON-encoded ROM data.
              */
-            this.abImage = eval("(" + sImageData + ")");
+            var rom = eval("(" + sImageData + ")");
+            var ab = rom['bytes'];
+            if (ab) {
+                this.abImage = ab;
+            } else {
+                this.abImage = rom;
+            }
         } catch (e) {
             this.println("Error processing ROM \"" + sImageName + "\": " + e.message);
             return;
