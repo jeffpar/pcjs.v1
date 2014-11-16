@@ -1548,7 +1548,7 @@ if (DEBUGGER) {
 
         if (this.cpu) {
             if (this.bitsMessageEnabled & Debugger.MESSAGE.HALT) {
-                this.cpu.haltCPU();
+                this.cpu.stopCPU();
             }
             /*
              * We have no idea what the frequency of println() calls might be; all we know is that they easily
@@ -1725,19 +1725,6 @@ if (DEBUGGER) {
 
         this.updateStatus(fRegs || false, false);
         return (this.nCycles > 0);
-    };
-
-    /**
-     * haltCPU()
-     *
-     * @this {Debugger}
-     */
-    Debugger.prototype.haltCPU = function()
-    {
-        /*
-         * We ask the CPU to halt, but we can't assume it's stopped until it calls stop()
-         */
-        this.cpu.haltCPU();
     };
 
     /**
@@ -2054,7 +2041,7 @@ if (DEBUGGER) {
     Debugger.prototype.checkMemoryRead = function(addr)
     {
         if (this.checkBreakpoint(addr, this.aBreakRead)) {
-            this.cpu.haltCPU(true);
+            this.cpu.stopCPU(true);
             return true;
         }
         return false;
@@ -2073,7 +2060,7 @@ if (DEBUGGER) {
     Debugger.prototype.checkMemoryWrite = function(addr)
     {
         if (this.checkBreakpoint(addr, this.aBreakWrite)) {
-            this.cpu.haltCPU(true);
+            this.cpu.stopCPU(true);
             return true;
         }
         return false;
@@ -2095,7 +2082,7 @@ if (DEBUGGER) {
          * We trust that the Bus component won't call us unless we told it to, so we halt unconditionally
          */
         this.println("break on input from port " + str.toHexWord(port) + ": " + str.toHexByte(bIn));
-        this.cpu.haltCPU(true);
+        this.cpu.stopCPU(true);
         return true;
     };
 
@@ -2115,7 +2102,7 @@ if (DEBUGGER) {
          * We trust that the Bus component won't call us unless we told it to, so we halt unconditionally
          */
         this.println("break on output to port " + str.toHexWord(port) + ": " + str.toHexByte(bOut));
-        this.cpu.haltCPU(true);
+        this.cpu.stopCPU(true);
         return true;
     };
 
@@ -3685,7 +3672,7 @@ if (DEBUGGER) {
     Debugger.prototype.doHalt = function(sCount)
     {
         if (this.aFlags.fRunning && sCount === undefined) {
-            this.haltCPU();
+            this.cpu.stopCPU();
             return;
         }
         var sMore = "";

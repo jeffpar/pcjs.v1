@@ -437,11 +437,11 @@ FDC.prototype.setBinding = function(sHTMLType, sBinding, control)
                         Component.error("FDC option error: " + e.message);
                     }
                 }
-                var sDesc = dataValue['desc'];
-                if (sDesc === undefined) sDesc = "";
+                var sHTML = dataValue['desc'];
+                if (sHTML === undefined) sHTML = "";
                 var sHRef = dataValue['href'];
-                if (sHRef !== undefined) sDesc = "<a href=\"" + sHRef + "\" target=\"_blank\">" + sDesc + "</a>";
-                controlDesc.innerHTML = sDesc;
+                if (sHRef !== undefined) sHTML = "<a href=\"" + sHRef + "\" target=\"_blank\">" + sHTML + "</a>";
+                controlDesc.innerHTML = sHTML;
             }
         };
         return true;
@@ -583,7 +583,7 @@ FDC.prototype.powerUp = function(data, fRepower)
             while (controlDrives.firstChild) {
                 controlDrives.removeChild(controlDrives.firstChild);
             }
-            controlDrives.innerHTML = "";
+            controlDrives.textContent = "";
             for (var iDrive = 0; iDrive < this.nDrives; iDrive++) {
                 var controlOption = window.document.createElement("option");
                 controlOption['value'] = iDrive;
@@ -592,7 +592,7 @@ FDC.prototype.powerUp = function(data, fRepower)
                  * and will NOT match the drive mappings that DOS ultimately uses.  We'll need to spiff this up at
                  * some point.
                  */
-                controlOption.innerHTML = String.fromCharCode(0x41 + iDrive) + ":";
+                controlOption.textContent = String.fromCharCode(0x41 + iDrive) + ":";
                 controlDrives.appendChild(controlOption);
             }
             if (this.nDrives > 0) {
@@ -1404,7 +1404,7 @@ FDC.prototype.addDiskette = function(sName, sPath)
         }
         var controlOption = window.document.createElement("option");
         controlOption['value'] = sPath;
-        controlOption.innerHTML = sName;
+        controlOption.textContent = sName;
         controlDisks.appendChild(controlOption);
     }
 };
@@ -1705,7 +1705,7 @@ FDC.prototype.outFDCData = function(port, bOut, addrFrom)
     }
     if (DEBUG) {
         this.messageDebugger("unsupported FDC command: " + str.toHexByte(bCmd));
-        if (DEBUGGER) this.cpu.haltCPU();
+        if (DEBUGGER) this.cpu.stopCPU();
     }
 };
 
@@ -1934,7 +1934,7 @@ FDC.prototype.doCmd = function()
     default:
         if (DEBUG) {
             this.messageDebugger("FDC operation unsupported (command=0x: " + str.toHexByte(bCmd) + ")");
-            if (DEBUGGER) this.cpu.haltCPU();
+            if (DEBUGGER) this.cpu.stopCPU();
         }
         break;
     }

@@ -728,7 +728,7 @@ X86CPU.prototype.initProcessor = function()
  */
 X86CPU.prototype.reset = function()
 {
-    if (this.aFlags.fRunning) this.haltCPU();
+    if (this.aFlags.fRunning) this.stopCPU();
     this.resetRegs();
     this.resetCycles();
     this.clearError();      // clear any fatal error/exception that setError() may have flagged
@@ -1717,7 +1717,7 @@ X86CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
         case "T":
         case "I":
         case "D":
-        case "O":
+        case "V":
             this.bindings[sBinding] = control;
             fBound = true;
             break;
@@ -2371,35 +2371,38 @@ X86CPU.prototype.delayINTR = function()
  * displayStatus()
  *
  * @this {X86CPU}
+ * @param {boolean} [fForce]
  */
-X86CPU.prototype.displayStatus = function()
+X86CPU.prototype.displayStatus = function(fForce)
 {
-    this.displayReg("AX", this.regAX);
-    this.displayReg("BX", this.regBX);
-    this.displayReg("CX", this.regCX);
-    this.displayReg("DX", this.regDX);
-    this.displayReg("SP", this.regSP);
-    this.displayReg("BP", this.regBP);
-    this.displayReg("SI", this.regSI);
-    this.displayReg("DI", this.regDI);
-    this.displayReg("CS", this.segCS.sel);
-    this.displayReg("DS", this.segDS.sel);
-    this.displayReg("SS", this.segSS.sel);
-    this.displayReg("ES", this.segES.sel);
-    this.displayReg("IP", this.regIP);
-    var regPS = this.getPS();
-    this.displayReg("PS", regPS);
-    this.displayReg("C", (regPS & X86.PS.CF)? 1 : 0, 1);
-    this.displayReg("P", (regPS & X86.PS.PF)? 1 : 0, 1);
-    this.displayReg("A", (regPS & X86.PS.AF)? 1 : 0, 1);
-    this.displayReg("Z", (regPS & X86.PS.ZF)? 1 : 0, 1);
-    this.displayReg("S", (regPS & X86.PS.SF)? 1 : 0, 1);
-    this.displayReg("T", (regPS & X86.PS.TF)? 1 : 0, 1);
-    this.displayReg("I", (regPS & X86.PS.IF)? 1 : 0, 1);
-    this.displayReg("D", (regPS & X86.PS.DF)? 1 : 0, 1);
-    this.displayReg("O", (regPS & X86.PS.OF)? 1 : 0, 1);
+    if (fForce || !this.aFlags.fRunning || this.aFlags.fDisplayLiveRegs) {
+        this.displayReg("AX", this.regAX);
+        this.displayReg("BX", this.regBX);
+        this.displayReg("CX", this.regCX);
+        this.displayReg("DX", this.regDX);
+        this.displayReg("SP", this.regSP);
+        this.displayReg("BP", this.regBP);
+        this.displayReg("SI", this.regSI);
+        this.displayReg("DI", this.regDI);
+        this.displayReg("CS", this.segCS.sel);
+        this.displayReg("DS", this.segDS.sel);
+        this.displayReg("SS", this.segSS.sel);
+        this.displayReg("ES", this.segES.sel);
+        this.displayReg("IP", this.regIP);
+        var regPS = this.getPS();
+        this.displayReg("PS", regPS);
+        this.displayReg("C", (regPS & X86.PS.CF)? 1 : 0, 1);
+        this.displayReg("P", (regPS & X86.PS.PF)? 1 : 0, 1);
+        this.displayReg("A", (regPS & X86.PS.AF)? 1 : 0, 1);
+        this.displayReg("Z", (regPS & X86.PS.ZF)? 1 : 0, 1);
+        this.displayReg("S", (regPS & X86.PS.SF)? 1 : 0, 1);
+        this.displayReg("T", (regPS & X86.PS.TF)? 1 : 0, 1);
+        this.displayReg("I", (regPS & X86.PS.IF)? 1 : 0, 1);
+        this.displayReg("D", (regPS & X86.PS.DF)? 1 : 0, 1);
+        this.displayReg("V", (regPS & X86.PS.OF)? 1 : 0, 1);
+    }
     var controlSpeed = this.bindings["speed"];
-    if (controlSpeed) controlSpeed.innerHTML = this.getSpeedCurrent();
+    if (controlSpeed) controlSpeed.textContent = this.getSpeedCurrent();
 };
 
 /**
@@ -2430,10 +2433,10 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
      * by a breakpoint or some other exceptional condition (false). NOTE: this does NOT include thrown
      * exceptions, which stepCPU() expects the caller to catch using its own exception handler.
      *
-     * The CPU relies on the use of haltCPU() rather than fComplete, because the CPU never single-steps
+     * The CPU relies on the use of stopCPU() rather than fComplete, because the CPU never single-steps
      * (ie, nMinCycles is always some large number), whereas the Debugger does.  And conversely, when the
      * Debugger is single-stepping (even when performing multiple single-steps), fRunning is never set,
-     * so haltCPU() would have no effect as far as the Debugger is concerned.
+     * so stopCPU() would have no effect as far as the Debugger is concerned.
      */
     this.aFlags.fComplete = true;
 
@@ -2456,7 +2459,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
 
     /*
      * We move the minimum cycle count to nStepCycles (the number of cycles left to step), so that other
-     * functions have the ability to force that number to zero (eg, haltCPU()), and thus we don't have to check
+     * functions have the ability to force that number to zero (eg, stopCPU()), and thus we don't have to check
      * any other criteria to determine whether we should continue stepping or not.
      */
     this.nBurstCycles = this.nStepCycles = nMinCycles;
@@ -2535,7 +2538,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
         }
 
         if (DEBUGGER && fDebugCheck && this.dbg.checkInstruction(this.regEIP)) {
-            this.haltCPU();
+            this.stopCPU();
             break;
         }
 
@@ -2574,7 +2577,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
             if (this.nStepCycles >= this.nSnapCycles && !(this.opFlags & X86.OPFLAG.PREFIXES)) {
                 this.println("cycle miscount: " + (this.nSnapCycles - this.nStepCycles));
                 this.setIP(this.opEA - this.segCS.base);
-                this.haltCPU();
+                this.stopCPU();
                 break;
             }
         }

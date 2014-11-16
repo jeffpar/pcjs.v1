@@ -101,6 +101,11 @@ function CPU(parmsCPU, nCyclesDefault)
     this.aFlags.fAutoStart = parmsCPU['autoStart'];
 
     /*
+     * TODO: Add some UI for fDisplayLiveRegs (either an XML property, or a UI checkbox, or both)
+     */
+    this.aFlags.fDisplayLiveRegs = false;
+
+    /*
      * Provide a power-saving URL-based way of overriding the 'autostart' setting;
      * if an "autostart" parameter is specified on the URL, anything other than "true"
      * or "false" is treated as the null setting (see above for details).
@@ -404,7 +409,7 @@ CPU.prototype.updateChecksum = function(nCycles)
             if (this.aCounts.nCyclesChecksumStop <= this.getCycles()) {
                 this.aCounts.nCyclesChecksumInterval = this.aCounts.nCyclesChecksumStop = -1;
                 this.resetChecksum();
-                this.haltCPU();
+                this.stopCPU();
                 fDisplay = true;
             }
         }
@@ -436,20 +441,25 @@ CPU.prototype.displayChecksum = function()
  */
 CPU.prototype.displayReg = function(sReg, nVal, cch)
 {
-    if (this.bindings[sReg] !== undefined) {
+    if (this.bindings[sReg]) {
         if (cch === undefined) cch = 4;
         if (nVal === undefined) {
             this.setError("Register " + sReg + " is invalid");
-            this.haltCPU();
+            this.stopCPU();
         }
-        var sVal = str.toHex(nVal, cch);
+        var sVal;
+        if (!this.aFlags.fRunning || this.aFlags.fDisplayLiveRegs) {
+            sVal = str.toHex(nVal, cch);
+        } else {
+            sVal = "----".substr(0, cch);
+        }
         /*
          * TODO: Determine if this test actually avoids any redrawing when a register hasn't changed, and/or if
          * we should maintain our own (numeric) cache of displayed register values (to avoid creating these temporary
          * string values that will have to garbage-collected), and/or if this is actually slower, and/or if I'm being
          * too obsessive.
          */
-        if (this.bindings[sReg].innerHTML != sVal) this.bindings[sReg].innerHTML = sVal;
+        if (this.bindings[sReg].textContent != sVal) this.bindings[sReg].textContent = sVal;
     }
 };
 
@@ -459,8 +469,9 @@ CPU.prototype.displayReg = function(sReg, nVal, cch)
  * This will be implemented by the X86CPU component.
  *
  * @this {CPU}
+ * @param {boolean} [fForce]
  */
-CPU.prototype.displayStatus = function()
+CPU.prototype.displayStatus = function(fForce)
 {
 };
 
@@ -496,7 +507,7 @@ CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
             if (!cpu.aFlags.fRunning)
                 cpu.runCPU(true);
             else
-                cpu.haltCPU(true);
+                cpu.stopCPU(true);
         };
         fBound = true;
         break;
@@ -524,7 +535,7 @@ CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
         control.onclick = function onClickSetSpeed() {
             cpu.setSpeed(cpu.aCounts.nCyclesMultiplier << 1, true);
         };
-        control.innerHTML = this.getSpeedTarget();
+        control.textContent = this.getSpeedTarget();
         fBound = true;
         break;
 
@@ -532,6 +543,34 @@ CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
         break;
     }
     return fBound;
+};
+
+/**
+ * setBurstCycles(nCycles)
+ *
+ * This function is used by the ChipSet component whenever a very low timer count is set,
+ * in anticipation of the timer requiring an update sooner than the normal nCyclesPerYield
+ * period in runCPU() would normally provide.
+ *
+ * @this {CPU}
+ * @param {number} nCycles is the target number of cycles to drop the current burst to
+ * @return {boolean}
+ */
+CPU.prototype.setBurstCycles = function(nCycles)
+{
+    if (this.aFlags.fRunning) {
+        var nDelta = this.nStepCycles - nCycles;
+        /*
+         * NOTE: If nDelta is negative, we will actually be increasing nStepCycles and nBurstCycles.
+         * Which is OK, but if we're also taking snapshots of the cycle counts, to make sure that instruction
+         * costs are being properly assessed, then we need to update nSnapCycles as well.
+         */
+        if (DEBUG) this.nSnapCycles -= nDelta;
+        this.nStepCycles -= nDelta;
+        this.nBurstCycles -= nDelta;
+        return true;
+    }
+    return false;
 };
 
 /**
@@ -764,7 +803,7 @@ CPU.prototype.setSpeed = function(nMultiplier, fOnClick)
             this.aCounts.mhzTarget = mhz;
             var sSpeed = this.getSpeedTarget();
             var controlSpeed = this.bindings["setSpeed"];
-            if (controlSpeed) controlSpeed.innerHTML = sSpeed;
+            if (controlSpeed) controlSpeed.textContent = sSpeed;
             this.println("target speed: " + sSpeed);
         }
         if (fOnClick) this.setFocus();
@@ -936,21 +975,9 @@ CPU.prototype.runCPU = function(fOnClick)
         if (this.cmp) this.cmp.stop(usr.getTime(), this.getCycles());
         return;
     }
-    if (!this.aFlags.fRunning) {
-        /*
-         *  setSpeed() without a speed parameter leaves the selected speed in place, but also resets the
-         *  cycle counter and timestamp for the current series of runCPU() calls, calculates the maximum number
-         *  of cycles for each burst based on the last known effective CPU speed, and resets the nCyclesRecalc
-         *  threshold counter.
-         */
-        this.setSpeed();
-        if (this.cmp) this.cmp.start(this.aCounts.msStartRun, this.getCycles());
-        this.aFlags.fRunning = true;
-        if (this.chipset) this.chipset.setSpeaker();
-        var controlRun = this.bindings["run"];
-        if (controlRun) controlRun.innerHTML = "Halt";
-        if (fOnClick) this.setFocus();
-    }
+
+    this.startCPU(fOnClick);
+
     /*
      *  calcStartTime() initializes the cycle counter and timestamp for this runCPU() invocation, and optionally
      *  recalculates the the maximum number of cycles for each burst if the nCyclesRecalc threshold has been reached.
@@ -1009,7 +1036,7 @@ CPU.prototype.runCPU = function(fOnClick)
         } while (this.aFlags.fRunning);
     }
     catch (e) {
-        this.haltCPU();
+        this.stopCPU();
         this.updateCPU();
         if (this.cmp) this.cmp.stop(usr.getTime(), this.getCycles());
         this.setBusy(false);
@@ -1020,56 +1047,30 @@ CPU.prototype.runCPU = function(fOnClick)
 };
 
 /**
- * setBurstCycles(nCycles)
+ * startCPU(fSetFocus)
  *
- * This function is used by the ChipSet component whenever a very low timer count is set,
- * in anticipation of the timer requiring an update sooner than the normal nCyclesPerYield
- * period in runCPU() would normally provide.
+ * WARNING: Other components must use runCPU() to get the CPU running; this is a runCPU() helper function only.
  *
- * @this {CPU}
- * @param {number} nCycles is the target number of cycles to drop the current burst to
- * @return {boolean}
+ * @param {boolean} [fSetFocus]
  */
-CPU.prototype.setBurstCycles = function(nCycles)
+CPU.prototype.startCPU = function(fSetFocus)
 {
-    if (this.aFlags.fRunning) {
-        var nDelta = this.nStepCycles - nCycles;
+    if (!this.aFlags.fRunning) {
         /*
-         * NOTE: If nDelta is negative, we will actually be increasing nStepCycles and nBurstCycles.
-         * Which is OK, but if we're also taking snapshots of the cycle counts, to make sure that instruction
-         * costs are being properly assessed, then we need to update nSnapCycles as well.
+         *  setSpeed() without a speed parameter leaves the selected speed in place, but also resets the
+         *  cycle counter and timestamp for the current series of runCPU() calls, calculates the maximum number
+         *  of cycles for each burst based on the last known effective CPU speed, and resets the nCyclesRecalc
+         *  threshold counter.
          */
-        if (DEBUG) this.nSnapCycles -= nDelta;
-        this.nStepCycles -= nDelta;
-        this.nBurstCycles -= nDelta;
-        return true;
-    }
-    return false;
-};
-
-/**
- * haltCPU(fComplete)
- *
- * This similar to yieldCPU(), but it doesn't need to zero nCyclesNextYield to break out of runCPU();
- * it simply needs to clear fRunning (well, "simply" may be oversimplifying a bit....)
- *
- * @this {CPU}
- * @param {boolean} [fComplete]
- */
-CPU.prototype.haltCPU = function(fComplete)
-{
-    this.isBusy(true);
-    this.nBurstCycles -= this.nStepCycles;
-    this.nStepCycles = 0;
-    this.addCycles(this.nRunCycles);
-    this.nRunCycles = 0;
-    if (this.aFlags.fRunning) {
-        this.aFlags.fRunning = false;
+        this.setSpeed();
+        if (this.cmp) this.cmp.start(this.aCounts.msStartRun, this.getCycles());
+        this.aFlags.fRunning = true;
         if (this.chipset) this.chipset.setSpeaker();
         var controlRun = this.bindings["run"];
-        if (controlRun) controlRun.innerHTML = "Run";
+        if (controlRun) controlRun.textContent = "Halt";
+        this.displayStatus(true);
+        if (fSetFocus) this.setFocus();
     }
-    this.aFlags.fComplete = fComplete;
 };
 
 /**
@@ -1084,6 +1085,33 @@ CPU.prototype.haltCPU = function(fComplete)
 CPU.prototype.stepCPU = function(nMinCycles)
 {
     return 0;
+};
+
+/**
+ * stopCPU(fComplete)
+ *
+ * For use by any component that wants to stop the CPU.
+ *
+ * This similar to yieldCPU(), but it doesn't need to zero nCyclesNextYield to break out of runCPU();
+ * it simply needs to clear fRunning (well, "simply" may be oversimplifying a bit....)
+ *
+ * @this {CPU}
+ * @param {boolean} [fComplete]
+ */
+CPU.prototype.stopCPU = function(fComplete)
+{
+    this.isBusy(true);
+    this.nBurstCycles -= this.nStepCycles;
+    this.nStepCycles = 0;
+    this.addCycles(this.nRunCycles);
+    this.nRunCycles = 0;
+    if (this.aFlags.fRunning) {
+        this.aFlags.fRunning = false;
+        if (this.chipset) this.chipset.setSpeaker();
+        var controlRun = this.bindings["run"];
+        if (controlRun) controlRun.textContent = "Run";
+    }
+    this.aFlags.fComplete = fComplete;
 };
 
 /**
@@ -1105,7 +1133,7 @@ CPU.prototype.updateCPU = function()
 /**
  * yieldCPU()
  *
- * Similar to haltCPU() with regard to how it resets various cycle countdown values, but the CPU
+ * Similar to stopCPU() with regard to how it resets various cycle countdown values, but the CPU
  * remains in a "running" state.
  *
  * @this {CPU}

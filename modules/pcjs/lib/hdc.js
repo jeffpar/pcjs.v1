@@ -1877,7 +1877,7 @@ HDC.prototype.doATCommand = function()
 
     default:
         if (DEBUG) this.messageDebugger("HDC.doATCommand(" + str.toHexByte(this.regCommand) + "): " + (bCmd < 0? ("invalid drive (" + iDrive + ")") : "unsupported operation"));
-        if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE.HDC) && bCmd >= 0) this.cpu.haltCPU();
+        if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE.HDC) && bCmd >= 0) this.cpu.stopCPU();
         break;
     }
 
@@ -2046,7 +2046,7 @@ HDC.prototype.doXTCommand = function()
         default:
             if (DEBUG) this.messageDebugger("HDC.doXTCommand(" + str.toHexByte(bCmdOrig) + "): " + (bCmd < 0? ("invalid drive (" + iDrive + ")") : "unsupported operation"));
             this.beginResult(HDC.XTC.DATA.STATUS_ERROR | bDrive);
-            if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE.HDC) && bCmd >= 0) this.cpu.haltCPU();
+            if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE.HDC) && bCmd >= 0) this.cpu.stopCPU();
             break;
         }
     }

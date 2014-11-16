@@ -743,7 +743,7 @@ Computer.prototype.powerOff = function(fSave, fShutdown)
      * components to do anything after they're no longer ready.
      */
     if (this.cpu && this.cpu.powerDown) {
-        if (fShutdown) this.cpu.haltCPU();
+        if (fShutdown) this.cpu.stopCPU();
         data = this.cpu.powerDown(fSave, fShutdown);
         if (typeof data === "object") stateComputer.set(this.cpu.id, data);
         if (fShutdown) {

@@ -543,7 +543,7 @@ Mouse.prototype.sendPacket = function(sDiag, xDiag, yDiag)
     var b1 = 0x40 | (this.fButton1? 0x20 : 0) | (this.fButton2? 0x10 : 0) | ((this.yDelta & 0xC0) >> 4) | ((this.xDelta & 0xC0) >> 6);
     var b2 = this.xDelta & 0x3F;
     var b3 = this.yDelta & 0x3F;
-    this.messageDebugger((sDiag? (sDiag + ": ") : "") + (yDiag !== undefined? ("mouse (" + xDiag + "," + yDiag + "): ") : "") + "serial packet [" + str.toHexByte(b1) + "," + str.toHexByte(b2) + "," + str.toHexByte(b3) + "]");
+    this.messageDebugger((sDiag? (sDiag + ": ") : "") + (yDiag !== undefined? ("mouse (" + xDiag + "," + yDiag + "): ") : "") + "serial packet [" + str.toHexByte(b1) + "," + str.toHexByte(b2) + "," + str.toHexByte(b3) + "]", Debugger.MESSAGE.SERIAL);
     this.componentAdapter.sendRBR([b1, b2, b3]);
     this.xDelta = this.yDelta = 0;
 };
@@ -637,11 +637,17 @@ Mouse.prototype.notifyMCR = function(bMCR)
  *
  * @this {Mouse}
  * @param {string} sMessage is any caller-defined message string
+ * @param {number} [bitsMessage] is one or more Debugger MESSAGE_* category flag(s)
  */
-Mouse.prototype.messageDebugger = function(sMessage)
+Mouse.prototype.messageDebugger = function(sMessage, bitsMessage)
 {
     if (DEBUGGER && this.dbg) {
-        if (this.dbg.messageEnabled(Debugger.MESSAGE.MOUSE)) {
+        if (bitsMessage == null) {
+            bitsMessage = Debugger.MESSAGE.MOUSE;
+        } else {
+            bitsMessage |= Debugger.MESSAGE.MOUSE;
+        }
+        if (this.dbg.messageEnabled(bitsMessage)) {
             this.dbg.message(sMessage + " @" + str.toHexAddr(this.cpu.regIP, this.cpu.segCS.sel));
         }
     }

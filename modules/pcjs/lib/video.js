@@ -2022,7 +2022,7 @@ Video.prototype.setBinding = function(sHTMLType, sBinding, control)
         switch (sBinding) {
 
         case "lockPointer":
-            this.sLockMessage = control.innerHTML;
+            this.sLockMessage = control.textContent;
             if (this.canvasScreen && this.canvasScreen.lockPointer) {
                 control.onclick = function onClickLockPointer() {
                     if (DEBUG) video.messageDebugger("lockPointer()");
@@ -2128,7 +2128,7 @@ Video.prototype.notifyPointerLocked = function(fLocked)
         if (this.kbd) this.kbd.notifyEscape(fLocked);
     }
     var control = this.bindings["lockPointer"];
-    if (control) control.innerHTML = (fLocked? "Press Esc to Unlock Pointer" : this.sLockMessage);
+    if (control) control.textContent = (fLocked? "Press Esc to Unlock Pointer" : this.sLockMessage);
 };
 
 /**

@@ -52,7 +52,7 @@ var X86OpXX = {
         /*
          * Look for common *potentially* bogus opcodes in DEBUG
          */
-        if (DEBUG && !b) this.haltCPU();
+        if (DEBUG && !b) this.stopCPU();
         X86Mods.aOpModsMemByte[b].call(this, X86Grps.opGrpADDb);
     },
     /**
@@ -3207,7 +3207,7 @@ var X86OpXX = {
          */
         if (DEBUGGER && this.dbg && this.dbg.checksEnabled(true)) {
             this.advanceIP(-1);     // this is purely for the Debugger's benefit, to show the HLT
-            this.haltCPU();
+            this.stopCPU();
             return;
         }
         /*
@@ -3216,7 +3216,7 @@ var X86OpXX = {
          */
         if (!this.getIF()) {
             if (DEBUGGER && this.dbg) this.advanceIP(-1);
-            this.haltCPU();
+            this.stopCPU();
          // return;
         }
     },

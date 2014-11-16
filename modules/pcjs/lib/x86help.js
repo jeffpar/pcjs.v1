@@ -478,7 +478,7 @@ var X86Help = {
             if (this.dbg.messageEnabled(Debugger.MESSAGE.CPU)) {
                 this.dbg.message("Fault 0x" + str.toHexByte(nFault) + (nError != null? " (0x" + str.toHexWord(nError) + ")" : "") + " on opcode 0x" + str.toHexByte(this.bus.getByteDirect(this.regEIP)) + " at " + str.toHexAddr(this.regIP, this.segCS.sel));
             }
-            if (fHalt) this.haltCPU();
+            if (fHalt) this.stopCPU();
         }
         if (this.model >= X86.MODEL_80186) {
             this.setIP(this.opEA - this.segCS.base);
@@ -490,7 +490,7 @@ var X86Help = {
      */
     opInvalid: function() {
         X86Help.opHelpFault.call(this, X86.EXCEPTION.UD_FAULT);
-        this.haltCPU();
+        this.stopCPU();
     },
     /**
      * @this {X86CPU}
@@ -498,7 +498,7 @@ var X86Help = {
     opUndefined: function() {
         this.setIP(this.opEA - this.segCS.base);
         this.setError("Undefined opcode 0x" + str.toHexByte(this.bus.getByteDirect(this.regEIP)) + " at " + str.toHexAddr(this.regIP, this.segCS.sel));
-        this.haltCPU();
+        this.stopCPU();
     }
 };
 

@@ -2054,13 +2054,13 @@ ChipSet.prototype.updateSwitchDesc = function()
         3: "Monochrome"
     };
     if (controlDesc != null) {
-        var sHTML = "";
-        sHTML += this.getSWMemorySize(true) + "Kb";
-        sHTML += ", " + asMonitorTypes[this.getSWVideoMonitor(true)] + " Monitor";
-        sHTML += ", " + this.getSWFloppyDrives(true) + " Floppy Drives";
+        var sText = "";
+        sText += this.getSWMemorySize(true) + "Kb";
+        sText += ", " + asMonitorTypes[this.getSWVideoMonitor(true)] + " Monitor";
+        sText += ", " + this.getSWFloppyDrives(true) + " Floppy Drives";
         if (this.sw1 != null && this.sw1 != this.sw1Init || this.sw2 != null && this.sw2 != this.sw2Init)
-            sHTML += " (Reset required)";
-        controlDesc.innerHTML = sHTML;
+            sText += " (Reset required)";
+        controlDesc.textContent = sText;
     }
 };
 
@@ -4087,7 +4087,7 @@ ChipSet.prototype.out8042InBuffCmd = function(port, bOut, addrFrom)
     default:
         if (DEBUG && DEBUGGER && this.dbg) {
             this.dbg.message("unrecognized 8042 command: " + str.toHexByte(this.b8042InBuff));
-            this.cpu.haltCPU();
+            this.cpu.stopCPU();
         }
         break;
     }
@@ -4164,7 +4164,7 @@ ChipSet.prototype.set8042OutPort = function(b)
          */
         if (DEBUG && DEBUGGER && this.dbg) {
             this.dbg.message("unexpected 8042 output port reset: " + str.toHexByte(b));
-            this.cpu.haltCPU();
+            this.cpu.stopCPU();
         }
         this.cpu.resetRegs();
     }
