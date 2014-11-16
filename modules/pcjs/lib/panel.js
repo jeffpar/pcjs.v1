@@ -53,29 +53,28 @@ function Panel(parmsPanel) {
 Component.subclass(Component, Panel);
 
 /**
- * setBinding(sHTMLClass, sHTMLType, sBinding, control)
+ * setBinding(sHTMLType, sBinding, control)
  *
  * The Panel doesn't have any bindings of its own; it passes along all binding requests to
  * the Computer, CPU, Keyboard and Debugger components. The order shouldn't matter, since any
  * component that doesn't recognize the specified binding should simply ignore it.
  *
  * @this {Panel}
- * @param {string|null} sHTMLClass is the class of the HTML control (eg, "input", "output")
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-Panel.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
+Panel.prototype.setBinding = function(sHTMLType, sBinding, control)
 {
-    if (this.cmp && this.cmp.setBinding(sHTMLClass, sHTMLType, sBinding, control)) return true;
-    if (this.cpu && this.cpu.setBinding(sHTMLClass, sHTMLType, sBinding, control)) return true;
-    if (this.kbd && this.kbd.setBinding(sHTMLClass, sHTMLType, sBinding, control)) return true;
-    if (DEBUGGER && this.dbg && this.dbg.setBinding(sHTMLClass, sHTMLType, sBinding, control)) return true;
+    if (this.cmp && this.cmp.setBinding(sHTMLType, sBinding, control)) return true;
+    if (this.cpu && this.cpu.setBinding(sHTMLType, sBinding, control)) return true;
+    if (this.kbd && this.kbd.setBinding(sHTMLType, sBinding, control)) return true;
+    if (DEBUGGER && this.dbg && this.dbg.setBinding(sHTMLType, sBinding, control)) return true;
     /*
      * TODO: Determine how to declare this superclass method in order to avoid a type warning
      */
-    return Component.prototype.setBinding.call(this, sHTMLClass, sHTMLType, sBinding, control);
+    return Component.prototype.setBinding.call(this, sHTMLType, sBinding, control);
 };
 
 /**

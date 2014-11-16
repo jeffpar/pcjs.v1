@@ -1983,9 +1983,9 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.kbd = cmp.getComponentByType("Keyboard");
     if (this.kbd && this.canvasScreen) {
         for (var s in this.bindings) {
-            if (s.indexOf("lock") > 0) this.kbd.setBinding("input", "led", s, this.bindings[s]);
+            if (s.indexOf("lock") > 0) this.kbd.setBinding("led", s, this.bindings[s]);
         }
-        this.kbd.setBinding("input", this.textareaScreen? "textarea" : "canvas", "kbd", this.textareaScreen || this.canvasScreen);
+        this.kbd.setBinding(this.textareaScreen? "textarea" : "canvas", "kbd", this.textareaScreen || this.canvasScreen);
     }
 
     this.bEGASW = 0x9;          // our default "switches" setting (see aEGAMonitorSwitches)
@@ -1998,16 +1998,15 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
 };
 
 /**
- * setBinding(sHTMLClass, sHTMLType, sBinding, control)
+ * setBinding(sHTMLType, sBinding, control)
  *
  * @this {Video}
- * @param {string|null} sHTMLClass is the class of the HTML control (eg, "input", "output")
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "refresh")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-Video.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
+Video.prototype.setBinding = function(sHTMLType, sBinding, control)
 {
     var video = this;
     var canvas, lockPointer;

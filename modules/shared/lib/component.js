@@ -189,10 +189,6 @@ Component.extend = function(o, p)
 /**
  * Component.subclass(superclass, subclass, methods, statics)
  *
- * TODO: Determine why every subclass created by this function ends up with a name prefix of "Component.subclass"
- * in Chrome's call stack, rather than the (more logical) name of the subclass constructor.  Is there a different
- * design pattern I should be using that creates subclasses more to Chrome's liking?
- *
  * See: Flanagan, David (2011-04-18). JavaScript: The Definitive Guide: The Definitive Guide (Kindle Locations 9854-9903). OReilly Media - A. Kindle Edition (Example 9-11)
  *
  * @param {Object} superclass is the constructor of the superclass
@@ -492,7 +488,7 @@ Component.bindExternalControl = function(component, sControl, sBinding, sType)
         if (target) {
             var eBinding = target.bindings[sControl];
             if (eBinding) {
-                component.setBinding(null, null, sBinding, eBinding);
+                component.setBinding(null, sBinding, eBinding);
             }
         }
     }
@@ -527,11 +523,10 @@ Component.bindComponentControls = function(component, element, sAppClass)
                 var parms;
                 sClass = aClasses[iClass];
                 switch (sClass) {
-                    case sAppClass + "-input":
-                    case sAppClass + "-output":
+                    case sAppClass + "-binding":
                         parms = Component.getComponentParms(control);
                         if (parms && parms['binding']) {
-                            component.setBinding(sClass, parms['type'], parms['binding'], control);
+                            component.setBinding(parms['type'], parms['binding'], control);
                         } else {
                             Component.log('Component.bindComponentControls("' + component.toString() + '"): missing binding' + (parms? ' for ' + parms['type'] : ''), "warning");
                         }
@@ -610,18 +605,17 @@ Component.prototype = {
         return nMachine;
     },
     /**
-     * setBinding(sHTMLClass, sHTMLType, sBinding, control)
+     * setBinding(sHTMLType, sBinding, control)
      *
      * Component's setBinding() method is intended to be overridden by subclasses.
      *
      * @this {Component}
-     * @param {string|null} sHTMLClass is the class of the HTML control (eg, "input", "output")
      * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
      * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
      * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
-    setBinding: function(sHTMLClass, sHTMLType, sBinding, control) {
+    setBinding: function(sHTMLType, sBinding, control) {
         switch (sBinding) {
         case "clear":
             if (!this.bindings[sBinding]) {

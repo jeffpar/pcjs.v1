@@ -1682,16 +1682,15 @@ X86CPU.prototype.traceLog = function(prop, dst, src, flagsIn, flagsOut, result)
 };
 
 /**
- * setBinding(sHTMLClass, sHTMLType, sBinding, control)
+ * setBinding(sHTMLType, sBinding, control)
  *
  * @this {X86CPU}
- * @param {string|null} sHTMLClass is the class of the HTML control (eg, "input", "output")
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "AX")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-X86CPU.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
+X86CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
 {
     var fBound = false;
     switch (sBinding) {
@@ -1723,7 +1722,7 @@ X86CPU.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
             fBound = true;
             break;
         default:
-            fBound = CPU.prototype.setBinding.call(this, sHTMLClass, sHTMLType, sBinding, control);
+            fBound = CPU.prototype.setBinding.call(this, sHTMLType, sBinding, control);
             break;
     }
     return fBound;

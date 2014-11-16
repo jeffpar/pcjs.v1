@@ -487,48 +487,47 @@ if (DEBUGGER) {
 
     /**
      * @this {C1PDebugger}
-     * @param {string|null} c is the class of the HTML control (eg, "input", "output")
-     * @param {string|null} t is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea")
-     * @param {string} s is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "debugInput")
-     * @param {Object} e is the HTML control DOM object (eg, HTMLButtonElement)
+     * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
+     * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "reset")
+     * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
      * @return {boolean} true if binding was successful, false if unrecognized binding request
      */
-    C1PDebugger.prototype.setBinding = function(c, t, s, e)
+    C1PDebugger.prototype.setBinding = function(sHTMLType, sBinding, control)
     {
         var dbg = this;
-        switch(s) {
+        switch(sBinding) {
         case "debugInput":
-            this.bindings[s] = e;
-            this.eDebug = e;
+            this.bindings[sBinding] = control;
+            this.eDebug = control;
             this.eDebug.focus();
-            e.onkeypress = function(dbg, e) {
+            control.onkeypress = function(dbg, e) {
                 return function(event) {
                     if (event.keyCode == 13) {
-                        s = e.value;
+                        sBinding = e.value;
                         e.value = "";
-                        C1PDebugger.input(dbg, s);
+                        C1PDebugger.input(dbg, sBinding);
                     }
                 };
-            }(this, e);
+            }(this, control);
             return true;
         case "debugEnter":
-            this.bindings[s] = e;
+            this.bindings[sBinding] = control;
             /*
              * I've replaced the standard "onclick" code with a call to our onClickRepeat() helper in
              * component.js, so that the "Enter" button can be held to repeat, just like the "Step" button.
              */
             web.onClickRepeat(
-                e, 500, 100,
+                control, 500, 100,
                 function(fRepeat) {
                     if (dbg.eDebug) {
-                        s = dbg.eDebug.value;
+                        sBinding = dbg.eDebug.value;
                         //
                         //  If we want to use the debugEnter button to repeatedly enter the same command,
                         //  then don't clear the command string.
                         //
                         //      dbg.eDebug.value = "";
                         //
-                        C1PDebugger.input(dbg, s);
+                        C1PDebugger.input(dbg, sBinding);
                         return true;
                     }
                     if (DEBUG) dbg.log("no debugger input buffer");
@@ -537,9 +536,9 @@ if (DEBUGGER) {
             );
             return true;
         case "step":
-            this.bindings[s] = e;
+            this.bindings[sBinding] = control;
             web.onClickRepeat(
-                e, 500, 100,
+                control, 500, 100,
                 function(fRepeat) {
                     var fCompleted = false;
                     if (!dbg.isBusy(true)) {

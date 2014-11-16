@@ -351,27 +351,27 @@
 			</xsl:if>
 			<xsl:choose>
 				<xsl:when test="@type = 'button'">
-					<button class="{$APPCLASS}-{@class}" style="-webkit-user-select:none;{$border}{$width}{$height}{$fontsize}{$style}" data-value="{$type},{$binding}"><xsl:apply-templates/></button>
+					<button class="{$APPCLASS}-binding" style="-webkit-user-select:none;{$border}{$width}{$height}{$fontsize}{$style}" data-value="{$type},{$binding}"><xsl:apply-templates/></button>
 				</xsl:when>
 				<xsl:when test="@type = 'list'">
-					<select class="{$APPCLASS}-{@class}" style="{$border}{$width}{$height}{$fontsize}{$style}" data-value="{$type},{$binding}">
+					<select class="{$APPCLASS}-binding" style="{$border}{$width}{$height}{$fontsize}{$style}" data-value="{$type},{$binding}">
 						<xsl:apply-templates select="disk|app|manifest" mode="component"/>
 					</select>
 				</xsl:when>
 				<xsl:when test="@type = 'text'">
-					<input class="{$APPCLASS}-{@class}" type="text" style="{$border}{$width}{$height}{$style}" data-value="{$type},{$binding}" value="{.}" autocapitalize="off" autocorrect="off"/>
+					<input class="{$APPCLASS}-binding" type="text" style="{$border}{$width}{$height}{$style}" data-value="{$type},{$binding}" value="{.}" autocapitalize="off" autocorrect="off"/>
 				</xsl:when>
 				<xsl:when test="@type = 'submit'">
-					<input class="{$APPCLASS}-{@class}" type="submit" style="{$border}{$fontsize}{$style}" data-value="{$type},{$binding}" value="{.}"/>
+					<input class="{$APPCLASS}-binding" type="submit" style="{$border}{$fontsize}{$style}" data-value="{$type},{$binding}" value="{.}"/>
 				</xsl:when>
 				<xsl:when test="@type = 'textarea'">
-					<textarea class="{$APPCLASS}-{@class}" style="{$border}{$width}{$height}{$style}" data-value="{$type},{$binding}" readonly="readonly"> </textarea>
+					<textarea class="{$APPCLASS}-binding" style="{$border}{$width}{$height}{$style}" data-value="{$type},{$binding}" readonly="readonly"> </textarea>
 				</xsl:when>
 				<xsl:when test="@type = 'heading'">
 					<div><xsl:value-of select="."/></div>
 				</xsl:when>
 				<xsl:when test="@type = 'file'">
-					<form class="{$APPCLASS}-{@class}" data-value="{$type},{$binding}">
+					<form class="{$APPCLASS}-binding" data-value="{$type},{$binding}">
 						<fieldset class="{$APPCLASS}-fieldset">
 							<input type="file"/>
 							<input type="submit" value="Load" disabled="true"/>
@@ -379,7 +379,7 @@
 					</form>
 				</xsl:when>
 				<xsl:when test="@type = 'led'">
-					<div class="{$APPCLASS}-{@class} {$APPCLASS}-{@type}" data-value="{$type},{$binding}"><xsl:value-of select="."/></div>
+					<div class="{$APPCLASS}-binding {$APPCLASS}-{@type}" data-value="{$type},{$binding}"><xsl:value-of select="."/></div>
 				</xsl:when>
 				<xsl:when test="@type = 'separator'">
 					<hr/>
@@ -391,7 +391,7 @@
 					<div style="clear:both"> </div>
 				</xsl:when>
 				<xsl:otherwise>
-					<div class="{$APPCLASS}-{@class}{$subClass} {$APPCLASS}-{@type}" style="-webkit-user-select:none;{$border}{$width}{$height}{$fontsize}{$style}" data-value="{$type},{$binding}"><xsl:apply-templates/></div>
+					<div class="{$APPCLASS}-binding{$subClass} {$APPCLASS}-{@type}" style="-webkit-user-select:none;{$border}{$width}{$height}{$fontsize}{$style}" data-value="{$type},{$binding}"><xsl:apply-templates/></div>
 				</xsl:otherwise>
 			</xsl:choose>
 			<xsl:if test="@label">

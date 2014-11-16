@@ -282,16 +282,15 @@ SerialPort.prototype.syncMouse = function() {
  */
 
 /**
- * setBinding(sHTMLClass, sHTMLType, sBinding, control)
+ * setBinding(sHTMLType, sBinding, control)
  *
  * @this {SerialPort}
- * @param {string|null} sHTMLClass is the class of the HTML control (eg, "input", "output")
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "buffer")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-SerialPort.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control) {
+SerialPort.prototype.setBinding = function(sHTMLType, sBinding, control) {
     var serial = this;
     switch (sBinding) {
     case SerialPort.sIOBuffer:

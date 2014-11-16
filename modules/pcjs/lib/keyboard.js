@@ -770,29 +770,28 @@ Keyboard.LIMIT = {
 };
 
 /**
- * setBinding(sHTMLClass, sHTMLType, sBinding, control)
+ * setBinding(sHTMLType, sBinding, control)
  *
  * @this {Keyboard}
- * @param {string|null} sHTMLClass is the class of the HTML control (eg, "input", "output")
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "esc")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-Keyboard.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
+Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control)
 {
     /*
      * There's a special binding that the Video component uses ("kbd") to effectively bind its
      * canvas to the entire keyboard, in Video.powerUp(); ie:
      *
-     *      video.kbd.setBinding("input", "canvas", "kbd", video.canvasScreen);
+     *      video.kbd.setBinding("canvas", "kbd", video.canvasScreen);
      * or:
-     *      video.kbd.setBinding("input", "textarea", "kbd", video.textareaScreen);
+     *      video.kbd.setBinding("textarea", "kbd", video.textareaScreen);
      *
      * However, it's also possible for the keyboard XML definition to define a control that serves
      * a similar purpose; eg:
      *
-     *      <control class="input" type="text" binding="kbd" width="2em">Kbd</control>
+     *      <control type="text" binding="kbd" width="2em">Kbd</control>
      *
      * The latter is purely experimental, while we work on finding ways to trigger the soft keyboard on
      * certain pesky devices (like the Kindle Fire).  Note that even if you use the latter, the former will

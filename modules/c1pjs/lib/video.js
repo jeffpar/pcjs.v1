@@ -172,13 +172,12 @@ C1PVideo.prototype.reset = function(fPowerOn)
 
 /**
  * @this {C1PVideo}
- * @param {string|null} sHTMLClass is the class of the HTML control (eg, "input", "output")
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea")
  * @param {string} sBinding is the value of the 'binding' parameter stored in the HTML control's "data-value" attribute (eg, "refresh")
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-C1PVideo.prototype.setBinding = function(sHTMLClass, sHTMLType, sBinding, control)
+C1PVideo.prototype.setBinding = function(sHTMLType, sBinding, control)
 {
     switch(sBinding) {
     case "refresh":
@@ -322,9 +321,9 @@ C1PVideo.prototype.setPower = function(fOn, cmp)
          */
         this.kbd = cmp.getComponentByType("keyboard");
         if (this.kbd) {
-            this.kbd.setBinding("input", "canvas", "keyDown", this.eCanvas);
-            this.kbd.setBinding("input", "canvas", "keyPress", this.eCanvas);
-            this.kbd.setBinding("input", "canvas", "keyUp", this.eCanvas);
+            this.kbd.setBinding("canvas", "keyDown", this.eCanvas);
+            this.kbd.setBinding("canvas", "keyPress", this.eCanvas);
+            this.kbd.setBinding("canvas", "keyUp", this.eCanvas);
         }
     }
     else
