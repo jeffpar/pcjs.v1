@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<keyboard id="keyboard" padleft="8px">
-	<control type="button" class="input" binding="esc">ESC</control>
-	<control type="button" class="input" binding="ctrl-c">CTRL-C</control>
-	<control type="button" class="input" binding="ctrl-alt-del">CTRL-ALT-DEL</control>
-</keyboard>

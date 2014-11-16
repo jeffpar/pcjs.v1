@@ -8,13 +8,13 @@
 	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pc/bios/5150/1981-04-24.json"/>
 	<video ref="/devices/pc/video/video-cga-960.xml"/>
 	<cpu id="cpu8088" model="8088" autostart="true"/>
-	<keyboard ref="/devices/pc/keyboard/minimal.xml"/>
+	<keyboard ref="/devices/pc/keyboard/keyboard-minimal.xml"/>
 	<debugger id="debugger"/>
 	<panel ref="/devices/pc/panel/wide.xml"/>
 	<fdc ref="/disks/pc/samples.xml" width="280px"/>
 	<chipset id="chipset" model="5150" sw1="01001001" sw2="11110000" pos="left" padleft="8px" padbottom="8px">
-		<control type="switches" class="input" label="SW1" binding="sw1" left="0px"/>
-		<control type="switches" class="input" label="SW2" binding="sw2" left="0px"/>
-		<control type="description" class="output" binding="swdesc" left="0px"/>
+		<control type="switches" label="SW1" binding="sw1" left="0px"/>
+		<control type="switches" label="SW2" binding="sw2" left="0px"/>
+		<control type="description" binding="swdesc" left="0px"/>
 	</chipset>
 </machine>

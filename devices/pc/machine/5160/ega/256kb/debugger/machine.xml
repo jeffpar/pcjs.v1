@@ -10,13 +10,13 @@
 	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pc/basic/ibm-basic-1.10.json"/>
 	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pc/bios/5160/1982-11-08.json"/>
 	<video ref="/devices/pc/video/video-ega-64kb.xml"/>
-	<keyboard ref="/devices/pc/keyboard/minimal-functions.xml"/>
+	<keyboard ref="/devices/pc/keyboard/keyboard-minimal-functions.xml"/>
 	<debugger id="debugger"/>
 	<panel ref="/devices/pc/panel/wide.xml"/>
 	<fdc ref="/disks/pc/library.xml" width="320px"/>
 	<chipset id="chipset" model="5160" sw1="01001101" pos="left" padleft="8px" padbottom="8px">
-		<control type="switches" class="input" label="SW1" binding="sw1" left="0px"/>
-		<control type="description" class="output" binding="swdesc" left="0px"/>
+		<control type="switches" label="SW1" binding="sw1" left="0px"/>
+		<control type="description" binding="swdesc" left="0px"/>
 	</chipset>
 	<hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",type:3}]'/>
 </machine>

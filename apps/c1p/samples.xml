@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <serial id="serialPort" pos="left" padleft="8px">
-	<control type="list" class="input" binding="listSerial">
+	<control type="list" binding="listSerial">
 		<item ref="/apps/c1p/BASIC/OSI/POKER.BAS">POKER</item>
 		<item ref="/apps/c1p/BASIC/OSI/SAMPLE1.BAS">BASIC MATH</item>
 		<item ref="/apps/c1p/BASIC/OSI/SAMPLE2.BAS">CHECKING</item>
@@ -9,6 +9,6 @@
 		<item ref="/apps/c1p/BASIC/OSI/SAMPLE5.BAS">COUNTER</item>
 		<item ref="/apps/c1p/BASIC/OSI/SAMPLE6.BAS">PRESIDENTS</item>
 	</control>
-	<control type="button" class="input" binding="loadSerial">Download</control>
-	<control type="file" class="input" binding="mountSerial" style="padding-left:16px"/>
+	<control type="button" binding="loadSerial">Download</control>
+	<control type="file" binding="mountSerial" style="padding-left:16px"/>
 </serial>

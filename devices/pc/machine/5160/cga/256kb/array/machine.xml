@@ -9,8 +9,8 @@
 	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pc/bios/5160/1982-11-08.json"/>
 	<video ref="/devices/pc/video/video-cga-960.xml"/>
 	<cpu id="cpu8088" model="8088" autostart="true" pos="left" padleft="8px">
-		<control type="button" class="input" binding="run">Run</control>
-		<control type="button" class="input" binding="reset">Reset</control>
+		<control type="button" binding="run">Run</control>
+		<control type="button" binding="reset">Reset</control>
 	</cpu>
 	<keyboard id="keyboard" model="us83"/>
 	<fdc ref="/disks/pc/samples.xml"/>

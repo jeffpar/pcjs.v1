@@ -23,9 +23,9 @@
 		<name>Video Display</name>
 	</video>
 	<keyboard id="keyboard" padleft="8px">
-		<control type="button" class="input" binding="ctrl-c">CTRL-C</control>
-		<control type="button" class="input" binding="ctrl-o">CTRL-O</control>
-		<control type="button" class="input" binding="break">BREAK</control>
+		<control type="button" binding="ctrl-c">CTRL-C</control>
+		<control type="button" binding="ctrl-o">CTRL-O</control>
+		<control type="button" binding="break">BREAK</control>
 	</keyboard>
 	<serial ref="/apps/c1p/samples.xml"/>
 	<disk ref="/disks/c1p/samples.xml"/>

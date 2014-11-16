@@ -9,20 +9,20 @@
 	<rom id="romBIOS"  addr="0xfe000" size="0x2000" file="/devices/pc/bios/5150/1981-04-24.json"/>
 	<video ref="/devices/pc/video/video-cga.xml"/>
 	<keyboard id="keyboard" pos="left" padleft="8px">
-		<control type="button" class="input" binding="esc">ESC</control>
-		<control type="button" class="input" binding="ctrl-c">CTRL-C</control>
-		<control type="button" class="input" binding="ctrl-alt-del">CTRL-ALT-DEL</control>
+		<control type="button" binding="esc">ESC</control>
+		<control type="button" binding="ctrl-c">CTRL-C</control>
+		<control type="button" binding="ctrl-alt-del">CTRL-ALT-DEL</control>
 	</keyboard>
 	<debugger id="debugger"/>
 	<panel ref="/devices/pc/panel/default.xml"/>
 	<fdc id="fdcNEC" automount='{A: {name: "Zork I", path: "/disks/pc/games/infocom/zork1/zork1-readonly.json"}}' pos="left" padleft="8px">
-		<control type="list" class="input" binding="listDrives"/>
-		<control type="list" class="input" binding="listDisks">
+		<control type="list" binding="listDrives"/>
+		<control type="list" binding="listDisks">
 			<disk path="">None</disk>
 			<manifest ref="/disks/pc/games/infocom/zork1/manifest.xml" disk="*"/>
 		</control>
-		<control type="button" class="input" binding="loadDrive">Load Drive</control>
-		<control type="description" class="output" binding="descDisk"/>
+		<control type="button" binding="loadDrive">Load Drive</control>
+		<control type="description" binding="descDisk"/>
 	</fdc>
 	<chipset id="chipset" model="5150" sw1="01001001" sw2="11110000"/>
 </machine>

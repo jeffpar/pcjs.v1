@@ -9,12 +9,12 @@
 	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pc/basic/ibm-basic-1.10.json"/>
 	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pc/bios/5160/1982-11-08.json"/>
 	<video ref="/devices/pc/video/video-mda.xml"/>
-	<keyboard ref="/devices/pc/keyboard/minimal.xml"/>
+	<keyboard ref="/devices/pc/keyboard/keyboard-minimal.xml"/>
 	<debugger id="debugger"/>
 	<panel ref="/devices/pc/panel/default.xml"/>
 	<fdc id="fdcNEC" width="280px" pos="left" padleft="8px" padbottom="8px" automount='{A:{name:"PC-DOS 2.00 (Disk 1)",path:"/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json"}, B:{name:"Executive Suite (1982)",path:"/apps/pc/1982/esuite/disk.json"}}'>
-		<control type="list" class="input" binding="listDrives"/>
-		<control type="list" class="input" binding="listDisks">
+		<control type="list" binding="listDrives"/>
+		<control type="list" binding="listDisks">
 			<disk path="">None</disk>
 			<manifest ref="/disks/pc/dos/ibm/1.00/manifest.xml" disk="*"/>
 			<manifest ref="/disks/pc/dos/ibm/1.10/manifest.xml" disk="*"/>
@@ -23,9 +23,9 @@
 			<manifest ref="/apps/pc/1981/visicalc/manifest.xml" disk="*"/>
 			<manifest ref="/apps/pc/1982/esuite/manifest.xml" disk="*"/>
 		</control>
-		<control type="button" class="input" binding="loadDrive">Download</control>
-		<control type="description" class="output" binding="descDisk" padleft="8px"/>
-		<control type="file" class="input" binding="mountDrive" padtop="8px"/>
+		<control type="button" binding="loadDrive">Download</control>
+		<control type="description" binding="descDisk" padleft="8px"/>
+		<control type="file" binding="mountDrive" padtop="8px"/>
 	</fdc>
 	<chipset id="chipset" model="5160" sw1="01000001"/>
 	<hdc id="hdcXT" drives='[{name:"10Mb Hard Disk",type:3}]'/>

@@ -18,9 +18,9 @@
 	<rom id="romSystem" size="0x0800" image="/devices/c1p/rom/system.hex"/>
 	<video id="video" screenwidth="256" screenheight="192" cols="32" rows="32" charset="/devices/c1p/video/chargen1x.png" width="256px" padding="8px"/>
 	<keyboard id="keyboard" padleft="8px">
-		<control type="button" class="input" binding="ctrl-c">CTRL-C</control>
-		<control type="button" class="input" binding="ctrl-o">CTRL-O</control>
-		<control type="button" class="input" binding="break">BREAK</control>
+		<control type="button" binding="ctrl-c">CTRL-C</control>
+		<control type="button" binding="ctrl-o">CTRL-O</control>
+		<control type="button" binding="break">BREAK</control>
 	</keyboard>
 	<serial id="serialPort" demo="true"/>
 </machine>

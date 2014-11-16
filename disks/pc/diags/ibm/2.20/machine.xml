@@ -8,21 +8,21 @@
 	<rom id="romBIOS"  addr="0xfe000" size="0x2000" file="/devices/pc/bios/5150/1981-04-24.json"/>
 	<video ref="/devices/pc/video/video-mda.xml"/>
 	<cpu id="cpu8088" model="8088" autostart="true" pos="left" padleft="8px" padbottom="8px">
-		<control type="button" class="input" binding="run">Run</control>
-		<control type="button" class="input" binding="reset">Reset</control>
+		<control type="button" binding="run">Run</control>
+		<control type="button" binding="reset">Reset</control>
 	</cpu>
-	<keyboard ref="/devices/pc/keyboard/minimal.xml"/>
+	<keyboard ref="/devices/pc/keyboard/keyboard-minimal.xml"/>
 	<debugger id="debugger"/>
 	<panel ref="/devices/pc/panel/wide.xml"/>
 	<fdc id="fdcNEC" pos="left" padleft="8px" automount='{A: {name: "IBM Advanced Diagnostics", path: "/disks/pc/diags/ibm/2.20/5150_5155_5160_ADVDIAG_220.json"}}'>
-		<control type="list" class="input" binding="listDrives"/>
-		<control type="list" class="input" binding="listDisks">
+		<control type="list" binding="listDrives"/>
+		<control type="list" binding="listDisks">
 			<disk path="">None</disk>
 			<manifest ref="/disks/pc/dos/ibm/2.00/manifest.xml" disk="*"/>
 			<manifest ref="/disks/pc/diags/ibm/2.20/manifest.xml" disk="*"/>
 		</control>
-		<control type="button" class="input" binding="loadDrive">Load Drive</control>
-		<control type="description" class="output" binding="descDisk" padleft="8px"/>
+		<control type="button" binding="loadDrive">Load Drive</control>
+		<control type="description" binding="descDisk" padleft="8px"/>
 	</fdc>
 	<chipset id="chipset" model="5150" sw1="01000001" sw2="11110000"/>
 </machine>

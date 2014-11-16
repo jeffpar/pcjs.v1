@@ -22,12 +22,12 @@
 		<name>Video Display</name>
 	</video>
 	<keyboard id="keyboard" padleft="8px">
-		<control type="button" class="input" binding="ctrl-c">CTRL-C</control>
-		<control type="button" class="input" binding="ctrl-o">CTRL-O</control>
-		<control type="button" class="input" binding="break">BREAK</control>
+		<control type="button" binding="ctrl-c">CTRL-C</control>
+		<control type="button" binding="ctrl-o">CTRL-O</control>
+		<control type="button" binding="break">BREAK</control>
 	</keyboard>
 	<serial id="serialPort" pos="left" padleft="8px">
-		<control type="list" class="input" binding="listSerial">
+		<control type="list" binding="listSerial">
 			<item ref="../../../../../../apps/c1p/BASIC/OSI/POKER.BAS">POKER</item>
 			<item ref="../../../../../../apps/c1p/BASIC/OSI/SAMPLE1.BAS">BASIC MATH</item>
 			<item ref="../../../../../../apps/c1p/BASIC/OSI/SAMPLE2.BAS">CHECKING</item>
@@ -36,7 +36,7 @@
 			<item ref="../../../../../../apps/c1p/BASIC/OSI/SAMPLE5.BAS">COUNTER</item>
 			<item ref="../../../../../../apps/c1p/BASIC/OSI/SAMPLE6.BAS">PRESIDENTS</item>
 		</control>
-		<control type="button" class="input" binding="loadSerial">Load File</control>
+		<control type="button" binding="loadSerial">Load File</control>
 	</serial>
 	<panel ref="../../../../panel/default.xml"/>
 </machine>

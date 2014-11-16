@@ -9,9 +9,9 @@
 	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pc/basic/ibm-basic-1.10.json"/>
 	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pc/bios/5160/1982-11-08.json"/>
 	<video ref="/devices/pc/video/video-ega-128kb-lock.xml"/>
-	<keyboard ref="/devices/pc/keyboard/minimal.xml"/>
+	<keyboard ref="/devices/pc/keyboard/keyboard-minimal.xml"/>
 	<cpu id="cpu8088" model="8088">
-		<control type="button" class="input" binding="setSpeed">Fast</control>
+		<control type="button" binding="setSpeed">Fast</control>
 	</cpu>
 	<fdc ref="/disks/pc/library.xml" pos="right"/>
 	<chipset id="chipset" model="5160" sw1="01001101"/>
