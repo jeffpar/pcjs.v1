@@ -129,9 +129,9 @@ C1PSerialPort.prototype.setBinding = function(sHTMLType, sBinding, control)
 
     case "mountSerial":
         /*
-         * Check for availability of FileReader
+         * Check for non-mobile (desktop) browser and the availability of FileReader
          */
-        if (window && 'FileReader' in window) {
+        if (!web.isMobile() && window && 'FileReader' in window) {
             this.bindings[sBinding] = control;
 
             /*

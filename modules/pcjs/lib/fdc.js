@@ -173,10 +173,11 @@ function FDC(parmsFDC) {
     this.aDiskHistory = [];
 
     /*
-     * If setBinding() sees a binding for loading local disks, it will set this flag, and then initBus()
-     * can intelligently update the "listDisks" control accordingly.
+     * Support for local disk images is currently limited to desktop browsers with FileReader support;
+     * when this flag is set, setBinding() allows local disk bindings and informs initBus() to update the
+     * "listDisks" binding accordingly.
      */
-    this.fLocalDisks = false;
+    this.fLocalDisks = (!web.isMobile() && window && 'FileReader' in window);
 
     /*
      * The remainder of FDC initialization now takes place in our initBus() handler, largely because we
@@ -473,13 +474,8 @@ FDC.prototype.setBinding = function(sHTMLType, sBinding, control)
         return true;
 
     case "mountDrive":
-        /*
-         * Check for availability of FileReader
-         */
-        if (window && 'FileReader' in window) {
-            this.fLocalDisks = true;
+        if (this.fLocalDisks) {
             this.bindings[sBinding] = control;
-
             /*
              * Enable "Mount" button only if a file is actually selected
              */

@@ -949,10 +949,10 @@ Keyboard.prototype.setModel = function(nModel)
 Keyboard.prototype.setReady = function()
 {
     this.iOS = web.isUserAgent("iOS");
-    this.fMobile = (this.iOS || web.isUserAgent("Android"));
+    this.fMobile = web.isMobile();
     this.messageDebugger("mobile keyboard support: " + (this.fMobile? "true" : "false"));
     /*
-     * TODO: Determine how to declare this superclass method in order to avoid a type warning
+     * TODO: Determine how to declare this superclass method in order to avoid a type warning in WebStorm
      */
     return Component.prototype.setReady.call(this);
 };

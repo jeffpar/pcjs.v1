@@ -550,6 +550,20 @@ web.isUserAgent = function(s)
 };
 
 /**
+ * isMobile()
+ *
+ * Check the browser's user-agent string for the substring "Mobi", as per Mozilla recommendation:
+ *
+ *      https://developer.mozilla.org/en-US/docs/Browser_detection_using_the_user_agent
+ *
+ * @return {boolean} is true if the browser appears to be a mobile (ie, non-desktop) web browser, false if not
+ */
+web.isMobile = function()
+{
+    return web.isUserAgent("Mobi");
+};
+
+/**
  * getURLParameters(sParms)
  *
  * @param {string} [sParms] containing the parameter portion of a URL (ie, after the '?')
