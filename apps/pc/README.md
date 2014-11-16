@@ -9,7 +9,11 @@ Below are selected demos of classic IBM PC applications running on [PCjs](/docs/
 * [ThinkTank (1987)](1987/thinktank/)
 * The Dungeons of Moria (1988, [1992](1992/moria/))
 
-More software is available in the [IBM PC Disk Archive](/disks/pc/).  
+Additional software is available in the [IBM PC Disk Archive](/disks/pc/).
+
+Learn more about
+[Application Demos](https://github.com/jeffpar/pcjs/tree/master/apps/pc) in the
+[PCjs Project](https://github.com/jeffpar/pcjs) on [GitHub](https://github.com/).
 
 <!--BEGIN:EXCLUDE-->
 

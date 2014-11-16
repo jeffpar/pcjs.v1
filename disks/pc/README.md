@@ -9,7 +9,13 @@ Below are selected Disk Sets featuring "Ready-to-Boot" machine configurations:
 
 You can browse the rest of the disk archive by type.  There is no search capability at this time.
 
-### Disk Sets and Manifests
+Learn more about
+[Disk Sets](https://github.com/jeffpar/pcjs/tree/master/disks/pc) in the
+[PCjs Project](https://github.com/jeffpar/pcjs) on [GitHub](https://github.com/).
+
+<!--BEGIN:EXCLUDE-->
+
+### Developer Notes: Disk Sets and Manifests
 
 Collections of related disks are organized into *Disk Sets* which can then be loaded from the
 [FDC (Floppy Disk Controller)](/docs/pcjs/fdc/) component of an [IBM PC Machine Configuration](/devices/pc/machine/).
@@ -77,3 +83,5 @@ or via the PCjs server's DiskDump API:
 	http://www.pcjs.org/api/v1/dump?path=/apps/pc/1981/visicalc/bin/vc.com&format=json
 
 Learn more about PCjs disk image formats [here](/disks/).
+
+<!--END:EXCLUDE-->
