@@ -27,7 +27,7 @@ including 8086 debuggers.
 + Machines created with the [Computer](/docs/pcjs/computer/) *resume* attribute set will save their entire machine
 state using your browser's local storage, so that any changes are preserved when your browser closes, including
 disk modifications. Any files you create or modify *inside* the machine will still be there when you return.
-TIP: To restore a diskette's original contents, simply press the "Load" button again.
+TIP: To restore a diskette's original contents, simply press the "Download" button again.
 + Machine states can also be dumped (using the built-in [Debugger](/docs/pcjs/debugger/)), saved as JSON files, and
 pre-loaded into a machine, bypassing the normal boot process.  You can even combine a pre-defined state with the
 "resume" feature, preserving any changes you make to the machine's original state.
@@ -37,7 +37,7 @@ Chrome or Firefox for other platforms.
 
 ### Future
 
-The following features are targeted for version 1.16:
+The following features are targeted for version 1.16.x:
 
 + Improved EGA compatibility
 + 80286 protected-mode support
@@ -50,9 +50,10 @@ The following features are targeted for version 1.16:
 + v1.13 introduced manifest files that describe software packages that can be used with PCjs. 
 More information on software manifests is available [here](/apps/).
 + v1.12.1 coincided with the first release of the new PCjs web server running on [Node.js](http://nodejs.org).
-The new server includes ROM and disk image conversion APIs, as well as a [Markdown](http://daringfireball.net/projects/markdown/syntax)
-module that supports link extensions for embedding C1Pjs and PCjs machine files in Markdown documents
-and automatically converts "README.md" files into "index.html" web pages.
+The new server includes ROM and disk image conversion APIs, as well as a
+[Markdown](http://daringfireball.net/projects/markdown/syntax) module that supports link extensions
+for embedding C1Pjs and PCjs machine files in Markdown documents and automatically converts "README.md"
+files into "index.html" web pages.
 + v1.11 improved the *embedPC()* and *embedC1P()* functions, so now you can embed XML machine configuration files
 that reference other configuration files, such as an external [Keyboard](/docs/pcjs/keyboard/) or
 [Control Panel](/docs/pcjs/panel/) XML layout.  It does this by building the entire XML configuration internally,
@@ -62,8 +63,8 @@ The ability to embed multiple PCs on a single web page is now supported as well.
 + v1.08 added soft-keyboard support, which isn't quite finished (sticky-shift and auto-repeat will be added in a future
 version), but it's good enough for use on iPads.  Browse [IBM PC Machine Configurations](/devices/pc/machine/) for
 machines that include a soft-keyboard.
-+ v1.06c added support for user-defined diskette images.  Select "User-defined URL..." from the diskette list and click
-"Load".  See **Creating PCjs-Compatible Disk Images** in the [PCjs Documentation](/docs/pcjs/) for more information
-about supported disk images.
++ v1.06c added support for user-defined diskette images.  Select "Remote Disk" from the diskette list, click
+"Download", and enter a URL at the prompt.  See **Creating PCjs-Compatible Disk Images** in the
+[PCjs Documentation](/docs/pcjs/) for more information about supported disk images.
 + v1.05b added support for webkitAudioContext, bringing your simulated IBM PC's speaker to life. Relive the thrill
 of running MUSIC.BAS and listening to those classic tunes.  *Sound support is still experimental*.

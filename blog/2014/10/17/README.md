@@ -1,7 +1,7 @@
 Release of PCjs v1.15.5
 ---
 
-The [IBM PC AT "Rev 3"](/devices/pc/machine/5170/ega/1152kb/rev3/) machine configuration boots in
+The [8Mhz IBM PC AT](/devices/pc/machine/5170/ega/1152kb/rev3/) machine configuration boots in
 v1.15.5 of PCjs now, which includes the following fixes:
 
 + The BIOS expects memory refresh to occur roughly every 16us, which I've resolved by tying the state

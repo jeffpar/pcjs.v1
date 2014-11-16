@@ -153,6 +153,10 @@ var X86Op0F = {
         this.addrIDTLimit = this.addrIDT + this.getWord(0x85E);
         this.segTSS.loadDesc6(this.getWord(0x816), 0x860);
         this.nStepCycles -= 195;
+        /*
+         * TODO: LOADALL operation still needs to be verified in protected mode....
+         */
+        if (DEBUG && DEBUGGER && (this.regMSW & X86.MSW.PE)) this.stopCPU();
     },
     /**
      * @this {X86CPU}

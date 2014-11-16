@@ -1,15 +1,15 @@
 The 8Mhz IBM PC AT 5170 
 ---
-I just added my first [IBM PC AT "Rev 3"](/devices/pc/machine/5170/ega/1152kb/rev3/) machine configuration
+I just added my first [8Mhz IBM PC AT](/devices/pc/machine/5170/ega/1152kb/rev3/) machine configuration
 to the list of [IBM PC Machine Configurations](/devices/pc/machine/), and not surprisingly, the new machine
 fails to boot.
 
-I call it "Rev 3" because it uses the 3rd [ROM BIOS](/devices/pc/bios/5170/) that IBM released for the PC AT,
-a revision that is supposed to include support for 3.5-inch 1.44Mb diskettes -- which would be great, because I
-have a number of 1.44Mb diskette images it would be nice to be able to read in a PCjs machine.
+This machine uses the 3rd [ROM BIOS](/devices/pc/bios/5170/) that IBM released for the PC AT, a revision that
+included support for 3.5-inch 1.44Mb diskettes -- which will be nice, because I have a number of 1.44Mb diskette
+images I would like to be able to read in a PCjs machine.
 
-Machines with this BIOS also ran at 8Mhz, so I've bumped the CPU speed up to 8,000,000 cycles/second.  It'll be
-interesting to see whether this BIOS also increased any of its hard-coded timing delay-loops as a result.
+Since machines with this BIOS also ran at 8Mhz, I've bumped the CPU speed up to 8,000,000 cycles/second.
+It'll be interesting to see whether this BIOS also increased any of its hard-coded timing delay-loops as a result.
 
 Anyway, when I enabled ChipSet I/O port messages in the Debugger:
 
