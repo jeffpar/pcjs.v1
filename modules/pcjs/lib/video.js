@@ -478,8 +478,7 @@ Video.aEGAMonitorSwitches = {
  * to enter a "mode" that has no BIOS counterpart (eg, non-standard combinations of frame buffer address,
  * memory access modes, fonts, display regions, etc).  Our hardware emulation routines will cope with those
  * situations as best they can (and when they don't, it should be considered a bug if some application is
- * broken as a result), but realistically, this is never going to be a completely accurate hardware emulation
- * of any video card.
+ * broken as a result), but realistically, this is never going to be a 100% accurate hardware emulation.
  */
 Video.MODES = {};
 Video.MODES.CGA_40X25_BW     = 0;
@@ -721,7 +720,9 @@ Video.aEGADWToByte[0x80808080] = 0xf;
  * Creates an object representing an initial video card state;
  * can also restore a video card from state data created by saveCard().
  *
- * See new Card().
+ * WARNING: Since Card objects are low-level objects that have no UI requirements,
+ * they do not inherit from the Component class, so you should only use class methods
+ * of Component, such as Component.assert(), or Debugger methods if the Debugger is available.
  *
  * @constructor
  * @param {Video} [video]
@@ -2694,6 +2695,7 @@ Video.prototype.onROMLoad = function(abROM)
 /**
  * getCardColors(nBitsPerPixel)
  *
+ * @this {Video}
  * @param {number} [nBitsPerPixel]
  * @returns {Array}
  */
@@ -2746,7 +2748,7 @@ Video.prototype.getCardColors = function(nBitsPerPixel)
         return Video.aCGAColors;
     }
 
-    Component.assert(this.cardColor === this.cardEGA);
+    if (DEBUG) this.assert(this.cardColor === this.cardEGA);
 
     var aRegs = (this.cardEGA.aATCRegs[15] != null? this.cardEGA.aATCRegs : Video.aEGAPalDef);
     for (var i = 0; i < this.aRGB.length; i++) {
@@ -4062,7 +4064,7 @@ Video.prototype.updateScreenText = function(addrScreen, addrScreenLimit, iCell, 
         if (iCell == this.iCellCursor) {
             data |= ((this.cBlinks & 0x1)? (Video.ATTRS.DRAW_CURSOR << 8) : 0);
         }
-        Component.assert(iCell < this.aCellCache.length);
+        if (DEBUG) this.assert(iCell < this.aCellCache.length);
         dataCache = this.aCellCache[iCell];
         if (dataCache != data) {
             var col = iCell % this.nCols;
@@ -4103,7 +4105,7 @@ Video.prototype.updateScreenGraphicsCGA = function(addrScreen, addrScreenLimit)
     var xDirty = this.nCols, xMaxDirty = 0, yDirty = this.nRows, yMaxDirty = 0;
     while (addr < addrScreenLimit) {
         data = this.bus.getWordDirect(addr);
-        Component.assert(iCell < this.aCellCache.length);
+        if (DEBUG) this.assert(iCell < this.aCellCache.length);
         dataCache = this.aCellCache[iCell];
         if (dataCache === data) {
             x += nPixelsPerCell;
@@ -4181,9 +4183,9 @@ Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
     var xDirty = this.nCols, xMaxDirty = 0, yDirty = this.nRows, yMaxDirty = 0;
     while (addr < addrScreenLimit) {
         var idw = addr++ - this.addrBuffer;
-        Component.assert(idw >= 0 && idw < adwMemory.length);
+        if (DEBUG) this.assert(idw >= 0 && idw < adwMemory.length);
         data = adwMemory[idw];
-        Component.assert(iCell < this.aCellCache.length);
+        if (DEBUG) this.assert(iCell < this.aCellCache.length);
         dataCache = this.aCellCache[iCell];
         if (dataCache === data) {
             x += nPixelsPerCell;
@@ -4206,10 +4208,10 @@ Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
                  */
                 if (dwPixel < 0) dwPixel += 0x100000000;
                 /*
-                 * Since assertions don't fix problems (only catch them, and only in DEBUG builds), I'm also insuring
+                 * Since assertions don't fix problems (only catch them, and only in DEBUG builds), I'm also ensuring
                  * that bPixel will always default to 0 if an undefined value ever slips through again.
                  */
-                Component.assert(Video.aEGADWToByte[dwPixel] !== undefined);
+                if (DEBUG) this.assert(Video.aEGADWToByte[dwPixel] !== undefined);
                 var bPixel = Video.aEGADWToByte[dwPixel] || 0;
                 this.setPixel(this.imageScreenBuffer, x++, y, aPixelColors[bPixel]);
                 data <<= 1;
@@ -4948,7 +4950,7 @@ Video.prototype.inCardStatus = function(card, addrFrom)
          * monitors the STATUS1 diagnostic bits, waiting for those palette bits to show up.  It turns out, however,
          * that we can easily fool the EGA BIOS by simply toggling the diagnostic bits.  So we take the easy way out.
          *
-         * TODO: Faithful emulation of these bits is certainly doable, so consider doing it at some point.
+         * TODO: Faithful emulation of these bits is certainly doable, so consider doing that at some point.
          */
         b |= ((card.statusReg & Card.STATUS1.DIAGNOSTIC) ^ Card.STATUS1.DIAGNOSTIC);
 

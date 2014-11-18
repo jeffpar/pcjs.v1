@@ -1201,7 +1201,7 @@ ChipSet.prototype.initRTCDate = function(sDate)
  */
 ChipSet.prototype.getRTCByte = function(iRTC)
 {
-    Component.assert(iRTC >= 0 && iRTC <= ChipSet.CMOS.ADDR.RTC_STATUSD);
+    if (DEBUG) this.assert(iRTC >= 0 && iRTC <= ChipSet.CMOS.ADDR.RTC_STATUSD);
 
     var b = this.abCMOSData[iRTC];
 
@@ -1253,7 +1253,7 @@ ChipSet.prototype.getRTCByte = function(iRTC)
  */
 ChipSet.prototype.setRTCByte = function(iRTC, b)
 {
-    Component.assert(iRTC >= 0 && iRTC <= ChipSet.CMOS.ADDR.RTC_STATUSD);
+    if (DEBUG) this.assert(iRTC >= 0 && iRTC <= ChipSet.CMOS.ADDR.RTC_STATUSD);
 
     if (iRTC < ChipSet.CMOS.ADDR.RTC_STATUSA) {
         var fBCD = false;
@@ -1272,7 +1272,7 @@ ChipSet.prototype.setRTCByte = function(iRTC, b)
                  * transformed it to 0x51-0x5C, so we must add 0x30.
                  */
                 if (b > 12) {
-                    Component.assert(b >= 0x51 && b <= 0x5c);
+                    if (DEBUG) this.assert(b >= 0x51 && b <= 0x5c);
                     b += 0x30;
                 }
             }
@@ -1306,7 +1306,7 @@ ChipSet.prototype.updateRTCDate = function()
      */
     if (this.nCyclesCMOSLastUpdate >= 0) {
         nCyclesDelta = nCyclesUpdate - this.nCyclesCMOSLastUpdate;
-        Component.assert(nCyclesDelta >= 0);
+        if (DEBUG) this.assert(nCyclesDelta >= 0);
         var nSecondsDelta = Math.floor(nCyclesDelta / nCyclesPerSecond);
         /*
          * We trust that updateRTCDate() is being called as part of updateAllTimers(), and is therefore
@@ -1315,7 +1315,7 @@ ChipSet.prototype.updateRTCDate = function()
          * (nCyclesDelta % nCyclesPerSecond) back into nCyclesCMOSLastUpdate, so that we will eventually
          * see a one-second delta.
          */
-        Component.assert(nSecondsDelta <= 1);
+        if (DEBUG) this.assert(nSecondsDelta <= 1);
         if (nSecondsDelta) {
             if (++this.abCMOSData[ChipSet.CMOS.ADDR.RTC_SEC] >= 60) {
                 this.abCMOSData[ChipSet.CMOS.ADDR.RTC_SEC] = 0;
@@ -1397,7 +1397,7 @@ ChipSet.prototype.initCMOSData = function()
 ChipSet.prototype.setCMOSByte = function(iCMOS, b)
 {
     if (this.abCMOSData) {
-        Component.assert(iCMOS >= ChipSet.CMOS.ADDR.FDRIVE && iCMOS < ChipSet.CMOS.ADDR.CHKSUM_HI);
+        if (DEBUG) this.assert(iCMOS >= ChipSet.CMOS.ADDR.FDRIVE && iCMOS < ChipSet.CMOS.ADDR.CHKSUM_HI);
         this.abCMOSData[iCMOS] = b;
         this.updateCMOSChecksum();
         return true;
@@ -1449,7 +1449,7 @@ ChipSet.prototype.setCMOSDriveType = function(iDrive, bType)
 {
     if (this.abCMOSData) {
         var b = this.abCMOSData[ChipSet.CMOS.ADDR.HDRIVE];
-        Component.assert(bType > 0 && bType < 0xf);
+        if (DEBUG) this.assert(bType > 0 && bType < 0xf);
         if (iDrive) {
             b = (b & ChipSet.CMOS.HDRIVE.D0_MASK) | bType;
         } else {
@@ -1549,7 +1549,7 @@ ChipSet.prototype.restore = function(data)
 
     a = data[5];
     if (a) {
-        Component.assert(this.model >= ChipSet.MODEL_5170);
+        if (DEBUG) this.assert(this.model >= ChipSet.MODEL_5170);
         this.b8042Status = a[0];
         this.b8042InBuff = a[1];
         this.b8042CmdData = a[2];
@@ -1560,7 +1560,7 @@ ChipSet.prototype.restore = function(data)
 
     a = data[6];
     if (a) {
-        Component.assert(this.model >= ChipSet.MODEL_5170);
+        if (DEBUG) this.assert(this.model >= ChipSet.MODEL_5170);
         this.bMFGData = a[0];
         this.abDMAPageSpare = a[1];
         this.bCMOSAddr = a[2];
@@ -1592,7 +1592,7 @@ ChipSet.prototype.initDMAController = function(iDMAC, aState)
 {
     var controller = this.aDMACs[iDMAC];
     if (!controller) {
-        Component.assert(!aState);
+        if (DEBUG) this.assert(!aState);
         controller = {
             aChannels: new Array(4)
         };
@@ -1623,7 +1623,7 @@ ChipSet.prototype.initDMAChannel = function(controller, iChannel, aState)
 {
     var channel = controller.aChannels[iChannel];
     if (!channel) {
-        Component.assert(!aState);
+        if (DEBUG) this.assert(!aState);
         channel = {
             addrInit: [0,0],
             countInit: [0,0],
@@ -1899,7 +1899,7 @@ ChipSet.prototype.getSWFloppyDriveType = function(iDrive)
                 return ChipSet.CMOS.FDRIVE.FD1440;
             }
         }
-        Component.assert(false);        // we should never get here (else something is out of out sync)
+        if (DEBUG) this.assert(false);  // we should never get here (else something is out of out sync)
     }
     return ChipSet.CMOS.FDRIVE.NONE;
 };
@@ -1920,7 +1920,7 @@ ChipSet.prototype.getSWFloppyDriveSize = function(iDrive)
         if (iDrive < this.aFloppyDrives.length) {
             return this.aFloppyDrives[iDrive];
         }
-        Component.assert(false);        // we should never get here (else something is out of out sync)
+        if (DEBUG) this.assert(false);  // we should never get here (else something is out of out sync)
     }
     return 0;
 };
@@ -4020,7 +4020,7 @@ ChipSet.prototype.in8042Status = function(port, addrFrom)
 ChipSet.prototype.out8042InBuffCmd = function(port, bOut, addrFrom)
 {
     this.messagePort(port, bOut, addrFrom, "8042_INBUFF.CMD", Debugger.MESSAGE.C8042);
-    Component.assert(!(this.b8042Status & ChipSet.KBC.STATUS.INBUFF_FULL));
+    if (DEBUG) this.assert(!(this.b8042Status & ChipSet.KBC.STATUS.INBUFF_FULL));
     this.b8042InBuff = bOut;
 
     this.b8042Status |= ChipSet.KBC.STATUS.CMD_FLAG;
@@ -4103,7 +4103,7 @@ ChipSet.prototype.set8042CmdData = function(b)
 {
     var bClockWasEnabled = !(this.b8042CmdData & ChipSet.KBC.DATA.CMD.NO_CLOCK);
     this.b8042CmdData = b;
-    Component.assert(ChipSet.KBC.DATA.CMD.SYS_FLAG === ChipSet.KBC.STATUS.SYS_FLAG);
+    if (DEBUG) this.assert(ChipSet.KBC.DATA.CMD.SYS_FLAG === ChipSet.KBC.STATUS.SYS_FLAG);
     this.b8042Status = (this.b8042Status & ~ChipSet.KBC.STATUS.SYS_FLAG) | (b & ChipSet.KBC.DATA.CMD.SYS_FLAG);
     if (this.kbd) {
         /*

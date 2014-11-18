@@ -88,8 +88,8 @@ X86Seg.loadReal = function loadReal(sel, fSuppress)
  * This replaces the segment's default load() function whenever the segment is notified via updateAccess() by the
  * CPU's setProtMode() that the processor is now in protected-mode.
  *
- * Segments in protected-mode are referenced by selectors, which are indexes into descriptor tables (GDT, LDT, IDT) whose
- * descriptors are 4-word (8-byte) entries:
+ * Segments in protected-mode are referenced by selectors, which are indexes into descriptor tables (GDT, LDT, IDT)
+ * whose descriptors are 4-word (8-byte) entries:
  *
  *      word 0: segment limit (0-15)
  *      word 1: base address low
@@ -112,7 +112,7 @@ X86Seg.loadProt = function loadProt(sel, fSuppress)
         addrDTLimit = this.cpu.addrGDTLimit;
     } else {
         addrDT = this.cpu.segLDT.base;
-        addrDTLimit = this.cpu.segLDT.limit;
+        addrDTLimit = addrDT + this.cpu.segLDT.limit;
     }
     var addrDesc = addrDT + (sel & X86.SEL.MASK);
     if (addrDesc + 7 <= addrDTLimit) {
@@ -291,8 +291,9 @@ X86Seg.prototype.loadDesc8 = function(sel, addrDesc)
     var ext = (DEBUG? this.cpu.getWord(addrDesc + X86.DESC.EXT.OFFSET) : 0);
 
     if (DEBUG) {
-        this.cpu.messageDebugger("loadDesc8(" + this.sName + "): base=" + str.toHex(base) + " limit=" + str.toHexWord(limit) + " acc=" + str.toHexWord(acc) + (ext? " ext=" + str.toHexWord(ext) : ""));
-        Component.assert(!ext);
+        var ch = (this.sName.length < 3? " " : "");
+        this.cpu.messageDebugger("loadDesc8(" + this.sName + "):" + ch + " base=" + str.toHex(base) + " limit=" + str.toHexWord(limit) + " acc=" + str.toHexWord(acc) + (ext? " ext=" + str.toHexWord(ext) : ""));
+     // this.cpu.assert(!ext);
     }
 
     /*
@@ -400,9 +401,9 @@ X86Seg.prototype.updateAccess = function(fProt)
                 this.checkWrite = X86Seg.checkReadProtDisabled;
             }
             /*
-             * If the CODE bit is set, or the the WRITEABLE bit is not set, then disallow writes
+             * If the CODE bit is set, or the the WRITABLE bit is not set, then disallow writes
              */
-            if ((this.acc & X86.DESC.ACC.TYPE.CODE) || !(this.acc & X86.DESC.ACC.TYPE.WRITEABLE)) {
+            if ((this.acc & X86.DESC.ACC.TYPE.CODE) || !(this.acc & X86.DESC.ACC.TYPE.WRITABLE)) {
                 this.checkWrite = X86Seg.checkWriteProtDisabled;
             }
         }

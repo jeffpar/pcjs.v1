@@ -811,7 +811,7 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
                                      * pattern, if any, into a dword pattern.
                                      */
                                     adw = [];
-                                    Component.assert((dwPattern & 0xff) == dwPattern);
+                                    if (DEBUG) this.assert((dwPattern & 0xff) == dwPattern);
                                     dwPattern = sector['pattern'] = (dwPattern | (dwPattern << 8) | (dwPattern << 16) | (dwPattern << 24));
                                     sector['data'] = adw;
                                 } else {
@@ -1152,7 +1152,7 @@ Disk.prototype.findDirtySectors = function(fAsync)
             var sectorNext = this.aDiskData[iCylinder][iHead][i];
             if (!sectorNext.fDirty) break;
             var j = this.aDirtySectors.indexOf(sectorNext);
-            Component.assert(j >= 0, "dirty sector (" + iCylinder + ":" + iHead + ":" + sectorNext['sector'] + ") missing from aDirtySectors");
+            if (DEBUG) this.assert(j >= 0, "dirty sector (" + iCylinder + ":" + iHead + ":" + sectorNext['sector'] + ") missing from aDirtySectors");
             if (DEBUG) this.messageDebugger("Disk.findDirtySectors(" + iCylinder + ":" + iHead + ":" + sectorNext['sector'] + ")");
             this.aDirtySectors.splice(j, 1);
             this.aDirtyTimestamps.splice(j, 1);
@@ -1160,7 +1160,7 @@ Disk.prototype.findDirtySectors = function(fAsync)
             sectorNext.fDirty = false;
             nSectors++;
         }
-        Component.assert(!!abSectors.length, "no data for dirty sector (" + iCylinder + ":" + iHead + ":" + sector['sector'] + ")");
+        if (DEBUG) this.assert(!!abSectors.length, "no data for dirty sector (" + iCylinder + ":" + iHead + ":" + sector['sector'] + ")");
         var response = this.writeRemoteSectors(iCylinder, iHead, iSector, nSectors, abSectors, fAsync);
         return fAsync || response;
     }

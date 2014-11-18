@@ -77,10 +77,6 @@ if (typeof module !== 'undefined') {
  * as many new BLOCK_SIZE Memory objects as the ranges require.  Partial Memory blocks could be
  * supported in theory, but in practice, they're not.
  *
- * NOTE: Since Memory blocks are low-level objects that have no UI requirements, they do not
- * inherit from the Component class; so, if you want to use println(), for example, you must
- * use the methods in the Debugger class.
- *
  * Because Memory blocks now allow us to have a "sparse" address space, we could choose to
  * take the memory hit of allocating 4K arrays per block, where each element stores only one byte,
  * instead of the more frugal but slightly slower approach of allocating arrays of 32-bit dwords
@@ -91,6 +87,10 @@ if (typeof module !== 'undefined') {
  * performance, so it is OFF by default to minimize our memory consumption.  Using TYPEDARRAYS is
  * probably best, although not all JavaScript implementations support them (IE9 is probably the
  * only real outlier: it lacks typed arrays but otherwise has all the necessary HTML5 support).
+ *
+ * WARNING: Since Memory blocks are low-level objects that have no UI requirements,
+ * they do not inherit from the Component class, so you should only use class methods
+ * of Component, such as Component.assert(), or Debugger methods if the Debugger is available.
  *
  * @constructor
  * @param {number} addr of block (must be some multiple of bus.blockSize)
@@ -565,14 +565,14 @@ Memory.prototype = {
                     this.resetReadAccess();
                     if (DEBUG) this.dbg.println("all read breakpoints removed from memory block " + str.toHex(this.addr));
                 }
-                Component.assert(this.cReadBreakpoints >= 0);
+                this.dbg.assert(this.cReadBreakpoints >= 0);
             }
             else {
                 if (--this.cWriteBreakpoints === 0) {
                     this.resetWriteAccess();
                     if (DEBUG) this.dbg.println("all write breakpoints removed from memory block " + str.toHex(this.addr));
                 }
-                Component.assert(this.cWriteBreakpoints >= 0);
+                this.dbg.assert(this.cWriteBreakpoints >= 0);
             }
         }
     }

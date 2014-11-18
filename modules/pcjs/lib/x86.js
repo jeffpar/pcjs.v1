@@ -81,15 +81,15 @@ var X86 = {
     },
     DESC: {                 // Descriptor Table Entry
         LIMIT: {
-            OFFSET:   0x0
+            OFFSET:     0x0
         },
         BASE: {
-            OFFSET:   0x2
+            OFFSET:     0x2
         },
         ACC: {              // bit definitions for the access word (offset 0x4)
-            OFFSET:   0x4,
-            BASE1623: 0x00ff,
-            MASK:     0xff00,
+            OFFSET:     0x4,
+            BASE1623:                       0x00ff,
+            MASK:                           0xff00,
             TYPE: {
                 MASK:                       0x1f00,
                 SEG:                        0x1000,
@@ -97,12 +97,12 @@ var X86 = {
                 /*
                  * The following bits apply only when SEG is set
                  */
-                CODE:                       0x0800, // set for CODE, clear for DATA
-                ACCESSED:                   0x0100, // set if accessed, clear if not accessed
-                READABLE:                   0x0200, // CODE: set if readable, clear if exec-only
-                WRITEABLE:                  0x0200, // DATA: set if writable, clear if read-only
-                CONFORMING:                 0x0400, // CODE: set if conforming, clear if not
-                EXPDOWN:                    0x0400, // DATA: set if expand-down, clear if not
+                CODE:                       0x0800,     // set for CODE, clear for DATA
+                ACCESSED:                   0x0100,     // set if accessed, clear if not accessed
+                READABLE:                   0x0200,     // CODE: set if readable, clear if exec-only
+                WRITABLE:                   0x0200,     // DATA: set if writable, clear if read-only
+                CONFORMING:                 0x0400,     // CODE: set if conforming, clear if not
+                EXPDOWN:                    0x0400,     // DATA: set if expand-down, clear if not
                 /*
                  * The following are all the possible (valid) types (well, except for the variations
                  * of DATA and CODE where the ACCESSED bit (0x0100) may also be set)
@@ -116,23 +116,27 @@ var X86 = {
                 GATE_INT:                   0x0600,
                 GATE_TRAP:                  0x0700,
                 DATA_READONLY:              0x1000,
-                DATA_WRITEABLE:             0x1200,
+                DATA_WRITABLE:              0x1200,
                 DATA_EXPDOWN_READONLY:      0x1400,
-                DATA_EXPDOWN_WRITEABLE:     0x1600,
+                DATA_EXPDOWN_WRITABLE:      0x1600,
                 CODE_EXECONLY:              0x1800,
                 CODE_READABLE:              0x1a00,
                 CODE_CONFORMING_EXECONLY:   0x1c00,
                 CODE_CONFORMING_READABLE:   0x1e00
             },
             DPL: {
-                MASK:  0x6000,
-                SHIFT: 13
+                MASK:                       0x6000,
+                SHIFT:                      13
             },
-            PRESENT:  0x8000
+            PRESENT:                        0x8000
         },
         EXT: {              // descriptor extension word (reserved on the 80286; "must be zero")
-            OFFSET:   0x6,
-            MASK:     0xffff
+            OFFSET:     0x6,
+            LIMIT1619:                      0x000f,
+            AVAIL:                          0x0010,     // NOTE: set in various descriptors in OS/2
+            DEFSIZE:                        0x0040,     // clear if default operand/address size is 16-bit, set if 32-bit
+            GRANULARITY:                    0x0080,     // clear if limit is bytes, set if limit is 4Kb pages
+            BASE2431:                       0xff00
         }
     },
     /*

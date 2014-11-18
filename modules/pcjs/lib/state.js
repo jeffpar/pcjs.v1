@@ -40,11 +40,6 @@ if (typeof module !== 'undefined') {
 /**
  * State(component, sVersion, sSuffix)
  *
- * @constructor
- * @param {Component} component
- * @param {string} [sVersion] is used to append a major version number to the key
- * @param {string} [sSuffix] is used to append any additional suffixes to the key
- *
  * State objects are used by components to save/restore their state.
  *
  * During a save operation, components add data to a State object via set(),
@@ -52,6 +47,15 @@ if (typeof module !== 'undefined') {
  *
  * During a restore operation, the Computer component passes the results of each
  * data() call back to the originating component.
+ *
+ * WARNING: Since State objects are low-level objects that have no UI requirements,
+ * they do not inherit from the Component class, so you should only use class methods
+ * of Component, such as Component.assert(), or Debugger methods if the Debugger is available.
+ *
+ * @constructor
+ * @param {Component} component
+ * @param {string} [sVersion] is used to append a major version number to the key
+ * @param {string} [sSuffix] is used to append any additional suffixes to the key
  */
 function State(component, sVersion, sSuffix) {
     this.id = component.id;
@@ -226,10 +230,10 @@ State.prototype = {
     /**
      * value()
      *
+     * Use this instead of data() if you haven't called parse() yet.
+     *
      * @this {State}
      * @return {string}
-     *
-     * Use this instead of data() if you haven't called parse() yet.
      */
     value: function() {
         return this[this.id];
@@ -246,12 +250,12 @@ State.prototype = {
     /**
      * load(s)
      *
+     * WARNING: Make sure you follow this call with either a call to parse() or unload(),
+     * because any stringified data that we've loaded isn't usable until it's been parsed.
+     *
      * @this {State}
      * @param {Object|string|null} [s]
      * @return {boolean} true if state exists in localStorage, false if not
-     *
-     * WARNING: Make sure you follow this call with either a call to parse() or unload(),
-     * because any stringified data that we've loaded isn't usable until it's been parsed.
      */
     load: function(s) {
         if (s) {
@@ -279,12 +283,12 @@ State.prototype = {
     /**
      * parse()
      *
-     * @this {State}
-     * @return {boolean} true if successful, false if error
-     *
      * This completes the load() operation, by parsing what was loaded, on the assumption there
      * might be some benefit to deferring parsing until we've given the user a chance to confirm.
      * Otherwise, load() could have just as easily done this, too.
+     *
+     * @this {State}
+     * @return {boolean} true if successful, false if error
      */
     parse: function() {
         var fSuccess = true;
@@ -337,12 +341,12 @@ State.prototype = {
     /**
      * unload(parms)
      *
-     * @this {State}
-     * @param {Object} [parms]
-     *
      * This discards any data saved via set() or loaded via load(), creating an empty State object.
      * Note that you have to follow this call with an explicit call to store() if you want to remove
      * the state from localStorage as well.
+     *
+     * @this {State}
+     * @param {Object} [parms]
      */
     unload: function(parms) {
         this[this.id] = {};
@@ -352,11 +356,11 @@ State.prototype = {
     /**
      * clear(fAll)
      *
-     * @this {State}
-     * @param {boolean} [fAll] true to unconditionally clear ALL localStorage for the current domain
-     *
      * This unloads the current state, and then clears ALL localStorage for the current machine,
      * independent of version, to reduce the chance of orphaned states wasting part of our limited allocation.
+     *
+     * @this {State}
+     * @param {boolean} [fAll] true to unconditionally clear ALL localStorage for the current domain
      */
     clear: function(fAll) {
         this.unload();
@@ -374,10 +378,10 @@ State.prototype = {
     /**
      * messageDebugger(sMessage)
      *
+     * This is a combination of the Debugger's messageEnabled(MESSAGE_STATE) and message() functions, for convenience.
+     *
      * @this {State}
      * @param {string} sMessage is any caller-defined message string
-     *
-     * This is a combination of the Debugger's messageEnabled(MESSAGE_STATE) and message() functions, for convenience.
      */
     messageDebugger: function(sMessage) {
         if (DEBUGGER && this.dbg) {

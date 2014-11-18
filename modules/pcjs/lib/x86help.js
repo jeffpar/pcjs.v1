@@ -34,6 +34,7 @@
 
 if (typeof module !== 'undefined') {
     var X86         = require("./x86");
+    var X86OpXX     = require("./x86opxx");
     var Debugger    = require("./debugger");
 }
 
@@ -176,7 +177,7 @@ var X86Help = {
      */
     opHelpLEA: function(dst, src) {
         if (this.regEA < 0) {
-            X86Help.opUndefined.call(this);
+            X86OpXX.opUndefined.call(this);
             return dst;
         }
         this.nStepCycles -= this.CYCLES.nOpCyclesLEA;
@@ -190,7 +191,7 @@ var X86Help = {
      */
     opHelpLDS: function(dst, src) {
         if (this.regEA < 0) {
-            X86Help.opUndefined.call(this);
+            X86OpXX.opUndefined.call(this);
             return dst;
         }
         this.setDS(this.getWord(this.regEA + 2));
@@ -205,7 +206,7 @@ var X86Help = {
      */
     opHelpLES: function(dst, src) {
         if (this.regEA < 0) {
-            X86Help.opUndefined.call(this);
+            X86OpXX.opUndefined.call(this);
             return dst;
         }
         this.setES(this.getWord(this.regEA + 2));
@@ -223,7 +224,7 @@ var X86Help = {
             /*
              * Generate a #UD fault (INT 0x06: Undefined Opcode) if src is not a memory operand.
              */
-            X86Help.opInvalid.call(this);
+            X86OpXX.opInvalid.call(this);
             return dst;
         }
         /*
@@ -237,7 +238,7 @@ var X86Help = {
             /*
              * The INT 0x05 handler must be called with CS:IP pointing to the BOUND instruction.
              *
-             * TODO: Determine the cycle impact when a BOUND exception is triggered, over and above nOpCyclesBound.
+             * TODO: Determine the cycle cost when a BOUND exception is triggered, over and above nOpCyclesBound.
              */
             this.setIP(this.opEA - this.segCS.base);
             X86Help.opHelpINT.call(this, X86.EXCEPTION.BOUND_ERR, null, 0);
@@ -416,6 +417,11 @@ var X86Help = {
      * @param {number} nCycles (in addition to the default of nOpCyclesInt)
      */
     opHelpINT: function(nIDT, nError, nCycles) {
+        /*
+         * TODO: We assess the cycle cost up front, because if loadIDTEntry() fails and we end up in opHelpFault(),
+         * no cost may get assessed.  opHelpFault() needs to determine an appropriate cycle cost.
+         */
+        this.nStepCycles -= this.CYCLES.nOpCyclesInt + nCycles;
         if (this.loadIDTEntry(nIDT)) {
             this.pushWord(this.getPS());
             this.regPS &= this.descIDT.maskPS;
@@ -423,11 +429,9 @@ var X86Help = {
             this.pushWord(this.regIP);
             if (nError != null) this.pushWord(nError);
             this.setCSIP(this.descIDT.off, this.descIDT.sel);
-            this.nStepCycles -= this.CYCLES.nOpCyclesInt + nCycles;
+            return;
         }
-        /*
-         * TODO: Now what?
-         */
+        X86Help.opHelpFault.call(this, X86.EXCEPTION.GP_FAULT, (nIDT << 3) | X86.ERRCODE.IDT | X86.ERRCODE.EXT, true);
     },
     /**
      * opHelpLMSW(w)
@@ -460,7 +464,7 @@ var X86Help = {
     opHelpDIVOverflow: function() {
         this.setIP(this.opEA - this.segCS.base);
         /*
-         * TODO: Determine the proper cycle count
+         * TODO: Determine the proper cycle cost.
          */
         X86Help.opHelpINT.call(this, X86.EXCEPTION.DIV_ERR, null, 2);
     },
@@ -471,34 +475,61 @@ var X86Help = {
      * @param {boolean} [fHalt] will halt the CPU if true *and* a Debugger is loaded
      */
     opHelpFault: function(nFault, nError, fHalt) {
+        var fFault = false;
+        if (this.model >= X86.MODEL_80186) {
+            if (this.nFault < 0) {
+                /*
+                 * Single-fault (error code is passed through, and the original instruction is restartable)
+                 */
+                this.setIP(this.opEA - this.segCS.base);
+                fFault = true;
+            } else if (this.nFault != X86.EXCEPTION.DF_FAULT) {
+                /*
+                 * Double-fault (error code is always zero, and the responsible instruction is not restartable)
+                 */
+                nError = 0;
+                nFault = X86.EXCEPTION.DF_FAULT;
+                fFault = true;
+            } else {
+                /*
+                 * Triple-fault (usually referred to in Intel literature as a "shutdown", but at least on the 80286,
+                 * it's actually a "reset")
+                 */
+                X86Help.opHelpFaultMessage.call(this, -1, 0, fHalt);
+                this.resetRegs();
+                return;
+            }
+        }
+        X86Help.opHelpFaultMessage.call(this, nFault, nError, fHalt);
+        if (fFault) X86Help.opHelpINT.call(this, this.nFault = nFault, nError, 0);
+    },
+    /**
+     * @this {X86CPU}
+     * @param {number} nFault
+     * @param {number} [nError]
+     * @param {boolean} [fHalt] will halt the CPU if true *and* a Debugger is loaded
+     */
+    opHelpFaultMessage: function(nFault, nError, fHalt) {
         if (DEBUGGER && this.dbg) {
             /*
              * NOTE: By using Debugger.message(), we have the option of setting "m halt on" and halting on messages like this.
              */
+            var bOpcode = this.bus.getByteDirect(this.regEIP);
             if (this.dbg.messageEnabled(Debugger.MESSAGE.CPU)) {
-                this.dbg.message("Fault 0x" + str.toHexByte(nFault) + (nError != null? " (0x" + str.toHexWord(nError) + ")" : "") + " on opcode 0x" + str.toHexByte(this.bus.getByteDirect(this.regEIP)) + " at " + str.toHexAddr(this.regIP, this.segCS.sel));
+                this.dbg.message("Fault 0x" + str.toHexByte(nFault) + (nError != null? " (0x" + str.toHexWord(nError) + ")" : "") + " on opcode 0x" + str.toHexByte(bOpcode) + " at " + str.toHexAddr(this.regIP, this.segCS.sel) + " (%" + str.toHex(this.regEIP) + ")");
             }
-            if (fHalt) this.stopCPU();
+            /*
+             * OS/2 1.0 uses an INT3 (0xCC) opcode in conjunction with an invalid IDT to trigger a triple-fault
+             * reset and return to real-mode, and these resets happen quite frequently during boot; for example, OS/2
+             * startup messages are displayed using INT 0x10 BIOS calls for each character, and each call requires a
+             * round-trip mode switch.
+             *
+             * Since we really only want to halt on "bad" faults, not "good" (ie, intentional) faults, we take
+             * advantage of the fact that all 3 faults comprising the triple-fault point to the INT3 (0xCC) opcode,
+             * and so whenever we see that opcode, we ignore the caller's fHalt flag.
+             */
+            if (fHalt && bOpcode != X86.OPCODE.INT3) this.dbg.stopCPU();
         }
-        if (this.model >= X86.MODEL_80186) {
-            this.setIP(this.opEA - this.segCS.base);
-            X86Help.opHelpINT.call(this, nFault, nError, 0);
-        }
-    },
-    /**
-     * @this {X86CPU}
-     */
-    opInvalid: function() {
-        X86Help.opHelpFault.call(this, X86.EXCEPTION.UD_FAULT);
-        this.stopCPU();
-    },
-    /**
-     * @this {X86CPU}
-     */
-    opUndefined: function() {
-        this.setIP(this.opEA - this.segCS.base);
-        this.setError("Undefined opcode 0x" + str.toHexByte(this.bus.getByteDirect(this.regEIP)) + " at " + str.toHexAddr(this.regIP, this.segCS.sel));
-        this.stopCPU();
     }
 };
 

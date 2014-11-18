@@ -63,7 +63,7 @@ var DEBUG = true;               // this @define is overridden by the Closure Com
 var MAXDEBUG = false;           // this @define is overridden by the Closure Compiler (to false) to remove MAXDEBUG-only code
 
 if (typeof module !== 'undefined') {
-    global.window = false;
+    global.window = false;      // provides an alternative "if (typeof window === 'undefined')" (ie, "if (window) ...")
     global.APPNAME = APPNAME;
     global.APPVERSION = APPVERSION;
     global.SITEHOST = SITEHOST;

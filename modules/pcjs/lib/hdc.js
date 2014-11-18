@@ -1399,7 +1399,7 @@ HDC.prototype.inATCData = function(port, addrFrom)
          * well, then the caller will get 0xff.
          */
         bIn = this.readByte(this.drive);
-        Component.assert(bIn >= 0);
+        if (DEBUG) this.assert(bIn >= 0);
 
         /*
          * Now that we've supplied a full sector of data, see if the caller's expecting additional sectors;
@@ -1420,7 +1420,7 @@ HDC.prototype.inATCData = function(port, addrFrom)
                         /*
                          * I shouldn't have to set BUSY (or DATA_REQ) again, because it should still be set, no?
                          */
-                        Component.assert(!!(hdc.regStatus & HDC.ATC.STATUS.BUSY));
+                        if (DEBUG) this.assert(!!(hdc.regStatus & HDC.ATC.STATUS.BUSY));
                     } else {
                         /*
                          * TODO: It would be nice to be a bit more specific about the error (if any) that just occurred.
@@ -1432,7 +1432,7 @@ HDC.prototype.inATCData = function(port, addrFrom)
                     }
                 }, false);
             } else {
-                Component.assert(this.drive.nBytes == 0);
+                if (DEBUG) this.assert(this.drive.nBytes == 0);
                 this.regStatus = HDC.ATC.STATUS.READY | HDC.ATC.STATUS.SEEK_OK;
             }
         }
@@ -1475,9 +1475,9 @@ HDC.prototype.outATCData = function(port, bOut, addrFrom)
                     /*
                      * I shouldn't have to set BUSY (or DATA_REQ) again, because it should still be set, no?
                      */
-                    Component.assert(!!(this.regStatus & HDC.ATC.STATUS.BUSY));
+                    if (DEBUG) this.assert(!!(this.regStatus & HDC.ATC.STATUS.BUSY));
                 } else {
-                    Component.assert(this.drive.nBytes == 0);
+                    if (DEBUG) this.assert(this.drive.nBytes == 0);
                     this.regStatus = HDC.ATC.STATUS.READY | HDC.ATC.STATUS.SEEK_OK;
                 }
             }
@@ -1868,8 +1868,8 @@ HDC.prototype.doATCommand = function()
          * The importance of SECCNT (nSectors) and DRVHD (nHeads) is controlling how multi-sector operations
          * advance to the next sector; see advanceSector().
          */
-        Component.assert(drive.nHeads == nHead + 1);
-        Component.assert(drive.nSectors == nSectors);
+        if (DEBUG) this.assert(drive.nHeads == nHead + 1);
+        if (DEBUG) this.assert(drive.nSectors == nSectors);
         drive.nHeads = nHead + 1;
         drive.nSectors = nSectors;
         fInterrupt = true;
@@ -2525,7 +2525,7 @@ HDC.prototype.writeByte = function(drive, b)
  */
 HDC.prototype.advanceSector = function(drive)
 {
-    Component.assert(drive.wCylinder < drive.nCylinders);
+    if (DEBUG) this.assert(drive.wCylinder < drive.nCylinders);
     drive.bSector++;
     var bSectorStart = (1 - drive.bSectorBias);
     if (drive.bSector >= drive.nSectors + bSectorStart) {

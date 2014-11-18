@@ -1364,6 +1364,7 @@ if (DEBUGGER) {
     {
         this.afnDumpers = [];
         this.bitsMessageEnabled = 0;
+        this.sMessagePrev = null;
         var aEnable = this.parseCommand(sEnable);
         if (aEnable.length) {
             for (var m in Debugger.MESSAGES) {
@@ -1544,7 +1545,11 @@ if (DEBUGGER) {
      */
     Debugger.prototype.message = function(sMessage)
     {
+        if (this.sMessagePrev && sMessage == this.sMessagePrev) return;
+
         this.println(sMessage);             // + " (" + this.cpu.getCycles() + " cycles)"
+
+        this.sMessagePrev = sMessage;
 
         if (this.cpu) {
             if (this.bitsMessageEnabled & Debugger.MESSAGE.HALT) {
@@ -1725,6 +1730,18 @@ if (DEBUGGER) {
 
         this.updateStatus(fRegs || false, false);
         return (this.nCycles > 0);
+    };
+
+    /**
+     * stopCPU(s)
+     *
+     * @this {Debugger}
+     * @param {string} [s]
+     */
+    Debugger.prototype.stopCPU = function(s)
+    {
+        if (s) this.message(s);
+        this.cpu.stopCPU();
     };
 
     /**
@@ -1993,7 +2010,7 @@ if (DEBUGGER) {
          * Assert that general-purpose register contents remain within their respective ranges;
          * this isn't intended to be complete, just a spot-check.
          */
-        Component.assert(!(this.cpu.regAX & ~0xffff) && !(this.cpu.regBX & ~0xffff) && !(this.cpu.regCX & ~0xffff) && !(this.cpu.regDX & ~0xffff), "register out of bounds");
+        if (DEBUG) this.assert(!(this.cpu.regAX & ~0xffff) && !(this.cpu.regBX & ~0xffff) && !(this.cpu.regCX & ~0xffff) && !(this.cpu.regDX & ~0xffff), "register out of bounds");
 
         if (!fSkipBP && this.checkBreakpoint(addr, this.aBreakExec)) {
             return true;
@@ -2112,7 +2129,8 @@ if (DEBUGGER) {
      * If the selector matches that of any of the CPU segment registers, then return the CPU's segment
      * register, instead of creating our own dummy segment register.  This makes it possible for us to
      * see what the CPU is seeing at certain critical junctures, such as after an LMSW instruction has
-     * switched the processor from real to protected mode.
+     * switched the processor from real to protected mode.  Actually loading the selector from the GDT/LDT
+     * should be done only as a last resort.
      *
      * @param {number} sel
      * @return {X86Seg} seg
@@ -2183,7 +2201,7 @@ if (DEBUGGER) {
         var addr = this.getAddr(aAddr, false, 0);
         if (addr >= 0) {
             b = this.bus.getByteDirect(addr);
-            Component.assert((b == (b & 0xff)), "invalid byte (" + b + ") at address: " + this.hexAddr(aAddr));
+            if (DEBUG) this.assert((b == (b & 0xff)), "invalid byte (" + b + ") at address: " + this.hexAddr(aAddr));
             if (inc !== undefined) this.incAddr(aAddr, inc);
         }
         return b;
@@ -2203,7 +2221,7 @@ if (DEBUGGER) {
         var addr = this.getAddr(aAddr, false, 1);
         if (addr >= 0) {
             w = this.bus.getWordDirect(addr);
-            Component.assert((w == (w & 0xffff)), "invalid word (" + w + ") at address: " + this.hexAddr(aAddr));
+            if (DEBUG) this.assert((w == (w & 0xffff)), "invalid word (" + w + ") at address: " + this.hexAddr(aAddr));
             if (inc !== undefined) this.incAddr(aAddr, inc);
         }
         return w;
@@ -3515,7 +3533,7 @@ if (DEBUGGER) {
                             s += (seg.acc & X86.DESC.ACC.TYPE.CONFORMING)? "conforming," : "nonconforming,";
                         } else {
                             s += "data:";
-                            s += (seg.acc & X86.DESC.ACC.TYPE.WRITEABLE)? "writeable," : "readonly,";
+                            s += (seg.acc & X86.DESC.ACC.TYPE.WRITABLE)? "writable," : "readonly,";
                             s += (seg.acc & X86.DESC.ACC.TYPE.EXPDOWN)? "expand down," : "expand up,";
                         }
                         s += (seg.acc & X86.DESC.ACC.TYPE.ACCESSED)? "accessed" : "not accessed";

@@ -1523,7 +1523,7 @@ FDC.prototype.unloadAllDrives = function(fDiscard)
 FDC.prototype.addDiskHistory = function(sDisketteName, sDiskettePath, disk)
 {
     var i;
-    Component.assert(!!sDiskettePath);
+    if (DEBUG) this.assert(!!sDiskettePath);
     for (i = 0; i < this.aDiskHistory.length; i++) {
         if (this.aDiskHistory[i][1] == sDiskettePath) {
             var nChanges = disk.restore(this.aDiskHistory[i][2]);
@@ -1796,7 +1796,7 @@ FDC.prototype.doCmd = function()
          * Controller docs say that H should always match HD, so I assert that, but what if someone
          * made a mistake and didn't program them identically -- what would happen?  Which should we honor?
          */
-        Component.assert(h == bHead);
+        if (DEBUG) this.assert(h == bHead);
         r = drive.bSector = this.popCmd(FDC.TERMS.R);   // R
         n = this.popCmd(FDC.TERMS.N);                   // N
         drive.nBytes = 128 << n;                        // 0 => 128, 1 => 256, 2 => 512, 3 => 1024
@@ -2005,7 +2005,7 @@ FDC.prototype.pushResults = function(drive, bCmd, bHead, c, h, r, n)
  */
 FDC.prototype.popCmd = function(name)
 {
-    Component.assert((!this.regDataIndex || name !== undefined) && this.regDataIndex < this.regDataTotal);
+    if (DEBUG) this.assert((!this.regDataIndex || name !== undefined) && this.regDataIndex < this.regDataTotal);
     var bCmd = this.regDataArray[this.regDataIndex];
     if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE.FDC)) {
         var bCmdMasked = bCmd & FDC.REG_DATA.CMD.MASK;
@@ -2372,7 +2372,7 @@ FDC.prototype.writeByte = function(drive, b)
  */
 FDC.prototype.advanceSector = function(drive)
 {
-    Component.assert(drive.bCylinder < drive.nDiskCylinders);
+    if (DEBUG) this.assert(drive.bCylinder < drive.nDiskCylinders);
     drive.bSector++;
     var bSectorStart = 1;
     if (drive.bSector >= drive.nDiskSectors + bSectorStart) {

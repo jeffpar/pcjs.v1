@@ -1332,8 +1332,10 @@ Keyboard.prototype.calcReleaseDelay = function(fRepeat)
 Keyboard.prototype.autoClear = function(notKeyCode)
 {
     if (this.prevCharDown && (notKeyCode === undefined || notKeyCode != this.prevCharDown)) {
-        if (DEBUG) this.messageDebugger("autoClear(" + this.prevCharDown + ")");
-        Component.assert(this.aKeyTimers[this.prevCharDown]);
+        if (DEBUG) {
+            this.messageDebugger("autoClear(" + this.prevCharDown + ")");
+            this.assert(this.aKeyTimers[this.prevCharDown]);
+        }
         clearTimeout(this.aKeyTimers[this.prevCharDown]);
         this.keySimulateUpOrDown(this.prevCharDown, false, Keyboard.SIMCODE.AUTOCLEAR);
     }

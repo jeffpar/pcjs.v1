@@ -290,7 +290,7 @@ Bus.prototype.getA20 = function()
  */
 Bus.prototype.setA20 = function(fEnable)
 {
-    Component.assert(fEnable !== undefined);
+    if (DEBUG) this.assert(fEnable !== undefined);
     if (fEnable !== undefined) {
         if (this.nBusWidth > 20) {
             var addrMask = (this.addrMask & ~0x100000) | (fEnable? 0x100000 : 0);

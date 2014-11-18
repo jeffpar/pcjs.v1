@@ -63,11 +63,6 @@ if (typeof module !== 'undefined') {
 /**
  * Component(type, parms, constructor)
  *
- * @constructor
- * @param {string} type
- * @param {Object} [parms]
- * @param {Object} [constructor]
- *
  * A Component object requires:
  *
  *      type: a user-defined type name (eg, "CPU")
@@ -79,6 +74,11 @@ if (typeof module !== 'undefined') {
  *      comment: component comment string (default is undefined)
  *
  * Subclasses that use Component.subclass() to extend Component will likely have additional (parms) properties.
+ *
+ * @constructor
+ * @param {string} type
+ * @param {Object} [parms]
+ * @param {Object} [constructor]
  */
 function Component(type, parms, constructor)
 {
@@ -110,9 +110,8 @@ function Component(type, parms, constructor)
     this[type] = constructor;
 
     /*
-     * TODO: Decide how to reintegrate this code into the components that still want it....
-     *
-    if (this.initStep) this.initStep(parms);
+     * Gather all the various component flags (booleans) into a single "flags" object, and encourage
+     * subclasses to do the same, to reduce the property clutter we have to wade through while debugging.
      */
     this.aFlags = {
         fReady: false,
@@ -151,8 +150,8 @@ Component.parmsURL = web.getURLParameters();
  */
 Component.inherit = function(p)
 {
-    if (window) {                       // an alternative to "if (typeof window === 'undefined')" if require("defines") has been invoked
-        if (!p) throw new TypeError();  // TODO: Why does this barf under Node?
+    if (window) {
+        if (!p) throw new TypeError();
         if (Object.create) {
             return Object.create(p);
         }
@@ -257,8 +256,11 @@ Component.log = function(s, type)
 /**
  * Component.assert(f, s)
  *
- * Used to verify conditions that must be true (for DEBUG builds only; compiled builds should automatically have all
- * references to Component.assert() removed).
+ * Verifies conditions that must be true (for DEBUG builds only).
+ *
+ * The Closure Compiler should automatically remove all references to Component.assert() in non-DEBUG builds.
+ *
+ * TODO: Add a task to the build process that "asserts" there are no occurrences of "assertion failure" in the final code.
  *
  * @param {boolean} f is the expression we are asserting to be true
  * @param {string} [s] is description of the assertion on failure
@@ -268,7 +270,7 @@ Component.assert = function(f, s)
     if (DEBUG) {
         if (!f) {
             /*
-             * TODO: An accompanying source file/line number/function call would be nice, if there was a browser-independent way....
+             * TODO: An accompanying source file/line number/function call (eg, stack trace) would be nice.
              */
             if (!s) s = "assertion failure";
             Component.log(s);
@@ -465,7 +467,7 @@ Component.getComponentParms = function(element)
              *          element.removeAttribute("data-value");
              *      }
              */
-        } catch (e) {
+        } catch(e) {
             Component.error(e.message + " (" + sParms + ")");
         }
     }
@@ -691,6 +693,49 @@ Component.prototype = {
     log: function(s, type) {
         if (DEBUG) {
             Component.log(s, type || this.id || this.type);
+        }
+    },
+    /**
+     * assert(f, s)
+     *
+     * Verifies conditions that must be true (for DEBUG builds only).
+     *
+     * WARNING: Make sure you preface all calls to this.assert() with "if (DEBUG)", because unlike Component.assert(),
+     * the Closure Compiler can't be sure that this instance method hasn't been overridden, so it refuses to treat it as
+     * dead code in non-DEBUG builds.
+     *
+     * TODO: Add a task to the build process that "asserts" there are no occurrences of "assertion failure" in the final code.
+     *
+     * @param {boolean} f is the expression we are asserting to be true
+     * @param {string} [s] is description of the assertion on failure
+     */
+    assert: function(f, s) {
+        if (DEBUG) {
+            if (!f) {
+                /*
+                 * TODO: An accompanying source file/line number/function call (eg, stack trace) would be nice.
+                 */
+                if (!s) s = "assertion failure in " + (this.id || this.type);
+                if (DEBUGGER && this.dbg) {
+                    this.dbg.stopCPU(s);
+                    /*
+                     * Why do we throw an Error only to immediately catch it and ignore it?  Simply to give our IDE
+                     * the opportunity to stop and smell the roses.  If the user has no desire to stop on assertions,
+                     * then yes, consider this a giant NO-OP.
+                     */
+                    try {
+                        throw new Error(s);
+                    } catch(e) {}
+                    return;
+                }
+                /*
+                 * If there's no Debugger, or the current component didn't bother saving a reference to the Debugger
+                 * (eg, in its initBus() handler), then this component-level assert() the same as the class-level assert(),
+                 * except for the (slightly) more detailed log() message.
+                 */
+                this.log(s);
+                throw new Error(s);
+            }
         }
     },
     /**

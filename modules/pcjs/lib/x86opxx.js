@@ -1741,7 +1741,7 @@ var X86OpXX = {
                 this.regMD16 = this.segDS.sel;
                 break;
             default:
-                X86Help.opUndefined.call(this);
+                X86OpXX.opUndefined.call(this);
                 return;
         }
         /*
@@ -1787,7 +1787,7 @@ var X86OpXX = {
             break;
         default:
             if (this.model >= X86.MODEL_80286) {
-                X86Help.opInvalid.call(this);
+                X86OpXX.opInvalid.call(this);
                 return;
             }
             switch(reg) {
@@ -1987,7 +1987,7 @@ var X86OpXX = {
         /*
          * TODO: Implement
          */
-        X86Help.opUndefined.call(this);
+        X86OpXX.opUndefined.call(this);
     },
     /**
      * @this {X86CPU}
@@ -2032,7 +2032,7 @@ var X86OpXX = {
         if (ah & X86.PS.ZF) this.setZF(); else this.clearZF();
         if (ah & X86.PS.SF) this.setSF(); else this.clearSF();
         this.nStepCycles -= this.CYCLES.nOpCyclesLAHF;
-        Component.assert((this.getPS() & X86.PS.SAHF) == (ah & X86.PS.SAHF));
+        if (DEBUG) this.assert((this.getPS() & X86.PS.SAHF) == (ah & X86.PS.SAHF));
     },
     /**
      * @this {X86CPU}
@@ -2846,10 +2846,8 @@ var X86OpXX = {
     opIRET: function() {
         this.setCSIP(this.popWord(), this.popWord());
         this.setPS(this.popWord());
+        this.nFault = -1;
         if (this.cIntReturn) this.checkIntReturn(this.regEIP);
-        /*
-         * NOTE: I'm assuming that neither POPF nor IRET are required to set NOINTR like STI does.
-         */
         this.nStepCycles -= this.CYCLES.nOpCyclesIRet;
     },
     /**
@@ -3159,7 +3157,7 @@ var X86OpXX = {
      * I still treat this as undefined, until I can verify the behavior on real hardware.
      */
     opINT1: function() {
-        X86Help.opUndefined.call(this);
+        X86OpXX.opUndefined.call(this);
     },
     /**
      * @this {X86CPU}
@@ -3353,6 +3351,21 @@ var X86OpXX = {
     opGRP4w: function() {
         X86Mods.aOpModsGrpWord[this.getIPByte()].call(this, X86Grps.aOpGRP4w, X86Grps.opGrpNoSrc);
         if (EAFUNCS) this.setEAWord = this.setEAWordEnabled;
+    },
+    /**
+     * @this {X86CPU}
+     */
+    opInvalid: function() {
+        X86Help.opHelpFault.call(this, X86.EXCEPTION.UD_FAULT);
+        this.stopCPU();
+    },
+    /**
+     * @this {X86CPU}
+     */
+    opUndefined: function() {
+        this.setIP(this.opEA - this.segCS.base);
+        this.setError("Undefined opcode 0x" + str.toHexByte(this.bus.getByteDirect(this.regEIP)) + " at " + str.toHexAddr(this.regIP, this.segCS.sel));
+        this.stopCPU();
     }
 };
 

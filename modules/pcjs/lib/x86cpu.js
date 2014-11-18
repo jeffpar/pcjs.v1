@@ -686,15 +686,15 @@ X86CPU.prototype.initProcessor = function()
          * opOUTSw, opENTER, and opLEAVE.
          */
         this.nShiftCountMask = 0x1f;        // on newer processors, all shift counts are MOD 32
-        this.aOps[0x0F]             = X86Help.opInvalid;
+        this.aOps[0x0F]             = X86OpXX.opInvalid;
         this.aOps[X86.OPCODE.PUSHA] = X86OpXX.opPUSHA;
         this.aOps[X86.OPCODE.POPA]  = X86OpXX.opPOPA;
         this.aOps[X86.OPCODE.BOUND] = X86OpXX.opBOUND;
-        this.aOps[0x63]             = X86Help.opInvalid;
-        this.aOps[0x64]             = X86Help.opInvalid;
-        this.aOps[0x65]             = X86Help.opInvalid;
-        this.aOps[0x66]             = X86Help.opInvalid;
-        this.aOps[0x67]             = X86Help.opInvalid;
+        this.aOps[0x63]             = X86OpXX.opInvalid;
+        this.aOps[0x64]             = X86OpXX.opInvalid;
+        this.aOps[0x65]             = X86OpXX.opInvalid;
+        this.aOps[0x66]             = X86OpXX.opInvalid;
+        this.aOps[0x67]             = X86OpXX.opInvalid;
         this.aOps[X86.OPCODE.PUSH16]= X86OpXX.opPUSH16;
         this.aOps[X86.OPCODE.IMUL16]= X86OpXX.opIMUL16;
         this.aOps[X86.OPCODE.PUSH8] = X86OpXX.opPUSH8;
@@ -788,6 +788,13 @@ X86CPU.prototype.resetRegs = function()
     this.nIOPL = 0;                                     // this should be set before the first setPS() call
 
     /*
+     * This is set by opHelpFault() and reset (to -1) by resetRegs() and opIRET(); its initial purpose is to
+     * "help" opHelpFault() determine when a nested fault should be converted into either a double-fault
+     * (DF_FAULT) or a triple-fault (ie, a processor reset).
+     */
+    this.nFault = -1;
+
+    /*
      * Segment registers used to be defined as separate variables (eg, regCS and regCS0 stored the
      * segment number and base physical address, respectively), but all segment registers are now defined
      * as X86Seg objects.
@@ -806,6 +813,10 @@ X86CPU.prototype.resetRegs = function()
      *      IDTR:   addrIDT (24 bits) and addrIDTLimit (24 bits)
      *
      * while the LDTR and TR are stored as special segment registers: segLDT and segTSS.
+     *
+     * So, yes, our GDTR and IDTR "registers" differ from other segment registers in that we do NOT record
+     * the 16-bit limit specified by the LGDT or LIDT instructions; instead, we immediately calculate the limiting
+     * address and record that instead.
      *
      * In addition to different CS:IP reset values, the CS base address must be set to the top of the 16Mb
      * address space rather than the top of the first 1Mb (which is why the MODEL_5170 ROM must be addressable
@@ -1147,9 +1158,9 @@ X86CPU.prototype.setMemoryEnabled = function()
  */
 X86CPU.prototype.verifyMemoryEnabled = function()
 {
-    Component.assert(!(this.regAX & 0xffff0000) && !(this.regBX & 0xffff0000) && !(this.regCX & 0xffff0000) && !(this.regDX & 0xffff0000));
-    Component.assert(!(this.regSI & 0xffff0000) && !(this.regDI & 0xffff0000) && !(this.regBP & 0xffff0000) && !(this.regSP & 0xffff0000));
-    Component.assert((this.getEAByte == this.getEAByteEnabled && this.getEAWord == this.getEAWordEnabled && this.modEAByte == this.modEAByteEnabled && this.modEAWord == this.modEAWordEnabled && this.setEAByte == this.setEAByteEnabled && this.setEAWord == this.setEAWordEnabled), "verifyMemoryEnabled() failed");
+    this.assert(!(this.regAX & 0xffff0000) && !(this.regBX & 0xffff0000) && !(this.regCX & 0xffff0000) && !(this.regDX & 0xffff0000));
+    this.assert(!(this.regSI & 0xffff0000) && !(this.regDI & 0xffff0000) && !(this.regBP & 0xffff0000) && !(this.regSP & 0xffff0000));
+    this.assert((this.getEAByte == this.getEAByteEnabled && this.getEAWord == this.getEAWordEnabled && this.modEAByte == this.modEAByteEnabled && this.modEAWord == this.modEAWordEnabled && this.setEAByte == this.setEAByteEnabled && this.setEAWord == this.setEAWordEnabled), "verifyMemoryEnabled() failed");
 };
 
 /**
@@ -1176,7 +1187,7 @@ X86CPU.prototype.getSeg = function(sName)
          * HACK: We return a fake segment register object in which only the base physical address is valid,
          * because that's all the caller provided (ie, we must be restoring from an older state).
          */
-        Component.assert(typeof sName == "number");
+        if (DEBUG) this.assert(typeof sName == "number");
         return [0, sName, 0, 0, ""];
     }
 };
@@ -1193,12 +1204,14 @@ X86CPU.prototype.getSeg = function(sName)
  *
  * @this {X86CPU}
  * @param {number} nIDT
- * @return {boolean} true if successful, false if not
+ * @return {boolean} true if successful, false if not (all failure cases currently limited to protected mode)
  */
 X86CPU.prototype.loadIDTEntry = function(nIDT)
 {
-    Component.assert(nIDT >= 0 && nIDT < 256);
     var offIDT;
+
+    if (DEBUG) this.assert(nIDT >= 0 && nIDT < 256);
+
     if (this.regMSW & X86.MSW.PE) {
         offIDT = this.addrIDT + (nIDT << 3);
         if (offIDT + 7 <= this.addrIDTLimit) {
@@ -1213,20 +1226,26 @@ X86CPU.prototype.loadIDTEntry = function(nIDT)
                 this.descIDT.maskPS = ~(X86.PS.NT | X86.PS.TF);
                 break;
             default:
+                if (DEBUG) this.assert(false);
                 return false;
             }
             return true;
         }
-    } else {
-        offIDT = this.addrIDT + (nIDT << 2);
-        if (offIDT + 7 <= this.addrIDTLimit) {
-            this.descIDT.off = this.getWord(offIDT);
-            this.descIDT.sel = this.getWord(offIDT + 2);
-            this.descIDT.maskPS = ~(X86.PS.TF | X86.PS.IF);
-            return true;
-        }
+        return false;
     }
-    return false;
+    if (DEBUG) this.assert(!this.addrIDT && this.addrIDTLimit == 0x03FF);
+    /*
+     * Intel documentation for INT/INTO under "REAL ADDRESS MODE EXCEPTIONS" says:
+     *
+     *      "[T]he 80286 will shut down if the SP = 1, 3, or 5 before executing the INT or INTO instruction--due to lack of stack space"
+     *
+     * Huh?  Why would real-mode care?  See http://localhost:8088/pubs/pc/reference/intel/80286/progref/#page-260
+     */
+    offIDT = this.addrIDT + (nIDT << 2);
+    this.descIDT.off = this.getWord(offIDT);
+    this.descIDT.sel = this.getWord(offIDT + 2);
+    this.descIDT.maskPS = ~(X86.PS.TF | X86.PS.IF);
+    return true;
 };
 
 /**
@@ -1323,7 +1342,7 @@ X86CPU.prototype.setIP = function(off)
  */
 X86CPU.prototype.setCSIP = function(off, sel)
 {
-    Component.assert((off & 0xffff) == off);
+    if (DEBUG) this.assert((off & 0xffff) == off);
     this.regEIP = this.segCS.load(sel) + (this.regIP = off);
     if (PREFETCH) this.flushPrefetch(this.regEIP);
 };
@@ -1655,7 +1674,7 @@ X86CPU.prototype.setPS = function(regPS)
     /*
      * Assert that all requested flag bits now agree with our simulated (PS_INDIRECT) bits
      */
-    Component.assert((regPS & X86.PS.INDIRECT) == (this.getPS() & X86.PS.INDIRECT));
+    if (DEBUG) this.assert((regPS & X86.PS.INDIRECT) == (this.getPS() & X86.PS.INDIRECT));
 
     if (this.regPS & X86.PS.TF) {
         this.intFlags |= X86.INTFLAG.TRAP;
@@ -2043,8 +2062,8 @@ X86CPU.prototype.getBytePrefetch = function(addr)
     if (!EAFUNCS && (this.opFlags & X86.OPFLAG.NOREAD)) return 0;
     var b;
     if (!this.cbPrefetchQueued) {
-        if (MAXDEBUG) Component.assert(addr == this.addrPrefetchHead, "X86CPU.getBytePrefetch(" + str.toHex(addr) + "): invalid head address (" + str.toHex(this.addrPrefetchHead) + ")");
-        if (MAXDEBUG) Component.assert(this.iPrefetchTail == this.iPrefetchHead, "X86CPU.getBytePrefetch(" + str.toHex(addr) + "): head (" + this.iPrefetchHead + ") does not match tail (" + this.iPrefetchTail + ")");
+        if (MAXDEBUG) this.assert(addr == this.addrPrefetchHead, "X86CPU.getBytePrefetch(" + str.toHex(addr) + "): invalid head address (" + str.toHex(this.addrPrefetchHead) + ")");
+        if (MAXDEBUG) this.assert(this.iPrefetchTail == this.iPrefetchHead, "X86CPU.getBytePrefetch(" + str.toHex(addr) + "): head (" + this.iPrefetchHead + ") does not match tail (" + this.iPrefetchTail + ")");
         this.fillPrefetch(1);
         this.nBusCycles += 4;
         /*
@@ -2061,7 +2080,7 @@ X86CPU.prototype.getBytePrefetch = function(addr)
     }
     b = this.aPrefetch[this.iPrefetchTail] & 0xff;
     if (MAXDEBUG) this.messageDebugger("  getBytePrefetch[" + this.iPrefetchTail + "]: " + str.toHex(addr) + ":" + str.toHexByte(b));
-    if (MAXDEBUG) Component.assert(addr == (this.aPrefetch[this.iPrefetchTail] >> 8), "X86CPU.getBytePrefetch(" + str.toHex(addr) + "): invalid tail address (" + str.toHex(this.aPrefetch[this.iPrefetchTail] >> 8) + ")");
+    if (MAXDEBUG) this.assert(addr == (this.aPrefetch[this.iPrefetchTail] >> 8), "X86CPU.getBytePrefetch(" + str.toHex(addr) + "): invalid tail address (" + str.toHex(this.aPrefetch[this.iPrefetchTail] >> 8) + ")");
     this.iPrefetchTail = (this.iPrefetchTail + 1) & X86CPU.PREFETCH.MASK;
     this.cbPrefetchQueued--;
     return b;
@@ -2220,7 +2239,7 @@ X86CPU.prototype.popWord = function()
  */
 X86CPU.prototype.pushWord = function(w)
 {
-    Component.assert((w & 0xffff) == w);
+    if (DEBUG) this.assert((w & 0xffff) == w);
     this.setSOWord(this.segSS, (this.regSP = (this.regSP - 2) & 0xffff), w);
 };
 
@@ -2295,7 +2314,7 @@ X86CPU.prototype.pushWord = function(w)
  */
 X86CPU.prototype.checkINTR = function()
 {
-    Component.assert(this.intFlags);
+    if (DEBUG) this.assert(this.intFlags);
     if (!(this.opFlags & X86.OPFLAG.NOINTR)) {
         if ((this.intFlags & X86.INTFLAG.INTR) && (this.regPS & X86.PS.IF)) {
             var nIDT = this.chipset.getIRRVector();

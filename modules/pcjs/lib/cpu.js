@@ -883,7 +883,7 @@ CPU.prototype.calcStartTime = function()
              * in case, I make absolutely sure it cannot happen, since doing so could result in negative
              * speed calculations.
              */
-            Component.assert(this.aCounts.msStartRun <= this.aCounts.msStartThisRun);
+            if (DEBUG) this.assert(this.aCounts.msStartRun <= this.aCounts.msStartThisRun);
             if (this.aCounts.msStartRun > this.aCounts.msStartThisRun) {
                 this.aCounts.msStartRun = this.aCounts.msStartThisRun;
             }
@@ -1049,7 +1049,7 @@ CPU.prototype.runCPU = function(fOnClick)
 /**
  * startCPU(fSetFocus)
  *
- * WARNING: Other components must use runCPU() to get the CPU running; this is a runCPU() helper function only.
+ * WARNING: Other components must use runCPU() to get the CPU running; This is a runCPU() helper function only; o
  *
  * @param {boolean} [fSetFocus]
  */
@@ -1145,10 +1145,10 @@ CPU.prototype.yieldCPU = function()
     this.nStepCycles = 0;               // this will break us out of stepCPU()
     /*
      * The Debugger calls yieldCPU() after every message() to ensure browser responsiveness, but it looks
-     * odd for those messages to show CPU state changes but for the CPU's own status display to not, so I've
-     * added this call to try to keep things looking synchronized.
+     * odd for those messages to show CPU state changes but for the CPU's own status display to not (ditto
+     * for the Video display), so I've added this call to try to keep things looking synchronized.
      */
-    this.displayStatus();
+    this.updateCPU();
 };
 
 if (typeof APP_PCJS !== 'undefined') APP_PCJS.CPU = CPU;
