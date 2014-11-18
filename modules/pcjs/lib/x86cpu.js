@@ -2607,19 +2607,21 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
 };
 
 /**
- * messageDebugger(sMessage)
+ * messageDebugger(sMessage, bitsMessage)
  *
- * This is a combination of the Debugger's messageEnabled(MESSAGE_MEM) and message() functions, for convenience.
+ * This is a combination of the Debugger's messageEnabled(MESSAGE_CPU) and message() functions, for convenience.
  *
  * @this {X86CPU}
  * @param {string} sMessage is any caller-defined message string
+ * @param {number} [bitsMessage] is one or more Debugger MESSAGE_* category flag(s)
  */
-X86CPU.prototype.messageDebugger = function(sMessage)
+X86CPU.prototype.messageDebugger = function(sMessage, bitsMessage)
 {
     if (DEBUGGER && this.dbg) {
-        if (this.dbg.messageEnabled(Debugger.MESSAGE.CPU)) {
-            this.dbg.message(sMessage);
+        if (bitsMessage == null) {
+            bitsMessage = Debugger.MESSAGE.CPU;
         }
+        if (this.dbg.messageEnabled(bitsMessage)) this.dbg.message(sMessage);
     }
 };
 

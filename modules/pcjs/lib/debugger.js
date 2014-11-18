@@ -173,31 +173,33 @@ function Debugger(parmsDbg)
  * Debugger message constants must always be defined, even when DEBUGGER is false, lest the Closure Compiler complain
  */
 Debugger.MESSAGE = {
-    MEM:        0x00000001,
-    PORT:       0x00000002,
-    DMA:        0x00000004,
-    PIC:        0x00000008,
-    TIMER:      0x00000010,
-    CMOS:       0x00000020,
-    RTC:        0x00000040,
-    C8042:      0x00000080,
-    CHIPSET:    0x00000100,
-    KBD:        0x00000200,
-    KEYS:       0x00000400,
-    VIDEO:      0x00000800,
-    FDC:        0x00001000,
-    HDC:        0x00002000,
-    DISK:       0x00004000,
-    SERIAL:     0x00008000,
-    SPEAKER:    0x00010000,
-    STATE:      0x00020000,
-    MOUSE:      0x00040000,
-    COMPUTER:   0x00080000,
-    CPU:        0x00100000,
-    DOS:        0x00200000,
-    INT:        0x00400000,
+    CPU:        0x00000001,
+    INT:        0x00000002,
+    SEG:        0x00000004,
+    FAULT:      0x00000008,
+    MEM:        0x00000010,
+    PORT:       0x00000020,
+    DMA:        0x00000040,
+    PIC:        0x00000080,
+    TIMER:      0x00000100,
+    CMOS:       0x00000200,
+    RTC:        0x00000400,
+    C8042:      0x00000800,
+    CHIPSET:    0x00001000,
+    KBD:        0x00002000,
+    KEYS:       0x00004000,
+    VIDEO:      0x00008000,
+    FDC:        0x00010000,
+    HDC:        0x00020000,
+    DISK:       0x00040000,
+    SERIAL:     0x00080000,
+    SPEAKER:    0x00100000,
+    STATE:      0x00200000,
+    MOUSE:      0x00400000,
+    COMPUTER:   0x00800000,
     LOG:        0x01000000,
-    HALT:       0x10000000
+    DOS:        0x02000000,
+    HALT:       0x80000000
 };
 
 if (DEBUGGER) {
@@ -483,6 +485,10 @@ if (DEBUGGER) {
      * something to be aware of).
      */
     Debugger.MESSAGES = {
+        "cpu":      Debugger.MESSAGE.CPU,
+        "int":      Debugger.MESSAGE.INT,
+        "seg":      Debugger.MESSAGE.SEG,
+        "fault":    Debugger.MESSAGE.FAULT,
         "mem":      Debugger.MESSAGE.MEM,
         "port":     Debugger.MESSAGE.PORT,
         "dma":      Debugger.MESSAGE.DMA,
@@ -503,10 +509,8 @@ if (DEBUGGER) {
         "state":    Debugger.MESSAGE.STATE,
         "mouse":    Debugger.MESSAGE.MOUSE,
         "computer": Debugger.MESSAGE.COMPUTER,
-        "cpu":      Debugger.MESSAGE.CPU,
-        "dos":      Debugger.MESSAGE.DOS,
-        "int":      Debugger.MESSAGE.INT,
         "log":      Debugger.MESSAGE.LOG,
+        "dos":      Debugger.MESSAGE.DOS,
         /*
          * Now we turn to message actions rather than message types; for example, setting "halt"
          * on or off doesn't enable "halt" messages, but rather halts the CPU on any message above.

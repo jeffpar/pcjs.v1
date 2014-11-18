@@ -4499,7 +4499,9 @@ ChipSet.prototype.setSpeaker = function(fOn)
 ChipSet.prototype.messageDebugger = function(sMessage, bitsMessage, nIRQ)
 {
     if (DEBUGGER && this.dbg) {
-        if (bitsMessage == null) bitsMessage = Debugger.MESSAGE.CHIPSET;
+        if (bitsMessage == null) {
+            bitsMessage = Debugger.MESSAGE.CHIPSET;
+        }
         if (nIRQ !== undefined) {
             bitsMessage |= (nIRQ == ChipSet.IRQ.TIMER0? Debugger.MESSAGE.TIMER : (nIRQ == ChipSet.IRQ.KBD? Debugger.MESSAGE.KBD : (nIRQ == ChipSet.IRQ.FDC? Debugger.MESSAGE.FDC : Debugger.MESSAGE.PIC)));
         }

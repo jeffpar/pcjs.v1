@@ -511,13 +511,8 @@ var X86Help = {
      */
     opHelpFaultMessage: function(nFault, nError, fHalt) {
         if (DEBUGGER && this.dbg) {
-            /*
-             * NOTE: By using Debugger.message(), we have the option of setting "m halt on" and halting on messages like this.
-             */
+            var bitsMessage = Debugger.MESSAGE.FAULT;
             var bOpcode = this.bus.getByteDirect(this.regEIP);
-            if (this.dbg.messageEnabled(Debugger.MESSAGE.CPU)) {
-                this.dbg.message("Fault 0x" + str.toHexByte(nFault) + (nError != null? " (0x" + str.toHexWord(nError) + ")" : "") + " on opcode 0x" + str.toHexByte(bOpcode) + " at " + str.toHexAddr(this.regIP, this.segCS.sel) + " (%" + str.toHex(this.regEIP) + ")");
-            }
             /*
              * OS/2 1.0 uses an INT3 (0xCC) opcode in conjunction with an invalid IDT to trigger a triple-fault
              * reset and return to real-mode, and these resets happen quite frequently during boot; for example, OS/2
@@ -528,7 +523,12 @@ var X86Help = {
              * advantage of the fact that all 3 faults comprising the triple-fault point to the INT3 (0xCC) opcode,
              * and so whenever we see that opcode, we ignore the caller's fHalt flag.
              */
-            if (fHalt && bOpcode != X86.OPCODE.INT3) this.dbg.stopCPU();
+            if (bOpcode == X86.OPCODE.INT3) {
+                fHalt = false;
+                bitsMessage |= Debugger.MESSAGE.CPU;
+            }
+            this.messageDebugger("Fault 0x" + str.toHexByte(nFault) + (nError != null? " (0x" + str.toHexWord(nError) + ")" : "") + " on opcode 0x" + str.toHexByte(bOpcode) + " at " + str.toHexAddr(this.regIP, this.segCS.sel) + " (%" + str.toHex(this.regEIP) + ")", bitsMessage);
+            if (fHalt) this.dbg.stopCPU();
         }
     }
 };

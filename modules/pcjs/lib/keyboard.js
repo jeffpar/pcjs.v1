@@ -1839,8 +1839,11 @@ Keyboard.prototype.keySimulateUpOrDown = function(keyCode, fDown, simCode)
 Keyboard.prototype.messageDebugger = function(sMessage, bitsMessage)
 {
     if (DEBUGGER && this.dbg) {
-        if (bitsMessage == null) bitsMessage = Debugger.MESSAGE.KBD;
-        if (bitsMessage == Debugger.MESSAGE.PORT) bitsMessage |= Debugger.MESSAGE.KBD;
+        if (bitsMessage == null) {
+            bitsMessage = Debugger.MESSAGE.KBD;
+        } else {
+            bitsMessage |= Debugger.MESSAGE.KBD;
+        }
         if (this.dbg.messageEnabled(bitsMessage)) this.dbg.message(sMessage);
     }
 };

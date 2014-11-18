@@ -254,7 +254,7 @@ X86Seg.prototype.loadDesc6 = function(sel, addrDesc)
     var limit = this.cpu.getWord(addrDesc + 4);
 
     if (DEBUG) {
-        this.cpu.messageDebugger("loadDesc6(" + this.sName + "): base=" + str.toHex(base) + " limit=" + str.toHexWord(limit) + " acc=" + str.toHexWord(acc));
+        this.cpu.messageDebugger("loadDesc6(" + this.sName + "): base=" + str.toHex(base) + " limit=" + str.toHexWord(limit) + " acc=" + str.toHexWord(acc), Debugger.MESSAGE.SEG);
     }
 
     this.sel = sel;
@@ -292,8 +292,8 @@ X86Seg.prototype.loadDesc8 = function(sel, addrDesc)
 
     if (DEBUG) {
         var ch = (this.sName.length < 3? " " : "");
-        this.cpu.messageDebugger("loadDesc8(" + this.sName + "):" + ch + " base=" + str.toHex(base) + " limit=" + str.toHexWord(limit) + " acc=" + str.toHexWord(acc) + (ext? " ext=" + str.toHexWord(ext) : ""));
-     // this.cpu.assert(!ext);
+        this.cpu.messageDebugger("loadDesc8(" + this.sName + "):" + ch + " base=" + str.toHex(base) + " limit=" + str.toHexWord(limit) + " acc=" + str.toHexWord(acc) + (ext? " ext=" + str.toHexWord(ext) : ""), Debugger.MESSAGE.SEG);
+        this.cpu.assert(!ext || ext == X86.DESC.EXT.AVAIL);
     }
 
     /*
