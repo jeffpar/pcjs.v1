@@ -51,7 +51,7 @@ var X86Op0F = {
         if ((bModRM & 0x38) < 0x10) {   // possible reg values: 0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, 0x38
             if (EAFUNCS) this.modEAWord = this.modEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOREAD;
         }
-        X86Mods.aOpModsGrpWord[bModRM].call(this, X86Op0F.aOpGRP6, X86Grps.opGrpNoSrc);
+        X86Mods.aOpModsGrpWord[bModRM].call(this, this.aOpGrp6, X86Grps.opGrpNoSrc);
         if (EAFUNCS) { this.modEAWord = this.modEAWordEnabled; this.setEAWord = this.setEAWordEnabled; }
     },
     /**
@@ -64,7 +64,7 @@ var X86Op0F = {
         if (!(bModRM & 0x10)) {
             if (EAFUNCS) this.modEAWord = this.modEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOREAD;
         }
-        X86Mods.aOpModsGrpWord[bModRM].call(this, X86Op0F.aOpGRP7, X86Grps.opGrpNoSrc);
+        X86Mods.aOpModsGrpWord[bModRM].call(this, X86Op0F.aOpGrp7, X86Grps.opGrpNoSrc);
         if (EAFUNCS) { this.modEAWord = this.modEAWordEnabled; this.setEAWord = this.setEAWordEnabled; }
     },
     /**
@@ -158,6 +158,19 @@ var X86Op0F = {
          * TODO: LOADALL operation still needs to be verified in protected mode....
          */
         if (DEBUG && DEBUGGER && (this.regMSW & X86.MSW.PE)) this.stopCPU();
+    },
+    /**
+     * @this {X86CPU}
+     *
+     * op=0x0F,0x06 (clts)
+     */
+    opCLTS: function() {
+        if (this.segCS.cpl) {
+            X86Help.opHelpFault.call(this, X86.EXCEPTION.GP_FAULT, 0, true);
+            return;
+        }
+        this.regMSW &= ~X86.MSW.TS;
+        this.nStepCycles -= 2;
     },
     /**
      * @this {X86CPU}
@@ -426,7 +439,7 @@ var X86Op0F = {
 
 X86Op0F.aOps0F = [
     X86Op0F.opGRP6,         X86Op0F.opGRP7,         X86Op0F.opLAR,          X86Op0F.opLSL,          // 0x00-0x03
-    X86OpXX.opUndefined,    X86Op0F.opLOADALL,      X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x04-0x07
+    X86OpXX.opUndefined,    X86Op0F.opLOADALL,      X86Op0F.opCLTS,         X86OpXX.opUndefined,    // 0x04-0x07
     /*
      * On all processors (except the 8086/8088, of course), 0x0F,0x0B is also referred to as "UD2": an
      * instruction guaranteed to raise a #UD (Invalid Opcode) exception (INT 0x06) on all future x86 processors.
@@ -502,27 +515,21 @@ X86Op0F.aOps0F = [
  * getEAWord() should be disabled *prior* to calling the ModRM helper function.  This latter case requires that
  * we decode the reg field of the ModRM byte before dispatching.
  */
-X86Op0F.aOpGRP6Prot = [
+X86Op0F.aOpGrp6Prot = [
     X86Op0F.opSLDT,         X86Op0F.opSTR,          X86Op0F.opLLDT,         X86Op0F.opLTR,          // 0x0F,0x00(reg=0x0-0x3)
     X86Op0F.opVERR,         X86Op0F.opVERW,         X86Grps.opGrpUndefined, X86Grps.opGrpUndefined  // 0x0F,0x00(reg=0x4-0x7)
 ];
 
-X86Op0F.aOpGRP6Real = [
+X86Op0F.aOpGrp6Real = [
     X86Grps.opGrpInvalid,   X86Grps.opGrpInvalid,   X86Grps.opGrpInvalid,   X86Grps.opGrpInvalid,   // 0x0F,0x00(reg=0x0-0x3)
     X86Grps.opGrpInvalid,   X86Grps.opGrpInvalid,   X86Grps.opGrpUndefined, X86Grps.opGrpUndefined  // 0x0F,0x00(reg=0x4-0x7)
 ];
 
 /*
- * setProtMode() will ensure that aOpGRP6 is set to the appropriate group, but it doesn't hurt to statically
- * initialize to its real-mode default, either.
- */
-X86Op0F.aOpGRP6 = X86Op0F.aOpGRP6Real;
-
-/*
  * Unlike GRP6, GRP7 does not require separate real-mode and protected-mode dispatch tables, because all GRP7
  * instructions are valid in both modes.
  */
-X86Op0F.aOpGRP7 = [
+X86Op0F.aOpGrp7 = [
     X86Op0F.opSGDT,         X86Op0F.opSIDT,         X86Op0F.opLGDT,         X86Op0F.opLIDT,         // 0x0F,0x01(reg=0x0-0x3)
     X86Op0F.opSMSW,         X86Grps.opGrpUndefined, X86Op0F.opLMSW,         X86Grps.opGrpUndefined  // 0x0F,0x01(reg=0x4-0x7)
 ];

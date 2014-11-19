@@ -671,12 +671,17 @@ X86CPU.prototype.setAddressMask = function(addrMask)
 X86CPU.prototype.initProcessor = function()
 {
     this.PS_SET = X86.PS.SET;
+    this.PS_DIRECT = X86.PS.DIRECT;
+
     this.OPFLAG_NOINTR8086 = X86.OPFLAG.NOINTR;
     this.nShiftCountMask = 0xff;            // on an 8086/8088, all shift counts are used as-is
 
     this.CYCLES = (this.model >= X86.MODEL_80286? X86CPU.CYCLES_80286 : X86CPU.CYCLES_8088);
 
-    this.aOps = X86OpXX.aOps.slice();       // make a copy of aOps before modifying it
+    this.aOps     = X86OpXX.aOps.slice();   // make a copy of aOps and others before modifying them
+    this.aOpGrp4b = X86Grps.aOpGrp4b.slice();
+    this.aOpGrp4w = X86Grps.aOpGrp4w.slice();
+    this.aOpGrp6  = X86Op0F.aOpGrp6Real;    // setProtMode() will ensure that aOpGrp6 is switched
 
     if (this.model >= X86.MODEL_80186) {
         /*
@@ -686,35 +691,39 @@ X86CPU.prototype.initProcessor = function()
          * opOUTSw, opENTER, and opLEAVE.
          */
         this.nShiftCountMask = 0x1f;        // on newer processors, all shift counts are MOD 32
-        this.aOps[0x0F]             = X86OpXX.opInvalid;
-        this.aOps[X86.OPCODE.PUSHA] = X86OpXX.opPUSHA;
-        this.aOps[X86.OPCODE.POPA]  = X86OpXX.opPOPA;
-        this.aOps[X86.OPCODE.BOUND] = X86OpXX.opBOUND;
-        this.aOps[0x63]             = X86OpXX.opInvalid;
-        this.aOps[0x64]             = X86OpXX.opInvalid;
-        this.aOps[0x65]             = X86OpXX.opInvalid;
-        this.aOps[0x66]             = X86OpXX.opInvalid;
-        this.aOps[0x67]             = X86OpXX.opInvalid;
-        this.aOps[X86.OPCODE.PUSH16]= X86OpXX.opPUSH16;
-        this.aOps[X86.OPCODE.IMUL16]= X86OpXX.opIMUL16;
-        this.aOps[X86.OPCODE.PUSH8] = X86OpXX.opPUSH8;
-        this.aOps[X86.OPCODE.IMUL8] = X86OpXX.opIMUL8;
-        this.aOps[X86.OPCODE.INSB]  = X86OpXX.opINSb;
-        this.aOps[X86.OPCODE.INSW]  = X86OpXX.opINSw;
-        this.aOps[X86.OPCODE.OUTSB] = X86OpXX.opOUTSb;
-        this.aOps[X86.OPCODE.OUTSW] = X86OpXX.opOUTSw;
-        this.aOps[0xC0]             = X86OpXX.opGRP2ab;
-        this.aOps[0xC1]             = X86OpXX.opGRP2aw;
-        this.aOps[X86.OPCODE.ENTER] = X86OpXX.opENTER;
-        this.aOps[X86.OPCODE.LEAVE] = X86OpXX.opLEAVE;
-        this.aOps[0xF1]             = X86OpXX.opINT1;
-        X86Grps.aOpGRP4b[0x07]      = X86Grps.opGrpInvalid;
-        X86Grps.aOpGRP4w[0x07]      = X86Grps.opGrpInvalid;
+        this.aOps[0x0F]                 = X86OpXX.opInvalid;
+        this.aOps[X86.OPCODE.PUSHA]     = X86OpXX.opPUSHA;
+        this.aOps[X86.OPCODE.POPA]      = X86OpXX.opPOPA;
+        this.aOps[X86.OPCODE.BOUND]     = X86OpXX.opBOUND;
+        this.aOps[0x63]                 = X86OpXX.opInvalid;
+        this.aOps[0x64]                 = X86OpXX.opInvalid;
+        this.aOps[0x65]                 = X86OpXX.opInvalid;
+        this.aOps[0x66]                 = X86OpXX.opInvalid;
+        this.aOps[0x67]                 = X86OpXX.opInvalid;
+        this.aOps[X86.OPCODE.PUSH16]    = X86OpXX.opPUSH16;
+        this.aOps[X86.OPCODE.IMUL16]    = X86OpXX.opIMUL16;
+        this.aOps[X86.OPCODE.PUSH8]     = X86OpXX.opPUSH8;
+        this.aOps[X86.OPCODE.IMUL8]     = X86OpXX.opIMUL8;
+        this.aOps[X86.OPCODE.INSB]      = X86OpXX.opINSb;
+        this.aOps[X86.OPCODE.INSW]      = X86OpXX.opINSw;
+        this.aOps[X86.OPCODE.OUTSB]     = X86OpXX.opOUTSb;
+        this.aOps[X86.OPCODE.OUTSW]     = X86OpXX.opOUTSw;
+        this.aOps[0xC0]                 = X86OpXX.opGRP2ab;
+        this.aOps[0xC1]                 = X86OpXX.opGRP2aw;
+        this.aOps[X86.OPCODE.ENTER]     = X86OpXX.opENTER;
+        this.aOps[X86.OPCODE.LEAVE]     = X86OpXX.opLEAVE;
+        this.aOps[0xF1]                 = X86OpXX.opINT1;
+        this.aOpGrp4b[0x07]             = X86Grps.opGrpInvalid;
+        this.aOpGrp4w[0x07]             = X86Grps.opGrpInvalid;
 
         if (this.model >= X86.MODEL_80286) {
+
             this.PS_SET = X86.PS.BIT1;      // on the 80286, only BIT1 of Processor Status (flags) is always set
+            this.PS_DIRECT |= X86.PS.IOPL.MASK | X86.PS.NT;
+
             this.OPFLAG_NOINTR8086 = 0;     // used with instructions that should *not* set NOINTR on an 80286 (eg, non-SS segment loads)
-            this.aOps[0x0F] = X86OpXX.op0F;
+
+            this.aOps[0x0F]             = X86OpXX.op0F;
             this.aOps[X86.OPCODE.ARPL]  = X86OpXX.opARPL;
             this.aOps[X86.OPCODE.PUSHSP]= X86OpXX.opPUSHSP;
         }
@@ -1010,11 +1019,7 @@ X86CPU.prototype.setProtMode = function(fProt)
     if (fProt === undefined) {
         fProt = !!(this.regMSW & X86.MSW.PE);
     }
-    if (fProt) {
-        X86Op0F.aOpGRP6 = X86Op0F.aOpGRP6Prot;
-    } else {
-        X86Op0F.aOpGRP6 = X86Op0F.aOpGRP6Real;
-    }
+    this.aOpGrp6 = (fProt? X86Op0F.aOpGrp6Prot : X86Op0F.aOpGrp6Real);
     this.segCS.updateAccess(fProt);
     this.segDS.updateAccess(fProt);
     this.segSS.updateAccess(fProt);
@@ -1600,8 +1605,9 @@ X86CPU.prototype.setPS = function(regPS)
     if (regPS & X86.PS.OF) this.setOF();
 
     /*
-     * Since PS.IOPL and PS.IF are part of PS.DIRECT, we need to take care of any 80286-specific checks before
-     * setting the PS.DIRECT bits.  Specifically, PS.IOPL is unchanged if CPL > 0, and PS.IF is unchanged if CPL > IOPL.
+     * Since PS.IOPL and PS.IF are part of PS_DIRECT, we need to take care of any 80286-specific checks before
+     * setting the PS_DIRECT bits from the incoming regPS bits.  Specifically, PS.IOPL is unchanged if CPL > 0,
+     * and PS.IF is unchanged if CPL > IOPL.
      */
     if (!this.segCS.cpl) {
         this.nIOPL = (regPS & X86.PS.IOPL.MASK) >> X86.PS.IOPL.SHIFT;           // IOPL allowed to change
@@ -1609,11 +1615,12 @@ X86CPU.prototype.setPS = function(regPS)
     } else {
         regPS = (regPS & ~X86.PS.IOPL.MASK) | (this.regPS & X86.PS.IOPL.MASK);  // IOPL not allowed to change
     }
+
     if (this.segCS.cpl > this.nIOPL) {
         regPS = (regPS & ~X86.PS.IF) | (this.regPS & X86.PS.IF);                // IF not allowed to change
     }
 
-    this.regPS = (this.regPS & ~X86.PS.DIRECT) | (regPS & X86.PS.DIRECT) | this.PS_SET;
+    this.regPS = (this.regPS & ~this.PS_DIRECT) | (regPS & this.PS_DIRECT) | this.PS_SET;
 
     /*
      * Assert that all requested flag bits now agree with our simulated (PS_INDIRECT) bits

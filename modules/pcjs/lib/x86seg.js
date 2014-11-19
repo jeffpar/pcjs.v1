@@ -446,7 +446,7 @@ X86Seg.prototype.messageDebugger = function(base, limit, acc, ext)
             var ch = (this.sName.length < 3? " " : "");
             var sDPL = " dpl=" + this.dpl;
             if (this.id == X86Seg.ID.CODE) sDPL += " cpl=" + this.cpl;
-            this.cpu.messageDebugger("loadDesc(" + this.sName + "):" + ch + " base=" + str.toHex(base) + " limit=" + str.toHexWord(limit) + " acc=" + str.toHexWord(acc) + sDPL, Debugger.MESSAGE.SEG);
+            this.cpu.messageDebugger("loadSeg(" + this.sName + "):" + ch + " base=" + str.toHex(base) + " limit=" + str.toHexWord(limit) + " acc=" + str.toHexWord(acc) + sDPL, Debugger.MESSAGE.SEG);
         }
         this.cpu.assert(!ext || ext == X86.DESC.EXT.AVAIL);
     }

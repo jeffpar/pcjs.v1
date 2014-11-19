@@ -81,6 +81,11 @@ function Debugger(parmsDbg)
         this.cInstructions = -1;
 
         /*
+         * The default numder of hex characters in a physical address; updated by initBus().
+         */
+        this.cchAddr = 5;
+
+        /*
          * Most commands that require an address call parseAddr(), which defaults to aAddrNextCode
          * or aAddrNextData when no address has been given.  doDump() and doUnassemble(), in turn,
          * update aAddrNextData and aAddrNextCode, respectively, when they're done.
@@ -183,31 +188,33 @@ function Debugger(parmsDbg)
  */
 Debugger.MESSAGE = {
     CPU:        0x00000001,
-    INT:        0x00000002,
-    SEG:        0x00000004,
-    FAULT:      0x00000008,
-    MEM:        0x00000010,
-    PORT:       0x00000020,
-    DMA:        0x00000040,
-    PIC:        0x00000080,
-    TIMER:      0x00000100,
-    CMOS:       0x00000200,
-    RTC:        0x00000400,
-    C8042:      0x00000800,
-    CHIPSET:    0x00001000,
-    KBD:        0x00002000,
-    KEYS:       0x00004000,
-    VIDEO:      0x00008000,
-    FDC:        0x00010000,
-    HDC:        0x00020000,
-    DISK:       0x00040000,
-    SERIAL:     0x00080000,
-    SPEAKER:    0x00100000,
-    STATE:      0x00200000,
-    MOUSE:      0x00400000,
-    COMPUTER:   0x00800000,
-    LOG:        0x01000000,
-    DOS:        0x02000000,
+    SEG:        0x00000002,
+    DESC:       0x00000004,
+    TSS:        0x00000008,
+    INT:        0x00000010,
+    FAULT:      0x00000020,
+    MEM:        0x00000040,
+    PORT:       0x00000080,
+    DMA:        0x00000100,
+    PIC:        0x00000200,
+    TIMER:      0x00000400,
+    CMOS:       0x00000800,
+    RTC:        0x00001000,
+    C8042:      0x00002000,
+    CHIPSET:    0x00004000,
+    KBD:        0x00008000,
+    KEYS:       0x00010000,
+    VIDEO:      0x00020000,
+    FDC:        0x00040000,
+    HDC:        0x00080000,
+    DISK:       0x00100000,
+    SERIAL:     0x00200000,
+    SPEAKER:    0x00400000,
+    STATE:      0x00800000,
+    MOUSE:      0x01000000,
+    COMPUTER:   0x02000000,
+    LOG:        0x04000000,
+    DOS:        0x08000000,
     HALT:       0x80000000
 };
 
@@ -495,8 +502,10 @@ if (DEBUGGER) {
      */
     Debugger.MESSAGES = {
         "cpu":      Debugger.MESSAGE.CPU,
-        "int":      Debugger.MESSAGE.INT,
         "seg":      Debugger.MESSAGE.SEG,
+        "desc":     Debugger.MESSAGE.DESC,
+        "tss":      Debugger.MESSAGE.TSS,
+        "int":      Debugger.MESSAGE.INT,
         "fault":    Debugger.MESSAGE.FAULT,
         "mem":      Debugger.MESSAGE.MEM,
         "port":     Debugger.MESSAGE.PORT,
@@ -886,7 +895,8 @@ if (DEBUGGER) {
         0x01: [Debugger.INS.GRP7,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORD  |  Debugger.TYPE_BOTH],
         0x02: [Debugger.INS.LAR,    Debugger.TYPE_REG    | Debugger.TYPE_WORD  |  Debugger.TYPE_IN | Debugger.TYPE_286,   Debugger.TYPE_MEM  | Debugger.TYPE_WORD | Debugger.TYPE_IN],
         0x03: [Debugger.INS.LSL,    Debugger.TYPE_REG    | Debugger.TYPE_WORD  |  Debugger.TYPE_IN | Debugger.TYPE_286,   Debugger.TYPE_MEM  | Debugger.TYPE_WORD | Debugger.TYPE_IN],
-        0x05: [Debugger.INS.LOADALL,Debugger.TYPE_286]
+        0x05: [Debugger.INS.LOADALL,Debugger.TYPE_286],
+        0x06: [Debugger.INS.CLTS,   Debugger.TYPE_286]
     };
 
     Debugger.aaGrpDescs = [
@@ -1197,6 +1207,8 @@ if (DEBUGGER) {
         this.hdc = cmp.getComponentByType("HDC");
         if (MAXDEBUG) this.chipset = cmp.getComponentByType("ChipSet");
 
+        this.cchAddr = bus.getWidth() >> 2;
+
         this.aaOpDescs = Debugger.aaOpDescs;
         if (this.cpu.model >= X86.MODEL_80186) {
             this.aaOpDescs = Debugger.aaOpDescs.slice();
@@ -1206,9 +1218,8 @@ if (DEBUGGER) {
             }
         }
 
-        this.messageDump(Debugger.MESSAGE.DOS, function onDumpDOS(s) {
-            dbg.dumpDOS(s);
-        });
+        this.messageDump(Debugger.MESSAGE.TSS, function onDumpTSS(s) { dbg.dumpTSS(s); });
+        this.messageDump(Debugger.MESSAGE.DOS, function onDumpDOS(s) { dbg.dumpDOS(s); });
 
         this.setReady();
 
@@ -1320,6 +1331,8 @@ if (DEBUGGER) {
     /**
      * dumpDOS(s)
      *
+     * This dumps DOS MCBs (Memory Control Blocks).
+     *
      * @this {Debugger}
      * @param {string} [s]
      */
@@ -1343,6 +1356,67 @@ if (DEBUGGER) {
             this.println(str.toHexAddr(0, seg) + ": '" + String.fromCharCode(bSig) + "' PID=" + str.toHexWord(wPID) + " LEN=" + str.toHexWord(wParas) + ' "' + this.dumpSZ(aAddr, 8) + '"');
             seg += 1 + wParas;
         }
+    };
+
+    Debugger.aTSSFields = {
+        "PREV_TSS":     0x00,
+        "CPL0_SP":      0x02,
+        "CPL0_SS":      0x04,
+        "CPL1_SP":      0x06,
+        "CPL1_SS":      0x08,
+        "CPL2_SP":      0x0a,
+        "CPL2_SS":      0x0c,
+        "TASK_IP":      0x0e,
+        "TASK_PS":      0x10,
+        "TASK_AX":      0x12,
+        "TASK_CX":      0x14,
+        "TASK_DX":      0x16,
+        "TASK_BX":      0x18,
+        "TASK_SP":      0x1a,
+        "TASK_BP":      0x1c,
+        "TASK_SI":      0x1e,
+        "TASK_DI":      0x20,
+        "TASK_ES":      0x22,
+        "TASK_CS":      0x24,
+        "TASK_SS":      0x26,
+        "TASK_DS":      0x28,
+        "TASK_LDT":     0x2a
+    };
+
+    /**
+     * dumpTSS(s)
+     *
+     * This dumps a TSS using the given selector.  If none is specified, the current TR is used.
+     *
+     * @this {Debugger}
+     * @param {string} [s]
+     */
+    Debugger.prototype.dumpTSS = function(s)
+    {
+        var seg;
+        if (!s) {
+            seg = this.cpu.segTSS;
+        } else {
+            var sel = str.parseInt(s);
+            if (sel === undefined) {
+                this.println("invalid task selector: " + s);
+                return;
+            }
+            seg = this.getSegment(sel);
+        }
+
+        this.println("dumpTSS(" + str.toHexWord(seg.sel) + "): %" + str.toHex(seg.base, this.cchAddr));
+
+        var sDump = "";
+        for (var sField in Debugger.aTSSFields) {
+            var off = Debugger.aTSSFields[sField];
+            var ch = (sField.length < 8? ' ' : '');
+            var w = this.bus.getWordDirect(seg.base + off);
+            if (sDump) sDump += '\n';
+            sDump += str.toHexWord(off) + " " + sField + ": " + ch + str.toHexWord(w);
+        }
+
+        this.println(sDump);
     };
 
     /**
@@ -2869,7 +2943,7 @@ if (DEBUGGER) {
      */
     Debugger.prototype.getSegStr = function(seg, fProt)
     {
-        return seg.sName + '=' + str.toHexWord(seg.sel) + (fProt? '[' + str.toHex(seg.base, 6) + ',' + str.toHexWord(seg.limit) + ']' : "");
+        return seg.sName + '=' + str.toHexWord(seg.sel) + (fProt? '[' + str.toHex(seg.base, this.cchAddr) + ',' + str.toHexWord(seg.limit) + ']' : "");
     };
 
     /**
@@ -2884,7 +2958,7 @@ if (DEBUGGER) {
      */
     Debugger.prototype.getDTRStr = function(sName, sel, addr, addrLimit)
     {
-        return sName + '=' + (sel != null? str.toHexWord(sel) : "") + '[' + str.toHex(addr, 6) + ',' + str.toHexWord(addrLimit - addr) + ']';
+        return sName + '=' + (sel != null? str.toHexWord(sel) : "") + '[' + str.toHex(addr, this.cchAddr) + ',' + str.toHexWord(addrLimit - addr) + ']';
     };
 
     /**
@@ -3844,6 +3918,41 @@ if (DEBUGGER) {
     };
 
     /**
+     * doList(sSymbol)
+     *
+     * @this {Debugger}
+     * @param {string} sSymbol
+     */
+    Debugger.prototype.doList = function(sSymbol)
+    {
+        var aAddr = this.parseAddr(sSymbol, Debugger.ADDR_CODE);
+        if (aAddr[0] == null && aAddr[2] == null) return;
+
+        var addr = this.getAddr(aAddr);
+
+        this.println(sSymbol + ": " + this.hexAddr(aAddr) + " (%" + str.toHex(addr, this.cchAddr) + ")");
+
+        var aSymbol = this.findSymbolAtAddr(aAddr, true);
+        if (aSymbol.length) {
+            var nDelta, sDelta;
+            if (aSymbol[0]) {
+                sDelta = "";
+                nDelta = aAddr[0] - aSymbol[1];
+                if (nDelta) sDelta = " + " + str.toHexWord(nDelta);
+                this.println(aSymbol[0] + " (" + str.toHexAddr(aSymbol[1], aAddr[1]) + ")" + sDelta);
+            }
+            if (aSymbol.length > 4 && aSymbol[4]) {
+                sDelta = "";
+                nDelta = aSymbol[5] - aAddr[0];
+                if (nDelta) sDelta = " - " + str.toHexWord(nDelta);
+                this.println(aSymbol[4] + " (" + str.toHexAddr(aSymbol[5], aAddr[1]) + ")" + sDelta);
+            }
+        } else {
+            this.println("no symbols");
+        }
+    };
+
+    /**
      * doLoad(asArgs)
      *
      * The format of this command mirrors the DOS DEBUG "L" command:
@@ -3869,36 +3978,14 @@ if (DEBUGGER) {
             return;
         }
 
-        var aAddr = [], iDrive, iSector = 0, nSectors = 0;
-
-        var fJSON = false;
-        if (asArgs[1] == "json") {
-            fJSON = true;
-        } else {
-            var fListSymbols = (asArgs[0] == "ln");
-            aAddr = this.parseAddr(asArgs[1], fListSymbols? Debugger.ADDR_CODE : Debugger.ADDR_DATA);
-            if (fListSymbols) {
-                var aSymbol = this.findSymbolAtAddr(aAddr, true);
-                if (aSymbol.length) {
-                    var nDelta, sDelta;
-                    if (aSymbol[0]) {
-                        sDelta = "";
-                        nDelta = aAddr[0] - aSymbol[1];
-                        if (nDelta) sDelta = " + " + str.toHexWord(nDelta);
-                        this.println(aSymbol[0] + " (" + str.toHexAddr(aSymbol[1], aAddr[1]) + ")" + sDelta);
-                    }
-                    if (aSymbol.length > 4 && aSymbol[4]) {
-                        sDelta = "";
-                        nDelta = aSymbol[5] - aAddr[0];
-                        if (nDelta) sDelta = " - " + str.toHexWord(nDelta);
-                        this.println(aSymbol[4] + " (" + str.toHexAddr(aSymbol[5], aAddr[1]) + ")" + sDelta);
-                    }
-                } else {
-                    this.println("no symbols");
-                }
-                return;
-            }
+        if (asArgs[0] == "ln") {
+            this.doList(asArgs[1]);
+            return;
         }
+
+        var fJSON = (asArgs[1] == "json");
+        var iDrive, iSector = 0, nSectors = 0;
+        var aAddr = (fJSON? [] : this.parseAddr(asArgs[1], Debugger.ADDR_DATA));
 
         iDrive = this.parseValue(asArgs[2], "drive #");
         if (iDrive === undefined) return;
@@ -4147,14 +4234,11 @@ if (DEBUGGER) {
             var sReg = asArgs[1];
             if (sReg == 'p') {
                 /*
-                 * If the CPU has not defined addrGDT, then there are no protected-mode registers
-                 *
-                 * TODO: Come up with a more formal way of determining the CPU's support for protected-mode,
-                 * and/or report an error.
+                 * If the CPU has not defined addrGDT, then there are no protected-mode registers.
                  */
                 fProt = (this.cpu.addrGDT !== undefined);
             } else {
-                fIns = false;
+             // fIns = false;
                 var sValue = null;
                 var i = sReg.indexOf("=");
                 if (i > 0) {
@@ -4230,20 +4314,21 @@ if (DEBUGGER) {
                         this.cpu.setSS(w);
                         break;
                     case "CS":
-                        fIns = true;
+                     // fIns = true;
                         this.cpu.setCS(w);
                         this.aAddrNextCode = this.newAddr(this.cpu.regIP, this.cpu.segCS.sel);
                         break;
                     case "IP":
-                        fIns = true;
+                     // fIns = true;
                         this.cpu.setIP(w);
                         this.aAddrNextCode = this.newAddr(this.cpu.regIP, this.cpu.segCS.sel);
                         break;
                     /*
                      * I used to alias "PC" to "IP", until I discovered that early (perhaps ALL) versions of
-                     * DEBUG.COM treat "PC" as an alias for the 16-bit flags register.
+                     * DEBUG.COM treat "PC" as an alias for the 16-bit flags register.  I, of course, prefer "PS".
                      */
                     case "PC":
+                    case "PS":
                         this.cpu.setPS(w);
                         break;
                     case "C":

@@ -306,6 +306,17 @@ Bus.prototype.setA20 = function(fEnable)
 };
 
 /**
+ * getWidth()
+ *
+ * @this {Bus}
+ * @return {number}
+ */
+Bus.prototype.getWidth = function()
+{
+    return this.nBusWidth;
+};
+
+/**
  * setMemoryAccess(addr, size)
  *
  * Updates the access functions in every block of the specified address range.  Since the only components

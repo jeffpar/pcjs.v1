@@ -1282,12 +1282,12 @@ var X86Grps = {
  * GRP4w, so I think my nomenclature makes more sense.  To compensate, I don't use GRP5, so that the
  * remaining group numbers remain in sync with Intel's.
  */
-X86Grps.aOpGRP1b = [
+X86Grps.aOpGrp1b = [
     X86Grps.opGrpADDb,      X86Grps.opGrpORb,       X86Grps.opGrpADCb,      X86Grps.opGrpSBBb,      // 0x80/0x82(reg=0x0-0x3)
     X86Grps.opGrpANDb,      X86Grps.opGrpSUBb,      X86Grps.opGrpXORb,      X86Grps.opGrpCMPb       // 0x80/0x82(reg=0x4-0x7)
 ];
 
-X86Grps.aOpGRP1w = [
+X86Grps.aOpGrp1w = [
     X86Grps.opGrpADDw,      X86Grps.opGrpORw,       X86Grps.opGrpADCw,      X86Grps.opGrpSBBw,      // 0x81/0x83(reg=0x0-0x3)
     X86Grps.opGrpANDw,      X86Grps.opGrpSUBw,      X86Grps.opGrpXORw,      X86Grps.opGrpCMPw       // 0x81/0x83(reg=0x4-0x7)
 ];
@@ -1302,32 +1302,32 @@ X86Grps.aOpGrpMOVImm = [
     X86Grps.opGrpUndefined, X86Grps.opGrpUndefined, X86Grps.opGrpUndefined, X86Grps.opGrpUndefined  // 0xC6/0xC7(reg=0x4-0x7)
 ];
 
-X86Grps.aOpGRP2b = [
+X86Grps.aOpGrp2b = [
     X86Grps.opGrpROLb,      X86Grps.opGrpRORb,      X86Grps.opGrpRCLb,      X86Grps.opGrpRCRb,      // 0xD0/0xD2(reg=0x0-0x3)
     X86Grps.opGrpSHLb,      X86Grps.opGrpSHRb,      X86Grps.opGrpUndefined, X86Grps.opGrpSARb       // 0xD0/0xD2(reg=0x4-0x7)
 ];
 
-X86Grps.aOpGRP2w = [
+X86Grps.aOpGrp2w = [
     X86Grps.opGrpROLw,      X86Grps.opGrpRORw,      X86Grps.opGrpRCLw,      X86Grps.opGrpRCRw,      // 0xD1/0xD3(reg=0x0-0x3)
     X86Grps.opGrpSHLw,      X86Grps.opGrpSHRw,      X86Grps.opGrpUndefined, X86Grps.opGrpSARw       // 0xD1/0xD3(reg=0x4-0x7)
 ];
 
-X86Grps.aOpGRP3b = [
+X86Grps.aOpGrp3b = [
     X86Grps.opGrpTEST8,     X86Grps.opGrpUndefined, X86Grps.opGrpNOTb,      X86Grps.opGrpNEGb,      // 0xF6(reg=0x0-0x3)
     X86Grps.opGrpMULb,      X86Grps.opGrpIMULb,     X86Grps.opGrpDIVb,      X86Grps.opGrpIDIVb      // 0xF6(reg=0x4-0x7)
 ];
 
-X86Grps.aOpGRP3w = [
+X86Grps.aOpGrp3w = [
     X86Grps.opGrpTEST16,    X86Grps.opGrpUndefined, X86Grps.opGrpNOTw,      X86Grps.opGrpNEGw,      // 0xF7(reg=0x0-0x3)
     X86Grps.opGrpMULw,      X86Grps.opGrpIMULw,     X86Grps.opGrpDIVw,      X86Grps.opGrpIDIVw      // 0xF7(reg=0x4-0x7)
 ];
 
-X86Grps.aOpGRP4b = [
+X86Grps.aOpGrp4b = [
     X86Grps.opGrpINCb,      X86Grps.opGrpDECb,      X86Grps.opGrpUndefined, X86Grps.opGrpUndefined, // 0xFE(reg=0x0-0x3)
     X86Grps.opGrpUndefined, X86Grps.opGrpUndefined, X86Grps.opGrpUndefined, X86Grps.opGrpUndefined  // 0xFE(reg=0x4-0x7)
 ];
 
-X86Grps.aOpGRP4w = [
+X86Grps.aOpGrp4w = [
     X86Grps.opGrpINCw,      X86Grps.opGrpDECw,      X86Grps.opGrpCALLw,     X86Grps.opGrpCALLdw,    // 0xFF(reg=0x0-0x3)
     X86Grps.opGrpJMPw,      X86Grps.opGrpJMPf,      X86Grps.opGrpPUSHw,     X86Grps.opGrpFault      // 0xFF(reg=0x4-0x7)
 ];
@@ -1335,12 +1335,12 @@ X86Grps.aOpGRP4w = [
 /*
  * The following are for 80186/80188 and up...
  */
-X86Grps.aOpGRP2ab = [
+X86Grps.aOpGrp2ab = [
     X86Grps.opGrpROLb,      X86Grps.opGrpRORb,      X86Grps.opGrpRCLb,      X86Grps.opGrpRCRb,      // 0xC0(reg=0x0-0x3)
     X86Grps.opGrpSHLb,      X86Grps.opGrpSHRb,      X86Grps.opGrpUndefined, X86Grps.opGrpSARb       // 0xC0(reg=0x4-0x7)
 ];
 
-X86Grps.aOpGRP2aw = [
+X86Grps.aOpGrp2aw = [
     X86Grps.opGrpROLw,      X86Grps.opGrpRORw,      X86Grps.opGrpRCLw,      X86Grps.opGrpRCRw,      // 0xC1(reg=0x0-0x3)
     X86Grps.opGrpSHLw,      X86Grps.opGrpSHRw,      X86Grps.opGrpUndefined, X86Grps.opGrpSARw       // 0xC1(reg=0x4-0x7)
 ];

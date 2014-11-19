@@ -485,7 +485,7 @@ var X86Help = {
             if (this.regPS & X86.PS.NT) {
                 var addrNew = this.segTSS.base;
                 var sel = this.getWord(addrNew + X86.TSS.PREV_TSS);
-                X86Help.opHelpSwitchTSS.call(this, sel);
+                X86Help.opHelpSwitchTSS.call(this, sel, false);
                 return;
             }
         }
@@ -569,7 +569,7 @@ var X86Help = {
      *
      * @this {X86CPU}
      * @param {number} selNew
-     * @param {boolean} [fNest]
+     * @param {boolean} fNest is true if nesting, false if un-nesting
      * @return {boolean} true if successful, false if error
      */
     opHelpSwitchTSS: function(selNew, fNest) {
@@ -581,65 +581,59 @@ var X86Help = {
                 X86Help.opHelpFault.call(this, X86.EXCEPTION.TS_FAULT, selNew, true);
                 return false;
             }
-            this.setWord(this.segTSS.addrDesc + X86.DESC.ACC.OFFSET, this.segTSS.acc &= ~X86.DESC.ACC.TYPE.LDT);
-            this.segTSS.type = X86.DESC.ACC.TYPE.TSS;
+            this.setWord(this.segTSS.addrDesc + X86.DESC.ACC.OFFSET, (this.segTSS.acc & ~X86.DESC.ACC.TYPE.TSS_BUSY) | X86.DESC.ACC.TYPE.TSS);
         }
-        if (this.segTSS.load(selNew) == null) return false;
+        if (this.segTSS.load(selNew) == null) {
+            return false;
+        }
         var addrNew = this.segTSS.base;
         if (DEBUG) {
-            this.messageDebugger((fNest? "switchTSS" : "returnTSS") + ": old TR=" + str.toHexWord(selOld) + " TSS=" + str.toHex(addrOld, 6) + ", new TR=" + str.toHexWord(selNew) + " TSS=" + str.toHex(addrNew, 6));
+            this.messageDebugger((fNest? "Task switch" : "Task return") + ": TR " + str.toHexWord(selOld) + " (%" + str.toHex(addrOld, 6) + "), new TR " + str.toHexWord(selNew) + " (%" + str.toHex(addrNew, 6) + ")", Debugger.MESSAGE.TSS);
         }
         if (fNest) {
             if (this.segTSS.type == X86.DESC.ACC.TYPE.TSS_BUSY) {
                 X86Help.opHelpFault.call(this, X86.EXCEPTION.GP_FAULT, selNew, true);
                 return false;
             }
-            this.setWord(this.segTSS.addrDesc + X86.DESC.ACC.OFFSET, this.segTSS.acc |= X86.DESC.ACC.TYPE.LDT);
+            this.setWord(this.segTSS.addrDesc + X86.DESC.ACC.OFFSET, this.segTSS.acc |= X86.DESC.ACC.TYPE.TSS_BUSY);
             this.segTSS.type = X86.DESC.ACC.TYPE.TSS_BUSY;
         }
-        this.setWord(addrOld + X86.TSS.CURR_IP, this.regIP);
-        this.setWord(addrOld + X86.TSS.CURR_PS, this.getPS());
-        this.setWord(addrOld + X86.TSS.CURR_AX, this.regAX);
-        this.setWord(addrOld + X86.TSS.CURR_CX, this.regCX);
-        this.setWord(addrOld + X86.TSS.CURR_DX, this.regDX);
-        this.setWord(addrOld + X86.TSS.CURR_BX, this.regBX);
-        this.setWord(addrOld + X86.TSS.CURR_SP, this.regSP);
-        this.setWord(addrOld + X86.TSS.CURR_BP, this.regBP);
-        this.setWord(addrOld + X86.TSS.CURR_SI, this.regSI);
-        this.setWord(addrOld + X86.TSS.CURR_DI, this.regDI);
-        this.setWord(addrOld + X86.TSS.CURR_ES, this.segES.sel);
-        this.setWord(addrOld + X86.TSS.CURR_CS, this.segCS.sel);
-        this.setWord(addrOld + X86.TSS.CURR_SS, this.segSS.sel);
-        this.setWord(addrOld + X86.TSS.CURR_DS, this.segDS.sel);
-        var offSS = X86.TSS.CURR_SS;
-        var offSP = X86.TSS.CURR_SP;
-        var regPS = this.getWord(addrNew + X86.TSS.CURR_PS);
-        this.setPS(regPS);
-        /*
-         * We have to set the NT (Nested Task) flag manually, because setPS() doesn't allow it.
-         */
-        this.regPS = (this.regPS & ~X86.PS.NT) | (regPS | X86.PS.NT);
-        this.regAX = this.getWord(addrNew + X86.TSS.CURR_AX);
-        this.regCX = this.getWord(addrNew + X86.TSS.CURR_CX);
-        this.regDX = this.getWord(addrNew + X86.TSS.CURR_DX);
-        this.regBX = this.getWord(addrNew + X86.TSS.CURR_BX);
-        this.regBP = this.getWord(addrNew + X86.TSS.CURR_BP);
-        this.regSI = this.getWord(addrNew + X86.TSS.CURR_SI);
-        this.regDI = this.getWord(addrNew + X86.TSS.CURR_DI);
-        this.segES.load(this.getWord(addrNew + X86.TSS.CURR_ES));
-        this.segDS.load(this.getWord(addrNew + X86.TSS.CURR_DS));
-        this.setCSIP(this.getWord(addrNew + X86.TSS.CURR_IP), this.getWord(addrNew + X86.TSS.CURR_CS));
+        this.setWord(addrOld + X86.TSS.TASK_IP, this.regIP);
+        this.setWord(addrOld + X86.TSS.TASK_PS, this.getPS());
+        this.setWord(addrOld + X86.TSS.TASK_AX, this.regAX);
+        this.setWord(addrOld + X86.TSS.TASK_CX, this.regCX);
+        this.setWord(addrOld + X86.TSS.TASK_DX, this.regDX);
+        this.setWord(addrOld + X86.TSS.TASK_BX, this.regBX);
+        this.setWord(addrOld + X86.TSS.TASK_SP, this.regSP);
+        this.setWord(addrOld + X86.TSS.TASK_BP, this.regBP);
+        this.setWord(addrOld + X86.TSS.TASK_SI, this.regSI);
+        this.setWord(addrOld + X86.TSS.TASK_DI, this.regDI);
+        this.setWord(addrOld + X86.TSS.TASK_ES, this.segES.sel);
+        this.setWord(addrOld + X86.TSS.TASK_CS, this.segCS.sel);
+        this.setWord(addrOld + X86.TSS.TASK_SS, this.segSS.sel);
+        this.setWord(addrOld + X86.TSS.TASK_DS, this.segDS.sel);
+        var offSS = X86.TSS.TASK_SS;
+        var offSP = X86.TSS.TASK_SP;
+        this.setPS(this.getWord(addrNew + X86.TSS.TASK_PS) | (fNest? X86.PS.NT : 0));
+        if (DEBUG) this.assert(!fNest || !!(this.regPS & X86.PS.NT));
+        this.regAX = this.getWord(addrNew + X86.TSS.TASK_AX);
+        this.regCX = this.getWord(addrNew + X86.TSS.TASK_CX);
+        this.regDX = this.getWord(addrNew + X86.TSS.TASK_DX);
+        this.regBX = this.getWord(addrNew + X86.TSS.TASK_BX);
+        this.regBP = this.getWord(addrNew + X86.TSS.TASK_BP);
+        this.regSI = this.getWord(addrNew + X86.TSS.TASK_SI);
+        this.regDI = this.getWord(addrNew + X86.TSS.TASK_DI);
+        this.segES.load(this.getWord(addrNew + X86.TSS.TASK_ES));
+        this.segDS.load(this.getWord(addrNew + X86.TSS.TASK_DS));
+        this.setCSIP(this.getWord(addrNew + X86.TSS.TASK_IP), this.getWord(addrNew + X86.TSS.TASK_CS));
         if (this.segCS.cpl < cplOld) {
             offSP = (this.segCS.cpl << 2) + X86.TSS.CPL0_SP;
             offSS = offSP + 2;
         }
         this.regSP = this.getWord(addrNew + offSP);
         this.segSS.load(this.getWord(addrNew + offSS));
-        this.segLDT.load(this.getWord(addrNew + X86.TSS.CURR_LDT));
-        if (fNest) {
-            this.setWord(addrNew + X86.TSS.PREV_TSS, selOld);
-            this.regPS |= X86.PS.NT;
-        }
+        this.segLDT.load(this.getWord(addrNew + X86.TSS.TASK_LDT));
+        if (fNest) this.setWord(addrNew + X86.TSS.PREV_TSS, selOld);
         this.regMSW |= X86.MSW.TS;
         return true;
     },
@@ -690,20 +684,22 @@ var X86Help = {
             var bOpcode = this.bus.getByteDirect(this.regEIP);
             /*
              * OS/2 1.0 uses an INT3 (0xCC) opcode in conjunction with an invalid IDT to trigger a triple-fault
-             * reset and return to real-mode, and these resets happen quite frequently during boot; for example, OS/2
-             * startup messages are displayed using a series of INT 0x10 BIOS calls for each character, and each
-             * series of BIOS calls requires a round-trip mode switch.
+             * reset and return to real-mode, and these resets happen quite frequently during boot; for example,
+             * OS/2 startup messages are displayed using a series of INT 0x10 BIOS calls for each character, and
+             * each series of BIOS calls requires a round-trip mode switch.
              *
              * Since we really only want to halt on "bad" faults, not "good" (ie, intentional) faults, we take
-             * advantage of the fact that all 3 faults comprising the triple-fault point to the INT3 (0xCC) opcode,
+             * advantage of the fact that all 3 faults comprising the triple-fault point to an INT3 (0xCC) opcode,
              * and so whenever we see that opcode, we ignore the caller's fHalt flag, and suppress FAULT messages
              * unless CPU messages are also enabled.
+             *
+             * When a triple fault shows up, nFault is -1; it displays as "ff" only because we truncate it to a byte.
              */
             if (bOpcode == X86.OPCODE.INT3) {
                 fHalt = false;
                 bitsMessage |= Debugger.MESSAGE.CPU;
             }
-            this.messageDebugger("Fault 0x" + str.toHexByte(nFault) + (nError != null? " (0x" + str.toHexWord(nError) + ")" : "") + " on opcode 0x" + str.toHexByte(bOpcode) + " at " + str.toHexAddr(this.regIP, this.segCS.sel) + " (" + str.toHex(this.regEIP, 6) + ")", bitsMessage);
+            this.messageDebugger("Fault " + str.toHexByte(nFault) + (nError != null? " (" + str.toHexWord(nError) + ")" : "") + " on opcode 0x" + str.toHexByte(bOpcode) + " at " + str.toHexAddr(this.regIP, this.segCS.sel) + " (%" + str.toHex(this.regEIP, 6) + ")", bitsMessage);
             if (fHalt) this.dbg.stopCPU();
         }
     }

@@ -146,21 +146,21 @@ var X86 = {
         CPL1_SS:    0x08,
         CPL2_SP:    0x0a,
         CPL2_SS:    0x0c,
-        CURR_IP:    0x0e,
-        CURR_PS:    0x10,
-        CURR_AX:    0x12,
-        CURR_CX:    0x14,
-        CURR_DX:    0x16,
-        CURR_BX:    0x18,
-        CURR_SP:    0x1a,
-        CURR_BP:    0x1c,
-        CURR_SI:    0x1e,
-        CURR_DI:    0x20,
-        CURR_ES:    0x22,
-        CURR_CS:    0x24,
-        CURR_SS:    0x26,
-        CURR_DS:    0x28,   // end of values altered by task switches
-        CURR_LDT:   0x2a
+        TASK_IP:    0x0e,
+        TASK_PS:    0x10,
+        TASK_AX:    0x12,
+        TASK_CX:    0x14,
+        TASK_DX:    0x16,
+        TASK_BX:    0x18,
+        TASK_SP:    0x1a,
+        TASK_BP:    0x1c,
+        TASK_SI:    0x1e,
+        TASK_DI:    0x20,
+        TASK_ES:    0x22,
+        TASK_CS:    0x24,
+        TASK_SS:    0x26,
+        TASK_DS:    0x28,   // end of values altered by task switches
+        TASK_LDT:   0x2a
     },
     /*
      * Processor Exception Interrupts
@@ -320,7 +320,7 @@ X86.PS.DIRECT =     (X86.PS.TF | X86.PS.IF | X86.PS.DF);
 X86.PS.INDIRECT =   (X86.PS.CF | X86.PS.PF | X86.PS.AF | X86.PS.ZF | X86.PS.SF | X86.PS.OF);
 
 /*
- * NOTE: These are the default "always set" PS bits for the 8086/8088; other processors must
+ * These are the default "always set" PS bits for the 8086/8088; other processors must
  * adjust these bits accordingly.  The final adjusted value is then stored in the X86CPU object
  * as "this.PS_SET"; setPS() must use that value, NOT this one.
  *
