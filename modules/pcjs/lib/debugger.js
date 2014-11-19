@@ -160,11 +160,20 @@ function Debugger(parmsDbg)
          * things down, but by that point, you've presumably already captured the info you need
          * and are willing to wait.
          */
-        if (DEBUG) {
-            this.traceInit();
-        }
+        if (DEBUG) this.traceInit();
 
         this.sInitCommands = parmsDbg['commands'];
+
+        /*
+         * Make it easier to access Debugger commands from an external REPL (eg, the WebStorm
+         * "live" console window); eg:
+         *
+         *      $('r')
+         */
+        var dbg = this;
+        if (window && window['$'] === undefined) {
+            window['$'] = function(s) { return dbg.doCommand(s); };
+        }
 
     }   // endif DEBUGGER
 }
@@ -2145,7 +2154,7 @@ if (DEBUGGER) {
         if (sel == this.cpu.segDS.sel) return this.cpu.segDS;
         if (sel == this.cpu.segES.sel) return this.cpu.segES;
         if (sel == this.cpu.segSS.sel) return this.cpu.segSS;
-        var seg = new X86Seg(this.cpu);
+        var seg = new X86Seg(this.cpu, X86Seg.ID.OTHER, "DBG");
         /*
          * TODO: Confirm that it's OK for this function to drop any error from seg.load() on the floor....
          */
@@ -2902,7 +2911,8 @@ if (DEBUGGER) {
         s += (fProt? '\n' : ' ');
         s += this.getSegStr(this.cpu.segCS, fProt) + " IP=" + str.toHexWord(this.cpu.regIP) +
              this.getFlagStr("V") + this.getFlagStr("D") + this.getFlagStr("I") + this.getFlagStr("T") +
-             this.getFlagStr("S") + this.getFlagStr("Z") + this.getFlagStr("A") + this.getFlagStr("P") + this.getFlagStr("C");
+             this.getFlagStr("S") + this.getFlagStr("Z") + this.getFlagStr("A") + this.getFlagStr("P") + this.getFlagStr("C") +
+             " PS=" + str.toHexWord(this.cpu.getPS());
         if (fProt) {
             s += " MS=" + str.toHexWord(this.cpu.regMSW) + '\n' +
                 this.getDTRStr("LD", this.cpu.segLDT.sel, this.cpu.segLDT.base, this.cpu.segLDT.base + this.cpu.segLDT.limit) + ' ' +
@@ -3517,14 +3527,6 @@ if (DEBUGGER) {
         if (aAddr[0] == null)
             return;
         if (sCmd == "ds") {
-            /*
-             * We used to call:
-             *
-             *      var seg = new X86Seg(this.cpu);
-             *      if (seg.load(aAddr[0], true) >= 0) { ... }
-             *
-             * but using getSegment() allows us to dump active segment registers, too.
-             */
             var seg = this.getSegment(aAddr[0]);
             if (seg.sel != null) {
                 var s = "selector=" + str.toHexWord(aAddr[0]) + " limit=" + str.toHexWord(seg.limit) + " base=" + str.toHex(seg.base);
@@ -4455,8 +4457,8 @@ if (DEBUGGER) {
             function onCountStepComplete() {
                 /*
                  * We explicitly called stepCPU() with fUpdateCPU === false, because repeatedly
-                 * calling updateCPU() is very slow, so once the repeat count has been exhausted,
-                 * we need to perform a final updateCPU().
+                 * calling updateCPU() can be very slow, especially when fDisplayLiveRegs is true,
+                 * so once the repeat count has been exhausted, we must perform a final updateCPU().
                  */
                 dbg.cpu.updateCPU();
                 dbg.setBusy(false);
@@ -4580,10 +4582,19 @@ if (DEBUGGER) {
                     this.println("ended assemble @" + this.hexAddr(this.aAddrAssemble));
                     this.aAddrNextCode = this.aAddrAssemble;
                     this.fAssemble = false;
+                } else {
+                    sCmd = '?';
                 }
             }
+
             sCmd = sCmd.toLowerCase();
-            if (this.isReady() && !this.isBusy(true) && sCmd.length > 0) {
+
+            /*
+             * I'm going to try relaxing the !isBusy() requirement for doCommand(), to maximize our
+             * ability to issue Debugger commands externally.
+             */
+            if (this.isReady() /* && !this.isBusy(true) */ && sCmd.length > 0) {
+
                 if (this.fAssemble) {
                     sCmd = "a " + this.hexAddr(this.aAddrAssemble) + " " + sCmd;
                 }

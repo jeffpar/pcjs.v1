@@ -784,7 +784,7 @@ X86CPU.prototype.resetRegs = function()
      */
     this.regMSW = X86.MSW.SET;
     this.addrIDT = 0; this.addrIDTLimit = 0x03FF;
-    this.descIDT = {off: 0, sel: 0, acc: 0, maskPS: -1};
+    this.descIDT = {off: 0, sel: 0, acc: 0, maskPS: 0};
     this.nIOPL = 0;                                     // this should be set before the first setPS() call
 
     /*
@@ -799,11 +799,11 @@ X86CPU.prototype.resetRegs = function()
      * segment number and base physical address, respectively), but all segment registers are now defined
      * as X86Seg objects.
      */
-    this.segCS = new X86Seg(this, "CS");
-    this.segDS = new X86Seg(this, "DS");
-    this.segSS = new X86Seg(this, "SS");
-    this.segES = new X86Seg(this, "ES");
-    this.segZERO = new X86Seg(this, "ZERO");
+    this.segCS   = new X86Seg(this, X86Seg.ID.CODE,  "CS");
+    this.segDS   = new X86Seg(this, X86Seg.ID.DATA,  "DS");
+    this.segES   = new X86Seg(this, X86Seg.ID.DATA,  "ES");
+    this.segSS   = new X86Seg(this, X86Seg.ID.STACK, "SS");
+    this.segNULL = new X86Seg(this, X86Seg.ID.NULL,  "NULL");
     this.setCSIP(0, 0xFFFF);                            // this should be called before the first setPS() call
 
     /*
@@ -826,10 +826,10 @@ X86CPU.prototype.resetRegs = function()
         /*
          * TODO: Verify what the 80286 actually sets addrGDT and addrGDTLimit to on reset (or if it leaves them alone).
          */
-        this.addrGDT = 0; this.addrGDTLimit = 0xFFFF;   // GDTR
-        this.segLDT = new X86Seg(this, "LDT", true);    // LDTR
-        this.segTSS = new X86Seg(this, "TSS", true);    // TR
-        this.segVER = new X86Seg(this, "VER", true);    // a scratch segment register for VERR and VERW instructions
+        this.addrGDT = 0; this.addrGDTLimit = 0xFFFF;                   // GDTR
+        this.segLDT = new X86Seg(this, X86Seg.ID.LDT,   "LDT", true);   // LDTR
+        this.segTSS = new X86Seg(this, X86Seg.ID.TSS,   "TSS", true);   // TR
+        this.segVER = new X86Seg(this, X86Seg.ID.OTHER, "VER", true);   // a scratch segment register for VERR and VERW instructions
         this.setCSIP(0xFFF0, 0xF000);                   // in real-mode, 0xF000 defaults the CS base address to 0x0F0000
         this.segCS.setBase(0xFF0000);                   // which is why we must manually adjust the CS base address to 0xFF0000
     }
@@ -1180,8 +1180,8 @@ X86CPU.prototype.getSeg = function(sName)
         return this.segSS;
     case "ES":
         return this.segES;
-    case "ZERO":
-        return this.segZERO;
+    case "NULL":
+        return this.segNULL;
     default:
         /*
          * HACK: We return a fake segment register object in which only the base physical address is valid,
@@ -1190,62 +1190,6 @@ X86CPU.prototype.getSeg = function(sName)
         if (DEBUG) this.assert(typeof sName == "number");
         return [0, sName, 0, 0, ""];
     }
-};
-
-/**
- * loadIDTEntry(nIDT)
- *
- * Updates descIDT as follows:
- *
- *      descIDT.off     0x0-0x1     offset of interrupt handler
- *      descIDT.sel     0x2-0x3     selector of interrupt handler
- *      descIDT.acc     0x4-0x5     access word (protected-mode only)
- *      descIDT.maskPS              mask to apply PS after saving current PS
- *
- * @this {X86CPU}
- * @param {number} nIDT
- * @return {boolean} true if successful, false if not (all failure cases currently limited to protected mode)
- */
-X86CPU.prototype.loadIDTEntry = function(nIDT)
-{
-    var offIDT;
-
-    if (DEBUG) this.assert(nIDT >= 0 && nIDT < 256);
-
-    if (this.regMSW & X86.MSW.PE) {
-        offIDT = this.addrIDT + (nIDT << 3);
-        if (offIDT + 7 <= this.addrIDTLimit) {
-            this.descIDT.off = this.getWord(offIDT);
-            this.descIDT.sel = this.getWord(offIDT + 2);
-            this.descIDT.acc = this.getWord(offIDT + 4);
-            switch (this.descIDT.acc & X86.DESC.ACC.TYPE.MASK) {
-            case X86.DESC.ACC.TYPE.GATE_INT:
-                this.descIDT.maskPS = ~(X86.PS.NT | X86.PS.TF | X86.PS.IF);
-                break;
-            case X86.DESC.ACC.TYPE.GATE_TRAP:
-                this.descIDT.maskPS = ~(X86.PS.NT | X86.PS.TF);
-                break;
-            default:
-                if (DEBUG) this.assert(false);
-                return false;
-            }
-            return true;
-        }
-        return false;
-    }
-    if (DEBUG) this.assert(!this.addrIDT && this.addrIDTLimit == 0x03FF);
-    /*
-     * Intel documentation for INT/INTO under "REAL ADDRESS MODE EXCEPTIONS" says:
-     *
-     *      "[T]he 80286 will shut down if the SP = 1, 3, or 5 before executing the INT or INTO instruction--due to lack of stack space"
-     *
-     * Huh?  Why would real-mode care?  See http://localhost:8088/pubs/pc/reference/intel/80286/progref/#page-260
-     */
-    offIDT = this.addrIDT + (nIDT << 2);
-    this.descIDT.off = this.getWord(offIDT);
-    this.descIDT.sel = this.getWord(offIDT + 2);
-    this.descIDT.maskPS = ~(X86.PS.TF | X86.PS.IF);
-    return true;
 };
 
 /**
@@ -1973,7 +1917,7 @@ X86CPU.prototype.modEAWordEnabled = function modEAWordEnabled(seg, off)
 X86CPU.prototype.setEAByteEnabled = function setEAByteEnabled(b)
 {
     if (!EAFUNCS && (this.opFlags & X86.OPFLAG.NOWRITE)) return;
-    this.setByte(this.segEA.checkWrite(this.offEA, 1), b);
+    this.setByte(this.segEA.checkWrite(this.offEA, 0), b);
 };
 
 /**
@@ -1985,7 +1929,7 @@ X86CPU.prototype.setEAByteEnabled = function setEAByteEnabled(b)
 X86CPU.prototype.setEAWordEnabled = function setEAWordEnabled(w)
 {
     if (!EAFUNCS && (this.opFlags & X86.OPFLAG.NOWRITE)) return;
-    this.setWord(this.segEA.checkWrite(this.offEA, 2), w);
+    this.setWord(this.segEA.checkWrite(this.offEA, 1), w);
 };
 
 /**
@@ -2593,7 +2537,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
             /*
              * Make sure that every instruction is assessing a cycle cost, and that the cost is a net positive.
              */
-            if (this.nStepCycles >= this.nSnapCycles && !(this.opFlags & X86.OPFLAG.PREFIXES)) {
+            if (this.aFlags.fComplete && this.nStepCycles >= this.nSnapCycles && !(this.opFlags & X86.OPFLAG.PREFIXES)) {
                 this.println("cycle miscount: " + (this.nSnapCycles - this.nStepCycles));
                 this.setIP(this.opEA - this.segCS.base);
                 this.stopCPU();

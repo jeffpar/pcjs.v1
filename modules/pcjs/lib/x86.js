@@ -58,11 +58,11 @@ var X86 = {
         DF:     0x0400,     // bit 10: Direction flag
         OF:     0x0800,     // bit 11: Overflow flag
         IOPL: {
-         MASK:  0x3000,     //  12-13: I/O Privilege Level (always set on 8086/80186, clear on 80286)
+         MASK:  0x3000,     // bits 12-13: I/O Privilege Level (always set on 8086/80186, clear on 80286 reset)
          SHIFT: 12
         },
-        NT:     0x4000,     // bit 14: Nested Task flag, always set on 8086/80186, clear on 80286
-        BIT15:  0x8000      // bit 15: reserved, always set on 8086/80186, clear otherwise
+        NT:     0x4000,     // bit 14: Nested Task flag (always set on 8086/80186, clear on 80286 reset)
+        BIT15:  0x8000      // bit 15: reserved (always set on 8086/80186, clear otherwise)
     },
     /*
      * Machine Status Word definitions (stored in regMSW)
@@ -109,7 +109,6 @@ var X86 = {
                  */
                 TSS:                        0x0100,
                 LDT:                        0x0200,
-                TSS_LDT:                    0x0300,
                 TSS_BUSY:                   0x0300,
                 GATE_CALL:                  0x0400,
                 GATE_TASK:                  0x0500,
@@ -138,6 +137,30 @@ var X86 = {
             GRANULARITY:                    0x0080,     // clear if limit is bytes, set if limit is 4Kb pages
             BASE2431:                       0xff00
         }
+    },
+    TSS: {
+        PREV_TSS:   0x00,
+        CPL0_SP:    0x02,   // start of values altered by task switches
+        CPL0_SS:    0x04,
+        CPL1_SP:    0x06,
+        CPL1_SS:    0x08,
+        CPL2_SP:    0x0a,
+        CPL2_SS:    0x0c,
+        CURR_IP:    0x0e,
+        CURR_PS:    0x10,
+        CURR_AX:    0x12,
+        CURR_CX:    0x14,
+        CURR_DX:    0x16,
+        CURR_BX:    0x18,
+        CURR_SP:    0x1a,
+        CURR_BP:    0x1c,
+        CURR_SI:    0x1e,
+        CURR_DI:    0x20,
+        CURR_ES:    0x22,
+        CURR_CS:    0x24,
+        CURR_SS:    0x26,
+        CURR_DS:    0x28,   // end of values altered by task switches
+        CURR_LDT:   0x2a
     },
     /*
      * Processor Exception Interrupts

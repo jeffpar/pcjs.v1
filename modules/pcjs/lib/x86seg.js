@@ -43,22 +43,34 @@ if (typeof module !== 'undefined') {
  *
  * @constructor
  * @param {X86CPU} cpu
+ * @param {number} id
  * @param {string} [sName] segment name
  * @param {boolean} [fProt] true if segment register used exclusively in protected-mode
  */
-function X86Seg(cpu, sName, fProt)
+function X86Seg(cpu, id, sName, fProt)
 {
     this.cpu = cpu;
+    this.id = id;
+    this.sName = sName || "";
     this.sel = 0;
     this.base = 0;
     this.limit = 0xffff;
     this.acc = 0;
-    this.fCode = (sName == "CS");
-    this.sName = sName;
+    this.addrDesc = null;
     this.cpl = 0;
     this.dpl = 0;
     this.updateAccess(fProt);
 }
+
+X86Seg.ID = {
+    NULL:   0,          // "NULL"
+    CODE:   1,          // "CS"
+    DATA:   2,          // "DS", "ES"
+    STACK:  3,          // "SS"
+    TSS:    4,          // "TSS"
+    LDT:    5,          // "LDT"
+    OTHER:  6           // "VER", "DBG", etc
+};
 
 /*
  * Class methods
@@ -72,7 +84,7 @@ function X86Seg(cpu, sName, fProt)
  * @this {X86Seg}
  * @param {number} sel
  * @param {boolean} [fSuppress] is true to suppress any errors
- * @return {number} base address of selected segment, or -1 if error
+ * @return {number|null} base address of selected segment, or null if error
  */
 X86Seg.loadReal = function loadReal(sel, fSuppress)
 {
@@ -101,7 +113,7 @@ X86Seg.loadReal = function loadReal(sel, fSuppress)
  * @this {X86Seg}
  * @param {number} sel
  * @param {boolean} [fSuppress] is true to suppress any errors
- * @return {number} base address of selected segment, or -1 if error
+ * @return {number|null} base address of selected segment, or null if error
  */
 X86Seg.loadProt = function loadProt(sel, fSuppress)
 {
@@ -124,7 +136,7 @@ X86Seg.loadProt = function loadProt(sel, fSuppress)
         this.cpu.nStepCycles -= 15;
         return this.loadDesc8(sel, addrDesc);
     }
-    return -1;
+    return null;
 };
 
 /**
@@ -137,7 +149,7 @@ X86Seg.loadProt = function loadProt(sel, fSuppress)
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of extra bytes to check (0 or 1)
  * @param {boolean} [fSuppress] is true to suppress any errors
- * @return {number} corresponding physical address if valid, -1 if not
+ * @return {number|null} corresponding physical address if valid, null if not
  */
 X86Seg.checkReadReal = function checkReadReal(off, cb, fSuppress)
 {
@@ -154,7 +166,7 @@ X86Seg.checkReadReal = function checkReadReal(off, cb, fSuppress)
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of extra bytes to check (0 or 1)
  * @param {boolean} [fSuppress] is true to suppress any errors
- * @return {number} corresponding physical address if valid, -1 if not
+ * @return {number|null} corresponding physical address if valid, null if not
  */
 X86Seg.checkWriteReal = function checkWriteReal(off, cb, fSuppress)
 {
@@ -168,7 +180,7 @@ X86Seg.checkWriteReal = function checkWriteReal(off, cb, fSuppress)
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of extra bytes to check (0 or 1)
  * @param {boolean} [fSuppress] is true to suppress any errors
- * @return {number} corresponding physical address if valid, -1 if not
+ * @return {number|null} corresponding physical address if valid, null if not
  */
 X86Seg.checkReadProtEnabled = function checkReadProtEnabled(off, cb, fSuppress)
 {
@@ -185,14 +197,14 @@ X86Seg.checkReadProtEnabled = function checkReadProtEnabled(off, cb, fSuppress)
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of extra bytes to check (0 or 1)
  * @param {boolean} [fSuppress] is true to suppress any errors
- * @return {number} corresponding physical address if valid, -1 if not
+ * @return {number|null} corresponding physical address if valid, null if not
  */
 X86Seg.checkReadProtDisabled = function checkReadProtDisabled(off, cb, fSuppress)
 {
     if (!fSuppress) {
         X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, 0);
     }
-    return -1;
+    return null;
 };
 
 /**
@@ -202,7 +214,7 @@ X86Seg.checkReadProtDisabled = function checkReadProtDisabled(off, cb, fSuppress
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of extra bytes to check (0 or 1)
  * @param {boolean} [fSuppress] is true to suppress any errors
- * @return {number} corresponding physical address if valid, -1 if not
+ * @return {number|null} corresponding physical address if valid, null if not
  */
 X86Seg.checkWriteProtEnabled = function checkWriteProtEnabled(off, cb, fSuppress)
 {
@@ -219,14 +231,14 @@ X86Seg.checkWriteProtEnabled = function checkWriteProtEnabled(off, cb, fSuppress
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of extra bytes to check (0 or 1)
  * @param {boolean} [fSuppress] is true to suppress any errors
- * @return {number} corresponding physical address if valid, -1 if not
+ * @return {number|null} corresponding physical address if valid, null if not
  */
 X86Seg.checkWriteProtDisabled = function checkWriteProtDisabled(off, cb, fSuppress)
 {
     if (!fSuppress) {
         X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, 0);
     }
-    return -1;
+    return null;
 };
 
 /*
@@ -245,7 +257,7 @@ X86Seg.checkWriteProtDisabled = function checkWriteProtDisabled(off, cb, fSuppre
  * @this {X86Seg}
  * @param {number} sel is the selector
  * @param {number} addrDesc is the offset
- * @return {number} base address of selected segment, or -1 if error
+ * @return {number} base address of selected segment
  */
 X86Seg.prototype.loadDesc6 = function(sel, addrDesc)
 {
@@ -253,15 +265,14 @@ X86Seg.prototype.loadDesc6 = function(sel, addrDesc)
     var base = this.cpu.getWord(addrDesc + 0) | ((acc & 0xff) << 16);
     var limit = this.cpu.getWord(addrDesc + 4);
 
-    if (DEBUG) {
-        this.cpu.messageDebugger("loadDesc6(" + this.sName + "): base=" + str.toHex(base) + " limit=" + str.toHexWord(limit) + " acc=" + str.toHexWord(acc), Debugger.MESSAGE.SEG);
-    }
-
     this.sel = sel;
     this.base = base;
     this.limit = limit;
     this.acc = acc & X86.DESC.ACC.MASK;
+    this.addrDesc = addrDesc;
     this.updateAccess();
+
+    this.messageDebugger(base, limit, acc);
 
     return base;
 };
@@ -281,40 +292,40 @@ X86Seg.prototype.loadDesc6 = function(sel, addrDesc)
  * @this {X86Seg}
  * @param {number} sel is the selector
  * @param {number} addrDesc is the offset
- * @return {number} base address of selected segment, or -1 if error
+ * @return {number|null} base address of selected segment, or null if error
  */
 X86Seg.prototype.loadDesc8 = function(sel, addrDesc)
 {
     var limit = this.cpu.getWord(addrDesc + X86.DESC.LIMIT.OFFSET);
     var acc = this.cpu.getWord(addrDesc + X86.DESC.ACC.OFFSET);
+    var type = (acc & X86.DESC.ACC.TYPE.MASK);
     var base = this.cpu.getWord(addrDesc + X86.DESC.BASE.OFFSET) | ((acc & X86.DESC.ACC.BASE1623) << 16);
     var ext = (DEBUG? this.cpu.getWord(addrDesc + X86.DESC.EXT.OFFSET) : 0);
 
-    if (DEBUG) {
-        var ch = (this.sName.length < 3? " " : "");
-        this.cpu.messageDebugger("loadDesc8(" + this.sName + "):" + ch + " base=" + str.toHex(base) + " limit=" + str.toHexWord(limit) + " acc=" + str.toHexWord(acc) + (ext? " ext=" + str.toHexWord(ext) : ""), Debugger.MESSAGE.SEG);
-        this.cpu.assert(!ext || ext == X86.DESC.EXT.AVAIL);
-    }
-
-    /*
-     * For LSL (which uses fSuppress), we must support X86.DESC.ACC.TYPE.SEG as well as TSS and LDT.
-     */
-    var accType;
-    if ((acc & X86.DESC.ACC.TYPE.SEG) || (accType = (acc & X86.DESC.ACC.TYPE.MASK)) && accType <= X86.DESC.ACC.TYPE.TSS_BUSY) {
+    while (true) {
+        /*
+         * For LSL, we must support X86.DESC.ACC.TYPE.SEG as well as TSS and LDT.
+         */
+        if (!(acc & X86.DESC.ACC.TYPE.SEG) && type > X86.DESC.ACC.TYPE.TSS_BUSY) {
+            base = null;
+            break;
+        }
+        if (this.id == X86Seg.ID.TSS) {
+            if (type != X86.DESC.ACC.TYPE.TSS && type != X86.DESC.ACC.TYPE.TSS_BUSY) {
+                X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.TS_FAULT, sel, true);
+                base = null;
+                break;
+            }
+        }
         this.sel = sel;
         this.base = base;
         this.limit = limit;
-        /*
-         * Note that bits 0-7 of acc will usually contain the BASE1623 bits from the descriptor entry,
-         * but it doesn't matter, because the only acc bits we pay attention to are bits 8-15; however,
-         * to keep things tidy, we zero bits 0-7.  Perhaps we'll find other (internal) uses for those bits.
-         */
-        this.acc = acc & X86.DESC.ACC.MASK;
-        this.type = acc & X86.DESC.ACC.TYPE.MASK;
+        this.acc = acc;
+        this.type = type;
+        this.addrDesc = addrDesc;
         this.updateAccess();
-    }
-    else {
-        base = -1;
+        this.messageDebugger(base, limit, acc, ext);
+        break;
     }
     return base;
 };
@@ -325,7 +336,7 @@ X86Seg.prototype.loadDesc8 = function(sel, addrDesc)
  * This is used in unusual situations where the base must be set independently; normally, the base
  * is set according to the selector provided to load(), but there are a few cases where setBase() is
  * required (eg, in resetRegs() where the 80286 wants the real-mode CS selector to be 0xF000 but the
- * CS base must be 0xFF0000, and LOADALL).
+ * CS base must be 0xFF0000, and possibly LOADALL).
  *
  * @this {X86Seg}
  * @param {number} addr
@@ -346,7 +357,7 @@ X86Seg.prototype.setBase = function(addr)
  */
 X86Seg.prototype.save = function()
 {
-    return [this.sel, this.base, this.limit, this.acc, this.fCode, this.sName, this.cpl, this.dpl];
+    return [this.sel, this.base, this.limit, this.acc, this.id, this.sName, this.cpl, this.dpl, this.addrDesc];
 };
 
 /**
@@ -363,14 +374,15 @@ X86Seg.prototype.restore = function(a)
     if (typeof a == "number") {
         this.load(a);
     } else {
-        this.sel    = a[0];
-        this.base   = a[1];
-        this.limit  = a[2];
-        this.acc    = a[3];
-        this.fCode  = a[4];
-        this.sName  = a[5];
-        this.cpl    = a[6];
-        this.dpl    = a[7];
+        this.sel      = a[0];
+        this.base     = a[1];
+        this.limit    = a[2];
+        this.acc      = a[3];
+        this.id       = a[4];
+        this.sName    = a[5];
+        this.cpl      = a[6];
+        this.dpl      = a[7];
+        this.addrDesc = a[8];
     }
 };
 
@@ -414,8 +426,30 @@ X86Seg.prototype.updateAccess = function(fProt)
         this.checkRead = X86Seg.checkReadReal;
         this.checkWrite = X86Seg.checkWriteReal;
         this.cpl = this.dpl = 0;
+        this.addrDesc = null;
     }
     return fProt;
+};
+
+/**
+ * messageDebugger(base, limit, acc, ext)
+ *
+ * @param {number} base
+ * @param {number} limit
+ * @param {number} acc
+ * @param {number} [ext]
+ */
+X86Seg.prototype.messageDebugger = function(base, limit, acc, ext)
+{
+    if (DEBUG) {
+        if (DEBUGGER) {
+            var ch = (this.sName.length < 3? " " : "");
+            var sDPL = " dpl=" + this.dpl;
+            if (this.id == X86Seg.ID.CODE) sDPL += " cpl=" + this.cpl;
+            this.cpu.messageDebugger("loadDesc(" + this.sName + "):" + ch + " base=" + str.toHex(base) + " limit=" + str.toHexWord(limit) + " acc=" + str.toHexWord(acc) + sDPL, Debugger.MESSAGE.SEG);
+        }
+        this.cpu.assert(!ext || ext == X86.DESC.EXT.AVAIL);
+    }
 };
 
 if (typeof module !== 'undefined') module.exports = X86Seg;

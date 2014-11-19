@@ -1758,7 +1758,7 @@ var X86OpXX = {
      */
     opLEA: function() {
         if (EAFUNCS) this.getEAWord = this.getEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOREAD;
-        this.segData = this.segStack = this.segZERO;    // we can't have the EA calculation, if any, "polluted" by segment arithmetic
+        this.segData = this.segStack = this.segNULL;    // we can't have the EA calculation, if any, "polluted" by segment arithmetic
         X86Mods.aOpModsRegWord[this.getIPByte()].call(this, X86Help.opHelpLEA);
         if (EAFUNCS) this.getEAWord = this.getEAWordEnabled;
     },
@@ -2844,11 +2844,7 @@ var X86OpXX = {
      * op=0xCF (iret)
      */
     opIRET: function() {
-        this.setCSIP(this.popWord(), this.popWord());
-        this.setPS(this.popWord());
-        this.nFault = -1;
-        if (this.cIntReturn) this.checkIntReturn(this.regEIP);
-        this.nStepCycles -= this.CYCLES.nOpCyclesIRet;
+        X86Help.opHelpIRET.call(this);
     },
     /**
      * @this {X86CPU}

@@ -204,6 +204,7 @@ about a few:
 - Unfiltered for…in loop
 - Bitwise operator usage
 - Comma expressions
+- loop statement that doesn't loop
 - “throw” of exception caught locally
 
 I acknowledge those those features can introduce bugs if you're not careful, so I make sure I'm careful.  I don't

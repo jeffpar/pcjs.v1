@@ -199,7 +199,10 @@ var X86Op0F = {
      */
     opLTR: function(dst, src) {
         if (EAFUNCS) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
-        this.segTSS.load(dst);
+        if (this.segTSS.load(dst) != null) {
+            this.setWord(this.segTSS.addrDesc + X86.DESC.ACC.OFFSET, this.segTSS.acc |= X86.DESC.ACC.TYPE.LDT);
+            this.segTSS.type = X86.DESC.ACC.TYPE.TSS_BUSY;
+        }
         this.nStepCycles -= (17 + (this.regEA < 0? 0 : 2));
         return dst;
     },
