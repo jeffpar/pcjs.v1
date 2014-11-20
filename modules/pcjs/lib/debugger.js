@@ -1427,12 +1427,12 @@ if (DEBUGGER) {
         if (seg.type & X86.DESC.ACC.TYPE.SEG) {
             if (seg.type & X86.DESC.ACC.TYPE.CODE) {
                 sType = "code";
-                if (seg.type & X86.DESC.ACC.TYPE.READABLE) sType += ",readable";
+                sType += (seg.type & X86.DESC.ACC.TYPE.READABLE)? ",readable" : ",execonly";
                 if (seg.type & X86.DESC.ACC.TYPE.CONFORMING) sType += ",conforming";
             }
             else {
                 sType = "data";
-                if (seg.type & X86.DESC.ACC.TYPE.WRITABLE) sType += ",writable";
+                sType += (seg.type & X86.DESC.ACC.TYPE.WRITABLE)? ",writable" : ",readonly";
                 if (seg.type & X86.DESC.ACC.TYPE.EXPDOWN) sType += ",expdown";
             }
             if (seg.type & X86.DESC.ACC.TYPE.ACCESSED) sType += ",accessed";
@@ -3642,6 +3642,14 @@ if (DEBUGGER) {
     /**
      * doDump(sCmd, sAddr, sLen)
      *
+     * While sLen is interpreted as a number of bytes or words, it's converted to the appropriate number of lines,
+     * because we always display whole lines.  If sLen is omitted/undefined, then we default to 8 lines, regardless
+     * whether dumping bytes or words.
+     *
+     * Also, unlike sAddr, sLen is interpreted as a decimal number, unless a radix specifier in included (eg, "0x100").
+     *
+     * And finally, sLen also support the DEBUG.COM-style syntax of a preceding "l" (eg, "l16").
+     *
      * @this {Debugger}
      * @param {string} sCmd
      * @param {string|undefined} sAddr
@@ -3660,9 +3668,8 @@ if (DEBUGGER) {
             }
             sDumpers += ",state,symbols";
             this.println("\ndump commands:");
-            this.println("\tdb [a] [#]    dump bytes at address a");
-            this.println("\tdw [a] [#]    dump words at address a");
-            this.println("\tds [s]        dump descriptor for selector s");
+            this.println("\tdb [a] [#]    dump # bytes at address a");
+            this.println("\tdw [a] [#]    dump # words at address a");
             if (sDumpers.length) this.println("dump extensions:\n\t" + sDumpers);
             return;
         }
@@ -3686,71 +3693,23 @@ if (DEBUGGER) {
             }
         }
         var aAddr = this.parseAddr(sAddr, Debugger.ADDR_DATA);
-        if (aAddr[0] == null)
-            return;
-        if (sCmd == "ds") {
-            var seg = this.getSegment(aAddr[0]);
-            if (seg.sel != null) {
-                var s = "selector=" + str.toHexWord(aAddr[0]) + " limit=" + str.toHexWord(seg.limit) + " base=" + str.toHex(seg.base);
-                if (seg.acc) {
-                    s += " access=" + str.toHexWord(seg.acc);
-                    if (seg.acc & X86.DESC.ACC.TYPE.SEG) {
-                        if (seg.acc & X86.DESC.ACC.TYPE.CODE) {
-                            s += "code:";
-                            s += (seg.acc & X86.DESC.ACC.TYPE.READABLE)? "readable," : "execonly,";
-                            s += (seg.acc & X86.DESC.ACC.TYPE.CONFORMING)? "conforming," : "nonconforming,";
-                        } else {
-                            s += "data:";
-                            s += (seg.acc & X86.DESC.ACC.TYPE.WRITABLE)? "writable," : "readonly,";
-                            s += (seg.acc & X86.DESC.ACC.TYPE.EXPDOWN)? "expand down," : "expand up,";
-                        }
-                        s += (seg.acc & X86.DESC.ACC.TYPE.ACCESSED)? "accessed" : "not accessed";
-                    } else {
-                        s += "type:";
-                        switch(seg.acc & X86.DESC.ACC.TYPE.MASK) {
-                        case X86.DESC.ACC.TYPE.TSS:
-                            s += "tss";
-                            break;
-                        case X86.DESC.ACC.TYPE.LDT:
-                            s += "ldt";
-                            break;
-                        case X86.DESC.ACC.TYPE.TSS_BUSY:
-                            s += "tss(busy)";
-                            break;
-                        case X86.DESC.ACC.TYPE.GATE_CALL:
-                            s += "call";
-                            break;
-                        case X86.DESC.ACC.TYPE.GATE_TASK:
-                            s += "task";
-                            break;
-                        case X86.DESC.ACC.TYPE.GATE_INT:
-                            s += "int";
-                            break;
-                        case X86.DESC.ACC.TYPE.GATE_TRAP:
-                            s += "trap";
-                            break;
-                        default:
-                            s += "unknown";
-                            break;
-                        }
-                    }
-                    s += ",dpl" + ((seg.acc >> X86.DESC.ACC.DPL.SHIFT) & X86.DESC.ACC.DPL.MASK);
-                    s += (seg.acc & X86.DESC.ACC.PRESENT)? ",present" : ",not present";
-                } else {
-                    // We must be in real-mode, where selectors have no access bytes
-                }
-                this.println(s);
-            } else {
-                this.println("invalid selector: " + str.toHexWord(aAddr[0]));
-            }
-            return;
-        }
+        if (aAddr[0] == null) return;
+
         var cLines = 0;
+        var fWords = (sCmd == "dw");
+
         if (sLen !== undefined) {
             if (sLen.charAt(0) == "l")
                 sLen = sLen.substr(1);
             cLines = parseInt(sLen, 10);
+            if (cLines) {
+                if (fWords)
+                    cLines = (cLines + 7) >> 3;
+                else
+                    cLines = (cLines + 15) >> 4;
+            }
         }
+
         var sDump = "";
         if (!cLines) cLines = 8;
         for (var iLine = 0; iLine < cLines; iLine++) {
@@ -3760,7 +3719,7 @@ if (DEBUGGER) {
             var bPrev = 0;
             for (var i = 0; i < 16; i++) {
                 var b = this.getByte(aAddr, 1);
-                if (sCmd == "dw") {
+                if (fWords) {
                     if (i & 0x1) {
                         sBytes += str.toHexWord(bPrev | (b << 8)) + (i == 7? " - " : "  ");
                     }
