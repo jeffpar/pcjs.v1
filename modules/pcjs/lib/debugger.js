@@ -227,6 +227,7 @@ if (DEBUGGER) {
      */
     Debugger.INT = {
         VIDEO:      0x10,
+        DISK:       0x13,
         CASSETTE:   0x15,
         KBD:        0x16,
         RTC:        0x1a,
@@ -237,8 +238,10 @@ if (DEBUGGER) {
 
     Debugger.INT_MESSAGE = {
         0x10:       Debugger.MESSAGE.VIDEO,
+        0x13:       Debugger.MESSAGE.FDC,
+        0x15:       Debugger.MESSAGE.CHIPSET,
         0x16:       Debugger.MESSAGE.KBD,
-//      0x1a:       Debugger.MESSAGE.RTC,       // ChipSet contains its own specialized messageInt() handler for the RTC
+     // 0x1a:       Debugger.MESSAGE.RTC,       // ChipSet contains its own specialized messageInt() handler for the RTC
         0x1c:       Debugger.MESSAGE.TIMER,
         0x21:       Debugger.MESSAGE.DOS,
         0x33:       Debugger.MESSAGE.MOUSE
@@ -1218,8 +1221,9 @@ if (DEBUGGER) {
             }
         }
 
-        this.messageDump(Debugger.MESSAGE.TSS, function onDumpTSS(s) { dbg.dumpTSS(s); });
-        this.messageDump(Debugger.MESSAGE.DOS, function onDumpDOS(s) { dbg.dumpDOS(s); });
+        this.messageDump(Debugger.MESSAGE.DESC, function onDumpDesc(s) { dbg.dumpDesc(s); });
+        this.messageDump(Debugger.MESSAGE.TSS,  function onDumpTSS(s)  { dbg.dumpTSS(s); });
+        this.messageDump(Debugger.MESSAGE.DOS,  function onDumpDOS(s)  { dbg.dumpDOS(s); });
 
         this.setReady();
 
@@ -1346,7 +1350,7 @@ if (DEBUGGER) {
          * If s is provided and str.parseInt(s) succeeds, then we assume it represents a starting
          * MCB (Memory Control Block) segment, and we dump the corresponding blocks.
          */
-        var seg = str.parseInt(s);
+        var seg = this.parseValue(s);
         while (seg) {
             var aAddr = this.newAddr(0, seg);
             var bSig = this.getByte(aAddr, 1);
@@ -1384,6 +1388,78 @@ if (DEBUGGER) {
     };
 
     /**
+     * dumpDesc(s)
+     *
+     * This dumps a descriptor for the given selector.
+     *
+     * @this {Debugger}
+     * @param {string} [s]
+     */
+    Debugger.prototype.dumpDesc = function(s)
+    {
+        if (!s) {
+            this.println("no selector");
+            return;
+        }
+
+        var sel = this.parseValue(s);
+        if (sel === undefined) {
+            this.println("invalid selector: " + s);
+            return;
+        }
+
+        var seg = this.getSegment(sel);
+
+        this.println("dumpDesc(" + str.toHexWord(seg.sel) + "): %" + str.toHex(seg.addrDesc, this.cchAddr));
+
+        var sType;
+        if (seg.type & X86.DESC.ACC.TYPE.SEG) {
+            if (seg.type & X86.DESC.ACC.TYPE.CODE) {
+                sType = "code";
+                if (seg.type & X86.DESC.ACC.TYPE.READABLE) sType += ",readable";
+                if (seg.type & X86.DESC.ACC.TYPE.CONFORMING) sType += ",conforming";
+            }
+            else {
+                sType = "data";
+                if (seg.type & X86.DESC.ACC.TYPE.WRITABLE) sType += ",writable";
+                if (seg.type & X86.DESC.ACC.TYPE.EXPDOWN) sType += ",expdown";
+            }
+            if (seg.type & X86.DESC.ACC.TYPE.ACCESSED) sType += ",accessed";
+        }
+        else {
+            switch(seg.type) {
+            case X86.DESC.ACC.TYPE.TSS:
+                sType = "tss";
+                break;
+            case X86.DESC.ACC.TYPE.LDT:
+                sType = "ldt";
+                break;
+            case X86.DESC.ACC.TYPE.TSS_BUSY:
+                sType = "busy tss";
+                break;
+            case X86.DESC.ACC.TYPE.GATE_CALL:
+                sType = "call gate";
+                break;
+            case X86.DESC.ACC.TYPE.GATE_TASK:
+                sType = "task gate";
+                break;
+            case X86.DESC.ACC.TYPE.GATE_INT:
+                sType = "int gate";
+                break;
+            case X86.DESC.ACC.TYPE.GATE_TRAP:
+                sType = "trap gate";
+                break;
+            default:
+                break;
+            }
+        }
+
+        if (sType && !(seg.acc & X86.DESC.ACC.PRESENT)) sType += ",not present";
+
+        this.println("base=" + str.toHex(seg.base, this.cchAddr) + " limit=" + str.toHexWord(seg.limit) + " dpl=" + str.toHexByte(seg.dpl) + " type=" + str.toHexByte(seg.acc >>> 8) + " (" + sType + ")");
+    };
+
+    /**
      * dumpTSS(s)
      *
      * This dumps a TSS using the given selector.  If none is specified, the current TR is used.
@@ -1397,7 +1473,7 @@ if (DEBUGGER) {
         if (!s) {
             seg = this.cpu.segTSS;
         } else {
-            var sel = str.parseInt(s);
+            var sel = this.parseValue(s);
             if (sel === undefined) {
                 this.println("invalid task selector: " + s);
                 return;
@@ -3120,7 +3196,7 @@ if (DEBUGGER) {
                     break;
             }
         } else {
-            this.println("missing " + (sName? sName : "value"));
+            this.println("missing " + (sName || "value"));
         }
         return value;
     };
@@ -3563,19 +3639,19 @@ if (DEBUGGER) {
     {
         var m;
         if (sAddr == "?") {
-            var sDumpers = "symbols";
+            var sDumpers = "";
             for (m in Debugger.MESSAGES) {
                 if (this.afnDumpers[m]) {
-                    if (sDumpers.length) sDumpers += ",";
+                    if (sDumpers) sDumpers += ",";
                     sDumpers = sDumpers + m;
                 }
             }
-            sDumpers += ",state";
+            sDumpers += ",state,symbols";
             this.println("\ndump commands:");
             this.println("\tdb [a] [#]    dump bytes at address a");
             this.println("\tdw [a] [#]    dump words at address a");
             this.println("\tds [s]        dump descriptor for selector s");
-            if (sDumpers.length) this.println("dumps are also available for: " + sDumpers);
+            if (sDumpers.length) this.println("dump extensions:\n\t" + sDumpers);
             return;
         }
         if (sAddr == "state") {
@@ -3926,6 +4002,7 @@ if (DEBUGGER) {
     Debugger.prototype.doList = function(sSymbol)
     {
         var aAddr = this.parseAddr(sSymbol, Debugger.ADDR_CODE);
+
         if (aAddr[0] == null && aAddr[2] == null) return;
 
         var addr = this.getAddr(aAddr);

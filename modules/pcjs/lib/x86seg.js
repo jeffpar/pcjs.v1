@@ -310,11 +310,31 @@ X86Seg.prototype.loadDesc8 = function(sel, addrDesc)
             base = null;
             break;
         }
-        if (this.id == X86Seg.ID.TSS) {
-            if (type != X86.DESC.ACC.TYPE.TSS && type != X86.DESC.ACC.TYPE.TSS_BUSY) {
-                X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.TS_FAULT, sel, true);
-                base = null;
-                break;
+        if (sel) {
+            /*
+             * TODO: These tests are far from complete; the main purpose right now is to
+             * catch cases (eg, call gates) that we need to add support for.
+             */
+            if (this.id == X86Seg.ID.CODE) {
+                if (type < X86.DESC.ACC.TYPE.CODE_EXECONLY) {
+                    X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, sel, true);
+                    base = null;
+                    break;
+                }
+            }
+            else if (this.id == X86Seg.ID.DATA || this.id == X86Seg.ID.STACK) {
+                if (type < X86.DESC.ACC.TYPE.DATA_READONLY || (type & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.READABLE)) == X86.DESC.ACC.TYPE.CODE) {
+                    X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, sel, true);
+                    base = null;
+                    break;
+                }
+            }
+            else if (this.id == X86Seg.ID.TSS) {
+                if (type != X86.DESC.ACC.TYPE.TSS && type != X86.DESC.ACC.TYPE.TSS_BUSY) {
+                    X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.TS_FAULT, sel, true);
+                    base = null;
+                    break;
+                }
             }
         }
         this.sel = sel;
@@ -448,7 +468,7 @@ X86Seg.prototype.messageDebugger = function(base, limit, acc, ext)
             if (this.id == X86Seg.ID.CODE) sDPL += " cpl=" + this.cpl;
             this.cpu.messageDebugger("loadSeg(" + this.sName + "):" + ch + " base=" + str.toHex(base) + " limit=" + str.toHexWord(limit) + " acc=" + str.toHexWord(acc) + sDPL, Debugger.MESSAGE.SEG);
         }
-        this.cpu.assert(!ext || ext == X86.DESC.EXT.AVAIL);
+        this.cpu.assert(base != null && (!ext || ext == X86.DESC.EXT.AVAIL));
     }
 };
 

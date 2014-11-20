@@ -2010,7 +2010,7 @@ FDC.prototype.popCmd = function(name)
     if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE.FDC)) {
         var bCmdMasked = bCmd & FDC.REG_DATA.CMD.MASK;
         if (!name && !this.regDataIndex && FDC.aCmdInfo[bCmdMasked]) name = FDC.aCmdInfo[bCmdMasked].name;
-        this.dbg.message("FDC.CMD[" + (name || this.regDataIndex) + "]: 0x" + str.toHexByte(bCmd));
+        this.messageDebugger("FDC.CMD[" + (name || this.regDataIndex) + "]: 0x" + str.toHexByte(bCmd), Debugger.MESSAGE.PORT);
     }
     this.regDataIndex++;
     return bCmd;
@@ -2061,7 +2061,7 @@ FDC.prototype.beginResult = function()
  */
 FDC.prototype.pushResult = function(bResult, name)
 {
-    if (DEBUG) this.messageDebugger("FDC.RES[" + (name || this.regDataTotal) + "]: 0x" + str.toHexByte(bResult), Debugger.MESSAGE.FDC);
+    if (DEBUG) this.messageDebugger("FDC.RES[" + (name || this.regDataTotal) + "]: 0x" + str.toHexByte(bResult), Debugger.MESSAGE.PORT);
     this.regDataArray[this.regDataTotal++] = bResult;
 };
 
@@ -2427,7 +2427,11 @@ FDC.prototype.writeFormat = function(drive, b)
 FDC.prototype.messageDebugger = function(sMessage, bitsMessage)
 {
     if (DEBUGGER && this.dbg) {
-        if (bitsMessage == null) bitsMessage = Debugger.MESSAGE.FDC;
+        if (bitsMessage == null) {
+            bitsMessage = Debugger.MESSAGE.FDC;
+        } else {
+            bitsMessage |= Debugger.MESSAGE.FDC;
+        }
         if (this.dbg.messageEnabled(bitsMessage)) this.dbg.message(sMessage);
     }
 };
