@@ -103,10 +103,11 @@ function Debugger(parmsDbg)
         this.aAddrNextData = [0, 0];
 
         /*
-         * When Enter is pressed on an empty input buffer, we default to the previous command,
-         * which is preserved here.
+         * This maintains command history.  New commands are inserted at index 0 of the array.
+         * When Enter is pressed on an empty input buffer, we default to the command at aPrevCmds[0].
          */
-        this.prevCmd = null;
+        this.iPrevCmd = -1;
+        this.aPrevCmds = [];
 
         /*
          * fAssemble is true when "assemble mode" is active, false when not.
@@ -1254,25 +1255,51 @@ if (DEBUGGER) {
             /*
              * For halted machines, this is fine, but for auto-start machines, it can be annoying.
              *
-             *      this.controlDebug.focus();
+             *      control.focus();
              */
-            control.onkeypress = function onKeyPressDebugInput(event) {
-                if (event.keyCode == 13) {
-                    var s = control.value;
+            control.onkeydown = function onKeyDownDebugInput(event) {
+                var sInput;
+                if (event.keyCode == Keyboard.KEYCODE.CR) {
+                    sInput = control.value;
                     control.value = "";
-                    var a = dbg.parseCommand(s, true);
-                    for (s in a) dbg.doCommand(a[s]);
                     /*
-                     * The following preventDefault() hack seems to be necessary only for IE; IE insists on giving
-                     * focus to the debugEnter control after we've processed the Enter key above (keyCode == 13)
-                     * for the debugInput control.  This hack allows focus to remain with debugInput.
+                     * The following preventDefault() hack seems to be necessary only for IE, which insists on giving
+                     * focus to the debugEnter control after we've processed KEYCODE.CR for the debugInput control.
+                     * This hack allows focus to remain with debugInput.
                      *
                      * NOTE: In IE9, I was able to resolve this problem (or so I thought) by forcing focus back to the
                      * debugInput control (eg, "control.focus()") but that wasn't working in IE10.  Here's hoping this
                      * also works in IE9 until I have a chance to test it.
+                     *
+                     * UPDATE: The above notes regarding IE are in reference to an "onkeypress" handler; this code
+                     * has since been changed to an "onkeydown" handler, so not everything noted above may still apply.
                      */
-                    if (event.preventDefault) event.preventDefault();
+                    if (sInput) {
+                        var a = dbg.parseCommand(sInput, true);
+                        for (var s in a) dbg.doCommand(a[s]);
+                    }
                 }
+                else {
+                    if (event.keyCode == Keyboard.KEYCODE.UP) {
+                        if (dbg.iPrevCmd < dbg.aPrevCmds.length - 1) {
+                            sInput = dbg.aPrevCmds[++dbg.iPrevCmd];
+                        }
+                    }
+                    else if (event.keyCode == Keyboard.KEYCODE.DOWN) {
+                        if (dbg.iPrevCmd > 0) {
+                            sInput = dbg.aPrevCmds[--dbg.iPrevCmd];
+                        } else {
+                            sInput = "";
+                            dbg.iPrevCmd = -1;
+                        }
+                    }
+                    if (sInput != null) {
+                        var cch = sInput.length;
+                        control.value = sInput;
+                        control.setSelectionRange(cch, cch);
+                    }
+                }
+                if (sInput != null && event.preventDefault) event.preventDefault();
             };
             return true;
 
@@ -2030,7 +2057,7 @@ if (DEBUGGER) {
         var state = new State(this);
         state.set(0, this.aAddrNextCode);
         state.set(1, this.aAddrAssemble);
-        state.set(2, [this.prevCmd, this.fAssemble, this.bitsMessageEnabled]);
+        state.set(2, [this.aPrevCmds, this.fAssemble, this.bitsMessageEnabled]);
         return state.data();
     };
 
@@ -2049,7 +2076,8 @@ if (DEBUGGER) {
         if (data[2] !== undefined) {
             this.aAddrNextCode = data[i++];
             this.aAddrAssemble = data[i++];
-            this.prevCmd = data[i][0];
+            this.aPrevCmds = data[i][0];
+            if (typeof this.aPrevCmds == "string") this.aPrevCmds = [this.aPrevCmds];
             this.fAssemble = data[i][1];
             if (!this.bitsMessageEnabled) {
                 /*
@@ -4714,9 +4742,13 @@ if (DEBUGGER) {
     {
         if (fSave) {
             if (!sCmd) {
-                sCmd = this.prevCmd;
+                sCmd = this.aPrevCmds[0];
             } else {
-                this.prevCmd = sCmd;
+                if (this.iPrevCmd < 0 || sCmd != this.aPrevCmds[this.iPrevCmd]) {
+                    this.aPrevCmds.splice(0, 0, sCmd);
+                    this.iPrevCmd = 0;
+                }
+                this.iPrevCmd--;
             }
         }
         var a = (sCmd? sCmd.split(sCmd.indexOf('|') >= 0? '|' : ';') : ['']);
