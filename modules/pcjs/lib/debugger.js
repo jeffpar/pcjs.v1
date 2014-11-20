@@ -521,7 +521,7 @@ if (DEBUGGER) {
         "8042":     Debugger.MESSAGE.C8042,
         "chipset":  Debugger.MESSAGE.CHIPSET,   // ie, anything else in ChipSet besides DMA, PIC, TIMER, CMOS, RTC and 8042
         "kbd":      Debugger.MESSAGE.KBD,
-        "keys":     Debugger.MESSAGE.KEYS,
+        "key":      Debugger.MESSAGE.KEYS,      // using "keys" instead of "key" causes an unfortunate JavaScript property collision
         "video":    Debugger.MESSAGE.VIDEO,
         "fdc":      Debugger.MESSAGE.FDC,
         "hdc":      Debugger.MESSAGE.HDC,
@@ -1350,7 +1350,10 @@ if (DEBUGGER) {
      */
     Debugger.prototype.dumpDOS = function(s)
     {
-        if (!s) return;
+        if (!s) {
+            this.println("no MCB");
+            return;
+        }
 
         this.println("dumpDOS(" + s + ")");
 

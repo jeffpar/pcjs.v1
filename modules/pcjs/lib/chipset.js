@@ -2103,7 +2103,7 @@ ChipSet.prototype.dumpTimer = function()
                     count |= (timer.countCurrent[i] << (i * 8));
                 }
             }
-            sDump += " MODE" + timer.mode + " BYTES=" + timer.countBytes + " COUNT=" + str.toHexWord(count);
+            sDump += " mode=" + timer.mode + " bytes=" + timer.countBytes + " count=" + str.toHexWord(count);
             this.dbg.message(sDump);
         }
     }
