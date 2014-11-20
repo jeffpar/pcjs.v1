@@ -1262,22 +1262,8 @@ if (DEBUGGER) {
                 if (event.keyCode == Keyboard.KEYCODE.CR) {
                     sInput = control.value;
                     control.value = "";
-                    /*
-                     * The following preventDefault() hack seems to be necessary only for IE, which insists on giving
-                     * focus to the debugEnter control after we've processed KEYCODE.CR for the debugInput control.
-                     * This hack allows focus to remain with debugInput.
-                     *
-                     * NOTE: In IE9, I was able to resolve this problem (or so I thought) by forcing focus back to the
-                     * debugInput control (eg, "control.focus()") but that wasn't working in IE10.  Here's hoping this
-                     * also works in IE9 until I have a chance to test it.
-                     *
-                     * UPDATE: The above notes regarding IE are in reference to an "onkeypress" handler; this code
-                     * has since been changed to an "onkeydown" handler, so not everything noted above may still apply.
-                     */
-                    if (sInput) {
-                        var a = dbg.parseCommand(sInput, true);
-                        for (var s in a) dbg.doCommand(a[s]);
-                    }
+                    var a = dbg.parseCommand(sInput, true);
+                    for (var s in a) dbg.doCommand(a[s]);
                 }
                 else {
                     if (event.keyCode == Keyboard.KEYCODE.UP) {
@@ -1310,14 +1296,9 @@ if (DEBUGGER) {
                 500, 100,
                 function onClickDebugEnter(fRepeat) {
                     if (dbg.controlDebug) {
-                        var s = dbg.controlDebug.value;
-                        /*
-                         *  NOTE: If we wanted to use the debugEnter button to repeatedly enter the same command, it
-                         *  used to be the case that we couldn't clear the command string.  That's apparently no longer true.
-                         */
-                        dbg.controlDebug.value = "";
-                        var a = dbg.parseCommand(s, true);
-                        for (s in a) dbg.doCommand(a[s]);
+                        var sInput = dbg.controlDebug.value;
+                        var a = dbg.parseCommand(sInput, true, true);
+                        for (var s in a) dbg.doCommand(a[s]);
                         return true;
                     }
                     if (DEBUG) dbg.log("no debugger input buffer");
@@ -4731,24 +4712,25 @@ if (DEBUGGER) {
     };
 
     /**
-     * parseCommand(sCmd, fSave)
+     * parseCommand(sCmd, fSave, fRepeat)
      *
      * @this {Debugger}
      * @param {string|undefined} sCmd
      * @param {boolean} [fSave] is true to save the command, false if not
+     * @param {boolean} [fRepeat] is true if the command may be repeated (and therefore iPrevCmd should not be decremented)
      * @return {Array.<string>}
      */
-    Debugger.prototype.parseCommand = function(sCmd, fSave)
+    Debugger.prototype.parseCommand = function(sCmd, fSave, fRepeat)
     {
         if (fSave) {
             if (!sCmd) {
-                sCmd = this.aPrevCmds[0];
+                sCmd = this.aPrevCmds[this.iPrevCmd+1];
             } else {
                 if (this.iPrevCmd < 0 || sCmd != this.aPrevCmds[this.iPrevCmd]) {
                     this.aPrevCmds.splice(0, 0, sCmd);
                     this.iPrevCmd = 0;
                 }
-                this.iPrevCmd--;
+                if (!fRepeat) this.iPrevCmd--;
             }
         }
         var a = (sCmd? sCmd.split(sCmd.indexOf('|') >= 0? '|' : ';') : ['']);
