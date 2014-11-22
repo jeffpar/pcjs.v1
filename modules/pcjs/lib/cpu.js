@@ -98,6 +98,7 @@ function CPU(parmsCPU, nCyclesDefault)
 
     this.aFlags.fPowered = false;
     this.aFlags.fRunning = false;
+    this.aFlags.fStarting = false;
     this.aFlags.fAutoStart = parmsCPU['autoStart'];
 
     /*
@@ -955,7 +956,7 @@ CPU.prototype.calcRemainingTime = function()
     this.aCounts.nCyclesRecalc += this.aCounts.nCyclesThisRun;
 
     if (DEBUG && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE.LOG) && msRemainsThisRun) {
-        this.dbg.message("at " + this.aCounts.msEndThisRun + "ms, calcRemainingTime returned " + msRemainsThisRun + "ms to sleep");
+        this.dbg.message("calcRemainingTime: " + msRemainsThisRun + "ms to sleep after " + this.aCounts.msEndThisRun + "ms");
     }
 
     this.aCounts.msEndThisRun += msRemainsThisRun;
@@ -998,6 +999,7 @@ CPU.prototype.runCPU = function(fOnClick)
              *      nCyclesPerBurst = nCyclesTimer0;
              *  }
              */
+            if (this.chipset) nCyclesPerBurst = this.chipset.getRTCCycleLimit(nCyclesPerBurst);
 
             /*
              * nCyclesPerBurst is how many cycles we WANT to run on each iteration of stepCPU(), but it may run
@@ -1065,6 +1067,7 @@ CPU.prototype.startCPU = function(fSetFocus)
         this.setSpeed();
         if (this.cmp) this.cmp.start(this.aCounts.msStartRun, this.getCycles());
         this.aFlags.fRunning = true;
+        this.aFlags.fStarting = true;
         if (this.chipset) this.chipset.setSpeaker();
         var controlRun = this.bindings["run"];
         if (controlRun) controlRun.textContent = "Halt";

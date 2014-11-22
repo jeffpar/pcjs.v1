@@ -2423,21 +2423,20 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
     this.aFlags.fComplete = true;
 
     /*
-     * fDebugCheck is true if we need to "check" every instruction with the Debugger.  The Debugger will
-     * call cpu.stepCPU(n) with n == 0 if it's executing only ONE instruction (ie, the user just clicked the
-     * "Step" button, or they've issued a "t" or "t1" command).  Otherwise, it will call with n == 1
-     * (ie, the user is holding the "Step" button, or they've issued a "t#" command where # > 1).
-     *
-     * In the first case, we want to ignore (ie, "step over") any breakpoints; otherwise, the Debugger has
-     * no easy way of moving past a breakpoint (other than clearing it, of course).  In the second case,
-     * we want to honor any breakpoints, which in turn will set fComplete to false and signal the Debugger
-     * to stop.
-     *
-     * Note that as a practical matter, both 0 and 1 are otherwise treated the same when it comes to the
-     * minimum number of cycles to process: one and only one instruction will execute, since every (valid)
-     * instruction consumes at least 1 cycle.
+     * fDebugCheck is true if we need to "check" every instruction with the Debugger.
      */
-    var fDebugCheck = this.aFlags.fDebugCheck = (DEBUGGER && nMinCycles && this.dbg && this.dbg.checksEnabled());
+    var fDebugCheck = this.aFlags.fDebugCheck = (DEBUGGER && this.dbg && this.dbg.checksEnabled());
+
+    /*
+     * fDebugSkip is checked only when fDebugCheck is true, and its sole purpose is to tell the first call
+     * to checkInstruction() that it can skip breakpoint checks, and that will be true ONLY when fStarting is
+     * true OR nMinCycles is zero (the latter means the Debugger is single-stepping).
+     *
+     * Once we snap fStarting, we clear it, because technically, we've moved beyond "starting" and have officially
+     * "started" now.
+     */
+    var fDebugSkip = this.aFlags.fStarting || !nMinCycles;
+    this.aFlags.fStarting = false;
 
     /*
      * We move the minimum cycle count to nStepCycles (the number of cycles left to step), so that other
@@ -2519,9 +2518,12 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
             }
         }
 
-        if (DEBUGGER && fDebugCheck && this.dbg.checkInstruction(this.regEIP)) {
-            this.stopCPU();
-            break;
+        if (DEBUGGER && fDebugCheck) {
+            if (this.dbg.checkInstruction(this.regEIP, fDebugSkip)) {
+                this.stopCPU();
+                break;
+            }
+            fDebugSkip = false;
         }
 
         this.opFlags = 0;

@@ -728,11 +728,6 @@ Component.prototype = {
                     } catch(e) {}
                     return;
                 }
-                /*
-                 * If there's no Debugger, or the current component didn't bother saving a reference to the Debugger
-                 * (eg, in its initBus() handler), then this component-level assert() the same as the class-level assert(),
-                 * except for the (slightly) more detailed log() message.
-                 */
                 this.log(s);
                 throw new Error(s);
             }

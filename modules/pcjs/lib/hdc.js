@@ -1420,7 +1420,7 @@ HDC.prototype.inATCData = function(port, addrFrom)
                         /*
                          * I shouldn't have to set BUSY (or DATA_REQ) again, because it should still be set, no?
                          */
-                        if (DEBUG) this.assert(!!(hdc.regStatus & HDC.ATC.STATUS.BUSY));
+                        if (DEBUG) hdc.assert(!!(hdc.regStatus & HDC.ATC.STATUS.BUSY));
                     } else {
                         /*
                          * TODO: It would be nice to be a bit more specific about the error (if any) that just occurred.

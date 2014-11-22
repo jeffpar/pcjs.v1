@@ -81,7 +81,7 @@ function Debugger(parmsDbg)
         this.cInstructions = -1;
 
         /*
-         * The default numder of hex characters in a physical address; updated by initBus().
+         * Default number of hex chars in a physical address (ie, for real-mode); updated by initBus().
          */
         this.cchAddr = 5;
 
@@ -214,9 +214,11 @@ Debugger.MESSAGE = {
     STATE:      0x00800000,
     MOUSE:      0x01000000,
     COMPUTER:   0x02000000,
-    LOG:        0x04000000,
-    DOS:        0x08000000,
-    HALT:       0x80000000
+    DOS:        0x04000000,
+    OTHER:      0x08000000,
+    LOG:        0x10000000,
+    WARN:       0x20000000,
+    HALT:       0x40000000
 };
 
 if (DEBUGGER) {
@@ -531,8 +533,10 @@ if (DEBUGGER) {
         "state":    Debugger.MESSAGE.STATE,
         "mouse":    Debugger.MESSAGE.MOUSE,
         "computer": Debugger.MESSAGE.COMPUTER,
-        "log":      Debugger.MESSAGE.LOG,
         "dos":      Debugger.MESSAGE.DOS,
+        "other":    Debugger.MESSAGE.OTHER,
+        "log":      Debugger.MESSAGE.LOG,
+        "warn":     Debugger.MESSAGE.WARN,
         /*
          * Now we turn to message actions rather than message types; for example, setting "halt"
          * on or off doesn't enable "halt" messages, but rather halts the CPU on any message above.
@@ -1265,6 +1269,9 @@ if (DEBUGGER) {
                     var a = dbg.parseCommand(sInput, true);
                     for (var s in a) dbg.doCommand(a[s]);
                 }
+                else if (event.keyCode == Keyboard.KEYCODE.ESC) {
+                    control.value = sInput = "";
+                }
                 else {
                     if (event.keyCode == Keyboard.KEYCODE.UP) {
                         if (dbg.iPrevCmd < dbg.aPrevCmds.length - 1) {
@@ -1297,7 +1304,8 @@ if (DEBUGGER) {
                 function onClickDebugEnter(fRepeat) {
                     if (dbg.controlDebug) {
                         var sInput = dbg.controlDebug.value;
-                        var a = dbg.parseCommand(sInput, true, true);
+                        dbg.controlDebug.value = "";
+                        var a = dbg.parseCommand(sInput, true);
                         for (var s in a) dbg.doCommand(a[s]);
                         return true;
                     }
@@ -1537,7 +1545,7 @@ if (DEBUGGER) {
     Debugger.prototype.initMessages = function(sEnable)
     {
         this.afnDumpers = [];
-        this.bitsMessageEnabled = 0;
+        this.bitsMessageEnabled = Debugger.MESSAGE.WARN;
         this.sMessagePrev = null;
         var aEnable = this.parseCommand(sEnable);
         if (aEnable.length) {
@@ -1575,13 +1583,16 @@ if (DEBUGGER) {
      * NOTE: If the caller specifies multiple MESSAGE category flags, then ALL the corresponding flags
      * in the Debugger's bitsMessageEnabled variable must be enabled as well, else the result will be false.
      *
+     * One wrinkle is MESSAGE.WARN: if that category is enabled, then ANY value with that bit will return true.
+     *
      * @this {Debugger}
      * @param {number} bitsMessage is one or more Debugger MESSAGE_* category flag(s)
      * @return {boolean} true if message category is enabled, false if not
      */
     Debugger.prototype.messageEnabled = function(bitsMessage)
     {
-        return ((this.bitsMessageEnabled & bitsMessage) === bitsMessage);
+        var bitsEnabled = this.bitsMessageEnabled & bitsMessage;
+        return (bitsEnabled === bitsMessage || !!(bitsEnabled & Debugger.MESSAGE.WARN));
     };
 
     /**
@@ -1620,8 +1631,8 @@ if (DEBUGGER) {
      *
      * @this {Debugger}
      * @param {number} nInt
-     * @param {number} addr
-     * @return {boolean} true if message generated, false if not
+     * @param {number} addr (EIP after the "INT n" instruction has been fetched but not dispatched)
+     * @return {boolean} true if message generated (which in turn triggers addIntReturn() inside checkIntNotify()), false if not
      */
     Debugger.prototype.messageInt = function(nInt, addr)
     {
@@ -1642,6 +1653,12 @@ if (DEBUGGER) {
                 this.updateRegValues();
                 sFunc = " " + str.replaceArray(this.aRegValues, sFunc);
             }
+            /*
+             * For purposes of display only, rewind addr to the address of the responsible "INT n" instruction; we
+             * know it's the two-byte "INT n" instruction because that's the only opcode handler that calls checkIntNotify()
+             * at the moment.  If that changes, then this will have to change as well.
+             */
+            addr -= 2;
             this.message("INT 0x" + str.toHexByte(nInt) + ": AH=" + str.toHexByte(AH) + " at " + str.toHexAddr(addr - this.cpu.segCS.base, this.cpu.segCS.sel) + sFunc);
         }
         return fMessage;
@@ -3977,8 +3994,8 @@ if (DEBUGGER) {
         if (aAddr[0] == null && aAddr[2] == null) return;
 
         var addr = this.getAddr(aAddr);
-
-        this.println(sSymbol + ": " + this.hexAddr(aAddr) + " (%" + str.toHex(addr, this.cchAddr) + ")");
+        sSymbol = sSymbol? (sSymbol + ": ") : "";
+        this.println(sSymbol + this.hexAddr(aAddr) + " (%" + str.toHex(addr, this.cchAddr) + ")");
 
         var aSymbol = this.findSymbolAtAddr(aAddr, true);
         if (aSymbol.length) {
@@ -4121,7 +4138,7 @@ if (DEBUGGER) {
         if (sCategory !== undefined) {
             var bitsMessage = 0;
             if (sCategory == "all") {
-                bitsMessage = 0xffffffff;
+                bitsMessage = 0xffffffff & ~Debugger.MESSAGE.HALT;
                 sCategory = null;
             } else if (sCategory == "on") {
                 fCriteria = true;
@@ -4674,15 +4691,14 @@ if (DEBUGGER) {
     };
 
     /**
-     * parseCommand(sCmd, fSave, fRepeat)
+     * parseCommand(sCmd, fSave)
      *
      * @this {Debugger}
      * @param {string|undefined} sCmd
      * @param {boolean} [fSave] is true to save the command, false if not
-     * @param {boolean} [fRepeat] is true if the command may be repeated (and therefore iPrevCmd should not be decremented)
      * @return {Array.<string>}
      */
-    Debugger.prototype.parseCommand = function(sCmd, fSave, fRepeat)
+    Debugger.prototype.parseCommand = function(sCmd, fSave)
     {
         if (fSave) {
             if (!sCmd) {
@@ -4692,7 +4708,7 @@ if (DEBUGGER) {
                     this.aPrevCmds.splice(0, 0, sCmd);
                     this.iPrevCmd = 0;
                 }
-                if (!fRepeat) this.iPrevCmd--;
+                this.iPrevCmd--;
             }
         }
         var a = (sCmd? sCmd.split(sCmd.indexOf('|') >= 0? '|' : ';') : ['']);
@@ -4743,24 +4759,18 @@ if (DEBUGGER) {
                      * For all other commands, if they lack a space between the command and argument portions,
                      * insert a space before the first non-alpha character, so that split() will have the desired effect.
                      */
-
-                    /*
-                     * These commands work great, except that they won't compile, and in fact, I don't WANT them in the
-                     * compiled version, but putting them inside (!COMPILED) doesn't help, so I must disable them for now.
-                     *
                     if (!COMPILED) {
                         if (sCmd == "debug") {
-                            DEBUG = true;
+                            window.DEBUG = true;
                             this.println("DEBUG checks on");
                             return true;
                         }
                         else if (sCmd == "nodebug") {
-                            DEBUG = false;
+                            window.DEBUG = false;
                             this.println("DEBUG checks off");
                             return true;
                         }
                     }
-                     */
 
                     var ch, ch0, i;
                     switch (sCmd) {

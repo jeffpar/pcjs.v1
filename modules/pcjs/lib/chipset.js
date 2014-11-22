@@ -503,13 +503,14 @@ ChipSet.IRQ = {
     SLAVE:              0x02,
     COM2:               0x03,
     COM1:               0x04,
-    XTC:                0x05,   // MODEL_5160 uses this for its HDC; MODEL_5170 designates it for LPT2
+    XTC:                0x05,   // MODEL_5160 uses IRQ 5 for HDC (XTC version)
+    LPT2:               0x05,   // MODEL_5170 uses IRQ 5 for LPT2
     FDC:                0x06,
     LPT1:               0x07,
     RTC:                0x08,
     IRQ2:               0x09,
     COPROC:             0x0D,
-    ATC:                0x0E    // MODEL_5170 uses this for its HDC
+    ATC:                0x0E    // MODEL_5170 uses IRQ 14 for HDC (ATC version)
 };
 
 /*
@@ -759,10 +760,10 @@ ChipSet.CMOS = {
         RTC_MONTH_DAY:  0x07,
         RTC_MONTH:      0x08,
         RTC_YEAR:       0x09,
-        RTC_STATUSA:    0x0A,
-        RTC_STATUSB:    0x0B,
-        RTC_STATUSC:    0x0C,
-        RTC_STATUSD:    0x0D,
+        STATUSA:        0x0A,
+        STATUSB:        0x0B,
+        STATUSC:        0x0C,
+        STATUSD:        0x0D,
         DIAG:           0x0E,
         SHUTDOWN:       0x0F,
         FDRIVE:         0x10,
@@ -785,29 +786,29 @@ ChipSet.CMOS = {
     DATA: {                     // this.abCMOSData
         PORT:           0x71
     },
-    STATUSA: {                  // abCMOSData[ChipSet.CMOS.ADDR.RTC_STATUSA]
+    STATUSA: {                  // abCMOSData[ChipSet.CMOS.ADDR.STATUSA]
         UIP:            0x80,   // bit 7: 1 indicates Update-In-Progress, 0 indicates date/time ready to read
         DV:             0x70,   // bits 6-4 (DV2-DV0) are programmed to 010 to select a 32.768Khz time base
         RS:             0x0F    // bits 3-0 (RS3-RS0) are programmed to 0110 to select a 976.562us interrupt rate
     },
-    STATUSB: {                  // abCMOSData[ChipSet.CMOS.ADDR.RTC_STATUSB]
+    STATUSB: {                  // abCMOSData[ChipSet.CMOS.ADDR.STATUSB]
         SET:            0x80,   // bit 7: 1 to set any/all of the 14 time-bytes
         PIE:            0x40,   // bit 6: 1 for Periodic Interrupt Enable
         AIE:            0x20,   // bit 5: 1 for Alarm Interrupt Enable
-        UIE:            0x10,   // bit 4: 1 for Update-Ended Interrupt Enable
+        UIE:            0x10,   // bit 4: 1 for Update Interrupt Enable
         SQWE:           0x08,   // bit 3: 1 for Square Wave Enabled (as set by the STATUSA rate selection bits)
         BINARY:         0x04,   // bit 2: 1 for binary Date Mode, 0 for BCD Date Mode
         HOUR24:         0x02,   // bit 1: 1 for 24-hour mode, 0 for 12-hour mode
         DST:            0x01    // bit 0: 1 for Daylight Savings Time enabled
     },
-    STATUSC: {                  // abCMOSData[ChipSet.CMOS.ADDR.RTC_STATUSC] TODO: Does reading this register clear these interrupt conditions? (see F000:01C6 in the MODEL_5170 BIOS)
-        IRQF:           0x80,   // bit 7
+    STATUSC: {                  // abCMOSData[ChipSet.CMOS.ADDR.STATUSC]
+        IRQF:           0x80,   // bit 7: 1 indicates one or more of the following bits (PF, AF, UF) are set
         PF:             0x40,   // bit 6: 1 indicates Periodic Interrupt
         AF:             0x20,   // bit 5: 1 indicates Alarm Interrupt
-        UF:             0x10,   // bit 4: 1 indicates Update-Ended Interrupt
+        UF:             0x10,   // bit 4: 1 indicates Update Interrupt
         RESERVED:       0x0F
     },
-    STATUSD: {                  // abCMOSData[ChipSet.CMOS.ADDR.RTC_STATUSD]
+    STATUSD: {                  // abCMOSData[ChipSet.CMOS.ADDR.STATUSD]
         VRB:            0x80,   // bit 7: 1 indicates Valid RAM Bit (0 implies power was and/or is lost)
         RESERVED:       0x7F
     },
@@ -1012,7 +1013,7 @@ ChipSet.prototype.powerDown = function(fSave)
  * reset(fHard)
  *
  * @this {ChipSet}
- * @param {boolean} [fHard] true if a machine reset (not just a soft reset)
+ * @param {boolean} [fHard] true on the initial reset (not a normal "soft" reset)
  */
 ChipSet.prototype.reset = function(fHard)
 {
@@ -1098,9 +1099,11 @@ ChipSet.prototype.reset = function(fHard)
          * and any later ("soft") resets (eg, from powerUp() calls), and make sure the latter preserves
          * existing CMOS information.
          */
-        if (fHard) this.abCMOSData = new Array(ChipSet.CMOS.ADDR.TOTAL);
+        if (fHard) {
+            this.abCMOSData = new Array(ChipSet.CMOS.ADDR.TOTAL);
+        }
 
-        this.initRTCDate(this.sRTCDate);
+        this.initRTCTime(this.sRTCDate);
 
         /*
          * initCMOSData() will initialize a variety of "legacy" CMOS bytes, but it will NOT overwrite any memory
@@ -1120,7 +1123,7 @@ ChipSet.prototype.reset = function(fHard)
 };
 
 /**
- * initRTCDate(sDate)
+ * initRTCTime(sDate)
  *
  * Initialize the RTC portion of the CMOS registers to match the specified date/time (or if none is specified,
  * the current date/time).  The date/time should be expressed in the ISO 8601 format; eg: "2011-10-10T14:48:00".
@@ -1128,7 +1131,7 @@ ChipSet.prototype.reset = function(fHard)
  * NOTE: There are two approaches we could take here: always store the RTC bytes in binary, and convert them
  * to/from BCD on-demand (ie, as the simulation reads/writes the CMOS RTC registers); or init/update them in the
  * format specified by CMOS_STATUSB.BINARY (1 for binary, 0 for BCD).  Both approaches require BCD conversion
- * functions, but the former seems more efficient, in part because the periodic calls to updateRTCDate() won't
+ * functions, but the former seems more efficient, in part because the periodic calls to updateRTCTime() won't
  * require any conversions.
  *
  * We take the same approach with the CMOS_STATUSB.HOUR24 setting: internally, we always operate in 24-hour mode,
@@ -1140,7 +1143,7 @@ ChipSet.prototype.reset = function(fHard)
  * @this {ChipSet}
  * @param {string} [sDate]
  */
-ChipSet.prototype.initRTCDate = function(sDate)
+ChipSet.prototype.initRTCTime = function(sDate)
 {
     /*
      * NOTE: I've already been burned once by a JavaScript library function that did NOT treat an undefined
@@ -1185,12 +1188,14 @@ ChipSet.prototype.initRTCDate = function(sDate)
     this.abCMOSData[ChipSet.CMOS.ADDR.RTC_YEAR] = nYear % 100;
     var nCentury = (nYear / 100);
     this.abCMOSData[ChipSet.CMOS.ADDR.CENTURY_DATE] = (nCentury % 10) | ((nCentury / 10) << 4);
-    this.nCyclesCMOSLastUpdate = -1;
 
-    this.abCMOSData[ChipSet.CMOS.ADDR.RTC_STATUSA] = 0x26;                          // hard-coded default; refer to ChipSet.CMOS.STATUSA.DV and ChipSet.CMOS.STATUSA.RS
-    this.abCMOSData[ChipSet.CMOS.ADDR.RTC_STATUSB] = ChipSet.CMOS.STATUSB.HOUR24;   // default to BCD mode (ChipSet.CMOS.STATUSB.BINARY not set)
-    this.abCMOSData[ChipSet.CMOS.ADDR.RTC_STATUSC] = 0x00;
-    this.abCMOSData[ChipSet.CMOS.ADDR.RTC_STATUSD] = ChipSet.CMOS.STATUSD.VRB;
+    this.abCMOSData[ChipSet.CMOS.ADDR.STATUSA] = 0x26;                          // hard-coded default; refer to ChipSet.CMOS.STATUSA.DV and ChipSet.CMOS.STATUSA.RS
+    this.abCMOSData[ChipSet.CMOS.ADDR.STATUSB] = ChipSet.CMOS.STATUSB.HOUR24;   // default to BCD mode (ChipSet.CMOS.STATUSB.BINARY not set)
+    this.abCMOSData[ChipSet.CMOS.ADDR.STATUSC] = 0x00;
+    this.abCMOSData[ChipSet.CMOS.ADDR.STATUSD] = ChipSet.CMOS.STATUSD.VRB;
+
+    this.nRTCCyclesLastUpdate = this.nRTCCyclesNextUpdate = 0;
+    this.nRTCPeriodsPerSecond = this.nRTCCyclesPerPeriod = null;
 };
 
 /**
@@ -1201,14 +1206,14 @@ ChipSet.prototype.initRTCDate = function(sDate)
  */
 ChipSet.prototype.getRTCByte = function(iRTC)
 {
-    if (DEBUG) this.assert(iRTC >= 0 && iRTC <= ChipSet.CMOS.ADDR.RTC_STATUSD);
+    if (DEBUG) this.assert(iRTC >= 0 && iRTC <= ChipSet.CMOS.ADDR.STATUSD);
 
     var b = this.abCMOSData[iRTC];
 
-    if (iRTC < ChipSet.CMOS.ADDR.RTC_STATUSA) {
+    if (iRTC < ChipSet.CMOS.ADDR.STATUSA) {
         var f12HourValue = false;
         if (iRTC == ChipSet.CMOS.ADDR.RTC_HOUR || iRTC == ChipSet.CMOS.ADDR.RTC_HOUR_ALRM) {
-            if (!(this.abCMOSData[ChipSet.CMOS.ADDR.RTC_STATUSB] & ChipSet.CMOS.STATUSB.HOUR24)) {
+            if (!(this.abCMOSData[ChipSet.CMOS.ADDR.STATUSB] & ChipSet.CMOS.STATUSB.HOUR24)) {
                 if (b < 12) {
                     b = (!b? 12 : b);
                 } else {
@@ -1218,7 +1223,7 @@ ChipSet.prototype.getRTCByte = function(iRTC)
                 f12HourValue = true;
             }
         }
-        if (!(this.abCMOSData[ChipSet.CMOS.ADDR.RTC_STATUSB] & ChipSet.CMOS.STATUSB.BINARY)) {
+        if (!(this.abCMOSData[ChipSet.CMOS.ADDR.STATUSB] & ChipSet.CMOS.STATUSB.BINARY)) {
             /*
              * We're in BCD mode, so we must convert b from BINARY to BCD.  But first:
              *
@@ -1233,7 +1238,7 @@ ChipSet.prototype.getRTCByte = function(iRTC)
             b = (b % 10) | ((b / 10) << 4);
         }
     } else {
-        if (iRTC == ChipSet.CMOS.ADDR.RTC_STATUSA) {
+        if (iRTC == ChipSet.CMOS.ADDR.STATUSA) {
             /*
              * HACK: Perform a mindless toggling of the "Update-In-Progress" bit, so that it's flipped
              * on the next read; this makes the MODEL_5170 BIOS ("POST2_RTCUP") happy.
@@ -1253,11 +1258,11 @@ ChipSet.prototype.getRTCByte = function(iRTC)
  */
 ChipSet.prototype.setRTCByte = function(iRTC, b)
 {
-    if (DEBUG) this.assert(iRTC >= 0 && iRTC <= ChipSet.CMOS.ADDR.RTC_STATUSD);
+    if (DEBUG) this.assert(iRTC >= 0 && iRTC <= ChipSet.CMOS.ADDR.STATUSD);
 
-    if (iRTC < ChipSet.CMOS.ADDR.RTC_STATUSA) {
+    if (iRTC < ChipSet.CMOS.ADDR.STATUSA) {
         var fBCD = false;
-        if (!(this.abCMOSData[ChipSet.CMOS.ADDR.RTC_STATUSB] & ChipSet.CMOS.STATUSB.BINARY)) {
+        if (!(this.abCMOSData[ChipSet.CMOS.ADDR.STATUSB] & ChipSet.CMOS.STATUSB.BINARY)) {
             /*
              * We're in BCD mode, so we must convert b from BCD to BINARY (we assume it's valid
              * BCD; ie, that both nibbles contain only 0-9, not A-F).
@@ -1276,7 +1281,7 @@ ChipSet.prototype.setRTCByte = function(iRTC, b)
                     b += 0x30;
                 }
             }
-            if (!(this.abCMOSData[ChipSet.CMOS.ADDR.RTC_STATUSB] & ChipSet.CMOS.STATUSB.HOUR24)) {
+            if (!(this.abCMOSData[ChipSet.CMOS.ADDR.STATUSB] & ChipSet.CMOS.STATUSB.HOUR24)) {
                 if (b <= 12) {
                     b = (b == 12? 0 : b);
                 } else {
@@ -1290,33 +1295,157 @@ ChipSet.prototype.setRTCByte = function(iRTC, b)
 };
 
 /**
- * updateRTCDate()
+ * calcRTCCyclePeriod()
+ *
+ * This should be called whenever the timings in STATUSA may have changed.
+ *
+ * TODO: 1024 is a hard-coded number of periods per second based on the default interrupt rate of 976.562us
+ * (ie, 1000000 / 976.562).  Calculate the actual number based on the values programmed in the STATUSA register.
  *
  * @this {ChipSet}
  */
-ChipSet.prototype.updateRTCDate = function()
+ChipSet.prototype.calcRTCCyclePeriod = function()
 {
-    var nCyclesDelta = 0;
+    this.nRTCCyclesLastUpdate = this.cpu.getCycles(this.fScaleTimers);
+    this.nRTCPeriodsPerSecond = 1024;
+    this.nRTCCyclesPerPeriod = Math.floor(this.cpu.getCyclesPerSecond() / this.nRTCPeriodsPerSecond);
+    this.setRTCCycleLimit();
+};
+
+/**
+ * getRTCCycleLimit(nCycles)
+ *
+ * This is called by the CPU to determine the maximum number of cycles it can process for the current burst.
+ *
+ * @this {ChipSet}
+ * @param {number} nCycles
+ * @return {number} maximum number of cycles (<= nCycles)
+ */
+ChipSet.prototype.getRTCCycleLimit = function(nCycles)
+{
+    if (this.abCMOSData && this.abCMOSData[ChipSet.CMOS.ADDR.STATUSB] & ChipSet.CMOS.STATUSB.PIE) {
+        var nCyclesUpdate = this.nRTCCyclesNextUpdate - this.cpu.getCycles(this.fScaleTimers);
+        if (nCyclesUpdate > 0) {
+            if (nCycles > nCyclesUpdate) {
+                if (DEBUG) this.messageDebugger("getRTCCycleLimit(" + nCycles + "): reduced to " + nCyclesUpdate + " cycles", Debugger.MESSAGE.RTC);
+                nCycles = nCyclesUpdate;
+            } else {
+                if (DEBUG) this.messageDebugger("getRTCCycleLimit(" + nCycles + "): already less than " + nCyclesUpdate + " cycles", Debugger.MESSAGE.RTC);
+            }
+        } else {
+            if (DEBUG) this.messageDebugger("RTC next update has passed by " + nCyclesUpdate + " cycles", Debugger.MESSAGE.RTC);
+        }
+    }
+    return nCycles;
+};
+
+/**
+ * setRTCCycleLimit(nCycles)
+ *
+ * This should be called when PIE becomes set in STATUSB (and whenever PF is cleared in STATUSC while PIE is still set).
+ *
+ * @this {ChipSet}
+ * @param {number} [nCycles]
+ */
+ChipSet.prototype.setRTCCycleLimit = function(nCycles)
+{
+    if (nCycles === undefined) nCycles = this.nRTCCyclesPerPeriod;
+    this.nRTCCyclesNextUpdate = this.cpu.getCycles(this.fScaleTimers) + nCycles;
+    if (this.abCMOSData[ChipSet.CMOS.ADDR.STATUSB] & ChipSet.CMOS.STATUSB.PIE) {
+        this.cpu.setBurstCycles(nCycles);
+    }
+};
+
+/**
+ * updateRTCTime()
+ *
+ * @this {ChipSet}
+ */
+ChipSet.prototype.updateRTCTime = function()
+{
     var nCyclesPerSecond = this.cpu.getCyclesPerSecond();
     var nCyclesUpdate = this.cpu.getCycles(this.fScaleTimers);
 
     /*
-     * If nCyclesCMOSLastUpdate hasn't been set yet (ie, if this is our first updateRTCDate() call),
-     * then do nothing except initialize nCyclesCMOSLastUpdate.
+     * We must arrange for the very first calcRTCCyclePeriod() call to occur here, on the very first
+     * updateRTCTime() call, because this is the first point we can be guaranteed that CPU cycle counts
+     * are initialized (the CPU is the last component to be powered up/restored).
+     *
+     * TODO: A side-effect of this is that it undermines the save/restore code's preservation of last
+     * and next RTC cycle counts, which may change when the next RTC event is delivered.
      */
-    if (this.nCyclesCMOSLastUpdate >= 0) {
-        nCyclesDelta = nCyclesUpdate - this.nCyclesCMOSLastUpdate;
-        if (DEBUG) this.assert(nCyclesDelta >= 0);
-        var nSecondsDelta = Math.floor(nCyclesDelta / nCyclesPerSecond);
-        /*
-         * We trust that updateRTCDate() is being called as part of updateAllTimers(), and is therefore
-         * being called often enough to ensure that nSecondsDelta will never be greater than one.  In fact,
-         * it would always be LESS than one if it weren't ALSO for the fact that we plow any "unused" cycles
-         * (nCyclesDelta % nCyclesPerSecond) back into nCyclesCMOSLastUpdate, so that we will eventually
-         * see a one-second delta.
-         */
-        if (DEBUG) this.assert(nSecondsDelta <= 1);
-        if (nSecondsDelta) {
+    if (this.nRTCCyclesPerPeriod == null) this.calcRTCCyclePeriod();
+
+    /*
+     * Step 1: Deal with Periodic Interrupts
+     */
+    if (nCyclesUpdate >= this.nRTCCyclesNextUpdate) {
+        var bPrev = this.abCMOSData[ChipSet.CMOS.ADDR.STATUSC];
+        this.abCMOSData[ChipSet.CMOS.ADDR.STATUSC] |= ChipSet.CMOS.STATUSC.PF;
+        if (this.abCMOSData[ChipSet.CMOS.ADDR.STATUSB] & ChipSet.CMOS.STATUSB.PIE) {
+            /*
+             * When PIE is set, setBurstCycles() should be getting called as needed to ensure
+             * that updateRTCTime() is called more frequently, so let's assert that we don't have
+             * an excess of cycles and thus possibly some missed Periodic Interrupts.
+             */
+            if (DEBUG) {
+                if (nCyclesUpdate - this.nRTCCyclesNextUpdate > this.nRTCCyclesPerPeriod) {
+                    if (bPrev & ChipSet.CMOS.STATUSC.PF) {
+                        this.messageDebugger("RTC interrupt handler failed to clear STATUSC", Debugger.MESSAGE.RTC | Debugger.MESSAGE.WARN);
+                    } else {
+                        this.messageDebugger("CPU took too long trigger new RTC periodic interrupt", Debugger.MESSAGE.RTC | Debugger.MESSAGE.WARN);
+                    }
+                }
+            }
+            this.abCMOSData[ChipSet.CMOS.ADDR.STATUSC] |= ChipSet.CMOS.STATUSC.IRQF;
+            this.setIRR(ChipSet.IRQ.RTC);
+            /*
+             * We could also call setRTCCycleLimit() at this point, but I don't think there's any
+             * benefit until the interrupt had been acknowledged and STATUSC has been read, thereby
+             * clearing the way for another Periodic Interrupt; it seems to me that when STATUSC
+             * is read, that's the more appropriate time to call setRTCCycleLimit().
+             */
+        }
+        this.nRTCCyclesNextUpdate = nCyclesUpdate + this.nRTCCyclesPerPeriod;
+    }
+
+    /*
+     * Step 2: Deal with Alarm Interrupts
+     */
+    if (this.abCMOSData[ChipSet.CMOS.ADDR.RTC_SEC] == this.abCMOSData[ChipSet.CMOS.ADDR.RTC_SEC_ALRM]) {
+        if (this.abCMOSData[ChipSet.CMOS.ADDR.RTC_MIN] == this.abCMOSData[ChipSet.CMOS.ADDR.RTC_MIN_ALRM]) {
+            if (this.abCMOSData[ChipSet.CMOS.ADDR.RTC_HOUR] == this.abCMOSData[ChipSet.CMOS.ADDR.RTC_HOUR_ALRM]) {
+                this.abCMOSData[ChipSet.CMOS.ADDR.STATUSC] |= ChipSet.CMOS.STATUSC.AF;
+                if (this.abCMOSData[ChipSet.CMOS.ADDR.STATUSB] & ChipSet.CMOS.STATUSB.AIE) {
+                    this.abCMOSData[ChipSet.CMOS.ADDR.STATUSC] |= ChipSet.CMOS.STATUSC.IRQF;
+                    this.setIRR(ChipSet.IRQ.RTC);
+                }
+            }
+        }
+    }
+
+    /*
+     * Step 3: Update the RTC date/time and deal with Update Interrupts
+     */
+    var nCyclesDelta = nCyclesUpdate - this.nRTCCyclesLastUpdate;
+    if (DEBUG) this.assert(nCyclesDelta >= 0);
+    var nSecondsDelta = Math.floor(nCyclesDelta / nCyclesPerSecond);
+
+    /*
+     * We trust that updateRTCTime() is being called as part of updateAllTimers(), and is therefore
+     * being called often enough to ensure that nSecondsDelta will never be greater than one.  In fact,
+     * it would always be LESS than one if it weren't also for the fact that we plow any "unused" cycles
+     * (nCyclesDelta % nCyclesPerSecond) back into nRTCCyclesLastUpdate, so that we will eventually
+     * see a one-second delta.
+     */
+    if (DEBUG) this.assert(nSecondsDelta <= 1);
+
+    /*
+     * Make sure that CMOS.STATUSB.SET isn't set; if it is, then the once-per-second RTC updates must be
+     * disabled so that software can write new RTC date/time values without interference.
+     */
+    if (nSecondsDelta && !(this.abCMOSData[ChipSet.CMOS.ADDR.STATUSB] & ChipSet.CMOS.STATUSB.SET)) {
+        while (nSecondsDelta--) {
             if (++this.abCMOSData[ChipSet.CMOS.ADDR.RTC_SEC] >= 60) {
                 this.abCMOSData[ChipSet.CMOS.ADDR.RTC_SEC] = 0;
                 if (++this.abCMOSData[ChipSet.CMOS.ADDR.RTC_MIN] >= 60) {
@@ -1336,8 +1465,14 @@ ChipSet.prototype.updateRTCDate = function()
                 }
             }
         }
+        this.abCMOSData[ChipSet.CMOS.ADDR.STATUSC] |= ChipSet.CMOS.STATUSC.UF;
+        if (this.abCMOSData[ChipSet.CMOS.ADDR.STATUSB] & ChipSet.CMOS.STATUSB.UIE) {
+            this.abCMOSData[ChipSet.CMOS.ADDR.STATUSC] |= ChipSet.CMOS.STATUSC.IRQF;
+            this.setIRR(ChipSet.IRQ.RTC);
+        }
     }
-    this.nCyclesCMOSLastUpdate = nCyclesUpdate - (nCyclesDelta % nCyclesPerSecond);
+
+    this.nRTCCyclesLastUpdate = nCyclesUpdate - (nCyclesDelta % nCyclesPerSecond);
 };
 
 /**
@@ -1501,7 +1636,7 @@ ChipSet.prototype.save = function()
     if (this.model >= ChipSet.MODEL_5170) {
         state.set(5, [this.b8042Status, this.b8042InBuff, this.b8042CmdData,
                       this.b8042OutBuff, this.b8042InPort, this.b8042OutPort]);
-        state.set(6, [this.bMFGData, this.abDMAPageSpare, this.bCMOSAddr, this.abCMOSData, this.nCyclesCMOSLastUpdate]);
+        state.set(6, [this.bMFGData, this.abDMAPageSpare, this.bCMOSAddr, this.abCMOSData, this.nRTCCyclesLastUpdate, this.nRTCCyclesNextUpdate]);
     }
     return state.data();
 };
@@ -1565,16 +1700,17 @@ ChipSet.prototype.restore = function(data)
         this.abDMAPageSpare = a[1];
         this.bCMOSAddr = a[2];
         this.abCMOSData = a[3];
-        this.nCyclesCMOSLastUpdate = a[4];
+        this.nRTCCyclesLastUpdate = a[4];
+        this.nRTCCyclesNextUpdate = a[5];
         /*
          * TODO: Decide whether restore() should faithfully preserve the RTC date/time that save() saved,
          * or always reinitialize the date/time, or give the user (or the machine configuration) the option.
          *
          * For now, we're always reinitializing the RTC date.  Alternatively, we could selectively update
-         * the CMOS bytes above, instead of overwriting them all, in which case this extra call to initRTCDate()
+         * the CMOS bytes above, instead of overwriting them all, in which case this extra call to initRTCTime()
          * could be avoided.
          */
-        this.initRTCDate();
+        this.initRTCTime();
     }
     return true;
 };
@@ -2119,7 +2255,7 @@ ChipSet.prototype.dumpCMOS = function()
     if (DEBUGGER) {
         var sDump = "";
         for (var iCMOS = 0; iCMOS < ChipSet.CMOS.ADDR.TOTAL; iCMOS++) {
-            var b = (iCMOS <= ChipSet.CMOS.ADDR.RTC_STATUSD? this.getRTCByte(iCMOS) : this.abCMOSData[iCMOS]);
+            var b = (iCMOS <= ChipSet.CMOS.ADDR.STATUSD? this.getRTCByte(iCMOS) : this.abCMOSData[iCMOS]);
             if (sDump) sDump += '\n';
             sDump += "CMOS[0x" + str.toHexByte(iCMOS) + "]: 0x" + str.toHexByte(b);
         }
@@ -2660,7 +2796,7 @@ ChipSet.prototype.advanceDMA = function(channel, fInit)
                 }
             }
             else {
-                if (DEBUG) this.messageDebugger("advanceDMA(" + iDMAChannel + ") unsupported xfer mode: " + str.toHexWord(channel.xfer), Debugger.MESSAGE.DMA);
+                if (DEBUG) this.messageDebugger("advanceDMA(" + iDMAChannel + ") unsupported xfer mode: " + str.toHexWord(channel.xfer), Debugger.MESSAGE.DMA | Debugger.MESSAGE.WARN);
                 channel.fError = true;
             }
         }
@@ -2855,11 +2991,12 @@ ChipSet.prototype.outPICLo = function(iPIC, bOut, addrFrom)
                 pic.bISR &= ~bIREnd;
                 this.checkIRR(iPIC);
             } else {
-                if (DEBUG) this.messageDebugger("outPIC" + iPIC + "(" + str.toHexByte(pic.port) + "): unexpected EOI command, IRQ " + nIRQ + " not in service", Debugger.MESSAGE.PIC);
+                if (DEBUG) this.messageDebugger("outPIC" + iPIC + "(" + str.toHexByte(pic.port) + "): unexpected EOI command, IRQ " + nIRQ + " not in service", Debugger.MESSAGE.PIC | Debugger.MESSAGE.WARN);
             }
             /*
              * TODO: Support EOI commands with automatic rotation (eg, ChipSet.PIC_LO.OCW2_EOI_ROT and ChipSet.PIC_LO.OCW2_EOI_ROTSPEC)
              */
+            if (DEBUG && (bOCW2 & ChipSet.PIC_LO.OCW2_SET_ROTAUTO)) this.messageDebugger("outPIC" + iPIC + "(" + str.toHexByte(pic.port) + "): unsupported OCW2 rotate command: " + str.toHexByte(bOut), Debugger.MESSAGE.PIC | Debugger.MESSAGE.WARN);
         }
         else  if (bOCW2 == ChipSet.PIC_LO.OCW2_SET_PRI) {
             /*
@@ -2871,7 +3008,7 @@ ChipSet.prototype.outPICLo = function(iPIC, bOut, addrFrom)
             /*
              * TODO: Remaining commands to support: ChipSet.PIC_LO.OCW2_SET_ROTAUTO and ChipSet.PIC_LO.OCW2_CLR_ROTAUTO
              */
-            if (DEBUG) this.messageDebugger("outPIC" + iPIC + "(" + str.toHexByte(pic.port) + "): unsupported OCW2 command: " + str.toHexByte(bOut), Debugger.MESSAGE.PIC);
+            if (DEBUG) this.messageDebugger("outPIC" + iPIC + "(" + str.toHexByte(pic.port) + "): unsupported OCW2 automatic EOI command: " + str.toHexByte(bOut), Debugger.MESSAGE.PIC | Debugger.MESSAGE.WARN);
         }
     } else {
         /*
@@ -2881,7 +3018,7 @@ ChipSet.prototype.outPICLo = function(iPIC, bOut, addrFrom)
          * that's unfortunate, because I don't support them yet.
          */
         if (bOut & (ChipSet.PIC_LO.OCW3_POLL_CMD | ChipSet.PIC_LO.OCW3_SMM_CMD)) {
-            if (DEBUG) this.messageDebugger("outPIC" + iPIC + "(" + str.toHexByte(pic.port) + "): unsupported OCW3 command: " + str.toHexByte(bOut), Debugger.MESSAGE.PIC);
+            if (DEBUG) this.messageDebugger("outPIC" + iPIC + "(" + str.toHexByte(pic.port) + "): unsupported OCW3 command: " + str.toHexByte(bOut), Debugger.MESSAGE.PIC | Debugger.MESSAGE.WARN);
         }
         pic.bOCW3 = bOut;
     }
@@ -3606,7 +3743,7 @@ ChipSet.prototype.updateAllTimers = function(fCycleReset)
     for (var iTimer = 0; iTimer < this.aTimers.length; iTimer++) {
         this.updateTimer(iTimer, fCycleReset);
     }
-    if (this.model >= ChipSet.MODEL_5170) this.updateRTCDate();
+    if (this.model >= ChipSet.MODEL_5170) this.updateRTCTime();
 };
 
 /**
@@ -4307,8 +4444,26 @@ ChipSet.prototype.outCMOSAddr = function(port, bOut, addrFrom)
 ChipSet.prototype.inCMOSData = function(port, addrFrom)
 {
     var bAddr = this.bCMOSAddr & ChipSet.CMOS.ADDR.MASK;
-    var bIn = (bAddr <= ChipSet.CMOS.ADDR.RTC_STATUSD? this.getRTCByte(bAddr) : this.abCMOSData[bAddr]);
+    var bIn = (bAddr <= ChipSet.CMOS.ADDR.STATUSD? this.getRTCByte(bAddr) : this.abCMOSData[bAddr]);
     this.messagePort(port, null, addrFrom, "CMOS_DATA[" + str.toHexByte(bAddr) + "]", Debugger.MESSAGE.CMOS, bIn);
+    if (addrFrom != null) {
+        if (bAddr == ChipSet.CMOS.ADDR.STATUSC) {
+            /*
+             * When software reads the STATUSC port, all interrupt bits (PF, AF, and UF) are automatically
+             * cleared, which in turn clears the IRQF bit, which in turn clears the IRQ.
+             */
+            this.abCMOSData[bAddr] &= ChipSet.CMOS.STATUSC.RESERVED;
+            if (bIn & ChipSet.CMOS.STATUSC.IRQF) this.clearIRR(ChipSet.IRQ.RTC);
+            /*
+             * If we just cleared PF, and PIE is still set, then we need to make sure the next Periodic Interrupt
+             * occurs in a timely manner, too.
+             */
+            if ((bIn & ChipSet.CMOS.STATUSC.PF) && (this.abCMOSData[ChipSet.CMOS.ADDR.STATUSB] & ChipSet.CMOS.STATUSB.PIE)) {
+                if (DEBUG) this.messageDebugger("RTC periodic interrupt cleared", Debugger.MESSAGE.RTC);
+                this.setRTCCycleLimit();
+            }
+        }
+    }
     return bIn;
 };
 
@@ -4324,7 +4479,16 @@ ChipSet.prototype.outCMOSData = function(port, bOut, addrFrom)
 {
     var bAddr = this.bCMOSAddr & ChipSet.CMOS.ADDR.MASK;
     this.messagePort(port, bOut, addrFrom, "CMOS_DATA[" + str.toHexByte(bAddr) + "]", Debugger.MESSAGE.CMOS);
-    this.abCMOSData[bAddr] = (bAddr <= ChipSet.CMOS.ADDR.RTC_STATUSD? this.setRTCByte(bAddr, bOut) : bOut);
+    var bDelta = bOut ^ this.abCMOSData[bAddr];
+    this.abCMOSData[bAddr] = (bAddr <= ChipSet.CMOS.ADDR.STATUSD? this.setRTCByte(bAddr, bOut) : bOut);
+    if (bAddr == ChipSet.CMOS.ADDR.STATUSB && (bDelta & ChipSet.CMOS.STATUSB.PIE)) {
+        if (bOut & ChipSet.CMOS.STATUSB.PIE) {
+            if (DEBUG) this.messageDebugger("RTC periodic interrupts enabled", Debugger.MESSAGE.RTC);
+            this.setRTCCycleLimit();
+        } else {
+            if (DEBUG) this.messageDebugger("RTC periodic interrupts disabled", Debugger.MESSAGE.RTC);
+        }
+    }
 };
 
 /**
@@ -4394,9 +4558,12 @@ ChipSet.prototype.outNMI = function(port, bOut, addrFrom)
 ChipSet.prototype.intBIOSRTC = function(addr)
 {
     if (DEBUGGER) {
-        var AH = this.cpu.regAX >> 8;
-        if (this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE.RTC)) {
-            this.dbg.messageInt(Debugger.INT.RTC, addr);
+        if (this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE.RTC) && this.dbg.messageInt(Debugger.INT.RTC, addr)) {
+            /*
+             * By computing AH now, we get the incoming AH value; if we computed it below, along with
+             * the rest of the register values, we'd get the outgoing AH value, which is not what we want.
+             */
+            var AH = this.cpu.regAX >> 8;
             this.cpu.addIntReturn(addr, function(chipset, nCycles) {
                 return function onBIOSRTCReturn(nLevel) {
                     nCycles = chipset.cpu.getCycles() - nCycles;
