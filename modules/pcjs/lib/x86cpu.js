@@ -158,6 +158,20 @@ function X86CPU(parmsCPU) {
      */
     this.setMemoryEnabled();
 
+    if (SAMPLER) {
+        /*
+         * For now, we're just going to sample EIP values
+         */
+        this.nSamples = 50000;
+        this.nSampleFreq = 1;
+        this.nSampleSkip = 3183300;
+        this.aSamples = new Array(this.nSamples);
+        for (var i = 0; i < this.nSamples; i++) this.aSamples[i] = -1;
+        this.iSampleNext = 0;
+        this.iSampleFreq = 0;
+        this.iSampleSkip = 0;
+    }
+
     /*
      * This initial resetRegs() call is important to create all the registers (eg, the X86Seg registers),
      * so that if/when we call restore(), it will have something to fill in.
@@ -741,6 +755,12 @@ X86CPU.prototype.reset = function()
     this.resetRegs();
     this.resetCycles();
     this.clearError();      // clear any fatal error/exception that setError() may have flagged
+
+    if (SAMPLER) {
+        this.iSampleNext = 0;
+        this.iSampleFreq = 0;
+        this.iSampleSkip = 0;
+    }
 };
 
 /**
@@ -2524,6 +2544,35 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
                 break;
             }
             fDebugSkip = false;
+        }
+
+        if (SAMPLER) {
+            if (++this.iSampleFreq >= this.nSampleFreq) {
+                this.iSampleFreq = 0;
+                if (this.iSampleSkip < this.nSampleSkip) {
+                    this.iSampleSkip++
+                } else {
+                    if (this.iSampleNext == this.nSamples) {
+                        this.println("sample buffer full");
+                        this.stopCPU();
+                        break;
+                    }
+                    var n = this.aSamples[this.iSampleNext];
+                    if (n !== -1) {
+                        if (n !== this.regEIP) {
+                            this.println("sample deviation at index " + this.iSampleNext + ": current EIP=" + str.toHex(this.regEIP) + ", target EIP=" + str.toHex(n));
+                            this.stopCPU();
+                            break;
+                        }
+                    } else {
+                        this.aSamples[this.iSampleNext] = this.regEIP;
+                    }
+                    if (this.iSampleNext == 112) {
+                        fDebugSkip = false;     // just some no-op statement we can set a breakpoint on
+                    }
+                    this.iSampleNext++;
+                }
+            }
         }
 
         this.opFlags = 0;

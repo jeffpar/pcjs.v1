@@ -2183,7 +2183,7 @@ FDC.prototype.doRead = function(drive)
      */
     drive.resCode = FDC.REG_DATA.RES.NOT_READY | FDC.REG_DATA.RES.INCOMPLETE;
 
-    if (DEBUG) this.messageDebugger("FDC.doRead(" + drive.bCylinder + ":" + drive.bHead + ":" + drive.bSector + ":" + drive.nBytes + ")");
+    if (DEBUG) this.messageDebugger("FDC.doRead(" + drive.bCylinder + ":" + drive.bHead + ":" + drive.bSector + ":" + drive.nBytes + ")", Debugger.MESSAGE.OTHER);
 
     if (drive.disk) {
         drive.sector = null;
@@ -2205,7 +2205,7 @@ FDC.prototype.doWrite = function(drive)
 {
     drive.resCode = FDC.REG_DATA.RES.NOT_READY | FDC.REG_DATA.RES.INCOMPLETE;
 
-    if (DEBUG) this.messageDebugger("FDC.doWrite(" + drive.bCylinder + ":" + drive.bHead + ":" + drive.bSector + ":" + drive.nBytes + ")");
+    if (DEBUG) this.messageDebugger("FDC.doWrite(" + drive.bCylinder + ":" + drive.bHead + ":" + drive.bSector + ":" + drive.nBytes + ")", Debugger.MESSAGE.OTHER);
 
     if (drive.disk) {
         if (drive.disk.fWriteProtected) {

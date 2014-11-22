@@ -1391,9 +1391,9 @@ ChipSet.prototype.updateRTCTime = function()
             if (DEBUG) {
                 if (nCyclesUpdate - this.nRTCCyclesNextUpdate > this.nRTCCyclesPerPeriod) {
                     if (bPrev & ChipSet.CMOS.STATUSC.PF) {
-                        this.messageDebugger("RTC interrupt handler failed to clear STATUSC", Debugger.MESSAGE.RTC | Debugger.MESSAGE.WARN);
+                        this.messageDebugger("RTC interrupt handler failed to clear STATUSC", Debugger.MESSAGE.RTC);
                     } else {
-                        this.messageDebugger("CPU took too long trigger new RTC periodic interrupt", Debugger.MESSAGE.RTC | Debugger.MESSAGE.WARN);
+                        this.messageDebugger("CPU took too long trigger new RTC periodic interrupt", Debugger.MESSAGE.RTC);
                     }
                 }
             }
@@ -2216,7 +2216,7 @@ ChipSet.prototype.dumpPIC = function()
                 sDump += " IC" + (i + 1) + "=" + str.toHexByte(b);
             }
             sDump += " IMR=" + str.toHexByte(pic.bIMR) + " IRR=" + str.toHexByte(pic.bIRR) + " ISR=" + str.toHexByte(pic.bISR);
-            this.dbg.message(sDump);
+            this.dbg.println(sDump);
         }
     }
 };
@@ -2240,7 +2240,7 @@ ChipSet.prototype.dumpTimer = function()
                 }
             }
             sDump += " mode=" + timer.mode + " bytes=" + timer.countBytes + " count=" + str.toHexWord(count);
-            this.dbg.message(sDump);
+            this.dbg.println(sDump);
         }
     }
 };
@@ -2259,7 +2259,7 @@ ChipSet.prototype.dumpCMOS = function()
             if (sDump) sDump += '\n';
             sDump += "CMOS[0x" + str.toHexByte(iCMOS) + "]: 0x" + str.toHexByte(b);
         }
-        this.dbg.message(sDump);
+        this.dbg.println(sDump);
     }
 };
 
@@ -2738,7 +2738,7 @@ ChipSet.prototype.advanceDMA = function(channel, fInit)
             var addr = (channel.bPage << 16) | (channel.addrCurrent[1] << 8) | channel.addrCurrent[0];
             if (DEBUG && DEBUGGER && channel.sAddrDebug === null) {
                 channel.sAddrDebug = str.toHex(addr >> 4, 4) + ":" + str.toHex(addr & 0xf, 4);
-                if (this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE.DMA | (iDMAChannel == ChipSet.DMA_FDC? Debugger.MESSAGE.FDC : (iDMAChannel == ChipSet.DMA_HDC? Debugger.MESSAGE.HDC : Debugger.MESSAGE.LOG))) && channel.xfer != ChipSet.DMA_MODE.XFER_WRITE) {
+                if (this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE.DMA | (iDMAChannel == ChipSet.DMA_FDC? Debugger.MESSAGE.FDC : (iDMAChannel == ChipSet.DMA_HDC? Debugger.MESSAGE.HDC : 0))) && channel.xfer != ChipSet.DMA_MODE.XFER_WRITE) {
                     this.dbg.message("advanceDMA(" + iDMAChannel + ") transferring " + channel.cbDebug + " bytes from " + channel.sAddrDebug);
                     this.dbg.doDump("db", channel.sAddrDebug, "l" + Math.floor((channel.cbDebug + 15) / 16));
                 }
@@ -2848,7 +2848,7 @@ ChipSet.prototype.updateDMA = function(channel)
         channel.component = channel.obj = null;
     }
 
-    if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE.DMA | (iDMAChannel == ChipSet.DMA_FDC? Debugger.MESSAGE.FDC : (iDMAChannel == ChipSet.DMA_HDC? Debugger.MESSAGE.HDC : Debugger.MESSAGE.LOG))) && channel.xfer == ChipSet.DMA_MODE.XFER_WRITE && channel.sAddrDebug) {
+    if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE.DMA | (iDMAChannel == ChipSet.DMA_FDC? Debugger.MESSAGE.FDC : (iDMAChannel == ChipSet.DMA_HDC? Debugger.MESSAGE.HDC : 0))) && channel.xfer == ChipSet.DMA_MODE.XFER_WRITE && channel.sAddrDebug) {
         this.dbg.message("updateDMA(" + iDMAChannel + ") transferred " + channel.cbDebug + " bytes to " + channel.sAddrDebug);
         this.dbg.doDump("db", channel.sAddrDebug, "l" + Math.floor((channel.cbDebug + 15) / 16));
     }
@@ -3721,7 +3721,7 @@ ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
             }
         }
 
-        if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE.TIMER)) {
+        if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE.TIMER | Debugger.MESSAGE.LOG)) {
             this.log("TIMER" + iTimer + " count: " + count + ", ticks: " + ticks + ", fired: " + (fFired? "true" : "false"));
         }
 
@@ -4090,7 +4090,7 @@ ChipSet.prototype.in8042RWReg = function(port, addrFrom)
      * Thanks to the WAITF function, this has become a very "busy" port, so let's not generate messages
      * unless both MESSAGE_8042 *and* MESSAGE_LOG are set.
      */
-    this.messagePort(port, null, addrFrom, "8042_RWREG", Debugger.MESSAGE.C8042 | Debugger.MESSAGE.LOG, b);
+    this.messagePort(port, null, addrFrom, "8042_RWREG", Debugger.MESSAGE.C8042, b);
     return b;
 };
 
@@ -4670,7 +4670,7 @@ ChipSet.prototype.messageDebugger = function(sMessage, bitsMessage, nIRQ)
             bitsMessage = Debugger.MESSAGE.CHIPSET;
         }
         if (nIRQ !== undefined) {
-            bitsMessage |= (nIRQ == ChipSet.IRQ.TIMER0? Debugger.MESSAGE.TIMER : (nIRQ == ChipSet.IRQ.KBD? Debugger.MESSAGE.KBD : (nIRQ == ChipSet.IRQ.FDC? Debugger.MESSAGE.FDC : Debugger.MESSAGE.PIC)));
+            bitsMessage |= (nIRQ == ChipSet.IRQ.TIMER0? Debugger.MESSAGE.TIMER : (nIRQ == ChipSet.IRQ.KBD? Debugger.MESSAGE.KBD : (nIRQ == ChipSet.IRQ.FDC? Debugger.MESSAGE.FDC : 0))) | Debugger.MESSAGE.PIC;
         }
         if (this.dbg.messageEnabled(bitsMessage)) this.dbg.message(sMessage);
     }

@@ -956,7 +956,7 @@ CPU.prototype.calcRemainingTime = function()
     this.aCounts.nCyclesRecalc += this.aCounts.nCyclesThisRun;
 
     if (DEBUG && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE.LOG) && msRemainsThisRun) {
-        this.dbg.message("calcRemainingTime: " + msRemainsThisRun + "ms to sleep after " + this.aCounts.msEndThisRun + "ms");
+        this.log("calcRemainingTime: " + msRemainsThisRun + "ms to sleep after " + this.aCounts.msEndThisRun + "ms");
     }
 
     this.aCounts.msEndThisRun += msRemainsThisRun;

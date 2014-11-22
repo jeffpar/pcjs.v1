@@ -1738,7 +1738,7 @@ if (DEBUGGER) {
     {
         if (this.sMessagePrev && sMessage == this.sMessagePrev) return;
 
-        this.println(sMessage);             // + " (" + this.cpu.getCycles() + " cycles)"
+        if (!SAMPLER) this.println(sMessage);   // + " (" + this.cpu.getCycles() + " cycles)"
 
         this.sMessagePrev = sMessage;
 
@@ -1931,7 +1931,7 @@ if (DEBUGGER) {
      */
     Debugger.prototype.stopCPU = function(s)
     {
-        if (s) this.message(s);
+        if (s) this.println(s);
         this.cpu.stopCPU();
     };
 
@@ -4138,7 +4138,7 @@ if (DEBUGGER) {
         if (sCategory !== undefined) {
             var bitsMessage = 0;
             if (sCategory == "all") {
-                bitsMessage = 0xffffffff & ~Debugger.MESSAGE.HALT;
+                bitsMessage = 0xffffffff & ~(Debugger.MESSAGE.HALT | Debugger.MESSAGE.LOG);
                 sCategory = null;
             } else if (sCategory == "on") {
                 fCriteria = true;

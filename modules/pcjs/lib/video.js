@@ -1766,7 +1766,7 @@ Card.prototype.dumpCard = function()
         }
 
         if (this.iCard == Video.CARDS.EGA) {
-            this.dbg.message(" ATCDATA: " + this.fATCData);
+            this.dbg.println(" ATCDATA: " + this.fATCData);
             this.dumpRegs(" ATC", this.iATCReg, this.aATCRegs, this.asATCRegs);
             this.dumpRegs(" GRC", this.iGRCReg, this.aGRCRegs, this.asGRCRegs);
             this.dumpRegs(" SEQ", this.iSEQReg, this.aSEQRegs, this.asSEQRegs);
@@ -1774,8 +1774,8 @@ Card.prototype.dumpCard = function()
             this.dumpRegs("    MISC", this.miscReg);
             this.dumpRegs(" STATUS0", this.status0);
             this.dumpRegs(" LATCHES", this.latches);
-            this.dbg.message("  ACCESS: " + str.toHexWord(this.nAccess));
-            this.dbg.message("Use 'dump video buffer' to dump video memory");
+            this.dbg.println("  ACCESS: " + str.toHexWord(this.nAccess));
+            this.dbg.println("Use 'dump video buffer' to dump video memory");
             /*
              * There are few more EGA regs we could dump, like GRCPos1, GRCPos2, but does anyone care?
              */
@@ -1793,7 +1793,7 @@ Card.prototype.dumpBuffer = function(sParm)
 {
     if (DEBUGGER) {
         if (!this.adwMemory) {
-            this.dbg.message("no buffer");
+            this.dbg.println("no buffer");
             return;
         }
         var idw = str.parseInt(sParm);
@@ -1809,7 +1809,7 @@ Card.prototype.dumpBuffer = function(sParm)
             if (sDump) sDump += "\n";
             sDump += sData;
         }
-        if (sDump) this.dbg.message(sDump);
+        if (sDump) this.dbg.println(sDump);
         this.prevDump = idw;
     }
 };
@@ -1830,7 +1830,7 @@ Card.prototype.dumpRegs = function(sName, iReg, aRegs, asRegs)
 {
     if (DEBUGGER) {
         if (!aRegs) {
-            this.dbg.message(sName + ": " + str.toHexByte(iReg));
+            this.dbg.println(sName + ": " + str.toHexByte(iReg));
             return;
         }
         var s = "", i, cchMax = 0;
@@ -1842,7 +1842,7 @@ Card.prototype.dumpRegs = function(sName, iReg, aRegs, asRegs)
             if (s) s += '\n';
             s += sName + "[" + str.toHexByte(i) + "]: " + str.pad(asRegs[i], cchMax) + str.toHexByte(aRegs[i]) + (i === iReg? "*" : "");
         }
-        this.dbg.message(s);
+        this.dbg.println(s);
     }
 };
 
@@ -4984,14 +4984,14 @@ Video.prototype.dumpVideo = function(sParm)
 {
     if (DEBUGGER) {
         if (!this.cardActive) {
-            this.dbg.message("no active video card");
+            this.dbg.println("no active video card");
             return;
         }
         if (sParm) {
             this.cardActive.dumpBuffer(sParm);
             return;
         }
-        this.dbg.message("BIOSMODE: " + str.toHexByte(this.nMode));
+        this.dbg.println("BIOSMODE: " + str.toHexByte(this.nMode));
         this.cardActive.dumpCard();
     }
 };

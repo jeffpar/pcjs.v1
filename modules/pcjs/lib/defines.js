@@ -105,6 +105,13 @@ var FATARRAYS = false;
  */
 var TYPEDARRAYS = false; // (typeof ArrayBuffer !== 'undefined');
 
+/**
+ * @define {boolean}
+ *
+ * Enable instruction sampling (work-in-progress).
+ */
+var SAMPLER = false;
+
 if (typeof module !== 'undefined') {
     global.PCJSCLASS = PCJSCLASS;
     global.DEBUGGER = DEBUGGER;
