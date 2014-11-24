@@ -946,7 +946,7 @@ ChipSet.prototype.initBus = function(cmp, bus, cpu, dbg)
     /*
      * This divisor is invariant, so we calculate it as soon as we're able to query the CPU's base speed.
      */
-    this.nTicksDivisor = Math.round(cpu.getCyclesPerSecond() / ChipSet.TIMER_TICKS_PER_SEC);
+    this.nTicksDivisor = (cpu.getCyclesPerSecond() / ChipSet.TIMER_TICKS_PER_SEC);
 
     bus.addPortInputTable(this, ChipSet.aPortInput);
     bus.addPortOutputTable(this, ChipSet.aPortOutput);
@@ -1318,7 +1318,7 @@ ChipSet.prototype.calcRTCCyclePeriod = function()
  * This is called by the CPU to determine the maximum number of cycles it can process for the current burst.
  *
  * @this {ChipSet}
- * @param {number} nCycles
+ * @param {number} nCycles desired
  * @return {number} maximum number of cycles (<= nCycles)
  */
 ChipSet.prototype.getRTCCycleLimit = function(nCycles)
@@ -1372,7 +1372,7 @@ ChipSet.prototype.updateRTCTime = function()
      * are initialized (the CPU is the last component to be powered up/restored).
      *
      * TODO: A side-effect of this is that it undermines the save/restore code's preservation of last
-     * and next RTC cycle counts, which may change when the next RTC event is delivered.
+     * and next RTC cycle counts, which may affect when the next RTC event is delivered.
      */
     if (this.nRTCCyclesPerPeriod == null) this.calcRTCCyclePeriod();
 
@@ -1946,7 +1946,7 @@ ChipSet.prototype.initTimer = function(iTimer, aState)
     timer.fOUT = a[9];
     timer.fLatched = a[10];
     timer.fCounting = a[11];
-    timer.nStartCycles = a[12];
+    timer.nCyclesStart = a[12];
     this.aTimers[iTimer] = timer;
 };
 
@@ -1974,7 +1974,7 @@ ChipSet.prototype.saveTimers = function()
             timer.fOUT,
             timer.fLatched,
             timer.fCounting,
-            timer.nStartCycles
+            timer.nCyclesStart
         ];
     }
     return data;
@@ -2991,12 +2991,18 @@ ChipSet.prototype.outPICLo = function(iPIC, bOut, addrFrom)
                 pic.bISR &= ~bIREnd;
                 this.checkIRR(iPIC);
             } else {
-                if (DEBUG) this.messageDebugger("outPIC" + iPIC + "(" + str.toHexByte(pic.port) + "): unexpected EOI command, IRQ " + nIRQ + " not in service", Debugger.MESSAGE.PIC | Debugger.MESSAGE.WARN);
+                if (DEBUG) {
+                    this.messageDebugger("outPIC" + iPIC + "(" + str.toHexByte(pic.port) + "): unexpected EOI command, IRQ " + nIRQ + " not in service", Debugger.MESSAGE.PIC | Debugger.MESSAGE.WARN);
+                    if (!SAMPLER) this.cpu.stopCPU();
+                }
             }
             /*
              * TODO: Support EOI commands with automatic rotation (eg, ChipSet.PIC_LO.OCW2_EOI_ROT and ChipSet.PIC_LO.OCW2_EOI_ROTSPEC)
              */
-            if (DEBUG && (bOCW2 & ChipSet.PIC_LO.OCW2_SET_ROTAUTO)) this.messageDebugger("outPIC" + iPIC + "(" + str.toHexByte(pic.port) + "): unsupported OCW2 rotate command: " + str.toHexByte(bOut), Debugger.MESSAGE.PIC | Debugger.MESSAGE.WARN);
+            if (DEBUG && (bOCW2 & ChipSet.PIC_LO.OCW2_SET_ROTAUTO)) {
+                this.messageDebugger("outPIC" + iPIC + "(" + str.toHexByte(pic.port) + "): unsupported OCW2 rotate command: " + str.toHexByte(bOut), Debugger.MESSAGE.PIC | Debugger.MESSAGE.WARN);
+                this.cpu.stopCPU();
+            }
         }
         else  if (bOCW2 == ChipSet.PIC_LO.OCW2_SET_PRI) {
             /*
@@ -3008,7 +3014,10 @@ ChipSet.prototype.outPICLo = function(iPIC, bOut, addrFrom)
             /*
              * TODO: Remaining commands to support: ChipSet.PIC_LO.OCW2_SET_ROTAUTO and ChipSet.PIC_LO.OCW2_CLR_ROTAUTO
              */
-            if (DEBUG) this.messageDebugger("outPIC" + iPIC + "(" + str.toHexByte(pic.port) + "): unsupported OCW2 automatic EOI command: " + str.toHexByte(bOut), Debugger.MESSAGE.PIC | Debugger.MESSAGE.WARN);
+            if (DEBUG) {
+                this.messageDebugger("outPIC" + iPIC + "(" + str.toHexByte(pic.port) + "): unsupported OCW2 automatic EOI command: " + str.toHexByte(bOut), Debugger.MESSAGE.PIC | Debugger.MESSAGE.WARN);
+                this.cpu.stopCPU();
+            }
         }
     } else {
         /*
@@ -3271,6 +3280,15 @@ ChipSet.prototype.inTimer = function(iTimer, addrFrom)
 /**
  * outTimer(iTimer, bOut, addrFrom)
  *
+ * We now rely EXCLUSIVELY on setBurstCycles() to address situations where quick timer interrupt turn-around
+ * is expected; eg, by the ROM BIOS POST when it sets TIMER0 to a low test count (0x16); since we typically
+ * don't update any of the timers until after we've finished a burst of CPU cycles, we must reduce the current
+ * burst cycle count, so that the current instruction burst will end at the same time a timer interrupt is expected.
+ *
+ * Note that in some cases, if the number of cycles remaining in the current burst is less than the target,
+ * this may have the effect of *lengthening* the current burst instead of shortening it, but stepCPU() should be
+ * OK with that.
+ *
  * @this {ChipSet}
  * @param {number} iTimer (ports 0x40, 0x41, 0x42)
  * @param {number} bOut
@@ -3292,8 +3310,9 @@ ChipSet.prototype.outTimer = function(iTimer, bOut, addrFrom)
             timer.fLatched = false;
             timer.countCurrent[0] = timer.countStart[0] = timer.countInit[0];
             timer.countCurrent[1] = timer.countStart[1] = timer.countInit[1];
-            timer.nStartCycles = this.cpu.getCycles(this.fScaleTimers);
+            timer.nCyclesStart = this.cpu.getCycles(this.fScaleTimers);
             timer.fCounting = true;
+
             /*
              * I believe MODE0 is the only mode where "OUT" (fOUT) starts out "low" (false); for the rest of the modes,
              * "OUT" (fOUT) starts "high" (true).  It's also my understanding that the way edge-triggered interrupts work
@@ -3301,52 +3320,21 @@ ChipSet.prototype.outTimer = function(iTimer, bOut, addrFrom)
              * "low" to "high".
              */
             timer.fOUT = (timer.mode != ChipSet.TIMER_CTRL.MODE0);
-            /*
-             * TODO: Determine if there are situations/modes where I should NOT automatically clear IRQ0 on behalf of TIMER0.
-             */
-            if (iTimer == ChipSet.TIMER0.INDEX) this.clearIRR(ChipSet.IRQ.TIMER0);
+
+            if (iTimer == ChipSet.TIMER0.INDEX) {
+                /*
+                 * TODO: Determine if there are situations/modes where I should NOT automatically clear IRQ0 on behalf of TIMER0.
+                 */
+                this.clearIRR(ChipSet.IRQ.TIMER0);
+                var countInit = this.getTimerInit(ChipSet.TIMER0.INDEX);
+                var nCyclesRemain = (countInit * this.nTicksDivisor) | 0;
+                if (timer.mode == ChipSet.TIMER_CTRL.MODE3) nCyclesRemain >>= 1;
+                this.cpu.setBurstCycles(nCyclesRemain);
+            }
         }
 
         if (iTimer == ChipSet.TIMER2.INDEX) {
             this.setSpeaker();
-        }
-
-        /*
-         * HACK to detect lower-than-normal initial timer counts and reduce the length of CPU bursts, using
-         * cpu.setBurstDivisor().  Alternatively, the CPU could ask us for a cycle limit, via getTimerCycleLimit(),
-         * prior to starting a new burst, but this seems to perform better (see "BASICA DONKEY.BAS").
-         */
-        if (iTimer == ChipSet.TIMER0.INDEX) {
-            var countInit = this.getTimerInit(ChipSet.TIMER0.INDEX);
-            /*
-             * Prevent the divisor from becoming too large (and we of course want to avoid a divide-by-zero);
-             * we'll use the initial count that BASICA likes to program as a baseline.
-             */
-            if (countInit >= 0x800) {
-                this.cpu.setBurstDivisor(Math.round(0x10000 / countInit));
-            }
-        }
-
-        if (iTimer == ChipSet.TIMER0.INDEX && timer.mode == ChipSet.TIMER_CTRL.MODE0 && timer.rw == ChipSet.TIMER_CTRL.RW_LSB) {
-            /*
-             * HACK to satisfy the quick h/w interrupt turn-around expected by the ROM BIOS when it sets TIMER0 to a
-             * low test count (0x16); since we typically don't update any of the timers until after we've finished a
-             * burst of CPU cycles, we reduce the current burst cycle count, so that the burst will end at roughly the
-             * same time a timer interrupt is expected.  Note that in some cases, if the number of cycles remaining
-             * in the current burst is less than the target, this will have the effect of *lengthening* the current
-             * burst instead of shortening it, but stepCPU() should be OK with that.
-             *
-             * Notice how this complements the setBurstDivisor() HACK above: while that code is concerned with how
-             * to deal with low timer counts prior to starting new bursts, here we're concerned with low timer counts
-             * (in particular, single-byte LSB counts) programmed in the middle of a burst.
-             *
-             * The MODEL_5170 BIOS performs a virtually identical test ("TEST.18"), although unsurprisingly, it uses an
-             * initial timer count that is explicitly twice that other of earlier models (0x16 * 2 = 0x2C).  Fortunately,
-             * it still uses an LSB-only count; however, the original hack calculated the burst-cycle threshold using a
-             * hard-coded multiplier of 4, which is incorrect for MODEL_5170; the correct model-independent multiplier to
-             * use is nTicksDivisor.
-             */
-            this.cpu.setBurstCycles(bOut * this.nTicksDivisor);
         }
     }
 };
@@ -3433,8 +3421,8 @@ ChipSet.prototype.outTimerCtrl = function(port, bOut, addrFrom)
                 var timer = this.aTimers[0];
                 timer.countStart[0] = timer.countInit[0];
                 timer.countStart[1] = timer.countInit[1];
-                timer.nStartCycles = this.cpu.getCycles(this.fScaleTimers);
-                if (DEBUG) this.messageDebugger("TIMER0 count reset @" + timer.nStartCycles + " cycles", Debugger.MESSAGE.TIMER);
+                timer.nCyclesStart = this.cpu.getCycles(this.fScaleTimers);
+                if (DEBUG) this.messageDebugger("TIMER0 count reset @" + timer.nCyclesStart + " cycles", Debugger.MESSAGE.TIMER);
             }
         }
     }
@@ -3471,18 +3459,33 @@ ChipSet.prototype.getTimerStart = function(iTimer)
 };
 
 /**
- * getTimerCycleLimit(iTimer)
+ * getTimerCycleLimit(iTimer, nCycles)
+ *
+ * This is called by the CPU to determine the maximum number of cycles it can process for the current burst.
+ * It's presumed that no instructions have been executed since the last updateTimer(iTimer) call.
  *
  * @this {ChipSet}
  * @param {number} iTimer
- * @return {number} number of cycles remaining for the specified timer, zero if no limit (or timer inactive)
- *
-ChipSet.prototype.getTimerCycleLimit = function(iTimer)
+ * @param {number} nCycles desired
+ * @return {number} maximum number of cycles remaining for the specified timer (<= nCycles)
+ */
+ChipSet.prototype.getTimerCycleLimit = function(iTimer, nCycles)
 {
     var timer = this.aTimers[iTimer];
-    return timer.fCounting? (this.getTimerStart(iTimer) * this.nTicksDivisor) : 0;
+    if (timer.fCounting) {
+        var nCyclesUpdate = this.cpu.getCycles(this.fScaleTimers);
+        var ticksElapsed = ((nCyclesUpdate - timer.nCyclesStart) / this.nTicksDivisor) | 0;
+        if (DEBUG) this.assert(ticksElapsed >= 0);
+        var countStart = this.getTimerStart(iTimer);
+        var countRemain = countStart - ticksElapsed;
+        if (timer.mode == ChipSet.TIMER_CTRL.MODE3) countRemain -= ticksElapsed;
+        if (DEBUG) this.assert(countRemain > 0);
+        var nCyclesRemain = (countRemain * this.nTicksDivisor) | 0;
+        if (timer.mode == ChipSet.TIMER_CTRL.MODE3) nCyclesRemain >>= 1;
+        if (nCycles > nCyclesRemain) nCycles = nCyclesRemain;
+    }
+    return nCycles;
 };
- */
 
 /**
  * latchTimer(iTimer)
@@ -3617,11 +3620,11 @@ ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
          * divisor (eg, 4 for MODEL_5150 and MODEL_5160, 5 for MODEL_5170, etc) is nTicksDivisor, which initBus()
          * calculates using the base CPU speed returned by cpu.getCyclesPerSecond().
          */
-        var ticks = ((nCycles - timer.nStartCycles) / this.nTicksDivisor) | 0;
+        var ticks = ((nCycles - timer.nCyclesStart) / this.nTicksDivisor) | 0;
 
         if (ticks < 0) {
             if (DEBUG) this.messageDebugger("updateTimer(" + iTimer + "): negative tick count (" + ticks + ")", Debugger.MESSAGE.TIMER);
-            timer.nStartCycles = nCycles;
+            timer.nCyclesStart = nCycles;
             ticks = 0;
         }
 
@@ -3676,7 +3679,7 @@ ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
                 }
                 timer.countStart[0] = count & 0xff;
                 timer.countStart[1] = count >> 8;
-                timer.nStartCycles = nCycles;
+                timer.nCyclesStart = nCycles;
                 if (!iTimer && timer.fOUT) {
                     fFired = true;
                     this.setIRR(ChipSet.IRQ.TIMER0);
@@ -3706,13 +3709,12 @@ ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
                 }
                 if (MAXDEBUG && DEBUGGER && !iTimer) {
                     var nCycleDelta = 0;
-                    if (this.acTimer0Counts.length > 0)
-                        nCycleDelta = nCycles - this.acTimer0Counts[0][1];
+                    if (this.acTimer0Counts.length > 0) nCycleDelta = nCycles - this.acTimer0Counts[0][1];
                     this.acTimer0Counts.push([count, nCycles, nCycleDelta]);
                 }
                 timer.countStart[0] = count & 0xff;
                 timer.countStart[1] = count >> 8;
-                timer.nStartCycles = nCycles;
+                timer.nCyclesStart = nCycles;
                 if (!iTimer && timer.fOUT) {
                     fFired = true;
                     this.setIRR(ChipSet.IRQ.TIMER0);
@@ -3727,7 +3729,7 @@ ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
 
         timer.countCurrent[0] = count & 0xff;
         timer.countCurrent[1] = count >> 8;
-        if (fCycleReset) this.nStartCycles = 0;
+        if (fCycleReset) this.nCyclesStart = 0;
     }
     return timer;
 };
@@ -4312,7 +4314,8 @@ ChipSet.prototype.set8042OutPort = function(b)
  *
  * In the old days of PCjs, the Keyboard component would simply call setIRR() when it had some data for the
  * keyboard controller.  However, that was completely inappropriate.  The sole responsibility of the Keyboard
- * is to emulate an actual keyboard and notify us whenever it has some data; it doesn't mess with IRQ lines.
+ * is to emulate an actual keyboard and notify us whenever it has some data; it has no business messing with
+ * IRQ lines.
  *
  * If there's an 8042, we check (this.b8042CmdData & ChipSet.KBC.DATA.CMD.NO_CLOCK); if NO_CLOCK is clear,
  * we can raise the IRQ immediately.  Well, not quite immediately....
@@ -4356,7 +4359,7 @@ ChipSet.prototype.set8042OutPort = function(b)
  * written with PUSHF/CLI and POPF intro/outro sequences, thereby honoring the first CLI at the top of K26A and
  * eliminating the need for the second CLI (@F000:370E).
  *
- * Of course, in REAL LIFE, this was probably never a problem, because the 8042 probably wasn't fast enough to
+ * Of course, in "real life", this was probably never a problem, because the 8042 probably wasn't fast enough to
  * generate another interrupt so soon after receiving the ChipSet.KBC.CMD.ENABLE_KBD command.  In my case, I ran
  * into this problem by 1) turning on "kbd" Debugger messages and 2) rapidly typing lots of keys.  The Debugger
  * messages bogged the machine down enough for me to hit the "window of opportunity", generating this message in

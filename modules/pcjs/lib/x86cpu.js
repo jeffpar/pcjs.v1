@@ -164,7 +164,7 @@ function X86CPU(parmsCPU) {
          */
         this.nSamples = 50000;
         this.nSampleFreq = 1;
-        this.nSampleSkip = 3183300;
+        this.nSampleSkip = 4778000;
         this.aSamples = new Array(this.nSamples);
         for (var i = 0; i < this.nSamples; i++) this.aSamples[i] = -1;
         this.iSampleNext = 0;
@@ -1101,7 +1101,7 @@ X86CPU.prototype.save = function()
     state.set(0, [this.regAX, this.regBX, this.regCX, this.regDX, this.regSP, this.regBP, this.regSI, this.regDI, this.nIOPL]);
     state.set(1, [this.regIP, this.segCS.save(), this.segDS.save(), this.segSS.save(), this.segES.save(), this.saveProtMode(), this.getPS()]);
     state.set(2, [this.segData.sName, this.segStack.sName, this.opFlags, this.opPrefixes, this.intFlags, this.regEA, this.regEAWrite]);
-    state.set(3, [this.nBurstDivisor, this.nTotalCycles, this.getSpeed()]);
+    state.set(3, [0, this.nTotalCycles, this.getSpeed()]);
     state.set(4, this.bus.saveMemory());
     return state.data();
 };
@@ -1143,11 +1143,10 @@ X86CPU.prototype.restore = function(data)
     this.opPrefixes = a[3];
     this.intFlags = a[4];
     this.regEA = a[5];
-    this.regEAWrite = a[6];     // NOTE: save/restore of prior EA calculation(s) isn't strictly necessary, but they may be of some interest to, say, the Debugger
-    a = data[3];
-    this.nBurstDivisor = a[0];
+    this.regEAWrite = a[6];     // save/restore of last EA calculation(s) isn't strictly necessary, but they may be of some interest to, say, the Debugger
+    a = data[3];                // a[0] was previously nBurstDivisor (no longer used)
     this.nTotalCycles = a[1];
-    this.setSpeed(a[2]);        // If we're restoring an old state that doesn't contain a value from getSpeed(), that's OK; setSpeed() checks for an undefined value
+    this.setSpeed(a[2]);        // if we're restoring an old state that doesn't contain a value from getSpeed(), that's OK; setSpeed() checks for an undefined value
     return this.bus.restoreMemory(data[4]);
 };
 
@@ -2466,18 +2465,10 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
     this.nBurstCycles = this.nStepCycles = nMinCycles;
 
     /*
-     * NOTE: I have moved updateAllTimers() from runCPU() to here.  The effect is exactly the same, except
-     * that this placement also insures that if the Debugger is doing a lot of single-stepping, all the timers
-     * will still get updated.
-     *
-     * In a typical PC configuration, the timer(s) should be updated a MINIMUM of 18.2 times per second,
-     * otherwise there's no way to guarantee the standard 18.2 interrupts per second (and in fact, our update
-     * frequency should probably be a bit higher, otherwise the delivery of timer interrupts may be rather
-     * uneven).  However, I have not yet created a dedicated threshold cycle counter to insure any particular
-     * timer update rate; I'm currently trusting that the existing update thresholds in the runCPU() function --
-     * primarily video updates and yields -- will occur frequently enough to provide adequate timer updates.
+     * NOTE: Even though runCPU() calls updateAllTimers(), we need an additional call here if we're being
+     * called from the Debugger, so that any single-stepping will update the timers as well.
      */
-    if (this.chipset) this.chipset.updateAllTimers();
+    if (this.chipset && !nMinCycles) this.chipset.updateAllTimers();
 
     /*
      * Let's also suppress h/w interrupts whenever the Debugger is single-stepping an instruction; I'm loathe
@@ -2567,7 +2558,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
                     } else {
                         this.aSamples[this.iSampleNext] = this.regEIP;
                     }
-                    if (this.iSampleNext == 112) {
+                    if (this.iSampleNext == 54) {
                         fDebugSkip = false;     // just some no-op statement we can set a breakpoint on
                     }
                     this.iSampleNext++;

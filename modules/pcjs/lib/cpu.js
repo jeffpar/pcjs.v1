@@ -575,24 +575,6 @@ CPU.prototype.setBurstCycles = function(nCycles)
 };
 
 /**
- * setBurstDivisor(nDivisor)
- *
- * This is called by the ChipSet component, on behalf of TIMER0, whenever the initial timer count has been
- * reprogrammed to a lower-than-default value, requiring the CPU to perform more frequent timer updates.
- *
- * A divisor greater than 1 (the default) does NOT require us to yield more frequently or update the screen
- * more frequently; it only means that stepCPU() must be called more frequently, with correspondingly smaller burst
- * cycles, because stepCPU() is responsible for updating all the timers ONCE, each time it's called.
- *
- * @this {CPU}
- * @param {number} nDivisor
- */
-CPU.prototype.setBurstDivisor = function(nDivisor)
-{
-    this.nBurstDivisor = nDivisor;
-};
-
-/**
  * addCycles(nCycles, fEndStep)
  *
  * @this {CPU}
@@ -737,7 +719,6 @@ CPU.prototype.getCyclesPerSecond = function()
 CPU.prototype.resetCycles = function()
 {
     this.aCounts.mhz = 0;
-    this.setBurstDivisor(1);
     this.nTotalCycles = this.nRunCycles = this.nBurstCycles = this.nStepCycles = 0;
     this.resetChecksum();
     this.setSpeed(1);
@@ -986,20 +967,13 @@ CPU.prototype.runCPU = function(fOnClick)
     this.calcStartTime();
     try {
         do {
-            var nCyclesPerBurst = this.aFlags.fChecksum? 1 : Math.round(this.aCounts.nCyclesPerBurst / this.nBurstDivisor);
+            var nCyclesPerBurst = (this.aFlags.fChecksum? 1 : this.aCounts.nCyclesPerBurst);
 
-            /*
-             * This is an alternative to ChipSet calling setBurstDivisor().  Unfortunately, this doesn't seem
-             * to work as well as setBurstDivisor(); for some reason, the smaller bursts that the burst divisor
-             * produces results in smoother video updates (see "BASICA DONKEY.BAS").  TODO: Research required;
-             * be sure to disable the setBurstDivisor() code in chipset.js if you enable this code.
-             *
-             *  var nCyclesTimer0 = (this.chipset? (this.chipset.getTimerCycleLimit(0)): 0);
-             *  if (nCyclesTimer0 && nCyclesPerBurst > nCyclesTimer0) {
-             *      nCyclesPerBurst = nCyclesTimer0;
-             *  }
-             */
-            if (this.chipset) nCyclesPerBurst = this.chipset.getRTCCycleLimit(nCyclesPerBurst);
+            if (this.chipset) {
+                this.chipset.updateAllTimers();
+                nCyclesPerBurst = this.chipset.getTimerCycleLimit(0, nCyclesPerBurst);
+                nCyclesPerBurst = this.chipset.getRTCCycleLimit(nCyclesPerBurst);
+            }
 
             /*
              * nCyclesPerBurst is how many cycles we WANT to run on each iteration of stepCPU(), but it may run
