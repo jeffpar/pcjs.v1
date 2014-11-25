@@ -1970,12 +1970,8 @@ var X86OpXX = {
      *
      * op=0x9A (call seg:off)
      */
-    opCALLf: function() {
-        var newIP = this.getIPWord();
-        var newCS = this.getIPWord();
-        this.pushWord(this.segCS.sel);
-        this.pushWord(this.regIP);
-        this.setCSIP(newIP, newCS);
+    opCALLF: function() {
+        X86Help.opHelpCallF.call(this, this.getIPWord(), this.getIPWord());
         this.nStepCycles -= this.CYCLES.nOpCyclesCallF;
     },
     /**
@@ -2789,8 +2785,12 @@ var X86OpXX = {
      */
     opRETFn: function() {
         var n = this.getIPWord();
-        this.setCSIP(this.popWord(), this.popWord());
+        var regIP = this.popWord();
+        var regCS = this.popWord();
         this.regSP = (this.regSP + n) & 0xffff;
+        if (this.setCSIP(regIP, regCS, false)) {
+            this.regSP = (this.regSP + n) & 0xffff;
+        }
         if (this.cIntReturn) this.checkIntReturn(this.regEIP);
         this.nStepCycles -= this.CYCLES.nOpCyclesRetFn;
     },
@@ -2800,7 +2800,7 @@ var X86OpXX = {
      * op=0xCB (retf)
      */
     opRETF: function() {
-        this.setCSIP(this.popWord(), this.popWord());
+        this.setCSIP(this.popWord(), this.popWord(), false);
         this.nStepCycles -= this.CYCLES.nOpCyclesRetF;
     },
     /**
@@ -3079,7 +3079,7 @@ var X86OpXX = {
      *
      * op=0xEA (jmp seg:off)
      */
-    opJMPf: function() {
+    opJMPF: function() {
         this.setCSIP(this.getIPWord(), this.getIPWord());
         this.nStepCycles -= this.CYCLES.nOpCyclesJmpF;
     },
@@ -3422,7 +3422,7 @@ X86OpXX.aOps = [
     X86OpXX.opMOVSegSrc,    X86OpXX.opLEA,          X86OpXX.opMOVSegDst,    X86OpXX.opPOPmw,        // 0x8C-0x8F
     X86OpXX.opNOP,          X86OpXX.opXCHGCX,       X86OpXX.opXCHGDX,       X86OpXX.opXCHGBX,       // 0x90-0x93
     X86OpXX.opXCHGSP,       X86OpXX.opXCHGBP,       X86OpXX.opXCHGSI,       X86OpXX.opXCHGDI,       // 0x94-0x97
-    X86OpXX.opCBW,          X86OpXX.opCWD,          X86OpXX.opCALLf,        X86OpXX.opWAIT,         // 0x98-0x9B
+    X86OpXX.opCBW,          X86OpXX.opCWD,          X86OpXX.opCALLF,        X86OpXX.opWAIT,         // 0x98-0x9B
     X86OpXX.opPUSHF,        X86OpXX.opPOPF,         X86OpXX.opSAHF,         X86OpXX.opLAHF,         // 0x9C-0x9F
     X86OpXX.opMOVALDst,     X86OpXX.opMOVAXDst,     X86OpXX.opMOVALSrc,     X86OpXX.opMOVAXSrc,     // 0xA0-0xA3
     X86OpXX.opMOVSb,        X86OpXX.opMOVSw,        X86OpXX.opCMPSb,        X86OpXX.opCMPSw,        // 0xA4-0xA7
@@ -3448,7 +3448,7 @@ X86OpXX.aOps = [
     X86OpXX.opESC,          X86OpXX.opESC,          X86OpXX.opESC,          X86OpXX.opESC,          // 0xDC-0xDF
     X86OpXX.opLOOPNZ,       X86OpXX.opLOOPZ,        X86OpXX.opLOOP,         X86OpXX.opJCXZ,         // 0xE0-0xE3
     X86OpXX.opINb,          X86OpXX.opINw,          X86OpXX.opOUTb,         X86OpXX.opOUTw,         // 0xE4-0xE7
-    X86OpXX.opCALL,         X86OpXX.opJMP,          X86OpXX.opJMPf,         X86OpXX.opJMPs,         // 0xE8-0xEB
+    X86OpXX.opCALL,         X86OpXX.opJMP,          X86OpXX.opJMPF,         X86OpXX.opJMPs,         // 0xE8-0xEB
     X86OpXX.opINDXb,        X86OpXX.opINDXw,        X86OpXX.opOUTDXb,       X86OpXX.opOUTDXw,       // 0xEC-0xEF
     /*
      * On an 8086/8088, opcode 0xF1 is assumed to be an alias for 0xF0; in any case, it definitely behaves like

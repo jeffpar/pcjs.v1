@@ -111,7 +111,7 @@ str.parseInt = function(s, base)
  *      s = "00000000".substr(0, 8 - s.length) + s;
  *      s = s.substr(0, cch).toUpperCase();
  *
- * @param {number|undefined} n is a 32-bit value
+ * @param {number|null|undefined} n is a 32-bit value
  * @param {number} [cch] is the desired number of hex digits (8 is both the default and the maximum)
  * @return {string} the hex representation of n
  */
@@ -123,7 +123,11 @@ str.toHex = function(n, cch)
     } else {
         if (cch > 8) cch = 8;
     }
-    if (isNaN(n)) {     // detects BOTH NaN and undefined
+    /*
+     * An initial "falsey" check for null takes care of both null and undefined;
+     * we can't rely entirely on isNaN(), because isNaN(null) returns false, oddly enough.
+     */
+    if (n == null || isNaN(n)) {
         while (cch-- > 0) s = '?' + s;
     } else {
         while (cch-- > 0) {

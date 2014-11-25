@@ -1432,6 +1432,7 @@ if (DEBUGGER) {
         this.println("dumpDesc(" + str.toHexWord(seg.sel) + "): %" + str.toHex(seg.addrDesc, this.cchAddr));
 
         var sType;
+        var fGate = false;
         if (seg.type & X86.DESC.ACC.TYPE.SEG) {
             if (seg.type & X86.DESC.ACC.TYPE.CODE) {
                 sType = "code";
@@ -1458,15 +1459,19 @@ if (DEBUGGER) {
                 break;
             case X86.DESC.ACC.TYPE.GATE_CALL:
                 sType = "call gate";
+                fGate = true;
                 break;
             case X86.DESC.ACC.TYPE.GATE_TASK:
                 sType = "task gate";
+                fGate = true;
                 break;
             case X86.DESC.ACC.TYPE.GATE_INT:
                 sType = "int gate";
+                fGate = true;
                 break;
             case X86.DESC.ACC.TYPE.GATE_TRAP:
                 sType = "trap gate";
+                fGate = true;
                 break;
             default:
                 break;
@@ -1475,7 +1480,13 @@ if (DEBUGGER) {
 
         if (sType && !(seg.acc & X86.DESC.ACC.PRESENT)) sType += ",not present";
 
-        this.println("base=" + str.toHex(seg.base, this.cchAddr) + " limit=" + str.toHexWord(seg.limit) + " dpl=" + str.toHexByte(seg.dpl) + " type=" + str.toHexByte(seg.acc >>> 8) + " (" + sType + ")");
+        var sDump;
+        if (fGate) {
+            sDump = "seg=" + str.toHexWord(seg.base & 0xffff) + " off=" + str.toHexWord(seg.limit);
+        } else {
+            sDump = "base=" + str.toHex(seg.base, this.cchAddr) + " limit=" + str.toHexWord(seg.limit);
+        }
+        this.println(sDump + " dpl=" + str.toHexByte(seg.dpl) + " type=" + str.toHexByte(seg.type >> 8) + " (" + sType + ")");
     };
 
     /**
@@ -2333,7 +2344,7 @@ if (DEBUGGER) {
         if (sel == this.cpu.segDS.sel) return this.cpu.segDS;
         if (sel == this.cpu.segES.sel) return this.cpu.segES;
         if (sel == this.cpu.segSS.sel) return this.cpu.segSS;
-        var seg = new X86Seg(this.cpu, X86Seg.ID.OTHER, "DBG");
+        var seg = new X86Seg(this.cpu, X86Seg.ID.DEBUG, "DBG");
         /*
          * TODO: Confirm that it's OK for this function to drop any error from seg.load() on the floor....
          */

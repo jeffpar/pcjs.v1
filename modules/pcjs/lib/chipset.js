@@ -2993,7 +2993,7 @@ ChipSet.prototype.outPICLo = function(iPIC, bOut, addrFrom)
             } else {
                 if (DEBUG) {
                     this.messageDebugger("outPIC" + iPIC + "(" + str.toHexByte(pic.port) + "): unexpected EOI command, IRQ " + nIRQ + " not in service", Debugger.MESSAGE.PIC | Debugger.MESSAGE.WARN);
-                    if (!SAMPLER) this.cpu.stopCPU();
+                    if (this.dbg && !SAMPLER) this.dbg.stopCPU();
                 }
             }
             /*
@@ -3001,7 +3001,7 @@ ChipSet.prototype.outPICLo = function(iPIC, bOut, addrFrom)
              */
             if (DEBUG && (bOCW2 & ChipSet.PIC_LO.OCW2_SET_ROTAUTO)) {
                 this.messageDebugger("outPIC" + iPIC + "(" + str.toHexByte(pic.port) + "): unsupported OCW2 rotate command: " + str.toHexByte(bOut), Debugger.MESSAGE.PIC | Debugger.MESSAGE.WARN);
-                this.cpu.stopCPU();
+                if (this.dbg) this.dbg.stopCPU();
             }
         }
         else  if (bOCW2 == ChipSet.PIC_LO.OCW2_SET_PRI) {
@@ -3016,7 +3016,7 @@ ChipSet.prototype.outPICLo = function(iPIC, bOut, addrFrom)
              */
             if (DEBUG) {
                 this.messageDebugger("outPIC" + iPIC + "(" + str.toHexByte(pic.port) + "): unsupported OCW2 automatic EOI command: " + str.toHexByte(bOut), Debugger.MESSAGE.PIC | Debugger.MESSAGE.WARN);
-                this.cpu.stopCPU();
+                if (this.dbg) this.dbg.stopCPU();
             }
         }
     } else {
@@ -3477,10 +3477,10 @@ ChipSet.prototype.getTimerCycleLimit = function(iTimer, nCycles)
         var ticksElapsed = ((nCyclesUpdate - timer.nCyclesStart) / this.nTicksDivisor) | 0;
         if (DEBUG) this.assert(ticksElapsed >= 0);
         var countStart = this.getTimerStart(iTimer);
-        var countRemain = countStart - ticksElapsed;
-        if (timer.mode == ChipSet.TIMER_CTRL.MODE3) countRemain -= ticksElapsed;
-        if (DEBUG) this.assert(countRemain > 0);
-        var nCyclesRemain = (countRemain * this.nTicksDivisor) | 0;
+        var count = countStart - ticksElapsed;
+        if (timer.mode == ChipSet.TIMER_CTRL.MODE3) count -= ticksElapsed;
+        if (DEBUG) this.assert(count > 0);
+        var nCyclesRemain = (count * this.nTicksDivisor) | 0;
         if (timer.mode == ChipSet.TIMER_CTRL.MODE3) nCyclesRemain >>= 1;
         if (nCycles > nCyclesRemain) nCycles = nCyclesRemain;
     }
@@ -3620,19 +3620,19 @@ ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
          * divisor (eg, 4 for MODEL_5150 and MODEL_5160, 5 for MODEL_5170, etc) is nTicksDivisor, which initBus()
          * calculates using the base CPU speed returned by cpu.getCyclesPerSecond().
          */
-        var ticks = ((nCycles - timer.nCyclesStart) / this.nTicksDivisor) | 0;
+        var ticksElapsed = ((nCycles - timer.nCyclesStart) / this.nTicksDivisor) | 0;
 
-        if (ticks < 0) {
-            if (DEBUG) this.messageDebugger("updateTimer(" + iTimer + "): negative tick count (" + ticks + ")", Debugger.MESSAGE.TIMER);
+        if (ticksElapsed < 0) {
+            if (DEBUG) this.messageDebugger("updateTimer(" + iTimer + "): negative tick count (" + ticksElapsed + ")", Debugger.MESSAGE.TIMER);
             timer.nCyclesStart = nCycles;
-            ticks = 0;
+            ticksElapsed = 0;
         }
 
         var countInit = this.getTimerInit(iTimer);
         var countStart = this.getTimerStart(iTimer);
 
         var fFired = false;
-        var count = countStart - ticks;
+        var count = countStart - ticksElapsed;
 
         /*
          * NOTE: This mode is used by ROM BIOS test code that wants to verify timer interrupts are arriving
@@ -3699,7 +3699,7 @@ ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
          */
         else
         if (timer.mode == ChipSet.TIMER_CTRL.MODE3) {
-            count -= ticks;
+            count -= ticksElapsed;
             if (count <= 0) {
                 timer.fOUT = !timer.fOUT;
                 count = countInit + count;
@@ -3724,7 +3724,7 @@ ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
         }
 
         if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE.TIMER | Debugger.MESSAGE.LOG)) {
-            this.log("TIMER" + iTimer + " count: " + count + ", ticks: " + ticks + ", fired: " + (fFired? "true" : "false"));
+            this.log("TIMER" + iTimer + " count: " + count + ", ticks: " + ticksElapsed + ", fired: " + (fFired? "true" : "false"));
         }
 
         timer.countCurrent[0] = count & 0xff;
@@ -4224,9 +4224,9 @@ ChipSet.prototype.out8042InBuffCmd = function(port, bOut, addrFrom)
         break;
 
     default:
-        if (DEBUG && DEBUGGER && this.dbg) {
-            this.dbg.message("unrecognized 8042 command: " + str.toHexByte(this.b8042InBuff));
-            this.cpu.stopCPU();
+        if (DEBUG) {
+            this.messageDebugger("unrecognized 8042 command: " + str.toHexByte(this.b8042InBuff));
+            if (this.dbg) this.dbg.stopCPU();
         }
         break;
     }
@@ -4301,9 +4301,9 @@ ChipSet.prototype.set8042OutPort = function(b)
          * KBC.CMD.PULSE_OUTPORT command, so if a RESET is detected via this command, we should try to
          * determine if that's what the caller intended.
          */
-        if (DEBUG && DEBUGGER && this.dbg) {
-            this.dbg.message("unexpected 8042 output port reset: " + str.toHexByte(b));
-            this.cpu.stopCPU();
+        if (DEBUG) {
+            this.messageDebugger("unexpected 8042 output port reset: " + str.toHexByte(b));
+            if (this.dbg) this.dbg.stopCPU();
         }
         this.cpu.resetRegs();
     }

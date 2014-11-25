@@ -277,7 +277,7 @@ var X86Help = {
          * TODO: This instruction's 80286 documentation does not discuss conforming code segments; determine
          * if we need a special check for them.
          */
-        if (this.segVER.load(src, true) >= 0) {
+        if (this.segVER.load(src, true) != null) {
             if (this.segVER.dpl >= this.segCS.cpl && this.segVER.dpl >= (src & X86.SEL.RPL)) {
                 this.setZF();
                 return this.segVER.acc & X86.DESC.ACC.MASK;
@@ -304,7 +304,7 @@ var X86Help = {
          * TODO: LSL is explicitly documented as ALSO requiring a non-null selector, so we check X86.SEL.MASK;
          * are there any other instructions that were, um, less explicit but also require a non-null selector?
          */
-        if ((src & X86.SEL.MASK) && this.segVER.load(src, true) >= 0) {
+        if ((src & X86.SEL.MASK) && this.segVER.load(src, true) != null) {
             var fConforming = ((this.segVER.acc & X86.DESC.ACC.TYPE.CODE_CONFORMING_EXECONLY) == X86.DESC.ACC.TYPE.CODE_CONFORMING_EXECONLY);
             if ((fConforming || this.segVER.dpl >= this.segCS.cpl) && this.segVER.dpl >= (src & X86.SEL.RPL)) {
                 this.setZF();
@@ -436,6 +436,23 @@ var X86Help = {
 
     },
     /**
+     * opHelpCallF(off, sel)
+     *
+     * For protected-mode, this function must attempt to load the new code segment first, because if the new segment
+     * requires a change in privilege level, the return address must be pushed on the NEW stack, not the current stack.
+     *
+     * @this {X86CPU}
+     * @param {number} off
+     * @param {number} sel
+     */
+    opHelpCallF: function(off, sel) {
+        var regCS = this.segCS.sel;
+        var regIP = this.regIP;
+        this.setCSIP(off, sel, true);
+        this.pushWord(regCS);
+        this.pushWord(regIP);
+    },
+    /**
      * opHelpDIVOverflow()
      *
      * @this {X86CPU}
@@ -489,7 +506,7 @@ var X86Help = {
                 return;
             }
         }
-        this.setCSIP(this.popWord(), this.popWord());
+        this.setCSIP(this.popWord(), this.popWord(), false);
         this.setPS(this.popWord());
         if (this.cIntReturn) this.checkIntReturn(this.regEIP);
     },
@@ -543,7 +560,7 @@ var X86Help = {
          *
          *      "[T]he 80286 will shut down if the SP = 1, 3, or 5 before executing the INT or INTO instruction--due to lack of stack space"
          *
-         * Huh?  Why would real-mode care?  See http://localhost:8088/pubs/pc/reference/intel/80286/progref/#page-260
+         * TODO: Verify that 80286 real-mode actually enforces the above.  See http://localhost:8088/pubs/pc/reference/intel/80286/progref/#page-260
          */
         offIDT = this.addrIDT + (nIDT << 2);
         this.descIDT.off = this.getWord(offIDT);
@@ -552,6 +569,11 @@ var X86Help = {
         return true;
     },
     /**
+     * opHelpPushPS(nError)
+     *
+     * Helper to push processor state, CS:IP, and optional error code onto the stack, and then jump
+     * to whatever CS:IP was fetched into descIDT by opHelpLoadIDT().
+     *
      * @this {X86CPU}
      * @param {number|null|undefined} nError
      */
@@ -566,6 +588,8 @@ var X86Help = {
     },
     /**
      * opHelpSwitchTSS(selNew, fNest)
+     *
+     * Helper implementing TSS (Task State Segment) task switching.
      *
      * @this {X86CPU}
      * @param {number} selNew
@@ -638,6 +662,10 @@ var X86Help = {
         return true;
     },
     /**
+     * opHelpFault(nFault, nError, fHalt)
+     *
+     * Helper to dispatch faults.
+     *
      * @this {X86CPU}
      * @param {number} nFault
      * @param {number} [nError]
@@ -669,39 +697,69 @@ var X86Help = {
                 return;
             }
         }
-        X86Help.opHelpFaultMessage.call(this, nFault, nError, fHalt);
+        if (X86Help.opHelpFaultMessage.call(this, nFault, nError, fHalt)) {
+            fFault = false;
+        }
         if (fFault) X86Help.opHelpINT.call(this, this.nFault = nFault, nError, 0);
     },
     /**
+     * opHelpFaultMessage()
+     *
+     * Aside from giving the Debugger an opportunity to report every fault, this also gives us the ability to
+     * halt exception processing in tracks: return true to prevent the fault handler from being dispatched.
+     *
+     * TODO: Provide the Debugger with some UI to control its "interference" with fault dispatching, and to
+     * continue the dispatch after it has interfered.
+     *
      * @this {X86CPU}
      * @param {number} nFault
      * @param {number} [nError]
      * @param {boolean} [fHalt] will halt the CPU if true *and* a Debugger is loaded
+     * @return {boolean} true to halt the CPU, false if not
      */
     opHelpFaultMessage: function(nFault, nError, fHalt) {
-        if (DEBUGGER && this.dbg) {
-            var bitsMessage = Debugger.MESSAGE.FAULT;
-            var bOpcode = this.bus.getByteDirect(this.regEIP);
-            /*
-             * OS/2 1.0 uses an INT3 (0xCC) opcode in conjunction with an invalid IDT to trigger a triple-fault
-             * reset and return to real-mode, and these resets happen quite frequently during boot; for example,
-             * OS/2 startup messages are displayed using a series of INT 0x10 BIOS calls for each character, and
-             * each series of BIOS calls requires a round-trip mode switch.
-             *
-             * Since we really only want to halt on "bad" faults, not "good" (ie, intentional) faults, we take
-             * advantage of the fact that all 3 faults comprising the triple-fault point to an INT3 (0xCC) opcode,
-             * and so whenever we see that opcode, we ignore the caller's fHalt flag, and suppress FAULT messages
-             * unless CPU messages are also enabled.
-             *
-             * When a triple fault shows up, nFault is -1; it displays as "ff" only because we truncate it to a byte.
-             */
-            if (bOpcode == X86.OPCODE.INT3) {
-                fHalt = false;
-                bitsMessage |= Debugger.MESSAGE.CPU;
-            }
-            this.messageDebugger("Fault " + str.toHexByte(nFault) + (nError != null? " (" + str.toHexWord(nError) + ")" : "") + " on opcode 0x" + str.toHexByte(bOpcode) + " at " + str.toHexAddr(this.regIP, this.segCS.sel) + " (%" + str.toHex(this.regEIP, 6) + ")", bitsMessage);
-            if (fHalt) this.dbg.stopCPU();
+        /*
+         * TODO: When we're done examining all GP faults, change the following to "fHalt || false"
+         */
+        fHalt = fHalt || (nFault == X86.EXCEPTION.GP_FAULT);
+
+        var bitsMessage = Debugger.MESSAGE.FAULT;
+        var bOpcode = this.bus.getByteDirect(this.regEIP);
+        /*
+         * OS/2 1.0 uses an INT3 (0xCC) opcode in conjunction with an invalid IDT to trigger a triple-fault
+         * reset and return to real-mode, and these resets happen quite frequently during boot; for example,
+         * OS/2 startup messages are displayed using a series of INT 0x10 BIOS calls for each character, and
+         * each series of BIOS calls requires a round-trip mode switch.
+         *
+         * Since we really only want to halt on "bad" faults, not "good" (ie, intentional) faults, we take
+         * advantage of the fact that all 3 faults comprising the triple-fault point to an INT3 (0xCC) opcode,
+         * and so whenever we see that opcode, we ignore the caller's fHalt flag, and suppress FAULT messages
+         * unless CPU messages are also enabled.
+         *
+         * When a triple fault shows up, nFault is -1; it displays as "ff" only because we truncate it to a byte.
+         */
+        if (bOpcode == X86.OPCODE.INT3) {
+            fHalt = false;
+            bitsMessage |= Debugger.MESSAGE.CPU;
         }
+        /*
+         * Similarly, the PC AT ROM BIOS deliberately generates a couple of GP faults as part of the POST
+         * (Power-On Self Test); we don't want to ignore those, but we don't want to halt on them either.  We
+         * detect those faults by virtue of EIP being in the range %0F0000 to %0FFFFF.
+         */
+        if (this.regEIP >= 0x0F0000 && this.regEIP <= 0x0FFFFF) {
+            fHalt = false;
+        }
+        var sMessage = "Fault " + str.toHexByte(nFault) + (nError != null? " (" + str.toHexWord(nError) + ")" : "") + " on opcode 0x" + str.toHexByte(bOpcode) + " at " + str.toHexAddr(this.regIP, this.segCS.sel) + " (%" + str.toHex(this.regEIP, 6) + ")";
+
+        if (DEBUGGER && this.dbg) {
+            this.messageDebugger(sMessage, bitsMessage);
+            if (fHalt) this.dbg.stopCPU();
+        } else if (fHalt) {
+            this.notice(sMessage);
+            this.stopCPU();
+        }
+        return fHalt;
     }
 };
 

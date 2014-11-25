@@ -59,7 +59,8 @@ function X86Seg(cpu, id, sName, fProt)
     this.addrDesc = null;
     this.cpl = 0;
     this.dpl = 0;
-    this.updateAccess(fProt);
+    this.awScratch = (this.id == X86Seg.ID.CODE? new Array(32) : []);
+    this.updateAccess(fProt || false);
 }
 
 X86Seg.ID = {
@@ -69,7 +70,8 @@ X86Seg.ID = {
     STACK:  3,          // "SS"
     TSS:    4,          // "TSS"
     LDT:    5,          // "LDT"
-    OTHER:  6           // "VER", "DBG", etc
+    OTHER:  6,          // "VER"
+    DEBUG:  7           // "DBG"
 };
 
 /*
@@ -112,7 +114,7 @@ X86Seg.loadReal = function loadReal(sel, fSuppress)
  *
  * @this {X86Seg}
  * @param {number} sel
- * @param {boolean} [fSuppress] is true to suppress any errors
+ * @param {boolean} [fSuppress] is true to suppress any errors, cycle assessment, etc
  * @return {number|null} base address of selected segment, or null if error
  */
 X86Seg.loadProt = function loadProt(sel, fSuppress)
@@ -133,7 +135,7 @@ X86Seg.loadProt = function loadProt(sel, fSuppress)
          * I simply noted that "POP segreg" takes 5 cycles in real mode and 20 in protected mode, so I'm
          * starting with a 15-cycle difference.  Obviously the difference will be much greater when the load fails.
          */
-        this.cpu.nStepCycles -= 15;
+        if (!fSuppress) this.cpu.nStepCycles -= 15;
         return this.loadDesc8(sel, addrDesc);
     }
     return null;
@@ -272,7 +274,7 @@ X86Seg.prototype.loadDesc6 = function(sel, addrDesc)
     this.addrDesc = addrDesc;
     this.updateAccess();
 
-    this.messageDebugger(base, limit, acc);
+    this.messageDebugger(sel, base, limit, acc);
 
     return base;
 };
@@ -303,20 +305,64 @@ X86Seg.prototype.loadDesc8 = function(sel, addrDesc)
     var ext = (DEBUG? this.cpu.getWord(addrDesc + X86.DESC.EXT.OFFSET) : 0);
 
     while (true) {
-        /*
-         * For LSL, we must support X86.DESC.ACC.TYPE.SEG as well as TSS and LDT.
-         */
-        if (!(acc & X86.DESC.ACC.TYPE.SEG) && type > X86.DESC.ACC.TYPE.TSS_BUSY) {
-            base = null;
-            break;
-        }
         if (sel) {
             /*
-             * TODO: These tests are far from complete; the main purpose right now is to
-             * catch cases (eg, call gates) that we need to add support for.
+             * TODO: These descriptor tests are far from complete....
              */
             if (this.id == X86Seg.ID.CODE) {
-                if (type < X86.DESC.ACC.TYPE.CODE_EXECONLY) {
+                this.fReturn = false;
+                var rpl = sel & X86.SEL.RPL;
+                var dpl = (acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
+                var regSP;
+                if (type == X86.DESC.ACC.TYPE.GATE_CALL) {
+                    /*
+                     * Since we are X86Seg.ID.CODE, we can use this.cpl instead of the more generic this.cpu.segCS.cpl
+                     */
+                    if (rpl < this.cpl) rpl = this.cpl;
+                    if (rpl <= dpl) {
+                        var cplPrev = this.cpl;
+                        if (this.load(base & 0xffff, true) != null) {
+                            this.cpu.regIP = limit;
+                            if (this.cpl < cplPrev) {
+                                if (this.fCall !== true) {
+                                    base = null;
+                                    break;
+                                }
+                                regSP = this.cpu.regSP;
+                                var i = 0, nWords = (acc & 0x1f);
+                                while (nWords--) {
+                                    this.awScratch[i++] = this.cpu.getSOWord(this.cpu.segSS, regSP);
+                                    regSP += 2;
+                                }
+                                var addrTSS = this.cpu.segTSS.base;
+                                var offSP = (this.cpl << 2) + X86.TSS.CPL0_SP;
+                                var offSS = offSP + 2;
+                                var regSPPrev = this.cpu.regSP;
+                                var regSSPrev = this.cpu.segSS.sel;
+                                this.cpu.regSP = this.cpu.getWord(addrTSS + offSP);
+                                this.cpu.segSS.load(this.cpu.getWord(addrTSS + offSS));
+                                this.cpu.pushWord(regSSPrev);
+                                this.cpu.pushWord(regSPPrev);
+                                while (i) this.cpu.pushWord(this.awScratch[--i]);
+                            }
+                            return this.base;
+                        }
+                    }
+                }
+                else if (type >= X86.DESC.ACC.TYPE.CODE_EXECONLY /* || dpl > this.cpu.segCS.cpl */) {
+                    rpl = sel & X86.SEL.RPL;
+                    if (rpl > this.cpl) {
+                        if (this.fCall !== false) {
+                            base = null;
+                            break;
+                        }
+                        regSP = this.cpu.popWord();
+                        this.cpu.segSS.load(this.cpu.popWord());
+                        this.cpu.regSP = regSP;
+                        this.fReturn = true;
+                    }
+                }
+                else {
                     X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, sel, true);
                     base = null;
                     break;
@@ -336,6 +382,15 @@ X86Seg.prototype.loadDesc8 = function(sel, addrDesc)
                     break;
                 }
             }
+            else if (this.id == X86Seg.ID.OTHER) {
+                /*
+                 * For LSL, we must support any descriptor marked X86.DESC.ACC.TYPE.SEG, as well as TSS and LDT descriptors.
+                 */
+                if (!(acc & X86.DESC.ACC.TYPE.SEG) && type > X86.DESC.ACC.TYPE.TSS_BUSY) {
+                    base = null;
+                    break;
+                }
+            }
         }
         this.sel = sel;
         this.base = base;
@@ -344,9 +399,9 @@ X86Seg.prototype.loadDesc8 = function(sel, addrDesc)
         this.type = type;
         this.addrDesc = addrDesc;
         this.updateAccess();
-        this.messageDebugger(base, limit, acc, ext);
         break;
     }
+    this.messageDebugger(sel, base, limit, acc, ext);
     return base;
 };
 
@@ -418,7 +473,10 @@ X86Seg.prototype.restore = function(a)
  */
 X86Seg.prototype.updateAccess = function(fProt)
 {
-    if (fProt === undefined) {
+    if (fProt !== undefined) {
+        this.fCall = null;          // true if "CALLF" in progress, false if "RETF [n]" in progress, null/undefined otherwise (X86Seg.ID.CODE only)
+        this.fReturn = false;       // true if "RETF" performed, false otherwise
+    } else {
         fProt = !!(this.cpu.regMSW & X86.MSW.PE);
     }
     if (fProt) {
@@ -452,21 +510,22 @@ X86Seg.prototype.updateAccess = function(fProt)
 };
 
 /**
- * messageDebugger(base, limit, acc, ext)
+ * messageDebugger(sel base, limit, acc, ext)
  *
- * @param {number} base
+ * @param {number} sel
+ * @param {number|null} base
  * @param {number} limit
  * @param {number} acc
  * @param {number} [ext]
  */
-X86Seg.prototype.messageDebugger = function(base, limit, acc, ext)
+X86Seg.prototype.messageDebugger = function(sel, base, limit, acc, ext)
 {
     if (DEBUG) {
         if (DEBUGGER) {
             var ch = (this.sName.length < 3? " " : "");
             var sDPL = " dpl=" + this.dpl;
             if (this.id == X86Seg.ID.CODE) sDPL += " cpl=" + this.cpl;
-            this.cpu.messageDebugger("loadSeg(" + this.sName + "):" + ch + " base=" + str.toHex(base) + " limit=" + str.toHexWord(limit) + " acc=" + str.toHexWord(acc) + sDPL, Debugger.MESSAGE.SEG);
+            this.cpu.messageDebugger("loadSeg(" + this.sName + "):" + ch + "sel=" + str.toHexWord(sel) + " base=" + str.toHex(base) + " limit=" + str.toHexWord(limit) + " acc=" + str.toHexWord(acc) + sDPL, Debugger.MESSAGE.SEG);
         }
         this.cpu.assert(base != null && (!ext || ext == X86.DESC.EXT.AVAIL));
     }

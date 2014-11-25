@@ -160,11 +160,11 @@ function X86CPU(parmsCPU) {
 
     if (SAMPLER) {
         /*
-         * For now, we're just going to sample EIP values
+         * For now, we're just going to sample EIP values (well, EIP + cycle count)
          */
         this.nSamples = 50000;
-        this.nSampleFreq = 1;
-        this.nSampleSkip = 4778000;
+        this.nSampleFreq = 1000;
+        this.nSampleSkip = 0;
         this.aSamples = new Array(this.nSamples);
         for (var i = 0; i < this.nSamples; i++) this.aSamples[i] = -1;
         this.iSampleNext = 0;
@@ -1290,7 +1290,7 @@ X86CPU.prototype.setIP = function(off)
 };
 
 /**
- * setCSIP(off, sel)
+ * setCSIP(off, sel, fCall)
  *
  * This function is a little different from the other segment setters, only because it turns out that CS is
  * never set without an accompanying IP (well, except for a few undocumented instructions, like POP CS, which
@@ -1300,19 +1300,32 @@ X86CPU.prototype.setIP = function(off)
  * 16-bit values, so there's never any need to mask them with 0xffff (although it doesn't hurt to assert that).
  *
  * And even though this function is called setCSIP(), please note the order of the parameters is IP,CS,
- * which matches the order that CS:IP values are normally stored in memory, allowing us to make calls like:
+ * which matches the order that CS:IP values are normally stored in memory, allowing us to make calls like this:
  *
  *      this.setCSIP(this.popWord(), this.popWord());
  *
  * @this {X86CPU}
  * @param {number} off
  * @param {number} sel
+ * @param {boolean} [fCall] is true if "CALLF" in progress
+ * @return {boolean} true if "RETF" performed a stack switch
  */
-X86CPU.prototype.setCSIP = function(off, sel)
+X86CPU.prototype.setCSIP = function(off, sel, fCall)
 {
     if (DEBUG) this.assert((off & 0xffff) == off);
-    this.regEIP = this.segCS.load(sel) + (this.regIP = off);
+    this.segCS.fCall = fCall;
+    /*
+     * We break this operation into the following discrete steps (eg, set IP, load CS, and then update EIP)
+     * so that the protected-mode version of segCS.load(sel) has the option of modifying IP when sel refers to a
+     * call gate.
+     */
+    this.regIP = off;
+    var base = this.segCS.load(sel);
+    if (base != null) {
+        this.regEIP = base + this.regIP;
+    }
     if (PREFETCH) this.flushPrefetch(this.regEIP);
+    return this.segCS.fReturn;
 };
 
 /**
@@ -2548,18 +2561,16 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
                         this.stopCPU();
                         break;
                     }
+                    var t = this.regEIP + this.getCycles();
                     var n = this.aSamples[this.iSampleNext];
                     if (n !== -1) {
-                        if (n !== this.regEIP) {
-                            this.println("sample deviation at index " + this.iSampleNext + ": current EIP=" + str.toHex(this.regEIP) + ", target EIP=" + str.toHex(n));
+                        if (n !== t) {
+                            this.println("sample deviation at index " + this.iSampleNext + ": current EIP=" + str.toHex(this.regEIP));
                             this.stopCPU();
                             break;
                         }
                     } else {
-                        this.aSamples[this.iSampleNext] = this.regEIP;
-                    }
-                    if (this.iSampleNext == 54) {
-                        fDebugSkip = false;     // just some no-op statement we can set a breakpoint on
+                        this.aSamples[this.iSampleNext] = t;
                     }
                     this.iSampleNext++;
                 }
