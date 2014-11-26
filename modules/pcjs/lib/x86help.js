@@ -549,7 +549,7 @@ var X86Help = {
             case X86.DESC.ACC.TYPE.GATE_TASK:
                 break;
             default:
-                if (DEBUG) this.assert(false);
+                if (DEBUG) this.assert(false, "INT 0x" + str.toHexByte(nIDT) + ": unrecognized IDT entry");
                 return false;
             }
             return true;
@@ -672,6 +672,11 @@ var X86Help = {
      * @param {boolean} [fHalt] will halt the CPU if true *and* a Debugger is loaded
      */
     opHelpFault: function(nFault, nError, fHalt) {
+        if (!this.aFlags.fComplete) {
+            // this.messageDebugger("Fault " + str.toHexByte(nFault) + " blocked by Debugger", Debugger.MESSAGE.WARN);
+            this.setIP(this.opEA - this.segCS.base);
+            return;
+        }
         var fFault = false;
         if (this.model >= X86.MODEL_80186) {
             if (this.nFault < 0) {

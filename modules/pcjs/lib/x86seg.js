@@ -60,7 +60,7 @@ function X86Seg(cpu, id, sName, fProt)
     this.cpl = 0;
     this.dpl = 0;
     this.awScratch = (this.id == X86Seg.ID.CODE? new Array(32) : []);
-    this.updateAccess(fProt || false);
+    this.updateAccess(fProt);
 }
 
 X86Seg.ID = {
@@ -138,6 +138,9 @@ X86Seg.loadProt = function loadProt(sel, fSuppress)
         if (!fSuppress) this.cpu.nStepCycles -= 15;
         return this.loadDesc8(sel, addrDesc);
     }
+    if (!fSuppress) {
+        X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, sel);
+    }
     return null;
 };
 
@@ -176,7 +179,7 @@ X86Seg.checkWriteReal = function checkWriteReal(off, cb, fSuppress)
 };
 
 /**
- * checkReadProtEnabled(off, cb, fSuppress)
+ * checkReadProt(off, cb, fSuppress)
  *
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
@@ -184,16 +187,16 @@ X86Seg.checkWriteReal = function checkWriteReal(off, cb, fSuppress)
  * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number|null} corresponding physical address if valid, null if not
  */
-X86Seg.checkReadProtEnabled = function checkReadProtEnabled(off, cb, fSuppress)
+X86Seg.checkReadProt = function checkReadProt(off, cb, fSuppress)
 {
     if (off + cb <= this.limit) {
         return this.base + off;
     }
-    return X86Seg.checkReadProtDisabled.call(this, off, cb, fSuppress);
+    return X86Seg.checkReadProtDisallowed.call(this, off, cb, fSuppress);
 };
 
 /**
- * checkReadProtDisabled(off, cb, fSuppress)
+ * checkReadProtDown(off, cb, fSuppress)
  *
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
@@ -201,7 +204,24 @@ X86Seg.checkReadProtEnabled = function checkReadProtEnabled(off, cb, fSuppress)
  * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number|null} corresponding physical address if valid, null if not
  */
-X86Seg.checkReadProtDisabled = function checkReadProtDisabled(off, cb, fSuppress)
+X86Seg.checkReadProtDown = function checkReadProtDown(off, cb, fSuppress)
+{
+    if (off + cb > this.limit) {
+        return this.base + off;
+    }
+    return X86Seg.checkReadProtDisallowed.call(this, off, cb, fSuppress);
+};
+
+/**
+ * checkReadProtDisallowed(off, cb, fSuppress)
+ *
+ * @this {X86Seg}
+ * @param {number} off is a segment-relative offset
+ * @param {number} cb is number of extra bytes to check (0 or 1)
+ * @param {boolean} [fSuppress] is true to suppress any errors
+ * @return {number|null} corresponding physical address if valid, null if not
+ */
+X86Seg.checkReadProtDisallowed = function checkReadProtDisallowed(off, cb, fSuppress)
 {
     if (!fSuppress) {
         X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, 0);
@@ -210,7 +230,7 @@ X86Seg.checkReadProtDisabled = function checkReadProtDisabled(off, cb, fSuppress
 };
 
 /**
- * checkWriteProtEnabled(off, cb, fSuppress)
+ * checkWriteProt(off, cb, fSuppress)
  *
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
@@ -218,16 +238,16 @@ X86Seg.checkReadProtDisabled = function checkReadProtDisabled(off, cb, fSuppress
  * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number|null} corresponding physical address if valid, null if not
  */
-X86Seg.checkWriteProtEnabled = function checkWriteProtEnabled(off, cb, fSuppress)
+X86Seg.checkWriteProt = function checkWriteProt(off, cb, fSuppress)
 {
     if (off + cb <= this.limit) {
         return this.base + off;
     }
-    return X86Seg.checkWriteProtDisabled.call(this, off, cb, fSuppress);
+    return X86Seg.checkWriteProtDisallowed.call(this, off, cb, fSuppress);
 };
 
 /**
- * checkWriteProtDisabled(off, cb, fSuppress)
+ * checkWriteProtDown(off, cb, fSuppress)
  *
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
@@ -235,7 +255,24 @@ X86Seg.checkWriteProtEnabled = function checkWriteProtEnabled(off, cb, fSuppress
  * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number|null} corresponding physical address if valid, null if not
  */
-X86Seg.checkWriteProtDisabled = function checkWriteProtDisabled(off, cb, fSuppress)
+X86Seg.checkWriteProtDown = function checkWriteProtDown(off, cb, fSuppress)
+{
+    if (off + cb > this.limit) {
+        return this.base + off;
+    }
+    return X86Seg.checkWriteProtDisallowed.call(this, off, cb, fSuppress);
+};
+
+/**
+ * checkWriteProtDisallowed(off, cb, fSuppress)
+ *
+ * @this {X86Seg}
+ * @param {number} off is a segment-relative offset
+ * @param {number} cb is number of extra bytes to check (0 or 1)
+ * @param {boolean} [fSuppress] is true to suppress any errors
+ * @return {number|null} corresponding physical address if valid, null if not
+ */
+X86Seg.checkWriteProtDisallowed = function checkWriteProtDisallowed(off, cb, fSuppress)
 {
     if (!fSuppress) {
         X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, 0);
@@ -250,7 +287,7 @@ X86Seg.checkWriteProtDisabled = function checkWriteProtDisabled(off, cb, fSuppre
 /**
  * loadDesc6(sel, addrDesc)
  *
- * Used to load a protected-mode selector that refers to a 6-byte descriptor "cache" (LOADALL) entry:
+ * Used to load a protected-mode selector that refers to a 6-byte "descriptor cache" (aka LOADALL) entry:
  *
  *      word 0: base address low
  *      word 1: base address high (0-7), segment type (8-11), descriptor type (12), DPL (13-14), present bit (15)
@@ -282,7 +319,7 @@ X86Seg.prototype.loadDesc6 = function(sel, addrDesc)
 /**
  * loadDesc8(sel, addrDesc)
  *
- * Used to load a protected-mode selector that refers to an 8-byte descriptor table (GDT, LDT, IDT) entry:
+ * Used to load a protected-mode selector that refers to an 8-byte "descriptor table" (GDT, LDT, IDT) entry:
  *
  *      word 0: segment limit (0-15)
  *      word 1: base address low
@@ -303,93 +340,101 @@ X86Seg.prototype.loadDesc8 = function(sel, addrDesc)
     var type = (acc & X86.DESC.ACC.TYPE.MASK);
     var base = this.cpu.getWord(addrDesc + X86.DESC.BASE.OFFSET) | ((acc & X86.DESC.ACC.BASE1623) << 16);
     var ext = (DEBUG? this.cpu.getWord(addrDesc + X86.DESC.EXT.OFFSET) : 0);
+    var selMasked = sel & X86.SEL.MASK;
 
     while (true) {
-        if (sel) {
-            /*
-             * TODO: These descriptor tests are far from complete....
-             */
-            if (this.id == X86Seg.ID.CODE) {
-                this.fReturn = false;
-                var rpl = sel & X86.SEL.RPL;
-                var dpl = (acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
-                var regSP;
-                if (type == X86.DESC.ACC.TYPE.GATE_CALL) {
-                    /*
-                     * Since we are X86Seg.ID.CODE, we can use this.cpl instead of the more generic this.cpu.segCS.cpl
-                     */
-                    if (rpl < this.cpl) rpl = this.cpl;
-                    if (rpl <= dpl) {
-                        var cplPrev = this.cpl;
-                        if (this.load(base & 0xffff, true) != null) {
-                            this.cpu.regIP = limit;
-                            if (this.cpl < cplPrev) {
-                                if (this.fCall !== true) {
-                                    base = null;
-                                    break;
-                                }
-                                regSP = this.cpu.regSP;
-                                var i = 0, nWords = (acc & 0x1f);
-                                while (nWords--) {
-                                    this.awScratch[i++] = this.cpu.getSOWord(this.cpu.segSS, regSP);
-                                    regSP += 2;
-                                }
-                                var addrTSS = this.cpu.segTSS.base;
-                                var offSP = (this.cpl << 2) + X86.TSS.CPL0_SP;
-                                var offSS = offSP + 2;
-                                var regSPPrev = this.cpu.regSP;
-                                var regSSPrev = this.cpu.segSS.sel;
-                                this.cpu.regSP = this.cpu.getWord(addrTSS + offSP);
-                                this.cpu.segSS.load(this.cpu.getWord(addrTSS + offSS));
-                                this.cpu.pushWord(regSSPrev);
-                                this.cpu.pushWord(regSPPrev);
-                                while (i) this.cpu.pushWord(this.awScratch[--i]);
+        if (this.id == X86Seg.ID.CODE) {
+            this.fStackSwitch = false;
+            var fCall = this.fCall;
+            var rpl = sel & X86.SEL.RPL;
+            var dpl = (acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
+            var regSP;
+            if (type == X86.DESC.ACC.TYPE.GATE_CALL) {
+                /*
+                 * Since we are X86Seg.ID.CODE, we can use this.cpl instead of the more generic this.cpu.segCS.cpl
+                 */
+                if (rpl < this.cpl) rpl = this.cpl;
+                if (rpl <= dpl) {
+                    var cplPrev = this.cpl;
+                    if (this.load(base & 0xffff, true) != null) {
+                        this.cpu.regIP = limit;
+                        if (this.cpl < cplPrev) {
+                            if (fCall !== true) {
+                                base = null;
+                                break;
                             }
-                            return this.base;
+                            regSP = this.cpu.regSP;
+                            var i = 0, nWords = (acc & 0x1f);
+                            while (nWords--) {
+                                this.awScratch[i++] = this.cpu.getSOWord(this.cpu.segSS, regSP);
+                                regSP += 2;
+                            }
+                            var addrTSS = this.cpu.segTSS.base;
+                            var offSP = (this.cpl << 2) + X86.TSS.CPL0_SP;
+                            var offSS = offSP + 2;
+                            var regSPPrev = this.cpu.regSP;
+                            var regSSPrev = this.cpu.segSS.sel;
+                            this.cpu.regSP = this.cpu.getWord(addrTSS + offSP);
+                            this.cpu.segSS.load(this.cpu.getWord(addrTSS + offSS));
+                            this.cpu.pushWord(regSSPrev);
+                            this.cpu.pushWord(regSPPrev);
+                            while (i) this.cpu.pushWord(this.awScratch[--i]);
+                            this.fStackSwitch = true;
                         }
+                        return this.base;
                     }
-                }
-                else if (type >= X86.DESC.ACC.TYPE.CODE_EXECONLY /* || dpl > this.cpu.segCS.cpl */) {
-                    rpl = sel & X86.SEL.RPL;
-                    if (rpl > this.cpl) {
-                        if (this.fCall !== false) {
-                            base = null;
-                            break;
-                        }
-                        regSP = this.cpu.popWord();
-                        this.cpu.segSS.load(this.cpu.popWord());
-                        this.cpu.regSP = regSP;
-                        this.fReturn = true;
-                    }
-                }
-                else {
-                    X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, sel, true);
-                    base = null;
-                    break;
                 }
             }
-            else if (this.id == X86Seg.ID.DATA || this.id == X86Seg.ID.STACK) {
+            else if (type >= X86.DESC.ACC.TYPE.CODE_EXECONLY /* || dpl > this.cpu.segCS.cpl */) {
+                rpl = sel & X86.SEL.RPL;
+                if (rpl > this.cpl) {
+                    if (fCall !== false) {
+                        base = null;
+                        break;
+                    }
+                    regSP = this.cpu.popWord();
+                    this.cpu.segSS.load(this.cpu.popWord());
+                    this.cpu.regSP = regSP;
+                    this.fStackSwitch = true;
+                }
+            }
+            else {
+                X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, sel, true);
+                base = null;
+                break;
+            }
+            if (DEBUG) this.cpu.assert(!!selMasked);    // a null CS selector should be caught by the final preceding check
+        }
+        else if (this.id == X86Seg.ID.DATA) {
+            if (selMasked) {
                 if (type < X86.DESC.ACC.TYPE.DATA_READONLY || (type & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.READABLE)) == X86.DESC.ACC.TYPE.CODE) {
                     X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, sel, true);
                     base = null;
                     break;
                 }
             }
-            else if (this.id == X86Seg.ID.TSS) {
-                if (type != X86.DESC.ACC.TYPE.TSS && type != X86.DESC.ACC.TYPE.TSS_BUSY) {
-                    X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.TS_FAULT, sel, true);
-                    base = null;
-                    break;
-                }
+        }
+        else if (this.id == X86Seg.ID.STACK) {
+            if (!selMasked || type < X86.DESC.ACC.TYPE.DATA_READONLY || (type & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.READABLE)) == X86.DESC.ACC.TYPE.CODE) {
+                X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, sel, true);
+                base = null;
+                break;
             }
-            else if (this.id == X86Seg.ID.OTHER) {
-                /*
-                 * For LSL, we must support any descriptor marked X86.DESC.ACC.TYPE.SEG, as well as TSS and LDT descriptors.
-                 */
-                if (!(acc & X86.DESC.ACC.TYPE.SEG) && type > X86.DESC.ACC.TYPE.TSS_BUSY) {
-                    base = null;
-                    break;
-                }
+        }
+        else if (this.id == X86Seg.ID.TSS) {
+            if (!selMasked || type != X86.DESC.ACC.TYPE.TSS && type != X86.DESC.ACC.TYPE.TSS_BUSY) {
+                X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.TS_FAULT, sel, true);
+                base = null;
+                break;
+            }
+        }
+        else if (this.id == X86Seg.ID.OTHER) {
+            /*
+             * For LSL, we must support any descriptor marked X86.DESC.ACC.TYPE.SEG, as well as TSS and LDT descriptors.
+             */
+            if (!(acc & X86.DESC.ACC.TYPE.SEG) && type > X86.DESC.ACC.TYPE.TSS_BUSY) {
+                base = null;
+                break;
             }
         }
         this.sel = sel;
@@ -473,28 +518,32 @@ X86Seg.prototype.restore = function(a)
  */
 X86Seg.prototype.updateAccess = function(fProt)
 {
-    if (fProt !== undefined) {
-        this.fCall = null;          // true if "CALLF" in progress, false if "RETF [n]" in progress, null/undefined otherwise (X86Seg.ID.CODE only)
-        this.fReturn = false;       // true if "RETF" performed, false otherwise
-    } else {
+    if (fProt === undefined) {
         fProt = !!(this.cpu.regMSW & X86.MSW.PE);
     }
     if (fProt) {
         this.load = X86Seg.loadProt;
-        this.checkRead = X86Seg.checkReadProtEnabled;
-        this.checkWrite = X86Seg.checkWriteProtEnabled;
+        this.checkRead = X86Seg.checkReadProt;
+        this.checkWrite = X86Seg.checkWriteProt;
         if (this.acc & X86.DESC.ACC.TYPE.SEG) {
             /*
              * If the READABLE bit of CODE_READABLE is not set, then disallow reads
              */
             if ((this.acc & X86.DESC.ACC.TYPE.CODE_READABLE) == X86.DESC.ACC.TYPE.CODE_EXECONLY) {
-                this.checkWrite = X86Seg.checkReadProtDisabled;
+                this.checkWrite = X86Seg.checkReadProtDisallowed;
             }
             /*
              * If the CODE bit is set, or the the WRITABLE bit is not set, then disallow writes
              */
             if ((this.acc & X86.DESC.ACC.TYPE.CODE) || !(this.acc & X86.DESC.ACC.TYPE.WRITABLE)) {
-                this.checkWrite = X86Seg.checkWriteProtDisabled;
+                this.checkWrite = X86Seg.checkWriteProtDisallowed;
+            }
+            /*
+             * If the CODE bit is not set *and* the EXPDOWN bit is set, then invert the limit check
+             */
+            if ((this.acc & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.EXPDOWN)) == X86.DESC.ACC.TYPE.EXPDOWN) {
+                if (this.checkRead == X86Seg.checkReadProt) this.checkRead = X86Seg.checkReadProtDown;
+                if (this.checkWrite == X86Seg.checkWriteProt) this.checkWrite = X86Seg.checkWriteProtDown;
             }
         }
         this.cpl = this.sel & X86.SEL.RPL;
@@ -506,6 +555,8 @@ X86Seg.prototype.updateAccess = function(fProt)
         this.cpl = this.dpl = 0;
         this.addrDesc = null;
     }
+    this.fCall = null;          // true if CALLF in progress, false if RETF in progress, null/undefined otherwise (X86Seg.ID.CODE only)
+    this.fStackSwitch = false;  // true if a stack switch occurred on the last loadDesc8(), false otherwise (X86Seg.ID.CODE only)
     return fProt;
 };
 

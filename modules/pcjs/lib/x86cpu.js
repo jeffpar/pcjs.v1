@@ -1307,8 +1307,8 @@ X86CPU.prototype.setIP = function(off)
  * @this {X86CPU}
  * @param {number} off
  * @param {number} sel
- * @param {boolean} [fCall] is true if "CALLF" in progress
- * @return {boolean} true if "RETF" performed a stack switch
+ * @param {boolean} [fCall] is true if CALLF in progress, false if RETF in progress, null/undefined otherwise
+ * @return {boolean} true if a stack switch occurred; the only opcode that needs to care about this is opRETFn()
  */
 X86CPU.prototype.setCSIP = function(off, sel, fCall)
 {
@@ -1316,8 +1316,7 @@ X86CPU.prototype.setCSIP = function(off, sel, fCall)
     this.segCS.fCall = fCall;
     /*
      * We break this operation into the following discrete steps (eg, set IP, load CS, and then update EIP)
-     * so that the protected-mode version of segCS.load(sel) has the option of modifying IP when sel refers to a
-     * call gate.
+     * so that segCS.load(sel) has the option of modifying IP when sel refers to a call gate.
      */
     this.regIP = off;
     var base = this.segCS.load(sel);
@@ -1325,7 +1324,7 @@ X86CPU.prototype.setCSIP = function(off, sel, fCall)
         this.regEIP = base + this.regIP;
     }
     if (PREFETCH) this.flushPrefetch(this.regEIP);
-    return this.segCS.fReturn;
+    return this.segCS.fStackSwitch;
 };
 
 /**

@@ -2993,7 +2993,7 @@ ChipSet.prototype.outPICLo = function(iPIC, bOut, addrFrom)
             } else {
                 if (DEBUG) {
                     this.messageDebugger("outPIC" + iPIC + "(" + str.toHexByte(pic.port) + "): unexpected EOI command, IRQ " + nIRQ + " not in service", Debugger.MESSAGE.PIC | Debugger.MESSAGE.WARN);
-                    if (this.dbg && !SAMPLER) this.dbg.stopCPU();
+                    if (this.dbg && !SAMPLER && MAXDEBUG) this.dbg.stopCPU();
                 }
             }
             /*
@@ -4313,9 +4313,8 @@ ChipSet.prototype.set8042OutPort = function(b)
  * notifyKbdData(fAvail)
  *
  * In the old days of PCjs, the Keyboard component would simply call setIRR() when it had some data for the
- * keyboard controller.  However, that was completely inappropriate.  The sole responsibility of the Keyboard
- * is to emulate an actual keyboard and notify us whenever it has some data; it has no business messing with
- * IRQ lines.
+ * keyboard controller.  However, the sole responsibility of the Keyboard is to emulate an actual keyboard and
+ * call notifyKbdData() whenever it has some data; it has no business messing with IRQ lines.
  *
  * If there's an 8042, we check (this.b8042CmdData & ChipSet.KBC.DATA.CMD.NO_CLOCK); if NO_CLOCK is clear,
  * we can raise the IRQ immediately.  Well, not quite immediately....

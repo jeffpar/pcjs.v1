@@ -222,16 +222,31 @@ DiskDump.aDefaultBPBs = [
   ],
   [                             // define BPB for 1.2Mb diskette
     0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
-    0x49, 0x42, 0x4d, 0x20, 0x31, 0x30, 0x2e, 0x31,     // "IBM 10.0" (which I believe was used on IBM OS/2 1.0 diskettes)
+    0x49, 0x42, 0x4D, 0x20, 0x31, 0x30, 0x2E, 0x31,     // "IBM 10.0" (which I believe was used on IBM OS/2 1.0 diskettes)
     0x00, 0x02,                 // 0x0B: bytes per sector (0x200 or 512)
     0x01,                       // 0x0D: sectors per cluster (1)
     0x01, 0x00,                 // 0x0E: reserved sectors; ie, # sectors preceding the first FAT--usually just the boot sector (1)
     0x02,                       // 0x10: FAT copies (2)
-    0xe0, 0x00,                 // 0x11: root directory entries (0xe0 or 224)  0xe0 * 0x20 = 0x1c00 (1 sector is 0x200 bytes, total of 14 sectors)
+    0xE0, 0x00,                 // 0x11: root directory entries (0xe0 or 224)  0xe0 * 0x20 = 0x1c00 (1 sector is 0x200 bytes, total of 14 sectors)
     0x60, 0x09,                 // 0x13: number of sectors (0x960 or 2400)
     0xF9,                       // 0x15: media type (0xF9 was used for 1228800-byte diskettes, and later for 737280-byte diskettes)
     0x07, 0x00,                 // 0x16: sectors per FAT (7)
     0x0f, 0x00,                 // 0x18: sectors per track (15)
+    0x02, 0x00,                 // 0x1A: number of heads (2)
+    0x00, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
+  ],
+  [                             // define BPB for 1.44Mb diskette
+    0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
+    0x4d, 0x53, 0x44, 0x4F, 0x53, 0x35, 0x2E, 0x30,     // "MSDOS5.0" (an actual OEM signature, arbitrarily chosen for use here)
+    0x00, 0x02,                 // 0x0B: bytes per sector (0x200 or 512)
+    0x01,                       // 0x0D: sectors per cluster (1)
+    0x01, 0x00,                 // 0x0E: reserved sectors; ie, # sectors preceding the first FAT--usually just the boot sector (1)
+    0x02,                       // 0x10: FAT copies (2)
+    0xE0, 0x00,                 // 0x11: root directory entries (0xe0 or 224)  0xe0 * 0x20 = 0x1c00 (1 sector is 0x200 bytes, total of 14 sectors)
+    0x40, 0x0B,                 // 0x13: number of sectors (0xb40 or 2880)
+    0xF0,                       // 0x15: media type (0xF0 was used for 1474560-byte diskettes)
+    0x09, 0x00,                 // 0x16: sectors per FAT (9)
+    0x12, 0x00,                 // 0x18: sectors per track (18)
     0x02, 0x00,                 // 0x1A: number of heads (2)
     0x00, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
   ],

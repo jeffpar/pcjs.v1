@@ -715,9 +715,9 @@ Component.prototype = {
                 /*
                  * TODO: An accompanying source file/line number/function call (eg, stack trace) would be nice.
                  */
-                if (!s) s = "assertion failure in " + (this.id || this.type);
+                s = "assertion failure in " + (this.id || this.type) + (s? ": " + s : "");
                 if (DEBUGGER && this.dbg) {
-                    this.dbg.stopCPU(s);
+                    this.dbg.stopCPU(s, true);
                     /*
                      * Why do we throw an Error only to immediately catch it and ignore it?  Simply to give our IDE
                      * the opportunity to stop and smell the roses.  If the user has no desire to stop on assertions,

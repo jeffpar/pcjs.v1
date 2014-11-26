@@ -319,7 +319,7 @@ if (DEBUGGER) {
      * Instruction names, indexed by instruction ordinal (above)
      */
     Debugger.asIns = [
-        "DB",     "AAA",    "AAD",    "AAM",    "AAS",    "ADC",    "ADD",    "AND",
+        "INVALID","AAA",    "AAD",    "AAM",    "AAS",    "ADC",    "ADD",    "AND",
         "ARPL",   "AS:",    "BOUND",  "BSF",    "BSR",    "BT",     "BTC",    "BTR",
         "BTS",    "CALL",   "CBW",    "CLC",    "CLD",    "CLI",    "CLTS",   "CMC",
         "CMP",    "CMPSB",  "CMPSW",  "CS:",    "CWD",    "DAA",    "DAS",    "DEC",
@@ -1939,11 +1939,12 @@ if (DEBUGGER) {
      *
      * @this {Debugger}
      * @param {string} [s]
+     * @param {boolean} [fBlockFaults]
      */
-    Debugger.prototype.stopCPU = function(s)
+    Debugger.prototype.stopCPU = function(s, fBlockFaults)
     {
         if (s) this.println(s);
-        this.cpu.stopCPU();
+        this.cpu.stopCPU(!fBlockFaults);
     };
 
     /**
@@ -2213,7 +2214,15 @@ if (DEBUGGER) {
          * Assert that general-purpose register contents remain within their respective ranges;
          * this isn't intended to be complete, just a spot-check.
          */
-        if (DEBUG) this.assert(!(this.cpu.regAX & ~0xffff) && !(this.cpu.regBX & ~0xffff) && !(this.cpu.regCX & ~0xffff) && !(this.cpu.regDX & ~0xffff), "register out of bounds");
+        if (DEBUG) {
+            this.assert(!(this.cpu.regAX & ~0xffff) && !(this.cpu.regBX & ~0xffff) && !(this.cpu.regCX & ~0xffff) && !(this.cpu.regDX & ~0xffff), "register out of bounds");
+            if (!fSkipBP && MAXDEBUG) {
+                if (!this.cpu.regIP) {
+                    this.println("suspicious IP");
+                    return true;
+                }
+            }
+        }
 
         if (!fSkipBP && this.checkBreakpoint(addr, this.aBreakExec)) {
             return true;
@@ -2760,6 +2769,7 @@ if (DEBUGGER) {
             aOpDesc = Debugger.aaGrpDescs[iIns - Debugger.asIns.length][(bModRM >> 3) & 0x7];
         }
 
+        var sOpcode = Debugger.asIns[aOpDesc[0]];
         var cOperands = 2;
         var sOperands = "";
         if (bOpcode >= X86.OPCODE.MOVSB && bOpcode <= X86.OPCODE.CMPSW || bOpcode >= X86.OPCODE.STOSB && bOpcode <= X86.OPCODE.SCASW) {
@@ -2819,8 +2829,9 @@ if (DEBUGGER) {
             else if (typeMode == Debugger.TYPE_ESDI) {
                 sOperand = "ES:[DI]";
             }
-            if (!sOperand.length) {
-                sOperand = "type(" + str.toHexWord(type) + ")";
+            if (!sOperand || !sOperand.length) {
+                sOperands = "INVALID";
+                break;
             }
             if (sOperands.length > 0) sOperands += ",";
             sOperands += sOperand;
@@ -2832,7 +2843,7 @@ if (DEBUGGER) {
             sBytes += str.toHexByte(this.getByte(aAddrIns, 1));
         } while (aAddrIns[0] != aAddr[0]);
         sLine += (sBytes + "            ").substr(0, 14);
-        sLine += (Debugger.asIns[aOpDesc[0]] + "       ").substr(0, 8);
+        sLine += (sOpcode + "       ").substr(0, 8);
         if (sOperands) sLine += " " + sOperands;
 
         if (sComment) {
@@ -2895,12 +2906,14 @@ if (DEBUGGER) {
      * @param {number} bReg
      * @param {number} type
      * @param {Array} aAddr
-     * @return {string} operand
+     * @return {string|null} operand
      */
     Debugger.prototype.getRegOperand = function(bReg, type, aAddr)
     {
-        if ((type & Debugger.TYPE_MODE) == Debugger.TYPE_SEGREG)
+        if ((type & Debugger.TYPE_MODE) == Debugger.TYPE_SEGREG) {
+            if (bReg >= 4) return null;
             bReg += 16;
+        }
         else if ((type & Debugger.TYPE_SIZE) >= Debugger.TYPE_WORD)
             bReg += 8;
         return Debugger.asRegs[bReg];
