@@ -115,8 +115,6 @@ X86Seg.ID = {
 X86Seg.loadReal = function loadReal(sel, fSuppress)
 {
     this.sel = sel;
-    this.limit = 0xffff;
-    this.cpl = this.dpl = 0;
     return this.base = sel << 4;
 };
 
@@ -126,7 +124,7 @@ X86Seg.loadReal = function loadReal(sel, fSuppress)
  * This replaces the segment's default load() function whenever the segment is notified via updateAccess() by the
  * CPU's setProtMode() that the processor is now in protected-mode.
  *
- * Segments in protected-mode are referenced by selectors, which are indexes into descriptor tables (GDT, LDT, IDT)
+ * Segments in protected-mode are referenced by selectors, which are indexes into descriptor tables (GDT or LDT)
  * whose descriptors are 4-word (8-byte) entries:
  *
  *      word 0: segment limit (0-15)
@@ -135,6 +133,8 @@ X86Seg.loadReal = function loadReal(sel, fSuppress)
  *      word 3: used only on 80386 and up (should be set to zero for upward compatibility)
  *
  * See X86.DESC for offset and bit definitions.
+ *
+ * IDT descriptor entries are handled separately by loadIDT().
  *
  * @this {X86Seg}
  * @param {number} sel
@@ -165,6 +165,52 @@ X86Seg.loadProt = function loadProt(sel, fSuppress)
     if (!fSuppress) {
         X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, sel);
     }
+    return null;
+};
+
+/**
+ * loadRealIDT(nIDT)
+ *
+ * @this {X86Seg}
+ * @param {number} nIDT
+ * @return {number|null} base address of selected segment, or null if error
+ */
+X86Seg.loadRealIDT = function loadRealIDT(nIDT)
+{
+    if (DEBUG) {
+        this.cpu.assert(nIDT >= 0 && nIDT < 256 && !this.cpu.addrIDT && this.cpu.addrIDTLimit == 0x03FF);
+    }
+    /*
+     * Intel documentation for INT/INTO under "REAL ADDRESS MODE EXCEPTIONS" says:
+     *
+     *      "[T]he 80286 will shut down if the SP = 1, 3, or 5 before executing the INT or INTO instruction--due to lack of stack space"
+     *
+     * TODO: Verify that 80286 real-mode actually enforces the above.  See http://localhost:8088/pubs/pc/reference/intel/80286/progref/#page-260
+     */
+    var offIDT = this.cpu.addrIDT + (nIDT << 2);
+    this.cpu.regIP = this.cpu.getWord(offIDT);
+    this.sel = this.cpu.getWord(offIDT + 2);
+    this.cpu.regPS &= ~(X86.PS.TF | X86.PS.IF);
+    return this.base = this.sel << 4;
+};
+
+/**
+ * loadProtIDT(nIDT)
+ *
+ * @this {X86Seg}
+ * @param {number} nIDT
+ * @return {number|null} base address of selected segment, or null if error
+ */
+X86Seg.loadProtIDT = function loadProtIDT(nIDT)
+{
+    if (DEBUG) this.cpu.assert(nIDT >= 0 && nIDT < 256);
+
+    nIDT <<= 3;
+    var addrDesc = this.cpu.addrIDT + nIDT;
+    if (addrDesc + 7 <= this.cpu.addrIDTLimit) {
+        return this.loadDesc8(nIDT, addrDesc);
+    }
+    X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, nIDT | X86.ERRCODE.IDT | X86.ERRCODE.EXT, true);
     return null;
 };
 
@@ -367,6 +413,9 @@ X86Seg.prototype.loadDesc8 = function(sel, addrDesc)
     var selMasked = sel & X86.SEL.MASK;
 
     while (true) {
+
+        var cplPrev, addrTSS, offSP, offSS, regSPPrev, regSSPrev;
+
         if (this.id == X86Seg.ID.CODE) {
             this.fStackSwitch = false;
             var fCall = this.fCall;
@@ -379,7 +428,7 @@ X86Seg.prototype.loadDesc8 = function(sel, addrDesc)
                  */
                 if (rpl < this.cpl) rpl = this.cpl;
                 if (rpl <= dpl) {
-                    var cplPrev = this.cpl;
+                    cplPrev = this.cpl;
                     if (this.load(base & 0xffff, true) != null) {
                         this.cpu.regIP = limit;
                         if (this.cpl < cplPrev) {
@@ -393,17 +442,49 @@ X86Seg.prototype.loadDesc8 = function(sel, addrDesc)
                                 this.awScratch[i++] = this.cpu.getSOWord(this.cpu.segSS, regSP);
                                 regSP += 2;
                             }
-                            var addrTSS = this.cpu.segTSS.base;
-                            var offSP = (this.cpl << 2) + X86.TSS.CPL0_SP;
-                            var offSS = offSP + 2;
-                            var regSPPrev = this.cpu.regSP;
-                            var regSSPrev = this.cpu.segSS.sel;
+                            addrTSS = this.cpu.segTSS.base;
+                            offSP = (this.cpl << 2) + X86.TSS.CPL0_SP;
+                            offSS = offSP + 2;
+                            regSPPrev = this.cpu.regSP;
+                            regSSPrev = this.cpu.segSS.sel;
                             this.cpu.regSP = this.cpu.getWord(addrTSS + offSP);
                             this.cpu.segSS.load(this.cpu.getWord(addrTSS + offSS));
                             this.cpu.pushWord(regSSPrev);
                             this.cpu.pushWord(regSPPrev);
                             while (i) this.cpu.pushWord(this.awScratch[--i]);
                             this.fStackSwitch = true;
+                        }
+                        return this.base;
+                    }
+                }
+            }
+            else if (type == X86.DESC.ACC.TYPE.GATE_INT || type == X86.DESC.ACC.TYPE.GATE_TRAP) {
+                if (rpl < this.cpl) rpl = this.cpl;
+                if (rpl <= dpl) {
+                    cplPrev = this.cpl;
+                    if (this.load(base & 0xffff, true) != null) {
+                        this.cpu.regIP = limit;
+                        if (this.cpl < cplPrev) {
+                            if (fCall !== true) {
+                                base = null;
+                                break;
+                            }
+                            regSP = this.cpu.regSP;
+                            addrTSS = this.cpu.segTSS.base;
+                            offSP = (this.cpl << 2) + X86.TSS.CPL0_SP;
+                            offSS = offSP + 2;
+                            regSPPrev = this.cpu.regSP;
+                            regSSPrev = this.cpu.segSS.sel;
+                            this.cpu.regSP = this.cpu.getWord(addrTSS + offSP);
+                            this.cpu.segSS.load(this.cpu.getWord(addrTSS + offSS));
+                            this.cpu.pushWord(regSSPrev);
+                            this.cpu.pushWord(regSPPrev);
+                            this.fStackSwitch = true;
+                        }
+                        if (type == X86.DESC.ACC.TYPE.GATE_INT) {
+                            this.cpu.regPS &= ~(X86.PS.NT | X86.PS.TF | X86.PS.IF);
+                        } else {
+                            this.cpu.regPS &= ~(X86.PS.NT | X86.PS.TF);
                         }
                         return this.base;
                     }
@@ -547,6 +628,7 @@ X86Seg.prototype.updateAccess = function(fProt)
     }
     if (fProt) {
         this.load = X86Seg.loadProt;
+        this.loadIDT = X86Seg.loadProtIDT;
         this.checkRead = X86Seg.checkReadProt;
         this.checkWrite = X86Seg.checkWriteProt;
         if (this.acc & X86.DESC.ACC.TYPE.SEG) {
@@ -574,8 +656,10 @@ X86Seg.prototype.updateAccess = function(fProt)
         this.dpl = (this.acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
     } else {
         this.load = X86Seg.loadReal;
+        this.loadIDT = X86Seg.loadRealIDT;
         this.checkRead = X86Seg.checkReadReal;
         this.checkWrite = X86Seg.checkWriteReal;
+        this.limit = 0xffff;
         this.cpl = this.dpl = 0;
         this.addrDesc = null;
     }

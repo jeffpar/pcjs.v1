@@ -448,9 +448,10 @@ var X86Help = {
     opHelpCallF: function(off, sel) {
         var regCS = this.segCS.sel;
         var regIP = this.regIP;
-        this.setCSIP(off, sel, true);
-        this.pushWord(regCS);
-        this.pushWord(regIP);
+        if (this.setCSIP(off, sel, true) != null) {
+            this.pushWord(regCS);
+            this.pushWord(regIP);
+        }
     },
     /**
      * opHelpDIVOverflow()
@@ -474,10 +475,22 @@ var X86Help = {
      */
     opHelpINT: function(nIDT, nError, nCycles) {
         /*
-         * TODO: We assess the cycle cost up front, because otherwise, if opHelpLoadIDT() fails and we end up in
-         * opHelpFault(), no cost may be assessed.  Ultimately, opHelpFault() needs to determine an appropriate cost.
+         * TODO: We assess the cycle cost up front, because otherwise, if loadIDT() fails, no cost may be assessed.
          */
         this.nStepCycles -= this.CYCLES.nOpCyclesInt + nCycles;
+        var regPS = this.getPS();
+        var regCS = this.segCS.sel;
+        var regIP = this.regIP;
+        var base = this.segCS.loadIDT(nIDT);
+        if (base != null) {
+            this.regEIP = base + this.regIP;
+            this.pushWord(regPS);
+            this.pushWord(regCS);
+            this.pushWord(regIP);
+            if (nError != null) this.pushWord(nError);
+            this.nFault = -1;
+        }
+        /*
         if (X86Help.opHelpLoadIDT.call(this, nIDT)) {
             if (this.descIDT.maskPS) {
                 X86Help.opHelpPushPS.call(this, nError);
@@ -487,6 +500,7 @@ var X86Help = {
             return;
         }
         X86Help.opHelpFault.call(this, X86.EXCEPTION.GP_FAULT, (nIDT << 3) | X86.ERRCODE.IDT | X86.ERRCODE.EXT, true);
+        */
     },
     /**
      * opHelpIRET()
@@ -506,9 +520,13 @@ var X86Help = {
                 return;
             }
         }
-        this.setCSIP(this.popWord(), this.popWord(), false);
-        this.setPS(this.popWord());
-        if (this.cIntReturn) this.checkIntReturn(this.regEIP);
+        var regIP = this.popWord();
+        var regCS = this.popWord();
+        var regPS = this.popWord();
+        if (this.setCSIP(regIP, regCS, false) != null) {
+            this.setPS(regPS);
+            if (this.cIntReturn) this.checkIntReturn(this.regEIP);
+        }
     },
     /**
      * opHelpLoadIDT(nIDT)
@@ -567,30 +585,6 @@ var X86Help = {
         this.descIDT.sel = this.getWord(offIDT + 2);
         this.descIDT.maskPS = ~(X86.PS.TF | X86.PS.IF);
         return true;
-    },
-    /**
-     * opHelpPushPS(nError)
-     *
-     * Helper to push processor state, CS:IP, and optional error code onto the stack, and then jump
-     * to whatever CS:IP was fetched into descIDT by opHelpLoadIDT().
-     *
-     * For protected-mode, this function must attempt to load the new code segment first, because if the new segment
-     * requires a change in privilege level, the return address must be pushed on the NEW stack, not the current stack.
-     *
-     * @this {X86CPU}
-     * @param {number|null|undefined} nError
-     */
-    opHelpPushPS: function(nError) {
-        var regPS = this.getPS();
-        var regCS = this.segCS.sel;
-        var regIP = this.regIP;
-        this.regPS &= this.descIDT.maskPS;
-        this.setCSIP(this.descIDT.off, this.descIDT.sel, true);
-        this.pushWord(regPS);
-        this.pushWord(regCS);
-        this.pushWord(regIP);
-        if (nError != null) this.pushWord(nError);
-        this.nFault = -1;
     },
     /**
      * opHelpSwitchTSS(selNew, fNest)

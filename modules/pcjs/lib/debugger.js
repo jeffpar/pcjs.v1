@@ -2216,6 +2216,11 @@ if (DEBUGGER) {
          */
         if (DEBUG) {
             this.assert(!(this.cpu.regAX & ~0xffff) && !(this.cpu.regBX & ~0xffff) && !(this.cpu.regCX & ~0xffff) && !(this.cpu.regDX & ~0xffff), "register out of bounds");
+            /*
+            if (!fSkipBP && this.cInstructions == 11303367) {
+                return true;
+            }
+            */
             if (!fSkipBP && MAXDEBUG) {
                 if (!this.cpu.regIP) {
                     this.println("suspicious IP");
@@ -4728,6 +4733,9 @@ if (DEBUGGER) {
             if (!sCmd) {
                 sCmd = this.aPrevCmds[this.iPrevCmd+1];
             } else {
+                if (this.iPrevCmd < 0 && this.aPrevCmds.length) {
+                    this.iPrevCmd = 0;
+                }
                 if (this.iPrevCmd < 0 || sCmd != this.aPrevCmds[this.iPrevCmd]) {
                     this.aPrevCmds.splice(0, 0, sCmd);
                     this.iPrevCmd = 0;
