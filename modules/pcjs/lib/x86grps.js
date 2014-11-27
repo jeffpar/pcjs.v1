@@ -1254,7 +1254,7 @@ var X86Grps = {
 };
 
 /*
- * A word (or two) on instruction groups (eg, GRP1, GRP2), which are groups of instructions that
+ * A word (or two) on instruction groups (eg, Grp1, Grp2), which are groups of instructions that
  * use a mod/reg/rm byte, where the reg field of that byte selects a function rather than a register.
  *
  * I start with the groupings used by Intel's "Pentium Processor User's Manual (Volume 3: Architecture
@@ -1263,21 +1263,21 @@ var X86Grps = {
  *
  *      Opcodes     Intel       PCjs                                                PC Mag TechRef
  *      -------     -----       ----                                                --------------
- *      0x80-0x83   Grp1        GRP1b, GRP1w, GRP1b, and GRP1sw                     Group A
- *      0xC0-0xC1   Grp2a       GRP2ab and GRP2aw                                   Group B
- *      0xD0-0xD3   Grp2        GRP2b and GRP2w                                     Group B
- *      0xF6-0xF7   Grp3        GRP3b and GRP3w                                     Group C
- *      0xFE        Grp4        GRP4b                                               Group D
- *      0xFF        Grp5        GRP4w                                               Group E
- *      0x0F,0x00   Grp6        GRP6 (SLDT, STR, LLDT, LTR, VERR, VERW)             Group F
- *      0x0F,0x01   Grp7        GRP7 (SGDT, SIDT, LGDT, LIDT, SMSW, LMSW, INVLPG)   Group G
- *      0x0F,0xBA   Grp8        GRP8 (BT, BTS, BTR, BTC)                            Group H
- *      0x0F,0xC7   Grp9        GRP9 (CMPXCH)                                       (N/A, 80386 and up?)
+ *      0x80-0x83   Grp1        Grp1b, Grp1w, Grp1b, and Grp1sw                     Group A
+ *      0xC0-0xC1   Grp2a       Grp2ab and Grp2aw                                   Group B
+ *      0xD0-0xD3   Grp2        Grp2b and Grp2w                                     Group B
+ *      0xF6-0xF7   Grp3        Grp3b and Grp3w                                     Group C
+ *      0xFE        Grp4        Grp4b                                               Group D
+ *      0xFF        Grp5        Grp4w                                               Group E
+ *      0x0F,0x00   Grp6        Grp6 (SLDT, STR, LLDT, LTR, VERR, VERW)             Group F
+ *      0x0F,0x01   Grp7        Grp7 (SGDT, SIDT, LGDT, LIDT, SMSW, LMSW, INVLPG)   Group G
+ *      0x0F,0xBA   Grp8        Grp8 (BT, BTS, BTR, BTC)                            Group H
+ *      0x0F,0xC7   Grp9        Grp9 (CMPXCH)                                       (N/A, 80386 and up)
  *
- * My only serious deviation is Grp5, which I refer to as GRP4w, because it contains word forms of
- * the INC and DEC instructions found in GRP4b.  Granted, GRP4w also contains versions of the CALL,
- * JMP and PUSH instructions, which are not in GRP4b, but there's nothing in GRP4b that conflicts with
- * GRP4w, so I think my nomenclature makes more sense.  To compensate, I don't use GRP5, so that the
+ * My only serious deviation is Grp5, which I refer to as Grp4w, because it contains word forms of
+ * the INC and DEC instructions found in Grp4b.  Granted, Grp4w also contains versions of the CALL,
+ * JMP and PUSH instructions, which are not in Grp4b, but there's nothing in Grp4b that conflicts with
+ * Grp4w, so I think my nomenclature makes more sense.  To compensate, I don't use Grp5, so that the
  * remaining group numbers remain in sync with Intel's.
  */
 X86Grps.aOpGrp1b = [

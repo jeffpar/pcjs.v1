@@ -46,7 +46,7 @@ var X86Op0F = {
      *
      * op=0x0F,0x00 (grp6 rm)
      */
-    opGRP6: function() {
+    opGrp6: function() {
         var bModRM = this.getIPByte();
         if ((bModRM & 0x38) < 0x10) {   // possible reg values: 0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, 0x38
             if (EAFUNCS) this.modEAWord = this.modEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOREAD;
@@ -59,7 +59,7 @@ var X86Op0F = {
      *
      * op=0x0F,0x01 (grp7 rm)
      */
-    opGRP7: function() {
+    opGrp7: function() {
         var bModRM = this.getIPByte();
         if (!(bModRM & 0x10)) {
             if (EAFUNCS) this.modEAWord = this.modEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOREAD;
@@ -438,7 +438,7 @@ var X86Op0F = {
 };
 
 X86Op0F.aOps0F = [
-    X86Op0F.opGRP6,         X86Op0F.opGRP7,         X86Op0F.opLAR,          X86Op0F.opLSL,          // 0x00-0x03
+    X86Op0F.opGrp6,         X86Op0F.opGrp7,         X86Op0F.opLAR,          X86Op0F.opLSL,          // 0x00-0x03
     X86OpXX.opUndefined,    X86Op0F.opLOADALL,      X86Op0F.opCLTS,         X86OpXX.opUndefined,    // 0x04-0x07
     /*
      * On all processors (except the 8086/8088, of course), 0x0F,0x0B is also referred to as "UD2": an
@@ -509,8 +509,8 @@ X86Op0F.aOps0F = [
 ];
 
 /*
- * These instruction groups are not as orthogonal as the original 8086/8088 groups (GRP1 through GRP4): some of
- * the instructions in GRP6 and GRP7 only read their dst operand (eg, LLDT), which means the ModRM helper function
+ * These instruction groups are not as orthogonal as the original 8086/8088 groups (Grp1 through Grp4): some of
+ * the instructions in Grp6 and Grp7 only read their dst operand (eg, LLDT), which means the ModRM helper function
  * must insure that setEAWord() is disabled, while others only write their dst operand (eg, SLDT), which means that
  * getEAWord() should be disabled *prior* to calling the ModRM helper function.  This latter case requires that
  * we decode the reg field of the ModRM byte before dispatching.
@@ -526,7 +526,7 @@ X86Op0F.aOpGrp6Real = [
 ];
 
 /*
- * Unlike GRP6, GRP7 does not require separate real-mode and protected-mode dispatch tables, because all GRP7
+ * Unlike Grp6, Grp7 does not require separate real-mode and protected-mode dispatch tables, because all Grp7
  * instructions are valid in both modes.
  */
 X86Op0F.aOpGrp7 = [

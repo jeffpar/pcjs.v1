@@ -1590,7 +1590,7 @@ var X86OpXX = {
      *
      * op=0x80/0x82 (grp1b rm,imm8)
      */
-    opGRP1b: function() {
+    opGrp1b: function() {
         X86Mods.aOpModsGrpByte[this.getIPByte()].call(this, X86Grps.aOpGrp1b, this.getIPByte);
         if (EAFUNCS) this.setEAByte = this.setEAByteEnabled;
         this.nStepCycles -= (this.regEAWrite < 0? 1 : this.CYCLES.nOpCyclesArithMID);
@@ -1600,7 +1600,7 @@ var X86OpXX = {
      *
      * op=0x81 (grp1w rm,imm16)
      */
-    opGRP1w: function() {
+    opGrp1w: function() {
         X86Mods.aOpModsGrpWord[this.getIPByte()].call(this, X86Grps.aOpGrp1w, this.getIPWord);
         if (EAFUNCS) this.setEAWord = this.setEAWordEnabled;
         this.nStepCycles -= (this.regEAWrite < 0? 1 : this.CYCLES.nOpCyclesArithMID);
@@ -1610,7 +1610,7 @@ var X86OpXX = {
      *
      * op=0x83 (grp1sw rm,disp)
      */
-    opGRP1sw: function() {
+    opGrp1sw: function() {
         X86Mods.aOpModsGrpWord[this.getIPByte()].call(this, X86Grps.aOpGrp1w, this.getIPDisp);
         if (EAFUNCS) this.setEAWord = this.setEAWordEnabled;
         this.nStepCycles -= (this.regEAWrite < 0? 1 : this.CYCLES.nOpCyclesArithMID);
@@ -2639,7 +2639,7 @@ var X86OpXX = {
      *
      * op=0xC0 (grp2ab rm) (80186/80188 and up)
      */
-    opGRP2ab: function() {
+    opGrp2ab: function() {
         X86Mods.aOpModsGrpByte[this.getIPByte()].call(this, X86Grps.aOpGrp2ab, X86Grps.opGrp2CountImm);
     },
     /**
@@ -2647,7 +2647,7 @@ var X86OpXX = {
      *
      * op=0xC1 (grp2aw rm) (80186/80188 and up)
      */
-    opGRP2aw: function() {
+    opGrp2aw: function() {
         X86Mods.aOpModsGrpWord[this.getIPByte()].call(this, X86Grps.aOpGrp2aw, X86Grps.opGrp2CountImm);
     },
     /**
@@ -2849,7 +2849,7 @@ var X86OpXX = {
      *
      * op=0xD0 (grp2b rm,1)
      */
-    opGRP2b1: function() {
+    opGrp2b1: function() {
         X86Mods.aOpModsGrpByte[this.getIPByte()].call(this, X86Grps.aOpGrp2b, X86Grps.opGrp2Count1);
     },
     /**
@@ -2857,7 +2857,7 @@ var X86OpXX = {
      *
      * op=0xD1 (grp2w rm,1)
      */
-    opGRP2w1: function() {
+    opGrp2w1: function() {
         X86Mods.aOpModsGrpWord[this.getIPByte()].call(this, X86Grps.aOpGrp2w, X86Grps.opGrp2Count1);
     },
     /**
@@ -2865,7 +2865,7 @@ var X86OpXX = {
      *
      * op=0xD2 (grp2b rm,CL)
      */
-    opGRP2bCL: function() {
+    opGrp2bCL: function() {
         X86Mods.aOpModsGrpByte[this.getIPByte()].call(this, X86Grps.aOpGrp2b, X86Grps.opGrp2CountCL);
     },
     /**
@@ -2873,7 +2873,7 @@ var X86OpXX = {
      *
      * op=0xD3 (grp2w rm,CL)
      */
-    opGRP2wCL: function() {
+    opGrp2wCL: function() {
         X86Mods.aOpModsGrpWord[this.getIPByte()].call(this, X86Grps.aOpGrp2w, X86Grps.opGrp2CountCL);
     },
     /**
@@ -3241,7 +3241,7 @@ var X86OpXX = {
      *
      * Similar issues with IMUL (and DIV and IDIV) are resolved using the same special variable(s).
      */
-    opGRP3b: function() {
+    opGrp3b: function() {
         this.regMD16 = -1;
         X86Mods.aOpModsGrpByte[this.getIPByte()].call(this, X86Grps.aOpGrp3b, X86Grps.opGrpNoSrc);
         if (this.regMD16 >= 0) this.regAX = this.regMD16;
@@ -3265,7 +3265,7 @@ var X86OpXX = {
      * (eg, regMD16/regMD32), which we will then put back into regAX/regDX if it's been updated.  This also relieves
      * us from having to decode any part of the ModRM byte, so maybe it's not such a bad work-around after all.
      */
-    opGRP3w: function() {
+    opGrp3w: function() {
         this.regMD16 = -1;
         X86Mods.aOpModsGrpWord[this.getIPByte()].call(this, X86Grps.aOpGrp3w, X86Grps.opGrpNoSrc);
         if (this.regMD16 >= 0) {
@@ -3334,7 +3334,7 @@ var X86OpXX = {
      *
      * op=0xFE (grp4b rm)
      */
-    opGRP4b: function() {
+    opGrp4b: function() {
         X86Mods.aOpModsGrpByte[this.getIPByte()].call(this, X86Grps.aOpGrp4b, X86Grps.opGrpNoSrc);
     },
     /**
@@ -3342,7 +3342,7 @@ var X86OpXX = {
      *
      * op=0xFF (grp4w rm)
      */
-    opGRP4w: function() {
+    opGrp4w: function() {
         X86Mods.aOpModsGrpWord[this.getIPByte()].call(this, X86Grps.aOpGrp4w, X86Grps.opGrpNoSrc);
         if (EAFUNCS) this.setEAWord = this.setEAWordEnabled;
     },
@@ -3416,7 +3416,7 @@ X86OpXX.aOps = [
      * to opcode 0x82 as a "reserved" instruction, but also cryptically refers to it as "MOVB AL,imm".  This is
      * assumed to be an error in the manual, because as far as I know, 0x82 has always mirrored 0x80.
      */
-    X86OpXX.opGRP1b,        X86OpXX.opGRP1w,        X86OpXX.opGRP1b,        X86OpXX.opGRP1sw,       // 0x80-0x83
+    X86OpXX.opGrp1b,        X86OpXX.opGrp1w,        X86OpXX.opGrp1b,        X86OpXX.opGrp1sw,       // 0x80-0x83
     X86OpXX.opTESTrb,       X86OpXX.opTESTrw,       X86OpXX.opXCHGrb,       X86OpXX.opXCHGrw,       // 0x84-0x87
     X86OpXX.opMOVmb,        X86OpXX.opMOVmw,        X86OpXX.opMOVrb,        X86OpXX.opMOVrw,        // 0x88-0x8B
     X86OpXX.opMOVSegSrc,    X86OpXX.opLEA,          X86OpXX.opMOVSegDst,    X86OpXX.opPOPmw,        // 0x8C-0x8F
@@ -3439,7 +3439,7 @@ X86OpXX.aOps = [
     X86OpXX.opLES,          X86OpXX.opLDS,          X86OpXX.opMOVb,         X86OpXX.opMOVw,         // 0xC4-0xC7
     X86OpXX.opRETFn,        X86OpXX.opRETF,         X86OpXX.opRETFn,        X86OpXX.opRETF,         // 0xC8-0xCB
     X86OpXX.opINT3,         X86OpXX.opINTn,         X86OpXX.opINTO,         X86OpXX.opIRET,         // 0xCC-0xCF
-    X86OpXX.opGRP2b1,       X86OpXX.opGRP2w1,       X86OpXX.opGRP2bCL,      X86OpXX.opGRP2wCL,      // 0xD0-0xD3
+    X86OpXX.opGrp2b1,       X86OpXX.opGrp2w1,       X86OpXX.opGrp2bCL,      X86OpXX.opGrp2wCL,      // 0xD0-0xD3
     /*
      * Even as of the Pentium, opcode 0xD6 is still marked as "reserved", but it's always been SETALC/SALC.
      */
@@ -3455,9 +3455,9 @@ X86OpXX.aOps = [
      * a prefix on those processors, so we treat it as such.  As of the Pentium, it is still marked as "reserved".
      */
     X86OpXX.opLOCK,         X86OpXX.opLOCK,         X86OpXX.opREPNZ,        X86OpXX.opREPZ,         // 0xF0-0xF3
-    X86OpXX.opHLT,          X86OpXX.opCMC,          X86OpXX.opGRP3b,        X86OpXX.opGRP3w,        // 0xF4-0xF7
+    X86OpXX.opHLT,          X86OpXX.opCMC,          X86OpXX.opGrp3b,        X86OpXX.opGrp3w,        // 0xF4-0xF7
     X86OpXX.opCLC,          X86OpXX.opSTC,          X86OpXX.opCLI,          X86OpXX.opSTI,          // 0xF8-0xFB
-    X86OpXX.opCLD,          X86OpXX.opSTD,          X86OpXX.opGRP4b,        X86OpXX.opGRP4w         // 0xFC-0xFF
+    X86OpXX.opCLD,          X86OpXX.opSTD,          X86OpXX.opGrp4b,        X86OpXX.opGrp4w         // 0xFC-0xFF
 ];
 
 if (typeof module !== 'undefined') module.exports = X86OpXX;

@@ -574,16 +574,22 @@ var X86Help = {
      * Helper to push processor state, CS:IP, and optional error code onto the stack, and then jump
      * to whatever CS:IP was fetched into descIDT by opHelpLoadIDT().
      *
+     * For protected-mode, this function must attempt to load the new code segment first, because if the new segment
+     * requires a change in privilege level, the return address must be pushed on the NEW stack, not the current stack.
+     *
      * @this {X86CPU}
      * @param {number|null|undefined} nError
      */
     opHelpPushPS: function(nError) {
-        this.pushWord(this.getPS());
+        var regPS = this.getPS();
+        var regCS = this.segCS.sel;
+        var regIP = this.regIP;
         this.regPS &= this.descIDT.maskPS;
-        this.pushWord(this.segCS.sel);
-        this.pushWord(this.regIP);
+        this.setCSIP(this.descIDT.off, this.descIDT.sel, true);
+        this.pushWord(regPS);
+        this.pushWord(regCS);
+        this.pushWord(regIP);
         if (nError != null) this.pushWord(nError);
-        this.setCSIP(this.descIDT.off, this.descIDT.sel);
         this.nFault = -1;
     },
     /**

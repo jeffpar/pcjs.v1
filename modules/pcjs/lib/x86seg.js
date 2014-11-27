@@ -59,7 +59,31 @@ function X86Seg(cpu, id, sName, fProt)
     this.addrDesc = null;
     this.cpl = 0;
     this.dpl = 0;
+    /*
+     * The following properties are used for CODE segments only (ie, segCS); if the process of loading
+     * CS also requires a stack switch, then fStackSwitch will be set to true; additionally, if the stack
+     * switch was the result of a CALL (ie, fCall is true) and one or more (up to 32) parameters are on
+     * the old stack, they will be copied to awScratch, and then once the stack is switched, the parameters
+     * will be pushed from awScratch onto the new stack.
+     *
+     * The typical ways of loading a new segment into CS are JMPF, CALLF (or INT), and RETF (or IRET);
+     * prior to calling segCS.load(), each of those operations must first set segCS.fCall to one of null,
+     * true, or false, respectively.
+     *
+     * It's critical that fCall be properly set prior to calling segCS.load(); fCall == null means NO
+     * privilege level transition may occur, fCall == true allows a stack switch and a privilege transition
+     * to a numerically lower privilege, and fCall == false allows a stack switch (restore) and a privilege
+     * transition to a numerically greater privilege.
+     *
+     * As long as setCSIP() is used for all CS changes, the foregoing is automatically taken care of.
+     *
+     * TODO: Consider making fCall a parameter to load(), instead of a property that must be set prior to
+     * calling load(); the downside (and why I didn't do that in the first place) is that such a parameter
+     * to load() would be meaningless for segments other than segCS.
+     */
     this.awScratch = (this.id == X86Seg.ID.CODE? new Array(32) : []);
+    this.fCall = null;
+    this.fStackSwitch = false;
     this.updateAccess(fProt);
 }
 
@@ -470,7 +494,7 @@ X86Seg.prototype.setBase = function(addr)
  * save()
  *
  * Early versions of PCjs saved only segment selectors, since that's all that mattered in real-mode;
- * newer versions need to save/restore the entire segment object.
+ * newer versions need to save/restore all the "defining" properties of the X86Seg object.
  *
  * @this {X86Seg}
  * @return {Array}
@@ -484,7 +508,7 @@ X86Seg.prototype.save = function()
  * restore(a)
  *
  * Early versions of PCjs saved only segment selectors, since that's all that mattered in real-mode;
- * newer versions need to save/restore the entire segment object.
+ * newer versions need to save/restore all the "defining" properties of the X86Seg object.
  *
  * @this {X86Seg}
  * @param {Array|number} a
@@ -555,8 +579,6 @@ X86Seg.prototype.updateAccess = function(fProt)
         this.cpl = this.dpl = 0;
         this.addrDesc = null;
     }
-    this.fCall = null;          // true if CALLF in progress, false if RETF in progress, null/undefined otherwise (X86Seg.ID.CODE only)
-    this.fStackSwitch = false;  // true if a stack switch occurred on the last loadDesc8(), false otherwise (X86Seg.ID.CODE only)
     return fProt;
 };
 
