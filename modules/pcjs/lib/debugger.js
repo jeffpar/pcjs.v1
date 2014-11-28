@@ -2051,8 +2051,8 @@ if (DEBUGGER) {
          * it here, so that if the CPU is reset while running, we can prevent stop()
          * from unnecessarily dumping the CPU state.
          */
-        if (this.aFlags.fRunning !== undefined && !fQuiet) this.println("reset");
-        this.aFlags.fRunning = false;
+        if (this.bitField.fRunning !== undefined && !fQuiet) this.println("reset");
+        this.bitField.fRunning = false;
         this.clearTempBreakpoint();
         if (!fQuiet) this.updateStatus();
     };
@@ -2119,7 +2119,7 @@ if (DEBUGGER) {
     Debugger.prototype.start = function(ms, nCycles)
     {
         if (!this.fProcStep) this.println("running");
-        this.aFlags.fRunning = true;
+        this.bitField.fRunning = true;
         this.msStart = ms;
         this.nCyclesStart = nCycles;
     };
@@ -2135,8 +2135,8 @@ if (DEBUGGER) {
      */
     Debugger.prototype.stop = function(ms, nCycles)
     {
-        if (this.aFlags.fRunning) {
-            this.aFlags.fRunning = false;
+        if (this.bitField.fRunning) {
+            this.bitField.fRunning = false;
             this.nCycles = nCycles - this.nCyclesStart;
             if (!this.fProcStep) {
                 var sStopped = "stopped";
@@ -2855,7 +2855,7 @@ if (DEBUGGER) {
             sLine += "                         ";
             sLine = sLine.substr(0, 50);
             sLine += ";";
-            if (!this.cpu.aFlags.fChecksum) {
+            if (!this.cpu.bitField.fChecksum) {
                 sLine += sComment + (nSequence != null? '=' + nSequence.toString() : "");
             } else {
                 var nCycles = this.cpu.getCycles();
@@ -3862,7 +3862,7 @@ if (DEBUGGER) {
      */
     Debugger.prototype.doHalt = function(sCount)
     {
-        if (this.aFlags.fRunning && sCount === undefined) {
+        if (this.bitField.fRunning && sCount === undefined) {
             this.cpu.stopCPU();
             return;
         }
@@ -4262,7 +4262,7 @@ if (DEBUGGER) {
                 if (nCycles !== undefined) {
                     this.cpu.resetChecksum();
                 }
-                this.println("checksums " + (this.cpu.aFlags.fChecksum? "enabled" : "disabled"));
+                this.println("checksums " + (this.cpu.bitField.fChecksum? "enabled" : "disabled"));
                 break;
             case "sp":
                 if (asArgs[2] !== undefined) {

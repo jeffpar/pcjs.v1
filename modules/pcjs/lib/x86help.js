@@ -305,7 +305,7 @@ var X86Help = {
          * are there any other instructions that were, um, less explicit but also require a non-null selector?
          */
         if ((src & X86.SEL.MASK) && this.segVER.load(src, true) != null) {
-            var fConforming = ((this.segVER.acc & X86.DESC.ACC.TYPE.CODE_CONFORMING_EXECONLY) == X86.DESC.ACC.TYPE.CODE_CONFORMING_EXECONLY);
+            var fConforming = ((this.segVER.acc & X86.DESC.ACC.TYPE.CODE_CONFORMING) == X86.DESC.ACC.TYPE.CODE_CONFORMING);
             if ((fConforming || this.segVER.dpl >= this.segCS.cpl) && this.segVER.dpl >= (src & X86.SEL.RPL)) {
                 this.setZF();
                 return this.segVER.limit;
@@ -454,18 +454,6 @@ var X86Help = {
         }
     },
     /**
-     * opHelpDIVOverflow()
-     *
-     * @this {X86CPU}
-     */
-    opHelpDIVOverflow: function() {
-        this.setIP(this.opEA - this.segCS.base);
-        /*
-         * TODO: Determine the proper cycle cost.
-         */
-        X86Help.opHelpINT.call(this, X86.EXCEPTION.DIV_ERR, null, 2);
-    },
-    /**
      * opHelpINT(nIDT, nError, nCycles)
      *
      * @this {X86CPU}
@@ -478,6 +466,7 @@ var X86Help = {
          * TODO: We assess the cycle cost up front, because otherwise, if loadIDT() fails, no cost may be assessed.
          */
         this.nStepCycles -= this.CYCLES.nOpCyclesInt + nCycles;
+        this.segCS.fCall = true;
         var regPS = this.getPS();
         var regCS = this.segCS.sel;
         var regIP = this.regIP;
@@ -490,17 +479,6 @@ var X86Help = {
             if (nError != null) this.pushWord(nError);
             this.nFault = -1;
         }
-        /*
-        if (X86Help.opHelpLoadIDT.call(this, nIDT)) {
-            if (this.descIDT.maskPS) {
-                X86Help.opHelpPushPS.call(this, nError);
-            } else {
-                X86Help.opHelpSwitchTSS.call(this, this.descIDT.sel, true);
-            }
-            return;
-        }
-        X86Help.opHelpFault.call(this, X86.EXCEPTION.GP_FAULT, (nIDT << 3) | X86.ERRCODE.IDT | X86.ERRCODE.EXT, true);
-        */
     },
     /**
      * opHelpIRET()
@@ -516,7 +494,7 @@ var X86Help = {
             if (this.regPS & X86.PS.NT) {
                 var addrNew = this.segTSS.base;
                 var sel = this.getWord(addrNew + X86.TSS.PREV_TSS);
-                X86Help.opHelpSwitchTSS.call(this, sel, false);
+                X86Seg.switchTSS.call(this.segCS, sel, false);
                 return;
             }
         }
@@ -529,137 +507,16 @@ var X86Help = {
         }
     },
     /**
-     * opHelpLoadIDT(nIDT)
-     *
-     * Updates descIDT as follows:
-     *
-     *      descIDT.off     0x0-0x1     offset of interrupt handler
-     *      descIDT.sel     0x2-0x3     selector of interrupt handler
-     *      descIDT.acc     0x4-0x5     access word (protected-mode only)
-     *      descIDT.maskPS              mask to apply PS after saving current PS (0 if none; ie, task switch)
+     * opHelpDIVOverflow()
      *
      * @this {X86CPU}
-     * @param {number} nIDT
-     * @return {boolean} true if successful, false if not (all failure cases currently limited to protected mode)
      */
-    opHelpLoadIDT: function(nIDT) {
-        var offIDT;
-
-        if (DEBUG) this.assert(nIDT >= 0 && nIDT < 256);
-
-        if (this.regMSW & X86.MSW.PE) {
-            offIDT = this.addrIDT + (nIDT << 3);
-            if (offIDT + 7 > this.addrIDTLimit) {
-                return false;
-            }
-            this.descIDT.off = this.getWord(offIDT);
-            this.descIDT.sel = this.getWord(offIDT + 2);
-            this.descIDT.acc = this.getWord(offIDT + 4);
-            this.descIDT.maskPS = 0;
-
-            switch (this.descIDT.acc & X86.DESC.ACC.TYPE.MASK) {
-            case X86.DESC.ACC.TYPE.GATE_INT:
-                this.descIDT.maskPS = ~(X86.PS.NT | X86.PS.TF | X86.PS.IF);
-                break;
-            case X86.DESC.ACC.TYPE.GATE_TRAP:
-                this.descIDT.maskPS = ~(X86.PS.NT | X86.PS.TF);
-                break;
-            case X86.DESC.ACC.TYPE.GATE_TASK:
-                break;
-            default:
-                if (DEBUG) this.assert(false, "INT 0x" + str.toHexByte(nIDT) + ": unrecognized IDT entry");
-                return false;
-            }
-            return true;
-        }
-        if (DEBUG) this.assert(!this.addrIDT && this.addrIDTLimit == 0x03FF);
+    opHelpDIVOverflow: function() {
+        this.setIP(this.opEA - this.segCS.base);
         /*
-         * Intel documentation for INT/INTO under "REAL ADDRESS MODE EXCEPTIONS" says:
-         *
-         *      "[T]he 80286 will shut down if the SP = 1, 3, or 5 before executing the INT or INTO instruction--due to lack of stack space"
-         *
-         * TODO: Verify that 80286 real-mode actually enforces the above.  See http://localhost:8088/pubs/pc/reference/intel/80286/progref/#page-260
+         * TODO: Determine the proper cycle cost.
          */
-        offIDT = this.addrIDT + (nIDT << 2);
-        this.descIDT.off = this.getWord(offIDT);
-        this.descIDT.sel = this.getWord(offIDT + 2);
-        this.descIDT.maskPS = ~(X86.PS.TF | X86.PS.IF);
-        return true;
-    },
-    /**
-     * opHelpSwitchTSS(selNew, fNest)
-     *
-     * Helper implementing TSS (Task State Segment) task switching.
-     *
-     * @this {X86CPU}
-     * @param {number} selNew
-     * @param {boolean} fNest is true if nesting, false if un-nesting
-     * @return {boolean} true if successful, false if error
-     */
-    opHelpSwitchTSS: function(selNew, fNest) {
-        var addrOld = this.segTSS.base;
-        var cplOld = this.segCS.cpl;
-        var selOld = this.segTSS.sel;
-        if (!fNest) {
-            if (this.segTSS.type != X86.DESC.ACC.TYPE.TSS_BUSY) {
-                X86Help.opHelpFault.call(this, X86.EXCEPTION.TS_FAULT, selNew, true);
-                return false;
-            }
-            this.setWord(this.segTSS.addrDesc + X86.DESC.ACC.OFFSET, (this.segTSS.acc & ~X86.DESC.ACC.TYPE.TSS_BUSY) | X86.DESC.ACC.TYPE.TSS);
-        }
-        if (this.segTSS.load(selNew) == null) {
-            return false;
-        }
-        var addrNew = this.segTSS.base;
-        if (DEBUG) {
-            this.messageDebugger((fNest? "Task switch" : "Task return") + ": TR " + str.toHexWord(selOld) + " (%" + str.toHex(addrOld, 6) + "), new TR " + str.toHexWord(selNew) + " (%" + str.toHex(addrNew, 6) + ")", Debugger.MESSAGE.TSS);
-        }
-        if (fNest) {
-            if (this.segTSS.type == X86.DESC.ACC.TYPE.TSS_BUSY) {
-                X86Help.opHelpFault.call(this, X86.EXCEPTION.GP_FAULT, selNew, true);
-                return false;
-            }
-            this.setWord(this.segTSS.addrDesc + X86.DESC.ACC.OFFSET, this.segTSS.acc |= X86.DESC.ACC.TYPE.TSS_BUSY);
-            this.segTSS.type = X86.DESC.ACC.TYPE.TSS_BUSY;
-        }
-        this.setWord(addrOld + X86.TSS.TASK_IP, this.regIP);
-        this.setWord(addrOld + X86.TSS.TASK_PS, this.getPS());
-        this.setWord(addrOld + X86.TSS.TASK_AX, this.regAX);
-        this.setWord(addrOld + X86.TSS.TASK_CX, this.regCX);
-        this.setWord(addrOld + X86.TSS.TASK_DX, this.regDX);
-        this.setWord(addrOld + X86.TSS.TASK_BX, this.regBX);
-        this.setWord(addrOld + X86.TSS.TASK_SP, this.regSP);
-        this.setWord(addrOld + X86.TSS.TASK_BP, this.regBP);
-        this.setWord(addrOld + X86.TSS.TASK_SI, this.regSI);
-        this.setWord(addrOld + X86.TSS.TASK_DI, this.regDI);
-        this.setWord(addrOld + X86.TSS.TASK_ES, this.segES.sel);
-        this.setWord(addrOld + X86.TSS.TASK_CS, this.segCS.sel);
-        this.setWord(addrOld + X86.TSS.TASK_SS, this.segSS.sel);
-        this.setWord(addrOld + X86.TSS.TASK_DS, this.segDS.sel);
-        var offSS = X86.TSS.TASK_SS;
-        var offSP = X86.TSS.TASK_SP;
-        this.setPS(this.getWord(addrNew + X86.TSS.TASK_PS) | (fNest? X86.PS.NT : 0));
-        if (DEBUG) this.assert(!fNest || !!(this.regPS & X86.PS.NT));
-        this.regAX = this.getWord(addrNew + X86.TSS.TASK_AX);
-        this.regCX = this.getWord(addrNew + X86.TSS.TASK_CX);
-        this.regDX = this.getWord(addrNew + X86.TSS.TASK_DX);
-        this.regBX = this.getWord(addrNew + X86.TSS.TASK_BX);
-        this.regBP = this.getWord(addrNew + X86.TSS.TASK_BP);
-        this.regSI = this.getWord(addrNew + X86.TSS.TASK_SI);
-        this.regDI = this.getWord(addrNew + X86.TSS.TASK_DI);
-        this.segES.load(this.getWord(addrNew + X86.TSS.TASK_ES));
-        this.segDS.load(this.getWord(addrNew + X86.TSS.TASK_DS));
-        this.setCSIP(this.getWord(addrNew + X86.TSS.TASK_IP), this.getWord(addrNew + X86.TSS.TASK_CS));
-        if (this.segCS.cpl < cplOld) {
-            offSP = (this.segCS.cpl << 2) + X86.TSS.CPL0_SP;
-            offSS = offSP + 2;
-        }
-        this.regSP = this.getWord(addrNew + offSP);
-        this.segSS.load(this.getWord(addrNew + offSS));
-        this.segLDT.load(this.getWord(addrNew + X86.TSS.TASK_LDT));
-        if (fNest) this.setWord(addrNew + X86.TSS.PREV_TSS, selOld);
-        this.regMSW |= X86.MSW.TS;
-        return true;
+        X86Help.opHelpINT.call(this, X86.EXCEPTION.DIV_ERR, null, 2);
     },
     /**
      * opHelpFault(nFault, nError, fHalt)
@@ -671,27 +528,28 @@ var X86Help = {
      * @param {number} [nError]
      * @param {boolean} [fHalt] will halt the CPU if true *and* a Debugger is loaded
      */
-    opHelpFault: function(nFault, nError, fHalt) {
-        if (!this.aFlags.fComplete) {
-            // this.messageDebugger("Fault " + str.toHexByte(nFault) + " blocked by Debugger", Debugger.MESSAGE.WARN);
+    opHelpFault: function(nFault, nError, fHalt)
+    {
+        if (!this.bitField.fComplete) {
+            this.messageDebugger("Fault " + str.toHexByte(nFault) + " blocked by Debugger", Debugger.MESSAGE.WARN);
             this.setIP(this.opEA - this.segCS.base);
             return;
         }
-        var fFault = false;
+        var fDispatch = false;
         if (this.model >= X86.MODEL_80186) {
             if (this.nFault < 0) {
                 /*
                  * Single-fault (error code is passed through, and the responsible instruction is restartable)
                  */
                 this.setIP(this.opEA - this.segCS.base);
-                fFault = true;
+                fDispatch = true;
             } else if (this.nFault != X86.EXCEPTION.DF_FAULT) {
                 /*
                  * Double-fault (error code is always zero, and the responsible instruction is not restartable)
                  */
                 nError = 0;
                 nFault = X86.EXCEPTION.DF_FAULT;
-                fFault = true;
+                fDispatch = true;
             } else {
                 /*
                  * Triple-fault (usually referred to in Intel literature as a "shutdown", but at least on the 80286,
@@ -703,9 +561,24 @@ var X86Help = {
             }
         }
         if (X86Help.opHelpFaultMessage.call(this, nFault, nError, fHalt)) {
-            fFault = false;
+            fDispatch = false;
         }
-        if (fFault) X86Help.opHelpINT.call(this, this.nFault = nFault, nError, 0);
+        if (fDispatch) X86Help.opHelpINT.call(this, this.nFault = nFault, nError, 0);
+
+        /*
+         * Since this fault is likely being issued in the context of an instruction that hasn't finished
+         * executing, and since we currently don't do anything to interrupt that execution (eg, throw a
+         * JavaScript exception), and since we don't want that instruction to perform any writes that might
+         * be destructive, we should shut off all further reads/writes for the current instruction.
+         *
+         * As long as we're not using EAFUNCS, this is easy for any EA-based memory accesses: simply set
+         * the NOREAD and NOWRITE flags.  However, there may still be direct, non-EA-based memory accesses that
+         * could cause us grief.  TODO: Implement the ultimate solution, which will involve setting a special
+         * flag and throwing an exception that the CPU must intercept and then quietly ignore.
+         */
+        if (!EAFUNCS) {
+            this.opFlags &= ~(X86.OPFLAG.NOREAD | X86.OPFLAG.NOWRITE);
+        }
     },
     /**
      * opHelpFaultMessage()
@@ -714,22 +587,26 @@ var X86Help = {
      * halt exception processing in tracks: return true to prevent the fault handler from being dispatched.
      *
      * TODO: Provide the Debugger with some UI to control its "interference" with fault dispatching, and to
-     * continue the dispatch after it has interfered.
+     * continue the dispatch after it has interfered.  At the moment, your only option is to single-step over
+     * the offending instruction to allow the fault to be dispatched.
      *
      * @this {X86CPU}
      * @param {number} nFault
      * @param {number} [nError]
      * @param {boolean} [fHalt] will halt the CPU if true *and* a Debugger is loaded
-     * @return {boolean} true to halt the CPU, false if not
+     * @return {boolean|undefined} true to block the fault, otherwise dispatch it
      */
-    opHelpFaultMessage: function(nFault, nError, fHalt) {
-        /*
-         * TODO: When we're done examining all GP faults, change the following to "fHalt || false"
-         */
-        fHalt = fHalt || (nFault == X86.EXCEPTION.GP_FAULT);
-
+    opHelpFaultMessage: function(nFault, nError, fHalt)
+    {
         var bitsMessage = Debugger.MESSAGE.FAULT;
         var bOpcode = this.bus.getByteDirect(this.regEIP);
+
+        var fDebugger = false;
+        if (DEBUGGER && this.dbg) {
+            fDebugger = true;
+            if (nFault == X86.EXCEPTION.GP_FAULT) fHalt = true;
+        }
+
         /*
          * OS/2 1.0 uses an INT3 (0xCC) opcode in conjunction with an invalid IDT to trigger a triple-fault
          * reset and return to real-mode, and these resets happen quite frequently during boot; for example,
@@ -755,14 +632,19 @@ var X86Help = {
         if (this.regEIP >= 0x0F0000 && this.regEIP <= 0x0FFFFF) {
             fHalt = false;
         }
-        var sMessage = "Fault " + str.toHexByte(nFault) + (nError != null? " (" + str.toHexWord(nError) + ")" : "") + " on opcode 0x" + str.toHexByte(bOpcode) + " at " + str.toHexAddr(this.regIP, this.segCS.sel) + " (%" + str.toHex(this.regEIP, 6) + ")";
 
-        if (DEBUGGER && this.dbg) {
-            this.messageDebugger(sMessage, bitsMessage);
-            if (fHalt) this.dbg.stopCPU();
-        } else if (fHalt) {
-            this.notice(sMessage);
-            this.stopCPU();
+        if (fDebugger && this.dbg.messageEnabled(bitsMessage) || !fDebugger && fHalt) {
+            var sMessage = "Fault " + str.toHexByte(nFault) + (nError != null? " (" + str.toHexWord(nError) + ")" : "") + " on opcode 0x" + str.toHexByte(bOpcode) + " at " + str.toHexAddr(this.regIP, this.segCS.sel) + " (%" + str.toHex(this.regEIP, 6) + ")";
+            if (fDebugger) {
+                this.messageDebugger(sMessage, bitsMessage);
+                if (fHalt) {
+                    fHalt = this.bitField.fRunning;
+                    this.dbg.stopCPU();
+                }
+            } else if (fHalt) {
+                this.notice(sMessage);
+                this.stopCPU();
+            }
         }
         return fHalt;
     }

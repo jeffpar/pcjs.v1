@@ -138,10 +138,10 @@ var X86Op0F = {
         this.regDX = this.getWord(0x830);
         this.regCX = this.getWord(0x832);
         this.regAX = this.getWord(0x834);
-        this.segES.loadDesc6(this.getWord(0x824), 0x836);
-        this.segCS.loadDesc6(this.getWord(0x822), 0x83C);
-        this.segSS.loadDesc6(this.getWord(0x820), 0x842);
-        this.segDS.loadDesc6(this.getWord(0x81E), 0x848);
+        this.segES.loadDesc6(0x836, this.getWord(0x824));
+        this.segCS.loadDesc6(0x83C, this.getWord(0x822));
+        this.segSS.loadDesc6(0x842, this.getWord(0x820));
+        this.segDS.loadDesc6(0x848, this.getWord(0x81E));
         this.setPS(this.getWord(0x818));
         this.setIP(this.getWord(0x81A));
         /*
@@ -149,10 +149,10 @@ var X86Op0F = {
          */
         this.addrGDT = this.getWord(0x84E) | (this.getWord(0x850) << 16);
         this.addrGDTLimit = this.addrGDT + this.getWord(0x852);
-        this.segLDT.loadDesc6(this.getWord(0x81C), 0x854);
+        this.segLDT.loadDesc6(0x854, this.getWord(0x81C));
         this.addrIDT = this.getWord(0x85A) | (this.getWord(0x85C) << 16);
         this.addrIDTLimit = this.addrIDT + this.getWord(0x85E);
-        this.segTSS.loadDesc6(this.getWord(0x816), 0x860);
+        this.segTSS.loadDesc6(0x860, this.getWord(0x816));
         this.nStepCycles -= 195;
         /*
          * TODO: LOADALL operation still needs to be verified in protected mode....
@@ -246,7 +246,7 @@ var X86Op0F = {
                  * current privilege level and the selector's RPL.
                  */
                 if (this.segVER.dpl >= this.segCS.cpl && this.segVER.dpl >= (dst & X86.SEL.RPL) ||
-                    (this.segVER.acc & X86.DESC.ACC.TYPE.CODE_CONFORMING_EXECONLY) == X86.DESC.ACC.TYPE.CODE_CONFORMING_EXECONLY) {
+                    (this.segVER.acc & X86.DESC.ACC.TYPE.CODE_CONFORMING) == X86.DESC.ACC.TYPE.CODE_CONFORMING) {
                     this.setZF();
                     return dst;
                 }

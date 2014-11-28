@@ -144,7 +144,7 @@ function X86CPU(parmsCPU) {
      * stepCPU() call, but it's good form to do so.
      */
     this.nBurstCycles = 0;
-    this.aFlags.fComplete = this.aFlags.fDebugCheck = false;
+    this.bitField.fComplete = this.bitField.fDebugCheck = false;
 
     /*
      * We're just declaring aMemBlocks and associated Bus parameters here; they'll be initialized by initMemory()
@@ -751,7 +751,7 @@ X86CPU.prototype.initProcessor = function()
  */
 X86CPU.prototype.reset = function()
 {
-    if (this.aFlags.fRunning) this.stopCPU();
+    if (this.bitField.fRunning) this.stopCPU();
     this.resetRegs();
     this.resetCycles();
     this.clearError();      // clear any fatal error/exception that setError() may have flagged
@@ -813,7 +813,6 @@ X86CPU.prototype.resetRegs = function()
      */
     this.regMSW = X86.MSW.SET;
     this.addrIDT = 0; this.addrIDTLimit = 0x03FF;
-    this.descIDT = {off: 0, sel: 0, acc: 0, maskPS: 0};
     this.nIOPL = 0;                                     // this should be set before the first setPS() call
 
     /*
@@ -966,7 +965,7 @@ X86CPU.prototype.checkIntNotify = function(nInt)
      * The enabling of MESSAGE_INT messages is one of the criteria that's also included in the Debugger's
      * checksEnabled() function, and therefore in fDebugCheck, so for maximum speed, we check fDebugCheck first.
      */
-    if (DEBUGGER && this.aFlags.fDebugCheck) {
+    if (DEBUGGER && this.bitField.fDebugCheck) {
         if (this.dbg.messageEnabled(Debugger.MESSAGE.INT) && this.dbg.messageInt(nInt, this.regEIP)) {
             this.addIntReturn(this.regEIP, function(cpu, nCycles) {
                 return function onIntReturn(nLevel) {
@@ -1040,10 +1039,10 @@ X86CPU.prototype.setProtMode = function(fProt)
         fProt = !!(this.regMSW & X86.MSW.PE);
     }
     this.aOpGrp6 = (fProt? X86Op0F.aOpGrp6Prot : X86Op0F.aOpGrp6Real);
-    this.segCS.updateAccess(fProt);
-    this.segDS.updateAccess(fProt);
-    this.segSS.updateAccess(fProt);
-    this.segES.updateAccess(fProt);
+    this.segCS.updateMode(fProt);
+    this.segDS.updateMode(fProt);
+    this.segSS.updateMode(fProt);
+    this.segES.updateMode(fProt);
 };
 
 /**
@@ -2389,7 +2388,7 @@ X86CPU.prototype.delayINTR = function()
  */
 X86CPU.prototype.displayStatus = function(fForce)
 {
-    if (fForce || !this.aFlags.fRunning || this.aFlags.fDisplayLiveRegs) {
+    if (fForce || !this.bitField.fRunning || this.bitField.fDisplayLiveRegs) {
         this.displayReg("AX", this.regAX);
         this.displayReg("BX", this.regBX);
         this.displayReg("CX", this.regCX);
@@ -2452,12 +2451,12 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
      * Debugger is single-stepping (even when performing multiple single-steps), fRunning is never set,
      * so stopCPU() would have no effect as far as the Debugger is concerned.
      */
-    this.aFlags.fComplete = true;
+    this.bitField.fComplete = true;
 
     /*
      * fDebugCheck is true if we need to "check" every instruction with the Debugger.
      */
-    var fDebugCheck = this.aFlags.fDebugCheck = (DEBUGGER && this.dbg && this.dbg.checksEnabled());
+    var fDebugCheck = this.bitField.fDebugCheck = (DEBUGGER && this.dbg && this.dbg.checksEnabled());
 
     /*
      * fDebugSkip is checked only when fDebugCheck is true, and its sole purpose is to tell the first call
@@ -2467,8 +2466,8 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
      * Once we snap fStarting, we clear it, because technically, we've moved beyond "starting" and have officially
      * "started" now.
      */
-    var fDebugSkip = this.aFlags.fStarting || !nMinCycles;
-    this.aFlags.fStarting = false;
+    var fDebugSkip = this.bitField.fStarting || !nMinCycles;
+    this.bitField.fStarting = false;
 
     /*
      * We move the minimum cycle count to nStepCycles (the number of cycles left to step), so that other
@@ -2609,7 +2608,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
             /*
              * Make sure that every instruction is assessing a cycle cost, and that the cost is a net positive.
              */
-            if (this.aFlags.fComplete && this.nStepCycles >= this.nSnapCycles && !(this.opFlags & X86.OPFLAG.PREFIXES)) {
+            if (this.bitField.fComplete && this.nStepCycles >= this.nSnapCycles && !(this.opFlags & X86.OPFLAG.PREFIXES)) {
                 this.println("cycle miscount: " + (this.nSnapCycles - this.nStepCycles));
                 this.setIP(this.opEA - this.segCS.base);
                 this.stopCPU();
@@ -2619,7 +2618,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
 
     } while (this.nStepCycles > 0);
 
-    return (this.aFlags.fComplete? this.nBurstCycles - this.nStepCycles : (this.aFlags.fComplete === undefined? 0 : -1));
+    return (this.bitField.fComplete? this.nBurstCycles - this.nStepCycles : (this.bitField.fComplete === undefined? 0 : -1));
 };
 
 /**

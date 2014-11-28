@@ -44,7 +44,7 @@ function C1PSerialPort(parmsSerial)
 {
     Component.call(this, "C1PSerialPort", parmsSerial);
 
-    this.aFlags.fPowered = false;
+    this.bitField.fPowered = false;
     this.fDemo = parmsSerial['demo'];
 
     this.STATUS_NONE = 0x00;
@@ -202,8 +202,8 @@ C1PSerialPort.prototype.setBuffer = function(abMemory, start, end, cpu)
  */
 C1PSerialPort.prototype.setPower = function(fOn, cmp)
 {
-    if (fOn && !this.aFlags.fPowered) {
-        this.aFlags.fPowered = true;
+    if (fOn && !this.bitField.fPowered) {
+        this.bitField.fPowered = true;
         this.cmp = cmp;
         this.kbd = cmp.getComponentByType("keyboard");
         if (DEBUGGER) this.dbg = cmp.getComponentByType("debugger");

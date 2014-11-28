@@ -84,7 +84,7 @@ function X86Seg(cpu, id, sName, fProt)
     this.awScratch = (this.id == X86Seg.ID.CODE? new Array(32) : []);
     this.fCall = null;
     this.fStackSwitch = false;
-    this.updateAccess(fProt);
+    this.updateMode(fProt);
 }
 
 X86Seg.ID = {
@@ -121,7 +121,7 @@ X86Seg.loadReal = function loadReal(sel, fSuppress)
 /**
  * loadProt(sel, fSuppress)
  *
- * This replaces the segment's default load() function whenever the segment is notified via updateAccess() by the
+ * This replaces the segment's default load() function whenever the segment is notified via updateMode() by the
  * CPU's setProtMode() that the processor is now in protected-mode.
  *
  * Segments in protected-mode are referenced by selectors, which are indexes into descriptor tables (GDT or LDT)
@@ -145,12 +145,14 @@ X86Seg.loadProt = function loadProt(sel, fSuppress)
 {
     var addrDT;
     var addrDTLimit;
+    var cpu = this.cpu;
+
     if (!(sel & X86.SEL.LDT)) {
-        addrDT = this.cpu.addrGDT;
-        addrDTLimit = this.cpu.addrGDTLimit;
+        addrDT = cpu.addrGDT;
+        addrDTLimit = cpu.addrGDTLimit;
     } else {
-        addrDT = this.cpu.segLDT.base;
-        addrDTLimit = addrDT + this.cpu.segLDT.limit;
+        addrDT = cpu.segLDT.base;
+        addrDTLimit = addrDT + cpu.segLDT.limit;
     }
     var addrDesc = addrDT + (sel & X86.SEL.MASK);
     if (addrDesc + 7 <= addrDTLimit) {
@@ -159,8 +161,8 @@ X86Seg.loadProt = function loadProt(sel, fSuppress)
          * I simply noted that "POP segreg" takes 5 cycles in real mode and 20 in protected mode, so I'm
          * starting with a 15-cycle difference.  Obviously the difference will be much greater when the load fails.
          */
-        if (!fSuppress) this.cpu.nStepCycles -= 15;
-        return this.loadDesc8(sel, addrDesc);
+        if (!fSuppress) cpu.nStepCycles -= 15;
+        return this.loadDesc8(addrDesc, sel);
     }
     if (!fSuppress) {
         X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, sel);
@@ -177,8 +179,9 @@ X86Seg.loadProt = function loadProt(sel, fSuppress)
  */
 X86Seg.loadRealIDT = function loadRealIDT(nIDT)
 {
+    var cpu = this.cpu;
     if (DEBUG) {
-        this.cpu.assert(nIDT >= 0 && nIDT < 256 && !this.cpu.addrIDT && this.cpu.addrIDTLimit == 0x03FF);
+        cpu.assert(nIDT >= 0 && nIDT < 256 && !cpu.addrIDT && cpu.addrIDTLimit == 0x03FF);
     }
     /*
      * Intel documentation for INT/INTO under "REAL ADDRESS MODE EXCEPTIONS" says:
@@ -187,10 +190,10 @@ X86Seg.loadRealIDT = function loadRealIDT(nIDT)
      *
      * TODO: Verify that 80286 real-mode actually enforces the above.  See http://localhost:8088/pubs/pc/reference/intel/80286/progref/#page-260
      */
-    var offIDT = this.cpu.addrIDT + (nIDT << 2);
-    this.cpu.regIP = this.cpu.getWord(offIDT);
-    this.sel = this.cpu.getWord(offIDT + 2);
-    this.cpu.regPS &= ~(X86.PS.TF | X86.PS.IF);
+    var offIDT = cpu.addrIDT + (nIDT << 2);
+    cpu.regIP = cpu.getWord(offIDT);
+    this.sel = cpu.getWord(offIDT + 2);
+    cpu.regPS &= ~(X86.PS.TF | X86.PS.IF);
     return this.base = this.sel << 4;
 };
 
@@ -203,12 +206,13 @@ X86Seg.loadRealIDT = function loadRealIDT(nIDT)
  */
 X86Seg.loadProtIDT = function loadProtIDT(nIDT)
 {
-    if (DEBUG) this.cpu.assert(nIDT >= 0 && nIDT < 256);
+    var cpu = this.cpu;
+    if (DEBUG) cpu.assert(nIDT >= 0 && nIDT < 256);
 
     nIDT <<= 3;
-    var addrDesc = this.cpu.addrIDT + nIDT;
-    if (addrDesc + 7 <= this.cpu.addrIDTLimit) {
-        return this.loadDesc8(nIDT, addrDesc);
+    var addrDesc = cpu.addrIDT + nIDT;
+    if (addrDesc + 7 <= cpu.addrIDTLimit) {
+        return this.loadDesc8(addrDesc, nIDT);
     }
     X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, nIDT | X86.ERRCODE.IDT | X86.ERRCODE.EXT, true);
     return null;
@@ -350,12 +354,123 @@ X86Seg.checkWriteProtDisallowed = function checkWriteProtDisallowed(off, cb, fSu
     return null;
 };
 
+/**
+ * switchTSS(selNew, fNest)
+ *
+ * Implements TSS (Task State Segment) task switching.
+ *
+ * @this {X86Seg}
+ * @param {number} selNew
+ * @param {boolean} fNest is true if nesting, false if un-nesting
+ * @return {boolean} true if successful, false if error
+ */
+X86Seg.switchTSS = function switchTSS(selNew, fNest)
+{
+    var cpu = this.cpu;
+    if (DEBUG) cpu.assert(this === cpu.segCS);
+
+    var addrOld = cpu.segTSS.base;
+    var cplOld = this.cpl;
+    var selOld = cpu.segTSS.sel;
+    if (!fNest) {
+        if (cpu.segTSS.type != X86.DESC.ACC.TYPE.TSS_BUSY) {
+            X86Help.opHelpFault.call(cpu, X86.EXCEPTION.TS_FAULT, selNew, true);
+            return false;
+        }
+        cpu.setWord(cpu.segTSS.addrDesc + X86.DESC.ACC.OFFSET, (cpu.segTSS.acc & ~X86.DESC.ACC.TYPE.TSS_BUSY) | X86.DESC.ACC.TYPE.TSS);
+    }
+    if (cpu.segTSS.load(selNew) == null) {
+        return false;
+    }
+    var addrNew = cpu.segTSS.base;
+    if (DEBUG) {
+        cpu.messageDebugger((fNest? "Task switch" : "Task return") + ": TR " + str.toHexWord(selOld) + " (%" + str.toHex(addrOld, 6) + "), new TR " + str.toHexWord(selNew) + " (%" + str.toHex(addrNew, 6) + ")", Debugger.MESSAGE.TSS);
+    }
+    if (fNest) {
+        if (cpu.segTSS.type == X86.DESC.ACC.TYPE.TSS_BUSY) {
+            X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, selNew, true);
+            return false;
+        }
+        cpu.setWord(cpu.segTSS.addrDesc + X86.DESC.ACC.OFFSET, cpu.segTSS.acc |= X86.DESC.ACC.TYPE.TSS_BUSY);
+        cpu.segTSS.type = X86.DESC.ACC.TYPE.TSS_BUSY;
+    }
+    cpu.setWord(addrOld + X86.TSS.TASK_IP, cpu.regIP);
+    cpu.setWord(addrOld + X86.TSS.TASK_PS, cpu.getPS());
+    cpu.setWord(addrOld + X86.TSS.TASK_AX, cpu.regAX);
+    cpu.setWord(addrOld + X86.TSS.TASK_CX, cpu.regCX);
+    cpu.setWord(addrOld + X86.TSS.TASK_DX, cpu.regDX);
+    cpu.setWord(addrOld + X86.TSS.TASK_BX, cpu.regBX);
+    cpu.setWord(addrOld + X86.TSS.TASK_SP, cpu.regSP);
+    cpu.setWord(addrOld + X86.TSS.TASK_BP, cpu.regBP);
+    cpu.setWord(addrOld + X86.TSS.TASK_SI, cpu.regSI);
+    cpu.setWord(addrOld + X86.TSS.TASK_DI, cpu.regDI);
+    cpu.setWord(addrOld + X86.TSS.TASK_ES, cpu.segES.sel);
+    cpu.setWord(addrOld + X86.TSS.TASK_CS, cpu.segCS.sel);
+    cpu.setWord(addrOld + X86.TSS.TASK_SS, cpu.segSS.sel);
+    cpu.setWord(addrOld + X86.TSS.TASK_DS, cpu.segDS.sel);
+    var offSS = X86.TSS.TASK_SS;
+    var offSP = X86.TSS.TASK_SP;
+    cpu.setPS(cpu.getWord(addrNew + X86.TSS.TASK_PS) | (fNest? X86.PS.NT : 0));
+    if (DEBUG) cpu.assert(!fNest || !!(cpu.regPS & X86.PS.NT));
+    cpu.regAX = cpu.getWord(addrNew + X86.TSS.TASK_AX);
+    cpu.regCX = cpu.getWord(addrNew + X86.TSS.TASK_CX);
+    cpu.regDX = cpu.getWord(addrNew + X86.TSS.TASK_DX);
+    cpu.regBX = cpu.getWord(addrNew + X86.TSS.TASK_BX);
+    cpu.regBP = cpu.getWord(addrNew + X86.TSS.TASK_BP);
+    cpu.regSI = cpu.getWord(addrNew + X86.TSS.TASK_SI);
+    cpu.regDI = cpu.getWord(addrNew + X86.TSS.TASK_DI);
+    cpu.segES.load(cpu.getWord(addrNew + X86.TSS.TASK_ES));
+    cpu.segDS.load(cpu.getWord(addrNew + X86.TSS.TASK_DS));
+    cpu.setCSIP(cpu.getWord(addrNew + X86.TSS.TASK_IP), cpu.getWord(addrNew + X86.TSS.TASK_CS));
+    if (this.cpl < cplOld) {
+        offSP = (this.cpl << 2) + X86.TSS.CPL0_SP;
+        offSS = offSP + 2;
+    }
+    cpu.regSP = cpu.getWord(addrNew + offSP);
+    cpu.segSS.load(cpu.getWord(addrNew + offSS));
+    cpu.segLDT.load(cpu.getWord(addrNew + X86.TSS.TASK_LDT));
+    if (fNest) cpu.setWord(addrNew + X86.TSS.PREV_TSS, selOld);
+    cpu.regMSW |= X86.MSW.TS;
+    return true;
+};
+
 /*
  * Object methods
  */
 
 /**
- * loadDesc6(sel, addrDesc)
+ * loadAcc(sel, fGDT)
+ *
+ * @this {X86Seg}
+ * @param {number} sel (protected-mode only)
+ * @param {boolean} [fGDT] is true if sel must be in the GDT
+ * @return {number|null} acc field from descriptor, or null if error
+ */
+X86Seg.prototype.loadAcc = function(sel, fGDT)
+{
+    var addrDT;
+    var addrDTLimit;
+    var cpu = this.cpu;
+
+    if (!(sel & X86.SEL.LDT)) {
+        addrDT = cpu.addrGDT;
+        addrDTLimit = cpu.addrGDTLimit;
+    } else if (!fGDT) {
+        addrDT = cpu.segLDT.base;
+        addrDTLimit = addrDT + cpu.segLDT.limit;
+    }
+    if (addrDT !== undefined) {
+        var addrDesc = addrDT + (sel & X86.SEL.MASK);
+        if (addrDesc + 7 <= addrDTLimit) {
+            return cpu.getWord(addrDesc + X86.DESC.ACC.OFFSET);
+        }
+    }
+    X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel);
+    return null;
+};
+
+/**
+ * loadDesc6(addrDesc, sel)
  *
  * Used to load a protected-mode selector that refers to a 6-byte "descriptor cache" (aka LOADALL) entry:
  *
@@ -364,22 +479,23 @@ X86Seg.checkWriteProtDisallowed = function checkWriteProtDisallowed(off, cb, fSu
  *      word 2: segment limit (0-15)
  *
  * @this {X86Seg}
- * @param {number} sel is the selector
- * @param {number} addrDesc is the offset
+ * @param {number} addrDesc is the descriptor address
+ * @param {number} sel is the associated selector
  * @return {number} base address of selected segment
  */
-X86Seg.prototype.loadDesc6 = function(sel, addrDesc)
+X86Seg.prototype.loadDesc6 = function(addrDesc, sel)
 {
-    var acc = this.cpu.getWord(addrDesc + 2);
-    var base = this.cpu.getWord(addrDesc + 0) | ((acc & 0xff) << 16);
-    var limit = this.cpu.getWord(addrDesc + 4);
+    var cpu = this.cpu;
+    var acc = cpu.getWord(addrDesc + 2);
+    var base = cpu.getWord(addrDesc + 0) | ((acc & 0xff) << 16);
+    var limit = cpu.getWord(addrDesc + 4);
 
     this.sel = sel;
     this.base = base;
     this.limit = limit;
     this.acc = acc & X86.DESC.ACC.MASK;
     this.addrDesc = addrDesc;
-    this.updateAccess();
+    this.updateMode();
 
     this.messageDebugger(sel, base, limit, acc);
 
@@ -387,7 +503,7 @@ X86Seg.prototype.loadDesc6 = function(sel, addrDesc)
 };
 
 /**
- * loadDesc8(sel, addrDesc)
+ * loadDesc8(addrDesc, sel)
  *
  * Used to load a protected-mode selector that refers to an 8-byte "descriptor table" (GDT, LDT, IDT) entry:
  *
@@ -399,22 +515,23 @@ X86Seg.prototype.loadDesc6 = function(sel, addrDesc)
  * See X86.DESC for offset and bit definitions.
  *
  * @this {X86Seg}
- * @param {number} sel is the selector
- * @param {number} addrDesc is the offset
+ * @param {number} addrDesc is the descriptor address
+ * @param {number} sel is the associated selector
  * @return {number|null} base address of selected segment, or null if error
  */
-X86Seg.prototype.loadDesc8 = function(sel, addrDesc)
+X86Seg.prototype.loadDesc8 = function(addrDesc, sel)
 {
-    var limit = this.cpu.getWord(addrDesc + X86.DESC.LIMIT.OFFSET);
-    var acc = this.cpu.getWord(addrDesc + X86.DESC.ACC.OFFSET);
+    var cpu = this.cpu;
+    var limit = cpu.getWord(addrDesc + X86.DESC.LIMIT.OFFSET);
+    var acc = cpu.getWord(addrDesc + X86.DESC.ACC.OFFSET);
     var type = (acc & X86.DESC.ACC.TYPE.MASK);
-    var base = this.cpu.getWord(addrDesc + X86.DESC.BASE.OFFSET) | ((acc & X86.DESC.ACC.BASE1623) << 16);
-    var ext = (DEBUG? this.cpu.getWord(addrDesc + X86.DESC.EXT.OFFSET) : 0);
+    var base = cpu.getWord(addrDesc + X86.DESC.BASE.OFFSET) | ((acc & X86.DESC.ACC.BASE1623) << 16);
+    var ext = (DEBUG? cpu.getWord(addrDesc + X86.DESC.EXT.OFFSET) : 0);
     var selMasked = sel & X86.SEL.MASK;
 
     while (true) {
 
-        var cplPrev, addrTSS, offSP, offSS, regSPPrev, regSSPrev;
+        var accCode, selCode, cplPrev, addrTSS, offSP, offSS, regSPPrev, regSSPrev;
 
         if (this.id == X86Seg.ID.CODE) {
             this.fStackSwitch = false;
@@ -422,93 +539,128 @@ X86Seg.prototype.loadDesc8 = function(sel, addrDesc)
             var rpl = sel & X86.SEL.RPL;
             var dpl = (acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
             var regSP;
-            if (type == X86.DESC.ACC.TYPE.GATE_CALL) {
-                /*
-                 * Since we are X86Seg.ID.CODE, we can use this.cpl instead of the more generic this.cpu.segCS.cpl
-                 */
-                if (rpl < this.cpl) rpl = this.cpl;
-                if (rpl <= dpl) {
-                    cplPrev = this.cpl;
-                    if (this.load(base & 0xffff, true) != null) {
-                        this.cpu.regIP = limit;
-                        if (this.cpl < cplPrev) {
-                            if (fCall !== true) {
-                                base = null;
-                                break;
-                            }
-                            regSP = this.cpu.regSP;
-                            var i = 0, nWords = (acc & 0x1f);
-                            while (nWords--) {
-                                this.awScratch[i++] = this.cpu.getSOWord(this.cpu.segSS, regSP);
-                                regSP += 2;
-                            }
-                            addrTSS = this.cpu.segTSS.base;
-                            offSP = (this.cpl << 2) + X86.TSS.CPL0_SP;
-                            offSS = offSP + 2;
-                            regSPPrev = this.cpu.regSP;
-                            regSSPrev = this.cpu.segSS.sel;
-                            this.cpu.regSP = this.cpu.getWord(addrTSS + offSP);
-                            this.cpu.segSS.load(this.cpu.getWord(addrTSS + offSS));
-                            this.cpu.pushWord(regSSPrev);
-                            this.cpu.pushWord(regSPPrev);
-                            while (i) this.cpu.pushWord(this.awScratch[--i]);
-                            this.fStackSwitch = true;
-                        }
-                        return this.base;
-                    }
-                }
-            }
-            else if (type == X86.DESC.ACC.TYPE.GATE_INT || type == X86.DESC.ACC.TYPE.GATE_TRAP) {
-                if (rpl < this.cpl) rpl = this.cpl;
-                if (rpl <= dpl) {
-                    cplPrev = this.cpl;
-                    if (this.load(base & 0xffff, true) != null) {
-                        this.cpu.regIP = limit;
-                        if (this.cpl < cplPrev) {
-                            if (fCall !== true) {
-                                base = null;
-                                break;
-                            }
-                            regSP = this.cpu.regSP;
-                            addrTSS = this.cpu.segTSS.base;
-                            offSP = (this.cpl << 2) + X86.TSS.CPL0_SP;
-                            offSS = offSP + 2;
-                            regSPPrev = this.cpu.regSP;
-                            regSSPrev = this.cpu.segSS.sel;
-                            this.cpu.regSP = this.cpu.getWord(addrTSS + offSP);
-                            this.cpu.segSS.load(this.cpu.getWord(addrTSS + offSS));
-                            this.cpu.pushWord(regSSPrev);
-                            this.cpu.pushWord(regSPPrev);
-                            this.fStackSwitch = true;
-                        }
-                        if (type == X86.DESC.ACC.TYPE.GATE_INT) {
-                            this.cpu.regPS &= ~(X86.PS.NT | X86.PS.TF | X86.PS.IF);
-                        } else {
-                            this.cpu.regPS &= ~(X86.PS.NT | X86.PS.TF);
-                        }
-                        return this.base;
-                    }
-                }
-            }
-            else if (type >= X86.DESC.ACC.TYPE.CODE_EXECONLY /* || dpl > this.cpu.segCS.cpl */) {
+            if (type >= X86.DESC.ACC.TYPE.CODE_EXECONLY /* || dpl > cpu.segCS.cpl */) {
                 rpl = sel & X86.SEL.RPL;
                 if (rpl > this.cpl) {
                     if (fCall !== false) {
                         base = null;
                         break;
                     }
-                    regSP = this.cpu.popWord();
-                    this.cpu.segSS.load(this.cpu.popWord());
-                    this.cpu.regSP = regSP;
+                    regSP = cpu.popWord();
+                    cpu.segSS.load(cpu.popWord());
+                    cpu.regSP = regSP;
                     this.fStackSwitch = true;
                 }
+            }
+            else if (type == X86.DESC.ACC.TYPE.GATE_CALL) {
+                /*
+                 * Since we are X86Seg.ID.CODE, we can use this.cpl instead of the more generic cpu.segCS.cpl
+                 */
+                selCode = base & 0xffff;
+                if (rpl < this.cpl) rpl = this.cpl;
+                if (rpl > dpl) {
+                    accCode = this.loadAcc(selCode, true);
+                    if (accCode != null && (accCode & X86.DESC.ACC.TYPE.CODE_CONFORMING) == X86.DESC.ACC.TYPE.CODE_CONFORMING) {
+                        rpl = dpl;
+                    }
+                }
+                if (rpl <= dpl) {
+                    cplPrev = this.cpl;
+                    if (this.load(selCode, true) == null) {
+                        if (DEBUG) cpu.assert(false);
+                        base = null;
+                        break;
+                    }
+                    cpu.regIP = limit;
+                    if (this.cpl < cplPrev) {
+                        if (fCall !== true) {
+                            if (DEBUG) cpu.assert(false);
+                            base = null;
+                            break;
+                        }
+                        regSP = cpu.regSP;
+                        var i = 0, nWords = (acc & 0x1f);
+                        while (nWords--) {
+                            this.awScratch[i++] = cpu.getSOWord(cpu.segSS, regSP);
+                            regSP += 2;
+                        }
+                        addrTSS = cpu.segTSS.base;
+                        offSP = (this.cpl << 2) + X86.TSS.CPL0_SP;
+                        offSS = offSP + 2;
+                        regSPPrev = cpu.regSP;
+                        regSSPrev = cpu.segSS.sel;
+                        cpu.regSP = cpu.getWord(addrTSS + offSP);
+                        cpu.segSS.load(cpu.getWord(addrTSS + offSS));
+                        cpu.pushWord(regSSPrev);
+                        cpu.pushWord(regSPPrev);
+                        while (i) cpu.pushWord(this.awScratch[--i]);
+                        this.fStackSwitch = true;
+                    }
+                    return this.base;
+                }
+                if (DEBUG) cpu.assert(false);
+                X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, true);
+                base = null;
+                break;
+            }
+            else if (type == X86.DESC.ACC.TYPE.GATE_INT || type == X86.DESC.ACC.TYPE.GATE_TRAP) {
+                selCode = base & 0xffff;
+                if (dpl > this.cpl) {
+                    accCode = this.loadAcc(selCode, true);
+                    if (accCode != null && (accCode & X86.DESC.ACC.TYPE.CODE_CONFORMING) == X86.DESC.ACC.TYPE.CODE_CONFORMING) {
+                        dpl = this.cpl;
+                    }
+                }
+                if (dpl <= this.cpl) {
+                    cplPrev = this.cpl;
+                    if (this.load(selCode, true) == null) {
+                        if (DEBUG) cpu.assert(false);
+                        base = null;
+                        break;
+                    }
+                    cpu.regIP = limit;
+                    if (this.cpl < cplPrev) {
+                        if (fCall !== true) {
+                            base = null;
+                            break;
+                        }
+                        regSP = cpu.regSP;
+                        addrTSS = cpu.segTSS.base;
+                        offSP = (this.cpl << 2) + X86.TSS.CPL0_SP;
+                        offSS = offSP + 2;
+                        regSPPrev = cpu.regSP;
+                        regSSPrev = cpu.segSS.sel;
+                        cpu.regSP = cpu.getWord(addrTSS + offSP);
+                        cpu.segSS.load(cpu.getWord(addrTSS + offSS));
+                        cpu.pushWord(regSSPrev);
+                        cpu.pushWord(regSPPrev);
+                        this.fStackSwitch = true;
+                    }
+                    if (type == X86.DESC.ACC.TYPE.GATE_INT) {
+                        cpu.regPS &= ~(X86.PS.NT | X86.PS.TF | X86.PS.IF);
+                    } else {
+                        cpu.regPS &= ~(X86.PS.NT | X86.PS.TF);
+                    }
+                    return this.base;
+                }
+                if (DEBUG) cpu.assert(false);
+                X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel | X86.ERRCODE.EXT, true);
+                base = null;
+                break;
+            }
+            else if (type == X86.DESC.ACC.TYPE.GATE_TASK) {
+                if (!X86Seg.switchTSS.call(this, base & 0xffff, true)) {
+                    base = null;
+                    break;
+                }
+                return this.base;
             }
             else {
                 X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, sel, true);
                 base = null;
                 break;
             }
-            if (DEBUG) this.cpu.assert(!!selMasked);    // a null CS selector should be caught by the final preceding check
+            if (DEBUG) cpu.assert(!!selMasked);     // a null CS selector should be caught by the final preceding check
         }
         else if (this.id == X86Seg.ID.DATA) {
             if (selMasked) {
@@ -548,7 +700,7 @@ X86Seg.prototype.loadDesc8 = function(sel, addrDesc)
         this.acc = acc;
         this.type = type;
         this.addrDesc = addrDesc;
-        this.updateAccess();
+        this.updateMode();
         break;
     }
     this.messageDebugger(sel, base, limit, acc, ext);
@@ -612,7 +764,7 @@ X86Seg.prototype.restore = function(a)
 };
 
 /**
- * updateAccess(fProt)
+ * updateMode(fProt)
  *
  * Ensures that the segment register's access (ie, load and check methods) matches the specified (or current)
  * operating mode (real or protected).
@@ -621,7 +773,7 @@ X86Seg.prototype.restore = function(a)
  * @param {boolean} [fProt] true for protected-mode access, false for real-mode access, undefined for current mode
  * @return {boolean}
  */
-X86Seg.prototype.updateAccess = function(fProt)
+X86Seg.prototype.updateMode = function(fProt)
 {
     if (fProt === undefined) {
         fProt = !!(this.cpu.regMSW & X86.MSW.PE);
@@ -684,7 +836,7 @@ X86Seg.prototype.messageDebugger = function(sel, base, limit, acc, ext)
             if (this.id == X86Seg.ID.CODE) sDPL += " cpl=" + this.cpl;
             this.cpu.messageDebugger("loadSeg(" + this.sName + "):" + ch + "sel=" + str.toHexWord(sel) + " base=" + str.toHex(base) + " limit=" + str.toHexWord(limit) + " acc=" + str.toHexWord(acc) + sDPL, Debugger.MESSAGE.SEG);
         }
-        this.cpu.assert(base != null && (!ext || ext == X86.DESC.EXT.AVAIL));
+        this.cpu.assert(/* base != null && */ (!ext || ext == X86.DESC.EXT.AVAIL));
     }
 };
 

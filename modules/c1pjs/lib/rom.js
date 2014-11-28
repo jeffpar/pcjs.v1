@@ -108,8 +108,8 @@ C1PROM.prototype.setBuffer = function(abMemory, start, end, cpu)
  */
 C1PROM.prototype.setPower = function(fOn, cmp)
 {
-    if (fOn && !this.aFlags.fPowered) {
-        this.aFlags.fPowered = true;
+    if (fOn && !this.bitField.fPowered) {
+        this.bitField.fPowered = true;
         if (DEBUGGER) this.dbg = cmp.getComponentByType("debugger");
     }
 };

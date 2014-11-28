@@ -120,7 +120,7 @@ var X86 = {
                 DATA_EXPDOWN_WRITABLE:      0x1600,
                 CODE_EXECONLY:              0x1800,
                 CODE_READABLE:              0x1a00,
-                CODE_CONFORMING_EXECONLY:   0x1c00,
+                CODE_CONFORMING:            0x1c00,
                 CODE_CONFORMING_READABLE:   0x1e00
             },
             DPL: {

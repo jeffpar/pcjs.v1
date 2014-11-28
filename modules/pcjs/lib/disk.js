@@ -652,7 +652,7 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
 {
     var disk = null;
     this.fWriteProtected = false;
-    var fPrintOnly = (nErrorCode < 0 && this.cmp && !this.cmp.aFlags.fPowered);
+    var fPrintOnly = (nErrorCode < 0 && this.cmp && !this.cmp.bitField.fPowered);
 
     if (this.fOnDemand) {
         if (!nErrorCode) {

@@ -124,7 +124,7 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
 
     Component.call(this, "Computer", parmsComputer, Computer);
 
-    this.aFlags.fPowered = false;
+    this.bitField.fPowered = false;
     this.nBusWidth = parmsComputer['buswidth'];
     this.resume = Computer.RESUME_NONE;
     this.sStateData = null;
@@ -537,9 +537,9 @@ Computer.prototype.powerOn = function(resume)
  */
 Computer.prototype.powerRestore = function(component, stateComputer, fRepower, fRestore)
 {
-    if (!component.aFlags.fPowered) {
+    if (!component.bitField.fPowered) {
 
-        component.aFlags.fPowered = true;
+        component.bitField.fPowered = true;
 
         if (component.powerUp) {
 
@@ -642,9 +642,9 @@ Computer.prototype.donePowerOn = function(aParms)
     var fRepower = (aParms[1] < 0);
     var fRestore = aParms[2];
 
-    if (DEBUG && this.aFlags.fPowered) this.messageDebugger("Computer.donePowerOn(): redundant");
+    if (DEBUG && this.bitField.fPowered) this.messageDebugger("Computer.donePowerOn(): redundant");
 
-    this.aFlags.fPowered = true;
+    this.bitField.fPowered = true;
 
     if (!this.fInitialized) {
         this.println(Computer.sAppName + " v" + Computer.sAppVer + "\n" + Computer.sCopyright + "\n" + Computer.LICENSE);
@@ -747,7 +747,7 @@ Computer.prototype.powerOff = function(fSave, fShutdown)
         data = this.cpu.powerDown(fSave, fShutdown);
         if (typeof data === "object") stateComputer.set(this.cpu.id, data);
         if (fShutdown) {
-            this.cpu.aFlags.fPowered = false;
+            this.cpu.bitField.fPowered = false;
             if (data === false) sState = null;
         }
     }
@@ -755,13 +755,13 @@ Computer.prototype.powerOff = function(fSave, fShutdown)
     var aComponents = Component.getComponents(this.id);
     for (var iComponent = 0; iComponent < aComponents.length; iComponent++) {
         var component = aComponents[iComponent];
-        if (component.aFlags.fPowered) {
+        if (component.bitField.fPowered) {
             if (component.powerDown) {
                 data = component.powerDown(fSave, fShutdown);
                 if (typeof data === "object") stateComputer.set(component.id, data);
             }
             if (fShutdown) {
-                component.aFlags.fPowered = false;
+                component.bitField.fPowered = false;
                 if (data === false) sState = null;
             }
         }
@@ -813,7 +813,7 @@ Computer.prototype.powerOff = function(fSave, fShutdown)
         }
     }
 
-    if (fShutdown) this.aFlags.fPowered = false;
+    if (fShutdown) this.bitField.fPowered = false;
 
     return sState;
 };
@@ -1213,7 +1213,7 @@ Computer.init = function()
              */
             var computer = new Computer(parmsComputer, parmsMachine, true);
 
-            if (DEBUG) computer.messageDebugger("onInit(" + computer.aFlags.fPowered + ")");
+            if (DEBUG) computer.messageDebugger("onInit(" + computer.bitField.fPowered + ")");
 
             /*
              * For now, all we support are "reset" and "save" buttons. We may eventually add a "power"
@@ -1243,9 +1243,9 @@ Computer.show = function()
         var computer = Component.getComponentByType("Computer", parmsComputer['id']);
         if (computer) {
 
-            if (DEBUG) computer.messageDebugger("onShow(" + computer.fInitialized + "," + computer.aFlags.fPowered + ")");
+            if (DEBUG) computer.messageDebugger("onShow(" + computer.fInitialized + "," + computer.bitField.fPowered + ")");
 
-            if (computer.fInitialized && !computer.aFlags.fPowered) {
+            if (computer.fInitialized && !computer.bitField.fPowered) {
                 /**
                  * Repower the computer, notifying every component to continue running as-is.
                  */
@@ -1290,9 +1290,9 @@ Computer.exit = function()
         var computer = Component.getComponentByType("Computer", parmsComputer['id']);
         if (computer) {
 
-            if (DEBUG) computer.messageDebugger("onExit(" + computer.aFlags.fPowered + ")");
+            if (DEBUG) computer.messageDebugger("onExit(" + computer.bitField.fPowered + ")");
 
-            if (computer.aFlags.fPowered) {
+            if (computer.bitField.fPowered) {
                 /**
                  * Power "down" the computer, giving every component an opportunity to save its state,
                  * but only if 'resume' has been set AND there is no valid resume path (because if a valid resume
