@@ -719,9 +719,17 @@ Component.prototype = {
                 if (DEBUGGER && this.dbg) {
                     this.dbg.stopCPU(s, true);
                     /*
-                     * Why do we throw an Error only to immediately catch it and ignore it?  Simply to give our IDE
-                     * the opportunity to stop and smell the roses.  If the user has no desire to stop on assertions,
-                     * then yes, consider this a giant NO-OP.
+                     * Why do we throw an Error only to immediately catch and ignore it?  Simply to give
+                     * any IDE the opportunity to inspect the application's state.  Even when the IDE has
+                     * control, you should still be able to invoke Debugger commands from the IDE's REPL,
+                     * using the '$' global function that the Debugger constructor sets up; eg:
+                     *
+                     *      $('r')
+                     *      $('dw 0:0')
+                     *      $('h')
+                     *      ...
+                     *
+                     * If you have no desire to stop on assertions, then yes, consider this a giant no-op.
                      */
                     try {
                         throw new Error(s);

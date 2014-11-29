@@ -150,9 +150,9 @@ function Debugger(parmsDbg)
         this.initMessages(parmsDbg['messages']);
 
         /*
-         * This object is filled in by updateRegValues() whenever we need a fresh snapshot.
+         * This object is filled in by messageRegs() whenever we need a fresh snapshot.
          */
-        this.aRegValues = {
+        this.aMessageRegs = {
             "AL":0, "CL":0, "DL":0, "BL":0, "AH":0, "CH":0, "DH":0, "BH":0,
             "AX":0, "CX":0, "DX":0, "BX":0, "SP":0, "BP":0, "SI":0, "DI":0,
             "ES":0, "CS":0, "SS":0, "DS":0, "IP":0
@@ -175,6 +175,9 @@ function Debugger(parmsDbg)
          * "live" console window); eg:
          *
          *      $('r')
+         *      $('dw 0:0')
+         *      $('h')
+         *      ...
          */
         var dbg = this;
         if (window && window['$'] === undefined) {
@@ -1607,34 +1610,34 @@ if (DEBUGGER) {
     };
 
     /**
-     * updateRegValues()
+     * messageRegs()
      *
      * @this {Debugger}
      */
-    Debugger.prototype.updateRegValues = function() {
+    Debugger.prototype.messageRegs = function() {
         var cpu = this.cpu;
         var asRegs = Debugger.asRegs;
-        this.aRegValues[asRegs[0]]  = str.toHexByte(cpu.regAX & 0xff);
-        this.aRegValues[asRegs[1]]  = str.toHexByte(cpu.regCX & 0xff);
-        this.aRegValues[asRegs[2]]  = str.toHexByte(cpu.regDX & 0xff);
-        this.aRegValues[asRegs[3]]  = str.toHexByte(cpu.regBX & 0xff);
-        this.aRegValues[asRegs[4]]  = str.toHexByte(cpu.regAX >> 8);
-        this.aRegValues[asRegs[5]]  = str.toHexByte(cpu.regCX >> 8);
-        this.aRegValues[asRegs[6]]  = str.toHexByte(cpu.regDX >> 8);
-        this.aRegValues[asRegs[7]]  = str.toHexByte(cpu.regBX >> 8);
-        this.aRegValues[asRegs[8]]  = str.toHexWord(cpu.regAX);
-        this.aRegValues[asRegs[9]]  = str.toHexWord(cpu.regCX);
-        this.aRegValues[asRegs[10]] = str.toHexWord(cpu.regDX);
-        this.aRegValues[asRegs[11]] = str.toHexWord(cpu.regBX);
-        this.aRegValues[asRegs[12]] = str.toHexWord(cpu.regSP);
-        this.aRegValues[asRegs[13]] = str.toHexWord(cpu.regBP);
-        this.aRegValues[asRegs[14]] = str.toHexWord(cpu.regSI);
-        this.aRegValues[asRegs[15]] = str.toHexWord(cpu.regDI);
-        this.aRegValues[asRegs[16]] = str.toHexWord(cpu.segES.sel);
-        this.aRegValues[asRegs[17]] = str.toHexWord(cpu.segCS.sel);
-        this.aRegValues[asRegs[18]] = str.toHexWord(cpu.segSS.sel);
-        this.aRegValues[asRegs[19]] = str.toHexWord(cpu.segDS.sel);
-        this.aRegValues[asRegs[20]] = str.toHexWord(cpu.regIP);
+        this.aMessageRegs[asRegs[0]]  = str.toHexByte(cpu.regAX & 0xff);
+        this.aMessageRegs[asRegs[1]]  = str.toHexByte(cpu.regCX & 0xff);
+        this.aMessageRegs[asRegs[2]]  = str.toHexByte(cpu.regDX & 0xff);
+        this.aMessageRegs[asRegs[3]]  = str.toHexByte(cpu.regBX & 0xff);
+        this.aMessageRegs[asRegs[4]]  = str.toHexByte(cpu.regAX >> 8);
+        this.aMessageRegs[asRegs[5]]  = str.toHexByte(cpu.regCX >> 8);
+        this.aMessageRegs[asRegs[6]]  = str.toHexByte(cpu.regDX >> 8);
+        this.aMessageRegs[asRegs[7]]  = str.toHexByte(cpu.regBX >> 8);
+        this.aMessageRegs[asRegs[8]]  = str.toHexWord(cpu.regAX);
+        this.aMessageRegs[asRegs[9]]  = str.toHexWord(cpu.regCX);
+        this.aMessageRegs[asRegs[10]] = str.toHexWord(cpu.regDX);
+        this.aMessageRegs[asRegs[11]] = str.toHexWord(cpu.regBX);
+        this.aMessageRegs[asRegs[12]] = str.toHexWord(cpu.regSP);
+        this.aMessageRegs[asRegs[13]] = str.toHexWord(cpu.regBP);
+        this.aMessageRegs[asRegs[14]] = str.toHexWord(cpu.regSI);
+        this.aMessageRegs[asRegs[15]] = str.toHexWord(cpu.regDI);
+        this.aMessageRegs[asRegs[16]] = str.toHexWord(cpu.segES.sel);
+        this.aMessageRegs[asRegs[17]] = str.toHexWord(cpu.segCS.sel);
+        this.aMessageRegs[asRegs[18]] = str.toHexWord(cpu.segSS.sel);
+        this.aMessageRegs[asRegs[19]] = str.toHexWord(cpu.segDS.sel);
+        this.aMessageRegs[asRegs[20]] = str.toHexWord(cpu.regIP);
     };
 
     /**
@@ -1661,8 +1664,8 @@ if (DEBUGGER) {
             var aFuncs = Debugger.INT_FUNCS[nInt];
             var sFunc = (aFuncs && aFuncs[AH]) || "";
             if (sFunc) {
-                this.updateRegValues();
-                sFunc = " " + str.replaceArray(this.aRegValues, sFunc);
+                this.messageRegs();
+                sFunc = " " + str.replaceArray(this.aMessageRegs, sFunc);
             }
             /*
              * For purposes of display only, rewind addr to the address of the responsible "INT n" instruction; we
@@ -1759,8 +1762,8 @@ if (DEBUGGER) {
             }
             /*
              * We have no idea what the frequency of println() calls might be; all we know is that they easily
-             * screw up the CPU's careful assumptions about cycles per burst.  So we need call yieldCPU() after
-             * every message, to effectively end the current burst and start fresh.
+             * screw up the CPU's careful assumptions about cycles per burst.  So we call yieldCPU() after every
+             * message, to effectively end the current burst and start fresh.
              *
              * TODO: See CPU.calcStartTime() for a discussion of why we might want to call yieldCPU() *before*
              * we display the message.
@@ -2180,7 +2183,7 @@ if (DEBUGGER) {
     };
 
     /**
-     * checksEnabled(fBreak)
+     * checksEnabled(fRelease)
      *
      * This "check" function is called by the CPU; we indicate whether or not every instruction needs to be checked.
      *
@@ -2189,12 +2192,12 @@ if (DEBUGGER) {
      * functions to deal with those breakpoints in the appropriate memory blocks.  So I've simplified the test below.
      *
      * @this {Debugger}
-     * @param {boolean} [fBreak] is true if the caller really wants to break (default is false)
+     * @param {boolean} [fRelease] is true for release criteria only; default is false (any criteria)
      * @return {boolean} true if every instruction needs to pass through checkInstruction(), false if not
      */
-    Debugger.prototype.checksEnabled = function(fBreak)
+    Debugger.prototype.checksEnabled = function(fRelease)
     {
-        return ((DEBUG && !fBreak)? true : (this.aBreakExec.length > 1 || this.messageEnabled(Debugger.MESSAGE.INT) /* || this.aBreakRead.length > 1 || this.aBreakWrite.length > 1 */));
+        return ((DEBUG && !fRelease)? true : (this.aBreakExec.length > 1 || this.messageEnabled(Debugger.MESSAGE.INT) /* || this.aBreakRead.length > 1 || this.aBreakWrite.length > 1 */));
     };
 
     /**
@@ -2216,17 +2219,6 @@ if (DEBUGGER) {
          */
         if (DEBUG) {
             this.assert(!(this.cpu.regAX & ~0xffff) && !(this.cpu.regBX & ~0xffff) && !(this.cpu.regCX & ~0xffff) && !(this.cpu.regDX & ~0xffff), "register out of bounds");
-            /*
-            if (!fSkipBP && this.cInstructions == 11303367) {
-                return true;
-            }
-            */
-            if (!fSkipBP && MAXDEBUG) {
-                if (!this.cpu.regIP) {
-                    this.println("suspicious IP");
-                    return true;
-                }
-            }
         }
 
         if (!fSkipBP && this.checkBreakpoint(addr, this.aBreakExec)) {
@@ -2571,12 +2563,20 @@ if (DEBUGGER) {
     {
         if (!this.findBreakpoint(aBreak, aAddr)) {
             /*
-             * Breakpoint addresses are managed slightly different than other addresses:
-             * we calculate the physical address at the time the breakpoint is added and save
-             * it in aAddr[2], so that a breakpoint set in one mode (eg, in real-mode) will still
-             * work as intended if the mode changes later (eg, to protected-mode).
+             * We used to calculate the physical address of the breakpoint address now, at the
+             * time the breakpoint is added, and save it in aAddr[2], so that a breakpoint set in
+             * one mode (eg, in real-mode) would still work as intended if the mode changed later
+             * (eg, to protected-mode).
+             *
+             * However, that creates difficulties setting protected-mode breakpoints in segments
+             * that might not be defined yet, or that may move in physical memory; so we're not
+             * doing this anymore:
+             *
+             *      aAddr[2] = this.getAddr(aAddr);
+             *
+             * The way to create a real-mode breakpoint that will regardless of mode is to use the
+             * physical address of the real-mode memory location.
              */
-            aAddr[2] = this.getAddr(aAddr);
             aAddr[3] = fTemp;
             aBreak.push(aAddr);
             if (aBreak != this.aBreakExec) {
@@ -2735,7 +2735,7 @@ if (DEBUGGER) {
                 if (aAddrBreak[3]) {
                     this.findBreakpoint(aBreak, aAddrBreak, true);
                 } else if (!fTemp) {
-                    this.println("breakpoint hit: " + this.hexAddr(aAddrBreak) + " (" + aBreak[0] + ")");
+                    this.println("\nbreakpoint hit: " + this.hexAddr(aAddrBreak) + " (" + aBreak[0] + ")");
                 }
                 fBreak = true;
                 break;
@@ -2882,7 +2882,7 @@ if (DEBUGGER) {
                 /*
                  * There's the occasional immediate byte we don't need to display (eg, the 0x0A
                  * following an AAM or AAD instruction), so we suppress the byte if it lacks a TYPE_IN
-                 * or TYPE_OUT designation (and TYPE_BOTH, as it name implies, includes both).
+                 * or TYPE_OUT designation (and TYPE_BOTH, as the name implies, includes both).
                  */
                 if (type & Debugger.TYPE_BOTH) {
                     sOperand = str.toHexByte(this.getByte(aAddr, 1));
@@ -3166,6 +3166,7 @@ if (DEBUGGER) {
 
             if (sAddr.charAt(0) == '%') {
                 sAddr = sAddr.substr(1);
+                off = -1;
                 seg = null;
                 addr = 0;
             }
@@ -3863,6 +3864,7 @@ if (DEBUGGER) {
     Debugger.prototype.doHalt = function(sCount)
     {
         if (this.bitField.fRunning && sCount === undefined) {
+            this.println("halting");
             this.cpu.stopCPU();
             return;
         }

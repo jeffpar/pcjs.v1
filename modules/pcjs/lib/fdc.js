@@ -774,7 +774,9 @@ FDC.prototype.initController = function(data)
     this.regInput = data[i++] || 0;                             // TODO: Determine if we should default to FDC.REG_INPUT.DISK_CHANGE instead of 0
     this.regControl = data[i] || FDC.REG_CONTROL.RATE500K;      // default to maximum data rate
 
-    if (DEBUG) this.messageDebugger("FDC initialized for " + this.aDrives.length + " drive(s)");
+    if (DEBUG && this.messageEnabled()) {
+        this.messageDebugger("FDC initialized for " + this.aDrives.length + " drive(s)");
+    }
     return fSuccess;
 };
 
@@ -1279,7 +1281,7 @@ FDC.prototype.loadDiskette = function(iDrive, sDisketteName, sDiskettePath, fAut
         if (fAutoMount) {
             drive.fAutoMount = true;
             this.cAutoMount++;
-            this.messageDebugger("loading diskette '" + sDisketteName + "'");
+            if (this.messageEnabled()) this.messageDebugger("loading diskette '" + sDisketteName + "'");
         }
         drive.fLocal = !!file;
         var disk = new Disk(this, drive, DiskAPI.MODE.PRELOAD);
@@ -1527,11 +1529,15 @@ FDC.prototype.addDiskHistory = function(sDisketteName, sDiskettePath, disk)
     for (i = 0; i < this.aDiskHistory.length; i++) {
         if (this.aDiskHistory[i][1] == sDiskettePath) {
             var nChanges = disk.restore(this.aDiskHistory[i][2]);
-            if (DEBUG) this.messageDebugger("disk '" + sDisketteName + "' restored from history (" + nChanges + " changes)");
+            if (DEBUG && this.messageEnabled()) {
+                this.messageDebugger("disk '" + sDisketteName + "' restored from history (" + nChanges + " changes)");
+            }
             return;
         }
     }
-    if (DEBUG) this.messageDebugger("disk '" + sDisketteName + "' added to history (nothing to restore)");
+    if (DEBUG && this.messageEnabled()) {
+        this.messageDebugger("disk '" + sDisketteName + "' added to history (nothing to restore)");
+    }
     this.aDiskHistory[i] = [sDisketteName, sDiskettePath, []];
 };
 
@@ -1548,11 +1554,15 @@ FDC.prototype.removeDiskHistory = function(sDisketteName, sDiskettePath)
     for (i = 0; i < this.aDiskHistory.length; i++) {
         if (this.aDiskHistory[i][1] == sDiskettePath) {
             this.aDiskHistory.splice(i, 1);
-            if (DEBUG) this.messageDebugger("disk '" + sDisketteName + "' removed from history");
+            if (DEBUG && this.messageEnabled()) {
+                this.messageDebugger("disk '" + sDisketteName + "' removed from history");
+            }
             return;
         }
     }
-    if (DEBUG) this.messageDebugger("unable to remove disk '" + sDisketteName + "' from history (" + sDiskettePath + ")");
+    if (DEBUG && this.messageEnabled()) {
+        this.messageDebugger("unable to remove disk '" + sDisketteName + "' from history (" + sDiskettePath + ")");
+    }
 };
 
 /**
@@ -1569,7 +1579,9 @@ FDC.prototype.updateDiskHistory = function(sDisketteName, sDiskettePath, disk)
     for (i = 0; i < this.aDiskHistory.length; i++) {
         if (this.aDiskHistory[i][1] == sDiskettePath) {
             this.aDiskHistory[i][2] = disk.save();
-            if (DEBUG) this.messageDebugger("disk '" + sDisketteName + "' updated in history");
+            if (DEBUG && this.messageEnabled()) {
+                this.messageDebugger("disk '" + sDisketteName + "' updated in history");
+            }
             return;
         }
     }
@@ -1579,7 +1591,9 @@ FDC.prototype.updateDiskHistory = function(sDisketteName, sDiskettePath, disk)
      * unload, and then reload/remount.  And since unloadDrive's normal behavior is to call updateDiskHistory()
      * before unloading, the fact that the disk is no longer listed here can't be treated as an error.
      */
-    if (DEBUG) this.messageDebugger("unable to update disk '" + sDisketteName + "' in history (" + sDiskettePath + ")");
+    if (DEBUG && this.messageEnabled()) {
+        this.messageDebugger("unable to update disk '" + sDisketteName + "' in history (" + sDiskettePath + ")");
+    }
 };
 
 /**
@@ -1668,7 +1682,9 @@ FDC.prototype.inFDCData = function(port, addrFrom)
     if (this.regOutput & FDC.REG_OUTPUT.INT_ENABLE) {
         if (this.chipset) this.chipset.clearIRR(ChipSet.IRQ.FDC);
     }
-    this.messagePort(port, null, addrFrom, "DATA[" + this.regDataIndex + "]", bIn);
+    if (this.messageEnabled()) {
+        this.messagePort(port, null, addrFrom, "DATA[" + this.regDataIndex + "]", bIn);
+    }
     if (++this.regDataIndex >= this.regDataTotal) {
         this.regStatus &= ~(FDC.REG_STATUS.READ_DATA | FDC.REG_STATUS.BUSY);
         this.regDataIndex = this.regDataTotal = 0;
@@ -1686,7 +1702,9 @@ FDC.prototype.inFDCData = function(port, addrFrom)
  */
 FDC.prototype.outFDCData = function(port, bOut, addrFrom)
 {
-    this.messagePort(port, bOut, addrFrom, "DATA[" + this.regDataTotal + "]");
+    if (this.messageEnabled()) {
+        this.messagePort(port, bOut, addrFrom, "DATA[" + this.regDataTotal + "]");
+    }
 
     if (this.regDataTotal < this.regDataArray.length) {
         this.regDataArray[this.regDataTotal++] = bOut;
@@ -1699,7 +1717,7 @@ FDC.prototype.outFDCData = function(port, bOut, addrFrom)
         }
         return;
     }
-    if (DEBUG) {
+    if (DEBUG && this.messageEnabled()) {
         this.messageDebugger("unsupported FDC command: " + str.toHexByte(bCmd));
         if (DEBUGGER) this.cpu.stopCPU();
     }
@@ -1928,7 +1946,7 @@ FDC.prototype.doCmd = function()
         break;
 
     default:
-        if (DEBUG) {
+        if (DEBUG && this.messageEnabled()) {
             this.messageDebugger("FDC operation unsupported (command=0x: " + str.toHexByte(bCmd) + ")");
             if (DEBUGGER) this.cpu.stopCPU();
         }
@@ -2007,7 +2025,7 @@ FDC.prototype.popCmd = function(name)
 {
     if (DEBUG) this.assert((!this.regDataIndex || name !== undefined) && this.regDataIndex < this.regDataTotal);
     var bCmd = this.regDataArray[this.regDataIndex];
-    if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE.FDC)) {
+    if (DEBUG && this.messageEnabled(Debugger.MESSAGE.PORT)) {
         var bCmdMasked = bCmd & FDC.REG_DATA.CMD.MASK;
         if (!name && !this.regDataIndex && FDC.aCmdInfo[bCmdMasked]) name = FDC.aCmdInfo[bCmdMasked].name;
         this.messageDebugger("FDC.CMD[" + (name || this.regDataIndex) + "]: 0x" + str.toHexByte(bCmd), Debugger.MESSAGE.PORT);
@@ -2061,7 +2079,9 @@ FDC.prototype.beginResult = function()
  */
 FDC.prototype.pushResult = function(bResult, name)
 {
-    if (DEBUG) this.messageDebugger("FDC.RES[" + (name || this.regDataTotal) + "]: 0x" + str.toHexByte(bResult), Debugger.MESSAGE.PORT);
+    if (DEBUG && this.messageEnabled(Debugger.MESSAGE.PORT)) {
+        this.messageDebugger("FDC.RES[" + (name || this.regDataTotal) + "]: 0x" + str.toHexByte(bResult), Debugger.MESSAGE.PORT);
+    }
     this.regDataArray[this.regDataTotal++] = bResult;
 };
 
@@ -2183,7 +2203,9 @@ FDC.prototype.doRead = function(drive)
      */
     drive.resCode = FDC.REG_DATA.RES.NOT_READY | FDC.REG_DATA.RES.INCOMPLETE;
 
-    if (DEBUG) this.messageDebugger("FDC.doRead(" + drive.bCylinder + ":" + drive.bHead + ":" + drive.bSector + ":" + drive.nBytes + ")", Debugger.MESSAGE.OTHER);
+    if (DEBUG && this.messageEnabled()) {
+        this.messageDebugger("FDC.doRead(" + drive.bCylinder + ":" + drive.bHead + ":" + drive.bSector + ":" + drive.nBytes + ")");
+    }
 
     if (drive.disk) {
         drive.sector = null;
@@ -2205,7 +2227,9 @@ FDC.prototype.doWrite = function(drive)
 {
     drive.resCode = FDC.REG_DATA.RES.NOT_READY | FDC.REG_DATA.RES.INCOMPLETE;
 
-    if (DEBUG) this.messageDebugger("FDC.doWrite(" + drive.bCylinder + ":" + drive.bHead + ":" + drive.bSector + ":" + drive.nBytes + ")", Debugger.MESSAGE.OTHER);
+    if (DEBUG && this.messageEnabled()) {
+        this.messageDebugger("FDC.doWrite(" + drive.bCylinder + ":" + drive.bHead + ":" + drive.bSector + ":" + drive.nBytes + ")");
+    }
 
     if (drive.disk) {
         if (drive.disk.fWriteProtected) {
@@ -2403,7 +2427,9 @@ FDC.prototype.writeFormat = function(drive, b)
         drive.bSector = drive.abFormat[2];      // R
         drive.nBytes = 128 << drive.abFormat[3];// N (0 => 128, 1 => 256, 2 => 512, 3 => 1024)
         drive.cbFormat = 0;
-        if (DEBUG) this.messageDebugger("writeFormat(head=" + str.toHexByte(drive.bHead) + ",cyl=" + str.toHexByte(drive.bCylinder) + ",sec=" + str.toHexByte(drive.bSector) + ",len=" + str.toHexWord(drive.nBytes) + ")");
+        if (DEBUG && this.messageEnabled()) {
+            this.messageDebugger("writeFormat(head=" + str.toHexByte(drive.bHead) + ",cyl=" + str.toHexByte(drive.bCylinder) + ",sec=" + str.toHexByte(drive.bSector) + ",len=" + str.toHexWord(drive.nBytes) + ")");
+        }
         for (var i = 0; i < drive.nBytes; i++) {
             if (this.writeByte(drive, drive.bFiller) < 0) {
                 return -1;
@@ -2413,6 +2439,26 @@ FDC.prototype.writeFormat = function(drive, b)
     }
     if (drive.cSectorsFormatted >= drive.bSectorEnd) b = -1;
     return b;
+};
+
+/**
+ * messageEnabled(bitsMessage)
+ *
+ * @this {FDC}
+ * @param {number} [bitsMessage] is one or more Debugger MESSAGE_* category flag(s)
+ * @return {boolean}
+ */
+FDC.prototype.messageEnabled = function(bitsMessage)
+{
+    if (DEBUGGER && this.dbg) {
+        if (bitsMessage == null) {
+            bitsMessage = Debugger.MESSAGE.FDC;
+        } else {
+            bitsMessage |= Debugger.MESSAGE.FDC;
+        }
+        return this.dbg.messageEnabled(bitsMessage);
+    }
+    return false;
 };
 
 /**

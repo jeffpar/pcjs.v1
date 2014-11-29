@@ -50,6 +50,7 @@ if (typeof module !== 'undefined') {
 function X86Seg(cpu, id, sName, fProt)
 {
     this.cpu = cpu;
+    this.dbg = cpu.dbg;
     this.id = id;
     this.sName = sName || "";
     this.sel = 0;
@@ -154,18 +155,30 @@ X86Seg.loadProt = function loadProt(sel, fSuppress)
         addrDT = cpu.segLDT.base;
         addrDTLimit = addrDT + cpu.segLDT.limit;
     }
-    var addrDesc = addrDT + (sel & X86.SEL.MASK);
-    if (addrDesc + 7 <= addrDTLimit) {
-        /*
-         * TODO: This is only the first of many steps toward accurately counting cycles in protected mode;
-         * I simply noted that "POP segreg" takes 5 cycles in real mode and 20 in protected mode, so I'm
-         * starting with a 15-cycle difference.  Obviously the difference will be much greater when the load fails.
-         */
-        if (!fSuppress) cpu.nStepCycles -= 15;
-        return this.loadDesc8(addrDesc, sel);
-    }
-    if (!fSuppress) {
-        X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, sel);
+    /*
+     * The ROM BIOS POST executes some test code in protected-mode without properly initializing the LDT,
+     * which has no bearing on the ROM's own code, because it never loads any LDT selectors, but if at the same
+     * time our Debugger attempts to validate a selector in one of its breakpoints, that could cause some
+     * grief here.  We avoid that grief by 1) relying on the Debugger setting fSuppress to true, and 2) skipping
+     * segment lookup if the descriptor table being referenced is zero.
+     *
+     * TODO: This could probably be simplified to a test of addrDT; please note, however, that there's nothing
+     * in the design of the CPU that prevents the GDT or LDT being located at physical address zero.
+     */
+    if (!fSuppress || addrDT) {
+        var addrDesc = addrDT + (sel & X86.SEL.MASK);
+        if (addrDesc + 7 <= addrDTLimit) {
+            /*
+             * TODO: This is only the first of many steps toward accurately counting cycles in protected mode;
+             * I simply noted that "POP segreg" takes 5 cycles in real mode and 20 in protected mode, so I'm
+             * starting with a 15-cycle difference.  Obviously the difference will be much greater when the load fails.
+             */
+            if (!fSuppress) cpu.nStepCycles -= 15;
+            return this.loadDesc8(addrDesc, sel, fSuppress);
+        }
+        if (!fSuppress) {
+            X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel);
+        }
     }
     return null;
 };
@@ -214,7 +227,7 @@ X86Seg.loadProtIDT = function loadProtIDT(nIDT)
     if (addrDesc + 7 <= cpu.addrIDTLimit) {
         return this.loadDesc8(addrDesc, nIDT);
     }
-    X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, nIDT | X86.ERRCODE.IDT | X86.ERRCODE.EXT, true);
+    X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, nIDT | X86.ERRCODE.IDT | X86.ERRCODE.EXT, true);
     return null;
 };
 
@@ -383,8 +396,8 @@ X86Seg.switchTSS = function switchTSS(selNew, fNest)
         return false;
     }
     var addrNew = cpu.segTSS.base;
-    if (DEBUG) {
-        cpu.messageDebugger((fNest? "Task switch" : "Task return") + ": TR " + str.toHexWord(selOld) + " (%" + str.toHex(addrOld, 6) + "), new TR " + str.toHexWord(selNew) + " (%" + str.toHex(addrNew, 6) + ")", Debugger.MESSAGE.TSS);
+    if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE.TSS)) {
+        this.dbg.message((fNest? "Task switch" : "Task return") + ": TR " + str.toHexWord(selOld) + " (%" + str.toHex(addrOld, 6) + "), new TR " + str.toHexWord(selNew) + " (%" + str.toHex(addrNew, 6) + ")");
     }
     if (fNest) {
         if (cpu.segTSS.type == X86.DESC.ACC.TYPE.TSS_BUSY) {
@@ -503,7 +516,7 @@ X86Seg.prototype.loadDesc6 = function(addrDesc, sel)
 };
 
 /**
- * loadDesc8(addrDesc, sel)
+ * loadDesc8(addrDesc, sel, fSuppress)
  *
  * Used to load a protected-mode selector that refers to an 8-byte "descriptor table" (GDT, LDT, IDT) entry:
  *
@@ -517,9 +530,10 @@ X86Seg.prototype.loadDesc6 = function(addrDesc, sel)
  * @this {X86Seg}
  * @param {number} addrDesc is the descriptor address
  * @param {number} sel is the associated selector
+ * @param {boolean} [fSuppress] is true to suppress any errors, cycle assessment, etc
  * @return {number|null} base address of selected segment, or null if error
  */
-X86Seg.prototype.loadDesc8 = function(addrDesc, sel)
+X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
 {
     var cpu = this.cpu;
     var limit = cpu.getWord(addrDesc + X86.DESC.LIMIT.OFFSET);
@@ -599,7 +613,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel)
                     return this.base;
                 }
                 if (DEBUG) cpu.assert(false);
-                X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, true);
+                if (!fSuppress) X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, true);
                 base = null;
                 break;
             }
@@ -644,7 +658,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel)
                     return this.base;
                 }
                 if (DEBUG) cpu.assert(false);
-                X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel | X86.ERRCODE.EXT, true);
+                if (!fSuppress) X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel | X86.ERRCODE.EXT, true);
                 base = null;
                 break;
             }
@@ -656,7 +670,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel)
                 return this.base;
             }
             else {
-                X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, sel, true);
+                if (!fSuppress) X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, true);
                 base = null;
                 break;
             }
@@ -665,7 +679,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel)
         else if (this.id == X86Seg.ID.DATA) {
             if (selMasked) {
                 if (type < X86.DESC.ACC.TYPE.DATA_READONLY || (type & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.READABLE)) == X86.DESC.ACC.TYPE.CODE) {
-                    X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, sel, true);
+                    if (!fSuppress) X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, true);
                     base = null;
                     break;
                 }
@@ -673,14 +687,14 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel)
         }
         else if (this.id == X86Seg.ID.STACK) {
             if (!selMasked || type < X86.DESC.ACC.TYPE.DATA_READONLY || (type & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.READABLE)) == X86.DESC.ACC.TYPE.CODE) {
-                X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, sel, true);
+                if (!fSuppress) X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, true);
                 base = null;
                 break;
             }
         }
         else if (this.id == X86Seg.ID.TSS) {
             if (!selMasked || type != X86.DESC.ACC.TYPE.TSS && type != X86.DESC.ACC.TYPE.TSS_BUSY) {
-                X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.TS_FAULT, sel, true);
+                if (!fSuppress) X86Help.opHelpFault.call(cpu, X86.EXCEPTION.TS_FAULT, sel, true);
                 base = null;
                 break;
             }
@@ -703,7 +717,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel)
         this.updateMode();
         break;
     }
-    this.messageDebugger(sel, base, limit, acc, ext);
+    if (!fSuppress) this.messageDebugger(sel, base, limit, acc, ext);
     return base;
 };
 
@@ -830,11 +844,11 @@ X86Seg.prototype.updateMode = function(fProt)
 X86Seg.prototype.messageDebugger = function(sel, base, limit, acc, ext)
 {
     if (DEBUG) {
-        if (DEBUGGER) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE.SEG)) {
             var ch = (this.sName.length < 3? " " : "");
             var sDPL = " dpl=" + this.dpl;
             if (this.id == X86Seg.ID.CODE) sDPL += " cpl=" + this.cpl;
-            this.cpu.messageDebugger("loadSeg(" + this.sName + "):" + ch + "sel=" + str.toHexWord(sel) + " base=" + str.toHex(base) + " limit=" + str.toHexWord(limit) + " acc=" + str.toHexWord(acc) + sDPL, Debugger.MESSAGE.SEG);
+            this.dbg.message("loadSeg(" + this.sName + "):" + ch + "sel=" + str.toHexWord(sel) + " base=" + str.toHex(base) + " limit=" + str.toHexWord(limit) + " acc=" + str.toHexWord(acc) + sDPL);
         }
         this.cpu.assert(/* base != null && */ (!ext || ext == X86.DESC.EXT.AVAIL));
     }

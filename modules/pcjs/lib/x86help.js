@@ -487,7 +487,7 @@ var X86Help = {
      */
     opHelpIRET: function() {
         /*
-         * TODO: We assess a fixed cycle cost up front, because at the moment, opHelpSwitchTSS() doesn't assess anything.
+         * TODO: We assess a fixed cycle cost up front, because at the moment, switchTSS() doesn't assess anything.
          */
         this.nStepCycles -= this.CYCLES.nOpCyclesIRet;
         if (this.regMSW & X86.MSW.PE) {
@@ -634,7 +634,7 @@ var X86Help = {
         }
 
         if (fDebugger && this.dbg.messageEnabled(bitsMessage) || !fDebugger && fHalt) {
-            var sMessage = "Fault " + str.toHexByte(nFault) + (nError != null? " (" + str.toHexWord(nError) + ")" : "") + " on opcode 0x" + str.toHexByte(bOpcode) + " at " + str.toHexAddr(this.regIP, this.segCS.sel) + " (%" + str.toHex(this.regEIP, 6) + ")";
+            var sMessage = (fHalt? '\n' : '') + "Fault " + str.toHexByte(nFault) + (nError != null? " (" + str.toHexWord(nError) + ")" : "") + " on opcode 0x" + str.toHexByte(bOpcode) + " at " + str.toHexAddr(this.regIP, this.segCS.sel) + " (%" + str.toHex(this.regEIP, 6) + ")";
             if (fDebugger) {
                 this.messageDebugger(sMessage, bitsMessage);
                 if (fHalt) {

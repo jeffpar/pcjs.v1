@@ -1637,24 +1637,24 @@ X86CPU.prototype.setPS = function(regPS)
 
     /*
      * OS/2 1.0 discriminates between an 80286 and an 80386 based on whether an IRET in real-mode that
-     * pops 0xF000 into the flags is able to set *any* of flag bits 12-15: if yes, then OS/2 declares the
-     * the CPU an 80386.  Therefore, in real-mode, we must effectively zero all incoming bits 12-15.
+     * pops 0xF000 into the flags is able to set *any* of flag bits 12-15: if it can, then OS/2 declares
+     * the the CPU an 80386.  Therefore, in real-mode, we must zero all incoming bits 12-15.
      *
-     * This has the added benefit of relieving us from zeroing the effective IOPL (this.nIOPL) in real-mode,
-     * since we're zeroing the IOPL bits up front; so that code below is commented out now.
+     * This has the added benefit of relieving us from having to zero the effective IOPL (this.nIOPL)
+     * whenever we're in real-mode, since we're zeroing the IOPL bits up front now.
      */
     if (!(this.regMSW & X86.MSW.PE)) {
         regPS &= ~(X86.PS.IOPL.MASK | X86.PS.NT | X86.PS.BIT15);
     }
 
     /*
-     * Since PS.IOPL and PS.IF are part of PS_DIRECT, we need to take care of any 80286-specific checks before
-     * setting the PS_DIRECT bits from the incoming regPS bits.  Specifically, PS.IOPL is unchanged if CPL > 0,
-     * and PS.IF is unchanged if CPL > IOPL.
+     * Since PS.IOPL and PS.IF are part of PS_DIRECT, we need to take care of any 80286-specific behaviors
+     * before setting the PS_DIRECT bits from the incoming regPS bits.
+     *
+     * Specifically, PS.IOPL is unchanged if CPL > 0, and PS.IF is unchanged if CPL > IOPL.
      */
     if (!this.segCS.cpl) {
         this.nIOPL = (regPS & X86.PS.IOPL.MASK) >> X86.PS.IOPL.SHIFT;           // IOPL allowed to change
-     // if (this.nIOPL && !(this.regMSW & X86.MSW.PE)) this.nIOPL = 0;          // effective IOPL remains 0
     } else {
         regPS = (regPS & ~X86.PS.IOPL.MASK) | (this.regPS & X86.PS.IOPL.MASK);  // IOPL not allowed to change
     }
