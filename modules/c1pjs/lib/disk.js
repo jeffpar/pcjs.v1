@@ -970,7 +970,7 @@ C1PDiskController.prototype.getByte = function(addr, addrFrom)
     if (addrFrom !== undefined) {
         var port = addr - this.addrController;
         var reg = this.getReg(port, false);
-        if (DEBUGGER && this.dbg) this.dbg.messagePort(this, addr, addrFrom, this.dbg.MESSAGE_DISK, false, reg.sName);
+        if (DEBUGGER && this.dbg) this.dbg.messageIO(this, addr, addrFrom, this.dbg.MESSAGE_DISK, false, reg.sName);
         reg.read();
     }
 };
@@ -991,7 +991,7 @@ C1PDiskController.prototype.setByte = function(addr, addrFrom)
         var port = addr - this.addrController;
         var reg = this.getReg(port, true);
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(this.dbg.MESSAGE_DISK | this.dbg.MESSAGE_PORT)) {
-            this.dbg.messagePort(this, addr, addrFrom, this.dbg.MESSAGE_DISK, true, reg.sName);
+            this.dbg.messageIO(this, addr, addrFrom, this.dbg.MESSAGE_DISK, true, reg.sName);
             if (reg.aBitIDs) {
                 var bTest = 0x80;
                 var bChanged = reg.bits ^ b;

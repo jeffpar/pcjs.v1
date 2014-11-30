@@ -571,10 +571,10 @@ var X86Help = {
          * JavaScript exception), and since we don't want that instruction to perform any writes that might
          * be destructive, we should shut off all further reads/writes for the current instruction.
          *
-         * As long as we're not using EAFUNCS, this is easy for any EA-based memory accesses: simply set
+         * As long as we're not using EAFUNCS, that's easy for any EA-based memory accesses: simply set both
          * the NOREAD and NOWRITE flags.  However, there may still be direct, non-EA-based memory accesses that
-         * could cause us grief.  TODO: Implement the ultimate solution, which will involve setting a special
-         * flag and throwing an exception that the CPU must intercept and then quietly ignore.
+         * could cause us grief.  TODO: Implement the ultimate solution, which will involve throwing a special
+         * JavaScript exception that cpu.js must intercept and quietly ignore.
          */
         if (!EAFUNCS) {
             this.opFlags &= ~(X86.OPFLAG.NOREAD | X86.OPFLAG.NOWRITE);
@@ -588,24 +588,20 @@ var X86Help = {
      *
      * TODO: Provide the Debugger with some UI to control its "interference" with fault dispatching, and to
      * continue the dispatch after it has interfered.  At the moment, your only option is to single-step over
-     * the offending instruction to allow the fault to be dispatched.
+     * the offending instruction, which will allow the fault to be dispatched, and then continue execution.
      *
      * @this {X86CPU}
      * @param {number} nFault
      * @param {number} [nError]
-     * @param {boolean} [fHalt] will halt the CPU if true *and* a Debugger is loaded
-     * @return {boolean|undefined} true to block the fault, otherwise dispatch it
+     * @param {boolean} [fHalt] true if the CPU should always be halted, false if "it depends"
+     * @return {boolean|undefined} true to block the fault (often desirable when fHalt is true), otherwise dispatch it
      */
     opHelpFaultMessage: function(nFault, nError, fHalt)
     {
         var bitsMessage = Debugger.MESSAGE.FAULT;
         var bOpcode = this.bus.getByteDirect(this.regEIP);
 
-        var fDebugger = false;
-        if (DEBUGGER && this.dbg) {
-            fDebugger = true;
-            if (nFault == X86.EXCEPTION.GP_FAULT) fHalt = true;
-        }
+        if (this.messageEnabled(bitsMessage)) fHalt = true;
 
         /*
          * OS/2 1.0 uses an INT3 (0xCC) opcode in conjunction with an invalid IDT to trigger a triple-fault
@@ -633,15 +629,24 @@ var X86Help = {
             fHalt = false;
         }
 
-        if (fDebugger && this.dbg.messageEnabled(bitsMessage) || !fDebugger && fHalt) {
+        if (this.messageEnabled(bitsMessage) || fHalt) {
             var sMessage = (fHalt? '\n' : '') + "Fault " + str.toHexByte(nFault) + (nError != null? " (" + str.toHexWord(nError) + ")" : "") + " on opcode 0x" + str.toHexByte(bOpcode) + " at " + str.toHexAddr(this.regIP, this.segCS.sel) + " (%" + str.toHex(this.regEIP, 6) + ")";
-            if (fDebugger) {
-                this.messageDebugger(sMessage, bitsMessage);
+            if (this.messageDebugger(sMessage)) {
                 if (fHalt) {
+                    /*
+                     * By setting fHalt to fRunning (which is true while running but false while single-stepping),
+                     * this allows a fault to be dispatched when you single-step over a faulting instruction; you can
+                     * then continue single-stepping into the fault handler, or start running again.
+                     */
                     fHalt = this.bitField.fRunning;
                     this.dbg.stopCPU();
                 }
-            } else if (fHalt) {
+            } else {
+                /*
+                 * If messageDebugger() returned false, then messageEnabled() must have returned false as well, which
+                 * means that fHalt must be true.  Which means we should shut the machine down.
+                 */
+                this.assert(fHalt);
                 this.notice(sMessage);
                 this.stopCPU();
             }

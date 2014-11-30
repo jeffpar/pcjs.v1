@@ -290,7 +290,7 @@ Bus.prototype.getA20 = function()
  */
 Bus.prototype.setA20 = function(fEnable)
 {
-    if (DEBUG) this.assert(fEnable !== undefined);
+    this.assert(fEnable !== undefined);
     if (fEnable !== undefined) {
         if (this.nBusWidth > 20) {
             var addrMask = (this.addrMask & ~0x100000) | (fEnable? 0x100000 : 0);
@@ -643,7 +643,7 @@ Bus.prototype.checkPortInputNotify = function(port, addrFrom)
     }
     else {
         if (DEBUGGER && this.dbg) {
-            this.dbg.messagePort(this, port, null, addrFrom);
+            this.dbg.messageIO(this, port, null, addrFrom);
             if (this.fPortInputBreakAll) this.dbg.checkPortInput(port, bIn);
         }
     }
@@ -759,7 +759,7 @@ Bus.prototype.checkPortOutputNotify = function(port, bOut, addrFrom)
     }
     else {
         if (DEBUGGER && this.dbg) {
-            this.dbg.messagePort(this, port, bOut, addrFrom);
+            this.dbg.messageIO(this, port, bOut, addrFrom);
             if (this.fPortOutputBreakAll) this.dbg.checkPortOutput(port, bOut);
         }
     }

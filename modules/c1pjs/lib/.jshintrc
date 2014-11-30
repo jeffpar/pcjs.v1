@@ -32,8 +32,10 @@
         "global": true,
         "module": true,
         "require": true,
+        "FileReader": false,
         "setTimeout": false,
         "clearTimeout": false,
-        "Image": false
+        "Image": false,
+        "DumpAPI": false
     }
 }

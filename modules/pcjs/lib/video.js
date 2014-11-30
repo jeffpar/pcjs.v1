@@ -106,7 +106,7 @@ if (typeof module !== 'undefined') {
  */
 function Video(parmsVideo, canvas, context, textarea)
 {
-    Component.call(this, "Video", parmsVideo, Video);
+    Component.call(this, "Video", parmsVideo, Video, Debugger.MESSAGE.VIDEO);
 
     /*
      * This records the model specified (eg, "mda", "cga", "ega" or "" if none specified);
@@ -2189,7 +2189,9 @@ Video.prototype.captureTouch = function()
  */
 Video.prototype.onFocusChange = function(fFocus)
 {
-    if (this.fHasFocus != fFocus && DEBUG) this.messageDebugger("onFocusChange(): focus is now " + fFocus);
+    if (this.fHasFocus != fFocus && DEBUG && this.messageEnabled()) {
+        this.messageDebugger("onFocusChange(): focus is now " + fFocus);
+    }
     this.fHasFocus = fFocus;
 };
 
@@ -2748,7 +2750,7 @@ Video.prototype.getCardColors = function(nBitsPerPixel)
         return Video.aCGAColors;
     }
 
-    if (DEBUG) this.assert(this.cardColor === this.cardEGA);
+    this.assert(this.cardColor === this.cardEGA);
 
     var aRegs = (this.cardEGA.aATCRegs[15] != null? this.cardEGA.aATCRegs : Video.aEGAPalDef);
     for (var i = 0; i < this.aRGB.length; i++) {
@@ -2867,7 +2869,10 @@ Video.prototype.buildFonts = function()
 Video.prototype.buildFont = function(nFont, offData, offSplit, cxChar, cyChar, abFontData, aRGBColors, aColorMap)
 {
     var fChanges = false;
-    if (DEBUG) this.messageDebugger("buildFont(" + nFont + "): building " + Video.cardSpecs[nFont][0] + " font");
+
+    if (DEBUG && this.messageEnabled()) {
+        this.messageDebugger("buildFont(" + nFont + "): building " + Video.cardSpecs[nFont][0] + " font");
+    }
     if (this.createFont(nFont, offData, offSplit, cxChar, cyChar, abFontData, aRGBColors, aColorMap)) fChanges = true;
 
     /*
@@ -2877,7 +2882,9 @@ Video.prototype.buildFont = function(nFont, offData, offSplit, cxChar, cyChar, a
      */
     if (this.fDoubleFont) {
         nFont <<= 1;
-        if (DEBUG) this.messageDebugger("buildFont(" + nFont + "): building " + Video.cardSpecs[nFont >> 1][0] + " double-size font");
+        if (DEBUG && this.messageEnabled()) {
+            this.messageDebugger("buildFont(" + nFont + "): building " + Video.cardSpecs[nFont >> 1][0] + " double-size font");
+        }
         if (this.createFont(nFont, offData, offSplit, cxChar, cyChar, abFontData, aRGBColors, aColorMap)) fChanges = true;
     }
     return fChanges;
@@ -2924,7 +2931,9 @@ Video.prototype.createFont = function(nFont, offData, offSplit, cxChar, cyChar, 
         var rgbColor = aRGBColors[iColor];
         var rgbColorOrig = font.aCSSColors[iColor]? font.aRGBColors[iColor] : [];
         if (rgbColor[0] !== rgbColorOrig[0] || rgbColor[1] !== rgbColorOrig[1] || rgbColor[2] !== rgbColorOrig[2]) {
-            if (DEBUG) this.messageDebugger("creating font color " + iColor + " for font " + nFont);
+            if (DEBUG && this.messageEnabled()) {
+                this.messageDebugger("creating font color " + iColor + " for font " + nFont);
+            }
             this.createFontColor(font, iColor, rgbColor, nDouble, offData, offSplit, cxChar, cyChar, abFontData);
             fChanges = true;
         }
@@ -3154,7 +3163,9 @@ Video.prototype.checkCursor = function()
      */
     var iCellCursor = (this.cardActive.aCRTCRegs[Card.CRTC.CURSOR_ADDR_LO] + ((this.cardActive.aCRTCRegs[Card.CRTC.CURSOR_ADDR_HI] & Card.CRTC.ADDR_HI_MASK) << 8));
     if (this.iCellCursor != iCellCursor) {
-        if (DEBUG) this.messageDebugger("checkCursor(): cursor moved from " + this.iCellCursor + " to " + iCellCursor);
+        if (DEBUG && this.messageEnabled()) {
+            this.messageDebugger("checkCursor(): cursor moved from " + this.iCellCursor + " to " + iCellCursor);
+        }
         this.removeCursor();
         this.iCellCursor = iCellCursor;
     }
@@ -3207,7 +3218,9 @@ Video.prototype.removeCursor = function()
                      */
                     this.updateChar(col, row, data);
                 }
-                if (DEBUG) this.messageDebugger("removeCursor(): removed from " + row + "," + col);
+                if (DEBUG && this.messageEnabled()) {
+                    this.messageDebugger("removeCursor(): removed from " + row + "," + col);
+                }
                 this.aCellCache[this.iCellCursor] = data;
             }
         }
@@ -3272,7 +3285,9 @@ Video.prototype.getAccess = function()
             }
             break;
         default:
-            if (DEBUG) this.messageDebugger("getAccess(): invalid GRC mode (" + str.toHexByte(regGRCMode) + ")");
+            if (DEBUG && this.messageEnabled()) {
+                this.messageDebugger("getAccess(): invalid GRC mode (" + str.toHexByte(regGRCMode) + ")");
+            }
             break;
         }
         if (regGRCMode & Card.GRC.MODE.READ_MODE1) {
@@ -3298,7 +3313,9 @@ Video.prototype.setAccess = function(nAccess)
     var card = this.cardActive;
     if (nAccess != null && card && nAccess != card.nAccess) {
 
-        if (DEBUG) this.messageDebugger("setAccess(0x" + str.toHexWord(nAccess) + ")");
+        if (DEBUG && this.messageEnabled()) {
+            this.messageDebugger("setAccess(0x" + str.toHexWord(nAccess) + ")");
+        }
 
         card.setMemoryAccess(nAccess);
 
@@ -3633,7 +3650,9 @@ Video.prototype.setMode = function(nMode, fForce)
 {
     if (nMode != null && (nMode != this.nMode || fForce)) {
 
-        if (DEBUG) this.messageDebugger("setMode(0x" + str.toHexWord(nMode) + (fForce? ",force" : "") + ")");
+        if (DEBUG && this.messageEnabled()) {
+            this.messageDebugger("setMode(0x" + str.toHexWord(nMode) + (fForce? ",force" : "") + ")");
+        }
 
         this.cUpdates = 0;      // count updateScreen() calls as a means of driving blink updates
         this.nMode = nMode;
@@ -3657,7 +3676,9 @@ Video.prototype.setMode = function(nMode, fForce)
 
             if (this.addrBuffer) {
 
-                if (DEBUG) this.messageDebugger("setMode(" + nMode + "): removing 0x" + str.toHex(this.sizeBuffer) + " bytes from 0x" + str.toHex(this.addrBuffer));
+                if (DEBUG && this.messageEnabled()) {
+                    this.messageDebugger("setMode(" + nMode + "): removing 0x" + str.toHex(this.sizeBuffer) + " bytes from 0x" + str.toHex(this.addrBuffer));
+                }
 
                 if (!this.bus.removeMemory(this.addrBuffer, this.sizeBuffer)) {
                     /*
@@ -3674,7 +3695,9 @@ Video.prototype.setMode = function(nMode, fForce)
             this.addrBuffer = card.addrBuffer;
             this.sizeBuffer = card.sizeBuffer;
 
-            if (DEBUG) this.messageDebugger("setMode(" + nMode + "): adding 0x" + str.toHex(this.sizeBuffer) + " bytes to 0x" + str.toHex(this.addrBuffer));
+            if (DEBUG && this.messageEnabled()) {
+                this.messageDebugger("setMode(" + nMode + "): adding 0x" + str.toHex(this.sizeBuffer) + " bytes to 0x" + str.toHex(this.addrBuffer));
+            }
 
             var controller = (card === this.cardEGA? card : null);
 
@@ -3824,7 +3847,7 @@ Video.prototype.updateChar = function(col, row, data, context)
         this.contextScreen.fillRect(xDst, yDst, this.cxScreenCell, this.cyScreenCell);
     }
 
-    if (MAXDEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE.VIDEO | Debugger.MESSAGE.LOG)) {
+    if (MAXDEBUG && this.messageEnabled(Debugger.MESSAGE.VIDEO | Debugger.MESSAGE.LOG)) {
         this.log("updateCharBgnd(" + col + "," + row + "," + bChar + "): filled " + xDst + "," + yDst);
     }
 
@@ -3835,7 +3858,7 @@ Video.prototype.updateChar = function(col, row, data, context)
         var xSrcFgnd = (bChar & 0xf) * font.cxCell;
         var ySrcFgnd = (bChar >> 4) * font.cyCell;
 
-        if (MAXDEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE.VIDEO | Debugger.MESSAGE.LOG)) {
+        if (MAXDEBUG && this.messageEnabled(Debugger.MESSAGE.VIDEO | Debugger.MESSAGE.LOG)) {
             this.log("updateCharFgnd(" + col + "," + row + "," + bChar + "): draw from " + xSrcFgnd + "," + ySrcFgnd + " (" + font.cxCell + "," + font.cyCell + ") to " + xDst + "," + yDst);
         }
 
@@ -4064,7 +4087,7 @@ Video.prototype.updateScreenText = function(addrScreen, addrScreenLimit, iCell, 
         if (iCell == this.iCellCursor) {
             data |= ((this.cBlinks & 0x1)? (Video.ATTRS.DRAW_CURSOR << 8) : 0);
         }
-        if (DEBUG) this.assert(iCell < this.aCellCache.length);
+        this.assert(iCell < this.aCellCache.length);
         dataCache = this.aCellCache[iCell];
         if (dataCache != data) {
             var col = iCell % this.nCols;
@@ -4105,7 +4128,7 @@ Video.prototype.updateScreenGraphicsCGA = function(addrScreen, addrScreenLimit)
     var xDirty = this.nCols, xMaxDirty = 0, yDirty = this.nRows, yMaxDirty = 0;
     while (addr < addrScreenLimit) {
         data = this.bus.getWordDirect(addr);
-        if (DEBUG) this.assert(iCell < this.aCellCache.length);
+        this.assert(iCell < this.aCellCache.length);
         dataCache = this.aCellCache[iCell];
         if (dataCache === data) {
             x += nPixelsPerCell;
@@ -4183,9 +4206,9 @@ Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
     var xDirty = this.nCols, xMaxDirty = 0, yDirty = this.nRows, yMaxDirty = 0;
     while (addr < addrScreenLimit) {
         var idw = addr++ - this.addrBuffer;
-        if (DEBUG) this.assert(idw >= 0 && idw < adwMemory.length);
+        this.assert(idw >= 0 && idw < adwMemory.length);
         data = adwMemory[idw];
-        if (DEBUG) this.assert(iCell < this.aCellCache.length);
+        this.assert(iCell < this.aCellCache.length);
         dataCache = this.aCellCache[iCell];
         if (dataCache === data) {
             x += nPixelsPerCell;
@@ -4211,7 +4234,7 @@ Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
                  * Since assertions don't fix problems (only catch them, and only in DEBUG builds), I'm also ensuring
                  * that bPixel will always default to 0 if an undefined value ever slips through again.
                  */
-                if (DEBUG) this.assert(Video.aEGADWToByte[dwPixel] !== undefined);
+                this.assert(Video.aEGADWToByte[dwPixel] !== undefined);
                 var bPixel = Video.aEGADWToByte[dwPixel] || 0;
                 this.setPixel(this.imageScreenBuffer, x++, y, aPixelColors[bPixel]);
                 data <<= 1;
@@ -4355,7 +4378,9 @@ Video.prototype.outFeat = function(port, bOut, addrFrom)
 Video.prototype.inATC = function(port, addrFrom)
 {
     var b = this.cardEGA.fATCData? this.cardEGA.aATCRegs[this.cardEGA.iATCReg & Card.ATC.INDX_MASK] : this.cardEGA.iATCReg;
-    this.messagePort(Card.ATC.PORT, null, addrFrom, "ATC." + (this.cardEGA.fATCData? this.cardEGA.asATCRegs[this.cardEGA.iATCReg & Card.ATC.INDX_MASK] : "INDX"), b);
+    if (this.messageEnabled()) {
+        this.messagePort(Card.ATC.PORT, null, addrFrom, "ATC." + (this.cardEGA.fATCData? this.cardEGA.asATCRegs[this.cardEGA.iATCReg & Card.ATC.INDX_MASK] : "INDX"), b);
+    }
     this.cardEGA.fATCData = !this.cardEGA.fATCData;
     return b;
 };
@@ -4377,9 +4402,13 @@ Video.prototype.outATC = function(port, bOut, addrFrom)
         this.cardEGA.fATCData = true;
         if ((bOut & Card.ATC.INDX_PAL_ENABLE) && !fPalEnabled) {
             if (!this.buildFonts()) {
-                if (DEBUG) this.messageDebugger("outATC(" + str.toHexByte(bOut) + "): no font changes required");
+                if (DEBUG && this.messageEnabled()) {
+                    this.messageDebugger("outATC(" + str.toHexByte(bOut) + "): no font changes required");
+                }
             } else {
-                if (DEBUG) this.messageDebugger("outATC(" + str.toHexByte(bOut) + "): redraw screen for font changes");
+                if (DEBUG && this.messageEnabled()) {
+                    this.messageDebugger("outATC(" + str.toHexByte(bOut) + "): redraw screen for font changes");
+                }
                 this.updateScreen(true);
             }
         }
@@ -4387,7 +4416,9 @@ Video.prototype.outATC = function(port, bOut, addrFrom)
         var iReg = this.cardEGA.iATCReg & Card.ATC.INDX_MASK;
         if (iReg >= Card.ATC.PALETTE_REGS || !fPalEnabled) {
             if (Video.TRAPALL || this.cardEGA.aATCRegs[iReg] !== bOut) {
-                this.messagePort(port, bOut, addrFrom, "ATC." + this.cardEGA.asATCRegs[iReg]);
+                if (this.messageEnabled()) {
+                    this.messagePort(port, bOut, addrFrom, "ATC." + this.cardEGA.asATCRegs[iReg]);
+                }
                 this.cardEGA.aATCRegs[iReg] = bOut;
             }
         }
@@ -4469,7 +4500,9 @@ Video.prototype.outSEQIndx = function(port, bOut, addrFrom)
 Video.prototype.inSEQData = function(port, addrFrom)
 {
     var b = this.cardEGA.aSEQRegs[this.cardEGA.iSEQReg];
-    this.messagePort(Card.SEQ.DATA.PORT, null, addrFrom, "SEQ" + this.cardEGA.asSEQRegs[this.cardEGA.iSEQReg], b);
+    if (this.messageEnabled()) {
+        this.messagePort(Card.SEQ.DATA.PORT, null, addrFrom, "SEQ" + this.cardEGA.asSEQRegs[this.cardEGA.iSEQReg], b);
+    }
     return b;
 };
 
@@ -4484,7 +4517,9 @@ Video.prototype.inSEQData = function(port, addrFrom)
 Video.prototype.outSEQData = function(port, bOut, addrFrom)
 {
     if (Video.TRAPALL || this.cardEGA.aSEQRegs[this.cardEGA.iSEQReg] !== bOut) {
-        this.messagePort(Card.SEQ.DATA.PORT, bOut, addrFrom, "SEQ." + this.cardEGA.asSEQRegs[this.cardEGA.iSEQReg]);
+        if (this.messageEnabled()) {
+            this.messagePort(Card.SEQ.DATA.PORT, bOut, addrFrom, "SEQ." + this.cardEGA.asSEQRegs[this.cardEGA.iSEQReg]);
+        }
         this.cardEGA.aSEQRegs[this.cardEGA.iSEQReg] = bOut;
     }
     if (this.cardEGA.iSEQReg == Card.SEQ.MAPMASK.INDX) {
@@ -4601,7 +4636,9 @@ Video.prototype.outGRCIndx = function(port, bOut, addrFrom)
 Video.prototype.inGRCData = function(port, addrFrom)
 {
     var b = this.cardEGA.aGRCRegs[this.cardEGA.iGRCReg];
-    this.messagePort(Card.GRC.DATA.PORT, null, addrFrom, "GRC." + this.cardEGA.asGRCRegs[this.cardEGA.iGRCReg], b);
+    if (this.messageEnabled()) {
+        this.messagePort(Card.GRC.DATA.PORT, null, addrFrom, "GRC." + this.cardEGA.asGRCRegs[this.cardEGA.iGRCReg], b);
+    }
     return b;
 };
 
@@ -4616,7 +4653,9 @@ Video.prototype.inGRCData = function(port, addrFrom)
 Video.prototype.outGRCData = function(port, bOut, addrFrom)
 {
     if (Video.TRAPALL || this.cardEGA.aGRCRegs[this.cardEGA.iGRCReg] !== bOut) {
-        this.messagePort(Card.GRC.DATA.PORT, bOut, addrFrom, "GRC." + this.cardEGA.asGRCRegs[this.cardEGA.iGRCReg]);
+        if (this.messageEnabled()) {
+            this.messagePort(Card.GRC.DATA.PORT, bOut, addrFrom, "GRC." + this.cardEGA.asGRCRegs[this.cardEGA.iGRCReg]);
+        }
         this.cardEGA.aGRCRegs[this.cardEGA.iGRCReg] = bOut;
     }
     switch(this.cardEGA.iGRCReg) {
@@ -4741,7 +4780,9 @@ Video.prototype.outCGAMode = function(port, bOut, addrFrom)
 Video.prototype.inCGAColor = function(port, addrFrom)
 {
     var b = this.cardColor.colorReg;
-    this.messagePort(this.cardColor.port + 5, null, addrFrom, this.cardColor.type + ".COLOR", b);
+    if (this.messageEnabled()) {
+        this.messagePort(this.cardColor.port + 5, null, addrFrom, this.cardColor.type + ".COLOR", b);
+    }
     return b;
 };
 
@@ -4755,7 +4796,9 @@ Video.prototype.inCGAColor = function(port, addrFrom)
  */
 Video.prototype.outCGAColor = function(port, bOut, addrFrom)
 {
-    this.messagePort(this.cardColor.port + 5, bOut, addrFrom, this.cardColor.type + ".COLOR");
+    if (this.messageEnabled()) {
+        this.messagePort(this.cardColor.port + 5, bOut, addrFrom, this.cardColor.type + ".COLOR");
+    }
     if (this.cardColor.colorReg !== bOut) {
         this.cardColor.colorReg = bOut;
         /*
@@ -4821,7 +4864,9 @@ Video.prototype.inCRTCData = function(card, addrFrom)
 {
     var b;
     if (card.iCRTCReg < card.nCRTCRegs) b = card.aCRTCRegs[card.iCRTCReg];
-    this.messagePort(card.port + 1, null, addrFrom, "CRTC." + card.asCRTCRegs[card.iCRTCReg], b);
+    if (this.messageEnabled()) {
+        this.messagePort(card.port + 1, null, addrFrom, "CRTC." + card.asCRTCRegs[card.iCRTCReg], b);
+    }
     return b;
 };
 
@@ -4837,7 +4882,9 @@ Video.prototype.outCRTCData = function(card, bOut, addrFrom)
 {
     if (card.iCRTCReg < card.nCRTCRegs) {
         if (Video.TRAPALL || card.aCRTCRegs[card.iCRTCReg] !== bOut) {
-            this.messagePort(card.port + 1, bOut, addrFrom, "CRTC." + card.asCRTCRegs[card.iCRTCReg]);
+            if (this.messageEnabled()) {
+                this.messagePort(card.port + 1, bOut, addrFrom, "CRTC." + card.asCRTCRegs[card.iCRTCReg]);
+            }
             card.aCRTCRegs[card.iCRTCReg] = bOut;
         }
         /*
@@ -4854,7 +4901,9 @@ Video.prototype.outCRTCData = function(card, bOut, addrFrom)
         }
         this.checkCursor();
     } else {
-        if (DEBUG) this.messageDebugger("outCRTCData(): ignoring unexpected write to CRTC[" + str.toHexByte(card.iCRTCReg) + "]: " + str.toHexByte(bOut));
+        if (DEBUG && this.messageEnabled()) {
+            this.messageDebugger("outCRTCData(): ignoring unexpected write to CRTC[" + str.toHexByte(card.iCRTCReg) + "]: " + str.toHexByte(bOut));
+        }
     }
 };
 
@@ -4993,43 +5042,6 @@ Video.prototype.dumpVideo = function(sParm)
         }
         this.dbg.println("BIOSMODE: " + str.toHexByte(this.nMode));
         this.cardActive.dumpCard();
-    }
-};
-
-/**
- * messageDebugger(sMessage)
- *
- * This is a combination of the Debugger's messageEnabled(MESSAGE_VIDEO) and message() functions, for convenience.
- *
- * @this {Video}
- * @param {boolean} [fForce] to display the message regardless of the MESSAGE_VIDEO setting, provided the Debugger is loaded
- * @param {string} sMessage is any caller-defined message string
- */
-Video.prototype.messageDebugger = function(sMessage, fForce)
-{
-    if (DEBUGGER && this.dbg) {
-        if (fForce || this.dbg.messageEnabled(Debugger.MESSAGE.VIDEO)) {
-            this.dbg.message(sMessage);
-        }
-    }
-};
-
-/**
- * messagePort(port, bOut, addrFrom, name, bIn)
- *
- * This is an internal version of the Debugger's messagePort() function, for convenience.
- *
- * @this {Video}
- * @param {number} port
- * @param {number|null} bOut if an output operation
- * @param {number|null} [addrFrom]
- * @param {string|null} [name] of the port, if any
- * @param {number} [bIn] is the input value, if known, on an input operation
- */
-Video.prototype.messagePort = function(port, bOut, addrFrom, name, bIn)
-{
-    if (DEBUGGER && this.dbg) {
-        this.dbg.messagePort(this, port, bOut, addrFrom, name, Debugger.MESSAGE.VIDEO, bIn);
     }
 };
 

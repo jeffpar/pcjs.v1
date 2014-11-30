@@ -966,7 +966,7 @@ X86CPU.prototype.checkIntNotify = function(nInt)
      * checksEnabled() function, and therefore in fDebugCheck, so for maximum speed, we check fDebugCheck first.
      */
     if (DEBUGGER && this.bitField.fDebugCheck) {
-        if (this.dbg.messageEnabled(Debugger.MESSAGE.INT) && this.dbg.messageInt(nInt, this.regEIP)) {
+        if (this.messageEnabled(Debugger.MESSAGE.INT) && this.dbg.messageInt(nInt, this.regEIP)) {
             this.addIntReturn(this.regEIP, function(cpu, nCycles) {
                 return function onIntReturn(nLevel) {
                     cpu.dbg.messageIntReturn(nInt, nLevel, cpu.getCycles() - nCycles);
@@ -1210,7 +1210,7 @@ X86CPU.prototype.getSeg = function(sName)
          * HACK: We return a fake segment register object in which only the base physical address is valid,
          * because that's all the caller provided (ie, we must be restoring from an older state).
          */
-        if (DEBUG) this.assert(typeof sName == "number");
+        this.assert(typeof sName == "number");
         return [0, sName, 0, 0, ""];
     }
 };
@@ -1311,7 +1311,7 @@ X86CPU.prototype.setIP = function(off)
  */
 X86CPU.prototype.setCSIP = function(off, sel, fCall)
 {
-    if (DEBUG) this.assert((off & 0xffff) == off);
+    this.assert((off & 0xffff) == off);
     this.segCS.fCall = fCall;
     /*
      * We break this operation into the following discrete steps (eg, set IP, load CS, and then update EIP)
@@ -1668,7 +1668,7 @@ X86CPU.prototype.setPS = function(regPS)
     /*
      * Assert that all requested flag bits now agree with our simulated (PS_INDIRECT) bits
      */
-    if (DEBUG) this.assert((regPS & X86.PS.INDIRECT) == (this.getPS() & X86.PS.INDIRECT));
+    this.assert((regPS & X86.PS.INDIRECT) == (this.getPS() & X86.PS.INDIRECT));
 
     if (this.regPS & X86.PS.TF) {
         this.intFlags |= X86.INTFLAG.TRAP;
@@ -2233,7 +2233,7 @@ X86CPU.prototype.popWord = function()
  */
 X86CPU.prototype.pushWord = function(w)
 {
-    if (DEBUG) this.assert((w & 0xffff) == w);
+    this.assert((w & 0xffff) == w);
     this.setSOWord(this.segSS, (this.regSP = (this.regSP - 2) & 0xffff), w);
 };
 
@@ -2308,7 +2308,7 @@ X86CPU.prototype.pushWord = function(w)
  */
 X86CPU.prototype.checkINTR = function()
 {
-    if (DEBUG) this.assert(this.intFlags);
+    this.assert(this.intFlags);
     if (!(this.opFlags & X86.OPFLAG.NOINTR)) {
         if ((this.intFlags & X86.INTFLAG.INTR) && (this.regPS & X86.PS.IF)) {
             var nIDT = this.chipset.getIRRVector();
@@ -2495,7 +2495,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
      * One exception I make here is when you've asked the Debugger to display PIC messages, the idea being that
      * if you're watching the PIC that closely, then you want to hardware interrupts to occur regardless.
      */
-    if (!nMinCycles && this.dbg && !this.dbg.messageEnabled(Debugger.MESSAGE.PIC)) this.opFlags |= X86.OPFLAG.NOINTR;
+    if (!nMinCycles && !this.messageEnabled(Debugger.MESSAGE.PIC)) this.opFlags |= X86.OPFLAG.NOINTR;
 
     do {
         var opPrefixes = this.opFlags & X86.OPFLAG.PREFIXES;
@@ -2553,7 +2553,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
             if (++this.iSampleFreq >= this.nSampleFreq) {
                 this.iSampleFreq = 0;
                 if (this.iSampleSkip < this.nSampleSkip) {
-                    this.iSampleSkip++
+                    this.iSampleSkip++;
                 } else {
                     if (this.iSampleNext == this.nSamples) {
                         this.println("sample buffer full");
@@ -2619,25 +2619,6 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
     } while (this.nStepCycles > 0);
 
     return (this.bitField.fComplete? this.nBurstCycles - this.nStepCycles : (this.bitField.fComplete === undefined? 0 : -1));
-};
-
-/**
- * messageDebugger(sMessage, bitsMessage)
- *
- * This is a combination of the Debugger's messageEnabled(MESSAGE_CPU) and message() functions, for convenience.
- *
- * @this {X86CPU}
- * @param {string} sMessage is any caller-defined message string
- * @param {number} [bitsMessage] is one or more Debugger MESSAGE_* category flag(s)
- */
-X86CPU.prototype.messageDebugger = function(sMessage, bitsMessage)
-{
-    if (DEBUGGER && this.dbg) {
-        if (bitsMessage == null) {
-            bitsMessage = Debugger.MESSAGE.CPU;
-        }
-        if (this.dbg.messageEnabled(bitsMessage)) this.dbg.message(sMessage);
-    }
 };
 
 /**

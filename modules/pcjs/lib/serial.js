@@ -87,7 +87,7 @@ function SerialPort(parmsSerial) {
      */
     this.controlIOBuffer = null;
 
-    Component.call(this, "SerialPort", parmsSerial, SerialPort);
+    Component.call(this, "SerialPort", parmsSerial, SerialPort, Debugger.MESSAGE.SERIAL);
 
     Component.bindExternalControl(this, parmsSerial['binding'], SerialPort.sIOBuffer);
 }
@@ -713,40 +713,6 @@ SerialPort.prototype.echoByte = function(b) {
         return true;
     }
     return false;
-};
-
-/**
- * messageDebugger(sMessage)
- *
- * This is a combination of the Debugger's messageEnabled(MESSAGE_SERIAL) and message() functions, for convenience.
- *
- * @this {SerialPort}
- * @param {string} sMessage is any caller-defined message string
- */
-SerialPort.prototype.messageDebugger = function(sMessage) {
-    if (DEBUGGER && this.dbg) {
-        if (this.dbg.messageEnabled(Debugger.MESSAGE.SERIAL)) {
-            this.dbg.message(sMessage);
-        }
-    }
-};
-
-/**
- * messagePort(port, bOut, addrFrom, name, bIn)
- *
- * This is an internal version of the Debugger's messagePort() function, for convenience.
- *
- * @this {SerialPort}
- * @param {number} port
- * @param {number|null} bOut if an output operation
- * @param {number|null} [addrFrom]
- * @param {string|null} [name] of the port, if any
- * @param {number} [bIn] is the input value, if known, on an input operation
- */
-SerialPort.prototype.messagePort = function(port, bOut, addrFrom, name, bIn) {
-    if (DEBUGGER && this.dbg) {
-        this.dbg.messagePort(this, port, bOut, addrFrom, name, Debugger.MESSAGE.SERIAL, bIn);
-    }
 };
 
 /*

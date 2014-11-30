@@ -179,7 +179,7 @@ Memory.prototype = {
      */
     writeNone: function(off, v) {
         if (DEBUGGER && this.dbg.messageEnabled(Debugger.MESSAGE.MEM) && !off) {
-            this.dbg.message("attempt to write 0x" + str.toHexWord(v) + " to invalid block %" + str.toHex(this.addr) + " from " + str.toHexAddr(this.cpu.regIP, this.cpu.segCS.sel));
+            this.dbg.message("attempt to write 0x" + str.toHexWord(v) + " to invalid block %" + str.toHex(this.addr), true);
         }
     },
     /**

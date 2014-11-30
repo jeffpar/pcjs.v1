@@ -75,7 +75,7 @@ if (typeof module !== 'undefined') {
  */
 function CPU(parmsCPU, nCyclesDefault)
 {
-    Component.call(this, "CPU", parmsCPU, CPU);
+    Component.call(this, "CPU", parmsCPU, CPU, Debugger.MESSAGE.CPU);
 
     var nCycles = parmsCPU['cycles'] || nCyclesDefault;
 
@@ -865,7 +865,7 @@ CPU.prototype.calcStartTime = function()
              * in case, I make absolutely sure it cannot happen, since doing so could result in negative
              * speed calculations.
              */
-            if (DEBUG) this.assert(this.aCounts.msStartRun <= this.aCounts.msStartThisRun);
+            this.assert(this.aCounts.msStartRun <= this.aCounts.msStartThisRun);
             if (this.aCounts.msStartRun > this.aCounts.msStartThisRun) {
                 this.aCounts.msStartRun = this.aCounts.msStartThisRun;
             }
@@ -936,7 +936,7 @@ CPU.prototype.calcRemainingTime = function()
      */
     this.aCounts.nCyclesRecalc += this.aCounts.nCyclesThisRun;
 
-    if (DEBUG && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE.LOG) && msRemainsThisRun) {
+    if (DEBUG && this.messageEnabled(Debugger.MESSAGE.LOG) && msRemainsThisRun) {
         this.log("calcRemainingTime: " + msRemainsThisRun + "ms to sleep after " + this.aCounts.msEndThisRun + "ms");
     }
 

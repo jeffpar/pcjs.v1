@@ -50,7 +50,8 @@ if (typeof module !== 'undefined') {
  *
  * WARNING: Since State objects are low-level objects that have no UI requirements,
  * they do not inherit from the Component class, so you should only use class methods
- * of Component, such as Component.assert(), or Debugger methods if the Debugger is available.
+ * of Component, such as Component.assert(), or Debugger methods if the Debugger
+ * is available.
  *
  * @constructor
  * @param {Component} component
@@ -136,12 +137,14 @@ State.decompress = function(aComp, nLength) {
 /**
  * State.compressEvenOdd(aSrc)
  *
- * This is a very simple variation on compress() that compresses all the EVEN elements of aSrc first, followed by all the ODD
- * elements.  This tends to work better on EGA video memory, because when odd/even addressing is enabled (eg, for text
- * modes), the DWORD values tend to alternate, which is the worst case for compress(), but the best case for compressEvenOdd().
+ * This is a very simple variation on compress() that compresses all the EVEN elements of aSrc first,
+ * followed by all the ODD elements.  This tends to work better on EGA video memory, because when odd/even
+ * addressing is enabled (eg, for text modes), the DWORD values tend to alternate, which is the worst case
+ * for compress(), but the best case for compressEvenOdd().
  *
- * One wrinkle we support: if the first element is uninitialized, then we assume the entire array is undefined, and return an
- * empty compressed array.  Conversely, decompressEvenOdd() will take an empty compressed array and return an uninitialized array.
+ * One wrinkle we support: if the first element is uninitialized, then we assume the entire array is undefined,
+ * and return an empty compressed array.  Conversely, decompressEvenOdd() will take an empty compressed array
+ * and return an uninitialized array.
  *
  * @param {Array.<number>|null} aSrc
  * @return {Array.<number>|null} is either the original array (aSrc), or a smaller array of "count, value" pairs (aComp)
@@ -170,9 +173,9 @@ State.compressEvenOdd = function(aSrc) {
 /**
  * State.decompressEvenOdd(aComp, nLength)
  *
- * This is the counterpart to compressEvenOdd().  Note that because there's nothing in the compressed sequence that differentiates
- * a compress() sequence from a compressEvenOdd() sequence, you simply have to be consistent -- if you used even/odd compression, then
- * you must use even/odd decompression.
+ * This is the counterpart to compressEvenOdd().  Note that because there's nothing in the compressed sequence
+ * that differentiates a compress() sequence from a compressEvenOdd() sequence, you simply have to be consistent:
+ * if you used even/odd compression, then you must use even/odd decompression.
  *
  * @param {Array.<number>} aComp
  * @param {number} nLength is expected length of decompressed data
@@ -214,7 +217,7 @@ State.prototype = {
         try {
             this[this.id][id] = data;
         } catch(e) {
-            Component.log(e.message)
+            Component.log(e.message);
         }
     },
     /**
@@ -274,7 +277,9 @@ State.prototype = {
             if (s) {
                 this[this.id] = s;
                 this.fLoaded = true;
-                if (DEBUG) this.messageDebugger("localStorage(" + this.key + "): " + s.length + " bytes loaded");
+                if (DEBUG && this.messageEnabled()) {
+                    this.messageDebugger("localStorage(" + this.key + "): " + s.length + " bytes loaded");
+                }
                 return true;
             }
         }
@@ -311,7 +316,9 @@ State.prototype = {
         if (web.hasLocalStorage()) {
             var s = JSON.stringify(this[this.id]);
             if (web.setLocalStorageItem(this.key, s)) {
-                if (DEBUG) this.messageDebugger("localStorage(" + this.key + "): " + s.length + " bytes stored");
+                if (DEBUG && this.messageEnabled()) {
+                    this.messageDebugger("localStorage(" + this.key + "): " + s.length + " bytes stored");
+                }
             } else {
                 /*
                  * WARNING: Because browsers tend to disable all alerts() during an "unload" operation,
@@ -369,24 +376,40 @@ State.prototype = {
             var sKey = aKeys[i];
             if (sKey && (fAll || sKey.substr(0, this.key.length) == this.key)) {
                 web.removeLocalStorageItem(sKey);
-                if (DEBUG) this.messageDebugger("localStorage(" + sKey + ") removed");
+                if (DEBUG && this.messageEnabled()) {
+                    this.messageDebugger("localStorage(" + sKey + ") removed");
+                }
                 aKeys.splice(i, 1);
                 i = 0;
             }
         }
     },
     /**
-     * messageDebugger(sMessage)
+     * messageEnabled(bitsMessage)
      *
-     * This is a combination of the Debugger's messageEnabled(MESSAGE_STATE) and message() functions, for convenience.
+     * @this {State}
+     * @param {number} [bitsMessage] is one or more Debugger MESSAGE_* category flag(s)
+     * @return {boolean}
+     */
+    messageEnabled: function(bitsMessage) {
+        if (DEBUGGER && this.dbg) {
+            if (bitsMessage == null) {
+                bitsMessage = Debugger.MESSAGE.STATE;
+            } else {
+                bitsMessage |= Debugger.MESSAGE.STATE;
+            }
+            return this.dbg.messageEnabled(bitsMessage);
+        }
+        return false;
+    },
+    /**
+     * messageDebugger(sMessage)
      *
      * @this {State}
      * @param {string} sMessage is any caller-defined message string
      */
     messageDebugger: function(sMessage) {
-        if (DEBUGGER && this.dbg) {
-            if (this.dbg.messageEnabled(Debugger.MESSAGE.STATE)) this.dbg.message(sMessage);
-        }
+        if (DEBUGGER && this.dbg) this.dbg.message(sMessage);
     }
 };
 

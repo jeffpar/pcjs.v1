@@ -122,7 +122,7 @@ if (typeof module !== 'undefined') {
  */
 function Computer(parmsComputer, parmsMachine, fSuspended) {
 
-    Component.call(this, "Computer", parmsComputer, Computer);
+    Component.call(this, "Computer", parmsComputer, Computer, Debugger.MESSAGE.COMPUTER);
 
     this.bitField.fPowered = false;
     this.nBusWidth = parmsComputer['buswidth'];
@@ -174,7 +174,7 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
         }
     }
 
-    if (DEBUG) this.messageDebugger("PREFETCH: " + PREFETCH + ", TYPEDARRAYS: " + TYPEDARRAYS);
+    if (DEBUG && this.messageEnabled()) this.messageDebugger("PREFETCH: " + PREFETCH + ", TYPEDARRAYS: " + TYPEDARRAYS);
 
     /*
      * Iterate through all the components again and call their initBus() handler, if any
@@ -319,7 +319,9 @@ Computer.prototype.onLoadSetReady = function(sStateFile, sStateData, nErrorCode)
 {
     if (!nErrorCode) {
         this.sStateData = sStateData;
-        if (DEBUG) this.messageDebugger("loaded state file " + sStateFile.replace(this.sUserID || "xxx", "xxx"));
+        if (DEBUG && this.messageEnabled()) {
+            this.messageDebugger("loaded state file " + sStateFile.replace(this.sUserID || "xxx", "xxx"));
+        }
     } else {
         this.sResumePath = null;
         this.fServerState = false;
@@ -360,7 +362,7 @@ Computer.prototype.wait = function(fn, parms)
             return;
         }
     }
-    if (DEBUG) this.messageDebugger("Computer.wait(ready)");
+    if (DEBUG && this.messageEnabled()) this.messageDebugger("Computer.wait(ready)");
     fn.call(this, parms);
 };
 
@@ -385,7 +387,9 @@ Computer.prototype.validateState = function(stateComputer)
             fValid = false;
             if (!stateComputer) stateValidate.clear();
         } else {
-            if (DEBUG) this.messageDebugger("Last state: " + sTimestampComputer + " (validate: " + sTimestampValidate + ")");
+            if (DEBUG && this.messageEnabled()) {
+                this.messageDebugger("Last state: " + sTimestampComputer + " (validate: " + sTimestampValidate + ")");
+            }
         }
     }
     return fValid;
@@ -405,7 +409,9 @@ Computer.prototype.powerOn = function(resume)
         resume = this.resume || (this.sStateData? Computer.RESUME_AUTO : Computer.RESUME_NONE);
     }
 
-    if (DEBUG) this.messageDebugger("Computer.powerOn(" + (resume == Computer.RESUME_REPOWER ? "repower" : (resume ? "resume" : "")) + ")");
+    if (DEBUG && this.messageEnabled()) {
+        this.messageDebugger("Computer.powerOn(" + (resume == Computer.RESUME_REPOWER ? "repower" : (resume ? "resume" : "")) + ")");
+    }
 
     var fRepower = false;
     var fRestore = false;
@@ -642,7 +648,9 @@ Computer.prototype.donePowerOn = function(aParms)
     var fRepower = (aParms[1] < 0);
     var fRestore = aParms[2];
 
-    if (DEBUG && this.bitField.fPowered) this.messageDebugger("Computer.donePowerOn(): redundant");
+    if (DEBUG && this.bitField.fPowered && this.messageEnabled()) {
+        this.messageDebugger("Computer.donePowerOn(): redundant");
+    }
 
     this.bitField.fPowered = true;
 
@@ -726,7 +734,9 @@ Computer.prototype.powerOff = function(fSave, fShutdown)
     var data;
     var sState = "none";
 
-    if (DEBUG) this.messageDebugger("Computer.powerOff(" + (fSave ? "save" : "nosave") + (fShutdown ? ",shutdown" : "") + ")");
+    if (DEBUG && this.messageEnabled()) {
+        this.messageDebugger("Computer.powerOff(" + (fSave ? "save" : "nosave") + (fShutdown ? ",shutdown" : "") + ")");
+    }
 
     var stateComputer = new State(this, Computer.sAppVer);
     var stateValidate = new State(this, Computer.sAppVer, Computer.STATE_VALIDATE);
@@ -832,14 +842,14 @@ Computer.prototype.powerOff = function(fSave, fShutdown)
 Computer.prototype.reset = function()
 {
     if (this.bus && this.bus.reset) {
-        this.messageDebugger("Resetting " + this.bus.type, true);
+        this.messageDebugger("Resetting " + this.bus.type);
         this.bus.reset();
     }
     var aComponents = Component.getComponents(this.id);
     for (var iComponent = 0; iComponent < aComponents.length; iComponent++) {
         var component = aComponents[iComponent];
         if (component !== this && component !== this.bus && component.reset) {
-            this.messageDebugger("Resetting " + component.type, true);
+            this.messageDebugger("Resetting " + component.type);
             component.reset();
         }
     }
@@ -978,7 +988,8 @@ Computer.prototype.queryUserID = function(fPrompt)
 Computer.prototype.verifyUserID = function(sUserID)
 {
     this.sUserID = null;
-    if (DEBUG) this.messageDebugger("verifyUserID(" + sUserID + ")");
+    var fMessages = DEBUG && this.messageEnabled();
+    if (fMessages) this.messageDebugger("verifyUserID(" + sUserID + ")");
     var sRequest = web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.VERIFY + '&' + UserAPI.QUERY.USER + '=' + sUserID;
     var response = web.loadResource(sRequest);
     var nErrorCode = response[0];
@@ -988,16 +999,16 @@ Computer.prototype.verifyUserID = function(sUserID)
             response = eval("(" + sResponse + ")");
             if (response.code && response.code == UserAPI.CODE.OK) {
                 web.setLocalStorageItem(Computer.STATE_USERID, response.data);
-                if (DEBUG) this.messageDebugger(Computer.STATE_USERID + " updated: " + response.data);
+                if (fMessages) this.messageDebugger(Computer.STATE_USERID + " updated: " + response.data);
                 this.sUserID = response.data;
             } else {
-                if (DEBUG) this.messageDebugger(response.code + ": " + response.data);
+                if (fMessages) this.messageDebugger(response.code + ": " + response.data);
             }
         } catch (e) {
             Component.error(e.message + " (" + sResponse + ")");
         }
     } else {
-        if (DEBUG) this.messageDebugger("invalid response (error " + nErrorCode + ")");
+        if (fMessages) this.messageDebugger("invalid response (error " + nErrorCode + ")");
     }
     return this.sUserID;
 };
@@ -1012,10 +1023,14 @@ Computer.prototype.getServerStatePath = function()
 {
     var sStatePath = null;
     if (this.sUserID) {
-        if (DEBUG) this.messageDebugger(Computer.STATE_USERID + " for load: " + this.sUserID);
+        if (DEBUG && this.messageEnabled()) {
+            this.messageDebugger(Computer.STATE_USERID + " for load: " + this.sUserID);
+        }
         sStatePath = web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.LOAD + '&' + UserAPI.QUERY.USER + '=' + this.sUserID + '&' + UserAPI.QUERY.STATE + '=' + State.key(this, Computer.sAppVer);
     } else {
-        if (DEBUG) this.messageDebugger(Computer.STATE_USERID + " unavailable");
+        if (DEBUG && this.messageEnabled()) {
+            this.messageDebugger(Computer.STATE_USERID + " unavailable");
+        }
     }
     return sStatePath;
 };
@@ -1035,7 +1050,9 @@ Computer.prototype.saveServerState = function(sUserID, sState)
      * tend to blow off alerts() and the like when closing down.
      */
     if (sState) {
-        if (DEBUG) this.messageDebugger("size of server state: " + sState.length + " bytes");
+        if (DEBUG && this.messageEnabled()) {
+            this.messageDebugger("size of server state: " + sState.length + " bytes");
+        }
         var response = this.storeServerState(sUserID, sState, true);
         if (response && response[UserAPI.RES.CODE] == UserAPI.CODE.OK) {
             this.notice("Machine state saved to server");
@@ -1050,7 +1067,9 @@ Computer.prototype.saveServerState = function(sUserID, sState)
             this.resetUserID();
         }
     } else {
-        if (DEBUG) this.messageDebugger("no state to store");
+        if (DEBUG && this.messageEnabled()) {
+            this.messageDebugger("no state to store");
+        }
     }
 };
 
@@ -1065,7 +1084,9 @@ Computer.prototype.saveServerState = function(sUserID, sState)
  */
 Computer.prototype.storeServerState = function(sUserID, sState, fSync)
 {
-    if (DEBUG) this.messageDebugger(Computer.STATE_USERID + " for store: " + sUserID);
+    if (DEBUG && this.messageEnabled()) {
+        this.messageDebugger(Computer.STATE_USERID + " for store: " + sUserID);
+    }
     /*
      * TODO: Determine whether or not any browsers cancel our request if we're called during a browser "shutdown" event,
      * and whether or not it matters if we do an async request (currently, we're not, to try to ensure the request goes through).
@@ -1089,7 +1110,7 @@ Computer.prototype.storeServerState = function(sUserID, sState, fSync)
             }
             sResponse = '{"' + UserAPI.RES.CODE + '":' + response[0] + ',"' + UserAPI.RES.DATA + '":"' + sResponse + '"}';
         }
-        if (DEBUG) this.messageDebugger(sResponse);
+        if (DEBUG && this.messageEnabled()) this.messageDebugger(sResponse);
         return JSON.parse(sResponse);
     }
     return null;
@@ -1166,22 +1187,6 @@ Computer.prototype.getComponentByType = function(sType, componentPrev)
 };
 
 /**
- * messageDebugger(sMessage, fForce)
- *
- * This is a combination of the Debugger's messageEnabled(MESSAGE_COMPUTER) and message() functions, for convenience.
- *
- * @this {Computer}
- * @param {string} sMessage is any caller-defined message string
- * @param {boolean} [fForce] is true to force display of the message
- */
-Computer.prototype.messageDebugger = function(sMessage, fForce)
-{
-    if (DEBUGGER && this.dbg) {
-        if (fForce || this.dbg.messageEnabled(Debugger.MESSAGE.COMPUTER)) this.dbg.message(sMessage);
-    }
-};
-
-/**
  * Computer.init()
  *
  * This function operates on every element (e) of class "computer", and initializes
@@ -1213,7 +1218,9 @@ Computer.init = function()
              */
             var computer = new Computer(parmsComputer, parmsMachine, true);
 
-            if (DEBUG) computer.messageDebugger("onInit(" + computer.bitField.fPowered + ")");
+            if (DEBUG && computer.messageEnabled()) {
+                computer.messageDebugger("onInit(" + computer.bitField.fPowered + ")");
+            }
 
             /*
              * For now, all we support are "reset" and "save" buttons. We may eventually add a "power"
@@ -1243,7 +1250,9 @@ Computer.show = function()
         var computer = Component.getComponentByType("Computer", parmsComputer['id']);
         if (computer) {
 
-            if (DEBUG) computer.messageDebugger("onShow(" + computer.fInitialized + "," + computer.bitField.fPowered + ")");
+            if (DEBUG && computer.messageEnabled()) {
+                computer.messageDebugger("onShow(" + computer.fInitialized + "," + computer.bitField.fPowered + ")");
+            }
 
             if (computer.fInitialized && !computer.bitField.fPowered) {
                 /**
@@ -1290,7 +1299,9 @@ Computer.exit = function()
         var computer = Component.getComponentByType("Computer", parmsComputer['id']);
         if (computer) {
 
-            if (DEBUG) computer.messageDebugger("onExit(" + computer.bitField.fPowered + ")");
+            if (DEBUG && computer.messageEnabled()) {
+                computer.messageDebugger("onExit(" + computer.bitField.fPowered + ")");
+            }
 
             if (computer.bitField.fPowered) {
                 /**

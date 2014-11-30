@@ -137,7 +137,7 @@ function FDC(parmsFDC) {
      * TODO: Indicate the type of diskette image being loaded (this might help folks understand what's going
      * on when they try to load a diskette image that's larger than what the selected operating system supports).
      */
-    Component.call(this, "FDC", parmsFDC, FDC);
+    Component.call(this, "FDC", parmsFDC, FDC, Debugger.MESSAGE.FDC);
 
     this['dmaRead'] = this.dmaRead;
     this['dmaWrite'] = this.dmaWrite;
@@ -211,7 +211,7 @@ if (DEBUG) {
         ST1: "ST1",     // Status Register 1
         ST2: "ST2",     // Status Register 2
         ST3: "ST3"      // Status Register 3
-    }
+    };
 } else {
     FDC.TERMS = {};
 }
@@ -390,7 +390,7 @@ if (DEBUG) {
         READ_ID:      "READ ID",
         FORMAT:       "FORMAT",
         SEEK:         "SEEK"
-    }
+    };
 } else {
     FDC.CMDS = {};
 }
@@ -483,7 +483,7 @@ FDC.prototype.setBinding = function(sHTMLType, sBinding, control)
                 var fieldset = control.children[0];
                 var files = fieldset.children[0].files;
                 var submit = fieldset.children[1];
-                submit.disabled = (files.length == 0);
+                submit.disabled = !files.length;
             });
 
             control.onsubmit = function(event) {
@@ -740,6 +740,7 @@ FDC.prototype.initController = function(data)
                 /* falls through */
             case 320:
             case 360:
+                /* falls through */
             default:                    // drives that don't have a recognized capacity default to 360
                 drive.nCylinders = 40;
                 drive.nSectors = 9;     // drives capable of writing 8 sectors/track can also write 9 sectors/track
@@ -1525,7 +1526,7 @@ FDC.prototype.unloadAllDrives = function(fDiscard)
 FDC.prototype.addDiskHistory = function(sDisketteName, sDiskettePath, disk)
 {
     var i;
-    if (DEBUG) this.assert(!!sDiskettePath);
+    this.assert(!!sDiskettePath);
     for (i = 0; i < this.aDiskHistory.length; i++) {
         if (this.aDiskHistory[i][1] == sDiskettePath) {
             var nChanges = disk.restore(this.aDiskHistory[i][2]);
@@ -1719,7 +1720,7 @@ FDC.prototype.outFDCData = function(port, bOut, addrFrom)
     }
     if (DEBUG && this.messageEnabled()) {
         this.messageDebugger("unsupported FDC command: " + str.toHexByte(bCmd));
-        if (DEBUGGER) this.cpu.stopCPU();
+        this.dbg.stopCPU();
     }
 };
 
@@ -1814,7 +1815,7 @@ FDC.prototype.doCmd = function()
          * Controller docs say that H should always match HD, so I assert that, but what if someone
          * made a mistake and didn't program them identically -- what would happen?  Which should we honor?
          */
-        if (DEBUG) this.assert(h == bHead);
+        this.assert(h == bHead);
         r = drive.bSector = this.popCmd(FDC.TERMS.R);   // R
         n = this.popCmd(FDC.TERMS.N);                   // N
         drive.nBytes = 128 << n;                        // 0 => 128, 1 => 256, 2 => 512, 3 => 1024
@@ -1938,7 +1939,7 @@ FDC.prototype.doCmd = function()
          * update() function that all FDC commands can use.  This code is merely sufficient to get us
          * through the "DSKETTE_SETUP" gauntlet in the MODEL_5170 BIOS.
          */
-        if (drive.bCylinder == 0) {
+        if (!drive.bCylinder) {
             drive.resCode |= FDC.REG_DATA.RES.TRACK0;
         }
         this.beginResult();                             // like FDC.REG_DATA.CMD.RECALIBRATE, no results are provided
@@ -1948,7 +1949,7 @@ FDC.prototype.doCmd = function()
     default:
         if (DEBUG && this.messageEnabled()) {
             this.messageDebugger("FDC operation unsupported (command=0x: " + str.toHexByte(bCmd) + ")");
-            if (DEBUGGER) this.cpu.stopCPU();
+            this.dbg.stopCPU();
         }
         break;
     }
@@ -2023,12 +2024,12 @@ FDC.prototype.pushResults = function(drive, bCmd, bHead, c, h, r, n)
  */
 FDC.prototype.popCmd = function(name)
 {
-    if (DEBUG) this.assert((!this.regDataIndex || name !== undefined) && this.regDataIndex < this.regDataTotal);
+    this.assert((!this.regDataIndex || name !== undefined) && this.regDataIndex < this.regDataTotal);
     var bCmd = this.regDataArray[this.regDataIndex];
     if (DEBUG && this.messageEnabled(Debugger.MESSAGE.PORT)) {
         var bCmdMasked = bCmd & FDC.REG_DATA.CMD.MASK;
         if (!name && !this.regDataIndex && FDC.aCmdInfo[bCmdMasked]) name = FDC.aCmdInfo[bCmdMasked].name;
-        this.messageDebugger("FDC.CMD[" + (name || this.regDataIndex) + "]: 0x" + str.toHexByte(bCmd), Debugger.MESSAGE.PORT);
+        this.messageDebugger("FDC.CMD[" + (name || this.regDataIndex) + "]: 0x" + str.toHexByte(bCmd));
     }
     this.regDataIndex++;
     return bCmd;
@@ -2080,7 +2081,7 @@ FDC.prototype.beginResult = function()
 FDC.prototype.pushResult = function(bResult, name)
 {
     if (DEBUG && this.messageEnabled(Debugger.MESSAGE.PORT)) {
-        this.messageDebugger("FDC.RES[" + (name || this.regDataTotal) + "]: 0x" + str.toHexByte(bResult), Debugger.MESSAGE.PORT);
+        this.messageDebugger("FDC.RES[" + (name || this.regDataTotal) + "]: 0x" + str.toHexByte(bResult));
     }
     this.regDataArray[this.regDataTotal++] = bResult;
 };
@@ -2396,7 +2397,7 @@ FDC.prototype.writeByte = function(drive, b)
  */
 FDC.prototype.advanceSector = function(drive)
 {
-    if (DEBUG) this.assert(drive.bCylinder < drive.nDiskCylinders);
+    this.assert(drive.bCylinder < drive.nDiskCylinders);
     drive.bSector++;
     var bSectorStart = 1;
     if (drive.bSector >= drive.nDiskSectors + bSectorStart) {
@@ -2439,64 +2440,6 @@ FDC.prototype.writeFormat = function(drive, b)
     }
     if (drive.cSectorsFormatted >= drive.bSectorEnd) b = -1;
     return b;
-};
-
-/**
- * messageEnabled(bitsMessage)
- *
- * @this {FDC}
- * @param {number} [bitsMessage] is one or more Debugger MESSAGE_* category flag(s)
- * @return {boolean}
- */
-FDC.prototype.messageEnabled = function(bitsMessage)
-{
-    if (DEBUGGER && this.dbg) {
-        if (bitsMessage == null) {
-            bitsMessage = Debugger.MESSAGE.FDC;
-        } else {
-            bitsMessage |= Debugger.MESSAGE.FDC;
-        }
-        return this.dbg.messageEnabled(bitsMessage);
-    }
-    return false;
-};
-
-/**
- * messageDebugger(sMessage, bitsMessage)
- *
- * This is a combination of the Debugger's messageEnabled(MESSAGE_FDC) and message() functions, for convenience.
- *
- * @this {FDC}
- * @param {string} sMessage is any caller-defined message string
- * @param {number} [bitsMessage] is one or more Debugger MESSAGE_* category flag(s)
- */
-FDC.prototype.messageDebugger = function(sMessage, bitsMessage)
-{
-    if (DEBUGGER && this.dbg) {
-        if (bitsMessage == null) {
-            bitsMessage = Debugger.MESSAGE.FDC;
-        } else {
-            bitsMessage |= Debugger.MESSAGE.FDC;
-        }
-        if (this.dbg.messageEnabled(bitsMessage)) this.dbg.message(sMessage);
-    }
-};
-
-/**
- * messagePort(port, bOut, addrFrom, name, bIn)
- *
- * This is an internal version of the Debugger's messagePort() function, for convenience.
- *
- * @this {FDC}
- * @param {number} port
- * @param {number|null} bOut if an output operation
- * @param {number|null} [addrFrom]
- * @param {string|null} [name] of the port, if any
- * @param {number} [bIn] is the input value, if known, on an input operation
- */
-FDC.prototype.messagePort = function(port, bOut, addrFrom, name, bIn)
-{
-    if (DEBUGGER && this.dbg) this.dbg.messagePort(this, port, bOut, addrFrom, name, Debugger.MESSAGE.FDC, bIn);
 };
 
 /*

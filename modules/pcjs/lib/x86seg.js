@@ -193,9 +193,7 @@ X86Seg.loadProt = function loadProt(sel, fSuppress)
 X86Seg.loadRealIDT = function loadRealIDT(nIDT)
 {
     var cpu = this.cpu;
-    if (DEBUG) {
-        cpu.assert(nIDT >= 0 && nIDT < 256 && !cpu.addrIDT && cpu.addrIDTLimit == 0x03FF);
-    }
+    cpu.assert(nIDT >= 0 && nIDT < 256 && !cpu.addrIDT && cpu.addrIDTLimit == 0x03FF);
     /*
      * Intel documentation for INT/INTO under "REAL ADDRESS MODE EXCEPTIONS" says:
      *
@@ -220,7 +218,7 @@ X86Seg.loadRealIDT = function loadRealIDT(nIDT)
 X86Seg.loadProtIDT = function loadProtIDT(nIDT)
 {
     var cpu = this.cpu;
-    if (DEBUG) cpu.assert(nIDT >= 0 && nIDT < 256);
+    cpu.assert(nIDT >= 0 && nIDT < 256);
 
     nIDT <<= 3;
     var addrDesc = cpu.addrIDT + nIDT;
@@ -380,7 +378,7 @@ X86Seg.checkWriteProtDisallowed = function checkWriteProtDisallowed(off, cb, fSu
 X86Seg.switchTSS = function switchTSS(selNew, fNest)
 {
     var cpu = this.cpu;
-    if (DEBUG) cpu.assert(this === cpu.segCS);
+    cpu.assert(this === cpu.segCS);
 
     var addrOld = cpu.segTSS.base;
     var cplOld = this.cpl;
@@ -424,7 +422,7 @@ X86Seg.switchTSS = function switchTSS(selNew, fNest)
     var offSS = X86.TSS.TASK_SS;
     var offSP = X86.TSS.TASK_SP;
     cpu.setPS(cpu.getWord(addrNew + X86.TSS.TASK_PS) | (fNest? X86.PS.NT : 0));
-    if (DEBUG) cpu.assert(!fNest || !!(cpu.regPS & X86.PS.NT));
+    cpu.assert(!fNest || !!(cpu.regPS & X86.PS.NT));
     cpu.regAX = cpu.getWord(addrNew + X86.TSS.TASK_AX);
     cpu.regCX = cpu.getWord(addrNew + X86.TSS.TASK_CX);
     cpu.regDX = cpu.getWord(addrNew + X86.TSS.TASK_DX);
@@ -581,14 +579,14 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                 if (rpl <= dpl) {
                     cplPrev = this.cpl;
                     if (this.load(selCode, true) == null) {
-                        if (DEBUG) cpu.assert(false);
+                        cpu.assert(false);
                         base = null;
                         break;
                     }
                     cpu.regIP = limit;
                     if (this.cpl < cplPrev) {
                         if (fCall !== true) {
-                            if (DEBUG) cpu.assert(false);
+                            cpu.assert(false);
                             base = null;
                             break;
                         }
@@ -612,7 +610,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                     }
                     return this.base;
                 }
-                if (DEBUG) cpu.assert(false);
+                cpu.assert(false);
                 if (!fSuppress) X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, true);
                 base = null;
                 break;
@@ -628,7 +626,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                 if (dpl <= this.cpl) {
                     cplPrev = this.cpl;
                     if (this.load(selCode, true) == null) {
-                        if (DEBUG) cpu.assert(false);
+                        cpu.assert(false);
                         base = null;
                         break;
                     }
@@ -657,7 +655,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                     }
                     return this.base;
                 }
-                if (DEBUG) cpu.assert(false);
+                cpu.assert(false);
                 if (!fSuppress) X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel | X86.ERRCODE.EXT, true);
                 base = null;
                 break;
@@ -674,7 +672,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                 base = null;
                 break;
             }
-            if (DEBUG) cpu.assert(!!selMasked);     // a null CS selector should be caught by the final preceding check
+            cpu.assert(!!selMasked);    // a null CS selector should be caught by the final preceding check
         }
         else if (this.id == X86Seg.ID.DATA) {
             if (selMasked) {
@@ -726,8 +724,8 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
  *
  * This is used in unusual situations where the base must be set independently; normally, the base
  * is set according to the selector provided to load(), but there are a few cases where setBase() is
- * required (eg, in resetRegs() where the 80286 wants the real-mode CS selector to be 0xF000 but the
- * CS base must be 0xFF0000, and possibly LOADALL).
+ * required (eg, in resetRegs(), where the 80286 wants the real-mode CS selector to be 0xF000 but the
+ * CS base must be 0xFF0000).
  *
  * @this {X86Seg}
  * @param {number} addr

@@ -61,7 +61,7 @@ if (typeof module !== 'undefined') {
 }
 
 /**
- * Component(type, parms, constructor)
+ * Component(type, parms, constructor, bitsMessage)
  *
  * A Component object requires:
  *
@@ -79,8 +79,9 @@ if (typeof module !== 'undefined') {
  * @param {string} type
  * @param {Object} [parms]
  * @param {Object} [constructor]
+ * @param {number} [bitsMessage]
  */
-function Component(type, parms, constructor)
+function Component(type, parms, constructor, bitsMessage)
 {
     this.type = type;
 
@@ -125,6 +126,7 @@ function Component(type, parms, constructor)
     this.clearError();
     this.bindings = {};
     this.dbg = null;                    // by default, no connection to a Debugger
+    this.bitsMessage = bitsMessage || -1;
 
     Component.add(this);
 }
@@ -729,7 +731,7 @@ Component.prototype = {
                      *      $('h')
                      *      ...
                      *
-                     * If you have no desire to stop on assertions, then yes, consider this a giant no-op.
+                     * If you have no desire to stop on assertions, consider this a no-op.
                      */
                     try {
                         throw new Error(s);
@@ -929,6 +931,63 @@ Component.prototype = {
     powerDown: function(fSave, fShutdown) {
         if (fShutdown) this.bitField.fPowered = false;
         return true;
+    },
+    /**
+     * messageEnabled(bitsMessage, fOnly)
+     *
+     * @this {Component}
+     * @param {number} [bitsMessage] is one or more Debugger MESSAGE_* category flag(s)
+     * @return {boolean} true if all specified message enabled, false if not
+     */
+    messageEnabled: function(bitsMessage) {
+        if (DEBUGGER && this.dbg) {
+            if (this === this.dbg) {
+                bitsMessage = bitsMessage || 0;
+            } else {
+                if (!bitsMessage) {
+                    bitsMessage = this.bitsMessage;
+                }
+            }
+            var bitsEnabled = this.dbg.bitsMessage & bitsMessage;
+            return (bitsEnabled === bitsMessage || !!(bitsEnabled & this.dbg.bitsWarning));
+        }
+        return false;
+    },
+    /**
+     * messageDebugger(sMessage, bitsMessage, fAddress)
+     *
+     * @this {Component}
+     * @param {string} sMessage is any caller-defined message string
+     * @param {number} [bitsMessage] is one or more Debugger MESSAGE_* category flag(s)
+     * @param {boolean} [fAddress] is true to display the current address
+     * @return {boolean} true if Debugger available, false if not
+     */
+    messageDebugger: function(sMessage, bitsMessage, fAddress) {
+        if (DEBUGGER && this.dbg) {
+            if (bitsMessage == null || this.messageEnabled(bitsMessage)) {
+                this.dbg.message(sMessage, fAddress);
+            }
+            return true;
+        }
+        return false;
+    },
+    /**
+     * messagePort(port, bOut, addrFrom, name, bIn, bitsMessage)
+     *
+     * This is an internal version of the Debugger's messagePort() function, for convenience.
+     *
+     * @this {Component}
+     * @param {number} port
+     * @param {number|null} bOut if an output operation
+     * @param {number|null} [addrFrom]
+     * @param {string|null} [name] of the port, if any
+     * @param {number} [bIn] is the input value, if known, on an input operation
+     * @param {number} [bitsMessage] is one or more Debugger MESSAGE_* category flag(s)
+     */
+    messagePort: function(port, bOut, addrFrom, name, bIn, bitsMessage) {
+        if (DEBUGGER && this.dbg) {
+            this.dbg.messageIO(this, port, bOut, addrFrom, name, bIn, bitsMessage || this.bitsMessage);
+        }
     }
 };
 

@@ -389,9 +389,9 @@ web.promptUser = function(sPrompt, sDefault)
  *
  * true if localStorage support exists, is enabled, and works; "falsey" otherwise
  *
- * @type {boolean|undefined}
+ * @type {boolean|null}
  */
-web.fLocalStorage;
+web.fLocalStorage = null;
 
 /**
  * hasLocalStorage
@@ -401,7 +401,7 @@ web.fLocalStorage;
  * @return {boolean}
  */
 web.hasLocalStorage = function() {
-    if (web.fLocalStorage === undefined) {
+    if (web.fLocalStorage == null) {
         var f;
         var sTest = 'PCjs.localStorage';
         try {

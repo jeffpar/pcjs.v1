@@ -126,6 +126,9 @@ var X86Op0F = {
      */
     opLOADALL: function() {
         if (this.segCS.cpl) {
+            /*
+             * You're not allowed to use LOADALL at any privilege level other than zero
+             */
             X86Help.opHelpFault.call(this, X86.EXCEPTION.GP_FAULT, 0, true);
             return;
         }

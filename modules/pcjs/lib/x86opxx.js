@@ -1980,7 +1980,7 @@ var X86OpXX = {
      * op=0x9B (wait)
      */
     opWAIT: function() {
-        this.messageDebugger("WAIT not implemented");
+        this.messageDebugger("WAIT not implemented", Debugger.MESSAGE.CPU);
         this.nStepCycles--;
     },
     /**
@@ -2026,7 +2026,7 @@ var X86OpXX = {
         if (ah & X86.PS.ZF) this.setZF(); else this.clearZF();
         if (ah & X86.PS.SF) this.setSF(); else this.clearSF();
         this.nStepCycles -= this.CYCLES.nOpCyclesLAHF;
-        if (DEBUG) this.assert((this.getPS() & X86.PS.SAHF) == (ah & X86.PS.SAHF));
+        this.assert((this.getPS() & X86.PS.SAHF) == (ah & X86.PS.SAHF));
     },
     /**
      * @this {X86CPU}

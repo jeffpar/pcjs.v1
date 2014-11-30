@@ -284,7 +284,7 @@ function embedMachine(sName, sVersion, idElement, sXMLFile, sXSLFile, sStateFile
 
     var doneMachine = function() {
         Component.assert(cMachines > 0);
-        if (--cMachines == 0) {
+        if (!--cMachines) {
             if (fAsync) web.enablePageEvents(true);
         }
     };

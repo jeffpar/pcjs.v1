@@ -71,7 +71,7 @@ if (typeof module !== 'undefined') {
  */
 function Mouse(parmsMouse)
 {
-    Component.call(this, "Mouse", parmsMouse, Mouse);
+    Component.call(this, "Mouse", parmsMouse, Mouse, Debugger.MESSAGE.MOUSE);
 
     this.idAdapter = parmsMouse['serial'];
     if (this.idAdapter) {
@@ -543,7 +543,9 @@ Mouse.prototype.sendPacket = function(sDiag, xDiag, yDiag)
     var b1 = 0x40 | (this.fButton1? 0x20 : 0) | (this.fButton2? 0x10 : 0) | ((this.yDelta & 0xC0) >> 4) | ((this.xDelta & 0xC0) >> 6);
     var b2 = this.xDelta & 0x3F;
     var b3 = this.yDelta & 0x3F;
-    this.messageDebugger((sDiag? (sDiag + ": ") : "") + (yDiag !== undefined? ("mouse (" + xDiag + "," + yDiag + "): ") : "") + "serial packet [" + str.toHexByte(b1) + "," + str.toHexByte(b2) + "," + str.toHexByte(b3) + "]", Debugger.MESSAGE.SERIAL);
+    if (this.messageEnabled(Debugger.MESSAGE.SERIAL)) {
+        this.messageDebugger((sDiag? (sDiag + ": ") : "") + (yDiag !== undefined? ("mouse (" + xDiag + "," + yDiag + "): ") : "") + "serial packet [" + str.toHexByte(b1) + "," + str.toHexByte(b2) + "," + str.toHexByte(b3) + "]", 0, true);
+    }
     this.componentAdapter.sendRBR([b1, b2, b3]);
     this.xDelta = this.yDelta = 0;
 };
@@ -628,29 +630,6 @@ Mouse.prototype.notifyMCR = function(bMCR)
         }
     }
     this.bMCR = bMCR;
-};
-
-/**
- * messageDebugger(sMessage)
- *
- * This is a combination of the Debugger's messageEnabled(MESSAGE_MOUSE) and message() functions, for convenience.
- *
- * @this {Mouse}
- * @param {string} sMessage is any caller-defined message string
- * @param {number} [bitsMessage] is one or more Debugger MESSAGE_* category flag(s)
- */
-Mouse.prototype.messageDebugger = function(sMessage, bitsMessage)
-{
-    if (DEBUGGER && this.dbg) {
-        if (bitsMessage == null) {
-            bitsMessage = Debugger.MESSAGE.MOUSE;
-        } else {
-            bitsMessage |= Debugger.MESSAGE.MOUSE;
-        }
-        if (this.dbg.messageEnabled(bitsMessage)) {
-            this.dbg.message(sMessage + " @" + str.toHexAddr(this.cpu.regIP, this.cpu.segCS.sel));
-        }
-    }
 };
 
 /**

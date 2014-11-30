@@ -364,7 +364,7 @@ C1PVideo.prototype.getByte = function(addr, addrFrom)
 {
     var b = this.cpu.getByte(addr);
     if (addrFrom !== undefined) {
-        if (DEBUGGER && this.dbg) this.dbg.messagePort(this, addr, addrFrom, this.dbg.MESSAGE_VIDEO);
+        if (DEBUGGER && this.dbg) this.dbg.messageIO(this, addr, addrFrom, this.dbg.MESSAGE_VIDEO);
     }
     /*
      * The only documented READ bit in addrVideoPort is bit 7, which is supposed to alternate between
@@ -388,7 +388,7 @@ C1PVideo.prototype.getByte = function(addr, addrFrom)
 C1PVideo.prototype.setByte = function(addr, addrFrom)
 {
     if (addrFrom !== undefined) {
-        if (DEBUGGER && this.dbg) this.dbg.messagePort(this, addr, addrFrom, this.dbg.MESSAGE_VIDEO);
+        if (DEBUGGER && this.dbg) this.dbg.messageIO(this, addr, addrFrom, this.dbg.MESSAGE_VIDEO);
     }
 };
 
@@ -404,7 +404,7 @@ C1PVideo.prototype.tripGuard = function(addr, addrFrom)
      * the Debugger performed this read (need a special Debugger I/O command if/when you really want to do that).
      */
     if (addrFrom !== undefined) {
-        if (DEBUGGER && this.dbg) this.dbg.messagePort(this, addr, addrFrom, this.dbg.MESSAGE_VIDEO, true);
+        if (DEBUGGER && this.dbg) this.dbg.messageIO(this, addr, addrFrom, this.dbg.MESSAGE_VIDEO, true);
         /*
          * The CPU has just written to the guard address we established just beyond the video buffer's 1K boundary,
          * implying that the system thinks we have a 2K buffer instead.  So we bump our model to 540, bump the

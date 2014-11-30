@@ -1558,14 +1558,15 @@ if (DEBUGGER) {
      */
     Debugger.prototype.initMessages = function(sEnable)
     {
-        this.afnDumpers = [];
-        this.bitsMessageEnabled = Debugger.MESSAGE.WARN;
+        this.dbg = this;
+        this.bitsMessage = this.bitsWarning = Debugger.MESSAGE.WARN;
         this.sMessagePrev = null;
+        this.afnDumpers = [];
         var aEnable = this.parseCommand(sEnable);
         if (aEnable.length) {
             for (var m in Debugger.MESSAGES) {
                 if (aEnable.indexOf(m) >= 0) {
-                    this.bitsMessageEnabled |= Debugger.MESSAGES[m];
+                    this.bitsMessage |= Debugger.MESSAGES[m];
                     this.println(m + " messages enabled");
                 }
             }
@@ -1589,24 +1590,6 @@ if (DEBUGGER) {
             }
         }
         return false;
-    };
-
-    /**
-     * messageEnabled(bitsMessage)
-     *
-     * NOTE: If the caller specifies multiple MESSAGE category flags, then ALL the corresponding flags
-     * in the Debugger's bitsMessageEnabled variable must be enabled as well, else the result will be false.
-     *
-     * One wrinkle is MESSAGE.WARN: if that category is enabled, then ANY value with that bit will return true.
-     *
-     * @this {Debugger}
-     * @param {number} bitsMessage is one or more Debugger MESSAGE_* category flag(s)
-     * @return {boolean} true if message category is enabled, false if not
-     */
-    Debugger.prototype.messageEnabled = function(bitsMessage)
-    {
-        var bitsEnabled = this.bitsMessageEnabled & bitsMessage;
-        return (bitsEnabled === bitsMessage || !!(bitsEnabled & Debugger.MESSAGE.WARN));
     };
 
     /**
@@ -1652,8 +1635,8 @@ if (DEBUGGER) {
     {
         var nCategory = Debugger.INT_MESSAGE[nInt];
         var fMessage = nCategory && this.messageEnabled(nCategory);
+        var AH = this.cpu.regAX >> 8;
         if (fMessage) {
-            var AH = this.cpu.regAX >> 8;
             var DL = this.cpu.regDX & 0xff;
             if (nInt == Debugger.INT.DOS && AH == 0x0b ||
                 nCategory == Debugger.MESSAGE.FDC && DL >= 0x80 || nCategory == Debugger.MESSAGE.HDC && DL < 0x80) {
@@ -1693,31 +1676,7 @@ if (DEBUGGER) {
     };
 
     /**
-     * messageMem(component, addr, fWrite, addrFrom, name, bitsMessage)
-     *
-     * NOTE: Not currently used
-     *
-     * @this {Debugger}
-     * @param {Component} component
-     * @param {number} addr
-     * @param {boolean} fWrite is true if this was a write, false if read
-     * @param {number|null} [addrFrom]
-     * @param {string|null} [name] of the memory address, if any
-     * @param {number} [bitsMessage] is one or more Debugger MESSAGE_* category flag(s)
-     *
-    Debugger.prototype.messageMem = function(component, addr, fWrite, addrFrom, name, bitsMessage)
-     {
-        if (!bitsMessage) bitsMessage = 0;
-        bitsMessage |= Debugger.MESSAGES_MEM;
-        if (addrFrom == null || (this.bitsMessageEnabled & bitsMessage) == bitsMessage) {
-            var b = this.bus.getByteDirect(addr);
-            this.message(component.idComponent + "." + (fWrite? "setByte" : "getByte") + "(0x" + str.toHexAddr(addr) + ")" + (addrFrom != null? (" at " + str.toHexAddr(addrFrom)) : "") + ": " + (name? (name + "=") : "") + str.toHexByte(b));
-        }
-    };
-     */
-
-    /**
-     * messagePort(component, port, bOut, addrFrom, name, bitsMessage, bIn)
+     * messageIO(component, port, bOut, addrFrom, name, bIn, bitsMessage)
      *
      * @this {Debugger}
      * @param {Component} component
@@ -1725,14 +1684,14 @@ if (DEBUGGER) {
      * @param {number|null} bOut if an output operation
      * @param {number|null} [addrFrom]
      * @param {string|null} [name] of the port, if any
-     * @param {number|null} [bitsMessage] is one or more Debugger MESSAGE_* category flag(s)
      * @param {number} [bIn] is the input value, if known, on an input operation
+     * @param {number} [bitsMessage] is one or more Debugger MESSAGE_* category flag(s)
      */
-    Debugger.prototype.messagePort = function(component, port, bOut, addrFrom, name, bitsMessage, bIn)
+    Debugger.prototype.messageIO = function(component, port, bOut, addrFrom, name, bIn, bitsMessage)
     {
         if (!bitsMessage) bitsMessage = 0;
         bitsMessage |= Debugger.MESSAGE.PORT;
-        if (addrFrom == null || (this.bitsMessageEnabled & bitsMessage) == bitsMessage) {
+        if (addrFrom == null || (this.bitsMessage & bitsMessage) == bitsMessage) {
             var segFrom = null;
             if (addrFrom != null) {
                 segFrom = this.cpu.segCS.sel;
@@ -1743,13 +1702,18 @@ if (DEBUGGER) {
     };
 
     /**
-     * message(sMessage)
+     * message(sMessage, fAddress)
      *
      * @this {Debugger}
      * @param {string} sMessage is any caller-defined message string
+     * @param {boolean} [fAddress] is true to display the current CS:IP
      */
-    Debugger.prototype.message = function(sMessage)
+    Debugger.prototype.message = function(sMessage, fAddress)
     {
+        if (fAddress) {
+            sMessage += " @" + str.toHexAddr(this.cpu.regIP, this.cpu.segCS.sel);
+        }
+
         if (this.sMessagePrev && sMessage == this.sMessagePrev) return;
 
         if (!SAMPLER) this.println(sMessage);   // + " (" + this.cpu.getCycles() + " cycles)"
@@ -1757,7 +1721,7 @@ if (DEBUGGER) {
         this.sMessagePrev = sMessage;
 
         if (this.cpu) {
-            if (this.bitsMessageEnabled & Debugger.MESSAGE.HALT) {
+            if (this.bitsMessage & Debugger.MESSAGE.HALT) {
                 this.cpu.stopCPU();
             }
             /*
@@ -2073,7 +2037,7 @@ if (DEBUGGER) {
         var state = new State(this);
         state.set(0, this.aAddrNextCode);
         state.set(1, this.aAddrAssemble);
-        state.set(2, [this.aPrevCmds, this.fAssemble, this.bitsMessageEnabled]);
+        state.set(2, [this.aPrevCmds, this.fAssemble, this.bitsMessage]);
         return state.data();
     };
 
@@ -2095,16 +2059,16 @@ if (DEBUGGER) {
             this.aPrevCmds = data[i][0];
             if (typeof this.aPrevCmds == "string") this.aPrevCmds = [this.aPrevCmds];
             this.fAssemble = data[i][1];
-            if (!this.bitsMessageEnabled) {
+            if (!this.bitsMessage) {
                 /*
-                 * It's actually kinda annoying that a restored (or predefined) state will trump my initial state,
+                 * It's actually kind of annoying that a restored (or predefined) state will trump my initial state,
                  * at least in situations where I've changed the initial state, if I want to diagnose something.
                  * Perhaps I should save/restore both the initial and current bitsMessageEnabled, and if the initial
                  * values don't agree, then leave the current value alone.
                  *
                  * But, it's much easier to just leave bitsMessageEnabled alone whenever it already contains set bits.
                  */
-                this.bitsMessageEnabled = data[i][2];
+                this.bitsMessage = data[i][2];
             }
         }
         return true;
@@ -2213,12 +2177,8 @@ if (DEBUGGER) {
      */
     Debugger.prototype.checkInstruction = function(addr, fSkipBP)
     {
-        /*
-         * Assert that general-purpose register contents remain within their respective ranges;
-         * this isn't intended to be complete, just a spot-check.
-         */
-        if (DEBUG) {
-            this.assert(!(this.cpu.regAX & ~0xffff) && !(this.cpu.regBX & ~0xffff) && !(this.cpu.regCX & ~0xffff) && !(this.cpu.regDX & ~0xffff), "register out of bounds");
+        if (!fSkipBP && this.cpu.segCS.cpl == 3 && !(this.cpu.regPS & X86.PS.IF)) {
+            return true;
         }
 
         if (!fSkipBP && this.checkBreakpoint(addr, this.aBreakExec)) {
@@ -2410,7 +2370,7 @@ if (DEBUGGER) {
         var addr = this.getAddr(aAddr, false, 0);
         if (addr >= 0) {
             b = this.bus.getByteDirect(addr);
-            if (DEBUG) this.assert((b == (b & 0xff)), "invalid byte (" + b + ") at address: " + this.hexAddr(aAddr));
+            this.assert((b == (b & 0xff)), "invalid byte (" + b + ") at address: " + this.hexAddr(aAddr));
             if (inc !== undefined) this.incAddr(aAddr, inc);
         }
         return b;
@@ -2430,7 +2390,7 @@ if (DEBUGGER) {
         var addr = this.getAddr(aAddr, false, 1);
         if (addr >= 0) {
             w = this.bus.getWordDirect(addr);
-            if (DEBUG) this.assert((w == (w & 0xffff)), "invalid word (" + w + ") at address: " + this.hexAddr(aAddr));
+            this.assert((w == (w & 0xffff)), "invalid word (" + w + ") at address: " + this.hexAddr(aAddr));
             if (inc !== undefined) this.incAddr(aAddr, inc);
         }
         return w;
@@ -4181,7 +4141,7 @@ if (DEBUGGER) {
                 for (m in Debugger.MESSAGES) {
                     if (sCategory == m) {
                         bitsMessage = Debugger.MESSAGES[m];
-                        fCriteria = !!(this.bitsMessageEnabled & bitsMessage);
+                        fCriteria = !!(this.bitsMessage & bitsMessage);
                         break;
                     }
                 }
@@ -4192,11 +4152,11 @@ if (DEBUGGER) {
             }
             if (bitsMessage) {
                 if (asArgs[2] == "on") {
-                    this.bitsMessageEnabled |= bitsMessage;
+                    this.bitsMessage |= bitsMessage;
                     fCriteria = true;
                 }
                 else if (asArgs[2] == "off") {
-                    this.bitsMessageEnabled &= ~bitsMessage;
+                    this.bitsMessage &= ~bitsMessage;
                     fCriteria = false;
                 }
             }
@@ -4210,7 +4170,7 @@ if (DEBUGGER) {
         for (m in Debugger.MESSAGES) {
             if (!sCategory || sCategory == m) {
                 var bitMessage = Debugger.MESSAGES[m];
-                var fEnabled = !!(this.bitsMessageEnabled & bitMessage);
+                var fEnabled = !!(this.bitsMessage & bitMessage);
                 if (fCriteria !== null && fCriteria != fEnabled) continue;
                 if (sCategories) sCategories += ",";
                 if (!(++n % 10)) sCategories += "\n\t";     // jshint ignore:line

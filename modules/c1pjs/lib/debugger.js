@@ -49,6 +49,7 @@ function C1PDebugger(parmsDbg)
 
         Component.call(this, "C1PDebugger", parmsDbg);
 
+        this.dbg = this;
         /*
          * This keeps track of instruction activity, but only when tracing or when
          * Debugger checks have been enabled (eg, one or more breakpoints have been set).
@@ -122,7 +123,7 @@ function C1PDebugger(parmsDbg)
         this.MESSAGE_SERIAL = 0x80;
         this.MESSAGE_NONE   = 0x00;
      // this.MESSAGE_ALL    = 0xff;
-        this.bMessages = this.MESSAGE_NONE;
+        this.bitsMessage = this.MESSAGE_NONE;
         this.aMessageCategories = {
             'port':     this.MESSAGE_PORT,
             'kbd':      this.MESSAGE_KBD,
@@ -694,7 +695,7 @@ if (DEBUGGER) {
             ];
             for (iMode=0; iMode < this.aOpModes.length; iMode++) {
                 sMode = this.aOpModes[iMode];
-                sRegEx += "(" + sMode.replace(/\[/g, "\\[").replace(/\]/g, "\\]").replace(/nnnn/g, "[0-9A-F][0-9A-F][0-9A-F][0-9A-F]?").replace(/nn/g, "[0-9A-F][0-9A-F]?").replace(/\+/g, "\\+") + "|)";
+                sRegEx += "(" + sMode.replace(/\[/g, "\\[").replace(/]/g, "\\]").replace(/nnnn/g, "[0-9A-F][0-9A-F][0-9A-F][0-9A-F]?").replace(/nn/g, "[0-9A-F][0-9A-F]?").replace(/\+/g, "\\+") + "|)";
             }
             this.regexOpModes = new RegExp(sRegEx);
         }
@@ -734,29 +735,16 @@ if (DEBUGGER) {
 
     /**
      * @this {C1PDebugger}
-     * @param {number} bMessage is one or more Debugger MESSAGE_* category flag(s)
-     * @return {boolean} true if message category is enabled, false if not
-     *
-     * NOTE: If the caller specifies MULTIPLE category flags, then ALL the corresponding flags
-     * in the Debugger's bMessages variable must be enabled as well, else the result will be false
-     */
-    C1PDebugger.prototype.messageEnabled = function(bMessage)
-    {
-        return ((this.bMessages & bMessage) === bMessage);
-    };
-
-    /**
-     * @this {C1PDebugger}
      * @param {Component} component
      * @param {number} addr
      * @param {number|undefined} addrFrom
-     * @param {boolean} bMessage is a Debugger MESSAGE_* category flag
+     * @param {boolean} bitsMessage is a Debugger MESSAGE_* category flag
      * @param {boolean|undefined} [fWrite] is true if this was a write, false (or undefined) if read
      * @param {string|undefined} [name] of the port, if any
      */
-    C1PDebugger.prototype.messagePort = function(component, addr, addrFrom, bMessage, fWrite, name)
+    C1PDebugger.prototype.messageIO = function(component, addr, addrFrom, bitsMessage, fWrite, name)
     {
-        if ((this.bMessages & bMessage) == bMessage) {
+        if ((this.bitsMessage & bitsMessage) == bitsMessage) {
             var b = this.cpu.getByte(addr);
             this.message(component.id + "." + (fWrite? "setByte":"getByte") + "(" + str.toHexWord(addr) + ")" + (addrFrom !== undefined? (" @" + str.toHexWord(addrFrom)) : "") + ": " + (name? (name + "=") : "") + str.toHexByte(b));
         }
@@ -1947,25 +1935,25 @@ if (DEBUGGER) {
             this.println("modern syntax enabled");
             break;
         case "msg":
-            var bMessage = 0;
+            var bitsMessage = 0;
             if (asArgs[2] !== undefined) {
                 if (asArgs[2] == "all")
-                    bMessage = 0xff;
+                    bitsMessage = 0xff;
                 else if (this.aMessageCategories[asArgs[2]] !== undefined)
-                    bMessage = this.aMessageCategories[asArgs[2]];
-                if (bMessage) {
+                    bitsMessage = this.aMessageCategories[asArgs[2]];
+                if (bitsMessage) {
                     if (asArgs[3] == "on") {
-                        this.bMessages |= bMessage;
+                        this.bitsMessage |= bitsMessage;
                     }
                     else if (asArgs[3] == "off") {
-                        this.bMessages &= ~bMessage;
+                        this.bitsMessage &= ~bitsMessage;
                     }
                 }
             }
             for (var sCategory in this.aMessageCategories) {
                 if (asArgs[2] !== undefined && (asArgs[2] != "all" && asArgs[2] != sCategory)) continue;
-                bMessage = this.aMessageCategories[sCategory];
-                this.println(sCategory + " messages: " + ((this.bMessages & bMessage)? "on" : "off"));
+                bitsMessage = this.aMessageCategories[sCategory];
+                this.println(sCategory + " messages: " + ((this.bitsMessage & bitsMessage)? "on" : "off"));
             }
             break;
         default:

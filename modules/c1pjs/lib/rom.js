@@ -127,7 +127,7 @@ C1PROM.prototype.setByte = function(addr, addrFrom)
      * we need to allow the Debugger to modify ROM contents).
      */
     if (addrFrom !== undefined) {
-        if (DEBUGGER && this.dbg) this.dbg.messagePort(this, addr, addrFrom, this.dbg.MESSAGE_PORT, true);
+        if (DEBUGGER && this.dbg) this.dbg.messageIO(this, addr, addrFrom, this.dbg.MESSAGE_PORT, true);
         var offset = (addr - this.offROM);
         Component.assert(offset >= 0 && offset < this.cbROM);
         if (!this.abImage)

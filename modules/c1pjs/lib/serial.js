@@ -141,7 +141,7 @@ C1PSerialPort.prototype.setBinding = function(sHTMLType, sBinding, control)
                 var fieldset = control.children[0];
                 var files = fieldset.children[0].files;
                 var submit = fieldset.children[1];
-                submit.disabled = (files.length == 0);
+                submit.disabled = !files.length;
             });
 
             control.onsubmit = function(event) {
@@ -321,7 +321,7 @@ C1PSerialPort.prototype.setByte = function(addr, addrFrom)
      * the Debugger performed this write (need a special Debugger I/O command if/when you really want to do that).
      */
     if (addrFrom !== undefined) {
-        if (DEBUGGER && this.dbg) this.dbg.messagePort(this, addr, addrFrom, this.dbg.MESSAGE_SERIAL, true);
+        if (DEBUGGER && this.dbg) this.dbg.messageIO(this, addr, addrFrom, this.dbg.MESSAGE_SERIAL, true);
         /*
          * WARNING: I don't yet care what state the CPU puts the port into.  When it's time to support serial output,
          * obviously that will become an issue.

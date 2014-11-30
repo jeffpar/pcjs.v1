@@ -231,7 +231,7 @@ if (typeof module !== 'undefined') {
  */
 function Disk(controller, drive, mode)
 {
-    Component.call(this, "Disk", {'id': controller.idMachine + ".disk" + Disk.nDisks++}, Disk);
+    Component.call(this, "Disk", {'id': controller.idMachine + ".disk" + Disk.nDisks++}, Disk, Debugger.MESSAGE.DISK);
 
     /*
      * Route all non-Debugger messages (eg, notice() and println() calls) through
@@ -444,7 +444,9 @@ Disk.prototype.create = function(mode, nCylinders, nHeads, nSectors, cbSector)
      * it wouldn't hurt to let create() do its thing, too, but it's a waste of time.
      */
     if (this.mode != DiskAPI.MODE.PRELOAD) {
-        if (DEBUG) this.messageDebugger("blank disk for \"" + this.sDiskName + "\": " + this.nCylinders + " cylinders, " + this.nHeads + " head(s)");
+        if (DEBUG && this.messageEnabled()) {
+            this.messageDebugger("blank disk for \"" + this.sDiskName + "\": " + this.nCylinders + " cylinders, " + this.nHeads + " head(s)");
+        }
         var aCylinders = new Array(this.nCylinders);
         for (var iCylinder = 0; iCylinder < aCylinders.length; iCylinder++) {
             var aHeads = new Array(this.nHeads);
@@ -656,7 +658,9 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
 
     if (this.fOnDemand) {
         if (!nErrorCode) {
-            if (DEBUG) this.messageDebugger('Disk.doneLoad("' + sDiskFile + '","' + sDiskPath + '")');
+            if (DEBUG && this.messageEnabled()) {
+                this.messageDebugger('Disk.doneLoad("' + sDiskFile + '","' + sDiskPath + '")');
+            }
             this.fRemote = true;
             disk = this;
         } else {
@@ -673,7 +677,9 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
          */
         this.controller.notice("Unable to load disk \"" + this.sDiskName + "\" (error " + nErrorCode + ")", fPrintOnly);
     } else {
-        if (DEBUG) this.messageDebugger('Disk.doneLoad("' + sDiskFile + '","' + sDiskPath + '")');
+        if (DEBUG && this.messageEnabled()) {
+            this.messageDebugger('Disk.doneLoad("' + sDiskFile + '","' + sDiskPath + '")');
+        }
         try {
             /*
              * The following code was a hack to turn on write-protection for a disk image if there was
@@ -764,13 +770,13 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
              * conversion to a forward-compatible 'data' array.
              */
             else {
-                if (MAXDEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE.DISK)) {
+                if (MAXDEBUG && this.messageEnabled()) {
                     var sCylinders = aDiskData.length + " track" + (aDiskData.length > 1 ? "s" : "");
                     var nHeads = aDiskData[0].length;
                     var sHeads = nHeads + " head" + (nHeads > 1 ? "s" : "");
                     var nSectorsPerTrack = aDiskData[0][0].length;
                     var sSectorsPerTrack = nSectorsPerTrack + " sector" + (nSectorsPerTrack > 1 ? "s" : "") + "/track";
-                    this.dbg.message(sCylinders + ", " + sHeads + ", " + sSectorsPerTrack);
+                    this.messageDebugger(sCylinders + ", " + sHeads + ", " + sSectorsPerTrack);
                 }
                 /*
                  * Before the image is usable, we must "normalize" all the sectors.  In the past, this meant
@@ -811,7 +817,7 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
                                      * pattern, if any, into a dword pattern.
                                      */
                                     adw = [];
-                                    if (DEBUG) this.assert((dwPattern & 0xff) == dwPattern);
+                                    this.assert((dwPattern & 0xff) == dwPattern);
                                     dwPattern = sector['pattern'] = (dwPattern | (dwPattern << 8) | (dwPattern << 16) | (dwPattern << 24));
                                     sector['data'] = adw;
                                 } else {
@@ -913,7 +919,9 @@ Disk.prototype.onLoadParseSectors = function(sURLName, sURLData, nErrorCode, sec
         var nSectors = sectorInfo[3];
         fAsync = sectorInfo[4];
 
-        if (DEBUG) this.messageDebugger("Disk.onLoadParseSectors(" + iCylinder + ":" + iHead + ":" + iSector + ":" + nSectors + ")");
+        if (DEBUG && this.messageEnabled()) {
+            this.messageDebugger("Disk.onLoadParseSectors(" + iCylinder + ":" + iHead + ":" + iSector + ":" + nSectors + ")");
+        }
 
         var abData = JSON.parse(sURLData);
         var offData = 0;
@@ -929,7 +937,9 @@ Disk.prototype.onLoadParseSectors = function(sURLName, sURLData, nErrorCode, sec
              */
             var sector = this.seek(iCylinder, iHead, iSector, true);
             if (!sector) {
-                if (DEBUG) this.messageDebugger("Disk.onLoadParseSectors(): seek(" + iCylinder + "," + iHead + "," + iSector + ") failed");
+                if (DEBUG && this.messageEnabled()) {
+                    this.messageDebugger("Disk.onLoadParseSectors(): seek(" + iCylinder + "," + iHead + "," + iSector + ") failed");
+                }
                 break;
             }
             this.fill(sector, abData, offData);
@@ -979,7 +989,9 @@ Disk.prototype.connectRemoteDisk = function(sDiskPath)
  */
 Disk.prototype.readRemoteSectors = function(iCylinder, iHead, iSector, cbSector, nSectors, done)
 {
-    if (DEBUG) this.messageDebugger("Disk.readRemoteSectors(" + iCylinder + ":" + iHead + ":" + iSector + ":" + nSectors + "," + cbSector + ")");
+    if (DEBUG && this.messageEnabled()) {
+        this.messageDebugger("Disk.readRemoteSectors(" + iCylinder + ":" + iHead + ":" + iSector + ":" + nSectors + "," + cbSector + ")");
+    }
 
     if (this.fRemote) {
         var sParms = DiskAPI.QUERY.ACTION + '=' + DiskAPI.ACTION.READ;
@@ -1017,7 +1029,9 @@ Disk.prototype.readRemoteSectors = function(iCylinder, iHead, iSector, cbSector,
  */
 Disk.prototype.writeRemoteSectors = function(iCylinder, iHead, iSector, nSectors, abSectors, fAsync)
 {
-    if (DEBUG) this.messageDebugger("Disk.writeRemoteSectors(" + iCylinder + ":" + iHead + ":" + iSector + ":" + nSectors + ")");
+    if (DEBUG && this.messageEnabled()) {
+        this.messageDebugger("Disk.writeRemoteSectors(" + iCylinder + ":" + iHead + ":" + iSector + ":" + nSectors + ")");
+    }
 
     if (this.fRemote) {
         var data = {};
@@ -1084,7 +1098,9 @@ Disk.prototype.queueDirtySector = function(sector, fAsync)
     this.aDirtySectors.push(sector);
     this.aDirtyTimestamps.push(usr.getTime());
 
-    if (DEBUG) this.messageDebugger("Disk.queueDirtySector(" + sector.iCylinder + ":" + sector.iHead + ":" + sector['sector'] + "): " + this.aDirtySectors.length + " dirty");
+    if (DEBUG && this.messageEnabled()) {
+        this.messageDebugger("Disk.queueDirtySector(" + sector.iCylinder + ":" + sector.iHead + ":" + sector['sector'] + "): " + this.aDirtySectors.length + " dirty");
+    }
 
     return fAsync && this.updateWriteTimer();
 };
@@ -1152,15 +1168,17 @@ Disk.prototype.findDirtySectors = function(fAsync)
             var sectorNext = this.aDiskData[iCylinder][iHead][i];
             if (!sectorNext.fDirty) break;
             var j = this.aDirtySectors.indexOf(sectorNext);
-            if (DEBUG) this.assert(j >= 0, "dirty sector (" + iCylinder + ":" + iHead + ":" + sectorNext['sector'] + ") missing from aDirtySectors");
-            if (DEBUG) this.messageDebugger("Disk.findDirtySectors(" + iCylinder + ":" + iHead + ":" + sectorNext['sector'] + ")");
+            this.assert(j >= 0, "dirty sector (" + iCylinder + ":" + iHead + ":" + sectorNext['sector'] + ") missing from aDirtySectors");
+            if (DEBUG && this.messageEnabled()) {
+                this.messageDebugger("Disk.findDirtySectors(" + iCylinder + ":" + iHead + ":" + sectorNext['sector'] + ")");
+            }
             this.aDirtySectors.splice(j, 1);
             this.aDirtyTimestamps.splice(j, 1);
             abSectors = abSectors.concat(this.toBytes(sectorNext));
             sectorNext.fDirty = false;
             nSectors++;
         }
-        if (DEBUG) this.assert(!!abSectors.length, "no data for dirty sector (" + iCylinder + ":" + iHead + ":" + sector['sector'] + ")");
+        this.assert(!!abSectors.length, "no data for dirty sector (" + iCylinder + ":" + iHead + ":" + sector['sector'] + ")");
         var response = this.writeRemoteSectors(iCylinder, iHead, iSector, nSectors, abSectors, fAsync);
         return fAsync || response;
     }
@@ -1188,7 +1206,9 @@ Disk.prototype.onWriteCleanSectors = function(sURLName, sURLData, nErrorCode, se
         for (var i = iSector - 1; nSectors-- > 0 && i >= 0 && i < this.aDiskData[iCylinder][iHead].length; i++) {
             var sector = this.aDiskData[iCylinder][iHead][i];
 
-            if (DEBUG) this.messageDebugger("Disk.onWriteCleanSectors(" + iCylinder + ":" + iHead + ":" + sector['sector'] + ")");
+            if (DEBUG && this.messageEnabled()) {
+                this.messageDebugger("Disk.onWriteCleanSectors(" + iCylinder + ":" + iHead + ":" + sector['sector'] + ")");
+            }
 
             if (!nErrorCode) {
                 if (!sector.fDirty) {
@@ -1318,7 +1338,9 @@ Disk.prototype.seek = function(iCylinder, iHead, iSector, fWrite, done)
                             });
                             return null;
                         } else {
-                            if (DEBUG) this.messageDebugger('Disk.seek("' + this.sDiskName + '"): uninitialized sector ' + iCylinder + ':' + iHead + ':' + iSector);
+                            if (DEBUG && this.messageEnabled()) {
+                                this.messageDebugger('Disk.seek("' + this.sDiskName + '"): uninitialized sector ' + iCylinder + ':' + iHead + ':' + iSector);
+                            }
                         }
                     }
                     break;
@@ -1395,7 +1417,9 @@ Disk.prototype.read = function(sector, ibSector, fCompare)
 {
     var b = -1;
 
-    if (DEBUG && !ibSector && !fCompare) this.messageDebugger("Disk.read(" + this.controller.id + ":" + this.drive.iDrive + "," + sector.iCylinder + ":" + sector.iHead + ":" + sector['sector'] + ")");
+    if (DEBUG && !ibSector && !fCompare && this.messageEnabled()) {
+        this.messageDebugger("Disk.read(" + this.controller.id + ":" + this.drive.iDrive + "," + sector.iCylinder + ":" + sector.iHead + ":" + sector['sector'] + ")");
+    }
 
     if (ibSector < sector['length']) {
         var adw = sector['data'];
@@ -1420,7 +1444,9 @@ Disk.prototype.write = function(sector, ibSector, b)
     if (this.fWriteProtected)
         return false;
 
-    if (DEBUG && !ibSector) this.messageDebugger("Disk.write(" + this.controller.id + ":" + this.drive.iDrive + "," + sector.iCylinder + ":" + sector.iHead + ":" + sector['sector'] + ")");
+    if (DEBUG && !ibSector && this.messageEnabled()) {
+        this.messageDebugger("Disk.write(" + this.controller.id + ":" + this.drive.iDrive + "," + sector.iCylinder + ":" + sector.iHead + ":" + sector['sector'] + ")");
+    }
 
     if (ibSector < sector['length']) {
         if (b != this.read(sector, ibSector, true)) {
@@ -1490,7 +1516,9 @@ Disk.prototype.save = function()
             }
         }
     }
-    if (DEBUG) this.messageDebugger('Disk.save("' + this.sDiskName + '"): saved ' + (deltas.length - 1) + ' change(s)');
+    if (DEBUG && this.messageEnabled()) {
+        this.messageDebugger('Disk.save("' + this.sDiskName + '"): saved ' + (deltas.length - 1) + ' change(s)');
+    }
     return deltas;
 };
 
@@ -1618,26 +1646,11 @@ Disk.prototype.restore = function(deltas)
     if (nChanges < 0) {
         this.controller.notice("unable to restore disk '" + this.sDiskName + ": " + sReason);
     } else {
-        if (DEBUG) this.messageDebugger('Disk.restore("' + this.sDiskName + '"): restored ' + nChanges + ' change(s)');
-    }
-    return nChanges;
-};
-
-/**
- * messageDebugger(sMessage)
- *
- * This is a combination of the Debugger's messageEnabled(MESSAGE_DISK) and message() functions, for convenience.
- *
- * @this {Disk}
- * @param {string} sMessage is any caller-defined message string
- */
-Disk.prototype.messageDebugger = function(sMessage)
-{
-    if (DEBUGGER && this.dbg) {
-        if (this.dbg.messageEnabled(Debugger.MESSAGE.DISK)) {
-            this.dbg.message(sMessage);
+        if (DEBUG && this.messageEnabled()) {
+            this.messageDebugger('Disk.restore("' + this.sDiskName + '"): restored ' + nChanges + ' change(s)');
         }
     }
+    return nChanges;
 };
 
 if (typeof APP_PCJS !== 'undefined') APP_PCJS.Disk = Disk;
