@@ -498,11 +498,12 @@ var X86Help = {
                 return;
             }
         }
+        var cpl = this.segCS.cpl;
         var regIP = this.popWord();
         var regCS = this.popWord();
         var regPS = this.popWord();
         if (this.setCSIP(regIP, regCS, false) != null) {
-            this.setPS(regPS);
+            this.setPS(regPS, cpl);
             if (this.cIntReturn) this.checkIntReturn(this.regEIP);
         }
     },
@@ -535,6 +536,7 @@ var X86Help = {
             this.setIP(this.opEA - this.segCS.base);
             return;
         }
+
         var fDispatch = false;
         if (this.model >= X86.MODEL_80186) {
             if (this.nFault < 0) {
@@ -560,9 +562,11 @@ var X86Help = {
                 return;
             }
         }
+
         if (X86Help.opHelpFaultMessage.call(this, nFault, nError, fHalt)) {
             fDispatch = false;
         }
+
         if (fDispatch) X86Help.opHelpINT.call(this, this.nFault = nFault, nError, 0);
 
         /*
@@ -573,7 +577,7 @@ var X86Help = {
          *
          * As long as we're not using EAFUNCS, that's easy for any EA-based memory accesses: simply set both
          * the NOREAD and NOWRITE flags.  However, there may still be direct, non-EA-based memory accesses that
-         * could cause us grief.  TODO: Implement the ultimate solution, which will involve throwing a special
+         * could cause us grief.  TODO: Implement a better solution, which may involve throwing a special
          * JavaScript exception that cpu.js must intercept and quietly ignore.
          */
         if (!EAFUNCS) {
@@ -586,9 +590,10 @@ var X86Help = {
      * Aside from giving the Debugger an opportunity to report every fault, this also gives us the ability to
      * halt exception processing in tracks: return true to prevent the fault handler from being dispatched.
      *
-     * TODO: Provide the Debugger with some UI to control its "interference" with fault dispatching, and to
-     * continue the dispatch after it has interfered.  At the moment, your only option is to single-step over
-     * the offending instruction, which will allow the fault to be dispatched, and then continue execution.
+     * At the moment, the only Debugger control you have over fault interception is setting MESSAGE.FAULT, which
+     * will display faults as they occur, and MESSAGE.HALT, which will halt after any Debugger message, including
+     * MESSAGE.FAULT.  If you want execution to continue after halting, clear MESSAGE.FAULT and/or MESSAGE.HALT,
+     * or single-step over the offending instruction, which will allow the fault to be dispatched.
      *
      * @this {X86CPU}
      * @param {number} nFault
@@ -600,8 +605,6 @@ var X86Help = {
     {
         var bitsMessage = Debugger.MESSAGE.FAULT;
         var bOpcode = this.bus.getByteDirect(this.regEIP);
-
-        if (this.messageEnabled(bitsMessage)) fHalt = true;
 
         /*
          * OS/2 1.0 uses an INT3 (0xCC) opcode in conjunction with an invalid IDT to trigger a triple-fault
@@ -620,6 +623,7 @@ var X86Help = {
             fHalt = false;
             bitsMessage |= Debugger.MESSAGE.CPU;
         }
+
         /*
          * Similarly, the PC AT ROM BIOS deliberately generates a couple of GP faults as part of the POST
          * (Power-On Self Test); we don't want to ignore those, but we don't want to halt on them either.  We
@@ -629,16 +633,28 @@ var X86Help = {
             fHalt = false;
         }
 
+        /*
+         * However, the foregoing notwithstanding, if MESSAGE.HALT is enabled along with all the other required
+         * MESSAGE bits, then we want to halt regardless.
+         */
+        if (this.messageEnabled(bitsMessage | Debugger.MESSAGE.HALT)) {
+            fHalt = true;
+        }
+
         if (this.messageEnabled(bitsMessage) || fHalt) {
             var sMessage = (fHalt? '\n' : '') + "Fault " + str.toHexByte(nFault) + (nError != null? " (" + str.toHexWord(nError) + ")" : "") + " on opcode 0x" + str.toHexByte(bOpcode) + " at " + str.toHexAddr(this.regIP, this.segCS.sel) + " (%" + str.toHex(this.regEIP, 6) + ")";
+            var fRunning = this.bitField.fRunning;
             if (this.messageDebugger(sMessage)) {
                 if (fHalt) {
                     /*
                      * By setting fHalt to fRunning (which is true while running but false while single-stepping),
                      * this allows a fault to be dispatched when you single-step over a faulting instruction; you can
                      * then continue single-stepping into the fault handler, or start running again.
+                     *
+                     * Note that we had to capture fRunning before calling messageDebugger(), because if MESSAGE.HALT
+                     * is set, messageDebugger() will have already halted the CPU.
                      */
-                    fHalt = this.bitField.fRunning;
+                    fHalt = fRunning;
                     this.dbg.stopCPU();
                 }
             } else {

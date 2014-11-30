@@ -1622,8 +1622,9 @@ X86CPU.prototype.getPS = function()
  *
  * @this {X86CPU}
  * @param {number} regPS
+ * @param {number} [cpl]
  */
-X86CPU.prototype.setPS = function(regPS)
+X86CPU.prototype.setPS = function(regPS, cpl)
 {
     this.resultSize = X86.RESULT.SIZE_BYTE;         // NOTE: We could have chosen SIZE_WORD, too; it's irrelevant
     this.resultValue = this.resultParitySign = this.resultAuxOverflow = 0;
@@ -1638,7 +1639,7 @@ X86CPU.prototype.setPS = function(regPS)
     /*
      * OS/2 1.0 discriminates between an 80286 and an 80386 based on whether an IRET in real-mode that
      * pops 0xF000 into the flags is able to set *any* of flag bits 12-15: if it can, then OS/2 declares
-     * the the CPU an 80386.  Therefore, in real-mode, we must zero all incoming bits 12-15.
+     * the CPU an 80386.  Therefore, in real-mode, we must zero all incoming bits 12-15.
      *
      * This has the added benefit of relieving us from having to zero the effective IOPL (this.nIOPL)
      * whenever we're in real-mode, since we're zeroing the IOPL bits up front now.
@@ -1648,18 +1649,24 @@ X86CPU.prototype.setPS = function(regPS)
     }
 
     /*
+     * There are some cases (eg, an IRET returning to a less privileged code segment) where the CPL
+     * we compare against should come from the outgoing code segment, so if the caller provided it, use it.
+     */
+    if (cpl === undefined) cpl = this.segCS.cpl;
+
+    /*
      * Since PS.IOPL and PS.IF are part of PS_DIRECT, we need to take care of any 80286-specific behaviors
      * before setting the PS_DIRECT bits from the incoming regPS bits.
      *
      * Specifically, PS.IOPL is unchanged if CPL > 0, and PS.IF is unchanged if CPL > IOPL.
      */
-    if (!this.segCS.cpl) {
+    if (!cpl) {
         this.nIOPL = (regPS & X86.PS.IOPL.MASK) >> X86.PS.IOPL.SHIFT;           // IOPL allowed to change
     } else {
         regPS = (regPS & ~X86.PS.IOPL.MASK) | (this.regPS & X86.PS.IOPL.MASK);  // IOPL not allowed to change
     }
 
-    if (this.segCS.cpl > this.nIOPL) {
+    if (cpl > this.nIOPL) {
         regPS = (regPS & ~X86.PS.IF) | (this.regPS & X86.PS.IF);                // IF not allowed to change
     }
 

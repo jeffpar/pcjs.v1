@@ -677,7 +677,29 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
         else if (this.id == X86Seg.ID.DATA) {
             if (selMasked) {
                 if (type < X86.DESC.ACC.TYPE.DATA_READONLY || (type & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.READABLE)) == X86.DESC.ACC.TYPE.CODE) {
-                    if (!fSuppress) X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, true);
+                    /*
+                     * OS/2 1.0 triggers this GP fault (what I'll call the "Empty Descriptor" GP fault) multiple times
+                     * during boot; eg:
+                     *
+                     *      Fault 0D (002F) on opcode 0x8E at 3190:3A05 (%112625)
+                     *      stopped (11315208 ops, 41813627 cycles, 498270 ms, 83918 hz)
+                     *      AX=0000 BX=0970 CX=0300 DX=0300 SP=0ABE BP=0ABA SI=0000 DI=001A
+                     *      DS=19C0[177300,2C5F] ES=001F[1743A0,07FF] SS=0038[175CE0,0B5F]
+                     *      CS=3190[10EC20,B89F] IP=3A05 V0 D0 I1 T0 S0 Z1 A0 P1 C0 PS=3246 MS=FFF3
+                     *      LD=0028[174BC0,003F] GD=[11A4E0,490F] ID=[11F61A,03FF]  TR=0010 A20=ON
+                     *      3190:3A05 8E4604        MOV      ES,[BP+04]
+                     *      0038:0ABE  002F  19C0  0000  067C - 07FC  0AD2  0010  C420   /.....|....... .
+                     *      dumpDesc(002F): %174BE8
+                     *      base=000000 limit=0000 dpl=00 type=00 (undefined)
+                     *
+                     * If we allow the GP fault to be dispatched, it recovers, so until I'm able to investigate this
+                     * further, I'm going to assume this is normal behavior.  If the segment (0x002F in the example)
+                     * simply needed to be "faulted" into memory, I would have expected OS/2 to build a descriptor
+                     * with the PRESENT bit clear, and rely on NP faults rather than GP faults, but maybe this was simpler.
+                     *
+                     * So, if acc is zero, we won't set fHalt on the following call.
+                     */
+                    if (!fSuppress) X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, acc != 0);
                     base = null;
                     break;
                 }
