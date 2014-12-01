@@ -57,7 +57,7 @@ function X86Seg(cpu, id, sName, fProt)
     this.base = 0;
     this.limit = 0xffff;
     this.acc = 0;
-    this.addrDesc = null;
+    this.addrDesc = X86.ADDR_INVALID;
     this.cpl = 0;
     this.dpl = 0;
     /*
@@ -76,11 +76,12 @@ function X86Seg(cpu, id, sName, fProt)
      * to a numerically lower privilege, and fCall == false allows a stack switch (restore) and a privilege
      * transition to a numerically greater privilege.
      *
-     * As long as setCSIP() is used for all CS changes, the foregoing is automatically taken care of.
+     * As long as setCSIP() or opHelpINT() are used for all CS changes, the foregoing is automatically
+     * taken care of.
      *
      * TODO: Consider making fCall a parameter to load(), instead of a property that must be set prior to
      * calling load(); the downside (and why I didn't do that in the first place) is that such a parameter
-     * to load() would be meaningless for segments other than segCS.
+     * is meaningless for segments other than segCS.
      */
     this.awScratch = (this.id == X86Seg.ID.CODE? new Array(32) : []);
     this.fCall = null;
@@ -111,7 +112,7 @@ X86Seg.ID = {
  * @this {X86Seg}
  * @param {number} sel
  * @param {boolean} [fSuppress] is true to suppress any errors
- * @return {number|null} base address of selected segment, or null if error
+ * @return {number} base address of selected segment, or ADDR_INVALID if error (TODO: No error conditions exist yet)
  */
 X86Seg.loadReal = function loadReal(sel, fSuppress)
 {
@@ -140,7 +141,7 @@ X86Seg.loadReal = function loadReal(sel, fSuppress)
  * @this {X86Seg}
  * @param {number} sel
  * @param {boolean} [fSuppress] is true to suppress any errors, cycle assessment, etc
- * @return {number|null} base address of selected segment, or null if error
+ * @return {number} base address of selected segment, or ADDR_INVALID if error
  */
 X86Seg.loadProt = function loadProt(sel, fSuppress)
 {
@@ -180,7 +181,7 @@ X86Seg.loadProt = function loadProt(sel, fSuppress)
             X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel);
         }
     }
-    return null;
+    return X86.ADDR_INVALID;
 };
 
 /**
@@ -188,7 +189,7 @@ X86Seg.loadProt = function loadProt(sel, fSuppress)
  *
  * @this {X86Seg}
  * @param {number} nIDT
- * @return {number|null} base address of selected segment, or null if error
+ * @return {number} base address of selected segment, or ADDR_INVALID if error (TODO: No error conditions exist yet)
  */
 X86Seg.loadRealIDT = function loadRealIDT(nIDT)
 {
@@ -213,7 +214,7 @@ X86Seg.loadRealIDT = function loadRealIDT(nIDT)
  *
  * @this {X86Seg}
  * @param {number} nIDT
- * @return {number|null} base address of selected segment, or null if error
+ * @return {number} base address of selected segment, or ADDR_INVALID if error (TODO: No error conditions exist yet)
  */
 X86Seg.loadProtIDT = function loadProtIDT(nIDT)
 {
@@ -226,7 +227,7 @@ X86Seg.loadProtIDT = function loadProtIDT(nIDT)
         return this.loadDesc8(addrDesc, nIDT);
     }
     X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, nIDT | X86.ERRCODE.IDT | X86.ERRCODE.EXT, true);
-    return null;
+    return X86.ADDR_INVALID;
 };
 
 /**
@@ -239,7 +240,7 @@ X86Seg.loadProtIDT = function loadProtIDT(nIDT)
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of extra bytes to check (0 or 1)
  * @param {boolean} [fSuppress] is true to suppress any errors
- * @return {number|null} corresponding physical address if valid, null if not
+ * @return {number} corresponding physical address if valid, or ADDR_INVALID if error (TODO: No error conditions exist yet)
  */
 X86Seg.checkReadReal = function checkReadReal(off, cb, fSuppress)
 {
@@ -256,7 +257,7 @@ X86Seg.checkReadReal = function checkReadReal(off, cb, fSuppress)
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of extra bytes to check (0 or 1)
  * @param {boolean} [fSuppress] is true to suppress any errors
- * @return {number|null} corresponding physical address if valid, null if not
+ * @return {number} corresponding physical address if valid, or ADDR_INVALID if error (TODO: No error conditions exist yet)
  */
 X86Seg.checkWriteReal = function checkWriteReal(off, cb, fSuppress)
 {
@@ -270,7 +271,7 @@ X86Seg.checkWriteReal = function checkWriteReal(off, cb, fSuppress)
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of extra bytes to check (0 or 1)
  * @param {boolean} [fSuppress] is true to suppress any errors
- * @return {number|null} corresponding physical address if valid, null if not
+ * @return {number} corresponding physical address if valid, or ADDR_INVALID if not
  */
 X86Seg.checkReadProt = function checkReadProt(off, cb, fSuppress)
 {
@@ -287,7 +288,7 @@ X86Seg.checkReadProt = function checkReadProt(off, cb, fSuppress)
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of extra bytes to check (0 or 1)
  * @param {boolean} [fSuppress] is true to suppress any errors
- * @return {number|null} corresponding physical address if valid, null if not
+ * @return {number} corresponding physical address if valid, ADDR_INVALID if not
  */
 X86Seg.checkReadProtDown = function checkReadProtDown(off, cb, fSuppress)
 {
@@ -304,14 +305,14 @@ X86Seg.checkReadProtDown = function checkReadProtDown(off, cb, fSuppress)
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of extra bytes to check (0 or 1)
  * @param {boolean} [fSuppress] is true to suppress any errors
- * @return {number|null} corresponding physical address if valid, null if not
+ * @return {number} corresponding physical address if valid, ADDR_INVALID if not
  */
 X86Seg.checkReadProtDisallowed = function checkReadProtDisallowed(off, cb, fSuppress)
 {
     if (!fSuppress) {
         X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, 0);
     }
-    return null;
+    return X86.ADDR_INVALID;
 };
 
 /**
@@ -321,7 +322,7 @@ X86Seg.checkReadProtDisallowed = function checkReadProtDisallowed(off, cb, fSupp
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of extra bytes to check (0 or 1)
  * @param {boolean} [fSuppress] is true to suppress any errors
- * @return {number|null} corresponding physical address if valid, null if not
+ * @return {number} corresponding physical address if valid, ADDR_INVALID if not
  */
 X86Seg.checkWriteProt = function checkWriteProt(off, cb, fSuppress)
 {
@@ -338,7 +339,7 @@ X86Seg.checkWriteProt = function checkWriteProt(off, cb, fSuppress)
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of extra bytes to check (0 or 1)
  * @param {boolean} [fSuppress] is true to suppress any errors
- * @return {number|null} corresponding physical address if valid, null if not
+ * @return {number} corresponding physical address if valid, ADDR_INVALID if not
  */
 X86Seg.checkWriteProtDown = function checkWriteProtDown(off, cb, fSuppress)
 {
@@ -355,20 +356,34 @@ X86Seg.checkWriteProtDown = function checkWriteProtDown(off, cb, fSuppress)
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of extra bytes to check (0 or 1)
  * @param {boolean} [fSuppress] is true to suppress any errors
- * @return {number|null} corresponding physical address if valid, null if not
+ * @return {number} corresponding physical address if valid, ADDR_INVALID if not
  */
 X86Seg.checkWriteProtDisallowed = function checkWriteProtDisallowed(off, cb, fSuppress)
 {
     if (!fSuppress) {
         X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, 0);
     }
-    return null;
+    return X86.ADDR_INVALID;
 };
 
 /**
  * switchTSS(selNew, fNest)
  *
  * Implements TSS (Task State Segment) task switching.
+ *
+ * NOTES: This typically occurs during double-fault processing, because the IDT entry for DF_FAULT normally
+ * contains a task gate.  Interestingly, if we force a GP_FAULT to occur at a sufficiently early point in the
+ * OS/2 1.0 initialization code, OS/2 does a nice job of displaying the GP fault and then shutting down:
+ *
+ *      0090:067B FB            STI
+ *      0090:067C EBFD          JMP      067B
+ *
+ * but it may not have yet reprogrammed the master PIC to re-vector hardware interrupts to IDT entries 0x50-0x57,
+ * so when the next timer interrupt (IRQ 0) occurs, it vectors through IDT entry 0x08, which is the double-fault
+ * vector. A spurious double-fault is generated, and a clean shutdown turns into a messy crash.
+ *
+ * Of course, that all could have been avoided if IBM had heeded Intel's advice and not used Intel-reserved IDT
+ * entries for PC interrupts.
  *
  * @this {X86Seg}
  * @param {number} selNew
@@ -390,7 +405,7 @@ X86Seg.switchTSS = function switchTSS(selNew, fNest)
         }
         cpu.setWord(cpu.segTSS.addrDesc + X86.DESC.ACC.OFFSET, (cpu.segTSS.acc & ~X86.DESC.ACC.TYPE.TSS_BUSY) | X86.DESC.ACC.TYPE.TSS);
     }
-    if (cpu.segTSS.load(selNew) == null) {
+    if (cpu.segTSS.load(selNew) == X86.ADDR_INVALID) {
         return false;
     }
     var addrNew = cpu.segTSS.base;
@@ -455,7 +470,7 @@ X86Seg.switchTSS = function switchTSS(selNew, fNest)
  * @this {X86Seg}
  * @param {number} sel (protected-mode only)
  * @param {boolean} [fGDT] is true if sel must be in the GDT
- * @return {number|null} acc field from descriptor, or null if error
+ * @return {number} acc field from descriptor, or X86.DESC.ACC.INVALID if error
  */
 X86Seg.prototype.loadAcc = function(sel, fGDT)
 {
@@ -477,7 +492,7 @@ X86Seg.prototype.loadAcc = function(sel, fGDT)
         }
     }
     X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel);
-    return null;
+    return X86.DESC.ACC.INVALID;
 };
 
 /**
@@ -508,7 +523,7 @@ X86Seg.prototype.loadDesc6 = function(addrDesc, sel)
     this.addrDesc = addrDesc;
     this.updateMode();
 
-    this.messageDebugger(sel, base, limit, acc);
+    this.messageSeg(sel, base, limit, acc);
 
     return base;
 };
@@ -529,7 +544,7 @@ X86Seg.prototype.loadDesc6 = function(addrDesc, sel)
  * @param {number} addrDesc is the descriptor address
  * @param {number} sel is the associated selector
  * @param {boolean} [fSuppress] is true to suppress any errors, cycle assessment, etc
- * @return {number|null} base address of selected segment, or null if error
+ * @return {number} base address of selected segment, or ADDR_INVALID if error
  */
 X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
 {
@@ -555,7 +570,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                 rpl = sel & X86.SEL.RPL;
                 if (rpl > this.cpl) {
                     if (fCall !== false) {
-                        base = null;
+                        base = X86.ADDR_INVALID;
                         break;
                     }
                     regSP = cpu.popWord();
@@ -572,22 +587,22 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                 if (rpl < this.cpl) rpl = this.cpl;
                 if (rpl > dpl) {
                     accCode = this.loadAcc(selCode, true);
-                    if (accCode != null && (accCode & X86.DESC.ACC.TYPE.CODE_CONFORMING) == X86.DESC.ACC.TYPE.CODE_CONFORMING) {
+                    if (accCode != X86.DESC.ACC.INVALID && (accCode & X86.DESC.ACC.TYPE.CODE_CONFORMING) == X86.DESC.ACC.TYPE.CODE_CONFORMING) {
                         rpl = dpl;
                     }
                 }
                 if (rpl <= dpl) {
                     cplPrev = this.cpl;
-                    if (this.load(selCode, true) == null) {
+                    if (this.load(selCode, true) == X86.ADDR_INVALID) {
                         cpu.assert(false);
-                        base = null;
+                        base = X86.ADDR_INVALID;
                         break;
                     }
                     cpu.regIP = limit;
                     if (this.cpl < cplPrev) {
                         if (fCall !== true) {
                             cpu.assert(false);
-                            base = null;
+                            base = X86.ADDR_INVALID;
                             break;
                         }
                         regSP = cpu.regSP;
@@ -612,28 +627,28 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                 }
                 cpu.assert(false);
                 if (!fSuppress) X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, true);
-                base = null;
+                base = X86.ADDR_INVALID;
                 break;
             }
             else if (type == X86.DESC.ACC.TYPE.GATE_INT || type == X86.DESC.ACC.TYPE.GATE_TRAP) {
                 selCode = base & 0xffff;
                 if (dpl > this.cpl) {
                     accCode = this.loadAcc(selCode, true);
-                    if (accCode != null && (accCode & X86.DESC.ACC.TYPE.CODE_CONFORMING) == X86.DESC.ACC.TYPE.CODE_CONFORMING) {
+                    if (accCode != X86.DESC.ACC.INVALID && (accCode & X86.DESC.ACC.TYPE.CODE_CONFORMING) == X86.DESC.ACC.TYPE.CODE_CONFORMING) {
                         dpl = this.cpl;
                     }
                 }
                 if (dpl <= this.cpl) {
                     cplPrev = this.cpl;
-                    if (this.load(selCode, true) == null) {
+                    if (this.load(selCode, true) == X86.ADDR_INVALID) {
                         cpu.assert(false);
-                        base = null;
+                        base = X86.ADDR_INVALID;
                         break;
                     }
                     cpu.regIP = limit;
                     if (this.cpl < cplPrev) {
                         if (fCall !== true) {
-                            base = null;
+                            base = X86.ADDR_INVALID;
                             break;
                         }
                         regSP = cpu.regSP;
@@ -657,22 +672,22 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                 }
                 cpu.assert(false);
                 if (!fSuppress) X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel | X86.ERRCODE.EXT, true);
-                base = null;
+                base = X86.ADDR_INVALID;
                 break;
             }
             else if (type == X86.DESC.ACC.TYPE.GATE_TASK) {
                 if (!X86Seg.switchTSS.call(this, base & 0xffff, true)) {
-                    base = null;
+                    base = X86.ADDR_INVALID;
                     break;
                 }
                 return this.base;
             }
             else {
                 if (!fSuppress) X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, true);
-                base = null;
+                base = X86.ADDR_INVALID;
                 break;
             }
-            cpu.assert(!!selMasked);    // a null CS selector should be caught by the final preceding check
+            cpu.assert(!!selMasked);    // a zero CS selector should be caught by the final preceding check
         }
         else if (this.id == X86Seg.ID.DATA) {
             if (selMasked) {
@@ -700,7 +715,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                      * So, if acc is zero, we won't set fHalt on the following call.
                      */
                     if (!fSuppress) X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, acc != 0);
-                    base = null;
+                    base = X86.ADDR_INVALID;
                     break;
                 }
             }
@@ -708,14 +723,14 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
         else if (this.id == X86Seg.ID.STACK) {
             if (!selMasked || type < X86.DESC.ACC.TYPE.DATA_READONLY || (type & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.READABLE)) == X86.DESC.ACC.TYPE.CODE) {
                 if (!fSuppress) X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, true);
-                base = null;
+                base = X86.ADDR_INVALID;
                 break;
             }
         }
         else if (this.id == X86Seg.ID.TSS) {
             if (!selMasked || type != X86.DESC.ACC.TYPE.TSS && type != X86.DESC.ACC.TYPE.TSS_BUSY) {
                 if (!fSuppress) X86Help.opHelpFault.call(cpu, X86.EXCEPTION.TS_FAULT, sel, true);
-                base = null;
+                base = X86.ADDR_INVALID;
                 break;
             }
         }
@@ -724,7 +739,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
              * For LSL, we must support any descriptor marked X86.DESC.ACC.TYPE.SEG, as well as TSS and LDT descriptors.
              */
             if (!(acc & X86.DESC.ACC.TYPE.SEG) && type > X86.DESC.ACC.TYPE.TSS_BUSY) {
-                base = null;
+                base = X86.ADDR_INVALID;
                 break;
             }
         }
@@ -737,7 +752,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
         this.updateMode();
         break;
     }
-    if (!fSuppress) this.messageDebugger(sel, base, limit, acc, ext);
+    if (!fSuppress) this.messageSeg(sel, base, limit, acc, ext);
     return base;
 };
 
@@ -847,21 +862,22 @@ X86Seg.prototype.updateMode = function(fProt)
         this.checkWrite = X86Seg.checkWriteReal;
         this.limit = 0xffff;
         this.cpl = this.dpl = 0;
-        this.addrDesc = null;
+        this.addrDesc = X86.ADDR_INVALID;
     }
     return fProt;
 };
 
 /**
- * messageDebugger(sel base, limit, acc, ext)
+ * messageSeg(sel, base, limit, acc, ext)
  *
+ * @this {X86Seg}
  * @param {number} sel
- * @param {number|null} base
+ * @param {number} base
  * @param {number} limit
  * @param {number} acc
  * @param {number} [ext]
  */
-X86Seg.prototype.messageDebugger = function(sel, base, limit, acc, ext)
+X86Seg.prototype.messageSeg = function(sel, base, limit, acc, ext)
 {
     if (DEBUG) {
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE.SEG)) {
@@ -870,7 +886,7 @@ X86Seg.prototype.messageDebugger = function(sel, base, limit, acc, ext)
             if (this.id == X86Seg.ID.CODE) sDPL += " cpl=" + this.cpl;
             this.dbg.message("loadSeg(" + this.sName + "):" + ch + "sel=" + str.toHexWord(sel) + " base=" + str.toHex(base) + " limit=" + str.toHexWord(limit) + " acc=" + str.toHexWord(acc) + sDPL);
         }
-        this.cpu.assert(/* base != null && */ (!ext || ext == X86.DESC.EXT.AVAIL));
+        this.cpu.assert(/* base != X86.ADDR_INVALID && */ (!ext || ext == X86.DESC.EXT.AVAIL));
     }
 };
 

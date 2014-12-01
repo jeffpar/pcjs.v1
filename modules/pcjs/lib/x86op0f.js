@@ -127,7 +127,7 @@ var X86Op0F = {
     opLOADALL: function() {
         if (this.segCS.cpl) {
             /*
-             * You're not allowed to use LOADALL at any privilege level other than zero
+             * You're not allowed to use LOADALL if the current privilege level is something other than zero
              */
             X86Help.opHelpFault.call(this, X86.EXCEPTION.GP_FAULT, 0, true);
             return;
@@ -215,7 +215,7 @@ var X86Op0F = {
      */
     opLTR: function(dst, src) {
         if (EAFUNCS) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
-        if (this.segTSS.load(dst) != null) {
+        if (this.segTSS.load(dst) != X86.ADDR_INVALID) {
             this.setWord(this.segTSS.addrDesc + X86.DESC.ACC.OFFSET, this.segTSS.acc |= X86.DESC.ACC.TYPE.LDT);
             this.segTSS.type = X86.DESC.ACC.TYPE.TSS_BUSY;
         }
@@ -235,7 +235,7 @@ var X86Op0F = {
          * descriptor table or the descriptor is not for a segment.
          */
         this.nStepCycles -= (14 + (this.regEA < 0? 0 : 2));
-        if (this.segVER.load(dst, true) >= 0) {
+        if (this.segVER.load(dst, true) != X86.ADDR_INVALID) {
             /*
              * Verify that this is a readable segment; that is, of these four combinations (code+readable,
              * code+nonreadable, data+writable, date+nonwritable), make sure we're not the second combination.
@@ -271,7 +271,7 @@ var X86Op0F = {
          * descriptor table or the descriptor is not for a segment.
          */
         this.nStepCycles -= (14 + (this.regEA < 0? 0 : 2));
-        if (this.segVER.load(dst, true) >= 0) {
+        if (this.segVER.load(dst, true) != X86.ADDR_INVALID) {
             /*
              * Verify that this is a writable data segment
              */

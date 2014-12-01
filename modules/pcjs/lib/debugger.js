@@ -585,7 +585,7 @@ if (DEBUGGER) {
      * Opcode 0x0F has a distinguished history:
      *
      *      On the 8086, it functioned as POP CS
-     *      On the 80186, it generated an illegal opcode (UD_FAULT) exception
+     *      On the 80186, it generated an Invalid Opcode (UD_FAULT) exception
      *      On the 80286, it introduced a new (and growing) series of two-byte opcodes
      *
      * Based on the active CPU model, we make every effort to execute and disassemble this (and every other)

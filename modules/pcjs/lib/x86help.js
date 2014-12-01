@@ -277,7 +277,7 @@ var X86Help = {
          * TODO: This instruction's 80286 documentation does not discuss conforming code segments; determine
          * if we need a special check for them.
          */
-        if (this.segVER.load(src, true) != null) {
+        if (this.segVER.load(src, true) != X86.ADDR_INVALID) {
             if (this.segVER.dpl >= this.segCS.cpl && this.segVER.dpl >= (src & X86.SEL.RPL)) {
                 this.setZF();
                 return this.segVER.acc & X86.DESC.ACC.MASK;
@@ -304,7 +304,7 @@ var X86Help = {
          * TODO: LSL is explicitly documented as ALSO requiring a non-null selector, so we check X86.SEL.MASK;
          * are there any other instructions that were, um, less explicit but also require a non-null selector?
          */
-        if ((src & X86.SEL.MASK) && this.segVER.load(src, true) != null) {
+        if ((src & X86.SEL.MASK) && this.segVER.load(src, true) != X86.ADDR_INVALID) {
             var fConforming = ((this.segVER.acc & X86.DESC.ACC.TYPE.CODE_CONFORMING) == X86.DESC.ACC.TYPE.CODE_CONFORMING);
             if ((fConforming || this.segVER.dpl >= this.segCS.cpl) && this.segVER.dpl >= (src & X86.SEL.RPL)) {
                 this.setZF();
@@ -456,6 +456,12 @@ var X86Help = {
     /**
      * opHelpINT(nIDT, nError, nCycles)
      *
+     * NOTE: We no longer use setCSIP(), because it always loads the new CS using the segCS.load() method,
+     * which only knows how to load GDT and LDT selectors, whereas interrupt instructions must use setCS.loadIDT().
+     *
+     * This means we must take care to replicate critical features of setCSIP(); eg, setting segCS.fCall before
+     * calling loadIDT(), updating EIP, and flushing the prefetch queue.
+     *
      * @this {X86CPU}
      * @param {number} nIDT
      * @param {number|null|undefined} nError
@@ -471,8 +477,9 @@ var X86Help = {
         var regCS = this.segCS.sel;
         var regIP = this.regIP;
         var base = this.segCS.loadIDT(nIDT);
-        if (base != null) {
+        if (base != X86.ADDR_INVALID) {
             this.regEIP = base + this.regIP;
+            if (PREFETCH) this.flushPrefetch(this.regEIP);
             this.pushWord(regPS);
             this.pushWord(regCS);
             this.pushWord(regIP);
@@ -572,13 +579,14 @@ var X86Help = {
         /*
          * Since this fault is likely being issued in the context of an instruction that hasn't finished
          * executing, and since we currently don't do anything to interrupt that execution (eg, throw a
-         * JavaScript exception), and since we don't want that instruction to perform any writes that might
-         * be destructive, we should shut off all further reads/writes for the current instruction.
+         * JavaScript exception), we should shut off all further reads/writes for the current instruction.
          *
-         * As long as we're not using EAFUNCS, that's easy for any EA-based memory accesses: simply set both
-         * the NOREAD and NOWRITE flags.  However, there may still be direct, non-EA-based memory accesses that
-         * could cause us grief.  TODO: Implement a better solution, which may involve throwing a special
-         * JavaScript exception that cpu.js must intercept and quietly ignore.
+         * That's easy for any EA-based memory accesses (provided we're not using EAFUNCS): simply set both
+         * the NOREAD and NOWRITE flags.  However, there are also direct, non-EA-based memory accesses to
+         * consider.  A perfect example is opPUSHA(): if a GP fault occurs on any PUSH other than the last,
+         * a subsequent PUSH is likely to cause another fault, which we will misinterpret as a double-fault.
+         *
+         * TODO: Throw a special JavaScript exception that cpu.js must intercept and quietly ignore.
          */
         if (!EAFUNCS) {
             this.opFlags &= ~(X86.OPFLAG.NOREAD | X86.OPFLAG.NOWRITE);

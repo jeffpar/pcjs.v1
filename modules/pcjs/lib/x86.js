@@ -41,6 +41,20 @@ var X86 = {
     MODEL_80186:    80186,
     MODEL_80188:    80188,
     MODEL_80286:    80286,
+
+    /*
+     * This constant is used to mark points in the code where the physical address being returned
+     * is invalid and should not be used.  TODO: There are still functions that will use an invalid
+     * address, which is why we've tried to choose a value that will cause the least harm, but ultimately,
+     * we must add checks to those functions or throw a special JavaScript exception to bypass them.
+     *
+     * This value is also used to indicate non-existent EA address calculations, which are usually
+     * detected with "regEA < 0" and "regEAWrite < 0" tests, so be careful if you change this value.
+     * If/when we ever extend our physical address space beyond 24 bits (ie, when we break the 2Gb barrier),
+     * negative 32-bit values values will become valid addresses, so those tests will have to be revised.
+     */
+    ADDR_INVALID:   -4,
+
     /*
      * Processor Status flag definitions (stored in regPS)
      */
@@ -127,7 +141,8 @@ var X86 = {
                 MASK:                       0x6000,
                 SHIFT:                      13
             },
-            PRESENT:                        0x8000
+            PRESENT:                        0x8000,
+            INVALID: 0      // use X86.DESC.ACC.INVALID for invalid ACC values
         },
         EXT: {              // descriptor extension word (reserved on the 80286; "must be zero")
             OFFSET:     0x6,
@@ -136,7 +151,8 @@ var X86 = {
             DEFSIZE:                        0x0040,     // clear if default operand/address size is 16-bit, set if 32-bit
             GRANULARITY:                    0x0080,     // clear if limit is bytes, set if limit is 4Kb pages
             BASE2431:                       0xff00
-        }
+        },
+        INVALID: 0          // use X86.DESC.INVALID for invalid DESC values
     },
     TSS: {
         PREV_TSS:   0x00,
@@ -177,12 +193,14 @@ var X86 = {
      *
      * Interrupts beyond 0x10 (up through 0x1F) are reserved for future exceptions.
      *
-     * Implementation Detail: For any opcode we know must generate a UD_FAULT interrupt, we invoke opInvalid().
-     * We reserve the term "undefined" for opcodes that require further investigation, and we invoke opUndefined()
-     * in those cases until an opcode's behavior has been defined; at that point, it's either valid or invalid.
+     * Implementation Detail: For any opcode we know must generate a UD_FAULT interrupt, we invoke opInvalid(),
+     * NOT opUndefined().  UD_FAULT is for INVALID opcodes, Intel's choice of "UD" notwithstanding.
      *
-     * As for "illegal", that's a silly (and redundant) term in this context, so we don't use it.  Similarly,
-     * the term "undocumented" should be limited to operations that are valid but that Intel did not document.
+     * We reserve the term "undefined" for opcodes that require further investigation, and we invoke opUndefined()
+     * ONLY until an opcode's behavior has finally been defined, at which point it becomes either valid or invalid.
+     * The term "illegal" seems completely superfluous; we don't need a third way of describing invalid opcodes.
+     *
+     * The term "undocumented" should be limited to operations that are valid but Intel simply never documented.
      */
     EXCEPTION: {
         DIV_ERR:    0x00,       // Divide Error Interrupt
@@ -214,7 +232,7 @@ var X86 = {
         AUXOVF_OF:  0x08080,
         AUXOVF_CF:  0x10100
     },
-    PARITY:  [                  // 256-byte array with a 1 wherever the number of set bits of the array index is EVEN
+    PARITY:  [                  // 256-byte array with a 1 wherever the number of set bits in the array index is EVEN
         1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
         0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
         0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,

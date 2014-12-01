@@ -901,7 +901,7 @@ X86CPU.prototype.resetRegs = function()
      * The next few initializations mirror what we must do prior to each instruction (ie, inside the stepCPU() function);
      * note that opPrefixes, along with segData and segStack, are reset only after we've executed a non-prefix instruction.
      */
-    this.regEA = this.regEAWrite = -1;
+    this.regEA = this.regEAWrite = X86.ADDR_INVALID;
     this.segData = this.segDS;
     this.segStack = this.segSS;
     this.opFlags = this.opPrefixes = 0;
@@ -1295,8 +1295,8 @@ X86CPU.prototype.setIP = function(off)
  * never set without an accompanying IP (well, except for a few undocumented instructions, like POP CS, which
  * were available ONLY on the 8086/8088/80186/80188; see setCS() for details).
  *
- * NOTE: Unlike setIP(), which is often passed a computation, the offsets passed to setCSIP() are strictly
- * 16-bit values, so there's never any need to mask them with 0xffff (although it doesn't hurt to assert that).
+ * NOTE: Unlike setIP(), which is often passed a computation, the offsets passed to setCSIP() are assumed to
+ * be 16-bit values, so there's no need to mask them with 0xffff (although it doesn't hurt to assert that).
  *
  * And even though this function is called setCSIP(), please note the order of the parameters is IP,CS,
  * which matches the order that CS:IP values are normally stored in memory, allowing us to make calls like this:
@@ -1306,8 +1306,8 @@ X86CPU.prototype.setIP = function(off)
  * @this {X86CPU}
  * @param {number} off
  * @param {number} sel
- * @param {boolean} [fCall] is true if CALLF in progress, false if RETF in progress, null/undefined otherwise
- * @return {boolean|null} true if a stack switch occurred; the only opcode that really needs to care is opRETFn()
+ * @param {boolean} [fCall] is true if CALLF in progress, false if RETF/IRET in progress, null/undefined otherwise
+ * @return {boolean|null} true if a stack switch occurred; the only opcode that really needs to pay attention is opRETFn()
  */
 X86CPU.prototype.setCSIP = function(off, sel, fCall)
 {
@@ -1319,12 +1319,12 @@ X86CPU.prototype.setCSIP = function(off, sel, fCall)
      */
     this.regIP = off;
     var base = this.segCS.load(sel);
-    if (base == null) {
-        return null;
+    if (base != X86.ADDR_INVALID) {
+        this.regEIP = base + this.regIP;
+        if (PREFETCH) this.flushPrefetch(this.regEIP);
+        return this.segCS.fStackSwitch;
     }
-    this.regEIP = base + this.regIP;
-    if (PREFETCH) this.flushPrefetch(this.regEIP);
-    return this.segCS.fStackSwitch;
+    return null;
 };
 
 /**
@@ -2510,7 +2510,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
             this.opPrefixes |= opPrefixes;
         } else {
             this.opEA = this.regEIP;
-            this.regEA = this.regEAWrite = -1;
+            this.regEA = this.regEAWrite = X86.ADDR_INVALID;
             this.segData = this.segDS;
             this.segStack = this.segSS;
             this.opPrefixes = this.opFlags & X86.OPFLAG.REPEAT;
