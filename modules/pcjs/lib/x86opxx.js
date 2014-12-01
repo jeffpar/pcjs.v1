@@ -1971,7 +1971,7 @@ var X86OpXX = {
      * op=0x9A (call seg:off)
      */
     opCALLF: function() {
-        X86Help.opHelpCallF.call(this, this.getIPWord(), this.getIPWord());
+        X86Help.opHelpCALLF.call(this, this.getIPWord(), this.getIPWord());
         this.nStepCycles -= this.CYCLES.nOpCyclesCallF;
     },
     /**
@@ -2784,14 +2784,7 @@ var X86OpXX = {
      * op=0xCA (retf n)
      */
     opRETFn: function() {
-        var n = this.getIPWord();
-        var regIP = this.popWord();
-        var regCS = this.popWord();
-        this.regSP = (this.regSP + n) & 0xffff;
-        if (this.setCSIP(regIP, regCS, false)) {
-            this.regSP = (this.regSP + n) & 0xffff;
-        }
-        if (this.cIntReturn) this.checkIntReturn(this.regEIP);
+        X86Help.opHelpRETF.call(this, this.getIPWord());
         this.nStepCycles -= this.CYCLES.nOpCyclesRetFn;
     },
     /**
@@ -2800,7 +2793,7 @@ var X86OpXX = {
      * op=0xCB (retf)
      */
     opRETF: function() {
-        this.setCSIP(this.popWord(), this.popWord(), false);
+        X86Help.opHelpRETF.call(this, 0);
         this.nStepCycles -= this.CYCLES.nOpCyclesRetF;
     },
     /**

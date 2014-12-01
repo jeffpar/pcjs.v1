@@ -1128,7 +1128,7 @@ var X86Grps = {
         if (this.regEA < 0) {
             return X86Grps.opGrpUndefined.call(this, dst, src);
         }
-        X86Help.opHelpCallF.call(this, dst, this.getWord(this.regEA + 2));
+        X86Help.opHelpCALLF.call(this, dst, this.getWord(this.regEA + 2));
         this.nStepCycles -= this.CYCLES.nOpCyclesCallDM;
         if (EAFUNCS) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;

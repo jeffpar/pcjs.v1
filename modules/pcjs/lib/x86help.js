@@ -222,7 +222,7 @@ var X86Help = {
     opHelpBOUND: function(dst, src) {
         if (this.regEA < 0) {
             /*
-             * Generate a #UD fault (INT 0x06: Undefined Opcode) if src is not a memory operand.
+             * Generate UD_FAULT (INT 0x06: Invalid Opcode) if src is not a memory operand.
              */
             X86OpXX.opInvalid.call(this);
             return dst;
@@ -436,7 +436,7 @@ var X86Help = {
 
     },
     /**
-     * opHelpCallF(off, sel)
+     * opHelpCALLF(off, sel)
      *
      * For protected-mode, this function must attempt to load the new code segment first, because if the new segment
      * requires a change in privilege level, the return address must be pushed on the NEW stack, not the current stack.
@@ -445,13 +445,51 @@ var X86Help = {
      * @param {number} off
      * @param {number} sel
      */
-    opHelpCallF: function(off, sel) {
+    opHelpCALLF: function(off, sel) {
         var regCS = this.segCS.sel;
         var regIP = this.regIP;
         if (this.setCSIP(off, sel, true) != null) {
             this.pushWord(regCS);
             this.pushWord(regIP);
         }
+    },
+    /**
+     * opHelpRETF(n)
+     *
+     * For protected-mode, this function must be prepared to pop any arguments off the current stack AND
+     * whatever stack we may have switched to (setCSIP() returns true only when a stack switch has occurred).
+     *
+     * @this {X86CPU}
+     * @param {number} n
+     */
+    opHelpRETF: function(n) {
+        var regIP = this.popWord();
+        var regCS = this.popWord();
+        if (n) this.regSP = (this.regSP + n) & 0xffff;
+        if (this.setCSIP(regIP, regCS, false)) {
+            if (n) this.regSP = (this.regSP + n) & 0xffff;
+            /*
+             * As per Intel documentation: "If any of [the DS or ES] registers refer to segments whose DPL is
+             * less than the new CPL (excluding conforming code segments), the segment register is loaded with
+             * the null selector."
+             *
+             * TODO: I'm not clear on whether a conforming code segment must also be marked readable, so I'm playing
+             * it safe and using CODE_CONFORMING instead of CODE_CONFORMING_READABLE.  Also, for the record, I've not
+             * seen this situation occur in OS/2 1.0 yet.
+             */
+            if ((this.segDS.sel & X86.SEL.MASK) && this.segDS.dpl < this.segCS.cpl && (this.segDS.acc & X86.DESC.ACC.TYPE.CODE_CONFORMING) != X86.DESC.ACC.TYPE.CODE_CONFORMING) {
+                this.assert(false);         // I'm not asserting this is bad, I just want to see it in action
+                this.segDS.load(0);
+            }
+            if ((this.segES.sel & X86.SEL.MASK) && this.segES.dpl < this.segCS.cpl && (this.segES.acc & X86.DESC.ACC.TYPE.CODE_CONFORMING) != X86.DESC.ACC.TYPE.CODE_CONFORMING) {
+                this.assert(false);         // I'm not asserting this is bad, I just want to see it in action
+                this.segES.load(0);
+            }
+        }
+        /*
+         * We check for possible "INT n" software interrupt returns only in the cases of "IRET" and "RETF 2".
+         */
+        if (n == 2 && this.cIntReturn) this.checkIntReturn(this.regEIP);
     },
     /**
      * opHelpINT(nIDT, nError, nCycles)

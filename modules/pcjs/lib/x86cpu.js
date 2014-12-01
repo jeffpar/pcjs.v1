@@ -518,7 +518,7 @@ X86CPU.prototype.setAddressMask = function(addrMask)
  * Microprocessor, March 1983" (pp.55-56).  "The iAPX 86,88 and iAPX 186,188 User's Manual Programmer's
  * Reference", p.3-38, apparently contains the same information, but I've not seen that document.
  *
- * Undefined Opcodes:
+ * Undefined [Invalid] Opcodes:
  *
  *      When the opcodes 63H, 64H, 65H, 66H, 67H, F1H, FEH/xx111xxxB and FFH/xx111xxxB are executed,
  *      the 80186 will execute an illegal [invalid] instruction exception, interrupt 0x06.
@@ -610,9 +610,9 @@ X86CPU.prototype.setAddressMask = function(addrMask)
  *
  *   6. Do Not Attempt Undefined 8086/8088 Operations
  *
- *      Instructions like POP CS or MOV CS,op will either cause exception 6 (undefined opcode) or perform a protection
- *      setup operation like LIDT on the 80286. Undefined bit encodings for bits 5-3 of the second byte of POP MEM
- *      or PUSH MEM will cause exception 13 on the 80286.
+ *      Instructions like POP CS or MOV CS,op will either cause exception 6 (undefined [invalid] opcode) or perform
+ *      a protection setup operation like LIDT on the 80286. Undefined bit encodings for bits 5-3 of the second byte
+ *      of POP MEM or PUSH MEM will cause exception 13 on the 80286.
  *
  *   7. Place a Far JMP Instruction at FFFF0H
  *

@@ -45,7 +45,7 @@ if (typeof module !== 'undefined') {
  * @param {X86CPU} cpu
  * @param {number} id
  * @param {string} [sName] segment name
- * @param {boolean} [fProt] true if segment register used exclusively in protected-mode
+ * @param {boolean} [fProt] true if segment register used exclusively in protected-mode (eg, segLDT)
  */
 function X86Seg(cpu, id, sName, fProt)
 {
@@ -64,26 +64,25 @@ function X86Seg(cpu, id, sName, fProt)
      * The following properties are used for CODE segments only (ie, segCS); if the process of loading
      * CS also requires a stack switch, then fStackSwitch will be set to true; additionally, if the stack
      * switch was the result of a CALL (ie, fCall is true) and one or more (up to 32) parameters are on
-     * the old stack, they will be copied to awScratch, and then once the stack is switched, the parameters
-     * will be pushed from awScratch onto the new stack.
+     * the old stack, they will be copied to awParms, and then once the stack is switched, the parameters
+     * will be pushed from awParms onto the new stack.
      *
      * The typical ways of loading a new segment into CS are JMPF, CALLF (or INT), and RETF (or IRET);
      * prior to calling segCS.load(), each of those operations must first set segCS.fCall to one of null,
      * true, or false, respectively.
      *
-     * It's critical that fCall be properly set prior to calling segCS.load(); fCall == null means NO
-     * privilege level transition may occur, fCall == true allows a stack switch and a privilege transition
-     * to a numerically lower privilege, and fCall == false allows a stack switch (restore) and a privilege
-     * transition to a numerically greater privilege.
+     * It's critical that fCall be properly set prior to calling segCS.load(); fCall === null means NO
+     * privilege level transition may occur, fCall === true allows a stack switch and a privilege transition
+     * to a numerically lower privilege, and fCall === false allows a stack restore and a privilege transition
+     * to a numerically greater privilege.
      *
-     * As long as setCSIP() or opHelpINT() are used for all CS changes, the foregoing is automatically
-     * taken care of.
+     * As long as setCSIP() or opHelpINT() are used for all CS changes, fCall is set automatically.
      *
      * TODO: Consider making fCall a parameter to load(), instead of a property that must be set prior to
      * calling load(); the downside (and why I didn't do that in the first place) is that such a parameter
      * is meaningless for segments other than segCS.
      */
-    this.awScratch = (this.id == X86Seg.ID.CODE? new Array(32) : []);
+    this.awParms = (this.id == X86Seg.ID.CODE? new Array(32) : []);
     this.fCall = null;
     this.fStackSwitch = false;
     this.updateMode(fProt);
@@ -136,7 +135,7 @@ X86Seg.loadReal = function loadReal(sel, fSuppress)
  *
  * See X86.DESC for offset and bit definitions.
  *
- * IDT descriptor entries are handled separately by loadIDT().
+ * IDT descriptor entries are handled separately by loadIDT(), which is mapped to loadRealIDT() or loadProtIDT().
  *
  * @this {X86Seg}
  * @param {number} sel
@@ -379,7 +378,7 @@ X86Seg.checkWriteProtDisallowed = function checkWriteProtDisallowed(off, cb, fSu
  *      0090:067C EBFD          JMP      067B
  *
  * but it may not have yet reprogrammed the master PIC to re-vector hardware interrupts to IDT entries 0x50-0x57,
- * so when the next timer interrupt (IRQ 0) occurs, it vectors through IDT entry 0x08, which is the double-fault
+ * so when the next timer interrupt (IRQ 0) occurs, it vectors through IDT entry 0x08, which is the DF_FAULT
  * vector. A spurious double-fault is generated, and a clean shutdown turns into a messy crash.
  *
  * Of course, that all could have been avoided if IBM had heeded Intel's advice and not used Intel-reserved IDT
@@ -560,6 +559,10 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
 
         var accCode, selCode, cplPrev, addrTSS, offSP, offSS, regSPPrev, regSSPrev;
 
+        /*
+         * TODO: Consider moving the following chunks of code into worker functions for each X86Seg.ID;
+         * however, it's not clear that these tests are more costly than making additional function calls.
+         */
         if (this.id == X86Seg.ID.CODE) {
             this.fStackSwitch = false;
             var fCall = this.fCall;
@@ -582,6 +585,10 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
             else if (type == X86.DESC.ACC.TYPE.GATE_CALL) {
                 /*
                  * Since we are X86Seg.ID.CODE, we can use this.cpl instead of the more generic cpu.segCS.cpl
+                 *
+                 * TODO: Consider factoring the GATE_CALL code, and the GATE_INT/GATE_TRAP code below it, into
+                 * something that can be shared; the main differences are privilege level checks, parameter copying,
+                 * and fault generation on error.
                  */
                 selCode = base & 0xffff;
                 if (rpl < this.cpl) rpl = this.cpl;
@@ -608,7 +615,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                         regSP = cpu.regSP;
                         var i = 0, nWords = (acc & 0x1f);
                         while (nWords--) {
-                            this.awScratch[i++] = cpu.getSOWord(cpu.segSS, regSP);
+                            this.awParms[i++] = cpu.getSOWord(cpu.segSS, regSP);
                             regSP += 2;
                         }
                         addrTSS = cpu.segTSS.base;
@@ -620,7 +627,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                         cpu.segSS.load(cpu.getWord(addrTSS + offSS));
                         cpu.pushWord(regSSPrev);
                         cpu.pushWord(regSPPrev);
-                        while (i) cpu.pushWord(this.awScratch[--i]);
+                        while (i) cpu.pushWord(this.awParms[--i]);
                         this.fStackSwitch = true;
                     }
                     return this.base;
@@ -663,11 +670,8 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                         cpu.pushWord(regSPPrev);
                         this.fStackSwitch = true;
                     }
-                    if (type == X86.DESC.ACC.TYPE.GATE_INT) {
-                        cpu.regPS &= ~(X86.PS.NT | X86.PS.TF | X86.PS.IF);
-                    } else {
-                        cpu.regPS &= ~(X86.PS.NT | X86.PS.TF);
-                    }
+                    cpu.regPS &= ~(X86.PS.NT | X86.PS.TF);
+                    if (type == X86.DESC.ACC.TYPE.GATE_INT) cpu.regPS &= ~X86.PS.IF;
                     return this.base;
                 }
                 cpu.assert(false);
