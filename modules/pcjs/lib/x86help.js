@@ -494,8 +494,9 @@ var X86Help = {
     /**
      * opHelpINT(nIDT, nError, nCycles)
      *
-     * NOTE: We no longer use setCSIP(), because it always loads the new CS using the segCS.load() method,
-     * which only knows how to load GDT and LDT selectors, whereas interrupt instructions must use setCS.loadIDT().
+     * NOTE: We no longer use setCSIP(), because it always loads the new CS using segCS.load(), which
+     * only knows how to load GDT and LDT descriptors, whereas interrupts must use setCS.loadIDT(), which
+     * deals exclusively with IDT descriptors.
      *
      * This means we must take care to replicate critical features of setCSIP(); eg, setting segCS.fCall before
      * calling loadIDT(), updating EIP, and flushing the prefetch queue.
@@ -663,7 +664,7 @@ var X86Help = {
          * and so whenever we see that opcode, we ignore the caller's fHalt flag, and suppress FAULT messages
          * unless CPU messages are also enabled.
          *
-         * When a triple fault shows up, nFault is -1; it displays as "ff" only because we truncate it to a byte.
+         * When a triple fault shows up, nFault is -1; it displays as "ff" because we display nFault as a byte.
          */
         if (bOpcode == X86.OPCODE.INT3) {
             fHalt = false;

@@ -541,7 +541,7 @@ X86Seg.prototype.loadDesc6 = function(addrDesc, sel)
  *
  * @this {X86Seg}
  * @param {number} addrDesc is the descriptor address
- * @param {number} sel is the associated selector
+ * @param {number} sel is the associated selector, or nIDT*8 if IDT descriptor
  * @param {boolean} [fSuppress] is true to suppress any errors, cycle assessment, etc
  * @return {number} base address of selected segment, or ADDR_INVALID if error
  */
@@ -557,7 +557,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
 
     while (true) {
 
-        var accCode, selCode, cplPrev, addrTSS, offSP, offSS, regSPPrev, regSSPrev;
+        var selCode, cplPrev, addrTSS, offSP, offSS, regSPPrev, regSSPrev;
 
         /*
          * TODO: Consider moving the following chunks of code into worker functions for each X86Seg.ID;
@@ -566,13 +566,22 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
         if (this.id == X86Seg.ID.CODE) {
             this.fStackSwitch = false;
             var fCall = this.fCall;
+            var fGate, regPSMask, nFaultError, regSP;
             var rpl = sel & X86.SEL.RPL;
             var dpl = (acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
-            var regSP;
-            if (type >= X86.DESC.ACC.TYPE.CODE_EXECONLY /* || dpl > cpu.segCS.cpl */) {
+            /*
+             * Since we are X86Seg.ID.CODE, we can use this.cpl instead of the more generic cpu.segCS.cpl
+             */
+            if (type >= X86.DESC.ACC.TYPE.CODE_EXECONLY) {
                 rpl = sel & X86.SEL.RPL;
                 if (rpl > this.cpl) {
-                    if (fCall !== false) {
+                    /*
+                     * If fCall is false, then we must have a RETF to a less privileged segment, which is OK.
+                     *
+                     * Otherwise, we must be dealing with a CALLF or JMPF to a less privileged segment, in which
+                     * case either DPL == CPL *or* the new segment is conforming and DPL <= CPL.
+                     */
+                    if (fCall !== false && !(dpl == this.cpl || (acc & X86.DESC.ACC.TYPE.CONFORMING) && dpl <= this.cpl)) {
                         base = X86.ADDR_INVALID;
                         break;
                     }
@@ -581,24 +590,45 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                     cpu.regSP = regSP;
                     this.fStackSwitch = true;
                 }
+                fGate = false;
             }
             else if (type == X86.DESC.ACC.TYPE.GATE_CALL) {
+                fGate = true;
+                regPSMask = ~0;
+                nFaultError = sel;
+                if (rpl < this.cpl) rpl = this.cpl;     // set RPL to max(RPL,CPL) for call gates
+            }
+            else if (type == X86.DESC.ACC.TYPE.GATE_INT) {
+                fGate = true;
+                regPSMask = ~(X86.PS.NT | X86.PS.TF | X86.PS.IF);
+                nFaultError = sel | X86.ERRCODE.EXT;
+                cpu.assert(!(acc & 0x1f));
+            }
+            else if (type == X86.DESC.ACC.TYPE.GATE_TRAP) {
+                fGate = true;
+                regPSMask = ~(X86.PS.NT | X86.PS.TF);
+                nFaultError = sel | X86.ERRCODE.EXT;
+                cpu.assert(!(acc & 0x1f));
+            }
+            else if (type == X86.DESC.ACC.TYPE.GATE_TASK) {
+                if (!X86Seg.switchTSS.call(this, base & 0xffff, true)) {
+                    base = X86.ADDR_INVALID;
+                    break;
+                }
+                return this.base;
+            }
+            if (fGate) {
                 /*
-                 * Since we are X86Seg.ID.CODE, we can use this.cpl instead of the more generic cpu.segCS.cpl
-                 *
-                 * TODO: Consider factoring the GATE_CALL code, and the GATE_INT/GATE_TRAP code below it, into
-                 * something that can be shared; the main differences are privilege level checks, parameter copying,
-                 * and fault generation on error.
+                 * Note that since GATE_INT/GATE_TRAP descriptors should appear in the IDT only, that means sel
+                 * will actually be nIDT * 8, which means the rpl will always be zero; additionally, the nWords
+                 * portion of acc should always be zero, but that's really dependent on the descriptor being properly
+                 * set (which we assert above).
                  */
                 selCode = base & 0xffff;
-                if (rpl < this.cpl) rpl = this.cpl;
-                if (rpl > dpl) {
-                    accCode = this.loadAcc(selCode, true);
-                    if (accCode != X86.DESC.ACC.INVALID && (accCode & X86.DESC.ACC.TYPE.CODE_CONFORMING) == X86.DESC.ACC.TYPE.CODE_CONFORMING) {
-                        rpl = dpl;
-                    }
-                }
                 if (rpl <= dpl) {
+                    /*
+                     * TODO: Verify the PRESENT bit of the gate descriptor, and issue NP_FAULT as appropriate.
+                     */
                     cplPrev = this.cpl;
                     if (this.load(selCode, true) == X86.ADDR_INVALID) {
                         cpu.assert(false);
@@ -630,75 +660,26 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                         while (i) cpu.pushWord(this.awParms[--i]);
                         this.fStackSwitch = true;
                     }
+                    cpu.regPS &= regPSMask;
                     return this.base;
                 }
+                cpu.assert(false);
+                if (!fSuppress) X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, nFaultError, true);
+                base = X86.ADDR_INVALID;
+                break;
+            }
+            else if (fGate !== false) {
                 cpu.assert(false);
                 if (!fSuppress) X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, true);
                 base = X86.ADDR_INVALID;
                 break;
             }
-            else if (type == X86.DESC.ACC.TYPE.GATE_INT || type == X86.DESC.ACC.TYPE.GATE_TRAP) {
-                selCode = base & 0xffff;
-                if (dpl > this.cpl) {
-                    accCode = this.loadAcc(selCode, true);
-                    if (accCode != X86.DESC.ACC.INVALID && (accCode & X86.DESC.ACC.TYPE.CODE_CONFORMING) == X86.DESC.ACC.TYPE.CODE_CONFORMING) {
-                        dpl = this.cpl;
-                    }
-                }
-                if (dpl <= this.cpl) {
-                    cplPrev = this.cpl;
-                    if (this.load(selCode, true) == X86.ADDR_INVALID) {
-                        cpu.assert(false);
-                        base = X86.ADDR_INVALID;
-                        break;
-                    }
-                    cpu.regIP = limit;
-                    if (this.cpl < cplPrev) {
-                        if (fCall !== true) {
-                            base = X86.ADDR_INVALID;
-                            break;
-                        }
-                        regSP = cpu.regSP;
-                        addrTSS = cpu.segTSS.base;
-                        offSP = (this.cpl << 2) + X86.TSS.CPL0_SP;
-                        offSS = offSP + 2;
-                        regSPPrev = cpu.regSP;
-                        regSSPrev = cpu.segSS.sel;
-                        cpu.regSP = cpu.getWord(addrTSS + offSP);
-                        cpu.segSS.load(cpu.getWord(addrTSS + offSS));
-                        cpu.pushWord(regSSPrev);
-                        cpu.pushWord(regSPPrev);
-                        this.fStackSwitch = true;
-                    }
-                    cpu.regPS &= ~(X86.PS.NT | X86.PS.TF);
-                    if (type == X86.DESC.ACC.TYPE.GATE_INT) cpu.regPS &= ~X86.PS.IF;
-                    return this.base;
-                }
-                cpu.assert(false);
-                if (!fSuppress) X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel | X86.ERRCODE.EXT, true);
-                base = X86.ADDR_INVALID;
-                break;
-            }
-            else if (type == X86.DESC.ACC.TYPE.GATE_TASK) {
-                if (!X86Seg.switchTSS.call(this, base & 0xffff, true)) {
-                    base = X86.ADDR_INVALID;
-                    break;
-                }
-                return this.base;
-            }
-            else {
-                if (!fSuppress) X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, true);
-                base = X86.ADDR_INVALID;
-                break;
-            }
-            cpu.assert(!!selMasked);    // a zero CS selector should be caught by the final preceding check
         }
         else if (this.id == X86Seg.ID.DATA) {
             if (selMasked) {
                 if (type < X86.DESC.ACC.TYPE.DATA_READONLY || (type & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.READABLE)) == X86.DESC.ACC.TYPE.CODE) {
                     /*
-                     * OS/2 1.0 triggers this GP fault (what I'll call the "Empty Descriptor" GP fault) multiple times
-                     * during boot; eg:
+                     * OS/2 1.0 triggers this "Empty Descriptor" GP_FAULT multiple times during boot; eg:
                      *
                      *      Fault 0D (002F) on opcode 0x8E at 3190:3A05 (%112625)
                      *      stopped (11315208 ops, 41813627 cycles, 498270 ms, 83918 hz)
@@ -714,9 +695,9 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                      * If we allow the GP fault to be dispatched, it recovers, so until I'm able to investigate this
                      * further, I'm going to assume this is normal behavior.  If the segment (0x002F in the example)
                      * simply needed to be "faulted" into memory, I would have expected OS/2 to build a descriptor
-                     * with the PRESENT bit clear, and rely on NP faults rather than GP faults, but maybe this was simpler.
+                     * with the PRESENT bit clear, and rely on NP_FAULT rather than GP_FAULT, but maybe this was simpler.
                      *
-                     * So, if acc is zero, we won't set fHalt on the following call.
+                     * Anyway, because of this, if acc is zero, we won't set fHalt on this GP_FAULT.
                      */
                     if (!fSuppress) X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, acc != 0);
                     base = X86.ADDR_INVALID;
