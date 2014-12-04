@@ -2026,10 +2026,10 @@ FDC.prototype.popCmd = function(name)
 {
     this.assert((!this.regDataIndex || name !== undefined) && this.regDataIndex < this.regDataTotal);
     var bCmd = this.regDataArray[this.regDataIndex];
-    if (DEBUG && this.messageEnabled(Debugger.MESSAGE.PORT)) {
+    if (DEBUG && this.messageEnabled(Debugger.MESSAGE.PORT | Debugger.MESSAGE.FDC)) {
         var bCmdMasked = bCmd & FDC.REG_DATA.CMD.MASK;
         if (!name && !this.regDataIndex && FDC.aCmdInfo[bCmdMasked]) name = FDC.aCmdInfo[bCmdMasked].name;
-        this.messageDebugger("FDC.CMD[" + (name || this.regDataIndex) + "]: 0x" + str.toHexByte(bCmd));
+        this.messageDebugger("FDC.CMD[" + (name || this.regDataIndex) + "]: 0x" + str.toHexByte(bCmd), true);
     }
     this.regDataIndex++;
     return bCmd;
@@ -2080,8 +2080,8 @@ FDC.prototype.beginResult = function()
  */
 FDC.prototype.pushResult = function(bResult, name)
 {
-    if (DEBUG && this.messageEnabled(Debugger.MESSAGE.PORT)) {
-        this.messageDebugger("FDC.RES[" + (name || this.regDataTotal) + "]: 0x" + str.toHexByte(bResult));
+    if (DEBUG && this.messageEnabled(Debugger.MESSAGE.PORT | Debugger.MESSAGE.FDC)) {
+        this.messageDebugger("FDC.RES[" + (name || this.regDataTotal) + "]: 0x" + str.toHexByte(bResult), true);
     }
     this.regDataArray[this.regDataTotal++] = bResult;
 };

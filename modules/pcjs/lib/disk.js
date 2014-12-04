@@ -36,12 +36,12 @@
  *      1) creating an empty disk: create()
  *      2) loading a disk image: load()
  *      3) getting disk information: info()
- *      4) dumping disk contents: dump()
- *      5) seeking a disk sector: seek()
- *      6) reading data from a sector: read()
- *      7) writing data to a sector: write()
- *      8) save disk deltas: save()
- *      9) restore disk deltas: restore()
+ *      4) seeking a disk sector: seek()
+ *      5) reading data from a sector: read()
+ *      6) writing data to a sector: write()
+ *      7) save disk deltas: save()
+ *      8) restore disk deltas: restore()
+ *      9) converting disk contents: toJSON()
  *
  *  More functionality may be factored out of the FDC and HDC components later and moved here, to
  *  further reduce some of the duplication between them, but the above functionality is a good start.
@@ -1237,39 +1237,6 @@ Disk.prototype.info = function()
 };
 
 /**
- * dump()
- *
- * We perform some RegExp massaging on the JSON data to eliminate unnecessary properties
- * (eg, 'length' values of 512, 'pattern' values of 0, quotes around the property names, etc).
- * Sectors that were initially compressed should remain compressed unless/until they were modified.
- *
- * TODO: Check sectors (or at least modified sectors) to see if they can be recompressed.
- *
- * @this {Disk}
- * @return {string} containing the entire disk image as JSON-encoded data
- */
-Disk.prototype.dump = function()
-{
-    var s = JSON.stringify(this.aDiskData);
-    s = s.replace(/,"length":512/gm, "").replace(/,"pattern":0/gm, "");
-    /*
-     * I don't really want to strip quotes from disk image property names, since I would have to put them
-     * back again during mount() -- or whenever JSON.parse() is used instead of eval().  But I still remove
-     * them temporarily, so that any remaining property names (eg, "iModify", "cModify", "fDirty") can
-     * easily be stripped out, by virtue of their being the only quoted properties left.  We then "requote"
-     * all the property names that remain.
-     */
-    s = s.replace(/"(sector|length|data|pattern)":/gm, "$1:");
-    /*
-     * The next line will remove any other numeric or boolean properties that were added at runtime, although
-     * they may have completely different ("minified") names if the code has been compiled.
-     */
-    s = s.replace(/,"[^"]*":([0-9]+|true|false)/gm, "");
-    s = s.replace(/(sector|length|data|pattern):/gm, "\"$1\":");
-    return s;
-};
-
-/**
  * seek(iCylinder, iHead, iSector, fWrite, done)
  *
  * TODO: There's some dodgy code in seek() that allows floppy images to be dynamically
@@ -1651,6 +1618,74 @@ Disk.prototype.restore = function(deltas)
         }
     }
     return nChanges;
+};
+
+/**
+ * toJSON()
+ *
+ * We perform some RegExp massaging on the JSON data to eliminate unnecessary properties
+ * (eg, 'length' values of 512, 'pattern' values of 0, quotes around the property names, etc).
+ * Sectors that were initially compressed should remain compressed unless/until they were modified.
+ *
+ * TODO: Check sectors (or at least modified sectors) to see if they can be recompressed.
+ *
+ * @this {Disk}
+ * @return {string} containing the entire disk image as JSON-encoded data
+ */
+Disk.prototype.toJSON = function()
+{
+    var s = JSON.stringify(this.aDiskData);
+    s = s.replace(/,"length":512/gm, "").replace(/,"pattern":0/gm, "");
+    /*
+     * I don't really want to strip quotes from disk image property names, since I would have to put them
+     * back again during mount() -- or whenever JSON.parse() is used instead of eval().  But I still remove
+     * them temporarily, so that any remaining property names (eg, "iModify", "cModify", "fDirty") can
+     * easily be stripped out, by virtue of their being the only quoted properties left.  We then "requote"
+     * all the property names that remain.
+     */
+    s = s.replace(/"(sector|length|data|pattern)":/gm, "$1:");
+    /*
+     * The next line will remove any other numeric or boolean properties that were added at runtime, although
+     * they may have completely different ("minified") names if the code has been compiled.
+     */
+    s = s.replace(/,"[^"]*":([0-9]+|true|false)/gm, "");
+    s = s.replace(/(sector|length|data|pattern):/gm, "\"$1\":");
+    return s;
+};
+
+/**
+ * dumpSector(sector)
+ *
+ * @param {Object} sector (returned from a previous seek)
+ * @return {string|undefined}
+ */
+Disk.prototype.dumpSector = function(sector)
+{
+    var sDump;
+    if (DEBUG) {
+        sDump = "";
+        var sBytes = "", sChars = "";
+        var cbSector = sector['length'];
+        var cdwData = sector['data'].length;
+        var dw = 0;
+        for (var i = 0; i < cbSector; i++) {
+            if (i % 16 == 0) {
+                if (sDump) sDump += sBytes + ' ' + sChars + '\n';
+                sDump += str.toHexWord(i) + ": ";
+                sBytes = sChars = "";
+            }
+            if (i % 4 == 0) {
+                var idw = i >> 2;
+                dw = (idw < cdwData? sector['data'][idw] : sector['pattern']);
+            }
+            var b = dw & 0xff;
+            dw >>>= 8;
+            sBytes += str.toHexByte(b) + (i % 16 == 7? "-" : " ");
+            sChars += (b >= 32 && b < 128? String.fromCharCode(b) : ".");
+        }
+        if (sBytes) sDump += sBytes + ' ' + sChars + '\n';
+    }
+    return sDump;
 };
 
 if (typeof APP_PCJS !== 'undefined') APP_PCJS.Disk = Disk;

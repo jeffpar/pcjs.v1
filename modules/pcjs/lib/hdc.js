@@ -891,7 +891,7 @@ HDC.prototype.initDrive = function(iDrive, drive, driveConfig, data, fHard)
     this.verifyDrive(drive);
 
     /*
-     * The next group of properties are managed by worker functions (eg, doRead()) to maintain state across DMA requests.
+     * The next group of properties are managed by worker functions (eg, doDMARead()) to maintain state across DMA requests.
      */
     drive.ibSector = data[i++];             // location of the next byte to be accessed in the above sector
     drive.sector = null;                    // initialized to null by worker, and then set to the next sector satisfying the request
@@ -1082,7 +1082,7 @@ HDC.prototype.seekDrive = function(drive, iSector, nSectors)
                 drive.errorCode = HDC.XTC.DATA.ERR.NONE;
                 /*
                  * At this point, we've finished simulating what an HDC.XTC.DATA.CMD.READ_DATA command would have performed,
-                 * up through doRead().  Now it's the caller responsibility to call readByte(), like the DMA Controller would.
+                 * up through doDMARead().  Now it's the caller responsibility to call readByte(), like the DMA Controller would.
                  */
                 return true;
             }
@@ -1261,7 +1261,7 @@ HDC.prototype.outXTCData = function(port, bOut, addrFrom)
          */
         this.regStatus |= HDC.XTC.STATUS.IOMODE;
         this.regStatus &= ~HDC.XTC.STATUS.REQ;
-        this.doXTCommand();
+        this.doXTC();
     }
 };
 
@@ -1386,14 +1386,8 @@ HDC.prototype.outXTCNoise = function(port, bOut, addrFrom)
 HDC.prototype.inATCData = function(port, addrFrom)
 {
     var bIn = -1;
-    var fSuppress = false;
 
     if (this.drive) {
-        /*
-         * messagePort() calls, if enabled, can be overwhelming for this port, so limit them to the first byte.
-         */
-        fSuppress = (this.drive.ibSector > 0);
-
         /*
          * We use the synchronous form of readByte() at this point because we have no choice; an I/O instruction
          * has just occurred and cannot be delayed.  The good news is that doATCommand() should have already primed
@@ -1407,7 +1401,22 @@ HDC.prototype.inATCData = function(port, addrFrom)
          * Now that we've supplied a full sector of data, see if the caller's expecting additional sectors;
          * if so, prime the pump again.  The caller should not poll us again until another interrupt's been delivered.
          */
-        if (this.drive.ibSector == this.drive.cbSector) {
+        if (this.drive.ibSector == 1) {
+            /*
+             * messagePort() calls, if enabled, can be overwhelming for this port, so limit them to the first byte
+             * of each sector.
+             */
+            if (this.messageEnabled(Debugger.MESSAGE.PORT | Debugger.MESSAGE.HDC)) {
+                this.messagePort(port, null, addrFrom, "DATA[" + this.drive.ibSector + "]", bIn);
+            }
+        }
+        else if (this.drive.ibSector == this.drive.cbSector) {
+
+            if (this.messageEnabled(Debugger.MESSAGE.OTHER | Debugger.MESSAGE.HDC)) {
+                var sDump = this.drive.disk.dumpSector(this.drive.sector);
+                if (sDump) this.dbg.message(sDump);
+            }
+
             this.drive.nBytes -= this.drive.cbSector;
             this.regSecCnt = (this.regSecCnt - 1) & 0xff;
             /*
@@ -1416,13 +1425,11 @@ HDC.prototype.inATCData = function(port, addrFrom)
              */
             if (this.drive.nBytes >= this.drive.cbSector) {
                 var hdc = this;
+                hdc.regStatus = HDC.ATC.STATUS.BUSY | HDC.ATC.STATUS.DATA_REQ;
                 this.readByte(this.drive, function(b, fAsync) {
                     if (b >= 0) {
                         hdc.setATCIRR();
-                        /*
-                         * I shouldn't have to set BUSY (or DATA_REQ) again, because it should still be set, no?
-                         */
-                        hdc.assert(!!(hdc.regStatus & HDC.ATC.STATUS.BUSY));
+                        hdc.regStatus = HDC.ATC.STATUS.READY | HDC.ATC.STATUS.SEEK_OK;
                     } else {
                         /*
                          * TODO: It would be nice to be a bit more specific about the error (if any) that just occurred.
@@ -1439,7 +1446,6 @@ HDC.prototype.inATCData = function(port, addrFrom)
             }
         }
     }
-    if (!fSuppress) this.messagePort(port, null, addrFrom, "DATA", bIn);
     return bIn;
 };
 
@@ -1453,11 +1459,6 @@ HDC.prototype.inATCData = function(port, addrFrom)
  */
 HDC.prototype.outATCData = function(port, bOut, addrFrom)
 {
-    /*
-     * messagePort() calls, if enabled, can be overwhelming for this port, so limit them to the first byte.
-     */
-    if (!this.drive || !this.drive.ibSector) this.messagePort(port, bOut, addrFrom, "DATA");
-
     if (this.drive) {
         if (this.drive.nBytes >= this.drive.cbSector) {
             if (this.writeByte(this.drive, bOut) < 0) {
@@ -1471,18 +1472,30 @@ HDC.prototype.outATCData = function(port, bOut, addrFrom)
                     this.messageDebugger("HDC.outATCData(" + str.toHexByte(bOut) + "): write failed");
                 }
             }
+            else if (this.drive.ibSector == 1) {
+                /*
+                 * messagePort() calls, if enabled, can be overwhelming for this port, so limit them to the first byte
+                 * of each sector.
+                 */
+                if (this.messageEnabled(Debugger.MESSAGE.PORT | Debugger.MESSAGE.HDC)) {
+                    this.messagePort(port, bOut, addrFrom, "DATA[" + this.drive.ibSector + "]");
+                }
+            }
             else if (this.drive.ibSector == this.drive.cbSector) {
+
+                if (this.messageEnabled(Debugger.MESSAGE.OTHER | Debugger.MESSAGE.HDC)) {
+                    var sDump = this.drive.disk.dumpSector(this.drive.sector);
+                    if (sDump) this.dbg.message(sDump);
+                }
+
                 this.drive.nBytes -= this.drive.cbSector;
                 this.regSecCnt = (this.regSecCnt - 1) & 0xff;
-                this.setATCIRR();
+                this.setATCIRR(true);
+                this.regStatus = HDC.ATC.STATUS.READY | HDC.ATC.STATUS.SEEK_OK;
                 if (this.drive.nBytes >= this.drive.cbSector) {
-                    /*
-                     * I shouldn't have to set BUSY (or DATA_REQ) again, because it should still be set, no?
-                     */
-                    this.assert(!!(this.regStatus & HDC.ATC.STATUS.BUSY));
+                    this.regStatus |= HDC.ATC.STATUS.DATA_REQ;
                 } else {
                     this.assert(!this.drive.nBytes);
-                    this.regStatus = HDC.ATC.STATUS.READY | HDC.ATC.STATUS.SEEK_OK;
                 }
             }
         } else {
@@ -1710,6 +1723,7 @@ HDC.prototype.inATCStatus = function(port, addrFrom)
 {
     var bIn = this.regStatus;
     this.messagePort(port, null, addrFrom, "STATUS", bIn);
+    if (this.chipset) this.chipset.clearIRR(ChipSet.IRQ.ATC);
     return bIn;
 };
 
@@ -1726,7 +1740,7 @@ HDC.prototype.outATCCommand = function(port, bOut, addrFrom)
     this.messagePort(port, bOut, addrFrom, "COMMAND");
     this.regCommand = bOut;
     if (this.chipset) this.chipset.clearIRR(ChipSet.IRQ.ATC);
-    this.doATCommand();
+    this.doATC();
 };
 
 /**
@@ -1752,13 +1766,13 @@ HDC.prototype.outATCFDR = function(port, bOut, addrFrom)
 };
 
 /**
- * doATCommand()
+ * doATC()
  *
  * Handles ATC (AT Controller) commands
  *
  * @this {HDC}
  */
-HDC.prototype.doATCommand = function()
+HDC.prototype.doATC = function()
 {
     var hdc = this;
     var fInterrupt = false;
@@ -1790,35 +1804,40 @@ HDC.prototype.doATCommand = function()
          * follow-up I/O instructions.  For example, any subsequent inATCData() and outATCData() calls need to
          * know which drive to talk to ("this.drive"), to issue their own readByte() and writeByte() calls.
          *
-         * The XTC didn't need this, because it used doRead(), doWrite(), doFormat() helper functions, which
-         * reset the current drive's "sector" and "errorCode" properties themselves and then used DMA functions
-         * that delivered drive data with direct calls to readByte() and writeByte().
+         * The XTC didn't need this, because it used doDMARead(), doDMAWrite(), doDMAFormat() helper functions,
+         * which reset the current drive's "sector" and "errorCode" properties themselves and then used DMA
+         * functions that delivered drive data with direct calls to readByte() and writeByte().
          */
         drive.sector = null;
+        drive.ibSector = 0;
         drive.errorCode = 0;
         this.drive = drive;
     }
 
-    if (DEBUG && this.messageEnabled(Debugger.MESSAGE.PORT | Debugger.MESSAGE.HDC)) {
-        this.messageDebugger("HDC.doATCommand(" + str.toHexByte(bCmd) + "): " + HDC.aATCCommands[bCmd]);
+    if (DEBUG && this.messageEnabled(Debugger.MESSAGE.HDC)) {
+        this.messageDebugger("HDC.doATC(0x" + str.toHexByte(bCmd) + "): " + HDC.aATCCommands[bCmd], true);
     }
 
     switch (bCmd & HDC.ATC.COMMAND.MASK) {
 
     case HDC.ATC.COMMAND.READ_DATA:
+        if (DEBUG && this.messageEnabled(Debugger.MESSAGE.HDC)) {
+            this.messageDebugger("HDC.doRead(" + iDrive + ',' + drive.wCylinder + ':' + drive.bHead + ':' + drive.bSector + ',' + nSectors + ")", true);
+        }
         /*
          * We're using a call to readByte() that disables auto-increment, so that once we've got the first
          * byte of the next sector, we can signal an interrupt without also consuming the first byte, allowing
          * inATCData() to begin with that byte.
+         *
+         * As with the WRITE_DATA command, I'm not sure which of BUSY and DATA_REQ (or both) should be set here,
+         * so I'm setting both of them for now.  I clear them as soon as I have data.
          */
+        hdc.regStatus = HDC.ATC.STATUS.BUSY | HDC.ATC.STATUS.DATA_REQ;
+
         this.readByte(drive, function(b, fAsync) {
             if (b >= 0 && hdc.chipset) {
                 hdc.setATCIRR();
-                /*
-                 * As with the WRITE_DATA command, I'm not sure which of BUSY and DATA_REQ (or both)
-                 * should be set here, so I'm setting both of them for now.
-                 */
-                hdc.regStatus = HDC.ATC.STATUS.BUSY | HDC.ATC.STATUS.DATA_REQ;
+                hdc.regStatus = HDC.ATC.STATUS.READY | HDC.ATC.STATUS.SEEK_OK;
             } else {
                 /*
                  * TODO: It would be nice to be a bit more specific about the error (if any) that just occurred.
@@ -1831,17 +1850,10 @@ HDC.prototype.doATCommand = function()
         break;
 
     case HDC.ATC.COMMAND.WRITE_DATA:
-        if (this.chipset) {
-            this.setATCIRR();
-            /*
-             * I know that DATA_REQ must be set at this point, but I'm not sure about BUSY; so I'm
-             * setting both of them for now.
-             */
-            this.regStatus = HDC.ATC.STATUS.BUSY | HDC.ATC.STATUS.DATA_REQ;
-        } else {
-            this.regStatus = HDC.ATC.STATUS.ERROR;
-            this.regError = HDC.ATC.ERROR.CMD_ABORT;
+        if (DEBUG && this.messageEnabled(Debugger.MESSAGE.HDC)) {
+            this.messageDebugger("HDC.doWrite(" + iDrive + ',' + drive.wCylinder + ':' + drive.bHead + ':' + drive.bSector + ',' + nSectors + ")", true);
         }
+        this.regStatus = HDC.ATC.STATUS.DATA_REQ;
         break;
 
     case HDC.ATC.COMMAND.RESTORE:
@@ -1853,7 +1865,8 @@ HDC.prototype.doATCommand = function()
 
     case HDC.ATC.COMMAND.READ_VERF:
         /*
-         * Since the READ VERIFY command returns no data, once again, logically, there isn't much for us to do.
+         * Since the READ VERIFY command returns no data, once again, logically, there isn't much we HAVE to
+         * to do, but... TODO: Verify that all the disk parameters are valid, and return an error if they're not.
          */
         fInterrupt = true;
         break;
@@ -1871,8 +1884,8 @@ HDC.prototype.doATCommand = function()
          *
          *      WPREC:   0x4B
          *      SECCNT:  0x11 (for 17 sectors per track)
-         *      CYL:    0x100 (256 -- uh, what?)
-         *      SECNUM:  0x0C (12 -- uh, what?)
+         *      CYL:    0x100 (256 -- huh?)
+         *      SECNUM:  0x0C (12 -- huh?)
          *      DRVHD:   0xA3 (max head of 0x03, for 4 total heads)
          *
          * The importance of SECCNT (nSectors) and DRVHD (nHeads) is controlling how multi-sector operations
@@ -1887,7 +1900,7 @@ HDC.prototype.doATCommand = function()
 
     default:
         if (DEBUG && this.messageEnabled()) {
-            this.messageDebugger("HDC.doATCommand(" + str.toHexByte(this.regCommand) + "): " + (bCmd < 0? ("invalid drive (" + iDrive + ")") : "unsupported operation"));
+            this.messageDebugger("HDC.doATC(0x" + str.toHexByte(this.regCommand) + "): " + (bCmd < 0? ("invalid drive (" + iDrive + ")") : "unsupported operation"));
             if (bCmd >= 0) this.dbg.stopCPU();
         }
         break;
@@ -1897,25 +1910,33 @@ HDC.prototype.doATCommand = function()
 };
 
 /**
- * setATCIRR()
+ * setATCIRR(fWrite)
  *
  * Raise the ATC's IRQ, provided ATC interrupts are enabled.
  *
  * @this {HDC}
+ * @param {boolean} [fWrite] is true on completion of a write to the sector buffer
  */
-HDC.prototype.setATCIRR = function()
+HDC.prototype.setATCIRR = function(fWrite)
 {
-    if (this.chipset && !(this.regFDR & HDC.ATC.FDR.INT_DISABLE)) this.chipset.setIRR(ChipSet.IRQ.ATC);
+    if (this.chipset) {
+        if (!(this.regFDR & HDC.ATC.FDR.INT_DISABLE)) {
+            this.chipset.setIRR(ChipSet.IRQ.ATC);
+            if (DEBUG) this.messageDebugger("HDC.setATCIRR(): enabled", Debugger.MESSAGE.PIC | Debugger.MESSAGE.HDC);
+        } else {
+            if (DEBUG) this.messageDebugger("HDC.setATCIRR(): disabled", Debugger.MESSAGE.PIC | Debugger.MESSAGE.HDC);
+        }
+    }
 };
 
 /**
- * doXTCommand()
+ * doXTC()
  *
  * Handles XTC (XT Controller) commands
  *
  * @this {HDC}
  */
-HDC.prototype.doXTCommand = function()
+HDC.prototype.doXTC = function()
 {
     var hdc = this;
     this.regDataIndex = 0;
@@ -1985,7 +2006,7 @@ HDC.prototype.doXTCommand = function()
         bDataStatus = HDC.XTC.DATA.STATUS_OK;
         if (!drive && this.iDriveAllowFail == iDrive) {
             this.iDriveAllowFail = -1;
-            if (DEBUG) this.messageDebugger("HDC.doXTCommand(): fake failure triggered");
+            if (DEBUG) this.messageDebugger("HDC.doXTC(): fake failure triggered");
             bDataStatus = HDC.XTC.DATA.STATUS_ERROR;
         }
         this.beginResult(bDataStatus | bDrive);
@@ -2022,7 +2043,7 @@ HDC.prototype.doXTCommand = function()
         case HDC.XTC.DATA.CMD.RECALIBRATE:      // 0x01
             drive.bControl = bControl;
             if (DEBUG && this.messageEnabled()) {
-                this.messageDebugger("HDC.doXTCommand(): drive " + iDrive + " control byte: 0x" + str.toHexByte(bControl));
+                this.messageDebugger("HDC.doXTC(): drive " + iDrive + " control byte: 0x" + str.toHexByte(bControl));
             }
             this.beginResult(HDC.XTC.DATA.STATUS_OK | bDrive);
             break;
@@ -2035,7 +2056,7 @@ HDC.prototype.doXTCommand = function()
             break;
 
         case HDC.XTC.DATA.CMD.READ_DATA:        // 0x08
-            this.doRead(drive, function(bStatus) {
+            this.doDMARead(drive, function(bStatus) {
                 hdc.beginResult(bStatus | bDrive);
             });
             break;
@@ -2046,13 +2067,13 @@ HDC.prototype.doXTCommand = function()
              * but it is omitted from the HDC.XTC.DATA.CMD.READ_DATA command.  Is that correct?  Note that, as far as the length
              * of the transfer is concerned, we rely exclusively on the DMA controller being programmed with the appropriate byte count.
              */
-            this.doWrite(drive, function(bStatus) {
+            this.doDMAWrite(drive, function(bStatus) {
                 hdc.beginResult(bStatus | bDrive);
             });
             break;
 
         case HDC.XTC.DATA.CMD.WRITE_BUFFER:     // 0x0F
-            this.doWriteToBuffer(drive, function(bStatus) {
+            this.doDMAWriteBuffer(drive, function(bStatus) {
                 hdc.beginResult(bStatus | bDrive);
             });
             break;
@@ -2060,7 +2081,7 @@ HDC.prototype.doXTCommand = function()
         default:
             this.beginResult(HDC.XTC.DATA.STATUS_ERROR | bDrive);
             if (DEBUG && this.messageEnabled()) {
-                this.messageDebugger("HDC.doXTCommand(" + str.toHexByte(bCmdOrig) + "): " + (bCmd < 0? ("invalid drive (" + iDrive + ")") : "unsupported operation"));
+                this.messageDebugger("HDC.doXTC(0x" + str.toHexByte(bCmdOrig) + "): " + (bCmd < 0? ("invalid drive (" + iDrive + ")") : "unsupported operation"));
                 if (bCmd >= 0) this.dbg.stopCPU();
             }
             break;
@@ -2081,7 +2102,7 @@ HDC.prototype.popCmd = function()
     if (bCmdIndex < this.regDataTotal) {
         bCmd = this.regDataArray[this.regDataIndex++];
         if (DEBUG && this.messageEnabled((bCmdIndex > 0? Debugger.MESSAGE.PORT : 0) | Debugger.MESSAGE.HDC)) {
-            this.messageDebugger("HDC.CMD[" + bCmdIndex + "]: 0x" + str.toHexByte(bCmd) + (!bCmdIndex && HDC.aXTCCommands[bCmd]? (" (" + HDC.aXTCCommands[bCmd] + ")") : ""));
+            this.messageDebugger("HDC.CMD[" + bCmdIndex + "]: 0x" + str.toHexByte(bCmd) + (!bCmdIndex && HDC.aXTCCommands[bCmd]? (" (" + HDC.aXTCCommands[bCmd] + ")") : ""), true);
         }
     }
     return bCmd;
@@ -2121,7 +2142,7 @@ HDC.prototype.beginResult = function(bResult)
 HDC.prototype.pushResult = function(bResult)
 {
     if (DEBUG && this.messageEnabled((this.regDataTotal > 0? Debugger.MESSAGE.PORT : 0) | Debugger.MESSAGE.HDC)) {
-        this.messageDebugger("HDC.RES[" + this.regDataTotal + "]: 0x" + str.toHexByte(bResult));
+        this.messageDebugger("HDC.RES[" + this.regDataTotal + "]: 0x" + str.toHexByte(bResult), true);
     }
     this.regDataArray[this.regDataTotal++] = bResult;
 };
@@ -2205,18 +2226,18 @@ HDC.prototype.dmaWriteFormat = function(drive, b)
 };
 
 /**
- * doRead(drive, done)
+ * doDMARead(drive, done)
  *
  * @this {HDC}
  * @param {Object} drive
  * @param {function(number)} done (dataStatus is XTC.DATA.STATUS_OK or XTC.DATA.STATUS_ERROR; if error, then drive.errorCode should be set as well)
  */
-HDC.prototype.doRead = function(drive, done)
+HDC.prototype.doDMARead = function(drive, done)
 {
     drive.errorCode = HDC.XTC.DATA.ERR.NOT_READY;
 
     if (DEBUG && this.messageEnabled()) {
-        this.messageDebugger("HDC.doRead(" + drive.wCylinder + ":" + drive.bHead + ":" + drive.bSector + ")");
+        this.messageDebugger("HDC.doDMARead(" + drive.iDrive + ',' + drive.wCylinder + ':' + drive.bHead + ':' + drive.bSector + ',' + ((drive.nBytes / drive.cbSector)|0) + ")");
     }
 
     if (drive.disk) {
@@ -2249,18 +2270,18 @@ HDC.prototype.doRead = function(drive, done)
 };
 
 /**
- * doWrite(drive, done)
+ * doDMAWrite(drive, done)
  *
  * @this {HDC}
  * @param {Object} drive
  * @param {function(number)} done (dataStatus is XTC.DATA.STATUS_OK or XTC.DATA.STATUS_ERROR; if error, then drive.errorCode should be set as well)
  */
-HDC.prototype.doWrite = function(drive, done)
+HDC.prototype.doDMAWrite = function(drive, done)
 {
     drive.errorCode = HDC.XTC.DATA.ERR.NOT_READY;
 
     if (DEBUG && this.messageEnabled()) {
-        this.messageDebugger("HDC.doWrite(" + drive.wCylinder + ":" + drive.bHead + ":" + drive.bSector + ")");
+        this.messageDebugger("HDC.doDMAWrite(" + drive.iDrive + ',' + drive.wCylinder + ':' + drive.bHead + ':' + drive.bSector + ',' + ((drive.nBytes / drive.cbSector)|0) + ")");
     }
 
     if (drive.disk) {
@@ -2300,17 +2321,17 @@ HDC.prototype.doWrite = function(drive, done)
 };
 
 /**
- * doWriteToBuffer(drive, done)
+ * doDMAWriteBuffer(drive, done)
  *
  * @this {HDC}
  * @param {Object} drive
  * @param {function(number)} done (dataStatus is XTC.DATA.STATUS_OK or XTC.DATA.STATUS_ERROR; if error, then drive.errorCode should be set as well)
  */
-HDC.prototype.doWriteToBuffer = function(drive, done)
+HDC.prototype.doDMAWriteBuffer = function(drive, done)
 {
     drive.errorCode = HDC.XTC.DATA.ERR.NOT_READY;
 
-    if (DEBUG) this.messageDebugger("HDC.doWriteToBuffer()");
+    if (DEBUG) this.messageDebugger("HDC.doDMAWriteBuffer()");
 
     if (!drive.abSector || drive.abSector.length != drive.nBytes) {
         drive.abSector = new Array(drive.nBytes);
@@ -2343,9 +2364,9 @@ HDC.prototype.doWriteToBuffer = function(drive, done)
 };
 
 /**
- * doFormat(drive, done)
+ * doDMAFormat(drive, done)
  *
- * The drive variable is initialized by doXTCommand() to the following extent:
+ * The drive variable is initialized by doXTC() to the following extent:
  *
  *      drive.bHead (ignored)
  *      drive.nBytes (bytes/sector)
@@ -2358,7 +2379,7 @@ HDC.prototype.doWriteToBuffer = function(drive, done)
  * @param {Object} drive
  * @param {function(number)} done (dataStatus is XTC.DATA.STATUS_OK or XTC.DATA.STATUS_ERROR; if error, then drive.errorCode should be set as well)
  */
-HDC.prototype.doFormat = function(drive, done)
+HDC.prototype.doDMAFormat = function(drive, done)
 {
     drive.errorCode = HDC.XTC.DATA.ERR.NOT_READY;
 

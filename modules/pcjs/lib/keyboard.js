@@ -967,7 +967,7 @@ Keyboard.prototype.resetDevice = function()
     /*
      * TODO: There's more to reset, like LED indicators, default type rate, and emptying the scan code buffer.
      */
-    this.messageDebugger("keyboard reset", Debugger.MESSAGE.PORT);
+    this.messageDebugger("keyboard reset", Debugger.MESSAGE.KBD | Debugger.MESSAGE.PORT);
     this.abScanBuffer = [Keyboard.CMDRES.BAT_SUCC];
     if (this.chipset) this.chipset.notifyKbdData(true);
 };
@@ -989,8 +989,8 @@ Keyboard.prototype.setEnable = function(fData, fClock)
 {
     var fReset = false;
     if (this.fClock !== fClock) {
-        if (DEBUG && this.messageEnabled()) {
-            this.messageDebugger("keyboard clock line changing to " + fClock, Debugger.MESSAGE.PORT);
+        if (DEBUG && this.messageEnabled(Debugger.MESSAGE.KBD | Debugger.MESSAGE.PORT)) {
+            this.messageDebugger("keyboard clock line changing to " + fClock, true);
         }
         /*
          * Toggling the clock line low and then high signals a "reset", which we acknowledge once the
@@ -999,8 +999,8 @@ Keyboard.prototype.setEnable = function(fData, fClock)
         this.fClock = this.fResetOnEnable = fClock;
     }
     if (this.fData !== fData) {
-        if (DEBUG && this.messageEnabled()) {
-            this.messageDebugger("keyboard data line changing to " + fData, Debugger.MESSAGE.PORT);
+        if (DEBUG && this.messageEnabled(Debugger.MESSAGE.KBD | Debugger.MESSAGE.PORT)) {
+            this.messageDebugger("keyboard data line changing to " + fData, true);
         }
         this.fData = fData;
         /*
@@ -1637,7 +1637,7 @@ Keyboard.prototype.keyUpDown = function(event, fDown)
     }
 
     if (DEBUG && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
-        this.messageDebugger(/*(fDown?"\n":"") +*/ "key" + (fDown? "Down" : "Up") + "(" + keyCode + "): " + (fPass? "pass" : "consume"));
+        this.messageDebugger(/*(fDown?"\n":"") +*/ "key" + (fDown? "Down" : "Up") + "(" + keyCode + "): " + (fPass? "pass" : "consume"), true);
     }
     return fPass;
 };
@@ -1687,7 +1687,7 @@ Keyboard.prototype.keyPress = function(event)
     }
 
     if (DEBUG && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
-        this.messageDebugger("keyPress(" + keyCode + "): " + (fPass? "pass" : "consume"));
+        this.messageDebugger("keyPress(" + keyCode + "): " + (fPass? "pass" : "consume"), true);
     }
     return fPass;
 };
@@ -1749,7 +1749,7 @@ Keyboard.prototype.keySimulatePress = function(keyCode, fCheckShift, fQuickRelea
         fSimulated = true;
     }
     if (DEBUG && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
-        this.messageDebugger("keySimulatePress(" + keyCode + "): " + (fSimulated? "true" : "false"));
+        this.messageDebugger("keySimulatePress(" + keyCode + "): " + (fSimulated? "true" : "false"), true);
     }
     return fSimulated;
 };
@@ -1836,7 +1836,7 @@ Keyboard.prototype.keySimulateUpOrDown = function(keyCode, fDown, simCode)
         fSimulated = true;
     }
     if (DEBUG && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
-        this.messageDebugger("keySimulateUpOrDown(" + keyCode + "," + (fDown? "down" : "up") + "," + Keyboard.aSimCodeDescs[simCode] + "): " + (fSimulated? "true" : "false"));
+        this.messageDebugger("keySimulateUpOrDown(" + keyCode + "," + (fDown? "down" : "up") + "," + Keyboard.aSimCodeDescs[simCode] + "): " + (fSimulated? "true" : "false"), true);
     }
     return fSimulated;
 };

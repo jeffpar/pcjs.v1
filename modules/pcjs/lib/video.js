@@ -44,16 +44,6 @@ if (typeof module !== 'undefined') {
 }
 
 /**
- * @class Font
- * @property {number} cxCell
- * @property {number} cyCell
- * @property {Array} aCSSColors
- * @property {Array} aRGBColors
- * @property {Array} aColorMap
- * @property {Array} aCanvas
- */
-
-/**
  * Video(parmsVideo, canvas, context, textarea)
  *
  * The Video component can be configured with the following (parmsVideo) properties:
@@ -171,14 +161,13 @@ function Video(parmsVideo, canvas, context, textarea)
      * Originally, setMode() would map/unmap the video buffer ONLY when the active card changed,
      * because as long as an MDA or CGA remained active, its video buffer never changed.  However,
      * since the EGA can change its video buffer on the fly, setMode() must also compare the card's
-     * hard-coded and/or programmed) buffer address/size to the "active" address/size; the latter
+     * hard-coded and/or programmed buffer address/size to the "active" address/size; the latter
      * is recorded here.
      */
     this.addrBuffer = this.sizeBuffer = 0;
 
     /*
-     * aFonts is an array of font objects (ie, arrays) indexed by FONT ID.  Font characters are
-     * arranged in 16x16 grids, with one grid per canvas object in the aCanvas array of each font object.
+     * aFonts is an array of font objects indexed by FONT ID.  Font characters are     * arranged in 16x16 grids, with one grid per canvas object in the aCanvas array of each font object.
      *
      * Each element is a Font object that describes the font size and provides bitmaps for all the font
      * color permutations.  aFonts.length will be non-zero if ANY fonts are loaded, but do NOT assume
@@ -494,6 +483,16 @@ Video.MODES.EGA_640X200      = 0x0E;    // mapped at A000:0000
 Video.MODES.EGA_640X350_MONO = 0x0F;    // mapped at A000:0000, monochrome
 Video.MODES.EGA_640X350      = 0x10;    // mapped at A000:0000, color
 Video.MODES.UNKNOWN          = 0xFF;
+
+/**
+ * @class Font
+ * @property {number} cxCell
+ * @property {number} cyCell
+ * @property {Array} aCSSColors
+ * @property {Array} aRGBColors
+ * @property {Array} aColorMap
+ * @property {Array} aCanvas
+ */
 
 /*
  * Supported Fonts

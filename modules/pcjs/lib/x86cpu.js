@@ -2516,13 +2516,13 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
             this.opPrefixes = this.opFlags & X86.OPFLAG.REPEAT;
             if (this.intFlags) {
                 if (this.checkINTR()) {
-                    /*
-                     * ASSERT: If it's never possible to have !nMinCycles WITHOUT the Debugger, then all we need
-                     * to check is !nMinCycles.
-                     */
-                    if (DEBUGGER && !nMinCycles) {
-                        this.opFlags = 0;
-                        break;
+                    if (!nMinCycles) {
+                        this.assert(DEBUGGER);  // nMinCycles of zero should be generated ONLY by the Debugger
+                        if (DEBUGGER) {
+                            this.println("interrupt dispatched");
+                            this.opFlags = 0;
+                            break;
+                        }
                     }
                 }
                 if (this.intFlags & X86.INTFLAG.HALT) {

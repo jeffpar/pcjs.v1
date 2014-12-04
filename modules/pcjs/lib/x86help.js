@@ -691,7 +691,7 @@ var X86Help = {
         if (this.messageEnabled(bitsMessage) || fHalt) {
             var sMessage = (fHalt? '\n' : '') + "Fault " + str.toHexByte(nFault) + (nError != null? " (" + str.toHexWord(nError) + ")" : "") + " on opcode 0x" + str.toHexByte(bOpcode) + " at " + str.toHexAddr(this.regIP, this.segCS.sel) + " (%" + str.toHex(this.regEIP, 6) + ")";
             var fRunning = this.bitField.fRunning;
-            if (this.messageDebugger(sMessage)) {
+            if (this.messageDebugger(sMessage, bitsMessage)) {
                 if (fHalt) {
                     /*
                      * By setting fHalt to fRunning (which is true while running but false while single-stepping),

@@ -1656,7 +1656,7 @@ if (DEBUGGER) {
              * at the moment.  If that changes, then this will have to change as well.
              */
             addr -= 2;
-            this.message("INT 0x" + str.toHexByte(nInt) + ": AH=" + str.toHexByte(AH) + " at " + str.toHexAddr(addr - this.cpu.segCS.base, this.cpu.segCS.sel) + sFunc);
+            this.message("INT 0x" + str.toHexByte(nInt) + ": AH=" + str.toHexByte(AH) + " @" + str.toHexAddr(addr - this.cpu.segCS.base, this.cpu.segCS.sel) + sFunc);
         }
         return fMessage;
     };
@@ -1684,12 +1684,11 @@ if (DEBUGGER) {
      * @param {number|null} bOut if an output operation
      * @param {number|null} [addrFrom]
      * @param {string|null} [name] of the port, if any
-     * @param {number} [bIn] is the input value, if known, on an input operation
+     * @param {number|null} [bIn] is the input value, if known, on an input operation
      * @param {number} [bitsMessage] is one or more Debugger MESSAGE_* category flag(s)
      */
     Debugger.prototype.messageIO = function(component, port, bOut, addrFrom, name, bIn, bitsMessage)
     {
-        if (!bitsMessage) bitsMessage = 0;
         bitsMessage |= Debugger.MESSAGE.PORT;
         if (addrFrom == null || (this.bitsMessage & bitsMessage) == bitsMessage) {
             var segFrom = null;
@@ -1697,7 +1696,7 @@ if (DEBUGGER) {
                 segFrom = this.cpu.segCS.sel;
                 addrFrom -= this.cpu.segCS.base;
             }
-            this.message(component.idComponent + "." + (bOut != null? "outPort" : "inPort") + "(0x" + str.toHexWord(port) + "," + (name? name : "unknown") + (bOut != null? ",0x" + str.toHexByte(bOut) : "") + ")" + (bIn != null? (": 0x" + str.toHexByte(bIn)) : "") + (addrFrom != null? (" at " + str.toHexAddr(addrFrom, segFrom)) : ""));
+            this.message(component.idComponent + "." + (bOut != null? "outPort" : "inPort") + "(0x" + str.toHexWord(port) + "," + (name? name : "unknown") + (bOut != null? ",0x" + str.toHexByte(bOut) : "") + ")" + (bIn != null? (": 0x" + str.toHexByte(bIn)) : "") + (addrFrom != null? (" @" + str.toHexAddr(addrFrom, segFrom)) : ""));
         }
     };
 
@@ -4078,7 +4077,7 @@ if (DEBUGGER) {
                          * "biggest" being that the large disk images really need to be compressed first, because they
                          * get "inflated" with use.  See the dump() method in the Disk component for more details.
                          */
-                        this.println(drive.disk.dump());
+                        this.println(drive.disk.toJSON());
                         return;
                     }
                     if (dc.seekDrive(drive, iSector, nSectors)) {
@@ -4539,6 +4538,10 @@ if (DEBUGGER) {
                     this.incAddr(aAddr, 1);
                     fRepeat = fPrefix = true;
                     break;
+                case X86.OPCODE.INSB:
+                case X86.OPCODE.INSW:
+                case X86.OPCODE.OUTSB:
+                case X86.OPCODE.OUTSW:
                 case X86.OPCODE.MOVSB:
                 case X86.OPCODE.MOVSW:
                 case X86.OPCODE.CMPSB:
