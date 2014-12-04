@@ -699,7 +699,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                      *
                      * Anyway, because of this, if acc is zero, we won't set fHalt on this GP_FAULT.
                      */
-                    if (!fSuppress) X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, acc != 0);
+                    if (!fSuppress) X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, !!acc);
                     base = X86.ADDR_INVALID;
                     break;
                 }

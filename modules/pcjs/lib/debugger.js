@@ -58,7 +58,7 @@ if (DEBUGGER) {
  *      commands: string containing zero or more commands, separated by ';'
  *
  *      messages: string containing zero or more message categories to enable;
- *      multiple categories must be separated by '|' or ';'.  Parsed by initMessages().
+ *      multiple categories must be separated by '|' or ';'.  Parsed by messageInit().
  *
  * The Debugger component is an optional component that implements a variety of user
  * commands for controlling the CPU, dumping and editing memory, etc.
@@ -137,17 +137,17 @@ function Debugger(parmsDbg)
         this.clearBreakpoints();
 
         /*
-         * Execution history is allocated by initHistory() whenever checksEnabled() conditions change.
+         * Execution history is allocated by historyInit() whenever checksEnabled() conditions change.
          * Execution history is updated whenever the CPU calls checkInstruction(), which will happen only
          * when checksEnabled() returns true (eg, whenever one or more breakpoints have been set).
          * This ensures that, by default, the CPU runs as fast as possible.
          */
-        this.initHistory();
+        this.historyInit();
 
         /*
          * Initialize Debugger message support
          */
-        this.initMessages(parmsDbg['messages']);
+        this.messageInit(parmsDbg['messages']);
 
         /*
          * This object is filled in by messageRegs() whenever we need a fresh snapshot.
@@ -218,7 +218,7 @@ Debugger.MESSAGE = {
     MOUSE:      0x01000000,
     COMPUTER:   0x02000000,
     DOS:        0x04000000,
-    OTHER:      0x08000000,
+    DATA:       0x08000000,
     LOG:        0x10000000,
     WARN:       0x20000000,
     HALT:       0x40000000
@@ -537,7 +537,7 @@ if (DEBUGGER) {
         "mouse":    Debugger.MESSAGE.MOUSE,
         "computer": Debugger.MESSAGE.COMPUTER,
         "dos":      Debugger.MESSAGE.DOS,
-        "other":    Debugger.MESSAGE.OTHER,
+        "data":     Debugger.MESSAGE.DATA,
         "log":      Debugger.MESSAGE.LOG,
         "warn":     Debugger.MESSAGE.WARN,
         /*
@@ -1551,12 +1551,12 @@ if (DEBUGGER) {
     };
 
     /**
-     * initMessages(sEnable)
+     * messageInit(sEnable)
      *
      * @this {Debugger}
      * @param {string|undefined} sEnable contains zero or more message categories to enable, separated by '|' or ';'
      */
-    Debugger.prototype.initMessages = function(sEnable)
+    Debugger.prototype.messageInit = function(sEnable)
     {
         this.dbg = this;
         this.bitsMessage = this.bitsWarning = Debugger.MESSAGE.WARN;
@@ -1633,9 +1633,17 @@ if (DEBUGGER) {
      */
     Debugger.prototype.messageInt = function(nInt, addr)
     {
+        var AH;
+        var fMessage = false;
         var nCategory = Debugger.INT_MESSAGE[nInt];
-        var fMessage = nCategory && this.messageEnabled(nCategory);
-        var AH = this.cpu.regAX >> 8;
+        if (nCategory) {
+            AH = this.cpu.regAX >> 8;
+            if (this.messageEnabled(nCategory)) {
+                fMessage = true;
+            } else {
+                fMessage = (nCategory == Debugger.MESSAGE.FDC && this.messageEnabled(nCategory = Debugger.MESSAGE.HDC));
+            }
+        }
         if (fMessage) {
             var DL = this.cpu.regDX & 0xff;
             if (nInt == Debugger.INT.DOS && AH == 0x0b ||
@@ -1798,7 +1806,7 @@ if (DEBUGGER) {
     };
 
     /**
-     * initHistory()
+     * historyInit()
      *
      * This function is intended to be called by the constructor, reset(), addBreakpoint(), findBreakpoint()
      * and any other function that changes the checksEnabled() criteria used to decide whether checkInstruction()
@@ -1809,7 +1817,7 @@ if (DEBUGGER) {
      *
      * @this {Debugger}
      */
-    Debugger.prototype.initHistory = function()
+    Debugger.prototype.historyInit = function()
     {
         var i;
         if (!this.checksEnabled()) {
@@ -2008,7 +2016,7 @@ if (DEBUGGER) {
      */
     Debugger.prototype.reset = function(fQuiet)
     {
-        this.initHistory();
+        this.historyInit();
         this.cInstructions = 0;
         this.nCycles = 0;
         this.aAddrNextCode = this.newAddr(this.cpu.regIP, this.cpu.segCS.sel);
@@ -2185,7 +2193,7 @@ if (DEBUGGER) {
         }
 
         /*
-         * The rest of the instruction tracking logic can only be performed if initHistory() has allocated
+         * The rest of the instruction tracking logic can only be performed if historyInit() has allocated
          * the necessary data structures; note that there is no explicit UI for enabling/disabling history,
          * other than adding/removing breakpoints, simply because it's breakpoints that trigger the call to
          * checkInstruction() -- well, OK, and a few other things now, like enabling MESSAGE_INT messages.
@@ -2198,7 +2206,7 @@ if (DEBUGGER) {
 
             /*
              * This is a good example of what NOT to do in a high-frequency function, and defeats
-             * the purpose of preallocating and preinitializing the history array in initHistory():
+             * the purpose of preallocating and preinitializing the history array in historyInit():
              *
              *      this.aOpcodeHistory[this.iOpcodeHistory] = this.newAddr(this.cpu.regIP, this.cpu.segCS.sel, addr);
              *
@@ -2542,7 +2550,7 @@ if (DEBUGGER) {
                 this.bus.addMemoryBreakpoint(this.getAddr(aAddr), aBreak == this.aBreakWrite);
             }
             if (!fTemp) this.println("breakpoint enabled: " + this.hexAddr(aAddr) + " (" + aBreak[0] + ")");
-            this.initHistory();
+            this.historyInit();
             return true;
         }
         return false;
@@ -2571,7 +2579,7 @@ if (DEBUGGER) {
                         this.bus.removeMemoryBreakpoint(addr, aBreak == this.aBreakWrite);
                     }
                     if (!aAddrBreak[3]) this.println("breakpoint cleared: " + this.hexAddr(aAddrBreak) + " (" + aBreak[0] + ")");
-                    this.initHistory();
+                    this.historyInit();
                     break;
                 }
                 this.println("breakpoint exists: " + this.hexAddr(aAddrBreak) + " (" + aBreak[0] + ")");

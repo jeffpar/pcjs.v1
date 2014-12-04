@@ -1669,12 +1669,12 @@ Disk.prototype.dumpSector = function(sector)
         var cdwData = sector['data'].length;
         var dw = 0;
         for (var i = 0; i < cbSector; i++) {
-            if (i % 16 == 0) {
+            if ((i % 16) === 0) {
                 if (sDump) sDump += sBytes + ' ' + sChars + '\n';
                 sDump += str.toHexWord(i) + ": ";
                 sBytes = sChars = "";
             }
-            if (i % 4 == 0) {
+            if ((i % 4) === 0) {
                 var idw = i >> 2;
                 dw = (idw < cdwData? sector['data'][idw] : sector['pattern']);
             }

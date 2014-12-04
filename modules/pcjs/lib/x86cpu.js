@@ -1038,6 +1038,9 @@ X86CPU.prototype.setProtMode = function(fProt)
     if (fProt === undefined) {
         fProt = !!(this.regMSW & X86.MSW.PE);
     }
+    if (!fProt) {
+        this.messageDebugger("returning to real-mode");
+    }
     this.aOpGrp6 = (fProt? X86Op0F.aOpGrp6Prot : X86Op0F.aOpGrp6Real);
     this.segCS.updateMode(fProt);
     this.segDS.updateMode(fProt);

@@ -2225,7 +2225,7 @@ ChipSet.prototype.dumpPIC = function()
                 var b = pic.aICW[i];
                 sDump += " IC" + (i + 1) + "=" + str.toHexByte(b);
             }
-            sDump += " IMR=" + str.toHexByte(pic.bIMR) + " IRR=" + str.toHexByte(pic.bIRR) + " ISR=" + str.toHexByte(pic.bISR);
+            sDump += " IMR=" + str.toHexByte(pic.bIMR) + " IRR=" + str.toHexByte(pic.bIRR) + " ISR=" + str.toHexByte(pic.bISR) + " DELAY=" + pic.nDelay;
             this.dbg.println(sDump);
         }
     }
@@ -2712,7 +2712,7 @@ ChipSet.prototype.requestDMA = function(iDMAChannel, done)
     var channel = controller.aChannels[iChannel];
 
     if (!channel.component || !channel.fnTransfer || !channel.obj) {
-        if (DEBUG && this.messageEnabled(Debugger.MESSAGE.DMA | Debugger.MESSAGE.OTHER)) {
+        if (DEBUG && this.messageEnabled(Debugger.MESSAGE.DMA | Debugger.MESSAGE.DATA)) {
             this.messageDebugger("requestDMA(" + iDMAChannel + "): not connected to a component", true);
         }
         if (done) done(true);
@@ -2729,7 +2729,7 @@ ChipSet.prototype.requestDMA = function(iDMAChannel, done)
     if (done) channel.done = done;
 
     if (channel.masked) {
-        if (DEBUG && this.messageEnabled(Debugger.MESSAGE.DMA | Debugger.MESSAGE.OTHER)) {
+        if (DEBUG && this.messageEnabled(Debugger.MESSAGE.DMA | Debugger.MESSAGE.DATA)) {
             this.messageDebugger("requestDMA(" + iDMAChannel + "): channel masked, request queued", true);
         }
         return;
@@ -3174,23 +3174,22 @@ ChipSet.prototype.setIRR = function(nIRQ, nDelay)
     var iPIC = nIRQ >> 3;
     var nIRL = nIRQ & 0x7;
     var pic = this.aPICs[iPIC];
-    pic.bIRR |= 1 << nIRL;
-    if (DEBUG && this.messageEnabled(this.messageBitsIRQ(nIRQ) | Debugger.MESSAGE.CHIPSET)) {
-        this.messageDebugger("setIRR(" + nIRQ + ")", true);
+    var bIRR = (1 << nIRL);
+    if (!(pic.bIRR & bIRR)) {
+        pic.bIRR |= bIRR;
+        if (DEBUG && this.messageEnabled(this.messageBitsIRQ(nIRQ) | Debugger.MESSAGE.CHIPSET)) {
+            this.messageDebugger("setIRR(" + nIRQ + ")", true);
+        }
+        pic.nDelay = nDelay || 0;
+        this.checkIRR();
     }
-    pic.nDelay = nDelay || 0;
-    /*
-     * When any (unmasked) slave IRR goes high, the master's slave IRR line should go high as well
-     */
-    if (iPIC == 1 && (pic.bIRR & ~pic.bIMR)) this.aPICs[0].bIRR |= (1 << ChipSet.IRQ.SLAVE);
-    this.checkIRR();
 };
 
 /**
  * clearIRR(nIRQ)
  *
  * @this {ChipSet}
- * @param {number} nIRQ (IRQ 0-7 implies iPIC 0, which is all we currently support anyway)
+ * @param {number} nIRQ (IRQ 0-7 implies iPIC 0, and IRQ 8-15 implies iPIC 1)
  */
 ChipSet.prototype.clearIRR = function(nIRQ)
 {
@@ -3203,17 +3202,6 @@ ChipSet.prototype.clearIRR = function(nIRQ)
         if (DEBUG && this.messageEnabled(this.messageBitsIRQ(nIRQ) | Debugger.MESSAGE.CHIPSET)) {
             this.messageDebugger("clearIRR(" + nIRQ + ")", true);
         }
-        /*
-         * When all (unmasked) slave IRRs go low, the master's slave IRR line should go low as well
-         */
-        if (iPIC == 1 && !(pic.bIRR & ~pic.bIMR)) this.aPICs[0].bIRR &= ~(1 << ChipSet.IRQ.SLAVE);
-        /*
-         * NOTE: I don't think calling checkIRR(), and by extension, cpu.updateINTR(false), is strictly necessary,
-         * because when the CPU gets around to acknowledging the INTR signal, it still has to call getIRRVector(),
-         * which will inform the CPU that there are no longer any requested interrupts.
-         *
-         * However, some efficiency may be gained by clearing INTR sooner rather than later, so that's what we'll do.
-         */
         this.checkIRR();
     }
 };
@@ -3227,20 +3215,24 @@ ChipSet.prototype.clearIRR = function(nIRQ)
 ChipSet.prototype.checkIRR = function(nDelay)
 {
     /*
-     * Look for any IRR bits that aren't masked and aren't already in service; in theory, all we have to
-     * check is the master PIC (which is the *only* PIC on pre-5170 models), because when any IRQs are set
-     * or cleared on the slave, that should automatically be reflected in IRQ.SLAVE on the master.
+     * Look for any IRR bits that aren't masked and aren't already in service; in theory, all we'd have to
+     * check is the master PIC (which is the *only* PIC on pre-5170 models), because when any IRQs are set or
+     * cleared on the slave, that would automatically be reflected in IRQ.SLAVE on the master; that's what
+     * setIRR() and clearIRR() used to do.
      *
-     * HOWEVER, when a slave interrupt is acknowledged, getIRRVector() ends up clearing the IRR bits for BOTH
-     * the slave's IRQ and the master's IRQ.SLAVE, setting the corresponding ISR bits, and then when interrupt
-     * handler send an EOI for both, the corresponding ISR bits are cleared as well.
+     * Unfortunately, despite setIRR() and clearIRR()'s efforts, whenever a slave interrupt is acknowledged,
+     * getIRRVector() ends up clearing the IRR bits for BOTH the slave's IRQ and the master's IRQ.SLAVE.
+     * So if another lower-priority slave IRQ is waiting to be dispatched, that fact is no longer reflected
+     * in IRQ.SLAVE.
      *
-     * As a result, if another lower-priority slave IRQ was waiting to be dispatched, that fact would no longer
-     * be reflected in the master's IRR bit for IRQ.SLAVE.  We resolve that problem here, by first checking the
-     * slave PIC for any unmasked, unserviced interrupts and updating the master's IRR bit for IRQ.SLAVE.
+     * Since checkIRR() is called on every EOI, we can resolve that problem here, by first checking the slave
+     * PIC for any unmasked, unserviced interrupts and updating the master's IRQ.SLAVE.
+     *
+     * And since this is ALSO called by both setIRR() and clearIRR(), those functions no longer need to perform
+     * their own IRQ.SLAVE updates.  This function consolidates the propagation of slave interrupts to the master.
      */
     var pic;
-    var bIR = 0;
+    var bIR = -1;
 
     if (this.cPICs > 1) {
         pic = this.aPICs[1];
@@ -3248,7 +3240,14 @@ ChipSet.prototype.checkIRR = function(nDelay)
     }
 
     pic = this.aPICs[0];
-    if (bIR) pic.bIRR |= (1 << ChipSet.IRQ.SLAVE);
+
+    if (bIR >= 0) {
+        if (bIR) {
+            pic.bIRR |= (1 << ChipSet.IRQ.SLAVE);
+        } else {
+            pic.bIRR &= ~(1 << ChipSet.IRQ.SLAVE);
+        }
+    }
 
     bIR = ~(pic.bISR | pic.bIMR) & pic.bIRR;
 
@@ -4769,7 +4768,7 @@ ChipSet.prototype.setSpeaker = function(fOn)
  */
 ChipSet.prototype.messageBitsDMA = function(iChannel)
 {
-    var bitsMessage = Debugger.MESSAGE.DMA;
+    var bitsMessage = Debugger.MESSAGE.DATA;
     if (iChannel == ChipSet.DMA_FDC) {
         bitsMessage |= Debugger.MESSAGE.FDC;
     } else if (iChannel == ChipSet.DMA_HDC) {

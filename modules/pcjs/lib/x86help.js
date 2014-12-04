@@ -433,7 +433,6 @@ var X86Help = {
          * case, but this instruction isn't used frequently enough to warrant it).
          */
         if (this.regMSW & X86.MSW.PE) this.setProtMode(true);
-
     },
     /**
      * opHelpCALLF(off, sel)

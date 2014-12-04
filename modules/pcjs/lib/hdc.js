@@ -1412,7 +1412,7 @@ HDC.prototype.inATCData = function(port, addrFrom)
         }
         else if (this.drive.ibSector == this.drive.cbSector) {
 
-            if (this.messageEnabled(Debugger.MESSAGE.OTHER | Debugger.MESSAGE.HDC)) {
+            if (this.messageEnabled(Debugger.MESSAGE.DATA | Debugger.MESSAGE.HDC)) {
                 var sDump = this.drive.disk.dumpSector(this.drive.sector);
                 if (sDump) this.dbg.message(sDump);
             }
@@ -1483,7 +1483,7 @@ HDC.prototype.outATCData = function(port, bOut, addrFrom)
             }
             else if (this.drive.ibSector == this.drive.cbSector) {
 
-                if (this.messageEnabled(Debugger.MESSAGE.OTHER | Debugger.MESSAGE.HDC)) {
+                if (this.messageEnabled(Debugger.MESSAGE.DATA | Debugger.MESSAGE.HDC)) {
                     var sDump = this.drive.disk.dumpSector(this.drive.sector);
                     if (sDump) this.dbg.message(sDump);
                 }
@@ -1508,7 +1508,7 @@ HDC.prototype.outATCData = function(port, bOut, addrFrom)
         }
     } else {
         /*
-         * TODO: What to do about unexpected writes? The number of bytes has exceeded what the command specified.
+         * TODO: What to do about unexpected writes? No command was specified.
          */
         if (DEBUG && this.messageEnabled()) {
             this.messageDebugger("HDC.outATCData(" + str.toHexByte(bOut) + "): write without command");
@@ -1723,7 +1723,24 @@ HDC.prototype.inATCStatus = function(port, addrFrom)
 {
     var bIn = this.regStatus;
     this.messagePort(port, null, addrFrom, "STATUS", bIn);
-    if (this.chipset) this.chipset.clearIRR(ChipSet.IRQ.ATC);
+    /*
+     * Despite what IBM's documentation for the "Personal Computer AT Fixed Disk and Diskette Drive Adapter"
+     * (August 31, 1984) says (ie, "A read of the status register clears interrupt request 14"), we cannot
+     * unilaterally clear the IRQ on any read of STATUS.  For starters, that would completely break the PC AT
+     * ROM BIOS; here's what it does for multi-sector reads:
+     *
+     *      (1) read sector (REP INSW)
+     *      (2) check STATUS
+     *      (3) check sector count, exit if done
+     *      (4) wait for interrupt
+     *      (5) repeat
+     *
+     * Since we set the IRR immediately after (1), we cannot immediately clear the IRR at (2), otherwise the
+     * interrupt at (4) never happens.  So, maybe there are SOME situations where IRR should be cleared on
+     * a read, but I don't know what they are.
+     *
+     *      if (this.chipset) this.chipset.clearIRR(ChipSet.IRQ.ATC);
+     */
     return bIn;
 };
 
@@ -1921,7 +1938,29 @@ HDC.prototype.setATCIRR = function(fWrite)
 {
     if (this.chipset) {
         if (!(this.regFDR & HDC.ATC.FDR.INT_DISABLE)) {
-            this.chipset.setIRR(ChipSet.IRQ.ATC);
+            /*
+             * TODO: Determine what the "correct" instruction delay should be here.  When the OS/2 1.0 Install Disk
+             * begins copying files to the hard disk, at one point it performs the following 125-sector write (use the
+             * Debugger's "m hdc on" and "m pic on" commands to enable HDC and PIC messages, along with "m data on"
+             * if you also want to see the actual sector data being written):
+             *
+             *      HDC.doATC(0x30): Write
+             *      HDC.doWrite(0,2:0:5,125)
+             *
+             * As the write progresses, you'll notice that the HDC interrupt after each sector occurs at decreasingly
+             * lower points in the stack, until we eventually start overwriting non-stack data:
+             *
+             *      getIRRVector(): IRQ 14 interrupting @0090:52A6 stack=0050:1906
+             *      getIRRVector(): IRQ 14 interrupting @0318:196B stack=0050:18D6
+             *      getIRRVector(): IRQ 14 interrupting @0318:196B stack=0050:18A6
+             *      ...
+             *      getIRRVector(): IRQ 14 interrupting @0318:196B stack=0050:1156
+             *
+             * At roughly this point, very bad things start happening.  I decided to try an arbitrarily large delay
+             * on the setIRR() call here (120), and the problem vanished, so it seems likely that the OS/2 disk driver
+             * has a low tolerance for fast controller interrupts during multi-sector operations.
+             */
+            this.chipset.setIRR(ChipSet.IRQ.ATC, 120);
             if (DEBUG) this.messageDebugger("HDC.setATCIRR(): enabled", Debugger.MESSAGE.PIC | Debugger.MESSAGE.HDC);
         } else {
             if (DEBUG) this.messageDebugger("HDC.setATCIRR(): disabled", Debugger.MESSAGE.PIC | Debugger.MESSAGE.HDC);
@@ -2375,10 +2414,12 @@ HDC.prototype.doDMAWriteBuffer = function(drive, done)
  *
  * and we expect the DMA controller to provide C, H, R and N (ie, 4 bytes) for each sector to be formatted.
  *
+ * NOTE: This function is not currently used.
+ *
  * @this {HDC}
  * @param {Object} drive
  * @param {function(number)} done (dataStatus is XTC.DATA.STATUS_OK or XTC.DATA.STATUS_ERROR; if error, then drive.errorCode should be set as well)
- */
+ *
 HDC.prototype.doDMAFormat = function(drive, done)
 {
     drive.errorCode = HDC.XTC.DATA.ERR.NOT_READY;
@@ -2390,20 +2431,20 @@ HDC.prototype.doDMAFormat = function(drive, done)
             drive.abFormat = new Array(4);
             drive.bFormatting = true;
             drive.cSectorsFormatted = 0;
-            /*
-             * We need to reverse the original logic, and default to success unless/until an actual error occurs;
-             * otherwise dmaWriteFormat() will bail on us.  The original approach would work because requestDMA()
-             * would immediately call us back with fComplete set to true EVEN if the DMA channel was not yet unmasked;
-             * now the callback is deferred until the DMA channel has been unmasked and the DMA request has finished.
-             */
+            //
+            // We need to reverse the original logic, and default to success unless/until an actual error occurs;
+            // otherwise dmaWriteFormat() will bail on us.  The original approach would work because requestDMA()
+            // would immediately call us back with fComplete set to true EVEN if the DMA channel was not yet unmasked;
+            // now the callback is deferred until the DMA channel has been unmasked and the DMA request has finished.
+            //
             drive.errorCode = HDC.XTC.DATA.ERR.NONE;
             this.chipset.connectDMA(ChipSet.DMA_HDC, this, 'dmaWriteFormat', drive);
             this.chipset.requestDMA(ChipSet.DMA_HDC, function(fComplete) {
                 if (!fComplete) {
-                    /*
-                     * If an incomplete request wasn't triggered by an explicit error, then let's make explicit
-                     * (ie, revert to the default failure code that we originally set above).
-                     */
+                    //
+                    // If an incomplete request wasn't triggered by an explicit error, then let's make explicit
+                    // (ie, revert to the default failure code that we originally set above).
+                    //
                     if (drive.errorCode == HDC.XTC.DATA.ERR.NONE) {
                         drive.errorCode = HDC.XTC.DATA.ERR.NOT_READY;
                     }
@@ -2416,6 +2457,7 @@ HDC.prototype.doDMAFormat = function(drive, done)
     }
     done(drive.errorCode? HDC.XTC.DATA.STATUS_ERROR : HDC.XTC.DATA.STATUS_OK);
 };
+ */
 
 /**
  * readByte(drive, done)
