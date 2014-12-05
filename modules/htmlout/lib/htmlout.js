@@ -1408,12 +1408,13 @@ HTMLOut.prototype.getMachineXML = function(sToken, sIndent, aParms, sXMLFile, sS
         /*
          * If we were called from getManifestXML(), then let's fallback to getReadMe() instead.
          */
+        s = obj.getRandomString(sIndent);
         if (fFromManifest) {
-            obj.getReadMe(sToken, sIndent, aParms, null);
+            obj.getReadMe(sToken, sIndent, aParms, s);
             return;
         }
 
-        obj.aTokens[sToken] = obj.getRandomString(sIndent);
+        obj.aTokens[sToken] = s;
         obj.replaceTokens();
     });
 };
