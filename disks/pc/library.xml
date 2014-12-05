@@ -19,9 +19,10 @@
 		<manifest ref="/disks/pc/dos/microsoft/4.0M/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/dos/compaq/3.10/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/dos/compaq/3.31/manifest.xml" disk="*"/>
-		<manifest ref="/disks/pc/os2/1.0/manifest.xml" disk="*"/>
-		<manifest ref="/disks/pc/os2/1.1/manifest.xml" disk="*"/>
-		<manifest ref="/disks/pc/os2/1.3/manifest.xml" disk="*"/>
+		<manifest ref="/disks/pc/os2/ibm/1.0/manifest.xml" disk="*"/>
+		<manifest ref="/disks/pc/os2/ibm/1.1/manifest.xml" disk="*"/>
+		<manifest ref="/disks/pc/os2/ibm/1.3/manifest.xml" disk="*"/>
+		<manifest ref="/disks/pc/os2/misc/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/win/win101/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/win/win103/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/win/win103a/manifest.xml" disk="*"/>

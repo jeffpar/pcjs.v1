@@ -4,3 +4,4 @@
      00CE   @   F_BTS
      00F3   @   MK_ENV
      0148   @   ENV_X ; SET 40x25 COLOR ALPHA
+     0D20   @   BEEP

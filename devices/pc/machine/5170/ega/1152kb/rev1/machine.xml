@@ -15,7 +15,7 @@
 	<fdc ref="/disks/pc/library.xml" width="320px" automount='{A: {name: "PC-DOS 3.00 (Disk 1)", path: "/disks/pc/dos/ibm/3.00/PCDOS300-DISK1.json"}, B: {name: "PC-DOS 3.00 (Disk 2)", path: "/disks/pc/dos/ibm/3.00/PCDOS300-DISK2.json"}}'/>
 	<hdc id="hdcAT" type="at" drives='[{name:"20Mb Hard Disk",type:2}]'/>
 	<chipset id="chipset" model="5170" floppies="[1200,1200]"/>
-	<serial id="com1" adapter="1" binding="print"/>
-	<serial id="com2" adapter="2"/>
-	<mouse serial="com2"/>
+	<serial id="com1" adapter="1"/>
+	<serial id="com2" adapter="2" binding="print"/>
+	<mouse serial="com1"/>
 </machine>

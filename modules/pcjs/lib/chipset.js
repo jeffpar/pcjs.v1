@@ -4645,6 +4645,44 @@ ChipSet.prototype.outNMI = function(port, bOut, addrFrom)
 };
 
 /**
+ * outCoprocClear(port, bOut, addrFrom)
+ *
+ * This handler is installed only for MODEL_5170.
+ *
+ * @this {ChipSet}
+ * @param {number} port (0xF0)
+ * @param {number} bOut (0x00 is the only expected output)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to write the specified port)
+ */
+ChipSet.prototype.outCoprocClear = function(port, bOut, addrFrom)
+{
+    /*
+     * TODO: Implement
+     */
+    this.messagePort(port, bOut, addrFrom, "COPROC.CLEAR");
+    this.assert(!bOut);
+};
+
+/**
+ * outCoprocReset(port, bOut, addrFrom)
+ *
+ * This handler is installed only for MODEL_5170.
+ *
+ * @this {ChipSet}
+ * @param {number} port (0xF1)
+ * @param {number} bOut (0x00 is the only expected output)
+ * @param {number} [addrFrom] (not defined if the Debugger is trying to write the specified port)
+ */
+ChipSet.prototype.outCoprocReset = function(port, bOut, addrFrom)
+{
+    /*
+     * TODO: Implement
+     */
+    this.messagePort(port, bOut, addrFrom, "COPROC.RESET");
+    this.assert(!bOut);
+};
+
+/**
  * intBIOSRTC(addr)
  *
  * INT 0x1A Quick Reference:
@@ -4939,7 +4977,9 @@ ChipSet.aPortOutput5170 = {
     0xD4: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAMask(ChipSet.DMA1.INDEX, port, bOut, addrFrom); },
     0xD6: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAMode(ChipSet.DMA1.INDEX, port, bOut, addrFrom); },
     0xD8: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAResetFF(ChipSet.DMA1.INDEX, port, bOut, addrFrom); },
-    0xDA: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAMasterClear(ChipSet.DMA1.INDEX, port, bOut, addrFrom); }
+    0xDA: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAMasterClear(ChipSet.DMA1.INDEX, port, bOut, addrFrom); },
+    0xF0: ChipSet.prototype.outCoprocClear,
+    0xF1: ChipSet.prototype.outCoprocReset
 };
 
 /**

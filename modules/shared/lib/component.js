@@ -649,10 +649,10 @@ Component.prototype = {
                     return function printPanel(s, type) {
                         s = (type !== undefined? (type + ": ") : "") + (s || "");
                         /*
-                         * In COMPILED builds, prevent the <textarea> from getting too large;
+                         * In all but MAXDEBUG builds, prevent the <textarea> from getting too large;
                          * otherwise, printing becomes slower and slower.
                          */
-                        if (COMPILED) {
+                        if (!MAXDEBUG) {
                             if (control.value.length > 8192) {
                                 control.value = control.value.substr(control.value.length - 4096);
                             }
