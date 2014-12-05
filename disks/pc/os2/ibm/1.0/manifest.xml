@@ -2,6 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.16.1/manifest.xsl"?>
 <manifest type="software">
 	<title>IBM OS/2 1.0</title>
+	<machine href="/disks/pc/os2/ibm/1.0/machine.xml"/>
 	<disk id="disk00" size="1474560" chs="80:2:18" img="private/OS210-INSTALL.img" href="/disks/pc/os2/ibm/1.0/OS210-INSTALL.json" md5="b0410a7cd0d8bf188028729d1634bf75" md5json="4e690e5d55de300077c442762c7b7f97">
 		<name>OS/2 1.0 (1.44Mb Install)</name>
 	</disk>
