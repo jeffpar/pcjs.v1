@@ -5,7 +5,7 @@ Exciting news for OS/2 fans: PCjs (v1.16.1) is now able to run OS/2 1.0 on
 of recent work in PCjs to fully emulate the Intel 80286 processor and 16-bit protected-mode, including undocumented
 features like [LOADALL](/pubs/pc/reference/intel/80286/loadall/) and triple-fault resets.
 
-For a quick demo, try the "[OS/2 1.0 Debugger Boot Disk](/disks/pc/os2/misc/1.0/debugger/)".  In a few seconds,
+For a quick demo, try the "[OS/2 1.0 Debugger Boot Disk](/disks/pc/os2/misc/)".  In a few seconds,
 you'll see a very rudimentary OS/2 shell (a slimmed-down version of the OS/2 Program Selector) that allows you to
 start the protected-mode command interpreter ("Start a Program") or the real-mode command interpreter ("command.com").
 

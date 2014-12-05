@@ -2,7 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.16.1/manifest.xsl"?>
 <manifest type="software">
 	<title>OS/2 Miscellaneous Disks</title>
-	<machine href="/devices/pc/machine/5170/ega/1152kb/rev3/machine.xml"/>
+	<machine href="/disks/pc/os2/misc/1.0/debugger/machine.xml"/>
 	<disk id="disk01" size="1228800" chs="80:2:15" href="/disks/pc/os2/misc/1.0/debugger/OS210-BOOT.json">
 		<name>OS/2 1.0 Debugger Boot Disk</name>
 	</disk>
