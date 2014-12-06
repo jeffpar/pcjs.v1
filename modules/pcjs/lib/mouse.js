@@ -202,7 +202,7 @@ Mouse.prototype.setActive = function(fActive)
     this.fActive = fActive;
     /*
      * It's currently not possible to automatically lock the pointer outside the context of a user action
-     * (eg, a button or canvas click), so this code is for naught.
+     * (eg, a button or screen click), so this code is for naught.
      *
      *      if (this.video) this.video.notifyPointerActive(fActive);
      *
@@ -248,15 +248,15 @@ Mouse.prototype.powerUp = function(data, fRepower)
                 }
             }
             if (this.componentAdapter) {
-                if (this.video) this.canvasScreen = this.video.getCanvas(this);
+                if (this.video) this.inputScreen = this.video.getInput(this);
             } else {
                 Component.warning(this.id + ": " + this.sAdapterType + " " + this.idAdapter + " unavailable");
             }
         }
         if (this.fActive) {
-            this.captureMouse(this.canvasScreen);
+            this.captureMouse(this.inputScreen);
         } else {
-            this.releaseMouse(this.canvasScreen);
+            this.releaseMouse(this.inputScreen);
         }
     }
     return true;
@@ -371,10 +371,10 @@ Mouse.prototype.notifyPointerLocked = function(fLocked)
  * captureMouse(control)
  *
  * NOTE: addEventListener() wasn't supported in IE until IE9, but that's OK, because IE9 is the
- * oldest IE we support anyway (since older versions of IE lacked complete HTML5/canvas support).
+ * oldest IE we support anyway (since older versions of IE lacked complete HTML5 support).
  *
  * @this {Mouse}
- * @param {Object} control from the HTML DOM (eg, the canvas for the simulated screen)
+ * @param {Object} control from the HTML DOM (eg, the control for the simulated screen)
  */
 Mouse.prototype.captureMouse = function(control)
 {
@@ -607,7 +607,7 @@ Mouse.prototype.notifyMCR = function(bMCR)
                 this.componentAdapter.sendRBR([Mouse.ID_SERIAL, Mouse.ID_SERIAL]);
                 this.messageDebugger("serial mouse ID sent");
             }
-            this.captureMouse(this.canvasScreen);
+            this.captureMouse(this.inputScreen);
             this.setActive(fActive);
         }
     } else {
@@ -625,7 +625,7 @@ Mouse.prototype.notifyMCR = function(bMCR)
              * polling the serial port, it might expect to see that data.  Unlikely, but not impossible.
              */
             this.messageDebugger("serial mouse inactive");
-            this.releaseMouse(this.canvasScreen);
+            this.releaseMouse(this.inputScreen);
             this.setActive(fActive);
         }
     }

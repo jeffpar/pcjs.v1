@@ -149,6 +149,7 @@ function Video(parmsVideo, canvas, context, textarea)
     this.canvasScreen = canvas;
     this.contextScreen = context;
     this.textareaScreen = textarea;
+    this.inputScreen = textarea || canvas || null;
 
     /*
      * If a Mouse exists, we'll be notified when it requests our canvas, and we make a note of it
@@ -185,25 +186,25 @@ function Video(parmsVideo, canvas, context, textarea)
     /*
      * Since I've not found clear documentation on a reliable way to check whether a particular DOM element
      * (other than the BODY element) has focus at any given time, I've added onfocus() and onblur() handlers
-     * to the canvas to maintain my own focus state.
+     * to the screen to maintain my own focus state.
      */
     this.fHasFocus = false;
 
     var video = this;
-    if (canvas) {
-        canvas.onfocus = function onFocusCanvas() {
+    if (this.inputScreen) {
+        this.inputScreen.onfocus = function onFocusScreen() {
             return video.onFocusChange(true);
         };
-        canvas.onblur = function onBlurCanvas() {
+        this.inputScreen.onblur = function onBlurScreen() {
             return video.onFocusChange(false);
         };
-        canvas.lockPointer = canvas['requestPointerLock'] || canvas['mozRequestPointerLock'] || canvas['webkitRequestPointerLock'];
-        canvas.unlockPointer = canvas['exitPointerLock'] || canvas['mozExitPointerLock'] || canvas['webkitExitPointerLock'];
+        this.inputScreen.lockPointer = this.inputScreen['requestPointerLock'] || this.inputScreen['mozRequestPointerLock'] || this.inputScreen['webkitRequestPointerLock'];
+        this.inputScreen.unlockPointer = this.inputScreen['exitPointerLock'] || this.inputScreen['mozExitPointerLock'] || this.inputScreen['webkitExitPointerLock'];
         var onPointerLockChange = function() {
             var fLocked = (
-            document['pointerLockElement'] === video.canvasScreen ||
-            document['mozPointerLockElement'] === video.canvasScreen ||
-            document['webkitPointerLockElement'] === video.canvasScreen);
+                document['pointerLockElement'] === video.inputScreen ||
+                document['mozPointerLockElement'] === video.inputScreen ||
+                document['webkitPointerLockElement'] === video.inputScreen);
             video.notifyPointerLocked(fLocked);
         };
         if ('onpointerlockchange' in document) {
@@ -216,26 +217,14 @@ function Video(parmsVideo, canvas, context, textarea)
     }
 
     /*
-     * As per http://stackoverflow.com/questions/6740253/disable-scrolling-when-changing-focus-form-elements-ipad-web-app,
-     * I decided to try this work-around to prevent the webpage from scrolling around whenever the canvas is given
-     * focus.  That sort of scrolling-into-view sounds great in principle, but in practice, if you were reading some other
-     * portion of the page, it can be irritating to be scrolled away from that portion when refreshing/returning to the page.
-     *
-     * However, this work-around doesn't seem to work with the latest version of Safari (or else I misunderstood something).
-     *
-    canvas.onfocus = function() {
-        window.scrollTo(0, 0);
-        window.document.body.scrollTop = 0;
-    }
-     */
-
-    /*
      * As far as overall image quality of scaled fonts, these options don't seem necessary for Safari (and
      * don't have any discernible effect anyway). Turning 'webkitImageSmoothingEnabled' off DOES have an effect
      * on Chrome, but it's not really a positive effect overall, so I'm leaving these off for now.
      *
-    this.contextScreen['mozImageSmoothingEnabled'] = false;
-    this.contextScreen['webkitImageSmoothingEnabled'] = false;
+     *  if (this.contextScreen) {
+     *      this.contextScreen['mozImageSmoothingEnabled'] = false;
+     *      this.contextScreen['webkitImageSmoothingEnabled'] = false;
+     *  }
      */
 
     var sFileURL = parmsVideo['fontROM'];
@@ -1985,7 +1974,7 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
         for (var s in this.bindings) {
             if (s.indexOf("lock") > 0) this.kbd.setBinding("led", s, this.bindings[s]);
         }
-        this.kbd.setBinding(this.textareaScreen? "textarea" : "canvas", "kbd", this.textareaScreen || this.canvasScreen);
+        this.kbd.setBinding(this.textareaScreen? "textarea" : "canvas", "kbd", this.inputScreen);
     }
 
     this.bEGASW = 0x9;          // our default "switches" setting (see aEGAMonitorSwitches)
@@ -2009,7 +1998,6 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
 Video.prototype.setBinding = function(sHTMLType, sBinding, control)
 {
     var video = this;
-    var canvas, lockPointer;
 
     if (!this.bindings[sBinding]) {
 
@@ -2023,7 +2011,7 @@ Video.prototype.setBinding = function(sHTMLType, sBinding, control)
 
         case "lockPointer":
             this.sLockMessage = control.textContent;
-            if (this.canvasScreen && this.canvasScreen.lockPointer) {
+            if (this.inputScreen && this.inputScreen.lockPointer) {
                 control.onclick = function onClickLockPointer() {
                     if (DEBUG) video.messageDebugger("lockPointer()");
                     video.lockPointer(true);
@@ -2055,11 +2043,11 @@ Video.prototype.setBinding = function(sHTMLType, sBinding, control)
  */
 Video.prototype.setFocus = function()
 {
-    if (this.canvasScreen) this.canvasScreen.focus();
+    if (this.inputScreen) this.inputScreen.focus();
 };
 
 /**
- * getCanvas()
+ * getInput()
  *
  * This is an interface used by the Mouse component, so that it can invoke capture/release mouse events from the screen element.
  *
@@ -2067,10 +2055,10 @@ Video.prototype.setFocus = function()
  * @param {Mouse} [mouse]
  * @return {Object|undefined}
  */
-Video.prototype.getCanvas = function(mouse)
+Video.prototype.getInput = function(mouse)
 {
     this.mouse = mouse;
-    return this.canvasScreen;
+    return this.inputScreen;
 };
 
 /**
@@ -2082,16 +2070,16 @@ Video.prototype.getCanvas = function(mouse)
  */
 Video.prototype.lockPointer = function(fLock)
 {
-    if (this.canvasScreen) {
+    if (this.inputScreen) {
         if (fLock) {
-            if (this.canvasScreen.lockPointer) {
-                this.canvasScreen.lockPointer();
+            if (this.inputScreen.lockPointer) {
+                this.inputScreen.lockPointer();
                 this.mouse.notifyPointerLocked(true);
                 return true;
             }
         } else {
-            if (this.canvasScreen.unlockPointer) {
-                this.canvasScreen.unlockPointer();
+            if (this.inputScreen.unlockPointer) {
+                this.inputScreen.unlockPointer();
                 this.mouse.notifyPointerLocked(false);
                 return true;
             }
@@ -2138,41 +2126,45 @@ Video.prototype.notifyPointerLocked = function(fLocked)
  */
 Video.prototype.captureTouch = function()
 {
-    var control = this.canvasScreen;
+    var control = this.inputScreen;
     if (control) {
         var video = this;
         if (!this.fCaptured) {
             control.addEventListener(
                 'touchstart',
-                function onTouchStartCanvas(event) { video.onTouchStart(event); },
-                false               // we'll specify false for the 'useCapture' parameter for now...
+                function onTouchStart(event) { video.onTouchStart(event); },
+                false                   // we'll specify false for the 'useCapture' parameter for now...
             );
             control.addEventListener(
                 'touchmove',
-                function onTouchMoveCanvas(event) { video.onTouchMove(event); },
+                function onTouchMove(event) { video.onTouchMove(event); },
                 true
             );
             control.addEventListener(
                 'touchend',
-                function onTouchEndCanvas(event) { video.onTouchEnd(event); },
-                false               // we'll specify false for the 'useCapture' parameter for now...
+                function onTouchEnd(event) { video.onTouchEnd(event); },
+                false                   // we'll specify false for the 'useCapture' parameter for now...
             );
-            if (MAXDEBUG) {
+            if (DEBUG) {
+                /*
+                 */
                 control.addEventListener(
                     'mousedown',
-                    function onMouseDownCanvas(event) { video.onTouchStart(event); },
+                    function onMouseDown(event) { video.onTouchStart(event); },
                     false               // we'll specify false for the 'useCapture' parameter for now...
                 );
+                /*
                 control.addEventListener(
                     'mousemove',
-                    function onMouseMoveCanvas(event) { video.onTouchMove(event); },
+                    function onMouseMove(event) { video.onTouchMove(event); },
                     true
                 );
                 control.addEventListener(
                     'mouseup',
-                    function onMouseUpCanvas(event) { video.onTouchEnd(event); },
+                    function onMouseUp(event) { video.onTouchEnd(event); },
                     false               // we'll specify false for the 'useCapture' parameter for now...
                 );
+                 */
             }
             // this.log("touch events captured");
             this.fCaptured = true;
@@ -2191,6 +2183,19 @@ Video.prototype.onFocusChange = function(fFocus)
     if (this.fHasFocus != fFocus && DEBUG && this.messageEnabled()) {
         this.messageDebugger("onFocusChange(): focus is now " + fFocus);
     }
+    /*
+     * As per http://stackoverflow.com/questions/6740253/disable-scrolling-when-changing-focus-form-elements-ipad-web-app,
+     * I decided to try this work-around to prevent the webpage from scrolling around whenever the canvas is given
+     * focus.  That sort of scrolling-into-view sounds great in principle, but in practice, if you were reading some other
+     * portion of the page, it can be irritating to be scrolled away from that portion when refreshing/returning to the page.
+     *
+     * However, this work-around doesn't seem to work with the latest version of Safari (or else I misunderstood something).
+     *
+     *  if (fFocus) {
+     *      window.scrollTo(0, 0);
+     *      window.document.body.scrollTop = 0;
+     *  }
+     */
     this.fHasFocus = fFocus;
 };
 
@@ -2282,8 +2287,16 @@ Video.prototype.processTouchEvent = function(event, fStart)
      * @name Event
      * @property {Array} targetTouches
      */
-    var xTouch = ((event.targetTouches[0].pageX - xTouchOffset) * xScale);
-    var yTouch = ((event.targetTouches[0].pageY - yTouchOffset) * yScale);
+    var xTouch, yTouch;
+    if (!event.targetTouches) {
+        xTouch = event.pageX;
+        yTouch = event.pageY;
+    } else {
+        xTouch = event.targetTouches[0].pageX;
+        yTouch = event.targetTouches[0].pageY;
+    }
+    xTouch = ((xTouch - xTouchOffset) * xScale);
+    yTouch = ((yTouch - yTouchOffset) * yScale);
     var xThird = (xTouch / (this.cxScreen / 3)) | 0;
     var yThird = (yTouch / (this.cyScreen / 3)) | 0;
     /*
@@ -2292,15 +2305,15 @@ Video.prototype.processTouchEvent = function(event, fStart)
      */
     if (/* xThird == 1 && */ yThird != 1) {
         if (!yThird) {
-            this.kbd.keySimulatePress(Keyboard.KEYCODE.UP, true);
+            this.kbd.keySimulatePress(Keyboard.aButtonCodes.up, true);
         } else {
-            this.kbd.keySimulatePress(Keyboard.KEYCODE.DOWN, true);
+            this.kbd.keySimulatePress(Keyboard.aButtonCodes.down, true);
         }
     } else if (/* yThird == 1 && */ xThird != 1) {
         if (!xThird) {
-            this.kbd.keySimulatePress(Keyboard.KEYCODE.LEFT, true);
+            this.kbd.keySimulatePress(Keyboard.aButtonCodes.left, true);
         } else {
-            this.kbd.keySimulatePress(Keyboard.KEYCODE.RIGHT, true);
+            this.kbd.keySimulatePress(Keyboard.aButtonCodes.right, true);
         }
     }
 };
@@ -5134,6 +5147,16 @@ Video.init = function()
         eCanvas.setAttribute("class", PCJSCLASS + "-canvas");
         eCanvas.setAttribute("width", parmsVideo['screenWidth']);
         eCanvas.setAttribute("height", parmsVideo['screenHeight']);
+        eCanvas.style.backgroundColor = parmsVideo['screenColor'];
+
+        /*
+         * The "contenteditable" attribute on a canvas element NOTICEABLY slows down canvas drawing on
+         * Safari as soon as you give the canvas focus (ie, click away from the canvas, and drawing speeds
+         * up; click on the canvas, and drawing slows down).  So the "transparent textarea hack" that we
+         * once employed as only a work-around for Android devices is now our default.
+         *
+         *      eCanvas.setAttribute("contenteditable", "true");
+         */
 
         /*
          * As noted in keyboard.js, the keyboard on an iOS device pops up with the SHIFT key depressed,
@@ -5142,10 +5165,10 @@ Video.init = function()
          * attribute on the <canvas> element, but apparently Safari honors that only inside certain elements
          * (eg, <input>).  However, I'm still optimistic that it'll be supported someday....
          */
-        eCanvas.setAttribute("contenteditable", "true");
-        eCanvas.setAttribute("autocapitalize", "off");
-        eCanvas.setAttribute("autocorrect", "off");
-        eCanvas.style.backgroundColor = parmsVideo['screenColor'];
+        if (web.isUserAgent("iOS")) {
+            eCanvas.setAttribute("autocapitalize", "off");
+            eCanvas.setAttribute("autocorrect", "off");
+        }
 
         /*
          * HACK: A canvas style of "auto" provides for excellent responsive canvas scaling in EVERY browser
@@ -5172,37 +5195,44 @@ Video.init = function()
          * "contenteditable" attribute; that is, when the canvas receives focus, they don't activate the on-screen
          * keyboard.  So my fallback is to create a transparent textarea on top of the canvas.
          *
-         * We depend upon the containing DIV (and/or its parent DIV) to have a style of "position:relative" (which
-         * all elements of class "pcjs-container" should have) so that we can position the textarea using absolute
-         * coordinates.  Also, we don't want the textarea to be visible, but we must use "opacity:0" instead of
-         * "visibility:hidden", because the latter prevents the element from receiving events.
+         * The parent DIV must have a style of "position:relative" (alternatively, a class of "pcjs-container"),
+         * so that we can position the textarea using absolute coordinates.  Also, we don't want the textarea to be
+         * visible, but we must use "opacity:0" instead of "visibility:hidden", because the latter seems to prevent
+         * the element from receiving events.
          *
          * UPDATE: Unfortunately, Android keyboards like to compose whole words before transmitting any of the
          * intervening characters; our textarea's keyDown/keyUp event handlers DO receive intervening key events,
-         * but their keyCode property is ZERO.  Virtually the only usable key event we receive is the Enter key,
-         * which makes this hack useless.  Android users will have to use machines that display their own on-screen
-         * keyboard, or use an external keyboard.
+         * but their keyCode property is ZERO.  Virtually the only usable key event we receive is the Enter key.
+         * Android users will have to use machines that display their own on-screen keyboard, or use an external
+         * keyboard.
+         *
+         * The following code didn't work any better on Android.  You could clearly see the overlaid semi-transparent
+         * password-enabled input field, but none of the input characters were passed along, with the exception of the
+         * "Go" (Enter) key.
+         *
+         *      var eInput = window.document.createElement("input");
+         *      eInput.setAttribute("type", "password");
+         *      eInput.setAttribute("style", "position:absolute; left:0; top:0; width:100%; height:100%; opacity:0.5");
+         *      eVideo.appendChild(eInput);
          *
          * See this Chromium issue for more information: https://code.google.com/p/chromium/issues/detail?id=118639
          *
-        var eTextArea = window.document.createElement("textarea");
-        eTextArea.setAttribute("style", "position:absolute; left:0; top:0; width:100%; height:100%; opacity:0");
-        eVideo.appendChild(eTextArea);
+         * TODO: The necessary styles for both the "textarea" and the parent video "object div" should be moved to the
+         * "component.css" file; they're here only for faster testing.
          *
-         * The following test failed as well.  You can clearly see the overlaid semi-transparent password-enabled
-         * input field, but none of the input characters are passed along, with the exception of the "Go" (Enter) key.
-         *
-        var eInput = window.document.createElement("input");
-        eInput.setAttribute("type", "password");
-        eInput.setAttribute("style", "position:absolute; left:0; top:0; width:100%; height:100%; opacity:0.5");
-        eVideo.appendChild(eInput);
+         * NOTE: The "line-height:0" attribute is how I prevent Safari on iOS from always displaying a blinking cursor.
          */
+        var eTextArea = window.document.createElement("textarea");
+        eTextArea.setAttribute("style", "position:absolute; left:0; top:0; width:100%; height:100%; opacity:0; border:0; padding:0; line-height:0;");
+        eVideo.style.clear = "both";
+        eVideo.style.position = "relative";
+        eVideo.appendChild(eTextArea);
 
         /*
          * Now we can create the Video object, record it, and wire it up to the associated document elements.
          */
         var eContext = eCanvas.getContext("2d");
-        var video = new Video(parmsVideo, eCanvas, eContext /*, eTextArea || eInput */);
+        var video = new Video(parmsVideo, eCanvas, eContext, eTextArea /* || eInput */);
 
         /*
          * Bind any video-specific controls (eg, the Refresh button). There are no essential controls, however;

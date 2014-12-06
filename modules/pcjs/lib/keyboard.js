@@ -97,6 +97,8 @@ function Keyboard(parmsKbd)
     this.msReleaseRepeat = 100;         // number of milliseconds before a held key is "forced" up (assuming auto-repeat)
     this.msInjectDelay   = 300;         // number of milliseconds between injected keystrokes
 
+    this.aKeyTimers = [];
+
     this.setReady();
 }
 
@@ -782,7 +784,7 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control)
 {
     /*
      * There's a special binding that the Video component uses ("kbd") to effectively bind its
-     * canvas to the entire keyboard, in Video.powerUp(); ie:
+     * screen to the entire keyboard, in Video.powerUp(); ie:
      *
      *      video.kbd.setBinding("canvas", "kbd", video.canvasScreen);
      * or:
@@ -795,7 +797,7 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control)
      *
      * The latter is purely experimental, while we work on finding ways to trigger the soft keyboard on
      * certain pesky devices (like the Kindle Fire).  Note that even if you use the latter, the former will
-     * still be enabled (there's currently no way to configure the Video component to not bind its canvas,
+     * still be enabled (there's currently no way to configure the Video component to not bind its screen,
      * but we could certainly add one if the need ever arose).
      */
     var kbd = this;
@@ -1164,17 +1166,15 @@ Keyboard.prototype.reset = function()
      * simulating the key "up" here, so that if I detect the actual key going up sooner, I can cancel the
      * timer and simulate the "up" immediately.  Similarly, if another press for the same key arrives before
      * last one expired (eg, auto-repeat), I need to cancel the previous timer for that key before setting another.
-     *
-     * NOTE: If this is anything other than an initial reset, then we need to make sure there are no outstanding
-     * timers before we blow the array away.
      */
-    if (this.aKeyTimers) {
-        for (var i in this.aKeyTimers) {
-            if (str.isValidInt(i)) continue; // ignore any non-numeric properties, if any
-            if (this.aKeyTimers[i]) clearTimeout(this.aKeyTimers[i]);
+    for (var i in this.aKeyTimers) {
+        if (str.isValidInt(i)) continue; // ignore any non-numeric properties, if any
+        if (this.aKeyTimers[i]) {
+            clearTimeout(this.aKeyTimers[i]);
+            this.aKeyTimers[i] = null;
         }
     }
-    this.aKeyTimers = [];
+
     this.prevCharDown = 0;
     this.prevKeyDown = 0;
 
@@ -1734,6 +1734,7 @@ Keyboard.prototype.keySimulatePress = function(keyCode, fCheckShift, fQuickRelea
             var fRepeat = false;
             if (this.aKeyTimers[keyCode]) {
                 clearTimeout(this.aKeyTimers[keyCode]);
+                this.aKeyTimers[keyCode] = null;
                 fRepeat = true;
             }
             var msDelay = this.calcReleaseDelay(fRepeat);
