@@ -50,8 +50,8 @@ because the cursor was flush with the left edge of the Canvas.  More importantly
 the full height of the Canvas.
 
 At this point, it seemed clear that iOS was trying to display the cursor based on what it believed the
-character width and line height to be: presumably zero for a Canvas.  So I switched back the transparent
-&lt;textarea&gt; again, set its "line-height" attribute to zero, and viola: no more blinking cursor.
+line height to be (ie, the full height of the Canvas).  So I switched back to the transparent &lt;textarea&gt;
+again, set its "line-height" attribute to zero, and viola: no more blinking cursor.
 
 So that, in a nutshell, is why v1.16.2 of PCjs comes one day after v1.16.1: because I happened to noticed
 that drawing performance in desktop Safari was suffering, and that there was a fairly straightforward solution.
