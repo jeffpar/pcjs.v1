@@ -178,8 +178,8 @@ Keyboard.KEYCODE = {
     /* 0x2C */ PRTSC:       44,
     /* 0x2D */ INS:         45,
     /* 0x2E */ DEL:         46,
-    /* 0x5B */ COMMAND:     91,         // TODO: Treat this like the 'Windows' key
-    /* 0x5D */ MENU:        93,
+    /* 0x5B */ CMD:         91,         // aka WIN
+    /* 0x5D */ RCMD:        93,         // aka MENU
     /* 0x60 */ NUM_INS:     96,         // 0
     /* 0x61 */ NUM_END:     97,         // 1
     /* 0x62 */ NUM_DOWN:    98,         // 2
@@ -209,7 +209,17 @@ Keyboard.KEYCODE = {
     /* 0x7B */ F12:         123,
     /* 0x90 */ NUM_LOCK:    144,
     /* 0x91 */ SCROLL_LOCK: 145,
+    /* 0xBA */ SEMI:        186,
+    /* 0xBB */ EQUALS:      187,
+    /* 0xBC */ COMMA:       188,
+    /* 0xBD */ DASH:        189,
+    /* 0xBE */ PERIOD:      190,
+    /* 0xBF */ SLASH:       191,
     /* 0xC0 */ BQUOTE:      192,
+    /* 0xDB */ LBRACK:      219,
+    /* 0xDC */ BSLASH:      220,
+    /* 0xDD */ RBRACK:      221,
+    /* 0xDE */ QUOTE:       222,
     //
     // The following biases use what I'll call "Decimal Coded Binary" or DCB (the reverse of BCD),
     // where decimal digits are used to represent binary bit values, which can be added together without
@@ -230,37 +240,47 @@ Keyboard.KEYCODE = {
 };
 
 /*
- * Maps unshifted keyCodes to their shifted counterparts; to be used when a shift-key is down.
- * Alphabetic characters are handled in code, since they must also take caps-lock into consideration.
- */
-Keyboard.SHIFTED_KEYCODES = {};
-Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['1']]  = Keyboard.ASCII['!'];
-Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['2']]  = Keyboard.ASCII['@'];
-Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['3']]  = Keyboard.ASCII['#'];
-Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['4']]  = Keyboard.ASCII['$'];
-Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['5']]  = Keyboard.ASCII['%'];
-Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['6']]  = Keyboard.ASCII['^'];
-Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['7']]  = Keyboard.ASCII['&'];
-Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['8']]  = Keyboard.ASCII['*'];
-Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['9']]  = Keyboard.ASCII['('];
-Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['0']]  = Keyboard.ASCII[')'];
-Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['-']]  = Keyboard.ASCII['_'];
-Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['=']]  = Keyboard.ASCII['+'];
-Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['[']]  = Keyboard.ASCII['{'];
-Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII[']']]  = Keyboard.ASCII['}'];
-Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII[';']]  = Keyboard.ASCII[':'];
-Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII["'"]]  = Keyboard.ASCII['"'];
-Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['`']]  = Keyboard.ASCII['~'];
-Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['\\']] = Keyboard.ASCII['|'];
-Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII[',']]  = Keyboard.ASCII['<'];
-Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['.']]  = Keyboard.ASCII['>'];
-Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['/']]  = Keyboard.ASCII['?'];
-
-/*
  * Maps "stupid" keyCodes to their "non-stupid" counterparts
  */
 Keyboard.STUPID_KEYCODES = {};
-Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.BQUOTE] = Keyboard.ASCII['`'];
+Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.SEMI]    = Keyboard.ASCII[';'];   // 186 -> 59
+Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.EQUALS]  = Keyboard.ASCII['='];   // 187 -> 61
+Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.COMMA]   = Keyboard.ASCII[','];   // 188 -> 44
+Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.DASH]    = Keyboard.ASCII['-'];   // 189 -> 45
+Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.PERIOD]  = Keyboard.ASCII['.'];   // 190 -> 46
+Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.SLASH]   = Keyboard.ASCII['/'];   // 191 -> 47
+Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.BQUOTE]  = Keyboard.ASCII['`'];   // 192 -> 96
+Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.LBRACK]  = Keyboard.ASCII['['];   // 219 -> 91
+Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.BSLASH]  = Keyboard.ASCII['\\'];  // 220 -> 92
+Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.RBRACK]  = Keyboard.ASCII[']'];   // 221 -> 93
+Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.QUOTE]   = Keyboard.ASCII["'"];   // 222 -> 39
+
+/*
+ * Maps unshifted keyCodes to their shifted counterparts; to be used when a shift-key is down.
+ * Alphabetic characters are handled in code, since they must also take CAPS_LOCK into consideration.
+ */
+Keyboard.SHIFTED_KEYCODES = {};
+Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['1']]     = Keyboard.ASCII['!'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['2']]     = Keyboard.ASCII['@'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['3']]     = Keyboard.ASCII['#'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['4']]     = Keyboard.ASCII['$'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['5']]     = Keyboard.ASCII['%'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['6']]     = Keyboard.ASCII['^'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['7']]     = Keyboard.ASCII['&'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['8']]     = Keyboard.ASCII['*'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['9']]     = Keyboard.ASCII['('];
+Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['0']]     = Keyboard.ASCII[')'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.KEYCODE.SEMI]   = Keyboard.ASCII[':'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.KEYCODE.EQUALS] = Keyboard.ASCII['+'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.KEYCODE.COMMA]  = Keyboard.ASCII['<'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.KEYCODE.DASH]   = Keyboard.ASCII['_'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.KEYCODE.PERIOD] = Keyboard.ASCII['>'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.KEYCODE.SLASH]  = Keyboard.ASCII['?'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.KEYCODE.BQUOTE] = Keyboard.ASCII['~'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.KEYCODE.LBRACK] = Keyboard.ASCII['{'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.KEYCODE.BSLASH] = Keyboard.ASCII['|'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.KEYCODE.RBRACK] = Keyboard.ASCII['}'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.KEYCODE.QUOTE]  = Keyboard.ASCII['"'];
 
 Keyboard.SIMCODE = {
     BS:           Keyboard.KEYCODE.BS          + Keyboard.KEYCODE.ONDOWN,
@@ -299,6 +319,8 @@ Keyboard.SIMCODE = {
     PGDN:         Keyboard.KEYCODE.PGDN        + Keyboard.KEYCODE.ONDOWN,
     INS:          Keyboard.KEYCODE.INS         + Keyboard.KEYCODE.ONDOWN,
     DEL:          Keyboard.KEYCODE.DEL         + Keyboard.KEYCODE.ONDOWN,
+    CMD:          Keyboard.KEYCODE.CMD         + Keyboard.KEYCODE.ONDOWN,
+    RCMD:         Keyboard.KEYCODE.RCMD        + Keyboard.KEYCODE.ONDOWN,
     CTRL_C:       Keyboard.ASCII.CTRL_C        + Keyboard.KEYCODE.FAKE,
     CTRL_BREAK:   Keyboard.KEYCODE.BS          + Keyboard.KEYCODE.FAKE,
     CTRL_ALT_DEL: Keyboard.KEYCODE.DEL         + Keyboard.KEYCODE.FAKE
@@ -395,9 +417,9 @@ Keyboard.SCANCODE = {
     /* 0x54 */ PAUSE:       84,         // 101-key keyboard only
     /* 0x57 */ F11:         87,
     /* 0x58 */ F12:         88,
-    /* 0x5B */ WIN:         91,
+    /* 0x5B */ WIN:         91,         // aka CMD
     /* 0x5C */ RWIN:        92,
-    /* 0x5D */ MENU:        93,
+    /* 0x5D */ MENU:        93,         // aka CMD + ONRIGHT
     /* 0x7F */ MAKE:        127,
     /* 0x80 */ BREAK:       128,
     /* 0xE0 */ EXTEND1:     224,
@@ -417,8 +439,15 @@ Keyboard.LOCATION = {
 };
 
 /**
- * These internal "shift key" states are used to indicate the current simulated shift/modifier key states
- * in shiftStates; note that right-hand shift bits match the corresponding left-hand bit shifted 1 bit right.
+ * These internal "shift key" states are used to indicate BOTH the physical shift-key states (in bitsState)
+ * and the simulated shift-key states (in bitsStateSim).  The LOCK keys are problematic in both cases: the
+ * browsers give us no way to query the LOCK key states, so we can only infer them, and because they are "soft"
+ * locks, the machine's notion of their state is subject change at any time as well.  Granted, the IBM PC
+ * ROM BIOS will store its LOCK states in the ROM BIOS Data Area (@0040:0017), but that's purely a convention.
+ *
+ * TODO: Consider taking notice of the ROM BIOS Data Area state anyway, although I'm not keen on the idea.
+ *
+ * Note that right-hand state bits match the left-hand state bits shifted right 1 bit; makes sense, "right"? ;-)
  *
  * @enum {number}
  */
@@ -429,13 +458,13 @@ Keyboard.STATE = {
     CTRL:           0x0008,
     RALT:           0x0010,             // 101-key keyboard only
     ALT:            0x0020,
-    COMMAND:        0x0040,             // 101-key keyboard only (TODO: Treat this like the 'Windows' key)
-    INSERT:         0x0080,             // TODO: Placeholder
-    CAPS_LOCK:      0x0100,
-    NUM_LOCK:       0x0200,
-    SCROLL_LOCK:    0x0400,
-    LOCK:           0x0700,             // STATE.CAPS_LOCK | STATE.NUM_LOCK | STATE.SCROLL_LOCK
-    SIMULATE:       0x003f              // STATE.RSHIFT | STATE.SHIFT | STATE.RCTRL | STATE.CTRL | STATE.RALT | STATE.ALT
+    RCMD:           0x0040,             // 101-key keyboard only
+    CMD:            0x0080,             // 101-key keyboard only
+    INSERT:         0x0100,             // TODO: Placeholder
+    CAPS_LOCK:      0x0200,
+    NUM_LOCK:       0x0400,
+    SCROLL_LOCK:    0x0800,
+    LOCK:           0x0e00              // STATE.CAPS_LOCK | STATE.NUM_LOCK | STATE.SCROLL_LOCK
 };
 
 /**
@@ -444,9 +473,12 @@ Keyboard.STATE = {
  * @enum {number}
  */
 Keyboard.KEYSTATES = {};
+Keyboard.KEYSTATES[Keyboard.SIMCODE.RSHIFT]      = Keyboard.STATE.RSHIFT;
 Keyboard.KEYSTATES[Keyboard.SIMCODE.SHIFT]       = Keyboard.STATE.SHIFT;
 Keyboard.KEYSTATES[Keyboard.SIMCODE.CTRL]        = Keyboard.STATE.CTRL;
 Keyboard.KEYSTATES[Keyboard.SIMCODE.ALT]         = Keyboard.STATE.ALT;
+Keyboard.KEYSTATES[Keyboard.SIMCODE.CMD]         = Keyboard.STATE.CMD;
+Keyboard.KEYSTATES[Keyboard.SIMCODE.RCMD]        = Keyboard.STATE.RCMD;
 Keyboard.KEYSTATES[Keyboard.SIMCODE.CAPS_LOCK]   = Keyboard.STATE.CAPS_LOCK;
 Keyboard.KEYSTATES[Keyboard.SIMCODE.NUM_LOCK]    = Keyboard.STATE.NUM_LOCK;
 Keyboard.KEYSTATES[Keyboard.SIMCODE.SCROLL_LOCK] = Keyboard.STATE.SCROLL_LOCK;
@@ -657,7 +689,7 @@ Keyboard.LEDSTATES = {
  * The other problem (which is more of a problem with keyboards like the C1P than any IBM keyboards) is
  * that the shift/modifier state for a character on the "source" keyboard may not match the shift/modifier
  * state for the same character on the "target" keyboard.  And since this code is inherited from C1Pjs,
- * we've inherited the same solution: keySimulate() has the ability to "undo" any states in shiftStates
+ * we've inherited the same solution: keySimulate() has the ability to "undo" any states in bitsState
  * that conflict with the state(s) required for the character in question.
  *
  * @enum {number}
@@ -811,6 +843,8 @@ Keyboard.SIMCODES[Keyboard.SIMCODE.DEL]          = Keyboard.SCANCODE.NUM_DEL;
  */
 Keyboard.SIMCODES[Keyboard.SIMCODE.F11]          = Keyboard.SCANCODE.F11;
 Keyboard.SIMCODES[Keyboard.SIMCODE.F12]          = Keyboard.SCANCODE.F12;
+Keyboard.SIMCODES[Keyboard.SIMCODE.CMD]          = Keyboard.SCANCODE.WIN;
+Keyboard.SIMCODES[Keyboard.SIMCODE.RCMD]         = Keyboard.SCANCODE.MENU;
 
 Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_C]       = Keyboard.SCANCODE.C           | (Keyboard.SCANCODE.CTRL << 8);
 Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_BREAK]   = Keyboard.SCANCODE.SCROLL_LOCK | (Keyboard.SCANCODE.CTRL << 8);
@@ -936,7 +970,7 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control)
                     return function onClickKeyboard(event) {
                         if (DEBUG && kbd.messageEnabled()) kbd.messageDebugger(sKey + " clicked", Debugger.MESSAGE.KEYS);
                         if (kbd.cpu) kbd.cpu.setFocus();
-                        kbd.updateShiftState(simCode);  // future-proofing if/when any LOCK keys are added to CLICKCODES
+                        kbd.updateShiftState(simCode, true);    // future-proofing if/when any LOCK keys are added to CLICKCODES
                         kbd.addActiveKey(simCode, true);
                     };
                 }(this, sCode, Keyboard.CLICKCODES[sCode]);
@@ -1252,11 +1286,11 @@ Keyboard.prototype.reset = function()
     this.initState();
 
     /*
-     * The current (assumed) physical state of the various shift/lock keys.
+     * The current (assumed) physical (and simulated) states of the various shift/lock keys.
      *
      * TODO: Determine how (or whether) we can query the browser's initial shift/lock key states.
      */
-    this.shiftStates = 0;
+    this.bitsState = this.bitsStateSim = 0;
 
     /*
      * New scan codes are "pushed" onto abScanBuffer and then "shifted" off.
@@ -1435,10 +1469,10 @@ Keyboard.prototype.setLED = function(control, f)
 /**
  * updateLEDs(bitState)
  *
- * Updates any and all shift-related LEDs with the corresponding state in shiftStates.
+ * Updates any and all shift-related LEDs with the corresponding state in bitsStateSim.
  *
  * @this {Keyboard}
- * @param {number} [bitState] is the bit in shiftStates that may have changed, if known; undefined if not
+ * @param {number} [bitState] is the bit in bitsStateSim that may have changed, if known; undefined if not
  */
 Keyboard.prototype.updateLEDs = function(bitState)
 {
@@ -1447,7 +1481,7 @@ Keyboard.prototype.updateLEDs = function(bitState)
         var id = "led-" + sBinding;
         var bitLED = Keyboard.LEDSTATES[sBinding];
         if ((!bitState || bitState == bitLED) && (control = this.bindings[id])) {
-            this.setLED(control, !!(this.shiftStates & bitLED));
+            this.setLED(control, !!(this.bitsStateSim & bitLED));
         }
     }
 };
@@ -1460,7 +1494,6 @@ Keyboard.prototype.updateLEDs = function(bitState)
  */
 Keyboard.prototype.toggleCapsLock = function(event)
 {
-    this.updateShiftState(Keyboard.SIMCODE.CAPS_LOCK);
     this.addActiveKey(Keyboard.SIMCODE.CAPS_LOCK, true);
 };
 
@@ -1472,7 +1505,6 @@ Keyboard.prototype.toggleCapsLock = function(event)
  */
 Keyboard.prototype.toggleNumLock = function(event)
 {
-    this.updateShiftState(Keyboard.SIMCODE.NUM_LOCK);
     this.addActiveKey(Keyboard.SIMCODE.NUM_LOCK, true);
 };
 
@@ -1484,31 +1516,44 @@ Keyboard.prototype.toggleNumLock = function(event)
  */
 Keyboard.prototype.toggleScrollLock = function(event)
 {
-    this.updateShiftState(Keyboard.SIMCODE.SCROLL_LOCK);
     this.addActiveKey(Keyboard.SIMCODE.SCROLL_LOCK, true);
 };
 
 /**
- * updateShiftState(simCode, fDown)
+ * updateShiftState(simCode, fSim, fDown)
+ *
+ * For non-locking shift keys, this function is straightforward: when fDown is true, the corresponding bitState
+ * is set, and when fDown is false, it's cleared.  However, for LOCK keys, fDown true means toggle, and fDown false
+ * means no change.
  *
  * @this {Keyboard}
  * @param {number} simCode (includes any ONDOWN and/or ONRIGHT modifiers)
- * @param {boolean} [fDown] is true for down, false for up, undefined for toggle
+ * @param {boolean} [fSim] is true to update simulated state only
+ * @param {boolean|null} [fDown] is true for down, false for up, undefined for toggle
  * @return {boolean} true if simCode was a shift key, false if not
  */
-Keyboard.prototype.updateShiftState = function(simCode, fDown)
+Keyboard.prototype.updateShiftState = function(simCode, fSim, fDown)
 {
     if (Keyboard.SIMCODES[simCode]) {
         var fRight = (Math.floor(simCode / 1000) & 2);
         var bitState = Keyboard.KEYSTATES[simCode] || 0;
         if (bitState) {
             if (fRight) bitState >>= 1;
-            if (fDown === undefined) {
-                fDown = !(this.shiftStates & bitState);
+            if (bitState & Keyboard.STATE.LOCK) {
+                if (fDown === false) return true;
+                fDown = null;
             }
-            this.shiftStates &= ~bitState;
-            if (fDown) this.shiftStates |= bitState;
-            this.updateLEDs(bitState);
+            if (fDown == null) {        // ie, null or undefined
+                fDown = !((fSim? this.bitsStateSim : this.bitsState) & bitState);
+            }
+            if (!fSim) {
+                this.bitsState &= ~bitState;
+                if (fDown) this.bitsState |= bitState;
+            } else {
+                this.bitsStateSim &= ~bitState;
+                if (fDown) this.bitsStateSim |= bitState;
+                this.updateLEDs(bitState);
+            }
             return true;
         }
     }
@@ -1564,7 +1609,7 @@ Keyboard.prototype.addActiveKey = function(simCode, fPress)
     if (i == this.aKeysActive.length) {
         key = {};
         key.simCode = simCode;
-        key.shiftStates = this.shiftStates;
+        key.bitsState = this.bitsState;
         this.findBinding(simCode, "key", true);
         i++;
     }
@@ -1591,11 +1636,11 @@ Keyboard.prototype.checkActiveKey = function()
 /**
  * checkActiveKeyShift()
  *
- * @return {number|null} shiftStates for active key, null if none
+ * @return {number|null} bitsState for active key, null if none
  *
 Keyboard.prototype.checkActiveKeyShift = function()
 {
-    return this.aKeysActive.length? this.aKeysActive[0].shiftStates : null;
+    return this.aKeysActive.length? this.aKeysActive[0].bitsState : null;
 };
  */
 
@@ -1737,15 +1782,19 @@ Keyboard.prototype.onKeyDown = function(event, fDown)
      * receive here to a compatibly shifted simCode.
      */
     if (keyCode >= Keyboard.ASCII.A && keyCode <= Keyboard.ASCII.Z) {
-        if (!(this.shiftStates & (Keyboard.STATE.SHIFT | Keyboard.STATE.RSHIFT | Keyboard.STATE.CAPS_LOCK))) {
+        if (!(this.bitsState & (Keyboard.STATE.SHIFT | Keyboard.STATE.RSHIFT | Keyboard.STATE.CAPS_LOCK))) {
             simCode = keyCode + (Keyboard.ASCII.a - Keyboard.ASCII.A);
         }
     }
-    else if (this.shiftStates & (Keyboard.STATE.SHIFT | Keyboard.STATE.RSHIFT)) {
-        if (wCode = Keyboard.SHIFTED_KEYCODES[keyCode]) simCode = wCode;
+    else if (this.bitsState & (Keyboard.STATE.SHIFT | Keyboard.STATE.RSHIFT)) {
+        if (wCode = Keyboard.SHIFTED_KEYCODES[keyCode]) {
+            simCode = wCode;
+        }
     }
     else {
-        if (wCode = Keyboard.STUPID_KEYCODES[keyCode]) simCode = wCode;
+        if (wCode = Keyboard.STUPID_KEYCODES[keyCode]) {
+            simCode = wCode;
+        }
     }
 
     if (Keyboard.SIMCODES[keyCode + Keyboard.KEYCODE.ONDOWN]) {
@@ -1755,15 +1804,15 @@ Keyboard.prototype.onKeyDown = function(event, fDown)
             simCode += Keyboard.KEYCODE.ONRIGHT;
         }
 
-        if (this.updateShiftState(simCode, fDown)) {
+        if (this.updateShiftState(simCode, false, fDown)) {
 
             if (keyCode == Keyboard.KEYCODE.CAPS_LOCK || keyCode == Keyboard.KEYCODE.NUM_LOCK || keyCode == Keyboard.KEYCODE.SCROLL_LOCK) {
                 /*
-                 * FYI, "lock" keys generate a "down" event ONLY when getting locked, and an "up" event ONLY
-                 * when getting unlocked--which is a little odd, since the key did actually go UP and DOWN each time.
+                 * FYI, "lock" keys generate a "down" event ONLY when getting locked and an "up" event ONLY
+                 * when getting unlocked--which is a little odd, since the key did go UP and DOWN each time.
                  *
-                 * We must treat each event like a "down" -- and as a "press", so that addActiveKey() will automatically
-                 * generate both the "make" and "break".
+                 * We must treat each event like a "down", and also as a "press", so that addActiveKey() will
+                 * automatically generate both the "make" and "break".
                  */
                 fDown = fPress = true;
             }
@@ -1774,43 +1823,58 @@ Keyboard.prototype.onKeyDown = function(event, fDown)
                 /*
                  * HACK for simulating Ctrl-Break using Ctrl-Del (Mac) / Ctrl-Backspace (Windows)
                  */
-                if (keyCode == Keyboard.KEYCODE.BS && (this.shiftStates & (Keyboard.STATE.CTRL|Keyboard.STATE.ALT)) == Keyboard.STATE.CTRL) {
+                if (keyCode == Keyboard.KEYCODE.BS && (this.bitsState & (Keyboard.STATE.CTRL|Keyboard.STATE.ALT)) == Keyboard.STATE.CTRL) {
                     simCode = Keyboard.SIMCODE.CTRL_BREAK;
                 }
                 /*
-                 * If I don't consume TAB on the "down" event, then that's all I'll see, because the
-                 * browser will see it and give focus to the next control. But the "down" side is that
-                 * that no "press" event will be generated.  This puts it in the same category as ESC,
-                 * which also generates "down" and "up" events (LOTS of "down" events for that matter),
-                 * but no "press" event.
+                 * If I don't consume TAB on the "down" event, then that's all I'll see, because the browser will
+                 * see it and give focus to the next control. But the "down" side is that * that no "press" event will
+                 * be generated.  This puts it in the same category as ESC, which also generates "down" and "up" events
+                 * (LOTS of "down" events for that matter), but no "press" event.
                  *
-                 * I don't get keyPress events for ESC (why?) and I never want the browser to act on BS
-                 * (which does double-duty as the "Back" button and leaves the current page).
+                 * I don't get keyPress events for ESC (why?) and I never want the browser to act on BS (which does
+                 * double-duty as the "Back" button and leaves the current page).
                  */
                 fPass = false;
             }
         }
     }
     else {
-        if (keyCode == Keyboard.KEYCODE.COMMAND) {
+        if (keyCode == Keyboard.KEYCODE.CMD) {
             /*
-             * Avoid interfering with useful Browser key commands, like COMMAND-Q, COMMAND-T, etc.
+             * Avoid interfering with useful Browser key commands, like CMD-Q, CMD-T, etc.
              */
-            this.shiftStates &= ~Keyboard.STATE.COMMAND;
-            if (fDown) this.shiftStates |= Keyboard.STATE.COMMAND;
+            this.bitsState &= ~Keyboard.STATE.CMD;
+            if (fDown) this.bitsState |= Keyboard.STATE.CMD;
             fAutoClear = false;
         }
     }
 
     if (fAutoClear) {
         /*
-         * When you use a command like COMMAND-T, I see the COMMAND key going down, but not going up,
-         * so I think the COMMAND key is still down and ignore all input; to easily get out of that state,
-         * I clear our internal BIT_COMMAND whenever I see ANY key go up (well, ALMOST any key; cases
-         * above that explicitly clear fAutoClear -- such as the COMMAND key itself -- are exceptions
+         * When you use a command like CMD-T, I see the CMD key going down, but not going up,
+         * so I think the CMD key is still down and ignore all input; to easily get out of that state,
+         * I clear our internal STATE.CMD whenever I see ANY key go up (well, ALMOST any key; cases
+         * above that explicitly clear fAutoClear -- such as the CMD key itself -- are exceptions
          * to the rule).
          */
-        this.shiftStates &= ~Keyboard.STATE.COMMAND;
+        this.bitsState &= ~Keyboard.STATE.CMD;
+    }
+
+    /*
+     * I used to be more "cautious" in calling preventDefault(), but there are a number of common key
+     * sequences that interfere with our machines; for example, the up/down arrows have a "default" behavior
+     * of scrolling the web page up and down, which is definitely NOT a behavior we want.  Similarly, if I
+     * have defined system-wide ctrl-key sequences to perform common editing operations (eg, ctrl-w and ctrl-z
+     * to scroll pages of text), the browser allows those operations to kick in as well.
+     *
+     * So now I've taken a more aggressive approach: any simCode that exists in the SIMCODES table (not just
+     * those with the ONDOWN "bit" set) is assumed to be one that we should invoke preventDefault() for as well.
+     *
+     * TODO: Consider whether we should set fPass to false as well.  I'm still treating that cautiously.
+     */
+    if (Keyboard.SIMCODES[simCode]) {
+        event.preventDefault();
     }
 
     if (DEBUG && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
@@ -1873,11 +1937,11 @@ Keyboard.prototype.onKeyPress = function(event)
         fPass = false;
     }
     else {
-        if (this.shiftStates & Keyboard.STATE.COMMAND) {
-            this.shiftStates &= ~Keyboard.STATE.COMMAND;
+        if (this.bitsState & Keyboard.STATE.CMD) {
+            this.bitsState &= ~Keyboard.STATE.CMD;
         } else {
             // if (DEBUG && event.altKey) this.messageDebugger("ALT press: keyCode " + keyCode, Debugger.MESSAGE.KEYS);
-            if (this.shiftStates & (Keyboard.STATE.CTRL | Keyboard.STATE.ALT)) {
+            if (this.bitsState & (Keyboard.STATE.CTRL | Keyboard.STATE.ALT)) {
                 fPass = false;
             } else {
                 if (this.fEscapeDisabled && keyCode == Keyboard.ASCII['`']) keyCode = Keyboard.KEYCODE.ESC;
@@ -1910,7 +1974,7 @@ Keyboard.prototype.keySimulate = function(simCode, fDown)
 {
     var fSimulated = false;
 
-    // this.updateShiftState(simCode, fDown);
+    this.updateShiftState(simCode, true, fDown);
 
     var wCode = Keyboard.SIMCODES[simCode] || Keyboard.SIMCODES[simCode + Keyboard.KEYCODE.ONDOWN];
 
@@ -1921,7 +1985,7 @@ Keyboard.prototype.keySimulate = function(simCode, fDown)
          * whenever both CTRL and ALT are pressed as well, so that it's easier to simulate that old favorite: CTRL-ALT-DEL
          */
         if (wCode == Keyboard.SCANCODE.BS) {
-            if ((this.shiftStates & (Keyboard.STATE.CTRL | Keyboard.STATE.ALT)) == (Keyboard.STATE.CTRL | Keyboard.STATE.ALT)) {
+            if ((this.bitsState & (Keyboard.STATE.CTRL | Keyboard.STATE.ALT)) == (Keyboard.STATE.CTRL | Keyboard.STATE.ALT)) {
                 wCode = Keyboard.SCANCODE.NUM_DEL;
             }
         }
@@ -1945,17 +2009,17 @@ Keyboard.prototype.keySimulate = function(simCode, fDown)
                 continue;
             }
             if (bScan == Keyboard.SCANCODE.SHIFT) {
-                if (!(this.shiftStates & (Keyboard.STATE.SHIFT | Keyboard.STATE.RSHIFT))) {
-                    if (!(this.shiftStates & Keyboard.STATE.CAPS_LOCK) || !fAlpha) {
+                if (!(this.bitsState & (Keyboard.STATE.SHIFT | Keyboard.STATE.RSHIFT))) {
+                    if (!(this.bitsState & Keyboard.STATE.CAPS_LOCK) || !fAlpha) {
                         bShift = bScan;
                     }
                 }
             } else if (bScan == Keyboard.SCANCODE.CTRL) {
-                if (!(this.shiftStates & (Keyboard.STATE.CTRL | Keyboard.STATE.RCTRL))) {
+                if (!(this.bitsState & (Keyboard.STATE.CTRL | Keyboard.STATE.RCTRL))) {
                     bShift = bScan;
                 }
             } else if (bScan == Keyboard.SCANCODE.ALT) {
-                if (!(this.shiftStates & (Keyboard.STATE.ALT | Keyboard.STATE.RALT))) {
+                if (!(this.bitsState & (Keyboard.STATE.ALT | Keyboard.STATE.RALT))) {
                     bShift = bScan;
                 }
             } else {
