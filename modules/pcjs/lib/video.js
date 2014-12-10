@@ -2305,15 +2305,15 @@ Video.prototype.processTouchEvent = function(event, fStart)
      */
     if (/* xThird == 1 && */ yThird != 1) {
         if (!yThird) {
-            this.kbd.keySimulatePress(Keyboard.aButtonCodes.up, true);
+            this.kbd.addActiveKey(Keyboard.CLICKCODES.UP, true);
         } else {
-            this.kbd.keySimulatePress(Keyboard.aButtonCodes.down, true);
+            this.kbd.addActiveKey(Keyboard.CLICKCODES.DOWN, true);
         }
     } else if (/* yThird == 1 && */ xThird != 1) {
         if (!xThird) {
-            this.kbd.keySimulatePress(Keyboard.aButtonCodes.left, true);
+            this.kbd.addActiveKey(Keyboard.CLICKCODES.LEFT, true);
         } else {
-            this.kbd.keySimulatePress(Keyboard.aButtonCodes.right, true);
+            this.kbd.addActiveKey(Keyboard.CLICKCODES.RIGHT, true);
         }
     }
 };

@@ -8,7 +8,7 @@
  */
 body {
     margin: 0;
-    background: #1d1d1d;
+    background: #202020;
 }
 h1, h2 {
     margin-top: 0;
@@ -81,7 +81,7 @@ pre a, code a {
     font-weight: bold;
 }
 .common-top {
-    background: #1d1d1d;
+    background: #202020;
     font-size: small;
 }
 .common-top-left {
@@ -118,7 +118,7 @@ pre a, code a {
 .common-middle {
     clear: both;
     padding: 1px 1em 1px 1em;
-    background: #303030;
+    background: #404040;
 }
 .common-sidebar {
     float: left;

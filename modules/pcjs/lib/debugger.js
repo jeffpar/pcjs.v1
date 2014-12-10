@@ -206,7 +206,7 @@ Debugger.MESSAGE = {
     RTC:        0x00001000,
     C8042:      0x00002000,
     CHIPSET:    0x00004000,
-    KBD:        0x00008000,
+    KEYBOARD:   0x00008000,
     KEYS:       0x00010000,
     VIDEO:      0x00020000,
     FDC:        0x00040000,
@@ -246,7 +246,7 @@ if (DEBUGGER) {
         0x10:       Debugger.MESSAGE.VIDEO,
         0x13:       Debugger.MESSAGE.FDC,
         0x15:       Debugger.MESSAGE.CHIPSET,
-        0x16:       Debugger.MESSAGE.KBD,
+        0x16:       Debugger.MESSAGE.KEYBOARD,
      // 0x1a:       Debugger.MESSAGE.RTC,       // ChipSet contains its own specialized messageInt() handler for the RTC
         0x1c:       Debugger.MESSAGE.TIMER,
         0x21:       Debugger.MESSAGE.DOS,
@@ -525,7 +525,7 @@ if (DEBUGGER) {
         "rtc":      Debugger.MESSAGE.RTC,
         "8042":     Debugger.MESSAGE.C8042,
         "chipset":  Debugger.MESSAGE.CHIPSET,   // ie, anything else in ChipSet besides DMA, PIC, TIMER, CMOS, RTC and 8042
-        "kbd":      Debugger.MESSAGE.KBD,
+        "keyboard": Debugger.MESSAGE.KEYBOARD,
         "key":      Debugger.MESSAGE.KEYS,      // using "keys" instead of "key" causes an unfortunate JavaScript property collision
         "video":    Debugger.MESSAGE.VIDEO,
         "fdc":      Debugger.MESSAGE.FDC,
@@ -1562,7 +1562,7 @@ if (DEBUGGER) {
         this.bitsMessage = this.bitsWarning = Debugger.MESSAGE.WARN;
         this.sMessagePrev = null;
         this.afnDumpers = [];
-        var aEnable = this.parseCommand(sEnable);
+        var aEnable = this.parseCommand(sEnable.replace("keys","key").replace("kbd","keyboard"));
         if (aEnable.length) {
             for (var m in Debugger.MESSAGES) {
                 if (aEnable.indexOf(m) >= 0) {
@@ -4145,6 +4145,8 @@ if (DEBUGGER) {
                 fCriteria = false;
                 sCategory = null;
             } else {
+                if (sCategory == "keys") sCategory = "key";
+                if (sCategory == "kbd") sCategory = "keyboard";
                 for (m in Debugger.MESSAGES) {
                     if (sCategory == m) {
                         bitsMessage = Debugger.MESSAGES[m];
@@ -4181,6 +4183,7 @@ if (DEBUGGER) {
                 if (fCriteria !== null && fCriteria != fEnabled) continue;
                 if (sCategories) sCategories += ",";
                 if (!(++n % 10)) sCategories += "\n\t";     // jshint ignore:line
+                if (m == "key") m = "keys";
                 sCategories += m;
             }
         }

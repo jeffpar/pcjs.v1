@@ -62,42 +62,56 @@ if (typeof module !== 'undefined') {
  */
 function Keyboard(parmsKbd)
 {
-    Component.call(this, "Keyboard", parmsKbd, Keyboard, Debugger.MESSAGE.KBD);
+    Component.call(this, "Keyboard", parmsKbd, Keyboard, Debugger.MESSAGE.KEYBOARD);
 
     this.nDefaultModel = parmsKbd['model'];
+
+    this.fMobile = web.isMobile();
+    this.messageDebugger("mobile keyboard support: " + (this.fMobile? "true" : "false"));
+
+    /*
+     * This is true whenever the physical Escape key is disabled (eg, by pointer locking code),
+     * giving us the opportunity to map a different physical key to machine's virtual Escape key.
+     */
     this.fEscapeDisabled = false;
 
     /*
-     * There are multiple ways that scan codes can be injected into the machine: button events,
-     * soft-key events, keyDown/keyUp/keyPress events, and the injectKeys() interface.  Currently,
-     * there's no attempt to provide any coordination among those mechanisms, except at the lowest
-     * level, where scan code generation takes place.  addScanCode() insures that a key (scan code)
-     * that's already in the "make" state will not trigger another "make" (unless a "repeat" has
-     * been explicitly requested), and it insures that a key (scan code) already in the "break"
-     * state will not trigger another "break".
-     *
-     * TODO: While it might seem sensible to save/restore this state data, I would argue that the
-     * best thing to do on a save() is force a "break" of every key still active and NOT save this
-     * data.  This relieves restore() from doing any extra work; it can simply assume -- as it has
-     * always assumed -- that the keyboard is free of any active "makes".  That does mean saving
-     * and restoring abScanBuffer, however, since the machine may not have been able to act upon
-     * any of those forced "breaks" yet.
-     *
-     * TODO: addScanCode() should also provide a "fail-safe" mechanism that attempts to ensure that
-     * a key cannot get stuck in the "make" state for more than a few seconds if the user did something
-     * odd (eg, switched away from the current page or the entire browser mid-keystroke). For some browser
-     * and key combinations (eg, Ctrl-Tab), this may be essential, to avoid stuck shift/modifier keys.
+     * This is set whenever we notice a discrepancy between our internal CAPS_LOCK state and its
+     * apparent state; we check whenever aKeysActive has been emptied.
      */
-    this.aScanCodesActive = {};
+    this.fToggleCapsLock = false;
 
     /*
-     * TODO: Make these delays configurable
+     * New unified approach to key event processing: When we process a key on the "down" event,
+     * we check the aKeysActive array: if the key is already active, do nothing; otherwise, insert
+     * it into the table, generate the "make" scan code(s), and set a timeout for "repeat" if it's
+     * a repeatable key (most are).
+     *
+     * Similarly, when a key goes "up", if it's already not active, do nothing; otherwise, generate
+     * the "break" scan code(s), cancel any pending timeout, and remove it from the active key table.
+     *
+     * If a "press" event is received, then if the key is already active, remove it and (re)insert
+     * it at the head of the table, generate the "make" scan code(s), set nRepeat to -1, and set a
+     * timeout for "break".
+     *
+     * This requires an aKeysActive array that keeps track of the status of every active key; only the
+     * first entry in the array allowed to repeat.  Each entry is a key object that looks like:
+     *
+     *      simCode:    our simulated keyCode from onKeyDown, onKeyUp, or onKeyPress
+     *      fDown:      next state to simulate (true for down, false for up)
+     *      nRepeat:    > 0 if timer should generate more "make" scan code(s), -1 for "break" scan code(s)
+     *      timer:      timer for next key operation, if any
+     *
+     * Keys are inserted into aKeysActive using splice(0, 0, key), but not before zeroing nRepeat
+     * of any key that already occupies index 0, so that at most only one key (ie, the most recent)
+     * can ever be in a repeating state.
      */
-    this.msReleaseDelay  = 250;         // number of milliseconds before a down key is "forced" up (unless we see it go up)
-    this.msReleaseRepeat = 100;         // number of milliseconds before a held key is "forced" up (assuming auto-repeat)
-    this.msInjectDelay   = 300;         // number of milliseconds between injected keystrokes
+    this.aKeysActive = [];
 
-    this.aKeyTimers = [];
+    this.msAutoRepeat   = 500;
+    this.msNextRepeat   = 100;
+    this.msAutoRelease  = 50;
+    this.msInjectDelay  = 300;          // number of milliseconds between injected keystrokes
 
     this.setReady();
 }
@@ -114,7 +128,7 @@ Component.subclass(Component, Keyboard);
  * @enum {number}
  */
 Keyboard.ASCII = {
-    CTRLA: 1, CTRLZ: 26,
+ CTRL_A:  1, CTRL_C:  3, CTRL_Z: 26,
     ' ': 32,    '!': 33,    '"': 34,    '#': 35,    '$': 36,    '%': 37,    '&': 38,    "'": 39,
     '(': 40,    ')': 41,    '*': 42,    '+': 43,    ',': 44,    '-': 45,    '.': 46,    '/': 47,
     '0': 48,    '1': 49,    '2': 50,    '3': 51,    '4': 52,    '5': 53,    '6': 54,    '7': 55,
@@ -138,51 +152,70 @@ Keyboard.ASCII = {
  *
  * Most of these represent non-ASCII keys (eg, the LEFT arrow key), yet for some reason,
  * browsers defined them using ASCII codes (eg, the LEFT arrow key uses the ASCII code
- * for '%' or 37).  This conflict is discussed further in the definition of aButtonCodes below.
+ * for '%' or 37).  This conflict is discussed further in the definition of CLICKCODE below.
  *
  * @enum {number}
  */
 Keyboard.KEYCODE = {
-    /* 0x08 */  BS:         8,
-    /* 0x09 */  TAB:        9,
-    /* 0x0A */  LF:         10,
-    /* 0x0D */  CR:         13,
-    /* 0x10 */  SHIFT:      16,
-    /* 0x11 */  CTRL:       17,
-    /* 0x12 */  ALT:        18,
-    /* 0x14 */  CAPS_LOCK:  20,
-    /* 0x1B */  ESC:        27,
-    /* 0x21 */  PGUP:       33,
-    /* 0x22 */  PGDN:       34,
-    /* 0x23 */  END:        35,
-    /* 0x24 */  HOME:       36,
-    /* 0x25 */  LEFT:       37,
-    /* 0x26 */  UP:         38,
-    /* 0x27 */  RIGHT:      39,
-    /* 0x28 */  DOWN:       40,
-    /* 0x2D */  INS:        45,
-    /* 0x2E */  DEL:        46,
-    /* 0x5B */  COMMAND:    91,         // TODO: Treat this like the 'Windows' key
-    /* 0x70 */  F1:         112,
-    /* 0x71 */  F2:         113,
-    /* 0x72 */  F3:         114,
-    /* 0x73 */  F4:         115,
-    /* 0x74 */  F5:         116,
-    /* 0x75 */  F6:         117,
-    /* 0x76 */  F7:         118,
-    /* 0x77 */  F8:         119,
-    /* 0x78 */  F9:         120,
-    /* 0x79 */  F10:        121,
-    /* 0x7A */  F11:        122,
-    /* 0x7B */  F12:        123,
-    /* 0x90 */  NUM_LOCK:   144,
-    /* 0x91 */  SCROLL_LOCK:145,
+    /* 0x08 */ BS:          8,
+    /* 0x09 */ TAB:         9,
+    /* 0x0A */ LF:          10,
+    /* 0x0D */ CR:          13,
+    /* 0x10 */ SHIFT:       16,
+    /* 0x11 */ CTRL:        17,
+    /* 0x12 */ ALT:         18,
+    /* 0x13 */ PAUSE:       19,         // Pause/Break
+    /* 0x14 */ CAPS_LOCK:   20,
+    /* 0x1B */ ESC:         27,
+    /* 0x21 */ PGUP:        33,
+    /* 0x22 */ PGDN:        34,
+    /* 0x23 */ END:         35,
+    /* 0x24 */ HOME:        36,
+    /* 0x25 */ LEFT:        37,
+    /* 0x26 */ UP:          38,
+    /* 0x27 */ RIGHT:       39,
+    /* 0x28 */ DOWN:        40,
+    /* 0x2C */ PRTSC:       44,
+    /* 0x2D */ INS:         45,
+    /* 0x2E */ DEL:         46,
+    /* 0x5B */ COMMAND:     91,         // TODO: Treat this like the 'Windows' key
+    /* 0x5D */ MENU:        93,
+    /* 0x60 */ NUM_INS:     96,         // 0
+    /* 0x61 */ NUM_END:     97,         // 1
+    /* 0x62 */ NUM_DOWN:    98,         // 2
+    /* 0x63 */ NUM_PGDN:    99,         // 3
+    /* 0x64 */ NUM_LEFT:    100,        // 4
+    /* 0x65 */ NUM_CENTER:  101,        // 5
+    /* 0x66 */ NUM_RIGHT:   102,        // 6
+    /* 0x67 */ NUM_HOME:    103,        // 7
+    /* 0x68 */ NUM_UP:      104,        // 8
+    /* 0x69 */ NUM_PGUP:    105,        // 9
+    /* 0x6A */ NUM_MUL:     106,
+    /* 0x6B */ NUM_ADD:     107,
+    /* 0x6D */ NUM_SUB:     109,
+    /* 0x6E */ NUM_DEL:     110,        // .
+    /* 0x6F */ NUM_DIV:     111,
+    /* 0x70 */ F1:          112,
+    /* 0x71 */ F2:          113,
+    /* 0x72 */ F3:          114,
+    /* 0x73 */ F4:          115,
+    /* 0x74 */ F5:          116,
+    /* 0x75 */ F6:          117,
+    /* 0x76 */ F7:          118,
+    /* 0x77 */ F8:          119,
+    /* 0x78 */ F9:          120,
+    /* 0x79 */ F10:         121,
+    /* 0x7A */ F11:         122,
+    /* 0x7B */ F12:         123,
+    /* 0x90 */ NUM_LOCK:    144,
+    /* 0x91 */ SCROLL_LOCK: 145,
+    /* 0xC0 */ BQUOTE:      192,
     //
-    // ONDOWN is a bias we add to browser keyCodes that we want to handle on "down" rather than "press".
-    //
-    // Note that these biases use what I'll call "Decimal Coded Binary" or DCB (the reverse of BCD),
+    // The following biases use what I'll call "Decimal Coded Binary" or DCB (the reverse of BCD),
     // where decimal digits are used to represent binary bit values, which can be added together without
     // affecting neighboring digits as long as you stick to 1, 2 or 4 in any given column.
+    //
+    // ONDOWN is a bias we add to browser keyCodes that we want to handle on "down" rather than "press".
     //
     ONDOWN:                 1000,
     //
@@ -193,10 +226,182 @@ Keyboard.KEYCODE = {
     // FAKE is a bias we add to signal these are fake keyCodes corresponding to internal keystroke combinations.
     // The actual values are for internal use only and merely need to be unique and used consistently.
     //
-    FAKE:                   4000,
-    FAKE_CTRLC:             4003,
-    FAKE_CTRLBREAK:         4063,
-    FAKE_CTRLALTDEL:        4081
+    FAKE:                   4000
+};
+
+/*
+ * Maps unshifted keyCodes to their shifted counterparts; to be used when a shift-key is down.
+ * Alphabetic characters are handled in code, since they must also take caps-lock into consideration.
+ */
+Keyboard.SHIFTED_KEYCODES = {};
+Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['1']]  = Keyboard.ASCII['!'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['2']]  = Keyboard.ASCII['@'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['3']]  = Keyboard.ASCII['#'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['4']]  = Keyboard.ASCII['$'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['5']]  = Keyboard.ASCII['%'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['6']]  = Keyboard.ASCII['^'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['7']]  = Keyboard.ASCII['&'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['8']]  = Keyboard.ASCII['*'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['9']]  = Keyboard.ASCII['('];
+Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['0']]  = Keyboard.ASCII[')'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['-']]  = Keyboard.ASCII['_'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['=']]  = Keyboard.ASCII['+'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['[']]  = Keyboard.ASCII['{'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII[']']]  = Keyboard.ASCII['}'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII[';']]  = Keyboard.ASCII[':'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII["'"]]  = Keyboard.ASCII['"'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['`']]  = Keyboard.ASCII['~'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['\\']] = Keyboard.ASCII['|'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII[',']]  = Keyboard.ASCII['<'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['.']]  = Keyboard.ASCII['>'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.ASCII['/']]  = Keyboard.ASCII['?'];
+
+/*
+ * Maps "stupid" keyCodes to their "non-stupid" counterparts
+ */
+Keyboard.STUPID_KEYCODES = {};
+Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.BQUOTE] = Keyboard.ASCII['`'];
+
+Keyboard.SIMCODE = {
+    BS:           Keyboard.KEYCODE.BS          + Keyboard.KEYCODE.ONDOWN,
+    TAB:          Keyboard.KEYCODE.TAB         + Keyboard.KEYCODE.ONDOWN,
+    SHIFT:        Keyboard.KEYCODE.SHIFT       + Keyboard.KEYCODE.ONDOWN,
+    RSHIFT:       Keyboard.KEYCODE.SHIFT       + Keyboard.KEYCODE.ONDOWN + Keyboard.KEYCODE.ONRIGHT,
+    CTRL:         Keyboard.KEYCODE.CTRL        + Keyboard.KEYCODE.ONDOWN,
+    ALT:          Keyboard.KEYCODE.ALT         + Keyboard.KEYCODE.ONDOWN,
+    CAPS_LOCK:    Keyboard.KEYCODE.CAPS_LOCK   + Keyboard.KEYCODE.ONDOWN,
+    ESC:          Keyboard.KEYCODE.ESC         + Keyboard.KEYCODE.ONDOWN,
+    F1:           Keyboard.KEYCODE.F1          + Keyboard.KEYCODE.ONDOWN,
+    F2:           Keyboard.KEYCODE.F2          + Keyboard.KEYCODE.ONDOWN,
+    F3:           Keyboard.KEYCODE.F3          + Keyboard.KEYCODE.ONDOWN,
+    F4:           Keyboard.KEYCODE.F4          + Keyboard.KEYCODE.ONDOWN,
+    F5:           Keyboard.KEYCODE.F5          + Keyboard.KEYCODE.ONDOWN,
+    F6:           Keyboard.KEYCODE.F6          + Keyboard.KEYCODE.ONDOWN,
+    F7:           Keyboard.KEYCODE.F7          + Keyboard.KEYCODE.ONDOWN,
+    F8:           Keyboard.KEYCODE.F8          + Keyboard.KEYCODE.ONDOWN,
+    F9:           Keyboard.KEYCODE.F9          + Keyboard.KEYCODE.ONDOWN,
+    F10:          Keyboard.KEYCODE.F10         + Keyboard.KEYCODE.ONDOWN,
+    F11:          Keyboard.KEYCODE.F11         + Keyboard.KEYCODE.ONDOWN,
+    F12:          Keyboard.KEYCODE.F12         + Keyboard.KEYCODE.ONDOWN,
+    NUM_LOCK:     Keyboard.KEYCODE.NUM_LOCK    + Keyboard.KEYCODE.ONDOWN,
+    SCROLL_LOCK:  Keyboard.KEYCODE.SCROLL_LOCK + Keyboard.KEYCODE.ONDOWN,
+    PRTSC:        Keyboard.KEYCODE.PRTSC       + Keyboard.KEYCODE.ONDOWN,
+    HOME:         Keyboard.KEYCODE.HOME        + Keyboard.KEYCODE.ONDOWN,
+    UP:           Keyboard.KEYCODE.UP          + Keyboard.KEYCODE.ONDOWN,
+    PGUP:         Keyboard.KEYCODE.PGUP        + Keyboard.KEYCODE.ONDOWN,
+    NUM_SUB:      Keyboard.KEYCODE.NUM_SUB     + Keyboard.KEYCODE.ONDOWN,
+    LEFT:         Keyboard.KEYCODE.LEFT        + Keyboard.KEYCODE.ONDOWN,
+    NUM_CENTER:   Keyboard.KEYCODE.NUM_CENTER  + Keyboard.KEYCODE.ONDOWN,
+    RIGHT:        Keyboard.KEYCODE.RIGHT       + Keyboard.KEYCODE.ONDOWN,
+    NUM_ADD:      Keyboard.KEYCODE.NUM_ADD     + Keyboard.KEYCODE.ONDOWN,
+    END:          Keyboard.KEYCODE.END         + Keyboard.KEYCODE.ONDOWN,
+    DOWN:         Keyboard.KEYCODE.DOWN        + Keyboard.KEYCODE.ONDOWN,
+    PGDN:         Keyboard.KEYCODE.PGDN        + Keyboard.KEYCODE.ONDOWN,
+    INS:          Keyboard.KEYCODE.INS         + Keyboard.KEYCODE.ONDOWN,
+    DEL:          Keyboard.KEYCODE.DEL         + Keyboard.KEYCODE.ONDOWN,
+    CTRL_C:       Keyboard.ASCII.CTRL_C        + Keyboard.KEYCODE.FAKE,
+    CTRL_BREAK:   Keyboard.KEYCODE.BS          + Keyboard.KEYCODE.FAKE,
+    CTRL_ALT_DEL: Keyboard.KEYCODE.DEL         + Keyboard.KEYCODE.FAKE
+};
+
+/*
+ * Scan code constants
+ */
+Keyboard.SCANCODE = {
+    /* 0x01 */ ESC:         1,
+    /* 0x02 */ ONE:         2,
+    /* 0x03 */ TWO:         3,
+    /* 0x04 */ THREE:       4,
+    /* 0x05 */ FOUR:        5,
+    /* 0x06 */ FIVE:        6,
+    /* 0x07 */ SIX:         7,
+    /* 0x08 */ SEVEN:       8,
+    /* 0x09 */ EIGHT:       9,
+    /* 0x0A */ NINE:        10,
+    /* 0x0B */ ZERO:        11,
+    /* 0x0C */ DASH:        12,
+    /* 0x0D */ EQUALS:      13,
+    /* 0x0E */ BS:          14,
+    /* 0x0F */ TAB:         15,
+    /* 0x10 */ Q:           16,
+    /* 0x11 */ W:           17,
+    /* 0x12 */ E:           18,
+    /* 0x13 */ R:           19,
+    /* 0x14 */ T:           20,
+    /* 0x15 */ Y:           21,
+    /* 0x16 */ U:           22,
+    /* 0x17 */ I:           23,
+    /* 0x18 */ O:           24,
+    /* 0x19 */ P:           25,
+    /* 0x1A */ LBRACK:      26,
+    /* 0x1B */ RBRACK:      27,
+    /* 0x1C */ ENTER:       28,
+    /* 0x1D */ CTRL:        29,
+    /* 0x1E */ A:           30,
+    /* 0x1F */ S:           31,
+    /* 0x20 */ D:           32,
+    /* 0x21 */ F:           33,
+    /* 0x22 */ G:           34,
+    /* 0x23 */ H:           35,
+    /* 0x24 */ J:           36,
+    /* 0x25 */ K:           37,
+    /* 0x26 */ L:           38,
+    /* 0x27 */ SEMI:        39,
+    /* 0x28 */ QUOTE:       40,
+    /* 0x29 */ BQUOTE:      41,
+    /* 0x2A */ SHIFT:       42,
+    /* 0x2B */ BSLASH:      43,
+    /* 0x2C */ Z:           44,
+    /* 0x2D */ X:           45,
+    /* 0x2E */ C:           46,
+    /* 0x2F */ V:           47,
+    /* 0x30 */ B:           48,
+    /* 0x31 */ N:           49,
+    /* 0x32 */ M:           50,
+    /* 0x33 */ COMMA:       51,
+    /* 0x34 */ PERIOD:      52,
+    /* 0x35 */ SLASH:       53,
+    /* 0x36 */ RSHIFT:      54,
+    /* 0x37 */ PRTSC:       55,         // unshifted '*'; becomes dedicated 'Print Screen' key on 101-key keyboards
+    /* 0x38 */ ALT:         56,
+    /* 0x39 */ SPACE:       57,
+    /* 0x3A */ CAPS_LOCK:   58,
+    /* 0x3B */ F1:          59,
+    /* 0x3C */ F2:          60,
+    /* 0x3D */ F3:          61,
+    /* 0x3E */ F4:          62,
+    /* 0x3F */ F5:          63,
+    /* 0x40 */ F6:          64,
+    /* 0x41 */ F7:          65,
+    /* 0x42 */ F8:          66,
+    /* 0x43 */ F9:          67,
+    /* 0x44 */ F10:         68,
+    /* 0x45 */ NUM_LOCK:    69,
+    /* 0x46 */ SCROLL_LOCK: 70,
+    /* 0x47 */ NUM_HOME:    71,
+    /* 0x48 */ NUM_UP:      72,
+    /* 0x49 */ NUM_PGUP:    73,
+    /* 0x4A */ NUM_SUB:     74,
+    /* 0x4B */ NUM_LEFT:    75,
+    /* 0x4C */ NUM_CENTER:  76,
+    /* 0x4D */ NUM_RIGHT:   77,
+    /* 0x4E */ NUM_ADD:     78,
+    /* 0x4F */ NUM_END:     79,
+    /* 0x50 */ NUM_DOWN:    80,
+    /* 0x51 */ NUM_PGDN:    81,
+    /* 0x52 */ NUM_INS:     82,
+    /* 0x53 */ NUM_DEL:     83,
+    /* 0x54 */ SYSREQ:      84,         // 84-key keyboard only (simulated with 'alt'+'prtsc' on 101-key keyboards)
+    /* 0x54 */ PAUSE:       84,         // 101-key keyboard only
+    /* 0x57 */ F11:         87,
+    /* 0x58 */ F12:         88,
+    /* 0x5B */ WIN:         91,
+    /* 0x5C */ RWIN:        92,
+    /* 0x5D */ MENU:        93,
+    /* 0x7F */ MAKE:        127,
+    /* 0x80 */ BREAK:       128,
+    /* 0xE0 */ EXTEND1:     224,
+    /* 0xE1 */ EXTEND2:     225
 };
 
 /**
@@ -206,9 +411,9 @@ Keyboard.KEYCODE = {
  * @enum {number}
  */
 Keyboard.LOCATION = {
-    LEFT:   1,
-    RIGHT:  2,
-    NUMPAD: 3
+    LEFT:           1,
+    RIGHT:          2,
+    NUMPAD:         3
 };
 
 /**
@@ -217,189 +422,70 @@ Keyboard.LOCATION = {
  *
  * @enum {number}
  */
-Keyboard.STATES = {
+Keyboard.STATE = {
     RSHIFT:         0x0001,
     SHIFT:          0x0002,
-    RCTRL:          0x0004,         // 101-key keyboard only
+    RCTRL:          0x0004,             // 101-key keyboard only
     CTRL:           0x0008,
-    RALT:           0x0010,         // 101-key keyboard only
+    RALT:           0x0010,             // 101-key keyboard only
     ALT:            0x0020,
-    COMMAND:        0x0040,         // 101-key keyboard only (TODO: Treat this like the 'Windows' key)
-    INSERT:         0x0080,         // TODO: Placeholder
+    COMMAND:        0x0040,             // 101-key keyboard only (TODO: Treat this like the 'Windows' key)
+    INSERT:         0x0080,             // TODO: Placeholder
     CAPS_LOCK:      0x0100,
     NUM_LOCK:       0x0200,
     SCROLL_LOCK:    0x0400,
-    LOCK:           0x0700,         // STATES.CAPS_LOCK | STATES.NUM_LOCK | STATES.SCROLL_LOCK
-    SIMULATE:       0x003f          // STATES.RSHIFT | STATES.SHIFT | STATES.RCTRL | STATES.CTRL | STATES.RALT | STATES.ALT
+    LOCK:           0x0700,             // STATE.CAPS_LOCK | STATE.NUM_LOCK | STATE.SCROLL_LOCK
+    SIMULATE:       0x003f              // STATE.RSHIFT | STATE.SHIFT | STATE.RCTRL | STATE.CTRL | STATE.RALT | STATE.ALT
 };
 
 /**
- * Maps KEYCODES of shift/modifier keys to their corresponding (default) STATES bit above
+ * Maps KEYCODES of shift/modifier keys to their corresponding (default) STATES bit above.
  *
  * @enum {number}
  */
 Keyboard.KEYSTATES = {};
-Keyboard.KEYSTATES[Keyboard.KEYCODE.SHIFT]      = Keyboard.STATES.SHIFT;
-Keyboard.KEYSTATES[Keyboard.KEYCODE.CTRL]       = Keyboard.STATES.CTRL;
-Keyboard.KEYSTATES[Keyboard.KEYCODE.ALT]        = Keyboard.STATES.ALT;
-Keyboard.KEYSTATES[Keyboard.KEYCODE.CAPS_LOCK]  = Keyboard.STATES.CAPS_LOCK;
-Keyboard.KEYSTATES[Keyboard.KEYCODE.NUM_LOCK]   = Keyboard.STATES.NUM_LOCK;
-Keyboard.KEYSTATES[Keyboard.KEYCODE.SCROLL_LOCK]= Keyboard.STATES.SCROLL_LOCK;
+Keyboard.KEYSTATES[Keyboard.SIMCODE.SHIFT]       = Keyboard.STATE.SHIFT;
+Keyboard.KEYSTATES[Keyboard.SIMCODE.CTRL]        = Keyboard.STATE.CTRL;
+Keyboard.KEYSTATES[Keyboard.SIMCODE.ALT]         = Keyboard.STATE.ALT;
+Keyboard.KEYSTATES[Keyboard.SIMCODE.CAPS_LOCK]   = Keyboard.STATE.CAPS_LOCK;
+Keyboard.KEYSTATES[Keyboard.SIMCODE.NUM_LOCK]    = Keyboard.STATE.NUM_LOCK;
+Keyboard.KEYSTATES[Keyboard.SIMCODE.SCROLL_LOCK] = Keyboard.STATE.SCROLL_LOCK;
 
 /**
- * Maps "soft-key" definitions of shift/modifier keys to their corresponding (default) STATES bit above
+ * Maps CLICKCODE (string) to SIMCODE (number).
  *
  * @enum {number}
  */
-Keyboard.LEDSTATES = {
-    'caps-lock':    Keyboard.STATES.CAPS_LOCK,
-    'num-lock':     Keyboard.STATES.NUM_LOCK,
-    'scroll-lock':  Keyboard.STATES.SCROLL_LOCK
-};
-
-/**
- * In a perfect world, each one of our "button" codes would map to a unique browser keyCode.
- *
- * However, because most of these codes are for non-ASCII keys, which browsers brilliantly
- * map to ASCII keyCodes that conflict with *actual* ASCII keys, we must add an ONDOWN bias
- * to all these particular keyCodes, and make sure we store these keyCodes in our aKeyCodes
- * lookup table with the same bias.
- *
- * The good news is that ONDOWN also serves as a signal to our keyCode handlers that the key
- * in question should be handled during keyDown (not keyPress), since most if not all of these
- * non-alphanumeric keys don't generate a keyPress event anyway.
- *
- * @enum {number}
- */
-Keyboard.aButtonCodes = {
-    'tab':          Keyboard.KEYCODE.TAB        + Keyboard.KEYCODE.ONDOWN,
-    'esc':          Keyboard.KEYCODE.ESC        + Keyboard.KEYCODE.ONDOWN,
-    'caps-lock':    Keyboard.KEYCODE.CAPS_LOCK  + Keyboard.KEYCODE.ONDOWN,
-    'f1':           Keyboard.KEYCODE.F1         + Keyboard.KEYCODE.ONDOWN,
-    'f2':           Keyboard.KEYCODE.F2         + Keyboard.KEYCODE.ONDOWN,
-    'f3':           Keyboard.KEYCODE.F3         + Keyboard.KEYCODE.ONDOWN,
-    'f4':           Keyboard.KEYCODE.F4         + Keyboard.KEYCODE.ONDOWN,
-    'f5':           Keyboard.KEYCODE.F5         + Keyboard.KEYCODE.ONDOWN,
-    'f6':           Keyboard.KEYCODE.F6         + Keyboard.KEYCODE.ONDOWN,
-    'f7':           Keyboard.KEYCODE.F7         + Keyboard.KEYCODE.ONDOWN,
-    'f8':           Keyboard.KEYCODE.F8         + Keyboard.KEYCODE.ONDOWN,
-    'f9':           Keyboard.KEYCODE.F9         + Keyboard.KEYCODE.ONDOWN,
-    'f10':          Keyboard.KEYCODE.F10        + Keyboard.KEYCODE.ONDOWN,
-    'left':         Keyboard.KEYCODE.LEFT       + Keyboard.KEYCODE.ONDOWN,   // formerly "left-arrow"
-    'up':           Keyboard.KEYCODE.UP         + Keyboard.KEYCODE.ONDOWN,   // formerly "up-arrow"
-    'right':        Keyboard.KEYCODE.RIGHT      + Keyboard.KEYCODE.ONDOWN,   // formerly "right-arrow"
-    'down':         Keyboard.KEYCODE.DOWN       + Keyboard.KEYCODE.ONDOWN,   // formerly "down-arrow"
+Keyboard.CLICKCODES = {
+    'TAB':          Keyboard.SIMCODE.TAB,
+    'ESC':          Keyboard.SIMCODE.ESC,
+    'F1':           Keyboard.SIMCODE.F1,
+    'F2':           Keyboard.SIMCODE.F2,
+    'F3':           Keyboard.SIMCODE.F3,
+    'F4':           Keyboard.SIMCODE.F4,
+    'F5':           Keyboard.SIMCODE.F5,
+    'F6':           Keyboard.SIMCODE.F6,
+    'F7':           Keyboard.SIMCODE.F7,
+    'F8':           Keyboard.SIMCODE.F8,
+    'F9':           Keyboard.SIMCODE.F9,
+    'F10':          Keyboard.SIMCODE.F10,
+    'LEFT':         Keyboard.SIMCODE.LEFT,      // formerly "left-arrow"
+    'UP':           Keyboard.SIMCODE.UP,        // formerly "up-arrow"
+    'RIGHT':        Keyboard.SIMCODE.RIGHT,     // formerly "right-arrow"
+    'DOWN':         Keyboard.SIMCODE.DOWN,      // formerly "down-arrow"
     /*
      * These bindings are for convenience (common key combinations that can be bound to a single control)
      */
-    'ctrl-c':       Keyboard.KEYCODE.FAKE_CTRLC,
-    'ctrl-break':   Keyboard.KEYCODE.FAKE_CTRLBREAK,
-    'ctrl-alt-del': Keyboard.KEYCODE.FAKE_CTRLALTDEL
-};
-
-/*
- * Scan code constants
- */
-Keyboard.SCANCODE = {
-    ESC:         0x01,
-    ONE:         0x02,
-    TWO:         0x03,
-    THREE:       0x04,
-    FOUR:        0x05,
-    FIVE:        0x06,
-    SIX:         0x07,
-    SEVEN:       0x08,
-    EIGHT:       0x09,
-    NINE:        0x0a,
-    ZERO:        0x0b,
-    DASH:        0x0c,
-    EQUALS:      0x0d,
-    BS:          0x0e,
-    TAB:         0x0f,
-    Q:           0x10,
-    W:           0x11,
-    E:           0x12,
-    R:           0x13,
-    T:           0x14,
-    Y:           0x15,
-    U:           0x16,
-    I:           0x17,
-    O:           0x18,
-    P:           0x19,
-    LBRACK:      0x1a,
-    RBRACK:      0x1b,
-    ENTER:       0x1c,
-    CTRL:        0x1d,
-    A:           0x1e,
-    S:           0x1f,
-    D:           0x20,
-    F:           0x21,
-    G:           0x22,
-    H:           0x23,
-    J:           0x24,
-    K:           0x25,
-    L:           0x26,
-    SEMI:        0x27,
-    QUOTE:       0x28,
-    BQUOTE:      0x29,
-    SHIFT:       0x2a,
-    BSLASH:      0x2b,
-    Z:           0x2c,
-    X:           0x2d,
-    C:           0x2e,
-    V:           0x2f,
-    B:           0x30,
-    N:           0x31,
-    M:           0x32,
-    COMMA:       0x33,
-    PERIOD:      0x34,
-    SLASH:       0x35,
-    RSHIFT:      0x36,
-    PRTSC:       0x37,           // unshifted '*'; becomes dedicated 'Print Screen' key on 101-key keyboards
-    ALT:         0x38,
-    SPACE:       0x39,
-    CAPS_LOCK:   0x3a,
-    F1:          0x3b,
-    F2:          0x3c,
-    F3:          0x3d,
-    F4:          0x3e,
-    F5:          0x3f,
-    F6:          0x40,
-    F7:          0x41,
-    F8:          0x42,
-    F9:          0x43,
-    F10:         0x44,
-    NUM_LOCK:    0x45,
-    SCROLL_LOCK: 0x46,
-    NUM_HOME:    0x47,
-    NUM_UP:      0x48,
-    NUM_PGUP:    0x49,
-    NUM_SUB:     0x4a,
-    NUM_LEFT:    0x4b,
-    NUM_CENTER:  0x4c,
-    NUM_RIGHT:   0x4d,
-    NUM_ADD:     0x4e,
-    NUM_END:     0x4f,
-    NUM_DOWN:    0x50,
-    NUM_PGDN:    0x51,
-    NUM_INS:     0x52,
-    NUM_DEL:     0x53,
-    SYSREQ:      0x54,           // 84-key keyboard only (simulated with 'alt'+'prtsc' on 101-key keyboards)
-    PAUSE:       0x54,           // 101-key keyboard only
-    F11:         0x57,
-    F12:         0x58,
-    WIN:         0x5b,
-    RWIN:        0x5c,
-    MENU:        0x5d,
-    MAKE:        0x7f,
-    BREAK:       0x80,
-    EXTEND1:     0xe0,
-    EXTEND2:     0xe1
+    'CTRL_C':       Keyboard.SIMCODE.CTRL_C,
+    'CTRL_BREAK':   Keyboard.SIMCODE.CTRL_BREAK,
+    'CTRL_ALT_DEL': Keyboard.SIMCODE.CTRL_ALT_DEL
 };
 
 /**
- * Define identifiers for all possible keys, based on their primary (unshifted) character or function.
- * This also serves as a definition of all supported scan codes, making it possible to create full-featured
+ * Maps SOFTCODE (string) to KEYCODE or SIMCODE (number).
+ *
+ * We define identifiers for all possible keys, based on their primary (unshifted) character or function.
+ * This also serves as a definition of all supported keys, making it possible to create full-featured
  * "soft keyboards".
  *
  * One exception to the (unshifted) rule above is 'prtsc': on the original IBM 83-key and 84-key keyboards,
@@ -438,261 +524,275 @@ Keyboard.SCANCODE = {
  *
  * @enum {number}
  */
-Keyboard.aSoftCodes = {
-    /*  1 */    'esc':          Keyboard.SCANCODE.ESC,
-    /*  2 */    '1':            Keyboard.SCANCODE.ONE,
-    /*  3 */    '2':            Keyboard.SCANCODE.TWO,
-    /*  4 */    '3':            Keyboard.SCANCODE.THREE,
-    /*  5 */    '4':            Keyboard.SCANCODE.FOUR,
-    /*  6 */    '5':            Keyboard.SCANCODE.FIVE,
-    /*  7 */    '6':            Keyboard.SCANCODE.SIX,
-    /*  8 */    '7':            Keyboard.SCANCODE.SEVEN,
-    /*  9 */    '8':            Keyboard.SCANCODE.EIGHT,
-    /* 10 */    '9':            Keyboard.SCANCODE.NINE,
-    /* 11 */    '0':            Keyboard.SCANCODE.ZERO,
-    /* 12 */    '-':            Keyboard.SCANCODE.DASH,
-    /* 13 */    '=':            Keyboard.SCANCODE.EQUALS,
-    /* 14 */    'bs':           Keyboard.SCANCODE.BS,
-    /* 15 */    'tab':          Keyboard.SCANCODE.TAB,
-    /* 16 */    'q':            Keyboard.SCANCODE.Q,
-    /* 17 */    'w':            Keyboard.SCANCODE.W,
-    /* 18 */    'e':            Keyboard.SCANCODE.E,
-    /* 19 */    'r':            Keyboard.SCANCODE.R,
-    /* 20 */    't':            Keyboard.SCANCODE.T,
-    /* 21 */    'y':            Keyboard.SCANCODE.Y,
-    /* 22 */    'u':            Keyboard.SCANCODE.U,
-    /* 23 */    'i':            Keyboard.SCANCODE.I,
-    /* 24 */    'o':            Keyboard.SCANCODE.O,
-    /* 25 */    'p':            Keyboard.SCANCODE.P,
-    /* 26 */    '[':            Keyboard.SCANCODE.LBRACK,
-    /* 27 */    ']':            Keyboard.SCANCODE.RBRACK,
-    /* 28 */    'enter':        Keyboard.SCANCODE.ENTER,
-    /* 29 */    'ctrl':         Keyboard.SCANCODE.CTRL,
-    /* 30 */    'a':            Keyboard.SCANCODE.A,
-    /* 31 */    's':            Keyboard.SCANCODE.S,
-    /* 32 */    'd':            Keyboard.SCANCODE.D,
-    /* 33 */    'f':            Keyboard.SCANCODE.F,
-    /* 34 */    'g':            Keyboard.SCANCODE.G,
-    /* 35 */    'h':            Keyboard.SCANCODE.H,
-    /* 36 */    'j':            Keyboard.SCANCODE.J,
-    /* 37 */    'k':            Keyboard.SCANCODE.K,
-    /* 38 */    'l':            Keyboard.SCANCODE.L,
-    /* 39 */    ';':            Keyboard.SCANCODE.SEMI,
-    /* 40 */    'quote':        Keyboard.SCANCODE.QUOTE,        // formerly "squote"
-    /* 41 */    '`':            Keyboard.SCANCODE.BQUOTE,       // formerly "bquote"
-    /* 42 */    'shift':        Keyboard.SCANCODE.SHIFT,        // formerly "lshift"
-    /* 43 */    '\\':           Keyboard.SCANCODE.BSLASH,       // formerly "bslash"
-    /* 44 */    'z':            Keyboard.SCANCODE.Z,
-    /* 45 */    'x':            Keyboard.SCANCODE.X,
-    /* 46 */    'c':            Keyboard.SCANCODE.C,
-    /* 47 */    'v':            Keyboard.SCANCODE.V,
-    /* 48 */    'b':            Keyboard.SCANCODE.B,
-    /* 49 */    'n':            Keyboard.SCANCODE.N,
-    /* 50 */    'm':            Keyboard.SCANCODE.M,
-    /* 51 */    ',':            Keyboard.SCANCODE.COMMA,
-    /* 52 */    '.':            Keyboard.SCANCODE.PERIOD,
-    /* 53 */    '/':            Keyboard.SCANCODE.SLASH,
-    /* 54 */    'right-shift':  Keyboard.SCANCODE.RSHIFT,       // formerly "rshift"
-    /* 55 */    'prtsc':        Keyboard.SCANCODE.PRTSC,        // unshifted '*'; becomes dedicated 'Print Screen' key on 101-key keyboards
-    /* 56 */    'alt':          Keyboard.SCANCODE.ALT,
-    /* 57 */    'space':        Keyboard.SCANCODE.SPACE,
-    /* 58 */    'caps-lock':    Keyboard.SCANCODE.CAPS_LOCK,
-    /* 59 */    'f1':           Keyboard.SCANCODE.F1,
-    /* 60 */    'f2':           Keyboard.SCANCODE.F2,
-    /* 61 */    'f3':           Keyboard.SCANCODE.F3,
-    /* 62 */    'f4':           Keyboard.SCANCODE.F4,
-    /* 63 */    'f5':           Keyboard.SCANCODE.F5,
-    /* 64 */    'f6':           Keyboard.SCANCODE.F6,
-    /* 65 */    'f7':           Keyboard.SCANCODE.F7,
-    /* 66 */    'f8':           Keyboard.SCANCODE.F8,
-    /* 67 */    'f9':           Keyboard.SCANCODE.F9,
-    /* 68 */    'f10':          Keyboard.SCANCODE.F10,
-    /* 69 */    'num-lock':     Keyboard.SCANCODE.NUM_LOCK,
-    /* 70 */    'scroll-lock':  Keyboard.SCANCODE.SCROLL_LOCK,  // TODO: 0xe046 on 101-key keyboards?
-    /* 71 */    'num-home':     Keyboard.SCANCODE.NUM_HOME,     // formerly "home"
-    /* 72 */    'num-up':       Keyboard.SCANCODE.NUM_UP,       // formerly "up-arrow"
-    /* 73 */    'num-pgup':     Keyboard.SCANCODE.NUM_PGUP,     // formerly "page-up"
-    /* 74 */    'num-sub':      Keyboard.SCANCODE.NUM_SUB,      // formerly "num-minus"
-    /* 75 */    'num-left':     Keyboard.SCANCODE.NUM_LEFT,     // formerly "left-arrow"
-    /* 76 */    'num-center':   Keyboard.SCANCODE.NUM_CENTER,   // formerly "center"
-    /* 77 */    'num-right':    Keyboard.SCANCODE.NUM_RIGHT,    // formerly "right-arrow"
-    /* 78 */    'num-add':      Keyboard.SCANCODE.NUM_ADD,      // formerly "num-plus"
-    /* 79 */    'num-end':      Keyboard.SCANCODE.NUM_END,      // formerly "end"
-    /* 80 */    'num-down':     Keyboard.SCANCODE.NUM_DOWN,     // formerly "down-arrow"
-    /* 81 */    'num-pgdn':     Keyboard.SCANCODE.NUM_PGDN,     // formerly "page-down"
-    /* 82 */    'num-ins':      Keyboard.SCANCODE.NUM_INS,      // formerly "ins"
-    /* 83 */    'num-del':      Keyboard.SCANCODE.NUM_DEL,      // formerly "del"
-    /* 84 */    'sysreq':       Keyboard.SCANCODE.SYSREQ,       // 84-key keyboard only (simulated with 'alt'+'prtsc' on 101-key keyboards)
-    /* 84 */    'pause':        Keyboard.SCANCODE.PAUSE,        // 101-key keyboard only
-    /* 85 */    'f11':          Keyboard.SCANCODE.F11,
-    /* 86 */    'f12':          Keyboard.SCANCODE.F12,
-    /* 87 */    'num-enter':    Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.ENTER << 8),
-    /* 88 */    'right-ctrl':   Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.CTRL << 8),
-    /* 89 */    'num-div':      Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.SLASH << 8),
-    /* 90 */    'num-mul':      Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.PRTSC << 8),
-    /* 91 */    'right-alt':    Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.ALT << 8),
-    /* 92 */    'home':         Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.NUM_HOME << 8),
-    /* 93 */    'up':           Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.NUM_UP << 8),
-    /* 94 */    'pgup':         Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.NUM_PGUP << 8),
-    /* 95 */    'left':         Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.NUM_LEFT << 8),
-    /* 96 */    'right':        Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.NUM_RIGHT << 8),
-    /* 97 */    'end':          Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.NUM_END << 8),
-    /* 98 */    'down':         Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.NUM_DOWN << 8),
-    /* 99 */    'pgdn':         Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.NUM_PGDN << 8),
-   /* 100 */    'ins':          Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.NUM_INS << 8),
-   /* 101 */    'del':          Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.NUM_DEL << 8),
-                'win':          Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.WIN << 8),
-                'right-win':    Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.RWIN << 8),
-                'menu':         Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.MENU << 8)
+Keyboard.SOFTCODES = {
+    /*  1 */    'esc':          Keyboard.SIMCODE.ESC,
+    /*  2 */    '1':            Keyboard.ASCII['1'],
+    /*  3 */    '2':            Keyboard.ASCII['2'],
+    /*  4 */    '3':            Keyboard.ASCII['3'],
+    /*  5 */    '4':            Keyboard.ASCII['4'],
+    /*  6 */    '5':            Keyboard.ASCII['5'],
+    /*  7 */    '6':            Keyboard.ASCII['6'],
+    /*  8 */    '7':            Keyboard.ASCII['7'],
+    /*  9 */    '8':            Keyboard.ASCII['8'],
+    /* 10 */    '9':            Keyboard.ASCII['9'],
+    /* 11 */    '0':            Keyboard.ASCII['0'],
+    /* 12 */    '-':            Keyboard.ASCII['-'],
+    /* 13 */    '=':            Keyboard.ASCII['='],
+    /* 14 */    'bs':           Keyboard.SIMCODE.BS,
+    /* 15 */    'tab':          Keyboard.SIMCODE.TAB,
+    /* 16 */    'q':            Keyboard.ASCII.Q,
+    /* 17 */    'w':            Keyboard.ASCII.W,
+    /* 18 */    'e':            Keyboard.ASCII.E,
+    /* 19 */    'r':            Keyboard.ASCII.R,
+    /* 20 */    't':            Keyboard.ASCII.T,
+    /* 21 */    'y':            Keyboard.ASCII.Y,
+    /* 22 */    'u':            Keyboard.ASCII.U,
+    /* 23 */    'i':            Keyboard.ASCII.I,
+    /* 24 */    'o':            Keyboard.ASCII.O,
+    /* 25 */    'p':            Keyboard.ASCII.P,
+    /* 26 */    '[':            Keyboard.ASCII['['],
+    /* 27 */    ']':            Keyboard.ASCII[']'],
+    /* 28 */    'enter':        Keyboard.KEYCODE.CR,
+    /* 29 */    'ctrl':         Keyboard.SIMCODE.CTRL,
+    /* 30 */    'a':            Keyboard.ASCII.A,
+    /* 31 */    's':            Keyboard.ASCII.S,
+    /* 32 */    'd':            Keyboard.ASCII.D,
+    /* 33 */    'f':            Keyboard.ASCII.F,
+    /* 34 */    'g':            Keyboard.ASCII.G,
+    /* 35 */    'h':            Keyboard.ASCII.H,
+    /* 36 */    'j':            Keyboard.ASCII.J,
+    /* 37 */    'k':            Keyboard.ASCII.K,
+    /* 38 */    'l':            Keyboard.ASCII.L,
+    /* 39 */    ';':            Keyboard.ASCII[';'],
+    /* 40 */    'quote':        Keyboard.ASCII["'"],            // formerly "squote"
+    /* 41 */    '`':            Keyboard.ASCII['`'],            // formerly "bquote"
+    /* 42 */    'shift':        Keyboard.SIMCODE.SHIFT,         // formerly "lshift"
+    /* 43 */    '\\':           Keyboard.ASCII['\\'],           // formerly "bslash"
+    /* 44 */    'z':            Keyboard.ASCII.Z,
+    /* 45 */    'x':            Keyboard.ASCII.X,
+    /* 46 */    'c':            Keyboard.ASCII.C,
+    /* 47 */    'v':            Keyboard.ASCII.V,
+    /* 48 */    'b':            Keyboard.ASCII.B,
+    /* 49 */    'n':            Keyboard.ASCII.N,
+    /* 50 */    'm':            Keyboard.ASCII.M,
+    /* 51 */    ',':            Keyboard.ASCII[','],
+    /* 52 */    '.':            Keyboard.ASCII['.'],
+    /* 53 */    '/':            Keyboard.ASCII['/'],
+    /* 54 */    'right-shift':  Keyboard.SIMCODE.RSHIFT,        // formerly "rshift"
+    /* 55 */    'prtsc':        Keyboard.SIMCODE.PRTSC,         // unshifted '*'; becomes dedicated 'Print Screen' key on 101-key keyboards
+    /* 56 */    'alt':          Keyboard.SIMCODE.ALT,
+    /* 57 */    'space':        Keyboard.ASCII[' '],
+    /* 58 */    'caps-lock':    Keyboard.SIMCODE.CAPS_LOCK,
+    /* 59 */    'f1':           Keyboard.SIMCODE.F1,
+    /* 60 */    'f2':           Keyboard.SIMCODE.F2,
+    /* 61 */    'f3':           Keyboard.SIMCODE.F3,
+    /* 62 */    'f4':           Keyboard.SIMCODE.F4,
+    /* 63 */    'f5':           Keyboard.SIMCODE.F5,
+    /* 64 */    'f6':           Keyboard.SIMCODE.F6,
+    /* 65 */    'f7':           Keyboard.SIMCODE.F7,
+    /* 66 */    'f8':           Keyboard.SIMCODE.F8,
+    /* 67 */    'f9':           Keyboard.SIMCODE.F9,
+    /* 68 */    'f10':          Keyboard.SIMCODE.F10,
+    /* 69 */    'num-lock':     Keyboard.SIMCODE.NUM_LOCK,
+    /* 70 */    'scroll-lock':  Keyboard.SIMCODE.SCROLL_LOCK,   // TODO: 0xe046 on 101-key keyboards?
+    /* 71 */    'num-home':     Keyboard.SIMCODE.HOME,          // formerly "home"
+    /* 72 */    'num-up':       Keyboard.SIMCODE.UP,            // formerly "up-arrow"
+    /* 73 */    'num-pgup':     Keyboard.SIMCODE.PGUP,          // formerly "page-up"
+    /* 74 */    'num-sub':      Keyboard.SIMCODE.NUM_SUB,       // formerly "num-minus"
+    /* 75 */    'num-left':     Keyboard.SIMCODE.LEFT,          // formerly "left-arrow"
+    /* 76 */    'num-center':   Keyboard.SIMCODE.NUM_CENTER,    // formerly "center"
+    /* 77 */    'num-right':    Keyboard.SIMCODE.RIGHT,         // formerly "right-arrow"
+    /* 78 */    'num-add':      Keyboard.SIMCODE.NUM_ADD,       // formerly "num-plus"
+    /* 79 */    'num-end':      Keyboard.SIMCODE.END,           // formerly "end"
+    /* 80 */    'num-down':     Keyboard.SIMCODE.DOWN,          // formerly "down-arrow"
+    /* 81 */    'num-pgdn':     Keyboard.SIMCODE.PGDN,          // formerly "page-down"
+    /* 82 */    'num-ins':      Keyboard.SIMCODE.INS,           // formerly "ins"
+    /* 83 */    'num-del':      Keyboard.SIMCODE.DEL            // formerly "del"
+//  /* 84 */    'sysreq':       Keyboard.SCANCODE.SYSREQ,       // 84-key keyboard only (simulated with 'alt'+'prtsc' on 101-key keyboards)
+//  /* 84 */    'pause':        Keyboard.SCANCODE.PAUSE,        // 101-key keyboard only
+//  /* 85 */    'f11':          Keyboard.SCANCODE.F11,
+//  /* 86 */    'f12':          Keyboard.SCANCODE.F12,
+//  /* 87 */    'num-enter':    Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.ENTER << 8),
+//  /* 88 */    'right-ctrl':   Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.CTRL << 8),
+//  /* 89 */    'num-div':      Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.SLASH << 8),
+//  /* 90 */    'num-mul':      Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.PRTSC << 8),
+//  /* 91 */    'right-alt':    Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.ALT << 8),
+//  /* 92 */    'home':         Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.NUM_HOME << 8),
+//  /* 93 */    'up':           Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.NUM_UP << 8),
+//  /* 94 */    'pgup':         Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.NUM_PGUP << 8),
+//  /* 95 */    'left':         Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.NUM_LEFT << 8),
+//  /* 96 */    'right':        Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.NUM_RIGHT << 8),
+//  /* 97 */    'end':          Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.NUM_END << 8),
+//  /* 98 */    'down':         Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.NUM_DOWN << 8),
+//  /* 99 */    'pgdn':         Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.NUM_PGDN << 8),
+//  /*100 */    'ins':          Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.NUM_INS << 8),
+//  /*101 */    'del':          Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.NUM_DEL << 8),
+//              'win':          Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.WIN << 8),
+//              'right-win':    Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.RWIN << 8),
+//              'menu':         Keyboard.SCANCODE.EXTEND1 | (Keyboard.SCANCODE.MENU << 8)
 };
 
 /**
- * This array is used by keySimulateUpOrDown() to lookup a given keyCode and convert it to a scan code
- * (lower byte) plus any required shift key states (upper bytes).
+ * Maps "soft-key" definitions (above) of shift/modifier keys to their corresponding (default) STATES bit.
+ *
+ * @enum {number}
+ */
+Keyboard.LEDSTATES = {
+    'caps-lock':    Keyboard.STATE.CAPS_LOCK,
+    'num-lock':     Keyboard.STATE.NUM_LOCK,
+    'scroll-lock':  Keyboard.STATE.SCROLL_LOCK
+};
+
+/**
+ * Maps SIMCODE (number) to SCANCODE (number(s)).
+ *
+ * This array is used by keySimulate() to lookup a given SIMCODE and convert it to a SCANCODE
+ * (lower byte), plus any required shift key SCANCODES (upper bytes).
  *
  * Using keyCodes from keyPress events proved to be more robust than using keyCodes from keyDown and
  * keyUp events, in part because of differences in the way browsers generate the keyDown and keyUp events.
  * For example, Safari on iOS devices will not generate up/down events for shift keys, and for other keys,
- * the up/down events are usually generated after the actual press is complete, and in rapid succession,
- * which doesn't always give a simulation (eg, C1Pjs) enough time to detect the key.
+ * the up/down events are usually generated after the actual press is complete, and in rapid succession.
  *
  * The other problem (which is more of a problem with keyboards like the C1P than any IBM keyboards) is
  * that the shift/modifier state for a character on the "source" keyboard may not match the shift/modifier
  * state for the same character on the "target" keyboard.  And since this code is inherited from C1Pjs,
- * we've inherited the same solution: keySimulateUpOrDown() has the ability to "undo" any states in
- * shiftStates that conflict with the state(s) required for the character in question.
+ * we've inherited the same solution: keySimulate() has the ability to "undo" any states in shiftStates
+ * that conflict with the state(s) required for the character in question.
  *
  * @enum {number}
  */
-Keyboard.aKeyCodes = {};
-Keyboard.aKeyCodes[Keyboard.KEYCODE.ESC   + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.ESC;
-Keyboard.aKeyCodes[Keyboard.ASCII['1']]   = Keyboard.SCANCODE.ONE;
-Keyboard.aKeyCodes[Keyboard.ASCII['!']]   = Keyboard.SCANCODE.ONE    | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII['2']]   = Keyboard.SCANCODE.TWO;
-Keyboard.aKeyCodes[Keyboard.ASCII['@']]   = Keyboard.SCANCODE.TWO    | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII['3']]   = Keyboard.SCANCODE.THREE;
-Keyboard.aKeyCodes[Keyboard.ASCII['#']]   = Keyboard.SCANCODE.THREE  | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII['4']]   = Keyboard.SCANCODE.FOUR;
-Keyboard.aKeyCodes[Keyboard.ASCII['$']]   = Keyboard.SCANCODE.FOUR   | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII['5']]   = Keyboard.SCANCODE.FIVE;
-Keyboard.aKeyCodes[Keyboard.ASCII['%']]   = Keyboard.SCANCODE.FIVE   | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII['6']]   = Keyboard.SCANCODE.SIX;
-Keyboard.aKeyCodes[Keyboard.ASCII['^']]   = Keyboard.SCANCODE.SIX    | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII['7']]   = Keyboard.SCANCODE.SEVEN;
-Keyboard.aKeyCodes[Keyboard.ASCII['&']]   = Keyboard.SCANCODE.SEVEN  | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII['8']]   = Keyboard.SCANCODE.EIGHT;
-Keyboard.aKeyCodes[Keyboard.ASCII['*']]   = Keyboard.SCANCODE.EIGHT  | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII['9']]   = Keyboard.SCANCODE.NINE;
-Keyboard.aKeyCodes[Keyboard.ASCII['(']]   = Keyboard.SCANCODE.NINE   | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII['0']]   = Keyboard.SCANCODE.ZERO;
-Keyboard.aKeyCodes[Keyboard.ASCII[')']]   = Keyboard.SCANCODE.ZERO   | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII['-']]   = Keyboard.SCANCODE.DASH;
-Keyboard.aKeyCodes[Keyboard.ASCII['_']]   = Keyboard.SCANCODE.DASH   | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII['=']]   = Keyboard.SCANCODE.EQUALS;
-Keyboard.aKeyCodes[Keyboard.ASCII['+']]   = Keyboard.SCANCODE.EQUALS | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.KEYCODE.BS    + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.BS;
-Keyboard.aKeyCodes[Keyboard.KEYCODE.TAB   + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.TAB;
-Keyboard.aKeyCodes[Keyboard.ASCII.q]      = Keyboard.SCANCODE.Q;
-Keyboard.aKeyCodes[Keyboard.ASCII.Q]      = Keyboard.SCANCODE.Q      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII.w]      = Keyboard.SCANCODE.W;
-Keyboard.aKeyCodes[Keyboard.ASCII.W]      = Keyboard.SCANCODE.W      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII.e]      = Keyboard.SCANCODE.E;
-Keyboard.aKeyCodes[Keyboard.ASCII.E]      = Keyboard.SCANCODE.E      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII.r]      = Keyboard.SCANCODE.R;
-Keyboard.aKeyCodes[Keyboard.ASCII.R]      = Keyboard.SCANCODE.R      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII.t]      = Keyboard.SCANCODE.T;
-Keyboard.aKeyCodes[Keyboard.ASCII.T]      = Keyboard.SCANCODE.T      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII.y]      = Keyboard.SCANCODE.Y;
-Keyboard.aKeyCodes[Keyboard.ASCII.Y]      = Keyboard.SCANCODE.Y      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII.u]      = Keyboard.SCANCODE.U;
-Keyboard.aKeyCodes[Keyboard.ASCII.U]      = Keyboard.SCANCODE.U      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII.i]      = Keyboard.SCANCODE.I;
-Keyboard.aKeyCodes[Keyboard.ASCII.I]      = Keyboard.SCANCODE.I      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII.o]      = Keyboard.SCANCODE.O;
-Keyboard.aKeyCodes[Keyboard.ASCII.O]      = Keyboard.SCANCODE.O      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII.p]      = Keyboard.SCANCODE.P;
-Keyboard.aKeyCodes[Keyboard.ASCII.P]      = Keyboard.SCANCODE.P      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII['[']]   = Keyboard.SCANCODE.LBRACK;
-Keyboard.aKeyCodes[Keyboard.ASCII['{']]   = Keyboard.SCANCODE.LBRACK | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII[']']]   = Keyboard.SCANCODE.RBRACK;
-Keyboard.aKeyCodes[Keyboard.ASCII['}']]   = Keyboard.SCANCODE.RBRACK | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.KEYCODE.CR]   = Keyboard.SCANCODE.ENTER;
-Keyboard.aKeyCodes[Keyboard.KEYCODE.CTRL  + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.CTRL;
-Keyboard.aKeyCodes[Keyboard.ASCII.a]      = Keyboard.SCANCODE.A;
-Keyboard.aKeyCodes[Keyboard.ASCII.A]      = Keyboard.SCANCODE.A      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII.s]      = Keyboard.SCANCODE.S;
-Keyboard.aKeyCodes[Keyboard.ASCII.S]      = Keyboard.SCANCODE.S      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII.d]      = Keyboard.SCANCODE.D;
-Keyboard.aKeyCodes[Keyboard.ASCII.D]      = Keyboard.SCANCODE.D      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII.f]      = Keyboard.SCANCODE.F;
-Keyboard.aKeyCodes[Keyboard.ASCII.F]      = Keyboard.SCANCODE.F      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII.g]      = Keyboard.SCANCODE.G;
-Keyboard.aKeyCodes[Keyboard.ASCII.G]      = Keyboard.SCANCODE.G      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII.h]      = Keyboard.SCANCODE.H;
-Keyboard.aKeyCodes[Keyboard.ASCII.H]      = Keyboard.SCANCODE.H      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII.j]      = Keyboard.SCANCODE.J;
-Keyboard.aKeyCodes[Keyboard.ASCII.J]      = Keyboard.SCANCODE.J      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII.k]      = Keyboard.SCANCODE.K;
-Keyboard.aKeyCodes[Keyboard.ASCII.K]      = Keyboard.SCANCODE.K      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII.l]      = Keyboard.SCANCODE.L;
-Keyboard.aKeyCodes[Keyboard.ASCII.L]      = Keyboard.SCANCODE.L      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII[';']]   = Keyboard.SCANCODE.SEMI;
-Keyboard.aKeyCodes[Keyboard.ASCII[':']]   = Keyboard.SCANCODE.SEMI   | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII["'"]]   = Keyboard.SCANCODE.QUOTE;
-Keyboard.aKeyCodes[Keyboard.ASCII['"']]   = Keyboard.SCANCODE.QUOTE  | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII['`']]   = Keyboard.SCANCODE.BQUOTE;
-Keyboard.aKeyCodes[Keyboard.ASCII['~']]   = Keyboard.SCANCODE.BQUOTE | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.KEYCODE.SHIFT + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.SHIFT;
-Keyboard.aKeyCodes[Keyboard.ASCII['\\']]  = Keyboard.SCANCODE.BSLASH;
-Keyboard.aKeyCodes[Keyboard.ASCII['|']]   = Keyboard.SCANCODE.BSLASH | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII.z]      = Keyboard.SCANCODE.Z;
-Keyboard.aKeyCodes[Keyboard.ASCII.Z]      = Keyboard.SCANCODE.Z      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII.x]      = Keyboard.SCANCODE.X;
-Keyboard.aKeyCodes[Keyboard.ASCII.X]      = Keyboard.SCANCODE.X      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII.c]      = Keyboard.SCANCODE.C;
-Keyboard.aKeyCodes[Keyboard.ASCII.C]      = Keyboard.SCANCODE.C      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII.v]      = Keyboard.SCANCODE.V;
-Keyboard.aKeyCodes[Keyboard.ASCII.V]      = Keyboard.SCANCODE.V      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII.b]      = Keyboard.SCANCODE.B;
-Keyboard.aKeyCodes[Keyboard.ASCII.B]      = Keyboard.SCANCODE.B      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII.n]      = Keyboard.SCANCODE.N;
-Keyboard.aKeyCodes[Keyboard.ASCII.N]      = Keyboard.SCANCODE.N      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII.m]      = Keyboard.SCANCODE.M;
-Keyboard.aKeyCodes[Keyboard.ASCII.M]      = Keyboard.SCANCODE.M      | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII[',']]   = Keyboard.SCANCODE.COMMA;
-Keyboard.aKeyCodes[Keyboard.ASCII['<']]   = Keyboard.SCANCODE.COMMA  | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII['.']]   = Keyboard.SCANCODE.PERIOD;
-Keyboard.aKeyCodes[Keyboard.ASCII['>']]   = Keyboard.SCANCODE.PERIOD | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.ASCII['/']]   = Keyboard.SCANCODE.SLASH;
-Keyboard.aKeyCodes[Keyboard.ASCII['?']]   = Keyboard.SCANCODE.SLASH  | (Keyboard.SCANCODE.SHIFT << 8);
-Keyboard.aKeyCodes[Keyboard.KEYCODE.SHIFT + Keyboard.KEYCODE.ONDOWN  +  Keyboard.KEYCODE.ONRIGHT] = Keyboard.SCANCODE.RSHIFT;
-// TODO: 0x37 ('prtsc')
-Keyboard.aKeyCodes[Keyboard.KEYCODE.ALT   + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.ALT;
-Keyboard.aKeyCodes[Keyboard.ASCII[' ']]   = Keyboard.SCANCODE.SPACE;
-Keyboard.aKeyCodes[Keyboard.KEYCODE.CAPS_LOCK   + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.CAPS_LOCK;
-Keyboard.aKeyCodes[Keyboard.KEYCODE.F1    + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.F1;
-Keyboard.aKeyCodes[Keyboard.KEYCODE.F2    + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.F2;
-Keyboard.aKeyCodes[Keyboard.KEYCODE.F3    + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.F3;
-Keyboard.aKeyCodes[Keyboard.KEYCODE.F4    + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.F4;
-Keyboard.aKeyCodes[Keyboard.KEYCODE.F5    + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.F5;
-Keyboard.aKeyCodes[Keyboard.KEYCODE.F6    + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.F6;
-Keyboard.aKeyCodes[Keyboard.KEYCODE.F7    + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.F7;
-Keyboard.aKeyCodes[Keyboard.KEYCODE.F8    + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.F8;
-Keyboard.aKeyCodes[Keyboard.KEYCODE.F9    + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.F9;
-Keyboard.aKeyCodes[Keyboard.KEYCODE.F10   + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.F10;
-Keyboard.aKeyCodes[Keyboard.KEYCODE.NUM_LOCK    + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.NUM_LOCK;
-Keyboard.aKeyCodes[Keyboard.KEYCODE.SCROLL_LOCK + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.SCROLL_LOCK;
-// TODO: 0x4a ('num-sub') and 0x4e ('num-add')
-Keyboard.aKeyCodes[Keyboard.KEYCODE.HOME  + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.NUM_HOME;
-Keyboard.aKeyCodes[Keyboard.KEYCODE.UP    + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.NUM_UP;
-Keyboard.aKeyCodes[Keyboard.KEYCODE.PGUP  + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.NUM_PGUP;
-Keyboard.aKeyCodes[Keyboard.KEYCODE.LEFT  + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.NUM_LEFT;
-Keyboard.aKeyCodes[Keyboard.KEYCODE.RIGHT + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.NUM_RIGHT;
-Keyboard.aKeyCodes[Keyboard.KEYCODE.END   + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.NUM_END;
-Keyboard.aKeyCodes[Keyboard.KEYCODE.DOWN  + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.NUM_DOWN;
-Keyboard.aKeyCodes[Keyboard.KEYCODE.PGDN  + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.NUM_PGDN;
-Keyboard.aKeyCodes[Keyboard.KEYCODE.INS   + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.NUM_INS;
-Keyboard.aKeyCodes[Keyboard.KEYCODE.DEL   + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.NUM_DEL;
+Keyboard.SIMCODES = {};
+Keyboard.SIMCODES[Keyboard.SIMCODE.ESC]          = Keyboard.SCANCODE.ESC;
+Keyboard.SIMCODES[Keyboard.ASCII['1']]           = Keyboard.SCANCODE.ONE;
+Keyboard.SIMCODES[Keyboard.ASCII['!']]           = Keyboard.SCANCODE.ONE    | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII['2']]           = Keyboard.SCANCODE.TWO;
+Keyboard.SIMCODES[Keyboard.ASCII['@']]           = Keyboard.SCANCODE.TWO    | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII['3']]           = Keyboard.SCANCODE.THREE;
+Keyboard.SIMCODES[Keyboard.ASCII['#']]           = Keyboard.SCANCODE.THREE  | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII['4']]           = Keyboard.SCANCODE.FOUR;
+Keyboard.SIMCODES[Keyboard.ASCII['$']]           = Keyboard.SCANCODE.FOUR   | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII['5']]           = Keyboard.SCANCODE.FIVE;
+Keyboard.SIMCODES[Keyboard.ASCII['%']]           = Keyboard.SCANCODE.FIVE   | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII['6']]           = Keyboard.SCANCODE.SIX;
+Keyboard.SIMCODES[Keyboard.ASCII['^']]           = Keyboard.SCANCODE.SIX    | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII['7']]           = Keyboard.SCANCODE.SEVEN;
+Keyboard.SIMCODES[Keyboard.ASCII['&']]           = Keyboard.SCANCODE.SEVEN  | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII['8']]           = Keyboard.SCANCODE.EIGHT;
+Keyboard.SIMCODES[Keyboard.ASCII['*']]           = Keyboard.SCANCODE.EIGHT  | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII['9']]           = Keyboard.SCANCODE.NINE;
+Keyboard.SIMCODES[Keyboard.ASCII['(']]           = Keyboard.SCANCODE.NINE   | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII['0']]           = Keyboard.SCANCODE.ZERO;
+Keyboard.SIMCODES[Keyboard.ASCII[')']]           = Keyboard.SCANCODE.ZERO   | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII['-']]           = Keyboard.SCANCODE.DASH;
+Keyboard.SIMCODES[Keyboard.ASCII['_']]           = Keyboard.SCANCODE.DASH   | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII['=']]           = Keyboard.SCANCODE.EQUALS;
+Keyboard.SIMCODES[Keyboard.ASCII['+']]           = Keyboard.SCANCODE.EQUALS | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.BS]           = Keyboard.SCANCODE.BS;
+Keyboard.SIMCODES[Keyboard.SIMCODE.TAB]          = Keyboard.SCANCODE.TAB;
+Keyboard.SIMCODES[Keyboard.ASCII.q]              = Keyboard.SCANCODE.Q;
+Keyboard.SIMCODES[Keyboard.ASCII.Q]              = Keyboard.SCANCODE.Q      | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII.w]              = Keyboard.SCANCODE.W;
+Keyboard.SIMCODES[Keyboard.ASCII.W]              = Keyboard.SCANCODE.W      | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII.e]              = Keyboard.SCANCODE.E;
+Keyboard.SIMCODES[Keyboard.ASCII.E]              = Keyboard.SCANCODE.E      | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII.r]              = Keyboard.SCANCODE.R;
+Keyboard.SIMCODES[Keyboard.ASCII.R]              = Keyboard.SCANCODE.R      | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII.t]              = Keyboard.SCANCODE.T;
+Keyboard.SIMCODES[Keyboard.ASCII.T]              = Keyboard.SCANCODE.T      | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII.y]              = Keyboard.SCANCODE.Y;
+Keyboard.SIMCODES[Keyboard.ASCII.Y]              = Keyboard.SCANCODE.Y      | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII.u]              = Keyboard.SCANCODE.U;
+Keyboard.SIMCODES[Keyboard.ASCII.U]              = Keyboard.SCANCODE.U      | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII.i]              = Keyboard.SCANCODE.I;
+Keyboard.SIMCODES[Keyboard.ASCII.I]              = Keyboard.SCANCODE.I      | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII.o]              = Keyboard.SCANCODE.O;
+Keyboard.SIMCODES[Keyboard.ASCII.O]              = Keyboard.SCANCODE.O      | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII.p]              = Keyboard.SCANCODE.P;
+Keyboard.SIMCODES[Keyboard.ASCII.P]              = Keyboard.SCANCODE.P      | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII['[']]           = Keyboard.SCANCODE.LBRACK;
+Keyboard.SIMCODES[Keyboard.ASCII['{']]           = Keyboard.SCANCODE.LBRACK | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII[']']]           = Keyboard.SCANCODE.RBRACK;
+Keyboard.SIMCODES[Keyboard.ASCII['}']]           = Keyboard.SCANCODE.RBRACK | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.KEYCODE.CR]           = Keyboard.SCANCODE.ENTER;
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL]         = Keyboard.SCANCODE.CTRL;
+Keyboard.SIMCODES[Keyboard.ASCII.a]              = Keyboard.SCANCODE.A;
+Keyboard.SIMCODES[Keyboard.ASCII.A]              = Keyboard.SCANCODE.A      | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII.s]              = Keyboard.SCANCODE.S;
+Keyboard.SIMCODES[Keyboard.ASCII.S]              = Keyboard.SCANCODE.S      | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII.d]              = Keyboard.SCANCODE.D;
+Keyboard.SIMCODES[Keyboard.ASCII.D]              = Keyboard.SCANCODE.D      | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII.f]              = Keyboard.SCANCODE.F;
+Keyboard.SIMCODES[Keyboard.ASCII.F]              = Keyboard.SCANCODE.F      | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII.g]              = Keyboard.SCANCODE.G;
+Keyboard.SIMCODES[Keyboard.ASCII.G]              = Keyboard.SCANCODE.G      | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII.h]              = Keyboard.SCANCODE.H;
+Keyboard.SIMCODES[Keyboard.ASCII.H]              = Keyboard.SCANCODE.H      | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII.j]              = Keyboard.SCANCODE.J;
+Keyboard.SIMCODES[Keyboard.ASCII.J]              = Keyboard.SCANCODE.J      | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII.k]              = Keyboard.SCANCODE.K;
+Keyboard.SIMCODES[Keyboard.ASCII.K]              = Keyboard.SCANCODE.K      | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII.l]              = Keyboard.SCANCODE.L;
+Keyboard.SIMCODES[Keyboard.ASCII.L]              = Keyboard.SCANCODE.L      | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII[';']]           = Keyboard.SCANCODE.SEMI;
+Keyboard.SIMCODES[Keyboard.ASCII[':']]           = Keyboard.SCANCODE.SEMI   | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII["'"]]           = Keyboard.SCANCODE.QUOTE;
+Keyboard.SIMCODES[Keyboard.ASCII['"']]           = Keyboard.SCANCODE.QUOTE  | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII['`']]           = Keyboard.SCANCODE.BQUOTE;
+Keyboard.SIMCODES[Keyboard.ASCII['~']]           = Keyboard.SCANCODE.BQUOTE | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.SHIFT]        = Keyboard.SCANCODE.SHIFT;
+Keyboard.SIMCODES[Keyboard.ASCII['\\']]          = Keyboard.SCANCODE.BSLASH;
+Keyboard.SIMCODES[Keyboard.ASCII['|']]           = Keyboard.SCANCODE.BSLASH | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII.z]              = Keyboard.SCANCODE.Z;
+Keyboard.SIMCODES[Keyboard.ASCII.Z]              = Keyboard.SCANCODE.Z      | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII.x]              = Keyboard.SCANCODE.X;
+Keyboard.SIMCODES[Keyboard.ASCII.X]              = Keyboard.SCANCODE.X      | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII.c]              = Keyboard.SCANCODE.C;
+Keyboard.SIMCODES[Keyboard.ASCII.C]              = Keyboard.SCANCODE.C      | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII.v]              = Keyboard.SCANCODE.V;
+Keyboard.SIMCODES[Keyboard.ASCII.V]              = Keyboard.SCANCODE.V      | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII.b]              = Keyboard.SCANCODE.B;
+Keyboard.SIMCODES[Keyboard.ASCII.B]              = Keyboard.SCANCODE.B      | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII.n]              = Keyboard.SCANCODE.N;
+Keyboard.SIMCODES[Keyboard.ASCII.N]              = Keyboard.SCANCODE.N      | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII.m]              = Keyboard.SCANCODE.M;
+Keyboard.SIMCODES[Keyboard.ASCII.M]              = Keyboard.SCANCODE.M      | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII[',']]           = Keyboard.SCANCODE.COMMA;
+Keyboard.SIMCODES[Keyboard.ASCII['<']]           = Keyboard.SCANCODE.COMMA  | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII['.']]           = Keyboard.SCANCODE.PERIOD;
+Keyboard.SIMCODES[Keyboard.ASCII['>']]           = Keyboard.SCANCODE.PERIOD | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.ASCII['/']]           = Keyboard.SCANCODE.SLASH;
+Keyboard.SIMCODES[Keyboard.ASCII['?']]           = Keyboard.SCANCODE.SLASH  | (Keyboard.SCANCODE.SHIFT << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.RSHIFT]       = Keyboard.SCANCODE.RSHIFT;
+Keyboard.SIMCODES[Keyboard.SIMCODE.PRTSC]        = Keyboard.SCANCODE.PRTSC;
+Keyboard.SIMCODES[Keyboard.SIMCODE.ALT]          = Keyboard.SCANCODE.ALT;
+Keyboard.SIMCODES[Keyboard.ASCII[' ']]           = Keyboard.SCANCODE.SPACE;
+Keyboard.SIMCODES[Keyboard.SIMCODE.CAPS_LOCK]    = Keyboard.SCANCODE.CAPS_LOCK;
+Keyboard.SIMCODES[Keyboard.SIMCODE.F1]           = Keyboard.SCANCODE.F1;
+Keyboard.SIMCODES[Keyboard.SIMCODE.F2]           = Keyboard.SCANCODE.F2;
+Keyboard.SIMCODES[Keyboard.SIMCODE.F3]           = Keyboard.SCANCODE.F3;
+Keyboard.SIMCODES[Keyboard.SIMCODE.F4]           = Keyboard.SCANCODE.F4;
+Keyboard.SIMCODES[Keyboard.SIMCODE.F5]           = Keyboard.SCANCODE.F5;
+Keyboard.SIMCODES[Keyboard.SIMCODE.F6]           = Keyboard.SCANCODE.F6;
+Keyboard.SIMCODES[Keyboard.SIMCODE.F7]           = Keyboard.SCANCODE.F7;
+Keyboard.SIMCODES[Keyboard.SIMCODE.F8]           = Keyboard.SCANCODE.F8;
+Keyboard.SIMCODES[Keyboard.SIMCODE.F9]           = Keyboard.SCANCODE.F9;
+Keyboard.SIMCODES[Keyboard.SIMCODE.F10]          = Keyboard.SCANCODE.F10;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_LOCK]     = Keyboard.SCANCODE.NUM_LOCK;
+Keyboard.SIMCODES[Keyboard.SIMCODE.SCROLL_LOCK]  = Keyboard.SCANCODE.SCROLL_LOCK;
+Keyboard.SIMCODES[Keyboard.SIMCODE.HOME]         = Keyboard.SCANCODE.NUM_HOME;
+Keyboard.SIMCODES[Keyboard.SIMCODE.UP]           = Keyboard.SCANCODE.NUM_UP;
+Keyboard.SIMCODES[Keyboard.SIMCODE.PGUP]         = Keyboard.SCANCODE.NUM_PGUP;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_SUB]      = Keyboard.SCANCODE.NUM_SUB;
+Keyboard.SIMCODES[Keyboard.SIMCODE.LEFT]         = Keyboard.SCANCODE.NUM_LEFT;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_CENTER]   = Keyboard.SCANCODE.NUM_CENTER;
+Keyboard.SIMCODES[Keyboard.SIMCODE.RIGHT]        = Keyboard.SCANCODE.NUM_RIGHT;
+Keyboard.SIMCODES[Keyboard.SIMCODE.NUM_ADD]      = Keyboard.SCANCODE.NUM_ADD;
+Keyboard.SIMCODES[Keyboard.SIMCODE.END]          = Keyboard.SCANCODE.NUM_END;
+Keyboard.SIMCODES[Keyboard.SIMCODE.DOWN]         = Keyboard.SCANCODE.NUM_DOWN;
+Keyboard.SIMCODES[Keyboard.SIMCODE.PGDN]         = Keyboard.SCANCODE.NUM_PGDN;
+Keyboard.SIMCODES[Keyboard.SIMCODE.INS]          = Keyboard.SCANCODE.NUM_INS;
+Keyboard.SIMCODES[Keyboard.SIMCODE.DEL]          = Keyboard.SCANCODE.NUM_DEL;
 /*
  * Entries beyond this point are for keys that existed only on 101-key keyboards (well, except for 'sysreq',
  * which also existed on the 84-key keyboard), which ALSO means that these keys essentially did not exist
@@ -709,29 +809,12 @@ Keyboard.aKeyCodes[Keyboard.KEYCODE.DEL   + Keyboard.KEYCODE.ONDOWN] =  Keyboard
  * TODO: Add entries for 'num-mul', 'num-div', 'num-enter', the stand-alone arrow keys, etc, AND at the same time,
  * make sure that keys with multi-byte sequences (eg, 0xe0 0x1c) work properly.
  */
-Keyboard.aKeyCodes[Keyboard.KEYCODE.F11   + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.F11;
-Keyboard.aKeyCodes[Keyboard.KEYCODE.F12   + Keyboard.KEYCODE.ONDOWN] =  Keyboard.SCANCODE.F12;
+Keyboard.SIMCODES[Keyboard.SIMCODE.F11]          = Keyboard.SCANCODE.F11;
+Keyboard.SIMCODES[Keyboard.SIMCODE.F12]          = Keyboard.SCANCODE.F12;
 
-Keyboard.aKeyCodes[Keyboard.KEYCODE.FAKE_CTRLC]      = Keyboard.SCANCODE.C           | (Keyboard.SCANCODE.CTRL << 8);
-Keyboard.aKeyCodes[Keyboard.KEYCODE.FAKE_CTRLBREAK]  = Keyboard.SCANCODE.SCROLL_LOCK | (Keyboard.SCANCODE.CTRL << 8);
-Keyboard.aKeyCodes[Keyboard.KEYCODE.FAKE_CTRLALTDEL] = Keyboard.SCANCODE.NUM_DEL     | (Keyboard.SCANCODE.CTRL << 8) | (Keyboard.SCANCODE.ALT << 16);
-
-/**
- * keySimulateUpOrDown() codes (for diagnostic purposes only)
- *
- * @enum {number}
- */
-Keyboard.SIMCODE = {
-    KEYPRESS:   0,
-    KEYRELEASE: 1,
-    KEYUPDOWN:  2,
-    KEYTIMEOUT: 3,
-    AUTOCLEAR:  4
-};
-
-if (DEBUGGER) {
-    Keyboard.aSimCodeDescs = ["keyPress", "keyRelease", "keyUpDown", "keyTimeout", "autoClear"];
-}
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_C]       = Keyboard.SCANCODE.C           | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_BREAK]   = Keyboard.SCANCODE.SCROLL_LOCK | (Keyboard.SCANCODE.CTRL << 8);
+Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_ALT_DEL] = Keyboard.SCANCODE.NUM_DEL     | (Keyboard.SCANCODE.CTRL << 8) | (Keyboard.SCANCODE.ALT << 16);
 
 /**
  * Commands that can be sent to the Keyboard via the 8042; see sendCmd()
@@ -757,7 +840,7 @@ Keyboard.CMD = {
 Keyboard.CMDRES = {
     OVERRUN:    0x00,
     LOAD_TEST:  0x65,   // undocumented "LOAD MANUFACTURING TEST REQUEST" response code
-    BAT_SUCC:   0xAA,   // Basic Assurance Test (BAT) completed successfully
+    BAT_OK:     0xAA,   // Basic Assurance Test (BAT) succeeded
     ECHO:       0xEE,
     BREAK_PREF: 0xF0,   // break prefix
     ACK:        0xFA,
@@ -807,20 +890,21 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control)
         switch (sBinding) {
         case "kbd":
             this.bindings[id] = control;
-            control.onkeydown = function onKeyDownKeyboard(event) {
-                return kbd.keyUpDown(event, true);
+            control.onkeydown = function onKeyDown(event) {
+                return kbd.onKeyDown(event, true);
             };
-            control.onkeypress = function onKeyPressKeyboard(event) {
-                return kbd.keyPress(event);
+            control.onkeypress = function onKeyPressKbd(event) {
+                return kbd.onKeyPress(event);
             };
-            control.onkeyup = function onKeyUpKeyboard(event) {
-                return kbd.keyUpDown(event, false);
+            control.onkeyup = function onKeyUp(event) {
+                return kbd.onKeyDown(event, false);
             };
             return true;
 
         case "caps-lock":
             this.bindings[id] = control;
             control.onclick = function onClickCapsLock(event) {
+                if (kbd.cpu) kbd.cpu.setFocus();
                 return kbd.toggleCapsLock(event);
             };
             return true;
@@ -828,6 +912,7 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control)
         case "num-lock":
             this.bindings[id] = control;
             control.onclick = function onClickNumLock(event) {
+                if (kbd.cpu) kbd.cpu.setFocus();
                 return kbd.toggleNumLock(event);
             };
             return true;
@@ -835,34 +920,39 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control)
         case "scroll-lock":
             this.bindings[id] = control;
             control.onclick = function onClickScrollLock(event) {
+                if (kbd.cpu) kbd.cpu.setFocus();
                 return kbd.toggleScrollLock(event);
             };
             return true;
 
         default:
-            if (Keyboard.aButtonCodes[sBinding] !== undefined && sHTMLType == "button") {
+            /*
+             * Maintain support for older button codes; eg, map button code "ctrl-c" to CLICKCODE "CTRL_C"
+             */
+            var sCode = sBinding.toUpperCase().replace(/-/g, '_');
+            if (Keyboard.CLICKCODES[sCode] !== undefined && sHTMLType == "button") {
                 this.bindings[id] = control;
-                control.onclick = function(kbd, sKey, keyCode) {
+                control.onclick = function(kbd, sKey, simCode) {
                     return function onClickKeyboard(event) {
                         if (DEBUG && kbd.messageEnabled()) kbd.messageDebugger(sKey + " clicked", Debugger.MESSAGE.KEYS);
                         if (kbd.cpu) kbd.cpu.setFocus();
-                        kbd.checkShiftState(keyCode);
-                        return !kbd.keySimulatePress(keyCode);
+                        kbd.updateShiftState(simCode);  // future-proofing if/when any LOCK keys are added to CLICKCODES
+                        kbd.addActiveKey(simCode, true);
                     };
-                }(this, sBinding, Keyboard.aButtonCodes[sBinding]);
+                }(this, sCode, Keyboard.CLICKCODES[sCode]);
                 return true;
-            } else if (Keyboard.aSoftCodes[sBinding] !== undefined) {
+            } else if (Keyboard.SOFTCODES[sBinding] !== undefined) {
                 this.bindings[id] = control;
-                var fnDown = function(kbd, sKey, bScan) {
+                var fnDown = function(kbd, sKey, simCode) {
                     return function onMouseOrTouchDownKeyboard(event) {
-                        kbd.addScanCode(bScan);
+                        kbd.addActiveKey(simCode);
                     };
-                }(this, sBinding, Keyboard.aSoftCodes[sBinding]);
-                var fnUp = function (kbd, sKey, bScan) {
+                }(this, sBinding, Keyboard.SOFTCODES[sBinding]);
+                var fnUp = function (kbd, sKey, simCode) {
                     return function onMouseOrTouchUpKeyboard(event) {
-                        kbd.addScanCode(bScan);
+                        kbd.removeActiveKey(simCode);
                     };
-                }(this, sBinding, Keyboard.aSoftCodes[sBinding] | Keyboard.SCANCODE.BREAK);
+                }(this, sBinding, Keyboard.SOFTCODES[sBinding]);
                 if ('ontouchstart' in window) {
                     control.ontouchstart = fnDown;
                     control.ontouchend = fnUp;
@@ -879,19 +969,20 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control)
 };
 
 /**
- * findBinding(bKey, sType, fDown)
+ * findBinding(simCode, sType, fDown)
  *
  * @this {Keyboard}
- * @param {number} bKey
+ * @param {number} simCode
  * @param {string} sType is the type of control (eg, "button" or "key")
  * @param {boolean} [fDown] is true if the key is going down, false if up, or undefined if unchanged
  * @return {Object} is the HTML control DOM object (eg, HTMLButtonElement), or undefined if no such control exists
  */
-Keyboard.prototype.findBinding = function(bKey, sType, fDown)
+Keyboard.prototype.findBinding = function(simCode, sType, fDown)
 {
     var control;
-    for (var sBinding in Keyboard.aSoftCodes) {
-        if (Keyboard.aSoftCodes[sBinding] == bKey) {
+    var code = Keyboard.SHIFTED_KEYCODES[simCode];
+    for (var sBinding in Keyboard.SOFTCODES) {
+        if (Keyboard.SOFTCODES[sBinding] == simCode || Keyboard.SOFTCODES[sBinding] == this.toUpperKey(simCode)) {
             var id = sType + '-' + sBinding;
             control = this.bindings[id];
             if (control && fDown !== undefined) {
@@ -944,34 +1035,19 @@ Keyboard.prototype.setModel = function(nModel)
 };
 
 /**
- * setReady()
+ * resetDevice(fNotify)
  *
  * @this {Keyboard}
+ * @param {boolean} [fNotify]
  */
-Keyboard.prototype.setReady = function()
-{
-    this.iOS = web.isUserAgent("iOS");
-    this.fMobile = web.isMobile();
-    this.messageDebugger("mobile keyboard support: " + (this.fMobile? "true" : "false"));
-    /*
-     * TODO: Determine how to declare this superclass method in order to avoid a type warning in WebStorm
-     */
-    return Component.prototype.setReady.call(this);
-};
-
-/**
- * resetDevice()
- *
- * @this {Keyboard}
- */
-Keyboard.prototype.resetDevice = function()
+Keyboard.prototype.resetDevice = function(fNotify)
 {
     /*
      * TODO: There's more to reset, like LED indicators, default type rate, and emptying the scan code buffer.
      */
-    this.messageDebugger("keyboard reset", Debugger.MESSAGE.KBD | Debugger.MESSAGE.PORT);
-    this.abScanBuffer = [Keyboard.CMDRES.BAT_SUCC];
-    if (this.chipset) this.chipset.notifyKbdData(true);
+    this.messageDebugger("keyboard reset", Debugger.MESSAGE.KEYBOARD | Debugger.MESSAGE.PORT);
+    this.abScanBuffer = [Keyboard.CMDRES.BAT_OK];
+    if (fNotify && this.chipset) this.chipset.notifyKbdData(this.abScanBuffer[0]);
 };
 
 /**
@@ -991,7 +1067,7 @@ Keyboard.prototype.setEnable = function(fData, fClock)
 {
     var fReset = false;
     if (this.fClock !== fClock) {
-        if (DEBUG && this.messageEnabled(Debugger.MESSAGE.KBD | Debugger.MESSAGE.PORT)) {
+        if (DEBUG && this.messageEnabled(Debugger.MESSAGE.KEYBOARD | Debugger.MESSAGE.PORT)) {
             this.messageDebugger("keyboard clock line changing to " + fClock, true);
         }
         /*
@@ -1001,7 +1077,7 @@ Keyboard.prototype.setEnable = function(fData, fClock)
         this.fClock = this.fResetOnEnable = fClock;
     }
     if (this.fData !== fData) {
-        if (DEBUG && this.messageEnabled(Debugger.MESSAGE.KBD | Debugger.MESSAGE.PORT)) {
+        if (DEBUG && this.messageEnabled(Debugger.MESSAGE.KEYBOARD | Debugger.MESSAGE.PORT)) {
             this.messageDebugger("keyboard data line changing to " + fData, true);
         }
         this.fData = fData;
@@ -1010,11 +1086,11 @@ Keyboard.prototype.setEnable = function(fData, fClock)
          * *exactly* what's called for here.
          */
         if (fData && !this.fResetOnEnable) {
-            this.shiftScanCode();
+            this.shiftScanCode(true);
         }
     }
     if (this.fData && this.fResetOnEnable) {
-        this.resetDevice();
+        this.resetDevice(true);
         this.fResetOnEnable = false;
         fReset = true;
     }
@@ -1046,54 +1122,80 @@ Keyboard.prototype.sendCmd = function(bCmd)
 };
 
 /**
- * readScanCode(fShift)
+ * checkScanCode()
  *
- * This is the ChipSet's interface for reading scan codes.  This also doubles as the ChipSet's interface for checking
- * whether or not any data is available.
+ * This is the ChipSet's interface for checking data availability.
  *
  * @this {Keyboard}
- * @param {boolean} [fShift] is used by the MODEL_5170 8042 Keyboard Controller (supersedes the old setEnable() interface)
  * @return {number} next scan code, or 0 if none
  */
-Keyboard.prototype.readScanCode = function(fShift)
+Keyboard.prototype.checkScanCode = function()
 {
     var b = 0;
     if (this.abScanBuffer.length) {
         b = this.abScanBuffer[0];
-        if (this.messageEnabled()) this.messageDebugger("scan code 0x" + str.toHexByte(b) + " delivered");
-        if (fShift) this.shiftScanCode();
+        if (this.chipset) this.chipset.notifyKbdData(b);
     }
+    if (this.messageEnabled()) this.messageDebugger("scan code 0x" + str.toHexByte(b) + " available");
     return b;
 };
 
 /**
- * shiftScanCode(fFlush)
+ * readScanCode()
  *
- * This is the ChipSet's interface to advance (or flush) scan codes.
+ * This is the ChipSet's interface for reading scan codes.
  *
  * @this {Keyboard}
- * @param {boolean} [fFlush] is true to completely flush the keyboard buffer
+ * @return {number} next scan code, or 0 if none
  */
-Keyboard.prototype.shiftScanCode = function(fFlush)
+Keyboard.prototype.readScanCode = function()
+{
+    var b = 0;
+    if (this.abScanBuffer.length) {
+        b = this.abScanBuffer[0];
+    }
+    if (this.messageEnabled()) this.messageDebugger("scan code 0x" + str.toHexByte(b) + " delivered");
+    return b;
+};
+
+/**
+ * flushScanCode()
+ *
+ * This is the ChipSet's interface to flush scan codes.
+ *
+ * @this {Keyboard}
+ */
+Keyboard.prototype.flushScanCode = function()
+{
+    this.abScanBuffer = [];
+    if (this.messageEnabled()) this.messageDebugger("scan codes flushed");
+};
+
+/**
+ * shiftScanCode(fNotify)
+ *
+ * This is the ChipSet's interface to advance scan codes.
+ *
+ * @this {Keyboard}
+ * @param {boolean} [fNotify] is true to notify ChipSet if more data is available.
+ */
+Keyboard.prototype.shiftScanCode = function(fNotify)
 {
     if (this.abScanBuffer.length > 0) {
-        if (fFlush) {
-            /*
-             * This is now called after receipt of an 8042 self-test command, to ensure we don't
-             * overwrite the self-test response byte with left-over scan codes.
-             */
-            this.abScanBuffer = [];
-        } else {
-            /*
-             * The keyboard interrupt service routine toggles the enable bit after reading a scan code, so
-             * presumably this is the proper point at which to shift the last scan code out, and then assert
-             * another interrupt if more scan codes exist.
-             */
-            this.abScanBuffer.shift();
-            if (this.abScanBuffer.length > 0) {
-                if (this.chipset) this.chipset.notifyKbdData(true);
+        /*
+         * The keyboard interrupt service routine toggles the enable bit after reading a scan code, so
+         * presumably this is the proper point at which to shift the last scan code out, and then assert
+         * another interrupt if more scan codes exist.
+         */
+        this.abScanBuffer.shift();
+        if (fNotify) {
+            if (!this.abScanBuffer.length || !this.chipset) {
+                fNotify = false;
+            } else {
+                this.chipset.notifyKbdData(this.abScanBuffer[0]);
             }
         }
+        if (this.messageEnabled()) this.messageDebugger("scan codes shifted, notify " + (fNotify? "true" : "false"));
     }
 };
 
@@ -1160,20 +1262,6 @@ Keyboard.prototype.reset = function()
      * New scan codes are "pushed" onto abScanBuffer and then "shifted" off.
      */
     this.abScanBuffer = [];
-
-    /*
-     * When a key "down" is simulated on behalf of some keyCode, I save the timer object responsible for
-     * simulating the key "up" here, so that if I detect the actual key going up sooner, I can cancel the
-     * timer and simulate the "up" immediately.  Similarly, if another press for the same key arrives before
-     * last one expired (eg, auto-repeat), I need to cancel the previous timer for that key before setting another.
-     */
-    for (var i in this.aKeyTimers) {
-        if (str.isValidInt(i)) continue; // ignore any non-numeric properties, if any
-        if (this.aKeyTimers[i]) {
-            clearTimeout(this.aKeyTimers[i]);
-            this.aKeyTimers[i] = null;
-        }
-    }
 
     this.prevCharDown = 0;
     this.prevKeyDown = 0;
@@ -1277,71 +1365,17 @@ Keyboard.prototype.addScanCode = function(bScan, fRepeat)
      */
     if (this.abScanBuffer) {
         if (this.abScanBuffer.length < Keyboard.LIMIT.MAX_SCANCODES) {
-            if (!fDown && !this.aScanCodesActive[bKey] || fDown && this.aScanCodesActive[bKey] && !fRepeat) {
-                if (MAXDEBUG && this.messageEnabled()) this.messageDebugger("scan code 0x" + str.toHexByte(bScan) + " redundant");
-                return;
-            }
-            this.aScanCodesActive[bKey] = fDown;
             if (this.messageEnabled()) this.messageDebugger("scan code 0x" + str.toHexByte(bScan) + " buffered");
             this.abScanBuffer.push(bScan);
             if (this.abScanBuffer.length == 1) {
-                if (this.chipset) this.chipset.notifyKbdData(true);
+                if (this.chipset) this.chipset.notifyKbdData(bScan);
             }
-            this.findBinding(bKey, "key", fDown);
             return;
         }
         if (this.abScanBuffer.length == Keyboard.LIMIT.MAX_SCANCODES) {
             this.abScanBuffer.push(Keyboard.CMDRES.BUFF_FULL);
         }
         this.messageDebugger("scan code buffer overflow");
-    }
-};
-
-/**
- * calcReleaseDelay(fRepeat)
- *
- * Attempts to scale our default "release" delay appropriately for the current CPU speed.
- *
- * Note that if the effective CPU speed exceeds 16Mhz, it becomes very difficult to rely on timer-driven key events
- * (even the shortest available timer delay still gives the CPU too much time, so it thinks that even the briefest key
- * press represents a held key, resulting in multiple keystrokes).
- *
- * @this {Keyboard}
- * @param {boolean} fRepeat is true if a timeout had already been active for the current key
- * @return {number}
- */
-Keyboard.prototype.calcReleaseDelay = function(fRepeat)
-{
-    /*
-     * NOTE: This delay affects only the "up" delay, not repeat delay, but it's useful to have an initial
-     * "up" delay that's sufficiently large to ensure the native machine's auto-repeat behavior cooperates
-     * with the virtual machine's auto-repeat behavior. msReleaseDelay is the initial delay, msReleaseRepeat
-     * is the subsequent delay.
-     *
-     * Unfortunately, with a large initial delay, we need to enable the auto-clear code in the keyUpDown()
-     * handler, otherwise doing things like pressing ENTER repeatedly will result in sluggish behavior
-     * (because you can generally press/release/repress keys faster than they will auto-repeat).
-     */
-    var msDelay = (fRepeat? this.msReleaseRepeat : this.msReleaseDelay);
-    if (this.cpu && this.cpu.aCounts.mhz) msDelay /= this.cpu.aCounts.mhz;
-    return msDelay;
-};
-
-/**
- * autoClear(notKeyCode)
- *
- * @this {Keyboard}
- * @param {number} [notKeyCode]
- */
-Keyboard.prototype.autoClear = function(notKeyCode)
-{
-    if (this.prevCharDown && (notKeyCode === undefined || notKeyCode != this.prevCharDown)) {
-        if (DEBUG) {
-            if (this.messageEnabled()) this.messageDebugger("autoClear(" + this.prevCharDown + ")");
-            this.assert(this.aKeyTimers[this.prevCharDown]);
-        }
-        clearTimeout(this.aKeyTimers[this.prevCharDown]);
-        this.keySimulateUpOrDown(this.prevCharDown, false, Keyboard.SIMCODE.AUTOCLEAR);
     }
 };
 
@@ -1375,7 +1409,7 @@ Keyboard.prototype.injectKeysFromBuffer = function(msDelay)
         if (ch == 0x0a) ch = 0x0d;
 
         this.sInjectBuffer = this.sInjectBuffer.substr(1);
-        this.keySimulatePress(ch);
+        this.addActiveKey(ch, true);
     }
     if (this.sInjectBuffer.length > 0) {
         setTimeout(function (kbd) {
@@ -1426,8 +1460,8 @@ Keyboard.prototype.updateLEDs = function(bitState)
  */
 Keyboard.prototype.toggleCapsLock = function(event)
 {
-    if (this.cpu) this.cpu.setFocus();
-    this.keySimulatePress(Keyboard.KEYCODE.CAPS_LOCK + Keyboard.KEYCODE.ONDOWN, true);
+    this.updateShiftState(Keyboard.SIMCODE.CAPS_LOCK);
+    this.addActiveKey(Keyboard.SIMCODE.CAPS_LOCK, true);
 };
 
 /**
@@ -1438,8 +1472,8 @@ Keyboard.prototype.toggleCapsLock = function(event)
  */
 Keyboard.prototype.toggleNumLock = function(event)
 {
-    if (this.cpu) this.cpu.setFocus();
-    this.keySimulatePress(Keyboard.KEYCODE.NUM_LOCK + Keyboard.KEYCODE.ONDOWN, true);
+    this.updateShiftState(Keyboard.SIMCODE.NUM_LOCK);
+    this.addActiveKey(Keyboard.SIMCODE.NUM_LOCK, true);
 };
 
 /**
@@ -1450,117 +1484,310 @@ Keyboard.prototype.toggleNumLock = function(event)
  */
 Keyboard.prototype.toggleScrollLock = function(event)
 {
-    if (this.cpu) this.cpu.setFocus();
-    this.keySimulatePress(Keyboard.KEYCODE.SCROLL_LOCK + Keyboard.KEYCODE.ONDOWN, true);
+    this.updateShiftState(Keyboard.SIMCODE.SCROLL_LOCK);
+    this.addActiveKey(Keyboard.SIMCODE.SCROLL_LOCK, true);
 };
 
 /**
- * checkShiftState(keyCode, fDown)
+ * updateShiftState(simCode, fDown)
  *
  * @this {Keyboard}
- * @param {number} keyCode (should already include any ONDOWN and/or ONRIGHT modifiers)
- * @param {boolean} [fDown] is true for down, false for up, undefined for TBD
+ * @param {number} simCode (includes any ONDOWN and/or ONRIGHT modifiers)
+ * @param {boolean} [fDown] is true for down, false for up, undefined for toggle
+ * @return {boolean} true if simCode was a shift key, false if not
  */
-Keyboard.prototype.checkShiftState = function(keyCode, fDown)
+Keyboard.prototype.updateShiftState = function(simCode, fDown)
 {
-    if (Keyboard.aKeyCodes[keyCode]) {
-        var bCode = Math.floor(keyCode % 1000);
-        var fRight = (Math.floor(keyCode / 1000) & 2);
-        var bitState = Keyboard.KEYSTATES[bCode] || 0;
+    if (Keyboard.SIMCODES[simCode]) {
+        var fRight = (Math.floor(simCode / 1000) & 2);
+        var bitState = Keyboard.KEYSTATES[simCode] || 0;
         if (bitState) {
             if (fRight) bitState >>= 1;
-            if (bitState & Keyboard.STATES.LOCK) {
+            if (fDown === undefined) {
                 fDown = !(this.shiftStates & bitState);
             }
             this.shiftStates &= ~bitState;
             if (fDown) this.shiftStates |= bitState;
-
             this.updateLEDs(bitState);
+            return true;
         }
+    }
+    return false;
+};
+
+/**
+ * addActiveKey(simCode, fPress)
+ *
+ * @param {number} simCode
+ * @param {boolean} [fPress]
+ */
+Keyboard.prototype.addActiveKey = function(simCode, fPress)
+{
+    if (!Keyboard.SIMCODES[simCode]) {
+        if (DEBUG && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
+            this.messageDebugger("addActiveKey(" + simCode + "," + (fPress? "press" : "down") + "): unrecognized", true);
+        }
+        return;
+    }
+
+    /*
+     * Ignore all active keys if the CPU is not running.
+     */
+    if (!this.cpu || !this.cpu.isRunning()) return;
+
+    var key;
+    for (var i = 0; i < this.aKeysActive.length; i++) {
+        key = this.aKeysActive[i];
+        if (key.simCode == simCode) {
+            /*
+             * This key is already active, so if this a "down" request (or a "press" for a key we already
+             * processed as a "down"), ignore it.
+             */
+            if (!fPress || key.nRepeat >= 0) {
+                i = -1;
+                break;
+            }
+            if (i > 0) {
+                this.aKeysActive[0].nRepeat = 0;
+                this.aKeysActive.splice(i, 1);
+            }
+            break;
+        }
+    }
+
+    if (DEBUG && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
+        this.messageDebugger("addActiveKey(" + simCode + "," + (fPress? "press" : "down") + "): " + (i < 0? "already active" : (i == this.aKeysActive? "adding" : "updating")), true);
+    }
+
+    if (i < 0) return;
+
+    if (i == this.aKeysActive.length) {
+        key = {};
+        key.simCode = simCode;
+        key.shiftStates = this.shiftStates;
+        this.findBinding(simCode, "key", true);
+        i++;
+    }
+    if (i > 0) {
+        this.aKeysActive.splice(0, 0, key);
+    }
+
+    key.fDown = true;
+    key.nRepeat = (fPress? -1: (Keyboard.KEYSTATES[simCode]? 0 : 1));
+
+    this.updateActiveKey(key);
+};
+
+/**
+ * checkActiveKey()
+ *
+ * @return {number} simCode of active key, 0 if none
+ */
+Keyboard.prototype.checkActiveKey = function()
+{
+    return this.aKeysActive.length? this.aKeysActive[0].simCode : 0;
+};
+
+/**
+ * checkActiveKeyShift()
+ *
+ * @return {number|null} shiftStates for active key, null if none
+ *
+Keyboard.prototype.checkActiveKeyShift = function()
+{
+    return this.aKeysActive.length? this.aKeysActive[0].shiftStates : null;
+};
+ */
+
+/**
+ * isAlphaKey(code)
+ *
+ * @param {number} code
+ * @returns {boolean} true if alpha key, false if not
+ */
+Keyboard.prototype.isAlphaKey = function(code)
+{
+    return (code >= Keyboard.ASCII.A && code <= Keyboard.ASCII.Z || code >= Keyboard.ASCII.a && code <= Keyboard.ASCII.z);
+};
+
+/**
+ * toUpperKey(code)
+ *
+ * @param {number} code
+ * @returns {number}
+ */
+Keyboard.prototype.toUpperKey = function(code)
+{
+    if (code >= Keyboard.ASCII.a && code <= Keyboard.ASCII.z) {
+        code -= (Keyboard.ASCII.a - Keyboard.ASCII.A);
+    }
+    return code;
+};
+
+/**
+ * removeActiveKey(simCode, fFlush)
+ *
+ * @param {number} simCode
+ * @param {boolean} [fFlush] is true whenever the key must be removed, independent of other factors
+ */
+Keyboard.prototype.removeActiveKey = function(simCode, fFlush)
+{
+    if (!Keyboard.SIMCODES[simCode]) {
+        if (DEBUG && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
+            this.messageDebugger("removeActiveKey(" + simCode + "): unrecognized", true);
+        }
+        return;
+    }
+
+    /*
+     * Ignore all active keys if the CPU is not running.
+     */
+    if (!fFlush && (!this.cpu || !this.cpu.isRunning())) return;
+
+    var fRemoved = false;
+    for (var i = 0; i < this.aKeysActive.length; i++) {
+        var key = this.aKeysActive[i];
+        if (key.simCode == simCode || key.simCode == Keyboard.SHIFTED_KEYCODES[simCode]) {
+            this.aKeysActive[0].nRepeat = 0;
+            this.aKeysActive.splice(i, 1);
+            if (key.timer) clearTimeout(key.timer);
+            if (key.fDown && !fFlush) this.keySimulate(key.simCode, false);
+            this.findBinding(simCode, "key", false);
+            fRemoved = true;
+            break;
+        }
+    }
+    if (DEBUG && !fFlush && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
+        this.messageDebugger("removeActiveKey(" + simCode + "): " + (fRemoved? "removed" : "not active"), true);
+    }
+    if (!this.aKeysActive.length && this.fToggleCapsLock) {
+        if (DEBUG) this.messageDebugger("removeActiveKey(): inverting caps-lock now", Debugger.MESSAGE.KEYS);
+        this.updateShiftState(Keyboard.SIMCODE.CAPS_LOCK);
+        this.fToggleCapsLock = false;
     }
 };
 
 /**
- * keyUpDown(event, fDown)
+ * updateActiveKey(key, msTimer)
+ *
+ * @param {Object} key
+ * @param {number} [msTimer]
+ */
+Keyboard.prototype.updateActiveKey = function(key, msTimer)
+{
+    /*
+     * All active keys are automatically removed once the CPU stops running.
+     */
+    if (!this.cpu || !this.cpu.isRunning()) {
+        this.removeActiveKey(key.simCode, true);
+        return;
+    }
+
+    if (DEBUG && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
+        this.messageDebugger((msTimer? '\n' : "") + "updateActiveKey(" + key.simCode + (msTimer? "," + msTimer + "ms" : "") + "): " + (key.fDown? "down" : "up"), true);
+    }
+
+    this.keySimulate(key.simCode, key.fDown);
+
+    if (!key.nRepeat) return;
+
+    var ms;
+    if (key.nRepeat < 0) {
+        if (!key.fDown) {
+            this.removeActiveKey(key.simCode);
+            return;
+        }
+        key.fDown = false;
+        ms = this.msAutoRelease;
+    }
+    else {
+        ms = (key.nRepeat++ == 1? this.msAutoRepeat : this.msNextRepeat);
+    }
+    key.timer = setTimeout(function(kbd) {
+        return function onUpdateActiveKey() {
+            kbd.updateActiveKey(key, ms);
+        };
+    }(this), ms);
+};
+
+/**
+ * onKeyDown(event, fDown)
  *
  * @this {Keyboard}
  * @param {Object} event
  * @param {boolean} fDown is true for a keyDown event, false for a keyUp event
  * @return {boolean} true to pass the event along, false to consume it
  */
-Keyboard.prototype.keyUpDown = function(event, fDown)
+Keyboard.prototype.onKeyDown = function(event, fDown)
 {
-    var fPass;
+    var fPass = true;
+    var fPress = false;
     var fAutoClear = !fDown;
+
+    var wCode;
     var keyCode = event.keyCode;
+    var simCode = keyCode;
 
-    var keyCodeSim = keyCode;
+    /*
+     * Although it would be nice to pay attention ONLY to these "up" and "down" events, and ignore "press"
+     * events, iOS devices force us to process "press" events, because they don't give us shift-key events,
+     * so we have to infer the shift state from the character code in the "press" event.
+     *
+     * So, to seamlessly blend "up" and "down" events with "press" events, we must convert any keyCodes we
+     * receive here to a compatibly shifted simCode.
+     */
+    if (keyCode >= Keyboard.ASCII.A && keyCode <= Keyboard.ASCII.Z) {
+        if (!(this.shiftStates & (Keyboard.STATE.SHIFT | Keyboard.STATE.RSHIFT | Keyboard.STATE.CAPS_LOCK))) {
+            simCode = keyCode + (Keyboard.ASCII.a - Keyboard.ASCII.A);
+        }
+    }
+    else if (this.shiftStates & (Keyboard.STATE.SHIFT | Keyboard.STATE.RSHIFT)) {
+        if (wCode = Keyboard.SHIFTED_KEYCODES[keyCode]) simCode = wCode;
+    }
+    else {
+        if (wCode = Keyboard.STUPID_KEYCODES[keyCode]) simCode = wCode;
+    }
 
-    if (fDown) this.prevKeyDown = keyCode;
+    if (Keyboard.SIMCODES[keyCode + Keyboard.KEYCODE.ONDOWN]) {
 
-    if (Keyboard.aKeyCodes[keyCode + Keyboard.KEYCODE.ONDOWN]) {
+        simCode += Keyboard.KEYCODE.ONDOWN;
+        if (event.location == Keyboard.LOCATION.RIGHT) {
+            simCode += Keyboard.KEYCODE.ONRIGHT;
+        }
 
-        keyCodeSim += Keyboard.KEYCODE.ONDOWN;
-        var bitState = Keyboard.KEYSTATES[keyCode] || 0;
-
-        if (bitState) {
-            if (event.location == Keyboard.LOCATION.RIGHT) {
-                bitState >>= 1;
-                keyCodeSim += Keyboard.KEYCODE.ONRIGHT;
-            }
-            this.shiftStates &= ~bitState;
-            if (fDown) this.shiftStates |= bitState;
-
-            this.updateLEDs(bitState);
+        if (this.updateShiftState(simCode, fDown)) {
 
             if (keyCode == Keyboard.KEYCODE.CAPS_LOCK || keyCode == Keyboard.KEYCODE.NUM_LOCK || keyCode == Keyboard.KEYCODE.SCROLL_LOCK) {
                 /*
                  * FYI, "lock" keys generate a "down" event ONLY when getting locked, and an "up" event ONLY
-                 * when getting unlocked--which is exactly what I want, even though that may seem a little
-                 * counter-intuitive.
+                 * when getting unlocked--which is a little odd, since the key did actually go UP and DOWN each time.
                  *
-                 * However, since the key DID actually go down AND up on each event, we must make sure both make
-                 * and break scan codes are delivered; keySimulatePress() will take care of that.
+                 * We must treat each event like a "down" -- and as a "press", so that addActiveKey() will automatically
+                 * generate both the "make" and "break".
                  */
-                fPass = this.keySimulatePress(keyCodeSim);
-            } else {
-                fAutoClear = false;
+                fDown = fPress = true;
             }
-        } else {
+            fAutoClear = false;
+        }
+        else {
             if (keyCode == Keyboard.KEYCODE.BS || keyCode == Keyboard.KEYCODE.TAB || keyCode == Keyboard.KEYCODE.ESC) {
                 /*
                  * HACK for simulating Ctrl-Break using Ctrl-Del (Mac) / Ctrl-Backspace (Windows)
                  */
-                if (keyCode == Keyboard.KEYCODE.BS && (this.shiftStates & (Keyboard.STATES.CTRL|Keyboard.STATES.ALT)) == Keyboard.STATES.CTRL) {
-                    keyCodeSim = Keyboard.KEYCODE.FAKE_CTRLBREAK;
+                if (keyCode == Keyboard.KEYCODE.BS && (this.shiftStates & (Keyboard.STATE.CTRL|Keyboard.STATE.ALT)) == Keyboard.STATE.CTRL) {
+                    simCode = Keyboard.SIMCODE.CTRL_BREAK;
                 }
                 /*
                  * If I don't consume TAB on the "down" event, then that's all I'll see, because the
                  * browser will see it and give focus to the next control. But the "down" side is that
                  * that no "press" event will be generated.  This puts it in the same category as ESC,
                  * which also generates "down" and "up" events (LOTS of "down" events for that matter),
-                 * but no "press" event.  The C1P has no TAB key, so it's safe to completely ignore,
-                 * hence the code below, but a PC does, so I need to simulate it.
-                 *
-                 *      fPass = fAutoClear = false;
+                 * but no "press" event.
                  *
                  * I don't get keyPress events for ESC (why?) and I never want the browser to act on BS
-                 * (which does double-duty as the "Back" button and leaves the current page), so I have
-                 * to simulate them now.
-                 *
-                 * Note that I call the "press" simulate method and NOT the "event" simulate method, because
-                 * the former takes care of simulating both individual "down" and "up" events.
+                 * (which does double-duty as the "Back" button and leaves the current page).
                  */
-                fPass = (fDown? !this.keySimulatePress(keyCodeSim) : false);
-            } else {
-                /*
-                 * No effect, at least in IE9....
-                 *
-                if (keyCode == Keyboard.KEYCODE.F1 || keyCode == Keyboard.KEYCODE.F11 || keyCode == Keyboard.KEYCODE.F12) {
-                    this.println("preventDefault()");
-                    event.preventDefault();
-                }
-                 */
+                fPass = false;
             }
         }
     }
@@ -1569,44 +1796,9 @@ Keyboard.prototype.keyUpDown = function(event, fDown)
             /*
              * Avoid interfering with useful Browser key commands, like COMMAND-Q, COMMAND-T, etc.
              */
-            this.shiftStates &= ~Keyboard.STATES.COMMAND;
-            if (fDown) this.shiftStates |= Keyboard.STATES.COMMAND;
+            this.shiftStates &= ~Keyboard.STATE.COMMAND;
+            if (fDown) this.shiftStates |= Keyboard.STATE.COMMAND;
             fAutoClear = false;
-            fPass = true;
-        }
-        /*
-         * All other ALT and/or CTRL-key combinations are handled here (in part because not all
-         * generate keyPress events, and even those that do may generate odd keyCodes that I'd rather
-         * not create mappings for).
-         */
-        else if (event.altKey || event.ctrlKey) {
-            if (keyCode >= Keyboard.ASCII.A && keyCode <= Keyboard.ASCII.Z) {
-                /*
-                 * Convert "upper-case" letter combinations into "lower-case" combinations, so
-                 * that keySimulateUpOrDown() doesn't think it also needs to simulate a SHIFT key, too.
-                 */
-                keyCodeSim += (Keyboard.ASCII.a - Keyboard.ASCII.A);
-            }
-            // if (DEBUG) this.messageDebugger("ALT event: keyCode " + keyCode);
-        }
-        else {
-            /*
-             * Pass on anything else, and we'll take care of it at the keyPress stage (if at all) rather
-             * than the keyDown/keyUp stage.
-             */
-            fPass = true;
-
-            /*
-             * At this point, I have a difficult choice to make: leave fAutoClear true for any remaining
-             * "up" events, so that keys will repeat immediately when released/pressed repeatedly (most
-             * noticeable with the Enter key), or set fAutoClear to false to ensure that polling apps have
-             * enough time to see every key press.
-             *
-             * I've decided that the former is more important than the latter, so if polling apps are still
-             * missing keystrokes, then perhaps nCyclesThreshold needs to be supplemented in some way.
-             *
-             *      fAutoClear = false;
-             */
         }
     }
 
@@ -1618,42 +1810,52 @@ Keyboard.prototype.keyUpDown = function(event, fDown)
          * above that explicitly clear fAutoClear -- such as the COMMAND key itself -- are exceptions
          * to the rule).
          */
-        this.shiftStates &= ~Keyboard.STATES.COMMAND;
-        /*
-         * I don't reliably get keyDown/keyUp events for all keys on all devices, but for those devices that
-         * I DO, it seems like a good idea to cancel any pending key "up" simulation on receipt of the actual
-         * keyUp event.
-         *
-         * However, the following code is problematic for Safari on iOS devices, which as noted above, doesn't
-         * generate keyDown/keyUp events until after the press operation is complete, and then they are generated
-         * in rapid succession, which doesn't give the C1P enough time to detect the key.  So I simply don't do
-         * this on iOS devices.
-         */
-        if (!this.fMobile && keyCode == this.prevKeyDown) this.autoClear();
-    }
-
-    if (fPass === undefined) {
-        fPass = !this.keySimulateUpOrDown(keyCodeSim, fDown, Keyboard.SIMCODE.KEYUPDOWN);
+        this.shiftStates &= ~Keyboard.STATE.COMMAND;
     }
 
     if (DEBUG && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
-        this.messageDebugger(/*(fDown?"\n":"") +*/ "key" + (fDown? "Down" : "Up") + "(" + keyCode + "): " + (fPass? "pass" : "consume"), true);
+        this.messageDebugger("\nonKey" + (fDown? "Down" : "Up") + "(" + simCode + "): " + (fPass? "true" : "false"), true);
     }
+
+    /*
+     * Mobile (eg, iOS) keyboards don't fully support onKeyDown/onKeyUp events; for example, they usually
+     * don't generate ANY events when a shift key is pressed, and even for normal keys, they seem to generate
+     * rapid (ie, fake) "up" and "down" events around "press" events, probably more to satisfy compatibility
+     * issues rather than making a serious effort to indicate when a key ACTUALLY went down or up.
+     */
+    if (!this.fMobile || !fPass) {
+        if (fDown) {
+            this.addActiveKey(simCode, fPress);
+        } else {
+            this.removeActiveKey(simCode);
+        }
+    }
+
     return fPass;
 };
 
 /**
- * keyPress(event)
+ * onKeyPress(event)
  *
  * @this {Keyboard}
  * @param {Object} event
  * @return {boolean} true to pass the event along, false to consume it
  */
-Keyboard.prototype.keyPress = function(event)
+Keyboard.prototype.onKeyPress = function(event)
 {
-    var fPass = true;
+    var fAdd = false, fPass = true;
+
     event = event || window.event;
     var keyCode = event.which || event.keyCode;
+
+    var simCode = this.checkActiveKey();
+    if (simCode && this.isAlphaKey(simCode) && this.isAlphaKey(keyCode) && simCode != keyCode) {
+        if (DEBUG && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
+            this.messageDebugger("onKeyPress(" + keyCode + ") out of sync with " + simCode + ", invert caps-lock", true);
+        }
+        this.fToggleCapsLock = true;
+        keyCode = simCode;
+    }
 
     /*
      * Let's stop any injection currently in progress, too
@@ -1662,126 +1864,64 @@ Keyboard.prototype.keyPress = function(event)
 
     if (keyCode == Keyboard.KEYCODE.BS || keyCode == Keyboard.KEYCODE.TAB) {
         /*
-         * Unlike Safari and Chrome, Firefox doesn't seem to honor our "consume" request for the "down" BS keyEvent,
-         * so we must ALSO check for the BS key here, and again "consume" it.  Ditto for TAB.
+         * Firefox does not seem to be honoring our consumption of onKeyDown events for BS or TAB, and generates keyPress
+         * events anyway.  This causes us grief for various CTRL and ALT combinations, resulting in duplicate key presses.
+         * So, I'm going to try to fix this below, by setting fPass to true if either of those modifier keys is currently down.
          *
          * This is just one example of a larger Firefox problem (see https://bugzilla.mozilla.org/show_bug.cgi?id=501496).
-         * Basically, Firefox is not honoring our consumption of keyDown events, and generates keyPress events anyway.
-         * This causes us grief for various CTRL and ALT combinations, resulting in duplicate key presses.  So, I'm going
-         * to try to fix this below, by setting fPass to true if either of those modifier keys is currently down;
-         * if they're not, then we'll continue with the original code that sets fPass based on the return from keySimulatePress().
          */
         fPass = false;
-    } else {
-        if (this.shiftStates & Keyboard.STATES.COMMAND) {
-            this.shiftStates &= ~Keyboard.STATES.COMMAND;
+    }
+    else {
+        if (this.shiftStates & Keyboard.STATE.COMMAND) {
+            this.shiftStates &= ~Keyboard.STATE.COMMAND;
         } else {
             // if (DEBUG && event.altKey) this.messageDebugger("ALT press: keyCode " + keyCode, Debugger.MESSAGE.KEYS);
-            if (this.shiftStates & (Keyboard.STATES.CTRL | Keyboard.STATES.ALT)) {
+            if (this.shiftStates & (Keyboard.STATE.CTRL | Keyboard.STATE.ALT)) {
                 fPass = false;
             } else {
                 if (this.fEscapeDisabled && keyCode == Keyboard.ASCII['`']) keyCode = Keyboard.KEYCODE.ESC;
-                fPass = !this.keySimulatePress(keyCode);
+                fPass = false;
+                fAdd = true;
             }
         }
     }
 
     if (DEBUG && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
-        this.messageDebugger("keyPress(" + keyCode + "): " + (fPass? "pass" : "consume"), true);
+        this.messageDebugger("\nonKeyPress(" + keyCode + "): " + (fPass? "true" : "false"), true);
     }
+
+    if (fAdd) {
+        this.addActiveKey(keyCode, true);
+    }
+
     return fPass;
 };
 
 /**
- * keySimulatePress(keyCode, fCheckShift, fQuickRelease)
+ * keySimulate(simCode, fDown)
  *
  * @this {Keyboard}
- * @param {number} keyCode
- * @param {boolean} [fCheckShift]
- * @param {boolean} [fQuickRelease] is true to simulate the press and release immediately
- * @return {boolean} true if successfully simulated, false if unrecognized/unsupported key
- */
-Keyboard.prototype.keySimulatePress = function(keyCode, fCheckShift, fQuickRelease)
-{
-    var fSimulated = false;
-
-    /*
-     * Auto-clear any previous down key EXCEPT for keyCode (because it may be held and repeating).
-     */
-    this.autoClear(keyCode);
-
-    if (fCheckShift) this.checkShiftState(keyCode);
-
-    if (this.keySimulateUpOrDown(keyCode, true, Keyboard.SIMCODE.KEYPRESS)) {
-        /*
-         * If fQuickRelease is set, we switch to an alternate approach, which is to immediately queue a
-         * "release" event as well.  I used to also do this at high speeds, because the CPU could get lucky
-         * and execute a LOT of instructions between delivery of the keyPress event and the "keyTimeout"
-         * event, and since JavaScript events (including timeouts) are delivered synchronously, it might
-         * take too long for the "keyTimeout" event to arrive.
-         *
-         * Why don't we ALWAYS do this?  Because at normal CPU speeds, we want to faithfully simulate how
-         * long a key is held, so that features like auto-repeat work properly.
-         *
-         * TODO: The above is probably more true for C1Pjs (where some of this code came from) than PCjs,
-         * so revisit these assumptions.  The fact that I had to add the fQuickRelease parameter suggests
-         * that it's time to review/overhaul this code.
-         */
-        if (fQuickRelease /* || this.cpu.speed == CPU.SPEED_MAX */) {
-            this.keySimulateUpOrDown(keyCode, false, Keyboard.SIMCODE.KEYRELEASE);
-        }
-        else {
-            var fRepeat = false;
-            if (this.aKeyTimers[keyCode]) {
-                clearTimeout(this.aKeyTimers[keyCode]);
-                this.aKeyTimers[keyCode] = null;
-                fRepeat = true;
-            }
-            var msDelay = this.calcReleaseDelay(fRepeat);
-            this.aKeyTimers[this.prevCharDown = keyCode] = setTimeout(function (kbd) {
-                return function onkeySimulatePressTimeout() {
-                    kbd.keySimulateUpOrDown(keyCode, false, Keyboard.SIMCODE.KEYTIMEOUT);
-                };
-            }(this), msDelay);
-            if (DEBUG && this.messageEnabled()) {
-                this.messageDebugger("keySimulatePress(" + keyCode + "): setTimeout()");
-            }
-        }
-        fSimulated = true;
-    }
-    if (DEBUG && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
-        this.messageDebugger("keySimulatePress(" + keyCode + "): " + (fSimulated? "true" : "false"), true);
-    }
-    return fSimulated;
-};
-
-/**
- * keySimulateUpOrDown(keyCode, fDown, simCode)
- *
- * @this {Keyboard}
- * @param {number} keyCode
+ * @param {number} simCode
  * @param {boolean} fDown
- * @param {number} simCode indicates the origin of the event
  * @return {boolean} true if successfully simulated, false if unrecognized/unsupported key
  */
-Keyboard.prototype.keySimulateUpOrDown = function(keyCode, fDown, simCode)
+Keyboard.prototype.keySimulate = function(simCode, fDown)
 {
     var fSimulated = false;
 
-    if (!fDown) {
-        this.aKeyTimers[keyCode] = null;
-        if (this.prevCharDown == keyCode) this.prevCharDown = 0;
-    }
+    // this.updateShiftState(simCode, fDown);
 
-    var wCode = Keyboard.aKeyCodes[keyCode] || Keyboard.aKeyCodes[keyCode + Keyboard.KEYCODE.ONDOWN];
+    var wCode = Keyboard.SIMCODES[simCode] || Keyboard.SIMCODES[simCode + Keyboard.KEYCODE.ONDOWN];
 
     if (wCode !== undefined) {
+
         /*
          * Hack to transform the IBM "BACKSPACE" key (which we normally map to KEYCODE_DELETE) to the IBM "DEL" key
          * whenever both CTRL and ALT are pressed as well, so that it's easier to simulate that old favorite: CTRL-ALT-DEL
          */
         if (wCode == Keyboard.SCANCODE.BS) {
-            if ((this.shiftStates & (Keyboard.STATES.CTRL | Keyboard.STATES.ALT)) == (Keyboard.STATES.CTRL | Keyboard.STATES.ALT)) {
+            if ((this.shiftStates & (Keyboard.STATE.CTRL | Keyboard.STATE.ALT)) == (Keyboard.STATE.CTRL | Keyboard.STATE.ALT)) {
                 wCode = Keyboard.SCANCODE.NUM_DEL;
             }
         }
@@ -1790,13 +1930,13 @@ Keyboard.prototype.keySimulateUpOrDown = function(keyCode, fDown, simCode)
         var bCode = wCode & 0xff;
         abScanCodes.push(bCode | (fDown? 0 : Keyboard.SCANCODE.BREAK));
 
-        var fAlpha = (keyCode >= Keyboard.ASCII.A && keyCode <= Keyboard.ASCII.Z || keyCode >= Keyboard.ASCII.a && keyCode <= Keyboard.ASCII.z);
+        var fAlpha = (simCode >= Keyboard.ASCII.A && simCode <= Keyboard.ASCII.Z || simCode >= Keyboard.ASCII.a && simCode <= Keyboard.ASCII.z);
 
         while (wCode >>>= 8) {
             var bShift = 0;
             var bScan = wCode & 0xff;
             /*
-             * TODO: The handling of aKeyCodes entries with "extended" codes still needs to be tested, and
+             * TODO: The handling of SIMCODE entries with "extended" codes still needs to be tested, and
              * moreover, if any of them need to perform any shift-state modifications, those modifications will
              * need to be encoded differently.
              */
@@ -1805,17 +1945,17 @@ Keyboard.prototype.keySimulateUpOrDown = function(keyCode, fDown, simCode)
                 continue;
             }
             if (bScan == Keyboard.SCANCODE.SHIFT) {
-                if (!(this.shiftStates & (Keyboard.STATES.SHIFT | Keyboard.STATES.RSHIFT))) {
-                    if (!(this.shiftStates & Keyboard.STATES.CAPS_LOCK) || !fAlpha) {
+                if (!(this.shiftStates & (Keyboard.STATE.SHIFT | Keyboard.STATE.RSHIFT))) {
+                    if (!(this.shiftStates & Keyboard.STATE.CAPS_LOCK) || !fAlpha) {
                         bShift = bScan;
                     }
                 }
             } else if (bScan == Keyboard.SCANCODE.CTRL) {
-                if (!(this.shiftStates & (Keyboard.STATES.CTRL | Keyboard.STATES.RCTRL))) {
+                if (!(this.shiftStates & (Keyboard.STATE.CTRL | Keyboard.STATE.RCTRL))) {
                     bShift = bScan;
                 }
             } else if (bScan == Keyboard.SCANCODE.ALT) {
-                if (!(this.shiftStates & (Keyboard.STATES.ALT | Keyboard.STATES.RALT))) {
+                if (!(this.shiftStates & (Keyboard.STATE.ALT | Keyboard.STATE.RALT))) {
                     bShift = bScan;
                 }
             } else {
@@ -1836,9 +1976,11 @@ Keyboard.prototype.keySimulateUpOrDown = function(keyCode, fDown, simCode)
 
         fSimulated = true;
     }
+
     if (DEBUG && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
-        this.messageDebugger("keySimulateUpOrDown(" + keyCode + "," + (fDown? "down" : "up") + "," + Keyboard.aSimCodeDescs[simCode] + "): " + (fSimulated? "true" : "false"), true);
+        this.messageDebugger("keySimulate(" + simCode + "," + (fDown? "down" : "up") + "): " + (fSimulated? "true" : "false"), true);
     }
+
     return fSimulated;
 };
 

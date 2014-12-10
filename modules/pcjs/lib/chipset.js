@@ -4050,8 +4050,7 @@ ChipSet.prototype.in8042OutBuff = function(port, addrFrom)
     var b = this.b8042OutBuff;
     this.messagePort(port, null, addrFrom, "8042_OUTBUFF", b, Debugger.MESSAGE.C8042);
     this.b8042Status &= ~(ChipSet.KBC.STATUS.OUTBUFF_FULL | ChipSet.KBC.STATUS.OUTBUFF_DELAY);
-    var bNext = this.kbd && this.kbd.readScanCode(true);
-    if (bNext) this.set8042OutBuff(bNext);
+    if (this.kbd) this.kbd.checkScanCode();
     return b;
 };
 
@@ -4290,23 +4289,24 @@ ChipSet.prototype.out8042InBuffCmd = function(port, bOut, addrFrom)
 
     case ChipSet.KBC.CMD.DISABLE_KBD:       // 0xAD
         this.set8042CmdData(this.b8042CmdData | ChipSet.KBC.DATA.CMD.NO_CLOCK);
-        if (DEBUG) this.messageDebugger("keyboard disabled", Debugger.MESSAGE.KBD | Debugger.MESSAGE.PORT);
+        if (DEBUG) this.messageDebugger("keyboard disabled", Debugger.MESSAGE.KEYBOARD | Debugger.MESSAGE.PORT);
         /*
          * NOTE: The MODEL_5170 BIOS calls "KBD_RESET" (F000:17D2) while the keyboard interface is disabled,
-         * yet we must still deliver the Keyboard's CMDRES.BAT_SUCC response code?  Seems like an odd thing for
+         * yet we must still deliver the Keyboard's CMDRES.BAT_OK response code?  Seems like an odd thing for
          * a "disabled interface" to do.
          */
         break;
 
     case ChipSet.KBC.CMD.ENABLE_KBD:        // 0xAE
         this.set8042CmdData(this.b8042CmdData & ~ChipSet.KBC.DATA.CMD.NO_CLOCK);
-        if (DEBUG) this.messageDebugger("keyboard re-enabled", Debugger.MESSAGE.KBD | Debugger.MESSAGE.PORT);
+        if (this.kbd) this.kbd.checkScanCode();
+        if (DEBUG) this.messageDebugger("keyboard re-enabled", Debugger.MESSAGE.KEYBOARD | Debugger.MESSAGE.PORT);
         break;
 
     case ChipSet.KBC.CMD.SELF_TEST:         // 0xAA
-        if (this.kbd) this.kbd.shiftScanCode(true);
+        if (this.kbd) this.kbd.flushScanCode();
         this.set8042CmdData(this.b8042CmdData | ChipSet.KBC.DATA.CMD.NO_CLOCK);
-        if (DEBUG) this.messageDebugger("keyboard disabled on reset", Debugger.MESSAGE.KBD | Debugger.MESSAGE.PORT);
+        if (DEBUG) this.messageDebugger("keyboard disabled on reset", Debugger.MESSAGE.KEYBOARD | Debugger.MESSAGE.PORT);
         this.set8042OutBuff(ChipSet.KBC.DATA.SELF_TEST.OK);
         this.set8042OutPort(ChipSet.KBC.OUTPORT.NO_RESET | ChipSet.KBC.OUTPORT.A20_ON);
         break;
@@ -4356,7 +4356,7 @@ ChipSet.prototype.set8042CmdData = function(b)
          *
          * And indeed, if we call the original MODEL_5150/MODEL_5160 setEnable() Keyboard interface here,
          * and both the data and clock lines have transitioned high (ie, both parameters are true), then it
-         * will call resetDevice(), generating a Keyboard.CMDRES.BAT_SUCC response.
+         * will call resetDevice(), generating a Keyboard.CMDRES.BAT_OK response.
          *
          * This agrees with my understanding of what happens when the 8042 toggles the clock line high
          * (ie, clears NO_CLOCK): the TechRef's "Basic Assurance Test" section says that when the Keyboard is
@@ -4364,12 +4364,7 @@ ChipSet.prototype.set8042CmdData = function(b)
          * a completion code (eg, 0xAA for success, or 0xFC or something else for failure).
          */
         var bClockEnabled = !(b & ChipSet.KBC.DATA.CMD.NO_CLOCK);
-        if (this.kbd.setEnable(!!(b & ChipSet.KBC.DATA.CMD.NO_INHIBIT), bClockEnabled)) {
-            this.set8042OutBuff(this.kbd.readScanCode(true));
-        }
-        if (!bClockWasEnabled && bClockEnabled && this.kbd.readScanCode()) {
-            this.notifyKbdData(true);
-        }
+        this.kbd.setEnable(!!(b & ChipSet.KBC.DATA.CMD.NO_INHIBIT), bClockEnabled);
     }
 };
 
@@ -4385,6 +4380,9 @@ ChipSet.prototype.set8042OutBuff = function(b)
         this.b8042OutBuff = b;
         this.b8042Status &= ~ChipSet.KBC.STATUS.OUTBUFF_FULL;
         this.b8042Status |= ChipSet.KBC.STATUS.OUTBUFF_DELAY;
+        if (DEBUG && this.messageEnabled(Debugger.MESSAGE.KEYBOARD | Debugger.MESSAGE.PORT)) {
+            this.messageDebugger("set8042OutBuff(0x" + str.toHexByte(b) + ")", true);
+        }
     }
 };
 
@@ -4413,11 +4411,11 @@ ChipSet.prototype.set8042OutPort = function(b)
 };
 
 /**
- * notifyKbdData(fAvail)
+ * notifyKbdData(b)
  *
  * In the old days of PCjs, the Keyboard component would simply call setIRR() when it had some data for the
- * keyboard controller.  However, the sole responsibility of the Keyboard is to emulate an actual keyboard and
- * call notifyKbdData() whenever it has some data; it has no business messing with IRQ lines.
+ * keyboard controller.  However, the Keyboard's sole responsibility is to emulate an actual keyboard and call
+ * notifyKbdData() whenever it has some data; it's not supposed to mess with IRQ lines.
  *
  * If there's an 8042, we check (this.b8042CmdData & ChipSet.KBC.DATA.CMD.NO_CLOCK); if NO_CLOCK is clear,
  * we can raise the IRQ immediately.  Well, not quite immediately....
@@ -4488,9 +4486,9 @@ ChipSet.prototype.set8042OutPort = function(b)
  * instructions, just to be safe, and pass that along to every setIRR() call we make here.
  *
  * @this {ChipSet}
- * @param {boolean} fAvail is true if the Keyboard has data to send, false if not
+ * @param {number} b
  */
-ChipSet.prototype.notifyKbdData = function(fAvail)
+ChipSet.prototype.notifyKbdData = function(b)
 {
     if (this.model < ChipSet.MODEL_5170) {
         /*
@@ -4499,12 +4497,29 @@ ChipSet.prototype.notifyKbdData = function(fAvail)
         this.setIRR(ChipSet.IRQ.KBD, 4);
     }
     else {
-        if (!(this.b8042CmdData & ChipSet.KBC.DATA.CMD.NO_CLOCK) && fAvail) {
+        if (!(this.b8042CmdData & ChipSet.KBC.DATA.CMD.NO_CLOCK)) {
             /*
-             * A delay of 4 instructions was originally requested as part of the the Keyboard's resetDevice()
-             * response, but a much larger delay (120) is now needed for MODEL_5170 machines, per the discussion above.
+             * The next read of b8042OutBuff will clear both of these bits and call kbd.checkScanCode(),
+             * which will call notifyKbdData() again if there's still keyboard data to process.
              */
-            this.setIRR(ChipSet.IRQ.KBD, 120);
+            if (!(this.b8042Status & (ChipSet.KBC.STATUS.OUTBUFF_FULL | ChipSet.KBC.STATUS.OUTBUFF_DELAY))) {
+                this.set8042OutBuff(b);
+                this.kbd.shiftScanCode();
+                /*
+                 * A delay of 4 instructions was originally requested as part of the the Keyboard's resetDevice()
+                 * response, but a much larger delay (120) is now needed for MODEL_5170 machines, per the discussion above.
+                 */
+                this.setIRR(ChipSet.IRQ.KBD, 120);
+            }
+            else {
+                if (DEBUG && this.messageEnabled(Debugger.MESSAGE.KEYBOARD | Debugger.MESSAGE.PORT)) {
+                    this.messageDebugger("notifyKbdData(0x" + str.toHexByte(b) + "): output buffer full", true);
+                }
+            }
+        } else {
+            if (DEBUG && this.messageEnabled(Debugger.MESSAGE.KEYBOARD | Debugger.MESSAGE.PORT)) {
+                this.messageDebugger("notifyKbdData(0x" + str.toHexByte(b) + "): disabled", true);
+            }
         }
     }
 };
@@ -4828,7 +4843,7 @@ ChipSet.prototype.messageBitsIRQ = function(nIRQ)
     if (nIRQ == ChipSet.IRQ.TIMER0) {           // IRQ 0
         bitsMessage |= Debugger.MESSAGE.TIMER;
     } else if (nIRQ == ChipSet.IRQ.KBD) {       // IRQ 1
-        bitsMessage |= Debugger.MESSAGE.KBD;
+        bitsMessage |= Debugger.MESSAGE.KEYBOARD;
     } else if (nIRQ == ChipSet.IRQ.SLAVE) {     // IRQ 2 (MODEL_5170 and up)
         bitsMessage |= Debugger.MESSAGE.CHIPSET;
     } else if (nIRQ == ChipSet.IRQ.XTC) {       // IRQ 5 (MODEL_5160)
