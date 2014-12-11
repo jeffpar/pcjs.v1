@@ -67,6 +67,7 @@ function Keyboard(parmsKbd)
     this.nDefaultModel = parmsKbd['model'];
 
     this.fMobile = web.isMobile();
+    this.fMSIE = web.isUserAgent("MSIE");
     this.messageDebugger("mobile keyboard support: " + (this.fMobile? "true" : "false"));
 
     /*
@@ -1927,8 +1928,13 @@ Keyboard.prototype.onKeyDown = function(event, fDown)
                  *
                  * We must treat each event like a "down", and also as a "press", so that addActiveKey() will
                  * automatically generate both the "make" and "break".
+                 *
+                 * Of course, there have to be exceptions, most notably MSIE, which sends both "up" and down"
+                 * on every press, so there's no need for trickery.
                  */
-                fDown = fPress = true;
+                if (!this.fMSIE) {
+                    fDown = fPress = true;
+                }
             }
             /*
              * As a safeguard, whenever the CMD key goes up, clear all active keys, because there appear to be
