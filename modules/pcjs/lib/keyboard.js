@@ -70,6 +70,12 @@ function Keyboard(parmsKbd)
     this.messageDebugger("mobile keyboard support: " + (this.fMobile? "true" : "false"));
 
     /*
+     * This is count of the number of "soft keyboard" keys present.  At the moment, its only
+     * purpose is to signal findBinding() whether to waste any time looking for SOFTCODE matches.
+     */
+    this.cSoftCodes = 0;
+
+    /*
      * This is true whenever the physical Escape key is disabled (eg, by pointer locking code),
      * giving us the opportunity to map a different physical key to machine's virtual Escape key.
      */
@@ -442,7 +448,7 @@ Keyboard.LOCATION = {
  * These internal "shift key" states are used to indicate BOTH the physical shift-key states (in bitsState)
  * and the simulated shift-key states (in bitsStateSim).  The LOCK keys are problematic in both cases: the
  * browsers give us no way to query the LOCK key states, so we can only infer them, and because they are "soft"
- * locks, the machine's notion of their state is subject change at any time as well.  Granted, the IBM PC
+ * locks, the machine's notion of their state is subject to change at any time as well.  Granted, the IBM PC
  * ROM BIOS will store its LOCK states in the ROM BIOS Data Area (@0040:0017), but that's purely a convention.
  *
  * TODO: Consider taking notice of the ROM BIOS Data Area state anyway, although I'm not keen on the idea.
@@ -458,13 +464,17 @@ Keyboard.STATE = {
     CTRL:           0x0008,
     RALT:           0x0010,             // 101-key keyboard only
     ALT:            0x0020,
+    ALTS:           0x0030,
     RCMD:           0x0040,             // 101-key keyboard only
     CMD:            0x0080,             // 101-key keyboard only
+    CMDS:           0x00c0,             // CMD | RCMD
+    CTRLS:          0x00fc,             // CTRL | RCTRL | ALT | RALT | CMD | RCMD
+    SHIFTS:         0x00ff,             // SHIFT | RSHIFT | CTRL | RCTRL | ALT | RALT | CMD | RCMD
     INSERT:         0x0100,             // TODO: Placeholder
     CAPS_LOCK:      0x0200,
     NUM_LOCK:       0x0400,
     SCROLL_LOCK:    0x0800,
-    LOCK:           0x0e00              // STATE.CAPS_LOCK | STATE.NUM_LOCK | STATE.SCROLL_LOCK
+    LOCKS:          0x0e00              // CAPS_LOCK | NUM_LOCK | SCROLL_LOCK
 };
 
 /**
@@ -968,7 +978,7 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control)
                 this.bindings[id] = control;
                 control.onclick = function(kbd, sKey, simCode) {
                     return function onClickKeyboard(event) {
-                        if (DEBUG && kbd.messageEnabled()) kbd.messageDebugger(sKey + " clicked", Debugger.MESSAGE.KEYS);
+                        if (!COMPILED && kbd.messageEnabled()) kbd.messageDebugger(sKey + " clicked", Debugger.MESSAGE.KEYS);
                         if (kbd.cpu) kbd.cpu.setFocus();
                         kbd.updateShiftState(simCode, true);    // future-proofing if/when any LOCK keys are added to CLICKCODES
                         kbd.addActiveKey(simCode, true);
@@ -976,6 +986,7 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control)
                 }(this, sCode, Keyboard.CLICKCODES[sCode]);
                 return true;
             } else if (Keyboard.SOFTCODES[sBinding] !== undefined) {
+                this.cSoftCodes++;
                 this.bindings[id] = control;
                 var fnDown = function(kbd, sKey, simCode) {
                     return function onMouseOrTouchDownKeyboard(event) {
@@ -1005,6 +1016,17 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control)
 /**
  * findBinding(simCode, sType, fDown)
  *
+ * TODO: This function is woefully inefficient, because the SOFTCODES table is designed for converting
+ * soft key presses into SIMCODES, whereas this function is doing the reverse: looking for the soft key,
+ * if any, that corresponds to a SIMCODE, simply so we can provide visual feedback of keys activated
+ * by other means (eg, real keyboard events, button clicks that generate key sequences like CTRL_ALT_DEL,
+ * etc).
+ *
+ * To minimize this function's cost, we would want to dynamically create a reverse-lookup table after
+ * all the setBinding() calls for the soft keys have been established; note that the reverse-lookup table
+ * would contain MORE entries than the SOFTCODES table, because there are multiple simCodes that correspond
+ * to a given soft key (eg, '1' and '!' both map to the same soft key).
+ *
  * @this {Keyboard}
  * @param {number} simCode
  * @param {string} sType is the type of control (eg, "button" or "key")
@@ -1014,15 +1036,24 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control)
 Keyboard.prototype.findBinding = function(simCode, sType, fDown)
 {
     var control;
-    var code = Keyboard.SHIFTED_KEYCODES[simCode];
-    for (var sBinding in Keyboard.SOFTCODES) {
-        if (Keyboard.SOFTCODES[sBinding] == simCode || Keyboard.SOFTCODES[sBinding] == this.toUpperKey(simCode)) {
-            var id = sType + '-' + sBinding;
-            control = this.bindings[id];
-            if (control && fDown !== undefined) {
-                this.setSoftKeyState(control, fDown);
+    if (this.cSoftCodes) {
+        for (var code in Keyboard.SHIFTED_KEYCODES) {
+            if (simCode == Keyboard.SHIFTED_KEYCODES[code]) {
+                simCode = parseInt(code, 10);
+                code = Keyboard.STUPID_KEYCODES[code];
+                if (code) simCode = code;
+                break;
             }
-            break;
+        }
+        for (var sBinding in Keyboard.SOFTCODES) {
+            if (Keyboard.SOFTCODES[sBinding] == simCode || Keyboard.SOFTCODES[sBinding] == this.toUpperKey(simCode)) {
+                var id = sType + '-' + sBinding;
+                control = this.bindings[id];
+                if (control && fDown !== undefined) {
+                    this.setSoftKeyState(control, fDown);
+                }
+                break;
+            }
         }
     }
     return control;
@@ -1101,7 +1132,7 @@ Keyboard.prototype.setEnable = function(fData, fClock)
 {
     var fReset = false;
     if (this.fClock !== fClock) {
-        if (DEBUG && this.messageEnabled(Debugger.MESSAGE.KEYBOARD | Debugger.MESSAGE.PORT)) {
+        if (!COMPILED && this.messageEnabled(Debugger.MESSAGE.KEYBOARD | Debugger.MESSAGE.PORT)) {
             this.messageDebugger("keyboard clock line changing to " + fClock, true);
         }
         /*
@@ -1111,7 +1142,7 @@ Keyboard.prototype.setEnable = function(fData, fClock)
         this.fClock = this.fResetOnEnable = fClock;
     }
     if (this.fData !== fData) {
-        if (DEBUG && this.messageEnabled(Debugger.MESSAGE.KEYBOARD | Debugger.MESSAGE.PORT)) {
+        if (!COMPILED && this.messageEnabled(Debugger.MESSAGE.KEYBOARD | Debugger.MESSAGE.PORT)) {
             this.messageDebugger("keyboard data line changing to " + fData, true);
         }
         this.fData = fData;
@@ -1423,7 +1454,7 @@ Keyboard.prototype.addScanCode = function(bScan, fRepeat)
 Keyboard.prototype.injectKeys = function(sKeyCodes, msDelay)
 {
     this.sInjectBuffer = sKeyCodes;
-    if (DEBUG) this.log("injectKeys(" + this.sInjectBuffer.split("\n").join("\\n") + ")");
+    if (!COMPILED) this.log("injectKeys(" + this.sInjectBuffer.split("\n").join("\\n") + ")");
     this.injectKeysFromBuffer(msDelay || this.msInjectDelay);
 };
 
@@ -1539,7 +1570,7 @@ Keyboard.prototype.updateShiftState = function(simCode, fSim, fDown)
         var bitState = Keyboard.KEYSTATES[simCode] || 0;
         if (bitState) {
             if (fRight) bitState >>= 1;
-            if (bitState & Keyboard.STATE.LOCK) {
+            if (bitState & Keyboard.STATE.LOCKS) {
                 if (fDown === false) return true;
                 fDown = null;
             }
@@ -1563,13 +1594,14 @@ Keyboard.prototype.updateShiftState = function(simCode, fSim, fDown)
 /**
  * addActiveKey(simCode, fPress)
  *
+ * @this {Keyboard}
  * @param {number} simCode
  * @param {boolean} [fPress]
  */
 Keyboard.prototype.addActiveKey = function(simCode, fPress)
 {
     if (!Keyboard.SIMCODES[simCode]) {
-        if (DEBUG && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
+        if (!COMPILED && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
             this.messageDebugger("addActiveKey(" + simCode + "," + (fPress? "press" : "down") + "): unrecognized", true);
         }
         return;
@@ -1593,15 +1625,15 @@ Keyboard.prototype.addActiveKey = function(simCode, fPress)
                 break;
             }
             if (i > 0) {
-                this.aKeysActive[0].nRepeat = 0;
+                if (this.aKeysActive[0].nRepeat > 0) this.aKeysActive[0].nRepeat = 0;
                 this.aKeysActive.splice(i, 1);
             }
             break;
         }
     }
 
-    if (DEBUG && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
-        this.messageDebugger("addActiveKey(" + simCode + "," + (fPress? "press" : "down") + "): " + (i < 0? "already active" : (i == this.aKeysActive? "adding" : "updating")), true);
+    if (!COMPILED && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
+        this.messageDebugger("addActiveKey(" + simCode + "," + (fPress? "press" : "down") + "): " + (i < 0? "already active" : (i == this.aKeysActive.length? "adding" : "updating")), true);
     }
 
     if (i < 0) return;
@@ -1626,6 +1658,7 @@ Keyboard.prototype.addActiveKey = function(simCode, fPress)
 /**
  * checkActiveKey()
  *
+ * @this {Keyboard}
  * @return {number} simCode of active key, 0 if none
  */
 Keyboard.prototype.checkActiveKey = function()
@@ -1636,6 +1669,7 @@ Keyboard.prototype.checkActiveKey = function()
 /**
  * checkActiveKeyShift()
  *
+ * @this {Keyboard}
  * @return {number|null} bitsState for active key, null if none
  *
 Keyboard.prototype.checkActiveKeyShift = function()
@@ -1647,6 +1681,7 @@ Keyboard.prototype.checkActiveKeyShift = function()
 /**
  * isAlphaKey(code)
  *
+ * @this {Keyboard}
  * @param {number} code
  * @returns {boolean} true if alpha key, false if not
  */
@@ -1658,6 +1693,7 @@ Keyboard.prototype.isAlphaKey = function(code)
 /**
  * toUpperKey(code)
  *
+ * @this {Keyboard}
  * @param {number} code
  * @returns {number}
  */
@@ -1670,30 +1706,49 @@ Keyboard.prototype.toUpperKey = function(code)
 };
 
 /**
+ * clearActiveKeys()
+ *
+ * Force all active keys to "self-deactivate".
+ *
+ * TODO: Consider limiting this to non-shift keys only.
+ *
+ * @this {Keyboard}
+ */
+Keyboard.prototype.clearActiveKeys = function()
+{
+    for (var i = 0; i < this.aKeysActive.length; i++) {
+        var key = this.aKeysActive[i];
+        key.fDown = false;
+        if (key.nRepeat > 0) key.nRepeat = 0;
+    }
+};
+
+/**
  * removeActiveKey(simCode, fFlush)
  *
  * @param {number} simCode
  * @param {boolean} [fFlush] is true whenever the key must be removed, independent of other factors
+ * @return {boolean} true if successfully removed, false if not
  */
 Keyboard.prototype.removeActiveKey = function(simCode, fFlush)
 {
     if (!Keyboard.SIMCODES[simCode]) {
-        if (DEBUG && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
+        if (!COMPILED && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
             this.messageDebugger("removeActiveKey(" + simCode + "): unrecognized", true);
         }
-        return;
+        return false;
     }
 
     /*
      * Ignore all active keys if the CPU is not running.
      */
-    if (!fFlush && (!this.cpu || !this.cpu.isRunning())) return;
+    if (!fFlush && (!this.cpu || !this.cpu.isRunning())) return false;
 
     var fRemoved = false;
     for (var i = 0; i < this.aKeysActive.length; i++) {
         var key = this.aKeysActive[i];
         if (key.simCode == simCode || key.simCode == Keyboard.SHIFTED_KEYCODES[simCode]) {
-            this.aKeysActive[0].nRepeat = 0;
+            if (this.aKeysActive[0].nRepeat > 0) this.aKeysActive[0].nRepeat = 0;
             this.aKeysActive.splice(i, 1);
             if (key.timer) clearTimeout(key.timer);
             if (key.fDown && !fFlush) this.keySimulate(key.simCode, false);
@@ -1702,14 +1757,15 @@ Keyboard.prototype.removeActiveKey = function(simCode, fFlush)
             break;
         }
     }
-    if (DEBUG && !fFlush && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
+    if (!COMPILED && !fFlush && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
         this.messageDebugger("removeActiveKey(" + simCode + "): " + (fRemoved? "removed" : "not active"), true);
     }
     if (!this.aKeysActive.length && this.fToggleCapsLock) {
-        if (DEBUG) this.messageDebugger("removeActiveKey(): inverting caps-lock now", Debugger.MESSAGE.KEYS);
+        if (!COMPILED) this.messageDebugger("removeActiveKey(): inverting caps-lock now", Debugger.MESSAGE.KEYS);
         this.updateShiftState(Keyboard.SIMCODE.CAPS_LOCK);
         this.fToggleCapsLock = false;
     }
+    return fRemoved;
 };
 
 /**
@@ -1728,7 +1784,7 @@ Keyboard.prototype.updateActiveKey = function(key, msTimer)
         return;
     }
 
-    if (DEBUG && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
+    if (!COMPILED && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
         this.messageDebugger((msTimer? '\n' : "") + "updateActiveKey(" + key.simCode + (msTimer? "," + msTimer + "ms" : "") + "): " + (key.fDown? "down" : "up"), true);
     }
 
@@ -1756,6 +1812,42 @@ Keyboard.prototype.updateActiveKey = function(key, msTimer)
 };
 
 /**
+ * getSimCode(keyCode)
+ *
+ * @this {Keyboard}
+ * @param {number} keyCode
+ * @param {boolean} fShifted
+ * @return {number} simCode
+ */
+Keyboard.prototype.getSimCode = function(keyCode, fShifted)
+{
+    var code;
+    var simCode = keyCode;
+
+    if (keyCode >= Keyboard.ASCII.A && keyCode <= Keyboard.ASCII.Z) {
+        if (!fShifted || !(this.bitsState & (Keyboard.STATE.SHIFT | Keyboard.STATE.RSHIFT | Keyboard.STATE.CAPS_LOCK))) {
+            simCode = keyCode + (Keyboard.ASCII.a - Keyboard.ASCII.A);
+        }
+    }
+    else if (keyCode >= Keyboard.ASCII.a && keyCode <= Keyboard.ASCII.z) {
+        if (!fShifted || (this.bitsState & (Keyboard.STATE.SHIFT | Keyboard.STATE.RSHIFT | Keyboard.STATE.CAPS_LOCK))) {
+            simCode = keyCode - (Keyboard.ASCII.a - Keyboard.ASCII.A);
+        }
+    }
+    else if (!fShifted || this.bitsState & (Keyboard.STATE.SHIFT | Keyboard.STATE.RSHIFT)) {
+        if (code = Keyboard.SHIFTED_KEYCODES[keyCode]) {
+            simCode = code;
+        }
+    }
+    else {
+        if (code = Keyboard.STUPID_KEYCODES[keyCode]) {
+            simCode = code;
+        }
+    }
+    return simCode;
+};
+
+/**
  * onKeyDown(event, fDown)
  *
  * @this {Keyboard}
@@ -1767,11 +1859,9 @@ Keyboard.prototype.onKeyDown = function(event, fDown)
 {
     var fPass = true;
     var fPress = false;
-    var fAutoClear = !fDown;
+    var fIgnore = false;
 
-    var wCode;
     var keyCode = event.keyCode;
-    var simCode = keyCode;
 
     /*
      * Although it would be nice to pay attention ONLY to these "up" and "down" events, and ignore "press"
@@ -1781,20 +1871,10 @@ Keyboard.prototype.onKeyDown = function(event, fDown)
      * So, to seamlessly blend "up" and "down" events with "press" events, we must convert any keyCodes we
      * receive here to a compatibly shifted simCode.
      */
-    if (keyCode >= Keyboard.ASCII.A && keyCode <= Keyboard.ASCII.Z) {
-        if (!(this.bitsState & (Keyboard.STATE.SHIFT | Keyboard.STATE.RSHIFT | Keyboard.STATE.CAPS_LOCK))) {
-            simCode = keyCode + (Keyboard.ASCII.a - Keyboard.ASCII.A);
-        }
-    }
-    else if (this.bitsState & (Keyboard.STATE.SHIFT | Keyboard.STATE.RSHIFT)) {
-        if (wCode = Keyboard.SHIFTED_KEYCODES[keyCode]) {
-            simCode = wCode;
-        }
-    }
-    else {
-        if (wCode = Keyboard.STUPID_KEYCODES[keyCode]) {
-            simCode = wCode;
-        }
+    var simCode = this.getSimCode(keyCode, true);
+
+    if (this.fEscapeDisabled && simCode == Keyboard.ASCII['`']) {
+        keyCode = simCode = Keyboard.KEYCODE.ESC;
     }
 
     if (Keyboard.SIMCODES[keyCode + Keyboard.KEYCODE.ONDOWN]) {
@@ -1816,69 +1896,71 @@ Keyboard.prototype.onKeyDown = function(event, fDown)
                  */
                 fDown = fPress = true;
             }
-            fAutoClear = false;
+            /*
+             * As a safeguard, whenever the CMD key goes up, clear all active keys, because there appear to be
+             * cases where we don't always get notification of a CMD key's companion key going up.
+             */
+            if (!fDown && (keyCode == Keyboard.KEYCODE.CMD || keyCode == Keyboard.KEYCODE.RCMD)) {
+                this.clearActiveKeys();
+            }
         }
         else {
-            if (keyCode == Keyboard.KEYCODE.BS || keyCode == Keyboard.KEYCODE.TAB || keyCode == Keyboard.KEYCODE.ESC) {
-                /*
-                 * HACK for simulating Ctrl-Break using Ctrl-Del (Mac) / Ctrl-Backspace (Windows)
-                 */
-                if (keyCode == Keyboard.KEYCODE.BS && (this.bitsState & (Keyboard.STATE.CTRL|Keyboard.STATE.ALT)) == Keyboard.STATE.CTRL) {
-                    simCode = Keyboard.SIMCODE.CTRL_BREAK;
-                }
-                /*
-                 * If I don't consume TAB on the "down" event, then that's all I'll see, because the browser will
-                 * see it and give focus to the next control. But the "down" side is that * that no "press" event will
-                 * be generated.  This puts it in the same category as ESC, which also generates "down" and "up" events
-                 * (LOTS of "down" events for that matter), but no "press" event.
-                 *
-                 * I don't get keyPress events for ESC (why?) and I never want the browser to act on BS (which does
-                 * double-duty as the "Back" button and leaves the current page).
-                 */
-                fPass = false;
+            /*
+             * Here we have all the non-shift keys in the ONDOWN category; eg, BS, TAB, ESC, UP, DOWN, LEFT, RIGHT,
+             * and many more.
+             *
+             * For various reasons (some of which are discussed below), we don't want to pass these on (ie, we want
+             * to suppress their "press" event), which means we must perform all key simulation on the "up" and "down"
+             * events.
+             *
+             * Regarding BS: I never want the browser to act on BS, since it does double-duty as the BACK button,
+             * leaving the current page.
+             *
+             * Regarding TAB: If I don't consume TAB on the "down" event, then that's all I'll see, because the browser
+             * act on it by giving focus to the next control.
+             *
+             * Regarding ESC: This key generates "down" and "up" events (LOTS of "down" events for that matter), but no
+             * "press" event.
+             */
+
+            /*
+             * HACK for simulating CTRL_BREAK using CTRL_DEL (Mac) / CTRL_BS (Windows)
+             */
+            if (keyCode == Keyboard.KEYCODE.BS && (this.bitsState & (Keyboard.STATE.CTRL|Keyboard.STATE.ALT)) == Keyboard.STATE.CTRL) {
+                simCode = Keyboard.SIMCODE.CTRL_BREAK;
             }
+
+            /*
+             * There are a number of other common key sequences that interfere with our machines; for example,
+             * the up/down arrows have a "default" behavior of scrolling the web page up and down, which is
+             * definitely NOT a behavior we want.  Since we mark those keys as ONDOWN, we'll catch them all here.
+             */
+            fPass = false;
         }
     }
     else {
-        if (keyCode == Keyboard.KEYCODE.CMD) {
-            /*
-             * Avoid interfering with useful Browser key commands, like CMD-Q, CMD-T, etc.
-             */
-            this.bitsState &= ~Keyboard.STATE.CMD;
-            if (fDown) this.bitsState |= Keyboard.STATE.CMD;
-            fAutoClear = false;
+        /*
+         * When I have defined system-wide CTRL-key sequences to perform common editing operations (eg, CTRL_W
+         * and CTRL_Z to scroll pages of text), the browser likes to act on those operations, so let's set fPass
+         * to false to prevent that.
+         */
+        if (Keyboard.SIMCODES[simCode] && (this.bitsState & Keyboard.STATE.CTRLS)) {
+            fPass = false;
+        }
+        /*
+         * For now, we don't want to simulate any key sequence that has the CMD key associated with it.
+         */
+        if (this.bitsState & Keyboard.STATE.CMDS) {
+            fIgnore = true;
         }
     }
 
-    if (fAutoClear) {
-        /*
-         * When you use a command like CMD-T, I see the CMD key going down, but not going up,
-         * so I think the CMD key is still down and ignore all input; to easily get out of that state,
-         * I clear our internal STATE.CMD whenever I see ANY key go up (well, ALMOST any key; cases
-         * above that explicitly clear fAutoClear -- such as the CMD key itself -- are exceptions
-         * to the rule).
-         */
-        this.bitsState &= ~Keyboard.STATE.CMD;
-    }
-
-    /*
-     * I used to be more "cautious" in calling preventDefault(), but there are a number of common key
-     * sequences that interfere with our machines; for example, the up/down arrows have a "default" behavior
-     * of scrolling the web page up and down, which is definitely NOT a behavior we want.  Similarly, if I
-     * have defined system-wide ctrl-key sequences to perform common editing operations (eg, ctrl-w and ctrl-z
-     * to scroll pages of text), the browser allows those operations to kick in as well.
-     *
-     * So now I've taken a more aggressive approach: any simCode that exists in the SIMCODES table (not just
-     * those with the ONDOWN "bit" set) is assumed to be one that we should invoke preventDefault() for as well.
-     *
-     * TODO: Consider whether we should set fPass to false as well.  I'm still treating that cautiously.
-     */
-    if (Keyboard.SIMCODES[simCode]) {
+    if (!fPass) {
         event.preventDefault();
     }
 
-    if (DEBUG && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
-        this.messageDebugger("\nonKey" + (fDown? "Down" : "Up") + "(" + simCode + "): " + (fPass? "true" : "false"), true);
+    if (!COMPILED && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
+        this.messageDebugger("\nonKey" + (fDown? "Down" : "Up") + "(" + simCode + "): " + (fIgnore? "ignore" : (fPass? "true" : "false")), true);
     }
 
     /*
@@ -1887,11 +1969,16 @@ Keyboard.prototype.onKeyDown = function(event, fDown)
      * rapid (ie, fake) "up" and "down" events around "press" events, probably more to satisfy compatibility
      * issues rather than making a serious effort to indicate when a key ACTUALLY went down or up.
      */
-    if (!this.fMobile || !fPass) {
-        if (fDown) {
-            this.addActiveKey(simCode, fPress);
-        } else {
-            this.removeActiveKey(simCode);
+    if (!fIgnore) {
+        if (!this.fMobile || !fPass) {
+            if (fDown) {
+                this.addActiveKey(simCode, fPress);
+            } else {
+                if (!this.removeActiveKey(simCode)) {
+                    var code = this.getSimCode(simCode, false);
+                    if (code != simCode) this.removeActiveKey(code);
+                }
+            }
         }
     }
 
@@ -1914,7 +2001,7 @@ Keyboard.prototype.onKeyPress = function(event)
 
     var simCode = this.checkActiveKey();
     if (simCode && this.isAlphaKey(simCode) && this.isAlphaKey(keyCode) && simCode != keyCode) {
-        if (DEBUG && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
+        if (!COMPILED && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
             this.messageDebugger("onKeyPress(" + keyCode + ") out of sync with " + simCode + ", invert caps-lock", true);
         }
         this.fToggleCapsLock = true;
@@ -1937,21 +2024,14 @@ Keyboard.prototype.onKeyPress = function(event)
         fPass = false;
     }
     else {
-        if (this.bitsState & Keyboard.STATE.CMD) {
-            this.bitsState &= ~Keyboard.STATE.CMD;
-        } else {
-            // if (DEBUG && event.altKey) this.messageDebugger("ALT press: keyCode " + keyCode, Debugger.MESSAGE.KEYS);
-            if (this.bitsState & (Keyboard.STATE.CTRL | Keyboard.STATE.ALT)) {
-                fPass = false;
-            } else {
-                if (this.fEscapeDisabled && keyCode == Keyboard.ASCII['`']) keyCode = Keyboard.KEYCODE.ESC;
-                fPass = false;
-                fAdd = true;
-            }
-        }
+        /*
+         * TODO: Determine whether this is still sensible since the rewrite.
+         */
+        fAdd = !(this.bitsState & (Keyboard.STATE.CTRL | Keyboard.STATE.ALT));
+        fPass = !Keyboard.SIMCODES[simCode];
     }
 
-    if (DEBUG && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
+    if (!COMPILED && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
         this.messageDebugger("\nonKeyPress(" + keyCode + "): " + (fPass? "true" : "false"), true);
     }
 
@@ -1982,7 +2062,7 @@ Keyboard.prototype.keySimulate = function(simCode, fDown)
 
         /*
          * Hack to transform the IBM "BACKSPACE" key (which we normally map to KEYCODE_DELETE) to the IBM "DEL" key
-         * whenever both CTRL and ALT are pressed as well, so that it's easier to simulate that old favorite: CTRL-ALT-DEL
+         * whenever both CTRL and ALT are pressed as well, so that it's easier to simulate that old favorite: CTRL_ALT_DEL
          */
         if (wCode == Keyboard.SCANCODE.BS) {
             if ((this.bitsState & (Keyboard.STATE.CTRL | Keyboard.STATE.ALT)) == (Keyboard.STATE.CTRL | Keyboard.STATE.ALT)) {
@@ -2001,8 +2081,8 @@ Keyboard.prototype.keySimulate = function(simCode, fDown)
             var bScan = wCode & 0xff;
             /*
              * TODO: The handling of SIMCODE entries with "extended" codes still needs to be tested, and
-             * moreover, if any of them need to perform any shift-state modifications, those modifications will
-             * need to be encoded differently.
+             * moreover, if any of them need to perform any shift-state modifications, those modifications
+             * may need to be encoded differently.
              */
             if (bCode == Keyboard.SCANCODE.EXTEND1 || bCode == Keyboard.SCANCODE.EXTEND2) {
                 abScanCodes.push(bCode | (fDown? 0 : Keyboard.SCANCODE.BREAK));
@@ -2041,7 +2121,7 @@ Keyboard.prototype.keySimulate = function(simCode, fDown)
         fSimulated = true;
     }
 
-    if (DEBUG && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
+    if (!COMPILED && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
         this.messageDebugger("keySimulate(" + simCode + "," + (fDown? "down" : "up") + "): " + (fSimulated? "true" : "false"), true);
     }
 

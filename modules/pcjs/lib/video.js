@@ -2070,22 +2070,24 @@ Video.prototype.getInput = function(mouse)
  */
 Video.prototype.lockPointer = function(fLock)
 {
+    var fSuccess = false;
     if (this.inputScreen) {
         if (fLock) {
             if (this.inputScreen.lockPointer) {
                 this.inputScreen.lockPointer();
                 this.mouse.notifyPointerLocked(true);
-                return true;
+                fSuccess = true;
             }
         } else {
             if (this.inputScreen.unlockPointer) {
                 this.inputScreen.unlockPointer();
                 this.mouse.notifyPointerLocked(false);
-                return true;
+                fSuccess = true;
             }
         }
+        this.setFocus();
     }
-    return false;
+    return fSuccess;
 };
 
 /**
