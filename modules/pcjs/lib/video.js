@@ -2183,7 +2183,7 @@ Video.prototype.captureTouch = function()
 Video.prototype.onFocusChange = function(fFocus)
 {
     if (this.fHasFocus != fFocus && DEBUG && this.messageEnabled()) {
-        this.messageDebugger("onFocusChange(): focus is now " + fFocus);
+        this.messageDebugger("onFocusChange(" + (fFocus? "true" : "false") + ")", true);
     }
     /*
      * As per http://stackoverflow.com/questions/6740253/disable-scrolling-when-changing-focus-form-elements-ipad-web-app,
@@ -2199,6 +2199,7 @@ Video.prototype.onFocusChange = function(fFocus)
      *  }
      */
     this.fHasFocus = fFocus;
+    if (this.kbd) this.kbd.onFocusChange(fFocus);
 };
 
 /*
@@ -5161,18 +5162,6 @@ Video.init = function()
          */
 
         /*
-         * As noted in keyboard.js, the keyboard on an iOS device pops up with the SHIFT key depressed,
-         * which is not the initial keyboard state that the Keyboard component expects. I originally tried
-         * to fix that by adding an 'autocapitalize="off"' attribute alongside the 'contenteditable="true"'
-         * attribute on the <canvas> element, but apparently Safari honors that only inside certain elements
-         * (eg, <input>).  However, I'm still optimistic that it'll be supported someday....
-         */
-        if (web.isUserAgent("iOS")) {
-            eCanvas.setAttribute("autocapitalize", "off");
-            eCanvas.setAttribute("autocorrect", "off");
-        }
-
-        /*
          * HACK: A canvas style of "auto" provides for excellent responsive canvas scaling in EVERY browser
          * except IE9/IE10, so I recalculate the appropriate CSS height every time the parent DIV is resized;
          * IE11 works without this hack, so we take advantage of the fact that IE11 doesn't report itself as "MSIE".
@@ -5205,7 +5194,7 @@ Video.init = function()
          * UPDATE: Unfortunately, Android keyboards like to compose whole words before transmitting any of the
          * intervening characters; our textarea's keyDown/keyUp event handlers DO receive intervening key events,
          * but their keyCode property is ZERO.  Virtually the only usable key event we receive is the Enter key.
-         * Android users will have to use machines that display their own on-screen keyboard, or use an external
+         * Android users will have to use machines that include their own on-screen "soft keyboard", or use an external
          * keyboard.
          *
          * The following code didn't work any better on Android.  You could clearly see the overlaid semi-transparent
@@ -5226,6 +5215,16 @@ Video.init = function()
          */
         var eTextArea = window.document.createElement("textarea");
         eTextArea.setAttribute("style", "position:absolute; left:0; top:0; width:100%; height:100%; opacity:0; border:0; padding:0; line-height:0;");
+
+        /*
+         * As noted in keyboard.js, the keyboard on an iOS device pops up with the SHIFT key depressed,
+         * which is not the initial keyboard state that the Keyboard component expects.
+         */
+        if (web.isUserAgent("iOS")) {
+            eTextArea.setAttribute("autocapitalize", "off");
+            eTextArea.setAttribute("autocorrect", "off");
+        }
+
         eVideo.style.clear = "both";
         eVideo.style.position = "relative";
         eVideo.appendChild(eTextArea);

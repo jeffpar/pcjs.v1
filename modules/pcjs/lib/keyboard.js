@@ -76,6 +76,11 @@ function Keyboard(parmsKbd)
     this.cSoftCodes = 0;
 
     /*
+     * Updated by onFocusChange()
+     */
+    this.fHasFocus = true;
+
+    /*
      * This is true whenever the physical Escape key is disabled (eg, by pointer locking code),
      * giving us the opportunity to map a different physical key to machine's virtual Escape key.
      */
@@ -184,6 +189,8 @@ Keyboard.KEYCODE = {
     /* 0x2C */ PRTSC:       44,
     /* 0x2D */ INS:         45,
     /* 0x2E */ DEL:         46,
+    /* 0x3B */ FF_SEMI:     59,
+    /* 0x3D */ FF_EQUALS:   61,
     /* 0x5B */ CMD:         91,         // aka WIN
     /* 0x5D */ RCMD:        93,         // aka MENU
     /* 0x60 */ NUM_INS:     96,         // 0
@@ -215,17 +222,19 @@ Keyboard.KEYCODE = {
     /* 0x7B */ F12:         123,
     /* 0x90 */ NUM_LOCK:    144,
     /* 0x91 */ SCROLL_LOCK: 145,
-    /* 0xBA */ SEMI:        186,
-    /* 0xBB */ EQUALS:      187,
-    /* 0xBC */ COMMA:       188,
-    /* 0xBD */ DASH:        189,
-    /* 0xBE */ PERIOD:      190,
-    /* 0xBF */ SLASH:       191,
-    /* 0xC0 */ BQUOTE:      192,
-    /* 0xDB */ LBRACK:      219,
-    /* 0xDC */ BSLASH:      220,
-    /* 0xDD */ RBRACK:      221,
-    /* 0xDE */ QUOTE:       222,
+    /* 0xAD */ FF_DASH:     173,
+    /* 0xBA */ SEMI:        186,        // Firefox: 59
+    /* 0xBB */ EQUALS:      187,        // Firefox: 61
+    /* 0xBC */ COMMA:       188,        // Firefox: 44
+    /* 0xBD */ DASH:        189,        // Firefox: 173
+    /* 0xBE */ PERIOD:      190,        // Firefox: 46
+    /* 0xBF */ SLASH:       191,        // Firefox: 47
+    /* 0xC0 */ BQUOTE:      192,        // Firefox: 96
+    /* 0xDB */ LBRACK:      219,        // Firefox: 91
+    /* 0xDC */ BSLASH:      220,        // Firefox: 92
+    /* 0xDD */ RBRACK:      221,        // Firefox: 93
+    /* 0xDE */ QUOTE:       222,        // Firefox: 39
+    /* 0xE0 */ FF_CMD:      224,        // Firefox only, which uses this for both CMD and RCMD
     //
     // The following biases use what I'll call "Decimal Coded Binary" or DCB (the reverse of BCD),
     // where decimal digits are used to represent binary bit values, which can be added together without
@@ -260,6 +269,7 @@ Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.LBRACK]  = Keyboard.ASCII['['];   // 2
 Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.BSLASH]  = Keyboard.ASCII['\\'];  // 220 -> 92
 Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.RBRACK]  = Keyboard.ASCII[']'];   // 221 -> 93
 Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.QUOTE]   = Keyboard.ASCII["'"];   // 222 -> 39
+Keyboard.STUPID_KEYCODES[Keyboard.KEYCODE.FF_DASH] = Keyboard.ASCII['-'];
 
 /*
  * Maps unshifted keyCodes to their shifted counterparts; to be used when a shift-key is down.
@@ -287,6 +297,9 @@ Keyboard.SHIFTED_KEYCODES[Keyboard.KEYCODE.LBRACK] = Keyboard.ASCII['{'];
 Keyboard.SHIFTED_KEYCODES[Keyboard.KEYCODE.BSLASH] = Keyboard.ASCII['|'];
 Keyboard.SHIFTED_KEYCODES[Keyboard.KEYCODE.RBRACK] = Keyboard.ASCII['}'];
 Keyboard.SHIFTED_KEYCODES[Keyboard.KEYCODE.QUOTE]  = Keyboard.ASCII['"'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.KEYCODE.FF_DASH]   = Keyboard.ASCII['_'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.KEYCODE.FF_EQUALS] = Keyboard.ASCII['+'];
+Keyboard.SHIFTED_KEYCODES[Keyboard.KEYCODE.FF_SEMI]   = Keyboard.ASCII[':'];
 
 Keyboard.SIMCODE = {
     BS:           Keyboard.KEYCODE.BS          + Keyboard.KEYCODE.ONDOWN,
@@ -327,6 +340,7 @@ Keyboard.SIMCODE = {
     DEL:          Keyboard.KEYCODE.DEL         + Keyboard.KEYCODE.ONDOWN,
     CMD:          Keyboard.KEYCODE.CMD         + Keyboard.KEYCODE.ONDOWN,
     RCMD:         Keyboard.KEYCODE.RCMD        + Keyboard.KEYCODE.ONDOWN,
+    FF_CMD:       Keyboard.KEYCODE.FF_CMD      + Keyboard.KEYCODE.ONDOWN,
     CTRL_C:       Keyboard.ASCII.CTRL_C        + Keyboard.KEYCODE.FAKE,
     CTRL_BREAK:   Keyboard.KEYCODE.BS          + Keyboard.KEYCODE.FAKE,
     CTRL_ALT_DEL: Keyboard.KEYCODE.DEL         + Keyboard.KEYCODE.FAKE
@@ -462,13 +476,13 @@ Keyboard.STATE = {
     SHIFT:          0x0002,
     RCTRL:          0x0004,             // 101-key keyboard only
     CTRL:           0x0008,
+    CTRLS:          0x000c,
     RALT:           0x0010,             // 101-key keyboard only
     ALT:            0x0020,
     ALTS:           0x0030,
     RCMD:           0x0040,             // 101-key keyboard only
     CMD:            0x0080,             // 101-key keyboard only
-    CMDS:           0x00c0,             // CMD | RCMD
-    CTRLS:          0x00fc,             // CTRL | RCTRL | ALT | RALT | CMD | RCMD
+    CMDS:           0x00c0,
     SHIFTS:         0x00ff,             // SHIFT | RSHIFT | CTRL | RCTRL | ALT | RALT | CMD | RCMD
     INSERT:         0x0100,             // TODO: Placeholder
     CAPS_LOCK:      0x0200,
@@ -489,6 +503,7 @@ Keyboard.KEYSTATES[Keyboard.SIMCODE.CTRL]        = Keyboard.STATE.CTRL;
 Keyboard.KEYSTATES[Keyboard.SIMCODE.ALT]         = Keyboard.STATE.ALT;
 Keyboard.KEYSTATES[Keyboard.SIMCODE.CMD]         = Keyboard.STATE.CMD;
 Keyboard.KEYSTATES[Keyboard.SIMCODE.RCMD]        = Keyboard.STATE.RCMD;
+Keyboard.KEYSTATES[Keyboard.SIMCODE.FF_CMD]      = Keyboard.STATE.CMD;
 Keyboard.KEYSTATES[Keyboard.SIMCODE.CAPS_LOCK]   = Keyboard.STATE.CAPS_LOCK;
 Keyboard.KEYSTATES[Keyboard.SIMCODE.NUM_LOCK]    = Keyboard.STATE.NUM_LOCK;
 Keyboard.KEYSTATES[Keyboard.SIMCODE.SCROLL_LOCK] = Keyboard.STATE.SCROLL_LOCK;
@@ -855,6 +870,7 @@ Keyboard.SIMCODES[Keyboard.SIMCODE.F11]          = Keyboard.SCANCODE.F11;
 Keyboard.SIMCODES[Keyboard.SIMCODE.F12]          = Keyboard.SCANCODE.F12;
 Keyboard.SIMCODES[Keyboard.SIMCODE.CMD]          = Keyboard.SCANCODE.WIN;
 Keyboard.SIMCODES[Keyboard.SIMCODE.RCMD]         = Keyboard.SCANCODE.MENU;
+Keyboard.SIMCODES[Keyboard.SIMCODE.FF_CMD]       = Keyboard.SCANCODE.WIN;
 
 Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_C]       = Keyboard.SCANCODE.C           | (Keyboard.SCANCODE.CTRL << 8);
 Keyboard.SIMCODES[Keyboard.SIMCODE.CTRL_BREAK]   = Keyboard.SCANCODE.SCROLL_LOCK | (Keyboard.SCANCODE.CTRL << 8);
@@ -1120,7 +1136,7 @@ Keyboard.prototype.resetDevice = function(fNotify)
  *
  * This is the ChipSet's primary interface for toggling keyboard "data" and "clock" lines.
  * For MODEL_5150 and MODEL_5160 machines, this function is called from the ChipSet's PPI_B
- * output handler.  For MODEL_5170 machines, this function is called when selected KBC.CMD
+ * output handler.  For MODEL_5170 machines, this function is called when selected CMD
  * "data bytes" have been written.
  *
  * @this {Keyboard}
@@ -1825,16 +1841,16 @@ Keyboard.prototype.getSimCode = function(keyCode, fShifted)
     var simCode = keyCode;
 
     if (keyCode >= Keyboard.ASCII.A && keyCode <= Keyboard.ASCII.Z) {
-        if (!fShifted || !(this.bitsState & (Keyboard.STATE.SHIFT | Keyboard.STATE.RSHIFT | Keyboard.STATE.CAPS_LOCK))) {
+        if (!(this.bitsState & (Keyboard.STATE.SHIFT | Keyboard.STATE.RSHIFT | Keyboard.STATE.CAPS_LOCK)) == fShifted) {
             simCode = keyCode + (Keyboard.ASCII.a - Keyboard.ASCII.A);
         }
     }
     else if (keyCode >= Keyboard.ASCII.a && keyCode <= Keyboard.ASCII.z) {
-        if (!fShifted || (this.bitsState & (Keyboard.STATE.SHIFT | Keyboard.STATE.RSHIFT | Keyboard.STATE.CAPS_LOCK))) {
+        if (!!(this.bitsState & (Keyboard.STATE.SHIFT | Keyboard.STATE.RSHIFT | Keyboard.STATE.CAPS_LOCK)) == fShifted) {
             simCode = keyCode - (Keyboard.ASCII.a - Keyboard.ASCII.A);
         }
     }
-    else if (!fShifted || this.bitsState & (Keyboard.STATE.SHIFT | Keyboard.STATE.RSHIFT)) {
+    else if (!!(this.bitsState & (Keyboard.STATE.SHIFT | Keyboard.STATE.RSHIFT)) == fShifted) {
         if (code = Keyboard.SHIFTED_KEYCODES[keyCode]) {
             simCode = code;
         }
@@ -1845,6 +1861,24 @@ Keyboard.prototype.getSimCode = function(keyCode, fShifted)
         }
     }
     return simCode;
+};
+
+/**
+ * onFocusChange(fFocus)
+ *
+ * @this {Keyboard}
+ * @param {boolean} fFocus is true if gaining focus, false if losing it
+ */
+Keyboard.prototype.onFocusChange = function(fFocus)
+{
+    if (this.fHasFocus != fFocus && !COMPILED && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
+        this.messageDebugger("onFocusChange(" + (fFocus? "true" : "false") + ")", true);
+    }
+    this.fHasFocus = fFocus;
+    /*
+     * Since we can't be sure of any shift states after losing focus, we clear them all.
+     */
+    if (!fFocus) this.bitsState &= ~Keyboard.STATE.SHIFTS;
 };
 
 /**
@@ -1898,7 +1932,8 @@ Keyboard.prototype.onKeyDown = function(event, fDown)
             }
             /*
              * As a safeguard, whenever the CMD key goes up, clear all active keys, because there appear to be
-             * cases where we don't always get notification of a CMD key's companion key going up.
+             * cases where we don't always get notification of a CMD key's companion key going up (this probably
+             * overlaps with most if not all situations where we also lose focus).
              */
             if (!fDown && (keyCode == Keyboard.KEYCODE.CMD || keyCode == Keyboard.KEYCODE.RCMD)) {
                 this.clearActiveKeys();
@@ -1944,15 +1979,14 @@ Keyboard.prototype.onKeyDown = function(event, fDown)
          * and CTRL_Z to scroll pages of text), the browser likes to act on those operations, so let's set fPass
          * to false to prevent that.
          */
-        if (Keyboard.SIMCODES[simCode] && (this.bitsState & Keyboard.STATE.CTRLS)) {
+        if (Keyboard.SIMCODES[simCode] && (this.bitsState & (Keyboard.STATE.CTRLS | Keyboard.STATE.ALTS))) {
             fPass = false;
         }
+
         /*
          * For now, we don't want to simulate any key sequence that has the CMD key associated with it.
          */
-        if (this.bitsState & Keyboard.STATE.CMDS) {
-            fIgnore = true;
-        }
+        fIgnore = !!(this.bitsState & Keyboard.STATE.CMDS);
     }
 
     if (!fPass) {
@@ -1960,7 +1994,7 @@ Keyboard.prototype.onKeyDown = function(event, fDown)
     }
 
     if (!COMPILED && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
-        this.messageDebugger("\nonKey" + (fDown? "Down" : "Up") + "(" + simCode + "): " + (fIgnore? "ignore" : (fPass? "true" : "false")), true);
+        this.messageDebugger("\nonKey" + (fDown? "Down" : "Up") + "(" + keyCode + "): " + (fIgnore? "ignore" : (fPass? "true" : "false")), true);
     }
 
     /*
@@ -1975,7 +2009,7 @@ Keyboard.prototype.onKeyDown = function(event, fDown)
                 this.addActiveKey(simCode, fPress);
             } else {
                 if (!this.removeActiveKey(simCode)) {
-                    var code = this.getSimCode(simCode, false);
+                    var code = this.getSimCode(keyCode, false);
                     if (code != simCode) this.removeActiveKey(code);
                 }
             }
@@ -1994,8 +2028,6 @@ Keyboard.prototype.onKeyDown = function(event, fDown)
  */
 Keyboard.prototype.onKeyPress = function(event)
 {
-    var fAdd = false, fPass = true;
-
     event = event || window.event;
     var keyCode = event.which || event.keyCode;
 
@@ -2013,29 +2045,13 @@ Keyboard.prototype.onKeyPress = function(event)
      */
     this.sInjectBuffer = "";
 
-    if (keyCode == Keyboard.KEYCODE.BS || keyCode == Keyboard.KEYCODE.TAB) {
-        /*
-         * Firefox does not seem to be honoring our consumption of onKeyDown events for BS or TAB, and generates keyPress
-         * events anyway.  This causes us grief for various CTRL and ALT combinations, resulting in duplicate key presses.
-         * So, I'm going to try to fix this below, by setting fPass to true if either of those modifier keys is currently down.
-         *
-         * This is just one example of a larger Firefox problem (see https://bugzilla.mozilla.org/show_bug.cgi?id=501496).
-         */
-        fPass = false;
-    }
-    else {
-        /*
-         * TODO: Determine whether this is still sensible since the rewrite.
-         */
-        fAdd = !(this.bitsState & (Keyboard.STATE.CTRL | Keyboard.STATE.ALT));
-        fPass = !Keyboard.SIMCODES[simCode];
-    }
+    var fPass = !Keyboard.SIMCODES[keyCode] || !!(this.bitsState & Keyboard.STATE.CMD);
 
     if (!COMPILED && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
         this.messageDebugger("\nonKeyPress(" + keyCode + "): " + (fPass? "true" : "false"), true);
     }
 
-    if (fAdd) {
+    if (!fPass) {
         this.addActiveKey(keyCode, true);
     }
 
