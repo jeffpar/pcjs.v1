@@ -35,8 +35,8 @@
 if (typeof module !== 'undefined') {
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
+    var Messages    = require("./messages");
     var ChipSet     = require("./chipset");
-    var Debugger    = require("./debugger");
     var State       = require("./state");
 }
 
@@ -87,7 +87,7 @@ function SerialPort(parmsSerial) {
      */
     this.controlIOBuffer = null;
 
-    Component.call(this, "SerialPort", parmsSerial, SerialPort, Debugger.MESSAGE.SERIAL);
+    Component.call(this, "SerialPort", parmsSerial, SerialPort, Messages.SERIAL);
 
     Component.bindExternalControl(this, parmsSerial['binding'], SerialPort.sIOBuffer);
 }

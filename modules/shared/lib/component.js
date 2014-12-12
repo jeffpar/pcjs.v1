@@ -114,7 +114,7 @@ function Component(type, parms, constructor, bitsMessage)
      * Gather all the various component flags (booleans) into a single "flags" object, and encourage
      * subclasses to do the same, to reduce the property clutter we have to wade through while debugging.
      */
-    this.bitField = {
+    this.aFlags = {
         fReady: false,
         fBusy: false,
         fBusyCancel: false,
@@ -794,7 +794,7 @@ Component.prototype = {
      * @param {string} s describes a fatal error condition
      */
     setError: function(s) {
-        this.bitField.fError = true;
+        this.aFlags.fError = true;
         this.notice("Fatal error: " + s);
     },
     /**
@@ -805,7 +805,7 @@ Component.prototype = {
      * @this {Component}
      */
     clearError: function() {
-        this.bitField.fError = false;
+        this.aFlags.fError = false;
     },
     /**
      * isError()
@@ -816,7 +816,7 @@ Component.prototype = {
      * @return {boolean} true if a fatal error condition exists, false if not
      */
     isError: function() {
-        if (this.bitField.fError) {
+        if (this.aFlags.fError) {
             this.println(this.toString() + " error");
             return true;
         }
@@ -837,14 +837,14 @@ Component.prototype = {
      */
     isReady: function(fnReady) {
         if (fnReady) {
-            if (this.bitField.fReady) {
+            if (this.aFlags.fReady) {
                 fnReady();
             } else {
                 if (DEBUG) this.log("NOT ready");
                 this.fnReady = fnReady;
             }
         }
-        return this.bitField.fReady;
+        return this.aFlags.fReady;
     },
     /**
      * setReady(fReady)
@@ -855,9 +855,9 @@ Component.prototype = {
      * @param {boolean} [fReady] is assumed to indicate "ready" unless EXPLICITLY set to false
      */
     setReady: function(fReady) {
-        if (!this.bitField.fError) {
-            this.bitField.fReady = (fReady !== false);
-            if (this.bitField.fReady) {
+        if (!this.aFlags.fError) {
+            this.aFlags.fReady = (fReady !== false);
+            if (this.aFlags.fReady) {
                 if (DEBUG || this.name) this.log("ready");
                 var fnReady = this.fnReady;
                 this.fnReady = null;
@@ -875,14 +875,14 @@ Component.prototype = {
      * @return {boolean} true if "busy", false if not
      */
     isBusy: function(fCancel) {
-        if (this.bitField.fBusy) {
+        if (this.aFlags.fBusy) {
             if (fCancel) {
-                this.bitField.fBusyCancel = true;
+                this.aFlags.fBusyCancel = true;
             } else if (fCancel === undefined) {
                 this.println(this.toString() + " busy");
             }
         }
-        return this.bitField.fBusy;
+        return this.aFlags.fBusy;
     },
     /**
      * setBusy(fBusy)
@@ -894,19 +894,19 @@ Component.prototype = {
      * @return {boolean}
      */
     setBusy: function(fBusy) {
-        if (this.bitField.fBusyCancel) {
-            if (this.bitField.fBusy) {
-                this.bitField.fBusy = false;
+        if (this.aFlags.fBusyCancel) {
+            if (this.aFlags.fBusy) {
+                this.aFlags.fBusy = false;
             }
-            this.bitField.fBusyCancel = false;
+            this.aFlags.fBusyCancel = false;
             return false;
         }
-        if (this.bitField.fError) {
+        if (this.aFlags.fError) {
             this.println(this.toString() + " error");
             return false;
         }
-        this.bitField.fBusy = fBusy;
-        return this.bitField.fBusy;
+        this.aFlags.fBusy = fBusy;
+        return this.aFlags.fBusy;
     },
     /**
      * powerUp(fSave)
@@ -917,7 +917,7 @@ Component.prototype = {
      * @return {boolean} true if successful, false if failure
      */
     powerUp: function(data, fRepower) {
-        this.bitField.fPowered = true;
+        this.aFlags.fPowered = true;
         return true;
     },
     /**
@@ -929,7 +929,7 @@ Component.prototype = {
      * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
      */
     powerDown: function(fSave, fShutdown) {
-        if (fShutdown) this.bitField.fPowered = false;
+        if (fShutdown) this.aFlags.fPowered = false;
         return true;
     },
     /**

@@ -17,14 +17,14 @@
     { "id": "ibm5150.romBASIC",
       "name": "",
       "addr": 0xf6000,
-      "size": 0x8000,
+      "size": 0x08000,
       "file": "/devices/pc/basic/ibm-basic-1.00.json",
       "notify": ""
     },
     { "id": "ibm5150.romBIOS",
       "name": "",
       "addr": 0xfe000,
-      "size": 0x2000,
+      "size": 0x02000,
       "file": "/devices/pc/bios/5150/1981-04-24.json",
       "notify": ""
     }

@@ -36,9 +36,9 @@ if (typeof module !== 'undefined') {
     var str         = require("../../shared/lib/strlib");
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
+    var Messages    = require("./messages");
     var SerialPort  = require("./serial");
     var State       = require("./state");
-    var Debugger    = require("./debugger");
 }
 
 /**
@@ -71,7 +71,7 @@ if (typeof module !== 'undefined') {
  */
 function Mouse(parmsMouse)
 {
-    Component.call(this, "Mouse", parmsMouse, Mouse, Debugger.MESSAGE.MOUSE);
+    Component.call(this, "Mouse", parmsMouse, Mouse, Messages.MOUSE);
 
     this.idAdapter = parmsMouse['serial'];
     if (this.idAdapter) {
@@ -543,7 +543,7 @@ Mouse.prototype.sendPacket = function(sDiag, xDiag, yDiag)
     var b1 = 0x40 | (this.fButton1? 0x20 : 0) | (this.fButton2? 0x10 : 0) | ((this.yDelta & 0xC0) >> 4) | ((this.xDelta & 0xC0) >> 6);
     var b2 = this.xDelta & 0x3F;
     var b3 = this.yDelta & 0x3F;
-    if (this.messageEnabled(Debugger.MESSAGE.SERIAL)) {
+    if (this.messageEnabled(Messages.SERIAL)) {
         this.messageDebugger((sDiag? (sDiag + ": ") : "") + (yDiag !== undefined? ("mouse (" + xDiag + "," + yDiag + "): ") : "") + "serial packet [" + str.toHexByte(b1) + "," + str.toHexByte(b2) + "," + str.toHexByte(b3) + "]", 0, true);
     }
     this.componentAdapter.sendRBR([b1, b2, b3]);

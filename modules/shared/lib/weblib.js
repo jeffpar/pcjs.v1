@@ -402,15 +402,17 @@ web.fLocalStorage = null;
  */
 web.hasLocalStorage = function() {
     if (web.fLocalStorage == null) {
-        var f;
-        var sTest = 'PCjs.localStorage';
-        try {
-            window.localStorage.setItem(sTest, sTest);
-            f = (window.localStorage.getItem(sTest) === sTest);
-            window.localStorage.removeItem(sTest);
-        } catch(e) {
-            web.logLocalStorageError(e);
-            f = false;
+        var f = false;
+        if (window) {
+            var sTest = 'PCjs.localStorage';
+            try {
+                window.localStorage.setItem(sTest, sTest);
+                f = (window.localStorage.getItem(sTest) === sTest);
+                window.localStorage.removeItem(sTest);
+            } catch(e) {
+                web.logLocalStorageError(e);
+                f = false;
+            }
         }
         web.fLocalStorage = f;
     }
@@ -438,10 +440,12 @@ web.logLocalStorageError = function(e)
 web.getLocalStorageItem = function(sKey)
 {
     var sValue;
-    try {
-        sValue = window.localStorage.getItem(sKey);
-    } catch(e) {
-        web.logLocalStorageError(e);
+    if (window) {
+        try {
+            sValue = window.localStorage.getItem(sKey);
+        } catch(e) {
+            web.logLocalStorageError(e);
+        }
     }
     return sValue;
 };

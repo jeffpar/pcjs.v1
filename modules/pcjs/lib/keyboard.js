@@ -36,10 +36,10 @@ if (typeof module !== 'undefined') {
     var str         = require("../../shared/lib/strlib");
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
+    var Messages    = require("./messages");
     var ChipSet     = require("./chipset");
     var State       = require("./state");
     var CPU         = require("./cpu");
-    var Debugger    = require("./debugger");
 }
 
 /**
@@ -62,7 +62,7 @@ if (typeof module !== 'undefined') {
  */
 function Keyboard(parmsKbd)
 {
-    Component.call(this, "Keyboard", parmsKbd, Keyboard, Debugger.MESSAGE.KEYBOARD);
+    Component.call(this, "Keyboard", parmsKbd, Keyboard, Messages.KEYBOARD);
 
     this.nDefaultModel = parmsKbd['model'];
 
@@ -995,7 +995,7 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control)
                 this.bindings[id] = control;
                 control.onclick = function(kbd, sKey, simCode) {
                     return function onClickKeyboard(event) {
-                        if (!COMPILED && kbd.messageEnabled()) kbd.messageDebugger(sKey + " clicked", Debugger.MESSAGE.KEYS);
+                        if (!COMPILED && kbd.messageEnabled()) kbd.messageDebugger(sKey + " clicked", Messages.KEYS);
                         if (kbd.cpu) kbd.cpu.setFocus();
                         kbd.updateShiftState(simCode, true);    // future-proofing if/when any LOCK keys are added to CLICKCODES
                         kbd.addActiveKey(simCode, true);
@@ -1127,7 +1127,7 @@ Keyboard.prototype.resetDevice = function(fNotify)
     /*
      * TODO: There's more to reset, like LED indicators, default type rate, and emptying the scan code buffer.
      */
-    this.messageDebugger("keyboard reset", Debugger.MESSAGE.KEYBOARD | Debugger.MESSAGE.PORT);
+    this.messageDebugger("keyboard reset", Messages.KEYBOARD | Messages.PORT);
     this.abScanBuffer = [Keyboard.CMDRES.BAT_OK];
     if (fNotify && this.chipset) this.chipset.notifyKbdData(this.abScanBuffer[0]);
 };
@@ -1149,7 +1149,7 @@ Keyboard.prototype.setEnable = function(fData, fClock)
 {
     var fReset = false;
     if (this.fClock !== fClock) {
-        if (!COMPILED && this.messageEnabled(Debugger.MESSAGE.KEYBOARD | Debugger.MESSAGE.PORT)) {
+        if (!COMPILED && this.messageEnabled(Messages.KEYBOARD | Messages.PORT)) {
             this.messageDebugger("keyboard clock line changing to " + fClock, true);
         }
         /*
@@ -1159,7 +1159,7 @@ Keyboard.prototype.setEnable = function(fData, fClock)
         this.fClock = this.fResetOnEnable = fClock;
     }
     if (this.fData !== fData) {
-        if (!COMPILED && this.messageEnabled(Debugger.MESSAGE.KEYBOARD | Debugger.MESSAGE.PORT)) {
+        if (!COMPILED && this.messageEnabled(Messages.KEYBOARD | Messages.PORT)) {
             this.messageDebugger("keyboard data line changing to " + fData, true);
         }
         this.fData = fData;
@@ -1618,7 +1618,7 @@ Keyboard.prototype.updateShiftState = function(simCode, fSim, fDown)
 Keyboard.prototype.addActiveKey = function(simCode, fPress)
 {
     if (!Keyboard.SIMCODES[simCode]) {
-        if (!COMPILED && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
+        if (!COMPILED && this.messageEnabled(Messages.KEYS)) {
             this.messageDebugger("addActiveKey(" + simCode + "," + (fPress? "press" : "down") + "): unrecognized", true);
         }
         return;
@@ -1649,7 +1649,7 @@ Keyboard.prototype.addActiveKey = function(simCode, fPress)
         }
     }
 
-    if (!COMPILED && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
+    if (!COMPILED && this.messageEnabled(Messages.KEYS)) {
         this.messageDebugger("addActiveKey(" + simCode + "," + (fPress? "press" : "down") + "): " + (i < 0? "already active" : (i == this.aKeysActive.length? "adding" : "updating")), true);
     }
 
@@ -1750,7 +1750,7 @@ Keyboard.prototype.clearActiveKeys = function()
 Keyboard.prototype.removeActiveKey = function(simCode, fFlush)
 {
     if (!Keyboard.SIMCODES[simCode]) {
-        if (!COMPILED && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
+        if (!COMPILED && this.messageEnabled(Messages.KEYS)) {
             this.messageDebugger("removeActiveKey(" + simCode + "): unrecognized", true);
         }
         return false;
@@ -1774,11 +1774,11 @@ Keyboard.prototype.removeActiveKey = function(simCode, fFlush)
             break;
         }
     }
-    if (!COMPILED && !fFlush && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
+    if (!COMPILED && !fFlush && this.messageEnabled(Messages.KEYS)) {
         this.messageDebugger("removeActiveKey(" + simCode + "): " + (fRemoved? "removed" : "not active"), true);
     }
     if (!this.aKeysActive.length && this.fToggleCapsLock) {
-        if (!COMPILED) this.messageDebugger("removeActiveKey(): inverting caps-lock now", Debugger.MESSAGE.KEYS);
+        if (!COMPILED) this.messageDebugger("removeActiveKey(): inverting caps-lock now", Messages.KEYS);
         this.updateShiftState(Keyboard.SIMCODE.CAPS_LOCK);
         this.fToggleCapsLock = false;
     }
@@ -1801,7 +1801,7 @@ Keyboard.prototype.updateActiveKey = function(key, msTimer)
         return;
     }
 
-    if (!COMPILED && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
+    if (!COMPILED && this.messageEnabled(Messages.KEYS)) {
         this.messageDebugger((msTimer? '\n' : "") + "updateActiveKey(" + key.simCode + (msTimer? "," + msTimer + "ms" : "") + "): " + (key.fDown? "down" : "up"), true);
     }
 
@@ -1872,7 +1872,7 @@ Keyboard.prototype.getSimCode = function(keyCode, fShifted)
  */
 Keyboard.prototype.onFocusChange = function(fFocus)
 {
-    if (this.fHasFocus != fFocus && !COMPILED && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
+    if (this.fHasFocus != fFocus && !COMPILED && this.messageEnabled(Messages.KEYS)) {
         this.messageDebugger("onFocusChange(" + (fFocus? "true" : "false") + ")", true);
     }
     this.fHasFocus = fFocus;
@@ -1999,7 +1999,7 @@ Keyboard.prototype.onKeyDown = function(event, fDown)
         event.preventDefault();
     }
 
-    if (!COMPILED && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
+    if (!COMPILED && this.messageEnabled(Messages.KEYS)) {
         this.messageDebugger("\nonKey" + (fDown? "Down" : "Up") + "(" + keyCode + "): " + (fIgnore? "ignore" : (fPass? "true" : "false")), true);
     }
 
@@ -2039,7 +2039,7 @@ Keyboard.prototype.onKeyPress = function(event)
 
     var simCode = this.checkActiveKey();
     if (simCode && this.isAlphaKey(simCode) && this.isAlphaKey(keyCode) && simCode != keyCode) {
-        if (!COMPILED && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
+        if (!COMPILED && this.messageEnabled(Messages.KEYS)) {
             this.messageDebugger("onKeyPress(" + keyCode + ") out of sync with " + simCode + ", invert caps-lock", true);
         }
         this.fToggleCapsLock = true;
@@ -2053,7 +2053,7 @@ Keyboard.prototype.onKeyPress = function(event)
 
     var fPass = !Keyboard.SIMCODES[keyCode] || !!(this.bitsState & Keyboard.STATE.CMD);
 
-    if (!COMPILED && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
+    if (!COMPILED && this.messageEnabled(Messages.KEYS)) {
         this.messageDebugger("\nonKeyPress(" + keyCode + "): " + (fPass? "true" : "false"), true);
     }
 
@@ -2143,7 +2143,7 @@ Keyboard.prototype.keySimulate = function(simCode, fDown)
         fSimulated = true;
     }
 
-    if (!COMPILED && this.messageEnabled(Debugger.MESSAGE.KEYS)) {
+    if (!COMPILED && this.messageEnabled(Messages.KEYS)) {
         this.messageDebugger("keySimulate(" + simCode + "," + (fDown? "down" : "up") + "): " + (fSimulated? "true" : "false"), true);
     }
 

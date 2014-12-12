@@ -72,9 +72,9 @@ if (typeof module !== 'undefined') {
     var UserAPI     = require("../../shared/lib/userapi");
     var ReportAPI   = require("../../shared/lib/reportapi");
     var Component   = require("../../shared/lib/component");
+    var Messages    = require("./messages");
     var Bus         = require("./bus");
     var State       = require("./state");
-    var Debugger    = require("./debugger");
 }
 
 /**
@@ -122,9 +122,9 @@ if (typeof module !== 'undefined') {
  */
 function Computer(parmsComputer, parmsMachine, fSuspended) {
 
-    Component.call(this, "Computer", parmsComputer, Computer, Debugger.MESSAGE.COMPUTER);
+    Component.call(this, "Computer", parmsComputer, Computer, Messages.COMPUTER);
 
-    this.bitField.fPowered = false;
+    this.aFlags.fPowered = false;
     this.nBusWidth = parmsComputer['buswidth'];
     this.resume = Computer.RESUME_NONE;
     this.sStateData = null;
@@ -543,9 +543,9 @@ Computer.prototype.powerOn = function(resume)
  */
 Computer.prototype.powerRestore = function(component, stateComputer, fRepower, fRestore)
 {
-    if (!component.bitField.fPowered) {
+    if (!component.aFlags.fPowered) {
 
-        component.bitField.fPowered = true;
+        component.aFlags.fPowered = true;
 
         if (component.powerUp) {
 
@@ -648,11 +648,11 @@ Computer.prototype.donePowerOn = function(aParms)
     var fRepower = (aParms[1] < 0);
     var fRestore = aParms[2];
 
-    if (DEBUG && this.bitField.fPowered && this.messageEnabled()) {
+    if (DEBUG && this.aFlags.fPowered && this.messageEnabled()) {
         this.messageDebugger("Computer.donePowerOn(): redundant");
     }
 
-    this.bitField.fPowered = true;
+    this.aFlags.fPowered = true;
 
     if (!this.fInitialized) {
         this.println(Computer.sAppName + " v" + Computer.sAppVer + "\n" + Computer.sCopyright + "\n" + Computer.LICENSE);
@@ -757,7 +757,7 @@ Computer.prototype.powerOff = function(fSave, fShutdown)
         data = this.cpu.powerDown(fSave, fShutdown);
         if (typeof data === "object") stateComputer.set(this.cpu.id, data);
         if (fShutdown) {
-            this.cpu.bitField.fPowered = false;
+            this.cpu.aFlags.fPowered = false;
             if (data === false) sState = null;
         }
     }
@@ -765,13 +765,13 @@ Computer.prototype.powerOff = function(fSave, fShutdown)
     var aComponents = Component.getComponents(this.id);
     for (var iComponent = 0; iComponent < aComponents.length; iComponent++) {
         var component = aComponents[iComponent];
-        if (component.bitField.fPowered) {
+        if (component.aFlags.fPowered) {
             if (component.powerDown) {
                 data = component.powerDown(fSave, fShutdown);
                 if (typeof data === "object") stateComputer.set(component.id, data);
             }
             if (fShutdown) {
-                component.bitField.fPowered = false;
+                component.aFlags.fPowered = false;
                 if (data === false) sState = null;
             }
         }
@@ -823,7 +823,7 @@ Computer.prototype.powerOff = function(fSave, fShutdown)
         }
     }
 
-    if (fShutdown) this.bitField.fPowered = false;
+    if (fShutdown) this.aFlags.fPowered = false;
 
     return sState;
 };
@@ -1219,7 +1219,7 @@ Computer.init = function()
             var computer = new Computer(parmsComputer, parmsMachine, true);
 
             if (DEBUG && computer.messageEnabled()) {
-                computer.messageDebugger("onInit(" + computer.bitField.fPowered + ")");
+                computer.messageDebugger("onInit(" + computer.aFlags.fPowered + ")");
             }
 
             /*
@@ -1251,10 +1251,10 @@ Computer.show = function()
         if (computer) {
 
             if (DEBUG && computer.messageEnabled()) {
-                computer.messageDebugger("onShow(" + computer.fInitialized + "," + computer.bitField.fPowered + ")");
+                computer.messageDebugger("onShow(" + computer.fInitialized + "," + computer.aFlags.fPowered + ")");
             }
 
-            if (computer.fInitialized && !computer.bitField.fPowered) {
+            if (computer.fInitialized && !computer.aFlags.fPowered) {
                 /**
                  * Repower the computer, notifying every component to continue running as-is.
                  */
@@ -1300,10 +1300,10 @@ Computer.exit = function()
         if (computer) {
 
             if (DEBUG && computer.messageEnabled()) {
-                computer.messageDebugger("onExit(" + computer.bitField.fPowered + ")");
+                computer.messageDebugger("onExit(" + computer.aFlags.fPowered + ")");
             }
 
-            if (computer.bitField.fPowered) {
+            if (computer.aFlags.fPowered) {
                 /**
                  * Power "down" the computer, giving every component an opportunity to save its state,
                  * but only if 'resume' has been set AND there is no valid resume path (because if a valid resume

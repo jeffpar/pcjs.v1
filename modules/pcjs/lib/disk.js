@@ -163,7 +163,7 @@ if (typeof module !== 'undefined') {
     var DiskAPI     = require("../../shared/lib/diskapi");
     var DumpAPI     = require("../../shared/lib/dumpapi");
     var Component   = require("../../shared/lib/component");
-    var Debugger    = require("./debugger");
+    var Messages    = require("./messages");
 }
 
 /**
@@ -231,7 +231,7 @@ if (typeof module !== 'undefined') {
  */
 function Disk(controller, drive, mode)
 {
-    Component.call(this, "Disk", {'id': controller.idMachine + ".disk" + Disk.nDisks++}, Disk, Debugger.MESSAGE.DISK);
+    Component.call(this, "Disk", {'id': controller.idMachine + ".disk" + Disk.nDisks++}, Disk, Messages.DISK);
 
     /*
      * Route all non-Debugger messages (eg, notice() and println() calls) through
@@ -654,7 +654,7 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
 {
     var disk = null;
     this.fWriteProtected = false;
-    var fPrintOnly = (nErrorCode < 0 && this.cmp && !this.cmp.bitField.fPowered);
+    var fPrintOnly = (nErrorCode < 0 && this.cmp && !this.cmp.aFlags.fPowered);
 
     if (this.fOnDemand) {
         if (!nErrorCode) {

@@ -35,8 +35,6 @@
 if (typeof module !== 'undefined') {
     var X86         = require("./x86");
     var X86Help     = require("./x86help");
-    var X86OpXX     = require("./x86opxx");
-    var Debugger    = require("./debugger");
 }
 
 var X86Grps = {
@@ -1238,7 +1236,7 @@ var X86Grps = {
      * @return {number}
      */
     opGrpInvalid: function(dst, src) {
-        X86OpXX.opInvalid.call(this);
+        X86Help.opHelpInvalid.call(this);
         return dst;
     },
     /**
@@ -1248,7 +1246,7 @@ var X86Grps = {
      * @return {number}
      */
     opGrpUndefined: function(dst, src) {
-        X86OpXX.opUndefined.call(this);
+        X86Help.opHelpUndefined.call(this);
         return dst;
     }
 };

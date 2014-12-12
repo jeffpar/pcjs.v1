@@ -1,8 +1,8 @@
 /**
- * @fileoverview Compile-time definitions for Debugger-less configurations.
+ * @fileoverview PCjs-specific BIOS/DOS interrupt definitions.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
- * Created 2014-May-08
+ * Created 2014-Dec-11
  *
  * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
  *
@@ -33,14 +33,46 @@
 "use strict";
 
 /*
- * WARNING: DEBUGGER needs to accurately reflect whether or not the Debugger component is (or will be) loaded.
- * In the compiled case, we rely on the Closure Compiler to override DEBUGGER as appropriate.  When it's *false*,
- * nearly all of debugger.js will be conditionally removed by the compiler, reducing it to little more than a
- * "type skeleton", which also solves some type-related warnings we would otherwise have if we tried to remove
- * debugger.js from the compilation process altogether.
+ * Components that previously used Debugger interrupt definitions by including:
  *
- * However, when we're in "development mode" and running uncompiled code in debugger-less configurations,
- * I would still like to skip loading debugger.js altogether.  To do that, we must arrange for this additional file,
- * nodebugger.js, to be loaded as early as possible, which explicitly UPDATES the value of DEBUGGER to false.
+ *     var Debugger = require("./debugger");
+ *
+ * and using:
+ *
+ *      Debugger.INT.FOO
+ *
+ * must now instead include:
+ *
+ *      var Interrupts = require("./interrupts");
+ *
+ * and then replace all occurrences of "Debugger.INT.FOO" with "Interrupts.FOO.VECTOR".
  */
-DEBUGGER = false;
+
+var Interrupts = {
+    VIDEO: {
+        VECTOR: 0x10
+    },
+    DISK: {
+        VECTOR: 0x13
+    },
+    CASSETTE: {
+        VECTOR: 0x15
+    },
+    KBD: {
+        VECTOR: 0x16
+    },
+    RTC: {
+        VECTOR: 0x1a
+    },
+    TIMER_TICK: {
+        VECTOR: 0x1c
+    },
+    DOS: {
+        VECTOR: 0x21
+    },
+    MOUSE: {
+        VECTOR: 0x33
+    }
+};
+
+if (typeof module !== 'undefined') module.exports = Interrupts;

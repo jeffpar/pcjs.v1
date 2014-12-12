@@ -36,7 +36,7 @@ if (typeof module !== 'undefined') {
     var str         = require("../../shared/lib/strlib");
     var usr         = require("../../shared/lib/usrlib");
     var Component   = require("../../shared/lib/component");
-    var Debugger    = require("./debugger");
+    var Messages    = require("./messages");
 }
 
 /**
@@ -75,7 +75,7 @@ if (typeof module !== 'undefined') {
  */
 function CPU(parmsCPU, nCyclesDefault)
 {
-    Component.call(this, "CPU", parmsCPU, CPU, Debugger.MESSAGE.CPU);
+    Component.call(this, "CPU", parmsCPU, CPU, Messages.CPU);
 
     var nCycles = parmsCPU['cycles'] || nCyclesDefault;
 
@@ -96,15 +96,15 @@ function CPU(parmsCPU, nCyclesDefault)
      */
     this.aCounts.mhzTarget = this.aCounts.mhzDefault * this.aCounts.nCyclesMultiplier;
 
-    this.bitField.fPowered = false;
-    this.bitField.fRunning = false;
-    this.bitField.fStarting = false;
-    this.bitField.fAutoStart = parmsCPU['autoStart'];
+    this.aFlags.fPowered = false;
+    this.aFlags.fRunning = false;
+    this.aFlags.fStarting = false;
+    this.aFlags.fAutoStart = parmsCPU['autoStart'];
 
     /*
      * TODO: Add some UI for fDisplayLiveRegs (either an XML property, or a UI checkbox, or both)
      */
-    this.bitField.fDisplayLiveRegs = false;
+    this.aFlags.fDisplayLiveRegs = false;
 
     /*
      * Provide a power-saving URL-based way of overriding the 'autostart' setting;
@@ -113,7 +113,7 @@ function CPU(parmsCPU, nCyclesDefault)
      */
     var sAutoStart = Component.parmsURL['autostart'];
     if (sAutoStart !== undefined) {
-        this.bitField.fAutoStart = (sAutoStart == "true"? true : (sAutoStart  == "false"? false : null));
+        this.aFlags.fAutoStart = (sAutoStart == "true"? true : (sAutoStart  == "false"? false : null));
     }
 
     /*
@@ -125,7 +125,7 @@ function CPU(parmsCPU, nCyclesDefault)
      * command ("x"); for example, "x cs int 5000" will set nCyclesChecksumInterval to 5000
      * and call resetChecksum().
      */
-    this.bitField.fChecksum = false;
+    this.aFlags.fChecksum = false;
     this.aCounts.nChecksum = this.aCounts.nCyclesChecksumNext = 0;
     this.aCounts.nCyclesChecksumStart = parmsCPU["csStart"];
     this.aCounts.nCyclesChecksumInterval = parmsCPU["csInterval"];
@@ -272,7 +272,7 @@ CPU.prototype.powerUp = function(data, fRepower)
             this.println("No debugger detected");
         }
     }
-    this.bitField.fPowered = true;
+    this.aFlags.fPowered = true;
     if (!this.autoStart() && this.dbg) this.dbg.updateStatus();
     this.updateCPU();
     return true;
@@ -287,7 +287,7 @@ CPU.prototype.powerUp = function(data, fRepower)
  */
 CPU.prototype.powerDown = function(fSave)
 {
-    this.bitField.fPowered = false;
+    this.aFlags.fPowered = false;
     return fSave && this.save ? this.save() : true;
 };
 
@@ -299,7 +299,7 @@ CPU.prototype.powerDown = function(fSave)
  */
 CPU.prototype.autoStart = function()
 {
-    if (this.bitField.fAutoStart === true || this.bitField.fAutoStart === null && (!DEBUGGER || !this.dbg) && this.bindings["run"] === undefined) {
+    if (this.aFlags.fAutoStart === true || this.aFlags.fAutoStart === null && (!DEBUGGER || !this.dbg) && this.bindings["run"] === undefined) {
         this.runCPU();      // start running automatically on power-up, assuming there's no Debugger
         return true;
     }
@@ -326,7 +326,7 @@ CPU.prototype.setFocus = function()
  */
 CPU.prototype.isPowered = function()
 {
-    if (!this.bitField.fPowered) {
+    if (!this.aFlags.fPowered) {
         this.println(this.toString() + " not powered");
         return false;
     }
@@ -341,7 +341,7 @@ CPU.prototype.isPowered = function()
  */
 CPU.prototype.isRunning = function()
 {
-    return this.bitField.fRunning;
+    return this.aFlags.fRunning;
 };
 
 /**
@@ -372,8 +372,8 @@ CPU.prototype.resetChecksum = function()
     if (this.aCounts.nCyclesChecksumStart === undefined) this.aCounts.nCyclesChecksumStart = 0;
     if (this.aCounts.nCyclesChecksumInterval === undefined) this.aCounts.nCyclesChecksumInterval = -1;
     if (this.aCounts.nCyclesChecksumStop === undefined) this.aCounts.nCyclesChecksumStop = -1;
-    this.bitField.fChecksum = (this.aCounts.nCyclesChecksumStart >= 0 && this.aCounts.nCyclesChecksumInterval > 0);
-    if (this.bitField.fChecksum) {
+    this.aFlags.fChecksum = (this.aCounts.nCyclesChecksumStart >= 0 && this.aCounts.nCyclesChecksumInterval > 0);
+    if (this.aFlags.fChecksum) {
         this.aCounts.nChecksum = 0;
         this.aCounts.nCyclesChecksumNext = this.aCounts.nCyclesChecksumStart - this.nTotalCycles;
         // this.aCounts.nCyclesChecksumNext = this.aCounts.nCyclesChecksumStart + this.aCounts.nCyclesChecksumInterval - (this.nTotalCycles % this.aCounts.nCyclesChecksumInterval);
@@ -395,7 +395,7 @@ CPU.prototype.resetChecksum = function()
  */
 CPU.prototype.updateChecksum = function(nCycles)
 {
-    if (this.bitField.fChecksum) {
+    if (this.aFlags.fChecksum) {
         /*
          * Get a 32-bit summation of the current CPU state and add it to our running 32-bit checksum
          */
@@ -449,7 +449,7 @@ CPU.prototype.displayReg = function(sReg, nVal, cch)
             this.stopCPU();
         }
         var sVal;
-        if (!this.bitField.fRunning || this.bitField.fDisplayLiveRegs) {
+        if (!this.aFlags.fRunning || this.aFlags.fDisplayLiveRegs) {
             sVal = str.toHex(nVal, cch);
         } else {
             sVal = "----".substr(0, cch);
@@ -505,7 +505,7 @@ CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
     case "run":
         this.bindings[sBinding] = control;
         control.onclick = function onClickRun() {
-            if (!cpu.bitField.fRunning)
+            if (!cpu.aFlags.fRunning)
                 cpu.runCPU(true);
             else
                 cpu.stopCPU(true);
@@ -559,7 +559,7 @@ CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
  */
 CPU.prototype.setBurstCycles = function(nCycles)
 {
-    if (this.bitField.fRunning) {
+    if (this.aFlags.fRunning) {
         var nDelta = this.nStepCycles - nCycles;
         /*
          * NOTE: If nDelta is negative, we will actually be increasing nStepCycles and nBurstCycles.
@@ -744,7 +744,7 @@ CPU.prototype.getSpeedCurrent = function() {
     /*
      * TODO: Has toFixed() been "fixed" in all browsers (eg, IE) to return a rounded value now?
      */
-    return ((this.bitField.fRunning && this.aCounts.mhz)? (this.aCounts.mhz.toFixed(2) + "Mhz") : "Stopped");
+    return ((this.aFlags.fRunning && this.aCounts.mhz)? (this.aCounts.mhz.toFixed(2) + "Mhz") : "Stopped");
 };
 
 /**
@@ -936,7 +936,7 @@ CPU.prototype.calcRemainingTime = function()
      */
     this.aCounts.nCyclesRecalc += this.aCounts.nCyclesThisRun;
 
-    if (DEBUG && this.messageEnabled(Debugger.MESSAGE.LOG) && msRemainsThisRun) {
+    if (DEBUG && this.messageEnabled(Messages.LOG) && msRemainsThisRun) {
         this.log("calcRemainingTime: " + msRemainsThisRun + "ms to sleep after " + this.aCounts.msEndThisRun + "ms");
     }
 
@@ -967,7 +967,7 @@ CPU.prototype.runCPU = function(fOnClick)
     this.calcStartTime();
     try {
         do {
-            var nCyclesPerBurst = (this.bitField.fChecksum? 1 : this.aCounts.nCyclesPerBurst);
+            var nCyclesPerBurst = (this.aFlags.fChecksum? 1 : this.aCounts.nCyclesPerBurst);
 
             if (this.chipset) {
                 this.chipset.updateAllTimers();
@@ -1009,7 +1009,7 @@ CPU.prototype.runCPU = function(fOnClick)
                 this.aCounts.nCyclesNextYield += this.aCounts.nCyclesPerYield;
                 break;
             }
-        } while (this.bitField.fRunning);
+        } while (this.aFlags.fRunning);
     }
     catch (e) {
         this.stopCPU();
@@ -1031,7 +1031,7 @@ CPU.prototype.runCPU = function(fOnClick)
  */
 CPU.prototype.startCPU = function(fSetFocus)
 {
-    if (!this.bitField.fRunning) {
+    if (!this.aFlags.fRunning) {
         /*
          *  setSpeed() without a speed parameter leaves the selected speed in place, but also resets the
          *  cycle counter and timestamp for the current series of runCPU() calls, calculates the maximum number
@@ -1040,8 +1040,8 @@ CPU.prototype.startCPU = function(fSetFocus)
          */
         this.setSpeed();
         if (this.cmp) this.cmp.start(this.aCounts.msStartRun, this.getCycles());
-        this.bitField.fRunning = true;
-        this.bitField.fStarting = true;
+        this.aFlags.fRunning = true;
+        this.aFlags.fStarting = true;
         if (this.chipset) this.chipset.setSpeaker();
         var controlRun = this.bindings["run"];
         if (controlRun) controlRun.textContent = "Halt";
@@ -1082,13 +1082,13 @@ CPU.prototype.stopCPU = function(fComplete)
     this.nStepCycles = 0;
     this.addCycles(this.nRunCycles);
     this.nRunCycles = 0;
-    if (this.bitField.fRunning) {
-        this.bitField.fRunning = false;
+    if (this.aFlags.fRunning) {
+        this.aFlags.fRunning = false;
         if (this.chipset) this.chipset.setSpeaker();
         var controlRun = this.bindings["run"];
         if (controlRun) controlRun.textContent = "Run";
     }
-    this.bitField.fComplete = fComplete;
+    this.aFlags.fComplete = fComplete;
 };
 
 /**
@@ -1117,7 +1117,7 @@ CPU.prototype.updateCPU = function()
  */
 CPU.prototype.yieldCPU = function()
 {
-    this.aCounts.nCyclesNextYield = 0;   // this will break us out of runCPU(), once we break out of stepCPU()
+    this.aCounts.nCyclesNextYield = 0;  // this will break us out of runCPU(), once we break out of stepCPU()
     this.nBurstCycles -= this.nStepCycles;
     this.nStepCycles = 0;               // this will break us out of stepCPU()
     /*

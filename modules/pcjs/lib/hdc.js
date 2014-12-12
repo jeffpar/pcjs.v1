@@ -37,10 +37,10 @@ if (typeof module !== 'undefined') {
     var web         = require("../../shared/lib/weblib");
     var DiskAPI     = require("../../shared/lib/diskapi");
     var Component   = require("../../shared/lib/component");
+    var Messages    = require("./messages");
     var ChipSet     = require("./chipset");
     var Disk        = require("./disk");
     var State       = require("./state");
-    var Debugger    = require("./debugger");
 }
 
 /**
@@ -78,7 +78,7 @@ if (typeof module !== 'undefined') {
  */
 function HDC(parmsHDC) {
 
-    Component.call(this, "HDC", parmsHDC, HDC, Debugger.MESSAGE.HDC);
+    Component.call(this, "HDC", parmsHDC, HDC, Messages.HDC);
 
     this['dmaRead'] = this.dmaRead;
     this['dmaWrite'] = this.dmaWrite;
@@ -1406,13 +1406,13 @@ HDC.prototype.inATCData = function(port, addrFrom)
              * messagePort() calls, if enabled, can be overwhelming for this port, so limit them to the first byte
              * of each sector.
              */
-            if (this.messageEnabled(Debugger.MESSAGE.PORT | Debugger.MESSAGE.HDC)) {
+            if (this.messageEnabled(Messages.PORT | Messages.HDC)) {
                 this.messagePort(port, null, addrFrom, "DATA[" + this.drive.ibSector + "]", bIn);
             }
         }
         else if (this.drive.ibSector == this.drive.cbSector) {
 
-            if (this.messageEnabled(Debugger.MESSAGE.DATA | Debugger.MESSAGE.HDC)) {
+            if (this.messageEnabled(Messages.DATA | Messages.HDC)) {
                 var sDump = this.drive.disk.dumpSector(this.drive.sector);
                 if (sDump) this.dbg.message(sDump);
             }
@@ -1477,13 +1477,13 @@ HDC.prototype.outATCData = function(port, bOut, addrFrom)
                  * messagePort() calls, if enabled, can be overwhelming for this port, so limit them to the first byte
                  * of each sector.
                  */
-                if (this.messageEnabled(Debugger.MESSAGE.PORT | Debugger.MESSAGE.HDC)) {
+                if (this.messageEnabled(Messages.PORT | Messages.HDC)) {
                     this.messagePort(port, bOut, addrFrom, "DATA[" + this.drive.ibSector + "]");
                 }
             }
             else if (this.drive.ibSector == this.drive.cbSector) {
 
-                if (this.messageEnabled(Debugger.MESSAGE.DATA | Debugger.MESSAGE.HDC)) {
+                if (this.messageEnabled(Messages.DATA | Messages.HDC)) {
                     var sDump = this.drive.disk.dumpSector(this.drive.sector);
                     if (sDump) this.dbg.message(sDump);
                 }
@@ -1831,14 +1831,14 @@ HDC.prototype.doATC = function()
         this.drive = drive;
     }
 
-    if (DEBUG && this.messageEnabled(Debugger.MESSAGE.HDC)) {
+    if (DEBUG && this.messageEnabled(Messages.HDC)) {
         this.messageDebugger("HDC.doATC(0x" + str.toHexByte(bCmd) + "): " + HDC.aATCCommands[bCmd], true);
     }
 
     switch (bCmd & HDC.ATC.COMMAND.MASK) {
 
     case HDC.ATC.COMMAND.READ_DATA:
-        if (DEBUG && this.messageEnabled(Debugger.MESSAGE.HDC)) {
+        if (DEBUG && this.messageEnabled(Messages.HDC)) {
             this.messageDebugger("HDC.doRead(" + iDrive + ',' + drive.wCylinder + ':' + drive.bHead + ':' + drive.bSector + ',' + nSectors + ")", true);
         }
         /*
@@ -1867,7 +1867,7 @@ HDC.prototype.doATC = function()
         break;
 
     case HDC.ATC.COMMAND.WRITE_DATA:
-        if (DEBUG && this.messageEnabled(Debugger.MESSAGE.HDC)) {
+        if (DEBUG && this.messageEnabled(Messages.HDC)) {
             this.messageDebugger("HDC.doWrite(" + iDrive + ',' + drive.wCylinder + ':' + drive.bHead + ':' + drive.bSector + ',' + nSectors + ")", true);
         }
         this.regStatus = HDC.ATC.STATUS.DATA_REQ;
@@ -1961,9 +1961,9 @@ HDC.prototype.setATCIRR = function(fWrite)
              * has a low tolerance for fast controller interrupts during multi-sector operations.
              */
             this.chipset.setIRR(ChipSet.IRQ.ATC, 120);
-            if (DEBUG) this.messageDebugger("HDC.setATCIRR(): enabled", Debugger.MESSAGE.PIC | Debugger.MESSAGE.HDC);
+            if (DEBUG) this.messageDebugger("HDC.setATCIRR(): enabled", Messages.PIC | Messages.HDC);
         } else {
-            if (DEBUG) this.messageDebugger("HDC.setATCIRR(): disabled", Debugger.MESSAGE.PIC | Debugger.MESSAGE.HDC);
+            if (DEBUG) this.messageDebugger("HDC.setATCIRR(): disabled", Messages.PIC | Messages.HDC);
         }
     }
 };
@@ -2140,7 +2140,7 @@ HDC.prototype.popCmd = function()
     var bCmdIndex = this.regDataIndex;
     if (bCmdIndex < this.regDataTotal) {
         bCmd = this.regDataArray[this.regDataIndex++];
-        if (DEBUG && this.messageEnabled((bCmdIndex > 0? Debugger.MESSAGE.PORT : 0) | Debugger.MESSAGE.HDC)) {
+        if (DEBUG && this.messageEnabled((bCmdIndex > 0? Messages.PORT : 0) | Messages.HDC)) {
             this.messageDebugger("HDC.CMD[" + bCmdIndex + "]: 0x" + str.toHexByte(bCmd) + (!bCmdIndex && HDC.aXTCCommands[bCmd]? (" (" + HDC.aXTCCommands[bCmd] + ")") : ""), true);
         }
     }
@@ -2180,7 +2180,7 @@ HDC.prototype.beginResult = function(bResult)
  */
 HDC.prototype.pushResult = function(bResult)
 {
-    if (DEBUG && this.messageEnabled((this.regDataTotal > 0? Debugger.MESSAGE.PORT : 0) | Debugger.MESSAGE.HDC)) {
+    if (DEBUG && this.messageEnabled((this.regDataTotal > 0? Messages.PORT : 0) | Messages.HDC)) {
         this.messageDebugger("HDC.RES[" + this.regDataTotal + "]: 0x" + str.toHexByte(bResult), true);
     }
     this.regDataArray[this.regDataTotal++] = bResult;

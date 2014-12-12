@@ -35,6 +35,7 @@
 if (typeof module !== 'undefined') {
     var web       = require("./../../shared/lib/weblib");
     var Component = require("./../../shared/lib/component");
+    var Messages    = require("./messages");
 }
 
 /**
@@ -394,9 +395,9 @@ State.prototype = {
     messageEnabled: function(bitsMessage) {
         if (DEBUGGER && this.dbg) {
             if (bitsMessage == null) {
-                bitsMessage = Debugger.MESSAGE.STATE;
+                bitsMessage = Messages.STATE;
             } else {
-                bitsMessage |= Debugger.MESSAGE.STATE;
+                bitsMessage |= Messages.STATE;
             }
             return this.dbg.messageEnabled(bitsMessage);
         }

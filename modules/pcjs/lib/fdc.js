@@ -37,11 +37,11 @@ if (typeof module !== 'undefined') {
     var web         = require("../../shared/lib/weblib");
     var DiskAPI     = require("../../shared/lib/diskapi");
     var Component   = require("../../shared/lib/component");
+    var Messages    = require("./messages");
     var ChipSet     = require("./chipset");
     var Disk        = require("./disk");
     var Computer    = require("./computer");
     var State       = require("./state");
-    var Debugger    = require("./debugger");
 }
 
 /*
@@ -137,7 +137,7 @@ function FDC(parmsFDC) {
      * TODO: Indicate the type of diskette image being loaded (this might help folks understand what's going
      * on when they try to load a diskette image that's larger than what the selected operating system supports).
      */
-    Component.call(this, "FDC", parmsFDC, FDC, Debugger.MESSAGE.FDC);
+    Component.call(this, "FDC", parmsFDC, FDC, Messages.FDC);
 
     this['dmaRead'] = this.dmaRead;
     this['dmaWrite'] = this.dmaWrite;
@@ -2026,7 +2026,7 @@ FDC.prototype.popCmd = function(name)
 {
     this.assert((!this.regDataIndex || name !== undefined) && this.regDataIndex < this.regDataTotal);
     var bCmd = this.regDataArray[this.regDataIndex];
-    if (DEBUG && this.messageEnabled(Debugger.MESSAGE.PORT | Debugger.MESSAGE.FDC)) {
+    if (DEBUG && this.messageEnabled(Messages.PORT | Messages.FDC)) {
         var bCmdMasked = bCmd & FDC.REG_DATA.CMD.MASK;
         if (!name && !this.regDataIndex && FDC.aCmdInfo[bCmdMasked]) name = FDC.aCmdInfo[bCmdMasked].name;
         this.messageDebugger("FDC.CMD[" + (name || this.regDataIndex) + "]: 0x" + str.toHexByte(bCmd), true);
@@ -2080,7 +2080,7 @@ FDC.prototype.beginResult = function()
  */
 FDC.prototype.pushResult = function(bResult, name)
 {
-    if (DEBUG && this.messageEnabled(Debugger.MESSAGE.PORT | Debugger.MESSAGE.FDC)) {
+    if (DEBUG && this.messageEnabled(Messages.PORT | Messages.FDC)) {
         this.messageDebugger("FDC.RES[" + (name || this.regDataTotal) + "]: 0x" + str.toHexByte(bResult), true);
     }
     this.regDataArray[this.regDataTotal++] = bResult;

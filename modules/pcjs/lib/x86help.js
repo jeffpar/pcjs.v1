@@ -34,8 +34,7 @@
 
 if (typeof module !== 'undefined') {
     var X86         = require("./x86");
-    var X86OpXX     = require("./x86opxx");
-    var Debugger    = require("./debugger");
+    var Messages    = require("./messages");
 }
 
 var X86Help = {
@@ -177,7 +176,7 @@ var X86Help = {
      */
     opHelpLEA: function(dst, src) {
         if (this.regEA < 0) {
-            X86OpXX.opUndefined.call(this);
+            X86Help.opHelpUndefined.call(this);
             return dst;
         }
         this.nStepCycles -= this.CYCLES.nOpCyclesLEA;
@@ -191,7 +190,7 @@ var X86Help = {
      */
     opHelpLDS: function(dst, src) {
         if (this.regEA < 0) {
-            X86OpXX.opUndefined.call(this);
+            X86Help.opHelpUndefined.call(this);
             return dst;
         }
         this.setDS(this.getWord(this.regEA + 2));
@@ -206,7 +205,7 @@ var X86Help = {
      */
     opHelpLES: function(dst, src) {
         if (this.regEA < 0) {
-            X86OpXX.opUndefined.call(this);
+            X86Help.opHelpUndefined.call(this);
             return dst;
         }
         this.setES(this.getWord(this.regEA + 2));
@@ -224,7 +223,7 @@ var X86Help = {
             /*
              * Generate UD_FAULT (INT 0x06: Invalid Opcode) if src is not a memory operand.
              */
-            X86OpXX.opInvalid.call(this);
+            X86Help.opHelpInvalid.call(this);
             return dst;
         }
         /*
@@ -576,8 +575,8 @@ var X86Help = {
      */
     opHelpFault: function(nFault, nError, fHalt)
     {
-        if (!this.bitField.fComplete) {
-            this.messageDebugger("Fault " + str.toHexByte(nFault) + " blocked by Debugger", Debugger.MESSAGE.WARN);
+        if (!this.aFlags.fComplete) {
+            this.messageDebugger("Fault " + str.toHexByte(nFault) + " blocked by Debugger", Messages.WARN);
             this.setIP(this.opEA - this.segCS.base);
             return;
         }
@@ -649,7 +648,7 @@ var X86Help = {
      */
     opHelpFaultMessage: function(nFault, nError, fHalt)
     {
-        var bitsMessage = Debugger.MESSAGE.FAULT;
+        var bitsMessage = Messages.FAULT;
         var bOpcode = this.bus.getByteDirect(this.regEIP);
 
         /*
@@ -667,7 +666,7 @@ var X86Help = {
          */
         if (bOpcode == X86.OPCODE.INT3) {
             fHalt = false;
-            bitsMessage |= Debugger.MESSAGE.CPU;
+            bitsMessage |= Messages.CPU;
         }
 
         /*
@@ -683,13 +682,13 @@ var X86Help = {
          * However, the foregoing notwithstanding, if MESSAGE.HALT is enabled along with all the other required
          * MESSAGE bits, then we want to halt regardless.
          */
-        if (this.messageEnabled(bitsMessage | Debugger.MESSAGE.HALT)) {
+        if (this.messageEnabled(bitsMessage | Messages.HALT)) {
             fHalt = true;
         }
 
         if (this.messageEnabled(bitsMessage) || fHalt) {
             var sMessage = (fHalt? '\n' : '') + "Fault " + str.toHexByte(nFault) + (nError != null? " (" + str.toHexWord(nError) + ")" : "") + " on opcode 0x" + str.toHexByte(bOpcode) + " at " + str.toHexAddr(this.regIP, this.segCS.sel) + " (%" + str.toHex(this.regEIP, 6) + ")";
-            var fRunning = this.bitField.fRunning;
+            var fRunning = this.aFlags.fRunning;
             if (this.messageDebugger(sMessage, bitsMessage)) {
                 if (fHalt) {
                     /*
@@ -714,6 +713,21 @@ var X86Help = {
             }
         }
         return fHalt;
+    },
+    /**
+     * @this {X86CPU}
+     */
+    opHelpInvalid: function() {
+        X86Help.opHelpFault.call(this, X86.EXCEPTION.UD_FAULT);
+        this.stopCPU();
+    },
+    /**
+     * @this {X86CPU}
+     */
+    opHelpUndefined: function() {
+        this.setIP(this.opEA - this.segCS.base);
+        this.setError("Undefined opcode 0x" + str.toHexByte(this.bus.getByteDirect(this.regEIP)) + " at " + str.toHexAddr(this.regIP, this.segCS.sel));
+        this.stopCPU();
     }
 };
 

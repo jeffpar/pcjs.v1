@@ -34,6 +34,7 @@
 
 if (typeof module !== 'undefined') {
     var str         = require("../../shared/lib/strlib");
+    var Messages    = require("./messages");
     var X86         = require("./x86");
     var X86Help     = require("./x86help");
 }
@@ -409,7 +410,7 @@ X86Seg.switchTSS = function switchTSS(selNew, fNest)
         return false;
     }
     var addrNew = cpu.segTSS.base;
-    if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE.TSS)) {
+    if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.TSS)) {
         this.dbg.message((fNest? "Task switch" : "Task return") + ": TR " + str.toHexWord(selOld) + " (%" + str.toHex(addrOld, 6) + "), new TR " + str.toHexWord(selNew) + " (%" + str.toHex(addrNew, 6) + ")");
     }
     if (fNest) {
@@ -866,7 +867,7 @@ X86Seg.prototype.updateMode = function(fProt)
 X86Seg.prototype.messageSeg = function(sel, base, limit, acc, ext)
 {
     if (DEBUG) {
-        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Debugger.MESSAGE.SEG)) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.SEG)) {
             var ch = (this.sName.length < 3? " " : "");
             var sDPL = " dpl=" + this.dpl;
             if (this.id == X86Seg.ID.CODE) sDPL += " cpl=" + this.cpl;

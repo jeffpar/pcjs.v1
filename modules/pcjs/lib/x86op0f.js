@@ -37,7 +37,6 @@ if (typeof module !== 'undefined') {
     var X86Grps     = require("./x86grps");
     var X86Help     = require("./x86help");
     var X86Mods     = require("./x86mods");
-    var X86OpXX     = require("./x86opxx");
 }
 
 var X86Op0F = {
@@ -297,7 +296,7 @@ var X86Op0F = {
      */
     opSGDT: function(dst, src) {
         if (this.regEA < 0) {
-            X86OpXX.opInvalid.call(this);
+            X86Help.opHelpInvalid.call(this);
         } else {
             /*
              * We don't need to setWord() the first word of the operand, because the ModRM group decoder that calls
@@ -351,7 +350,7 @@ var X86Op0F = {
      */
     opSIDT: function(dst, src) {
         if (this.regEA < 0) {
-            X86OpXX.opInvalid.call(this);
+            X86Help.opHelpInvalid.call(this);
         } else {
             /*
              * We don't need to setWord() the first word of the operand, because the ModRM group decoder that calls
@@ -384,7 +383,7 @@ var X86Op0F = {
      */
     opLGDT: function(dst, src) {
         if (this.regEA < 0) {
-            X86OpXX.opInvalid.call(this);
+            X86Help.opHelpInvalid.call(this);
         } else {
             this.addrGDT = this.getWord(this.regEA + 2) | (this.getByte(this.regEA + 4) << 16);
             this.addrGDTLimit = this.addrGDT + dst;
@@ -407,7 +406,7 @@ var X86Op0F = {
      */
     opLIDT: function(dst, src) {
         if (this.regEA < 0) {
-            X86OpXX.opInvalid.call(this);
+            X86Help.opHelpInvalid.call(this);
         } else {
             this.addrIDT = this.getWord(this.regEA + 2) | (this.getByte(this.regEA + 4) << 16);
             this.addrIDTLimit = this.addrIDT + dst;
@@ -442,73 +441,73 @@ var X86Op0F = {
 
 X86Op0F.aOps0F = [
     X86Op0F.opGrp6,         X86Op0F.opGrp7,         X86Op0F.opLAR,          X86Op0F.opLSL,          // 0x00-0x03
-    X86OpXX.opUndefined,    X86Op0F.opLOADALL,      X86Op0F.opCLTS,         X86OpXX.opUndefined,    // 0x04-0x07
+    X86Help.opHelpUndefined,X86Op0F.opLOADALL,      X86Op0F.opCLTS,         X86Help.opHelpUndefined,// 0x04-0x07
     /*
      * On all processors (except the 8086/8088, of course), 0x0F,0x0B is also referred to as "UD2": an
      * instruction guaranteed to raise a #UD (Invalid Opcode) exception (INT 0x06) on all future x86 processors.
      */
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opInvalid,      // 0x08-0x0B
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x0C-0x0F
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x10-0x13
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x14-0x17
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x18-0x1B
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x1C-0x1F
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x20-0x23
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x24-0x27
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x28-0x2B
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x2C-0x2F
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x30-0x33
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x34-0x37
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x38-0x3B
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x3C-0x3F
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x40-0x43
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x44-0x47
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x48-0x4B
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x4C-0x4F
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x50-0x53
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x54-0x57
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x58-0x5B
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x5C-0x5F
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x60-0x63
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x64-0x67
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x68-0x6B
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x6C-0x6F
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x70-0x73
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x74-0x77
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x78-0x7B
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x7C-0x7F
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x80-0x83
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x84-0x87
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x88-0x8B
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x8C-0x8F
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x90-0x93
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x94-0x97
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x98-0x9B
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0x9C-0x9F
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0xA0-0xA3
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0xA4-0xA7
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0xA8-0xAB
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0xAC-0xAF
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0xB0-0xB3
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0xB4-0xB7
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0xB8-0xBB
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0xBC-0xBF
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0xC0-0xC3
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0xC4-0xC7
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0xC8-0xCB
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0xCC-0xCF
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0xD0-0xD3
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0xD4-0xD7
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0xD8-0xDB
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0xDC-0xDF
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0xE0-0xE3
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0xE4-0xE7
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0xE8-0xEB
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0xEC-0xEF
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0xF0-0xF3
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0xF4-0xF7
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    // 0xF8-0xFB
-    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined,    X86OpXX.opUndefined     // 0xFC-0xFF
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpInvalid,  // 0x08-0x0B
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x0C-0x0F
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x10-0x13
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x14-0x17
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x18-0x1B
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x1C-0x1F
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x20-0x23
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x24-0x27
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x28-0x2B
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x2C-0x2F
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x30-0x33
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x34-0x37
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x38-0x3B
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x3C-0x3F
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x40-0x43
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x44-0x47
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x48-0x4B
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x4C-0x4F
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x50-0x53
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x54-0x57
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x58-0x5B
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x5C-0x5F
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x60-0x63
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x64-0x67
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x68-0x6B
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x6C-0x6F
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x70-0x73
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x74-0x77
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x78-0x7B
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x7C-0x7F
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x80-0x83
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x84-0x87
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x88-0x8B
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x8C-0x8F
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x90-0x93
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x94-0x97
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x98-0x9B
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0x9C-0x9F
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0xA0-0xA3
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0xA4-0xA7
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0xA8-0xAB
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0xAC-0xAF
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0xB0-0xB3
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0xB4-0xB7
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0xB8-0xBB
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0xBC-0xBF
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0xC0-0xC3
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0xC4-0xC7
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0xC8-0xCB
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0xCC-0xCF
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0xD0-0xD3
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0xD4-0xD7
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0xD8-0xDB
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0xDC-0xDF
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0xE0-0xE3
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0xE4-0xE7
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0xE8-0xEB
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0xEC-0xEF
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0xF0-0xF3
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0xF4-0xF7
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,// 0xF8-0xFB
+    X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined,X86Help.opHelpUndefined // 0xFC-0xFF
 ];
 
 /*

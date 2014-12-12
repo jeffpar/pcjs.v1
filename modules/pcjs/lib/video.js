@@ -37,10 +37,10 @@ if (typeof module !== 'undefined') {
     var web         = require("../../shared/lib/weblib");
     var DumpAPI     = require("../../shared/lib/dumpapi");
     var Component   = require("../../shared/lib/component");
+    var Messages    = require("./messages");
     var ChipSet     = require("./chipset");
     var Keyboard    = require("./keyboard");
     var State       = require("./state");
-    var Debugger    = require("./debugger");
 }
 
 /**
@@ -96,7 +96,7 @@ if (typeof module !== 'undefined') {
  */
 function Video(parmsVideo, canvas, context, textarea)
 {
-    Component.call(this, "Video", parmsVideo, Video, Debugger.MESSAGE.VIDEO);
+    Component.call(this, "Video", parmsVideo, Video, Messages.VIDEO);
 
     /*
      * This records the model specified (eg, "mda", "cga", "ega" or "" if none specified);
@@ -1960,7 +1960,7 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
 
     if (DEBUGGER && dbg) {
         var video = this;
-        dbg.messageDump(Debugger.MESSAGE.VIDEO, function onDumpVideo(sParm) {
+        dbg.messageDump(Messages.VIDEO, function onDumpVideo(sParm) {
             video.dumpVideo(sParm);
         });
     }
@@ -3862,7 +3862,7 @@ Video.prototype.updateChar = function(col, row, data, context)
         this.contextScreen.fillRect(xDst, yDst, this.cxScreenCell, this.cyScreenCell);
     }
 
-    if (MAXDEBUG && this.messageEnabled(Debugger.MESSAGE.VIDEO | Debugger.MESSAGE.LOG)) {
+    if (MAXDEBUG && this.messageEnabled(Messages.VIDEO | Messages.LOG)) {
         this.log("updateCharBgnd(" + col + "," + row + "," + bChar + "): filled " + xDst + "," + yDst);
     }
 
@@ -3873,7 +3873,7 @@ Video.prototype.updateChar = function(col, row, data, context)
         var xSrcFgnd = (bChar & 0xf) * font.cxCell;
         var ySrcFgnd = (bChar >> 4) * font.cyCell;
 
-        if (MAXDEBUG && this.messageEnabled(Debugger.MESSAGE.VIDEO | Debugger.MESSAGE.LOG)) {
+        if (MAXDEBUG && this.messageEnabled(Messages.VIDEO | Messages.LOG)) {
             this.log("updateCharFgnd(" + col + "," + row + "," + bChar + "): draw from " + xSrcFgnd + "," + ySrcFgnd + " (" + font.cxCell + "," + font.cyCell + ") to " + xDst + "," + yDst);
         }
 
@@ -3943,7 +3943,7 @@ Video.prototype.updateScreen = function(fForce)
     /*
      * The Computer component maintains the fPowered setting on our behalf, so we use it.
      */
-    if (!this.bitField.fPowered) return;
+    if (!this.aFlags.fPowered) return;
 
     /*
      * If the card's video signal is disabled (eg, during a mode change), then skip the update,

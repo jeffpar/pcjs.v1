@@ -1,8 +1,8 @@
 /**
- * @fileoverview Compile-time definitions for Debugger-less configurations.
+ * @fileoverview PCjs-specific message definitions.
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
- * Created 2014-May-08
+ * Created 2014-Dec-11
  *
  * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
  *
@@ -33,14 +33,53 @@
 "use strict";
 
 /*
- * WARNING: DEBUGGER needs to accurately reflect whether or not the Debugger component is (or will be) loaded.
- * In the compiled case, we rely on the Closure Compiler to override DEBUGGER as appropriate.  When it's *false*,
- * nearly all of debugger.js will be conditionally removed by the compiler, reducing it to little more than a
- * "type skeleton", which also solves some type-related warnings we would otherwise have if we tried to remove
- * debugger.js from the compilation process altogether.
+ * Components that previously used Debugger messages definitions by including:
  *
- * However, when we're in "development mode" and running uncompiled code in debugger-less configurations,
- * I would still like to skip loading debugger.js altogether.  To do that, we must arrange for this additional file,
- * nodebugger.js, to be loaded as early as possible, which explicitly UPDATES the value of DEBUGGER to false.
+ *     var Debugger = require("./debugger");
+ *
+ * and using:
+ *
+ *      Debugger.MESSAGE.FOO
+ *
+ * must now instead include:
+ *
+ *      var Messages = require("./messages");
+ *
+ * and then replace all occurrences of "Debugger.MESSAGE.FOO" with "Messages.FOO".
  */
-DEBUGGER = false;
+
+var Messages = {
+    CPU:        0x00000001,
+    SEG:        0x00000002,
+    DESC:       0x00000004,
+    TSS:        0x00000008,
+    INT:        0x00000010,
+    FAULT:      0x00000020,
+    MEM:        0x00000040,
+    PORT:       0x00000080,
+    DMA:        0x00000100,
+    PIC:        0x00000200,
+    TIMER:      0x00000400,
+    CMOS:       0x00000800,
+    RTC:        0x00001000,
+    C8042:      0x00002000,
+    CHIPSET:    0x00004000,
+    KEYBOARD:   0x00008000,
+    KEYS:       0x00010000,
+    VIDEO:      0x00020000,
+    FDC:        0x00040000,
+    HDC:        0x00080000,
+    DISK:       0x00100000,
+    SERIAL:     0x00200000,
+    SPEAKER:    0x00400000,
+    STATE:      0x00800000,
+    MOUSE:      0x01000000,
+    COMPUTER:   0x02000000,
+    DOS:        0x04000000,
+    DATA:       0x08000000,
+    LOG:        0x10000000,
+    WARN:       0x20000000,
+    HALT:       0x40000000
+};
+
+if (typeof module !== 'undefined') module.exports = Messages;

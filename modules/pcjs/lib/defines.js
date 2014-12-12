@@ -119,6 +119,7 @@ if (typeof module !== 'undefined') {
     global.EAFUNCS = EAFUNCS;
     global.FATARRAYS = FATARRAYS;
     global.TYPEDARRAYS = TYPEDARRAYS;
+    global.SAMPLER = SAMPLER;
     /*
      * TODO: When we're "required" by Node, should we return anything via module.exports?
      */

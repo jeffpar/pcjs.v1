@@ -34,6 +34,7 @@
 
 if (typeof module !== 'undefined') {
     var Component   = require("../../shared/lib/component");
+    var Messages    = require("./messages");
     var X86         = require("./x86");
     var X86Grps     = require("./x86grps");
     var X86Help     = require("./x86help");
@@ -193,7 +194,7 @@ var X86OpXX = {
     /**
      * @this {X86CPU}
      *
-     * op=0x0F (pop CS) (undocumented on 8086/8088; replaced with opInvalid on 80186/80188, and op0F on 80286 and up)
+     * op=0x0F (pop CS) (undocumented on 8086/8088; replaced with opHelpInvalid on 80186/80188, and op0F on 80286 and up)
      */
     opPOPCS: function() {
         this.setCS(this.popWord());
@@ -1741,7 +1742,7 @@ var X86OpXX = {
                 this.regMD16 = this.segDS.sel;
                 break;
             default:
-                X86OpXX.opUndefined.call(this);
+                X86Help.opHelpUndefined.call(this);
                 return;
         }
         /*
@@ -1787,7 +1788,7 @@ var X86OpXX = {
             break;
         default:
             if (this.model >= X86.MODEL_80286) {
-                X86OpXX.opInvalid.call(this);
+                X86Help.opHelpInvalid.call(this);
                 return;
             }
             switch(reg) {
@@ -1980,7 +1981,7 @@ var X86OpXX = {
      * op=0x9B (wait)
      */
     opWAIT: function() {
-        this.messageDebugger("WAIT not implemented", Debugger.MESSAGE.CPU);
+        this.messageDebugger("WAIT not implemented", Messages.CPU);
         this.nStepCycles--;
     },
     /**
@@ -3144,7 +3145,7 @@ var X86OpXX = {
      * I still treat this as undefined, until I can verify the behavior on real hardware.
      */
     opINT1: function() {
-        X86OpXX.opUndefined.call(this);
+        X86Help.opHelpUndefined.call(this);
     },
     /**
      * @this {X86CPU}
@@ -3338,21 +3339,6 @@ var X86OpXX = {
     opGrp4w: function() {
         X86Mods.aOpModsGrpWord[this.getIPByte()].call(this, X86Grps.aOpGrp4w, X86Grps.opGrpNoSrc);
         if (EAFUNCS) this.setEAWord = this.setEAWordEnabled;
-    },
-    /**
-     * @this {X86CPU}
-     */
-    opInvalid: function() {
-        X86Help.opHelpFault.call(this, X86.EXCEPTION.UD_FAULT);
-        this.stopCPU();
-    },
-    /**
-     * @this {X86CPU}
-     */
-    opUndefined: function() {
-        this.setIP(this.opEA - this.segCS.base);
-        this.setError("Undefined opcode 0x" + str.toHexByte(this.bus.getByteDirect(this.regEIP)) + " at " + str.toHexAddr(this.regIP, this.segCS.sel));
-        this.stopCPU();
     }
 };
 

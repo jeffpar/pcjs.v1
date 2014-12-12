@@ -38,6 +38,8 @@ if (DEBUGGER) {
         var usr         = require("../../shared/lib/usrlib");
         var web         = require("../../shared/lib/weblib");
         var Component   = require("../../shared/lib/component");
+        var Interrupts  = require("./interrupts");
+        var Messages    = require("./messages");
         var Bus         = require("./bus");
         var State       = require("./state");
         var CPU         = require("./cpu");
@@ -180,49 +182,18 @@ function Debugger(parmsDbg)
          *      ...
          */
         var dbg = this;
-        if (window && window['$'] === undefined) {
-            window['$'] = function(s) { return dbg.doCommand(s); };
+        if (window) {
+            if (window['$'] === undefined) {
+                window['$'] = function(s) { return dbg.doCommand(s); };
+            }
+        } else {
+            if (global['$'] === undefined) {
+                global['$'] = function(s) { return dbg.doCommand(s); };
+            }
         }
 
     }   // endif DEBUGGER
 }
-
-/*
- * Debugger message constants must always be defined, even when DEBUGGER is false, lest the Closure Compiler complain
- */
-Debugger.MESSAGE = {
-    CPU:        0x00000001,
-    SEG:        0x00000002,
-    DESC:       0x00000004,
-    TSS:        0x00000008,
-    INT:        0x00000010,
-    FAULT:      0x00000020,
-    MEM:        0x00000040,
-    PORT:       0x00000080,
-    DMA:        0x00000100,
-    PIC:        0x00000200,
-    TIMER:      0x00000400,
-    CMOS:       0x00000800,
-    RTC:        0x00001000,
-    C8042:      0x00002000,
-    CHIPSET:    0x00004000,
-    KEYBOARD:   0x00008000,
-    KEYS:       0x00010000,
-    VIDEO:      0x00020000,
-    FDC:        0x00040000,
-    HDC:        0x00080000,
-    DISK:       0x00100000,
-    SERIAL:     0x00200000,
-    SPEAKER:    0x00400000,
-    STATE:      0x00800000,
-    MOUSE:      0x01000000,
-    COMPUTER:   0x02000000,
-    DOS:        0x04000000,
-    DATA:       0x08000000,
-    LOG:        0x10000000,
-    WARN:       0x20000000,
-    HALT:       0x40000000
-};
 
 if (DEBUGGER) {
 
@@ -231,26 +202,15 @@ if (DEBUGGER) {
     /*
      * Information regarding interrupts of interest (used by messageInt() and others)
      */
-    Debugger.INT = {
-        VIDEO:      0x10,
-        DISK:       0x13,
-        CASSETTE:   0x15,
-        KBD:        0x16,
-        RTC:        0x1a,
-        TIMER_TICK: 0x1c,
-        DOS:        0x21,
-        MOUSE:      0x33
-    };
-
-    Debugger.INT_MESSAGE = {
-        0x10:       Debugger.MESSAGE.VIDEO,
-        0x13:       Debugger.MESSAGE.FDC,
-        0x15:       Debugger.MESSAGE.CHIPSET,
-        0x16:       Debugger.MESSAGE.KEYBOARD,
-     // 0x1a:       Debugger.MESSAGE.RTC,       // ChipSet contains its own specialized messageInt() handler for the RTC
-        0x1c:       Debugger.MESSAGE.TIMER,
-        0x21:       Debugger.MESSAGE.DOS,
-        0x33:       Debugger.MESSAGE.MOUSE
+    Debugger.INT_MESSAGES = {
+        0x10:       Messages.VIDEO,
+        0x13:       Messages.FDC,
+        0x15:       Messages.CHIPSET,
+        0x16:       Messages.KEYBOARD,
+     // 0x1a:       Messages.RTC,       // ChipSet contains its own specialized messageInt() handler for the RTC
+        0x1c:       Messages.TIMER,
+        0x21:       Messages.DOS,
+        0x33:       Messages.MOUSE
     };
 
     Debugger.aCommands = {
@@ -510,41 +470,41 @@ if (DEBUGGER) {
      * something to be aware of).
      */
     Debugger.MESSAGES = {
-        "cpu":      Debugger.MESSAGE.CPU,
-        "seg":      Debugger.MESSAGE.SEG,
-        "desc":     Debugger.MESSAGE.DESC,
-        "tss":      Debugger.MESSAGE.TSS,
-        "int":      Debugger.MESSAGE.INT,
-        "fault":    Debugger.MESSAGE.FAULT,
-        "mem":      Debugger.MESSAGE.MEM,
-        "port":     Debugger.MESSAGE.PORT,
-        "dma":      Debugger.MESSAGE.DMA,
-        "pic":      Debugger.MESSAGE.PIC,
-        "timer":    Debugger.MESSAGE.TIMER,
-        "cmos":     Debugger.MESSAGE.CMOS,
-        "rtc":      Debugger.MESSAGE.RTC,
-        "8042":     Debugger.MESSAGE.C8042,
-        "chipset":  Debugger.MESSAGE.CHIPSET,   // ie, anything else in ChipSet besides DMA, PIC, TIMER, CMOS, RTC and 8042
-        "keyboard": Debugger.MESSAGE.KEYBOARD,
-        "key":      Debugger.MESSAGE.KEYS,      // using "keys" instead of "key" causes an unfortunate JavaScript property collision
-        "video":    Debugger.MESSAGE.VIDEO,
-        "fdc":      Debugger.MESSAGE.FDC,
-        "hdc":      Debugger.MESSAGE.HDC,
-        "disk":     Debugger.MESSAGE.DISK,
-        "serial":   Debugger.MESSAGE.SERIAL,
-        "speaker":  Debugger.MESSAGE.SPEAKER,
-        "state":    Debugger.MESSAGE.STATE,
-        "mouse":    Debugger.MESSAGE.MOUSE,
-        "computer": Debugger.MESSAGE.COMPUTER,
-        "dos":      Debugger.MESSAGE.DOS,
-        "data":     Debugger.MESSAGE.DATA,
-        "log":      Debugger.MESSAGE.LOG,
-        "warn":     Debugger.MESSAGE.WARN,
+        "cpu":      Messages.CPU,
+        "seg":      Messages.SEG,
+        "desc":     Messages.DESC,
+        "tss":      Messages.TSS,
+        "int":      Messages.INT,
+        "fault":    Messages.FAULT,
+        "mem":      Messages.MEM,
+        "port":     Messages.PORT,
+        "dma":      Messages.DMA,
+        "pic":      Messages.PIC,
+        "timer":    Messages.TIMER,
+        "cmos":     Messages.CMOS,
+        "rtc":      Messages.RTC,
+        "8042":     Messages.C8042,
+        "chipset":  Messages.CHIPSET,   // ie, anything else in ChipSet besides DMA, PIC, TIMER, CMOS, RTC and 8042
+        "keyboard": Messages.KEYBOARD,
+        "key":      Messages.KEYS,      // using "keys" instead of "key" causes an unfortunate JavaScript property collision
+        "video":    Messages.VIDEO,
+        "fdc":      Messages.FDC,
+        "hdc":      Messages.HDC,
+        "disk":     Messages.DISK,
+        "serial":   Messages.SERIAL,
+        "speaker":  Messages.SPEAKER,
+        "state":    Messages.STATE,
+        "mouse":    Messages.MOUSE,
+        "computer": Messages.COMPUTER,
+        "dos":      Messages.DOS,
+        "data":     Messages.DATA,
+        "log":      Messages.LOG,
+        "warn":     Messages.WARN,
         /*
          * Now we turn to message actions rather than message types; for example, setting "halt"
          * on or off doesn't enable "halt" messages, but rather halts the CPU on any message above.
          */
-        "halt":     Debugger.MESSAGE.HALT
+        "halt":     Messages.HALT
     };
 
     /*
@@ -1229,9 +1189,9 @@ if (DEBUGGER) {
             }
         }
 
-        this.messageDump(Debugger.MESSAGE.DESC, function onDumpDesc(s) { dbg.dumpDesc(s); });
-        this.messageDump(Debugger.MESSAGE.TSS,  function onDumpTSS(s)  { dbg.dumpTSS(s); });
-        this.messageDump(Debugger.MESSAGE.DOS,  function onDumpDOS(s)  { dbg.dumpDOS(s); });
+        this.messageDump(Messages.DESC, function onDumpDesc(s) { dbg.dumpDesc(s); });
+        this.messageDump(Messages.TSS,  function onDumpTSS(s)  { dbg.dumpTSS(s); });
+        this.messageDump(Messages.DOS,  function onDumpDOS(s)  { dbg.dumpDOS(s); });
 
         this.setReady();
 
@@ -1559,7 +1519,7 @@ if (DEBUGGER) {
     Debugger.prototype.messageInit = function(sEnable)
     {
         this.dbg = this;
-        this.bitsMessage = this.bitsWarning = Debugger.MESSAGE.WARN;
+        this.bitsMessage = this.bitsWarning = Messages.WARN;
         this.sMessagePrev = null;
         this.afnDumpers = [];
         var aEnable = this.parseCommand(sEnable.replace("keys","key").replace("kbd","keyboard"));
@@ -1635,19 +1595,19 @@ if (DEBUGGER) {
     {
         var AH;
         var fMessage = false;
-        var nCategory = Debugger.INT_MESSAGE[nInt];
+        var nCategory = Debugger.INT_MESSAGES[nInt];
         if (nCategory) {
             AH = this.cpu.regAX >> 8;
             if (this.messageEnabled(nCategory)) {
                 fMessage = true;
             } else {
-                fMessage = (nCategory == Debugger.MESSAGE.FDC && this.messageEnabled(nCategory = Debugger.MESSAGE.HDC));
+                fMessage = (nCategory == Messages.FDC && this.messageEnabled(nCategory = Messages.HDC));
             }
         }
         if (fMessage) {
             var DL = this.cpu.regDX & 0xff;
-            if (nInt == Debugger.INT.DOS && AH == 0x0b ||
-                nCategory == Debugger.MESSAGE.FDC && DL >= 0x80 || nCategory == Debugger.MESSAGE.HDC && DL < 0x80) {
+            if (nInt == Interrupts.DOS.VECTOR && AH == 0x0b ||
+                nCategory == Messages.FDC && DL >= 0x80 || nCategory == Messages.HDC && DL < 0x80) {
                 fMessage = false;
             }
         }
@@ -1697,7 +1657,7 @@ if (DEBUGGER) {
      */
     Debugger.prototype.messageIO = function(component, port, bOut, addrFrom, name, bIn, bitsMessage)
     {
-        bitsMessage |= Debugger.MESSAGE.PORT;
+        bitsMessage |= Messages.PORT;
         if (addrFrom == null || (this.bitsMessage & bitsMessage) == bitsMessage) {
             var segFrom = null;
             if (addrFrom != null) {
@@ -1728,7 +1688,7 @@ if (DEBUGGER) {
         this.sMessagePrev = sMessage;
 
         if (this.cpu) {
-            if (this.bitsMessage & Debugger.MESSAGE.HALT) {
+            if (this.bitsMessage & Messages.HALT) {
                 this.cpu.stopCPU();
             }
             /*
@@ -2025,8 +1985,8 @@ if (DEBUGGER) {
          * it here, so that if the CPU is reset while running, we can prevent stop()
          * from unnecessarily dumping the CPU state.
          */
-        if (this.bitField.fRunning !== undefined && !fQuiet) this.println("reset");
-        this.bitField.fRunning = false;
+        if (this.aFlags.fRunning !== undefined && !fQuiet) this.println("reset");
+        this.aFlags.fRunning = false;
         this.clearTempBreakpoint();
         if (!fQuiet) this.updateStatus();
     };
@@ -2093,7 +2053,7 @@ if (DEBUGGER) {
     Debugger.prototype.start = function(ms, nCycles)
     {
         if (!this.fProcStep) this.println("running");
-        this.bitField.fRunning = true;
+        this.aFlags.fRunning = true;
         this.msStart = ms;
         this.nCyclesStart = nCycles;
     };
@@ -2109,8 +2069,8 @@ if (DEBUGGER) {
      */
     Debugger.prototype.stop = function(ms, nCycles)
     {
-        if (this.bitField.fRunning) {
-            this.bitField.fRunning = false;
+        if (this.aFlags.fRunning) {
+            this.aFlags.fRunning = false;
             this.nCycles = nCycles - this.nCyclesStart;
             if (!this.fProcStep) {
                 var sStopped = "stopped";
@@ -2168,7 +2128,7 @@ if (DEBUGGER) {
      */
     Debugger.prototype.checksEnabled = function(fRelease)
     {
-        return ((DEBUG && !fRelease)? true : (this.aBreakExec.length > 1 || this.messageEnabled(Debugger.MESSAGE.INT) /* || this.aBreakRead.length > 1 || this.aBreakWrite.length > 1 */));
+        return ((DEBUG && !fRelease)? true : (this.aBreakExec.length > 1 || this.messageEnabled(Messages.INT) /* || this.aBreakRead.length > 1 || this.aBreakWrite.length > 1 */));
     };
 
     /**
@@ -2822,7 +2782,7 @@ if (DEBUGGER) {
             sLine += "                         ";
             sLine = sLine.substr(0, 50);
             sLine += ";";
-            if (!this.cpu.bitField.fChecksum) {
+            if (!this.cpu.aFlags.fChecksum) {
                 sLine += sComment + (nSequence != null? '=' + nSequence.toString() : "");
             } else {
                 var nCycles = this.cpu.getCycles();
@@ -3830,7 +3790,7 @@ if (DEBUGGER) {
      */
     Debugger.prototype.doHalt = function(sCount)
     {
-        if (this.bitField.fRunning && sCount === undefined) {
+        if (this.aFlags.fRunning && sCount === undefined) {
             this.println("halting");
             this.cpu.stopCPU();
             return;
@@ -4136,7 +4096,7 @@ if (DEBUGGER) {
         if (sCategory !== undefined) {
             var bitsMessage = 0;
             if (sCategory == "all") {
-                bitsMessage = 0xffffffff & ~(Debugger.MESSAGE.HALT | Debugger.MESSAGE.LOG);
+                bitsMessage = 0xffffffff & ~(Messages.HALT | Messages.LOG);
                 sCategory = null;
             } else if (sCategory == "on") {
                 fCriteria = true;
@@ -4234,7 +4194,7 @@ if (DEBUGGER) {
                 if (nCycles !== undefined) {
                     this.cpu.resetChecksum();
                 }
-                this.println("checksums " + (this.cpu.bitField.fChecksum? "enabled" : "disabled"));
+                this.println("checksums " + (this.cpu.aFlags.fChecksum? "enabled" : "disabled"));
                 break;
             case "sp":
                 if (asArgs[2] !== undefined) {
