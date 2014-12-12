@@ -43,4 +43,4 @@
  * I would still like to skip loading debugger.js altogether.  To do that, we must arrange for this additional file,
  * nodebugger.js, to be loaded as early as possible, which explicitly UPDATES the value of DEBUGGER to false.
  */
-DEBUGGER = false;
+var DEBUGGER = false;

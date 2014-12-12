@@ -107,7 +107,8 @@ function Keyboard(parmsKbd)
      * timeout for "break".
      *
      * This requires an aKeysActive array that keeps track of the status of every active key; only the
-     * first entry in the array allowed to repeat.  Each entry is a key object that looks like:
+     * first entry in the array is allowed to repeat.  Each entry is a key object with the following
+     * properties:
      *
      *      simCode:    our simulated keyCode from onKeyDown, onKeyUp, or onKeyPress
      *      fDown:      next state to simulate (true for down, false for up)
@@ -115,8 +116,8 @@ function Keyboard(parmsKbd)
      *      timer:      timer for next key operation, if any
      *
      * Keys are inserted into aKeysActive using splice(0, 0, key), but not before zeroing nRepeat
-     * of any key that already occupies index 0, so that at most only one key (ie, the most recent)
-     * can ever be in a repeating state.
+     * of any repeating key that already occupies index 0, so that at most only one key (ie, the most
+     * recent) can ever be in a repeating state.
      */
     this.aKeysActive = [];
 
@@ -176,7 +177,7 @@ Keyboard.KEYCODE = {
     /* 0x10 */ SHIFT:       16,
     /* 0x11 */ CTRL:        17,
     /* 0x12 */ ALT:         18,
-    /* 0x13 */ PAUSE:       19,         // Pause/Break
+    /* 0x13 */ PAUSE:       19,         // PAUSE/BREAK
     /* 0x14 */ CAPS_LOCK:   20,
     /* 0x1B */ ESC:         27,
     /* 0x21 */ PGUP:        33,
@@ -186,15 +187,23 @@ Keyboard.KEYCODE = {
     /* 0x25 */ LEFT:        37,
     /* 0x26 */ UP:          38,
     /* 0x27 */ RIGHT:       39,
+    /* 0x27 */ FF_QUOTE:    39,
     /* 0x28 */ DOWN:        40,
+    /* 0x2C */ FF_COMMA:    44,
     /* 0x2C */ PRTSC:       44,
     /* 0x2D */ INS:         45,
     /* 0x2E */ DEL:         46,
+    /* 0x2E */ FF_PERIOD:   46,
+    /* 0x2F */ FF_SLASH:    47,
     /* 0x3B */ FF_SEMI:     59,
     /* 0x3D */ FF_EQUALS:   61,
     /* 0x5B */ CMD:         91,         // aka WIN
+    /* 0x5B */ FF_LBRACK:   91,
+    /* 0x5C */ FF_BSLASH:   92,
     /* 0x5D */ RCMD:        93,         // aka MENU
+    /* 0x5D */ FF_RBRACK:   93,
     /* 0x60 */ NUM_INS:     96,         // 0
+    /* 0x60 */ FF_BQUOTE:   96,
     /* 0x61 */ NUM_END:     97,         // 1
     /* 0x62 */ NUM_DOWN:    98,         // 2
     /* 0x63 */ NUM_PGDN:    99,         // 3
@@ -235,11 +244,13 @@ Keyboard.KEYCODE = {
     /* 0xDC */ BSLASH:      220,        // Firefox: 92
     /* 0xDD */ RBRACK:      221,        // Firefox: 93
     /* 0xDE */ QUOTE:       222,        // Firefox: 39
-    /* 0xE0 */ FF_CMD:      224,        // Firefox only, which uses this for both CMD and RCMD
+    /* 0xE0 */ FF_CMD:      224,        // Firefox only (used for both CMD and RCMD)
     //
-    // The following biases use what I'll call "Decimal Coded Binary" or DCB (the reverse of BCD),
-    // where decimal digits are used to represent binary bit values, which can be added together without
-    // affecting neighboring digits as long as you stick to 1, 2 or 4 in any given column.
+    // The following biases use what I'll call Decimal Coded Binary or DCB (the opposite of BCD),
+    // where the thousands digit is used to store the sum of "binary" digits 1 and/or 2 and/or 4.
+    //
+    // Technically, that makes it DCO (Decimal Coded Octal), but then again, BCD should have really
+    // been called HCD (Hexadecimal Coded Decimal), so if "they" can take liberties, so can I.
     //
     // ONDOWN is a bias we add to browser keyCodes that we want to handle on "down" rather than "press".
     //
@@ -966,7 +977,7 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control)
             this.bindings[id] = control;
             control.onclick = function onClickCapsLock(event) {
                 if (kbd.cpu) kbd.cpu.setFocus();
-                return kbd.toggleCapsLock(event);
+                return kbd.toggleCapsLock();
             };
             return true;
 
@@ -974,7 +985,7 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control)
             this.bindings[id] = control;
             control.onclick = function onClickNumLock(event) {
                 if (kbd.cpu) kbd.cpu.setFocus();
-                return kbd.toggleNumLock(event);
+                return kbd.toggleNumLock();
             };
             return true;
 
@@ -982,7 +993,7 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control)
             this.bindings[id] = control;
             control.onclick = function onClickScrollLock(event) {
                 if (kbd.cpu) kbd.cpu.setFocus();
-                return kbd.toggleScrollLock(event);
+                return kbd.toggleScrollLock();
             };
             return true;
 
@@ -1428,16 +1439,13 @@ Keyboard.prototype.setSoftKeyState = function(control, f)
 };
 
 /**
- * addScanCode(bScan, fRepeat)
+ * addScanCode(bScan)
  *
  * @this {Keyboard}
  * @param {number} bScan
- * @param {boolean} [fRepeat]
  */
-Keyboard.prototype.addScanCode = function(bScan, fRepeat)
+Keyboard.prototype.addScanCode = function(bScan)
 {
-    var bKey = bScan & Keyboard.SCANCODE.MAKE;
-    var fDown = (bKey == bScan);
     /*
      * Prepare for the possibility that our reset() function may not have been called yet.
      *
@@ -1535,34 +1543,31 @@ Keyboard.prototype.updateLEDs = function(bitState)
 };
 
 /**
- * toggleCapsLock(event)
+ * toggleCapsLock()
  *
  * @this {Keyboard}
- * @param {Object} event
  */
-Keyboard.prototype.toggleCapsLock = function(event)
+Keyboard.prototype.toggleCapsLock = function()
 {
     this.addActiveKey(Keyboard.SIMCODE.CAPS_LOCK, true);
 };
 
 /**
- * toggleNumLock(event)
+ * toggleNumLock()
  *
  * @this {Keyboard}
- * @param {Object} event
  */
-Keyboard.prototype.toggleNumLock = function(event)
+Keyboard.prototype.toggleNumLock = function()
 {
     this.addActiveKey(Keyboard.SIMCODE.NUM_LOCK, true);
 };
 
 /**
- * toggleScrollLock(event)
+ * toggleScrollLock()
  *
  * @this {Keyboard}
- * @param {Object} event
  */
-Keyboard.prototype.toggleScrollLock = function(event)
+Keyboard.prototype.toggleScrollLock = function()
 {
     this.addActiveKey(Keyboard.SIMCODE.SCROLL_LOCK, true);
 };
@@ -1965,7 +1970,7 @@ Keyboard.prototype.onKeyDown = function(event, fDown)
              */
 
             /*
-             * HACK for simulating CTRL_BREAK using CTRL_DEL (Mac) / CTRL_BS (Windows)
+             * HACK for simulating CTRL_BREAK using CTRL_DEL (Mac) or CTRL_BS (Windows)
              */
             if (keyCode == Keyboard.KEYCODE.BS && (this.bitsState & (Keyboard.STATE.CTRL|Keyboard.STATE.ALT)) == Keyboard.STATE.CTRL) {
                 simCode = Keyboard.SIMCODE.CTRL_BREAK;

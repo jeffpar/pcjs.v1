@@ -38,10 +38,10 @@
  * nearly all of debugger.js will be conditionally removed by the compiler, reducing it to little more than a
  * "type skeleton", which also solves some type-related warnings we would otherwise have if we tried to remove
  * debugger.js from the compilation process altogether.
- * 
+ *
  * However, when we're in "development mode" and running uncompiled code in debugger-less configurations,
  * I would like to skip loading debugger.js altogether.  To do that, we must arrange for this additional file
  * (nodebugger.js) to be loaded as early as possible, which *explicitly* overrides the previously defined value
  * of DEBUGGER with *false*.
  */
-DEBUGGER = false;
+var DEBUGGER = false;
