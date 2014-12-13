@@ -394,6 +394,14 @@ web.promptUser = function(sPrompt, sDefault)
 web.fLocalStorage = null;
 
 /**
+ * TODO: Is there any way to get the Closure Compiler to stop inlining this string?  This
+ * isn't cutting it.
+ *
+ * @const {string}
+ */
+web.sLocalStorageTest = "PCjs.localStorage";
+
+/**
  * hasLocalStorage
  *
  * true if localStorage support exists, is enabled, and works; false otherwise
@@ -404,11 +412,10 @@ web.hasLocalStorage = function() {
     if (web.fLocalStorage == null) {
         var f = false;
         if (window) {
-            var sTest = 'PCjs.localStorage';
             try {
-                window.localStorage.setItem(sTest, sTest);
-                f = (window.localStorage.getItem(sTest) === sTest);
-                window.localStorage.removeItem(sTest);
+                window.localStorage.setItem(web.sLocalStorageTest, web.sLocalStorageTest);
+                f = (window.localStorage.getItem(web.sLocalStorageTest) == web.sLocalStorageTest);
+                window.localStorage.removeItem(web.sLocalStorageTest);
             } catch(e) {
                 web.logLocalStorageError(e);
                 f = false;

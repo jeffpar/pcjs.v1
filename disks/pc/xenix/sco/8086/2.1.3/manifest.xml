@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.16.4/manifest.xsl"?>
+<manifest type="software">
+	<title>SCO Xenix 8086 Operating System v2.1.3</title>
+	<disk id="disk01" size="368640" chs="40:2:9" img="private/N1" href="/disks/pc/xenix/sco/8086/2.1.3/N1.json" md5="f3abb0fbee6a60d925cbd81a31e9f2a5" md5json="d84c47d7fa2e14f00f76dabed23a3b58">
+		<name>SCO Xenix 8086 (N1)</name>
+	</disk>
+	<disk id="disk02" size="368640" chs="40:2:9" img="private/N2" href="/disks/pc/xenix/sco/8086/2.1.3/N2.json" md5="f3c8234732431e0fb29fea3c70f01be2" md5json="38b9a234911757176e437abff2173d02">
+		<name>SCO Xenix 8086 (N2)</name>
+	</disk>
+	<disk id="disk03" size="368640" chs="40:2:9" img="private/N3" href="/disks/pc/xenix/sco/8086/2.1.3/N3.json" md5="fb94524d93934e05615d29d618e426bf" md5json="49537e4c3601cb95e807b763fca2eb59">
+		<name>SCO Xenix 8086 (N3)</name>
+	</disk>
+	<disk id="disk04" size="368640" chs="40:2:9" img="private/N4" href="/disks/pc/xenix/sco/8086/2.1.3/N4.json" md5="93b380d3bfe3d720f4b14f1078119125" md5json="3e5e568e3eecf7c3673a68442065ed85">
+		<name>SCO Xenix 8086 (N4)</name>
+	</disk>
+	<disk id="disk05" size="368640" chs="40:2:9" img="private/N5" href="/disks/pc/xenix/sco/8086/2.1.3/N5.json" md5="5f9361267fea2565561e187896d0b437" md5json="74e4ff69686cc45932424d02e9f5e5eb">
+		<name>SCO Xenix 8086 (N5)</name>
+	</disk>
+	<disk id="disk06" size="368640" chs="40:2:9" img="private/N6" href="/disks/pc/xenix/sco/8086/2.1.3/N6.json" md5="fa649506a8d03d6b620a543b947f7b4a" md5json="7e7fbf7288b432c377653a5e1b2ceb8b">
+		<name>SCO Xenix 8086 (N6)</name>
+	</disk>
+	<disk id="disk07" size="368640" chs="40:2:9" img="private/B1" href="/disks/pc/xenix/sco/8086/2.1.3/B1.json" md5="f14b42cc487c43892a98a7429f406b2c" md5json="ddcbf13e539aaa77ec311b8a390b919a">
+		<name>SCO Xenix 8086 (B1)</name>
+	</disk>
+	<disk id="disk08" size="368640" chs="40:2:9" img="private/B2" href="/disks/pc/xenix/sco/8086/2.1.3/B2.json" md5="d43f006038c66cf442e1fb0b7d94c889" md5json="9f1b830c15442ac7cbf56cda585f2d69">
+		<name>SCO Xenix 8086 (B2)</name>
+	</disk>
+	<disk id="disk09" size="368640" chs="40:2:9" img="private/B3" href="/disks/pc/xenix/sco/8086/2.1.3/B3.json" md5="7a0e593bb15eaa0fa56a7ef9f72e0b8d" md5json="2406f520bdb52fd7b498b7db68aef6b3">
+		<name>SCO Xenix 8086 (B3)</name>
+	</disk>
+	<disk id="disk10" size="368640" chs="40:2:9" img="private/X1" href="/disks/pc/xenix/sco/8086/2.1.3/X1.json" md5="0d456f3ff755fb0b3c9244abd6e946ed" md5json="dfcee09880e36afff1c579dc4d35c3c6">
+		<name>SCO Xenix 8086 (X1)</name>
+	</disk>
+	<disk id="disk11" size="368640" chs="40:2:9" img="private/X2" href="/disks/pc/xenix/sco/8086/2.1.3/X2.json" md5="62c2c7de8af9b742c552e118049f1f53" md5json="c3b05fb2f8ffc91e3c70ebfdd07dc8fd">
+		<name>SCO Xenix 8086 (X2)</name>
+	</disk>
+	<disk id="disk12" size="368640" chs="40:2:9" img="private/X3" href="/disks/pc/xenix/sco/8086/2.1.3/X3.json" md5="3f113fbade21054c5405ce89ada06c7a" md5json="57299f97b269ad62b5d1c6e73afa811d">
+		<name>SCO Xenix 8086 (X3)</name>
+	</disk>
+	<disk id="disk13" size="368640" chs="40:2:9" img="private/X4" href="/disks/pc/xenix/sco/8086/2.1.3/X4.json" md5="f14e3828cc4dc55d5c6b3c538f1532b1" md5json="2ec909508308505b1af7cf8e37598be6">
+		<name>SCO Xenix 8086 (X4)</name>
+	</disk>
+	<disk id="disk14" size="368640" chs="40:2:9" img="private/X5" href="/disks/pc/xenix/sco/8086/2.1.3/X5.json" md5="19e99431c8a44d78d50b12e524861eb9" md5json="e3bf413459e789e70979114ff3626944">
+		<name>SCO Xenix 8086 (X5)</name>
+	</disk>
+	<disk id="disk15" size="368640" chs="40:2:9" img="private/X6" href="/disks/pc/xenix/sco/8086/2.1.3/X6.json" md5="228b4b09421a46931d8976b5dd2b0bb9" md5json="970d62a77b268a532300c15bd6be7150">
+		<name>SCO Xenix 8086 (X6)</name>
+	</disk>
+	<disk id="disk16" size="368640" chs="40:2:9" img="private/GAMES" href="/disks/pc/xenix/sco/8086/2.1.3/GAMES.json" md5="0be7c5213dc1d540c4019e130f533835" md5json="2dac3fffe51f3200f3b8f2a5cebcf5a2">
+		<name>SCO Xenix 8086 (GAMES)</name>
+	</disk>
+</manifest>

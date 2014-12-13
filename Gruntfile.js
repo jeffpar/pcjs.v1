@@ -86,8 +86,8 @@
  * the weak documentation and unfortunate memory constraints.
  *
  * To integrate "prepjs" back into the build process, add it to the "default" task, and change the
- * "closureCompiler" task to compile the inlined code in "/tmp/(c1pjs|pcjs)/...".  The "/tmp" folder
- * structure mirrors the "/versions" folder structure.
+ * "closureCompiler" task to compile the inlined code in "/tmp" (the "/tmp" folder structure mirrors
+ * the "/versions" folder structure).
  */
 
 var path = require("path");

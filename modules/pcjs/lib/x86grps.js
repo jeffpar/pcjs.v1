@@ -1122,7 +1122,7 @@ var X86Grps = {
      * @param {number} src (null)
      * @return {number}
      */
-    opGrpCALLdw: function(dst, src) {
+    opGrpCALLFdw: function(dst, src) {
         if (this.regEA < 0) {
             return X86Grps.opGrpUndefined.call(this, dst, src);
         }
@@ -1149,11 +1149,12 @@ var X86Grps = {
      * @param {number} src (null)
      * @return {number}
      */
-    opGrpJMPdw: function(dst, src) {
+    opGrpJMPFdw: function(dst, src) {
         if (this.regEA < 0) {
             return X86Grps.opGrpUndefined.call(this, dst, src);
         }
         this.setCSIP(dst, this.getWord(this.regEA + 2));
+        if (this.cIntReturn) this.checkIntReturn(this.regEIP);
         this.nStepCycles -= this.CYCLES.nOpCyclesJmpDM;
         if (EAFUNCS) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
@@ -1324,8 +1325,8 @@ X86Grps.aOpGrp4b = [
 ];
 
 X86Grps.aOpGrp4w = [
-    X86Grps.opGrpINCw,      X86Grps.opGrpDECw,      X86Grps.opGrpCALLw,     X86Grps.opGrpCALLdw,    // 0xFF(reg=0x0-0x3)
-    X86Grps.opGrpJMPw,      X86Grps.opGrpJMPdw,     X86Grps.opGrpPUSHw,     X86Grps.opGrpFault      // 0xFF(reg=0x4-0x7)
+    X86Grps.opGrpINCw,      X86Grps.opGrpDECw,      X86Grps.opGrpCALLw,     X86Grps.opGrpCALLFdw,   // 0xFF(reg=0x0-0x3)
+    X86Grps.opGrpJMPw,      X86Grps.opGrpJMPFdw,    X86Grps.opGrpPUSHw,     X86Grps.opGrpFault      // 0xFF(reg=0x4-0x7)
 ];
 
 /*

@@ -23,23 +23,27 @@
 		<manifest ref="/disks/pc/os2/ibm/1.1/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/os2/ibm/1.3/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/os2/misc/manifest.xml" disk="*"/>
-		<manifest ref="/disks/pc/win/win101/manifest.xml" disk="*"/>
-		<manifest ref="/disks/pc/win/win103/manifest.xml" disk="*"/>
-		<manifest ref="/disks/pc/win/win103a/manifest.xml" disk="*"/>
-		<manifest ref="/disks/pc/win/win104/manifest.xml" disk="*"/>
-		<manifest ref="/disks/pc/win/win203/manifest.xml" disk="*"/>
+		<manifest ref="/disks/pc/windows/1.01/manifest.xml" disk="*"/>
+		<manifest ref="/disks/pc/windows/1.03/manifest.xml" disk="*"/>
+		<manifest ref="/disks/pc/windows/1.03a/manifest.xml" disk="*"/>
+		<manifest ref="/disks/pc/windows/1.04/manifest.xml" disk="*"/>
+		<manifest ref="/disks/pc/windows/2.03/manifest.xml" disk="*"/>
+		<manifest ref="/disks/pc/minix/1.1/manifest.xml" disk="*"/>
+		<manifest ref="/disks/pc/unix/ibm/pcix/manifest.xml" disk="*"/>
+		<manifest ref="/disks/pc/xenix/sco/8086/2.1.3/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/apps/lotus/123/1.0a/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/apps/microsoft/word/3.0/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/apps/microsoft/word/3.1/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/apps/microsoft/word/5.0/manifest.xml" disk="*"/>
+		<manifest ref="/disks/pc/apps/microsoft/winword/2.0c/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/games/microsoft/flightsim/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/tools/microsoft/basic/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/tools/microsoft/c/4.00/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/tools/microsoft/masm/4.00/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/tools/microsoft/mouse/5.00/manifest.xml" disk="*"/>
-		<manifest ref="/disks/pc/tools/microsoft/winsdk/1.01/manifest.xml" disk="*"/>
-		<manifest ref="/disks/pc/tools/microsoft/winsdk/1.04/manifest.xml" disk="*"/>
-		<manifest ref="/disks/pc/tools/microsoft/winsdk/2.03/manifest.xml" disk="*"/>
+		<manifest ref="/disks/pc/tools/microsoft/windows/sdk/1.01/manifest.xml" disk="*"/>
+		<manifest ref="/disks/pc/tools/microsoft/windows/sdk/1.04/manifest.xml" disk="*"/>
+		<manifest ref="/disks/pc/tools/microsoft/windows/sdk/2.03/manifest.xml" disk="*"/>
 		<manifest ref="/apps/pc/1981/visicalc/manifest.xml" disk="disk01"/>
 		<manifest ref="/apps/pc/1982/esuite/manifest.xml" disk="disk01"/>
 		<manifest ref="/apps/pc/1985/rogue/manifest.xml" disk="disk01"/>

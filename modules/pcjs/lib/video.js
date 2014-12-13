@@ -2013,7 +2013,7 @@ Video.prototype.setBinding = function(sHTMLType, sBinding, control)
             this.sLockMessage = control.textContent;
             if (this.inputScreen && this.inputScreen.lockPointer) {
                 control.onclick = function onClickLockPointer() {
-                    if (DEBUG) video.messageDebugger("lockPointer()");
+                    if (DEBUG) video.messagePrint("lockPointer()");
                     video.lockPointer(true);
                 };
             } else {
@@ -2024,7 +2024,7 @@ Video.prototype.setBinding = function(sHTMLType, sBinding, control)
 
         case "refresh":
             control.onclick = function onClickRefresh() {
-                if (DEBUG) video.messageDebugger("refreshScreen()");
+                if (DEBUG) video.messagePrint("refreshScreen()");
                 video.updateScreen(true);
             };
             return true;
@@ -2183,7 +2183,7 @@ Video.prototype.captureTouch = function()
 Video.prototype.onFocusChange = function(fFocus)
 {
     if (this.fHasFocus != fFocus && DEBUG && this.messageEnabled()) {
-        this.messageDebugger("onFocusChange(" + (fFocus? "true" : "false") + ")", true);
+        this.messagePrint("onFocusChange(" + (fFocus? "true" : "false") + ")", true);
     }
     /*
      * As per http://stackoverflow.com/questions/6740253/disable-scrolling-when-changing-focus-form-elements-ipad-web-app,
@@ -2216,7 +2216,7 @@ Video.prototype.releaseTouch = function()
  */
 Video.prototype.onTouchStart = function(event)
 {
-    if (DEBUG) this.messageDebugger("onTouchStart()");
+    if (DEBUG) this.messagePrint("onTouchStart()");
     this.processTouchEvent(event, true);
 };
 
@@ -2228,7 +2228,7 @@ Video.prototype.onTouchStart = function(event)
  */
 Video.prototype.onTouchMove = function(event)
 {
-    if (DEBUG) this.messageDebugger("onTouchMove()");
+    if (DEBUG) this.messagePrint("onTouchMove()");
     this.processTouchEvent(event, false);
 };
 
@@ -2240,7 +2240,7 @@ Video.prototype.onTouchMove = function(event)
  */
 Video.prototype.onTouchEnd = function(event)
 {
-    if (DEBUG) this.messageDebugger("onTouchEnd()");
+    if (DEBUG) this.messagePrint("onTouchEnd()");
 };
 
 /**
@@ -2703,7 +2703,7 @@ Video.prototype.onROMLoad = function(abROM)
          * TODO: Unlike the MDA/CGA font data, we may want to hang onto this data, so that we can regenerate
          * the color font(s) whenever the foreground and/or background colors have been changed.
          */
-        if (DEBUG) this.messageDebugger("onROMLoad(): EGA fonts loaded");
+        if (DEBUG) this.messagePrint("onROMLoad(): EGA fonts loaded");
         this.setFontData(abROM, [0x2230, 0x3160], 8);
     }
     this.setReady();
@@ -2886,7 +2886,7 @@ Video.prototype.buildFont = function(nFont, offData, offSplit, cxChar, cyChar, a
     var fChanges = false;
 
     if (DEBUG && this.messageEnabled()) {
-        this.messageDebugger("buildFont(" + nFont + "): building " + Video.cardSpecs[nFont][0] + " font");
+        this.messagePrint("buildFont(" + nFont + "): building " + Video.cardSpecs[nFont][0] + " font");
     }
     if (this.createFont(nFont, offData, offSplit, cxChar, cyChar, abFontData, aRGBColors, aColorMap)) fChanges = true;
 
@@ -2898,7 +2898,7 @@ Video.prototype.buildFont = function(nFont, offData, offSplit, cxChar, cyChar, a
     if (this.fDoubleFont) {
         nFont <<= 1;
         if (DEBUG && this.messageEnabled()) {
-            this.messageDebugger("buildFont(" + nFont + "): building " + Video.cardSpecs[nFont >> 1][0] + " double-size font");
+            this.messagePrint("buildFont(" + nFont + "): building " + Video.cardSpecs[nFont >> 1][0] + " double-size font");
         }
         if (this.createFont(nFont, offData, offSplit, cxChar, cyChar, abFontData, aRGBColors, aColorMap)) fChanges = true;
     }
@@ -2947,7 +2947,7 @@ Video.prototype.createFont = function(nFont, offData, offSplit, cxChar, cyChar, 
         var rgbColorOrig = font.aCSSColors[iColor]? font.aRGBColors[iColor] : [];
         if (rgbColor[0] !== rgbColorOrig[0] || rgbColor[1] !== rgbColorOrig[1] || rgbColor[2] !== rgbColorOrig[2]) {
             if (DEBUG && this.messageEnabled()) {
-                this.messageDebugger("creating font color " + iColor + " for font " + nFont);
+                this.messagePrint("creating font color " + iColor + " for font " + nFont);
             }
             this.createFontColor(font, iColor, rgbColor, nDouble, offData, offSplit, cxChar, cyChar, abFontData);
             fChanges = true;
@@ -3179,7 +3179,7 @@ Video.prototype.checkCursor = function()
     var iCellCursor = (this.cardActive.aCRTCRegs[Card.CRTC.CURSOR_ADDR_LO] + ((this.cardActive.aCRTCRegs[Card.CRTC.CURSOR_ADDR_HI] & Card.CRTC.ADDR_HI_MASK) << 8));
     if (this.iCellCursor != iCellCursor) {
         if (DEBUG && this.messageEnabled()) {
-            this.messageDebugger("checkCursor(): cursor moved from " + this.iCellCursor + " to " + iCellCursor);
+            this.messagePrint("checkCursor(): cursor moved from " + this.iCellCursor + " to " + iCellCursor);
         }
         this.removeCursor();
         this.iCellCursor = iCellCursor;
@@ -3234,7 +3234,7 @@ Video.prototype.removeCursor = function()
                     this.updateChar(col, row, data);
                 }
                 if (DEBUG && this.messageEnabled()) {
-                    this.messageDebugger("removeCursor(): removed from " + row + "," + col);
+                    this.messagePrint("removeCursor(): removed from " + row + "," + col);
                 }
                 this.aCellCache[this.iCellCursor] = data;
             }
@@ -3301,7 +3301,7 @@ Video.prototype.getAccess = function()
             break;
         default:
             if (DEBUG && this.messageEnabled()) {
-                this.messageDebugger("getAccess(): invalid GRC mode (" + str.toHexByte(regGRCMode) + ")");
+                this.messagePrint("getAccess(): invalid GRC mode (" + str.toHexByte(regGRCMode) + ")");
             }
             break;
         }
@@ -3329,7 +3329,7 @@ Video.prototype.setAccess = function(nAccess)
     if (nAccess != null && card && nAccess != card.nAccess) {
 
         if (DEBUG && this.messageEnabled()) {
-            this.messageDebugger("setAccess(0x" + str.toHexWord(nAccess) + ")");
+            this.messagePrint("setAccess(0x" + str.toHexWord(nAccess) + ")");
         }
 
         card.setMemoryAccess(nAccess);
@@ -3666,7 +3666,7 @@ Video.prototype.setMode = function(nMode, fForce)
     if (nMode != null && (nMode != this.nMode || fForce)) {
 
         if (DEBUG && this.messageEnabled()) {
-            this.messageDebugger("setMode(0x" + str.toHexWord(nMode) + (fForce? ",force" : "") + ")");
+            this.messagePrint("setMode(0x" + str.toHexWord(nMode) + (fForce? ",force" : "") + ")");
         }
 
         this.cUpdates = 0;      // count updateScreen() calls as a means of driving blink updates
@@ -3692,7 +3692,7 @@ Video.prototype.setMode = function(nMode, fForce)
             if (this.addrBuffer) {
 
                 if (DEBUG && this.messageEnabled()) {
-                    this.messageDebugger("setMode(" + nMode + "): removing 0x" + str.toHex(this.sizeBuffer) + " bytes from 0x" + str.toHex(this.addrBuffer));
+                    this.messagePrint("setMode(" + nMode + "): removing 0x" + str.toHex(this.sizeBuffer) + " bytes from 0x" + str.toHex(this.addrBuffer));
                 }
 
                 if (!this.bus.removeMemory(this.addrBuffer, this.sizeBuffer)) {
@@ -3711,7 +3711,7 @@ Video.prototype.setMode = function(nMode, fForce)
             this.sizeBuffer = card.sizeBuffer;
 
             if (DEBUG && this.messageEnabled()) {
-                this.messageDebugger("setMode(" + nMode + "): adding 0x" + str.toHex(this.sizeBuffer) + " bytes to 0x" + str.toHex(this.addrBuffer));
+                this.messagePrint("setMode(" + nMode + "): adding 0x" + str.toHex(this.sizeBuffer) + " bytes to 0x" + str.toHex(this.addrBuffer));
             }
 
             var controller = (card === this.cardEGA? card : null);
@@ -4418,11 +4418,11 @@ Video.prototype.outATC = function(port, bOut, addrFrom)
         if ((bOut & Card.ATC.INDX_PAL_ENABLE) && !fPalEnabled) {
             if (!this.buildFonts()) {
                 if (DEBUG && this.messageEnabled()) {
-                    this.messageDebugger("outATC(" + str.toHexByte(bOut) + "): no font changes required");
+                    this.messagePrint("outATC(" + str.toHexByte(bOut) + "): no font changes required");
                 }
             } else {
                 if (DEBUG && this.messageEnabled()) {
-                    this.messageDebugger("outATC(" + str.toHexByte(bOut) + "): redraw screen for font changes");
+                    this.messagePrint("outATC(" + str.toHexByte(bOut) + "): redraw screen for font changes");
                 }
                 this.updateScreen(true);
             }
@@ -4917,7 +4917,7 @@ Video.prototype.outCRTCData = function(card, bOut, addrFrom)
         this.checkCursor();
     } else {
         if (DEBUG && this.messageEnabled()) {
-            this.messageDebugger("outCRTCData(): ignoring unexpected write to CRTC[" + str.toHexByte(card.iCRTCReg) + "]: " + str.toHexByte(bOut));
+            this.messagePrint("outCRTCData(): ignoring unexpected write to CRTC[" + str.toHexByte(card.iCRTCReg) + "]: " + str.toHexByte(bOut));
         }
     }
 };

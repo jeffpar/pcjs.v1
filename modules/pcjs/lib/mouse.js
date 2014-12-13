@@ -544,7 +544,7 @@ Mouse.prototype.sendPacket = function(sDiag, xDiag, yDiag)
     var b2 = this.xDelta & 0x3F;
     var b3 = this.yDelta & 0x3F;
     if (this.messageEnabled(Messages.SERIAL)) {
-        this.messageDebugger((sDiag? (sDiag + ": ") : "") + (yDiag !== undefined? ("mouse (" + xDiag + "," + yDiag + "): ") : "") + "serial packet [" + str.toHexByte(b1) + "," + str.toHexByte(b2) + "," + str.toHexByte(b3) + "]", 0, true);
+        this.messagePrint((sDiag? (sDiag + ": ") : "") + (yDiag !== undefined? ("mouse (" + xDiag + "," + yDiag + "): ") : "") + "serial packet [" + str.toHexByte(b1) + "," + str.toHexByte(b2) + "," + str.toHexByte(b3) + "]", 0, true);
     }
     this.componentAdapter.sendRBR([b1, b2, b3]);
     this.xDelta = this.yDelta = 0;
@@ -576,11 +576,11 @@ Mouse.prototype.notifyMCR = function(bMCR)
             var fIdentify = false;
             if (!(this.bMCR & SerialPort.MCR.RTS)) {
                 this.reset();
-                this.messageDebugger("serial mouse reset");
+                this.messagePrint("serial mouse reset");
                 fIdentify = true;
             }
             if (!(this.bMCR & SerialPort.MCR.DTR)) {
-                this.messageDebugger("serial mouse ID requested");
+                this.messagePrint("serial mouse ID requested");
                 fIdentify = true;
             }
             if (fIdentify) {
@@ -605,7 +605,7 @@ Mouse.prototype.notifyMCR = function(bMCR)
                  * I'm calling this good enough for now.
                  */
                 this.componentAdapter.sendRBR([Mouse.ID_SERIAL, Mouse.ID_SERIAL]);
-                this.messageDebugger("serial mouse ID sent");
+                this.messagePrint("serial mouse ID sent");
             }
             this.captureMouse(this.inputScreen);
             this.setActive(fActive);
@@ -624,7 +624,7 @@ Mouse.prototype.notifyMCR = function(bMCR)
              * a mouse device that's still powered may still send event data to the serial port, and if there was software
              * polling the serial port, it might expect to see that data.  Unlikely, but not impossible.
              */
-            this.messageDebugger("serial mouse inactive");
+            this.messagePrint("serial mouse inactive");
             this.releaseMouse(this.inputScreen);
             this.setActive(fActive);
         }

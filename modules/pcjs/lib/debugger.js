@@ -1584,6 +1584,41 @@ if (DEBUGGER) {
     };
 
     /**
+     * message(sMessage, fAddress)
+     *
+     * @this {Debugger}
+     * @param {string} sMessage is any caller-defined message string
+     * @param {boolean} [fAddress] is true to display the current CS:IP
+     */
+    Debugger.prototype.message = function(sMessage, fAddress)
+    {
+        if (fAddress) {
+            sMessage += " @" + str.toHexAddr(this.cpu.regIP, this.cpu.segCS.sel);
+        }
+
+        if (this.sMessagePrev && sMessage == this.sMessagePrev) return;
+
+        if (!SAMPLER) this.println(sMessage);   // + " (" + this.cpu.getCycles() + " cycles)"
+
+        this.sMessagePrev = sMessage;
+
+        if (this.cpu) {
+            if (this.bitsMessage & Messages.HALT) {
+                this.cpu.stopCPU();
+            }
+            /*
+             * We have no idea what the frequency of println() calls might be; all we know is that they easily
+             * screw up the CPU's careful assumptions about cycles per burst.  So we call yieldCPU() after every
+             * message, to effectively end the current burst and start fresh.
+             *
+             * TODO: See CPU.calcStartTime() for a discussion of why we might want to call yieldCPU() *before*
+             * we display the message.
+             */
+            this.cpu.yieldCPU();
+        }
+    };
+
+    /**
      * messageInt(nInt, addr)
      *
      * @this {Debugger}
@@ -1665,41 +1700,6 @@ if (DEBUGGER) {
                 addrFrom -= this.cpu.segCS.base;
             }
             this.message(component.idComponent + "." + (bOut != null? "outPort" : "inPort") + "(0x" + str.toHexWord(port) + "," + (name? name : "unknown") + (bOut != null? ",0x" + str.toHexByte(bOut) : "") + ")" + (bIn != null? (": 0x" + str.toHexByte(bIn)) : "") + (addrFrom != null? (" @" + str.toHexAddr(addrFrom, segFrom)) : ""));
-        }
-    };
-
-    /**
-     * message(sMessage, fAddress)
-     *
-     * @this {Debugger}
-     * @param {string} sMessage is any caller-defined message string
-     * @param {boolean} [fAddress] is true to display the current CS:IP
-     */
-    Debugger.prototype.message = function(sMessage, fAddress)
-    {
-        if (fAddress) {
-            sMessage += " @" + str.toHexAddr(this.cpu.regIP, this.cpu.segCS.sel);
-        }
-
-        if (this.sMessagePrev && sMessage == this.sMessagePrev) return;
-
-        if (!SAMPLER) this.println(sMessage);   // + " (" + this.cpu.getCycles() + " cycles)"
-
-        this.sMessagePrev = sMessage;
-
-        if (this.cpu) {
-            if (this.bitsMessage & Messages.HALT) {
-                this.cpu.stopCPU();
-            }
-            /*
-             * We have no idea what the frequency of println() calls might be; all we know is that they easily
-             * screw up the CPU's careful assumptions about cycles per burst.  So we call yieldCPU() after every
-             * message, to effectively end the current burst and start fresh.
-             *
-             * TODO: See CPU.calcStartTime() for a discussion of why we might want to call yieldCPU() *before*
-             * we display the message.
-             */
-            this.cpu.yieldCPU();
         }
     };
 

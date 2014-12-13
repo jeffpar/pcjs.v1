@@ -174,7 +174,7 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
         }
     }
 
-    if (DEBUG && this.messageEnabled()) this.messageDebugger("PREFETCH: " + PREFETCH + ", TYPEDARRAYS: " + TYPEDARRAYS);
+    if (DEBUG && this.messageEnabled()) this.messagePrint("PREFETCH: " + PREFETCH + ", TYPEDARRAYS: " + TYPEDARRAYS);
 
     /*
      * Iterate through all the components again and call their initBus() handler, if any
@@ -320,7 +320,7 @@ Computer.prototype.onLoadSetReady = function(sStateFile, sStateData, nErrorCode)
     if (!nErrorCode) {
         this.sStateData = sStateData;
         if (DEBUG && this.messageEnabled()) {
-            this.messageDebugger("loaded state file " + sStateFile.replace(this.sUserID || "xxx", "xxx"));
+            this.messagePrint("loaded state file " + sStateFile.replace(this.sUserID || "xxx", "xxx"));
         }
     } else {
         this.sResumePath = null;
@@ -362,7 +362,7 @@ Computer.prototype.wait = function(fn, parms)
             return;
         }
     }
-    if (DEBUG && this.messageEnabled()) this.messageDebugger("Computer.wait(ready)");
+    if (DEBUG && this.messageEnabled()) this.messagePrint("Computer.wait(ready)");
     fn.call(this, parms);
 };
 
@@ -388,7 +388,7 @@ Computer.prototype.validateState = function(stateComputer)
             if (!stateComputer) stateValidate.clear();
         } else {
             if (DEBUG && this.messageEnabled()) {
-                this.messageDebugger("Last state: " + sTimestampComputer + " (validate: " + sTimestampValidate + ")");
+                this.messagePrint("Last state: " + sTimestampComputer + " (validate: " + sTimestampValidate + ")");
             }
         }
     }
@@ -410,7 +410,7 @@ Computer.prototype.powerOn = function(resume)
     }
 
     if (DEBUG && this.messageEnabled()) {
-        this.messageDebugger("Computer.powerOn(" + (resume == Computer.RESUME_REPOWER ? "repower" : (resume ? "resume" : "")) + ")");
+        this.messagePrint("Computer.powerOn(" + (resume == Computer.RESUME_REPOWER ? "repower" : (resume ? "resume" : "")) + ")");
     }
 
     var fRepower = false;
@@ -649,7 +649,7 @@ Computer.prototype.donePowerOn = function(aParms)
     var fRestore = aParms[2];
 
     if (DEBUG && this.aFlags.fPowered && this.messageEnabled()) {
-        this.messageDebugger("Computer.donePowerOn(): redundant");
+        this.messagePrint("Computer.donePowerOn(): redundant");
     }
 
     this.aFlags.fPowered = true;
@@ -735,7 +735,7 @@ Computer.prototype.powerOff = function(fSave, fShutdown)
     var sState = "none";
 
     if (DEBUG && this.messageEnabled()) {
-        this.messageDebugger("Computer.powerOff(" + (fSave ? "save" : "nosave") + (fShutdown ? ",shutdown" : "") + ")");
+        this.messagePrint("Computer.powerOff(" + (fSave ? "save" : "nosave") + (fShutdown ? ",shutdown" : "") + ")");
     }
 
     var stateComputer = new State(this, Computer.sAppVer);
@@ -842,14 +842,14 @@ Computer.prototype.powerOff = function(fSave, fShutdown)
 Computer.prototype.reset = function()
 {
     if (this.bus && this.bus.reset) {
-        this.messageDebugger("Resetting " + this.bus.type);
+        this.messagePrint("Resetting " + this.bus.type);
         this.bus.reset();
     }
     var aComponents = Component.getComponents(this.id);
     for (var iComponent = 0; iComponent < aComponents.length; iComponent++) {
         var component = aComponents[iComponent];
         if (component !== this && component !== this.bus && component.reset) {
-            this.messageDebugger("Resetting " + component.type);
+            this.messagePrint("Resetting " + component.type);
             component.reset();
         }
     }
@@ -989,7 +989,7 @@ Computer.prototype.verifyUserID = function(sUserID)
 {
     this.sUserID = null;
     var fMessages = DEBUG && this.messageEnabled();
-    if (fMessages) this.messageDebugger("verifyUserID(" + sUserID + ")");
+    if (fMessages) this.messagePrint("verifyUserID(" + sUserID + ")");
     var sRequest = web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.VERIFY + '&' + UserAPI.QUERY.USER + '=' + sUserID;
     var response = web.loadResource(sRequest);
     var nErrorCode = response[0];
@@ -999,16 +999,16 @@ Computer.prototype.verifyUserID = function(sUserID)
             response = eval("(" + sResponse + ")");
             if (response.code && response.code == UserAPI.CODE.OK) {
                 web.setLocalStorageItem(Computer.STATE_USERID, response.data);
-                if (fMessages) this.messageDebugger(Computer.STATE_USERID + " updated: " + response.data);
+                if (fMessages) this.messagePrint(Computer.STATE_USERID + " updated: " + response.data);
                 this.sUserID = response.data;
             } else {
-                if (fMessages) this.messageDebugger(response.code + ": " + response.data);
+                if (fMessages) this.messagePrint(response.code + ": " + response.data);
             }
         } catch (e) {
             Component.error(e.message + " (" + sResponse + ")");
         }
     } else {
-        if (fMessages) this.messageDebugger("invalid response (error " + nErrorCode + ")");
+        if (fMessages) this.messagePrint("invalid response (error " + nErrorCode + ")");
     }
     return this.sUserID;
 };
@@ -1024,12 +1024,12 @@ Computer.prototype.getServerStatePath = function()
     var sStatePath = null;
     if (this.sUserID) {
         if (DEBUG && this.messageEnabled()) {
-            this.messageDebugger(Computer.STATE_USERID + " for load: " + this.sUserID);
+            this.messagePrint(Computer.STATE_USERID + " for load: " + this.sUserID);
         }
         sStatePath = web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.LOAD + '&' + UserAPI.QUERY.USER + '=' + this.sUserID + '&' + UserAPI.QUERY.STATE + '=' + State.key(this, Computer.sAppVer);
     } else {
         if (DEBUG && this.messageEnabled()) {
-            this.messageDebugger(Computer.STATE_USERID + " unavailable");
+            this.messagePrint(Computer.STATE_USERID + " unavailable");
         }
     }
     return sStatePath;
@@ -1051,7 +1051,7 @@ Computer.prototype.saveServerState = function(sUserID, sState)
      */
     if (sState) {
         if (DEBUG && this.messageEnabled()) {
-            this.messageDebugger("size of server state: " + sState.length + " bytes");
+            this.messagePrint("size of server state: " + sState.length + " bytes");
         }
         var response = this.storeServerState(sUserID, sState, true);
         if (response && response[UserAPI.RES.CODE] == UserAPI.CODE.OK) {
@@ -1068,7 +1068,7 @@ Computer.prototype.saveServerState = function(sUserID, sState)
         }
     } else {
         if (DEBUG && this.messageEnabled()) {
-            this.messageDebugger("no state to store");
+            this.messagePrint("no state to store");
         }
     }
 };
@@ -1085,7 +1085,7 @@ Computer.prototype.saveServerState = function(sUserID, sState)
 Computer.prototype.storeServerState = function(sUserID, sState, fSync)
 {
     if (DEBUG && this.messageEnabled()) {
-        this.messageDebugger(Computer.STATE_USERID + " for store: " + sUserID);
+        this.messagePrint(Computer.STATE_USERID + " for store: " + sUserID);
     }
     /*
      * TODO: Determine whether or not any browsers cancel our request if we're called during a browser "shutdown" event,
@@ -1110,7 +1110,7 @@ Computer.prototype.storeServerState = function(sUserID, sState, fSync)
             }
             sResponse = '{"' + UserAPI.RES.CODE + '":' + response[0] + ',"' + UserAPI.RES.DATA + '":"' + sResponse + '"}';
         }
-        if (DEBUG && this.messageEnabled()) this.messageDebugger(sResponse);
+        if (DEBUG && this.messageEnabled()) this.messagePrint(sResponse);
         return JSON.parse(sResponse);
     }
     return null;
@@ -1219,7 +1219,7 @@ Computer.init = function()
             var computer = new Computer(parmsComputer, parmsMachine, true);
 
             if (DEBUG && computer.messageEnabled()) {
-                computer.messageDebugger("onInit(" + computer.aFlags.fPowered + ")");
+                computer.messagePrint("onInit(" + computer.aFlags.fPowered + ")");
             }
 
             /*
@@ -1251,7 +1251,7 @@ Computer.show = function()
         if (computer) {
 
             if (DEBUG && computer.messageEnabled()) {
-                computer.messageDebugger("onShow(" + computer.fInitialized + "," + computer.aFlags.fPowered + ")");
+                computer.messagePrint("onShow(" + computer.fInitialized + "," + computer.aFlags.fPowered + ")");
             }
 
             if (computer.fInitialized && !computer.aFlags.fPowered) {
@@ -1300,7 +1300,7 @@ Computer.exit = function()
         if (computer) {
 
             if (DEBUG && computer.messageEnabled()) {
-                computer.messageDebugger("onExit(" + computer.aFlags.fPowered + ")");
+                computer.messagePrint("onExit(" + computer.aFlags.fPowered + ")");
             }
 
             if (computer.aFlags.fPowered) {

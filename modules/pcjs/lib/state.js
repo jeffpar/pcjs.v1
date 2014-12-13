@@ -279,7 +279,7 @@ State.prototype = {
                 this[this.id] = s;
                 this.fLoaded = true;
                 if (DEBUG && this.messageEnabled()) {
-                    this.messageDebugger("localStorage(" + this.key + "): " + s.length + " bytes loaded");
+                    this.messagePrint("localStorage(" + this.key + "): " + s.length + " bytes loaded");
                 }
                 return true;
             }
@@ -318,7 +318,7 @@ State.prototype = {
             var s = JSON.stringify(this[this.id]);
             if (web.setLocalStorageItem(this.key, s)) {
                 if (DEBUG && this.messageEnabled()) {
-                    this.messageDebugger("localStorage(" + this.key + "): " + s.length + " bytes stored");
+                    this.messagePrint("localStorage(" + this.key + "): " + s.length + " bytes stored");
                 }
             } else {
                 /*
@@ -378,7 +378,7 @@ State.prototype = {
             if (sKey && (fAll || sKey.substr(0, this.key.length) == this.key)) {
                 web.removeLocalStorageItem(sKey);
                 if (DEBUG && this.messageEnabled()) {
-                    this.messageDebugger("localStorage(" + sKey + ") removed");
+                    this.messagePrint("localStorage(" + sKey + ") removed");
                 }
                 aKeys.splice(i, 1);
                 i = 0;
@@ -404,12 +404,12 @@ State.prototype = {
         return false;
     },
     /**
-     * messageDebugger(sMessage)
+     * messagePrint(sMessage)
      *
      * @this {State}
      * @param {string} sMessage is any caller-defined message string
      */
-    messageDebugger: function(sMessage) {
+    messagePrint: function(sMessage) {
         if (DEBUGGER && this.dbg) this.dbg.message(sMessage);
     }
 };

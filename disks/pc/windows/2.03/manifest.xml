@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.16.4/manifest.xsl"?>
+<manifest type="software">
+	<title>Microsoft Windows 2.03</title>
+	<source href="http://os2museum.com">os2museum.com</source>
+	<disk id="disk01" size="368640" chs="40:2:9" img="private/WIN203-DISK1-SETUP.img" href="/disks/pc/windows/2.03/WIN203-DISK1-SETUP.json" md5="3c022ce0b1ac4e1156f0b84195f3368b" md5json="9a9e44cc0964638fbae71fb50d8d1085">
+		<name>Windows 2.03 (SETUP)</name>
+	</disk>
+	<disk id="disk02" size="368640" chs="40:2:9" img="private/WIN203-DISK2-BUILD.img" href="/disks/pc/windows/2.03/WIN203-DISK2-BUILD.json" md5="8d260fcf2694bb1e5e943b5b9bea1e55" md5json="1b15b0f9fc7986c9725b0426a07bfe9f">
+		<name>Windows 2.03 (BUILD)</name>
+	</disk>
+	<disk id="disk03" size="368640" chs="40:2:9" img="private/WIN203-DISK3-DISPLAYS.img" href="/disks/pc/windows/2.03/WIN203-DISK3-DISPLAYS.json" md5="3a1c5eb59d82bc0e8f9fa1ccc7fa2609" md5json="c2408d72404a29240d560e15acedc891">
+		<name>Windows 2.03 (DISPLAYS)</name>
+	</disk>
+	<disk id="disk04" size="368640" chs="40:2:9" img="private/WIN203-DISK4-UTILS1.img" href="/disks/pc/windows/2.03/WIN203-DISK4-UTILS1.json" md5="7e5ea7dd9c2aac0ddaf8afe8ae886057" md5json="43de8d53cdfc933de46d65b4478d9162">
+		<name>Windows 2.03 (UTILS 1)</name>
+	</disk>
+	<disk id="disk05" size="368640" chs="40:2:9" img="private/WIN203-DISK5-UTILS2.img" href="/disks/pc/windows/2.03/WIN203-DISK5-UTILS2.json" md5="7a22c637c719e9b531bed43544e9b862" md5json="a45ed72b23d85d6bc9db49477ef8e2af">
+		<name>Windows 2.03 (UTILS 2)</name>
+	</disk>
+	<disk id="disk06" size="368640" chs="40:2:9" img="private/WIN203-DISK6-FONTS1.img" href="/disks/pc/windows/2.03/WIN203-DISK6-FONTS1.json" md5="46027695974098aa81d1be286a6d6d50" md5json="6a7ffee4ff659588118cadda947f9172">
+		<name>Windows 2.03 (FONTS 1)</name>
+	</disk>
+	<disk id="disk07" size="368640" chs="40:2:9" img="private/WIN203-DISK7-FONTS2.img" href="/disks/pc/windows/2.03/WIN203-DISK7-FONTS2.json" md5="7aef8a57582ac39e185db3fb03d9b84b" md5json="563cadc58389122c9658b2e7c3c937f0">
+		<name>Windows 2.03 (FONTS 2)</name>
+	</disk>
+	<disk id="disk08" size="368640" chs="40:2:9" img="private/WIN203-DISK8-APPS.img" href="/disks/pc/windows/2.03/WIN203-DISK8-APPS.json" md5="272a839b7d625d74b9b43fa35f28d8b2" md5json="6f125d2e93110ad9f158bb352dead477">
+		<name>Windows 2.03 (APPS)</name>
+	</disk>
+	<disk id="disk09" size="368640" chs="40:2:9" img="private/WIN203-DISK9-WRITE.img" href="/disks/pc/windows/2.03/WIN203-DISK9-WRITE.json" md5="1a46590d19f8027655287b1c885a7bb8" md5json="31436d67a05e4963153f431ea3563609">
+		<name>Windows 2.03 (WRITE)</name>
+	</disk>
+</manifest>

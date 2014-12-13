@@ -1333,17 +1333,17 @@ ChipSet.prototype.getRTCCycleLimit = function(nCycles)
         if (nCyclesUpdate > 0) {
             if (nCycles > nCyclesUpdate) {
                 if (DEBUG && this.messageEnabled(Messages.RTC)) {
-                    this.messageDebugger("getRTCCycleLimit(" + nCycles + "): reduced to " + nCyclesUpdate + " cycles", true);
+                    this.messagePrint("getRTCCycleLimit(" + nCycles + "): reduced to " + nCyclesUpdate + " cycles", true);
                 }
                 nCycles = nCyclesUpdate;
             } else {
                 if (DEBUG && this.messageEnabled(Messages.RTC)) {
-                    this.messageDebugger("getRTCCycleLimit(" + nCycles + "): already less than " + nCyclesUpdate + " cycles", true);
+                    this.messagePrint("getRTCCycleLimit(" + nCycles + "): already less than " + nCyclesUpdate + " cycles", true);
                 }
             }
         } else {
             if (DEBUG && this.messageEnabled(Messages.RTC)) {
-                this.messageDebugger("RTC next update has passed by " + nCyclesUpdate + " cycles", true);
+                this.messagePrint("RTC next update has passed by " + nCyclesUpdate + " cycles", true);
             }
         }
     }
@@ -1402,9 +1402,9 @@ ChipSet.prototype.updateRTCTime = function()
             if (DEBUG) {
                 if (nCyclesUpdate - this.nRTCCyclesNextUpdate > this.nRTCCyclesPerPeriod) {
                     if (bPrev & ChipSet.CMOS.STATUSC.PF) {
-                        this.messageDebugger("RTC interrupt handler failed to clear STATUSC", Messages.RTC);
+                        this.messagePrint("RTC interrupt handler failed to clear STATUSC", Messages.RTC);
                     } else {
-                        this.messageDebugger("CPU took too long trigger new RTC periodic interrupt", Messages.RTC);
+                        this.messagePrint("CPU took too long trigger new RTC periodic interrupt", Messages.RTC);
                     }
                 }
             }
@@ -2714,7 +2714,7 @@ ChipSet.prototype.requestDMA = function(iDMAChannel, done)
 
     if (!channel.component || !channel.fnTransfer || !channel.obj) {
         if (DEBUG && this.messageEnabled(Messages.DMA | Messages.DATA)) {
-            this.messageDebugger("requestDMA(" + iDMAChannel + "): not connected to a component", true);
+            this.messagePrint("requestDMA(" + iDMAChannel + "): not connected to a component", true);
         }
         if (done) done(true);
         return;
@@ -2731,7 +2731,7 @@ ChipSet.prototype.requestDMA = function(iDMAChannel, done)
 
     if (channel.masked) {
         if (DEBUG && this.messageEnabled(Messages.DMA | Messages.DATA)) {
-            this.messageDebugger("requestDMA(" + iDMAChannel + "): channel masked, request queued", true);
+            this.messagePrint("requestDMA(" + iDMAChannel + "): channel masked, request queued", true);
         }
         return;
     }
@@ -2784,7 +2784,7 @@ ChipSet.prototype.advanceDMA = function(channel, fInit)
             if (DEBUG && DEBUGGER && channel.sAddrDebug === null) {
                 channel.sAddrDebug = str.toHex(addr >> 4, 4) + ":" + str.toHex(addr & 0xf, 4);
                 if (this.messageEnabled(this.messageBitsDMA(iDMAChannel)) && channel.xfer != ChipSet.DMA_MODE.XFER_WRITE) {
-                    this.messageDebugger("advanceDMA(" + iDMAChannel + ") transferring " + channel.cbDebug + " bytes from " + channel.sAddrDebug, true);
+                    this.messagePrint("advanceDMA(" + iDMAChannel + ") transferring " + channel.cbDebug + " bytes from " + channel.sAddrDebug, true);
                     this.dbg.doDump("db", channel.sAddrDebug, "l" + Math.floor((channel.cbDebug + 15) / 16));
                 }
             }
@@ -2795,7 +2795,7 @@ ChipSet.prototype.advanceDMA = function(channel, fInit)
                         if (b < 0) {
                             if (!channel.fWarning) {
                                 if (DEBUG && obj.messageEnabled(Messages.DMA)) {
-                                    obj.messageDebugger("advanceDMA(" + iDMAChannel + ") ran out of data, assuming 0xff", true);
+                                    obj.messagePrint("advanceDMA(" + iDMAChannel + ") ran out of data, assuming 0xff", true);
                                 }
                                 channel.fWarning = true;
                             }
@@ -2844,7 +2844,7 @@ ChipSet.prototype.advanceDMA = function(channel, fInit)
             }
             else {
                 if (DEBUG && this.messageEnabled(Messages.DMA | Messages.WARN)) {
-                    this.messageDebugger("advanceDMA(" + iDMAChannel + ") unsupported xfer mode: " + str.toHexWord(channel.xfer), true);
+                    this.messagePrint("advanceDMA(" + iDMAChannel + ") unsupported xfer mode: " + str.toHexWord(channel.xfer), true);
                 }
                 channel.fError = true;
             }
@@ -2898,7 +2898,7 @@ ChipSet.prototype.updateDMA = function(channel)
     }
 
     if (DEBUG && this.messageEnabled(this.messageBitsDMA(iDMAChannel)) && channel.xfer == ChipSet.DMA_MODE.XFER_WRITE && channel.sAddrDebug) {
-        this.messageDebugger("updateDMA(" + iDMAChannel + ") transferred " + channel.cbDebug + " bytes to " + channel.sAddrDebug, true);
+        this.messagePrint("updateDMA(" + iDMAChannel + ") transferred " + channel.cbDebug + " bytes to " + channel.sAddrDebug, true);
         this.dbg.doDump("db", channel.sAddrDebug, "l" + Math.floor((channel.cbDebug + 15) / 16));
     }
 
@@ -3041,22 +3041,22 @@ ChipSet.prototype.outPICLo = function(iPIC, bOut, addrFrom)
             var nIRQ = (nIRL == null? undefined : pic.nIRQBase + nIRL);
             if (pic.bISR & bIREnd) {
                 if (DEBUG && this.messageEnabled(this.messageBitsIRQ(nIRQ))) {
-                    this.messageDebugger("outPIC" + iPIC + "(0x" + str.toHexByte(pic.port) + "): IRQ " + nIRQ + " going out of service", true);
+                    this.messagePrint("outPIC" + iPIC + "(0x" + str.toHexByte(pic.port) + "): IRQ " + nIRQ + " going out of service", true);
                 }
                 pic.bISR &= ~bIREnd;
                 this.checkIRR();
             } else {
                 if (DEBUG && this.messageEnabled(Messages.PIC | Messages.WARN)) {
-                    this.messageDebugger("outPIC" + iPIC + "(0x" + str.toHexByte(pic.port) + "): unexpected EOI command, IRQ " + nIRQ + " not in service", true);
+                    this.messagePrint("outPIC" + iPIC + "(0x" + str.toHexByte(pic.port) + "): unexpected EOI command, IRQ " + nIRQ + " not in service", true);
                     if (!SAMPLER && MAXDEBUG) this.dbg.stopCPU();
                 }
             }
             /*
              * TODO: Support EOI commands with automatic rotation (eg, ChipSet.PIC_LO.OCW2_EOI_ROT and ChipSet.PIC_LO.OCW2_EOI_ROTSPEC)
              */
-            if (DEBUG && (bOCW2 & ChipSet.PIC_LO.OCW2_SET_ROTAUTO) && this.messageEnabled(Messages.PIC | Messages.WARN)) {
-                this.messageDebugger("outPIC" + iPIC + "(0x" + str.toHexByte(pic.port) + "): unsupported OCW2 rotate command: " + str.toHexByte(bOut), true);
-                this.dbg.stopCPU();
+            if (bOCW2 & ChipSet.PIC_LO.OCW2_SET_ROTAUTO) {
+                this.notice("PIC" + iPIC + "(0x" + str.toHexByte(pic.port) + "): unsupported OCW2 rotate command: " + str.toHexByte(bOut));
+                this.cpu.stopCPU();
             }
         }
         else  if (bOCW2 == ChipSet.PIC_LO.OCW2_SET_PRI) {
@@ -3069,10 +3069,8 @@ ChipSet.prototype.outPICLo = function(iPIC, bOut, addrFrom)
             /*
              * TODO: Remaining commands to support: ChipSet.PIC_LO.OCW2_SET_ROTAUTO and ChipSet.PIC_LO.OCW2_CLR_ROTAUTO
              */
-            if (DEBUG && this.messageEnabled(Messages.PIC | Messages.WARN)) {
-                this.messageDebugger("outPIC" + iPIC + "(0x" + str.toHexByte(pic.port) + "): unsupported OCW2 automatic EOI command: " + str.toHexByte(bOut), true);
-                this.dbg.stopCPU();
-            }
+            this.notice("PIC" + iPIC + "(0x" + str.toHexByte(pic.port) + "): unsupported OCW2 automatic EOI command: " + str.toHexByte(bOut));
+            this.cpu.stopCPU();
         }
     } else {
         /*
@@ -3082,9 +3080,8 @@ ChipSet.prototype.outPICLo = function(iPIC, bOut, addrFrom)
          * that's unfortunate, because I don't support them yet.
          */
         if (bOut & (ChipSet.PIC_LO.OCW3_POLL_CMD | ChipSet.PIC_LO.OCW3_SMM_CMD)) {
-            if (DEBUG && this.messageEnabled(Messages.PIC | Messages.WARN)) {
-                this.messageDebugger("outPIC" + iPIC + "(0x" + str.toHexByte(pic.port) + "): unsupported OCW3 command: " + str.toHexByte(bOut), true);
-            }
+            this.notice("PIC" + iPIC + "(0x" + str.toHexByte(pic.port) + "): unsupported OCW3 command: " + str.toHexByte(bOut));
+            this.cpu.stopCPU();
         }
         pic.bOCW3 = bOut;
     }
@@ -3179,7 +3176,7 @@ ChipSet.prototype.setIRR = function(nIRQ, nDelay)
     if (!(pic.bIRR & bIRR)) {
         pic.bIRR |= bIRR;
         if (DEBUG && this.messageEnabled(this.messageBitsIRQ(nIRQ) | Messages.CHIPSET)) {
-            this.messageDebugger("setIRR(" + nIRQ + ")", true);
+            this.messagePrint("setIRR(" + nIRQ + ")", true);
         }
         pic.nDelay = nDelay || 0;
         this.checkIRR();
@@ -3201,7 +3198,7 @@ ChipSet.prototype.clearIRR = function(nIRQ)
     if (pic.bIRR & bIRR) {
         pic.bIRR &= ~bIRR;
         if (DEBUG && this.messageEnabled(this.messageBitsIRQ(nIRQ) | Messages.CHIPSET)) {
-            this.messageDebugger("clearIRR(" + nIRQ + ")", true);
+            this.messagePrint("clearIRR(" + nIRQ + ")", true);
         }
         this.checkIRR();
     }
@@ -3328,7 +3325,7 @@ ChipSet.prototype.getIRRVector = function(iPIC)
 
                     var nIRQ = pic.nIRQBase + nIRL;
                     if (DEBUG && this.messageEnabled(this.messageBitsIRQ(nIRQ))) {
-                        this.messageDebugger("getIRRVector(): IRQ " + nIRQ + " interrupting @" + str.toHexAddr(this.cpu.regIP, this.cpu.segCS.sel) + " stack=" + str.toHexAddr(this.cpu.regSP, this.cpu.segSS.sel), true);
+                        this.messagePrint("getIRRVector(): IRQ " + nIRQ + " interrupting @" + str.toHexAddr(this.cpu.regIP, this.cpu.segCS.sel) + " stack=" + str.toHexAddr(this.cpu.regSP, this.cpu.segSS.sel), true);
                     }
                     if (MAXDEBUG && DEBUGGER) {
                         this.acInterrupts[nIRQ]++;
@@ -3444,7 +3441,7 @@ ChipSet.prototype.outTimer = function(iTimer, bOut, addrFrom)
 ChipSet.prototype.inTimerCtrl = function(port, addrFrom)
 {
     this.messagePort(port, null, addrFrom, "TIMER_CTRL", null, Messages.TIMER);
-    if (DEBUG) this.messageDebugger("TIMER_CTRL: Read-Back command not supported (yet)", Messages.TIMER);
+    if (DEBUG) this.messagePrint("TIMER_CTRL: Read-Back command not supported (yet)", Messages.TIMER);
     return null;
 };
 
@@ -3465,7 +3462,7 @@ ChipSet.prototype.outTimerCtrl = function(port, bOut, addrFrom)
      */
     var iTimer = (bOut & ChipSet.TIMER_CTRL.SC) >> 6;
     if (iTimer == 0x3) {
-        if (DEBUG) this.messageDebugger("TIMER_CTRL: Read-Back command not supported (yet)", Messages.TIMER);
+        if (DEBUG) this.messagePrint("TIMER_CTRL: Read-Back command not supported (yet)", Messages.TIMER);
         return;
     }
     /*
@@ -3517,7 +3514,7 @@ ChipSet.prototype.outTimerCtrl = function(port, bOut, addrFrom)
                 timer.countStart[1] = timer.countInit[1];
                 timer.nCyclesStart = this.cpu.getCycles(this.fScaleTimers);
                 if (DEBUG && this.messageEnabled(Messages.TIMER)) {
-                    this.messageDebugger("TIMER0 count reset @" + timer.nCyclesStart + " cycles", true);
+                    this.messagePrint("TIMER0 count reset @" + timer.nCyclesStart + " cycles", true);
                 }
             }
         }
@@ -3720,7 +3717,7 @@ ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
 
         if (ticksElapsed < 0) {
             if (DEBUG && this.messageEnabled(Messages.TIMER)) {
-                this.messageDebugger("updateTimer(" + iTimer + "): negative tick count (" + ticksElapsed + ")", true);
+                this.messagePrint("updateTimer(" + iTimer + "): negative tick count (" + ticksElapsed + ")", true);
             }
             timer.nCyclesStart = nCycles;
             ticksElapsed = 0;
@@ -3740,7 +3737,7 @@ ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
         if (timer.mode == ChipSet.TIMER_CTRL.MODE0) {
             if (count <= 0) count = 0;
             if (DEBUG && this.messageEnabled(Messages.TIMER)) {
-                this.messageDebugger("updateTimer(" + iTimer + "): MODE0 timer count=" + count, true);
+                this.messagePrint("updateTimer(" + iTimer + "): MODE0 timer count=" + count, true);
             }
             if (!count) {
                 timer.fOUT = true;
@@ -3775,7 +3772,7 @@ ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
                 count = countInit + count;
                 if (count <= 0) {
                     if (DEBUG && this.messageEnabled(Messages.TIMER)) {
-                        this.messageDebugger("updateTimer(" + iTimer + "): underflow=" + count, true);
+                        this.messagePrint("updateTimer(" + iTimer + "): underflow=" + count, true);
                     }
                     count = countInit;
                 }
@@ -3807,7 +3804,7 @@ ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
                 count = countInit + count;
                 if (count <= 0) {
                     if (DEBUG && this.messageEnabled(Messages.TIMER)) {
-                        this.messageDebugger("updateTimer(" + iTimer + "): underflow=" + count, true);
+                        this.messagePrint("updateTimer(" + iTimer + "): underflow=" + count, true);
                     }
                     count = countInit;
                 }
@@ -4290,7 +4287,7 @@ ChipSet.prototype.out8042InBuffCmd = function(port, bOut, addrFrom)
 
     case ChipSet.KBC.CMD.DISABLE_KBD:       // 0xAD
         this.set8042CmdData(this.b8042CmdData | ChipSet.KBC.DATA.CMD.NO_CLOCK);
-        if (DEBUG) this.messageDebugger("keyboard disabled", Messages.KEYBOARD | Messages.PORT);
+        if (DEBUG) this.messagePrint("keyboard disabled", Messages.KEYBOARD | Messages.PORT);
         /*
          * NOTE: The MODEL_5170 BIOS calls "KBD_RESET" (F000:17D2) while the keyboard interface is disabled,
          * yet we must still deliver the Keyboard's CMDRES.BAT_OK response code?  Seems like an odd thing for
@@ -4301,13 +4298,13 @@ ChipSet.prototype.out8042InBuffCmd = function(port, bOut, addrFrom)
     case ChipSet.KBC.CMD.ENABLE_KBD:        // 0xAE
         this.set8042CmdData(this.b8042CmdData & ~ChipSet.KBC.DATA.CMD.NO_CLOCK);
         if (this.kbd) this.kbd.checkScanCode();
-        if (DEBUG) this.messageDebugger("keyboard re-enabled", Messages.KEYBOARD | Messages.PORT);
+        if (DEBUG) this.messagePrint("keyboard re-enabled", Messages.KEYBOARD | Messages.PORT);
         break;
 
     case ChipSet.KBC.CMD.SELF_TEST:         // 0xAA
         if (this.kbd) this.kbd.flushScanCode();
         this.set8042CmdData(this.b8042CmdData | ChipSet.KBC.DATA.CMD.NO_CLOCK);
-        if (DEBUG) this.messageDebugger("keyboard disabled on reset", Messages.KEYBOARD | Messages.PORT);
+        if (DEBUG) this.messagePrint("keyboard disabled on reset", Messages.KEYBOARD | Messages.PORT);
         this.set8042OutBuff(ChipSet.KBC.DATA.SELF_TEST.OK);
         this.set8042OutPort(ChipSet.KBC.OUTPORT.NO_RESET | ChipSet.KBC.OUTPORT.A20_ON);
         break;
@@ -4329,7 +4326,7 @@ ChipSet.prototype.out8042InBuffCmd = function(port, bOut, addrFrom)
 
     default:
         if (DEBUG && this.messageEnabled(Messages.C8042)) {
-            this.messageDebugger("unrecognized 8042 command: " + str.toHexByte(this.b8042InBuff), true);
+            this.messagePrint("unrecognized 8042 command: " + str.toHexByte(this.b8042InBuff), true);
             this.dbg.stopCPU();
         }
         break;
@@ -4382,7 +4379,7 @@ ChipSet.prototype.set8042OutBuff = function(b)
         this.b8042Status &= ~ChipSet.KBC.STATUS.OUTBUFF_FULL;
         this.b8042Status |= ChipSet.KBC.STATUS.OUTBUFF_DELAY;
         if (DEBUG && this.messageEnabled(Messages.KEYBOARD | Messages.PORT)) {
-            this.messageDebugger("set8042OutBuff(0x" + str.toHexByte(b) + ")", true);
+            this.messagePrint("set8042OutBuff(0x" + str.toHexByte(b) + ")", true);
         }
     }
 };
@@ -4404,7 +4401,7 @@ ChipSet.prototype.set8042OutPort = function(b)
          * determine if that's what the caller intended.
          */
         if (DEBUG && this.messageEnabled(Messages.C8042)) {
-            this.messageDebugger("unexpected 8042 output port reset: " + str.toHexByte(b), true);
+            this.messagePrint("unexpected 8042 output port reset: " + str.toHexByte(b), true);
             this.dbg.stopCPU();
         }
         this.cpu.resetRegs();
@@ -4514,12 +4511,12 @@ ChipSet.prototype.notifyKbdData = function(b)
             }
             else {
                 if (DEBUG && this.messageEnabled(Messages.KEYBOARD | Messages.PORT)) {
-                    this.messageDebugger("notifyKbdData(0x" + str.toHexByte(b) + "): output buffer full", true);
+                    this.messagePrint("notifyKbdData(0x" + str.toHexByte(b) + "): output buffer full", true);
                 }
             }
         } else {
             if (DEBUG && this.messageEnabled(Messages.KEYBOARD | Messages.PORT)) {
-                this.messageDebugger("notifyKbdData(0x" + str.toHexByte(b) + "): disabled", true);
+                this.messagePrint("notifyKbdData(0x" + str.toHexByte(b) + "): disabled", true);
             }
         }
     }
@@ -4582,7 +4579,7 @@ ChipSet.prototype.inCMOSData = function(port, addrFrom)
              * occurs in a timely manner, too.
              */
             if ((bIn & ChipSet.CMOS.STATUSC.PF) && (this.abCMOSData[ChipSet.CMOS.ADDR.STATUSB] & ChipSet.CMOS.STATUSB.PIE)) {
-                if (DEBUG) this.messageDebugger("RTC periodic interrupt cleared", Messages.RTC);
+                if (DEBUG) this.messagePrint("RTC periodic interrupt cleared", Messages.RTC);
                 this.setRTCCycleLimit();
             }
         }
@@ -4608,10 +4605,10 @@ ChipSet.prototype.outCMOSData = function(port, bOut, addrFrom)
     this.abCMOSData[bAddr] = (bAddr <= ChipSet.CMOS.ADDR.STATUSD? this.setRTCByte(bAddr, bOut) : bOut);
     if (bAddr == ChipSet.CMOS.ADDR.STATUSB && (bDelta & ChipSet.CMOS.STATUSB.PIE)) {
         if (bOut & ChipSet.CMOS.STATUSB.PIE) {
-            if (DEBUG) this.messageDebugger("RTC periodic interrupts enabled", Messages.RTC);
+            if (DEBUG) this.messagePrint("RTC periodic interrupts enabled", Messages.RTC);
             this.setRTCCycleLimit();
         } else {
-            if (DEBUG) this.messageDebugger("RTC periodic interrupts disabled", Messages.RTC);
+            if (DEBUG) this.messagePrint("RTC periodic interrupts disabled", Messages.RTC);
         }
     }
 };
@@ -4791,13 +4788,13 @@ ChipSet.prototype.setSpeaker = function(fOn)
         if (fOn) {
             if (this.sourceAudio) {
                 this.sourceAudio['frequency']['value'] = freq;
-                if (this.messageEnabled(Messages.SPEAKER)) this.messageDebugger("speaker set to " + freq + "hz", true);
+                if (this.messageEnabled(Messages.SPEAKER)) this.messagePrint("speaker set to " + freq + "hz", true);
             } else {
                 this.sourceAudio = this.contextAudio['createOscillator']();
                 this.sourceAudio['type'] = 1;       // 0: sine wave, 1: square wave, 2: sawtooth wave, 3: triangle wave
                 this.sourceAudio['connect'](this.contextAudio['destination']);
                 this.sourceAudio['frequency']['value'] = freq;
-                if (this.messageEnabled(Messages.SPEAKER)) this.messageDebugger("speaker on at  " + freq + "hz", true);
+                if (this.messageEnabled(Messages.SPEAKER)) this.messagePrint("speaker on at  " + freq + "hz", true);
                 this.sourceAudio['noteOn'](0);      // aka start()
             }
         } else {
@@ -4805,11 +4802,11 @@ ChipSet.prototype.setSpeaker = function(fOn)
                 this.sourceAudio['noteOff'](0);     // aka stop()
                 this.sourceAudio['disconnect']();   // QUESTION: is this automatic following a stop(), since this particular source cannot be started again?
                 delete this.sourceAudio;            // QUESTION: ditto?
-                if (this.messageEnabled(Messages.SPEAKER)) this.messageDebugger("speaker off at " + freq + "hz", true);
+                if (this.messageEnabled(Messages.SPEAKER)) this.messagePrint("speaker off at " + freq + "hz", true);
             }
         }
     } else if (fOn) {
-        this.messageDebugger("BEEP", Messages.SPEAKER);
+        this.messagePrint("BEEP", Messages.SPEAKER);
     }
 };
 

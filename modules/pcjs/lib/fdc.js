@@ -776,7 +776,7 @@ FDC.prototype.initController = function(data)
     this.regControl = data[i] || FDC.REG_CONTROL.RATE500K;      // default to maximum data rate
 
     if (DEBUG && this.messageEnabled()) {
-        this.messageDebugger("FDC initialized for " + this.aDrives.length + " drive(s)");
+        this.messagePrint("FDC initialized for " + this.aDrives.length + " drive(s)");
     }
     return fSuccess;
 };
@@ -1282,7 +1282,7 @@ FDC.prototype.loadDiskette = function(iDrive, sDisketteName, sDiskettePath, fAut
         if (fAutoMount) {
             drive.fAutoMount = true;
             this.cAutoMount++;
-            if (this.messageEnabled()) this.messageDebugger("loading diskette '" + sDisketteName + "'");
+            if (this.messageEnabled()) this.messagePrint("loading diskette '" + sDisketteName + "'");
         }
         drive.fLocal = !!file;
         var disk = new Disk(this, drive, DiskAPI.MODE.PRELOAD);
@@ -1531,13 +1531,13 @@ FDC.prototype.addDiskHistory = function(sDisketteName, sDiskettePath, disk)
         if (this.aDiskHistory[i][1] == sDiskettePath) {
             var nChanges = disk.restore(this.aDiskHistory[i][2]);
             if (DEBUG && this.messageEnabled()) {
-                this.messageDebugger("disk '" + sDisketteName + "' restored from history (" + nChanges + " changes)");
+                this.messagePrint("disk '" + sDisketteName + "' restored from history (" + nChanges + " changes)");
             }
             return;
         }
     }
     if (DEBUG && this.messageEnabled()) {
-        this.messageDebugger("disk '" + sDisketteName + "' added to history (nothing to restore)");
+        this.messagePrint("disk '" + sDisketteName + "' added to history (nothing to restore)");
     }
     this.aDiskHistory[i] = [sDisketteName, sDiskettePath, []];
 };
@@ -1556,13 +1556,13 @@ FDC.prototype.removeDiskHistory = function(sDisketteName, sDiskettePath)
         if (this.aDiskHistory[i][1] == sDiskettePath) {
             this.aDiskHistory.splice(i, 1);
             if (DEBUG && this.messageEnabled()) {
-                this.messageDebugger("disk '" + sDisketteName + "' removed from history");
+                this.messagePrint("disk '" + sDisketteName + "' removed from history");
             }
             return;
         }
     }
     if (DEBUG && this.messageEnabled()) {
-        this.messageDebugger("unable to remove disk '" + sDisketteName + "' from history (" + sDiskettePath + ")");
+        this.messagePrint("unable to remove disk '" + sDisketteName + "' from history (" + sDiskettePath + ")");
     }
 };
 
@@ -1581,7 +1581,7 @@ FDC.prototype.updateDiskHistory = function(sDisketteName, sDiskettePath, disk)
         if (this.aDiskHistory[i][1] == sDiskettePath) {
             this.aDiskHistory[i][2] = disk.save();
             if (DEBUG && this.messageEnabled()) {
-                this.messageDebugger("disk '" + sDisketteName + "' updated in history");
+                this.messagePrint("disk '" + sDisketteName + "' updated in history");
             }
             return;
         }
@@ -1593,7 +1593,7 @@ FDC.prototype.updateDiskHistory = function(sDisketteName, sDiskettePath, disk)
      * before unloading, the fact that the disk is no longer listed here can't be treated as an error.
      */
     if (DEBUG && this.messageEnabled()) {
-        this.messageDebugger("unable to update disk '" + sDisketteName + "' in history (" + sDiskettePath + ")");
+        this.messagePrint("unable to update disk '" + sDisketteName + "' in history (" + sDiskettePath + ")");
     }
 };
 
@@ -1719,7 +1719,7 @@ FDC.prototype.outFDCData = function(port, bOut, addrFrom)
         return;
     }
     if (DEBUG && this.messageEnabled()) {
-        this.messageDebugger("unsupported FDC command: " + str.toHexByte(bCmd));
+        this.messagePrint("unsupported FDC command: " + str.toHexByte(bCmd));
         this.dbg.stopCPU();
     }
 };
@@ -1948,7 +1948,7 @@ FDC.prototype.doCmd = function()
 
     default:
         if (DEBUG && this.messageEnabled()) {
-            this.messageDebugger("FDC operation unsupported (command=0x: " + str.toHexByte(bCmd) + ")");
+            this.messagePrint("FDC operation unsupported (command=0x: " + str.toHexByte(bCmd) + ")");
             this.dbg.stopCPU();
         }
         break;
@@ -2029,7 +2029,7 @@ FDC.prototype.popCmd = function(name)
     if (DEBUG && this.messageEnabled(Messages.PORT | Messages.FDC)) {
         var bCmdMasked = bCmd & FDC.REG_DATA.CMD.MASK;
         if (!name && !this.regDataIndex && FDC.aCmdInfo[bCmdMasked]) name = FDC.aCmdInfo[bCmdMasked].name;
-        this.messageDebugger("FDC.CMD[" + (name || this.regDataIndex) + "]: 0x" + str.toHexByte(bCmd), true);
+        this.messagePrint("FDC.CMD[" + (name || this.regDataIndex) + "]: 0x" + str.toHexByte(bCmd), true);
     }
     this.regDataIndex++;
     return bCmd;
@@ -2081,7 +2081,7 @@ FDC.prototype.beginResult = function()
 FDC.prototype.pushResult = function(bResult, name)
 {
     if (DEBUG && this.messageEnabled(Messages.PORT | Messages.FDC)) {
-        this.messageDebugger("FDC.RES[" + (name || this.regDataTotal) + "]: 0x" + str.toHexByte(bResult), true);
+        this.messagePrint("FDC.RES[" + (name || this.regDataTotal) + "]: 0x" + str.toHexByte(bResult), true);
     }
     this.regDataArray[this.regDataTotal++] = bResult;
 };
@@ -2147,7 +2147,7 @@ FDC.prototype.dmaRead = function(drive, b, done)
     /*
      * The DMA controller should be ASKING for data, not GIVING us data; this suggests an internal DMA miscommunication
      */
-    if (DEBUG) this.messageDebugger("dmaRead(): invalid DMA acknowledgement");
+    if (DEBUG) this.messagePrint("dmaRead(): invalid DMA acknowledgement");
     done(-1, false);
 };
 
@@ -2166,7 +2166,7 @@ FDC.prototype.dmaWrite = function(drive, b)
     /*
      * The DMA controller should be GIVING us data, not ASKING for data; this suggests an internal DMA miscommunication
      */
-    if (DEBUG) this.messageDebugger("dmaWrite(): invalid DMA acknowledgement");
+    if (DEBUG) this.messagePrint("dmaWrite(): invalid DMA acknowledgement");
     return -1;
 };
 
@@ -2185,7 +2185,7 @@ FDC.prototype.dmaFormat = function(drive, b)
     /*
      * The DMA controller should be GIVING us data, not ASKING for data; this suggests an internal DMA miscommunication
      */
-    if (DEBUG) this.messageDebugger("dmaFormat(): invalid DMA acknowledgement");
+    if (DEBUG) this.messagePrint("dmaFormat(): invalid DMA acknowledgement");
     return -1;
 };
 
@@ -2205,7 +2205,7 @@ FDC.prototype.doRead = function(drive)
     drive.resCode = FDC.REG_DATA.RES.NOT_READY | FDC.REG_DATA.RES.INCOMPLETE;
 
     if (DEBUG && this.messageEnabled()) {
-        this.messageDebugger("FDC.doRead(" + drive.bCylinder + ":" + drive.bHead + ":" + drive.bSector + ":" + drive.nBytes + ")");
+        this.messagePrint("FDC.doRead(" + drive.bCylinder + ":" + drive.bHead + ":" + drive.bSector + ":" + drive.nBytes + ")");
     }
 
     if (drive.disk) {
@@ -2229,7 +2229,7 @@ FDC.prototype.doWrite = function(drive)
     drive.resCode = FDC.REG_DATA.RES.NOT_READY | FDC.REG_DATA.RES.INCOMPLETE;
 
     if (DEBUG && this.messageEnabled()) {
-        this.messageDebugger("FDC.doWrite(" + drive.bCylinder + ":" + drive.bHead + ":" + drive.bSector + ":" + drive.nBytes + ")");
+        this.messagePrint("FDC.doWrite(" + drive.bCylinder + ":" + drive.bHead + ":" + drive.bSector + ":" + drive.nBytes + ")");
     }
 
     if (drive.disk) {
@@ -2429,7 +2429,7 @@ FDC.prototype.writeFormat = function(drive, b)
         drive.nBytes = 128 << drive.abFormat[3];// N (0 => 128, 1 => 256, 2 => 512, 3 => 1024)
         drive.cbFormat = 0;
         if (DEBUG && this.messageEnabled()) {
-            this.messageDebugger("writeFormat(head=" + str.toHexByte(drive.bHead) + ",cyl=" + str.toHexByte(drive.bCylinder) + ",sec=" + str.toHexByte(drive.bSector) + ",len=" + str.toHexWord(drive.nBytes) + ")");
+            this.messagePrint("writeFormat(head=" + str.toHexByte(drive.bHead) + ",cyl=" + str.toHexByte(drive.bCylinder) + ",sec=" + str.toHexByte(drive.bSector) + ",len=" + str.toHexWord(drive.nBytes) + ")");
         }
         for (var i = 0; i < drive.nBytes; i++) {
             if (this.writeByte(drive, drive.bFiller) < 0) {

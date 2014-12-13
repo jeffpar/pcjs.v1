@@ -1981,7 +1981,7 @@ var X86OpXX = {
      * op=0x9B (wait)
      */
     opWAIT: function() {
-        this.messageDebugger("WAIT not implemented", Messages.CPU);
+        this.messagePrint("WAIT not implemented", Messages.CPU);
         this.nStepCycles--;
     },
     /**

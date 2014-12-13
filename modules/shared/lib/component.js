@@ -938,7 +938,7 @@ Component.prototype = {
      * If bitsMessage is not specified, the component's MESSAGE category is used.
      *
      * @this {Component}
-     * @param {number} [bitsMessage] is zero or more Debugger MESSAGE_* category flag(s)
+     * @param {number} [bitsMessage] is zero or more MESSAGE_* category flag(s)
      * @return {boolean} true if all specified message enabled, false if not
      */
     messageEnabled: function(bitsMessage) {
@@ -954,18 +954,18 @@ Component.prototype = {
         return false;
     },
     /**
-     * messageDebugger(sMessage, bitsMessage, fAddress)
+     * messagePrint(sMessage, bitsMessage, fAddress)
      *
      * If bitsMessage is not specified, the component's MESSAGE category is used.
      * If bitsMessage is true, the message is displayed regardless.
      *
      * @this {Component}
      * @param {string} sMessage is any caller-defined message string
-     * @param {number|boolean} [bitsMessage] is zero or more Debugger MESSAGE_* category flag(s)
+     * @param {number|boolean} [bitsMessage] is zero or more MESSAGE_* category flag(s)
      * @param {boolean} [fAddress] is true to display the current address
      * @return {boolean} true if Debugger available, false if not
      */
-    messageDebugger: function(sMessage, bitsMessage, fAddress) {
+    messagePrint: function(sMessage, bitsMessage, fAddress) {
         if (DEBUGGER && this.dbg) {
             if (bitsMessage === true || this.messageEnabled(bitsMessage | 0)) {
                 this.dbg.message(sMessage, fAddress);
@@ -986,7 +986,7 @@ Component.prototype = {
      * @param {number|null} [addrFrom]
      * @param {string|null} [name] of the port, if any
      * @param {number|null} [bIn] is the input value, if known, on an input operation
-     * @param {number|boolean} [bitsMessage] is zero or more Debugger MESSAGE_* category flag(s)
+     * @param {number|boolean} [bitsMessage] is zero or more MESSAGE_* category flag(s)
      */
     messagePort: function(port, bOut, addrFrom, name, bIn, bitsMessage) {
         if (DEBUGGER && this.dbg) {

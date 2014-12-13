@@ -56,30 +56,29 @@ if (typeof module !== 'undefined') {
  *
  *      model: a number (eg, 8088) that should match one of the X86.MODEL values
  *
- * This extends the CPU class and passes any remaining parmsCPU properties to the
- * CPU class constructor, along with a default speed (cycles per second) based on the
- * specified (or default) CPU model number.
+ * This extends the CPU class and passes any remaining parmsCPU properties to the CPU class
+ * constructor, along with a default speed (cycles per second) based on the specified (or default)
+ * CPU model number.
  *
- * The X86CPU class was initially written to simulate a 8086/8088 microprocessor, although
- * over time it is evolving to support newer microprocessors (for example, limited
- * support for 80186/80188 instructions can already be conditionally enabled).
+ * The X86CPU class was initially written to simulate a 8086/8088 microprocessor, although over time
+ * it has evolved to support later microprocessors (eg, the 80186/80188 and the 80286, including
+ * protected-mode support).
  *
- * This is a logical simulation, not a physical simulation, and performance is critical,
- * second only to the accuracy of the simulation when running real-world x86 software.
- * Consequently, it takes liberties that do not reflect exactly how actual hardware
- * operated, especially with regard to external components.
+ * This is a logical simulation, not a physical simulation, and performance is critical, second only
+ * to the accuracy of the simulation when running real-world x86 software.  Consequently, it takes a
+ * few liberties with the operation of the simulated hardware, especially with regard to timings,
+ * little-used features, etc.  We do make an effort to maintain accurate instruction cycle counts,
+ * but there are many other obstacles (eg, prefetch queue, wait states) to achieving perfect timings.
  *
- * For example, our 8237 DMA controller performs all DMA transfers immediately,
- * since internally they are all memory-to-memory, and attempting to interleave DMA
- * cycles with instruction execution cycles would only hurt overall performance.
- * Similarly, the 8254 timer counters are updated only on-demand.
+ * For example, our 8237 DMA controller performs all DMA transfers immediately, since internally
+ * they are all memory-to-memory, and attempting to interleave DMA cycles with instruction execution
+ * cycles would hurt overall performance.  Similarly, 8254 timer counters are updated only on-demand.
  *
- * The 8237 and 8254, along with several "chips", are combined into a single convenient
- * "Chipset" component, to keep the number of components we must juggle to a minimum.
+ * The 8237 and 8254, along with the 8259 interrupt controller and several other "chips", are combined
+ * into a single "Chipset" component, to keep the number of components we juggle to a minimum.
  *
- * All that being said, this does not change the primary goal: to produce as accurate
- * a simulation as possible, within the limits of what JavaScript allows and how
- * precisely/predictably it behaves.
+ * All that being said, this does not change the overall goal: to produce as accurate a simulation as
+ * possible, within the limits of what JavaScript allows and how precisely/predictably it behaves.
  *
  * @constructor
  * @extends CPU
@@ -1006,8 +1005,14 @@ X86CPU.prototype.addIntReturn = function(addr, fn)
 /**
  * checkIntReturn(addr)
  *
- * It is expected (though not required) that callers will check cIntReturn and avoid calling
- * this function if the count is zero.
+ * We check for possible "INT n" software interrupt returns in the cases of "IRET" (opHelpIRET), "RETF 2"
+ * (opHelpRETF) and "JMPF [DWORD]" (opGrpJMPFdw).
+ *
+ * "JMPF [DWORD]" is an unfortunate choice that newer versions of DOS (as of at least 3.20, and probably
+ * earlier) employed in their INT 0x13 hooks; I would have preferred not making this call for that opcode.
+ *
+ * It is expected (though not required) that callers will check cIntReturn and avoid calling this function
+ * if the count is zero, for maximum performance.
  *
  * @this {X86CPU}
  * @param {number} addr is a physical (non-segmented) address
@@ -1039,7 +1044,7 @@ X86CPU.prototype.setProtMode = function(fProt)
         fProt = !!(this.regMSW & X86.MSW.PE);
     }
     if (!fProt) {
-        this.messageDebugger("returning to real-mode");
+        this.messagePrint("returning to real-mode");
     }
     this.aOpGrp6 = (fProt? X86Op0F.aOpGrp6Prot : X86Op0F.aOpGrp6Real);
     this.segCS.updateMode(fProt);
@@ -2083,7 +2088,7 @@ X86CPU.prototype.getBytePrefetch = function(addr)
          */
     }
     b = this.aPrefetch[this.iPrefetchTail] & 0xff;
-    if (MAXDEBUG) this.messageDebugger("  getBytePrefetch[" + this.iPrefetchTail + "]: " + str.toHex(addr) + ":" + str.toHexByte(b));
+    if (MAXDEBUG) this.messagePrint("  getBytePrefetch[" + this.iPrefetchTail + "]: " + str.toHex(addr) + ":" + str.toHexByte(b));
     if (MAXDEBUG) this.assert(addr == (this.aPrefetch[this.iPrefetchTail] >> 8), "X86CPU.getBytePrefetch(" + str.toHex(addr) + "): invalid tail address (" + str.toHex(this.aPrefetch[this.iPrefetchTail] >> 8) + ")");
     this.iPrefetchTail = (this.iPrefetchTail + 1) & X86CPU.PREFETCH.MASK;
     this.cbPrefetchQueued--;
@@ -2125,7 +2130,7 @@ X86CPU.prototype.fillPrefetch = function(n)
         var addr = this.addrPrefetchHead;
         var b = this.aMemBlocks[(addr & this.addrMemMask) >> this.blockShift].readByte(addr & this.blockLimit);
         this.aPrefetch[this.iPrefetchHead] = b | (addr << 8);
-        if (MAXDEBUG) this.messageDebugger("     fillPrefetch[" + this.iPrefetchHead + "]: " + str.toHex(addr) + ":" + str.toHexByte(b));
+        if (MAXDEBUG) this.messagePrint("     fillPrefetch[" + this.iPrefetchHead + "]: " + str.toHex(addr) + ":" + str.toHexByte(b));
         this.addrPrefetchHead = (addr + 1) & this.addrMemMask;
         this.iPrefetchHead = (this.iPrefetchHead + 1) & X86CPU.PREFETCH.MASK;
         this.cbPrefetchQueued++;
@@ -2150,7 +2155,7 @@ X86CPU.prototype.flushPrefetch = function(addr)
 {
     this.addrPrefetchHead = addr;
     this.iPrefetchTail = this.iPrefetchHead = this.cbPrefetchQueued = this.cbPrefetchValid = 0;
-    if (MAXDEBUG && addr !== undefined) this.messageDebugger("    flushPrefetch[-]: " + str.toHex(addr));
+    if (MAXDEBUG && addr !== undefined) this.messagePrint("    flushPrefetch[-]: " + str.toHex(addr));
 };
 
 /**
@@ -2173,7 +2178,7 @@ X86CPU.prototype.advancePrefetch = function(inc)
         this.cbPrefetchQueued -= inc;
     } else {
         this.flushPrefetch(this.regEIP);
-        if (MAXDEBUG) this.messageDebugger("advancePrefetch(" + inc + "): flushed");
+        if (MAXDEBUG) this.messagePrint("advancePrefetch(" + inc + "): flushed");
     }
 };
 

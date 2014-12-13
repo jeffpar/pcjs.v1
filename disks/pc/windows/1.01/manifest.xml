@@ -2,7 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.16.4/manifest.xsl"?>
 <manifest type="software">
 	<title>Microsoft Windows 1.01</title>
-	<disk id="disk01" size="368640" chs="40:2:9" dir="private/01-SETUP/" href="/disks/pc/win/win101/WIN101-DISK1-SETUP.json" md5="f82a9804ea9baab98f0d1fe9bf639637" md5json="6fd1f1762e78830e27f44e3e9386ae55">
+	<disk id="disk01" size="368640" chs="40:2:9" dir="private/01-SETUP/" href="/disks/pc/windows/1.01/WIN101-DISK1-SETUP.json" md5="f82a9804ea9baab98f0d1fe9bf639637" md5json="6fd1f1762e78830e27f44e3e9386ae55">
 		<name>Windows 1.01 (SETUP)</name>
 		<file size="13008" time="1985-11-15 05:43:02" attr="0x20" md5="448755ac06a2d21ef62f5967a3a5d8e5">CGA.DRV</file>
 		<file size="4860" time="1985-11-15 05:43:02" attr="0x20" md5="7767fa437c8a0140e5e397af57e1afd7">COMM.DRV</file>
@@ -32,7 +32,7 @@
 		<file size="2594" time="1985-11-15 05:42:04" attr="0x20" md5="beb1694f1d82d4ec3bf5cf45481f8eec">SYSTEM.DRV</file>
 		<file size="43" time="1985-11-15 05:42:04" attr="0x20" md5="5f0a7d6bb899fa15d37c557b246f77e9">WRITE.DAT</file>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" dir="private/02-BUILD/" href="/disks/pc/win/win101/WIN101-DISK2-BUILD.json" md5="2d8649d75390b429b083f412e005cede" md5json="66be09615232dffe680ca89660b4ed93">
+	<disk id="disk02" size="368640" chs="40:2:9" dir="private/02-BUILD/" href="/disks/pc/windows/1.01/WIN101-DISK2-BUILD.json" md5="2d8649d75390b429b083f412e005cede" md5json="66be09615232dffe680ca89660b4ed93">
 		<name>Windows 1.01 (BUILD)</name>
 		<file size="7" time="1985-11-15 05:42:28" attr="0x20" md5="6b63c5f0ee5a61490b9cf597f243218b">BUILD.LBL</file>
 		<file size="1350" time="1985-11-15 05:42:28" attr="0x20" md5="823dc86f961753335105812383fc2037">CGA.GRB</file>
@@ -56,7 +56,7 @@
 		<file size="1801" time="1985-11-15 05:42:32" attr="0x20" md5="ad575c8ae72d0e34d98e1f04e6a77a07">WIN.INI</file>
 		<file size="19392" time="1985-11-15 05:42:32" attr="0x20" md5="bab96f3323889bf48e194ed359367d72">WINOLDAP.MOD</file>
 	</disk>
-	<disk id="disk03" size="368640" chs="40:2:9" dir="private/03-UTILITY/" href="/disks/pc/win/win101/WIN101-DISK3-UTILITY.json" md5="02ecc9bafc6a35dbcb8963442f6a0d06" md5json="a78f2b37a8de31f9f4e061b34902ef7c">
+	<disk id="disk03" size="368640" chs="40:2:9" dir="private/03-UTILITY/" href="/disks/pc/windows/1.01/WIN101-DISK3-UTILITY.json" md5="02ecc9bafc6a35dbcb8963442f6a0d06" md5json="a78f2b37a8de31f9f4e061b34902ef7c">
 		<name>Windows 1.01 (UTILITY)</name>
 		<file size="10976" time="1985-11-15 05:42:40" attr="0x20" md5="aa42db631396338efeb6b0c1d6392253">CITOH.DRV</file>
 		<file size="8720" time="1985-11-15 05:42:40" attr="0x20" md5="c1866c6007006357d830dae06ed52804">COURA.FON</file>
@@ -88,7 +88,7 @@
 		<file size="11520" time="1985-11-15 05:42:46" attr="0x20" md5="6ea5f62162424664f67144511421e55d">TOSH.DRV</file>
 		<file size="9" time="1985-11-15 05:42:46" attr="0x20" md5="318fb76c21e90462f1a349d8f5508937">UTILITY.LBL</file>
 	</disk>
-	<disk id="disk04" size="368640" chs="40:2:9" dir="private/04-APPS/" href="/disks/pc/win/win101/WIN101-DISK4-APPS.json" md5="156bf4133a73ef0b038bb585c2d2580b" md5json="5597927d69320802239864daad8797a7">
+	<disk id="disk04" size="368640" chs="40:2:9" dir="private/04-APPS/" href="/disks/pc/windows/1.01/WIN101-DISK4-APPS.json" md5="156bf4133a73ef0b038bb585c2d2580b" md5json="5597927d69320802239864daad8797a7">
 		<name>Windows 1.01 (APPS)</name>
 		<file size="42" time="1985-11-15 05:42:54" attr="0x20" md5="353472a7d9a5ca979ec01c65729a3314">ABC.TXT</file>
 		<file size="24992" time="1985-11-15 05:42:56" attr="0x20" md5="179582df868a2b7bfb0a246359a65308">CALC.EXE</file>
@@ -103,7 +103,7 @@
 		<file size="14816" time="1985-11-15 05:42:56" attr="0x20" md5="eb2adf9dc45588c3c26806065b638f29">REVERSI.EXE</file>
 		<file size="43968" time="1985-11-15 05:42:58" attr="0x20" md5="5f4f111f08c4a2e2e3726bfc7657ed0f">TERMINAL.EXE</file>
 	</disk>
-	<disk id="disk05" size="368640" chs="40:2:9" dir="private/05-WRITE/" href="/disks/pc/win/win101/WIN101-DISK5-WRITE.json" md5="5894d26a8c8ad549dd94b5d4b894b9c7" md5json="47ef722460ce9dbe9932a12b80528f52">
+	<disk id="disk05" size="368640" chs="40:2:9" dir="private/05-WRITE/" href="/disks/pc/windows/1.01/WIN101-DISK5-WRITE.json" md5="5894d26a8c8ad549dd94b5d4b894b9c7" md5json="47ef722460ce9dbe9932a12b80528f52">
 		<name>Windows 1.01 (WRITE)</name>
 		<file size="2944" time="1985-11-15 05:44:10" attr="0x20" md5="b7ce592cd474ff286bed94b9c6492f39">PRACTICE.DOC</file>
 		<file size="2922" time="1985-11-15 05:44:10" attr="0x20" md5="3acfbe04f032f32ee8c5dbb5a650a01a">README.DOC</file>
