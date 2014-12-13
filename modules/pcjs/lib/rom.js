@@ -330,12 +330,10 @@ ROM.prototype.addROM = function(addr)
 /**
  * ROM.init()
  *
- * This function operates on every element (e) of class "rom", and initializes
- * all the necessary HTML to construct the ROM module(s) as spec'ed.
- *
- * Note that each element (e) of class "rom" is expected to have a "data-value"
- * attribute containing the same JSON-encoded parameters that the ROM constructor
- * expects.
+ * This function operates on every HTML element of class "rom", extracting the
+ * JSON-encoded parameters for the ROM constructor from the element's "data-value"
+ * attribute, invoking the constructor to create a ROM component, and then binding
+ * any associated HTML controls to the new component.
  */
 ROM.init = function()
 {

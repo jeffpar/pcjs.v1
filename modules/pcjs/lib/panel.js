@@ -125,12 +125,10 @@ Panel.prototype.powerDown = function(fSave)
 /**
  * Panel.init()
  *
- * This function operates on every element (e) of class "panel", and initializes
- * all the necessary HTML to construct the Panel module(s) as spec'ed.
- *
- * Note that each element (e) of class "panel" is expected to have a "data-value"
- * attribute containing the same JSON-encoded parameters that the Panel constructor
- * expects.
+ * This function operates on every HTML element of class "panel", extracting the
+ * JSON-encoded parameters for the Panel constructor from the element's "data-value"
+ * attribute, invoking the constructor to create a Panel component, and then binding
+ * any associated HTML controls to the new component.
  *
  * NOTE: Unlike most other component init() functions, this one is designed to be
  * called multiple times: once at load time, so that we can binding our print()

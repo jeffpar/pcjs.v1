@@ -3862,14 +3862,12 @@ C1PCPU.prototype.opUndefined = function()
 };
 
 /**
- *  C1PCPU.init()
+ * C1PCPU.init()
  *
- *  This function operates on every element (e) of class "cpu", and initializes
- *  all the necessary HTML to construct the CPU module(s) as spec'ed.
- *
- *  Note that each element (e) of class "cpu" is expected to have a "data-value"
- *  attribute containing the same JSON-encoded parameters that the CPU constructor
- *  expects.
+ * This function operates on every HTML element of class "cpu", extracting the
+ * JSON-encoded parameters for the C1PCPU constructor from the element's "data-value"
+ * attribute, invoking the constructor to create a C1PCPU component, and then binding
+ * any associated HTML controls to the new component.
  */
 C1PCPU.init = function()
 {

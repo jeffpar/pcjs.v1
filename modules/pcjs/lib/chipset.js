@@ -4996,14 +4996,12 @@ ChipSet.aPortOutput5170 = {
 };
 
 /**
- *  ChipSet.init()
+ * ChipSet.init()
  *
- *  This function operates on every element (e) of class "chipset", and initializes
- *  all the necessary HTML to construct the ChipSet module(s) as spec'ed.
- *
- *  Note that each element (e) of class "chipset" is expected to have a "data-value"
- *  attribute containing the same JSON-encoded parameters that the ChipSet constructor
- *  expects.
+ * This function operates on every HTML element of class "chipset", extracting the
+ * JSON-encoded parameters for the ChipSet constructor from the element's "data-value"
+ * attribute, invoking the constructor to create a ChipSet component, and then binding
+ * any associated HTML controls to the new component.
  */
 ChipSet.init = function()
 {

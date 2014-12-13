@@ -1189,12 +1189,10 @@ Computer.prototype.getComponentByType = function(sType, componentPrev)
 /**
  * Computer.init()
  *
- * This function operates on every element (e) of class "computer", and initializes
- * all the necessary HTML to construct the Computer(s) as spec'ed.
- *
- * Note that each element (e) of class "computer" is expected to have a "data-value"
- * attribute containing the same JSON-encoded parameters that the Computer constructor
- * expects.
+ * For every machine represented by an HTML element of class "pcjs-machine", this function
+ * locates the HTML element of class "computer", extracting the JSON-encoded parameters for the
+ * Computer constructor from the element's "data-value" attribute, invoking the constructor to
+ * create a Computer component, and then binding any associated HTML controls to the new component.
  */
 Computer.init = function()
 {
@@ -1240,6 +1238,12 @@ Computer.init = function()
 
 /**
  * Computer.show()
+ *
+ * When exit() is using an "onbeforeunload" handler, this "onpageshow" handler allows us to repower everything,
+ * without either resetting or restoring.  We call powerOn() with a special resume value (RESUME_REPOWER) if the
+ * computer is already marked as "ready", meaning the browser didn't change anything.  This "repower" process
+ * should be very quick, essentially just marking all components as powered again (so that, for example, the Video
+ * component will start drawing again) and firing the CPU up again.
  */
 Computer.show = function()
 {

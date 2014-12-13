@@ -2185,12 +2185,10 @@ if (DEBUGGER) {
     /**
      * C1PDebugger.init()
      *
-     * This function operates on every element (e) of class "debugger", and initializes
-     * all the necessary HTML to construct the Debugger module(s) as spec'ed.
-     *
-     * Note that each element (e) of class "debugger" is expected to have a "data-value"
-     * attribute containing the same JSON-encoded parameters that the Debugger constructor
-     * expects.
+     * This function operates on every HTML element of class "debugger", extracting the
+     * JSON-encoded parameters for the C1PDebugger constructor from the element's "data-value"
+     * attribute, invoking the constructor to create a C1PDebugger component, and then binding
+     * any associated HTML controls to the new component.
      */
     C1PDebugger.init = function()
     {

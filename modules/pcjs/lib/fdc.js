@@ -2469,11 +2469,10 @@ FDC.aPortOutput = {
 /**
  * FDC.init()
  *
- * This function operates on every element (e) of class "fdc", and initializes
- * all the necessary HTML to construct the FDC module(s) as spec'ed.
- *
- * Note that each element (e) of class "fdc" is expected to have a "data-value"
- * attribute containing the same JSON-encoded parameters that the FDC constructor expects.
+ * This function operates on every HTML element of class "fdc", extracting the
+ * JSON-encoded parameters for the FDC constructor from the element's "data-value"
+ * attribute, invoking the constructor to create a FDC component, and then binding
+ * any associated HTML controls to the new component.
  */
 FDC.init = function() {
     var aeFDC = Component.getElementsByClass(window.document, PCJSCLASS, "fdc");

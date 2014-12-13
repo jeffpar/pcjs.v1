@@ -89,21 +89,19 @@ C1PPanel.prototype.setPower = function(fOn, cmp)
 /**
  * C1PPanel.init()
  *
- * This function operates on every element (e) of class "panel", and initializes
- * all the necessary HTML to construct the Panel module(s) as spec'ed.
- *
- * Note that each element (e) of class "panel" is expected to have a "data-value"
- * attribute containing the same JSON-encoded parameters that the Panel constructor
- * expects.
+ * This function operates on every HTML element of class "panel", extracting the
+ * JSON-encoded parameters for the C1PPanel constructor from the element's "data-value"
+ * attribute, invoking the constructor to create a C1PPanel component, and then binding
+ * any associated HTML controls to the new component.
  *
  * NOTE: Unlike most other component init() functions, this one is designed to be
  * called multiple times: once at load time, so that we can binding our print()
- * function to the panel's output control ASAP, and again when the Computer component
+ * function to the panel's output control ASAP, and again when the C1PComputer component
  * is verifying that all components are ready and invoking their setPower() functions.
  *
  * Our setPower() method gives us a second opportunity to notify any components that
- * that might care (eg, CPU, Keyboard, and Debugger) that we have some controls they
- * might want to use.
+ * that might care (eg, C1PCPU, C1PKeyboard, and C1PDebugger) that we have some controls
+ * they might want to use.
  */
 C1PPanel.init = function()
 {

@@ -512,12 +512,10 @@ C1PVideo.prototype.updateWindow = function(col, row, b)
 /**
  * C1PVideo.init()
  *
- * This function operates on every element (e) of class "video", and initializes
- * all the necessary HTML to construct every Video module as spec'ed.
- *
- * Note that each element (e) of class "video" is expected to have a "data-value"
- * attribute containing the same JSON-encoded parameters that the Video constructor
- * expects.
+ * This function operates on every HTML element of class "video", extracting the
+ * JSON-encoded parameters for the C1PVideo constructor from the element's "data-value"
+ * attribute, invoking the constructor to create a C1PVideo component, and then binding
+ * any associated HTML controls to the new component.
  */
 C1PVideo.init = function()
 {

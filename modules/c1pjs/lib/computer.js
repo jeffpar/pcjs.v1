@@ -248,14 +248,12 @@ C1PComputer.power = function(computer)
 };
 
 /*
- *  C1PComputer.init()
+ * C1PComputer.init()
  *
- *  This function operates on every element (e) of class "computer", and initializes
- *  all the necessary HTML to construct the C1PComputer(s) as spec'ed.
- *
- *  Note that each element (e) of class "computer" is expected to have a "data-value"
- *  attribute containing the same JSON-encoded parameters that the C1PComputer constructor
- *  expects.
+ * This function operates on every HTML element of class "computer", extracting the
+ * JSON-encoded parameters for the C1PComputer constructor from the element's "data-value"
+ * attribute, invoking the constructor to create a C1PComputer component, and then binding
+ * any associated HTML controls to the new component.
  */
 C1PComputer.init = function()
 {

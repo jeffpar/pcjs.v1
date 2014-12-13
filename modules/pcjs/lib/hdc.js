@@ -2815,11 +2815,10 @@ HDC.aATCPortOutput = {
 /**
  * HDC.init()
  *
- * This function operates on every element (e) of class "hdc", and initializes
- * all the necessary HTML to construct the HDC module(s) as spec'ed.
- *
- * Note that each element (e) of class "hdc" is expected to have a "data-value"
- * attribute containing the same JSON-encoded parameters that the HDC constructor expects.
+ * This function operates on every HTML element of class "hdc", extracting the
+ * JSON-encoded parameters for the HDC constructor from the element's "data-value"
+ * attribute, invoking the constructor to create a HDC component, and then binding
+ * any associated HTML controls to the new component.
  */
 HDC.init = function()
 {

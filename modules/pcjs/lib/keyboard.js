@@ -2177,12 +2177,10 @@ Keyboard.prototype.keySimulate = function(simCode, fDown)
 /**
  * Keyboard.init()
  *
- * This function operates on every element (e) of class "keyboard", and initializes
- * all the necessary HTML to construct the Keyboard module(s) as spec'ed.
- *
- * Note that each element (e) of class "keyboard" is expected to have a "data-value"
- * attribute containing the same JSON-encoded parameters that the Keyboard constructor
- * expects.
+ * This function operates on every HTML element of class "keyboard", extracting the
+ * JSON-encoded parameters for the Keyboard constructor from the element's "data-value"
+ * attribute, invoking the constructor to create a Keyboard component, and then binding
+ * any associated HTML controls to the new component.
  */
 Keyboard.init = function()
 {

@@ -377,12 +377,10 @@ C1PSerialPort.prototype.updateMemory = function()
 /**
  * C1PSerialPort.init()
  *
- * This function operates on every element (e) of class "serial", and initializes
- * all the necessary HTML to construct the SerialPort module(s) as spec'ed.
- *
- * Note that each element (e) of class "serial" is expected to have a "data-value"
- * attribute containing the same JSON-encoded parameters that the SerialPort constructor
- * expects.
+ * This function operates on every HTML element of class "serial", extracting the
+ * JSON-encoded parameters for the C1PSerialPort constructor from the element's "data-value"
+ * attribute, invoking the constructor to create a C1PSerialPort component, and then binding
+ * any associated HTML controls to the new component.
  */
 C1PSerialPort.init = function()
 {
