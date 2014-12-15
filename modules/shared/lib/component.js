@@ -43,9 +43,8 @@
  *
  * I wasn't thrilled about replacing all "++" and "--" operators with "+= 1" and "-= 1", nor about using
  * "(s || '')" instead of "(s? s : '')", because while the former may seem simpler, it is NOT more portable.
- * It's not that I'm trying to write "portable JavaScript", but some of this code was ported from C code
- * I'd written about 14 years earlier, and portability is good, so I see no reason to rewrite code to make
- * it less portable.
+ * It's not that I'm trying to write "portable JavaScript", but some of this code was ported from C code I'd
+ * written about 14 years earlier, and portability is good, so I'm not going to rewrite if there's no need.
  *
  * UPDATE: I've since switched to JSHint, which seems to have more reasonable defaults.
  */
@@ -228,7 +227,7 @@ Component.add = function(component)
     /*
      * This just generates a lot of useless noise, handy in the early days, not so much these days...
      *
-     *      Component.log("Component.add(" + component.type + "," + component.id + ")");
+     *      if (DEBUG) Component.log("Component.add(" + component.type + "," + component.id + ")");
      */
     Component.all[Component.all.length] = component;
 };
@@ -406,7 +405,7 @@ Component.getComponentByID = function(id, idRelated)
                 return Component.all[i];
             }
         }
-        Component.log('Component.getComponentByID("' + id + '"): no component found', "warning");
+        Component.log("Component ID '" + id + "' not found", "warning");
     }
     return null;
 };
@@ -444,7 +443,7 @@ Component.getComponentByType = function(sType, idRelated, componentPrev)
                 return Component.all[i];
             }
         }
-        Component.log('Component.getComponentByType("' + sType + '"): no component found', "warning");
+        Component.log("Component type '" + sType + "' not found", "warning");
     }
     return null;
 };
@@ -532,12 +531,12 @@ Component.bindComponentControls = function(component, element, sAppClass)
                         if (parms && parms['binding']) {
                             component.setBinding(parms['type'], parms['binding'], control);
                         } else {
-                            Component.log('Component.bindComponentControls("' + component.toString() + '"): missing binding' + (parms? ' for ' + parms['type'] : ''), "warning");
+                            Component.log("Component '" + component.toString() + "' missing binding" + (parms? " for " + parms['type'] : ""), "warning");
                         }
                         iClass = aClasses.length;
                         break;
                     default:
-                        // Component.log("Component.bindComponentControls(" + component.toString() + "): unrecognized control class \"" + sClass + "\"", "warning");
+                        // if (DEBUG) Component.log("Component.bindComponentControls(" + component.toString() + "): unrecognized control class \"" + sClass + "\"", "warning");
                         break;
                 }
             }
@@ -577,7 +576,7 @@ Component.getElementsByClass = function(element, sClass, sObjClass)
         }
     }
     if (!ae.length) {
-        Component.log('no elements of class "' + sClass + '" found');
+        Component.log('No elements of class "' + sClass + '" found');
     }
     return ae;
 };

@@ -58,10 +58,9 @@ if (typeof module !== 'undefined') {
  * addMemory().  If the component needs something more than simple read/write storage,
  * it must provide a controller with getMemoryBuffer() and getMemoryAccess() methods.
  *
- * By contrast, all port access operations are defined by external handlers; they
- * register with us, and we manage those registrations, and we'll probably provide I/O
- * breakpoints at some point, but unlike memory accesses, we're not involved with I/O
- * accesses at all.
+ * By contrast, all port (I/O) operations are defined by external handlers; they register
+ * with us, and we manage those registrations, as well as support for I/O breakpoints,
+ * but unlike memory accesses, we're not involved with port data accesses.
  *
  * @constructor
  * @extends Component

@@ -80,17 +80,20 @@ if (typeof module !== 'undefined') {
  * Because Memory blocks now allow us to have a "sparse" address space, we could choose to
  * take the memory hit of allocating 4K arrays per block, where each element stores only one byte,
  * instead of the more frugal but slightly slower approach of allocating arrays of 32-bit dwords
- * (DWORDARRAYS) and shifting/masking bytes/words to/from dwords; in theory, byte accesses would
+ * (NUMARRAYS) and shifting/masking bytes/words to/from dwords; in theory, byte accesses would
  * be faster and word accesses somewhat less faster.
  *
  * However, preliminary testing of that feature (FATARRAYS) did not yield significantly faster
- * performance, so it is OFF by default to minimize our memory consumption.  Using TYPEDARRAYS is
- * probably best, although not all JavaScript implementations support them (IE9 is probably the
- * only real outlier: it lacks typed arrays but otherwise has all the necessary HTML5 support).
+ * performance, so it is OFF by default to minimize our memory consumption.  Using TYPEDARRAYS
+ * would seem best, but as discussed in defines.js, it's off by default, because it doesn't perform
+ * as well as NUMARRAYS; the other advantage of TYPEDARRAYS is that it should theoretically use
+ * about 1/2 the memory of NUMARRAYS (32-bit elements vs 64-bit numbers), but I value speed over size
+ * at this point.  Also, not all JavaScript implementations support TYPEDARRAYS (IE9 is probably
+ * the only real outlier: it lacks typed arrays but otherwise has all the necessary HTML5 support).
  *
- * WARNING: Since Memory blocks are low-level objects that have no UI requirements,
- * they do not inherit from the Component class, so you should only use class methods
- * of Component, such as Component.assert(), or Debugger methods if the Debugger is available.
+ * WARNING: Since Memory blocks are low-level objects that have no UI requirements, they
+ * do not inherit from the Component class, so you should only use class methods of Component,
+ * such as Component.assert(), or Debugger methods if a debugger (dbg) is available.
  *
  * @constructor
  * @param {number} addr of block (must be some multiple of bus.blockSize)

@@ -663,7 +663,7 @@ ChipSet.PPI_SW = {
  * documents in /devices/pc/keyboard, as well as the following websites:
  *
  *      http://halicery.com/8042/8042_INTERN_TXT.htm
- *      http://www.os2museum.com/wp/?p=589 ("IBM PC/AT 8042 Keyboard Controller Commands")
+ *      http://www.os2museum.com/wp/ibm-pcat-8042-keyboard-controller-commands/
  */
 ChipSet.KBC = {
     DATA: {                     // this.b8042OutBuff (PPI_A on previous models, still referred to as "PORT A" by the MODEL_5170 BIOS)
@@ -4844,6 +4844,8 @@ ChipSet.prototype.messageBitsIRQ = function(nIRQ)
         bitsMessage |= Messages.KEYBOARD;
     } else if (nIRQ == ChipSet.IRQ.SLAVE) {     // IRQ 2 (MODEL_5170 and up)
         bitsMessage |= Messages.CHIPSET;
+    } else if (nIRQ == ChipSet.IRQ.COM1 || nIRQ == ChipSet.IRQ.COM2) {
+        bitsMessage |= Messages.SERIAL;
     } else if (nIRQ == ChipSet.IRQ.XTC) {       // IRQ 5 (MODEL_5160)
         bitsMessage |= Messages.HDC;
     } else if (nIRQ == ChipSet.IRQ.FDC) {       // IRQ 6
