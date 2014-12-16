@@ -508,12 +508,13 @@ Keyboard.STATE = {
     RCMD:           0x0040,             // 101-key keyboard only
     CMD:            0x0080,             // 101-key keyboard only
     CMDS:           0x00c0,
-    SHIFTS:         0x00ff,             // SHIFT | RSHIFT | CTRL | RCTRL | ALT | RALT | CMD | RCMD
+    ALL_RIGHT:      0x0055,             // RSHIFT | RCTRL | RALT | RCMD
+    ALL_SHIFT:      0x00ff,             // SHIFT | RSHIFT | CTRL | RCTRL | ALT | RALT | CMD | RCMD
     INSERT:         0x0100,             // TODO: Placeholder (we currently have no notion of any "insert" states)
     CAPS_LOCK:      0x0200,
     NUM_LOCK:       0x0400,
     SCROLL_LOCK:    0x0800,
-    LOCKS:          0x0e00              // CAPS_LOCK | NUM_LOCK | SCROLL_LOCK
+    ALL_LOCKS:      0x0e00              // CAPS_LOCK | NUM_LOCK | SCROLL_LOCK
 };
 
 /**
@@ -1604,13 +1605,34 @@ Keyboard.prototype.updateShiftState = function(simCode, fSim, fDown)
         var fRight = (Math.floor(simCode / 1000) & 2);
         var bitState = Keyboard.KEYSTATES[simCode] || 0;
         if (bitState) {
-            if (fRight) bitState >>= 1;
-            if (bitState & Keyboard.STATE.LOCKS) {
+            if (fRight && !(bitState & Keyboard.STATE.ALL_RIGHT)) {
+                bitState >>= 1;
+            }
+            if (bitState & Keyboard.STATE.ALL_LOCKS) {
                 if (fDown === false) return true;
                 fDown = null;
             }
             if (fDown == null) {        // ie, null or undefined
                 fDown = !((fSim? this.bitsStateSim : this.bitsState) & bitState);
+            }
+            else if (!fDown) {
+                /*
+                 * In current webkit browsers, pressing and then releasing both left and right shift keys together
+                 * (or both alt keys, or both cmd/windows keys, or presumably both ctrl keys) results in 4 events, as
+                 * you would expect, but 3 of the 4 are "down" events; only the last of the 4 is an "up" event.
+                 *
+                 * Perhaps this is a browser accessibility feature (ie, deliberately suppressing the "up" event
+                 * of one of the shift keys to implement a "sticky shift mode"?), but in any case, to maintain our
+                 * internal consistency, if this is an "up" event and the shift state bit is any of ALL_SHIFT, then
+                 * we set it to ALL_SHIFT, so that we'll automatically clear ALL shift states.
+                 *
+                 * TODO: The only downside to this work-around is that the simulation will still think a shift key is
+                 * down.  So in effect, we have enabled a "sticky shift mode" inside the simulation, whether or not that
+                 * was the browser's intent.  To fix that, we would have to identify the shift key that never went up
+                 * and simulate the "up".  That's more work than I think the problem merits.  The user just needs to tap
+                 * a single shift key to get out that mode.
+                 */
+                if (bitState & Keyboard.STATE.ALL_SHIFT) bitState = Keyboard.STATE.ALL_SHIFT;
             }
             if (!fSim) {
                 this.bitsState &= ~bitState;
@@ -1903,7 +1925,7 @@ Keyboard.prototype.onFocusChange = function(fFocus)
     /*
      * Since we can't be sure of any shift states after losing focus, we clear them all.
      */
-    if (!fFocus) this.bitsState &= ~Keyboard.STATE.SHIFTS;
+    if (!fFocus) this.bitsState &= ~Keyboard.STATE.ALL_SHIFT;
 };
 
 /**

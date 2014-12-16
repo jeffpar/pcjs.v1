@@ -440,6 +440,9 @@ HTTPAPI.readUserVolume = function(sPath, fd, aCHS, aAddr, done)
     fs.read(fd, buf, 0, len, pos, function(err, cbRead, buffer) {
         var nResponse = 200;
         var sResponse = null;
+        //
+        // TODO: The callback should be asserting/verifying that cbRead equals the requested length.
+        //
         if (err) {
             nResponse = 400;
             sResponse = err.message;
@@ -499,7 +502,24 @@ HTTPAPI.writeUserVolume = function(sPath, fd, aCHS, aAddr, sData, done)
 
     if (abData.length == len) {
         var buf = new Buffer(abData);
+        /*
+         * I have some concerns about asynchronous writes being performed out of order; however,
+         * even after changing fs.write() to fs.writeSync(), I'm still getting a corrupted 20mb disk
+         * image after running PKXARC B:DOCS.ARC into C:\TMP.  TODO: Investigate.
+         */
+        var nResponse = 200;
+        var sResponse = null;
+        var cbWrite = fs.writeSync(fd, buf, 0, len, pos);
+        if (cbWrite != len) {
+            nResponse = 400;
+            sResponse = "write length (" + cbWrite + ") does not equal buffer length (" + len + ")"
+        }
+        done(nResponse, sResponse);
+        /*
         fs.write(fd, buf, 0, len, pos, function(err, cbWrite, buffer) {
+            //
+            // TODO: The callback should be asserting/verifying that cbWrite equals the requested length.
+            //
             var nResponse = 200;
             var sResponse = null;
             if (err) {
@@ -508,8 +528,9 @@ HTTPAPI.writeUserVolume = function(sPath, fd, aCHS, aAddr, sData, done)
             }
             done(nResponse, sResponse);
         });
+        */
     } else {
-        done(-1, "buffer length (" + abData.length + ") does not equal write length (" + len + ")");
+        done(-1, "buffer length (" + abData.length + ") does not equal requested length (" + len + ")");
     }
 };
 

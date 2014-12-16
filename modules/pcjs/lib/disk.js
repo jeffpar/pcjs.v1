@@ -1052,8 +1052,8 @@ Disk.prototype.writeRemoteSectors = function(iCylinder, iHead, iSector, nSectors
 /**
  * disconnectRemoteDisk()
  *
- * This is called by our powerDown() notification handler.  If fRemote is true, we issue the disconnect request and
- * then immediately set fRemote to false; we don't wait for (or test) the response.
+ * This is called by our powerDown() notification handler.  If fRemote is true, we issue the disconnect
+ * request and then immediately set fRemote to false; we don't wait for (or test) the response.
  *
  * @this {Disk}
  */

@@ -97,7 +97,7 @@ DiskAPI.BPB = {
     RESERVED_SECS:  0x0E,       // 2 bytes: reserved sectors; ie, # sectors preceding the first FAT--usually just the boot sector (eg, 1)
     FAT_TOTAL:      0x10,       // 1 byte: FAT copies (eg, 2)
     ROOT_ENTRIES:   0x11,       // 2 bytes: root directory entries (eg, 0x40 or 64) 0x40 * 0x20 = 0x800 (1 sector is 0x200 bytes, total of 4 sectors)
-    SECTOR_TOTAL:   0x13,       // 2 bytes: number of sectors (eg, 0x140 or 320)
+    SECTOR_TOTAL:   0x13,       // 2 bytes: number of sectors (eg, 0x140 or 320); if zero, refer to LARGE_SECS
     MEDIA_TYPE:     0x15,       // 1 byte: media type (eg, 0xFF: 320Kb, 0xFE: 160Kb, 0xFD: 360Kb, 0xFC: 180Kb)
     FAT_SECS:       0x16,       // 2 bytes: sectors per FAT (eg, 1)
     TRACK_SECS:     0x18,       // 2 bytes: sectors per track (eg, 8)
