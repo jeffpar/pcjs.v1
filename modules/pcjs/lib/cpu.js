@@ -300,22 +300,10 @@ CPU.prototype.powerDown = function(fSave)
 CPU.prototype.autoStart = function()
 {
     if (this.aFlags.fAutoStart === true || this.aFlags.fAutoStart === null && (!DEBUGGER || !this.dbg) && this.bindings["run"] === undefined) {
-        this.runCPU();      // start running automatically on power-up, assuming there's no Debugger
+        this.runCPU();      // start running automatically on power-up, assuming there's no Debugger and no "Run" button
         return true;
     }
     return false;
-};
-
-/**
- * setFocus()
- *
- * @this {CPU}
- */
-CPU.prototype.setFocus = function()
-{
-    /*
-     * Nothing to do until powerUp() installs a replacement function
-     */
 };
 
 /**
@@ -467,7 +455,7 @@ CPU.prototype.displayReg = function(sReg, nVal, cch)
 /**
  * displayStatus()
  *
- * This will be implemented by the X86CPU component.
+ * This is implemented by the X86CPU component, which subclasses us.
  *
  * @this {CPU}
  * @param {boolean} [fForce]
@@ -479,13 +467,23 @@ CPU.prototype.displayStatus = function(fForce)
 /**
  * displayVideo()
  *
+ * This is implemented by the Video component (installed when initBus() is called).
+ *
  * @this {CPU}
  */
 CPU.prototype.displayVideo = function()
 {
-    /*
-     * Nothing to do until powerUp() installs a replacement function
-     */
+};
+
+/**
+ * setFocus()
+ *
+ * This is implemented by the Video component (installed when initBus() is called).
+ *
+ * @this {CPU}
+ */
+CPU.prototype.setFocus = function()
+{
 };
 
 /**
@@ -730,7 +728,8 @@ CPU.prototype.resetCycles = function()
  * @this {CPU}
  * @return {number} the current speed multiplier
  */
-CPU.prototype.getSpeed = function() {
+CPU.prototype.getSpeed = function()
+{
     return this.aCounts.nCyclesMultiplier;
 };
 
@@ -740,7 +739,8 @@ CPU.prototype.getSpeed = function() {
  * @this {CPU}
  * @return {string} the current speed, in mhz, as a string formatted to two decimal places
  */
-CPU.prototype.getSpeedCurrent = function() {
+CPU.prototype.getSpeedCurrent = function()
+{
     /*
      * TODO: Has toFixed() been "fixed" in all browsers (eg, IE) to return a rounded value now?
      */
@@ -753,7 +753,8 @@ CPU.prototype.getSpeedCurrent = function() {
  * @this {CPU}
  * @return {string} the target speed, in mhz, as a string formatted to two decimal places
  */
-CPU.prototype.getSpeedTarget = function() {
+CPU.prototype.getSpeedTarget = function()
+{
     /*
      * TODO: Has toFixed() been "fixed" in all browsers (eg, IE) to return a rounded value now?
      */
@@ -1025,7 +1026,7 @@ CPU.prototype.runCPU = function(fOnClick)
 /**
  * startCPU(fSetFocus)
  *
- * WARNING: Other components must use runCPU() to get the CPU running; This is a runCPU() helper function only; o
+ * WARNING: Other components must use runCPU() to get the CPU running; this is a runCPU() helper function only.
  *
  * @param {boolean} [fSetFocus]
  */

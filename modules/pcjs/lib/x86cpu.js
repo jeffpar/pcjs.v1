@@ -1736,7 +1736,7 @@ X86CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
         case "ES":
         case "IP":
         case "PC":      // deprecated as an alias for "IP" (still used by older XML files like /disks/pc/unlisted/crobots/machine.xml)
-        case "PS":      // this refers to "Processor Status", aka the 16-bit flags register (old versions of DEBUG actually refer to this as "PC", surprisingly)
+        case "PS":      // this refers to "Processor Status", aka the 16-bit flags register (DEBUG.COM actually refers to this as "PC", surprisingly)
         case "C":
         case "P":
         case "A":
@@ -2289,14 +2289,14 @@ X86CPU.prototype.pushWord = function(w)
  * piggy-back on the CPU's execution logic, to help drive async DMA requests.
  *
  * Originally, DMA requests (eg, FDC or HDC I/O operations) were all handled synchronously, since no actual
- * I/O was required to satisfy the request; from the CPU's perspective, this meant our DMA hardware was
- * incredibly fast.  However, with the introduction of remote disk connections, some actual I/O may be required;
+ * I/O was required to satisfy the request; from the CPU's perspective, this meant DMA operations were virtually
+ * instantaneous.  However, with the introduction of remote disk connections, some actual I/O may now be required;
  * in practice, this means that the FIRST byte requested as part of a DMA operation may require a callback to
- * finish, while all remaining bytes will be retrieved during subsequent checkINTR() calls -- unless additional
- * remote I/O operations are required to complete the DMA operation.
+ * finish, while all remaining bytes will be retrieved during subsequent checkINTR() calls -- unless of course
+ * additional remote I/O operations are required to complete the DMA operation.
  *
  * As a result, the CPU will run slightly slower while an async DMA request is in progress, but the slowdown
- * should be negligible.  The downside is that this slowdown will be in effect for the entire duration of the
+ * should be negligible.  One downside is that this slowdown will be in effect for the entire duration of the
  * I/O (ie, even while we're waiting for the remote I/O to finish), so the ChipSet component should avoid
  * calling setDMA() whenever possible.
  *
@@ -2305,10 +2305,9 @@ X86CPU.prototype.pushWord = function(w)
  * whereas I delay acknowledgment of the Trap flag until the *following* instruction, so in PCjs, SYMDEB
  * doesn't get control until the following instruction.  I think PCjs behavior is correct, at least for SS.
  *
- * ERRATA: I do recall that early revisions of the 8086/8088 failed to suppress hardware interrupts (and
- * possibly also Trap acknowledgements) after an SS load, but that Intel corrected the problem at some point;
- * however, I don't know when that change was made or which IBM PC models may have been affected, if any.
- * TODO: More research required.
+ * ERRATA: Early revisions of the 8086/8088 failed to suppress hardware interrupts (and possibly also Trap
+ * acknowledgements) after an SS load, but Intel corrected the problem at some point; however, I don't know when
+ * that change was made or which IBM PC models may have been affected, if any.  TODO: More research required.
  *
  * WARNING: There is also a priority consideration here.  On the 8086/8088, hardware interrupts have higher
  * priority than Trap interrupts (which is why the code below is written the way it is).  A potentially
@@ -2450,15 +2449,15 @@ X86CPU.prototype.displayStatus = function(fForce)
  *
  * @this {X86CPU}
  * @param {number} nMinCycles (0 implies a single-step, and therefore breakpoints should be ignored)
- * @return {number} of cycles executed; 0 indicates that the last instruction was not executed (eg,
- * we hit an execution breakpoint), -1 implies a post-execution condition was triggered (eg, a write
- * breakpoint), and a positive number indicates successful completion of the indicated number of cycles.
+ * @return {number} of cycles executed; 0 indicates a pre-execution condition (ie, an execution breakpoint
+ * was hit), -1 indicates a post-execution condition (eg, a read or write breakpoint was hit), and a positive
+ * number indicates successful completion of that many cycles (which should always be >= nMinCycles).
  */
 X86CPU.prototype.stepCPU = function(nMinCycles)
 {
     /*
      * The Debugger uses fComplete to determine if the instruction completed (true) or was interrupted
-     * by a breakpoint or some other exceptional condition (false). NOTE: this does NOT include thrown
+     * by a breakpoint or some other exceptional condition (false).  NOTE: this does NOT include JavaScript
      * exceptions, which stepCPU() expects the caller to catch using its own exception handler.
      *
      * The CPU relies on the use of stopCPU() rather than fComplete, because the CPU never single-steps
@@ -2478,8 +2477,8 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
      * to checkInstruction() that it can skip breakpoint checks, and that will be true ONLY when fStarting is
      * true OR nMinCycles is zero (the latter means the Debugger is single-stepping).
      *
-     * Once we snap fStarting, we clear it, because technically, we've moved beyond "starting" and have officially
-     * "started" now.
+     * Once we snap fStarting, we clear it, because technically, we've moved beyond "starting" and have
+     * officially "started" now.
      */
     var fDebugSkip = this.aFlags.fStarting || !nMinCycles;
     this.aFlags.fStarting = false;
