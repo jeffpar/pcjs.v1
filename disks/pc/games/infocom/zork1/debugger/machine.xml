@@ -14,15 +14,7 @@
 		<control type="button" binding="ctrl-alt-del">CTRL-ALT-DEL</control>
 	</keyboard>
 	<debugger id="debugger"/>
-	<panel ref="/devices/pc/panel/default.xml"/>
-	<fdc id="fdcNEC" automount='{A: {name: "Zork I", path: "/disks/pc/games/infocom/zork1/zork1-readonly.json"}}' pos="left" padleft="8px">
-		<control type="list" binding="listDrives"/>
-		<control type="list" binding="listDisks">
-			<disk path="">None</disk>
-			<manifest ref="/disks/pc/games/infocom/zork1/manifest.xml" disk="*"/>
-		</control>
-		<control type="button" binding="loadDrive">Load Drive</control>
-		<control type="description" binding="descDisk"/>
-	</fdc>
+	<panel ref="/devices/pc/panel/wide.xml"/>
+	<fdc ref="/disks/pc/games/infocom/disks.xml"/>
 	<chipset id="chipset" model="5150" sw1="01001001" sw2="11110000"/>
 </machine>
