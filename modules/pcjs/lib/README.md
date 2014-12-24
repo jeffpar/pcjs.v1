@@ -76,7 +76,8 @@ Features
 ### BackTrack Support
 
 The next major feature to be implemented is referred to as BackTrack Support, or simply BackTracks.  When BackTracks
-are enabled, every memory location (at the byte level) may have an optional link back to its source.
+are enabled, every memory location (at the byte level) and every general-purpose byte register may have an optional link
+back to its source.  These links are called BackTrack indexes.
 
 All the code that a virtual machine initially executes enters the machine either via ROM or disk sectors, and as that
 code executes, the machine is loading data into registers from memory locations and/or I/O ports and writing the results
@@ -84,33 +85,16 @@ to other memory locations and/or I/O ports.  BackTracks keep track of that data 
 of any piece of data at any time, down to the byte level; while this feature could be extended to the bit level, it
 would make the feature dramatically more expensive, both in terms of size and speed.
 
-BackTrack values are currently encoded as 32-bit values with three parts:
+A BackTrack index is encoded as a 32-bit value with three parts:
 
-- 16-bit Object Index (OI)
-- 9-bit Byte Index (0-511), relative to the start of the object (BI)
-- 6-bit Generation Index (0-63) (GI)
+- 15-bit BackTrack object index
+- 9-bit source object offset (0-511)
+- 6-bit generation number (1-63)
+
+This represents a total of 30 bits, with 2 bits reserved.
 
 Let's look at one of the last things a ROM does during boot: load a disk sector into RAM.  It will be up to the disk
 controller (or DMA controller if one is used) to create a BackTrack object representing the sector that was read,
-adding that object to a BackTrack Object array, and then associating the "Object Index" (OI) from that array with the
-first byte of RAM where the sector was loaded.  Subsequent bytes of RAM containing the rest of the sector will also
-have associated indexes, but they will be "Object-Relative Indexes" or ORIs (eg, +1, +2, +3, ..., +511).
-
-Similarly, when a chunk of memory is copied to another location, the first byte at the new location will have an
-associated "Memory Index" or MI that refers to the first byte at the old location, and subsequent bytes will have
-"Memory-Relative Indexes" or MRIs (eg, +1, +2, ..., +65535 for forward copies, or -1, -2, ..., -65535 for backward
-copies).  However, MRIs are optional, since every new memory location can simply use an MI to refer to the corresponding
-old memory location -- and indeed, that's likely all the first iteration of BackTracks will do.
-
-At this point, it's worth diving down a bit, and understanding what typical BackTrack indexes will look like.  We want
-them to be simple and low-overhead, so we'll stick with numbers (specifically, signed 32-bit values) to represent all
-possible index values.
-
-By biasing all absolute indexes by 65536, that allows values 1 through 65535 to represent relative indexes.
-We also want to allow negative relative indexes -1 through -65535, so to keep things simple, we won't ANY negative
-absolute indexes.
-
-So, we choose a range for absolute MIs of 0x00010000 to 0x0100FFFF (for a maximum of 16Mb), and a range for absolute
-OIs of 0x01010000 to 0x0101FFFF (for a maximum of 65536 objects).
-
-
+adding that object to the global BackTrack object array, and then associating the corresponding BackTrack index with
+the first byte of RAM where the sector was loaded.  Subsequent bytes of RAM containing the rest of the sector will refer
+to the same BackTrack object, using BackTrack indexes containing offsets 1-511.
