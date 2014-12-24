@@ -1650,13 +1650,13 @@ var X86OpXX = {
          *
          * To be clear, a single assignment like this will fail:
          *
-         *      opModeRegByteF2: function(fn) {
+         *      opModsRegByteF2: function(fn) {
          *          this.regDX = (this.regDX & 0xff) | (fn.call(this, this.regDX >> 8, this.regDX & 0xff) << 8);
          *      }
          *
          * which is why all affected decoders now use separate assignments; eg:
          *
-         *      opModeRegByteF2: function(fn) {
+         *      opModsRegByteF2: function(fn) {
          *          var b = fn.call(this, this.regDX >> 8, this.regDX & 0xff);
          *          this.regDX = (this.regDX & 0xff) | (b << 8);
          *      }
@@ -3225,7 +3225,7 @@ var X86OpXX = {
      *      0xF6 0xE0:  MUL AL
      *      0xF6 0xE4:  MUL AH
      *
-     * because the OpModeGrpByte decoder function will attempt to put the opGrpMULb() function's
+     * because the OpModsGrpByte decoder function will attempt to put the opGrpMULb() function's
      * return value back into AL or AH, undoing opGrpMULb's update of AX.  And since opGrpMULb doesn't
      * know what the target is (only the target's value), it cannot easily work around the problem.
      *
@@ -3251,7 +3251,7 @@ var X86OpXX = {
      *      0xF7 0xE0:  MUL AX
      *      0xF7 0xE2:  MUL DX
      *
-     * because the OpModeGrpWord decoder function will attempt to put the opGrpMULw() function's
+     * because the OpModsGrpWord decoder function will attempt to put the opGrpMULw() function's
      * return value back into AX or DX, undoing opGrpMULw's update of DX:AX.  And since opGrpMULw doesn't
      * know what the target is (only the target's value), it cannot easily work around the problem.
      *

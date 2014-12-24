@@ -2747,6 +2747,7 @@ ChipSet.prototype.requestDMA = function(iDMAChannel, done)
 /**
  * advanceDMA(channel, fInit)
  *
+ * @this {ChipSet}
  * @param {Object} channel
  * @param {boolean} [fInit]
  */
@@ -2772,7 +2773,8 @@ ChipSet.prototype.advanceDMA = function(channel, fInit)
      * I/O request, which will in turn trigger another async callback.  Thus, the DMA request keeps itself going without
      * requiring any special assistance from the CPU via setDMA().
      */
-    var obj = this;
+    var bto = null;
+    var chipset = this;
     var fAsyncRequest = false;
     var controller = channel.controller;
     var iDMAChannel = controller.nChannelBase + channel.iChannel;
@@ -2791,11 +2793,11 @@ ChipSet.prototype.advanceDMA = function(channel, fInit)
             if (channel.xfer == ChipSet.DMA_MODE.XFER_WRITE) {
                 fAsyncRequest = true;
                 (function advanceDMAWrite(addrCur) {
-                    channel.fnTransfer.call(channel.component, channel.obj, -1, function onTransferDMA(b, fAsync) {
+                    channel.fnTransfer.call(channel.component, channel.obj, -1, function onTransferDMA(b, fAsync, obj, off) {
                         if (b < 0) {
                             if (!channel.fWarning) {
-                                if (DEBUG && obj.messageEnabled(Messages.DMA)) {
-                                    obj.messagePrint("advanceDMA(" + iDMAChannel + ") ran out of data, assuming 0xff", true);
+                                if (DEBUG && chipset.messageEnabled(Messages.DMA)) {
+                                    chipset.messagePrint("advanceDMA(" + iDMAChannel + ") ran out of data, assuming 0xff", true);
                                 }
                                 channel.fWarning = true;
                             }
@@ -2807,18 +2809,20 @@ ChipSet.prototype.advanceDMA = function(channel, fInit)
                         if (!channel.masked) {
                             /*
                              * While it makes sense to call bus.setByteDirect(), since DMA deals with physical memory,
-                             * we lose the ability to trap accesses with write breakpoints by not using obj.cpu.setByte().
+                             * we lose the ability to trap accesses with write breakpoints by not using chipset.cpu.setByte().
                              *
                              * TODO: Consider providing a Bus memory interface that honors write breakpoints.
                              */
-                            obj.bus.setByteDirect(addrCur, b);
+                            chipset.bus.setByteDirect(addrCur, b);
+                            if (BACKTRACK) {
+                                bto = chipset.bus.addBackTrackObject(obj, bto, off);
+                                chipset.bus.setBackTrackIndex(addrCur, bto, off);
+                            }
                         }
                         fAsyncRequest = fAsync;
                         if (fAsync) {
                             setTimeout(function() {
-                                if (!obj.updateDMA(channel)) {
-                                    obj.advanceDMA(channel);
-                                }
+                                if (!chipset.updateDMA(channel)) chipset.advanceDMA(channel);
                             }, 0);
                         }
                     });
@@ -2827,12 +2831,12 @@ ChipSet.prototype.advanceDMA = function(channel, fInit)
             else if (channel.xfer == ChipSet.DMA_MODE.XFER_READ) {
                 /*
                  * While it makes sense to call bus.getByteDirect(), since DMA deals with physical memory,
-                 * we lose the ability to trap accesses with read breakpoints by not using obj.cpu.getByte().
+                 * we lose the ability to trap accesses with read breakpoints by not using chipset.cpu.getByte().
                  *
                  * TODO: Determine whether we should support async dmaWrite() functions (currently not required),
                  * and consider providing a Bus memory interface that honors read breakpoints.
                  */
-                b = obj.bus.getByteDirect(addr);
+                b = chipset.bus.getByteDirect(addr);
                 if (channel.fnTransfer.call(channel.component, channel.obj, b) < 0) {
                     /*
                      * In this case, I think I have no choice but to terminate the DMA operation in response to a failure,
@@ -2856,6 +2860,7 @@ ChipSet.prototype.advanceDMA = function(channel, fInit)
 /**
  * updateDMA(channel)
  *
+ * @this {ChipSet}
  * @param {Object} channel
  * @return {boolean} true if DMA operation complete, false if not
  */

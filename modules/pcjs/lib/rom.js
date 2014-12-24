@@ -90,20 +90,20 @@ Component.subclass(Component, ROM);
 
 /*
  * ROM BIOS Data Area (RBDA) definitions, in physical address form, using the same ALL-CAPS names
- * found in the original IBM PC ROM BIOS listing.
- *
- * TODO: Fill in remaining RBDA holes.
+ * found in the original IBM PC ROM BIOS listing.  TODO: Fill in remaining RBDA holes.
  */
-ROM.BIOS = {};
-ROM.BIOS.RS232_BASE     = 0x400;        // 4 (word) I/O addresses of RS-232 adapters
-ROM.BIOS.PRINTER_BASE   = 0x408;        // 4 (word) I/O addresses of printer adapters
-ROM.BIOS.EQUIP_FLAG     = 0x410;        // installed hardware (word)
-ROM.BIOS.MFG_TEST       = 0x412;        // initialization flag (byte)
-ROM.BIOS.MEMORY_SIZE    = 0x413;        // memory size in K-bytes (word)
-ROM.BIOS.RESET_FLAG     = 0x472;        // set to 0x1234 if keyboard reset underway (word)
-ROM.BIOS.RESET_FLAG_WARMBOOT = 0x1234;  // value stored at ROM.BIOS.RESET_FLAG to indicate a "warm boot", bypassing memory tests
+ROM.BIOS = {
+    RS232_BASE:     0x400,              // 4 (word) I/O addresses of RS-232 adapters
+    PRINTER_BASE:   0x408,              // 4 (word) I/O addresses of printer adapters
+    EQUIP_FLAG:     0x410,              // installed hardware (word)
+    MFG_TEST:       0x412,              // initialization flag (byte)
+    MEMORY_SIZE:    0x413,              // memory size in K-bytes (word)
+    RESET_FLAG:     0x472               // set to 0x1234 if keyboard reset underway (word)
+};
 
 // RESET_FLAG is the traditional end of the RBDA, as originally defined at real-mode segment 0x40.
+
+ROM.BIOS.RESET_FLAG_WARMBOOT = 0x1234;  // value stored at ROM.BIOS.RESET_FLAG to indicate a "warm boot", bypassing memory tests
 
 /*
  * NOTE: There's currently no need for this component to have a reset() function, since
@@ -316,8 +316,13 @@ ROM.prototype.addROM = function(addr)
     if (addr == null) return true;
     if (this.bus.addMemory(addr, this.sizeROM, true)) {
         if (DEBUG) this.log("addROM(): copying ROM to " + str.toHexAddr(addr) + " (0x" + str.toHex(this.abROM.length) + " bytes)");
+        var bto = null;
         for (var i = 0; i < this.abROM.length; i++) {
             this.bus.setByteDirect(addr + i, this.abROM[i]);
+            if (BACKTRACK) {
+                bto = this.bus.addBackTrackObject(this, bto, i);
+                this.bus.setBackTrackIndex(addr + i, bto, i);
+            }
         }
         return true;
     }

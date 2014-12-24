@@ -37,7 +37,7 @@ if (typeof module !== 'undefined') {
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
     var Messages    = require("./messages");
-    var SerialPort  = require("./serial");
+    var SerialPort  = require("./serialport");
     var State       = require("./state");
 }
 

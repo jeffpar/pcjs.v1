@@ -101,13 +101,28 @@ if (typeof module !== 'undefined') {
  * @param {boolean} [fReadOnly] is true if the block must be marked read-only
  * @param {Object} [controller] is an optional memory controller component
  */
-function Memory(addr, size, fReadOnly, controller) {
+function Memory(addr, size, fReadOnly, controller)
+{
+    var i;
+
     this.cb = size || 0;
     this.adw = null;
     this.offset = 0;
     this.fReadOnly = fReadOnly;
     this.controller = null;
     this.fDirty = this.fDirtyEver = false;
+
+    if (BACKTRACK) {
+        if (this.fReadOnly || !size || controller) {
+            this.readBackTrack = Memory.readBackTrackNone;
+            this.writeBackTrack = Memory.writeBackTrackNone;
+        } else {
+            this.readBackTrack = Memory.readBackTrackIndex;
+            this.writeBackTrack = Memory.writeBackTrackIndex;
+            this.abtIndexes = new Array(size);
+            for (i = 0; i < size; i++) this.abtIndexes[i] = 0;
+        }
+    }
 
     /*
      * For empty memory blocks, all we need to do is ensure all access functions
@@ -135,6 +150,9 @@ function Memory(addr, size, fReadOnly, controller) {
      * This is the normal case: allocate a buffer that provides 8 bits of data per address;
      * no controller is required because our default memory access functions (see afnMemory)
      * know how to deal with this simple 1-1 mapping of addresses to bytes and words.
+     *
+     * TODO: Consider initializing the memory array to random (or pseudo-random) values in DEBUG
+     * mode; pseudo-random might be best, because if that uncovers a bug, it might be reproducible.
      */
     if (TYPEDARRAYS) {
         this.buffer = new ArrayBuffer(size);
@@ -149,216 +167,307 @@ function Memory(addr, size, fReadOnly, controller) {
         if (FATARRAYS) {
             this.ab = new Array(size);
         } else {
+            /*
+             * NOTE: This is the default mode of operation (!TYPEDARRAYS && !FATARRAYS), because it
+             * seems to provide the best performance; and although in theory, that performance might
+             * come at twice the overhead of TYPEDARRAYS, it's increasingly likely that the JavaScript
+             * runtime will notice that all we ever store are 32-bit values, and optimize accordingly.
+             */
             this.adw = new Array(size >> 2);
-            for (var i = 0; i < this.adw.length; i++) {
-                this.adw[i] = 0;
-            }
+            for (i = 0; i < this.adw.length; i++) this.adw[i] = 0;
         }
         this.setAccess(Memory.afnMemory);
     }
 }
 
-Memory.prototype = {
-    constructor: Memory,
-    /**
-     * readNone(off)
-     *
-     * @this {Memory}
-     * @param {number} off
-     * @return {number}
-     */
-    readNone: function(off) {
-        if (DEBUGGER && this.dbg.messageEnabled(Messages.MEM) /* && !off */) {
-            this.dbg.message("attempt to read invalid block %" + str.toHex(this.addr) + " from " + str.toHexAddr(this.cpu.regIP, this.cpu.segCS.sel));
-        }
-        return 0;
-    },
-    /**
-     * writeNone(off, v)
-     *
-     * @this {Memory}
-     * @param {number} off
-     * @param {number} v (could be either a byte or word value, since we use the same handler for both kinds of accesses)
-     */
-    writeNone: function(off, v) {
-        if (DEBUGGER && this.dbg.messageEnabled(Messages.MEM) /* && !off */) {
-            this.dbg.message("attempt to write 0x" + str.toHexWord(v) + " to invalid block %" + str.toHex(this.addr), true);
-        }
-    },
-    /**
-     * readByteMemory(off)
-     *
-     * @this {Memory}
-     * @param {number} off
-     * @return {number}
-     */
-    readByteMemory: function readByteMemory(off) {
-        Component.assert(off >= 0 && off < this.cb);
-        if (FATARRAYS) {
-            return this.ab[off];
-        }
-        return ((this.adw[off >> 2] >>> ((off & 0x3) << 3)) & 0xff);
-    },
-    /**
-     * readWordMemory(off)
-     *
-     * @this {Memory}
-     * @param {number} off
-     * @return {number}
-     */
-    readWordMemory: function readWordMemory(off) {
-        Component.assert(off >= 0 && off < this.cb - 1);
-        if (FATARRAYS) {
-            return this.ab[off] | (this.ab[off + 1] << 8);
-        }
-        var w;
+/**
+ * readNone(off)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @return {number}
+ */
+Memory.readNone = function readNone(off)
+{
+    if (DEBUGGER && this.dbg.messageEnabled(Messages.MEM) /* && !off */) {
+        this.dbg.message("attempt to read invalid block %" + str.toHex(this.addr) + " from " + str.toHexAddr(this.cpu.regIP, this.cpu.segCS.sel));
+    }
+    return 0;
+};
+
+/**
+ * writeNone(off, v)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @param {number} v (could be either a byte or word value, since we use the same handler for both kinds of accesses)
+ */
+Memory.writeNone = function writeNone(off, v) {
+    if (DEBUGGER && this.dbg.messageEnabled(Messages.MEM) /* && !off */) {
+        this.dbg.message("attempt to write 0x" + str.toHexWord(v) + " to invalid block %" + str.toHex(this.addr), true);
+    }
+},
+
+/**
+ * readByteMemory(off)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @return {number}
+ */
+Memory.readByteMemory = function readByteMemory(off)
+{
+    Component.assert(off >= 0 && off < this.cb);
+    if (FATARRAYS) {
+        return this.ab[off];
+    }
+    return ((this.adw[off >> 2] >>> ((off & 0x3) << 3)) & 0xff);
+};
+
+/**
+ * readWordMemory(off)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @return {number}
+ */
+Memory.readWordMemory = function readWordMemory(off)
+{
+    Component.assert(off >= 0 && off < this.cb - 1);
+    if (FATARRAYS) {
+        return this.ab[off] | (this.ab[off + 1] << 8);
+    }
+    var w;
+    var idw = off >> 2;
+    var nShift = (off & 0x3) << 3;
+    var dw = (this.adw[idw] >>> nShift);
+    if (nShift < 24) {
+        w = dw & 0xffff;
+    } else {
+        w = (dw & 0xff) | ((this.adw[idw + 1] & 0xff) << 8);
+    }
+    return w;
+};
+
+/**
+ * writeByteMemory(off, b)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @param {number} b
+ */
+Memory.writeByteMemory = function writeByteMemory(off, b)
+{
+    Component.assert(off >= 0 && off < this.cb && (b & 0xff) == b);
+    if (FATARRAYS) {
+        this.ab[off] = b;
+    } else {
         var idw = off >> 2;
         var nShift = (off & 0x3) << 3;
-        var dw = (this.adw[idw] >>> nShift);
+        this.adw[idw] = (this.adw[idw] & ~(0xff << nShift)) | (b << nShift);
+    }
+    this.fDirty = true;
+};
+
+/**
+ * writeWordMemory(off, w)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @param {number} w
+ */
+Memory.writeWordMemory = function writeWordMemory(off, w)
+{
+    Component.assert(off >= 0 && off < this.cb - 1 && (w & 0xffff) == w);
+    if (FATARRAYS) {
+        this.ab[off] = (w & 0xff);
+        this.ab[off + 1] = (w >> 8);
+    } else {
+        var idw = off >> 2;
+        var nShift = (off & 0x3) << 3;
         if (nShift < 24) {
-            w = dw & 0xffff;
+            this.adw[idw] = (this.adw[idw] & ~(0xffff << nShift)) | (w << nShift);
         } else {
-            w = (dw & 0xff) | ((this.adw[idw + 1] & 0xff) << 8);
+            this.adw[idw] = (this.adw[idw] & 0x00ffffff) | (w << 24);
+            idw++;
+            this.adw[idw] = (this.adw[idw] & 0xffffff00) | (w >> 8);
         }
-        return w;
-    },
-    /**
-     * writeByteMemory(off, b)
-     *
-     * @this {Memory}
-     * @param {number} off
-     * @param {number} b
-     */
-    writeByteMemory: function writeByteMemory(off, b) {
-        Component.assert(off >= 0 && off < this.cb && (b & 0xff) == b);
-        if (FATARRAYS) {
-            this.ab[off] = b;
-        } else {
-            var idw = off >> 2;
-            var nShift = (off & 0x3) << 3;
-            this.adw[idw] = (this.adw[idw] & ~(0xff << nShift)) | (b << nShift);
-        }
-        this.fDirty = true;
-    },
-    /**
-     * writeWordMemory(off, w)
-     *
-     * @this {Memory}
-     * @param {number} off
-     * @param {number} w
-     */
-    writeWordMemory: function writeWordMemory(off, w) {
-        Component.assert(off >= 0 && off < this.cb - 1 && (w & 0xffff) == w);
-        if (FATARRAYS) {
-            this.ab[off] = (w & 0xff);
-            this.ab[off + 1] = (w >> 8);
-        } else {
-            var idw = off >> 2;
-            var nShift = (off & 0x3) << 3;
-            if (nShift < 24) {
-                this.adw[idw] = (this.adw[idw] & ~(0xffff << nShift)) | (w << nShift);
-            } else {
-                this.adw[idw] = (this.adw[idw] & 0x00ffffff) | (w << 24);
-                idw++;
-                this.adw[idw] = (this.adw[idw] & 0xffffff00) | (w >> 8);
-            }
-        }
-        this.fDirty = true;
-    },
-    /**
-     * readByteChecked(off)
-     *
-     * @this {Memory}
-     * @param {number} off
-     * @return {number}
-     */
-    readByteChecked: function readByteChecked(off) {
-        if (DEBUGGER) this.dbg.checkMemoryRead(this.addr + off);
-        return this.readByteDirect(off);
-    },
-    /**
-     * readWordChecked(off)
-     *
-     * @this {Memory}
-     * @param {number} off
-     * @return {number}
-     */
-    readWordChecked: function readWordChecked(off) {
-        if (DEBUGGER) {
-            this.dbg.checkMemoryRead(this.addr + off) || this.dbg.checkMemoryRead(this.addr + off + 1);     // jshint ignore:line
-        }
-        return this.readWordDirect(off);
-    },
-    /**
-     * writeByteChecked(off, b)
-     *
-     * @this {Memory}
-     * @param {number} off
-     * @param {number} b
-     */
-    writeByteChecked: function writeByteChecked(off, b) {
-        if (DEBUGGER) this.dbg.checkMemoryWrite(this.addr + off);
-        this.writeByteDirect(off, b);
-    },
-    /**
-     * writeWordChecked(off, w)
-     *
-     * @this {Memory}
-     * @param {number} off
-     * @param {number} w
-     */
-    writeWordChecked: function writeWordChecked(off, w) {
-        if (DEBUGGER) {
-            this.dbg.checkMemoryWrite(this.addr + off) || this.dbg.checkMemoryWrite(this.addr + off + 1);   // jshint ignore:line
-        }
-        this.writeWordDirect(off, w);
-    },
-    /**
-     * readByteTypedArray(off)
-     *
-     * @this {Memory}
-     * @param {number} off
-     * @return {number}
-     */
-    readByteTypedArray: function readByteTypedArray(off) {
-        Component.assert(off >= 0 && off < this.cb);
-        return this.ab[off];
-    },
-    /**
-     * readWordTypedArray(off)
-     *
-     * @this {Memory}
-     * @param {number} off
-     * @return {number}
-     */
-    readWordTypedArray: function readWordTypedArray(off) {
-        Component.assert(off >= 0 && off < this.cb - 1);
-        return this.dv.getUint16(off, true);
-    },
-    /**
-     * writeByteTypedArray(off, b)
-     *
-     * @this {Memory}
-     * @param {number} off
-     * @param {number} b
-     */
-    writeByteTypedArray: function writeByteTypedArray(off, b) {
-        Component.assert(off >= 0 && off < this.cb && (b & 0xff) == b);
-        this.ab[off] = b;
-        this.fDirty = true;
-    },
-    /**
-     * writeWordTypedArray(off, w)
-     *
-     * @this {Memory}
-     * @param {number} off
-     * @param {number} w
-     */
-    writeWordTypedArray: function writeWordTypedArray(off, w) {
-        Component.assert(off >= 0 && off < this.cb - 1 && (w & 0xffff) == w);
-        this.dv.setUint16(off, w, true);
-        this.fDirty = true;
-    },
+    }
+    this.fDirty = true;
+};
+
+/**
+ * readByteChecked(off)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @return {number}
+ */
+Memory.readByteChecked = function readByteChecked(off)
+{
+    if (DEBUGGER) this.dbg.checkMemoryRead(this.addr + off);
+    return this.readByteDirect(off);
+};
+
+/**
+ * readWordChecked(off)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @return {number}
+ */
+Memory.readWordChecked = function readWordChecked(off)
+{
+    if (DEBUGGER) {
+        this.dbg.checkMemoryRead(this.addr + off) || this.dbg.checkMemoryRead(this.addr + off + 1);     // jshint ignore:line
+    }
+    return this.readWordDirect(off);
+};
+
+/**
+ * writeByteChecked(off, b)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @param {number} b
+ */
+Memory.writeByteChecked = function writeByteChecked(off, b)
+{
+    if (DEBUGGER) this.dbg.checkMemoryWrite(this.addr + off);
+    this.writeByteDirect(off, b);
+};
+
+/**
+ * writeWordChecked(off, w)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @param {number} w
+ */
+Memory.writeWordChecked = function writeWordChecked(off, w)
+{
+    if (DEBUGGER) {
+        this.dbg.checkMemoryWrite(this.addr + off) || this.dbg.checkMemoryWrite(this.addr + off + 1);   // jshint ignore:line
+    }
+    this.writeWordDirect(off, w);
+};
+
+/**
+ * readByteTypedArray(off)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @return {number}
+ */
+Memory.readByteTypedArray = function readByteTypedArray(off)
+{
+    Component.assert(off >= 0 && off < this.cb);
+    return this.ab[off];
+};
+
+/**
+ * readWordTypedArray(off)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @return {number}
+ */
+Memory.readWordTypedArray = function readWordTypedArray(off)
+{
+    Component.assert(off >= 0 && off < this.cb - 1);
+    return this.dv.getUint16(off, true);
+};
+
+/**
+ * writeByteTypedArray(off, b)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @param {number} b
+ */
+Memory.writeByteTypedArray = function writeByteTypedArray(off, b)
+{
+    Component.assert(off >= 0 && off < this.cb && (b & 0xff) == b);
+    this.ab[off] = b;
+    this.fDirty = true;
+};
+
+/**
+ * writeWordTypedArray(off, w)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @param {number} w
+ */
+Memory.writeWordTypedArray = function writeWordTypedArray(off, w)
+{
+    Component.assert(off >= 0 && off < this.cb - 1 && (w & 0xffff) == w);
+    this.dv.setUint16(off, w, true);
+    this.fDirty = true;
+};
+
+/**
+ * readBackTrackNone(off)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @return {number}
+ */
+Memory.readBackTrackNone = function readBackTrackNone(off)
+{
+    return 0;
+};
+
+/**
+ * writeBackTrackNone(off, bti)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @param {number} bti
+ */
+Memory.writeBackTrackNone = function writeBackTrackNone(off, bti)
+{
+};
+
+/**
+ * readBackTrackIndex(off)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @return {number}
+ */
+Memory.readBackTrackIndex = function readBackTrackIndex(off)
+{
+    Component.assert(off >= 0 && off < this.cb);
+    return this.abtIndexes[off];
+};
+
+/**
+ * writeBackTrackIndex(off, bti)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @param {number} bti
+ * @return {number} previous bti (0 if none)
+ */
+Memory.writeBackTrackIndex = function writeBackTrackIndex(off, bti)
+{
+    var btiPrev;
+    Component.assert(off >= 0 && off < this.cb);
+    btiPrev = this.abtIndexes[off];
+    this.abtIndexes[off] = bti;
+    return btiPrev;
+};
+
+Memory.afnMemory = [Memory.readByteMemory, Memory.readWordMemory, Memory.writeByteMemory, Memory.writeWordMemory];
+Memory.afnChecked = [Memory.readByteChecked, Memory.readWordChecked, Memory.writeByteChecked, Memory.writeWordChecked];
+
+if (TYPEDARRAYS) {
+    Memory.afnTypedArray = [Memory.readByteTypedArray, Memory.readWordTypedArray, Memory.writeByteTypedArray, Memory.writeWordTypedArray];
+}
+
+Memory.prototype = {
+    constructor: Memory,
     /**
      * save()
      *
@@ -424,9 +533,9 @@ Memory.prototype = {
         /*
          * At this point, it's a consistency error for adw to be null; it's happened once already,
          * when there was a restore bug in the Video component that added the frame buffer at the video
-         * card's "spec'ed" address instead of the programmed address, hence there were no controller-owned
-         * memory blocks installed at the programmed address, and so we arrived here at a block with no
-         * controller AND no data.
+         * card's "spec'ed" address instead of the programmed address, so there were no controller-owned
+         * memory blocks installed at the programmed address, and so we arrived here at a block with
+         * no controller AND no data.
          */
         Component.assert(adw != null);
         if (adw && this.cb == adw.length << 2) {
@@ -473,11 +582,11 @@ Memory.prototype = {
      * @param {boolean} [fDirect]
      */
     setReadAccess: function(afn, fDirect) {
-        this.readByte = afn[0]? afn[0] : this.readNone;
-        this.readWord = afn[1]? afn[1] : this.readNone;
+        this.readByte = afn[0] || Memory.readNone;
+        this.readWord = afn[1] || Memory.readNone;
         if (fDirect) {
-            this.readByteDirect = afn[0]? afn[0] : this.readNone;
-            this.readWordDirect = afn[1]? afn[1] : this.readNone;
+            this.readByteDirect = afn[0] || Memory.readNone;
+            this.readWordDirect = afn[1] || Memory.readNone;
         }
     },
     /**
@@ -488,11 +597,11 @@ Memory.prototype = {
      * @param {boolean} [fDirect]
      */
     setWriteAccess: function(afn, fDirect) {
-        this.writeByte = afn[2] && !this.fReadOnly? afn[2] : this.writeNone;
-        this.writeWord = afn[3] && !this.fReadOnly? afn[3] : this.writeNone;
+        this.writeByte = !this.fReadOnly && afn[2] || Memory.writeNone;
+        this.writeWord = !this.fReadOnly && afn[3] || Memory.writeNone;
         if (fDirect) {
-            this.writeByteDirect = afn[2]? afn[2] : this.writeNone;
-            this.writeWordDirect = afn[3]? afn[3] : this.writeNone;
+            this.writeByteDirect = afn[2] || Memory.writeNone;
+            this.writeWordDirect = afn[3] || Memory.writeNone;
         }
     },
     /**
@@ -510,8 +619,8 @@ Memory.prototype = {
      * @this {Memory}
      */
     resetWriteAccess: function() {
-        this.writeByte = this.fReadOnly? this.writeNone : this.writeByteDirect;
-        this.writeWord = this.fReadOnly? this.writeNone : this.writeWordDirect;
+        this.writeByte = this.fReadOnly? Memory.writeNone : this.writeByteDirect;
+        this.writeWord = this.fReadOnly? Memory.writeNone : this.writeWordDirect;
     },
     /**
      * setDebugInfo(cpu, dbg, addr, size)
@@ -580,13 +689,6 @@ Memory.prototype = {
         }
     }
 };
-
-Memory.afnMemory = [Memory.prototype.readByteMemory, Memory.prototype.readWordMemory, Memory.prototype.writeByteMemory, Memory.prototype.writeWordMemory];
-Memory.afnChecked = [Memory.prototype.readByteChecked, Memory.prototype.readWordChecked, Memory.prototype.writeByteChecked, Memory.prototype.writeWordChecked];
-
-if (TYPEDARRAYS) {
-    Memory.afnTypedArray = [Memory.prototype.readByteTypedArray, Memory.prototype.readWordTypedArray, Memory.prototype.writeByteTypedArray, Memory.prototype.writeWordTypedArray];
-}
 
 if (typeof APP_PCJS !== 'undefined') APP_PCJS.Memory = Memory;
 

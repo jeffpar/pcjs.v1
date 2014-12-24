@@ -423,11 +423,18 @@ X86CPU.CYCLES_80286 = {
  * that can easily be changed to 6 bytes if/when we decide to fully implement 8086 support
  * (see X86CPU.PREFETCH.QUEUE).  It's just not clear whether that support will be a goal.
  */
+X86CPU.PREFETCH = {
+    QUEUE:      4,
+    ARRAY:      8,              // smallest power-of-two > PREFETCH.QUEUE
+    MASK:       0x7             // (X86CPU.PREFETCH.ARRAY - 1)
+};
 
-X86CPU.PREFETCH = {};
-X86CPU.PREFETCH.QUEUE  = 4;
-X86CPU.PREFETCH.ARRAY  = 8;        // smallest power-of-two > PREFETCH.QUEUE
-X86CPU.PREFETCH.MASK   = 0x7;      // (X86CPU.PREFETCH.ARRAY - 1)
+if (BACKTRACK) {
+    X86CPU.BACKTRACK = {
+        SP_LO:  0,
+        SP_HI:  0
+    };
+}
 
 /**
  * initMemory(aMemBlocks, addrLimit, blockShift, blockLimit, blockMask)
@@ -691,7 +698,7 @@ X86CPU.prototype.initProcessor = function()
 
     this.CYCLES = (this.model >= X86.MODEL_80286? X86CPU.CYCLES_80286 : X86CPU.CYCLES_8088);
 
-    this.aOps     = X86OpXX.aOps.slice();   // make a copy of aOps and others before modifying them
+    this.aOps     = X86OpXX.aOps.slice();   // make copies of aOps and others before modifying them
     this.aOpGrp4b = X86Grps.aOpGrp4b.slice();
     this.aOpGrp4w = X86Grps.aOpGrp4w.slice();
     this.aOpGrp6  = X86Op0F.aOpGrp6Real;    // setProtMode() will ensure that aOpGrp6 is switched
@@ -754,7 +761,6 @@ X86CPU.prototype.reset = function()
     this.resetRegs();
     this.resetCycles();
     this.clearError();      // clear any fatal error/exception that setError() may have flagged
-
     if (SAMPLER) {
         this.iSampleNext = 0;
         this.iSampleFreq = 0;
@@ -767,21 +773,21 @@ X86CPU.prototype.reset = function()
  *
  * According to "The 8086 Book", p.7-5, a RESET signal initializes the following registers:
  *
- *      PS = 0x0000 (which has the important side-effect of disabling interrupts and traps)
- *      IP = 0x0000
- *      CS = 0xFFFF
- *      DS/ES/SS = 0x0000
+ *      PS          =   0x0000 (which has the important side-effect of disabling interrupts and traps)
+ *      IP          =   0x0000
+ *      CS          =   0xFFFF
+ *      DS/ES/SS    =   0x0000
  *
  * It is silent as to whether the remaining registers are initialized to any particular values.
  *
  * According to the "80286 and 80287 Programmer's Reference Manual", these 80286 registers are reset:
  *
- *      PS  = 0x0002
- *      MSW = 0xFFF0
- *      IP  = 0xFFF0
- *      CS Selector =   0xF000  DS/ES/SS Selector =   0x0000
- *      CS Base     = 0xFF0000  DS/ES/SS Base     = 0x000000    IDT Base  = 0x000000
- *      CS Limit    =   0xFFFF  DS/ES/SS Limit    =   0xFFFF    IDT Limit =   0x03FF
+ *      PS          =   0x0002
+ *      MSW         =   0xFFF0
+ *      IP          =   0xFFF0
+ *      CS Selector =   0xF000      DS/ES/SS Selector =   0x0000
+ *      CS Base     = 0xFF0000      DS/ES/SS Base     = 0x000000        IDT Base  = 0x000000
+ *      CS Limit    =   0xFFFF      DS/ES/SS Limit    =   0xFFFF        IDT Limit =   0x03FF
  *
  * We define some additional "registers", such as regEIP. which mirrors the physical address corresponding
  * to CS:IP (ie, the address of the next opcode).  This means that whenever segCS or regIP are explicitly
@@ -790,7 +796,7 @@ X86CPU.prototype.reset = function()
  * segCS is changing (eg, undocumented 8086 opcodes), use setCS().
  *
  * The other segment registers (DS, SS and ES) have similar setters (for segDS, segSS and segES), but those
- * functions do not mirror any special segment:offset values in the same way that regEIP mirrors CS:IP.
+ * functions do not mirror any segment:offset values in the same way that regEIP mirrors CS:IP.
  *
  * @this {X86CPU}
  */
@@ -832,6 +838,37 @@ X86CPU.prototype.resetRegs = function()
     this.segSS   = new X86Seg(this, X86Seg.ID.STACK, "SS");
     this.segNULL = new X86Seg(this, X86Seg.ID.NULL,  "NULL");
     this.setCSIP(0, 0xFFFF);                            // this should be called before the first setPS() call
+
+    if (BACKTRACK) {
+        /*
+         * Initialize the backtrack indexes for all registers to zero.  And while, yes, it IS possible
+         * for raw data to flow through segment registers as well, it's not common enough in real-mode
+         * (and too difficult in protected-mode) to merit the overhead.  Ditto for SP, which can't really
+         * be considered a general-purpose register.
+         *
+         * Every time getByte() is called, btMemLo is filled with the matching backtrack info; similarly,
+         * every time getWord() is called, btMemLo and btMemHi are filled with the matching backtrack info
+         * for the low and high bytes, respectively.
+         */
+        this.backTrack = {
+            btiAL:      0,
+            btiAH:      0,
+            btiBL:      0,
+            btiBH:      0,
+            btiCL:      0,
+            btiCH:      0,
+            btiDL:      0,
+            btiDH:      0,
+            btiBPLo:    0,
+            btiBPHi:    0,
+            btiSILo:    0,
+            btiSIHi:    0,
+            btiDILo:    0,
+            btiDIHi:    0,
+            btiMemLo:   0,
+            btiMemHi:   0
+        };
+    }
 
     /*
      * Assorted 80286-specific registers.  The GDTR and IDTR registers are stored as the following pieces:
@@ -892,7 +929,7 @@ X86CPU.prototype.resetRegs = function()
     /*
      * Another internal "register" we occasionally need is an interim copy of bModRM, set inside selected opcode
      * handlers so that the helper function can have access to the instruction's bModRM without resorting to a closure
-     * (which, in Chrome's V8, for example, seems to cause constant recompilation).
+     * (which, in the Chrome V8 engine, for example, seems to cause constant recompilation).
      */
     this.bModRM = 0;
 
@@ -1649,8 +1686,8 @@ X86CPU.prototype.setPS = function(regPS, cpl)
      * pops 0xF000 into the flags is able to set *any* of flag bits 12-15: if it can, then OS/2 declares
      * the CPU an 80386.  Therefore, in real-mode, we must zero all incoming bits 12-15.
      *
-     * This has the added benefit of relieving us from having to zero the effective IOPL (this.nIOPL)
-     * whenever we're in real-mode, since we're zeroing the IOPL bits up front now.
+     * This has the added benefit of relieving us from zeroing the effective IOPL (this.nIOPL) whenever
+     * we're in real-mode, since we're zeroing the incoming IOPL bits up front now.
      */
     if (!(this.regMSW & X86.MSW.PE)) {
         regPS &= ~(X86.PS.IOPL.MASK | X86.PS.NT | X86.PS.BIT15);
@@ -1735,7 +1772,7 @@ X86CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
         case "SS":
         case "ES":
         case "IP":
-        case "PC":      // deprecated as an alias for "IP" (still used by older XML files like /disks/pc/unlisted/crobots/machine.xml)
+        case "PC":      // deprecated as an alias for "IP" (still used by older XML files like the one at http://tpoindex.github.io/crobots/)
         case "PS":      // this refers to "Processor Status", aka the 16-bit flags register (DEBUG.COM actually refers to this as "PC", surprisingly)
         case "C":
         case "P":
@@ -1765,6 +1802,9 @@ X86CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
  */
 X86CPU.prototype.getByte = function(addr)
 {
+    if (BACKTRACK) {
+        this.backTrack.btiMemLo = this.aMemBlocks[(addr & this.addrMemMask) >> this.blockShift].readBackTrack(addr & this.blockLimit);
+    }
     return this.aMemBlocks[(addr & this.addrMemMask) >> this.blockShift].readByte(addr & this.blockLimit);
 };
 
@@ -1786,7 +1826,15 @@ X86CPU.prototype.getWord = function(addr)
      */
     this.nStepCycles -= this.CYCLES.nWordCyclePenalty;
     if (off != this.blockLimit) {
+        if (BACKTRACK) {
+            this.backTrack.btiMemLo = this.aMemBlocks[iBlock].readBackTrack(off);
+            this.backTrack.btiMemHi = this.aMemBlocks[iBlock].readBackTrack(off + 1);
+        }
         return this.aMemBlocks[iBlock].readWord(off);
+    }
+    if (BACKTRACK) {
+        this.backTrack.btiMemLo = this.aMemBlocks[iBlock].readBackTrack(off);
+        this.backTrack.btiMemHi = this.aMemBlocks[(iBlock + 1) & this.blockMask].readBackTrack(0);
     }
     return this.aMemBlocks[iBlock++].readByte(off) | (this.aMemBlocks[iBlock & this.blockMask].readByte(0) << 8);
 };
@@ -1800,6 +1848,9 @@ X86CPU.prototype.getWord = function(addr)
  */
 X86CPU.prototype.setByte = function(addr, b)
 {
+    if (BACKTRACK) {
+        this.aMemBlocks[(addr & this.addrMemMask) >> this.blockShift].writeBackTrack(addr & this.blockLimit, this.backTrack.btiMemLo);
+    }
     this.aMemBlocks[(addr & this.addrMemMask) >> this.blockShift].writeByte(addr & this.blockLimit, b & 0xff);
 };
 
@@ -1821,8 +1872,16 @@ X86CPU.prototype.setWord = function(addr, w)
      */
     this.nStepCycles -= this.CYCLES.nWordCyclePenalty;
     if (off != this.blockLimit) {
+        if (BACKTRACK) {
+            this.aMemBlocks[iBlock].writeBackTrack(off, this.backTrack.btiMemLo);
+            this.aMemBlocks[iBlock].writeBackTrack(off + 1, this.backTrack.btiMemHi);
+        }
         this.aMemBlocks[iBlock].writeWord(off, w & 0xffff);
         return;
+    }
+    if (BACKTRACK) {
+        this.aMemBlocks[iBlock].writeBackTrack(off, this.backTrack.btiMemLo);
+        this.aMemBlocks[(iBlock + 1) & this.blockMask].writeBackTrack(0, this.backTrack.btiMemHi);
     }
     this.aMemBlocks[iBlock++].writeByte(off, w & 0xff);
     this.aMemBlocks[iBlock & this.blockMask].writeByte(0, (w >> 8) & 0xff);
@@ -2071,8 +2130,11 @@ X86CPU.prototype.getBytePrefetch = function(addr)
     if (!EAFUNCS && (this.opFlags & X86.OPFLAG.NOREAD)) return 0;
     var b;
     if (!this.cbPrefetchQueued) {
-        if (MAXDEBUG) this.assert(addr == this.addrPrefetchHead, "X86CPU.getBytePrefetch(" + str.toHex(addr) + "): invalid head address (" + str.toHex(this.addrPrefetchHead) + ")");
-        if (MAXDEBUG) this.assert(this.iPrefetchTail == this.iPrefetchHead, "X86CPU.getBytePrefetch(" + str.toHex(addr) + "): head (" + this.iPrefetchHead + ") does not match tail (" + this.iPrefetchTail + ")");
+        if (MAXDEBUG) {
+            this.messagePrint("  getBytePrefetch[" + this.iPrefetchTail + "]: filling");
+            this.assert(addr == this.addrPrefetchHead, "X86CPU.getBytePrefetch(" + str.toHex(addr) + "): invalid head address (" + str.toHex(this.addrPrefetchHead) + ")");
+            this.assert(this.iPrefetchTail == this.iPrefetchHead, "X86CPU.getBytePrefetch(" + str.toHex(addr) + "): head (" + this.iPrefetchHead + ") does not match tail (" + this.iPrefetchTail + ")");
+        }
         this.fillPrefetch(1);
         this.nBusCycles += 4;
         /*
@@ -2088,8 +2150,10 @@ X86CPU.prototype.getBytePrefetch = function(addr)
          */
     }
     b = this.aPrefetch[this.iPrefetchTail] & 0xff;
-    if (MAXDEBUG) this.messagePrint("  getBytePrefetch[" + this.iPrefetchTail + "]: " + str.toHex(addr) + ":" + str.toHexByte(b));
-    if (MAXDEBUG) this.assert(addr == (this.aPrefetch[this.iPrefetchTail] >> 8), "X86CPU.getBytePrefetch(" + str.toHex(addr) + "): invalid tail address (" + str.toHex(this.aPrefetch[this.iPrefetchTail] >> 8) + ")");
+    if (MAXDEBUG) {
+        this.messagePrint("  getBytePrefetch[" + this.iPrefetchTail + "]: " + str.toHex(addr) + ":" + str.toHexByte(b));
+        this.assert(addr == (this.aPrefetch[this.iPrefetchTail] >> 8), "X86CPU.getBytePrefetch(" + str.toHex(addr) + "): invalid tail address (" + str.toHex(this.aPrefetch[this.iPrefetchTail] >> 8) + ")");
+    }
     this.iPrefetchTail = (this.iPrefetchTail + 1) & X86CPU.PREFETCH.MASK;
     this.cbPrefetchQueued--;
     return b;

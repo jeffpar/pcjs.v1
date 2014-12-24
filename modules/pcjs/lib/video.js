@@ -1140,9 +1140,9 @@ if (DEBUGGER) Card.GRC.REGS = ["SRESET","ESRESET","COLRCMP","DATAROT","READMAP",
  * we rely on the Memory object's "this.controller" property to give us access to the Card's state.
  *
  * And we take a little extra time to conditionally set fDirty on writes, meaning if a write did not actually
- * change the value of the memory, we will not set fDirty.  The default write functions in mem.js don't take that
- * performance hit, but here, it may be worthwhile, because if it results in fewer dirty blocks, display updates
- * may be faster.
+ * change the value of the memory, we will not set fDirty.  The default write functions in memory.js don't take
+ * that performance hit, but here, it may be worthwhile, because if it results in fewer dirty blocks, display
+ * updates may be faster.
  *
  * Note that we don't have to worry about dealing with word accesses that straddle block boundaries, because
  * the Bus component automatically breaks those accesses into separate byte requests.  Similarly, byte and word

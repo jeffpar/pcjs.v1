@@ -66,8 +66,8 @@
  * ---
  * Originally, when the Disk class was given a disk image to load and mount, it would request the
  * ENTIRE disk image from the DiskDump module.  That works well for small (floppy) disk images, but
- * for larger disks -- let's just say anything stored on the server as an IMG file -- we'd prefer
- * to interact with that disk using "On-Demand I/O".  Any IMG file on the same server as the PCjs
+ * for larger disks -- let's just say anything stored on the server as an "img" file -- we'd prefer
+ * to interact with that disk using "On-Demand I/O".  Any "img" file on the same server as the PCjs
  * application should be a candidate for on-demand access.
  *
  * On-Demand I/O means that nothing is initially transferred from the server.  As sectors are
@@ -558,7 +558,7 @@ Disk.prototype.load = function(sDiskName, sDiskPath, file, fnNotify, controller)
                  * driveConfig 'size' parm, or to match the capacity required by the driveConfig 'type' parameter.
                  *
                  * If a 'disk' is specified, we pass mbhd=0, because the actual size will depend on the image.
-                 * However, I don't currently have any .DSK or .IMG files containing hard disk images; those formats
+                 * However, I don't currently have any "dsk" or "img" files containing hard disk images; those formats
                  * were really intended for floppy disk images.  If I never create any hard disk image files, then
                  * we can simply eliminate sSizeParm in the 'disk' case.
                  *
@@ -781,9 +781,9 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
                 /*
                  * Before the image is usable, we must "normalize" all the sectors.  In the past, this meant
                  * "inflating" them all.  However, that's no longer strictly necessary.  Mainly, it just means
-                 * setting 'length', 'pattern' and 'data' properties, so that all the sectors are well-defined.
-                 * This includes detecting sector data in older formats (eg, the OLD array of 'bytes' instead
-                 * of the NEW 'data' array of dwords) and converting them on-the-fly to the current format.
+                 * setting 'length', 'data', and 'pattern' properties, so that all the sectors are well-defined.
+                 * This includes detecting sector data in older formats (eg, the old array of 'bytes' instead
+                 * of the new 'data' array of dwords) and converting them on-the-fly to the current format.
                  */
                 this.nCylinders = aDiskData.length;
                 this.nHeads = aDiskData[0].length;

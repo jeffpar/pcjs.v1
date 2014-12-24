@@ -35,9 +35,17 @@
 if (typeof module !== 'undefined') {
     var str         = require("../../shared/lib/strlib");
     var Component   = require("../../shared/lib/component");
-    var Memory      = require("./mem");
+    var Memory      = require("./memory");
     var State       = require("./state");
 }
+
+/**
+ * @class BackTrack
+ * @property {Object} obj
+ * @property {number} off
+ * @property {number} slot
+ * @property {number} refs
+ */
 
 /**
  * Bus(cpu, dbg)
@@ -154,10 +162,35 @@ function Bus(parmsBus, cpu, dbg)
      * Allocate empty Memory blocks to span the entire physical address space.
      */
     this.initMemory();
+
+    if (BACKTRACK) {
+        /*
+         * BackTrack objects have the following properties:
+         *
+         *      obj:    a reference to the source object (eg, ROM object, Sector object)
+         *      off:    the offset within the source object that this object refers to
+         *      slot:   the slot in abtObjects which this object currently occupies
+         *      refs:   the number of memory references, as recorded by setBackTrackIndex()
+         */
+        this.abtObjects = [];
+        this.cbtDeletions = 0;
+    }
+
     this.setReady();
 }
 
 Component.subclass(Component, Bus);
+
+if (BACKTRACK) {
+    Bus.BACKTRACK = {
+        SLOT_MAX:   32768,
+        SLOT_SHIFT: 16,
+        GEN_START:  1,
+        GEN_MAX:    64,
+        GEN_SHIFT:  9,
+        OFF_MAX:    512
+    };
+}
 
 /**
  * initMemory()
@@ -429,6 +462,80 @@ Bus.prototype.setWordDirect = function(addr, w)
     }
     this.aMemBlocks[iBlock++].writeByteDirect(off, w & 0xff);
     this.aMemBlocks[iBlock & this.blockMask].writeByteDirect(0, (w >> 8) & 0xff);
+};
+
+/**
+ * addBackTrackObject(obj, bto, off)
+ *
+ * If bto is null, then we create bto (ie, an object that references obj and records off).
+ *
+ * If bto is NOT null, then we verify that off is within bto's range; if not, then we must
+ * create a new bto and return that instead.
+ *
+ * @this {Bus}
+ * @param {Object} obj
+ * @param {Object} bto
+ * @param {number} off
+ * @return {Object|null}
+ */
+Bus.prototype.addBackTrackObject = function(obj, bto, off)
+{
+    if (BACKTRACK && obj) {
+        if (!bto || off < bto.off || off >= bto.off + Bus.BACKTRACK.OFF_MAX) {
+            var slot;
+            var cbtObjects = this.abtObjects.length;
+            bto = {obj: obj, off: off, slot: 0, refs: 0};
+            if (!this.cbtDeletions) {
+                slot = cbtObjects;
+            } else {
+                for (slot = 0; slot < cbtObjects; slot++) {
+                    if (!this.abtObjects[slot]) {
+                        this.cbtDeletions--;
+                        break;
+                    }
+                }
+                this.assert(slot < cbtObjects);
+            }
+            this.assert(slot < Bus.BACKTRACK.SLOT_MAX);
+            bto.slot = slot;
+            if (slot == cbtObjects) {
+                this.abtObjects.push(bto);
+            } else {
+                this.abtObjects[slot] = bto;
+            }
+        }
+        return bto;
+    }
+    return null;
+};
+
+/**
+ * setBackTrackIndex(addr, bto, off)
+ *
+ * @this {Bus}
+ * @param {number} addr is a physical (non-segmented) address
+ * @param {Object|null} bto
+ * @param {number} off
+ */
+Bus.prototype.setBackTrackIndex = function(addr, bto, off)
+{
+    if (BACKTRACK && bto) {
+        this.assert(off - bto.off >= 0 && off - bto.off < Bus.BACKTRACK.OFF_MAX);
+        var bti = (bto.slot << Bus.BACKTRACK.SLOT_SHIFT) | (Bus.BACKTRACK.GEN_START << Bus.BACKTRACK.GEN_SHIFT) | (off - bto.off);
+        var btiPrev = this.aMemBlocks[(addr & this.addrMask) >> this.blockShift].writeBackTrack(addr & this.blockLimit, bti);
+        if (btiPrev != bti) {
+            if (btiPrev) {
+                var slot = btiPrev >>> Bus.BACKTRACK.SLOT_SHIFT;
+                var btoPrev = this.abtObjects[slot];
+                this.assert(btoPrev && btoPrev.refs > 0);
+                if (!--btoPrev.refs) {
+                    this.abtObjects[slot] = null;
+                    this.cbtDeletions++;
+                }
+            }
+            bto.refs++;
+        }
+    }
 };
 
 /**

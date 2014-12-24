@@ -1104,8 +1104,8 @@ FDC.prototype.copyDrive = function(iDrive)
  *
  * Also note that in an actual FDC request, drive.nBytes is initialized to the size of a single sector; the extent
  * of the entire transfer is actually determined by a count that has been pre-loaded into the DMA controller.  The FDC
- * isn't even aware of the extent of the transfer, so in the case of a read request, all readByte() can do is return bytes
- * until the current track (or, in the case of a multi-track request, the current cylinder) has been exhausted.
+ * isn't even aware of the extent of the transfer, so in the case of a read request, all readByte() can do is return
+ * bytes until the current track (or, in the case of a multi-track request, the current cylinder) has been exhausted.
  *
  * Since seekDrive() is for use with non-DMA requests, we use nBytes to specify the length of the entire transfer.
  *
@@ -2281,7 +2281,7 @@ FDC.prototype.doFormat = function(drive)
 };
 
 /**
- * readByte(drive)
+ * readByte(drive, done)
  *
  * The following drive properties must have been setup prior to our first call:
  *
@@ -2301,16 +2301,21 @@ FDC.prototype.doFormat = function(drive)
  *
  * @this {FDC}
  * @param {Object} drive
- * @param {function(number,boolean)} done (number is next available byte from drive, or -1 if no more bytes available)
+ * @param {function(number,boolean,Object,number)} done (number is next available byte from drive, or -1 if no more bytes available)
  */
 FDC.prototype.readByte = function(drive, done)
 {
     var b = -1;
+    var obj, off;       // these variables are purely for BACKTRACK purposes
+
     if (!drive.resCode && drive.disk) {
         do {
             if (drive.sector) {
-                if ((b = drive.disk.read(drive.sector, drive.ibSector++)) >= 0)
+                off = drive.ibSector;
+                if ((b = drive.disk.read(drive.sector, drive.ibSector++)) >= 0) {
+                    obj = drive.sector;
                     break;
+                }
             }
             /*
              * Locate the next sector, and then try reading again.
@@ -2328,7 +2333,7 @@ FDC.prototype.readByte = function(drive, done)
             this.advanceSector(drive);
         } while (true);
     }
-    done(b, false);
+    done(b, false, obj, off);
 };
 
 /**

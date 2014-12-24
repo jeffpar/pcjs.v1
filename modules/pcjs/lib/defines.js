@@ -108,7 +108,19 @@ var TYPEDARRAYS = false; // (typeof ArrayBuffer !== 'undefined');
 /**
  * @define {boolean}
  *
- * Enable instruction sampling (work-in-progress).
+ * Enable backtracking (disabled in compiled versions).  Backtracking is a mechanism that allows us to tag
+ * every byte of incoming data and follow the flow of that data.
+ */
+var BACKTRACK = true;
+
+/**
+ * @define {boolean}
+ *
+ * Enable instruction sampling (a work-in-progress).  This was used briefly as an internal debugging aid, to
+ * periodically record EIP values in a fixed-length sampling buffer, halting execution once the sampling buffer
+ * was full, and then compare those sampled EIP values to corresponding EIP values on subsequent runs, to look
+ * for deviations.  In theory, every run is supposed to be absolutely identical, even if you interrupt execution
+ * with the Debugger or enable/disable different sets of messages, but in practice, that's hard to guarantee.
  */
 var SAMPLER = false;
 

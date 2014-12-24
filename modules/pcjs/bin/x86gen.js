@@ -275,43 +275,52 @@ function genMode(d, w, mrm, sGroup, sRO) {
     var sRegGet = null;
     var sRegSet = null;
     var sRegSetBegin = "", sRegSetEnd = "";
+    var sRegBTLo = null, sRegBTHi = null;
     if (!w) {
         switch (reg) {
         case 0:
             sRegGet = "this.regAX & 0xff";
             sRegSet = "this.regAX = (this.regAX & ~0xff) | ";
+            sRegBTLo = "this.backTrack.btiAL";
             break;
         case 1:
             sRegGet = "this.regCX & 0xff";
             sRegSet = "this.regCX = (this.regCX & ~0xff) | ";
+            sRegBTLo = "this.backTrack.btiCL";
             break;
         case 2:
             sRegGet = "this.regDX & 0xff";
             sRegSet = "this.regDX = (this.regDX & ~0xff) | ";
+            sRegBTLo = "this.backTrack.btiDL";
             break;
         case 3:
             sRegGet = "this.regBX & 0xff";
             sRegSet = "this.regBX = (this.regBX & ~0xff) | ";
+            sRegBTLo = "this.backTrack.btiBL";
             break;
         case 4:
             sRegGet = "this.regAX >> 8";
             sRegSet = "this.regAX = (this.regAX & 0xff) | ";
             sRegSetEnd = " << 8";
+            sRegBTLo = "this.backTrack.btiAH";
             break;
         case 5:
             sRegGet = "this.regCX >> 8";
             sRegSet = "this.regCX = (this.regCX & 0xff) | ";
             sRegSetEnd = " << 8";
+            sRegBTLo = "this.backTrack.btiCH";
             break;
         case 6:
             sRegGet = "this.regDX >> 8";
             sRegSet = "this.regDX = (this.regDX & 0xff) | ";
             sRegSetEnd = " << 8";
+            sRegBTLo = "this.backTrack.btiDH";
             break;
         case 7:
             sRegGet = "this.regBX >> 8";
             sRegSet = "this.regBX = (this.regBX & 0xff) | ";
             sRegSetEnd = " << 8";
+            sRegBTLo = "this.backTrack.btiBH";
             break;
         default:
             sError = "unrecognized w=0 reg: " + reg;
@@ -322,27 +331,43 @@ function genMode(d, w, mrm, sGroup, sRO) {
         switch (reg) {
         case 0:
             sRegGet = "this.regAX";
+            sRegBTLo = "this.backTrack.btiAL";
+            sRegBTHi = "this.backTrack.btiAH";
             break;
         case 1:
             sRegGet = "this.regCX";
+            sRegBTLo = "this.backTrack.btiCL";
+            sRegBTHi = "this.backTrack.btiCH";
             break;
         case 2:
             sRegGet = "this.regDX";
+            sRegBTLo = "this.backTrack.btiDL";
+            sRegBTHi = "this.backTrack.btiDH";
             break;
         case 3:
             sRegGet = "this.regBX";
+            sRegBTLo = "this.backTrack.btiBL";
+            sRegBTHi = "this.backTrack.btiBH";
             break;
         case 4:
             sRegGet = "this.regSP";
+            sRegBTLo = "X86CPU.BACKTRACK.SP_LO";
+            sRegBTHi = "X86CPU.BACKTRACK.SP_HI";
             break;
         case 5:
             sRegGet = "this.regBP";
+            sRegBTLo = "this.backTrack.btiBPLo";
+            sRegBTHi = "this.backTrack.btiBPHi";
             break;
         case 6:
             sRegGet = "this.regSI";
+            sRegBTLo = "this.backTrack.btiSILo";
+            sRegBTHi = "this.backTrack.btiSIHi";
             break;
         case 7:
             sRegGet = "this.regDI";
+            sRegBTLo = "this.backTrack.btiDILo";
+            sRegBTHi = "this.backTrack.btiDIHi";
             break;
         default:
             sError = "unrecognized w=1 reg: " + reg;
@@ -363,6 +388,7 @@ function genMode(d, w, mrm, sGroup, sRO) {
     var sModRegGet = null;
     var sModRegSet = null;
     var sModRegSetBegin = "", sModRegSetEnd = "";
+    var sModRegBTLo = null, sModRegBTHi = null;
     var sModRegSeg = "this.segData";
     switch (mod) {
     case 0:
@@ -370,44 +396,44 @@ function genMode(d, w, mrm, sGroup, sRO) {
         case 0:
             sModAddr = "this.regBX + this.regSI";
             sModFunc = "BXSI";
-            nCycles = "this.nEACyclesBaseIndex";        // 8086: 7
+            nCycles = "this.CYCLES.nEACyclesBaseIndex";        // 8086: 7
             break;
         case 1:
             sModAddr = "this.regBX + this.regDI";
             sModFunc = "BXDI";
-            nCycles = "this.nEACyclesBaseIndexExtra";   // 8086: 8
+            nCycles = "this.CYCLES.nEACyclesBaseIndexExtra";   // 8086: 8
             break;
         case 2:
             sModAddr = "this.regBP + this.regSI";
             sModFunc = "BPSI";
             sModRegSeg = "this.segStack";
-            nCycles = "this.nEACyclesBaseIndexExtra";   // 8086: 8
+            nCycles = "this.CYCLES.nEACyclesBaseIndexExtra";   // 8086: 8
             break;
         case 3:
             sModAddr = "this.regBP + this.regDI";
             sModFunc = "BPDI";
             sModRegSeg = "this.segStack";
-            nCycles = "this.nEACyclesBaseIndex";        // 8086: 7
+            nCycles = "this.CYCLES.nEACyclesBaseIndex";        // 8086: 7
             break;
         case 4:
             sModAddr = "this.regSI";
             sModFunc = "SI";
-            nCycles = "this.nEACyclesBase";             // 8086: 5
+            nCycles = "this.CYCLES.nEACyclesBase";             // 8086: 5
             break;
         case 5:
             sModAddr = "this.regDI";
             sModFunc = "DI";
-            nCycles = "this.nEACyclesBase";             // 8086: 5
+            nCycles = "this.CYCLES.nEACyclesBase";             // 8086: 5
             break;
         case 6:
             sModAddr = "this.getIPWord()";
             sModFunc = "D16";
-            nCycles = "this.nEACyclesDisp";             // 8086: 6
+            nCycles = "this.CYCLES.nEACyclesDisp";             // 8086: 6
             break;
         case 7:
             sModAddr = "this.regBX";
             sModFunc = "BX";
-            nCycles = "this.nEACyclesBase";             // 8086: 5
+            nCycles = "this.CYCLES.nEACyclesBase";             // 8086: 5
             break;
         default:
             sError = "unrecognized mod=0 r/m: " + r_m;
@@ -419,45 +445,45 @@ function genMode(d, w, mrm, sGroup, sRO) {
         case 0:
             sModAddr = "this.regBX + this.regSI + this.getIPDisp()";
             sModFunc = "BXSID8";
-            nCycles = "this.nEACyclesBaseIndexDisp";        // 8086: 11
+            nCycles = "this.CYCLES.nEACyclesBaseIndexDisp";        // 8086: 11
             break;
         case 1:
             sModAddr = "this.regBX + this.regDI + this.getIPDisp()";
             sModFunc = "BXDID8";
-            nCycles = "this.nEACyclesBaseIndexDispExtra";   // 8086: 12
+            nCycles = "this.CYCLES.nEACyclesBaseIndexDispExtra";   // 8086: 12
             break;
         case 2:
             sModAddr = "this.regBP + this.regSI + this.getIPDisp()";
             sModFunc = "BPSID8";
             sModRegSeg = "this.segStack";
-            nCycles = "this.nEACyclesBaseIndexDispExtra";   // 8086: 12
+            nCycles = "this.CYCLES.nEACyclesBaseIndexDispExtra";   // 8086: 12
             break;
         case 3:
             sModAddr = "this.regBP + this.regDI + this.getIPDisp()";
             sModFunc = "BPDID8";
             sModRegSeg = "this.segStack";
-            nCycles = "this.nEACyclesBaseIndexDisp";        // 8086: 11
+            nCycles = "this.CYCLES.nEACyclesBaseIndexDisp";        // 8086: 11
             break;
         case 4:
             sModAddr = "this.regSI + this.getIPDisp()";
             sModFunc = "SID8";
-            nCycles = "this.nEACyclesBaseDisp";             // 8086: 9
+            nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
             break;
         case 5:
             sModAddr = "this.regDI + this.getIPDisp()";
             sModFunc = "DID8";
-            nCycles = "this.nEACyclesBaseDisp";             // 8086: 9
+            nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
             break;
         case 6:
             sModAddr = "this.regBP + this.getIPDisp()";
             sModFunc = "BPD8";
             sModRegSeg = "this.segStack";
-            nCycles = "this.nEACyclesBaseDisp";             // 8086: 9
+            nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
             break;
         case 7:
             sModAddr = "this.regBX + this.getIPDisp()";
             sModFunc = "BXD8";
-            nCycles = "this.nEACyclesBaseDisp";             // 8086: 9
+            nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
             break;
         default:
             sError = "unrecognized mod=1 r/m: " + r_m;
@@ -469,45 +495,45 @@ function genMode(d, w, mrm, sGroup, sRO) {
         case 0:
             sModAddr = "this.regBX + this.regSI + this.getIPWord()";
             sModFunc = "BXSID16";
-            nCycles = "this.nEACyclesBaseIndexDisp";        // 8086: 11
+            nCycles = "this.CYCLES.nEACyclesBaseIndexDisp";        // 8086: 11
             break;
         case 1:
             sModAddr = "this.regBX + this.regDI + this.getIPWord()";
             sModFunc = "BXDID16";
-            nCycles = "this.nEACyclesBaseIndexDispExtra";   // 8086: 12
+            nCycles = "this.CYCLES.nEACyclesBaseIndexDispExtra";   // 8086: 12
             break;
         case 2:
             sModAddr = "this.regBP + this.regSI + this.getIPWord()";
             sModFunc = "BPSID16";
             sModRegSeg = "this.segStack";
-            nCycles = "this.nEACyclesBaseIndexDispExtra";   // 8086: 12
+            nCycles = "this.CYCLES.nEACyclesBaseIndexDispExtra";   // 8086: 12
             break;
         case 3:
             sModAddr = "this.regBP + this.regDI + this.getIPWord()";
             sModFunc = "BPDID16";
             sModRegSeg = "this.segStack";
-            nCycles = "this.nEACyclesBaseIndexDisp";        // 8086: 11
+            nCycles = "this.CYCLES.nEACyclesBaseIndexDisp";        // 8086: 11
             break;
         case 4:
             sModAddr = "this.regSI + this.getIPWord()";
             sModFunc = "SID16";
-            nCycles = "this.nEACyclesBaseDisp";             // 8086: 9
+            nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
             break;
         case 5:
             sModAddr = "this.regDI + this.getIPWord()";
             sModFunc = "DID16";
-            nCycles = "this.nEACyclesBaseDisp";             // 8086: 9
+            nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
             break;
         case 6:
             sModAddr = "this.regBP + this.getIPWord()";
             sModFunc = "BPD16";
             sModRegSeg = "this.segStack";
-            nCycles = "this.nEACyclesBaseDisp";             // 8086: 9
+            nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
             break;
         case 7:
             sModAddr = "this.regBX + this.getIPWord()";
             sModFunc = "BXD16";
-            nCycles = "this.nEACyclesBaseDisp";             // 8086: 9
+            nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
             break;
         default:
             sError = "unrecognized mod=2 r/m: " + r_m;
@@ -520,38 +546,46 @@ function genMode(d, w, mrm, sGroup, sRO) {
             case 0:
                 sModRegGet = "this.regAX & 0xff";
                 sModRegSet = "this.regAX = (this.regAX & ~0xff) | ";
+                sModRegBTLo = "this.backTrack.btiAL";
                 break;
             case 1:
                 sModRegGet = "this.regCX & 0xff";
                 sModRegSet = "this.regCX = (this.regCX & ~0xff) | ";
+                sModRegBTLo = "this.backTrack.btiCL";
                 break;
             case 2:
                 sModRegGet = "this.regDX & 0xff";
                 sModRegSet = "this.regDX = (this.regDX & ~0xff) | ";
+                sModRegBTLo = "this.backTrack.btiDL";
                 break;
             case 3:
                 sModRegGet = "this.regBX & 0xff";
                 sModRegSet = "this.regBX = (this.regBX & ~0xff) | ";
+                sModRegBTLo = "this.backTrack.btiBL";
                 break;
             case 4:
                 sModRegGet = "this.regAX >> 8";
                 sModRegSet = "this.regAX = (this.regAX & 0xff) | ";
                 sModRegSetEnd = " << 8";
+                sModRegBTLo = "this.backTrack.btiAH";
                 break;
             case 5:
                 sModRegGet = "this.regCX >> 8";
                 sModRegSet = "this.regCX = (this.regCX & 0xff) | ";
                 sModRegSetEnd = " << 8";
+                sModRegBTLo = "this.backTrack.btiCH";
                 break;
             case 6:
                 sModRegGet = "this.regDX >> 8";
                 sModRegSet = "this.regDX = (this.regDX & 0xff) | ";
                 sModRegSetEnd = " << 8";
+                sModRegBTLo = "this.backTrack.btiDH";
                 break;
             case 7:
                 sModRegGet = "this.regBX >> 8";
                 sModRegSet = "this.regBX = (this.regBX & 0xff) | ";
                 sModRegSetEnd = " << 8";
+                sModRegBTLo = "this.backTrack.btiBH";
                 break;
             default:
                 sError = "unrecognized w=0 mod=3 r/m: " + r_m;
@@ -562,27 +596,43 @@ function genMode(d, w, mrm, sGroup, sRO) {
             switch (r_m) {
             case 0:
                 sModRegGet = "this.regAX";
+                sModRegBTLo = "this.backTrack.btiAL";
+                sModRegBTHi = "this.backTrack.btiAH";
                 break;
             case 1:
                 sModRegGet = "this.regCX";
+                sModRegBTLo = "this.backTrack.btiCL";
+                sModRegBTHi = "this.backTrack.btiCH";
                 break;
             case 2:
                 sModRegGet = "this.regDX";
+                sModRegBTLo = "this.backTrack.btiDL";
+                sModRegBTHi = "this.backTrack.btiDH";
                 break;
             case 3:
                 sModRegGet = "this.regBX";
+                sModRegBTLo = "this.backTrack.btiBL";
+                sModRegBTHi = "this.backTrack.btiBH";
                 break;
             case 4:
                 sModRegGet = "this.regSP";
+                sModRegBTLo = "X86CPU.BACKTRACK.SP_LO";
+                sModRegBTHi = "X86CPU.BACKTRACK.SP_HI";
                 break;
             case 5:
                 sModRegGet = "this.regBP";
+                sModRegBTLo = "this.backTrack.btiBPLo";
+                sModRegBTHi = "this.backTrack.btiBPHi";
                 break;
             case 6:
                 sModRegGet = "this.regSI";
+                sModRegBTLo = "this.backTrack.btiSILo";
+                sModRegBTHi = "this.backTrack.btiSIHi";
                 break;
             case 7:
                 sModRegGet = "this.regDI";
+                sModRegBTLo = "this.backTrack.btiDILo";
+                sModRegBTHi = "this.backTrack.btiDIHi";
                 break;
             default:
                 sError = "unrecognized w=1 mod=3 r/m: " + r_m;
@@ -614,17 +664,18 @@ function genMode(d, w, mrm, sGroup, sRO) {
         }
 
         print("    /**");
+        print("     * " + sOpMod + "(afnGrp, fnSrc): mod=" + toMod(d, mod) + "  reg=" + toReg(d, w, reg, sGroup) + "  r/m=" + toRM(mod, w, r_m));
+        print("     *");
         print("     * @this {X86CPU}");
         print("     * @param {Array.<function(number,number)>} afnGrp");
         print("     * @param {function()} fnSrc");
-        print("     *");
-        print("     * mod=" + toMod(d, mod) + "  reg=" + toReg(d, w, reg, sGroup) + "  r/m=" + toRM(mod, w, r_m));
         print("     */");
         print("    " + sOpMod + ": function(afnGrp, fnSrc) {");
 
         if (sModAddr) {
-            if (sModAddr.indexOf("+") > 0)
+            if (sModAddr.indexOf("+") > 0) {
                 sModAddr = "((" + sModAddr + ") & 0xffff)";
+            }
             if (!d) {
                 if (reg == 7 && sRO) {
                     if (sModFunc) {
@@ -681,6 +732,15 @@ function genMode(d, w, mrm, sGroup, sRO) {
                     print("        var " + sTemp + " = afnGrp[" + reg + "].call(this, " + sModRegGet + ", fnSrc.call(this));");
                     print("        " + sModRegSet + sModRegSetBegin + sTemp + sModRegSetEnd + ";");
                 }
+                if (sModRegBTLo) {
+                    if (!sModRegBTHi) {
+                        print("        if (BACKTRACK) " + sModRegBTLo + " = this.backTrack.btiMemLo;");
+                    } else {
+                        print("        if (BACKTRACK) {");
+                        print("            " + sModRegBTLo + " = this.backTrack.btiMemLo; " + sModRegBTHi + " = this.backTrack.btiMemHi;");
+                        print("        }");
+                    }
+                }
             }
         }
     }
@@ -697,21 +757,31 @@ function genMode(d, w, mrm, sGroup, sRO) {
         }
 
         print("    /**");
+        print("     * " + sOpMod + "(fn): mod=" + toMod(d, mod) + "  reg=" + toReg(d, w, reg) + "  r/m=" + toRM(mod, w, r_m));
+        print("     *");
         print("     * @this {X86CPU}");
         print("     * @param {function(number,number)} fn (dst,src)");
-        print("     *");
-        print("     * mod=" + toMod(d, mod) + "  reg=" + toReg(d, w, reg) + "  r/m=" + toRM(mod, w, r_m));
         print("     */");
         print("    " + sOpMod + ": function(fn) {");
 
         if (sModAddr && sRegGet) {
 
-            if (sModAddr.indexOf("+") > 0)
+            if (sModAddr.indexOf("+") > 0) {
                 sModAddr = "((" + sModAddr + ") & 0xffff)";
+            }
             if (!d) {
                 if (sModFunc) {
                     if (fInline) {
                         print("        var " + sTemp + " = fn.call(this, this.modEA" + aSize[w] + "(" + sModRegSeg + ", " + sModAddr + "), " + sRegGet + ");");
+                        if (sRegBTLo) {
+                            if (!sRegBTHi) {
+                                print("        if (BACKTRACK) this.backTrack.btiMemLo = " + sRegBTLo + ";");
+                            } else {
+                                print("        if (BACKTRACK) {");
+                                print("            this.backTrack.btiMemLo = " + sRegBTLo + "; this.backTrack.btiMemHi = " + sRegBTHi + ";");
+                                print("        }");
+                            }
+                        }
                         print("        this.setEA" + aSize[w] + "(" + sTemp + ");");
                     } else {
                         sModFunc = "write" + sModFunc + aSize[w];
@@ -723,6 +793,15 @@ function genMode(d, w, mrm, sGroup, sRO) {
                 } else {
                     print("        this.regEAWrite = " + sModRegSeg + "[1] + " + sModAddr + ";");
                     print("        var " + sTemp + " = fn.call(this, this.modEA" + aSize[w] + "(this.regEAWrite), " + sRegGet + ");");
+                    if (sRegBTLo) {
+                        if (!sRegBTHi) {
+                            print("        if (BACKTRACK) this.backTrack.btiMemLo = " + sRegBTLo + ";");
+                        } else {
+                            print("        if (BACKTRACK) {");
+                            print("            this.backTrack.btiMemLo = " + sRegBTLo + "; this.backTrack.btiMemHi = " + sRegBTHi + ";");
+                            print("        }");
+                        }
+                    }
                     print("        this.setEA" + aSize[w] + "(this.regEAWrite, " + sTemp + ");");
                 }
             }
@@ -763,6 +842,15 @@ function genMode(d, w, mrm, sGroup, sRO) {
                         print("        " + sRegSet + sRegSetBegin + sTemp + sRegSetEnd + ";");
                     }
                 }
+                if (sRegBTLo && sRegBTLo.indexOf("this.") >= 0) {
+                    if (!sRegBTHi) {
+                        print("        if (BACKTRACK) " + sRegBTLo + " = this.backTrack.btiMemLo;");
+                    } else {
+                        print("        if (BACKTRACK) {");
+                        print("            " + sRegBTLo + " = this.backTrack.btiMemLo; " + sRegBTHi + " = this.backTrack.btiMemHi;");
+                        print("        }");
+                    }
+                }
             }
             if (nCycles !== null)
                 print("        this.nStepCycles -= " + nCycles + ";");
@@ -783,6 +871,15 @@ function genMode(d, w, mrm, sGroup, sRO) {
                     print("        var " + sTemp + " = fn.call(this, " + sModRegGet + ", " + sRegGet + ");");
                     print("        " + sModRegSet + sModRegSetBegin + sTemp + sModRegSetEnd + ";");
                 }
+                if (sModRegBTLo && sModRegBTLo.indexOf("this.") >= 0 && sRegBTLo && sModRegBTLo != sRegBTLo) {
+                    if (!sModRegBTHi || !sRegBTHi) {
+                        print("        if (BACKTRACK) " + sModRegBTLo + " = " + sRegBTLo + ";");
+                    } else {
+                        print("        if (BACKTRACK) {");
+                        print("            " + sModRegBTLo + " = " + sRegBTLo + "; " + sModRegBTHi + " = " + sRegBTHi + ";");
+                        print("        }");
+                    }
+                }
             }
             else {
                 if (!sRegSet) {
@@ -798,6 +895,15 @@ function genMode(d, w, mrm, sGroup, sRO) {
                 } else {
                     print("        var " + sTemp + " = fn.call(this, " + sRegGet + ", " + sModRegGet + ");");
                     print("        " + sRegSet + sRegSetBegin + sTemp + sRegSetEnd + ";");
+                }
+                if (sRegBTLo && sRegBTLo.indexOf("this.") >= 0 && sModRegBTLo && sRegBTLo != sModRegBTLo) {
+                    if (!sRegBTHi || !sModRegBTHi) {
+                        print("        if (BACKTRACK) " + sRegBTLo + " = " + sModRegBTLo + ";");
+                    } else {
+                        print("        if (BACKTRACK) {");
+                        print("            " + sRegBTLo + " = " + sModRegBTLo + "; " + sRegBTHi + " = " + sModRegBTHi + ";");
+                        print("        }");
+                    }
                 }
             }
         }
