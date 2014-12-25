@@ -97,13 +97,36 @@ DiskAPI.BPB = {
     RESERVED_SECS:  0x0E,       // 2 bytes: reserved sectors; ie, # sectors preceding the first FAT--usually just the boot sector (eg, 1)
     FAT_TOTAL:      0x10,       // 1 byte: FAT copies (eg, 2)
     ROOT_ENTRIES:   0x11,       // 2 bytes: root directory entries (eg, 0x40 or 64) 0x40 * 0x20 = 0x800 (1 sector is 0x200 bytes, total of 4 sectors)
-    SECTOR_TOTAL:   0x13,       // 2 bytes: number of sectors (eg, 0x140 or 320); if zero, refer to LARGE_SECS
+    TOTAL_SECS:     0x13,       // 2 bytes: number of sectors (eg, 0x140 or 320); if zero, refer to LARGE_SECS
     MEDIA_TYPE:     0x15,       // 1 byte: media type (eg, 0xFF: 320Kb, 0xFE: 160Kb, 0xFD: 360Kb, 0xFC: 180Kb)
     FAT_SECS:       0x16,       // 2 bytes: sectors per FAT (eg, 1)
     TRACK_SECS:     0x18,       // 2 bytes: sectors per track (eg, 8)
     HEAD_TOTAL:     0x1A,       // 2 bytes: number of heads (eg, 1)
     HIDDEN_SECS:    0x1C,       // 4 bytes: number of hidden sectors (always 0 for non-partitioned media)
-    LARGE_SECS:     0x20        // 4 bytes: number of sectors if SECTOR_TOTAL is zero
+    LARGE_SECS:     0x20        // 4 bytes: number of sectors if TOTAL_SECS is zero
+};
+
+/*
+ * Directory Entry offsets in FAT-based disk images
+ */
+DiskAPI.DIR = {
+    NAME:           0x00,       // 8 bytes
+    EXT:            0x08,       // 3 bytes
+    ATTR:           0x0B,       // 1 byte
+    MODTIME:        0x16,       // 2 bytes
+    MODDATE:        0x18,       // 2 bytes
+    CLUSTER:        0x1A,       // 2 bytes
+    SIZE:           0x1C,       // 4 bytes (typically zero for subdirectories)
+    LENGTH:         0x20        // 32 bytes total
+};
+
+DiskAPI.ATTR = {
+    READONLY:       0x01,       // PC-DOS 2.0 and up
+    HIDDEN:         0x02,
+    SYSTEM:         0x04,
+    LABEL:          0x08,       // PC-DOS 2.0 and up
+    SUBDIR:         0x10,       // PC-DOS 2.0 and up
+    ARCHIVE:        0x20        // PC-DOS 2.0 and up
 };
 
 if (typeof module !== 'undefined') module.exports = DiskAPI;

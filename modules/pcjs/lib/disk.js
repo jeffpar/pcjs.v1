@@ -852,6 +852,7 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
                 this.aDiskData = aDiskData;
                 this.dwChecksum = dwChecksum;
                 disk = this;
+                this.buildSectorMap();
             }
         } catch (e) {
             Component.error("Disk image error: " + e.message);
@@ -862,6 +863,292 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
         this.fnNotify.call(this.controllerNotify, this.drive, disk, this.sDiskName, this.sDiskPath);
         this.fnNotify = null;
     }
+};
+
+/**
+ * buildSectorMap()
+ *
+ * This function builds a mapping object (aSectorMap) that maps sectors to files.  Used for BACKTRACK support.
+ *
+ * Note that while most of the methods in this module use CHS-style parameters, because our primary clients are disk
+ * controllers that deal exclusively with cylinder/head/sector values, here we use 0-based logical sector numbers for
+ * the sector map.  This is also known as logical block addressing or LBA.
+ *
+ * @this {Disk}
+ */
+Disk.prototype.buildSectorMap = function()
+{
+    if (BACKTRACK) {
+        var dir = {};
+        this.aFileTable = [];
+        this.aSectorMap = {};
+        var sectorBoot = this.getSector(0);
+        dir.cbSector = this.getSectorData(sectorBoot, DiskAPI.BPB.SECTOR_BYTES, 2);
+        if (dir.cbSector != 512) {
+            /*
+             * TODO: This is likely an MBR on a fixed disk, as opposed to a boot sector on a removable disk; we should come
+             * up with a cleaner way of detecting fixed disks, and then eventually deal with all the possible partition types.
+             */
+            return;
+        }
+        dir.lbaTotal = this.getSectorData(sectorBoot, DiskAPI.BPB.TOTAL_SECS, 2) || this.getSectorData(sectorBoot, DiskAPI.BPB.LARGE_SECS, 4);
+        dir.lbaFAT = this.getSectorData(sectorBoot, DiskAPI.BPB.RESERVED_SECS, 2);
+        dir.lbaRoot = dir.lbaFAT + this.getSectorData(sectorBoot, DiskAPI.BPB.FAT_SECS, 2) * this.getSectorData(sectorBoot, DiskAPI.BPB.FAT_TOTAL, 1);
+        dir.nEntries = this.getSectorData(sectorBoot, DiskAPI.BPB.ROOT_ENTRIES, 2);
+        dir.lbaData = dir.lbaRoot + (((dir.nEntries * DiskAPI.DIR.LENGTH) / dir.cbSector) | 0);
+        dir.nClusterSecs = this.getSectorData(sectorBoot, DiskAPI.BPB.CLUSTER_SECS, 1);
+        dir.nClusters = (((dir.lbaTotal - dir.lbaData) / dir.nClusterSecs) | 0);
+        /*
+         * In all FATs, the first valid cluster number is 2, as 0 is used to indicate a free cluster and 1 is reserved.
+         *
+         * In a 12-bit FAT, cluster numbers 0xFF0-0xFF6 are reserved, 0xFF7 indicates a bad cluster, and 0xFF8-0xFFF
+         * indicate the last cluster in a chain.  Since 12 bits yields 4096 possible values, and since 10 of the values
+         * (0, 1, and 0xFF8-0xFFF) cannot be used to refer to an actual cluster, that leaves a maximum of 4086 clusters
+         * for a 12-bit FAT; a volume with more than 4086 clusters must be using a 16-bit FAT.
+         *
+         * TODO: More research is required to ensure we're setting iClusterLimit appropriately, because 0xFF0 seems the
+         * safer limit for a 12-bit FAT, not 0xFF8.  Despite Microsoft's claim the cut-over from a 12-bit to a 16-bit FAT
+         * is 4086 clusters, I'm not sure why that's true, unless there are volumes that actually use clusters >= 0xFF0.
+         *
+         * Also, perhaps it would be worth setting the limit to match the capacity of the volume, instead of the theoretical
+         * limit, as that might help us catch more problems.
+         */
+        dir.nFATBits = (dir.nClusters <= 4086? 12 : 16);
+        dir.iClusterLimit = (dir.nFATBits == 12? 0xFF0 : 0xFFF0);
+        this.assert(!((dir.lbaTotal - dir.lbaData) % dir.nClusterSecs));
+        this.assert(!((dir.nEntries * DiskAPI.DIR.LENGTH) % dir.cbSector));
+        var aSectors = [];
+        for (var i = dir.lbaRoot; i < dir.lbaData; i++) aSectors.push(i);
+        this.getDir(dir, "", aSectors);
+    }
+};
+
+/**
+ * getDir(dir, sDir, aSectors)
+ *
+ * @this {Disk}
+ * @param {Object} dir
+ * @param {string} sDir
+ * @param {Array.<number>} aSectors
+ */
+Disk.prototype.getDir = function(dir, sDir, aSectors)
+{
+    var iStart = this.aFileTable.length;
+    var nEntriesPerSector = (dir.cbSector / DiskAPI.DIR.LENGTH) | 0;
+
+    for (var iSector = 0; iSector < aSectors.length; iSector++) {
+        var lba = aSectors[iSector];
+        for (var iEntry = 0; iEntry < nEntriesPerSector; iEntry++) {
+            if (!this.getDirEntry(dir, lba, iEntry)) continue;
+            if (DEBUG) {
+                this.controller.println('"' + dir.sName + '" size=' + dir.cbSize + ' cluster=' + dir.iCluster + ' sectors=' + JSON.stringify(dir.aSectors));
+                if (dir.aSectors.length) this.getSector(dir.aSectors[0]);
+            }
+            this.aFileTable.push({sName: sDir + "\\" + dir.sName, bAttr: dir.bAttr, cbSize: dir.cbSize, aSectors: dir.aSectors});
+        }
+    }
+
+    var iEnd = this.aFileTable.length;
+
+    for (var i = iStart; i < iEnd; i++) {
+        var file = this.aFileTable[i];
+        if (file.bAttr & DiskAPI.ATTR.SUBDIR && file.aSectors.length) {
+            this.getDir(dir, sDir + "\\" + file.sName, file.aSectors[0]);
+        }
+    }
+};
+
+/**
+ * getDirEntry(dir, lba, i)
+ *
+ * This sets the following properties on the 'dir' object:
+ *
+ *      sName
+ *      bAttr
+ *      cbSize
+ *      iCluster
+ *      aSectors (ie, array of lba values)
+ *
+ * On return, it's the caller's responsibility to copy out any data into a new object
+ * if it wants to preserve any of the above information.
+ *
+ * This function also caches the following properties in the 'dir' object:
+ *
+ *      lbaDir (of the last directory sector read, if any)
+ *      sectorDir (of the last directory sector read, if any)
+ *
+ * Also, the caller must also set the following 'dir' helper properties, so that clusters
+ * can be located and converted to sectors (see convertClusterToSectors):
+ *
+ *      lbaFAT
+ *      lbaData
+ *      cbSector
+ *      iClusterLimit
+ *      nClusterSecs
+ *      nFATBits
+ *
+ * @this {Disk}
+ * @param {Object} dir (to be filled in)
+ * @param {number} lba (a sector of the directory)
+ * @param {number} i (an entry in the directory sector, 0-based)
+ * @returns {boolean} true if valid entry, false if deleted or empty (or no more sectors)
+ */
+Disk.prototype.getDirEntry = function(dir, lba, i)
+{
+    if (!dir.sectorDir || !dir.lbaDir || dir.lbaDir != lba) {
+        dir.lbaDir = lba;
+        dir.sectorDir = this.getSector(dir.lbaDir);
+    }
+    if (dir.sectorDir) {
+        var off = i * DiskAPI.DIR.LENGTH;
+        var b = this.getSectorData(dir.sectorDir, off, 1);
+        if (!b || b == 0xe5) return false;
+        dir.sName = str.trim(this.getSectorString(dir.sectorDir, off + DiskAPI.DIR.NAME, 8));
+        var s = str.trim(this.getSectorString(dir.sectorDir, off + DiskAPI.DIR.EXT, 3));
+        if (s.length) dir.sName += '.' + s;
+        dir.bAttr = this.getSectorData(dir.sectorDir, off + DiskAPI.DIR.ATTR, 1);
+        dir.cbSize = this.getSectorData(dir.sectorDir, off + DiskAPI.DIR.SIZE, 2);
+        dir.iCluster = this.getSectorData(dir.sectorDir, off + DiskAPI.DIR.CLUSTER, 2);
+        this.convertClusterToSectors(dir);
+        return true;
+    }
+    return false;
+};
+
+/**
+ * convertClusterToSectors(dir)
+ *
+ * @this {Disk}
+ * @param {Object} dir
+ */
+Disk.prototype.convertClusterToSectors = function(dir)
+{
+    dir.aSectors = [];
+    var iCluster = dir.iCluster;
+    if (iCluster) {
+        do {
+            this.assert(iCluster >= 2);
+            var lba = dir.lbaData + ((iCluster - 2) * dir.nClusterSecs);
+            for (var i = 0; i < dir.nClusterSecs; i++) {
+                dir.aSectors.push(lba++);
+            }
+            iCluster = this.getClusterEntry(dir, iCluster, 0) | this.getClusterEntry(dir, iCluster, 1);
+        } while (iCluster < dir.iClusterLimit);
+    }
+};
+
+/**
+ * getClusterEntry(dir, iCluster, iByte)
+ *
+ * @this {Disk}
+ * @param {Object} dir
+ * @param {number} iCluster
+ * @param {number} iByte (0 for low byte of cluster entry, 1 for high byte)
+ * @return {number}
+ */
+Disk.prototype.getClusterEntry = function(dir, iCluster, iByte)
+{
+    var w = 0;
+    var cbitsSector = dir.cbSector * 8;
+    var offBits = dir.nFATBits * iCluster;
+    var iSec = (offBits / cbitsSector) | 0;
+    if (!dir.sectorFATCache || !dir.lbaFATCache || dir.lbaFATCache != dir.lbaFAT + iSec) {
+        dir.lbaFATCache = dir.lbaFAT + iSec;
+        dir.sectorFATCache = this.getSector(dir.lbaFATCache);
+    }
+    if (dir.sectorFATCache) {
+        offBits = (offBits % cbitsSector) | 0;
+        var off = (offBits >> 3) + iByte;
+        w = this.getSectorData(dir.sectorFATCache, off, 1);
+        if (!iByte) {
+            if (offBits & 0x7) w >>= 4;
+        } else {
+            if (dir.nFATBits == 16) {
+                w <<= 8;
+            } else {
+                if (offBits & 0x7) {
+                    w <<= 4;
+                } else {
+                    w = (w & 0xf) << 8;
+                }
+            }
+        }
+    }
+    return w;
+};
+
+/**
+ * getSector(lba)
+ *
+ * @this {Disk}
+ * @param {number} lba (logical block address)
+ * @return {Object} sector
+ */
+Disk.prototype.getSector = function(lba)
+{
+    var nSectorsPerCylinder = this.nHeads * this.nSectors;
+    var iCylinder = (lba / nSectorsPerCylinder) | 0;
+    this.assert(iCylinder < this.nCylinders);
+    var nSectorsRemaining = (lba % nSectorsPerCylinder);
+    var iHead = (nSectorsRemaining / this.nSectors) | 0;
+    this.assert(iHead < this.nHeads);
+    var iSector = (nSectorsRemaining % this.nSectors);
+    this.assert(iSector < this.nSectors);
+    /*
+     * LBA numbers are 0-based, but the sector numbers in CHS addressing are 1-based, so add one to iSector
+     */
+    var sector = this.seek(iCylinder, iHead, iSector + 1);
+    if (DEBUG) this.controller.println("logical sector #" + lba + ":\n" + this.dumpSector(sector));
+    return sector;
+};
+
+/**
+ * getSectorData(sector, off, len)
+ *
+ * NOTE: Yes, this function is not the most efficient way to read a byte/word/dword value from within
+ * a sector, but given the different states a sector may be in, it's certainly the simplest and safest,
+ * and it's not clear that we need to be superfast anyway.
+ *
+ * @this {Disk}
+ * @param {Object} sector
+ * @param {number} off (byte offset)
+ * @param {number} len (1 to 4 bytes)
+ * @return {number}
+ */
+Disk.prototype.getSectorData = function(sector, off, len)
+{
+    var dw = 0;
+    var nShift = 0;
+    this.assert(len > 0 && len <= 4);
+    while (len--) {
+        this.assert(off < sector['length']);
+        var b = this.read(sector, off++);
+        this.assert(b >= 0);
+        if (b < 0) break;
+        dw |= (b << nShift);
+        nShift += 8;
+    }
+    return dw;
+};
+
+/**
+ * getSectorString(sector, off, len)
+ *
+ * @this {Disk}
+ * @param {Object} sector
+ * @param {number} off (byte offset)
+ * @param {number} len (use -1 to read a null-terminated string)
+ * @return {string}
+ */
+Disk.prototype.getSectorString = function(sector, off, len)
+{
+    var s = "";
+    while (len--) {
+        var b = this.read(sector, off++);
+        if (b <= 0) break;
+        s += String.fromCharCode(b);
+    }
+    return s;
 };
 
 /**
@@ -902,60 +1189,6 @@ Disk.prototype.initSector = function(sector, iCylinder, iHead, iSector, cbSector
 };
 
 /**
- * onLoadParseSectors(sURLName, sURLData, nErrorCode, sectorInfo)
- *
- * @param {string} sURLName
- * @param {string} sURLData
- * @param {number} nErrorCode
- * @param {Array} sectorInfo
- */
-Disk.prototype.onLoadParseSectors = function(sURLName, sURLData, nErrorCode, sectorInfo)
-{
-    var fAsync = false;
-    if (!nErrorCode) {
-        var iCylinder = sectorInfo[0];
-        var iHead = sectorInfo[1];
-        var iSector = sectorInfo[2];
-        var nSectors = sectorInfo[3];
-        fAsync = sectorInfo[4];
-
-        if (DEBUG && this.messageEnabled()) {
-            this.messagePrint("Disk.onLoadParseSectors(" + iCylinder + ":" + iHead + ":" + iSector + ":" + nSectors + ")");
-        }
-
-        var abData = JSON.parse(sURLData);
-        var offData = 0;
-        while (nSectors--) {
-            /*
-             * We call seek with fWrite == true to prevent seek() from triggering another call
-             * to readRemoteSectors() and endlessly recursing.  That also forces seek() to:
-             *
-             *  1) zero the sector's 'pattern'
-             *  2) disable warning about reading an uninitialized sector
-             *
-             * We KNOW this is an uninitialized sector, because we're about to initialize it.
-             */
-            var sector = this.seek(iCylinder, iHead, iSector, true);
-            if (!sector) {
-                if (DEBUG && this.messageEnabled()) {
-                    this.messagePrint("Disk.onLoadParseSectors(): seek(" + iCylinder + "," + iHead + "," + iSector + ") failed");
-                }
-                break;
-            }
-            this.fill(sector, abData, offData);
-            offData += sector['length'];
-            /*
-             * We happen to know that when seek() calls readRemoteSectors(), it limits the number of sectors
-             * to the current track, so the only variable we need to advance is iSector.
-             */
-            iSector++;
-        }
-    }
-    var done = sectorInfo[5];
-    if (done) done(nErrorCode, fAsync);
-};
-
-/**
  * connectRemoteDisk(sDiskPath)
  *
  * Unlike disconnect(), we don't issue the connect request ourselves; instead, we piggyback on the existing
@@ -978,16 +1211,17 @@ Disk.prototype.connectRemoteDisk = function(sDiskPath)
 };
 
 /**
- * readRemoteSectors(iCylinder, iHead, iSector, nSectors, done)
+ * readRemoteSectors(iCylinder, iHead, iSector, nSectors, fAsync, done)
  *
  * @param {number} iCylinder
  * @param {number} iHead
  * @param {number} iSector
  * @param {number} cbSector
  * @param {number} nSectors
+ * @param {boolean} fAsync
  * @param {function(number,boolean)} [done]
  */
-Disk.prototype.readRemoteSectors = function(iCylinder, iHead, iSector, cbSector, nSectors, done)
+Disk.prototype.readRemoteSectors = function(iCylinder, iHead, iSector, cbSector, nSectors, fAsync, done)
 {
     if (DEBUG && this.messageEnabled()) {
         this.messagePrint("Disk.readRemoteSectors(" + iCylinder + ":" + iHead + ":" + iSector + ":" + nSectors + "," + cbSector + ")");
@@ -1001,10 +1235,64 @@ Disk.prototype.readRemoteSectors = function(iCylinder, iHead, iSector, cbSector,
         sParms += '&' + DiskAPI.QUERY.MACHINE + '=' + this.controller.getMachineID();
         sParms += '&' + DiskAPI.QUERY.USER + '=' + this.controller.getUserID();
         var sDiskURL = web.getHost() + DiskAPI.ENDPOINT + '?' + sParms;
-        web.loadResource(sDiskURL, true, null, this, this.onLoadParseSectors, [iCylinder, iHead, iSector, nSectors, true, done]);
+        web.loadResource(sDiskURL, fAsync, null, this, this.doneReadRemoteSectors, [iCylinder, iHead, iSector, nSectors, fAsync, done]);
         return;
     }
     if (done) done(-1, false);
+};
+
+/**
+ * doneReadRemoteSectors(sURLName, sURLData, nErrorCode, sectorInfo)
+ *
+ * @param {string} sURLName
+ * @param {string} sURLData
+ * @param {number} nErrorCode
+ * @param {Array} sectorInfo
+ */
+Disk.prototype.doneReadRemoteSectors = function(sURLName, sURLData, nErrorCode, sectorInfo)
+{
+    var fAsync = false;
+    if (!nErrorCode) {
+        var iCylinder = sectorInfo[0];
+        var iHead = sectorInfo[1];
+        var iSector = sectorInfo[2];
+        var nSectors = sectorInfo[3];
+        fAsync = sectorInfo[4];
+
+        if (DEBUG && this.messageEnabled()) {
+            this.messagePrint("Disk.doneReadRemoteSectors(" + iCylinder + ":" + iHead + ":" + iSector + ":" + nSectors + ")");
+        }
+
+        var abData = JSON.parse(sURLData);
+        var offData = 0;
+        while (nSectors--) {
+            /*
+             * We call seek with fWrite == true to prevent seek() from triggering another call
+             * to readRemoteSectors() and endlessly recursing.  That also forces seek() to:
+             *
+             *  1) zero the sector's 'pattern'
+             *  2) disable warning about reading an uninitialized sector
+             *
+             * We KNOW this is an uninitialized sector, because we're about to initialize it.
+             */
+            var sector = this.seek(iCylinder, iHead, iSector, true);
+            if (!sector) {
+                if (DEBUG && this.messageEnabled()) {
+                    this.messagePrint("Disk.doneReadRemoteSectors(): seek(" + iCylinder + "," + iHead + "," + iSector + ") failed");
+                }
+                break;
+            }
+            this.fill(sector, abData, offData);
+            offData += sector['length'];
+            /*
+             * We happen to know that when seek() calls readRemoteSectors(), it limits the number of sectors
+             * to the current track, so the only variable we need to advance is iSector.
+             */
+            iSector++;
+        }
+    }
+    var done = sectorInfo[5];
+    if (done) done(nErrorCode, fAsync);
 };
 
 /**
@@ -1044,9 +1332,46 @@ Disk.prototype.writeRemoteSectors = function(iCylinder, iHead, iSector, nSectors
         data[DiskAPI.QUERY.USER] = this.controller.getUserID();
         data[DiskAPI.QUERY.DATA] = JSON.stringify(abSectors);
         var sDiskURL = web.getHost() + DiskAPI.ENDPOINT;
-        return web.loadResource(sDiskURL, fAsync, data, this, this.onWriteCleanSectors, [iCylinder, iHead, iSector, nSectors, fAsync]);
+        return web.loadResource(sDiskURL, fAsync, data, this, this.doneWriteRemoteSectors, [iCylinder, iHead, iSector, nSectors, fAsync]);
     }
     return false;
+};
+
+/**
+ * doneWriteRemoteSectors(sURLName, sURLData, nErrorCode, sectorInfo)
+ *
+ * @param {string} sURLName
+ * @param {string} sURLData
+ * @param {number} nErrorCode
+ * @param {Array} sectorInfo
+ */
+Disk.prototype.doneWriteRemoteSectors = function(sURLName, sURLData, nErrorCode, sectorInfo)
+{
+    var iCylinder = sectorInfo[0];
+    var iHead = sectorInfo[1];
+    var iSector = sectorInfo[2];
+    var nSectors = sectorInfo[3];
+    var fAsync = sectorInfo[4];
+    this.fWriteInProgress = false;
+
+    if (iCylinder >= 0 && iCylinder < this.aDiskData.length && iHead >= 0 && iHead < this.aDiskData[iCylinder].length) {
+        for (var i = iSector - 1; nSectors-- > 0 && i >= 0 && i < this.aDiskData[iCylinder][iHead].length; i++) {
+            var sector = this.aDiskData[iCylinder][iHead][i];
+
+            if (DEBUG && this.messageEnabled()) {
+                this.messagePrint("Disk.doneWriteRemoteSectors(" + iCylinder + ":" + iHead + ":" + sector['sector'] + ")");
+            }
+
+            if (!nErrorCode) {
+                if (!sector.fDirty) {
+                    sector.iModify = sector.cModify = 0;
+                }
+            } else {
+                this.queueDirtySector(sector, false);
+            }
+        }
+    }
+    if (fAsync) this.updateWriteTimer();
 };
 
 /**
@@ -1186,43 +1511,6 @@ Disk.prototype.findDirtySectors = function(fAsync)
 };
 
 /**
- * onWriteCleanSectors(sURLName, sURLData, nErrorCode, sectorInfo)
- *
- * @param {string} sURLName
- * @param {string} sURLData
- * @param {number} nErrorCode
- * @param {Array} sectorInfo
- */
-Disk.prototype.onWriteCleanSectors = function(sURLName, sURLData, nErrorCode, sectorInfo)
-{
-    var iCylinder = sectorInfo[0];
-    var iHead = sectorInfo[1];
-    var iSector = sectorInfo[2];
-    var nSectors = sectorInfo[3];
-    var fAsync = sectorInfo[4];
-    this.fWriteInProgress = false;
-
-    if (iCylinder >= 0 && iCylinder < this.aDiskData.length && iHead >= 0 && iHead < this.aDiskData[iCylinder].length) {
-        for (var i = iSector - 1; nSectors-- > 0 && i >= 0 && i < this.aDiskData[iCylinder][iHead].length; i++) {
-            var sector = this.aDiskData[iCylinder][iHead][i];
-
-            if (DEBUG && this.messageEnabled()) {
-                this.messagePrint("Disk.onWriteCleanSectors(" + iCylinder + ":" + iHead + ":" + sector['sector'] + ")");
-            }
-
-            if (!nErrorCode) {
-                if (!sector.fDirty) {
-                    sector.iModify = sector.cModify = 0;
-                }
-            } else {
-                this.queueDirtySector(sector, false);
-            }
-        }
-    }
-    if (fAsync) this.updateWriteTimer();
-};
-
-/**
  * info()
  *
  * @this {Disk}
@@ -1289,7 +1577,7 @@ Disk.prototype.seek = function(iCylinder, iHead, iSector, fWrite, done)
                              * sector, then we shouldn't need to read it from the server; assume a zero pattern and return.
                              */
                             sector['pattern'] = 0;
-                        } else if (done) {
+                        } else {
                             var nSectors = 1;
                             /*
                              * We know we need to read at least 1 sector, but let's count the number of trailing sectors
@@ -1298,16 +1586,13 @@ Disk.prototype.seek = function(iCylinder, iHead, iSector, fWrite, done)
                             while (++i < track.length) {
                                 if (track[i]['pattern'] === null) nSectors++;
                             }
-                            this.readRemoteSectors(iCylinder, iHead, iSector, drive.cbSector, nSectors, function onReadRemoteComplete(err, fAsync) {
+                            this.readRemoteSectors(iCylinder, iHead, iSector, drive.cbSector, nSectors, done != null, function onReadRemoteComplete(err, fAsync) {
                                 if (err) sector = null;
-                                // noinspection JSReferencingMutableVariableFromClosure
-                                done(sector, fAsync);
+                                if (done) { //noinspection JSReferencingMutableVariableFromClosure
+                                    done(sector, fAsync);
+                                }
                             });
-                            return null;
-                        } else {
-                            if (DEBUG && this.messageEnabled()) {
-                                this.messagePrint('Disk.seek("' + this.sDiskName + '"): uninitialized sector ' + iCylinder + ':' + iHead + ':' + iSector);
-                            }
+                            return done? null : sector;
                         }
                     }
                     break;
@@ -1383,16 +1668,16 @@ Disk.prototype.toBytes = function(sector)
 Disk.prototype.read = function(sector, ibSector, fCompare)
 {
     var b = -1;
-
-    if (DEBUG && !ibSector && !fCompare && this.messageEnabled()) {
-        this.messagePrint("Disk.read(" + this.controller.id + ":" + this.drive.iDrive + "," + sector.iCylinder + ":" + sector.iHead + ":" + sector['sector'] + ")");
-    }
-
-    if (ibSector < sector['length']) {
-        var adw = sector['data'];
-        var idw = ibSector >> 2;
-        var dw = (idw < adw.length ? adw[idw] : sector['pattern']);
-        b = ((dw >> ((ibSector & 0x3) << 3)) & 0xff);
+    if (sector) {
+        if (DEBUG && !ibSector && !fCompare && this.messageEnabled()) {
+            this.messagePrint("Disk.read(" + this.controller.id + ":" + this.drive.iDrive + "," + sector.iCylinder + ":" + sector.iHead + ":" + sector['sector'] + ")");
+        }
+        if (ibSector < sector['length']) {
+            var adw = sector['data'];
+            var idw = ibSector >> 2;
+            var dw = (idw < adw.length ? adw[idw] : sector['pattern']);
+            b = ((dw >> ((ibSector & 0x3) << 3)) & 0xff);
+        }
     }
     return b;
 };
@@ -1661,9 +1946,8 @@ Disk.prototype.toJSON = function()
  */
 Disk.prototype.dumpSector = function(sector)
 {
-    var sDump;
-    if (DEBUG) {
-        sDump = "";
+    var sDump = "";
+    if (DEBUG && sector) {
         var sBytes = "", sChars = "";
         var cbSector = sector['length'];
         var cdwData = sector['data'].length;
@@ -1683,7 +1967,7 @@ Disk.prototype.dumpSector = function(sector)
             sBytes += str.toHexByte(b) + (i % 16 == 7? "-" : " ");
             sChars += (b >= 32 && b < 128? String.fromCharCode(b) : ".");
         }
-        if (sBytes) sDump += sBytes + ' ' + sChars + '\n';
+        if (sBytes) sDump += sBytes + ' ' + sChars;
     }
     return sDump;
 };

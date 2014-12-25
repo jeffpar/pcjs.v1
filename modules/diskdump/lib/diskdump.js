@@ -2145,7 +2145,7 @@ DiskDump.prototype.convertToJSON = function()
             if ((bByte0 == X86.OPCODE.JMP || bByte0 == X86.OPCODE.JMPS) && cbSectorBPB == cbSector) {
 
                 var nHeadsBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.HEAD_TOTAL);
-                var nSectorsTotalBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.SECTOR_TOTAL);
+                var nSectorsTotalBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.TOTAL_SECS);
                 var nSectorsPerTrackBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.TRACK_SECS);
 
                 if (nSectorsPerTrackBPB && nHeadsBPB) {
