@@ -2815,6 +2815,9 @@ ChipSet.prototype.advanceDMA = function(channel, fInit)
                              */
                             chipset.bus.setByteDirect(addrCur, b);
                             if (BACKTRACK) {
+                                if (!off && obj.file) {
+                                    chipset.println('loading ' + obj.file.sPath + '[' + obj.offFile + '] @' + str.toHex(addrCur));
+                                }
                                 bto = chipset.bus.addBackTrackObject(obj, bto, off);
                                 chipset.bus.setBackTrackIndex(addrCur, bto, off);
                             }

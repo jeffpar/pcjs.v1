@@ -194,7 +194,7 @@ DiskDump.aDefaultBPBs = [
     0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
     0x49, 0x42, 0x4D, 0x20, 0x20, 0x31, 0x2E, 0x30,     // "IBM  1.0" (this is a fake OEM signature)
     0x00, 0x02,                 // 0x0B: bytes per sector (0x200 or 512)
-    0x01,                       // 0x0D: sectors per cluster (2)
+    0x01,                       // 0x0D: sectors per cluster (1)
     0x01, 0x00,                 // 0x0E: reserved sectors; ie, # sectors preceding the first FAT--usually just the boot sector (1)
     0x02,                       // 0x10: FAT copies (2)
     0x40, 0x00,                 // 0x11: root directory entries (0x40 or 64)  0x40 * 0x20 = 0x800 (1 sector is 0x200 bytes, total of 4 sectors)
@@ -2113,7 +2113,7 @@ DiskDump.prototype.convertToJSON = function()
              */
         }
 
-        var bByte0 = this.bufDisk.readUInt8(offBootSector + DiskAPI.BPB.JMP_OPCODE);
+        var bByte0 = this.bufDisk.readUInt8(offBootSector + DiskAPI.BOOT.JMP_OPCODE);
         var cbSectorBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.SECTOR_BYTES);
 
         /*
@@ -2144,7 +2144,7 @@ DiskDump.prototype.convertToJSON = function()
              */
             if ((bByte0 == X86.OPCODE.JMP || bByte0 == X86.OPCODE.JMPS) && cbSectorBPB == cbSector) {
 
-                var nHeadsBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.HEAD_TOTAL);
+                var nHeadsBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.TOTAL_HEADS);
                 var nSectorsTotalBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.TOTAL_SECS);
                 var nSectorsPerTrackBPB = this.bufDisk.readUInt16LE(offBootSector + DiskAPI.BPB.TRACK_SECS);
 
@@ -2714,13 +2714,13 @@ DiskDump.prototype.convertToIMG = function()
                 /*
                  * Mimic the BPB test in convertToJSON(), because we don't want to blast an OEM string into non-DOS diskette images
                  */
-                var bByte0 = buf.readUInt8(DiskAPI.BPB.JMP_OPCODE);
+                var bByte0 = buf.readUInt8(DiskAPI.BOOT.JMP_OPCODE);
                 var cbSectorBPB = buf.readUInt16LE(DiskAPI.BPB.SECTOR_BYTES);
                 if ((bByte0 == X86.OPCODE.JMP || bByte0 == X86.OPCODE.JMPS) && cbSectorBPB == 512) {
                     /*
                      * Overwrite the OEM string with our own, so that people know how the image originated
                      */
-                    buf.write(DiskDump.MY_OEM_STRING, DiskAPI.BPB.OEM_STRING, DiskDump.MY_OEM_STRING.length);
+                    buf.write(DiskDump.MY_OEM_STRING, DiskAPI.BOOT.OEM_STRING, DiskDump.MY_OEM_STRING.length);
                 }
             }
         } catch(err) {
