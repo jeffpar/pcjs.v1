@@ -221,7 +221,7 @@ module.exports = function(grunt) {
                      */
                     compilation_level: "ADVANCED_OPTIMIZATIONS",
                     externs: pkg.closureCompilerExterns,
-                    define: ["'SITEHOST=\"www.pcjs.org\"'", "'COMPILED=true'", "'DEBUG=false'", "'BACKTRACK=false'"],
+                    define: ["'SITEHOST=\"www.pcjs.org\"'", "'COMPILED=true'", "'DEBUG=false'"],
                     warning_level: "verbose",
                     // jscomp_off: ["checkTypes", "fileoverviewTags"],
                     // summary_detail_level: 3,
@@ -260,7 +260,7 @@ module.exports = function(grunt) {
                 TEMPcompilerOpts: {
                     // create_source_map: "./tmp/c1pjs/"  + pkg.version + "/c1p.map",
                     define: ["\"APPNAME='C1Pjs'\"", "\"APPVERSION='" + pkg.version + "'\"", "DEBUGGER=false",
-                             "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "BACKTRACK=false"],
+                             "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false"],
                     // output_wrapper: "\"(function(){%output%})();//@ sourceMappingURL=/tmp/c1pjs/" + pkg.version + "/c1p.map\""
                     output_wrapper: "\"(function(){%output%})();\""
                 },
@@ -272,7 +272,7 @@ module.exports = function(grunt) {
                 TEMPcompilerOpts: {
                     // create_source_map: "./tmp/c1pjs/"  + pkg.version + "/c1p-dbg.map",
                     define: ["\"APPNAME='C1Pjs'\"", "\"APPVERSION='" + pkg.version + "'\"",
-                             "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "BACKTRACK=false"],
+                             "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false"],
                     // output_wrapper: "\"(function(){%output%})();//@ sourceMappingURL=/tmp/c1pjs/" + pkg.version + "/c1p-dbg.map\""
                     output_wrapper: "\"(function(){%output%})();\""
                 },

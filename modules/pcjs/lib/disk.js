@@ -656,6 +656,8 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
     this.fWriteProtected = false;
     var fPrintOnly = (nErrorCode < 0 && this.cmp && !this.cmp.aFlags.fPowered);
 
+    this.sDiskFile = sDiskFile;
+
     if (this.fOnDemand) {
         if (!nErrorCode) {
             if (DEBUG && this.messageEnabled()) {
@@ -1014,7 +1016,7 @@ Disk.prototype.buildFileTable = function()
 
         var apba = [];
         for (var lba = dir.lbaRoot; lba < dir.lbaData; lba++) apba.push(dir.pbaVolume + lba);
-        this.getDir(dir, "\\\\DISK" + Disk.nDisks, apba);
+        this.getDir(dir, this.sDiskFile, "", apba);
 
         /*
          * Create the sector-to-file mappings now.
@@ -1031,21 +1033,23 @@ Disk.prototype.buildFileTable = function()
 };
 
 /**
- * getDir(dir, sDir, apba)
+ * getDir(dir, sDisk, sDir, apba)
  *
  * @this {Disk}
  * @param {Object} dir
+ * @param {string} sDisk
  * @param {string} sDir
  * @param {Array.<number>} apba
  */
-Disk.prototype.getDir = function(dir, sDir, apba)
+Disk.prototype.getDir = function(dir, sDisk, sDir, apba)
 {
     var iStart = this.aFileTable.length;
     var nEntriesPerSector = (dir.cbSector / DiskAPI.DIRENT.LENGTH) | 0;
 
-    if (DEBUG && this.messageEnabled()) this.messagePrint("getDir(" + sDir + ")");
-
     dir.sDir = sDir + "\\";
+
+    if (DEBUG && this.messageEnabled()) this.messagePrint('getDir("' + sDisk + '","' + dir.sDir + '")');
+
     for (var iSector = 0; iSector < apba.length; iSector++) {
         var pba = apba[iSector];
         for (var iEntry = 0; iEntry < nEntriesPerSector; iEntry++) {
@@ -1067,7 +1071,7 @@ Disk.prototype.getDir = function(dir, sDir, apba)
 
     for (var i = iStart; i < iEnd; i++) {
         var file = this.aFileTable[i];
-        if (file.bAttr & DiskAPI.ATTR.SUBDIR && file.apba.length) this.getDir(dir, sDir + "\\" + file.sName, file.apba);
+        if (file.bAttr & DiskAPI.ATTR.SUBDIR && file.apba.length) this.getDir(dir, sDisk, sDir + "\\" + file.sName, file.apba);
     }
 };
 
@@ -1373,15 +1377,14 @@ Disk.prototype.connectRemoteDisk = function(sDiskPath)
  * @param {number} iCylinder
  * @param {number} iHead
  * @param {number} iSector
- * @param {number} cbSector
  * @param {number} nSectors (to read)
  * @param {boolean} fAsync
  * @param {function(number,boolean)} [done]
  */
-Disk.prototype.readRemoteSectors = function(iCylinder, iHead, iSector, cbSector, nSectors, fAsync, done)
+Disk.prototype.readRemoteSectors = function(iCylinder, iHead, iSector, nSectors, fAsync, done)
 {
     if (DEBUG && this.messageEnabled()) {
-        this.messagePrint("readRemoteSectors(" + iCylinder + ":" + iHead + ":" + iSector + ":" + nSectors + "," + cbSector + ")");
+        this.messagePrint("readRemoteSectors(CHS=" + iCylinder + ':' + iHead + ':' + iSector + ",N=" + nSectors + ")");
     }
 
     if (this.fRemote) {
@@ -1431,7 +1434,7 @@ Disk.prototype.doneReadRemoteSectors = function(sURLName, sURLData, nErrorCode, 
             var sector = this.seek(iCylinder, iHead, iSector, true);
             if (!sector) {
                 if (DEBUG && this.messageEnabled()) {
-                    this.messagePrint("doneReadRemoteSectors(): seek(" + iCylinder + "," + iHead + "," + iSector + ") failed");
+                    this.messagePrint("doneReadRemoteSectors(): seek(CHS=" + iCylinder + ':' + iHead + ':' + iSector + ") failed");
                 }
                 break;
             }
@@ -1446,7 +1449,7 @@ Disk.prototype.doneReadRemoteSectors = function(sURLName, sURLData, nErrorCode, 
         fAsync = sectorInfo[4];
     } else {
         if (DEBUG && this.messageEnabled()) {
-            this.messagePrint("doneReadRemoteSectors(" + iCylinder + ":" + iHead + ":" + iSector + ":" + nSectors + ") returned error " + nErrorCode);
+            this.messagePrint("doneReadRemoteSectors(CHS=" + iCylinder + ':' + iHead + ':' + iSector + ",N=" + nSectors + ") returned error " + nErrorCode);
         }
     }
     var done = sectorInfo[5];
@@ -1476,7 +1479,7 @@ Disk.prototype.doneReadRemoteSectors = function(sURLName, sURLData, nErrorCode, 
 Disk.prototype.writeRemoteSectors = function(iCylinder, iHead, iSector, nSectors, abSectors, fAsync)
 {
     if (DEBUG && this.messageEnabled()) {
-        this.messagePrint("writeRemoteSectors(" + iCylinder + ":" + iHead + ":" + iSector + ":" + nSectors + ")");
+        this.messagePrint("writeRemoteSectors(CHS=" + iCylinder + ':' + iHead + ':' + iSector + ",N=" + nSectors + ")");
     }
 
     if (this.fRemote) {
@@ -1522,7 +1525,7 @@ Disk.prototype.doneWriteRemoteSectors = function(sURLName, sURLData, nErrorCode,
                 }
             } else {
                 if (DEBUG && this.messageEnabled()) {
-                    this.messagePrint("doneWriteRemoteSectors(" + iCylinder + ":" + iHead + ":" + sector['sector'] + ") returned error " + nErrorCode);
+                    this.messagePrint("doneWriteRemoteSectors(CHS=" + iCylinder + ':' + iHead + ':' + sector['sector'] + ") returned error " + nErrorCode);
                 }
                 this.queueDirtySector(sector, false);
             }
@@ -1581,7 +1584,7 @@ Disk.prototype.queueDirtySector = function(sector, fAsync)
     this.aDirtyTimestamps.push(usr.getTime());
 
     if (DEBUG && this.messageEnabled()) {
-        this.messagePrint("queueDirtySector(" + sector.iCylinder + ":" + sector.iHead + ":" + sector['sector'] + "): " + this.aDirtySectors.length + " dirty");
+        this.messagePrint("queueDirtySector(CHS=" + sector.iCylinder + ':' + sector.iHead + ':' + sector['sector'] + "): " + this.aDirtySectors.length + " dirty");
     }
 
     return fAsync && this.updateWriteTimer();
@@ -1650,9 +1653,9 @@ Disk.prototype.findDirtySectors = function(fAsync)
             var sectorNext = this.aDiskData[iCylinder][iHead][i];
             if (!sectorNext.fDirty) break;
             var j = this.aDirtySectors.indexOf(sectorNext);
-            this.assert(j >= 0, "dirty sector (" + iCylinder + ":" + iHead + ":" + sectorNext['sector'] + ") missing from aDirtySectors");
+            this.assert(j >= 0, "findDirtySectors(CHS=" + iCylinder + ':' + iHead + ':' + sectorNext['sector'] + ") missing from aDirtySectors");
             if (DEBUG && this.messageEnabled()) {
-                this.messagePrint("findDirtySectors(" + iCylinder + ":" + iHead + ":" + sectorNext['sector'] + ")");
+                this.messagePrint("findDirtySectors(CHS=" + iCylinder + ':' + iHead + ':' + sectorNext['sector'] + ")");
             }
             this.aDirtySectors.splice(j, 1);
             this.aDirtyTimestamps.splice(j, 1);
@@ -1660,7 +1663,7 @@ Disk.prototype.findDirtySectors = function(fAsync)
             sectorNext.fDirty = false;
             nSectors++;
         }
-        this.assert(!!abSectors.length, "no data for dirty sector (" + iCylinder + ":" + iHead + ":" + sector['sector'] + ")");
+        this.assert(!!abSectors.length, "no data for dirty sector (CHS=" + iCylinder + ':' + iHead + ':' + sector['sector'] + ")");
         var response = this.writeRemoteSectors(iCylinder, iHead, iSector, nSectors, abSectors, fAsync);
         return fAsync || response;
     }
@@ -1743,7 +1746,7 @@ Disk.prototype.seek = function(iCylinder, iHead, iSector, fWrite, done)
                             while (++i < track.length) {
                                 if (track[i]['pattern'] === null) nSectors++;
                             }
-                            this.readRemoteSectors(iCylinder, iHead, iSector, drive.cbSector, nSectors, done != null, function onReadRemoteComplete(err, fAsync) {
+                            this.readRemoteSectors(iCylinder, iHead, iSector, nSectors, done != null, function onReadRemoteComplete(err, fAsync) {
                                 if (err) sector = null;
                                 if (done) { //noinspection JSReferencingMutableVariableFromClosure
                                     done(sector, fAsync);
@@ -1827,7 +1830,7 @@ Disk.prototype.read = function(sector, ibSector, fCompare)
     var b = -1;
     if (sector) {
         if (DEBUG && !ibSector && !fCompare && this.messageEnabled()) {
-            this.messagePrint("read(" + this.controller.id + ":" + this.drive.iDrive + "," + sector.iCylinder + ":" + sector.iHead + ":" + sector['sector'] + ")");
+            this.messagePrint('read("' + this.sDiskFile + '",CHS=' + sector.iCylinder + ':' + sector.iHead + ':' + sector['sector'] + ')');
         }
         if (ibSector < sector['length']) {
             var adw = sector['data'];
@@ -1854,7 +1857,7 @@ Disk.prototype.write = function(sector, ibSector, b)
         return false;
 
     if (DEBUG && !ibSector && this.messageEnabled()) {
-        this.messagePrint("write(" + this.controller.id + ":" + this.drive.iDrive + "," + sector.iCylinder + ":" + sector.iHead + ":" + sector['sector'] + ")");
+        this.messagePrint('write("' + this.sDiskFile + '",CHS=' + sector.iCylinder + ':' + sector.iHead + ':' + sector['sector'] + ')');
     }
 
     if (ibSector < sector['length']) {
@@ -2020,7 +2023,7 @@ Disk.prototype.restore = function(deltas)
              * centralizes all the failure conditions we're currently checking (which, admittedly, ain't much).
              */
             if (iCylinder >= this.aDiskData.length || iHead >= this.aDiskData[iCylinder].length || iSector >= this.aDiskData[iCylinder][iHead].length) {
-                sReason = "sector " + iCylinder + ":" + iHead + ":" + iSector + " out of range (" + nChanges + " changes applied)";
+                sReason = "sector (CHS=" + iCylinder + ':' + iHead + ':' + iSector + ") out of range (" + nChanges + " changes applied)";
                 nChanges = -1;
                 break;
             }

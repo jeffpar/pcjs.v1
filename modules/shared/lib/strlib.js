@@ -196,10 +196,16 @@ str.toHexAddr = function(off, sel)
 str.getBaseName = function(sFileName, fStripExt)
 {
     var sBaseName = sFileName;
-    var i = sFileName.lastIndexOf("/");
-    if (i >= 0) {
-        sBaseName = sFileName.substr(i + 1);
-    }
+
+    var i = sFileName.lastIndexOf('/');
+    if (i >= 0) sBaseName = sFileName.substr(i + 1);
+
+    /*
+     * This next bit is a kludge to clean up names that are part of a URL that includes unsightly query parameters.
+     */
+    i = sBaseName.indexOf('&');
+    if (i > 0) sBaseName = sBaseName.substr(0, i);
+
     if (fStripExt) {
         i = sBaseName.lastIndexOf(".");
         if (i > 0) {
