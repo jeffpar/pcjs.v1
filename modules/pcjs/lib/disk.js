@@ -231,7 +231,7 @@ if (typeof module !== 'undefined') {
  */
 function Disk(controller, drive, mode)
 {
-    Component.call(this, "Disk", {'id': controller.idMachine + ".disk" + Disk.nDisks++}, Disk, Messages.DISK);
+    Component.call(this, "Disk", {'id': controller.idMachine + ".disk" + ++Disk.nDisks}, Disk, Messages.DISK);
 
     /*
      * Route all non-Debugger messages (eg, notice() and println() calls) through
@@ -1014,7 +1014,7 @@ Disk.prototype.buildFileTable = function()
 
         var apba = [];
         for (var lba = dir.lbaRoot; lba < dir.lbaData; lba++) apba.push(dir.pbaVolume + lba);
-        this.getDir(dir, "", apba);
+        this.getDir(dir, "\\\\DISK" + Disk.nDisks, apba);
 
         /*
          * Create the sector-to-file mappings now.
@@ -1241,9 +1241,10 @@ Disk.prototype.updateSector = function(file, pba, off)
     var iCylinder = (pba / nSectorsPerCylinder) | 0;
     var nSectorsRemaining = (pba % nSectorsPerCylinder);
     var iHead = (nSectorsRemaining / this.nSectors) | 0;
-    var iSector = (nSectorsRemaining % this.nSectors) + 1;
+    var iSector = (nSectorsRemaining % this.nSectors);
     var cylinder, head, sector;
     if ((cylinder = this.aDiskData[iCylinder]) && (head = cylinder[iHead]) && (sector = head[iSector])) {
+        this.assert(sector['sector'] == iSector +1);
         if (sector.file) {
             if (DEBUG && this.messageEnabled()) {
                 this.messagePrint('"' + sector.file.sPath + '" cross-linked at offset ' + sector.file.offFile + ' with "' + file.sPath + '" at offset ' + off);
@@ -1254,6 +1255,7 @@ Disk.prototype.updateSector = function(file, pba, off)
         sector.offFile = off;
         return true;
     }
+    if (DEBUG && this.messageEnabled()) this.messagePrint("unable to map PBA " + pba + " to CHS");
     return false;
 };
 

@@ -2204,11 +2204,10 @@ FDC.prototype.doRead = function(drive)
      */
     drive.resCode = FDC.REG_DATA.RES.NOT_READY | FDC.REG_DATA.RES.INCOMPLETE;
 
-    if (DEBUG && this.messageEnabled()) {
-        this.messagePrint("FDC.doRead(" + drive.bCylinder + ":" + drive.bHead + ":" + drive.bSector + ":" + drive.nBytes + ")");
-    }
-
     if (drive.disk) {
+        if (DEBUG && this.messageEnabled()) {
+            this.messagePrint("FDC.doRead(CHS=" + drive.bCylinder + ':' + drive.bHead + ':' + drive.bSector + ",LBA=" + (drive.bCylinder * (drive.disk.nHeads * drive.disk.nSectors) + drive.bHead * drive.disk.nSectors + drive.bSector-1) + ')');
+        }
         drive.sector = null;
         drive.resCode = FDC.REG_DATA.RES.NONE;
         if (this.chipset) {
@@ -2228,11 +2227,10 @@ FDC.prototype.doWrite = function(drive)
 {
     drive.resCode = FDC.REG_DATA.RES.NOT_READY | FDC.REG_DATA.RES.INCOMPLETE;
 
-    if (DEBUG && this.messageEnabled()) {
-        this.messagePrint("FDC.doWrite(" + drive.bCylinder + ":" + drive.bHead + ":" + drive.bSector + ":" + drive.nBytes + ")");
-    }
-
     if (drive.disk) {
+        if (DEBUG && this.messageEnabled()) {
+            this.messagePrint("FDC.doWrite(CHS=" + drive.bCylinder + ':' + drive.bHead + ':' + drive.bSector + ",LBA=" + (drive.bCylinder * (drive.disk.nHeads * drive.disk.nSectors) + drive.bHead * drive.disk.nSectors + drive.bSector-1) + ')');
+        }
         if (drive.disk.fWriteProtected) {
             drive.resCode = FDC.REG_DATA.RES.NOT_WRITABLE | FDC.REG_DATA.RES.INCOMPLETE;
             return;

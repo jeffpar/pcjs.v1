@@ -405,6 +405,18 @@ Bus.prototype.removeMemory = function(addr, size)
 };
 
 /**
+ * getByte(addr)
+ *
+ * @this {Bus}
+ * @param {number} addr is a physical (non-segmented) address
+ * @return {number} byte (8-bit) value at that address
+ */
+Bus.prototype.getByte = function(addr)
+{
+    return this.aMemBlocks[(addr & this.addrMask) >> this.blockShift].readByte(addr & this.blockLimit);
+};
+
+/**
  * getByteDirect(addr)
  *
  * @this {Bus}
@@ -414,6 +426,23 @@ Bus.prototype.removeMemory = function(addr, size)
 Bus.prototype.getByteDirect = function(addr)
 {
     return this.aMemBlocks[(addr & this.addrMask) >> this.blockShift].readByteDirect(addr & this.blockLimit);
+};
+
+/**
+ * getWord(addr)
+ *
+ * @this {Bus}
+ * @param {number} addr is a physical (non-segmented) address
+ * @return {number} word (16-bit) value at that address
+ */
+Bus.prototype.getWord = function(addr)
+{
+    var off = addr & this.blockLimit;
+    var iBlock = (addr & this.addrMask) >> this.blockShift;
+    if (off != this.blockLimit) {
+        return this.aMemBlocks[iBlock].readWord(off);
+    }
+    return this.aMemBlocks[iBlock++].readByte(off) | (this.aMemBlocks[iBlock & this.blockMask].readByte(0) << 8);
 };
 
 /**
@@ -434,6 +463,18 @@ Bus.prototype.getWordDirect = function(addr)
 };
 
 /**
+ * setByte(addr, b)
+ *
+ * @this {Bus}
+ * @param {number} addr is a physical (non-segmented) address
+ * @param {number} b is the byte (8-bit) value to write (we truncate it to 8 bits to be safe)
+ */
+Bus.prototype.setByte = function(addr, b)
+{
+    this.aMemBlocks[(addr & this.addrMask) >> this.blockShift].writeByte(addr & this.blockLimit, b & 0xff);
+};
+
+/**
  * setByteDirect(addr, b)
  *
  * @this {Bus}
@@ -443,6 +484,25 @@ Bus.prototype.getWordDirect = function(addr)
 Bus.prototype.setByteDirect = function(addr, b)
 {
     this.aMemBlocks[(addr & this.addrMask) >> this.blockShift].writeByteDirect(addr & this.blockLimit, b & 0xff);
+};
+
+/**
+ * setWord(addr, w)
+ *
+ * @this {Bus}
+ * @param {number} addr is a physical (non-segmented) address
+ * @param {number} w is the word (16-bit) value to write (we truncate it to 16 bits to be safe)
+ */
+Bus.prototype.setWord = function(addr, w)
+{
+    var off = addr & this.blockLimit;
+    var iBlock = (addr & this.addrMask) >> this.blockShift;
+    if (off != this.blockLimit) {
+        this.aMemBlocks[iBlock].writeWord(off, w & 0xffff);
+        return;
+    }
+    this.aMemBlocks[iBlock++].writeByte(off, w & 0xff);
+    this.aMemBlocks[iBlock & this.blockMask].writeByte(0, (w >> 8) & 0xff);
 };
 
 /**
@@ -527,8 +587,16 @@ Bus.prototype.setBackTrackIndex = function(addr, bto, off)
             if (btiPrev) {
                 var slot = btiPrev >>> Bus.BACKTRACK.SLOT_SHIFT;
                 var btoPrev = this.abtObjects[slot];
-                this.assert(btoPrev && btoPrev.refs > 0);
-                if (!--btoPrev.refs) {
+                if (!btoPrev) {
+                    if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.WARN)) {
+                        this.dbg.message("setBackTrackIndex(%" + str.toHex(addr) + "): previous index (" + str.toHex(btiPrev) + ") refers to empty slot");
+                    }
+                }
+                else if (btoPrev.refs <= 0) {
+                    if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.WARN)) {
+                        this.dbg.message("setBackTrackIndex(%" + str.toHex(addr) + "): previous index (" + str.toHex(btiPrev) + ") refers object to with bad ref count (" + btoPrev.refs + ")");
+                    }
+                } else if (!--btoPrev.refs) {
                     this.abtObjects[slot] = null;
                     this.cbtDeletions++;
                 }

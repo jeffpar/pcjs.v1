@@ -2662,7 +2662,7 @@ if (DEBUGGER) {
                 if (aAddrBreak[3]) {
                     this.findBreakpoint(aBreak, aAddrBreak, true);
                 } else if (!fTemp) {
-                    this.println("\nbreakpoint hit: " + this.hexAddr(aAddrBreak) + " (" + aBreak[0] + ")");
+                    this.println("breakpoint hit: " + this.hexAddr(aAddrBreak) + " (" + aBreak[0] + ")");
                 }
                 fBreak = true;
                 break;

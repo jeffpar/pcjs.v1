@@ -2787,7 +2787,7 @@ ChipSet.prototype.advanceDMA = function(channel, fInit)
                 channel.sAddrDebug = str.toHex(addr >> 4, 4) + ":" + str.toHex(addr & 0xf, 4);
                 if (this.messageEnabled(this.messageBitsDMA(iDMAChannel)) && channel.xfer != ChipSet.DMA_MODE.XFER_WRITE) {
                     this.messagePrint("advanceDMA(" + iDMAChannel + ") transferring " + channel.cbDebug + " bytes from " + channel.sAddrDebug, true);
-                    this.dbg.doDump("db", channel.sAddrDebug, "l" + Math.floor((channel.cbDebug + 15) / 16));
+                    this.dbg.doDump("db", channel.sAddrDebug, "l" + channel.cbDebug);
                 }
             }
             if (channel.xfer == ChipSet.DMA_MODE.XFER_WRITE) {
@@ -2807,16 +2807,10 @@ ChipSet.prototype.advanceDMA = function(channel, fInit)
                             b = 0xff;
                         }
                         if (!channel.masked) {
-                            /*
-                             * While it makes sense to call bus.setByteDirect(), since DMA deals with physical memory,
-                             * we lose the ability to trap accesses with write breakpoints by not using chipset.cpu.setByte().
-                             *
-                             * TODO: Consider providing a Bus memory interface that honors write breakpoints.
-                             */
-                            chipset.bus.setByteDirect(addrCur, b);
+                            chipset.bus.setByte(addrCur, b);
                             if (BACKTRACK) {
                                 if (!off && obj.file) {
-                                    chipset.println('loading ' + obj.file.sPath + '[' + obj.offFile + '] @' + str.toHex(addrCur));
+                                    chipset.println('loading ' + obj.file.sPath + '[' + obj.offFile + '] at %' + str.toHex(addrCur));
                                 }
                                 bto = chipset.bus.addBackTrackObject(obj, bto, off);
                                 chipset.bus.setBackTrackIndex(addrCur, bto, off);
@@ -2833,13 +2827,9 @@ ChipSet.prototype.advanceDMA = function(channel, fInit)
             }
             else if (channel.xfer == ChipSet.DMA_MODE.XFER_READ) {
                 /*
-                 * While it makes sense to call bus.getByteDirect(), since DMA deals with physical memory,
-                 * we lose the ability to trap accesses with read breakpoints by not using chipset.cpu.getByte().
-                 *
-                 * TODO: Determine whether we should support async dmaWrite() functions (currently not required),
-                 * and consider providing a Bus memory interface that honors read breakpoints.
+                 * TODO: Determine whether we should support async dmaWrite() functions (currently not required)
                  */
-                b = chipset.bus.getByteDirect(addr);
+                b = chipset.bus.getByte(addr);
                 if (channel.fnTransfer.call(channel.component, channel.obj, b) < 0) {
                     /*
                      * In this case, I think I have no choice but to terminate the DMA operation in response to a failure,
@@ -2907,7 +2897,7 @@ ChipSet.prototype.updateDMA = function(channel)
 
     if (DEBUG && this.messageEnabled(this.messageBitsDMA(iDMAChannel)) && channel.xfer == ChipSet.DMA_MODE.XFER_WRITE && channel.sAddrDebug) {
         this.messagePrint("updateDMA(" + iDMAChannel + ") transferred " + channel.cbDebug + " bytes to " + channel.sAddrDebug, true);
-        this.dbg.doDump("db", channel.sAddrDebug, "l" + Math.floor((channel.cbDebug + 15) / 16));
+        this.dbg.doDump("db", channel.sAddrDebug, "l" + channel.cbDebug);
     }
 
     if (channel.done) {
