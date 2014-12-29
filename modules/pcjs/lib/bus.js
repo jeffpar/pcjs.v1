@@ -170,7 +170,7 @@ function Bus(parmsBus, cpu, dbg)
          *      obj:    a reference to the source object (eg, ROM object, Sector object)
          *      off:    the offset within the source object that this object refers to
          *      slot:   the slot in abtObjects which this object currently occupies
-         *      refs:   the number of memory references, as recorded by setBackTrackIndex()
+         *      refs:   the number of memory references, as recorded by writeBackTrack()
          */
         this.abtObjects = [];
         this.cbtDeletions = 0;
@@ -527,7 +527,7 @@ Bus.prototype.setWordDirect = function(addr, w)
 /**
  * addBackTrackObject(obj, bto, off)
  *
- * If bto is null, then we create bto (ie, an object that references obj and records off).
+ * If bto is null, then we create bto (ie, an object that wraps obj and records off).
  *
  * If bto is NOT null, then we verify that off is within bto's range; if not, then we must
  * create a new bto and return that instead.
@@ -541,7 +541,7 @@ Bus.prototype.setWordDirect = function(addr, w)
 Bus.prototype.addBackTrackObject = function(obj, bto, off)
 {
     if (BACKTRACK && obj) {
-        if (!bto || off < bto.off || off >= bto.off + Bus.BACKTRACK.OFF_MAX) {
+        if (!bto || bto.obj != obj || off < bto.off || off >= bto.off + Bus.BACKTRACK.OFF_MAX) {
             var slot;
             var cbtObjects = this.abtObjects.length;
             bto = {obj: obj, off: off, slot: 0, refs: 0};
@@ -570,38 +570,74 @@ Bus.prototype.addBackTrackObject = function(obj, bto, off)
 };
 
 /**
- * setBackTrackIndex(addr, bto, off)
+ * writeBackTrackObject(addr, bto, off)
  *
  * @this {Bus}
  * @param {number} addr is a physical (non-segmented) address
  * @param {Object|null} bto
  * @param {number} off
  */
-Bus.prototype.setBackTrackIndex = function(addr, bto, off)
+Bus.prototype.writeBackTrackObject = function(addr, bto, off)
 {
     if (BACKTRACK && bto) {
         this.assert(off - bto.off >= 0 && off - bto.off < Bus.BACKTRACK.OFF_MAX);
         var bti = (bto.slot << Bus.BACKTRACK.SLOT_SHIFT) | (Bus.BACKTRACK.GEN_START << Bus.BACKTRACK.GEN_SHIFT) | (off - bto.off);
+        this.writeBackTrack(addr, bti);
+    }
+};
+
+/**
+ * readBackTrack(addr)
+ *
+ * @this {Bus}
+ * @param {number} addr is a physical (non-segmented) address
+ * @return {number}
+ */
+Bus.prototype.readBackTrack = function(addr)
+{
+    if (BACKTRACK) {
+        return this.aMemBlocks[(addr & this.addrMask) >> this.blockShift].readBackTrack(addr & this.blockLimit);
+    }
+    return 0;
+};
+
+/**
+ * writeBackTrack(addr, bti)
+ *
+ * @this {Bus}
+ * @param {number} addr is a physical (non-segmented) address
+ * @param {number} bti
+ */
+Bus.prototype.writeBackTrack = function(addr, bti)
+{
+    if (BACKTRACK) {
+        var slot = bti >>> Bus.BACKTRACK.SLOT_SHIFT;
         var btiPrev = this.aMemBlocks[(addr & this.addrMask) >> this.blockShift].writeBackTrack(addr & this.blockLimit, bti);
-        if (btiPrev != bti) {
+        var slotPrev = btiPrev >>> Bus.BACKTRACK.SLOT_SHIFT;
+        if (slot != slotPrev) {
             if (btiPrev) {
-                var slot = btiPrev >>> Bus.BACKTRACK.SLOT_SHIFT;
-                var btoPrev = this.abtObjects[slot];
+                var btoPrev = this.abtObjects[slotPrev];
                 if (!btoPrev) {
                     if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.WARN)) {
-                        this.dbg.message("setBackTrackIndex(%" + str.toHex(addr) + "): previous index (" + str.toHex(btiPrev) + ") refers to empty slot");
+                        this.dbg.message("writeBackTrack(%" + str.toHex(addr) + ',' + str.toHex(bti) + "): previous index (" + str.toHex(btiPrev) + ") refers to empty slot (" + slotPrev + ")");
                     }
                 }
                 else if (btoPrev.refs <= 0) {
                     if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.WARN)) {
-                        this.dbg.message("setBackTrackIndex(%" + str.toHex(addr) + "): previous index (" + str.toHex(btiPrev) + ") refers object to with bad ref count (" + btoPrev.refs + ")");
+                        this.dbg.message("writeBackTrack(%" + str.toHex(addr) + ',' + str.toHex(bti) + "): previous index (" + str.toHex(btiPrev) + ") refers to object with bad ref count (" + btoPrev.refs + ")");
                     }
                 } else if (!--btoPrev.refs) {
-                    this.abtObjects[slot] = null;
+                    this.abtObjects[slotPrev] = null;
                     this.cbtDeletions++;
                 }
             }
-            bto.refs++;
+            if (bti) {
+                var bto = this.abtObjects[slot];
+                if (bto) {
+                    this.assert(slot == bto.slot);
+                    bto.refs++;
+                }
+            }
         }
     }
 };

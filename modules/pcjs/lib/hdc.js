@@ -286,39 +286,120 @@ HDC.ATC = {
 /*
  * XTC (XT Controller) Registers
  */
-
-/*
- * XTC Data Register (0x320, read-write)
- *
- * Writes to this register are discussed below; see HDC Commands.
- *
- * Reads from this register after a command has been executed retrieve a "status byte",
- * which must NOT be confused with the Status Register (see below).  This data "status byte"
- * contains only two bits of interest: XTC_DATA.STATUS_ERROR and XTC_DATA.STATUS_UNIT.
- */
-HDC.XTC = {};
-HDC.XTC.DATA = {};
-HDC.XTC.DATA.PORT           = 0x320;    // port address
-HDC.XTC.DATA.STATUS_OK      = 0x00;     // no error
-HDC.XTC.DATA.STATUS_ERROR   = 0x02;     // error occurred during command execution
-HDC.XTC.DATA.STATUS_UNIT    = 0x20;     // logical unit number of the drive
-
-/*
- * XTC Status Register (0x321, read-only)
- *
- * WARNING: The IBM Technical Reference Manual *badly* confuses the XTC_DATA "status byte" (above)
- * that the controller sends following an HDC.XTC.DATA.CMD operation with the Status Register (below).
- * In fact, it's so badly confused that it completely fails to document any of the Status Register
- * bits below; I'm forced to guess at their meanings from the HDC BIOS listing.
- */
-HDC.XTC.STATUS = {};
-HDC.XTC.STATUS.PORT         = 0x321;    // port address
-HDC.XTC.STATUS.NONE         = 0x00;
-HDC.XTC.STATUS.REQ          = 0x01;     // HDC BIOS: request bit
-HDC.XTC.STATUS.IOMODE       = 0x02;     // HDC BIOS: mode bit (GUESS: set whenever XTC_DATA contains a response?)
-HDC.XTC.STATUS.BUS          = 0x04;     // HDC BIOS: command/data bit (GUESS: set whenever XTC_DATA ready for request?)
-HDC.XTC.STATUS.BUSY         = 0x08;     // HDC BIOS: busy bit
-HDC.XTC.STATUS.INTERRUPT    = 0x20;     // HDC BIOS: interrupt bit
+HDC.XTC = {
+    /*
+     * XTC Data Register (0x320, read-write)
+     *
+     * Writes to this register are discussed below; see HDC Commands.
+     *
+     * Reads from this register after a command has been executed retrieve a "status byte",
+     * which must NOT be confused with the Status Register (see below).  This data "status byte"
+     * contains only two bits of interest: XTC.DATA.STATUS.ERROR and XTC.DATA.STATUS.UNIT.
+     */
+    DATA: {
+        PORT:          0x320,   // port address
+        STATUS: {
+            OK:         0x00,   // no error
+            ERROR:      0x02,   // error occurred during command execution
+            UNIT:       0x20    // logical unit number of the drive
+        },
+        /*
+         * XTC Commands, as issued to XTC_DATA
+         *
+         * Commands are multi-byte sequences sent to XTC_DATA, starting with a XTC_DATA.CMD byte,
+         * and followed by 5 more bytes, for a total of 6 bytes, which collectively are called a
+         * Device Control Block (DCB).  Not all commands use all 6 bytes, but all 6 bytes must be present;
+         * unused bytes are simply ignored.
+         *
+         *      XTC_DATA.CMD    (3-bit class code, 5-bit operation code)
+         *      XTC_DATA.HEAD   (1-bit drive number, 5-bit head number)
+         *      XTC_DATA.CLSEC  (upper bits of 10-bit cylinder number, 6-bit sector number)
+         *      XTC_DATA.CH     (lower bits of 10-bit cylinder number)
+         *      XTC_DATA.COUNT  (8-bit interleave or block count)
+         *      XTC_DATA.CTRL   (8-bit control field)
+         *
+         * One command, HDC.XTC.DATA.CMD.INIT_DRIVE, must include 8 additional bytes following the DCB:
+         *
+         *      maximum number of cylinders (high)
+         *      maximum number of cylinders (low)
+         *      maximum number of heads
+         *      start reduced write current cylinder (high)
+         *      start reduced write current cylinder (low)
+         *      start write precompensation cylinder (high)
+         *      start write precompensation cylinder (low)
+         *      maximum ECC data burst length
+         *
+         * Note that the 3 word values above are stored in "big-endian" format (high byte followed by low byte),
+         * rather than the more typical "little-endian" format (low byte followed by high byte).
+         */
+        CMD: {
+            TEST_READY:     0x00,       // Test Drive Ready
+            RECALIBRATE:    0x01,       // Recalibrate
+            REQUEST_SENSE:  0x03,       // Request Sense Status
+            FORMAT_DRIVE:   0x04,       // Format Drive
+            READ_VERF:      0x05,       // Read Verify
+            FORMAT_TRK:     0x06,       // Format Track
+            FORMAT_BAD:     0x07,       // Format Bad Track
+            READ_DATA:      0x08,       // Read
+            WRITE_DATA:     0x0A,       // Write
+            SEEK:           0x0B,       // Seek
+            INIT_DRIVE:     0x0C,       // Initialize Drive Characteristics
+            READ_ECC_BURST: 0x0D,       // Read ECC Burst Error Length
+            READ_BUFFER:    0x0E,       // Read Data from Sector Buffer
+            WRITE_BUFFER:   0x0F,       // Write Data to Sector Buffer
+            RAM_DIAGNOSTIC: 0xE0,       // RAM Diagnostic
+            DRV_DIAGNOSTIC: 0xE3,       // HDC BIOS: CHK_DRV_CMD
+            CTL_DIAGNOSTIC: 0xE4,       // HDC BIOS: CNTLR_DIAG_CMD
+            READ_LONG:      0xE5,       // HDC BIOS: RD_LONG_CMD
+            WRITE_LONG:     0xE6        // HDC BIOS: WR_LONG_CMD
+        },
+        ERR: {
+            /*
+             * HDC error conditions, as returned in byte 0 of the (4) bytes returned by the Request Sense Status command
+             */
+            NONE:           0x00,
+            NO_INDEX:       0x01,       // no index signal detected
+            SEEK_INCOMPLETE:0x02,       // no seek-complete signal
+            WRITE_FAULT:    0x03,
+            NOT_READY:      0x04,       // after the controller selected the drive, the drive did not respond with a ready signal
+            NO_TRACK:       0x06,       // after stepping the max number of cylinders, the controller did not receive the track 00 signal from the drive
+            STILL_SEEKING:  0x08,
+            ECC_ID_ERROR:   0x10,
+            ECC_DATA_ERROR: 0x11,
+            NO_ADDR_MARK:   0x12,
+            NO_SECTOR:      0x14,
+            BAD_SEEK:       0x15,       // seek error: the cylinder and/or head address did not compare with the expected target address
+            ECC_CORRECTABLE:0x18,       // correctable data error
+            BAD_TRACK:      0x19,
+            BAD_CMD:        0x20,
+            BAD_DISK_ADDR:  0x21,
+            RAM:            0x30,
+            CHECKSUM:       0x31,
+            POLYNOMIAL:     0x32,
+            MASK:           0x3F
+        },
+        SENSE: {
+            ADDR_VALID:     0x80
+        }
+    },
+    /*
+     * XTC Status Register (0x321, read-only)
+     *
+     * WARNING: The IBM Technical Reference Manual *badly* confuses the XTC_DATA "status byte" (above)
+     * that the controller sends following an HDC.XTC.DATA.CMD operation with the Status Register (below).
+     * In fact, it's so badly confused that it completely fails to document any of the Status Register
+     * bits below; I'm forced to guess at their meanings from the HDC BIOS listing.
+     */
+    STATUS: {
+        PORT:          0x321,   // port address
+        NONE:           0x00,
+        REQ:            0x01,   // HDC BIOS: request bit
+        IOMODE:         0x02,   // HDC BIOS: mode bit (GUESS: set whenever XTC_DATA contains a response?)
+        BUS:            0x04,   // HDC BIOS: command/data bit (GUESS: set whenever XTC_DATA ready for request?)
+        BUSY:           0x08,   // HDC BIOS: busy bit
+        INTERRUPT:      0x20    // HDC BIOS: interrupt bit
+    }
+};
 
 /*
  * XTC Config Register (0x322, read-only)
@@ -331,87 +412,6 @@ HDC.XTC.STATUS.INTERRUPT    = 0x20;     // HDC BIOS: interrupt bit
  *      OFF, ON     Drive Type 2   (306 cylinders, 6 heads)
  *      OFF, OFF    Drive Type 3   (306 cylinders, 4 heads)
  */
-
-/*
- * XTC Commands, as issued to XTC_DATA
- *
- * Commands are multi-byte sequences sent to XTC_DATA, starting with a XTC_DATA.CMD byte,
- * and followed by 5 more bytes, for a total of 6 bytes, which collectively are called a
- * Device Control Block (DCB).  Not all commands use all 6 bytes, but all 6 bytes must be present;
- * unused bytes are simply ignored.
- *
- *      XTC_DATA.CMD    (3-bit class code, 5-bit operation code)
- *      XTC_DATA.HEAD   (1-bit drive number, 5-bit head number)
- *      XTC_DATA.CLSEC  (upper bits of 10-bit cylinder number, 6-bit sector number)
- *      XTC_DATA.CH     (lower bits of 10-bit cylinder number)
- *      XTC_DATA.COUNT  (8-bit interleave or block count)
- *      XTC_DATA.CTRL   (8-bit control field)
- *
- * One command, HDC.XTC.DATA.CMD.INIT_DRIVE, must include 8 additional bytes following the DCB:
- *
- *      maximum number of cylinders (high)
- *      maximum number of cylinders (low)
- *      maximum number of heads
- *      start reduced write current cylinder (high)
- *      start reduced write current cylinder (low)
- *      start write precompensation cylinder (high)
- *      start write precompensation cylinder (low)
- *      maximum ECC data burst length
- *
- * Note that the 3 word values above are stored in "big-endian" format (high byte followed by low byte),
- * rather than the more typical "little-endian" format (low byte followed by high byte).
- */
-HDC.XTC.DATA.CMD = {
-    TEST_READY:     0x00,       // Test Drive Ready
-    RECALIBRATE:    0x01,       // Recalibrate
-    REQUEST_SENSE:  0x03,       // Request Sense Status
-    FORMAT_DRIVE:   0x04,       // Format Drive
-    READ_VERF:      0x05,       // Read Verify
-    FORMAT_TRK:     0x06,       // Format Track
-    FORMAT_BAD:     0x07,       // Format Bad Track
-    READ_DATA:      0x08,       // Read
-    WRITE_DATA:     0x0A,       // Write
-    SEEK:           0x0B,       // Seek
-    INIT_DRIVE:     0x0C,       // Initialize Drive Characteristics
-    READ_ECC_BURST: 0x0D,       // Read ECC Burst Error Length
-    READ_BUFFER:    0x0E,       // Read Data from Sector Buffer
-    WRITE_BUFFER:   0x0F,       // Write Data to Sector Buffer
-    RAM_DIAGNOSTIC: 0xE0,       // RAM Diagnostic
-    DRV_DIAGNOSTIC: 0xE3,       // HDC BIOS: CHK_DRV_CMD
-    CTL_DIAGNOSTIC: 0xE4,       // HDC BIOS: CNTLR_DIAG_CMD
-    READ_LONG:      0xE5,       // HDC BIOS: RD_LONG_CMD
-    WRITE_LONG:     0xE6        // HDC BIOS: WR_LONG_CMD
-};
-
-/*
- * HDC error conditions, as returned in byte 0 of the (4) bytes returned by the Request Sense Status command
- */
-HDC.XTC.DATA.ERR = {
-    NONE:           0x00,
-    NO_INDEX:       0x01,       // no index signal detected
-    SEEK_INCOMPLETE:0x02,       // no seek-complete signal
-    WRITE_FAULT:    0x03,
-    NOT_READY:      0x04,       // after the controller selected the drive, the drive did not respond with a ready signal
-    NO_TRACK:       0x06,       // after stepping the max number of cylinders, the controller did not receive the track 00 signal from the drive
-    STILL_SEEKING:  0x08,
-    ECC_ID_ERROR:   0x10,
-    ECC_DATA_ERROR: 0x11,
-    NO_ADDR_MARK:   0x12,
-    NO_SECTOR:      0x14,
-    BAD_SEEK:       0x15,       // seek error: the cylinder and/or head address did not compare with the expected target address
-    ECC_CORRECTABLE:0x18,       // correctable data error
-    BAD_TRACK:      0x19,
-    BAD_CMD:        0x20,
-    BAD_DISK_ADDR:  0x21,
-    RAM:            0x30,
-    CHECKSUM:       0x31,
-    POLYNOMIAL:     0x32,
-    MASK:           0x3F
-};
-
-HDC.XTC.DATA.SENSE = {
-    ADDR_VALID:     0x80
-};
 
 /*
  * HDC Command Sequences
@@ -2021,12 +2021,12 @@ HDC.prototype.doXTC = function()
         /*
          * Although not terribly clear from IBM's "Fixed Disk Adapter" documentation, a data "status byte"
          * also follows the 4 "sense bytes".  Interestingly, The HDC BIOS checks that data status byte for
-         * XTC.DATA.STATUS_ERROR, but I have to wonder if it would have ever been set for this command....
+         * XTC.DATA.STATUS.ERROR, but I have to wonder if it would have ever been set for this command....
          *
          * The whole point of the HDC.XTC.DATA.CMD.REQUEST_SENSE command is to obtain details about a
          * previous error, so if HDC.XTC.DATA.CMD.REQUEST_SENSE itself reports an error, what would that mean?
          */
-        this.pushResult(HDC.XTC.DATA.STATUS_OK | bDrive);
+        this.pushResult(HDC.XTC.DATA.STATUS.OK | bDrive);
         bCmd = -1;                              // mark the command as complete
         break;
 
@@ -2042,11 +2042,11 @@ HDC.prototype.doXTC = function()
             }
         }
         if (drive) this.verifyDrive(drive);
-        bDataStatus = HDC.XTC.DATA.STATUS_OK;
+        bDataStatus = HDC.XTC.DATA.STATUS.OK;
         if (!drive && this.iDriveAllowFail == iDrive) {
             this.iDriveAllowFail = -1;
             if (DEBUG) this.messagePrint("HDC.doXTC(): fake failure triggered");
-            bDataStatus = HDC.XTC.DATA.STATUS_ERROR;
+            bDataStatus = HDC.XTC.DATA.STATUS.ERROR;
         }
         this.beginResult(bDataStatus | bDrive);
         bCmd = -1;                              // mark the command as complete
@@ -2054,7 +2054,7 @@ HDC.prototype.doXTC = function()
 
     case HDC.XTC.DATA.CMD.RAM_DIAGNOSTIC:       // 0xE0
     case HDC.XTC.DATA.CMD.CTL_DIAGNOSTIC:       // 0xE4
-        this.beginResult(HDC.XTC.DATA.STATUS_OK | bDrive);
+        this.beginResult(HDC.XTC.DATA.STATUS.OK | bDrive);
         bCmd = -1;                              // mark the command as complete
         break;
 
@@ -2076,7 +2076,7 @@ HDC.prototype.doXTC = function()
         }
         switch (bCmd) {
         case HDC.XTC.DATA.CMD.TEST_READY:       // 0x00
-            this.beginResult(HDC.XTC.DATA.STATUS_OK | bDrive);
+            this.beginResult(HDC.XTC.DATA.STATUS.OK | bDrive);
             break;
 
         case HDC.XTC.DATA.CMD.RECALIBRATE:      // 0x01
@@ -2084,14 +2084,14 @@ HDC.prototype.doXTC = function()
             if (DEBUG && this.messageEnabled()) {
                 this.messagePrint("HDC.doXTC(): drive " + iDrive + " control byte: 0x" + str.toHexByte(bControl));
             }
-            this.beginResult(HDC.XTC.DATA.STATUS_OK | bDrive);
+            this.beginResult(HDC.XTC.DATA.STATUS.OK | bDrive);
             break;
 
         case HDC.XTC.DATA.CMD.READ_VERF:        // 0x05
             /*
              * This is a non-DMA operation, so we simply pretend everything is OK for now.  TODO: Revisit.
              */
-            this.beginResult(HDC.XTC.DATA.STATUS_OK | bDrive);
+            this.beginResult(HDC.XTC.DATA.STATUS.OK | bDrive);
             break;
 
         case HDC.XTC.DATA.CMD.READ_DATA:        // 0x08
@@ -2118,7 +2118,7 @@ HDC.prototype.doXTC = function()
             break;
 
         default:
-            this.beginResult(HDC.XTC.DATA.STATUS_ERROR | bDrive);
+            this.beginResult(HDC.XTC.DATA.STATUS.ERROR | bDrive);
             if (DEBUG && this.messageEnabled()) {
                 this.messagePrint("HDC.doXTC(0x" + str.toHexByte(bCmdOrig) + "): " + (bCmd < 0? ("invalid drive (" + iDrive + ")") : "unsupported operation"));
                 if (bCmd >= 0) this.dbg.stopCPU();
@@ -2269,7 +2269,7 @@ HDC.prototype.dmaWriteFormat = function(drive, b)
  *
  * @this {HDC}
  * @param {Object} drive
- * @param {function(number)} done (dataStatus is XTC.DATA.STATUS_OK or XTC.DATA.STATUS_ERROR; if error, then drive.errorCode should be set as well)
+ * @param {function(number)} done (dataStatus is XTC.DATA.STATUS.OK or XTC.DATA.STATUS.ERROR; if error, then drive.errorCode should be set as well)
  */
 HDC.prototype.doDMARead = function(drive, done)
 {
@@ -2300,12 +2300,12 @@ HDC.prototype.doDMARead = function(drive, done)
                         drive.errorCode = HDC.XTC.DATA.ERR.NOT_READY;
                     }
                 }
-                done(drive.errorCode? HDC.XTC.DATA.STATUS_ERROR : HDC.XTC.DATA.STATUS_OK);
+                done(drive.errorCode? HDC.XTC.DATA.STATUS.ERROR : HDC.XTC.DATA.STATUS.OK);
             });
             return;
         }
     }
-    done(drive.errorCode? HDC.XTC.DATA.STATUS_ERROR : HDC.XTC.DATA.STATUS_OK);
+    done(drive.errorCode? HDC.XTC.DATA.STATUS.ERROR : HDC.XTC.DATA.STATUS.OK);
 };
 
 /**
@@ -2313,7 +2313,7 @@ HDC.prototype.doDMARead = function(drive, done)
  *
  * @this {HDC}
  * @param {Object} drive
- * @param {function(number)} done (dataStatus is XTC.DATA.STATUS_OK or XTC.DATA.STATUS_ERROR; if error, then drive.errorCode should be set as well)
+ * @param {function(number)} done (dataStatus is XTC.DATA.STATUS.OK or XTC.DATA.STATUS.ERROR; if error, then drive.errorCode should be set as well)
  */
 HDC.prototype.doDMAWrite = function(drive, done)
 {
@@ -2351,12 +2351,12 @@ HDC.prototype.doDMAWrite = function(drive, done)
                         drive.errorCode = HDC.XTC.DATA.ERR.NONE;
                     }
                 }
-                done(drive.errorCode? HDC.XTC.DATA.STATUS_ERROR : HDC.XTC.DATA.STATUS_OK);
+                done(drive.errorCode? HDC.XTC.DATA.STATUS.ERROR : HDC.XTC.DATA.STATUS.OK);
             });
             return;
         }
     }
-    done(drive.errorCode? HDC.XTC.DATA.STATUS_ERROR : HDC.XTC.DATA.STATUS_OK);
+    done(drive.errorCode? HDC.XTC.DATA.STATUS.ERROR : HDC.XTC.DATA.STATUS.OK);
 };
 
 /**
@@ -2364,7 +2364,7 @@ HDC.prototype.doDMAWrite = function(drive, done)
  *
  * @this {HDC}
  * @param {Object} drive
- * @param {function(number)} done (dataStatus is XTC.DATA.STATUS_OK or XTC.DATA.STATUS_ERROR; if error, then drive.errorCode should be set as well)
+ * @param {function(number)} done (dataStatus is XTC.DATA.STATUS.OK or XTC.DATA.STATUS.ERROR; if error, then drive.errorCode should be set as well)
  */
 HDC.prototype.doDMAWriteBuffer = function(drive, done)
 {
@@ -2395,11 +2395,11 @@ HDC.prototype.doDMAWriteBuffer = function(drive, done)
                     drive.errorCode = HDC.XTC.DATA.ERR.NOT_READY;
                 }
             }
-            done(drive.errorCode? HDC.XTC.DATA.STATUS_ERROR : HDC.XTC.DATA.STATUS_OK);
+            done(drive.errorCode? HDC.XTC.DATA.STATUS.ERROR : HDC.XTC.DATA.STATUS.OK);
         });
         return;
     }
-    done(drive.errorCode? HDC.XTC.DATA.STATUS_ERROR : HDC.XTC.DATA.STATUS_OK);
+    done(drive.errorCode? HDC.XTC.DATA.STATUS.ERROR : HDC.XTC.DATA.STATUS.OK);
 };
 
 /**
@@ -2418,7 +2418,7 @@ HDC.prototype.doDMAWriteBuffer = function(drive, done)
  *
  * @this {HDC}
  * @param {Object} drive
- * @param {function(number)} done (dataStatus is XTC.DATA.STATUS_OK or XTC.DATA.STATUS_ERROR; if error, then drive.errorCode should be set as well)
+ * @param {function(number)} done (dataStatus is XTC.DATA.STATUS.OK or XTC.DATA.STATUS.ERROR; if error, then drive.errorCode should be set as well)
  *
 HDC.prototype.doDMAFormat = function(drive, done)
 {
@@ -2450,12 +2450,12 @@ HDC.prototype.doDMAFormat = function(drive, done)
                     }
                 }
                 drive.bFormatting = false;
-                done(drive.errorCode? HDC.XTC.DATA.STATUS_ERROR : HDC.XTC.DATA.STATUS_OK);
+                done(drive.errorCode? HDC.XTC.DATA.STATUS.ERROR : HDC.XTC.DATA.STATUS.OK);
             });
             return;
         }
     }
-    done(drive.errorCode? HDC.XTC.DATA.STATUS_ERROR : HDC.XTC.DATA.STATUS_OK);
+    done(drive.errorCode? HDC.XTC.DATA.STATUS.ERROR : HDC.XTC.DATA.STATUS.OK);
 };
  */
 

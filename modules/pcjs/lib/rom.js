@@ -321,7 +321,7 @@ ROM.prototype.addROM = function(addr)
             this.bus.setByteDirect(addr + i, this.abROM[i]);
             if (BACKTRACK) {
                 bto = this.bus.addBackTrackObject(this, bto, i);
-                this.bus.setBackTrackIndex(addr + i, bto, i);
+                this.bus.writeBackTrackObject(addr + i, bto, i);
             }
         }
         return true;

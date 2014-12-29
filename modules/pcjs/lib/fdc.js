@@ -78,11 +78,11 @@ if (typeof module !== 'undefined') {
  *
  *      N       Number                  the number of data bytes written in a sector
  *
- *      NCN     New Cylinder Number     the new cylinder number for a Seek operation
+ *      NCN     New Cylinder Number     the new cylinder number for a SEEK operation
  *
  *      ND      Non-Data Mode           indicates an operation in the non-data mode
  *
- *      PCN     Present Cylinder Number the cylinder number at the completion of a Sense Interrupt Status command
+ *      PCN     Present Cylinder Number the cylinder number at the completion of a SENSE INTERRUPT STATUS command
  *                                      (present position of the head)
  *
  *      R       Record                  the sector number to be read or written
@@ -227,19 +227,20 @@ if (DEBUG) {
  * are supported, hence bit 1 is always 0 (ie, FDC.REG_OUTPUT.DS2 and FDC.REG_OUTPUT.DS3 are not supported) and bits
  * 6 and 7 are unused (FDC.REG_OUTPUT.MOTOR_D2 and FDC.REG_OUTPUT.MOTOR_D3 are not supported).
  */
-FDC.REG_OUTPUT = {};
-FDC.REG_OUTPUT.PORT         = 0x3F2;
-FDC.REG_OUTPUT.DS           = 0x03;     // drive select bits
-FDC.REG_OUTPUT.DS0          = 0x00;
-FDC.REG_OUTPUT.DS1          = 0x01;
-FDC.REG_OUTPUT.DS2          = 0x02;     // reserved on the MODEL_5170
-FDC.REG_OUTPUT.DS3          = 0x03;     // reserved on the MODEL_5170
-FDC.REG_OUTPUT.ENABLE       = 0x04;     // clearing this bit resets the FDC
-FDC.REG_OUTPUT.INT_ENABLE   = 0x08;     // enables both FDC and DMA (Channel 2) interrupt requests (IRQ 6)
-FDC.REG_OUTPUT.MOTOR_D0     = 0x10;
-FDC.REG_OUTPUT.MOTOR_D1     = 0x20;
-FDC.REG_OUTPUT.MOTOR_D2     = 0x40;     // reserved on the MODEL_5170
-FDC.REG_OUTPUT.MOTOR_D3     = 0x80;     // reserved on the MODEL_5170
+FDC.REG_OUTPUT = {
+    PORT:      0x3F2,
+    DS:         0x03,   // drive select bits
+    DS0:        0x00,
+    DS1:        0x01,
+    DS2:        0x02,   // reserved on the MODEL_5170
+    DS3:        0x03,   // reserved on the MODEL_5170
+    ENABLE:     0x04,   // clearing this bit resets the FDC
+    INT_ENABLE: 0x08,   // enables both FDC and DMA (Channel 2) interrupt requests (IRQ 6)
+    MOTOR_D0:   0x10,
+    MOTOR_D1:   0x20,
+    MOTOR_D2:   0x40,   // reserved on the MODEL_5170
+    MOTOR_D3:   0x80    // reserved on the MODEL_5170
+};
 
 /*
  * FDC Main Status Register (0x3F4, read-only)
@@ -247,22 +248,96 @@ FDC.REG_OUTPUT.MOTOR_D3     = 0x80;     // reserved on the MODEL_5170
  * On the MODEL_5170 "PC AT Fixed Disk and Diskette Drive Adapter", bits 2 and 3 are reserved, since that adapter
  * supported a maximum of two diskette drives.
  */
-FDC.REG_STATUS = {};
-FDC.REG_STATUS.PORT         = 0x3F4;
-FDC.REG_STATUS.BUSY_A       = 0x01;
-FDC.REG_STATUS.BUSY_B       = 0x02;
-FDC.REG_STATUS.BUSY_C       = 0x04;     // reserved on the MODEL_5170
-FDC.REG_STATUS.BUSY_D       = 0x08;     // reserved on the MODEL_5170
-FDC.REG_STATUS.BUSY         = 0x10;     // a read or write command is in progress
-FDC.REG_STATUS.NON_DMA      = 0x20;     // FDC is in non-DMA mode
-FDC.REG_STATUS.READ_DATA    = 0x40;     // transfer is from FDC Data Register to processor (if clear, then transfer is from processor to the FDC Data Register)
-FDC.REG_STATUS.RQM          = 0x80;     // indicates FDC Data Register is ready to send or receive data to or from the processor (Request for Master)
+FDC.REG_STATUS = {
+    PORT:      0x3F4,
+    BUSY_A:     0x01,
+    BUSY_B:     0x02,
+    BUSY_C:     0x04,   // reserved on the MODEL_5170
+    BUSY_D:     0x08,   // reserved on the MODEL_5170
+    BUSY:       0x10,   // a read or write command is in progress
+    NON_DMA:    0x20,   // FDC is in non-DMA mode
+    READ_DATA:  0x40,   // transfer is from FDC Data Register to processor (if clear, then transfer is from processor to the FDC Data Register)
+    RQM:        0x80    // indicates FDC Data Register is ready to send or receive data to or from the processor (Request for Master)
+};
 
 /*
  * FDC Data Register (0x3F5, read-write)
  */
-FDC.REG_DATA = {};
-FDC.REG_DATA.PORT           = 0x3F5;
+FDC.REG_DATA = {
+    PORT:      0x3F5,
+    /*
+     * FDC Commands
+     *
+     * NOTE: FDC command bytes need to be masked with FDC.REG_DATA.CMD.MASK before comparing to the values below, since a
+     * number of commands use the following additional bits as follows:
+     *
+     *      SK (0x20): Skip Deleted Data Address Mark
+     *      MF (0x40): Modified Frequency Modulation (as opposed to FM or Frequency Modulation)
+     *      MT (0x80): multi-track operation (ie, data processed under both head 0 and head 1)
+     *
+     * We don't support MT (Multi-Track) operations at this time, and the MF and SK designations cannot be supported as long
+     * as our diskette images contain only the original data bytes without any formatting information.
+     */
+    CMD: {
+        READ_TRACK:     0x02,
+        SPECIFY:        0x03,
+        SENSE_DRIVE:    0x04,
+        WRITE_DATA:     0x05,
+        READ_DATA:      0x06,
+        RECALIBRATE:    0x07,
+        SENSE_INT:      0x08,       // this command is used to clear the FDC interrupt following the clearing/setting of FDC.REG_OUTPUT.ENABLE
+        WRITE_DEL_DATA: 0x09,
+        READ_ID:        0x0A,
+        READ_DEL_DATA:  0x0C,
+        FORMAT_TRACK:   0x0D,
+        SEEK:           0x0F,
+        SCAN_EQUAL:     0x11,
+        SCAN_LO_EQUAL:  0x19,
+        SCAN_HI_EQUAL:  0x1D,
+        MASK:           0x1F,
+        SK:             0x20,       // SK (Skip Deleted Data Address Mark)
+        MF:             0x40,       // MF (Modified Frequency Modulation)
+        MT:             0x80        // MT (Multi-Track; ie, data under both heads will be processed)
+    },
+    /*
+     * FDC status/error results, generally assigned according to the corresponding ST0, ST1, ST2 or ST3 status bit.
+     *
+     * TODO: Determine when EQUIP_CHECK is *really* set; also, "77 step pulses" sounds suspiciously like a typo.
+     */
+    RES: {
+        NONE:           0x00000000, // ST0 (IC): Normal termination of command (NT)
+        NOT_READY:      0x00000008, // ST0 (NR): When the FDD is in the not-ready state and a read or write command is issued, this flag is set; if a read or write command is issued to side 1 of a single sided drive, then this flag is set
+        EQUIP_CHECK:    0x00000010, // ST0 (EC): If a fault signal is received from the FDD, or if the track 0 signal fails to occur after 77 step pulses (recalibrate command), then this flag is set
+        SEEK_END:       0x00000020, // ST0 (SE): When the FDC completes the Seek command, this flag is set to 1 (high)
+        INCOMPLETE:     0x00000040, // ST0 (IC): Abnormal termination of command (AT); execution of command was started, but was not successfully completed
+        RESET:          0x000000C0, // ST0 (IC): Abnormal termination because during command execution the ready signal from the drive changed state
+        INVALID:        0x00000080, // ST0 (IC): Invalid command issue (IC); command which was issued was never started
+        ST0:            0x000000FF,
+        NO_ID_MARK:     0x00000100, // ST1 (MA): If the FDC cannot detect the ID Address Mark, this flag is set; at the same time, the MD (Missing Address Mark in Data Field) of Status Register 2 is set
+        NOT_WRITABLE:   0x00000200, // ST1 (NW): During Execution of a Write Data, Write Deleted Data, or Format a Cylinder command, if the FDC detects a write protect signal from the FDD, then this flag is set
+        NO_DATA:        0x00000400, // ST1 (ND): FDC cannot find specified sector (or specified ID if READ_ID command)
+        DMA_OVERRUN:    0x00001000, // ST1 (OR): If the FDC is not serviced by the main systems during data transfers within a certain time interval, this flag is set
+        CRC_ERROR:      0x00002000, // ST1 (DE): When the FDC detects a CRC error in either the ID field or the data field, this flag is set
+        END_OF_CYL:     0x00008000, // ST1 (EN): When the FDC tries to access a sector beyond the final sector of a cylinder, this flag is set
+        ST1:            0x0000FF00,
+        NO_DATA_MARK:   0x00010000, // ST2 (MD): When data is read from the medium, if the FDC cannot find a Data Address Mark or Deleted Data Address Mark, then this flag is set
+        BAD_CYL:        0x00020000, // ST2 (BC): This bit is related to the ND bit, and when the contents of C on the medium are different from that stored in the ID Register, and the content of C is FF, then this flag is set
+        SCAN_FAILED:    0x00040000, // ST2 (SN): During execution of the Scan command, if the FDC cannot find a sector on the cylinder which meets the condition, then this flag is set
+        SCAN_EQUAL:     0x00080000, // ST2 (SH): During execution of the Scan command, if the condition of "equal" is satisfied, this flag is set
+        WRONG_CYL:      0x00100000, // ST2 (WC): This bit is related to the ND bit, and when the contents of C on the medium are different from that stored in the ID Register, this flag is set
+        DATA_FIELD:     0x00200000, // ST2 (DD): If the FDC detects a CRC error in the data, then this flag is set
+        STRL_MARK:      0x00400000, // ST2 (CM): During execution of the Read Data or Scan command, if the FDC encounters a sector which contains a Deleted Data Address Mark, this flag is set
+        ST2:            0x00FF0000,
+        DRIVE:          0x03000000, // ST3 (Ux): Status of the "Drive Select" signals from the diskette drive
+        HEAD:           0x04000000, // ST3 (HD): Status of the "Side Select" signal from the diskette drive
+        TWOSIDE:        0x08000000, // ST3 (TS): Status of the "Two Side" signal from the diskette drive
+        TRACK0:         0x10000000, // ST3 (T0): Status of the "Track 0" signal from the diskette drive
+        READY:          0x20000000, // ST3 (RY): Status of the "Ready" signal from the diskette drive
+        WRITEPROT:      0x40000000, // ST3 (WP): Status of the "Write Protect" signal from the diskette drive
+        FAULT:          0x80000000, // ST3 (FT): Status of the "Fault" signal from the diskette drive
+        ST3:            0xFF000000
+    }
+};
 
 /*
  * FDC "Fixed Disk" Register (0x3F6, write-only)
@@ -278,100 +353,30 @@ FDC.REG_DATA.PORT           = 0x3F5;
  * hard disk drive, so this port must be shared with the HDC; bits 0-6 are valid for 50 microseconds after a write to
  * the Drive Head Register.
  */
-FDC.REG_INPUT = {};
-FDC.REG_INPUT.PORT          = 0x3F7;
-FDC.REG_INPUT.DS0           = 0x01;     // Drive Select 0
-FDC.REG_INPUT.DS1           = 0x02;     // Drive Select 1
-FDC.REG_INPUT.HS0           = 0x04;     // Head Select 0
-FDC.REG_INPUT.HS1           = 0x08;     // Head Select 1
-FDC.REG_INPUT.HS2           = 0x10;     // Head Select 2
-FDC.REG_INPUT.HS3           = 0x20;     // Head Select 3
-FDC.REG_INPUT.WRITE_GATE    = 0x40;     // Write Gate
-FDC.REG_INPUT.DISK_CHANGE   = 0x80;     // Diskette Change
+FDC.REG_INPUT = {
+    PORT:      0x3F7,
+    DS0:        0x01,   // Drive Select 0
+    DS1:        0x02,   // Drive Select 1
+    HS0:        0x04,   // Head Select 0
+    HS1:        0x08,   // Head Select 1
+    HS2:        0x10,   // Head Select 2
+    HS3:        0x20,   // Head Select 3
+    WRITE_GATE: 0x40,   // Write Gate
+    DISK_CHANGE:0x80    // Diskette Change
+};
 
 /*
  * FDC Diskette Control Register (0x3F7, write-only, MODEL_5170 only)
  *
  * Only bits 0-1 are used; bits 2-7 are reserved.
  */
-FDC.REG_CONTROL = {};
-FDC.REG_CONTROL.PORT        = 0x3F7;
-FDC.REG_CONTROL.RATE500K    = 0x00;     // 500,000 bps
-FDC.REG_CONTROL.RATE300K    = 0x02;     // 300,000 bps
-FDC.REG_CONTROL.RATE250K    = 0x01;     // 250,000 bps
-FDC.REG_CONTROL.RATEUNUSED  = 0x03;
-
-/*
- * FDC Commands
- *
- * NOTE: FDC command bytes need to be masked with FDC.REG_DATA.CMD.MASK before comparing to the values below, since a
- * number of commands use the following additional bits as follows:
- *
- *      SK (0x20): Skip Deleted Data Address Mark
- *      MF (0x40): Modified Frequency Modulation (as opposed to FM or Frequency Modulation)
- *      MT (0x80): multi-track operation (ie, data processed under both head 0 and head 1)
- *
- * We don't support MT (Multi-Track) operations at this time, and the MF and SK designations cannot be supported as long
- * as our diskette images contain only the original data bytes without any formatting information.
- */
-FDC.REG_DATA.CMD = {};
-FDC.REG_DATA.CMD.READ_TRACK     = 0x02;
-FDC.REG_DATA.CMD.SPECIFY        = 0x03;
-FDC.REG_DATA.CMD.SENSE_DRIVE    = 0x04;
-FDC.REG_DATA.CMD.WRITE_DATA     = 0x05;
-FDC.REG_DATA.CMD.READ_DATA      = 0x06;
-FDC.REG_DATA.CMD.RECALIBRATE    = 0x07;
-FDC.REG_DATA.CMD.SENSE_INT      = 0x08;     // this command is used to clear the FDC interrupt following the clearing/setting of FDC.REG_OUTPUT.ENABLE
-FDC.REG_DATA.CMD.WRITE_DEL_DATA = 0x09;
-FDC.REG_DATA.CMD.READ_ID        = 0x0A;
-FDC.REG_DATA.CMD.READ_DEL_DATA  = 0x0C;
-FDC.REG_DATA.CMD.FORMAT_TRACK   = 0x0D;
-FDC.REG_DATA.CMD.SEEK           = 0x0F;
-FDC.REG_DATA.CMD.SCAN_EQUAL     = 0x11;
-FDC.REG_DATA.CMD.SCAN_LO_EQUAL  = 0x19;
-FDC.REG_DATA.CMD.SCAN_HI_EQUAL  = 0x1D;
-FDC.REG_DATA.CMD.MASK           = 0x1F;
-FDC.REG_DATA.CMD.SK             = 0x20;     // SK (Skip Deleted Data Address Mark)
-FDC.REG_DATA.CMD.MF             = 0x40;     // MF (Modified Frequency Modulation)
-FDC.REG_DATA.CMD.MT             = 0x80;     // MT (Multi-Track; ie, data under both heads will be processed)
-
-/*
- * FDC status/error results, generally assigned according to the corresponding ST0, ST1, ST2 or ST3 status bit.
- *
- * TODO: Determine when EQUIP_CHECK is *really* set; also, "77 step pulses" sounds suspiciously like a typo.
- */
-FDC.REG_DATA.RES = {};
-FDC.REG_DATA.RES.NONE         = 0x00000000; // ST0 (IC): Normal termination of command (NT)
-FDC.REG_DATA.RES.NOT_READY    = 0x00000008; // ST0 (NR): When the FDD is in the not-ready state and a read or write command is issued, this flag is set; if a read or write command is issued to side 1 of a single sided drive, then this flag is set
-FDC.REG_DATA.RES.EQUIP_CHECK  = 0x00000010; // ST0 (EC): If a fault signal is received from the FDD, or if the track 0 signal fails to occur after 77 step pulses (recalibrate command), then this flag is set
-FDC.REG_DATA.RES.SEEK_END     = 0x00000020; // ST0 (SE): When the FDC completes the Seek command, this flag is set to 1 (high)
-FDC.REG_DATA.RES.INCOMPLETE   = 0x00000040; // ST0 (IC): Abnormal termination of command (AT); execution of command was started, but was not successfully completed
-FDC.REG_DATA.RES.RESET        = 0x000000C0; // ST0 (IC): Abnormal termination because during command execution the ready signal from the drive changed state
-FDC.REG_DATA.RES.INVALID      = 0x00000080; // ST0 (IC): Invalid command issue (IC); command which was issued was never started
-FDC.REG_DATA.RES.ST0          = 0x000000FF;
-FDC.REG_DATA.RES.NO_ID_MARK   = 0x00000100; // ST1 (MA): If the FDC cannot detect the ID Address Mark, this flag is set; at the same time, the MD (Missing Address Mark in Data Field) of Status Register 2 is set
-FDC.REG_DATA.RES.NOT_WRITABLE = 0x00000200; // ST1 (NW): During Execution of a Write Data, Write Deleted Data, or Format a Cylinder command, if the FDC detects a write protect signal from the FDD, then this flag is set
-FDC.REG_DATA.RES.NO_DATA      = 0x00000400; // ST1 (ND): FDC cannot find specified sector (or specified ID if READ_ID command)
-FDC.REG_DATA.RES.DMA_OVERRUN  = 0x00001000; // ST1 (OR): If the FDC is not serviced by the main systems during data transfers within a certain time interval, this flag is set
-FDC.REG_DATA.RES.CRC_ERROR    = 0x00002000; // ST1 (DE): When the FDC detects a CRC error in either the ID field or the data field, this flag is set
-FDC.REG_DATA.RES.END_OF_CYL   = 0x00008000; // ST1 (EN): When the FDC tries to access a sector beyond the final sector of a cylinder, this flag is set
-FDC.REG_DATA.RES.ST1          = 0x0000FF00;
-FDC.REG_DATA.RES.NO_DATA_MARK = 0x00010000; // ST2 (MD): When data is read from the medium, if the FDC cannot find a Data Address Mark or Deleted Data Address Mark, then this flag is set
-FDC.REG_DATA.RES.BAD_CYL      = 0x00020000; // ST2 (BC): This bit is related to the ND bit, and when the contents of C on the medium are different from that stored in the ID Register, and the content of C is FF, then this flag is set
-FDC.REG_DATA.RES.SCAN_FAILED  = 0x00040000; // ST2 (SN): During execution of the Scan command, if the FDC cannot find a sector on the cylinder which meets the condition, then this flag is set
-FDC.REG_DATA.RES.SCAN_EQUAL   = 0x00080000; // ST2 (SH): During execution of the Scan command, if the condition of "equal" is satisfied, this flag is set
-FDC.REG_DATA.RES.WRONG_CYL    = 0x00100000; // ST2 (WC): This bit is related to the ND bit, and when the contents of C on the medium are different from that stored in the ID Register, this flag is set
-FDC.REG_DATA.RES.DATA_FIELD   = 0x00200000; // ST2 (DD): If the FDC detects a CRC error in the data, then this flag is set
-FDC.REG_DATA.RES.STRL_MARK    = 0x00400000; // ST2 (CM): During execution of the Read Data or Scan command, if the FDC encounters a sector which contains a Deleted Data Address Mark, this flag is set
-FDC.REG_DATA.RES.ST2          = 0x00FF0000;
-FDC.REG_DATA.RES.DRIVE        = 0x03000000; // ST3 (Ux): Status of the "Drive Select" signals from the diskette drive
-FDC.REG_DATA.RES.HEAD         = 0x04000000; // ST3 (HD): Status of the "Side Select" signal from the diskette drive
-FDC.REG_DATA.RES.TWOSIDE      = 0x08000000; // ST3 (TS): Status of the "Two Side" signal from the diskette drive
-FDC.REG_DATA.RES.TRACK0       = 0x10000000; // ST3 (T0): Status of the "Track 0" signal from the diskette drive
-FDC.REG_DATA.RES.READY        = 0x20000000; // ST3 (RY): Status of the "Ready" signal from the diskette drive
-FDC.REG_DATA.RES.WRITEPROT    = 0x40000000; // ST3 (WP): Status of the "Write Protect" signal from the diskette drive
-FDC.REG_DATA.RES.FAULT        = 0x80000000; // ST3 (FT): Status of the "Fault" signal from the diskette drive
-FDC.REG_DATA.RES.ST3          = 0xFF000000;
+FDC.REG_CONTROL = {
+    PORT:      0x3F7,
+    RATE500K:   0x00,   // 500,000 bps
+    RATE300K:   0x02,   // 300,000 bps
+    RATE250K:   0x01,   // 250,000 bps
+    RATEUNUSED: 0x03
+};
 
 /*
  * FDC Command Sequences
@@ -894,7 +899,7 @@ FDC.prototype.initDrive = function(drive, iDrive, data)
      * but I'm using per-drive variables so that the FDC component can be a good client to both the CPU and other components.
      *
      * COMPATIBILITY ALERT: The MODEL_5170 BIOS ("DSKETTE_SETUP") attempts to discern the drive type (double-density vs.
-     * high-capacity) by "slapping" the heads around.  Literally (it uses a constant named "TRK_SLAP" equal to 48).
+     * high-capacity) by "slapping" the heads around -- "litrally" (it uses a constant named "TRK_SLAP" equal to 48).
      * After seeking to "TRK_SLAP", the BIOS performs a series of seeks, looking for the precise point where the heads
      * return to track 0.
      *
@@ -2206,7 +2211,7 @@ FDC.prototype.doRead = function(drive)
 
     if (drive.disk) {
         if (DEBUG && this.messageEnabled()) {
-            this.messagePrint("FDC.doRead(CHS=" + drive.bCylinder + ':' + drive.bHead + ':' + drive.bSector + ",LBA=" + (drive.bCylinder * (drive.disk.nHeads * drive.disk.nSectors) + drive.bHead * drive.disk.nSectors + drive.bSector-1) + ')');
+            this.messagePrint("FDC.doRead(CHS=" + drive.bCylinder + ':' + drive.bHead + ':' + drive.bSector + ",PBA=" + (drive.bCylinder * (drive.disk.nHeads * drive.disk.nSectors) + drive.bHead * drive.disk.nSectors + drive.bSector-1) + ')');
         }
         drive.sector = null;
         drive.resCode = FDC.REG_DATA.RES.NONE;
@@ -2229,7 +2234,7 @@ FDC.prototype.doWrite = function(drive)
 
     if (drive.disk) {
         if (DEBUG && this.messageEnabled()) {
-            this.messagePrint("FDC.doWrite(CHS=" + drive.bCylinder + ':' + drive.bHead + ':' + drive.bSector + ",LBA=" + (drive.bCylinder * (drive.disk.nHeads * drive.disk.nSectors) + drive.bHead * drive.disk.nSectors + drive.bSector-1) + ')');
+            this.messagePrint("FDC.doWrite(CHS=" + drive.bCylinder + ':' + drive.bHead + ':' + drive.bSector + ",PBA=" + (drive.bCylinder * (drive.disk.nHeads * drive.disk.nSectors) + drive.bHead * drive.disk.nSectors + drive.bSector-1) + ')');
         }
         if (drive.disk.fWriteProtected) {
             drive.resCode = FDC.REG_DATA.RES.NOT_WRITABLE | FDC.REG_DATA.RES.INCOMPLETE;

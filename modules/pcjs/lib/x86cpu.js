@@ -1803,7 +1803,7 @@ X86CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
 X86CPU.prototype.getByte = function(addr)
 {
     if (BACKTRACK) {
-        this.backTrack.btiMemLo = this.aMemBlocks[(addr & this.addrMemMask) >> this.blockShift].readBackTrack(addr & this.blockLimit);
+        this.backTrack.btiMemLo = this.bus.readBackTrack(addr);
     }
     return this.aMemBlocks[(addr & this.addrMemMask) >> this.blockShift].readByte(addr & this.blockLimit);
 };
@@ -1819,22 +1819,20 @@ X86CPU.prototype.getWord = function(addr)
 {
     var off = addr & this.blockLimit;
     var iBlock = (addr & this.addrMemMask) >> this.blockShift;
+
     /*
      * On the 8088, it takes 4 cycles to read the additional byte REGARDLESS whether the address is odd or even.
      *
      * TODO: For the 8086, the penalty is actually "(addr & 0x1) << 2" (4 additional cycles only when the address is odd).
      */
     this.nStepCycles -= this.CYCLES.nWordCyclePenalty;
-    if (off != this.blockLimit) {
-        if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.aMemBlocks[iBlock].readBackTrack(off);
-            this.backTrack.btiMemHi = this.aMemBlocks[iBlock].readBackTrack(off + 1);
-        }
-        return this.aMemBlocks[iBlock].readWord(off);
-    }
+
     if (BACKTRACK) {
-        this.backTrack.btiMemLo = this.aMemBlocks[iBlock].readBackTrack(off);
-        this.backTrack.btiMemHi = this.aMemBlocks[(iBlock + 1) & this.blockMask].readBackTrack(0);
+        this.backTrack.btiMemLo = this.bus.readBackTrack(addr);
+        this.backTrack.btiMemHi = this.bus.readBackTrack(addr + 1);
+    }
+    if (off != this.blockLimit) {
+        return this.aMemBlocks[iBlock].readWord(off);
     }
     return this.aMemBlocks[iBlock++].readByte(off) | (this.aMemBlocks[iBlock & this.blockMask].readByte(0) << 8);
 };
@@ -1849,7 +1847,7 @@ X86CPU.prototype.getWord = function(addr)
 X86CPU.prototype.setByte = function(addr, b)
 {
     if (BACKTRACK) {
-        this.aMemBlocks[(addr & this.addrMemMask) >> this.blockShift].writeBackTrack(addr & this.blockLimit, this.backTrack.btiMemLo);
+        this.bus.writeBackTrack(addr, this.backTrack.btiMemLo);
     }
     this.aMemBlocks[(addr & this.addrMemMask) >> this.blockShift].writeByte(addr & this.blockLimit, b & 0xff);
 };
@@ -1865,23 +1863,21 @@ X86CPU.prototype.setWord = function(addr, w)
 {
     var off = addr & this.blockLimit;
     var iBlock = (addr & this.addrMemMask) >> this.blockShift;
+
     /*
      * On the 8088, it takes 4 cycles to write the additional byte REGARDLESS whether the address is odd or even.
      *
      * TODO: For the 8086, the penalty is actually "(addr & 0x1) << 2" (4 additional cycles only when the address is odd).
      */
     this.nStepCycles -= this.CYCLES.nWordCyclePenalty;
+
+    if (BACKTRACK) {
+        this.bus.writeBackTrack(addr, this.backTrack.btiMemLo);
+        this.bus.writeBackTrack(addr + 1, this.backTrack.btiMemHi);
+    }
     if (off != this.blockLimit) {
-        if (BACKTRACK) {
-            this.aMemBlocks[iBlock].writeBackTrack(off, this.backTrack.btiMemLo);
-            this.aMemBlocks[iBlock].writeBackTrack(off + 1, this.backTrack.btiMemHi);
-        }
         this.aMemBlocks[iBlock].writeWord(off, w & 0xffff);
         return;
-    }
-    if (BACKTRACK) {
-        this.aMemBlocks[iBlock].writeBackTrack(off, this.backTrack.btiMemLo);
-        this.aMemBlocks[(iBlock + 1) & this.blockMask].writeBackTrack(0, this.backTrack.btiMemHi);
     }
     this.aMemBlocks[iBlock++].writeByte(off, w & 0xff);
     this.aMemBlocks[iBlock & this.blockMask].writeByte(0, (w >> 8) & 0xff);

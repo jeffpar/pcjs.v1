@@ -517,4 +517,4 @@
 ![Page 514](../../static/80286/progref/thumbs/80286_and_80287_Programmers_Reference_Manual_1987 514.jpeg "link:../../static/80286/progref/pages/80286_and_80287_Programmers_Reference_Manual_1987 514.pdf:200:260")
 ![Page 515](../../static/80286/progref/thumbs/80286_and_80287_Programmers_Reference_Manual_1987 515.jpeg "link:../../static/80286/progref/pages/80286_and_80287_Programmers_Reference_Manual_1987 515.pdf:200:260")
 
-[[Full PDF](../../static/80286/progref/80286/progref.pdf)]
+[[Full PDF](../../static/80286/progref/80286_and_80287_Programmers_Reference_Manual_1987.pdf)]

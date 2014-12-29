@@ -2813,7 +2813,7 @@ ChipSet.prototype.advanceDMA = function(channel, fInit)
                                     chipset.println('loading ' + obj.file.sPath + '[' + obj.offFile + '] at %' + str.toHex(addrCur));
                                 }
                                 bto = chipset.bus.addBackTrackObject(obj, bto, off);
-                                chipset.bus.setBackTrackIndex(addrCur, bto, off);
+                                chipset.bus.writeBackTrackObject(addrCur, bto, off);
                             }
                         }
                         fAsyncRequest = fAsync;

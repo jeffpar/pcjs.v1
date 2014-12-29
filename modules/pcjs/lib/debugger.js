@@ -1043,9 +1043,9 @@ if (DEBUGGER) {
         0x13: {
             0x00: "disk reset",
             0x01: "get status",
-            0x02: "read drive DL (CH:DH:CL:AL) into ES:BX",
-            0x03: "write drive DL (CH:DH:CL:AL) from ES:BX",
-            0x04: "verify drive DL (CH:DH:CL:AL)",
+            0x02: "read drive DL (CH:DH:CL,AL) into ES:BX",
+            0x03: "write drive DL (CH:DH:CL,AL) from ES:BX",
+            0x04: "verify drive DL (CH:DH:CL,AL)",
             0x05: "format drive DL using ES:BX",
             0x08: "read drive DL parameters into ES:DI",
             0x15: "get drive DL DASD type",
