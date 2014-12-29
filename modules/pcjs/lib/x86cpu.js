@@ -866,7 +866,8 @@ X86CPU.prototype.resetRegs = function()
             btiDILo:    0,
             btiDIHi:    0,
             btiMemLo:   0,
-            btiMemHi:   0
+            btiMemHi:   0,
+            btiIO:      0
         };
     }
 

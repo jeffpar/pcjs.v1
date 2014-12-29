@@ -1213,6 +1213,7 @@ var X86OpXX = {
 
         if (nReps--) {
             var b = this.bus.checkPortInputNotify(this.regDX, this.regEIP - nDelta - 1);
+            if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiIO;
             this.setSOByte(this.segES, this.regDI, b);
             this.regDI = (this.regDI + ((this.regPS & X86.PS.DF)? -1 : 1)) & 0xffff;
             this.nStepCycles -= nCycles;
@@ -1258,7 +1259,10 @@ var X86OpXX = {
         }
         if (nReps--) {
             var addrFrom = this.regEIP - nDelta - 1;
-            var w = this.bus.checkPortInputNotify(this.regDX, addrFrom) | (this.bus.checkPortInputNotify(this.regDX, addrFrom) << 8);
+            var w = this.bus.checkPortInputNotify(this.regDX, addrFrom);
+            if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiIO;
+            w |= (this.bus.checkPortInputNotify(this.regDX, addrFrom) << 8);
+            if (BACKTRACK) this.backTrack.btiMemHi = this.backTrack.btiIO;
             this.setSOWord(this.segES, this.regDI, w);
             this.regDI = (this.regDI + ((this.regPS & X86.PS.DF)? -2 : 2)) & 0xffff;
             this.nStepCycles -= nCycles;
@@ -3014,6 +3018,7 @@ var X86OpXX = {
     opINb: function() {
         var port = this.getIPByte();
         this.regAX = (this.regAX & ~0xff) | this.bus.checkPortInputNotify(port, this.regEIP - 2);
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiIO;
         this.nStepCycles -= this.CYCLES.nOpCyclesInP;
     },
     /**
@@ -3023,7 +3028,10 @@ var X86OpXX = {
      */
     opINw: function() {
         var port = this.getIPByte();
-        this.regAX = this.bus.checkPortInputNotify(port, this.regEIP - 1) | (this.bus.checkPortInputNotify((port + 1) & 0xffff, this.regEIP - 2) << 8);
+        this.regAX = this.bus.checkPortInputNotify(port, this.regEIP - 2);
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiIO;
+        this.regAX |= (this.bus.checkPortInputNotify((port + 1) & 0xffff, this.regEIP - 2) << 8);
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiIO;
         this.nStepCycles -= this.CYCLES.nOpCyclesInP;
     },
     /**
@@ -3094,6 +3102,7 @@ var X86OpXX = {
      */
     opINDXb: function() {
         this.regAX = (this.regAX & ~0xff) | this.bus.checkPortInputNotify(this.regDX, this.regEIP - 1);
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiIO;
         this.nStepCycles -= this.CYCLES.nOpCyclesInDX;
     },
     /**
@@ -3102,7 +3111,10 @@ var X86OpXX = {
      * op=0xED (in AX,dx)
      */
     opINDXw: function() {
-        this.regAX = this.bus.checkPortInputNotify(this.regDX, this.regEIP - 1) | (this.bus.checkPortInputNotify((this.regDX + 1) & 0xffff, this.regEIP - 1) << 8);
+        this.regAX = this.bus.checkPortInputNotify(this.regDX, this.regEIP - 1);
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiIO;
+        this.regAX |= (this.bus.checkPortInputNotify((this.regDX + 1) & 0xffff, this.regEIP - 1) << 8);
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiIO;
         this.nStepCycles -= this.CYCLES.nOpCyclesInDX;
     },
     /**

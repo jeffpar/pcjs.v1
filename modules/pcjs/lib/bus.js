@@ -98,7 +98,7 @@ function Bus(parmsBus, cpu, dbg)
      *
      *      iBlock & this.blockMask
      *
-     * While we *could* say that we mask addresses with this.addrLimit to simulate "A20 wrap", the simple
+     * While we *could* say that we mask addresses with this.addrMask to simulate "A20 wrap", the simple
      * fact is it relieves us from bounds-checking every aMemBlocks index.  Address wrapping at the 1Mb
      * boundary (ie, the A20 address line) is something we'll have to deal with more carefully on the 80286.
      *
@@ -407,6 +407,11 @@ Bus.prototype.removeMemory = function(addr, size)
 /**
  * getByte(addr)
  *
+ * Why does the CPU use its own getByte() (which is substantially similar to ours) instead of calling us?
+ *
+ * It certainly could, but the CPU also needs to update some BACKTRACK state.  There may also be a slight
+ * performance advantage calling its own method vs. calling through another object (ie, the Bus object).
+ *
  * @this {Bus}
  * @param {number} addr is a physical (non-segmented) address
  * @return {number} byte (8-bit) value at that address
@@ -419,6 +424,8 @@ Bus.prototype.getByte = function(addr)
 /**
  * getByteDirect(addr)
  *
+ * This is useful for the Debugger and other components that want to bypass getByte() breakpoint detection.
+ *
  * @this {Bus}
  * @param {number} addr is a physical (non-segmented) address
  * @return {number} byte (8-bit) value at that address
@@ -430,6 +437,12 @@ Bus.prototype.getByteDirect = function(addr)
 
 /**
  * getWord(addr)
+ *
+ * Why does the CPU use its own getWord() (which is substantially similar to ours) instead of calling us?
+ *
+ * It certainly could, but the CPU also needs to update its cycle count, along with some BACKTRACK state.
+ * There may also be a slight performance advantage calling its own method vs. calling through another object
+ * (ie, the Bus object).
  *
  * @this {Bus}
  * @param {number} addr is a physical (non-segmented) address
@@ -448,6 +461,8 @@ Bus.prototype.getWord = function(addr)
 /**
  * getWordDirect(addr)
  *
+ * This is useful for the Debugger and other components that want to bypass getWord() breakpoint detection.
+ *
  * @this {Bus}
  * @param {number} addr is a physical (non-segmented) address
  * @return {number} word (16-bit) value at that address
@@ -465,6 +480,11 @@ Bus.prototype.getWordDirect = function(addr)
 /**
  * setByte(addr, b)
  *
+ * Why does the CPU use its own setByte() (which is substantially similar to ours) instead of calling us?
+ *
+ * It certainly could, but the CPU also needs to update some BACKTRACK state.  There may also be a slight
+ * performance advantage calling its own method vs. calling through another object (ie, the Bus object).
+ *
  * @this {Bus}
  * @param {number} addr is a physical (non-segmented) address
  * @param {number} b is the byte (8-bit) value to write (we truncate it to 8 bits to be safe)
@@ -477,6 +497,9 @@ Bus.prototype.setByte = function(addr, b)
 /**
  * setByteDirect(addr, b)
  *
+ * This is useful for the Debugger and other components that want to bypass breakpoint detection AND read-only
+ * memory protection (for example, this is an interface the ROM component could use to initialize ROM contents).
+ *
  * @this {Bus}
  * @param {number} addr is a physical (non-segmented) address
  * @param {number} b is the byte (8-bit) value to write (we truncate it to 8 bits to be safe)
@@ -488,6 +511,12 @@ Bus.prototype.setByteDirect = function(addr, b)
 
 /**
  * setWord(addr, w)
+ *
+ * Why does the CPU use its own setWord() (which is substantially similar to ours) instead of calling us?
+ *
+ * It certainly could, but the CPU also needs to update its cycle count, along with some BACKTRACK state.
+ * There may also be a slight performance advantage calling its own method vs. calling through another object
+ * (ie, the Bus object).
  *
  * @this {Bus}
  * @param {number} addr is a physical (non-segmented) address
@@ -507,6 +536,9 @@ Bus.prototype.setWord = function(addr, w)
 
 /**
  * setWordDirect(addr, w)
+ *
+ * This is useful for the Debugger and other components that want to bypass breakpoint detection AND read-only
+ * memory protection (for example, this is an interface the ROM component could use to initialize ROM contents).
  *
  * @this {Bus}
  * @param {number} addr is a physical (non-segmented) address
@@ -541,9 +573,15 @@ Bus.prototype.setWordDirect = function(addr, w)
 Bus.prototype.addBackTrackObject = function(obj, bto, off)
 {
     if (BACKTRACK && obj) {
+        var cbtObjects = this.abtObjects.length;
+        if (!bto) {
+            /*
+             * Try the most recently created bto, on the off-chance it's what the caller needs
+             */
+            if (cbtObjects) bto = this.abtObjects[cbtObjects-1];
+        }
         if (!bto || bto.obj != obj || off < bto.off || off >= bto.off + Bus.BACKTRACK.OFF_MAX) {
             var slot;
-            var cbtObjects = this.abtObjects.length;
             bto = {obj: obj, off: off, slot: 0, refs: 0};
             if (!this.cbtDeletions) {
                 slot = cbtObjects;
@@ -567,6 +605,23 @@ Bus.prototype.addBackTrackObject = function(obj, bto, off)
         return bto;
     }
     return null;
+};
+
+/**
+ * getBackTrackIndex(bto, off)
+ *
+ * @this {Bus}
+ * @param {Object|null} bto
+ * @param {number} off
+ * @return {number}
+ */
+Bus.prototype.getBackTrackIndex = function(bto, off)
+{
+    var bti = 0;
+    if (BACKTRACK && bto) {
+        bti = (bto.slot << Bus.BACKTRACK.SLOT_SHIFT) | (Bus.BACKTRACK.GEN_START << Bus.BACKTRACK.GEN_SHIFT) | (off - bto.off);
+    }
+    return bti;
 };
 
 /**
@@ -843,6 +898,10 @@ Bus.prototype.checkPortInputNotify = function(port, addrFrom)
 {
     var bIn = 0xff;
     var aNotify = this.aPortInputNotify[port];
+
+    if (BACKTRACK) {
+        this.cpu.backTrack.btiIO = 0;
+    }
     if (aNotify !== undefined) {
         if (aNotify[1]) {
             bIn = aNotify[1].call(aNotify[0], port, addrFrom);

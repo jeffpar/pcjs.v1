@@ -2309,7 +2309,7 @@ FDC.prototype.doFormat = function(drive)
 FDC.prototype.readByte = function(drive, done)
 {
     var b = -1;
-    var obj, off;       // these variables are purely for BACKTRACK purposes
+    var obj = null, off = 0;    // these variables are purely for BACKTRACK purposes
 
     if (!drive.resCode && drive.disk) {
         do {

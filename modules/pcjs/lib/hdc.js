@@ -1394,13 +1394,25 @@ HDC.prototype.inATCData = function(port, addrFrom)
          * the pump; all we can do is assert that the pump has something in it.  If bIn is inexplicably negative,
          * well, then the caller will get 0xff.
          */
-        bIn = this.readByte(this.drive);
+        var hdc = this;
+        bIn = this.readByte(this.drive, function(b, fAsync, obj, off) {
+            hdc.assert(!fAsync);
+            if (BACKTRACK) {
+                if (!off && obj.file) {
+                    hdc.println("loading " + obj.file.sPath + '[' + obj.offFile + "] via port 0x" + str.toHexWord(port));
+                }
+                /*
+                 * TODO: We could define a cached BTO that's reset prior to a new ATC command, and then pass that
+                 * to addBackTrackObject() here instead of null; but for now, we're going to rely on that function's
+                 * simplistic MRU cache.  If that fails, the worst that will (or should) happen is we'll burn through
+                 * more BackTrack wrapper objects than necessary, and run the risk of running out.
+                 */
+                var bto = hdc.bus.addBackTrackObject(obj, null, off);
+                hdc.cpu.backTrack.btiIO = hdc.bus.getBackTrackIndex(bto, off);
+            }
+        });
         this.assert(bIn >= 0);
 
-        /*
-         * Now that we've supplied a full sector of data, see if the caller's expecting additional sectors;
-         * if so, prime the pump again.  The caller should not poll us again until another interrupt's been delivered.
-         */
         if (this.drive.ibSector == 1) {
             /*
              * messagePort() calls, if enabled, can be overwhelming for this port, so limit them to the first byte
@@ -1411,7 +1423,10 @@ HDC.prototype.inATCData = function(port, addrFrom)
             }
         }
         else if (this.drive.ibSector == this.drive.cbSector) {
-
+            /*
+             * Now that we've supplied a full sector of data, see if the caller's expecting additional sectors;
+             * if so, prime the pump again.  The caller should not poll us again until another interrupt's been delivered.
+             */
             if (this.messageEnabled(Messages.DATA | Messages.HDC)) {
                 var sDump = this.drive.disk.dumpSector(this.drive.sector);
                 if (sDump) this.dbg.message(sDump);
@@ -1424,7 +1439,6 @@ HDC.prototype.inATCData = function(port, addrFrom)
              * additional bytes into the inATCData() stream.  And we must first set DATA_REQ in the STATUS register.
              */
             if (this.drive.nBytes >= this.drive.cbSector) {
-                var hdc = this;
                 hdc.regStatus = HDC.ATC.STATUS.BUSY | HDC.ATC.STATUS.DATA_REQ;
                 this.readByte(this.drive, function(b, fAsync) {
                     if (b >= 0) {
@@ -2478,26 +2492,29 @@ HDC.prototype.doDMAFormat = function(drive, done)
  *
  * @this {HDC}
  * @param {Object} drive
- * @param {function(number,boolean)} [done] (number is next available byte from drive, or -1 if no more bytes available)
+ * @param {function(number,boolean,Object,number)} [done] (number is next available byte from drive, or -1 if no more bytes available)
  * @param {boolean} [fAutoInc] (default is true to auto-increment)
  * @return {number} the requested byte, or -1 if unavailable
  */
 HDC.prototype.readByte = function(drive, done, fAutoInc)
 {
     var b = -1;
+    var obj = null, off = 0;    // these variables are purely for BACKTRACK purposes
 
     if (drive.errorCode) {
-        if (done) done(b, false);
+        if (done) done(b, false, obj, off);
         return b;
     }
 
     var inc = (fAutoInc !== false? 1 : 0);
 
     if (drive.sector) {
+        off = drive.ibSector;
         b = drive.disk.read(drive.sector, drive.ibSector);
         drive.ibSector += inc;
         if (b >= 0) {
-            if (done) done(b, false);
+            obj = drive.sector;
+            if (done) done(b, false, obj, off);
             return b;
         }
     }
@@ -2514,7 +2531,8 @@ HDC.prototype.readByte = function(drive, done, fAutoInc)
         if (drive.disk) {
             drive.disk.seek(drive.wCylinder, drive.bHead, drive.bSector + drive.bSectorBias, false, function(sector, fAsync) {
                 if ((drive.sector = sector)) {
-                    drive.ibSector = 0;
+                    obj = sector;
+                    off = drive.ibSector = 0;
                     /*
                      * We "pre-advance" bSector et al now, instead of waiting to advance it right before the seek().
                      * This allows the initial call to readByte() to perform a seek without triggering an unwanted advance.
@@ -2525,12 +2543,12 @@ HDC.prototype.readByte = function(drive, done, fAutoInc)
                 } else {
                     drive.errorCode = HDC.XTC.DATA.ERR.NO_SECTOR;
                 }
-                done(b, fAsync);
+                done(b, fAsync, obj, off);
             });
             return b;
         }
         drive.errorCode = HDC.XTC.DATA.ERR.NO_SECTOR;
-        done(b, false);
+        done(b, false, obj, off);
     }
     return b;
 };
