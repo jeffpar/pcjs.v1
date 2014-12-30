@@ -429,13 +429,6 @@ X86CPU.PREFETCH = {
     MASK:       0x7             // (X86CPU.PREFETCH.ARRAY - 1)
 };
 
-if (BACKTRACK) {
-    X86CPU.BACKTRACK = {
-        SP_LO:  0,
-        SP_HI:  0
-    };
-}
-
 /**
  * initMemory(aMemBlocks, addrLimit, blockShift, blockLimit, blockMask)
  *

@@ -351,8 +351,8 @@ function genMode(d, w, mrm, sGroup, sRO) {
             break;
         case 4:
             sRegGet = "this.regSP";
-            sRegBTLo = "X86CPU.BACKTRACK.SP_LO";
-            sRegBTHi = "X86CPU.BACKTRACK.SP_HI";
+            sRegBTLo = "X86.BACKTRACK.SP_LO";
+            sRegBTHi = "X86.BACKTRACK.SP_HI";
             break;
         case 5:
             sRegGet = "this.regBP";
@@ -616,8 +616,8 @@ function genMode(d, w, mrm, sGroup, sRO) {
                 break;
             case 4:
                 sModRegGet = "this.regSP";
-                sModRegBTLo = "X86CPU.BACKTRACK.SP_LO";
-                sModRegBTHi = "X86CPU.BACKTRACK.SP_HI";
+                sModRegBTLo = "X86.BACKTRACK.SP_LO";
+                sModRegBTHi = "X86.BACKTRACK.SP_HI";
                 break;
             case 5:
                 sModRegGet = "this.regBP";

@@ -326,6 +326,13 @@ var X86 = {
     }
 };
 
+if (BACKTRACK) {
+    X86.BACKTRACK = {
+        SP_LO:  0,
+        SP_HI:  0
+    };
+}
+
 /*
  * Some PS flags are stored directly in regPS, hence the "direct" designation.
  */
