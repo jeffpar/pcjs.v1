@@ -4,7 +4,7 @@
  * @version 1.0
  * Created 2014-02-01
  *
- * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
+ * Copyright © 2012-2015 Jeff Parsons <Jeff@pcjs.org>
  *
  * This file is part of the JavaScript Machines Project (aka JSMachines) at <http://jsmachines.net/>
  * and <http://pcjs.org/>.
@@ -174,7 +174,7 @@ DiskDump.setLogFile = function(file) {
  * Class constants
  */
 DiskDump.sAPIURL = "http://www.pcjs.org" + DumpAPI.ENDPOINT;
-DiskDump.sCopyright = "© 2012-2014 by Jeff Parsons (@jeffpar)";
+DiskDump.sCopyright = "© 2012-2015 by Jeff Parsons (@jeffpar)";
 DiskDump.sNotice = DiskDump.sAPIURL + " " + DiskDump.sCopyright;
 DiskDump.sUsage = "Usage: " + DiskDump.sAPIURL + "?" + DumpAPI.QUERY.PATH + "={url}&amp;" + DumpAPI.QUERY.FORMAT + "=json|data|hex|bytes|img";
 

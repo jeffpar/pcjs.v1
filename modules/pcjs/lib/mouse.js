@@ -4,7 +4,7 @@
  * @version 1.0
  * Created 2012-Jul-01
  *
- * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
+ * Copyright © 2012-2015 Jeff Parsons <Jeff@pcjs.org>
  *
  * This file is part of PCjs, which is part of the JavaScript Machines Project (aka JSMachines)
  * at <http://jsmachines.net/> and <http://pcjs.org/>.
@@ -544,7 +544,7 @@ Mouse.prototype.sendPacket = function(sDiag, xDiag, yDiag)
     var b2 = this.xDelta & 0x3F;
     var b3 = this.yDelta & 0x3F;
     if (this.messageEnabled(Messages.SERIAL)) {
-        this.messagePrint((sDiag? (sDiag + ": ") : "") + (yDiag !== undefined? ("mouse (" + xDiag + "," + yDiag + "): ") : "") + "serial packet [" + str.toHexByte(b1) + "," + str.toHexByte(b2) + "," + str.toHexByte(b3) + "]", 0, true);
+        this.printMessage((sDiag? (sDiag + ": ") : "") + (yDiag !== undefined? ("mouse (" + xDiag + "," + yDiag + "): ") : "") + "serial packet [" + str.toHexByte(b1) + "," + str.toHexByte(b2) + "," + str.toHexByte(b3) + "]", 0, true);
     }
     this.componentAdapter.sendRBR([b1, b2, b3]);
     this.xDelta = this.yDelta = 0;
@@ -576,11 +576,11 @@ Mouse.prototype.notifyMCR = function(bMCR)
             var fIdentify = false;
             if (!(this.bMCR & SerialPort.MCR.RTS)) {
                 this.reset();
-                this.messagePrint("serial mouse reset");
+                this.printMessage("serial mouse reset");
                 fIdentify = true;
             }
             if (!(this.bMCR & SerialPort.MCR.DTR)) {
-                this.messagePrint("serial mouse ID requested");
+                this.printMessage("serial mouse ID requested");
                 fIdentify = true;
             }
             if (fIdentify) {
@@ -605,7 +605,7 @@ Mouse.prototype.notifyMCR = function(bMCR)
                  * I'm calling this good enough for now.
                  */
                 this.componentAdapter.sendRBR([Mouse.ID_SERIAL, Mouse.ID_SERIAL]);
-                this.messagePrint("serial mouse ID sent");
+                this.printMessage("serial mouse ID sent");
             }
             this.captureMouse(this.inputScreen);
             this.setActive(fActive);
@@ -624,7 +624,7 @@ Mouse.prototype.notifyMCR = function(bMCR)
              * a mouse device that's still powered may still send event data to the serial port, and if there was software
              * polling the serial port, it might expect to see that data.  Unlikely, but not impossible.
              */
-            this.messagePrint("serial mouse inactive");
+            this.printMessage("serial mouse inactive");
             this.releaseMouse(this.inputScreen);
             this.setActive(fActive);
         }

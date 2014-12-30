@@ -4,7 +4,7 @@
  * @version 1.0
  * Created 2012-Nov-26
  *
- * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
+ * Copyright © 2012-2015 Jeff Parsons <Jeff@pcjs.org>
  *
  * This file is part of PCjs, which is part of the JavaScript Machines Project (aka JSMachines)
  * at <http://jsmachines.net/> and <http://pcjs.org/>.
@@ -748,7 +748,7 @@ HDC.prototype.initController = function(data, fHard)
         }
     }
     if (DEBUG && this.messageEnabled()) {
-        this.messagePrint("HDC initialized for " + this.aDrives.length + " drive(s)");
+        this.printMessage("HDC initialized for " + this.aDrives.length + " drive(s)");
     }
     return fSuccess;
 };
@@ -1149,7 +1149,7 @@ HDC.prototype.loadDisk = function(iDrive, sDiskName, sDiskPath, fAutoMount)
     if (fAutoMount) {
         drive.fAutoMount = true;
         this.cAutoMount++;
-        if (this.messageEnabled()) this.messagePrint("loading " + sDiskName);
+        if (this.messageEnabled()) this.printMessage("loading " + sDiskName);
     }
     var disk = drive.disk || new Disk(this, drive, drive.mode);
     disk.load(sDiskName, sDiskPath, null, this.doneLoadDisk);
@@ -1223,7 +1223,7 @@ HDC.prototype.inXTCData = function(port, addrFrom)
     if (this.chipset) this.chipset.clearIRR(ChipSet.IRQ.XTC);
     this.regStatus &= ~HDC.XTC.STATUS.INTERRUPT;
 
-    this.messagePort(port, null, addrFrom, "DATA[" + this.regDataIndex + "]", bIn);
+    this.printMessageIO(port, null, addrFrom, "DATA[" + this.regDataIndex + "]", bIn);
     if (++this.regDataIndex >= this.regDataTotal) {
         this.regDataIndex = this.regDataTotal = 0;
         this.regStatus &= ~(HDC.XTC.STATUS.IOMODE | HDC.XTC.STATUS.BUS | HDC.XTC.STATUS.BUSY);
@@ -1241,7 +1241,7 @@ HDC.prototype.inXTCData = function(port, addrFrom)
  */
 HDC.prototype.outXTCData = function(port, bOut, addrFrom)
 {
-    this.messagePort(port, bOut, addrFrom, "DATA[" + this.regDataTotal + "]");
+    this.printMessageIO(port, bOut, addrFrom, "DATA[" + this.regDataTotal + "]");
     if (this.regDataTotal < this.regDataArray.length) {
         this.regDataArray[this.regDataTotal++] = bOut;
     }
@@ -1276,7 +1276,7 @@ HDC.prototype.outXTCData = function(port, bOut, addrFrom)
 HDC.prototype.inXTCStatus = function(port, addrFrom)
 {
     var b = this.regStatus;
-    this.messagePort(port, null, addrFrom, "STATUS", b);
+    this.printMessageIO(port, null, addrFrom, "STATUS", b);
     /*
      * HACK: The HDC BIOS will not finish the HDC.XTC.DATA.CMD.INIT_DRIVE sequence unless it sees XTC.STATUS.REQ set again, nor will
      * it read any of the XTC.DATA bytes returned from a HDC.XTC.DATA.CMD.REQUEST_SENSE command unless XTC.STATUS.REQ is set again, so
@@ -1298,7 +1298,7 @@ HDC.prototype.inXTCStatus = function(port, addrFrom)
  */
 HDC.prototype.outXTCReset = function(port, bOut, addrFrom)
 {
-    this.messagePort(port, bOut, addrFrom, "RESET");
+    this.printMessageIO(port, bOut, addrFrom, "RESET");
     /*
      * Not sure what to do with this value, and the value itself may be "don't care", but we'll save it anyway.
      */
@@ -1317,7 +1317,7 @@ HDC.prototype.outXTCReset = function(port, bOut, addrFrom)
  */
 HDC.prototype.inXTCConfig = function(port, addrFrom)
 {
-    this.messagePort(port, null, addrFrom, "CONFIG", this.regConfig);
+    this.printMessageIO(port, null, addrFrom, "CONFIG", this.regConfig);
     return this.regConfig;
 };
 
@@ -1331,7 +1331,7 @@ HDC.prototype.inXTCConfig = function(port, addrFrom)
  */
 HDC.prototype.outXTCPulse = function(port, bOut, addrFrom)
 {
-    this.messagePort(port, bOut, addrFrom, "PULSE");
+    this.printMessageIO(port, bOut, addrFrom, "PULSE");
     /*
      * Not sure what to do with this value, and the value itself may be "don't care", but we'll save it anyway.
      */
@@ -1358,7 +1358,7 @@ HDC.prototype.outXTCPulse = function(port, bOut, addrFrom)
  */
 HDC.prototype.outXTCPattern = function(port, bOut, addrFrom)
 {
-    this.messagePort(port, bOut, addrFrom, "PATTERN");
+    this.printMessageIO(port, bOut, addrFrom, "PATTERN");
     this.regPattern = bOut;
 };
 
@@ -1372,7 +1372,7 @@ HDC.prototype.outXTCPattern = function(port, bOut, addrFrom)
  */
 HDC.prototype.outXTCNoise = function(port, bOut, addrFrom)
 {
-    this.messagePort(port, bOut, addrFrom, "NOISE");
+    this.printMessageIO(port, bOut, addrFrom, "NOISE");
 };
 
 /**
@@ -1398,8 +1398,8 @@ HDC.prototype.inATCData = function(port, addrFrom)
         bIn = this.readByte(this.drive, function(b, fAsync, obj, off) {
             hdc.assert(!fAsync);
             if (BACKTRACK) {
-                if (!off && obj.file) {
-                    hdc.println("loading " + obj.file.sPath + '[' + obj.offFile + "] via port 0x" + str.toHexWord(port));
+                if (!off && obj.file && hdc.messageEnabled(Messages.DISK)) {
+                    hdc.printMessage("loading " + obj.file.sPath + '[' + obj.offFile + "] via port 0x" + str.toHexWord(port), true);
                 }
                 /*
                  * TODO: We could define a cached BTO that's reset prior to a new ATC command, and then pass that
@@ -1415,11 +1415,11 @@ HDC.prototype.inATCData = function(port, addrFrom)
 
         if (this.drive.ibSector == 1) {
             /*
-             * messagePort() calls, if enabled, can be overwhelming for this port, so limit them to the first byte
+             * printMessageIO() calls, if enabled, can be overwhelming for this port, so limit them to the first byte
              * of each sector.
              */
             if (this.messageEnabled(Messages.PORT | Messages.HDC)) {
-                this.messagePort(port, null, addrFrom, "DATA[" + this.drive.ibSector + "]", bIn);
+                this.printMessageIO(port, null, addrFrom, "DATA[" + this.drive.ibSector + "]", bIn);
             }
         }
         else if (this.drive.ibSector == this.drive.cbSector) {
@@ -1451,7 +1451,7 @@ HDC.prototype.inATCData = function(port, addrFrom)
                          */
                          hdc.regStatus = HDC.ATC.STATUS.ERROR;
                          hdc.regError = HDC.ATC.ERROR.NO_CHS;
-                        if (DEBUG) hdc.messagePrint("HDC.inATCData(): read failed");
+                        if (DEBUG) hdc.printMessage("HDC.inATCData(): read failed");
                     }
                 }, false);
             } else {
@@ -1483,16 +1483,16 @@ HDC.prototype.outATCData = function(port, bOut, addrFrom)
                 this.regStatus = HDC.ATC.STATUS.ERROR;
                 this.regError = HDC.ATC.ERROR.NO_CHS;
                 if (DEBUG && this.messageEnabled()) {
-                    this.messagePrint("HDC.outATCData(" + str.toHexByte(bOut) + "): write failed");
+                    this.printMessage("HDC.outATCData(" + str.toHexByte(bOut) + "): write failed");
                 }
             }
             else if (this.drive.ibSector == 1) {
                 /*
-                 * messagePort() calls, if enabled, can be overwhelming for this port, so limit them to the first byte
+                 * printMessageIO() calls, if enabled, can be overwhelming for this port, so limit them to the first byte
                  * of each sector.
                  */
                 if (this.messageEnabled(Messages.PORT | Messages.HDC)) {
-                    this.messagePort(port, bOut, addrFrom, "DATA[" + this.drive.ibSector + "]");
+                    this.printMessageIO(port, bOut, addrFrom, "DATA[" + this.drive.ibSector + "]");
                 }
             }
             else if (this.drive.ibSector == this.drive.cbSector) {
@@ -1517,7 +1517,7 @@ HDC.prototype.outATCData = function(port, bOut, addrFrom)
              * TODO: What to do about unexpected writes? The number of bytes has exceeded what the command specified.
              */
             if (DEBUG && this.messageEnabled()) {
-                this.messagePrint("HDC.outATCData(" + str.toHexByte(bOut) + "): write exceeds count (" + this.drive.nBytes + ")");
+                this.printMessage("HDC.outATCData(" + str.toHexByte(bOut) + "): write exceeds count (" + this.drive.nBytes + ")");
             }
         }
     } else {
@@ -1525,7 +1525,7 @@ HDC.prototype.outATCData = function(port, bOut, addrFrom)
          * TODO: What to do about unexpected writes? No command was specified.
          */
         if (DEBUG && this.messageEnabled()) {
-            this.messagePrint("HDC.outATCData(" + str.toHexByte(bOut) + "): write without command");
+            this.printMessage("HDC.outATCData(" + str.toHexByte(bOut) + "): write without command");
         }
     }
 };
@@ -1541,7 +1541,7 @@ HDC.prototype.outATCData = function(port, bOut, addrFrom)
 HDC.prototype.inATCError = function(port, addrFrom)
 {
     var bIn = this.regError;
-    this.messagePort(port, null, addrFrom, "ERROR", bIn);
+    this.printMessageIO(port, null, addrFrom, "ERROR", bIn);
     return bIn;
 };
 
@@ -1555,7 +1555,7 @@ HDC.prototype.inATCError = function(port, addrFrom)
  */
 HDC.prototype.outATCWPreC = function(port, bOut, addrFrom)
 {
-    this.messagePort(port, bOut, addrFrom, "WPREC");
+    this.printMessageIO(port, bOut, addrFrom, "WPREC");
     this.regWPreC = bOut;
 };
 
@@ -1570,7 +1570,7 @@ HDC.prototype.outATCWPreC = function(port, bOut, addrFrom)
 HDC.prototype.inATCSecCnt = function(port, addrFrom)
 {
     var bIn = this.regSecCnt;
-    this.messagePort(port, null, addrFrom, "SECCNT", bIn);
+    this.printMessageIO(port, null, addrFrom, "SECCNT", bIn);
     return bIn;
 };
 
@@ -1584,7 +1584,7 @@ HDC.prototype.inATCSecCnt = function(port, addrFrom)
  */
 HDC.prototype.outATCSecCnt = function(port, bOut, addrFrom)
 {
-    this.messagePort(port, bOut, addrFrom, "SECCNT");
+    this.printMessageIO(port, bOut, addrFrom, "SECCNT");
     this.regSecCnt = bOut;
 };
 
@@ -1599,7 +1599,7 @@ HDC.prototype.outATCSecCnt = function(port, bOut, addrFrom)
 HDC.prototype.inATCSecNum = function(port, addrFrom)
 {
     var bIn = this.regSecNum;
-    this.messagePort(port, null, addrFrom, "SECNUM", bIn);
+    this.printMessageIO(port, null, addrFrom, "SECNUM", bIn);
     return bIn;
 };
 
@@ -1613,7 +1613,7 @@ HDC.prototype.inATCSecNum = function(port, addrFrom)
  */
 HDC.prototype.outATCSecNum = function(port, bOut, addrFrom)
 {
-    this.messagePort(port, bOut, addrFrom, "SECNUM");
+    this.printMessageIO(port, bOut, addrFrom, "SECNUM");
     this.regSecNum = bOut;
 };
 
@@ -1628,7 +1628,7 @@ HDC.prototype.outATCSecNum = function(port, bOut, addrFrom)
 HDC.prototype.inATCCylLo = function(port, addrFrom)
 {
     var bIn = this.regCylLo;
-    this.messagePort(port, null, addrFrom, "CYLLO", bIn);
+    this.printMessageIO(port, null, addrFrom, "CYLLO", bIn);
     return bIn;
 };
 
@@ -1642,7 +1642,7 @@ HDC.prototype.inATCCylLo = function(port, addrFrom)
  */
 HDC.prototype.outATCCylLo = function(port, bOut, addrFrom)
 {
-    this.messagePort(port, bOut, addrFrom, "CYLLO");
+    this.printMessageIO(port, bOut, addrFrom, "CYLLO");
     this.regCylLo = bOut;
 };
 
@@ -1657,7 +1657,7 @@ HDC.prototype.outATCCylLo = function(port, bOut, addrFrom)
 HDC.prototype.inATCCylHi = function(port, addrFrom)
 {
     var bIn = this.regCylHi;
-    this.messagePort(port, null, addrFrom, "CYLHI", bIn);
+    this.printMessageIO(port, null, addrFrom, "CYLHI", bIn);
     return bIn;
 };
 
@@ -1671,7 +1671,7 @@ HDC.prototype.inATCCylHi = function(port, addrFrom)
  */
 HDC.prototype.outATCCylHi = function(port, bOut, addrFrom)
 {
-    this.messagePort(port, bOut, addrFrom, "CYLHI");
+    this.printMessageIO(port, bOut, addrFrom, "CYLHI");
     this.regCylHi = bOut;
 };
 
@@ -1686,7 +1686,7 @@ HDC.prototype.outATCCylHi = function(port, bOut, addrFrom)
 HDC.prototype.inATCDrvHd = function(port, addrFrom)
 {
     var bIn = this.regDrvHd;
-    this.messagePort(port, null, addrFrom, "DRVHD", bIn);
+    this.printMessageIO(port, null, addrFrom, "DRVHD", bIn);
     return bIn;
 };
 
@@ -1700,7 +1700,7 @@ HDC.prototype.inATCDrvHd = function(port, addrFrom)
  */
 HDC.prototype.outATCDrvHd = function(port, bOut, addrFrom)
 {
-    this.messagePort(port, bOut, addrFrom, "DRVHD");
+    this.printMessageIO(port, bOut, addrFrom, "DRVHD");
     this.regDrvHd = bOut;
     /*
      * The MODEL_5170_REV3 BIOS (see "POST2_CHK_HF2" @F000:14FC) probes for a 2nd hard drive when the number
@@ -1736,7 +1736,7 @@ HDC.prototype.outATCDrvHd = function(port, bOut, addrFrom)
 HDC.prototype.inATCStatus = function(port, addrFrom)
 {
     var bIn = this.regStatus;
-    this.messagePort(port, null, addrFrom, "STATUS", bIn);
+    this.printMessageIO(port, null, addrFrom, "STATUS", bIn);
     /*
      * Despite what IBM's documentation for the "Personal Computer AT Fixed Disk and Diskette Drive Adapter"
      * (August 31, 1984) says (ie, "A read of the status register clears interrupt request 14"), we cannot
@@ -1768,7 +1768,7 @@ HDC.prototype.inATCStatus = function(port, addrFrom)
  */
 HDC.prototype.outATCCommand = function(port, bOut, addrFrom)
 {
-    this.messagePort(port, bOut, addrFrom, "COMMAND");
+    this.printMessageIO(port, bOut, addrFrom, "COMMAND");
     this.regCommand = bOut;
     if (this.chipset) this.chipset.clearIRR(ChipSet.IRQ.ATC);
     this.doATC();
@@ -1786,7 +1786,7 @@ HDC.prototype.outATCCommand = function(port, bOut, addrFrom)
  */
 HDC.prototype.outATCFDR = function(port, bOut, addrFrom)
 {
-    this.messagePort(port, bOut, addrFrom, "FDR");
+    this.printMessageIO(port, bOut, addrFrom, "FDR");
     /*
      * I'm not really sure if I should set HDC.ATC.DIAG.NO_ERROR in regError after *every* write where
      * HDC.ATC.FDR.RESET is clear, or only after it has transitioned from set to clear; since the BIOS only
@@ -1846,14 +1846,14 @@ HDC.prototype.doATC = function()
     }
 
     if (DEBUG && this.messageEnabled(Messages.HDC)) {
-        this.messagePrint("HDC.doATC(0x" + str.toHexByte(bCmd) + "): " + HDC.aATCCommands[bCmd], true);
+        this.printMessage("HDC.doATC(0x" + str.toHexByte(bCmd) + "): " + HDC.aATCCommands[bCmd], true);
     }
 
     switch (bCmd & HDC.ATC.COMMAND.MASK) {
 
     case HDC.ATC.COMMAND.READ_DATA:
         if (DEBUG && this.messageEnabled(Messages.HDC)) {
-            this.messagePrint("HDC.doRead(" + iDrive + ',' + drive.wCylinder + ':' + drive.bHead + ':' + drive.bSector + ',' + nSectors + ")", true);
+            this.printMessage("HDC.doRead(" + iDrive + ',' + drive.wCylinder + ':' + drive.bHead + ':' + drive.bSector + ',' + nSectors + ")", true);
         }
         /*
          * We're using a call to readByte() that disables auto-increment, so that once we've got the first
@@ -1882,7 +1882,7 @@ HDC.prototype.doATC = function()
 
     case HDC.ATC.COMMAND.WRITE_DATA:
         if (DEBUG && this.messageEnabled(Messages.HDC)) {
-            this.messagePrint("HDC.doWrite(" + iDrive + ',' + drive.wCylinder + ':' + drive.bHead + ':' + drive.bSector + ',' + nSectors + ")", true);
+            this.printMessage("HDC.doWrite(" + iDrive + ',' + drive.wCylinder + ':' + drive.bHead + ':' + drive.bSector + ',' + nSectors + ")", true);
         }
         this.regStatus = HDC.ATC.STATUS.DATA_REQ;
         break;
@@ -1931,7 +1931,7 @@ HDC.prototype.doATC = function()
 
     default:
         if (DEBUG && this.messageEnabled()) {
-            this.messagePrint("HDC.doATC(0x" + str.toHexByte(this.regCommand) + "): " + (bCmd < 0? ("invalid drive (" + iDrive + ")") : "unsupported operation"));
+            this.printMessage("HDC.doATC(0x" + str.toHexByte(this.regCommand) + "): " + (bCmd < 0? ("invalid drive (" + iDrive + ")") : "unsupported operation"));
             if (bCmd >= 0) this.dbg.stopCPU();
         }
         break;
@@ -1975,9 +1975,9 @@ HDC.prototype.setATCIRR = function(fWrite)
              * has a low tolerance for fast controller interrupts during multi-sector operations.
              */
             this.chipset.setIRR(ChipSet.IRQ.ATC, 120);
-            if (DEBUG) this.messagePrint("HDC.setATCIRR(): enabled", Messages.PIC | Messages.HDC);
+            if (DEBUG) this.printMessage("HDC.setATCIRR(): enabled", Messages.PIC | Messages.HDC);
         } else {
-            if (DEBUG) this.messagePrint("HDC.setATCIRR(): disabled", Messages.PIC | Messages.HDC);
+            if (DEBUG) this.printMessage("HDC.setATCIRR(): disabled", Messages.PIC | Messages.HDC);
         }
     }
 };
@@ -2059,7 +2059,7 @@ HDC.prototype.doXTC = function()
         bDataStatus = HDC.XTC.DATA.STATUS.OK;
         if (!drive && this.iDriveAllowFail == iDrive) {
             this.iDriveAllowFail = -1;
-            if (DEBUG) this.messagePrint("HDC.doXTC(): fake failure triggered");
+            if (DEBUG) this.printMessage("HDC.doXTC(): fake failure triggered");
             bDataStatus = HDC.XTC.DATA.STATUS.ERROR;
         }
         this.beginResult(bDataStatus | bDrive);
@@ -2096,7 +2096,7 @@ HDC.prototype.doXTC = function()
         case HDC.XTC.DATA.CMD.RECALIBRATE:      // 0x01
             drive.bControl = bControl;
             if (DEBUG && this.messageEnabled()) {
-                this.messagePrint("HDC.doXTC(): drive " + iDrive + " control byte: 0x" + str.toHexByte(bControl));
+                this.printMessage("HDC.doXTC(): drive " + iDrive + " control byte: 0x" + str.toHexByte(bControl));
             }
             this.beginResult(HDC.XTC.DATA.STATUS.OK | bDrive);
             break;
@@ -2134,7 +2134,7 @@ HDC.prototype.doXTC = function()
         default:
             this.beginResult(HDC.XTC.DATA.STATUS.ERROR | bDrive);
             if (DEBUG && this.messageEnabled()) {
-                this.messagePrint("HDC.doXTC(0x" + str.toHexByte(bCmdOrig) + "): " + (bCmd < 0? ("invalid drive (" + iDrive + ")") : "unsupported operation"));
+                this.printMessage("HDC.doXTC(0x" + str.toHexByte(bCmdOrig) + "): " + (bCmd < 0? ("invalid drive (" + iDrive + ")") : "unsupported operation"));
                 if (bCmd >= 0) this.dbg.stopCPU();
             }
             break;
@@ -2155,7 +2155,7 @@ HDC.prototype.popCmd = function()
     if (bCmdIndex < this.regDataTotal) {
         bCmd = this.regDataArray[this.regDataIndex++];
         if (DEBUG && this.messageEnabled((bCmdIndex > 0? Messages.PORT : 0) | Messages.HDC)) {
-            this.messagePrint("HDC.CMD[" + bCmdIndex + "]: 0x" + str.toHexByte(bCmd) + (!bCmdIndex && HDC.aXTCCommands[bCmd]? (" (" + HDC.aXTCCommands[bCmd] + ")") : ""), true);
+            this.printMessage("HDC.CMD[" + bCmdIndex + "]: 0x" + str.toHexByte(bCmd) + (!bCmdIndex && HDC.aXTCCommands[bCmd]? (" (" + HDC.aXTCCommands[bCmd] + ")") : ""), true);
         }
     }
     return bCmd;
@@ -2173,7 +2173,7 @@ HDC.prototype.beginResult = function(bResult)
 
     if (bResult !== undefined) {
         if (DEBUG && this.messageEnabled()) {
-            this.messagePrint("HDC.beginResult(0x" + str.toHexByte(bResult) + ")");
+            this.printMessage("HDC.beginResult(0x" + str.toHexByte(bResult) + ")");
         }
         this.pushResult(bResult);
     }
@@ -2195,7 +2195,7 @@ HDC.prototype.beginResult = function(bResult)
 HDC.prototype.pushResult = function(bResult)
 {
     if (DEBUG && this.messageEnabled((this.regDataTotal > 0? Messages.PORT : 0) | Messages.HDC)) {
-        this.messagePrint("HDC.RES[" + this.regDataTotal + "]: 0x" + str.toHexByte(bResult), true);
+        this.printMessage("HDC.RES[" + this.regDataTotal + "]: 0x" + str.toHexByte(bResult), true);
     }
     this.regDataArray[this.regDataTotal++] = bResult;
 };
@@ -2217,7 +2217,7 @@ HDC.prototype.dmaRead = function(drive, b, done)
     /*
      * The DMA controller should be ASKING for data, not GIVING us data; this suggests an internal DMA miscommunication
      */
-    if (DEBUG) this.messagePrint("dmaRead(): invalid DMA acknowledgement");
+    if (DEBUG) this.printMessage("dmaRead(): invalid DMA acknowledgement");
     done(-1, false);
 };
 
@@ -2236,7 +2236,7 @@ HDC.prototype.dmaWrite = function(drive, b)
     /*
      * The DMA controller should be GIVING us data, not ASKING for data; this suggests an internal DMA miscommunication
      */
-    if (DEBUG) this.messagePrint("dmaWrite(): invalid DMA acknowledgement");
+    if (DEBUG) this.printMessage("dmaWrite(): invalid DMA acknowledgement");
     return -1;
 };
 
@@ -2255,7 +2255,7 @@ HDC.prototype.dmaWriteBuffer = function(drive, b)
     /*
      * The DMA controller should be GIVING us data, not ASKING for data; this suggests an internal DMA miscommunication
      */
-    if (DEBUG) this.messagePrint("dmaWriteBuffer(): invalid DMA acknowledgement");
+    if (DEBUG) this.printMessage("dmaWriteBuffer(): invalid DMA acknowledgement");
     return -1;
 };
 
@@ -2274,7 +2274,7 @@ HDC.prototype.dmaWriteFormat = function(drive, b)
     /*
      * The DMA controller should be GIVING us data, not ASKING for data; this suggests an internal DMA miscommunication
      */
-    if (DEBUG) this.messagePrint("dmaWriteFormat(): invalid DMA acknowledgement");
+    if (DEBUG) this.printMessage("dmaWriteFormat(): invalid DMA acknowledgement");
     return -1;
 };
 
@@ -2290,7 +2290,7 @@ HDC.prototype.doDMARead = function(drive, done)
     drive.errorCode = HDC.XTC.DATA.ERR.NOT_READY;
 
     if (DEBUG && this.messageEnabled()) {
-        this.messagePrint("HDC.doDMARead(" + drive.iDrive + ',' + drive.wCylinder + ':' + drive.bHead + ':' + drive.bSector + ',' + ((drive.nBytes / drive.cbSector)|0) + ")");
+        this.printMessage("HDC.doDMARead(" + drive.iDrive + ',' + drive.wCylinder + ':' + drive.bHead + ':' + drive.bSector + ',' + ((drive.nBytes / drive.cbSector)|0) + ")");
     }
 
     if (drive.disk) {
@@ -2334,7 +2334,7 @@ HDC.prototype.doDMAWrite = function(drive, done)
     drive.errorCode = HDC.XTC.DATA.ERR.NOT_READY;
 
     if (DEBUG && this.messageEnabled()) {
-        this.messagePrint("HDC.doDMAWrite(" + drive.iDrive + ',' + drive.wCylinder + ':' + drive.bHead + ':' + drive.bSector + ',' + ((drive.nBytes / drive.cbSector)|0) + ")");
+        this.printMessage("HDC.doDMAWrite(" + drive.iDrive + ',' + drive.wCylinder + ':' + drive.bHead + ':' + drive.bSector + ',' + ((drive.nBytes / drive.cbSector)|0) + ")");
     }
 
     if (drive.disk) {
@@ -2384,7 +2384,7 @@ HDC.prototype.doDMAWriteBuffer = function(drive, done)
 {
     drive.errorCode = HDC.XTC.DATA.ERR.NOT_READY;
 
-    if (DEBUG) this.messagePrint("HDC.doDMAWriteBuffer()");
+    if (DEBUG) this.printMessage("HDC.doDMAWriteBuffer()");
 
     if (!drive.abSector || drive.abSector.length != drive.nBytes) {
         drive.abSector = new Array(drive.nBytes);
@@ -2687,7 +2687,7 @@ HDC.prototype.writeFormat = function(drive, b)
         drive.cbFormat = 0;
 
         if (DEBUG && this.messageEnabled()) {
-            this.messagePrint("HDC.writeFormat(" + drive.wCylinder + ":" + drive.bHead + ":" + drive.bSector + ":" + drive.nBytes + ")");
+            this.printMessage("HDC.writeFormat(" + drive.wCylinder + ":" + drive.bHead + ":" + drive.bSector + ":" + drive.nBytes + ")");
         }
 
         for (var i = 0; i < drive.nBytes; i++) {
@@ -2772,7 +2772,7 @@ HDC.prototype.intBIOSDiskette = function(addr)
 {
     var AH = this.cpu.regAX >> 8;
     if ((!AH && this.chipset && this.chipset.checkIMR(ChipSet.IRQ.FDC))) {
-        if (DEBUG) this.messagePrint("HDC.intBIOSDiskette(): skipping useless INT 0x40 diskette reset");
+        if (DEBUG) this.printMessage("HDC.intBIOSDiskette(): skipping useless INT 0x40 diskette reset");
         return false;
     }
     return true;

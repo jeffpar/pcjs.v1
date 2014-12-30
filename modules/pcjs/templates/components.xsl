@@ -221,7 +221,7 @@
 					<xsl:otherwise/>
 				</xsl:choose>
 				<div class="{$APPCLASS}-copyright">
-					<a href="http://{$SITEHOST}" target="_blank">PCjs</a> v<xsl:value-of select="$APPVERSION"/> © 2012-2014 by <a href="http://twitter.com/jeffpar" target="_blank">@jeffpar</a>
+					<a href="http://{$SITEHOST}" target="_blank">PCjs</a> v<xsl:value-of select="$APPVERSION"/> © 2012-2015 by <a href="http://twitter.com/jeffpar" target="_blank">@jeffpar</a>
 				</div>
 				<div style="clear:both"> </div>
 			</xsl:if>

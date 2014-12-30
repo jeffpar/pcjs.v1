@@ -4,7 +4,7 @@
  * @version 1.0
  * Created 2012-May-14
  *
- * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
+ * Copyright © 2012-2015 Jeff Parsons <Jeff@pcjs.org>
  *
  * This file is part of the JavaScript Machines Project (aka JSMachines) at <http://jsmachines.net/>
  * and <http://pcjs.org/>.
@@ -952,7 +952,7 @@ Component.prototype = {
         return false;
     },
     /**
-     * messagePrint(sMessage, bitsMessage, fAddress)
+     * printMessage(sMessage, bitsMessage, fAddress)
      *
      * If bitsMessage is not specified, the component's MESSAGE category is used.
      * If bitsMessage is true, the message is displayed regardless.
@@ -963,7 +963,7 @@ Component.prototype = {
      * @param {boolean} [fAddress] is true to display the current address
      * @return {boolean} true if Debugger available, false if not
      */
-    messagePrint: function(sMessage, bitsMessage, fAddress) {
+    printMessage: function(sMessage, bitsMessage, fAddress) {
         if (DEBUGGER && this.dbg) {
             if (bitsMessage === true || this.messageEnabled(bitsMessage | 0)) {
                 this.dbg.message(sMessage, fAddress);
@@ -973,7 +973,7 @@ Component.prototype = {
         return false;
     },
     /**
-     * messagePort(port, bOut, addrFrom, name, bIn, bitsMessage)
+     * printMessageIO(port, bOut, addrFrom, name, bIn, bitsMessage)
      *
      * If bitsMessage is not specified, the component's MESSAGE category is used.
      * If bitsMessage is true, the message is displayed as long as MESSAGE.PORT is enabled.
@@ -986,7 +986,7 @@ Component.prototype = {
      * @param {number|null} [bIn] is the input value, if known, on an input operation
      * @param {number|boolean} [bitsMessage] is zero or more MESSAGE_* category flag(s)
      */
-    messagePort: function(port, bOut, addrFrom, name, bIn, bitsMessage) {
+    printMessageIO: function(port, bOut, addrFrom, name, bIn, bitsMessage) {
         if (DEBUGGER && this.dbg) {
             if (bitsMessage === true) {
                 bitsMessage = 0;

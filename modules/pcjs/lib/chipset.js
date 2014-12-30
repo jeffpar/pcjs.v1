@@ -4,7 +4,7 @@
  * @version 1.0
  * Created 2012-Sep-14
  *
- * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
+ * Copyright © 2012-2015 Jeff Parsons <Jeff@pcjs.org>
  *
  * This file is part of PCjs, which is part of the JavaScript Machines Project (aka JSMachines)
  * at <http://jsmachines.net/> and <http://pcjs.org/>.
@@ -1333,17 +1333,17 @@ ChipSet.prototype.getRTCCycleLimit = function(nCycles)
         if (nCyclesUpdate > 0) {
             if (nCycles > nCyclesUpdate) {
                 if (DEBUG && this.messageEnabled(Messages.RTC)) {
-                    this.messagePrint("getRTCCycleLimit(" + nCycles + "): reduced to " + nCyclesUpdate + " cycles", true);
+                    this.printMessage("getRTCCycleLimit(" + nCycles + "): reduced to " + nCyclesUpdate + " cycles", true);
                 }
                 nCycles = nCyclesUpdate;
             } else {
                 if (DEBUG && this.messageEnabled(Messages.RTC)) {
-                    this.messagePrint("getRTCCycleLimit(" + nCycles + "): already less than " + nCyclesUpdate + " cycles", true);
+                    this.printMessage("getRTCCycleLimit(" + nCycles + "): already less than " + nCyclesUpdate + " cycles", true);
                 }
             }
         } else {
             if (DEBUG && this.messageEnabled(Messages.RTC)) {
-                this.messagePrint("RTC next update has passed by " + nCyclesUpdate + " cycles", true);
+                this.printMessage("RTC next update has passed by " + nCyclesUpdate + " cycles", true);
             }
         }
     }
@@ -1402,9 +1402,9 @@ ChipSet.prototype.updateRTCTime = function()
             if (DEBUG) {
                 if (nCyclesUpdate - this.nRTCCyclesNextUpdate > this.nRTCCyclesPerPeriod) {
                     if (bPrev & ChipSet.CMOS.STATUSC.PF) {
-                        this.messagePrint("RTC interrupt handler failed to clear STATUSC", Messages.RTC);
+                        this.printMessage("RTC interrupt handler failed to clear STATUSC", Messages.RTC);
                     } else {
-                        this.messagePrint("CPU took too long trigger new RTC periodic interrupt", Messages.RTC);
+                        this.printMessage("CPU took too long trigger new RTC periodic interrupt", Messages.RTC);
                     }
                 }
             }
@@ -2290,7 +2290,7 @@ ChipSet.prototype.inDMAChannelAddr = function(iDMAC, iChannel, port, addrFrom)
     var channel = controller.aChannels[iChannel];
     var b = channel.addrCurrent[controller.bIndex];
     if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
-        this.messagePort(port, null, addrFrom, "DMA" + iDMAC + ".CHANNEL" + iChannel + ".ADDR[" + controller.bIndex + "]", b, true);
+        this.printMessageIO(port, null, addrFrom, "DMA" + iDMAC + ".CHANNEL" + iChannel + ".ADDR[" + controller.bIndex + "]", b, true);
     }
     controller.bIndex ^= 0x1;
     /*
@@ -2327,7 +2327,7 @@ ChipSet.prototype.outDMAChannelAddr = function outDMAChannelAddr(iDMAC, iChannel
 {
     var controller = this.aDMACs[iDMAC];
     if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
-        this.messagePort(port, bOut, addrFrom, "DMA" + iDMAC + ".CHANNEL" + iChannel + ".ADDR[" + controller.bIndex + "]", null, true);
+        this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".CHANNEL" + iChannel + ".ADDR[" + controller.bIndex + "]", null, true);
     }
     var channel = controller.aChannels[iChannel];
     channel.addrCurrent[controller.bIndex] = channel.addrInit[controller.bIndex] = bOut;
@@ -2350,7 +2350,7 @@ ChipSet.prototype.inDMAChannelCount = function(iDMAC, iChannel, port, addrFrom)
     var channel = controller.aChannels[iChannel];
     var b = channel.countCurrent[controller.bIndex];
     if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
-        this.messagePort(port, null, addrFrom, "DMA" + iDMAC + ".CHANNEL" + iChannel + ".COUNT[" + controller.bIndex + "]", b, true);
+        this.printMessageIO(port, null, addrFrom, "DMA" + iDMAC + ".CHANNEL" + iChannel + ".COUNT[" + controller.bIndex + "]", b, true);
     }
     controller.bIndex ^= 0x1;
     /*
@@ -2391,7 +2391,7 @@ ChipSet.prototype.outDMAChannelCount = function(iDMAC, iChannel, port, bOut, add
 {
     var controller = this.aDMACs[iDMAC];
     if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
-        this.messagePort(port, bOut, addrFrom, "DMA" + iDMAC + ".CHANNEL" + iChannel + ".COUNT[" + controller.bIndex + "]", null, true);
+        this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".CHANNEL" + iChannel + ".COUNT[" + controller.bIndex + "]", null, true);
     }
     var channel = controller.aChannels[iChannel];
     channel.countCurrent[controller.bIndex] = channel.countInit[controller.bIndex] = bOut;
@@ -2434,7 +2434,7 @@ ChipSet.prototype.inDMAStatus = function(iDMAC, port, addrFrom)
     var b = controller.bStatus | ChipSet.DMA_STATUS.CH0_TC;
     controller.bStatus &= ~ChipSet.DMA_STATUS.ALL_TC;
     if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
-        this.messagePort(port, null, addrFrom, "DMA" + iDMAC + ".STATUS", b, true);
+        this.printMessageIO(port, null, addrFrom, "DMA" + iDMAC + ".STATUS", b, true);
     }
     return b;
 };
@@ -2451,7 +2451,7 @@ ChipSet.prototype.inDMAStatus = function(iDMAC, port, addrFrom)
 ChipSet.prototype.outDMACmd = function(iDMAC, port, bOut, addrFrom)
 {
     if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
-        this.messagePort(port, bOut, addrFrom, "DMA" + iDMAC + ".CMD", null, true);
+        this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".CMD", null, true);
     }
     this.aDMACs[iDMAC].bCmd = bOut;
 };
@@ -2479,7 +2479,7 @@ ChipSet.prototype.outDMAReq = function(iDMAC, port, bOut, addrFrom)
 {
     var controller = this.aDMACs[iDMAC];
     if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
-        this.messagePort(port, bOut, addrFrom, "DMA" + iDMAC + ".REQ", null, true);
+        this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".REQ", null, true);
     }
     /*
      * Bits 0-1 contain the channel number
@@ -2506,7 +2506,7 @@ ChipSet.prototype.outDMAMask = function(iDMAC, port, bOut, addrFrom)
 {
     var controller = this.aDMACs[iDMAC];
     if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
-        this.messagePort(port, bOut, addrFrom, "DMA" + iDMAC + ".MASK", null, true);
+        this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".MASK", null, true);
     }
     var iChannel = bOut & ChipSet.DMA_MASK.CHANNEL;
     var channel = controller.aChannels[iChannel];
@@ -2526,7 +2526,7 @@ ChipSet.prototype.outDMAMask = function(iDMAC, port, bOut, addrFrom)
 ChipSet.prototype.outDMAMode = function(iDMAC, port, bOut, addrFrom)
 {
     if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
-        this.messagePort(port, bOut, addrFrom, "DMA" + iDMAC + ".MODE", null, true);
+        this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".MODE", null, true);
     }
     var iChannel = bOut & ChipSet.DMA_MODE.CHANNEL;
     this.aDMACs[iDMAC].aChannels[iChannel].mode = bOut;
@@ -2547,7 +2547,7 @@ ChipSet.prototype.outDMAMode = function(iDMAC, port, bOut, addrFrom)
 ChipSet.prototype.outDMAResetFF = function(iDMAC, port, bOut, addrFrom)
 {
     if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
-        this.messagePort(port, bOut, addrFrom, "DMA" + iDMAC + ".RESET_FF", null, true);
+        this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".RESET_FF", null, true);
     }
     this.aDMACs[iDMAC].bIndex = 0;
 };
@@ -2564,7 +2564,7 @@ ChipSet.prototype.outDMAResetFF = function(iDMAC, port, bOut, addrFrom)
 ChipSet.prototype.outDMAMasterClear = function(iDMAC, port, bOut, addrFrom)
 {
     if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
-        this.messagePort(port, bOut, addrFrom, "DMA" + iDMAC + ".MASTER_CLEAR", null, true);
+        this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".MASTER_CLEAR", null, true);
     }
     /*
      * The value written to this port doesn't matter; any write triggers a "master clear" operation
@@ -2591,7 +2591,7 @@ ChipSet.prototype.inDMAPageReg = function(iDMAC, iChannel, port, addrFrom)
 {
     var bIn = this.aDMACs[iDMAC].aChannels[iChannel].bPage;
     if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
-        this.messagePort(port, null, addrFrom, "DMA" + iDMAC + ".CHANNEL" + iChannel + ".PAGE", bIn, true);
+        this.printMessageIO(port, null, addrFrom, "DMA" + iDMAC + ".CHANNEL" + iChannel + ".PAGE", bIn, true);
     }
     return bIn;
 };
@@ -2609,7 +2609,7 @@ ChipSet.prototype.inDMAPageReg = function(iDMAC, iChannel, port, addrFrom)
 ChipSet.prototype.outDMAPageReg = function(iDMAC, iChannel, port, bOut, addrFrom)
 {
     if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
-        this.messagePort(port, bOut, addrFrom, "DMA" + iDMAC + ".CHANNEL" + iChannel + ".PAGE", null, true);
+        this.printMessageIO(port, bOut, addrFrom, "DMA" + iDMAC + ".CHANNEL" + iChannel + ".PAGE", null, true);
     }
     this.aDMACs[iDMAC].aChannels[iChannel].bPage = bOut;
 };
@@ -2627,7 +2627,7 @@ ChipSet.prototype.inDMAPageSpare = function(iSpare, port, addrFrom)
 {
     var bIn = this.abDMAPageSpare[iSpare];
     if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
-        this.messagePort(port, null, addrFrom, "DMA.SPARE" + iSpare + ".PAGE", bIn, true);
+        this.printMessageIO(port, null, addrFrom, "DMA.SPARE" + iSpare + ".PAGE", bIn, true);
     }
     return bIn;
 };
@@ -2644,7 +2644,7 @@ ChipSet.prototype.inDMAPageSpare = function(iSpare, port, addrFrom)
 ChipSet.prototype.outDMAPageSpare = function(iSpare, port, bOut, addrFrom)
 {
     if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
-        this.messagePort(port, bOut, addrFrom, "DMA.SPARE" + iSpare + ".PAGE", null, true);
+        this.printMessageIO(port, bOut, addrFrom, "DMA.SPARE" + iSpare + ".PAGE", null, true);
     }
     this.abDMAPageSpare[iSpare] = bOut;
 };
@@ -2714,7 +2714,7 @@ ChipSet.prototype.requestDMA = function(iDMAChannel, done)
 
     if (!channel.component || !channel.fnTransfer || !channel.obj) {
         if (DEBUG && this.messageEnabled(Messages.DMA | Messages.DATA)) {
-            this.messagePrint("requestDMA(" + iDMAChannel + "): not connected to a component", true);
+            this.printMessage("requestDMA(" + iDMAChannel + "): not connected to a component", true);
         }
         if (done) done(true);
         return;
@@ -2731,7 +2731,7 @@ ChipSet.prototype.requestDMA = function(iDMAChannel, done)
 
     if (channel.masked) {
         if (DEBUG && this.messageEnabled(Messages.DMA | Messages.DATA)) {
-            this.messagePrint("requestDMA(" + iDMAChannel + "): channel masked, request queued", true);
+            this.printMessage("requestDMA(" + iDMAChannel + "): channel masked, request queued", true);
         }
         return;
     }
@@ -2786,7 +2786,7 @@ ChipSet.prototype.advanceDMA = function(channel, fInit)
             if (DEBUG && DEBUGGER && channel.sAddrDebug === null) {
                 channel.sAddrDebug = str.toHex(addr >> 4, 4) + ":" + str.toHex(addr & 0xf, 4);
                 if (this.messageEnabled(this.messageBitsDMA(iDMAChannel)) && channel.xfer != ChipSet.DMA_MODE.XFER_WRITE) {
-                    this.messagePrint("advanceDMA(" + iDMAChannel + ") transferring " + channel.cbDebug + " bytes from " + channel.sAddrDebug, true);
+                    this.printMessage("advanceDMA(" + iDMAChannel + ") transferring " + channel.cbDebug + " bytes from " + channel.sAddrDebug, true);
                     this.dbg.doDump("db", channel.sAddrDebug, "l" + channel.cbDebug);
                 }
             }
@@ -2797,7 +2797,7 @@ ChipSet.prototype.advanceDMA = function(channel, fInit)
                         if (b < 0) {
                             if (!channel.fWarning) {
                                 if (DEBUG && chipset.messageEnabled(Messages.DMA)) {
-                                    chipset.messagePrint("advanceDMA(" + iDMAChannel + ") ran out of data, assuming 0xff", true);
+                                    chipset.printMessage("advanceDMA(" + iDMAChannel + ") ran out of data, assuming 0xff", true);
                                 }
                                 channel.fWarning = true;
                             }
@@ -2809,8 +2809,8 @@ ChipSet.prototype.advanceDMA = function(channel, fInit)
                         if (!channel.masked) {
                             chipset.bus.setByte(addrCur, b);
                             if (BACKTRACK) {
-                                if (!off && obj.file) {
-                                    chipset.println('loading ' + obj.file.sPath + '[' + obj.offFile + '] at %' + str.toHex(addrCur));
+                                if (!off && obj.file && chipset.messageEnabled(Messages.DISK)) {
+                                    chipset.printMessage("loading " + obj.file.sPath + '[' + obj.offFile + "] at %" + str.toHex(addrCur), true);
                                 }
                                 bto = chipset.bus.addBackTrackObject(obj, bto, off);
                                 chipset.bus.writeBackTrackObject(addrCur, bto, off);
@@ -2841,7 +2841,7 @@ ChipSet.prototype.advanceDMA = function(channel, fInit)
             }
             else {
                 if (DEBUG && this.messageEnabled(Messages.DMA | Messages.WARN)) {
-                    this.messagePrint("advanceDMA(" + iDMAChannel + ") unsupported xfer mode: " + str.toHexWord(channel.xfer), true);
+                    this.printMessage("advanceDMA(" + iDMAChannel + ") unsupported xfer mode: " + str.toHexWord(channel.xfer), true);
                 }
                 channel.fError = true;
             }
@@ -2896,7 +2896,7 @@ ChipSet.prototype.updateDMA = function(channel)
     }
 
     if (DEBUG && this.messageEnabled(this.messageBitsDMA(iDMAChannel)) && channel.xfer == ChipSet.DMA_MODE.XFER_WRITE && channel.sAddrDebug) {
-        this.messagePrint("updateDMA(" + iDMAChannel + ") transferred " + channel.cbDebug + " bytes to " + channel.sAddrDebug, true);
+        this.printMessage("updateDMA(" + iDMAChannel + ") transferred " + channel.cbDebug + " bytes to " + channel.sAddrDebug, true);
         this.dbg.doDump("db", channel.sAddrDebug, "l" + channel.cbDebug);
     }
 
@@ -2938,7 +2938,7 @@ ChipSet.prototype.inPICLo = function(iPIC, addrFrom)
         }
     }
     if (this.messageEnabled(Messages.PIC | Messages.PORT | Messages.CHIPSET)) {
-        this.messagePort(pic.port, null, addrFrom, "PIC" + iPIC, b, true);
+        this.printMessageIO(pic.port, null, addrFrom, "PIC" + iPIC, b, true);
     }
     return b;
 };
@@ -2955,7 +2955,7 @@ ChipSet.prototype.outPICLo = function(iPIC, bOut, addrFrom)
 {
     var pic = this.aPICs[iPIC];
     if (this.messageEnabled(Messages.PIC | Messages.PORT | Messages.CHIPSET)) {
-        this.messagePort(pic.port, bOut, addrFrom, "PIC" + iPIC, null, true);
+        this.printMessageIO(pic.port, bOut, addrFrom, "PIC" + iPIC, null, true);
     }
     if (bOut & ChipSet.PIC_LO.ICW1) {
         /*
@@ -3039,13 +3039,13 @@ ChipSet.prototype.outPICLo = function(iPIC, bOut, addrFrom)
             var nIRQ = (nIRL == null? undefined : pic.nIRQBase + nIRL);
             if (pic.bISR & bIREnd) {
                 if (DEBUG && this.messageEnabled(this.messageBitsIRQ(nIRQ))) {
-                    this.messagePrint("outPIC" + iPIC + "(0x" + str.toHexByte(pic.port) + "): IRQ " + nIRQ + " going out of service", true);
+                    this.printMessage("outPIC" + iPIC + "(0x" + str.toHexByte(pic.port) + "): IRQ " + nIRQ + " going out of service", true);
                 }
                 pic.bISR &= ~bIREnd;
                 this.checkIRR();
             } else {
                 if (DEBUG && this.messageEnabled(Messages.PIC | Messages.WARN)) {
-                    this.messagePrint("outPIC" + iPIC + "(0x" + str.toHexByte(pic.port) + "): unexpected EOI command, IRQ " + nIRQ + " not in service", true);
+                    this.printMessage("outPIC" + iPIC + "(0x" + str.toHexByte(pic.port) + "): unexpected EOI command, IRQ " + nIRQ + " not in service", true);
                     if (!SAMPLER && MAXDEBUG) this.dbg.stopCPU();
                 }
             }
@@ -3098,7 +3098,7 @@ ChipSet.prototype.inPICHi = function(iPIC, addrFrom)
     var pic = this.aPICs[iPIC];
     var b = pic.bIMR;
     if (this.messageEnabled(Messages.PIC | Messages.PORT | Messages.CHIPSET)) {
-        this.messagePort(pic.port+1, null, addrFrom, "PIC" + iPIC, b, true);
+        this.printMessageIO(pic.port+1, null, addrFrom, "PIC" + iPIC, b, true);
     }
     return b;
 };
@@ -3115,7 +3115,7 @@ ChipSet.prototype.outPICHi = function(iPIC, bOut, addrFrom)
 {
     var pic = this.aPICs[iPIC];
     if (this.messageEnabled(Messages.PIC | Messages.PORT | Messages.CHIPSET)) {
-        this.messagePort(pic.port+1, bOut, addrFrom, "PIC" + iPIC, null, true);
+        this.printMessageIO(pic.port+1, bOut, addrFrom, "PIC" + iPIC, null, true);
     }
     if (pic.nICW < pic.aICW.length) {
         pic.aICW[pic.nICW++] = bOut;
@@ -3174,7 +3174,7 @@ ChipSet.prototype.setIRR = function(nIRQ, nDelay)
     if (!(pic.bIRR & bIRR)) {
         pic.bIRR |= bIRR;
         if (DEBUG && this.messageEnabled(this.messageBitsIRQ(nIRQ) | Messages.CHIPSET)) {
-            this.messagePrint("setIRR(" + nIRQ + ")", true);
+            this.printMessage("setIRR(" + nIRQ + ")", true);
         }
         pic.nDelay = nDelay || 0;
         this.checkIRR();
@@ -3196,7 +3196,7 @@ ChipSet.prototype.clearIRR = function(nIRQ)
     if (pic.bIRR & bIRR) {
         pic.bIRR &= ~bIRR;
         if (DEBUG && this.messageEnabled(this.messageBitsIRQ(nIRQ) | Messages.CHIPSET)) {
-            this.messagePrint("clearIRR(" + nIRQ + ")", true);
+            this.printMessage("clearIRR(" + nIRQ + ")", true);
         }
         this.checkIRR();
     }
@@ -3323,7 +3323,7 @@ ChipSet.prototype.getIRRVector = function(iPIC)
 
                     var nIRQ = pic.nIRQBase + nIRL;
                     if (DEBUG && this.messageEnabled(this.messageBitsIRQ(nIRQ))) {
-                        this.messagePrint("getIRRVector(): IRQ " + nIRQ + " interrupting @" + str.toHexAddr(this.cpu.regIP, this.cpu.segCS.sel) + " stack=" + str.toHexAddr(this.cpu.regSP, this.cpu.segSS.sel), true);
+                        this.printMessage("getIRRVector(): IRQ " + nIRQ + " interrupting @" + str.toHexAddr(this.cpu.regIP, this.cpu.segCS.sel) + " stack=" + str.toHexAddr(this.cpu.regSP, this.cpu.segSS.sel), true);
                     }
                     if (MAXDEBUG && DEBUGGER) {
                         this.acInterrupts[nIRQ]++;
@@ -3360,7 +3360,7 @@ ChipSet.prototype.inTimer = function(iTimer, addrFrom)
     this.updateTimer(iTimer);
     b = timer.countCurrent[timer.countIndex++];
     if (this.messageEnabled(Messages.TIMER | Messages.PORT)) {
-        this.messagePort(ChipSet.TIMER0.PORT + iTimer, null, addrFrom, "TIMER" + iTimer, b, true);
+        this.printMessageIO(ChipSet.TIMER0.PORT + iTimer, null, addrFrom, "TIMER" + iTimer, b, true);
     }
     return b;
 };
@@ -3385,7 +3385,7 @@ ChipSet.prototype.inTimer = function(iTimer, addrFrom)
 ChipSet.prototype.outTimer = function(iTimer, bOut, addrFrom)
 {
     if (this.messageEnabled(Messages.TIMER | Messages.PORT)) {
-        this.messagePort(ChipSet.TIMER0.PORT + iTimer, bOut, addrFrom, "TIMER" + iTimer, null, true);
+        this.printMessageIO(ChipSet.TIMER0.PORT + iTimer, bOut, addrFrom, "TIMER" + iTimer, null, true);
     }
     var timer = this.aTimers[iTimer];
     if (timer.countIndex == timer.countBytes) this.resetTimerIndex(iTimer);
@@ -3438,8 +3438,8 @@ ChipSet.prototype.outTimer = function(iTimer, bOut, addrFrom)
  */
 ChipSet.prototype.inTimerCtrl = function(port, addrFrom)
 {
-    this.messagePort(port, null, addrFrom, "TIMER_CTRL", null, Messages.TIMER);
-    if (DEBUG) this.messagePrint("TIMER_CTRL: Read-Back command not supported (yet)", Messages.TIMER);
+    this.printMessageIO(port, null, addrFrom, "TIMER_CTRL", null, Messages.TIMER);
+    if (DEBUG) this.printMessage("TIMER_CTRL: Read-Back command not supported (yet)", Messages.TIMER);
     return null;
 };
 
@@ -3454,13 +3454,13 @@ ChipSet.prototype.inTimerCtrl = function(port, addrFrom)
 ChipSet.prototype.outTimerCtrl = function(port, bOut, addrFrom)
 {
     this.bTimerCtrl = bOut;
-    this.messagePort(port, bOut, addrFrom, "TIMER_CTRL", null, Messages.TIMER);
+    this.printMessageIO(port, bOut, addrFrom, "TIMER_CTRL", null, Messages.TIMER);
     /*
      * Extract the SC (Select Counter) bits
      */
     var iTimer = (bOut & ChipSet.TIMER_CTRL.SC) >> 6;
     if (iTimer == 0x3) {
-        if (DEBUG) this.messagePrint("TIMER_CTRL: Read-Back command not supported (yet)", Messages.TIMER);
+        if (DEBUG) this.printMessage("TIMER_CTRL: Read-Back command not supported (yet)", Messages.TIMER);
         return;
     }
     /*
@@ -3512,7 +3512,7 @@ ChipSet.prototype.outTimerCtrl = function(port, bOut, addrFrom)
                 timer.countStart[1] = timer.countInit[1];
                 timer.nCyclesStart = this.cpu.getCycles(this.fScaleTimers);
                 if (DEBUG && this.messageEnabled(Messages.TIMER)) {
-                    this.messagePrint("TIMER0 count reset @" + timer.nCyclesStart + " cycles", true);
+                    this.printMessage("TIMER0 count reset @" + timer.nCyclesStart + " cycles", true);
                 }
             }
         }
@@ -3715,7 +3715,7 @@ ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
 
         if (ticksElapsed < 0) {
             if (DEBUG && this.messageEnabled(Messages.TIMER)) {
-                this.messagePrint("updateTimer(" + iTimer + "): negative tick count (" + ticksElapsed + ")", true);
+                this.printMessage("updateTimer(" + iTimer + "): negative tick count (" + ticksElapsed + ")", true);
             }
             timer.nCyclesStart = nCycles;
             ticksElapsed = 0;
@@ -3735,7 +3735,7 @@ ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
         if (timer.mode == ChipSet.TIMER_CTRL.MODE0) {
             if (count <= 0) count = 0;
             if (DEBUG && this.messageEnabled(Messages.TIMER)) {
-                this.messagePrint("updateTimer(" + iTimer + "): MODE0 timer count=" + count, true);
+                this.printMessage("updateTimer(" + iTimer + "): MODE0 timer count=" + count, true);
             }
             if (!count) {
                 timer.fOUT = true;
@@ -3770,7 +3770,7 @@ ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
                 count = countInit + count;
                 if (count <= 0) {
                     if (DEBUG && this.messageEnabled(Messages.TIMER)) {
-                        this.messagePrint("updateTimer(" + iTimer + "): underflow=" + count, true);
+                        this.printMessage("updateTimer(" + iTimer + "): underflow=" + count, true);
                     }
                     count = countInit;
                 }
@@ -3802,7 +3802,7 @@ ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
                 count = countInit + count;
                 if (count <= 0) {
                     if (DEBUG && this.messageEnabled(Messages.TIMER)) {
-                        this.messagePrint("updateTimer(" + iTimer + "): underflow=" + count, true);
+                        this.printMessage("updateTimer(" + iTimer + "): underflow=" + count, true);
                     }
                     count = countInit;
                 }
@@ -3866,7 +3866,7 @@ ChipSet.prototype.inPPIA = function(port, addrFrom)
             b = this.kbd.readScanCode();
         }
     }
-    this.messagePort(port, null, addrFrom, "PPI_A", b);
+    this.printMessageIO(port, null, addrFrom, "PPI_A", b);
     return b;
 };
 
@@ -3880,7 +3880,7 @@ ChipSet.prototype.inPPIA = function(port, addrFrom)
  */
 ChipSet.prototype.outPPIA = function(port, bOut, addrFrom)
 {
-    this.messagePort(port, bOut, addrFrom, "PPI_A");
+    this.printMessageIO(port, bOut, addrFrom, "PPI_A");
     this.bPPIA = bOut;
 };
 
@@ -3895,7 +3895,7 @@ ChipSet.prototype.outPPIA = function(port, bOut, addrFrom)
 ChipSet.prototype.inPPIB = function(port, addrFrom)
 {
     var b = this.bPPIB;
-    this.messagePort(port, null, addrFrom, "PPI_B", b);
+    this.printMessageIO(port, null, addrFrom, "PPI_B", b);
     return b;
 };
 
@@ -3909,7 +3909,7 @@ ChipSet.prototype.inPPIB = function(port, addrFrom)
  */
 ChipSet.prototype.outPPIB = function(port, bOut, addrFrom)
 {
-    this.messagePort(port, bOut, addrFrom, "PPI_B");
+    this.printMessageIO(port, bOut, addrFrom, "PPI_B");
     this.updatePPIB(bOut);
     if (this.kbd) this.kbd.setEnable((bOut & ChipSet.PPI_B.CLEAR_KBD)? false : true, (bOut & ChipSet.PPI_B.CLK_KBD)? true : false);
 };
@@ -3986,7 +3986,7 @@ ChipSet.prototype.inPPIC = function(port, addrFrom)
      * The ROM BIOS polls this port incessantly during its memory tests, checking for memory parity errors
      * (which of course we never report), so we further restrict these port messages to MESSAGE_MEM.
      */
-    this.messagePort(port, null, addrFrom, "PPI_C", b, Messages.CHIPSET | Messages.MEM);
+    this.printMessageIO(port, null, addrFrom, "PPI_C", b, Messages.CHIPSET | Messages.MEM);
     return b;
 };
 
@@ -4000,7 +4000,7 @@ ChipSet.prototype.inPPIC = function(port, addrFrom)
  */
 ChipSet.prototype.outPPIC = function(port, bOut, addrFrom)
 {
-    this.messagePort(port, bOut, addrFrom, "PPI_C");
+    this.printMessageIO(port, bOut, addrFrom, "PPI_C");
     this.bPPIC = bOut;
 };
 
@@ -4015,7 +4015,7 @@ ChipSet.prototype.outPPIC = function(port, bOut, addrFrom)
 ChipSet.prototype.inPPICtrl = function(port, addrFrom)
 {
     var b = this.bPPICtrl;
-    this.messagePort(port, null, addrFrom, "PPI_CTRL", b);
+    this.printMessageIO(port, null, addrFrom, "PPI_CTRL", b);
     return b;
 };
 
@@ -4029,7 +4029,7 @@ ChipSet.prototype.inPPICtrl = function(port, addrFrom)
  */
 ChipSet.prototype.outPPICtrl = function(port, bOut, addrFrom)
 {
-    this.messagePort(port, bOut, addrFrom, "PPI_CTRL");
+    this.printMessageIO(port, bOut, addrFrom, "PPI_CTRL");
     this.bPPICtrl = bOut;
 };
 
@@ -4044,7 +4044,7 @@ ChipSet.prototype.outPPICtrl = function(port, bOut, addrFrom)
 ChipSet.prototype.in8042OutBuff = function(port, addrFrom)
 {
     var b = this.b8042OutBuff;
-    this.messagePort(port, null, addrFrom, "8042_OUTBUFF", b, Messages.C8042);
+    this.printMessageIO(port, null, addrFrom, "8042_OUTBUFF", b, Messages.C8042);
     this.b8042Status &= ~(ChipSet.KBC.STATUS.OUTBUFF_FULL | ChipSet.KBC.STATUS.OUTBUFF_DELAY);
     if (this.kbd) this.kbd.checkScanCode();
     return b;
@@ -4064,7 +4064,7 @@ ChipSet.prototype.in8042OutBuff = function(port, addrFrom)
  */
 ChipSet.prototype.out8042InBuffData = function(port, bOut, addrFrom)
 {
-    this.messagePort(port, bOut, addrFrom, "8042_INBUF.DATA", null, Messages.C8042);
+    this.printMessageIO(port, bOut, addrFrom, "8042_INBUF.DATA", null, Messages.C8042);
 
     if (this.b8042Status & ChipSet.KBC.STATUS.CMD_FLAG) {
         switch (this.b8042InBuff) {
@@ -4190,7 +4190,7 @@ ChipSet.prototype.in8042RWReg = function(port, addrFrom)
      * Thanks to the WAITF function, this has become a very "busy" port, so let's not generate messages
      * unless both MESSAGE_8042 *and* MESSAGE_LOG are set.
      */
-    this.messagePort(port, null, addrFrom, "8042_RWREG", b, Messages.C8042);
+    this.printMessageIO(port, null, addrFrom, "8042_RWREG", b, Messages.C8042);
     return b;
 };
 
@@ -4204,7 +4204,7 @@ ChipSet.prototype.in8042RWReg = function(port, addrFrom)
  */
 ChipSet.prototype.out8042RWReg = function(port, bOut, addrFrom)
 {
-    this.messagePort(port, bOut, addrFrom, "8042_RWREG", null, Messages.C8042);
+    this.printMessageIO(port, bOut, addrFrom, "8042_RWREG", null, Messages.C8042);
     this.updatePPIB(bOut);
 };
 
@@ -4218,7 +4218,7 @@ ChipSet.prototype.out8042RWReg = function(port, bOut, addrFrom)
  */
 ChipSet.prototype.in8042Status = function(port, addrFrom)
 {
-    this.messagePort(port, null, addrFrom, "8042_STATUS", this.b8042Status, Messages.C8042);
+    this.printMessageIO(port, null, addrFrom, "8042_STATUS", this.b8042Status, Messages.C8042);
     var b = this.b8042Status & 0xff;
     /*
      * There's code in the 5170 BIOS (F000:03BF) that writes an 8042 command (0xAA), waits for
@@ -4256,7 +4256,7 @@ ChipSet.prototype.in8042Status = function(port, addrFrom)
  */
 ChipSet.prototype.out8042InBuffCmd = function(port, bOut, addrFrom)
 {
-    this.messagePort(port, bOut, addrFrom, "8042_INBUFF.CMD", null, Messages.C8042);
+    this.printMessageIO(port, bOut, addrFrom, "8042_INBUFF.CMD", null, Messages.C8042);
     this.assert(!(this.b8042Status & ChipSet.KBC.STATUS.INBUFF_FULL));
     this.b8042InBuff = bOut;
 
@@ -4285,7 +4285,7 @@ ChipSet.prototype.out8042InBuffCmd = function(port, bOut, addrFrom)
 
     case ChipSet.KBC.CMD.DISABLE_KBD:       // 0xAD
         this.set8042CmdData(this.b8042CmdData | ChipSet.KBC.DATA.CMD.NO_CLOCK);
-        if (DEBUG) this.messagePrint("keyboard disabled", Messages.KEYBOARD | Messages.PORT);
+        if (DEBUG) this.printMessage("keyboard disabled", Messages.KEYBOARD | Messages.PORT);
         /*
          * NOTE: The MODEL_5170 BIOS calls "KBD_RESET" (F000:17D2) while the keyboard interface is disabled,
          * yet we must still deliver the Keyboard's CMDRES.BAT_OK response code?  Seems like an odd thing for
@@ -4296,13 +4296,13 @@ ChipSet.prototype.out8042InBuffCmd = function(port, bOut, addrFrom)
     case ChipSet.KBC.CMD.ENABLE_KBD:        // 0xAE
         this.set8042CmdData(this.b8042CmdData & ~ChipSet.KBC.DATA.CMD.NO_CLOCK);
         if (this.kbd) this.kbd.checkScanCode();
-        if (DEBUG) this.messagePrint("keyboard re-enabled", Messages.KEYBOARD | Messages.PORT);
+        if (DEBUG) this.printMessage("keyboard re-enabled", Messages.KEYBOARD | Messages.PORT);
         break;
 
     case ChipSet.KBC.CMD.SELF_TEST:         // 0xAA
         if (this.kbd) this.kbd.flushScanCode();
         this.set8042CmdData(this.b8042CmdData | ChipSet.KBC.DATA.CMD.NO_CLOCK);
-        if (DEBUG) this.messagePrint("keyboard disabled on reset", Messages.KEYBOARD | Messages.PORT);
+        if (DEBUG) this.printMessage("keyboard disabled on reset", Messages.KEYBOARD | Messages.PORT);
         this.set8042OutBuff(ChipSet.KBC.DATA.SELF_TEST.OK);
         this.set8042OutPort(ChipSet.KBC.OUTPORT.NO_RESET | ChipSet.KBC.OUTPORT.A20_ON);
         break;
@@ -4324,7 +4324,7 @@ ChipSet.prototype.out8042InBuffCmd = function(port, bOut, addrFrom)
 
     default:
         if (DEBUG && this.messageEnabled(Messages.C8042)) {
-            this.messagePrint("unrecognized 8042 command: " + str.toHexByte(this.b8042InBuff), true);
+            this.printMessage("unrecognized 8042 command: " + str.toHexByte(this.b8042InBuff), true);
             this.dbg.stopCPU();
         }
         break;
@@ -4377,7 +4377,7 @@ ChipSet.prototype.set8042OutBuff = function(b)
         this.b8042Status &= ~ChipSet.KBC.STATUS.OUTBUFF_FULL;
         this.b8042Status |= ChipSet.KBC.STATUS.OUTBUFF_DELAY;
         if (DEBUG && this.messageEnabled(Messages.KEYBOARD | Messages.PORT)) {
-            this.messagePrint("set8042OutBuff(0x" + str.toHexByte(b) + ")", true);
+            this.printMessage("set8042OutBuff(0x" + str.toHexByte(b) + ")", true);
         }
     }
 };
@@ -4399,7 +4399,7 @@ ChipSet.prototype.set8042OutPort = function(b)
          * determine if that's what the caller intended.
          */
         if (DEBUG && this.messageEnabled(Messages.C8042)) {
-            this.messagePrint("unexpected 8042 output port reset: " + str.toHexByte(b), true);
+            this.printMessage("unexpected 8042 output port reset: " + str.toHexByte(b), true);
             this.dbg.stopCPU();
         }
         this.cpu.resetRegs();
@@ -4509,12 +4509,12 @@ ChipSet.prototype.notifyKbdData = function(b)
             }
             else {
                 if (DEBUG && this.messageEnabled(Messages.KEYBOARD | Messages.PORT)) {
-                    this.messagePrint("notifyKbdData(0x" + str.toHexByte(b) + "): output buffer full", true);
+                    this.printMessage("notifyKbdData(0x" + str.toHexByte(b) + "): output buffer full", true);
                 }
             }
         } else {
             if (DEBUG && this.messageEnabled(Messages.KEYBOARD | Messages.PORT)) {
-                this.messagePrint("notifyKbdData(0x" + str.toHexByte(b) + "): disabled", true);
+                this.printMessage("notifyKbdData(0x" + str.toHexByte(b) + "): disabled", true);
             }
         }
     }
@@ -4530,7 +4530,7 @@ ChipSet.prototype.notifyKbdData = function(b)
  */
 ChipSet.prototype.inCMOSAddr = function(port, addrFrom)
 {
-    this.messagePort(port, null, addrFrom, "CMOS.ADDR", this.bCMOSAddr, Messages.CMOS);
+    this.printMessageIO(port, null, addrFrom, "CMOS.ADDR", this.bCMOSAddr, Messages.CMOS);
     return this.bCMOSAddr;
 };
 
@@ -4544,7 +4544,7 @@ ChipSet.prototype.inCMOSAddr = function(port, addrFrom)
  */
 ChipSet.prototype.outCMOSAddr = function(port, bOut, addrFrom)
 {
-    this.messagePort(port, bOut, addrFrom, "CMOS.ADDR", null, Messages.CMOS);
+    this.printMessageIO(port, bOut, addrFrom, "CMOS.ADDR", null, Messages.CMOS);
     this.bCMOSAddr = bOut;
     this.bNMI = (bOut & ChipSet.CMOS.ADDR.NMI_DISABLE)? ChipSet.NMI.DISABLE : ChipSet.NMI.ENABLE;
 };
@@ -4562,7 +4562,7 @@ ChipSet.prototype.inCMOSData = function(port, addrFrom)
     var bAddr = this.bCMOSAddr & ChipSet.CMOS.ADDR.MASK;
     var bIn = (bAddr <= ChipSet.CMOS.ADDR.STATUSD? this.getRTCByte(bAddr) : this.abCMOSData[bAddr]);
     if (this.messageEnabled(Messages.CMOS | Messages.PORT)) {
-        this.messagePort(port, null, addrFrom, "CMOS.DATA[" + str.toHexByte(bAddr) + "]", bIn, true);
+        this.printMessageIO(port, null, addrFrom, "CMOS.DATA[" + str.toHexByte(bAddr) + "]", bIn, true);
     }
     if (addrFrom != null) {
         if (bAddr == ChipSet.CMOS.ADDR.STATUSC) {
@@ -4577,7 +4577,7 @@ ChipSet.prototype.inCMOSData = function(port, addrFrom)
              * occurs in a timely manner, too.
              */
             if ((bIn & ChipSet.CMOS.STATUSC.PF) && (this.abCMOSData[ChipSet.CMOS.ADDR.STATUSB] & ChipSet.CMOS.STATUSB.PIE)) {
-                if (DEBUG) this.messagePrint("RTC periodic interrupt cleared", Messages.RTC);
+                if (DEBUG) this.printMessage("RTC periodic interrupt cleared", Messages.RTC);
                 this.setRTCCycleLimit();
             }
         }
@@ -4597,16 +4597,16 @@ ChipSet.prototype.outCMOSData = function(port, bOut, addrFrom)
 {
     var bAddr = this.bCMOSAddr & ChipSet.CMOS.ADDR.MASK;
     if (this.messageEnabled(Messages.CMOS | Messages.PORT)) {
-        this.messagePort(port, bOut, addrFrom, "CMOS.DATA[" + str.toHexByte(bAddr) + "]", null, true);
+        this.printMessageIO(port, bOut, addrFrom, "CMOS.DATA[" + str.toHexByte(bAddr) + "]", null, true);
     }
     var bDelta = bOut ^ this.abCMOSData[bAddr];
     this.abCMOSData[bAddr] = (bAddr <= ChipSet.CMOS.ADDR.STATUSD? this.setRTCByte(bAddr, bOut) : bOut);
     if (bAddr == ChipSet.CMOS.ADDR.STATUSB && (bDelta & ChipSet.CMOS.STATUSB.PIE)) {
         if (bOut & ChipSet.CMOS.STATUSB.PIE) {
-            if (DEBUG) this.messagePrint("RTC periodic interrupts enabled", Messages.RTC);
+            if (DEBUG) this.printMessage("RTC periodic interrupts enabled", Messages.RTC);
             this.setRTCCycleLimit();
         } else {
-            if (DEBUG) this.messagePrint("RTC periodic interrupts disabled", Messages.RTC);
+            if (DEBUG) this.printMessage("RTC periodic interrupts disabled", Messages.RTC);
         }
     }
 };
@@ -4621,7 +4621,7 @@ ChipSet.prototype.outCMOSData = function(port, bOut, addrFrom)
  */
 ChipSet.prototype.inMFGData = function(port, addrFrom)
 {
-    this.messagePort(port, null, addrFrom, "MFG_DATA", this.bMFGData);
+    this.printMessageIO(port, null, addrFrom, "MFG_DATA", this.bMFGData);
     return this.bMFGData;
 };
 
@@ -4635,7 +4635,7 @@ ChipSet.prototype.inMFGData = function(port, addrFrom)
  */
 ChipSet.prototype.outMFGData = function(port, bOut, addrFrom)
 {
-    this.messagePort(port, bOut, addrFrom, "MFG_DATA");
+    this.printMessageIO(port, bOut, addrFrom, "MFG_DATA");
     this.bMFGData = bOut;
 };
 
@@ -4651,7 +4651,7 @@ ChipSet.prototype.outMFGData = function(port, bOut, addrFrom)
  */
 ChipSet.prototype.outNMI = function(port, bOut, addrFrom)
 {
-    this.messagePort(port, bOut, addrFrom, "NMI");
+    this.printMessageIO(port, bOut, addrFrom, "NMI");
     this.bNMI = bOut;
 };
 
@@ -4670,7 +4670,7 @@ ChipSet.prototype.outCoprocClear = function(port, bOut, addrFrom)
     /*
      * TODO: Implement
      */
-    this.messagePort(port, bOut, addrFrom, "COPROC.CLEAR");
+    this.printMessageIO(port, bOut, addrFrom, "COPROC.CLEAR");
     this.assert(!bOut);
 };
 
@@ -4689,7 +4689,7 @@ ChipSet.prototype.outCoprocReset = function(port, bOut, addrFrom)
     /*
      * TODO: Implement
      */
-    this.messagePort(port, bOut, addrFrom, "COPROC.RESET");
+    this.printMessageIO(port, bOut, addrFrom, "COPROC.RESET");
     this.assert(!bOut);
 };
 
@@ -4786,13 +4786,13 @@ ChipSet.prototype.setSpeaker = function(fOn)
         if (fOn) {
             if (this.sourceAudio) {
                 this.sourceAudio['frequency']['value'] = freq;
-                if (this.messageEnabled(Messages.SPEAKER)) this.messagePrint("speaker set to " + freq + "hz", true);
+                if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker set to " + freq + "hz", true);
             } else {
                 this.sourceAudio = this.contextAudio['createOscillator']();
                 this.sourceAudio['type'] = 1;       // 0: sine wave, 1: square wave, 2: sawtooth wave, 3: triangle wave
                 this.sourceAudio['connect'](this.contextAudio['destination']);
                 this.sourceAudio['frequency']['value'] = freq;
-                if (this.messageEnabled(Messages.SPEAKER)) this.messagePrint("speaker on at  " + freq + "hz", true);
+                if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker on at  " + freq + "hz", true);
                 this.sourceAudio['noteOn'](0);      // aka start()
             }
         } else {
@@ -4800,11 +4800,11 @@ ChipSet.prototype.setSpeaker = function(fOn)
                 this.sourceAudio['noteOff'](0);     // aka stop()
                 this.sourceAudio['disconnect']();   // QUESTION: is this automatic following a stop(), since this particular source cannot be started again?
                 delete this.sourceAudio;            // QUESTION: ditto?
-                if (this.messageEnabled(Messages.SPEAKER)) this.messagePrint("speaker off at " + freq + "hz", true);
+                if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker off at " + freq + "hz", true);
             }
         }
     } else if (fOn) {
-        this.messagePrint("BEEP", Messages.SPEAKER);
+        this.printMessage("BEEP", Messages.SPEAKER);
     }
 };
 

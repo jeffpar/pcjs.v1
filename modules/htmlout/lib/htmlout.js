@@ -1110,7 +1110,9 @@ HTMLOut.prototype.getDirList = function(sToken, sIndent, aParms)
  */
 HTMLOut.prototype.getYear = function(sToken, sIndent, aParms)
 {
-    this.aTokens[sToken] = new Date().getFullYear().toString();
+    var year = new Date().getFullYear();
+    if (year < 2015) year = 2015;
+    this.aTokens[sToken] = year.toString();
 };
 
 /**

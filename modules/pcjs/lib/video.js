@@ -4,7 +4,7 @@
  * @version 1.0
  * Created 2012-Jun-15
  *
- * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
+ * Copyright © 2012-2015 Jeff Parsons <Jeff@pcjs.org>
  *
  * This file is part of PCjs, which is part of the JavaScript Machines Project (aka JSMachines)
  * at <http://jsmachines.net/> and <http://pcjs.org/>.
@@ -2013,7 +2013,7 @@ Video.prototype.setBinding = function(sHTMLType, sBinding, control)
             this.sLockMessage = control.textContent;
             if (this.inputScreen && this.inputScreen.lockPointer) {
                 control.onclick = function onClickLockPointer() {
-                    if (DEBUG) video.messagePrint("lockPointer()");
+                    if (DEBUG) video.printMessage("lockPointer()");
                     video.lockPointer(true);
                 };
             } else {
@@ -2024,7 +2024,7 @@ Video.prototype.setBinding = function(sHTMLType, sBinding, control)
 
         case "refresh":
             control.onclick = function onClickRefresh() {
-                if (DEBUG) video.messagePrint("refreshScreen()");
+                if (DEBUG) video.printMessage("refreshScreen()");
                 video.updateScreen(true);
             };
             return true;
@@ -2183,7 +2183,7 @@ Video.prototype.captureTouch = function()
 Video.prototype.onFocusChange = function(fFocus)
 {
     if (this.fHasFocus != fFocus && DEBUG && this.messageEnabled()) {
-        this.messagePrint("onFocusChange(" + (fFocus? "true" : "false") + ")", true);
+        this.printMessage("onFocusChange(" + (fFocus? "true" : "false") + ")", true);
     }
     /*
      * As per http://stackoverflow.com/questions/6740253/disable-scrolling-when-changing-focus-form-elements-ipad-web-app,
@@ -2216,7 +2216,7 @@ Video.prototype.releaseTouch = function()
  */
 Video.prototype.onTouchStart = function(event)
 {
-    if (DEBUG) this.messagePrint("onTouchStart()");
+    if (DEBUG) this.printMessage("onTouchStart()");
     this.processTouchEvent(event, true);
 };
 
@@ -2228,7 +2228,7 @@ Video.prototype.onTouchStart = function(event)
  */
 Video.prototype.onTouchMove = function(event)
 {
-    if (DEBUG) this.messagePrint("onTouchMove()");
+    if (DEBUG) this.printMessage("onTouchMove()");
     this.processTouchEvent(event, false);
 };
 
@@ -2240,7 +2240,7 @@ Video.prototype.onTouchMove = function(event)
  */
 Video.prototype.onTouchEnd = function(event)
 {
-    if (DEBUG) this.messagePrint("onTouchEnd()");
+    if (DEBUG) this.printMessage("onTouchEnd()");
 };
 
 /**
@@ -2703,7 +2703,7 @@ Video.prototype.onROMLoad = function(abROM)
          * TODO: Unlike the MDA/CGA font data, we may want to hang onto this data, so that we can regenerate
          * the color font(s) whenever the foreground and/or background colors have been changed.
          */
-        if (DEBUG) this.messagePrint("onROMLoad(): EGA fonts loaded");
+        if (DEBUG) this.printMessage("onROMLoad(): EGA fonts loaded");
         this.setFontData(abROM, [0x2230, 0x3160], 8);
     }
     this.setReady();
@@ -2886,7 +2886,7 @@ Video.prototype.buildFont = function(nFont, offData, offSplit, cxChar, cyChar, a
     var fChanges = false;
 
     if (DEBUG && this.messageEnabled()) {
-        this.messagePrint("buildFont(" + nFont + "): building " + Video.cardSpecs[nFont][0] + " font");
+        this.printMessage("buildFont(" + nFont + "): building " + Video.cardSpecs[nFont][0] + " font");
     }
     if (this.createFont(nFont, offData, offSplit, cxChar, cyChar, abFontData, aRGBColors, aColorMap)) fChanges = true;
 
@@ -2898,7 +2898,7 @@ Video.prototype.buildFont = function(nFont, offData, offSplit, cxChar, cyChar, a
     if (this.fDoubleFont) {
         nFont <<= 1;
         if (DEBUG && this.messageEnabled()) {
-            this.messagePrint("buildFont(" + nFont + "): building " + Video.cardSpecs[nFont >> 1][0] + " double-size font");
+            this.printMessage("buildFont(" + nFont + "): building " + Video.cardSpecs[nFont >> 1][0] + " double-size font");
         }
         if (this.createFont(nFont, offData, offSplit, cxChar, cyChar, abFontData, aRGBColors, aColorMap)) fChanges = true;
     }
@@ -2947,7 +2947,7 @@ Video.prototype.createFont = function(nFont, offData, offSplit, cxChar, cyChar, 
         var rgbColorOrig = font.aCSSColors[iColor]? font.aRGBColors[iColor] : [];
         if (rgbColor[0] !== rgbColorOrig[0] || rgbColor[1] !== rgbColorOrig[1] || rgbColor[2] !== rgbColorOrig[2]) {
             if (DEBUG && this.messageEnabled()) {
-                this.messagePrint("creating font color " + iColor + " for font " + nFont);
+                this.printMessage("creating font color " + iColor + " for font " + nFont);
             }
             this.createFontColor(font, iColor, rgbColor, nDouble, offData, offSplit, cxChar, cyChar, abFontData);
             fChanges = true;
@@ -3179,7 +3179,7 @@ Video.prototype.checkCursor = function()
     var iCellCursor = (this.cardActive.aCRTCRegs[Card.CRTC.CURSOR_ADDR_LO] + ((this.cardActive.aCRTCRegs[Card.CRTC.CURSOR_ADDR_HI] & Card.CRTC.ADDR_HI_MASK) << 8));
     if (this.iCellCursor != iCellCursor) {
         if (DEBUG && this.messageEnabled()) {
-            this.messagePrint("checkCursor(): cursor moved from " + this.iCellCursor + " to " + iCellCursor);
+            this.printMessage("checkCursor(): cursor moved from " + this.iCellCursor + " to " + iCellCursor);
         }
         this.removeCursor();
         this.iCellCursor = iCellCursor;
@@ -3234,7 +3234,7 @@ Video.prototype.removeCursor = function()
                     this.updateChar(col, row, data);
                 }
                 if (DEBUG && this.messageEnabled()) {
-                    this.messagePrint("removeCursor(): removed from " + row + "," + col);
+                    this.printMessage("removeCursor(): removed from " + row + "," + col);
                 }
                 this.aCellCache[this.iCellCursor] = data;
             }
@@ -3301,7 +3301,7 @@ Video.prototype.getAccess = function()
             break;
         default:
             if (DEBUG && this.messageEnabled()) {
-                this.messagePrint("getAccess(): invalid GRC mode (" + str.toHexByte(regGRCMode) + ")");
+                this.printMessage("getAccess(): invalid GRC mode (" + str.toHexByte(regGRCMode) + ")");
             }
             break;
         }
@@ -3329,7 +3329,7 @@ Video.prototype.setAccess = function(nAccess)
     if (nAccess != null && card && nAccess != card.nAccess) {
 
         if (DEBUG && this.messageEnabled()) {
-            this.messagePrint("setAccess(0x" + str.toHexWord(nAccess) + ")");
+            this.printMessage("setAccess(0x" + str.toHexWord(nAccess) + ")");
         }
 
         card.setMemoryAccess(nAccess);
@@ -3666,7 +3666,7 @@ Video.prototype.setMode = function(nMode, fForce)
     if (nMode != null && (nMode != this.nMode || fForce)) {
 
         if (DEBUG && this.messageEnabled()) {
-            this.messagePrint("setMode(0x" + str.toHexWord(nMode) + (fForce? ",force" : "") + ")");
+            this.printMessage("setMode(0x" + str.toHexWord(nMode) + (fForce? ",force" : "") + ")");
         }
 
         this.cUpdates = 0;      // count updateScreen() calls as a means of driving blink updates
@@ -3692,7 +3692,7 @@ Video.prototype.setMode = function(nMode, fForce)
             if (this.addrBuffer) {
 
                 if (DEBUG && this.messageEnabled()) {
-                    this.messagePrint("setMode(" + nMode + "): removing 0x" + str.toHex(this.sizeBuffer) + " bytes from 0x" + str.toHex(this.addrBuffer));
+                    this.printMessage("setMode(" + nMode + "): removing 0x" + str.toHex(this.sizeBuffer) + " bytes from 0x" + str.toHex(this.addrBuffer));
                 }
 
                 if (!this.bus.removeMemory(this.addrBuffer, this.sizeBuffer)) {
@@ -3711,7 +3711,7 @@ Video.prototype.setMode = function(nMode, fForce)
             this.sizeBuffer = card.sizeBuffer;
 
             if (DEBUG && this.messageEnabled()) {
-                this.messagePrint("setMode(" + nMode + "): adding 0x" + str.toHex(this.sizeBuffer) + " bytes to 0x" + str.toHex(this.addrBuffer));
+                this.printMessage("setMode(" + nMode + "): adding 0x" + str.toHex(this.sizeBuffer) + " bytes to 0x" + str.toHex(this.addrBuffer));
             }
 
             var controller = (card === this.cardEGA? card : null);
@@ -4379,7 +4379,7 @@ Video.prototype.inMDAStatus = function(port, addrFrom)
 Video.prototype.outFeat = function(port, bOut, addrFrom)
 {
     this.cardEGA.featReg = (this.cardEGA.featReg & ~Card.FEAT_CTRL.BITS) | (bOut & Card.FEAT_CTRL.BITS);
-    this.messagePort(port, bOut, addrFrom, "FEAT");
+    this.printMessageIO(port, bOut, addrFrom, "FEAT");
 };
 
 /**
@@ -4394,7 +4394,7 @@ Video.prototype.inATC = function(port, addrFrom)
 {
     var b = this.cardEGA.fATCData? this.cardEGA.aATCRegs[this.cardEGA.iATCReg & Card.ATC.INDX_MASK] : this.cardEGA.iATCReg;
     if (this.messageEnabled()) {
-        this.messagePort(Card.ATC.PORT, null, addrFrom, "ATC." + (this.cardEGA.fATCData? this.cardEGA.asATCRegs[this.cardEGA.iATCReg & Card.ATC.INDX_MASK] : "INDX"), b);
+        this.printMessageIO(Card.ATC.PORT, null, addrFrom, "ATC." + (this.cardEGA.fATCData? this.cardEGA.asATCRegs[this.cardEGA.iATCReg & Card.ATC.INDX_MASK] : "INDX"), b);
     }
     this.cardEGA.fATCData = !this.cardEGA.fATCData;
     return b;
@@ -4413,16 +4413,16 @@ Video.prototype.outATC = function(port, bOut, addrFrom)
     var fPalEnabled = (this.cardEGA.iATCReg & Card.ATC.INDX_PAL_ENABLE);
     if (!this.cardEGA.fATCData) {
         this.cardEGA.iATCReg = bOut;
-        this.messagePort(port, bOut, addrFrom, "ATC.INDX");
+        this.printMessageIO(port, bOut, addrFrom, "ATC.INDX");
         this.cardEGA.fATCData = true;
         if ((bOut & Card.ATC.INDX_PAL_ENABLE) && !fPalEnabled) {
             if (!this.buildFonts()) {
                 if (DEBUG && this.messageEnabled()) {
-                    this.messagePrint("outATC(" + str.toHexByte(bOut) + "): no font changes required");
+                    this.printMessage("outATC(" + str.toHexByte(bOut) + "): no font changes required");
                 }
             } else {
                 if (DEBUG && this.messageEnabled()) {
-                    this.messagePrint("outATC(" + str.toHexByte(bOut) + "): redraw screen for font changes");
+                    this.printMessage("outATC(" + str.toHexByte(bOut) + "): redraw screen for font changes");
                 }
                 this.updateScreen(true);
             }
@@ -4432,7 +4432,7 @@ Video.prototype.outATC = function(port, bOut, addrFrom)
         if (iReg >= Card.ATC.PALETTE_REGS || !fPalEnabled) {
             if (Video.TRAPALL || this.cardEGA.aATCRegs[iReg] !== bOut) {
                 if (this.messageEnabled()) {
-                    this.messagePort(port, bOut, addrFrom, "ATC." + this.cardEGA.asATCRegs[iReg]);
+                    this.printMessageIO(port, bOut, addrFrom, "ATC." + this.cardEGA.asATCRegs[iReg]);
                 }
                 this.cardEGA.aATCRegs[iReg] = bOut;
             }
@@ -4458,7 +4458,7 @@ Video.prototype.inStatus0 = function(port, addrFrom)
      * TODO: Figure out where Card.STATUS0.FEAT bits should come from....
      */
     this.cardEGA.status0 = b;
-    this.messagePort(Card.STATUS0.PORT, null, addrFrom, "STATUS0", b);
+    this.printMessageIO(Card.STATUS0.PORT, null, addrFrom, "STATUS0", b);
     return b;
 };
 
@@ -4472,7 +4472,7 @@ Video.prototype.outMisc = function(port, bOut, addrFrom)
 {
     this.cardEGA.miscReg = bOut;
     this.enableEGA();
-    this.messagePort(Card.MISC.PORT, bOut, addrFrom, "MISC");
+    this.printMessageIO(Card.MISC.PORT, bOut, addrFrom, "MISC");
 };
 
 /**
@@ -4486,7 +4486,7 @@ Video.prototype.outMisc = function(port, bOut, addrFrom)
 Video.prototype.inSEQIndx = function(port, addrFrom)
 {
     var b = this.cardEGA.iSEQReg;
-    this.messagePort(Card.SEQ.INDX.PORT, null, addrFrom, "SEQ.INDX", b);
+    this.printMessageIO(Card.SEQ.INDX.PORT, null, addrFrom, "SEQ.INDX", b);
     return b;
 };
 
@@ -4501,7 +4501,7 @@ Video.prototype.inSEQIndx = function(port, addrFrom)
 Video.prototype.outSEQIndx = function(port, bOut, addrFrom)
 {
     this.cardEGA.iSEQReg = bOut;
-    this.messagePort(Card.SEQ.INDX.PORT, bOut, addrFrom, "SEQ.INDX");
+    this.printMessageIO(Card.SEQ.INDX.PORT, bOut, addrFrom, "SEQ.INDX");
 };
 
 /**
@@ -4516,7 +4516,7 @@ Video.prototype.inSEQData = function(port, addrFrom)
 {
     var b = this.cardEGA.aSEQRegs[this.cardEGA.iSEQReg];
     if (this.messageEnabled()) {
-        this.messagePort(Card.SEQ.DATA.PORT, null, addrFrom, "SEQ" + this.cardEGA.asSEQRegs[this.cardEGA.iSEQReg], b);
+        this.printMessageIO(Card.SEQ.DATA.PORT, null, addrFrom, "SEQ" + this.cardEGA.asSEQRegs[this.cardEGA.iSEQReg], b);
     }
     return b;
 };
@@ -4533,7 +4533,7 @@ Video.prototype.outSEQData = function(port, bOut, addrFrom)
 {
     if (Video.TRAPALL || this.cardEGA.aSEQRegs[this.cardEGA.iSEQReg] !== bOut) {
         if (this.messageEnabled()) {
-            this.messagePort(Card.SEQ.DATA.PORT, bOut, addrFrom, "SEQ." + this.cardEGA.asSEQRegs[this.cardEGA.iSEQReg]);
+            this.printMessageIO(Card.SEQ.DATA.PORT, bOut, addrFrom, "SEQ." + this.cardEGA.asSEQRegs[this.cardEGA.iSEQReg]);
         }
         this.cardEGA.aSEQRegs[this.cardEGA.iSEQReg] = bOut;
     }
@@ -4553,7 +4553,7 @@ Video.prototype.outSEQData = function(port, bOut, addrFrom)
 Video.prototype.inGRCPos1 = function(port, addrFrom)
 {
     var b = this.cardEGA.iGRCPos1;
-    this.messagePort(Card.GRC.POS1_PORT, null, addrFrom, "GRC1", b);
+    this.printMessageIO(Card.GRC.POS1_PORT, null, addrFrom, "GRC1", b);
     return b;
 };
 
@@ -4574,7 +4574,7 @@ Video.prototype.inGRCPos1 = function(port, addrFrom)
 Video.prototype.outGRCPos1 = function(port, bOut, addrFrom)
 {
     this.cardEGA.iGRCPos1 = bOut;
-    this.messagePort(Card.GRC.POS1_PORT, bOut, addrFrom, "GRC1");
+    this.printMessageIO(Card.GRC.POS1_PORT, bOut, addrFrom, "GRC1");
 };
 
 /**
@@ -4588,7 +4588,7 @@ Video.prototype.outGRCPos1 = function(port, bOut, addrFrom)
 Video.prototype.inGRCPos2 = function(port, addrFrom)
 {
     var b = this.cardEGA.iGRCPos2;
-    this.messagePort(Card.GRC.POS2_PORT, null, addrFrom, "GRC2", b);
+    this.printMessageIO(Card.GRC.POS2_PORT, null, addrFrom, "GRC2", b);
     return b;
 };
 
@@ -4608,7 +4608,7 @@ Video.prototype.inGRCPos2 = function(port, addrFrom)
 Video.prototype.outGRCPos2 = function(port, bOut, addrFrom)
 {
     this.cardEGA.iGRCPos2 = bOut;
-    this.messagePort(Card.GRC.POS2_PORT, bOut, addrFrom, "GRC2");
+    this.printMessageIO(Card.GRC.POS2_PORT, bOut, addrFrom, "GRC2");
 };
 
 /**
@@ -4622,7 +4622,7 @@ Video.prototype.outGRCPos2 = function(port, bOut, addrFrom)
 Video.prototype.inGRCIndx = function(port, addrFrom)
 {
     var b = this.cardEGA.iGRCReg;
-    this.messagePort(Card.GRC.INDX.PORT, null, addrFrom, "GRC.INDX", b);
+    this.printMessageIO(Card.GRC.INDX.PORT, null, addrFrom, "GRC.INDX", b);
     return b;
 };
 
@@ -4637,7 +4637,7 @@ Video.prototype.inGRCIndx = function(port, addrFrom)
 Video.prototype.outGRCIndx = function(port, bOut, addrFrom)
 {
     this.cardEGA.iGRCReg = bOut;
-    this.messagePort(Card.GRC.INDX.PORT, bOut, addrFrom, "GRC.INDX");
+    this.printMessageIO(Card.GRC.INDX.PORT, bOut, addrFrom, "GRC.INDX");
 };
 
 /**
@@ -4652,7 +4652,7 @@ Video.prototype.inGRCData = function(port, addrFrom)
 {
     var b = this.cardEGA.aGRCRegs[this.cardEGA.iGRCReg];
     if (this.messageEnabled()) {
-        this.messagePort(Card.GRC.DATA.PORT, null, addrFrom, "GRC." + this.cardEGA.asGRCRegs[this.cardEGA.iGRCReg], b);
+        this.printMessageIO(Card.GRC.DATA.PORT, null, addrFrom, "GRC." + this.cardEGA.asGRCRegs[this.cardEGA.iGRCReg], b);
     }
     return b;
 };
@@ -4669,7 +4669,7 @@ Video.prototype.outGRCData = function(port, bOut, addrFrom)
 {
     if (Video.TRAPALL || this.cardEGA.aGRCRegs[this.cardEGA.iGRCReg] !== bOut) {
         if (this.messageEnabled()) {
-            this.messagePort(Card.GRC.DATA.PORT, bOut, addrFrom, "GRC." + this.cardEGA.asGRCRegs[this.cardEGA.iGRCReg]);
+            this.printMessageIO(Card.GRC.DATA.PORT, bOut, addrFrom, "GRC." + this.cardEGA.asGRCRegs[this.cardEGA.iGRCReg]);
         }
         this.cardEGA.aGRCRegs[this.cardEGA.iGRCReg] = bOut;
     }
@@ -4796,7 +4796,7 @@ Video.prototype.inCGAColor = function(port, addrFrom)
 {
     var b = this.cardColor.colorReg;
     if (this.messageEnabled()) {
-        this.messagePort(this.cardColor.port + 5, null, addrFrom, this.cardColor.type + ".COLOR", b);
+        this.printMessageIO(this.cardColor.port + 5, null, addrFrom, this.cardColor.type + ".COLOR", b);
     }
     return b;
 };
@@ -4812,7 +4812,7 @@ Video.prototype.inCGAColor = function(port, addrFrom)
 Video.prototype.outCGAColor = function(port, bOut, addrFrom)
 {
     if (this.messageEnabled()) {
-        this.messagePort(this.cardColor.port + 5, bOut, addrFrom, this.cardColor.type + ".COLOR");
+        this.printMessageIO(this.cardColor.port + 5, bOut, addrFrom, this.cardColor.type + ".COLOR");
     }
     if (this.cardColor.colorReg !== bOut) {
         this.cardColor.colorReg = bOut;
@@ -4848,7 +4848,7 @@ Video.prototype.inCGAStatus = function(port, addrFrom)
 Video.prototype.inCRTCIndx = function(card, addrFrom)
 {
     var b = card.iCRTCReg;
-    this.messagePort(card.port, null, addrFrom, "CRTC.INDX", b);
+    this.printMessageIO(card.port, null, addrFrom, "CRTC.INDX", b);
     return b;
 };
 
@@ -4864,7 +4864,7 @@ Video.prototype.outCRTCIndx = function(card, bOut, addrFrom)
 {
     card.iCRTCPrev = card.iCRTCReg;
     card.iCRTCReg = bOut & Card.CGA.CRTC.INDX.MASK;
-    this.messagePort(card.port, bOut, addrFrom, "CRTC.INDX");
+    this.printMessageIO(card.port, bOut, addrFrom, "CRTC.INDX");
 };
 
 /**
@@ -4880,7 +4880,7 @@ Video.prototype.inCRTCData = function(card, addrFrom)
     var b;
     if (card.iCRTCReg < card.nCRTCRegs) b = card.aCRTCRegs[card.iCRTCReg];
     if (this.messageEnabled()) {
-        this.messagePort(card.port + 1, null, addrFrom, "CRTC." + card.asCRTCRegs[card.iCRTCReg], b);
+        this.printMessageIO(card.port + 1, null, addrFrom, "CRTC." + card.asCRTCRegs[card.iCRTCReg], b);
     }
     return b;
 };
@@ -4898,7 +4898,7 @@ Video.prototype.outCRTCData = function(card, bOut, addrFrom)
     if (card.iCRTCReg < card.nCRTCRegs) {
         if (Video.TRAPALL || card.aCRTCRegs[card.iCRTCReg] !== bOut) {
             if (this.messageEnabled()) {
-                this.messagePort(card.port + 1, bOut, addrFrom, "CRTC." + card.asCRTCRegs[card.iCRTCReg]);
+                this.printMessageIO(card.port + 1, bOut, addrFrom, "CRTC." + card.asCRTCRegs[card.iCRTCReg]);
             }
             card.aCRTCRegs[card.iCRTCReg] = bOut;
         }
@@ -4917,7 +4917,7 @@ Video.prototype.outCRTCData = function(card, bOut, addrFrom)
         this.checkCursor();
     } else {
         if (DEBUG && this.messageEnabled()) {
-            this.messagePrint("outCRTCData(): ignoring unexpected write to CRTC[" + str.toHexByte(card.iCRTCReg) + "]: " + str.toHexByte(bOut));
+            this.printMessage("outCRTCData(): ignoring unexpected write to CRTC[" + str.toHexByte(card.iCRTCReg) + "]: " + str.toHexByte(bOut));
         }
     }
 };
@@ -4933,7 +4933,7 @@ Video.prototype.outCRTCData = function(card, bOut, addrFrom)
 Video.prototype.inCardMode = function(card, addrFrom)
 {
     var b = card.modeReg;
-    this.messagePort(card.port + 4, null, addrFrom, "MODE", b);
+    this.printMessageIO(card.port + 4, null, addrFrom, "MODE", b);
     return b;
 };
 
@@ -4947,7 +4947,7 @@ Video.prototype.inCardMode = function(card, addrFrom)
  */
 Video.prototype.outCardMode = function(card, bOut, addrFrom)
 {
-    this.messagePort(card.port + 4, bOut, addrFrom, "MODE");
+    this.printMessageIO(card.port + 4, bOut, addrFrom, "MODE");
     card.modeReg = bOut;
     this.checkMode(false);
 };
@@ -5034,7 +5034,7 @@ Video.prototype.inCardStatus = function(card, addrFrom)
         b = (card.statusReg ^= (Card.CGA.STATUS.DISP_ENABLE | Card.CGA.STATUS.VERT_RETRACE)) | 0xf0;
     }
     card.statusReg = b;
-    this.messagePort(card.port + 6, null, addrFrom, (card === this.cardEGA? "STATUS1" : "STATUS"), b);
+    this.printMessageIO(card.port + 6, null, addrFrom, (card === this.cardEGA? "STATUS1" : "STATUS"), b);
     return b;
 };
 

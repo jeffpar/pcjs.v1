@@ -4,7 +4,7 @@
  * @version 1.0
  * Created 2012-Nov-26
  *
- * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
+ * Copyright © 2012-2015 Jeff Parsons <Jeff@pcjs.org>
  *
  * This file is part of PCjs, which is part of the JavaScript Machines Project (aka JSMachines)
  * at <http://jsmachines.net/> and <http://pcjs.org/>.
@@ -445,7 +445,7 @@ Disk.prototype.create = function(mode, nCylinders, nHeads, nSectors, cbSector)
      */
     if (this.mode != DiskAPI.MODE.PRELOAD) {
         if (DEBUG && this.messageEnabled()) {
-            this.messagePrint("blank disk for \"" + this.sDiskName + "\": " + this.nCylinders + " cylinders, " + this.nHeads + " head(s)");
+            this.printMessage("blank disk for \"" + this.sDiskName + "\": " + this.nCylinders + " cylinders, " + this.nHeads + " head(s)");
         }
         var aCylinders = new Array(this.nCylinders);
         for (var iCylinder = 0; iCylinder < aCylinders.length; iCylinder++) {
@@ -506,7 +506,7 @@ Disk.prototype.load = function(sDiskName, sDiskPath, file, fnNotify, controller)
     if (DEBUG) {
         var sMessage = 'load("' + sDiskName + '","' + sDiskPath + '")';
         this.controller.log(sMessage);
-        this.messagePrint(sMessage);
+        this.printMessage(sMessage);
     }
 
     if (this.fnNotify) {
@@ -661,7 +661,7 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
     if (this.fOnDemand) {
         if (!nErrorCode) {
             if (DEBUG && this.messageEnabled()) {
-                this.messagePrint('doneLoad("' + sDiskFile + '","' + sDiskPath + '")');
+                this.printMessage('doneLoad("' + sDiskFile + '","' + sDiskPath + '")');
             }
             this.fRemote = true;
             this.buildFileTable();
@@ -681,7 +681,7 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
         this.controller.notice("Unable to load disk \"" + this.sDiskName + "\" (error " + nErrorCode + ")", fPrintOnly);
     } else {
         if (DEBUG && this.messageEnabled()) {
-            this.messagePrint('doneLoad("' + sDiskFile + '","' + sDiskPath + '")');
+            this.printMessage('doneLoad("' + sDiskFile + '","' + sDiskPath + '")');
         }
         try {
             /*
@@ -779,7 +779,7 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
                     var sHeads = nHeads + " head" + (nHeads > 1 ? "s" : "");
                     var nSectorsPerTrack = aDiskData[0][0].length;
                     var sSectorsPerTrack = nSectorsPerTrack + " sector" + (nSectorsPerTrack > 1 ? "s" : "") + "/track";
-                    this.messagePrint(sCylinders + ", " + sHeads + ", " + sSectorsPerTrack);
+                    this.printMessage(sCylinders + ", " + sHeads + ", " + sSectorsPerTrack);
                 }
                 /*
                  * Before the image is usable, we must "normalize" all the sectors.  In the past, this meant
@@ -898,7 +898,7 @@ Disk.prototype.buildFileTable = function()
         var sectorBoot = this.getSector(0);
         if (!sectorBoot) {
             if (DEBUG && this.messageEnabled()) {
-                this.messagePrint("buildFileTable(): unable to read boot sector");
+                this.printMessage("buildFileTable(): unable to read boot sector");
             }
             return;
         }
@@ -953,7 +953,7 @@ Disk.prototype.buildFileTable = function()
             }
             if (!fValid) {
                 if (DEBUG && this.messageEnabled()) {
-                    this.messagePrint("buildFileTable(): unrecognized " + cbDisk + "-byte disk image with " + this.cbSector + "-byte sectors");
+                    this.printMessage("buildFileTable(): unrecognized " + cbDisk + "-byte disk image with " + this.cbSector + "-byte sectors");
                 }
                 return;
             }
@@ -991,7 +991,7 @@ Disk.prototype.buildFileTable = function()
         dir.iClusterMax = (dir.nFATBits == 12? DiskAPI.FAT12.CLUSNUM_MAX : DiskAPI.FAT16.CLUSNUM_MAX);
 
         if (DEBUG && this.messageEnabled()) {
-            this.messagePrint("buildFileTable()\n\tlbaFAT: " + dir.lbaFAT + "\n\tlbaRoot: " + dir.lbaRoot + "\n\tlbaData: " + dir.lbaData + "\n\tlbaTotal: " + dir.lbaTotal + "\n\tnClusterSecs: " + dir.nClusterSecs + "\n\tnClusters: " + dir.nClusters);
+            this.printMessage("buildFileTable()\n\tlbaFAT: " + dir.lbaFAT + "\n\tlbaRoot: " + dir.lbaRoot + "\n\tlbaData: " + dir.lbaData + "\n\tlbaTotal: " + dir.lbaTotal + "\n\tnClusterSecs: " + dir.nClusterSecs + "\n\tnClusters: " + dir.nClusters);
         }
 
         /*
@@ -1001,7 +1001,7 @@ Disk.prototype.buildFileTable = function()
         i = (dir.lbaTotal - dir.lbaData) % dir.nClusterSecs;
         if (i) {
             if (DEBUG && this.messageEnabled()) {
-                this.messagePrint("buildFileTable(): " + cbDisk + "-byte disk image wasting " + i + " sectors");
+                this.printMessage("buildFileTable(): " + cbDisk + "-byte disk image wasting " + i + " sectors");
             }
         }
 
@@ -1048,7 +1048,7 @@ Disk.prototype.getDir = function(dir, sDisk, sDir, apba)
 
     dir.sDir = sDir + "\\";
 
-    if (DEBUG && this.messageEnabled()) this.messagePrint('getDir("' + sDisk + '","' + dir.sDir + '")');
+    if (DEBUG && this.messageEnabled()) this.printMessage('getDir("' + sDisk + '","' + dir.sDir + '")');
 
     for (var iSector = 0; iSector < apba.length; iSector++) {
         var pba = apba[iSector];
@@ -1060,8 +1060,8 @@ Disk.prototype.getDir = function(dir, sDisk, sDir, apba)
             if (dir.sName == null || dir.sName == "." || dir.sName == "..") continue;
             var sPath = dir.sDir + dir.sName;
             if (DEBUG && this.messageEnabled(Messages.DISK | Messages.DATA)) {
-                this.messagePrint('"' + sPath + '" size=' + dir.cbSize + ' cluster=' + dir.iCluster + ' sectors=' + JSON.stringify(dir.apba));
-                if (dir.apba.length) this.messagePrint(this.dumpSector(this.getSector(dir.apba[0]), dir.apba[0], sPath));
+                this.printMessage('"' + sPath + '" size=' + dir.cbSize + ' cluster=' + dir.iCluster + ' sectors=' + JSON.stringify(dir.apba));
+                if (dir.apba.length) this.printMessage(this.dumpSector(this.getSector(dir.apba[0]), dir.apba[0], sPath));
             }
             this.aFileTable.push({sPath: sPath, sName: dir.sName, bAttr: dir.bAttr, cbSize: dir.cbSize, apba: dir.apba, disk: this});
         }
@@ -1116,7 +1116,7 @@ Disk.prototype.getDirEntry = function(dir, pba, i)
         dir.pbaDirCache = pba;
         dir.sectorDirCache = this.getSector(dir.pbaDirCache);
         if (DEBUG && this.messageEnabled(Messages.DISK | Messages.DATA)) {
-            this.messagePrint(this.dumpSector(dir.sectorDirCache, dir.pbaDirCache, dir.sDir));
+            this.printMessage(this.dumpSector(dir.sectorDirCache, dir.pbaDirCache, dir.sDir));
         }
     }
     if (dir.sectorDirCache) {
@@ -1251,7 +1251,7 @@ Disk.prototype.updateSector = function(file, pba, off)
         this.assert(sector['sector'] == iSector +1);
         if (sector.file) {
             if (DEBUG && this.messageEnabled()) {
-                this.messagePrint('"' + sector.file.sPath + '" cross-linked at offset ' + sector.file.offFile + ' with "' + file.sPath + '" at offset ' + off);
+                this.printMessage('"' + sector.file.sPath + '" cross-linked at offset ' + sector.file.offFile + ' with "' + file.sPath + '" at offset ' + off);
             }
             return false;
         }
@@ -1259,7 +1259,7 @@ Disk.prototype.updateSector = function(file, pba, off)
         sector.offFile = off;
         return true;
     }
-    if (DEBUG && this.messageEnabled()) this.messagePrint("unable to map PBA " + pba + " to CHS");
+    if (DEBUG && this.messageEnabled()) this.printMessage("unable to map PBA " + pba + " to CHS");
     return false;
 };
 
@@ -1384,7 +1384,7 @@ Disk.prototype.connectRemoteDisk = function(sDiskPath)
 Disk.prototype.readRemoteSectors = function(iCylinder, iHead, iSector, nSectors, fAsync, done)
 {
     if (DEBUG && this.messageEnabled()) {
-        this.messagePrint("readRemoteSectors(CHS=" + iCylinder + ':' + iHead + ':' + iSector + ",N=" + nSectors + ")");
+        this.printMessage("readRemoteSectors(CHS=" + iCylinder + ':' + iHead + ':' + iSector + ",N=" + nSectors + ")");
     }
 
     if (this.fRemote) {
@@ -1434,7 +1434,7 @@ Disk.prototype.doneReadRemoteSectors = function(sURLName, sURLData, nErrorCode, 
             var sector = this.seek(iCylinder, iHead, iSector, true);
             if (!sector) {
                 if (DEBUG && this.messageEnabled()) {
-                    this.messagePrint("doneReadRemoteSectors(): seek(CHS=" + iCylinder + ':' + iHead + ':' + iSector + ") failed");
+                    this.printMessage("doneReadRemoteSectors(): seek(CHS=" + iCylinder + ':' + iHead + ':' + iSector + ") failed");
                 }
                 break;
             }
@@ -1449,7 +1449,7 @@ Disk.prototype.doneReadRemoteSectors = function(sURLName, sURLData, nErrorCode, 
         fAsync = sectorInfo[4];
     } else {
         if (DEBUG && this.messageEnabled()) {
-            this.messagePrint("doneReadRemoteSectors(CHS=" + iCylinder + ':' + iHead + ':' + iSector + ",N=" + nSectors + ") returned error " + nErrorCode);
+            this.printMessage("doneReadRemoteSectors(CHS=" + iCylinder + ':' + iHead + ':' + iSector + ",N=" + nSectors + ") returned error " + nErrorCode);
         }
     }
     var done = sectorInfo[5];
@@ -1479,7 +1479,7 @@ Disk.prototype.doneReadRemoteSectors = function(sURLName, sURLData, nErrorCode, 
 Disk.prototype.writeRemoteSectors = function(iCylinder, iHead, iSector, nSectors, abSectors, fAsync)
 {
     if (DEBUG && this.messageEnabled()) {
-        this.messagePrint("writeRemoteSectors(CHS=" + iCylinder + ':' + iHead + ':' + iSector + ",N=" + nSectors + ")");
+        this.printMessage("writeRemoteSectors(CHS=" + iCylinder + ':' + iHead + ':' + iSector + ",N=" + nSectors + ")");
     }
 
     if (this.fRemote) {
@@ -1525,7 +1525,7 @@ Disk.prototype.doneWriteRemoteSectors = function(sURLName, sURLData, nErrorCode,
                 }
             } else {
                 if (DEBUG && this.messageEnabled()) {
-                    this.messagePrint("doneWriteRemoteSectors(CHS=" + iCylinder + ':' + iHead + ':' + sector['sector'] + ") returned error " + nErrorCode);
+                    this.printMessage("doneWriteRemoteSectors(CHS=" + iCylinder + ':' + iHead + ':' + sector['sector'] + ") returned error " + nErrorCode);
                 }
                 this.queueDirtySector(sector, false);
             }
@@ -1584,7 +1584,7 @@ Disk.prototype.queueDirtySector = function(sector, fAsync)
     this.aDirtyTimestamps.push(usr.getTime());
 
     if (DEBUG && this.messageEnabled()) {
-        this.messagePrint("queueDirtySector(CHS=" + sector.iCylinder + ':' + sector.iHead + ':' + sector['sector'] + "): " + this.aDirtySectors.length + " dirty");
+        this.printMessage("queueDirtySector(CHS=" + sector.iCylinder + ':' + sector.iHead + ':' + sector['sector'] + "): " + this.aDirtySectors.length + " dirty");
     }
 
     return fAsync && this.updateWriteTimer();
@@ -1655,7 +1655,7 @@ Disk.prototype.findDirtySectors = function(fAsync)
             var j = this.aDirtySectors.indexOf(sectorNext);
             this.assert(j >= 0, "findDirtySectors(CHS=" + iCylinder + ':' + iHead + ':' + sectorNext['sector'] + ") missing from aDirtySectors");
             if (DEBUG && this.messageEnabled()) {
-                this.messagePrint("findDirtySectors(CHS=" + iCylinder + ':' + iHead + ':' + sectorNext['sector'] + ")");
+                this.printMessage("findDirtySectors(CHS=" + iCylinder + ':' + iHead + ':' + sectorNext['sector'] + ")");
             }
             this.aDirtySectors.splice(j, 1);
             this.aDirtyTimestamps.splice(j, 1);
@@ -1830,7 +1830,7 @@ Disk.prototype.read = function(sector, ibSector, fCompare)
     var b = -1;
     if (sector) {
         if (DEBUG && !ibSector && !fCompare && this.messageEnabled()) {
-            this.messagePrint('read("' + this.sDiskFile + '",CHS=' + sector.iCylinder + ':' + sector.iHead + ':' + sector['sector'] + ')');
+            this.printMessage('read("' + this.sDiskFile + '",CHS=' + sector.iCylinder + ':' + sector.iHead + ':' + sector['sector'] + ')');
         }
         if (ibSector < sector['length']) {
             var adw = sector['data'];
@@ -1857,7 +1857,7 @@ Disk.prototype.write = function(sector, ibSector, b)
         return false;
 
     if (DEBUG && !ibSector && this.messageEnabled()) {
-        this.messagePrint('write("' + this.sDiskFile + '",CHS=' + sector.iCylinder + ':' + sector.iHead + ':' + sector['sector'] + ')');
+        this.printMessage('write("' + this.sDiskFile + '",CHS=' + sector.iCylinder + ':' + sector.iHead + ':' + sector['sector'] + ')');
     }
 
     if (ibSector < sector['length']) {
@@ -1929,7 +1929,7 @@ Disk.prototype.save = function()
         }
     }
     if (DEBUG && this.messageEnabled()) {
-        this.messagePrint('save("' + this.sDiskName + '"): saved ' + (deltas.length - 1) + ' change(s)');
+        this.printMessage('save("' + this.sDiskName + '"): saved ' + (deltas.length - 1) + ' change(s)');
     }
     return deltas;
 };
@@ -2059,7 +2059,7 @@ Disk.prototype.restore = function(deltas)
         this.controller.notice("unable to restore disk '" + this.sDiskName + ": " + sReason);
     } else {
         if (DEBUG && this.messageEnabled()) {
-            this.messagePrint('restore("' + this.sDiskName + '"): restored ' + nChanges + ' change(s)');
+            this.printMessage('restore("' + this.sDiskName + '"): restored ' + nChanges + ' change(s)');
         }
     }
     return nChanges;

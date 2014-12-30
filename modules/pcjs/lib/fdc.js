@@ -4,7 +4,7 @@
  * @version 1.0
  * Created 2012-Aug-09
  *
- * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
+ * Copyright © 2012-2015 Jeff Parsons <Jeff@pcjs.org>
  *
  * This file is part of PCjs, which is part of the JavaScript Machines Project (aka JSMachines)
  * at <http://jsmachines.net/> and <http://pcjs.org/>.
@@ -781,7 +781,7 @@ FDC.prototype.initController = function(data)
     this.regControl = data[i] || FDC.REG_CONTROL.RATE500K;      // default to maximum data rate
 
     if (DEBUG && this.messageEnabled()) {
-        this.messagePrint("FDC initialized for " + this.aDrives.length + " drive(s)");
+        this.printMessage("FDC initialized for " + this.aDrives.length + " drive(s)");
     }
     return fSuccess;
 };
@@ -1287,7 +1287,7 @@ FDC.prototype.loadDiskette = function(iDrive, sDisketteName, sDiskettePath, fAut
         if (fAutoMount) {
             drive.fAutoMount = true;
             this.cAutoMount++;
-            if (this.messageEnabled()) this.messagePrint("loading diskette '" + sDisketteName + "'");
+            if (this.messageEnabled()) this.printMessage("loading diskette '" + sDisketteName + "'");
         }
         drive.fLocal = !!file;
         var disk = new Disk(this, drive, DiskAPI.MODE.PRELOAD);
@@ -1536,13 +1536,13 @@ FDC.prototype.addDiskHistory = function(sDisketteName, sDiskettePath, disk)
         if (this.aDiskHistory[i][1] == sDiskettePath) {
             var nChanges = disk.restore(this.aDiskHistory[i][2]);
             if (DEBUG && this.messageEnabled()) {
-                this.messagePrint("disk '" + sDisketteName + "' restored from history (" + nChanges + " changes)");
+                this.printMessage("disk '" + sDisketteName + "' restored from history (" + nChanges + " changes)");
             }
             return;
         }
     }
     if (DEBUG && this.messageEnabled()) {
-        this.messagePrint("disk '" + sDisketteName + "' added to history (nothing to restore)");
+        this.printMessage("disk '" + sDisketteName + "' added to history (nothing to restore)");
     }
     this.aDiskHistory[i] = [sDisketteName, sDiskettePath, []];
 };
@@ -1561,13 +1561,13 @@ FDC.prototype.removeDiskHistory = function(sDisketteName, sDiskettePath)
         if (this.aDiskHistory[i][1] == sDiskettePath) {
             this.aDiskHistory.splice(i, 1);
             if (DEBUG && this.messageEnabled()) {
-                this.messagePrint("disk '" + sDisketteName + "' removed from history");
+                this.printMessage("disk '" + sDisketteName + "' removed from history");
             }
             return;
         }
     }
     if (DEBUG && this.messageEnabled()) {
-        this.messagePrint("unable to remove disk '" + sDisketteName + "' from history (" + sDiskettePath + ")");
+        this.printMessage("unable to remove disk '" + sDisketteName + "' from history (" + sDiskettePath + ")");
     }
 };
 
@@ -1586,7 +1586,7 @@ FDC.prototype.updateDiskHistory = function(sDisketteName, sDiskettePath, disk)
         if (this.aDiskHistory[i][1] == sDiskettePath) {
             this.aDiskHistory[i][2] = disk.save();
             if (DEBUG && this.messageEnabled()) {
-                this.messagePrint("disk '" + sDisketteName + "' updated in history");
+                this.printMessage("disk '" + sDisketteName + "' updated in history");
             }
             return;
         }
@@ -1598,7 +1598,7 @@ FDC.prototype.updateDiskHistory = function(sDisketteName, sDiskettePath, disk)
      * before unloading, the fact that the disk is no longer listed here can't be treated as an error.
      */
     if (DEBUG && this.messageEnabled()) {
-        this.messagePrint("unable to update disk '" + sDisketteName + "' in history (" + sDiskettePath + ")");
+        this.printMessage("unable to update disk '" + sDisketteName + "' in history (" + sDiskettePath + ")");
     }
 };
 
@@ -1612,7 +1612,7 @@ FDC.prototype.updateDiskHistory = function(sDisketteName, sDiskettePath, disk)
  */
 FDC.prototype.outFDCOutput = function(port, bOut, addrFrom)
 {
-    this.messagePort(port, bOut, addrFrom, "OUTPUT");
+    this.printMessageIO(port, bOut, addrFrom, "OUTPUT");
     if (!(bOut & FDC.REG_OUTPUT.ENABLE)) {
         this.initController();
         /*
@@ -1664,7 +1664,7 @@ FDC.prototype.outFDCOutput = function(port, bOut, addrFrom)
  */
 FDC.prototype.inFDCStatus = function(port, addrFrom)
 {
-    this.messagePort(port, null, addrFrom, "STATUS", this.regStatus);
+    this.printMessageIO(port, null, addrFrom, "STATUS", this.regStatus);
     return this.regStatus;
 };
 
@@ -1689,7 +1689,7 @@ FDC.prototype.inFDCData = function(port, addrFrom)
         if (this.chipset) this.chipset.clearIRR(ChipSet.IRQ.FDC);
     }
     if (this.messageEnabled()) {
-        this.messagePort(port, null, addrFrom, "DATA[" + this.regDataIndex + "]", bIn);
+        this.printMessageIO(port, null, addrFrom, "DATA[" + this.regDataIndex + "]", bIn);
     }
     if (++this.regDataIndex >= this.regDataTotal) {
         this.regStatus &= ~(FDC.REG_STATUS.READ_DATA | FDC.REG_STATUS.BUSY);
@@ -1709,7 +1709,7 @@ FDC.prototype.inFDCData = function(port, addrFrom)
 FDC.prototype.outFDCData = function(port, bOut, addrFrom)
 {
     if (this.messageEnabled()) {
-        this.messagePort(port, bOut, addrFrom, "DATA[" + this.regDataTotal + "]");
+        this.printMessageIO(port, bOut, addrFrom, "DATA[" + this.regDataTotal + "]");
     }
 
     if (this.regDataTotal < this.regDataArray.length) {
@@ -1724,7 +1724,7 @@ FDC.prototype.outFDCData = function(port, bOut, addrFrom)
         return;
     }
     if (DEBUG && this.messageEnabled()) {
-        this.messagePrint("unsupported FDC command: " + str.toHexByte(bCmd));
+        this.printMessage("unsupported FDC command: " + str.toHexByte(bCmd));
         this.dbg.stopCPU();
     }
 };
@@ -1744,7 +1744,7 @@ FDC.prototype.inFDCInput = function(port, addrFrom)
      * TODO: Determine when the DISK_CHANGE bit is *really* cleared (this is just a guess)
      */
     this.regInput &= ~FDC.REG_INPUT.DISK_CHANGE;
-    this.messagePort(port, null, addrFrom, "INPUT", bIn);
+    this.printMessageIO(port, null, addrFrom, "INPUT", bIn);
     return bIn;
 };
 
@@ -1758,7 +1758,7 @@ FDC.prototype.inFDCInput = function(port, addrFrom)
  */
 FDC.prototype.outFDCControl = function(port, bOut, addrFrom)
 {
-    this.messagePort(port, bOut, addrFrom, "CONTROL");
+    this.printMessageIO(port, bOut, addrFrom, "CONTROL");
     this.regControl  = bOut;
 };
 
@@ -1953,7 +1953,7 @@ FDC.prototype.doCmd = function()
 
     default:
         if (DEBUG && this.messageEnabled()) {
-            this.messagePrint("FDC operation unsupported (command=0x: " + str.toHexByte(bCmd) + ")");
+            this.printMessage("FDC operation unsupported (command=0x: " + str.toHexByte(bCmd) + ")");
             this.dbg.stopCPU();
         }
         break;
@@ -2034,7 +2034,7 @@ FDC.prototype.popCmd = function(name)
     if (DEBUG && this.messageEnabled(Messages.PORT | Messages.FDC)) {
         var bCmdMasked = bCmd & FDC.REG_DATA.CMD.MASK;
         if (!name && !this.regDataIndex && FDC.aCmdInfo[bCmdMasked]) name = FDC.aCmdInfo[bCmdMasked].name;
-        this.messagePrint("FDC.CMD[" + (name || this.regDataIndex) + "]: 0x" + str.toHexByte(bCmd), true);
+        this.printMessage("FDC.CMD[" + (name || this.regDataIndex) + "]: 0x" + str.toHexByte(bCmd), true);
     }
     this.regDataIndex++;
     return bCmd;
@@ -2086,7 +2086,7 @@ FDC.prototype.beginResult = function()
 FDC.prototype.pushResult = function(bResult, name)
 {
     if (DEBUG && this.messageEnabled(Messages.PORT | Messages.FDC)) {
-        this.messagePrint("FDC.RES[" + (name || this.regDataTotal) + "]: 0x" + str.toHexByte(bResult), true);
+        this.printMessage("FDC.RES[" + (name || this.regDataTotal) + "]: 0x" + str.toHexByte(bResult), true);
     }
     this.regDataArray[this.regDataTotal++] = bResult;
 };
@@ -2152,7 +2152,7 @@ FDC.prototype.dmaRead = function(drive, b, done)
     /*
      * The DMA controller should be ASKING for data, not GIVING us data; this suggests an internal DMA miscommunication
      */
-    if (DEBUG) this.messagePrint("dmaRead(): invalid DMA acknowledgement");
+    if (DEBUG) this.printMessage("dmaRead(): invalid DMA acknowledgement");
     done(-1, false);
 };
 
@@ -2171,7 +2171,7 @@ FDC.prototype.dmaWrite = function(drive, b)
     /*
      * The DMA controller should be GIVING us data, not ASKING for data; this suggests an internal DMA miscommunication
      */
-    if (DEBUG) this.messagePrint("dmaWrite(): invalid DMA acknowledgement");
+    if (DEBUG) this.printMessage("dmaWrite(): invalid DMA acknowledgement");
     return -1;
 };
 
@@ -2190,7 +2190,7 @@ FDC.prototype.dmaFormat = function(drive, b)
     /*
      * The DMA controller should be GIVING us data, not ASKING for data; this suggests an internal DMA miscommunication
      */
-    if (DEBUG) this.messagePrint("dmaFormat(): invalid DMA acknowledgement");
+    if (DEBUG) this.printMessage("dmaFormat(): invalid DMA acknowledgement");
     return -1;
 };
 
@@ -2211,7 +2211,7 @@ FDC.prototype.doRead = function(drive)
 
     if (drive.disk) {
         if (DEBUG && this.messageEnabled()) {
-            this.messagePrint("FDC.doRead(CHS=" + drive.bCylinder + ':' + drive.bHead + ':' + drive.bSector + ",PBA=" + (drive.bCylinder * (drive.disk.nHeads * drive.disk.nSectors) + drive.bHead * drive.disk.nSectors + drive.bSector-1) + ')');
+            this.printMessage("FDC.doRead(CHS=" + drive.bCylinder + ':' + drive.bHead + ':' + drive.bSector + ",PBA=" + (drive.bCylinder * (drive.disk.nHeads * drive.disk.nSectors) + drive.bHead * drive.disk.nSectors + drive.bSector-1) + ')');
         }
         drive.sector = null;
         drive.resCode = FDC.REG_DATA.RES.NONE;
@@ -2234,7 +2234,7 @@ FDC.prototype.doWrite = function(drive)
 
     if (drive.disk) {
         if (DEBUG && this.messageEnabled()) {
-            this.messagePrint("FDC.doWrite(CHS=" + drive.bCylinder + ':' + drive.bHead + ':' + drive.bSector + ",PBA=" + (drive.bCylinder * (drive.disk.nHeads * drive.disk.nSectors) + drive.bHead * drive.disk.nSectors + drive.bSector-1) + ')');
+            this.printMessage("FDC.doWrite(CHS=" + drive.bCylinder + ':' + drive.bHead + ':' + drive.bSector + ",PBA=" + (drive.bCylinder * (drive.disk.nHeads * drive.disk.nSectors) + drive.bHead * drive.disk.nSectors + drive.bSector-1) + ')');
         }
         if (drive.disk.fWriteProtected) {
             drive.resCode = FDC.REG_DATA.RES.NOT_WRITABLE | FDC.REG_DATA.RES.INCOMPLETE;
@@ -2437,7 +2437,7 @@ FDC.prototype.writeFormat = function(drive, b)
         drive.nBytes = 128 << drive.abFormat[3];// N (0 => 128, 1 => 256, 2 => 512, 3 => 1024)
         drive.cbFormat = 0;
         if (DEBUG && this.messageEnabled()) {
-            this.messagePrint("writeFormat(head=" + str.toHexByte(drive.bHead) + ",cyl=" + str.toHexByte(drive.bCylinder) + ",sec=" + str.toHexByte(drive.bSector) + ",len=" + str.toHexWord(drive.nBytes) + ")");
+            this.printMessage("writeFormat(head=" + str.toHexByte(drive.bHead) + ",cyl=" + str.toHexByte(drive.bCylinder) + ",sec=" + str.toHexByte(drive.bSector) + ",len=" + str.toHexWord(drive.nBytes) + ")");
         }
         for (var i = 0; i < drive.nBytes; i++) {
             if (this.writeByte(drive, drive.bFiller) < 0) {

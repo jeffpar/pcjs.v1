@@ -4,7 +4,7 @@
  * @version 1.0
  * Created 2012-Aug-28
  *
- * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
+ * Copyright © 2012-2015 Jeff Parsons <Jeff@pcjs.org>
  *
  * This file is part of the JavaScript Machines Project (aka JSMachines) at <http://jsmachines.net/>
  * and <http://pcjs.org/>.

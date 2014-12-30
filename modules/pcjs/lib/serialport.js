@@ -4,7 +4,7 @@
  * @version 1.0
  * Created 2012-Jul-01
  *
- * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
+ * Copyright © 2012-2015 Jeff Parsons <Jeff@pcjs.org>
  *
  * This file is part of PCjs, which is part of the JavaScript Machines Project (aka JSMachines)
  * at <http://jsmachines.net/> and <http://pcjs.org/>.
@@ -512,7 +512,7 @@ SerialPort.prototype.advanceRBR = function() {
  */
 SerialPort.prototype.inRBR = function(port, addrFrom) {
     var b = ((this.bLCR & SerialPort.LCR.DLAB) ? (this.wDL & 0xff) : this.bRBR);
-    this.messagePort(port, null, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLL" : "RBR", b);
+    this.printMessageIO(port, null, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLL" : "RBR", b);
     this.bLSR &= ~SerialPort.LSR.DR;
     this.advanceRBR();
     return b;
@@ -528,7 +528,7 @@ SerialPort.prototype.inRBR = function(port, addrFrom) {
  */
 SerialPort.prototype.inIER = function(port, addrFrom) {
     var b = ((this.bLCR & SerialPort.LCR.DLAB) ? (this.wDL >> 8) : this.bIER);
-    this.messagePort(port, null, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLM" : "IER", b);
+    this.printMessageIO(port, null, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLM" : "IER", b);
     return b;
 };
 
@@ -542,7 +542,7 @@ SerialPort.prototype.inIER = function(port, addrFrom) {
  */
 SerialPort.prototype.inIIR = function(port, addrFrom) {
     var b = this.bIIR;
-    this.messagePort(port, null, addrFrom, "IIR", b);
+    this.printMessageIO(port, null, addrFrom, "IIR", b);
     return b;
 };
 
@@ -556,7 +556,7 @@ SerialPort.prototype.inIIR = function(port, addrFrom) {
  */
 SerialPort.prototype.inLCR = function(port, addrFrom) {
     var b = this.bLCR;
-    this.messagePort(port, null, addrFrom, "LCR", b);
+    this.printMessageIO(port, null, addrFrom, "LCR", b);
     return b;
 };
 
@@ -570,7 +570,7 @@ SerialPort.prototype.inLCR = function(port, addrFrom) {
  */
 SerialPort.prototype.inMCR = function(port, addrFrom) {
     var b = this.bMCR;
-    this.messagePort(port, null, addrFrom, "MCR", b);
+    this.printMessageIO(port, null, addrFrom, "MCR", b);
     return b;
 };
 
@@ -584,7 +584,7 @@ SerialPort.prototype.inMCR = function(port, addrFrom) {
  */
 SerialPort.prototype.inLSR = function(port, addrFrom) {
     var b = this.bLSR;
-    this.messagePort(port, null, addrFrom, "LSR", b);
+    this.printMessageIO(port, null, addrFrom, "LSR", b);
     return b;
 };
 
@@ -598,7 +598,7 @@ SerialPort.prototype.inLSR = function(port, addrFrom) {
  */
 SerialPort.prototype.inMSR = function(port, addrFrom) {
     var b = this.bMSR;
-    this.messagePort(port, null, addrFrom, "MSR", b);
+    this.printMessageIO(port, null, addrFrom, "MSR", b);
     return b;
 };
 
@@ -611,7 +611,7 @@ SerialPort.prototype.inMSR = function(port, addrFrom) {
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
  */
 SerialPort.prototype.outTHR = function(port, bOut, addrFrom) {
-    this.messagePort(port, bOut, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLL" : "THR");
+    this.printMessageIO(port, bOut, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLL" : "THR");
     if (this.bLCR & SerialPort.LCR.DLAB) {
         this.wDL = (this.wDL & ~0xff) | bOut;
     } else {
@@ -635,7 +635,7 @@ SerialPort.prototype.outTHR = function(port, bOut, addrFrom) {
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
  */
 SerialPort.prototype.outIER = function(port, bOut, addrFrom) {
-    this.messagePort(port, bOut, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLM" : "IER");
+    this.printMessageIO(port, bOut, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLM" : "IER");
     if (this.bLCR & SerialPort.LCR.DLAB) {
         this.wDL = (this.wDL & 0xff) | (bOut << 8);
     } else {
@@ -652,7 +652,7 @@ SerialPort.prototype.outIER = function(port, bOut, addrFrom) {
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
  */
 SerialPort.prototype.outLCR = function(port, bOut, addrFrom) {
-    this.messagePort(port, bOut, addrFrom, "LCR");
+    this.printMessageIO(port, bOut, addrFrom, "LCR");
     this.bLCR = bOut;
 };
 
@@ -666,7 +666,7 @@ SerialPort.prototype.outLCR = function(port, bOut, addrFrom) {
  */
 SerialPort.prototype.outMCR = function(port, bOut, addrFrom) {
     var bPrev = this.bMCR;
-    this.messagePort(port, bOut, addrFrom, "MCR");
+    this.printMessageIO(port, bOut, addrFrom, "MCR");
     this.bMCR = bOut;
     if (this.mouse && (bPrev ^ bOut) & (SerialPort.MCR.DTR | SerialPort.MCR.RTS)) {
         this.mouse.notifyMCR(this.bMCR);

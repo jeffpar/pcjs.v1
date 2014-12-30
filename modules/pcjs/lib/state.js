@@ -4,7 +4,7 @@
  * @version 1.0
  * Created 2012-May-14
  *
- * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
+ * Copyright © 2012-2015 Jeff Parsons <Jeff@pcjs.org>
  *
  * This file is part of PCjs, which is part of the JavaScript Machines Project (aka JSMachines)
  * at <http://jsmachines.net/> and <http://pcjs.org/>.
@@ -279,7 +279,7 @@ State.prototype = {
                 this[this.id] = s;
                 this.fLoaded = true;
                 if (DEBUG && this.messageEnabled()) {
-                    this.messagePrint("localStorage(" + this.key + "): " + s.length + " bytes loaded");
+                    this.printMessage("localStorage(" + this.key + "): " + s.length + " bytes loaded");
                 }
                 return true;
             }
@@ -318,7 +318,7 @@ State.prototype = {
             var s = JSON.stringify(this[this.id]);
             if (web.setLocalStorageItem(this.key, s)) {
                 if (DEBUG && this.messageEnabled()) {
-                    this.messagePrint("localStorage(" + this.key + "): " + s.length + " bytes stored");
+                    this.printMessage("localStorage(" + this.key + "): " + s.length + " bytes stored");
                 }
             } else {
                 /*
@@ -378,7 +378,7 @@ State.prototype = {
             if (sKey && (fAll || sKey.substr(0, this.key.length) == this.key)) {
                 web.removeLocalStorageItem(sKey);
                 if (DEBUG && this.messageEnabled()) {
-                    this.messagePrint("localStorage(" + sKey + ") removed");
+                    this.printMessage("localStorage(" + sKey + ") removed");
                 }
                 aKeys.splice(i, 1);
                 i = 0;
@@ -404,12 +404,12 @@ State.prototype = {
         return false;
     },
     /**
-     * messagePrint(sMessage)
+     * printMessage(sMessage)
      *
      * @this {State}
      * @param {string} sMessage is any caller-defined message string
      */
-    messagePrint: function(sMessage) {
+    printMessage: function(sMessage) {
         if (DEBUGGER && this.dbg) this.dbg.message(sMessage);
     }
 };

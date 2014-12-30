@@ -4,7 +4,7 @@
  * @version 1.0
  * Created 2012-Sep-05
  *
- * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
+ * Copyright © 2012-2015 Jeff Parsons <Jeff@pcjs.org>
  *
  * This file is part of PCjs, which is part of the JavaScript Machines Project (aka JSMachines)
  * at <http://jsmachines.net/> and <http://pcjs.org/>.
@@ -1075,7 +1075,7 @@ X86CPU.prototype.setProtMode = function(fProt)
         fProt = !!(this.regMSW & X86.MSW.PE);
     }
     if (!fProt) {
-        this.messagePrint("returning to real-mode");
+        this.printMessage("returning to real-mode");
     }
     this.aOpGrp6 = (fProt? X86Op0F.aOpGrp6Prot : X86Op0F.aOpGrp6Real);
     this.segCS.updateMode(fProt);
@@ -2121,7 +2121,7 @@ X86CPU.prototype.getBytePrefetch = function(addr)
     var b;
     if (!this.cbPrefetchQueued) {
         if (MAXDEBUG) {
-            this.messagePrint("  getBytePrefetch[" + this.iPrefetchTail + "]: filling");
+            this.printMessage("  getBytePrefetch[" + this.iPrefetchTail + "]: filling");
             this.assert(addr == this.addrPrefetchHead, "X86CPU.getBytePrefetch(" + str.toHex(addr) + "): invalid head address (" + str.toHex(this.addrPrefetchHead) + ")");
             this.assert(this.iPrefetchTail == this.iPrefetchHead, "X86CPU.getBytePrefetch(" + str.toHex(addr) + "): head (" + this.iPrefetchHead + ") does not match tail (" + this.iPrefetchTail + ")");
         }
@@ -2141,7 +2141,7 @@ X86CPU.prototype.getBytePrefetch = function(addr)
     }
     b = this.aPrefetch[this.iPrefetchTail] & 0xff;
     if (MAXDEBUG) {
-        this.messagePrint("  getBytePrefetch[" + this.iPrefetchTail + "]: " + str.toHex(addr) + ":" + str.toHexByte(b));
+        this.printMessage("  getBytePrefetch[" + this.iPrefetchTail + "]: " + str.toHex(addr) + ":" + str.toHexByte(b));
         this.assert(addr == (this.aPrefetch[this.iPrefetchTail] >> 8), "X86CPU.getBytePrefetch(" + str.toHex(addr) + "): invalid tail address (" + str.toHex(this.aPrefetch[this.iPrefetchTail] >> 8) + ")");
     }
     this.iPrefetchTail = (this.iPrefetchTail + 1) & X86CPU.PREFETCH.MASK;
@@ -2184,7 +2184,7 @@ X86CPU.prototype.fillPrefetch = function(n)
         var addr = this.addrPrefetchHead;
         var b = this.aMemBlocks[(addr & this.addrMemMask) >> this.blockShift].readByte(addr & this.blockLimit);
         this.aPrefetch[this.iPrefetchHead] = b | (addr << 8);
-        if (MAXDEBUG) this.messagePrint("     fillPrefetch[" + this.iPrefetchHead + "]: " + str.toHex(addr) + ":" + str.toHexByte(b));
+        if (MAXDEBUG) this.printMessage("     fillPrefetch[" + this.iPrefetchHead + "]: " + str.toHex(addr) + ":" + str.toHexByte(b));
         this.addrPrefetchHead = (addr + 1) & this.addrMemMask;
         this.iPrefetchHead = (this.iPrefetchHead + 1) & X86CPU.PREFETCH.MASK;
         this.cbPrefetchQueued++;
@@ -2209,7 +2209,7 @@ X86CPU.prototype.flushPrefetch = function(addr)
 {
     this.addrPrefetchHead = addr;
     this.iPrefetchTail = this.iPrefetchHead = this.cbPrefetchQueued = this.cbPrefetchValid = 0;
-    if (MAXDEBUG && addr !== undefined) this.messagePrint("    flushPrefetch[-]: " + str.toHex(addr));
+    if (MAXDEBUG && addr !== undefined) this.printMessage("    flushPrefetch[-]: " + str.toHex(addr));
 };
 
 /**
@@ -2232,7 +2232,7 @@ X86CPU.prototype.advancePrefetch = function(inc)
         this.cbPrefetchQueued -= inc;
     } else {
         this.flushPrefetch(this.regEIP);
-        if (MAXDEBUG) this.messagePrint("advancePrefetch(" + inc + "): flushed");
+        if (MAXDEBUG) this.printMessage("advancePrefetch(" + inc + "): flushed");
     }
 };
 

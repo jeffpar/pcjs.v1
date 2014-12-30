@@ -4,7 +4,7 @@
  * @version 1.0
  * Created 2012-Jun-15
  *
- * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
+ * Copyright © 2012-2015 Jeff Parsons <Jeff@pcjs.org>
  *
  * This file is part of PCjs, which is part of the JavaScript Machines Project (aka JSMachines)
  * at <http://jsmachines.net/> and <http://pcjs.org/>.
@@ -174,7 +174,7 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
         }
     }
 
-    if (DEBUG && this.messageEnabled()) this.messagePrint("PREFETCH: " + PREFETCH + ", TYPEDARRAYS: " + TYPEDARRAYS);
+    if (DEBUG && this.messageEnabled()) this.printMessage("PREFETCH: " + PREFETCH + ", TYPEDARRAYS: " + TYPEDARRAYS);
 
     /*
      * Iterate through all the components again and call their initBus() handler, if any
@@ -260,7 +260,7 @@ Component.subclass(Component, Computer);
  */
 Computer.sAppName = APPNAME || "PCjs";
 Computer.sAppVer = APPVERSION;
-Computer.sCopyright = "Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>";
+Computer.sCopyright = "Copyright © 2012-2015 Jeff Parsons <Jeff@pcjs.org>";
 
 /*
  * I think it's a good idea to also display a GPL notice, putting people on notice that even
@@ -320,7 +320,7 @@ Computer.prototype.onLoadSetReady = function(sStateFile, sStateData, nErrorCode)
     if (!nErrorCode) {
         this.sStateData = sStateData;
         if (DEBUG && this.messageEnabled()) {
-            this.messagePrint("loaded state file " + sStateFile.replace(this.sUserID || "xxx", "xxx"));
+            this.printMessage("loaded state file " + sStateFile.replace(this.sUserID || "xxx", "xxx"));
         }
     } else {
         this.sResumePath = null;
@@ -362,7 +362,7 @@ Computer.prototype.wait = function(fn, parms)
             return;
         }
     }
-    if (DEBUG && this.messageEnabled()) this.messagePrint("Computer.wait(ready)");
+    if (DEBUG && this.messageEnabled()) this.printMessage("Computer.wait(ready)");
     fn.call(this, parms);
 };
 
@@ -388,7 +388,7 @@ Computer.prototype.validateState = function(stateComputer)
             if (!stateComputer) stateValidate.clear();
         } else {
             if (DEBUG && this.messageEnabled()) {
-                this.messagePrint("Last state: " + sTimestampComputer + " (validate: " + sTimestampValidate + ")");
+                this.printMessage("Last state: " + sTimestampComputer + " (validate: " + sTimestampValidate + ")");
             }
         }
     }
@@ -410,7 +410,7 @@ Computer.prototype.powerOn = function(resume)
     }
 
     if (DEBUG && this.messageEnabled()) {
-        this.messagePrint("Computer.powerOn(" + (resume == Computer.RESUME_REPOWER ? "repower" : (resume ? "resume" : "")) + ")");
+        this.printMessage("Computer.powerOn(" + (resume == Computer.RESUME_REPOWER ? "repower" : (resume ? "resume" : "")) + ")");
     }
 
     var fRepower = false;
@@ -649,7 +649,7 @@ Computer.prototype.donePowerOn = function(aParms)
     var fRestore = aParms[2];
 
     if (DEBUG && this.aFlags.fPowered && this.messageEnabled()) {
-        this.messagePrint("Computer.donePowerOn(): redundant");
+        this.printMessage("Computer.donePowerOn(): redundant");
     }
 
     this.aFlags.fPowered = true;
@@ -735,7 +735,7 @@ Computer.prototype.powerOff = function(fSave, fShutdown)
     var sState = "none";
 
     if (DEBUG && this.messageEnabled()) {
-        this.messagePrint("Computer.powerOff(" + (fSave ? "save" : "nosave") + (fShutdown ? ",shutdown" : "") + ")");
+        this.printMessage("Computer.powerOff(" + (fSave ? "save" : "nosave") + (fShutdown ? ",shutdown" : "") + ")");
     }
 
     var stateComputer = new State(this, Computer.sAppVer);
@@ -842,14 +842,14 @@ Computer.prototype.powerOff = function(fSave, fShutdown)
 Computer.prototype.reset = function()
 {
     if (this.bus && this.bus.reset) {
-        this.messagePrint("Resetting " + this.bus.type);
+        this.printMessage("Resetting " + this.bus.type);
         this.bus.reset();
     }
     var aComponents = Component.getComponents(this.id);
     for (var iComponent = 0; iComponent < aComponents.length; iComponent++) {
         var component = aComponents[iComponent];
         if (component !== this && component !== this.bus && component.reset) {
-            this.messagePrint("Resetting " + component.type);
+            this.printMessage("Resetting " + component.type);
             component.reset();
         }
     }
@@ -989,7 +989,7 @@ Computer.prototype.verifyUserID = function(sUserID)
 {
     this.sUserID = null;
     var fMessages = DEBUG && this.messageEnabled();
-    if (fMessages) this.messagePrint("verifyUserID(" + sUserID + ")");
+    if (fMessages) this.printMessage("verifyUserID(" + sUserID + ")");
     var sRequest = web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.VERIFY + '&' + UserAPI.QUERY.USER + '=' + sUserID;
     var response = web.loadResource(sRequest);
     var nErrorCode = response[0];
@@ -999,16 +999,16 @@ Computer.prototype.verifyUserID = function(sUserID)
             response = eval("(" + sResponse + ")");
             if (response.code && response.code == UserAPI.CODE.OK) {
                 web.setLocalStorageItem(Computer.STATE_USERID, response.data);
-                if (fMessages) this.messagePrint(Computer.STATE_USERID + " updated: " + response.data);
+                if (fMessages) this.printMessage(Computer.STATE_USERID + " updated: " + response.data);
                 this.sUserID = response.data;
             } else {
-                if (fMessages) this.messagePrint(response.code + ": " + response.data);
+                if (fMessages) this.printMessage(response.code + ": " + response.data);
             }
         } catch (e) {
             Component.error(e.message + " (" + sResponse + ")");
         }
     } else {
-        if (fMessages) this.messagePrint("invalid response (error " + nErrorCode + ")");
+        if (fMessages) this.printMessage("invalid response (error " + nErrorCode + ")");
     }
     return this.sUserID;
 };
@@ -1024,12 +1024,12 @@ Computer.prototype.getServerStatePath = function()
     var sStatePath = null;
     if (this.sUserID) {
         if (DEBUG && this.messageEnabled()) {
-            this.messagePrint(Computer.STATE_USERID + " for load: " + this.sUserID);
+            this.printMessage(Computer.STATE_USERID + " for load: " + this.sUserID);
         }
         sStatePath = web.getHost() + UserAPI.ENDPOINT + '?' + UserAPI.QUERY.REQ + '=' + UserAPI.REQ.LOAD + '&' + UserAPI.QUERY.USER + '=' + this.sUserID + '&' + UserAPI.QUERY.STATE + '=' + State.key(this, Computer.sAppVer);
     } else {
         if (DEBUG && this.messageEnabled()) {
-            this.messagePrint(Computer.STATE_USERID + " unavailable");
+            this.printMessage(Computer.STATE_USERID + " unavailable");
         }
     }
     return sStatePath;
@@ -1051,7 +1051,7 @@ Computer.prototype.saveServerState = function(sUserID, sState)
      */
     if (sState) {
         if (DEBUG && this.messageEnabled()) {
-            this.messagePrint("size of server state: " + sState.length + " bytes");
+            this.printMessage("size of server state: " + sState.length + " bytes");
         }
         var response = this.storeServerState(sUserID, sState, true);
         if (response && response[UserAPI.RES.CODE] == UserAPI.CODE.OK) {
@@ -1068,7 +1068,7 @@ Computer.prototype.saveServerState = function(sUserID, sState)
         }
     } else {
         if (DEBUG && this.messageEnabled()) {
-            this.messagePrint("no state to store");
+            this.printMessage("no state to store");
         }
     }
 };
@@ -1085,7 +1085,7 @@ Computer.prototype.saveServerState = function(sUserID, sState)
 Computer.prototype.storeServerState = function(sUserID, sState, fSync)
 {
     if (DEBUG && this.messageEnabled()) {
-        this.messagePrint(Computer.STATE_USERID + " for store: " + sUserID);
+        this.printMessage(Computer.STATE_USERID + " for store: " + sUserID);
     }
     /*
      * TODO: Determine whether or not any browsers cancel our request if we're called during a browser "shutdown" event,
@@ -1110,7 +1110,7 @@ Computer.prototype.storeServerState = function(sUserID, sState, fSync)
             }
             sResponse = '{"' + UserAPI.RES.CODE + '":' + response[0] + ',"' + UserAPI.RES.DATA + '":"' + sResponse + '"}';
         }
-        if (DEBUG && this.messageEnabled()) this.messagePrint(sResponse);
+        if (DEBUG && this.messageEnabled()) this.printMessage(sResponse);
         return JSON.parse(sResponse);
     }
     return null;
@@ -1217,7 +1217,7 @@ Computer.init = function()
             var computer = new Computer(parmsComputer, parmsMachine, true);
 
             if (DEBUG && computer.messageEnabled()) {
-                computer.messagePrint("onInit(" + computer.aFlags.fPowered + ")");
+                computer.printMessage("onInit(" + computer.aFlags.fPowered + ")");
             }
 
             /*
@@ -1255,7 +1255,7 @@ Computer.show = function()
         if (computer) {
 
             if (DEBUG && computer.messageEnabled()) {
-                computer.messagePrint("onShow(" + computer.fInitialized + "," + computer.aFlags.fPowered + ")");
+                computer.printMessage("onShow(" + computer.fInitialized + "," + computer.aFlags.fPowered + ")");
             }
 
             if (computer.fInitialized && !computer.aFlags.fPowered) {
@@ -1304,7 +1304,7 @@ Computer.exit = function()
         if (computer) {
 
             if (DEBUG && computer.messageEnabled()) {
-                computer.messagePrint("onExit(" + computer.aFlags.fPowered + ")");
+                computer.printMessage("onExit(" + computer.aFlags.fPowered + ")");
             }
 
             if (computer.aFlags.fPowered) {

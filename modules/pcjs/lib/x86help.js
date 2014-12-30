@@ -4,7 +4,7 @@
  * @version 1.0
  * Created 2012-Sep-05
  *
- * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
+ * Copyright © 2012-2015 Jeff Parsons <Jeff@pcjs.org>
  *
  * This file is part of PCjs, which is part of the JavaScript Machines Project (aka JSMachines)
  * at <http://jsmachines.net/> and <http://pcjs.org/>.
@@ -573,7 +573,7 @@ var X86Help = {
     opHelpFault: function(nFault, nError, fHalt)
     {
         if (!this.aFlags.fComplete) {
-            this.messagePrint("Fault " + str.toHexByte(nFault) + " blocked by Debugger", Messages.WARN);
+            this.printMessage("Fault " + str.toHexByte(nFault) + " blocked by Debugger", Messages.WARN);
             this.setIP(this.opEA - this.segCS.base);
             return;
         }
@@ -686,22 +686,22 @@ var X86Help = {
         if (this.messageEnabled(bitsMessage) || fHalt) {
             var sMessage = (fHalt? '\n' : '') + "Fault " + str.toHexByte(nFault) + (nError != null? " (" + str.toHexWord(nError) + ")" : "") + " on opcode 0x" + str.toHexByte(bOpcode) + " at " + str.toHexAddr(this.regIP, this.segCS.sel) + " (%" + str.toHex(this.regEIP, 6) + ")";
             var fRunning = this.aFlags.fRunning;
-            if (this.messagePrint(sMessage, bitsMessage)) {
+            if (this.printMessage(sMessage, bitsMessage)) {
                 if (fHalt) {
                     /*
                      * By setting fHalt to fRunning (which is true while running but false while single-stepping),
                      * this allows a fault to be dispatched when you single-step over a faulting instruction; you can
                      * then continue single-stepping into the fault handler, or start running again.
                      *
-                     * Note that we had to capture fRunning before calling messagePrint(), because if MESSAGE.HALT
-                     * is set, messagePrint() will have already halted the CPU.
+                     * Note that we had to capture fRunning before calling printMessage(), because if MESSAGE.HALT
+                     * is set, printMessage() will have already halted the CPU.
                      */
                     fHalt = fRunning;
                     this.dbg.stopCPU();
                 }
             } else {
                 /*
-                 * If messagePrint() returned false, then messageEnabled() must have returned false as well, which
+                 * If printMessage() returned false, then messageEnabled() must have returned false as well, which
                  * means that fHalt must be true.  Which means we should shut the machine down.
                  */
                 this.assert(fHalt);

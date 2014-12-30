@@ -4,7 +4,7 @@
  * @version 1.0
  * Created 2012-Sep-05
  *
- * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
+ * Copyright © 2012-2015 Jeff Parsons <Jeff@pcjs.org>
  *
  * This file is part of PCjs, which is part of the JavaScript Machines Project (aka JSMachines)
  * at <http://jsmachines.net/> and <http://pcjs.org/>.
@@ -1985,7 +1985,7 @@ var X86OpXX = {
      * op=0x9B (wait)
      */
     opWAIT: function() {
-        this.messagePrint("WAIT not implemented", Messages.CPU);
+        this.printMessage("WAIT not implemented", Messages.CPU);
         this.nStepCycles--;
     },
     /**

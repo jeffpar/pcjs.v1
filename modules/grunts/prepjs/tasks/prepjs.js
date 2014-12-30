@@ -4,7 +4,7 @@
  * @version 1.1
  * Created 2014-Mar-22
  *
- * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
+ * Copyright © 2012-2015 Jeff Parsons <Jeff@pcjs.org>
  *
  * This file is part of C1Pjs, PCjs, and other related components written
  * by Jeff Parsons and originally published at cpusim.org and jsmachines.net.

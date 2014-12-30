@@ -4,7 +4,7 @@
  * @version 1.0
  * Created 2014-02-01
  *
- * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
+ * Copyright © 2012-2015 Jeff Parsons <Jeff@pcjs.org>
  *
  * This file is part of the JavaScript Machines Project (aka JSMachines) at <http://jsmachines.net/>
  * and <http://pcjs.org/>.
@@ -76,7 +76,7 @@ function FileDump(sFormat, fComments, fDecimal, sServerRoot)
  * Class constants
  */
 FileDump.sAPIURL = "http://www.pcjs.org" + DumpAPI.ENDPOINT;
-FileDump.sCopyright = "© 2012-2014 by Jeff Parsons (@jeffpar)";
+FileDump.sCopyright = "© 2012-2015 by Jeff Parsons (@jeffpar)";
 FileDump.sNotice = FileDump.sAPIURL + " " + FileDump.sCopyright;
 FileDump.sUsage = "Usage: " + FileDump.sAPIURL + "?" + DumpAPI.QUERY.FILE + "=({path}|{URL})&" + DumpAPI.QUERY.FORMAT + "=(json|data|hex|bytes|rom)";
 

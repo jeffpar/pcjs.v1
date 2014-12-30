@@ -4,7 +4,7 @@
  * @version 1.0
  * Created 2012-Jun-15
  *
- * Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>
+ * Copyright © 2012-2015 Jeff Parsons <Jeff@pcjs.org>
  *
  * This file is part of C1Pjs, which is part of the JavaScript Machines Project (aka JSMachines)
  * at <http://jsmachines.net/> and <http://pcjs.org/>.
@@ -96,7 +96,7 @@ function C1PComputer(parmsComputer, modules)
 
 C1PComputer.sAppName = APPNAME || "C1Pjs";
 C1PComputer.sAppVer = APPVERSION;
-C1PComputer.sCopyright = "Copyright © 2012-2014 Jeff Parsons <Jeff@pcjs.org>";
+C1PComputer.sCopyright = "Copyright © 2012-2015 Jeff Parsons <Jeff@pcjs.org>";
 
 Component.subclass(Component, C1PComputer);
 
