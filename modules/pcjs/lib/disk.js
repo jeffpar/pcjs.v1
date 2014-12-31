@@ -1154,7 +1154,10 @@ Disk.prototype.convertClusterToSectors = function(dir)
     var iCluster = dir.iCluster;
     if (iCluster) {
         do {
-            this.assert(iCluster >= DiskAPI.FAT12.CLUSNUM_MIN);
+            if (iCluster < DiskAPI.FAT12.CLUSNUM_MIN) {
+                this.assert(false);
+                break;
+            }
             var lba = dir.lbaData + ((iCluster - DiskAPI.FAT12.CLUSNUM_MIN) * dir.nClusterSecs);
             for (var i = 0; i < dir.nClusterSecs; i++) {
                 apba.push(dir.pbaVolume + lba++);

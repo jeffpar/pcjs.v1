@@ -1,4 +1,4 @@
-Byte #3, November 1975
+[Byte #3, November 1975](../static/BYTE-1975-11/BYTE-1975-11.pdf)
 ---
 
 ![Page 1](../static/BYTE-1975-11/thumbs/BYTE-1975-11 1.jpeg "link:../static/BYTE-1975-11/pages/BYTE-1975-11 1.pdf:200:260")
@@ -99,5 +99,3 @@ Byte #3, November 1975
 ![Page 96](../static/BYTE-1975-11/thumbs/BYTE-1975-11 96.jpeg "link:../static/BYTE-1975-11/pages/BYTE-1975-11 96.pdf:200:260")
 ![Page 97](../static/BYTE-1975-11/thumbs/BYTE-1975-11 97.jpeg "link:../static/BYTE-1975-11/pages/BYTE-1975-11 97.pdf:200:260")
 ![Page 98](../static/BYTE-1975-11/thumbs/BYTE-1975-11 98.jpeg "link:../static/BYTE-1975-11/pages/BYTE-1975-11 98.pdf:200:260")
-
-[[Full PDF](../static/BYTE-1975-11/BYTE-1975-11.pdf)]

@@ -1,4 +1,4 @@
-PC Tech Journal, December 1987
+[PC Tech Journal, December 1987](../static/PCTJ-1987-12/PCTJ-1987-12.pdf)
 ---
 
 ![Page 1](../static/PCTJ-1987-12/thumbs/PCTJ-1987-12 1.jpeg "link:../static/PCTJ-1987-12/pages/PCTJ-1987-12 1.pdf:200:260")
@@ -243,5 +243,3 @@ PC Tech Journal, December 1987
 ![Page 240](../static/PCTJ-1987-12/thumbs/PCTJ-1987-12 240.jpeg "link:../static/PCTJ-1987-12/pages/PCTJ-1987-12 240.pdf:200:260")
 ![Page 241](../static/PCTJ-1987-12/thumbs/PCTJ-1987-12 241.jpeg "link:../static/PCTJ-1987-12/pages/PCTJ-1987-12 241.pdf:200:260")
 ![Page 242](../static/PCTJ-1987-12/thumbs/PCTJ-1987-12 242.jpeg "link:../static/PCTJ-1987-12/pages/PCTJ-1987-12 242.pdf:200:260")
-
-[[Full PDF](../static/PCTJ-1987-12/PCTJ-1987-12.pdf)]

@@ -1,4 +1,4 @@
-IBM 5150 Technical Reference, August 1981
+[IBM 5150 Technical Reference, August 1981](http://minuszerodegrees.net/manuals/IBM_5150_Technical_Reference_6025005_AUG81.pdf)
 ---
 
 ![Page 1](../../static/5150/techref/1981-08/thumbs/IBM-5150-TECHREF 1.jpeg "link:../../static/5150/techref/1981-08/pages/IBM-5150-TECHREF 1.pdf:200:260")
@@ -395,5 +395,3 @@ IBM 5150 Technical Reference, August 1981
 ![Page 392](../../static/5150/techref/1981-08/thumbs/IBM-5150-TECHREF 392.jpeg "link:../../static/5150/techref/1981-08/pages/IBM-5150-TECHREF 392.pdf:200:260")
 ![Page 393](../../static/5150/techref/1981-08/thumbs/IBM-5150-TECHREF 393.jpeg "link:../../static/5150/techref/1981-08/pages/IBM-5150-TECHREF 393.pdf:200:260")
 ![Page 394](../../static/5150/techref/1981-08/thumbs/IBM-5150-TECHREF 394.jpeg "link:../../static/5150/techref/1981-08/pages/IBM-5150-TECHREF 394.pdf:200:260")
-
-[[Full PDF](http://minuszerodegrees.net/manuals/IBM_5150_Technical_Reference_6025005_AUG81.pdf)]

@@ -50,7 +50,7 @@ if (typeof module !== 'undefined') {
 /**
  * Bus(cpu, dbg)
  *
- * The Bus component manages "physical" memory and I/O address spaces.
+ * The Bus component manages physical memory and I/O address spaces.
  *
  * The Bus component has no UI elements, so it does not require an init() handler,
  * but it still inherits from the Component class and must be allocated like any
@@ -174,6 +174,8 @@ function Bus(parmsBus, cpu, dbg)
          */
         this.abtObjects = [];
         this.cbtDeletions = 0;
+        this.ibtLastAlloc = -1;
+        this.ibtLastDelete = 0;
     }
 
     this.setReady();
@@ -219,6 +221,9 @@ Bus.prototype.initMemory = function()
 Bus.prototype.reset = function()
 {
     this.setA20(true);
+    if (BACKTRACK) {
+        this.ibtLastDelete = 0;
+    }
 };
 
 /**
@@ -407,10 +412,8 @@ Bus.prototype.removeMemory = function(addr, size)
 /**
  * getByte(addr)
  *
- * Why does the CPU use its own getByte() (which is substantially similar to ours) instead of calling us?
- *
- * It certainly could, but the CPU also needs to update some BACKTRACK state.  There may also be a slight
- * performance advantage calling its own method vs. calling through another object (ie, the Bus object).
+ * The CPU could use this, but the CPU also needs to update BACKTRACK states.  There may also be a slight
+ * performance advantage calling its own getByte() method vs. calling through another object (ie, the Bus object).
  *
  * @this {Bus}
  * @param {number} addr is a physical (non-segmented) address
@@ -438,11 +441,9 @@ Bus.prototype.getByteDirect = function(addr)
 /**
  * getWord(addr)
  *
- * Why does the CPU use its own getWord() (which is substantially similar to ours) instead of calling us?
- *
- * It certainly could, but the CPU also needs to update its cycle count, along with some BACKTRACK state.
- * There may also be a slight performance advantage calling its own method vs. calling through another object
- * (ie, the Bus object).
+ * The CPU could use this, but the CPU also needs to update cycle counts, along with BACKTRACK states.
+ * There may also be a slight performance advantage calling its own getWord() method vs. calling through another
+ * object (ie, the Bus object).
  *
  * @this {Bus}
  * @param {number} addr is a physical (non-segmented) address
@@ -480,10 +481,8 @@ Bus.prototype.getWordDirect = function(addr)
 /**
  * setByte(addr, b)
  *
- * Why does the CPU use its own setByte() (which is substantially similar to ours) instead of calling us?
- *
- * It certainly could, but the CPU also needs to update some BACKTRACK state.  There may also be a slight
- * performance advantage calling its own method vs. calling through another object (ie, the Bus object).
+ * The CPU could use this, but the CPU also needs to update BACKTRACK states.  There may also be a slight
+ * performance advantage calling its own setByte() method vs. calling through another object (ie, the Bus object).
  *
  * @this {Bus}
  * @param {number} addr is a physical (non-segmented) address
@@ -512,11 +511,9 @@ Bus.prototype.setByteDirect = function(addr, b)
 /**
  * setWord(addr, w)
  *
- * Why does the CPU use its own setWord() (which is substantially similar to ours) instead of calling us?
- *
- * It certainly could, but the CPU also needs to update its cycle count, along with some BACKTRACK state.
- * There may also be a slight performance advantage calling its own method vs. calling through another object
- * (ie, the Bus object).
+ * The CPU could use this, but the CPU also needs to update cycle counts, along with BACKTRACK states.
+ * There may also be a slight performance advantage calling its own setWord() method vs. calling through another
+ * object (ie, the Bus object).
  *
  * @this {Bus}
  * @param {number} addr is a physical (non-segmented) address
@@ -561,13 +558,13 @@ Bus.prototype.setWordDirect = function(addr, w)
  *
  * If bto is null, then we create bto (ie, an object that wraps obj and records off).
  *
- * If bto is NOT null, then we verify that off is within bto's range; if not, then we must
- * create a new bto and return that instead.
+ * If bto is NOT null, then we verify that off is within the given bto's range; if not,
+ * then we must create a new bto and return that instead.
  *
  * @this {Bus}
  * @param {Object} obj
  * @param {Object} bto
- * @param {number} off
+ * @param {number} off (the offset within obj that this wrapper object is relative to)
  * @return {Object|null}
  */
 Bus.prototype.addBackTrackObject = function(obj, bto, off)
@@ -578,24 +575,34 @@ Bus.prototype.addBackTrackObject = function(obj, bto, off)
             /*
              * Try the most recently created bto, on the off-chance it's what the caller needs
              */
-            if (cbtObjects) bto = this.abtObjects[cbtObjects-1];
+            if (this.ibtLastAlloc >= 0) bto = this.abtObjects[this.ibtLastAlloc];
         }
         if (!bto || bto.obj != obj || off < bto.off || off >= bto.off + Bus.BACKTRACK.OFF_MAX) {
-            var slot;
+
             bto = {obj: obj, off: off, slot: 0, refs: 0};
+
+            var slot;
             if (!this.cbtDeletions) {
                 slot = cbtObjects;
             } else {
-                for (slot = 0; slot < cbtObjects; slot++) {
-                    if (!this.abtObjects[slot]) {
+                for (slot = this.ibtLastDelete; slot < cbtObjects; slot++) {
+                    var btoTest = this.abtObjects[slot];
+                    if (!btoTest || !btoTest.refs && !this.isBackTrackWeak(slot << Bus.BACKTRACK.SLOT_SHIFT)) {
+                        this.ibtLastDelete = slot + 1;
                         this.cbtDeletions--;
                         break;
                     }
                 }
-                this.assert(slot < cbtObjects);
+                /*
+                 * There's no longer any guarantee that simply because cbtDeletions was non-zero that there WILL
+                 * be an available (existing) slot, because cbtDeletions also counts weak references that may still
+                 * be weak.
+                 *
+                 *      this.assert(slot < cbtObjects);
+                 */
             }
             this.assert(slot < Bus.BACKTRACK.SLOT_MAX);
-            bto.slot = slot;
+            this.ibtLastAlloc = bto.slot = slot;
             if (slot == cbtObjects) {
                 this.abtObjects.push(bto);
             } else {
@@ -682,7 +689,33 @@ Bus.prototype.writeBackTrack = function(addr, bti)
                         this.dbg.message("writeBackTrack(%" + str.toHex(addr) + ',' + str.toHex(bti) + "): previous index (" + str.toHex(btiPrev) + ") refers to object with bad ref count (" + btoPrev.refs + ")");
                     }
                 } else if (!--btoPrev.refs) {
-                    this.abtObjects[slotPrev] = null;
+                    /*
+                     * We used to just slam a null into the previous slot and consider it gone, but there may still
+                     * be "weak references" to that slot (ie, it may still be associated with a register bti).
+                     *
+                     * The easiest way to handle weak references is to leave the slot allocated, with the object's ref
+                     * count sitting at zero, and change addBackTrackObject() to look for both empty slots AND non-empty
+                     * slots with a ref count of zero; in the latter case, it should again check for weak references,
+                     * after which we can re-use the slot if all its weak references are now gone.
+                     */
+                    if (!this.isBackTrackWeak(btiPrev)) this.abtObjects[slotPrev] = null;
+                    /*
+                     * TODO: Consider what the appropriate trigger should be for resetting ibtLastDelete to zero;
+                     * if we don't OCCASIONALLY set it to zero, we may never clear out obsolete weak references,
+                     * whereas if we ALWAYS set it to zero, we may be forcing addBackTrackObject() to scan the entire
+                     * table too often.
+                     *
+                     * I'd prefer to do something like this:
+                     *
+                     *      if (this.ibtLastDelete > slotPrev) this.ibtLastDelete = slotPrev;
+                     *
+                     * or even this:
+                     *
+                     *      if (this.ibtLastDelete > slotPrev) this.ibtLastDelete = 0;
+                     *
+                     * But neither one of those guarantees that we will at least occasionally scan the entire table.
+                     */
+                    this.ibtLastDelete = 0;
                     this.cbtDeletions++;
                 }
             }
@@ -695,6 +728,33 @@ Bus.prototype.writeBackTrack = function(addr, bti)
             }
         }
     }
+};
+
+/**
+ * isBackTrackWeak(bti)
+ *
+ * @param {number} bti
+ * @returns {boolean} true if the given bti is still referenced by a register, false if not
+ */
+Bus.prototype.isBackTrackWeak = function(bti)
+{
+    var bt = this.cpu.backTrack;
+    var slot = bti >>> Bus.BACKTRACK.SLOT_SHIFT;
+    return (bt.btiAL >>> Bus.BACKTRACK.SLOT_SHIFT == slot ||
+            bt.btiAH >>> Bus.BACKTRACK.SLOT_SHIFT == slot ||
+            bt.btiBL >>> Bus.BACKTRACK.SLOT_SHIFT == slot ||
+            bt.btiBH >>> Bus.BACKTRACK.SLOT_SHIFT == slot ||
+            bt.btiCL >>> Bus.BACKTRACK.SLOT_SHIFT == slot ||
+            bt.btiCH >>> Bus.BACKTRACK.SLOT_SHIFT == slot ||
+            bt.btiDL >>> Bus.BACKTRACK.SLOT_SHIFT == slot ||
+            bt.btiDH >>> Bus.BACKTRACK.SLOT_SHIFT == slot ||
+            bt.btiBPLo >>> Bus.BACKTRACK.SLOT_SHIFT == slot ||
+            bt.btiBPHi >>> Bus.BACKTRACK.SLOT_SHIFT == slot ||
+            bt.btiSILo >>> Bus.BACKTRACK.SLOT_SHIFT == slot ||
+            bt.btiSIHi >>> Bus.BACKTRACK.SLOT_SHIFT == slot ||
+            bt.btiDILo >>> Bus.BACKTRACK.SLOT_SHIFT == slot ||
+            bt.btiDIHi >>> Bus.BACKTRACK.SLOT_SHIFT == slot
+    );
 };
 
 /**

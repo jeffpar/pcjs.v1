@@ -532,7 +532,7 @@ ChipSet.TIMER1 = {
 
 ChipSet.TIMER2 = {
     INDEX:              2,
-    PORT:               0x42    // used speaker tone generation
+    PORT:               0x42    // used for speaker tone generation
 };
 
 ChipSet.TIMER_CTRL = {

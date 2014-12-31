@@ -849,7 +849,7 @@ CPU.prototype.calcStartTime = function()
      *
      * This also won't do anything about other internal delays; for example, Debugger message() calls.
      * By the time the message() function has called yieldCPU(), the cost of the message has already been
-     * incurred, so it will be end up being charged against the instruction(s) that triggered them.
+     * incurred, so it will be end up being charged against the instruction(s) that triggered it.
      *
      * TODO: Consider calling yieldCPU() sooner from message(), so that it can arrange for the msEndThisRun
      * "snapshot" to occur sooner; it's unclear, however, whether that will really improve the CPU's ability

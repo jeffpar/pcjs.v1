@@ -1,4 +1,4 @@
-IBM 5170 Installation and Setup, March 1984
+[IBM 5170 Installation and Setup, March 1984](http://minuszerodegrees.net/manuals/IBM_5170_Installation_and_Setup_1502491_MAR84.pdf)
 ---
 
 ![Page 1](../../static/5170/setup/thumbs/IBM-5170-SETUP 1.jpeg "link:../../static/5170/setup/pages/IBM-5170-SETUP 1.pdf:200:260")
@@ -287,5 +287,3 @@ IBM 5170 Installation and Setup, March 1984
 ![Page 284](../../static/5170/setup/thumbs/IBM-5170-SETUP 284.jpeg "link:../../static/5170/setup/pages/IBM-5170-SETUP 284.pdf:200:260")
 ![Page 285](../../static/5170/setup/thumbs/IBM-5170-SETUP 285.jpeg "link:../../static/5170/setup/pages/IBM-5170-SETUP 285.pdf:200:260")
 ![Page 286](../../static/5170/setup/thumbs/IBM-5170-SETUP 286.jpeg "link:../../static/5170/setup/pages/IBM-5170-SETUP 286.pdf:200:260")
-
-[[Full PDF](http://minuszerodegrees.net/manuals/IBM_5170_Installation_and_Setup_1502491_MAR84.pdf)]

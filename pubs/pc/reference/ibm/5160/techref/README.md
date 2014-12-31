@@ -1,4 +1,4 @@
-IBM 5160 Technical Reference, April 1983
+[IBM 5160 Technical Reference, April 1983](http://retroarchive.org/dos/docs/ibm5160techref.pdf)
 ---
 
 ![Page 1](../../static/5160/techref/1983-04/thumbs/IBM-5160-TECHREF 1.jpeg "link:../../static/5160/techref/1983-04/pages/IBM-5160-TECHREF 1.pdf:200:260")
@@ -624,5 +624,3 @@ IBM 5160 Technical Reference, April 1983
 ![Page 621](../../static/5160/techref/1983-04/thumbs/IBM-5160-TECHREF 621.jpeg "link:../../static/5160/techref/1983-04/pages/IBM-5160-TECHREF 621.pdf:200:260")
 ![Page 622](../../static/5160/techref/1983-04/thumbs/IBM-5160-TECHREF 622.jpeg "link:../../static/5160/techref/1983-04/pages/IBM-5160-TECHREF 622.pdf:200:260")
 ![Page 623](../../static/5160/techref/1983-04/thumbs/IBM-5160-TECHREF 623.jpeg "link:../../static/5160/techref/1983-04/pages/IBM-5160-TECHREF 623.pdf:200:260")
-
-[[Full PDF](http://retroarchive.org/dos/docs/ibm5160techref.pdf)]

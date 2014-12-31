@@ -1,4 +1,4 @@
-Microsoft Systems Journal, October 1986
+[Microsoft Systems Journal, October 1986](../static/MSJ-1986-10/MSJ-1986-10.pdf)
 ---
 
 ![Page 1](../static/MSJ-1986-10/thumbs/MSJ-1986-10 1.jpeg "link:../static/MSJ-1986-10/pages/MSJ-1986-10 1.pdf:200:260")
@@ -35,5 +35,3 @@ Microsoft Systems Journal, October 1986
 ![Page 32](../static/MSJ-1986-10/thumbs/MSJ-1986-10 32.jpeg "link:../static/MSJ-1986-10/pages/MSJ-1986-10 32.pdf:200:260")
 ![Page 33](../static/MSJ-1986-10/thumbs/MSJ-1986-10 33.jpeg "link:../static/MSJ-1986-10/pages/MSJ-1986-10 33.pdf:200:260")
 ![Page 34](../static/MSJ-1986-10/thumbs/MSJ-1986-10 34.jpeg "link:../static/MSJ-1986-10/pages/MSJ-1986-10 34.pdf:200:260")
-
-[[Full PDF](../static/MSJ-1986-10/MSJ-1986-10.pdf)]

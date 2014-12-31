@@ -1,4 +1,4 @@
-Microsoft Systems Journal, May 1987
+[Microsoft Systems Journal, May 1987](../static/MSJ-1987-05/MSJ-1987-05.pdf)
 ---
 
 ![Page 1](../static/MSJ-1987-05/thumbs/MSJ-1987-05 1.jpeg "link:../static/MSJ-1987-05/pages/MSJ-1987-05 1.pdf:200:260")
@@ -91,5 +91,3 @@ Microsoft Systems Journal, May 1987
 ![Page 88](../static/MSJ-1987-05/thumbs/MSJ-1987-05 88.jpeg "link:../static/MSJ-1987-05/pages/MSJ-1987-05 88.pdf:200:260")
 ![Page 89](../static/MSJ-1987-05/thumbs/MSJ-1987-05 89.jpeg "link:../static/MSJ-1987-05/pages/MSJ-1987-05 89.pdf:200:260")
 ![Page 90](../static/MSJ-1987-05/thumbs/MSJ-1987-05 90.jpeg "link:../static/MSJ-1987-05/pages/MSJ-1987-05 90.pdf:200:260")
-
-[[Full PDF](../static/MSJ-1987-05/MSJ-1987-05.pdf)]

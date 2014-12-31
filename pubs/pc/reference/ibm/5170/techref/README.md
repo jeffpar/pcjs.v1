@@ -1,4 +1,4 @@
-IBM 5170 Technical Reference, March 1984
+[IBM 5170 Technical Reference, March 1984](http://minuszerodegrees.net/manuals/IBM_5170_Technical_Reference_1502243_MAR84.pdf)
 ---
 
 ![Page 1](../../static/5170/techref/1984-03/thumbs/IBM-5170-TECHREF 1.jpeg "link:../../static/5170/techref/1984-03/pages/IBM-5170-TECHREF 1.pdf:200:260")
@@ -463,5 +463,3 @@ IBM 5170 Technical Reference, March 1984
 ![Page 460](../../static/5170/techref/1984-03/thumbs/IBM-5170-TECHREF 460.jpeg "link:../../static/5170/techref/1984-03/pages/IBM-5170-TECHREF 460.pdf:200:260")
 ![Page 461](../../static/5170/techref/1984-03/thumbs/IBM-5170-TECHREF 461.jpeg "link:../../static/5170/techref/1984-03/pages/IBM-5170-TECHREF 461.pdf:200:260")
 ![Page 462](../../static/5170/techref/1984-03/thumbs/IBM-5170-TECHREF 462.jpeg "link:../../static/5170/techref/1984-03/pages/IBM-5170-TECHREF 462.pdf:200:260")
-
-[[Full PDF](http://minuszerodegrees.net/manuals/IBM_5170_Technical_Reference_1502243_MAR84.pdf)]

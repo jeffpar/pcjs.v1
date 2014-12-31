@@ -1654,9 +1654,12 @@ HTMLOut.prototype.getReadMe = function(sToken, sIndent, aParms, sPrevious)
              * it would be cleaner if this replacement could be performed by getTitle(), but unfortunately,
              * getTitle() is called long before any README.md is opened.
              */
-            var match = s.match(/^\s*<h([0-9])[^>]*>([^<]*)<\/h\1>/);
+            var match = s.match(/^\s*<h([0-9])[^>]*>(.*?)<\/h\1>/);
             if (match) {
-                obj.sHTML = obj.sHTML.replace(/(<title[^>]*>)([^\|]*)\|[^<]*(<\/title>)/, "$1$2| " + match[2] + "$3");
+                var sTitle = match[2];
+                match = sTitle.match(/<a [^>]*>([^<]*)<\/a>/);
+                if (match) sTitle = match[1];
+                obj.sHTML = obj.sHTML.replace(/(<title[^>]*>)([^\|]*)\|[^<]*(<\/title>)/, "$1$2| " + sTitle + "$3");
             }
             /*
              * We need to query the MarkOut object for any machine definitions that the current "readme"

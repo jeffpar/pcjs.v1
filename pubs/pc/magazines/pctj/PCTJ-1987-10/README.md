@@ -1,4 +1,4 @@
-PC Tech Journal, October 1987
+[PC Tech Journal, October 1987](../static/PCTJ-1987-10/PCTJ-1987-10.pdf)
 ---
 
 ![Page 1](../static/PCTJ-1987-10/thumbs/PCTJ-1987-10 1.jpeg "link:../static/PCTJ-1987-10/pages/PCTJ-1987-10 1.pdf:200:260")
@@ -232,5 +232,3 @@ PC Tech Journal, October 1987
 ![Page 229](../static/PCTJ-1987-10/thumbs/PCTJ-1987-10 229.jpeg "link:../static/PCTJ-1987-10/pages/PCTJ-1987-10 229.pdf:200:260")
 ![Page 230](../static/PCTJ-1987-10/thumbs/PCTJ-1987-10 230.jpeg "link:../static/PCTJ-1987-10/pages/PCTJ-1987-10 230.pdf:200:260")
 ![Page 231](../static/PCTJ-1987-10/thumbs/PCTJ-1987-10 231.jpeg "link:../static/PCTJ-1987-10/pages/PCTJ-1987-10 231.pdf:200:260")
-
-[[Full PDF](../static/PCTJ-1987-10/PCTJ-1987-10.pdf)]

@@ -1,4 +1,4 @@
-IBM Enhanced Graphics Adapter
+[IBM Enhanced Graphics Adapter](http://minuszerodegrees.net/oa/OA - IBM Enhanced Graphics Adapter.pdf)
 ---
 
 ![Page 1](../static/ega/thumbs/IBM-EGA 1.jpeg "link:../static/ega/pages/IBM-EGA 1.pdf:200:260")
@@ -175,5 +175,3 @@ IBM Enhanced Graphics Adapter
 ![Page 172](../static/ega/thumbs/IBM-EGA 172.jpeg "link:../static/ega/pages/IBM-EGA 172.pdf:200:260")
 ![Page 173](../static/ega/thumbs/IBM-EGA 173.jpeg "link:../static/ega/pages/IBM-EGA 173.pdf:200:260")
 ![Page 174](../static/ega/thumbs/IBM-EGA 174.jpeg "link:../static/ega/pages/IBM-EGA 174.pdf:200:260")
-
-[[Full PDF](http://minuszerodegrees.net/oa/OA - IBM Enhanced Graphics Adapter.pdf)]

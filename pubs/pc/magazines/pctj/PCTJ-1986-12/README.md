@@ -1,4 +1,4 @@
-PC Tech Journal, December 1986
+[PC Tech Journal, December 1986](../static/PCTJ-1986-12/PCTJ-1986-12.pdf)
 ---
 
 ![Page 1](../static/PCTJ-1986-12/thumbs/PCTJ-1986-12 1.jpeg "link:../static/PCTJ-1986-12/pages/PCTJ-1986-12 1.pdf:200:260")
@@ -233,5 +233,3 @@ PC Tech Journal, December 1986
 ![Page 230](../static/PCTJ-1986-12/thumbs/PCTJ-1986-12 230.jpeg "link:../static/PCTJ-1986-12/pages/PCTJ-1986-12 230.pdf:200:260")
 ![Page 231](../static/PCTJ-1986-12/thumbs/PCTJ-1986-12 231.jpeg "link:../static/PCTJ-1986-12/pages/PCTJ-1986-12 231.pdf:200:260")
 ![Page 232](../static/PCTJ-1986-12/thumbs/PCTJ-1986-12 232.jpeg "link:../static/PCTJ-1986-12/pages/PCTJ-1986-12 232.pdf:200:260")
-
-[[Full PDF](../static/PCTJ-1986-12/PCTJ-1986-12.pdf)]
