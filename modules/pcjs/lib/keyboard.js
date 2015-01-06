@@ -2033,12 +2033,22 @@ Keyboard.prototype.onKeyDown = function(event, fDown)
          */
         if (Keyboard.SIMCODES[simCode] && (this.bitsState & (Keyboard.STATE.CTRLS | Keyboard.STATE.ALTS))) {
             fPass = false;
+        } else {
+            /*
+             * HACK: For all other keys (ie, keys not marked as ONDOWN, and non-CTRL/non-ALT combinations), we're
+             * going to ignore their down/up events; even though that prevents those keys from being repeated properly
+             * (ie, at the simulation's repeat rate rather than the browser's repeat rate), it's the safest thing to
+             * do when dealing with international keyboards, because our mapping tables are designed for US keyboards,
+             * and testing all the permutations of international keyboards and browsers is more work than I can take
+             * on now.  TODO: Dig into this some day.
+             */
+            fIgnore = true;
         }
 
         /*
-         * For now, we don't want to simulate any key sequence that has the CMD key associated with it.
+         * For now, we also don't want to simulate any key sequence that has the CMD key associated with it.
          */
-        fIgnore = !!(this.bitsState & Keyboard.STATE.CMDS);
+        if (!!(this.bitsState & Keyboard.STATE.CMDS)) fIgnore = true;
     }
 
     if (!fPass) {

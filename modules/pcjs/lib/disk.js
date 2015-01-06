@@ -167,47 +167,6 @@ if (typeof module !== 'undefined') {
 }
 
 /**
- * @class Sector
- * @property {number} sector
- * @property {number} length
- * @property {Array.<number>} data
- * @property {number|null} pattern
- * @property {number} iCylinder
- * @property {number} iHead
- * @property {number} iModify
- * @property {number} cModify
- *
- * Every Sector object (once loaded and fully parsed) should have ALL of the following named properties:
- *
- *      'sector':   sector number
- *      'length':   size of the sector, in bytes
- *      'data':     array of dwords
- *      'pattern':  dword pattern to use for empty or partial sectors (or null if sector still needs to be loaded)
- *
- * initSector() also sets the following properties, to help us quickly identify its location within aDiskData:
- *
- *      iCylinder
- *      iHead
- *
- * In addition, we will maintain the following information on a per-sector basis, as sectors are modified:
- *
- *      iModify:    index of first modified dword in sector
- *      cModify:    number of modified dwords in sector
- *      fDirty:     true if sector is dirty, false if clean (or cleaning in progress)
- *
- * fDirty is used in conjunction with "demandrw" disks; it is set to true whenever the sector is modified, and is
- * set to false whenever the sector has been sent to the server.  If the server write succeeds and fDirty is still
- * false, then the sector modifications are removed (cModify is set to zero).  If the write succeeds but fDirty was
- * set to true again in the meantime, then all the sector modifications (even those that were just written) remain
- * in place (since we don't keep track of more than one modification range within a sector).  And if the write failed,
- * then fDirty is set back to true and again all modifications remain in place; the best we can do is schedule another
- * write attempt.
- *
- * TODO: Perhaps we should also maintain a failure count and stop trying to write sectors that reach a certain
- * threshold.  Error-handling, as usual, is the thorniest problem.
- */
-
-/**
  * Disk(controller, drive, mode)
  *
  * Disk contents are stored as an array (aDiskData) of cylinders, each of which is an array of
@@ -268,6 +227,57 @@ function Disk(controller, drive, mode)
 
     this.setReady();
 }
+
+/**
+ * @class File
+ * @property {string} sPath
+ * @property {string} sName
+ * @property {number} bAttr
+ * @property {number} cbSize
+ * @property {Array.<number>} apba
+ * @property {Disk} disk
+ */
+
+/**
+ * @class Sector
+ * @property {number} sector
+ * @property {number} length
+ * @property {Array.<number>} data
+ * @property {number|null} pattern
+ * @property {number} iCylinder
+ * @property {number} iHead
+ * @property {number} iModify
+ * @property {number} cModify
+ *
+ * Every Sector object (once loaded and fully parsed) should have ALL of the following named properties:
+ *
+ *      'sector':   sector number
+ *      'length':   size of the sector, in bytes
+ *      'data':     array of dwords
+ *      'pattern':  dword pattern to use for empty or partial sectors (or null if sector still needs to be loaded)
+ *
+ * initSector() also sets the following properties, to help us quickly identify its location within aDiskData:
+ *
+ *      iCylinder
+ *      iHead
+ *
+ * In addition, we will maintain the following information on a per-sector basis, as sectors are modified:
+ *
+ *      iModify:    index of first modified dword in sector
+ *      cModify:    number of modified dwords in sector
+ *      fDirty:     true if sector is dirty, false if clean (or cleaning in progress)
+ *
+ * fDirty is used in conjunction with "demandrw" disks; it is set to true whenever the sector is modified, and is
+ * set to false whenever the sector has been sent to the server.  If the server write succeeds and fDirty is still
+ * false, then the sector modifications are removed (cModify is set to zero).  If the write succeeds but fDirty was
+ * set to true again in the meantime, then all the sector modifications (even those that were just written) remain
+ * in place (since we don't keep track of more than one modification range within a sector).  And if the write failed,
+ * then fDirty is set back to true and again all modifications remain in place; the best we can do is schedule another
+ * write attempt.
+ *
+ * TODO: Perhaps we should also maintain a failure count and stop trying to write sectors that reach a certain
+ * threshold.  Error-handling, as usual, is the thorniest problem.
+ */
 
 /**
  * @class SectorInfo
