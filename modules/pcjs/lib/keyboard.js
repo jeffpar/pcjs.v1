@@ -139,6 +139,15 @@ function Keyboard(parmsKbd)
 
 Component.subclass(Component, Keyboard);
 
+/*
+ * HACK: We set ALL_ONDOWN to false to ignore all down/up events for keys not explicitly marked as ONDOWN;
+ * even though that prevents those keys from being repeated properly (ie, at the simulation's repeat rate
+ * rather than the browser's repeat rate), it's the safest thing to do when dealing with international keyboards,
+ * because our mapping tables are designed for US keyboards, and testing all the permutations of international
+ * keyboards and web browsers is more work than I can take on right now.  TODO: Dig into this some day.
+ */
+Keyboard.ALL_ONDOWN = false;
+
 /**
  * Alphanumeric and other common (printable) ASCII codes.
  *
@@ -2030,25 +2039,18 @@ Keyboard.prototype.onKeyDown = function(event, fDown)
          * When I have defined system-wide CTRL-key sequences to perform common editing operations (eg, CTRL_W
          * and CTRL_Z to scroll pages of text), the browser likes to act on those operations, so let's set fPass
          * to false to prevent that.
+         *
+         * Also, we don't want to set fIgnore in such cases, because the browser may not give us a press event for
+         * these CTRL-key sequences, so we can't risk ignoring them.
          */
         if (Keyboard.SIMCODES[simCode] && (this.bitsState & (Keyboard.STATE.CTRLS | Keyboard.STATE.ALTS))) {
             fPass = false;
-        } else {
-            /*
-             * HACK: For all other keys (ie, keys not marked as ONDOWN, and non-CTRL/non-ALT combinations), we're
-             * going to ignore their down/up events; even though that prevents those keys from being repeated properly
-             * (ie, at the simulation's repeat rate rather than the browser's repeat rate), it's the safest thing to
-             * do when dealing with international keyboards, because our mapping tables are designed for US keyboards,
-             * and testing all the permutations of international keyboards and browsers is more work than I can take
-             * on now.  TODO: Dig into this some day.
-             */
-            fIgnore = true;
         }
 
         /*
-         * For now, we also don't want to simulate any key sequence that has the CMD key associated with it.
+         * Don't simulate any key not explicitly marked ONDOWN, as well as any key sequence with the CMD key held.
          */
-        if (!!(this.bitsState & Keyboard.STATE.CMDS)) fIgnore = true;
+        if (!Keyboard.ALL_ONDOWN && fPass && fDown || !!(this.bitsState & Keyboard.STATE.CMDS)) fIgnore = true;
     }
 
     if (!fPass) {
@@ -2065,15 +2067,13 @@ Keyboard.prototype.onKeyDown = function(event, fDown)
      * rapid (ie, fake) "up" and "down" events around "press" events, probably more to satisfy compatibility
      * issues rather than making a serious effort to indicate when a key ACTUALLY went down or up.
      */
-    if (!fIgnore) {
-        if (!this.fMobile || !fPass) {
-            if (fDown) {
-                this.addActiveKey(simCode, fPress);
-            } else {
-                if (!this.removeActiveKey(simCode)) {
-                    var code = this.getSimCode(keyCode, false);
-                    if (code != simCode) this.removeActiveKey(code);
-                }
+    if (!fIgnore && (!this.fMobile || !fPass)) {
+        if (fDown) {
+            this.addActiveKey(simCode, fPress);
+        } else {
+            if (!this.removeActiveKey(simCode)) {
+                var code = this.getSimCode(keyCode, false);
+                if (code != simCode) this.removeActiveKey(code);
             }
         }
     }
@@ -2093,13 +2093,15 @@ Keyboard.prototype.onKeyPress = function(event)
     event = event || window.event;
     var keyCode = event.which || event.keyCode;
 
-    var simCode = this.checkActiveKey();
-    if (simCode && this.isAlphaKey(simCode) && this.isAlphaKey(keyCode) && simCode != keyCode) {
-        if (!COMPILED && this.messageEnabled(Messages.KEYS)) {
-            this.printMessage("onKeyPress(" + keyCode + ") out of sync with " + simCode + ", invert caps-lock", true);
+    if (Keyboard.ALL_ONDOWN) {
+        var simCode = this.checkActiveKey();
+        if (simCode && this.isAlphaKey(simCode) && this.isAlphaKey(keyCode) && simCode != keyCode) {
+            if (!COMPILED && this.messageEnabled(Messages.KEYS)) {
+                this.printMessage("onKeyPress(" + keyCode + ") out of sync with " + simCode + ", invert caps-lock", true);
+            }
+            this.fToggleCapsLock = true;
+            keyCode = simCode;
         }
-        this.fToggleCapsLock = true;
-        keyCode = simCode;
     }
 
     /*
@@ -2167,17 +2169,17 @@ Keyboard.prototype.keySimulate = function(simCode, fDown)
                 continue;
             }
             if (bScan == Keyboard.SCANCODE.SHIFT) {
-                if (!(this.bitsState & (Keyboard.STATE.SHIFT | Keyboard.STATE.RSHIFT))) {
-                    if (!(this.bitsState & Keyboard.STATE.CAPS_LOCK) || !fAlpha) {
+                if (!(this.bitsStateSim & (Keyboard.STATE.SHIFT | Keyboard.STATE.RSHIFT))) {
+                    if (!(this.bitsStateSim & Keyboard.STATE.CAPS_LOCK) || !fAlpha) {
                         bShift = bScan;
                     }
                 }
             } else if (bScan == Keyboard.SCANCODE.CTRL) {
-                if (!(this.bitsState & (Keyboard.STATE.CTRL | Keyboard.STATE.RCTRL))) {
+                if (!(this.bitsStateSim & (Keyboard.STATE.CTRL | Keyboard.STATE.RCTRL))) {
                     bShift = bScan;
                 }
             } else if (bScan == Keyboard.SCANCODE.ALT) {
-                if (!(this.bitsState & (Keyboard.STATE.ALT | Keyboard.STATE.RALT))) {
+                if (!(this.bitsStateSim & (Keyboard.STATE.ALT | Keyboard.STATE.RALT))) {
                     bShift = bScan;
                 }
             } else {
