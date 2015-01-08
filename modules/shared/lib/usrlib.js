@@ -87,9 +87,7 @@ usr.binaryInsert = function(a, v, fnCompare) {
  *
  * @return {number} the current time, in milliseconds
  */
-usr.getTime = function() {
-    return Date.now() || +new Date();
-};
+usr.getTime = Date.now || function() { return +new Date(); };
 
 /**
  * getTimestamp()
