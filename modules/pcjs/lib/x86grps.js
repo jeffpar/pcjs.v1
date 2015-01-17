@@ -1257,14 +1257,13 @@ var X86Grps = {
  * use a mod/reg/rm byte, where the reg field of that byte selects a function rather than a register.
  *
  * I start with the groupings used by Intel's "Pentium Processor User's Manual (Volume 3: Architecture
- * and Programming Manual)", but I deviate slightly, mostly by subdividing their groups with the use
- * of suffixes:
+ * and Programming Manual)", but I deviate slightly, mostly by subdividing their groups with letter suffixes:
  *
  *      Opcodes     Intel       PCjs                                                PC Mag TechRef
  *      -------     -----       ----                                                --------------
  *      0x80-0x83   Grp1        Grp1b, Grp1w, Grp1b, and Grp1sw                     Group A
- *      0xC0-0xC1   Grp2a       Grp2ab and Grp2aw                                   Group B
- *      0xD0-0xD3   Grp2        Grp2b and Grp2w                                     Group B
+ *      0xC0-0xC1   Grp2        Grp2b and Grp2w (opGrp2bi/wi)                       Group B
+ *      0xD0-0xD3   Grp2        Grp2b and Grp2w (opGrp2b1/w1 and opGrp2bCL/wCL)     Group B
  *      0xF6-0xF7   Grp3        Grp3b and Grp3w                                     Group C
  *      0xFE        Grp4        Grp4b                                               Group D
  *      0xFF        Grp5        Grp4w                                               Group E
@@ -1278,6 +1277,11 @@ var X86Grps = {
  * JMP and PUSH instructions, which are not in Grp4b, but there's nothing in Grp4b that conflicts with
  * Grp4w, so I think my nomenclature makes more sense.  To compensate, I don't use Grp5, so that the
  * remaining group numbers remain in sync with Intel's.
+ *
+ * To the above list, I also add these "groups of 1": opcode 0x8F uses GrpPOPw, and opcodes 0xC6/0xC7 use
+ * GrpMOVImm.  In both of these groups, the only valid (documented) instruction is where reg=0x0.
+ *
+ * TODO: Test what happens on real hardware when the reg field is non-zero for opcodes 0x8F and 0xC6/0xC7.
  */
 X86Grps.aOpGrp1b = [
     X86Grps.opGrpADDb,      X86Grps.opGrpORb,       X86Grps.opGrpADCb,      X86Grps.opGrpSBBb,      // 0x80/0x82(reg=0x0-0x3)
@@ -1327,19 +1331,6 @@ X86Grps.aOpGrp4b = [
 X86Grps.aOpGrp4w = [
     X86Grps.opGrpINCw,      X86Grps.opGrpDECw,      X86Grps.opGrpCALLw,     X86Grps.opGrpCALLFdw,   // 0xFF(reg=0x0-0x3)
     X86Grps.opGrpJMPw,      X86Grps.opGrpJMPFdw,    X86Grps.opGrpPUSHw,     X86Grps.opGrpFault      // 0xFF(reg=0x4-0x7)
-];
-
-/*
- * The following are for 80186/80188 and up...
- */
-X86Grps.aOpGrp2ab = [
-    X86Grps.opGrpROLb,      X86Grps.opGrpRORb,      X86Grps.opGrpRCLb,      X86Grps.opGrpRCRb,      // 0xC0(reg=0x0-0x3)
-    X86Grps.opGrpSHLb,      X86Grps.opGrpSHRb,      X86Grps.opGrpUndefined, X86Grps.opGrpSARb       // 0xC0(reg=0x4-0x7)
-];
-
-X86Grps.aOpGrp2aw = [
-    X86Grps.opGrpROLw,      X86Grps.opGrpRORw,      X86Grps.opGrpRCLw,      X86Grps.opGrpRCRw,      // 0xC1(reg=0x0-0x3)
-    X86Grps.opGrpSHLw,      X86Grps.opGrpSHRw,      X86Grps.opGrpUndefined, X86Grps.opGrpSARw       // 0xC1(reg=0x4-0x7)
 ];
 
 if (typeof module !== 'undefined') module.exports = X86Grps;

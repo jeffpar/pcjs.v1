@@ -168,7 +168,8 @@ function Video(parmsVideo, canvas, context, textarea)
     this.addrBuffer = this.sizeBuffer = 0;
 
     /*
-     * aFonts is an array of font objects indexed by FONT ID.  Font characters are     * arranged in 16x16 grids, with one grid per canvas object in the aCanvas array of each font object.
+     * aFonts is an array of font objects indexed by FONT ID.  Font characters are arranged
+     * in 16x16 grids, with one grid per canvas object in the aCanvas array of each font object.
      *
      * Each element is a Font object that describes the font size and provides bitmaps for all the font
      * color permutations.  aFonts.length will be non-zero if ANY fonts are loaded, but do NOT assume
@@ -273,12 +274,12 @@ Video.TRAPALL = true;           // monitor all I/O by default (not just deltas)
  * In fact, there's special logic in setDimensions() to ignore fScaleFont in certain cases (eg,
  * 40-column modes, to improve sharpness and avoid stretching the font beyond readability).
  *
- * Graphics modes, on the other hand, are always scaled to the window size. Pixels are captured
+ * Graphics modes, on the other hand, are always scaled to the window size.  Pixels are captured
  * in an off-screen buffer, which is then drawn to match the size of the virtual display window.
  *
  * TODO: Whenever there are borders, they should be filled with the CGA's overscan colors.  However,
  * in the case of graphics modes (and text modes whenever font scaling is enabled), we don't reserve
- * any space for borders, so if borders are important, explicit support will be required.
+ * any space for borders, so if borders are important, explicit border support will be required.
  *
  * EGA Support
  *
@@ -1977,7 +1978,7 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
         this.kbd.setBinding(this.textareaScreen? "textarea" : "canvas", "kbd", this.inputScreen);
     }
 
-    this.bEGASW = 0x9;          // our default "switches" setting (see aEGAMonitorSwitches)
+    this.bEGASW = 0x09;         // our default "switches" setting (see aEGAMonitorSwitches)
     this.chipset = cmp.getComponentByType("ChipSet");
     if (this.chipset && this.sEGASW) {
         this.bEGASW = this.chipset.parseSwitches(this.sEGASW, this.bEGASW);
@@ -2262,6 +2263,7 @@ Video.prototype.processTouchEvent = function(event, fStart)
      * retains focus, preventDefault() will always be called.
      */
     if (this.fHasFocus) event.preventDefault();
+
     /*
      * Touch coordinates (that is, the pageX and pageY properties) are relative to the page, so to make
      * them relative to the canvas, we must subtract the canvas's left and top positions.  This Apple web page:
@@ -2280,12 +2282,14 @@ Video.prototype.processTouchEvent = function(event, fStart)
             yTouchOffset += eCurrent.offsetTop;
         }
     } while ((eCurrent = eCurrent.offsetParent));
+
     /*
      * Due to the responsive nature of our pages, the displayed size of the canvas may be smaller than the allocated
      * size, and the coordinates we receive from touch events are based on the currently displayed size.
      */
     var xScale =  this.cxScreen / this.canvasScreen.offsetWidth;
     var yScale = this.cyScreen / this.canvasScreen.offsetHeight;
+
     /**
      * @name Event
      * @property {Array} targetTouches
@@ -2302,6 +2306,7 @@ Video.prototype.processTouchEvent = function(event, fStart)
     yTouch = ((yTouch - yTouchOffset) * yScale);
     var xThird = (xTouch / (this.cxScreen / 3)) | 0;
     var yThird = (yTouch / (this.cyScreen / 3)) | 0;
+
     /*
      * At this point, xThird and yThird should both be one of 0, 1 or 2, indicating which horizontal and vertical
      * third of the virtual screen the touch event occurred.
@@ -2623,30 +2628,30 @@ Video.prototype.onLoadSetFonts = function(sFontFile, sFontData, nErrorCode)
              *      0 0 0 0 0 0 0 0  <== 00 from offset 0x080E
              *      0 0 0 0 0 0 0 0  <== 00 from offset 0x080F
              *
-             *  In the second 2K chunk, we observe that the last two bytes of every font cell definition are zero;
-             *  this confirms our understanding that MDA font cell size is 8x14.
+             * In the second 2K chunk, we observe that the last two bytes of every font cell definition are zero;
+             * this confirms our understanding that MDA font cell size is 8x14.
              *
-             *  Finally, there's the issue of screen cell size, which is actually 9x14 on the MDA.  We compensate for that
-             *  by building a 9x14 font, even though there's only 8x14 bits of data. As http://www.seasip.info/VintagePC/mda.html
-             *  explains:
+             * Finally, there's the issue of screen cell size, which is actually 9x14 on the MDA.  We compensate for that
+             * by building a 9x14 font, even though there's only 8x14 bits of data. As http://www.seasip.info/VintagePC/mda.html
+             * explains:
              *
              *      "For characters C0h-DFh, the ninth pixel column is a duplicate of the eighth; for others, it's blank."
              *
-             *  This last point is confirmed by "The IBM Personal Computer From The Inside Out", p.295:
+             * This last point is confirmed by "The IBM Personal Computer From The Inside Out", p.295:
              *
-             *      "Another unique feature of the monochrome adapter is a set of line-drawing and area-fill characters that give
-             *      continuous lines and filled areas. This is unusual for a display with a 9x14 character box because the character
-             *      generator provides a row only eight dots wide. On most displays, a blank 9th dot is then inserted between characters.
-             *      On the monochrome display, there is circuitry that duplicates the 8th dot into the 9th dot position for characters
-             *      whose ASCII codes are 0xB0 through 0xDF."
+             *      "Another unique feature of the monochrome adapter is a set of line-drawing and area-fill characters
+             *      that give continuous lines and filled areas. This is unusual for a display with a 9x14 character box
+             *      because the character generator provides a row only eight dots wide. On most displays, a blank 9th
+             *      dot is then inserted between characters. On the monochrome display, there is circuitry that duplicates
+             *      the 8th dot into the 9th dot position for characters whose ASCII codes are 0xB0 through 0xDF."
              *
-             *  The only question is: is the range actually 0xC0-0xDF, or 0xB0-0xDF???  I'll assume the latter, since 0xB0 is where
-             *  the line-drawing/area-fill characters appear to begin.
+             * The only question is: is the range actually 0xC0-0xDF, or 0xB0-0xDF???  I'll assume the latter, since
+             * 0xB0 is where the line-drawing/area-fill characters appear to begin.
              *
-             *  The CGA font is part of the same ROM.  In fact, there are TWO CGA fonts in the ROM: a thin 5x7 "single dot" font
-             *  located at offset 0x1000, and a thick 7x7 "double dot" font at offset 0x1800.  The latter is the default font,
-             *  unless overridden by a jumper setting on the CGA card, so it is our default CGA font as well (although someday we
-             *  may provide a virtual jumper setting that allows you to select the thinner font).
+             * The CGA font is part of the same ROM.  In fact, there are TWO CGA fonts in the ROM: a thin 5x7 "single dot"
+             * font located at offset 0x1000, and a thick 7x7 "double dot" font at offset 0x1800.  The latter is the default
+             * font, unless overridden by a jumper setting on the CGA card, so it is our default CGA font as well (although
+             * someday we may provide a virtual jumper setting that allows you to select the thinner font).
              *
              * The first offset we pass to setFontData() is the offset of the MDA font.  For the second (CGA) font offset,
              * we choose the thicker "double dot" CGA font at 0x1800 (which was the PC's default font as well), instead
@@ -2672,8 +2677,7 @@ Video.prototype.onLoadSetFonts = function(sFontFile, sFontData, nErrorCode)
 /**
  * onROMLoad(abRom)
  *
- * Called by ROM.prototype.copyImage() whenever a ROM with a 'notify' attribute set to our component ID
- * has been loaded.
+ * Called by copyROM() whenever a ROM with a 'notify' attribute set to our component ID has been loaded.
  *
  * If model is "ega", then we assume the associated ROM is the original IBM EGA ROM, which stores
  * its 8x14 font data at 0x2230 (and unlike the MDA/CGA character generator ROM, which splits the first
@@ -2700,8 +2704,8 @@ Video.prototype.onROMLoad = function(abROM)
 {
     if (this.model == "ega") {
         /*
-         * TODO: Unlike the MDA/CGA font data, we may want to hang onto this data, so that we can regenerate
-         * the color font(s) whenever the foreground and/or background colors have been changed.
+         * TODO: Unlike the MDA/CGA font data, we may want to hang onto this data, so that we can
+         * regenerate the color font(s) whenever the foreground and/or background colors have changed.
          */
         if (DEBUG) this.printMessage("onROMLoad(): EGA fonts loaded");
         this.setFontData(abROM, [0x2230, 0x3160], 8);

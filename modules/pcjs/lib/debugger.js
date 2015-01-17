@@ -258,17 +258,17 @@ if (DEBUGGER) {
         FCOM:   40,  FCOMP:  41,  FDIV:   42,  FDIVR:  43,  FIADD:  44,  FICOM:  45,  FICOMP: 46,  FIDIV:  47,
         FIDIVR: 48,  FILD:   49,  FIMUL:  50,  FIST:   51,  FISTP:  52,  FISUB:  53,  FISUBR: 54,  FLD:    55,
         FLDCW:  56,  FLDENV: 57,  FMUL:   58,  FNSAVE: 59,  FNSTCW: 60,  FNSTENV:61,  FNSTSW: 62,  FRSTOR: 63,
-        FS:     64,  FST:    65,  FSTP:   66,  FSUB:   67,  FSUBR:  68,  GBP:    69,  GS:     70,  HLT:    71,
-        IDIV:   72,  IMUL:   73,  IN:     74,  INC:    75,  INS:    76,  INT:    77,  INT3:   78,  INTO:   79,
-        IRET:   80,  JBE:    81,  JC:     82,  JCXZ:   83,  JG:     84,  JGE:    85,  JL:     86,  JLE:    87,
-        JMP:    88,  JNBE:   89,  JNC:    90,  JNO:    91,  JNP:    92,  JNS:    93,  JNZ:    94,  JO:     95,
-        JP:     96,  JS:     97,  JZ:     98,  LAHF:   99,  LAR:    100, LDS:    101, LEA:    102, LEAVE:  103,
-        LES:    104, LFS:    105, LGDT:   106, LGS:    107, LIDT:   108, LLDT:   109, LMSW:   110, LOADALL:111,
-        LOCK:   112, LODSB:  113, LODSW:  114, LOOP:   115, LOOPNZ: 116, LOOPZ:  117, LSL:    118, LSS:    119,
-        LTR:    120, MOV:    121, MOVSB:  122, MOVSW:  123, MOVSX:  124, MOVZX:  125, MUL:    126, NEG:    127,
-        NOP:    128, NOT:    129, OR:     130, OSIZE:  131, OUT:    132, OUTS:   133, POP:    134, POPA:   135,
-        POPF:   136, PUSH:   137, PUSHA:  138, PUSHF:  139, RCL:    140, RCR:    141, REPNZ:  142, REPZ:   143,
-        RET:    144, RETF:   145, ROL:    146, ROR:    147, SAHF:   148, SAR:    149, SBB:    150, SCASB:  151,
+        FS:     64,  FST:    65,  FSTP:   66,  FSUB:   67,  FSUBR:  68,  GS:     69,  HLT:    70,  IDIV:   71,
+        IMUL:   72,  IN:     73,  INC:    74,  INS:    75,  INT:    76,  INT3:   77,  INTO:   78,  IRET:   79,
+        JBE:    80,  JC:     81,  JCXZ:   82,  JG:     83,  JGE:    84,  JL:     85,  JLE:    86,  JMP:    87,
+        JNBE:   88,  JNC:    89,  JNO:    90,  JNP:    91,  JNS:    92,  JNZ:    93,  JO:     94,  JP:     95,
+        JS:     96,  JZ:     97,  LAHF:   98,  LAR:    99,  LDS:    100, LEA:    101, LEAVE:  102, LES:    103,
+        LFS:    104, LGDT:   105, LGS:    106, LIDT:   107, LLDT:   108, LMSW:   109, LOADALL:110, LOCK:   111,
+        LODSB:  112, LODSW:  113, LOOP:   114, LOOPNZ: 115, LOOPZ:  116, LSL:    117, LSS:    118, LTR:    119,
+        MOV:    120, MOVSB:  121, MOVSW:  122, MOVSX:  123, MOVZX:  124, MUL:    125, NEG:    126, NOP:    127,
+        NOT:    128, OR:     129, OSIZE:  130, OUT:    131, OUTS:   132, POP:    133, POPA:   134, POPF:   135,
+        PUSH:   136, PUSHA:  137, PUSHF:  138, RCL:    139, RCR:    140, REPNZ:  141, REPZ:   142, RET:    143,
+        RETF:   144, ROL:    145, ROR:    146, SAHF:   147, SALC:   148, SAR:    149, SBB:    150, SCASB:  151,
         SCASW:  152, SETBE:  153, SETC:   154, SETG:   155, SETGE:  156, SETL:   157, SETLE:  158, SETNBE: 159,
         SETNC:  160, SETNO:  161, SETNP:  162, SETNS:  163, SETNZ:  164, SETO:   165, SETP:   166, SETS:   167,
         SETZ:   168, SGDT:   169, SHL:    170, SHLD:   171, SHR:    172, SHRD:   173, SIDT:   174, SLDT:   175,
@@ -290,17 +290,17 @@ if (DEBUGGER) {
         "FCOM",   "FCOMP",  "FDIV",   "FDIVR",  "FIADD",  "FICOM",  "FICOMP", "FIDIV",
         "FIDIVR", "FILD",   "FIMUL",  "FIST",   "FISTP",  "FISUB",  "FISUBR", "FLD",
         "FLDCW",  "FLDENV", "FMUL",   "FNSAVE", "FNSTCW", "FNSTENV","FNSTSW", "FRSTOR",
-        "FS:",    "FST",    "FSTP",   "FSUB",   "FSUBR",  "GBP",    "GS:",    "HLT",
-        "IDIV",   "IMUL",   "IN",     "INC",    "INS",    "INT",    "INT3",   "INTO",
-        "IRET",   "JBE",    "JC",     "JCXZ",   "JG",     "JGE",    "JL",     "JLE",
-        "JMP",    "JNBE",   "JNC",    "JNO",    "JNP",    "JNS",    "JNZ",    "JO",
-        "JP",     "JS",     "JZ",     "LAHF",   "LAR",    "LDS",    "LEA",    "LEAVE",
-        "LES",    "LFS",    "LGDT",   "LGS",    "LIDT",   "LLDT",   "LMSW",   "LOADALL",
-        "LOCK",   "LODSB",  "LODSW",  "LOOP",   "LOOPNZ", "LOOPZ",  "LSL",    "LSS",
-        "LTR",    "MOV",    "MOVSB",  "MOVSW",  "MOVSX",  "MOVZX",  "MUL",    "NEG",
-        "NOP",    "NOT",    "OR",     "OS:",    "OUT",    "OUTS",   "POP",    "POPA",
-        "POPF",   "PUSH",   "PUSHA",  "PUSHF",  "RCL",    "RCR",    "REPNZ",  "REPZ",
-        "RET",    "RETF",   "ROL",    "ROR",    "SAHF",   "SAR",    "SBB",    "SCASB",
+        "FS:",    "FST",    "FSTP",   "FSUB",   "FSUBR",  "GS:",    "HLT",    "IDIV",
+        "IMUL",   "IN",     "INC",    "INS",    "INT",    "INT3",   "INTO",   "IRET",
+        "JBE",    "JC",     "JCXZ",   "JG",     "JGE",    "JL",     "JLE",    "JMP",
+        "JNBE",   "JNC",    "JNO",    "JNP",    "JNS",    "JNZ",    "JO",     "JP",
+        "JS",     "JZ",     "LAHF",   "LAR",    "LDS",    "LEA",    "LEAVE",  "LES",
+        "LFS",    "LGDT",   "LGS",    "LIDT",   "LLDT",   "LMSW",   "LOADALL","LOCK",
+        "LODSB",  "LODSW",  "LOOP",   "LOOPNZ", "LOOPZ",  "LSL",    "LSS",    "LTR",
+        "MOV",    "MOVSB",  "MOVSW",  "MOVSX",  "MOVZX",  "MUL",    "NEG",    "NOP",
+        "NOT",    "OR",     "OS:",    "OUT",    "OUTS",   "POP",    "POPA",   "POPF",
+        "PUSH",   "PUSHA",  "PUSHF",  "RCL",    "RCR",    "REPNZ",  "REPZ",   "RET",
+        "RETF",   "ROL",    "ROR",    "SAHF",   "SALC",   "SAR",    "SBB",    "SCASB",
         "SCASW",  "SETBE",  "SETC",   "SETG",   "SETGE",  "SETL",   "SETLE",  "SETNBE",
         "SETNC",  "SETNO",  "SETNP",  "SETNS",  "SETNZ",  "SETO",   "SETP",   "SETS",
         "SETZ",   "SGDT",   "SHL",    "SHLD",   "SHR",    "SHRD",   "SIDT",   "SLDT",
@@ -812,7 +812,7 @@ if (DEBUGGER) {
     /* 0xD3 */ [Debugger.INS.GRP2WC,Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_IMPREG | Debugger.TYPE_CL |   Debugger.TYPE_IN],
     /* 0xD4 */ [Debugger.INS.AAM,   Debugger.TYPE_IMM    | Debugger.TYPE_BYTE],
     /* 0xD5 */ [Debugger.INS.AAD,   Debugger.TYPE_IMM    | Debugger.TYPE_BYTE],
-    /* 0xD6 */ [Debugger.INS.GBP],
+    /* 0xD6 */ [Debugger.INS.SALC],
     /* 0xD7 */ [Debugger.INS.XLAT],
 
     /* 0xD8 */ [Debugger.INS.ESC,   Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
@@ -3643,6 +3643,7 @@ if (DEBUGGER) {
             sDumpers += ",state,symbols";
             this.println("\ndump commands:");
             this.println("\tdb [a] [#]    dump # bytes at address a");
+            if (BACKTRACK) this.println("\tdi [a]        dump backtrack info at address a");
             this.println("\tdw [a] [#]    dump # words at address a");
             if (sDumpers.length) this.println("dump extensions:\n\t" + sDumpers);
             return;
@@ -3669,43 +3670,42 @@ if (DEBUGGER) {
         var aAddr = this.parseAddr(sAddr, Debugger.ADDR_DATA);
         if (aAddr[0] == null) return;
 
-        var cLines = 0;
-        var fWords = (sCmd == "dw");
-
-        if (sLen !== undefined) {
-            if (sLen.charAt(0) == "l")
-                sLen = sLen.substr(1);
-            cLines = parseInt(sLen, 10);
-            if (cLines) {
-                if (fWords)
-                    cLines = (cLines + 7) >> 3;
-                else
-                    cLines = (cLines + 15) >> 4;
-            }
-        }
-
         var sDump = "";
-        if (!cLines) cLines = 8;
-        for (var iLine = 0; iLine < cLines; iLine++) {
-            var sBytes = "";
-            var sChars = "";
-            sAddr = this.hexAddr(aAddr);
-            var bPrev = 0;
-            for (var i = 0; i < 16; i++) {
-                var b = this.getByte(aAddr, 1);
-                if (fWords) {
-                    if (i & 0x1) {
-                        sBytes += str.toHexWord(bPrev | (b << 8)) + (i == 7? " - " : "  ");
-                    }
-                }
-                else {
-                    sBytes += str.toHexByte(b) + (i == 7? "-" : " ");
-                }
-                sChars += (b >= 32 && b < 128? String.fromCharCode(b) : ".");
-                bPrev = b;
+        if (sCmd == "di") {
+            var addr = this.getAddr(aAddr);
+            sDump += '%' + str.toHex(addr) + ": ";
+            var sInfo = this.bus.getBackTrackInfoFromAddr(addr);
+            sDump += sInfo || "no information";
+        }
+        else {
+            var cLines = 0;
+            var fWords = (sCmd == "dw");
+            if (sLen !== undefined) {
+                if (sLen.charAt(0) == "l") sLen = sLen.substr(1);
+                cLines = parseInt(sLen, 10);
+                if (cLines) cLines = fWords? ((cLines + 7) >> 3) : ((cLines + 15) >> 4);
             }
-            if (sDump) sDump += "\n";
-            sDump += sAddr + "  " + sBytes + " " + sChars;
+            if (!cLines) cLines = 8;
+            for (var iLine = 0; iLine < cLines; iLine++) {
+                var bPrev = 0;
+                var sBytes = "", sChars = "";
+                sAddr = this.hexAddr(aAddr);
+                for (var i = 0; i < 16; i++) {
+                    var b = this.getByte(aAddr, 1);
+                    if (fWords) {
+                        if (i & 0x1) {
+                            sBytes += str.toHexWord(bPrev | (b << 8)) + (i == 7? " - " : "  ");
+                        }
+                    }
+                    else {
+                        sBytes += str.toHexByte(b) + (i == 7? "-" : " ");
+                    }
+                    sChars += (b >= 32 && b < 128? String.fromCharCode(b) : ".");
+                    bPrev = b;
+                }
+                if (sDump) sDump += "\n";
+                sDump += sAddr + "  " + sBytes + " " + sChars;
+            }
         }
         if (sDump) this.println(sDump);
         this.aAddrNextData = aAddr;
@@ -4746,7 +4746,7 @@ if (DEBUGGER) {
                         if (this.cmp) this.cmp.reset();
                         return true;
                     case "ver":
-                        this.println((APPNAME || "PCjs") + " version " + APPVERSION + " (" + (COMPILED? "release" : (DEBUG? "debug" : "nodebug")) + (PREFETCH? ",prefetch" : ",noprefetch") + (EAFUNCS? "eafuncs" : ",eatests") + (TYPEDARRAYS? ",typedarrays" : (FATARRAYS? ",fatarrays" : ",dwordarrays")) + ")");
+                        this.println((APPNAME || "PCjs") + " version " + APPVERSION + " (" + (COMPILED? "RELEASE" : (DEBUG? "DEBUG" : "NODEBUG")) + (PREFETCH? ",PREFETCH" : ",NOPREFETCH") + (EAFUNCS? "EAFUNCS" : ",EATESTS") + (TYPEDARRAYS? ",TYPEDARRAYS" : (FATARRAYS? ",FATARRAYS" : ",DWORDARRAYS")) + ")");
                         return true;
                     default:
                         ch0 = sCmd.charAt(0);

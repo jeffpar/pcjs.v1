@@ -169,7 +169,7 @@ function Bus(parmsBus, cpu, dbg)
          *
          *      obj:    a reference to the source object (eg, ROM object, Sector object)
          *      off:    the offset within the source object that this object refers to
-         *      slot:   the slot in abtObjects which this object currently occupies
+         *      slot:   the slot (+1) in abtObjects which this object currently occupies
          *      refs:   the number of memory references, as recorded by writeBackTrack()
          */
         this.abtObjects = [];
@@ -184,13 +184,54 @@ function Bus(parmsBus, cpu, dbg)
 Component.subclass(Component, Bus);
 
 if (BACKTRACK) {
+    /*
+     * BackTrack indexes are 31-bit values, where bits 0-8 store an object offset (0-511) and bits 16-30 store
+     * an object number (1-32767).  Object number 0 is reserved for dynamic data (ie, data created independent
+     * of any source); examples include zero values produced by instructions such as "SUB AX,AX" or "XOR AX,AX".
+     * We must special-case instructions like that, because even though AX will almost certainly contain some source
+     * data prior to the instruction, the result no longer has any connection to the source.  Similarly, "SBB AX,AX"
+     * may produce 0 or -1, depending on carry, but since we don't track the source of individual bits (including the
+     * carry flag), AX is now source-less.  TODO: This is an argument for maintaining source info on selected flags,
+     * even though it would be rather expensive.
+     *
+     * The 7 middle bits (9-15) record type and access information, as follows:
+     *
+     *      bit 15: set to indicate a "data" byte, clear to indicate a "code" byte
+     *
+     * All bytes start out as "data" bytes; only once they've been executed do they become "code" bytes.  For code
+     * bytes, the remaining 6 middle bits (9-14) represent an execution count that starts at 1 (on the byte's initial
+     * transition from data to code) and tops out at 63.
+     *
+     * For data bytes, the remaining middle bits indicate any transformations the data has undergone; eg:
+     *
+     *      bit 14: ADD/SUB/INC/DEC
+     *      bit 13: MUL/DIV
+     *      bit 12: OR/AND/XOR/NOT
+     *
+     * We make no attempt to record the original data or the transformation data, only that the transformation occurred.
+     *
+     * Other middle bits indicate whether the data was ever read and/or written:
+     *
+     *      bit 11: READ
+     *      bit 10: WRITE
+     *
+     * Bit 9 is reserved for now.
+     */
     Bus.BACKTRACK = {
-        SLOT_MAX:   32768,
-        SLOT_SHIFT: 16,
-        GEN_START:  1,
-        GEN_MAX:    64,
-        GEN_SHIFT:  9,
-        OFF_MAX:    512
+        SLOT_MAX:       32768,
+        SLOT_SHIFT:     16,
+        TYPE_DATA:      0x8000,
+        TYPE_ADDSUB:    0x4000,
+        TYPE_MULDIV:    0x2000,
+        TYPE_LOGICAL:   0x1000,
+        TYPE_READ:      0x0800,
+        TYPE_WRITE:     0x0400,
+        TYPE_COUNT_INC: 0x0200,
+        TYPE_COUNT_MAX: 0x7E00,
+        TYPE_MASK:      0xFE00,
+        TYPE_SHIFT:     9,
+        OFF_MAX:        512,
+        OFF_MASK:       0x1FF
     };
 }
 
@@ -602,7 +643,8 @@ Bus.prototype.addBackTrackObject = function(obj, bto, off)
                  */
             }
             this.assert(slot < Bus.BACKTRACK.SLOT_MAX);
-            this.ibtLastAlloc = bto.slot = slot;
+            this.ibtLastAlloc = slot;
+            bto.slot = slot + 1;
             if (slot == cbtObjects) {
                 this.abtObjects.push(bto);
             } else {
@@ -626,7 +668,7 @@ Bus.prototype.getBackTrackIndex = function(bto, off)
 {
     var bti = 0;
     if (BACKTRACK && bto) {
-        bti = (bto.slot << Bus.BACKTRACK.SLOT_SHIFT) | (Bus.BACKTRACK.GEN_START << Bus.BACKTRACK.GEN_SHIFT) | (off - bto.off);
+        bti = (bto.slot << Bus.BACKTRACK.SLOT_SHIFT) | Bus.BACKTRACK.TYPE_DATA | (off - bto.off);
     }
     return bti;
 };
@@ -643,7 +685,7 @@ Bus.prototype.writeBackTrackObject = function(addr, bto, off)
 {
     if (BACKTRACK && bto) {
         this.assert(off - bto.off >= 0 && off - bto.off < Bus.BACKTRACK.OFF_MAX);
-        var bti = (bto.slot << Bus.BACKTRACK.SLOT_SHIFT) | (Bus.BACKTRACK.GEN_START << Bus.BACKTRACK.GEN_SHIFT) | (off - bto.off);
+        var bti = (bto.slot << Bus.BACKTRACK.SLOT_SHIFT) | Bus.BACKTRACK.TYPE_DATA | (off - bto.off);
         this.writeBackTrack(addr, bti);
     }
 };
@@ -677,8 +719,8 @@ Bus.prototype.writeBackTrack = function(addr, bti)
         var btiPrev = this.aMemBlocks[(addr & this.addrMask) >> this.blockShift].writeBackTrack(addr & this.blockLimit, bti);
         var slotPrev = btiPrev >>> Bus.BACKTRACK.SLOT_SHIFT;
         if (slot != slotPrev) {
-            if (btiPrev) {
-                var btoPrev = this.abtObjects[slotPrev];
+            if (btiPrev && slotPrev) {
+                var btoPrev = this.abtObjects[slotPrev-1];
                 if (!btoPrev) {
                     if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.WARN)) {
                         this.dbg.message("writeBackTrack(%" + str.toHex(addr) + ',' + str.toHex(bti) + "): previous index (" + str.toHex(btiPrev) + ") refers to empty slot (" + slotPrev + ")");
@@ -698,7 +740,7 @@ Bus.prototype.writeBackTrack = function(addr, bti)
                      * slots with a ref count of zero; in the latter case, it should again check for weak references,
                      * after which we can re-use the slot if all its weak references are now gone.
                      */
-                    if (!this.isBackTrackWeak(btiPrev)) this.abtObjects[slotPrev] = null;
+                    if (!this.isBackTrackWeak(btiPrev)) this.abtObjects[slotPrev-1] = null;
                     /*
                      * TODO: Consider what the appropriate trigger should be for resetting ibtLastDelete to zero;
                      * if we don't OCCASIONALLY set it to zero, we may never clear out obsolete weak references,
@@ -707,11 +749,11 @@ Bus.prototype.writeBackTrack = function(addr, bti)
                      *
                      * I'd prefer to do something like this:
                      *
-                     *      if (this.ibtLastDelete > slotPrev) this.ibtLastDelete = slotPrev;
+                     *      if (this.ibtLastDelete > slotPrev-1) this.ibtLastDelete = slotPrev-1;
                      *
                      * or even this:
                      *
-                     *      if (this.ibtLastDelete > slotPrev) this.ibtLastDelete = 0;
+                     *      if (this.ibtLastDelete > slotPrev-1) this.ibtLastDelete = 0;
                      *
                      * But neither one of those guarantees that we will at least occasionally scan the entire table.
                      */
@@ -719,8 +761,8 @@ Bus.prototype.writeBackTrack = function(addr, bti)
                     this.cbtDeletions++;
                 }
             }
-            if (bti) {
-                var bto = this.abtObjects[slot];
+            if (bti && slot) {
+                var bto = this.abtObjects[slot-1];
                 if (bto) {
                     this.assert(slot == bto.slot);
                     bto.refs++;
@@ -739,22 +781,81 @@ Bus.prototype.writeBackTrack = function(addr, bti)
 Bus.prototype.isBackTrackWeak = function(bti)
 {
     var bt = this.cpu.backTrack;
-    var slot = bti >>> Bus.BACKTRACK.SLOT_SHIFT;
-    return (bt.btiAL >>> Bus.BACKTRACK.SLOT_SHIFT == slot ||
-            bt.btiAH >>> Bus.BACKTRACK.SLOT_SHIFT == slot ||
-            bt.btiBL >>> Bus.BACKTRACK.SLOT_SHIFT == slot ||
-            bt.btiBH >>> Bus.BACKTRACK.SLOT_SHIFT == slot ||
-            bt.btiCL >>> Bus.BACKTRACK.SLOT_SHIFT == slot ||
-            bt.btiCH >>> Bus.BACKTRACK.SLOT_SHIFT == slot ||
-            bt.btiDL >>> Bus.BACKTRACK.SLOT_SHIFT == slot ||
-            bt.btiDH >>> Bus.BACKTRACK.SLOT_SHIFT == slot ||
-            bt.btiBPLo >>> Bus.BACKTRACK.SLOT_SHIFT == slot ||
-            bt.btiBPHi >>> Bus.BACKTRACK.SLOT_SHIFT == slot ||
-            bt.btiSILo >>> Bus.BACKTRACK.SLOT_SHIFT == slot ||
-            bt.btiSIHi >>> Bus.BACKTRACK.SLOT_SHIFT == slot ||
-            bt.btiDILo >>> Bus.BACKTRACK.SLOT_SHIFT == slot ||
-            bt.btiDIHi >>> Bus.BACKTRACK.SLOT_SHIFT == slot
+    var slot = bti >> Bus.BACKTRACK.SLOT_SHIFT;
+    return (bt.btiAL   >> Bus.BACKTRACK.SLOT_SHIFT == slot ||
+            bt.btiAH   >> Bus.BACKTRACK.SLOT_SHIFT == slot ||
+            bt.btiBL   >> Bus.BACKTRACK.SLOT_SHIFT == slot ||
+            bt.btiBH   >> Bus.BACKTRACK.SLOT_SHIFT == slot ||
+            bt.btiCL   >> Bus.BACKTRACK.SLOT_SHIFT == slot ||
+            bt.btiCH   >> Bus.BACKTRACK.SLOT_SHIFT == slot ||
+            bt.btiDL   >> Bus.BACKTRACK.SLOT_SHIFT == slot ||
+            bt.btiDH   >> Bus.BACKTRACK.SLOT_SHIFT == slot ||
+            bt.btiBPLo >> Bus.BACKTRACK.SLOT_SHIFT == slot ||
+            bt.btiBPHi >> Bus.BACKTRACK.SLOT_SHIFT == slot ||
+            bt.btiSILo >> Bus.BACKTRACK.SLOT_SHIFT == slot ||
+            bt.btiSIHi >> Bus.BACKTRACK.SLOT_SHIFT == slot ||
+            bt.btiDILo >> Bus.BACKTRACK.SLOT_SHIFT == slot ||
+            bt.btiDIHi >> Bus.BACKTRACK.SLOT_SHIFT == slot
     );
+};
+
+/**
+ * updateBackTrackCode(addr, bti)
+ *
+ * @this {Bus}
+ * @param {number} addr is a physical (non-segmented) address
+ * @param {number} bti
+ */
+Bus.prototype.updateBackTrackCode = function(addr, bti)
+{
+    if (BACKTRACK) {
+        if (bti & Bus.BACKTRACK.TYPE_DATA) {
+            bti = (bti & ~Bus.BACKTRACK.TYPE_MASK) | Bus.BACKTRACK.TYPE_COUNT_INC;
+        } else if ((bti & Bus.BACKTRACK.TYPE_MASK) < Bus.BACKTRACK.TYPE_COUNT_MAX) {
+            bti += Bus.BACKTRACK.TYPE_COUNT_INC;
+        } else {
+            return;
+        }
+        this.aMemBlocks[(addr & this.addrMask) >> this.blockShift].writeBackTrack(addr & this.blockLimit, bti);
+    }
+};
+
+/**
+ * getBackTrackInfo(bti)
+ *
+ * @this {Bus}
+ * @param {number} bti
+ * @return {string|null}
+ */
+Bus.prototype.getBackTrackInfo = function(bti)
+{
+    if (BACKTRACK) {
+        var slot = bti >>> Bus.BACKTRACK.SLOT_SHIFT;
+        if (slot) {
+            var off = bti & Bus.BACKTRACK.OFF_MASK;
+            var bto = this.abtObjects[slot-1];
+            var file = bto.obj.file;
+            if (file) {
+                this.assert(!bto.off);
+                return file.sName + '[' + (bto.obj.offFile + off) + ']';
+            }
+            return bto.obj.idComponent + '[' + (bto.off + off) + ']';
+        }
+    }
+    return null;
+};
+
+/**
+ * getBackTrackInfoFromAddr(addr)
+ *
+ * @this {Bus}
+ * @param {number} addr
+ * @return {string|null}
+ */
+Bus.prototype.getBackTrackInfoFromAddr = function(addr)
+{
+    var bti = this.readBackTrack(addr);
+    return this.getBackTrackInfo(bti);
 };
 
 /**

@@ -104,7 +104,6 @@ if (typeof module !== 'undefined') {
 function Memory(addr, size, fReadOnly, controller)
 {
     var i;
-
     this.cb = size || 0;
     this.adw = null;
     this.offset = 0;
@@ -113,7 +112,7 @@ function Memory(addr, size, fReadOnly, controller)
     this.fDirty = this.fDirtyEver = false;
 
     if (BACKTRACK) {
-        if (this.fReadOnly || !size || controller) {
+        if (!size || controller) {
             this.readBackTrack = Memory.readBackTrackNone;
             this.writeBackTrack = Memory.writeBackTrackNone;
         } else {

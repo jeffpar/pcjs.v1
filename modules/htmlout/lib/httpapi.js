@@ -120,8 +120,8 @@ var aExternalRedirects = {
 };
 
 var aExternalRedirectPatterns = {
-    "^/configs/c1p/machines/(.*)":                              "/devices/c1p/machine/$1",
-    "^/configs/pc/machines/(.*)":                               "/devices/pc/machine/$1"
+    "^/configs/c1p/machines/?(.*)":                             "/devices/c1p/machine/$1",
+    "^/configs/pc/machines/?(.*)":                              "/devices/pc/machine/$1"
 };
 
 /*

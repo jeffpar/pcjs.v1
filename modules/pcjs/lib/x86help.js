@@ -176,6 +176,15 @@ var X86Help = {
      */
     opHelpLEA: function(dst, src) {
         if (this.regEA < 0) {
+            /*
+             * TODO: After reading http://www.os2museum.com/wp/undocumented-8086-opcodes/, it seems that this
+             * form of LEA (eg, "LEA AX,DX") simply returns the last calculated EA.  Since we always reset regEA
+             * at the start of a new instruction, we would need to preserve the previous EA if we want to mimic
+             * that (undocumented) behavior.
+             *
+             * And for completeness, we would have to extend EA tracking beyond the usual ModRM instructions
+             * (eg, XLAT, instructions that modify the stack pointer, and string instructions).  Anything else?
+             */
             X86Help.opHelpUndefined.call(this);
             return dst;
         }
@@ -314,6 +323,24 @@ var X86Help = {
         return dst;
     },
     /**
+     * opHelpXCHGrb(dst, src)
+     *
+     * If an instruction like "XCHG AL,AH" was a traditional "op dst,src" instruction, dst would contain AL,
+     * src would contain AH, and we would return src, which the caller would then store in AL, and we'd be done.
+     *
+     * However, that's only half of what XCHG does, so THIS function must perform the other half; in the previous
+     * example, that entails storing AL (dst) into AH (src).
+     *
+     * BACKTRACK support is incomplete without also passing bti values as parameters, because the caller will
+     * store btiAH in btiAL, but the original btiAL will be lost.  Similarly, if src is a memory operand, the
+     * caller will store btiEALo in btiAL, but again, the original btiAL will be lost.
+     *
+     * BACKTRACK support for memory operands could be fixed by decoding the dst register in order to determine the
+     * corresponding bti and then temporarily storing it in btiEALo around the setEAByte() call below.  Register-only
+     * XCHGs would require a more extensive hack.  For now, I'm going to live with one-way BACKTRACK support here.
+     *
+     * TODO: Implement full BACKTRACK support for XCHG instructions.
+     *
      * @this {X86CPU}
      * @param {number} dst
      * @param {number} src
@@ -321,6 +348,9 @@ var X86Help = {
      */
     opHelpXCHGrb: function(dst, src) {
         if (this.regEA < 0) {
+            //
+            // Decode which register was src
+            //
             switch (this.bModRM & 0x7) {
             case 0x0:       // AL
                 this.regAX = (this.regAX & ~0xff) | dst;
@@ -351,10 +381,11 @@ var X86Help = {
             }
             this.nStepCycles -= this.CYCLES.nOpCyclesXchgRR;
         } else {
-            /*
-             * This is a case where the ModRM decoder that's calling us didn't know it should have called modEAByte()
-             * instead of getEAByte(), so we compensate by updating regEAWrite.
-             */
+            //
+            // This is a case where the ModRM decoder that's calling us didn't know it should have called modEAByte()
+            // instead of getEAByte(), so we compensate by updating regEAWrite.  However, setEAByte() has since been
+            // changed to revalidate the write using segEA:offEA, so updating regEAWrite here isn't strictly necessary.
+            //
             this.regEAWrite = this.regEA;
             this.setEAByte(dst);
             this.nStepCycles -= this.CYCLES.nOpCyclesXchgRM;
@@ -362,6 +393,16 @@ var X86Help = {
         return src;
     },
     /**
+     * opHelpXCHGrw(dst, src)
+     *
+     * If an instruction like "XCHG AX,DX" was a traditional "op dst,src" instruction, dst would contain AX,
+     * src would contain DX, and we would return src, which the caller would then store in AX, and we'd be done.
+     *
+     * However, that's only half of what XCHG does, so THIS function must perform the other half; in the previous
+     * example, that entails storing AX (dst) into DX (src).
+     *
+     * TODO: Implement full BACKTRACK support for XCHG instructions (see opHelpXCHGrb comments).
+     *
      * @this {X86CPU}
      * @param {number} dst
      * @param {number} src
@@ -369,6 +410,9 @@ var X86Help = {
      */
     opHelpXCHGrw: function(dst, src) {
         if (this.regEA < 0) {
+            //
+            // Decode which register was src
+            //
             switch (this.bModRM & 0x7) {
             case 0x0:       // AX
                 this.regAX = dst;
@@ -399,10 +443,11 @@ var X86Help = {
             }
             this.nStepCycles -= this.CYCLES.nOpCyclesXchgRR;
         } else {
-            /*
-             * This is a case where the ModRM decoder that's calling us didn't know it should have called modEAByte()
-             * instead of getEAByte(), so we compensate by updating regEAWrite.
-             */
+            //
+            // This is a case where the ModRM decoder that's calling us didn't know it should have called modEAWord()
+            // instead of getEAWord(), so we compensate by updating regEAWrite.  However, setEAWord() has since been
+            // changed to revalidate the write using segEA:offEA, so updating regEAWrite here isn't strictly necessary.
+            //
             this.regEAWrite = this.regEA;
             this.setEAWord(dst);
             this.nStepCycles -= this.CYCLES.nOpCyclesXchgRM;

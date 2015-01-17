@@ -721,8 +721,8 @@ X86CPU.prototype.initProcessor = function()
         this.aOps[X86.OPCODE.INSW]      = X86OpXX.opINSw;
         this.aOps[X86.OPCODE.OUTSB]     = X86OpXX.opOUTSb;
         this.aOps[X86.OPCODE.OUTSW]     = X86OpXX.opOUTSw;
-        this.aOps[0xC0]                 = X86OpXX.opGrp2ab;
-        this.aOps[0xC1]                 = X86OpXX.opGrp2aw;
+        this.aOps[0xC0]                 = X86OpXX.opGrp2bi;
+        this.aOps[0xC1]                 = X86OpXX.opGrp2wi;
         this.aOps[X86.OPCODE.ENTER]     = X86OpXX.opENTER;
         this.aOps[X86.OPCODE.LEAVE]     = X86OpXX.opLEAVE;
         this.aOps[0xF1]                 = X86OpXX.opINT1;
@@ -858,6 +858,8 @@ X86CPU.prototype.resetRegs = function()
             btiSIHi:    0,
             btiDILo:    0,
             btiDIHi:    0,
+            btiEALo:    0,
+            btiEAHi:    0,
             btiMemLo:   0,
             btiMemHi:   0,
             btiIO:      0
@@ -1175,8 +1177,8 @@ X86CPU.prototype.restore = function(data)
     this.setPS(a[6]);
     this.setIP(a[0]);
     a = data[2];
-    this.segData = this.getSeg(a[0]);
-    this.segStack = this.getSeg(a[1]);
+    this.segData = a[0] != null && this.getSeg(a[0]) || this.segDS;
+    this.segStack = a[1] != null && this.getSeg(a[1]) || this.segSS;
     this.opFlags = a[2];
     this.opPrefixes = a[3];
     this.intFlags = a[4];
@@ -1971,7 +1973,9 @@ X86CPU.prototype.getEAByteEnabled = function getEAByteEnabled(seg, off)
     this.segEA = seg;
     this.regEA = seg.checkRead(this.offEA = off, 0);
     if (!EAFUNCS && (this.opFlags & X86.OPFLAG.NOREAD)) return 0;
-    return this.getByte(this.regEA);
+    var b = this.getByte(this.regEA);
+    if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiMemLo;
+    return b;
 };
 
 /**
@@ -1987,7 +1991,12 @@ X86CPU.prototype.getEAWordEnabled = function getEAWordEnabled(seg, off)
     this.segEA = seg;
     this.regEA = seg.checkRead(this.offEA = off, 1);
     if (!EAFUNCS && (this.opFlags & X86.OPFLAG.NOREAD)) return 0;
-    return this.getWord(this.regEA);
+    var w = this.getWord(this.regEA);
+    if (BACKTRACK) {
+        this.backTrack.btiEALo = this.backTrack.btiMemLo;
+        this.backTrack.btiEAHi = this.backTrack.btiMemHi;
+    }
+    return w;
 };
 
 /**
@@ -2003,7 +2012,9 @@ X86CPU.prototype.modEAByteEnabled = function modEAByteEnabled(seg, off)
     this.segEA = seg;
     this.regEAWrite = this.regEA = seg.checkRead(this.offEA = off, 0);
     if (!EAFUNCS && (this.opFlags & X86.OPFLAG.NOREAD)) return 0;
-    return this.getByte(this.regEA);
+    var b = this.getByte(this.regEA);
+    if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiMemLo;
+    return b;
 };
 
 /**
@@ -2019,7 +2030,12 @@ X86CPU.prototype.modEAWordEnabled = function modEAWordEnabled(seg, off)
     this.segEA = seg;
     this.regEAWrite = this.regEA = seg.checkRead(this.offEA = off, 1);
     if (!EAFUNCS && (this.opFlags & X86.OPFLAG.NOREAD)) return 0;
-    return this.getWord(this.regEA);
+    var w = this.getWord(this.regEA);
+    if (BACKTRACK) {
+        this.backTrack.btiEALo = this.backTrack.btiMemLo;
+        this.backTrack.btiEAHi = this.backTrack.btiMemHi;
+    }
+    return w;
 };
 
 /**
@@ -2031,6 +2047,7 @@ X86CPU.prototype.modEAWordEnabled = function modEAWordEnabled(seg, off)
 X86CPU.prototype.setEAByteEnabled = function setEAByteEnabled(b)
 {
     if (!EAFUNCS && (this.opFlags & X86.OPFLAG.NOWRITE)) return;
+    if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiEALo;
     this.setByte(this.segEA.checkWrite(this.offEA, 0), b);
 };
 
@@ -2043,6 +2060,10 @@ X86CPU.prototype.setEAByteEnabled = function setEAByteEnabled(b)
 X86CPU.prototype.setEAWordEnabled = function setEAWordEnabled(w)
 {
     if (!EAFUNCS && (this.opFlags & X86.OPFLAG.NOWRITE)) return;
+    if (BACKTRACK) {
+        this.backTrack.btiMemLo = this.backTrack.btiEALo;
+        this.backTrack.btiMemHi = this.backTrack.btiEAHi;
+    }
     this.setWord(this.segEA.checkWrite(this.offEA, 1), w);
 };
 
@@ -2239,22 +2260,19 @@ X86CPU.prototype.advancePrefetch = function(inc)
 /**
  * getIPByte()
  *
- * NOTE: We don't need to mask the incoming regEIP, because regEIP is always masked after update.
- *
  * @this {X86CPU}
  * @return {number} byte at the current IP; IP advanced by 1
  */
 X86CPU.prototype.getIPByte = function()
 {
     var b = (PREFETCH? this.getBytePrefetch(this.regEIP) : this.getByte(this.regEIP));
-    this.regEIP = this.segCS.base + (this.regIP = (this.regIP + 1) & 0xffff);     // this.advanceIP(1)
+    if (BACKTRACK) this.bus.updateBackTrackCode(this.regEIP, this.backTrack.btiMemLo);
+    this.regEIP = this.segCS.base + (this.regIP = (this.regIP + 1) & 0xffff);   // this.advanceIP(1)
     return b;
 };
 
 /**
  * getIPDisp()
- *
- * NOTE: We don't need to mask the incoming regEIP, because regEIP is always masked after update.
  *
  * @this {X86CPU}
  * @return {number} sign-extended value from the byte at the current IP; IP advanced by 1
@@ -2262,14 +2280,13 @@ X86CPU.prototype.getIPByte = function()
 X86CPU.prototype.getIPDisp = function()
 {
     var b = ((PREFETCH? this.getBytePrefetch(this.regEIP) : this.getByte(this.regEIP)) << 24) >> 24;
-    this.regEIP = this.segCS.base + (this.regIP = (this.regIP + 1) & 0xffff);     // this.advanceIP(1)
+    if (BACKTRACK) this.bus.updateBackTrackCode(this.regEIP, this.backTrack.btiMemLo);
+    this.regEIP = this.segCS.base + (this.regIP = (this.regIP + 1) & 0xffff);   // this.advanceIP(1)
     return b & 0xffff;
 };
 
 /**
  * getIPWord()
- *
- * NOTE: We don't need to mask the incoming regEIP, because regEIP is always masked after update.
  *
  * @this {X86CPU}
  * @return {number} word at the current IP; IP advanced by 2
@@ -2277,7 +2294,11 @@ X86CPU.prototype.getIPDisp = function()
 X86CPU.prototype.getIPWord = function()
 {
     var w = (PREFETCH? this.getWordPrefetch(this.regEIP) : this.getWord(this.regEIP));
-    this.regEIP = this.segCS.base + (this.regIP = (this.regIP + 2) & 0xffff);     // this.advanceIP(2)
+    if (BACKTRACK) {
+        this.bus.updateBackTrackCode(this.regEIP, this.backTrack.btiMemLo);
+        this.bus.updateBackTrackCode(this.regEIP + 1, this.backTrack.btiMemHi);
+    }
+    this.regEIP = this.segCS.base + (this.regIP = (this.regIP + 2) & 0xffff);   // this.advanceIP(2)
     return w;
 };
 

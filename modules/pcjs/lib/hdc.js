@@ -1404,8 +1404,8 @@ HDC.prototype.inATCData = function(port, addrFrom)
                 /*
                  * TODO: We could define a cached BTO that's reset prior to a new ATC command, and then pass that
                  * to addBackTrackObject() here instead of null; but for now, we're going to rely on that function's
-                 * simplistic MRU cache.  If that fails, the worst that will (or should) happen is we'll burn through
-                 * more BackTrack wrapper objects than necessary, and run the risk of running out.
+                 * simplistic MRU logic.  If that fails, the worst that will (or should) happen is we'll burn through
+                 * more BackTrack wrapper objects than necessary, and risk running out.
                  */
                 var bto = hdc.bus.addBackTrackObject(obj, null, off);
                 hdc.cpu.backTrack.btiIO = hdc.bus.getBackTrackIndex(bto, off);

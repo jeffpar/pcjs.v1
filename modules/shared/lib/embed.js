@@ -321,7 +321,14 @@ function embedMachine(sName, sVersion, idElement, sXMLFile, sXSLFile, sStateFile
         if (eMachine) {
             var sAppClass = sName.toLowerCase();        // eg, "pcjs" or "c1pjs"
             if (!sXSLFile) {
-                if (DEBUG && sVersion == "1.x.x") {
+                /*
+                 * Now that PCjs is an open-source project, we can make the following test more flexible,
+                 * and revert to the internal template if DEBUG *or* internal version (instead of *and*).
+                 *
+                 * Third-party sites that don't use the PCjs server will ALWAYS want to specify a fully-qualified
+                 * path to the XSL file, unless they choose to mirror our folder structure.
+                 */
+                if (DEBUG || sVersion == "1.x.x") {
                     sXSLFile = "/modules/" + sAppClass + "/templates/components.xsl";
                 } else {
                     sXSLFile = "/versions/" + sAppClass + "/" + sVersion + "/components.xsl";

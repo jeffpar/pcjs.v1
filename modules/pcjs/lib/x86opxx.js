@@ -1643,8 +1643,8 @@ var X86OpXX = {
      *
      * op=0x86 (xchgb reg,rm)
      *
-     * NOTE: The XCHG instruction is unique in that both src and dst are both read and written
-     * (and therefore, if regEA is set, then regEAWrite must be set as well).
+     * NOTE: The XCHG instruction is unique in that both src and dst are both read and written;
+     * see opHelpXCHGrb() for how we deal with this special case.
      */
     opXCHGrb: function() {
         /*
@@ -1672,8 +1672,8 @@ var X86OpXX = {
      *
      * op=0x87 (xchgw reg,rm)
      *
-     * NOTE: The XCHG instruction is unique in that both src and dst are both read and written
-     * (and therefore, if regEA is set, then regEAWrite must be set as well).
+     * NOTE: The XCHG instruction is unique in that both src and dst are both read and written;
+     * see opHelpXCHGrw() for how we deal with this special case.
      */
     opXCHGrw: function() {
         X86Mods.aOpModsRegWord[this.bModRM = this.getIPByte()].call(this, X86Help.opHelpXCHGrw);
@@ -2642,18 +2642,18 @@ var X86OpXX = {
     /**
      * @this {X86CPU}
      *
-     * op=0xC0 (grp2ab rm) (80186/80188 and up)
+     * op=0xC0 (grp2bi rm) (80186/80188 and up)
      */
-    opGrp2ab: function() {
-        X86Mods.aOpModsGrpByte[this.getIPByte()].call(this, X86Grps.aOpGrp2ab, X86Grps.opGrp2CountImm);
+    opGrp2bi: function() {
+        X86Mods.aOpModsGrpByte[this.getIPByte()].call(this, X86Grps.aOpGrp2b, X86Grps.opGrp2CountImm);
     },
     /**
      * @this {X86CPU}
      *
-     * op=0xC1 (grp2aw rm) (80186/80188 and up)
+     * op=0xC1 (grp2wi rm) (80186/80188 and up)
      */
-    opGrp2aw: function() {
-        X86Mods.aOpModsGrpWord[this.getIPByte()].call(this, X86Grps.aOpGrp2aw, X86Grps.opGrp2CountImm);
+    opGrp2wi: function() {
+        X86Mods.aOpModsGrpWord[this.getIPByte()].call(this, X86Grps.aOpGrp2w, X86Grps.opGrp2CountImm);
     },
     /**
      * @this {X86CPU}
@@ -3232,7 +3232,7 @@ var X86OpXX = {
      *
      * op=0xF6 (grp3b rm)
      *
-     * The MUL instruction is problematic in two cases:
+     * The MUL byte instruction is problematic in two cases:
      *
      *      0xF6 0xE0:  MUL AL
      *      0xF6 0xE4:  MUL AH
@@ -3258,7 +3258,7 @@ var X86OpXX = {
      *
      * op=0xF7 (grp3w rm)
      *
-     * The MUL instruction is problematic in two cases:
+     * The MUL word instruction is problematic in two cases:
      *
      *      0xF7 0xE0:  MUL AX
      *      0xF7 0xE2:  MUL DX

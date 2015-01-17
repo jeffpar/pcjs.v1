@@ -1738,13 +1738,9 @@ HTMLOut.prototype.getRandomString = function(sIndent)
  *
  * At a minimum, each machine object should contain the following properties:
  *
- *      'class' (ie, a machine class, such as "pc" or "c1p")
- *      'version' (eg, "1.10", or "*" to select the current version; "*" is the default)
+ *      'class' (eg, a machine class, such as "pc" or "c1p")
+ *      'version' (eg, "1.10", "*" to select the current version, or "uncompiled"; "*" is the default)
  *      'debugger' (eg, true or false; false is the default)
- *
- * Additional properties can include:
- *
- *      'compiled' (eg, true or false); if not defined, we choose a value based on the module's fDebug setting
  *
  * @this {HTMLOut}
  * @param {Array} aMachines is an array of objects containing information about each machine on the current page
@@ -1760,20 +1756,18 @@ HTMLOut.prototype.processMachines = function(aMachines, done)
 
         var sClass = infoMachine['class'];                      // aka the machine class
 
+        var fCompiled = !this.fDebug;
         var sVersion = infoMachine['version'];
-        if (sVersion === undefined) sVersion = "*";             // default to newest version
+        if (sVersion === undefined || sVersion == '*') {
+            sVersion = pkg.version;
+        } else {
+            fCompiled = (sVersion != "uncompiled");
+        }
 
         var fDebugger = infoMachine['debugger'];
         if (fDebugger === undefined) fDebugger = false;         // default to no debugger
 
-        var fCompiled = infoMachine['compiled'];
-        if (fCompiled === undefined) fCompiled = !this.fDebug;
-        if (sVersion == "*") {
-            sVersion = pkg.version;
-        } else {
-            fCompiled = true;                                   // use of a specific version requires using the compiled version
-        }
-        var fNoDebug = !fCompiled && net.hasParm(net.GORT_COMMAND, net.GORT_NODEBUG, this.req);
+        var fNoDebug = !this.fDebug || net.hasParm(net.GORT_COMMAND, net.GORT_NODEBUG, this.req);
 
         var sScriptEmbed = "";
         if (infoMachine['func']) {

@@ -45,7 +45,7 @@ var X86Mods = {
      */
     opModMemByte00: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)), this.regAX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
@@ -57,7 +57,7 @@ var X86Mods = {
      */
     opModMemByte01: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)), this.regAX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
@@ -69,7 +69,7 @@ var X86Mods = {
      */
     opModMemByte02: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)), this.regAX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
@@ -81,7 +81,7 @@ var X86Mods = {
      */
     opModMemByte03: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)), this.regAX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
@@ -93,7 +93,7 @@ var X86Mods = {
      */
     opModMemByte04: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regSI), this.regAX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -105,7 +105,7 @@ var X86Mods = {
      */
     opModMemByte05: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regDI), this.regAX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -117,7 +117,7 @@ var X86Mods = {
      */
     opModMemByte06: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.getIPWord()), this.regAX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
@@ -129,7 +129,7 @@ var X86Mods = {
      */
     opModMemByte07: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regBX), this.regAX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -141,7 +141,7 @@ var X86Mods = {
      */
     opModMemByte08: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)), this.regCX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
@@ -153,7 +153,7 @@ var X86Mods = {
      */
     opModMemByte09: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)), this.regCX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
@@ -165,7 +165,7 @@ var X86Mods = {
      */
     opModMemByte0A: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)), this.regCX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
@@ -177,7 +177,7 @@ var X86Mods = {
      */
     opModMemByte0B: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)), this.regCX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
@@ -189,7 +189,7 @@ var X86Mods = {
      */
     opModMemByte0C: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regSI), this.regCX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -201,7 +201,7 @@ var X86Mods = {
      */
     opModMemByte0D: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regDI), this.regCX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -213,7 +213,7 @@ var X86Mods = {
      */
     opModMemByte0E: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.getIPWord()), this.regCX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
@@ -225,7 +225,7 @@ var X86Mods = {
      */
     opModMemByte0F: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regBX), this.regCX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -237,7 +237,7 @@ var X86Mods = {
      */
     opModMemByte10: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)), this.regDX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
@@ -249,7 +249,7 @@ var X86Mods = {
      */
     opModMemByte11: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)), this.regDX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
@@ -261,7 +261,7 @@ var X86Mods = {
      */
     opModMemByte12: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)), this.regDX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
@@ -273,7 +273,7 @@ var X86Mods = {
      */
     opModMemByte13: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)), this.regDX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
@@ -285,7 +285,7 @@ var X86Mods = {
      */
     opModMemByte14: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regSI), this.regDX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -297,7 +297,7 @@ var X86Mods = {
      */
     opModMemByte15: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regDI), this.regDX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -309,7 +309,7 @@ var X86Mods = {
      */
     opModMemByte16: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.getIPWord()), this.regDX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
@@ -321,7 +321,7 @@ var X86Mods = {
      */
     opModMemByte17: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regBX), this.regDX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -333,7 +333,7 @@ var X86Mods = {
      */
     opModMemByte18: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)), this.regBX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
@@ -345,7 +345,7 @@ var X86Mods = {
      */
     opModMemByte19: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)), this.regBX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
@@ -357,7 +357,7 @@ var X86Mods = {
      */
     opModMemByte1A: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)), this.regBX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
@@ -369,7 +369,7 @@ var X86Mods = {
      */
     opModMemByte1B: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)), this.regBX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
@@ -381,7 +381,7 @@ var X86Mods = {
      */
     opModMemByte1C: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regSI), this.regBX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -393,7 +393,7 @@ var X86Mods = {
      */
     opModMemByte1D: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regDI), this.regBX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -405,7 +405,7 @@ var X86Mods = {
      */
     opModMemByte1E: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.getIPWord()), this.regBX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
@@ -417,7 +417,7 @@ var X86Mods = {
      */
     opModMemByte1F: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regBX), this.regBX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -429,7 +429,7 @@ var X86Mods = {
      */
     opModMemByte20: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)), this.regAX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
@@ -441,7 +441,7 @@ var X86Mods = {
      */
     opModMemByte21: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)), this.regAX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
@@ -453,7 +453,7 @@ var X86Mods = {
      */
     opModMemByte22: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)), this.regAX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
@@ -465,7 +465,7 @@ var X86Mods = {
      */
     opModMemByte23: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)), this.regAX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
@@ -477,7 +477,7 @@ var X86Mods = {
      */
     opModMemByte24: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regSI), this.regAX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -489,7 +489,7 @@ var X86Mods = {
      */
     opModMemByte25: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regDI), this.regAX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -501,7 +501,7 @@ var X86Mods = {
      */
     opModMemByte26: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.getIPWord()), this.regAX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
@@ -513,7 +513,7 @@ var X86Mods = {
      */
     opModMemByte27: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regBX), this.regAX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -525,7 +525,7 @@ var X86Mods = {
      */
     opModMemByte28: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)), this.regCX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
@@ -537,7 +537,7 @@ var X86Mods = {
      */
     opModMemByte29: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)), this.regCX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
@@ -549,7 +549,7 @@ var X86Mods = {
      */
     opModMemByte2A: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)), this.regCX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
@@ -561,7 +561,7 @@ var X86Mods = {
      */
     opModMemByte2B: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)), this.regCX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
@@ -573,7 +573,7 @@ var X86Mods = {
      */
     opModMemByte2C: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regSI), this.regCX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -585,7 +585,7 @@ var X86Mods = {
      */
     opModMemByte2D: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regDI), this.regCX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -597,7 +597,7 @@ var X86Mods = {
      */
     opModMemByte2E: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.getIPWord()), this.regCX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
@@ -609,7 +609,7 @@ var X86Mods = {
      */
     opModMemByte2F: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regBX), this.regCX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -621,7 +621,7 @@ var X86Mods = {
      */
     opModMemByte30: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)), this.regDX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
@@ -633,7 +633,7 @@ var X86Mods = {
      */
     opModMemByte31: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)), this.regDX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
@@ -645,7 +645,7 @@ var X86Mods = {
      */
     opModMemByte32: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)), this.regDX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
@@ -657,7 +657,7 @@ var X86Mods = {
      */
     opModMemByte33: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)), this.regDX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
@@ -669,7 +669,7 @@ var X86Mods = {
      */
     opModMemByte34: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regSI), this.regDX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -681,7 +681,7 @@ var X86Mods = {
      */
     opModMemByte35: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regDI), this.regDX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -693,7 +693,7 @@ var X86Mods = {
      */
     opModMemByte36: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.getIPWord()), this.regDX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
@@ -705,7 +705,7 @@ var X86Mods = {
      */
     opModMemByte37: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regBX), this.regDX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -717,7 +717,7 @@ var X86Mods = {
      */
     opModMemByte38: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)), this.regBX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
@@ -729,7 +729,7 @@ var X86Mods = {
      */
     opModMemByte39: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)), this.regBX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
@@ -741,7 +741,7 @@ var X86Mods = {
      */
     opModMemByte3A: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)), this.regBX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
@@ -753,7 +753,7 @@ var X86Mods = {
      */
     opModMemByte3B: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)), this.regBX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
@@ -765,7 +765,7 @@ var X86Mods = {
      */
     opModMemByte3C: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regSI), this.regBX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -777,7 +777,7 @@ var X86Mods = {
      */
     opModMemByte3D: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regDI), this.regBX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -789,7 +789,7 @@ var X86Mods = {
      */
     opModMemByte3E: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.getIPWord()), this.regBX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
@@ -801,7 +801,7 @@ var X86Mods = {
      */
     opModMemByte3F: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, this.regBX), this.regBX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -813,7 +813,7 @@ var X86Mods = {
      */
     opModMemByte40: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), this.regAX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -825,7 +825,7 @@ var X86Mods = {
      */
     opModMemByte41: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), this.regAX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -837,7 +837,7 @@ var X86Mods = {
      */
     opModMemByte42: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), this.regAX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -849,7 +849,7 @@ var X86Mods = {
      */
     opModMemByte43: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), this.regAX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -861,7 +861,7 @@ var X86Mods = {
      */
     opModMemByte44: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), this.regAX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -873,7 +873,7 @@ var X86Mods = {
      */
     opModMemByte45: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), this.regAX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -885,7 +885,7 @@ var X86Mods = {
      */
     opModMemByte46: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), this.regAX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -897,7 +897,7 @@ var X86Mods = {
      */
     opModMemByte47: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), this.regAX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -909,7 +909,7 @@ var X86Mods = {
      */
     opModMemByte48: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), this.regCX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -921,7 +921,7 @@ var X86Mods = {
      */
     opModMemByte49: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), this.regCX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -933,7 +933,7 @@ var X86Mods = {
      */
     opModMemByte4A: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), this.regCX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -945,7 +945,7 @@ var X86Mods = {
      */
     opModMemByte4B: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), this.regCX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -957,7 +957,7 @@ var X86Mods = {
      */
     opModMemByte4C: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), this.regCX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -969,7 +969,7 @@ var X86Mods = {
      */
     opModMemByte4D: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), this.regCX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -981,7 +981,7 @@ var X86Mods = {
      */
     opModMemByte4E: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), this.regCX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -993,7 +993,7 @@ var X86Mods = {
      */
     opModMemByte4F: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), this.regCX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1005,7 +1005,7 @@ var X86Mods = {
      */
     opModMemByte50: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), this.regDX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -1017,7 +1017,7 @@ var X86Mods = {
      */
     opModMemByte51: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), this.regDX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -1029,7 +1029,7 @@ var X86Mods = {
      */
     opModMemByte52: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), this.regDX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -1041,7 +1041,7 @@ var X86Mods = {
      */
     opModMemByte53: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), this.regDX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -1053,7 +1053,7 @@ var X86Mods = {
      */
     opModMemByte54: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), this.regDX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1065,7 +1065,7 @@ var X86Mods = {
      */
     opModMemByte55: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), this.regDX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1077,7 +1077,7 @@ var X86Mods = {
      */
     opModMemByte56: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), this.regDX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1089,7 +1089,7 @@ var X86Mods = {
      */
     opModMemByte57: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), this.regDX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1101,7 +1101,7 @@ var X86Mods = {
      */
     opModMemByte58: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), this.regBX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -1113,7 +1113,7 @@ var X86Mods = {
      */
     opModMemByte59: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), this.regBX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -1125,7 +1125,7 @@ var X86Mods = {
      */
     opModMemByte5A: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), this.regBX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -1137,7 +1137,7 @@ var X86Mods = {
      */
     opModMemByte5B: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), this.regBX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -1149,7 +1149,7 @@ var X86Mods = {
      */
     opModMemByte5C: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), this.regBX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1161,7 +1161,7 @@ var X86Mods = {
      */
     opModMemByte5D: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), this.regBX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1173,7 +1173,7 @@ var X86Mods = {
      */
     opModMemByte5E: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), this.regBX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1185,7 +1185,7 @@ var X86Mods = {
      */
     opModMemByte5F: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), this.regBX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1197,7 +1197,7 @@ var X86Mods = {
      */
     opModMemByte60: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), this.regAX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -1209,7 +1209,7 @@ var X86Mods = {
      */
     opModMemByte61: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), this.regAX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -1221,7 +1221,7 @@ var X86Mods = {
      */
     opModMemByte62: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), this.regAX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -1233,7 +1233,7 @@ var X86Mods = {
      */
     opModMemByte63: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), this.regAX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -1245,7 +1245,7 @@ var X86Mods = {
      */
     opModMemByte64: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), this.regAX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1257,7 +1257,7 @@ var X86Mods = {
      */
     opModMemByte65: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), this.regAX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1269,7 +1269,7 @@ var X86Mods = {
      */
     opModMemByte66: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), this.regAX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1281,7 +1281,7 @@ var X86Mods = {
      */
     opModMemByte67: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), this.regAX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1293,7 +1293,7 @@ var X86Mods = {
      */
     opModMemByte68: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), this.regCX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -1305,7 +1305,7 @@ var X86Mods = {
      */
     opModMemByte69: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), this.regCX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -1317,7 +1317,7 @@ var X86Mods = {
      */
     opModMemByte6A: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), this.regCX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -1329,7 +1329,7 @@ var X86Mods = {
      */
     opModMemByte6B: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), this.regCX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -1341,7 +1341,7 @@ var X86Mods = {
      */
     opModMemByte6C: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), this.regCX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1353,7 +1353,7 @@ var X86Mods = {
      */
     opModMemByte6D: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), this.regCX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1365,7 +1365,7 @@ var X86Mods = {
      */
     opModMemByte6E: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), this.regCX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1377,7 +1377,7 @@ var X86Mods = {
      */
     opModMemByte6F: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), this.regCX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1389,7 +1389,7 @@ var X86Mods = {
      */
     opModMemByte70: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), this.regDX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -1401,7 +1401,7 @@ var X86Mods = {
      */
     opModMemByte71: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), this.regDX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -1413,7 +1413,7 @@ var X86Mods = {
      */
     opModMemByte72: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), this.regDX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -1425,7 +1425,7 @@ var X86Mods = {
      */
     opModMemByte73: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), this.regDX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -1437,7 +1437,7 @@ var X86Mods = {
      */
     opModMemByte74: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), this.regDX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1449,7 +1449,7 @@ var X86Mods = {
      */
     opModMemByte75: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), this.regDX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1461,7 +1461,7 @@ var X86Mods = {
      */
     opModMemByte76: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), this.regDX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1473,7 +1473,7 @@ var X86Mods = {
      */
     opModMemByte77: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), this.regDX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1485,7 +1485,7 @@ var X86Mods = {
      */
     opModMemByte78: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), this.regBX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -1497,7 +1497,7 @@ var X86Mods = {
      */
     opModMemByte79: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), this.regBX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -1509,7 +1509,7 @@ var X86Mods = {
      */
     opModMemByte7A: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), this.regBX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -1521,7 +1521,7 @@ var X86Mods = {
      */
     opModMemByte7B: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), this.regBX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -1533,7 +1533,7 @@ var X86Mods = {
      */
     opModMemByte7C: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), this.regBX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1545,7 +1545,7 @@ var X86Mods = {
      */
     opModMemByte7D: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), this.regBX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1557,7 +1557,7 @@ var X86Mods = {
      */
     opModMemByte7E: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), this.regBX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1569,7 +1569,7 @@ var X86Mods = {
      */
     opModMemByte7F: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), this.regBX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1581,7 +1581,7 @@ var X86Mods = {
      */
     opModMemByte80: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), this.regAX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -1593,7 +1593,7 @@ var X86Mods = {
      */
     opModMemByte81: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), this.regAX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -1605,7 +1605,7 @@ var X86Mods = {
      */
     opModMemByte82: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), this.regAX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -1617,7 +1617,7 @@ var X86Mods = {
      */
     opModMemByte83: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), this.regAX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -1629,7 +1629,7 @@ var X86Mods = {
      */
     opModMemByte84: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), this.regAX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1641,7 +1641,7 @@ var X86Mods = {
      */
     opModMemByte85: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), this.regAX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1653,7 +1653,7 @@ var X86Mods = {
      */
     opModMemByte86: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), this.regAX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1665,7 +1665,7 @@ var X86Mods = {
      */
     opModMemByte87: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), this.regAX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1677,7 +1677,7 @@ var X86Mods = {
      */
     opModMemByte88: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), this.regCX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -1689,7 +1689,7 @@ var X86Mods = {
      */
     opModMemByte89: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), this.regCX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -1701,7 +1701,7 @@ var X86Mods = {
      */
     opModMemByte8A: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), this.regCX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -1713,7 +1713,7 @@ var X86Mods = {
      */
     opModMemByte8B: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), this.regCX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -1725,7 +1725,7 @@ var X86Mods = {
      */
     opModMemByte8C: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), this.regCX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1737,7 +1737,7 @@ var X86Mods = {
      */
     opModMemByte8D: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), this.regCX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1749,7 +1749,7 @@ var X86Mods = {
      */
     opModMemByte8E: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), this.regCX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1761,7 +1761,7 @@ var X86Mods = {
      */
     opModMemByte8F: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), this.regCX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1773,7 +1773,7 @@ var X86Mods = {
      */
     opModMemByte90: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), this.regDX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -1785,7 +1785,7 @@ var X86Mods = {
      */
     opModMemByte91: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), this.regDX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -1797,7 +1797,7 @@ var X86Mods = {
      */
     opModMemByte92: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), this.regDX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -1809,7 +1809,7 @@ var X86Mods = {
      */
     opModMemByte93: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), this.regDX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -1821,7 +1821,7 @@ var X86Mods = {
      */
     opModMemByte94: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), this.regDX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1833,7 +1833,7 @@ var X86Mods = {
      */
     opModMemByte95: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), this.regDX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1845,7 +1845,7 @@ var X86Mods = {
      */
     opModMemByte96: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), this.regDX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1857,7 +1857,7 @@ var X86Mods = {
      */
     opModMemByte97: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), this.regDX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1869,7 +1869,7 @@ var X86Mods = {
      */
     opModMemByte98: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), this.regBX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -1881,7 +1881,7 @@ var X86Mods = {
      */
     opModMemByte99: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), this.regBX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -1893,7 +1893,7 @@ var X86Mods = {
      */
     opModMemByte9A: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), this.regBX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -1905,7 +1905,7 @@ var X86Mods = {
      */
     opModMemByte9B: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), this.regBX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -1917,7 +1917,7 @@ var X86Mods = {
      */
     opModMemByte9C: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), this.regBX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1929,7 +1929,7 @@ var X86Mods = {
      */
     opModMemByte9D: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), this.regBX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1941,7 +1941,7 @@ var X86Mods = {
      */
     opModMemByte9E: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), this.regBX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1953,7 +1953,7 @@ var X86Mods = {
      */
     opModMemByte9F: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), this.regBX & 0xff);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBL;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBL;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -1965,7 +1965,7 @@ var X86Mods = {
      */
     opModMemByteA0: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), this.regAX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -1977,7 +1977,7 @@ var X86Mods = {
      */
     opModMemByteA1: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), this.regAX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -1989,7 +1989,7 @@ var X86Mods = {
      */
     opModMemByteA2: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), this.regAX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -2001,7 +2001,7 @@ var X86Mods = {
      */
     opModMemByteA3: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), this.regAX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -2013,7 +2013,7 @@ var X86Mods = {
      */
     opModMemByteA4: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), this.regAX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -2025,7 +2025,7 @@ var X86Mods = {
      */
     opModMemByteA5: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), this.regAX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -2037,7 +2037,7 @@ var X86Mods = {
      */
     opModMemByteA6: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), this.regAX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -2049,7 +2049,7 @@ var X86Mods = {
      */
     opModMemByteA7: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), this.regAX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -2061,7 +2061,7 @@ var X86Mods = {
      */
     opModMemByteA8: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), this.regCX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -2073,7 +2073,7 @@ var X86Mods = {
      */
     opModMemByteA9: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), this.regCX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -2085,7 +2085,7 @@ var X86Mods = {
      */
     opModMemByteAA: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), this.regCX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -2097,7 +2097,7 @@ var X86Mods = {
      */
     opModMemByteAB: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), this.regCX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -2109,7 +2109,7 @@ var X86Mods = {
      */
     opModMemByteAC: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), this.regCX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -2121,7 +2121,7 @@ var X86Mods = {
      */
     opModMemByteAD: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), this.regCX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -2133,7 +2133,7 @@ var X86Mods = {
      */
     opModMemByteAE: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), this.regCX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -2145,7 +2145,7 @@ var X86Mods = {
      */
     opModMemByteAF: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), this.regCX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiCH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -2157,7 +2157,7 @@ var X86Mods = {
      */
     opModMemByteB0: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), this.regDX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -2169,7 +2169,7 @@ var X86Mods = {
      */
     opModMemByteB1: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), this.regDX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -2181,7 +2181,7 @@ var X86Mods = {
      */
     opModMemByteB2: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), this.regDX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -2193,7 +2193,7 @@ var X86Mods = {
      */
     opModMemByteB3: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), this.regDX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -2205,7 +2205,7 @@ var X86Mods = {
      */
     opModMemByteB4: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), this.regDX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -2217,7 +2217,7 @@ var X86Mods = {
      */
     opModMemByteB5: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), this.regDX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -2229,7 +2229,7 @@ var X86Mods = {
      */
     opModMemByteB6: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), this.regDX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -2241,7 +2241,7 @@ var X86Mods = {
      */
     opModMemByteB7: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), this.regDX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiDH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -2253,7 +2253,7 @@ var X86Mods = {
      */
     opModMemByteB8: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), this.regBX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -2265,7 +2265,7 @@ var X86Mods = {
      */
     opModMemByteB9: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), this.regBX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -2277,7 +2277,7 @@ var X86Mods = {
      */
     opModMemByteBA: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), this.regBX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -2289,7 +2289,7 @@ var X86Mods = {
      */
     opModMemByteBB: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), this.regBX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -2301,7 +2301,7 @@ var X86Mods = {
      */
     opModMemByteBC: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), this.regBX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -2313,7 +2313,7 @@ var X86Mods = {
      */
     opModMemByteBD: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), this.regBX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -2325,7 +2325,7 @@ var X86Mods = {
      */
     opModMemByteBE: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), this.regBX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -2337,7 +2337,7 @@ var X86Mods = {
      */
     opModMemByteBF: function(fn) {
         var b = fn.call(this, this.modEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), this.regBX >> 8);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiBH;
+        if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBH;
         this.setEAByte(b);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -2350,7 +2350,7 @@ var X86Mods = {
     opModMemWord00: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)), this.regAX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
+            this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
@@ -2364,7 +2364,7 @@ var X86Mods = {
     opModMemWord01: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)), this.regAX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
+            this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
@@ -2378,7 +2378,7 @@ var X86Mods = {
     opModMemWord02: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)), this.regAX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
+            this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
@@ -2392,7 +2392,7 @@ var X86Mods = {
     opModMemWord03: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)), this.regAX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
+            this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
@@ -2406,7 +2406,7 @@ var X86Mods = {
     opModMemWord04: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regSI), this.regAX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
+            this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
@@ -2420,7 +2420,7 @@ var X86Mods = {
     opModMemWord05: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regDI), this.regAX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
+            this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
@@ -2434,7 +2434,7 @@ var X86Mods = {
     opModMemWord06: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.getIPWord()), this.regAX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
+            this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
@@ -2448,7 +2448,7 @@ var X86Mods = {
     opModMemWord07: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regBX), this.regAX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
+            this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
@@ -2462,7 +2462,7 @@ var X86Mods = {
     opModMemWord08: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)), this.regCX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiCL; this.backTrack.btiMemHi = this.backTrack.btiCH;
+            this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
@@ -2476,7 +2476,7 @@ var X86Mods = {
     opModMemWord09: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)), this.regCX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiCL; this.backTrack.btiMemHi = this.backTrack.btiCH;
+            this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
@@ -2490,7 +2490,7 @@ var X86Mods = {
     opModMemWord0A: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)), this.regCX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiCL; this.backTrack.btiMemHi = this.backTrack.btiCH;
+            this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
@@ -2504,7 +2504,7 @@ var X86Mods = {
     opModMemWord0B: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)), this.regCX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiCL; this.backTrack.btiMemHi = this.backTrack.btiCH;
+            this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
@@ -2518,7 +2518,7 @@ var X86Mods = {
     opModMemWord0C: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regSI), this.regCX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiCL; this.backTrack.btiMemHi = this.backTrack.btiCH;
+            this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
@@ -2532,7 +2532,7 @@ var X86Mods = {
     opModMemWord0D: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regDI), this.regCX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiCL; this.backTrack.btiMemHi = this.backTrack.btiCH;
+            this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
@@ -2546,7 +2546,7 @@ var X86Mods = {
     opModMemWord0E: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.getIPWord()), this.regCX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiCL; this.backTrack.btiMemHi = this.backTrack.btiCH;
+            this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
@@ -2560,7 +2560,7 @@ var X86Mods = {
     opModMemWord0F: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regBX), this.regCX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiCL; this.backTrack.btiMemHi = this.backTrack.btiCH;
+            this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
@@ -2574,7 +2574,7 @@ var X86Mods = {
     opModMemWord10: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)), this.regDX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDL; this.backTrack.btiMemHi = this.backTrack.btiDH;
+            this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
@@ -2588,7 +2588,7 @@ var X86Mods = {
     opModMemWord11: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)), this.regDX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDL; this.backTrack.btiMemHi = this.backTrack.btiDH;
+            this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
@@ -2602,7 +2602,7 @@ var X86Mods = {
     opModMemWord12: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)), this.regDX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDL; this.backTrack.btiMemHi = this.backTrack.btiDH;
+            this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
@@ -2616,7 +2616,7 @@ var X86Mods = {
     opModMemWord13: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)), this.regDX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDL; this.backTrack.btiMemHi = this.backTrack.btiDH;
+            this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
@@ -2630,7 +2630,7 @@ var X86Mods = {
     opModMemWord14: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regSI), this.regDX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDL; this.backTrack.btiMemHi = this.backTrack.btiDH;
+            this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
@@ -2644,7 +2644,7 @@ var X86Mods = {
     opModMemWord15: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regDI), this.regDX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDL; this.backTrack.btiMemHi = this.backTrack.btiDH;
+            this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
@@ -2658,7 +2658,7 @@ var X86Mods = {
     opModMemWord16: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.getIPWord()), this.regDX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDL; this.backTrack.btiMemHi = this.backTrack.btiDH;
+            this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
@@ -2672,7 +2672,7 @@ var X86Mods = {
     opModMemWord17: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regBX), this.regDX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDL; this.backTrack.btiMemHi = this.backTrack.btiDH;
+            this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
@@ -2686,7 +2686,7 @@ var X86Mods = {
     opModMemWord18: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)), this.regBX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBL; this.backTrack.btiMemHi = this.backTrack.btiBH;
+            this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
@@ -2700,7 +2700,7 @@ var X86Mods = {
     opModMemWord19: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)), this.regBX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBL; this.backTrack.btiMemHi = this.backTrack.btiBH;
+            this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
@@ -2714,7 +2714,7 @@ var X86Mods = {
     opModMemWord1A: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)), this.regBX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBL; this.backTrack.btiMemHi = this.backTrack.btiBH;
+            this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
@@ -2728,7 +2728,7 @@ var X86Mods = {
     opModMemWord1B: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)), this.regBX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBL; this.backTrack.btiMemHi = this.backTrack.btiBH;
+            this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
@@ -2742,7 +2742,7 @@ var X86Mods = {
     opModMemWord1C: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regSI), this.regBX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBL; this.backTrack.btiMemHi = this.backTrack.btiBH;
+            this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
@@ -2756,7 +2756,7 @@ var X86Mods = {
     opModMemWord1D: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regDI), this.regBX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBL; this.backTrack.btiMemHi = this.backTrack.btiBH;
+            this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
@@ -2770,7 +2770,7 @@ var X86Mods = {
     opModMemWord1E: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.getIPWord()), this.regBX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBL; this.backTrack.btiMemHi = this.backTrack.btiBH;
+            this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
@@ -2784,7 +2784,7 @@ var X86Mods = {
     opModMemWord1F: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regBX), this.regBX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBL; this.backTrack.btiMemHi = this.backTrack.btiBH;
+            this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
@@ -2798,7 +2798,7 @@ var X86Mods = {
     opModMemWord20: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)), this.regSP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = X86.BACKTRACK.SP_LO; this.backTrack.btiMemHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
@@ -2812,7 +2812,7 @@ var X86Mods = {
     opModMemWord21: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)), this.regSP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = X86.BACKTRACK.SP_LO; this.backTrack.btiMemHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
@@ -2826,7 +2826,7 @@ var X86Mods = {
     opModMemWord22: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)), this.regSP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = X86.BACKTRACK.SP_LO; this.backTrack.btiMemHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
@@ -2840,7 +2840,7 @@ var X86Mods = {
     opModMemWord23: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)), this.regSP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = X86.BACKTRACK.SP_LO; this.backTrack.btiMemHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
@@ -2854,7 +2854,7 @@ var X86Mods = {
     opModMemWord24: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regSI), this.regSP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = X86.BACKTRACK.SP_LO; this.backTrack.btiMemHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
@@ -2868,7 +2868,7 @@ var X86Mods = {
     opModMemWord25: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regDI), this.regSP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = X86.BACKTRACK.SP_LO; this.backTrack.btiMemHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
@@ -2882,7 +2882,7 @@ var X86Mods = {
     opModMemWord26: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.getIPWord()), this.regSP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = X86.BACKTRACK.SP_LO; this.backTrack.btiMemHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
@@ -2896,7 +2896,7 @@ var X86Mods = {
     opModMemWord27: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regBX), this.regSP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = X86.BACKTRACK.SP_LO; this.backTrack.btiMemHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
@@ -2910,7 +2910,7 @@ var X86Mods = {
     opModMemWord28: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)), this.regBP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBPLo; this.backTrack.btiMemHi = this.backTrack.btiBPHi;
+            this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
@@ -2924,7 +2924,7 @@ var X86Mods = {
     opModMemWord29: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)), this.regBP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBPLo; this.backTrack.btiMemHi = this.backTrack.btiBPHi;
+            this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
@@ -2938,7 +2938,7 @@ var X86Mods = {
     opModMemWord2A: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)), this.regBP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBPLo; this.backTrack.btiMemHi = this.backTrack.btiBPHi;
+            this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
@@ -2952,7 +2952,7 @@ var X86Mods = {
     opModMemWord2B: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)), this.regBP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBPLo; this.backTrack.btiMemHi = this.backTrack.btiBPHi;
+            this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
@@ -2966,7 +2966,7 @@ var X86Mods = {
     opModMemWord2C: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regSI), this.regBP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBPLo; this.backTrack.btiMemHi = this.backTrack.btiBPHi;
+            this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
@@ -2980,7 +2980,7 @@ var X86Mods = {
     opModMemWord2D: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regDI), this.regBP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBPLo; this.backTrack.btiMemHi = this.backTrack.btiBPHi;
+            this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
@@ -2994,7 +2994,7 @@ var X86Mods = {
     opModMemWord2E: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.getIPWord()), this.regBP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBPLo; this.backTrack.btiMemHi = this.backTrack.btiBPHi;
+            this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
@@ -3008,7 +3008,7 @@ var X86Mods = {
     opModMemWord2F: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regBX), this.regBP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBPLo; this.backTrack.btiMemHi = this.backTrack.btiBPHi;
+            this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
@@ -3022,7 +3022,7 @@ var X86Mods = {
     opModMemWord30: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)), this.regSI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiSILo; this.backTrack.btiMemHi = this.backTrack.btiSIHi;
+            this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
@@ -3036,7 +3036,7 @@ var X86Mods = {
     opModMemWord31: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)), this.regSI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiSILo; this.backTrack.btiMemHi = this.backTrack.btiSIHi;
+            this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
@@ -3050,7 +3050,7 @@ var X86Mods = {
     opModMemWord32: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)), this.regSI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiSILo; this.backTrack.btiMemHi = this.backTrack.btiSIHi;
+            this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
@@ -3064,7 +3064,7 @@ var X86Mods = {
     opModMemWord33: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)), this.regSI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiSILo; this.backTrack.btiMemHi = this.backTrack.btiSIHi;
+            this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
@@ -3078,7 +3078,7 @@ var X86Mods = {
     opModMemWord34: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regSI), this.regSI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiSILo; this.backTrack.btiMemHi = this.backTrack.btiSIHi;
+            this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
@@ -3092,7 +3092,7 @@ var X86Mods = {
     opModMemWord35: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regDI), this.regSI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiSILo; this.backTrack.btiMemHi = this.backTrack.btiSIHi;
+            this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
@@ -3106,7 +3106,7 @@ var X86Mods = {
     opModMemWord36: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.getIPWord()), this.regSI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiSILo; this.backTrack.btiMemHi = this.backTrack.btiSIHi;
+            this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
@@ -3120,7 +3120,7 @@ var X86Mods = {
     opModMemWord37: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regBX), this.regSI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiSILo; this.backTrack.btiMemHi = this.backTrack.btiSIHi;
+            this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
@@ -3134,7 +3134,7 @@ var X86Mods = {
     opModMemWord38: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)), this.regDI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDILo; this.backTrack.btiMemHi = this.backTrack.btiDIHi;
+            this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
@@ -3148,7 +3148,7 @@ var X86Mods = {
     opModMemWord39: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)), this.regDI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDILo; this.backTrack.btiMemHi = this.backTrack.btiDIHi;
+            this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
@@ -3162,7 +3162,7 @@ var X86Mods = {
     opModMemWord3A: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)), this.regDI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDILo; this.backTrack.btiMemHi = this.backTrack.btiDIHi;
+            this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
@@ -3176,7 +3176,7 @@ var X86Mods = {
     opModMemWord3B: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)), this.regDI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDILo; this.backTrack.btiMemHi = this.backTrack.btiDIHi;
+            this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
@@ -3190,7 +3190,7 @@ var X86Mods = {
     opModMemWord3C: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regSI), this.regDI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDILo; this.backTrack.btiMemHi = this.backTrack.btiDIHi;
+            this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
@@ -3204,7 +3204,7 @@ var X86Mods = {
     opModMemWord3D: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regDI), this.regDI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDILo; this.backTrack.btiMemHi = this.backTrack.btiDIHi;
+            this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
@@ -3218,7 +3218,7 @@ var X86Mods = {
     opModMemWord3E: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.getIPWord()), this.regDI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDILo; this.backTrack.btiMemHi = this.backTrack.btiDIHi;
+            this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
@@ -3232,7 +3232,7 @@ var X86Mods = {
     opModMemWord3F: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, this.regBX), this.regDI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDILo; this.backTrack.btiMemHi = this.backTrack.btiDIHi;
+            this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
@@ -3246,7 +3246,7 @@ var X86Mods = {
     opModMemWord40: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), this.regAX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
+            this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
@@ -3260,7 +3260,7 @@ var X86Mods = {
     opModMemWord41: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), this.regAX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
+            this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
@@ -3274,7 +3274,7 @@ var X86Mods = {
     opModMemWord42: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), this.regAX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
+            this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
@@ -3288,7 +3288,7 @@ var X86Mods = {
     opModMemWord43: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), this.regAX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
+            this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
@@ -3302,7 +3302,7 @@ var X86Mods = {
     opModMemWord44: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), this.regAX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
+            this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -3316,7 +3316,7 @@ var X86Mods = {
     opModMemWord45: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), this.regAX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
+            this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -3330,7 +3330,7 @@ var X86Mods = {
     opModMemWord46: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), this.regAX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
+            this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -3344,7 +3344,7 @@ var X86Mods = {
     opModMemWord47: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), this.regAX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
+            this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -3358,7 +3358,7 @@ var X86Mods = {
     opModMemWord48: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), this.regCX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiCL; this.backTrack.btiMemHi = this.backTrack.btiCH;
+            this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
@@ -3372,7 +3372,7 @@ var X86Mods = {
     opModMemWord49: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), this.regCX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiCL; this.backTrack.btiMemHi = this.backTrack.btiCH;
+            this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
@@ -3386,7 +3386,7 @@ var X86Mods = {
     opModMemWord4A: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), this.regCX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiCL; this.backTrack.btiMemHi = this.backTrack.btiCH;
+            this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
@@ -3400,7 +3400,7 @@ var X86Mods = {
     opModMemWord4B: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), this.regCX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiCL; this.backTrack.btiMemHi = this.backTrack.btiCH;
+            this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
@@ -3414,7 +3414,7 @@ var X86Mods = {
     opModMemWord4C: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), this.regCX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiCL; this.backTrack.btiMemHi = this.backTrack.btiCH;
+            this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -3428,7 +3428,7 @@ var X86Mods = {
     opModMemWord4D: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), this.regCX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiCL; this.backTrack.btiMemHi = this.backTrack.btiCH;
+            this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -3442,7 +3442,7 @@ var X86Mods = {
     opModMemWord4E: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), this.regCX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiCL; this.backTrack.btiMemHi = this.backTrack.btiCH;
+            this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -3456,7 +3456,7 @@ var X86Mods = {
     opModMemWord4F: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), this.regCX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiCL; this.backTrack.btiMemHi = this.backTrack.btiCH;
+            this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -3470,7 +3470,7 @@ var X86Mods = {
     opModMemWord50: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), this.regDX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDL; this.backTrack.btiMemHi = this.backTrack.btiDH;
+            this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
@@ -3484,7 +3484,7 @@ var X86Mods = {
     opModMemWord51: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), this.regDX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDL; this.backTrack.btiMemHi = this.backTrack.btiDH;
+            this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
@@ -3498,7 +3498,7 @@ var X86Mods = {
     opModMemWord52: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), this.regDX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDL; this.backTrack.btiMemHi = this.backTrack.btiDH;
+            this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
@@ -3512,7 +3512,7 @@ var X86Mods = {
     opModMemWord53: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), this.regDX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDL; this.backTrack.btiMemHi = this.backTrack.btiDH;
+            this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
@@ -3526,7 +3526,7 @@ var X86Mods = {
     opModMemWord54: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), this.regDX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDL; this.backTrack.btiMemHi = this.backTrack.btiDH;
+            this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -3540,7 +3540,7 @@ var X86Mods = {
     opModMemWord55: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), this.regDX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDL; this.backTrack.btiMemHi = this.backTrack.btiDH;
+            this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -3554,7 +3554,7 @@ var X86Mods = {
     opModMemWord56: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), this.regDX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDL; this.backTrack.btiMemHi = this.backTrack.btiDH;
+            this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -3568,7 +3568,7 @@ var X86Mods = {
     opModMemWord57: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), this.regDX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDL; this.backTrack.btiMemHi = this.backTrack.btiDH;
+            this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -3582,7 +3582,7 @@ var X86Mods = {
     opModMemWord58: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), this.regBX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBL; this.backTrack.btiMemHi = this.backTrack.btiBH;
+            this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
@@ -3596,7 +3596,7 @@ var X86Mods = {
     opModMemWord59: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), this.regBX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBL; this.backTrack.btiMemHi = this.backTrack.btiBH;
+            this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
@@ -3610,7 +3610,7 @@ var X86Mods = {
     opModMemWord5A: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), this.regBX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBL; this.backTrack.btiMemHi = this.backTrack.btiBH;
+            this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
@@ -3624,7 +3624,7 @@ var X86Mods = {
     opModMemWord5B: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), this.regBX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBL; this.backTrack.btiMemHi = this.backTrack.btiBH;
+            this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
@@ -3638,7 +3638,7 @@ var X86Mods = {
     opModMemWord5C: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), this.regBX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBL; this.backTrack.btiMemHi = this.backTrack.btiBH;
+            this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -3652,7 +3652,7 @@ var X86Mods = {
     opModMemWord5D: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), this.regBX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBL; this.backTrack.btiMemHi = this.backTrack.btiBH;
+            this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -3666,7 +3666,7 @@ var X86Mods = {
     opModMemWord5E: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), this.regBX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBL; this.backTrack.btiMemHi = this.backTrack.btiBH;
+            this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -3680,7 +3680,7 @@ var X86Mods = {
     opModMemWord5F: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), this.regBX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBL; this.backTrack.btiMemHi = this.backTrack.btiBH;
+            this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -3694,7 +3694,7 @@ var X86Mods = {
     opModMemWord60: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), this.regSP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = X86.BACKTRACK.SP_LO; this.backTrack.btiMemHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
@@ -3708,7 +3708,7 @@ var X86Mods = {
     opModMemWord61: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), this.regSP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = X86.BACKTRACK.SP_LO; this.backTrack.btiMemHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
@@ -3722,7 +3722,7 @@ var X86Mods = {
     opModMemWord62: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), this.regSP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = X86.BACKTRACK.SP_LO; this.backTrack.btiMemHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
@@ -3736,7 +3736,7 @@ var X86Mods = {
     opModMemWord63: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), this.regSP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = X86.BACKTRACK.SP_LO; this.backTrack.btiMemHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
@@ -3750,7 +3750,7 @@ var X86Mods = {
     opModMemWord64: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), this.regSP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = X86.BACKTRACK.SP_LO; this.backTrack.btiMemHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -3764,7 +3764,7 @@ var X86Mods = {
     opModMemWord65: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), this.regSP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = X86.BACKTRACK.SP_LO; this.backTrack.btiMemHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -3778,7 +3778,7 @@ var X86Mods = {
     opModMemWord66: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), this.regSP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = X86.BACKTRACK.SP_LO; this.backTrack.btiMemHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -3792,7 +3792,7 @@ var X86Mods = {
     opModMemWord67: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), this.regSP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = X86.BACKTRACK.SP_LO; this.backTrack.btiMemHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -3806,7 +3806,7 @@ var X86Mods = {
     opModMemWord68: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), this.regBP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBPLo; this.backTrack.btiMemHi = this.backTrack.btiBPHi;
+            this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
@@ -3820,7 +3820,7 @@ var X86Mods = {
     opModMemWord69: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), this.regBP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBPLo; this.backTrack.btiMemHi = this.backTrack.btiBPHi;
+            this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
@@ -3834,7 +3834,7 @@ var X86Mods = {
     opModMemWord6A: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), this.regBP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBPLo; this.backTrack.btiMemHi = this.backTrack.btiBPHi;
+            this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
@@ -3848,7 +3848,7 @@ var X86Mods = {
     opModMemWord6B: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), this.regBP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBPLo; this.backTrack.btiMemHi = this.backTrack.btiBPHi;
+            this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
@@ -3862,7 +3862,7 @@ var X86Mods = {
     opModMemWord6C: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), this.regBP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBPLo; this.backTrack.btiMemHi = this.backTrack.btiBPHi;
+            this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -3876,7 +3876,7 @@ var X86Mods = {
     opModMemWord6D: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), this.regBP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBPLo; this.backTrack.btiMemHi = this.backTrack.btiBPHi;
+            this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -3890,7 +3890,7 @@ var X86Mods = {
     opModMemWord6E: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), this.regBP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBPLo; this.backTrack.btiMemHi = this.backTrack.btiBPHi;
+            this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -3904,7 +3904,7 @@ var X86Mods = {
     opModMemWord6F: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), this.regBP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBPLo; this.backTrack.btiMemHi = this.backTrack.btiBPHi;
+            this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -3918,7 +3918,7 @@ var X86Mods = {
     opModMemWord70: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), this.regSI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiSILo; this.backTrack.btiMemHi = this.backTrack.btiSIHi;
+            this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
@@ -3932,7 +3932,7 @@ var X86Mods = {
     opModMemWord71: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), this.regSI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiSILo; this.backTrack.btiMemHi = this.backTrack.btiSIHi;
+            this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
@@ -3946,7 +3946,7 @@ var X86Mods = {
     opModMemWord72: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), this.regSI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiSILo; this.backTrack.btiMemHi = this.backTrack.btiSIHi;
+            this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
@@ -3960,7 +3960,7 @@ var X86Mods = {
     opModMemWord73: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), this.regSI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiSILo; this.backTrack.btiMemHi = this.backTrack.btiSIHi;
+            this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
@@ -3974,7 +3974,7 @@ var X86Mods = {
     opModMemWord74: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), this.regSI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiSILo; this.backTrack.btiMemHi = this.backTrack.btiSIHi;
+            this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -3988,7 +3988,7 @@ var X86Mods = {
     opModMemWord75: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), this.regSI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiSILo; this.backTrack.btiMemHi = this.backTrack.btiSIHi;
+            this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4002,7 +4002,7 @@ var X86Mods = {
     opModMemWord76: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), this.regSI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiSILo; this.backTrack.btiMemHi = this.backTrack.btiSIHi;
+            this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4016,7 +4016,7 @@ var X86Mods = {
     opModMemWord77: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), this.regSI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiSILo; this.backTrack.btiMemHi = this.backTrack.btiSIHi;
+            this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4030,7 +4030,7 @@ var X86Mods = {
     opModMemWord78: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)), this.regDI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDILo; this.backTrack.btiMemHi = this.backTrack.btiDIHi;
+            this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
@@ -4044,7 +4044,7 @@ var X86Mods = {
     opModMemWord79: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)), this.regDI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDILo; this.backTrack.btiMemHi = this.backTrack.btiDIHi;
+            this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
@@ -4058,7 +4058,7 @@ var X86Mods = {
     opModMemWord7A: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)), this.regDI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDILo; this.backTrack.btiMemHi = this.backTrack.btiDIHi;
+            this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
@@ -4072,7 +4072,7 @@ var X86Mods = {
     opModMemWord7B: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)), this.regDI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDILo; this.backTrack.btiMemHi = this.backTrack.btiDIHi;
+            this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
@@ -4086,7 +4086,7 @@ var X86Mods = {
     opModMemWord7C: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)), this.regDI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDILo; this.backTrack.btiMemHi = this.backTrack.btiDIHi;
+            this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4100,7 +4100,7 @@ var X86Mods = {
     opModMemWord7D: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)), this.regDI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDILo; this.backTrack.btiMemHi = this.backTrack.btiDIHi;
+            this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4114,7 +4114,7 @@ var X86Mods = {
     opModMemWord7E: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)), this.regDI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDILo; this.backTrack.btiMemHi = this.backTrack.btiDIHi;
+            this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4128,7 +4128,7 @@ var X86Mods = {
     opModMemWord7F: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)), this.regDI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDILo; this.backTrack.btiMemHi = this.backTrack.btiDIHi;
+            this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4142,7 +4142,7 @@ var X86Mods = {
     opModMemWord80: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), this.regAX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
+            this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
@@ -4156,7 +4156,7 @@ var X86Mods = {
     opModMemWord81: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), this.regAX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
+            this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
@@ -4170,7 +4170,7 @@ var X86Mods = {
     opModMemWord82: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), this.regAX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
+            this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
@@ -4184,7 +4184,7 @@ var X86Mods = {
     opModMemWord83: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), this.regAX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
+            this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
@@ -4198,7 +4198,7 @@ var X86Mods = {
     opModMemWord84: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), this.regAX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
+            this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4212,7 +4212,7 @@ var X86Mods = {
     opModMemWord85: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), this.regAX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
+            this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4226,7 +4226,7 @@ var X86Mods = {
     opModMemWord86: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), this.regAX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
+            this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4240,7 +4240,7 @@ var X86Mods = {
     opModMemWord87: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), this.regAX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
+            this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4254,7 +4254,7 @@ var X86Mods = {
     opModMemWord88: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), this.regCX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiCL; this.backTrack.btiMemHi = this.backTrack.btiCH;
+            this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
@@ -4268,7 +4268,7 @@ var X86Mods = {
     opModMemWord89: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), this.regCX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiCL; this.backTrack.btiMemHi = this.backTrack.btiCH;
+            this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
@@ -4282,7 +4282,7 @@ var X86Mods = {
     opModMemWord8A: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), this.regCX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiCL; this.backTrack.btiMemHi = this.backTrack.btiCH;
+            this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
@@ -4296,7 +4296,7 @@ var X86Mods = {
     opModMemWord8B: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), this.regCX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiCL; this.backTrack.btiMemHi = this.backTrack.btiCH;
+            this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
@@ -4310,7 +4310,7 @@ var X86Mods = {
     opModMemWord8C: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), this.regCX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiCL; this.backTrack.btiMemHi = this.backTrack.btiCH;
+            this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4324,7 +4324,7 @@ var X86Mods = {
     opModMemWord8D: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), this.regCX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiCL; this.backTrack.btiMemHi = this.backTrack.btiCH;
+            this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4338,7 +4338,7 @@ var X86Mods = {
     opModMemWord8E: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), this.regCX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiCL; this.backTrack.btiMemHi = this.backTrack.btiCH;
+            this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4352,7 +4352,7 @@ var X86Mods = {
     opModMemWord8F: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), this.regCX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiCL; this.backTrack.btiMemHi = this.backTrack.btiCH;
+            this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4366,7 +4366,7 @@ var X86Mods = {
     opModMemWord90: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), this.regDX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDL; this.backTrack.btiMemHi = this.backTrack.btiDH;
+            this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
@@ -4380,7 +4380,7 @@ var X86Mods = {
     opModMemWord91: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), this.regDX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDL; this.backTrack.btiMemHi = this.backTrack.btiDH;
+            this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
@@ -4394,7 +4394,7 @@ var X86Mods = {
     opModMemWord92: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), this.regDX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDL; this.backTrack.btiMemHi = this.backTrack.btiDH;
+            this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
@@ -4408,7 +4408,7 @@ var X86Mods = {
     opModMemWord93: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), this.regDX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDL; this.backTrack.btiMemHi = this.backTrack.btiDH;
+            this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
@@ -4422,7 +4422,7 @@ var X86Mods = {
     opModMemWord94: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), this.regDX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDL; this.backTrack.btiMemHi = this.backTrack.btiDH;
+            this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4436,7 +4436,7 @@ var X86Mods = {
     opModMemWord95: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), this.regDX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDL; this.backTrack.btiMemHi = this.backTrack.btiDH;
+            this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4450,7 +4450,7 @@ var X86Mods = {
     opModMemWord96: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), this.regDX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDL; this.backTrack.btiMemHi = this.backTrack.btiDH;
+            this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4464,7 +4464,7 @@ var X86Mods = {
     opModMemWord97: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), this.regDX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDL; this.backTrack.btiMemHi = this.backTrack.btiDH;
+            this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4478,7 +4478,7 @@ var X86Mods = {
     opModMemWord98: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), this.regBX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBL; this.backTrack.btiMemHi = this.backTrack.btiBH;
+            this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
@@ -4492,7 +4492,7 @@ var X86Mods = {
     opModMemWord99: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), this.regBX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBL; this.backTrack.btiMemHi = this.backTrack.btiBH;
+            this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
@@ -4506,7 +4506,7 @@ var X86Mods = {
     opModMemWord9A: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), this.regBX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBL; this.backTrack.btiMemHi = this.backTrack.btiBH;
+            this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
@@ -4520,7 +4520,7 @@ var X86Mods = {
     opModMemWord9B: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), this.regBX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBL; this.backTrack.btiMemHi = this.backTrack.btiBH;
+            this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
@@ -4534,7 +4534,7 @@ var X86Mods = {
     opModMemWord9C: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), this.regBX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBL; this.backTrack.btiMemHi = this.backTrack.btiBH;
+            this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4548,7 +4548,7 @@ var X86Mods = {
     opModMemWord9D: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), this.regBX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBL; this.backTrack.btiMemHi = this.backTrack.btiBH;
+            this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4562,7 +4562,7 @@ var X86Mods = {
     opModMemWord9E: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), this.regBX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBL; this.backTrack.btiMemHi = this.backTrack.btiBH;
+            this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4576,7 +4576,7 @@ var X86Mods = {
     opModMemWord9F: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), this.regBX);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBL; this.backTrack.btiMemHi = this.backTrack.btiBH;
+            this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4590,7 +4590,7 @@ var X86Mods = {
     opModMemWordA0: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), this.regSP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = X86.BACKTRACK.SP_LO; this.backTrack.btiMemHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
@@ -4604,7 +4604,7 @@ var X86Mods = {
     opModMemWordA1: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), this.regSP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = X86.BACKTRACK.SP_LO; this.backTrack.btiMemHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
@@ -4618,7 +4618,7 @@ var X86Mods = {
     opModMemWordA2: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), this.regSP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = X86.BACKTRACK.SP_LO; this.backTrack.btiMemHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
@@ -4632,7 +4632,7 @@ var X86Mods = {
     opModMemWordA3: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), this.regSP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = X86.BACKTRACK.SP_LO; this.backTrack.btiMemHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
@@ -4646,7 +4646,7 @@ var X86Mods = {
     opModMemWordA4: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), this.regSP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = X86.BACKTRACK.SP_LO; this.backTrack.btiMemHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4660,7 +4660,7 @@ var X86Mods = {
     opModMemWordA5: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), this.regSP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = X86.BACKTRACK.SP_LO; this.backTrack.btiMemHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4674,7 +4674,7 @@ var X86Mods = {
     opModMemWordA6: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), this.regSP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = X86.BACKTRACK.SP_LO; this.backTrack.btiMemHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4688,7 +4688,7 @@ var X86Mods = {
     opModMemWordA7: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), this.regSP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = X86.BACKTRACK.SP_LO; this.backTrack.btiMemHi = X86.BACKTRACK.SP_HI;
+            this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4702,7 +4702,7 @@ var X86Mods = {
     opModMemWordA8: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), this.regBP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBPLo; this.backTrack.btiMemHi = this.backTrack.btiBPHi;
+            this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
@@ -4716,7 +4716,7 @@ var X86Mods = {
     opModMemWordA9: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), this.regBP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBPLo; this.backTrack.btiMemHi = this.backTrack.btiBPHi;
+            this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
@@ -4730,7 +4730,7 @@ var X86Mods = {
     opModMemWordAA: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), this.regBP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBPLo; this.backTrack.btiMemHi = this.backTrack.btiBPHi;
+            this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
@@ -4744,7 +4744,7 @@ var X86Mods = {
     opModMemWordAB: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), this.regBP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBPLo; this.backTrack.btiMemHi = this.backTrack.btiBPHi;
+            this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
@@ -4758,7 +4758,7 @@ var X86Mods = {
     opModMemWordAC: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), this.regBP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBPLo; this.backTrack.btiMemHi = this.backTrack.btiBPHi;
+            this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4772,7 +4772,7 @@ var X86Mods = {
     opModMemWordAD: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), this.regBP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBPLo; this.backTrack.btiMemHi = this.backTrack.btiBPHi;
+            this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4786,7 +4786,7 @@ var X86Mods = {
     opModMemWordAE: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), this.regBP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBPLo; this.backTrack.btiMemHi = this.backTrack.btiBPHi;
+            this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4800,7 +4800,7 @@ var X86Mods = {
     opModMemWordAF: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), this.regBP);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiBPLo; this.backTrack.btiMemHi = this.backTrack.btiBPHi;
+            this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4814,7 +4814,7 @@ var X86Mods = {
     opModMemWordB0: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), this.regSI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiSILo; this.backTrack.btiMemHi = this.backTrack.btiSIHi;
+            this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
@@ -4828,7 +4828,7 @@ var X86Mods = {
     opModMemWordB1: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), this.regSI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiSILo; this.backTrack.btiMemHi = this.backTrack.btiSIHi;
+            this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
@@ -4842,7 +4842,7 @@ var X86Mods = {
     opModMemWordB2: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), this.regSI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiSILo; this.backTrack.btiMemHi = this.backTrack.btiSIHi;
+            this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
@@ -4856,7 +4856,7 @@ var X86Mods = {
     opModMemWordB3: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), this.regSI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiSILo; this.backTrack.btiMemHi = this.backTrack.btiSIHi;
+            this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
@@ -4870,7 +4870,7 @@ var X86Mods = {
     opModMemWordB4: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), this.regSI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiSILo; this.backTrack.btiMemHi = this.backTrack.btiSIHi;
+            this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4884,7 +4884,7 @@ var X86Mods = {
     opModMemWordB5: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), this.regSI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiSILo; this.backTrack.btiMemHi = this.backTrack.btiSIHi;
+            this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4898,7 +4898,7 @@ var X86Mods = {
     opModMemWordB6: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), this.regSI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiSILo; this.backTrack.btiMemHi = this.backTrack.btiSIHi;
+            this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4912,7 +4912,7 @@ var X86Mods = {
     opModMemWordB7: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), this.regSI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiSILo; this.backTrack.btiMemHi = this.backTrack.btiSIHi;
+            this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4926,7 +4926,7 @@ var X86Mods = {
     opModMemWordB8: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)), this.regDI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDILo; this.backTrack.btiMemHi = this.backTrack.btiDIHi;
+            this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
@@ -4940,7 +4940,7 @@ var X86Mods = {
     opModMemWordB9: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)), this.regDI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDILo; this.backTrack.btiMemHi = this.backTrack.btiDIHi;
+            this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
@@ -4954,7 +4954,7 @@ var X86Mods = {
     opModMemWordBA: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)), this.regDI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDILo; this.backTrack.btiMemHi = this.backTrack.btiDIHi;
+            this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
@@ -4968,7 +4968,7 @@ var X86Mods = {
     opModMemWordBB: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)), this.regDI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDILo; this.backTrack.btiMemHi = this.backTrack.btiDIHi;
+            this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
@@ -4982,7 +4982,7 @@ var X86Mods = {
     opModMemWordBC: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)), this.regDI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDILo; this.backTrack.btiMemHi = this.backTrack.btiDIHi;
+            this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -4996,7 +4996,7 @@ var X86Mods = {
     opModMemWordBD: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)), this.regDI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDILo; this.backTrack.btiMemHi = this.backTrack.btiDIHi;
+            this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -5010,7 +5010,7 @@ var X86Mods = {
     opModMemWordBE: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)), this.regDI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDILo; this.backTrack.btiMemHi = this.backTrack.btiDIHi;
+            this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -5024,7 +5024,7 @@ var X86Mods = {
     opModMemWordBF: function(fn) {
         var w = fn.call(this, this.modEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)), this.regDI);
         if (BACKTRACK) {
-            this.backTrack.btiMemLo = this.backTrack.btiDILo; this.backTrack.btiMemHi = this.backTrack.btiDIHi;
+            this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
@@ -5038,7 +5038,7 @@ var X86Mods = {
     opModRegByte00: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
@@ -5050,7 +5050,7 @@ var X86Mods = {
     opModRegByte01: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
@@ -5062,7 +5062,7 @@ var X86Mods = {
     opModRegByte02: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
@@ -5074,7 +5074,7 @@ var X86Mods = {
     opModRegByte03: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
@@ -5086,7 +5086,7 @@ var X86Mods = {
     opModRegByte04: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segData, this.regSI));
         this.regAX = (this.regAX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
@@ -5098,7 +5098,7 @@ var X86Mods = {
     opModRegByte05: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segData, this.regDI));
         this.regAX = (this.regAX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
@@ -5110,7 +5110,7 @@ var X86Mods = {
     opModRegByte06: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segData, this.getIPWord()));
         this.regAX = (this.regAX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
@@ -5122,7 +5122,7 @@ var X86Mods = {
     opModRegByte07: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segData, this.regBX));
         this.regAX = (this.regAX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
@@ -5134,7 +5134,7 @@ var X86Mods = {
     opModRegByte08: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
@@ -5146,7 +5146,7 @@ var X86Mods = {
     opModRegByte09: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
@@ -5158,7 +5158,7 @@ var X86Mods = {
     opModRegByte0A: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
@@ -5170,7 +5170,7 @@ var X86Mods = {
     opModRegByte0B: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
@@ -5182,7 +5182,7 @@ var X86Mods = {
     opModRegByte0C: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segData, this.regSI));
         this.regCX = (this.regCX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
@@ -5194,7 +5194,7 @@ var X86Mods = {
     opModRegByte0D: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segData, this.regDI));
         this.regCX = (this.regCX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
@@ -5206,7 +5206,7 @@ var X86Mods = {
     opModRegByte0E: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segData, this.getIPWord()));
         this.regCX = (this.regCX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
@@ -5218,7 +5218,7 @@ var X86Mods = {
     opModRegByte0F: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segData, this.regBX));
         this.regCX = (this.regCX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
@@ -5230,7 +5230,7 @@ var X86Mods = {
     opModRegByte10: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
@@ -5242,7 +5242,7 @@ var X86Mods = {
     opModRegByte11: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
@@ -5254,7 +5254,7 @@ var X86Mods = {
     opModRegByte12: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
@@ -5266,7 +5266,7 @@ var X86Mods = {
     opModRegByte13: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
@@ -5278,7 +5278,7 @@ var X86Mods = {
     opModRegByte14: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segData, this.regSI));
         this.regDX = (this.regDX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
@@ -5290,7 +5290,7 @@ var X86Mods = {
     opModRegByte15: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segData, this.regDI));
         this.regDX = (this.regDX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
@@ -5302,7 +5302,7 @@ var X86Mods = {
     opModRegByte16: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segData, this.getIPWord()));
         this.regDX = (this.regDX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
@@ -5314,7 +5314,7 @@ var X86Mods = {
     opModRegByte17: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segData, this.regBX));
         this.regDX = (this.regDX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
@@ -5326,7 +5326,7 @@ var X86Mods = {
     opModRegByte18: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
@@ -5338,7 +5338,7 @@ var X86Mods = {
     opModRegByte19: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
@@ -5350,7 +5350,7 @@ var X86Mods = {
     opModRegByte1A: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
@@ -5362,7 +5362,7 @@ var X86Mods = {
     opModRegByte1B: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
@@ -5374,7 +5374,7 @@ var X86Mods = {
     opModRegByte1C: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segData, this.regSI));
         this.regBX = (this.regBX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
@@ -5386,7 +5386,7 @@ var X86Mods = {
     opModRegByte1D: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segData, this.regDI));
         this.regBX = (this.regBX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
@@ -5398,7 +5398,7 @@ var X86Mods = {
     opModRegByte1E: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segData, this.getIPWord()));
         this.regBX = (this.regBX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
@@ -5410,7 +5410,7 @@ var X86Mods = {
     opModRegByte1F: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segData, this.regBX));
         this.regBX = (this.regBX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
@@ -5422,7 +5422,7 @@ var X86Mods = {
     opModRegByte20: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
@@ -5434,7 +5434,7 @@ var X86Mods = {
     opModRegByte21: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
@@ -5446,7 +5446,7 @@ var X86Mods = {
     opModRegByte22: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
@@ -5458,7 +5458,7 @@ var X86Mods = {
     opModRegByte23: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
@@ -5470,7 +5470,7 @@ var X86Mods = {
     opModRegByte24: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segData, this.regSI));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
@@ -5482,7 +5482,7 @@ var X86Mods = {
     opModRegByte25: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segData, this.regDI));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
@@ -5494,7 +5494,7 @@ var X86Mods = {
     opModRegByte26: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segData, this.getIPWord()));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
@@ -5506,7 +5506,7 @@ var X86Mods = {
     opModRegByte27: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segData, this.regBX));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
@@ -5518,7 +5518,7 @@ var X86Mods = {
     opModRegByte28: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
@@ -5530,7 +5530,7 @@ var X86Mods = {
     opModRegByte29: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
@@ -5542,7 +5542,7 @@ var X86Mods = {
     opModRegByte2A: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
@@ -5554,7 +5554,7 @@ var X86Mods = {
     opModRegByte2B: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
@@ -5566,7 +5566,7 @@ var X86Mods = {
     opModRegByte2C: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segData, this.regSI));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
@@ -5578,7 +5578,7 @@ var X86Mods = {
     opModRegByte2D: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segData, this.regDI));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
@@ -5590,7 +5590,7 @@ var X86Mods = {
     opModRegByte2E: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segData, this.getIPWord()));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
@@ -5602,7 +5602,7 @@ var X86Mods = {
     opModRegByte2F: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segData, this.regBX));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
@@ -5614,7 +5614,7 @@ var X86Mods = {
     opModRegByte30: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
@@ -5626,7 +5626,7 @@ var X86Mods = {
     opModRegByte31: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
@@ -5638,7 +5638,7 @@ var X86Mods = {
     opModRegByte32: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
@@ -5650,7 +5650,7 @@ var X86Mods = {
     opModRegByte33: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
@@ -5662,7 +5662,7 @@ var X86Mods = {
     opModRegByte34: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segData, this.regSI));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
@@ -5674,7 +5674,7 @@ var X86Mods = {
     opModRegByte35: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segData, this.regDI));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
@@ -5686,7 +5686,7 @@ var X86Mods = {
     opModRegByte36: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segData, this.getIPWord()));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
@@ -5698,7 +5698,7 @@ var X86Mods = {
     opModRegByte37: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segData, this.regBX));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
@@ -5710,7 +5710,7 @@ var X86Mods = {
     opModRegByte38: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regSI) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
@@ -5722,7 +5722,7 @@ var X86Mods = {
     opModRegByte39: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regDI) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
@@ -5734,7 +5734,7 @@ var X86Mods = {
     opModRegByte3A: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regSI) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
@@ -5746,7 +5746,7 @@ var X86Mods = {
     opModRegByte3B: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regDI) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
@@ -5758,7 +5758,7 @@ var X86Mods = {
     opModRegByte3C: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segData, this.regSI));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
@@ -5770,7 +5770,7 @@ var X86Mods = {
     opModRegByte3D: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segData, this.regDI));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
@@ -5782,7 +5782,7 @@ var X86Mods = {
     opModRegByte3E: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segData, this.getIPWord()));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
@@ -5794,7 +5794,7 @@ var X86Mods = {
     opModRegByte3F: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segData, this.regBX));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
@@ -5806,7 +5806,7 @@ var X86Mods = {
     opModRegByte40: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
@@ -5818,7 +5818,7 @@ var X86Mods = {
     opModRegByte41: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
@@ -5830,7 +5830,7 @@ var X86Mods = {
     opModRegByte42: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
@@ -5842,7 +5842,7 @@ var X86Mods = {
     opModRegByte43: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
@@ -5854,7 +5854,7 @@ var X86Mods = {
     opModRegByte44: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -5866,7 +5866,7 @@ var X86Mods = {
     opModRegByte45: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -5878,7 +5878,7 @@ var X86Mods = {
     opModRegByte46: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -5890,7 +5890,7 @@ var X86Mods = {
     opModRegByte47: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -5902,7 +5902,7 @@ var X86Mods = {
     opModRegByte48: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
@@ -5914,7 +5914,7 @@ var X86Mods = {
     opModRegByte49: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
@@ -5926,7 +5926,7 @@ var X86Mods = {
     opModRegByte4A: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
@@ -5938,7 +5938,7 @@ var X86Mods = {
     opModRegByte4B: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
@@ -5950,7 +5950,7 @@ var X86Mods = {
     opModRegByte4C: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -5962,7 +5962,7 @@ var X86Mods = {
     opModRegByte4D: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -5974,7 +5974,7 @@ var X86Mods = {
     opModRegByte4E: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -5986,7 +5986,7 @@ var X86Mods = {
     opModRegByte4F: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -5998,7 +5998,7 @@ var X86Mods = {
     opModRegByte50: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
@@ -6010,7 +6010,7 @@ var X86Mods = {
     opModRegByte51: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
@@ -6022,7 +6022,7 @@ var X86Mods = {
     opModRegByte52: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
@@ -6034,7 +6034,7 @@ var X86Mods = {
     opModRegByte53: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
@@ -6046,7 +6046,7 @@ var X86Mods = {
     opModRegByte54: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6058,7 +6058,7 @@ var X86Mods = {
     opModRegByte55: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6070,7 +6070,7 @@ var X86Mods = {
     opModRegByte56: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6082,7 +6082,7 @@ var X86Mods = {
     opModRegByte57: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6094,7 +6094,7 @@ var X86Mods = {
     opModRegByte58: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
@@ -6106,7 +6106,7 @@ var X86Mods = {
     opModRegByte59: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
@@ -6118,7 +6118,7 @@ var X86Mods = {
     opModRegByte5A: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
@@ -6130,7 +6130,7 @@ var X86Mods = {
     opModRegByte5B: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
@@ -6142,7 +6142,7 @@ var X86Mods = {
     opModRegByte5C: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6154,7 +6154,7 @@ var X86Mods = {
     opModRegByte5D: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6166,7 +6166,7 @@ var X86Mods = {
     opModRegByte5E: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6178,7 +6178,7 @@ var X86Mods = {
     opModRegByte5F: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6190,7 +6190,7 @@ var X86Mods = {
     opModRegByte60: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
@@ -6202,7 +6202,7 @@ var X86Mods = {
     opModRegByte61: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
@@ -6214,7 +6214,7 @@ var X86Mods = {
     opModRegByte62: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
@@ -6226,7 +6226,7 @@ var X86Mods = {
     opModRegByte63: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
@@ -6238,7 +6238,7 @@ var X86Mods = {
     opModRegByte64: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6250,7 +6250,7 @@ var X86Mods = {
     opModRegByte65: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6262,7 +6262,7 @@ var X86Mods = {
     opModRegByte66: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6274,7 +6274,7 @@ var X86Mods = {
     opModRegByte67: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6286,7 +6286,7 @@ var X86Mods = {
     opModRegByte68: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
@@ -6298,7 +6298,7 @@ var X86Mods = {
     opModRegByte69: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
@@ -6310,7 +6310,7 @@ var X86Mods = {
     opModRegByte6A: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
@@ -6322,7 +6322,7 @@ var X86Mods = {
     opModRegByte6B: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
@@ -6334,7 +6334,7 @@ var X86Mods = {
     opModRegByte6C: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6346,7 +6346,7 @@ var X86Mods = {
     opModRegByte6D: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6358,7 +6358,7 @@ var X86Mods = {
     opModRegByte6E: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6370,7 +6370,7 @@ var X86Mods = {
     opModRegByte6F: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6382,7 +6382,7 @@ var X86Mods = {
     opModRegByte70: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
@@ -6394,7 +6394,7 @@ var X86Mods = {
     opModRegByte71: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
@@ -6406,7 +6406,7 @@ var X86Mods = {
     opModRegByte72: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
@@ -6418,7 +6418,7 @@ var X86Mods = {
     opModRegByte73: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
@@ -6430,7 +6430,7 @@ var X86Mods = {
     opModRegByte74: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6442,7 +6442,7 @@ var X86Mods = {
     opModRegByte75: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6454,7 +6454,7 @@ var X86Mods = {
     opModRegByte76: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6466,7 +6466,7 @@ var X86Mods = {
     opModRegByte77: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6478,7 +6478,7 @@ var X86Mods = {
     opModRegByte78: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
@@ -6490,7 +6490,7 @@ var X86Mods = {
     opModRegByte79: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
@@ -6502,7 +6502,7 @@ var X86Mods = {
     opModRegByte7A: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
@@ -6514,7 +6514,7 @@ var X86Mods = {
     opModRegByte7B: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
@@ -6526,7 +6526,7 @@ var X86Mods = {
     opModRegByte7C: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6538,7 +6538,7 @@ var X86Mods = {
     opModRegByte7D: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6550,7 +6550,7 @@ var X86Mods = {
     opModRegByte7E: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6562,7 +6562,7 @@ var X86Mods = {
     opModRegByte7F: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6574,7 +6574,7 @@ var X86Mods = {
     opModRegByte80: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
@@ -6586,7 +6586,7 @@ var X86Mods = {
     opModRegByte81: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
@@ -6598,7 +6598,7 @@ var X86Mods = {
     opModRegByte82: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
@@ -6610,7 +6610,7 @@ var X86Mods = {
     opModRegByte83: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
@@ -6622,7 +6622,7 @@ var X86Mods = {
     opModRegByte84: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6634,7 +6634,7 @@ var X86Mods = {
     opModRegByte85: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6646,7 +6646,7 @@ var X86Mods = {
     opModRegByte86: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6658,7 +6658,7 @@ var X86Mods = {
     opModRegByte87: function(fn) {
         var b = fn.call(this, this.regAX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)));
         this.regAX = (this.regAX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6670,7 +6670,7 @@ var X86Mods = {
     opModRegByte88: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
@@ -6682,7 +6682,7 @@ var X86Mods = {
     opModRegByte89: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
@@ -6694,7 +6694,7 @@ var X86Mods = {
     opModRegByte8A: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
@@ -6706,7 +6706,7 @@ var X86Mods = {
     opModRegByte8B: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
@@ -6718,7 +6718,7 @@ var X86Mods = {
     opModRegByte8C: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6730,7 +6730,7 @@ var X86Mods = {
     opModRegByte8D: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6742,7 +6742,7 @@ var X86Mods = {
     opModRegByte8E: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6754,7 +6754,7 @@ var X86Mods = {
     opModRegByte8F: function(fn) {
         var b = fn.call(this, this.regCX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)));
         this.regCX = (this.regCX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6766,7 +6766,7 @@ var X86Mods = {
     opModRegByte90: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
@@ -6778,7 +6778,7 @@ var X86Mods = {
     opModRegByte91: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
@@ -6790,7 +6790,7 @@ var X86Mods = {
     opModRegByte92: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
@@ -6802,7 +6802,7 @@ var X86Mods = {
     opModRegByte93: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
@@ -6814,7 +6814,7 @@ var X86Mods = {
     opModRegByte94: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6826,7 +6826,7 @@ var X86Mods = {
     opModRegByte95: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6838,7 +6838,7 @@ var X86Mods = {
     opModRegByte96: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6850,7 +6850,7 @@ var X86Mods = {
     opModRegByte97: function(fn) {
         var b = fn.call(this, this.regDX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)));
         this.regDX = (this.regDX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6862,7 +6862,7 @@ var X86Mods = {
     opModRegByte98: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
@@ -6874,7 +6874,7 @@ var X86Mods = {
     opModRegByte99: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
@@ -6886,7 +6886,7 @@ var X86Mods = {
     opModRegByte9A: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
@@ -6898,7 +6898,7 @@ var X86Mods = {
     opModRegByte9B: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
@@ -6910,7 +6910,7 @@ var X86Mods = {
     opModRegByte9C: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6922,7 +6922,7 @@ var X86Mods = {
     opModRegByte9D: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6934,7 +6934,7 @@ var X86Mods = {
     opModRegByte9E: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6946,7 +6946,7 @@ var X86Mods = {
     opModRegByte9F: function(fn) {
         var b = fn.call(this, this.regBX & 0xff, this.getEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)));
         this.regBX = (this.regBX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -6958,7 +6958,7 @@ var X86Mods = {
     opModRegByteA0: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
@@ -6970,7 +6970,7 @@ var X86Mods = {
     opModRegByteA1: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
@@ -6982,7 +6982,7 @@ var X86Mods = {
     opModRegByteA2: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
@@ -6994,7 +6994,7 @@ var X86Mods = {
     opModRegByteA3: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
@@ -7006,7 +7006,7 @@ var X86Mods = {
     opModRegByteA4: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -7018,7 +7018,7 @@ var X86Mods = {
     opModRegByteA5: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -7030,7 +7030,7 @@ var X86Mods = {
     opModRegByteA6: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -7042,7 +7042,7 @@ var X86Mods = {
     opModRegByteA7: function(fn) {
         var b = fn.call(this, this.regAX >> 8, this.getEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -7054,7 +7054,7 @@ var X86Mods = {
     opModRegByteA8: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
@@ -7066,7 +7066,7 @@ var X86Mods = {
     opModRegByteA9: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
@@ -7078,7 +7078,7 @@ var X86Mods = {
     opModRegByteAA: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
@@ -7090,7 +7090,7 @@ var X86Mods = {
     opModRegByteAB: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
@@ -7102,7 +7102,7 @@ var X86Mods = {
     opModRegByteAC: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -7114,7 +7114,7 @@ var X86Mods = {
     opModRegByteAD: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -7126,7 +7126,7 @@ var X86Mods = {
     opModRegByteAE: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -7138,7 +7138,7 @@ var X86Mods = {
     opModRegByteAF: function(fn) {
         var b = fn.call(this, this.regCX >> 8, this.getEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -7150,7 +7150,7 @@ var X86Mods = {
     opModRegByteB0: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
@@ -7162,7 +7162,7 @@ var X86Mods = {
     opModRegByteB1: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
@@ -7174,7 +7174,7 @@ var X86Mods = {
     opModRegByteB2: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
@@ -7186,7 +7186,7 @@ var X86Mods = {
     opModRegByteB3: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
@@ -7198,7 +7198,7 @@ var X86Mods = {
     opModRegByteB4: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -7210,7 +7210,7 @@ var X86Mods = {
     opModRegByteB5: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -7222,7 +7222,7 @@ var X86Mods = {
     opModRegByteB6: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -7234,7 +7234,7 @@ var X86Mods = {
     opModRegByteB7: function(fn) {
         var b = fn.call(this, this.regDX >> 8, this.getEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -7246,7 +7246,7 @@ var X86Mods = {
     opModRegByteB8: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
@@ -7258,7 +7258,7 @@ var X86Mods = {
     opModRegByteB9: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
@@ -7270,7 +7270,7 @@ var X86Mods = {
     opModRegByteBA: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
@@ -7282,7 +7282,7 @@ var X86Mods = {
     opModRegByteBB: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
@@ -7294,7 +7294,7 @@ var X86Mods = {
     opModRegByteBC: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -7306,7 +7306,7 @@ var X86Mods = {
     opModRegByteBD: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -7318,7 +7318,7 @@ var X86Mods = {
     opModRegByteBE: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -7330,7 +7330,7 @@ var X86Mods = {
     opModRegByteBF: function(fn) {
         var b = fn.call(this, this.regBX >> 8, this.getEAByte(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -8038,7 +8038,7 @@ var X86Mods = {
     opModRegWord00: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
@@ -8051,7 +8051,7 @@ var X86Mods = {
     opModRegWord01: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
@@ -8064,7 +8064,7 @@ var X86Mods = {
     opModRegWord02: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
@@ -8077,7 +8077,7 @@ var X86Mods = {
     opModRegWord03: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
@@ -8090,7 +8090,7 @@ var X86Mods = {
     opModRegWord04: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segData, this.regSI));
         if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -8103,7 +8103,7 @@ var X86Mods = {
     opModRegWord05: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segData, this.regDI));
         if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -8116,7 +8116,7 @@ var X86Mods = {
     opModRegWord06: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segData, this.getIPWord()));
         if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
@@ -8129,7 +8129,7 @@ var X86Mods = {
     opModRegWord07: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segData, this.regBX));
         if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -8142,7 +8142,7 @@ var X86Mods = {
     opModRegWord08: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
@@ -8155,7 +8155,7 @@ var X86Mods = {
     opModRegWord09: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
@@ -8168,7 +8168,7 @@ var X86Mods = {
     opModRegWord0A: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
@@ -8181,7 +8181,7 @@ var X86Mods = {
     opModRegWord0B: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
@@ -8194,7 +8194,7 @@ var X86Mods = {
     opModRegWord0C: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segData, this.regSI));
         if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -8207,7 +8207,7 @@ var X86Mods = {
     opModRegWord0D: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segData, this.regDI));
         if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -8220,7 +8220,7 @@ var X86Mods = {
     opModRegWord0E: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segData, this.getIPWord()));
         if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
@@ -8233,7 +8233,7 @@ var X86Mods = {
     opModRegWord0F: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segData, this.regBX));
         if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -8246,7 +8246,7 @@ var X86Mods = {
     opModRegWord10: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
@@ -8259,7 +8259,7 @@ var X86Mods = {
     opModRegWord11: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
@@ -8272,7 +8272,7 @@ var X86Mods = {
     opModRegWord12: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
@@ -8285,7 +8285,7 @@ var X86Mods = {
     opModRegWord13: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
@@ -8298,7 +8298,7 @@ var X86Mods = {
     opModRegWord14: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segData, this.regSI));
         if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -8311,7 +8311,7 @@ var X86Mods = {
     opModRegWord15: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segData, this.regDI));
         if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -8324,7 +8324,7 @@ var X86Mods = {
     opModRegWord16: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segData, this.getIPWord()));
         if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
@@ -8337,7 +8337,7 @@ var X86Mods = {
     opModRegWord17: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segData, this.regBX));
         if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -8350,7 +8350,7 @@ var X86Mods = {
     opModRegWord18: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
@@ -8363,7 +8363,7 @@ var X86Mods = {
     opModRegWord19: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
@@ -8376,7 +8376,7 @@ var X86Mods = {
     opModRegWord1A: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
@@ -8389,7 +8389,7 @@ var X86Mods = {
     opModRegWord1B: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
@@ -8402,7 +8402,7 @@ var X86Mods = {
     opModRegWord1C: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segData, this.regSI));
         if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -8415,7 +8415,7 @@ var X86Mods = {
     opModRegWord1D: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segData, this.regDI));
         if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -8428,7 +8428,7 @@ var X86Mods = {
     opModRegWord1E: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segData, this.getIPWord()));
         if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
@@ -8441,7 +8441,7 @@ var X86Mods = {
     opModRegWord1F: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segData, this.regBX));
         if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -8534,7 +8534,7 @@ var X86Mods = {
     opModRegWord28: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
@@ -8547,7 +8547,7 @@ var X86Mods = {
     opModRegWord29: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
@@ -8560,7 +8560,7 @@ var X86Mods = {
     opModRegWord2A: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
@@ -8573,7 +8573,7 @@ var X86Mods = {
     opModRegWord2B: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
@@ -8586,7 +8586,7 @@ var X86Mods = {
     opModRegWord2C: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segData, this.regSI));
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -8599,7 +8599,7 @@ var X86Mods = {
     opModRegWord2D: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segData, this.regDI));
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -8612,7 +8612,7 @@ var X86Mods = {
     opModRegWord2E: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segData, this.getIPWord()));
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
@@ -8625,7 +8625,7 @@ var X86Mods = {
     opModRegWord2F: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segData, this.regBX));
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -8638,7 +8638,7 @@ var X86Mods = {
     opModRegWord30: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
@@ -8651,7 +8651,7 @@ var X86Mods = {
     opModRegWord31: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
@@ -8664,7 +8664,7 @@ var X86Mods = {
     opModRegWord32: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
@@ -8677,7 +8677,7 @@ var X86Mods = {
     opModRegWord33: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
@@ -8690,7 +8690,7 @@ var X86Mods = {
     opModRegWord34: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segData, this.regSI));
         if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -8703,7 +8703,7 @@ var X86Mods = {
     opModRegWord35: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segData, this.regDI));
         if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -8716,7 +8716,7 @@ var X86Mods = {
     opModRegWord36: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segData, this.getIPWord()));
         if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
@@ -8729,7 +8729,7 @@ var X86Mods = {
     opModRegWord37: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segData, this.regBX));
         if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -8742,7 +8742,7 @@ var X86Mods = {
     opModRegWord38: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segData, ((this.regBX + this.regSI) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
@@ -8755,7 +8755,7 @@ var X86Mods = {
     opModRegWord39: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segData, ((this.regBX + this.regDI) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
@@ -8768,7 +8768,7 @@ var X86Mods = {
     opModRegWord3A: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segStack, ((this.regBP + this.regSI) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
@@ -8781,7 +8781,7 @@ var X86Mods = {
     opModRegWord3B: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segStack, ((this.regBP + this.regDI) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
@@ -8794,7 +8794,7 @@ var X86Mods = {
     opModRegWord3C: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segData, this.regSI));
         if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -8807,7 +8807,7 @@ var X86Mods = {
     opModRegWord3D: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segData, this.regDI));
         if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -8820,7 +8820,7 @@ var X86Mods = {
     opModRegWord3E: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segData, this.getIPWord()));
         if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
@@ -8833,7 +8833,7 @@ var X86Mods = {
     opModRegWord3F: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segData, this.regBX));
         if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
@@ -8846,7 +8846,7 @@ var X86Mods = {
     opModRegWord40: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -8859,7 +8859,7 @@ var X86Mods = {
     opModRegWord41: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -8872,7 +8872,7 @@ var X86Mods = {
     opModRegWord42: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -8885,7 +8885,7 @@ var X86Mods = {
     opModRegWord43: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -8898,7 +8898,7 @@ var X86Mods = {
     opModRegWord44: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -8911,7 +8911,7 @@ var X86Mods = {
     opModRegWord45: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -8924,7 +8924,7 @@ var X86Mods = {
     opModRegWord46: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -8937,7 +8937,7 @@ var X86Mods = {
     opModRegWord47: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -8950,7 +8950,7 @@ var X86Mods = {
     opModRegWord48: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -8963,7 +8963,7 @@ var X86Mods = {
     opModRegWord49: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -8976,7 +8976,7 @@ var X86Mods = {
     opModRegWord4A: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -8989,7 +8989,7 @@ var X86Mods = {
     opModRegWord4B: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -9002,7 +9002,7 @@ var X86Mods = {
     opModRegWord4C: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9015,7 +9015,7 @@ var X86Mods = {
     opModRegWord4D: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9028,7 +9028,7 @@ var X86Mods = {
     opModRegWord4E: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9041,7 +9041,7 @@ var X86Mods = {
     opModRegWord4F: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9054,7 +9054,7 @@ var X86Mods = {
     opModRegWord50: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -9067,7 +9067,7 @@ var X86Mods = {
     opModRegWord51: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -9080,7 +9080,7 @@ var X86Mods = {
     opModRegWord52: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -9093,7 +9093,7 @@ var X86Mods = {
     opModRegWord53: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -9106,7 +9106,7 @@ var X86Mods = {
     opModRegWord54: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9119,7 +9119,7 @@ var X86Mods = {
     opModRegWord55: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9132,7 +9132,7 @@ var X86Mods = {
     opModRegWord56: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9145,7 +9145,7 @@ var X86Mods = {
     opModRegWord57: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9158,7 +9158,7 @@ var X86Mods = {
     opModRegWord58: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -9171,7 +9171,7 @@ var X86Mods = {
     opModRegWord59: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -9184,7 +9184,7 @@ var X86Mods = {
     opModRegWord5A: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -9197,7 +9197,7 @@ var X86Mods = {
     opModRegWord5B: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -9210,7 +9210,7 @@ var X86Mods = {
     opModRegWord5C: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9223,7 +9223,7 @@ var X86Mods = {
     opModRegWord5D: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9236,7 +9236,7 @@ var X86Mods = {
     opModRegWord5E: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9249,7 +9249,7 @@ var X86Mods = {
     opModRegWord5F: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9342,7 +9342,7 @@ var X86Mods = {
     opModRegWord68: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -9355,7 +9355,7 @@ var X86Mods = {
     opModRegWord69: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -9368,7 +9368,7 @@ var X86Mods = {
     opModRegWord6A: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -9381,7 +9381,7 @@ var X86Mods = {
     opModRegWord6B: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -9394,7 +9394,7 @@ var X86Mods = {
     opModRegWord6C: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9407,7 +9407,7 @@ var X86Mods = {
     opModRegWord6D: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9420,7 +9420,7 @@ var X86Mods = {
     opModRegWord6E: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9433,7 +9433,7 @@ var X86Mods = {
     opModRegWord6F: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9446,7 +9446,7 @@ var X86Mods = {
     opModRegWord70: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -9459,7 +9459,7 @@ var X86Mods = {
     opModRegWord71: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -9472,7 +9472,7 @@ var X86Mods = {
     opModRegWord72: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -9485,7 +9485,7 @@ var X86Mods = {
     opModRegWord73: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -9498,7 +9498,7 @@ var X86Mods = {
     opModRegWord74: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9511,7 +9511,7 @@ var X86Mods = {
     opModRegWord75: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9524,7 +9524,7 @@ var X86Mods = {
     opModRegWord76: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9537,7 +9537,7 @@ var X86Mods = {
     opModRegWord77: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9550,7 +9550,7 @@ var X86Mods = {
     opModRegWord78: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segData, ((this.regBX + this.regSI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -9563,7 +9563,7 @@ var X86Mods = {
     opModRegWord79: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segData, ((this.regBX + this.regDI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -9576,7 +9576,7 @@ var X86Mods = {
     opModRegWord7A: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -9589,7 +9589,7 @@ var X86Mods = {
     opModRegWord7B: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -9602,7 +9602,7 @@ var X86Mods = {
     opModRegWord7C: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segData, ((this.regSI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9615,7 +9615,7 @@ var X86Mods = {
     opModRegWord7D: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segData, ((this.regDI + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9628,7 +9628,7 @@ var X86Mods = {
     opModRegWord7E: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segStack, ((this.regBP + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9641,7 +9641,7 @@ var X86Mods = {
     opModRegWord7F: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segData, ((this.regBX + this.getIPDisp()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9654,7 +9654,7 @@ var X86Mods = {
     opModRegWord80: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -9667,7 +9667,7 @@ var X86Mods = {
     opModRegWord81: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -9680,7 +9680,7 @@ var X86Mods = {
     opModRegWord82: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -9693,7 +9693,7 @@ var X86Mods = {
     opModRegWord83: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -9706,7 +9706,7 @@ var X86Mods = {
     opModRegWord84: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9719,7 +9719,7 @@ var X86Mods = {
     opModRegWord85: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9732,7 +9732,7 @@ var X86Mods = {
     opModRegWord86: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9745,7 +9745,7 @@ var X86Mods = {
     opModRegWord87: function(fn) {
         this.regAX = fn.call(this, this.regAX, this.getEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9758,7 +9758,7 @@ var X86Mods = {
     opModRegWord88: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -9771,7 +9771,7 @@ var X86Mods = {
     opModRegWord89: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -9784,7 +9784,7 @@ var X86Mods = {
     opModRegWord8A: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -9797,7 +9797,7 @@ var X86Mods = {
     opModRegWord8B: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -9810,7 +9810,7 @@ var X86Mods = {
     opModRegWord8C: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9823,7 +9823,7 @@ var X86Mods = {
     opModRegWord8D: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9836,7 +9836,7 @@ var X86Mods = {
     opModRegWord8E: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9849,7 +9849,7 @@ var X86Mods = {
     opModRegWord8F: function(fn) {
         this.regCX = fn.call(this, this.regCX, this.getEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9862,7 +9862,7 @@ var X86Mods = {
     opModRegWord90: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -9875,7 +9875,7 @@ var X86Mods = {
     opModRegWord91: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -9888,7 +9888,7 @@ var X86Mods = {
     opModRegWord92: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -9901,7 +9901,7 @@ var X86Mods = {
     opModRegWord93: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -9914,7 +9914,7 @@ var X86Mods = {
     opModRegWord94: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9927,7 +9927,7 @@ var X86Mods = {
     opModRegWord95: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9940,7 +9940,7 @@ var X86Mods = {
     opModRegWord96: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9953,7 +9953,7 @@ var X86Mods = {
     opModRegWord97: function(fn) {
         this.regDX = fn.call(this, this.regDX, this.getEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -9966,7 +9966,7 @@ var X86Mods = {
     opModRegWord98: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -9979,7 +9979,7 @@ var X86Mods = {
     opModRegWord99: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -9992,7 +9992,7 @@ var X86Mods = {
     opModRegWord9A: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -10005,7 +10005,7 @@ var X86Mods = {
     opModRegWord9B: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -10018,7 +10018,7 @@ var X86Mods = {
     opModRegWord9C: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -10031,7 +10031,7 @@ var X86Mods = {
     opModRegWord9D: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -10044,7 +10044,7 @@ var X86Mods = {
     opModRegWord9E: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -10057,7 +10057,7 @@ var X86Mods = {
     opModRegWord9F: function(fn) {
         this.regBX = fn.call(this, this.regBX, this.getEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -10150,7 +10150,7 @@ var X86Mods = {
     opModRegWordA8: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -10163,7 +10163,7 @@ var X86Mods = {
     opModRegWordA9: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -10176,7 +10176,7 @@ var X86Mods = {
     opModRegWordAA: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -10189,7 +10189,7 @@ var X86Mods = {
     opModRegWordAB: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -10202,7 +10202,7 @@ var X86Mods = {
     opModRegWordAC: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -10215,7 +10215,7 @@ var X86Mods = {
     opModRegWordAD: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -10228,7 +10228,7 @@ var X86Mods = {
     opModRegWordAE: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -10241,7 +10241,7 @@ var X86Mods = {
     opModRegWordAF: function(fn) {
         this.regBP = fn.call(this, this.regBP, this.getEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -10254,7 +10254,7 @@ var X86Mods = {
     opModRegWordB0: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -10267,7 +10267,7 @@ var X86Mods = {
     opModRegWordB1: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -10280,7 +10280,7 @@ var X86Mods = {
     opModRegWordB2: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -10293,7 +10293,7 @@ var X86Mods = {
     opModRegWordB3: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -10306,7 +10306,7 @@ var X86Mods = {
     opModRegWordB4: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -10319,7 +10319,7 @@ var X86Mods = {
     opModRegWordB5: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -10332,7 +10332,7 @@ var X86Mods = {
     opModRegWordB6: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -10345,7 +10345,7 @@ var X86Mods = {
     opModRegWordB7: function(fn) {
         this.regSI = fn.call(this, this.regSI, this.getEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -10358,7 +10358,7 @@ var X86Mods = {
     opModRegWordB8: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segData, ((this.regBX + this.regSI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -10371,7 +10371,7 @@ var X86Mods = {
     opModRegWordB9: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segData, ((this.regBX + this.regDI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -10384,7 +10384,7 @@ var X86Mods = {
     opModRegWordBA: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segStack, ((this.regBP + this.regSI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
@@ -10397,7 +10397,7 @@ var X86Mods = {
     opModRegWordBB: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segStack, ((this.regBP + this.regDI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
@@ -10410,7 +10410,7 @@ var X86Mods = {
     opModRegWordBC: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segData, ((this.regSI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -10423,7 +10423,7 @@ var X86Mods = {
     opModRegWordBD: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segData, ((this.regDI + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -10436,7 +10436,7 @@ var X86Mods = {
     opModRegWordBE: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segStack, ((this.regBP + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -10449,7 +10449,7 @@ var X86Mods = {
     opModRegWordBF: function(fn) {
         this.regDI = fn.call(this, this.regDI, this.getEAWord(this.segData, ((this.regBX + this.getIPWord()) & 0xffff)));
         if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
@@ -13490,7 +13490,7 @@ var X86Mods = {
     opModGrpByteC0: function(afnGrp, fnSrc) {
         var b = afnGrp[0].call(this, this.regAX & 0xff, fnSrc.call(this));
         this.regAX = (this.regAX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteC1(afnGrp, fnSrc): mod=11 (reg:dst)  reg=000 (afnGrp[0])  r/m=001 (CL)
@@ -13502,7 +13502,7 @@ var X86Mods = {
     opModGrpByteC1: function(afnGrp, fnSrc) {
         var b = afnGrp[0].call(this, this.regCX & 0xff, fnSrc.call(this));
         this.regCX = (this.regCX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteC2(afnGrp, fnSrc): mod=11 (reg:dst)  reg=000 (afnGrp[0])  r/m=010 (DL)
@@ -13514,7 +13514,7 @@ var X86Mods = {
     opModGrpByteC2: function(afnGrp, fnSrc) {
         var b = afnGrp[0].call(this, this.regDX & 0xff, fnSrc.call(this));
         this.regDX = (this.regDX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteC3(afnGrp, fnSrc): mod=11 (reg:dst)  reg=000 (afnGrp[0])  r/m=011 (BL)
@@ -13526,7 +13526,7 @@ var X86Mods = {
     opModGrpByteC3: function(afnGrp, fnSrc) {
         var b = afnGrp[0].call(this, this.regBX & 0xff, fnSrc.call(this));
         this.regBX = (this.regBX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteC4(afnGrp, fnSrc): mod=11 (reg:dst)  reg=000 (afnGrp[0])  r/m=100 (AH)
@@ -13538,7 +13538,7 @@ var X86Mods = {
     opModGrpByteC4: function(afnGrp, fnSrc) {
         var b = afnGrp[0].call(this, this.regAX >> 8, fnSrc.call(this));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteC5(afnGrp, fnSrc): mod=11 (reg:dst)  reg=000 (afnGrp[0])  r/m=101 (CH)
@@ -13550,7 +13550,7 @@ var X86Mods = {
     opModGrpByteC5: function(afnGrp, fnSrc) {
         var b = afnGrp[0].call(this, this.regCX >> 8, fnSrc.call(this));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteC6(afnGrp, fnSrc): mod=11 (reg:dst)  reg=000 (afnGrp[0])  r/m=110 (DH)
@@ -13562,7 +13562,7 @@ var X86Mods = {
     opModGrpByteC6: function(afnGrp, fnSrc) {
         var b = afnGrp[0].call(this, this.regDX >> 8, fnSrc.call(this));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteC7(afnGrp, fnSrc): mod=11 (reg:dst)  reg=000 (afnGrp[0])  r/m=111 (BH)
@@ -13574,7 +13574,7 @@ var X86Mods = {
     opModGrpByteC7: function(afnGrp, fnSrc) {
         var b = afnGrp[0].call(this, this.regBX >> 8, fnSrc.call(this));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteC8(afnGrp, fnSrc): mod=11 (reg:dst)  reg=001 (afnGrp[1])  r/m=000 (AL)
@@ -13586,7 +13586,7 @@ var X86Mods = {
     opModGrpByteC8: function(afnGrp, fnSrc) {
         var b = afnGrp[1].call(this, this.regAX & 0xff, fnSrc.call(this));
         this.regAX = (this.regAX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteC9(afnGrp, fnSrc): mod=11 (reg:dst)  reg=001 (afnGrp[1])  r/m=001 (CL)
@@ -13598,7 +13598,7 @@ var X86Mods = {
     opModGrpByteC9: function(afnGrp, fnSrc) {
         var b = afnGrp[1].call(this, this.regCX & 0xff, fnSrc.call(this));
         this.regCX = (this.regCX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteCA(afnGrp, fnSrc): mod=11 (reg:dst)  reg=001 (afnGrp[1])  r/m=010 (DL)
@@ -13610,7 +13610,7 @@ var X86Mods = {
     opModGrpByteCA: function(afnGrp, fnSrc) {
         var b = afnGrp[1].call(this, this.regDX & 0xff, fnSrc.call(this));
         this.regDX = (this.regDX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteCB(afnGrp, fnSrc): mod=11 (reg:dst)  reg=001 (afnGrp[1])  r/m=011 (BL)
@@ -13622,7 +13622,7 @@ var X86Mods = {
     opModGrpByteCB: function(afnGrp, fnSrc) {
         var b = afnGrp[1].call(this, this.regBX & 0xff, fnSrc.call(this));
         this.regBX = (this.regBX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteCC(afnGrp, fnSrc): mod=11 (reg:dst)  reg=001 (afnGrp[1])  r/m=100 (AH)
@@ -13634,7 +13634,7 @@ var X86Mods = {
     opModGrpByteCC: function(afnGrp, fnSrc) {
         var b = afnGrp[1].call(this, this.regAX >> 8, fnSrc.call(this));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteCD(afnGrp, fnSrc): mod=11 (reg:dst)  reg=001 (afnGrp[1])  r/m=101 (CH)
@@ -13646,7 +13646,7 @@ var X86Mods = {
     opModGrpByteCD: function(afnGrp, fnSrc) {
         var b = afnGrp[1].call(this, this.regCX >> 8, fnSrc.call(this));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteCE(afnGrp, fnSrc): mod=11 (reg:dst)  reg=001 (afnGrp[1])  r/m=110 (DH)
@@ -13658,7 +13658,7 @@ var X86Mods = {
     opModGrpByteCE: function(afnGrp, fnSrc) {
         var b = afnGrp[1].call(this, this.regDX >> 8, fnSrc.call(this));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteCF(afnGrp, fnSrc): mod=11 (reg:dst)  reg=001 (afnGrp[1])  r/m=111 (BH)
@@ -13670,7 +13670,7 @@ var X86Mods = {
     opModGrpByteCF: function(afnGrp, fnSrc) {
         var b = afnGrp[1].call(this, this.regBX >> 8, fnSrc.call(this));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteD0(afnGrp, fnSrc): mod=11 (reg:dst)  reg=010 (afnGrp[2])  r/m=000 (AL)
@@ -13682,7 +13682,7 @@ var X86Mods = {
     opModGrpByteD0: function(afnGrp, fnSrc) {
         var b = afnGrp[2].call(this, this.regAX & 0xff, fnSrc.call(this));
         this.regAX = (this.regAX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteD1(afnGrp, fnSrc): mod=11 (reg:dst)  reg=010 (afnGrp[2])  r/m=001 (CL)
@@ -13694,7 +13694,7 @@ var X86Mods = {
     opModGrpByteD1: function(afnGrp, fnSrc) {
         var b = afnGrp[2].call(this, this.regCX & 0xff, fnSrc.call(this));
         this.regCX = (this.regCX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteD2(afnGrp, fnSrc): mod=11 (reg:dst)  reg=010 (afnGrp[2])  r/m=010 (DL)
@@ -13706,7 +13706,7 @@ var X86Mods = {
     opModGrpByteD2: function(afnGrp, fnSrc) {
         var b = afnGrp[2].call(this, this.regDX & 0xff, fnSrc.call(this));
         this.regDX = (this.regDX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteD3(afnGrp, fnSrc): mod=11 (reg:dst)  reg=010 (afnGrp[2])  r/m=011 (BL)
@@ -13718,7 +13718,7 @@ var X86Mods = {
     opModGrpByteD3: function(afnGrp, fnSrc) {
         var b = afnGrp[2].call(this, this.regBX & 0xff, fnSrc.call(this));
         this.regBX = (this.regBX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteD4(afnGrp, fnSrc): mod=11 (reg:dst)  reg=010 (afnGrp[2])  r/m=100 (AH)
@@ -13730,7 +13730,7 @@ var X86Mods = {
     opModGrpByteD4: function(afnGrp, fnSrc) {
         var b = afnGrp[2].call(this, this.regAX >> 8, fnSrc.call(this));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteD5(afnGrp, fnSrc): mod=11 (reg:dst)  reg=010 (afnGrp[2])  r/m=101 (CH)
@@ -13742,7 +13742,7 @@ var X86Mods = {
     opModGrpByteD5: function(afnGrp, fnSrc) {
         var b = afnGrp[2].call(this, this.regCX >> 8, fnSrc.call(this));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteD6(afnGrp, fnSrc): mod=11 (reg:dst)  reg=010 (afnGrp[2])  r/m=110 (DH)
@@ -13754,7 +13754,7 @@ var X86Mods = {
     opModGrpByteD6: function(afnGrp, fnSrc) {
         var b = afnGrp[2].call(this, this.regDX >> 8, fnSrc.call(this));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteD7(afnGrp, fnSrc): mod=11 (reg:dst)  reg=010 (afnGrp[2])  r/m=111 (BH)
@@ -13766,7 +13766,7 @@ var X86Mods = {
     opModGrpByteD7: function(afnGrp, fnSrc) {
         var b = afnGrp[2].call(this, this.regBX >> 8, fnSrc.call(this));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteD8(afnGrp, fnSrc): mod=11 (reg:dst)  reg=011 (afnGrp[3])  r/m=000 (AL)
@@ -13778,7 +13778,7 @@ var X86Mods = {
     opModGrpByteD8: function(afnGrp, fnSrc) {
         var b = afnGrp[3].call(this, this.regAX & 0xff, fnSrc.call(this));
         this.regAX = (this.regAX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteD9(afnGrp, fnSrc): mod=11 (reg:dst)  reg=011 (afnGrp[3])  r/m=001 (CL)
@@ -13790,7 +13790,7 @@ var X86Mods = {
     opModGrpByteD9: function(afnGrp, fnSrc) {
         var b = afnGrp[3].call(this, this.regCX & 0xff, fnSrc.call(this));
         this.regCX = (this.regCX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteDA(afnGrp, fnSrc): mod=11 (reg:dst)  reg=011 (afnGrp[3])  r/m=010 (DL)
@@ -13802,7 +13802,7 @@ var X86Mods = {
     opModGrpByteDA: function(afnGrp, fnSrc) {
         var b = afnGrp[3].call(this, this.regDX & 0xff, fnSrc.call(this));
         this.regDX = (this.regDX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteDB(afnGrp, fnSrc): mod=11 (reg:dst)  reg=011 (afnGrp[3])  r/m=011 (BL)
@@ -13814,7 +13814,7 @@ var X86Mods = {
     opModGrpByteDB: function(afnGrp, fnSrc) {
         var b = afnGrp[3].call(this, this.regBX & 0xff, fnSrc.call(this));
         this.regBX = (this.regBX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteDC(afnGrp, fnSrc): mod=11 (reg:dst)  reg=011 (afnGrp[3])  r/m=100 (AH)
@@ -13826,7 +13826,7 @@ var X86Mods = {
     opModGrpByteDC: function(afnGrp, fnSrc) {
         var b = afnGrp[3].call(this, this.regAX >> 8, fnSrc.call(this));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteDD(afnGrp, fnSrc): mod=11 (reg:dst)  reg=011 (afnGrp[3])  r/m=101 (CH)
@@ -13838,7 +13838,7 @@ var X86Mods = {
     opModGrpByteDD: function(afnGrp, fnSrc) {
         var b = afnGrp[3].call(this, this.regCX >> 8, fnSrc.call(this));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteDE(afnGrp, fnSrc): mod=11 (reg:dst)  reg=011 (afnGrp[3])  r/m=110 (DH)
@@ -13850,7 +13850,7 @@ var X86Mods = {
     opModGrpByteDE: function(afnGrp, fnSrc) {
         var b = afnGrp[3].call(this, this.regDX >> 8, fnSrc.call(this));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteDF(afnGrp, fnSrc): mod=11 (reg:dst)  reg=011 (afnGrp[3])  r/m=111 (BH)
@@ -13862,7 +13862,7 @@ var X86Mods = {
     opModGrpByteDF: function(afnGrp, fnSrc) {
         var b = afnGrp[3].call(this, this.regBX >> 8, fnSrc.call(this));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteE0(afnGrp, fnSrc): mod=11 (reg:dst)  reg=100 (afnGrp[4])  r/m=000 (AL)
@@ -13874,7 +13874,7 @@ var X86Mods = {
     opModGrpByteE0: function(afnGrp, fnSrc) {
         var b = afnGrp[4].call(this, this.regAX & 0xff, fnSrc.call(this));
         this.regAX = (this.regAX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteE1(afnGrp, fnSrc): mod=11 (reg:dst)  reg=100 (afnGrp[4])  r/m=001 (CL)
@@ -13886,7 +13886,7 @@ var X86Mods = {
     opModGrpByteE1: function(afnGrp, fnSrc) {
         var b = afnGrp[4].call(this, this.regCX & 0xff, fnSrc.call(this));
         this.regCX = (this.regCX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteE2(afnGrp, fnSrc): mod=11 (reg:dst)  reg=100 (afnGrp[4])  r/m=010 (DL)
@@ -13898,7 +13898,7 @@ var X86Mods = {
     opModGrpByteE2: function(afnGrp, fnSrc) {
         var b = afnGrp[4].call(this, this.regDX & 0xff, fnSrc.call(this));
         this.regDX = (this.regDX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteE3(afnGrp, fnSrc): mod=11 (reg:dst)  reg=100 (afnGrp[4])  r/m=011 (BL)
@@ -13910,7 +13910,7 @@ var X86Mods = {
     opModGrpByteE3: function(afnGrp, fnSrc) {
         var b = afnGrp[4].call(this, this.regBX & 0xff, fnSrc.call(this));
         this.regBX = (this.regBX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteE4(afnGrp, fnSrc): mod=11 (reg:dst)  reg=100 (afnGrp[4])  r/m=100 (AH)
@@ -13922,7 +13922,7 @@ var X86Mods = {
     opModGrpByteE4: function(afnGrp, fnSrc) {
         var b = afnGrp[4].call(this, this.regAX >> 8, fnSrc.call(this));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteE5(afnGrp, fnSrc): mod=11 (reg:dst)  reg=100 (afnGrp[4])  r/m=101 (CH)
@@ -13934,7 +13934,7 @@ var X86Mods = {
     opModGrpByteE5: function(afnGrp, fnSrc) {
         var b = afnGrp[4].call(this, this.regCX >> 8, fnSrc.call(this));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteE6(afnGrp, fnSrc): mod=11 (reg:dst)  reg=100 (afnGrp[4])  r/m=110 (DH)
@@ -13946,7 +13946,7 @@ var X86Mods = {
     opModGrpByteE6: function(afnGrp, fnSrc) {
         var b = afnGrp[4].call(this, this.regDX >> 8, fnSrc.call(this));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteE7(afnGrp, fnSrc): mod=11 (reg:dst)  reg=100 (afnGrp[4])  r/m=111 (BH)
@@ -13958,7 +13958,7 @@ var X86Mods = {
     opModGrpByteE7: function(afnGrp, fnSrc) {
         var b = afnGrp[4].call(this, this.regBX >> 8, fnSrc.call(this));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteE8(afnGrp, fnSrc): mod=11 (reg:dst)  reg=101 (afnGrp[5])  r/m=000 (AL)
@@ -13970,7 +13970,7 @@ var X86Mods = {
     opModGrpByteE8: function(afnGrp, fnSrc) {
         var b = afnGrp[5].call(this, this.regAX & 0xff, fnSrc.call(this));
         this.regAX = (this.regAX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteE9(afnGrp, fnSrc): mod=11 (reg:dst)  reg=101 (afnGrp[5])  r/m=001 (CL)
@@ -13982,7 +13982,7 @@ var X86Mods = {
     opModGrpByteE9: function(afnGrp, fnSrc) {
         var b = afnGrp[5].call(this, this.regCX & 0xff, fnSrc.call(this));
         this.regCX = (this.regCX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteEA(afnGrp, fnSrc): mod=11 (reg:dst)  reg=101 (afnGrp[5])  r/m=010 (DL)
@@ -13994,7 +13994,7 @@ var X86Mods = {
     opModGrpByteEA: function(afnGrp, fnSrc) {
         var b = afnGrp[5].call(this, this.regDX & 0xff, fnSrc.call(this));
         this.regDX = (this.regDX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteEB(afnGrp, fnSrc): mod=11 (reg:dst)  reg=101 (afnGrp[5])  r/m=011 (BL)
@@ -14006,7 +14006,7 @@ var X86Mods = {
     opModGrpByteEB: function(afnGrp, fnSrc) {
         var b = afnGrp[5].call(this, this.regBX & 0xff, fnSrc.call(this));
         this.regBX = (this.regBX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteEC(afnGrp, fnSrc): mod=11 (reg:dst)  reg=101 (afnGrp[5])  r/m=100 (AH)
@@ -14018,7 +14018,7 @@ var X86Mods = {
     opModGrpByteEC: function(afnGrp, fnSrc) {
         var b = afnGrp[5].call(this, this.regAX >> 8, fnSrc.call(this));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteED(afnGrp, fnSrc): mod=11 (reg:dst)  reg=101 (afnGrp[5])  r/m=101 (CH)
@@ -14030,7 +14030,7 @@ var X86Mods = {
     opModGrpByteED: function(afnGrp, fnSrc) {
         var b = afnGrp[5].call(this, this.regCX >> 8, fnSrc.call(this));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteEE(afnGrp, fnSrc): mod=11 (reg:dst)  reg=101 (afnGrp[5])  r/m=110 (DH)
@@ -14042,7 +14042,7 @@ var X86Mods = {
     opModGrpByteEE: function(afnGrp, fnSrc) {
         var b = afnGrp[5].call(this, this.regDX >> 8, fnSrc.call(this));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteEF(afnGrp, fnSrc): mod=11 (reg:dst)  reg=101 (afnGrp[5])  r/m=111 (BH)
@@ -14054,7 +14054,7 @@ var X86Mods = {
     opModGrpByteEF: function(afnGrp, fnSrc) {
         var b = afnGrp[5].call(this, this.regBX >> 8, fnSrc.call(this));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteF0(afnGrp, fnSrc): mod=11 (reg:dst)  reg=110 (afnGrp[6])  r/m=000 (AL)
@@ -14066,7 +14066,7 @@ var X86Mods = {
     opModGrpByteF0: function(afnGrp, fnSrc) {
         var b = afnGrp[6].call(this, this.regAX & 0xff, fnSrc.call(this));
         this.regAX = (this.regAX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteF1(afnGrp, fnSrc): mod=11 (reg:dst)  reg=110 (afnGrp[6])  r/m=001 (CL)
@@ -14078,7 +14078,7 @@ var X86Mods = {
     opModGrpByteF1: function(afnGrp, fnSrc) {
         var b = afnGrp[6].call(this, this.regCX & 0xff, fnSrc.call(this));
         this.regCX = (this.regCX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteF2(afnGrp, fnSrc): mod=11 (reg:dst)  reg=110 (afnGrp[6])  r/m=010 (DL)
@@ -14090,7 +14090,7 @@ var X86Mods = {
     opModGrpByteF2: function(afnGrp, fnSrc) {
         var b = afnGrp[6].call(this, this.regDX & 0xff, fnSrc.call(this));
         this.regDX = (this.regDX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteF3(afnGrp, fnSrc): mod=11 (reg:dst)  reg=110 (afnGrp[6])  r/m=011 (BL)
@@ -14102,7 +14102,7 @@ var X86Mods = {
     opModGrpByteF3: function(afnGrp, fnSrc) {
         var b = afnGrp[6].call(this, this.regBX & 0xff, fnSrc.call(this));
         this.regBX = (this.regBX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteF4(afnGrp, fnSrc): mod=11 (reg:dst)  reg=110 (afnGrp[6])  r/m=100 (AH)
@@ -14114,7 +14114,7 @@ var X86Mods = {
     opModGrpByteF4: function(afnGrp, fnSrc) {
         var b = afnGrp[6].call(this, this.regAX >> 8, fnSrc.call(this));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteF5(afnGrp, fnSrc): mod=11 (reg:dst)  reg=110 (afnGrp[6])  r/m=101 (CH)
@@ -14126,7 +14126,7 @@ var X86Mods = {
     opModGrpByteF5: function(afnGrp, fnSrc) {
         var b = afnGrp[6].call(this, this.regCX >> 8, fnSrc.call(this));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteF6(afnGrp, fnSrc): mod=11 (reg:dst)  reg=110 (afnGrp[6])  r/m=110 (DH)
@@ -14138,7 +14138,7 @@ var X86Mods = {
     opModGrpByteF6: function(afnGrp, fnSrc) {
         var b = afnGrp[6].call(this, this.regDX >> 8, fnSrc.call(this));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteF7(afnGrp, fnSrc): mod=11 (reg:dst)  reg=110 (afnGrp[6])  r/m=111 (BH)
@@ -14150,7 +14150,7 @@ var X86Mods = {
     opModGrpByteF7: function(afnGrp, fnSrc) {
         var b = afnGrp[6].call(this, this.regBX >> 8, fnSrc.call(this));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteF8(afnGrp, fnSrc): mod=11 (reg:dst)  reg=111 (afnGrp[7])  r/m=000 (AL)
@@ -14162,7 +14162,7 @@ var X86Mods = {
     opModGrpByteF8: function(afnGrp, fnSrc) {
         var b = afnGrp[7].call(this, this.regAX & 0xff, fnSrc.call(this));
         this.regAX = (this.regAX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteF9(afnGrp, fnSrc): mod=11 (reg:dst)  reg=111 (afnGrp[7])  r/m=001 (CL)
@@ -14174,7 +14174,7 @@ var X86Mods = {
     opModGrpByteF9: function(afnGrp, fnSrc) {
         var b = afnGrp[7].call(this, this.regCX & 0xff, fnSrc.call(this));
         this.regCX = (this.regCX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteFA(afnGrp, fnSrc): mod=11 (reg:dst)  reg=111 (afnGrp[7])  r/m=010 (DL)
@@ -14186,7 +14186,7 @@ var X86Mods = {
     opModGrpByteFA: function(afnGrp, fnSrc) {
         var b = afnGrp[7].call(this, this.regDX & 0xff, fnSrc.call(this));
         this.regDX = (this.regDX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteFB(afnGrp, fnSrc): mod=11 (reg:dst)  reg=111 (afnGrp[7])  r/m=011 (BL)
@@ -14198,7 +14198,7 @@ var X86Mods = {
     opModGrpByteFB: function(afnGrp, fnSrc) {
         var b = afnGrp[7].call(this, this.regBX & 0xff, fnSrc.call(this));
         this.regBX = (this.regBX & ~0xff) | b;
-        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteFC(afnGrp, fnSrc): mod=11 (reg:dst)  reg=111 (afnGrp[7])  r/m=100 (AH)
@@ -14210,7 +14210,7 @@ var X86Mods = {
     opModGrpByteFC: function(afnGrp, fnSrc) {
         var b = afnGrp[7].call(this, this.regAX >> 8, fnSrc.call(this));
         this.regAX = (this.regAX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteFD(afnGrp, fnSrc): mod=11 (reg:dst)  reg=111 (afnGrp[7])  r/m=101 (CH)
@@ -14222,7 +14222,7 @@ var X86Mods = {
     opModGrpByteFD: function(afnGrp, fnSrc) {
         var b = afnGrp[7].call(this, this.regCX >> 8, fnSrc.call(this));
         this.regCX = (this.regCX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteFE(afnGrp, fnSrc): mod=11 (reg:dst)  reg=111 (afnGrp[7])  r/m=110 (DH)
@@ -14234,7 +14234,7 @@ var X86Mods = {
     opModGrpByteFE: function(afnGrp, fnSrc) {
         var b = afnGrp[7].call(this, this.regDX >> 8, fnSrc.call(this));
         this.regDX = (this.regDX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
     },
     /**
      * opModGrpByteFF(afnGrp, fnSrc): mod=11 (reg:dst)  reg=111 (afnGrp[7])  r/m=111 (BH)
@@ -14246,7 +14246,7 @@ var X86Mods = {
     opModGrpByteFF: function(afnGrp, fnSrc) {
         var b = afnGrp[7].call(this, this.regBX >> 8, fnSrc.call(this));
         this.regBX = (this.regBX & 0xff) | (b << 8);
-        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
+        if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
     },
     /**
      * opModGrpWord00(afnGrp, fnSrc): mod=00 (mem:dst)  reg=000 (afnGrp[0])  r/m=000 (BX+SI)
@@ -16562,7 +16562,7 @@ var X86Mods = {
     opModGrpWordC0: function(afnGrp, fnSrc) {
         this.regAX = afnGrp[0].call(this, this.regAX, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -16575,7 +16575,7 @@ var X86Mods = {
     opModGrpWordC1: function(afnGrp, fnSrc) {
         this.regCX = afnGrp[0].call(this, this.regCX, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -16588,7 +16588,7 @@ var X86Mods = {
     opModGrpWordC2: function(afnGrp, fnSrc) {
         this.regDX = afnGrp[0].call(this, this.regDX, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -16601,7 +16601,7 @@ var X86Mods = {
     opModGrpWordC3: function(afnGrp, fnSrc) {
         this.regBX = afnGrp[0].call(this, this.regBX, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -16614,7 +16614,7 @@ var X86Mods = {
     opModGrpWordC4: function(afnGrp, fnSrc) {
         this.regSP = afnGrp[0].call(this, this.regSP, fnSrc.call(this));
         if (BACKTRACK) {
-            X86.BACKTRACK.SP_LO = this.backTrack.btiMemLo; X86.BACKTRACK.SP_HI = this.backTrack.btiMemHi;
+            X86.BACKTRACK.SP_LO = this.backTrack.btiEALo; X86.BACKTRACK.SP_HI = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -16627,7 +16627,7 @@ var X86Mods = {
     opModGrpWordC5: function(afnGrp, fnSrc) {
         this.regBP = afnGrp[0].call(this, this.regBP, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -16640,7 +16640,7 @@ var X86Mods = {
     opModGrpWordC6: function(afnGrp, fnSrc) {
         this.regSI = afnGrp[0].call(this, this.regSI, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -16653,7 +16653,7 @@ var X86Mods = {
     opModGrpWordC7: function(afnGrp, fnSrc) {
         this.regDI = afnGrp[0].call(this, this.regDI, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -16666,7 +16666,7 @@ var X86Mods = {
     opModGrpWordC8: function(afnGrp, fnSrc) {
         this.regAX = afnGrp[1].call(this, this.regAX, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -16679,7 +16679,7 @@ var X86Mods = {
     opModGrpWordC9: function(afnGrp, fnSrc) {
         this.regCX = afnGrp[1].call(this, this.regCX, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -16692,7 +16692,7 @@ var X86Mods = {
     opModGrpWordCA: function(afnGrp, fnSrc) {
         this.regDX = afnGrp[1].call(this, this.regDX, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -16705,7 +16705,7 @@ var X86Mods = {
     opModGrpWordCB: function(afnGrp, fnSrc) {
         this.regBX = afnGrp[1].call(this, this.regBX, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -16718,7 +16718,7 @@ var X86Mods = {
     opModGrpWordCC: function(afnGrp, fnSrc) {
         this.regSP = afnGrp[1].call(this, this.regSP, fnSrc.call(this));
         if (BACKTRACK) {
-            X86.BACKTRACK.SP_LO = this.backTrack.btiMemLo; X86.BACKTRACK.SP_HI = this.backTrack.btiMemHi;
+            X86.BACKTRACK.SP_LO = this.backTrack.btiEALo; X86.BACKTRACK.SP_HI = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -16731,7 +16731,7 @@ var X86Mods = {
     opModGrpWordCD: function(afnGrp, fnSrc) {
         this.regBP = afnGrp[1].call(this, this.regBP, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -16744,7 +16744,7 @@ var X86Mods = {
     opModGrpWordCE: function(afnGrp, fnSrc) {
         this.regSI = afnGrp[1].call(this, this.regSI, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -16757,7 +16757,7 @@ var X86Mods = {
     opModGrpWordCF: function(afnGrp, fnSrc) {
         this.regDI = afnGrp[1].call(this, this.regDI, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -16770,7 +16770,7 @@ var X86Mods = {
     opModGrpWordD0: function(afnGrp, fnSrc) {
         this.regAX = afnGrp[2].call(this, this.regAX, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -16783,7 +16783,7 @@ var X86Mods = {
     opModGrpWordD1: function(afnGrp, fnSrc) {
         this.regCX = afnGrp[2].call(this, this.regCX, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -16796,7 +16796,7 @@ var X86Mods = {
     opModGrpWordD2: function(afnGrp, fnSrc) {
         this.regDX = afnGrp[2].call(this, this.regDX, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -16809,7 +16809,7 @@ var X86Mods = {
     opModGrpWordD3: function(afnGrp, fnSrc) {
         this.regBX = afnGrp[2].call(this, this.regBX, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -16822,7 +16822,7 @@ var X86Mods = {
     opModGrpWordD4: function(afnGrp, fnSrc) {
         this.regSP = afnGrp[2].call(this, this.regSP, fnSrc.call(this));
         if (BACKTRACK) {
-            X86.BACKTRACK.SP_LO = this.backTrack.btiMemLo; X86.BACKTRACK.SP_HI = this.backTrack.btiMemHi;
+            X86.BACKTRACK.SP_LO = this.backTrack.btiEALo; X86.BACKTRACK.SP_HI = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -16835,7 +16835,7 @@ var X86Mods = {
     opModGrpWordD5: function(afnGrp, fnSrc) {
         this.regBP = afnGrp[2].call(this, this.regBP, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -16848,7 +16848,7 @@ var X86Mods = {
     opModGrpWordD6: function(afnGrp, fnSrc) {
         this.regSI = afnGrp[2].call(this, this.regSI, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -16861,7 +16861,7 @@ var X86Mods = {
     opModGrpWordD7: function(afnGrp, fnSrc) {
         this.regDI = afnGrp[2].call(this, this.regDI, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -16874,7 +16874,7 @@ var X86Mods = {
     opModGrpWordD8: function(afnGrp, fnSrc) {
         this.regAX = afnGrp[3].call(this, this.regAX, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -16887,7 +16887,7 @@ var X86Mods = {
     opModGrpWordD9: function(afnGrp, fnSrc) {
         this.regCX = afnGrp[3].call(this, this.regCX, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -16900,7 +16900,7 @@ var X86Mods = {
     opModGrpWordDA: function(afnGrp, fnSrc) {
         this.regDX = afnGrp[3].call(this, this.regDX, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -16913,7 +16913,7 @@ var X86Mods = {
     opModGrpWordDB: function(afnGrp, fnSrc) {
         this.regBX = afnGrp[3].call(this, this.regBX, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -16926,7 +16926,7 @@ var X86Mods = {
     opModGrpWordDC: function(afnGrp, fnSrc) {
         this.regSP = afnGrp[3].call(this, this.regSP, fnSrc.call(this));
         if (BACKTRACK) {
-            X86.BACKTRACK.SP_LO = this.backTrack.btiMemLo; X86.BACKTRACK.SP_HI = this.backTrack.btiMemHi;
+            X86.BACKTRACK.SP_LO = this.backTrack.btiEALo; X86.BACKTRACK.SP_HI = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -16939,7 +16939,7 @@ var X86Mods = {
     opModGrpWordDD: function(afnGrp, fnSrc) {
         this.regBP = afnGrp[3].call(this, this.regBP, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -16952,7 +16952,7 @@ var X86Mods = {
     opModGrpWordDE: function(afnGrp, fnSrc) {
         this.regSI = afnGrp[3].call(this, this.regSI, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -16965,7 +16965,7 @@ var X86Mods = {
     opModGrpWordDF: function(afnGrp, fnSrc) {
         this.regDI = afnGrp[3].call(this, this.regDI, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -16978,7 +16978,7 @@ var X86Mods = {
     opModGrpWordE0: function(afnGrp, fnSrc) {
         this.regAX = afnGrp[4].call(this, this.regAX, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -16991,7 +16991,7 @@ var X86Mods = {
     opModGrpWordE1: function(afnGrp, fnSrc) {
         this.regCX = afnGrp[4].call(this, this.regCX, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -17004,7 +17004,7 @@ var X86Mods = {
     opModGrpWordE2: function(afnGrp, fnSrc) {
         this.regDX = afnGrp[4].call(this, this.regDX, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -17017,7 +17017,7 @@ var X86Mods = {
     opModGrpWordE3: function(afnGrp, fnSrc) {
         this.regBX = afnGrp[4].call(this, this.regBX, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -17030,7 +17030,7 @@ var X86Mods = {
     opModGrpWordE4: function(afnGrp, fnSrc) {
         this.regSP = afnGrp[4].call(this, this.regSP, fnSrc.call(this));
         if (BACKTRACK) {
-            X86.BACKTRACK.SP_LO = this.backTrack.btiMemLo; X86.BACKTRACK.SP_HI = this.backTrack.btiMemHi;
+            X86.BACKTRACK.SP_LO = this.backTrack.btiEALo; X86.BACKTRACK.SP_HI = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -17043,7 +17043,7 @@ var X86Mods = {
     opModGrpWordE5: function(afnGrp, fnSrc) {
         this.regBP = afnGrp[4].call(this, this.regBP, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -17056,7 +17056,7 @@ var X86Mods = {
     opModGrpWordE6: function(afnGrp, fnSrc) {
         this.regSI = afnGrp[4].call(this, this.regSI, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -17069,7 +17069,7 @@ var X86Mods = {
     opModGrpWordE7: function(afnGrp, fnSrc) {
         this.regDI = afnGrp[4].call(this, this.regDI, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -17082,7 +17082,7 @@ var X86Mods = {
     opModGrpWordE8: function(afnGrp, fnSrc) {
         this.regAX = afnGrp[5].call(this, this.regAX, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -17095,7 +17095,7 @@ var X86Mods = {
     opModGrpWordE9: function(afnGrp, fnSrc) {
         this.regCX = afnGrp[5].call(this, this.regCX, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -17108,7 +17108,7 @@ var X86Mods = {
     opModGrpWordEA: function(afnGrp, fnSrc) {
         this.regDX = afnGrp[5].call(this, this.regDX, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -17121,7 +17121,7 @@ var X86Mods = {
     opModGrpWordEB: function(afnGrp, fnSrc) {
         this.regBX = afnGrp[5].call(this, this.regBX, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -17134,7 +17134,7 @@ var X86Mods = {
     opModGrpWordEC: function(afnGrp, fnSrc) {
         this.regSP = afnGrp[5].call(this, this.regSP, fnSrc.call(this));
         if (BACKTRACK) {
-            X86.BACKTRACK.SP_LO = this.backTrack.btiMemLo; X86.BACKTRACK.SP_HI = this.backTrack.btiMemHi;
+            X86.BACKTRACK.SP_LO = this.backTrack.btiEALo; X86.BACKTRACK.SP_HI = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -17147,7 +17147,7 @@ var X86Mods = {
     opModGrpWordED: function(afnGrp, fnSrc) {
         this.regBP = afnGrp[5].call(this, this.regBP, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -17160,7 +17160,7 @@ var X86Mods = {
     opModGrpWordEE: function(afnGrp, fnSrc) {
         this.regSI = afnGrp[5].call(this, this.regSI, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -17173,7 +17173,7 @@ var X86Mods = {
     opModGrpWordEF: function(afnGrp, fnSrc) {
         this.regDI = afnGrp[5].call(this, this.regDI, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -17186,7 +17186,7 @@ var X86Mods = {
     opModGrpWordF0: function(afnGrp, fnSrc) {
         this.regAX = afnGrp[6].call(this, this.regAX, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -17199,7 +17199,7 @@ var X86Mods = {
     opModGrpWordF1: function(afnGrp, fnSrc) {
         this.regCX = afnGrp[6].call(this, this.regCX, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -17212,7 +17212,7 @@ var X86Mods = {
     opModGrpWordF2: function(afnGrp, fnSrc) {
         this.regDX = afnGrp[6].call(this, this.regDX, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -17225,7 +17225,7 @@ var X86Mods = {
     opModGrpWordF3: function(afnGrp, fnSrc) {
         this.regBX = afnGrp[6].call(this, this.regBX, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -17238,7 +17238,7 @@ var X86Mods = {
     opModGrpWordF4: function(afnGrp, fnSrc) {
         this.regSP = afnGrp[6].call(this, this.regSP, fnSrc.call(this));
         if (BACKTRACK) {
-            X86.BACKTRACK.SP_LO = this.backTrack.btiMemLo; X86.BACKTRACK.SP_HI = this.backTrack.btiMemHi;
+            X86.BACKTRACK.SP_LO = this.backTrack.btiEALo; X86.BACKTRACK.SP_HI = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -17251,7 +17251,7 @@ var X86Mods = {
     opModGrpWordF5: function(afnGrp, fnSrc) {
         this.regBP = afnGrp[6].call(this, this.regBP, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -17264,7 +17264,7 @@ var X86Mods = {
     opModGrpWordF6: function(afnGrp, fnSrc) {
         this.regSI = afnGrp[6].call(this, this.regSI, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -17277,7 +17277,7 @@ var X86Mods = {
     opModGrpWordF7: function(afnGrp, fnSrc) {
         this.regDI = afnGrp[6].call(this, this.regDI, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -17290,7 +17290,7 @@ var X86Mods = {
     opModGrpWordF8: function(afnGrp, fnSrc) {
         this.regAX = afnGrp[7].call(this, this.regAX, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
+            this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -17303,7 +17303,7 @@ var X86Mods = {
     opModGrpWordF9: function(afnGrp, fnSrc) {
         this.regCX = afnGrp[7].call(this, this.regCX, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
+            this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -17316,7 +17316,7 @@ var X86Mods = {
     opModGrpWordFA: function(afnGrp, fnSrc) {
         this.regDX = afnGrp[7].call(this, this.regDX, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
+            this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -17329,7 +17329,7 @@ var X86Mods = {
     opModGrpWordFB: function(afnGrp, fnSrc) {
         this.regBX = afnGrp[7].call(this, this.regBX, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
+            this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -17342,7 +17342,7 @@ var X86Mods = {
     opModGrpWordFC: function(afnGrp, fnSrc) {
         this.regSP = afnGrp[7].call(this, this.regSP, fnSrc.call(this));
         if (BACKTRACK) {
-            X86.BACKTRACK.SP_LO = this.backTrack.btiMemLo; X86.BACKTRACK.SP_HI = this.backTrack.btiMemHi;
+            X86.BACKTRACK.SP_LO = this.backTrack.btiEALo; X86.BACKTRACK.SP_HI = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -17355,7 +17355,7 @@ var X86Mods = {
     opModGrpWordFD: function(afnGrp, fnSrc) {
         this.regBP = afnGrp[7].call(this, this.regBP, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
+            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -17368,7 +17368,7 @@ var X86Mods = {
     opModGrpWordFE: function(afnGrp, fnSrc) {
         this.regSI = afnGrp[7].call(this, this.regSI, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
     },
     /**
@@ -17381,7 +17381,7 @@ var X86Mods = {
     opModGrpWordFF: function(afnGrp, fnSrc) {
         this.regDI = afnGrp[7].call(this, this.regDI, fnSrc.call(this));
         if (BACKTRACK) {
-            this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
+            this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
     }
 };

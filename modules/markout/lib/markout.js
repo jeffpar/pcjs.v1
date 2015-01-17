@@ -967,13 +967,13 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
         cMatches++;
 
         this.addMachine({
-            'class': sMachineClass,
+            'class': sMachineClass,     // eg, a machine class, such as "pc" or "c1p"
             'func': sMachineFunc,
             'id': sMachineID,
             'xml': sMachineXMLFile,
             'xsl': sMachineXSLFile,
-            'version': sMachineVersion,
-            'debugger': fDebugger,
+            'version': sMachineVersion, // eg, "1.10", "*" to select the current version, or "uncompiled"; "*" is the default
+            'debugger': fDebugger,      // eg, true or false; false is the default
             'state': sMachineState}
         );
     }

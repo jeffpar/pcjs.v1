@@ -68,10 +68,11 @@ function ROM(parmsROM)
     this.addrROM = parmsROM['addr'];
     this.sizeROM = parmsROM['size'];
     this.addrROMAlias = parmsROM['alias'];
-    this.sFileName = parmsROM['file'];
+    this.sFilePath = parmsROM['file'];
+    this.sFileName = str.getBaseName(this.sFilePath);
     this.idNotify = parmsROM['notify'];
-    if (this.sFileName) {
-        var sFileURL = this.sFileName;
+    if (this.sFilePath) {
+        var sFileURL = this.sFilePath;
         if (DEBUG) this.log('load("' + sFileURL + '")');
         /*
          * If the selected ROM file has a ".json" extension, then we assume it's pre-converted
@@ -80,7 +81,7 @@ function ROM(parmsROM)
          */
         var sFileExt = str.getExtension(this.sFileName);
         if (sFileExt != DumpAPI.FORMAT.JSON && sFileExt != DumpAPI.FORMAT.HEX) {
-            sFileURL = web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFileName + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES + '&' + DumpAPI.QUERY.DECIMAL + '=true';
+            sFileURL = web.getHost() + DumpAPI.ENDPOINT + '?' + DumpAPI.QUERY.FILE + '=' + this.sFilePath + '&' + DumpAPI.QUERY.FORMAT + '=' + DumpAPI.FORMAT.BYTES + '&' + DumpAPI.QUERY.DECIMAL + '=true';
         }
         web.loadResource(sFileURL, true, null, this, ROM.prototype.onLoadROM);
     }
@@ -259,7 +260,7 @@ ROM.prototype.onLoadROM = function(sROMFile, sROMData, nErrorCode)
 ROM.prototype.copyROM = function()
 {
     if (!this.isReady()) {
-        if (!this.sFileName) {
+        if (!this.sFilePath) {
             this.setReady();
         }
         else if (this.abROM && this.bus) {
@@ -317,11 +318,11 @@ ROM.prototype.addROM = function(addr)
     if (this.bus.addMemory(addr, this.sizeROM, true)) {
         if (DEBUG) this.log("addROM(): copying ROM to " + str.toHexAddr(addr) + " (0x" + str.toHex(this.abROM.length) + " bytes)");
         var bto = null;
-        for (var i = 0; i < this.abROM.length; i++) {
-            this.bus.setByteDirect(addr + i, this.abROM[i]);
+        for (var off = 0; off < this.abROM.length; off++) {
+            this.bus.setByteDirect(addr + off, this.abROM[off]);
             if (BACKTRACK) {
-                bto = this.bus.addBackTrackObject(this, bto, i);
-                this.bus.writeBackTrackObject(addr + i, bto, i);
+                bto = this.bus.addBackTrackObject(this, bto, off);
+                this.bus.writeBackTrackObject(addr + off, bto, off);
             }
         }
         return true;
