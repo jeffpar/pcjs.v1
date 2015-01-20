@@ -723,14 +723,14 @@ var X86Grps = {
      * @return {number} (we return dst unchanged, since it's actually AX that's modified)
      */
     opGrpMULb: function(dst, src) {
-        this.regAX = this.regMD16 = (this.resultValue = (src = this.regAX & 0xff) * dst) & 0xffff;
+        this.regEAX = this.regMD16 = (this.resultValue = (src = this.regEAX & 0xff) * dst) & 0xffff;
         this.resultAuxOverflow = this.resultParitySign = this.resultValue;
         this.resultSize = X86.RESULT.SIZE_BYTE;
         /*
          * TODO: Look into a more efficient way of setting/synchronizing CF and OF; this code works,
          * but it somewhat defeats the purpose of the indirect result variables that we've set above.
          */
-        if (this.regAX & 0xff00) {
+        if (this.regEAX & 0xff00) {
             this.setCF(); this.setOF();
         } else {
             this.clearCF(); this.clearOF();
@@ -766,8 +766,8 @@ var X86Grps = {
      * @return {number} (we return dst unchanged, since it's actually AX that's modified)
      */
     opGrpIMULb: function(dst, src) {
-        var result = (((src = this.regAX) << 24) >> 24) * ((dst << 24) >> 24);
-        this.regAX = this.regMD16 = result & 0xffff;
+        var result = (((src = this.regEAX) << 24) >> 24) * ((dst << 24) >> 24);
+        this.regEAX = this.regMD16 = result & 0xffff;
         this.resultValue = this.resultAuxOverflow = this.resultParitySign = result;
         this.resultSize = X86.RESULT.SIZE_BYTE;
         /*
@@ -807,12 +807,12 @@ var X86Grps = {
         /*
          * Detect small divisor (quotient overflow)
          */
-        var uQuotient = ((src = this.regAX) / dst);
+        var uQuotient = ((src = this.regEAX) / dst);
         if (uQuotient > 0xff) {
             X86Help.opHelpDIVOverflow.call(this);
             return dst;
         }
-        this.regMD16 = this.regAX = (uQuotient & 0xff) | (((this.regAX % dst) & 0xff) << 8);
+        this.regMD16 = this.regEAX = (uQuotient & 0xff) | (((this.regEAX % dst) & 0xff) << 8);
         /*
          * TODO: Verify that all of the arithmetic flags are "undefined" after DIV, and that this code unnecessary
          */
@@ -854,12 +854,12 @@ var X86Grps = {
         /*
          * Detect small divisor (quotient overflow)
          */
-        var lQuotient = ((((src = this.regAX) << 16) >> 16) / ((dst << 24) >> 24));
+        var lQuotient = ((((src = this.regEAX) << 16) >> 16) / ((dst << 24) >> 24));
         if (lQuotient > ((lQuotient << 24) >> 24) & 0xffff) {
             X86Help.opHelpDIVOverflow.call(this);
             return dst;
         }
-        this.regMD16 = this.regAX = (lQuotient & 0xff) | (((((this.regAX << 16) >> 16) % ((dst << 24) >> 24)) & 0xff) << 8);
+        this.regMD16 = this.regEAX = (lQuotient & 0xff) | (((((this.regEAX << 16) >> 16) % ((dst << 24) >> 24)) & 0xff) << 8);
         /*
          * TODO: Verify that all of the arithmetic flags are "undefined" after IDIV, and that this code unnecessary
          */
@@ -883,15 +883,15 @@ var X86Grps = {
      * @return {number} (we return dst unchanged, since it's actually DX:AX that's modified)
      */
     opGrpMULw: function(dst, src) {
-        this.regMD16 = this.regAX = (this.resultValue = (src = this.regAX) * dst) & 0xffff;
-        this.regMD32 = this.regDX = (this.resultValue >> 16) & 0xffff;
+        this.regMD16 = this.regEAX = (this.resultValue = (src = this.regEAX) * dst) & 0xffff;
+        this.regMD32 = this.regEDX = (this.resultValue >> 16) & 0xffff;
         this.resultAuxOverflow = this.resultParitySign = this.resultValue;
         this.resultSize = X86.RESULT.SIZE_WORD;
         /*
          * TODO: Look into a more efficient way of setting/synchronizing CF and OF; this code works,
          * but it somewhat defeats the purpose of the indirect result variables that we've set above.
          */
-        if (this.regDX) {
+        if (this.regEDX) {
             this.setCF(); this.setOF();
         } else {
             this.clearCF(); this.clearOF();
@@ -927,9 +927,9 @@ var X86Grps = {
      * @return {number} (we return dst unchanged, since it's actually DX:AX that's modified)
      */
     opGrpIMULw: function(dst, src) {
-        var result = (((src = this.regAX) << 16) >> 16) * ((dst << 16) >> 16);
-        this.regAX = this.regMD16 = result & 0xffff;
-        this.regDX = this.regMD32 = (result >> 16) & 0xffff;
+        var result = (((src = this.regEAX) << 16) >> 16) * ((dst << 16) >> 16);
+        this.regEAX = this.regMD16 = result & 0xffff;
+        this.regEDX = this.regMD32 = (result >> 16) & 0xffff;
         this.resultValue = this.resultAuxOverflow = this.resultParitySign = result;
         this.resultSize = X86.RESULT.SIZE_WORD;
         /*
@@ -969,18 +969,18 @@ var X86Grps = {
         /*
          * Detect small divisor (quotient overflow)
          *
-         * WARNING: We CANNOT simply do "src = (this.regDX << 16) | this.regAX", because if bit 15 of DX
+         * WARNING: We CANNOT simply do "src = (this.regEDX << 16) | this.regEAX", because if bit 15 of DX
          * is set, JavaScript will create a negative 32-bit number.  So we instead use non-bit-wise operators
          * to force JavaScript to create a floating-point value that won't suffer from 32-bit-math side-effects.
          */
-        src = this.regAX + this.regDX * X86.RESULT.SIZE_WORD;
+        src = this.regEAX + this.regEDX * X86.RESULT.SIZE_WORD;
         var uQuotient = Math.floor(src / dst);
         if (uQuotient >= X86.RESULT.SIZE_WORD) {
             X86Help.opHelpDIVOverflow.call(this);
             return dst;
         }
-        this.regMD16 = this.regAX = (uQuotient & 0xffff);
-        this.regMD32 = this.regDX = (src % dst) & 0xffff;
+        this.regMD16 = this.regEAX = (uQuotient & 0xffff);
+        this.regMD32 = this.regEDX = (src % dst) & 0xffff;
         /*
          * TODO: Verify that all of the arithmetic flags are "undefined" after DIV, and that this code unnecessary
          */
@@ -1023,14 +1023,14 @@ var X86Grps = {
          * Detect small divisor (quotient overflow)
          */
         var lDivisor = ((dst << 16) >> 16);
-        src = (this.regDX << 16) | this.regAX;
+        src = (this.regEDX << 16) | this.regEAX;
         var lQuotient = Math.floor(src / lDivisor);
         if (lQuotient != ((lQuotient & 0xffff) << 16) >> 16) {
             X86Help.opHelpDIVOverflow.call(this);
             return dst;
         }
-        this.regMD16 = this.regAX = (lQuotient & 0xffff);
-        this.regMD32 = this.regDX = (src % lDivisor) & 0xffff;
+        this.regMD16 = this.regEAX = (lQuotient & 0xffff);
+        this.regMD32 = this.regEDX = (src % lDivisor) & 0xffff;
         /*
          * TODO: Verify that all of the arithmetic flags are "undefined" after IDIV, and that this code unnecessary
          */
@@ -1200,7 +1200,7 @@ var X86Grps = {
      * @return {number}
      */
     opGrp2CountCL: function() {
-        var count = this.regCX & this.nShiftCountMask;
+        var count = this.regECX & this.nShiftCountMask;
         this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesShiftCR : this.CYCLES.nOpCyclesShiftCM) + (count << this.CYCLES.nOpCyclesShiftCS);
         return count;
     },
@@ -1261,7 +1261,7 @@ var X86Grps = {
  *
  *      Opcodes     Intel       PCjs                                                PC Mag TechRef
  *      -------     -----       ----                                                --------------
- *      0x80-0x83   Grp1        Grp1b, Grp1w, Grp1b, and Grp1sw                     Group A
+ *      0x80-0x83   Grp1        Grp1b and Grp1w                                     Group A
  *      0xC0-0xC1   Grp2        Grp2b and Grp2w (opGrp2bi/wi)                       Group B
  *      0xD0-0xD3   Grp2        Grp2b and Grp2w (opGrp2b1/w1 and opGrp2bCL/wCL)     Group B
  *      0xF6-0xF7   Grp3        Grp3b and Grp3w                                     Group C

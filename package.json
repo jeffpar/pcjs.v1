@@ -1,6 +1,6 @@
 {
   "name": "pcjs",
-  "version": "1.16.5",
+  "version": "1.17.0",
   "description": "Node-enabled version of PCjs",
   "main": "server.js",
   "directories": {
@@ -108,7 +108,8 @@
     "./modules/pcjs/lib/x86cpu.js",
     "./modules/pcjs/lib/x86grps.js",
     "./modules/pcjs/lib/x86help.js",
-    "./modules/pcjs/lib/x86mods.js",
+    "./modules/pcjs/lib/x86modb.js",
+    "./modules/pcjs/lib/x86modw.js",
     "./modules/pcjs/lib/x86opxx.js",
     "./modules/pcjs/lib/x86op0f.js",
     "./modules/pcjs/lib/chipset.js",

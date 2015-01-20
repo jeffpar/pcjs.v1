@@ -13,7 +13,7 @@ To make it easier to launch machines with the uncompiled code, the PCjs server n
 of a PCjs machine link to specify "uncompiled"; previously, the only *version* values allowed were a specific
 version number (eg, "1.16.5") or an asterisk (which would default to the latest compiled version).
 
-Here's how you define an uncompiled machine in a PCjs Markdown file:
+Here's how you embed an "uncompiled" machine in a PCjs Markdown file:
 
 	[Embedded IBM PC](/devices/pc/machine/5170/ega/1152kb/rev3/ "PCjs:at-ega-1152k-rev3::uncompiled:debugger")
 

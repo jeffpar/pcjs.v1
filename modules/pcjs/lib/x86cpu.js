@@ -44,7 +44,8 @@ if (typeof module !== 'undefined') {
     var X86Seg      = require("./x86seg");
     var X86Grps     = require("./x86grps");
     var X86Help     = require("./x86help");
-    var X86Mods     = require("./x86mods");
+    var X86ModB     = require("./x86modb");
+    var X86ModW     = require("./x86modw");
     var X86OpXX     = require("./x86opxx");
     var X86Op0F     = require("./x86op0f");
 }
@@ -96,6 +97,9 @@ function X86CPU(parmsCPU) {
         break;
     case X86.MODEL_80286:
         nCyclesDefault = 6000000;
+        break;
+    case X86.MODEL_80386:
+        nCyclesDefault = 16000000;
         break;
     }
 
@@ -795,14 +799,14 @@ X86CPU.prototype.reset = function()
  */
 X86CPU.prototype.resetRegs = function()
 {
-    this.regAX = 0;
-    this.regBX = 0;
-    this.regCX = 0;
-    this.regDX = 0;
-    this.regSP = 0;
-    this.regBP = 0;
-    this.regSI = 0;
-    this.regDI = 0;
+    this.regEAX = 0;
+    this.regEBX = 0;
+    this.regECX = 0;
+    this.regEDX = 0;
+    this.regESP = 0;
+    this.regEBP = 0;
+    this.regESI = 0;
+    this.regEDI = 0;
 
     /*
      * NOTE: Even though the MSW and IDTR are 80286-specific, we initialize them for ALL CPUs, so that
@@ -825,10 +829,15 @@ X86CPU.prototype.resetRegs = function()
      * segment number and base physical address, respectively), but all segment registers are now defined
      * as X86Seg objects.
      */
-    this.segCS   = new X86Seg(this, X86Seg.ID.CODE,  "CS");
-    this.segDS   = new X86Seg(this, X86Seg.ID.DATA,  "DS");
-    this.segES   = new X86Seg(this, X86Seg.ID.DATA,  "ES");
-    this.segSS   = new X86Seg(this, X86Seg.ID.STACK, "SS");
+    this.segCS     = new X86Seg(this, X86Seg.ID.CODE,  "CS");
+    this.segDS     = new X86Seg(this, X86Seg.ID.DATA,  "DS");
+    this.segES     = new X86Seg(this, X86Seg.ID.DATA,  "ES");
+    this.segSS     = new X86Seg(this, X86Seg.ID.STACK, "SS");
+    if (this.model >= X86.MODEL_80386) {
+        this.segFS = new X86Seg(this, X86Seg.ID.DATA,  "FS");
+        this.segGS = new X86Seg(this, X86Seg.ID.DATA,  "GS");
+    }
+
     this.segNULL = new X86Seg(this, X86Seg.ID.NULL,  "NULL");
     this.setCSIP(0, 0xFFFF);                            // this should be called before the first setPS() call
 
@@ -937,6 +946,18 @@ X86CPU.prototype.resetRegs = function()
     this.segData = this.segDS;
     this.segStack = this.segSS;
     this.opFlags = this.opPrefixes = 0;
+    this.opSize = 2;
+    this.opMask = 0xffff;
+    this.opMaskClear = ~this.opMask;
+    this.addrSize = 2;
+    this.addrMask = 0xffff;
+    this.addrMaskClear = ~this.addrMask;
+    this.aOpModMemByte = X86ModB.aOpModMem;
+    this.aOpModRegByte = X86ModB.aOpModReg;
+    this.aOpModGrpByte = X86ModB.aOpModGrp;
+    this.aOpModMemWord = X86ModW.aOpModMem;
+    this.aOpModRegWord = X86ModW.aOpModReg;
+    this.aOpModGrpWord = X86ModW.aOpModGrp;
 };
 
 /**
@@ -947,7 +968,7 @@ X86CPU.prototype.resetRegs = function()
  */
 X86CPU.prototype.getChecksum = function()
 {
-    var sum = (this.regAX + this.regBX + this.regCX + this.regDX + this.regSP + this.regBP + this.regSI + this.regDI) | 0;
+    var sum = (this.regEAX + this.regEBX + this.regECX + this.regEDX + this.regESP + this.regEBP + this.regESI + this.regEDI) | 0;
     sum = (sum + this.regIP + this.segCS.sel + this.segDS.sel + this.segSS.sel + this.segES.sel + this.getPS()) | 0;
     return sum;
 };
@@ -1138,7 +1159,7 @@ X86CPU.prototype.restoreProtMode = function(a)
 X86CPU.prototype.save = function()
 {
     var state = new State(this);
-    state.set(0, [this.regAX, this.regBX, this.regCX, this.regDX, this.regSP, this.regBP, this.regSI, this.regDI, this.nIOPL]);
+    state.set(0, [this.regEAX, this.regEBX, this.regECX, this.regEDX, this.regESP, this.regEBP, this.regESI, this.regEDI, this.nIOPL]);
     state.set(1, [this.regIP, this.segCS.save(), this.segDS.save(), this.segSS.save(), this.segES.save(), this.saveProtMode(), this.getPS()]);
     state.set(2, [this.segData.sName, this.segStack.sName, this.opFlags, this.opPrefixes, this.intFlags, this.regEA, this.regEAWrite]);
     state.set(3, [0, this.nTotalCycles, this.getSpeed()]);
@@ -1159,14 +1180,14 @@ X86CPU.prototype.restore = function(data)
 {
     var a;
     a = data[0];
-    this.regAX = a[0];
-    this.regBX = a[1];
-    this.regCX = a[2];
-    this.regDX = a[3];
-    this.regSP = a[4];
-    this.regBP = a[5];
-    this.regSI = a[6];
-    this.regDI = a[7];
+    this.regEAX = a[0];
+    this.regEBX = a[1];
+    this.regECX = a[2];
+    this.regEDX = a[3];
+    this.regESP = a[4];
+    this.regEBP = a[5];
+    this.regESI = a[6];
+    this.regEDI = a[7];
     this.nIOPL = a[8] || 0;
     a = data[1];
     this.segCS.restore(a[1]);
@@ -1176,8 +1197,12 @@ X86CPU.prototype.restore = function(data)
     this.restoreProtMode(a[5]);
     this.setPS(a[6]);
     this.setIP(a[0]);
+    if (this.model >= X86.MODEL_80386) {
+        this.segFS.restore(a[7]);
+        this.segGS.restore(a[8]);
+    }
     a = data[2];
-    this.segData = a[0] != null && this.getSeg(a[0]) || this.segDS;
+    this.segData  = a[0] != null && this.getSeg(a[0]) || this.segDS;
     this.segStack = a[1] != null && this.getSeg(a[1]) || this.segSS;
     this.opFlags = a[2];
     this.opPrefixes = a[3];
@@ -1222,8 +1247,8 @@ X86CPU.prototype.setMemoryEnabled = function()
  */
 X86CPU.prototype.verifyMemoryEnabled = function()
 {
-    this.assert(!(this.regAX & 0xffff0000) && !(this.regBX & 0xffff0000) && !(this.regCX & 0xffff0000) && !(this.regDX & 0xffff0000));
-    this.assert(!(this.regSI & 0xffff0000) && !(this.regDI & 0xffff0000) && !(this.regBP & 0xffff0000) && !(this.regSP & 0xffff0000));
+    this.assert(!(this.regEAX & 0xffff0000) && !(this.regEBX & 0xffff0000) && !(this.regECX & 0xffff0000) && !(this.regEDX & 0xffff0000));
+    this.assert(!(this.regESI & 0xffff0000) && !(this.regEDI & 0xffff0000) && !(this.regEBP & 0xffff0000) && !(this.regESP & 0xffff0000));
     this.assert((this.getEAByte == this.getEAByteEnabled && this.getEAWord == this.getEAWordEnabled && this.modEAByte == this.modEAByteEnabled && this.modEAWord == this.modEAWordEnabled && this.setEAByte == this.setEAByteEnabled && this.setEAWord == this.setEAWordEnabled), "verifyMemoryEnabled() failed");
 };
 
@@ -1270,7 +1295,7 @@ X86CPU.prototype.getSeg = function(sName)
  */
 X86CPU.prototype.setCS = function(sel)
 {
-    this.regEIP = this.segCS.load(sel) + this.regIP;
+    this.regEIP = this.segCS.load(sel & 0xffff) + this.regIP;
     this.opFlags |= this.OPFLAG_NOINTR8086;
     if (PREFETCH) this.flushPrefetch(this.regEIP);
 };
@@ -1283,7 +1308,7 @@ X86CPU.prototype.setCS = function(sel)
  */
 X86CPU.prototype.setDS = function(sel)
 {
-    this.segDS.load(sel);
+    this.segDS.load(sel & 0xffff);
     this.opFlags |= this.OPFLAG_NOINTR8086;
 };
 
@@ -1295,7 +1320,9 @@ X86CPU.prototype.setDS = function(sel)
  */
 X86CPU.prototype.setSS = function(sel)
 {
-    this.segSS.load(sel);
+    this.segSS.load(sel & 0xffff);
+    this.segSS.addrMask = (this.model >= X86.MODEL_80386 && (this.segSS.ext & X86.DESC.EXT.BIG))? 0xffffffff : 0xffff;
+    this.segSS.addrMaskClear = ~this.segSS.addrMask;
     this.opFlags |= X86.OPFLAG.NOINTR;
 };
 
@@ -1307,7 +1334,7 @@ X86CPU.prototype.setSS = function(sel)
  */
 X86CPU.prototype.setES = function(sel)
 {
-    this.segES.load(sel);
+    this.segES.load(sel & 0xffff);
     this.opFlags |= this.OPFLAG_NOINTR8086;
 };
 
@@ -2310,9 +2337,9 @@ X86CPU.prototype.getIPWord = function()
  */
 X86CPU.prototype.popWord = function()
 {
-    var regSP = this.regSP;
-    this.regSP = (this.regSP + 2) & 0xffff;
-    return this.getSOWord(this.segSS, regSP);
+    var regESP = this.regESP;
+    this.regESP = (this.regESP + 2) & 0xffff;
+    return this.getSOWord(this.segSS, regESP);
 };
 
 /**
@@ -2324,7 +2351,7 @@ X86CPU.prototype.popWord = function()
 X86CPU.prototype.pushWord = function(w)
 {
     this.assert((w & 0xffff) == w);
-    this.setSOWord(this.segSS, (this.regSP = (this.regSP - 2) & 0xffff), w);
+    this.setSOWord(this.segSS, (this.regESP = (this.regESP - 2) & 0xffff), w);
 };
 
 /**
@@ -2478,14 +2505,14 @@ X86CPU.prototype.delayINTR = function()
 X86CPU.prototype.displayStatus = function(fForce)
 {
     if (fForce || !this.aFlags.fRunning || this.aFlags.fDisplayLiveRegs) {
-        this.displayReg("AX", this.regAX);
-        this.displayReg("BX", this.regBX);
-        this.displayReg("CX", this.regCX);
-        this.displayReg("DX", this.regDX);
-        this.displayReg("SP", this.regSP);
-        this.displayReg("BP", this.regBP);
-        this.displayReg("SI", this.regSI);
-        this.displayReg("DI", this.regDI);
+        this.displayReg("AX", this.regEAX);
+        this.displayReg("BX", this.regEBX);
+        this.displayReg("CX", this.regECX);
+        this.displayReg("DX", this.regEDX);
+        this.displayReg("SP", this.regESP);
+        this.displayReg("BP", this.regEBP);
+        this.displayReg("SI", this.regESI);
+        this.displayReg("DI", this.regEDI);
         this.displayReg("CS", this.segCS.sel);
         this.displayReg("DS", this.segDS.sel);
         this.displayReg("SS", this.segSS.sel);
@@ -2741,7 +2768,6 @@ if (typeof APP_PCJS !== 'undefined') {
     APP_PCJS.X86.X86Seg = X86Seg;
     APP_PCJS.X86.X86Grps = X86Grps;
     APP_PCJS.X86.X86Help = X86Help;
-    APP_PCJS.X86.X86Mods = X86Mods;
     APP_PCJS.X86.X86Op0F = X86Op0F;
     APP_PCJS.X86.X86OpXX = X86OpXX;
 }

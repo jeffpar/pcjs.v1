@@ -140,11 +140,11 @@ if (!fGenMods) {
             print("    /**");
             print("     * @this {X86CPU}");
             print("     *");
-            print("     * op=0x" + toHex(op, 2) + " (" + sOpCode.toLowerCase() + " AX," + sDst + ")");
+            print("     * op=0x" + toHex(op, 2) + " (" + sOpCode.toLowerCase() + " EAX," + sDst + ")");
             print("     */");
             sOp = "op" + sOpCode + sDst;
             print("    " + sOp + ": function() {");
-            print("        var temp = this.regAX; this.regAX = " + sDstReg + "; " + sDstReg + " = temp;");
+            print("        var temp = this.regEAX; this.regEAX = " + sDstReg + "; " + sDstReg + " = temp;");
             print("    },");
             if (sOps) sOps += ((cOps % 4)? ", " : ",\n");
             sOps += "        this." + sOp;
@@ -279,46 +279,46 @@ function genMode(d, w, mrm, sGroup, sRO) {
     if (!w) {
         switch (reg) {
         case 0:
-            sRegGet = "this.regAX & 0xff";
-            sRegSet = "this.regAX = (this.regAX & ~0xff) | ";
+            sRegGet = "this.regEAX & 0xff";
+            sRegSet = "this.regEAX = (this.regEAX & ~0xff) | ";
             sRegBTLo = "this.backTrack.btiAL";
             break;
         case 1:
-            sRegGet = "this.regCX & 0xff";
-            sRegSet = "this.regCX = (this.regCX & ~0xff) | ";
+            sRegGet = "this.regECX & 0xff";
+            sRegSet = "this.regECX = (this.regECX & ~0xff) | ";
             sRegBTLo = "this.backTrack.btiCL";
             break;
         case 2:
-            sRegGet = "this.regDX & 0xff";
-            sRegSet = "this.regDX = (this.regDX & ~0xff) | ";
+            sRegGet = "this.regEDX & 0xff";
+            sRegSet = "this.regEDX = (this.regEDX & ~0xff) | ";
             sRegBTLo = "this.backTrack.btiDL";
             break;
         case 3:
-            sRegGet = "this.regBX & 0xff";
-            sRegSet = "this.regBX = (this.regBX & ~0xff) | ";
+            sRegGet = "this.regEBX & 0xff";
+            sRegSet = "this.regEBX = (this.regEBX & ~0xff) | ";
             sRegBTLo = "this.backTrack.btiBL";
             break;
         case 4:
-            sRegGet = "this.regAX >> 8";
-            sRegSet = "this.regAX = (this.regAX & 0xff) | ";
+            sRegGet = "(this.regEAX >> 8) & 0xff";
+            sRegSet = "this.regEAX = (this.regEAX & ~0xff00) | ";
             sRegSetEnd = " << 8";
             sRegBTLo = "this.backTrack.btiAH";
             break;
         case 5:
-            sRegGet = "this.regCX >> 8";
-            sRegSet = "this.regCX = (this.regCX & 0xff) | ";
+            sRegGet = "(this.regECX >> 8) & 0xff";
+            sRegSet = "this.regECX = (this.regECX & ~0xff00) | ";
             sRegSetEnd = " << 8";
             sRegBTLo = "this.backTrack.btiCH";
             break;
         case 6:
-            sRegGet = "this.regDX >> 8";
-            sRegSet = "this.regDX = (this.regDX & 0xff) | ";
+            sRegGet = "(this.regEDX >> 8) & 0xff";
+            sRegSet = "this.regEDX = (this.regEDX & ~0xff00) | ";
             sRegSetEnd = " << 8";
             sRegBTLo = "this.backTrack.btiDH";
             break;
         case 7:
-            sRegGet = "this.regBX >> 8";
-            sRegSet = "this.regBX = (this.regBX & 0xff) | ";
+            sRegGet = "(this.regEBX >> 8) & 0xff";
+            sRegSet = "this.regEBX = (this.regEBX & ~0xff00) | ";
             sRegSetEnd = " << 8";
             sRegBTLo = "this.backTrack.btiBH";
             break;
@@ -330,42 +330,50 @@ function genMode(d, w, mrm, sGroup, sRO) {
     else {
         switch (reg) {
         case 0:
-            sRegGet = "this.regAX";
+            sRegGet = "this.regEAX & this.opMask";
+            sRegSet = "this.regEAX = (this.regEAX & this.opMaskClear) | ";
             sRegBTLo = "this.backTrack.btiAL";
             sRegBTHi = "this.backTrack.btiAH";
             break;
         case 1:
-            sRegGet = "this.regCX";
+            sRegGet = "this.regECX & this.opMask";
+            sRegSet = "this.regECX = (this.regECX & this.opMaskClear) | ";
             sRegBTLo = "this.backTrack.btiCL";
             sRegBTHi = "this.backTrack.btiCH";
             break;
         case 2:
-            sRegGet = "this.regDX";
+            sRegGet = "this.regEDX & this.opMask";
+            sRegSet = "this.regEDX = (this.regEDX & this.opMaskClear) | ";
             sRegBTLo = "this.backTrack.btiDL";
             sRegBTHi = "this.backTrack.btiDH";
             break;
         case 3:
-            sRegGet = "this.regBX";
+            sRegGet = "this.regEBX & this.opMask";
+            sRegSet = "this.regEBX = (this.regEBX & this.opMaskClear) | ";
             sRegBTLo = "this.backTrack.btiBL";
             sRegBTHi = "this.backTrack.btiBH";
             break;
         case 4:
-            sRegGet = "this.regSP";
+            sRegGet = "this.regESP & this.opMask";
+            sRegSet = "this.regESP = (this.regESP & this.opMaskClear) | ";
             sRegBTLo = "X86.BACKTRACK.SP_LO";
             sRegBTHi = "X86.BACKTRACK.SP_HI";
             break;
         case 5:
-            sRegGet = "this.regBP";
+            sRegGet = "this.regEBP & this.opMask";
+            sRegSet = "this.regEBP = (this.regEBP & this.opMaskClear) | ";
             sRegBTLo = "this.backTrack.btiBPLo";
             sRegBTHi = "this.backTrack.btiBPHi";
             break;
         case 6:
-            sRegGet = "this.regSI";
+            sRegGet = "this.regESI & this.opMask";
+            sRegSet = "this.regESI = (this.regESI & this.opMaskClear) | ";
             sRegBTLo = "this.backTrack.btiSILo";
             sRegBTHi = "this.backTrack.btiSIHi";
             break;
         case 7:
-            sRegGet = "this.regDI";
+            sRegGet = "this.regEDI & this.opMask";
+            sRegSet = "this.regEDI = (this.regEDI & this.opMaskClear) | ";
             sRegBTLo = "this.backTrack.btiDILo";
             sRegBTHi = "this.backTrack.btiDIHi";
             break;
@@ -394,34 +402,34 @@ function genMode(d, w, mrm, sGroup, sRO) {
     case 0:
         switch (r_m) {
         case 0:
-            sModAddr = "this.regBX + this.regSI";
+            sModAddr = "this.regEBX + this.regESI";
             sModFunc = "BXSI";
             nCycles = "this.CYCLES.nEACyclesBaseIndex";        // 8086: 7
             break;
         case 1:
-            sModAddr = "this.regBX + this.regDI";
+            sModAddr = "this.regEBX + this.regEDI";
             sModFunc = "BXDI";
             nCycles = "this.CYCLES.nEACyclesBaseIndexExtra";   // 8086: 8
             break;
         case 2:
-            sModAddr = "this.regBP + this.regSI";
+            sModAddr = "this.regEBP + this.regESI";
             sModFunc = "BPSI";
             sModRegSeg = "this.segStack";
             nCycles = "this.CYCLES.nEACyclesBaseIndexExtra";   // 8086: 8
             break;
         case 3:
-            sModAddr = "this.regBP + this.regDI";
+            sModAddr = "this.regEBP + this.regEDI";
             sModFunc = "BPDI";
             sModRegSeg = "this.segStack";
             nCycles = "this.CYCLES.nEACyclesBaseIndex";        // 8086: 7
             break;
         case 4:
-            sModAddr = "this.regSI";
+            sModAddr = "this.regESI";
             sModFunc = "SI";
             nCycles = "this.CYCLES.nEACyclesBase";             // 8086: 5
             break;
         case 5:
-            sModAddr = "this.regDI";
+            sModAddr = "this.regEDI";
             sModFunc = "DI";
             nCycles = "this.CYCLES.nEACyclesBase";             // 8086: 5
             break;
@@ -431,7 +439,7 @@ function genMode(d, w, mrm, sGroup, sRO) {
             nCycles = "this.CYCLES.nEACyclesDisp";             // 8086: 6
             break;
         case 7:
-            sModAddr = "this.regBX";
+            sModAddr = "this.regEBX";
             sModFunc = "BX";
             nCycles = "this.CYCLES.nEACyclesBase";             // 8086: 5
             break;
@@ -443,45 +451,45 @@ function genMode(d, w, mrm, sGroup, sRO) {
     case 1:
         switch (r_m) {
         case 0:
-            sModAddr = "this.regBX + this.regSI + this.getIPDisp()";
+            sModAddr = "this.regEBX + this.regESI + this.getIPDisp()";
             sModFunc = "BXSID8";
             nCycles = "this.CYCLES.nEACyclesBaseIndexDisp";        // 8086: 11
             break;
         case 1:
-            sModAddr = "this.regBX + this.regDI + this.getIPDisp()";
+            sModAddr = "this.regEBX + this.regEDI + this.getIPDisp()";
             sModFunc = "BXDID8";
             nCycles = "this.CYCLES.nEACyclesBaseIndexDispExtra";   // 8086: 12
             break;
         case 2:
-            sModAddr = "this.regBP + this.regSI + this.getIPDisp()";
+            sModAddr = "this.regEBP + this.regESI + this.getIPDisp()";
             sModFunc = "BPSID8";
             sModRegSeg = "this.segStack";
             nCycles = "this.CYCLES.nEACyclesBaseIndexDispExtra";   // 8086: 12
             break;
         case 3:
-            sModAddr = "this.regBP + this.regDI + this.getIPDisp()";
+            sModAddr = "this.regEBP + this.regEDI + this.getIPDisp()";
             sModFunc = "BPDID8";
             sModRegSeg = "this.segStack";
             nCycles = "this.CYCLES.nEACyclesBaseIndexDisp";        // 8086: 11
             break;
         case 4:
-            sModAddr = "this.regSI + this.getIPDisp()";
+            sModAddr = "this.regESI + this.getIPDisp()";
             sModFunc = "SID8";
             nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
             break;
         case 5:
-            sModAddr = "this.regDI + this.getIPDisp()";
+            sModAddr = "this.regEDI + this.getIPDisp()";
             sModFunc = "DID8";
             nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
             break;
         case 6:
-            sModAddr = "this.regBP + this.getIPDisp()";
+            sModAddr = "this.regEBP + this.getIPDisp()";
             sModFunc = "BPD8";
             sModRegSeg = "this.segStack";
             nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
             break;
         case 7:
-            sModAddr = "this.regBX + this.getIPDisp()";
+            sModAddr = "this.regEBX + this.getIPDisp()";
             sModFunc = "BXD8";
             nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
             break;
@@ -493,45 +501,45 @@ function genMode(d, w, mrm, sGroup, sRO) {
     case 2:
         switch (r_m) {
         case 0:
-            sModAddr = "this.regBX + this.regSI + this.getIPWord()";
+            sModAddr = "this.regEBX + this.regESI + this.getIPWord()";
             sModFunc = "BXSID16";
             nCycles = "this.CYCLES.nEACyclesBaseIndexDisp";        // 8086: 11
             break;
         case 1:
-            sModAddr = "this.regBX + this.regDI + this.getIPWord()";
+            sModAddr = "this.regEBX + this.regEDI + this.getIPWord()";
             sModFunc = "BXDID16";
             nCycles = "this.CYCLES.nEACyclesBaseIndexDispExtra";   // 8086: 12
             break;
         case 2:
-            sModAddr = "this.regBP + this.regSI + this.getIPWord()";
+            sModAddr = "this.regEBP + this.regESI + this.getIPWord()";
             sModFunc = "BPSID16";
             sModRegSeg = "this.segStack";
             nCycles = "this.CYCLES.nEACyclesBaseIndexDispExtra";   // 8086: 12
             break;
         case 3:
-            sModAddr = "this.regBP + this.regDI + this.getIPWord()";
+            sModAddr = "this.regEBP + this.regEDI + this.getIPWord()";
             sModFunc = "BPDID16";
             sModRegSeg = "this.segStack";
             nCycles = "this.CYCLES.nEACyclesBaseIndexDisp";        // 8086: 11
             break;
         case 4:
-            sModAddr = "this.regSI + this.getIPWord()";
+            sModAddr = "this.regESI + this.getIPWord()";
             sModFunc = "SID16";
             nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
             break;
         case 5:
-            sModAddr = "this.regDI + this.getIPWord()";
+            sModAddr = "this.regEDI + this.getIPWord()";
             sModFunc = "DID16";
             nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
             break;
         case 6:
-            sModAddr = "this.regBP + this.getIPWord()";
+            sModAddr = "this.regEBP + this.getIPWord()";
             sModFunc = "BPD16";
             sModRegSeg = "this.segStack";
             nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
             break;
         case 7:
-            sModAddr = "this.regBX + this.getIPWord()";
+            sModAddr = "this.regEBX + this.getIPWord()";
             sModFunc = "BXD16";
             nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
             break;
@@ -544,46 +552,46 @@ function genMode(d, w, mrm, sGroup, sRO) {
         if (!w) {
             switch (r_m) {
             case 0:
-                sModRegGet = "this.regAX & 0xff";
-                sModRegSet = "this.regAX = (this.regAX & ~0xff) | ";
+                sModRegGet = "this.regEAX & 0xff";
+                sModRegSet = "this.regEAX = (this.regEAX & ~0xff) | ";
                 sModRegBTLo = "this.backTrack.btiAL";
                 break;
             case 1:
-                sModRegGet = "this.regCX & 0xff";
-                sModRegSet = "this.regCX = (this.regCX & ~0xff) | ";
+                sModRegGet = "this.regECX & 0xff";
+                sModRegSet = "this.regECX = (this.regECX & ~0xff) | ";
                 sModRegBTLo = "this.backTrack.btiCL";
                 break;
             case 2:
-                sModRegGet = "this.regDX & 0xff";
-                sModRegSet = "this.regDX = (this.regDX & ~0xff) | ";
+                sModRegGet = "this.regEDX & 0xff";
+                sModRegSet = "this.regEDX = (this.regEDX & ~0xff) | ";
                 sModRegBTLo = "this.backTrack.btiDL";
                 break;
             case 3:
-                sModRegGet = "this.regBX & 0xff";
-                sModRegSet = "this.regBX = (this.regBX & ~0xff) | ";
+                sModRegGet = "this.regEBX & 0xff";
+                sModRegSet = "this.regEBX = (this.regEBX & ~0xff) | ";
                 sModRegBTLo = "this.backTrack.btiBL";
                 break;
             case 4:
-                sModRegGet = "this.regAX >> 8";
-                sModRegSet = "this.regAX = (this.regAX & 0xff) | ";
+                sModRegGet = "(this.regEAX >> 8) & 0xff";
+                sModRegSet = "this.regEAX = (this.regEAX & ~0xff00) | ";
                 sModRegSetEnd = " << 8";
                 sModRegBTLo = "this.backTrack.btiAH";
                 break;
             case 5:
-                sModRegGet = "this.regCX >> 8";
-                sModRegSet = "this.regCX = (this.regCX & 0xff) | ";
+                sModRegGet = "(this.regECX >> 8) & 0xff";
+                sModRegSet = "this.regECX = (this.regECX & ~0xff00) | ";
                 sModRegSetEnd = " << 8";
                 sModRegBTLo = "this.backTrack.btiCH";
                 break;
             case 6:
-                sModRegGet = "this.regDX >> 8";
-                sModRegSet = "this.regDX = (this.regDX & 0xff) | ";
+                sModRegGet = "(this.regEDX >> 8) & 0xff";
+                sModRegSet = "this.regEDX = (this.regEDX & ~0xff00) | ";
                 sModRegSetEnd = " << 8";
                 sModRegBTLo = "this.backTrack.btiDH";
                 break;
             case 7:
-                sModRegGet = "this.regBX >> 8";
-                sModRegSet = "this.regBX = (this.regBX & 0xff) | ";
+                sModRegGet = "(this.regEBX >> 8) & 0xff";
+                sModRegSet = "this.regEBX = (this.regEBX & ~0xff00) | ";
                 sModRegSetEnd = " << 8";
                 sModRegBTLo = "this.backTrack.btiBH";
                 break;
@@ -595,42 +603,50 @@ function genMode(d, w, mrm, sGroup, sRO) {
         else {
             switch (r_m) {
             case 0:
-                sModRegGet = "this.regAX";
+                sModRegGet = "this.regEAX & this.opMask";
+                sModRegSet = "this.regEAX = (this.regEAX & this.opMaskClear) | ";
                 sModRegBTLo = "this.backTrack.btiAL";
                 sModRegBTHi = "this.backTrack.btiAH";
                 break;
             case 1:
-                sModRegGet = "this.regCX";
+                sModRegGet = "this.regECX & this.opMask";
+                sModRegSet = "this.regECX = (this.regECX & this.opMaskClear) | ";
                 sModRegBTLo = "this.backTrack.btiCL";
                 sModRegBTHi = "this.backTrack.btiCH";
                 break;
             case 2:
-                sModRegGet = "this.regDX";
+                sModRegGet = "this.regEDX & this.opMask";
+                sModRegSet = "this.regEDX = (this.regEDX & this.opMaskClear) | ";
                 sModRegBTLo = "this.backTrack.btiDL";
                 sModRegBTHi = "this.backTrack.btiDH";
                 break;
             case 3:
-                sModRegGet = "this.regBX";
+                sModRegGet = "this.regEBX & this.opMask";
+                sModRegSet = "this.regEBX = (this.regEBX & this.opMaskClear) | ";
                 sModRegBTLo = "this.backTrack.btiBL";
                 sModRegBTHi = "this.backTrack.btiBH";
                 break;
             case 4:
-                sModRegGet = "this.regSP";
+                sModRegGet = "this.regESP & this.opMask";
+                sModRegSet = "this.regESP = (this.regESP & this.opMaskClear) | ";
                 sModRegBTLo = "X86.BACKTRACK.SP_LO";
                 sModRegBTHi = "X86.BACKTRACK.SP_HI";
                 break;
             case 5:
-                sModRegGet = "this.regBP";
+                sModRegGet = "this.regEBP & this.opMask";
+                sModRegSet = "this.regEBP = (this.regEBP & this.opMaskClear) | ";
                 sModRegBTLo = "this.backTrack.btiBPLo";
                 sModRegBTHi = "this.backTrack.btiBPHi";
                 break;
             case 6:
-                sModRegGet = "this.regSI";
+                sModRegGet = "this.regESI & this.opMask";
+                sModRegSet = "this.regESI = (this.regESI & this.opMaskClear) | ";
                 sModRegBTLo = "this.backTrack.btiSILo";
                 sModRegBTHi = "this.backTrack.btiSIHi";
                 break;
             case 7:
-                sModRegGet = "this.regDI";
+                sModRegGet = "this.regEDI & this.opMask";
+                sModRegSet = "this.regEDI = (this.regEDI & this.opMaskClear) | ";
                 sModRegBTLo = "this.backTrack.btiDILo";
                 sModRegBTHi = "this.backTrack.btiDIHi";
                 break;
@@ -670,10 +686,10 @@ function genMode(d, w, mrm, sGroup, sRO) {
         print("     * @param {Array.<function(number,number)>} afnGrp");
         print("     * @param {function()} fnSrc");
         print("     */");
-        print("    " + sOpMod + ": function(afnGrp, fnSrc) {");
+        print("    " + sOpMod.replace("Byte","").replace("Word","") + ": function " + sOpMod + "(afnGrp, fnSrc) {");
 
         if (sModAddr) {
-            if (sModAddr.indexOf("+") > 0) {
+            if (sModAddr.indexOf("+") > 0 || sModAddr.indexOf("regE") >= 0) {
                 sModAddr = "((" + sModAddr + ") & 0xffff)";
             }
             if (!d) {
@@ -734,10 +750,10 @@ function genMode(d, w, mrm, sGroup, sRO) {
                 }
                 if (sModRegBTLo) {
                     if (!sModRegBTHi) {
-                        print("        if (BACKTRACK) " + sModRegBTLo + " = this.backTrack.btiMemLo;");
+                        print("        if (BACKTRACK) " + sModRegBTLo + " = this.backTrack.btiEALo;");
                     } else {
                         print("        if (BACKTRACK) {");
-                        print("            " + sModRegBTLo + " = this.backTrack.btiMemLo; " + sModRegBTHi + " = this.backTrack.btiMemHi;");
+                        print("            " + sModRegBTLo + " = this.backTrack.btiEALo; " + sModRegBTHi + " = this.backTrack.btiEAHi;");
                         print("        }");
                     }
                 }
@@ -762,11 +778,11 @@ function genMode(d, w, mrm, sGroup, sRO) {
         print("     * @this {X86CPU}");
         print("     * @param {function(number,number)} fn (dst,src)");
         print("     */");
-        print("    " + sOpMod + ": function(fn) {");
+        print("    " + sOpMod.replace("Byte","").replace("Word","") + ": function " + sOpMod + "(fn) {");
 
         if (sModAddr && sRegGet) {
 
-            if (sModAddr.indexOf("+") > 0) {
+            if (sModAddr.indexOf("+") > 0 || sModAddr.indexOf("regE") >= 0) {
                 sModAddr = "((" + sModAddr + ") & 0xffff)";
             }
             if (!d) {
@@ -775,10 +791,10 @@ function genMode(d, w, mrm, sGroup, sRO) {
                         print("        var " + sTemp + " = fn.call(this, this.modEA" + aSize[w] + "(" + sModRegSeg + ", " + sModAddr + "), " + sRegGet + ");");
                         if (sRegBTLo) {
                             if (!sRegBTHi) {
-                                print("        if (BACKTRACK) this.backTrack.btiMemLo = " + sRegBTLo + ";");
+                                print("        if (BACKTRACK) this.backTrack.btiEALo = " + sRegBTLo + ";");
                             } else {
                                 print("        if (BACKTRACK) {");
-                                print("            this.backTrack.btiMemLo = " + sRegBTLo + "; this.backTrack.btiMemHi = " + sRegBTHi + ";");
+                                print("            this.backTrack.btiEALo = " + sRegBTLo + "; this.backTrack.btiEAHi = " + sRegBTHi + ";");
                                 print("        }");
                             }
                         }
@@ -795,10 +811,10 @@ function genMode(d, w, mrm, sGroup, sRO) {
                     print("        var " + sTemp + " = fn.call(this, this.modEA" + aSize[w] + "(this.regEAWrite), " + sRegGet + ");");
                     if (sRegBTLo) {
                         if (!sRegBTHi) {
-                            print("        if (BACKTRACK) this.backTrack.btiMemLo = " + sRegBTLo + ";");
+                            print("        if (BACKTRACK) this.backTrack.btiEALo = " + sRegBTLo + ";");
                         } else {
                             print("        if (BACKTRACK) {");
-                            print("            this.backTrack.btiMemLo = " + sRegBTLo + "; this.backTrack.btiMemHi = " + sRegBTHi + ";");
+                            print("            this.backTrack.btiEALo = " + sRegBTLo + "; this.backTrack.btiEAHi = " + sRegBTHi + ";");
                             print("        }");
                         }
                     }
@@ -844,10 +860,10 @@ function genMode(d, w, mrm, sGroup, sRO) {
                 }
                 if (sRegBTLo && sRegBTLo.indexOf("this.") >= 0) {
                     if (!sRegBTHi) {
-                        print("        if (BACKTRACK) " + sRegBTLo + " = this.backTrack.btiMemLo;");
+                        print("        if (BACKTRACK) " + sRegBTLo + " = this.backTrack.btiEALo;");
                     } else {
                         print("        if (BACKTRACK) {");
-                        print("            " + sRegBTLo + " = this.backTrack.btiMemLo; " + sRegBTHi + " = this.backTrack.btiMemHi;");
+                        print("            " + sRegBTLo + " = this.backTrack.btiEALo; " + sRegBTHi + " = this.backTrack.btiEAHi;");
                         print("        }");
                     }
                 }

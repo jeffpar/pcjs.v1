@@ -3323,7 +3323,7 @@ ChipSet.prototype.getIRRVector = function(iPIC)
 
                     var nIRQ = pic.nIRQBase + nIRL;
                     if (DEBUG && this.messageEnabled(this.messageBitsIRQ(nIRQ))) {
-                        this.printMessage("getIRRVector(): IRQ " + nIRQ + " interrupting @" + str.toHexAddr(this.cpu.regIP, this.cpu.segCS.sel) + " stack=" + str.toHexAddr(this.cpu.regSP, this.cpu.segSS.sel), true);
+                        this.printMessage("getIRRVector(): IRQ " + nIRQ + " interrupting @" + str.toHexAddr(this.cpu.regIP, this.cpu.segCS.sel) + " stack=" + str.toHexAddr(this.cpu.regESP, this.cpu.segSS.sel), true);
                     }
                     if (MAXDEBUG && DEBUGGER) {
                         this.acInterrupts[nIRQ]++;
@@ -4721,19 +4721,19 @@ ChipSet.prototype.intBIOSRTC = function(addr)
              * By computing AH now, we get the incoming AH value; if we computed it below, along with
              * the rest of the register values, we'd get the outgoing AH value, which is not what we want.
              */
-            var AH = this.cpu.regAX >> 8;
+            var AH = this.cpu.regEAX >> 8;
             this.cpu.addIntReturn(addr, function(chipset, nCycles) {
                 return function onBIOSRTCReturn(nLevel) {
                     nCycles = chipset.cpu.getCycles() - nCycles;
                     var sResult;
-                    var CL = chipset.cpu.regDX & 0xff;
-                    var CH = chipset.cpu.regDX >> 8;
-                    var DL = chipset.cpu.regDX & 0xff;
-                    var DH = chipset.cpu.regDX >> 8;
+                    var CL = chipset.cpu.regEDX & 0xff;
+                    var CH = chipset.cpu.regEDX >> 8;
+                    var DL = chipset.cpu.regEDX & 0xff;
+                    var DH = chipset.cpu.regEDX >> 8;
                     if (AH == 0x02 || AH == 0x03) {
                         sResult = " CH(hour)=" + str.toHexWord(CH) + " CL(min)=" + str.toHexByte(CL) + " DH(sec)=" + str.toHexByte(DH);
                     } else if (AH == 0x04 || AH == 0x05) {
-                        sResult = " CX(year)=" + str.toHexWord(chipset.cpu.regCX) + " DH(month)=" + str.toHexByte(DH) + " DL(day)=" + str.toHexByte(DL);
+                        sResult = " CX(year)=" + str.toHexWord(chipset.cpu.regECX) + " DH(month)=" + str.toHexByte(DH) + " DL(day)=" + str.toHexByte(DL);
                     }
                     chipset.dbg.messageIntReturn(Interrupts.RTC.VECTOR, nLevel, nCycles, sResult);
                 };

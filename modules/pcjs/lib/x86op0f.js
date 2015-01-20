@@ -36,7 +36,6 @@ if (typeof module !== 'undefined') {
     var X86         = require("./x86");
     var X86Grps     = require("./x86grps");
     var X86Help     = require("./x86help");
-    var X86Mods     = require("./x86mods");
 }
 
 var X86Op0F = {
@@ -50,7 +49,7 @@ var X86Op0F = {
         if ((bModRM & 0x38) < 0x10) {   // possible reg values: 0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, 0x38
             if (EAFUNCS) this.modEAWord = this.modEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOREAD;
         }
-        X86Mods.aOpModsGrpWord[bModRM].call(this, this.aOpGrp6, X86Grps.opGrpNoSrc);
+        this.aOpModGrpWord[bModRM].call(this, this.aOpGrp6, X86Grps.opGrpNoSrc);
         if (EAFUNCS) { this.modEAWord = this.modEAWordEnabled; this.setEAWord = this.setEAWordEnabled; }
     },
     /**
@@ -63,7 +62,7 @@ var X86Op0F = {
         if (!(bModRM & 0x10)) {
             if (EAFUNCS) this.modEAWord = this.modEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOREAD;
         }
-        X86Mods.aOpModsGrpWord[bModRM].call(this, X86Op0F.aOpGrp7, X86Grps.opGrpNoSrc);
+        this.aOpModGrpWord[bModRM].call(this, X86Op0F.aOpGrp7, X86Grps.opGrpNoSrc);
         if (EAFUNCS) { this.modEAWord = this.modEAWordEnabled; this.setEAWord = this.setEAWordEnabled; }
     },
     /**
@@ -72,7 +71,7 @@ var X86Op0F = {
      * op=0x0F,0x02 (lar reg,rm)
      */
     opLAR: function() {
-        X86Mods.aOpModsRegWord[this.getIPByte()].call(this, X86Help.opHelpLAR);
+        this.aOpModRegWord[this.getIPByte()].call(this, X86Help.opHelpLAR);
     },
     /**
      * @this {X86CPU}
@@ -80,7 +79,7 @@ var X86Op0F = {
      * op=0x0F,0x03 (lsl reg,rm)
      */
     opLSL: function() {
-        X86Mods.aOpModsRegWord[this.getIPByte()].call(this, X86Help.opHelpLSL);
+        this.aOpModRegWord[this.getIPByte()].call(this, X86Help.opHelpLSL);
     },
     /**
      * opLOADALL()
@@ -132,14 +131,14 @@ var X86Op0F = {
             return;
         }
         X86Help.opHelpLMSW.call(this, this.getWord(0x806));
-        this.regDI = this.getWord(0x826);
-        this.regSI = this.getWord(0x828);
-        this.regBP = this.getWord(0x82A);
-        this.regSP = this.getWord(0x82C);
-        this.regBX = this.getWord(0x82E);
-        this.regDX = this.getWord(0x830);
-        this.regCX = this.getWord(0x832);
-        this.regAX = this.getWord(0x834);
+        this.regEDI = this.getWord(0x826);
+        this.regESI = this.getWord(0x828);
+        this.regEBP = this.getWord(0x82A);
+        this.regESP = this.getWord(0x82C);
+        this.regEBX = this.getWord(0x82E);
+        this.regEDX = this.getWord(0x830);
+        this.regECX = this.getWord(0x832);
+        this.regEAX = this.getWord(0x834);
         this.segES.loadDesc6(0x836, this.getWord(0x824));
         this.segCS.loadDesc6(0x83C, this.getWord(0x822));
         this.segSS.loadDesc6(0x842, this.getWord(0x820));

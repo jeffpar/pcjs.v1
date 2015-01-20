@@ -1560,22 +1560,22 @@ if (DEBUGGER) {
     Debugger.prototype.messageRegs = function() {
         var cpu = this.cpu;
         var asRegs = Debugger.asRegs;
-        this.aMessageRegs[asRegs[0]]  = str.toHexByte(cpu.regAX & 0xff);
-        this.aMessageRegs[asRegs[1]]  = str.toHexByte(cpu.regCX & 0xff);
-        this.aMessageRegs[asRegs[2]]  = str.toHexByte(cpu.regDX & 0xff);
-        this.aMessageRegs[asRegs[3]]  = str.toHexByte(cpu.regBX & 0xff);
-        this.aMessageRegs[asRegs[4]]  = str.toHexByte(cpu.regAX >> 8);
-        this.aMessageRegs[asRegs[5]]  = str.toHexByte(cpu.regCX >> 8);
-        this.aMessageRegs[asRegs[6]]  = str.toHexByte(cpu.regDX >> 8);
-        this.aMessageRegs[asRegs[7]]  = str.toHexByte(cpu.regBX >> 8);
-        this.aMessageRegs[asRegs[8]]  = str.toHexWord(cpu.regAX);
-        this.aMessageRegs[asRegs[9]]  = str.toHexWord(cpu.regCX);
-        this.aMessageRegs[asRegs[10]] = str.toHexWord(cpu.regDX);
-        this.aMessageRegs[asRegs[11]] = str.toHexWord(cpu.regBX);
-        this.aMessageRegs[asRegs[12]] = str.toHexWord(cpu.regSP);
-        this.aMessageRegs[asRegs[13]] = str.toHexWord(cpu.regBP);
-        this.aMessageRegs[asRegs[14]] = str.toHexWord(cpu.regSI);
-        this.aMessageRegs[asRegs[15]] = str.toHexWord(cpu.regDI);
+        this.aMessageRegs[asRegs[0]]  = str.toHexByte(cpu.regEAX & 0xff);
+        this.aMessageRegs[asRegs[1]]  = str.toHexByte(cpu.regECX & 0xff);
+        this.aMessageRegs[asRegs[2]]  = str.toHexByte(cpu.regEDX & 0xff);
+        this.aMessageRegs[asRegs[3]]  = str.toHexByte(cpu.regEBX & 0xff);
+        this.aMessageRegs[asRegs[4]]  = str.toHexByte(cpu.regEAX >> 8);
+        this.aMessageRegs[asRegs[5]]  = str.toHexByte(cpu.regECX >> 8);
+        this.aMessageRegs[asRegs[6]]  = str.toHexByte(cpu.regEDX >> 8);
+        this.aMessageRegs[asRegs[7]]  = str.toHexByte(cpu.regEBX >> 8);
+        this.aMessageRegs[asRegs[8]]  = str.toHexWord(cpu.regEAX);
+        this.aMessageRegs[asRegs[9]]  = str.toHexWord(cpu.regECX);
+        this.aMessageRegs[asRegs[10]] = str.toHexWord(cpu.regEDX);
+        this.aMessageRegs[asRegs[11]] = str.toHexWord(cpu.regEBX);
+        this.aMessageRegs[asRegs[12]] = str.toHexWord(cpu.regESP);
+        this.aMessageRegs[asRegs[13]] = str.toHexWord(cpu.regEBP);
+        this.aMessageRegs[asRegs[14]] = str.toHexWord(cpu.regESI);
+        this.aMessageRegs[asRegs[15]] = str.toHexWord(cpu.regEDI);
         this.aMessageRegs[asRegs[16]] = str.toHexWord(cpu.segES.sel);
         this.aMessageRegs[asRegs[17]] = str.toHexWord(cpu.segCS.sel);
         this.aMessageRegs[asRegs[18]] = str.toHexWord(cpu.segSS.sel);
@@ -1632,7 +1632,7 @@ if (DEBUGGER) {
         var fMessage = false;
         var nCategory = Debugger.INT_MESSAGES[nInt];
         if (nCategory) {
-            AH = this.cpu.regAX >> 8;
+            AH = this.cpu.regEAX >> 8;
             if (this.messageEnabled(nCategory)) {
                 fMessage = true;
             } else {
@@ -1640,7 +1640,7 @@ if (DEBUGGER) {
             }
         }
         if (fMessage) {
-            var DL = this.cpu.regDX & 0xff;
+            var DL = this.cpu.regEDX & 0xff;
             if (nInt == Interrupts.DOS.VECTOR && AH == 0x0b ||
                 nCategory == Messages.FDC && DL >= 0x80 || nCategory == Messages.HDC && DL < 0x80) {
                 fMessage = false;
@@ -3034,14 +3034,14 @@ if (DEBUGGER) {
         if (fProt === undefined) {
             fProt = !!(this.cpu.regMSW & X86.MSW.PE);
         }
-        var s = "AX=" + str.toHexWord(this.cpu.regAX) +
-               " BX=" + str.toHexWord(this.cpu.regBX) +
-               " CX=" + str.toHexWord(this.cpu.regCX) +
-               " DX=" + str.toHexWord(this.cpu.regDX) +
-               " SP=" + str.toHexWord(this.cpu.regSP) +
-               " BP=" + str.toHexWord(this.cpu.regBP) +
-               " SI=" + str.toHexWord(this.cpu.regSI) +
-               " DI=" + str.toHexWord(this.cpu.regDI) + '\n';
+        var s = "AX=" + str.toHexWord(this.cpu.regEAX) +
+               " BX=" + str.toHexWord(this.cpu.regEBX) +
+               " CX=" + str.toHexWord(this.cpu.regECX) +
+               " DX=" + str.toHexWord(this.cpu.regEDX) +
+               " SP=" + str.toHexWord(this.cpu.regESP) +
+               " BP=" + str.toHexWord(this.cpu.regEBP) +
+               " SI=" + str.toHexWord(this.cpu.regESI) +
+               " DI=" + str.toHexWord(this.cpu.regEDI) + '\n';
         s += this.getSegStr(this.cpu.segDS, fProt) + ' ' + this.getSegStr(this.cpu.segES, fProt) + ' ' + this.getSegStr(this.cpu.segSS, fProt);
         s += (fProt? '\n' : ' ');
         s += this.getSegStr(this.cpu.segCS, fProt) + " IP=" + str.toHexWord(this.cpu.regIP) +
@@ -3134,28 +3134,28 @@ if (DEBUGGER) {
             sValue = sValue.toUpperCase();
             switch (sValue) {
                 case "AX":
-                    value = this.cpu.regAX;
+                    value = this.cpu.regEAX;
                     break;
                 case "BX":
-                    value = this.cpu.regBX;
+                    value = this.cpu.regEBX;
                     break;
                 case "CX":
-                    value = this.cpu.regCX;
+                    value = this.cpu.regECX;
                     break;
                 case "DX":
-                    value = this.cpu.regDX;
+                    value = this.cpu.regEDX;
                     break;
                 case "SI":
-                    value = this.cpu.regSI;
+                    value = this.cpu.regESI;
                     break;
                 case "DI":
-                    value = this.cpu.regDI;
+                    value = this.cpu.regEDI;
                     break;
                 case "BP":
-                    value = this.cpu.regBP;
+                    value = this.cpu.regEBP;
                     break;
                 case "SP":
-                    value = this.cpu.regSP;
+                    value = this.cpu.regESP;
                     break;
                 case "CS":
                     value = this.cpu.segCS.sel;
@@ -4283,52 +4283,52 @@ if (DEBUGGER) {
                     sReg = sReg.toUpperCase();
                     switch (sReg) {
                     case "AL":
-                        this.cpu.regAX = (this.cpu.regAX & 0xff00) | (w & 0xff);
+                        this.cpu.regEAX = (this.cpu.regEAX & 0xff00) | (w & 0xff);
                         break;
                     case "AH":
-                        this.cpu.regAX = (this.cpu.regAX & 0x00ff) | ((w << 8) & 0xff);
+                        this.cpu.regEAX = (this.cpu.regEAX & 0x00ff) | ((w << 8) & 0xff);
                         break;
                     case "AX":
-                        this.cpu.regAX = (w & 0xffff);
+                        this.cpu.regEAX = (w & 0xffff);
                         break;
                     case "BL":
-                        this.cpu.regBX = (this.cpu.regBX & 0xff00) | (w & 0xff);
+                        this.cpu.regEBX = (this.cpu.regEBX & 0xff00) | (w & 0xff);
                         break;
                     case "BH":
-                        this.cpu.regBX = (this.cpu.regBX & 0x00ff) | ((w << 8) & 0xff);
+                        this.cpu.regEBX = (this.cpu.regEBX & 0x00ff) | ((w << 8) & 0xff);
                         break;
                     case "BX":
-                        this.cpu.regBX = (w & 0xffff);
+                        this.cpu.regEBX = (w & 0xffff);
                         break;
                     case "CL":
-                        this.cpu.regCX = (this.cpu.regCX & 0xff00) | (w & 0xff);
+                        this.cpu.regECX = (this.cpu.regECX & 0xff00) | (w & 0xff);
                         break;
                     case "CH":
-                        this.cpu.regCX = (this.cpu.regCX & 0x00ff) | ((w << 8) & 0xff);
+                        this.cpu.regECX = (this.cpu.regECX & 0x00ff) | ((w << 8) & 0xff);
                         break;
                     case "CX":
-                        this.cpu.regCX = (w & 0xffff);
+                        this.cpu.regECX = (w & 0xffff);
                         break;
                     case "DL":
-                        this.cpu.regDX = (this.cpu.regDX & 0xff00) | (w & 0xff);
+                        this.cpu.regEDX = (this.cpu.regEDX & 0xff00) | (w & 0xff);
                         break;
                     case "DH":
-                        this.cpu.regDX = (this.cpu.regDX & 0x00ff) | ((w << 8) & 0xff);
+                        this.cpu.regEDX = (this.cpu.regEDX & 0x00ff) | ((w << 8) & 0xff);
                         break;
                     case "DX":
-                        this.cpu.regDX = (w & 0xffff);
+                        this.cpu.regEDX = (w & 0xffff);
                         break;
                     case "SP":
-                        this.cpu.regSP = (w & 0xffff);
+                        this.cpu.regESP = (w & 0xffff);
                         break;
                     case "BP":
-                        this.cpu.regBP = (w & 0xffff);
+                        this.cpu.regEBP = (w & 0xffff);
                         break;
                     case "SI":
-                        this.cpu.regSI = (w & 0xffff);
+                        this.cpu.regESI = (w & 0xffff);
                         break;
                     case "DI":
-                        this.cpu.regDI = (w & 0xffff);
+                        this.cpu.regEDI = (w & 0xffff);
                         break;
                     case "DS":
                         this.cpu.setDS(w);
@@ -4746,7 +4746,7 @@ if (DEBUGGER) {
                         if (this.cmp) this.cmp.reset();
                         return true;
                     case "ver":
-                        this.println((APPNAME || "PCjs") + " version " + APPVERSION + " (" + (COMPILED? "RELEASE" : (DEBUG? "DEBUG" : "NODEBUG")) + (PREFETCH? ",PREFETCH" : ",NOPREFETCH") + (EAFUNCS? "EAFUNCS" : ",EATESTS") + (TYPEDARRAYS? ",TYPEDARRAYS" : (FATARRAYS? ",FATARRAYS" : ",DWORDARRAYS")) + ")");
+                        this.println((APPNAME || "PCjs") + " version " + APPVERSION + " (" + (COMPILED? "RELEASE" : (DEBUG? "DEBUG" : "NODEBUG")) + (PREFETCH? ",PREFETCH" : ",NOPREFETCH") + (EAFUNCS? "EAFUNCS" : ",EATESTS") + (TYPEDARRAYS? ",TYPEDARRAYS" : (FATARRAYS? ",FATARRAYS" : ",DWORDARRAYS")) + (BACKTRACK? ",BACKTRACK" : "") + ")");
                         return true;
                     default:
                         ch0 = sCmd.charAt(0);

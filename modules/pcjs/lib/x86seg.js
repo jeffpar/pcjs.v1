@@ -117,6 +117,7 @@ X86Seg.ID = {
 X86Seg.loadReal = function loadReal(sel, fSuppress)
 {
     this.sel = sel;
+    this.ext = 0;
     return this.base = sel << 4;
 };
 
@@ -423,14 +424,14 @@ X86Seg.switchTSS = function switchTSS(selNew, fNest)
     }
     cpu.setWord(addrOld + X86.TSS.TASK_IP, cpu.regIP);
     cpu.setWord(addrOld + X86.TSS.TASK_PS, cpu.getPS());
-    cpu.setWord(addrOld + X86.TSS.TASK_AX, cpu.regAX);
-    cpu.setWord(addrOld + X86.TSS.TASK_CX, cpu.regCX);
-    cpu.setWord(addrOld + X86.TSS.TASK_DX, cpu.regDX);
-    cpu.setWord(addrOld + X86.TSS.TASK_BX, cpu.regBX);
-    cpu.setWord(addrOld + X86.TSS.TASK_SP, cpu.regSP);
-    cpu.setWord(addrOld + X86.TSS.TASK_BP, cpu.regBP);
-    cpu.setWord(addrOld + X86.TSS.TASK_SI, cpu.regSI);
-    cpu.setWord(addrOld + X86.TSS.TASK_DI, cpu.regDI);
+    cpu.setWord(addrOld + X86.TSS.TASK_AX, cpu.regEAX);
+    cpu.setWord(addrOld + X86.TSS.TASK_CX, cpu.regECX);
+    cpu.setWord(addrOld + X86.TSS.TASK_DX, cpu.regEDX);
+    cpu.setWord(addrOld + X86.TSS.TASK_BX, cpu.regEBX);
+    cpu.setWord(addrOld + X86.TSS.TASK_SP, cpu.regESP);
+    cpu.setWord(addrOld + X86.TSS.TASK_BP, cpu.regEBP);
+    cpu.setWord(addrOld + X86.TSS.TASK_SI, cpu.regESI);
+    cpu.setWord(addrOld + X86.TSS.TASK_DI, cpu.regEDI);
     cpu.setWord(addrOld + X86.TSS.TASK_ES, cpu.segES.sel);
     cpu.setWord(addrOld + X86.TSS.TASK_CS, cpu.segCS.sel);
     cpu.setWord(addrOld + X86.TSS.TASK_SS, cpu.segSS.sel);
@@ -439,13 +440,13 @@ X86Seg.switchTSS = function switchTSS(selNew, fNest)
     var offSP = X86.TSS.TASK_SP;
     cpu.setPS(cpu.getWord(addrNew + X86.TSS.TASK_PS) | (fNest? X86.PS.NT : 0));
     cpu.assert(!fNest || !!(cpu.regPS & X86.PS.NT));
-    cpu.regAX = cpu.getWord(addrNew + X86.TSS.TASK_AX);
-    cpu.regCX = cpu.getWord(addrNew + X86.TSS.TASK_CX);
-    cpu.regDX = cpu.getWord(addrNew + X86.TSS.TASK_DX);
-    cpu.regBX = cpu.getWord(addrNew + X86.TSS.TASK_BX);
-    cpu.regBP = cpu.getWord(addrNew + X86.TSS.TASK_BP);
-    cpu.regSI = cpu.getWord(addrNew + X86.TSS.TASK_SI);
-    cpu.regDI = cpu.getWord(addrNew + X86.TSS.TASK_DI);
+    cpu.regEAX = cpu.getWord(addrNew + X86.TSS.TASK_AX);
+    cpu.regECX = cpu.getWord(addrNew + X86.TSS.TASK_CX);
+    cpu.regEDX = cpu.getWord(addrNew + X86.TSS.TASK_DX);
+    cpu.regEBX = cpu.getWord(addrNew + X86.TSS.TASK_BX);
+    cpu.regEBP = cpu.getWord(addrNew + X86.TSS.TASK_BP);
+    cpu.regESI = cpu.getWord(addrNew + X86.TSS.TASK_SI);
+    cpu.regEDI = cpu.getWord(addrNew + X86.TSS.TASK_DI);
     cpu.segES.load(cpu.getWord(addrNew + X86.TSS.TASK_ES));
     cpu.segDS.load(cpu.getWord(addrNew + X86.TSS.TASK_DS));
     cpu.setCSIP(cpu.getWord(addrNew + X86.TSS.TASK_IP), cpu.getWord(addrNew + X86.TSS.TASK_CS));
@@ -453,7 +454,7 @@ X86Seg.switchTSS = function switchTSS(selNew, fNest)
         offSP = (this.cpl << 2) + X86.TSS.CPL0_SP;
         offSS = offSP + 2;
     }
-    cpu.regSP = cpu.getWord(addrNew + offSP);
+    cpu.regESP = cpu.getWord(addrNew + offSP);
     cpu.segSS.load(cpu.getWord(addrNew + offSS));
     cpu.segLDT.load(cpu.getWord(addrNew + X86.TSS.TASK_LDT));
     if (fNest) cpu.setWord(addrNew + X86.TSS.PREV_TSS, selOld);
@@ -514,13 +515,15 @@ X86Seg.prototype.loadDesc6 = function(addrDesc, sel)
 {
     var cpu = this.cpu;
     var acc = cpu.getWord(addrDesc + 2);
-    var base = cpu.getWord(addrDesc + 0) | ((acc & 0xff) << 16);
+    var base = cpu.getWord(addrDesc) | ((acc & 0xff) << 16);
     var limit = cpu.getWord(addrDesc + 4);
 
     this.sel = sel;
     this.base = base;
     this.limit = limit;
     this.acc = acc & X86.DESC.ACC.MASK;
+    this.type = (acc & X86.DESC.ACC.TYPE.MASK);
+    this.ext = 0;
     this.addrDesc = addrDesc;
     this.updateMode();
 
@@ -554,7 +557,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
     var acc = cpu.getWord(addrDesc + X86.DESC.ACC.OFFSET);
     var type = (acc & X86.DESC.ACC.TYPE.MASK);
     var base = cpu.getWord(addrDesc + X86.DESC.BASE.OFFSET) | ((acc & X86.DESC.ACC.BASE1623) << 16);
-    var ext = (DEBUG? cpu.getWord(addrDesc + X86.DESC.EXT.OFFSET) : 0);
+    var ext = cpu.getWord(addrDesc + X86.DESC.EXT.OFFSET);
     var selMasked = sel & X86.SEL.MASK;
 
     while (true) {
@@ -589,7 +592,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                     }
                     regSP = cpu.popWord();
                     cpu.segSS.load(cpu.popWord());
-                    cpu.regSP = regSP;
+                    cpu.regESP = regSP;
                     this.fStackSwitch = true;
                 }
                 fGate = false;
@@ -644,7 +647,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                             base = X86.ADDR_INVALID;
                             break;
                         }
-                        regSP = cpu.regSP;
+                        regSP = cpu.regESP;
                         var i = 0, nWords = (acc & 0x1f);
                         while (nWords--) {
                             this.awParms[i++] = cpu.getSOWord(cpu.segSS, regSP);
@@ -653,9 +656,9 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                         addrTSS = cpu.segTSS.base;
                         offSP = (this.cpl << 2) + X86.TSS.CPL0_SP;
                         offSS = offSP + 2;
-                        regSPPrev = cpu.regSP;
+                        regSPPrev = cpu.regESP;
                         regSSPrev = cpu.segSS.sel;
-                        cpu.regSP = cpu.getWord(addrTSS + offSP);
+                        cpu.regESP = cpu.getWord(addrTSS + offSP);
                         cpu.segSS.load(cpu.getWord(addrTSS + offSS));
                         cpu.pushWord(regSSPrev);
                         cpu.pushWord(regSPPrev);
@@ -735,6 +738,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
         this.limit = limit;
         this.acc = acc;
         this.type = type;
+        this.ext = ext;
         this.addrDesc = addrDesc;
         this.updateMode();
         break;

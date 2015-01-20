@@ -2733,8 +2733,8 @@ HDC.prototype.writeFormat = function(drive, b)
  */
 HDC.prototype.intBIOSDisk = function(addr)
 {
-    var AH = this.cpu.regAX >> 8;
-    var DL = this.cpu.regDX & 0xff;
+    var AH = this.cpu.regEAX >> 8;
+    var DL = this.cpu.regEDX & 0xff;
     if (!AH && DL > 0x80) this.iDriveAllowFail = DL - 0x80;
     return true;
 };
@@ -2770,7 +2770,7 @@ HDC.prototype.intBIOSDisk = function(addr)
  */
 HDC.prototype.intBIOSDiskette = function(addr)
 {
-    var AH = this.cpu.regAX >> 8;
+    var AH = this.cpu.regEAX >> 8;
     if ((!AH && this.chipset && this.chipset.checkIMR(ChipSet.IRQ.FDC))) {
         if (DEBUG) this.printMessage("HDC.intBIOSDiskette(): skipping useless INT 0x40 diskette reset");
         return false;

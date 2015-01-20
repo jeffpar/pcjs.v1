@@ -353,28 +353,28 @@ var X86Help = {
             //
             switch (this.bModRM & 0x7) {
             case 0x0:       // AL
-                this.regAX = (this.regAX & ~0xff) | dst;
+                this.regEAX = (this.regEAX & ~0xff) | dst;
                 break;
             case 0x1:       // CL
-                this.regCX = (this.regCX & ~0xff) | dst;
+                this.regECX = (this.regECX & ~0xff) | dst;
                 break;
             case 0x2:       // DL
-                this.regDX = (this.regDX & ~0xff) | dst;
+                this.regEDX = (this.regEDX & ~0xff) | dst;
                 break;
             case 0x3:       // BL
-                this.regBX = (this.regBX & ~0xff) | dst;
+                this.regEBX = (this.regEBX & ~0xff) | dst;
                 break;
             case 0x4:       // AH
-                this.regAX = (this.regAX & 0xff) | (dst << 8);
+                this.regEAX = (this.regEAX & 0xff) | (dst << 8);
                 break;
             case 0x5:       // CH
-                this.regCX = (this.regCX & 0xff) | (dst << 8);
+                this.regECX = (this.regECX & 0xff) | (dst << 8);
                 break;
             case 0x6:       // DH
-                this.regDX = (this.regDX & 0xff) | (dst << 8);
+                this.regEDX = (this.regEDX & 0xff) | (dst << 8);
                 break;
             case 0x7:       // BH
-                this.regBX = (this.regBX & 0xff) | (dst << 8);
+                this.regEBX = (this.regEBX & 0xff) | (dst << 8);
                 break;
             default:
                 break;      // there IS no other case, but JavaScript inspections don't know that
@@ -415,28 +415,28 @@ var X86Help = {
             //
             switch (this.bModRM & 0x7) {
             case 0x0:       // AX
-                this.regAX = dst;
+                this.regEAX = dst;
                 break;
             case 0x1:       // CX
-                this.regCX = dst;
+                this.regECX = dst;
                 break;
             case 0x2:       // DX
-                this.regDX = dst;
+                this.regEDX = dst;
                 break;
             case 0x3:       // BX
-                this.regBX = dst;
+                this.regEBX = dst;
                 break;
             case 0x4:       // SP
-                this.regSP = dst;
+                this.regESP = dst;
                 break;
             case 0x5:       // BP
-                this.regBP = dst;
+                this.regEBP = dst;
                 break;
             case 0x6:       // SI
-                this.regSI = dst;
+                this.regESI = dst;
                 break;
             case 0x7:       // DI
-                this.regDI = dst;
+                this.regEDI = dst;
                 break;
             default:
                 break;      // there IS no other case, but JavaScript inspections don't know that
@@ -508,9 +508,9 @@ var X86Help = {
     opHelpRETF: function(n) {
         var regIP = this.popWord();
         var regCS = this.popWord();
-        if (n) this.regSP = (this.regSP + n) & 0xffff;
+        if (n) this.regESP = (this.regESP + n) & 0xffff;
         if (this.setCSIP(regIP, regCS, false)) {
-            if (n) this.regSP = (this.regSP + n) & 0xffff;
+            if (n) this.regESP = (this.regESP + n) & 0xffff;
             /*
              * As per Intel documentation: "If any of [the DS or ES] registers refer to segments whose DPL is
              * less than the new CPL (excluding conforming code segments), the segment register is loaded with

@@ -41,6 +41,7 @@ var X86 = {
     MODEL_80186:    80186,
     MODEL_80188:    80188,
     MODEL_80286:    80286,
+    MODEL_80386:    80386,
 
     /*
      * This constant is used to mark points in the code where the physical address being returned
@@ -148,7 +149,15 @@ var X86 = {
             OFFSET:     0x6,
             LIMIT1619:                      0x000f,
             AVAIL:                          0x0010,     // NOTE: set in various descriptors in OS/2
-            DEFSIZE:                        0x0040,     // clear if default operand/address size is 16-bit, set if 32-bit
+            /*
+             * The BIG bit is known as the D bit for code segments; when set, all addresses and operands
+             * in that code segment are assumed to be 32-bit.
+             *
+             * The BIG bit is known as the B bit for data segments; when set, it indicates: 1) all pushes,
+             * pops, calls and returns use ESP instead of SP, and 2) the upper bound of an expand-down segment
+             * is 0xffffffff instead of 0xffff.
+             */
+            BIG:                            0x0040,     // clear if default operand/address size is 16-bit, set if 32-bit
             GRANULARITY:                    0x0080,     // clear if limit is bytes, set if limit is 4Kb pages
             BASE2431:                       0xff00
         },
@@ -232,7 +241,7 @@ var X86 = {
         AUXOVF_OF:  0x08080,
         AUXOVF_CF:  0x10100
     },
-    PARITY:  [                  // 256-byte array with a 1 wherever the number of set bits in the array index is EVEN
+    PARITY: [                   // 256-byte array with a 1 wherever the number of set bits in the array index is EVEN
         1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
         0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
         0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
