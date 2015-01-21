@@ -285,7 +285,7 @@ function genSIB(sib) {
     print("     */");
     print("    function " + sFunc + "(mod) {");
     var sBase = (base == 5? "(mod? this.reg" + aBase[base] + " : this.getIPWord())" : "this.reg" + aBase[base]);
-    if (index != 4) sBase += " + (this.reg" + (aIndex[index] + " << " + scale) + ")";
+    if (index != 4) sBase += " + " + (scale? ("(this.reg" + aIndex[index] + " << " + scale + ")") : ("this.reg" + aIndex[index]));
     print("        return " + sBase + ";");
     print("    }" + (sib < 255? "," : ""));
 }

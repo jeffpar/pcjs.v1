@@ -46,7 +46,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB00(mod) {
-        return this.regEAX + (this.regEAX << 0);
+        return this.regEAX + this.regEAX;
     },
     /**
      * opModSIB01(): scale=00 (1)  index=000 (EAX)  base=001 (ECX)
@@ -55,7 +55,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB01(mod) {
-        return this.regECX + (this.regEAX << 0);
+        return this.regECX + this.regEAX;
     },
     /**
      * opModSIB02(): scale=00 (1)  index=000 (EAX)  base=010 (EDX)
@@ -64,7 +64,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB02(mod) {
-        return this.regEDX + (this.regEAX << 0);
+        return this.regEDX + this.regEAX;
     },
     /**
      * opModSIB03(): scale=00 (1)  index=000 (EAX)  base=011 (EBX)
@@ -73,7 +73,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB03(mod) {
-        return this.regEBX + (this.regEAX << 0);
+        return this.regEBX + this.regEAX;
     },
     /**
      * opModSIB04(): scale=00 (1)  index=000 (EAX)  base=100 (ESP)
@@ -82,7 +82,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB04(mod) {
-        return this.regESP + (this.regEAX << 0);
+        return this.regESP + this.regEAX;
     },
     /**
      * opModSIB05(): scale=00 (1)  index=000 (EAX)  base=101 (mod? EBP : disp32)
@@ -91,7 +91,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB05(mod) {
-        return (mod? this.regEBP : this.getIPWord()) + (this.regEAX << 0);
+        return (mod? this.regEBP : this.getIPWord()) + this.regEAX;
     },
     /**
      * opModSIB06(): scale=00 (1)  index=000 (EAX)  base=110 (ESI)
@@ -100,7 +100,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB06(mod) {
-        return this.regESI + (this.regEAX << 0);
+        return this.regESI + this.regEAX;
     },
     /**
      * opModSIB07(): scale=00 (1)  index=000 (EAX)  base=111 (EDI)
@@ -109,7 +109,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB07(mod) {
-        return this.regEDI + (this.regEAX << 0);
+        return this.regEDI + this.regEAX;
     },
     /**
      * opModSIB08(): scale=00 (1)  index=001 (ECX)  base=000 (EAX)
@@ -118,7 +118,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB08(mod) {
-        return this.regEAX + (this.regECX << 0);
+        return this.regEAX + this.regECX;
     },
     /**
      * opModSIB09(): scale=00 (1)  index=001 (ECX)  base=001 (ECX)
@@ -127,7 +127,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB09(mod) {
-        return this.regECX + (this.regECX << 0);
+        return this.regECX + this.regECX;
     },
     /**
      * opModSIB0A(): scale=00 (1)  index=001 (ECX)  base=010 (EDX)
@@ -136,7 +136,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB0A(mod) {
-        return this.regEDX + (this.regECX << 0);
+        return this.regEDX + this.regECX;
     },
     /**
      * opModSIB0B(): scale=00 (1)  index=001 (ECX)  base=011 (EBX)
@@ -145,7 +145,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB0B(mod) {
-        return this.regEBX + (this.regECX << 0);
+        return this.regEBX + this.regECX;
     },
     /**
      * opModSIB0C(): scale=00 (1)  index=001 (ECX)  base=100 (ESP)
@@ -154,7 +154,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB0C(mod) {
-        return this.regESP + (this.regECX << 0);
+        return this.regESP + this.regECX;
     },
     /**
      * opModSIB0D(): scale=00 (1)  index=001 (ECX)  base=101 (mod? EBP : disp32)
@@ -163,7 +163,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB0D(mod) {
-        return (mod? this.regEBP : this.getIPWord()) + (this.regECX << 0);
+        return (mod? this.regEBP : this.getIPWord()) + this.regECX;
     },
     /**
      * opModSIB0E(): scale=00 (1)  index=001 (ECX)  base=110 (ESI)
@@ -172,7 +172,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB0E(mod) {
-        return this.regESI + (this.regECX << 0);
+        return this.regESI + this.regECX;
     },
     /**
      * opModSIB0F(): scale=00 (1)  index=001 (ECX)  base=111 (EDI)
@@ -181,7 +181,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB0F(mod) {
-        return this.regEDI + (this.regECX << 0);
+        return this.regEDI + this.regECX;
     },
     /**
      * opModSIB10(): scale=00 (1)  index=010 (EDX)  base=000 (EAX)
@@ -190,7 +190,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB10(mod) {
-        return this.regEAX + (this.regEDX << 0);
+        return this.regEAX + this.regEDX;
     },
     /**
      * opModSIB11(): scale=00 (1)  index=010 (EDX)  base=001 (ECX)
@@ -199,7 +199,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB11(mod) {
-        return this.regECX + (this.regEDX << 0);
+        return this.regECX + this.regEDX;
     },
     /**
      * opModSIB12(): scale=00 (1)  index=010 (EDX)  base=010 (EDX)
@@ -208,7 +208,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB12(mod) {
-        return this.regEDX + (this.regEDX << 0);
+        return this.regEDX + this.regEDX;
     },
     /**
      * opModSIB13(): scale=00 (1)  index=010 (EDX)  base=011 (EBX)
@@ -217,7 +217,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB13(mod) {
-        return this.regEBX + (this.regEDX << 0);
+        return this.regEBX + this.regEDX;
     },
     /**
      * opModSIB14(): scale=00 (1)  index=010 (EDX)  base=100 (ESP)
@@ -226,7 +226,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB14(mod) {
-        return this.regESP + (this.regEDX << 0);
+        return this.regESP + this.regEDX;
     },
     /**
      * opModSIB15(): scale=00 (1)  index=010 (EDX)  base=101 (mod? EBP : disp32)
@@ -235,7 +235,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB15(mod) {
-        return (mod? this.regEBP : this.getIPWord()) + (this.regEDX << 0);
+        return (mod? this.regEBP : this.getIPWord()) + this.regEDX;
     },
     /**
      * opModSIB16(): scale=00 (1)  index=010 (EDX)  base=110 (ESI)
@@ -244,7 +244,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB16(mod) {
-        return this.regESI + (this.regEDX << 0);
+        return this.regESI + this.regEDX;
     },
     /**
      * opModSIB17(): scale=00 (1)  index=010 (EDX)  base=111 (EDI)
@@ -253,7 +253,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB17(mod) {
-        return this.regEDI + (this.regEDX << 0);
+        return this.regEDI + this.regEDX;
     },
     /**
      * opModSIB18(): scale=00 (1)  index=011 (EBX)  base=000 (EAX)
@@ -262,7 +262,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB18(mod) {
-        return this.regEAX + (this.regEBX << 0);
+        return this.regEAX + this.regEBX;
     },
     /**
      * opModSIB19(): scale=00 (1)  index=011 (EBX)  base=001 (ECX)
@@ -271,7 +271,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB19(mod) {
-        return this.regECX + (this.regEBX << 0);
+        return this.regECX + this.regEBX;
     },
     /**
      * opModSIB1A(): scale=00 (1)  index=011 (EBX)  base=010 (EDX)
@@ -280,7 +280,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB1A(mod) {
-        return this.regEDX + (this.regEBX << 0);
+        return this.regEDX + this.regEBX;
     },
     /**
      * opModSIB1B(): scale=00 (1)  index=011 (EBX)  base=011 (EBX)
@@ -289,7 +289,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB1B(mod) {
-        return this.regEBX + (this.regEBX << 0);
+        return this.regEBX + this.regEBX;
     },
     /**
      * opModSIB1C(): scale=00 (1)  index=011 (EBX)  base=100 (ESP)
@@ -298,7 +298,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB1C(mod) {
-        return this.regESP + (this.regEBX << 0);
+        return this.regESP + this.regEBX;
     },
     /**
      * opModSIB1D(): scale=00 (1)  index=011 (EBX)  base=101 (mod? EBP : disp32)
@@ -307,7 +307,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB1D(mod) {
-        return (mod? this.regEBP : this.getIPWord()) + (this.regEBX << 0);
+        return (mod? this.regEBP : this.getIPWord()) + this.regEBX;
     },
     /**
      * opModSIB1E(): scale=00 (1)  index=011 (EBX)  base=110 (ESI)
@@ -316,7 +316,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB1E(mod) {
-        return this.regESI + (this.regEBX << 0);
+        return this.regESI + this.regEBX;
     },
     /**
      * opModSIB1F(): scale=00 (1)  index=011 (EBX)  base=111 (EDI)
@@ -325,7 +325,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB1F(mod) {
-        return this.regEDI + (this.regEBX << 0);
+        return this.regEDI + this.regEBX;
     },
     /**
      * opModSIB20(): scale=00 (1)  index=100 (none)  base=000 (EAX)
@@ -406,7 +406,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB28(mod) {
-        return this.regEAX + (this.regEBP << 0);
+        return this.regEAX + this.regEBP;
     },
     /**
      * opModSIB29(): scale=00 (1)  index=101 (EBP)  base=001 (ECX)
@@ -415,7 +415,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB29(mod) {
-        return this.regECX + (this.regEBP << 0);
+        return this.regECX + this.regEBP;
     },
     /**
      * opModSIB2A(): scale=00 (1)  index=101 (EBP)  base=010 (EDX)
@@ -424,7 +424,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB2A(mod) {
-        return this.regEDX + (this.regEBP << 0);
+        return this.regEDX + this.regEBP;
     },
     /**
      * opModSIB2B(): scale=00 (1)  index=101 (EBP)  base=011 (EBX)
@@ -433,7 +433,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB2B(mod) {
-        return this.regEBX + (this.regEBP << 0);
+        return this.regEBX + this.regEBP;
     },
     /**
      * opModSIB2C(): scale=00 (1)  index=101 (EBP)  base=100 (ESP)
@@ -442,7 +442,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB2C(mod) {
-        return this.regESP + (this.regEBP << 0);
+        return this.regESP + this.regEBP;
     },
     /**
      * opModSIB2D(): scale=00 (1)  index=101 (EBP)  base=101 (mod? EBP : disp32)
@@ -451,7 +451,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB2D(mod) {
-        return (mod? this.regEBP : this.getIPWord()) + (this.regEBP << 0);
+        return (mod? this.regEBP : this.getIPWord()) + this.regEBP;
     },
     /**
      * opModSIB2E(): scale=00 (1)  index=101 (EBP)  base=110 (ESI)
@@ -460,7 +460,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB2E(mod) {
-        return this.regESI + (this.regEBP << 0);
+        return this.regESI + this.regEBP;
     },
     /**
      * opModSIB2F(): scale=00 (1)  index=101 (EBP)  base=111 (EDI)
@@ -469,7 +469,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB2F(mod) {
-        return this.regEDI + (this.regEBP << 0);
+        return this.regEDI + this.regEBP;
     },
     /**
      * opModSIB30(): scale=00 (1)  index=110 (ESI)  base=000 (EAX)
@@ -478,7 +478,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB30(mod) {
-        return this.regEAX + (this.regESI << 0);
+        return this.regEAX + this.regESI;
     },
     /**
      * opModSIB31(): scale=00 (1)  index=110 (ESI)  base=001 (ECX)
@@ -487,7 +487,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB31(mod) {
-        return this.regECX + (this.regESI << 0);
+        return this.regECX + this.regESI;
     },
     /**
      * opModSIB32(): scale=00 (1)  index=110 (ESI)  base=010 (EDX)
@@ -496,7 +496,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB32(mod) {
-        return this.regEDX + (this.regESI << 0);
+        return this.regEDX + this.regESI;
     },
     /**
      * opModSIB33(): scale=00 (1)  index=110 (ESI)  base=011 (EBX)
@@ -505,7 +505,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB33(mod) {
-        return this.regEBX + (this.regESI << 0);
+        return this.regEBX + this.regESI;
     },
     /**
      * opModSIB34(): scale=00 (1)  index=110 (ESI)  base=100 (ESP)
@@ -514,7 +514,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB34(mod) {
-        return this.regESP + (this.regESI << 0);
+        return this.regESP + this.regESI;
     },
     /**
      * opModSIB35(): scale=00 (1)  index=110 (ESI)  base=101 (mod? EBP : disp32)
@@ -523,7 +523,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB35(mod) {
-        return (mod? this.regEBP : this.getIPWord()) + (this.regESI << 0);
+        return (mod? this.regEBP : this.getIPWord()) + this.regESI;
     },
     /**
      * opModSIB36(): scale=00 (1)  index=110 (ESI)  base=110 (ESI)
@@ -532,7 +532,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB36(mod) {
-        return this.regESI + (this.regESI << 0);
+        return this.regESI + this.regESI;
     },
     /**
      * opModSIB37(): scale=00 (1)  index=110 (ESI)  base=111 (EDI)
@@ -541,7 +541,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB37(mod) {
-        return this.regEDI + (this.regESI << 0);
+        return this.regEDI + this.regESI;
     },
     /**
      * opModSIB38(): scale=00 (1)  index=111 (EDI)  base=000 (EAX)
@@ -550,7 +550,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB38(mod) {
-        return this.regEAX + (this.regEDI << 0);
+        return this.regEAX + this.regEDI;
     },
     /**
      * opModSIB39(): scale=00 (1)  index=111 (EDI)  base=001 (ECX)
@@ -559,7 +559,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB39(mod) {
-        return this.regECX + (this.regEDI << 0);
+        return this.regECX + this.regEDI;
     },
     /**
      * opModSIB3A(): scale=00 (1)  index=111 (EDI)  base=010 (EDX)
@@ -568,7 +568,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB3A(mod) {
-        return this.regEDX + (this.regEDI << 0);
+        return this.regEDX + this.regEDI;
     },
     /**
      * opModSIB3B(): scale=00 (1)  index=111 (EDI)  base=011 (EBX)
@@ -577,7 +577,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB3B(mod) {
-        return this.regEBX + (this.regEDI << 0);
+        return this.regEBX + this.regEDI;
     },
     /**
      * opModSIB3C(): scale=00 (1)  index=111 (EDI)  base=100 (ESP)
@@ -586,7 +586,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB3C(mod) {
-        return this.regESP + (this.regEDI << 0);
+        return this.regESP + this.regEDI;
     },
     /**
      * opModSIB3D(): scale=00 (1)  index=111 (EDI)  base=101 (mod? EBP : disp32)
@@ -595,7 +595,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB3D(mod) {
-        return (mod? this.regEBP : this.getIPWord()) + (this.regEDI << 0);
+        return (mod? this.regEBP : this.getIPWord()) + this.regEDI;
     },
     /**
      * opModSIB3E(): scale=00 (1)  index=111 (EDI)  base=110 (ESI)
@@ -604,7 +604,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB3E(mod) {
-        return this.regESI + (this.regEDI << 0);
+        return this.regESI + this.regEDI;
     },
     /**
      * opModSIB3F(): scale=00 (1)  index=111 (EDI)  base=111 (EDI)
@@ -613,7 +613,7 @@ X86ModSIB.aOpModSIB = [
      * @param {number} mod
      */
     function opModSIB3F(mod) {
-        return this.regEDI + (this.regEDI << 0);
+        return this.regEDI + this.regEDI;
     },
     /**
      * opModSIB40(): scale=01 (2)  index=000 (EAX)  base=000 (EAX)
