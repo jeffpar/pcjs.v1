@@ -75,6 +75,9 @@ var w, sError = "";
 var fGenMods = true;
 var sEAFuncs = "";
 
+var aBase  = ["EAX", "ECX", "EDX", "EBX", "ESP",  "EBP", "ESI", "EDI"];
+var aIndex = ["EAX", "ECX", "EDX", "EBX", "none", "EBP", "ESI", "EDI"];
+
 if (!fGenMods) {
 
     var sOps = "", cOps = 0;
@@ -256,9 +259,35 @@ else {
         }
     }
 
+    sContainer = "X86ModSIB" + ".aOpModSIB";
+
+    print(sContainer + " = [");
+    for (var sib = 0x00; sib <= 0xff && !sError; sib++) {
+        genSIB(sib);
+    }
+    print("];\n");
+
     if (sEAFuncs) {
         print("var X86Mods = {\n" + sEAFuncs + "};\n");
     }
+}
+
+function genSIB(sib) {
+    var scale = (sib >> 6);
+    var index = (sib >> 3) & 0x7;
+    var base = (sib & 0x7);
+    var sFunc = "opModSIB" + toHex(sib, 2);
+    print("    /**");
+    print("     * " + sFunc + "(): scale=" + toBin(scale, 2) + " (" + toHex(1 << scale, 1) + ")  index=" + toBin(index, 3) + " (" + aIndex[index] + ")  base=" + toBin(base, 3) + " (" + (base == 5? "mod? EBP : disp32)" : aBase[base] + ")"));
+    print("     *");
+    print("     * @this {X86CPU}");
+    print("     * @param {number} mod");
+    print("     */");
+    print("    function " + sFunc + "(mod) {");
+    var sBase = (base == 5? "(mod? this.reg" + aBase[base] + " : this.getIPWord())" : "this.reg" + aBase[base]);
+    if (index != 4) sBase += " + (this.reg" + (aIndex[index] + " << " + scale) + ")";
+    print("        return " + sBase + ";");
+    print("    }" + (sib < 255? "," : ""));
 }
 
 function genMode(a, d, w, mrm, sGroup, sRO) {
@@ -680,7 +709,7 @@ function genMode(a, d, w, mrm, sGroup, sRO) {
                 nCycles = "this.CYCLES.nEACyclesBase";
                 break;
             case 4:
-                sModAddr = "this.getSIB()";
+                sModAddr = "this.getSIB(0)";
                 sModFunc = "SIB";
                 nCycles = "this.CYCLES.nEACyclesBase";
                 break;
@@ -727,7 +756,7 @@ function genMode(a, d, w, mrm, sGroup, sRO) {
                 nCycles = "this.CYCLES.nEACyclesBaseDisp";
                 break;
             case 4:
-                sModAddr = "this.getSIB() + this.getIPDisp()";
+                sModAddr = "this.getSIB(1) + this.getIPDisp()";
                 sModFunc = "SIBD8";
                 nCycles = "this.CYCLES.nEACyclesBaseDisp";
                 break;
@@ -774,7 +803,7 @@ function genMode(a, d, w, mrm, sGroup, sRO) {
                 nCycles = "this.CYCLES.nEACyclesBaseDisp";
                 break;
             case 4:
-                sModAddr = "this.getSIB() + this.getIPWord()";
+                sModAddr = "this.getSIB(2) + this.getIPWord()";
                 sModFunc = "SIBD32";
                 nCycles = "this.CYCLES.nEACyclesBaseDisp";
                 break;
@@ -917,7 +946,7 @@ function genMode(a, d, w, mrm, sGroup, sRO) {
         return null;
     }
 
-    sOpMod = "opMod" + aOpPrefix[w] + aAddrPrefix[a] + (sGroup? sGroup + (sRO? sRO : "") : aDst[d]) + toHex(mrm, 2);
+    sOpMod = "opMod" + aAddrPrefix[a] + (sGroup? sGroup + (sRO? sRO : "") : aDst[d]) + aSize[w] + toHex(mrm, 2);
 
     var sTemp = aSize[w].charAt(0).toLowerCase();
 
@@ -926,7 +955,7 @@ function genMode(a, d, w, mrm, sGroup, sRO) {
          * Use this to generate ModRM decoders that accept an array (ie, "group") of functions, and pass along an implied argument as well
          */
         if (sRO && reg != 7) {
-            sOpMod = "opMod" + aSize[w] + aAddrPrefix[a] + (sGroup? sGroup : aDst[d]) + toHex(mrm, 2);
+            sOpMod = "opMod" + aAddrPrefix[a] + (sGroup? sGroup : aDst[d]) + aSize[w] + toHex(mrm, 2);
             return sOpMod;
         }
 
@@ -1023,7 +1052,7 @@ function genMode(a, d, w, mrm, sGroup, sRO) {
         if (mod == 3 && !d) {
             var mrmPrime = (mod << 6) | (r_m << 3) | reg;
             print("    X86Mod" + aOpPrefix[w] + aAddrPrefix[a] + ".aOpModReg[0x" + toHex(mrmPrime, 2) + "],");
-            sOpMod = "opMod" + aOpPrefix[w] + aAddrPrefix[a] + aDst[1] + toHex(mrmPrime, 2);
+            sOpMod = "opMod" + aAddrPrefix[a] + aDst[1] + aSize[w] + toHex(mrmPrime, 2);
             return sOpMod;
         }
 

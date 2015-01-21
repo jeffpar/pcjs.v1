@@ -46,6 +46,9 @@ if (typeof module !== 'undefined') {
     var X86Help     = require("./x86help");
     var X86ModB     = require("./x86modb");
     var X86ModW     = require("./x86modw");
+    var X86ModB32   = require("./x86modb32");
+    var X86ModW32   = require("./x86modw32");
+    var X86ModSIB   = require("./x86modsib");
     var X86OpXX     = require("./x86opxx");
     var X86Op0F     = require("./x86op0f");
 }
@@ -2318,7 +2321,7 @@ X86CPU.prototype.getIPByte = function()
 {
     var b = (PREFETCH? this.getBytePrefetch(this.regLIP) : this.getByte(this.regLIP));
     if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
-    this.regLIP = this.segCS.base + (this.regEIP = (this.regEIP + 1) & 0xffff);   // this.advanceIP(1)
+    this.regLIP = this.segCS.base + (this.regEIP = (this.regEIP + 1) & 0xffff); // this.advanceIP(1)
     return b;
 };
 
@@ -2332,7 +2335,7 @@ X86CPU.prototype.getIPDisp = function()
 {
     var b = ((PREFETCH? this.getBytePrefetch(this.regLIP) : this.getByte(this.regLIP)) << 24) >> 24;
     if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
-    this.regLIP = this.segCS.base + (this.regEIP = (this.regEIP + 1) & 0xffff);   // this.advanceIP(1)
+    this.regLIP = this.segCS.base + (this.regEIP = (this.regEIP + 1) & 0xffff); // this.advanceIP(1)
     return b & 0xffff;
 };
 
@@ -2349,8 +2352,22 @@ X86CPU.prototype.getIPWord = function()
         this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
         this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMemHi);
     }
-    this.regLIP = this.segCS.base + (this.regEIP = (this.regEIP + 2) & 0xffff);   // this.advanceIP(2)
+    this.regLIP = this.segCS.base + (this.regEIP = (this.regEIP + 2) & 0xffff); // this.advanceIP(2)
     return w;
+};
+
+/**
+ * getSIB(mod)
+ *
+ * @this {X86CPU}
+ * @param {number} mod
+ * @return {number}
+ */
+X86CPU.prototype.getSIB = function(mod)
+{
+    var b = PREFETCH? this.getBytePrefetch(this.regLIP) : this.getByte(this.regLIP);
+    if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
+    return X86ModSIB.aOpModSIB[b].call(this, mod);
 };
 
 /**
