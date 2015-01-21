@@ -189,7 +189,7 @@ function Memory(addr, size, fReadOnly, controller)
 Memory.readNone = function readNone(off)
 {
     if (DEBUGGER && this.dbg.messageEnabled(Messages.MEM) /* && !off */) {
-        this.dbg.message("attempt to read invalid block %" + str.toHex(this.addr) + " from " + str.toHexAddr(this.cpu.regIP, this.cpu.segCS.sel));
+        this.dbg.message("attempt to read invalid block %" + str.toHex(this.addr) + " from " + str.toHexAddr(this.cpu.regEIP, this.cpu.segCS.sel));
     }
     return 0;
 };
@@ -201,11 +201,12 @@ Memory.readNone = function readNone(off)
  * @param {number} off
  * @param {number} v (could be either a byte or word value, since we use the same handler for both kinds of accesses)
  */
-Memory.writeNone = function writeNone(off, v) {
+Memory.writeNone = function writeNone(off, v)
+{
     if (DEBUGGER && this.dbg.messageEnabled(Messages.MEM) /* && !off */) {
         this.dbg.message("attempt to write 0x" + str.toHexWord(v) + " to invalid block %" + str.toHex(this.addr), true);
     }
-},
+};
 
 /**
  * readByteMemory(off)

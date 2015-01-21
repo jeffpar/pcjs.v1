@@ -248,7 +248,7 @@ var X86Help = {
              *
              * TODO: Determine the cycle cost when a BOUND exception is triggered, over and above nOpCyclesBound.
              */
-            this.setIP(this.opEA - this.segCS.base);
+            this.setIP(this.opLIP - this.segCS.base);
             X86Help.opHelpINT.call(this, X86.EXCEPTION.BOUND_ERR, null, 0);
         }
         if (EAFUNCS) this.setEAByte = this.setEAByteDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
@@ -490,10 +490,10 @@ var X86Help = {
      */
     opHelpCALLF: function(off, sel) {
         var regCS = this.segCS.sel;
-        var regIP = this.regIP;
+        var regEIP = this.regEIP;
         if (this.setCSIP(off, sel, true) != null) {
             this.pushWord(regCS);
-            this.pushWord(regIP);
+            this.pushWord(regEIP);
         }
     },
     /**
@@ -506,10 +506,10 @@ var X86Help = {
      * @param {number} n
      */
     opHelpRETF: function(n) {
-        var regIP = this.popWord();
+        var regEIP = this.popWord();
         var regCS = this.popWord();
         if (n) this.regESP = (this.regESP + n) & 0xffff;
-        if (this.setCSIP(regIP, regCS, false)) {
+        if (this.setCSIP(regEIP, regCS, false)) {
             if (n) this.regESP = (this.regESP + n) & 0xffff;
             /*
              * As per Intel documentation: "If any of [the DS or ES] registers refer to segments whose DPL is
@@ -529,7 +529,7 @@ var X86Help = {
                 this.segES.load(0);
             }
         }
-        if (n == 2 && this.cIntReturn) this.checkIntReturn(this.regEIP);
+        if (n == 2 && this.cIntReturn) this.checkIntReturn(this.regLIP);
     },
     /**
      * opHelpINT(nIDT, nError, nCycles)
@@ -554,14 +554,14 @@ var X86Help = {
         this.segCS.fCall = true;
         var regPS = this.getPS();
         var regCS = this.segCS.sel;
-        var regIP = this.regIP;
+        var regEIP = this.regEIP;
         var base = this.segCS.loadIDT(nIDT);
         if (base != X86.ADDR_INVALID) {
-            this.regEIP = base + this.regIP;
-            if (PREFETCH) this.flushPrefetch(this.regEIP);
+            this.regLIP = base + this.regEIP;
+            if (PREFETCH) this.flushPrefetch(this.regLIP);
             this.pushWord(regPS);
             this.pushWord(regCS);
-            this.pushWord(regIP);
+            this.pushWord(regEIP);
             if (nError != null) this.pushWord(nError);
             this.nFault = -1;
         }
@@ -585,12 +585,12 @@ var X86Help = {
             }
         }
         var cpl = this.segCS.cpl;
-        var regIP = this.popWord();
+        var regEIP = this.popWord();
         var regCS = this.popWord();
         var regPS = this.popWord();
-        if (this.setCSIP(regIP, regCS, false) != null) {
+        if (this.setCSIP(regEIP, regCS, false) != null) {
             this.setPS(regPS, cpl);
-            if (this.cIntReturn) this.checkIntReturn(this.regEIP);
+            if (this.cIntReturn) this.checkIntReturn(this.regLIP);
         }
     },
     /**
@@ -599,7 +599,7 @@ var X86Help = {
      * @this {X86CPU}
      */
     opHelpDIVOverflow: function() {
-        this.setIP(this.opEA - this.segCS.base);
+        this.setIP(this.opLIP - this.segCS.base);
         /*
          * TODO: Determine the proper cycle cost.
          */
@@ -619,7 +619,7 @@ var X86Help = {
     {
         if (!this.aFlags.fComplete) {
             this.printMessage("Fault " + str.toHexByte(nFault) + " blocked by Debugger", Messages.WARN);
-            this.setIP(this.opEA - this.segCS.base);
+            this.setIP(this.opLIP - this.segCS.base);
             return;
         }
 
@@ -629,7 +629,7 @@ var X86Help = {
                 /*
                  * Single-fault (error code is passed through, and the responsible instruction is restartable)
                  */
-                this.setIP(this.opEA - this.segCS.base);
+                this.setIP(this.opLIP - this.segCS.base);
                 fDispatch = true;
             } else if (this.nFault != X86.EXCEPTION.DF_FAULT) {
                 /*
@@ -691,7 +691,7 @@ var X86Help = {
     opHelpFaultMessage: function(nFault, nError, fHalt)
     {
         var bitsMessage = Messages.FAULT;
-        var bOpcode = this.bus.getByteDirect(this.regEIP);
+        var bOpcode = this.bus.getByteDirect(this.regLIP);
 
         /*
          * OS/2 1.0 uses an INT3 (0xCC) opcode in conjunction with an invalid IDT to trigger a triple-fault
@@ -716,7 +716,7 @@ var X86Help = {
          * (Power-On Self Test); we don't want to ignore those, but we don't want to halt on them either.  We
          * detect those faults by virtue of EIP being in the range %0F0000 to %0FFFFF.
          */
-        if (this.regEIP >= 0x0F0000 && this.regEIP <= 0x0FFFFF) {
+        if (this.regLIP >= 0x0F0000 && this.regLIP <= 0x0FFFFF) {
             fHalt = false;
         }
 
@@ -729,7 +729,7 @@ var X86Help = {
         }
 
         if (this.messageEnabled(bitsMessage) || fHalt) {
-            var sMessage = (fHalt? '\n' : '') + "Fault " + str.toHexByte(nFault) + (nError != null? " (" + str.toHexWord(nError) + ")" : "") + " on opcode 0x" + str.toHexByte(bOpcode) + " at " + str.toHexAddr(this.regIP, this.segCS.sel) + " (%" + str.toHex(this.regEIP, 6) + ")";
+            var sMessage = (fHalt? '\n' : '') + "Fault " + str.toHexByte(nFault) + (nError != null? " (" + str.toHexWord(nError) + ")" : "") + " on opcode 0x" + str.toHexByte(bOpcode) + " at " + str.toHexAddr(this.regEIP, this.segCS.sel) + " (%" + str.toHex(this.regLIP, 6) + ")";
             var fRunning = this.aFlags.fRunning;
             if (this.printMessage(sMessage, bitsMessage)) {
                 if (fHalt) {
@@ -767,8 +767,8 @@ var X86Help = {
      * @this {X86CPU}
      */
     opHelpUndefined: function() {
-        this.setIP(this.opEA - this.segCS.base);
-        this.setError("Undefined opcode 0x" + str.toHexByte(this.bus.getByteDirect(this.regEIP)) + " at " + str.toHexAddr(this.regIP, this.segCS.sel));
+        this.setIP(this.opLIP - this.segCS.base);
+        this.setError("Undefined opcode 0x" + str.toHexByte(this.bus.getByteDirect(this.regLIP)) + " at " + str.toHexAddr(this.regEIP, this.segCS.sel));
         this.stopCPU();
     }
 };

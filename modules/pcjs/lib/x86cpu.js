@@ -469,7 +469,7 @@ X86CPU.PREFETCH = {
  *
  * Corresponding to iPrefetchHead is addrPrefetchHead; both are incremented in lock-step.
  * Whenever the prefetch queue is flushed, it's typically because a new, non-incremental
- * regEIP has been set, so flushPrefetch() expects to receive that address.
+ * regLIP has been set, so flushPrefetch() expects to receive that address.
  *
  * If the prefetch queue does not contain any (or enough) bytes to satisfy a getBytePrefetch()
  * or getWordPrefetch() request, we force the queue to be filled with the necessary number
@@ -786,14 +786,14 @@ X86CPU.prototype.reset = function()
  *      CS Base     = 0xFF0000      DS/ES/SS Base     = 0x000000        IDT Base  = 0x000000
  *      CS Limit    =   0xFFFF      DS/ES/SS Limit    =   0xFFFF        IDT Limit =   0x03FF
  *
- * We define some additional "registers", such as regEIP. which mirrors the physical address corresponding
- * to CS:IP (ie, the address of the next opcode).  This means that whenever segCS or regIP are explicitly
- * modified, regEIP must be updated as well.  So, when setting segCS or regIP, you should always use setCSIP(),
+ * We define some additional "registers", such as regLIP. which mirrors the linear address corresponding
+ * to CS:IP (ie, the address of the next opcode).  This means that whenever segCS or regEIP are explicitly
+ * modified, regLIP must be updated as well.  So, when setting segCS or regEIP, you should always use setCSIP(),
  * which takes both an offset and a segment, or setIP(), whichever is appropriate; in unusual cases where only
  * segCS is changing (eg, undocumented 8086 opcodes), use setCS().
  *
  * The other segment registers (DS, SS and ES) have similar setters (for segDS, segSS and segES), but those
- * functions do not mirror any segment:offset values in the same way that regEIP mirrors CS:IP.
+ * functions do not mirror any segment:offset values in the same way that regLIP mirrors CS:IP.
  *
  * @this {X86CPU}
  */
@@ -946,12 +946,38 @@ X86CPU.prototype.resetRegs = function()
     this.segData = this.segDS;
     this.segStack = this.segSS;
     this.opFlags = this.opPrefixes = 0;
-    this.opSize = 2;
-    this.opMask = 0xffff;
-    this.opMaskClear = ~this.opMask;
-    this.addrSize = 2;
-    this.addrMask = 0xffff;
-    this.addrMaskClear = ~this.addrMask;
+
+    /*
+     * The following contain the (default) OPERAND size (in terms of number of bytes), and the corresponding masks
+     * for isolating the (src) bits of an OPERAND and clearing the (dst) bits of an OPERAND.  These are reset to
+     * their segCS counterparts at the start of every new instruction, but are also set here for documentation purposes.
+     */
+    this.opSize = this.segCS.opSize;
+    this.opMask = this.segCS.opMask;
+
+    /*
+     * Similarly, the following contain the (default) ADDRESS size (in terms of number of bytes), and the corresponding
+     * masks for isolating the (src) bits of an address and clearing the (dst) bits of an address.  Like the OPERAND size
+     * properties, these are reset to their segCS counterparts at the start of every new instruction.
+     */
+    this.addrSize = this.segCS.addrSize;
+    this.addrMask = this.segCS.addrMask;
+
+    /*
+     * It's also worth noting that instructions that implicitly use the stack also rely on something called STACK size,
+     * which is based on the BIG bit of the last descriptor loaded into SS; use the following segSS properties:
+     *
+     *      segSS.addrSize      (2 or 4)
+     *      segSS.addrMask      (0xffff or 0xffffffff)
+     *
+     * As there is no STACK size instruction prefix override, there's no need to propagate these segSS properties
+     * to separate X86CPU properties, as we do for the OPERAND size and ADDRESS size properties.
+     */
+
+    /*
+     * The default ModRM dispatch tables; the *Word tables will be updated based on the current ADDRESS size,
+     * which is based foremost on segCS.addrSize, but can also be overridden by an ADDRESS size instruction prefix.
+     */
     this.aOpModMemByte = X86ModB.aOpModMem;
     this.aOpModRegByte = X86ModB.aOpModReg;
     this.aOpModGrpByte = X86ModB.aOpModGrp;
@@ -969,7 +995,7 @@ X86CPU.prototype.resetRegs = function()
 X86CPU.prototype.getChecksum = function()
 {
     var sum = (this.regEAX + this.regEBX + this.regECX + this.regEDX + this.regESP + this.regEBP + this.regESI + this.regEDI) | 0;
-    sum = (sum + this.regIP + this.segCS.sel + this.segDS.sel + this.segSS.sel + this.segES.sel + this.getPS()) | 0;
+    sum = (sum + this.regEIP + this.segCS.sel + this.segDS.sel + this.segSS.sel + this.segES.sel + this.getPS()) | 0;
     return sum;
 };
 
@@ -1009,7 +1035,7 @@ X86CPU.prototype.checkIntNotify = function(nInt)
     var aNotify = this.aIntNotify[nInt];
     if (aNotify !== undefined) {
         for (var i = 0; i < aNotify.length; i++) {
-            if (!aNotify[i][1].call(aNotify[i][0], this.regEIP)) {
+            if (!aNotify[i][1].call(aNotify[i][0], this.regLIP)) {
                 return false;
             }
         }
@@ -1019,8 +1045,8 @@ X86CPU.prototype.checkIntNotify = function(nInt)
      * checksEnabled() function, and therefore in fDebugCheck, so for maximum speed, we check fDebugCheck first.
      */
     if (DEBUGGER && this.aFlags.fDebugCheck) {
-        if (this.messageEnabled(Messages.INT) && this.dbg.messageInt(nInt, this.regEIP)) {
-            this.addIntReturn(this.regEIP, function(cpu, nCycles) {
+        if (this.messageEnabled(Messages.INT) && this.dbg.messageInt(nInt, this.regLIP)) {
+            this.addIntReturn(this.regLIP, function(cpu, nCycles) {
                 return function onIntReturn(nLevel) {
                     cpu.dbg.messageIntReturn(nInt, nLevel, cpu.getCycles() - nCycles);
                 };
@@ -1160,7 +1186,7 @@ X86CPU.prototype.save = function()
 {
     var state = new State(this);
     state.set(0, [this.regEAX, this.regEBX, this.regECX, this.regEDX, this.regESP, this.regEBP, this.regESI, this.regEDI, this.nIOPL]);
-    state.set(1, [this.regIP, this.segCS.save(), this.segDS.save(), this.segSS.save(), this.segES.save(), this.saveProtMode(), this.getPS()]);
+    state.set(1, [this.regEIP, this.segCS.save(), this.segDS.save(), this.segSS.save(), this.segES.save(), this.saveProtMode(), this.getPS()]);
     state.set(2, [this.segData.sName, this.segStack.sName, this.opFlags, this.opPrefixes, this.intFlags, this.regEA, this.regEAWrite]);
     state.set(3, [0, this.nTotalCycles, this.getSpeed()]);
     state.set(4, this.bus.saveMemory());
@@ -1295,9 +1321,9 @@ X86CPU.prototype.getSeg = function(sName)
  */
 X86CPU.prototype.setCS = function(sel)
 {
-    this.regEIP = this.segCS.load(sel & 0xffff) + this.regIP;
+    this.regLIP = this.segCS.load(sel & 0xffff) + this.regEIP;
     this.opFlags |= this.OPFLAG_NOINTR8086;
-    if (PREFETCH) this.flushPrefetch(this.regEIP);
+    if (PREFETCH) this.flushPrefetch(this.regLIP);
 };
 
 /**
@@ -1321,8 +1347,6 @@ X86CPU.prototype.setDS = function(sel)
 X86CPU.prototype.setSS = function(sel)
 {
     this.segSS.load(sel & 0xffff);
-    this.segSS.addrMask = (this.model >= X86.MODEL_80386 && (this.segSS.ext & X86.DESC.EXT.BIG))? 0xffffffff : 0xffff;
-    this.segSS.addrMaskClear = ~this.segSS.addrMask;
     this.opFlags |= X86.OPFLAG.NOINTR;
 };
 
@@ -1342,9 +1366,9 @@ X86CPU.prototype.setES = function(sel)
  * setIP(off)
  *
  * With the addition of flushPrefetch(), this function should only be called
- * for non-incremental IP updates; setIP(this.regIP+1) is no longer appropriate.
+ * for non-incremental IP updates; setIP(this.regEIP+1) is no longer appropriate.
  *
- * In fact, for performance reasons, it's preferable to increment regIP yourself,
+ * In fact, for performance reasons, it's preferable to increment regEIP yourself,
  * but you can also call advanceIP() if speed is not important.
  *
  * @this {X86CPU}
@@ -1352,8 +1376,8 @@ X86CPU.prototype.setES = function(sel)
  */
 X86CPU.prototype.setIP = function(off)
 {
-    this.regEIP = this.segCS.base + (this.regIP = off & 0xffff);
-    if (PREFETCH) this.flushPrefetch(this.regEIP);
+    this.regLIP = this.segCS.base + (this.regEIP = off & 0xffff);
+    if (PREFETCH) this.flushPrefetch(this.regLIP);
 };
 
 /**
@@ -1385,11 +1409,11 @@ X86CPU.prototype.setCSIP = function(off, sel, fCall)
      * We break this operation into the following discrete steps (eg, set IP, load CS, and then update EIP)
      * so that segCS.load(sel) has the option of modifying IP when sel refers to a gate (call, interrupt, trap, etc).
      */
-    this.regIP = off;
+    this.regEIP = off;
     var base = this.segCS.load(sel);
     if (base != X86.ADDR_INVALID) {
-        this.regEIP = base + this.regIP;
-        if (PREFETCH) this.flushPrefetch(this.regEIP);
+        this.regLIP = base + this.regEIP;
+        if (PREFETCH) this.flushPrefetch(this.regLIP);
         return this.segCS.fStackSwitch;
     }
     return null;
@@ -1403,7 +1427,7 @@ X86CPU.prototype.setCSIP = function(off, sel, fCall)
  */
 X86CPU.prototype.advanceIP = function(inc)
 {
-    this.regEIP = this.segCS.base + (this.regIP = (this.regIP + inc) & 0xffff);
+    this.regLIP = this.segCS.base + (this.regEIP = (this.regEIP + inc) & 0xffff);
     if (PREFETCH) this.advancePrefetch(inc);
 };
 
@@ -2251,7 +2275,7 @@ X86CPU.prototype.fillPrefetch = function(n)
  * Empty the prefetch queue.
  *
  * @this {X86CPU}
- * @param {number} addr is a physical (non-segmented) address of the current program counter (regEIP)
+ * @param {number} addr is a physical (non-segmented) address of the current program counter (regLIP)
  */
 X86CPU.prototype.flushPrefetch = function(addr)
 {
@@ -2279,7 +2303,7 @@ X86CPU.prototype.advancePrefetch = function(inc)
         this.iPrefetchTail = (this.iPrefetchTail + inc) & X86CPU.PREFETCH.MASK;
         this.cbPrefetchQueued -= inc;
     } else {
-        this.flushPrefetch(this.regEIP);
+        this.flushPrefetch(this.regLIP);
         if (MAXDEBUG) this.printMessage("advancePrefetch(" + inc + "): flushed");
     }
 };
@@ -2292,9 +2316,9 @@ X86CPU.prototype.advancePrefetch = function(inc)
  */
 X86CPU.prototype.getIPByte = function()
 {
-    var b = (PREFETCH? this.getBytePrefetch(this.regEIP) : this.getByte(this.regEIP));
-    if (BACKTRACK) this.bus.updateBackTrackCode(this.regEIP, this.backTrack.btiMemLo);
-    this.regEIP = this.segCS.base + (this.regIP = (this.regIP + 1) & 0xffff);   // this.advanceIP(1)
+    var b = (PREFETCH? this.getBytePrefetch(this.regLIP) : this.getByte(this.regLIP));
+    if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
+    this.regLIP = this.segCS.base + (this.regEIP = (this.regEIP + 1) & 0xffff);   // this.advanceIP(1)
     return b;
 };
 
@@ -2306,9 +2330,9 @@ X86CPU.prototype.getIPByte = function()
  */
 X86CPU.prototype.getIPDisp = function()
 {
-    var b = ((PREFETCH? this.getBytePrefetch(this.regEIP) : this.getByte(this.regEIP)) << 24) >> 24;
-    if (BACKTRACK) this.bus.updateBackTrackCode(this.regEIP, this.backTrack.btiMemLo);
-    this.regEIP = this.segCS.base + (this.regIP = (this.regIP + 1) & 0xffff);   // this.advanceIP(1)
+    var b = ((PREFETCH? this.getBytePrefetch(this.regLIP) : this.getByte(this.regLIP)) << 24) >> 24;
+    if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
+    this.regLIP = this.segCS.base + (this.regEIP = (this.regEIP + 1) & 0xffff);   // this.advanceIP(1)
     return b & 0xffff;
 };
 
@@ -2320,12 +2344,12 @@ X86CPU.prototype.getIPDisp = function()
  */
 X86CPU.prototype.getIPWord = function()
 {
-    var w = (PREFETCH? this.getWordPrefetch(this.regEIP) : this.getWord(this.regEIP));
+    var w = (PREFETCH? this.getWordPrefetch(this.regLIP) : this.getWord(this.regLIP));
     if (BACKTRACK) {
-        this.bus.updateBackTrackCode(this.regEIP, this.backTrack.btiMemLo);
-        this.bus.updateBackTrackCode(this.regEIP + 1, this.backTrack.btiMemHi);
+        this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
+        this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMemHi);
     }
-    this.regEIP = this.segCS.base + (this.regIP = (this.regIP + 2) & 0xffff);   // this.advanceIP(2)
+    this.regLIP = this.segCS.base + (this.regEIP = (this.regEIP + 2) & 0xffff);   // this.advanceIP(2)
     return w;
 };
 
@@ -2517,7 +2541,7 @@ X86CPU.prototype.displayStatus = function(fForce)
         this.displayReg("DS", this.segDS.sel);
         this.displayReg("SS", this.segSS.sel);
         this.displayReg("ES", this.segES.sel);
-        this.displayReg("IP", this.regIP);
+        this.displayReg("IP", this.regEIP);
         var regPS = this.getPS();
         this.displayReg("PS", regPS);
         this.displayReg("C", (regPS & X86.PS.CF)? 1 : 0, 1);
@@ -2544,7 +2568,7 @@ X86CPU.prototype.displayStatus = function(fForce)
  * stepping vs. running should never change the behavior of the simulation.
  *
  * Similarly, the Debugger's execution breakpoints have no involvement with the x86 breakpoint instruction
- * (0xCC); the Debugger monitors changes to the regEIP register to implement its own execution breakpoints.
+ * (0xCC); the Debugger monitors changes to the regLIP register to implement its own execution breakpoints.
  *
  * As a result, the Debugger's complete independence means you can run other 8086/8088 debuggers
  * (eg, DEBUG) inside the simulation without interference; you can even "debug" them with the Debugger.
@@ -2618,10 +2642,16 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
         if (opPrefixes) {
             this.opPrefixes |= opPrefixes;
         } else {
-            this.opEA = this.regEIP;
+            this.opLIP = this.regLIP;
             this.regEA = this.regEAWrite = X86.ADDR_INVALID;
             this.segData = this.segDS;
             this.segStack = this.segSS;
+
+            this.opSize = this.segCS.opSize;
+            this.opMask = this.segCS.opMask;
+            this.addrSize = this.segCS.addrSize;
+            this.addrMask = this.segCS.addrMask;
+
             this.opPrefixes = this.opFlags & X86.OPFLAG.REPEAT;
             if (this.intFlags) {
                 if (this.checkINTR()) {
@@ -2658,7 +2688,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
         }
 
         if (DEBUGGER && fDebugCheck) {
-            if (this.dbg.checkInstruction(this.regEIP, fDebugSkip)) {
+            if (this.dbg.checkInstruction(this.regLIP, fDebugSkip)) {
                 this.stopCPU();
                 break;
             }
@@ -2676,11 +2706,11 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
                         this.stopCPU();
                         break;
                     }
-                    var t = this.regEIP + this.getCycles();
+                    var t = this.regLIP + this.getCycles();
                     var n = this.aSamples[this.iSampleNext];
                     if (n !== -1) {
                         if (n !== t) {
-                            this.println("sample deviation at index " + this.iSampleNext + ": current EIP=" + str.toHex(this.regEIP));
+                            this.println("sample deviation at index " + this.iSampleNext + ": current EIP=" + str.toHex(this.regLIP));
                             this.stopCPU();
                             break;
                         }
@@ -2726,7 +2756,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
              */
             if (this.aFlags.fComplete && this.nStepCycles >= this.nSnapCycles && !(this.opFlags & X86.OPFLAG.PREFIXES)) {
                 this.println("cycle miscount: " + (this.nSnapCycles - this.nStepCycles));
-                this.setIP(this.opEA - this.segCS.base);
+                this.setIP(this.opLIP - this.segCS.base);
                 this.stopCPU();
                 break;
             }

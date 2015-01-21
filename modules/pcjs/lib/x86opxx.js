@@ -98,7 +98,7 @@ var X86OpXX = {
      * op=0x05 (add AX,imm16)
      */
     opADDAXw: function() {
-        this.regEAX = (this.regEAX & this.opMaskClear) | X86Grps.opGrpADDw.call(this, this.regEAX & this.opMask, this.getIPWord());
+        this.regEAX = (this.regEAX & ~this.opMask) | X86Grps.opGrpADDw.call(this, this.regEAX & this.opMask, this.getIPWord());
         /*
          * In the absence of any EA calculations, opGrpADDw() will deduct nOpCyclesArithRR, and for all CPUs through
          * the 80286, we need deduct only one more cycle.
@@ -174,7 +174,7 @@ var X86OpXX = {
      * op=0x0D (or AX,imm16)
      */
     opORAXw: function() {
-        this.regEAX = (this.regEAX & this.opMaskClear) | X86Grps.opGrpORw.call(this, this.regEAX & this.opMask, this.getIPWord());
+        this.regEAX = (this.regEAX & ~this.opMask) | X86Grps.opGrpORw.call(this, this.regEAX & this.opMask, this.getIPWord());
         /*
          * In the absence of any EA calculations, opGrpORw() will deduct nOpCyclesArithRR, and for all CPUs through
          * the 80286, we need deduct only one more cycle.
@@ -258,7 +258,7 @@ var X86OpXX = {
      * op=0x15 (adc AX,imm16)
      */
     opADCAXw: function() {
-        this.regEAX = (this.regEAX & this.opMaskClear) | X86Grps.opGrpADCw.call(this, this.regEAX & this.opMask, this.getIPWord());
+        this.regEAX = (this.regEAX & ~this.opMask) | X86Grps.opGrpADCw.call(this, this.regEAX & this.opMask, this.getIPWord());
         /*
          * In the absence of any EA calculations, opGrpADCw() will deduct nOpCyclesArithRR, and for all CPUs through
          * the 80286, we need deduct only one more cycle.
@@ -334,7 +334,7 @@ var X86OpXX = {
      * op=0x1D (sbb AX,imm16)
      */
     opSBBAXw: function() {
-        this.regEAX = (this.regEAX & this.opMaskClear) | X86Grps.opGrpSBBw.call(this, this.regEAX & this.opMask, this.getIPWord());
+        this.regEAX = (this.regEAX & ~this.opMask) | X86Grps.opGrpSBBw.call(this, this.regEAX & this.opMask, this.getIPWord());
         /*
          * In the absence of any EA calculations, opGrpSBBw() will deduct nOpCyclesArithRR, and for all CPUs through
          * the 80286, we need deduct only one more cycle.
@@ -410,7 +410,7 @@ var X86OpXX = {
      * op=0x25 (and AX,imm16)
      */
     opANDAXw: function() {
-        this.regEAX = (this.regEAX & this.opMaskClear) | X86Grps.opGrpANDw.call(this, this.regEAX & this.opMask, this.getIPWord());
+        this.regEAX = (this.regEAX & ~this.opMask) | X86Grps.opGrpANDw.call(this, this.regEAX & this.opMask, this.getIPWord());
         /*
          * In the absence of any EA calculations, opGrpANDw() will deduct nOpCyclesArithRR, and for all CPUs through
          * the 80286, we need deduct only one more cycle.
@@ -505,7 +505,7 @@ var X86OpXX = {
      * op=0x2D (sub AX,imm16)
      */
     opSUBAXw: function() {
-        this.regEAX = (this.regEAX & this.opMaskClear) | X86Grps.opGrpSUBw.call(this, this.regEAX & this.opMask, this.getIPWord());
+        this.regEAX = (this.regEAX & ~this.opMask) | X86Grps.opGrpSUBw.call(this, this.regEAX & this.opMask, this.getIPWord());
         /*
          * In the absence of any EA calculations, opGrpSUBw() will deduct nOpCyclesArithRR, and for all CPUs
          * through the 80286, we need deduct only one more cycle.
@@ -600,7 +600,7 @@ var X86OpXX = {
      * op=0x35 (xor AX,imm16)
      */
     opXORAXw: function() {
-        this.regEAX = (this.regEAX & this.opMaskClear) | X86Grps.opGrpXORw.call(this, this.regEAX & this.opMask, this.getIPWord());
+        this.regEAX = (this.regEAX & ~this.opMask) | X86Grps.opGrpXORw.call(this, this.regEAX & this.opMask, this.getIPWord());
         /*
          * In the absence of any EA calculations, opGrpXORw() will deduct nOpCyclesArithRR, and for all CPUs through
          * the 80286, we need deduct only one more cycle.
@@ -759,7 +759,7 @@ var X86OpXX = {
      */
     opINCAX: function() {
         this.resultAuxOverflow = this.regEAX;
-        this.regEAX = (this.regEAX & this.opMaskClear) | (this.resultParitySign = this.regEAX + 1) & this.opMask;
+        this.regEAX = (this.regEAX & ~this.opMask) | (this.resultParitySign = this.regEAX + 1) & this.opMask;
         this.resultValue = this.regEAX | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of INC takes 2 cycles on all CPUs
@@ -771,7 +771,7 @@ var X86OpXX = {
      */
     opINCCX: function() {
         this.resultAuxOverflow = this.regECX;
-        this.regECX = (this.regECX & this.opMaskClear) | (this.resultParitySign = this.regECX + 1) & this.opMask;
+        this.regECX = (this.regECX & ~this.opMask) | (this.resultParitySign = this.regECX + 1) & this.opMask;
         this.resultValue = this.regECX | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of INC takes 2 cycles on all CPUs
@@ -783,7 +783,7 @@ var X86OpXX = {
      */
     opINCDX: function() {
         this.resultAuxOverflow = this.regEDX;
-        this.regEDX = (this.regEDX & this.opMaskClear) | (this.resultParitySign = this.regEDX + 1) & this.opMask;
+        this.regEDX = (this.regEDX & ~this.opMask) | (this.resultParitySign = this.regEDX + 1) & this.opMask;
         this.resultValue = this.regEDX | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of INC takes 2 cycles on all CPUs
@@ -795,7 +795,7 @@ var X86OpXX = {
      */
     opINCBX: function() {
         this.resultAuxOverflow = this.regEBX;
-        this.regEBX = (this.regEBX & this.opMaskClear) | (this.resultParitySign = this.regEBX + 1) & this.opMask;
+        this.regEBX = (this.regEBX & ~this.opMask) | (this.resultParitySign = this.regEBX + 1) & this.opMask;
         this.resultValue = this.regEBX | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of INC takes 2 cycles on all CPUs
@@ -807,7 +807,7 @@ var X86OpXX = {
      */
     opINCSP: function() {
         this.resultAuxOverflow = this.regESP;
-        this.regESP = (this.regESP & this.opMaskClear) | (this.resultParitySign = this.regESP + 1) & this.opMask;
+        this.regESP = (this.regESP & ~this.opMask) | (this.resultParitySign = this.regESP + 1) & this.opMask;
         this.resultValue = this.regESP | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of INC takes 2 cycles on all CPUs
@@ -819,7 +819,7 @@ var X86OpXX = {
      */
     opINCBP: function() {
         this.resultAuxOverflow = this.regEBP;
-        this.regEBP = (this.regEBP & this.opMaskClear) | (this.resultParitySign = this.regEBP + 1) & this.opMask;
+        this.regEBP = (this.regEBP & ~this.opMask) | (this.resultParitySign = this.regEBP + 1) & this.opMask;
         this.resultValue = this.regEBP | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of INC takes 2 cycles on all CPUs
@@ -831,7 +831,7 @@ var X86OpXX = {
      */
     opINCSI: function() {
         this.resultAuxOverflow = this.regESI;
-        this.regESI = (this.regESI & this.opMaskClear) | (this.resultParitySign = this.regESI + 1) & this.opMask;
+        this.regESI = (this.regESI & ~this.opMask) | (this.resultParitySign = this.regESI + 1) & this.opMask;
         this.resultValue = this.regESI | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of INC takes 2 cycles on all CPUs
@@ -843,7 +843,7 @@ var X86OpXX = {
      */
     opINCDI: function() {
         this.resultAuxOverflow = this.regEDI;
-        this.regEDI = (this.regEDI & this.opMaskClear) | (this.resultParitySign = this.regEDI + 1) & this.opMask;
+        this.regEDI = (this.regEDI & ~this.opMask) | (this.resultParitySign = this.regEDI + 1) & this.opMask;
         this.resultValue = this.regEDI | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of INC takes 2 cycles on all CPUs
@@ -855,7 +855,7 @@ var X86OpXX = {
      */
     opDECAX: function() {
         this.resultAuxOverflow = this.regEAX;
-        this.regEAX = (this.regEAX & this.opMaskClear) | (this.resultParitySign = this.regEAX - 1) & this.opMask;
+        this.regEAX = (this.regEAX & ~this.opMask) | (this.resultParitySign = this.regEAX - 1) & this.opMask;
         this.resultValue = this.regEAX | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of DEC takes 2 cycles on all CPUs
@@ -867,7 +867,7 @@ var X86OpXX = {
      */
     opDECCX: function() {
         this.resultAuxOverflow = this.regECX;
-        this.regECX = (this.regECX & this.opMaskClear) | (this.resultParitySign = this.regECX - 1) & this.opMask;
+        this.regECX = (this.regECX & ~this.opMask) | (this.resultParitySign = this.regECX - 1) & this.opMask;
         this.resultValue = this.regECX | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of DEC takes 2 cycles on all CPUs
@@ -879,7 +879,7 @@ var X86OpXX = {
      */
     opDECDX: function() {
         this.resultAuxOverflow = this.regEDX;
-        this.regEDX = (this.regEDX & this.opMaskClear) | (this.resultParitySign = this.regEDX - 1) & this.opMask;
+        this.regEDX = (this.regEDX & ~this.opMask) | (this.resultParitySign = this.regEDX - 1) & this.opMask;
         this.resultValue = this.regEDX | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of DEC takes 2 cycles on all CPUs
@@ -891,7 +891,7 @@ var X86OpXX = {
      */
     opDECBX: function() {
         this.resultAuxOverflow = this.regEBX;
-        this.regEBX = (this.regEBX & this.opMaskClear) | (this.resultParitySign = this.regEBX - 1) & this.opMask;
+        this.regEBX = (this.regEBX & ~this.opMask) | (this.resultParitySign = this.regEBX - 1) & this.opMask;
         this.resultValue = this.regEBX | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of DEC takes 2 cycles on all CPUs
@@ -903,7 +903,7 @@ var X86OpXX = {
      */
     opDECSP: function() {
         this.resultAuxOverflow = this.regESP;
-        this.regESP = (this.regESP & this.opMaskClear) | (this.resultParitySign = this.regESP - 1) & this.opMask;
+        this.regESP = (this.regESP & ~this.opMask) | (this.resultParitySign = this.regESP - 1) & this.opMask;
         this.resultValue = this.regESP | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of DEC takes 2 cycles on all CPUs
@@ -915,7 +915,7 @@ var X86OpXX = {
      */
     opDECBP: function() {
         this.resultAuxOverflow = this.regEBP;
-        this.regEBP = (this.regEBP & this.opMaskClear) | (this.resultParitySign = this.regEBP - 1) & this.opMask;
+        this.regEBP = (this.regEBP & ~this.opMask) | (this.resultParitySign = this.regEBP - 1) & this.opMask;
         this.resultValue = this.regEBP | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of DEC takes 2 cycles on all CPUs
@@ -927,7 +927,7 @@ var X86OpXX = {
      */
     opDECSI: function() {
         this.resultAuxOverflow = this.regESI;
-        this.regESI = (this.regESI & this.opMaskClear) | (this.resultParitySign = this.regESI - 1) & this.opMask;
+        this.regESI = (this.regESI & ~this.opMask) | (this.resultParitySign = this.regESI - 1) & this.opMask;
         this.resultValue = this.regESI | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of DEC takes 2 cycles on all CPUs
@@ -939,7 +939,7 @@ var X86OpXX = {
      */
     opDECDI: function() {
         this.resultAuxOverflow = this.regEDI;
-        this.regEDI = (this.regEDI & this.opMaskClear) | (this.resultParitySign = this.regEDI - 1) & this.opMask;
+        this.regEDI = (this.regEDI & ~this.opMask) | (this.resultParitySign = this.regEDI - 1) & this.opMask;
         this.resultValue = this.regEDI | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of DEC takes 2 cycles on all CPUs
@@ -1032,7 +1032,7 @@ var X86OpXX = {
      * op=0x58 (pop AX)
      */
     opPOPAX: function() {
-        this.regEAX = (this.regEAX & this.opMaskClear) | this.popWord();
+        this.regEAX = (this.regEAX & ~this.opMask) | this.popWord();
         this.nStepCycles -= this.CYCLES.nOpCyclesPopReg;
     },
     /**
@@ -1041,7 +1041,7 @@ var X86OpXX = {
      * op=0x59 (pop CX)
      */
     opPOPCX: function() {
-        this.regECX = (this.regECX & this.opMaskClear) | this.popWord();
+        this.regECX = (this.regECX & ~this.opMask) | this.popWord();
         this.nStepCycles -= this.CYCLES.nOpCyclesPopReg;
     },
     /**
@@ -1050,7 +1050,7 @@ var X86OpXX = {
      * op=0x5A (pop DX)
      */
     opPOPDX: function() {
-        this.regEDX = (this.regEDX & this.opMaskClear) | this.popWord();
+        this.regEDX = (this.regEDX & ~this.opMask) | this.popWord();
         this.nStepCycles -= this.CYCLES.nOpCyclesPopReg;
     },
     /**
@@ -1059,7 +1059,7 @@ var X86OpXX = {
      * op=0x5B (pop BX)
      */
     opPOPBX: function() {
-        this.regEBX = (this.regEBX & this.opMaskClear) | this.popWord();
+        this.regEBX = (this.regEBX & ~this.opMask) | this.popWord();
         this.nStepCycles -= this.CYCLES.nOpCyclesPopReg;
     },
     /**
@@ -1068,7 +1068,7 @@ var X86OpXX = {
      * op=0x5C (pop SP)
      */
     opPOPSP: function() {
-        this.regESP = (this.regESP & this.opMaskClear) | this.popWord();
+        this.regESP = (this.regESP & ~this.opMask) | this.popWord();
         this.nStepCycles -= this.CYCLES.nOpCyclesPopReg;
     },
     /**
@@ -1077,7 +1077,7 @@ var X86OpXX = {
      * op=0x5D (pop BP)
      */
     opPOPBP: function() {
-        this.regEBP = (this.regEBP & this.opMaskClear) | this.popWord();
+        this.regEBP = (this.regEBP & ~this.opMask) | this.popWord();
         this.nStepCycles -= this.CYCLES.nOpCyclesPopReg;
     },
     /**
@@ -1086,7 +1086,7 @@ var X86OpXX = {
      * op=0x5E (pop SI)
      */
     opPOPSI: function() {
-        this.regESI = (this.regESI & this.opMaskClear) | this.popWord();
+        this.regESI = (this.regESI & ~this.opMask) | this.popWord();
         this.nStepCycles -= this.CYCLES.nOpCyclesPopReg;
     },
     /**
@@ -1095,7 +1095,7 @@ var X86OpXX = {
      * op=0x5F (pop DI)
      */
     opPOPDI: function() {
-        this.regEDI = (this.regEDI & this.opMaskClear) | this.popWord();
+        this.regEDI = (this.regEDI & ~this.opMask) | this.popWord();
         this.nStepCycles -= this.CYCLES.nOpCyclesPopReg;
     },
     /**
@@ -1121,14 +1121,14 @@ var X86OpXX = {
      * op=0x61 (popa) (80186/80188 and up)
      */
     opPOPA: function() {
-        this.regEDI = (this.regEDI & this.opMaskClear) | this.popWord();
-        this.regESI = (this.regESI & this.opMaskClear) | this.popWord();
-        this.regEBP = (this.regEBP & this.opMaskClear) | this.popWord();
+        this.regEDI = (this.regEDI & ~this.opMask) | this.popWord();
+        this.regESI = (this.regESI & ~this.opMask) | this.popWord();
+        this.regEBP = (this.regEBP & ~this.opMask) | this.popWord();
         this.regESP += this.opSize;
-        this.regEBX = (this.regEBX & this.opMaskClear) | this.popWord();
-        this.regEDX = (this.regEDX & this.opMaskClear) | this.popWord();
-        this.regECX = (this.regECX & this.opMaskClear) | this.popWord();
-        this.regEAX = (this.regEAX & this.opMaskClear) | this.popWord();
+        this.regEBX = (this.regEBX & ~this.opMask) | this.popWord();
+        this.regEDX = (this.regEDX & ~this.opMask) | this.popWord();
+        this.regECX = (this.regECX & ~this.opMask) | this.popWord();
+        this.regEAX = (this.regEAX & ~this.opMask) | this.popWord();
         this.nStepCycles -= this.CYCLES.nOpCyclesPopAll;
     },
     /**
@@ -1211,10 +1211,10 @@ var X86OpXX = {
         }
 
         if (nReps--) {
-            var b = this.bus.checkPortInputNotify(this.regEDX, this.regEIP - nDelta - 1);
+            var b = this.bus.checkPortInputNotify(this.regEDX, this.regLIP - nDelta - 1);
             if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiIO;
             this.setSOByte(this.segES, this.regEDI & this.addrMask, b);
-            this.regEDI = (this.regEDI & this.addrMaskClear) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -1 : 1)) & this.addrMask);
+            this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -1 : 1)) & this.addrMask);
             this.nStepCycles -= nCycles;
             this.regECX -= nDelta;
             if (nReps) {
@@ -1224,6 +1224,7 @@ var X86OpXX = {
                  * the interrupt handler will return us to an invalid state.
                  */
                 this.advanceIP(-2);             // this instruction does not support segment overrides
+                this.assert(this.regLIP == this.opLIP);
                 this.opFlags |= X86.OPFLAG.REPEAT;
             }
         }
@@ -1257,13 +1258,13 @@ var X86OpXX = {
             if (this.opPrefixes & X86.OPFLAG.REPEAT) nCycles = 4;
         }
         if (nReps--) {
-            var addrFrom = this.regEIP - nDelta - 1;
+            var addrFrom = this.regLIP - nDelta - 1;
             var w = this.bus.checkPortInputNotify(this.regEDX, addrFrom);
             if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiIO;
             w |= (this.bus.checkPortInputNotify(this.regEDX, addrFrom) << 8);
             if (BACKTRACK) this.backTrack.btiMemHi = this.backTrack.btiIO;
             this.setSOWord(this.segES, this.regEDI & this.addrMask, w);
-            this.regEDI = (this.regEDI & this.addrMaskClear) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -2 : 2)) & this.addrMask);
+            this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -2 : 2)) & this.addrMask);
             this.nStepCycles -= nCycles;
             this.regECX -= nDelta;
             if (nReps) {
@@ -1273,6 +1274,7 @@ var X86OpXX = {
                  * the interrupt handler will return us to an invalid state.
                  */
                 this.advanceIP(-2);             // this instruction does not support segment overrides
+                this.assert(this.regLIP == this.opLIP);
                 this.opFlags |= X86.OPFLAG.REPEAT;
             }
         }
@@ -1305,10 +1307,10 @@ var X86OpXX = {
         }
         if (nReps--) {
             var b = this.getSOByte(this.segDS, this.regESI & this.addrMask);
-            this.regESI = (this.regESI & this.addrMaskClear) | ((this.regESI + ((this.regPS & X86.PS.DF)? -1 : 1)) & this.addrMask);
+            this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + ((this.regPS & X86.PS.DF)? -1 : 1)) & this.addrMask);
             this.nStepCycles -= nCycles;
             this.regECX -= nDelta;
-            this.bus.checkPortOutputNotify(this.regEDX, b, this.regEIP - nDelta - 1);
+            this.bus.checkPortOutputNotify(this.regEDX, b, this.regLIP - nDelta - 1);
             if (nReps) {
                 /*
                  * We have to back up to the prefix byte(s), not just to the string instruction,
@@ -1316,6 +1318,7 @@ var X86OpXX = {
                  * the interrupt handler will return us to an invalid state.
                  */
                 this.advanceIP(-2);             // this instruction does not support segment overrides
+                this.assert(this.regLIP == this.opLIP);
                 this.opFlags |= X86.OPFLAG.REPEAT;
             }
         }
@@ -1348,10 +1351,10 @@ var X86OpXX = {
         }
         if (nReps--) {
             var w = this.getSOWord(this.segDS, this.regESI & this.addrMask);
-            this.regESI = (this.regESI & this.addrMaskClear) | ((this.regESI + ((this.regPS & X86.PS.DF)? -2 : 2)) & this.addrMask);
+            this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + ((this.regPS & X86.PS.DF)? -2 : 2)) & this.addrMask);
             this.nStepCycles -= nCycles;
             this.regECX -= nDelta;
-            var addrFrom = this.regEIP - nDelta - 1;
+            var addrFrom = this.regLIP - nDelta - 1;
             this.bus.checkPortOutputNotify(this.regEDX, w & 0xff, addrFrom);
             this.bus.checkPortOutputNotify(this.regEDX, w >> 8, addrFrom);
             if (nReps) {
@@ -1361,6 +1364,7 @@ var X86OpXX = {
                  * the interrupt handler will return us to an invalid state.
                  */
                 this.advanceIP(-2);             // this instruction does not support segment overrides
+                this.assert(this.regLIP == this.opLIP);
                 this.opFlags |= X86.OPFLAG.REPEAT;
             }
         }
@@ -1373,7 +1377,7 @@ var X86OpXX = {
     opJO: function() {
         var disp = this.getIPDisp();
         if (this.getOF()) {
-            this.setIP(this.regIP + disp);
+            this.setIP(this.regEIP + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
             return;
         }
@@ -1387,7 +1391,7 @@ var X86OpXX = {
     opJNO: function() {
         var disp = this.getIPDisp();
         if (!this.getOF()) {
-            this.setIP(this.regIP + disp);
+            this.setIP(this.regEIP + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
             return;
         }
@@ -1401,7 +1405,7 @@ var X86OpXX = {
     opJC: function() {
         var disp = this.getIPDisp();
         if (this.getCF()) {
-            this.setIP(this.regIP + disp);
+            this.setIP(this.regEIP + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
             return;
         }
@@ -1415,7 +1419,7 @@ var X86OpXX = {
     opJNC: function() {
         var disp = this.getIPDisp();
         if (!this.getCF()) {
-            this.setIP(this.regIP + disp);
+            this.setIP(this.regEIP + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
             return;
         }
@@ -1429,7 +1433,7 @@ var X86OpXX = {
     opJZ: function() {
         var disp = this.getIPDisp();
         if (this.getZF()) {
-            this.setIP(this.regIP + disp);
+            this.setIP(this.regEIP + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
             return;
         }
@@ -1443,7 +1447,7 @@ var X86OpXX = {
     opJNZ: function() {
         var disp = this.getIPDisp();
         if (!this.getZF()) {
-            this.setIP(this.regIP + disp);
+            this.setIP(this.regEIP + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
             return;
         }
@@ -1457,7 +1461,7 @@ var X86OpXX = {
     opJBE: function() {
         var disp = this.getIPDisp();
         if (this.getCF() || this.getZF()) {
-            this.setIP(this.regIP + disp);
+            this.setIP(this.regEIP + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
             return;
         }
@@ -1471,7 +1475,7 @@ var X86OpXX = {
     opJNBE: function() {
         var disp = this.getIPDisp();
         if (!this.getCF() && !this.getZF()) {
-            this.setIP(this.regIP + disp);
+            this.setIP(this.regEIP + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
             return;
         }
@@ -1485,7 +1489,7 @@ var X86OpXX = {
     opJS: function() {
         var disp = this.getIPDisp();
         if (this.getSF()) {
-            this.setIP(this.regIP + disp);
+            this.setIP(this.regEIP + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
             return;
         }
@@ -1499,7 +1503,7 @@ var X86OpXX = {
     opJNS: function() {
         var disp = this.getIPDisp();
         if (!this.getSF()) {
-            this.setIP(this.regIP + disp);
+            this.setIP(this.regEIP + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
             return;
         }
@@ -1513,7 +1517,7 @@ var X86OpXX = {
     opJP: function() {
         var disp = this.getIPDisp();
         if (this.getPF()) {
-            this.setIP(this.regIP + disp);
+            this.setIP(this.regEIP + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
             return;
         }
@@ -1527,7 +1531,7 @@ var X86OpXX = {
     opJNP: function() {
         var disp = this.getIPDisp();
         if (!this.getPF()) {
-            this.setIP(this.regIP + disp);
+            this.setIP(this.regEIP + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
             return;
         }
@@ -1541,7 +1545,7 @@ var X86OpXX = {
     opJL: function() {
         var disp = this.getIPDisp();
         if (!this.getSF() != !this.getOF()) {                   // jshint ignore:line
-            this.setIP(this.regIP + disp);
+            this.setIP(this.regEIP + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
             return;
         }
@@ -1555,7 +1559,7 @@ var X86OpXX = {
     opJNL: function() {
         var disp = this.getIPDisp();
         if (!this.getSF() == !this.getOF()) {                   // jshint ignore:line
-            this.setIP(this.regIP + disp);
+            this.setIP(this.regEIP + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
             return;
         }
@@ -1569,7 +1573,7 @@ var X86OpXX = {
     opJLE: function() {
         var disp = this.getIPDisp();
         if (this.getZF() || !this.getSF() != !this.getOF()) {   // jshint ignore:line
-            this.setIP(this.regIP + disp);
+            this.setIP(this.regEIP + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
             return;
         }
@@ -1583,7 +1587,7 @@ var X86OpXX = {
     opJNLE: function() {
         var disp = this.getIPDisp();
         if (!this.getZF() && !this.getSF() == !this.getOF()) {  // jshint ignore:line
-            this.setIP(this.regIP + disp);
+            this.setIP(this.regEIP + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
             return;
         }
@@ -1881,8 +1885,8 @@ var X86OpXX = {
      */
     opXCHGCX: function() {
         var temp = this.regEAX;
-        this.regEAX = (this.regEAX & this.opMaskClear) | (this.regECX & this.opMask);
-        this.regECX = (this.regECX & this.opMaskClear) | (temp & this.opMask);
+        this.regEAX = (this.regEAX & ~this.opMask) | (this.regECX & this.opMask);
+        this.regECX = (this.regECX & ~this.opMask) | (temp & this.opMask);
         this.nStepCycles -= 3;                          // this form of XCHG takes 3 cycles on all CPUs
     },
     /**
@@ -1892,8 +1896,8 @@ var X86OpXX = {
      */
     opXCHGDX: function() {
         var temp = this.regEAX;
-        this.regEAX = (this.regEAX & this.opMaskClear) | (this.regEDX & this.opMask);
-        this.regEDX = (this.regEDX & this.opMaskClear) | (temp & this.opMask);
+        this.regEAX = (this.regEAX & ~this.opMask) | (this.regEDX & this.opMask);
+        this.regEDX = (this.regEDX & ~this.opMask) | (temp & this.opMask);
         this.nStepCycles -= 3;                          // this form of XCHG takes 3 cycles on all CPUs
     },
     /**
@@ -1903,8 +1907,8 @@ var X86OpXX = {
      */
     opXCHGBX: function() {
         var temp = this.regEAX;
-        this.regEAX = (this.regEAX & this.opMaskClear) | (this.regEBX & this.opMask);
-        this.regEBX = (this.regEBX & this.opMaskClear) | (temp & this.opMask);
+        this.regEAX = (this.regEAX & ~this.opMask) | (this.regEBX & this.opMask);
+        this.regEBX = (this.regEBX & ~this.opMask) | (temp & this.opMask);
         this.nStepCycles -= 3;                          // this form of XCHG takes 3 cycles on all CPUs
     },
     /**
@@ -1914,8 +1918,8 @@ var X86OpXX = {
      */
     opXCHGSP: function() {
         var temp = this.regEAX;
-        this.regEAX = (this.regEAX & this.opMaskClear) | (this.regESP & this.opMask);
-        this.regESP = (this.regESP & this.opMaskClear) | (temp & this.opMask);
+        this.regEAX = (this.regEAX & ~this.opMask) | (this.regESP & this.opMask);
+        this.regESP = (this.regESP & ~this.opMask) | (temp & this.opMask);
         this.nStepCycles -= 3;                          // this form of XCHG takes 3 cycles on all CPUs
     },
     /**
@@ -1925,8 +1929,8 @@ var X86OpXX = {
      */
     opXCHGBP: function() {
         var temp = this.regEAX;
-        this.regEAX = (this.regEAX & this.opMaskClear) | (this.regEBP & this.opMask);
-        this.regEBP = (this.regEBP & this.opMaskClear) | (temp & this.opMask);
+        this.regEAX = (this.regEAX & ~this.opMask) | (this.regEBP & this.opMask);
+        this.regEBP = (this.regEBP & ~this.opMask) | (temp & this.opMask);
         this.nStepCycles -= 3;                          // this form of XCHG takes 3 cycles on all CPUs
     },
     /**
@@ -1936,8 +1940,8 @@ var X86OpXX = {
      */
     opXCHGSI: function() {
         var temp = this.regEAX;
-        this.regEAX = (this.regEAX & this.opMaskClear) | (this.regESI & this.opMask);
-        this.regESI = (this.regESI & this.opMaskClear) | (temp & this.opMask);
+        this.regEAX = (this.regEAX & ~this.opMask) | (this.regESI & this.opMask);
+        this.regESI = (this.regESI & ~this.opMask) | (temp & this.opMask);
         this.nStepCycles -= 3;                          // this form of XCHG takes 3 cycles on all CPUs
     },
     /**
@@ -1947,8 +1951,8 @@ var X86OpXX = {
      */
     opXCHGDI: function() {
         var temp = this.regEAX;
-        this.regEAX = (this.regEAX & this.opMaskClear) | (this.regEDI & this.opMask);
-        this.regEDI = (this.regEDI & this.opMaskClear) | (temp & this.opMask);
+        this.regEAX = (this.regEAX & ~this.opMask) | (this.regEDI & this.opMask);
+        this.regEDI = (this.regEDI & ~this.opMask) | (temp & this.opMask);
         this.nStepCycles -= 3;                          // this form of XCHG takes 3 cycles on all CPUs
     },
     /**
@@ -1958,7 +1962,7 @@ var X86OpXX = {
      */
     opCBW: function() {
         if (this.opSize == 2) {
-            this.regEAX = (this.regEAX & this.opMaskClear) | (((this.regEAX << 24) >> 24) & 0xffff);
+            this.regEAX = (this.regEAX & ~this.opMask) | (((this.regEAX << 24) >> 24) & 0xffff);
         } else {
             this.regEAX = ((this.regEAX << 16) >> 16);
         }
@@ -1971,7 +1975,7 @@ var X86OpXX = {
      */
     opCWD: function() {
         if (this.opSize == 2) {
-            this.regEDX = (this.regEDX & this.opMaskClear) | ((this.regEAX & 0x8000)? 0xffff : 0);
+            this.regEDX = (this.regEDX & ~this.opMask) | ((this.regEAX & 0x8000)? 0xffff : 0);
         } else {
             this.regEDX = (this.regEAX & 0x80000000)? 0xffffffff : 0;
         }
@@ -2064,7 +2068,7 @@ var X86OpXX = {
      * op=0xA1 (mov AX,mem)
      */
     opMOVAXDst: function() {
-        this.regEAX = (this.regEAX & this.opMaskClear) | this.getEAWord(this.segData, this.getIPWord());
+        this.regEAX = (this.regEAX & ~this.opMask) | this.getEAWord(this.segData, this.getIPWord());
         this.nStepCycles -= this.CYCLES.nOpCyclesMovAM;
     },
     /**
@@ -2109,8 +2113,8 @@ var X86OpXX = {
         if (nReps--) {
             var nInc = ((this.regPS & X86.PS.DF)? -1 : 1);
             this.setSOByte(this.segES, this.regEDI & this.addrMask, this.getEAByte(this.segData, this.regESI));
-            this.regESI = (this.regESI & this.addrMaskClear) | ((this.regESI + nInc) & this.addrMask);
-            this.regEDI = (this.regEDI & this.addrMaskClear) | ((this.regEDI + nInc) & this.addrMask);
+            this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + nInc) & this.addrMask);
+            this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + nInc) & this.addrMask);
             this.nStepCycles -= nCycles;
             this.regECX -= nDelta;
             if (nReps) {
@@ -2124,6 +2128,7 @@ var X86OpXX = {
                  * string instructions with multiple prefixes.
                  */
                 this.advanceIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
+                this.assert(this.regLIP == this.opLIP);
                 this.opFlags |= X86.OPFLAG.REPEAT;
             }
         }
@@ -2146,8 +2151,8 @@ var X86OpXX = {
         if (nReps--) {
             var nInc = ((this.regPS & X86.PS.DF)? -2 : 2);
             this.setSOWord(this.segES, this.regEDI & this.addrMask, this.getEAWord(this.segData, this.regESI));
-            this.regESI = (this.regESI & this.addrMaskClear) | ((this.regESI + nInc) & this.addrMask);
-            this.regEDI = (this.regEDI & this.addrMaskClear) | ((this.regEDI + nInc) & this.addrMask);
+            this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + nInc) & this.addrMask);
+            this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + nInc) & this.addrMask);
             this.nStepCycles -= nCycles;
             this.regECX -= nDelta;
             if (nReps) {
@@ -2161,6 +2166,7 @@ var X86OpXX = {
                  * string instructions with multiple prefixes.
                  */
                 this.advanceIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
+                this.assert(this.regLIP == this.opLIP);
                 this.opFlags |= X86.OPFLAG.REPEAT;
             }
         }
@@ -2185,8 +2191,8 @@ var X86OpXX = {
             var bDst = this.getEAByte(this.segData, this.regESI & this.addrMask);
             var bSrc = this.modEAByte(this.segES, this.regEDI & this.addrMask);
             X86Grps.opGrpCMPb.call(this, bDst, bSrc);
-            this.regESI = (this.regESI & this.addrMaskClear) | ((this.regESI + nInc) & this.addrMask);
-            this.regEDI = (this.regEDI & this.addrMaskClear) | ((this.regEDI + nInc) & this.addrMask);
+            this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + nInc) & this.addrMask);
+            this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + nInc) & this.addrMask);
             /*
              * NOTE: As long as we're calling opGrpCMPb(), all our cycle times must be reduced by nOpCyclesArithRM
              */
@@ -2208,6 +2214,7 @@ var X86OpXX = {
                  * string instructions with multiple prefixes.
                  */
                 this.advanceIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
+                this.assert(this.regLIP == this.opLIP);
                 this.opFlags |= X86.OPFLAG.REPEAT;
             }
             if (EAFUNCS) this.setEAByte = this.setEAByteEnabled;
@@ -2233,8 +2240,8 @@ var X86OpXX = {
             var wDst = this.getEAWord(this.segData, this.regESI & this.addrMask);
             var wSrc = this.modEAWord(this.segES, this.regEDI & this.addrMask);
             X86Grps.opGrpCMPw.call(this, wDst, wSrc);
-            this.regESI = (this.regESI & this.addrMaskClear) | ((this.regESI + nInc) & this.addrMask);
-            this.regEDI = (this.regEDI & this.addrMaskClear) | ((this.regEDI + nInc) & this.addrMask);
+            this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + nInc) & this.addrMask);
+            this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + nInc) & this.addrMask);
             /*
              * NOTE: As long as we're calling opGrpCMPw(), all our cycle times must be reduced by nOpCyclesArithRM
              */
@@ -2256,6 +2263,7 @@ var X86OpXX = {
                  * string instructions with multiple prefixes.
                  */
                 this.advanceIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
+                this.assert(this.regLIP == this.opLIP);
                 this.opFlags |= X86.OPFLAG.REPEAT;
             }
             if (EAFUNCS) this.setEAWord = this.setEAWordEnabled;
@@ -2305,7 +2313,7 @@ var X86OpXX = {
              * NOTE: We rely on setSOByte() to truncate regEAX to 8 bits; if setSOByte() changes, mask AX below.
              */
             this.setSOByte(this.segES, this.regEDI & this.addrMask, this.regEAX);
-            this.regEDI = (this.regEDI & this.addrMaskClear) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -1 : 1)) & this.addrMask);
+            this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -1 : 1)) & this.addrMask);
             this.nStepCycles -= nCycles;
             this.regECX -= nDelta;
             if (nReps) {
@@ -2315,7 +2323,7 @@ var X86OpXX = {
                  * the interrupt handler will return us to an invalid state.
                  */
                 this.advanceIP(-2);             // this instruction does not support segment overrides
-                this.assert(this.regEIP == this.opEA);
+                this.assert(this.regLIP == this.opLIP);
                 this.opFlags |= X86.OPFLAG.REPEAT;
             }
         }
@@ -2345,7 +2353,7 @@ var X86OpXX = {
              * if you think the cycle times here are too high.
              */
             this.setSOWord(this.segES, this.regEDI & this.addrMask, this.regEAX);
-            this.regEDI = (this.regEDI & this.addrMaskClear) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -2 : 2)) & this.addrMask);
+            this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -2 : 2)) & this.addrMask);
             this.nStepCycles -= nCycles;
             this.regECX -= nDelta;
             if (nReps) {
@@ -2355,6 +2363,7 @@ var X86OpXX = {
                  * the interrupt handler will return us to an invalid state.
                  */
                 this.advanceIP(-2);             // this instruction does not support segment overrides
+                this.assert(this.regLIP == this.opLIP);
                 this.opFlags |= X86.OPFLAG.REPEAT;
             }
         }
@@ -2376,7 +2385,7 @@ var X86OpXX = {
         }
         if (nReps--) {
             this.regEAX = (this.regEAX & ~0xff) | this.getEAByte(this.segData, this.regESI & this.addrMask);
-            this.regESI = (this.regESI & this.addrMaskClear) | ((this.regESI + ((this.regPS & X86.PS.DF)? -1 : 1)) & this.addrMask);
+            this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + ((this.regPS & X86.PS.DF)? -1 : 1)) & this.addrMask);
             this.nStepCycles -= nCycles;
             this.regECX -= nDelta;
             if (nReps) {
@@ -2390,6 +2399,7 @@ var X86OpXX = {
                  * string instructions with multiple prefixes.
                  */
                 this.advanceIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
+                this.assert(this.regLIP == this.opLIP);
                 this.opFlags |= X86.OPFLAG.REPEAT;
             }
         }
@@ -2411,7 +2421,7 @@ var X86OpXX = {
         }
         if (nReps--) {
             this.regEAX = this.getEAWord(this.segData, this.regESI & this.addrMask);
-            this.regESI = (this.regESI & this.addrMaskClear) | ((this.regESI + ((this.regPS & X86.PS.DF)? -2 : 2)) & this.addrMask);
+            this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + ((this.regPS & X86.PS.DF)? -2 : 2)) & this.addrMask);
             this.nStepCycles -= nCycles;
             this.regECX -= nDelta;
             if (nReps) {
@@ -2425,6 +2435,7 @@ var X86OpXX = {
                  * string instructions with multiple prefixes.
                  */
                 this.advanceIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
+                this.assert(this.regLIP == this.opLIP);
                 this.opFlags |= X86.OPFLAG.REPEAT;
             }
         }
@@ -2446,7 +2457,7 @@ var X86OpXX = {
         }
         if (nReps--) {
             X86Grps.opGrpCMPb.call(this, this.regEAX & 0xff, this.modEAByte(this.segES, this.regEDI & this.addrMask));
-            this.regEDI = (this.regEDI & this.addrMaskClear) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -1 : 1)) & this.addrMask);
+            this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -1 : 1)) & this.addrMask);
             /*
              * NOTE: As long as we're calling opGrpCMPb(), all our cycle times must be reduced by nOpCyclesArithRM
              */
@@ -2464,6 +2475,7 @@ var X86OpXX = {
                  * the interrupt handler will return us to an invalid state.
                  */
                 this.advanceIP(-2);             // this instruction does not support segment overrides
+                this.assert(this.regLIP == this.opLIP);
                 this.opFlags |= X86.OPFLAG.REPEAT;
             }
             if (EAFUNCS) this.setEAByte = this.setEAByteEnabled;
@@ -2486,7 +2498,7 @@ var X86OpXX = {
         }
         if (nReps--) {
             X86Grps.opGrpCMPw.call(this, this.regEAX, this.modEAWord(this.segES, this.regEDI & this.addrMask));
-            this.regEDI = (this.regEDI & this.addrMaskClear) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -2 : 2)) & this.addrMask);
+            this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -2 : 2)) & this.addrMask);
             /*
              * NOTE: As long as we're calling opGrpCMPb(), all our cycle times must be reduced by nOpCyclesArithRM
              */
@@ -2504,6 +2516,7 @@ var X86OpXX = {
                  * the interrupt handler will return us to an invalid state.
                  */
                 this.advanceIP(-2);             // this instruction does not support segment overrides
+                this.assert(this.regLIP == this.opLIP);
                 this.opFlags |= X86.OPFLAG.REPEAT;
             }
             if (EAFUNCS) this.setEAWord = this.setEAWordEnabled;
@@ -2587,7 +2600,7 @@ var X86OpXX = {
      * op=0xB8 (mov AX,imm16)
      */
     opMOVAXw: function() {
-        this.regEAX = (this.regEAX & this.opMaskClear) | this.getIPWord();
+        this.regEAX = (this.regEAX & ~this.opMask) | this.getIPWord();
         this.nStepCycles -= this.CYCLES.nOpCyclesLAHF;
     },
     /**
@@ -2596,7 +2609,7 @@ var X86OpXX = {
      * op=0xB9 (mov CX,imm16)
      */
     opMOVCXw: function() {
-        this.regECX = (this.regECX & this.opMaskClear) | this.getIPWord();
+        this.regECX = (this.regECX & ~this.opMask) | this.getIPWord();
         this.nStepCycles -= this.CYCLES.nOpCyclesLAHF;
     },
     /**
@@ -2605,7 +2618,7 @@ var X86OpXX = {
      * op=0xBA (mov DX,imm16)
      */
     opMOVDXw: function() {
-        this.regEDX = (this.regEDX & this.opMaskClear) | this.getIPWord();
+        this.regEDX = (this.regEDX & ~this.opMask) | this.getIPWord();
         this.nStepCycles -= this.CYCLES.nOpCyclesLAHF;
     },
     /**
@@ -2614,7 +2627,7 @@ var X86OpXX = {
      * op=0xBB (mov BX,imm16)
      */
     opMOVBXw: function() {
-        this.regEBX = (this.regEBX & this.opMaskClear) | this.getIPWord();
+        this.regEBX = (this.regEBX & ~this.opMask) | this.getIPWord();
         this.nStepCycles -= this.CYCLES.nOpCyclesLAHF;
     },
     /**
@@ -2623,7 +2636,7 @@ var X86OpXX = {
      * op=0xBC (mov SP,imm16)
      */
     opMOVSPw: function() {
-        this.regESP = (this.regESP & this.opMaskClear) | this.getIPWord();
+        this.regESP = (this.regESP & ~this.opMask) | this.getIPWord();
         this.nStepCycles -= this.CYCLES.nOpCyclesLAHF;
     },
     /**
@@ -2632,7 +2645,7 @@ var X86OpXX = {
      * op=0xBD (mov BP,imm16)
      */
     opMOVBPw: function() {
-        this.regEBP = (this.regEBP & this.opMaskClear) | this.getIPWord();
+        this.regEBP = (this.regEBP & ~this.opMask) | this.getIPWord();
         this.nStepCycles -= this.CYCLES.nOpCyclesLAHF;
     },
     /**
@@ -2641,7 +2654,7 @@ var X86OpXX = {
      * op=0xBE (mov SI,imm16)
      */
     opMOVSIw: function() {
-        this.regESI = (this.regESI & this.opMaskClear) | this.getIPWord();
+        this.regESI = (this.regESI & ~this.opMask) | this.getIPWord();
         this.nStepCycles -= this.CYCLES.nOpCyclesLAHF;
     },
     /**
@@ -2650,7 +2663,7 @@ var X86OpXX = {
      * op=0xBF (mov DI,imm16)
      */
     opMOVDIw: function() {
-        this.regEDI = (this.regEDI & this.opMaskClear) | this.getIPWord();
+        this.regEDI = (this.regEDI & ~this.opMask) | this.getIPWord();
         this.nStepCycles -= this.CYCLES.nOpCyclesLAHF;
     },
     /**
@@ -2677,7 +2690,7 @@ var X86OpXX = {
     opRETn: function() {
         var n = this.getIPWord();
         this.setIP(this.popWord());
-        this.regESP = (this.regESP & this.addrMaskClear) | ((this.regESP + (n << (this.opSize >> 2))) & this.addrMask);
+        this.regESP = (this.regESP & ~this.addrMask) | ((this.regESP + (n << (this.opSize >> 2))) & this.addrMask);
         this.nStepCycles -= this.CYCLES.nOpCyclesRetn;
     },
     /**
@@ -2773,13 +2786,13 @@ var X86OpXX = {
         if (bLevel > 0) {
             this.nStepCycles -= (bLevel << 2) + (bLevel > 1? 1 : 0);
             while (--bLevel) {
-                this.regEBP = (this.regEBP & this.segSS.addrMaskClear) | ((this.regEBP - this.opSize) & this.segSS.addrMask);
+                this.regEBP = (this.regEBP & ~this.segSS.addrMask) | ((this.regEBP - this.opSize) & this.segSS.addrMask);
                 this.pushWord(this.getSOWord(this.segSS, this.regEBP & this.segSS.addrMask));
             }
             this.pushWord(wFrame);
         }
-        this.regEBP = (this.regEBP & this.segSS.addrMaskClear) | wFrame;
-        this.regESP = (this.regESP & this.segSS.addrMaskClear) | ((this.regESP - wLocal) & this.segSS.addrMask);
+        this.regEBP = (this.regEBP & ~this.segSS.addrMask) | wFrame;
+        this.regESP = (this.regESP & ~this.segSS.addrMask) | ((this.regESP - wLocal) & this.segSS.addrMask);
     },
     /**
      * @this {X86CPU}
@@ -2789,8 +2802,8 @@ var X86OpXX = {
      * op=0xC9 (leave) (80186/80188 and up)
      */
     opLEAVE: function() {
-        this.regESP = (this.regESP & this.segSS.addrMaskClear) | (this.regEBP & this.segSS.addrMask);
-        this.regEBP = (this.regEBP & this.opMaskClear) | (this.popWord() & this.opMask);
+        this.regESP = (this.regESP & ~this.segSS.addrMask) | (this.regEBP & this.segSS.addrMask);
+        this.regEBP = (this.regEBP & ~this.opMask) | (this.popWord() & this.opMask);
         /*
          * NOTE: 5 is the cycle time for the 80286; the 80186/80188 has a cycle time of 8.  However, accurate cycle
          * counts for the 80186/80188 is low priority. TODO: Fix this someday.
@@ -2976,7 +2989,7 @@ var X86OpXX = {
     opLOOPNZ: function() {
         var disp = this.getIPDisp();
         if ((this.regECX = (this.regECX - 1) & 0xffff) && (this.resultValue & (this.resultSize - 1))) {
-            this.setIP(this.regIP + disp);
+            this.setIP(this.regEIP + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesLoopNZ;
             return;
         }
@@ -2990,7 +3003,7 @@ var X86OpXX = {
     opLOOPZ: function() {
         var disp = this.getIPDisp();
         if ((this.regECX = (this.regECX - 1) & 0xffff) && !(this.resultValue & (this.resultSize - 1))) {
-            this.setIP(this.regIP + disp);
+            this.setIP(this.regEIP + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesLoopZ;
             return;
         }
@@ -3004,7 +3017,7 @@ var X86OpXX = {
     opLOOP: function() {
         var disp = this.getIPDisp();
         if ((this.regECX = (this.regECX - 1) & 0xffff)) {
-            this.setIP(this.regIP + disp);
+            this.setIP(this.regEIP + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesLoop;
             return;
         }
@@ -3018,7 +3031,7 @@ var X86OpXX = {
     opJCXZ: function() {
         var disp = this.getIPDisp();
         if (!this.regECX) {
-            this.setIP(this.regIP + disp);
+            this.setIP(this.regEIP + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesLoopZ;
             return;
         }
@@ -3031,7 +3044,7 @@ var X86OpXX = {
      */
     opINb: function() {
         var port = this.getIPByte();
-        this.regEAX = (this.regEAX & ~0xff) | this.bus.checkPortInputNotify(port, this.regEIP - 2);
+        this.regEAX = (this.regEAX & ~0xff) | this.bus.checkPortInputNotify(port, this.regLIP - 2);
         if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiIO;
         this.nStepCycles -= this.CYCLES.nOpCyclesInP;
     },
@@ -3042,9 +3055,9 @@ var X86OpXX = {
      */
     opINw: function() {
         var port = this.getIPByte();
-        this.regEAX = this.bus.checkPortInputNotify(port, this.regEIP - 2);
+        this.regEAX = this.bus.checkPortInputNotify(port, this.regLIP - 2);
         if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiIO;
-        this.regEAX |= (this.bus.checkPortInputNotify((port + 1) & 0xffff, this.regEIP - 2) << 8);
+        this.regEAX |= (this.bus.checkPortInputNotify((port + 1) & 0xffff, this.regLIP - 2) << 8);
         if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiIO;
         this.nStepCycles -= this.CYCLES.nOpCyclesInP;
     },
@@ -3055,7 +3068,7 @@ var X86OpXX = {
      */
     opOUTb: function() {
         var port = this.getIPByte();
-        this.bus.checkPortOutputNotify(port, this.regEAX & 0xff, this.regEIP - 2);
+        this.bus.checkPortOutputNotify(port, this.regEAX & 0xff, this.regLIP - 2);
         this.nStepCycles -= this.CYCLES.nOpCyclesOutP;
     },
     /**
@@ -3065,8 +3078,8 @@ var X86OpXX = {
      */
     opOUTw: function() {
         var port = this.getIPByte();
-        this.bus.checkPortOutputNotify(port, this.regEAX & 0xff, this.regEIP - 2);
-        this.bus.checkPortOutputNotify((port + 1) & 0xffff, this.regEAX >> 8, this.regEIP - 2);
+        this.bus.checkPortOutputNotify(port, this.regEAX & 0xff, this.regLIP - 2);
+        this.bus.checkPortOutputNotify((port + 1) & 0xffff, this.regEAX >> 8, this.regLIP - 2);
         this.nStepCycles -= this.CYCLES.nOpCyclesOutP;
     },
     /**
@@ -3076,8 +3089,8 @@ var X86OpXX = {
      */
     opCALL: function() {
         var disp = this.getIPWord();
-        this.pushWord(this.regIP);
-        this.setIP(this.regIP + disp);
+        this.pushWord(this.regEIP);
+        this.setIP(this.regEIP + disp);
         this.nStepCycles -= this.CYCLES.nOpCyclesCall;
     },
     /**
@@ -3087,7 +3100,7 @@ var X86OpXX = {
      */
     opJMP: function() {
         var disp = this.getIPWord();
-        this.setIP(this.regIP + disp);
+        this.setIP(this.regEIP + disp);
         this.nStepCycles -= this.CYCLES.nOpCyclesJmp;
     },
     /**
@@ -3106,7 +3119,7 @@ var X86OpXX = {
      */
     opJMPs: function() {
         var disp = this.getIPDisp();
-        this.setIP(this.regIP + disp);
+        this.setIP(this.regEIP + disp);
         this.nStepCycles -= this.CYCLES.nOpCyclesJmp;
     },
     /**
@@ -3115,7 +3128,7 @@ var X86OpXX = {
      * op=0xEC (in AL,dx)
      */
     opINDXb: function() {
-        this.regEAX = (this.regEAX & ~0xff) | this.bus.checkPortInputNotify(this.regEDX, this.regEIP - 1);
+        this.regEAX = (this.regEAX & ~0xff) | this.bus.checkPortInputNotify(this.regEDX, this.regLIP - 1);
         if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiIO;
         this.nStepCycles -= this.CYCLES.nOpCyclesInDX;
     },
@@ -3125,9 +3138,9 @@ var X86OpXX = {
      * op=0xED (in AX,dx)
      */
     opINDXw: function() {
-        this.regEAX = this.bus.checkPortInputNotify(this.regEDX, this.regEIP - 1);
+        this.regEAX = this.bus.checkPortInputNotify(this.regEDX, this.regLIP - 1);
         if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiIO;
-        this.regEAX |= (this.bus.checkPortInputNotify((this.regEDX + 1) & 0xffff, this.regEIP - 1) << 8);
+        this.regEAX |= (this.bus.checkPortInputNotify((this.regEDX + 1) & 0xffff, this.regLIP - 1) << 8);
         if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiIO;
         this.nStepCycles -= this.CYCLES.nOpCyclesInDX;
     },
@@ -3137,7 +3150,7 @@ var X86OpXX = {
      * op=0xEE (out dx,AL)
      */
     opOUTDXb: function() {
-        this.bus.checkPortOutputNotify(this.regEDX, this.regEAX & 0xff, this.regEIP - 1);
+        this.bus.checkPortOutputNotify(this.regEDX, this.regEAX & 0xff, this.regLIP - 1);
         this.nStepCycles -= this.CYCLES.nOpCyclesOutDX;
     },
     /**
@@ -3146,8 +3159,8 @@ var X86OpXX = {
      * op=0xEF (out dx,AX)
      */
     opOUTDXw: function() {
-        this.bus.checkPortOutputNotify(this.regEDX, this.regEAX & 0xff, this.regEIP - 1);
-        this.bus.checkPortOutputNotify((this.regEDX + 1) & 0xffff, this.regEAX >> 8, this.regEIP - 1);
+        this.bus.checkPortOutputNotify(this.regEDX, this.regEAX & 0xff, this.regLIP - 1);
+        this.bus.checkPortOutputNotify((this.regEDX + 1) & 0xffff, this.regEAX >> 8, this.regLIP - 1);
         this.nStepCycles -= this.CYCLES.nOpCyclesOutDX;
     },
     /**

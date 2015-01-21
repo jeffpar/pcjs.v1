@@ -142,6 +142,40 @@ var X86Grps = {
         return dst;
     },
     /**
+     * opGrpADDw(dst, src)
+     *
+     * Notes regarding carry following a 32-bit addition:
+     *
+     * The following table summarizes bit 31 of dst, src, and result, along with the expected carry bit:
+     *
+     *      dst src res carry
+     *      --- --- --- -----
+     *      0   0   0   0   no
+     *      0   0   1   0   no (there must have been a carry out of bit 30, but it was "absorbed")
+     *      0   1   0   1   yes (there must have been a carry out of bit 30, but it was NOT "absorbed")
+     *      0   1   1   0   no
+     *      1   0   0   1   yes (same as the preceding "yes" case)
+     *      1   0   1   0   no
+     *      1   1   0   1   yes (since the addition of two ones must always produce a carry)
+     *      1   1   1   1   yes (since the addition of two ones must always produce a carry)
+     *
+     * So, we can use “(dst ^ ((dst ^ src) & (src ^ res))) >> 15” to shift the proper carry bit into the conventional
+     * SIZE_WORD position; eg:
+     *
+     *      resultValue = ((resultValue >>> 16) | (resultValue & 0xffff)) | (((dst ^ ((dst ^ src) & (src ^ resultValue))) >> 15) & SIZE_WORD);
+     *
+     * Essentially, we’re “cramming” all 32 result bits into the low 16 bits (which will effectively represent the
+     * zero flag), and then setting bit 16 to the effective carry flag.  This transforms the zero and carry conditions
+     * for a DWORD computation into the corresponding conditions for a WORD computation.  This will slow down 32-bit
+     * addition, but it allows 8-bit and 16-bit addition to remain fast.  Languages that support 64-bit values in
+     * conjunction with bit-wise operators can omit that one-line transformation, and we can set SIZE_DWORD to a 33-bit
+     * value, but sadly, we cannot do that in JavaScript.
+     *
+     * Alternatively, we could store src and dst into their own result variables (eg, resultSrc and resultDst) and
+     * compute carry lazily, but that would affect MUCH more existing code (eg, all code that currently inspects carry
+     * with a single bit test).  I think the DWORD-to-WORD flag conversion for 32-bit instructions that modify zero
+     * and/or carry) is a more reasonable first step.
+     *
      * @this {X86CPU}
      * @param {number} dst
      * @param {number} src
@@ -269,54 +303,22 @@ var X86Grps = {
      * of updating CARRY and OVERFLOW (and possibly changing resultSize from SIZE_BYTE to SIZE_WORD, or vice versa),
      * we must take care to preserve SIGN, ZERO, and the other arithmetic flags.
      *
-     * This code originally left resultParitySign alone, but if resultSize changes, then resultParitySign needs to
-     * change along with it.  PARITY is always based on the low 8 bits of resultParitySign, so let's focus on SIGN:
-     * if resultSize is changing from SIZE_BYTE to SIZE_WORD, propagating bit 7 to bit 15 of resultParitySign preserves
-     * SIGN; similarly, if resultSize is changing from SIZE_WORD to SIZE_BYTE, propagating bit 15 to bit 7 preserves
-     * SIGN--but could also alter PARITY.  So we must compensate: if bit 15 differs from bit 7, then XOR resultParitySign
-     * with 0xC0, which will flip not only bit 7 but also bit 6, thereby preserving PARITY.
-     *
-     * resultValue merits similar consideration because of the ZERO flag: if resultSize increases, nothing needs to be
-     * done, because the larger size will still pick up any non-zero bits in the lower 8 bits of resultValue, but if it
-     * decreases, we need to OR the upper 8 bits from resultValue into the lower 8 bits.
-     *
-     * Finally, this function must set the CARRY and OVERFLOW flags according to the given result.  OVERFLOW is a particular
-     * pain, because it has a dependency on resultParitySign; the simplest solution is to call setOF() or clearOF().
+     * However, in the interest of efficiency, rather than changing resultSize to match the operand size, it's easier
+     * to leave resultSize as-is and simply set CARRY and OVERFLOW based on the previous resultSize, since there isn't
+     * actually any requirement or dependency (that I can think of) that resultSize always reflect the operand size of
+     * the last operation.  Since only 2 of the 6 arithmetic flags need to change, that tips the scales in favor of leaving
+     * resultSize alone.
      *
      * NOTE: Although I've yet to find confirmation of this for the 8086/8088, OVERFLOW is "undefined" on modern x86
      * CPUs for shift counts > 1 (in fact, on modern CPUs, OVERFLOW tends to be clear in those situations).  Since I set
      * OVERFLOW the same way for all shift counts, my "well-defined" behavior may or may not match the 8086/8088, but
      * until I see a defined behavior (or more importantly, some dependency on a different behavior), this seems good enough.
      *
-     * UPDATE: While the desire to set resultSize to match the operand size is strong, it occurred to me later that
-     * it would be easier to leave resultSize as-is and simply set CARRY and OVERFLOW based on the previous resultSize,
-     * since there isn't actually any requirement or dependency (that I can think of) that resultSize always reflect the
-     * operand size of the last operation.  And since only 2 of the 6 arithmetic flags need to change, that tips the scales
-     * in favor of leaving resultSize alone.  However, the previous code that worked so hard to update resultSize is still
-     * here, commented out; it works, but it's less efficient.
-     *
      * @this {X86CPU}
      * @param {number} result (untruncated, so that we can inspect it for CARRY and OVERFLOW)
      * @param {number} size
      */
     opGrpRotateFlags: function(result, size) {
-        /*
-        var deltaSize = size - this.resultSize;
-        if (deltaSize) {
-            var bitsXOR = 0;
-            var bitsSign = this.resultParitySign & 0x8080;
-            if (deltaSize > 0) {
-                if (bitsSign == 0x0080 || bitsSign == 0x8000) bitsXOR = 0x8000;
-            } else {
-                if (bitsSign == 0x0080 || bitsSign == 0x8000) bitsXOR = 0x00C0;
-                this.resultValue |= (this.resultValue >> 8);
-            }
-            this.resultParitySign ^= bitsXOR;
-            this.resultSize = size;
-        }
-        this.resultValue = (this.resultValue & (size - 1)) | (result & size);
-        if ((result ^ (result >> 1)) & (size >> 1)) this.setOF(); else this.clearOF();
-         */
         this.resultValue = (this.resultValue & (this.resultSize - 1)) | ((result & size)? this.resultSize : 0);
         if ((result ^ (result >> 1)) & (size >> 1)) this.setOF(); else this.clearOF();
     },
@@ -1110,7 +1112,7 @@ var X86Grps = {
      * @return {number}
      */
     opGrpCALLw: function(dst, src) {
-        this.pushWord(this.regIP);
+        this.pushWord(this.regEIP);
         this.setIP(dst);
         this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesCallWR : this.CYCLES.nOpCyclesCallWM);
         if (EAFUNCS) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
@@ -1154,7 +1156,7 @@ var X86Grps = {
             return X86Grps.opGrpUndefined.call(this, dst, src);
         }
         this.setCSIP(dst, this.getWord(this.regEA + 2));
-        if (this.cIntReturn) this.checkIntReturn(this.regEIP);
+        if (this.cIntReturn) this.checkIntReturn(this.regLIP);
         this.nStepCycles -= this.CYCLES.nOpCyclesJmpDM;
         if (EAFUNCS) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;

@@ -59,6 +59,8 @@ try {
 
 var aDst = ["Mem", "Reg"];
 var aSize = ["Byte", "Word"];
+var aOpPrefix = ["B", "W"];
+var aAddrPrefix = ["", "32"];
 var aDisp = ["8", "16"];
 
 /*
@@ -71,7 +73,6 @@ var aREG = [
 
 var w, sError = "";
 var fGenMods = true;
-var fGenTables = true;
 var sEAFuncs = "";
 
 if (!fGenMods) {
@@ -182,10 +183,6 @@ if (!fGenMods) {
             cOps++;
         }
     }
-
-    if (fGenTables) print("    this.aOpCodeFuncs = [");
-    if (fGenTables) print(sOps);
-    if (fGenTables) print("    ];");
 }
 else {
 
@@ -195,72 +192,68 @@ else {
     var aMOD = ["mem", "mem+d8", "mem+d16", "reg"];
 
     /*
-     * Index aRM like so: aRM[mod][w][r_m], forcing w to 0 unless mod is 3
+     * Index aRM like so: aRM[a][mod][w][r_m], forcing w to 0 unless mod is 3
      */
     var aRM = [
-        [["BX+SI", "BX+DI", "BP+SI", "BP+DI", "SI", "DI", "d16", "BX"], []],
-        [["BX+SI+d8", "BX+DI+d8", "BP+SI+d8", "BP+DI+d8", "SI+d8", "DI+d8", "BP+d8", "BX+d8"], []],
-        [["BX+SI+d16", "BX+DI+d16", "BP+SI+d16", "BP+DI+d16", "SI+d16", "DI+d16", "BP+d16", "BX+d16"], []],
-        [["AL", "CL", "DL", "BL", "AH", "CH", "DH", "BH"], ["AX", "CX", "DX", "BX", "SP", "BP", "SI", "DI"]]
+        [
+            [["BX+SI", "BX+DI", "BP+SI", "BP+DI", "SI", "DI", "d16", "BX"], []],
+            [["BX+SI+d8", "BX+DI+d8", "BP+SI+d8", "BP+DI+d8", "SI+d8", "DI+d8", "BP+d8", "BX+d8"], []],
+            [["BX+SI+d16", "BX+DI+d16", "BP+SI+d16", "BP+DI+d16", "SI+d16", "DI+d16", "BP+d16", "BX+d16"], []],
+            [["AL", "CL", "DL", "BL", "AH", "CH", "DH", "BH"], ["AX", "CX", "DX", "BX", "SP", "BP", "SI", "DI"]]
+        ],[
+            [["EAX", "ECX", "EDX", "EBX", "sib", "d32", "ESI", "EDI"], []],
+            [["EAX+d8", "ECX+d8", "EDX+d8", "EBX+d8", "sib+d8", "EBP+d8", "ESI+d8", "EDI+d8"], []],
+            [["EAX+d32", "ECX+d32", "EDX+d32", "EBX+d32", "sib+d32", "EBP+d32", "ESI+d32", "EDI+d32"], []],
+            [["AL", "CL", "DL", "BL", "AH", "CH", "DH", "BH"], ["EAX", "ECX", "EDX", "EBX", "ESP", "EBP", "ESI", "EDI"]]
+        ]
     ];
 
     var cOpMods, mrm;
     var sOpMods, sOpMod, sContainer;
 
     print('"use strict";\n');
-    print("var X86Mods = {};\n");
+    print("var X86ModB = {};");
+    print("var X86ModW = {};");
+    print("var X86ModB32 = {};");
+    print("var X86ModW32 = {};\n");
 
-    for (var d = 0; d <= 1 && !sError; d++) {
+    for (var a = 0; a <= 1 && !sError; a++) {
 
         for (w = 0; w <= 1 && !sError; w++) {
 
+            for (var d = 1; d >= 0 && !sError; d--) {
+
+                cOpMods = 0;
+                sOpMods = "";
+                sContainer = "X86Mod" + aOpPrefix[w] + aAddrPrefix[a] + ".aOpMod" + aDst[d];
+
+                print(sContainer + " = [");
+                for (mrm = 0x00; mrm <= 0xff && !sError; mrm++) {
+                    sOpMod = genMode(a, d, w, mrm);
+                    if (sOpMod) {
+                        if (sOpMods) sOpMods += ((cOpMods % 4)? ", " : ",\n");
+                        sOpMods += "    " + sContainer + "." + sOpMod;
+                        cOpMods++;
+                    }
+                }
+                print("];\n");
+            }
+
             cOpMods = 0;
             sOpMods = "";
+            sContainer = "X86Mod" + aOpPrefix[w] + aAddrPrefix[a] + ".aOpModGrp";
 
-            sContainer = "X86Mods"; // + aDst[d].substr(0, 1) + aSize[w].substr(0, 1);
-
-            if (fGenTables) print(sContainer + " = {");
-
+            print(sContainer + " = [");
             for (mrm = 0x00; mrm <= 0xff && !sError; mrm++) {
-                sOpMod = genMode(d, w, mrm);
+                sOpMod = genMode(a, 0, w, mrm, "Grp");
                 if (sOpMod) {
                     if (sOpMods) sOpMods += ((cOpMods % 4)? ", " : ",\n");
                     sOpMods += "    " + sContainer + "." + sOpMod;
                     cOpMods++;
                 }
             }
-
-            if (fGenTables) print("};\n");
-
-            if (fGenTables) print("X86Mods.aOpMod" + aDst[d] + aSize[w] + " = [");
-            if (fGenTables) print(sOpMods);
-            if (fGenTables) print("];\n");
+            print("];\n");
         }
-    }
-
-    for (w = 0; w <= 1 && !sError; w++) {
-
-        cOpMods = 0;
-        sOpMods = "";
-
-        sContainer = "X86Mods"; // + "G" + aSize[w].substr(0, 1);
-
-        if (fGenTables) print(sContainer + " = {");
-
-        for (mrm = 0x00; mrm <= 0xff && !sError; mrm++) {
-            sOpMod = genMode(0, w, mrm, "Grp");
-            if (sOpMod) {
-                if (sOpMods) sOpMods += ((cOpMods % 4)? ", " : ",\n");
-                sOpMods += "    " + sContainer + "." + sOpMod;
-                cOpMods++;
-            }
-        }
-
-        if (fGenTables) print("};\n");
-
-        if (fGenTables) print("X86Mods.aOpMod" + "Grp" + aSize[w] + " = [");
-        if (fGenTables) print(sOpMods);
-        if (fGenTables) print("];\n");
     }
 
     if (sEAFuncs) {
@@ -268,7 +261,7 @@ else {
     }
 }
 
-function genMode(d, w, mrm, sGroup, sRO) {
+function genMode(a, d, w, mrm, sGroup, sRO) {
     var mod = (mrm >> 6);
     var reg = (mrm >> 3) & 0x7;
     var r_m = (mrm & 0x7);
@@ -331,49 +324,49 @@ function genMode(d, w, mrm, sGroup, sRO) {
         switch (reg) {
         case 0:
             sRegGet = "this.regEAX & this.opMask";
-            sRegSet = "this.regEAX = (this.regEAX & this.opMaskClear) | ";
+            sRegSet = "this.regEAX = (this.regEAX & ~this.opMask) | ";
             sRegBTLo = "this.backTrack.btiAL";
             sRegBTHi = "this.backTrack.btiAH";
             break;
         case 1:
             sRegGet = "this.regECX & this.opMask";
-            sRegSet = "this.regECX = (this.regECX & this.opMaskClear) | ";
+            sRegSet = "this.regECX = (this.regECX & ~this.opMask) | ";
             sRegBTLo = "this.backTrack.btiCL";
             sRegBTHi = "this.backTrack.btiCH";
             break;
         case 2:
             sRegGet = "this.regEDX & this.opMask";
-            sRegSet = "this.regEDX = (this.regEDX & this.opMaskClear) | ";
+            sRegSet = "this.regEDX = (this.regEDX & ~this.opMask) | ";
             sRegBTLo = "this.backTrack.btiDL";
             sRegBTHi = "this.backTrack.btiDH";
             break;
         case 3:
             sRegGet = "this.regEBX & this.opMask";
-            sRegSet = "this.regEBX = (this.regEBX & this.opMaskClear) | ";
+            sRegSet = "this.regEBX = (this.regEBX & ~this.opMask) | ";
             sRegBTLo = "this.backTrack.btiBL";
             sRegBTHi = "this.backTrack.btiBH";
             break;
         case 4:
             sRegGet = "this.regESP & this.opMask";
-            sRegSet = "this.regESP = (this.regESP & this.opMaskClear) | ";
+            sRegSet = "this.regESP = (this.regESP & ~this.opMask) | ";
             sRegBTLo = "X86.BACKTRACK.SP_LO";
             sRegBTHi = "X86.BACKTRACK.SP_HI";
             break;
         case 5:
             sRegGet = "this.regEBP & this.opMask";
-            sRegSet = "this.regEBP = (this.regEBP & this.opMaskClear) | ";
+            sRegSet = "this.regEBP = (this.regEBP & ~this.opMask) | ";
             sRegBTLo = "this.backTrack.btiBPLo";
             sRegBTHi = "this.backTrack.btiBPHi";
             break;
         case 6:
             sRegGet = "this.regESI & this.opMask";
-            sRegSet = "this.regESI = (this.regESI & this.opMaskClear) | ";
+            sRegSet = "this.regESI = (this.regESI & ~this.opMask) | ";
             sRegBTLo = "this.backTrack.btiSILo";
             sRegBTHi = "this.backTrack.btiSIHi";
             break;
         case 7:
             sRegGet = "this.regEDI & this.opMask";
-            sRegSet = "this.regEDI = (this.regEDI & this.opMaskClear) | ";
+            sRegSet = "this.regEDI = (this.regEDI & ~this.opMask) | ";
             sRegBTLo = "this.backTrack.btiDILo";
             sRegBTHi = "this.backTrack.btiDIHi";
             break;
@@ -398,267 +391,525 @@ function genMode(d, w, mrm, sGroup, sRO) {
     var sModRegSetBegin = "", sModRegSetEnd = "";
     var sModRegBTLo = null, sModRegBTHi = null;
     var sModRegSeg = "this.segData";
-    switch (mod) {
-    case 0:
-        switch (r_m) {
+
+    if (!a) {
+        switch (mod) {
         case 0:
-            sModAddr = "this.regEBX + this.regESI";
-            sModFunc = "BXSI";
-            nCycles = "this.CYCLES.nEACyclesBaseIndex";        // 8086: 7
-            break;
-        case 1:
-            sModAddr = "this.regEBX + this.regEDI";
-            sModFunc = "BXDI";
-            nCycles = "this.CYCLES.nEACyclesBaseIndexExtra";   // 8086: 8
-            break;
-        case 2:
-            sModAddr = "this.regEBP + this.regESI";
-            sModFunc = "BPSI";
-            sModRegSeg = "this.segStack";
-            nCycles = "this.CYCLES.nEACyclesBaseIndexExtra";   // 8086: 8
-            break;
-        case 3:
-            sModAddr = "this.regEBP + this.regEDI";
-            sModFunc = "BPDI";
-            sModRegSeg = "this.segStack";
-            nCycles = "this.CYCLES.nEACyclesBaseIndex";        // 8086: 7
-            break;
-        case 4:
-            sModAddr = "this.regESI";
-            sModFunc = "SI";
-            nCycles = "this.CYCLES.nEACyclesBase";             // 8086: 5
-            break;
-        case 5:
-            sModAddr = "this.regEDI";
-            sModFunc = "DI";
-            nCycles = "this.CYCLES.nEACyclesBase";             // 8086: 5
-            break;
-        case 6:
-            sModAddr = "this.getIPWord()";
-            sModFunc = "D16";
-            nCycles = "this.CYCLES.nEACyclesDisp";             // 8086: 6
-            break;
-        case 7:
-            sModAddr = "this.regEBX";
-            sModFunc = "BX";
-            nCycles = "this.CYCLES.nEACyclesBase";             // 8086: 5
-            break;
-        default:
-            sError = "unrecognized mod=0 r/m: " + r_m;
-            break;
-        }
-        break;
-    case 1:
-        switch (r_m) {
-        case 0:
-            sModAddr = "this.regEBX + this.regESI + this.getIPDisp()";
-            sModFunc = "BXSID8";
-            nCycles = "this.CYCLES.nEACyclesBaseIndexDisp";        // 8086: 11
-            break;
-        case 1:
-            sModAddr = "this.regEBX + this.regEDI + this.getIPDisp()";
-            sModFunc = "BXDID8";
-            nCycles = "this.CYCLES.nEACyclesBaseIndexDispExtra";   // 8086: 12
-            break;
-        case 2:
-            sModAddr = "this.regEBP + this.regESI + this.getIPDisp()";
-            sModFunc = "BPSID8";
-            sModRegSeg = "this.segStack";
-            nCycles = "this.CYCLES.nEACyclesBaseIndexDispExtra";   // 8086: 12
-            break;
-        case 3:
-            sModAddr = "this.regEBP + this.regEDI + this.getIPDisp()";
-            sModFunc = "BPDID8";
-            sModRegSeg = "this.segStack";
-            nCycles = "this.CYCLES.nEACyclesBaseIndexDisp";        // 8086: 11
-            break;
-        case 4:
-            sModAddr = "this.regESI + this.getIPDisp()";
-            sModFunc = "SID8";
-            nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
-            break;
-        case 5:
-            sModAddr = "this.regEDI + this.getIPDisp()";
-            sModFunc = "DID8";
-            nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
-            break;
-        case 6:
-            sModAddr = "this.regEBP + this.getIPDisp()";
-            sModFunc = "BPD8";
-            sModRegSeg = "this.segStack";
-            nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
-            break;
-        case 7:
-            sModAddr = "this.regEBX + this.getIPDisp()";
-            sModFunc = "BXD8";
-            nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
-            break;
-        default:
-            sError = "unrecognized mod=1 r/m: " + r_m;
-            break;
-        }
-        break;
-    case 2:
-        switch (r_m) {
-        case 0:
-            sModAddr = "this.regEBX + this.regESI + this.getIPWord()";
-            sModFunc = "BXSID16";
-            nCycles = "this.CYCLES.nEACyclesBaseIndexDisp";        // 8086: 11
-            break;
-        case 1:
-            sModAddr = "this.regEBX + this.regEDI + this.getIPWord()";
-            sModFunc = "BXDID16";
-            nCycles = "this.CYCLES.nEACyclesBaseIndexDispExtra";   // 8086: 12
-            break;
-        case 2:
-            sModAddr = "this.regEBP + this.regESI + this.getIPWord()";
-            sModFunc = "BPSID16";
-            sModRegSeg = "this.segStack";
-            nCycles = "this.CYCLES.nEACyclesBaseIndexDispExtra";   // 8086: 12
-            break;
-        case 3:
-            sModAddr = "this.regEBP + this.regEDI + this.getIPWord()";
-            sModFunc = "BPDID16";
-            sModRegSeg = "this.segStack";
-            nCycles = "this.CYCLES.nEACyclesBaseIndexDisp";        // 8086: 11
-            break;
-        case 4:
-            sModAddr = "this.regESI + this.getIPWord()";
-            sModFunc = "SID16";
-            nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
-            break;
-        case 5:
-            sModAddr = "this.regEDI + this.getIPWord()";
-            sModFunc = "DID16";
-            nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
-            break;
-        case 6:
-            sModAddr = "this.regEBP + this.getIPWord()";
-            sModFunc = "BPD16";
-            sModRegSeg = "this.segStack";
-            nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
-            break;
-        case 7:
-            sModAddr = "this.regEBX + this.getIPWord()";
-            sModFunc = "BXD16";
-            nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
-            break;
-        default:
-            sError = "unrecognized mod=2 r/m: " + r_m;
-            break;
-        }
-        break;
-    case 3:
-        if (!w) {
             switch (r_m) {
             case 0:
-                sModRegGet = "this.regEAX & 0xff";
-                sModRegSet = "this.regEAX = (this.regEAX & ~0xff) | ";
-                sModRegBTLo = "this.backTrack.btiAL";
+                sModAddr = "this.regEBX + this.regESI";
+                sModFunc = "BXSI";
+                nCycles = "this.CYCLES.nEACyclesBaseIndex";        // 8086: 7
                 break;
             case 1:
-                sModRegGet = "this.regECX & 0xff";
-                sModRegSet = "this.regECX = (this.regECX & ~0xff) | ";
-                sModRegBTLo = "this.backTrack.btiCL";
+                sModAddr = "this.regEBX + this.regEDI";
+                sModFunc = "BXDI";
+                nCycles = "this.CYCLES.nEACyclesBaseIndexExtra";   // 8086: 8
                 break;
             case 2:
-                sModRegGet = "this.regEDX & 0xff";
-                sModRegSet = "this.regEDX = (this.regEDX & ~0xff) | ";
-                sModRegBTLo = "this.backTrack.btiDL";
+                sModAddr = "this.regEBP + this.regESI";
+                sModFunc = "BPSI";
+                sModRegSeg = "this.segStack";
+                nCycles = "this.CYCLES.nEACyclesBaseIndexExtra";   // 8086: 8
                 break;
             case 3:
-                sModRegGet = "this.regEBX & 0xff";
-                sModRegSet = "this.regEBX = (this.regEBX & ~0xff) | ";
-                sModRegBTLo = "this.backTrack.btiBL";
+                sModAddr = "this.regEBP + this.regEDI";
+                sModFunc = "BPDI";
+                sModRegSeg = "this.segStack";
+                nCycles = "this.CYCLES.nEACyclesBaseIndex";        // 8086: 7
                 break;
             case 4:
-                sModRegGet = "(this.regEAX >> 8) & 0xff";
-                sModRegSet = "this.regEAX = (this.regEAX & ~0xff00) | ";
-                sModRegSetEnd = " << 8";
-                sModRegBTLo = "this.backTrack.btiAH";
+                sModAddr = "this.regESI";
+                sModFunc = "SI";
+                nCycles = "this.CYCLES.nEACyclesBase";             // 8086: 5
                 break;
             case 5:
-                sModRegGet = "(this.regECX >> 8) & 0xff";
-                sModRegSet = "this.regECX = (this.regECX & ~0xff00) | ";
-                sModRegSetEnd = " << 8";
-                sModRegBTLo = "this.backTrack.btiCH";
+                sModAddr = "this.regEDI";
+                sModFunc = "DI";
+                nCycles = "this.CYCLES.nEACyclesBase";             // 8086: 5
                 break;
             case 6:
-                sModRegGet = "(this.regEDX >> 8) & 0xff";
-                sModRegSet = "this.regEDX = (this.regEDX & ~0xff00) | ";
-                sModRegSetEnd = " << 8";
-                sModRegBTLo = "this.backTrack.btiDH";
+                sModAddr = "this.getIPWord()";
+                sModFunc = "D16";
+                nCycles = "this.CYCLES.nEACyclesDisp";             // 8086: 6
                 break;
             case 7:
-                sModRegGet = "(this.regEBX >> 8) & 0xff";
-                sModRegSet = "this.regEBX = (this.regEBX & ~0xff00) | ";
-                sModRegSetEnd = " << 8";
-                sModRegBTLo = "this.backTrack.btiBH";
+                sModAddr = "this.regEBX";
+                sModFunc = "BX";
+                nCycles = "this.CYCLES.nEACyclesBase";             // 8086: 5
                 break;
             default:
-                sError = "unrecognized w=0 mod=3 r/m: " + r_m;
+                sError = "unrecognized mod=0 r/m: " + r_m;
                 break;
             }
-        }
-        else {
+            break;
+        case 1:
             switch (r_m) {
             case 0:
-                sModRegGet = "this.regEAX & this.opMask";
-                sModRegSet = "this.regEAX = (this.regEAX & this.opMaskClear) | ";
-                sModRegBTLo = "this.backTrack.btiAL";
-                sModRegBTHi = "this.backTrack.btiAH";
+                sModAddr = "this.regEBX + this.regESI + this.getIPDisp()";
+                sModFunc = "BXSID8";
+                nCycles = "this.CYCLES.nEACyclesBaseIndexDisp";        // 8086: 11
                 break;
             case 1:
-                sModRegGet = "this.regECX & this.opMask";
-                sModRegSet = "this.regECX = (this.regECX & this.opMaskClear) | ";
-                sModRegBTLo = "this.backTrack.btiCL";
-                sModRegBTHi = "this.backTrack.btiCH";
+                sModAddr = "this.regEBX + this.regEDI + this.getIPDisp()";
+                sModFunc = "BXDID8";
+                nCycles = "this.CYCLES.nEACyclesBaseIndexDispExtra";   // 8086: 12
                 break;
             case 2:
-                sModRegGet = "this.regEDX & this.opMask";
-                sModRegSet = "this.regEDX = (this.regEDX & this.opMaskClear) | ";
-                sModRegBTLo = "this.backTrack.btiDL";
-                sModRegBTHi = "this.backTrack.btiDH";
+                sModAddr = "this.regEBP + this.regESI + this.getIPDisp()";
+                sModFunc = "BPSID8";
+                sModRegSeg = "this.segStack";
+                nCycles = "this.CYCLES.nEACyclesBaseIndexDispExtra";   // 8086: 12
                 break;
             case 3:
-                sModRegGet = "this.regEBX & this.opMask";
-                sModRegSet = "this.regEBX = (this.regEBX & this.opMaskClear) | ";
-                sModRegBTLo = "this.backTrack.btiBL";
-                sModRegBTHi = "this.backTrack.btiBH";
+                sModAddr = "this.regEBP + this.regEDI + this.getIPDisp()";
+                sModFunc = "BPDID8";
+                sModRegSeg = "this.segStack";
+                nCycles = "this.CYCLES.nEACyclesBaseIndexDisp";        // 8086: 11
                 break;
             case 4:
-                sModRegGet = "this.regESP & this.opMask";
-                sModRegSet = "this.regESP = (this.regESP & this.opMaskClear) | ";
-                sModRegBTLo = "X86.BACKTRACK.SP_LO";
-                sModRegBTHi = "X86.BACKTRACK.SP_HI";
+                sModAddr = "this.regESI + this.getIPDisp()";
+                sModFunc = "SID8";
+                nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
                 break;
             case 5:
-                sModRegGet = "this.regEBP & this.opMask";
-                sModRegSet = "this.regEBP = (this.regEBP & this.opMaskClear) | ";
-                sModRegBTLo = "this.backTrack.btiBPLo";
-                sModRegBTHi = "this.backTrack.btiBPHi";
+                sModAddr = "this.regEDI + this.getIPDisp()";
+                sModFunc = "DID8";
+                nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
                 break;
             case 6:
-                sModRegGet = "this.regESI & this.opMask";
-                sModRegSet = "this.regESI = (this.regESI & this.opMaskClear) | ";
-                sModRegBTLo = "this.backTrack.btiSILo";
-                sModRegBTHi = "this.backTrack.btiSIHi";
+                sModAddr = "this.regEBP + this.getIPDisp()";
+                sModFunc = "BPD8";
+                sModRegSeg = "this.segStack";
+                nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
                 break;
             case 7:
-                sModRegGet = "this.regEDI & this.opMask";
-                sModRegSet = "this.regEDI = (this.regEDI & this.opMaskClear) | ";
-                sModRegBTLo = "this.backTrack.btiDILo";
-                sModRegBTHi = "this.backTrack.btiDIHi";
+                sModAddr = "this.regEBX + this.getIPDisp()";
+                sModFunc = "BXD8";
+                nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
                 break;
             default:
-                sError = "unrecognized w=1 mod=3 r/m: " + r_m;
+                sError = "unrecognized mod=1 r/m: " + r_m;
                 break;
             }
+            break;
+        case 2:
+            switch (r_m) {
+            case 0:
+                sModAddr = "this.regEBX + this.regESI + this.getIPWord()";
+                sModFunc = "BXSID16";
+                nCycles = "this.CYCLES.nEACyclesBaseIndexDisp";        // 8086: 11
+                break;
+            case 1:
+                sModAddr = "this.regEBX + this.regEDI + this.getIPWord()";
+                sModFunc = "BXDID16";
+                nCycles = "this.CYCLES.nEACyclesBaseIndexDispExtra";   // 8086: 12
+                break;
+            case 2:
+                sModAddr = "this.regEBP + this.regESI + this.getIPWord()";
+                sModFunc = "BPSID16";
+                sModRegSeg = "this.segStack";
+                nCycles = "this.CYCLES.nEACyclesBaseIndexDispExtra";   // 8086: 12
+                break;
+            case 3:
+                sModAddr = "this.regEBP + this.regEDI + this.getIPWord()";
+                sModFunc = "BPDID16";
+                sModRegSeg = "this.segStack";
+                nCycles = "this.CYCLES.nEACyclesBaseIndexDisp";        // 8086: 11
+                break;
+            case 4:
+                sModAddr = "this.regESI + this.getIPWord()";
+                sModFunc = "SID16";
+                nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
+                break;
+            case 5:
+                sModAddr = "this.regEDI + this.getIPWord()";
+                sModFunc = "DID16";
+                nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
+                break;
+            case 6:
+                sModAddr = "this.regEBP + this.getIPWord()";
+                sModFunc = "BPD16";
+                sModRegSeg = "this.segStack";
+                nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
+                break;
+            case 7:
+                sModAddr = "this.regEBX + this.getIPWord()";
+                sModFunc = "BXD16";
+                nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
+                break;
+            default:
+                sError = "unrecognized mod=2 r/m: " + r_m;
+                break;
+            }
+            break;
+        case 3:
+            if (!w) {
+                switch (r_m) {
+                case 0:
+                    sModRegGet = "this.regEAX & 0xff";
+                    sModRegSet = "this.regEAX = (this.regEAX & ~0xff) | ";
+                    sModRegBTLo = "this.backTrack.btiAL";
+                    break;
+                case 1:
+                    sModRegGet = "this.regECX & 0xff";
+                    sModRegSet = "this.regECX = (this.regECX & ~0xff) | ";
+                    sModRegBTLo = "this.backTrack.btiCL";
+                    break;
+                case 2:
+                    sModRegGet = "this.regEDX & 0xff";
+                    sModRegSet = "this.regEDX = (this.regEDX & ~0xff) | ";
+                    sModRegBTLo = "this.backTrack.btiDL";
+                    break;
+                case 3:
+                    sModRegGet = "this.regEBX & 0xff";
+                    sModRegSet = "this.regEBX = (this.regEBX & ~0xff) | ";
+                    sModRegBTLo = "this.backTrack.btiBL";
+                    break;
+                case 4:
+                    sModRegGet = "(this.regEAX >> 8) & 0xff";
+                    sModRegSet = "this.regEAX = (this.regEAX & ~0xff00) | ";
+                    sModRegSetEnd = " << 8";
+                    sModRegBTLo = "this.backTrack.btiAH";
+                    break;
+                case 5:
+                    sModRegGet = "(this.regECX >> 8) & 0xff";
+                    sModRegSet = "this.regECX = (this.regECX & ~0xff00) | ";
+                    sModRegSetEnd = " << 8";
+                    sModRegBTLo = "this.backTrack.btiCH";
+                    break;
+                case 6:
+                    sModRegGet = "(this.regEDX >> 8) & 0xff";
+                    sModRegSet = "this.regEDX = (this.regEDX & ~0xff00) | ";
+                    sModRegSetEnd = " << 8";
+                    sModRegBTLo = "this.backTrack.btiDH";
+                    break;
+                case 7:
+                    sModRegGet = "(this.regEBX >> 8) & 0xff";
+                    sModRegSet = "this.regEBX = (this.regEBX & ~0xff00) | ";
+                    sModRegSetEnd = " << 8";
+                    sModRegBTLo = "this.backTrack.btiBH";
+                    break;
+                default:
+                    sError = "unrecognized w=0 mod=3 r/m: " + r_m;
+                    break;
+                }
+            }
+            else {
+                switch (r_m) {
+                case 0:
+                    sModRegGet = "this.regEAX & this.opMask";
+                    sModRegSet = "this.regEAX = (this.regEAX & ~this.opMask) | ";
+                    sModRegBTLo = "this.backTrack.btiAL";
+                    sModRegBTHi = "this.backTrack.btiAH";
+                    break;
+                case 1:
+                    sModRegGet = "this.regECX & this.opMask";
+                    sModRegSet = "this.regECX = (this.regECX & ~this.opMask) | ";
+                    sModRegBTLo = "this.backTrack.btiCL";
+                    sModRegBTHi = "this.backTrack.btiCH";
+                    break;
+                case 2:
+                    sModRegGet = "this.regEDX & this.opMask";
+                    sModRegSet = "this.regEDX = (this.regEDX & ~this.opMask) | ";
+                    sModRegBTLo = "this.backTrack.btiDL";
+                    sModRegBTHi = "this.backTrack.btiDH";
+                    break;
+                case 3:
+                    sModRegGet = "this.regEBX & this.opMask";
+                    sModRegSet = "this.regEBX = (this.regEBX & ~this.opMask) | ";
+                    sModRegBTLo = "this.backTrack.btiBL";
+                    sModRegBTHi = "this.backTrack.btiBH";
+                    break;
+                case 4:
+                    sModRegGet = "this.regESP & this.opMask";
+                    sModRegSet = "this.regESP = (this.regESP & ~this.opMask) | ";
+                    sModRegBTLo = "X86.BACKTRACK.SP_LO";
+                    sModRegBTHi = "X86.BACKTRACK.SP_HI";
+                    break;
+                case 5:
+                    sModRegGet = "this.regEBP & this.opMask";
+                    sModRegSet = "this.regEBP = (this.regEBP & ~this.opMask) | ";
+                    sModRegBTLo = "this.backTrack.btiBPLo";
+                    sModRegBTHi = "this.backTrack.btiBPHi";
+                    break;
+                case 6:
+                    sModRegGet = "this.regESI & this.opMask";
+                    sModRegSet = "this.regESI = (this.regESI & ~this.opMask) | ";
+                    sModRegBTLo = "this.backTrack.btiSILo";
+                    sModRegBTHi = "this.backTrack.btiSIHi";
+                    break;
+                case 7:
+                    sModRegGet = "this.regEDI & this.opMask";
+                    sModRegSet = "this.regEDI = (this.regEDI & ~this.opMask) | ";
+                    sModRegBTLo = "this.backTrack.btiDILo";
+                    sModRegBTHi = "this.backTrack.btiDIHi";
+                    break;
+                default:
+                    sError = "unrecognized w=1 mod=3 r/m: " + r_m;
+                    break;
+                }
+            }
+            break;
+        default:
+            sError = "unrecognized mod: " + mod;
+            break;
         }
-        break;
-    default:
-        sError = "unrecognized mod: " + mod;
-        break;
+    } else {
+        switch (mod) {
+        case 0:
+            switch (r_m) {
+            case 0:
+                sModAddr = "this.regEAX";
+                sModFunc = "EAX";
+                nCycles = "this.CYCLES.nEACyclesBase";
+                break;
+            case 1:
+                sModAddr = "this.regECX";
+                sModFunc = "ECX";
+                nCycles = "this.CYCLES.nEACyclesBase";
+                break;
+            case 2:
+                sModAddr = "this.regEDX";
+                sModFunc = "EDX";
+                nCycles = "this.CYCLES.nEACyclesBase";
+                break;
+            case 3:
+                sModAddr = "this.regEBX";
+                sModFunc = "EBX";
+                nCycles = "this.CYCLES.nEACyclesBase";
+                break;
+            case 4:
+                sModAddr = "this.getSIB()";
+                sModFunc = "SIB";
+                nCycles = "this.CYCLES.nEACyclesBase";
+                break;
+            case 5:
+                sModAddr = "this.getIPWord()";
+                sModFunc = "D32";
+                nCycles = "this.CYCLES.nEACyclesDisp";
+                break;
+            case 6:
+                sModAddr = "this.regESI";
+                sModFunc = "ESI";
+                nCycles = "this.CYCLES.nEACyclesBase";
+                break;
+            case 7:
+                sModAddr = "this.regEDI";
+                sModFunc = "EDI";
+                nCycles = "this.CYCLES.nEACyclesBase";
+                break;
+            default:
+                sError = "unrecognized mod=0 r/m: " + r_m;
+                break;
+            }
+            break;
+        case 1:
+            switch (r_m) {
+            case 0:
+                sModAddr = "this.regEAX + this.getIPDisp()";
+                sModFunc = "EAXD8";
+                nCycles = "this.CYCLES.nEACyclesBaseDisp";
+                break;
+            case 1:
+                sModAddr = "this.regECX + this.getIPDisp()";
+                sModFunc = "ECXD8";
+                nCycles = "this.CYCLES.nEACyclesBaseDisp";
+                break;
+            case 2:
+                sModAddr = "this.regEDX + this.getIPDisp()";
+                sModFunc = "EDXD8";
+                nCycles = "this.CYCLES.nEACyclesBaseDisp";
+                break;
+            case 3:
+                sModAddr = "this.regEBX + this.getIPDisp()";
+                sModFunc = "EBXD8";
+                nCycles = "this.CYCLES.nEACyclesBaseDisp";
+                break;
+            case 4:
+                sModAddr = "this.getSIB() + this.getIPDisp()";
+                sModFunc = "SIBD8";
+                nCycles = "this.CYCLES.nEACyclesBaseDisp";
+                break;
+            case 5:
+                sModAddr = "this.regEBP + this.getIPDisp()";
+                sModFunc = "EBPD8";
+                nCycles = "this.CYCLES.nEACyclesBaseDisp";
+                break;
+            case 6:
+                sModAddr = "this.regESI + this.getIPDisp()";
+                sModFunc = "ESID8";
+                nCycles = "this.CYCLES.nEACyclesBaseDisp";
+                break;
+            case 7:
+                sModAddr = "this.regEDI + this.getIPDisp()";
+                sModFunc = "EDID8";
+                nCycles = "this.CYCLES.nEACyclesBaseDisp";
+                break;
+            default:
+                sError = "unrecognized mod=1 r/m: " + r_m;
+                break;
+            }
+            break;
+        case 2:
+            switch (r_m) {
+            case 0:
+                sModAddr = "this.regEAX + this.getIPWord()";
+                sModFunc = "EAXD32";
+                nCycles = "this.CYCLES.nEACyclesBaseDisp";
+                break;
+            case 1:
+                sModAddr = "this.regECX + this.getIPWord()";
+                sModFunc = "ECXD32";
+                nCycles = "this.CYCLES.nEACyclesBaseDisp";
+                break;
+            case 2:
+                sModAddr = "this.regEDX + this.getIPWord()";
+                sModFunc = "EDXD32";
+                nCycles = "this.CYCLES.nEACyclesBaseDisp";
+                break;
+            case 3:
+                sModAddr = "this.regEBX + this.getIPWord()";
+                sModFunc = "EBXD32";
+                nCycles = "this.CYCLES.nEACyclesBaseDisp";
+                break;
+            case 4:
+                sModAddr = "this.getSIB() + this.getIPWord()";
+                sModFunc = "SIBD32";
+                nCycles = "this.CYCLES.nEACyclesBaseDisp";
+                break;
+            case 5:
+                sModAddr = "this.regEBP + this.getIPWord()";
+                sModFunc = "EBPD32";
+                nCycles = "this.CYCLES.nEACyclesBaseDisp";
+                break;
+            case 6:
+                sModAddr = "this.regESI + this.getIPWord()";
+                sModFunc = "ESID32";
+                nCycles = "this.CYCLES.nEACyclesBaseDisp";
+                break;
+            case 7:
+                sModAddr = "this.regEDI + this.getIPWord()";
+                sModFunc = "EDID32";
+                nCycles = "this.CYCLES.nEACyclesBaseDisp";
+                break;
+            default:
+                sError = "unrecognized mod=2 r/m: " + r_m;
+                break;
+            }
+            break;
+        case 3:
+            if (!w) {
+                switch (r_m) {
+                case 0:
+                    sModRegGet = "this.regEAX & 0xff";
+                    sModRegSet = "this.regEAX = (this.regEAX & ~0xff) | ";
+                    sModRegBTLo = "this.backTrack.btiAL";
+                    break;
+                case 1:
+                    sModRegGet = "this.regECX & 0xff";
+                    sModRegSet = "this.regECX = (this.regECX & ~0xff) | ";
+                    sModRegBTLo = "this.backTrack.btiCL";
+                    break;
+                case 2:
+                    sModRegGet = "this.regEDX & 0xff";
+                    sModRegSet = "this.regEDX = (this.regEDX & ~0xff) | ";
+                    sModRegBTLo = "this.backTrack.btiDL";
+                    break;
+                case 3:
+                    sModRegGet = "this.regEBX & 0xff";
+                    sModRegSet = "this.regEBX = (this.regEBX & ~0xff) | ";
+                    sModRegBTLo = "this.backTrack.btiBL";
+                    break;
+                case 4:
+                    sModRegGet = "(this.regEAX >> 8) & 0xff";
+                    sModRegSet = "this.regEAX = (this.regEAX & ~0xff00) | ";
+                    sModRegSetEnd = " << 8";
+                    sModRegBTLo = "this.backTrack.btiAH";
+                    break;
+                case 5:
+                    sModRegGet = "(this.regECX >> 8) & 0xff";
+                    sModRegSet = "this.regECX = (this.regECX & ~0xff00) | ";
+                    sModRegSetEnd = " << 8";
+                    sModRegBTLo = "this.backTrack.btiCH";
+                    break;
+                case 6:
+                    sModRegGet = "(this.regEDX >> 8) & 0xff";
+                    sModRegSet = "this.regEDX = (this.regEDX & ~0xff00) | ";
+                    sModRegSetEnd = " << 8";
+                    sModRegBTLo = "this.backTrack.btiDH";
+                    break;
+                case 7:
+                    sModRegGet = "(this.regEBX >> 8) & 0xff";
+                    sModRegSet = "this.regEBX = (this.regEBX & ~0xff00) | ";
+                    sModRegSetEnd = " << 8";
+                    sModRegBTLo = "this.backTrack.btiBH";
+                    break;
+                default:
+                    sError = "unrecognized w=0 mod=3 r/m: " + r_m;
+                    break;
+                }
+            }
+            else {
+                switch (r_m) {
+                case 0:
+                    sModRegGet = "this.regEAX & this.opMask";
+                    sModRegSet = "this.regEAX = (this.regEAX & ~this.opMask) | ";
+                    sModRegBTLo = "this.backTrack.btiAL";
+                    sModRegBTHi = "this.backTrack.btiAH";
+                    break;
+                case 1:
+                    sModRegGet = "this.regECX & this.opMask";
+                    sModRegSet = "this.regECX = (this.regECX & ~this.opMask) | ";
+                    sModRegBTLo = "this.backTrack.btiCL";
+                    sModRegBTHi = "this.backTrack.btiCH";
+                    break;
+                case 2:
+                    sModRegGet = "this.regEDX & this.opMask";
+                    sModRegSet = "this.regEDX = (this.regEDX & ~this.opMask) | ";
+                    sModRegBTLo = "this.backTrack.btiDL";
+                    sModRegBTHi = "this.backTrack.btiDH";
+                    break;
+                case 3:
+                    sModRegGet = "this.regEBX & this.opMask";
+                    sModRegSet = "this.regEBX = (this.regEBX & ~this.opMask) | ";
+                    sModRegBTLo = "this.backTrack.btiBL";
+                    sModRegBTHi = "this.backTrack.btiBH";
+                    break;
+                case 4:
+                    sModRegGet = "this.regESP & this.opMask";
+                    sModRegSet = "this.regESP = (this.regESP & ~this.opMask) | ";
+                    sModRegBTLo = "X86.BACKTRACK.SP_LO";
+                    sModRegBTHi = "X86.BACKTRACK.SP_HI";
+                    break;
+                case 5:
+                    sModRegGet = "this.regEBP & this.opMask";
+                    sModRegSet = "this.regEBP = (this.regEBP & ~this.opMask) | ";
+                    sModRegBTLo = "this.backTrack.btiBPLo";
+                    sModRegBTHi = "this.backTrack.btiBPHi";
+                    break;
+                case 6:
+                    sModRegGet = "this.regESI & this.opMask";
+                    sModRegSet = "this.regESI = (this.regESI & ~this.opMask) | ";
+                    sModRegBTLo = "this.backTrack.btiSILo";
+                    sModRegBTHi = "this.backTrack.btiSIHi";
+                    break;
+                case 7:
+                    sModRegGet = "this.regEDI & this.opMask";
+                    sModRegSet = "this.regEDI = (this.regEDI & ~this.opMask) | ";
+                    sModRegBTLo = "this.backTrack.btiDILo";
+                    sModRegBTHi = "this.backTrack.btiDIHi";
+                    break;
+                default:
+                    sError = "unrecognized w=1 mod=3 r/m: " + r_m;
+                    break;
+                }
+            }
+            break;
+        default:
+            sError = "unrecognized mod: " + mod;
+            break;
+        }
     }
 
     if (sError) {
@@ -666,7 +917,7 @@ function genMode(d, w, mrm, sGroup, sRO) {
         return null;
     }
 
-    sOpMod = "opMod" + (sGroup? sGroup + (sRO? sRO : "") : aDst[d]) + aSize[w] + toHex(mrm, 2);
+    sOpMod = "opMod" + aOpPrefix[w] + aAddrPrefix[a] + (sGroup? sGroup + (sRO? sRO : "") : aDst[d]) + toHex(mrm, 2);
 
     var sTemp = aSize[w].charAt(0).toLowerCase();
 
@@ -675,22 +926,25 @@ function genMode(d, w, mrm, sGroup, sRO) {
          * Use this to generate ModRM decoders that accept an array (ie, "group") of functions, and pass along an implied argument as well
          */
         if (sRO && reg != 7) {
-            sOpMod = "opMod" + (sGroup? sGroup : aDst[d]) + aSize[w] + toHex(mrm, 2);
+            sOpMod = "opMod" + aSize[w] + aAddrPrefix[a] + (sGroup? sGroup : aDst[d]) + toHex(mrm, 2);
             return sOpMod;
         }
 
         print("    /**");
-        print("     * " + sOpMod + "(afnGrp, fnSrc): mod=" + toMod(d, mod) + "  reg=" + toReg(d, w, reg, sGroup) + "  r/m=" + toRM(mod, w, r_m));
+        print("     * " + sOpMod + "(afnGrp, fnSrc): mod=" + toMod(d, mod) + "  reg=" + toReg(d, w, reg, sGroup) + "  r/m=" + toRM(a, mod, w, r_m));
         print("     *");
         print("     * @this {X86CPU}");
         print("     * @param {Array.<function(number,number)>} afnGrp");
         print("     * @param {function()} fnSrc");
         print("     */");
-        print("    " + sOpMod.replace("Byte","").replace("Word","") + ": function " + sOpMod + "(afnGrp, fnSrc) {");
+        print("    function " + sOpMod + "(afnGrp, fnSrc) {");
 
         if (sModAddr) {
-            if (sModAddr.indexOf("+") > 0 || sModAddr.indexOf("regE") >= 0) {
-                sModAddr = "((" + sModAddr + ") & 0xffff)";
+            if (!a && sModAddr.indexOf("regE") >= 0) {
+                if (sModAddr.indexOf(' ') > 0) {
+                    sModAddr = "(" + sModAddr + ")";
+                }
+                sModAddr += " & 0xffff";
             }
             if (!d) {
                 if (reg == 7 && sRO) {
@@ -768,22 +1022,25 @@ function genMode(d, w, mrm, sGroup, sRO) {
          */
         if (mod == 3 && !d) {
             var mrmPrime = (mod << 6) | (r_m << 3) | reg;
-            sOpMod = "opMod" + aDst[1] + aSize[w] + toHex(mrmPrime, 2);
+            print("    X86Mod" + aOpPrefix[w] + aAddrPrefix[a] + ".aOpModReg[0x" + toHex(mrmPrime, 2) + "],");
+            sOpMod = "opMod" + aOpPrefix[w] + aAddrPrefix[a] + aDst[1] + toHex(mrmPrime, 2);
             return sOpMod;
         }
 
         print("    /**");
-        print("     * " + sOpMod + "(fn): mod=" + toMod(d, mod) + "  reg=" + toReg(d, w, reg) + "  r/m=" + toRM(mod, w, r_m));
+        print("     * " + sOpMod + "(fn): mod=" + toMod(d, mod) + "  reg=" + toReg(d, w, reg) + "  r/m=" + toRM(a, mod, w, r_m));
         print("     *");
         print("     * @this {X86CPU}");
         print("     * @param {function(number,number)} fn (dst,src)");
         print("     */");
-        print("    " + sOpMod.replace("Byte","").replace("Word","") + ": function " + sOpMod + "(fn) {");
+        print("    function " + sOpMod + "(fn) {");
 
         if (sModAddr && sRegGet) {
-
-            if (sModAddr.indexOf("+") > 0 || sModAddr.indexOf("regE") >= 0) {
-                sModAddr = "((" + sModAddr + ") & 0xffff)";
+            if (!a && sModAddr.indexOf("regE") >= 0) {
+                if (sModAddr.indexOf(' ') > 0) {
+                    sModAddr = "(" + sModAddr + ")";
+                }
+                sModAddr += " & 0xffff";
             }
             if (!d) {
                 if (sModFunc) {
@@ -943,15 +1200,15 @@ function genEAFunc(sFuncName, sFuncBody) {
 }
 
 function toMod(d, mod) {
-    return toBin(mod, 2) + " (" + aMOD[mod] + ":" + (d? "src" : "dst") + ")";
+    return toBin(mod, 2) + " (" + (d? "src" : "dst") + ":" + aMOD[mod] + ")";
 }
 
 function toReg(d, w, reg, sGroup) {
-    return toBin(reg, 3) + " (" + (sGroup? "afnGrp[" + reg + "]" : aREG[w][reg] + ":" + (d? "dst" : "src")) + ")";
+    return toBin(reg, 3) + " (" + (sGroup? "afnGrp[" + reg + "]" : (d? "dst" : "src") + ":" + aREG[w][reg]) + ")";
 }
 
-function toRM(mod, w, r_m) {
-    return toBin(r_m, 3) + " (" + aRM[mod][mod < 3? 0 : w][r_m] + ")";
+function toRM(a, mod, w, r_m) {
+    return toBin(r_m, 3) + " (" + aRM[a][mod][mod < 3? 0 : w][r_m] + ")";
 }
 
 function toBin(v, len) {

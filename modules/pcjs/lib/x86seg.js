@@ -58,6 +58,7 @@ function X86Seg(cpu, id, sName, fProt)
     this.base = 0;
     this.limit = 0xffff;
     this.acc = 0;
+    this.ext = 0;
     this.addrDesc = X86.ADDR_INVALID;
     this.cpl = 0;
     this.dpl = 0;
@@ -117,7 +118,8 @@ X86Seg.ID = {
 X86Seg.loadReal = function loadReal(sel, fSuppress)
 {
     this.sel = sel;
-    this.ext = 0;
+    this.opSize = this.addrSize = 2;
+    this.opMask = this.addrMask = 0xffff;
     return this.base = sel << 4;
 };
 
@@ -204,11 +206,10 @@ X86Seg.loadRealIDT = function loadRealIDT(nIDT)
      *
      * TODO: Verify that 80286 real-mode actually enforces the above.  See http://localhost:8088/pubs/pc/reference/intel/80286/progref/#page-260
      */
-    var offIDT = cpu.addrIDT + (nIDT << 2);
-    cpu.regIP = cpu.getWord(offIDT);
-    this.sel = cpu.getWord(offIDT + 2);
+    var addrIDT = cpu.addrIDT + (nIDT << 2);
+    cpu.regEIP = cpu.getWord(addrIDT);
     cpu.regPS &= ~(X86.PS.TF | X86.PS.IF);
-    return this.base = this.sel << 4;
+    return this.load(cpu.getWord(addrIDT + 2));
 };
 
 /**
@@ -422,7 +423,7 @@ X86Seg.switchTSS = function switchTSS(selNew, fNest)
         cpu.setWord(cpu.segTSS.addrDesc + X86.DESC.ACC.OFFSET, cpu.segTSS.acc |= X86.DESC.ACC.TYPE.TSS_BUSY);
         cpu.segTSS.type = X86.DESC.ACC.TYPE.TSS_BUSY;
     }
-    cpu.setWord(addrOld + X86.TSS.TASK_IP, cpu.regIP);
+    cpu.setWord(addrOld + X86.TSS.TASK_IP, cpu.regEIP);
     cpu.setWord(addrOld + X86.TSS.TASK_PS, cpu.getPS());
     cpu.setWord(addrOld + X86.TSS.TASK_AX, cpu.regEAX);
     cpu.setWord(addrOld + X86.TSS.TASK_CX, cpu.regECX);
@@ -640,7 +641,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                         base = X86.ADDR_INVALID;
                         break;
                     }
-                    cpu.regIP = limit;
+                    cpu.regEIP = limit;
                     if (this.cpl < cplPrev) {
                         if (fCall !== true) {
                             cpu.assert(false);
@@ -846,6 +847,13 @@ X86Seg.prototype.updateMode = function(fProt)
         }
         this.cpl = this.sel & X86.SEL.RPL;
         this.dpl = (this.acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
+        if (this.cpu.model < X86.MODEL_80386 || !(this.ext & X86.DESC.EXT.BIG)) {
+            this.opSize = 2;
+            this.opMask = 0xffff;
+        } else {
+            this.opSize = 4;
+            this.opMask = 0xffffffff;
+        }
     } else {
         this.load = X86Seg.loadReal;
         this.loadIDT = X86Seg.loadRealIDT;
@@ -854,7 +862,11 @@ X86Seg.prototype.updateMode = function(fProt)
         this.limit = 0xffff;
         this.cpl = this.dpl = 0;
         this.addrDesc = X86.ADDR_INVALID;
+        this.opSize = 2;
+        this.opMask = 0xffff;
     }
+    this.addrSize = this.opSize;
+    this.addrMask = this.opMask;
     return fProt;
 };
 
