@@ -44,7 +44,7 @@ if (typeof module !== 'undefined') {
 }
 
 /**
- * Video(parmsVideo, canvas, context, textarea)
+ * Video(parmsVideo, canvas, context, textarea, container)
  *
  * The Video component can be configured with the following (parmsVideo) properties:
  *
@@ -93,8 +93,9 @@ if (typeof module !== 'undefined') {
  * @param {Object} [canvas]
  * @param {Object} [context]
  * @param {Object} [textarea]
+ * @param {Object} [container]
  */
-function Video(parmsVideo, canvas, context, textarea)
+function Video(parmsVideo, canvas, context, textarea, container)
 {
     Component.call(this, "Video", parmsVideo, Video, Messages.VIDEO);
 
@@ -192,6 +193,31 @@ function Video(parmsVideo, canvas, context, textarea)
     this.fHasFocus = false;
 
     var video = this;
+
+    /*
+     * All the gross code to handle full-screen support across all supported browsers (standards? hello?)
+     */
+    this.container = container;
+    if (this.container) {
+        this.container.doFullScreen = container['requestFullscreen'] || container['msRequestFullscreen'] || container['mozRequestFullScreen'] || container['webkitRequestFullscreen'];
+        var onFullScreenChange = function() {
+            var fFullScreen = (document['fullscreenElement'] || document['mozFullScreenElement'] || document['webkitFullscreenElement'] || document['msFullscreenElement']);
+            video.notifyFullScreen(fFullScreen? true : false);
+        };
+        if ('onfullscreenchange' in document) {
+            document.addEventListener('fullscreenchange', onFullScreenChange, false);
+        } else if ('onmozfullscreenchange' in document) {
+            document.addEventListener('mozfullscreenchange', onFullScreenChange, false);
+        } else if ('onwebkitfullscreenchange' in document) {
+            document.addEventListener('webkitfullscreenchange', onFullScreenChange, false);
+        } else if ('onmsfullscreenchange' in document) {
+            document.addEventListener('msfullscreenchange', onFullScreenChange, false);
+        }
+    }
+
+    /*
+     * All the gross code to handle pointer-locking support across all supported browsers (standards? hello?)
+     */
     if (this.inputScreen) {
         this.inputScreen.onfocus = function onFocusScreen() {
             return video.onFocusChange(true);
@@ -2010,6 +2036,18 @@ Video.prototype.setBinding = function(sHTMLType, sBinding, control)
 
         switch (sBinding) {
 
+        case "fullScreen":
+            if (this.container && this.container.doFullScreen) {
+                control.onclick = function onClickFullScreen() {
+                    if (DEBUG) video.printMessage("fullScreen()");
+                    video.doFullScreen();
+                };
+            } else {
+                if (DEBUG) this.log("FullScreen API not available");
+                control.parentNode.removeChild(control);
+            }
+            return true;
+
         case "lockPointer":
             this.sLockMessage = control.textContent;
             if (this.inputScreen && this.inputScreen.lockPointer) {
@@ -2060,6 +2098,39 @@ Video.prototype.getInput = function(mouse)
 {
     this.mouse = mouse;
     return this.inputScreen;
+};
+
+/**
+ * doFullScreen()
+ *
+ * @this {Video}
+ * @return {boolean} true if request successful, false if not (eg, failed OR not supported)
+ */
+Video.prototype.doFullScreen = function()
+{
+    var fSuccess = false;
+    if (this.container) {
+        if (this.container.doFullScreen) {
+            this.container.style.width = this.container.style.height = "100%";
+            this.container.style.backgroundColor = "black";
+            this.container.doFullScreen();
+            fSuccess = true;
+        }
+        this.setFocus();
+    }
+    return fSuccess;
+};
+
+/**
+ * notifyFullScreen(fFullScreen)
+ *
+ * @this {Video}
+ * @param {boolean} fFullScreen
+ */
+Video.prototype.notifyFullScreen = function(fFullScreen)
+{
+    this.printMessage("notifyFullScreen(" + fFullScreen + ")", true);
+    if (this.kbd) this.kbd.notifyEscape(fFullScreen);
 };
 
 /**
@@ -3753,10 +3824,10 @@ Video.prototype.setMode = function(nMode, fForce)
 Video.prototype.setPixel = function(imageData, x, y, rgb)
 {
     var index = (x + y * imageData.width) * rgb.length;
-    imageData.data[index + 0] = rgb[0];
-    imageData.data[index + 1] = rgb[1];
-    imageData.data[index + 2] = rgb[2];
-    imageData.data[index + 3] = rgb[3];
+    imageData.data[index]   = rgb[0];
+    imageData.data[index+1] = rgb[1];
+    imageData.data[index+2] = rgb[2];
+    imageData.data[index+3] = rgb[3];
 };
 
 /**
@@ -5235,7 +5306,7 @@ Video.init = function()
          * Now we can create the Video object, record it, and wire it up to the associated document elements.
          */
         var eContext = eCanvas.getContext("2d");
-        var video = new Video(parmsVideo, eCanvas, eContext, eTextArea /* || eInput */);
+        var video = new Video(parmsVideo, eCanvas, eContext, eTextArea /* || eInput */, eVideo);
 
         /*
          * Bind any video-specific controls (eg, the Refresh button). There are no essential controls, however;

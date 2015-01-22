@@ -7,6 +7,7 @@
 			<control type="led" label="Num" binding="num-lock" padleft="8px"/>
 			<control type="led" label="Scroll" binding="scroll-lock" padleft="8px"/>
 			<control type="button" binding="lockPointer" padleft="8px">Lock Pointer</control>
+			<control type="button" binding="fullScreen" padleft="8px">Full Screen</control>
 		</control>
 	</menu>
 </video>

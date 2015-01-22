@@ -35,7 +35,7 @@
 if (typeof module !== 'undefined') {
     var web       = require("./../../shared/lib/weblib");
     var Component = require("./../../shared/lib/component");
-    var Messages    = require("./messages");
+    var Messages  = require("./messages");
 }
 
 /**

@@ -134,19 +134,19 @@ function Keyboard(parmsKbd)
     this.msAutoRelease  = 50;
     this.msInjectDelay  = 300;          // number of milliseconds between injected keystrokes
 
+    /*
+     * HACK: We set fAllDown to false to ignore all down/up events for keys not explicitly marked as ONDOWN;
+     * even though that prevents those keys from being repeated properly (ie, at the simulation's repeat rate
+     * rather than the browser's repeat rate), it's the safest thing to do when dealing with international keyboards,
+     * because our mapping tables are designed for US keyboards, and testing all the permutations of international
+     * keyboards and web browsers is more work than I can take on right now.  TODO: Dig into this some day.
+     */
+    this.fAllDown = false;
+
     this.setReady();
 }
 
 Component.subclass(Component, Keyboard);
-
-/*
- * HACK: We set ALL_ONDOWN to false to ignore all down/up events for keys not explicitly marked as ONDOWN;
- * even though that prevents those keys from being repeated properly (ie, at the simulation's repeat rate
- * rather than the browser's repeat rate), it's the safest thing to do when dealing with international keyboards,
- * because our mapping tables are designed for US keyboards, and testing all the permutations of international
- * keyboards and web browsers is more work than I can take on right now.  TODO: Dig into this some day.
- */
-Keyboard.ALL_ONDOWN = false;
 
 /**
  * Alphanumeric and other common (printable) ASCII codes.
@@ -1128,16 +1128,18 @@ Keyboard.prototype.initBus = function(cmp, bus, cpu, dbg)
 };
 
 /**
- * notifyEscape(fDisabled)
+ * notifyEscape(fDisabled, fAllDown)
  *
  * When ESC is used by the browser to disable pointer lock, this gives us the option of mapping a different key to ESC.
  *
  * @this {Keyboard}
  * @param {boolean} fDisabled
+ * @param {boolean} [fAllDown] (an experimental option to re-enable processing of all onkeydown/onkeyup events)
  */
-Keyboard.prototype.notifyEscape = function(fDisabled)
+Keyboard.prototype.notifyEscape = function(fDisabled, fAllDown)
 {
     this.fEscapeDisabled = fDisabled;
+    if (fAllDown !== undefined) this.fAllDown = fAllDown;
 };
 
 /**
@@ -2050,7 +2052,7 @@ Keyboard.prototype.onKeyDown = function(event, fDown)
         /*
          * Don't simulate any key not explicitly marked ONDOWN, as well as any key sequence with the CMD key held.
          */
-        if (!Keyboard.ALL_ONDOWN && fPass && fDown || !!(this.bitsState & Keyboard.STATE.CMDS)) fIgnore = true;
+        if (!this.fAllDown && fPass && fDown || !!(this.bitsState & Keyboard.STATE.CMDS)) fIgnore = true;
     }
 
     if (!fPass) {
@@ -2093,7 +2095,7 @@ Keyboard.prototype.onKeyPress = function(event)
     event = event || window.event;
     var keyCode = event.which || event.keyCode;
 
-    if (Keyboard.ALL_ONDOWN) {
+    if (this.fAllDown) {
         var simCode = this.checkActiveKey();
         if (simCode && this.isAlphaKey(simCode) && this.isAlphaKey(keyCode) && simCode != keyCode) {
             if (!COMPILED && this.messageEnabled(Messages.KEYS)) {
