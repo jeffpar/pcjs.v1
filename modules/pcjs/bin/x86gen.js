@@ -709,7 +709,7 @@ function genMode(a, d, w, mrm, sGroup, sRO) {
                 nCycles = "this.CYCLES.nEACyclesBase";
                 break;
             case 4:
-                sModAddr = "this.getSIB(0)";
+                sModAddr = "this.getSIBAddr(0)";
                 sModFunc = "SIB";
                 nCycles = "this.CYCLES.nEACyclesBase";
                 break;
@@ -756,7 +756,7 @@ function genMode(a, d, w, mrm, sGroup, sRO) {
                 nCycles = "this.CYCLES.nEACyclesBaseDisp";
                 break;
             case 4:
-                sModAddr = "this.getSIB(1) + this.getIPDisp()";
+                sModAddr = "this.getSIBAddr(1) + this.getIPDisp()";
                 sModFunc = "SIBD8";
                 nCycles = "this.CYCLES.nEACyclesBaseDisp";
                 break;
@@ -803,7 +803,7 @@ function genMode(a, d, w, mrm, sGroup, sRO) {
                 nCycles = "this.CYCLES.nEACyclesBaseDisp";
                 break;
             case 4:
-                sModAddr = "this.getSIB(2) + this.getIPWord()";
+                sModAddr = "this.getSIBAddr(2) + this.getIPWord()";
                 sModFunc = "SIBD32";
                 nCycles = "this.CYCLES.nEACyclesBaseDisp";
                 break;

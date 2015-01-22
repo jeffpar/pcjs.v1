@@ -46,11 +46,16 @@ if (typeof module !== 'undefined') {
     var X86Help     = require("./x86help");
     var X86ModB     = require("./x86modb");
     var X86ModW     = require("./x86modw");
-    var X86ModB32   = require("./x86modb32");
-    var X86ModW32   = require("./x86modw32");
-    var X86ModSIB   = require("./x86modsib");
     var X86OpXX     = require("./x86opxx");
     var X86Op0F     = require("./x86op0f");
+}
+
+if (I386) {
+    if (typeof module !== 'undefined') {
+        var X86ModB32   = require("./x86modb32");
+        var X86ModW32   = require("./x86modw32");
+        var X86ModSIB   = require("./x86modsib");
+    }
 }
 
 /**
@@ -706,7 +711,7 @@ X86CPU.prototype.initProcessor = function()
     if (this.model >= X86.MODEL_80186) {
         /*
          * TODO: I don't go out of my way to make 80186/80188 cycle times accurate, since no IBM PC models used
-         * those processors; beyond this point, my real priority is the 80286.  But we may revisit the 80186 someday;
+         * those processors; beyond the 8086, my next priority is the 80286.  But we may revisit the 80186 someday;
          * instruction handlers that contain "hard-coded" 80286 cycle times include: opINSb, opINSw, opOUTSb,
          * opOUTSw, opENTER, and opLEAVE.
          */
@@ -743,9 +748,14 @@ X86CPU.prototype.initProcessor = function()
 
             this.OPFLAG_NOINTR8086 = 0;     // used with instructions that should *not* set NOINTR on an 80286 (eg, non-SS segment loads)
 
-            this.aOps[0x0F]             = X86OpXX.op0F;
-            this.aOps[X86.OPCODE.ARPL]  = X86OpXX.opARPL;
-            this.aOps[X86.OPCODE.PUSHSP]= X86OpXX.opPUSHSP;
+            this.aOps[0x0F]              = X86OpXX.op0F;
+            this.aOps[X86.OPCODE.ARPL]   = X86OpXX.opARPL;
+            this.aOps[X86.OPCODE.PUSHSP] = X86OpXX.opPUSHSP;
+
+            if (I386 && this.model >= X86.MODEL_80386) {
+                this.aOps[X86.OPCODE.OS] = X86OpXX.opOS;
+                this.aOps[X86.OPCODE.AS] = X86OpXX.opAS;
+            }
         }
     }
 };
@@ -762,9 +772,7 @@ X86CPU.prototype.reset = function()
     this.resetCycles();
     this.clearError();      // clear any fatal error/exception that setError() may have flagged
     if (SAMPLER) {
-        this.iSampleNext = 0;
-        this.iSampleFreq = 0;
-        this.iSampleSkip = 0;
+        this.iSampleNext = this.iSampleFreq = this.iSampleSkip = 0;
     }
 };
 
@@ -836,7 +844,8 @@ X86CPU.prototype.resetRegs = function()
     this.segDS     = new X86Seg(this, X86Seg.ID.DATA,  "DS");
     this.segES     = new X86Seg(this, X86Seg.ID.DATA,  "ES");
     this.segSS     = new X86Seg(this, X86Seg.ID.STACK, "SS");
-    if (this.model >= X86.MODEL_80386) {
+
+    if (I386 && this.model >= X86.MODEL_80386) {
         this.segFS = new X86Seg(this, X86Seg.ID.DATA,  "FS");
         this.segGS = new X86Seg(this, X86Seg.ID.DATA,  "GS");
     }
@@ -870,10 +879,10 @@ X86CPU.prototype.resetRegs = function()
             btiSIHi:    0,
             btiDILo:    0,
             btiDIHi:    0,
-            btiEALo:    0,
-            btiEAHi:    0,
             btiMemLo:   0,
             btiMemHi:   0,
+            btiEALo:    0,
+            btiEAHi:    0,
             btiIO:      0
         };
     }
@@ -951,7 +960,7 @@ X86CPU.prototype.resetRegs = function()
     this.opFlags = this.opPrefixes = 0;
 
     /*
-     * The following contain the (default) OPERAND size (in terms of number of bytes), and the corresponding masks
+     * The following contain the (default) OPERAND size (2 for 16 bits, 4 for 32 bits), and the corresponding masks
      * for isolating the (src) bits of an OPERAND and clearing the (dst) bits of an OPERAND.  These are reset to
      * their segCS counterparts at the start of every new instruction, but are also set here for documentation purposes.
      */
@@ -959,7 +968,7 @@ X86CPU.prototype.resetRegs = function()
     this.opMask = this.segCS.opMask;
 
     /*
-     * Similarly, the following contain the (default) ADDRESS size (in terms of number of bytes), and the corresponding
+     * Similarly, the following contain the (default) ADDRESS size (0 for 16 bits, 1 for 32 bits), and the corresponding
      * masks for isolating the (src) bits of an address and clearing the (dst) bits of an address.  Like the OPERAND size
      * properties, these are reset to their segCS counterparts at the start of every new instruction.
      */
@@ -970,7 +979,7 @@ X86CPU.prototype.resetRegs = function()
      * It's also worth noting that instructions that implicitly use the stack also rely on something called STACK size,
      * which is based on the BIG bit of the last descriptor loaded into SS; use the following segSS properties:
      *
-     *      segSS.addrSize      (2 or 4)
+     *      segSS.addrSize      (0 or 1)
      *      segSS.addrMask      (0xffff or 0xffffffff)
      *
      * As there is no STACK size instruction prefix override, there's no need to propagate these segSS properties
@@ -978,15 +987,29 @@ X86CPU.prototype.resetRegs = function()
      */
 
     /*
-     * The default ModRM dispatch tables; the *Word tables will be updated based on the current ADDRESS size,
+     * The ModRM dispatch tables; opMods refers to the active set, based on the current ADDRESS size (addrSize),
      * which is based foremost on segCS.addrSize, but can also be overridden by an ADDRESS size instruction prefix.
      */
-    this.aOpModMemByte = X86ModB.aOpModMem;
-    this.aOpModRegByte = X86ModB.aOpModReg;
-    this.aOpModGrpByte = X86ModB.aOpModGrp;
-    this.aOpModMemWord = X86ModW.aOpModMem;
-    this.aOpModRegWord = X86ModW.aOpModReg;
-    this.aOpModGrpWord = X86ModW.aOpModGrp;
+    this.aaOpMod = new Array(2);
+    this.aaOpMod[0] = {
+        aOpModRegByte: X86ModB.aOpModReg,
+        aOpModMemByte: X86ModB.aOpModMem,
+        aOpModGrpByte: X86ModB.aOpModGrp,
+        aOpModRegWord: X86ModW.aOpModReg,
+        aOpModMemWord: X86ModW.aOpModMem,
+        aOpModGrpWord: X86ModW.aOpModGrp
+    };
+    if (I386) {
+        this.aaOpMod[1] = {
+            aOpModRegByte: X86ModB32.aOpModReg,
+            aOpModMemByte: X86ModB32.aOpModMem,
+            aOpModGrpByte: X86ModB32.aOpModGrp,
+            aOpModRegWord: X86ModW32.aOpModReg,
+            aOpModMemWord: X86ModW32.aOpModMem,
+            aOpModGrpWord: X86ModW32.aOpModGrp
+        };
+    }
+    this.opMods = this.aaOpMod[this.segCS.addrSize];
 };
 
 /**
@@ -1226,7 +1249,7 @@ X86CPU.prototype.restore = function(data)
     this.restoreProtMode(a[5]);
     this.setPS(a[6]);
     this.setIP(a[0]);
-    if (this.model >= X86.MODEL_80386) {
+    if (I386 && this.model >= X86.MODEL_80386) {
         this.segFS.restore(a[7]);
         this.segGS.restore(a[8]);
     }
@@ -1448,12 +1471,32 @@ X86CPU.prototype.getCF = function()
 /**
  * getPF()
  *
+ * From http://graphics.stanford.edu/~seander/bithacks.html#ParityParallel:
+ *
+ *      unsigned int v;  // word value to compute the parity of
+ *      v ^= v >> 16;
+ *      v ^= v >> 8;
+ *      v ^= v >> 4;
+ *      v &= 0xf;
+ *      return (0x6996 >> v) & 1;
+ *
+ *      The method above takes around 9 operations, and works for 32-bit words.  It may be optimized to work just on
+ *      bytes in 5 operations by removing the two lines immediately following "unsigned int v;".  The method first shifts
+ *      and XORs the eight nibbles of the 32-bit value together, leaving the result in the lowest nibble of v.  Next,
+ *      the binary number 0110 1001 1001 0110 (0x6996 in hex) is shifted to the right by the value represented in the
+ *      lowest nibble of v.  This number is like a miniature 16-bit parity-table indexed by the low four bits in v.
+ *      The result has the parity of v in bit 1, which is masked and returned.
+ *
+ * The x86 parity flag (PF) is based exclusively on the low 8 bits of resultParitySign, and PF must be SET if that byte
+ * has EVEN parity; the above calculation yields ODD parity, so we use the conditional operator to invert the result.
+ *
  * @this {X86CPU}
  * @return {number}
  */
 X86CPU.prototype.getPF = function()
 {
-    return (X86.PARITY[this.resultParitySign & 0xff])? X86.PS.PF : 0;
+    var v = this.resultParitySign;
+    return ((0x6996 >> ((v ^ (v >> 4)) & 0xf)) & 1)? 0 : X86.PS.PF;
 };
 
 /**
@@ -1852,9 +1895,7 @@ X86CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
  */
 X86CPU.prototype.getByte = function(addr)
 {
-    if (BACKTRACK) {
-        this.backTrack.btiMemLo = this.bus.readBackTrack(addr);
-    }
+    if (BACKTRACK) this.backTrack.btiMemLo = this.bus.readBackTrack(addr);
     return this.aMemBlocks[(addr & this.addrMemMask) >> this.blockShift].readByte(addr & this.blockLimit);
 };
 
@@ -1896,9 +1937,7 @@ X86CPU.prototype.getWord = function(addr)
  */
 X86CPU.prototype.setByte = function(addr, b)
 {
-    if (BACKTRACK) {
-        this.bus.writeBackTrack(addr, this.backTrack.btiMemLo);
-    }
+    if (BACKTRACK) this.bus.writeBackTrack(addr, this.backTrack.btiMemLo);
     this.aMemBlocks[(addr & this.addrMemMask) >> this.blockShift].writeByte(addr & this.blockLimit, b & 0xff);
 };
 
@@ -2357,13 +2396,13 @@ X86CPU.prototype.getIPWord = function()
 };
 
 /**
- * getSIB(mod)
+ * getSIBAddr(mod)
  *
  * @this {X86CPU}
  * @param {number} mod
  * @return {number}
  */
-X86CPU.prototype.getSIB = function(mod)
+X86CPU.prototype.getSIBAddr = function(mod)
 {
     var b = PREFETCH? this.getBytePrefetch(this.regLIP) : this.getByte(this.regLIP);
     if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
@@ -2664,10 +2703,13 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
             this.segData = this.segDS;
             this.segStack = this.segSS;
 
-            this.opSize = this.segCS.opSize;
-            this.opMask = this.segCS.opMask;
-            this.addrSize = this.segCS.addrSize;
-            this.addrMask = this.segCS.addrMask;
+            if (I386) {
+                this.opSize = this.segCS.opSize;
+                this.opMask = this.segCS.opMask;
+                this.addrSize = this.segCS.addrSize;
+                this.addrMask = this.segCS.addrMask;
+                this.opMods = this.aaOpMod[this.addrSize];
+            }
 
             this.opPrefixes = this.opFlags & X86.OPFLAG.REPEAT;
             if (this.intFlags) {

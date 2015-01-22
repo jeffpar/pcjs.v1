@@ -118,7 +118,7 @@ X86Seg.ID = {
 X86Seg.loadReal = function loadReal(sel, fSuppress)
 {
     this.sel = sel;
-    this.opSize = this.addrSize = 2;
+    this.opSize = 2; this.addrSize = 0;
     this.opMask = this.addrMask = 0xffff;
     return this.base = sel << 4;
 };
@@ -865,7 +865,7 @@ X86Seg.prototype.updateMode = function(fProt)
         this.opSize = 2;
         this.opMask = 0xffff;
     }
-    this.addrSize = this.opSize;
+    this.addrSize = this.opSize >> 2;
     this.addrMask = this.opMask;
     return fProt;
 };

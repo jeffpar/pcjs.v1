@@ -284,7 +284,7 @@ module.exports = function(grunt) {
                 TEMPcompilerOpts: {
                     // create_source_map: "./tmp/pcjs/"  + pkg.version + "/pc.map",
                     define: ["\"APPNAME='PCjs'\"", "\"APPVERSION='" + pkg.version + "'\"", "DEBUGGER=false",
-                             "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "BACKTRACK=false"],
+                             "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "BACKTRACK=false", "I386=false"],
                     // output_wrapper: "\"(function(){%output%})();//@ sourceMappingURL=/tmp/pcjs/" + pkg.version + "/pc.map\""
                     output_wrapper: "\"(function(){%output%})();\""
                 },
@@ -299,7 +299,7 @@ module.exports = function(grunt) {
                 TEMPcompilerOpts: {
                     // create_source_map: "./tmp/pcjs/"  + pkg.version + "/pc-dbg.map",
                     define: ["\"APPNAME='PCjs'\"", "\"APPVERSION='" + pkg.version + "'\"",
-                             "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "BACKTRACK=false"],
+                             "\"SITEHOST='www.pcjs.org'\"", "COMPILED=true", "DEBUG=false", "BACKTRACK=false", "I386=false"],
                     // output_wrapper: "\"(function(){%output%})();//@ sourceMappingURL=/tmp/pcjs/" + pkg.version + "/pc-dbg.map\""
                     output_wrapper: "\"(function(){%output%})();\""
                 },
