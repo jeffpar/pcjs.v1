@@ -37,6 +37,7 @@ if (typeof module !== 'undefined') {
     var web         = require("../../shared/lib/weblib");
     var DumpAPI     = require("../../shared/lib/dumpapi");
     var Component   = require("../../shared/lib/component");
+    var Memory      = require("./memory");
     var Messages    = require("./messages");
     var ChipSet     = require("./chipset");
     var Keyboard    = require("./keyboard");
@@ -200,18 +201,20 @@ function Video(parmsVideo, canvas, context, textarea, container)
     this.container = container;
     if (this.container) {
         this.container.doFullScreen = container['requestFullscreen'] || container['msRequestFullscreen'] || container['mozRequestFullScreen'] || container['webkitRequestFullscreen'];
-        var onFullScreenChange = function() {
-            var fFullScreen = (document['fullscreenElement'] || document['mozFullScreenElement'] || document['webkitFullscreenElement'] || document['msFullscreenElement']);
-            video.notifyFullScreen(fFullScreen? true : false);
-        };
-        if ('onfullscreenchange' in document) {
-            document.addEventListener('fullscreenchange', onFullScreenChange, false);
-        } else if ('onmozfullscreenchange' in document) {
-            document.addEventListener('mozfullscreenchange', onFullScreenChange, false);
-        } else if ('onwebkitfullscreenchange' in document) {
-            document.addEventListener('webkitfullscreenchange', onFullScreenChange, false);
-        } else if ('onmsfullscreenchange' in document) {
-            document.addEventListener('msfullscreenchange', onFullScreenChange, false);
+        if (this.container.doFullScreen) {
+            var onFullScreenChange = function() {
+                var fFullScreen = (document['fullscreenElement'] || document['mozFullScreenElement'] || document['webkitFullscreenElement'] || document['msFullscreenElement']);
+                video.notifyFullScreen(fFullScreen? true : false);
+            };
+            if ('onfullscreenchange' in document) {
+                document.addEventListener('fullscreenchange', onFullScreenChange, false);
+            } else if ('onmozfullscreenchange' in document) {
+                document.addEventListener('mozfullscreenchange', onFullScreenChange, false);
+            } else if ('onwebkitfullscreenchange' in document) {
+                document.addEventListener('webkitfullscreenchange', onFullScreenChange, false);
+            } else if ('onmsfullscreenchange' in document) {
+                document.addEventListener('msfullscreenchange', onFullScreenChange, false);
+            }
         }
     }
 
@@ -227,19 +230,21 @@ function Video(parmsVideo, canvas, context, textarea, container)
         };
         this.inputScreen.lockPointer = this.inputScreen['requestPointerLock'] || this.inputScreen['mozRequestPointerLock'] || this.inputScreen['webkitRequestPointerLock'];
         this.inputScreen.unlockPointer = this.inputScreen['exitPointerLock'] || this.inputScreen['mozExitPointerLock'] || this.inputScreen['webkitExitPointerLock'];
-        var onPointerLockChange = function() {
-            var fLocked = (
-                document['pointerLockElement'] === video.inputScreen ||
-                document['mozPointerLockElement'] === video.inputScreen ||
-                document['webkitPointerLockElement'] === video.inputScreen);
-            video.notifyPointerLocked(fLocked);
-        };
-        if ('onpointerlockchange' in document) {
-            document.addEventListener('pointerlockchange', onPointerLockChange, false);
-        } else if ('onmozpointerlockchange' in document) {
-            document.addEventListener('mozpointerlockchange', onPointerLockChange, false);
-        } else if ('onwebkitpointerlockchange' in document) {
-            document.addEventListener('webkitpointerlockchange', onPointerLockChange, false);
+        if (this.inputScreen.lockPointer) {
+            var onPointerLockChange = function() {
+                var fLocked = (
+                    document['pointerLockElement'] === video.inputScreen ||
+                    document['mozPointerLockElement'] === video.inputScreen ||
+                    document['webkitPointerLockElement'] === video.inputScreen);
+                video.notifyPointerLocked(fLocked);
+            };
+            if ('onpointerlockchange' in document) {
+                document.addEventListener('pointerlockchange', onPointerLockChange, false);
+            } else if ('onmozpointerlockchange' in document) {
+                document.addEventListener('mozpointerlockchange', onPointerLockChange, false);
+            } else if ('onwebkitpointerlockchange' in document) {
+                document.addEventListener('webkitpointerlockchange', onPointerLockChange, false);
+            }
         }
     }
 
@@ -3791,7 +3796,7 @@ Video.prototype.setMode = function(nMode, fForce)
 
             var controller = (card === this.cardEGA? card : null);
 
-            if (!this.bus.addMemory(card.addrBuffer, card.sizeBuffer, false, controller)) {
+            if (!this.bus.addMemory(card.addrBuffer, card.sizeBuffer, Memory.TYPE.VIDEO, controller)) {
                 /*
                  * TODO: Force this failure case and see how well the Video component deals with it.
                  */
@@ -4041,7 +4046,7 @@ Video.prototype.updateScreen = function(fForce)
     }
     else {
         /*
-         * This should never happen, but since updateScreen() is also called by CPU.displayVideo(),
+         * This should never happen, but since updateScreen() is also called by CPU.updateVideo(),
          * better safe than sorry.
          */
         if (this.aCellCache === undefined) return;
@@ -4306,24 +4311,23 @@ Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
             this.aCellCache[iCell] = data;
             if (x < xDirty) xDirty = x;
             for (var iPixel = 0; iPixel < nPixelsPerCell; iPixel++) {
-                var dwPixel = data & 0x80808080;
                 /*
                  * JavaScript Alert: if adwMemory contains a 32-bit value such as -1526726656, and then we mask it
                  * with 0x80808080, we end up with -2147483648, which in a perfect 32-bit world, would be equivalent
                  * to 0x80000000, which means that when we look up "Video.aEGADWToByte[0x80000000]", we should get
                  * the entry containing 0x8.  But no, in JavaScript, since the original value was negative, the
                  * masked value is still negative, because there are 52 "significand" bits in JavaScript numbers,
-                 * whereas bit-wise operations operate ONLY on the low 32 bits.
+                 * and bit-wise operations operate ONLY on the low 32 bits, leaving the higher sign bits intact.
                  *
-                 * This can be confirmed by looking at dwPixel.toString(16), which returns "-80000000".  The solution
-                 * is to add 4294967296 (0x100000000) to any negative 32-bit value for which you need the positive
-                 * representation instead.
+                 * This can be confirmed by looking at dwPixel.toString(16), which returns "-80000000".  One solution
+                 * is to add 4294967296 (0x100000000) to any negative 32-bit value for which we need the positive
+                 * representation.
+                 *
+                 * And, since assertions don't fix problems (only catch them, and only in DEBUG builds), I'm also
+                 * ensuring that bPixel will always default to 0 if an undefined value ever slips through again.
                  */
+                var dwPixel = data & 0x80808080;
                 if (dwPixel < 0) dwPixel += 0x100000000;
-                /*
-                 * Since assertions don't fix problems (only catch them, and only in DEBUG builds), I'm also ensuring
-                 * that bPixel will always default to 0 if an undefined value ever slips through again.
-                 */
                 this.assert(Video.aEGADWToByte[dwPixel] !== undefined);
                 var bPixel = Video.aEGADWToByte[dwPixel] || 0;
                 this.setPixel(this.imageScreenBuffer, x++, y, aPixelColors[bPixel]);
@@ -5238,12 +5242,8 @@ Video.init = function()
          * HACK: A canvas style of "auto" provides for excellent responsive canvas scaling in EVERY browser
          * except IE9/IE10, so I recalculate the appropriate CSS height every time the parent DIV is resized;
          * IE11 works without this hack, so we take advantage of the fact that IE11 doesn't report itself as "MSIE".
-         *
-         * Also, make sure the parent DIV also has a style of "auto"; normally, it has no explicit height, but
-         * sometimes we'll preset it to a height (eg, "350px") for design purposes.
          */
-        eCanvas.style.height = eVideo.style.height = "auto";
-
+        eCanvas.style.height = "auto";
         if (web.getUserAgent().indexOf("MSIE") >= 0) {
             eCanvas.style.height = (((eVideo.clientWidth * parmsVideo['screenHeight']) / parmsVideo['screenWidth']) | 0) + "px";
             eVideo.onresize = function(eParent, eChild, cx, cy) {
@@ -5255,24 +5255,25 @@ Video.init = function()
         eVideo.appendChild(eCanvas);
 
         /*
-         * HACK: Android-based browsers (eg, the Kindle Fire browser, the Chrome browser) don't honor the
+         * HACK: Android-based browsers, like the Silk (Amazon) browser and Chrome for Android, don't honor the
          * "contenteditable" attribute; that is, when the canvas receives focus, they don't activate the on-screen
          * keyboard.  So my fallback is to create a transparent textarea on top of the canvas.
          *
          * The parent DIV must have a style of "position:relative" (alternatively, a class of "pcjs-container"),
          * so that we can position the textarea using absolute coordinates.  Also, we don't want the textarea to be
          * visible, but we must use "opacity:0" instead of "visibility:hidden", because the latter seems to prevent
-         * the element from receiving events.
+         * the element from receiving events.  These styling requirements are taken care of in components.css
+         * (see references to the "pcjs-video-object" class).
          *
          * UPDATE: Unfortunately, Android keyboards like to compose whole words before transmitting any of the
          * intervening characters; our textarea's keyDown/keyUp event handlers DO receive intervening key events,
          * but their keyCode property is ZERO.  Virtually the only usable key event we receive is the Enter key.
-         * Android users will have to use machines that include their own on-screen "soft keyboard", or use an external
-         * keyboard.
+         * Android users will have to use machines that include their own on-screen "soft keyboard", or use an
+         * external keyboard.
          *
-         * The following code didn't work any better on Android.  You could clearly see the overlaid semi-transparent
-         * password-enabled input field, but none of the input characters were passed along, with the exception of the
-         * "Go" (Enter) key.
+         * The following attempt to use a password-enabled input field didn't work any better on Android.  You could
+         * clearly see the overlaid semi-transparent input field, but none of the input characters were passed along,
+         * with the exception of the "Go" (Enter) key.
          *
          *      var eInput = window.document.createElement("input");
          *      eInput.setAttribute("type", "password");
@@ -5280,14 +5281,8 @@ Video.init = function()
          *      eVideo.appendChild(eInput);
          *
          * See this Chromium issue for more information: https://code.google.com/p/chromium/issues/detail?id=118639
-         *
-         * TODO: The necessary styles for both the "textarea" and the parent video "object div" should be moved to the
-         * "component.css" file; they're here only for faster testing.
-         *
-         * NOTE: The "line-height:0" attribute is how I prevent Safari on iOS from always displaying a blinking cursor.
          */
         var eTextArea = window.document.createElement("textarea");
-        eTextArea.setAttribute("style", "position:absolute; left:0; top:0; width:100%; height:100%; opacity:0; border:0; padding:0; line-height:0;");
 
         /*
          * As noted in keyboard.js, the keyboard on an iOS device pops up with the SHIFT key depressed,
@@ -5297,9 +5292,6 @@ Video.init = function()
             eTextArea.setAttribute("autocapitalize", "off");
             eTextArea.setAttribute("autocorrect", "off");
         }
-
-        eVideo.style.clear = "both";
-        eVideo.style.position = "relative";
         eVideo.appendChild(eTextArea);
 
         /*

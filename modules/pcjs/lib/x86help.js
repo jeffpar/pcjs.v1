@@ -348,9 +348,9 @@ var X86Help = {
      */
     opHelpXCHGrb: function(dst, src) {
         if (this.regEA < 0) {
-            //
-            // Decode which register was src
-            //
+            /*
+             * Decode which register was src
+             */
             switch (this.bModRM & 0x7) {
             case 0x0:       // AL
                 this.regEAX = (this.regEAX & ~0xff) | dst;
@@ -381,11 +381,11 @@ var X86Help = {
             }
             this.nStepCycles -= this.CYCLES.nOpCyclesXchgRR;
         } else {
-            //
-            // This is a case where the ModRM decoder that's calling us didn't know it should have called modEAByte()
-            // instead of getEAByte(), so we compensate by updating regEAWrite.  However, setEAByte() has since been
-            // changed to revalidate the write using segEA:offEA, so updating regEAWrite here isn't strictly necessary.
-            //
+            /*
+             * This is a case where the ModRM decoder that's calling us didn't know it should have called modEAByte()
+             * instead of getEAByte(), so we compensate by updating regEAWrite.  However, setEAByte() has since been
+             * changed to revalidate the write using segEA:offEA, so updating regEAWrite here isn't strictly necessary.
+             */
             this.regEAWrite = this.regEA;
             this.setEAByte(dst);
             this.nStepCycles -= this.CYCLES.nOpCyclesXchgRM;
@@ -410,9 +410,9 @@ var X86Help = {
      */
     opHelpXCHGrw: function(dst, src) {
         if (this.regEA < 0) {
-            //
-            // Decode which register was src
-            //
+            /*
+             * Decode which register was src
+             */
             switch (this.bModRM & 0x7) {
             case 0x0:       // AX
                 this.regEAX = dst;
@@ -443,11 +443,11 @@ var X86Help = {
             }
             this.nStepCycles -= this.CYCLES.nOpCyclesXchgRR;
         } else {
-            //
-            // This is a case where the ModRM decoder that's calling us didn't know it should have called modEAWord()
-            // instead of getEAWord(), so we compensate by updating regEAWrite.  However, setEAWord() has since been
-            // changed to revalidate the write using segEA:offEA, so updating regEAWrite here isn't strictly necessary.
-            //
+            /*
+             * This is a case where the ModRM decoder that's calling us didn't know it should have called modEAWord()
+             * instead of getEAWord(), so we compensate by updating regEAWrite.  However, setEAWord() has since been
+             * changed to revalidate the write using segEA:offEA, so updating regEAWrite here isn't strictly necessary.
+             */
             this.regEAWrite = this.regEA;
             this.setEAWord(dst);
             this.nStepCycles -= this.CYCLES.nOpCyclesXchgRM;
@@ -539,7 +539,7 @@ var X86Help = {
      * deals exclusively with IDT descriptors.
      *
      * This means we must take care to replicate critical features of setCSIP(); eg, setting segCS.fCall before
-     * calling loadIDT(), updating EIP, and flushing the prefetch queue.
+     * calling loadIDT(), updating LIP, and flushing the prefetch queue.
      *
      * @this {X86CPU}
      * @param {number} nIDT
@@ -714,7 +714,7 @@ var X86Help = {
         /*
          * Similarly, the PC AT ROM BIOS deliberately generates a couple of GP faults as part of the POST
          * (Power-On Self Test); we don't want to ignore those, but we don't want to halt on them either.  We
-         * detect those faults by virtue of EIP being in the range %0F0000 to %0FFFFF.
+         * detect those faults by virtue of the LIP being in the range %0F0000 to %0FFFFF.
          */
         if (this.regLIP >= 0x0F0000 && this.regLIP <= 0x0FFFFF) {
             fHalt = false;

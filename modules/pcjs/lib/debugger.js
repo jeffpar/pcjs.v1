@@ -1623,7 +1623,7 @@ if (DEBUGGER) {
      *
      * @this {Debugger}
      * @param {number} nInt
-     * @param {number} addr (EIP after the "INT n" instruction has been fetched but not dispatched)
+     * @param {number} addr (LIP after the "INT n" instruction has been fetched but not dispatched)
      * @return {boolean} true if message generated (which in turn triggers addIntReturn() inside checkIntNotify()), false if not
      */
     Debugger.prototype.messageInt = function(nInt, addr)
@@ -2465,13 +2465,13 @@ if (DEBUGGER) {
         this.aBreakExec = ["exec"];
         if (this.aBreakRead !== undefined) {
             for (i = 1; i < this.aBreakRead.length; i++) {
-                this.bus.removeMemoryBreakpoint(this.getAddr(this.aBreakRead[i]), false);
+                this.bus.removeMemBreak(this.getAddr(this.aBreakRead[i]), false);
             }
         }
         this.aBreakRead = ["read"];
         if (this.aBreakWrite !== undefined) {
             for (i = 1; i < this.aBreakWrite.length; i++) {
-                this.bus.removeMemoryBreakpoint(this.getAddr(this.aBreakWrite[i]), true);
+                this.bus.removeMemBreak(this.getAddr(this.aBreakWrite[i]), true);
             }
         }
         this.aBreakWrite = ["write"];
@@ -2507,7 +2507,7 @@ if (DEBUGGER) {
             aAddr[3] = fTemp;
             aBreak.push(aAddr);
             if (aBreak != this.aBreakExec) {
-                this.bus.addMemoryBreakpoint(this.getAddr(aAddr), aBreak == this.aBreakWrite);
+                this.bus.addMemBreak(this.getAddr(aAddr), aBreak == this.aBreakWrite);
             }
             if (!fTemp) this.println("breakpoint enabled: " + this.hexAddr(aAddr) + " (" + aBreak[0] + ")");
             this.historyInit();
@@ -2536,7 +2536,7 @@ if (DEBUGGER) {
                 if (fRemove) {
                     aBreak.splice(i, 1);
                     if (aBreak != this.aBreakExec) {
-                        this.bus.removeMemoryBreakpoint(addr, aBreak == this.aBreakWrite);
+                        this.bus.removeMemBreak(addr, aBreak == this.aBreakWrite);
                     }
                     if (!aAddrBreak[3]) this.println("breakpoint cleared: " + this.hexAddr(aAddrBreak) + " (" + aBreak[0] + ")");
                     this.historyInit();
@@ -2592,7 +2592,7 @@ if (DEBUGGER) {
         for (var i = 1; i < aBreak.length; i++) {
             var addrBreak = this.getAddr(aBreak[i]);
             if (addrBreak >= addr && addrBreak < addr + size) {
-                this.bus.addMemoryBreakpoint(addrBreak, aBreak == this.aBreakWrite);
+                this.bus.addMemBreak(addrBreak, aBreak == this.aBreakWrite);
             }
         }
     };

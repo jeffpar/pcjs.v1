@@ -125,7 +125,7 @@ function X86CPU(parmsCPU) {
      *      [0]: registered component
      *      [1]: registered function to call for every software interrupt
      *
-     * The registered function is called with the physical address (EIP) following the software interrupt;
+     * The registered function is called with the linear address (LIP) following the software interrupt;
      * if any function returns false, the software interrupt will be skipped (presumed to be emulated),
      * and no further notification functions will be called.
      *
@@ -158,6 +158,11 @@ function X86CPU(parmsCPU) {
     this.aFlags.fComplete = this.aFlags.fDebugCheck = false;
 
     /*
+     * If there are no live registers to display, then updateStatus() can skip a bit....
+     */
+    this.cLiveRegs = 0;
+
+    /*
      * We're just declaring aMemBlocks and associated Bus parameters here; they'll be initialized by initMemory()
      * when the Bus is initialized.
      */
@@ -171,7 +176,7 @@ function X86CPU(parmsCPU) {
 
     if (SAMPLER) {
         /*
-         * For now, we're just going to sample EIP values (well, EIP + cycle count)
+         * For now, we're just going to sample LIP values (well, LIP + cycle count)
          */
         this.nSamples = 50000;
         this.nSampleFreq = 1000;
@@ -1031,7 +1036,7 @@ X86CPU.prototype.getChecksum = function()
  * @this {X86CPU}
  * @param {number} nInt
  * @param {Component} component
- * @param {function(number)} fn is called with the EIP value following the software interrupt
+ * @param {function(number)} fn is called with the LIP value following the software interrupt
  */
 X86CPU.prototype.addIntNotify = function(nInt, component, fn)
 {
@@ -1430,7 +1435,7 @@ X86CPU.prototype.setCSIP = function(off, sel, fCall)
     this.assert((off & 0xffff) == off);
     this.segCS.fCall = fCall;
     /*
-     * We break this operation into the following discrete steps (eg, set IP, load CS, and then update EIP)
+     * We break this operation into the following discrete steps (eg, set IP, load CS, and then update LIP)
      * so that segCS.load(sel) has the option of modifying IP when sel refers to a gate (call, interrupt, trap, etc).
      */
     this.regEIP = off;
@@ -1875,6 +1880,7 @@ X86CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
         case "D":
         case "V":
             this.bindings[sBinding] = control;
+            this.cLiveRegs++;
             fBound = true;
             break;
         default:
@@ -2578,41 +2584,52 @@ X86CPU.prototype.delayINTR = function()
 };
 
 /**
- * displayStatus()
+ * updateStatus()
+ *
+ * This provides periodic Control Panel updates (eg, a few times per second; see STATUS_UPDATES_PER_SECOND).
+ * this is where we take care of any DOM updates (eg, register values) while the CPU is running.
+ *
+ * Any high-frequency updates should be performed in updateVideo(), which should avoid DOM updates, since
+ * updateVideo() can be called up to 60 times per second (see VIDEO_UPDATES_PER_SECOND).
  *
  * @this {X86CPU}
- * @param {boolean} [fForce]
+ * @param {boolean} [fForce] (true will display registers even if the CPU is running and "live" registers are not enabled)
  */
-X86CPU.prototype.displayStatus = function(fForce)
+X86CPU.prototype.updateStatus = function(fForce)
 {
-    if (fForce || !this.aFlags.fRunning || this.aFlags.fDisplayLiveRegs) {
-        this.displayReg("AX", this.regEAX);
-        this.displayReg("BX", this.regEBX);
-        this.displayReg("CX", this.regECX);
-        this.displayReg("DX", this.regEDX);
-        this.displayReg("SP", this.regESP);
-        this.displayReg("BP", this.regEBP);
-        this.displayReg("SI", this.regESI);
-        this.displayReg("DI", this.regEDI);
-        this.displayReg("CS", this.segCS.sel);
-        this.displayReg("DS", this.segDS.sel);
-        this.displayReg("SS", this.segSS.sel);
-        this.displayReg("ES", this.segES.sel);
-        this.displayReg("IP", this.regEIP);
-        var regPS = this.getPS();
-        this.displayReg("PS", regPS);
-        this.displayReg("C", (regPS & X86.PS.CF)? 1 : 0, 1);
-        this.displayReg("P", (regPS & X86.PS.PF)? 1 : 0, 1);
-        this.displayReg("A", (regPS & X86.PS.AF)? 1 : 0, 1);
-        this.displayReg("Z", (regPS & X86.PS.ZF)? 1 : 0, 1);
-        this.displayReg("S", (regPS & X86.PS.SF)? 1 : 0, 1);
-        this.displayReg("T", (regPS & X86.PS.TF)? 1 : 0, 1);
-        this.displayReg("I", (regPS & X86.PS.IF)? 1 : 0, 1);
-        this.displayReg("D", (regPS & X86.PS.DF)? 1 : 0, 1);
-        this.displayReg("V", (regPS & X86.PS.OF)? 1 : 0, 1);
+    if (this.cLiveRegs) {
+        if (fForce || !this.aFlags.fRunning || this.aFlags.fDisplayLiveRegs) {
+            this.displayReg("AX", this.regEAX);
+            this.displayReg("BX", this.regEBX);
+            this.displayReg("CX", this.regECX);
+            this.displayReg("DX", this.regEDX);
+            this.displayReg("SP", this.regESP);
+            this.displayReg("BP", this.regEBP);
+            this.displayReg("SI", this.regESI);
+            this.displayReg("DI", this.regEDI);
+            this.displayReg("CS", this.segCS.sel);
+            this.displayReg("DS", this.segDS.sel);
+            this.displayReg("SS", this.segSS.sel);
+            this.displayReg("ES", this.segES.sel);
+            this.displayReg("IP", this.regEIP);
+            var regPS = this.getPS();
+            this.displayReg("PS", regPS);
+            this.displayReg("C", (regPS & X86.PS.CF)? 1 : 0, 1);
+            this.displayReg("P", (regPS & X86.PS.PF)? 1 : 0, 1);
+            this.displayReg("A", (regPS & X86.PS.AF)? 1 : 0, 1);
+            this.displayReg("Z", (regPS & X86.PS.ZF)? 1 : 0, 1);
+            this.displayReg("S", (regPS & X86.PS.SF)? 1 : 0, 1);
+            this.displayReg("T", (regPS & X86.PS.TF)? 1 : 0, 1);
+            this.displayReg("I", (regPS & X86.PS.IF)? 1 : 0, 1);
+            this.displayReg("D", (regPS & X86.PS.DF)? 1 : 0, 1);
+            this.displayReg("V", (regPS & X86.PS.OF)? 1 : 0, 1);
+        }
     }
+
     var controlSpeed = this.bindings["speed"];
     if (controlSpeed) controlSpeed.textContent = this.getSpeedCurrent();
+
+    this.parent.updateStatus.call(this, fForce);
 };
 
 /**
@@ -2770,7 +2787,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
                     var n = this.aSamples[this.iSampleNext];
                     if (n !== -1) {
                         if (n !== t) {
-                            this.println("sample deviation at index " + this.iSampleNext + ": current EIP=" + str.toHex(this.regLIP));
+                            this.println("sample deviation at index " + this.iSampleNext + ": current LIP=" + str.toHex(this.regLIP));
                             this.stopCPU();
                             break;
                         }

@@ -35,6 +35,7 @@
 if (typeof module !== 'undefined') {
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
+    var Memory      = require("./memory");
     var ROM         = require("./rom");
 }
 
@@ -47,7 +48,7 @@ if (typeof module !== 'undefined') {
  *      size: amount of RAM, in bytes (optional)
  *
  * NOTE: We make a note of the specified size, but no memory is initially allocated
- * for the RAM until the Computer component calls setPower().
+ * for the RAM until the Computer component calls powerUp().
  *
  * @constructor
  * @extends Component
@@ -157,7 +158,7 @@ RAM.prototype.reset = function() {
         this.sizeRAM = baseRAM;
     }
     if (!this.fAllocated && this.sizeRAM) {
-        if (this.bus.addMemory(this.addrRAM, this.sizeRAM)) {
+        if (this.bus.addMemory(this.addrRAM, this.sizeRAM, Memory.TYPE.RAM)) {
             this.fAllocated = true;
             this.status(Math.floor(this.sizeRAM / 1024) + "Kb");
             /*

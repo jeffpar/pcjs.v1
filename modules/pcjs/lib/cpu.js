@@ -177,17 +177,9 @@ CPU.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.cmp = cmp;
     /*
      * Attach the Video component to the CPU, so that the CPU can periodically update
-     * the video display via displayVideo(), as cycles permit.
+     * the video display via updateVideo(), as cycles permit.
      */
-    var video = cmp.getComponentByType("Video");
-    if (video) {
-        this.displayVideo = function onDisplayVideo() {
-            video.updateScreen();
-        };
-        this.setFocus = function onSetFocus() {
-            video.setFocus();
-        };
-    }
+    this.video = cmp.getComponentByType("Video");
     /*
      * Attach the ChipSet component to the CPU, so that it can obtain the IDT vector number of
      * pending hardware interrupts, in response to ChipSet's updateINTR() notifications.
@@ -453,37 +445,41 @@ CPU.prototype.displayReg = function(sReg, nVal, cch)
 };
 
 /**
- * displayStatus()
+ * updateStatus(fForce)
  *
- * This is implemented by the X86CPU component, which subclasses us.
+ * This provides periodic Control Panel updates (eg, a few times per second; see STATUS_UPDATES_PER_SECOND).
+ * The X86CPU subclasses updateStatus() to take care of any DOM updates (eg, register values) while the CPU is running.
  *
  * @this {CPU}
  * @param {boolean} [fForce]
  */
-CPU.prototype.displayStatus = function(fForce)
+CPU.prototype.updateStatus = function(fForce)
 {
+    if (this.cmp && this.cmp.panel) this.cmp.panel.updateStatus();
 };
 
 /**
- * displayVideo()
+ * updateVideo()
  *
- * This is implemented by the Video component (installed when initBus() is called).
+ * Any high-frequency updates should be performed here.  Avoid DOM updates, since updateVideo() can be called up to
+ * 60 times per second (see VIDEO_UPDATES_PER_SECOND).
  *
  * @this {CPU}
  */
-CPU.prototype.displayVideo = function()
+CPU.prototype.updateVideo = function()
 {
+    if (this.video) this.video.updateScreen();
+    if (this.cmp && this.cmp.panel) this.cmp.panel.updateAnimation();
 };
 
 /**
  * setFocus()
  *
- * This is implemented by the Video component (installed when initBus() is called).
- *
  * @this {CPU}
  */
 CPU.prototype.setFocus = function()
 {
+    if (this.video) this.video.setFocus();
 };
 
 /**
@@ -605,8 +601,8 @@ CPU.prototype.addCycles = function(nCycles, fEndStep)
  * to the time we expected the virtual hardware to take (eg, 1000ms/50 or 20ms), and if we still have time
  * remaining, we sleep the remaining time (or 0ms if there's no remaining time), and then restart runCPU().
  *
- * Similarly, whenever the "next video update" cycle counter goes to (or below) zero, we call displayVideo(),
- * and whenever the "next status update" cycle counter goes to (or below) zero, we call displayStatus().
+ * Similarly, whenever the "next video update" cycle counter goes to (or below) zero, we call updateVideo(),
+ * and whenever the "next status update" cycle counter goes to (or below) zero, we call updateStatus().
  *
  * @this {CPU}
  * @param {boolean} [fRecalc] is true if the caller wants to recalculate thresholds based on the most recent
@@ -996,13 +992,13 @@ CPU.prototype.runCPU = function(fOnClick)
             this.aCounts.nCyclesNextVideoUpdate -= nCycles;
             if (this.aCounts.nCyclesNextVideoUpdate <= 0) {
                 this.aCounts.nCyclesNextVideoUpdate += this.aCounts.nCyclesPerVideoUpdate;
-                this.displayVideo();
+                this.updateVideo();
             }
 
             this.aCounts.nCyclesNextStatusUpdate -= nCycles;
             if (this.aCounts.nCyclesNextStatusUpdate <= 0) {
                 this.aCounts.nCyclesNextStatusUpdate += this.aCounts.nCyclesPerStatusUpdate;
-                this.displayStatus();
+                this.updateStatus();
             }
 
             this.aCounts.nCyclesNextYield -= nCycles;
@@ -1046,7 +1042,7 @@ CPU.prototype.startCPU = function(fSetFocus)
         if (this.chipset) this.chipset.setSpeaker();
         var controlRun = this.bindings["run"];
         if (controlRun) controlRun.textContent = "Halt";
-        this.displayStatus(true);
+        this.updateStatus(true);
         if (fSetFocus) this.setFocus();
     }
 };
@@ -1104,8 +1100,8 @@ CPU.prototype.stopCPU = function(fComplete)
  */
 CPU.prototype.updateCPU = function()
 {
-    this.displayVideo();
-    this.displayStatus();
+    this.updateVideo();
+    this.updateStatus();
 };
 
 /**

@@ -223,7 +223,7 @@ web.loadResource = function(sURL, fAsync, data, componentNotify, fnNotify, pNoti
                  * from the local file system (ie, when using the "file:" protocol), we have to be a bit more "flexible".
                  */
                 if (xmlHTTP.status == 200 || !xmlHTTP.status && sURLData.length && web.getHostProtocol() == "file:") {
-                    web.log("xmlHTTP.onreadystatechange(" + sURL + "): returned " + sURLData.length + " bytes");
+                    if (MAXDEBUG) web.log("xmlHTTP.onreadystatechange(" + sURL + "): returned " + sURLData.length + " bytes");
                 }
                 else {
                     nErrorCode = xmlHTTP.status || -1;
@@ -247,12 +247,12 @@ web.loadResource = function(sURL, fAsync, data, componentNotify, fnNotify, pNoti
             sData += p + '=' + encodeURIComponent(data[p]);
         }
         sData = sData.replace(/%20/g, '+');
-        web.log("web.loadResource(POST " + sURL + "): " + sData.length + " bytes");
+        if (MAXDEBUG) web.log("web.loadResource(POST " + sURL + "): " + sData.length + " bytes");
         xmlHTTP.open("POST", sURL, fAsync);
         xmlHTTP.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         xmlHTTP.send(sData);
     } else {
-        web.log("web.loadResource(GET " + sURL + ")");
+        if (MAXDEBUG) web.log("web.loadResource(GET " + sURL + ")");
         xmlHTTP.open("GET", sURL, fAsync);
         xmlHTTP.send();
     }
@@ -260,7 +260,7 @@ web.loadResource = function(sURL, fAsync, data, componentNotify, fnNotify, pNoti
     if (!fAsync) {
         sURLData = xmlHTTP.responseText;
         if (xmlHTTP.status == 200) {
-            web.log("web.loadResource(" + sURL + "): returned " + sURLData.length + " bytes");
+            if (MAXDEBUG) web.log("web.loadResource(" + sURL + "): returned " + sURLData.length + " bytes");
         } else {
             nErrorCode = xmlHTTP.status || -1;
             web.log("web.loadResource(" + sURL + "): error code " + nErrorCode);

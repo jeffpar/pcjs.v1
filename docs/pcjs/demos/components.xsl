@@ -349,6 +349,9 @@
 				</xsl:if>
 			</xsl:if>
 			<xsl:choose>
+				<xsl:when test="@type = 'canvas'">
+					<canvas class="{$APPCLASS}-binding {$APPCLASS}-canvas" width="{@width}" height="{@height}" style="-webkit-user-select:none;{$border}{$fontsize}{$style}" data-value="{$type},{$binding}"><xsl:apply-templates/></canvas>
+				</xsl:when>
 				<xsl:when test="@type = 'button'">
 					<button class="{$APPCLASS}-binding" style="-webkit-user-select:none;{$border}{$width}{$height}{$fontsize}{$style}" data-value="{$type},{$binding}"><xsl:apply-templates/></button>
 				</xsl:when>

@@ -48,6 +48,8 @@ if (typeof module !== 'undefined') {
  */
 function Panel(parmsPanel) {
     Component.call(this, "Panel", parmsPanel, Panel);
+    this.canvas = null;
+    if (BACKTRACK) this.fBackTrack = false;
 }
 
 Component.subclass(Component, Panel);
@@ -55,9 +57,9 @@ Component.subclass(Component, Panel);
 /**
  * setBinding(sHTMLType, sBinding, control)
  *
- * The Panel doesn't have any bindings of its own; it passes along all binding requests to
- * the Computer, CPU, Keyboard and Debugger components. The order shouldn't matter, since any
- * component that doesn't recognize the specified binding should simply ignore it.
+ * Most panel layouts don't have bindings of their own, so we pass along all binding requests to the
+ * Computer, CPU, Keyboard and Debugger components first.  The order shouldn't matter, since any component
+ * that doesn't recognize the specified binding should simply ignore it.
  *
  * @this {Panel}
  * @param {string|null} sHTMLType is the type of the HTML control (eg, "button", "list", "text", "submit", "textarea", "canvas")
@@ -71,6 +73,21 @@ Panel.prototype.setBinding = function(sHTMLType, sBinding, control)
     if (this.cpu && this.cpu.setBinding(sHTMLType, sBinding, control)) return true;
     if (this.kbd && this.kbd.setBinding(sHTMLType, sBinding, control)) return true;
     if (DEBUGGER && this.dbg && this.dbg.setBinding(sHTMLType, sBinding, control)) return true;
+    if (!this.canvas && sHTMLType == "canvas") {
+        var fPanel = false;
+        if (BACKTRACK && sBinding == "btpanel") {
+            this.fBackTrack = fPanel = true;
+        }
+        if (fPanel) {
+            this.canvas = control;
+            this.canvasContext = this.canvas.getContext("2d");
+            /*
+             * this.canvas.width and this.canvas.height contain the width and height of the canvas, in pixels
+             */
+            this.fRedraw = true;
+            return true;
+        }
+    }
     return this.parent.setBinding.call(this, sHTMLType, sBinding, control);
 };
 
@@ -86,6 +103,7 @@ Panel.prototype.setBinding = function(sHTMLType, sBinding, control)
 Panel.prototype.initBus = function(cmp, bus, cpu, dbg)
 {
     this.cmp = cmp;
+    this.bus = bus;
     this.cpu = cpu;
     this.dbg = dbg;
     this.kbd = cmp.getComponentByType("Keyboard");
@@ -120,6 +138,41 @@ Panel.prototype.powerDown = function(fSave)
 };
 
 /**
+ * updateAnimation()
+ *
+ * If the given Control Panel contains a canvas requiring animation (eg, "btpanel"), then this is where that happens.
+ *
+ * @this {Panel}
+ */
+Panel.prototype.updateAnimation = function()
+{
+    var context = this.canvasContext;
+    if (context) {
+        if (this.fRedraw) {
+            if (BACKTRACK && this.fBackTrack) {
+                context.font = "40px Arial";
+                context.fillStyle = "#FFFFFF";
+                context.fillText("BackTrack Panel",10,50);
+            }
+            this.fRedraw = false;
+        }
+    }
+};
+
+/**
+ * updateStatus()
+ *
+ * Update function for Control Panels containing DOM elements with low-frequency display requirements.
+ *
+ * For the time being, the X86CPU component has its own updateStatus() handler, and displays all CPU registers itself.
+ *
+ * @this {Panel}
+ */
+Panel.prototype.updateStatus = function()
+{
+};
+
+/**
  * Panel.init()
  *
  * This function operates on every HTML element of class "panel", extracting the
@@ -130,9 +183,9 @@ Panel.prototype.powerDown = function(fSave)
  * NOTE: Unlike most other component init() functions, this one is designed to be
  * called multiple times: once at load time, so that we can binding our print()
  * function to the panel's output control ASAP, and again when the Computer component
- * is verifying that all components are ready and invoking their setPower() functions.
+ * is verifying that all components are ready and invoking their powerUp() functions.
  *
- * Our setPower() method gives us a second opportunity to notify any components that
+ * Our powerUp() method gives us a second opportunity to notify any components that
  * that might care (eg, CPU, Keyboard, and Debugger) that we have some controls they
  * might want to use.
  */

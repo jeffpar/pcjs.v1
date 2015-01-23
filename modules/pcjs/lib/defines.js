@@ -98,7 +98,7 @@ var FATARRAYS = false;
  * TYPEDARRAYS enables use of typed arrays for Memory blocks.  This used to be a compile-time-only option, but I've
  * added Memory access functions for typed arrays (see Memory.afnTypedArray), so support can be enabled dynamically.
  *
- * However, TYPEDARRAYS has always been slightly slower than the original NUMARRAYS implementation (which uses an
+ * However, TYPEDARRAYS has always been slightly slower than the original DWORDARRAYS implementation (which uses an
  * Array of numbers that stores 32 bits -- 4 consecutive bytes -- per number), so TYPEDARRAYS is completely disabled.
  *
  * See the Memory component for details.
@@ -117,8 +117,8 @@ var BACKTRACK = true;
  * @define {boolean}
  *
  * Enables instruction sampling (a work-in-progress).  This was used briefly as an internal debugging aid, to
- * periodically record EIP values in a fixed-length sampling buffer, halting execution once the sampling buffer
- * was full, and then compare those sampled EIP values to corresponding EIP values on subsequent runs, to look
+ * periodically record LIP values in a fixed-length sampling buffer, halting execution once the sampling buffer
+ * was full, and then compare those sampled LIP values to corresponding LIP values on subsequent runs, to look
  * for deviations.  In theory, every run is supposed to be absolutely identical, even if you interrupt execution
  * with the Debugger or enable/disable different sets of messages, but in practice, that's hard to guarantee.
  */

@@ -37,6 +37,7 @@ if (typeof module !== 'undefined') {
     var web         = require("../../shared/lib/weblib");
     var DumpAPI     = require("../../shared/lib/dumpapi");
     var Component   = require("../../shared/lib/component");
+    var Memory      = require("./memory");
 }
 
 /**
@@ -315,7 +316,7 @@ ROM.prototype.copyROM = function()
 ROM.prototype.addROM = function(addr)
 {
     if (addr == null) return true;
-    if (this.bus.addMemory(addr, this.sizeROM, true)) {
+    if (this.bus.addMemory(addr, this.sizeROM, Memory.TYPE.ROM)) {
         if (DEBUG) this.log("addROM(): copying ROM to " + str.toHexAddr(addr) + " (0x" + str.toHex(this.abROM.length) + " bytes)");
         var bto = null;
         for (var off = 0; off < this.abROM.length; off++) {

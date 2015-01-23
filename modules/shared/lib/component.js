@@ -838,7 +838,7 @@ Component.prototype = {
             if (this.aFlags.fReady) {
                 fnReady();
             } else {
-                if (DEBUG) this.log("NOT ready");
+                if (MAXDEBUG) this.log("NOT ready");
                 this.fnReady = fnReady;
             }
         }
@@ -856,7 +856,7 @@ Component.prototype = {
         if (!this.aFlags.fError) {
             this.aFlags.fReady = (fReady !== false);
             if (this.aFlags.fReady) {
-                if (DEBUG || this.name) this.log("ready");
+                if (MAXDEBUG /* || this.name */) this.log("ready");
                 var fnReady = this.fnReady;
                 this.fnReady = null;
                 if (fnReady) fnReady();

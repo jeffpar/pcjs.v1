@@ -139,7 +139,7 @@ function Bus(parmsBus, cpu, dbg)
      *      [1]: registered function to call for every I/O access
      *
      * The registered function is called with the port address, and if the access was triggered by the CPU,
-     * the physical address (EIP) that the access occurred from.
+     * the linear address (LIP) that the access occurred from.
      *
      * WARNING: Unlike the (old) read and write memory notification functions, these support only one
      * pair of input/output functions per port.  A more sophisticated architecture could support a list
@@ -291,7 +291,7 @@ Bus.prototype.powerUp = function(data, fRepower)
 };
 
 /**
- * addMemory(addr, size, fReadOnly, controller)
+ * addMemory(addr, size, type, controller)
  *
  * Adds new Memory blocks to the specified address range.  Any Memory blocks previously
  * added to that range must first be removed via removeMemory(); otherwise, you'll get
@@ -303,11 +303,11 @@ Bus.prototype.powerUp = function(data, fRepower)
  * @this {Bus}
  * @param {number} addr is the starting physical address of the memory address range
  * @param {number} size of the length in bytes of the range; must be a multiple of BLOCK_SIZE
- * @param {boolean} [fReadOnly] is true if the memory must be read-only; default is read-write
+ * @param {number} type is one of the Memory.TYPE constants
  * @param {Object} [controller] is an optional memory controller component
  * @return {boolean} true if successful, false if not
  */
-Bus.prototype.addMemory = function(addr, size, fReadOnly, controller)
+Bus.prototype.addMemory = function(addr, size, type, controller)
 {
     if (!(addr & this.blockLimit) && size && !(size & this.blockLimit)) {
         var iBlock = addr >> this.blockShift;
@@ -317,7 +317,7 @@ Bus.prototype.addMemory = function(addr, size, fReadOnly, controller)
                 return this.reportError(1, addr, size);
             }
             addr = iBlock * this.blockSize;
-            block = this.aMemBlocks[iBlock++] = new Memory(addr, this.blockSize, fReadOnly, controller);
+            block = this.aMemBlocks[iBlock++] = new Memory(addr, this.blockSize, type, controller);
             if (DEBUGGER) block.setDebugInfo(this.cpu, this.dbg, addr, this.blockSize);
             size -= this.blockSize;
         }
@@ -912,7 +912,7 @@ Bus.prototype.saveMemory = function()
  * This restores the contents of all Memory blocks; called by X86CPU.restore().
  *
  * In theory, we ONLY have to save/restore block contents.  Other block attributes,
- * like fReadOnly, the memory controller (if any), and the active memory access functions,
+ * like the type, the memory controller (if any), and the active memory access functions,
  * should already be restored, since every component (re)allocates all the memory blocks
  * it was using when it's restored.  And since the CPU is guaranteed to be the last
  * component to be restored, all those blocks (and their attributes) should be in place now.
@@ -948,13 +948,13 @@ Bus.prototype.restoreMemory = function(a)
 };
 
 /**
- * addMemoryBreakpoint(addr, fWrite)
+ * addMemBreak(addr, fWrite)
  *
  * @this {Bus}
  * @param {number} addr
  * @param {boolean} fWrite is true for a memory write breakpoint, false for a memory read breakpoint
  */
-Bus.prototype.addMemoryBreakpoint = function(addr, fWrite)
+Bus.prototype.addMemBreak = function(addr, fWrite)
 {
     if (DEBUGGER) {
         var iBlock = addr >> this.blockShift;
@@ -963,13 +963,13 @@ Bus.prototype.addMemoryBreakpoint = function(addr, fWrite)
 };
 
 /**
- * removeMemoryBreakpoint(addr, fWrite)
+ * removeMemBreak(addr, fWrite)
  *
  * @this {Bus}
  * @param {number} addr
  * @param {boolean} fWrite is true for a memory write breakpoint, false for a memory read breakpoint
  */
-Bus.prototype.removeMemoryBreakpoint = function(addr, fWrite)
+Bus.prototype.removeMemBreak = function(addr, fWrite)
 {
     if (DEBUGGER) {
         var iBlock = addr >> this.blockShift;
@@ -1006,7 +1006,7 @@ Bus.prototype.addPortInputBreak = function(port)
  * @param {number} start port address
  * @param {number} end port address
  * @param {Component} component
- * @param {function(number,number)} fn is called with the port and EIP values at the time of the input
+ * @param {function(number,number)} fn is called with the port and LIP values at the time of the input
  */
 Bus.prototype.addPortInputNotify = function(start, end, component, fn)
 {
@@ -1049,7 +1049,7 @@ Bus.prototype.addPortInputTable = function(component, table, offset)
  *
  * @this {Bus}
  * @param {number} port
- * @param {number} [addrFrom] is the EIP value at the time of the input
+ * @param {number} [addrFrom] is the LIP value at the time of the input
  * @return {number} simulated port value (0xff if none)
  *
  * NOTE: It seems that at least parts of the ROM BIOS (like the RS-232 probes around F000:E5D7 in the 5150 BIOS)
@@ -1130,7 +1130,7 @@ Bus.prototype.addPortOutputBreak = function(port)
  * @param {number} start port address
  * @param {number} end port address
  * @param {Component} component
- * @param {function(number,number)} fn is called with the port and EIP values at the time of the output
+ * @param {function(number,number)} fn is called with the port and LIP values at the time of the output
  */
 Bus.prototype.addPortOutputNotify = function(start, end, component, fn)
 {
@@ -1174,7 +1174,7 @@ Bus.prototype.addPortOutputTable = function(component, table, offset)
  * @this {Bus}
  * @param {number} port
  * @param {number} bOut
- * @param {number} [addrFrom] is the EIP value at the time of the output
+ * @param {number} [addrFrom] is the LIP value at the time of the output
  */
 Bus.prototype.checkPortOutputNotify = function(port, bOut, addrFrom)
 {

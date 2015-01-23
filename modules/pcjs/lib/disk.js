@@ -889,8 +889,8 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
  * "logical" sector numbers for volume-relative block addresses (aka LBAs or Logical Block Addresses), and
  * 0-based "physical" sector numbers for disk-relative block addresses (aka PBAs or Physical Block Addresses).
  *
- * Our use of the term LBA differs from the popular usage of the term, in which disk controllers use LBA
- * numbers instead of CHS values.  In our world, those controllers would actually be using PBA numbers.
+ * Also, our use of the term LBA differs from that of more modern disk controllers; in the pre-modern world
+ * of PCjs, what we call PBA numbers are what those controllers would call LBA numbers.
  *
  * @this {Disk}
  */
@@ -904,6 +904,19 @@ Disk.prototype.buildFileTable = function()
         dir.pbaVolume = dir.lbaTotal = 0;
 
         var cbDisk = this.nCylinders * this.nHeads * this.nSectors * this.cbSector;
+
+        /*
+         * At this point, if this is a remote disk, you may see some warning messages in your browser's console,
+         * like this message from Chrome:
+         *
+         *      "Synchronous XMLHttpRequest on the main thread is deprecated because of its detrimental effects
+         *      to the end user's experience. For more help, check http://xhr.spec.whatwg.org/."
+         *
+         * This is because I was lazy and made the buildFileTable() worker function getSector() use the synchronous
+         * form of seek().  For development purposes, that was fine, but...  TODO: Eventually change buildFileTable()
+         * to use async I/O.
+         */
+        if (this.fRemote) this.log("ignore synchronous XMLHttpRequest warnings here for now....");
 
         var sectorBoot = this.getSector(0);
         if (!sectorBoot) {
@@ -1279,9 +1292,9 @@ Disk.prototype.updateSector = function(file, pba, off)
 /**
  * getSectorData(sector, off, len)
  *
- * NOTE: Yes, this function is not the most efficient way to read a byte/word/dword value from within
- * a sector, but given the different states a sector may be in, it's certainly the simplest and safest,
- * and it's not clear that we need to be superfast anyway.
+ * NOTE: Yes, this function is not the most efficient way to read a byte/word/dword value from within a sector,
+ * but given the different states a sector may be in, it's certainly the simplest and safest, and since this is
+ * only used by buildFileTable() and its progeny, it's not clear that we need to be superfast anyway.
  *
  * @this {Disk}
  * @param {Object} sector

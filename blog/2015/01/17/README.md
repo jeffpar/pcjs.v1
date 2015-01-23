@@ -1,8 +1,8 @@
 PCjs Uncompiled
 ---
 Most machines on [pcjs.org](http://www.pcjs.org/) run with a compiled version of PCjs, which is produced
-by running PCjs JavaScript source code through Google's Closure Compiler, yielding a smaller (minified) version
-that loads and runs much faster than the original source code.
+by running PCjs JavaScript source code through Google's Closure Compiler, yielding a smaller (minified)
+version that loads and runs much faster than the original source code.
 
 However, certain features are disabled in the compiled versions, including a new BACKTRACK feature that
 makes it possible to track the contents of memory locations and registers back to their source (eg, to a ROM
@@ -17,7 +17,7 @@ Here's how you embed an "uncompiled" machine in a PCjs Markdown file:
 
 	[Embedded IBM PC](/devices/pc/machine/5170/ega/1152kb/rev3/ "PCjs:at-ega-1152k-rev3::uncompiled:debugger")
 
-And here's that example in action, using the current Markdown (README.md) file:
+And here's that example in action, in the Markdown ([README.md]()) file you are reading right now:
 
 [Embedded IBM PC](/devices/pc/machine/5170/ega/1152kb/rev3/ "PCjs:at-ega-1152k-rev3::uncompiled:debugger")
 

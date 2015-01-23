@@ -64,7 +64,7 @@ if (typeof module !== 'undefined') {
  */
 
 /**
- * Memory(addr, size, fReadOnly, controller)
+ * Memory(addr, size, type, controller)
  *
  * The Bus component allocates Memory objects so that each has a memory buffer with a
  * block-granular starting address and an address range equal to bus.blockSize; however,
@@ -74,40 +74,42 @@ if (typeof module !== 'undefined') {
  * The Bus allocates empty blocks for the entire address space during initialization, so that
  * any reads/writes to undefined addresses will have no effect.  Later, the ROM and RAM
  * components will ask the Bus to allocate memory for specific ranges, and the Bus will allocate
- * as many new BLOCK_SIZE Memory objects as the ranges require.  Partial Memory blocks could be
- * supported in theory, but in practice, they're not.
+ * as many new BLOCK_SIZE Memory objects as the ranges require.  Partial Memory blocks could
+ * also be supported in theory, but in practice, they're not.
  *
  * Because Memory blocks now allow us to have a "sparse" address space, we could choose to
  * take the memory hit of allocating 4K arrays per block, where each element stores only one byte,
  * instead of the more frugal but slightly slower approach of allocating arrays of 32-bit dwords
- * (NUMARRAYS) and shifting/masking bytes/words to/from dwords; in theory, byte accesses would
+ * (DWORDARRAYS) and shifting/masking bytes/words to/from dwords; in theory, byte accesses would
  * be faster and word accesses somewhat less faster.
  *
  * However, preliminary testing of that feature (FATARRAYS) did not yield significantly faster
  * performance, so it is OFF by default to minimize our memory consumption.  Using TYPEDARRAYS
  * would seem best, but as discussed in defines.js, it's off by default, because it doesn't perform
- * as well as NUMARRAYS; the other advantage of TYPEDARRAYS is that it should theoretically use
- * about 1/2 the memory of NUMARRAYS (32-bit elements vs 64-bit numbers), but I value speed over size
- * at this point.  Also, not all JavaScript implementations support TYPEDARRAYS (IE9 is probably
+ * as well as DWORDARRAYS; the other advantage of TYPEDARRAYS is that it should theoretically use
+ * about 1/2 the memory of DWORDARRAYS (32-bit elements vs 64-bit numbers), but I value speed over
+ * size at this point.  Also, not all JavaScript implementations support TYPEDARRAYS (IE9 is probably
  * the only real outlier: it lacks typed arrays but otherwise has all the necessary HTML5 support).
  *
  * WARNING: Since Memory blocks are low-level objects that have no UI requirements, they
- * do not inherit from the Component class, so you should only use class methods of Component,
- * such as Component.assert(), or Debugger methods if a debugger (dbg) is available.
+ * do not inherit from the Component class, so if you want to use any Component class methods,
+ * such as Component.assert(), use the corresponding Debugger methods instead (assuming a debugger
+ * is available).
  *
  * @constructor
  * @param {number} addr of block (must be some multiple of bus.blockSize)
  * @param {number} [size] of block's buffer in bytes (0 for none); must be a multiple of 4
- * @param {boolean} [fReadOnly] is true if the block must be marked read-only
+ * @param {number} [type] is one of the Memory.TYPE constants (default is Memory.TYPE.NONE)
  * @param {Object} [controller] is an optional memory controller component
  */
-function Memory(addr, size, fReadOnly, controller)
+function Memory(addr, size, type, controller)
 {
     var i;
     this.cb = size || 0;
     this.adw = null;
     this.offset = 0;
-    this.fReadOnly = fReadOnly;
+    this.type = type || Memory.TYPE.NONE;
+    this.fReadOnly = (type == Memory.TYPE.ROM);
     this.controller = null;
     this.fDirty = this.fDirtyEver = false;
 
@@ -178,6 +180,28 @@ function Memory(addr, size, fReadOnly, controller)
         this.setAccess(Memory.afnMemory);
     }
 }
+
+/*
+ * Basic memory types
+ *
+ * The type that is most critical is ROM, because it determines the fReadOnly setting for allocated
+ * memory blocks.  Both RAM and VIDEO memory are always considered writable, and even ROM can be written
+ * using the Bus setByteDirect() interface (which in turn uses the Memory writeByteDirect() interface),
+ * allowing the ROM component to initialize its own memory.  Only the Memory interfaces used by the CPU
+ * are designed to ignore writes to ROM.
+ *
+ * The other purpose these types serve is to provide the Control Panel with the ability to highlight
+ * memory regions according to their primary purpose.
+ *
+ * Unallocated regions of the address space also contain memory blocks, but the blocks themselves are
+ * empty (that is, their data arrays are uninitialized) and the memory type is NONE.
+ */
+Memory.TYPE = {
+    NONE:   0,
+    RAM:    1,
+    ROM:    2,
+    VIDEO:  3
+};
 
 /**
  * readNone(off)

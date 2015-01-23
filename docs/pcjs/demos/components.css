@@ -104,6 +104,22 @@
     line-height: 19px;
     background-color: #000000;
 }
+.pcjs-video-object {
+    clear: both;
+    height: auto;
+    position: relative;
+}
+.pcjs-video-object textarea {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    border: 0;
+    padding: 0;
+    line-height: 0;
+}
 .pcjs-reference {
     float: left;
     font-size: x-small;
