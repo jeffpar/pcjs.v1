@@ -8522,9 +8522,6 @@ X86ModW.aOpModGrp = [
     function opModGrpWordC4(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.regESP & this.opMask, fnSrc.call(this));
         this.regESP = (this.regESP & ~this.opMask) | w;
-        if (BACKTRACK) {
-            X86.BACKTRACK.SP_LO = this.backTrack.btiEALo; X86.BACKTRACK.SP_HI = this.backTrack.btiEAHi;
-        }
     },
     /**
      * opModGrpWordC5(afnGrp, fnSrc): mod=11 (dst:reg)  reg=000 (afnGrp[0])  r/m=101 (BP)
@@ -8634,9 +8631,6 @@ X86ModW.aOpModGrp = [
     function opModGrpWordCC(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.regESP & this.opMask, fnSrc.call(this));
         this.regESP = (this.regESP & ~this.opMask) | w;
-        if (BACKTRACK) {
-            X86.BACKTRACK.SP_LO = this.backTrack.btiEALo; X86.BACKTRACK.SP_HI = this.backTrack.btiEAHi;
-        }
     },
     /**
      * opModGrpWordCD(afnGrp, fnSrc): mod=11 (dst:reg)  reg=001 (afnGrp[1])  r/m=101 (BP)
@@ -8746,9 +8740,6 @@ X86ModW.aOpModGrp = [
     function opModGrpWordD4(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.regESP & this.opMask, fnSrc.call(this));
         this.regESP = (this.regESP & ~this.opMask) | w;
-        if (BACKTRACK) {
-            X86.BACKTRACK.SP_LO = this.backTrack.btiEALo; X86.BACKTRACK.SP_HI = this.backTrack.btiEAHi;
-        }
     },
     /**
      * opModGrpWordD5(afnGrp, fnSrc): mod=11 (dst:reg)  reg=010 (afnGrp[2])  r/m=101 (BP)
@@ -8858,9 +8849,6 @@ X86ModW.aOpModGrp = [
     function opModGrpWordDC(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.regESP & this.opMask, fnSrc.call(this));
         this.regESP = (this.regESP & ~this.opMask) | w;
-        if (BACKTRACK) {
-            X86.BACKTRACK.SP_LO = this.backTrack.btiEALo; X86.BACKTRACK.SP_HI = this.backTrack.btiEAHi;
-        }
     },
     /**
      * opModGrpWordDD(afnGrp, fnSrc): mod=11 (dst:reg)  reg=011 (afnGrp[3])  r/m=101 (BP)
@@ -8970,9 +8958,6 @@ X86ModW.aOpModGrp = [
     function opModGrpWordE4(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.regESP & this.opMask, fnSrc.call(this));
         this.regESP = (this.regESP & ~this.opMask) | w;
-        if (BACKTRACK) {
-            X86.BACKTRACK.SP_LO = this.backTrack.btiEALo; X86.BACKTRACK.SP_HI = this.backTrack.btiEAHi;
-        }
     },
     /**
      * opModGrpWordE5(afnGrp, fnSrc): mod=11 (dst:reg)  reg=100 (afnGrp[4])  r/m=101 (BP)
@@ -9082,9 +9067,6 @@ X86ModW.aOpModGrp = [
     function opModGrpWordEC(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.regESP & this.opMask, fnSrc.call(this));
         this.regESP = (this.regESP & ~this.opMask) | w;
-        if (BACKTRACK) {
-            X86.BACKTRACK.SP_LO = this.backTrack.btiEALo; X86.BACKTRACK.SP_HI = this.backTrack.btiEAHi;
-        }
     },
     /**
      * opModGrpWordED(afnGrp, fnSrc): mod=11 (dst:reg)  reg=101 (afnGrp[5])  r/m=101 (BP)
@@ -9194,9 +9176,6 @@ X86ModW.aOpModGrp = [
     function opModGrpWordF4(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.regESP & this.opMask, fnSrc.call(this));
         this.regESP = (this.regESP & ~this.opMask) | w;
-        if (BACKTRACK) {
-            X86.BACKTRACK.SP_LO = this.backTrack.btiEALo; X86.BACKTRACK.SP_HI = this.backTrack.btiEAHi;
-        }
     },
     /**
      * opModGrpWordF5(afnGrp, fnSrc): mod=11 (dst:reg)  reg=110 (afnGrp[6])  r/m=101 (BP)
@@ -9306,9 +9285,6 @@ X86ModW.aOpModGrp = [
     function opModGrpWordFC(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.regESP & this.opMask, fnSrc.call(this));
         this.regESP = (this.regESP & ~this.opMask) | w;
-        if (BACKTRACK) {
-            X86.BACKTRACK.SP_LO = this.backTrack.btiEALo; X86.BACKTRACK.SP_HI = this.backTrack.btiEAHi;
-        }
     },
     /**
      * opModGrpWordFD(afnGrp, fnSrc): mod=11 (dst:reg)  reg=111 (afnGrp[7])  r/m=101 (BP)

@@ -266,7 +266,7 @@ var X86 = {
         DMA:        0x08        // async DMA operation in progress
     },
     /*
-     * Common opcodes
+     * Common opcodes (and/or any opcodes we need to refer to explicitly)
      */
     OPCODE: {
         ES:         0x26,       // opES()
@@ -274,22 +274,24 @@ var X86 = {
         SS:         0x36,       // opSS()
         DS:         0x3E,       // opDS()
         PUSHSP:     0x54,
-        PUSHA:      0x60,
-        POPA:       0x61,
-        BOUND:      0x62,
-        ARPL:       0x63,
-        OS:         0x66,
-        AS:         0x67,
-        PUSH16:     0x68,
-        IMUL16:     0x69,
-        PUSH8:      0x6A,
-        IMUL8:      0x6B,
-        INSB:       0x6C,
-        INSW:       0x6D,
-        OUTSB:      0x6E,
-        OUTSW:      0x6F,
-        ENTER:      0xC8,
-        LEAVE:      0xC9,
+        PUSHA:      0x60,       // 80186 and up
+        POPA:       0x61,       // 80186 and up
+        BOUND:      0x62,       // 80186 and up
+        ARPL:       0x63,       // 80286 and up
+        FS:         0x64,       // 80386 and up
+        GS:         0x65,       // 80386 and up
+        OS:         0x66,       // 80386 and up
+        AS:         0x67,       // 80386 and up
+        PUSH16:     0x68,       // 80186 and up
+        IMUL16:     0x69,       // 80186 and up
+        PUSH8:      0x6A,       // 80186 and up
+        IMUL8:      0x6B,       // 80186 and up
+        INSB:       0x6C,       // 80186 and up
+        INSW:       0x6D,       // 80186 and up
+        OUTSB:      0x6E,       // 80186 and up
+        OUTSW:      0x6F,       // 80186 and up
+        ENTER:      0xC8,       // 80186 and up
+        LEAVE:      0xC9,       // 80186 and up
         CALLF:      0x9A,       // opCALLf()
         MOVSB:      0xA4,       // opMOVSb()
         MOVSW:      0xA5,       // opMOVSw()
@@ -315,7 +317,7 @@ var X86 = {
         REPZ:       0xF3,
         CALLW:      0x10FF,
         CALLDW:     0x18FF,
-        UD2:        0x0B0F      // UD2 (invalid opcode guaranteed to generate UD_FAULT on all post-8086 processors)
+        UD2:        0x0B0F      // UD2 (invalid opcode "guaranteed" to generate UD_FAULT on all post-8086 processors)
     }
 };
 

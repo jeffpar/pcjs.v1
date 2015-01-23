@@ -444,11 +444,11 @@ X86CPU.PREFETCH = {
 /**
  * initMemory(aMemBlocks, addrLimit, blockShift, blockLimit, blockMask)
  *
- * Notification from Bus.initMemory(), giving us direct access to the entire memory
- * space (aMemBlocks).
+ * Notification from Bus.initMemory(), giving us direct access to the entire memory space
+ * (aMemBlocks).
  *
- * We also initialize an instruction byte prefetch queue, aPrefetch, which is an
- * N-element array whose slots look like:
+ * We also initialize an instruction byte prefetch queue, aPrefetch, which is an N-element
+ * array with slots that look like:
  *
  *      0:  [tag, b]    <-- iPrefetchTail
  *      1:  [tag, b]
@@ -459,7 +459,7 @@ X86CPU.PREFETCH = {
  * where tag is the physical address of the byte that's been prefetched, and b is the
  * value of the byte.  N is currently 8 (PREFETCH.ARRAY), but it can be any power-of-two
  * that is equal to or greater than (PREFETCH.QUEUE), the effective size of the prefetch
- * queue (6 on an 8086, 4 on an 8088; currently hard-coded to the latter). All slots
+ * queue (6 on an 8086, 4 on an 8088; currently hard-coded to the latter).  All slots
  * are initialized to [-1, 0] when preallocating the prefetch queue, but those initial
  * values are quickly overwritten and never seen again.
  *
@@ -523,7 +523,7 @@ X86CPU.prototype.setAddressMask = function(addrMask)
 /**
  * initProcessor()
  *
- * This isolates 80186/80188/80286 support, so that it can be selectively enabled/tested.
+ * This isolates 80186/80188/80286/80386 support, so that it can be selectively enabled/tested.
  *
  * Here's a summary of 80186/80188 differences according to "AP-186: Introduction to the 80186
  * Microprocessor, March 1983" (pp.55-56).  "The iAPX 86,88 and iAPX 186,188 User's Manual Programmer's
@@ -711,8 +711,8 @@ X86CPU.prototype.initProcessor = function()
     if (this.model >= X86.MODEL_80186) {
         /*
          * TODO: I don't go out of my way to make 80186/80188 cycle times accurate, since no IBM PC models used
-         * those processors; beyond the 8086, my next priority is the 80286.  But we may revisit the 80186 someday;
-         * instruction handlers that contain "hard-coded" 80286 cycle times include: opINSb, opINSw, opOUTSb,
+         * those processors; beyond the 8086, the next priority is the 80286, but we may revisit the 80186 someday.
+         * Instruction handlers that contain "hard-coded" 80286 cycle times include: opINSb, opINSw, opOUTSb,
          * opOUTSw, opENTER, and opLEAVE.
          */
         this.nShiftCountMask = 0x1f;        // on newer processors, all shift counts are MOD 32
@@ -720,11 +720,11 @@ X86CPU.prototype.initProcessor = function()
         this.aOps[X86.OPCODE.PUSHA]     = X86OpXX.opPUSHA;
         this.aOps[X86.OPCODE.POPA]      = X86OpXX.opPOPA;
         this.aOps[X86.OPCODE.BOUND]     = X86OpXX.opBOUND;
-        this.aOps[0x63]                 = X86Help.opHelpInvalid;
-        this.aOps[0x64]                 = X86Help.opHelpInvalid;
-        this.aOps[0x65]                 = X86Help.opHelpInvalid;
-        this.aOps[0x66]                 = X86Help.opHelpInvalid;
-        this.aOps[0x67]                 = X86Help.opHelpInvalid;
+        this.aOps[X86.OPCODE.ARPL]      = X86Help.opHelpInvalid;
+        this.aOps[X86.OPCODE.FS]        = X86Help.opHelpInvalid;
+        this.aOps[X86.OPCODE.GS]        = X86Help.opHelpInvalid;
+        this.aOps[X86.OPCODE.OS]        = X86Help.opHelpInvalid;
+        this.aOps[X86.OPCODE.AS]        = X86Help.opHelpInvalid;
         this.aOps[X86.OPCODE.PUSH16]    = X86OpXX.opPUSH16;
         this.aOps[X86.OPCODE.IMUL16]    = X86OpXX.opIMUL16;
         this.aOps[X86.OPCODE.PUSH8]     = X86OpXX.opPUSH8;
@@ -771,9 +771,7 @@ X86CPU.prototype.reset = function()
     this.resetRegs();
     this.resetCycles();
     this.clearError();      // clear any fatal error/exception that setError() may have flagged
-    if (SAMPLER) {
-        this.iSampleNext = this.iSampleFreq = this.iSampleSkip = 0;
-    }
+    if (SAMPLER) this.iSampleNext = this.iSampleFreq = this.iSampleSkip = 0;
 };
 
 /**
@@ -897,7 +895,7 @@ X86CPU.prototype.resetRegs = function()
      *
      * So, yes, our GDTR and IDTR "registers" differ from other segment registers in that we do NOT record
      * the 16-bit limit specified by the LGDT or LIDT instructions; instead, we immediately calculate the limiting
-     * address and record that instead.
+     * address, and record that instead.
      *
      * In addition to different CS:IP reset values, the CS base address must be set to the top of the 16Mb
      * address space rather than the top of the first 1Mb (which is why the MODEL_5170 ROM must be addressable
@@ -927,7 +925,7 @@ X86CPU.prototype.resetRegs = function()
     this.setProtMode();
 
     /*
-     * intFlags contains some internal "flags" that we use to indicate whether a hardware interrupt (INTFLAG.INTR) or
+     * intFlags contains some internal states we use to indicate whether a hardware interrupt (INTFLAG.INTR) or
      * Trap software interrupt (INTR.TRAP) has been requested, as well as when we're in a "HLT" state (INTFLAG.HALT)
      * that requires us to wait for a hardware interrupt (INTFLAG.INTR) before continuing execution.
      *
@@ -1203,7 +1201,7 @@ X86CPU.prototype.restoreProtMode = function(a)
  *
  * This implements save support for the X86 component.
  *
- * UPDATES: The current speed multiplier from getSpeed() is now saved in data group #3, so that your speed is preserved.
+ * UPDATES: The current speed multiplier from getSpeed() is now saved in group #3, so that your speed is preserved.
  *
  * @this {X86CPU}
  * @return {Object}
@@ -1336,8 +1334,8 @@ X86CPU.prototype.getSeg = function(sName)
 /**
  * setCS(sel)
  *
- * NOTE: This is used ONLY by those few undocumented 8086/8088/80186/80188 instructions that MOV or POP a value
- * into CS, and which we assume have the same behavior as any other instruction that MOVs or POPs a segment register
+ * NOTE: This is used ONLY by those few undocumented 8086/8088/80186/80188 instructions that "MOV" or "POP" a value
+ * into CS, which we assume have the same behavior as any other instruction that moves or pops a segment register
  * (ie, suppresses h/w interrupts for one instruction).  Instructions that "JMP" or "CALL" or "INT" or "IRET" a new
  * value into CS are always accompanied by a new IP value, so they use setCSIP() instead, which does NOT suppress
  * h/w interrupts.
@@ -1865,8 +1863,8 @@ X86CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
         case "SS":
         case "ES":
         case "IP":
-        case "PC":      // deprecated as an alias for "IP" (still used by older XML files like the one at http://tpoindex.github.io/crobots/)
-        case "PS":      // this refers to "Processor Status", aka the 16-bit flags register (DEBUG.COM actually refers to this as "PC", surprisingly)
+        case "PC":      // deprecated as an alias for "IP" (still used by older XML files, like the one at http://tpoindex.github.io/crobots/)
+        case "PS":      // this refers to "Processor Status", aka the 16-bit flags register (although DEBUG.COM refers to this as "PC", surprisingly)
         case "C":
         case "P":
         case "A":
@@ -1880,7 +1878,7 @@ X86CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
             fBound = true;
             break;
         default:
-            fBound = CPU.prototype.setBinding.call(this, sHTMLType, sBinding, control);
+            fBound = this.parent.setBinding.call(this, sHTMLType, sBinding, control);
             break;
     }
     return fBound;
@@ -2506,6 +2504,9 @@ X86CPU.prototype.checkINTR = function()
 {
     this.assert(this.intFlags);
     if (!(this.opFlags & X86.OPFLAG.NOINTR)) {
+        /*
+         * TODO: Reverse the order of the INTR and TRAP tests if the processor is an 80286 or higher.
+         */
         if ((this.intFlags & X86.INTFLAG.INTR) && (this.regPS & X86.PS.IF)) {
             var nIDT = this.chipset.getIRRVector();
             if (nIDT >= -1) {

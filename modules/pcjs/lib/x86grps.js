@@ -144,25 +144,25 @@ var X86Grps = {
     /**
      * opGrpADDw(dst, src)
      *
-     * Notes regarding carry following a 32-bit addition:
+     * Notes regarding carry following a 32-bit addition (which we do not YET support but will eventually):
      *
      * The following table summarizes bit 31 of dst, src, and result, along with the expected carry bit:
      *
      *      dst src res carry
      *      --- --- --- -----
-     *      0   0   0   0   no
-     *      0   0   1   0   no (there must have been a carry out of bit 30, but it was "absorbed")
-     *      0   1   0   1   yes (there must have been a carry out of bit 30, but it was NOT "absorbed")
-     *      0   1   1   0   no
-     *      1   0   0   1   yes (same as the preceding "yes" case)
-     *      1   0   1   0   no
-     *      1   1   0   1   yes (since the addition of two ones must always produce a carry)
-     *      1   1   1   1   yes (since the addition of two ones must always produce a carry)
+     *      0   0   0   0       no
+     *      0   0   1   0       no (there must have been a carry out of bit 30, but it was "absorbed")
+     *      0   1   0   1       yes (there must have been a carry out of bit 30, but it was NOT "absorbed")
+     *      0   1   1   0       no
+     *      1   0   0   1       yes (same as the preceding "yes" case)
+     *      1   0   1   0       no
+     *      1   1   0   1       yes (since the addition of two ones must always produce a carry)
+     *      1   1   1   1       yes (since the addition of two ones must always produce a carry)
      *
-     * So, we can use “(dst ^ ((dst ^ src) & (src ^ res))) >> 15” to shift the proper carry bit into the conventional
-     * SIZE_WORD position; eg:
+     * So, we can use “(dst ^ ((dst ^ src) & (src ^ res))) >>> 15” to shift the calculated carry bit (bit 31)
+     * into the conventional SIZE_WORD position (bit 16); eg:
      *
-     *      resultValue = ((resultValue >>> 16) | (resultValue & 0xffff)) | (((dst ^ ((dst ^ src) & (src ^ resultValue))) >> 15) & SIZE_WORD);
+     *      resultValue = ((resultValue >>> 16) | (resultValue & 0xffff)) | (((dst ^ ((dst ^ src) & (src ^ resultValue))) >>> 15) & SIZE_WORD);
      *
      * Essentially, we’re “cramming” all 32 result bits into the low 16 bits (which will effectively represent the
      * zero flag), and then setting bit 16 to the effective carry flag.  This transforms the zero and carry conditions

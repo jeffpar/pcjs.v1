@@ -1034,7 +1034,7 @@ function genMode(a, d, w, mrm, sGroup, sRO) {
                 if (sModRegBTLo) {
                     if (!sModRegBTHi) {
                         print("        if (BACKTRACK) " + sModRegBTLo + " = this.backTrack.btiEALo;");
-                    } else {
+                    } else if (sModRegBTLo.indexOf("_") < 0) {
                         print("        if (BACKTRACK) {");
                         print("            " + sModRegBTLo + " = this.backTrack.btiEALo; " + sModRegBTHi + " = this.backTrack.btiEAHi;");
                         print("        }");
@@ -1176,7 +1176,7 @@ function genMode(a, d, w, mrm, sGroup, sRO) {
                 if (sModRegBTLo && sModRegBTLo.indexOf("this.") >= 0 && sRegBTLo && sModRegBTLo != sRegBTLo) {
                     if (!sModRegBTHi || !sRegBTHi) {
                         print("        if (BACKTRACK) " + sModRegBTLo + " = " + sRegBTLo + ";");
-                    } else {
+                    } else if (sModRegBTLo.indexOf("_") < 0) {
                         print("        if (BACKTRACK) {");
                         print("            " + sModRegBTLo + " = " + sRegBTLo + "; " + sModRegBTHi + " = " + sRegBTHi + ";");
                         print("        }");

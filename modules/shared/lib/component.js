@@ -84,9 +84,7 @@ function Component(type, parms, constructor, bitsMessage)
 {
     this.type = type;
 
-    if (!parms) {
-        parms = {'id': "", 'name': ""};
-    }
+    if (!parms) parms = {'id': "", 'name': ""};
 
     this.id = parms['id'];
     this.name = parms['name'];
@@ -200,6 +198,7 @@ Component.subclass = function(superclass, subclass, methods, statics)
 {
     subclass.prototype = Component.inherit(superclass.prototype);
     subclass.prototype.constructor = subclass;
+    subclass.prototype.parent = superclass.prototype;
     if (methods) {
         Component.extend(subclass.prototype, methods);
     }
@@ -583,6 +582,7 @@ Component.getElementsByClass = function(element, sClass, sObjClass)
 
 Component.prototype = {
     constructor: Component,
+    parent: null,
     /**
      * toString()
      *
