@@ -72,19 +72,6 @@ var PREFETCH = false;
 /**
  * @define {boolean}
  *
- * EAFUNCS enables dynamic function switching whenever the CPU needs to disable one or both EA (Effective Address)
- * memory functions for a ModRM instruction that doesn't observe the normal "read/modify/write" behavior.  The goal
- * is to avoid useless memory reads (which are mostly harmless) and stale memory writes (which are mostly destructive).
- *
- * If EAFUNCS is false, then the CPU falls back to setting/testing internal OP_NOREAD and OP_NOWRITE opFlags as
- * needed.  At the moment, it seems that "EAFUNCS mode" is a bit slower than "EATESTS mode", so EAFUNCS is turned off;
- * however, your mileage may vary, depending on the browser and its vintage.
- */
-var EAFUNCS = false;
-
-/**
- * @define {boolean}
- *
  * FATARRAYS is a Closure Compiler compile-time option that allocates an Array of numbers for every Memory block,
  * where each a number represents ONE byte; very wasteful, but potentially slightly faster.
  *
@@ -137,7 +124,6 @@ if (typeof module !== 'undefined') {
     global.PCJSCLASS = PCJSCLASS;
     global.DEBUGGER = DEBUGGER;
     global.PREFETCH = PREFETCH;
-    global.EAFUNCS = EAFUNCS;
     global.FATARRAYS = FATARRAYS;
     global.TYPEDARRAYS = TYPEDARRAYS;
     global.BACKTRACK = BACKTRACK;

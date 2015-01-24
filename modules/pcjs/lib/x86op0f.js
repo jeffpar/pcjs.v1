@@ -47,10 +47,9 @@ var X86Op0F = {
     opGrp6: function() {
         var bModRM = this.getIPByte();
         if ((bModRM & 0x38) < 0x10) {   // possible reg values: 0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, 0x38
-            if (EAFUNCS) this.modEAWord = this.modEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOREAD;
+            this.opFlags |= X86.OPFLAG.NOREAD;
         }
         this.opMods.aOpModGrpWord[bModRM].call(this, this.aOpGrp6, X86Grps.opGrpNoSrc);
-        if (EAFUNCS) { this.modEAWord = this.modEAWordEnabled; this.setEAWord = this.setEAWordEnabled; }
     },
     /**
      * @this {X86CPU}
@@ -60,10 +59,9 @@ var X86Op0F = {
     opGrp7: function() {
         var bModRM = this.getIPByte();
         if (!(bModRM & 0x10)) {
-            if (EAFUNCS) this.modEAWord = this.modEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOREAD;
+            this.opFlags |= X86.OPFLAG.NOREAD;
         }
         this.opMods.aOpModGrpWord[bModRM].call(this, X86Op0F.aOpGrp7, X86Grps.opGrpNoSrc);
-        if (EAFUNCS) { this.modEAWord = this.modEAWordEnabled; this.setEAWord = this.setEAWordEnabled; }
     },
     /**
      * @this {X86CPU}
@@ -200,7 +198,7 @@ var X86Op0F = {
      * @return {number}
      */
     opLLDT: function(dst, src) {
-        if (EAFUNCS) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+        this.opFlags |= X86.OPFLAG.NOWRITE;
         this.segLDT.load(dst);
         this.nStepCycles -= (17 + (this.regEA < 0? 0 : 2));
         return dst;
@@ -212,7 +210,7 @@ var X86Op0F = {
      * @return {number}
      */
     opLTR: function(dst, src) {
-        if (EAFUNCS) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+        this.opFlags |= X86.OPFLAG.NOWRITE;
         if (this.segTSS.load(dst) != X86.ADDR_INVALID) {
             this.setWord(this.segTSS.addrDesc + X86.DESC.ACC.OFFSET, this.segTSS.acc |= X86.DESC.ACC.TYPE.LDT);
             this.segTSS.type = X86.DESC.ACC.TYPE.TSS_BUSY;
@@ -227,7 +225,7 @@ var X86Op0F = {
      * @return {number}
      */
     opVERR: function(dst, src) {
-        if (EAFUNCS) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+        this.opFlags |= X86.OPFLAG.NOWRITE;
         /*
          * Currently, segVER.load() will return an error only if the selector is beyond the bounds of the
          * descriptor table or the descriptor is not for a segment.
@@ -263,7 +261,7 @@ var X86Op0F = {
      * @return {number}
      */
     opVERW: function(dst, src) {
-        if (EAFUNCS) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+        this.opFlags |= X86.OPFLAG.NOWRITE;
         /*
          * Currently, segVER.load() will return an error only if the selector is beyond the bounds of the
          * descriptor table or the descriptor is not for a segment.
@@ -386,7 +384,7 @@ var X86Op0F = {
         } else {
             this.addrGDT = this.getWord(this.regEA + 2) | (this.getByte(this.regEA + 4) << 16);
             this.addrGDTLimit = this.addrGDT + dst;
-            if (EAFUNCS) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+            this.opFlags |= X86.OPFLAG.NOWRITE;
             this.nStepCycles -= 11;
         }
         return dst;
@@ -409,7 +407,7 @@ var X86Op0F = {
         } else {
             this.addrIDT = this.getWord(this.regEA + 2) | (this.getByte(this.regEA + 4) << 16);
             this.addrIDTLimit = this.addrIDT + dst;
-            if (EAFUNCS) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+            this.opFlags |= X86.OPFLAG.NOWRITE;
             this.nStepCycles -= 12;
         }
         return dst;
@@ -433,7 +431,7 @@ var X86Op0F = {
     opLMSW: function(dst, src) {
         X86Help.opHelpLMSW.call(this, dst);
         this.nStepCycles -= (this.regEA < 0? 3 : 6);
-        if (EAFUNCS) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+        this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     }
 };

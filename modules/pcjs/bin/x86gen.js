@@ -284,7 +284,15 @@ function genSIB(sib) {
     print("     * @param {number} mod");
     print("     */");
     print("    function " + sFunc + "(mod) {");
-    var sBase = (base == 5? "(mod? this.reg" + aBase[base] + " : this.getIPWord())" : "this.reg" + aBase[base]);
+    var sMod = "this.reg" + aBase[base];
+    if (aBase[base] == "ESP" || aBase[base] == "EBP") {
+        if (base != 5) {
+            print("        this.segData = this.segStack;");
+        } else {
+            sMod = "((this.segData = this.segStack), " + sMod + ")";
+        }
+    }
+    var sBase = (base == 5? "(mod? " + sMod + " : this.getIPWord())" : "this.reg" + aBase[base]);
     if (index != 4) sBase += " + " + (scale? ("(this.reg" + aIndex[index] + " << " + scale + ")") : ("this.reg" + aIndex[index]));
     print("        return " + sBase + ";");
     print("    }" + (sib < 255? "," : ""));
@@ -419,7 +427,7 @@ function genMode(a, d, w, mrm, sGroup, sRO) {
     var sModRegSet = null;
     var sModRegSetBegin = "", sModRegSetEnd = "";
     var sModRegBTLo = null, sModRegBTHi = null;
-    var sModRegSeg = "this.segData";
+    var sModRegSeg = "Data";
 
     if (!a) {
         switch (mod) {
@@ -438,13 +446,13 @@ function genMode(a, d, w, mrm, sGroup, sRO) {
             case 2:
                 sModAddr = "this.regEBP + this.regESI";
                 sModFunc = "BPSI";
-                sModRegSeg = "this.segStack";
+                sModRegSeg = "Stack";
                 nCycles = "this.CYCLES.nEACyclesBaseIndexExtra";   // 8086: 8
                 break;
             case 3:
                 sModAddr = "this.regEBP + this.regEDI";
                 sModFunc = "BPDI";
-                sModRegSeg = "this.segStack";
+                sModRegSeg = "Stack";
                 nCycles = "this.CYCLES.nEACyclesBaseIndex";        // 8086: 7
                 break;
             case 4:
@@ -487,13 +495,13 @@ function genMode(a, d, w, mrm, sGroup, sRO) {
             case 2:
                 sModAddr = "this.regEBP + this.regESI + this.getIPDisp()";
                 sModFunc = "BPSID8";
-                sModRegSeg = "this.segStack";
+                sModRegSeg = "Stack";
                 nCycles = "this.CYCLES.nEACyclesBaseIndexDispExtra";   // 8086: 12
                 break;
             case 3:
                 sModAddr = "this.regEBP + this.regEDI + this.getIPDisp()";
                 sModFunc = "BPDID8";
-                sModRegSeg = "this.segStack";
+                sModRegSeg = "Stack";
                 nCycles = "this.CYCLES.nEACyclesBaseIndexDisp";        // 8086: 11
                 break;
             case 4:
@@ -509,7 +517,7 @@ function genMode(a, d, w, mrm, sGroup, sRO) {
             case 6:
                 sModAddr = "this.regEBP + this.getIPDisp()";
                 sModFunc = "BPD8";
-                sModRegSeg = "this.segStack";
+                sModRegSeg = "Stack";
                 nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
                 break;
             case 7:
@@ -537,13 +545,13 @@ function genMode(a, d, w, mrm, sGroup, sRO) {
             case 2:
                 sModAddr = "this.regEBP + this.regESI + this.getIPWord()";
                 sModFunc = "BPSID16";
-                sModRegSeg = "this.segStack";
+                sModRegSeg = "Stack";
                 nCycles = "this.CYCLES.nEACyclesBaseIndexDispExtra";   // 8086: 12
                 break;
             case 3:
                 sModAddr = "this.regEBP + this.regEDI + this.getIPWord()";
                 sModFunc = "BPDID16";
-                sModRegSeg = "this.segStack";
+                sModRegSeg = "Stack";
                 nCycles = "this.CYCLES.nEACyclesBaseIndexDisp";        // 8086: 11
                 break;
             case 4:
@@ -559,7 +567,7 @@ function genMode(a, d, w, mrm, sGroup, sRO) {
             case 6:
                 sModAddr = "this.regEBP + this.getIPWord()";
                 sModFunc = "BPD16";
-                sModRegSeg = "this.segStack";
+                sModRegSeg = "Stack";
                 nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
                 break;
             case 7:
@@ -763,6 +771,7 @@ function genMode(a, d, w, mrm, sGroup, sRO) {
             case 5:
                 sModAddr = "this.regEBP + this.getIPDisp()";
                 sModFunc = "EBPD8";
+                sModRegSeg = "Stack";
                 nCycles = "this.CYCLES.nEACyclesBaseDisp";
                 break;
             case 6:
@@ -810,6 +819,7 @@ function genMode(a, d, w, mrm, sGroup, sRO) {
             case 5:
                 sModAddr = "this.regEBP + this.getIPWord()";
                 sModFunc = "EBPD32";
+                sModRegSeg = "Stack";
                 nCycles = "this.CYCLES.nEACyclesBaseDisp";
                 break;
             case 6:
@@ -969,17 +979,11 @@ function genMode(a, d, w, mrm, sGroup, sRO) {
         print("    function " + sOpMod + "(afnGrp, fnSrc) {");
 
         if (sModAddr) {
-            if (!a && sModAddr.indexOf("regE") >= 0) {
-                if (sModAddr.indexOf(' ') > 0) {
-                    sModAddr = "(" + sModAddr + ")";
-                }
-                sModAddr += " & 0xffff";
-            }
             if (!d) {
                 if (reg == 7 && sRO) {
                     if (sModFunc) {
                         if (fInline) {
-                            print("        afnGrp[" + reg + "].call(this, this.getEA" + aSize[w] + "(" + sModRegSeg + ", " + sModAddr + "), fnSrc.call(this));");
+                            print("        afnGrp[" + reg + "].call(this, this.getEA" + aSize[w] + sModRegSeg + "(" + sModAddr + "), fnSrc.call(this));");
                         } else {
                             sModFunc = "read" + sModFunc + aSize[w];
                             print("        var addr = X86Mods." + sModFunc + ".call(this);");
@@ -994,7 +998,7 @@ function genMode(a, d, w, mrm, sGroup, sRO) {
                 else {
                     if (sModFunc) {
                         if (fInline) {
-                            print("        var " + sTemp + " = afnGrp[" + reg + "].call(this, this.modEA" + aSize[w] + "(" + sModRegSeg + ", " + sModAddr + "), fnSrc.call(this));");
+                            print("        var " + sTemp + " = afnGrp[" + reg + "].call(this, this.modEA" + aSize[w] + sModRegSeg + "(" + sModAddr + "), fnSrc.call(this));");
                             print("        this.setEA" + aSize[w] + "(" + sTemp + ");");
                         } else {
                             sModFunc = "write" + sModFunc + aSize[w];
@@ -1065,16 +1069,10 @@ function genMode(a, d, w, mrm, sGroup, sRO) {
         print("    function " + sOpMod + "(fn) {");
 
         if (sModAddr && sRegGet) {
-            if (!a && sModAddr.indexOf("regE") >= 0) {
-                if (sModAddr.indexOf(' ') > 0) {
-                    sModAddr = "(" + sModAddr + ")";
-                }
-                sModAddr += " & 0xffff";
-            }
             if (!d) {
                 if (sModFunc) {
                     if (fInline) {
-                        print("        var " + sTemp + " = fn.call(this, this.modEA" + aSize[w] + "(" + sModRegSeg + ", " + sModAddr + "), " + sRegGet + ");");
+                        print("        var " + sTemp + " = fn.call(this, this.modEA" + aSize[w] + sModRegSeg + "(" + sModAddr + "), " + sRegGet + ");");
                         if (sRegBTLo) {
                             if (!sRegBTHi) {
                                 print("        if (BACKTRACK) this.backTrack.btiEALo = " + sRegBTLo + ";");
@@ -1119,9 +1117,9 @@ function genMode(a, d, w, mrm, sGroup, sRO) {
                 if (sModFunc) {
                     if (fInline) {
                         if (!sTemp) {
-                            print("        " + sRegSet + sRegSetBegin + "fn.call(this, " + sRegGet + ", this.getEA" + aSize[w] + "(" + sModRegSeg + ", " + sModAddr + "))" + sRegSetEnd + ";");
+                            print("        " + sRegSet + sRegSetBegin + "fn.call(this, " + sRegGet + ", this.getEA" + aSize[w] + sModRegSeg + "(" + sModAddr + "))" + sRegSetEnd + ";");
                         } else {
-                            print("        var " + sTemp + " = fn.call(this, " + sRegGet + ", this.getEA" + aSize[w] + "(" + sModRegSeg + ", " + sModAddr + "));");
+                            print("        var " + sTemp + " = fn.call(this, " + sRegGet + ", this.getEA" + aSize[w] + sModRegSeg + "(" + sModAddr + "));");
                             print("        " + sRegSet + sRegSetBegin + sTemp + sRegSetEnd + ";");
                         }
                     } else {

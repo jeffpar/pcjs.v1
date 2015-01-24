@@ -262,9 +262,7 @@ Bus.prototype.initMemory = function()
 Bus.prototype.reset = function()
 {
     this.setA20(true);
-    if (BACKTRACK) {
-        this.ibtLastDelete = 0;
-    }
+    if (BACKTRACK) this.ibtLastDelete = 0;
 };
 
 /**
@@ -347,6 +345,30 @@ Bus.prototype.cleanMemory = function(addr, size)
         iBlock++;
     }
     return fClean;
+};
+
+/**
+ * scanMemory(addr, size, stats)
+ *
+ * @this {Bus}
+ * @param {number} [addr]
+ * @param {number} [size]
+ * @param {Object} [stats]
+ * @return {number} bytes allocated
+ */
+Bus.prototype.scanMemory = function(addr, size, stats)
+{
+    var cbTotal = 0;
+    if (addr === undefined) addr = 0;
+    if (size === undefined) size = (this.addrLimit + 1) - addr;
+    var iBlock = addr >>> this.blockShift;
+    var iBlockMax = ((addr + size - 1) >>> this.blockShift);
+    while (iBlock <= iBlockMax) {
+        var block = this.aMemBlocks[iBlock];
+        cbTotal += block.size;
+        iBlock++;
+    }
+    return cbTotal;
 };
 
 /**
@@ -821,6 +843,37 @@ Bus.prototype.updateBackTrackCode = function(addr, bti)
 };
 
 /**
+ * getBackTrackObject(bti)
+ *
+ * @this {Bus}
+ * @param {number} bti
+ * @return {Object|null}
+ */
+Bus.prototype.getBackTrackObject = function(bti)
+{
+    if (BACKTRACK) {
+        var slot = bti >>> Bus.BACKTRACK.SLOT_SHIFT;
+        if (slot) {
+            var bto = this.abtObjects[slot-1];
+            if (bto) return bto.obj;
+        }
+    }
+    return null;
+};
+
+/**
+ * getBackTrackObjectFromAddr(addr)
+ *
+ * @this {Bus}
+ * @param {number} addr
+ * @return {Object|null}
+ */
+Bus.prototype.getBackTrackObjectFromAddr = function(addr)
+{
+    return BACKTRACK? this.getBackTrackObject(this.readBackTrack(addr)) : null;
+};
+
+/**
  * getBackTrackInfo(bti)
  *
  * @this {Bus}
@@ -830,10 +883,9 @@ Bus.prototype.updateBackTrackCode = function(addr, bti)
 Bus.prototype.getBackTrackInfo = function(bti)
 {
     if (BACKTRACK) {
-        var slot = bti >>> Bus.BACKTRACK.SLOT_SHIFT;
-        if (slot) {
+        var bto = this.getBackTrackObject(bti);
+        if (bto) {
             var off = bti & Bus.BACKTRACK.OFF_MASK;
-            var bto = this.abtObjects[slot-1];
             var file = bto.obj.file;
             if (file) {
                 this.assert(!bto.off);
@@ -854,8 +906,7 @@ Bus.prototype.getBackTrackInfo = function(bti)
  */
 Bus.prototype.getBackTrackInfoFromAddr = function(addr)
 {
-    var bti = this.readBackTrack(addr);
-    return this.getBackTrackInfo(bti);
+    return BACKTRACK? this.getBackTrackInfo(this.readBackTrack(addr)) : null;
 };
 
 /**

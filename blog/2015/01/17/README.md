@@ -17,7 +17,8 @@ Here's how you embed an "uncompiled" machine in a PCjs Markdown file:
 
 	[Embedded IBM PC](/devices/pc/machine/5170/ega/1152kb/rev3/ "PCjs:at-ega-1152k-rev3::uncompiled:debugger")
 
-And here's that example in action, in the Markdown ([README.md]()) file you are reading right now:
+And here's that example in action, in the Markdown ([README.md]()) file you are reading right now -- assuming
+you are reading it on a [PCjs](http://www.pcjs.org/blog/2015/01/17/) web server:
 
 [Embedded IBM PC](/devices/pc/machine/5170/ega/1152kb/rev3/ "PCjs:at-ega-1152k-rev3::uncompiled:debugger")
 

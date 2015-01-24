@@ -67,7 +67,7 @@ var X86Help = {
         this.resultValue = this.resultParitySign = this.resultAuxOverflow = dst & src;
         this.resultSize = X86.RESULT.SIZE_BYTE;
         this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesTestRR : this.CYCLES.nOpCyclesTestRM) : this.CYCLES.nOpCyclesTestRM);
-        if (EAFUNCS) this.setEAByte = this.setEAByteDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+        this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
     /**
@@ -80,7 +80,7 @@ var X86Help = {
         this.resultValue = this.resultParitySign = this.resultAuxOverflow = dst & src;
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesTestRR : this.CYCLES.nOpCyclesTestRM) : this.CYCLES.nOpCyclesTestRM);
-        if (EAFUNCS) this.setEAWord = this.setEAWordDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+        this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
     /**
@@ -251,7 +251,7 @@ var X86Help = {
             this.setIP(this.opLIP - this.segCS.base);
             X86Help.opHelpINT.call(this, X86.EXCEPTION.BOUND_ERR, null, 0);
         }
-        if (EAFUNCS) this.setEAByte = this.setEAByteDisabled; else this.opFlags |= X86.OPFLAG.NOWRITE;
+        this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
     },
     /**
@@ -660,16 +660,14 @@ var X86Help = {
          * executing, and since we currently don't do anything to interrupt that execution (eg, throw a
          * JavaScript exception), we should shut off all further reads/writes for the current instruction.
          *
-         * That's easy for any EA-based memory accesses (provided we're not using EAFUNCS): simply set both
-         * the NOREAD and NOWRITE flags.  However, there are also direct, non-EA-based memory accesses to
-         * consider.  A perfect example is opPUSHA(): if a GP fault occurs on any PUSH other than the last,
-         * a subsequent PUSH is likely to cause another fault, which we will misinterpret as a double-fault.
+         * That's easy for any EA-based memory accesses: simply set both the NOREAD and NOWRITE flags.
+         * However, there are also direct, non-EA-based memory accesses to consider.  A perfect example is
+         * opPUSHA(): if a GP fault occurs on any PUSH other than the last, a subsequent PUSH is likely to
+         * cause another fault, which we will misinterpret as a double-fault.
          *
          * TODO: Throw a special JavaScript exception that cpu.js must intercept and quietly ignore.
          */
-        if (!EAFUNCS) {
-            this.opFlags &= ~(X86.OPFLAG.NOREAD | X86.OPFLAG.NOWRITE);
-        }
+        this.opFlags &= ~(X86.OPFLAG.NOREAD | X86.OPFLAG.NOWRITE);
     },
     /**
      * opHelpFaultMessage()

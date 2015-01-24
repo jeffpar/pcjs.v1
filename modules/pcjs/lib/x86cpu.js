@@ -169,11 +169,6 @@ function X86CPU(parmsCPU) {
     this.aMemBlocks = [];
     this.addrMemMask = this.blockShift = this.blockLimit = this.blockMask = 0;
 
-    /*
-     * Establish all the default get/set functions for accessing memory; see this function for details.
-     */
-    this.setMemoryEnabled();
-
     if (SAMPLER) {
         /*
          * For now, we're just going to sample LIP values (well, LIP + cycle count)
@@ -1271,43 +1266,6 @@ X86CPU.prototype.restore = function(data)
 };
 
 /**
- * setMemoryEnabled()
- *
- * Set the default EA memory access functions (enabled vs. disabled).  When EAFUNCS is true, assorted
- * CPU opcode functions override the default functions whenever a CPU operation needs to temporarily disable the
- * "get" of a source operand (or the "set" of a destination operand, as in the case of a CMP instruction).
- *
- * However, it is ALSO every CPU opcode function's responsibility to restore those default access functions
- * back to their normal (eg, enabled) values below, so that stepCPU() doesn't have to do this after every
- * instruction (although in DEBUG builds, stepCPU() will call verifyMemoryEnabled() to assert that's been done).
- *
- * @this {X86CPU}
- */
-X86CPU.prototype.setMemoryEnabled = function()
-{
-    this.getEAByte = this.getEAByteEnabled;
-    this.getEAWord = this.getEAWordEnabled;
-    this.modEAByte = this.modEAByteEnabled;
-    this.modEAWord = this.modEAWordEnabled;
-    this.setEAByte = this.setEAByteEnabled;
-    this.setEAWord = this.setEAWordEnabled;
-};
-
-/**
- * verifyMemoryEnabled()
- *
- * Used by stepCPU() in DEBUG builds to confirm that all CPU opcode functions have re-enabled memory access.
- *
- * @this {X86CPU}
- */
-X86CPU.prototype.verifyMemoryEnabled = function()
-{
-    this.assert(!(this.regEAX & 0xffff0000) && !(this.regEBX & 0xffff0000) && !(this.regECX & 0xffff0000) && !(this.regEDX & 0xffff0000));
-    this.assert(!(this.regESI & 0xffff0000) && !(this.regEDI & 0xffff0000) && !(this.regEBP & 0xffff0000) && !(this.regESP & 0xffff0000));
-    this.assert((this.getEAByte == this.getEAByteEnabled && this.getEAWord == this.getEAWordEnabled && this.modEAByte == this.modEAByteEnabled && this.modEAWord == this.modEAWordEnabled && this.setEAByte == this.setEAByteEnabled && this.setEAWord == this.setEAWordEnabled), "verifyMemoryEnabled() failed");
-};
-
-/**
  * getSeg(sName)
  *
  * @param {string} sName
@@ -1977,117 +1935,36 @@ X86CPU.prototype.setWord = function(addr, w)
 };
 
 /**
- * getEAByteDisabled(seg, off)
- *
- * @this {X86CPU}
- * @param {X86Seg} seg register (eg, segDS)
- * @param {number} off is a segment-relative offset
- * @return {number}
- *
-X86CPU.prototype.getEAByteDisabled = function getEAByteDisabled(seg, off)
-{
-    this.segEA = seg;
-    this.offEA = off;
-    //
-    // The LEA opcode is at least one unavoidable reason we must still calculate regEA in
-    // getEAWordDisabled(), but as for getEAByteDisabled(), I can't think of any reason for this.
-    //
-    this.regEA = seg.base + off;
-    return 0;
-};
- */
-
-/**
- * getEAWordDisabled(seg, off)
- *
- * @this {X86CPU}
- * @param {X86Seg} seg register (eg, segDS)
- * @param {number} off is a segment-relative offset
- * @return {number}
- */
-X86CPU.prototype.getEAWordDisabled = function getEAWordDisabled(seg, off)
-{
-    this.segEA = seg;
-    this.offEA = off;
-    /*
-     * The LEA opcode is at least one unavoidable reason we must still calculate regEA here....
-     */
-    this.regEA = seg.base + off;
-    return 0;
-};
-
-/**
- * modEAByteDisabled(seg, off)
- *
- * @this {X86CPU}
- * @param {X86Seg} seg register (eg, segDS)
- * @param {number} off is a segment-relative offset
- * @return {number}
- */
-X86CPU.prototype.modEAByteDisabled = function modEADisabled(seg, off)
-{
-    this.segEA = seg;
-    this.offEA = off;
-    /*
-     * TODO: Should this not also set regEA? Optimization or oversight?
-     */
-    this.regEAWrite = seg.base + off;
-    return 0;
-};
-
-X86CPU.prototype.modEAWordDisabled = X86CPU.prototype.modEAByteDisabled;
-
-/**
- * setEAByteDisabled(w)
- *
- * @this {X86CPU}
- * @param {number} w is the word (16-bit) value to write (ignored)
- */
-X86CPU.prototype.setEAByteDisabled = function setEAByteDisabled(w)
-{
-};
-
-/**
- * setEAWordDisabled(w)
- *
- * @this {X86CPU}
- * @param {number} w is the word (16-bit) value to write (ignored)
- */
-X86CPU.prototype.setEAWordDisabled = function setEAWordDisabled(w)
-{
-};
-
-/**
- * getEAByteEnabled(seg, off)
+ * getEAByte(seg, off)
  *
  * @this {X86CPU}
  * @param {X86Seg} seg register (eg, segDS)
  * @param {number} off is a segment-relative offset
  * @return {number} byte (8-bit) value at that address
  */
-X86CPU.prototype.getEAByteEnabled = function getEAByteEnabled(seg, off)
+X86CPU.prototype.getEAByte = function(seg, off)
 {
     this.segEA = seg;
     this.regEA = seg.checkRead(this.offEA = off, 0);
-    if (!EAFUNCS && (this.opFlags & X86.OPFLAG.NOREAD)) return 0;
+    if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
     var b = this.getByte(this.regEA);
     if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiMemLo;
     return b;
 };
 
 /**
- * getEAWordEnabled(seg, off)
+ * getEAWord(seg, off)
  *
  * @this {X86CPU}
  * @param {X86Seg} seg register (eg, segDS)
  * @param {number} off is a segment-relative offset
  * @return {number} word (16-bit) value at that address
  */
-X86CPU.prototype.getEAWordEnabled = function getEAWordEnabled(seg, off)
+X86CPU.prototype.getEAWord = function(seg, off)
 {
     this.segEA = seg;
     this.regEA = seg.checkRead(this.offEA = off, 1);
-    if (!EAFUNCS && (this.opFlags & X86.OPFLAG.NOREAD)) return 0;
+    if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
     var w = this.getWord(this.regEA);
     if (BACKTRACK) {
         this.backTrack.btiEALo = this.backTrack.btiMemLo;
@@ -2097,36 +1974,36 @@ X86CPU.prototype.getEAWordEnabled = function getEAWordEnabled(seg, off)
 };
 
 /**
- * modEAByteEnabled(seg, off)
+ * modEAByte(seg, off)
  *
  * @this {X86CPU}
  * @param {X86Seg} seg register (eg, segDS)
  * @param {number} off is a segment-relative offset
  * @return {number} byte (8-bit) value at that address
  */
-X86CPU.prototype.modEAByteEnabled = function modEAByteEnabled(seg, off)
+X86CPU.prototype.modEAByte = function(seg, off)
 {
     this.segEA = seg;
     this.regEAWrite = this.regEA = seg.checkRead(this.offEA = off, 0);
-    if (!EAFUNCS && (this.opFlags & X86.OPFLAG.NOREAD)) return 0;
+    if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
     var b = this.getByte(this.regEA);
     if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiMemLo;
     return b;
 };
 
 /**
- * modEAWordEnabled(seg, off)
+ * modEAWord(seg, off)
  *
  * @this {X86CPU}
  * @param {X86Seg} seg register (eg, segDS)
  * @param {number} off is a segment-relative offset
  * @return {number} word (16-bit) value at that address
  */
-X86CPU.prototype.modEAWordEnabled = function modEAWordEnabled(seg, off)
+X86CPU.prototype.modEAWord = function(seg, off)
 {
     this.segEA = seg;
     this.regEAWrite = this.regEA = seg.checkRead(this.offEA = off, 1);
-    if (!EAFUNCS && (this.opFlags & X86.OPFLAG.NOREAD)) return 0;
+    if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
     var w = this.getWord(this.regEA);
     if (BACKTRACK) {
         this.backTrack.btiEALo = this.backTrack.btiMemLo;
@@ -2136,27 +2013,123 @@ X86CPU.prototype.modEAWordEnabled = function modEAWordEnabled(seg, off)
 };
 
 /**
- * setEAByteEnabled(b)
+ * getEAByteData(off)
+ *
+ * @this {X86CPU}
+ * @param {number} off is a segment-relative offset
+ * @return {number} byte (8-bit) value at that address
+ */
+X86CPU.prototype.getEAByteData = function(off)
+{
+    return this.getEAByte(this.segData, off & this.addrMask);
+};
+
+/**
+ * getEAByteStack(off)
+ *
+ * @this {X86CPU}
+ * @param {number} off is a segment-relative offset
+ * @return {number} byte (8-bit) value at that address
+ */
+X86CPU.prototype.getEAByteStack = function(off)
+{
+    return this.getEAByte(this.segStack, off & this.addrMask);
+};
+
+/**
+ * getEAWordData(off)
+ *
+ * @this {X86CPU}
+ * @param {number} off is a segment-relative offset
+ * @return {number} word (16-bit) value at that address
+ */
+X86CPU.prototype.getEAWordData = function(off)
+{
+    return this.getEAWord(this.segData, off & this.addrMask);
+};
+
+/**
+ * getEAWordStack(off)
+ *
+ * @this {X86CPU}
+ * @param {number} off is a segment-relative offset
+ * @return {number} word (16-bit) value at that address
+ */
+X86CPU.prototype.getEAWordStack = function(off)
+{
+    return this.getEAWord(this.segStack, off & this.addrMask);
+};
+
+/**
+ * modEAByteData(off)
+ *
+ * @this {X86CPU}
+ * @param {number} off is a segment-relative offset
+ * @return {number} byte (8-bit) value at that address
+ */
+X86CPU.prototype.modEAByteData = function(off)
+{
+    return this.modEAByte(this.segData, off & this.addrMask);
+};
+
+/**
+ * modEAByteStack(off)
+ *
+ * @this {X86CPU}
+ * @param {number} off is a segment-relative offset
+ * @return {number} byte (8-bit) value at that address
+ */
+X86CPU.prototype.modEAByteStack = function(off)
+{
+    return this.modEAByte(this.segStack, off & this.addrMask);
+};
+
+/**
+ * modEAWordData(off)
+ *
+ * @this {X86CPU}
+ * @param {number} off is a segment-relative offset
+ * @return {number} word (16-bit) value at that address
+ */
+X86CPU.prototype.modEAWordData = function(off)
+{
+    return this.modEAWord(this.segData, off & this.addrMask);
+};
+
+/**
+ * modEAWordStack(off)
+ *
+ * @this {X86CPU}
+ * @param {number} off is a segment-relative offset
+ * @return {number} word (16-bit) value at that address
+ */
+X86CPU.prototype.modEAWordStack = function(off)
+{
+    return this.modEAWord(this.segStack, off & this.addrMask);
+};
+
+/**
+ * setEAByte(b)
  *
  * @this {X86CPU}
  * @param {number} b is the byte (8-bit) value to write
  */
-X86CPU.prototype.setEAByteEnabled = function setEAByteEnabled(b)
+X86CPU.prototype.setEAByte = function(b)
 {
-    if (!EAFUNCS && (this.opFlags & X86.OPFLAG.NOWRITE)) return;
+    if (this.opFlags & X86.OPFLAG.NOWRITE) return;
     if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiEALo;
     this.setByte(this.segEA.checkWrite(this.offEA, 0), b);
 };
 
 /**
- * setEAWordEnabled(w)
+ * setEAWord(w)
  *
  * @this {X86CPU}
  * @param {number} w is the word (16-bit) value to write
  */
-X86CPU.prototype.setEAWordEnabled = function setEAWordEnabled(w)
+X86CPU.prototype.setEAWord = function(w)
 {
-    if (!EAFUNCS && (this.opFlags & X86.OPFLAG.NOWRITE)) return;
+    if (this.opFlags & X86.OPFLAG.NOWRITE) return;
     if (BACKTRACK) {
         this.backTrack.btiMemLo = this.backTrack.btiEALo;
         this.backTrack.btiMemHi = this.backTrack.btiEAHi;
@@ -2235,7 +2208,7 @@ X86CPU.prototype.setSOWord = function(seg, off, w)
  */
 X86CPU.prototype.getBytePrefetch = function(addr)
 {
-    if (!EAFUNCS && (this.opFlags & X86.OPFLAG.NOREAD)) return 0;
+    if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
     var b;
     if (!this.cbPrefetchQueued) {
         if (MAXDEBUG) {
@@ -2816,18 +2789,6 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
         }
 
         if (DEBUG) {
-            /*
-             * Some opcode helpers are required to temporarily redirect getEAByte/getEAWord or setEAByte/setEAWord
-             * to null functions, effectively disabling a memory read that's unnecessary (or a memory write that could
-             * be destructive).  However, they weren't originally required to restore those memory functions when they
-             * were done; we would simply reset all the memory functions here, after every single instruction.
-             *
-             * That's no longer the case.  Those opcode helpers (or their callers) are now required to restore the
-             * memory access functions to their defaults, so that we don't have to waste time resetting them here, on
-             * every instruction.  The DEBUG-only verifyMemoryEnabled() simply confirms that everyone's doing their job.
-             */
-            this.verifyMemoryEnabled();
-
             /*
              * Make sure that every instruction is assessing a cycle cost, and that the cost is a net positive.
              */

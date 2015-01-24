@@ -3671,7 +3671,7 @@ if (DEBUGGER) {
         if (aAddr[0] == null) return;
 
         var sDump = "";
-        if (sCmd == "di") {
+        if (BACKTRACK && sCmd == "di") {
             var addr = this.getAddr(aAddr);
             sDump += '%' + str.toHex(addr) + ": ";
             var sInfo = this.bus.getBackTrackInfoFromAddr(addr);
@@ -4746,7 +4746,7 @@ if (DEBUGGER) {
                         if (this.cmp) this.cmp.reset();
                         return true;
                     case "ver":
-                        this.println((APPNAME || "PCjs") + " version " + APPVERSION + " (" + (I386? "80386" : "80286") + (COMPILED? ",RELEASE" : (DEBUG? ",DEBUG" : ",NODEBUG")) + (PREFETCH? ",PREFETCH" : ",NOPREFETCH") + (EAFUNCS? ",EAFUNCS" : ",EATESTS") + (TYPEDARRAYS? ",TYPEDARRAYS" : (FATARRAYS? ",FATARRAYS" : ",DWORDARRAYS")) + (BACKTRACK? ",BACKTRACK" : "") + ")");
+                        this.println((APPNAME || "PCjs") + " version " + APPVERSION + " (" + (I386? "80386" : "80286") + (COMPILED? ",RELEASE" : (DEBUG? ",DEBUG" : ",NODEBUG")) + (PREFETCH? ",PREFETCH" : ",NOPREFETCH") + (TYPEDARRAYS? ",TYPEDARRAYS" : (FATARRAYS? ",FATARRAYS" : ",DWORDARRAYS")) + (BACKTRACK? ",BACKTRACK" : "") + ")");
                         return true;
                     default:
                         ch0 = sCmd.charAt(0);

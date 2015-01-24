@@ -121,6 +121,25 @@ Panel.prototype.powerUp = function(data, fRepower)
 {
     if (!fRepower) {
         Panel.init();
+        if (this.canvas) {
+            if (this.fBackTrack) {
+                /*
+                 * We need to calculate some parameters based on the canvas pixel dimensions.  For now, we're
+                 * going to use 100% of the canvas height, and 75% of the canvas width (starting with the left edge),
+                 * for the live memory display.
+                 *
+                 * For a 640x350 canvas, that means 480x350 pixels for the live memory display, or 168,000 pixels.
+                 * For a 16Mb (24-bit) address space, with 16,777,216 locations, the worst case would mean each pixel
+                 * represents roughly 100 memory locations.  But in a machine with only 1152Kb of RAM, 32Kb of Video RAM,
+                 * and 128Kb of ROM, that's only 1,343,488 locations we need to worry about, because we can ignore all
+                 * the unallocated regions.
+                 *
+                 * So to start, we need a function that scans the entire address space, and reports how many bytes are
+                 * actually allocated.  At the same time, we should also count how many different objects exist.
+                 */
+                this.bus.scanMemory()
+            }
+        }
     }
     return true;
 };
@@ -135,6 +154,11 @@ Panel.prototype.powerUp = function(data, fRepower)
 Panel.prototype.powerDown = function(fSave)
 {
     return true;
+};
+
+Panel.prototype.scanMemory = function()
+{
+
 };
 
 /**
