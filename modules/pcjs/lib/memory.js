@@ -609,6 +609,7 @@ if (TYPEDARRAYS) {
 
 Memory.prototype = {
     constructor: Memory,
+    parent: null,
     /**
      * save()
      *

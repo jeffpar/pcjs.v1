@@ -542,6 +542,48 @@ Bus.prototype.getWordDirect = function(addr)
 };
 
 /**
+ * getLong(addr)
+ *
+ * The CPU could use this, but the CPU also needs to update cycle counts, along with BACKTRACK states.
+ * There may also be a slight performance advantage calling its own getLong() method vs. calling through another
+ * object (ie, the Bus object).
+ *
+ * @this {Bus}
+ * @param {number} addr is a physical (non-segmented) address
+ * @return {number} long (32-bit) value at that address
+ */
+Bus.prototype.getLong = function(addr)
+{
+    var off = addr & this.blockLimit;
+    var iBlock = (addr & this.addrMask) >> this.blockShift;
+    if (off < this.blockLimit - 2) {
+        return this.aMemBlocks[iBlock].readLong(off);
+    }
+    var nShift = (off & 0x3) << 3;
+    return (this.aMemBlocks[iBlock].readLong(off & ~0x3) >>> nShift) | (this.aMemBlocks[(iBlock + 1) & this.blockMask].readLong(0) << (32 - nShift));
+};
+
+/**
+ * getLongDirect(addr)
+ *
+ * This is useful for the Debugger and other components that want to bypass getLong() breakpoint detection.
+ *
+ * @this {Bus}
+ * @param {number} addr is a physical (non-segmented) address
+ * @return {number} long (32-bit) value at that address
+ */
+Bus.prototype.getLongDirect = function(addr)
+{
+    var off = addr & this.blockLimit;
+    var iBlock = (addr & this.addrMask) >> this.blockShift;
+    if (off < this.blockLimit - 2) {
+        return this.aMemBlocks[iBlock].readLongDirect(off);
+    }
+    var nShift = (off & 0x3) << 3;
+    return (this.aMemBlocks[iBlock].readLongDirect(off & ~0x3) >>> nShift) | (this.aMemBlocks[(iBlock + 1) & this.blockMask].readLongDirect(0) << (32 - nShift));
+};
+
+/**
  * setByte(addr, b)
  *
  * The CPU could use this, but the CPU also needs to update BACKTRACK states.  There may also be a slight
@@ -614,6 +656,61 @@ Bus.prototype.setWordDirect = function(addr, w)
     }
     this.aMemBlocks[iBlock++].writeByteDirect(off, w & 0xff);
     this.aMemBlocks[iBlock & this.blockMask].writeByteDirect(0, (w >> 8) & 0xff);
+};
+
+/**
+ * setLong(addr, l)
+ *
+ * The CPU could use this, but the CPU also needs to update cycle counts, along with BACKTRACK states.
+ * There may also be a slight performance advantage calling its own setLong() method vs. calling through another
+ * object (ie, the Bus object).
+ *
+ * @this {Bus}
+ * @param {number} addr is a physical (non-segmented) address
+ * @param {number} l is the long (32-bit) value to write
+ */
+Bus.prototype.setLong = function(addr, l)
+{
+    var off = addr & this.blockLimit;
+    var iBlock = (addr & this.addrMask) >> this.blockShift;
+    if (off < this.blockLimit - 2) {
+        this.aMemBlocks[iBlock].writeLong(off, l);
+        return;
+    }
+    var lPrev, nShift = (off & 0x3) << 3;
+    off &= ~0x3;
+    lPrev = this.aMemBlocks[iBlock].readLong(off);
+    this.aMemBlocks[iBlock].writeLong(off, (lPrev & ~(0xffffffff << nShift)) | (l << nShift));
+    iBlock = (iBlock + 1) & this.blockMask;
+    lPrev = this.aMemBlocks[iBlock].readLong(0);
+    this.aMemBlocks[iBlock].writeLong(0, (lPrev & (0xffffffff << nShift)) | (l >>> (32 - nShift)));
+};
+
+/**
+ * setLongDirect(addr, l)
+ *
+ * This is useful for the Debugger and other components that want to bypass breakpoint detection AND read-only
+ * memory protection (for example, this is an interface the ROM component could use to initialize ROM contents).
+ *
+ * @this {Bus}
+ * @param {number} addr is a physical (non-segmented) address
+ * @param {number} l is the long (32-bit) value to write
+ */
+Bus.prototype.setLongDirect = function(addr, l)
+{
+    var off = addr & this.blockLimit;
+    var iBlock = (addr & this.addrMask) >> this.blockShift;
+    if (off < this.blockLimit - 2) {
+        this.aMemBlocks[iBlock].writeLongDirect(off, l);
+        return;
+    }
+    var lPrev, nShift = (off & 0x3) << 3;
+    off &= ~0x3;
+    lPrev = this.aMemBlocks[iBlock].readLongDirect(off);
+    this.aMemBlocks[iBlock].writeLongDirect(off, (lPrev & ~(0xffffffff << nShift)) | (l << nShift));
+    iBlock = (iBlock + 1) & this.blockMask;
+    lPrev = this.aMemBlocks[iBlock].readLongDirect(0);
+    this.aMemBlocks[iBlock].writeLongDirect(0, (lPrev & (0xffffffff << nShift)) | (l >>> (32 - nShift)));
 };
 
 /**
