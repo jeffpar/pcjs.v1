@@ -38,6 +38,20 @@ if (typeof module !== 'undefined') {
 
 var X86ModSIB = {};
 
+/*
+ * TODO: Factor out the SIB (scale=1) decoders that are functionally equivalent to one another,
+ * just as I've already done for all the ModRM (register-to-register) decoders.  For example:
+ *
+ *      opModSIB01():   this.regECX + this.regEAX
+ *
+ * is functionally equivalent to:
+ *
+ *      opModSIB08():   this.regEAX + this.regECX
+ *
+ * This isn't super critical, since the SIB decoders are much smaller/simpler than the ModRM decoders,
+ * but still, it's wasteful.
+ */
+
 X86ModSIB.aOpModSIB = [
     /**
      * opModSIB00(): scale=00 (1)  index=000 (EAX)  base=000 (EAX)

@@ -191,7 +191,7 @@ function Memory(addr, size, type, controller)
  * are designed to ignore writes to ROM.
  *
  * The other purpose these types serve is to provide the Control Panel with the ability to highlight
- * memory regions according to their primary purpose.
+ * memory regions according to one of the following types.
  *
  * Unallocated regions of the address space also contain memory blocks, but the blocks themselves are
  * empty (that is, their data arrays are uninitialized) and the memory type is NONE.
@@ -264,13 +264,36 @@ Memory.readWordMemory = function readWordMemory(off)
     var w;
     var idw = off >> 2;
     var nShift = (off & 0x3) << 3;
-    var dw = (this.adw[idw] >>> nShift);
+    var dw = (this.adw[idw] >> nShift);
     if (nShift < 24) {
         w = dw & 0xffff;
     } else {
         w = (dw & 0xff) | ((this.adw[idw + 1] & 0xff) << 8);
     }
     return w;
+};
+
+/**
+ * readLongMemory(off)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @return {number}
+ */
+Memory.readLongMemory = function readLongMemory(off)
+{
+    Component.assert(off >= 0 && off < this.cb - 3);
+    if (FATARRAYS) {
+        return this.ab[off] | (this.ab[off + 1] << 8) | (this.ab[off + 2] << 16) | (this.ab[off + 3] << 24);
+    }
+    var idw = off >> 2;
+    var nShift = (off & 0x3) << 3;
+    var dw = this.adw[idw];
+    if (nShift) {
+        dw >>>= nShift;
+        dw |= this.adw[idw + 1] << (32 - nShift);
+    }
+    return dw;
 };
 
 /**
@@ -321,6 +344,35 @@ Memory.writeWordMemory = function writeWordMemory(off, w)
 };
 
 /**
+ * writeLongMemory(off, dw)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @param {number} dw
+ */
+Memory.writeLongMemory = function writeLongMemory(off, dw)
+{
+    Component.assert(off >= 0 && off < this.cb - 3);
+    if (FATARRAYS) {
+        this.ab[off] = (dw & 0xff);
+        this.ab[off + 1] = (dw >> 8) & 0xff;
+        this.ab[off + 2] = (dw >> 16) & 0xff;
+        this.ab[off + 3] = (dw >> 24) & 0xff;
+    } else {
+        var idw = off >> 2;
+        var nShift = (off & 0x3) << 3;
+        if (!nShift) {
+            this.adw[idw] = dw;
+        } else {
+            this.adw[idw] = (this.adw[idw] & ~(0xffffffff << nShift)) | (dw << nShift);
+            idw++;
+            this.adw[idw] = (this.adw[idw] & (0xffffffff << nShift)) | (dw >>> (32 - nShift));
+        }
+    }
+    this.fDirty = true;
+};
+
+/**
  * readByteChecked(off)
  *
  * @this {Memory}
@@ -343,9 +395,28 @@ Memory.readByteChecked = function readByteChecked(off)
 Memory.readWordChecked = function readWordChecked(off)
 {
     if (DEBUGGER) {
-        this.dbg.checkMemoryRead(this.addr + off) || this.dbg.checkMemoryRead(this.addr + off + 1);     // jshint ignore:line
+        this.dbg.checkMemoryRead(this.addr + off) ||
+        this.dbg.checkMemoryRead(this.addr + off + 1);
     }
     return this.readWordDirect(off);
+};
+
+/**
+ * readLongChecked(off)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @return {number}
+ */
+Memory.readLongChecked = function readLongChecked(off)
+{
+    if (DEBUGGER) {
+        this.dbg.checkMemoryRead(this.addr + off) ||
+        this.dbg.checkMemoryRead(this.addr + off + 1) ||
+        this.dbg.checkMemoryRead(this.addr + off + 2) ||
+        this.dbg.checkMemoryRead(this.addr + off + 3);
+    }
+    return this.readLongDirect(off);
 };
 
 /**
@@ -371,9 +442,28 @@ Memory.writeByteChecked = function writeByteChecked(off, b)
 Memory.writeWordChecked = function writeWordChecked(off, w)
 {
     if (DEBUGGER) {
-        this.dbg.checkMemoryWrite(this.addr + off) || this.dbg.checkMemoryWrite(this.addr + off + 1);   // jshint ignore:line
+        this.dbg.checkMemoryWrite(this.addr + off) ||
+        this.dbg.checkMemoryWrite(this.addr + off + 1);
     }
     this.writeWordDirect(off, w);
+};
+
+/**
+ * writeLongChecked(off, dw)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @param {number} dw
+ */
+Memory.writeLongChecked = function writeLongChecked(off, dw)
+{
+    if (DEBUGGER) {
+        this.dbg.checkMemoryWrite(this.addr + off) ||
+        this.dbg.checkMemoryWrite(this.addr + off + 1) ||
+        this.dbg.checkMemoryWrite(this.addr + off + 2) ||
+        this.dbg.checkMemoryWrite(this.addr + off + 3)
+    }
+    this.writeLongDirect(off, dw);
 };
 
 /**
@@ -403,6 +493,19 @@ Memory.readWordTypedArray = function readWordTypedArray(off)
 };
 
 /**
+ * readLongTypedArray(off)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @return {number}
+ */
+Memory.readLongTypedArray = function readLongTypedArray(off)
+{
+    Component.assert(off >= 0 && off < this.cb - 3);
+    return this.dv.getInt32(off, true);
+};
+
+/**
  * writeByteTypedArray(off, b)
  *
  * @this {Memory}
@@ -427,6 +530,20 @@ Memory.writeWordTypedArray = function writeWordTypedArray(off, w)
 {
     Component.assert(off >= 0 && off < this.cb - 1 && (w & 0xffff) == w);
     this.dv.setUint16(off, w, true);
+    this.fDirty = true;
+};
+
+/**
+ * writeLongTypedArray(off, dw)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @param {number} dw
+ */
+Memory.writeLongTypedArray = function writeLongTypedArray(off, dw)
+{
+    Component.assert(off >= 0 && off < this.cb - 3);
+    this.dv.setInt32(off, dw, true);
     this.fDirty = true;
 };
 
@@ -483,11 +600,11 @@ Memory.writeBackTrackIndex = function writeBackTrackIndex(off, bti)
     return btiPrev;
 };
 
-Memory.afnMemory = [Memory.readByteMemory, Memory.readWordMemory, Memory.writeByteMemory, Memory.writeWordMemory];
-Memory.afnChecked = [Memory.readByteChecked, Memory.readWordChecked, Memory.writeByteChecked, Memory.writeWordChecked];
+Memory.afnMemory         = [Memory.readByteMemory,  Memory.readWordMemory,  Memory.readLongMemory,  Memory.writeByteMemory,  Memory.writeWordMemory,  Memory.writeLongMemory];
+Memory.afnChecked        = [Memory.readByteChecked, Memory.readWordChecked, Memory.readLongChecked, Memory.writeByteChecked, Memory.writeWordChecked, Memory.writeLongChecked];
 
 if (TYPEDARRAYS) {
-    Memory.afnTypedArray = [Memory.readByteTypedArray, Memory.readWordTypedArray, Memory.writeByteTypedArray, Memory.writeWordTypedArray];
+    Memory.afnTypedArray = [Memory.readByteTypedArray, Memory.readWordTypedArray, Memory.readLongTypedArray, Memory.writeByteTypedArray, Memory.writeWordTypedArray, Memory.writeLongTypedArray];
 }
 
 Memory.prototype = {
@@ -608,9 +725,11 @@ Memory.prototype = {
     setReadAccess: function(afn, fDirect) {
         this.readByte = afn[0] || Memory.readNone;
         this.readWord = afn[1] || Memory.readNone;
+        this.readLong = afn[2] || Memory.readNone;
         if (fDirect) {
             this.readByteDirect = afn[0] || Memory.readNone;
             this.readWordDirect = afn[1] || Memory.readNone;
+            this.readLongDirect = afn[2] || Memory.readNone;
         }
     },
     /**
@@ -621,11 +740,13 @@ Memory.prototype = {
      * @param {boolean} [fDirect]
      */
     setWriteAccess: function(afn, fDirect) {
-        this.writeByte = !this.fReadOnly && afn[2] || Memory.writeNone;
-        this.writeWord = !this.fReadOnly && afn[3] || Memory.writeNone;
+        this.writeByte = !this.fReadOnly && afn[3] || Memory.writeNone;
+        this.writeWord = !this.fReadOnly && afn[4] || Memory.writeNone;
+        this.writeLong = !this.fReadOnly && afn[5] || Memory.writeNone;
         if (fDirect) {
-            this.writeByteDirect = afn[2] || Memory.writeNone;
-            this.writeWordDirect = afn[3] || Memory.writeNone;
+            this.writeByteDirect = afn[3] || Memory.writeNone;
+            this.writeWordDirect = afn[4] || Memory.writeNone;
+            this.writeLongDirect = afn[5] || Memory.writeNone;
         }
     },
     /**
@@ -636,6 +757,7 @@ Memory.prototype = {
     resetReadAccess: function() {
         this.readByte = this.readByteDirect;
         this.readWord = this.readWordDirect;
+        this.readLong = this.readLongDirect;
     },
     /**
      * resetWriteAccess()
@@ -645,6 +767,7 @@ Memory.prototype = {
     resetWriteAccess: function() {
         this.writeByte = this.fReadOnly? Memory.writeNone : this.writeByteDirect;
         this.writeWord = this.fReadOnly? Memory.writeNone : this.writeWordDirect;
+        this.writeLong = this.fReadOnly? Memory.writeNone : this.writeLongDirect;
     },
     /**
      * setDebugInfo(cpu, dbg, addr, size)

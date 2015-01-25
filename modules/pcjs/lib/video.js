@@ -1247,9 +1247,21 @@ Card.ACCESS.WRITE.MASK      = 0xff00;
  * @param {number} off
  * @return {number}
  */
-Card.ACCESS.readWord = function writeWord(off)
+Card.ACCESS.readWord = function readWord(off)
 {
-    return this.readByte(off) | (this.readByte(off+1) << 8);
+    return this.readByte(off) | (this.readByte(off + 1) << 8);
+};
+
+/**
+ * readLong(off)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @return {number}
+ */
+Card.ACCESS.readLong = function readLong(off)
+{
+    return this.readByte(off) | (this.readByte(off + 1) << 8) | (this.readByte(off + 2) << 16) | (this.readByte(off + 3) << 24);
 };
 
 /**
@@ -1261,8 +1273,24 @@ Card.ACCESS.readWord = function writeWord(off)
  */
 Card.ACCESS.writeWord = function writeWord(off, w)
 {
+    Component.assert(!(w & ~0xffff));
+    this.writeByte(off, w & 0xff);
+    this.writeByte(off + 1, w >> 8);
+};
+
+/**
+ * writeLong(off, w)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @param {number} w
+ */
+Card.ACCESS.writeLong = function writeLong(off, w)
+{
     this.writeByte(off, w & 0xff);
     this.writeByte(off + 1, (w >> 8) & 0xff);
+    this.writeByte(off + 2, (w >> 16) & 0xff);
+    this.writeByte(off + 3, (w >>> 24));
 };
 
 /**
@@ -1925,10 +1953,10 @@ Card.prototype.setMemoryAccess = function(nAccess)
             }
         }
         if (!this.afnAccess) {
-            this.afnAccess  = [null, Card.ACCESS.readWord, null, Card.ACCESS.writeWord];
+            this.afnAccess  = [null, Card.ACCESS.readWord, Card.ACCESS.readLong, null, Card.ACCESS.writeWord, Card.ACCESS.writeLong];
         }
         this.afnAccess[0] = fnReadByte;
-        this.afnAccess[2] = fnWriteByte;
+        this.afnAccess[3] = fnWriteByte;
         this.nAccess = nAccess;
     }
 };

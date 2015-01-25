@@ -958,7 +958,7 @@ X86CPU.prototype.resetRegs = function()
     this.opFlags = this.opPrefixes = 0;
 
     /*
-     * The following contain the (default) OPERAND size (2 for 16 bits, 4 for 32 bits), and the corresponding masks
+     * The following contain the (default) OPERAND size (0 for 16 bits, 1 for 32 bits), and the corresponding masks
      * for isolating the (src) bits of an OPERAND and clearing the (dst) bits of an OPERAND.  These are reset to
      * their segCS counterparts at the start of every new instruction, but are also set here for documentation purposes.
      */
@@ -985,7 +985,20 @@ X86CPU.prototype.resetRegs = function()
      */
 
     /*
-     * The ModRM dispatch tables; opMods refers to the active set, based on the current ADDRESS size (addrSize),
+     * The memory dispatch tables; opMem refers to the active set, based on the current OPERAND size (opSize),
+     * which is based foremost on segCS.opSize, but can also be overridden by an OPERAND size instruction prefix.
+     */
+    this.aaOpMem = new Array(2);
+    this.aaOpMem[0] = {
+        getByte: this.getByte,
+        getWord: this.getWord,
+        setByte: this.setByte,
+        setWord: this.setWord
+    };
+    this.opMem = this.aaOpMem[this.segCS.opSize];
+
+    /*
+     * The ModRM dispatch tables; opMod refers to the active set, based on the current ADDRESS size (addrSize),
      * which is based foremost on segCS.addrSize, but can also be overridden by an ADDRESS size instruction prefix.
      */
     this.aaOpMod = new Array(2);
@@ -1007,7 +1020,7 @@ X86CPU.prototype.resetRegs = function()
             aOpModGrpWord: X86ModW32.aOpModGrp
         };
     }
-    this.opMods = this.aaOpMod[this.segCS.addrSize];
+    this.opMod = this.aaOpMod[this.segCS.addrSize];
 };
 
 /**
@@ -1363,7 +1376,7 @@ X86CPU.prototype.setES = function(sel)
  */
 X86CPU.prototype.setIP = function(off)
 {
-    this.regLIP = this.segCS.base + (this.regEIP = off & 0xffff);
+    this.regLIP = this.segCS.base + (this.regEIP = off & this.addrMask);
     if (PREFETCH) this.flushPrefetch(this.regLIP);
 };
 
@@ -1390,7 +1403,7 @@ X86CPU.prototype.setIP = function(off)
  */
 X86CPU.prototype.setCSIP = function(off, sel, fCall)
 {
-    this.assert((off & 0xffff) == off);
+    this.assert(!this.addrMask || (off & this.addrMask) == off);
     this.segCS.fCall = fCall;
     /*
      * We break this operation into the following discrete steps (eg, set IP, load CS, and then update LIP)
@@ -1414,7 +1427,7 @@ X86CPU.prototype.setCSIP = function(off, sel, fCall)
  */
 X86CPU.prototype.advanceIP = function(inc)
 {
-    this.regLIP = this.segCS.base + (this.regEIP = (this.regEIP + inc) & 0xffff);
+    this.regLIP = this.segCS.base + (this.regEIP = (this.regEIP + inc) & this.addrMask);
     if (PREFETCH) this.advancePrefetch(inc);
 };
 
@@ -1872,10 +1885,8 @@ X86CPU.prototype.getWord = function(addr)
 {
     var off = addr & this.blockLimit;
     var iBlock = (addr & this.addrMemMask) >> this.blockShift;
-
     /*
      * On the 8088, it takes 4 cycles to read the additional byte REGARDLESS whether the address is odd or even.
-     *
      * TODO: For the 8086, the penalty is actually "(addr & 0x1) << 2" (4 additional cycles only when the address is odd).
      */
     this.nStepCycles -= this.CYCLES.nWordCyclePenalty;
@@ -1884,10 +1895,34 @@ X86CPU.prototype.getWord = function(addr)
         this.backTrack.btiMemLo = this.bus.readBackTrack(addr);
         this.backTrack.btiMemHi = this.bus.readBackTrack(addr + 1);
     }
-    if (off != this.blockLimit) {
+    if (off < this.blockLimit) {
         return this.aMemBlocks[iBlock].readWord(off);
     }
-    return this.aMemBlocks[iBlock++].readByte(off) | (this.aMemBlocks[iBlock & this.blockMask].readByte(0) << 8);
+    return this.aMemBlocks[iBlock].readByte(off) | (this.aMemBlocks[(iBlock + 1) & this.blockMask].readByte(0) << 8);
+};
+
+/**
+ * getLong(addr)
+ *
+ * @this {X86CPU}
+ * @param {number} addr is a physical (non-segmented) address
+ * @return {number} word (32-bit) value at that address
+ */
+X86CPU.prototype.getLong = function(addr)
+{
+    var off = addr & this.blockLimit;
+    var iBlock = (addr & this.addrMemMask) >> this.blockShift;
+    if (BACKTRACK) {
+        this.backTrack.btiMemLo = this.bus.readBackTrack(addr);
+        this.backTrack.btiMemHi = this.bus.readBackTrack(addr + 1);
+    }
+    var nShift = (off & 0x3) << 3;
+    var dw = this.aMemBlocks[iBlock].readLong(off & ~0x3);
+    if (nShift) {
+        dw >>>= nShift;
+        dw |= (this.aMemBlocks[(iBlock + 1) & this.blockMask].readLong(0) << (32 - nShift));
+    }
+    return dw;
 };
 
 /**
@@ -1914,10 +1949,8 @@ X86CPU.prototype.setWord = function(addr, w)
 {
     var off = addr & this.blockLimit;
     var iBlock = (addr & this.addrMemMask) >> this.blockShift;
-
     /*
      * On the 8088, it takes 4 cycles to write the additional byte REGARDLESS whether the address is odd or even.
-     *
      * TODO: For the 8086, the penalty is actually "(addr & 0x1) << 2" (4 additional cycles only when the address is odd).
      */
     this.nStepCycles -= this.CYCLES.nWordCyclePenalty;
@@ -1926,7 +1959,7 @@ X86CPU.prototype.setWord = function(addr, w)
         this.bus.writeBackTrack(addr, this.backTrack.btiMemLo);
         this.bus.writeBackTrack(addr + 1, this.backTrack.btiMemHi);
     }
-    if (off != this.blockLimit) {
+    if (off < this.blockLimit) {
         this.aMemBlocks[iBlock].writeWord(off, w & 0xffff);
         return;
     }
@@ -2337,7 +2370,7 @@ X86CPU.prototype.getIPByte = function()
 {
     var b = (PREFETCH? this.getBytePrefetch(this.regLIP) : this.getByte(this.regLIP));
     if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
-    this.regLIP = this.segCS.base + (this.regEIP = (this.regEIP + 1) & 0xffff); // this.advanceIP(1)
+    this.regLIP = this.segCS.base + (this.regEIP = (this.regEIP + 1) & this.addrMask);  // this.advanceIP(1)
     return b;
 };
 
@@ -2351,8 +2384,8 @@ X86CPU.prototype.getIPDisp = function()
 {
     var b = ((PREFETCH? this.getBytePrefetch(this.regLIP) : this.getByte(this.regLIP)) << 24) >> 24;
     if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
-    this.regLIP = this.segCS.base + (this.regEIP = (this.regEIP + 1) & 0xffff); // this.advanceIP(1)
-    return b & 0xffff;
+    this.regLIP = this.segCS.base + (this.regEIP = (this.regEIP + 1) & this.addrMask);  // this.advanceIP(1)
+    return b & this.addrMask;
 };
 
 /**
@@ -2368,7 +2401,7 @@ X86CPU.prototype.getIPWord = function()
         this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
         this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMemHi);
     }
-    this.regLIP = this.segCS.base + (this.regEIP = (this.regEIP + 2) & 0xffff); // this.advanceIP(2)
+    this.regLIP = this.segCS.base + (this.regEIP = (this.regEIP + 2) & this.addrMask);  // this.advanceIP(2)
     return w;
 };
 
@@ -2395,7 +2428,7 @@ X86CPU.prototype.getSIBAddr = function(mod)
 X86CPU.prototype.popWord = function()
 {
     var regESP = this.regESP;
-    this.regESP = (this.regESP + 2) & 0xffff;
+    this.regESP = (this.regESP + 2) & this.addrMask;
     return this.getSOWord(this.segSS, regESP);
 };
 
@@ -2407,8 +2440,8 @@ X86CPU.prototype.popWord = function()
  */
 X86CPU.prototype.pushWord = function(w)
 {
-    this.assert((w & 0xffff) == w);
-    this.setSOWord(this.segSS, (this.regESP = (this.regESP - 2) & 0xffff), w);
+    this.assert((w & this.opMask) == w);
+    this.setSOWord(this.segSS, (this.regESP = (this.regESP - 2) & this.addrMask), w);
 };
 
 /**
@@ -2699,7 +2732,8 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
                 this.opMask = this.segCS.opMask;
                 this.addrSize = this.segCS.addrSize;
                 this.addrMask = this.segCS.addrMask;
-                this.opMods = this.aaOpMod[this.addrSize];
+                this.opMem = this.aaOpMem[this.opSize];
+                this.opMod = this.aaOpMod[this.addrSize];
             }
 
             this.opPrefixes = this.opFlags & X86.OPFLAG.REPEAT;

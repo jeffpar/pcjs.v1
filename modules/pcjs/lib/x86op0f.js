@@ -49,7 +49,7 @@ var X86Op0F = {
         if ((bModRM & 0x38) < 0x10) {   // possible reg values: 0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, 0x38
             this.opFlags |= X86.OPFLAG.NOREAD;
         }
-        this.opMods.aOpModGrpWord[bModRM].call(this, this.aOpGrp6, X86Grps.opGrpNoSrc);
+        this.opMod.aOpModGrpWord[bModRM].call(this, this.aOpGrp6, X86Grps.opGrpNoSrc);
     },
     /**
      * @this {X86CPU}
@@ -61,7 +61,7 @@ var X86Op0F = {
         if (!(bModRM & 0x10)) {
             this.opFlags |= X86.OPFLAG.NOREAD;
         }
-        this.opMods.aOpModGrpWord[bModRM].call(this, X86Op0F.aOpGrp7, X86Grps.opGrpNoSrc);
+        this.opMod.aOpModGrpWord[bModRM].call(this, X86Op0F.aOpGrp7, X86Grps.opGrpNoSrc);
     },
     /**
      * @this {X86CPU}
@@ -69,7 +69,7 @@ var X86Op0F = {
      * op=0x0F,0x02 (lar reg,rm)
      */
     opLAR: function() {
-        this.opMods.aOpModRegWord[this.getIPByte()].call(this, X86Help.opHelpLAR);
+        this.opMod.aOpModRegWord[this.getIPByte()].call(this, X86Help.opHelpLAR);
     },
     /**
      * @this {X86CPU}
@@ -77,7 +77,7 @@ var X86Op0F = {
      * op=0x0F,0x03 (lsl reg,rm)
      */
     opLSL: function() {
-        this.opMods.aOpModRegWord[this.getIPByte()].call(this, X86Help.opHelpLSL);
+        this.opMod.aOpModRegWord[this.getIPByte()].call(this, X86Help.opHelpLSL);
     },
     /**
      * opLOADALL()

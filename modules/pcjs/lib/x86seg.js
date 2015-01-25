@@ -118,7 +118,7 @@ X86Seg.ID = {
 X86Seg.loadReal = function loadReal(sel, fSuppress)
 {
     this.sel = sel;
-    this.opSize = 2; this.addrSize = 0;
+    this.opSize = this.addrSize = 0;
     this.opMask = this.addrMask = 0xffff;
     return this.base = sel << 4;
 };
@@ -848,10 +848,10 @@ X86Seg.prototype.updateMode = function(fProt)
         this.cpl = this.sel & X86.SEL.RPL;
         this.dpl = (this.acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
         if (this.cpu.model < X86.MODEL_80386 || !(this.ext & X86.DESC.EXT.BIG)) {
-            this.opSize = 2;
+            this.opSize = 0;
             this.opMask = 0xffff;
         } else {
-            this.opSize = 4;
+            this.opSize = 1;
             this.opMask = 0xffffffff;
         }
     } else {
@@ -862,10 +862,10 @@ X86Seg.prototype.updateMode = function(fProt)
         this.limit = 0xffff;
         this.cpl = this.dpl = 0;
         this.addrDesc = X86.ADDR_INVALID;
-        this.opSize = 2;
+        this.opSize = 0;
         this.opMask = 0xffff;
     }
-    this.addrSize = this.opSize >> 2;
+    this.addrSize = this.opSize;
     this.addrMask = this.opMask;
     return fProt;
 };
