@@ -85,7 +85,7 @@ var FATARRAYS = false;
  * TYPEDARRAYS enables use of typed arrays for Memory blocks.  This used to be a compile-time-only option, but I've
  * added Memory access functions for typed arrays (see Memory.afnTypedArray), so support can be enabled dynamically.
  *
- * However, TYPEDARRAYS has always been slightly slower than the original DWORDARRAYS implementation (which uses an
+ * However, TYPEDARRAYS has always been slightly slower than the original LONGARRAYS implementation (which uses an
  * Array of numbers that stores 32 bits -- 4 consecutive bytes -- per number), so TYPEDARRAYS is completely disabled.
  *
  * See the Memory component for details.

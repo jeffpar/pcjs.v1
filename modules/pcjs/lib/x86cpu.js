@@ -1906,7 +1906,7 @@ X86CPU.prototype.getWord = function(addr)
  *
  * @this {X86CPU}
  * @param {number} addr is a physical (non-segmented) address
- * @return {number} word (32-bit) value at that address
+ * @return {number} long (32-bit) value at that address
  */
 X86CPU.prototype.getLong = function(addr)
 {
@@ -1916,13 +1916,11 @@ X86CPU.prototype.getLong = function(addr)
         this.backTrack.btiMemLo = this.bus.readBackTrack(addr);
         this.backTrack.btiMemHi = this.bus.readBackTrack(addr + 1);
     }
-    var nShift = (off & 0x3) << 3;
-    var dw = this.aMemBlocks[iBlock].readLong(off & ~0x3);
-    if (nShift) {
-        dw >>>= nShift;
-        dw |= (this.aMemBlocks[(iBlock + 1) & this.blockMask].readLong(0) << (32 - nShift));
+    if (off < this.blockLimit - 2) {
+        return this.aMemBlocks[iBlock].readLong(off);
     }
-    return dw;
+    var nShift = (off & 0x3) << 3;
+    return (this.aMemBlocks[iBlock].readLong(off & ~0x3) >>> nShift) | (this.aMemBlocks[(iBlock + 1) & this.blockMask].readLong(0) << (32 - nShift));
 };
 
 /**
@@ -1965,6 +1963,36 @@ X86CPU.prototype.setWord = function(addr, w)
     }
     this.aMemBlocks[iBlock++].writeByte(off, w & 0xff);
     this.aMemBlocks[iBlock & this.blockMask].writeByte(0, (w >> 8) & 0xff);
+};
+
+/**
+ * setLong(addr, l)
+ *
+ * @this {X86CPU}
+ * @param {number} addr is a physical (non-segmented) address
+ * @param {number} l is the long (32-bit) value to write
+ */
+X86CPU.prototype.setLong = function(addr, l)
+{
+    var off = addr & this.blockLimit;
+    var iBlock = (addr & this.addrMemMask) >> this.blockShift;
+    this.nStepCycles -= this.CYCLES.nWordCyclePenalty;
+
+    if (BACKTRACK) {
+        this.bus.writeBackTrack(addr, this.backTrack.btiMemLo);
+        this.bus.writeBackTrack(addr + 1, this.backTrack.btiMemHi);
+    }
+    if (off < this.blockLimit - 2) {
+        this.aMemBlocks[iBlock].writeLong(off, l);
+        return;
+    }
+    var lPrev, nShift = (off & 0x3) << 3;
+    off &= ~0x3;
+    lPrev = this.aMemBlocks[iBlock].readLong(off);
+    this.aMemBlocks[iBlock].writeLong(off, (lPrev & ~(0xffffffff << nShift)) | (l << nShift));
+    iBlock = (iBlock + 1) & this.blockMask;
+    lPrev = this.aMemBlocks[iBlock].readLong(0);
+    this.aMemBlocks[iBlock].writeLong(0, (lPrev & (0xffffffff << nShift)) | (l >>> (32 - nShift)));
 };
 
 /**

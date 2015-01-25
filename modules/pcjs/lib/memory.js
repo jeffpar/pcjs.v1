@@ -80,14 +80,14 @@ if (typeof module !== 'undefined') {
  * Because Memory blocks now allow us to have a "sparse" address space, we could choose to
  * take the memory hit of allocating 4K arrays per block, where each element stores only one byte,
  * instead of the more frugal but slightly slower approach of allocating arrays of 32-bit dwords
- * (DWORDARRAYS) and shifting/masking bytes/words to/from dwords; in theory, byte accesses would
+ * (LONGARRAYS) and shifting/masking bytes/words to/from dwords; in theory, byte accesses would
  * be faster and word accesses somewhat less faster.
  *
  * However, preliminary testing of that feature (FATARRAYS) did not yield significantly faster
  * performance, so it is OFF by default to minimize our memory consumption.  Using TYPEDARRAYS
  * would seem best, but as discussed in defines.js, it's off by default, because it doesn't perform
- * as well as DWORDARRAYS; the other advantage of TYPEDARRAYS is that it should theoretically use
- * about 1/2 the memory of DWORDARRAYS (32-bit elements vs 64-bit numbers), but I value speed over
+ * as well as LONGARRAYS; the other advantage of TYPEDARRAYS is that it should theoretically use
+ * about 1/2 the memory of LONGARRAYS (32-bit elements vs 64-bit numbers), but I value speed over
  * size at this point.  Also, not all JavaScript implementations support TYPEDARRAYS (IE9 is probably
  * the only real outlier: it lacks typed arrays but otherwise has all the necessary HTML5 support).
  *
@@ -288,12 +288,12 @@ Memory.readLongMemory = function readLongMemory(off)
     }
     var idw = off >> 2;
     var nShift = (off & 0x3) << 3;
-    var dw = this.adw[idw];
+    var l = this.adw[idw];
     if (nShift) {
-        dw >>>= nShift;
-        dw |= this.adw[idw + 1] << (32 - nShift);
+        l >>>= nShift;
+        l |= this.adw[idw + 1] << (32 - nShift);
     }
-    return dw;
+    return l;
 };
 
 /**
@@ -344,29 +344,29 @@ Memory.writeWordMemory = function writeWordMemory(off, w)
 };
 
 /**
- * writeLongMemory(off, dw)
+ * writeLongMemory(off, l)
  *
  * @this {Memory}
  * @param {number} off
- * @param {number} dw
+ * @param {number} l
  */
-Memory.writeLongMemory = function writeLongMemory(off, dw)
+Memory.writeLongMemory = function writeLongMemory(off, l)
 {
     Component.assert(off >= 0 && off < this.cb - 3);
     if (FATARRAYS) {
-        this.ab[off] = (dw & 0xff);
-        this.ab[off + 1] = (dw >> 8) & 0xff;
-        this.ab[off + 2] = (dw >> 16) & 0xff;
-        this.ab[off + 3] = (dw >> 24) & 0xff;
+        this.ab[off] = (l & 0xff);
+        this.ab[off + 1] = (l >> 8) & 0xff;
+        this.ab[off + 2] = (l >> 16) & 0xff;
+        this.ab[off + 3] = (l >> 24) & 0xff;
     } else {
         var idw = off >> 2;
         var nShift = (off & 0x3) << 3;
         if (!nShift) {
-            this.adw[idw] = dw;
+            this.adw[idw] = l;
         } else {
-            this.adw[idw] = (this.adw[idw] & ~(0xffffffff << nShift)) | (dw << nShift);
+            this.adw[idw] = (this.adw[idw] & ~(0xffffffff << nShift)) | (l << nShift);
             idw++;
-            this.adw[idw] = (this.adw[idw] & (0xffffffff << nShift)) | (dw >>> (32 - nShift));
+            this.adw[idw] = (this.adw[idw] & (0xffffffff << nShift)) | (l >>> (32 - nShift));
         }
     }
     this.fDirty = true;
@@ -449,13 +449,13 @@ Memory.writeWordChecked = function writeWordChecked(off, w)
 };
 
 /**
- * writeLongChecked(off, dw)
+ * writeLongChecked(off, l)
  *
  * @this {Memory}
  * @param {number} off
- * @param {number} dw
+ * @param {number} l
  */
-Memory.writeLongChecked = function writeLongChecked(off, dw)
+Memory.writeLongChecked = function writeLongChecked(off, l)
 {
     if (DEBUGGER) {
         this.dbg.checkMemoryWrite(this.addr + off) ||
@@ -463,7 +463,7 @@ Memory.writeLongChecked = function writeLongChecked(off, dw)
         this.dbg.checkMemoryWrite(this.addr + off + 2) ||
         this.dbg.checkMemoryWrite(this.addr + off + 3)
     }
-    this.writeLongDirect(off, dw);
+    this.writeLongDirect(off, l);
 };
 
 /**
@@ -534,16 +534,16 @@ Memory.writeWordTypedArray = function writeWordTypedArray(off, w)
 };
 
 /**
- * writeLongTypedArray(off, dw)
+ * writeLongTypedArray(off, l)
  *
  * @this {Memory}
  * @param {number} off
- * @param {number} dw
+ * @param {number} l
  */
-Memory.writeLongTypedArray = function writeLongTypedArray(off, dw)
+Memory.writeLongTypedArray = function writeLongTypedArray(off, l)
 {
     Component.assert(off >= 0 && off < this.cb - 3);
-    this.dv.setInt32(off, dw, true);
+    this.dv.setInt32(off, l, true);
     this.fDirty = true;
 };
 

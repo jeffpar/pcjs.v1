@@ -4746,7 +4746,7 @@ if (DEBUGGER) {
                         if (this.cmp) this.cmp.reset();
                         return true;
                     case "ver":
-                        this.println((APPNAME || "PCjs") + " version " + APPVERSION + " (" + (I386? "80386" : "80286") + (COMPILED? ",RELEASE" : (DEBUG? ",DEBUG" : ",NODEBUG")) + (PREFETCH? ",PREFETCH" : ",NOPREFETCH") + (TYPEDARRAYS? ",TYPEDARRAYS" : (FATARRAYS? ",FATARRAYS" : ",DWORDARRAYS")) + (BACKTRACK? ",BACKTRACK" : "") + ")");
+                        this.println((APPNAME || "PCjs") + " version " + APPVERSION + " (" + (I386? "80386" : "80286") + (COMPILED? ",RELEASE" : (DEBUG? ",DEBUG" : ",NODEBUG")) + (PREFETCH? ",PREFETCH" : ",NOPREFETCH") + (TYPEDARRAYS? ",TYPEDARRAYS" : (FATARRAYS? ",FATARRAYS" : ",LONGARRAYS")) + (BACKTRACK? ",BACKTRACK" : "") + ")");
                         return true;
                     default:
                         ch0 = sCmd.charAt(0);
