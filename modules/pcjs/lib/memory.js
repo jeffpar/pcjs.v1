@@ -74,7 +74,7 @@ if (typeof module !== 'undefined') {
  * The Bus allocates empty blocks for the entire address space during initialization, so that
  * any reads/writes to undefined addresses will have no effect.  Later, the ROM and RAM
  * components will ask the Bus to allocate memory for specific ranges, and the Bus will allocate
- * as many new BLOCK_SIZE Memory objects as the ranges require.  Partial Memory blocks could
+ * as many new blockSize Memory objects as the ranges require.  Partial Memory blocks could
  * also be supported in theory, but in practice, they're not.
  *
  * Because Memory blocks now allow us to have a "sparse" address space, we could choose to
@@ -105,9 +105,9 @@ if (typeof module !== 'undefined') {
 function Memory(addr, size, type, controller)
 {
     var i;
-    this.cb = size || 0;
     this.adw = null;
     this.offset = 0;
+    this.size = size || 0;
     this.type = type || Memory.TYPE.NONE;
     this.fReadOnly = (type == Memory.TYPE.ROM);
     this.controller = null;
@@ -115,11 +115,15 @@ function Memory(addr, size, type, controller)
 
     if (BACKTRACK) {
         if (!size || controller) {
+            this.fModBackTrack = false;
             this.readBackTrack = Memory.readBackTrackNone;
             this.writeBackTrack = Memory.writeBackTrackNone;
+            this.modBackTrack = Memory.modBackTrackNone;
         } else {
+            this.fModBackTrack = true;
             this.readBackTrack = Memory.readBackTrackIndex;
             this.writeBackTrack = Memory.writeBackTrackIndex;
+            this.modBackTrack = Memory.modBackTrackIndex;
             this.abtIndexes = new Array(size);
             for (i = 0; i < size; i++) this.abtIndexes[i] = 0;
         }
@@ -153,7 +157,7 @@ function Memory(addr, size, type, controller)
      * know how to deal with this simple 1-1 mapping of addresses to bytes and words.
      *
      * TODO: Consider initializing the memory array to random (or pseudo-random) values in DEBUG
-     * mode; pseudo-random might be best, because if that uncovers a bug, it might be reproducible.
+     * mode; pseudo-random might be best, because if it uncovers a bug, the bug should be reproducible.
      */
     if (TYPEDARRAYS) {
         this.buffer = new ArrayBuffer(size);
@@ -203,6 +207,10 @@ Memory.TYPE = {
     VIDEO:  3
 };
 
+if (DEBUG) {
+    Memory.TYPE.NAMES = ["NONE", "RAM", "ROM", "VIDEO"];
+}
+
 /**
  * readNone(off)
  *
@@ -241,7 +249,7 @@ Memory.writeNone = function writeNone(off, v)
  */
 Memory.readByteMemory = function readByteMemory(off)
 {
-    Component.assert(off >= 0 && off < this.cb);
+    Component.assert(off >= 0 && off < this.size);
     if (FATARRAYS) {
         return this.ab[off];
     }
@@ -249,15 +257,15 @@ Memory.readByteMemory = function readByteMemory(off)
 };
 
 /**
- * readWordMemory(off)
+ * readShortMemory(off)
  *
  * @this {Memory}
  * @param {number} off
  * @return {number}
  */
-Memory.readWordMemory = function readWordMemory(off)
+Memory.readShortMemory = function readShortMemory(off)
 {
-    Component.assert(off >= 0 && off < this.cb - 1);
+    Component.assert(off >= 0 && off < this.size - 1);
     if (FATARRAYS) {
         return this.ab[off] | (this.ab[off + 1] << 8);
     }
@@ -282,7 +290,7 @@ Memory.readWordMemory = function readWordMemory(off)
  */
 Memory.readLongMemory = function readLongMemory(off)
 {
-    Component.assert(off >= 0 && off < this.cb - 3);
+    Component.assert(off >= 0 && off < this.size - 3);
     if (FATARRAYS) {
         return this.ab[off] | (this.ab[off + 1] << 8) | (this.ab[off + 2] << 16) | (this.ab[off + 3] << 24);
     }
@@ -305,7 +313,7 @@ Memory.readLongMemory = function readLongMemory(off)
  */
 Memory.writeByteMemory = function writeByteMemory(off, b)
 {
-    Component.assert(off >= 0 && off < this.cb && (b & 0xff) == b);
+    Component.assert(off >= 0 && off < this.size && (b & 0xff) == b);
     if (FATARRAYS) {
         this.ab[off] = b;
     } else {
@@ -317,15 +325,15 @@ Memory.writeByteMemory = function writeByteMemory(off, b)
 };
 
 /**
- * writeWordMemory(off, w)
+ * writeShortMemory(off, w)
  *
  * @this {Memory}
  * @param {number} off
  * @param {number} w
  */
-Memory.writeWordMemory = function writeWordMemory(off, w)
+Memory.writeShortMemory = function writeShortMemory(off, w)
 {
-    Component.assert(off >= 0 && off < this.cb - 1 && (w & 0xffff) == w);
+    Component.assert(off >= 0 && off < this.size - 1 && (w & 0xffff) == w);
     if (FATARRAYS) {
         this.ab[off] = (w & 0xff);
         this.ab[off + 1] = (w >> 8);
@@ -352,7 +360,7 @@ Memory.writeWordMemory = function writeWordMemory(off, w)
  */
 Memory.writeLongMemory = function writeLongMemory(off, l)
 {
-    Component.assert(off >= 0 && off < this.cb - 3);
+    Component.assert(off >= 0 && off < this.size - 3);
     if (FATARRAYS) {
         this.ab[off] = (l & 0xff);
         this.ab[off + 1] = (l >> 8) & 0xff;
@@ -386,19 +394,19 @@ Memory.readByteChecked = function readByteChecked(off)
 };
 
 /**
- * readWordChecked(off)
+ * readShortChecked(off)
  *
  * @this {Memory}
  * @param {number} off
  * @return {number}
  */
-Memory.readWordChecked = function readWordChecked(off)
+Memory.readShortChecked = function readShortChecked(off)
 {
     if (DEBUGGER) {
         this.dbg.checkMemoryRead(this.addr + off) ||
         this.dbg.checkMemoryRead(this.addr + off + 1);
     }
-    return this.readWordDirect(off);
+    return this.readShortDirect(off);
 };
 
 /**
@@ -433,19 +441,19 @@ Memory.writeByteChecked = function writeByteChecked(off, b)
 };
 
 /**
- * writeWordChecked(off, w)
+ * writeShortChecked(off, w)
  *
  * @this {Memory}
  * @param {number} off
  * @param {number} w
  */
-Memory.writeWordChecked = function writeWordChecked(off, w)
+Memory.writeShortChecked = function writeShortChecked(off, w)
 {
     if (DEBUGGER) {
         this.dbg.checkMemoryWrite(this.addr + off) ||
         this.dbg.checkMemoryWrite(this.addr + off + 1);
     }
-    this.writeWordDirect(off, w);
+    this.writeShortDirect(off, w);
 };
 
 /**
@@ -475,20 +483,20 @@ Memory.writeLongChecked = function writeLongChecked(off, l)
  */
 Memory.readByteTypedArray = function readByteTypedArray(off)
 {
-    Component.assert(off >= 0 && off < this.cb);
+    Component.assert(off >= 0 && off < this.size);
     return this.ab[off];
 };
 
 /**
- * readWordTypedArray(off)
+ * readShortTypedArray(off)
  *
  * @this {Memory}
  * @param {number} off
  * @return {number}
  */
-Memory.readWordTypedArray = function readWordTypedArray(off)
+Memory.readShortTypedArray = function readShortTypedArray(off)
 {
-    Component.assert(off >= 0 && off < this.cb - 1);
+    Component.assert(off >= 0 && off < this.size - 1);
     return this.dv.getUint16(off, true);
 };
 
@@ -501,7 +509,7 @@ Memory.readWordTypedArray = function readWordTypedArray(off)
  */
 Memory.readLongTypedArray = function readLongTypedArray(off)
 {
-    Component.assert(off >= 0 && off < this.cb - 3);
+    Component.assert(off >= 0 && off < this.size - 3);
     return this.dv.getInt32(off, true);
 };
 
@@ -514,21 +522,21 @@ Memory.readLongTypedArray = function readLongTypedArray(off)
  */
 Memory.writeByteTypedArray = function writeByteTypedArray(off, b)
 {
-    Component.assert(off >= 0 && off < this.cb && (b & 0xff) == b);
+    Component.assert(off >= 0 && off < this.size && (b & 0xff) == b);
     this.ab[off] = b;
     this.fDirty = true;
 };
 
 /**
- * writeWordTypedArray(off, w)
+ * writeShortTypedArray(off, w)
  *
  * @this {Memory}
  * @param {number} off
  * @param {number} w
  */
-Memory.writeWordTypedArray = function writeWordTypedArray(off, w)
+Memory.writeShortTypedArray = function writeShortTypedArray(off, w)
 {
-    Component.assert(off >= 0 && off < this.cb - 1 && (w & 0xffff) == w);
+    Component.assert(off >= 0 && off < this.size - 1 && (w & 0xffff) == w);
     this.dv.setUint16(off, w, true);
     this.fDirty = true;
 };
@@ -542,7 +550,7 @@ Memory.writeWordTypedArray = function writeWordTypedArray(off, w)
  */
 Memory.writeLongTypedArray = function writeLongTypedArray(off, l)
 {
-    Component.assert(off >= 0 && off < this.cb - 3);
+    Component.assert(off >= 0 && off < this.size - 3);
     this.dv.setInt32(off, l, true);
     this.fDirty = true;
 };
@@ -571,6 +579,17 @@ Memory.writeBackTrackNone = function writeBackTrackNone(off, bti)
 };
 
 /**
+ * modBackTrackNone(fMod)
+ *
+ * @this {Memory}
+ * @param {boolean} fMod
+ */
+Memory.modBackTrackNone = function modBackTrackNone(fMod)
+{
+    return false;
+};
+
+/**
  * readBackTrackIndex(off)
  *
  * @this {Memory}
@@ -579,7 +598,7 @@ Memory.writeBackTrackNone = function writeBackTrackNone(off, bti)
  */
 Memory.readBackTrackIndex = function readBackTrackIndex(off)
 {
-    Component.assert(off >= 0 && off < this.cb);
+    Component.assert(off >= 0 && off < this.size);
     return this.abtIndexes[off];
 };
 
@@ -594,17 +613,31 @@ Memory.readBackTrackIndex = function readBackTrackIndex(off)
 Memory.writeBackTrackIndex = function writeBackTrackIndex(off, bti)
 {
     var btiPrev;
-    Component.assert(off >= 0 && off < this.cb);
+    Component.assert(off >= 0 && off < this.size);
     btiPrev = this.abtIndexes[off];
     this.abtIndexes[off] = bti;
     return btiPrev;
 };
 
-Memory.afnMemory         = [Memory.readByteMemory,  Memory.readWordMemory,  Memory.readLongMemory,  Memory.writeByteMemory,  Memory.writeWordMemory,  Memory.writeLongMemory];
-Memory.afnChecked        = [Memory.readByteChecked, Memory.readWordChecked, Memory.readLongChecked, Memory.writeByteChecked, Memory.writeWordChecked, Memory.writeLongChecked];
+/**
+ * modBackTrackIndex(fMod)
+ *
+ * @this {Memory}
+ * @param {boolean} fMod
+ * @return {boolean} previous value
+ */
+Memory.modBackTrackIndex = function modBackTrackIndex(fMod)
+{
+    var fModPrev = this.fModBackTrack;
+    this.fModBackTrack = fMod;
+    return fModPrev;
+};
+
+Memory.afnMemory         = [Memory.readByteMemory,  Memory.readShortMemory,  Memory.readLongMemory,  Memory.writeByteMemory,  Memory.writeShortMemory,  Memory.writeLongMemory];
+Memory.afnChecked        = [Memory.readByteChecked, Memory.readShortChecked, Memory.readLongChecked, Memory.writeByteChecked, Memory.writeShortChecked, Memory.writeLongChecked];
 
 if (TYPEDARRAYS) {
-    Memory.afnTypedArray = [Memory.readByteTypedArray, Memory.readWordTypedArray, Memory.readLongTypedArray, Memory.writeByteTypedArray, Memory.writeWordTypedArray, Memory.writeLongTypedArray];
+    Memory.afnTypedArray = [Memory.readByteTypedArray, Memory.readShortTypedArray, Memory.readLongTypedArray, Memory.writeByteTypedArray, Memory.writeShortTypedArray, Memory.writeLongTypedArray];
 }
 
 Memory.prototype = {
@@ -628,7 +661,7 @@ Memory.prototype = {
             adw = null;
         }
         else if (FATARRAYS) {
-            adw = new Array(this.cb >> 2);
+            adw = new Array(this.size >> 2);
             var off = 0;
             for (i = 0; i < adw.length; i++) {
                 adw[i] = this.ab[off] | (this.ab[off + 1] << 8) | (this.ab[off + 2] << 16) | (this.ab[off + 3] << 24);
@@ -637,7 +670,7 @@ Memory.prototype = {
         }
         else if (TYPEDARRAYS) {
             /*
-             * It might be tempting to just return a copy of Int32Array(this.buffer, 0, this.cb >> 2),
+             * It might be tempting to just return a copy of Int32Array(this.buffer, 0, this.size >> 2),
              * but we can't be sure of the "endianness" of an Int32Array -- which would be OK if the array
              * was always saved/restored on the same machine, but there's no guarantee of that, either.
              * So we use getInt32() and require little-endian values.
@@ -646,7 +679,7 @@ Memory.prototype = {
              * a normal array; it's serialized as an Object rather than an Array, so it lacks a "length"
              * property and causes problems for State.store() and State.parse().
              */
-            adw = new Array(this.cb >> 2);
+            adw = new Array(this.size >> 2);
             for (i = 0; i < adw.length; i++) {
                 adw[i] = this.dv.getInt32(i << 2, true);
             }
@@ -680,7 +713,7 @@ Memory.prototype = {
          * no controller AND no data.
          */
         Component.assert(adw != null);
-        if (adw && this.cb == adw.length << 2) {
+        if (adw && this.size == adw.length << 2) {
             var i;
             if (FATARRAYS) {
                 var off = 0;
@@ -725,11 +758,11 @@ Memory.prototype = {
      */
     setReadAccess: function(afn, fDirect) {
         this.readByte = afn[0] || Memory.readNone;
-        this.readWord = afn[1] || Memory.readNone;
+        this.readShort = afn[1] || Memory.readNone;
         this.readLong = afn[2] || Memory.readNone;
         if (fDirect) {
             this.readByteDirect = afn[0] || Memory.readNone;
-            this.readWordDirect = afn[1] || Memory.readNone;
+            this.readShortDirect = afn[1] || Memory.readNone;
             this.readLongDirect = afn[2] || Memory.readNone;
         }
     },
@@ -742,11 +775,11 @@ Memory.prototype = {
      */
     setWriteAccess: function(afn, fDirect) {
         this.writeByte = !this.fReadOnly && afn[3] || Memory.writeNone;
-        this.writeWord = !this.fReadOnly && afn[4] || Memory.writeNone;
+        this.writeShort = !this.fReadOnly && afn[4] || Memory.writeNone;
         this.writeLong = !this.fReadOnly && afn[5] || Memory.writeNone;
         if (fDirect) {
             this.writeByteDirect = afn[3] || Memory.writeNone;
-            this.writeWordDirect = afn[4] || Memory.writeNone;
+            this.writeShortDirect = afn[4] || Memory.writeNone;
             this.writeLongDirect = afn[5] || Memory.writeNone;
         }
     },
@@ -757,7 +790,7 @@ Memory.prototype = {
      */
     resetReadAccess: function() {
         this.readByte = this.readByteDirect;
-        this.readWord = this.readWordDirect;
+        this.readShort = this.readShortDirect;
         this.readLong = this.readLongDirect;
     },
     /**
@@ -767,7 +800,7 @@ Memory.prototype = {
      */
     resetWriteAccess: function() {
         this.writeByte = this.fReadOnly? Memory.writeNone : this.writeByteDirect;
-        this.writeWord = this.fReadOnly? Memory.writeNone : this.writeWordDirect;
+        this.writeShort = this.fReadOnly? Memory.writeNone : this.writeShortDirect;
         this.writeLong = this.fReadOnly? Memory.writeNone : this.writeLongDirect;
     },
     /**

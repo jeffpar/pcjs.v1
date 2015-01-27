@@ -710,10 +710,10 @@ Video.aCGAColorSet2 = [Video.ATTRS.FGND_CYAN,  Video.ATTRS.FGND_MAGENTA, Video.A
 Video.aEGAPalDef = [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x14, 0x07, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D, 0x3E, 0x3F];
 
 Video.aEGAByteToDW = [
-    0x00000000, 0x000000ff, 0x0000ff00, 0x0000ffff,
-    0x00ff0000, 0x00ff00ff, 0x00ffff00, 0x00ffffff,
-    0xff000000, 0xff0000ff, 0xff00ff00, 0xff00ffff,
-    0xffff0000, 0xffff00ff, 0xffffff00, 0xffffffff
+      0x00000000,   0x000000ff,   0x0000ff00,   0x0000ffff,
+      0x00ff0000,   0x00ff00ff,   0x00ffff00,   0x00ffffff,
+      0xff000000|0, 0xff0000ff|0, 0xff00ff00|0, 0xff00ffff|0,
+      0xffff0000|0, 0xffff00ff|0, 0xffffff00|0, 0xffffffff|0
 ];
 
 Video.aEGADWToByte = [];
@@ -725,14 +725,14 @@ Video.aEGADWToByte[0x00800000] = 0x4;
 Video.aEGADWToByte[0x00800080] = 0x5;
 Video.aEGADWToByte[0x00808000] = 0x6;
 Video.aEGADWToByte[0x00808080] = 0x7;
-Video.aEGADWToByte[0x80000000] = 0x8;
-Video.aEGADWToByte[0x80000080] = 0x9;
-Video.aEGADWToByte[0x80008000] = 0xa;
-Video.aEGADWToByte[0x80008080] = 0xb;
-Video.aEGADWToByte[0x80800000] = 0xc;
-Video.aEGADWToByte[0x80800080] = 0xd;
-Video.aEGADWToByte[0x80808000] = 0xe;
-Video.aEGADWToByte[0x80808080] = 0xf;
+Video.aEGADWToByte[0x80000000|0] = 0x8;
+Video.aEGADWToByte[0x80000080|0] = 0x9;
+Video.aEGADWToByte[0x80008000|0] = 0xa;
+Video.aEGADWToByte[0x80008080|0] = 0xb;
+Video.aEGADWToByte[0x80800000|0] = 0xc;
+Video.aEGADWToByte[0x80800080|0] = 0xd;
+Video.aEGADWToByte[0x80808000|0] = 0xe;
+Video.aEGADWToByte[0x80808080|0] = 0xf;
 
 /**
  * Card(video, iCard, data, cbMemory)
@@ -1241,13 +1241,13 @@ Card.ACCESS.WRITE.MODE2XOR  = 0xE000;
 Card.ACCESS.WRITE.MASK      = 0xff00;
 
 /**
- * readWord(off)
+ * readShort(off)
  *
  * @this {Memory}
  * @param {number} off
  * @return {number}
  */
-Card.ACCESS.readWord = function readWord(off)
+Card.ACCESS.readShort = function readShort(off)
 {
     return this.readByte(off) | (this.readByte(off + 1) << 8);
 };
@@ -1265,13 +1265,13 @@ Card.ACCESS.readLong = function readLong(off)
 };
 
 /**
- * writeWord(off, w)
+ * writeShort(off, w)
  *
  * @this {Memory}
  * @param {number} off
  * @param {number} w
  */
-Card.ACCESS.writeWord = function writeWord(off, w)
+Card.ACCESS.writeShort = function writeShort(off, w)
 {
     Component.assert(!(w & ~0xffff));
     this.writeByte(off, w & 0xff);
@@ -1655,11 +1655,11 @@ Card.prototype.initEGA = function(data, nMonitorType)
              */
             /*15*/  Card.ACCESS.READ.MODE0 | Card.ACCESS.READ.EVENODD | Card.ACCESS.WRITE.MODE0 | Card.ACCESS.WRITE.EVENODD,
             /*16*/  0,
-            /*17*/  0xffffffff,
+            /*17*/  0xffffffff|0,
             /*18*/  0,
-            /*19*/  0xffffffff,
+            /*19*/  0xffffffff|0,
             /*20*/  0,
-            /*21*/  0xffffffff,
+            /*21*/  0xffffffff|0,
             /*22*/  0,
             /*23*/  0,
             /*24*/  0
@@ -1953,7 +1953,7 @@ Card.prototype.setMemoryAccess = function(nAccess)
             }
         }
         if (!this.afnAccess) {
-            this.afnAccess  = [null, Card.ACCESS.readWord, Card.ACCESS.readLong, null, Card.ACCESS.writeWord, Card.ACCESS.writeLong];
+            this.afnAccess  = [null, Card.ACCESS.readShort, Card.ACCESS.readLong, null, Card.ACCESS.writeShort, Card.ACCESS.writeLong];
         }
         this.afnAccess[0] = fnReadByte;
         this.afnAccess[3] = fnWriteByte;
@@ -4340,8 +4340,8 @@ Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
             if (x < xDirty) xDirty = x;
             for (var iPixel = 0; iPixel < nPixelsPerCell; iPixel++) {
                 /*
-                 * JavaScript Alert: if adwMemory contains a 32-bit value such as -1526726656, and then we mask it
-                 * with 0x80808080, we end up with -2147483648, which in a perfect 32-bit world, would be equivalent
+                 * JavaScript Alert: if adwMemory contains a 32-bit value such as -1526726656, and then we mask
+                 * it with 0x80808080, we end up with -2147483648, which in a perfect 32-bit world, would be equal
                  * to 0x80000000, which means that when we look up "Video.aEGADWToByte[0x80000000]", we should get
                  * the entry containing 0x8.  But no, in JavaScript, since the original value was negative, the
                  * masked value is still negative, because there are 52 "significand" bits in JavaScript numbers,
@@ -4349,13 +4349,17 @@ Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
                  *
                  * This can be confirmed by looking at dwPixel.toString(16), which returns "-80000000".  One solution
                  * is to add 4294967296 (0x100000000) to any negative 32-bit value for which we need the positive
-                 * representation.
+                 * representation.  A better solution (ie, one that doesn't require 33-bit values, triggering floating
+                 * point arithmetic) is storing negative indexes in the lookup array (aEGADWToByte).  However, you CANNOT
+                 * do that by simply writing a value like 0x80000080 as "-0x80000080", because JavaScript will interpret
+                 * that as the negation of 2147483776, yielding -2147483776, the low 32 bits of which are 0x7FFFFFF80,
+                 * not 0x80000080 as intended.  So, the safest way to write a constant like that is "0x80000080|0".
                  *
                  * And, since assertions don't fix problems (only catch them, and only in DEBUG builds), I'm also
                  * ensuring that bPixel will always default to 0 if an undefined value ever slips through again.
                  */
                 var dwPixel = data & 0x80808080;
-                if (dwPixel < 0) dwPixel += 0x100000000;
+                // if (dwPixel < 0) dwPixel += 0x100000000;
                 this.assert(Video.aEGADWToByte[dwPixel] !== undefined);
                 var bPixel = Video.aEGADWToByte[dwPixel] || 0;
                 this.setPixel(this.imageScreenBuffer, x++, y, aPixelColors[bPixel]);

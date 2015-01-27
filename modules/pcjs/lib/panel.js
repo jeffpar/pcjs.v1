@@ -35,6 +35,8 @@
 if (typeof module !== 'undefined') {
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
+    var Bus         = require("./bus");
+    var Memory      = require("./memory");
 }
 
 /**
@@ -49,7 +51,10 @@ if (typeof module !== 'undefined') {
 function Panel(parmsPanel) {
     Component.call(this, "Panel", parmsPanel, Panel);
     this.canvas = null;
-    if (BACKTRACK) this.fBackTrack = false;
+    if (BACKTRACK) {
+        this.stats = null;
+        this.fBackTrack = false;
+    }
 }
 
 Component.subclass(Component, Panel);
@@ -82,7 +87,7 @@ Panel.prototype.setBinding = function(sHTMLType, sBinding, control)
             this.canvas = control;
             this.canvasContext = this.canvas.getContext("2d");
             /*
-             * this.canvas.width and this.canvas.height contain the width and height of the canvas, in pixels
+             * NOTE: this.canvas.width and this.canvas.height contain the width and height of the canvas, in pixels
              */
             this.fRedraw = true;
             return true;
@@ -121,25 +126,6 @@ Panel.prototype.powerUp = function(data, fRepower)
 {
     if (!fRepower) {
         Panel.init();
-        if (this.canvas) {
-            if (this.fBackTrack) {
-                /*
-                 * We need to calculate some parameters based on the canvas pixel dimensions.  For now, we're
-                 * going to use 100% of the canvas height, and 75% of the canvas width (starting with the left edge),
-                 * for the live memory display.
-                 *
-                 * For a 640x350 canvas, that means 480x350 pixels for the live memory display, or 168,000 pixels.
-                 * For a 16Mb (24-bit) address space, with 16,777,216 locations, the worst case would mean each pixel
-                 * represents roughly 100 memory locations.  But in a machine with only 1152Kb of RAM, 32Kb of Video RAM,
-                 * and 128Kb of ROM, that's only 1,343,488 locations we need to worry about, because we can ignore all
-                 * the unallocated regions.
-                 *
-                 * So to start, we need a function that scans the entire address space, and reports how many bytes are
-                 * actually allocated.  At the same time, we should also count how many different objects exist.
-                 */
-                this.bus.scanMemory()
-            }
-        }
     }
     return true;
 };
@@ -156,11 +142,6 @@ Panel.prototype.powerDown = function(fSave)
     return true;
 };
 
-Panel.prototype.scanMemory = function()
-{
-
-};
-
 /**
  * updateAnimation()
  *
@@ -175,7 +156,11 @@ Panel.prototype.updateAnimation = function()
         if (this.fRedraw) {
             if (BACKTRACK && this.fBackTrack) {
                 context.font = "40px Arial";
-                context.fillStyle = "#FFFFFF";
+                /*
+                 * Even when the canvas from whence the context came has an explicit "color" style,
+                 * the context still defaults to "black", so we must manually propagate the canvas color.
+                 */
+                context.fillStyle = this.canvas.style.color;
                 context.fillText("BackTrack Panel",10,50);
             }
             this.fRedraw = false;
@@ -194,6 +179,62 @@ Panel.prototype.updateAnimation = function()
  */
 Panel.prototype.updateStatus = function()
 {
+    if (this.canvas) {
+        if (this.fBackTrack) {
+            if (MAXDEBUG) this.log("begin scanMemory()");
+            this.stats = this.bus.scanMemory(this.stats);
+            this.findRegions();
+            if (MAXDEBUG) this.log("end scanMemory(): total bytes: " + this.stats.cbTotal + ", total blocks: " + this.stats.cBlocks + ", total regions: " + this.stats.cRegions);
+        }
+    }
+};
+
+/**
+ * findRegions()
+ *
+ * This takes the stats object produced by scanMemory() and adds the following:
+ *
+ *      cRegions:   number of contiguous memory regions
+ *      aRegions:   array of aBlocks indexes (bits 0-15) combined with block counts (bits 16-31)
+ *
+ * It calls addRegion() for each discrete region (set of contiguous blocks with the same type) that it finds.
+ *
+ * @this {Panel}
+ */
+Panel.prototype.findRegions = function()
+{
+    this.stats.cRegions = 0;
+    if (!this.stats.aRegions) this.stats.aRegions = [];
+    var typeRegion = -1, iBlockRegion = 0, addrRegion = 0, nBlockPrev = -1;
+    for (var iBlock = 0; iBlock < this.stats.cBlocks; iBlock++) {
+        var nBlock = this.stats.aBlocks[iBlock];
+        var type = nBlock >>> Bus.BLOCK.TYPE_SHIFT;
+        var nBlockCurr = (nBlock & Bus.BLOCK.MASK);
+        if (type != typeRegion || nBlockCurr != nBlockPrev + 1) {
+            var cBlocks = iBlock - iBlockRegion;
+            if (cBlocks) this.addRegion(addrRegion, iBlockRegion, cBlocks, typeRegion);
+            typeRegion = type;
+            iBlockRegion = iBlock;
+            addrRegion = (nBlock & Bus.BLOCK.MASK) << this.bus.blockShift;
+        }
+        nBlockPrev = nBlockCurr;
+    }
+    this.addRegion(addrRegion, iBlockRegion, iBlock - iBlockRegion, typeRegion);
+};
+
+/**
+ * addRegion(addr, iBlock, cBlocks, type)
+ *
+ * @this {Panel}
+ * @param {number} addr
+ * @param {number} iBlock
+ * @param {number} cBlocks
+ * @param {number} type
+ */
+Panel.prototype.addRegion = function(addr, iBlock, cBlocks, type)
+{
+    this.stats.aRegions[this.stats.cRegions++] = (iBlock | cBlocks << 16);
+    if (MAXDEBUG) this.log("region " + this.stats.cRegions + " (addr " + str.toHex(addr) + ", type " + Memory.TYPE.NAMES[type] + ") contains " + cBlocks + " blocks");
 };
 
 /**

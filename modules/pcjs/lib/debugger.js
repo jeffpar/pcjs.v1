@@ -3076,7 +3076,7 @@ if (DEBUGGER) {
      * done later, by getAddr(), which returns a negative result (-1) for invalid segments, out-of-range offsets,
      * etc.  The Debugger's low-level get/set memory functions verify all getAddr() results, but even if an
      * invalid address is passed through to the Bus memory interfaces, the address will simply be masked with
-     * Bus.addrLimit; in the case of -1, that will generally refer to the last byte of physical address space.
+     * Bus.busLimit; in the case of -1, that will generally refer to the last byte of physical address space.
      *
      * @this {Debugger}
      * @param {string|undefined} sAddr
@@ -4596,7 +4596,7 @@ if (DEBUGGER) {
             return;
 
         if (n === undefined) n = 1;
-        var aAddrEnd = this.newAddr(0xffff, aAddr[1], this.bus.addrLimit);
+        var aAddrEnd = this.newAddr(0xffff, aAddr[1], this.bus.busLimit);
 
         if (sAddrEnd !== undefined) {
             aAddrEnd = this.parseAddr(sAddrEnd, Debugger.ADDR_CODE);

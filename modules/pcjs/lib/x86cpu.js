@@ -167,7 +167,7 @@ function X86CPU(parmsCPU) {
      * when the Bus is initialized.
      */
     this.aMemBlocks = [];
-    this.addrMemMask = this.blockShift = this.blockLimit = this.blockMask = 0;
+    this.busMask = this.blockShift = this.blockLimit = this.blockMask = 0;
 
     if (SAMPLER) {
         /*
@@ -442,7 +442,7 @@ X86CPU.PREFETCH = {
 };
 
 /**
- * initMemory(aMemBlocks, addrLimit, blockShift, blockLimit, blockMask)
+ * initMemory(aMemBlocks, busMask, blockShift, blockLimit, blockMask)
  *
  * Notification from Bus.initMemory(), giving us direct access to the entire memory space
  * (aMemBlocks).
@@ -485,15 +485,13 @@ X86CPU.PREFETCH = {
  *
  * @this {X86CPU}
  * @param {Array} aMemBlocks
- * @param {number} addrLimit
  * @param {number} blockShift
  * @param {number} blockLimit
  * @param {number} blockMask
  */
-X86CPU.prototype.initMemory = function(aMemBlocks, addrLimit, blockShift, blockLimit, blockMask)
+X86CPU.prototype.initMemory = function(aMemBlocks, blockShift, blockLimit, blockMask)
 {
     this.aMemBlocks = aMemBlocks;
-    this.addrMemMask = addrLimit;
     this.blockShift = blockShift;
     this.blockLimit = blockLimit;
     this.blockMask = blockMask;
@@ -508,16 +506,16 @@ X86CPU.prototype.initMemory = function(aMemBlocks, addrLimit, blockShift, blockL
 };
 
 /**
- * setAddressMask(addrMask)
+ * setAddressMask(busMask)
  *
  * Notification from Bus.setA20(), called whenever the A20 line changes.
  *
  * @this {X86CPU}
- * @param {number} addrMask
+ * @param {number} busMask
  */
-X86CPU.prototype.setAddressMask = function(addrMask)
+X86CPU.prototype.setAddressMask = function(busMask)
 {
-    this.addrMemMask = addrMask;
+    this.busMask = busMask;
 };
 
 /**
@@ -1879,7 +1877,7 @@ X86CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
 X86CPU.prototype.getByte = function(addr)
 {
     if (BACKTRACK) this.backTrack.btiMemLo = this.bus.readBackTrack(addr);
-    return this.aMemBlocks[(addr & this.addrMemMask) >> this.blockShift].readByte(addr & this.blockLimit);
+    return this.aMemBlocks[(addr & this.busMask) >> this.blockShift].readByte(addr & this.blockLimit);
 };
 
 /**
@@ -1892,7 +1890,7 @@ X86CPU.prototype.getByte = function(addr)
 X86CPU.prototype.getShort = function(addr)
 {
     var off = addr & this.blockLimit;
-    var iBlock = (addr & this.addrMemMask) >> this.blockShift;
+    var iBlock = (addr & this.busMask) >> this.blockShift;
     /*
      * On the 8088, it takes 4 cycles to read the additional byte REGARDLESS whether the address is odd or even.
      * TODO: For the 8086, the penalty is actually "(addr & 0x1) << 2" (4 additional cycles only when the address is odd).
@@ -1904,7 +1902,7 @@ X86CPU.prototype.getShort = function(addr)
         this.backTrack.btiMemHi = this.bus.readBackTrack(addr + 1);
     }
     if (off < this.blockLimit) {
-        return this.aMemBlocks[iBlock].readWord(off);
+        return this.aMemBlocks[iBlock].readShort(off);
     }
     return this.aMemBlocks[iBlock].readByte(off) | (this.aMemBlocks[(iBlock + 1) & this.blockMask].readByte(0) << 8);
 };
@@ -1919,7 +1917,7 @@ X86CPU.prototype.getShort = function(addr)
 X86CPU.prototype.getLong = function(addr)
 {
     var off = addr & this.blockLimit;
-    var iBlock = (addr & this.addrMemMask) >> this.blockShift;
+    var iBlock = (addr & this.busMask) >> this.blockShift;
     if (BACKTRACK) {
         this.backTrack.btiMemLo = this.bus.readBackTrack(addr);
         this.backTrack.btiMemHi = this.bus.readBackTrack(addr + 1);
@@ -1941,7 +1939,7 @@ X86CPU.prototype.getLong = function(addr)
 X86CPU.prototype.setByte = function(addr, b)
 {
     if (BACKTRACK) this.bus.writeBackTrack(addr, this.backTrack.btiMemLo);
-    this.aMemBlocks[(addr & this.addrMemMask) >> this.blockShift].writeByte(addr & this.blockLimit, b & 0xff);
+    this.aMemBlocks[(addr & this.busMask) >> this.blockShift].writeByte(addr & this.blockLimit, b & 0xff);
 };
 
 /**
@@ -1954,7 +1952,7 @@ X86CPU.prototype.setByte = function(addr, b)
 X86CPU.prototype.setShort = function(addr, w)
 {
     var off = addr & this.blockLimit;
-    var iBlock = (addr & this.addrMemMask) >> this.blockShift;
+    var iBlock = (addr & this.busMask) >> this.blockShift;
     /*
      * On the 8088, it takes 4 cycles to write the additional byte REGARDLESS whether the address is odd or even.
      * TODO: For the 8086, the penalty is actually "(addr & 0x1) << 2" (4 additional cycles only when the address is odd).
@@ -1966,7 +1964,7 @@ X86CPU.prototype.setShort = function(addr, w)
         this.bus.writeBackTrack(addr + 1, this.backTrack.btiMemHi);
     }
     if (off < this.blockLimit) {
-        this.aMemBlocks[iBlock].writeWord(off, w & 0xffff);
+        this.aMemBlocks[iBlock].writeShort(off, w & 0xffff);
         return;
     }
     this.aMemBlocks[iBlock++].writeByte(off, w & 0xff);
@@ -1983,7 +1981,7 @@ X86CPU.prototype.setShort = function(addr, w)
 X86CPU.prototype.setLong = function(addr, l)
 {
     var off = addr & this.blockLimit;
-    var iBlock = (addr & this.addrMemMask) >> this.blockShift;
+    var iBlock = (addr & this.busMask) >> this.blockShift;
     this.nStepCycles -= this.CYCLES.nWordCyclePenalty;
 
     if (BACKTRACK) {
@@ -2292,10 +2290,10 @@ X86CPU.prototype.getBytePrefetch = function(addr)
          * with side-effects we may not want, and in any case, while it seemed to improve Safari's performance slightly,
          * it did nothing for the oddball Chrome performance I'm seeing with PREFETCH enabled.
          *
-         *      b = this.aMemBlocks[(addr & this.addrMemMask) >> this.blockShift].readByte(addr & this.blockLimit);
+         *      b = this.aMemBlocks[(addr & this.busMask) >> this.blockShift].readByte(addr & this.blockLimit);
          *      this.nBusCycles += 4;
          *      this.cbPrefetchValid = 0;
-         *      this.addrPrefetchHead = (addr + 1) & this.addrMemMask;
+         *      this.addrPrefetchHead = (addr + 1) & this.busMask;
          *      return b;
          */
     }
@@ -2342,10 +2340,10 @@ X86CPU.prototype.fillPrefetch = function(n)
 {
     while (n-- > 0 && this.cbPrefetchQueued < X86CPU.PREFETCH.QUEUE) {
         var addr = this.addrPrefetchHead;
-        var b = this.aMemBlocks[(addr & this.addrMemMask) >> this.blockShift].readByte(addr & this.blockLimit);
+        var b = this.aMemBlocks[(addr & this.busMask) >> this.blockShift].readByte(addr & this.blockLimit);
         this.aPrefetch[this.iPrefetchHead] = b | (addr << 8);
         if (MAXDEBUG) this.printMessage("     fillPrefetch[" + this.iPrefetchHead + "]: " + str.toHex(addr) + ":" + str.toHexByte(b));
-        this.addrPrefetchHead = (addr + 1) & this.addrMemMask;
+        this.addrPrefetchHead = (addr + 1) & this.busMask;
         this.iPrefetchHead = (this.iPrefetchHead + 1) & X86CPU.PREFETCH.MASK;
         this.cbPrefetchQueued++;
         /*

@@ -1167,7 +1167,7 @@ HDC.prototype.loadDisk = function(iDrive, sDiskName, sDiskPath, fAutoMount)
  * @param {string} sDiskName
  * @param {string} sDiskPath
  */
-HDC.prototype.doneLoadDisk = function onHDCLoadNotify(drive, disk, sDiskName, sDiskPath)
+HDC.prototype.doneLoadDisk = function(drive, disk, sDiskName, sDiskPath)
 {
     drive.fBusy = false;
     if ((drive.disk = disk)) {
