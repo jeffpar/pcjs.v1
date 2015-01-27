@@ -128,30 +128,30 @@ var X86Op0F = {
             X86Help.opHelpFault.call(this, X86.EXCEPTION.GP_FAULT, 0, true);
             return;
         }
-        X86Help.opHelpLMSW.call(this, this.getWord(0x806));
-        this.regEDI = this.getWord(0x826);
-        this.regESI = this.getWord(0x828);
-        this.regEBP = this.getWord(0x82A);
-        this.regESP = this.getWord(0x82C);
-        this.regEBX = this.getWord(0x82E);
-        this.regEDX = this.getWord(0x830);
-        this.regECX = this.getWord(0x832);
-        this.regEAX = this.getWord(0x834);
-        this.segES.loadDesc6(0x836, this.getWord(0x824));
-        this.segCS.loadDesc6(0x83C, this.getWord(0x822));
-        this.segSS.loadDesc6(0x842, this.getWord(0x820));
-        this.segDS.loadDesc6(0x848, this.getWord(0x81E));
-        this.setPS(this.getWord(0x818));
-        this.setIP(this.getWord(0x81A));
+        X86Help.opHelpLMSW.call(this, this.getShort(0x806));
+        this.regEDI = this.getShort(0x826);
+        this.regESI = this.getShort(0x828);
+        this.regEBP = this.getShort(0x82A);
+        this.regESP = this.getShort(0x82C);
+        this.regEBX = this.getShort(0x82E);
+        this.regEDX = this.getShort(0x830);
+        this.regECX = this.getShort(0x832);
+        this.regEAX = this.getShort(0x834);
+        this.segES.loadDesc6(0x836, this.getShort(0x824));
+        this.segCS.loadDesc6(0x83C, this.getShort(0x822));
+        this.segSS.loadDesc6(0x842, this.getShort(0x820));
+        this.segDS.loadDesc6(0x848, this.getShort(0x81E));
+        this.setPS(this.getShort(0x818));
+        this.setIP(this.getShort(0x81A));
         /*
          * TODO: The bytes at 0x851 and 0x85D "should be zeroes", but do we rely on that, or do we load zeros ourselves?
          */
-        this.addrGDT = this.getWord(0x84E) | (this.getWord(0x850) << 16);
-        this.addrGDTLimit = this.addrGDT + this.getWord(0x852);
-        this.segLDT.loadDesc6(0x854, this.getWord(0x81C));
-        this.addrIDT = this.getWord(0x85A) | (this.getWord(0x85C) << 16);
-        this.addrIDTLimit = this.addrIDT + this.getWord(0x85E);
-        this.segTSS.loadDesc6(0x860, this.getWord(0x816));
+        this.addrGDT = this.getShort(0x84E) | (this.getShort(0x850) << 16);
+        this.addrGDTLimit = this.addrGDT + this.getShort(0x852);
+        this.segLDT.loadDesc6(0x854, this.getShort(0x81C));
+        this.addrIDT = this.getShort(0x85A) | (this.getShort(0x85C) << 16);
+        this.addrIDTLimit = this.addrIDT + this.getShort(0x85E);
+        this.segTSS.loadDesc6(0x860, this.getShort(0x816));
         this.nStepCycles -= 195;
         /*
          * TODO: LOADALL operation still needs to be verified in protected mode....
@@ -212,7 +212,7 @@ var X86Op0F = {
     opLTR: function(dst, src) {
         this.opFlags |= X86.OPFLAG.NOWRITE;
         if (this.segTSS.load(dst) != X86.ADDR_INVALID) {
-            this.setWord(this.segTSS.addrDesc + X86.DESC.ACC.OFFSET, this.segTSS.acc |= X86.DESC.ACC.TYPE.LDT);
+            this.setShort(this.segTSS.addrDesc + X86.DESC.ACC.OFFSET, this.segTSS.acc |= X86.DESC.ACC.TYPE.LDT);
             this.segTSS.type = X86.DESC.ACC.TYPE.TSS_BUSY;
         }
         this.nStepCycles -= (17 + (this.regEA < 0? 0 : 2));
@@ -296,11 +296,11 @@ var X86Op0F = {
             X86Help.opHelpInvalid.call(this);
         } else {
             /*
-             * We don't need to setWord() the first word of the operand, because the ModRM group decoder that calls
-             * us does that automatically with the value we return (dst).
+             * We don't need to setShort() the first word of the operand, because the ModRM group decoder that
+             * calls us does that automatically with the value we return (dst).
              */
             dst = this.addrGDTLimit - this.addrGDT;
-            this.setWord(this.regEA + 2, this.addrGDT);
+            this.setShort(this.regEA + 2, this.addrGDT);
             /*
              * We previously left the 6th byte of the target operand "undefined".  But it turns out we have to set
              * it to *something*, because there's processor detection in PC-DOS 7.0 (at least in the SETUP portion)
@@ -329,12 +329,12 @@ var X86Op0F = {
              *      145E:4BC2 9D            POPF
              *      145E:4BC3 CB            RETF
              *
-             * This code is expecting SGDT on an 80286 to set the 6th "undefined" byte to 0xFF.  So we use setWord()
+             * This code is expecting SGDT on an 80286 to set the 6th "undefined" byte to 0xFF.  So we use setShort()
              * instead of setByte() and force the upper byte to 0xFF.
              *
              * TODO: Remove the 0xFF00 below on post-80286 processors; also, determine whether this behavior is unique to real-mode.
              */
-            this.setWord(this.regEA + 4, 0xFF00 | (this.addrGDT >> 16));
+            this.setShort(this.regEA + 4, 0xFF00 | (this.addrGDT >> 16));
             this.nStepCycles -= 11;
         }
         return dst;
@@ -350,18 +350,18 @@ var X86Op0F = {
             X86Help.opHelpInvalid.call(this);
         } else {
             /*
-             * We don't need to setWord() the first word of the operand, because the ModRM group decoder that calls
+             * We don't need to setShort() the first word of the operand, because the ModRM group decoder that calls
              * us does that automatically with the value we return (dst).
              */
             dst = this.addrIDTLimit - this.addrIDT;
-            this.setWord(this.regEA + 2, this.addrIDT);
+            this.setShort(this.regEA + 2, this.addrIDT);
             /*
              * As with SGDT, the 6th byte is technically "undefined" on an 80286, but we now set it to 0xFF, for the
              * same reasons discussed in SGDT (above).
              *
              * TODO: Remove the 0xFF00 below on post-80286 processors; also, determine whether this behavior is unique to real-mode.
              */
-            this.setWord(this.regEA + 4, 0xFF00 | (this.addrIDT >> 16));
+            this.setShort(this.regEA + 4, 0xFF00 | (this.addrIDT >> 16));
             this.nStepCycles -= 12;
         }
         return dst;
@@ -382,7 +382,7 @@ var X86Op0F = {
         if (this.regEA < 0) {
             X86Help.opHelpInvalid.call(this);
         } else {
-            this.addrGDT = this.getWord(this.regEA + 2) | (this.getByte(this.regEA + 4) << 16);
+            this.addrGDT = this.getShort(this.regEA + 2) | (this.getByte(this.regEA + 4) << 16);
             this.addrGDTLimit = this.addrGDT + dst;
             this.opFlags |= X86.OPFLAG.NOWRITE;
             this.nStepCycles -= 11;
@@ -405,7 +405,7 @@ var X86Op0F = {
         if (this.regEA < 0) {
             X86Help.opHelpInvalid.call(this);
         } else {
-            this.addrIDT = this.getWord(this.regEA + 2) | (this.getByte(this.regEA + 4) << 16);
+            this.addrIDT = this.getShort(this.regEA + 2) | (this.getByte(this.regEA + 4) << 16);
             this.addrIDTLimit = this.addrIDT + dst;
             this.opFlags |= X86.OPFLAG.NOWRITE;
             this.nStepCycles -= 12;

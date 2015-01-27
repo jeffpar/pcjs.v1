@@ -1336,8 +1336,8 @@ if (DEBUGGER) {
         while (seg) {
             var aAddr = this.newAddr(0, seg);
             var bSig = this.getByte(aAddr, 1);
-            var wPID = this.getWord(aAddr, 2);
-            var wParas = this.getWord(aAddr, 5);
+            var wPID = this.getShort(aAddr, 2);
+            var wParas = this.getShort(aAddr, 5);
             if (bSig != 0x4D && bSig != 0x5A) break;
             this.println(str.toHexAddr(0, seg) + ": '" + String.fromCharCode(bSig) + "' PID=" + str.toHexWord(wPID) + " LEN=" + str.toHexWord(wParas) + ' "' + this.dumpSZ(aAddr, 8) + '"');
             seg += 1 + wParas;
@@ -1480,7 +1480,7 @@ if (DEBUGGER) {
         for (var sField in Debugger.aTSSFields) {
             var off = Debugger.aTSSFields[sField];
             var ch = (sField.length < 8? ' ' : '');
-            var w = this.bus.getWordDirect(seg.base + off);
+            var w = this.bus.getShortDirect(seg.base + off);
             if (sDump) sDump += '\n';
             sDump += str.toHexWord(off) + " " + sField + ": " + ch + str.toHexWord(w);
         }
@@ -2344,19 +2344,19 @@ if (DEBUGGER) {
     };
 
     /**
-     * getWord(aAddr, inc)
+     * getShort(aAddr, inc)
      *
      * @this {Debugger}
      * @param {Array} aAddr
      * @param {number} [inc]
      * @return {number}
      */
-    Debugger.prototype.getWord = function(aAddr, inc)
+    Debugger.prototype.getShort = function(aAddr, inc)
     {
         var w = 0xffff;
         var addr = this.getAddr(aAddr, false, 1);
         if (addr >= 0) {
-            w = this.bus.getWordDirect(addr);
+            w = this.bus.getShortDirect(addr);
             this.assert((w == (w & 0xffff)), "invalid word (" + w + ") at address: " + this.hexAddr(aAddr));
             if (inc !== undefined) this.incAddr(aAddr, inc);
         }
@@ -2386,18 +2386,18 @@ if (DEBUGGER) {
     };
 
     /**
-     * setWord(aAddr, w, inc)
+     * setShort(aAddr, w, inc)
      *
      * @this {Debugger}
      * @param {Array} aAddr
      * @param {number} w
      * @param {number} [inc]
      */
-    Debugger.prototype.setWord = function(aAddr, w, inc)
+    Debugger.prototype.setShort = function(aAddr, w, inc)
     {
         var addr = this.getAddr(aAddr, true, 1);
         if (addr >= 0) {
-            this.bus.setWordDirect(addr, w);
+            this.bus.setShortDirect(addr, w);
             if (inc !== undefined) this.incAddr(aAddr, inc);
             this.cpu.updateCPU();
         }
@@ -2734,7 +2734,7 @@ if (DEBUGGER) {
                 sOperand = this.getImmediateOperand(type, aAddr);
             }
             else if (typeMode == Debugger.TYPE_IMMOFF) {
-                sOperand = "[" + str.toHexWord(this.getWord(aAddr, 2)) + "]";
+                sOperand = "[" + str.toHexWord(this.getShort(aAddr, 2)) + "]";
             }
             else if (typeMode == Debugger.TYPE_IMMREL) {
                 var disp;
@@ -2743,7 +2743,7 @@ if (DEBUGGER) {
                     disp = ((disp << 24) >> 24);
                 }
                 else {
-                    disp = this.getWord(aAddr, 2);
+                    disp = this.getShort(aAddr, 2);
                 }
                 var offset = (aAddr[0] + disp) & 0xffff;
                 var aSymbol = this.findSymbolAtAddr(this.newAddr(offset, aAddr[1]));
@@ -2820,10 +2820,10 @@ if (DEBUGGER) {
                 break;
             case Debugger.TYPE_WORD:
             case Debugger.TYPE_VWORD:
-                sOperand = str.toHexWord(this.getWord(aAddr, 2));
+                sOperand = str.toHexWord(this.getShort(aAddr, 2));
                 break;
             case Debugger.TYPE_FARP:
-                sOperand = this.hexAddr(this.newAddr(this.getWord(aAddr, 2), this.getWord(aAddr, 2)));
+                sOperand = this.hexAddr(this.newAddr(this.getShort(aAddr, 2), this.getShort(aAddr, 2)));
                 break;
             default:
                 sOperand = "imm(" + str.toHexWord(type) + ")";
@@ -2868,7 +2868,7 @@ if (DEBUGGER) {
         if (bMod < 3) {
             var disp;
             if (!bMod && bRM == 6) {
-                disp = this.getWord(aAddr, 2);
+                disp = this.getShort(aAddr, 2);
                 sOperand = str.toHexWord(disp);
             }
             else {
@@ -2884,7 +2884,7 @@ if (DEBUGGER) {
                     }
                 }
                 else if (bMod == 2) {
-                    disp = this.getWord(aAddr, 2);
+                    disp = this.getShort(aAddr, 2);
                     sOperand += "+" + str.toHexWord(disp);
                 }
             }

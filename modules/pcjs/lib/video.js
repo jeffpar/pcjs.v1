@@ -2577,7 +2577,7 @@ Video.prototype.reset = function()
                 bChar = dataRandom & 0xff;
                 bAttr = ((dataRandom & 0x100)? (Video.ATTRS.FGND_WHITE | Video.ATTRS.BGND_BLACK) : (Video.ATTRS.FGND_BLACK | Video.ATTRS.BGND_WHITE)) | ((Video.ATTRS.FGND_BRIGHT /* | Video.ATTRS.BGND_BLINK */) & (dataRandom >> 8));
             }
-            this.bus.setWordDirect(addrScreen, bChar | (bAttr << 8));
+            this.bus.setShortDirect(addrScreen, bChar | (bAttr << 8));
         }
         this.updateScreen(true);
     }
@@ -4201,7 +4201,7 @@ Video.prototype.updateScreenText = function(addrScreen, addrScreenLimit, iCell, 
     }
     addr = addrScreen + (iCell << 1);
     while (addr < addrScreenLimit && iCell < nCells) {
-        data = this.bus.getWordDirect(addr);
+        data = this.bus.getShortDirect(addr);
         data |= dataDraw;
         if (data & dataBlink) {
             this.cBlinkVisible++;
@@ -4250,7 +4250,7 @@ Video.prototype.updateScreenGraphicsCGA = function(addrScreen, addrScreenLimit)
     var x = 0, y = 0;
     var xDirty = this.nCols, xMaxDirty = 0, yDirty = this.nRows, yMaxDirty = 0;
     while (addr < addrScreenLimit) {
-        data = this.bus.getWordDirect(addr);
+        data = this.bus.getShortDirect(addr);
         this.assert(iCell < this.aCellCache.length);
         dataCache = this.aCellCache[iCell];
         if (dataCache === data) {

@@ -177,7 +177,7 @@ RAM.prototype.reset = function() {
              * memory storage tests. See rom.js for all RBDA definitions.
              */
             if (MAXDEBUG) this.status("ROM BIOS memory test has been disabled");
-            this.bus.setWordDirect(ROM.BIOS.RESET_FLAG, ROM.BIOS.RESET_FLAG_WARMBOOT);
+            this.bus.setShortDirect(ROM.BIOS.RESET_FLAG, ROM.BIOS.RESET_FLAG_WARMBOOT);
         }
         if (this.chipset) this.chipset.addCMOSMemory(this.addrRAM, this.sizeRAM);
     } else {

@@ -502,17 +502,17 @@ Bus.prototype.getByteDirect = function(addr)
 };
 
 /**
- * getWord(addr)
+ * getShort(addr)
  *
  * The CPU could use this, but the CPU also needs to update cycle counts, along with BACKTRACK states.
- * There may also be a slight performance advantage calling its own getWord() method vs. calling through another
+ * There may also be a slight performance advantage calling its own getShort() method vs. calling through another
  * object (ie, the Bus object).
  *
  * @this {Bus}
  * @param {number} addr is a physical (non-segmented) address
  * @return {number} word (16-bit) value at that address
  */
-Bus.prototype.getWord = function(addr)
+Bus.prototype.getShort = function(addr)
 {
     var off = addr & this.blockLimit;
     var iBlock = (addr & this.addrMask) >> this.blockShift;
@@ -523,15 +523,15 @@ Bus.prototype.getWord = function(addr)
 };
 
 /**
- * getWordDirect(addr)
+ * getShortDirect(addr)
  *
- * This is useful for the Debugger and other components that want to bypass getWord() breakpoint detection.
+ * This is useful for the Debugger and other components that want to bypass getShort() breakpoint detection.
  *
  * @this {Bus}
  * @param {number} addr is a physical (non-segmented) address
  * @return {number} word (16-bit) value at that address
  */
-Bus.prototype.getWordDirect = function(addr)
+Bus.prototype.getShortDirect = function(addr)
 {
     var off = addr & this.blockLimit;
     var iBlock = (addr & this.addrMask) >> this.blockShift;
@@ -614,17 +614,17 @@ Bus.prototype.setByteDirect = function(addr, b)
 };
 
 /**
- * setWord(addr, w)
+ * setShort(addr, w)
  *
  * The CPU could use this, but the CPU also needs to update cycle counts, along with BACKTRACK states.
- * There may also be a slight performance advantage calling its own setWord() method vs. calling through another
+ * There may also be a slight performance advantage calling its own setShort() method vs. calling through another
  * object (ie, the Bus object).
  *
  * @this {Bus}
  * @param {number} addr is a physical (non-segmented) address
  * @param {number} w is the word (16-bit) value to write (we truncate it to 16 bits to be safe)
  */
-Bus.prototype.setWord = function(addr, w)
+Bus.prototype.setShort = function(addr, w)
 {
     var off = addr & this.blockLimit;
     var iBlock = (addr & this.addrMask) >> this.blockShift;
@@ -637,7 +637,7 @@ Bus.prototype.setWord = function(addr, w)
 };
 
 /**
- * setWordDirect(addr, w)
+ * setShortDirect(addr, w)
  *
  * This is useful for the Debugger and other components that want to bypass breakpoint detection AND read-only
  * memory protection (for example, this is an interface the ROM component could use to initialize ROM contents).
@@ -646,7 +646,7 @@ Bus.prototype.setWord = function(addr, w)
  * @param {number} addr is a physical (non-segmented) address
  * @param {number} w is the word (16-bit) value to write (we truncate it to 16 bits to be safe)
  */
-Bus.prototype.setWordDirect = function(addr, w)
+Bus.prototype.setShortDirect = function(addr, w)
 {
     var off = addr & this.blockLimit;
     var iBlock = (addr & this.addrMask) >> this.blockShift;

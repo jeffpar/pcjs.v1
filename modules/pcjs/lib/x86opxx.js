@@ -105,7 +105,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opADDAXw: function() {
-        this.regEAX = (this.regEAX & ~this.opMask) | X86Grps.opGrpADDw.call(this, this.regEAX & this.opMask, this.getIPWord());
+        this.regEAX = (this.regEAX & ~this.dataMask) | X86Grps.opGrpADDw.call(this, this.regEAX & this.dataMask, this.getIPWord());
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
         }
@@ -185,7 +185,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opORAXw: function() {
-        this.regEAX = (this.regEAX & ~this.opMask) | X86Grps.opGrpORw.call(this, this.regEAX & this.opMask, this.getIPWord());
+        this.regEAX = (this.regEAX & ~this.dataMask) | X86Grps.opGrpORw.call(this, this.regEAX & this.dataMask, this.getIPWord());
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
         }
@@ -273,7 +273,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opADCAXw: function() {
-        this.regEAX = (this.regEAX & ~this.opMask) | X86Grps.opGrpADCw.call(this, this.regEAX & this.opMask, this.getIPWord());
+        this.regEAX = (this.regEAX & ~this.dataMask) | X86Grps.opGrpADCw.call(this, this.regEAX & this.dataMask, this.getIPWord());
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
         }
@@ -353,7 +353,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opSBBAXw: function() {
-        this.regEAX = (this.regEAX & ~this.opMask) | X86Grps.opGrpSBBw.call(this, this.regEAX & this.opMask, this.getIPWord());
+        this.regEAX = (this.regEAX & ~this.dataMask) | X86Grps.opGrpSBBw.call(this, this.regEAX & this.dataMask, this.getIPWord());
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
         }
@@ -433,7 +433,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opANDAXw: function() {
-        this.regEAX = (this.regEAX & ~this.opMask) | X86Grps.opGrpANDw.call(this, this.regEAX & this.opMask, this.getIPWord());
+        this.regEAX = (this.regEAX & ~this.dataMask) | X86Grps.opGrpANDw.call(this, this.regEAX & this.dataMask, this.getIPWord());
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
         }
@@ -532,7 +532,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opSUBAXw: function() {
-        this.regEAX = (this.regEAX & ~this.opMask) | X86Grps.opGrpSUBw.call(this, this.regEAX & this.opMask, this.getIPWord());
+        this.regEAX = (this.regEAX & ~this.dataMask) | X86Grps.opGrpSUBw.call(this, this.regEAX & this.dataMask, this.getIPWord());
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
         }
@@ -631,7 +631,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opXORAXw: function() {
-        this.regEAX = (this.regEAX & ~this.opMask) | X86Grps.opGrpXORw.call(this, this.regEAX & this.opMask, this.getIPWord());
+        this.regEAX = (this.regEAX & ~this.dataMask) | X86Grps.opGrpXORw.call(this, this.regEAX & this.dataMask, this.getIPWord());
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
         }
@@ -729,7 +729,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opCMPAXw: function() {
-        X86Grps.opGrpCMPw.call(this, this.regEAX & this.opMask, this.getIPWord());
+        X86Grps.opGrpCMPw.call(this, this.regEAX & this.dataMask, this.getIPWord());
         /*
          * In the absence of any EA calculations, opGrpCMPw() will deduct nOpCyclesArithRR, and for all CPUs through
          * the 80286, we need deduct only one more cycle.
@@ -787,7 +787,7 @@ var X86OpXX = {
      */
     opINCAX: function() {
         this.resultAuxOverflow = this.regEAX;
-        this.regEAX = (this.regEAX & ~this.opMask) | (this.resultParitySign = this.regEAX + 1) & this.opMask;
+        this.regEAX = (this.regEAX & ~this.dataMask) | (this.resultParitySign = this.regEAX + 1) & this.dataMask;
         this.resultValue = this.regEAX | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of INC takes 2 cycles on all CPUs
@@ -799,7 +799,7 @@ var X86OpXX = {
      */
     opINCCX: function() {
         this.resultAuxOverflow = this.regECX;
-        this.regECX = (this.regECX & ~this.opMask) | (this.resultParitySign = this.regECX + 1) & this.opMask;
+        this.regECX = (this.regECX & ~this.dataMask) | (this.resultParitySign = this.regECX + 1) & this.dataMask;
         this.resultValue = this.regECX | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of INC takes 2 cycles on all CPUs
@@ -811,7 +811,7 @@ var X86OpXX = {
      */
     opINCDX: function() {
         this.resultAuxOverflow = this.regEDX;
-        this.regEDX = (this.regEDX & ~this.opMask) | (this.resultParitySign = this.regEDX + 1) & this.opMask;
+        this.regEDX = (this.regEDX & ~this.dataMask) | (this.resultParitySign = this.regEDX + 1) & this.dataMask;
         this.resultValue = this.regEDX | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of INC takes 2 cycles on all CPUs
@@ -823,7 +823,7 @@ var X86OpXX = {
      */
     opINCBX: function() {
         this.resultAuxOverflow = this.regEBX;
-        this.regEBX = (this.regEBX & ~this.opMask) | (this.resultParitySign = this.regEBX + 1) & this.opMask;
+        this.regEBX = (this.regEBX & ~this.dataMask) | (this.resultParitySign = this.regEBX + 1) & this.dataMask;
         this.resultValue = this.regEBX | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of INC takes 2 cycles on all CPUs
@@ -835,7 +835,7 @@ var X86OpXX = {
      */
     opINCSP: function() {
         this.resultAuxOverflow = this.regESP;
-        this.regESP = (this.regESP & ~this.opMask) | (this.resultParitySign = this.regESP + 1) & this.opMask;
+        this.regESP = (this.regESP & ~this.dataMask) | (this.resultParitySign = this.regESP + 1) & this.dataMask;
         this.resultValue = this.regESP | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of INC takes 2 cycles on all CPUs
@@ -847,7 +847,7 @@ var X86OpXX = {
      */
     opINCBP: function() {
         this.resultAuxOverflow = this.regEBP;
-        this.regEBP = (this.regEBP & ~this.opMask) | (this.resultParitySign = this.regEBP + 1) & this.opMask;
+        this.regEBP = (this.regEBP & ~this.dataMask) | (this.resultParitySign = this.regEBP + 1) & this.dataMask;
         this.resultValue = this.regEBP | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of INC takes 2 cycles on all CPUs
@@ -859,7 +859,7 @@ var X86OpXX = {
      */
     opINCSI: function() {
         this.resultAuxOverflow = this.regESI;
-        this.regESI = (this.regESI & ~this.opMask) | (this.resultParitySign = this.regESI + 1) & this.opMask;
+        this.regESI = (this.regESI & ~this.dataMask) | (this.resultParitySign = this.regESI + 1) & this.dataMask;
         this.resultValue = this.regESI | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of INC takes 2 cycles on all CPUs
@@ -871,7 +871,7 @@ var X86OpXX = {
      */
     opINCDI: function() {
         this.resultAuxOverflow = this.regEDI;
-        this.regEDI = (this.regEDI & ~this.opMask) | (this.resultParitySign = this.regEDI + 1) & this.opMask;
+        this.regEDI = (this.regEDI & ~this.dataMask) | (this.resultParitySign = this.regEDI + 1) & this.dataMask;
         this.resultValue = this.regEDI | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of INC takes 2 cycles on all CPUs
@@ -883,7 +883,7 @@ var X86OpXX = {
      */
     opDECAX: function() {
         this.resultAuxOverflow = this.regEAX;
-        this.regEAX = (this.regEAX & ~this.opMask) | (this.resultParitySign = this.regEAX - 1) & this.opMask;
+        this.regEAX = (this.regEAX & ~this.dataMask) | (this.resultParitySign = this.regEAX - 1) & this.dataMask;
         this.resultValue = this.regEAX | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of DEC takes 2 cycles on all CPUs
@@ -895,7 +895,7 @@ var X86OpXX = {
      */
     opDECCX: function() {
         this.resultAuxOverflow = this.regECX;
-        this.regECX = (this.regECX & ~this.opMask) | (this.resultParitySign = this.regECX - 1) & this.opMask;
+        this.regECX = (this.regECX & ~this.dataMask) | (this.resultParitySign = this.regECX - 1) & this.dataMask;
         this.resultValue = this.regECX | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of DEC takes 2 cycles on all CPUs
@@ -907,7 +907,7 @@ var X86OpXX = {
      */
     opDECDX: function() {
         this.resultAuxOverflow = this.regEDX;
-        this.regEDX = (this.regEDX & ~this.opMask) | (this.resultParitySign = this.regEDX - 1) & this.opMask;
+        this.regEDX = (this.regEDX & ~this.dataMask) | (this.resultParitySign = this.regEDX - 1) & this.dataMask;
         this.resultValue = this.regEDX | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of DEC takes 2 cycles on all CPUs
@@ -919,7 +919,7 @@ var X86OpXX = {
      */
     opDECBX: function() {
         this.resultAuxOverflow = this.regEBX;
-        this.regEBX = (this.regEBX & ~this.opMask) | (this.resultParitySign = this.regEBX - 1) & this.opMask;
+        this.regEBX = (this.regEBX & ~this.dataMask) | (this.resultParitySign = this.regEBX - 1) & this.dataMask;
         this.resultValue = this.regEBX | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of DEC takes 2 cycles on all CPUs
@@ -931,7 +931,7 @@ var X86OpXX = {
      */
     opDECSP: function() {
         this.resultAuxOverflow = this.regESP;
-        this.regESP = (this.regESP & ~this.opMask) | (this.resultParitySign = this.regESP - 1) & this.opMask;
+        this.regESP = (this.regESP & ~this.dataMask) | (this.resultParitySign = this.regESP - 1) & this.dataMask;
         this.resultValue = this.regESP | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of DEC takes 2 cycles on all CPUs
@@ -943,7 +943,7 @@ var X86OpXX = {
      */
     opDECBP: function() {
         this.resultAuxOverflow = this.regEBP;
-        this.regEBP = (this.regEBP & ~this.opMask) | (this.resultParitySign = this.regEBP - 1) & this.opMask;
+        this.regEBP = (this.regEBP & ~this.dataMask) | (this.resultParitySign = this.regEBP - 1) & this.dataMask;
         this.resultValue = this.regEBP | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of DEC takes 2 cycles on all CPUs
@@ -955,7 +955,7 @@ var X86OpXX = {
      */
     opDECSI: function() {
         this.resultAuxOverflow = this.regESI;
-        this.regESI = (this.regESI & ~this.opMask) | (this.resultParitySign = this.regESI - 1) & this.opMask;
+        this.regESI = (this.regESI & ~this.dataMask) | (this.resultParitySign = this.regESI - 1) & this.dataMask;
         this.resultValue = this.regESI | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of DEC takes 2 cycles on all CPUs
@@ -967,7 +967,7 @@ var X86OpXX = {
      */
     opDECDI: function() {
         this.resultAuxOverflow = this.regEDI;
-        this.regEDI = (this.regEDI & ~this.opMask) | (this.resultParitySign = this.regEDI - 1) & this.opMask;
+        this.regEDI = (this.regEDI & ~this.dataMask) | (this.resultParitySign = this.regEDI - 1) & this.dataMask;
         this.resultValue = this.regEDI | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of DEC takes 2 cycles on all CPUs
@@ -981,7 +981,7 @@ var X86OpXX = {
         if (BACKTRACK) {
             this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
         }
-        this.pushWord(this.regEAX & this.opMask);
+        this.pushWord(this.regEAX & this.dataMask);
         this.nStepCycles -= this.CYCLES.nOpCyclesPushReg;
     },
     /**
@@ -993,7 +993,7 @@ var X86OpXX = {
         if (BACKTRACK) {
             this.backTrack.btiMemLo = this.backTrack.btiCL; this.backTrack.btiMemHi = this.backTrack.btiCH;
         }
-        this.pushWord(this.regECX & this.opMask);
+        this.pushWord(this.regECX & this.dataMask);
         this.nStepCycles -= this.CYCLES.nOpCyclesPushReg;
     },
     /**
@@ -1005,7 +1005,7 @@ var X86OpXX = {
         if (BACKTRACK) {
             this.backTrack.btiMemLo = this.backTrack.btiDL; this.backTrack.btiMemHi = this.backTrack.btiDH;
         }
-        this.pushWord(this.regEDX & this.opMask);
+        this.pushWord(this.regEDX & this.dataMask);
         this.nStepCycles -= this.CYCLES.nOpCyclesPushReg;
     },
     /**
@@ -1017,7 +1017,7 @@ var X86OpXX = {
         if (BACKTRACK) {
             this.backTrack.btiMemLo = this.backTrack.btiBL; this.backTrack.btiMemHi = this.backTrack.btiBH;
         }
-        this.pushWord(this.regEBX & this.opMask);
+        this.pushWord(this.regEBX & this.dataMask);
         this.nStepCycles -= this.CYCLES.nOpCyclesPushReg;
     },
     /**
@@ -1026,7 +1026,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opPUSHSP8086: function() {
-        var w = (this.regESP - (2 << this.opSize)) & this.opMask;
+        var w = (this.regESP - (2 << this.dataSize)) & this.dataMask;
         this.pushWord(w);
         this.nStepCycles -= this.CYCLES.nOpCyclesPushReg;
     },
@@ -1036,7 +1036,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opPUSHSP: function() {
-        this.pushWord(this.regESP & this.opMask);
+        this.pushWord(this.regESP & this.dataMask);
         this.nStepCycles -= this.CYCLES.nOpCyclesPushReg;
     },
     /**
@@ -1048,7 +1048,7 @@ var X86OpXX = {
         if (BACKTRACK) {
             this.backTrack.btiMemLo = this.backTrack.btiBPLo; this.backTrack.btiMemHi = this.backTrack.btiBPHi;
         }
-        this.pushWord(this.regEBP & this.opMask);
+        this.pushWord(this.regEBP & this.dataMask);
         this.nStepCycles -= this.CYCLES.nOpCyclesPushReg;
     },
     /**
@@ -1060,7 +1060,7 @@ var X86OpXX = {
         if (BACKTRACK) {
             this.backTrack.btiMemLo = this.backTrack.btiSILo; this.backTrack.btiMemHi = this.backTrack.btiSIHi;
         }
-        this.pushWord(this.regESI & this.opMask);
+        this.pushWord(this.regESI & this.dataMask);
         this.nStepCycles -= this.CYCLES.nOpCyclesPushReg;
     },
     /**
@@ -1072,7 +1072,7 @@ var X86OpXX = {
         if (BACKTRACK) {
             this.backTrack.btiMemLo = this.backTrack.btiDILo; this.backTrack.btiMemHi = this.backTrack.btiDIHi;
         }
-        this.pushWord(this.regEDI & this.opMask);
+        this.pushWord(this.regEDI & this.dataMask);
         this.nStepCycles -= this.CYCLES.nOpCyclesPushReg;
     },
     /**
@@ -1081,7 +1081,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opPOPAX: function() {
-        this.regEAX = (this.regEAX & ~this.opMask) | this.popWord();
+        this.regEAX = (this.regEAX & ~this.dataMask) | this.popWord();
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
         }
@@ -1093,7 +1093,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opPOPCX: function() {
-        this.regECX = (this.regECX & ~this.opMask) | this.popWord();
+        this.regECX = (this.regECX & ~this.dataMask) | this.popWord();
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
         }
@@ -1105,7 +1105,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opPOPDX: function() {
-        this.regEDX = (this.regEDX & ~this.opMask) | this.popWord();
+        this.regEDX = (this.regEDX & ~this.dataMask) | this.popWord();
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
         }
@@ -1117,7 +1117,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opPOPBX: function() {
-        this.regEBX = (this.regEBX & ~this.opMask) | this.popWord();
+        this.regEBX = (this.regEBX & ~this.dataMask) | this.popWord();
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
         }
@@ -1129,7 +1129,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opPOPSP: function() {
-        this.regESP = (this.regESP & ~this.opMask) | this.popWord();
+        this.regESP = (this.regESP & ~this.dataMask) | this.popWord();
         this.nStepCycles -= this.CYCLES.nOpCyclesPopReg;
     },
     /**
@@ -1138,7 +1138,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opPOPBP: function() {
-        this.regEBP = (this.regEBP & ~this.opMask) | this.popWord();
+        this.regEBP = (this.regEBP & ~this.dataMask) | this.popWord();
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
         }
@@ -1150,7 +1150,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opPOPSI: function() {
-        this.regESI = (this.regESI & ~this.opMask) | this.popWord();
+        this.regESI = (this.regESI & ~this.dataMask) | this.popWord();
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
         }
@@ -1162,7 +1162,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opPOPDI: function() {
-        this.regEDI = (this.regEDI & ~this.opMask) | this.popWord();
+        this.regEDI = (this.regEDI & ~this.dataMask) | this.popWord();
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
         }
@@ -1174,36 +1174,36 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opPUSHA: function() {
-        var temp = this.regESP & this.opMask;
+        var temp = this.regESP & this.dataMask;
         if (BACKTRACK) {
             this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
         }
-        this.pushWord(this.regEAX & this.opMask);
+        this.pushWord(this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiMemLo = this.backTrack.btiCL; this.backTrack.btiMemHi = this.backTrack.btiCH;
         }
-        this.pushWord(this.regECX & this.opMask);
+        this.pushWord(this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiMemLo = this.backTrack.btiDL; this.backTrack.btiMemHi = this.backTrack.btiDH;
         }
-        this.pushWord(this.regEDX & this.opMask);
+        this.pushWord(this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiMemLo = this.backTrack.btiBL; this.backTrack.btiMemHi = this.backTrack.btiBH;
         }
-        this.pushWord(this.regEBX & this.opMask);
+        this.pushWord(this.regEBX & this.dataMask);
         this.pushWord(temp);
         if (BACKTRACK) {
             this.backTrack.btiMemLo = this.backTrack.btiBPLo; this.backTrack.btiMemHi = this.backTrack.btiBPHi;
         }
-        this.pushWord(this.regEBP & this.opMask);
+        this.pushWord(this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiMemLo = this.backTrack.btiSILo; this.backTrack.btiMemHi = this.backTrack.btiSIHi;
         }
-        this.pushWord(this.regESI & this.opMask);
+        this.pushWord(this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiMemLo = this.backTrack.btiDILo; this.backTrack.btiMemHi = this.backTrack.btiDIHi;
         }
-        this.pushWord(this.regEDI & this.opMask);
+        this.pushWord(this.regEDI & this.dataMask);
         this.nStepCycles -= this.CYCLES.nOpCyclesPushAll;
     },
     /**
@@ -1212,32 +1212,32 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opPOPA: function() {
-        this.regEDI = (this.regEDI & ~this.opMask) | this.popWord();
+        this.regEDI = (this.regEDI & ~this.dataMask) | this.popWord();
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
         }
-        this.regESI = (this.regESI & ~this.opMask) | this.popWord();
+        this.regESI = (this.regESI & ~this.dataMask) | this.popWord();
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
         }
-        this.regEBP = (this.regEBP & ~this.opMask) | this.popWord();
+        this.regEBP = (this.regEBP & ~this.dataMask) | this.popWord();
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
         }
-        this.regESP += (2 << this.opSize);
-        this.regEBX = (this.regEBX & ~this.opMask) | this.popWord();
+        this.regESP += (2 << this.dataSize);
+        this.regEBX = (this.regEBX & ~this.dataMask) | this.popWord();
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
         }
-        this.regEDX = (this.regEDX & ~this.opMask) | this.popWord();
+        this.regEDX = (this.regEDX & ~this.dataMask) | this.popWord();
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
         }
-        this.regECX = (this.regECX & ~this.opMask) | this.popWord();
+        this.regECX = (this.regECX & ~this.dataMask) | this.popWord();
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
         }
-        this.regEAX = (this.regEAX & ~this.opMask) | this.popWord();
+        this.regEAX = (this.regEAX & ~this.dataMask) | this.popWord();
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
         }
@@ -1268,9 +1268,9 @@ var X86OpXX = {
      */
     opOS: function() {
         this.opFlags |= X86.OPFLAG.SEG;
-        this.opSize ^= 1;               // that which is 0 shall become 1, and vice versa
-        this.opMask ^= 0xffff0000;      // that which is 0x0000ffff shall become 0xffffffff, and vice versa
-        this.opMem = this.aaOpMem[this.opSize];
+        this.dataSize ^= 1;             // that which is 0 shall become 1, and vice versa
+        this.dataMask ^= 0xffff0000;      // that which is 0x0000ffff shall become 0xffffffff, and vice versa
+        this.opMem = this.aaOpMem[this.dataSize];
         this.nStepCycles -= this.CYCLES.nOpCyclesPrefix;
     },
     /**
@@ -2019,8 +2019,8 @@ var X86OpXX = {
      */
     opXCHGCX: function() {
         var temp = this.regEAX;
-        this.regEAX = (this.regEAX & ~this.opMask) | (this.regECX & this.opMask);
-        this.regECX = (this.regECX & ~this.opMask) | (temp & this.opMask);
+        this.regEAX = (this.regEAX & ~this.dataMask) | (this.regECX & this.dataMask);
+        this.regECX = (this.regECX & ~this.dataMask) | (temp & this.dataMask);
         if (BACKTRACK) {
             temp = this.backTrack.btiAL; this.backTrack.btiAL = this.backTrack.btiCL; this.backTrack.btiCL = temp;
             temp = this.backTrack.btiAH; this.backTrack.btiAH = this.backTrack.btiCH; this.backTrack.btiCH = temp;
@@ -2034,8 +2034,8 @@ var X86OpXX = {
      */
     opXCHGDX: function() {
         var temp = this.regEAX;
-        this.regEAX = (this.regEAX & ~this.opMask) | (this.regEDX & this.opMask);
-        this.regEDX = (this.regEDX & ~this.opMask) | (temp & this.opMask);
+        this.regEAX = (this.regEAX & ~this.dataMask) | (this.regEDX & this.dataMask);
+        this.regEDX = (this.regEDX & ~this.dataMask) | (temp & this.dataMask);
         if (BACKTRACK) {
             temp = this.backTrack.btiAL; this.backTrack.btiAL = this.backTrack.btiDL; this.backTrack.btiDL = temp;
             temp = this.backTrack.btiAH; this.backTrack.btiAH = this.backTrack.btiDH; this.backTrack.btiDH = temp;
@@ -2049,8 +2049,8 @@ var X86OpXX = {
      */
     opXCHGBX: function() {
         var temp = this.regEAX;
-        this.regEAX = (this.regEAX & ~this.opMask) | (this.regEBX & this.opMask);
-        this.regEBX = (this.regEBX & ~this.opMask) | (temp & this.opMask);
+        this.regEAX = (this.regEAX & ~this.dataMask) | (this.regEBX & this.dataMask);
+        this.regEBX = (this.regEBX & ~this.dataMask) | (temp & this.dataMask);
         if (BACKTRACK) {
             temp = this.backTrack.btiAL; this.backTrack.btiAL = this.backTrack.btiBL; this.backTrack.btiBL = temp;
             temp = this.backTrack.btiAH; this.backTrack.btiAH = this.backTrack.btiBH; this.backTrack.btiBH = temp;
@@ -2064,8 +2064,8 @@ var X86OpXX = {
      */
     opXCHGSP: function() {
         var temp = this.regEAX;
-        this.regEAX = (this.regEAX & ~this.opMask) | (this.regESP & this.opMask);
-        this.regESP = (this.regESP & ~this.opMask) | (temp & this.opMask);
+        this.regEAX = (this.regEAX & ~this.dataMask) | (this.regESP & this.dataMask);
+        this.regESP = (this.regESP & ~this.dataMask) | (temp & this.dataMask);
         if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiAH = 0;
         this.nStepCycles -= 3;                          // this form of XCHG takes 3 cycles on all CPUs
     },
@@ -2076,8 +2076,8 @@ var X86OpXX = {
      */
     opXCHGBP: function() {
         var temp = this.regEAX;
-        this.regEAX = (this.regEAX & ~this.opMask) | (this.regEBP & this.opMask);
-        this.regEBP = (this.regEBP & ~this.opMask) | (temp & this.opMask);
+        this.regEAX = (this.regEAX & ~this.dataMask) | (this.regEBP & this.dataMask);
+        this.regEBP = (this.regEBP & ~this.dataMask) | (temp & this.dataMask);
         if (BACKTRACK) {
             temp = this.backTrack.btiAL; this.backTrack.btiAL = this.backTrack.btiBPLo; this.backTrack.btiBPLo = temp;
             temp = this.backTrack.btiAH; this.backTrack.btiAH = this.backTrack.btiBPHi; this.backTrack.btiBPHi = temp;
@@ -2091,8 +2091,8 @@ var X86OpXX = {
      */
     opXCHGSI: function() {
         var temp = this.regEAX;
-        this.regEAX = (this.regEAX & ~this.opMask) | (this.regESI & this.opMask);
-        this.regESI = (this.regESI & ~this.opMask) | (temp & this.opMask);
+        this.regEAX = (this.regEAX & ~this.dataMask) | (this.regESI & this.dataMask);
+        this.regESI = (this.regESI & ~this.dataMask) | (temp & this.dataMask);
         if (BACKTRACK) {
             temp = this.backTrack.btiAL; this.backTrack.btiAL = this.backTrack.btiSILo; this.backTrack.btiSILo = temp;
             temp = this.backTrack.btiAH; this.backTrack.btiAH = this.backTrack.btiSIHi; this.backTrack.btiSIHi = temp;
@@ -2106,8 +2106,8 @@ var X86OpXX = {
      */
     opXCHGDI: function() {
         var temp = this.regEAX;
-        this.regEAX = (this.regEAX & ~this.opMask) | (this.regEDI & this.opMask);
-        this.regEDI = (this.regEDI & ~this.opMask) | (temp & this.opMask);
+        this.regEAX = (this.regEAX & ~this.dataMask) | (this.regEDI & this.dataMask);
+        this.regEDI = (this.regEDI & ~this.dataMask) | (temp & this.dataMask);
         if (BACKTRACK) {
             temp = this.backTrack.btiAL; this.backTrack.btiAL = this.backTrack.btiDILo; this.backTrack.btiDILo = temp;
             temp = this.backTrack.btiAH; this.backTrack.btiAH = this.backTrack.btiDIHi; this.backTrack.btiDIHi = temp;
@@ -2123,7 +2123,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opCBW: function() {
-        if (!this.opSize) {
+        if (!this.dataSize) {
             /*
              * CBW
              */
@@ -2146,7 +2146,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opCWD: function() {
-        if (!this.opSize) {
+        if (!this.dataSize) {
             /*
              * CWD
              */
@@ -2248,7 +2248,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opMOVAXm: function() {
-        this.regEAX = (this.regEAX & ~this.opMask) | this.getSOWord(this.segData, this.getIPWord());
+        this.regEAX = (this.regEAX & ~this.dataMask) | this.getSOWord(this.segData, this.getIPWord());
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
         }
@@ -2799,7 +2799,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opMOVAXw: function() {
-        this.regEAX = (this.regEAX & ~this.opMask) | this.getIPWord();
+        this.regEAX = (this.regEAX & ~this.dataMask) | this.getIPWord();
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
         }
@@ -2811,7 +2811,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opMOVCXw: function() {
-        this.regECX = (this.regECX & ~this.opMask) | this.getIPWord();
+        this.regECX = (this.regECX & ~this.dataMask) | this.getIPWord();
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
         }
@@ -2823,7 +2823,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opMOVDXw: function() {
-        this.regEDX = (this.regEDX & ~this.opMask) | this.getIPWord();
+        this.regEDX = (this.regEDX & ~this.dataMask) | this.getIPWord();
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
         }
@@ -2835,7 +2835,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opMOVBXw: function() {
-        this.regEBX = (this.regEBX & ~this.opMask) | this.getIPWord();
+        this.regEBX = (this.regEBX & ~this.dataMask) | this.getIPWord();
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
         }
@@ -2847,7 +2847,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opMOVSPw: function() {
-        this.regESP = (this.regESP & ~this.opMask) | this.getIPWord();
+        this.regESP = (this.regESP & ~this.dataMask) | this.getIPWord();
         this.nStepCycles -= this.CYCLES.nOpCyclesLAHF;
     },
     /**
@@ -2856,7 +2856,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opMOVBPw: function() {
-        this.regEBP = (this.regEBP & ~this.opMask) | this.getIPWord();
+        this.regEBP = (this.regEBP & ~this.dataMask) | this.getIPWord();
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
         }
@@ -2868,7 +2868,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opMOVSIw: function() {
-        this.regESI = (this.regESI & ~this.opMask) | this.getIPWord();
+        this.regESI = (this.regESI & ~this.dataMask) | this.getIPWord();
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
         }
@@ -2880,7 +2880,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opMOVDIw: function() {
-        this.regEDI = (this.regEDI & ~this.opMask) | this.getIPWord();
+        this.regEDI = (this.regEDI & ~this.dataMask) | this.getIPWord();
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
         }
@@ -2910,7 +2910,7 @@ var X86OpXX = {
     opRETn: function() {
         var n = this.getIPWord();
         this.setIP(this.popWord());
-        this.regESP = (this.regESP & ~this.addrMask) | ((this.regESP + (n << this.opSize)) & this.addrMask);
+        this.regESP = (this.regESP & ~this.addrMask) | ((this.regESP + (n << this.dataSize)) & this.addrMask);
         this.nStepCycles -= this.CYCLES.nOpCyclesRetn;
     },
     /**
@@ -3004,7 +3004,7 @@ var X86OpXX = {
         if (bLevel > 0) {
             this.nStepCycles -= (bLevel << 2) + (bLevel > 1? 1 : 0);
             while (--bLevel) {
-                this.regEBP = (this.regEBP & ~this.segSS.addrMask) | ((this.regEBP - (2 << this.opSize)) & this.segSS.addrMask);
+                this.regEBP = (this.regEBP & ~this.segSS.addrMask) | ((this.regEBP - (2 << this.dataSize)) & this.segSS.addrMask);
                 this.pushWord(this.getSOWord(this.segSS, this.regEBP & this.segSS.addrMask));
             }
             this.pushWord(wFrame);
@@ -3021,7 +3021,7 @@ var X86OpXX = {
      */
     opLEAVE: function() {
         this.regESP = (this.regESP & ~this.segSS.addrMask) | (this.regEBP & this.segSS.addrMask);
-        this.regEBP = (this.regEBP & ~this.opMask) | (this.popWord() & this.opMask);
+        this.regEBP = (this.regEBP & ~this.dataMask) | (this.popWord() & this.dataMask);
         /*
          * NOTE: 5 is the cycle time for the 80286; the 80186/80188 has a cycle time of 8.  However, accurate cycle
          * counts for the 80186/80188 is low priority. TODO: Fix this someday.

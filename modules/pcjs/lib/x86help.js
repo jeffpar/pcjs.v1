@@ -202,7 +202,7 @@ var X86Help = {
             X86Help.opHelpUndefined.call(this);
             return dst;
         }
-        this.setDS(this.getWord(this.regEA + 2));
+        this.setDS(this.getShort(this.regEA + 2));
         this.nStepCycles -= this.CYCLES.nOpCyclesLS;
         return src;
     },
@@ -217,7 +217,7 @@ var X86Help = {
             X86Help.opHelpUndefined.call(this);
             return dst;
         }
-        this.setES(this.getWord(this.regEA + 2));
+        this.setES(this.getShort(this.regEA + 2));
         this.nStepCycles -= this.CYCLES.nOpCyclesLS;
         return src;
     },
@@ -239,8 +239,8 @@ var X86Help = {
          * Note that BOUND performs signed comparisons, so we must transform all arguments into signed values.
          */
         var wIndex = (dst << 16) >> 16;
-        var wLower = (this.getWord(this.regEA) << 16) >> 16;
-        var wUpper = (this.getWord(this.regEA + 2) << 16) >> 16;
+        var wLower = (this.getShort(this.regEA) << 16) >> 16;
+        var wUpper = (this.getShort(this.regEA + 2) << 16) >> 16;
         this.nStepCycles -= this.CYCLES.nOpCyclesBound;
         if (wIndex < wLower || wIndex > wUpper) {
             /*
@@ -579,15 +579,15 @@ var X86Help = {
         if (this.regMSW & X86.MSW.PE) {
             if (this.regPS & X86.PS.NT) {
                 var addrNew = this.segTSS.base;
-                var sel = this.getWord(addrNew + X86.TSS.PREV_TSS);
+                var sel = this.getShort(addrNew + X86.TSS.PREV_TSS);
                 X86Seg.switchTSS.call(this.segCS, sel, false);
                 return;
             }
         }
         var cpl = this.segCS.cpl;
         var regEIP = this.popWord();
-        var regCS = this.popWord();
-        var regPS = this.popWord();
+        var regCS  = this.popWord();
+        var regPS  = this.popWord();
         if (this.setCSIP(regEIP, regCS, false) != null) {
             this.setPS(regPS, cpl);
             if (this.cIntReturn) this.checkIntReturn(this.regLIP);

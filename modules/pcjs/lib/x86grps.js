@@ -1128,7 +1128,7 @@ var X86Grps = {
         if (this.regEA < 0) {
             return X86Grps.opGrpUndefined.call(this, dst, src);
         }
-        X86Help.opHelpCALLF.call(this, dst, this.getWord(this.regEA + 2));
+        X86Help.opHelpCALLF.call(this, dst, this.getShort(this.regEA + 2));
         this.nStepCycles -= this.CYCLES.nOpCyclesCallDM;
         this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
@@ -1155,7 +1155,7 @@ var X86Grps = {
         if (this.regEA < 0) {
             return X86Grps.opGrpUndefined.call(this, dst, src);
         }
-        this.setCSIP(dst, this.getWord(this.regEA + 2));
+        this.setCSIP(dst, this.getShort(this.regEA + 2));
         if (this.cIntReturn) this.checkIntReturn(this.regLIP);
         this.nStepCycles -= this.CYCLES.nOpCyclesJmpDM;
         this.opFlags |= X86.OPFLAG.NOWRITE;

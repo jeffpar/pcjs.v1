@@ -360,50 +360,50 @@ function genMode(a, d, w, mrm, sGroup, sRO) {
     else {
         switch (reg) {
         case 0:
-            sRegGet = "this.regEAX & this.opMask";
-            sRegSet = "this.regEAX = (this.regEAX & ~this.opMask) | ";
+            sRegGet = "this.regEAX & this.dataMask";
+            sRegSet = "this.regEAX = (this.regEAX & ~this.dataMask) | ";
             sRegBTLo = "this.backTrack.btiAL";
             sRegBTHi = "this.backTrack.btiAH";
             break;
         case 1:
-            sRegGet = "this.regECX & this.opMask";
-            sRegSet = "this.regECX = (this.regECX & ~this.opMask) | ";
+            sRegGet = "this.regECX & this.dataMask";
+            sRegSet = "this.regECX = (this.regECX & ~this.dataMask) | ";
             sRegBTLo = "this.backTrack.btiCL";
             sRegBTHi = "this.backTrack.btiCH";
             break;
         case 2:
-            sRegGet = "this.regEDX & this.opMask";
-            sRegSet = "this.regEDX = (this.regEDX & ~this.opMask) | ";
+            sRegGet = "this.regEDX & this.dataMask";
+            sRegSet = "this.regEDX = (this.regEDX & ~this.dataMask) | ";
             sRegBTLo = "this.backTrack.btiDL";
             sRegBTHi = "this.backTrack.btiDH";
             break;
         case 3:
-            sRegGet = "this.regEBX & this.opMask";
-            sRegSet = "this.regEBX = (this.regEBX & ~this.opMask) | ";
+            sRegGet = "this.regEBX & this.dataMask";
+            sRegSet = "this.regEBX = (this.regEBX & ~this.dataMask) | ";
             sRegBTLo = "this.backTrack.btiBL";
             sRegBTHi = "this.backTrack.btiBH";
             break;
         case 4:
-            sRegGet = "this.regESP & this.opMask";
-            sRegSet = "this.regESP = (this.regESP & ~this.opMask) | ";
+            sRegGet = "this.regESP & this.dataMask";
+            sRegSet = "this.regESP = (this.regESP & ~this.dataMask) | ";
             sRegBTLo = "X86.BACKTRACK.SP_LO";
             sRegBTHi = "X86.BACKTRACK.SP_HI";
             break;
         case 5:
-            sRegGet = "this.regEBP & this.opMask";
-            sRegSet = "this.regEBP = (this.regEBP & ~this.opMask) | ";
+            sRegGet = "this.regEBP & this.dataMask";
+            sRegSet = "this.regEBP = (this.regEBP & ~this.dataMask) | ";
             sRegBTLo = "this.backTrack.btiBPLo";
             sRegBTHi = "this.backTrack.btiBPHi";
             break;
         case 6:
-            sRegGet = "this.regESI & this.opMask";
-            sRegSet = "this.regESI = (this.regESI & ~this.opMask) | ";
+            sRegGet = "this.regESI & this.dataMask";
+            sRegSet = "this.regESI = (this.regESI & ~this.dataMask) | ";
             sRegBTLo = "this.backTrack.btiSILo";
             sRegBTHi = "this.backTrack.btiSIHi";
             break;
         case 7:
-            sRegGet = "this.regEDI & this.opMask";
-            sRegSet = "this.regEDI = (this.regEDI & ~this.opMask) | ";
+            sRegGet = "this.regEDI & this.dataMask";
+            sRegSet = "this.regEDI = (this.regEDI & ~this.dataMask) | ";
             sRegBTLo = "this.backTrack.btiDILo";
             sRegBTHi = "this.backTrack.btiDIHi";
             break;
@@ -635,50 +635,50 @@ function genMode(a, d, w, mrm, sGroup, sRO) {
             else {
                 switch (r_m) {
                 case 0:
-                    sModRegGet = "this.regEAX & this.opMask";
-                    sModRegSet = "this.regEAX = (this.regEAX & ~this.opMask) | ";
+                    sModRegGet = "this.regEAX & this.dataMask";
+                    sModRegSet = "this.regEAX = (this.regEAX & ~this.dataMask) | ";
                     sModRegBTLo = "this.backTrack.btiAL";
                     sModRegBTHi = "this.backTrack.btiAH";
                     break;
                 case 1:
-                    sModRegGet = "this.regECX & this.opMask";
-                    sModRegSet = "this.regECX = (this.regECX & ~this.opMask) | ";
+                    sModRegGet = "this.regECX & this.dataMask";
+                    sModRegSet = "this.regECX = (this.regECX & ~this.dataMask) | ";
                     sModRegBTLo = "this.backTrack.btiCL";
                     sModRegBTHi = "this.backTrack.btiCH";
                     break;
                 case 2:
-                    sModRegGet = "this.regEDX & this.opMask";
-                    sModRegSet = "this.regEDX = (this.regEDX & ~this.opMask) | ";
+                    sModRegGet = "this.regEDX & this.dataMask";
+                    sModRegSet = "this.regEDX = (this.regEDX & ~this.dataMask) | ";
                     sModRegBTLo = "this.backTrack.btiDL";
                     sModRegBTHi = "this.backTrack.btiDH";
                     break;
                 case 3:
-                    sModRegGet = "this.regEBX & this.opMask";
-                    sModRegSet = "this.regEBX = (this.regEBX & ~this.opMask) | ";
+                    sModRegGet = "this.regEBX & this.dataMask";
+                    sModRegSet = "this.regEBX = (this.regEBX & ~this.dataMask) | ";
                     sModRegBTLo = "this.backTrack.btiBL";
                     sModRegBTHi = "this.backTrack.btiBH";
                     break;
                 case 4:
-                    sModRegGet = "this.regESP & this.opMask";
-                    sModRegSet = "this.regESP = (this.regESP & ~this.opMask) | ";
+                    sModRegGet = "this.regESP & this.dataMask";
+                    sModRegSet = "this.regESP = (this.regESP & ~this.dataMask) | ";
                     sModRegBTLo = "X86.BACKTRACK.SP_LO";
                     sModRegBTHi = "X86.BACKTRACK.SP_HI";
                     break;
                 case 5:
-                    sModRegGet = "this.regEBP & this.opMask";
-                    sModRegSet = "this.regEBP = (this.regEBP & ~this.opMask) | ";
+                    sModRegGet = "this.regEBP & this.dataMask";
+                    sModRegSet = "this.regEBP = (this.regEBP & ~this.dataMask) | ";
                     sModRegBTLo = "this.backTrack.btiBPLo";
                     sModRegBTHi = "this.backTrack.btiBPHi";
                     break;
                 case 6:
-                    sModRegGet = "this.regESI & this.opMask";
-                    sModRegSet = "this.regESI = (this.regESI & ~this.opMask) | ";
+                    sModRegGet = "this.regESI & this.dataMask";
+                    sModRegSet = "this.regESI = (this.regESI & ~this.dataMask) | ";
                     sModRegBTLo = "this.backTrack.btiSILo";
                     sModRegBTHi = "this.backTrack.btiSIHi";
                     break;
                 case 7:
-                    sModRegGet = "this.regEDI & this.opMask";
-                    sModRegSet = "this.regEDI = (this.regEDI & ~this.opMask) | ";
+                    sModRegGet = "this.regEDI & this.dataMask";
+                    sModRegSet = "this.regEDI = (this.regEDI & ~this.dataMask) | ";
                     sModRegBTLo = "this.backTrack.btiDILo";
                     sModRegBTHi = "this.backTrack.btiDIHi";
                     break;
@@ -892,50 +892,50 @@ function genMode(a, d, w, mrm, sGroup, sRO) {
             else {
                 switch (r_m) {
                 case 0:
-                    sModRegGet = "this.regEAX & this.opMask";
-                    sModRegSet = "this.regEAX = (this.regEAX & ~this.opMask) | ";
+                    sModRegGet = "this.regEAX & this.dataMask";
+                    sModRegSet = "this.regEAX = (this.regEAX & ~this.dataMask) | ";
                     sModRegBTLo = "this.backTrack.btiAL";
                     sModRegBTHi = "this.backTrack.btiAH";
                     break;
                 case 1:
-                    sModRegGet = "this.regECX & this.opMask";
-                    sModRegSet = "this.regECX = (this.regECX & ~this.opMask) | ";
+                    sModRegGet = "this.regECX & this.dataMask";
+                    sModRegSet = "this.regECX = (this.regECX & ~this.dataMask) | ";
                     sModRegBTLo = "this.backTrack.btiCL";
                     sModRegBTHi = "this.backTrack.btiCH";
                     break;
                 case 2:
-                    sModRegGet = "this.regEDX & this.opMask";
-                    sModRegSet = "this.regEDX = (this.regEDX & ~this.opMask) | ";
+                    sModRegGet = "this.regEDX & this.dataMask";
+                    sModRegSet = "this.regEDX = (this.regEDX & ~this.dataMask) | ";
                     sModRegBTLo = "this.backTrack.btiDL";
                     sModRegBTHi = "this.backTrack.btiDH";
                     break;
                 case 3:
-                    sModRegGet = "this.regEBX & this.opMask";
-                    sModRegSet = "this.regEBX = (this.regEBX & ~this.opMask) | ";
+                    sModRegGet = "this.regEBX & this.dataMask";
+                    sModRegSet = "this.regEBX = (this.regEBX & ~this.dataMask) | ";
                     sModRegBTLo = "this.backTrack.btiBL";
                     sModRegBTHi = "this.backTrack.btiBH";
                     break;
                 case 4:
-                    sModRegGet = "this.regESP & this.opMask";
-                    sModRegSet = "this.regESP = (this.regESP & ~this.opMask) | ";
+                    sModRegGet = "this.regESP & this.dataMask";
+                    sModRegSet = "this.regESP = (this.regESP & ~this.dataMask) | ";
                     sModRegBTLo = "X86.BACKTRACK.SP_LO";
                     sModRegBTHi = "X86.BACKTRACK.SP_HI";
                     break;
                 case 5:
-                    sModRegGet = "this.regEBP & this.opMask";
-                    sModRegSet = "this.regEBP = (this.regEBP & ~this.opMask) | ";
+                    sModRegGet = "this.regEBP & this.dataMask";
+                    sModRegSet = "this.regEBP = (this.regEBP & ~this.dataMask) | ";
                     sModRegBTLo = "this.backTrack.btiBPLo";
                     sModRegBTHi = "this.backTrack.btiBPHi";
                     break;
                 case 6:
-                    sModRegGet = "this.regESI & this.opMask";
-                    sModRegSet = "this.regESI = (this.regESI & ~this.opMask) | ";
+                    sModRegGet = "this.regESI & this.dataMask";
+                    sModRegSet = "this.regESI = (this.regESI & ~this.dataMask) | ";
                     sModRegBTLo = "this.backTrack.btiSILo";
                     sModRegBTHi = "this.backTrack.btiSIHi";
                     break;
                 case 7:
-                    sModRegGet = "this.regEDI & this.opMask";
-                    sModRegSet = "this.regEDI = (this.regEDI & ~this.opMask) | ";
+                    sModRegGet = "this.regEDI & this.dataMask";
+                    sModRegSet = "this.regEDI = (this.regEDI & ~this.dataMask) | ";
                     sModRegBTLo = "this.backTrack.btiDILo";
                     sModRegBTHi = "this.backTrack.btiDIHi";
                     break;

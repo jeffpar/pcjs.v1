@@ -46,8 +46,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord00(fn) {
-        var w = fn.call(this, this.regEAX & this.opMask, this.getEAWordData(this.regEAX));
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.regEAX));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
@@ -60,8 +60,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord01(fn) {
-        var w = fn.call(this, this.regEAX & this.opMask, this.getEAWordData(this.regECX));
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.regECX));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
@@ -74,8 +74,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord02(fn) {
-        var w = fn.call(this, this.regEAX & this.opMask, this.getEAWordData(this.regEDX));
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.regEDX));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
@@ -88,8 +88,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord03(fn) {
-        var w = fn.call(this, this.regEAX & this.opMask, this.getEAWordData(this.regEBX));
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.regEBX));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
@@ -102,8 +102,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord04(fn) {
-        var w = fn.call(this, this.regEAX & this.opMask, this.getEAWordData(this.getSIBAddr(0)));
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.getSIBAddr(0)));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
@@ -116,8 +116,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord05(fn) {
-        var w = fn.call(this, this.regEAX & this.opMask, this.getEAWordData(this.getIPWord()));
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.getIPWord()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
@@ -130,8 +130,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord06(fn) {
-        var w = fn.call(this, this.regEAX & this.opMask, this.getEAWordData(this.regESI));
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.regESI));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
@@ -144,8 +144,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord07(fn) {
-        var w = fn.call(this, this.regEAX & this.opMask, this.getEAWordData(this.regEDI));
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.regEDI));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
@@ -158,8 +158,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord08(fn) {
-        var w = fn.call(this, this.regECX & this.opMask, this.getEAWordData(this.regEAX));
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.regEAX));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
@@ -172,8 +172,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord09(fn) {
-        var w = fn.call(this, this.regECX & this.opMask, this.getEAWordData(this.regECX));
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.regECX));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
@@ -186,8 +186,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord0A(fn) {
-        var w = fn.call(this, this.regECX & this.opMask, this.getEAWordData(this.regEDX));
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.regEDX));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
@@ -200,8 +200,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord0B(fn) {
-        var w = fn.call(this, this.regECX & this.opMask, this.getEAWordData(this.regEBX));
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.regEBX));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
@@ -214,8 +214,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord0C(fn) {
-        var w = fn.call(this, this.regECX & this.opMask, this.getEAWordData(this.getSIBAddr(0)));
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.getSIBAddr(0)));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
@@ -228,8 +228,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord0D(fn) {
-        var w = fn.call(this, this.regECX & this.opMask, this.getEAWordData(this.getIPWord()));
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.getIPWord()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
@@ -242,8 +242,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord0E(fn) {
-        var w = fn.call(this, this.regECX & this.opMask, this.getEAWordData(this.regESI));
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.regESI));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
@@ -256,8 +256,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord0F(fn) {
-        var w = fn.call(this, this.regECX & this.opMask, this.getEAWordData(this.regEDI));
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.regEDI));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
@@ -270,8 +270,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord10(fn) {
-        var w = fn.call(this, this.regEDX & this.opMask, this.getEAWordData(this.regEAX));
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.regEAX));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
@@ -284,8 +284,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord11(fn) {
-        var w = fn.call(this, this.regEDX & this.opMask, this.getEAWordData(this.regECX));
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.regECX));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
@@ -298,8 +298,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord12(fn) {
-        var w = fn.call(this, this.regEDX & this.opMask, this.getEAWordData(this.regEDX));
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.regEDX));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
@@ -312,8 +312,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord13(fn) {
-        var w = fn.call(this, this.regEDX & this.opMask, this.getEAWordData(this.regEBX));
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.regEBX));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
@@ -326,8 +326,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord14(fn) {
-        var w = fn.call(this, this.regEDX & this.opMask, this.getEAWordData(this.getSIBAddr(0)));
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.getSIBAddr(0)));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
@@ -340,8 +340,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord15(fn) {
-        var w = fn.call(this, this.regEDX & this.opMask, this.getEAWordData(this.getIPWord()));
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.getIPWord()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
@@ -354,8 +354,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord16(fn) {
-        var w = fn.call(this, this.regEDX & this.opMask, this.getEAWordData(this.regESI));
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.regESI));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
@@ -368,8 +368,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord17(fn) {
-        var w = fn.call(this, this.regEDX & this.opMask, this.getEAWordData(this.regEDI));
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.regEDI));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
@@ -382,8 +382,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord18(fn) {
-        var w = fn.call(this, this.regEBX & this.opMask, this.getEAWordData(this.regEAX));
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.regEAX));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
@@ -396,8 +396,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord19(fn) {
-        var w = fn.call(this, this.regEBX & this.opMask, this.getEAWordData(this.regECX));
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.regECX));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
@@ -410,8 +410,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord1A(fn) {
-        var w = fn.call(this, this.regEBX & this.opMask, this.getEAWordData(this.regEDX));
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.regEDX));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
@@ -424,8 +424,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord1B(fn) {
-        var w = fn.call(this, this.regEBX & this.opMask, this.getEAWordData(this.regEBX));
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.regEBX));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
@@ -438,8 +438,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord1C(fn) {
-        var w = fn.call(this, this.regEBX & this.opMask, this.getEAWordData(this.getSIBAddr(0)));
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.getSIBAddr(0)));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
@@ -452,8 +452,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord1D(fn) {
-        var w = fn.call(this, this.regEBX & this.opMask, this.getEAWordData(this.getIPWord()));
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.getIPWord()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
@@ -466,8 +466,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord1E(fn) {
-        var w = fn.call(this, this.regEBX & this.opMask, this.getEAWordData(this.regESI));
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.regESI));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
@@ -480,8 +480,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord1F(fn) {
-        var w = fn.call(this, this.regEBX & this.opMask, this.getEAWordData(this.regEDI));
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.regEDI));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
@@ -494,8 +494,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord20(fn) {
-        var w = fn.call(this, this.regESP & this.opMask, this.getEAWordData(this.regEAX));
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.regEAX));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
@@ -505,8 +505,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord21(fn) {
-        var w = fn.call(this, this.regESP & this.opMask, this.getEAWordData(this.regECX));
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.regECX));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
@@ -516,8 +516,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord22(fn) {
-        var w = fn.call(this, this.regESP & this.opMask, this.getEAWordData(this.regEDX));
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.regEDX));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
@@ -527,8 +527,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord23(fn) {
-        var w = fn.call(this, this.regESP & this.opMask, this.getEAWordData(this.regEBX));
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.regEBX));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
@@ -538,8 +538,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord24(fn) {
-        var w = fn.call(this, this.regESP & this.opMask, this.getEAWordData(this.getSIBAddr(0)));
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.getSIBAddr(0)));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
@@ -549,8 +549,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord25(fn) {
-        var w = fn.call(this, this.regESP & this.opMask, this.getEAWordData(this.getIPWord()));
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.getIPWord()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
@@ -560,8 +560,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord26(fn) {
-        var w = fn.call(this, this.regESP & this.opMask, this.getEAWordData(this.regESI));
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.regESI));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
@@ -571,8 +571,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord27(fn) {
-        var w = fn.call(this, this.regESP & this.opMask, this.getEAWordData(this.regEDI));
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.regEDI));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
@@ -582,8 +582,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord28(fn) {
-        var w = fn.call(this, this.regEBP & this.opMask, this.getEAWordData(this.regEAX));
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.regEAX));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
@@ -596,8 +596,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord29(fn) {
-        var w = fn.call(this, this.regEBP & this.opMask, this.getEAWordData(this.regECX));
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.regECX));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
@@ -610,8 +610,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord2A(fn) {
-        var w = fn.call(this, this.regEBP & this.opMask, this.getEAWordData(this.regEDX));
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.regEDX));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
@@ -624,8 +624,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord2B(fn) {
-        var w = fn.call(this, this.regEBP & this.opMask, this.getEAWordData(this.regEBX));
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.regEBX));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
@@ -638,8 +638,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord2C(fn) {
-        var w = fn.call(this, this.regEBP & this.opMask, this.getEAWordData(this.getSIBAddr(0)));
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.getSIBAddr(0)));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
@@ -652,8 +652,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord2D(fn) {
-        var w = fn.call(this, this.regEBP & this.opMask, this.getEAWordData(this.getIPWord()));
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.getIPWord()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
@@ -666,8 +666,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord2E(fn) {
-        var w = fn.call(this, this.regEBP & this.opMask, this.getEAWordData(this.regESI));
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.regESI));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
@@ -680,8 +680,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord2F(fn) {
-        var w = fn.call(this, this.regEBP & this.opMask, this.getEAWordData(this.regEDI));
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.regEDI));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
@@ -694,8 +694,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord30(fn) {
-        var w = fn.call(this, this.regESI & this.opMask, this.getEAWordData(this.regEAX));
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.regEAX));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
@@ -708,8 +708,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord31(fn) {
-        var w = fn.call(this, this.regESI & this.opMask, this.getEAWordData(this.regECX));
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.regECX));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
@@ -722,8 +722,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord32(fn) {
-        var w = fn.call(this, this.regESI & this.opMask, this.getEAWordData(this.regEDX));
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.regEDX));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
@@ -736,8 +736,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord33(fn) {
-        var w = fn.call(this, this.regESI & this.opMask, this.getEAWordData(this.regEBX));
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.regEBX));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
@@ -750,8 +750,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord34(fn) {
-        var w = fn.call(this, this.regESI & this.opMask, this.getEAWordData(this.getSIBAddr(0)));
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.getSIBAddr(0)));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
@@ -764,8 +764,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord35(fn) {
-        var w = fn.call(this, this.regESI & this.opMask, this.getEAWordData(this.getIPWord()));
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.getIPWord()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
@@ -778,8 +778,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord36(fn) {
-        var w = fn.call(this, this.regESI & this.opMask, this.getEAWordData(this.regESI));
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.regESI));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
@@ -792,8 +792,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord37(fn) {
-        var w = fn.call(this, this.regESI & this.opMask, this.getEAWordData(this.regEDI));
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.regEDI));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
@@ -806,8 +806,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord38(fn) {
-        var w = fn.call(this, this.regEDI & this.opMask, this.getEAWordData(this.regEAX));
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.regEAX));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
@@ -820,8 +820,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord39(fn) {
-        var w = fn.call(this, this.regEDI & this.opMask, this.getEAWordData(this.regECX));
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.regECX));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
@@ -834,8 +834,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord3A(fn) {
-        var w = fn.call(this, this.regEDI & this.opMask, this.getEAWordData(this.regEDX));
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.regEDX));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
@@ -848,8 +848,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord3B(fn) {
-        var w = fn.call(this, this.regEDI & this.opMask, this.getEAWordData(this.regEBX));
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.regEBX));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
@@ -862,8 +862,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord3C(fn) {
-        var w = fn.call(this, this.regEDI & this.opMask, this.getEAWordData(this.getSIBAddr(0)));
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.getSIBAddr(0)));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
@@ -876,8 +876,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord3D(fn) {
-        var w = fn.call(this, this.regEDI & this.opMask, this.getEAWordData(this.getIPWord()));
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.getIPWord()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
@@ -890,8 +890,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord3E(fn) {
-        var w = fn.call(this, this.regEDI & this.opMask, this.getEAWordData(this.regESI));
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.regESI));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
@@ -904,8 +904,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord3F(fn) {
-        var w = fn.call(this, this.regEDI & this.opMask, this.getEAWordData(this.regEDI));
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.regEDI));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
@@ -918,8 +918,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord40(fn) {
-        var w = fn.call(this, this.regEAX & this.opMask, this.getEAWordData(this.regEAX + this.getIPDisp()));
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.regEAX + this.getIPDisp()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
@@ -932,8 +932,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord41(fn) {
-        var w = fn.call(this, this.regEAX & this.opMask, this.getEAWordData(this.regECX + this.getIPDisp()));
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.regECX + this.getIPDisp()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
@@ -946,8 +946,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord42(fn) {
-        var w = fn.call(this, this.regEAX & this.opMask, this.getEAWordData(this.regEDX + this.getIPDisp()));
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.regEDX + this.getIPDisp()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
@@ -960,8 +960,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord43(fn) {
-        var w = fn.call(this, this.regEAX & this.opMask, this.getEAWordData(this.regEBX + this.getIPDisp()));
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.regEBX + this.getIPDisp()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
@@ -974,8 +974,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord44(fn) {
-        var w = fn.call(this, this.regEAX & this.opMask, this.getEAWordData(this.getSIBAddr(1) + this.getIPDisp()));
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.getSIBAddr(1) + this.getIPDisp()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
@@ -988,8 +988,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord45(fn) {
-        var w = fn.call(this, this.regEAX & this.opMask, this.getEAWordStack(this.regEBP + this.getIPDisp()));
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordStack(this.regEBP + this.getIPDisp()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
@@ -1002,8 +1002,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord46(fn) {
-        var w = fn.call(this, this.regEAX & this.opMask, this.getEAWordData(this.regESI + this.getIPDisp()));
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.regESI + this.getIPDisp()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
@@ -1016,8 +1016,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord47(fn) {
-        var w = fn.call(this, this.regEAX & this.opMask, this.getEAWordData(this.regEDI + this.getIPDisp()));
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.regEDI + this.getIPDisp()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
@@ -1030,8 +1030,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord48(fn) {
-        var w = fn.call(this, this.regECX & this.opMask, this.getEAWordData(this.regEAX + this.getIPDisp()));
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.regEAX + this.getIPDisp()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
@@ -1044,8 +1044,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord49(fn) {
-        var w = fn.call(this, this.regECX & this.opMask, this.getEAWordData(this.regECX + this.getIPDisp()));
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.regECX + this.getIPDisp()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
@@ -1058,8 +1058,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord4A(fn) {
-        var w = fn.call(this, this.regECX & this.opMask, this.getEAWordData(this.regEDX + this.getIPDisp()));
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.regEDX + this.getIPDisp()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
@@ -1072,8 +1072,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord4B(fn) {
-        var w = fn.call(this, this.regECX & this.opMask, this.getEAWordData(this.regEBX + this.getIPDisp()));
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.regEBX + this.getIPDisp()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
@@ -1086,8 +1086,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord4C(fn) {
-        var w = fn.call(this, this.regECX & this.opMask, this.getEAWordData(this.getSIBAddr(1) + this.getIPDisp()));
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.getSIBAddr(1) + this.getIPDisp()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
@@ -1100,8 +1100,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord4D(fn) {
-        var w = fn.call(this, this.regECX & this.opMask, this.getEAWordStack(this.regEBP + this.getIPDisp()));
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordStack(this.regEBP + this.getIPDisp()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
@@ -1114,8 +1114,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord4E(fn) {
-        var w = fn.call(this, this.regECX & this.opMask, this.getEAWordData(this.regESI + this.getIPDisp()));
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.regESI + this.getIPDisp()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
@@ -1128,8 +1128,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord4F(fn) {
-        var w = fn.call(this, this.regECX & this.opMask, this.getEAWordData(this.regEDI + this.getIPDisp()));
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.regEDI + this.getIPDisp()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
@@ -1142,8 +1142,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord50(fn) {
-        var w = fn.call(this, this.regEDX & this.opMask, this.getEAWordData(this.regEAX + this.getIPDisp()));
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.regEAX + this.getIPDisp()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
@@ -1156,8 +1156,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord51(fn) {
-        var w = fn.call(this, this.regEDX & this.opMask, this.getEAWordData(this.regECX + this.getIPDisp()));
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.regECX + this.getIPDisp()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
@@ -1170,8 +1170,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord52(fn) {
-        var w = fn.call(this, this.regEDX & this.opMask, this.getEAWordData(this.regEDX + this.getIPDisp()));
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.regEDX + this.getIPDisp()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
@@ -1184,8 +1184,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord53(fn) {
-        var w = fn.call(this, this.regEDX & this.opMask, this.getEAWordData(this.regEBX + this.getIPDisp()));
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.regEBX + this.getIPDisp()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
@@ -1198,8 +1198,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord54(fn) {
-        var w = fn.call(this, this.regEDX & this.opMask, this.getEAWordData(this.getSIBAddr(1) + this.getIPDisp()));
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.getSIBAddr(1) + this.getIPDisp()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
@@ -1212,8 +1212,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord55(fn) {
-        var w = fn.call(this, this.regEDX & this.opMask, this.getEAWordStack(this.regEBP + this.getIPDisp()));
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordStack(this.regEBP + this.getIPDisp()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
@@ -1226,8 +1226,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord56(fn) {
-        var w = fn.call(this, this.regEDX & this.opMask, this.getEAWordData(this.regESI + this.getIPDisp()));
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.regESI + this.getIPDisp()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
@@ -1240,8 +1240,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord57(fn) {
-        var w = fn.call(this, this.regEDX & this.opMask, this.getEAWordData(this.regEDI + this.getIPDisp()));
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.regEDI + this.getIPDisp()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
@@ -1254,8 +1254,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord58(fn) {
-        var w = fn.call(this, this.regEBX & this.opMask, this.getEAWordData(this.regEAX + this.getIPDisp()));
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.regEAX + this.getIPDisp()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
@@ -1268,8 +1268,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord59(fn) {
-        var w = fn.call(this, this.regEBX & this.opMask, this.getEAWordData(this.regECX + this.getIPDisp()));
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.regECX + this.getIPDisp()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
@@ -1282,8 +1282,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord5A(fn) {
-        var w = fn.call(this, this.regEBX & this.opMask, this.getEAWordData(this.regEDX + this.getIPDisp()));
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.regEDX + this.getIPDisp()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
@@ -1296,8 +1296,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord5B(fn) {
-        var w = fn.call(this, this.regEBX & this.opMask, this.getEAWordData(this.regEBX + this.getIPDisp()));
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.regEBX + this.getIPDisp()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
@@ -1310,8 +1310,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord5C(fn) {
-        var w = fn.call(this, this.regEBX & this.opMask, this.getEAWordData(this.getSIBAddr(1) + this.getIPDisp()));
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.getSIBAddr(1) + this.getIPDisp()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
@@ -1324,8 +1324,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord5D(fn) {
-        var w = fn.call(this, this.regEBX & this.opMask, this.getEAWordStack(this.regEBP + this.getIPDisp()));
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordStack(this.regEBP + this.getIPDisp()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
@@ -1338,8 +1338,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord5E(fn) {
-        var w = fn.call(this, this.regEBX & this.opMask, this.getEAWordData(this.regESI + this.getIPDisp()));
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.regESI + this.getIPDisp()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
@@ -1352,8 +1352,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord5F(fn) {
-        var w = fn.call(this, this.regEBX & this.opMask, this.getEAWordData(this.regEDI + this.getIPDisp()));
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.regEDI + this.getIPDisp()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
@@ -1366,8 +1366,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord60(fn) {
-        var w = fn.call(this, this.regESP & this.opMask, this.getEAWordData(this.regEAX + this.getIPDisp()));
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.regEAX + this.getIPDisp()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -1377,8 +1377,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord61(fn) {
-        var w = fn.call(this, this.regESP & this.opMask, this.getEAWordData(this.regECX + this.getIPDisp()));
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.regECX + this.getIPDisp()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -1388,8 +1388,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord62(fn) {
-        var w = fn.call(this, this.regESP & this.opMask, this.getEAWordData(this.regEDX + this.getIPDisp()));
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.regEDX + this.getIPDisp()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -1399,8 +1399,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord63(fn) {
-        var w = fn.call(this, this.regESP & this.opMask, this.getEAWordData(this.regEBX + this.getIPDisp()));
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.regEBX + this.getIPDisp()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -1410,8 +1410,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord64(fn) {
-        var w = fn.call(this, this.regESP & this.opMask, this.getEAWordData(this.getSIBAddr(1) + this.getIPDisp()));
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.getSIBAddr(1) + this.getIPDisp()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -1421,8 +1421,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord65(fn) {
-        var w = fn.call(this, this.regESP & this.opMask, this.getEAWordStack(this.regEBP + this.getIPDisp()));
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordStack(this.regEBP + this.getIPDisp()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -1432,8 +1432,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord66(fn) {
-        var w = fn.call(this, this.regESP & this.opMask, this.getEAWordData(this.regESI + this.getIPDisp()));
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.regESI + this.getIPDisp()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -1443,8 +1443,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord67(fn) {
-        var w = fn.call(this, this.regESP & this.opMask, this.getEAWordData(this.regEDI + this.getIPDisp()));
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.regEDI + this.getIPDisp()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -1454,8 +1454,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord68(fn) {
-        var w = fn.call(this, this.regEBP & this.opMask, this.getEAWordData(this.regEAX + this.getIPDisp()));
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.regEAX + this.getIPDisp()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
@@ -1468,8 +1468,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord69(fn) {
-        var w = fn.call(this, this.regEBP & this.opMask, this.getEAWordData(this.regECX + this.getIPDisp()));
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.regECX + this.getIPDisp()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
@@ -1482,8 +1482,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord6A(fn) {
-        var w = fn.call(this, this.regEBP & this.opMask, this.getEAWordData(this.regEDX + this.getIPDisp()));
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.regEDX + this.getIPDisp()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
@@ -1496,8 +1496,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord6B(fn) {
-        var w = fn.call(this, this.regEBP & this.opMask, this.getEAWordData(this.regEBX + this.getIPDisp()));
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.regEBX + this.getIPDisp()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
@@ -1510,8 +1510,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord6C(fn) {
-        var w = fn.call(this, this.regEBP & this.opMask, this.getEAWordData(this.getSIBAddr(1) + this.getIPDisp()));
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.getSIBAddr(1) + this.getIPDisp()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
@@ -1524,8 +1524,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord6D(fn) {
-        var w = fn.call(this, this.regEBP & this.opMask, this.getEAWordStack(this.regEBP + this.getIPDisp()));
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordStack(this.regEBP + this.getIPDisp()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
@@ -1538,8 +1538,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord6E(fn) {
-        var w = fn.call(this, this.regEBP & this.opMask, this.getEAWordData(this.regESI + this.getIPDisp()));
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.regESI + this.getIPDisp()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
@@ -1552,8 +1552,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord6F(fn) {
-        var w = fn.call(this, this.regEBP & this.opMask, this.getEAWordData(this.regEDI + this.getIPDisp()));
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.regEDI + this.getIPDisp()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
@@ -1566,8 +1566,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord70(fn) {
-        var w = fn.call(this, this.regESI & this.opMask, this.getEAWordData(this.regEAX + this.getIPDisp()));
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.regEAX + this.getIPDisp()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
@@ -1580,8 +1580,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord71(fn) {
-        var w = fn.call(this, this.regESI & this.opMask, this.getEAWordData(this.regECX + this.getIPDisp()));
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.regECX + this.getIPDisp()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
@@ -1594,8 +1594,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord72(fn) {
-        var w = fn.call(this, this.regESI & this.opMask, this.getEAWordData(this.regEDX + this.getIPDisp()));
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.regEDX + this.getIPDisp()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
@@ -1608,8 +1608,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord73(fn) {
-        var w = fn.call(this, this.regESI & this.opMask, this.getEAWordData(this.regEBX + this.getIPDisp()));
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.regEBX + this.getIPDisp()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
@@ -1622,8 +1622,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord74(fn) {
-        var w = fn.call(this, this.regESI & this.opMask, this.getEAWordData(this.getSIBAddr(1) + this.getIPDisp()));
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.getSIBAddr(1) + this.getIPDisp()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
@@ -1636,8 +1636,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord75(fn) {
-        var w = fn.call(this, this.regESI & this.opMask, this.getEAWordStack(this.regEBP + this.getIPDisp()));
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordStack(this.regEBP + this.getIPDisp()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
@@ -1650,8 +1650,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord76(fn) {
-        var w = fn.call(this, this.regESI & this.opMask, this.getEAWordData(this.regESI + this.getIPDisp()));
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.regESI + this.getIPDisp()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
@@ -1664,8 +1664,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord77(fn) {
-        var w = fn.call(this, this.regESI & this.opMask, this.getEAWordData(this.regEDI + this.getIPDisp()));
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.regEDI + this.getIPDisp()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
@@ -1678,8 +1678,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord78(fn) {
-        var w = fn.call(this, this.regEDI & this.opMask, this.getEAWordData(this.regEAX + this.getIPDisp()));
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.regEAX + this.getIPDisp()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
@@ -1692,8 +1692,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord79(fn) {
-        var w = fn.call(this, this.regEDI & this.opMask, this.getEAWordData(this.regECX + this.getIPDisp()));
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.regECX + this.getIPDisp()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
@@ -1706,8 +1706,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord7A(fn) {
-        var w = fn.call(this, this.regEDI & this.opMask, this.getEAWordData(this.regEDX + this.getIPDisp()));
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.regEDX + this.getIPDisp()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
@@ -1720,8 +1720,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord7B(fn) {
-        var w = fn.call(this, this.regEDI & this.opMask, this.getEAWordData(this.regEBX + this.getIPDisp()));
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.regEBX + this.getIPDisp()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
@@ -1734,8 +1734,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord7C(fn) {
-        var w = fn.call(this, this.regEDI & this.opMask, this.getEAWordData(this.getSIBAddr(1) + this.getIPDisp()));
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.getSIBAddr(1) + this.getIPDisp()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
@@ -1748,8 +1748,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord7D(fn) {
-        var w = fn.call(this, this.regEDI & this.opMask, this.getEAWordStack(this.regEBP + this.getIPDisp()));
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordStack(this.regEBP + this.getIPDisp()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
@@ -1762,8 +1762,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord7E(fn) {
-        var w = fn.call(this, this.regEDI & this.opMask, this.getEAWordData(this.regESI + this.getIPDisp()));
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.regESI + this.getIPDisp()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
@@ -1776,8 +1776,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord7F(fn) {
-        var w = fn.call(this, this.regEDI & this.opMask, this.getEAWordData(this.regEDI + this.getIPDisp()));
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.regEDI + this.getIPDisp()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
@@ -1790,8 +1790,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord80(fn) {
-        var w = fn.call(this, this.regEAX & this.opMask, this.getEAWordData(this.regEAX + this.getIPWord()));
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.regEAX + this.getIPWord()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
@@ -1804,8 +1804,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord81(fn) {
-        var w = fn.call(this, this.regEAX & this.opMask, this.getEAWordData(this.regECX + this.getIPWord()));
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.regECX + this.getIPWord()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
@@ -1818,8 +1818,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord82(fn) {
-        var w = fn.call(this, this.regEAX & this.opMask, this.getEAWordData(this.regEDX + this.getIPWord()));
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.regEDX + this.getIPWord()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
@@ -1832,8 +1832,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord83(fn) {
-        var w = fn.call(this, this.regEAX & this.opMask, this.getEAWordData(this.regEBX + this.getIPWord()));
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.regEBX + this.getIPWord()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
@@ -1846,8 +1846,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord84(fn) {
-        var w = fn.call(this, this.regEAX & this.opMask, this.getEAWordData(this.getSIBAddr(2) + this.getIPWord()));
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.getSIBAddr(2) + this.getIPWord()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
@@ -1860,8 +1860,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord85(fn) {
-        var w = fn.call(this, this.regEAX & this.opMask, this.getEAWordStack(this.regEBP + this.getIPWord()));
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordStack(this.regEBP + this.getIPWord()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
@@ -1874,8 +1874,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord86(fn) {
-        var w = fn.call(this, this.regEAX & this.opMask, this.getEAWordData(this.regESI + this.getIPWord()));
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.regESI + this.getIPWord()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
@@ -1888,8 +1888,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord87(fn) {
-        var w = fn.call(this, this.regEAX & this.opMask, this.getEAWordData(this.regEDI + this.getIPWord()));
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.regEDI + this.getIPWord()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
@@ -1902,8 +1902,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord88(fn) {
-        var w = fn.call(this, this.regECX & this.opMask, this.getEAWordData(this.regEAX + this.getIPWord()));
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.regEAX + this.getIPWord()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
@@ -1916,8 +1916,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord89(fn) {
-        var w = fn.call(this, this.regECX & this.opMask, this.getEAWordData(this.regECX + this.getIPWord()));
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.regECX + this.getIPWord()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
@@ -1930,8 +1930,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord8A(fn) {
-        var w = fn.call(this, this.regECX & this.opMask, this.getEAWordData(this.regEDX + this.getIPWord()));
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.regEDX + this.getIPWord()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
@@ -1944,8 +1944,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord8B(fn) {
-        var w = fn.call(this, this.regECX & this.opMask, this.getEAWordData(this.regEBX + this.getIPWord()));
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.regEBX + this.getIPWord()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
@@ -1958,8 +1958,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord8C(fn) {
-        var w = fn.call(this, this.regECX & this.opMask, this.getEAWordData(this.getSIBAddr(2) + this.getIPWord()));
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.getSIBAddr(2) + this.getIPWord()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
@@ -1972,8 +1972,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord8D(fn) {
-        var w = fn.call(this, this.regECX & this.opMask, this.getEAWordStack(this.regEBP + this.getIPWord()));
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordStack(this.regEBP + this.getIPWord()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
@@ -1986,8 +1986,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord8E(fn) {
-        var w = fn.call(this, this.regECX & this.opMask, this.getEAWordData(this.regESI + this.getIPWord()));
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.regESI + this.getIPWord()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
@@ -2000,8 +2000,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord8F(fn) {
-        var w = fn.call(this, this.regECX & this.opMask, this.getEAWordData(this.regEDI + this.getIPWord()));
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.regEDI + this.getIPWord()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
@@ -2014,8 +2014,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord90(fn) {
-        var w = fn.call(this, this.regEDX & this.opMask, this.getEAWordData(this.regEAX + this.getIPWord()));
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.regEAX + this.getIPWord()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
@@ -2028,8 +2028,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord91(fn) {
-        var w = fn.call(this, this.regEDX & this.opMask, this.getEAWordData(this.regECX + this.getIPWord()));
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.regECX + this.getIPWord()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
@@ -2042,8 +2042,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord92(fn) {
-        var w = fn.call(this, this.regEDX & this.opMask, this.getEAWordData(this.regEDX + this.getIPWord()));
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.regEDX + this.getIPWord()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
@@ -2056,8 +2056,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord93(fn) {
-        var w = fn.call(this, this.regEDX & this.opMask, this.getEAWordData(this.regEBX + this.getIPWord()));
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.regEBX + this.getIPWord()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
@@ -2070,8 +2070,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord94(fn) {
-        var w = fn.call(this, this.regEDX & this.opMask, this.getEAWordData(this.getSIBAddr(2) + this.getIPWord()));
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.getSIBAddr(2) + this.getIPWord()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
@@ -2084,8 +2084,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord95(fn) {
-        var w = fn.call(this, this.regEDX & this.opMask, this.getEAWordStack(this.regEBP + this.getIPWord()));
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordStack(this.regEBP + this.getIPWord()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
@@ -2098,8 +2098,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord96(fn) {
-        var w = fn.call(this, this.regEDX & this.opMask, this.getEAWordData(this.regESI + this.getIPWord()));
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.regESI + this.getIPWord()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
@@ -2112,8 +2112,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord97(fn) {
-        var w = fn.call(this, this.regEDX & this.opMask, this.getEAWordData(this.regEDI + this.getIPWord()));
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.regEDI + this.getIPWord()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
@@ -2126,8 +2126,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord98(fn) {
-        var w = fn.call(this, this.regEBX & this.opMask, this.getEAWordData(this.regEAX + this.getIPWord()));
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.regEAX + this.getIPWord()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
@@ -2140,8 +2140,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord99(fn) {
-        var w = fn.call(this, this.regEBX & this.opMask, this.getEAWordData(this.regECX + this.getIPWord()));
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.regECX + this.getIPWord()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
@@ -2154,8 +2154,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord9A(fn) {
-        var w = fn.call(this, this.regEBX & this.opMask, this.getEAWordData(this.regEDX + this.getIPWord()));
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.regEDX + this.getIPWord()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
@@ -2168,8 +2168,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord9B(fn) {
-        var w = fn.call(this, this.regEBX & this.opMask, this.getEAWordData(this.regEBX + this.getIPWord()));
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.regEBX + this.getIPWord()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
@@ -2182,8 +2182,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord9C(fn) {
-        var w = fn.call(this, this.regEBX & this.opMask, this.getEAWordData(this.getSIBAddr(2) + this.getIPWord()));
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.getSIBAddr(2) + this.getIPWord()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
@@ -2196,8 +2196,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord9D(fn) {
-        var w = fn.call(this, this.regEBX & this.opMask, this.getEAWordStack(this.regEBP + this.getIPWord()));
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordStack(this.regEBP + this.getIPWord()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
@@ -2210,8 +2210,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord9E(fn) {
-        var w = fn.call(this, this.regEBX & this.opMask, this.getEAWordData(this.regESI + this.getIPWord()));
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.regESI + this.getIPWord()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
@@ -2224,8 +2224,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWord9F(fn) {
-        var w = fn.call(this, this.regEBX & this.opMask, this.getEAWordData(this.regEDI + this.getIPWord()));
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.regEDI + this.getIPWord()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
@@ -2238,8 +2238,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordA0(fn) {
-        var w = fn.call(this, this.regESP & this.opMask, this.getEAWordData(this.regEAX + this.getIPWord()));
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.regEAX + this.getIPWord()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -2249,8 +2249,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordA1(fn) {
-        var w = fn.call(this, this.regESP & this.opMask, this.getEAWordData(this.regECX + this.getIPWord()));
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.regECX + this.getIPWord()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -2260,8 +2260,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordA2(fn) {
-        var w = fn.call(this, this.regESP & this.opMask, this.getEAWordData(this.regEDX + this.getIPWord()));
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.regEDX + this.getIPWord()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -2271,8 +2271,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordA3(fn) {
-        var w = fn.call(this, this.regESP & this.opMask, this.getEAWordData(this.regEBX + this.getIPWord()));
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.regEBX + this.getIPWord()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -2282,8 +2282,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordA4(fn) {
-        var w = fn.call(this, this.regESP & this.opMask, this.getEAWordData(this.getSIBAddr(2) + this.getIPWord()));
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.getSIBAddr(2) + this.getIPWord()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -2293,8 +2293,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordA5(fn) {
-        var w = fn.call(this, this.regESP & this.opMask, this.getEAWordStack(this.regEBP + this.getIPWord()));
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordStack(this.regEBP + this.getIPWord()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -2304,8 +2304,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordA6(fn) {
-        var w = fn.call(this, this.regESP & this.opMask, this.getEAWordData(this.regESI + this.getIPWord()));
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.regESI + this.getIPWord()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -2315,8 +2315,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordA7(fn) {
-        var w = fn.call(this, this.regESP & this.opMask, this.getEAWordData(this.regEDI + this.getIPWord()));
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.regEDI + this.getIPWord()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
@@ -2326,8 +2326,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordA8(fn) {
-        var w = fn.call(this, this.regEBP & this.opMask, this.getEAWordData(this.regEAX + this.getIPWord()));
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.regEAX + this.getIPWord()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
@@ -2340,8 +2340,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordA9(fn) {
-        var w = fn.call(this, this.regEBP & this.opMask, this.getEAWordData(this.regECX + this.getIPWord()));
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.regECX + this.getIPWord()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
@@ -2354,8 +2354,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordAA(fn) {
-        var w = fn.call(this, this.regEBP & this.opMask, this.getEAWordData(this.regEDX + this.getIPWord()));
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.regEDX + this.getIPWord()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
@@ -2368,8 +2368,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordAB(fn) {
-        var w = fn.call(this, this.regEBP & this.opMask, this.getEAWordData(this.regEBX + this.getIPWord()));
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.regEBX + this.getIPWord()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
@@ -2382,8 +2382,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordAC(fn) {
-        var w = fn.call(this, this.regEBP & this.opMask, this.getEAWordData(this.getSIBAddr(2) + this.getIPWord()));
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.getSIBAddr(2) + this.getIPWord()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
@@ -2396,8 +2396,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordAD(fn) {
-        var w = fn.call(this, this.regEBP & this.opMask, this.getEAWordStack(this.regEBP + this.getIPWord()));
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordStack(this.regEBP + this.getIPWord()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
@@ -2410,8 +2410,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordAE(fn) {
-        var w = fn.call(this, this.regEBP & this.opMask, this.getEAWordData(this.regESI + this.getIPWord()));
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.regESI + this.getIPWord()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
@@ -2424,8 +2424,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordAF(fn) {
-        var w = fn.call(this, this.regEBP & this.opMask, this.getEAWordData(this.regEDI + this.getIPWord()));
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.regEDI + this.getIPWord()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
@@ -2438,8 +2438,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordB0(fn) {
-        var w = fn.call(this, this.regESI & this.opMask, this.getEAWordData(this.regEAX + this.getIPWord()));
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.regEAX + this.getIPWord()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
@@ -2452,8 +2452,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordB1(fn) {
-        var w = fn.call(this, this.regESI & this.opMask, this.getEAWordData(this.regECX + this.getIPWord()));
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.regECX + this.getIPWord()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
@@ -2466,8 +2466,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordB2(fn) {
-        var w = fn.call(this, this.regESI & this.opMask, this.getEAWordData(this.regEDX + this.getIPWord()));
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.regEDX + this.getIPWord()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
@@ -2480,8 +2480,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordB3(fn) {
-        var w = fn.call(this, this.regESI & this.opMask, this.getEAWordData(this.regEBX + this.getIPWord()));
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.regEBX + this.getIPWord()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
@@ -2494,8 +2494,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordB4(fn) {
-        var w = fn.call(this, this.regESI & this.opMask, this.getEAWordData(this.getSIBAddr(2) + this.getIPWord()));
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.getSIBAddr(2) + this.getIPWord()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
@@ -2508,8 +2508,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordB5(fn) {
-        var w = fn.call(this, this.regESI & this.opMask, this.getEAWordStack(this.regEBP + this.getIPWord()));
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordStack(this.regEBP + this.getIPWord()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
@@ -2522,8 +2522,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordB6(fn) {
-        var w = fn.call(this, this.regESI & this.opMask, this.getEAWordData(this.regESI + this.getIPWord()));
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.regESI + this.getIPWord()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
@@ -2536,8 +2536,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordB7(fn) {
-        var w = fn.call(this, this.regESI & this.opMask, this.getEAWordData(this.regEDI + this.getIPWord()));
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.regEDI + this.getIPWord()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
@@ -2550,8 +2550,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordB8(fn) {
-        var w = fn.call(this, this.regEDI & this.opMask, this.getEAWordData(this.regEAX + this.getIPWord()));
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.regEAX + this.getIPWord()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
@@ -2564,8 +2564,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordB9(fn) {
-        var w = fn.call(this, this.regEDI & this.opMask, this.getEAWordData(this.regECX + this.getIPWord()));
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.regECX + this.getIPWord()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
@@ -2578,8 +2578,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordBA(fn) {
-        var w = fn.call(this, this.regEDI & this.opMask, this.getEAWordData(this.regEDX + this.getIPWord()));
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.regEDX + this.getIPWord()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
@@ -2592,8 +2592,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordBB(fn) {
-        var w = fn.call(this, this.regEDI & this.opMask, this.getEAWordData(this.regEBX + this.getIPWord()));
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.regEBX + this.getIPWord()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
@@ -2606,8 +2606,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordBC(fn) {
-        var w = fn.call(this, this.regEDI & this.opMask, this.getEAWordData(this.getSIBAddr(2) + this.getIPWord()));
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.getSIBAddr(2) + this.getIPWord()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
@@ -2620,8 +2620,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordBD(fn) {
-        var w = fn.call(this, this.regEDI & this.opMask, this.getEAWordStack(this.regEBP + this.getIPWord()));
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordStack(this.regEBP + this.getIPWord()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
@@ -2634,8 +2634,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordBE(fn) {
-        var w = fn.call(this, this.regEDI & this.opMask, this.getEAWordData(this.regESI + this.getIPWord()));
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.regESI + this.getIPWord()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
@@ -2648,8 +2648,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordBF(fn) {
-        var w = fn.call(this, this.regEDI & this.opMask, this.getEAWordData(this.regEDI + this.getIPWord()));
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.regEDI + this.getIPWord()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
@@ -2662,8 +2662,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordC0(fn) {
-        var w = fn.call(this, this.regEAX & this.opMask, this.regEAX & this.opMask);
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEAX & this.dataMask, this.regEAX & this.dataMask);
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
     },
     /**
      * opMod32RegWordC1(fn): mod=11 (src:reg)  reg=000 (dst:AX)  r/m=001 (ECX)
@@ -2672,8 +2672,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordC1(fn) {
-        var w = fn.call(this, this.regEAX & this.opMask, this.regECX & this.opMask);
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEAX & this.dataMask, this.regECX & this.dataMask);
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiCL; this.backTrack.btiAH = this.backTrack.btiCH;
         }
@@ -2685,8 +2685,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordC2(fn) {
-        var w = fn.call(this, this.regEAX & this.opMask, this.regEDX & this.opMask);
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEAX & this.dataMask, this.regEDX & this.dataMask);
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiDL; this.backTrack.btiAH = this.backTrack.btiDH;
         }
@@ -2698,8 +2698,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordC3(fn) {
-        var w = fn.call(this, this.regEAX & this.opMask, this.regEBX & this.opMask);
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEAX & this.dataMask, this.regEBX & this.dataMask);
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiBL; this.backTrack.btiAH = this.backTrack.btiBH;
         }
@@ -2711,8 +2711,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordC4(fn) {
-        var w = fn.call(this, this.regEAX & this.opMask, this.regESP & this.opMask);
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEAX & this.dataMask, this.regESP & this.dataMask);
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = X86.BACKTRACK.SP_LO; this.backTrack.btiAH = X86.BACKTRACK.SP_HI;
         }
@@ -2724,8 +2724,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordC5(fn) {
-        var w = fn.call(this, this.regEAX & this.opMask, this.regEBP & this.opMask);
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEAX & this.dataMask, this.regEBP & this.dataMask);
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiBPLo; this.backTrack.btiAH = this.backTrack.btiBPHi;
         }
@@ -2737,8 +2737,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordC6(fn) {
-        var w = fn.call(this, this.regEAX & this.opMask, this.regESI & this.opMask);
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEAX & this.dataMask, this.regESI & this.dataMask);
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiSILo; this.backTrack.btiAH = this.backTrack.btiSIHi;
         }
@@ -2750,8 +2750,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordC7(fn) {
-        var w = fn.call(this, this.regEAX & this.opMask, this.regEDI & this.opMask);
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEAX & this.dataMask, this.regEDI & this.dataMask);
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiDILo; this.backTrack.btiAH = this.backTrack.btiDIHi;
         }
@@ -2763,8 +2763,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordC8(fn) {
-        var w = fn.call(this, this.regECX & this.opMask, this.regEAX & this.opMask);
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = fn.call(this, this.regECX & this.dataMask, this.regEAX & this.dataMask);
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiAL; this.backTrack.btiCH = this.backTrack.btiAH;
         }
@@ -2776,8 +2776,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordC9(fn) {
-        var w = fn.call(this, this.regECX & this.opMask, this.regECX & this.opMask);
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = fn.call(this, this.regECX & this.dataMask, this.regECX & this.dataMask);
+        this.regECX = (this.regECX & ~this.dataMask) | w;
     },
     /**
      * opMod32RegWordCA(fn): mod=11 (src:reg)  reg=001 (dst:CX)  r/m=010 (EDX)
@@ -2786,8 +2786,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordCA(fn) {
-        var w = fn.call(this, this.regECX & this.opMask, this.regEDX & this.opMask);
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = fn.call(this, this.regECX & this.dataMask, this.regEDX & this.dataMask);
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiDL; this.backTrack.btiCH = this.backTrack.btiDH;
         }
@@ -2799,8 +2799,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordCB(fn) {
-        var w = fn.call(this, this.regECX & this.opMask, this.regEBX & this.opMask);
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = fn.call(this, this.regECX & this.dataMask, this.regEBX & this.dataMask);
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiBL; this.backTrack.btiCH = this.backTrack.btiBH;
         }
@@ -2812,8 +2812,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordCC(fn) {
-        var w = fn.call(this, this.regECX & this.opMask, this.regESP & this.opMask);
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = fn.call(this, this.regECX & this.dataMask, this.regESP & this.dataMask);
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = X86.BACKTRACK.SP_LO; this.backTrack.btiCH = X86.BACKTRACK.SP_HI;
         }
@@ -2825,8 +2825,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordCD(fn) {
-        var w = fn.call(this, this.regECX & this.opMask, this.regEBP & this.opMask);
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = fn.call(this, this.regECX & this.dataMask, this.regEBP & this.dataMask);
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiBPLo; this.backTrack.btiCH = this.backTrack.btiBPHi;
         }
@@ -2838,8 +2838,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordCE(fn) {
-        var w = fn.call(this, this.regECX & this.opMask, this.regESI & this.opMask);
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = fn.call(this, this.regECX & this.dataMask, this.regESI & this.dataMask);
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiSILo; this.backTrack.btiCH = this.backTrack.btiSIHi;
         }
@@ -2851,8 +2851,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordCF(fn) {
-        var w = fn.call(this, this.regECX & this.opMask, this.regEDI & this.opMask);
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = fn.call(this, this.regECX & this.dataMask, this.regEDI & this.dataMask);
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiDILo; this.backTrack.btiCH = this.backTrack.btiDIHi;
         }
@@ -2864,8 +2864,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordD0(fn) {
-        var w = fn.call(this, this.regEDX & this.opMask, this.regEAX & this.opMask);
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDX & this.dataMask, this.regEAX & this.dataMask);
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiAL; this.backTrack.btiDH = this.backTrack.btiAH;
         }
@@ -2877,8 +2877,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordD1(fn) {
-        var w = fn.call(this, this.regEDX & this.opMask, this.regECX & this.opMask);
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDX & this.dataMask, this.regECX & this.dataMask);
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiCL; this.backTrack.btiDH = this.backTrack.btiCH;
         }
@@ -2890,8 +2890,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordD2(fn) {
-        var w = fn.call(this, this.regEDX & this.opMask, this.regEDX & this.opMask);
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDX & this.dataMask, this.regEDX & this.dataMask);
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
     },
     /**
      * opMod32RegWordD3(fn): mod=11 (src:reg)  reg=010 (dst:DX)  r/m=011 (EBX)
@@ -2900,8 +2900,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordD3(fn) {
-        var w = fn.call(this, this.regEDX & this.opMask, this.regEBX & this.opMask);
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDX & this.dataMask, this.regEBX & this.dataMask);
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiBL; this.backTrack.btiDH = this.backTrack.btiBH;
         }
@@ -2913,8 +2913,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordD4(fn) {
-        var w = fn.call(this, this.regEDX & this.opMask, this.regESP & this.opMask);
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDX & this.dataMask, this.regESP & this.dataMask);
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = X86.BACKTRACK.SP_LO; this.backTrack.btiDH = X86.BACKTRACK.SP_HI;
         }
@@ -2926,8 +2926,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordD5(fn) {
-        var w = fn.call(this, this.regEDX & this.opMask, this.regEBP & this.opMask);
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDX & this.dataMask, this.regEBP & this.dataMask);
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiBPLo; this.backTrack.btiDH = this.backTrack.btiBPHi;
         }
@@ -2939,8 +2939,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordD6(fn) {
-        var w = fn.call(this, this.regEDX & this.opMask, this.regESI & this.opMask);
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDX & this.dataMask, this.regESI & this.dataMask);
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiSILo; this.backTrack.btiDH = this.backTrack.btiSIHi;
         }
@@ -2952,8 +2952,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordD7(fn) {
-        var w = fn.call(this, this.regEDX & this.opMask, this.regEDI & this.opMask);
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDX & this.dataMask, this.regEDI & this.dataMask);
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiDILo; this.backTrack.btiDH = this.backTrack.btiDIHi;
         }
@@ -2965,8 +2965,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordD8(fn) {
-        var w = fn.call(this, this.regEBX & this.opMask, this.regEAX & this.opMask);
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBX & this.dataMask, this.regEAX & this.dataMask);
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiAL; this.backTrack.btiBH = this.backTrack.btiAH;
         }
@@ -2978,8 +2978,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordD9(fn) {
-        var w = fn.call(this, this.regEBX & this.opMask, this.regECX & this.opMask);
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBX & this.dataMask, this.regECX & this.dataMask);
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiCL; this.backTrack.btiBH = this.backTrack.btiCH;
         }
@@ -2991,8 +2991,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordDA(fn) {
-        var w = fn.call(this, this.regEBX & this.opMask, this.regEDX & this.opMask);
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBX & this.dataMask, this.regEDX & this.dataMask);
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiDL; this.backTrack.btiBH = this.backTrack.btiDH;
         }
@@ -3004,8 +3004,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordDB(fn) {
-        var w = fn.call(this, this.regEBX & this.opMask, this.regEBX & this.opMask);
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBX & this.dataMask, this.regEBX & this.dataMask);
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
     },
     /**
      * opMod32RegWordDC(fn): mod=11 (src:reg)  reg=011 (dst:BX)  r/m=100 (ESP)
@@ -3014,8 +3014,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordDC(fn) {
-        var w = fn.call(this, this.regEBX & this.opMask, this.regESP & this.opMask);
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBX & this.dataMask, this.regESP & this.dataMask);
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = X86.BACKTRACK.SP_LO; this.backTrack.btiBH = X86.BACKTRACK.SP_HI;
         }
@@ -3027,8 +3027,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordDD(fn) {
-        var w = fn.call(this, this.regEBX & this.opMask, this.regEBP & this.opMask);
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBX & this.dataMask, this.regEBP & this.dataMask);
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiBPLo; this.backTrack.btiBH = this.backTrack.btiBPHi;
         }
@@ -3040,8 +3040,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordDE(fn) {
-        var w = fn.call(this, this.regEBX & this.opMask, this.regESI & this.opMask);
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBX & this.dataMask, this.regESI & this.dataMask);
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiSILo; this.backTrack.btiBH = this.backTrack.btiSIHi;
         }
@@ -3053,8 +3053,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordDF(fn) {
-        var w = fn.call(this, this.regEBX & this.opMask, this.regEDI & this.opMask);
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBX & this.dataMask, this.regEDI & this.dataMask);
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiDILo; this.backTrack.btiBH = this.backTrack.btiDIHi;
         }
@@ -3066,8 +3066,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordE0(fn) {
-        var w = fn.call(this, this.regESP & this.opMask, this.regEAX & this.opMask);
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = fn.call(this, this.regESP & this.dataMask, this.regEAX & this.dataMask);
+        this.regESP = (this.regESP & ~this.dataMask) | w;
     },
     /**
      * opMod32RegWordE1(fn): mod=11 (src:reg)  reg=100 (dst:SP)  r/m=001 (ECX)
@@ -3076,8 +3076,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordE1(fn) {
-        var w = fn.call(this, this.regESP & this.opMask, this.regECX & this.opMask);
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = fn.call(this, this.regESP & this.dataMask, this.regECX & this.dataMask);
+        this.regESP = (this.regESP & ~this.dataMask) | w;
     },
     /**
      * opMod32RegWordE2(fn): mod=11 (src:reg)  reg=100 (dst:SP)  r/m=010 (EDX)
@@ -3086,8 +3086,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordE2(fn) {
-        var w = fn.call(this, this.regESP & this.opMask, this.regEDX & this.opMask);
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = fn.call(this, this.regESP & this.dataMask, this.regEDX & this.dataMask);
+        this.regESP = (this.regESP & ~this.dataMask) | w;
     },
     /**
      * opMod32RegWordE3(fn): mod=11 (src:reg)  reg=100 (dst:SP)  r/m=011 (EBX)
@@ -3096,8 +3096,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordE3(fn) {
-        var w = fn.call(this, this.regESP & this.opMask, this.regEBX & this.opMask);
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = fn.call(this, this.regESP & this.dataMask, this.regEBX & this.dataMask);
+        this.regESP = (this.regESP & ~this.dataMask) | w;
     },
     /**
      * opMod32RegWordE4(fn): mod=11 (src:reg)  reg=100 (dst:SP)  r/m=100 (ESP)
@@ -3106,8 +3106,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordE4(fn) {
-        var w = fn.call(this, this.regESP & this.opMask, this.regESP & this.opMask);
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = fn.call(this, this.regESP & this.dataMask, this.regESP & this.dataMask);
+        this.regESP = (this.regESP & ~this.dataMask) | w;
     },
     /**
      * opMod32RegWordE5(fn): mod=11 (src:reg)  reg=100 (dst:SP)  r/m=101 (EBP)
@@ -3116,8 +3116,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordE5(fn) {
-        var w = fn.call(this, this.regESP & this.opMask, this.regEBP & this.opMask);
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = fn.call(this, this.regESP & this.dataMask, this.regEBP & this.dataMask);
+        this.regESP = (this.regESP & ~this.dataMask) | w;
     },
     /**
      * opMod32RegWordE6(fn): mod=11 (src:reg)  reg=100 (dst:SP)  r/m=110 (ESI)
@@ -3126,8 +3126,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordE6(fn) {
-        var w = fn.call(this, this.regESP & this.opMask, this.regESI & this.opMask);
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = fn.call(this, this.regESP & this.dataMask, this.regESI & this.dataMask);
+        this.regESP = (this.regESP & ~this.dataMask) | w;
     },
     /**
      * opMod32RegWordE7(fn): mod=11 (src:reg)  reg=100 (dst:SP)  r/m=111 (EDI)
@@ -3136,8 +3136,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordE7(fn) {
-        var w = fn.call(this, this.regESP & this.opMask, this.regEDI & this.opMask);
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = fn.call(this, this.regESP & this.dataMask, this.regEDI & this.dataMask);
+        this.regESP = (this.regESP & ~this.dataMask) | w;
     },
     /**
      * opMod32RegWordE8(fn): mod=11 (src:reg)  reg=101 (dst:BP)  r/m=000 (EAX)
@@ -3146,8 +3146,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordE8(fn) {
-        var w = fn.call(this, this.regEBP & this.opMask, this.regEAX & this.opMask);
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBP & this.dataMask, this.regEAX & this.dataMask);
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiAL; this.backTrack.btiBPHi = this.backTrack.btiAH;
         }
@@ -3159,8 +3159,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordE9(fn) {
-        var w = fn.call(this, this.regEBP & this.opMask, this.regECX & this.opMask);
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBP & this.dataMask, this.regECX & this.dataMask);
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiCL; this.backTrack.btiBPHi = this.backTrack.btiCH;
         }
@@ -3172,8 +3172,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordEA(fn) {
-        var w = fn.call(this, this.regEBP & this.opMask, this.regEDX & this.opMask);
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBP & this.dataMask, this.regEDX & this.dataMask);
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiDL; this.backTrack.btiBPHi = this.backTrack.btiDH;
         }
@@ -3185,8 +3185,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordEB(fn) {
-        var w = fn.call(this, this.regEBP & this.opMask, this.regEBX & this.opMask);
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBP & this.dataMask, this.regEBX & this.dataMask);
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiBL; this.backTrack.btiBPHi = this.backTrack.btiBH;
         }
@@ -3198,8 +3198,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordEC(fn) {
-        var w = fn.call(this, this.regEBP & this.opMask, this.regESP & this.opMask);
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBP & this.dataMask, this.regESP & this.dataMask);
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = X86.BACKTRACK.SP_LO; this.backTrack.btiBPHi = X86.BACKTRACK.SP_HI;
         }
@@ -3211,8 +3211,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordED(fn) {
-        var w = fn.call(this, this.regEBP & this.opMask, this.regEBP & this.opMask);
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBP & this.dataMask, this.regEBP & this.dataMask);
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
     },
     /**
      * opMod32RegWordEE(fn): mod=11 (src:reg)  reg=101 (dst:BP)  r/m=110 (ESI)
@@ -3221,8 +3221,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordEE(fn) {
-        var w = fn.call(this, this.regEBP & this.opMask, this.regESI & this.opMask);
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBP & this.dataMask, this.regESI & this.dataMask);
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiSILo; this.backTrack.btiBPHi = this.backTrack.btiSIHi;
         }
@@ -3234,8 +3234,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordEF(fn) {
-        var w = fn.call(this, this.regEBP & this.opMask, this.regEDI & this.opMask);
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = fn.call(this, this.regEBP & this.dataMask, this.regEDI & this.dataMask);
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiDILo; this.backTrack.btiBPHi = this.backTrack.btiDIHi;
         }
@@ -3247,8 +3247,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordF0(fn) {
-        var w = fn.call(this, this.regESI & this.opMask, this.regEAX & this.opMask);
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = fn.call(this, this.regESI & this.dataMask, this.regEAX & this.dataMask);
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiAL; this.backTrack.btiSIHi = this.backTrack.btiAH;
         }
@@ -3260,8 +3260,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordF1(fn) {
-        var w = fn.call(this, this.regESI & this.opMask, this.regECX & this.opMask);
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = fn.call(this, this.regESI & this.dataMask, this.regECX & this.dataMask);
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiCL; this.backTrack.btiSIHi = this.backTrack.btiCH;
         }
@@ -3273,8 +3273,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordF2(fn) {
-        var w = fn.call(this, this.regESI & this.opMask, this.regEDX & this.opMask);
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = fn.call(this, this.regESI & this.dataMask, this.regEDX & this.dataMask);
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiDL; this.backTrack.btiSIHi = this.backTrack.btiDH;
         }
@@ -3286,8 +3286,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordF3(fn) {
-        var w = fn.call(this, this.regESI & this.opMask, this.regEBX & this.opMask);
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = fn.call(this, this.regESI & this.dataMask, this.regEBX & this.dataMask);
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiBL; this.backTrack.btiSIHi = this.backTrack.btiBH;
         }
@@ -3299,8 +3299,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordF4(fn) {
-        var w = fn.call(this, this.regESI & this.opMask, this.regESP & this.opMask);
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = fn.call(this, this.regESI & this.dataMask, this.regESP & this.dataMask);
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = X86.BACKTRACK.SP_LO; this.backTrack.btiSIHi = X86.BACKTRACK.SP_HI;
         }
@@ -3312,8 +3312,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordF5(fn) {
-        var w = fn.call(this, this.regESI & this.opMask, this.regEBP & this.opMask);
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = fn.call(this, this.regESI & this.dataMask, this.regEBP & this.dataMask);
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiBPLo; this.backTrack.btiSIHi = this.backTrack.btiBPHi;
         }
@@ -3325,8 +3325,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordF6(fn) {
-        var w = fn.call(this, this.regESI & this.opMask, this.regESI & this.opMask);
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = fn.call(this, this.regESI & this.dataMask, this.regESI & this.dataMask);
+        this.regESI = (this.regESI & ~this.dataMask) | w;
     },
     /**
      * opMod32RegWordF7(fn): mod=11 (src:reg)  reg=110 (dst:SI)  r/m=111 (EDI)
@@ -3335,8 +3335,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordF7(fn) {
-        var w = fn.call(this, this.regESI & this.opMask, this.regEDI & this.opMask);
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = fn.call(this, this.regESI & this.dataMask, this.regEDI & this.dataMask);
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiDILo; this.backTrack.btiSIHi = this.backTrack.btiDIHi;
         }
@@ -3348,8 +3348,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordF8(fn) {
-        var w = fn.call(this, this.regEDI & this.opMask, this.regEAX & this.opMask);
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDI & this.dataMask, this.regEAX & this.dataMask);
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiAL; this.backTrack.btiDIHi = this.backTrack.btiAH;
         }
@@ -3361,8 +3361,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordF9(fn) {
-        var w = fn.call(this, this.regEDI & this.opMask, this.regECX & this.opMask);
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDI & this.dataMask, this.regECX & this.dataMask);
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiCL; this.backTrack.btiDIHi = this.backTrack.btiCH;
         }
@@ -3374,8 +3374,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordFA(fn) {
-        var w = fn.call(this, this.regEDI & this.opMask, this.regEDX & this.opMask);
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDI & this.dataMask, this.regEDX & this.dataMask);
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiDL; this.backTrack.btiDIHi = this.backTrack.btiDH;
         }
@@ -3387,8 +3387,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordFB(fn) {
-        var w = fn.call(this, this.regEDI & this.opMask, this.regEBX & this.opMask);
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDI & this.dataMask, this.regEBX & this.dataMask);
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiBL; this.backTrack.btiDIHi = this.backTrack.btiBH;
         }
@@ -3400,8 +3400,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordFC(fn) {
-        var w = fn.call(this, this.regEDI & this.opMask, this.regESP & this.opMask);
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDI & this.dataMask, this.regESP & this.dataMask);
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = X86.BACKTRACK.SP_LO; this.backTrack.btiDIHi = X86.BACKTRACK.SP_HI;
         }
@@ -3413,8 +3413,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordFD(fn) {
-        var w = fn.call(this, this.regEDI & this.opMask, this.regEBP & this.opMask);
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDI & this.dataMask, this.regEBP & this.dataMask);
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiBPLo; this.backTrack.btiDIHi = this.backTrack.btiBPHi;
         }
@@ -3426,8 +3426,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordFE(fn) {
-        var w = fn.call(this, this.regEDI & this.opMask, this.regESI & this.opMask);
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDI & this.dataMask, this.regESI & this.dataMask);
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiSILo; this.backTrack.btiDIHi = this.backTrack.btiSIHi;
         }
@@ -3439,8 +3439,8 @@ X86ModW32.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32RegWordFF(fn) {
-        var w = fn.call(this, this.regEDI & this.opMask, this.regEDI & this.opMask);
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = fn.call(this, this.regEDI & this.dataMask, this.regEDI & this.dataMask);
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
     }
 ];
 
@@ -3452,7 +3452,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord00(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEAX), this.regEAX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEAX), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -3466,7 +3466,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord01(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regECX), this.regEAX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regECX), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -3480,7 +3480,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord02(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDX), this.regEAX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDX), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -3494,7 +3494,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord03(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX), this.regEAX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEBX), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -3508,7 +3508,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord04(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(0)), this.regEAX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(0)), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -3522,7 +3522,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord05(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getIPWord()), this.regEAX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.getIPWord()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -3536,7 +3536,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord06(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI), this.regEAX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regESI), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -3550,7 +3550,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord07(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI), this.regEAX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDI), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -3564,7 +3564,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord08(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEAX), this.regECX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEAX), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -3578,7 +3578,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord09(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regECX), this.regECX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regECX), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -3592,7 +3592,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord0A(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDX), this.regECX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDX), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -3606,7 +3606,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord0B(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX), this.regECX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEBX), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -3620,7 +3620,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord0C(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(0)), this.regECX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(0)), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -3634,7 +3634,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord0D(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getIPWord()), this.regECX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.getIPWord()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -3648,7 +3648,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord0E(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI), this.regECX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regESI), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -3662,7 +3662,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord0F(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI), this.regECX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDI), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -3676,7 +3676,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord10(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEAX), this.regEDX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEAX), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -3690,7 +3690,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord11(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regECX), this.regEDX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regECX), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -3704,7 +3704,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord12(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDX), this.regEDX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDX), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -3718,7 +3718,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord13(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX), this.regEDX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEBX), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -3732,7 +3732,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord14(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(0)), this.regEDX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(0)), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -3746,7 +3746,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord15(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getIPWord()), this.regEDX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.getIPWord()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -3760,7 +3760,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord16(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI), this.regEDX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regESI), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -3774,7 +3774,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord17(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI), this.regEDX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDI), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -3788,7 +3788,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord18(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEAX), this.regEBX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEAX), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -3802,7 +3802,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord19(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regECX), this.regEBX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regECX), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -3816,7 +3816,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord1A(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDX), this.regEBX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDX), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -3830,7 +3830,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord1B(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX), this.regEBX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEBX), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -3844,7 +3844,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord1C(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(0)), this.regEBX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(0)), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -3858,7 +3858,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord1D(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getIPWord()), this.regEBX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.getIPWord()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -3872,7 +3872,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord1E(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI), this.regEBX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regESI), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -3886,7 +3886,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord1F(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI), this.regEBX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDI), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -3900,7 +3900,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord20(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEAX), this.regESP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEAX), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -3914,7 +3914,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord21(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regECX), this.regESP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regECX), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -3928,7 +3928,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord22(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDX), this.regESP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDX), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -3942,7 +3942,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord23(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX), this.regESP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEBX), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -3956,7 +3956,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord24(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(0)), this.regESP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(0)), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -3970,7 +3970,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord25(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getIPWord()), this.regESP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.getIPWord()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -3984,7 +3984,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord26(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI), this.regESP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regESI), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -3998,7 +3998,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord27(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI), this.regESP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDI), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -4012,7 +4012,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord28(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEAX), this.regEBP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEAX), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -4026,7 +4026,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord29(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regECX), this.regEBP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regECX), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -4040,7 +4040,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord2A(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDX), this.regEBP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDX), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -4054,7 +4054,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord2B(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX), this.regEBP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEBX), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -4068,7 +4068,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord2C(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(0)), this.regEBP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(0)), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -4082,7 +4082,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord2D(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getIPWord()), this.regEBP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.getIPWord()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -4096,7 +4096,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord2E(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI), this.regEBP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regESI), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -4110,7 +4110,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord2F(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI), this.regEBP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDI), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -4124,7 +4124,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord30(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEAX), this.regESI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEAX), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -4138,7 +4138,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord31(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regECX), this.regESI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regECX), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -4152,7 +4152,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord32(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDX), this.regESI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDX), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -4166,7 +4166,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord33(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX), this.regESI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEBX), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -4180,7 +4180,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord34(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(0)), this.regESI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(0)), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -4194,7 +4194,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord35(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getIPWord()), this.regESI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.getIPWord()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -4208,7 +4208,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord36(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI), this.regESI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regESI), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -4222,7 +4222,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord37(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI), this.regESI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDI), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -4236,7 +4236,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord38(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEAX), this.regEDI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEAX), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -4250,7 +4250,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord39(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regECX), this.regEDI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regECX), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -4264,7 +4264,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord3A(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDX), this.regEDI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDX), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -4278,7 +4278,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord3B(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX), this.regEDI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEBX), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -4292,7 +4292,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord3C(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(0)), this.regEDI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(0)), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -4306,7 +4306,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord3D(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getIPWord()), this.regEDI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.getIPWord()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -4320,7 +4320,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord3E(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI), this.regEDI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regESI), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -4334,7 +4334,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord3F(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI), this.regEDI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDI), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -4348,7 +4348,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord40(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPDisp()), this.regEAX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPDisp()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -4362,7 +4362,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord41(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPDisp()), this.regEAX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPDisp()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -4376,7 +4376,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord42(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPDisp()), this.regEAX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPDisp()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -4390,7 +4390,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord43(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.regEAX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -4404,7 +4404,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord44(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(1) + this.getIPDisp()), this.regEAX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(1) + this.getIPDisp()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -4418,7 +4418,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord45(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.regEAX & this.opMask);
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -4432,7 +4432,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord46(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.regEAX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -4446,7 +4446,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord47(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.regEAX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -4460,7 +4460,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord48(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPDisp()), this.regECX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPDisp()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -4474,7 +4474,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord49(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPDisp()), this.regECX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPDisp()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -4488,7 +4488,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord4A(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPDisp()), this.regECX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPDisp()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -4502,7 +4502,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord4B(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.regECX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -4516,7 +4516,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord4C(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(1) + this.getIPDisp()), this.regECX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(1) + this.getIPDisp()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -4530,7 +4530,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord4D(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.regECX & this.opMask);
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -4544,7 +4544,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord4E(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.regECX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -4558,7 +4558,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord4F(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.regECX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -4572,7 +4572,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord50(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPDisp()), this.regEDX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPDisp()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -4586,7 +4586,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord51(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPDisp()), this.regEDX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPDisp()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -4600,7 +4600,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord52(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPDisp()), this.regEDX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPDisp()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -4614,7 +4614,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord53(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.regEDX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -4628,7 +4628,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord54(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(1) + this.getIPDisp()), this.regEDX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(1) + this.getIPDisp()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -4642,7 +4642,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord55(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.regEDX & this.opMask);
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -4656,7 +4656,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord56(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.regEDX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -4670,7 +4670,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord57(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.regEDX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -4684,7 +4684,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord58(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPDisp()), this.regEBX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPDisp()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -4698,7 +4698,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord59(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPDisp()), this.regEBX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPDisp()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -4712,7 +4712,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord5A(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPDisp()), this.regEBX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPDisp()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -4726,7 +4726,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord5B(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.regEBX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -4740,7 +4740,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord5C(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(1) + this.getIPDisp()), this.regEBX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(1) + this.getIPDisp()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -4754,7 +4754,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord5D(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.regEBX & this.opMask);
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -4768,7 +4768,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord5E(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.regEBX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -4782,7 +4782,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord5F(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.regEBX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -4796,7 +4796,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord60(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPDisp()), this.regESP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPDisp()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -4810,7 +4810,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord61(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPDisp()), this.regESP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPDisp()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -4824,7 +4824,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord62(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPDisp()), this.regESP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPDisp()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -4838,7 +4838,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord63(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.regESP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -4852,7 +4852,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord64(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(1) + this.getIPDisp()), this.regESP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(1) + this.getIPDisp()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -4866,7 +4866,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord65(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.regESP & this.opMask);
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -4880,7 +4880,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord66(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.regESP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -4894,7 +4894,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord67(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.regESP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -4908,7 +4908,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord68(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPDisp()), this.regEBP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPDisp()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -4922,7 +4922,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord69(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPDisp()), this.regEBP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPDisp()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -4936,7 +4936,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord6A(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPDisp()), this.regEBP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPDisp()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -4950,7 +4950,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord6B(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.regEBP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -4964,7 +4964,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord6C(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(1) + this.getIPDisp()), this.regEBP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(1) + this.getIPDisp()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -4978,7 +4978,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord6D(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.regEBP & this.opMask);
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -4992,7 +4992,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord6E(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.regEBP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -5006,7 +5006,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord6F(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.regEBP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -5020,7 +5020,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord70(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPDisp()), this.regESI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPDisp()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -5034,7 +5034,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord71(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPDisp()), this.regESI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPDisp()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -5048,7 +5048,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord72(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPDisp()), this.regESI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPDisp()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -5062,7 +5062,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord73(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.regESI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -5076,7 +5076,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord74(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(1) + this.getIPDisp()), this.regESI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(1) + this.getIPDisp()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -5090,7 +5090,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord75(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.regESI & this.opMask);
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -5104,7 +5104,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord76(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.regESI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -5118,7 +5118,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord77(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.regESI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -5132,7 +5132,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord78(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPDisp()), this.regEDI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPDisp()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -5146,7 +5146,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord79(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPDisp()), this.regEDI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPDisp()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -5160,7 +5160,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord7A(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPDisp()), this.regEDI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPDisp()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -5174,7 +5174,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord7B(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.regEDI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -5188,7 +5188,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord7C(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(1) + this.getIPDisp()), this.regEDI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(1) + this.getIPDisp()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -5202,7 +5202,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord7D(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.regEDI & this.opMask);
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -5216,7 +5216,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord7E(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.regEDI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -5230,7 +5230,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord7F(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.regEDI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -5244,7 +5244,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord80(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPWord()), this.regEAX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPWord()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -5258,7 +5258,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord81(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPWord()), this.regEAX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPWord()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -5272,7 +5272,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord82(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPWord()), this.regEAX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPWord()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -5286,7 +5286,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord83(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPWord()), this.regEAX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPWord()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -5300,7 +5300,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord84(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(2) + this.getIPWord()), this.regEAX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(2) + this.getIPWord()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -5314,7 +5314,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord85(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), this.regEAX & this.opMask);
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -5328,7 +5328,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord86(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPWord()), this.regEAX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPWord()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -5342,7 +5342,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord87(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPWord()), this.regEAX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPWord()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -5356,7 +5356,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord88(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPWord()), this.regECX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPWord()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -5370,7 +5370,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord89(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPWord()), this.regECX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPWord()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -5384,7 +5384,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord8A(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPWord()), this.regECX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPWord()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -5398,7 +5398,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord8B(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPWord()), this.regECX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPWord()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -5412,7 +5412,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord8C(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(2) + this.getIPWord()), this.regECX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(2) + this.getIPWord()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -5426,7 +5426,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord8D(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), this.regECX & this.opMask);
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -5440,7 +5440,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord8E(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPWord()), this.regECX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPWord()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -5454,7 +5454,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord8F(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPWord()), this.regECX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPWord()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -5468,7 +5468,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord90(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPWord()), this.regEDX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPWord()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -5482,7 +5482,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord91(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPWord()), this.regEDX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPWord()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -5496,7 +5496,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord92(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPWord()), this.regEDX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPWord()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -5510,7 +5510,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord93(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPWord()), this.regEDX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPWord()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -5524,7 +5524,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord94(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(2) + this.getIPWord()), this.regEDX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(2) + this.getIPWord()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -5538,7 +5538,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord95(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), this.regEDX & this.opMask);
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -5552,7 +5552,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord96(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPWord()), this.regEDX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPWord()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -5566,7 +5566,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord97(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPWord()), this.regEDX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPWord()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -5580,7 +5580,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord98(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPWord()), this.regEBX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPWord()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -5594,7 +5594,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord99(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPWord()), this.regEBX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPWord()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -5608,7 +5608,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord9A(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPWord()), this.regEBX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPWord()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -5622,7 +5622,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord9B(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPWord()), this.regEBX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPWord()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -5636,7 +5636,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord9C(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(2) + this.getIPWord()), this.regEBX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(2) + this.getIPWord()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -5650,7 +5650,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord9D(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), this.regEBX & this.opMask);
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -5664,7 +5664,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord9E(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPWord()), this.regEBX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPWord()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -5678,7 +5678,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWord9F(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPWord()), this.regEBX & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPWord()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -5692,7 +5692,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWordA0(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPWord()), this.regESP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPWord()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -5706,7 +5706,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWordA1(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPWord()), this.regESP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPWord()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -5720,7 +5720,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWordA2(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPWord()), this.regESP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPWord()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -5734,7 +5734,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWordA3(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPWord()), this.regESP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPWord()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -5748,7 +5748,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWordA4(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(2) + this.getIPWord()), this.regESP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(2) + this.getIPWord()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -5762,7 +5762,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWordA5(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), this.regESP & this.opMask);
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -5776,7 +5776,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWordA6(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPWord()), this.regESP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPWord()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -5790,7 +5790,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWordA7(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPWord()), this.regESP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPWord()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -5804,7 +5804,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWordA8(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPWord()), this.regEBP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPWord()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -5818,7 +5818,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWordA9(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPWord()), this.regEBP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPWord()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -5832,7 +5832,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWordAA(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPWord()), this.regEBP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPWord()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -5846,7 +5846,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWordAB(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPWord()), this.regEBP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPWord()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -5860,7 +5860,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWordAC(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(2) + this.getIPWord()), this.regEBP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(2) + this.getIPWord()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -5874,7 +5874,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWordAD(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), this.regEBP & this.opMask);
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -5888,7 +5888,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWordAE(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPWord()), this.regEBP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPWord()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -5902,7 +5902,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWordAF(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPWord()), this.regEBP & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPWord()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -5916,7 +5916,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWordB0(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPWord()), this.regESI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPWord()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -5930,7 +5930,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWordB1(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPWord()), this.regESI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPWord()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -5944,7 +5944,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWordB2(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPWord()), this.regESI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPWord()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -5958,7 +5958,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWordB3(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPWord()), this.regESI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPWord()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -5972,7 +5972,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWordB4(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(2) + this.getIPWord()), this.regESI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(2) + this.getIPWord()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -5986,7 +5986,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWordB5(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), this.regESI & this.opMask);
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -6000,7 +6000,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWordB6(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPWord()), this.regESI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPWord()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -6014,7 +6014,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWordB7(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPWord()), this.regESI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPWord()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -6028,7 +6028,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWordB8(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPWord()), this.regEDI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEAX + this.getIPWord()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -6042,7 +6042,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWordB9(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPWord()), this.regEDI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regECX + this.getIPWord()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -6056,7 +6056,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWordBA(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPWord()), this.regEDI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDX + this.getIPWord()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -6070,7 +6070,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWordBB(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPWord()), this.regEDI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPWord()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -6084,7 +6084,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWordBC(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(2) + this.getIPWord()), this.regEDI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.getSIBAddr(2) + this.getIPWord()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -6098,7 +6098,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWordBD(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), this.regEDI & this.opMask);
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -6112,7 +6112,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWordBE(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPWord()), this.regEDI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPWord()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -6126,7 +6126,7 @@ X86ModW32.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opMod32MemWordBF(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPWord()), this.regEDI & this.opMask);
+        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPWord()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -8464,8 +8464,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordC0(afnGrp, fnSrc) {
-        var w = afnGrp[0].call(this, this.regEAX & this.opMask, fnSrc.call(this));
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = afnGrp[0].call(this, this.regEAX & this.dataMask, fnSrc.call(this));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
@@ -8478,8 +8478,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordC1(afnGrp, fnSrc) {
-        var w = afnGrp[0].call(this, this.regECX & this.opMask, fnSrc.call(this));
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = afnGrp[0].call(this, this.regECX & this.dataMask, fnSrc.call(this));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
@@ -8492,8 +8492,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordC2(afnGrp, fnSrc) {
-        var w = afnGrp[0].call(this, this.regEDX & this.opMask, fnSrc.call(this));
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = afnGrp[0].call(this, this.regEDX & this.dataMask, fnSrc.call(this));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
@@ -8506,8 +8506,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordC3(afnGrp, fnSrc) {
-        var w = afnGrp[0].call(this, this.regEBX & this.opMask, fnSrc.call(this));
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = afnGrp[0].call(this, this.regEBX & this.dataMask, fnSrc.call(this));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
@@ -8520,8 +8520,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordC4(afnGrp, fnSrc) {
-        var w = afnGrp[0].call(this, this.regESP & this.opMask, fnSrc.call(this));
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = afnGrp[0].call(this, this.regESP & this.dataMask, fnSrc.call(this));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
     },
     /**
      * opMod32GrpWordC5(afnGrp, fnSrc): mod=11 (dst:reg)  reg=000 (afnGrp[0])  r/m=101 (EBP)
@@ -8531,8 +8531,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordC5(afnGrp, fnSrc) {
-        var w = afnGrp[0].call(this, this.regEBP & this.opMask, fnSrc.call(this));
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = afnGrp[0].call(this, this.regEBP & this.dataMask, fnSrc.call(this));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
@@ -8545,8 +8545,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordC6(afnGrp, fnSrc) {
-        var w = afnGrp[0].call(this, this.regESI & this.opMask, fnSrc.call(this));
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = afnGrp[0].call(this, this.regESI & this.dataMask, fnSrc.call(this));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
@@ -8559,8 +8559,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordC7(afnGrp, fnSrc) {
-        var w = afnGrp[0].call(this, this.regEDI & this.opMask, fnSrc.call(this));
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = afnGrp[0].call(this, this.regEDI & this.dataMask, fnSrc.call(this));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
@@ -8573,8 +8573,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordC8(afnGrp, fnSrc) {
-        var w = afnGrp[1].call(this, this.regEAX & this.opMask, fnSrc.call(this));
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = afnGrp[1].call(this, this.regEAX & this.dataMask, fnSrc.call(this));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
@@ -8587,8 +8587,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordC9(afnGrp, fnSrc) {
-        var w = afnGrp[1].call(this, this.regECX & this.opMask, fnSrc.call(this));
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = afnGrp[1].call(this, this.regECX & this.dataMask, fnSrc.call(this));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
@@ -8601,8 +8601,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordCA(afnGrp, fnSrc) {
-        var w = afnGrp[1].call(this, this.regEDX & this.opMask, fnSrc.call(this));
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = afnGrp[1].call(this, this.regEDX & this.dataMask, fnSrc.call(this));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
@@ -8615,8 +8615,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordCB(afnGrp, fnSrc) {
-        var w = afnGrp[1].call(this, this.regEBX & this.opMask, fnSrc.call(this));
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = afnGrp[1].call(this, this.regEBX & this.dataMask, fnSrc.call(this));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
@@ -8629,8 +8629,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordCC(afnGrp, fnSrc) {
-        var w = afnGrp[1].call(this, this.regESP & this.opMask, fnSrc.call(this));
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = afnGrp[1].call(this, this.regESP & this.dataMask, fnSrc.call(this));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
     },
     /**
      * opMod32GrpWordCD(afnGrp, fnSrc): mod=11 (dst:reg)  reg=001 (afnGrp[1])  r/m=101 (EBP)
@@ -8640,8 +8640,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordCD(afnGrp, fnSrc) {
-        var w = afnGrp[1].call(this, this.regEBP & this.opMask, fnSrc.call(this));
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = afnGrp[1].call(this, this.regEBP & this.dataMask, fnSrc.call(this));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
@@ -8654,8 +8654,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordCE(afnGrp, fnSrc) {
-        var w = afnGrp[1].call(this, this.regESI & this.opMask, fnSrc.call(this));
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = afnGrp[1].call(this, this.regESI & this.dataMask, fnSrc.call(this));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
@@ -8668,8 +8668,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordCF(afnGrp, fnSrc) {
-        var w = afnGrp[1].call(this, this.regEDI & this.opMask, fnSrc.call(this));
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = afnGrp[1].call(this, this.regEDI & this.dataMask, fnSrc.call(this));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
@@ -8682,8 +8682,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordD0(afnGrp, fnSrc) {
-        var w = afnGrp[2].call(this, this.regEAX & this.opMask, fnSrc.call(this));
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = afnGrp[2].call(this, this.regEAX & this.dataMask, fnSrc.call(this));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
@@ -8696,8 +8696,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordD1(afnGrp, fnSrc) {
-        var w = afnGrp[2].call(this, this.regECX & this.opMask, fnSrc.call(this));
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = afnGrp[2].call(this, this.regECX & this.dataMask, fnSrc.call(this));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
@@ -8710,8 +8710,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordD2(afnGrp, fnSrc) {
-        var w = afnGrp[2].call(this, this.regEDX & this.opMask, fnSrc.call(this));
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = afnGrp[2].call(this, this.regEDX & this.dataMask, fnSrc.call(this));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
@@ -8724,8 +8724,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordD3(afnGrp, fnSrc) {
-        var w = afnGrp[2].call(this, this.regEBX & this.opMask, fnSrc.call(this));
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = afnGrp[2].call(this, this.regEBX & this.dataMask, fnSrc.call(this));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
@@ -8738,8 +8738,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordD4(afnGrp, fnSrc) {
-        var w = afnGrp[2].call(this, this.regESP & this.opMask, fnSrc.call(this));
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = afnGrp[2].call(this, this.regESP & this.dataMask, fnSrc.call(this));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
     },
     /**
      * opMod32GrpWordD5(afnGrp, fnSrc): mod=11 (dst:reg)  reg=010 (afnGrp[2])  r/m=101 (EBP)
@@ -8749,8 +8749,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordD5(afnGrp, fnSrc) {
-        var w = afnGrp[2].call(this, this.regEBP & this.opMask, fnSrc.call(this));
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = afnGrp[2].call(this, this.regEBP & this.dataMask, fnSrc.call(this));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
@@ -8763,8 +8763,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordD6(afnGrp, fnSrc) {
-        var w = afnGrp[2].call(this, this.regESI & this.opMask, fnSrc.call(this));
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = afnGrp[2].call(this, this.regESI & this.dataMask, fnSrc.call(this));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
@@ -8777,8 +8777,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordD7(afnGrp, fnSrc) {
-        var w = afnGrp[2].call(this, this.regEDI & this.opMask, fnSrc.call(this));
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = afnGrp[2].call(this, this.regEDI & this.dataMask, fnSrc.call(this));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
@@ -8791,8 +8791,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordD8(afnGrp, fnSrc) {
-        var w = afnGrp[3].call(this, this.regEAX & this.opMask, fnSrc.call(this));
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = afnGrp[3].call(this, this.regEAX & this.dataMask, fnSrc.call(this));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
@@ -8805,8 +8805,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordD9(afnGrp, fnSrc) {
-        var w = afnGrp[3].call(this, this.regECX & this.opMask, fnSrc.call(this));
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = afnGrp[3].call(this, this.regECX & this.dataMask, fnSrc.call(this));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
@@ -8819,8 +8819,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordDA(afnGrp, fnSrc) {
-        var w = afnGrp[3].call(this, this.regEDX & this.opMask, fnSrc.call(this));
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = afnGrp[3].call(this, this.regEDX & this.dataMask, fnSrc.call(this));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
@@ -8833,8 +8833,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordDB(afnGrp, fnSrc) {
-        var w = afnGrp[3].call(this, this.regEBX & this.opMask, fnSrc.call(this));
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = afnGrp[3].call(this, this.regEBX & this.dataMask, fnSrc.call(this));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
@@ -8847,8 +8847,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordDC(afnGrp, fnSrc) {
-        var w = afnGrp[3].call(this, this.regESP & this.opMask, fnSrc.call(this));
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = afnGrp[3].call(this, this.regESP & this.dataMask, fnSrc.call(this));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
     },
     /**
      * opMod32GrpWordDD(afnGrp, fnSrc): mod=11 (dst:reg)  reg=011 (afnGrp[3])  r/m=101 (EBP)
@@ -8858,8 +8858,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordDD(afnGrp, fnSrc) {
-        var w = afnGrp[3].call(this, this.regEBP & this.opMask, fnSrc.call(this));
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = afnGrp[3].call(this, this.regEBP & this.dataMask, fnSrc.call(this));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
@@ -8872,8 +8872,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordDE(afnGrp, fnSrc) {
-        var w = afnGrp[3].call(this, this.regESI & this.opMask, fnSrc.call(this));
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = afnGrp[3].call(this, this.regESI & this.dataMask, fnSrc.call(this));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
@@ -8886,8 +8886,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordDF(afnGrp, fnSrc) {
-        var w = afnGrp[3].call(this, this.regEDI & this.opMask, fnSrc.call(this));
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = afnGrp[3].call(this, this.regEDI & this.dataMask, fnSrc.call(this));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
@@ -8900,8 +8900,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordE0(afnGrp, fnSrc) {
-        var w = afnGrp[4].call(this, this.regEAX & this.opMask, fnSrc.call(this));
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = afnGrp[4].call(this, this.regEAX & this.dataMask, fnSrc.call(this));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
@@ -8914,8 +8914,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordE1(afnGrp, fnSrc) {
-        var w = afnGrp[4].call(this, this.regECX & this.opMask, fnSrc.call(this));
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = afnGrp[4].call(this, this.regECX & this.dataMask, fnSrc.call(this));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
@@ -8928,8 +8928,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordE2(afnGrp, fnSrc) {
-        var w = afnGrp[4].call(this, this.regEDX & this.opMask, fnSrc.call(this));
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = afnGrp[4].call(this, this.regEDX & this.dataMask, fnSrc.call(this));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
@@ -8942,8 +8942,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordE3(afnGrp, fnSrc) {
-        var w = afnGrp[4].call(this, this.regEBX & this.opMask, fnSrc.call(this));
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = afnGrp[4].call(this, this.regEBX & this.dataMask, fnSrc.call(this));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
@@ -8956,8 +8956,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordE4(afnGrp, fnSrc) {
-        var w = afnGrp[4].call(this, this.regESP & this.opMask, fnSrc.call(this));
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = afnGrp[4].call(this, this.regESP & this.dataMask, fnSrc.call(this));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
     },
     /**
      * opMod32GrpWordE5(afnGrp, fnSrc): mod=11 (dst:reg)  reg=100 (afnGrp[4])  r/m=101 (EBP)
@@ -8967,8 +8967,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordE5(afnGrp, fnSrc) {
-        var w = afnGrp[4].call(this, this.regEBP & this.opMask, fnSrc.call(this));
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = afnGrp[4].call(this, this.regEBP & this.dataMask, fnSrc.call(this));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
@@ -8981,8 +8981,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordE6(afnGrp, fnSrc) {
-        var w = afnGrp[4].call(this, this.regESI & this.opMask, fnSrc.call(this));
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = afnGrp[4].call(this, this.regESI & this.dataMask, fnSrc.call(this));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
@@ -8995,8 +8995,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordE7(afnGrp, fnSrc) {
-        var w = afnGrp[4].call(this, this.regEDI & this.opMask, fnSrc.call(this));
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = afnGrp[4].call(this, this.regEDI & this.dataMask, fnSrc.call(this));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
@@ -9009,8 +9009,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordE8(afnGrp, fnSrc) {
-        var w = afnGrp[5].call(this, this.regEAX & this.opMask, fnSrc.call(this));
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = afnGrp[5].call(this, this.regEAX & this.dataMask, fnSrc.call(this));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
@@ -9023,8 +9023,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordE9(afnGrp, fnSrc) {
-        var w = afnGrp[5].call(this, this.regECX & this.opMask, fnSrc.call(this));
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = afnGrp[5].call(this, this.regECX & this.dataMask, fnSrc.call(this));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
@@ -9037,8 +9037,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordEA(afnGrp, fnSrc) {
-        var w = afnGrp[5].call(this, this.regEDX & this.opMask, fnSrc.call(this));
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = afnGrp[5].call(this, this.regEDX & this.dataMask, fnSrc.call(this));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
@@ -9051,8 +9051,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordEB(afnGrp, fnSrc) {
-        var w = afnGrp[5].call(this, this.regEBX & this.opMask, fnSrc.call(this));
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = afnGrp[5].call(this, this.regEBX & this.dataMask, fnSrc.call(this));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
@@ -9065,8 +9065,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordEC(afnGrp, fnSrc) {
-        var w = afnGrp[5].call(this, this.regESP & this.opMask, fnSrc.call(this));
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = afnGrp[5].call(this, this.regESP & this.dataMask, fnSrc.call(this));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
     },
     /**
      * opMod32GrpWordED(afnGrp, fnSrc): mod=11 (dst:reg)  reg=101 (afnGrp[5])  r/m=101 (EBP)
@@ -9076,8 +9076,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordED(afnGrp, fnSrc) {
-        var w = afnGrp[5].call(this, this.regEBP & this.opMask, fnSrc.call(this));
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = afnGrp[5].call(this, this.regEBP & this.dataMask, fnSrc.call(this));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
@@ -9090,8 +9090,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordEE(afnGrp, fnSrc) {
-        var w = afnGrp[5].call(this, this.regESI & this.opMask, fnSrc.call(this));
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = afnGrp[5].call(this, this.regESI & this.dataMask, fnSrc.call(this));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
@@ -9104,8 +9104,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordEF(afnGrp, fnSrc) {
-        var w = afnGrp[5].call(this, this.regEDI & this.opMask, fnSrc.call(this));
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = afnGrp[5].call(this, this.regEDI & this.dataMask, fnSrc.call(this));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
@@ -9118,8 +9118,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordF0(afnGrp, fnSrc) {
-        var w = afnGrp[6].call(this, this.regEAX & this.opMask, fnSrc.call(this));
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = afnGrp[6].call(this, this.regEAX & this.dataMask, fnSrc.call(this));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
@@ -9132,8 +9132,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordF1(afnGrp, fnSrc) {
-        var w = afnGrp[6].call(this, this.regECX & this.opMask, fnSrc.call(this));
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = afnGrp[6].call(this, this.regECX & this.dataMask, fnSrc.call(this));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
@@ -9146,8 +9146,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordF2(afnGrp, fnSrc) {
-        var w = afnGrp[6].call(this, this.regEDX & this.opMask, fnSrc.call(this));
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = afnGrp[6].call(this, this.regEDX & this.dataMask, fnSrc.call(this));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
@@ -9160,8 +9160,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordF3(afnGrp, fnSrc) {
-        var w = afnGrp[6].call(this, this.regEBX & this.opMask, fnSrc.call(this));
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = afnGrp[6].call(this, this.regEBX & this.dataMask, fnSrc.call(this));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
@@ -9174,8 +9174,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordF4(afnGrp, fnSrc) {
-        var w = afnGrp[6].call(this, this.regESP & this.opMask, fnSrc.call(this));
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = afnGrp[6].call(this, this.regESP & this.dataMask, fnSrc.call(this));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
     },
     /**
      * opMod32GrpWordF5(afnGrp, fnSrc): mod=11 (dst:reg)  reg=110 (afnGrp[6])  r/m=101 (EBP)
@@ -9185,8 +9185,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordF5(afnGrp, fnSrc) {
-        var w = afnGrp[6].call(this, this.regEBP & this.opMask, fnSrc.call(this));
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = afnGrp[6].call(this, this.regEBP & this.dataMask, fnSrc.call(this));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
@@ -9199,8 +9199,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordF6(afnGrp, fnSrc) {
-        var w = afnGrp[6].call(this, this.regESI & this.opMask, fnSrc.call(this));
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = afnGrp[6].call(this, this.regESI & this.dataMask, fnSrc.call(this));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
@@ -9213,8 +9213,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordF7(afnGrp, fnSrc) {
-        var w = afnGrp[6].call(this, this.regEDI & this.opMask, fnSrc.call(this));
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = afnGrp[6].call(this, this.regEDI & this.dataMask, fnSrc.call(this));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
@@ -9227,8 +9227,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordF8(afnGrp, fnSrc) {
-        var w = afnGrp[7].call(this, this.regEAX & this.opMask, fnSrc.call(this));
-        this.regEAX = (this.regEAX & ~this.opMask) | w;
+        var w = afnGrp[7].call(this, this.regEAX & this.dataMask, fnSrc.call(this));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
@@ -9241,8 +9241,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordF9(afnGrp, fnSrc) {
-        var w = afnGrp[7].call(this, this.regECX & this.opMask, fnSrc.call(this));
-        this.regECX = (this.regECX & ~this.opMask) | w;
+        var w = afnGrp[7].call(this, this.regECX & this.dataMask, fnSrc.call(this));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
@@ -9255,8 +9255,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordFA(afnGrp, fnSrc) {
-        var w = afnGrp[7].call(this, this.regEDX & this.opMask, fnSrc.call(this));
-        this.regEDX = (this.regEDX & ~this.opMask) | w;
+        var w = afnGrp[7].call(this, this.regEDX & this.dataMask, fnSrc.call(this));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
@@ -9269,8 +9269,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordFB(afnGrp, fnSrc) {
-        var w = afnGrp[7].call(this, this.regEBX & this.opMask, fnSrc.call(this));
-        this.regEBX = (this.regEBX & ~this.opMask) | w;
+        var w = afnGrp[7].call(this, this.regEBX & this.dataMask, fnSrc.call(this));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
@@ -9283,8 +9283,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordFC(afnGrp, fnSrc) {
-        var w = afnGrp[7].call(this, this.regESP & this.opMask, fnSrc.call(this));
-        this.regESP = (this.regESP & ~this.opMask) | w;
+        var w = afnGrp[7].call(this, this.regESP & this.dataMask, fnSrc.call(this));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
     },
     /**
      * opMod32GrpWordFD(afnGrp, fnSrc): mod=11 (dst:reg)  reg=111 (afnGrp[7])  r/m=101 (EBP)
@@ -9294,8 +9294,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordFD(afnGrp, fnSrc) {
-        var w = afnGrp[7].call(this, this.regEBP & this.opMask, fnSrc.call(this));
-        this.regEBP = (this.regEBP & ~this.opMask) | w;
+        var w = afnGrp[7].call(this, this.regEBP & this.dataMask, fnSrc.call(this));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
@@ -9308,8 +9308,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordFE(afnGrp, fnSrc) {
-        var w = afnGrp[7].call(this, this.regESI & this.opMask, fnSrc.call(this));
-        this.regESI = (this.regESI & ~this.opMask) | w;
+        var w = afnGrp[7].call(this, this.regESI & this.dataMask, fnSrc.call(this));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
@@ -9322,8 +9322,8 @@ X86ModW32.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opMod32GrpWordFF(afnGrp, fnSrc) {
-        var w = afnGrp[7].call(this, this.regEDI & this.opMask, fnSrc.call(this));
-        this.regEDI = (this.regEDI & ~this.opMask) | w;
+        var w = afnGrp[7].call(this, this.regEDI & this.dataMask, fnSrc.call(this));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }

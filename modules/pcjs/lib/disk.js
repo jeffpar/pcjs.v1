@@ -890,7 +890,7 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
  * 0-based "physical" sector numbers for disk-relative block addresses (aka PBAs or Physical Block Addresses).
  *
  * Also, our use of the term LBA differs from that of more modern disk controllers; in the pre-modern world
- * of PCjs, what we call PBA numbers are what those controllers would call LBA numbers.
+ * of PCjs, what we call PBA numbers are what those controllers would later call LBA numbers.
  *
  * @this {Disk}
  */
@@ -916,7 +916,7 @@ Disk.prototype.buildFileTable = function()
          * form of seek().  For development purposes, that was fine, but...  TODO: Eventually change buildFileTable()
          * to use async I/O.
          */
-        if (this.fRemote) this.log("ignore synchronous XMLHttpRequest warnings here for now....");
+        if (this.fRemote) this.log("ignore any synchronous XMLHttpRequest warnings here (for now)");
 
         var sectorBoot = this.getSector(0);
         if (!sectorBoot) {
