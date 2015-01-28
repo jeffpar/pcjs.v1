@@ -4299,10 +4299,10 @@ Video.prototype.updateScreenGraphicsCGA = function(addrScreen, addrScreenLimit)
          * artifacts along the edges of those rectangles.  So it appears I must continue to redraw the entire canvasScreenBuffer
          * on every change.
          *
-        var xScreen = ((xDirty * this.cxScreen) / this.nCols);
-        var yScreen = ((yDirty * this.cyScreen) / this.nRows);
-        var cxScreen = ((cxDirty * this.cxScreen) / this.nCols);
-        var cyScreen = ((cyDirty * this.cyScreen) / this.nRows);
+        var xScreen = (((xDirty * this.cxScreen) / this.nCols) | 0);
+        var yScreen = (((yDirty * this.cyScreen) / this.nRows) | 0);
+        var cxScreen = (((cxDirty * this.cxScreen) / this.nCols) | 0);
+        var cyScreen = (((cyDirty * this.cyScreen) / this.nRows) | 0);
         this.contextScreen.drawImage(this.canvasScreenBuffer, xDirty, yDirty, cxDirty, cyDirty, xScreen, yScreen, cxScreen, cyScreen);
          */
         this.contextScreen.drawImage(this.canvasScreenBuffer, 0, 0, this.nCols, this.nRows, 0, 0, this.cxScreen, this.cyScreen);

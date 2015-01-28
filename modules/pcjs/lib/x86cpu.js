@@ -2654,15 +2654,15 @@ X86CPU.prototype.updateStatus = function(fForce)
             this.displayReg("IP", this.regEIP);
             var regPS = this.getPS();
             this.displayReg("PS", regPS);
-            this.displayReg("C", (regPS & X86.PS.CF)? 1 : 0, 1);
-            this.displayReg("P", (regPS & X86.PS.PF)? 1 : 0, 1);
-            this.displayReg("A", (regPS & X86.PS.AF)? 1 : 0, 1);
-            this.displayReg("Z", (regPS & X86.PS.ZF)? 1 : 0, 1);
-            this.displayReg("S", (regPS & X86.PS.SF)? 1 : 0, 1);
-            this.displayReg("T", (regPS & X86.PS.TF)? 1 : 0, 1);
-            this.displayReg("I", (regPS & X86.PS.IF)? 1 : 0, 1);
-            this.displayReg("D", (regPS & X86.PS.DF)? 1 : 0, 1);
             this.displayReg("V", (regPS & X86.PS.OF)? 1 : 0, 1);
+            this.displayReg("D", (regPS & X86.PS.DF)? 1 : 0, 1);
+            this.displayReg("I", (regPS & X86.PS.IF)? 1 : 0, 1);
+            this.displayReg("T", (regPS & X86.PS.TF)? 1 : 0, 1);
+            this.displayReg("S", (regPS & X86.PS.SF)? 1 : 0, 1);
+            this.displayReg("Z", (regPS & X86.PS.ZF)? 1 : 0, 1);
+            this.displayReg("A", (regPS & X86.PS.AF)? 1 : 0, 1);
+            this.displayReg("P", (regPS & X86.PS.PF)? 1 : 0, 1);
+            this.displayReg("C", (regPS & X86.PS.CF)? 1 : 0, 1);
         }
     }
 

@@ -33,6 +33,7 @@
 "use strict";
 
 if (typeof module !== 'undefined') {
+    var str         = require("../../shared/lib/strlib");
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
     var Bus         = require("./bus");
@@ -58,6 +59,30 @@ function Panel(parmsPanel) {
 }
 
 Component.subclass(Component, Panel);
+
+/*
+ * The "Live" canvases that we create internally have the following fixed dimensions, to make drawing
+ * simpler.  We then render, via drawImage(), these canvases onto the supplied canvas, which will automatically
+ * stretch the live images to fit.
+ */
+Panel.LIVECANVAS = {
+    WIDTH:      1280,
+    HEIGHT:     720,
+    FONT:       {
+        NAME:   "Monaco",
+        HEIGHT: 18
+    }
+};
+
+Panel.LIVEMEMORY = {
+    WIDTH:  (Panel.LIVECANVAS.WIDTH * 3) >> 2,
+    HEIGHT: Panel.LIVECANVAS.HEIGHT
+};
+
+Panel.LIVEREGISTERS = {
+    WIDTH:  (Panel.LIVECANVAS.WIDTH - Panel.LIVEMEMORY.WIDTH),
+    HEIGHT: Panel.LIVECANVAS.HEIGHT
+};
 
 /**
  * setBinding(sHTMLType, sBinding, control)
@@ -85,10 +110,29 @@ Panel.prototype.setBinding = function(sHTMLType, sBinding, control)
         }
         if (fPanel) {
             this.canvas = control;
-            this.canvasContext = this.canvas.getContext("2d");
-            /*
-             * NOTE: this.canvas.width and this.canvas.height contain the width and height of the canvas, in pixels
-             */
+            this.context = this.canvas.getContext("2d");
+
+            this.xMemory = this.yMemory = 0;
+            this.cxMemory = ((this.canvas.width * Panel.LIVEMEMORY.WIDTH) / Panel.LIVECANVAS.WIDTH) | 0;
+            this.cyMemory = this.canvas.height;
+            this.xRegisters = this.cxMemory;
+            this.yRegisters = 0;
+            this.cxRegisters = this.canvas.width - this.cxMemory;
+            this.cyRegisters = this.canvas.height;
+
+            this.canvasLiveMemory = window.document.createElement("canvas");
+            this.canvasLiveMemory.width = Panel.LIVEMEMORY.WIDTH;
+            this.canvasLiveMemory.height = Panel.LIVEMEMORY.HEIGHT;
+            this.contextLiveMemory = this.canvasLiveMemory.getContext("2d");
+            this.contextLiveMemory.font = Panel.LIVECANVAS.FONT.HEIGHT + "px " + Panel.LIVECANVAS.FONT.NAME;
+            this.imageLiveMemory = this.contextLiveMemory.createImageData(this.canvasLiveMemory.width, this.canvasLiveMemory.height);
+
+            this.canvasLiveRegisters = window.document.createElement("canvas");
+            this.canvasLiveRegisters.width = Panel.LIVEREGISTERS.WIDTH;
+            this.canvasLiveRegisters.height = Panel.LIVEREGISTERS.HEIGHT;
+            this.contextLiveRegisters = this.canvasLiveRegisters.getContext("2d");
+            this.contextLiveRegisters.font = Panel.LIVECANVAS.FONT.HEIGHT + "px " + Panel.LIVECANVAS.FONT.NAME;
+
             this.fRedraw = true;
             return true;
         }
@@ -151,20 +195,17 @@ Panel.prototype.powerDown = function(fSave)
  */
 Panel.prototype.updateAnimation = function()
 {
-    var context = this.canvasContext;
-    if (context) {
-        if (this.fRedraw) {
-            if (BACKTRACK && this.fBackTrack) {
-                context.font = "40px Arial";
-                /*
-                 * Even when the canvas from whence the context came has an explicit "color" style,
-                 * the context still defaults to "black", so we must manually propagate the canvas color.
-                 */
-                context.fillStyle = this.canvas.style.color;
-                context.fillText("BackTrack Panel",10,50);
-            }
-            this.fRedraw = false;
+    if (this.fRedraw) {
+        if (this.fBackTrack) {
+            if (MAXDEBUG) this.log("begin scanMemory()");
+            this.stats = this.bus.scanMemory(this.stats);
+            this.findRegions();
+            if (MAXDEBUG) this.log("end scanMemory(): total bytes: " + this.stats.cbTotal + ", total blocks: " + this.stats.cBlocks + ", total regions: " + this.stats.cRegions);
         }
+        this.initPen(10, Panel.LIVECANVAS.FONT.HEIGHT, this.canvasLiveMemory, this.contextLiveMemory);
+        this.drawText("This space intentionally left blank");
+        this.context.drawImage(this.canvasLiveMemory, 0, 0, this.canvasLiveMemory.width, this.canvasLiveMemory.height, this.xMemory, this.yMemory, this.cxMemory, this.cyMemory);
+        this.fRedraw = false;
     }
 };
 
@@ -180,12 +221,7 @@ Panel.prototype.updateAnimation = function()
 Panel.prototype.updateStatus = function()
 {
     if (this.canvas) {
-        if (this.fBackTrack) {
-            if (MAXDEBUG) this.log("begin scanMemory()");
-            this.stats = this.bus.scanMemory(this.stats);
-            this.findRegions();
-            if (MAXDEBUG) this.log("end scanMemory(): total bytes: " + this.stats.cbTotal + ", total blocks: " + this.stats.cBlocks + ", total regions: " + this.stats.cRegions);
-        }
+        this.updateRegisters();
     }
 };
 
@@ -235,6 +271,154 @@ Panel.prototype.addRegion = function(addr, iBlock, cBlocks, type)
 {
     this.stats.aRegions[this.stats.cRegions++] = (iBlock | cBlocks << 16);
     if (MAXDEBUG) this.log("region " + this.stats.cRegions + " (addr " + str.toHex(addr) + ", type " + Memory.TYPE.NAMES[type] + ") contains " + cBlocks + " blocks");
+};
+
+/**
+ * updateRegisters()
+ *
+ * Updates the live register portion of the panel.
+ *
+ * @this {Panel}
+ */
+Panel.prototype.updateRegisters = function()
+{
+    if (this.context && this.canvasLiveRegisters && this.contextLiveRegisters) {
+
+        this.contextLiveRegisters.fillStyle = "black";
+        this.contextLiveRegisters.fillRect(0, 0, this.canvasLiveRegisters.width, this.canvasLiveRegisters.height);
+
+        this.initPen(10, Panel.LIVECANVAS.FONT.HEIGHT, this.canvasLiveRegisters, this.contextLiveRegisters);
+        this.initCols(3);
+        this.drawText("CPU");
+        this.drawText("Target");
+        this.drawText("Current");
+        this.skipLines();
+        this.drawText(this.cpu.model);
+        this.drawText(this.cpu.getSpeedTarget());
+        this.drawText(this.cpu.getSpeedCurrent());
+        this.skipLines(2);
+        this.initCols(8);
+        this.initNumberFormat(16, 4);
+        this.drawText("AX", this.cpu.regEAX, 2);
+        this.drawText("SI", this.cpu.regESI, 0, 1);
+        this.drawText("BX", this.cpu.regEBX, 2);
+        this.drawText("DI", this.cpu.regEDI, 0, 1);
+        this.drawText("CX", this.cpu.regECX, 2);
+        this.drawText("SP", this.cpu.regESP, 0, 1);
+        this.drawText("DX", this.cpu.regEDX, 2);
+        this.drawText("BP", this.cpu.regEBP, 0, 2);
+        this.drawText("CS", this.cpu.segCS.sel, 2);
+        this.drawText("DS", this.cpu.segDS.sel, 0, 1);
+        this.drawText("SS", this.cpu.segSS.sel, 2);
+        this.drawText("ES", this.cpu.segES.sel, 0, 2);
+        this.drawText("IP", this.cpu.regEIP, 2);
+        var regPS;
+        this.drawText("PS", regPS = this.cpu.getPS(), 0, 2);
+        this.initCols(9);
+        this.drawText("V" + ((regPS & X86.PS.OF)? 1 : 0));
+        this.drawText("D" + ((regPS & X86.PS.DF)? 1 : 0));
+        this.drawText("I" + ((regPS & X86.PS.IF)? 1 : 0));
+        this.drawText("T" + ((regPS & X86.PS.TF)? 1 : 0));
+        this.drawText("S" + ((regPS & X86.PS.SF)? 1 : 0));
+        this.drawText("Z" + ((regPS & X86.PS.ZF)? 1 : 0));
+        this.drawText("A" + ((regPS & X86.PS.AF)? 1 : 0));
+        this.drawText("P" + ((regPS & X86.PS.PF)? 1 : 0));
+        this.drawText("C" + ((regPS & X86.PS.CF)? 1 : 0), 0, 2);
+        this.context.drawImage(this.canvasLiveRegisters, 0, 0, this.canvasLiveRegisters.width, this.canvasLiveRegisters.height, this.xRegisters, this.yRegisters, this.cxRegisters, this.cyRegisters);
+    }
+};
+
+/**
+ * initPen(xLeft, yTop, canvasText, contextText)
+ *
+ * @this {Panel}
+ * @param {number} xLeft
+ * @param {number} yTop
+ * @param {Object} [canvasText]
+ * @param {Object} [contextText]
+ */
+Panel.prototype.initPen = function(xLeft, yTop, canvasText, contextText)
+{
+    this.xLeftMargin = this.xLeft = xLeft;
+    this.yTop = yTop;
+    if (canvasText) {
+        this.canvasText = canvasText;
+    }
+    if (contextText) {
+        this.contextText = contextText;
+        this.contextText.fillStyle = this.canvas.style.color
+    }
+};
+
+/**
+ * initCols(nCols)
+ *
+ * @this {Panel}
+ * @param {number} nCols
+ */
+Panel.prototype.initCols = function(nCols)
+{
+    this.cxColumn = (this.canvasText.width / nCols) | 0;
+};
+
+/**
+ * skipCols(nCols)
+ *
+ * @this {Panel}
+ * @param {number} nCols
+ */
+Panel.prototype.skipCols = function(nCols)
+{
+    this.xLeft += this.cxColumn * nCols;
+};
+
+/**
+ * skipLines(nLines)
+ *
+ * @this {Panel}
+ * @param {number} [nLines]
+ */
+Panel.prototype.skipLines = function(nLines)
+{
+    this.xLeft = this.xLeftMargin;
+    this.yTop += (Panel.LIVECANVAS.FONT.HEIGHT + 2) * (nLines || 1);
+};
+
+/**
+ * initNumberFormat(nBase, nDigits)
+ *
+ * @param {number} nBase
+ * @param {number} nDigits
+ */
+Panel.prototype.initNumberFormat = function(nBase, nDigits)
+{
+    this.nDefaultBase = nBase;
+    this.nDefaultDigits = nDigits;
+};
+
+/**
+ * drawText(sText)
+ *
+ * @this {Panel}
+ * @param {string} sText
+ * @param {number} [nValue]
+ * @param {number} [nColsSkip]
+ * @param {number} [nLinesSkip]
+ */
+Panel.prototype.drawText = function(sText, nValue, nColsSkip, nLinesSkip)
+{
+    this.contextText.fillText(sText, this.xLeft, this.yTop);
+    this.xLeft += this.cxColumn;
+    if (nValue !== undefined) {
+        var sValue = nValue.toString();
+        if (this.nDefaultBase == 16) {
+            sValue = "0x" + str.toHex(nValue, this.nDefaultDigits);
+        }
+        this.contextText.fillText(sValue, this.xLeft, this.yTop);
+        this.xLeft += this.cxColumn;
+    }
+    if (nColsSkip) this.skipCols(nColsSkip);
+    if (nLinesSkip) this.skipLines(nLinesSkip);
 };
 
 /**
