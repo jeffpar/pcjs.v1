@@ -956,7 +956,7 @@ X86CPU.prototype.resetRegs = function()
     this.opFlags = this.opPrefixes = 0;
 
     /*
-     * The following contain the (default) OPERAND size (0 for 16 bits, 1 for 32 bits), and the corresponding masks
+     * The following contain the (default) OPERAND size (2 for 16 bits, 4 for 32 bits), and the corresponding masks
      * for isolating the (src) bits of an OPERAND and clearing the (dst) bits of an OPERAND.  These are reset to
      * their segCS counterparts at the start of every new instruction, but are also set here for documentation purposes.
      */
@@ -964,7 +964,7 @@ X86CPU.prototype.resetRegs = function()
     this.dataMask = this.segCS.dataMask;
 
     /*
-     * Similarly, the following contain the (default) ADDRESS size (0 for 16 bits, 1 for 32 bits), and the corresponding
+     * Similarly, the following contain the (default) ADDRESS size (2 for 16 bits, 4 for 32 bits), and the corresponding
      * masks for isolating the (src) bits of an address and clearing the (dst) bits of an address.  Like the OPERAND size
      * properties, these are reset to their segCS counterparts at the start of every new instruction.
      */
@@ -975,7 +975,7 @@ X86CPU.prototype.resetRegs = function()
      * It's also worth noting that instructions that implicitly use the stack also rely on something called STACK size,
      * which is based on the BIG bit of the last descriptor loaded into SS; use the following segSS properties:
      *
-     *      segSS.addrSize      (0 or 1)
+     *      segSS.addrSize      (2 or 4)
      *      segSS.addrMask      (0xffff or 0xffffffff)
      *
      * As there is no STACK size instruction prefix override, there's no need to propagate these segSS properties
@@ -986,18 +986,14 @@ X86CPU.prototype.resetRegs = function()
      * The memory dispatch tables; opMem refers to the active set, based on the current OPERAND size (dataSize),
      * which is based foremost on segCS.dataSize, but can also be overridden by an OPERAND size instruction prefix.
      */
-    this.aaOpMem = new Array(2);
-    this.aaOpMem[0] = {
-        getByte: this.getByte.bind(this),
+    this.aaOpMem = new Array(5);
+    this.aaOpMem[2] = {
         getWord: this.getShort.bind(this),
-        setByte: this.setByte.bind(this),
         setWord: this.setShort.bind(this)
     };
     if (I386) {
-        this.aaOpMem[1] = {
-            getByte: this.getByte.bind(this),
+        this.aaOpMem[4] = {
             getWord: this.getLong.bind(this),
-            setByte: this.setByte.bind(this),
             setWord: this.setLong.bind(this)
         };
     }
@@ -1007,8 +1003,8 @@ X86CPU.prototype.resetRegs = function()
      * The ModRM dispatch tables; opMod refers to the active set, based on the current ADDRESS size (addrSize),
      * which is based foremost on segCS.addrSize, but can also be overridden by an ADDRESS size instruction prefix.
      */
-    this.aaOpMod = new Array(2);
-    this.aaOpMod[0] = {
+    this.aaOpMod = new Array(5);
+    this.aaOpMod[2] = {
         aOpModRegByte: X86ModB.aOpModReg,
         aOpModMemByte: X86ModB.aOpModMem,
         aOpModGrpByte: X86ModB.aOpModGrp,
@@ -1017,7 +1013,7 @@ X86CPU.prototype.resetRegs = function()
         aOpModGrpWord: X86ModW.aOpModGrp
     };
     if (I386) {
-        this.aaOpMod[1] = {
+        this.aaOpMod[4] = {
             aOpModRegByte: X86ModB32.aOpModReg,
             aOpModMemByte: X86ModB32.aOpModMem,
             aOpModGrpByte: X86ModB32.aOpModGrp,
@@ -2030,7 +2026,7 @@ X86CPU.prototype.getEAByte = function(seg, off)
 X86CPU.prototype.getEAWord = function(seg, off)
 {
     this.segEA = seg;
-    this.regEA = seg.checkRead(this.offEA = off, 1 + this.dataSize + this.dataSize);
+    this.regEA = seg.checkRead(this.offEA = off, this.dataSize-1);
     if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
     var w = this.opMem.getWord(this.regEA);
     if (BACKTRACK) {
@@ -2069,7 +2065,7 @@ X86CPU.prototype.modEAByte = function(seg, off)
 X86CPU.prototype.modEAWord = function(seg, off)
 {
     this.segEA = seg;
-    this.regEAWrite = this.regEA = seg.checkRead(this.offEA = off, 1 + this.dataSize + this.dataSize);
+    this.regEAWrite = this.regEA = seg.checkRead(this.offEA = off, this.dataSize-1);
     if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
     var w = this.opMem.getWord(this.regEA);
     if (BACKTRACK) {
@@ -2088,7 +2084,13 @@ X86CPU.prototype.modEAWord = function(seg, off)
  */
 X86CPU.prototype.getEAByteData = function(off)
 {
-    return this.getEAByte(this.segData, off & this.addrMask);
+    // return this.getEAByte(this.segData, off & this.addrMask);
+    this.segEA = this.segData;
+    this.regEA = this.segData.checkRead(this.offEA = off & this.addrMask, 0);
+    if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
+    var b = this.getByte(this.regEA);
+    if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiMemLo;
+    return b;
 };
 
 /**
@@ -2100,7 +2102,13 @@ X86CPU.prototype.getEAByteData = function(off)
  */
 X86CPU.prototype.getEAByteStack = function(off)
 {
-    return this.getEAByte(this.segStack, off & this.addrMask);
+    // return this.getEAByte(this.segStack, off & this.addrMask);
+    this.segEA = this.segStack;
+    this.regEA = this.segStack.checkRead(this.offEA = off & this.addrMask, 0);
+    if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
+    var b = this.getByte(this.regEA);
+    if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiMemLo;
+    return b;
 };
 
 /**
@@ -2112,7 +2120,16 @@ X86CPU.prototype.getEAByteStack = function(off)
  */
 X86CPU.prototype.getEAWordData = function(off)
 {
-    return this.getEAWord(this.segData, off & this.addrMask);
+    // return this.getEAWord(this.segData, off & this.addrMask);
+    this.segEA = this.segData;
+    this.regEA = this.segData.checkRead(this.offEA = off & this.addrMask, this.dataSize-1);
+    if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
+    var w = this.opMem.getWord(this.regEA);
+    if (BACKTRACK) {
+        this.backTrack.btiEALo = this.backTrack.btiMemLo;
+        this.backTrack.btiEAHi = this.backTrack.btiMemHi;
+    }
+    return w;
 };
 
 /**
@@ -2124,7 +2141,16 @@ X86CPU.prototype.getEAWordData = function(off)
  */
 X86CPU.prototype.getEAWordStack = function(off)
 {
-    return this.getEAWord(this.segStack, off & this.addrMask);
+    // return this.getEAWord(this.segStack, off & this.addrMask);
+    this.segEA = this.segStack;
+    this.regEA = this.segStack.checkRead(this.offEA = off & this.addrMask, this.dataSize-1);
+    if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
+    var w = this.opMem.getWord(this.regEA);
+    if (BACKTRACK) {
+        this.backTrack.btiEALo = this.backTrack.btiMemLo;
+        this.backTrack.btiEAHi = this.backTrack.btiMemHi;
+    }
+    return w;
 };
 
 /**
@@ -2136,7 +2162,13 @@ X86CPU.prototype.getEAWordStack = function(off)
  */
 X86CPU.prototype.modEAByteData = function(off)
 {
-    return this.modEAByte(this.segData, off & this.addrMask);
+    // return this.modEAByte(this.segData, off & this.addrMask);
+    this.segEA = this.segData;
+    this.regEAWrite = this.regEA = this.segData.checkRead(this.offEA = off & this.addrMask, 0);
+    if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
+    var b = this.getByte(this.regEA);
+    if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiMemLo;
+    return b;
 };
 
 /**
@@ -2148,7 +2180,13 @@ X86CPU.prototype.modEAByteData = function(off)
  */
 X86CPU.prototype.modEAByteStack = function(off)
 {
-    return this.modEAByte(this.segStack, off & this.addrMask);
+    // return this.modEAByte(this.segStack, off & this.addrMask);
+    this.segEA = this.segStack;
+    this.regEAWrite = this.regEA = this.segStack.checkRead(this.offEA = off & this.addrMask, 0);
+    if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
+    var b = this.getByte(this.regEA);
+    if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiMemLo;
+    return b;
 };
 
 /**
@@ -2160,7 +2198,16 @@ X86CPU.prototype.modEAByteStack = function(off)
  */
 X86CPU.prototype.modEAWordData = function(off)
 {
-    return this.modEAWord(this.segData, off & this.addrMask);
+    // return this.modEAWord(this.segData, off & this.addrMask);
+    this.segEA = this.segData;
+    this.regEAWrite = this.regEA = this.segData.checkRead(this.offEA = off & this.addrMask, this.dataSize-1);
+    if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
+    var w = this.opMem.getWord(this.regEA);
+    if (BACKTRACK) {
+        this.backTrack.btiEALo = this.backTrack.btiMemLo;
+        this.backTrack.btiEAHi = this.backTrack.btiMemHi;
+    }
+    return w;
 };
 
 /**
@@ -2172,7 +2219,16 @@ X86CPU.prototype.modEAWordData = function(off)
  */
 X86CPU.prototype.modEAWordStack = function(off)
 {
-    return this.modEAWord(this.segStack, off & this.addrMask);
+    // return this.modEAWord(this.segStack, off & this.addrMask);
+    this.segEA = this.segStack;
+    this.regEAWrite = this.regEA = this.segStack.checkRead(this.offEA = off & this.addrMask, this.dataSize-1);
+    if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
+    var w = this.opMem.getWord(this.regEA);
+    if (BACKTRACK) {
+        this.backTrack.btiEALo = this.backTrack.btiMemLo;
+        this.backTrack.btiEAHi = this.backTrack.btiMemHi;
+    }
+    return w;
 };
 
 /**
@@ -2201,7 +2257,7 @@ X86CPU.prototype.setEAWord = function(w)
         this.backTrack.btiMemLo = this.backTrack.btiEALo;
         this.backTrack.btiMemHi = this.backTrack.btiEAHi;
     }
-    this.opMem.setWord(this.segEA.checkWrite(this.offEA, 1), w);
+    this.opMem.setWord(this.segEA.checkWrite(this.offEA, this.dataSize-1), w);
 };
 
 /**
@@ -2231,7 +2287,7 @@ X86CPU.prototype.getSOByte = function(seg, off)
  */
 X86CPU.prototype.getSOWord = function(seg, off)
 {
-    return this.opMem.getWord(seg.checkRead(off, 1 + this.dataSize + this.dataSize));
+    return this.opMem.getWord(seg.checkRead(off, this.dataSize-1));
 };
 
 /**
@@ -2261,7 +2317,7 @@ X86CPU.prototype.setSOByte = function(seg, off, b)
  */
 X86CPU.prototype.setSOWord = function(seg, off, w)
 {
-    this.opMem.setWord(seg.checkWrite(off, 1), w);
+    this.opMem.setWord(seg.checkWrite(off, this.dataSize-1), w);
 };
 
 /**
@@ -2426,7 +2482,7 @@ X86CPU.prototype.getIPDisp = function()
  * getIPWord()
  *
  * @this {X86CPU}
- * @return {number} word at the current IP; IP advanced by 2
+ * @return {number} word at the current IP; IP advanced by 2 or 4
  */
 X86CPU.prototype.getIPWord = function()
 {
@@ -2435,7 +2491,7 @@ X86CPU.prototype.getIPWord = function()
         this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
         this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMemHi);
     }
-    this.regLIP = this.segCS.base + (this.regEIP = (this.regEIP + (2 << this.dataSize)) & this.addrMask);
+    this.regLIP = this.segCS.base + (this.regEIP = (this.regEIP + this.dataSize) & this.addrMask);
     return w;
 };
 
@@ -2462,7 +2518,7 @@ X86CPU.prototype.getSIBAddr = function(mod)
 X86CPU.prototype.popWord = function()
 {
     var regESP = this.regESP;
-    this.regESP = (this.regESP + (2 << this.dataSize)) & this.addrMask;
+    this.regESP = (this.regESP + this.dataSize) & this.addrMask;
     return this.getSOWord(this.segSS, regESP);
 };
 
@@ -2475,7 +2531,7 @@ X86CPU.prototype.popWord = function()
 X86CPU.prototype.pushWord = function(w)
 {
     this.assert((w & this.dataMask) == w);
-    this.setSOWord(this.segSS, (this.regESP = (this.regESP - (2 << this.dataSize)) & this.addrMask), w);
+    this.setSOWord(this.segSS, (this.regESP = (this.regESP - this.dataSize) & this.addrMask), w);
 };
 
 /**

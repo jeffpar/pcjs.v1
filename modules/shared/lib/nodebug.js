@@ -37,7 +37,7 @@
 /*
  * In the compiled case, we rely on the Closure Compiler to override DEBUG, setting it to false,
  * so that all DEBUG-only code will be removed by the compiler.
- * 
+ *
  * However, when we're in "development mode" and want to run uncompiled code without any DEBUG-only
  * code, we must arrange for this additional file, nodebug.js, to be loaded as early as possible,
  * which will then set DEBUG to false at runtime.

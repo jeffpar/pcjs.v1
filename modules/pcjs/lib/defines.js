@@ -80,17 +80,12 @@ var PREFETCH = false;
 var FATARRAYS = false;
 
 /**
- * @define {boolean}
- *
  * TYPEDARRAYS enables use of typed arrays for Memory blocks.  This used to be a compile-time-only option, but I've
  * added Memory access functions for typed arrays (see Memory.afnTypedArray), so support can be enabled dynamically.
  *
- * However, TYPEDARRAYS has always been slightly slower than the original LONGARRAYS implementation (which uses an
- * Array of numbers that stores 32 bits -- 4 consecutive bytes -- per number), so TYPEDARRAYS is completely disabled.
- *
  * See the Memory component for details.
  */
-var TYPEDARRAYS = false; // (typeof ArrayBuffer !== 'undefined');
+var TYPEDARRAYS = (typeof ArrayBuffer !== 'undefined');
 
 /**
  * @define {boolean}
@@ -98,7 +93,7 @@ var TYPEDARRAYS = false; // (typeof ArrayBuffer !== 'undefined');
  * Enables backtracking (disabled in compiled versions).  Backtracking is a mechanism that allows us to tag
  * every byte of incoming data and follow the flow of that data.
  */
-var BACKTRACK = true;
+var BACKTRACK = DEBUG;
 
 /**
  * @define {boolean}
