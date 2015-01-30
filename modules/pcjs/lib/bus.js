@@ -130,7 +130,7 @@ function Bus(parmsBus, cpu, dbg)
     this.blockLimit = this.blockSize - 1;
     this.blockTotal = ((this.busLimit + this.blockSize) / this.blockSize) | 0;
     this.blockMask = this.blockTotal - 1;
-    this.assert(this.blockTotal <= Bus.BLOCK.MASK);
+    this.assert(this.blockTotal <= Bus.BLOCK.NUM_MASK);
 
     /*
      * Lists of I/O notification functions: aPortInputNotify and aPortOutputNotify are arrays, indexed by
@@ -237,12 +237,18 @@ if (BACKTRACK) {
 }
 
 /*
- * scanMemory() records block numbers in bits 0-14, a BackTrack "mod" bit in bit 15, and the block type at bit 16.
+ * scanMemory() records block numbers in bits 0-14, a BackTrack "mod" bit in bit 15, and a block type at bit 28;
+ * the bits reserved for a count are not used.
  */
 Bus.BLOCK = {
-    MASK:           0x7fff,
+    NUM_SHIFT:      0,
+    NUM_MASK:       0x7fff,
     BTMOD_SHIFT:    15,
-    TYPE_SHIFT:     16
+    BTMOD_MASK:     0x1,
+    COUNT_SHIFT:    16,
+    COUNT_MASK:     0x0fff,
+    TYPE_SHIFT:     28,
+    TYPE_MASK:      0x7
 };
 
 /**

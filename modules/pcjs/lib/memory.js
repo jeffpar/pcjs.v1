@@ -204,12 +204,10 @@ Memory.TYPE = {
     NONE:   0,
     RAM:    1,
     ROM:    2,
-    VIDEO:  3
+    VIDEO:  3,
+    NAMES:  ["NONE", "RAM", "ROM", "VIDEO"],
+    COLORS: ["black", "blue", "green", "cyan"]
 };
-
-if (DEBUG) {
-    Memory.TYPE.NAMES = ["NONE", "RAM", "ROM", "VIDEO"];
-}
 
 /**
  * readNone(off)
