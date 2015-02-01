@@ -52,6 +52,8 @@ if (typeof module !== 'undefined') {
 
 if (I386) {
     if (typeof module !== 'undefined') {
+        var X86ModB16   = require("./x86modb16");
+        var X86ModW16   = require("./x86modw16");
         var X86ModB32   = require("./x86modb32");
         var X86ModW32   = require("./x86modw32");
         var X86ModSIB   = require("./x86modsib");
@@ -970,7 +972,6 @@ X86CPU.prototype.resetRegs = function()
      */
     this.addrSize = this.segCS.addrSize;
     this.addrMask = this.segCS.addrMask;
-
     /*
      * It's also worth noting that instructions that implicitly use the stack also rely on something called STACK size,
      * which is based on the BIG bit of the last descriptor loaded into SS; use the following segSS properties:
@@ -986,7 +987,7 @@ X86CPU.prototype.resetRegs = function()
      * The memory dispatch tables; opMem refers to the active set, based on the current OPERAND size (dataSize),
      * which is based foremost on segCS.dataSize, but can also be overridden by an OPERAND size instruction prefix.
      */
-    this.aaOpMem = new Array(5);
+    this.aaOpMem = [];
     this.aaOpMem[2] = {
         getWord: this.getShort.bind(this),
         setWord: this.setShort.bind(this)
@@ -998,31 +999,43 @@ X86CPU.prototype.resetRegs = function()
         };
     }
     this.opMem = this.aaOpMem[this.segCS.dataSize];
+    this.setOpMod();
+};
 
-    /*
-     * The ModRM dispatch tables; opMod refers to the active set, based on the current ADDRESS size (addrSize),
-     * which is based foremost on segCS.addrSize, but can also be overridden by an ADDRESS size instruction prefix.
-     */
-    this.aaOpMod = new Array(5);
-    this.aaOpMod[2] = {
-        aOpModRegByte: X86ModB.aOpModReg,
-        aOpModMemByte: X86ModB.aOpModMem,
-        aOpModGrpByte: X86ModB.aOpModGrp,
-        aOpModRegWord: X86ModW.aOpModReg,
-        aOpModMemWord: X86ModW.aOpModMem,
-        aOpModGrpWord: X86ModW.aOpModGrp
-    };
-    if (I386) {
-        this.aaOpMod[4] = {
-            aOpModRegByte: X86ModB32.aOpModReg,
-            aOpModMemByte: X86ModB32.aOpModMem,
-            aOpModGrpByte: X86ModB32.aOpModGrp,
-            aOpModRegWord: X86ModW32.aOpModReg,
-            aOpModMemWord: X86ModW32.aOpModMem,
-            aOpModGrpWord: X86ModW32.aOpModGrp
-        };
+/**
+ * setOpMod()
+ *
+ * Select the appropriate ModRM dispatch tables, based on the current ADDRESS size (addrSize), which
+ * is based foremost on segCS.addrSize, but can also be overridden by an ADDRESS size instruction prefix.
+ *
+ * @this {X86CPU}
+ */
+X86CPU.prototype.setOpMod = function()
+{
+    if (!I386) {
+        this.aOpModRegByte = X86ModB.aOpModReg;
+        this.aOpModMemByte = X86ModB.aOpModMem;
+        this.aOpModGrpByte = X86ModB.aOpModGrp;
+        this.aOpModRegWord = X86ModW.aOpModReg;
+        this.aOpModMemWord = X86ModW.aOpModMem;
+        this.aOpModGrpWord = X86ModW.aOpModGrp;
+    } else {
+        if (this.addrSize == 2) {
+            this.aOpModRegByte = X86ModB16.aOpModReg;
+            this.aOpModMemByte = X86ModB16.aOpModMem;
+            this.aOpModGrpByte = X86ModB16.aOpModGrp;
+            this.aOpModRegWord = X86ModW16.aOpModReg;
+            this.aOpModMemWord = X86ModW16.aOpModMem;
+            this.aOpModGrpWord = X86ModW16.aOpModGrp;
+        } else {
+            this.aOpModRegByte = X86ModB32.aOpModReg;
+            this.aOpModMemByte = X86ModB32.aOpModMem;
+            this.aOpModGrpByte = X86ModB32.aOpModGrp;
+            this.aOpModRegWord = X86ModW32.aOpModReg;
+            this.aOpModMemWord = X86ModW32.aOpModMem;
+            this.aOpModGrpWord = X86ModW32.aOpModGrp;
+        }
     }
-    this.opMod = this.aaOpMod[this.segCS.addrSize];
 };
 
 /**
@@ -1378,7 +1391,7 @@ X86CPU.prototype.setES = function(sel)
  */
 X86CPU.prototype.setIP = function(off)
 {
-    this.regLIP = this.segCS.base + (this.regEIP = off & this.addrMask);
+    this.regLIP = this.segCS.base + (this.regEIP = off & (I386? this.addrMask : 0xffff));
     if (PREFETCH) this.flushPrefetch(this.regLIP);
 };
 
@@ -1429,7 +1442,7 @@ X86CPU.prototype.setCSIP = function(off, sel, fCall)
  */
 X86CPU.prototype.advanceIP = function(inc)
 {
-    this.regLIP = this.segCS.base + (this.regEIP = (this.regEIP + inc) & this.addrMask);
+    this.regLIP = this.segCS.base + (this.regEIP = (this.regEIP + inc) & (I386? this.addrMask : 0xffff));
     if (PREFETCH) this.advancePrefetch(inc);
 };
 
@@ -2026,9 +2039,9 @@ X86CPU.prototype.getEAByte = function(seg, off)
 X86CPU.prototype.getEAWord = function(seg, off)
 {
     this.segEA = seg;
-    this.regEA = seg.checkRead(this.offEA = off, this.dataSize-1);
+    this.regEA = seg.checkRead(this.offEA = off, (I386? this.dataSize-1 : 1));
     if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
-    var w = this.opMem.getWord(this.regEA);
+    var w = I386? this.opMem.getWord(this.regEA) : this.getShort(this.regEA);
     if (BACKTRACK) {
         this.backTrack.btiEALo = this.backTrack.btiMemLo;
         this.backTrack.btiEAHi = this.backTrack.btiMemHi;
@@ -2065,9 +2078,9 @@ X86CPU.prototype.modEAByte = function(seg, off)
 X86CPU.prototype.modEAWord = function(seg, off)
 {
     this.segEA = seg;
-    this.regEAWrite = this.regEA = seg.checkRead(this.offEA = off, this.dataSize-1);
+    this.regEAWrite = this.regEA = seg.checkRead(this.offEA = off, (I386? this.dataSize-1 : 1));
     if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
-    var w = this.opMem.getWord(this.regEA);
+    var w = I386? this.opMem.getWord(this.regEA) : this.getShort(this.regEA);
     if (BACKTRACK) {
         this.backTrack.btiEALo = this.backTrack.btiMemLo;
         this.backTrack.btiEAHi = this.backTrack.btiMemHi;
@@ -2086,7 +2099,7 @@ X86CPU.prototype.getEAByteData = function(off)
 {
     // return this.getEAByte(this.segData, off & this.addrMask);
     this.segEA = this.segData;
-    this.regEA = this.segData.checkRead(this.offEA = off & this.addrMask, 0);
+    this.regEA = this.segData.checkRead(this.offEA = off & (I386? this.addrMask : 0xffff), 0);
     if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
     var b = this.getByte(this.regEA);
     if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiMemLo;
@@ -2104,7 +2117,7 @@ X86CPU.prototype.getEAByteStack = function(off)
 {
     // return this.getEAByte(this.segStack, off & this.addrMask);
     this.segEA = this.segStack;
-    this.regEA = this.segStack.checkRead(this.offEA = off & this.addrMask, 0);
+    this.regEA = this.segStack.checkRead(this.offEA = off & (I386? this.addrMask : 0xffff), 0);
     if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
     var b = this.getByte(this.regEA);
     if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiMemLo;
@@ -2122,9 +2135,9 @@ X86CPU.prototype.getEAWordData = function(off)
 {
     // return this.getEAWord(this.segData, off & this.addrMask);
     this.segEA = this.segData;
-    this.regEA = this.segData.checkRead(this.offEA = off & this.addrMask, this.dataSize-1);
+    this.regEA = this.segData.checkRead(this.offEA = off & (I386? this.addrMask : 0xffff), (I386? this.dataSize-1 : 1));
     if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
-    var w = this.opMem.getWord(this.regEA);
+    var w = I386? this.opMem.getWord(this.regEA) : this.getShort(this.regEA);
     if (BACKTRACK) {
         this.backTrack.btiEALo = this.backTrack.btiMemLo;
         this.backTrack.btiEAHi = this.backTrack.btiMemHi;
@@ -2143,9 +2156,9 @@ X86CPU.prototype.getEAWordStack = function(off)
 {
     // return this.getEAWord(this.segStack, off & this.addrMask);
     this.segEA = this.segStack;
-    this.regEA = this.segStack.checkRead(this.offEA = off & this.addrMask, this.dataSize-1);
+    this.regEA = this.segStack.checkRead(this.offEA = off & (I386? this.addrMask : 0xffff), (I386? this.dataSize-1 : 1));
     if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
-    var w = this.opMem.getWord(this.regEA);
+    var w = I386? this.opMem.getWord(this.regEA) : this.getShort(this.regEA);
     if (BACKTRACK) {
         this.backTrack.btiEALo = this.backTrack.btiMemLo;
         this.backTrack.btiEAHi = this.backTrack.btiMemHi;
@@ -2164,7 +2177,7 @@ X86CPU.prototype.modEAByteData = function(off)
 {
     // return this.modEAByte(this.segData, off & this.addrMask);
     this.segEA = this.segData;
-    this.regEAWrite = this.regEA = this.segData.checkRead(this.offEA = off & this.addrMask, 0);
+    this.regEAWrite = this.regEA = this.segData.checkRead(this.offEA = off & (I386? this.addrMask : 0xffff), 0);
     if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
     var b = this.getByte(this.regEA);
     if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiMemLo;
@@ -2182,7 +2195,7 @@ X86CPU.prototype.modEAByteStack = function(off)
 {
     // return this.modEAByte(this.segStack, off & this.addrMask);
     this.segEA = this.segStack;
-    this.regEAWrite = this.regEA = this.segStack.checkRead(this.offEA = off & this.addrMask, 0);
+    this.regEAWrite = this.regEA = this.segStack.checkRead(this.offEA = off & (I386? this.addrMask : 0xffff), 0);
     if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
     var b = this.getByte(this.regEA);
     if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiMemLo;
@@ -2200,9 +2213,9 @@ X86CPU.prototype.modEAWordData = function(off)
 {
     // return this.modEAWord(this.segData, off & this.addrMask);
     this.segEA = this.segData;
-    this.regEAWrite = this.regEA = this.segData.checkRead(this.offEA = off & this.addrMask, this.dataSize-1);
+    this.regEAWrite = this.regEA = this.segData.checkRead(this.offEA = off & (I386? this.addrMask : 0xffff), (I386? this.dataSize-1 : 1));
     if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
-    var w = this.opMem.getWord(this.regEA);
+    var w = I386? this.opMem.getWord(this.regEA) : this.getShort(this.regEA);
     if (BACKTRACK) {
         this.backTrack.btiEALo = this.backTrack.btiMemLo;
         this.backTrack.btiEAHi = this.backTrack.btiMemHi;
@@ -2221,9 +2234,9 @@ X86CPU.prototype.modEAWordStack = function(off)
 {
     // return this.modEAWord(this.segStack, off & this.addrMask);
     this.segEA = this.segStack;
-    this.regEAWrite = this.regEA = this.segStack.checkRead(this.offEA = off & this.addrMask, this.dataSize-1);
+    this.regEAWrite = this.regEA = this.segStack.checkRead(this.offEA = off & (I386? this.addrMask : 0xffff), (I386? this.dataSize-1 : 1));
     if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
-    var w = this.opMem.getWord(this.regEA);
+    var w = I386? this.opMem.getWord(this.regEA) : this.getShort(this.regEA);
     if (BACKTRACK) {
         this.backTrack.btiEALo = this.backTrack.btiMemLo;
         this.backTrack.btiEAHi = this.backTrack.btiMemHi;
@@ -2257,7 +2270,11 @@ X86CPU.prototype.setEAWord = function(w)
         this.backTrack.btiMemLo = this.backTrack.btiEALo;
         this.backTrack.btiMemHi = this.backTrack.btiEAHi;
     }
-    this.opMem.setWord(this.segEA.checkWrite(this.offEA, this.dataSize-1), w);
+    if (!I386) {
+        this.setShort(this.segEA.checkWrite(this.offEA, 1), w);
+    } else {
+        this.opMem.setWord(this.segEA.checkWrite(this.offEA, this.dataSize-1), w);
+    }
 };
 
 /**
@@ -2287,7 +2304,11 @@ X86CPU.prototype.getSOByte = function(seg, off)
  */
 X86CPU.prototype.getSOWord = function(seg, off)
 {
-    return this.opMem.getWord(seg.checkRead(off, this.dataSize-1));
+    if (!I386) {
+        return this.getShort(seg.checkRead(off, 1));
+    } else {
+        return this.opMem.getWord(seg.checkRead(off, this.dataSize-1));
+    }
 };
 
 /**
@@ -2317,7 +2338,11 @@ X86CPU.prototype.setSOByte = function(seg, off, b)
  */
 X86CPU.prototype.setSOWord = function(seg, off, w)
 {
-    this.opMem.setWord(seg.checkWrite(off, this.dataSize-1), w);
+    if (!I386) {
+        this.setShort(seg.checkWrite(off, 1), w);
+    } else {
+        this.opMem.setWord(seg.checkWrite(off, this.dataSize-1), w);
+    }
 };
 
 /**
@@ -2460,7 +2485,7 @@ X86CPU.prototype.getIPByte = function()
 {
     var b = (PREFETCH? this.getBytePrefetch(this.regLIP) : this.getByte(this.regLIP));
     if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
-    this.regLIP = this.segCS.base + (this.regEIP = (this.regEIP + 1) & this.addrMask);
+    this.regLIP = this.segCS.base + (this.regEIP = (this.regEIP + 1) & (I386? this.addrMask : 0xffff));
     return b;
 };
 
@@ -2474,8 +2499,8 @@ X86CPU.prototype.getIPDisp = function()
 {
     var b = ((PREFETCH? this.getBytePrefetch(this.regLIP) : this.getByte(this.regLIP)) << 24) >> 24;
     if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
-    this.regLIP = this.segCS.base + (this.regEIP = (this.regEIP + 1) & this.addrMask);
-    return b & this.addrMask;
+    this.regLIP = this.segCS.base + (this.regEIP = (this.regEIP + 1) & (I386? this.addrMask : 0xffff));
+    return b & (I386? this.addrMask : 0xffff);
 };
 
 /**
@@ -2486,12 +2511,12 @@ X86CPU.prototype.getIPDisp = function()
  */
 X86CPU.prototype.getIPWord = function()
 {
-    var w = (PREFETCH? this.getWordPrefetch(this.regLIP) : this.opMem.getWord(this.regLIP));
+    var w = (PREFETCH? this.getWordPrefetch(this.regLIP) : (I386? this.opMem.getWord(this.regLIP) : this.getShort(this.regLIP)));
     if (BACKTRACK) {
         this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
         this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMemHi);
     }
-    this.regLIP = this.segCS.base + (this.regEIP = (this.regEIP + this.dataSize) & this.addrMask);
+    this.regLIP = this.segCS.base + (this.regEIP = (this.regEIP + (I386? this.dataSize : 2)) & (I386? this.addrMask : 0xffff));
     return w;
 };
 
@@ -2518,7 +2543,7 @@ X86CPU.prototype.getSIBAddr = function(mod)
 X86CPU.prototype.popWord = function()
 {
     var regESP = this.regESP;
-    this.regESP = (this.regESP + this.dataSize) & this.addrMask;
+    this.regESP = (this.regESP + (I386? this.dataSize : 2)) & (I386? this.addrMask : 0xffff);
     return this.getSOWord(this.segSS, regESP);
 };
 
@@ -2531,7 +2556,7 @@ X86CPU.prototype.popWord = function()
 X86CPU.prototype.pushWord = function(w)
 {
     this.assert((w & this.dataMask) == w);
-    this.setSOWord(this.segSS, (this.regESP = (this.regESP - this.dataSize) & this.addrMask), w);
+    this.setSOWord(this.segSS, (this.regESP = (this.regESP - (I386? this.dataSize : 2)) & (I386? this.addrMask : 0xffff)), w);
 };
 
 /**
@@ -2823,7 +2848,6 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
                 this.addrSize = this.segCS.addrSize;
                 this.addrMask = this.segCS.addrMask;
                 this.opMem = this.aaOpMem[this.dataSize];
-                this.opMod = this.aaOpMod[this.addrSize];
             }
 
             this.opPrefixes = this.opFlags & X86.OPFLAG.REPEAT;

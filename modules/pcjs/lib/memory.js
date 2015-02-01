@@ -53,6 +53,7 @@ if (typeof module !== 'undefined') {
     var Component   = require("../../shared/lib/component");
     var Messages    = require("./messages");
 }
+
 /**
  * @class DataView
  * @property {function(number,boolean):number} getUint8
@@ -62,6 +63,12 @@ if (typeof module !== 'undefined') {
  * @property {function(number,boolean):number} getInt32
  * @property {function(number,number,boolean)} setInt32
  */
+
+var littleEndian = (function() {
+    var buffer = new ArrayBuffer(2);
+    new DataView(buffer).setUint16(0, 256, true);
+    return new Uint16Array(buffer)[0] === 256;
+})();
 
 /**
  * Memory(addr, size, type, controller)
@@ -163,11 +170,14 @@ function Memory(addr, size, type, controller)
         this.buffer = new ArrayBuffer(size);
         this.dv = new DataView(this.buffer, 0, size);
         /*
-         * We could also use dv.getUint8() and dv.setUint8(), but using ab[] to get/set bytes
-         * in this.buffer is more convenient and presents no "endianness" issues.
+         * If littleEndian is true, we can use ab[], aw[] and adw[] directly; well, we can use them
+         * whenever the offset is a multiple of 1, 2 or 4, respectively.  Otherwise, we must fallback to
+         * dv.getUint8()/dv.setUint8(), dv.getUint16()/dv.setUint16() and db.getInt32()/dv.setInt32().
          */
         this.ab = new Uint8Array(this.buffer, 0, size);
-        this.setAccess(Memory.afnTypedArray);
+        this.aw = new Uint16Array(this.buffer, 0, size >> 1);
+        this.adw = new Int32Array(this.buffer, 0, size >> 2);
+        this.setAccess(littleEndian? Memory.afnLittleEndian : Memory.afnBigEndian);
     } else {
         if (FATARRAYS) {
             this.ab = new Array(size);
@@ -473,83 +483,196 @@ Memory.writeLongChecked = function writeLongChecked(off, l)
 };
 
 /**
- * readByteTypedArray(off)
+ * readByteBigEndian(off)
  *
  * @this {Memory}
  * @param {number} off
  * @return {number}
  */
-Memory.readByteTypedArray = function readByteTypedArray(off)
+Memory.readByteBigEndian = function readByteBigEndian(off)
 {
     Component.assert(off >= 0 && off < this.size);
     return this.ab[off];
 };
 
 /**
- * readShortTypedArray(off)
+ * readByteLittleEndian(off)
  *
  * @this {Memory}
  * @param {number} off
  * @return {number}
  */
-Memory.readShortTypedArray = function readShortTypedArray(off)
+Memory.readByteLittleEndian = function readByteLittleEndian(off)
+{
+    Component.assert(off >= 0 && off < this.size);
+    return this.ab[off];
+};
+
+/**
+ * readShortBigEndian(off)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @return {number}
+ */
+Memory.readShortBigEndian = function readShortBigEndian(off)
 {
     Component.assert(off >= 0 && off < this.size - 1);
     return this.dv.getUint16(off, true);
 };
 
 /**
- * readLongTypedArray(off)
+ * readShortLittleEndian(off)
  *
  * @this {Memory}
  * @param {number} off
  * @return {number}
  */
-Memory.readLongTypedArray = function readLongTypedArray(off)
+Memory.readShortLittleEndian = function readShortLittleEndian(off)
+{
+    Component.assert(off >= 0 && off < this.size - 1);
+    /*
+     * TODO: It remains to be seen if there's any advantage to checking the offset
+     * for an aligned read vs. always reading the bytes separately; it seems a safe bet
+     * for longs, but it's less clear for shorts.
+     */
+    return (off & 0x1)? (this.ab[off] | (this.ab[off+1] << 8)) : this.aw[off >> 1];
+};
+
+/**
+ * readLongBigEndian(off)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @return {number}
+ */
+Memory.readLongBigEndian = function readLongBigEndian(off)
 {
     Component.assert(off >= 0 && off < this.size - 3);
     return this.dv.getInt32(off, true);
 };
 
 /**
- * writeByteTypedArray(off, b)
+ * readLongLittleEndian(off)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @return {number}
+ */
+Memory.readLongLittleEndian = function readLongLittleEndian(off)
+{
+    Component.assert(off >= 0 && off < this.size - 3);
+    /*
+     * TODO: It remains to be seen if there's any advantage to checking the offset
+     * for an aligned read vs. always reading the bytes separately; it seems a safe bet
+     * for longs, but it's less clear for shorts.
+     */
+    return (off & 0x3)? (this.ab[off] | (this.ab[off+1] << 8) | (this.ab[off+2] << 16) | (this.ab[off+3] << 24)) : this.adw[off >> 2];
+};
+
+/**
+ * writeByteBigEndian(off, b)
  *
  * @this {Memory}
  * @param {number} off
  * @param {number} b
  */
-Memory.writeByteTypedArray = function writeByteTypedArray(off, b)
+Memory.writeByteBigEndian = function writeByteBigEndian(off, b)
 {
-    Component.assert(off >= 0 && off < this.size && (b & 0xff) == b);
+    Component.assert(off >= 0 && off < this.size);
     this.ab[off] = b;
     this.fDirty = true;
 };
 
 /**
- * writeShortTypedArray(off, w)
+ * writeByteLittleEndian(off, b)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @param {number} b
+ */
+Memory.writeByteLittleEndian = function writeByteLittleEndian(off, b)
+{
+    Component.assert(off >= 0 && off < this.size);
+    this.ab[off] = b;
+    this.fDirty = true;
+};
+
+/**
+ * writeShortBigEndian(off, w)
  *
  * @this {Memory}
  * @param {number} off
  * @param {number} w
  */
-Memory.writeShortTypedArray = function writeShortTypedArray(off, w)
+Memory.writeShortBigEndian = function writeShortBigEndian(off, w)
 {
-    Component.assert(off >= 0 && off < this.size - 1 && (w & 0xffff) == w);
+    Component.assert(off >= 0 && off < this.size - 1);
     this.dv.setUint16(off, w, true);
     this.fDirty = true;
 };
 
 /**
- * writeLongTypedArray(off, l)
+ * writeShortLittleEndian(off, w)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @param {number} w
+ */
+Memory.writeShortLittleEndian = function writeShortLittleEndian(off, w)
+{
+    Component.assert(off >= 0 && off < this.size - 1);
+    /*
+     * TODO: It remains to be seen if there's any advantage to checking the offset
+     * for an aligned write vs. always writing the bytes separately; it seems a safe bet
+     * for longs, but it's less clear for shorts.
+     */
+    if (off & 0x1) {
+        this.ab[off] = w;
+        this.ab[off+1] = w >> 8;
+    } else {
+        this.aw[off >> 1] = w;
+    }
+    this.fDirty = true;
+};
+
+/**
+ * writeLongBigEndian(off, l)
  *
  * @this {Memory}
  * @param {number} off
  * @param {number} l
  */
-Memory.writeLongTypedArray = function writeLongTypedArray(off, l)
+Memory.writeLongBigEndian = function writeLongBigEndian(off, l)
 {
     Component.assert(off >= 0 && off < this.size - 3);
     this.dv.setInt32(off, l, true);
+    this.fDirty = true;
+};
+
+/**
+ * writeLongLittleEndian(off, l)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @param {number} l
+ */
+Memory.writeLongLittleEndian = function writeLongLittleEndian(off, l)
+{
+    Component.assert(off >= 0 && off < this.size - 3);
+    /*
+     * TODO: It remains to be seen if there's any advantage to checking the offset
+     * for an aligned write vs. always writing the bytes separately; it seems a safe bet
+     * for longs, but it's less clear for shorts.
+     */
+    if (off & 0x3) {
+        this.ab[off] = l;
+        this.ab[off+1] = (l >> 8);
+        this.ab[off+2] = (l >> 16);
+        this.ab[off+3] = (l >> 24);
+    } else {
+        this.adw[off >> 2] = l;
+    }
     this.fDirty = true;
 };
 
@@ -635,7 +758,8 @@ Memory.afnMemory         = [Memory.readByteMemory,  Memory.readShortMemory,  Mem
 Memory.afnChecked        = [Memory.readByteChecked, Memory.readShortChecked, Memory.readLongChecked, Memory.writeByteChecked, Memory.writeShortChecked, Memory.writeLongChecked];
 
 if (TYPEDARRAYS) {
-    Memory.afnTypedArray = [Memory.readByteTypedArray, Memory.readShortTypedArray, Memory.readLongTypedArray, Memory.writeByteTypedArray, Memory.writeShortTypedArray, Memory.writeLongTypedArray];
+    Memory.afnBigEndian    = [Memory.readByteBigEndian,    Memory.readShortBigEndian,    Memory.readLongBigEndian,    Memory.writeByteBigEndian,    Memory.writeShortBigEndian,    Memory.writeLongBigEndian];
+    Memory.afnLittleEndian = [Memory.readByteLittleEndian, Memory.readShortLittleEndian, Memory.readLongLittleEndian, Memory.writeByteLittleEndian, Memory.writeShortLittleEndian, Memory.writeLongLittleEndian];
 }
 
 Memory.prototype = {

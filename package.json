@@ -110,6 +110,8 @@
     "./modules/pcjs/lib/x86help.js",
     "./modules/pcjs/lib/x86modb.js",
     "./modules/pcjs/lib/x86modw.js",
+    "./modules/pcjs/lib/x86modb16.js",
+    "./modules/pcjs/lib/x86modw16.js",
     "./modules/pcjs/lib/x86modb32.js",
     "./modules/pcjs/lib/x86modw32.js",
     "./modules/pcjs/lib/x86modsib.js",

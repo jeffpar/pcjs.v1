@@ -36,3167 +36,3423 @@ if (typeof module !== 'undefined') {
     var X86         = require("./x86");
 }
 
-var X86ModW = {};
+var X86ModW16 = {};
 
-X86ModW.aOpModReg = [
+X86ModW16.aOpModReg = [
     /**
-     * opModRegWord00(fn): mod=00 (src:mem)  reg=000 (dst:AX)  r/m=000 (BX+SI)
+     * opMod16RegWord00(fn): mod=00 (src:mem)  reg=000 (dst:AX)  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord00(fn) {
-        this.regEAX = fn.call(this, this.regEAX, this.getEAWordData(this.regEBX + this.regESI));
+    function opMod16RegWord00(fn) {
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.regEBX + this.regESI));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModRegWord01(fn): mod=00 (src:mem)  reg=000 (dst:AX)  r/m=001 (BX+DI)
+     * opMod16RegWord01(fn): mod=00 (src:mem)  reg=000 (dst:AX)  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord01(fn) {
-        this.regEAX = fn.call(this, this.regEAX, this.getEAWordData(this.regEBX + this.regEDI));
+    function opMod16RegWord01(fn) {
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.regEBX + this.regEDI));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModRegWord02(fn): mod=00 (src:mem)  reg=000 (dst:AX)  r/m=010 (BP+SI)
+     * opMod16RegWord02(fn): mod=00 (src:mem)  reg=000 (dst:AX)  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord02(fn) {
-        this.regEAX = fn.call(this, this.regEAX, this.getEAWordStack(this.regEBP + this.regESI));
+    function opMod16RegWord02(fn) {
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordStack(this.regEBP + this.regESI));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModRegWord03(fn): mod=00 (src:mem)  reg=000 (dst:AX)  r/m=011 (BP+DI)
+     * opMod16RegWord03(fn): mod=00 (src:mem)  reg=000 (dst:AX)  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord03(fn) {
-        this.regEAX = fn.call(this, this.regEAX, this.getEAWordStack(this.regEBP + this.regEDI));
+    function opMod16RegWord03(fn) {
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordStack(this.regEBP + this.regEDI));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModRegWord04(fn): mod=00 (src:mem)  reg=000 (dst:AX)  r/m=100 (SI)
+     * opMod16RegWord04(fn): mod=00 (src:mem)  reg=000 (dst:AX)  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord04(fn) {
-        this.regEAX = fn.call(this, this.regEAX, this.getEAWordData(this.regESI));
+    function opMod16RegWord04(fn) {
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.regESI));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModRegWord05(fn): mod=00 (src:mem)  reg=000 (dst:AX)  r/m=101 (DI)
+     * opMod16RegWord05(fn): mod=00 (src:mem)  reg=000 (dst:AX)  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord05(fn) {
-        this.regEAX = fn.call(this, this.regEAX, this.getEAWordData(this.regEDI));
+    function opMod16RegWord05(fn) {
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.regEDI));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModRegWord06(fn): mod=00 (src:mem)  reg=000 (dst:AX)  r/m=110 (d16)
+     * opMod16RegWord06(fn): mod=00 (src:mem)  reg=000 (dst:AX)  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord06(fn) {
-        this.regEAX = fn.call(this, this.regEAX, this.getEAWordData(this.getIPWord()));
+    function opMod16RegWord06(fn) {
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.getIPWord()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
-     * opModRegWord07(fn): mod=00 (src:mem)  reg=000 (dst:AX)  r/m=111 (BX)
+     * opMod16RegWord07(fn): mod=00 (src:mem)  reg=000 (dst:AX)  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord07(fn) {
-        this.regEAX = fn.call(this, this.regEAX, this.getEAWordData(this.regEBX));
+    function opMod16RegWord07(fn) {
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.regEBX));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModRegWord08(fn): mod=00 (src:mem)  reg=001 (dst:CX)  r/m=000 (BX+SI)
+     * opMod16RegWord08(fn): mod=00 (src:mem)  reg=001 (dst:CX)  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord08(fn) {
-        this.regECX = fn.call(this, this.regECX, this.getEAWordData(this.regEBX + this.regESI));
+    function opMod16RegWord08(fn) {
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.regEBX + this.regESI));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModRegWord09(fn): mod=00 (src:mem)  reg=001 (dst:CX)  r/m=001 (BX+DI)
+     * opMod16RegWord09(fn): mod=00 (src:mem)  reg=001 (dst:CX)  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord09(fn) {
-        this.regECX = fn.call(this, this.regECX, this.getEAWordData(this.regEBX + this.regEDI));
+    function opMod16RegWord09(fn) {
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.regEBX + this.regEDI));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModRegWord0A(fn): mod=00 (src:mem)  reg=001 (dst:CX)  r/m=010 (BP+SI)
+     * opMod16RegWord0A(fn): mod=00 (src:mem)  reg=001 (dst:CX)  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord0A(fn) {
-        this.regECX = fn.call(this, this.regECX, this.getEAWordStack(this.regEBP + this.regESI));
+    function opMod16RegWord0A(fn) {
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordStack(this.regEBP + this.regESI));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModRegWord0B(fn): mod=00 (src:mem)  reg=001 (dst:CX)  r/m=011 (BP+DI)
+     * opMod16RegWord0B(fn): mod=00 (src:mem)  reg=001 (dst:CX)  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord0B(fn) {
-        this.regECX = fn.call(this, this.regECX, this.getEAWordStack(this.regEBP + this.regEDI));
+    function opMod16RegWord0B(fn) {
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordStack(this.regEBP + this.regEDI));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModRegWord0C(fn): mod=00 (src:mem)  reg=001 (dst:CX)  r/m=100 (SI)
+     * opMod16RegWord0C(fn): mod=00 (src:mem)  reg=001 (dst:CX)  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord0C(fn) {
-        this.regECX = fn.call(this, this.regECX, this.getEAWordData(this.regESI));
+    function opMod16RegWord0C(fn) {
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.regESI));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModRegWord0D(fn): mod=00 (src:mem)  reg=001 (dst:CX)  r/m=101 (DI)
+     * opMod16RegWord0D(fn): mod=00 (src:mem)  reg=001 (dst:CX)  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord0D(fn) {
-        this.regECX = fn.call(this, this.regECX, this.getEAWordData(this.regEDI));
+    function opMod16RegWord0D(fn) {
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.regEDI));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModRegWord0E(fn): mod=00 (src:mem)  reg=001 (dst:CX)  r/m=110 (d16)
+     * opMod16RegWord0E(fn): mod=00 (src:mem)  reg=001 (dst:CX)  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord0E(fn) {
-        this.regECX = fn.call(this, this.regECX, this.getEAWordData(this.getIPWord()));
+    function opMod16RegWord0E(fn) {
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.getIPWord()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
-     * opModRegWord0F(fn): mod=00 (src:mem)  reg=001 (dst:CX)  r/m=111 (BX)
+     * opMod16RegWord0F(fn): mod=00 (src:mem)  reg=001 (dst:CX)  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord0F(fn) {
-        this.regECX = fn.call(this, this.regECX, this.getEAWordData(this.regEBX));
+    function opMod16RegWord0F(fn) {
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.regEBX));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModRegWord10(fn): mod=00 (src:mem)  reg=010 (dst:DX)  r/m=000 (BX+SI)
+     * opMod16RegWord10(fn): mod=00 (src:mem)  reg=010 (dst:DX)  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord10(fn) {
-        this.regEDX = fn.call(this, this.regEDX, this.getEAWordData(this.regEBX + this.regESI));
+    function opMod16RegWord10(fn) {
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.regEBX + this.regESI));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModRegWord11(fn): mod=00 (src:mem)  reg=010 (dst:DX)  r/m=001 (BX+DI)
+     * opMod16RegWord11(fn): mod=00 (src:mem)  reg=010 (dst:DX)  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord11(fn) {
-        this.regEDX = fn.call(this, this.regEDX, this.getEAWordData(this.regEBX + this.regEDI));
+    function opMod16RegWord11(fn) {
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.regEBX + this.regEDI));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModRegWord12(fn): mod=00 (src:mem)  reg=010 (dst:DX)  r/m=010 (BP+SI)
+     * opMod16RegWord12(fn): mod=00 (src:mem)  reg=010 (dst:DX)  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord12(fn) {
-        this.regEDX = fn.call(this, this.regEDX, this.getEAWordStack(this.regEBP + this.regESI));
+    function opMod16RegWord12(fn) {
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordStack(this.regEBP + this.regESI));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModRegWord13(fn): mod=00 (src:mem)  reg=010 (dst:DX)  r/m=011 (BP+DI)
+     * opMod16RegWord13(fn): mod=00 (src:mem)  reg=010 (dst:DX)  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord13(fn) {
-        this.regEDX = fn.call(this, this.regEDX, this.getEAWordStack(this.regEBP + this.regEDI));
+    function opMod16RegWord13(fn) {
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordStack(this.regEBP + this.regEDI));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModRegWord14(fn): mod=00 (src:mem)  reg=010 (dst:DX)  r/m=100 (SI)
+     * opMod16RegWord14(fn): mod=00 (src:mem)  reg=010 (dst:DX)  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord14(fn) {
-        this.regEDX = fn.call(this, this.regEDX, this.getEAWordData(this.regESI));
+    function opMod16RegWord14(fn) {
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.regESI));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModRegWord15(fn): mod=00 (src:mem)  reg=010 (dst:DX)  r/m=101 (DI)
+     * opMod16RegWord15(fn): mod=00 (src:mem)  reg=010 (dst:DX)  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord15(fn) {
-        this.regEDX = fn.call(this, this.regEDX, this.getEAWordData(this.regEDI));
+    function opMod16RegWord15(fn) {
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.regEDI));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModRegWord16(fn): mod=00 (src:mem)  reg=010 (dst:DX)  r/m=110 (d16)
+     * opMod16RegWord16(fn): mod=00 (src:mem)  reg=010 (dst:DX)  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord16(fn) {
-        this.regEDX = fn.call(this, this.regEDX, this.getEAWordData(this.getIPWord()));
+    function opMod16RegWord16(fn) {
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.getIPWord()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
-     * opModRegWord17(fn): mod=00 (src:mem)  reg=010 (dst:DX)  r/m=111 (BX)
+     * opMod16RegWord17(fn): mod=00 (src:mem)  reg=010 (dst:DX)  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord17(fn) {
-        this.regEDX = fn.call(this, this.regEDX, this.getEAWordData(this.regEBX));
+    function opMod16RegWord17(fn) {
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.regEBX));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModRegWord18(fn): mod=00 (src:mem)  reg=011 (dst:BX)  r/m=000 (BX+SI)
+     * opMod16RegWord18(fn): mod=00 (src:mem)  reg=011 (dst:BX)  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord18(fn) {
-        this.regEBX = fn.call(this, this.regEBX, this.getEAWordData(this.regEBX + this.regESI));
+    function opMod16RegWord18(fn) {
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.regEBX + this.regESI));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModRegWord19(fn): mod=00 (src:mem)  reg=011 (dst:BX)  r/m=001 (BX+DI)
+     * opMod16RegWord19(fn): mod=00 (src:mem)  reg=011 (dst:BX)  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord19(fn) {
-        this.regEBX = fn.call(this, this.regEBX, this.getEAWordData(this.regEBX + this.regEDI));
+    function opMod16RegWord19(fn) {
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.regEBX + this.regEDI));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModRegWord1A(fn): mod=00 (src:mem)  reg=011 (dst:BX)  r/m=010 (BP+SI)
+     * opMod16RegWord1A(fn): mod=00 (src:mem)  reg=011 (dst:BX)  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord1A(fn) {
-        this.regEBX = fn.call(this, this.regEBX, this.getEAWordStack(this.regEBP + this.regESI));
+    function opMod16RegWord1A(fn) {
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordStack(this.regEBP + this.regESI));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModRegWord1B(fn): mod=00 (src:mem)  reg=011 (dst:BX)  r/m=011 (BP+DI)
+     * opMod16RegWord1B(fn): mod=00 (src:mem)  reg=011 (dst:BX)  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord1B(fn) {
-        this.regEBX = fn.call(this, this.regEBX, this.getEAWordStack(this.regEBP + this.regEDI));
+    function opMod16RegWord1B(fn) {
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordStack(this.regEBP + this.regEDI));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModRegWord1C(fn): mod=00 (src:mem)  reg=011 (dst:BX)  r/m=100 (SI)
+     * opMod16RegWord1C(fn): mod=00 (src:mem)  reg=011 (dst:BX)  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord1C(fn) {
-        this.regEBX = fn.call(this, this.regEBX, this.getEAWordData(this.regESI));
+    function opMod16RegWord1C(fn) {
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.regESI));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModRegWord1D(fn): mod=00 (src:mem)  reg=011 (dst:BX)  r/m=101 (DI)
+     * opMod16RegWord1D(fn): mod=00 (src:mem)  reg=011 (dst:BX)  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord1D(fn) {
-        this.regEBX = fn.call(this, this.regEBX, this.getEAWordData(this.regEDI));
+    function opMod16RegWord1D(fn) {
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.regEDI));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModRegWord1E(fn): mod=00 (src:mem)  reg=011 (dst:BX)  r/m=110 (d16)
+     * opMod16RegWord1E(fn): mod=00 (src:mem)  reg=011 (dst:BX)  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord1E(fn) {
-        this.regEBX = fn.call(this, this.regEBX, this.getEAWordData(this.getIPWord()));
+    function opMod16RegWord1E(fn) {
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.getIPWord()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
-     * opModRegWord1F(fn): mod=00 (src:mem)  reg=011 (dst:BX)  r/m=111 (BX)
+     * opMod16RegWord1F(fn): mod=00 (src:mem)  reg=011 (dst:BX)  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord1F(fn) {
-        this.regEBX = fn.call(this, this.regEBX, this.getEAWordData(this.regEBX));
+    function opMod16RegWord1F(fn) {
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.regEBX));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModRegWord20(fn): mod=00 (src:mem)  reg=100 (dst:SP)  r/m=000 (BX+SI)
+     * opMod16RegWord20(fn): mod=00 (src:mem)  reg=100 (dst:SP)  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord20(fn) {
-        this.regESP = fn.call(this, this.regESP, this.getEAWordData(this.regEBX + this.regESI));
+    function opMod16RegWord20(fn) {
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.regEBX + this.regESI));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModRegWord21(fn): mod=00 (src:mem)  reg=100 (dst:SP)  r/m=001 (BX+DI)
+     * opMod16RegWord21(fn): mod=00 (src:mem)  reg=100 (dst:SP)  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord21(fn) {
-        this.regESP = fn.call(this, this.regESP, this.getEAWordData(this.regEBX + this.regEDI));
+    function opMod16RegWord21(fn) {
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.regEBX + this.regEDI));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModRegWord22(fn): mod=00 (src:mem)  reg=100 (dst:SP)  r/m=010 (BP+SI)
+     * opMod16RegWord22(fn): mod=00 (src:mem)  reg=100 (dst:SP)  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord22(fn) {
-        this.regESP = fn.call(this, this.regESP, this.getEAWordStack(this.regEBP + this.regESI));
+    function opMod16RegWord22(fn) {
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordStack(this.regEBP + this.regESI));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModRegWord23(fn): mod=00 (src:mem)  reg=100 (dst:SP)  r/m=011 (BP+DI)
+     * opMod16RegWord23(fn): mod=00 (src:mem)  reg=100 (dst:SP)  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord23(fn) {
-        this.regESP = fn.call(this, this.regESP, this.getEAWordStack(this.regEBP + this.regEDI));
+    function opMod16RegWord23(fn) {
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordStack(this.regEBP + this.regEDI));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModRegWord24(fn): mod=00 (src:mem)  reg=100 (dst:SP)  r/m=100 (SI)
+     * opMod16RegWord24(fn): mod=00 (src:mem)  reg=100 (dst:SP)  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord24(fn) {
-        this.regESP = fn.call(this, this.regESP, this.getEAWordData(this.regESI));
+    function opMod16RegWord24(fn) {
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.regESI));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModRegWord25(fn): mod=00 (src:mem)  reg=100 (dst:SP)  r/m=101 (DI)
+     * opMod16RegWord25(fn): mod=00 (src:mem)  reg=100 (dst:SP)  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord25(fn) {
-        this.regESP = fn.call(this, this.regESP, this.getEAWordData(this.regEDI));
+    function opMod16RegWord25(fn) {
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.regEDI));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModRegWord26(fn): mod=00 (src:mem)  reg=100 (dst:SP)  r/m=110 (d16)
+     * opMod16RegWord26(fn): mod=00 (src:mem)  reg=100 (dst:SP)  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord26(fn) {
-        this.regESP = fn.call(this, this.regESP, this.getEAWordData(this.getIPWord()));
+    function opMod16RegWord26(fn) {
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.getIPWord()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
-     * opModRegWord27(fn): mod=00 (src:mem)  reg=100 (dst:SP)  r/m=111 (BX)
+     * opMod16RegWord27(fn): mod=00 (src:mem)  reg=100 (dst:SP)  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord27(fn) {
-        this.regESP = fn.call(this, this.regESP, this.getEAWordData(this.regEBX));
+    function opMod16RegWord27(fn) {
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.regEBX));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModRegWord28(fn): mod=00 (src:mem)  reg=101 (dst:BP)  r/m=000 (BX+SI)
+     * opMod16RegWord28(fn): mod=00 (src:mem)  reg=101 (dst:BP)  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord28(fn) {
-        this.regEBP = fn.call(this, this.regEBP, this.getEAWordData(this.regEBX + this.regESI));
+    function opMod16RegWord28(fn) {
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.regEBX + this.regESI));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModRegWord29(fn): mod=00 (src:mem)  reg=101 (dst:BP)  r/m=001 (BX+DI)
+     * opMod16RegWord29(fn): mod=00 (src:mem)  reg=101 (dst:BP)  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord29(fn) {
-        this.regEBP = fn.call(this, this.regEBP, this.getEAWordData(this.regEBX + this.regEDI));
+    function opMod16RegWord29(fn) {
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.regEBX + this.regEDI));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModRegWord2A(fn): mod=00 (src:mem)  reg=101 (dst:BP)  r/m=010 (BP+SI)
+     * opMod16RegWord2A(fn): mod=00 (src:mem)  reg=101 (dst:BP)  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord2A(fn) {
-        this.regEBP = fn.call(this, this.regEBP, this.getEAWordStack(this.regEBP + this.regESI));
+    function opMod16RegWord2A(fn) {
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordStack(this.regEBP + this.regESI));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModRegWord2B(fn): mod=00 (src:mem)  reg=101 (dst:BP)  r/m=011 (BP+DI)
+     * opMod16RegWord2B(fn): mod=00 (src:mem)  reg=101 (dst:BP)  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord2B(fn) {
-        this.regEBP = fn.call(this, this.regEBP, this.getEAWordStack(this.regEBP + this.regEDI));
+    function opMod16RegWord2B(fn) {
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordStack(this.regEBP + this.regEDI));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModRegWord2C(fn): mod=00 (src:mem)  reg=101 (dst:BP)  r/m=100 (SI)
+     * opMod16RegWord2C(fn): mod=00 (src:mem)  reg=101 (dst:BP)  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord2C(fn) {
-        this.regEBP = fn.call(this, this.regEBP, this.getEAWordData(this.regESI));
+    function opMod16RegWord2C(fn) {
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.regESI));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModRegWord2D(fn): mod=00 (src:mem)  reg=101 (dst:BP)  r/m=101 (DI)
+     * opMod16RegWord2D(fn): mod=00 (src:mem)  reg=101 (dst:BP)  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord2D(fn) {
-        this.regEBP = fn.call(this, this.regEBP, this.getEAWordData(this.regEDI));
+    function opMod16RegWord2D(fn) {
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.regEDI));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModRegWord2E(fn): mod=00 (src:mem)  reg=101 (dst:BP)  r/m=110 (d16)
+     * opMod16RegWord2E(fn): mod=00 (src:mem)  reg=101 (dst:BP)  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord2E(fn) {
-        this.regEBP = fn.call(this, this.regEBP, this.getEAWordData(this.getIPWord()));
+    function opMod16RegWord2E(fn) {
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.getIPWord()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
-        }
-        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
-    },
-    /**
-     * opModRegWord2F(fn): mod=00 (src:mem)  reg=101 (dst:BP)  r/m=111 (BX)
-     *
-     * @this {X86CPU}
-     * @param {function(number,number)} fn (dst,src)
-     */
-    function opModRegWord2F(fn) {
-        this.regEBP = fn.call(this, this.regEBP, this.getEAWordData(this.regEBX));
-        if (BACKTRACK) {
-            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
-        }
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
-    },
-    /**
-     * opModRegWord30(fn): mod=00 (src:mem)  reg=110 (dst:SI)  r/m=000 (BX+SI)
-     *
-     * @this {X86CPU}
-     * @param {function(number,number)} fn (dst,src)
-     */
-    function opModRegWord30(fn) {
-        this.regESI = fn.call(this, this.regESI, this.getEAWordData(this.regEBX + this.regESI));
-        if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
-        }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
-    },
-    /**
-     * opModRegWord31(fn): mod=00 (src:mem)  reg=110 (dst:SI)  r/m=001 (BX+DI)
-     *
-     * @this {X86CPU}
-     * @param {function(number,number)} fn (dst,src)
-     */
-    function opModRegWord31(fn) {
-        this.regESI = fn.call(this, this.regESI, this.getEAWordData(this.regEBX + this.regEDI));
-        if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
-        }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
-    },
-    /**
-     * opModRegWord32(fn): mod=00 (src:mem)  reg=110 (dst:SI)  r/m=010 (BP+SI)
-     *
-     * @this {X86CPU}
-     * @param {function(number,number)} fn (dst,src)
-     */
-    function opModRegWord32(fn) {
-        this.regESI = fn.call(this, this.regESI, this.getEAWordStack(this.regEBP + this.regESI));
-        if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
-        }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
-    },
-    /**
-     * opModRegWord33(fn): mod=00 (src:mem)  reg=110 (dst:SI)  r/m=011 (BP+DI)
-     *
-     * @this {X86CPU}
-     * @param {function(number,number)} fn (dst,src)
-     */
-    function opModRegWord33(fn) {
-        this.regESI = fn.call(this, this.regESI, this.getEAWordStack(this.regEBP + this.regEDI));
-        if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
-        }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
-    },
-    /**
-     * opModRegWord34(fn): mod=00 (src:mem)  reg=110 (dst:SI)  r/m=100 (SI)
-     *
-     * @this {X86CPU}
-     * @param {function(number,number)} fn (dst,src)
-     */
-    function opModRegWord34(fn) {
-        this.regESI = fn.call(this, this.regESI, this.getEAWordData(this.regESI));
-        if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
-        }
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
-    },
-    /**
-     * opModRegWord35(fn): mod=00 (src:mem)  reg=110 (dst:SI)  r/m=101 (DI)
-     *
-     * @this {X86CPU}
-     * @param {function(number,number)} fn (dst,src)
-     */
-    function opModRegWord35(fn) {
-        this.regESI = fn.call(this, this.regESI, this.getEAWordData(this.regEDI));
-        if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
-        }
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
-    },
-    /**
-     * opModRegWord36(fn): mod=00 (src:mem)  reg=110 (dst:SI)  r/m=110 (d16)
-     *
-     * @this {X86CPU}
-     * @param {function(number,number)} fn (dst,src)
-     */
-    function opModRegWord36(fn) {
-        this.regESI = fn.call(this, this.regESI, this.getEAWordData(this.getIPWord()));
-        if (BACKTRACK) {
-            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
-     * opModRegWord37(fn): mod=00 (src:mem)  reg=110 (dst:SI)  r/m=111 (BX)
+     * opMod16RegWord2F(fn): mod=00 (src:mem)  reg=101 (dst:BP)  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord37(fn) {
-        this.regESI = fn.call(this, this.regESI, this.getEAWordData(this.regEBX));
+    function opMod16RegWord2F(fn) {
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.regEBX));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
+        if (BACKTRACK) {
+            this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
+        }
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+    },
+    /**
+     * opMod16RegWord30(fn): mod=00 (src:mem)  reg=110 (dst:SI)  r/m=000 (BX+SI)
+     *
+     * @this {X86CPU}
+     * @param {function(number,number)} fn (dst,src)
+     */
+    function opMod16RegWord30(fn) {
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.regEBX + this.regESI));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
+        if (BACKTRACK) {
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
+        }
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+    },
+    /**
+     * opMod16RegWord31(fn): mod=00 (src:mem)  reg=110 (dst:SI)  r/m=001 (BX+DI)
+     *
+     * @this {X86CPU}
+     * @param {function(number,number)} fn (dst,src)
+     */
+    function opMod16RegWord31(fn) {
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.regEBX + this.regEDI));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
+        if (BACKTRACK) {
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
+        }
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+    },
+    /**
+     * opMod16RegWord32(fn): mod=00 (src:mem)  reg=110 (dst:SI)  r/m=010 (BP+SI)
+     *
+     * @this {X86CPU}
+     * @param {function(number,number)} fn (dst,src)
+     */
+    function opMod16RegWord32(fn) {
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordStack(this.regEBP + this.regESI));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
+        if (BACKTRACK) {
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
+        }
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+    },
+    /**
+     * opMod16RegWord33(fn): mod=00 (src:mem)  reg=110 (dst:SI)  r/m=011 (BP+DI)
+     *
+     * @this {X86CPU}
+     * @param {function(number,number)} fn (dst,src)
+     */
+    function opMod16RegWord33(fn) {
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordStack(this.regEBP + this.regEDI));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
+        if (BACKTRACK) {
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
+        }
+        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+    },
+    /**
+     * opMod16RegWord34(fn): mod=00 (src:mem)  reg=110 (dst:SI)  r/m=100 (SI)
+     *
+     * @this {X86CPU}
+     * @param {function(number,number)} fn (dst,src)
+     */
+    function opMod16RegWord34(fn) {
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.regESI));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModRegWord38(fn): mod=00 (src:mem)  reg=111 (dst:DI)  r/m=000 (BX+SI)
+     * opMod16RegWord35(fn): mod=00 (src:mem)  reg=110 (dst:SI)  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord38(fn) {
-        this.regEDI = fn.call(this, this.regEDI, this.getEAWordData(this.regEBX + this.regESI));
+    function opMod16RegWord35(fn) {
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.regEDI));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
+        if (BACKTRACK) {
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
+        }
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+    },
+    /**
+     * opMod16RegWord36(fn): mod=00 (src:mem)  reg=110 (dst:SI)  r/m=110 (d16)
+     *
+     * @this {X86CPU}
+     * @param {function(number,number)} fn (dst,src)
+     */
+    function opMod16RegWord36(fn) {
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.getIPWord()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
+        if (BACKTRACK) {
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
+        }
+        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
+    },
+    /**
+     * opMod16RegWord37(fn): mod=00 (src:mem)  reg=110 (dst:SI)  r/m=111 (BX)
+     *
+     * @this {X86CPU}
+     * @param {function(number,number)} fn (dst,src)
+     */
+    function opMod16RegWord37(fn) {
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.regEBX));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
+        if (BACKTRACK) {
+            this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
+        }
+        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+    },
+    /**
+     * opMod16RegWord38(fn): mod=00 (src:mem)  reg=111 (dst:DI)  r/m=000 (BX+SI)
+     *
+     * @this {X86CPU}
+     * @param {function(number,number)} fn (dst,src)
+     */
+    function opMod16RegWord38(fn) {
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.regEBX + this.regESI));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModRegWord39(fn): mod=00 (src:mem)  reg=111 (dst:DI)  r/m=001 (BX+DI)
+     * opMod16RegWord39(fn): mod=00 (src:mem)  reg=111 (dst:DI)  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord39(fn) {
-        this.regEDI = fn.call(this, this.regEDI, this.getEAWordData(this.regEBX + this.regEDI));
+    function opMod16RegWord39(fn) {
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.regEBX + this.regEDI));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModRegWord3A(fn): mod=00 (src:mem)  reg=111 (dst:DI)  r/m=010 (BP+SI)
+     * opMod16RegWord3A(fn): mod=00 (src:mem)  reg=111 (dst:DI)  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord3A(fn) {
-        this.regEDI = fn.call(this, this.regEDI, this.getEAWordStack(this.regEBP + this.regESI));
+    function opMod16RegWord3A(fn) {
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordStack(this.regEBP + this.regESI));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModRegWord3B(fn): mod=00 (src:mem)  reg=111 (dst:DI)  r/m=011 (BP+DI)
+     * opMod16RegWord3B(fn): mod=00 (src:mem)  reg=111 (dst:DI)  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord3B(fn) {
-        this.regEDI = fn.call(this, this.regEDI, this.getEAWordStack(this.regEBP + this.regEDI));
+    function opMod16RegWord3B(fn) {
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordStack(this.regEBP + this.regEDI));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModRegWord3C(fn): mod=00 (src:mem)  reg=111 (dst:DI)  r/m=100 (SI)
+     * opMod16RegWord3C(fn): mod=00 (src:mem)  reg=111 (dst:DI)  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord3C(fn) {
-        this.regEDI = fn.call(this, this.regEDI, this.getEAWordData(this.regESI));
+    function opMod16RegWord3C(fn) {
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.regESI));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModRegWord3D(fn): mod=00 (src:mem)  reg=111 (dst:DI)  r/m=101 (DI)
+     * opMod16RegWord3D(fn): mod=00 (src:mem)  reg=111 (dst:DI)  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord3D(fn) {
-        this.regEDI = fn.call(this, this.regEDI, this.getEAWordData(this.regEDI));
+    function opMod16RegWord3D(fn) {
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.regEDI));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModRegWord3E(fn): mod=00 (src:mem)  reg=111 (dst:DI)  r/m=110 (d16)
+     * opMod16RegWord3E(fn): mod=00 (src:mem)  reg=111 (dst:DI)  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord3E(fn) {
-        this.regEDI = fn.call(this, this.regEDI, this.getEAWordData(this.getIPWord()));
+    function opMod16RegWord3E(fn) {
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.getIPWord()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
-     * opModRegWord3F(fn): mod=00 (src:mem)  reg=111 (dst:DI)  r/m=111 (BX)
+     * opMod16RegWord3F(fn): mod=00 (src:mem)  reg=111 (dst:DI)  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord3F(fn) {
-        this.regEDI = fn.call(this, this.regEDI, this.getEAWordData(this.regEBX));
+    function opMod16RegWord3F(fn) {
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.regEBX));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModRegWord40(fn): mod=01 (src:mem+d8)  reg=000 (dst:AX)  r/m=000 (BX+SI+d8)
+     * opMod16RegWord40(fn): mod=01 (src:mem+d8)  reg=000 (dst:AX)  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord40(fn) {
-        this.regEAX = fn.call(this, this.regEAX, this.getEAWordData(this.regEBX + this.regESI + this.getIPDisp()));
+    function opMod16RegWord40(fn) {
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.regEBX + this.regESI + this.getIPDisp()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModRegWord41(fn): mod=01 (src:mem+d8)  reg=000 (dst:AX)  r/m=001 (BX+DI+d8)
+     * opMod16RegWord41(fn): mod=01 (src:mem+d8)  reg=000 (dst:AX)  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord41(fn) {
-        this.regEAX = fn.call(this, this.regEAX, this.getEAWordData(this.regEBX + this.regEDI + this.getIPDisp()));
+    function opMod16RegWord41(fn) {
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.regEBX + this.regEDI + this.getIPDisp()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModRegWord42(fn): mod=01 (src:mem+d8)  reg=000 (dst:AX)  r/m=010 (BP+SI+d8)
+     * opMod16RegWord42(fn): mod=01 (src:mem+d8)  reg=000 (dst:AX)  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord42(fn) {
-        this.regEAX = fn.call(this, this.regEAX, this.getEAWordStack(this.regEBP + this.regESI + this.getIPDisp()));
+    function opMod16RegWord42(fn) {
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordStack(this.regEBP + this.regESI + this.getIPDisp()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModRegWord43(fn): mod=01 (src:mem+d8)  reg=000 (dst:AX)  r/m=011 (BP+DI+d8)
+     * opMod16RegWord43(fn): mod=01 (src:mem+d8)  reg=000 (dst:AX)  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord43(fn) {
-        this.regEAX = fn.call(this, this.regEAX, this.getEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()));
+    function opMod16RegWord43(fn) {
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModRegWord44(fn): mod=01 (src:mem+d8)  reg=000 (dst:AX)  r/m=100 (SI+d8)
+     * opMod16RegWord44(fn): mod=01 (src:mem+d8)  reg=000 (dst:AX)  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord44(fn) {
-        this.regEAX = fn.call(this, this.regEAX, this.getEAWordData(this.regESI + this.getIPDisp()));
+    function opMod16RegWord44(fn) {
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.regESI + this.getIPDisp()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord45(fn): mod=01 (src:mem+d8)  reg=000 (dst:AX)  r/m=101 (DI+d8)
+     * opMod16RegWord45(fn): mod=01 (src:mem+d8)  reg=000 (dst:AX)  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord45(fn) {
-        this.regEAX = fn.call(this, this.regEAX, this.getEAWordData(this.regEDI + this.getIPDisp()));
+    function opMod16RegWord45(fn) {
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.regEDI + this.getIPDisp()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord46(fn): mod=01 (src:mem+d8)  reg=000 (dst:AX)  r/m=110 (BP+d8)
+     * opMod16RegWord46(fn): mod=01 (src:mem+d8)  reg=000 (dst:AX)  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord46(fn) {
-        this.regEAX = fn.call(this, this.regEAX, this.getEAWordStack(this.regEBP + this.getIPDisp()));
+    function opMod16RegWord46(fn) {
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordStack(this.regEBP + this.getIPDisp()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord47(fn): mod=01 (src:mem+d8)  reg=000 (dst:AX)  r/m=111 (BX+d8)
+     * opMod16RegWord47(fn): mod=01 (src:mem+d8)  reg=000 (dst:AX)  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord47(fn) {
-        this.regEAX = fn.call(this, this.regEAX, this.getEAWordData(this.regEBX + this.getIPDisp()));
+    function opMod16RegWord47(fn) {
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.regEBX + this.getIPDisp()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord48(fn): mod=01 (src:mem+d8)  reg=001 (dst:CX)  r/m=000 (BX+SI+d8)
+     * opMod16RegWord48(fn): mod=01 (src:mem+d8)  reg=001 (dst:CX)  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord48(fn) {
-        this.regECX = fn.call(this, this.regECX, this.getEAWordData(this.regEBX + this.regESI + this.getIPDisp()));
+    function opMod16RegWord48(fn) {
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.regEBX + this.regESI + this.getIPDisp()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModRegWord49(fn): mod=01 (src:mem+d8)  reg=001 (dst:CX)  r/m=001 (BX+DI+d8)
+     * opMod16RegWord49(fn): mod=01 (src:mem+d8)  reg=001 (dst:CX)  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord49(fn) {
-        this.regECX = fn.call(this, this.regECX, this.getEAWordData(this.regEBX + this.regEDI + this.getIPDisp()));
+    function opMod16RegWord49(fn) {
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.regEBX + this.regEDI + this.getIPDisp()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModRegWord4A(fn): mod=01 (src:mem+d8)  reg=001 (dst:CX)  r/m=010 (BP+SI+d8)
+     * opMod16RegWord4A(fn): mod=01 (src:mem+d8)  reg=001 (dst:CX)  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord4A(fn) {
-        this.regECX = fn.call(this, this.regECX, this.getEAWordStack(this.regEBP + this.regESI + this.getIPDisp()));
+    function opMod16RegWord4A(fn) {
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordStack(this.regEBP + this.regESI + this.getIPDisp()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModRegWord4B(fn): mod=01 (src:mem+d8)  reg=001 (dst:CX)  r/m=011 (BP+DI+d8)
+     * opMod16RegWord4B(fn): mod=01 (src:mem+d8)  reg=001 (dst:CX)  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord4B(fn) {
-        this.regECX = fn.call(this, this.regECX, this.getEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()));
+    function opMod16RegWord4B(fn) {
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModRegWord4C(fn): mod=01 (src:mem+d8)  reg=001 (dst:CX)  r/m=100 (SI+d8)
+     * opMod16RegWord4C(fn): mod=01 (src:mem+d8)  reg=001 (dst:CX)  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord4C(fn) {
-        this.regECX = fn.call(this, this.regECX, this.getEAWordData(this.regESI + this.getIPDisp()));
+    function opMod16RegWord4C(fn) {
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.regESI + this.getIPDisp()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord4D(fn): mod=01 (src:mem+d8)  reg=001 (dst:CX)  r/m=101 (DI+d8)
+     * opMod16RegWord4D(fn): mod=01 (src:mem+d8)  reg=001 (dst:CX)  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord4D(fn) {
-        this.regECX = fn.call(this, this.regECX, this.getEAWordData(this.regEDI + this.getIPDisp()));
+    function opMod16RegWord4D(fn) {
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.regEDI + this.getIPDisp()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord4E(fn): mod=01 (src:mem+d8)  reg=001 (dst:CX)  r/m=110 (BP+d8)
+     * opMod16RegWord4E(fn): mod=01 (src:mem+d8)  reg=001 (dst:CX)  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord4E(fn) {
-        this.regECX = fn.call(this, this.regECX, this.getEAWordStack(this.regEBP + this.getIPDisp()));
+    function opMod16RegWord4E(fn) {
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordStack(this.regEBP + this.getIPDisp()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord4F(fn): mod=01 (src:mem+d8)  reg=001 (dst:CX)  r/m=111 (BX+d8)
+     * opMod16RegWord4F(fn): mod=01 (src:mem+d8)  reg=001 (dst:CX)  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord4F(fn) {
-        this.regECX = fn.call(this, this.regECX, this.getEAWordData(this.regEBX + this.getIPDisp()));
+    function opMod16RegWord4F(fn) {
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.regEBX + this.getIPDisp()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord50(fn): mod=01 (src:mem+d8)  reg=010 (dst:DX)  r/m=000 (BX+SI+d8)
+     * opMod16RegWord50(fn): mod=01 (src:mem+d8)  reg=010 (dst:DX)  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord50(fn) {
-        this.regEDX = fn.call(this, this.regEDX, this.getEAWordData(this.regEBX + this.regESI + this.getIPDisp()));
+    function opMod16RegWord50(fn) {
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.regEBX + this.regESI + this.getIPDisp()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModRegWord51(fn): mod=01 (src:mem+d8)  reg=010 (dst:DX)  r/m=001 (BX+DI+d8)
+     * opMod16RegWord51(fn): mod=01 (src:mem+d8)  reg=010 (dst:DX)  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord51(fn) {
-        this.regEDX = fn.call(this, this.regEDX, this.getEAWordData(this.regEBX + this.regEDI + this.getIPDisp()));
+    function opMod16RegWord51(fn) {
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.regEBX + this.regEDI + this.getIPDisp()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModRegWord52(fn): mod=01 (src:mem+d8)  reg=010 (dst:DX)  r/m=010 (BP+SI+d8)
+     * opMod16RegWord52(fn): mod=01 (src:mem+d8)  reg=010 (dst:DX)  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord52(fn) {
-        this.regEDX = fn.call(this, this.regEDX, this.getEAWordStack(this.regEBP + this.regESI + this.getIPDisp()));
+    function opMod16RegWord52(fn) {
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordStack(this.regEBP + this.regESI + this.getIPDisp()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModRegWord53(fn): mod=01 (src:mem+d8)  reg=010 (dst:DX)  r/m=011 (BP+DI+d8)
+     * opMod16RegWord53(fn): mod=01 (src:mem+d8)  reg=010 (dst:DX)  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord53(fn) {
-        this.regEDX = fn.call(this, this.regEDX, this.getEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()));
+    function opMod16RegWord53(fn) {
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModRegWord54(fn): mod=01 (src:mem+d8)  reg=010 (dst:DX)  r/m=100 (SI+d8)
+     * opMod16RegWord54(fn): mod=01 (src:mem+d8)  reg=010 (dst:DX)  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord54(fn) {
-        this.regEDX = fn.call(this, this.regEDX, this.getEAWordData(this.regESI + this.getIPDisp()));
+    function opMod16RegWord54(fn) {
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.regESI + this.getIPDisp()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord55(fn): mod=01 (src:mem+d8)  reg=010 (dst:DX)  r/m=101 (DI+d8)
+     * opMod16RegWord55(fn): mod=01 (src:mem+d8)  reg=010 (dst:DX)  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord55(fn) {
-        this.regEDX = fn.call(this, this.regEDX, this.getEAWordData(this.regEDI + this.getIPDisp()));
+    function opMod16RegWord55(fn) {
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.regEDI + this.getIPDisp()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord56(fn): mod=01 (src:mem+d8)  reg=010 (dst:DX)  r/m=110 (BP+d8)
+     * opMod16RegWord56(fn): mod=01 (src:mem+d8)  reg=010 (dst:DX)  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord56(fn) {
-        this.regEDX = fn.call(this, this.regEDX, this.getEAWordStack(this.regEBP + this.getIPDisp()));
+    function opMod16RegWord56(fn) {
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordStack(this.regEBP + this.getIPDisp()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord57(fn): mod=01 (src:mem+d8)  reg=010 (dst:DX)  r/m=111 (BX+d8)
+     * opMod16RegWord57(fn): mod=01 (src:mem+d8)  reg=010 (dst:DX)  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord57(fn) {
-        this.regEDX = fn.call(this, this.regEDX, this.getEAWordData(this.regEBX + this.getIPDisp()));
+    function opMod16RegWord57(fn) {
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.regEBX + this.getIPDisp()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord58(fn): mod=01 (src:mem+d8)  reg=011 (dst:BX)  r/m=000 (BX+SI+d8)
+     * opMod16RegWord58(fn): mod=01 (src:mem+d8)  reg=011 (dst:BX)  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord58(fn) {
-        this.regEBX = fn.call(this, this.regEBX, this.getEAWordData(this.regEBX + this.regESI + this.getIPDisp()));
+    function opMod16RegWord58(fn) {
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.regEBX + this.regESI + this.getIPDisp()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModRegWord59(fn): mod=01 (src:mem+d8)  reg=011 (dst:BX)  r/m=001 (BX+DI+d8)
+     * opMod16RegWord59(fn): mod=01 (src:mem+d8)  reg=011 (dst:BX)  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord59(fn) {
-        this.regEBX = fn.call(this, this.regEBX, this.getEAWordData(this.regEBX + this.regEDI + this.getIPDisp()));
+    function opMod16RegWord59(fn) {
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.regEBX + this.regEDI + this.getIPDisp()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModRegWord5A(fn): mod=01 (src:mem+d8)  reg=011 (dst:BX)  r/m=010 (BP+SI+d8)
+     * opMod16RegWord5A(fn): mod=01 (src:mem+d8)  reg=011 (dst:BX)  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord5A(fn) {
-        this.regEBX = fn.call(this, this.regEBX, this.getEAWordStack(this.regEBP + this.regESI + this.getIPDisp()));
+    function opMod16RegWord5A(fn) {
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordStack(this.regEBP + this.regESI + this.getIPDisp()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModRegWord5B(fn): mod=01 (src:mem+d8)  reg=011 (dst:BX)  r/m=011 (BP+DI+d8)
+     * opMod16RegWord5B(fn): mod=01 (src:mem+d8)  reg=011 (dst:BX)  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord5B(fn) {
-        this.regEBX = fn.call(this, this.regEBX, this.getEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()));
+    function opMod16RegWord5B(fn) {
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModRegWord5C(fn): mod=01 (src:mem+d8)  reg=011 (dst:BX)  r/m=100 (SI+d8)
+     * opMod16RegWord5C(fn): mod=01 (src:mem+d8)  reg=011 (dst:BX)  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord5C(fn) {
-        this.regEBX = fn.call(this, this.regEBX, this.getEAWordData(this.regESI + this.getIPDisp()));
+    function opMod16RegWord5C(fn) {
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.regESI + this.getIPDisp()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord5D(fn): mod=01 (src:mem+d8)  reg=011 (dst:BX)  r/m=101 (DI+d8)
+     * opMod16RegWord5D(fn): mod=01 (src:mem+d8)  reg=011 (dst:BX)  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord5D(fn) {
-        this.regEBX = fn.call(this, this.regEBX, this.getEAWordData(this.regEDI + this.getIPDisp()));
+    function opMod16RegWord5D(fn) {
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.regEDI + this.getIPDisp()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord5E(fn): mod=01 (src:mem+d8)  reg=011 (dst:BX)  r/m=110 (BP+d8)
+     * opMod16RegWord5E(fn): mod=01 (src:mem+d8)  reg=011 (dst:BX)  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord5E(fn) {
-        this.regEBX = fn.call(this, this.regEBX, this.getEAWordStack(this.regEBP + this.getIPDisp()));
+    function opMod16RegWord5E(fn) {
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordStack(this.regEBP + this.getIPDisp()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord5F(fn): mod=01 (src:mem+d8)  reg=011 (dst:BX)  r/m=111 (BX+d8)
+     * opMod16RegWord5F(fn): mod=01 (src:mem+d8)  reg=011 (dst:BX)  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord5F(fn) {
-        this.regEBX = fn.call(this, this.regEBX, this.getEAWordData(this.regEBX + this.getIPDisp()));
+    function opMod16RegWord5F(fn) {
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.regEBX + this.getIPDisp()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord60(fn): mod=01 (src:mem+d8)  reg=100 (dst:SP)  r/m=000 (BX+SI+d8)
+     * opMod16RegWord60(fn): mod=01 (src:mem+d8)  reg=100 (dst:SP)  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord60(fn) {
-        this.regESP = fn.call(this, this.regESP, this.getEAWordData(this.regEBX + this.regESI + this.getIPDisp()));
+    function opMod16RegWord60(fn) {
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.regEBX + this.regESI + this.getIPDisp()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModRegWord61(fn): mod=01 (src:mem+d8)  reg=100 (dst:SP)  r/m=001 (BX+DI+d8)
+     * opMod16RegWord61(fn): mod=01 (src:mem+d8)  reg=100 (dst:SP)  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord61(fn) {
-        this.regESP = fn.call(this, this.regESP, this.getEAWordData(this.regEBX + this.regEDI + this.getIPDisp()));
+    function opMod16RegWord61(fn) {
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.regEBX + this.regEDI + this.getIPDisp()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModRegWord62(fn): mod=01 (src:mem+d8)  reg=100 (dst:SP)  r/m=010 (BP+SI+d8)
+     * opMod16RegWord62(fn): mod=01 (src:mem+d8)  reg=100 (dst:SP)  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord62(fn) {
-        this.regESP = fn.call(this, this.regESP, this.getEAWordStack(this.regEBP + this.regESI + this.getIPDisp()));
+    function opMod16RegWord62(fn) {
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordStack(this.regEBP + this.regESI + this.getIPDisp()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModRegWord63(fn): mod=01 (src:mem+d8)  reg=100 (dst:SP)  r/m=011 (BP+DI+d8)
+     * opMod16RegWord63(fn): mod=01 (src:mem+d8)  reg=100 (dst:SP)  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord63(fn) {
-        this.regESP = fn.call(this, this.regESP, this.getEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()));
+    function opMod16RegWord63(fn) {
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModRegWord64(fn): mod=01 (src:mem+d8)  reg=100 (dst:SP)  r/m=100 (SI+d8)
+     * opMod16RegWord64(fn): mod=01 (src:mem+d8)  reg=100 (dst:SP)  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord64(fn) {
-        this.regESP = fn.call(this, this.regESP, this.getEAWordData(this.regESI + this.getIPDisp()));
+    function opMod16RegWord64(fn) {
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.regESI + this.getIPDisp()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord65(fn): mod=01 (src:mem+d8)  reg=100 (dst:SP)  r/m=101 (DI+d8)
+     * opMod16RegWord65(fn): mod=01 (src:mem+d8)  reg=100 (dst:SP)  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord65(fn) {
-        this.regESP = fn.call(this, this.regESP, this.getEAWordData(this.regEDI + this.getIPDisp()));
+    function opMod16RegWord65(fn) {
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.regEDI + this.getIPDisp()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord66(fn): mod=01 (src:mem+d8)  reg=100 (dst:SP)  r/m=110 (BP+d8)
+     * opMod16RegWord66(fn): mod=01 (src:mem+d8)  reg=100 (dst:SP)  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord66(fn) {
-        this.regESP = fn.call(this, this.regESP, this.getEAWordStack(this.regEBP + this.getIPDisp()));
+    function opMod16RegWord66(fn) {
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordStack(this.regEBP + this.getIPDisp()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord67(fn): mod=01 (src:mem+d8)  reg=100 (dst:SP)  r/m=111 (BX+d8)
+     * opMod16RegWord67(fn): mod=01 (src:mem+d8)  reg=100 (dst:SP)  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord67(fn) {
-        this.regESP = fn.call(this, this.regESP, this.getEAWordData(this.regEBX + this.getIPDisp()));
+    function opMod16RegWord67(fn) {
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.regEBX + this.getIPDisp()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord68(fn): mod=01 (src:mem+d8)  reg=101 (dst:BP)  r/m=000 (BX+SI+d8)
+     * opMod16RegWord68(fn): mod=01 (src:mem+d8)  reg=101 (dst:BP)  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord68(fn) {
-        this.regEBP = fn.call(this, this.regEBP, this.getEAWordData(this.regEBX + this.regESI + this.getIPDisp()));
+    function opMod16RegWord68(fn) {
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.regEBX + this.regESI + this.getIPDisp()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModRegWord69(fn): mod=01 (src:mem+d8)  reg=101 (dst:BP)  r/m=001 (BX+DI+d8)
+     * opMod16RegWord69(fn): mod=01 (src:mem+d8)  reg=101 (dst:BP)  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord69(fn) {
-        this.regEBP = fn.call(this, this.regEBP, this.getEAWordData(this.regEBX + this.regEDI + this.getIPDisp()));
+    function opMod16RegWord69(fn) {
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.regEBX + this.regEDI + this.getIPDisp()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModRegWord6A(fn): mod=01 (src:mem+d8)  reg=101 (dst:BP)  r/m=010 (BP+SI+d8)
+     * opMod16RegWord6A(fn): mod=01 (src:mem+d8)  reg=101 (dst:BP)  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord6A(fn) {
-        this.regEBP = fn.call(this, this.regEBP, this.getEAWordStack(this.regEBP + this.regESI + this.getIPDisp()));
+    function opMod16RegWord6A(fn) {
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordStack(this.regEBP + this.regESI + this.getIPDisp()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModRegWord6B(fn): mod=01 (src:mem+d8)  reg=101 (dst:BP)  r/m=011 (BP+DI+d8)
+     * opMod16RegWord6B(fn): mod=01 (src:mem+d8)  reg=101 (dst:BP)  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord6B(fn) {
-        this.regEBP = fn.call(this, this.regEBP, this.getEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()));
+    function opMod16RegWord6B(fn) {
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModRegWord6C(fn): mod=01 (src:mem+d8)  reg=101 (dst:BP)  r/m=100 (SI+d8)
+     * opMod16RegWord6C(fn): mod=01 (src:mem+d8)  reg=101 (dst:BP)  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord6C(fn) {
-        this.regEBP = fn.call(this, this.regEBP, this.getEAWordData(this.regESI + this.getIPDisp()));
+    function opMod16RegWord6C(fn) {
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.regESI + this.getIPDisp()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord6D(fn): mod=01 (src:mem+d8)  reg=101 (dst:BP)  r/m=101 (DI+d8)
+     * opMod16RegWord6D(fn): mod=01 (src:mem+d8)  reg=101 (dst:BP)  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord6D(fn) {
-        this.regEBP = fn.call(this, this.regEBP, this.getEAWordData(this.regEDI + this.getIPDisp()));
+    function opMod16RegWord6D(fn) {
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.regEDI + this.getIPDisp()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord6E(fn): mod=01 (src:mem+d8)  reg=101 (dst:BP)  r/m=110 (BP+d8)
+     * opMod16RegWord6E(fn): mod=01 (src:mem+d8)  reg=101 (dst:BP)  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord6E(fn) {
-        this.regEBP = fn.call(this, this.regEBP, this.getEAWordStack(this.regEBP + this.getIPDisp()));
+    function opMod16RegWord6E(fn) {
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordStack(this.regEBP + this.getIPDisp()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord6F(fn): mod=01 (src:mem+d8)  reg=101 (dst:BP)  r/m=111 (BX+d8)
+     * opMod16RegWord6F(fn): mod=01 (src:mem+d8)  reg=101 (dst:BP)  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord6F(fn) {
-        this.regEBP = fn.call(this, this.regEBP, this.getEAWordData(this.regEBX + this.getIPDisp()));
+    function opMod16RegWord6F(fn) {
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.regEBX + this.getIPDisp()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord70(fn): mod=01 (src:mem+d8)  reg=110 (dst:SI)  r/m=000 (BX+SI+d8)
+     * opMod16RegWord70(fn): mod=01 (src:mem+d8)  reg=110 (dst:SI)  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord70(fn) {
-        this.regESI = fn.call(this, this.regESI, this.getEAWordData(this.regEBX + this.regESI + this.getIPDisp()));
+    function opMod16RegWord70(fn) {
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.regEBX + this.regESI + this.getIPDisp()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModRegWord71(fn): mod=01 (src:mem+d8)  reg=110 (dst:SI)  r/m=001 (BX+DI+d8)
+     * opMod16RegWord71(fn): mod=01 (src:mem+d8)  reg=110 (dst:SI)  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord71(fn) {
-        this.regESI = fn.call(this, this.regESI, this.getEAWordData(this.regEBX + this.regEDI + this.getIPDisp()));
+    function opMod16RegWord71(fn) {
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.regEBX + this.regEDI + this.getIPDisp()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModRegWord72(fn): mod=01 (src:mem+d8)  reg=110 (dst:SI)  r/m=010 (BP+SI+d8)
+     * opMod16RegWord72(fn): mod=01 (src:mem+d8)  reg=110 (dst:SI)  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord72(fn) {
-        this.regESI = fn.call(this, this.regESI, this.getEAWordStack(this.regEBP + this.regESI + this.getIPDisp()));
+    function opMod16RegWord72(fn) {
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordStack(this.regEBP + this.regESI + this.getIPDisp()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModRegWord73(fn): mod=01 (src:mem+d8)  reg=110 (dst:SI)  r/m=011 (BP+DI+d8)
+     * opMod16RegWord73(fn): mod=01 (src:mem+d8)  reg=110 (dst:SI)  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord73(fn) {
-        this.regESI = fn.call(this, this.regESI, this.getEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()));
+    function opMod16RegWord73(fn) {
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModRegWord74(fn): mod=01 (src:mem+d8)  reg=110 (dst:SI)  r/m=100 (SI+d8)
+     * opMod16RegWord74(fn): mod=01 (src:mem+d8)  reg=110 (dst:SI)  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord74(fn) {
-        this.regESI = fn.call(this, this.regESI, this.getEAWordData(this.regESI + this.getIPDisp()));
+    function opMod16RegWord74(fn) {
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.regESI + this.getIPDisp()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord75(fn): mod=01 (src:mem+d8)  reg=110 (dst:SI)  r/m=101 (DI+d8)
+     * opMod16RegWord75(fn): mod=01 (src:mem+d8)  reg=110 (dst:SI)  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord75(fn) {
-        this.regESI = fn.call(this, this.regESI, this.getEAWordData(this.regEDI + this.getIPDisp()));
+    function opMod16RegWord75(fn) {
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.regEDI + this.getIPDisp()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord76(fn): mod=01 (src:mem+d8)  reg=110 (dst:SI)  r/m=110 (BP+d8)
+     * opMod16RegWord76(fn): mod=01 (src:mem+d8)  reg=110 (dst:SI)  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord76(fn) {
-        this.regESI = fn.call(this, this.regESI, this.getEAWordStack(this.regEBP + this.getIPDisp()));
+    function opMod16RegWord76(fn) {
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordStack(this.regEBP + this.getIPDisp()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord77(fn): mod=01 (src:mem+d8)  reg=110 (dst:SI)  r/m=111 (BX+d8)
+     * opMod16RegWord77(fn): mod=01 (src:mem+d8)  reg=110 (dst:SI)  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord77(fn) {
-        this.regESI = fn.call(this, this.regESI, this.getEAWordData(this.regEBX + this.getIPDisp()));
+    function opMod16RegWord77(fn) {
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.regEBX + this.getIPDisp()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord78(fn): mod=01 (src:mem+d8)  reg=111 (dst:DI)  r/m=000 (BX+SI+d8)
+     * opMod16RegWord78(fn): mod=01 (src:mem+d8)  reg=111 (dst:DI)  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord78(fn) {
-        this.regEDI = fn.call(this, this.regEDI, this.getEAWordData(this.regEBX + this.regESI + this.getIPDisp()));
+    function opMod16RegWord78(fn) {
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.regEBX + this.regESI + this.getIPDisp()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModRegWord79(fn): mod=01 (src:mem+d8)  reg=111 (dst:DI)  r/m=001 (BX+DI+d8)
+     * opMod16RegWord79(fn): mod=01 (src:mem+d8)  reg=111 (dst:DI)  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord79(fn) {
-        this.regEDI = fn.call(this, this.regEDI, this.getEAWordData(this.regEBX + this.regEDI + this.getIPDisp()));
+    function opMod16RegWord79(fn) {
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.regEBX + this.regEDI + this.getIPDisp()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModRegWord7A(fn): mod=01 (src:mem+d8)  reg=111 (dst:DI)  r/m=010 (BP+SI+d8)
+     * opMod16RegWord7A(fn): mod=01 (src:mem+d8)  reg=111 (dst:DI)  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord7A(fn) {
-        this.regEDI = fn.call(this, this.regEDI, this.getEAWordStack(this.regEBP + this.regESI + this.getIPDisp()));
+    function opMod16RegWord7A(fn) {
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordStack(this.regEBP + this.regESI + this.getIPDisp()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModRegWord7B(fn): mod=01 (src:mem+d8)  reg=111 (dst:DI)  r/m=011 (BP+DI+d8)
+     * opMod16RegWord7B(fn): mod=01 (src:mem+d8)  reg=111 (dst:DI)  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord7B(fn) {
-        this.regEDI = fn.call(this, this.regEDI, this.getEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()));
+    function opMod16RegWord7B(fn) {
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModRegWord7C(fn): mod=01 (src:mem+d8)  reg=111 (dst:DI)  r/m=100 (SI+d8)
+     * opMod16RegWord7C(fn): mod=01 (src:mem+d8)  reg=111 (dst:DI)  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord7C(fn) {
-        this.regEDI = fn.call(this, this.regEDI, this.getEAWordData(this.regESI + this.getIPDisp()));
+    function opMod16RegWord7C(fn) {
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.regESI + this.getIPDisp()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord7D(fn): mod=01 (src:mem+d8)  reg=111 (dst:DI)  r/m=101 (DI+d8)
+     * opMod16RegWord7D(fn): mod=01 (src:mem+d8)  reg=111 (dst:DI)  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord7D(fn) {
-        this.regEDI = fn.call(this, this.regEDI, this.getEAWordData(this.regEDI + this.getIPDisp()));
+    function opMod16RegWord7D(fn) {
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.regEDI + this.getIPDisp()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord7E(fn): mod=01 (src:mem+d8)  reg=111 (dst:DI)  r/m=110 (BP+d8)
+     * opMod16RegWord7E(fn): mod=01 (src:mem+d8)  reg=111 (dst:DI)  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord7E(fn) {
-        this.regEDI = fn.call(this, this.regEDI, this.getEAWordStack(this.regEBP + this.getIPDisp()));
+    function opMod16RegWord7E(fn) {
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordStack(this.regEBP + this.getIPDisp()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord7F(fn): mod=01 (src:mem+d8)  reg=111 (dst:DI)  r/m=111 (BX+d8)
+     * opMod16RegWord7F(fn): mod=01 (src:mem+d8)  reg=111 (dst:DI)  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord7F(fn) {
-        this.regEDI = fn.call(this, this.regEDI, this.getEAWordData(this.regEBX + this.getIPDisp()));
+    function opMod16RegWord7F(fn) {
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.regEBX + this.getIPDisp()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord80(fn): mod=10 (src:mem+d16)  reg=000 (dst:AX)  r/m=000 (BX+SI+d16)
+     * opMod16RegWord80(fn): mod=10 (src:mem+d16)  reg=000 (dst:AX)  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord80(fn) {
-        this.regEAX = fn.call(this, this.regEAX, this.getEAWordData(this.regEBX + this.regESI + this.getIPWord()));
+    function opMod16RegWord80(fn) {
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.regEBX + this.regESI + this.getIPWord()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModRegWord81(fn): mod=10 (src:mem+d16)  reg=000 (dst:AX)  r/m=001 (BX+DI+d16)
+     * opMod16RegWord81(fn): mod=10 (src:mem+d16)  reg=000 (dst:AX)  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord81(fn) {
-        this.regEAX = fn.call(this, this.regEAX, this.getEAWordData(this.regEBX + this.regEDI + this.getIPWord()));
+    function opMod16RegWord81(fn) {
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.regEBX + this.regEDI + this.getIPWord()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModRegWord82(fn): mod=10 (src:mem+d16)  reg=000 (dst:AX)  r/m=010 (BP+SI+d16)
+     * opMod16RegWord82(fn): mod=10 (src:mem+d16)  reg=000 (dst:AX)  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord82(fn) {
-        this.regEAX = fn.call(this, this.regEAX, this.getEAWordStack(this.regEBP + this.regESI + this.getIPWord()));
+    function opMod16RegWord82(fn) {
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordStack(this.regEBP + this.regESI + this.getIPWord()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModRegWord83(fn): mod=10 (src:mem+d16)  reg=000 (dst:AX)  r/m=011 (BP+DI+d16)
+     * opMod16RegWord83(fn): mod=10 (src:mem+d16)  reg=000 (dst:AX)  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord83(fn) {
-        this.regEAX = fn.call(this, this.regEAX, this.getEAWordStack(this.regEBP + this.regEDI + this.getIPWord()));
+    function opMod16RegWord83(fn) {
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordStack(this.regEBP + this.regEDI + this.getIPWord()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModRegWord84(fn): mod=10 (src:mem+d16)  reg=000 (dst:AX)  r/m=100 (SI+d16)
+     * opMod16RegWord84(fn): mod=10 (src:mem+d16)  reg=000 (dst:AX)  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord84(fn) {
-        this.regEAX = fn.call(this, this.regEAX, this.getEAWordData(this.regESI + this.getIPWord()));
+    function opMod16RegWord84(fn) {
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.regESI + this.getIPWord()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord85(fn): mod=10 (src:mem+d16)  reg=000 (dst:AX)  r/m=101 (DI+d16)
+     * opMod16RegWord85(fn): mod=10 (src:mem+d16)  reg=000 (dst:AX)  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord85(fn) {
-        this.regEAX = fn.call(this, this.regEAX, this.getEAWordData(this.regEDI + this.getIPWord()));
+    function opMod16RegWord85(fn) {
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.regEDI + this.getIPWord()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord86(fn): mod=10 (src:mem+d16)  reg=000 (dst:AX)  r/m=110 (BP+d16)
+     * opMod16RegWord86(fn): mod=10 (src:mem+d16)  reg=000 (dst:AX)  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord86(fn) {
-        this.regEAX = fn.call(this, this.regEAX, this.getEAWordStack(this.regEBP + this.getIPWord()));
+    function opMod16RegWord86(fn) {
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordStack(this.regEBP + this.getIPWord()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord87(fn): mod=10 (src:mem+d16)  reg=000 (dst:AX)  r/m=111 (BX+d16)
+     * opMod16RegWord87(fn): mod=10 (src:mem+d16)  reg=000 (dst:AX)  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord87(fn) {
-        this.regEAX = fn.call(this, this.regEAX, this.getEAWordData(this.regEBX + this.getIPWord()));
+    function opMod16RegWord87(fn) {
+        var w = fn.call(this, this.regEAX & this.dataMask, this.getEAWordData(this.regEBX + this.getIPWord()));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord88(fn): mod=10 (src:mem+d16)  reg=001 (dst:CX)  r/m=000 (BX+SI+d16)
+     * opMod16RegWord88(fn): mod=10 (src:mem+d16)  reg=001 (dst:CX)  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord88(fn) {
-        this.regECX = fn.call(this, this.regECX, this.getEAWordData(this.regEBX + this.regESI + this.getIPWord()));
+    function opMod16RegWord88(fn) {
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.regEBX + this.regESI + this.getIPWord()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModRegWord89(fn): mod=10 (src:mem+d16)  reg=001 (dst:CX)  r/m=001 (BX+DI+d16)
+     * opMod16RegWord89(fn): mod=10 (src:mem+d16)  reg=001 (dst:CX)  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord89(fn) {
-        this.regECX = fn.call(this, this.regECX, this.getEAWordData(this.regEBX + this.regEDI + this.getIPWord()));
+    function opMod16RegWord89(fn) {
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.regEBX + this.regEDI + this.getIPWord()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModRegWord8A(fn): mod=10 (src:mem+d16)  reg=001 (dst:CX)  r/m=010 (BP+SI+d16)
+     * opMod16RegWord8A(fn): mod=10 (src:mem+d16)  reg=001 (dst:CX)  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord8A(fn) {
-        this.regECX = fn.call(this, this.regECX, this.getEAWordStack(this.regEBP + this.regESI + this.getIPWord()));
+    function opMod16RegWord8A(fn) {
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordStack(this.regEBP + this.regESI + this.getIPWord()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModRegWord8B(fn): mod=10 (src:mem+d16)  reg=001 (dst:CX)  r/m=011 (BP+DI+d16)
+     * opMod16RegWord8B(fn): mod=10 (src:mem+d16)  reg=001 (dst:CX)  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord8B(fn) {
-        this.regECX = fn.call(this, this.regECX, this.getEAWordStack(this.regEBP + this.regEDI + this.getIPWord()));
+    function opMod16RegWord8B(fn) {
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordStack(this.regEBP + this.regEDI + this.getIPWord()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModRegWord8C(fn): mod=10 (src:mem+d16)  reg=001 (dst:CX)  r/m=100 (SI+d16)
+     * opMod16RegWord8C(fn): mod=10 (src:mem+d16)  reg=001 (dst:CX)  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord8C(fn) {
-        this.regECX = fn.call(this, this.regECX, this.getEAWordData(this.regESI + this.getIPWord()));
+    function opMod16RegWord8C(fn) {
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.regESI + this.getIPWord()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord8D(fn): mod=10 (src:mem+d16)  reg=001 (dst:CX)  r/m=101 (DI+d16)
+     * opMod16RegWord8D(fn): mod=10 (src:mem+d16)  reg=001 (dst:CX)  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord8D(fn) {
-        this.regECX = fn.call(this, this.regECX, this.getEAWordData(this.regEDI + this.getIPWord()));
+    function opMod16RegWord8D(fn) {
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.regEDI + this.getIPWord()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord8E(fn): mod=10 (src:mem+d16)  reg=001 (dst:CX)  r/m=110 (BP+d16)
+     * opMod16RegWord8E(fn): mod=10 (src:mem+d16)  reg=001 (dst:CX)  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord8E(fn) {
-        this.regECX = fn.call(this, this.regECX, this.getEAWordStack(this.regEBP + this.getIPWord()));
+    function opMod16RegWord8E(fn) {
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordStack(this.regEBP + this.getIPWord()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord8F(fn): mod=10 (src:mem+d16)  reg=001 (dst:CX)  r/m=111 (BX+d16)
+     * opMod16RegWord8F(fn): mod=10 (src:mem+d16)  reg=001 (dst:CX)  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord8F(fn) {
-        this.regECX = fn.call(this, this.regECX, this.getEAWordData(this.regEBX + this.getIPWord()));
+    function opMod16RegWord8F(fn) {
+        var w = fn.call(this, this.regECX & this.dataMask, this.getEAWordData(this.regEBX + this.getIPWord()));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord90(fn): mod=10 (src:mem+d16)  reg=010 (dst:DX)  r/m=000 (BX+SI+d16)
+     * opMod16RegWord90(fn): mod=10 (src:mem+d16)  reg=010 (dst:DX)  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord90(fn) {
-        this.regEDX = fn.call(this, this.regEDX, this.getEAWordData(this.regEBX + this.regESI + this.getIPWord()));
+    function opMod16RegWord90(fn) {
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.regEBX + this.regESI + this.getIPWord()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModRegWord91(fn): mod=10 (src:mem+d16)  reg=010 (dst:DX)  r/m=001 (BX+DI+d16)
+     * opMod16RegWord91(fn): mod=10 (src:mem+d16)  reg=010 (dst:DX)  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord91(fn) {
-        this.regEDX = fn.call(this, this.regEDX, this.getEAWordData(this.regEBX + this.regEDI + this.getIPWord()));
+    function opMod16RegWord91(fn) {
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.regEBX + this.regEDI + this.getIPWord()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModRegWord92(fn): mod=10 (src:mem+d16)  reg=010 (dst:DX)  r/m=010 (BP+SI+d16)
+     * opMod16RegWord92(fn): mod=10 (src:mem+d16)  reg=010 (dst:DX)  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord92(fn) {
-        this.regEDX = fn.call(this, this.regEDX, this.getEAWordStack(this.regEBP + this.regESI + this.getIPWord()));
+    function opMod16RegWord92(fn) {
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordStack(this.regEBP + this.regESI + this.getIPWord()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModRegWord93(fn): mod=10 (src:mem+d16)  reg=010 (dst:DX)  r/m=011 (BP+DI+d16)
+     * opMod16RegWord93(fn): mod=10 (src:mem+d16)  reg=010 (dst:DX)  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord93(fn) {
-        this.regEDX = fn.call(this, this.regEDX, this.getEAWordStack(this.regEBP + this.regEDI + this.getIPWord()));
+    function opMod16RegWord93(fn) {
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordStack(this.regEBP + this.regEDI + this.getIPWord()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModRegWord94(fn): mod=10 (src:mem+d16)  reg=010 (dst:DX)  r/m=100 (SI+d16)
+     * opMod16RegWord94(fn): mod=10 (src:mem+d16)  reg=010 (dst:DX)  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord94(fn) {
-        this.regEDX = fn.call(this, this.regEDX, this.getEAWordData(this.regESI + this.getIPWord()));
+    function opMod16RegWord94(fn) {
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.regESI + this.getIPWord()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord95(fn): mod=10 (src:mem+d16)  reg=010 (dst:DX)  r/m=101 (DI+d16)
+     * opMod16RegWord95(fn): mod=10 (src:mem+d16)  reg=010 (dst:DX)  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord95(fn) {
-        this.regEDX = fn.call(this, this.regEDX, this.getEAWordData(this.regEDI + this.getIPWord()));
+    function opMod16RegWord95(fn) {
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.regEDI + this.getIPWord()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord96(fn): mod=10 (src:mem+d16)  reg=010 (dst:DX)  r/m=110 (BP+d16)
+     * opMod16RegWord96(fn): mod=10 (src:mem+d16)  reg=010 (dst:DX)  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord96(fn) {
-        this.regEDX = fn.call(this, this.regEDX, this.getEAWordStack(this.regEBP + this.getIPWord()));
+    function opMod16RegWord96(fn) {
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordStack(this.regEBP + this.getIPWord()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord97(fn): mod=10 (src:mem+d16)  reg=010 (dst:DX)  r/m=111 (BX+d16)
+     * opMod16RegWord97(fn): mod=10 (src:mem+d16)  reg=010 (dst:DX)  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord97(fn) {
-        this.regEDX = fn.call(this, this.regEDX, this.getEAWordData(this.regEBX + this.getIPWord()));
+    function opMod16RegWord97(fn) {
+        var w = fn.call(this, this.regEDX & this.dataMask, this.getEAWordData(this.regEBX + this.getIPWord()));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord98(fn): mod=10 (src:mem+d16)  reg=011 (dst:BX)  r/m=000 (BX+SI+d16)
+     * opMod16RegWord98(fn): mod=10 (src:mem+d16)  reg=011 (dst:BX)  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord98(fn) {
-        this.regEBX = fn.call(this, this.regEBX, this.getEAWordData(this.regEBX + this.regESI + this.getIPWord()));
+    function opMod16RegWord98(fn) {
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.regEBX + this.regESI + this.getIPWord()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModRegWord99(fn): mod=10 (src:mem+d16)  reg=011 (dst:BX)  r/m=001 (BX+DI+d16)
+     * opMod16RegWord99(fn): mod=10 (src:mem+d16)  reg=011 (dst:BX)  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord99(fn) {
-        this.regEBX = fn.call(this, this.regEBX, this.getEAWordData(this.regEBX + this.regEDI + this.getIPWord()));
+    function opMod16RegWord99(fn) {
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.regEBX + this.regEDI + this.getIPWord()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModRegWord9A(fn): mod=10 (src:mem+d16)  reg=011 (dst:BX)  r/m=010 (BP+SI+d16)
+     * opMod16RegWord9A(fn): mod=10 (src:mem+d16)  reg=011 (dst:BX)  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord9A(fn) {
-        this.regEBX = fn.call(this, this.regEBX, this.getEAWordStack(this.regEBP + this.regESI + this.getIPWord()));
+    function opMod16RegWord9A(fn) {
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordStack(this.regEBP + this.regESI + this.getIPWord()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModRegWord9B(fn): mod=10 (src:mem+d16)  reg=011 (dst:BX)  r/m=011 (BP+DI+d16)
+     * opMod16RegWord9B(fn): mod=10 (src:mem+d16)  reg=011 (dst:BX)  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord9B(fn) {
-        this.regEBX = fn.call(this, this.regEBX, this.getEAWordStack(this.regEBP + this.regEDI + this.getIPWord()));
+    function opMod16RegWord9B(fn) {
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordStack(this.regEBP + this.regEDI + this.getIPWord()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModRegWord9C(fn): mod=10 (src:mem+d16)  reg=011 (dst:BX)  r/m=100 (SI+d16)
+     * opMod16RegWord9C(fn): mod=10 (src:mem+d16)  reg=011 (dst:BX)  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord9C(fn) {
-        this.regEBX = fn.call(this, this.regEBX, this.getEAWordData(this.regESI + this.getIPWord()));
+    function opMod16RegWord9C(fn) {
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.regESI + this.getIPWord()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord9D(fn): mod=10 (src:mem+d16)  reg=011 (dst:BX)  r/m=101 (DI+d16)
+     * opMod16RegWord9D(fn): mod=10 (src:mem+d16)  reg=011 (dst:BX)  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord9D(fn) {
-        this.regEBX = fn.call(this, this.regEBX, this.getEAWordData(this.regEDI + this.getIPWord()));
+    function opMod16RegWord9D(fn) {
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.regEDI + this.getIPWord()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord9E(fn): mod=10 (src:mem+d16)  reg=011 (dst:BX)  r/m=110 (BP+d16)
+     * opMod16RegWord9E(fn): mod=10 (src:mem+d16)  reg=011 (dst:BX)  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord9E(fn) {
-        this.regEBX = fn.call(this, this.regEBX, this.getEAWordStack(this.regEBP + this.getIPWord()));
+    function opMod16RegWord9E(fn) {
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordStack(this.regEBP + this.getIPWord()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWord9F(fn): mod=10 (src:mem+d16)  reg=011 (dst:BX)  r/m=111 (BX+d16)
+     * opMod16RegWord9F(fn): mod=10 (src:mem+d16)  reg=011 (dst:BX)  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWord9F(fn) {
-        this.regEBX = fn.call(this, this.regEBX, this.getEAWordData(this.regEBX + this.getIPWord()));
+    function opMod16RegWord9F(fn) {
+        var w = fn.call(this, this.regEBX & this.dataMask, this.getEAWordData(this.regEBX + this.getIPWord()));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWordA0(fn): mod=10 (src:mem+d16)  reg=100 (dst:SP)  r/m=000 (BX+SI+d16)
+     * opMod16RegWordA0(fn): mod=10 (src:mem+d16)  reg=100 (dst:SP)  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordA0(fn) {
-        this.regESP = fn.call(this, this.regESP, this.getEAWordData(this.regEBX + this.regESI + this.getIPWord()));
+    function opMod16RegWordA0(fn) {
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.regEBX + this.regESI + this.getIPWord()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModRegWordA1(fn): mod=10 (src:mem+d16)  reg=100 (dst:SP)  r/m=001 (BX+DI+d16)
+     * opMod16RegWordA1(fn): mod=10 (src:mem+d16)  reg=100 (dst:SP)  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordA1(fn) {
-        this.regESP = fn.call(this, this.regESP, this.getEAWordData(this.regEBX + this.regEDI + this.getIPWord()));
+    function opMod16RegWordA1(fn) {
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.regEBX + this.regEDI + this.getIPWord()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModRegWordA2(fn): mod=10 (src:mem+d16)  reg=100 (dst:SP)  r/m=010 (BP+SI+d16)
+     * opMod16RegWordA2(fn): mod=10 (src:mem+d16)  reg=100 (dst:SP)  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordA2(fn) {
-        this.regESP = fn.call(this, this.regESP, this.getEAWordStack(this.regEBP + this.regESI + this.getIPWord()));
+    function opMod16RegWordA2(fn) {
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordStack(this.regEBP + this.regESI + this.getIPWord()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModRegWordA3(fn): mod=10 (src:mem+d16)  reg=100 (dst:SP)  r/m=011 (BP+DI+d16)
+     * opMod16RegWordA3(fn): mod=10 (src:mem+d16)  reg=100 (dst:SP)  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordA3(fn) {
-        this.regESP = fn.call(this, this.regESP, this.getEAWordStack(this.regEBP + this.regEDI + this.getIPWord()));
+    function opMod16RegWordA3(fn) {
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordStack(this.regEBP + this.regEDI + this.getIPWord()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModRegWordA4(fn): mod=10 (src:mem+d16)  reg=100 (dst:SP)  r/m=100 (SI+d16)
+     * opMod16RegWordA4(fn): mod=10 (src:mem+d16)  reg=100 (dst:SP)  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordA4(fn) {
-        this.regESP = fn.call(this, this.regESP, this.getEAWordData(this.regESI + this.getIPWord()));
+    function opMod16RegWordA4(fn) {
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.regESI + this.getIPWord()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWordA5(fn): mod=10 (src:mem+d16)  reg=100 (dst:SP)  r/m=101 (DI+d16)
+     * opMod16RegWordA5(fn): mod=10 (src:mem+d16)  reg=100 (dst:SP)  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordA5(fn) {
-        this.regESP = fn.call(this, this.regESP, this.getEAWordData(this.regEDI + this.getIPWord()));
+    function opMod16RegWordA5(fn) {
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.regEDI + this.getIPWord()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWordA6(fn): mod=10 (src:mem+d16)  reg=100 (dst:SP)  r/m=110 (BP+d16)
+     * opMod16RegWordA6(fn): mod=10 (src:mem+d16)  reg=100 (dst:SP)  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordA6(fn) {
-        this.regESP = fn.call(this, this.regESP, this.getEAWordStack(this.regEBP + this.getIPWord()));
+    function opMod16RegWordA6(fn) {
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordStack(this.regEBP + this.getIPWord()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWordA7(fn): mod=10 (src:mem+d16)  reg=100 (dst:SP)  r/m=111 (BX+d16)
+     * opMod16RegWordA7(fn): mod=10 (src:mem+d16)  reg=100 (dst:SP)  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordA7(fn) {
-        this.regESP = fn.call(this, this.regESP, this.getEAWordData(this.regEBX + this.getIPWord()));
+    function opMod16RegWordA7(fn) {
+        var w = fn.call(this, this.regESP & this.dataMask, this.getEAWordData(this.regEBX + this.getIPWord()));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWordA8(fn): mod=10 (src:mem+d16)  reg=101 (dst:BP)  r/m=000 (BX+SI+d16)
+     * opMod16RegWordA8(fn): mod=10 (src:mem+d16)  reg=101 (dst:BP)  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordA8(fn) {
-        this.regEBP = fn.call(this, this.regEBP, this.getEAWordData(this.regEBX + this.regESI + this.getIPWord()));
+    function opMod16RegWordA8(fn) {
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.regEBX + this.regESI + this.getIPWord()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModRegWordA9(fn): mod=10 (src:mem+d16)  reg=101 (dst:BP)  r/m=001 (BX+DI+d16)
+     * opMod16RegWordA9(fn): mod=10 (src:mem+d16)  reg=101 (dst:BP)  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordA9(fn) {
-        this.regEBP = fn.call(this, this.regEBP, this.getEAWordData(this.regEBX + this.regEDI + this.getIPWord()));
+    function opMod16RegWordA9(fn) {
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.regEBX + this.regEDI + this.getIPWord()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModRegWordAA(fn): mod=10 (src:mem+d16)  reg=101 (dst:BP)  r/m=010 (BP+SI+d16)
+     * opMod16RegWordAA(fn): mod=10 (src:mem+d16)  reg=101 (dst:BP)  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordAA(fn) {
-        this.regEBP = fn.call(this, this.regEBP, this.getEAWordStack(this.regEBP + this.regESI + this.getIPWord()));
+    function opMod16RegWordAA(fn) {
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordStack(this.regEBP + this.regESI + this.getIPWord()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModRegWordAB(fn): mod=10 (src:mem+d16)  reg=101 (dst:BP)  r/m=011 (BP+DI+d16)
+     * opMod16RegWordAB(fn): mod=10 (src:mem+d16)  reg=101 (dst:BP)  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordAB(fn) {
-        this.regEBP = fn.call(this, this.regEBP, this.getEAWordStack(this.regEBP + this.regEDI + this.getIPWord()));
+    function opMod16RegWordAB(fn) {
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordStack(this.regEBP + this.regEDI + this.getIPWord()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModRegWordAC(fn): mod=10 (src:mem+d16)  reg=101 (dst:BP)  r/m=100 (SI+d16)
+     * opMod16RegWordAC(fn): mod=10 (src:mem+d16)  reg=101 (dst:BP)  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordAC(fn) {
-        this.regEBP = fn.call(this, this.regEBP, this.getEAWordData(this.regESI + this.getIPWord()));
+    function opMod16RegWordAC(fn) {
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.regESI + this.getIPWord()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWordAD(fn): mod=10 (src:mem+d16)  reg=101 (dst:BP)  r/m=101 (DI+d16)
+     * opMod16RegWordAD(fn): mod=10 (src:mem+d16)  reg=101 (dst:BP)  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordAD(fn) {
-        this.regEBP = fn.call(this, this.regEBP, this.getEAWordData(this.regEDI + this.getIPWord()));
+    function opMod16RegWordAD(fn) {
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.regEDI + this.getIPWord()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWordAE(fn): mod=10 (src:mem+d16)  reg=101 (dst:BP)  r/m=110 (BP+d16)
+     * opMod16RegWordAE(fn): mod=10 (src:mem+d16)  reg=101 (dst:BP)  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordAE(fn) {
-        this.regEBP = fn.call(this, this.regEBP, this.getEAWordStack(this.regEBP + this.getIPWord()));
+    function opMod16RegWordAE(fn) {
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordStack(this.regEBP + this.getIPWord()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWordAF(fn): mod=10 (src:mem+d16)  reg=101 (dst:BP)  r/m=111 (BX+d16)
+     * opMod16RegWordAF(fn): mod=10 (src:mem+d16)  reg=101 (dst:BP)  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordAF(fn) {
-        this.regEBP = fn.call(this, this.regEBP, this.getEAWordData(this.regEBX + this.getIPWord()));
+    function opMod16RegWordAF(fn) {
+        var w = fn.call(this, this.regEBP & this.dataMask, this.getEAWordData(this.regEBX + this.getIPWord()));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWordB0(fn): mod=10 (src:mem+d16)  reg=110 (dst:SI)  r/m=000 (BX+SI+d16)
+     * opMod16RegWordB0(fn): mod=10 (src:mem+d16)  reg=110 (dst:SI)  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordB0(fn) {
-        this.regESI = fn.call(this, this.regESI, this.getEAWordData(this.regEBX + this.regESI + this.getIPWord()));
+    function opMod16RegWordB0(fn) {
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.regEBX + this.regESI + this.getIPWord()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModRegWordB1(fn): mod=10 (src:mem+d16)  reg=110 (dst:SI)  r/m=001 (BX+DI+d16)
+     * opMod16RegWordB1(fn): mod=10 (src:mem+d16)  reg=110 (dst:SI)  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordB1(fn) {
-        this.regESI = fn.call(this, this.regESI, this.getEAWordData(this.regEBX + this.regEDI + this.getIPWord()));
+    function opMod16RegWordB1(fn) {
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.regEBX + this.regEDI + this.getIPWord()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModRegWordB2(fn): mod=10 (src:mem+d16)  reg=110 (dst:SI)  r/m=010 (BP+SI+d16)
+     * opMod16RegWordB2(fn): mod=10 (src:mem+d16)  reg=110 (dst:SI)  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordB2(fn) {
-        this.regESI = fn.call(this, this.regESI, this.getEAWordStack(this.regEBP + this.regESI + this.getIPWord()));
+    function opMod16RegWordB2(fn) {
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordStack(this.regEBP + this.regESI + this.getIPWord()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModRegWordB3(fn): mod=10 (src:mem+d16)  reg=110 (dst:SI)  r/m=011 (BP+DI+d16)
+     * opMod16RegWordB3(fn): mod=10 (src:mem+d16)  reg=110 (dst:SI)  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordB3(fn) {
-        this.regESI = fn.call(this, this.regESI, this.getEAWordStack(this.regEBP + this.regEDI + this.getIPWord()));
+    function opMod16RegWordB3(fn) {
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordStack(this.regEBP + this.regEDI + this.getIPWord()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModRegWordB4(fn): mod=10 (src:mem+d16)  reg=110 (dst:SI)  r/m=100 (SI+d16)
+     * opMod16RegWordB4(fn): mod=10 (src:mem+d16)  reg=110 (dst:SI)  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordB4(fn) {
-        this.regESI = fn.call(this, this.regESI, this.getEAWordData(this.regESI + this.getIPWord()));
+    function opMod16RegWordB4(fn) {
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.regESI + this.getIPWord()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWordB5(fn): mod=10 (src:mem+d16)  reg=110 (dst:SI)  r/m=101 (DI+d16)
+     * opMod16RegWordB5(fn): mod=10 (src:mem+d16)  reg=110 (dst:SI)  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordB5(fn) {
-        this.regESI = fn.call(this, this.regESI, this.getEAWordData(this.regEDI + this.getIPWord()));
+    function opMod16RegWordB5(fn) {
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.regEDI + this.getIPWord()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWordB6(fn): mod=10 (src:mem+d16)  reg=110 (dst:SI)  r/m=110 (BP+d16)
+     * opMod16RegWordB6(fn): mod=10 (src:mem+d16)  reg=110 (dst:SI)  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordB6(fn) {
-        this.regESI = fn.call(this, this.regESI, this.getEAWordStack(this.regEBP + this.getIPWord()));
+    function opMod16RegWordB6(fn) {
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordStack(this.regEBP + this.getIPWord()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWordB7(fn): mod=10 (src:mem+d16)  reg=110 (dst:SI)  r/m=111 (BX+d16)
+     * opMod16RegWordB7(fn): mod=10 (src:mem+d16)  reg=110 (dst:SI)  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordB7(fn) {
-        this.regESI = fn.call(this, this.regESI, this.getEAWordData(this.regEBX + this.getIPWord()));
+    function opMod16RegWordB7(fn) {
+        var w = fn.call(this, this.regESI & this.dataMask, this.getEAWordData(this.regEBX + this.getIPWord()));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWordB8(fn): mod=10 (src:mem+d16)  reg=111 (dst:DI)  r/m=000 (BX+SI+d16)
+     * opMod16RegWordB8(fn): mod=10 (src:mem+d16)  reg=111 (dst:DI)  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordB8(fn) {
-        this.regEDI = fn.call(this, this.regEDI, this.getEAWordData(this.regEBX + this.regESI + this.getIPWord()));
+    function opMod16RegWordB8(fn) {
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.regEBX + this.regESI + this.getIPWord()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModRegWordB9(fn): mod=10 (src:mem+d16)  reg=111 (dst:DI)  r/m=001 (BX+DI+d16)
+     * opMod16RegWordB9(fn): mod=10 (src:mem+d16)  reg=111 (dst:DI)  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordB9(fn) {
-        this.regEDI = fn.call(this, this.regEDI, this.getEAWordData(this.regEBX + this.regEDI + this.getIPWord()));
+    function opMod16RegWordB9(fn) {
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.regEBX + this.regEDI + this.getIPWord()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModRegWordBA(fn): mod=10 (src:mem+d16)  reg=111 (dst:DI)  r/m=010 (BP+SI+d16)
+     * opMod16RegWordBA(fn): mod=10 (src:mem+d16)  reg=111 (dst:DI)  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordBA(fn) {
-        this.regEDI = fn.call(this, this.regEDI, this.getEAWordStack(this.regEBP + this.regESI + this.getIPWord()));
+    function opMod16RegWordBA(fn) {
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordStack(this.regEBP + this.regESI + this.getIPWord()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModRegWordBB(fn): mod=10 (src:mem+d16)  reg=111 (dst:DI)  r/m=011 (BP+DI+d16)
+     * opMod16RegWordBB(fn): mod=10 (src:mem+d16)  reg=111 (dst:DI)  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordBB(fn) {
-        this.regEDI = fn.call(this, this.regEDI, this.getEAWordStack(this.regEBP + this.regEDI + this.getIPWord()));
+    function opMod16RegWordBB(fn) {
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordStack(this.regEBP + this.regEDI + this.getIPWord()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModRegWordBC(fn): mod=10 (src:mem+d16)  reg=111 (dst:DI)  r/m=100 (SI+d16)
+     * opMod16RegWordBC(fn): mod=10 (src:mem+d16)  reg=111 (dst:DI)  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordBC(fn) {
-        this.regEDI = fn.call(this, this.regEDI, this.getEAWordData(this.regESI + this.getIPWord()));
+    function opMod16RegWordBC(fn) {
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.regESI + this.getIPWord()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWordBD(fn): mod=10 (src:mem+d16)  reg=111 (dst:DI)  r/m=101 (DI+d16)
+     * opMod16RegWordBD(fn): mod=10 (src:mem+d16)  reg=111 (dst:DI)  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordBD(fn) {
-        this.regEDI = fn.call(this, this.regEDI, this.getEAWordData(this.regEDI + this.getIPWord()));
+    function opMod16RegWordBD(fn) {
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.regEDI + this.getIPWord()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWordBE(fn): mod=10 (src:mem+d16)  reg=111 (dst:DI)  r/m=110 (BP+d16)
+     * opMod16RegWordBE(fn): mod=10 (src:mem+d16)  reg=111 (dst:DI)  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordBE(fn) {
-        this.regEDI = fn.call(this, this.regEDI, this.getEAWordStack(this.regEBP + this.getIPWord()));
+    function opMod16RegWordBE(fn) {
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordStack(this.regEBP + this.getIPWord()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWordBF(fn): mod=10 (src:mem+d16)  reg=111 (dst:DI)  r/m=111 (BX+d16)
+     * opMod16RegWordBF(fn): mod=10 (src:mem+d16)  reg=111 (dst:DI)  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordBF(fn) {
-        this.regEDI = fn.call(this, this.regEDI, this.getEAWordData(this.regEBX + this.getIPWord()));
+    function opMod16RegWordBF(fn) {
+        var w = fn.call(this, this.regEDI & this.dataMask, this.getEAWordData(this.regEBX + this.getIPWord()));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModRegWordC0(fn): mod=11 (src:reg)  reg=000 (dst:AX)  r/m=000 (AX)
+     * opMod16RegWordC0(fn): mod=11 (src:reg)  reg=000 (dst:AX)  r/m=000 (AX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordC0(fn) {
-        this.regEAX = fn.call(this, this.regEAX, this.regEAX);
+    function opMod16RegWordC0(fn) {
+        var w = fn.call(this, this.regEAX & this.dataMask, this.regEAX & this.dataMask);
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
     },
     /**
-     * opModRegWordC1(fn): mod=11 (src:reg)  reg=000 (dst:AX)  r/m=001 (CX)
+     * opMod16RegWordC1(fn): mod=11 (src:reg)  reg=000 (dst:AX)  r/m=001 (CX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordC1(fn) {
-        this.regEAX = fn.call(this, this.regEAX, this.regECX);
+    function opMod16RegWordC1(fn) {
+        var w = fn.call(this, this.regEAX & this.dataMask, this.regECX & this.dataMask);
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiCL; this.backTrack.btiAH = this.backTrack.btiCH;
         }
     },
     /**
-     * opModRegWordC2(fn): mod=11 (src:reg)  reg=000 (dst:AX)  r/m=010 (DX)
+     * opMod16RegWordC2(fn): mod=11 (src:reg)  reg=000 (dst:AX)  r/m=010 (DX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordC2(fn) {
-        this.regEAX = fn.call(this, this.regEAX, this.regEDX);
+    function opMod16RegWordC2(fn) {
+        var w = fn.call(this, this.regEAX & this.dataMask, this.regEDX & this.dataMask);
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiDL; this.backTrack.btiAH = this.backTrack.btiDH;
         }
     },
     /**
-     * opModRegWordC3(fn): mod=11 (src:reg)  reg=000 (dst:AX)  r/m=011 (BX)
+     * opMod16RegWordC3(fn): mod=11 (src:reg)  reg=000 (dst:AX)  r/m=011 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordC3(fn) {
-        this.regEAX = fn.call(this, this.regEAX, this.regEBX);
+    function opMod16RegWordC3(fn) {
+        var w = fn.call(this, this.regEAX & this.dataMask, this.regEBX & this.dataMask);
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiBL; this.backTrack.btiAH = this.backTrack.btiBH;
         }
     },
     /**
-     * opModRegWordC4(fn): mod=11 (src:reg)  reg=000 (dst:AX)  r/m=100 (SP)
+     * opMod16RegWordC4(fn): mod=11 (src:reg)  reg=000 (dst:AX)  r/m=100 (SP)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordC4(fn) {
-        this.regEAX = fn.call(this, this.regEAX, this.regESP);
+    function opMod16RegWordC4(fn) {
+        var w = fn.call(this, this.regEAX & this.dataMask, this.regESP & this.dataMask);
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = X86.BACKTRACK.SP_LO; this.backTrack.btiAH = X86.BACKTRACK.SP_HI;
         }
     },
     /**
-     * opModRegWordC5(fn): mod=11 (src:reg)  reg=000 (dst:AX)  r/m=101 (BP)
+     * opMod16RegWordC5(fn): mod=11 (src:reg)  reg=000 (dst:AX)  r/m=101 (BP)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordC5(fn) {
-        this.regEAX = fn.call(this, this.regEAX, this.regEBP);
+    function opMod16RegWordC5(fn) {
+        var w = fn.call(this, this.regEAX & this.dataMask, this.regEBP & this.dataMask);
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiBPLo; this.backTrack.btiAH = this.backTrack.btiBPHi;
         }
     },
     /**
-     * opModRegWordC6(fn): mod=11 (src:reg)  reg=000 (dst:AX)  r/m=110 (SI)
+     * opMod16RegWordC6(fn): mod=11 (src:reg)  reg=000 (dst:AX)  r/m=110 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordC6(fn) {
-        this.regEAX = fn.call(this, this.regEAX, this.regESI);
+    function opMod16RegWordC6(fn) {
+        var w = fn.call(this, this.regEAX & this.dataMask, this.regESI & this.dataMask);
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiSILo; this.backTrack.btiAH = this.backTrack.btiSIHi;
         }
     },
     /**
-     * opModRegWordC7(fn): mod=11 (src:reg)  reg=000 (dst:AX)  r/m=111 (DI)
+     * opMod16RegWordC7(fn): mod=11 (src:reg)  reg=000 (dst:AX)  r/m=111 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordC7(fn) {
-        this.regEAX = fn.call(this, this.regEAX, this.regEDI);
+    function opMod16RegWordC7(fn) {
+        var w = fn.call(this, this.regEAX & this.dataMask, this.regEDI & this.dataMask);
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiDILo; this.backTrack.btiAH = this.backTrack.btiDIHi;
         }
     },
     /**
-     * opModRegWordC8(fn): mod=11 (src:reg)  reg=001 (dst:CX)  r/m=000 (AX)
+     * opMod16RegWordC8(fn): mod=11 (src:reg)  reg=001 (dst:CX)  r/m=000 (AX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordC8(fn) {
-        this.regECX = fn.call(this, this.regECX, this.regEAX);
+    function opMod16RegWordC8(fn) {
+        var w = fn.call(this, this.regECX & this.dataMask, this.regEAX & this.dataMask);
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiAL; this.backTrack.btiCH = this.backTrack.btiAH;
         }
     },
     /**
-     * opModRegWordC9(fn): mod=11 (src:reg)  reg=001 (dst:CX)  r/m=001 (CX)
+     * opMod16RegWordC9(fn): mod=11 (src:reg)  reg=001 (dst:CX)  r/m=001 (CX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordC9(fn) {
-        this.regECX = fn.call(this, this.regECX, this.regECX);
+    function opMod16RegWordC9(fn) {
+        var w = fn.call(this, this.regECX & this.dataMask, this.regECX & this.dataMask);
+        this.regECX = (this.regECX & ~this.dataMask) | w;
     },
     /**
-     * opModRegWordCA(fn): mod=11 (src:reg)  reg=001 (dst:CX)  r/m=010 (DX)
+     * opMod16RegWordCA(fn): mod=11 (src:reg)  reg=001 (dst:CX)  r/m=010 (DX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordCA(fn) {
-        this.regECX = fn.call(this, this.regECX, this.regEDX);
+    function opMod16RegWordCA(fn) {
+        var w = fn.call(this, this.regECX & this.dataMask, this.regEDX & this.dataMask);
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiDL; this.backTrack.btiCH = this.backTrack.btiDH;
         }
     },
     /**
-     * opModRegWordCB(fn): mod=11 (src:reg)  reg=001 (dst:CX)  r/m=011 (BX)
+     * opMod16RegWordCB(fn): mod=11 (src:reg)  reg=001 (dst:CX)  r/m=011 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordCB(fn) {
-        this.regECX = fn.call(this, this.regECX, this.regEBX);
+    function opMod16RegWordCB(fn) {
+        var w = fn.call(this, this.regECX & this.dataMask, this.regEBX & this.dataMask);
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiBL; this.backTrack.btiCH = this.backTrack.btiBH;
         }
     },
     /**
-     * opModRegWordCC(fn): mod=11 (src:reg)  reg=001 (dst:CX)  r/m=100 (SP)
+     * opMod16RegWordCC(fn): mod=11 (src:reg)  reg=001 (dst:CX)  r/m=100 (SP)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordCC(fn) {
-        this.regECX = fn.call(this, this.regECX, this.regESP);
+    function opMod16RegWordCC(fn) {
+        var w = fn.call(this, this.regECX & this.dataMask, this.regESP & this.dataMask);
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = X86.BACKTRACK.SP_LO; this.backTrack.btiCH = X86.BACKTRACK.SP_HI;
         }
     },
     /**
-     * opModRegWordCD(fn): mod=11 (src:reg)  reg=001 (dst:CX)  r/m=101 (BP)
+     * opMod16RegWordCD(fn): mod=11 (src:reg)  reg=001 (dst:CX)  r/m=101 (BP)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordCD(fn) {
-        this.regECX = fn.call(this, this.regECX, this.regEBP);
+    function opMod16RegWordCD(fn) {
+        var w = fn.call(this, this.regECX & this.dataMask, this.regEBP & this.dataMask);
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiBPLo; this.backTrack.btiCH = this.backTrack.btiBPHi;
         }
     },
     /**
-     * opModRegWordCE(fn): mod=11 (src:reg)  reg=001 (dst:CX)  r/m=110 (SI)
+     * opMod16RegWordCE(fn): mod=11 (src:reg)  reg=001 (dst:CX)  r/m=110 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordCE(fn) {
-        this.regECX = fn.call(this, this.regECX, this.regESI);
+    function opMod16RegWordCE(fn) {
+        var w = fn.call(this, this.regECX & this.dataMask, this.regESI & this.dataMask);
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiSILo; this.backTrack.btiCH = this.backTrack.btiSIHi;
         }
     },
     /**
-     * opModRegWordCF(fn): mod=11 (src:reg)  reg=001 (dst:CX)  r/m=111 (DI)
+     * opMod16RegWordCF(fn): mod=11 (src:reg)  reg=001 (dst:CX)  r/m=111 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordCF(fn) {
-        this.regECX = fn.call(this, this.regECX, this.regEDI);
+    function opMod16RegWordCF(fn) {
+        var w = fn.call(this, this.regECX & this.dataMask, this.regEDI & this.dataMask);
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiDILo; this.backTrack.btiCH = this.backTrack.btiDIHi;
         }
     },
     /**
-     * opModRegWordD0(fn): mod=11 (src:reg)  reg=010 (dst:DX)  r/m=000 (AX)
+     * opMod16RegWordD0(fn): mod=11 (src:reg)  reg=010 (dst:DX)  r/m=000 (AX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordD0(fn) {
-        this.regEDX = fn.call(this, this.regEDX, this.regEAX);
+    function opMod16RegWordD0(fn) {
+        var w = fn.call(this, this.regEDX & this.dataMask, this.regEAX & this.dataMask);
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiAL; this.backTrack.btiDH = this.backTrack.btiAH;
         }
     },
     /**
-     * opModRegWordD1(fn): mod=11 (src:reg)  reg=010 (dst:DX)  r/m=001 (CX)
+     * opMod16RegWordD1(fn): mod=11 (src:reg)  reg=010 (dst:DX)  r/m=001 (CX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordD1(fn) {
-        this.regEDX = fn.call(this, this.regEDX, this.regECX);
+    function opMod16RegWordD1(fn) {
+        var w = fn.call(this, this.regEDX & this.dataMask, this.regECX & this.dataMask);
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiCL; this.backTrack.btiDH = this.backTrack.btiCH;
         }
     },
     /**
-     * opModRegWordD2(fn): mod=11 (src:reg)  reg=010 (dst:DX)  r/m=010 (DX)
+     * opMod16RegWordD2(fn): mod=11 (src:reg)  reg=010 (dst:DX)  r/m=010 (DX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordD2(fn) {
-        this.regEDX = fn.call(this, this.regEDX, this.regEDX);
+    function opMod16RegWordD2(fn) {
+        var w = fn.call(this, this.regEDX & this.dataMask, this.regEDX & this.dataMask);
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
     },
     /**
-     * opModRegWordD3(fn): mod=11 (src:reg)  reg=010 (dst:DX)  r/m=011 (BX)
+     * opMod16RegWordD3(fn): mod=11 (src:reg)  reg=010 (dst:DX)  r/m=011 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordD3(fn) {
-        this.regEDX = fn.call(this, this.regEDX, this.regEBX);
+    function opMod16RegWordD3(fn) {
+        var w = fn.call(this, this.regEDX & this.dataMask, this.regEBX & this.dataMask);
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiBL; this.backTrack.btiDH = this.backTrack.btiBH;
         }
     },
     /**
-     * opModRegWordD4(fn): mod=11 (src:reg)  reg=010 (dst:DX)  r/m=100 (SP)
+     * opMod16RegWordD4(fn): mod=11 (src:reg)  reg=010 (dst:DX)  r/m=100 (SP)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordD4(fn) {
-        this.regEDX = fn.call(this, this.regEDX, this.regESP);
+    function opMod16RegWordD4(fn) {
+        var w = fn.call(this, this.regEDX & this.dataMask, this.regESP & this.dataMask);
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = X86.BACKTRACK.SP_LO; this.backTrack.btiDH = X86.BACKTRACK.SP_HI;
         }
     },
     /**
-     * opModRegWordD5(fn): mod=11 (src:reg)  reg=010 (dst:DX)  r/m=101 (BP)
+     * opMod16RegWordD5(fn): mod=11 (src:reg)  reg=010 (dst:DX)  r/m=101 (BP)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordD5(fn) {
-        this.regEDX = fn.call(this, this.regEDX, this.regEBP);
+    function opMod16RegWordD5(fn) {
+        var w = fn.call(this, this.regEDX & this.dataMask, this.regEBP & this.dataMask);
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiBPLo; this.backTrack.btiDH = this.backTrack.btiBPHi;
         }
     },
     /**
-     * opModRegWordD6(fn): mod=11 (src:reg)  reg=010 (dst:DX)  r/m=110 (SI)
+     * opMod16RegWordD6(fn): mod=11 (src:reg)  reg=010 (dst:DX)  r/m=110 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordD6(fn) {
-        this.regEDX = fn.call(this, this.regEDX, this.regESI);
+    function opMod16RegWordD6(fn) {
+        var w = fn.call(this, this.regEDX & this.dataMask, this.regESI & this.dataMask);
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiSILo; this.backTrack.btiDH = this.backTrack.btiSIHi;
         }
     },
     /**
-     * opModRegWordD7(fn): mod=11 (src:reg)  reg=010 (dst:DX)  r/m=111 (DI)
+     * opMod16RegWordD7(fn): mod=11 (src:reg)  reg=010 (dst:DX)  r/m=111 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordD7(fn) {
-        this.regEDX = fn.call(this, this.regEDX, this.regEDI);
+    function opMod16RegWordD7(fn) {
+        var w = fn.call(this, this.regEDX & this.dataMask, this.regEDI & this.dataMask);
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiDILo; this.backTrack.btiDH = this.backTrack.btiDIHi;
         }
     },
     /**
-     * opModRegWordD8(fn): mod=11 (src:reg)  reg=011 (dst:BX)  r/m=000 (AX)
+     * opMod16RegWordD8(fn): mod=11 (src:reg)  reg=011 (dst:BX)  r/m=000 (AX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordD8(fn) {
-        this.regEBX = fn.call(this, this.regEBX, this.regEAX);
+    function opMod16RegWordD8(fn) {
+        var w = fn.call(this, this.regEBX & this.dataMask, this.regEAX & this.dataMask);
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiAL; this.backTrack.btiBH = this.backTrack.btiAH;
         }
     },
     /**
-     * opModRegWordD9(fn): mod=11 (src:reg)  reg=011 (dst:BX)  r/m=001 (CX)
+     * opMod16RegWordD9(fn): mod=11 (src:reg)  reg=011 (dst:BX)  r/m=001 (CX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordD9(fn) {
-        this.regEBX = fn.call(this, this.regEBX, this.regECX);
+    function opMod16RegWordD9(fn) {
+        var w = fn.call(this, this.regEBX & this.dataMask, this.regECX & this.dataMask);
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiCL; this.backTrack.btiBH = this.backTrack.btiCH;
         }
     },
     /**
-     * opModRegWordDA(fn): mod=11 (src:reg)  reg=011 (dst:BX)  r/m=010 (DX)
+     * opMod16RegWordDA(fn): mod=11 (src:reg)  reg=011 (dst:BX)  r/m=010 (DX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordDA(fn) {
-        this.regEBX = fn.call(this, this.regEBX, this.regEDX);
+    function opMod16RegWordDA(fn) {
+        var w = fn.call(this, this.regEBX & this.dataMask, this.regEDX & this.dataMask);
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiDL; this.backTrack.btiBH = this.backTrack.btiDH;
         }
     },
     /**
-     * opModRegWordDB(fn): mod=11 (src:reg)  reg=011 (dst:BX)  r/m=011 (BX)
+     * opMod16RegWordDB(fn): mod=11 (src:reg)  reg=011 (dst:BX)  r/m=011 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordDB(fn) {
-        this.regEBX = fn.call(this, this.regEBX, this.regEBX);
+    function opMod16RegWordDB(fn) {
+        var w = fn.call(this, this.regEBX & this.dataMask, this.regEBX & this.dataMask);
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
     },
     /**
-     * opModRegWordDC(fn): mod=11 (src:reg)  reg=011 (dst:BX)  r/m=100 (SP)
+     * opMod16RegWordDC(fn): mod=11 (src:reg)  reg=011 (dst:BX)  r/m=100 (SP)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordDC(fn) {
-        this.regEBX = fn.call(this, this.regEBX, this.regESP);
+    function opMod16RegWordDC(fn) {
+        var w = fn.call(this, this.regEBX & this.dataMask, this.regESP & this.dataMask);
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = X86.BACKTRACK.SP_LO; this.backTrack.btiBH = X86.BACKTRACK.SP_HI;
         }
     },
     /**
-     * opModRegWordDD(fn): mod=11 (src:reg)  reg=011 (dst:BX)  r/m=101 (BP)
+     * opMod16RegWordDD(fn): mod=11 (src:reg)  reg=011 (dst:BX)  r/m=101 (BP)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordDD(fn) {
-        this.regEBX = fn.call(this, this.regEBX, this.regEBP);
+    function opMod16RegWordDD(fn) {
+        var w = fn.call(this, this.regEBX & this.dataMask, this.regEBP & this.dataMask);
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiBPLo; this.backTrack.btiBH = this.backTrack.btiBPHi;
         }
     },
     /**
-     * opModRegWordDE(fn): mod=11 (src:reg)  reg=011 (dst:BX)  r/m=110 (SI)
+     * opMod16RegWordDE(fn): mod=11 (src:reg)  reg=011 (dst:BX)  r/m=110 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordDE(fn) {
-        this.regEBX = fn.call(this, this.regEBX, this.regESI);
+    function opMod16RegWordDE(fn) {
+        var w = fn.call(this, this.regEBX & this.dataMask, this.regESI & this.dataMask);
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiSILo; this.backTrack.btiBH = this.backTrack.btiSIHi;
         }
     },
     /**
-     * opModRegWordDF(fn): mod=11 (src:reg)  reg=011 (dst:BX)  r/m=111 (DI)
+     * opMod16RegWordDF(fn): mod=11 (src:reg)  reg=011 (dst:BX)  r/m=111 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordDF(fn) {
-        this.regEBX = fn.call(this, this.regEBX, this.regEDI);
+    function opMod16RegWordDF(fn) {
+        var w = fn.call(this, this.regEBX & this.dataMask, this.regEDI & this.dataMask);
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiDILo; this.backTrack.btiBH = this.backTrack.btiDIHi;
         }
     },
     /**
-     * opModRegWordE0(fn): mod=11 (src:reg)  reg=100 (dst:SP)  r/m=000 (AX)
+     * opMod16RegWordE0(fn): mod=11 (src:reg)  reg=100 (dst:SP)  r/m=000 (AX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordE0(fn) {
-        this.regESP = fn.call(this, this.regESP, this.regEAX);
+    function opMod16RegWordE0(fn) {
+        var w = fn.call(this, this.regESP & this.dataMask, this.regEAX & this.dataMask);
+        this.regESP = (this.regESP & ~this.dataMask) | w;
     },
     /**
-     * opModRegWordE1(fn): mod=11 (src:reg)  reg=100 (dst:SP)  r/m=001 (CX)
+     * opMod16RegWordE1(fn): mod=11 (src:reg)  reg=100 (dst:SP)  r/m=001 (CX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordE1(fn) {
-        this.regESP = fn.call(this, this.regESP, this.regECX);
+    function opMod16RegWordE1(fn) {
+        var w = fn.call(this, this.regESP & this.dataMask, this.regECX & this.dataMask);
+        this.regESP = (this.regESP & ~this.dataMask) | w;
     },
     /**
-     * opModRegWordE2(fn): mod=11 (src:reg)  reg=100 (dst:SP)  r/m=010 (DX)
+     * opMod16RegWordE2(fn): mod=11 (src:reg)  reg=100 (dst:SP)  r/m=010 (DX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordE2(fn) {
-        this.regESP = fn.call(this, this.regESP, this.regEDX);
+    function opMod16RegWordE2(fn) {
+        var w = fn.call(this, this.regESP & this.dataMask, this.regEDX & this.dataMask);
+        this.regESP = (this.regESP & ~this.dataMask) | w;
     },
     /**
-     * opModRegWordE3(fn): mod=11 (src:reg)  reg=100 (dst:SP)  r/m=011 (BX)
+     * opMod16RegWordE3(fn): mod=11 (src:reg)  reg=100 (dst:SP)  r/m=011 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordE3(fn) {
-        this.regESP = fn.call(this, this.regESP, this.regEBX);
+    function opMod16RegWordE3(fn) {
+        var w = fn.call(this, this.regESP & this.dataMask, this.regEBX & this.dataMask);
+        this.regESP = (this.regESP & ~this.dataMask) | w;
     },
     /**
-     * opModRegWordE4(fn): mod=11 (src:reg)  reg=100 (dst:SP)  r/m=100 (SP)
+     * opMod16RegWordE4(fn): mod=11 (src:reg)  reg=100 (dst:SP)  r/m=100 (SP)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordE4(fn) {
-        this.regESP = fn.call(this, this.regESP, this.regESP);
+    function opMod16RegWordE4(fn) {
+        var w = fn.call(this, this.regESP & this.dataMask, this.regESP & this.dataMask);
+        this.regESP = (this.regESP & ~this.dataMask) | w;
     },
     /**
-     * opModRegWordE5(fn): mod=11 (src:reg)  reg=100 (dst:SP)  r/m=101 (BP)
+     * opMod16RegWordE5(fn): mod=11 (src:reg)  reg=100 (dst:SP)  r/m=101 (BP)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordE5(fn) {
-        this.regESP = fn.call(this, this.regESP, this.regEBP);
+    function opMod16RegWordE5(fn) {
+        var w = fn.call(this, this.regESP & this.dataMask, this.regEBP & this.dataMask);
+        this.regESP = (this.regESP & ~this.dataMask) | w;
     },
     /**
-     * opModRegWordE6(fn): mod=11 (src:reg)  reg=100 (dst:SP)  r/m=110 (SI)
+     * opMod16RegWordE6(fn): mod=11 (src:reg)  reg=100 (dst:SP)  r/m=110 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordE6(fn) {
-        this.regESP = fn.call(this, this.regESP, this.regESI);
+    function opMod16RegWordE6(fn) {
+        var w = fn.call(this, this.regESP & this.dataMask, this.regESI & this.dataMask);
+        this.regESP = (this.regESP & ~this.dataMask) | w;
     },
     /**
-     * opModRegWordE7(fn): mod=11 (src:reg)  reg=100 (dst:SP)  r/m=111 (DI)
+     * opMod16RegWordE7(fn): mod=11 (src:reg)  reg=100 (dst:SP)  r/m=111 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordE7(fn) {
-        this.regESP = fn.call(this, this.regESP, this.regEDI);
+    function opMod16RegWordE7(fn) {
+        var w = fn.call(this, this.regESP & this.dataMask, this.regEDI & this.dataMask);
+        this.regESP = (this.regESP & ~this.dataMask) | w;
     },
     /**
-     * opModRegWordE8(fn): mod=11 (src:reg)  reg=101 (dst:BP)  r/m=000 (AX)
+     * opMod16RegWordE8(fn): mod=11 (src:reg)  reg=101 (dst:BP)  r/m=000 (AX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordE8(fn) {
-        this.regEBP = fn.call(this, this.regEBP, this.regEAX);
+    function opMod16RegWordE8(fn) {
+        var w = fn.call(this, this.regEBP & this.dataMask, this.regEAX & this.dataMask);
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiAL; this.backTrack.btiBPHi = this.backTrack.btiAH;
         }
     },
     /**
-     * opModRegWordE9(fn): mod=11 (src:reg)  reg=101 (dst:BP)  r/m=001 (CX)
+     * opMod16RegWordE9(fn): mod=11 (src:reg)  reg=101 (dst:BP)  r/m=001 (CX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordE9(fn) {
-        this.regEBP = fn.call(this, this.regEBP, this.regECX);
+    function opMod16RegWordE9(fn) {
+        var w = fn.call(this, this.regEBP & this.dataMask, this.regECX & this.dataMask);
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiCL; this.backTrack.btiBPHi = this.backTrack.btiCH;
         }
     },
     /**
-     * opModRegWordEA(fn): mod=11 (src:reg)  reg=101 (dst:BP)  r/m=010 (DX)
+     * opMod16RegWordEA(fn): mod=11 (src:reg)  reg=101 (dst:BP)  r/m=010 (DX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordEA(fn) {
-        this.regEBP = fn.call(this, this.regEBP, this.regEDX);
+    function opMod16RegWordEA(fn) {
+        var w = fn.call(this, this.regEBP & this.dataMask, this.regEDX & this.dataMask);
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiDL; this.backTrack.btiBPHi = this.backTrack.btiDH;
         }
     },
     /**
-     * opModRegWordEB(fn): mod=11 (src:reg)  reg=101 (dst:BP)  r/m=011 (BX)
+     * opMod16RegWordEB(fn): mod=11 (src:reg)  reg=101 (dst:BP)  r/m=011 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordEB(fn) {
-        this.regEBP = fn.call(this, this.regEBP, this.regEBX);
+    function opMod16RegWordEB(fn) {
+        var w = fn.call(this, this.regEBP & this.dataMask, this.regEBX & this.dataMask);
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiBL; this.backTrack.btiBPHi = this.backTrack.btiBH;
         }
     },
     /**
-     * opModRegWordEC(fn): mod=11 (src:reg)  reg=101 (dst:BP)  r/m=100 (SP)
+     * opMod16RegWordEC(fn): mod=11 (src:reg)  reg=101 (dst:BP)  r/m=100 (SP)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordEC(fn) {
-        this.regEBP = fn.call(this, this.regEBP, this.regESP);
+    function opMod16RegWordEC(fn) {
+        var w = fn.call(this, this.regEBP & this.dataMask, this.regESP & this.dataMask);
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = X86.BACKTRACK.SP_LO; this.backTrack.btiBPHi = X86.BACKTRACK.SP_HI;
         }
     },
     /**
-     * opModRegWordED(fn): mod=11 (src:reg)  reg=101 (dst:BP)  r/m=101 (BP)
+     * opMod16RegWordED(fn): mod=11 (src:reg)  reg=101 (dst:BP)  r/m=101 (BP)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordED(fn) {
-        this.regEBP = fn.call(this, this.regEBP, this.regEBP);
+    function opMod16RegWordED(fn) {
+        var w = fn.call(this, this.regEBP & this.dataMask, this.regEBP & this.dataMask);
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
     },
     /**
-     * opModRegWordEE(fn): mod=11 (src:reg)  reg=101 (dst:BP)  r/m=110 (SI)
+     * opMod16RegWordEE(fn): mod=11 (src:reg)  reg=101 (dst:BP)  r/m=110 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordEE(fn) {
-        this.regEBP = fn.call(this, this.regEBP, this.regESI);
+    function opMod16RegWordEE(fn) {
+        var w = fn.call(this, this.regEBP & this.dataMask, this.regESI & this.dataMask);
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiSILo; this.backTrack.btiBPHi = this.backTrack.btiSIHi;
         }
     },
     /**
-     * opModRegWordEF(fn): mod=11 (src:reg)  reg=101 (dst:BP)  r/m=111 (DI)
+     * opMod16RegWordEF(fn): mod=11 (src:reg)  reg=101 (dst:BP)  r/m=111 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordEF(fn) {
-        this.regEBP = fn.call(this, this.regEBP, this.regEDI);
+    function opMod16RegWordEF(fn) {
+        var w = fn.call(this, this.regEBP & this.dataMask, this.regEDI & this.dataMask);
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiDILo; this.backTrack.btiBPHi = this.backTrack.btiDIHi;
         }
     },
     /**
-     * opModRegWordF0(fn): mod=11 (src:reg)  reg=110 (dst:SI)  r/m=000 (AX)
+     * opMod16RegWordF0(fn): mod=11 (src:reg)  reg=110 (dst:SI)  r/m=000 (AX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordF0(fn) {
-        this.regESI = fn.call(this, this.regESI, this.regEAX);
+    function opMod16RegWordF0(fn) {
+        var w = fn.call(this, this.regESI & this.dataMask, this.regEAX & this.dataMask);
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiAL; this.backTrack.btiSIHi = this.backTrack.btiAH;
         }
     },
     /**
-     * opModRegWordF1(fn): mod=11 (src:reg)  reg=110 (dst:SI)  r/m=001 (CX)
+     * opMod16RegWordF1(fn): mod=11 (src:reg)  reg=110 (dst:SI)  r/m=001 (CX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordF1(fn) {
-        this.regESI = fn.call(this, this.regESI, this.regECX);
+    function opMod16RegWordF1(fn) {
+        var w = fn.call(this, this.regESI & this.dataMask, this.regECX & this.dataMask);
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiCL; this.backTrack.btiSIHi = this.backTrack.btiCH;
         }
     },
     /**
-     * opModRegWordF2(fn): mod=11 (src:reg)  reg=110 (dst:SI)  r/m=010 (DX)
+     * opMod16RegWordF2(fn): mod=11 (src:reg)  reg=110 (dst:SI)  r/m=010 (DX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordF2(fn) {
-        this.regESI = fn.call(this, this.regESI, this.regEDX);
+    function opMod16RegWordF2(fn) {
+        var w = fn.call(this, this.regESI & this.dataMask, this.regEDX & this.dataMask);
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiDL; this.backTrack.btiSIHi = this.backTrack.btiDH;
         }
     },
     /**
-     * opModRegWordF3(fn): mod=11 (src:reg)  reg=110 (dst:SI)  r/m=011 (BX)
+     * opMod16RegWordF3(fn): mod=11 (src:reg)  reg=110 (dst:SI)  r/m=011 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordF3(fn) {
-        this.regESI = fn.call(this, this.regESI, this.regEBX);
+    function opMod16RegWordF3(fn) {
+        var w = fn.call(this, this.regESI & this.dataMask, this.regEBX & this.dataMask);
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiBL; this.backTrack.btiSIHi = this.backTrack.btiBH;
         }
     },
     /**
-     * opModRegWordF4(fn): mod=11 (src:reg)  reg=110 (dst:SI)  r/m=100 (SP)
+     * opMod16RegWordF4(fn): mod=11 (src:reg)  reg=110 (dst:SI)  r/m=100 (SP)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordF4(fn) {
-        this.regESI = fn.call(this, this.regESI, this.regESP);
+    function opMod16RegWordF4(fn) {
+        var w = fn.call(this, this.regESI & this.dataMask, this.regESP & this.dataMask);
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = X86.BACKTRACK.SP_LO; this.backTrack.btiSIHi = X86.BACKTRACK.SP_HI;
         }
     },
     /**
-     * opModRegWordF5(fn): mod=11 (src:reg)  reg=110 (dst:SI)  r/m=101 (BP)
+     * opMod16RegWordF5(fn): mod=11 (src:reg)  reg=110 (dst:SI)  r/m=101 (BP)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordF5(fn) {
-        this.regESI = fn.call(this, this.regESI, this.regEBP);
+    function opMod16RegWordF5(fn) {
+        var w = fn.call(this, this.regESI & this.dataMask, this.regEBP & this.dataMask);
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiBPLo; this.backTrack.btiSIHi = this.backTrack.btiBPHi;
         }
     },
     /**
-     * opModRegWordF6(fn): mod=11 (src:reg)  reg=110 (dst:SI)  r/m=110 (SI)
+     * opMod16RegWordF6(fn): mod=11 (src:reg)  reg=110 (dst:SI)  r/m=110 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordF6(fn) {
-        this.regESI = fn.call(this, this.regESI, this.regESI);
+    function opMod16RegWordF6(fn) {
+        var w = fn.call(this, this.regESI & this.dataMask, this.regESI & this.dataMask);
+        this.regESI = (this.regESI & ~this.dataMask) | w;
     },
     /**
-     * opModRegWordF7(fn): mod=11 (src:reg)  reg=110 (dst:SI)  r/m=111 (DI)
+     * opMod16RegWordF7(fn): mod=11 (src:reg)  reg=110 (dst:SI)  r/m=111 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordF7(fn) {
-        this.regESI = fn.call(this, this.regESI, this.regEDI);
+    function opMod16RegWordF7(fn) {
+        var w = fn.call(this, this.regESI & this.dataMask, this.regEDI & this.dataMask);
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiDILo; this.backTrack.btiSIHi = this.backTrack.btiDIHi;
         }
     },
     /**
-     * opModRegWordF8(fn): mod=11 (src:reg)  reg=111 (dst:DI)  r/m=000 (AX)
+     * opMod16RegWordF8(fn): mod=11 (src:reg)  reg=111 (dst:DI)  r/m=000 (AX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordF8(fn) {
-        this.regEDI = fn.call(this, this.regEDI, this.regEAX);
+    function opMod16RegWordF8(fn) {
+        var w = fn.call(this, this.regEDI & this.dataMask, this.regEAX & this.dataMask);
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiAL; this.backTrack.btiDIHi = this.backTrack.btiAH;
         }
     },
     /**
-     * opModRegWordF9(fn): mod=11 (src:reg)  reg=111 (dst:DI)  r/m=001 (CX)
+     * opMod16RegWordF9(fn): mod=11 (src:reg)  reg=111 (dst:DI)  r/m=001 (CX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordF9(fn) {
-        this.regEDI = fn.call(this, this.regEDI, this.regECX);
+    function opMod16RegWordF9(fn) {
+        var w = fn.call(this, this.regEDI & this.dataMask, this.regECX & this.dataMask);
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiCL; this.backTrack.btiDIHi = this.backTrack.btiCH;
         }
     },
     /**
-     * opModRegWordFA(fn): mod=11 (src:reg)  reg=111 (dst:DI)  r/m=010 (DX)
+     * opMod16RegWordFA(fn): mod=11 (src:reg)  reg=111 (dst:DI)  r/m=010 (DX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordFA(fn) {
-        this.regEDI = fn.call(this, this.regEDI, this.regEDX);
+    function opMod16RegWordFA(fn) {
+        var w = fn.call(this, this.regEDI & this.dataMask, this.regEDX & this.dataMask);
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiDL; this.backTrack.btiDIHi = this.backTrack.btiDH;
         }
     },
     /**
-     * opModRegWordFB(fn): mod=11 (src:reg)  reg=111 (dst:DI)  r/m=011 (BX)
+     * opMod16RegWordFB(fn): mod=11 (src:reg)  reg=111 (dst:DI)  r/m=011 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordFB(fn) {
-        this.regEDI = fn.call(this, this.regEDI, this.regEBX);
+    function opMod16RegWordFB(fn) {
+        var w = fn.call(this, this.regEDI & this.dataMask, this.regEBX & this.dataMask);
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiBL; this.backTrack.btiDIHi = this.backTrack.btiBH;
         }
     },
     /**
-     * opModRegWordFC(fn): mod=11 (src:reg)  reg=111 (dst:DI)  r/m=100 (SP)
+     * opMod16RegWordFC(fn): mod=11 (src:reg)  reg=111 (dst:DI)  r/m=100 (SP)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordFC(fn) {
-        this.regEDI = fn.call(this, this.regEDI, this.regESP);
+    function opMod16RegWordFC(fn) {
+        var w = fn.call(this, this.regEDI & this.dataMask, this.regESP & this.dataMask);
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = X86.BACKTRACK.SP_LO; this.backTrack.btiDIHi = X86.BACKTRACK.SP_HI;
         }
     },
     /**
-     * opModRegWordFD(fn): mod=11 (src:reg)  reg=111 (dst:DI)  r/m=101 (BP)
+     * opMod16RegWordFD(fn): mod=11 (src:reg)  reg=111 (dst:DI)  r/m=101 (BP)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordFD(fn) {
-        this.regEDI = fn.call(this, this.regEDI, this.regEBP);
+    function opMod16RegWordFD(fn) {
+        var w = fn.call(this, this.regEDI & this.dataMask, this.regEBP & this.dataMask);
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiBPLo; this.backTrack.btiDIHi = this.backTrack.btiBPHi;
         }
     },
     /**
-     * opModRegWordFE(fn): mod=11 (src:reg)  reg=111 (dst:DI)  r/m=110 (SI)
+     * opMod16RegWordFE(fn): mod=11 (src:reg)  reg=111 (dst:DI)  r/m=110 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordFE(fn) {
-        this.regEDI = fn.call(this, this.regEDI, this.regESI);
+    function opMod16RegWordFE(fn) {
+        var w = fn.call(this, this.regEDI & this.dataMask, this.regESI & this.dataMask);
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiSILo; this.backTrack.btiDIHi = this.backTrack.btiSIHi;
         }
     },
     /**
-     * opModRegWordFF(fn): mod=11 (src:reg)  reg=111 (dst:DI)  r/m=111 (DI)
+     * opMod16RegWordFF(fn): mod=11 (src:reg)  reg=111 (dst:DI)  r/m=111 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModRegWordFF(fn) {
-        this.regEDI = fn.call(this, this.regEDI, this.regEDI);
+    function opMod16RegWordFF(fn) {
+        var w = fn.call(this, this.regEDI & this.dataMask, this.regEDI & this.dataMask);
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
     }
 ];
 
-X86ModW.aOpModMem = [
+X86ModW16.aOpModMem = [
     /**
-     * opModMemWord00(fn): mod=00 (dst:mem)  reg=000 (src:AX)  r/m=000 (BX+SI)
+     * opMod16MemWord00(fn): mod=00 (dst:mem)  reg=000 (src:AX)  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord00(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI), this.regEAX);
+    function opMod16MemWord00(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -3204,13 +3460,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModMemWord01(fn): mod=00 (dst:mem)  reg=000 (src:AX)  r/m=001 (BX+DI)
+     * opMod16MemWord01(fn): mod=00 (dst:mem)  reg=000 (src:AX)  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord01(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI), this.regEAX);
+    function opMod16MemWord01(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -3218,13 +3474,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModMemWord02(fn): mod=00 (dst:mem)  reg=000 (src:AX)  r/m=010 (BP+SI)
+     * opMod16MemWord02(fn): mod=00 (dst:mem)  reg=000 (src:AX)  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord02(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI), this.regEAX);
+    function opMod16MemWord02(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -3232,13 +3488,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModMemWord03(fn): mod=00 (dst:mem)  reg=000 (src:AX)  r/m=011 (BP+DI)
+     * opMod16MemWord03(fn): mod=00 (dst:mem)  reg=000 (src:AX)  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord03(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI), this.regEAX);
+    function opMod16MemWord03(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -3246,13 +3502,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModMemWord04(fn): mod=00 (dst:mem)  reg=000 (src:AX)  r/m=100 (SI)
+     * opMod16MemWord04(fn): mod=00 (dst:mem)  reg=000 (src:AX)  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord04(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI), this.regEAX);
+    function opMod16MemWord04(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regESI), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -3260,13 +3516,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModMemWord05(fn): mod=00 (dst:mem)  reg=000 (src:AX)  r/m=101 (DI)
+     * opMod16MemWord05(fn): mod=00 (dst:mem)  reg=000 (src:AX)  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord05(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI), this.regEAX);
+    function opMod16MemWord05(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEDI), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -3274,13 +3530,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModMemWord06(fn): mod=00 (dst:mem)  reg=000 (src:AX)  r/m=110 (d16)
+     * opMod16MemWord06(fn): mod=00 (dst:mem)  reg=000 (src:AX)  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord06(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getIPWord()), this.regEAX);
+    function opMod16MemWord06(fn) {
+        var w = fn.call(this, this.modEAWordData(this.getIPWord()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -3288,13 +3544,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
-     * opModMemWord07(fn): mod=00 (dst:mem)  reg=000 (src:AX)  r/m=111 (BX)
+     * opMod16MemWord07(fn): mod=00 (dst:mem)  reg=000 (src:AX)  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord07(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX), this.regEAX);
+    function opMod16MemWord07(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -3302,13 +3558,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModMemWord08(fn): mod=00 (dst:mem)  reg=001 (src:CX)  r/m=000 (BX+SI)
+     * opMod16MemWord08(fn): mod=00 (dst:mem)  reg=001 (src:CX)  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord08(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI), this.regECX);
+    function opMod16MemWord08(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -3316,13 +3572,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModMemWord09(fn): mod=00 (dst:mem)  reg=001 (src:CX)  r/m=001 (BX+DI)
+     * opMod16MemWord09(fn): mod=00 (dst:mem)  reg=001 (src:CX)  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord09(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI), this.regECX);
+    function opMod16MemWord09(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -3330,13 +3586,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModMemWord0A(fn): mod=00 (dst:mem)  reg=001 (src:CX)  r/m=010 (BP+SI)
+     * opMod16MemWord0A(fn): mod=00 (dst:mem)  reg=001 (src:CX)  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord0A(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI), this.regECX);
+    function opMod16MemWord0A(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -3344,13 +3600,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModMemWord0B(fn): mod=00 (dst:mem)  reg=001 (src:CX)  r/m=011 (BP+DI)
+     * opMod16MemWord0B(fn): mod=00 (dst:mem)  reg=001 (src:CX)  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord0B(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI), this.regECX);
+    function opMod16MemWord0B(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -3358,13 +3614,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModMemWord0C(fn): mod=00 (dst:mem)  reg=001 (src:CX)  r/m=100 (SI)
+     * opMod16MemWord0C(fn): mod=00 (dst:mem)  reg=001 (src:CX)  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord0C(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI), this.regECX);
+    function opMod16MemWord0C(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regESI), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -3372,13 +3628,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModMemWord0D(fn): mod=00 (dst:mem)  reg=001 (src:CX)  r/m=101 (DI)
+     * opMod16MemWord0D(fn): mod=00 (dst:mem)  reg=001 (src:CX)  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord0D(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI), this.regECX);
+    function opMod16MemWord0D(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEDI), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -3386,13 +3642,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModMemWord0E(fn): mod=00 (dst:mem)  reg=001 (src:CX)  r/m=110 (d16)
+     * opMod16MemWord0E(fn): mod=00 (dst:mem)  reg=001 (src:CX)  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord0E(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getIPWord()), this.regECX);
+    function opMod16MemWord0E(fn) {
+        var w = fn.call(this, this.modEAWordData(this.getIPWord()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -3400,13 +3656,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
-     * opModMemWord0F(fn): mod=00 (dst:mem)  reg=001 (src:CX)  r/m=111 (BX)
+     * opMod16MemWord0F(fn): mod=00 (dst:mem)  reg=001 (src:CX)  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord0F(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX), this.regECX);
+    function opMod16MemWord0F(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -3414,13 +3670,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModMemWord10(fn): mod=00 (dst:mem)  reg=010 (src:DX)  r/m=000 (BX+SI)
+     * opMod16MemWord10(fn): mod=00 (dst:mem)  reg=010 (src:DX)  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord10(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI), this.regEDX);
+    function opMod16MemWord10(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -3428,13 +3684,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModMemWord11(fn): mod=00 (dst:mem)  reg=010 (src:DX)  r/m=001 (BX+DI)
+     * opMod16MemWord11(fn): mod=00 (dst:mem)  reg=010 (src:DX)  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord11(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI), this.regEDX);
+    function opMod16MemWord11(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -3442,13 +3698,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModMemWord12(fn): mod=00 (dst:mem)  reg=010 (src:DX)  r/m=010 (BP+SI)
+     * opMod16MemWord12(fn): mod=00 (dst:mem)  reg=010 (src:DX)  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord12(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI), this.regEDX);
+    function opMod16MemWord12(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -3456,13 +3712,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModMemWord13(fn): mod=00 (dst:mem)  reg=010 (src:DX)  r/m=011 (BP+DI)
+     * opMod16MemWord13(fn): mod=00 (dst:mem)  reg=010 (src:DX)  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord13(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI), this.regEDX);
+    function opMod16MemWord13(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -3470,13 +3726,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModMemWord14(fn): mod=00 (dst:mem)  reg=010 (src:DX)  r/m=100 (SI)
+     * opMod16MemWord14(fn): mod=00 (dst:mem)  reg=010 (src:DX)  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord14(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI), this.regEDX);
+    function opMod16MemWord14(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regESI), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -3484,13 +3740,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModMemWord15(fn): mod=00 (dst:mem)  reg=010 (src:DX)  r/m=101 (DI)
+     * opMod16MemWord15(fn): mod=00 (dst:mem)  reg=010 (src:DX)  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord15(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI), this.regEDX);
+    function opMod16MemWord15(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEDI), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -3498,13 +3754,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModMemWord16(fn): mod=00 (dst:mem)  reg=010 (src:DX)  r/m=110 (d16)
+     * opMod16MemWord16(fn): mod=00 (dst:mem)  reg=010 (src:DX)  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord16(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getIPWord()), this.regEDX);
+    function opMod16MemWord16(fn) {
+        var w = fn.call(this, this.modEAWordData(this.getIPWord()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -3512,13 +3768,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
-     * opModMemWord17(fn): mod=00 (dst:mem)  reg=010 (src:DX)  r/m=111 (BX)
+     * opMod16MemWord17(fn): mod=00 (dst:mem)  reg=010 (src:DX)  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord17(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX), this.regEDX);
+    function opMod16MemWord17(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -3526,13 +3782,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModMemWord18(fn): mod=00 (dst:mem)  reg=011 (src:BX)  r/m=000 (BX+SI)
+     * opMod16MemWord18(fn): mod=00 (dst:mem)  reg=011 (src:BX)  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord18(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI), this.regEBX);
+    function opMod16MemWord18(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -3540,13 +3796,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModMemWord19(fn): mod=00 (dst:mem)  reg=011 (src:BX)  r/m=001 (BX+DI)
+     * opMod16MemWord19(fn): mod=00 (dst:mem)  reg=011 (src:BX)  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord19(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI), this.regEBX);
+    function opMod16MemWord19(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -3554,13 +3810,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModMemWord1A(fn): mod=00 (dst:mem)  reg=011 (src:BX)  r/m=010 (BP+SI)
+     * opMod16MemWord1A(fn): mod=00 (dst:mem)  reg=011 (src:BX)  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord1A(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI), this.regEBX);
+    function opMod16MemWord1A(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -3568,13 +3824,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModMemWord1B(fn): mod=00 (dst:mem)  reg=011 (src:BX)  r/m=011 (BP+DI)
+     * opMod16MemWord1B(fn): mod=00 (dst:mem)  reg=011 (src:BX)  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord1B(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI), this.regEBX);
+    function opMod16MemWord1B(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -3582,13 +3838,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModMemWord1C(fn): mod=00 (dst:mem)  reg=011 (src:BX)  r/m=100 (SI)
+     * opMod16MemWord1C(fn): mod=00 (dst:mem)  reg=011 (src:BX)  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord1C(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI), this.regEBX);
+    function opMod16MemWord1C(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regESI), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -3596,13 +3852,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModMemWord1D(fn): mod=00 (dst:mem)  reg=011 (src:BX)  r/m=101 (DI)
+     * opMod16MemWord1D(fn): mod=00 (dst:mem)  reg=011 (src:BX)  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord1D(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI), this.regEBX);
+    function opMod16MemWord1D(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEDI), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -3610,13 +3866,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModMemWord1E(fn): mod=00 (dst:mem)  reg=011 (src:BX)  r/m=110 (d16)
+     * opMod16MemWord1E(fn): mod=00 (dst:mem)  reg=011 (src:BX)  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord1E(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getIPWord()), this.regEBX);
+    function opMod16MemWord1E(fn) {
+        var w = fn.call(this, this.modEAWordData(this.getIPWord()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -3624,13 +3880,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
-     * opModMemWord1F(fn): mod=00 (dst:mem)  reg=011 (src:BX)  r/m=111 (BX)
+     * opMod16MemWord1F(fn): mod=00 (dst:mem)  reg=011 (src:BX)  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord1F(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX), this.regEBX);
+    function opMod16MemWord1F(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -3638,13 +3894,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModMemWord20(fn): mod=00 (dst:mem)  reg=100 (src:SP)  r/m=000 (BX+SI)
+     * opMod16MemWord20(fn): mod=00 (dst:mem)  reg=100 (src:SP)  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord20(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI), this.regESP);
+    function opMod16MemWord20(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -3652,13 +3908,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModMemWord21(fn): mod=00 (dst:mem)  reg=100 (src:SP)  r/m=001 (BX+DI)
+     * opMod16MemWord21(fn): mod=00 (dst:mem)  reg=100 (src:SP)  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord21(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI), this.regESP);
+    function opMod16MemWord21(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -3666,13 +3922,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModMemWord22(fn): mod=00 (dst:mem)  reg=100 (src:SP)  r/m=010 (BP+SI)
+     * opMod16MemWord22(fn): mod=00 (dst:mem)  reg=100 (src:SP)  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord22(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI), this.regESP);
+    function opMod16MemWord22(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -3680,13 +3936,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModMemWord23(fn): mod=00 (dst:mem)  reg=100 (src:SP)  r/m=011 (BP+DI)
+     * opMod16MemWord23(fn): mod=00 (dst:mem)  reg=100 (src:SP)  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord23(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI), this.regESP);
+    function opMod16MemWord23(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -3694,13 +3950,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModMemWord24(fn): mod=00 (dst:mem)  reg=100 (src:SP)  r/m=100 (SI)
+     * opMod16MemWord24(fn): mod=00 (dst:mem)  reg=100 (src:SP)  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord24(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI), this.regESP);
+    function opMod16MemWord24(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regESI), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -3708,13 +3964,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModMemWord25(fn): mod=00 (dst:mem)  reg=100 (src:SP)  r/m=101 (DI)
+     * opMod16MemWord25(fn): mod=00 (dst:mem)  reg=100 (src:SP)  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord25(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI), this.regESP);
+    function opMod16MemWord25(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEDI), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -3722,13 +3978,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModMemWord26(fn): mod=00 (dst:mem)  reg=100 (src:SP)  r/m=110 (d16)
+     * opMod16MemWord26(fn): mod=00 (dst:mem)  reg=100 (src:SP)  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord26(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getIPWord()), this.regESP);
+    function opMod16MemWord26(fn) {
+        var w = fn.call(this, this.modEAWordData(this.getIPWord()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -3736,13 +3992,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
-     * opModMemWord27(fn): mod=00 (dst:mem)  reg=100 (src:SP)  r/m=111 (BX)
+     * opMod16MemWord27(fn): mod=00 (dst:mem)  reg=100 (src:SP)  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord27(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX), this.regESP);
+    function opMod16MemWord27(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -3750,13 +4006,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModMemWord28(fn): mod=00 (dst:mem)  reg=101 (src:BP)  r/m=000 (BX+SI)
+     * opMod16MemWord28(fn): mod=00 (dst:mem)  reg=101 (src:BP)  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord28(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI), this.regEBP);
+    function opMod16MemWord28(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -3764,13 +4020,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModMemWord29(fn): mod=00 (dst:mem)  reg=101 (src:BP)  r/m=001 (BX+DI)
+     * opMod16MemWord29(fn): mod=00 (dst:mem)  reg=101 (src:BP)  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord29(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI), this.regEBP);
+    function opMod16MemWord29(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -3778,13 +4034,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModMemWord2A(fn): mod=00 (dst:mem)  reg=101 (src:BP)  r/m=010 (BP+SI)
+     * opMod16MemWord2A(fn): mod=00 (dst:mem)  reg=101 (src:BP)  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord2A(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI), this.regEBP);
+    function opMod16MemWord2A(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -3792,13 +4048,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModMemWord2B(fn): mod=00 (dst:mem)  reg=101 (src:BP)  r/m=011 (BP+DI)
+     * opMod16MemWord2B(fn): mod=00 (dst:mem)  reg=101 (src:BP)  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord2B(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI), this.regEBP);
+    function opMod16MemWord2B(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -3806,13 +4062,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModMemWord2C(fn): mod=00 (dst:mem)  reg=101 (src:BP)  r/m=100 (SI)
+     * opMod16MemWord2C(fn): mod=00 (dst:mem)  reg=101 (src:BP)  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord2C(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI), this.regEBP);
+    function opMod16MemWord2C(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regESI), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -3820,13 +4076,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModMemWord2D(fn): mod=00 (dst:mem)  reg=101 (src:BP)  r/m=101 (DI)
+     * opMod16MemWord2D(fn): mod=00 (dst:mem)  reg=101 (src:BP)  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord2D(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI), this.regEBP);
+    function opMod16MemWord2D(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEDI), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -3834,13 +4090,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModMemWord2E(fn): mod=00 (dst:mem)  reg=101 (src:BP)  r/m=110 (d16)
+     * opMod16MemWord2E(fn): mod=00 (dst:mem)  reg=101 (src:BP)  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord2E(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getIPWord()), this.regEBP);
+    function opMod16MemWord2E(fn) {
+        var w = fn.call(this, this.modEAWordData(this.getIPWord()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -3848,13 +4104,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
-     * opModMemWord2F(fn): mod=00 (dst:mem)  reg=101 (src:BP)  r/m=111 (BX)
+     * opMod16MemWord2F(fn): mod=00 (dst:mem)  reg=101 (src:BP)  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord2F(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX), this.regEBP);
+    function opMod16MemWord2F(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -3862,13 +4118,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModMemWord30(fn): mod=00 (dst:mem)  reg=110 (src:SI)  r/m=000 (BX+SI)
+     * opMod16MemWord30(fn): mod=00 (dst:mem)  reg=110 (src:SI)  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord30(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI), this.regESI);
+    function opMod16MemWord30(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -3876,13 +4132,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModMemWord31(fn): mod=00 (dst:mem)  reg=110 (src:SI)  r/m=001 (BX+DI)
+     * opMod16MemWord31(fn): mod=00 (dst:mem)  reg=110 (src:SI)  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord31(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI), this.regESI);
+    function opMod16MemWord31(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -3890,13 +4146,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModMemWord32(fn): mod=00 (dst:mem)  reg=110 (src:SI)  r/m=010 (BP+SI)
+     * opMod16MemWord32(fn): mod=00 (dst:mem)  reg=110 (src:SI)  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord32(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI), this.regESI);
+    function opMod16MemWord32(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -3904,13 +4160,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModMemWord33(fn): mod=00 (dst:mem)  reg=110 (src:SI)  r/m=011 (BP+DI)
+     * opMod16MemWord33(fn): mod=00 (dst:mem)  reg=110 (src:SI)  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord33(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI), this.regESI);
+    function opMod16MemWord33(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -3918,13 +4174,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModMemWord34(fn): mod=00 (dst:mem)  reg=110 (src:SI)  r/m=100 (SI)
+     * opMod16MemWord34(fn): mod=00 (dst:mem)  reg=110 (src:SI)  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord34(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI), this.regESI);
+    function opMod16MemWord34(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regESI), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -3932,13 +4188,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModMemWord35(fn): mod=00 (dst:mem)  reg=110 (src:SI)  r/m=101 (DI)
+     * opMod16MemWord35(fn): mod=00 (dst:mem)  reg=110 (src:SI)  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord35(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI), this.regESI);
+    function opMod16MemWord35(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEDI), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -3946,13 +4202,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModMemWord36(fn): mod=00 (dst:mem)  reg=110 (src:SI)  r/m=110 (d16)
+     * opMod16MemWord36(fn): mod=00 (dst:mem)  reg=110 (src:SI)  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord36(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getIPWord()), this.regESI);
+    function opMod16MemWord36(fn) {
+        var w = fn.call(this, this.modEAWordData(this.getIPWord()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -3960,13 +4216,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
-     * opModMemWord37(fn): mod=00 (dst:mem)  reg=110 (src:SI)  r/m=111 (BX)
+     * opMod16MemWord37(fn): mod=00 (dst:mem)  reg=110 (src:SI)  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord37(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX), this.regESI);
+    function opMod16MemWord37(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -3974,13 +4230,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModMemWord38(fn): mod=00 (dst:mem)  reg=111 (src:DI)  r/m=000 (BX+SI)
+     * opMod16MemWord38(fn): mod=00 (dst:mem)  reg=111 (src:DI)  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord38(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI), this.regEDI);
+    function opMod16MemWord38(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -3988,13 +4244,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModMemWord39(fn): mod=00 (dst:mem)  reg=111 (src:DI)  r/m=001 (BX+DI)
+     * opMod16MemWord39(fn): mod=00 (dst:mem)  reg=111 (src:DI)  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord39(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI), this.regEDI);
+    function opMod16MemWord39(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -4002,13 +4258,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModMemWord3A(fn): mod=00 (dst:mem)  reg=111 (src:DI)  r/m=010 (BP+SI)
+     * opMod16MemWord3A(fn): mod=00 (dst:mem)  reg=111 (src:DI)  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord3A(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI), this.regEDI);
+    function opMod16MemWord3A(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -4016,13 +4272,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModMemWord3B(fn): mod=00 (dst:mem)  reg=111 (src:DI)  r/m=011 (BP+DI)
+     * opMod16MemWord3B(fn): mod=00 (dst:mem)  reg=111 (src:DI)  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord3B(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI), this.regEDI);
+    function opMod16MemWord3B(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -4030,13 +4286,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModMemWord3C(fn): mod=00 (dst:mem)  reg=111 (src:DI)  r/m=100 (SI)
+     * opMod16MemWord3C(fn): mod=00 (dst:mem)  reg=111 (src:DI)  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord3C(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI), this.regEDI);
+    function opMod16MemWord3C(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regESI), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -4044,13 +4300,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModMemWord3D(fn): mod=00 (dst:mem)  reg=111 (src:DI)  r/m=101 (DI)
+     * opMod16MemWord3D(fn): mod=00 (dst:mem)  reg=111 (src:DI)  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord3D(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI), this.regEDI);
+    function opMod16MemWord3D(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEDI), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -4058,13 +4314,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModMemWord3E(fn): mod=00 (dst:mem)  reg=111 (src:DI)  r/m=110 (d16)
+     * opMod16MemWord3E(fn): mod=00 (dst:mem)  reg=111 (src:DI)  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord3E(fn) {
-        var w = fn.call(this, this.modEAWordData(this.getIPWord()), this.regEDI);
+    function opMod16MemWord3E(fn) {
+        var w = fn.call(this, this.modEAWordData(this.getIPWord()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -4072,13 +4328,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
-     * opModMemWord3F(fn): mod=00 (dst:mem)  reg=111 (src:DI)  r/m=111 (BX)
+     * opMod16MemWord3F(fn): mod=00 (dst:mem)  reg=111 (src:DI)  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord3F(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX), this.regEDI);
+    function opMod16MemWord3F(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -4086,13 +4342,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModMemWord40(fn): mod=01 (dst:mem+d8)  reg=000 (src:AX)  r/m=000 (BX+SI+d8)
+     * opMod16MemWord40(fn): mod=01 (dst:mem+d8)  reg=000 (src:AX)  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord40(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPDisp()), this.regEAX);
+    function opMod16MemWord40(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPDisp()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -4100,13 +4356,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModMemWord41(fn): mod=01 (dst:mem+d8)  reg=000 (src:AX)  r/m=001 (BX+DI+d8)
+     * opMod16MemWord41(fn): mod=01 (dst:mem+d8)  reg=000 (src:AX)  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord41(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPDisp()), this.regEAX);
+    function opMod16MemWord41(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPDisp()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -4114,13 +4370,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModMemWord42(fn): mod=01 (dst:mem+d8)  reg=000 (src:AX)  r/m=010 (BP+SI+d8)
+     * opMod16MemWord42(fn): mod=01 (dst:mem+d8)  reg=000 (src:AX)  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord42(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPDisp()), this.regEAX);
+    function opMod16MemWord42(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPDisp()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -4128,13 +4384,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModMemWord43(fn): mod=01 (dst:mem+d8)  reg=000 (src:AX)  r/m=011 (BP+DI+d8)
+     * opMod16MemWord43(fn): mod=01 (dst:mem+d8)  reg=000 (src:AX)  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord43(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()), this.regEAX);
+    function opMod16MemWord43(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -4142,13 +4398,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModMemWord44(fn): mod=01 (dst:mem+d8)  reg=000 (src:AX)  r/m=100 (SI+d8)
+     * opMod16MemWord44(fn): mod=01 (dst:mem+d8)  reg=000 (src:AX)  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord44(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.regEAX);
+    function opMod16MemWord44(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -4156,13 +4412,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord45(fn): mod=01 (dst:mem+d8)  reg=000 (src:AX)  r/m=101 (DI+d8)
+     * opMod16MemWord45(fn): mod=01 (dst:mem+d8)  reg=000 (src:AX)  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord45(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.regEAX);
+    function opMod16MemWord45(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -4170,13 +4426,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord46(fn): mod=01 (dst:mem+d8)  reg=000 (src:AX)  r/m=110 (BP+d8)
+     * opMod16MemWord46(fn): mod=01 (dst:mem+d8)  reg=000 (src:AX)  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord46(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.regEAX);
+    function opMod16MemWord46(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -4184,13 +4440,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord47(fn): mod=01 (dst:mem+d8)  reg=000 (src:AX)  r/m=111 (BX+d8)
+     * opMod16MemWord47(fn): mod=01 (dst:mem+d8)  reg=000 (src:AX)  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord47(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.regEAX);
+    function opMod16MemWord47(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -4198,13 +4454,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord48(fn): mod=01 (dst:mem+d8)  reg=001 (src:CX)  r/m=000 (BX+SI+d8)
+     * opMod16MemWord48(fn): mod=01 (dst:mem+d8)  reg=001 (src:CX)  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord48(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPDisp()), this.regECX);
+    function opMod16MemWord48(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPDisp()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -4212,13 +4468,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModMemWord49(fn): mod=01 (dst:mem+d8)  reg=001 (src:CX)  r/m=001 (BX+DI+d8)
+     * opMod16MemWord49(fn): mod=01 (dst:mem+d8)  reg=001 (src:CX)  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord49(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPDisp()), this.regECX);
+    function opMod16MemWord49(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPDisp()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -4226,13 +4482,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModMemWord4A(fn): mod=01 (dst:mem+d8)  reg=001 (src:CX)  r/m=010 (BP+SI+d8)
+     * opMod16MemWord4A(fn): mod=01 (dst:mem+d8)  reg=001 (src:CX)  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord4A(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPDisp()), this.regECX);
+    function opMod16MemWord4A(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPDisp()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -4240,13 +4496,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModMemWord4B(fn): mod=01 (dst:mem+d8)  reg=001 (src:CX)  r/m=011 (BP+DI+d8)
+     * opMod16MemWord4B(fn): mod=01 (dst:mem+d8)  reg=001 (src:CX)  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord4B(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()), this.regECX);
+    function opMod16MemWord4B(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -4254,13 +4510,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModMemWord4C(fn): mod=01 (dst:mem+d8)  reg=001 (src:CX)  r/m=100 (SI+d8)
+     * opMod16MemWord4C(fn): mod=01 (dst:mem+d8)  reg=001 (src:CX)  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord4C(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.regECX);
+    function opMod16MemWord4C(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -4268,13 +4524,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord4D(fn): mod=01 (dst:mem+d8)  reg=001 (src:CX)  r/m=101 (DI+d8)
+     * opMod16MemWord4D(fn): mod=01 (dst:mem+d8)  reg=001 (src:CX)  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord4D(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.regECX);
+    function opMod16MemWord4D(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -4282,13 +4538,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord4E(fn): mod=01 (dst:mem+d8)  reg=001 (src:CX)  r/m=110 (BP+d8)
+     * opMod16MemWord4E(fn): mod=01 (dst:mem+d8)  reg=001 (src:CX)  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord4E(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.regECX);
+    function opMod16MemWord4E(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -4296,13 +4552,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord4F(fn): mod=01 (dst:mem+d8)  reg=001 (src:CX)  r/m=111 (BX+d8)
+     * opMod16MemWord4F(fn): mod=01 (dst:mem+d8)  reg=001 (src:CX)  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord4F(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.regECX);
+    function opMod16MemWord4F(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -4310,13 +4566,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord50(fn): mod=01 (dst:mem+d8)  reg=010 (src:DX)  r/m=000 (BX+SI+d8)
+     * opMod16MemWord50(fn): mod=01 (dst:mem+d8)  reg=010 (src:DX)  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord50(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPDisp()), this.regEDX);
+    function opMod16MemWord50(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPDisp()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -4324,13 +4580,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModMemWord51(fn): mod=01 (dst:mem+d8)  reg=010 (src:DX)  r/m=001 (BX+DI+d8)
+     * opMod16MemWord51(fn): mod=01 (dst:mem+d8)  reg=010 (src:DX)  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord51(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPDisp()), this.regEDX);
+    function opMod16MemWord51(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPDisp()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -4338,13 +4594,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModMemWord52(fn): mod=01 (dst:mem+d8)  reg=010 (src:DX)  r/m=010 (BP+SI+d8)
+     * opMod16MemWord52(fn): mod=01 (dst:mem+d8)  reg=010 (src:DX)  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord52(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPDisp()), this.regEDX);
+    function opMod16MemWord52(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPDisp()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -4352,13 +4608,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModMemWord53(fn): mod=01 (dst:mem+d8)  reg=010 (src:DX)  r/m=011 (BP+DI+d8)
+     * opMod16MemWord53(fn): mod=01 (dst:mem+d8)  reg=010 (src:DX)  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord53(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()), this.regEDX);
+    function opMod16MemWord53(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -4366,13 +4622,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModMemWord54(fn): mod=01 (dst:mem+d8)  reg=010 (src:DX)  r/m=100 (SI+d8)
+     * opMod16MemWord54(fn): mod=01 (dst:mem+d8)  reg=010 (src:DX)  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord54(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.regEDX);
+    function opMod16MemWord54(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -4380,13 +4636,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord55(fn): mod=01 (dst:mem+d8)  reg=010 (src:DX)  r/m=101 (DI+d8)
+     * opMod16MemWord55(fn): mod=01 (dst:mem+d8)  reg=010 (src:DX)  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord55(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.regEDX);
+    function opMod16MemWord55(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -4394,13 +4650,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord56(fn): mod=01 (dst:mem+d8)  reg=010 (src:DX)  r/m=110 (BP+d8)
+     * opMod16MemWord56(fn): mod=01 (dst:mem+d8)  reg=010 (src:DX)  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord56(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.regEDX);
+    function opMod16MemWord56(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -4408,13 +4664,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord57(fn): mod=01 (dst:mem+d8)  reg=010 (src:DX)  r/m=111 (BX+d8)
+     * opMod16MemWord57(fn): mod=01 (dst:mem+d8)  reg=010 (src:DX)  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord57(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.regEDX);
+    function opMod16MemWord57(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -4422,13 +4678,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord58(fn): mod=01 (dst:mem+d8)  reg=011 (src:BX)  r/m=000 (BX+SI+d8)
+     * opMod16MemWord58(fn): mod=01 (dst:mem+d8)  reg=011 (src:BX)  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord58(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPDisp()), this.regEBX);
+    function opMod16MemWord58(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPDisp()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -4436,13 +4692,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModMemWord59(fn): mod=01 (dst:mem+d8)  reg=011 (src:BX)  r/m=001 (BX+DI+d8)
+     * opMod16MemWord59(fn): mod=01 (dst:mem+d8)  reg=011 (src:BX)  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord59(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPDisp()), this.regEBX);
+    function opMod16MemWord59(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPDisp()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -4450,13 +4706,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModMemWord5A(fn): mod=01 (dst:mem+d8)  reg=011 (src:BX)  r/m=010 (BP+SI+d8)
+     * opMod16MemWord5A(fn): mod=01 (dst:mem+d8)  reg=011 (src:BX)  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord5A(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPDisp()), this.regEBX);
+    function opMod16MemWord5A(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPDisp()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -4464,13 +4720,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModMemWord5B(fn): mod=01 (dst:mem+d8)  reg=011 (src:BX)  r/m=011 (BP+DI+d8)
+     * opMod16MemWord5B(fn): mod=01 (dst:mem+d8)  reg=011 (src:BX)  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord5B(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()), this.regEBX);
+    function opMod16MemWord5B(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -4478,13 +4734,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModMemWord5C(fn): mod=01 (dst:mem+d8)  reg=011 (src:BX)  r/m=100 (SI+d8)
+     * opMod16MemWord5C(fn): mod=01 (dst:mem+d8)  reg=011 (src:BX)  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord5C(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.regEBX);
+    function opMod16MemWord5C(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -4492,13 +4748,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord5D(fn): mod=01 (dst:mem+d8)  reg=011 (src:BX)  r/m=101 (DI+d8)
+     * opMod16MemWord5D(fn): mod=01 (dst:mem+d8)  reg=011 (src:BX)  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord5D(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.regEBX);
+    function opMod16MemWord5D(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -4506,13 +4762,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord5E(fn): mod=01 (dst:mem+d8)  reg=011 (src:BX)  r/m=110 (BP+d8)
+     * opMod16MemWord5E(fn): mod=01 (dst:mem+d8)  reg=011 (src:BX)  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord5E(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.regEBX);
+    function opMod16MemWord5E(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -4520,13 +4776,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord5F(fn): mod=01 (dst:mem+d8)  reg=011 (src:BX)  r/m=111 (BX+d8)
+     * opMod16MemWord5F(fn): mod=01 (dst:mem+d8)  reg=011 (src:BX)  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord5F(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.regEBX);
+    function opMod16MemWord5F(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -4534,13 +4790,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord60(fn): mod=01 (dst:mem+d8)  reg=100 (src:SP)  r/m=000 (BX+SI+d8)
+     * opMod16MemWord60(fn): mod=01 (dst:mem+d8)  reg=100 (src:SP)  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord60(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPDisp()), this.regESP);
+    function opMod16MemWord60(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPDisp()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -4548,13 +4804,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModMemWord61(fn): mod=01 (dst:mem+d8)  reg=100 (src:SP)  r/m=001 (BX+DI+d8)
+     * opMod16MemWord61(fn): mod=01 (dst:mem+d8)  reg=100 (src:SP)  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord61(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPDisp()), this.regESP);
+    function opMod16MemWord61(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPDisp()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -4562,13 +4818,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModMemWord62(fn): mod=01 (dst:mem+d8)  reg=100 (src:SP)  r/m=010 (BP+SI+d8)
+     * opMod16MemWord62(fn): mod=01 (dst:mem+d8)  reg=100 (src:SP)  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord62(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPDisp()), this.regESP);
+    function opMod16MemWord62(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPDisp()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -4576,13 +4832,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModMemWord63(fn): mod=01 (dst:mem+d8)  reg=100 (src:SP)  r/m=011 (BP+DI+d8)
+     * opMod16MemWord63(fn): mod=01 (dst:mem+d8)  reg=100 (src:SP)  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord63(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()), this.regESP);
+    function opMod16MemWord63(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -4590,13 +4846,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModMemWord64(fn): mod=01 (dst:mem+d8)  reg=100 (src:SP)  r/m=100 (SI+d8)
+     * opMod16MemWord64(fn): mod=01 (dst:mem+d8)  reg=100 (src:SP)  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord64(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.regESP);
+    function opMod16MemWord64(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -4604,13 +4860,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord65(fn): mod=01 (dst:mem+d8)  reg=100 (src:SP)  r/m=101 (DI+d8)
+     * opMod16MemWord65(fn): mod=01 (dst:mem+d8)  reg=100 (src:SP)  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord65(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.regESP);
+    function opMod16MemWord65(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -4618,13 +4874,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord66(fn): mod=01 (dst:mem+d8)  reg=100 (src:SP)  r/m=110 (BP+d8)
+     * opMod16MemWord66(fn): mod=01 (dst:mem+d8)  reg=100 (src:SP)  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord66(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.regESP);
+    function opMod16MemWord66(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -4632,13 +4888,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord67(fn): mod=01 (dst:mem+d8)  reg=100 (src:SP)  r/m=111 (BX+d8)
+     * opMod16MemWord67(fn): mod=01 (dst:mem+d8)  reg=100 (src:SP)  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord67(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.regESP);
+    function opMod16MemWord67(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -4646,13 +4902,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord68(fn): mod=01 (dst:mem+d8)  reg=101 (src:BP)  r/m=000 (BX+SI+d8)
+     * opMod16MemWord68(fn): mod=01 (dst:mem+d8)  reg=101 (src:BP)  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord68(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPDisp()), this.regEBP);
+    function opMod16MemWord68(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPDisp()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -4660,13 +4916,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModMemWord69(fn): mod=01 (dst:mem+d8)  reg=101 (src:BP)  r/m=001 (BX+DI+d8)
+     * opMod16MemWord69(fn): mod=01 (dst:mem+d8)  reg=101 (src:BP)  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord69(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPDisp()), this.regEBP);
+    function opMod16MemWord69(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPDisp()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -4674,13 +4930,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModMemWord6A(fn): mod=01 (dst:mem+d8)  reg=101 (src:BP)  r/m=010 (BP+SI+d8)
+     * opMod16MemWord6A(fn): mod=01 (dst:mem+d8)  reg=101 (src:BP)  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord6A(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPDisp()), this.regEBP);
+    function opMod16MemWord6A(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPDisp()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -4688,13 +4944,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModMemWord6B(fn): mod=01 (dst:mem+d8)  reg=101 (src:BP)  r/m=011 (BP+DI+d8)
+     * opMod16MemWord6B(fn): mod=01 (dst:mem+d8)  reg=101 (src:BP)  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord6B(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()), this.regEBP);
+    function opMod16MemWord6B(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -4702,13 +4958,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModMemWord6C(fn): mod=01 (dst:mem+d8)  reg=101 (src:BP)  r/m=100 (SI+d8)
+     * opMod16MemWord6C(fn): mod=01 (dst:mem+d8)  reg=101 (src:BP)  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord6C(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.regEBP);
+    function opMod16MemWord6C(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -4716,13 +4972,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord6D(fn): mod=01 (dst:mem+d8)  reg=101 (src:BP)  r/m=101 (DI+d8)
+     * opMod16MemWord6D(fn): mod=01 (dst:mem+d8)  reg=101 (src:BP)  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord6D(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.regEBP);
+    function opMod16MemWord6D(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -4730,13 +4986,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord6E(fn): mod=01 (dst:mem+d8)  reg=101 (src:BP)  r/m=110 (BP+d8)
+     * opMod16MemWord6E(fn): mod=01 (dst:mem+d8)  reg=101 (src:BP)  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord6E(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.regEBP);
+    function opMod16MemWord6E(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -4744,13 +5000,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord6F(fn): mod=01 (dst:mem+d8)  reg=101 (src:BP)  r/m=111 (BX+d8)
+     * opMod16MemWord6F(fn): mod=01 (dst:mem+d8)  reg=101 (src:BP)  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord6F(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.regEBP);
+    function opMod16MemWord6F(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -4758,13 +5014,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord70(fn): mod=01 (dst:mem+d8)  reg=110 (src:SI)  r/m=000 (BX+SI+d8)
+     * opMod16MemWord70(fn): mod=01 (dst:mem+d8)  reg=110 (src:SI)  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord70(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPDisp()), this.regESI);
+    function opMod16MemWord70(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPDisp()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -4772,13 +5028,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModMemWord71(fn): mod=01 (dst:mem+d8)  reg=110 (src:SI)  r/m=001 (BX+DI+d8)
+     * opMod16MemWord71(fn): mod=01 (dst:mem+d8)  reg=110 (src:SI)  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord71(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPDisp()), this.regESI);
+    function opMod16MemWord71(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPDisp()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -4786,13 +5042,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModMemWord72(fn): mod=01 (dst:mem+d8)  reg=110 (src:SI)  r/m=010 (BP+SI+d8)
+     * opMod16MemWord72(fn): mod=01 (dst:mem+d8)  reg=110 (src:SI)  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord72(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPDisp()), this.regESI);
+    function opMod16MemWord72(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPDisp()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -4800,13 +5056,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModMemWord73(fn): mod=01 (dst:mem+d8)  reg=110 (src:SI)  r/m=011 (BP+DI+d8)
+     * opMod16MemWord73(fn): mod=01 (dst:mem+d8)  reg=110 (src:SI)  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord73(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()), this.regESI);
+    function opMod16MemWord73(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -4814,13 +5070,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModMemWord74(fn): mod=01 (dst:mem+d8)  reg=110 (src:SI)  r/m=100 (SI+d8)
+     * opMod16MemWord74(fn): mod=01 (dst:mem+d8)  reg=110 (src:SI)  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord74(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.regESI);
+    function opMod16MemWord74(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -4828,13 +5084,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord75(fn): mod=01 (dst:mem+d8)  reg=110 (src:SI)  r/m=101 (DI+d8)
+     * opMod16MemWord75(fn): mod=01 (dst:mem+d8)  reg=110 (src:SI)  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord75(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.regESI);
+    function opMod16MemWord75(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -4842,13 +5098,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord76(fn): mod=01 (dst:mem+d8)  reg=110 (src:SI)  r/m=110 (BP+d8)
+     * opMod16MemWord76(fn): mod=01 (dst:mem+d8)  reg=110 (src:SI)  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord76(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.regESI);
+    function opMod16MemWord76(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -4856,13 +5112,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord77(fn): mod=01 (dst:mem+d8)  reg=110 (src:SI)  r/m=111 (BX+d8)
+     * opMod16MemWord77(fn): mod=01 (dst:mem+d8)  reg=110 (src:SI)  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord77(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.regESI);
+    function opMod16MemWord77(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -4870,13 +5126,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord78(fn): mod=01 (dst:mem+d8)  reg=111 (src:DI)  r/m=000 (BX+SI+d8)
+     * opMod16MemWord78(fn): mod=01 (dst:mem+d8)  reg=111 (src:DI)  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord78(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPDisp()), this.regEDI);
+    function opMod16MemWord78(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPDisp()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -4884,13 +5140,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModMemWord79(fn): mod=01 (dst:mem+d8)  reg=111 (src:DI)  r/m=001 (BX+DI+d8)
+     * opMod16MemWord79(fn): mod=01 (dst:mem+d8)  reg=111 (src:DI)  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord79(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPDisp()), this.regEDI);
+    function opMod16MemWord79(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPDisp()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -4898,13 +5154,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModMemWord7A(fn): mod=01 (dst:mem+d8)  reg=111 (src:DI)  r/m=010 (BP+SI+d8)
+     * opMod16MemWord7A(fn): mod=01 (dst:mem+d8)  reg=111 (src:DI)  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord7A(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPDisp()), this.regEDI);
+    function opMod16MemWord7A(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPDisp()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -4912,13 +5168,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModMemWord7B(fn): mod=01 (dst:mem+d8)  reg=111 (src:DI)  r/m=011 (BP+DI+d8)
+     * opMod16MemWord7B(fn): mod=01 (dst:mem+d8)  reg=111 (src:DI)  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord7B(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()), this.regEDI);
+    function opMod16MemWord7B(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -4926,13 +5182,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModMemWord7C(fn): mod=01 (dst:mem+d8)  reg=111 (src:DI)  r/m=100 (SI+d8)
+     * opMod16MemWord7C(fn): mod=01 (dst:mem+d8)  reg=111 (src:DI)  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord7C(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.regEDI);
+    function opMod16MemWord7C(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPDisp()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -4940,13 +5196,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord7D(fn): mod=01 (dst:mem+d8)  reg=111 (src:DI)  r/m=101 (DI+d8)
+     * opMod16MemWord7D(fn): mod=01 (dst:mem+d8)  reg=111 (src:DI)  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord7D(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.regEDI);
+    function opMod16MemWord7D(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -4954,13 +5210,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord7E(fn): mod=01 (dst:mem+d8)  reg=111 (src:DI)  r/m=110 (BP+d8)
+     * opMod16MemWord7E(fn): mod=01 (dst:mem+d8)  reg=111 (src:DI)  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord7E(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.regEDI);
+    function opMod16MemWord7E(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -4968,13 +5224,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord7F(fn): mod=01 (dst:mem+d8)  reg=111 (src:DI)  r/m=111 (BX+d8)
+     * opMod16MemWord7F(fn): mod=01 (dst:mem+d8)  reg=111 (src:DI)  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord7F(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.regEDI);
+    function opMod16MemWord7F(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -4982,13 +5238,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord80(fn): mod=10 (dst:mem+d16)  reg=000 (src:AX)  r/m=000 (BX+SI+d16)
+     * opMod16MemWord80(fn): mod=10 (dst:mem+d16)  reg=000 (src:AX)  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord80(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPWord()), this.regEAX);
+    function opMod16MemWord80(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPWord()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -4996,13 +5252,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModMemWord81(fn): mod=10 (dst:mem+d16)  reg=000 (src:AX)  r/m=001 (BX+DI+d16)
+     * opMod16MemWord81(fn): mod=10 (dst:mem+d16)  reg=000 (src:AX)  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord81(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPWord()), this.regEAX);
+    function opMod16MemWord81(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPWord()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -5010,13 +5266,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModMemWord82(fn): mod=10 (dst:mem+d16)  reg=000 (src:AX)  r/m=010 (BP+SI+d16)
+     * opMod16MemWord82(fn): mod=10 (dst:mem+d16)  reg=000 (src:AX)  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord82(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPWord()), this.regEAX);
+    function opMod16MemWord82(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPWord()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -5024,13 +5280,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModMemWord83(fn): mod=10 (dst:mem+d16)  reg=000 (src:AX)  r/m=011 (BP+DI+d16)
+     * opMod16MemWord83(fn): mod=10 (dst:mem+d16)  reg=000 (src:AX)  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord83(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPWord()), this.regEAX);
+    function opMod16MemWord83(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPWord()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -5038,13 +5294,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModMemWord84(fn): mod=10 (dst:mem+d16)  reg=000 (src:AX)  r/m=100 (SI+d16)
+     * opMod16MemWord84(fn): mod=10 (dst:mem+d16)  reg=000 (src:AX)  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord84(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPWord()), this.regEAX);
+    function opMod16MemWord84(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPWord()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -5052,13 +5308,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord85(fn): mod=10 (dst:mem+d16)  reg=000 (src:AX)  r/m=101 (DI+d16)
+     * opMod16MemWord85(fn): mod=10 (dst:mem+d16)  reg=000 (src:AX)  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord85(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPWord()), this.regEAX);
+    function opMod16MemWord85(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPWord()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -5066,13 +5322,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord86(fn): mod=10 (dst:mem+d16)  reg=000 (src:AX)  r/m=110 (BP+d16)
+     * opMod16MemWord86(fn): mod=10 (dst:mem+d16)  reg=000 (src:AX)  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord86(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), this.regEAX);
+    function opMod16MemWord86(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -5080,13 +5336,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord87(fn): mod=10 (dst:mem+d16)  reg=000 (src:AX)  r/m=111 (BX+d16)
+     * opMod16MemWord87(fn): mod=10 (dst:mem+d16)  reg=000 (src:AX)  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord87(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPWord()), this.regEAX);
+    function opMod16MemWord87(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPWord()), this.regEAX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
@@ -5094,13 +5350,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord88(fn): mod=10 (dst:mem+d16)  reg=001 (src:CX)  r/m=000 (BX+SI+d16)
+     * opMod16MemWord88(fn): mod=10 (dst:mem+d16)  reg=001 (src:CX)  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord88(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPWord()), this.regECX);
+    function opMod16MemWord88(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPWord()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -5108,13 +5364,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModMemWord89(fn): mod=10 (dst:mem+d16)  reg=001 (src:CX)  r/m=001 (BX+DI+d16)
+     * opMod16MemWord89(fn): mod=10 (dst:mem+d16)  reg=001 (src:CX)  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord89(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPWord()), this.regECX);
+    function opMod16MemWord89(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPWord()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -5122,13 +5378,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModMemWord8A(fn): mod=10 (dst:mem+d16)  reg=001 (src:CX)  r/m=010 (BP+SI+d16)
+     * opMod16MemWord8A(fn): mod=10 (dst:mem+d16)  reg=001 (src:CX)  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord8A(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPWord()), this.regECX);
+    function opMod16MemWord8A(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPWord()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -5136,13 +5392,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModMemWord8B(fn): mod=10 (dst:mem+d16)  reg=001 (src:CX)  r/m=011 (BP+DI+d16)
+     * opMod16MemWord8B(fn): mod=10 (dst:mem+d16)  reg=001 (src:CX)  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord8B(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPWord()), this.regECX);
+    function opMod16MemWord8B(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPWord()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -5150,13 +5406,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModMemWord8C(fn): mod=10 (dst:mem+d16)  reg=001 (src:CX)  r/m=100 (SI+d16)
+     * opMod16MemWord8C(fn): mod=10 (dst:mem+d16)  reg=001 (src:CX)  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord8C(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPWord()), this.regECX);
+    function opMod16MemWord8C(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPWord()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -5164,13 +5420,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord8D(fn): mod=10 (dst:mem+d16)  reg=001 (src:CX)  r/m=101 (DI+d16)
+     * opMod16MemWord8D(fn): mod=10 (dst:mem+d16)  reg=001 (src:CX)  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord8D(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPWord()), this.regECX);
+    function opMod16MemWord8D(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPWord()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -5178,13 +5434,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord8E(fn): mod=10 (dst:mem+d16)  reg=001 (src:CX)  r/m=110 (BP+d16)
+     * opMod16MemWord8E(fn): mod=10 (dst:mem+d16)  reg=001 (src:CX)  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord8E(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), this.regECX);
+    function opMod16MemWord8E(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -5192,13 +5448,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord8F(fn): mod=10 (dst:mem+d16)  reg=001 (src:CX)  r/m=111 (BX+d16)
+     * opMod16MemWord8F(fn): mod=10 (dst:mem+d16)  reg=001 (src:CX)  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord8F(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPWord()), this.regECX);
+    function opMod16MemWord8F(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPWord()), this.regECX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
@@ -5206,13 +5462,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord90(fn): mod=10 (dst:mem+d16)  reg=010 (src:DX)  r/m=000 (BX+SI+d16)
+     * opMod16MemWord90(fn): mod=10 (dst:mem+d16)  reg=010 (src:DX)  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord90(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPWord()), this.regEDX);
+    function opMod16MemWord90(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPWord()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -5220,13 +5476,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModMemWord91(fn): mod=10 (dst:mem+d16)  reg=010 (src:DX)  r/m=001 (BX+DI+d16)
+     * opMod16MemWord91(fn): mod=10 (dst:mem+d16)  reg=010 (src:DX)  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord91(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPWord()), this.regEDX);
+    function opMod16MemWord91(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPWord()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -5234,13 +5490,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModMemWord92(fn): mod=10 (dst:mem+d16)  reg=010 (src:DX)  r/m=010 (BP+SI+d16)
+     * opMod16MemWord92(fn): mod=10 (dst:mem+d16)  reg=010 (src:DX)  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord92(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPWord()), this.regEDX);
+    function opMod16MemWord92(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPWord()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -5248,13 +5504,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModMemWord93(fn): mod=10 (dst:mem+d16)  reg=010 (src:DX)  r/m=011 (BP+DI+d16)
+     * opMod16MemWord93(fn): mod=10 (dst:mem+d16)  reg=010 (src:DX)  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord93(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPWord()), this.regEDX);
+    function opMod16MemWord93(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPWord()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -5262,13 +5518,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModMemWord94(fn): mod=10 (dst:mem+d16)  reg=010 (src:DX)  r/m=100 (SI+d16)
+     * opMod16MemWord94(fn): mod=10 (dst:mem+d16)  reg=010 (src:DX)  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord94(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPWord()), this.regEDX);
+    function opMod16MemWord94(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPWord()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -5276,13 +5532,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord95(fn): mod=10 (dst:mem+d16)  reg=010 (src:DX)  r/m=101 (DI+d16)
+     * opMod16MemWord95(fn): mod=10 (dst:mem+d16)  reg=010 (src:DX)  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord95(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPWord()), this.regEDX);
+    function opMod16MemWord95(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPWord()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -5290,13 +5546,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord96(fn): mod=10 (dst:mem+d16)  reg=010 (src:DX)  r/m=110 (BP+d16)
+     * opMod16MemWord96(fn): mod=10 (dst:mem+d16)  reg=010 (src:DX)  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord96(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), this.regEDX);
+    function opMod16MemWord96(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -5304,13 +5560,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord97(fn): mod=10 (dst:mem+d16)  reg=010 (src:DX)  r/m=111 (BX+d16)
+     * opMod16MemWord97(fn): mod=10 (dst:mem+d16)  reg=010 (src:DX)  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord97(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPWord()), this.regEDX);
+    function opMod16MemWord97(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPWord()), this.regEDX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
@@ -5318,13 +5574,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord98(fn): mod=10 (dst:mem+d16)  reg=011 (src:BX)  r/m=000 (BX+SI+d16)
+     * opMod16MemWord98(fn): mod=10 (dst:mem+d16)  reg=011 (src:BX)  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord98(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPWord()), this.regEBX);
+    function opMod16MemWord98(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPWord()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -5332,13 +5588,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModMemWord99(fn): mod=10 (dst:mem+d16)  reg=011 (src:BX)  r/m=001 (BX+DI+d16)
+     * opMod16MemWord99(fn): mod=10 (dst:mem+d16)  reg=011 (src:BX)  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord99(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPWord()), this.regEBX);
+    function opMod16MemWord99(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPWord()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -5346,13 +5602,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModMemWord9A(fn): mod=10 (dst:mem+d16)  reg=011 (src:BX)  r/m=010 (BP+SI+d16)
+     * opMod16MemWord9A(fn): mod=10 (dst:mem+d16)  reg=011 (src:BX)  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord9A(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPWord()), this.regEBX);
+    function opMod16MemWord9A(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPWord()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -5360,13 +5616,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModMemWord9B(fn): mod=10 (dst:mem+d16)  reg=011 (src:BX)  r/m=011 (BP+DI+d16)
+     * opMod16MemWord9B(fn): mod=10 (dst:mem+d16)  reg=011 (src:BX)  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord9B(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPWord()), this.regEBX);
+    function opMod16MemWord9B(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPWord()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -5374,13 +5630,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModMemWord9C(fn): mod=10 (dst:mem+d16)  reg=011 (src:BX)  r/m=100 (SI+d16)
+     * opMod16MemWord9C(fn): mod=10 (dst:mem+d16)  reg=011 (src:BX)  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord9C(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPWord()), this.regEBX);
+    function opMod16MemWord9C(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPWord()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -5388,13 +5644,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord9D(fn): mod=10 (dst:mem+d16)  reg=011 (src:BX)  r/m=101 (DI+d16)
+     * opMod16MemWord9D(fn): mod=10 (dst:mem+d16)  reg=011 (src:BX)  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord9D(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPWord()), this.regEBX);
+    function opMod16MemWord9D(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPWord()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -5402,13 +5658,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord9E(fn): mod=10 (dst:mem+d16)  reg=011 (src:BX)  r/m=110 (BP+d16)
+     * opMod16MemWord9E(fn): mod=10 (dst:mem+d16)  reg=011 (src:BX)  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord9E(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), this.regEBX);
+    function opMod16MemWord9E(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -5416,13 +5672,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWord9F(fn): mod=10 (dst:mem+d16)  reg=011 (src:BX)  r/m=111 (BX+d16)
+     * opMod16MemWord9F(fn): mod=10 (dst:mem+d16)  reg=011 (src:BX)  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWord9F(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPWord()), this.regEBX);
+    function opMod16MemWord9F(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPWord()), this.regEBX & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
@@ -5430,13 +5686,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWordA0(fn): mod=10 (dst:mem+d16)  reg=100 (src:SP)  r/m=000 (BX+SI+d16)
+     * opMod16MemWordA0(fn): mod=10 (dst:mem+d16)  reg=100 (src:SP)  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWordA0(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPWord()), this.regESP);
+    function opMod16MemWordA0(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPWord()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -5444,13 +5700,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModMemWordA1(fn): mod=10 (dst:mem+d16)  reg=100 (src:SP)  r/m=001 (BX+DI+d16)
+     * opMod16MemWordA1(fn): mod=10 (dst:mem+d16)  reg=100 (src:SP)  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWordA1(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPWord()), this.regESP);
+    function opMod16MemWordA1(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPWord()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -5458,13 +5714,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModMemWordA2(fn): mod=10 (dst:mem+d16)  reg=100 (src:SP)  r/m=010 (BP+SI+d16)
+     * opMod16MemWordA2(fn): mod=10 (dst:mem+d16)  reg=100 (src:SP)  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWordA2(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPWord()), this.regESP);
+    function opMod16MemWordA2(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPWord()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -5472,13 +5728,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModMemWordA3(fn): mod=10 (dst:mem+d16)  reg=100 (src:SP)  r/m=011 (BP+DI+d16)
+     * opMod16MemWordA3(fn): mod=10 (dst:mem+d16)  reg=100 (src:SP)  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWordA3(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPWord()), this.regESP);
+    function opMod16MemWordA3(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPWord()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -5486,13 +5742,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModMemWordA4(fn): mod=10 (dst:mem+d16)  reg=100 (src:SP)  r/m=100 (SI+d16)
+     * opMod16MemWordA4(fn): mod=10 (dst:mem+d16)  reg=100 (src:SP)  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWordA4(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPWord()), this.regESP);
+    function opMod16MemWordA4(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPWord()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -5500,13 +5756,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWordA5(fn): mod=10 (dst:mem+d16)  reg=100 (src:SP)  r/m=101 (DI+d16)
+     * opMod16MemWordA5(fn): mod=10 (dst:mem+d16)  reg=100 (src:SP)  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWordA5(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPWord()), this.regESP);
+    function opMod16MemWordA5(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPWord()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -5514,13 +5770,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWordA6(fn): mod=10 (dst:mem+d16)  reg=100 (src:SP)  r/m=110 (BP+d16)
+     * opMod16MemWordA6(fn): mod=10 (dst:mem+d16)  reg=100 (src:SP)  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWordA6(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), this.regESP);
+    function opMod16MemWordA6(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -5528,13 +5784,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWordA7(fn): mod=10 (dst:mem+d16)  reg=100 (src:SP)  r/m=111 (BX+d16)
+     * opMod16MemWordA7(fn): mod=10 (dst:mem+d16)  reg=100 (src:SP)  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWordA7(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPWord()), this.regESP);
+    function opMod16MemWordA7(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPWord()), this.regESP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
@@ -5542,13 +5798,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWordA8(fn): mod=10 (dst:mem+d16)  reg=101 (src:BP)  r/m=000 (BX+SI+d16)
+     * opMod16MemWordA8(fn): mod=10 (dst:mem+d16)  reg=101 (src:BP)  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWordA8(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPWord()), this.regEBP);
+    function opMod16MemWordA8(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPWord()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -5556,13 +5812,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModMemWordA9(fn): mod=10 (dst:mem+d16)  reg=101 (src:BP)  r/m=001 (BX+DI+d16)
+     * opMod16MemWordA9(fn): mod=10 (dst:mem+d16)  reg=101 (src:BP)  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWordA9(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPWord()), this.regEBP);
+    function opMod16MemWordA9(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPWord()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -5570,13 +5826,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModMemWordAA(fn): mod=10 (dst:mem+d16)  reg=101 (src:BP)  r/m=010 (BP+SI+d16)
+     * opMod16MemWordAA(fn): mod=10 (dst:mem+d16)  reg=101 (src:BP)  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWordAA(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPWord()), this.regEBP);
+    function opMod16MemWordAA(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPWord()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -5584,13 +5840,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModMemWordAB(fn): mod=10 (dst:mem+d16)  reg=101 (src:BP)  r/m=011 (BP+DI+d16)
+     * opMod16MemWordAB(fn): mod=10 (dst:mem+d16)  reg=101 (src:BP)  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWordAB(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPWord()), this.regEBP);
+    function opMod16MemWordAB(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPWord()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -5598,13 +5854,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModMemWordAC(fn): mod=10 (dst:mem+d16)  reg=101 (src:BP)  r/m=100 (SI+d16)
+     * opMod16MemWordAC(fn): mod=10 (dst:mem+d16)  reg=101 (src:BP)  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWordAC(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPWord()), this.regEBP);
+    function opMod16MemWordAC(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPWord()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -5612,13 +5868,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWordAD(fn): mod=10 (dst:mem+d16)  reg=101 (src:BP)  r/m=101 (DI+d16)
+     * opMod16MemWordAD(fn): mod=10 (dst:mem+d16)  reg=101 (src:BP)  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWordAD(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPWord()), this.regEBP);
+    function opMod16MemWordAD(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPWord()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -5626,13 +5882,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWordAE(fn): mod=10 (dst:mem+d16)  reg=101 (src:BP)  r/m=110 (BP+d16)
+     * opMod16MemWordAE(fn): mod=10 (dst:mem+d16)  reg=101 (src:BP)  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWordAE(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), this.regEBP);
+    function opMod16MemWordAE(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -5640,13 +5896,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWordAF(fn): mod=10 (dst:mem+d16)  reg=101 (src:BP)  r/m=111 (BX+d16)
+     * opMod16MemWordAF(fn): mod=10 (dst:mem+d16)  reg=101 (src:BP)  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWordAF(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPWord()), this.regEBP);
+    function opMod16MemWordAF(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPWord()), this.regEBP & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
@@ -5654,13 +5910,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWordB0(fn): mod=10 (dst:mem+d16)  reg=110 (src:SI)  r/m=000 (BX+SI+d16)
+     * opMod16MemWordB0(fn): mod=10 (dst:mem+d16)  reg=110 (src:SI)  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWordB0(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPWord()), this.regESI);
+    function opMod16MemWordB0(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPWord()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -5668,13 +5924,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModMemWordB1(fn): mod=10 (dst:mem+d16)  reg=110 (src:SI)  r/m=001 (BX+DI+d16)
+     * opMod16MemWordB1(fn): mod=10 (dst:mem+d16)  reg=110 (src:SI)  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWordB1(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPWord()), this.regESI);
+    function opMod16MemWordB1(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPWord()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -5682,13 +5938,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModMemWordB2(fn): mod=10 (dst:mem+d16)  reg=110 (src:SI)  r/m=010 (BP+SI+d16)
+     * opMod16MemWordB2(fn): mod=10 (dst:mem+d16)  reg=110 (src:SI)  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWordB2(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPWord()), this.regESI);
+    function opMod16MemWordB2(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPWord()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -5696,13 +5952,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModMemWordB3(fn): mod=10 (dst:mem+d16)  reg=110 (src:SI)  r/m=011 (BP+DI+d16)
+     * opMod16MemWordB3(fn): mod=10 (dst:mem+d16)  reg=110 (src:SI)  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWordB3(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPWord()), this.regESI);
+    function opMod16MemWordB3(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPWord()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -5710,13 +5966,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModMemWordB4(fn): mod=10 (dst:mem+d16)  reg=110 (src:SI)  r/m=100 (SI+d16)
+     * opMod16MemWordB4(fn): mod=10 (dst:mem+d16)  reg=110 (src:SI)  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWordB4(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPWord()), this.regESI);
+    function opMod16MemWordB4(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPWord()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -5724,13 +5980,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWordB5(fn): mod=10 (dst:mem+d16)  reg=110 (src:SI)  r/m=101 (DI+d16)
+     * opMod16MemWordB5(fn): mod=10 (dst:mem+d16)  reg=110 (src:SI)  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWordB5(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPWord()), this.regESI);
+    function opMod16MemWordB5(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPWord()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -5738,13 +5994,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWordB6(fn): mod=10 (dst:mem+d16)  reg=110 (src:SI)  r/m=110 (BP+d16)
+     * opMod16MemWordB6(fn): mod=10 (dst:mem+d16)  reg=110 (src:SI)  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWordB6(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), this.regESI);
+    function opMod16MemWordB6(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -5752,13 +6008,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWordB7(fn): mod=10 (dst:mem+d16)  reg=110 (src:SI)  r/m=111 (BX+d16)
+     * opMod16MemWordB7(fn): mod=10 (dst:mem+d16)  reg=110 (src:SI)  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWordB7(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPWord()), this.regESI);
+    function opMod16MemWordB7(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPWord()), this.regESI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
@@ -5766,13 +6022,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWordB8(fn): mod=10 (dst:mem+d16)  reg=111 (src:DI)  r/m=000 (BX+SI+d16)
+     * opMod16MemWordB8(fn): mod=10 (dst:mem+d16)  reg=111 (src:DI)  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWordB8(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPWord()), this.regEDI);
+    function opMod16MemWordB8(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPWord()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -5780,13 +6036,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModMemWordB9(fn): mod=10 (dst:mem+d16)  reg=111 (src:DI)  r/m=001 (BX+DI+d16)
+     * opMod16MemWordB9(fn): mod=10 (dst:mem+d16)  reg=111 (src:DI)  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWordB9(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPWord()), this.regEDI);
+    function opMod16MemWordB9(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPWord()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -5794,13 +6050,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModMemWordBA(fn): mod=10 (dst:mem+d16)  reg=111 (src:DI)  r/m=010 (BP+SI+d16)
+     * opMod16MemWordBA(fn): mod=10 (dst:mem+d16)  reg=111 (src:DI)  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWordBA(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPWord()), this.regEDI);
+    function opMod16MemWordBA(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPWord()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -5808,13 +6064,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModMemWordBB(fn): mod=10 (dst:mem+d16)  reg=111 (src:DI)  r/m=011 (BP+DI+d16)
+     * opMod16MemWordBB(fn): mod=10 (dst:mem+d16)  reg=111 (src:DI)  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWordBB(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPWord()), this.regEDI);
+    function opMod16MemWordBB(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPWord()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -5822,13 +6078,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModMemWordBC(fn): mod=10 (dst:mem+d16)  reg=111 (src:DI)  r/m=100 (SI+d16)
+     * opMod16MemWordBC(fn): mod=10 (dst:mem+d16)  reg=111 (src:DI)  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWordBC(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPWord()), this.regEDI);
+    function opMod16MemWordBC(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regESI + this.getIPWord()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -5836,13 +6092,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWordBD(fn): mod=10 (dst:mem+d16)  reg=111 (src:DI)  r/m=101 (DI+d16)
+     * opMod16MemWordBD(fn): mod=10 (dst:mem+d16)  reg=111 (src:DI)  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWordBD(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPWord()), this.regEDI);
+    function opMod16MemWordBD(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEDI + this.getIPWord()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -5850,13 +6106,13 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWordBE(fn): mod=10 (dst:mem+d16)  reg=111 (src:DI)  r/m=110 (BP+d16)
+     * opMod16MemWordBE(fn): mod=10 (dst:mem+d16)  reg=111 (src:DI)  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWordBE(fn) {
-        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), this.regEDI);
+    function opMod16MemWordBE(fn) {
+        var w = fn.call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
@@ -5864,3150 +6120,3214 @@ X86ModW.aOpModMem = [
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModMemWordBF(fn): mod=10 (dst:mem+d16)  reg=111 (src:DI)  r/m=111 (BX+d16)
+     * opMod16MemWordBF(fn): mod=10 (dst:mem+d16)  reg=111 (src:DI)  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {function(number,number)} fn (dst,src)
      */
-    function opModMemWordBF(fn) {
-        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPWord()), this.regEDI);
+    function opMod16MemWordBF(fn) {
+        var w = fn.call(this, this.modEAWordData(this.regEBX + this.getIPWord()), this.regEDI & this.dataMask);
         if (BACKTRACK) {
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
-    X86ModW.aOpModReg[0xC0],    X86ModW.aOpModReg[0xC8],    X86ModW.aOpModReg[0xD0],    X86ModW.aOpModReg[0xD8],
-    X86ModW.aOpModReg[0xE0],    X86ModW.aOpModReg[0xE8],    X86ModW.aOpModReg[0xF0],    X86ModW.aOpModReg[0xF8],
-    X86ModW.aOpModReg[0xC1],    X86ModW.aOpModReg[0xC9],    X86ModW.aOpModReg[0xD1],    X86ModW.aOpModReg[0xD9],
-    X86ModW.aOpModReg[0xE1],    X86ModW.aOpModReg[0xE9],    X86ModW.aOpModReg[0xF1],    X86ModW.aOpModReg[0xF9],
-    X86ModW.aOpModReg[0xC2],    X86ModW.aOpModReg[0xCA],    X86ModW.aOpModReg[0xD2],    X86ModW.aOpModReg[0xDA],
-    X86ModW.aOpModReg[0xE2],    X86ModW.aOpModReg[0xEA],    X86ModW.aOpModReg[0xF2],    X86ModW.aOpModReg[0xFA],
-    X86ModW.aOpModReg[0xC3],    X86ModW.aOpModReg[0xCB],    X86ModW.aOpModReg[0xD3],    X86ModW.aOpModReg[0xDB],
-    X86ModW.aOpModReg[0xE3],    X86ModW.aOpModReg[0xEB],    X86ModW.aOpModReg[0xF3],    X86ModW.aOpModReg[0xFB],
-    X86ModW.aOpModReg[0xC4],    X86ModW.aOpModReg[0xCC],    X86ModW.aOpModReg[0xD4],    X86ModW.aOpModReg[0xDC],
-    X86ModW.aOpModReg[0xE4],    X86ModW.aOpModReg[0xEC],    X86ModW.aOpModReg[0xF4],    X86ModW.aOpModReg[0xFC],
-    X86ModW.aOpModReg[0xC5],    X86ModW.aOpModReg[0xCD],    X86ModW.aOpModReg[0xD5],    X86ModW.aOpModReg[0xDD],
-    X86ModW.aOpModReg[0xE5],    X86ModW.aOpModReg[0xED],    X86ModW.aOpModReg[0xF5],    X86ModW.aOpModReg[0xFD],
-    X86ModW.aOpModReg[0xC6],    X86ModW.aOpModReg[0xCE],    X86ModW.aOpModReg[0xD6],    X86ModW.aOpModReg[0xDE],
-    X86ModW.aOpModReg[0xE6],    X86ModW.aOpModReg[0xEE],    X86ModW.aOpModReg[0xF6],    X86ModW.aOpModReg[0xFE],
-    X86ModW.aOpModReg[0xC7],    X86ModW.aOpModReg[0xCF],    X86ModW.aOpModReg[0xD7],    X86ModW.aOpModReg[0xDF],
-    X86ModW.aOpModReg[0xE7],    X86ModW.aOpModReg[0xEF],    X86ModW.aOpModReg[0xF7],    X86ModW.aOpModReg[0xFF]
+    X86ModW16.aOpModReg[0xC0],  X86ModW16.aOpModReg[0xC8],  X86ModW16.aOpModReg[0xD0],  X86ModW16.aOpModReg[0xD8],
+    X86ModW16.aOpModReg[0xE0],  X86ModW16.aOpModReg[0xE8],  X86ModW16.aOpModReg[0xF0],  X86ModW16.aOpModReg[0xF8],
+    X86ModW16.aOpModReg[0xC1],  X86ModW16.aOpModReg[0xC9],  X86ModW16.aOpModReg[0xD1],  X86ModW16.aOpModReg[0xD9],
+    X86ModW16.aOpModReg[0xE1],  X86ModW16.aOpModReg[0xE9],  X86ModW16.aOpModReg[0xF1],  X86ModW16.aOpModReg[0xF9],
+    X86ModW16.aOpModReg[0xC2],  X86ModW16.aOpModReg[0xCA],  X86ModW16.aOpModReg[0xD2],  X86ModW16.aOpModReg[0xDA],
+    X86ModW16.aOpModReg[0xE2],  X86ModW16.aOpModReg[0xEA],  X86ModW16.aOpModReg[0xF2],  X86ModW16.aOpModReg[0xFA],
+    X86ModW16.aOpModReg[0xC3],  X86ModW16.aOpModReg[0xCB],  X86ModW16.aOpModReg[0xD3],  X86ModW16.aOpModReg[0xDB],
+    X86ModW16.aOpModReg[0xE3],  X86ModW16.aOpModReg[0xEB],  X86ModW16.aOpModReg[0xF3],  X86ModW16.aOpModReg[0xFB],
+    X86ModW16.aOpModReg[0xC4],  X86ModW16.aOpModReg[0xCC],  X86ModW16.aOpModReg[0xD4],  X86ModW16.aOpModReg[0xDC],
+    X86ModW16.aOpModReg[0xE4],  X86ModW16.aOpModReg[0xEC],  X86ModW16.aOpModReg[0xF4],  X86ModW16.aOpModReg[0xFC],
+    X86ModW16.aOpModReg[0xC5],  X86ModW16.aOpModReg[0xCD],  X86ModW16.aOpModReg[0xD5],  X86ModW16.aOpModReg[0xDD],
+    X86ModW16.aOpModReg[0xE5],  X86ModW16.aOpModReg[0xED],  X86ModW16.aOpModReg[0xF5],  X86ModW16.aOpModReg[0xFD],
+    X86ModW16.aOpModReg[0xC6],  X86ModW16.aOpModReg[0xCE],  X86ModW16.aOpModReg[0xD6],  X86ModW16.aOpModReg[0xDE],
+    X86ModW16.aOpModReg[0xE6],  X86ModW16.aOpModReg[0xEE],  X86ModW16.aOpModReg[0xF6],  X86ModW16.aOpModReg[0xFE],
+    X86ModW16.aOpModReg[0xC7],  X86ModW16.aOpModReg[0xCF],  X86ModW16.aOpModReg[0xD7],  X86ModW16.aOpModReg[0xDF],
+    X86ModW16.aOpModReg[0xE7],  X86ModW16.aOpModReg[0xEF],  X86ModW16.aOpModReg[0xF7],  X86ModW16.aOpModReg[0xFF]
 ];
 
-X86ModW.aOpModGrp = [
+X86ModW16.aOpModGrp = [
     /**
-     * opModGrpWord00(afnGrp, fnSrc): mod=00 (dst:mem)  reg=000 (afnGrp[0])  r/m=000 (BX+SI)
+     * opMod16GrpWord00(afnGrp, fnSrc): mod=00 (dst:mem)  reg=000 (afnGrp[0])  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord00(afnGrp, fnSrc) {
+    function opMod16GrpWord00(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordData(this.regEBX + this.regESI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModGrpWord01(afnGrp, fnSrc): mod=00 (dst:mem)  reg=000 (afnGrp[0])  r/m=001 (BX+DI)
+     * opMod16GrpWord01(afnGrp, fnSrc): mod=00 (dst:mem)  reg=000 (afnGrp[0])  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord01(afnGrp, fnSrc) {
+    function opMod16GrpWord01(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordData(this.regEBX + this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModGrpWord02(afnGrp, fnSrc): mod=00 (dst:mem)  reg=000 (afnGrp[0])  r/m=010 (BP+SI)
+     * opMod16GrpWord02(afnGrp, fnSrc): mod=00 (dst:mem)  reg=000 (afnGrp[0])  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord02(afnGrp, fnSrc) {
+    function opMod16GrpWord02(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordStack(this.regEBP + this.regESI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModGrpWord03(afnGrp, fnSrc): mod=00 (dst:mem)  reg=000 (afnGrp[0])  r/m=011 (BP+DI)
+     * opMod16GrpWord03(afnGrp, fnSrc): mod=00 (dst:mem)  reg=000 (afnGrp[0])  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord03(afnGrp, fnSrc) {
+    function opMod16GrpWord03(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordStack(this.regEBP + this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModGrpWord04(afnGrp, fnSrc): mod=00 (dst:mem)  reg=000 (afnGrp[0])  r/m=100 (SI)
+     * opMod16GrpWord04(afnGrp, fnSrc): mod=00 (dst:mem)  reg=000 (afnGrp[0])  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord04(afnGrp, fnSrc) {
+    function opMod16GrpWord04(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordData(this.regESI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModGrpWord05(afnGrp, fnSrc): mod=00 (dst:mem)  reg=000 (afnGrp[0])  r/m=101 (DI)
+     * opMod16GrpWord05(afnGrp, fnSrc): mod=00 (dst:mem)  reg=000 (afnGrp[0])  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord05(afnGrp, fnSrc) {
+    function opMod16GrpWord05(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordData(this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModGrpWord06(afnGrp, fnSrc): mod=00 (dst:mem)  reg=000 (afnGrp[0])  r/m=110 (d16)
+     * opMod16GrpWord06(afnGrp, fnSrc): mod=00 (dst:mem)  reg=000 (afnGrp[0])  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord06(afnGrp, fnSrc) {
+    function opMod16GrpWord06(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordData(this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
-     * opModGrpWord07(afnGrp, fnSrc): mod=00 (dst:mem)  reg=000 (afnGrp[0])  r/m=111 (BX)
+     * opMod16GrpWord07(afnGrp, fnSrc): mod=00 (dst:mem)  reg=000 (afnGrp[0])  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord07(afnGrp, fnSrc) {
+    function opMod16GrpWord07(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordData(this.regEBX), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModGrpWord08(afnGrp, fnSrc): mod=00 (dst:mem)  reg=001 (afnGrp[1])  r/m=000 (BX+SI)
+     * opMod16GrpWord08(afnGrp, fnSrc): mod=00 (dst:mem)  reg=001 (afnGrp[1])  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord08(afnGrp, fnSrc) {
+    function opMod16GrpWord08(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordData(this.regEBX + this.regESI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModGrpWord09(afnGrp, fnSrc): mod=00 (dst:mem)  reg=001 (afnGrp[1])  r/m=001 (BX+DI)
+     * opMod16GrpWord09(afnGrp, fnSrc): mod=00 (dst:mem)  reg=001 (afnGrp[1])  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord09(afnGrp, fnSrc) {
+    function opMod16GrpWord09(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordData(this.regEBX + this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModGrpWord0A(afnGrp, fnSrc): mod=00 (dst:mem)  reg=001 (afnGrp[1])  r/m=010 (BP+SI)
+     * opMod16GrpWord0A(afnGrp, fnSrc): mod=00 (dst:mem)  reg=001 (afnGrp[1])  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord0A(afnGrp, fnSrc) {
+    function opMod16GrpWord0A(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordStack(this.regEBP + this.regESI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModGrpWord0B(afnGrp, fnSrc): mod=00 (dst:mem)  reg=001 (afnGrp[1])  r/m=011 (BP+DI)
+     * opMod16GrpWord0B(afnGrp, fnSrc): mod=00 (dst:mem)  reg=001 (afnGrp[1])  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord0B(afnGrp, fnSrc) {
+    function opMod16GrpWord0B(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordStack(this.regEBP + this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModGrpWord0C(afnGrp, fnSrc): mod=00 (dst:mem)  reg=001 (afnGrp[1])  r/m=100 (SI)
+     * opMod16GrpWord0C(afnGrp, fnSrc): mod=00 (dst:mem)  reg=001 (afnGrp[1])  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord0C(afnGrp, fnSrc) {
+    function opMod16GrpWord0C(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordData(this.regESI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModGrpWord0D(afnGrp, fnSrc): mod=00 (dst:mem)  reg=001 (afnGrp[1])  r/m=101 (DI)
+     * opMod16GrpWord0D(afnGrp, fnSrc): mod=00 (dst:mem)  reg=001 (afnGrp[1])  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord0D(afnGrp, fnSrc) {
+    function opMod16GrpWord0D(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordData(this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModGrpWord0E(afnGrp, fnSrc): mod=00 (dst:mem)  reg=001 (afnGrp[1])  r/m=110 (d16)
+     * opMod16GrpWord0E(afnGrp, fnSrc): mod=00 (dst:mem)  reg=001 (afnGrp[1])  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord0E(afnGrp, fnSrc) {
+    function opMod16GrpWord0E(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordData(this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
-     * opModGrpWord0F(afnGrp, fnSrc): mod=00 (dst:mem)  reg=001 (afnGrp[1])  r/m=111 (BX)
+     * opMod16GrpWord0F(afnGrp, fnSrc): mod=00 (dst:mem)  reg=001 (afnGrp[1])  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord0F(afnGrp, fnSrc) {
+    function opMod16GrpWord0F(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordData(this.regEBX), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModGrpWord10(afnGrp, fnSrc): mod=00 (dst:mem)  reg=010 (afnGrp[2])  r/m=000 (BX+SI)
+     * opMod16GrpWord10(afnGrp, fnSrc): mod=00 (dst:mem)  reg=010 (afnGrp[2])  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord10(afnGrp, fnSrc) {
+    function opMod16GrpWord10(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordData(this.regEBX + this.regESI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModGrpWord11(afnGrp, fnSrc): mod=00 (dst:mem)  reg=010 (afnGrp[2])  r/m=001 (BX+DI)
+     * opMod16GrpWord11(afnGrp, fnSrc): mod=00 (dst:mem)  reg=010 (afnGrp[2])  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord11(afnGrp, fnSrc) {
+    function opMod16GrpWord11(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordData(this.regEBX + this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModGrpWord12(afnGrp, fnSrc): mod=00 (dst:mem)  reg=010 (afnGrp[2])  r/m=010 (BP+SI)
+     * opMod16GrpWord12(afnGrp, fnSrc): mod=00 (dst:mem)  reg=010 (afnGrp[2])  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord12(afnGrp, fnSrc) {
+    function opMod16GrpWord12(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordStack(this.regEBP + this.regESI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModGrpWord13(afnGrp, fnSrc): mod=00 (dst:mem)  reg=010 (afnGrp[2])  r/m=011 (BP+DI)
+     * opMod16GrpWord13(afnGrp, fnSrc): mod=00 (dst:mem)  reg=010 (afnGrp[2])  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord13(afnGrp, fnSrc) {
+    function opMod16GrpWord13(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordStack(this.regEBP + this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModGrpWord14(afnGrp, fnSrc): mod=00 (dst:mem)  reg=010 (afnGrp[2])  r/m=100 (SI)
+     * opMod16GrpWord14(afnGrp, fnSrc): mod=00 (dst:mem)  reg=010 (afnGrp[2])  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord14(afnGrp, fnSrc) {
+    function opMod16GrpWord14(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordData(this.regESI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModGrpWord15(afnGrp, fnSrc): mod=00 (dst:mem)  reg=010 (afnGrp[2])  r/m=101 (DI)
+     * opMod16GrpWord15(afnGrp, fnSrc): mod=00 (dst:mem)  reg=010 (afnGrp[2])  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord15(afnGrp, fnSrc) {
+    function opMod16GrpWord15(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordData(this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModGrpWord16(afnGrp, fnSrc): mod=00 (dst:mem)  reg=010 (afnGrp[2])  r/m=110 (d16)
+     * opMod16GrpWord16(afnGrp, fnSrc): mod=00 (dst:mem)  reg=010 (afnGrp[2])  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord16(afnGrp, fnSrc) {
+    function opMod16GrpWord16(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordData(this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
-     * opModGrpWord17(afnGrp, fnSrc): mod=00 (dst:mem)  reg=010 (afnGrp[2])  r/m=111 (BX)
+     * opMod16GrpWord17(afnGrp, fnSrc): mod=00 (dst:mem)  reg=010 (afnGrp[2])  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord17(afnGrp, fnSrc) {
+    function opMod16GrpWord17(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordData(this.regEBX), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModGrpWord18(afnGrp, fnSrc): mod=00 (dst:mem)  reg=011 (afnGrp[3])  r/m=000 (BX+SI)
+     * opMod16GrpWord18(afnGrp, fnSrc): mod=00 (dst:mem)  reg=011 (afnGrp[3])  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord18(afnGrp, fnSrc) {
+    function opMod16GrpWord18(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordData(this.regEBX + this.regESI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModGrpWord19(afnGrp, fnSrc): mod=00 (dst:mem)  reg=011 (afnGrp[3])  r/m=001 (BX+DI)
+     * opMod16GrpWord19(afnGrp, fnSrc): mod=00 (dst:mem)  reg=011 (afnGrp[3])  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord19(afnGrp, fnSrc) {
+    function opMod16GrpWord19(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordData(this.regEBX + this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModGrpWord1A(afnGrp, fnSrc): mod=00 (dst:mem)  reg=011 (afnGrp[3])  r/m=010 (BP+SI)
+     * opMod16GrpWord1A(afnGrp, fnSrc): mod=00 (dst:mem)  reg=011 (afnGrp[3])  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord1A(afnGrp, fnSrc) {
+    function opMod16GrpWord1A(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordStack(this.regEBP + this.regESI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModGrpWord1B(afnGrp, fnSrc): mod=00 (dst:mem)  reg=011 (afnGrp[3])  r/m=011 (BP+DI)
+     * opMod16GrpWord1B(afnGrp, fnSrc): mod=00 (dst:mem)  reg=011 (afnGrp[3])  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord1B(afnGrp, fnSrc) {
+    function opMod16GrpWord1B(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordStack(this.regEBP + this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModGrpWord1C(afnGrp, fnSrc): mod=00 (dst:mem)  reg=011 (afnGrp[3])  r/m=100 (SI)
+     * opMod16GrpWord1C(afnGrp, fnSrc): mod=00 (dst:mem)  reg=011 (afnGrp[3])  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord1C(afnGrp, fnSrc) {
+    function opMod16GrpWord1C(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordData(this.regESI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModGrpWord1D(afnGrp, fnSrc): mod=00 (dst:mem)  reg=011 (afnGrp[3])  r/m=101 (DI)
+     * opMod16GrpWord1D(afnGrp, fnSrc): mod=00 (dst:mem)  reg=011 (afnGrp[3])  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord1D(afnGrp, fnSrc) {
+    function opMod16GrpWord1D(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordData(this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModGrpWord1E(afnGrp, fnSrc): mod=00 (dst:mem)  reg=011 (afnGrp[3])  r/m=110 (d16)
+     * opMod16GrpWord1E(afnGrp, fnSrc): mod=00 (dst:mem)  reg=011 (afnGrp[3])  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord1E(afnGrp, fnSrc) {
+    function opMod16GrpWord1E(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordData(this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
-     * opModGrpWord1F(afnGrp, fnSrc): mod=00 (dst:mem)  reg=011 (afnGrp[3])  r/m=111 (BX)
+     * opMod16GrpWord1F(afnGrp, fnSrc): mod=00 (dst:mem)  reg=011 (afnGrp[3])  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord1F(afnGrp, fnSrc) {
+    function opMod16GrpWord1F(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordData(this.regEBX), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModGrpWord20(afnGrp, fnSrc): mod=00 (dst:mem)  reg=100 (afnGrp[4])  r/m=000 (BX+SI)
+     * opMod16GrpWord20(afnGrp, fnSrc): mod=00 (dst:mem)  reg=100 (afnGrp[4])  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord20(afnGrp, fnSrc) {
+    function opMod16GrpWord20(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordData(this.regEBX + this.regESI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModGrpWord21(afnGrp, fnSrc): mod=00 (dst:mem)  reg=100 (afnGrp[4])  r/m=001 (BX+DI)
+     * opMod16GrpWord21(afnGrp, fnSrc): mod=00 (dst:mem)  reg=100 (afnGrp[4])  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord21(afnGrp, fnSrc) {
+    function opMod16GrpWord21(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordData(this.regEBX + this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModGrpWord22(afnGrp, fnSrc): mod=00 (dst:mem)  reg=100 (afnGrp[4])  r/m=010 (BP+SI)
+     * opMod16GrpWord22(afnGrp, fnSrc): mod=00 (dst:mem)  reg=100 (afnGrp[4])  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord22(afnGrp, fnSrc) {
+    function opMod16GrpWord22(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordStack(this.regEBP + this.regESI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModGrpWord23(afnGrp, fnSrc): mod=00 (dst:mem)  reg=100 (afnGrp[4])  r/m=011 (BP+DI)
+     * opMod16GrpWord23(afnGrp, fnSrc): mod=00 (dst:mem)  reg=100 (afnGrp[4])  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord23(afnGrp, fnSrc) {
+    function opMod16GrpWord23(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordStack(this.regEBP + this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModGrpWord24(afnGrp, fnSrc): mod=00 (dst:mem)  reg=100 (afnGrp[4])  r/m=100 (SI)
+     * opMod16GrpWord24(afnGrp, fnSrc): mod=00 (dst:mem)  reg=100 (afnGrp[4])  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord24(afnGrp, fnSrc) {
+    function opMod16GrpWord24(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordData(this.regESI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModGrpWord25(afnGrp, fnSrc): mod=00 (dst:mem)  reg=100 (afnGrp[4])  r/m=101 (DI)
+     * opMod16GrpWord25(afnGrp, fnSrc): mod=00 (dst:mem)  reg=100 (afnGrp[4])  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord25(afnGrp, fnSrc) {
+    function opMod16GrpWord25(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordData(this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModGrpWord26(afnGrp, fnSrc): mod=00 (dst:mem)  reg=100 (afnGrp[4])  r/m=110 (d16)
+     * opMod16GrpWord26(afnGrp, fnSrc): mod=00 (dst:mem)  reg=100 (afnGrp[4])  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord26(afnGrp, fnSrc) {
+    function opMod16GrpWord26(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordData(this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
-     * opModGrpWord27(afnGrp, fnSrc): mod=00 (dst:mem)  reg=100 (afnGrp[4])  r/m=111 (BX)
+     * opMod16GrpWord27(afnGrp, fnSrc): mod=00 (dst:mem)  reg=100 (afnGrp[4])  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord27(afnGrp, fnSrc) {
+    function opMod16GrpWord27(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordData(this.regEBX), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModGrpWord28(afnGrp, fnSrc): mod=00 (dst:mem)  reg=101 (afnGrp[5])  r/m=000 (BX+SI)
+     * opMod16GrpWord28(afnGrp, fnSrc): mod=00 (dst:mem)  reg=101 (afnGrp[5])  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord28(afnGrp, fnSrc) {
+    function opMod16GrpWord28(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordData(this.regEBX + this.regESI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModGrpWord29(afnGrp, fnSrc): mod=00 (dst:mem)  reg=101 (afnGrp[5])  r/m=001 (BX+DI)
+     * opMod16GrpWord29(afnGrp, fnSrc): mod=00 (dst:mem)  reg=101 (afnGrp[5])  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord29(afnGrp, fnSrc) {
+    function opMod16GrpWord29(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordData(this.regEBX + this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModGrpWord2A(afnGrp, fnSrc): mod=00 (dst:mem)  reg=101 (afnGrp[5])  r/m=010 (BP+SI)
+     * opMod16GrpWord2A(afnGrp, fnSrc): mod=00 (dst:mem)  reg=101 (afnGrp[5])  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord2A(afnGrp, fnSrc) {
+    function opMod16GrpWord2A(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordStack(this.regEBP + this.regESI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModGrpWord2B(afnGrp, fnSrc): mod=00 (dst:mem)  reg=101 (afnGrp[5])  r/m=011 (BP+DI)
+     * opMod16GrpWord2B(afnGrp, fnSrc): mod=00 (dst:mem)  reg=101 (afnGrp[5])  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord2B(afnGrp, fnSrc) {
+    function opMod16GrpWord2B(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordStack(this.regEBP + this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModGrpWord2C(afnGrp, fnSrc): mod=00 (dst:mem)  reg=101 (afnGrp[5])  r/m=100 (SI)
+     * opMod16GrpWord2C(afnGrp, fnSrc): mod=00 (dst:mem)  reg=101 (afnGrp[5])  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord2C(afnGrp, fnSrc) {
+    function opMod16GrpWord2C(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordData(this.regESI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModGrpWord2D(afnGrp, fnSrc): mod=00 (dst:mem)  reg=101 (afnGrp[5])  r/m=101 (DI)
+     * opMod16GrpWord2D(afnGrp, fnSrc): mod=00 (dst:mem)  reg=101 (afnGrp[5])  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord2D(afnGrp, fnSrc) {
+    function opMod16GrpWord2D(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordData(this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModGrpWord2E(afnGrp, fnSrc): mod=00 (dst:mem)  reg=101 (afnGrp[5])  r/m=110 (d16)
+     * opMod16GrpWord2E(afnGrp, fnSrc): mod=00 (dst:mem)  reg=101 (afnGrp[5])  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord2E(afnGrp, fnSrc) {
+    function opMod16GrpWord2E(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordData(this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
-     * opModGrpWord2F(afnGrp, fnSrc): mod=00 (dst:mem)  reg=101 (afnGrp[5])  r/m=111 (BX)
+     * opMod16GrpWord2F(afnGrp, fnSrc): mod=00 (dst:mem)  reg=101 (afnGrp[5])  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord2F(afnGrp, fnSrc) {
+    function opMod16GrpWord2F(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordData(this.regEBX), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModGrpWord30(afnGrp, fnSrc): mod=00 (dst:mem)  reg=110 (afnGrp[6])  r/m=000 (BX+SI)
+     * opMod16GrpWord30(afnGrp, fnSrc): mod=00 (dst:mem)  reg=110 (afnGrp[6])  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord30(afnGrp, fnSrc) {
+    function opMod16GrpWord30(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordData(this.regEBX + this.regESI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModGrpWord31(afnGrp, fnSrc): mod=00 (dst:mem)  reg=110 (afnGrp[6])  r/m=001 (BX+DI)
+     * opMod16GrpWord31(afnGrp, fnSrc): mod=00 (dst:mem)  reg=110 (afnGrp[6])  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord31(afnGrp, fnSrc) {
+    function opMod16GrpWord31(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordData(this.regEBX + this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModGrpWord32(afnGrp, fnSrc): mod=00 (dst:mem)  reg=110 (afnGrp[6])  r/m=010 (BP+SI)
+     * opMod16GrpWord32(afnGrp, fnSrc): mod=00 (dst:mem)  reg=110 (afnGrp[6])  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord32(afnGrp, fnSrc) {
+    function opMod16GrpWord32(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordStack(this.regEBP + this.regESI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModGrpWord33(afnGrp, fnSrc): mod=00 (dst:mem)  reg=110 (afnGrp[6])  r/m=011 (BP+DI)
+     * opMod16GrpWord33(afnGrp, fnSrc): mod=00 (dst:mem)  reg=110 (afnGrp[6])  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord33(afnGrp, fnSrc) {
+    function opMod16GrpWord33(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordStack(this.regEBP + this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModGrpWord34(afnGrp, fnSrc): mod=00 (dst:mem)  reg=110 (afnGrp[6])  r/m=100 (SI)
+     * opMod16GrpWord34(afnGrp, fnSrc): mod=00 (dst:mem)  reg=110 (afnGrp[6])  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord34(afnGrp, fnSrc) {
+    function opMod16GrpWord34(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordData(this.regESI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModGrpWord35(afnGrp, fnSrc): mod=00 (dst:mem)  reg=110 (afnGrp[6])  r/m=101 (DI)
+     * opMod16GrpWord35(afnGrp, fnSrc): mod=00 (dst:mem)  reg=110 (afnGrp[6])  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord35(afnGrp, fnSrc) {
+    function opMod16GrpWord35(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordData(this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModGrpWord36(afnGrp, fnSrc): mod=00 (dst:mem)  reg=110 (afnGrp[6])  r/m=110 (d16)
+     * opMod16GrpWord36(afnGrp, fnSrc): mod=00 (dst:mem)  reg=110 (afnGrp[6])  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord36(afnGrp, fnSrc) {
+    function opMod16GrpWord36(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordData(this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
-     * opModGrpWord37(afnGrp, fnSrc): mod=00 (dst:mem)  reg=110 (afnGrp[6])  r/m=111 (BX)
+     * opMod16GrpWord37(afnGrp, fnSrc): mod=00 (dst:mem)  reg=110 (afnGrp[6])  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord37(afnGrp, fnSrc) {
+    function opMod16GrpWord37(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordData(this.regEBX), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModGrpWord38(afnGrp, fnSrc): mod=00 (dst:mem)  reg=111 (afnGrp[7])  r/m=000 (BX+SI)
+     * opMod16GrpWord38(afnGrp, fnSrc): mod=00 (dst:mem)  reg=111 (afnGrp[7])  r/m=000 (BX+SI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord38(afnGrp, fnSrc) {
+    function opMod16GrpWord38(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordData(this.regEBX + this.regESI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModGrpWord39(afnGrp, fnSrc): mod=00 (dst:mem)  reg=111 (afnGrp[7])  r/m=001 (BX+DI)
+     * opMod16GrpWord39(afnGrp, fnSrc): mod=00 (dst:mem)  reg=111 (afnGrp[7])  r/m=001 (BX+DI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord39(afnGrp, fnSrc) {
+    function opMod16GrpWord39(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordData(this.regEBX + this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModGrpWord3A(afnGrp, fnSrc): mod=00 (dst:mem)  reg=111 (afnGrp[7])  r/m=010 (BP+SI)
+     * opMod16GrpWord3A(afnGrp, fnSrc): mod=00 (dst:mem)  reg=111 (afnGrp[7])  r/m=010 (BP+SI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord3A(afnGrp, fnSrc) {
+    function opMod16GrpWord3A(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordStack(this.regEBP + this.regESI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
     },
     /**
-     * opModGrpWord3B(afnGrp, fnSrc): mod=00 (dst:mem)  reg=111 (afnGrp[7])  r/m=011 (BP+DI)
+     * opMod16GrpWord3B(afnGrp, fnSrc): mod=00 (dst:mem)  reg=111 (afnGrp[7])  r/m=011 (BP+DI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord3B(afnGrp, fnSrc) {
+    function opMod16GrpWord3B(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordStack(this.regEBP + this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
     },
     /**
-     * opModGrpWord3C(afnGrp, fnSrc): mod=00 (dst:mem)  reg=111 (afnGrp[7])  r/m=100 (SI)
+     * opMod16GrpWord3C(afnGrp, fnSrc): mod=00 (dst:mem)  reg=111 (afnGrp[7])  r/m=100 (SI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord3C(afnGrp, fnSrc) {
+    function opMod16GrpWord3C(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordData(this.regESI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModGrpWord3D(afnGrp, fnSrc): mod=00 (dst:mem)  reg=111 (afnGrp[7])  r/m=101 (DI)
+     * opMod16GrpWord3D(afnGrp, fnSrc): mod=00 (dst:mem)  reg=111 (afnGrp[7])  r/m=101 (DI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord3D(afnGrp, fnSrc) {
+    function opMod16GrpWord3D(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordData(this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModGrpWord3E(afnGrp, fnSrc): mod=00 (dst:mem)  reg=111 (afnGrp[7])  r/m=110 (d16)
+     * opMod16GrpWord3E(afnGrp, fnSrc): mod=00 (dst:mem)  reg=111 (afnGrp[7])  r/m=110 (d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord3E(afnGrp, fnSrc) {
+    function opMod16GrpWord3E(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordData(this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesDisp;
     },
     /**
-     * opModGrpWord3F(afnGrp, fnSrc): mod=00 (dst:mem)  reg=111 (afnGrp[7])  r/m=111 (BX)
+     * opMod16GrpWord3F(afnGrp, fnSrc): mod=00 (dst:mem)  reg=111 (afnGrp[7])  r/m=111 (BX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord3F(afnGrp, fnSrc) {
+    function opMod16GrpWord3F(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordData(this.regEBX), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBase;
     },
     /**
-     * opModGrpWord40(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=000 (afnGrp[0])  r/m=000 (BX+SI+d8)
+     * opMod16GrpWord40(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=000 (afnGrp[0])  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord40(afnGrp, fnSrc) {
+    function opMod16GrpWord40(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModGrpWord41(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=000 (afnGrp[0])  r/m=001 (BX+DI+d8)
+     * opMod16GrpWord41(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=000 (afnGrp[0])  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord41(afnGrp, fnSrc) {
+    function opMod16GrpWord41(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModGrpWord42(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=000 (afnGrp[0])  r/m=010 (BP+SI+d8)
+     * opMod16GrpWord42(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=000 (afnGrp[0])  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord42(afnGrp, fnSrc) {
+    function opMod16GrpWord42(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModGrpWord43(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=000 (afnGrp[0])  r/m=011 (BP+DI+d8)
+     * opMod16GrpWord43(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=000 (afnGrp[0])  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord43(afnGrp, fnSrc) {
+    function opMod16GrpWord43(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModGrpWord44(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=000 (afnGrp[0])  r/m=100 (SI+d8)
+     * opMod16GrpWord44(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=000 (afnGrp[0])  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord44(afnGrp, fnSrc) {
+    function opMod16GrpWord44(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordData(this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord45(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=000 (afnGrp[0])  r/m=101 (DI+d8)
+     * opMod16GrpWord45(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=000 (afnGrp[0])  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord45(afnGrp, fnSrc) {
+    function opMod16GrpWord45(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord46(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=000 (afnGrp[0])  r/m=110 (BP+d8)
+     * opMod16GrpWord46(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=000 (afnGrp[0])  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord46(afnGrp, fnSrc) {
+    function opMod16GrpWord46(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord47(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=000 (afnGrp[0])  r/m=111 (BX+d8)
+     * opMod16GrpWord47(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=000 (afnGrp[0])  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord47(afnGrp, fnSrc) {
+    function opMod16GrpWord47(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord48(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=001 (afnGrp[1])  r/m=000 (BX+SI+d8)
+     * opMod16GrpWord48(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=001 (afnGrp[1])  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord48(afnGrp, fnSrc) {
+    function opMod16GrpWord48(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModGrpWord49(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=001 (afnGrp[1])  r/m=001 (BX+DI+d8)
+     * opMod16GrpWord49(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=001 (afnGrp[1])  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord49(afnGrp, fnSrc) {
+    function opMod16GrpWord49(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModGrpWord4A(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=001 (afnGrp[1])  r/m=010 (BP+SI+d8)
+     * opMod16GrpWord4A(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=001 (afnGrp[1])  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord4A(afnGrp, fnSrc) {
+    function opMod16GrpWord4A(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModGrpWord4B(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=001 (afnGrp[1])  r/m=011 (BP+DI+d8)
+     * opMod16GrpWord4B(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=001 (afnGrp[1])  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord4B(afnGrp, fnSrc) {
+    function opMod16GrpWord4B(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModGrpWord4C(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=001 (afnGrp[1])  r/m=100 (SI+d8)
+     * opMod16GrpWord4C(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=001 (afnGrp[1])  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord4C(afnGrp, fnSrc) {
+    function opMod16GrpWord4C(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordData(this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord4D(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=001 (afnGrp[1])  r/m=101 (DI+d8)
+     * opMod16GrpWord4D(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=001 (afnGrp[1])  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord4D(afnGrp, fnSrc) {
+    function opMod16GrpWord4D(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord4E(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=001 (afnGrp[1])  r/m=110 (BP+d8)
+     * opMod16GrpWord4E(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=001 (afnGrp[1])  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord4E(afnGrp, fnSrc) {
+    function opMod16GrpWord4E(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord4F(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=001 (afnGrp[1])  r/m=111 (BX+d8)
+     * opMod16GrpWord4F(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=001 (afnGrp[1])  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord4F(afnGrp, fnSrc) {
+    function opMod16GrpWord4F(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord50(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=010 (afnGrp[2])  r/m=000 (BX+SI+d8)
+     * opMod16GrpWord50(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=010 (afnGrp[2])  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord50(afnGrp, fnSrc) {
+    function opMod16GrpWord50(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModGrpWord51(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=010 (afnGrp[2])  r/m=001 (BX+DI+d8)
+     * opMod16GrpWord51(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=010 (afnGrp[2])  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord51(afnGrp, fnSrc) {
+    function opMod16GrpWord51(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModGrpWord52(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=010 (afnGrp[2])  r/m=010 (BP+SI+d8)
+     * opMod16GrpWord52(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=010 (afnGrp[2])  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord52(afnGrp, fnSrc) {
+    function opMod16GrpWord52(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModGrpWord53(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=010 (afnGrp[2])  r/m=011 (BP+DI+d8)
+     * opMod16GrpWord53(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=010 (afnGrp[2])  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord53(afnGrp, fnSrc) {
+    function opMod16GrpWord53(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModGrpWord54(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=010 (afnGrp[2])  r/m=100 (SI+d8)
+     * opMod16GrpWord54(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=010 (afnGrp[2])  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord54(afnGrp, fnSrc) {
+    function opMod16GrpWord54(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordData(this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord55(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=010 (afnGrp[2])  r/m=101 (DI+d8)
+     * opMod16GrpWord55(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=010 (afnGrp[2])  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord55(afnGrp, fnSrc) {
+    function opMod16GrpWord55(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord56(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=010 (afnGrp[2])  r/m=110 (BP+d8)
+     * opMod16GrpWord56(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=010 (afnGrp[2])  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord56(afnGrp, fnSrc) {
+    function opMod16GrpWord56(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord57(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=010 (afnGrp[2])  r/m=111 (BX+d8)
+     * opMod16GrpWord57(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=010 (afnGrp[2])  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord57(afnGrp, fnSrc) {
+    function opMod16GrpWord57(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord58(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=011 (afnGrp[3])  r/m=000 (BX+SI+d8)
+     * opMod16GrpWord58(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=011 (afnGrp[3])  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord58(afnGrp, fnSrc) {
+    function opMod16GrpWord58(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModGrpWord59(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=011 (afnGrp[3])  r/m=001 (BX+DI+d8)
+     * opMod16GrpWord59(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=011 (afnGrp[3])  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord59(afnGrp, fnSrc) {
+    function opMod16GrpWord59(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModGrpWord5A(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=011 (afnGrp[3])  r/m=010 (BP+SI+d8)
+     * opMod16GrpWord5A(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=011 (afnGrp[3])  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord5A(afnGrp, fnSrc) {
+    function opMod16GrpWord5A(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModGrpWord5B(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=011 (afnGrp[3])  r/m=011 (BP+DI+d8)
+     * opMod16GrpWord5B(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=011 (afnGrp[3])  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord5B(afnGrp, fnSrc) {
+    function opMod16GrpWord5B(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModGrpWord5C(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=011 (afnGrp[3])  r/m=100 (SI+d8)
+     * opMod16GrpWord5C(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=011 (afnGrp[3])  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord5C(afnGrp, fnSrc) {
+    function opMod16GrpWord5C(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordData(this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord5D(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=011 (afnGrp[3])  r/m=101 (DI+d8)
+     * opMod16GrpWord5D(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=011 (afnGrp[3])  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord5D(afnGrp, fnSrc) {
+    function opMod16GrpWord5D(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord5E(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=011 (afnGrp[3])  r/m=110 (BP+d8)
+     * opMod16GrpWord5E(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=011 (afnGrp[3])  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord5E(afnGrp, fnSrc) {
+    function opMod16GrpWord5E(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord5F(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=011 (afnGrp[3])  r/m=111 (BX+d8)
+     * opMod16GrpWord5F(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=011 (afnGrp[3])  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord5F(afnGrp, fnSrc) {
+    function opMod16GrpWord5F(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord60(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=100 (afnGrp[4])  r/m=000 (BX+SI+d8)
+     * opMod16GrpWord60(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=100 (afnGrp[4])  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord60(afnGrp, fnSrc) {
+    function opMod16GrpWord60(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModGrpWord61(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=100 (afnGrp[4])  r/m=001 (BX+DI+d8)
+     * opMod16GrpWord61(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=100 (afnGrp[4])  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord61(afnGrp, fnSrc) {
+    function opMod16GrpWord61(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModGrpWord62(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=100 (afnGrp[4])  r/m=010 (BP+SI+d8)
+     * opMod16GrpWord62(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=100 (afnGrp[4])  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord62(afnGrp, fnSrc) {
+    function opMod16GrpWord62(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModGrpWord63(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=100 (afnGrp[4])  r/m=011 (BP+DI+d8)
+     * opMod16GrpWord63(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=100 (afnGrp[4])  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord63(afnGrp, fnSrc) {
+    function opMod16GrpWord63(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModGrpWord64(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=100 (afnGrp[4])  r/m=100 (SI+d8)
+     * opMod16GrpWord64(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=100 (afnGrp[4])  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord64(afnGrp, fnSrc) {
+    function opMod16GrpWord64(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordData(this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord65(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=100 (afnGrp[4])  r/m=101 (DI+d8)
+     * opMod16GrpWord65(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=100 (afnGrp[4])  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord65(afnGrp, fnSrc) {
+    function opMod16GrpWord65(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord66(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=100 (afnGrp[4])  r/m=110 (BP+d8)
+     * opMod16GrpWord66(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=100 (afnGrp[4])  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord66(afnGrp, fnSrc) {
+    function opMod16GrpWord66(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord67(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=100 (afnGrp[4])  r/m=111 (BX+d8)
+     * opMod16GrpWord67(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=100 (afnGrp[4])  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord67(afnGrp, fnSrc) {
+    function opMod16GrpWord67(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord68(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=101 (afnGrp[5])  r/m=000 (BX+SI+d8)
+     * opMod16GrpWord68(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=101 (afnGrp[5])  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord68(afnGrp, fnSrc) {
+    function opMod16GrpWord68(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModGrpWord69(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=101 (afnGrp[5])  r/m=001 (BX+DI+d8)
+     * opMod16GrpWord69(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=101 (afnGrp[5])  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord69(afnGrp, fnSrc) {
+    function opMod16GrpWord69(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModGrpWord6A(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=101 (afnGrp[5])  r/m=010 (BP+SI+d8)
+     * opMod16GrpWord6A(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=101 (afnGrp[5])  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord6A(afnGrp, fnSrc) {
+    function opMod16GrpWord6A(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModGrpWord6B(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=101 (afnGrp[5])  r/m=011 (BP+DI+d8)
+     * opMod16GrpWord6B(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=101 (afnGrp[5])  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord6B(afnGrp, fnSrc) {
+    function opMod16GrpWord6B(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModGrpWord6C(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=101 (afnGrp[5])  r/m=100 (SI+d8)
+     * opMod16GrpWord6C(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=101 (afnGrp[5])  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord6C(afnGrp, fnSrc) {
+    function opMod16GrpWord6C(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordData(this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord6D(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=101 (afnGrp[5])  r/m=101 (DI+d8)
+     * opMod16GrpWord6D(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=101 (afnGrp[5])  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord6D(afnGrp, fnSrc) {
+    function opMod16GrpWord6D(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord6E(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=101 (afnGrp[5])  r/m=110 (BP+d8)
+     * opMod16GrpWord6E(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=101 (afnGrp[5])  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord6E(afnGrp, fnSrc) {
+    function opMod16GrpWord6E(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord6F(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=101 (afnGrp[5])  r/m=111 (BX+d8)
+     * opMod16GrpWord6F(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=101 (afnGrp[5])  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord6F(afnGrp, fnSrc) {
+    function opMod16GrpWord6F(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord70(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=110 (afnGrp[6])  r/m=000 (BX+SI+d8)
+     * opMod16GrpWord70(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=110 (afnGrp[6])  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord70(afnGrp, fnSrc) {
+    function opMod16GrpWord70(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModGrpWord71(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=110 (afnGrp[6])  r/m=001 (BX+DI+d8)
+     * opMod16GrpWord71(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=110 (afnGrp[6])  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord71(afnGrp, fnSrc) {
+    function opMod16GrpWord71(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModGrpWord72(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=110 (afnGrp[6])  r/m=010 (BP+SI+d8)
+     * opMod16GrpWord72(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=110 (afnGrp[6])  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord72(afnGrp, fnSrc) {
+    function opMod16GrpWord72(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModGrpWord73(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=110 (afnGrp[6])  r/m=011 (BP+DI+d8)
+     * opMod16GrpWord73(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=110 (afnGrp[6])  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord73(afnGrp, fnSrc) {
+    function opMod16GrpWord73(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModGrpWord74(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=110 (afnGrp[6])  r/m=100 (SI+d8)
+     * opMod16GrpWord74(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=110 (afnGrp[6])  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord74(afnGrp, fnSrc) {
+    function opMod16GrpWord74(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordData(this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord75(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=110 (afnGrp[6])  r/m=101 (DI+d8)
+     * opMod16GrpWord75(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=110 (afnGrp[6])  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord75(afnGrp, fnSrc) {
+    function opMod16GrpWord75(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord76(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=110 (afnGrp[6])  r/m=110 (BP+d8)
+     * opMod16GrpWord76(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=110 (afnGrp[6])  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord76(afnGrp, fnSrc) {
+    function opMod16GrpWord76(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord77(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=110 (afnGrp[6])  r/m=111 (BX+d8)
+     * opMod16GrpWord77(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=110 (afnGrp[6])  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord77(afnGrp, fnSrc) {
+    function opMod16GrpWord77(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord78(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=111 (afnGrp[7])  r/m=000 (BX+SI+d8)
+     * opMod16GrpWord78(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=111 (afnGrp[7])  r/m=000 (BX+SI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord78(afnGrp, fnSrc) {
+    function opMod16GrpWord78(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModGrpWord79(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=111 (afnGrp[7])  r/m=001 (BX+DI+d8)
+     * opMod16GrpWord79(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=111 (afnGrp[7])  r/m=001 (BX+DI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord79(afnGrp, fnSrc) {
+    function opMod16GrpWord79(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModGrpWord7A(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=111 (afnGrp[7])  r/m=010 (BP+SI+d8)
+     * opMod16GrpWord7A(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=111 (afnGrp[7])  r/m=010 (BP+SI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord7A(afnGrp, fnSrc) {
+    function opMod16GrpWord7A(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModGrpWord7B(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=111 (afnGrp[7])  r/m=011 (BP+DI+d8)
+     * opMod16GrpWord7B(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=111 (afnGrp[7])  r/m=011 (BP+DI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord7B(afnGrp, fnSrc) {
+    function opMod16GrpWord7B(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModGrpWord7C(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=111 (afnGrp[7])  r/m=100 (SI+d8)
+     * opMod16GrpWord7C(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=111 (afnGrp[7])  r/m=100 (SI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord7C(afnGrp, fnSrc) {
+    function opMod16GrpWord7C(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordData(this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord7D(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=111 (afnGrp[7])  r/m=101 (DI+d8)
+     * opMod16GrpWord7D(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=111 (afnGrp[7])  r/m=101 (DI+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord7D(afnGrp, fnSrc) {
+    function opMod16GrpWord7D(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord7E(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=111 (afnGrp[7])  r/m=110 (BP+d8)
+     * opMod16GrpWord7E(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=111 (afnGrp[7])  r/m=110 (BP+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord7E(afnGrp, fnSrc) {
+    function opMod16GrpWord7E(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord7F(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=111 (afnGrp[7])  r/m=111 (BX+d8)
+     * opMod16GrpWord7F(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=111 (afnGrp[7])  r/m=111 (BX+d8)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord7F(afnGrp, fnSrc) {
+    function opMod16GrpWord7F(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord80(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=000 (afnGrp[0])  r/m=000 (BX+SI+d16)
+     * opMod16GrpWord80(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=000 (afnGrp[0])  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord80(afnGrp, fnSrc) {
+    function opMod16GrpWord80(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModGrpWord81(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=000 (afnGrp[0])  r/m=001 (BX+DI+d16)
+     * opMod16GrpWord81(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=000 (afnGrp[0])  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord81(afnGrp, fnSrc) {
+    function opMod16GrpWord81(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModGrpWord82(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=000 (afnGrp[0])  r/m=010 (BP+SI+d16)
+     * opMod16GrpWord82(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=000 (afnGrp[0])  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord82(afnGrp, fnSrc) {
+    function opMod16GrpWord82(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModGrpWord83(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=000 (afnGrp[0])  r/m=011 (BP+DI+d16)
+     * opMod16GrpWord83(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=000 (afnGrp[0])  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord83(afnGrp, fnSrc) {
+    function opMod16GrpWord83(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModGrpWord84(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=000 (afnGrp[0])  r/m=100 (SI+d16)
+     * opMod16GrpWord84(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=000 (afnGrp[0])  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord84(afnGrp, fnSrc) {
+    function opMod16GrpWord84(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordData(this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord85(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=000 (afnGrp[0])  r/m=101 (DI+d16)
+     * opMod16GrpWord85(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=000 (afnGrp[0])  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord85(afnGrp, fnSrc) {
+    function opMod16GrpWord85(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordData(this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord86(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=000 (afnGrp[0])  r/m=110 (BP+d16)
+     * opMod16GrpWord86(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=000 (afnGrp[0])  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord86(afnGrp, fnSrc) {
+    function opMod16GrpWord86(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord87(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=000 (afnGrp[0])  r/m=111 (BX+d16)
+     * opMod16GrpWord87(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=000 (afnGrp[0])  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord87(afnGrp, fnSrc) {
+    function opMod16GrpWord87(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordData(this.regEBX + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord88(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=001 (afnGrp[1])  r/m=000 (BX+SI+d16)
+     * opMod16GrpWord88(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=001 (afnGrp[1])  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord88(afnGrp, fnSrc) {
+    function opMod16GrpWord88(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModGrpWord89(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=001 (afnGrp[1])  r/m=001 (BX+DI+d16)
+     * opMod16GrpWord89(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=001 (afnGrp[1])  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord89(afnGrp, fnSrc) {
+    function opMod16GrpWord89(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModGrpWord8A(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=001 (afnGrp[1])  r/m=010 (BP+SI+d16)
+     * opMod16GrpWord8A(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=001 (afnGrp[1])  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord8A(afnGrp, fnSrc) {
+    function opMod16GrpWord8A(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModGrpWord8B(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=001 (afnGrp[1])  r/m=011 (BP+DI+d16)
+     * opMod16GrpWord8B(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=001 (afnGrp[1])  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord8B(afnGrp, fnSrc) {
+    function opMod16GrpWord8B(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModGrpWord8C(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=001 (afnGrp[1])  r/m=100 (SI+d16)
+     * opMod16GrpWord8C(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=001 (afnGrp[1])  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord8C(afnGrp, fnSrc) {
+    function opMod16GrpWord8C(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordData(this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord8D(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=001 (afnGrp[1])  r/m=101 (DI+d16)
+     * opMod16GrpWord8D(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=001 (afnGrp[1])  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord8D(afnGrp, fnSrc) {
+    function opMod16GrpWord8D(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordData(this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord8E(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=001 (afnGrp[1])  r/m=110 (BP+d16)
+     * opMod16GrpWord8E(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=001 (afnGrp[1])  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord8E(afnGrp, fnSrc) {
+    function opMod16GrpWord8E(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord8F(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=001 (afnGrp[1])  r/m=111 (BX+d16)
+     * opMod16GrpWord8F(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=001 (afnGrp[1])  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord8F(afnGrp, fnSrc) {
+    function opMod16GrpWord8F(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordData(this.regEBX + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord90(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=010 (afnGrp[2])  r/m=000 (BX+SI+d16)
+     * opMod16GrpWord90(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=010 (afnGrp[2])  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord90(afnGrp, fnSrc) {
+    function opMod16GrpWord90(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModGrpWord91(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=010 (afnGrp[2])  r/m=001 (BX+DI+d16)
+     * opMod16GrpWord91(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=010 (afnGrp[2])  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord91(afnGrp, fnSrc) {
+    function opMod16GrpWord91(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModGrpWord92(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=010 (afnGrp[2])  r/m=010 (BP+SI+d16)
+     * opMod16GrpWord92(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=010 (afnGrp[2])  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord92(afnGrp, fnSrc) {
+    function opMod16GrpWord92(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModGrpWord93(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=010 (afnGrp[2])  r/m=011 (BP+DI+d16)
+     * opMod16GrpWord93(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=010 (afnGrp[2])  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord93(afnGrp, fnSrc) {
+    function opMod16GrpWord93(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModGrpWord94(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=010 (afnGrp[2])  r/m=100 (SI+d16)
+     * opMod16GrpWord94(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=010 (afnGrp[2])  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord94(afnGrp, fnSrc) {
+    function opMod16GrpWord94(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordData(this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord95(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=010 (afnGrp[2])  r/m=101 (DI+d16)
+     * opMod16GrpWord95(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=010 (afnGrp[2])  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord95(afnGrp, fnSrc) {
+    function opMod16GrpWord95(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordData(this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord96(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=010 (afnGrp[2])  r/m=110 (BP+d16)
+     * opMod16GrpWord96(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=010 (afnGrp[2])  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord96(afnGrp, fnSrc) {
+    function opMod16GrpWord96(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord97(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=010 (afnGrp[2])  r/m=111 (BX+d16)
+     * opMod16GrpWord97(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=010 (afnGrp[2])  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord97(afnGrp, fnSrc) {
+    function opMod16GrpWord97(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordData(this.regEBX + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord98(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=011 (afnGrp[3])  r/m=000 (BX+SI+d16)
+     * opMod16GrpWord98(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=011 (afnGrp[3])  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord98(afnGrp, fnSrc) {
+    function opMod16GrpWord98(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModGrpWord99(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=011 (afnGrp[3])  r/m=001 (BX+DI+d16)
+     * opMod16GrpWord99(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=011 (afnGrp[3])  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord99(afnGrp, fnSrc) {
+    function opMod16GrpWord99(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModGrpWord9A(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=011 (afnGrp[3])  r/m=010 (BP+SI+d16)
+     * opMod16GrpWord9A(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=011 (afnGrp[3])  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord9A(afnGrp, fnSrc) {
+    function opMod16GrpWord9A(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModGrpWord9B(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=011 (afnGrp[3])  r/m=011 (BP+DI+d16)
+     * opMod16GrpWord9B(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=011 (afnGrp[3])  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord9B(afnGrp, fnSrc) {
+    function opMod16GrpWord9B(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModGrpWord9C(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=011 (afnGrp[3])  r/m=100 (SI+d16)
+     * opMod16GrpWord9C(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=011 (afnGrp[3])  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord9C(afnGrp, fnSrc) {
+    function opMod16GrpWord9C(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordData(this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord9D(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=011 (afnGrp[3])  r/m=101 (DI+d16)
+     * opMod16GrpWord9D(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=011 (afnGrp[3])  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord9D(afnGrp, fnSrc) {
+    function opMod16GrpWord9D(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordData(this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord9E(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=011 (afnGrp[3])  r/m=110 (BP+d16)
+     * opMod16GrpWord9E(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=011 (afnGrp[3])  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord9E(afnGrp, fnSrc) {
+    function opMod16GrpWord9E(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWord9F(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=011 (afnGrp[3])  r/m=111 (BX+d16)
+     * opMod16GrpWord9F(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=011 (afnGrp[3])  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWord9F(afnGrp, fnSrc) {
+    function opMod16GrpWord9F(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordData(this.regEBX + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWordA0(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=100 (afnGrp[4])  r/m=000 (BX+SI+d16)
+     * opMod16GrpWordA0(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=100 (afnGrp[4])  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordA0(afnGrp, fnSrc) {
+    function opMod16GrpWordA0(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModGrpWordA1(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=100 (afnGrp[4])  r/m=001 (BX+DI+d16)
+     * opMod16GrpWordA1(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=100 (afnGrp[4])  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordA1(afnGrp, fnSrc) {
+    function opMod16GrpWordA1(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModGrpWordA2(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=100 (afnGrp[4])  r/m=010 (BP+SI+d16)
+     * opMod16GrpWordA2(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=100 (afnGrp[4])  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordA2(afnGrp, fnSrc) {
+    function opMod16GrpWordA2(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModGrpWordA3(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=100 (afnGrp[4])  r/m=011 (BP+DI+d16)
+     * opMod16GrpWordA3(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=100 (afnGrp[4])  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordA3(afnGrp, fnSrc) {
+    function opMod16GrpWordA3(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModGrpWordA4(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=100 (afnGrp[4])  r/m=100 (SI+d16)
+     * opMod16GrpWordA4(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=100 (afnGrp[4])  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordA4(afnGrp, fnSrc) {
+    function opMod16GrpWordA4(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordData(this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWordA5(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=100 (afnGrp[4])  r/m=101 (DI+d16)
+     * opMod16GrpWordA5(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=100 (afnGrp[4])  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordA5(afnGrp, fnSrc) {
+    function opMod16GrpWordA5(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordData(this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWordA6(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=100 (afnGrp[4])  r/m=110 (BP+d16)
+     * opMod16GrpWordA6(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=100 (afnGrp[4])  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordA6(afnGrp, fnSrc) {
+    function opMod16GrpWordA6(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWordA7(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=100 (afnGrp[4])  r/m=111 (BX+d16)
+     * opMod16GrpWordA7(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=100 (afnGrp[4])  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordA7(afnGrp, fnSrc) {
+    function opMod16GrpWordA7(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordData(this.regEBX + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWordA8(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=101 (afnGrp[5])  r/m=000 (BX+SI+d16)
+     * opMod16GrpWordA8(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=101 (afnGrp[5])  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordA8(afnGrp, fnSrc) {
+    function opMod16GrpWordA8(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModGrpWordA9(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=101 (afnGrp[5])  r/m=001 (BX+DI+d16)
+     * opMod16GrpWordA9(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=101 (afnGrp[5])  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordA9(afnGrp, fnSrc) {
+    function opMod16GrpWordA9(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModGrpWordAA(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=101 (afnGrp[5])  r/m=010 (BP+SI+d16)
+     * opMod16GrpWordAA(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=101 (afnGrp[5])  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordAA(afnGrp, fnSrc) {
+    function opMod16GrpWordAA(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModGrpWordAB(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=101 (afnGrp[5])  r/m=011 (BP+DI+d16)
+     * opMod16GrpWordAB(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=101 (afnGrp[5])  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordAB(afnGrp, fnSrc) {
+    function opMod16GrpWordAB(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModGrpWordAC(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=101 (afnGrp[5])  r/m=100 (SI+d16)
+     * opMod16GrpWordAC(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=101 (afnGrp[5])  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordAC(afnGrp, fnSrc) {
+    function opMod16GrpWordAC(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordData(this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWordAD(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=101 (afnGrp[5])  r/m=101 (DI+d16)
+     * opMod16GrpWordAD(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=101 (afnGrp[5])  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordAD(afnGrp, fnSrc) {
+    function opMod16GrpWordAD(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordData(this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWordAE(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=101 (afnGrp[5])  r/m=110 (BP+d16)
+     * opMod16GrpWordAE(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=101 (afnGrp[5])  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordAE(afnGrp, fnSrc) {
+    function opMod16GrpWordAE(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWordAF(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=101 (afnGrp[5])  r/m=111 (BX+d16)
+     * opMod16GrpWordAF(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=101 (afnGrp[5])  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordAF(afnGrp, fnSrc) {
+    function opMod16GrpWordAF(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordData(this.regEBX + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWordB0(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=110 (afnGrp[6])  r/m=000 (BX+SI+d16)
+     * opMod16GrpWordB0(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=110 (afnGrp[6])  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordB0(afnGrp, fnSrc) {
+    function opMod16GrpWordB0(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModGrpWordB1(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=110 (afnGrp[6])  r/m=001 (BX+DI+d16)
+     * opMod16GrpWordB1(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=110 (afnGrp[6])  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordB1(afnGrp, fnSrc) {
+    function opMod16GrpWordB1(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModGrpWordB2(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=110 (afnGrp[6])  r/m=010 (BP+SI+d16)
+     * opMod16GrpWordB2(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=110 (afnGrp[6])  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordB2(afnGrp, fnSrc) {
+    function opMod16GrpWordB2(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModGrpWordB3(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=110 (afnGrp[6])  r/m=011 (BP+DI+d16)
+     * opMod16GrpWordB3(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=110 (afnGrp[6])  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordB3(afnGrp, fnSrc) {
+    function opMod16GrpWordB3(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModGrpWordB4(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=110 (afnGrp[6])  r/m=100 (SI+d16)
+     * opMod16GrpWordB4(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=110 (afnGrp[6])  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordB4(afnGrp, fnSrc) {
+    function opMod16GrpWordB4(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordData(this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWordB5(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=110 (afnGrp[6])  r/m=101 (DI+d16)
+     * opMod16GrpWordB5(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=110 (afnGrp[6])  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordB5(afnGrp, fnSrc) {
+    function opMod16GrpWordB5(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordData(this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWordB6(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=110 (afnGrp[6])  r/m=110 (BP+d16)
+     * opMod16GrpWordB6(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=110 (afnGrp[6])  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordB6(afnGrp, fnSrc) {
+    function opMod16GrpWordB6(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWordB7(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=110 (afnGrp[6])  r/m=111 (BX+d16)
+     * opMod16GrpWordB7(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=110 (afnGrp[6])  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordB7(afnGrp, fnSrc) {
+    function opMod16GrpWordB7(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordData(this.regEBX + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWordB8(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=111 (afnGrp[7])  r/m=000 (BX+SI+d16)
+     * opMod16GrpWordB8(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=111 (afnGrp[7])  r/m=000 (BX+SI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordB8(afnGrp, fnSrc) {
+    function opMod16GrpWordB8(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModGrpWordB9(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=111 (afnGrp[7])  r/m=001 (BX+DI+d16)
+     * opMod16GrpWordB9(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=111 (afnGrp[7])  r/m=001 (BX+DI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordB9(afnGrp, fnSrc) {
+    function opMod16GrpWordB9(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModGrpWordBA(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=111 (afnGrp[7])  r/m=010 (BP+SI+d16)
+     * opMod16GrpWordBA(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=111 (afnGrp[7])  r/m=010 (BP+SI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordBA(afnGrp, fnSrc) {
+    function opMod16GrpWordBA(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
     },
     /**
-     * opModGrpWordBB(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=111 (afnGrp[7])  r/m=011 (BP+DI+d16)
+     * opMod16GrpWordBB(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=111 (afnGrp[7])  r/m=011 (BP+DI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordBB(afnGrp, fnSrc) {
+    function opMod16GrpWordBB(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
     },
     /**
-     * opModGrpWordBC(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=111 (afnGrp[7])  r/m=100 (SI+d16)
+     * opMod16GrpWordBC(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=111 (afnGrp[7])  r/m=100 (SI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordBC(afnGrp, fnSrc) {
+    function opMod16GrpWordBC(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordData(this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWordBD(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=111 (afnGrp[7])  r/m=101 (DI+d16)
+     * opMod16GrpWordBD(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=111 (afnGrp[7])  r/m=101 (DI+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordBD(afnGrp, fnSrc) {
+    function opMod16GrpWordBD(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordData(this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWordBE(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=111 (afnGrp[7])  r/m=110 (BP+d16)
+     * opMod16GrpWordBE(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=111 (afnGrp[7])  r/m=110 (BP+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordBE(afnGrp, fnSrc) {
+    function opMod16GrpWordBE(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWordBF(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=111 (afnGrp[7])  r/m=111 (BX+d16)
+     * opMod16GrpWordBF(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=111 (afnGrp[7])  r/m=111 (BX+d16)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordBF(afnGrp, fnSrc) {
+    function opMod16GrpWordBF(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordData(this.regEBX + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
         this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
     },
     /**
-     * opModGrpWordC0(afnGrp, fnSrc): mod=11 (dst:reg)  reg=000 (afnGrp[0])  r/m=000 (AX)
+     * opMod16GrpWordC0(afnGrp, fnSrc): mod=11 (dst:reg)  reg=000 (afnGrp[0])  r/m=000 (AX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordC0(afnGrp, fnSrc) {
-        this.regEAX = afnGrp[0].call(this, this.regEAX, fnSrc.call(this));
+    function opMod16GrpWordC0(afnGrp, fnSrc) {
+        var w = afnGrp[0].call(this, this.regEAX & this.dataMask, fnSrc.call(this));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordC1(afnGrp, fnSrc): mod=11 (dst:reg)  reg=000 (afnGrp[0])  r/m=001 (CX)
+     * opMod16GrpWordC1(afnGrp, fnSrc): mod=11 (dst:reg)  reg=000 (afnGrp[0])  r/m=001 (CX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordC1(afnGrp, fnSrc) {
-        this.regECX = afnGrp[0].call(this, this.regECX, fnSrc.call(this));
+    function opMod16GrpWordC1(afnGrp, fnSrc) {
+        var w = afnGrp[0].call(this, this.regECX & this.dataMask, fnSrc.call(this));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordC2(afnGrp, fnSrc): mod=11 (dst:reg)  reg=000 (afnGrp[0])  r/m=010 (DX)
+     * opMod16GrpWordC2(afnGrp, fnSrc): mod=11 (dst:reg)  reg=000 (afnGrp[0])  r/m=010 (DX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordC2(afnGrp, fnSrc) {
-        this.regEDX = afnGrp[0].call(this, this.regEDX, fnSrc.call(this));
+    function opMod16GrpWordC2(afnGrp, fnSrc) {
+        var w = afnGrp[0].call(this, this.regEDX & this.dataMask, fnSrc.call(this));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordC3(afnGrp, fnSrc): mod=11 (dst:reg)  reg=000 (afnGrp[0])  r/m=011 (BX)
+     * opMod16GrpWordC3(afnGrp, fnSrc): mod=11 (dst:reg)  reg=000 (afnGrp[0])  r/m=011 (BX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordC3(afnGrp, fnSrc) {
-        this.regEBX = afnGrp[0].call(this, this.regEBX, fnSrc.call(this));
+    function opMod16GrpWordC3(afnGrp, fnSrc) {
+        var w = afnGrp[0].call(this, this.regEBX & this.dataMask, fnSrc.call(this));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordC4(afnGrp, fnSrc): mod=11 (dst:reg)  reg=000 (afnGrp[0])  r/m=100 (SP)
+     * opMod16GrpWordC4(afnGrp, fnSrc): mod=11 (dst:reg)  reg=000 (afnGrp[0])  r/m=100 (SP)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordC4(afnGrp, fnSrc) {
-        this.regESP = afnGrp[0].call(this, this.regESP, fnSrc.call(this));
+    function opMod16GrpWordC4(afnGrp, fnSrc) {
+        var w = afnGrp[0].call(this, this.regESP & this.dataMask, fnSrc.call(this));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
     },
     /**
-     * opModGrpWordC5(afnGrp, fnSrc): mod=11 (dst:reg)  reg=000 (afnGrp[0])  r/m=101 (BP)
+     * opMod16GrpWordC5(afnGrp, fnSrc): mod=11 (dst:reg)  reg=000 (afnGrp[0])  r/m=101 (BP)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordC5(afnGrp, fnSrc) {
-        this.regEBP = afnGrp[0].call(this, this.regEBP, fnSrc.call(this));
+    function opMod16GrpWordC5(afnGrp, fnSrc) {
+        var w = afnGrp[0].call(this, this.regEBP & this.dataMask, fnSrc.call(this));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordC6(afnGrp, fnSrc): mod=11 (dst:reg)  reg=000 (afnGrp[0])  r/m=110 (SI)
+     * opMod16GrpWordC6(afnGrp, fnSrc): mod=11 (dst:reg)  reg=000 (afnGrp[0])  r/m=110 (SI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordC6(afnGrp, fnSrc) {
-        this.regESI = afnGrp[0].call(this, this.regESI, fnSrc.call(this));
+    function opMod16GrpWordC6(afnGrp, fnSrc) {
+        var w = afnGrp[0].call(this, this.regESI & this.dataMask, fnSrc.call(this));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordC7(afnGrp, fnSrc): mod=11 (dst:reg)  reg=000 (afnGrp[0])  r/m=111 (DI)
+     * opMod16GrpWordC7(afnGrp, fnSrc): mod=11 (dst:reg)  reg=000 (afnGrp[0])  r/m=111 (DI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordC7(afnGrp, fnSrc) {
-        this.regEDI = afnGrp[0].call(this, this.regEDI, fnSrc.call(this));
+    function opMod16GrpWordC7(afnGrp, fnSrc) {
+        var w = afnGrp[0].call(this, this.regEDI & this.dataMask, fnSrc.call(this));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordC8(afnGrp, fnSrc): mod=11 (dst:reg)  reg=001 (afnGrp[1])  r/m=000 (AX)
+     * opMod16GrpWordC8(afnGrp, fnSrc): mod=11 (dst:reg)  reg=001 (afnGrp[1])  r/m=000 (AX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordC8(afnGrp, fnSrc) {
-        this.regEAX = afnGrp[1].call(this, this.regEAX, fnSrc.call(this));
+    function opMod16GrpWordC8(afnGrp, fnSrc) {
+        var w = afnGrp[1].call(this, this.regEAX & this.dataMask, fnSrc.call(this));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordC9(afnGrp, fnSrc): mod=11 (dst:reg)  reg=001 (afnGrp[1])  r/m=001 (CX)
+     * opMod16GrpWordC9(afnGrp, fnSrc): mod=11 (dst:reg)  reg=001 (afnGrp[1])  r/m=001 (CX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordC9(afnGrp, fnSrc) {
-        this.regECX = afnGrp[1].call(this, this.regECX, fnSrc.call(this));
+    function opMod16GrpWordC9(afnGrp, fnSrc) {
+        var w = afnGrp[1].call(this, this.regECX & this.dataMask, fnSrc.call(this));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordCA(afnGrp, fnSrc): mod=11 (dst:reg)  reg=001 (afnGrp[1])  r/m=010 (DX)
+     * opMod16GrpWordCA(afnGrp, fnSrc): mod=11 (dst:reg)  reg=001 (afnGrp[1])  r/m=010 (DX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordCA(afnGrp, fnSrc) {
-        this.regEDX = afnGrp[1].call(this, this.regEDX, fnSrc.call(this));
+    function opMod16GrpWordCA(afnGrp, fnSrc) {
+        var w = afnGrp[1].call(this, this.regEDX & this.dataMask, fnSrc.call(this));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordCB(afnGrp, fnSrc): mod=11 (dst:reg)  reg=001 (afnGrp[1])  r/m=011 (BX)
+     * opMod16GrpWordCB(afnGrp, fnSrc): mod=11 (dst:reg)  reg=001 (afnGrp[1])  r/m=011 (BX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordCB(afnGrp, fnSrc) {
-        this.regEBX = afnGrp[1].call(this, this.regEBX, fnSrc.call(this));
+    function opMod16GrpWordCB(afnGrp, fnSrc) {
+        var w = afnGrp[1].call(this, this.regEBX & this.dataMask, fnSrc.call(this));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordCC(afnGrp, fnSrc): mod=11 (dst:reg)  reg=001 (afnGrp[1])  r/m=100 (SP)
+     * opMod16GrpWordCC(afnGrp, fnSrc): mod=11 (dst:reg)  reg=001 (afnGrp[1])  r/m=100 (SP)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordCC(afnGrp, fnSrc) {
-        this.regESP = afnGrp[1].call(this, this.regESP, fnSrc.call(this));
+    function opMod16GrpWordCC(afnGrp, fnSrc) {
+        var w = afnGrp[1].call(this, this.regESP & this.dataMask, fnSrc.call(this));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
     },
     /**
-     * opModGrpWordCD(afnGrp, fnSrc): mod=11 (dst:reg)  reg=001 (afnGrp[1])  r/m=101 (BP)
+     * opMod16GrpWordCD(afnGrp, fnSrc): mod=11 (dst:reg)  reg=001 (afnGrp[1])  r/m=101 (BP)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordCD(afnGrp, fnSrc) {
-        this.regEBP = afnGrp[1].call(this, this.regEBP, fnSrc.call(this));
+    function opMod16GrpWordCD(afnGrp, fnSrc) {
+        var w = afnGrp[1].call(this, this.regEBP & this.dataMask, fnSrc.call(this));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordCE(afnGrp, fnSrc): mod=11 (dst:reg)  reg=001 (afnGrp[1])  r/m=110 (SI)
+     * opMod16GrpWordCE(afnGrp, fnSrc): mod=11 (dst:reg)  reg=001 (afnGrp[1])  r/m=110 (SI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordCE(afnGrp, fnSrc) {
-        this.regESI = afnGrp[1].call(this, this.regESI, fnSrc.call(this));
+    function opMod16GrpWordCE(afnGrp, fnSrc) {
+        var w = afnGrp[1].call(this, this.regESI & this.dataMask, fnSrc.call(this));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordCF(afnGrp, fnSrc): mod=11 (dst:reg)  reg=001 (afnGrp[1])  r/m=111 (DI)
+     * opMod16GrpWordCF(afnGrp, fnSrc): mod=11 (dst:reg)  reg=001 (afnGrp[1])  r/m=111 (DI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordCF(afnGrp, fnSrc) {
-        this.regEDI = afnGrp[1].call(this, this.regEDI, fnSrc.call(this));
+    function opMod16GrpWordCF(afnGrp, fnSrc) {
+        var w = afnGrp[1].call(this, this.regEDI & this.dataMask, fnSrc.call(this));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordD0(afnGrp, fnSrc): mod=11 (dst:reg)  reg=010 (afnGrp[2])  r/m=000 (AX)
+     * opMod16GrpWordD0(afnGrp, fnSrc): mod=11 (dst:reg)  reg=010 (afnGrp[2])  r/m=000 (AX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordD0(afnGrp, fnSrc) {
-        this.regEAX = afnGrp[2].call(this, this.regEAX, fnSrc.call(this));
+    function opMod16GrpWordD0(afnGrp, fnSrc) {
+        var w = afnGrp[2].call(this, this.regEAX & this.dataMask, fnSrc.call(this));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordD1(afnGrp, fnSrc): mod=11 (dst:reg)  reg=010 (afnGrp[2])  r/m=001 (CX)
+     * opMod16GrpWordD1(afnGrp, fnSrc): mod=11 (dst:reg)  reg=010 (afnGrp[2])  r/m=001 (CX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordD1(afnGrp, fnSrc) {
-        this.regECX = afnGrp[2].call(this, this.regECX, fnSrc.call(this));
+    function opMod16GrpWordD1(afnGrp, fnSrc) {
+        var w = afnGrp[2].call(this, this.regECX & this.dataMask, fnSrc.call(this));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordD2(afnGrp, fnSrc): mod=11 (dst:reg)  reg=010 (afnGrp[2])  r/m=010 (DX)
+     * opMod16GrpWordD2(afnGrp, fnSrc): mod=11 (dst:reg)  reg=010 (afnGrp[2])  r/m=010 (DX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordD2(afnGrp, fnSrc) {
-        this.regEDX = afnGrp[2].call(this, this.regEDX, fnSrc.call(this));
+    function opMod16GrpWordD2(afnGrp, fnSrc) {
+        var w = afnGrp[2].call(this, this.regEDX & this.dataMask, fnSrc.call(this));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordD3(afnGrp, fnSrc): mod=11 (dst:reg)  reg=010 (afnGrp[2])  r/m=011 (BX)
+     * opMod16GrpWordD3(afnGrp, fnSrc): mod=11 (dst:reg)  reg=010 (afnGrp[2])  r/m=011 (BX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordD3(afnGrp, fnSrc) {
-        this.regEBX = afnGrp[2].call(this, this.regEBX, fnSrc.call(this));
+    function opMod16GrpWordD3(afnGrp, fnSrc) {
+        var w = afnGrp[2].call(this, this.regEBX & this.dataMask, fnSrc.call(this));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordD4(afnGrp, fnSrc): mod=11 (dst:reg)  reg=010 (afnGrp[2])  r/m=100 (SP)
+     * opMod16GrpWordD4(afnGrp, fnSrc): mod=11 (dst:reg)  reg=010 (afnGrp[2])  r/m=100 (SP)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordD4(afnGrp, fnSrc) {
-        this.regESP = afnGrp[2].call(this, this.regESP, fnSrc.call(this));
+    function opMod16GrpWordD4(afnGrp, fnSrc) {
+        var w = afnGrp[2].call(this, this.regESP & this.dataMask, fnSrc.call(this));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
     },
     /**
-     * opModGrpWordD5(afnGrp, fnSrc): mod=11 (dst:reg)  reg=010 (afnGrp[2])  r/m=101 (BP)
+     * opMod16GrpWordD5(afnGrp, fnSrc): mod=11 (dst:reg)  reg=010 (afnGrp[2])  r/m=101 (BP)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordD5(afnGrp, fnSrc) {
-        this.regEBP = afnGrp[2].call(this, this.regEBP, fnSrc.call(this));
+    function opMod16GrpWordD5(afnGrp, fnSrc) {
+        var w = afnGrp[2].call(this, this.regEBP & this.dataMask, fnSrc.call(this));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordD6(afnGrp, fnSrc): mod=11 (dst:reg)  reg=010 (afnGrp[2])  r/m=110 (SI)
+     * opMod16GrpWordD6(afnGrp, fnSrc): mod=11 (dst:reg)  reg=010 (afnGrp[2])  r/m=110 (SI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordD6(afnGrp, fnSrc) {
-        this.regESI = afnGrp[2].call(this, this.regESI, fnSrc.call(this));
+    function opMod16GrpWordD6(afnGrp, fnSrc) {
+        var w = afnGrp[2].call(this, this.regESI & this.dataMask, fnSrc.call(this));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordD7(afnGrp, fnSrc): mod=11 (dst:reg)  reg=010 (afnGrp[2])  r/m=111 (DI)
+     * opMod16GrpWordD7(afnGrp, fnSrc): mod=11 (dst:reg)  reg=010 (afnGrp[2])  r/m=111 (DI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordD7(afnGrp, fnSrc) {
-        this.regEDI = afnGrp[2].call(this, this.regEDI, fnSrc.call(this));
+    function opMod16GrpWordD7(afnGrp, fnSrc) {
+        var w = afnGrp[2].call(this, this.regEDI & this.dataMask, fnSrc.call(this));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordD8(afnGrp, fnSrc): mod=11 (dst:reg)  reg=011 (afnGrp[3])  r/m=000 (AX)
+     * opMod16GrpWordD8(afnGrp, fnSrc): mod=11 (dst:reg)  reg=011 (afnGrp[3])  r/m=000 (AX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordD8(afnGrp, fnSrc) {
-        this.regEAX = afnGrp[3].call(this, this.regEAX, fnSrc.call(this));
+    function opMod16GrpWordD8(afnGrp, fnSrc) {
+        var w = afnGrp[3].call(this, this.regEAX & this.dataMask, fnSrc.call(this));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordD9(afnGrp, fnSrc): mod=11 (dst:reg)  reg=011 (afnGrp[3])  r/m=001 (CX)
+     * opMod16GrpWordD9(afnGrp, fnSrc): mod=11 (dst:reg)  reg=011 (afnGrp[3])  r/m=001 (CX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordD9(afnGrp, fnSrc) {
-        this.regECX = afnGrp[3].call(this, this.regECX, fnSrc.call(this));
+    function opMod16GrpWordD9(afnGrp, fnSrc) {
+        var w = afnGrp[3].call(this, this.regECX & this.dataMask, fnSrc.call(this));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordDA(afnGrp, fnSrc): mod=11 (dst:reg)  reg=011 (afnGrp[3])  r/m=010 (DX)
+     * opMod16GrpWordDA(afnGrp, fnSrc): mod=11 (dst:reg)  reg=011 (afnGrp[3])  r/m=010 (DX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordDA(afnGrp, fnSrc) {
-        this.regEDX = afnGrp[3].call(this, this.regEDX, fnSrc.call(this));
+    function opMod16GrpWordDA(afnGrp, fnSrc) {
+        var w = afnGrp[3].call(this, this.regEDX & this.dataMask, fnSrc.call(this));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordDB(afnGrp, fnSrc): mod=11 (dst:reg)  reg=011 (afnGrp[3])  r/m=011 (BX)
+     * opMod16GrpWordDB(afnGrp, fnSrc): mod=11 (dst:reg)  reg=011 (afnGrp[3])  r/m=011 (BX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordDB(afnGrp, fnSrc) {
-        this.regEBX = afnGrp[3].call(this, this.regEBX, fnSrc.call(this));
+    function opMod16GrpWordDB(afnGrp, fnSrc) {
+        var w = afnGrp[3].call(this, this.regEBX & this.dataMask, fnSrc.call(this));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordDC(afnGrp, fnSrc): mod=11 (dst:reg)  reg=011 (afnGrp[3])  r/m=100 (SP)
+     * opMod16GrpWordDC(afnGrp, fnSrc): mod=11 (dst:reg)  reg=011 (afnGrp[3])  r/m=100 (SP)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordDC(afnGrp, fnSrc) {
-        this.regESP = afnGrp[3].call(this, this.regESP, fnSrc.call(this));
+    function opMod16GrpWordDC(afnGrp, fnSrc) {
+        var w = afnGrp[3].call(this, this.regESP & this.dataMask, fnSrc.call(this));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
     },
     /**
-     * opModGrpWordDD(afnGrp, fnSrc): mod=11 (dst:reg)  reg=011 (afnGrp[3])  r/m=101 (BP)
+     * opMod16GrpWordDD(afnGrp, fnSrc): mod=11 (dst:reg)  reg=011 (afnGrp[3])  r/m=101 (BP)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordDD(afnGrp, fnSrc) {
-        this.regEBP = afnGrp[3].call(this, this.regEBP, fnSrc.call(this));
+    function opMod16GrpWordDD(afnGrp, fnSrc) {
+        var w = afnGrp[3].call(this, this.regEBP & this.dataMask, fnSrc.call(this));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordDE(afnGrp, fnSrc): mod=11 (dst:reg)  reg=011 (afnGrp[3])  r/m=110 (SI)
+     * opMod16GrpWordDE(afnGrp, fnSrc): mod=11 (dst:reg)  reg=011 (afnGrp[3])  r/m=110 (SI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordDE(afnGrp, fnSrc) {
-        this.regESI = afnGrp[3].call(this, this.regESI, fnSrc.call(this));
+    function opMod16GrpWordDE(afnGrp, fnSrc) {
+        var w = afnGrp[3].call(this, this.regESI & this.dataMask, fnSrc.call(this));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordDF(afnGrp, fnSrc): mod=11 (dst:reg)  reg=011 (afnGrp[3])  r/m=111 (DI)
+     * opMod16GrpWordDF(afnGrp, fnSrc): mod=11 (dst:reg)  reg=011 (afnGrp[3])  r/m=111 (DI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordDF(afnGrp, fnSrc) {
-        this.regEDI = afnGrp[3].call(this, this.regEDI, fnSrc.call(this));
+    function opMod16GrpWordDF(afnGrp, fnSrc) {
+        var w = afnGrp[3].call(this, this.regEDI & this.dataMask, fnSrc.call(this));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordE0(afnGrp, fnSrc): mod=11 (dst:reg)  reg=100 (afnGrp[4])  r/m=000 (AX)
+     * opMod16GrpWordE0(afnGrp, fnSrc): mod=11 (dst:reg)  reg=100 (afnGrp[4])  r/m=000 (AX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordE0(afnGrp, fnSrc) {
-        this.regEAX = afnGrp[4].call(this, this.regEAX, fnSrc.call(this));
+    function opMod16GrpWordE0(afnGrp, fnSrc) {
+        var w = afnGrp[4].call(this, this.regEAX & this.dataMask, fnSrc.call(this));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordE1(afnGrp, fnSrc): mod=11 (dst:reg)  reg=100 (afnGrp[4])  r/m=001 (CX)
+     * opMod16GrpWordE1(afnGrp, fnSrc): mod=11 (dst:reg)  reg=100 (afnGrp[4])  r/m=001 (CX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordE1(afnGrp, fnSrc) {
-        this.regECX = afnGrp[4].call(this, this.regECX, fnSrc.call(this));
+    function opMod16GrpWordE1(afnGrp, fnSrc) {
+        var w = afnGrp[4].call(this, this.regECX & this.dataMask, fnSrc.call(this));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordE2(afnGrp, fnSrc): mod=11 (dst:reg)  reg=100 (afnGrp[4])  r/m=010 (DX)
+     * opMod16GrpWordE2(afnGrp, fnSrc): mod=11 (dst:reg)  reg=100 (afnGrp[4])  r/m=010 (DX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordE2(afnGrp, fnSrc) {
-        this.regEDX = afnGrp[4].call(this, this.regEDX, fnSrc.call(this));
+    function opMod16GrpWordE2(afnGrp, fnSrc) {
+        var w = afnGrp[4].call(this, this.regEDX & this.dataMask, fnSrc.call(this));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordE3(afnGrp, fnSrc): mod=11 (dst:reg)  reg=100 (afnGrp[4])  r/m=011 (BX)
+     * opMod16GrpWordE3(afnGrp, fnSrc): mod=11 (dst:reg)  reg=100 (afnGrp[4])  r/m=011 (BX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordE3(afnGrp, fnSrc) {
-        this.regEBX = afnGrp[4].call(this, this.regEBX, fnSrc.call(this));
+    function opMod16GrpWordE3(afnGrp, fnSrc) {
+        var w = afnGrp[4].call(this, this.regEBX & this.dataMask, fnSrc.call(this));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordE4(afnGrp, fnSrc): mod=11 (dst:reg)  reg=100 (afnGrp[4])  r/m=100 (SP)
+     * opMod16GrpWordE4(afnGrp, fnSrc): mod=11 (dst:reg)  reg=100 (afnGrp[4])  r/m=100 (SP)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordE4(afnGrp, fnSrc) {
-        this.regESP = afnGrp[4].call(this, this.regESP, fnSrc.call(this));
+    function opMod16GrpWordE4(afnGrp, fnSrc) {
+        var w = afnGrp[4].call(this, this.regESP & this.dataMask, fnSrc.call(this));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
     },
     /**
-     * opModGrpWordE5(afnGrp, fnSrc): mod=11 (dst:reg)  reg=100 (afnGrp[4])  r/m=101 (BP)
+     * opMod16GrpWordE5(afnGrp, fnSrc): mod=11 (dst:reg)  reg=100 (afnGrp[4])  r/m=101 (BP)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordE5(afnGrp, fnSrc) {
-        this.regEBP = afnGrp[4].call(this, this.regEBP, fnSrc.call(this));
+    function opMod16GrpWordE5(afnGrp, fnSrc) {
+        var w = afnGrp[4].call(this, this.regEBP & this.dataMask, fnSrc.call(this));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordE6(afnGrp, fnSrc): mod=11 (dst:reg)  reg=100 (afnGrp[4])  r/m=110 (SI)
+     * opMod16GrpWordE6(afnGrp, fnSrc): mod=11 (dst:reg)  reg=100 (afnGrp[4])  r/m=110 (SI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordE6(afnGrp, fnSrc) {
-        this.regESI = afnGrp[4].call(this, this.regESI, fnSrc.call(this));
+    function opMod16GrpWordE6(afnGrp, fnSrc) {
+        var w = afnGrp[4].call(this, this.regESI & this.dataMask, fnSrc.call(this));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordE7(afnGrp, fnSrc): mod=11 (dst:reg)  reg=100 (afnGrp[4])  r/m=111 (DI)
+     * opMod16GrpWordE7(afnGrp, fnSrc): mod=11 (dst:reg)  reg=100 (afnGrp[4])  r/m=111 (DI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordE7(afnGrp, fnSrc) {
-        this.regEDI = afnGrp[4].call(this, this.regEDI, fnSrc.call(this));
+    function opMod16GrpWordE7(afnGrp, fnSrc) {
+        var w = afnGrp[4].call(this, this.regEDI & this.dataMask, fnSrc.call(this));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordE8(afnGrp, fnSrc): mod=11 (dst:reg)  reg=101 (afnGrp[5])  r/m=000 (AX)
+     * opMod16GrpWordE8(afnGrp, fnSrc): mod=11 (dst:reg)  reg=101 (afnGrp[5])  r/m=000 (AX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordE8(afnGrp, fnSrc) {
-        this.regEAX = afnGrp[5].call(this, this.regEAX, fnSrc.call(this));
+    function opMod16GrpWordE8(afnGrp, fnSrc) {
+        var w = afnGrp[5].call(this, this.regEAX & this.dataMask, fnSrc.call(this));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordE9(afnGrp, fnSrc): mod=11 (dst:reg)  reg=101 (afnGrp[5])  r/m=001 (CX)
+     * opMod16GrpWordE9(afnGrp, fnSrc): mod=11 (dst:reg)  reg=101 (afnGrp[5])  r/m=001 (CX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordE9(afnGrp, fnSrc) {
-        this.regECX = afnGrp[5].call(this, this.regECX, fnSrc.call(this));
+    function opMod16GrpWordE9(afnGrp, fnSrc) {
+        var w = afnGrp[5].call(this, this.regECX & this.dataMask, fnSrc.call(this));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordEA(afnGrp, fnSrc): mod=11 (dst:reg)  reg=101 (afnGrp[5])  r/m=010 (DX)
+     * opMod16GrpWordEA(afnGrp, fnSrc): mod=11 (dst:reg)  reg=101 (afnGrp[5])  r/m=010 (DX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordEA(afnGrp, fnSrc) {
-        this.regEDX = afnGrp[5].call(this, this.regEDX, fnSrc.call(this));
+    function opMod16GrpWordEA(afnGrp, fnSrc) {
+        var w = afnGrp[5].call(this, this.regEDX & this.dataMask, fnSrc.call(this));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordEB(afnGrp, fnSrc): mod=11 (dst:reg)  reg=101 (afnGrp[5])  r/m=011 (BX)
+     * opMod16GrpWordEB(afnGrp, fnSrc): mod=11 (dst:reg)  reg=101 (afnGrp[5])  r/m=011 (BX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordEB(afnGrp, fnSrc) {
-        this.regEBX = afnGrp[5].call(this, this.regEBX, fnSrc.call(this));
+    function opMod16GrpWordEB(afnGrp, fnSrc) {
+        var w = afnGrp[5].call(this, this.regEBX & this.dataMask, fnSrc.call(this));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordEC(afnGrp, fnSrc): mod=11 (dst:reg)  reg=101 (afnGrp[5])  r/m=100 (SP)
+     * opMod16GrpWordEC(afnGrp, fnSrc): mod=11 (dst:reg)  reg=101 (afnGrp[5])  r/m=100 (SP)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordEC(afnGrp, fnSrc) {
-        this.regESP = afnGrp[5].call(this, this.regESP, fnSrc.call(this));
+    function opMod16GrpWordEC(afnGrp, fnSrc) {
+        var w = afnGrp[5].call(this, this.regESP & this.dataMask, fnSrc.call(this));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
     },
     /**
-     * opModGrpWordED(afnGrp, fnSrc): mod=11 (dst:reg)  reg=101 (afnGrp[5])  r/m=101 (BP)
+     * opMod16GrpWordED(afnGrp, fnSrc): mod=11 (dst:reg)  reg=101 (afnGrp[5])  r/m=101 (BP)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordED(afnGrp, fnSrc) {
-        this.regEBP = afnGrp[5].call(this, this.regEBP, fnSrc.call(this));
+    function opMod16GrpWordED(afnGrp, fnSrc) {
+        var w = afnGrp[5].call(this, this.regEBP & this.dataMask, fnSrc.call(this));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordEE(afnGrp, fnSrc): mod=11 (dst:reg)  reg=101 (afnGrp[5])  r/m=110 (SI)
+     * opMod16GrpWordEE(afnGrp, fnSrc): mod=11 (dst:reg)  reg=101 (afnGrp[5])  r/m=110 (SI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordEE(afnGrp, fnSrc) {
-        this.regESI = afnGrp[5].call(this, this.regESI, fnSrc.call(this));
+    function opMod16GrpWordEE(afnGrp, fnSrc) {
+        var w = afnGrp[5].call(this, this.regESI & this.dataMask, fnSrc.call(this));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordEF(afnGrp, fnSrc): mod=11 (dst:reg)  reg=101 (afnGrp[5])  r/m=111 (DI)
+     * opMod16GrpWordEF(afnGrp, fnSrc): mod=11 (dst:reg)  reg=101 (afnGrp[5])  r/m=111 (DI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordEF(afnGrp, fnSrc) {
-        this.regEDI = afnGrp[5].call(this, this.regEDI, fnSrc.call(this));
+    function opMod16GrpWordEF(afnGrp, fnSrc) {
+        var w = afnGrp[5].call(this, this.regEDI & this.dataMask, fnSrc.call(this));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordF0(afnGrp, fnSrc): mod=11 (dst:reg)  reg=110 (afnGrp[6])  r/m=000 (AX)
+     * opMod16GrpWordF0(afnGrp, fnSrc): mod=11 (dst:reg)  reg=110 (afnGrp[6])  r/m=000 (AX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordF0(afnGrp, fnSrc) {
-        this.regEAX = afnGrp[6].call(this, this.regEAX, fnSrc.call(this));
+    function opMod16GrpWordF0(afnGrp, fnSrc) {
+        var w = afnGrp[6].call(this, this.regEAX & this.dataMask, fnSrc.call(this));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordF1(afnGrp, fnSrc): mod=11 (dst:reg)  reg=110 (afnGrp[6])  r/m=001 (CX)
+     * opMod16GrpWordF1(afnGrp, fnSrc): mod=11 (dst:reg)  reg=110 (afnGrp[6])  r/m=001 (CX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordF1(afnGrp, fnSrc) {
-        this.regECX = afnGrp[6].call(this, this.regECX, fnSrc.call(this));
+    function opMod16GrpWordF1(afnGrp, fnSrc) {
+        var w = afnGrp[6].call(this, this.regECX & this.dataMask, fnSrc.call(this));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordF2(afnGrp, fnSrc): mod=11 (dst:reg)  reg=110 (afnGrp[6])  r/m=010 (DX)
+     * opMod16GrpWordF2(afnGrp, fnSrc): mod=11 (dst:reg)  reg=110 (afnGrp[6])  r/m=010 (DX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordF2(afnGrp, fnSrc) {
-        this.regEDX = afnGrp[6].call(this, this.regEDX, fnSrc.call(this));
+    function opMod16GrpWordF2(afnGrp, fnSrc) {
+        var w = afnGrp[6].call(this, this.regEDX & this.dataMask, fnSrc.call(this));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordF3(afnGrp, fnSrc): mod=11 (dst:reg)  reg=110 (afnGrp[6])  r/m=011 (BX)
+     * opMod16GrpWordF3(afnGrp, fnSrc): mod=11 (dst:reg)  reg=110 (afnGrp[6])  r/m=011 (BX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordF3(afnGrp, fnSrc) {
-        this.regEBX = afnGrp[6].call(this, this.regEBX, fnSrc.call(this));
+    function opMod16GrpWordF3(afnGrp, fnSrc) {
+        var w = afnGrp[6].call(this, this.regEBX & this.dataMask, fnSrc.call(this));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordF4(afnGrp, fnSrc): mod=11 (dst:reg)  reg=110 (afnGrp[6])  r/m=100 (SP)
+     * opMod16GrpWordF4(afnGrp, fnSrc): mod=11 (dst:reg)  reg=110 (afnGrp[6])  r/m=100 (SP)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordF4(afnGrp, fnSrc) {
-        this.regESP = afnGrp[6].call(this, this.regESP, fnSrc.call(this));
+    function opMod16GrpWordF4(afnGrp, fnSrc) {
+        var w = afnGrp[6].call(this, this.regESP & this.dataMask, fnSrc.call(this));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
     },
     /**
-     * opModGrpWordF5(afnGrp, fnSrc): mod=11 (dst:reg)  reg=110 (afnGrp[6])  r/m=101 (BP)
+     * opMod16GrpWordF5(afnGrp, fnSrc): mod=11 (dst:reg)  reg=110 (afnGrp[6])  r/m=101 (BP)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordF5(afnGrp, fnSrc) {
-        this.regEBP = afnGrp[6].call(this, this.regEBP, fnSrc.call(this));
+    function opMod16GrpWordF5(afnGrp, fnSrc) {
+        var w = afnGrp[6].call(this, this.regEBP & this.dataMask, fnSrc.call(this));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordF6(afnGrp, fnSrc): mod=11 (dst:reg)  reg=110 (afnGrp[6])  r/m=110 (SI)
+     * opMod16GrpWordF6(afnGrp, fnSrc): mod=11 (dst:reg)  reg=110 (afnGrp[6])  r/m=110 (SI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordF6(afnGrp, fnSrc) {
-        this.regESI = afnGrp[6].call(this, this.regESI, fnSrc.call(this));
+    function opMod16GrpWordF6(afnGrp, fnSrc) {
+        var w = afnGrp[6].call(this, this.regESI & this.dataMask, fnSrc.call(this));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordF7(afnGrp, fnSrc): mod=11 (dst:reg)  reg=110 (afnGrp[6])  r/m=111 (DI)
+     * opMod16GrpWordF7(afnGrp, fnSrc): mod=11 (dst:reg)  reg=110 (afnGrp[6])  r/m=111 (DI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordF7(afnGrp, fnSrc) {
-        this.regEDI = afnGrp[6].call(this, this.regEDI, fnSrc.call(this));
+    function opMod16GrpWordF7(afnGrp, fnSrc) {
+        var w = afnGrp[6].call(this, this.regEDI & this.dataMask, fnSrc.call(this));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordF8(afnGrp, fnSrc): mod=11 (dst:reg)  reg=111 (afnGrp[7])  r/m=000 (AX)
+     * opMod16GrpWordF8(afnGrp, fnSrc): mod=11 (dst:reg)  reg=111 (afnGrp[7])  r/m=000 (AX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordF8(afnGrp, fnSrc) {
-        this.regEAX = afnGrp[7].call(this, this.regEAX, fnSrc.call(this));
+    function opMod16GrpWordF8(afnGrp, fnSrc) {
+        var w = afnGrp[7].call(this, this.regEAX & this.dataMask, fnSrc.call(this));
+        this.regEAX = (this.regEAX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordF9(afnGrp, fnSrc): mod=11 (dst:reg)  reg=111 (afnGrp[7])  r/m=001 (CX)
+     * opMod16GrpWordF9(afnGrp, fnSrc): mod=11 (dst:reg)  reg=111 (afnGrp[7])  r/m=001 (CX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordF9(afnGrp, fnSrc) {
-        this.regECX = afnGrp[7].call(this, this.regECX, fnSrc.call(this));
+    function opMod16GrpWordF9(afnGrp, fnSrc) {
+        var w = afnGrp[7].call(this, this.regECX & this.dataMask, fnSrc.call(this));
+        this.regECX = (this.regECX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordFA(afnGrp, fnSrc): mod=11 (dst:reg)  reg=111 (afnGrp[7])  r/m=010 (DX)
+     * opMod16GrpWordFA(afnGrp, fnSrc): mod=11 (dst:reg)  reg=111 (afnGrp[7])  r/m=010 (DX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordFA(afnGrp, fnSrc) {
-        this.regEDX = afnGrp[7].call(this, this.regEDX, fnSrc.call(this));
+    function opMod16GrpWordFA(afnGrp, fnSrc) {
+        var w = afnGrp[7].call(this, this.regEDX & this.dataMask, fnSrc.call(this));
+        this.regEDX = (this.regEDX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordFB(afnGrp, fnSrc): mod=11 (dst:reg)  reg=111 (afnGrp[7])  r/m=011 (BX)
+     * opMod16GrpWordFB(afnGrp, fnSrc): mod=11 (dst:reg)  reg=111 (afnGrp[7])  r/m=011 (BX)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordFB(afnGrp, fnSrc) {
-        this.regEBX = afnGrp[7].call(this, this.regEBX, fnSrc.call(this));
+    function opMod16GrpWordFB(afnGrp, fnSrc) {
+        var w = afnGrp[7].call(this, this.regEBX & this.dataMask, fnSrc.call(this));
+        this.regEBX = (this.regEBX & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordFC(afnGrp, fnSrc): mod=11 (dst:reg)  reg=111 (afnGrp[7])  r/m=100 (SP)
+     * opMod16GrpWordFC(afnGrp, fnSrc): mod=11 (dst:reg)  reg=111 (afnGrp[7])  r/m=100 (SP)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordFC(afnGrp, fnSrc) {
-        this.regESP = afnGrp[7].call(this, this.regESP, fnSrc.call(this));
+    function opMod16GrpWordFC(afnGrp, fnSrc) {
+        var w = afnGrp[7].call(this, this.regESP & this.dataMask, fnSrc.call(this));
+        this.regESP = (this.regESP & ~this.dataMask) | w;
     },
     /**
-     * opModGrpWordFD(afnGrp, fnSrc): mod=11 (dst:reg)  reg=111 (afnGrp[7])  r/m=101 (BP)
+     * opMod16GrpWordFD(afnGrp, fnSrc): mod=11 (dst:reg)  reg=111 (afnGrp[7])  r/m=101 (BP)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordFD(afnGrp, fnSrc) {
-        this.regEBP = afnGrp[7].call(this, this.regEBP, fnSrc.call(this));
+    function opMod16GrpWordFD(afnGrp, fnSrc) {
+        var w = afnGrp[7].call(this, this.regEBP & this.dataMask, fnSrc.call(this));
+        this.regEBP = (this.regEBP & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordFE(afnGrp, fnSrc): mod=11 (dst:reg)  reg=111 (afnGrp[7])  r/m=110 (SI)
+     * opMod16GrpWordFE(afnGrp, fnSrc): mod=11 (dst:reg)  reg=111 (afnGrp[7])  r/m=110 (SI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordFE(afnGrp, fnSrc) {
-        this.regESI = afnGrp[7].call(this, this.regESI, fnSrc.call(this));
+    function opMod16GrpWordFE(afnGrp, fnSrc) {
+        var w = afnGrp[7].call(this, this.regESI & this.dataMask, fnSrc.call(this));
+        this.regESI = (this.regESI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
     },
     /**
-     * opModGrpWordFF(afnGrp, fnSrc): mod=11 (dst:reg)  reg=111 (afnGrp[7])  r/m=111 (DI)
+     * opMod16GrpWordFF(afnGrp, fnSrc): mod=11 (dst:reg)  reg=111 (afnGrp[7])  r/m=111 (DI)
      *
      * @this {X86CPU}
      * @param {Array.<function(number,number)>} afnGrp
      * @param {function()} fnSrc
      */
-    function opModGrpWordFF(afnGrp, fnSrc) {
-        this.regEDI = afnGrp[7].call(this, this.regEDI, fnSrc.call(this));
+    function opMod16GrpWordFF(afnGrp, fnSrc) {
+        var w = afnGrp[7].call(this, this.regEDI & this.dataMask, fnSrc.call(this));
+        this.regEDI = (this.regEDI & ~this.dataMask) | w;
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
     }
 ];
 
-if (typeof module !== 'undefined') module.exports = X86ModW;
+if (typeof module !== 'undefined') module.exports = X86ModW16;
