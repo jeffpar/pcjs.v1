@@ -465,7 +465,7 @@ Panel.prototype.updateRegisters = function()
         this.drawText("BX", this.cpu.regEBX, 2);
         this.drawText("DI", this.cpu.regEDI, 0, 1);
         this.drawText("CX", this.cpu.regECX, 2);
-        this.drawText("SP", this.cpu.regESP, 0, 1);
+        this.drawText("SP", this.cpu.getSP(), 0, 1);
         this.drawText("DX", this.cpu.regEDX, 2);
         this.drawText("BP", this.cpu.regEBP, 0, 2);
         this.drawText("CS", this.cpu.getCS(), 2);

@@ -834,9 +834,9 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opINCSP: function() {
-        this.resultAuxOverflow = this.regESP;
-        this.regESP = (this.regESP & ~this.dataMask) | (this.resultParitySign = this.regESP + 1) & this.dataMask;
-        this.resultValue = this.regESP | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
+        this.resultAuxOverflow = this.getSP();
+        this.setSP((this.resultAuxOverflow & ~this.dataMask) | (this.resultParitySign = this.resultAuxOverflow + 1) & this.dataMask);
+        this.resultValue = this.getSP() | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of INC takes 2 cycles on all CPUs
     },
@@ -930,9 +930,9 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opDECSP: function() {
-        this.resultAuxOverflow = this.regESP;
-        this.regESP = (this.regESP & ~this.dataMask) | (this.resultParitySign = this.regESP - 1) & this.dataMask;
-        this.resultValue = this.regESP | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
+        this.resultAuxOverflow = this.getSP();
+        this.setSP((this.resultAuxOverflow & ~this.dataMask) | (this.resultParitySign = this.resultAuxOverflow - 1) & this.dataMask);
+        this.resultValue = this.getSP() | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of DEC takes 2 cycles on all CPUs
     },
@@ -1026,7 +1026,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opPUSHSP8086: function() {
-        var w = (this.regESP - this.dataSize) & this.dataMask;
+        var w = (this.getSP() - this.dataSize) & this.dataMask;
         this.pushWord(w);
         this.nStepCycles -= this.CYCLES.nOpCyclesPushReg;
     },
@@ -1036,7 +1036,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opPUSHSP: function() {
-        this.pushWord(this.regESP & this.dataMask);
+        this.pushWord(this.getSP() & this.dataMask);
         this.nStepCycles -= this.CYCLES.nOpCyclesPushReg;
     },
     /**
@@ -1129,7 +1129,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opPOPSP: function() {
-        this.regESP = (this.regESP & ~this.dataMask) | this.popWord();
+        this.setSP((this.getSP() & ~this.dataMask) | this.popWord());
         this.nStepCycles -= this.CYCLES.nOpCyclesPopReg;
     },
     /**
@@ -1174,7 +1174,10 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opPUSHA: function() {
-        var temp = this.regESP & this.dataMask;
+        /*
+         * TODO: regLSP needs to be pre-bounds-checked against regLSPLimitLow
+         */
+        var temp = this.getSP() & this.dataMask;
         if (BACKTRACK) {
             this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
         }
@@ -1224,7 +1227,11 @@ var X86OpXX = {
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
         }
-        this.regESP += this.dataSize;
+        /*
+         * TODO: regLSP needs to be pre-bounds-checked against regLSPLimit at the start
+         */
+        this.setSP(this.getSP() + this.dataSize);
+        // this.regLSP += (I386? this.dataSize : 2);
         this.regEBX = (this.regEBX & ~this.dataMask) | this.popWord();
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
@@ -1942,7 +1949,7 @@ var X86OpXX = {
                 temp = this.regECX;
                 break;
             case 0x4:           // this form of MOV to ES is undocumented on 8086/8088/80186/80188, invalid on 80286, and uses FS starting with 80386
-                temp = this.regESP;
+                temp = this.getSP();
                 break;
             case 0x5:           // this form of MOV to CS is undocumented on 8086/8088/80186/80188, invalid on 80286, and uses GS starting with 80386
                 temp = this.regEBP;
@@ -1977,8 +1984,8 @@ var X86OpXX = {
             this.regEBX = temp;
             break;
         case 0x4:
-            this.setES(this.regESP);
-            this.regESP = temp;
+            this.setES(this.getSP());
+            this.setSP(temp);
             break;
         case 0x5:
             this.setCS(this.regEBP);
@@ -2068,8 +2075,9 @@ var X86OpXX = {
      */
     opXCHGSP: function() {
         var temp = this.regEAX;
-        this.regEAX = (this.regEAX & ~this.dataMask) | (this.regESP & this.dataMask);
-        this.regESP = (this.regESP & ~this.dataMask) | (temp & this.dataMask);
+        var regESP = this.getSP();
+        this.regEAX = (this.regEAX & ~this.dataMask) | (regESP & this.dataMask);
+        this.setSP((regESP & ~this.dataMask) | (temp & this.dataMask));
         if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiAH = 0;
         this.nStepCycles -= 3;                          // this form of XCHG takes 3 cycles on all CPUs
     },
@@ -2851,7 +2859,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opMOVSPw: function() {
-        this.regESP = (this.regESP & ~this.dataMask) | this.getIPWord();
+        this.setSP((this.getSP() & ~this.dataMask) | this.getIPWord());
         this.nStepCycles -= this.CYCLES.nOpCyclesLAHF;
     },
     /**
@@ -2912,9 +2920,9 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opRETn: function() {
-        var n = this.getIPWord();
+        var n = this.getIPWord() << (this.dataSize >> 2);
         this.setIP(this.popWord());
-        this.regESP = (this.regESP & ~this.addrMask) | ((this.regESP + (n << (this.dataSize >> 2))) & this.addrMask);
+        if (n) this.setSP(this.getSP() + n);            // TODO: optimize
         this.nStepCycles -= this.CYCLES.nOpCyclesRetn;
     },
     /**
@@ -3004,7 +3012,7 @@ var X86OpXX = {
          */
         this.nStepCycles -= 11;
         this.pushWord(this.regEBP);
-        var wFrame = this.regESP & this.segSS.addrMask;
+        var wFrame = this.getSP() & this.segSS.addrMask;
         if (bLevel > 0) {
             this.nStepCycles -= (bLevel << 2) + (bLevel > 1? 1 : 0);
             while (--bLevel) {
@@ -3014,7 +3022,7 @@ var X86OpXX = {
             this.pushWord(wFrame);
         }
         this.regEBP = (this.regEBP & ~this.segSS.addrMask) | wFrame;
-        this.regESP = (this.regESP & ~this.segSS.addrMask) | ((this.regESP - wLocal) & this.segSS.addrMask);
+        this.setSP((this.getSP() & ~this.segSS.addrMask) | ((this.getSP() - wLocal) & this.segSS.addrMask));
     },
     /**
      * op=0xC9 (LEAVE) (80186/80188 and up)
@@ -3024,7 +3032,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opLEAVE: function() {
-        this.regESP = (this.regESP & ~this.segSS.addrMask) | (this.regEBP & this.segSS.addrMask);
+        this.setSP((this.getSP() & ~this.segSS.addrMask) | (this.regEBP & this.segSS.addrMask));
         this.regEBP = (this.regEBP & ~this.dataMask) | (this.popWord() & this.dataMask);
         /*
          * NOTE: 5 is the cycle time for the 80286; the 80186/80188 has a cycle time of 8.  However, accurate cycle

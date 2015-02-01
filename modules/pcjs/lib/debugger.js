@@ -1572,7 +1572,7 @@ if (DEBUGGER) {
         this.aMessageRegs[asRegs[9]]  = str.toHexWord(cpu.regECX);
         this.aMessageRegs[asRegs[10]] = str.toHexWord(cpu.regEDX);
         this.aMessageRegs[asRegs[11]] = str.toHexWord(cpu.regEBX);
-        this.aMessageRegs[asRegs[12]] = str.toHexWord(cpu.regESP);
+        this.aMessageRegs[asRegs[12]] = str.toHexWord(cpu.getSP());
         this.aMessageRegs[asRegs[13]] = str.toHexWord(cpu.regEBP);
         this.aMessageRegs[asRegs[14]] = str.toHexWord(cpu.regESI);
         this.aMessageRegs[asRegs[15]] = str.toHexWord(cpu.regEDI);
@@ -3038,7 +3038,7 @@ if (DEBUGGER) {
                " BX=" + str.toHexWord(this.cpu.regEBX) +
                " CX=" + str.toHexWord(this.cpu.regECX) +
                " DX=" + str.toHexWord(this.cpu.regEDX) +
-               " SP=" + str.toHexWord(this.cpu.regESP) +
+               " SP=" + str.toHexWord(this.cpu.getSP()) +
                " BP=" + str.toHexWord(this.cpu.regEBP) +
                " SI=" + str.toHexWord(this.cpu.regESI) +
                " DI=" + str.toHexWord(this.cpu.regEDI) + '\n';
@@ -3155,7 +3155,7 @@ if (DEBUGGER) {
                     value = this.cpu.regEBP;
                     break;
                 case "SP":
-                    value = this.cpu.regESP;
+                    value = this.cpu.getSP();
                     break;
                 case "CS":
                     value = this.cpu.getCS();
@@ -4319,7 +4319,7 @@ if (DEBUGGER) {
                         this.cpu.regEDX = (w & 0xffff);
                         break;
                     case "SP":
-                        this.cpu.regESP = (w & 0xffff);
+                        this.cpu.setSP(w);
                         break;
                     case "BP":
                         this.cpu.regEBP = (w & 0xffff);

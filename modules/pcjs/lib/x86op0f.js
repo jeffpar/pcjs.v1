@@ -132,7 +132,6 @@ var X86Op0F = {
         this.regEDI = this.getShort(0x826);
         this.regESI = this.getShort(0x828);
         this.regEBP = this.getShort(0x82A);
-        this.regESP = this.getShort(0x82C);
         this.regEBX = this.getShort(0x82E);
         this.regEDX = this.getShort(0x830);
         this.regECX = this.getShort(0x832);
@@ -142,14 +141,24 @@ var X86Op0F = {
         this.segSS.loadDesc6(0x842, this.getShort(0x820));
         this.segDS.loadDesc6(0x848, this.getShort(0x81E));
         this.setPS(this.getShort(0x818));
-        this.setIP(this.getShort(0x81A));
         /*
-         * TODO: The bytes at 0x851 and 0x85D "should be zeroes", but do we rely on that, or do we load zeros ourselves?
+         * It's important to call setIP() and setSP() *after* the segCS and segSS loads, so that the CPU's
+         * linear IP and SP registers (regLIP and regLSP) will be updated properly.  Ordinarily that would be
+         * taken care of by simply using the CPU's setCS() and setSS() functions, but those functions call the
+         * default descriptor load() functions, and obviously here we must use loadDesc6() instead.
          */
-        this.addrGDT = this.getShort(0x84E) | (this.getShort(0x850) << 16);
+        this.setIP(this.getShort(0x81A));
+        this.setSP(this.getShort(0x82C));
+        /*
+         * The bytes at 0x851 and 0x85D "should be zeroes", as per the "Undocumented iAPX 286 Test Instruction"
+         * document, but the LOADALL issued by RAMDRIVE in PC-DOS 7.0 contains 0xFF in both of those bytes, resulting
+         * in very large addrGDT and addrIDT values.  Obviously, we can't have that, so we load only the low byte
+         * of the second word for both of those registers.
+         */
+        this.addrGDT = this.getShort(0x84E) | (this.getByte(0x850) << 16);
         this.addrGDTLimit = this.addrGDT + this.getShort(0x852);
         this.segLDT.loadDesc6(0x854, this.getShort(0x81C));
-        this.addrIDT = this.getShort(0x85A) | (this.getShort(0x85C) << 16);
+        this.addrIDT = this.getShort(0x85A) | (this.getByte(0x85C) << 16);
         this.addrIDTLimit = this.addrIDT + this.getShort(0x85E);
         this.segTSS.loadDesc6(0x860, this.getShort(0x816));
         this.nStepCycles -= 195;

@@ -97,7 +97,7 @@ X86ModSIB.aOpModSIB = [
      */
     function opModSIB04(mod) {
         this.segData = this.segStack;
-        return this.regESP + this.regEAX;
+        return this.getSP() + this.regEAX;
     },
     /**
      * opModSIB05(): scale=00 (1)  index=000 (EAX)  base=101 (mod? EBP : disp32)
@@ -170,7 +170,7 @@ X86ModSIB.aOpModSIB = [
      */
     function opModSIB0C(mod) {
         this.segData = this.segStack;
-        return this.regESP + this.regECX;
+        return this.getSP() + this.regECX;
     },
     /**
      * opModSIB0D(): scale=00 (1)  index=001 (ECX)  base=101 (mod? EBP : disp32)
@@ -243,7 +243,7 @@ X86ModSIB.aOpModSIB = [
      */
     function opModSIB14(mod) {
         this.segData = this.segStack;
-        return this.regESP + this.regEDX;
+        return this.getSP() + this.regEDX;
     },
     /**
      * opModSIB15(): scale=00 (1)  index=010 (EDX)  base=101 (mod? EBP : disp32)
@@ -316,7 +316,7 @@ X86ModSIB.aOpModSIB = [
      */
     function opModSIB1C(mod) {
         this.segData = this.segStack;
-        return this.regESP + this.regEBX;
+        return this.getSP() + this.regEBX;
     },
     /**
      * opModSIB1D(): scale=00 (1)  index=011 (EBX)  base=101 (mod? EBP : disp32)
@@ -389,7 +389,7 @@ X86ModSIB.aOpModSIB = [
      */
     function opModSIB24(mod) {
         this.segData = this.segStack;
-        return this.regESP;
+        return this.getSP();
     },
     /**
      * opModSIB25(): scale=00 (1)  index=100 (none)  base=101 (mod? EBP : disp32)
@@ -462,7 +462,7 @@ X86ModSIB.aOpModSIB = [
      */
     function opModSIB2C(mod) {
         this.segData = this.segStack;
-        return this.regESP + this.regEBP;
+        return this.getSP() + this.regEBP;
     },
     /**
      * opModSIB2D(): scale=00 (1)  index=101 (EBP)  base=101 (mod? EBP : disp32)
@@ -535,7 +535,7 @@ X86ModSIB.aOpModSIB = [
      */
     function opModSIB34(mod) {
         this.segData = this.segStack;
-        return this.regESP + this.regESI;
+        return this.getSP() + this.regESI;
     },
     /**
      * opModSIB35(): scale=00 (1)  index=110 (ESI)  base=101 (mod? EBP : disp32)
@@ -608,7 +608,7 @@ X86ModSIB.aOpModSIB = [
      */
     function opModSIB3C(mod) {
         this.segData = this.segStack;
-        return this.regESP + this.regEDI;
+        return this.getSP() + this.regEDI;
     },
     /**
      * opModSIB3D(): scale=00 (1)  index=111 (EDI)  base=101 (mod? EBP : disp32)
@@ -681,7 +681,7 @@ X86ModSIB.aOpModSIB = [
      */
     function opModSIB44(mod) {
         this.segData = this.segStack;
-        return this.regESP + (this.regEAX << 1);
+        return this.getSP() + (this.regEAX << 1);
     },
     /**
      * opModSIB45(): scale=01 (2)  index=000 (EAX)  base=101 (mod? EBP : disp32)
@@ -754,7 +754,7 @@ X86ModSIB.aOpModSIB = [
      */
     function opModSIB4C(mod) {
         this.segData = this.segStack;
-        return this.regESP + (this.regECX << 1);
+        return this.getSP() + (this.regECX << 1);
     },
     /**
      * opModSIB4D(): scale=01 (2)  index=001 (ECX)  base=101 (mod? EBP : disp32)
@@ -827,7 +827,7 @@ X86ModSIB.aOpModSIB = [
      */
     function opModSIB54(mod) {
         this.segData = this.segStack;
-        return this.regESP + (this.regEDX << 1);
+        return this.getSP() + (this.regEDX << 1);
     },
     /**
      * opModSIB55(): scale=01 (2)  index=010 (EDX)  base=101 (mod? EBP : disp32)
@@ -900,7 +900,7 @@ X86ModSIB.aOpModSIB = [
      */
     function opModSIB5C(mod) {
         this.segData = this.segStack;
-        return this.regESP + (this.regEBX << 1);
+        return this.getSP() + (this.regEBX << 1);
     },
     /**
      * opModSIB5D(): scale=01 (2)  index=011 (EBX)  base=101 (mod? EBP : disp32)
@@ -973,7 +973,7 @@ X86ModSIB.aOpModSIB = [
      */
     function opModSIB64(mod) {
         this.segData = this.segStack;
-        return this.regESP;
+        return this.getSP();
     },
     /**
      * opModSIB65(): scale=01 (2)  index=100 (none)  base=101 (mod? EBP : disp32)
@@ -1046,7 +1046,7 @@ X86ModSIB.aOpModSIB = [
      */
     function opModSIB6C(mod) {
         this.segData = this.segStack;
-        return this.regESP + (this.regEBP << 1);
+        return this.getSP() + (this.regEBP << 1);
     },
     /**
      * opModSIB6D(): scale=01 (2)  index=101 (EBP)  base=101 (mod? EBP : disp32)
@@ -1119,7 +1119,7 @@ X86ModSIB.aOpModSIB = [
      */
     function opModSIB74(mod) {
         this.segData = this.segStack;
-        return this.regESP + (this.regESI << 1);
+        return this.getSP() + (this.regESI << 1);
     },
     /**
      * opModSIB75(): scale=01 (2)  index=110 (ESI)  base=101 (mod? EBP : disp32)
@@ -1192,7 +1192,7 @@ X86ModSIB.aOpModSIB = [
      */
     function opModSIB7C(mod) {
         this.segData = this.segStack;
-        return this.regESP + (this.regEDI << 1);
+        return this.getSP() + (this.regEDI << 1);
     },
     /**
      * opModSIB7D(): scale=01 (2)  index=111 (EDI)  base=101 (mod? EBP : disp32)
@@ -1265,7 +1265,7 @@ X86ModSIB.aOpModSIB = [
      */
     function opModSIB84(mod) {
         this.segData = this.segStack;
-        return this.regESP + (this.regEAX << 2);
+        return this.getSP() + (this.regEAX << 2);
     },
     /**
      * opModSIB85(): scale=10 (4)  index=000 (EAX)  base=101 (mod? EBP : disp32)
@@ -1338,7 +1338,7 @@ X86ModSIB.aOpModSIB = [
      */
     function opModSIB8C(mod) {
         this.segData = this.segStack;
-        return this.regESP + (this.regECX << 2);
+        return this.getSP() + (this.regECX << 2);
     },
     /**
      * opModSIB8D(): scale=10 (4)  index=001 (ECX)  base=101 (mod? EBP : disp32)
@@ -1411,7 +1411,7 @@ X86ModSIB.aOpModSIB = [
      */
     function opModSIB94(mod) {
         this.segData = this.segStack;
-        return this.regESP + (this.regEDX << 2);
+        return this.getSP() + (this.regEDX << 2);
     },
     /**
      * opModSIB95(): scale=10 (4)  index=010 (EDX)  base=101 (mod? EBP : disp32)
@@ -1484,7 +1484,7 @@ X86ModSIB.aOpModSIB = [
      */
     function opModSIB9C(mod) {
         this.segData = this.segStack;
-        return this.regESP + (this.regEBX << 2);
+        return this.getSP() + (this.regEBX << 2);
     },
     /**
      * opModSIB9D(): scale=10 (4)  index=011 (EBX)  base=101 (mod? EBP : disp32)
@@ -1557,7 +1557,7 @@ X86ModSIB.aOpModSIB = [
      */
     function opModSIBA4(mod) {
         this.segData = this.segStack;
-        return this.regESP;
+        return this.getSP();
     },
     /**
      * opModSIBA5(): scale=10 (4)  index=100 (none)  base=101 (mod? EBP : disp32)
@@ -1630,7 +1630,7 @@ X86ModSIB.aOpModSIB = [
      */
     function opModSIBAC(mod) {
         this.segData = this.segStack;
-        return this.regESP + (this.regEBP << 2);
+        return this.getSP() + (this.regEBP << 2);
     },
     /**
      * opModSIBAD(): scale=10 (4)  index=101 (EBP)  base=101 (mod? EBP : disp32)
@@ -1703,7 +1703,7 @@ X86ModSIB.aOpModSIB = [
      */
     function opModSIBB4(mod) {
         this.segData = this.segStack;
-        return this.regESP + (this.regESI << 2);
+        return this.getSP() + (this.regESI << 2);
     },
     /**
      * opModSIBB5(): scale=10 (4)  index=110 (ESI)  base=101 (mod? EBP : disp32)
@@ -1776,7 +1776,7 @@ X86ModSIB.aOpModSIB = [
      */
     function opModSIBBC(mod) {
         this.segData = this.segStack;
-        return this.regESP + (this.regEDI << 2);
+        return this.getSP() + (this.regEDI << 2);
     },
     /**
      * opModSIBBD(): scale=10 (4)  index=111 (EDI)  base=101 (mod? EBP : disp32)
@@ -1849,7 +1849,7 @@ X86ModSIB.aOpModSIB = [
      */
     function opModSIBC4(mod) {
         this.segData = this.segStack;
-        return this.regESP + (this.regEAX << 3);
+        return this.getSP() + (this.regEAX << 3);
     },
     /**
      * opModSIBC5(): scale=11 (8)  index=000 (EAX)  base=101 (mod? EBP : disp32)
@@ -1922,7 +1922,7 @@ X86ModSIB.aOpModSIB = [
      */
     function opModSIBCC(mod) {
         this.segData = this.segStack;
-        return this.regESP + (this.regECX << 3);
+        return this.getSP() + (this.regECX << 3);
     },
     /**
      * opModSIBCD(): scale=11 (8)  index=001 (ECX)  base=101 (mod? EBP : disp32)
@@ -1995,7 +1995,7 @@ X86ModSIB.aOpModSIB = [
      */
     function opModSIBD4(mod) {
         this.segData = this.segStack;
-        return this.regESP + (this.regEDX << 3);
+        return this.getSP() + (this.regEDX << 3);
     },
     /**
      * opModSIBD5(): scale=11 (8)  index=010 (EDX)  base=101 (mod? EBP : disp32)
@@ -2068,7 +2068,7 @@ X86ModSIB.aOpModSIB = [
      */
     function opModSIBDC(mod) {
         this.segData = this.segStack;
-        return this.regESP + (this.regEBX << 3);
+        return this.getSP() + (this.regEBX << 3);
     },
     /**
      * opModSIBDD(): scale=11 (8)  index=011 (EBX)  base=101 (mod? EBP : disp32)
@@ -2141,7 +2141,7 @@ X86ModSIB.aOpModSIB = [
      */
     function opModSIBE4(mod) {
         this.segData = this.segStack;
-        return this.regESP;
+        return this.getSP();
     },
     /**
      * opModSIBE5(): scale=11 (8)  index=100 (none)  base=101 (mod? EBP : disp32)
@@ -2214,7 +2214,7 @@ X86ModSIB.aOpModSIB = [
      */
     function opModSIBEC(mod) {
         this.segData = this.segStack;
-        return this.regESP + (this.regEBP << 3);
+        return this.getSP() + (this.regEBP << 3);
     },
     /**
      * opModSIBED(): scale=11 (8)  index=101 (EBP)  base=101 (mod? EBP : disp32)
@@ -2287,7 +2287,7 @@ X86ModSIB.aOpModSIB = [
      */
     function opModSIBF4(mod) {
         this.segData = this.segStack;
-        return this.regESP + (this.regESI << 3);
+        return this.getSP() + (this.regESI << 3);
     },
     /**
      * opModSIBF5(): scale=11 (8)  index=110 (ESI)  base=101 (mod? EBP : disp32)
@@ -2360,7 +2360,7 @@ X86ModSIB.aOpModSIB = [
      */
     function opModSIBFC(mod) {
         this.segData = this.segStack;
-        return this.regESP + (this.regEDI << 3);
+        return this.getSP() + (this.regEDI << 3);
     },
     /**
      * opModSIBFD(): scale=11 (8)  index=111 (EDI)  base=101 (mod? EBP : disp32)

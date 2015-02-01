@@ -429,7 +429,7 @@ X86Seg.switchTSS = function switchTSS(selNew, fNest)
     cpu.setShort(addrOld + X86.TSS.TASK_CX, cpu.regECX);
     cpu.setShort(addrOld + X86.TSS.TASK_DX, cpu.regEDX);
     cpu.setShort(addrOld + X86.TSS.TASK_BX, cpu.regEBX);
-    cpu.setShort(addrOld + X86.TSS.TASK_SP, cpu.regESP);
+    cpu.setShort(addrOld + X86.TSS.TASK_SP, cpu.getSP());
     cpu.setShort(addrOld + X86.TSS.TASK_BP, cpu.regEBP);
     cpu.setShort(addrOld + X86.TSS.TASK_SI, cpu.regESI);
     cpu.setShort(addrOld + X86.TSS.TASK_DI, cpu.regEDI);
@@ -455,8 +455,8 @@ X86Seg.switchTSS = function switchTSS(selNew, fNest)
         offSP = (this.cpl << 2) + X86.TSS.CPL0_SP;
         offSS = offSP + 2;
     }
-    cpu.regESP = cpu.getShort(addrNew + offSP);
-    cpu.segSS.load(cpu.getShort(addrNew + offSS));
+    cpu.setSS(cpu.getShort(addrNew + offSS));   // TODO: Do we care that cpu.setSS() -- unlike segSS.load() -- will also set X86.OPFLAG.NOINTR?
+    cpu.setSP(cpu.getShort(addrNew + offSP));
     cpu.segLDT.load(cpu.getShort(addrNew + X86.TSS.TASK_LDT));
     if (fNest) cpu.setShort(addrNew + X86.TSS.PREV_TSS, selOld);
     cpu.regMSW |= X86.MSW.TS;
@@ -592,8 +592,8 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                         break;
                     }
                     regSP = cpu.popWord();
-                    cpu.segSS.load(cpu.popWord());
-                    cpu.regESP = regSP;
+                    cpu.setSS(cpu.popWord());   // TODO: Do we care that cpu.setSS() -- unlike segSS.load() -- will also set X86.OPFLAG.NOINTR?
+                    cpu.setSP(regSP);
                     this.fStackSwitch = true;
                 }
                 fGate = false;
@@ -648,7 +648,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                             base = X86.ADDR_INVALID;
                             break;
                         }
-                        regSP = cpu.regESP;
+                        regSP = cpu.getSP();
                         var i = 0, nWords = (acc & 0x1f);
                         while (nWords--) {
                             this.awParms[i++] = cpu.getSOWord(cpu.segSS, regSP);
@@ -657,10 +657,10 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                         addrTSS = cpu.segTSS.base;
                         offSP = (this.cpl << 2) + X86.TSS.CPL0_SP;
                         offSS = offSP + 2;
-                        regSPPrev = cpu.regESP;
-                        regSSPrev = cpu.segSS.sel;
-                        cpu.regESP = cpu.getShort(addrTSS + offSP);
-                        cpu.segSS.load(cpu.getShort(addrTSS + offSS));
+                        regSSPrev = cpu.getSS();
+                        regSPPrev = cpu.getSP();
+                        cpu.setSS(cpu.getShort(addrTSS + offSS));   // TODO: Do we care that cpu.setSS() -- unlike segSS.load() -- will also set X86.OPFLAG.NOINTR?
+                        cpu.setSP(cpu.getShort(addrTSS + offSP));
                         cpu.pushWord(regSSPrev);
                         cpu.pushWord(regSPPrev);
                         while (i) cpu.pushWord(this.awParms[--i]);

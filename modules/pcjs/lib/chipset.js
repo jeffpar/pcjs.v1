@@ -3323,7 +3323,7 @@ ChipSet.prototype.getIRRVector = function(iPIC)
 
                     var nIRQ = pic.nIRQBase + nIRL;
                     if (DEBUG && this.messageEnabled(this.messageBitsIRQ(nIRQ))) {
-                        this.printMessage("getIRRVector(): IRQ " + nIRQ + " interrupting @" + str.toHexAddr(this.cpu.getIP(), this.cpu.getCS()) + " stack=" + str.toHexAddr(this.cpu.regESP, this.cpu.getSS()), true);
+                        this.printMessage("getIRRVector(): IRQ " + nIRQ + " interrupting @" + str.toHexAddr(this.cpu.getIP(), this.cpu.getCS()) + " stack=" + str.toHexAddr(this.cpu.getSP(), this.cpu.getSS()), true);
                     }
                     if (MAXDEBUG && DEBUGGER) {
                         this.acInterrupts[nIRQ]++;

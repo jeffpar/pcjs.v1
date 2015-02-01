@@ -813,7 +813,7 @@ X86CPU.prototype.resetRegs = function()
     this.regEBX = 0;
     this.regECX = 0;
     this.regEDX = 0;
-    this.regESP = 0;
+    this.regESP = 0;            // this isn't needed in a 16-bit environment, but we'll need it later
     this.regEBP = 0;
     this.regESI = 0;
     this.regEDI = 0;
@@ -825,7 +825,7 @@ X86CPU.prototype.resetRegs = function()
      */
     this.regMSW = X86.MSW.SET;
     this.addrIDT = 0; this.addrIDTLimit = 0x03FF;
-    this.nIOPL = 0;                                     // this should be set before the first setPS() call
+    this.nIOPL = 0;             // this should be set before the first setPS() call
 
     /*
      * This is set by opHelpFault() and reset (to -1) by resetRegs() and opIRET(); its initial purpose is to
@@ -843,6 +843,7 @@ X86CPU.prototype.resetRegs = function()
     this.segDS     = new X86Seg(this, X86Seg.ID.DATA,  "DS");
     this.segES     = new X86Seg(this, X86Seg.ID.DATA,  "ES");
     this.segSS     = new X86Seg(this, X86Seg.ID.STACK, "SS");
+    this.setSP(0);
 
     if (I386 && this.model >= X86.MODEL_80386) {
         this.segFS = new X86Seg(this, X86Seg.ID.DATA,  "FS");
@@ -850,7 +851,7 @@ X86CPU.prototype.resetRegs = function()
     }
 
     this.segNULL = new X86Seg(this, X86Seg.ID.NULL,  "NULL");
-    this.setCSIP(0, 0xFFFF);                            // this should be called before the first setPS() call
+    this.setCSIP(0, 0xFFFF);    // this should be called before the first setPS() call
 
     if (BACKTRACK) {
         /*
@@ -1048,7 +1049,7 @@ X86CPU.prototype.setOpMod = function()
  */
 X86CPU.prototype.getChecksum = function()
 {
-    var sum = (this.regEAX + this.regEBX + this.regECX + this.regEDX + this.regESP + this.regEBP + this.regESI + this.regEDI) | 0;
+    var sum = (this.regEAX + this.regEBX + this.regECX + this.regEDX + this.getSP() + this.regEBP + this.regESI + this.regEDI) | 0;
     sum = (sum + this.getIP() + this.getCS() + this.getDS() + this.getSS() + this.getES() + this.getPS()) | 0;
     return sum;
 };
@@ -1239,7 +1240,7 @@ X86CPU.prototype.restoreProtMode = function(a)
 X86CPU.prototype.save = function()
 {
     var state = new State(this);
-    state.set(0, [this.regEAX, this.regEBX, this.regECX, this.regEDX, this.regESP, this.regEBP, this.regESI, this.regEDI, this.nIOPL]);
+    state.set(0, [this.regEAX, this.regEBX, this.regECX, this.regEDX, this.getSP(), this.regEBP, this.regESI, this.regEDI, this.nIOPL]);
     state.set(1, [this.getIP(), this.segCS.save(), this.segDS.save(), this.segSS.save(), this.segES.save(), this.saveProtMode(), this.getPS()]);
     state.set(2, [this.segData.sName, this.segStack.sName, this.opFlags, this.opPrefixes, this.intFlags, this.regEA, this.regEAWrite]);
     state.set(3, [0, this.nTotalCycles, this.getSpeed()]);
@@ -1264,7 +1265,7 @@ X86CPU.prototype.restore = function(data)
     this.regEBX = a[1];
     this.regECX = a[2];
     this.regEDX = a[3];
-    this.regESP = a[4];
+    var regESP = a[4];
     this.regEBP = a[5];
     this.regESI = a[6];
     this.regEDI = a[7];
@@ -1276,7 +1277,12 @@ X86CPU.prototype.restore = function(data)
     this.segES.restore(a[4]);
     this.restoreProtMode(a[5]);
     this.setPS(a[6]);
+    /*
+     * Since we're not using setCS() and setSS(), it's important to call setIP() and setSP() *after* the segCS
+     * and segSS loads, so that the CPU's linear IP and SP registers (regLIP and regLSP) will be updated properly.
+     */
     this.setIP(a[0]);
+    this.setSP(regESP);
     if (I386 && this.model >= X86.MODEL_80386) {
         this.segFS.restore(a[7]);
         this.segGS.restore(a[8]);
@@ -1398,7 +1404,10 @@ X86CPU.prototype.getSS = function()
  */
 X86CPU.prototype.setSS = function(sel)
 {
-    this.segSS.load(sel & 0xffff);
+    var regESP = this.getSP();
+    this.regLSP = this.segSS.load(sel & 0xffff) + regESP;
+    this.regLSPLimit = this.segSS.base + this.segSS.limit;
+    this.regLSPLimitLow = this.segSS.base;  // TODO: Set this to the actual low limit
     this.opFlags |= X86.OPFLAG.NOINTR;
 };
 
@@ -1527,6 +1536,28 @@ X86CPU.prototype.advanceIP = function(inc)
     } else {
         this.setIP(this.regLIP - this.segCS.base);
     }
+};
+
+/**
+ * getSP()
+ *
+ * @this {X86CPU}
+ * @return {number}
+ */
+X86CPU.prototype.getSP = function()
+{
+    return this.regLSP - this.segSS.base;
+};
+
+/**
+ * setSP(off)
+ *
+ * @this {X86CPU}
+ * @param {number} off
+ */
+X86CPU.prototype.setSP = function(off)
+{
+    this.regLSP = this.segSS.base + (off & (I386? this.segSS.addrMask : 0xffff));
 };
 
 /**
@@ -2575,9 +2606,10 @@ X86CPU.prototype.getSIBAddr = function(mod)
  */
 X86CPU.prototype.popWord = function()
 {
-    var regESP = this.regESP;
-    this.regESP = (this.regESP + (I386? this.dataSize : 2)) & (I386? this.addrMask : 0xffff);
-    return this.getSOWord(this.segSS, regESP);
+    var w = (I386? this.opMem.getWord(this.regLSP) : this.getShort(this.regLSP));
+    this.regLSP += (I386? this.dataSize : 2);
+    if (this.regLSP > this.regLSPLimit) this.setSP(this.regLSP - this.segSS.base);
+    return w;
 };
 
 /**
@@ -2589,7 +2621,9 @@ X86CPU.prototype.popWord = function()
 X86CPU.prototype.pushWord = function(w)
 {
     this.assert((w & this.dataMask) == w);
-    this.setSOWord(this.segSS, (this.regESP = (this.regESP - (I386? this.dataSize : 2)) & (I386? this.addrMask : 0xffff)), w);
+    this.regLSP -= (I386? this.dataSize : 2);
+    if (this.regLSP < this.regLSPLimitLow) this.setSP(this.regLSP - this.segSS.base);
+    if (!I386) this.setShort(this.regLSP, w); else this.opMem.setWord(this.regLSP, w);
 };
 
 /**
@@ -2757,7 +2791,7 @@ X86CPU.prototype.updateStatus = function(fForce)
             this.displayReg("BX", this.regEBX);
             this.displayReg("CX", this.regECX);
             this.displayReg("DX", this.regEDX);
-            this.displayReg("SP", this.regESP);
+            this.displayReg("SP", this.getSP());
             this.displayReg("BP", this.regEBP);
             this.displayReg("SI", this.regESI);
             this.displayReg("DI", this.regEDI);

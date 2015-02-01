@@ -427,7 +427,7 @@ var X86Help = {
                 this.regEBX = dst;
                 break;
             case 0x4:       // SP
-                this.regESP = dst;
+                this.setSP(dst);
                 break;
             case 0x5:       // BP
                 this.regEBP = dst;
@@ -508,9 +508,10 @@ var X86Help = {
     opHelpRETF: function(n) {
         var regEIP = this.popWord();
         var regCS = this.popWord();
-        if (n) this.regESP = (this.regESP + n) & 0xffff;
+        n <<= (this.dataSize >> 2);
+        if (n) this.setSP(this.getSP() + n);            // TODO: optimize
         if (this.setCSIP(regEIP, regCS, false)) {
-            if (n) this.regESP = (this.regESP + n) & 0xffff;
+            if (n) this.setSP(this.getSP() + n);        // TODO: optimize
             /*
              * As per Intel documentation: "If any of [the DS or ES] registers refer to segments whose DPL is
              * less than the new CPL (excluding conforming code segments), the segment register is loaded with
