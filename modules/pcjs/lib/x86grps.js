@@ -1112,7 +1112,7 @@ var X86Grps = {
      * @return {number}
      */
     opGrpCALLw: function(dst, src) {
-        this.pushWord(this.regEIP);
+        this.pushWord(this.getIP());
         this.setIP(dst);
         this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesCallWR : this.CYCLES.nOpCyclesCallWM);
         this.opFlags |= X86.OPFLAG.NOWRITE;

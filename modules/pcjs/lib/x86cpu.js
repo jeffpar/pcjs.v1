@@ -795,11 +795,12 @@ X86CPU.prototype.reset = function()
  *      CS Base     = 0xFF0000      DS/ES/SS Base     = 0x000000        IDT Base  = 0x000000
  *      CS Limit    =   0xFFFF      DS/ES/SS Limit    =   0xFFFF        IDT Limit =   0x03FF
  *
- * We define some additional "registers", such as regLIP. which mirrors the linear address corresponding
- * to CS:IP (ie, the address of the next opcode).  This means that whenever segCS or regEIP are explicitly
- * modified, regLIP must be updated as well.  So, when setting segCS or regEIP, you should always use setCSIP(),
- * which takes both an offset and a segment, or setIP(), whichever is appropriate; in unusual cases where only
- * segCS is changing (eg, undocumented 8086 opcodes), use setCS().
+ * We define some additional "registers", such as regLIP. which mirrors the linear address corresponding to
+ * CS:IP (the address of the next opcode byte).  In fact, regLIP functions as our internal IP register, so any
+ * code that needs the real IP must call getIP().  This, in turn, means that whenever CS or IP must be modified,
+ * regLIP must be recalculated, so you must use either setCSIP(), which takes both an offset and a segment,
+ * or setIP(), whichever is appropriate; in unusual cases where only segCS is changing (eg, undocumented 8086
+ * opcodes), use setCS().
  *
  * The other segment registers (DS, SS and ES) have similar setters (for segDS, segSS and segES), but those
  * functions do not mirror any segment:offset values in the same way that regLIP mirrors CS:IP.
@@ -910,7 +911,7 @@ X86CPU.prototype.resetRegs = function()
         this.segTSS = new X86Seg(this, X86Seg.ID.TSS,   "TSS", true);   // TR
         this.segVER = new X86Seg(this, X86Seg.ID.OTHER, "VER", true);   // a scratch segment register for VERR and VERW instructions
         this.setCSIP(0xFFF0, 0xF000);                   // in real-mode, 0xF000 defaults the CS base address to 0x0F0000
-        this.segCS.setBase(0xFF0000);                   // which is why we must manually adjust the CS base address to 0xFF0000
+        this.setCSBase(0xFF0000);                       // which is why we must manually adjust the CS base address to 0xFF0000
     }
 
     /*
@@ -972,6 +973,7 @@ X86CPU.prototype.resetRegs = function()
      */
     this.addrSize = this.segCS.addrSize;
     this.addrMask = this.segCS.addrMask;
+
     /*
      * It's also worth noting that instructions that implicitly use the stack also rely on something called STACK size,
      * which is based on the BIG bit of the last descriptor loaded into SS; use the following segSS properties:
@@ -1047,7 +1049,7 @@ X86CPU.prototype.setOpMod = function()
 X86CPU.prototype.getChecksum = function()
 {
     var sum = (this.regEAX + this.regEBX + this.regECX + this.regEDX + this.regESP + this.regEBP + this.regESI + this.regEDI) | 0;
-    sum = (sum + this.regEIP + this.segCS.sel + this.segDS.sel + this.segSS.sel + this.segES.sel + this.getPS()) | 0;
+    sum = (sum + this.getIP() + this.getCS() + this.getDS() + this.getSS() + this.getES() + this.getPS()) | 0;
     return sum;
 };
 
@@ -1238,7 +1240,7 @@ X86CPU.prototype.save = function()
 {
     var state = new State(this);
     state.set(0, [this.regEAX, this.regEBX, this.regECX, this.regEDX, this.regESP, this.regEBP, this.regESI, this.regEDI, this.nIOPL]);
-    state.set(1, [this.regEIP, this.segCS.save(), this.segDS.save(), this.segSS.save(), this.segES.save(), this.saveProtMode(), this.getPS()]);
+    state.set(1, [this.getIP(), this.segCS.save(), this.segDS.save(), this.segSS.save(), this.segES.save(), this.saveProtMode(), this.getPS()]);
     state.set(2, [this.segData.sName, this.segStack.sName, this.opFlags, this.opPrefixes, this.intFlags, this.regEA, this.regEAWrite]);
     state.set(3, [0, this.nTotalCycles, this.getSpeed()]);
     state.set(4, this.bus.saveMemory());
@@ -1323,6 +1325,17 @@ X86CPU.prototype.getSeg = function(sName)
 };
 
 /**
+ * getCS()
+ *
+ * @this {X86CPU}
+ * @return {number}
+ */
+X86CPU.prototype.getCS = function()
+{
+    return this.segCS.sel;
+};
+
+/**
  * setCS(sel)
  *
  * NOTE: This is used ONLY by those few undocumented 8086/8088/80186/80188 instructions that "MOV" or "POP" a value
@@ -1336,9 +1349,22 @@ X86CPU.prototype.getSeg = function(sName)
  */
 X86CPU.prototype.setCS = function(sel)
 {
-    this.regLIP = this.segCS.load(sel & 0xffff) + this.regEIP;
+    var regEIP = this.getIP();
+    this.regLIP = this.segCS.load(sel & 0xffff) + regEIP;
+    this.regLIPLimit = this.segCS.base + this.segCS.limit;
     this.opFlags |= this.OPFLAG_NOINTR8086;
     if (PREFETCH) this.flushPrefetch(this.regLIP);
+};
+
+/**
+ * getDS()
+ *
+ * @this {X86CPU}
+ * @return {number}
+ */
+X86CPU.prototype.getDS = function()
+{
+    return this.segDS.sel;
 };
 
 /**
@@ -1354,6 +1380,17 @@ X86CPU.prototype.setDS = function(sel)
 };
 
 /**
+ * getSS()
+ *
+ * @this {X86CPU}
+ * @return {number}
+ */
+X86CPU.prototype.getSS = function()
+{
+    return this.segSS.sel;
+};
+
+/**
  * setSS(sel)
  *
  * @this {X86CPU}
@@ -1363,6 +1400,17 @@ X86CPU.prototype.setSS = function(sel)
 {
     this.segSS.load(sel & 0xffff);
     this.opFlags |= X86.OPFLAG.NOINTR;
+};
+
+/**
+ * getES()
+ *
+ * @this {X86CPU}
+ * @return {number}
+ */
+X86CPU.prototype.getES = function()
+{
+    return this.segES.sel;
 };
 
 /**
@@ -1378,12 +1426,23 @@ X86CPU.prototype.setES = function(sel)
 };
 
 /**
+ * getIP()
+ *
+ * @this {X86CPU}
+ * @return {number}
+ */
+X86CPU.prototype.getIP = function()
+{
+    return this.regLIP - this.segCS.base;
+};
+
+/**
  * setIP(off)
  *
  * With the addition of flushPrefetch(), this function should only be called
- * for non-incremental IP updates; setIP(this.regEIP+1) is no longer appropriate.
+ * for non-incremental IP updates; setIP(this.getIP()+1) is no longer appropriate.
  *
- * In fact, for performance reasons, it's preferable to increment regEIP yourself,
+ * In fact, for performance reasons, it's preferable to increment regLIP yourself,
  * but you can also call advanceIP() if speed is not important.
  *
  * @this {X86CPU}
@@ -1391,7 +1450,7 @@ X86CPU.prototype.setES = function(sel)
  */
 X86CPU.prototype.setIP = function(off)
 {
-    this.regLIP = this.segCS.base + (this.regEIP = off & (I386? this.addrMask : 0xffff));
+    this.regLIP = this.segCS.base + (off & (I386? this.addrMask : 0xffff));
     if (PREFETCH) this.flushPrefetch(this.regLIP);
 };
 
@@ -1421,17 +1480,37 @@ X86CPU.prototype.setCSIP = function(off, sel, fCall)
     this.assert(!this.addrMask || (off & this.addrMask) == off);
     this.segCS.fCall = fCall;
     /*
-     * We break this operation into the following discrete steps (eg, set IP, load CS, and then update LIP)
-     * so that segCS.load(sel) has the option of modifying IP when sel refers to a gate (call, interrupt, trap, etc).
+     * We break this operation into the following discrete steps (eg, set IP, load CS, and then update IP) so
+     * that segCS.load(sel) has the ability to modify IP when sel refers to a gate (call, interrupt, trap, etc).
+     *
+     * NOTE: regEIP acts merely as a conduit for the IP, if any, that segCS.load() may load; regLIP is still our
+     * internal instruction pointer.  Callers that need the real IP must call getIP().
      */
     this.regEIP = off;
     var base = this.segCS.load(sel);
     if (base != X86.ADDR_INVALID) {
         this.regLIP = base + this.regEIP;
+        this.regLIPLimit = base + this.segCS.limit;
         if (PREFETCH) this.flushPrefetch(this.regLIP);
         return this.segCS.fStackSwitch;
     }
     return null;
+};
+
+/**
+ * setCSBase(addr)
+ *
+ * Since the CPU must maintain regLIP as the sum of the CS base and the current IP, all calls to setBase()
+ * for segCS need to go through here.
+ *
+ * @param {number} addr
+ */
+X86CPU.prototype.setCSBase = function(addr)
+{
+    var regIP = this.getIP();
+    this.segCS.setBase(addr);
+    this.regLIP = addr + regIP;
+    this.regLIPLimit = addr + this.segCS.limit;
 };
 
 /**
@@ -1442,8 +1521,12 @@ X86CPU.prototype.setCSIP = function(off, sel, fCall)
  */
 X86CPU.prototype.advanceIP = function(inc)
 {
-    this.regLIP = this.segCS.base + (this.regEIP = (this.regEIP + inc) & (I386? this.addrMask : 0xffff));
-    if (PREFETCH) this.advancePrefetch(inc);
+    this.regLIP += inc;
+    if (this.regLIP <= this.regLIPLimit) {
+        if (PREFETCH) this.advancePrefetch(inc);
+    } else {
+        this.setIP(this.regLIP - this.segCS.base);
+    }
 };
 
 /**
@@ -2029,6 +2112,30 @@ X86CPU.prototype.getEAByte = function(seg, off)
 };
 
 /**
+ * getEAByteData(off)
+ *
+ * @this {X86CPU}
+ * @param {number} off is a segment-relative offset
+ * @return {number} byte (8-bit) value at that address
+ */
+X86CPU.prototype.getEAByteData = function(off)
+{
+    return this.getEAByte(this.segData, off & (I386? this.addrMask : 0xffff));
+};
+
+/**
+ * getEAByteStack(off)
+ *
+ * @this {X86CPU}
+ * @param {number} off is a segment-relative offset
+ * @return {number} byte (8-bit) value at that address
+ */
+X86CPU.prototype.getEAByteStack = function(off)
+{
+    return this.getEAByte(this.segStack, off & (I386? this.addrMask : 0xffff));
+};
+
+/**
  * getEAWord(seg, off)
  *
  * @this {X86CPU}
@@ -2050,6 +2157,30 @@ X86CPU.prototype.getEAWord = function(seg, off)
 };
 
 /**
+ * getEAWordData(off)
+ *
+ * @this {X86CPU}
+ * @param {number} off is a segment-relative offset
+ * @return {number} word (16-bit) value at that address
+ */
+X86CPU.prototype.getEAWordData = function(off)
+{
+    return this.getEAWord(this.segData, off & (I386? this.addrMask : 0xffff));
+};
+
+/**
+ * getEAWordStack(off)
+ *
+ * @this {X86CPU}
+ * @param {number} off is a segment-relative offset
+ * @return {number} word (16-bit) value at that address
+ */
+X86CPU.prototype.getEAWordStack = function(off)
+{
+    return this.getEAWord(this.segStack, off & (I386? this.addrMask : 0xffff));
+};
+
+/**
  * modEAByte(seg, off)
  *
  * @this {X86CPU}
@@ -2065,6 +2196,30 @@ X86CPU.prototype.modEAByte = function(seg, off)
     var b = this.getByte(this.regEA);
     if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiMemLo;
     return b;
+};
+
+/**
+ * modEAByteData(off)
+ *
+ * @this {X86CPU}
+ * @param {number} off is a segment-relative offset
+ * @return {number} byte (8-bit) value at that address
+ */
+X86CPU.prototype.modEAByteData = function(off)
+{
+    return this.modEAByte(this.segData, off & (I386? this.addrMask : 0xffff));
+};
+
+/**
+ * modEAByteStack(off)
+ *
+ * @this {X86CPU}
+ * @param {number} off is a segment-relative offset
+ * @return {number} byte (8-bit) value at that address
+ */
+X86CPU.prototype.modEAByteStack = function(off)
+{
+    return this.modEAByte(this.segStack, off & (I386? this.addrMask : 0xffff));
 };
 
 /**
@@ -2089,120 +2244,6 @@ X86CPU.prototype.modEAWord = function(seg, off)
 };
 
 /**
- * getEAByteData(off)
- *
- * @this {X86CPU}
- * @param {number} off is a segment-relative offset
- * @return {number} byte (8-bit) value at that address
- */
-X86CPU.prototype.getEAByteData = function(off)
-{
-    // return this.getEAByte(this.segData, off & this.addrMask);
-    this.segEA = this.segData;
-    this.regEA = this.segData.checkRead(this.offEA = off & (I386? this.addrMask : 0xffff), 0);
-    if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
-    var b = this.getByte(this.regEA);
-    if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiMemLo;
-    return b;
-};
-
-/**
- * getEAByteStack(off)
- *
- * @this {X86CPU}
- * @param {number} off is a segment-relative offset
- * @return {number} byte (8-bit) value at that address
- */
-X86CPU.prototype.getEAByteStack = function(off)
-{
-    // return this.getEAByte(this.segStack, off & this.addrMask);
-    this.segEA = this.segStack;
-    this.regEA = this.segStack.checkRead(this.offEA = off & (I386? this.addrMask : 0xffff), 0);
-    if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
-    var b = this.getByte(this.regEA);
-    if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiMemLo;
-    return b;
-};
-
-/**
- * getEAWordData(off)
- *
- * @this {X86CPU}
- * @param {number} off is a segment-relative offset
- * @return {number} word (16-bit) value at that address
- */
-X86CPU.prototype.getEAWordData = function(off)
-{
-    // return this.getEAWord(this.segData, off & this.addrMask);
-    this.segEA = this.segData;
-    this.regEA = this.segData.checkRead(this.offEA = off & (I386? this.addrMask : 0xffff), (I386? this.dataSize-1 : 1));
-    if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
-    var w = I386? this.opMem.getWord(this.regEA) : this.getShort(this.regEA);
-    if (BACKTRACK) {
-        this.backTrack.btiEALo = this.backTrack.btiMemLo;
-        this.backTrack.btiEAHi = this.backTrack.btiMemHi;
-    }
-    return w;
-};
-
-/**
- * getEAWordStack(off)
- *
- * @this {X86CPU}
- * @param {number} off is a segment-relative offset
- * @return {number} word (16-bit) value at that address
- */
-X86CPU.prototype.getEAWordStack = function(off)
-{
-    // return this.getEAWord(this.segStack, off & this.addrMask);
-    this.segEA = this.segStack;
-    this.regEA = this.segStack.checkRead(this.offEA = off & (I386? this.addrMask : 0xffff), (I386? this.dataSize-1 : 1));
-    if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
-    var w = I386? this.opMem.getWord(this.regEA) : this.getShort(this.regEA);
-    if (BACKTRACK) {
-        this.backTrack.btiEALo = this.backTrack.btiMemLo;
-        this.backTrack.btiEAHi = this.backTrack.btiMemHi;
-    }
-    return w;
-};
-
-/**
- * modEAByteData(off)
- *
- * @this {X86CPU}
- * @param {number} off is a segment-relative offset
- * @return {number} byte (8-bit) value at that address
- */
-X86CPU.prototype.modEAByteData = function(off)
-{
-    // return this.modEAByte(this.segData, off & this.addrMask);
-    this.segEA = this.segData;
-    this.regEAWrite = this.regEA = this.segData.checkRead(this.offEA = off & (I386? this.addrMask : 0xffff), 0);
-    if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
-    var b = this.getByte(this.regEA);
-    if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiMemLo;
-    return b;
-};
-
-/**
- * modEAByteStack(off)
- *
- * @this {X86CPU}
- * @param {number} off is a segment-relative offset
- * @return {number} byte (8-bit) value at that address
- */
-X86CPU.prototype.modEAByteStack = function(off)
-{
-    // return this.modEAByte(this.segStack, off & this.addrMask);
-    this.segEA = this.segStack;
-    this.regEAWrite = this.regEA = this.segStack.checkRead(this.offEA = off & (I386? this.addrMask : 0xffff), 0);
-    if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
-    var b = this.getByte(this.regEA);
-    if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiMemLo;
-    return b;
-};
-
-/**
  * modEAWordData(off)
  *
  * @this {X86CPU}
@@ -2211,16 +2252,7 @@ X86CPU.prototype.modEAByteStack = function(off)
  */
 X86CPU.prototype.modEAWordData = function(off)
 {
-    // return this.modEAWord(this.segData, off & this.addrMask);
-    this.segEA = this.segData;
-    this.regEAWrite = this.regEA = this.segData.checkRead(this.offEA = off & (I386? this.addrMask : 0xffff), (I386? this.dataSize-1 : 1));
-    if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
-    var w = I386? this.opMem.getWord(this.regEA) : this.getShort(this.regEA);
-    if (BACKTRACK) {
-        this.backTrack.btiEALo = this.backTrack.btiMemLo;
-        this.backTrack.btiEAHi = this.backTrack.btiMemHi;
-    }
-    return w;
+    return this.modEAWord(this.segData, off & (I386? this.addrMask : 0xffff));
 };
 
 /**
@@ -2232,16 +2264,7 @@ X86CPU.prototype.modEAWordData = function(off)
  */
 X86CPU.prototype.modEAWordStack = function(off)
 {
-    // return this.modEAWord(this.segStack, off & this.addrMask);
-    this.segEA = this.segStack;
-    this.regEAWrite = this.regEA = this.segStack.checkRead(this.offEA = off & (I386? this.addrMask : 0xffff), (I386? this.dataSize-1 : 1));
-    if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
-    var w = I386? this.opMem.getWord(this.regEA) : this.getShort(this.regEA);
-    if (BACKTRACK) {
-        this.backTrack.btiEALo = this.backTrack.btiMemLo;
-        this.backTrack.btiEAHi = this.backTrack.btiMemHi;
-    }
-    return w;
+    return this.modEAWord(this.segStack, off & (I386? this.addrMask : 0xffff));
 };
 
 /**
@@ -2485,7 +2508,9 @@ X86CPU.prototype.getIPByte = function()
 {
     var b = (PREFETCH? this.getBytePrefetch(this.regLIP) : this.getByte(this.regLIP));
     if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
-    this.regLIP = this.segCS.base + (this.regEIP = (this.regEIP + 1) & (I386? this.addrMask : 0xffff));
+    if (++this.regLIP > this.regLIPLimit) {
+        this.setIP(this.regLIP - this.segCS.base);
+    }
     return b;
 };
 
@@ -2497,10 +2522,12 @@ X86CPU.prototype.getIPByte = function()
  */
 X86CPU.prototype.getIPDisp = function()
 {
-    var b = ((PREFETCH? this.getBytePrefetch(this.regLIP) : this.getByte(this.regLIP)) << 24) >> 24;
+    var w = ((PREFETCH? this.getBytePrefetch(this.regLIP) : this.getByte(this.regLIP)) << 24) >> 24;
     if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
-    this.regLIP = this.segCS.base + (this.regEIP = (this.regEIP + 1) & (I386? this.addrMask : 0xffff));
-    return b & (I386? this.addrMask : 0xffff);
+    if (++this.regLIP > this.regLIPLimit) {
+        this.setIP(this.regLIP - this.segCS.base);
+    }
+    return w & (I386? this.addrMask : 0xffff);
 };
 
 /**
@@ -2516,7 +2543,10 @@ X86CPU.prototype.getIPWord = function()
         this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
         this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMemHi);
     }
-    this.regLIP = this.segCS.base + (this.regEIP = (this.regEIP + (I386? this.dataSize : 2)) & (I386? this.addrMask : 0xffff));
+    this.regLIP += this.addrSize;
+    if (this.regLIP > this.regLIPLimit) {
+        this.setIP(this.regLIP - this.segCS.base);
+    }
     return w;
 };
 
@@ -2531,6 +2561,9 @@ X86CPU.prototype.getSIBAddr = function(mod)
 {
     var b = PREFETCH? this.getBytePrefetch(this.regLIP) : this.getByte(this.regLIP);
     if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
+    if (++this.regLIP > this.regLIPLimit) {
+        this.setIP(this.regLIP - this.segCS.base);
+    }
     return X86ModSIB.aOpModSIB[b].call(this, mod);
 };
 
@@ -2728,11 +2761,11 @@ X86CPU.prototype.updateStatus = function(fForce)
             this.displayReg("BP", this.regEBP);
             this.displayReg("SI", this.regESI);
             this.displayReg("DI", this.regEDI);
-            this.displayReg("CS", this.segCS.sel);
-            this.displayReg("DS", this.segDS.sel);
-            this.displayReg("SS", this.segSS.sel);
-            this.displayReg("ES", this.segES.sel);
-            this.displayReg("IP", this.regEIP);
+            this.displayReg("CS", this.getCS());
+            this.displayReg("DS", this.getDS());
+            this.displayReg("SS", this.getSS());
+            this.displayReg("ES", this.getES());
+            this.displayReg("IP", this.getIP());
             var regPS = this.getPS();
             this.displayReg("PS", regPS);
             this.displayReg("V", (regPS & X86.PS.OF)? 1 : 0, 1);

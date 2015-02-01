@@ -1576,11 +1576,11 @@ if (DEBUGGER) {
         this.aMessageRegs[asRegs[13]] = str.toHexWord(cpu.regEBP);
         this.aMessageRegs[asRegs[14]] = str.toHexWord(cpu.regESI);
         this.aMessageRegs[asRegs[15]] = str.toHexWord(cpu.regEDI);
-        this.aMessageRegs[asRegs[16]] = str.toHexWord(cpu.segES.sel);
-        this.aMessageRegs[asRegs[17]] = str.toHexWord(cpu.segCS.sel);
-        this.aMessageRegs[asRegs[18]] = str.toHexWord(cpu.segSS.sel);
-        this.aMessageRegs[asRegs[19]] = str.toHexWord(cpu.segDS.sel);
-        this.aMessageRegs[asRegs[20]] = str.toHexWord(cpu.regEIP);
+        this.aMessageRegs[asRegs[16]] = str.toHexWord(cpu.getES());
+        this.aMessageRegs[asRegs[17]] = str.toHexWord(cpu.getCS());
+        this.aMessageRegs[asRegs[18]] = str.toHexWord(cpu.getSS());
+        this.aMessageRegs[asRegs[19]] = str.toHexWord(cpu.getDS());
+        this.aMessageRegs[asRegs[20]] = str.toHexWord(cpu.getIP());
     };
 
     /**
@@ -1593,7 +1593,7 @@ if (DEBUGGER) {
     Debugger.prototype.message = function(sMessage, fAddress)
     {
         if (fAddress) {
-            sMessage += " @" + str.toHexAddr(this.cpu.regEIP, this.cpu.segCS.sel);
+            sMessage += " @" + str.toHexAddr(this.cpu.getIP(), this.cpu.getCS());
         }
 
         if (this.sMessagePrev && sMessage == this.sMessagePrev) return;
@@ -1659,7 +1659,7 @@ if (DEBUGGER) {
              * at the moment.  If that changes, then this will have to change as well.
              */
             addr -= 2;
-            this.message("INT 0x" + str.toHexByte(nInt) + ": AH=" + str.toHexByte(AH) + " @" + str.toHexAddr(addr - this.cpu.segCS.base, this.cpu.segCS.sel) + sFunc);
+            this.message("INT 0x" + str.toHexByte(nInt) + ": AH=" + str.toHexByte(AH) + " @" + str.toHexAddr(addr - this.cpu.segCS.base, this.cpu.getCS()) + sFunc);
         }
         return fMessage;
     };
@@ -1696,7 +1696,7 @@ if (DEBUGGER) {
         if (addrFrom == null || (this.bitsMessage & bitsMessage) == bitsMessage) {
             var segFrom = null;
             if (addrFrom != null) {
-                segFrom = this.cpu.segCS.sel;
+                segFrom = this.cpu.getCS();
                 addrFrom -= this.cpu.segCS.base;
             }
             this.message(component.idComponent + "." + (bOut != null? "outPort" : "inPort") + "(0x" + str.toHexWord(port) + "," + (name? name : "unknown") + (bOut != null? ",0x" + str.toHexByte(bOut) : "") + ")" + (bIn != null? (": 0x" + str.toHexByte(bIn)) : "") + (addrFrom != null? (" @" + str.toHexAddr(addrFrom, segFrom)) : ""));
@@ -1737,7 +1737,7 @@ if (DEBUGGER) {
             if (this.traceEnabled !== undefined && this.traceEnabled[prop]) {
                 var trace = Debugger.TRACE[prop];
                 var len = (trace.size >> 2);
-                var s = str.toHexAddr(this.cpu.opLIP - this.cpu.segCS.base, this.cpu.segCS.sel) + " " + Debugger.asIns[trace.ins] + "(" + str.toHex(dst, len) + "," + str.toHex(src, len) + "," + (flagsIn === null? "-" : str.toHexWord(flagsIn)) + ") " + str.toHex(result, len) + "," + (flagsOut === null? "-" : str.toHexWord(flagsOut));
+                var s = str.toHexAddr(this.cpu.opLIP - this.cpu.segCS.base, this.cpu.getCS()) + " " + Debugger.asIns[trace.ins] + "(" + str.toHex(dst, len) + "," + str.toHex(src, len) + "," + (flagsIn === null? "-" : str.toHexWord(flagsIn)) + ") " + str.toHex(result, len) + "," + (flagsOut === null? "-" : str.toHexWord(flagsOut));
                 if (!this.aTraceBuffer.length) this.aTraceBuffer = new Array(Debugger.TRACE_LIMIT);
                 this.aTraceBuffer[this.iTraceBuffer++] = s;
                 if (this.iTraceBuffer >= this.aTraceBuffer.length) {
@@ -1893,7 +1893,7 @@ if (DEBUGGER) {
         if (fRegs === undefined) fRegs = true;
         if (fCompact === undefined) fCompact = true;
 
-        this.aAddrNextCode = this.newAddr(this.cpu.regEIP, this.cpu.segCS.sel);
+        this.aAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
         /*
          * this.fProcStep used to be a simple boolean, but now it's 0 (or undefined)
          * if inactive, 1 if stepping over an instruction without a register dump, or 2
@@ -1979,7 +1979,7 @@ if (DEBUGGER) {
         this.historyInit();
         this.cInstructions = 0;
         this.nCycles = 0;
-        this.aAddrNextCode = this.newAddr(this.cpu.regEIP, this.cpu.segCS.sel);
+        this.aAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
         /*
          * fRunning is set by start() and cleared by stop().  In addition, we clear
          * it here, so that if the CPU is reset while running, we can prevent stop()
@@ -2168,13 +2168,13 @@ if (DEBUGGER) {
              * This is a good example of what NOT to do in a high-frequency function, and defeats
              * the purpose of preallocating and preinitializing the history array in historyInit():
              *
-             *      this.aOpcodeHistory[this.iOpcodeHistory] = this.newAddr(this.cpu.regEIP, this.cpu.segCS.sel, addr);
+             *      this.aOpcodeHistory[this.iOpcodeHistory] = this.newAddr(this.cpu.getIP(), this.cpu.getCS(), addr);
              *
              * As the name implies, newAddr() returns a new "Addr" (Array) object every time it's called.
              */
             var a = this.aOpcodeHistory[this.iOpcodeHistory];
-            a[0] = this.cpu.regEIP;
-            a[1] = this.cpu.segCS.sel;
+            a[0] = this.cpu.getIP();
+            a[1] = this.cpu.getCS();
             a[2] = addr;
             if (++this.iOpcodeHistory == this.aOpcodeHistory.length) this.iOpcodeHistory = 0;
         }
@@ -2273,10 +2273,10 @@ if (DEBUGGER) {
      */
     Debugger.prototype.getSegment = function(sel)
     {
-        if (sel == this.cpu.segCS.sel) return this.cpu.segCS;
-        if (sel == this.cpu.segDS.sel) return this.cpu.segDS;
-        if (sel == this.cpu.segES.sel) return this.cpu.segES;
-        if (sel == this.cpu.segSS.sel) return this.cpu.segSS;
+        if (sel == this.cpu.getCS()) return this.cpu.segCS;
+        if (sel == this.cpu.getDS()) return this.cpu.segDS;
+        if (sel == this.cpu.getES()) return this.cpu.segES;
+        if (sel == this.cpu.getSS()) return this.cpu.segSS;
         var seg = new X86Seg(this.cpu, X86Seg.ID.DEBUG, "DBG");
         /*
          * TODO: Confirm that it's OK for this function to drop any error from seg.load() on the floor....
@@ -3044,7 +3044,7 @@ if (DEBUGGER) {
                " DI=" + str.toHexWord(this.cpu.regEDI) + '\n';
         s += this.getSegStr(this.cpu.segDS, fProt) + ' ' + this.getSegStr(this.cpu.segES, fProt) + ' ' + this.getSegStr(this.cpu.segSS, fProt);
         s += (fProt? '\n' : ' ');
-        s += this.getSegStr(this.cpu.segCS, fProt) + " IP=" + str.toHexWord(this.cpu.regEIP) +
+        s += this.getSegStr(this.cpu.segCS, fProt) + " IP=" + str.toHexWord(this.cpu.getIP()) +
              this.getFlagStr("V") + this.getFlagStr("D") + this.getFlagStr("I") + this.getFlagStr("T") +
              this.getFlagStr("S") + this.getFlagStr("Z") + this.getFlagStr("A") + this.getFlagStr("P") + this.getFlagStr("C") +
              " PS=" + str.toHexWord(this.cpu.getPS());
@@ -3158,23 +3158,23 @@ if (DEBUGGER) {
                     value = this.cpu.regESP;
                     break;
                 case "CS":
-                    value = this.cpu.segCS.sel;
+                    value = this.cpu.getCS();
                     break;
                 case "DS":
-                    value = this.cpu.segDS.sel;
+                    value = this.cpu.getDS();
                     break;
                 case "ES":
-                    value = this.cpu.segES.sel;
+                    value = this.cpu.getES();
                     break;
                 case "SS":
-                    value = this.cpu.segSS.sel;
+                    value = this.cpu.getSS();
                     break;
                 /*
                  * I used to alias "PC" to "IP", until I discovered that early (perhaps even ALL) versions of DEBUG.COM
                  * treat "PC" as an alias for the 16-bit flags register.  So for purposes of parseValue(), "PC" has been removed.
                  */
                 case "IP":
-                    value = this.cpu.regEIP;
+                    value = this.cpu.getIP();
                     break;
                 default:
                     value = str.parseInt(sValue);
@@ -4342,12 +4342,12 @@ if (DEBUGGER) {
                     case "CS":
                      // fIns = true;
                         this.cpu.setCS(w);
-                        this.aAddrNextCode = this.newAddr(this.cpu.regEIP, this.cpu.segCS.sel);
+                        this.aAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
                         break;
                     case "IP":
                      // fIns = true;
                         this.cpu.setIP(w);
-                        this.aAddrNextCode = this.newAddr(this.cpu.regEIP, this.cpu.segCS.sel);
+                        this.aAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
                         break;
                     /*
                      * I used to alias "PC" to "IP", until I discovered that early (perhaps ALL) versions of
@@ -4420,7 +4420,7 @@ if (DEBUGGER) {
         this.println((fCompact? '' : '\n') + this.getRegStr(fProt));
 
         if (fIns) {
-            this.aAddrNextCode = this.newAddr(this.cpu.regEIP, this.cpu.segCS.sel);
+            this.aAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
             this.doUnassemble(this.hexAddr(this.aAddrNextCode));
         }
     };
@@ -4461,7 +4461,7 @@ if (DEBUGGER) {
         if (!this.fProcStep) {
             var fPrefix;
             var fRepeat = false;
-            var aAddr = this.newAddr(this.cpu.regEIP, this.cpu.segCS.sel);
+            var aAddr = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
             do {
                 fPrefix = false;
                 var bOpcode = this.getByte(aAddr);

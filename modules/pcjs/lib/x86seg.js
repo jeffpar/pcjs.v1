@@ -139,7 +139,7 @@ X86Seg.loadReal = function loadReal(sel, fSuppress)
  *
  * See X86.DESC for offset and bit definitions.
  *
- * IDT descriptor entries are handled separately by loadIDT(), which is mapped to loadRealIDT() or loadProtIDT().
+ * IDT descriptor entries are handled separately by loadIDT(), which is mapped to loadIDTReal() or loadIDTProt().
  *
  * @this {X86Seg}
  * @param {number} sel
@@ -189,13 +189,13 @@ X86Seg.loadProt = function loadProt(sel, fSuppress)
 };
 
 /**
- * loadRealIDT(nIDT)
+ * loadIDTReal(nIDT)
  *
  * @this {X86Seg}
  * @param {number} nIDT
- * @return {number} base address of selected segment, or ADDR_INVALID if error (TODO: No error conditions exist yet)
+ * @return {number} address from selected veector, or ADDR_INVALID if error (TODO: No error conditions exist yet)
  */
-X86Seg.loadRealIDT = function loadRealIDT(nIDT)
+X86Seg.loadIDTReal = function loadIDTReal(nIDT)
 {
     var cpu = this.cpu;
     cpu.assert(nIDT >= 0 && nIDT < 256 && !cpu.addrIDT && cpu.addrIDTLimit == 0x03FF);
@@ -207,19 +207,19 @@ X86Seg.loadRealIDT = function loadRealIDT(nIDT)
      * TODO: Verify that 80286 real-mode actually enforces the above.  See http://localhost:8088/pubs/pc/reference/intel/80286/progref/#page-260
      */
     var addrIDT = cpu.addrIDT + (nIDT << 2);
-    cpu.regEIP = cpu.getShort(addrIDT);
+    var off = cpu.getShort(addrIDT);
     cpu.regPS &= ~(X86.PS.TF | X86.PS.IF);
-    return this.load(cpu.getShort(addrIDT + 2));
+    return this.load(cpu.getShort(addrIDT + 2)) + off;
 };
 
 /**
- * loadProtIDT(nIDT)
+ * loadIDTProt(nIDT)
  *
  * @this {X86Seg}
  * @param {number} nIDT
- * @return {number} base address of selected segment, or ADDR_INVALID if error (TODO: No error conditions exist yet)
+ * @return {number} address from selected vector, or ADDR_INVALID if error (TODO: No error conditions exist yet)
  */
-X86Seg.loadProtIDT = function loadProtIDT(nIDT)
+X86Seg.loadIDTProt = function loadIDTProt(nIDT)
 {
     var cpu = this.cpu;
     cpu.assert(nIDT >= 0 && nIDT < 256);
@@ -227,7 +227,7 @@ X86Seg.loadProtIDT = function loadProtIDT(nIDT)
     nIDT <<= 3;
     var addrDesc = cpu.addrIDT + nIDT;
     if (addrDesc + 7 <= cpu.addrIDTLimit) {
-        return this.loadDesc8(addrDesc, nIDT);
+        return this.loadDesc8(addrDesc, nIDT) + cpu.regEIP;
     }
     X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, nIDT | X86.ERRCODE.IDT | X86.ERRCODE.EXT, true);
     return X86.ADDR_INVALID;
@@ -423,7 +423,7 @@ X86Seg.switchTSS = function switchTSS(selNew, fNest)
         cpu.setShort(cpu.segTSS.addrDesc + X86.DESC.ACC.OFFSET, cpu.segTSS.acc |= X86.DESC.ACC.TYPE.TSS_BUSY);
         cpu.segTSS.type = X86.DESC.ACC.TYPE.TSS_BUSY;
     }
-    cpu.setShort(addrOld + X86.TSS.TASK_IP, cpu.regEIP);
+    cpu.setShort(addrOld + X86.TSS.TASK_IP, cpu.getIP());
     cpu.setShort(addrOld + X86.TSS.TASK_PS, cpu.getPS());
     cpu.setShort(addrOld + X86.TSS.TASK_AX, cpu.regEAX);
     cpu.setShort(addrOld + X86.TSS.TASK_CX, cpu.regECX);
@@ -821,7 +821,7 @@ X86Seg.prototype.updateMode = function(fProt)
     }
     if (fProt) {
         this.load = X86Seg.loadProt;
-        this.loadIDT = X86Seg.loadProtIDT;
+        this.loadIDT = X86Seg.loadIDTProt;
         this.checkRead = X86Seg.checkReadProt;
         this.checkWrite = X86Seg.checkWriteProt;
         if (this.acc & X86.DESC.ACC.TYPE.SEG) {
@@ -856,7 +856,7 @@ X86Seg.prototype.updateMode = function(fProt)
         }
     } else {
         this.load = X86Seg.loadReal;
-        this.loadIDT = X86Seg.loadRealIDT;
+        this.loadIDT = X86Seg.loadIDTReal;
         this.checkRead = X86Seg.checkReadReal;
         this.checkWrite = X86Seg.checkWriteReal;
         this.limit = 0xffff;

@@ -468,11 +468,11 @@ Panel.prototype.updateRegisters = function()
         this.drawText("SP", this.cpu.regESP, 0, 1);
         this.drawText("DX", this.cpu.regEDX, 2);
         this.drawText("BP", this.cpu.regEBP, 0, 2);
-        this.drawText("CS", this.cpu.segCS.sel, 2);
-        this.drawText("DS", this.cpu.segDS.sel, 0, 1);
-        this.drawText("SS", this.cpu.segSS.sel, 2);
-        this.drawText("ES", this.cpu.segES.sel, 0, 2);
-        this.drawText("IP", this.cpu.regEIP, 2);
+        this.drawText("CS", this.cpu.getCS(), 2);
+        this.drawText("DS", this.cpu.getDS(), 0, 1);
+        this.drawText("SS", this.cpu.getSS(), 2);
+        this.drawText("ES", this.cpu.getES(), 0, 2);
+        this.drawText("IP", this.cpu.getIP(), 2);
         var regPS;
         this.drawText("PS", regPS = this.cpu.getPS(), 0, 2);
         this.initCols(9);

@@ -1525,7 +1525,7 @@ var X86OpXX = {
     opJO: function() {
         var disp = this.getIPDisp();
         if (this.getOF()) {
-            this.setIP(this.regEIP + disp);
+            this.setIP(this.getIP() + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
             return;
         }
@@ -1539,7 +1539,7 @@ var X86OpXX = {
     opJNO: function() {
         var disp = this.getIPDisp();
         if (!this.getOF()) {
-            this.setIP(this.regEIP + disp);
+            this.setIP(this.getIP() + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
             return;
         }
@@ -1553,7 +1553,7 @@ var X86OpXX = {
     opJC: function() {
         var disp = this.getIPDisp();
         if (this.getCF()) {
-            this.setIP(this.regEIP + disp);
+            this.setIP(this.getIP() + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
             return;
         }
@@ -1567,7 +1567,7 @@ var X86OpXX = {
     opJNC: function() {
         var disp = this.getIPDisp();
         if (!this.getCF()) {
-            this.setIP(this.regEIP + disp);
+            this.setIP(this.getIP() + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
             return;
         }
@@ -1581,7 +1581,7 @@ var X86OpXX = {
     opJZ: function() {
         var disp = this.getIPDisp();
         if (this.getZF()) {
-            this.setIP(this.regEIP + disp);
+            this.setIP(this.getIP() + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
             return;
         }
@@ -1595,7 +1595,7 @@ var X86OpXX = {
     opJNZ: function() {
         var disp = this.getIPDisp();
         if (!this.getZF()) {
-            this.setIP(this.regEIP + disp);
+            this.setIP(this.getIP() + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
             return;
         }
@@ -1609,7 +1609,7 @@ var X86OpXX = {
     opJBE: function() {
         var disp = this.getIPDisp();
         if (this.getCF() || this.getZF()) {
-            this.setIP(this.regEIP + disp);
+            this.setIP(this.getIP() + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
             return;
         }
@@ -1623,7 +1623,7 @@ var X86OpXX = {
     opJNBE: function() {
         var disp = this.getIPDisp();
         if (!this.getCF() && !this.getZF()) {
-            this.setIP(this.regEIP + disp);
+            this.setIP(this.getIP() + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
             return;
         }
@@ -1637,7 +1637,7 @@ var X86OpXX = {
     opJS: function() {
         var disp = this.getIPDisp();
         if (this.getSF()) {
-            this.setIP(this.regEIP + disp);
+            this.setIP(this.getIP() + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
             return;
         }
@@ -1651,7 +1651,7 @@ var X86OpXX = {
     opJNS: function() {
         var disp = this.getIPDisp();
         if (!this.getSF()) {
-            this.setIP(this.regEIP + disp);
+            this.setIP(this.getIP() + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
             return;
         }
@@ -1665,7 +1665,7 @@ var X86OpXX = {
     opJP: function() {
         var disp = this.getIPDisp();
         if (this.getPF()) {
-            this.setIP(this.regEIP + disp);
+            this.setIP(this.getIP() + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
             return;
         }
@@ -1679,7 +1679,7 @@ var X86OpXX = {
     opJNP: function() {
         var disp = this.getIPDisp();
         if (!this.getPF()) {
-            this.setIP(this.regEIP + disp);
+            this.setIP(this.getIP() + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
             return;
         }
@@ -1693,7 +1693,7 @@ var X86OpXX = {
     opJL: function() {
         var disp = this.getIPDisp();
         if (!this.getSF() != !this.getOF()) {                   // jshint ignore:line
-            this.setIP(this.regEIP + disp);
+            this.setIP(this.getIP() + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
             return;
         }
@@ -1707,7 +1707,7 @@ var X86OpXX = {
     opJNL: function() {
         var disp = this.getIPDisp();
         if (!this.getSF() == !this.getOF()) {                   // jshint ignore:line
-            this.setIP(this.regEIP + disp);
+            this.setIP(this.getIP() + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
             return;
         }
@@ -1721,7 +1721,7 @@ var X86OpXX = {
     opJLE: function() {
         var disp = this.getIPDisp();
         if (this.getZF() || !this.getSF() != !this.getOF()) {   // jshint ignore:line
-            this.setIP(this.regEIP + disp);
+            this.setIP(this.getIP() + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
             return;
         }
@@ -1735,7 +1735,7 @@ var X86OpXX = {
     opJNLE: function() {
         var disp = this.getIPDisp();
         if (!this.getZF() && !this.getSF() == !this.getOF()) {  // jshint ignore:line
-            this.setIP(this.regEIP + disp);
+            this.setIP(this.getIP() + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
             return;
         }
@@ -3211,7 +3211,7 @@ var X86OpXX = {
     opLOOPNZ: function() {
         var disp = this.getIPDisp();
         if ((this.regECX = (this.regECX - 1) & this.addrMask) && (this.resultValue & (this.resultSize - 1))) {
-            this.setIP(this.regEIP + disp);
+            this.setIP(this.getIP() + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesLoopNZ;
             return;
         }
@@ -3225,7 +3225,7 @@ var X86OpXX = {
     opLOOPZ: function() {
         var disp = this.getIPDisp();
         if ((this.regECX = (this.regECX - 1) & this.addrMask) && !(this.resultValue & (this.resultSize - 1))) {
-            this.setIP(this.regEIP + disp);
+            this.setIP(this.getIP() + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesLoopZ;
             return;
         }
@@ -3239,7 +3239,7 @@ var X86OpXX = {
     opLOOP: function() {
         var disp = this.getIPDisp();
         if ((this.regECX = (this.regECX - 1) & this.addrMask)) {
-            this.setIP(this.regEIP + disp);
+            this.setIP(this.getIP() + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesLoop;
             return;
         }
@@ -3253,7 +3253,7 @@ var X86OpXX = {
     opJCXZ: function() {
         var disp = this.getIPDisp();
         if (!this.regECX) {
-            this.setIP(this.regEIP + disp);
+            this.setIP(this.getIP() + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesLoopZ;
             return;
         }
@@ -3311,8 +3311,8 @@ var X86OpXX = {
      */
     opCALL: function() {
         var disp = this.getIPWord();
-        this.pushWord(this.regEIP);
-        this.setIP(this.regEIP + disp);
+        this.pushWord(this.getIP());
+        this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.CYCLES.nOpCyclesCall;
     },
     /**
@@ -3322,7 +3322,7 @@ var X86OpXX = {
      */
     opJMP: function() {
         var disp = this.getIPWord();
-        this.setIP(this.regEIP + disp);
+        this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.CYCLES.nOpCyclesJmp;
     },
     /**
@@ -3341,7 +3341,7 @@ var X86OpXX = {
      */
     opJMPs: function() {
         var disp = this.getIPDisp();
-        this.setIP(this.regEIP + disp);
+        this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.CYCLES.nOpCyclesJmp;
     },
     /**

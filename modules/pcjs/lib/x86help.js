@@ -489,8 +489,8 @@ var X86Help = {
      * @param {number} sel
      */
     opHelpCALLF: function(off, sel) {
-        var regCS = this.segCS.sel;
-        var regEIP = this.regEIP;
+        var regCS = this.getCS();
+        var regEIP = this.getIP();
         if (this.setCSIP(off, sel, true) != null) {
             this.pushWord(regCS);
             this.pushWord(regEIP);
@@ -553,11 +553,11 @@ var X86Help = {
         this.nStepCycles -= this.CYCLES.nOpCyclesInt + nCycles;
         this.segCS.fCall = true;
         var regPS = this.getPS();
-        var regCS = this.segCS.sel;
-        var regEIP = this.regEIP;
-        var base = this.segCS.loadIDT(nIDT);
-        if (base != X86.ADDR_INVALID) {
-            this.regLIP = base + this.regEIP;
+        var regCS = this.getCS();
+        var regEIP = this.getIP();
+        var addr = this.segCS.loadIDT(nIDT);
+        if (addr != X86.ADDR_INVALID) {
+            this.regLIP = addr;
             if (PREFETCH) this.flushPrefetch(this.regLIP);
             this.pushWord(regPS);
             this.pushWord(regCS);
@@ -727,7 +727,7 @@ var X86Help = {
         }
 
         if (this.messageEnabled(bitsMessage) || fHalt) {
-            var sMessage = (fHalt? '\n' : '') + "Fault " + str.toHexByte(nFault) + (nError != null? " (" + str.toHexWord(nError) + ")" : "") + " on opcode 0x" + str.toHexByte(bOpcode) + " at " + str.toHexAddr(this.regEIP, this.segCS.sel) + " (%" + str.toHex(this.regLIP, 6) + ")";
+            var sMessage = (fHalt? '\n' : '') + "Fault " + str.toHexByte(nFault) + (nError != null? " (" + str.toHexWord(nError) + ")" : "") + " on opcode 0x" + str.toHexByte(bOpcode) + " at " + str.toHexAddr(this.getIP(), this.getCS()) + " (%" + str.toHex(this.regLIP, 6) + ")";
             var fRunning = this.aFlags.fRunning;
             if (this.printMessage(sMessage, bitsMessage)) {
                 if (fHalt) {
@@ -766,7 +766,7 @@ var X86Help = {
      */
     opHelpUndefined: function() {
         this.setIP(this.opLIP - this.segCS.base);
-        this.setError("Undefined opcode 0x" + str.toHexByte(this.bus.getByteDirect(this.regLIP)) + " at " + str.toHexAddr(this.regEIP, this.segCS.sel));
+        this.setError("Undefined opcode 0x" + str.toHexByte(this.bus.getByteDirect(this.regLIP)) + " at " + str.toHexAddr(this.getIP(), this.getCS()));
         this.stopCPU();
     }
 };
