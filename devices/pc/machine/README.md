@@ -27,6 +27,7 @@ Here you'll find sample Machine Configurations for all the IBM PC models that PC
 * [IBM PC XT, EGA, 256K, 10Mb Drive, Debugger](/devices/pc/machine/5160/ega/256kb/debugger/)
 * [IBM PC XT, EGA, 640K, 10Mb Drive, Debugger](/devices/pc/machine/5160/ega/640kb/debugger/)
 * [IBM PC XT, EGA, 640K, Windows 1.01](/devices/pc/machine/5160/ega/640kb/win101/)
+* [IBM PC XT, EGA, 640K, Windows 1.01, Debugger](/devices/pc/machine/5160/ega/640kb/win101/debugger/)
 * [IBM PC XT, EGA "Server Array" Demo](/devices/pc/machine/5160/ega/640kb/array/)
 
 ### Model 5170 Machine Configurations
