@@ -48,7 +48,7 @@ var X86Grps = {
         this.resultAuxOverflow = dst ^ src;
         this.resultSize = X86.RESULT.SIZE_BYTE;
         this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
-        return (this.resultValue = this.resultParitySign = dst + src) & 0xff;
+        return (this.resultZeroCarry = this.resultParitySign = dst + src) & 0xff;
     },
     /**
      * @this {X86CPU}
@@ -59,7 +59,7 @@ var X86Grps = {
     opGrpORb: function(dst, src) {
         this.resultSize = X86.RESULT.SIZE_BYTE;
         this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
-        return (this.resultValue = this.resultParitySign = this.resultAuxOverflow = dst | src) & 0xff;
+        return (this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst | src) & 0xff;
     },
     /**
      * NOTE: Notice that some of the simpler math functions could get away with updating resultSize before
@@ -72,10 +72,10 @@ var X86Grps = {
      */
     opGrpADCb: function(dst, src) {
         this.resultAuxOverflow = dst ^ src;
-        this.resultValue = this.resultParitySign = dst + src + ((this.resultValue & this.resultSize)? 1 : 0);
+        this.resultZeroCarry = this.resultParitySign = dst + src + ((this.resultZeroCarry & this.resultSize)? 1 : 0);
         this.resultSize = X86.RESULT.SIZE_BYTE;
         this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
-        return this.resultValue & 0xff;
+        return this.resultZeroCarry & 0xff;
     },
     /**
      * NOTE: Notice that some of the simpler math functions could get away with updating resultSize before
@@ -88,10 +88,10 @@ var X86Grps = {
      */
     opGrpSBBb: function(dst, src) {
         this.resultAuxOverflow = dst ^ src;
-        this.resultValue = this.resultParitySign = dst - src - ((this.resultValue & this.resultSize)? 1 : 0);
+        this.resultZeroCarry = this.resultParitySign = dst - src - ((this.resultZeroCarry & this.resultSize)? 1 : 0);
         this.resultSize = X86.RESULT.SIZE_BYTE;
         this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
-        return this.resultValue & 0xff;
+        return this.resultZeroCarry & 0xff;
     },
     /**
      * @this {X86CPU}
@@ -102,7 +102,7 @@ var X86Grps = {
     opGrpANDb: function(dst, src) {
         this.resultSize = X86.RESULT.SIZE_BYTE;
         this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
-        return (this.resultValue = this.resultParitySign = this.resultAuxOverflow = dst & src) & 0xff;
+        return (this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst & src) & 0xff;
     },
     /**
      * @this {X86CPU}
@@ -114,7 +114,7 @@ var X86Grps = {
         this.resultAuxOverflow = dst ^ src;
         this.resultSize = X86.RESULT.SIZE_BYTE;
         this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
-        return (this.resultValue = this.resultParitySign = dst - src) & 0xff;
+        return (this.resultZeroCarry = this.resultParitySign = dst - src) & 0xff;
     },
     /**
      * @this {X86CPU}
@@ -125,7 +125,7 @@ var X86Grps = {
     opGrpXORb: function(dst, src) {
         this.resultSize = X86.RESULT.SIZE_BYTE;
         this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
-        return (this.resultValue = this.resultParitySign = this.resultAuxOverflow = dst ^ src) & 0xff;
+        return (this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst ^ src) & 0xff;
     },
     /**
      * @this {X86CPU}
@@ -136,7 +136,7 @@ var X86Grps = {
     opGrpCMPb: function(dst, src) {
         this.resultAuxOverflow = dst ^ src;
         this.resultSize = X86.RESULT.SIZE_BYTE;
-        this.resultValue = this.resultParitySign = dst - src;
+        this.resultZeroCarry = this.resultParitySign = dst - src;
         this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesCompareRM) : this.CYCLES.nOpCyclesArithRM);
         this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
@@ -162,14 +162,14 @@ var X86Grps = {
      * So, we can use “(dst ^ ((dst ^ src) & (src ^ res))) >>> 15” to shift the calculated carry bit (bit 31)
      * into the conventional SIZE_WORD position (bit 16); eg:
      *
-     *      resultValue = ((resultValue >>> 16) | (resultValue & 0xffff)) | (((dst ^ ((dst ^ src) & (src ^ resultValue))) >>> 15) & SIZE_WORD);
+     *      resultZeroCarry = ((resultZeroCarry >>> 16) | (resultZeroCarry & 0xffff)) | (((dst ^ ((dst ^ src) & (src ^ resultZeroCarry))) >>> 15) & SIZE_WORD);
      *
      * Essentially, we’re “cramming” all 32 result bits into the low 16 bits (which will effectively represent the
      * zero flag), and then setting bit 16 to the effective carry flag.  This transforms the zero and carry conditions
      * for a DWORD computation into the corresponding conditions for a WORD computation.  This will slow down 32-bit
      * addition, but it allows 8-bit and 16-bit addition to remain fast.  Languages that support 64-bit values in
-     * conjunction with bit-wise operators can omit that one-line transformation, and we can set SIZE_DWORD to a 33-bit
-     * value, but sadly, we cannot do that in JavaScript.
+     * conjunction with bit-wise operators can omit that one-line transformation, allowing us to set SIZE_DWORD to a
+     * 33-bit value, but sadly, we cannot do that in JavaScript.
      *
      * Alternatively, we could store src and dst into their own result variables (eg, resultSrc and resultDst) and
      * compute carry lazily, but that would affect MUCH more existing code (eg, all code that currently inspects carry
@@ -185,7 +185,7 @@ var X86Grps = {
         this.resultAuxOverflow = dst ^ src;
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
-        return (this.resultValue = this.resultParitySign = dst + src) & 0xffff;
+        return (this.resultZeroCarry = this.resultParitySign = dst + src) & 0xffff;
     },
     /**
      * @this {X86CPU}
@@ -196,7 +196,7 @@ var X86Grps = {
     opGrpORw: function(dst, src) {
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
-        return (this.resultValue = this.resultParitySign = this.resultAuxOverflow = dst | src) & 0xffff;
+        return (this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst | src) & 0xffff;
     },
     /**
      * NOTE: Notice that some of the simpler math functions could get away with updating resultSize before
@@ -209,10 +209,10 @@ var X86Grps = {
      */
     opGrpADCw: function(dst, src) {
         this.resultAuxOverflow = dst ^ src;
-        this.resultValue = this.resultParitySign = dst + src + ((this.resultValue & this.resultSize)? 1 : 0);
+        this.resultZeroCarry = this.resultParitySign = dst + src + ((this.resultZeroCarry & this.resultSize)? 1 : 0);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
-        return this.resultValue & 0xffff;
+        return this.resultZeroCarry & 0xffff;
     },
     /**
      * NOTE: Notice that some of the simpler math functions could get away with updating resultSize before
@@ -225,10 +225,10 @@ var X86Grps = {
      */
     opGrpSBBw: function(dst, src) {
         this.resultAuxOverflow = dst ^ src;
-        this.resultValue = this.resultParitySign = dst - src - ((this.resultValue & this.resultSize)? 1 : 0);
+        this.resultZeroCarry = this.resultParitySign = dst - src - ((this.resultZeroCarry & this.resultSize)? 1 : 0);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
-        return this.resultValue & 0xffff;
+        return this.resultZeroCarry & 0xffff;
     },
     /**
      * @this {X86CPU}
@@ -239,7 +239,7 @@ var X86Grps = {
     opGrpANDw: function(dst, src) {
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
-        return (this.resultValue = this.resultParitySign = this.resultAuxOverflow = dst & src) & 0xffff;
+        return (this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst & src) & 0xffff;
     },
     /**
      * @this {X86CPU}
@@ -251,7 +251,7 @@ var X86Grps = {
         this.resultAuxOverflow = dst ^ src;
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
-        return (this.resultValue = this.resultParitySign = dst - src) & 0xffff;
+        return (this.resultZeroCarry = this.resultParitySign = dst - src) & 0xffff;
     },
     /**
      * @this {X86CPU}
@@ -262,7 +262,7 @@ var X86Grps = {
     opGrpXORw: function(dst, src) {
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
-        return (this.resultValue = this.resultParitySign = this.resultAuxOverflow = dst ^ src) & 0xffff;
+        return (this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst ^ src) & 0xffff;
     },
     /**
      * @this {X86CPU}
@@ -273,7 +273,7 @@ var X86Grps = {
     opGrpCMPw: function(dst, src) {
         this.resultAuxOverflow = dst ^ src;
         this.resultSize = X86.RESULT.SIZE_WORD;
-        this.resultValue = this.resultParitySign = dst - src;
+        this.resultZeroCarry = this.resultParitySign = dst - src;
         this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesCompareRM) : this.CYCLES.nOpCyclesArithRM);
         this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
@@ -319,7 +319,7 @@ var X86Grps = {
      * @param {number} size
      */
     opGrpRotateFlags: function(result, size) {
-        this.resultValue = (this.resultValue & (this.resultSize - 1)) | ((result & size)? this.resultSize : 0);
+        this.resultZeroCarry = (this.resultZeroCarry & (this.resultSize - 1)) | ((result & size)? this.resultSize : 0);
         if ((result ^ (result >> 1)) & (size >> 1)) this.setOF(); else this.clearOF();
     },
     /**
@@ -417,9 +417,9 @@ var X86Grps = {
             var temp;
             var shift = (src & this.nShiftCountMask) % 0x9;
             if (!shift) {
-                temp = dst | (((this.resultValue & this.resultSize)? 1 : 0) << 8);
+                temp = dst | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 8);
             } else {
-                temp = (dst << shift) | (((this.resultValue & this.resultSize)? 1 : 0) << (shift - 1)) | (dst >> (9 - shift));
+                temp = (dst << shift) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << (shift - 1)) | (dst >> (9 - shift));
                 result = temp & 0xff;
             }
             X86Grps.opGrpRotateFlags.call(this, temp, X86.RESULT.SIZE_BYTE);
@@ -440,9 +440,9 @@ var X86Grps = {
             var temp;
             var shift = (src & this.nShiftCountMask) % 0x11;
             if (!shift) {
-                temp = dst | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
+                temp = dst | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
             } else {
-                temp = (dst << shift) | (((this.resultValue & this.resultSize)? 1 : 0) << (shift - 1)) | (dst >> (17 - shift));
+                temp = (dst << shift) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << (shift - 1)) | (dst >> (17 - shift));
                 result = temp & 0xffff;
             }
             X86Grps.opGrpRotateFlags.call(this, temp, X86.RESULT.SIZE_WORD);
@@ -461,7 +461,7 @@ var X86Grps = {
         var flagsIn = (DEBUG? this.getPS() : 0);
         if (src) {
             var shift = (src & this.nShiftCountMask) % 0x9;
-            result = (dst >> shift) | (((this.resultValue & this.resultSize)? 1 : 0) << (8 - shift)) | (dst << (9 - shift));
+            result = (dst >> shift) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << (8 - shift)) | (dst << (9 - shift));
             X86Grps.opGrpRotateFlags.call(this, result, X86.RESULT.SIZE_BYTE);
             result &= 0xff;
         }
@@ -479,7 +479,7 @@ var X86Grps = {
         var flagsIn = (DEBUG? this.getPS() : 0);
         if (src) {
             var shift = (src & this.nShiftCountMask) % 0x11;
-            result = (dst >> shift) | (((this.resultValue & this.resultSize)? 1 : 0) << (16 - shift)) | (dst << (17 - shift));
+            result = (dst >> shift) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << (16 - shift)) | (dst << (17 - shift));
             X86Grps.opGrpRotateFlags.call(this, result, X86.RESULT.SIZE_WORD);
             result &= 0xffff;
         }
@@ -508,9 +508,9 @@ var X86Grps = {
         var flagsIn = (DEBUG? this.getPS() : 0);
         if (src) {
             if (src > 8)                // this comparison obviates the need to mask with this.nShiftCountMask
-                result = this.resultValue = this.resultParitySign = 0;
+                result = this.resultZeroCarry = this.resultParitySign = 0;
             else
-                result = (this.resultValue = this.resultParitySign = (dst << src)) & 0xff;
+                result = (this.resultZeroCarry = this.resultParitySign = (dst << src)) & 0xff;
             this.resultAuxOverflow = 0;
             this.resultSize = X86.RESULT.SIZE_BYTE;
         }
@@ -533,9 +533,9 @@ var X86Grps = {
         var flagsIn = (DEBUG? this.getPS() : 0);
         if (src) {
             if (src > 16)               // this comparison obviates the need to mask with this.nShiftCountMask
-                result = this.resultValue = this.resultParitySign = 0;
+                result = this.resultZeroCarry = this.resultParitySign = 0;
             else
-                result = (this.resultValue = this.resultParitySign = (dst << src)) & 0xffff;
+                result = (this.resultZeroCarry = this.resultParitySign = (dst << src)) & 0xffff;
             this.resultAuxOverflow = 0;
             this.resultSize = X86.RESULT.SIZE_WORD;
         }
@@ -556,14 +556,14 @@ var X86Grps = {
     opGrpSHRb: function(dst, src) {
         if (src) {                      // the following comparison obviates the need to mask with this.nShiftCountMask
             var temp = (src > 8? 0 : (dst >> (src - 1)));
-            this.resultValue = this.resultParitySign = temp >> 1;
+            this.resultZeroCarry = this.resultParitySign = temp >> 1;
             if (temp & 0x01)
-                this.resultValue |= X86.RESULT.SIZE_BYTE;
+                this.resultZeroCarry |= X86.RESULT.SIZE_BYTE;
             else
-                this.resultValue &= ~X86.RESULT.SIZE_BYTE;
-            this.resultAuxOverflow = dst ^ this.resultValue;
+                this.resultZeroCarry &= ~X86.RESULT.SIZE_BYTE;
+            this.resultAuxOverflow = dst ^ this.resultZeroCarry;
             this.resultSize = X86.RESULT.SIZE_BYTE;
-            dst = this.resultValue;
+            dst = this.resultZeroCarry;
         }
         return dst & 0xff;
     },
@@ -581,14 +581,14 @@ var X86Grps = {
     opGrpSHRw: function(dst, src) {
         if (src) {                      // the following comparison obviates the need to mask with this.nShiftCountMask
             var temp = (src > 16? 0 : (dst >> (src - 1)));
-            this.resultValue = this.resultParitySign = temp >> 1;
+            this.resultZeroCarry = this.resultParitySign = temp >> 1;
             if (temp & 0x01)
-                this.resultValue |= X86.RESULT.SIZE_WORD;
+                this.resultZeroCarry |= X86.RESULT.SIZE_WORD;
             else
-                this.resultValue &= ~X86.RESULT.SIZE_WORD;
-            this.resultAuxOverflow = dst ^ this.resultValue;
+                this.resultZeroCarry &= ~X86.RESULT.SIZE_WORD;
+            this.resultAuxOverflow = dst ^ this.resultZeroCarry;
             this.resultSize = X86.RESULT.SIZE_WORD;
-            dst = this.resultValue;
+            dst = this.resultZeroCarry;
         }
         return dst & 0xffff;
     },
@@ -607,14 +607,14 @@ var X86Grps = {
         if (src) {
             if (src > 8) src = 9;       // this comparison obviates the need to mask with this.nShiftCountMask
             var temp = ((dst << 24) >> 24) >> (src - 1);
-            this.resultValue = this.resultParitySign = temp >> 1;
+            this.resultZeroCarry = this.resultParitySign = temp >> 1;
             if (temp & 0x01)
-                this.resultValue |= X86.RESULT.SIZE_BYTE;
+                this.resultZeroCarry |= X86.RESULT.SIZE_BYTE;
             else
-                this.resultValue &= ~X86.RESULT.SIZE_BYTE;
-            this.resultAuxOverflow = dst ^ this.resultValue;
+                this.resultZeroCarry &= ~X86.RESULT.SIZE_BYTE;
+            this.resultAuxOverflow = dst ^ this.resultZeroCarry;
             this.resultSize = X86.RESULT.SIZE_BYTE;
-            dst = this.resultValue;
+            dst = this.resultZeroCarry;
         }
         return dst & 0xff;
     },
@@ -633,14 +633,14 @@ var X86Grps = {
         if (src) {
             if (src > 16) src = 17;     // this comparison obviates the need to mask with this.nShiftCountMask
             var temp = ((dst << 16) >> 16) >> (src - 1);
-            this.resultValue = this.resultParitySign = temp >> 1;
+            this.resultZeroCarry = this.resultParitySign = temp >> 1;
             if (temp & 0x01)
-                this.resultValue |= X86.RESULT.SIZE_WORD;
+                this.resultZeroCarry |= X86.RESULT.SIZE_WORD;
             else
-                this.resultValue &= ~X86.RESULT.SIZE_WORD;
-            this.resultAuxOverflow = dst ^ this.resultValue;
+                this.resultZeroCarry &= ~X86.RESULT.SIZE_WORD;
+            this.resultAuxOverflow = dst ^ this.resultZeroCarry;
             this.resultSize = X86.RESULT.SIZE_WORD;
-            dst = this.resultValue;
+            dst = this.resultZeroCarry;
         }
         return dst & 0xffff;
     },
@@ -652,7 +652,7 @@ var X86Grps = {
      */
     opGrpTEST8: function(dst, src) {
         src = this.getIPByte();
-        this.resultValue = this.resultParitySign = this.resultAuxOverflow = dst & src;
+        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst & src;
         this.resultSize = X86.RESULT.SIZE_BYTE;
         this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesTestRI : this.CYCLES.nOpCyclesTestMI);
         this.opFlags |= X86.OPFLAG.NOWRITE;
@@ -666,7 +666,7 @@ var X86Grps = {
      */
     opGrpTEST16: function(dst, src) {
         src = this.getIPWord();
-        this.resultValue = this.resultParitySign = this.resultAuxOverflow = dst & src;
+        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst & src;
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesTestRI : this.CYCLES.nOpCyclesTestMI);
         this.opFlags |= X86.OPFLAG.NOWRITE;
@@ -703,7 +703,7 @@ var X86Grps = {
         this.resultAuxOverflow = dst ^ src;
         this.resultSize = X86.RESULT.SIZE_BYTE;
         this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesNegR : this.CYCLES.nOpCyclesNegM);
-        return (this.resultValue = this.resultParitySign = src - dst) & 0xff;
+        return (this.resultZeroCarry = this.resultParitySign = src - dst) & 0xff;
     },
     /**
      * @this {X86CPU}
@@ -716,7 +716,7 @@ var X86Grps = {
         this.resultAuxOverflow = dst ^ src;
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesNegR : this.CYCLES.nOpCyclesNegM);
-        return (this.resultValue = this.resultParitySign = src - dst) & 0xffff;
+        return (this.resultZeroCarry = this.resultParitySign = src - dst) & 0xffff;
     },
     /**
      * @this {X86CPU}
@@ -725,8 +725,8 @@ var X86Grps = {
      * @return {number} (we return dst unchanged, since it's actually AX that's modified)
      */
     opGrpMULb: function(dst, src) {
-        this.regEAX = this.regMD16 = (this.resultValue = (src = this.regEAX & 0xff) * dst) & 0xffff;
-        this.resultAuxOverflow = this.resultParitySign = this.resultValue;
+        this.regEAX = this.regMD16 = (this.resultZeroCarry = (src = this.regEAX & 0xff) * dst) & 0xffff;
+        this.resultAuxOverflow = this.resultParitySign = this.resultZeroCarry;
         this.resultSize = X86.RESULT.SIZE_BYTE;
         /*
          * TODO: Look into a more efficient way of setting/synchronizing CF and OF; this code works,
@@ -770,7 +770,7 @@ var X86Grps = {
     opGrpIMULb: function(dst, src) {
         var result = (((src = this.regEAX) << 24) >> 24) * ((dst << 24) >> 24);
         this.regEAX = this.regMD16 = result & 0xffff;
-        this.resultValue = this.resultAuxOverflow = this.resultParitySign = result;
+        this.resultZeroCarry = this.resultAuxOverflow = this.resultParitySign = result;
         this.resultSize = X86.RESULT.SIZE_BYTE;
         /*
          * TODO: Look into a more efficient way of setting/synchronizing CF and OF; this code works,
@@ -818,7 +818,7 @@ var X86Grps = {
         /*
          * TODO: Verify that all of the arithmetic flags are "undefined" after DIV, and that this code unnecessary
          */
-        this.resultParitySign = this.resultAuxOverflow = (this.resultValue = uQuotient | X86.RESULT.SIZE_BYTE);
+        this.resultParitySign = this.resultAuxOverflow = (this.resultZeroCarry = uQuotient | X86.RESULT.SIZE_BYTE);
         this.resultSize = X86.RESULT.SIZE_BYTE;
         /*
          * Multiply/divide instructions specify only a single operand, which the decoders pass to us
@@ -865,7 +865,7 @@ var X86Grps = {
         /*
          * TODO: Verify that all of the arithmetic flags are "undefined" after IDIV, and that this code unnecessary
          */
-        this.resultParitySign = this.resultAuxOverflow = (this.resultValue = lQuotient | X86.RESULT.SIZE_BYTE);
+        this.resultParitySign = this.resultAuxOverflow = (this.resultZeroCarry = lQuotient | X86.RESULT.SIZE_BYTE);
         this.resultSize = X86.RESULT.SIZE_BYTE;
         /*
          * Multiply/divide instructions specify only a single operand, which the decoders pass to us
@@ -885,9 +885,9 @@ var X86Grps = {
      * @return {number} (we return dst unchanged, since it's actually DX:AX that's modified)
      */
     opGrpMULw: function(dst, src) {
-        this.regMD16 = this.regEAX = (this.resultValue = (src = this.regEAX) * dst) & 0xffff;
-        this.regMD32 = this.regEDX = (this.resultValue >> 16) & 0xffff;
-        this.resultAuxOverflow = this.resultParitySign = this.resultValue;
+        this.regMD16 = this.regEAX = (this.resultZeroCarry = (src = this.regEAX) * dst) & 0xffff;
+        this.regMD32 = this.regEDX = (this.resultZeroCarry >> 16) & 0xffff;
+        this.resultAuxOverflow = this.resultParitySign = this.resultZeroCarry;
         this.resultSize = X86.RESULT.SIZE_WORD;
         /*
          * TODO: Look into a more efficient way of setting/synchronizing CF and OF; this code works,
@@ -932,7 +932,7 @@ var X86Grps = {
         var result = (((src = this.regEAX) << 16) >> 16) * ((dst << 16) >> 16);
         this.regEAX = this.regMD16 = result & 0xffff;
         this.regEDX = this.regMD32 = (result >> 16) & 0xffff;
-        this.resultValue = this.resultAuxOverflow = this.resultParitySign = result;
+        this.resultZeroCarry = this.resultAuxOverflow = this.resultParitySign = result;
         this.resultSize = X86.RESULT.SIZE_WORD;
         /*
          * TODO: Look into a more efficient way of setting/synchronizing CF and OF; this code works,
@@ -986,7 +986,7 @@ var X86Grps = {
         /*
          * TODO: Verify that all of the arithmetic flags are "undefined" after DIV, and that this code unnecessary
          */
-        this.resultParitySign = this.resultAuxOverflow = (this.resultValue = uQuotient | X86.RESULT.SIZE_WORD);
+        this.resultParitySign = this.resultAuxOverflow = (this.resultZeroCarry = uQuotient | X86.RESULT.SIZE_WORD);
         this.resultSize = X86.RESULT.SIZE_WORD;
         /*
          * Multiply/divide instructions specify only a single operand, which the decoders pass to us
@@ -1036,7 +1036,7 @@ var X86Grps = {
         /*
          * TODO: Verify that all of the arithmetic flags are "undefined" after IDIV, and that this code unnecessary
          */
-        this.resultParitySign = this.resultAuxOverflow = (this.resultValue = lQuotient | X86.RESULT.SIZE_WORD);
+        this.resultParitySign = this.resultAuxOverflow = (this.resultZeroCarry = lQuotient | X86.RESULT.SIZE_WORD);
         this.resultSize = X86.RESULT.SIZE_WORD;
         /*
          * Multiply/divide instructions specify only a single operand, which the decoders pass to us
@@ -1058,7 +1058,7 @@ var X86Grps = {
     opGrpINCb: function(dst, src) {
         this.resultAuxOverflow = dst;
         dst = (this.resultParitySign = dst + 1) & 0xff;
-        this.resultValue = dst | (((this.resultValue & this.resultSize)? 1 : 0) << 8);
+        this.resultZeroCarry = dst | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 8);
         this.resultSize = X86.RESULT.SIZE_BYTE;
         this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesIncR : this.CYCLES.nOpCyclesIncM);
         return dst;
@@ -1072,7 +1072,7 @@ var X86Grps = {
     opGrpDECb: function(dst, src) {
         this.resultAuxOverflow = dst;
         dst = (this.resultParitySign = dst - 1) & 0xff;
-        this.resultValue = dst | (((this.resultValue & this.resultSize)? 1 : 0) << 8);
+        this.resultZeroCarry = dst | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 8);
         this.resultSize = X86.RESULT.SIZE_BYTE;
         this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesIncR : this.CYCLES.nOpCyclesIncM);
         return dst;
@@ -1086,7 +1086,7 @@ var X86Grps = {
     opGrpINCw: function(dst, src) {
         this.resultAuxOverflow = dst;
         dst = (this.resultParitySign = dst + 1) & 0xffff;
-        this.resultValue = dst | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
+        this.resultZeroCarry = dst | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesIncR : this.CYCLES.nOpCyclesIncM);
         return dst;
@@ -1100,7 +1100,7 @@ var X86Grps = {
     opGrpDECw: function(dst, src) {
         this.resultAuxOverflow = dst;
         dst = (this.resultParitySign = dst - 1) & 0xffff;
-        this.resultValue = dst | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
+        this.resultZeroCarry = dst | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesIncR : this.CYCLES.nOpCyclesIncM);
         return dst;

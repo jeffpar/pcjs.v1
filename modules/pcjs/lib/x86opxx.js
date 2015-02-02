@@ -88,9 +88,8 @@ var X86OpXX = {
     opADDALb: function() {
         this.regEAX = (this.regEAX & ~0xff) | X86Grps.opGrpADDb.call(this, this.regEAX & 0xff, this.getIPByte());
         /*
-         * BACKTRACK note: I'm going to say this just once, even though it applies to MANY instructions.  The
-         * result is a blending of btiAL and btiMemLo, so technically, a new bti should be allocated to reflect
-         * that fact; however, I'm leaving perfect BACKTRACKing for another day.
+         * NOTE: Whenever the result is "blended" value (eg, of btiAL and btiMemLo), a new bti should be
+         * allocated to reflect that fact; however, I'm leaving "perfect" BACKTRACK support for another day.
          */
         if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
         /*
@@ -465,7 +464,7 @@ var X86OpXX = {
     opDAA: function() {
         var AL = this.regEAX & 0xff;
         var fAuxCarry = this.getAF();
-        var fCarry = (this.resultValue & this.resultSize);
+        var fCarry = (this.resultZeroCarry & this.resultSize);
         if ((AL & 0xf) > 9 || fAuxCarry) {
             AL += 0x6;
             fAuxCarry = true;
@@ -474,9 +473,9 @@ var X86OpXX = {
             AL += 0x60;
             fCarry = true;
         }
-        this.regEAX = (this.regEAX & ~0xff) | (this.resultValue = this.resultParitySign = (AL & 0xff));
+        this.regEAX = (this.regEAX & ~0xff) | (this.resultZeroCarry = this.resultParitySign = (AL & 0xff));
         this.resultSize = X86.RESULT.SIZE_WORD;
-        if (fCarry) this.resultValue |= this.resultSize;
+        if (fCarry) this.resultZeroCarry |= this.resultSize;
         if (fAuxCarry) this.setAF(); else this.clearAF();
         this.nStepCycles -= this.CYCLES.nOpCyclesAAA;          // AAA and DAA have the same cycle times
     },
@@ -564,7 +563,7 @@ var X86OpXX = {
     opDAS: function() {
         var AL = this.regEAX & 0xff;
         var fAuxCarry = this.getAF();
-        var fCarry = (this.resultValue & this.resultSize);
+        var fCarry = (this.resultZeroCarry & this.resultSize);
         if ((AL & 0xf) > 9 || fAuxCarry) {
             AL -= 0x6;
             fAuxCarry = true;
@@ -573,9 +572,9 @@ var X86OpXX = {
             AL -= 0x60;
             fCarry = true;
         }
-        this.regEAX = (this.regEAX & ~0xff) | (this.resultValue = this.resultParitySign = (AL & 0xff));
+        this.regEAX = (this.regEAX & ~0xff) | (this.resultZeroCarry = this.resultParitySign = (AL & 0xff));
         this.resultSize = X86.RESULT.SIZE_WORD;
-        if (fCarry) this.resultValue |= this.resultSize;
+        if (fCarry) this.resultZeroCarry |= this.resultSize;
         if (fAuxCarry) this.setAF(); else this.clearAF();
         this.nStepCycles -= this.CYCLES.nOpCyclesAAA;          // AAA and DAS have the same cycle times
     },
@@ -672,9 +671,9 @@ var X86OpXX = {
         } else {
             fCarry = fAuxCarry = false;
         }
-        this.regEAX = (this.regEAX & ~0xffff) | (AH << 8) | (this.resultValue = AL);
+        this.regEAX = (this.regEAX & ~0xffff) | (AH << 8) | (this.resultZeroCarry = AL);
         this.resultSize = X86.RESULT.SIZE_WORD;
-        if (fCarry) this.resultValue |= this.resultSize;
+        if (fCarry) this.resultZeroCarry |= this.resultSize;
         if (fAuxCarry) this.setAF(); else this.clearAF();
         this.nStepCycles -= this.CYCLES.nOpCyclesAAA;
     },
@@ -774,11 +773,11 @@ var X86OpXX = {
         } else {
             fCarry = fAuxCarry = false;
         }
-        this.regEAX = (this.regEAX & ~0xffff) | (AH << 8) | (this.resultValue = AL);
+        this.regEAX = (this.regEAX & ~0xffff) | (AH << 8) | (this.resultZeroCarry = AL);
         this.resultSize = X86.RESULT.SIZE_WORD;
-        if (fCarry) this.resultValue |= this.resultSize;
+        if (fCarry) this.resultZeroCarry |= this.resultSize;
         if (fAuxCarry) this.setAF(); else this.clearAF();
-        this.nStepCycles -= this.CYCLES.nOpCyclesAAA;          // AAA and AAS have the same cycle times
+        this.nStepCycles -= this.CYCLES.nOpCyclesAAA;   // AAA and AAS have the same cycle times
     },
     /**
      * op=0x40 (INC AX)
@@ -786,9 +785,14 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opINCAX: function() {
-        this.resultAuxOverflow = this.regEAX;
-        this.regEAX = (this.regEAX & ~this.dataMask) | (this.resultParitySign = this.regEAX + 1) & this.dataMask;
-        this.resultValue = this.regEAX | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
+        this.resultParitySign = (this.resultAuxOverflow = this.regEAX) + 1;
+        if (I386) {
+            this.regEAX = (this.regEAX & ~this.dataMask) | (this.resultParitySign & this.dataMask);
+            this.resultZeroCarry = (((this.regEAX) & this.dataMask) >>> 16) | (this.regEAX & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
+        } else {
+            this.regEAX = this.resultParitySign & 0xffff;
+            this.resultZeroCarry = this.regEAX | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
+        }
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of INC takes 2 cycles on all CPUs
     },
@@ -798,9 +802,14 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opINCCX: function() {
-        this.resultAuxOverflow = this.regECX;
-        this.regECX = (this.regECX & ~this.dataMask) | (this.resultParitySign = this.regECX + 1) & this.dataMask;
-        this.resultValue = this.regECX | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
+        this.resultParitySign = (this.resultAuxOverflow = this.regECX) + 1;
+        if (I386) {
+            this.regECX = (this.regECX & ~this.dataMask) | (this.resultParitySign & this.dataMask);
+            this.resultZeroCarry = (((this.regECX) & this.dataMask) >>> 16) | (this.regECX & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
+        } else {
+            this.regECX = this.resultParitySign & 0xffff;
+            this.resultZeroCarry = this.regECX | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
+        }
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of INC takes 2 cycles on all CPUs
     },
@@ -810,9 +819,14 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opINCDX: function() {
-        this.resultAuxOverflow = this.regEDX;
-        this.regEDX = (this.regEDX & ~this.dataMask) | (this.resultParitySign = this.regEDX + 1) & this.dataMask;
-        this.resultValue = this.regEDX | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
+        this.resultParitySign = (this.resultAuxOverflow = this.regEDX) + 1;
+        if (I386) {
+            this.regEDX = (this.regEDX & ~this.dataMask) | (this.resultParitySign & this.dataMask);
+            this.resultZeroCarry = (((this.regEDX) & this.dataMask) >>> 16) | (this.regEDX & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
+        } else {
+            this.regEDX = this.resultParitySign & 0xffff;
+            this.resultZeroCarry = this.regEDX | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
+        }
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of INC takes 2 cycles on all CPUs
     },
@@ -822,9 +836,14 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opINCBX: function() {
-        this.resultAuxOverflow = this.regEBX;
-        this.regEBX = (this.regEBX & ~this.dataMask) | (this.resultParitySign = this.regEBX + 1) & this.dataMask;
-        this.resultValue = this.regEBX | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
+        this.resultParitySign = (this.resultAuxOverflow = this.regEBX) + 1;
+        if (I386) {
+            this.regEBX = (this.regEBX & ~this.dataMask) | (this.resultParitySign & this.dataMask);
+            this.resultZeroCarry = (((this.regEBX) & this.dataMask) >>> 16) | (this.regEBX & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
+        } else {
+            this.regEBX = this.resultParitySign & 0xffff;
+            this.resultZeroCarry = this.regEBX | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
+        }
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of INC takes 2 cycles on all CPUs
     },
@@ -834,9 +853,10 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opINCSP: function() {
-        this.resultAuxOverflow = this.getSP();
-        this.setSP((this.resultAuxOverflow & ~this.dataMask) | (this.resultParitySign = this.resultAuxOverflow + 1) & this.dataMask);
-        this.resultValue = this.getSP() | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
+        var regESP;
+        this.resultParitySign = (this.resultAuxOverflow = this.getSP()) + 1;
+        this.setSP(regESP = (this.resultAuxOverflow & ~this.dataMask) | (this.resultParitySign & this.dataMask));
+        this.resultZeroCarry = (((regESP) & this.dataMask) >>> 16) | (regESP & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of INC takes 2 cycles on all CPUs
     },
@@ -846,9 +866,14 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opINCBP: function() {
-        this.resultAuxOverflow = this.regEBP;
-        this.regEBP = (this.regEBP & ~this.dataMask) | (this.resultParitySign = this.regEBP + 1) & this.dataMask;
-        this.resultValue = this.regEBP | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
+        this.resultParitySign = (this.resultAuxOverflow = this.regEBP) + 1;
+        if (I386) {
+            this.regEBP = (this.regEBP & ~this.dataMask) | (this.resultParitySign & this.dataMask);
+            this.resultZeroCarry = (((this.regEBP) & this.dataMask) >>> 16) | (this.regEBP & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
+        } else {
+            this.regEBP = this.resultParitySign & 0xffff;
+            this.resultZeroCarry = this.regEBP | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
+        }
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of INC takes 2 cycles on all CPUs
     },
@@ -858,9 +883,14 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opINCSI: function() {
-        this.resultAuxOverflow = this.regESI;
-        this.regESI = (this.regESI & ~this.dataMask) | (this.resultParitySign = this.regESI + 1) & this.dataMask;
-        this.resultValue = this.regESI | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
+        this.resultParitySign = (this.resultAuxOverflow = this.regESI) + 1;
+        if (I386) {
+            this.regESI = (this.regESI & ~this.dataMask) | (this.resultParitySign & this.dataMask);
+            this.resultZeroCarry = (((this.regESI) & this.dataMask) >>> 16) | (this.regESI & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
+        } else {
+            this.regESI = this.resultParitySign & 0xffff;
+            this.resultZeroCarry = this.regESI | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
+        }
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of INC takes 2 cycles on all CPUs
     },
@@ -870,9 +900,14 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opINCDI: function() {
-        this.resultAuxOverflow = this.regEDI;
-        this.regEDI = (this.regEDI & ~this.dataMask) | (this.resultParitySign = this.regEDI + 1) & this.dataMask;
-        this.resultValue = this.regEDI | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
+        this.resultParitySign = (this.resultAuxOverflow = this.regEDI) + 1;
+        if (I386) {
+            this.regEDI = (this.regEDI & ~this.dataMask) | (this.resultParitySign & this.dataMask);
+            this.resultZeroCarry = (((this.regEDI) & this.dataMask) >>> 16) | (this.regEDI & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
+        } else {
+            this.regEDI = this.resultParitySign & 0xffff;
+            this.resultZeroCarry = this.regEDI | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
+        }
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of INC takes 2 cycles on all CPUs
     },
@@ -882,9 +917,14 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opDECAX: function() {
-        this.resultAuxOverflow = this.regEAX;
-        this.regEAX = (this.regEAX & ~this.dataMask) | (this.resultParitySign = this.regEAX - 1) & this.dataMask;
-        this.resultValue = this.regEAX | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
+        this.resultParitySign = (this.resultAuxOverflow = this.regEAX) - 1;
+        if (I386) {
+            this.regEAX = (this.regEAX & ~this.dataMask) | (this.resultParitySign & this.dataMask);
+            this.resultZeroCarry = (((this.regEAX) & this.dataMask) >>> 16) | (this.regEAX & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
+        } else {
+            this.regEAX = this.resultParitySign & 0xffff;
+            this.resultZeroCarry = this.regEAX | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
+        }
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of DEC takes 2 cycles on all CPUs
     },
@@ -894,9 +934,9 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opDECCX: function() {
-        this.resultAuxOverflow = this.regECX;
-        this.regECX = (this.regECX & ~this.dataMask) | (this.resultParitySign = this.regECX - 1) & this.dataMask;
-        this.resultValue = this.regECX | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
+        this.resultParitySign = (this.resultAuxOverflow = this.regECX) - 1;
+        this.regECX = (I386? (this.regECX & ~this.dataMask) | (this.resultParitySign & this.dataMask) : this.resultParitySign & 0xffff);
+        this.resultZeroCarry = this.regECX | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of DEC takes 2 cycles on all CPUs
     },
@@ -906,9 +946,9 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opDECDX: function() {
-        this.resultAuxOverflow = this.regEDX;
-        this.regEDX = (this.regEDX & ~this.dataMask) | (this.resultParitySign = this.regEDX - 1) & this.dataMask;
-        this.resultValue = this.regEDX | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
+        this.resultParitySign = (this.resultAuxOverflow = this.regEDX) - 1;
+        this.regEDX = (I386? (this.regEDX & ~this.dataMask) | (this.resultParitySign & this.dataMask) : this.resultParitySign & 0xffff);
+        this.resultZeroCarry = this.regEDX | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of DEC takes 2 cycles on all CPUs
     },
@@ -918,9 +958,14 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opDECBX: function() {
-        this.resultAuxOverflow = this.regEBX;
-        this.regEBX = (this.regEBX & ~this.dataMask) | (this.resultParitySign = this.regEBX - 1) & this.dataMask;
-        this.resultValue = this.regEBX | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
+        this.resultParitySign = (this.resultAuxOverflow = this.regEBX) - 1;
+        if (I386) {
+            this.regEBX = (this.regEBX & ~this.dataMask) | (this.resultParitySign & this.dataMask);
+            this.resultZeroCarry = (((this.regEBX) & this.dataMask) >>> 16) | (this.regEBX & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
+        } else {
+            this.regEBX = this.resultParitySign & 0xffff;
+            this.resultZeroCarry = this.regEBX | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
+        }
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of DEC takes 2 cycles on all CPUs
     },
@@ -930,9 +975,10 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opDECSP: function() {
-        this.resultAuxOverflow = this.getSP();
-        this.setSP((this.resultAuxOverflow & ~this.dataMask) | (this.resultParitySign = this.resultAuxOverflow - 1) & this.dataMask);
-        this.resultValue = this.getSP() | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
+        var regESP;
+        this.resultParitySign = (this.resultAuxOverflow = this.getSP()) - 1;
+        this.setSP(regESP = (this.resultAuxOverflow & ~this.dataMask) | (this.resultParitySign & this.dataMask));
+        this.resultZeroCarry = (((regESP) & this.dataMask) >>> 16) | (regESP & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of DEC takes 2 cycles on all CPUs
     },
@@ -942,9 +988,14 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opDECBP: function() {
-        this.resultAuxOverflow = this.regEBP;
-        this.regEBP = (this.regEBP & ~this.dataMask) | (this.resultParitySign = this.regEBP - 1) & this.dataMask;
-        this.resultValue = this.regEBP | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
+        this.resultParitySign = (this.resultAuxOverflow = this.regEBP) - 1;
+        if (I386) {
+            this.regEBP = (this.regEBP & ~this.dataMask) | (this.resultParitySign & this.dataMask);
+            this.resultZeroCarry = (((this.regEBP) & this.dataMask) >>> 16) | (this.regEBP & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
+        } else {
+            this.regEBP = this.resultParitySign & 0xffff;
+            this.resultZeroCarry = this.regEBP | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
+        }
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of DEC takes 2 cycles on all CPUs
     },
@@ -954,21 +1005,31 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opDECSI: function() {
-        this.resultAuxOverflow = this.regESI;
-        this.regESI = (this.regESI & ~this.dataMask) | (this.resultParitySign = this.regESI - 1) & this.dataMask;
-        this.resultValue = this.regESI | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
+        this.resultParitySign = (this.resultAuxOverflow = this.regESI) - 1;
+        if (I386) {
+            this.regESI = (this.regESI & ~this.dataMask) | (this.resultParitySign & this.dataMask);
+            this.resultZeroCarry = (((this.regESI) & this.dataMask) >>> 16) | (this.regESI & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
+        } else {
+            this.regESI = this.resultParitySign & 0xffff;
+            this.resultZeroCarry = this.regESI | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
+        }
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of DEC takes 2 cycles on all CPUs
     },
-    /**
+    /**`
      * op=0x4F (DEC DI)
      *
      * @this {X86CPU}
      */
     opDECDI: function() {
-        this.resultAuxOverflow = this.regEDI;
-        this.regEDI = (this.regEDI & ~this.dataMask) | (this.resultParitySign = this.regEDI - 1) & this.dataMask;
-        this.resultValue = this.regEDI | (((this.resultValue & this.resultSize)? 1 : 0) << 16);
+        this.resultParitySign = (this.resultAuxOverflow = this.regEDI) - 1;
+        if (I386) {
+            this.regEDI = (this.regEDI & ~this.dataMask) | (this.resultParitySign & this.dataMask);
+            this.resultZeroCarry = (((this.regEDI) & this.dataMask) >>> 16) | (this.regEDI & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
+        } else {
+            this.regEDI = this.resultParitySign & 0xffff;
+            this.resultZeroCarry = this.regEDI | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
+        }
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= 2;                          // this form of DEC takes 2 cycles on all CPUs
     },
@@ -1337,8 +1398,6 @@ var X86OpXX = {
      * op=0x6C (INSB) (80186/80188 and up)
      *
      * NOTE: Segment overrides are ignored for this instruction, so we must use segES instead of segData.
-     * In fact, this is a good thing, because otherwise we would need a separate internal register to track
-     * the effect of segment overrides on ES (eg, segExtra), because segData tracks overrides for DS only.
      *
      * @this {X86CPU}
      */
@@ -1370,13 +1429,12 @@ var X86OpXX = {
             this.nStepCycles -= nCycles;
             this.regECX -= nDelta;
             if (nReps) {
-                /*
-                 * We have to back up to the prefix byte(s), not just to the string instruction,
-                 * because if a h/w interrupt is acknowledged before the next repetition begins,
-                 * the interrupt handler will return us to an invalid state.
-                 */
-                this.advanceIP(-2);             // this instruction does not support segment overrides
-                this.assert(this.regLIP == this.opLIP);
+                if (BUGS_8086) {
+                    this.advanceIP(-2);                 // this instruction does not support segment overrides
+                    this.assert(this.regLIP == this.opLIP);
+                } else {
+                    this.regLIP = this.opLIP;
+                }
                 this.opFlags |= X86.OPFLAG.REPEAT;
             }
         }
@@ -1385,8 +1443,6 @@ var X86OpXX = {
      * op=0x6D (INSW) (80186/80188 and up)
      *
      * NOTE: Segment overrides are ignored for this instruction, so we must use segDS instead of segData.
-     * In fact, this is a good thing, because otherwise we would need a separate internal register to track
-     * the effect of segment overrides on ES (eg, segExtra), because segData tracks overrides for DS only.
      *
      * @this {X86CPU}
      */
@@ -1420,13 +1476,12 @@ var X86OpXX = {
             this.nStepCycles -= nCycles;
             this.regECX -= nDelta;
             if (nReps) {
-                /*
-                 * We have to back up to the prefix byte(s), not just to the string instruction,
-                 * because if a h/w interrupt is acknowledged before the next repetition begins,
-                 * the interrupt handler will return us to an invalid state.
-                 */
-                this.advanceIP(-2);             // this instruction does not support segment overrides
-                this.assert(this.regLIP == this.opLIP);
+                if (BUGS_8086) {
+                    this.advanceIP(-2);                 // this instruction does not support segment overrides
+                    this.assert(this.regLIP == this.opLIP);
+                } else {
+                    this.regLIP = this.opLIP;
+                }
                 this.opFlags |= X86.OPFLAG.REPEAT;
             }
         }
@@ -1465,13 +1520,12 @@ var X86OpXX = {
             if (BACKTRACK) this.backTrack.btiIO = this.backTrack.btiMemLo;
             this.bus.checkPortOutputNotify(this.regEDX, b, this.regLIP - nDelta - 1);
             if (nReps) {
-                /*
-                 * We have to back up to the prefix byte(s), not just to the string instruction,
-                 * because if a h/w interrupt is acknowledged before the next repetition begins,
-                 * the interrupt handler will return us to an invalid state.
-                 */
-                this.advanceIP(-2);             // this instruction does not support segment overrides
-                this.assert(this.regLIP == this.opLIP);
+                if (BUGS_8086) {
+                    this.advanceIP(-2);                 // this instruction does not support segment overrides
+                    this.assert(this.regLIP == this.opLIP);
+                } else {
+                    this.regLIP = this.opLIP;
+                }
                 this.opFlags |= X86.OPFLAG.REPEAT;
             }
         }
@@ -1513,13 +1567,12 @@ var X86OpXX = {
             if (BACKTRACK) this.backTrack.btiIO = this.backTrack.btiMemHi;
             this.bus.checkPortOutputNotify(this.regEDX, w >> 8, addrFrom);
             if (nReps) {
-                /*
-                 * We have to back up to the prefix byte(s), not just to the string instruction,
-                 * because if a h/w interrupt is acknowledged before the next repetition begins,
-                 * the interrupt handler will return us to an invalid state.
-                 */
-                this.advanceIP(-2);             // this instruction does not support segment overrides
-                this.assert(this.regLIP == this.opLIP);
+                if (BUGS_8086) {
+                    this.advanceIP(-2);                 // this instruction does not support segment overrides
+                    this.assert(this.regLIP == this.opLIP);
+                } else {
+                    this.regLIP = this.opLIP;
+                }
                 this.opFlags |= X86.OPFLAG.REPEAT;
             }
         }
@@ -2030,8 +2083,8 @@ var X86OpXX = {
      */
     opXCHGCX: function() {
         var temp = this.regEAX;
-        this.regEAX = (this.regEAX & ~this.dataMask) | (this.regECX & this.dataMask);
-        this.regECX = (this.regECX & ~this.dataMask) | (temp & this.dataMask);
+        this.regEAX = (I386? (this.regEAX & ~this.dataMask) | (this.regECX & this.dataMask) : this.regECX);
+        this.regECX = (I386? (this.regECX & ~this.dataMask) | (temp & this.dataMask) : temp);
         if (BACKTRACK) {
             temp = this.backTrack.btiAL; this.backTrack.btiAL = this.backTrack.btiCL; this.backTrack.btiCL = temp;
             temp = this.backTrack.btiAH; this.backTrack.btiAH = this.backTrack.btiCH; this.backTrack.btiCH = temp;
@@ -2045,8 +2098,8 @@ var X86OpXX = {
      */
     opXCHGDX: function() {
         var temp = this.regEAX;
-        this.regEAX = (this.regEAX & ~this.dataMask) | (this.regEDX & this.dataMask);
-        this.regEDX = (this.regEDX & ~this.dataMask) | (temp & this.dataMask);
+        this.regEAX = (I386? (this.regEAX & ~this.dataMask) | (this.regEDX & this.dataMask) : this.regEDX);
+        this.regEDX = (I386? (this.regEDX & ~this.dataMask) | (temp & this.dataMask) : temp);
         if (BACKTRACK) {
             temp = this.backTrack.btiAL; this.backTrack.btiAL = this.backTrack.btiDL; this.backTrack.btiDL = temp;
             temp = this.backTrack.btiAH; this.backTrack.btiAH = this.backTrack.btiDH; this.backTrack.btiDH = temp;
@@ -2060,8 +2113,8 @@ var X86OpXX = {
      */
     opXCHGBX: function() {
         var temp = this.regEAX;
-        this.regEAX = (this.regEAX & ~this.dataMask) | (this.regEBX & this.dataMask);
-        this.regEBX = (this.regEBX & ~this.dataMask) | (temp & this.dataMask);
+        this.regEAX = (I386? (this.regEAX & ~this.dataMask) | (this.regEBX & this.dataMask) : this.regEBX);
+        this.regEBX = (I386? (this.regEBX & ~this.dataMask) | (temp & this.dataMask) : temp);
         if (BACKTRACK) {
             temp = this.backTrack.btiAL; this.backTrack.btiAL = this.backTrack.btiBL; this.backTrack.btiBL = temp;
             temp = this.backTrack.btiAH; this.backTrack.btiAH = this.backTrack.btiBH; this.backTrack.btiBH = temp;
@@ -2076,8 +2129,8 @@ var X86OpXX = {
     opXCHGSP: function() {
         var temp = this.regEAX;
         var regESP = this.getSP();
-        this.regEAX = (this.regEAX & ~this.dataMask) | (regESP & this.dataMask);
-        this.setSP((regESP & ~this.dataMask) | (temp & this.dataMask));
+        this.regEAX = (I386? (this.regEAX & ~this.dataMask) | (regESP & this.dataMask) : regESP);
+        this.setSP((I386? (regESP & ~this.dataMask) | (temp & this.dataMask) : temp));
         if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiAH = 0;
         this.nStepCycles -= 3;                          // this form of XCHG takes 3 cycles on all CPUs
     },
@@ -2088,8 +2141,8 @@ var X86OpXX = {
      */
     opXCHGBP: function() {
         var temp = this.regEAX;
-        this.regEAX = (this.regEAX & ~this.dataMask) | (this.regEBP & this.dataMask);
-        this.regEBP = (this.regEBP & ~this.dataMask) | (temp & this.dataMask);
+        this.regEAX = (I386? (this.regEAX & ~this.dataMask) | (this.regEBP & this.dataMask) : this.regEBP);
+        this.regEBP = (I386? (this.regEBP & ~this.dataMask) | (temp & this.dataMask) : temp);
         if (BACKTRACK) {
             temp = this.backTrack.btiAL; this.backTrack.btiAL = this.backTrack.btiBPLo; this.backTrack.btiBPLo = temp;
             temp = this.backTrack.btiAH; this.backTrack.btiAH = this.backTrack.btiBPHi; this.backTrack.btiBPHi = temp;
@@ -2103,8 +2156,8 @@ var X86OpXX = {
      */
     opXCHGSI: function() {
         var temp = this.regEAX;
-        this.regEAX = (this.regEAX & ~this.dataMask) | (this.regESI & this.dataMask);
-        this.regESI = (this.regESI & ~this.dataMask) | (temp & this.dataMask);
+        this.regEAX = (I386? (this.regEAX & ~this.dataMask) | (this.regESI & this.dataMask) : this.regESI);
+        this.regESI = (I386? (this.regESI & ~this.dataMask) | (temp & this.dataMask) : temp);
         if (BACKTRACK) {
             temp = this.backTrack.btiAL; this.backTrack.btiAL = this.backTrack.btiSILo; this.backTrack.btiSILo = temp;
             temp = this.backTrack.btiAH; this.backTrack.btiAH = this.backTrack.btiSIHi; this.backTrack.btiSIHi = temp;
@@ -2118,8 +2171,8 @@ var X86OpXX = {
      */
     opXCHGDI: function() {
         var temp = this.regEAX;
-        this.regEAX = (this.regEAX & ~this.dataMask) | (this.regEDI & this.dataMask);
-        this.regEDI = (this.regEDI & ~this.dataMask) | (temp & this.dataMask);
+        this.regEAX = (I386? (this.regEAX & ~this.dataMask) | (this.regEDI & this.dataMask) : this.regEDI);
+        this.regEDI = (I386? (this.regEDI & ~this.dataMask) | (temp & this.dataMask) : temp);
         if (BACKTRACK) {
             temp = this.backTrack.btiAL; this.backTrack.btiAL = this.backTrack.btiDILo; this.backTrack.btiDILo = temp;
             temp = this.backTrack.btiAH; this.backTrack.btiAH = this.backTrack.btiDIHi; this.backTrack.btiDIHi = temp;
@@ -2317,17 +2370,12 @@ var X86OpXX = {
             this.nStepCycles -= nCycles;
             this.regECX -= nDelta;
             if (nReps) {
-                /*
-                 * We have to back up to the prefix byte(s), not just to the string instruction,
-                 * because if a h/w interrupt is acknowledged before the next repetition begins,
-                 * the interrupt handler will return us to an invalid state.
-                 *
-                 * TODO: Decide what to do about string instructions with multiple (ie, redundant)
-                 * SEG prefixes, and whether we should strictly emulate the 8086's failure to restart
-                 * string instructions with multiple prefixes.
-                 */
-                this.advanceIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
-                this.assert(this.regLIP == this.opLIP);
+                if (BUGS_8086) {
+                    this.advanceIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
+                    this.assert(this.regLIP == this.opLIP);
+                } else {
+                    this.regLIP = this.opLIP;
+                }
                 this.opFlags |= X86.OPFLAG.REPEAT;
             }
         }
@@ -2355,17 +2403,12 @@ var X86OpXX = {
             this.nStepCycles -= nCycles;
             this.regECX -= nDelta;
             if (nReps) {
-                /*
-                 * We have to back up to the prefix byte(s), not just to the string instruction,
-                 * because if a h/w interrupt is acknowledged before the next repetition begins,
-                 * the interrupt handler will return us to an invalid state.
-                 *
-                 * TODO: Decide what to do about string instructions with multiple (ie, redundant)
-                 * SEG prefixes, and whether we should strictly emulate the 8086's failure to restart
-                 * string instructions with multiple prefixes.
-                 */
-                this.advanceIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
-                this.assert(this.regLIP == this.opLIP);
+                if (BUGS_8086) {
+                    this.advanceIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
+                    this.assert(this.regLIP == this.opLIP);
+                } else {
+                    this.regLIP = this.opLIP;
+                }
                 this.opFlags |= X86.OPFLAG.REPEAT;
             }
         }
@@ -2403,17 +2446,12 @@ var X86OpXX = {
              * two values are equal, we must continue.
              */
             if (nReps && this.getZF() == (this.opPrefixes & X86.OPFLAG.REPZ)) {
-                /*
-                 * We have to back up to the prefix byte(s), not just to the string instruction,
-                 * because if a h/w interrupt is acknowledged before the next repetition begins,
-                 * the interrupt handler will return us to an invalid state.
-                 *
-                 * TODO: Decide what to do about string instructions with multiple (ie, redundant)
-                 * SEG prefixes, and whether we should strictly emulate the 8086's failure to restart
-                 * string instructions with multiple prefixes.
-                 */
-                this.advanceIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
-                this.assert(this.regLIP == this.opLIP);
+                if (BUGS_8086) {
+                    this.advanceIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
+                    this.assert(this.regLIP == this.opLIP);
+                } else {
+                    this.regLIP = this.opLIP;
+                }
                 this.opFlags |= X86.OPFLAG.REPEAT;
             }
         }
@@ -2451,17 +2489,12 @@ var X86OpXX = {
              * two values are equal, we must continue.
              */
             if (nReps && this.getZF() == (this.opPrefixes & X86.OPFLAG.REPZ)) {
-                /*
-                 * We have to back up to the prefix byte(s), not just to the string instruction,
-                 * because if a h/w interrupt is acknowledged before the next repetition begins,
-                 * the interrupt handler will return us to an invalid state.
-                 *
-                 * TODO: Decide what to do about string instructions with multiple (ie, redundant)
-                 * SEG prefixes, and whether we should strictly emulate the 8086's failure to restart
-                 * string instructions with multiple prefixes.
-                 */
-                this.advanceIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
-                this.assert(this.regLIP == this.opLIP);
+                if (BUGS_8086) {
+                    this.advanceIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
+                    this.assert(this.regLIP == this.opLIP);
+                } else {
+                    this.regLIP = this.opLIP;
+                }
                 this.opFlags |= X86.OPFLAG.REPEAT;
             }
         }
@@ -2472,7 +2505,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opTESTALb: function() {
-        this.resultValue = this.resultParitySign = this.resultAuxOverflow = this.regEAX & this.getIPByte();
+        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = this.regEAX & this.getIPByte();
         this.resultSize = X86.RESULT.SIZE_BYTE;
         this.nStepCycles -= this.CYCLES.nOpCyclesAAA;
     },
@@ -2482,7 +2515,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opTESTAXw: function() {
-        this.resultValue = this.resultParitySign = this.resultAuxOverflow = this.regEAX & this.getIPWord();
+        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = this.regEAX & this.getIPWord();
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= this.CYCLES.nOpCyclesAAA;
     },
@@ -2490,8 +2523,6 @@ var X86OpXX = {
      * op=0xAA (STOSB)
      *
      * NOTES: Segment overrides are ignored for this instruction, so we must use segES instead of segData.
-     * In fact, this is a good thing, because otherwise we would need a separate internal register to track
-     * the effect of segment overrides on ES (eg, segExtra), because segData tracks overrides for DS only.
      *
      * @this {X86CPU}
      */
@@ -2515,13 +2546,12 @@ var X86OpXX = {
             this.nStepCycles -= nCycles;
             this.regECX -= nDelta;
             if (nReps) {
-                /*
-                 * We have to back up to the prefix byte(s), not just to the string instruction,
-                 * because if a h/w interrupt is acknowledged before the next repetition begins,
-                 * the interrupt handler will return us to an invalid state.
-                 */
-                this.advanceIP(-2);             // this instruction does not support segment overrides
-                this.assert(this.regLIP == this.opLIP);
+                if (BUGS_8086) {
+                    this.advanceIP(-2);                 // this instruction does not support segment overrides
+                    this.assert(this.regLIP == this.opLIP);
+                } else {
+                    this.regLIP = this.opLIP;
+                }
                 this.opFlags |= X86.OPFLAG.REPEAT;
             }
         }
@@ -2530,8 +2560,6 @@ var X86OpXX = {
      * op=0xAB (STOSW)
      *
      * NOTES: Segment overrides are ignored for this instruction, so we must use segES instead of segData.
-     * In fact, this is a good thing, because otherwise we would need a separate internal register to track
-     * the effect of segment overrides on ES (eg, segExtra), because segData tracks overrides for DS only.
      *
      * @this {X86CPU}
      */
@@ -2558,13 +2586,12 @@ var X86OpXX = {
             this.nStepCycles -= nCycles;
             this.regECX -= nDelta;
             if (nReps) {
-                /*
-                 * We have to back up to the prefix byte(s), not just to the string instruction,
-                 * because if a h/w interrupt is acknowledged before the next repetition begins,
-                 * the interrupt handler will return us to an invalid state.
-                 */
-                this.advanceIP(-2);             // this instruction does not support segment overrides
-                this.assert(this.regLIP == this.opLIP);
+                if (BUGS_8086) {
+                    this.advanceIP(-2);                 // this instruction does not support segment overrides
+                    this.assert(this.regLIP == this.opLIP);
+                } else {
+                    this.regLIP = this.opLIP;
+                }
                 this.opFlags |= X86.OPFLAG.REPEAT;
             }
         }
@@ -2591,17 +2618,12 @@ var X86OpXX = {
             this.nStepCycles -= nCycles;
             this.regECX -= nDelta;
             if (nReps) {
-                /*
-                 * We have to back up to the prefix byte(s), not just to the string instruction,
-                 * because if a h/w interrupt is acknowledged before the next repetition begins,
-                 * the interrupt handler will return us to an invalid state.
-                 *
-                 * TODO: Decide what to do about string instructions with multiple (ie, redundant)
-                 * SEG prefixes, and whether we should strictly emulate the 8086's failure to restart
-                 * string instructions with multiple prefixes.
-                 */
-                this.advanceIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
-                this.assert(this.regLIP == this.opLIP);
+                if (BUGS_8086) {
+                    this.advanceIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
+                    this.assert(this.regLIP == this.opLIP);
+                } else {
+                    this.regLIP = this.opLIP;
+                }
                 this.opFlags |= X86.OPFLAG.REPEAT;
             }
         }
@@ -2630,17 +2652,12 @@ var X86OpXX = {
             this.nStepCycles -= nCycles;
             this.regECX -= nDelta;
             if (nReps) {
-                /*
-                 * We have to back up to the prefix byte(s), not just to the string instruction,
-                 * because if a h/w interrupt is acknowledged before the next repetition begins,
-                 * the interrupt handler will return us to an invalid state.
-                 *
-                 * TODO: Decide what to do about string instructions with multiple (ie, redundant)
-                 * SEG prefixes, and whether we should strictly emulate the 8086's failure to restart
-                 * string instructions with multiple prefixes.
-                 */
-                this.advanceIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
-                this.assert(this.regLIP == this.opLIP);
+                if (BUGS_8086) {
+                    this.advanceIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
+                    this.assert(this.regLIP == this.opLIP);
+                } else {
+                    this.regLIP = this.opLIP;
+                }
                 this.opFlags |= X86.OPFLAG.REPEAT;
             }
         }
@@ -2674,13 +2691,12 @@ var X86OpXX = {
              * two values are equal, we must continue.
              */
             if (nReps && this.getZF() == (this.opPrefixes & X86.OPFLAG.REPZ)) {
-                /*
-                 * We have to back up to the prefix byte(s), not just to the string instruction,
-                 * because if a h/w interrupt is acknowledged before the next repetition begins,
-                 * the interrupt handler will return us to an invalid state.
-                 */
-                this.advanceIP(-2);             // this instruction does not support segment overrides
-                this.assert(this.regLIP == this.opLIP);
+                if (BUGS_8086) {
+                    this.advanceIP(-2);                 // this instruction does not support segment overrides
+                    this.assert(this.regLIP == this.opLIP);
+                } else {
+                    this.regLIP = this.opLIP;
+                }
                 this.opFlags |= X86.OPFLAG.REPEAT;
             }
         }
@@ -2714,13 +2730,12 @@ var X86OpXX = {
              * two values are equal, we must continue.
              */
             if (nReps && this.getZF() == (this.opPrefixes & X86.OPFLAG.REPZ)) {
-                /*
-                 * We have to back up to the prefix byte(s), not just to the string instruction,
-                 * because if a h/w interrupt is acknowledged before the next repetition begins,
-                 * the interrupt handler will return us to an invalid state.
-                 */
-                this.advanceIP(-2);             // this instruction does not support segment overrides
-                this.assert(this.regLIP == this.opLIP);
+                if (BUGS_8086) {
+                    this.advanceIP(-2);                 // this instruction does not support segment overrides
+                    this.assert(this.regLIP == this.opLIP);
+                } else {
+                    this.regLIP = this.opLIP;
+                }
                 this.opFlags |= X86.OPFLAG.REPEAT;
             }
         }
@@ -3151,7 +3166,7 @@ var X86OpXX = {
         var bRemainder = AL % bDivisor;
         this.regEAX = (bQuotient << 8) | bRemainder;
         this.resultSize = X86.RESULT.SIZE_BYTE;
-        this.resultValue = this.resultParitySign = AL;
+        this.resultZeroCarry = this.resultParitySign = AL;
         this.nStepCycles -= this.CYCLES.nOpCyclesAAM;
     },
     /**
@@ -3172,7 +3187,7 @@ var X86OpXX = {
      */
     opAAD: function() {
         var bMultiplier = this.getIPByte();
-        this.resultValue = this.resultParitySign = this.regEAX = (((this.regEAX >> 8) * bMultiplier) + this.regEAX) & 0xff;
+        this.resultZeroCarry = this.resultParitySign = this.regEAX = (((this.regEAX >> 8) * bMultiplier) + this.regEAX) & 0xff;
         this.resultSize = X86.RESULT.SIZE_BYTE;
         this.nStepCycles -= this.CYCLES.nOpCyclesAAD;
     },
@@ -3218,7 +3233,7 @@ var X86OpXX = {
      */
     opLOOPNZ: function() {
         var disp = this.getIPDisp();
-        if ((this.regECX = (this.regECX - 1) & this.addrMask) && (this.resultValue & (this.resultSize - 1))) {
+        if ((this.regECX = (this.regECX - 1) & this.addrMask) && (this.resultZeroCarry & (this.resultSize - 1))) {
             this.setIP(this.getIP() + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesLoopNZ;
             return;
@@ -3232,7 +3247,7 @@ var X86OpXX = {
      */
     opLOOPZ: function() {
         var disp = this.getIPDisp();
-        if ((this.regECX = (this.regECX - 1) & this.addrMask) && !(this.resultValue & (this.resultSize - 1))) {
+        if ((this.regECX = (this.regECX - 1) & this.addrMask) && !(this.resultZeroCarry & (this.resultSize - 1))) {
             this.setIP(this.getIP() + disp);
             this.nStepCycles -= this.CYCLES.nOpCyclesLoopZ;
             return;
@@ -3544,7 +3559,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opCLC: function() {
-        this.resultValue &= ~this.resultSize;
+        this.resultZeroCarry &= ~this.resultSize;
         this.nStepCycles -= 2;                          // CLC takes 2 cycles on all CPUs
     },
     /**
@@ -3553,7 +3568,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     opSTC: function() {
-        this.resultValue |= this.resultSize;
+        this.resultZeroCarry |= this.resultSize;
         this.nStepCycles -= 2;                          // STC takes 2 cycles on all CPUs
     },
     /**

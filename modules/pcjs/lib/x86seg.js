@@ -1,5 +1,5 @@
 /**
- * @fileoverview Implements PCjs X86 Segment objects
+ * @fileoverview Implements PCjs X86 Segment Registers
  * @author <a href="mailto:Jeff@pcjs.org">Jeff Parsons</a>
  * @version 1.0
  * Created 2014-Sep-10
@@ -45,7 +45,7 @@ if (typeof module !== 'undefined') {
  * @constructor
  * @param {X86CPU} cpu
  * @param {number} id
- * @param {string} [sName] segment name
+ * @param {string} [sName] segment register name
  * @param {boolean} [fProt] true if segment register used exclusively in protected-mode (eg, segLDT)
  */
 function X86Seg(cpu, id, sName, fProt)
@@ -81,12 +81,17 @@ function X86Seg(cpu, id, sName, fProt)
      * As long as setCSIP() or opHelpINT() are used for all CS changes, fCall is set automatically.
      *
      * TODO: Consider making fCall a parameter to load(), instead of a property that must be set prior to
-     * calling load(); the downside (and why I didn't do that in the first place) is that such a parameter
-     * is meaningless for segments other than segCS.
+     * calling load(); the downside is that such a parameter is meaningless for segments other than segCS.
      */
     this.awParms = (this.id == X86Seg.ID.CODE? new Array(32) : []);
     this.fCall = null;
     this.fStackSwitch = false;
+    /*
+     * The following properties are used for STACK segments only (ie, segSS); we want to make it easier
+     * for setSS() to set stack lower and upper limits, which requires knowing whether or not the segment is
+     * marked as EXPDOWN.
+     */
+    this.fExpDown = false;
     this.updateMode(fProt);
 }
 
@@ -117,6 +122,7 @@ X86Seg.ID = {
  */
 X86Seg.loadReal = function loadReal(sel, fSuppress)
 {
+    this.cpu.assert(!(sel & ~0xffff));
     this.sel = sel;
     this.dataSize = this.addrSize = 2;
     this.dataMask = this.addrMask = 0xffff;
@@ -152,6 +158,8 @@ X86Seg.loadProt = function loadProt(sel, fSuppress)
     var addrDTLimit;
     var cpu = this.cpu;
 
+    this.cpu.assert(!(sel & ~0xffff));
+
     if (!(sel & X86.SEL.LDT)) {
         addrDT = cpu.addrGDT;
         addrDTLimit = cpu.addrGDTLimit;
@@ -166,8 +174,8 @@ X86Seg.loadProt = function loadProt(sel, fSuppress)
      * grief here.  We avoid that grief by 1) relying on the Debugger setting fSuppress to true, and 2) skipping
      * segment lookup if the descriptor table being referenced is zero.
      *
-     * TODO: This could probably be simplified to a test of addrDT; please note, however, that there's nothing
-     * in the design of the CPU that prevents the GDT or LDT being located at physical address zero.
+     * TODO: This could probably be simplified to a test of addrDT; however, there's nothing in the design
+     * of the CPU that prevents the GDT or LDT being located at physical address zero.
      */
     if (!fSuppress || addrDT) {
         var addrDesc = addrDT + (sel & X86.SEL.MASK);
@@ -193,7 +201,7 @@ X86Seg.loadProt = function loadProt(sel, fSuppress)
  *
  * @this {X86Seg}
  * @param {number} nIDT
- * @return {number} address from selected veector, or ADDR_INVALID if error (TODO: No error conditions exist yet)
+ * @return {number} address from selected vector, or ADDR_INVALID if error (TODO: No error conditions exist yet)
  */
 X86Seg.loadIDTReal = function loadIDTReal(nIDT)
 {
@@ -455,7 +463,7 @@ X86Seg.switchTSS = function switchTSS(selNew, fNest)
         offSP = (this.cpl << 2) + X86.TSS.CPL0_SP;
         offSS = offSP + 2;
     }
-    cpu.setSS(cpu.getShort(addrNew + offSS));   // TODO: Do we care that cpu.setSS() -- unlike segSS.load() -- will also set X86.OPFLAG.NOINTR?
+    cpu.setSS(cpu.getShort(addrNew + offSS), true);
     cpu.setSP(cpu.getShort(addrNew + offSP));
     cpu.segLDT.load(cpu.getShort(addrNew + X86.TSS.TASK_LDT));
     if (fNest) cpu.setShort(addrNew + X86.TSS.PREV_TSS, selOld);
@@ -592,7 +600,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                         break;
                     }
                     regSP = cpu.popWord();
-                    cpu.setSS(cpu.popWord());   // TODO: Do we care that cpu.setSS() -- unlike segSS.load() -- will also set X86.OPFLAG.NOINTR?
+                    cpu.setSS(cpu.popWord(), true);
                     cpu.setSP(regSP);
                     this.fStackSwitch = true;
                 }
@@ -659,7 +667,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                         offSS = offSP + 2;
                         regSSPrev = cpu.getSS();
                         regSPPrev = cpu.getSP();
-                        cpu.setSS(cpu.getShort(addrTSS + offSS));   // TODO: Do we care that cpu.setSS() -- unlike segSS.load() -- will also set X86.OPFLAG.NOINTR?
+                        cpu.setSS(cpu.getShort(addrTSS + offSS), true);
                         cpu.setSP(cpu.getShort(addrTSS + offSP));
                         cpu.pushWord(regSSPrev);
                         cpu.pushWord(regSPPrev);
@@ -819,6 +827,7 @@ X86Seg.prototype.updateMode = function(fProt)
     if (fProt === undefined) {
         fProt = !!(this.cpu.regMSW & X86.MSW.PE);
     }
+    this.fExpDown = false;
     if (fProt) {
         this.load = X86Seg.loadProt;
         this.loadIDT = X86Seg.loadIDTProt;
@@ -843,6 +852,7 @@ X86Seg.prototype.updateMode = function(fProt)
             if ((this.acc & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.EXPDOWN)) == X86.DESC.ACC.TYPE.EXPDOWN) {
                 if (this.checkRead == X86Seg.checkReadProt) this.checkRead = X86Seg.checkReadProtDown;
                 if (this.checkWrite == X86Seg.checkWriteProt) this.checkWrite = X86Seg.checkWriteProtDown;
+                this.fExpDown = true;
             }
         }
         this.cpl = this.sel & X86.SEL.RPL;

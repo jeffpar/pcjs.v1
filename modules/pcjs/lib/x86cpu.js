@@ -813,7 +813,7 @@ X86CPU.prototype.resetRegs = function()
     this.regEBX = 0;
     this.regECX = 0;
     this.regEDX = 0;
-    this.regESP = 0;            // this isn't needed in a 16-bit environment, but we'll need it later
+    this.regESP = 0;            // this isn't needed in a 16-bit environment, but is required for I386
     this.regEBP = 0;
     this.regESI = 0;
     this.regEDI = 0;
@@ -1356,9 +1356,9 @@ X86CPU.prototype.getCS = function()
 X86CPU.prototype.setCS = function(sel)
 {
     var regEIP = this.getIP();
-    this.regLIP = this.segCS.load(sel & 0xffff) + regEIP;
+    this.regLIP = this.segCS.load(sel) + regEIP;
     this.regLIPLimit = this.segCS.base + this.segCS.limit;
-    this.opFlags |= this.OPFLAG_NOINTR8086;
+    if (!BUGS_8086) this.opFlags |= this.OPFLAG_NOINTR8086;
     if (PREFETCH) this.flushPrefetch(this.regLIP);
 };
 
@@ -1381,8 +1381,8 @@ X86CPU.prototype.getDS = function()
  */
 X86CPU.prototype.setDS = function(sel)
 {
-    this.segDS.load(sel & 0xffff);
-    this.opFlags |= this.OPFLAG_NOINTR8086;
+    this.segDS.load(sel);
+    if (!BUGS_8086) this.opFlags |= this.OPFLAG_NOINTR8086;
 };
 
 /**
@@ -1401,14 +1401,20 @@ X86CPU.prototype.getSS = function()
  *
  * @this {X86CPU}
  * @param {number} sel
+ * @param {boolean} [fInterruptable]
  */
-X86CPU.prototype.setSS = function(sel)
+X86CPU.prototype.setSS = function(sel, fInterruptable)
 {
     var regESP = this.getSP();
-    this.regLSP = this.segSS.load(sel & 0xffff) + regESP;
-    this.regLSPLimit = this.segSS.base + this.segSS.limit;
-    this.regLSPLimitLow = this.segSS.base;  // TODO: Set this to the actual low limit
-    this.opFlags |= X86.OPFLAG.NOINTR;
+    this.regLSP = this.segSS.load(sel) + regESP;
+    if (this.segSS.fExpDown) {
+        this.regLSPLimit = this.segSS.base + this.segSS.addrMask;
+        this.regLSPLimitLow = this.segSS.base + this.segSS.limit;
+    } else {
+        this.regLSPLimit = this.segSS.base + this.segSS.limit;
+        this.regLSPLimitLow = this.segSS.base;
+    }
+    if (!BUGS_8086 && !fInterruptable) this.opFlags |= X86.OPFLAG.NOINTR;
 };
 
 /**
@@ -1430,8 +1436,8 @@ X86CPU.prototype.getES = function()
  */
 X86CPU.prototype.setES = function(sel)
 {
-    this.segES.load(sel & 0xffff);
-    this.opFlags |= this.OPFLAG_NOINTR8086;
+    this.segES.load(sel);
+    if (!BUGS_8086) this.opFlags |= this.OPFLAG_NOINTR8086;
 };
 
 /**
@@ -1546,6 +1552,10 @@ X86CPU.prototype.advanceIP = function(inc)
  */
 X86CPU.prototype.getSP = function()
 {
+    if (I386) {
+        this.assert(!((this.regLSP - this.segSS.base) & ~this.segSS.addrMask));
+        return (this.regESP & ~this.segSS.addrMask) | (this.regLSP - this.segSS.base);
+    }
     return this.regLSP - this.segSS.base;
 };
 
@@ -1557,7 +1567,12 @@ X86CPU.prototype.getSP = function()
  */
 X86CPU.prototype.setSP = function(off)
 {
-    this.regLSP = this.segSS.base + (off & (I386? this.segSS.addrMask : 0xffff));
+    if (I386) {
+        this.regESP = off;
+        this.regLSP = this.segSS.base + (off & this.segSS.addrMask);
+    } else {
+        this.regLSP = this.segSS.base + off;
+    }
 };
 
 /**
@@ -1568,7 +1583,7 @@ X86CPU.prototype.setSP = function(off)
  */
 X86CPU.prototype.getCF = function()
 {
-    return (this.resultValue & this.resultSize)? X86.PS.CF : 0;
+    return (this.resultZeroCarry & this.resultSize)? X86.PS.CF : 0;
 };
 
 /**
@@ -1621,7 +1636,7 @@ X86CPU.prototype.getAF = function()
  */
 X86CPU.prototype.getZF = function()
 {
-    return (this.resultValue & (this.resultSize - 1))? 0 : X86.PS.ZF;
+    return (this.resultZeroCarry & (this.resultSize - 1))? 0 : X86.PS.ZF;
 };
 
 /**
@@ -1686,7 +1701,7 @@ X86CPU.prototype.getDF = function()
  */
 X86CPU.prototype.clearCF = function()
 {
-    this.resultValue &= ~this.resultSize;
+    this.resultZeroCarry &= ~this.resultSize;
 };
 
 /**
@@ -1716,7 +1731,7 @@ X86CPU.prototype.clearAF = function()
  */
 X86CPU.prototype.clearZF = function()
 {
-    this.resultValue |= (this.resultSize - 1);
+    this.resultZeroCarry |= (this.resultSize - 1);
 };
 
 /**
@@ -1770,7 +1785,7 @@ X86CPU.prototype.clearOF = function()
  */
 X86CPU.prototype.setCF = function()
 {
-    this.resultValue |= this.resultSize;
+    this.resultZeroCarry |= this.resultSize;
 };
 
 /**
@@ -1800,7 +1815,7 @@ X86CPU.prototype.setAF = function()
  */
 X86CPU.prototype.setZF = function()
 {
-    this.resultValue &= ~(this.resultSize - 1);
+    this.resultZeroCarry &= ~(this.resultSize - 1);
 };
 
 /**
@@ -1868,7 +1883,7 @@ X86CPU.prototype.getPS = function()
 X86CPU.prototype.setPS = function(regPS, cpl)
 {
     this.resultSize = X86.RESULT.SIZE_BYTE;         // NOTE: We could have chosen SIZE_WORD, too; it's irrelevant
-    this.resultValue = this.resultParitySign = this.resultAuxOverflow = 0;
+    this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = 0;
 
     if (regPS & X86.PS.CF) this.setCF();
     if (!(regPS & X86.PS.PF)) this.resultParitySign |= 0x1;
@@ -2608,7 +2623,10 @@ X86CPU.prototype.popWord = function()
 {
     var w = (I386? this.opMem.getWord(this.regLSP) : this.getShort(this.regLSP));
     this.regLSP += (I386? this.dataSize : 2);
-    if (this.regLSP > this.regLSPLimit) this.setSP(this.regLSP - this.segSS.base);
+    if (this.regLSP > this.regLSPLimit) {
+        // TODO: Generate exception in protected mode
+        this.setSP(this.regLSP - this.segSS.base);
+    }
     return w;
 };
 
@@ -2622,7 +2640,10 @@ X86CPU.prototype.pushWord = function(w)
 {
     this.assert((w & this.dataMask) == w);
     this.regLSP -= (I386? this.dataSize : 2);
-    if (this.regLSP < this.regLSPLimitLow) this.setSP(this.regLSP - this.segSS.base);
+    if (this.regLSP < this.regLSPLimitLow) {
+        // TODO: Generate exception in protected mode (and bail)
+        this.setSP(this.regLSP - this.segSS.base);
+    }
     if (!I386) this.setShort(this.regLSP, w); else this.opMem.setWord(this.regLSP, w);
 };
 
@@ -2904,6 +2925,19 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
         if (opPrefixes) {
             this.opPrefixes |= opPrefixes;
         } else {
+            /*
+             * opLIP is used, among other things, to help string instructions rewind to the first prefix
+             * byte whenever the instruction needs to be repeated.  Repeating string instructions in this
+             * manner (essentially restarting them) is a bit heavy-handed, but ultimately it's more compatible,
+             * because it allows hardware interrupts (as well as Trap processing and Debugger single-stepping)
+             * to occur at any point during the string operation, without any additional effort.
+             *
+             * NOTE: The way we restart string instructions actually fixes an 8086/8088 flaw, because string
+             * instructions with multiple prefixes (eg, a REP and a segment override) would not be restarted
+             * properly following a hardware interrupt.  The recommended workarounds were to either turn off
+             * interrupts or make sure the REP prefix was first and follow the string instruction with a LOOPNZ
+             * back to the REP.  To emulate this flawed behavior, turn on BUGS_8086.
+             */
             this.opLIP = this.regLIP;
             this.regEA = this.regEAWrite = X86.ADDR_INVALID;
             this.segData = this.segDS;

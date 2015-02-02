@@ -109,6 +109,16 @@ var SAMPLER = false;
 /**
  * @define {boolean}
  *
+ * Enables support for known 8086 bugs.  It's turned off by default, because 1) it adds overhead, and 2) it's
+ * hard to imagine any software actually being dependent on any of the bugs covered by this (eg, the failure to
+ * properly restart string instructions with multiple prefixes, or the failure to inhibit hardware interrupts
+ * following SS segment loads).
+ */
+var BUGS_8086 = false;
+
+/**
+ * @define {boolean}
+ *
  * Enables 80386 support.  My preference continues to be one "binary" that supports all implemented CPUs, but
  * I'm providing this to enable a slimmed-down binary, at least until 80386 support is actually finished; at the
  * moment, there's just a lot of scaffolding that bloats the compiled version without adding real functionality.

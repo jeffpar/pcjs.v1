@@ -64,7 +64,7 @@ var X86Help = {
      * @return {number}
      */
     opHelpTESTb: function(dst, src) {
-        this.resultValue = this.resultParitySign = this.resultAuxOverflow = dst & src;
+        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst & src;
         this.resultSize = X86.RESULT.SIZE_BYTE;
         this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesTestRR : this.CYCLES.nOpCyclesTestRM) : this.CYCLES.nOpCyclesTestRM);
         this.opFlags |= X86.OPFLAG.NOWRITE;
@@ -77,7 +77,7 @@ var X86Help = {
      * @return {number}
      */
     opHelpTESTw: function(dst, src) {
-        this.resultValue = this.resultParitySign = this.resultAuxOverflow = dst & src;
+        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst & src;
         this.resultSize = X86.RESULT.SIZE_WORD;
         this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesTestRR : this.CYCLES.nOpCyclesTestRM) : this.CYCLES.nOpCyclesTestRM);
         this.opFlags |= X86.OPFLAG.NOWRITE;
@@ -100,7 +100,7 @@ var X86Help = {
      */
     opHelpIMUL8: function(dst, src) {
         var result = ((src << 16) >> 16) * ((this.getIPByte() << 24) >> 24);
-        this.resultValue = this.resultAuxOverflow = this.resultParitySign = result;
+        this.resultZeroCarry = this.resultAuxOverflow = this.resultParitySign = result;
         this.resultSize = X86.RESULT.SIZE_BYTE;
         /*
          * TODO: Look into a more efficient way of setting/synchronizing CF and OF; this code works,
@@ -138,7 +138,7 @@ var X86Help = {
      */
     opHelpIMUL16: function(dst, src) {
         var result = ((src << 16) >> 16) * ((this.getIPWord() << 16) >> 16);
-        this.resultValue = this.resultAuxOverflow = this.resultParitySign = result;
+        this.resultZeroCarry = this.resultAuxOverflow = this.resultParitySign = result;
         this.resultSize = X86.RESULT.SIZE_WORD;
         /*
          * TODO: Look into a more efficient way of setting/synchronizing CF and OF; this code works,

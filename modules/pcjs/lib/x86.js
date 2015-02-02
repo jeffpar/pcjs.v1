@@ -356,7 +356,7 @@ X86.PS.SET =        (X86.PS.BIT1 | X86.PS.IOPL.MASK | X86.PS.NT | X86.PS.BIT15);
  * These "result registers" are created/reset by an initial call to setPS(0); they include:
  *
  *      this.resultSize (must be set to one of: SIZE_BYTE or SIZE_WORD)
- *      this.resultValue
+ *      this.resultZeroCarry
  *      this.resultParitySign
  *      this.resultAuxOverflow
  *
