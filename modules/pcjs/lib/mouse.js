@@ -370,8 +370,8 @@ Mouse.prototype.notifyPointerLocked = function(fLocked)
 /**
  * captureMouse(control)
  *
- * NOTE: addEventListener() wasn't supported in IE until IE9, but that's OK, because IE9 is the
- * oldest IE we support anyway (since older versions of IE lacked complete HTML5 support).
+ * NOTE: addEventListener() wasn't supported in Internet Explorer until IE9, but that's OK, because
+ * IE9 is the oldest IE we support anyway (since versions prior to IE9 lack the necessary HTML5 support).
  *
  * @this {Mouse}
  * @param {Object} control from the HTML DOM (eg, the control for the simulated screen)

@@ -52,6 +52,9 @@ if (typeof module !== 'undefined') {
 function Panel(parmsPanel) {
     Component.call(this, "Panel", parmsPanel, Panel);
     this.canvas = null;
+    this.lockMouse = -1;
+    this.fMouseDown = false;
+    this.xMouse = this.yMouse = -1;
     if (BACKTRACK) {
         this.stats = null;
         this.fBackTrack = false;
@@ -66,22 +69,28 @@ Component.subclass(Component, Panel);
  * stretch the live images to fit.
  */
 Panel.LIVECANVAS = {
-    WIDTH:      1280,
-    HEIGHT:     720,
+    CX:         1280,
+    CY:         720,
     FONT:       {
-        NAME:   "Monaco",
-        HEIGHT: 18
+        CY:     18,
+        FACE:   "Monaco, Lucida Console, Courier New"
     }
 };
 
-Panel.LIVEMEMORY = {
-    WIDTH:  (Panel.LIVECANVAS.WIDTH * 3) >> 2,
-    HEIGHT: Panel.LIVECANVAS.HEIGHT
+Panel.LIVEMEM = {
+    CX: (Panel.LIVECANVAS.CX * 3) >> 2,
+    CY: (Panel.LIVECANVAS.CY)
 };
 
-Panel.LIVEREGISTERS = {
-    WIDTH:  (Panel.LIVECANVAS.WIDTH - Panel.LIVEMEMORY.WIDTH),
-    HEIGHT: Panel.LIVECANVAS.HEIGHT
+Panel.LIVEREGS = {
+    CX:     (Panel.LIVECANVAS.CX - Panel.LIVEMEM.CX),
+    CY:     (Panel.LIVECANVAS.CY),
+    COLOR:  "black"
+};
+
+Panel.LIVEDUMP = {
+    CX: (Panel.LIVECANVAS.CX - Panel.LIVEMEM.CX),
+    CY: (Panel.LIVECANVAS.CY >> 1)
 };
 
 /*
@@ -161,6 +170,18 @@ function Rectangle(x, y, cx, cy)
 }
 
 /**
+ * contains(x, y)
+ *
+ * @param {number} x
+ * @param {number} y
+ * @return {boolean} true if (x,y) lies within the rectangle, false if not
+ */
+Rectangle.prototype.contains = function(x, y)
+{
+    return (x >= this.x && x < this.x + this.cx && y >= this.y && y < this.y + this.cy);
+};
+
+/**
  * subDivide(units, unitsTotal, fHorizontal)
  *
  * Return a new rectangle that is a subset of the current rectangle, based on the ratio of
@@ -225,32 +246,64 @@ Panel.prototype.setBinding = function(sHTMLType, sBinding, control)
     if (DEBUGGER && this.dbg && this.dbg.setBinding(sHTMLType, sBinding, control)) return true;
 
     if (!this.canvas && sHTMLType == "canvas") {
+
+        var panel = this;
         var fPanel = false;
+
         if (BACKTRACK && sBinding == "btpanel") {
             this.fBackTrack = fPanel = true;
         }
+
         if (fPanel) {
             this.canvas = control;
             this.context = this.canvas.getContext("2d");
 
-            this.xMemory = this.yMemory = 0;
-            this.cxMemory = ((this.canvas.width * Panel.LIVEMEMORY.WIDTH) / Panel.LIVECANVAS.WIDTH) | 0;
-            this.cyMemory = this.canvas.height;
-            this.xRegisters = this.cxMemory;
-            this.yRegisters = 0;
-            this.cxRegisters = this.canvas.width - this.cxMemory;
-            this.cyRegisters = this.canvas.height;
+            this.xMem = this.yMem = 0;
+            this.cxMem = ((this.canvas.width * Panel.LIVEMEM.CX) / Panel.LIVECANVAS.CX) | 0;
+            this.cyMem = this.canvas.height;
 
-            this.canvasLiveMemory = window.document.createElement("canvas");
-            this.canvasLiveMemory.width = Panel.LIVEMEMORY.WIDTH;
-            this.canvasLiveMemory.height = Panel.LIVEMEMORY.HEIGHT;
-            this.contextLiveMemory = this.canvasLiveMemory.getContext("2d");
-            this.imageLiveMemory = this.contextLiveMemory.createImageData(this.canvasLiveMemory.width, this.canvasLiveMemory.height);
+            this.xReg = this.cxMem;
+            this.yReg = 0;
+            this.cxReg = this.canvas.width - this.cxMem;
+            this.cyReg = this.canvas.height;
 
-            this.canvasLiveRegisters = window.document.createElement("canvas");
-            this.canvasLiveRegisters.width = Panel.LIVEREGISTERS.WIDTH;
-            this.canvasLiveRegisters.height = Panel.LIVEREGISTERS.HEIGHT;
-            this.contextLiveRegisters = this.canvasLiveRegisters.getContext("2d");
+            this.xDump = this.xReg;
+            this.yDump = ((this.canvas.height * (Panel.LIVEREGS.CY - Panel.LIVEDUMP.CY)) / Panel.LIVECANVAS.CY) | 0;
+            this.cxDump = this.cxReg;
+            this.cyDump = ((this.canvas.height * Panel.LIVEDUMP.CY) / Panel.LIVECANVAS.CY) | 0;
+
+            this.canvasLiveMem = window.document.createElement("canvas");
+            this.canvasLiveMem.width = Panel.LIVEMEM.CX;
+            this.canvasLiveMem.height = Panel.LIVEMEM.CY;
+            this.contextLiveMem = this.canvasLiveMem.getContext("2d");
+            this.imageLiveMem = this.contextLiveMem.createImageData(this.canvasLiveMem.width, this.canvasLiveMem.height);
+
+            this.canvasLiveRegs = window.document.createElement("canvas");
+            this.canvasLiveRegs.width = Panel.LIVEREGS.CX;
+            this.canvasLiveRegs.height = Panel.LIVEREGS.CY;
+            this.contextLiveRegs = this.canvasLiveRegs.getContext("2d");
+
+            this.canvas.addEventListener(
+                'mousemove',
+                function onMouseMove(event) {
+                    panel.moveMouse(event);
+                },
+                false               // we'll specify false for the 'useCapture' parameter for now...
+            );
+            this.canvas.addEventListener(
+                'mousedown',
+                function onMouseDown(event) {
+                    panel.clickMouse(event, true);
+                },
+                false               // we'll specify false for the 'useCapture' parameter for now...
+            );
+            this.canvas.addEventListener(
+                'mouseup',
+                function onMouseUp(event) {
+                    panel.clickMouse(event, false);
+                },
+                false               // we'll specify false for the 'useCapture' parameter for now...
+            );
 
             this.fRedraw = true;
             return true;
@@ -304,6 +357,137 @@ Panel.prototype.powerDown = function(fSave)
 };
 
 /**
+ * clickMouse(event, fDown)
+ *
+ * @this {Panel}
+ * @param {Object} event object from a 'mousedown' or 'mouseup' event
+ * @param {boolean} fDown
+ */
+Panel.prototype.clickMouse = function(event, fDown)
+{
+    /*
+     * event.button is 0 for the LEFT button and 2 for the RIGHT button
+     */
+    if (!event.button) {
+        this.lockMouse = fDown? 0 : -1;
+        this.fMouseDown = fDown;
+        this.updateMouse(event, fDown);
+    }
+};
+
+/**
+ * moveMouse(event)
+ *
+ * @this {Panel}
+ * @param {Object} event object from a 'mousemove' event
+ */
+Panel.prototype.moveMouse = function(event)
+{
+    this.updateMouse(event);
+};
+
+/**
+ * updateMouse(event, fDown)
+ *
+ * MouseEvent objects contain, among other things, the following properties:
+ *
+ *      clientX
+ *      clientY
+ *
+ * I've selected the above properties because they're widely supported, not because I need
+ * client-area coordinates.  In fact, layerX and layerY are probably closer to what I really want,
+ * but I don't think they're available in all browsers.  screenX and screenY would work as well.
+ *
+ * @this {Panel}
+ * @param {Object} event object from a mouse event (specifically, a MouseEvent object)
+ * @param {boolean} [fDown]
+ */
+Panel.prototype.updateMouse = function(event, fDown)
+{
+    /*
+     * Due to the responsive nature of our pages, the displayed size of the canvas may be smaller than the
+     * allocated size, and the coordinates we receive from mouse events are based on the currently displayed size.
+     */
+    var xScale = Panel.LIVECANVAS.CX / this.canvas.offsetWidth;
+    var yScale = Panel.LIVECANVAS.CY / this.canvas.offsetHeight;
+
+    var rect = this.canvas.getBoundingClientRect();
+    var x = ((event.clientX - rect.left) * xScale) | 0;
+    var y = ((event.clientY - rect.top) * yScale) | 0;
+
+    if (fDown == null) {
+        if (!this.lockMouse) {
+            this.lockMouse = Math.abs(this.xMouse - x) > Math.abs(this.yMouse - y)? 1 : 2;
+        }
+        if (this.lockMouse == 1) {
+            y = this.yMouse;
+        } else if (this.lockMouse == 2) {
+            x = this.xMouse;
+        }
+    }
+
+    this.xMouse = x;
+    this.yMouse = y;
+
+    if (MAXDEBUG) this.log("Panel.moveMouse(" + x + "," + y + ")");
+    this.assert(x >= 0 && x < Panel.LIVECANVAS.CX && y >= 0 && y < Panel.LIVECANVAS.CY);
+    /*
+     * Convert the mouse position into the corresponding memory address, assuming it's over the live memory area
+     */
+    var addr = this.findAddress(x, y);
+    if (addr != X86.ADDR_INVALID) {
+        addr &= ~0xf;
+        if (addr != this.addrDumpLast) {
+            this.dumpMemory(addr, true);
+            this.addrDumpLast = addr;
+        }
+    }
+};
+
+/**
+ * findAddress(x, y)
+ *
+ * @this {Panel}
+ * @param {number} x
+ * @param {number} y
+ * @return {number} address corresponding to (x,y) canvas coordinates, or ADDR_INVALID if none
+ */
+Panel.prototype.findAddress = function(x, y)
+{
+    if (x < Panel.LIVEMEM.CX && this.stats && this.stats.aRects) {
+        var i, rect;
+        for (i = 0; i < this.stats.aRects.length; i++) {
+            rect = this.stats.aRects[i];
+            if (rect.contains(x, y)) {
+                x -= rect.x;
+                y -= rect.y;
+                var nRegion = this.stats.aRegions[i];
+                var iBlock = this.stats.aBlocks[nRegion & Bus.BLOCK.NUM_MASK] & Bus.BLOCK.NUM_MASK;
+                var cBlocks = (nRegion >> Bus.BLOCK.COUNT_SHIFT) & Bus.BLOCK.COUNT_MASK;
+                var type = (nRegion >> Bus.BLOCK.TYPE_SHIFT) & Bus.BLOCK.TYPE_MASK;
+                var addr = iBlock * this.bus.blockSize;
+                var addrLimit = (iBlock + cBlocks) * this.bus.blockSize - 1;
+
+                /*
+                 * If you want memory to be displayed "vertically" instead of "horizontally", do this instead:
+                 *
+                 *      if (x > 0) addr += rect.cy * (x - 1) * this.ratioMemoryToPixels;
+                 *      addr += (y * this.ratioMemoryToPixels);
+                 */
+                if (y > 0) addr += rect.cx * (y - 1) * this.ratioMemoryToPixels;
+                addr += (x * this.ratioMemoryToPixels);
+
+                addr |= 0;
+                if (addr > addrLimit) addr = addrLimit;
+                if (MAXDEBUG) this.log("Panel.findAddress(" + x + "," + y + ") found type " + Memory.TYPE.NAMES[type] + ", address %" + str.toHex(addr));
+                return addr;
+            }
+        }
+    }
+    return X86.ADDR_INVALID;
+};
+
+/**
  * updateAnimation()
  *
  * If the given Control Panel contains a canvas requiring animation (eg, "btpanel"), then this is where that happens.
@@ -314,40 +498,52 @@ Panel.prototype.updateAnimation = function()
 {
     if (this.fRedraw) {
 
-        this.initPen(10, Panel.LIVECANVAS.FONT.HEIGHT, this.canvasLiveMemory, this.contextLiveMemory, this.canvas.style.color);
+        this.initPen(10, Panel.LIVECANVAS.FONT.CY, this.canvasLiveMem, this.contextLiveMem, this.canvas.style.color);
 
         if (this.fBackTrack) {
             if (DEBUG) this.log("begin scanMemory()");
             this.stats = this.bus.scanMemory(this.stats);
+            /*
+             * Calculate the pixel-to-memory-address ratio
+             */
+            this.ratioMemoryToPixels = (this.stats.cBlocks * this.bus.blockSize) / (Panel.LIVEMEM.CX * Panel.LIVEMEM.CY);
             /*
              * Update the Stats object with region information (cRegions and aRegions); return true if region
              * information has changed since the last call.
              */
             if (this.findRegions()) {
                 /*
-                 * For each region, I choose a slice of the LiveMemory canvas and record the corresponding rectangle
+                 * For each region, I choose a slice of the LiveMem canvas and record the corresponding rectangle
                  * within an aRects array (parallel to the aRegions array) in the Stats object.
                  *
                  * I don't need a sophisticated Treemap algorithm, because at this level, the data is not hierarchical.
                  * subDivide() makes a simple horizontal or vertical slicing decision based on the ratio of region blocks
                  * to remaining blocks.
                  */
-                var i;
-                var rectAvail = new Rectangle(0, 0, this.canvasLiveMemory.width, this.canvasLiveMemory.height);
+                var i, rect;
+                var rectAvail = new Rectangle(0, 0, this.canvasLiveMem.width, this.canvasLiveMem.height);
                 this.stats.aRects = [];
                 var cBlocksRemaining = this.stats.cBlocks;
                 for (i = 0; i < this.stats.cRegions; i++) {
                     var cBlocksRegion = (this.stats.aRegions[i] >> Bus.BLOCK.COUNT_SHIFT) & Bus.BLOCK.COUNT_MASK;
-                    this.stats.aRects.push(rectAvail.subDivide(cBlocksRegion, cBlocksRemaining, true));
+                    this.stats.aRects.push(rect = rectAvail.subDivide(cBlocksRegion, cBlocksRemaining, true));
+                    if (MAXDEBUG) this.log("region " + i + " rectangle: (" + rect.x + "," + rect.y + " " + rect.cx + "," + rect.cy + ")");
                     cBlocksRemaining -= cBlocksRegion;
                 }
+                /*
+                 * Assert that not only did all the specified regions account for all the specified blocks, but also that
+                 * the series of subDivide() calls exhausted the original rectangle to one of either zero width or zero height.
+                 */
                 this.assert(!cBlocksRemaining && (!rectAvail.cx || !rectAvail.cy));
+                /*
+                 * Now draw all the rectangles produced by the series of subDivide() calls.
+                 */
                 for (i = 0; i < this.stats.aRects.length; i++) {
                     var nRegion = this.stats.aRegions[i];
                     var type = (nRegion >> Bus.BLOCK.TYPE_SHIFT) & Bus.BLOCK.TYPE_MASK;
                     var cBlocks = (nRegion >> Bus.BLOCK.COUNT_SHIFT) & Bus.BLOCK.COUNT_MASK;
-                    var rect = this.stats.aRects[i];
-                    rect.drawWith(this.contextLiveMemory, Memory.TYPE.COLORS[type]);
+                    rect = this.stats.aRects[i];
+                    rect.drawWith(this.contextLiveMem, Memory.TYPE.COLORS[type]);
                     this.centerPen(rect);
                     this.centerText(Memory.TYPE.NAMES[type] + " (" + (((cBlocks * this.bus.blockSize) / 1024) | 0) + "Kb)");
                 }
@@ -356,7 +552,7 @@ Panel.prototype.updateAnimation = function()
         } else {
             this.drawText("This space intentionally left blank");
         }
-        this.context.drawImage(this.canvasLiveMemory, 0, 0, this.canvasLiveMemory.width, this.canvasLiveMemory.height, this.xMemory, this.yMemory, this.cxMemory, this.cyMemory);
+        this.context.drawImage(this.canvasLiveMem, 0, 0, this.canvasLiveMem.width, this.canvasLiveMem.height, this.xMem, this.yMem, this.cxMem, this.cyMem);
         this.fRedraw = false;
     }
 };
@@ -373,7 +569,7 @@ Panel.prototype.updateAnimation = function()
 Panel.prototype.updateStatus = function()
 {
     if (this.canvas) {
-        this.updateRegisters();
+        this.dumpRegisters();
     }
 };
 
@@ -435,20 +631,22 @@ Panel.prototype.addRegion = function(addr, iBlock, cBlocks, type)
 };
 
 /**
- * updateRegisters()
+ * dumpRegisters()
  *
  * Updates the live register portion of the panel.
  *
  * @this {Panel}
  */
-Panel.prototype.updateRegisters = function()
+Panel.prototype.dumpRegisters = function()
 {
-    if (this.context && this.canvasLiveRegisters && this.contextLiveRegisters) {
+    if (this.context && this.canvasLiveRegs && this.contextLiveRegs) {
 
-        this.contextLiveRegisters.fillStyle = "black";
-        this.contextLiveRegisters.fillRect(0, 0, this.canvasLiveRegisters.width, this.canvasLiveRegisters.height);
+        var x = 0, y = 0, cx = this.canvasLiveRegs.width, cy = this.canvasLiveRegs.height;
 
-        this.initPen(10, Panel.LIVECANVAS.FONT.HEIGHT, this.canvasLiveRegisters, this.contextLiveRegisters, this.canvas.style.color);
+        this.contextLiveRegs.fillStyle = Panel.LIVEREGS.COLOR;
+        this.contextLiveRegs.fillRect(x, y, cx, cy);
+
+        this.initPen(x + 10, y + Panel.LIVECANVAS.FONT.CY, this.canvasLiveRegs, this.contextLiveRegs, this.canvas.style.color);
         this.initCols(3);
         this.drawText("CPU");
         this.drawText("Target");
@@ -461,20 +659,20 @@ Panel.prototype.updateRegisters = function()
         this.initCols(8);
         this.initNumberFormat(16, 4);
         this.drawText("AX", this.cpu.regEAX, 2);
-        this.drawText("SI", this.cpu.regESI, 0, 1);
-        this.drawText("BX", this.cpu.regEBX, 2);
-        this.drawText("DI", this.cpu.regEDI, 0, 1);
-        this.drawText("CX", this.cpu.regECX, 2);
-        this.drawText("SP", this.cpu.getSP(), 0, 1);
-        this.drawText("DX", this.cpu.regEDX, 2);
-        this.drawText("BP", this.cpu.regEBP, 0, 2);
-        this.drawText("CS", this.cpu.getCS(), 2);
         this.drawText("DS", this.cpu.getDS(), 0, 1);
-        this.drawText("SS", this.cpu.getSS(), 2);
-        this.drawText("ES", this.cpu.getES(), 0, 2);
+        this.drawText("DX", this.cpu.regEDX, 2);
+        this.drawText("SI", this.cpu.regESI, 0, 1.5);
+        this.drawText("BX", this.cpu.regEBX, 2);
+        this.drawText("ES", this.cpu.getES(), 0, 1);
+        this.drawText("CX", this.cpu.regECX, 2);
+        this.drawText("DI", this.cpu.regEDI, 0, 1.5);
+        this.drawText("CS", this.cpu.getCS(), 2);
+        this.drawText("SS", this.cpu.getSS(), 0, 1);
         this.drawText("IP", this.cpu.getIP(), 2);
+        this.drawText("SP", this.cpu.getSP(), 0, 1.5);
         var regPS;
-        this.drawText("PS", regPS = this.cpu.getPS(), 0, 2);
+        this.drawText("PS", regPS = this.cpu.getPS(), 2);
+        this.drawText("BP", this.cpu.regEBP, 0, 1.5);
         this.initCols(9);
         this.drawText("V" + ((regPS & X86.PS.OF)? 1 : 0));
         this.drawText("D" + ((regPS & X86.PS.DF)? 1 : 0));
@@ -485,12 +683,52 @@ Panel.prototype.updateRegisters = function()
         this.drawText("A" + ((regPS & X86.PS.AF)? 1 : 0));
         this.drawText("P" + ((regPS & X86.PS.PF)? 1 : 0));
         this.drawText("C" + ((regPS & X86.PS.CF)? 1 : 0), 0, 2);
-        this.context.drawImage(this.canvasLiveRegisters, 0, 0, this.canvasLiveRegisters.width, this.canvasLiveRegisters.height, this.xRegisters, this.yRegisters, this.cxRegisters, this.cyRegisters);
+
+        this.dumpMemory(this.addrDumpLast);
+
+        this.context.drawImage(this.canvasLiveRegs, x, y, cx, cy, this.xReg, this.yReg, this.cxReg, this.cyReg);
     }
 };
 
 /**
- * initPen(xLeft, yTop, canvas, context, sColor)
+ * dumpMemory(addr, fDraw)
+ *
+ * @this {Panel}
+ * @param {number} addr
+ * @param {boolean} [fDraw]
+ */
+Panel.prototype.dumpMemory = function(addr, fDraw)
+{
+    if (this.context && this.canvasLiveRegs && this.contextLiveRegs) {
+
+        var x = 0, y = Panel.LIVEREGS.CY - Panel.LIVEDUMP.CY, cx = this.canvasLiveRegs.width, cy = Panel.LIVEDUMP.CY;
+
+        this.contextLiveRegs.fillStyle = Panel.LIVEREGS.COLOR;
+        this.contextLiveRegs.fillRect(x, y, cx, cy);
+
+        this.initPen(x + 10, y + Panel.LIVECANVAS.FONT.CY, this.canvasLiveRegs, this.contextLiveRegs, this.canvas.style.color);
+        this.initCols(24);
+        if (addr == null) {
+            this.drawText("Mouse over memory to dump");
+        } else {
+            this.drawText("0x" + str.toHex(addr), null, 0, 1);
+            for (var iLine = 1; iLine <= 16; iLine++) {
+                var sChars = "";
+                for (var iCol = 1; iCol <= 8; iCol++) {
+                    var b = this.bus.getByteDirect(addr++);
+                    this.drawText(str.toHexByte(b), null, 1);
+                    sChars += (b >= 32 && b < 128? String.fromCharCode(b) : ".");
+                }
+                this.drawText(sChars, null, 0, 1);
+            }
+        }
+
+        if (fDraw) this.context.drawImage(this.canvasLiveRegs, x, y, cx, cy, this.xDump, this.yDump, this.cxDump, this.cyDump);
+    }
+};
+
+/**
+ * initPen(xLeft, yTop, canvas, context, sColor, cyFont, sFontFace)
  *
  * @this {Panel}
  * @param {number} xLeft
@@ -498,12 +736,15 @@ Panel.prototype.updateRegisters = function()
  * @param {HTMLCanvasElement} [canvas]
  * @param {Object} [context]
  * @param {string} [sColor]
+ * @param {number} [cyFont]
+ * @param {string} [sFontFace]
  */
-Panel.prototype.initPen = function(xLeft, yTop, canvas, context, sColor)
+Panel.prototype.initPen = function(xLeft, yTop, canvas, context, sColor, cyFont, sFontFace)
 {
-    this.heightText = this.heightDefault = yTop;
-    this.fontText = this.fontDefault = this.heightText + "px " + Panel.LIVECANVAS.FONT.NAME;
     this.setPen(this.xLeftMargin = xLeft, yTop);
+    this.heightText = this.heightDefault = cyFont || Panel.LIVECANVAS.FONT.CY;
+    if (!sFontFace) sFontFace = this.fontDefault || (this.heightDefault + "px " + Panel.LIVECANVAS.FONT.FACE);
+    this.fontText = this.fontDefault = sFontFace;
     if (canvas) {
         this.canvasText = canvas;
     }
@@ -538,7 +779,7 @@ Panel.prototype.centerPen = function(rect)
     this.heightText = this.heightDefault;
     if (rect.cy < this.heightText) {
         this.heightText = rect.cy;
-        this.fontText = this.heightText + "px " + Panel.LIVECANVAS.FONT.NAME;
+        this.fontText = this.heightText + "px " + Panel.LIVECANVAS.FONT.FACE;
     }
     this.setPen(rect.x + (rect.cx >> 1), rect.y + (rect.cy >> 1));
 };
@@ -595,7 +836,7 @@ Panel.prototype.initNumberFormat = function(nBase, nDigits)
  *
  * @this {Panel}
  * @param {string} sText
- * @param {number} [nValue]
+ * @param {number|null} [nValue]
  * @param {number} [nColsSkip]
  * @param {number} [nLinesSkip]
  */
@@ -605,7 +846,7 @@ Panel.prototype.drawText = function(sText, nValue, nColsSkip, nLinesSkip)
     this.contextText.fillStyle = this.colorText;
     this.contextText.fillText(sText, this.xText, this.yText);
     this.xText += this.cxColumn;
-    if (nValue !== undefined) {
+    if (nValue != null) {
         var sValue = nValue.toString();
         if (this.nDefaultBase == 16) {
             sValue = "0x" + str.toHex(nValue, this.nDefaultDigits);

@@ -2376,6 +2376,9 @@ Video.prototype.processTouchEvent = function(event, fStart)
      *
      * makes it sound simple, but it turns out we have to walk the canvas' entire "parentage" of DOM elements
      * to get the exact offsets.
+     *
+     * TODO: Determine whether the getBoundingClientRect() code used in panel.js for mouse events can also
+     * be used here to simplify this annoyingly complicated code for touch events.
      */
     var xTouchOffset = 0;
     var yTouchOffset = 0;
@@ -2388,8 +2391,8 @@ Video.prototype.processTouchEvent = function(event, fStart)
     } while ((eCurrent = eCurrent.offsetParent));
 
     /*
-     * Due to the responsive nature of our pages, the displayed size of the canvas may be smaller than the allocated
-     * size, and the coordinates we receive from touch events are based on the currently displayed size.
+     * Due to the responsive nature of our pages, the displayed size of the canvas may be smaller than the
+     * allocated size, and the coordinates we receive from touch events are based on the currently displayed size.
      */
     var xScale =  this.cxScreen / this.canvasScreen.offsetWidth;
     var yScale = this.cyScreen / this.canvasScreen.offsetHeight;

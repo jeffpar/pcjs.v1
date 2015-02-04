@@ -64,11 +64,11 @@ if (typeof module !== 'undefined') {
  * @property {function(number,number,boolean)} setInt32
  */
 
-var littleEndian = (function() {
+var littleEndian = (TYPEDARRAYS? (function() {
     var buffer = new ArrayBuffer(2);
     new DataView(buffer).setUint16(0, 256, true);
     return new Uint16Array(buffer)[0] === 256;
-})();
+})() : false);
 
 /**
  * Memory(addr, size, type, controller)
