@@ -11,8 +11,8 @@ So it's best to refer to these files generically as "modules", and more specific
 whenever they implement a specific device (or set of devices, in the case of [*ChipSet*](/docs/pcjs/chipset/)).
 
 Examples of non-device modules include UI modules like [panel.js](panel.js) and [debugger.js](debugger.js),
-and sub-modules like [x86opxx.js](x86opxx.js), [x86mods.js](x86mods.js) and [x86help.js](x86help.js)
-that separate the CPU functionality of [x86.js](x86.js) into more manageable pieces.
+and sub-modules like [x86opxx.js](x86opxx.js) and [x86help.js](x86help.js) that separate the CPU functionality
+of [x86.js](x86.js) into more manageable pieces.
 
 These modules should always be loaded or compiled in the order listed by the *pcJSFiles* property in
 [package.json](../../../package.json), which includes all the necessary *shared* modules as well.
@@ -39,7 +39,13 @@ At the time of this writing, the order is:
 * [pcjs/x86cpu.js](x86cpu.js)
 * [pcjs/x86grps.js](x86grps.js)
 * [pcjs/x86help.js](x86help.js)
-* [pcjs/x86mods.js](x86mods.js)
+* [pcjs/x86modb.js](x86modb.js)
+* [pcjs/x86modw.js](x86modw.js)
+* [pcjs/x86modb16.js](x86modb16.js)
+* [pcjs/x86modw16.js](x86modw16.js)
+* [pcjs/x86modb32.js](x86modb32.js)
+* [pcjs/x86modw32.js](x86modw32.js)
+* [pcjs/x86modsib.js](x86modsib.js)
 * [pcjs/x86opxx.js](x86opxx.js)
 * [pcjs/x86op0f.js](x86op0f.js)
 * [pcjs/chipset.js](chipset.js)
@@ -87,14 +93,14 @@ would make the feature dramatically more expensive, both in terms of size and sp
 
 A BackTrack index is encoded as a 32-bit value with three parts:
 
-- 15-bit BackTrack object index
-- 9-bit source object offset (0-511)
-- 6-bit generation number (1-63)
+- Bits 0-8: 9-bit BackTrack object offset (0-511)
+- Bits 9-15: 7-bit type and access info
+- Bits 16-30: 15-bit BackTrack object number (1-32767, 0 reserved for dynamic data)
 
-This represents a total of 30 bits, with 2 bits reserved.
+This represents a total of 31 bits, with bit 31 reserved.
 
-Let's look at one of the last things a ROM does during boot: load a disk sector into RAM.  It will be up to the disk
-controller (or DMA controller if one is used) to create a BackTrack object representing the sector that was read,
+For example, look at one of the last things a ROM does during boot: load a disk sector into RAM.  It will be up to the
+disk controller (or DMA controller if one is used) to create a BackTrack object representing the sector that was read,
 adding that object to the global BackTrack object array, and then associating the corresponding BackTrack index with
 the first byte of RAM where the sector was loaded.  Subsequent bytes of RAM containing the rest of the sector will refer
 to the same BackTrack object, using BackTrack indexes containing offsets 1-511.

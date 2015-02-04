@@ -198,7 +198,10 @@ Rectangle.prototype.contains = function(x, y)
 Rectangle.prototype.subDivide = function(units, unitsTotal, fHorizontal)
 {
     var rect;
-    if (fHorizontal || units >= (unitsTotal >> 2)) {
+    if (fHorizontal === undefined) {
+        fHorizontal = units >= (unitsTotal >> 2);
+    }
+    if (fHorizontal) {
         rect = new Rectangle(this.x, this.y, this.cx, ((this.cy * units) / unitsTotal) | 0);
         this.y += rect.cy;
         this.cy -= rect.cy;
@@ -221,6 +224,8 @@ Rectangle.prototype.subDivide = function(units, unitsTotal, fHorizontal)
 Rectangle.prototype.drawWith = function(context, color)
 {
     if (!color) color = new Color();
+    context.strokeStyle = "black";
+    context.strokeRect(this.x, this.y, this.cx, this.cy);
     context.fillStyle = (typeof color == "string"? color : color.toString());
     context.fillRect(this.x, this.y, this.cx, this.cy);
 };
@@ -412,7 +417,7 @@ Panel.prototype.moveMouse = function(event)
  *
  * @this {Panel}
  * @param {Object} event object from a mouse event (specifically, a MouseEvent object)
- * @param {boolean} [fDown]
+ * @param {boolean} [fDown] is true or false if this was a click event, otherwise it's just a move event
  */
 Panel.prototype.updateMouse = function(event, fDown)
 {
@@ -443,6 +448,7 @@ Panel.prototype.updateMouse = function(event, fDown)
 
     if (MAXDEBUG) this.log("Panel.moveMouse(" + x + "," + y + ")");
     this.assert(x >= 0 && x < Panel.LIVECANVAS.CX && y >= 0 && y < Panel.LIVECANVAS.CY);
+
     /*
      * Convert the mouse position into the corresponding memory address, assuming it's over the live memory area
      */
@@ -481,7 +487,7 @@ Panel.prototype.findAddress = function(x, y)
                 var addrLimit = (iBlock + cBlocks) * this.bus.blockSize - 1;
 
                 /*
-                 * If you want memory to be displayed "vertically" instead of "horizontally", do this instead:
+                 * If you want memory to be arranged "vertically" instead of "horizontally", do this:
                  *
                  *      if (x > 0) addr += rect.cy * (x - 1) * this.ratioMemoryToPixels;
                  *      addr += (y * this.ratioMemoryToPixels);
@@ -538,7 +544,7 @@ Panel.prototype.updateAnimation = function()
                 var cBlocksRemaining = this.stats.cBlocks;
                 for (i = 0; i < this.stats.cRegions; i++) {
                     var cBlocksRegion = (this.stats.aRegions[i] >> Bus.BLOCK.COUNT_SHIFT) & Bus.BLOCK.COUNT_MASK;
-                    this.stats.aRects.push(rect = rectAvail.subDivide(cBlocksRegion, cBlocksRemaining, true));
+                    this.stats.aRects.push(rect = rectAvail.subDivide(cBlocksRegion, cBlocksRemaining, i == 0));
                     if (MAXDEBUG) this.log("region " + i + " rectangle: (" + rect.x + "," + rect.y + " " + rect.cx + "," + rect.cy + ")");
                     cBlocksRemaining -= cBlocksRegion;
                 }
@@ -789,11 +795,22 @@ Panel.prototype.centerPen = function(rect)
 {
     this.fontText = this.fontDefault;
     this.heightText = this.heightDefault;
-    if (rect.cy < this.heightText) {
-        this.heightText = rect.cy;
+    var x = rect.x + (rect.cx >> 1);
+    var y = rect.y + (rect.cy >> 1);
+    var maxText = rect.cy;
+    if (rect.cx < rect.cy) {
+        maxText = rect.cx;
+        this.fVerticalText = true;
+        this.contextText.save();
+        this.contextText.translate(x, y);
+        this.contextText.rotate(-Math.PI/2);
+        x = y = 0;
+    }
+    if (maxText < this.heightText) {
+        this.heightText = maxText;
         this.fontText = this.heightText + "px " + Panel.LIVECANVAS.FONT.FACE;
     }
-    this.setPen(rect.x + (rect.cx >> 1), rect.y + (rect.cy >> 1));
+    this.setPen(x, y);
 };
 
 /**
@@ -880,7 +897,7 @@ Panel.prototype.drawText = function(sText, nValue, nColsSkip, nLinesSkip)
  *
  * centerPen() sets xLeft and yTop to the center of the specified rectangle, and centerText() calculates
  * the width of the text, adjusting the horizontal centering by its width and the vertical centering by the
- * default font height.  Then it call drawText().
+ * default font height.  Then it calls drawText().
  *
  * @this {Panel}
  * @param {string} sText
@@ -890,8 +907,12 @@ Panel.prototype.centerText = function(sText)
     this.contextText.font = this.fontText;
     var tm = this.contextText.measureText(sText);
     this.xText -= tm.width >> 1;
-    this.yText += (this.heightText >> 1) - 1;
+    this.yText += (this.heightText >> 1) - 2;
     this.drawText(sText);
+    if (this.fVerticalText) {
+        this.contextText.restore();
+        this.fVerticalText = false;
+    }
 };
 
 /**

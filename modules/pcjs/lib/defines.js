@@ -133,6 +133,7 @@ if (typeof module !== 'undefined') {
     global.TYPEDARRAYS = TYPEDARRAYS;
     global.BACKTRACK = BACKTRACK;
     global.SAMPLER = SAMPLER;
+    global.BUGS_8086 = BUGS_8086;
     global.I386 = I386;
     /*
      * TODO: When we're "required" by Node, should we return anything via module.exports?
