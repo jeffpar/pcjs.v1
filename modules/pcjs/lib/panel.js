@@ -258,6 +258,18 @@ Panel.prototype.setBinding = function(sHTMLType, sBinding, control)
             this.canvas = control;
             this.context = this.canvas.getContext("2d");
 
+            /*
+             * Employ the same gross onresize() hack for IE9/IE10 that we had to use for the Video canvas
+             */
+            if (web.getUserAgent().indexOf("MSIE") >= 0) {
+                this.canvas.onresize = function(canvas, cx, cy) {
+                    return function onResizeVideo() {
+                        canvas.style.height = (((canvas.clientWidth * cy) / cx) | 0) + "px";
+                    };
+                }(this.canvas, this.canvas.width, this.canvas.height);
+                this.canvas.onresize();
+            }
+
             this.xMem = this.yMem = 0;
             this.cxMem = ((this.canvas.width * Panel.LIVEMEM.CX) / Panel.LIVECANVAS.CX) | 0;
             this.cyMem = this.canvas.height;
