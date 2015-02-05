@@ -784,7 +784,7 @@ MarkOut.prototype.convertMDImageLinks = function(sBlock, sIndent)
     var cImageLinks = 0;
     var fNoGallery = false;
     var sBlockOrig = sBlock;
-    var re = /!\[(.*?)\]\((.*?)(?:\s*"(.*?)"\)|\))/g;
+    var re = /!\[(.*?)]\((.*?)(?:\s*"(.*?)"\)|\))/g;
     while ((aMatch = re.exec(sBlockOrig))) {
         var sImage = '<img src="' + net.encodeURL(aMatch[2], this.req, this.fDebug) + '" alt="' + aMatch[1] + '"';
         if (aMatch[3]) {
