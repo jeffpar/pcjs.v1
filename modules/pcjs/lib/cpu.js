@@ -96,7 +96,9 @@ function CPU(parmsCPU, nCyclesDefault)
      */
     this.aCounts.mhzTarget = this.aCounts.mhzDefault * this.aCounts.nCyclesMultiplier;
 
-    this.aFlags.fPowered = false;
+    /*
+     * We add a number of flags to the set initialized by Component
+     */
     this.aFlags.fRunning = false;
     this.aFlags.fStarting = false;
     this.aFlags.fAutoStart = parmsCPU['autoStart'];
@@ -264,8 +266,12 @@ CPU.prototype.powerUp = function(data, fRepower)
             this.println("No debugger detected");
         }
     }
-    this.aFlags.fPowered = true;
-    if (!this.autoStart() && this.dbg) this.dbg.updateStatus();
+    /*
+     * The Computer component (which is responsible for all powerDown and powerUp notifications)
+     * is now responsible for managing a component's fPowered flag, not us.
+     *
+     *      this.aFlags.fPowered = true;
+     */
     this.updateCPU();
     return true;
 };
@@ -279,7 +285,12 @@ CPU.prototype.powerUp = function(data, fRepower)
  */
 CPU.prototype.powerDown = function(fSave)
 {
-    this.aFlags.fPowered = false;
+    /*
+     * The Computer component (which is responsible for all powerDown and powerUp notifications)
+     * is now responsible for managing a component's fPowered flag, not us.
+     *
+     *      this.aFlags.fPowered = false;
+     */
     return fSave && this.save ? this.save() : true;
 };
 
@@ -499,6 +510,7 @@ CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
     case "run":
         this.bindings[sBinding] = control;
         control.onclick = function onClickRun() {
+            if (!cpu.cmp || !cpu.cmp.checkPower()) return;
             if (!cpu.aFlags.fRunning)
                 cpu.runCPU(true);
             else

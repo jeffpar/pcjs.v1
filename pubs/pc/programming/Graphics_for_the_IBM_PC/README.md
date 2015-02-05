@@ -2,6 +2,8 @@
 ---
 by Dan Illowsky and Michael Abrash (1984)
 
+Check out the [Live Demos](demos/) we've created from this classic text.
+
 ![Page 1](../static/Graphics_for_the_IBM_PC/thumbs/Graphics_for_the_IBM_PC 1.jpeg "link:/modules/shared/templates/pdf.html?url=/pubs/pc/programming/Graphics_for_the_IBM_PC/pages/Graphics_for_the_IBM_PC 1.pdf&page=1&total=320:200:260")
 ![Page 2](../static/Graphics_for_the_IBM_PC/thumbs/Graphics_for_the_IBM_PC 2.jpeg "link:/modules/shared/templates/pdf.html?url=/pubs/pc/programming/Graphics_for_the_IBM_PC/pages/Graphics_for_the_IBM_PC 2.pdf&page=2&total=320:200:260")
 ![Page 3](../static/Graphics_for_the_IBM_PC/thumbs/Graphics_for_the_IBM_PC 3.jpeg "link:/modules/shared/templates/pdf.html?url=/pubs/pc/programming/Graphics_for_the_IBM_PC/pages/Graphics_for_the_IBM_PC 3.pdf&page=3&total=320:200:260")

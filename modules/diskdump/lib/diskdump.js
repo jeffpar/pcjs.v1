@@ -1154,6 +1154,23 @@ DiskDump.prototype.addManifestInfo = function(fileInfo)
     this.aManifestInfo.push(fileInfo);
 };
 
+DiskDump.asTextFileExts = [".MD", ".ME", ".BAS", ".TXT", ".XML"];
+
+/**
+ * isTextFile(sFileName)
+ *
+ * @this {DiskDump}
+ * @param {string} sFileName
+ * @return {boolean} true if the filename contains a known text file extension, false if unknown
+ */
+DiskDump.prototype.isTextFile = function(sFileName)
+{
+    for (var i = 0; i < DiskDump.asTextFileExts.length; i++) {
+        if (str.endsWith(sFileName, DiskDump.asTextFileExts[i])) return true;
+    }
+    return false;
+};
+
 /**
  * readDir(sDir, fRoot, done)
  *
@@ -1254,7 +1271,7 @@ DiskDump.prototype.readDir = function(sDir, fRoot, done)
                         } else {
                             fileInfo.FILE_ATTR = DiskDump.ATTR_ARCHIVE;
                             fileInfo.FILE_SIZE = stats.size;
-                            if (fileInfo.FILE_NAME == "README.MD") {
+                            if (obj.isTextFile(fileInfo.FILE_NAME)) {
                                 fs.readFile(fileInfo.FILE_PATH, {encoding: "utf8"}, function doneReadDirEntry(err, s) {
                                     if (!err) {
                                         s = s.replace(/\n/g, "\r\n").replace(/\r\r/g, "\r");
@@ -1384,7 +1401,7 @@ DiskDump.prototype.readPath = function(sPath, done)
                     } else {
                         fileInfo.FILE_ATTR = DiskDump.ATTR_ARCHIVE;
                         fileInfo.FILE_SIZE = stats.size;
-                        if (fileInfo.FILE_NAME == "README.MD") {
+                        if (obj.isTextFile(fileInfo.FILE_NAME)) {
                             DiskDump.readFile(sFilePath, "utf8", function doneReadPathEntry(err, sData) {
                                 if (!err) {
                                     sData = sData.replace(/\n/g, "\r\n").replace(/\r\r/g, "\r");
@@ -2056,6 +2073,8 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
         done(err);
         return false;
     }
+
+    done(null);
     return true;
 };
 

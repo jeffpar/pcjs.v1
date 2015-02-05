@@ -668,6 +668,7 @@ Computer.prototype.donePowerOn = function(aParms)
          * TODO: Do we not care about the return value here? (ie, is checking fRestoreError sufficient)?
          */
         this.powerRestore(this.cpu, stateComputer, fRepower, fRestore);
+        this.cpu.autoStart();
     }
 
     /*
@@ -683,6 +684,34 @@ Computer.prototype.donePowerOn = function(aParms)
         this.stateFailSafe.clear();
         delete this.stateFailSafe;
     }
+};
+
+/**
+ * checkPower()
+ *
+ * @this {Computer}
+ * @return {boolean} true if the computer is fully powered, false otherwise
+ */
+Computer.prototype.checkPower = function()
+{
+    if (this.aFlags.fPowered) return true;
+
+    var component = null, iComponent;
+    var aComponents = Component.getComponents(this.id);
+    for (iComponent = 0; iComponent < aComponents.length; iComponent++) {
+        component = aComponents[iComponent];
+        if (component !== this && !component.aFlags.fReady) break;
+    }
+    if (iComponent == aComponents.length) {
+        for (iComponent = 0; iComponent < aComponents.length; iComponent++) {
+            component = aComponents[iComponent];
+            if (component !== this && !component.aFlags.fPowered) break;
+        }
+    }
+    if (iComponent == aComponents.length) component = this;
+    var s = "The " + component.type + " component (" + component.id + ") is not " + (!component.aFlags.fReady? "ready yet" + (component.fnReady? " (waiting for notification)" : "") : "powered yet") + ".";
+    web.alertUser(s);
+    return false;
 };
 
 /**

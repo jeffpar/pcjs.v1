@@ -373,8 +373,12 @@ function embedMachine(sName, sVersion, idElement, sXMLFile, sXSLFile, sStateFile
                             xsltProcessor['importStylesheet'](xsl);
                             var eFragment = xsltProcessor['transformToFragment'](xml, window.document);
                             if (eFragment) {
-                                eMachine.parentNode.replaceChild(eFragment, eMachine);
-                                doneMachine();
+                                if (eMachine.parentNode) {
+                                    eMachine.parentNode.replaceChild(eFragment, eMachine);
+                                    doneMachine();
+                                } else {
+                                    displayError("invalid machine element: " + idElement);
+                                }
                             } else {
                                 displayError("transformToFragment failed");
                             }
@@ -402,7 +406,7 @@ function embedMachine(sName, sVersion, idElement, sXMLFile, sXSLFile, sStateFile
                 parseXML(sXMLFile, null, idElement, sStateFile, false, displayMessage, loadXSL);
             }
         } else {
-            displayError("failed to find machine element: " + idElement);
+            displayError("missing machine element: " + idElement);
         }
     } catch(e) {
         displayError(e.message);

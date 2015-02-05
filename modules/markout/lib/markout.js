@@ -174,7 +174,7 @@ MarkOut.CLI = function()
             if (err) {
                 MarkOut.logError(err, true);
             } else {
-                var m = new MarkOut(str, null, req, null, fDebug, fDebug);
+                var m = new MarkOut(str, null, req, null, fDebug);
                 console.log(m.convertMD("    "));
             }
         });
@@ -733,7 +733,7 @@ MarkOut.prototype.convertMDLines = function(s)
 MarkOut.prototype.convertMDLinks = function(sBlock)
 {
     var aMatch;
-    var re = /\[([^\[\]]*)\]\((.*?)(?:\s*"(.*?)"\)|\))/g;
+    var re = /\[([^\[\]]*)]\((.*?)(?:\s*"(.*?)"\)|\))/g;
     while ((aMatch = re.exec(sBlock))) {
         var sTag = "a";
         var sType = "href";
@@ -915,7 +915,7 @@ MarkOut.prototype.convertMDMachineLinks = function(sBlock)
      */
     var aMatch;
     var cMatches = 0;
-    var reMachines = /\[(.*?)\]\((.*?)\s*"(PC|C1P)js:(.*?)"\)/gi;
+    var reMachines = /\[(.*?)]\((.*?)\s*"(PC|C1P)js:(.*?)"\)/gi;
 
     while ((aMatch = reMachines.exec(sBlock))) {
 
