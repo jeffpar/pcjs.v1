@@ -76,8 +76,10 @@
 						e = document.getElementById('returnPath');
 						if (e) e.textContent = sReturnPath;
 					}
-					i = pdf.indexOf("%20");
+					i = pdf.indexOf('%20');
+					if (i < 0) i = pdf.indexOf(' ');
 					if (i > 0) pdf = pdf.substr(0, i);
+					pdf = pdf.replace('/static/', '/');
 					var setPage = function(page) {
 						frame.setAttribute('src', 'http://static.pcjs.org' + pdf + ' ' + curPage + '.pdf');
 					};
