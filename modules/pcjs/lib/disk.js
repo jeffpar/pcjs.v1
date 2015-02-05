@@ -2022,7 +2022,7 @@ Disk.prototype.restore = function(deltas)
              */
             else if (aDiskInfo[1] != null && this.dwChecksum != null && aDiskInfo[1] != this.dwChecksum) {
                 sReason = "original checksum (" + aDiskInfo[1] + ") differs from current checksum (" + this.dwChecksum + ")";
-                nChanges = -1;
+                nChanges = -2;
             }
             /*
              * Checksum is more important than disk path, and for now, I want the flexibility to move disk images.
@@ -2082,7 +2082,12 @@ Disk.prototype.restore = function(deltas)
     }
 
     if (nChanges < 0) {
-        this.controller.notice("unable to restore disk '" + this.sDiskName + ": " + sReason);
+        /*
+         * We're suppressing checksum messages for the general public for now....
+         */
+        if (DEBUG || nChanges != -2) {
+            this.controller.notice("Unable to restore disk '" + this.sDiskName + ": " + sReason);
+        }
     } else {
         if (DEBUG && this.messageEnabled()) {
             this.printMessage('restore("' + this.sDiskName + '"): restored ' + nChanges + ' change(s)');
