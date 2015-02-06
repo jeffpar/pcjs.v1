@@ -1729,6 +1729,12 @@ DiskDump.prototype.buildClusters = function(aFiles, offDisk, cbCluster, iParentC
                 this.cWritesPending++;
                 (function readClusters(file, cb, off) {
                     fs.readFile(file.FILE_PATH, function doneReadClusters(err, buf) {
+                        /*
+                         * If cWritesPending has been prematurely zeroed, we assume that's because the buildClusters()
+                         * caller discovered a problem (eg, the total number of clusters exceeds what can fit in the image),
+                         * so we bail.
+                         */
+                        if (!obj.cWritesPending) return;
                         if (!err) {
                             if (fDebug && cb != buf.length) DiskDump.logConsole(file.FILE_NAME + ": initial size (" + cb + ") does not match actual size (" + buf.length + ")");
                             buf.copy(obj.bufDisk, off);
@@ -1777,7 +1783,7 @@ DiskDump.prototype.buildClusters = function(aFiles, offDisk, cbCluster, iParentC
         }
     }
 
-    if (iLevel) {
+    if (!iLevel) {
         if (!this.cWritesPending) done(null);
     }
 
@@ -2070,11 +2076,11 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
 
     if (offDisk > cbDisk) {
         err = new Error("too much data for disk image (" + cClusters + " clusters required)");
+        this.cWritesPending = 0;
         done(err);
         return false;
     }
 
-    done(null);
     return true;
 };
 
