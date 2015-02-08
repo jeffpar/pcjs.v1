@@ -3,9 +3,9 @@ IBM PC Machine Configurations
 
 Here you'll find sample Machine Configurations for all the IBM PC models that PCjs currently supports.
 
-* [Model 5150](/devices/pc/machine/5150/)
-* [Model 5160](/devices/pc/machine/5160/)
-* [Model 5170](/devices/pc/machine/5170/)
+* [Model 5150](/devices/pc/machine/#model-5150-machine-configurations)
+* [Model 5160](/devices/pc/machine/#model-5160-machine-configurations)
+* [Model 5170](/devices/pc/machine/#model-5170-machine-configurations)
 
 ### Model 5150 Machine Configurations
 

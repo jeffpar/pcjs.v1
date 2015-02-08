@@ -12,6 +12,27 @@ information on [customizing and embedding](embed/) your own configurations.
 
 ### Using C1Pjs
 
+> **NOTE:** For those of you who never used a *real* Challenger 1P machine, if any of the operational
+details of the machine seem bizarre, that's not the simulator's fault.  It's how the machine
+actually operated.
+
+> Some of those details are artifacts of teletype-based interfaces, which were more common
+than a video monitor interface in the 1970's.  On a teletype, there was no way to physically
+erase printed characters, so you had to count underscores to know how many characters had been
+erased internally.
+
+> Also, the wide margins on either side of the screen were a side-effect of how the machine
+displayed video on a conventional television set; they helped ensure that no characters would be
+displayed off-screen and therefore unreadable.  As a result, even though the machine contained
+enough video memory for 32 rows of characters, each with 32 columns, the usable portion was much
+smaller.
+
+> The original C1P, with its more modern keyboard and video monitor interface, obviously could
+have done a better job processing and displaying user input (and in fact, I wrote some
+machine-language extensions back in the day that did exactly that).  And Ohio Scientific did improve
+later models, but the original C1P functioned exactly as shown, with all its teletype-like
+idiosyncrasies and television-related limitations.
+
 #### Starting the Simulator
 
 > Press the **RUN** or **BREAK** button to start the C1Pjs Simulator.
