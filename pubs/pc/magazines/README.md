@@ -4,7 +4,7 @@ Browser our collection of PC-related magazines.
 
 ![Byte Magazine](byte/static/BYTE-1975-11/thumbs/BYTE-1975-11 1.jpeg "link:byte/:200:260")
 ![Microsoft Systems Journal](msj/static/MSJ-1986-10/thumbs/MSJ-1986-10 1.jpeg "link:msj/:200:260")
-![PC Tech Journal](pctj/static/PCTJ-1987-11/thumbs/PCTJ-1987-11 1.jpeg "link:pctj/:200:260")
+![PC Tech Journal](pctj/static/PCTJ-1983-07/thumbs/PCTJ-1983-07 1.jpeg "link:pctj/:200:260")
 
 We also have an assortment of selected articles:
 

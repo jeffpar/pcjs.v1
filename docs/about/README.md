@@ -1,4 +1,4 @@
-About JavaScript Machines and the PCjs Project
+About JavaScript Machines
 ---
 
 The JavaScript Machines Project (originally at [jsmachines.net](http://jsmachines.net/)) is a collection of computer

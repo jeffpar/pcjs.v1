@@ -1,6 +1,8 @@
 PC Tech Journal
 ---
 
+![PC Tech Journal, Jul 1983](static/PCTJ-1983-07/thumbs/PCTJ-1983-07 1.jpeg "link:PCTJ-1983-07/:200:260")
+![PC Tech Journal, Sep 1983](static/PCTJ-1983-09/thumbs/PCTJ-1983-09 1.jpeg "link:PCTJ-1983-09/:200:260")
 ![PC Tech Journal, Oct 1986](static/PCTJ-1986-10/thumbs/PCTJ-1986-10 1.jpeg "link:PCTJ-1986-10/:200:260")
 ![PC Tech Journal, Nov 1986](static/PCTJ-1986-11/thumbs/PCTJ-1986-11 1.jpeg "link:PCTJ-1986-11/:200:260")
 ![PC Tech Journal, Dec 1986](static/PCTJ-1986-12/thumbs/PCTJ-1986-12 1.jpeg "link:PCTJ-1986-12/:200:260")
