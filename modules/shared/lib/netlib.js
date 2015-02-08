@@ -154,7 +154,7 @@ net.encodeURL = function(sURL, req, fDebug)
     if (sURL) {
         sURL = sURL.replace(/\\/g, '/');
         if (!fDebug) {
-            if (sURL.match(/^[^:]*static/)) {
+            if (sURL.match(/^[^:?]*static/)) {
                 sURL = "http://static.pcjs.org" + path.join(req.path, sURL).replace("/static/", "/");
             }
         }
