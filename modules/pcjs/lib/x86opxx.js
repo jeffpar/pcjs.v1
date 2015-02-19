@@ -1337,8 +1337,8 @@ var X86OpXX = {
     opOS: function() {
         if (I386) {
             this.opFlags |= X86.OPFLAG.SEG;
-            this.dataSize ^= 0x6;             // that which is 2 shall become 4, and vice versa
-            this.dataMask ^= 0xffff0000;      // that which is 0x0000ffff shall become 0xffffffff, and vice versa
+            this.dataSize ^= 0x6;               // that which is 2 shall become 4, and vice versa
+            this.dataMask ^= (0xffff0000|0);    // that which is 0x0000ffff shall become 0xffffffff, and vice versa
             this.opMem = this.aaOpMem[this.dataSize];
             this.nStepCycles -= this.CYCLES.nOpCyclesPrefix;
         }
@@ -1353,8 +1353,8 @@ var X86OpXX = {
     opAS: function() {
         if (I386) {
             this.opFlags |= X86.OPFLAG.SEG;
-            this.addrSize ^= 0x06;          // that which is 2 shall become 4, and vice versa
-            this.addrMask ^= 0xffff0000;    // that which is 0x0000ffff shall become 0xffffffff, and vice versa
+            this.addrSize ^= 0x06;              // that which is 2 shall become 4, and vice versa
+            this.addrMask ^= (0xffff0000|0);    // that which is 0x0000ffff shall become 0xffffffff, and vice versa
             this.setOpMod();
             this.nStepCycles -= this.CYCLES.nOpCyclesPrefix;
         }
@@ -2221,7 +2221,7 @@ var X86OpXX = {
             /*
              * CDQ
              */
-            this.regEDX = (this.regEAX & 0x80000000)? 0xffffffff : 0;
+            this.regEDX = (this.regEAX & (0x80000000|0))? -1 : 0;
         }
         this.nStepCycles -= this.CYCLES.nOpCyclesCWD;
     },

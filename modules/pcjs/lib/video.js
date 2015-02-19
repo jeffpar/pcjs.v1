@@ -1377,7 +1377,7 @@ Card.ACCESS.writeByteMode0EvenOdd = function writeByteMode0EvenOdd(off, b)
     // the address is even, and cleared for planes 0 and 2 if the address is odd.
     //
     var idw = off & ~0x1;
-    var maskMaps = this.controller.nWriteMapMask & (idw == off? 0x00ff00ff : 0xff00ff00);
+    var maskMaps = this.controller.nWriteMapMask & (idw == off? 0x00ff00ff : (0xff00ff00|0));
     dw = (dw & maskMaps) | (this.adw[idw] & ~maskMaps);
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
     if (this.adw[idw] != dw) {
@@ -1587,7 +1587,7 @@ Card.ACCESS.writeByteMode2Xor = function writeByteMode2Xor(off, b)
  */
 Card.ACCESS.afn = [];
 Card.ACCESS.afn[Card.ACCESS.READ.MODE0]     = Card.ACCESS.readByteMode0;
-Card.ACCESS.afn[Card.ACCESS.READ.MODE0 | Card.ACCESS.READ.EVENODD]  = Card.ACCESS.readByteMode0EvenOdd;
+Card.ACCESS.afn[Card.ACCESS.READ.MODE0  | Card.ACCESS.READ.EVENODD]  = Card.ACCESS.readByteMode0EvenOdd;
 Card.ACCESS.afn[Card.ACCESS.READ.MODE1]     = Card.ACCESS.readByteMode1;
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0]    = Card.ACCESS.writeByteMode0;
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0ROT] = Card.ACCESS.writeByteMode0Rot;
@@ -4361,7 +4361,7 @@ Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
                  * And, since assertions don't fix problems (only catch them, and only in DEBUG builds), I'm also
                  * ensuring that bPixel will always default to 0 if an undefined value ever slips through again.
                  */
-                var dwPixel = data & 0x80808080;
+                var dwPixel = data & (0x80808080|0);
                 // if (dwPixel < 0) dwPixel += 0x100000000;
                 this.assert(Video.aEGADWToByte[dwPixel] !== undefined);
                 var bPixel = Video.aEGADWToByte[dwPixel] || 0;
@@ -4797,7 +4797,7 @@ Video.prototype.outGRCData = function(port, bOut, addrFrom)
         this.cardEGA.nSetMapBits = this.cardEGA.nSetMapData & ~this.cardEGA.nSetMapMask;
         break;
     case Card.GRC.COLRCMP.INDX:
-        this.cardEGA.nColorCompare = Video.aEGAByteToDW[bOut & 0xf] & 0x80808080;
+        this.cardEGA.nColorCompare = Video.aEGAByteToDW[bOut & 0xf] & (0x80808080|0);
         break;
     case Card.GRC.DATAROT.INDX:
     case Card.GRC.MODE.INDX:
@@ -4810,7 +4810,7 @@ Video.prototype.outGRCData = function(port, bOut, addrFrom)
         this.checkMode(false);
         break;
     case Card.GRC.COLRDC.INDX:
-        this.cardEGA.nColorDontCare = Video.aEGAByteToDW[(bOut & 0xf) ^ 0xf] & 0x80808080;
+        this.cardEGA.nColorDontCare = Video.aEGAByteToDW[(bOut & 0xf) ^ 0xf] & (0x80808080|0);
         break;
     case Card.GRC.BITMASK.INDX:
         this.cardEGA.nBitMapMask = bOut | (bOut << 8) | (bOut << 16) | (bOut << 24);

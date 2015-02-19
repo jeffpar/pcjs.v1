@@ -4096,7 +4096,7 @@ if (DEBUGGER) {
         if (sCategory !== undefined) {
             var bitsMessage = 0;
             if (sCategory == "all") {
-                bitsMessage = 0xffffffff & ~(Messages.HALT | Messages.LOG);
+                bitsMessage = (0xffffffff|0) & ~(Messages.HALT | Messages.LOG);
                 sCategory = null;
             } else if (sCategory == "on") {
                 fCriteria = true;

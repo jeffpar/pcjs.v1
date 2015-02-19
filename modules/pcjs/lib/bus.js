@@ -718,10 +718,10 @@ Bus.prototype.setLong = function(addr, l)
     var lPrev, nShift = (off & 0x3) << 3;
     off &= ~0x3;
     lPrev = this.aMemBlocks[iBlock].readLong(off);
-    this.aMemBlocks[iBlock].writeLong(off, (lPrev & ~(0xffffffff << nShift)) | (l << nShift));
+    this.aMemBlocks[iBlock].writeLong(off, (lPrev & ~((0xffffffff|0) << nShift)) | (l << nShift));
     iBlock = (iBlock + 1) & this.blockMask;
     lPrev = this.aMemBlocks[iBlock].readLong(0);
-    this.aMemBlocks[iBlock].writeLong(0, (lPrev & (0xffffffff << nShift)) | (l >>> (32 - nShift)));
+    this.aMemBlocks[iBlock].writeLong(0, (lPrev & ((0xffffffff|0) << nShift)) | (l >>> (32 - nShift)));
 };
 
 /**
@@ -745,10 +745,10 @@ Bus.prototype.setLongDirect = function(addr, l)
     var lPrev, nShift = (off & 0x3) << 3;
     off &= ~0x3;
     lPrev = this.aMemBlocks[iBlock].readLongDirect(off);
-    this.aMemBlocks[iBlock].writeLongDirect(off, (lPrev & ~(0xffffffff << nShift)) | (l << nShift));
+    this.aMemBlocks[iBlock].writeLongDirect(off, (lPrev & ~((0xffffffff|0) << nShift)) | (l << nShift));
     iBlock = (iBlock + 1) & this.blockMask;
     lPrev = this.aMemBlocks[iBlock].readLongDirect(0);
-    this.aMemBlocks[iBlock].writeLongDirect(0, (lPrev & (0xffffffff << nShift)) | (l >>> (32 - nShift)));
+    this.aMemBlocks[iBlock].writeLongDirect(0, (lPrev & ((0xffffffff|0) << nShift)) | (l >>> (32 - nShift)));
 };
 
 /**

@@ -862,7 +862,7 @@ X86Seg.prototype.updateMode = function(fProt)
             this.dataMask = 0xffff;
         } else {
             this.dataSize = 4;
-            this.dataMask = 0xffffffff;
+            this.dataMask = (0xffffffff|0);
         }
     } else {
         this.load = X86Seg.loadReal;

@@ -302,7 +302,7 @@ FDC.REG_DATA = {
     /*
      * FDC status/error results, generally assigned according to the corresponding ST0, ST1, ST2 or ST3 status bit.
      *
-     * TODO: Determine when EQUIP_CHECK is *really* set; also, "77 step pulses" sounds suspiciously like a typo.
+     * TODO: Determine when EQUIP_CHECK is *really* set; also, "77 step pulses" sounds suspiciously like a typo (it's not 79?)
      */
     RES: {
         NONE:           0x00000000, // ST0 (IC): Normal termination of command (NT)
@@ -334,8 +334,8 @@ FDC.REG_DATA = {
         TRACK0:         0x10000000, // ST3 (T0): Status of the "Track 0" signal from the diskette drive
         READY:          0x20000000, // ST3 (RY): Status of the "Ready" signal from the diskette drive
         WRITEPROT:      0x40000000, // ST3 (WP): Status of the "Write Protect" signal from the diskette drive
-        FAULT:          0x80000000, // ST3 (FT): Status of the "Fault" signal from the diskette drive
-        ST3:            0xFF000000
+        FAULT:          0x80000000|0, // ST3 (FT): Status of the "Fault" signal from the diskette drive
+        ST3:            0xFF000000|0
     }
 };
 

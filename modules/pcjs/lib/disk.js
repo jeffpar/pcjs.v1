@@ -629,7 +629,7 @@ Disk.prototype.build = function(buffer, fModified)
                     var adw = sector['data'];
                     for (var idw = 0; idw < cdw; idw++, ib += 4) {
                         var dw = adw[idw] = dv.getInt32(ib, true);
-                        dwChecksum = (dwChecksum + dw) & 0xffffffff;
+                        dwChecksum = (dwChecksum + dw) & (0xffffffff|0);
                     }
                     if (fModified) sector.cModify = cdw;
                     head[iSector] = sector;
@@ -857,7 +857,7 @@ Disk.prototype.doneLoad = function(sDiskFile, sDiskData, nErrorCode, sDiskPath)
                              * being written).  So all we need to do at this point is checksum all the initial sector data.
                              */
                             for (var idw = 0; idw < adw.length; idw++) {
-                                dwChecksum = (dwChecksum + adw[idw]) & 0xffffffff;
+                                dwChecksum = (dwChecksum + adw[idw]) & (0xffffffff|0);
                             }
                         }
                     }

@@ -349,11 +349,16 @@ Memory.writeShortMemory = function writeShortMemory(off, w)
         var idw = off >> 2;
         var nShift = (off & 0x3) << 3;
         if (nShift < 24) {
+            /*
+             *  0:  0xffff0000
+             *  8:  0xff0000ff
+             * 16:  0x0000ffff
+             */
             this.adw[idw] = (this.adw[idw] & ~(0xffff << nShift)) | (w << nShift);
         } else {
             this.adw[idw] = (this.adw[idw] & 0x00ffffff) | (w << 24);
             idw++;
-            this.adw[idw] = (this.adw[idw] & 0xffffff00) | (w >> 8);
+            this.adw[idw] = (this.adw[idw] & (0xffffff00|0)) | (w >> 8);
         }
     }
     this.fDirty = true;
@@ -380,9 +385,15 @@ Memory.writeLongMemory = function writeLongMemory(off, l)
         if (!nShift) {
             this.adw[idw] = l;
         } else {
-            this.adw[idw] = (this.adw[idw] & ~(0xffffffff << nShift)) | (l << nShift);
+            /*
+             *  8:  0xffffff00
+             * 16:  0xffff0000
+             * 24:  0xff000000
+             */
+            var mask = (0xffffffff|0) << nShift;
+            this.adw[idw] = (this.adw[idw] & ~mask) | (l << nShift);
             idw++;
-            this.adw[idw] = (this.adw[idw] & (0xffffffff << nShift)) | (l >>> (32 - nShift));
+            this.adw[idw] = (this.adw[idw] & mask) | (l >>> (32 - nShift));
         }
     }
     this.fDirty = true;

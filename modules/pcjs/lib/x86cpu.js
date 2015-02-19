@@ -2133,10 +2133,10 @@ X86CPU.prototype.setLong = function(addr, l)
     var lPrev, nShift = (off & 0x3) << 3;
     off &= ~0x3;
     lPrev = this.aMemBlocks[iBlock].readLong(off);
-    this.aMemBlocks[iBlock].writeLong(off, (lPrev & ~(0xffffffff << nShift)) | (l << nShift));
+    this.aMemBlocks[iBlock].writeLong(off, (lPrev & ~(-1 << nShift)) | (l << nShift));
     iBlock = (iBlock + 1) & this.blockMask;
     lPrev = this.aMemBlocks[iBlock].readLong(0);
-    this.aMemBlocks[iBlock].writeLong(0, (lPrev & (0xffffffff << nShift)) | (l >>> (32 - nShift)));
+    this.aMemBlocks[iBlock].writeLong(0, (lPrev & (-1 << nShift)) | (l >>> (32 - nShift)));
 };
 
 /**
