@@ -143,11 +143,6 @@ FileDump.CLI = function()
     }
 
     var sOutputFile = argv['output'];
-    if (typeof sOutputFile != "string") {
-        FileDump.logError(new Error("bad or missing output filename"));
-        return;
-    }
-
     if (sOutputFile && sOutputFile.charAt(0) != '/') sOutputFile = path.join(process.cwd(), sOutputFile);
     var fOverwrite = argv['overwrite'];
 
@@ -238,19 +233,17 @@ FileDump.validateFormat = function(sFormat)
  */
 FileDump.prototype.loadFile = function(sFile, iStart, nSkip, done)
 {
-    /*
-     * Since we don't include an 'options' object (with an 'encoding' property) between
-     * the sFilePath and callback parameters to readFile(), the callback's 2nd parameter will
-     * be a Buffer object rather than a String -- and so we call it 'buf' instead of 'data'.
-     */
     var obj = this;
+
+    var options = {encoding: str.endsWith(sFile, ".hex")? "utf8" : null};
+
     var sFilePath = net.isRemote(sFile)? sFile : path.join(this.sServerRoot, sFile);
 
     if (!this.sFilePath) this.sFilePath = sFilePath;
     if (this.fDebug) console.log("loadFile(" + sFilePath + "," + iStart + "," + nSkip + ")");
 
     if (net.isRemote(sFilePath)) {
-        net.getFile(sFilePath, null, function(err, status, buf) {
+        net.getFile(sFilePath, options.encoding, function(err, status, buf) {
             if (err) {
                 FileDump.logError(err);
                 done(err);
@@ -260,7 +253,7 @@ FileDump.prototype.loadFile = function(sFile, iStart, nSkip, done)
             done(null);
         });
     } else {
-        fs.readFile(sFilePath, function(err, buf) {
+        fs.readFile(sFilePath, options, function(err, buf) {
             if (err) {
                 FileDump.logError(err);
                 done(err);
@@ -278,12 +271,30 @@ FileDump.prototype.loadFile = function(sFile, iStart, nSkip, done)
  * Records the given file data in the FileDump's buffer
  *
  * @this {FileDump}
- * @param {Buffer} buf
+ * @param {Buffer|string} buf
  * @param {number} iStart
  * @param {number} nSkip
  */
 FileDump.prototype.setData = function(buf, iStart, nSkip)
 {
+    var b, i, s;
+    if (typeof buf == "string") {
+        /*
+         * We've received a string that must be converted to a Buffer before we continue.
+         *
+         * At the moment, the only string-based file format we support is a ".hex" file,
+         * which contains a series of byte values encoded in hex, separated by whitespace.
+         */
+        var ab = [];
+        var as = buf.split(/\s+/);
+        for (i = 0; i < as.length; i++) {
+            s = as[i];
+            if (!s.length) continue;
+            if (isNaN(b = parseInt(s, 16))) break;
+            ab.push(b);
+        }
+        buf = new Buffer(ab);
+    }
     if (!this.buf) {
         if (!nSkip) {
             this.buf = buf;
@@ -292,8 +303,7 @@ FileDump.prototype.setData = function(buf, iStart, nSkip)
         }
     }
     if (nSkip) {
-        var b;
-        for (var i = 0; i < buf.length; i++) {
+        for (i = 0; i < buf.length; i++) {
             this.buf.writeUInt8(b = buf.readUInt8(i), iStart);
             iStart += nSkip + 1;
         }
@@ -353,10 +363,15 @@ FileDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offData)
     var cMaxCols = 16 * cbItem;
     if (offData === undefined) offData = 0;
 
-    /*
-     * TODO: Assert that off is always < buf.length as well.
-     */
     for (var off = 0; off < len; off += cbItem) {
+
+        /*
+         * WARNING: Whenever the following condition arises, you probably have a non-dword-granular
+         * file, and you should have requested a byte-granular dump instead.
+         */
+        if (off + cbItem > buf.length) {
+            break;
+        }
 
         var v = (cbItem == 1? buf.readUInt8(off) : buf.readInt32LE(off));
 
