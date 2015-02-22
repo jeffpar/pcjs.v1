@@ -79,15 +79,19 @@ var X86 = {
         NT:     0x4000,     // bit 14: Nested Task flag (always set on 8086/80186, clear on 80286 reset)
         BIT15:  0x8000      // bit 15: reserved (always set on 8086/80186, clear otherwise)
     },
-    /*
-     * Machine Status Word definitions (stored in regMSW)
-     */
-    MSW: {
-        PE:     0x0001,     // protected-mode enabled
-        MP:     0x0002,     // monitor processor extension (ie, coprocessor)
-        EM:     0x0004,     // emulate processor extension
-        TS:     0x0008,     // task switch indicator
-        SET:    0xfff0      // on the 80286, these are always set (TODO: Verify)
+    CR0: {
+        /*
+         * Machine Status Word (MSW) bit definitions
+         */
+        MSW: {
+            PE: 0x0001,     // protected-mode enabled
+            MP: 0x0002,     // monitor processor extension (ie, coprocessor)
+            EM: 0x0004,     // emulate processor extension
+            TS: 0x0008,     // task switch indicator
+            ON: 0xfff0      // on the 80286, these bits are always on (TODO: Verify)
+        },
+        ET: 0x00000010,     // coprocessor type (80287 or 80387); always 1 on post-80386 CPUs
+        PG: 0x80000000|0    // 0: paging disabled
     },
     SEL: {
         RPL:    0x0003,     // requested privilege level (0-3)

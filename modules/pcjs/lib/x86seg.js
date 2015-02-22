@@ -255,7 +255,7 @@ X86Seg.loadIDTProt = function loadIDTProt(nIDT)
  */
 X86Seg.checkReadReal = function checkReadReal(off, cb, fSuppress)
 {
-    return this.base + off;
+    return (this.base + off) | 0;
 };
 
 /**
@@ -272,7 +272,7 @@ X86Seg.checkReadReal = function checkReadReal(off, cb, fSuppress)
  */
 X86Seg.checkWriteReal = function checkWriteReal(off, cb, fSuppress)
 {
-    return this.base + off;
+    return (this.base + off) | 0;
 };
 
 /**
@@ -467,7 +467,7 @@ X86Seg.switchTSS = function switchTSS(selNew, fNest)
     cpu.setSP(cpu.getShort(addrNew + offSP));
     cpu.segLDT.load(cpu.getShort(addrNew + X86.TSS.TASK_LDT));
     if (fNest) cpu.setShort(addrNew + X86.TSS.PREV_TSS, selOld);
-    cpu.regMSW |= X86.MSW.TS;
+    cpu.regCR0 |= X86.CR0.MSW.TS;
     return true;
 };
 
@@ -760,16 +760,21 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
  * setBase(addr)
  *
  * This is used in unusual situations where the base must be set independently; normally, the base
- * is set according to the selector provided to load(), but there are a few cases where setBase() is
- * required (eg, in resetRegs(), where the 80286 wants the real-mode CS selector to be 0xF000 but the
- * CS base must be 0xFF0000).
+ * is set according to the selector provided to load(), but there are a few cases where setBase()
+ * is required.
+ *
+ * For example, in resetRegs(), the real-mode CS selector must be reset to 0xF000 for an 80286 or 80386,
+ * but the CS base must be set to 0x00FF0000 or 0xFFFF0000, respectively.  To simplify life for setBase()
+ * callers, we allow them to specify 32-bit bases, which we then truncate to 24 bits as needed.
  *
  * @this {X86Seg}
  * @param {number} addr
+ * @return {number} addr, truncated as needed
  */
 X86Seg.prototype.setBase = function(addr)
 {
-    this.base = addr;
+    if (this.cpu.model < X86.MODEL_80386) addr &= 0xffffff;
+    return this.base = addr;
 };
 
 /**
@@ -825,7 +830,7 @@ X86Seg.prototype.restore = function(a)
 X86Seg.prototype.updateMode = function(fProt)
 {
     if (fProt === undefined) {
-        fProt = !!(this.cpu.regMSW & X86.MSW.PE);
+        fProt = !!(this.cpu.regCR0 & X86.CR0.MSW.PE);
     }
     this.fExpDown = false;
     if (fProt) {

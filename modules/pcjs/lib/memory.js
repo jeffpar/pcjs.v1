@@ -71,7 +71,7 @@ var littleEndian = (TYPEDARRAYS? (function() {
 })() : false);
 
 /**
- * Memory(addr, size, type, controller)
+ * Memory(addr, used, size, type, controller)
  *
  * The Bus component allocates Memory objects so that each has a memory buffer with a
  * block-granular starting address and an address range equal to bus.blockSize; however,
@@ -104,16 +104,19 @@ var littleEndian = (TYPEDARRAYS? (function() {
  * is available).
  *
  * @constructor
- * @param {number} addr of block (must be some multiple of bus.blockSize)
+ * @param {number} addr of lowest used address in block
+ * @param {number} [used] portion of block in bytes (0 for none); must be a multiple of 4
  * @param {number} [size] of block's buffer in bytes (0 for none); must be a multiple of 4
  * @param {number} [type] is one of the Memory.TYPE constants (default is Memory.TYPE.NONE)
  * @param {Object} [controller] is an optional memory controller component
  */
-function Memory(addr, size, type, controller)
+function Memory(addr, used, size, type, controller)
 {
     var i;
     this.adw = null;
     this.offset = 0;
+    this.addr = addr;
+    this.used = used;
     this.size = size || 0;
     this.type = type || Memory.TYPE.NONE;
     this.fReadOnly = (type == Memory.TYPE.ROM);
@@ -172,7 +175,7 @@ function Memory(addr, size, type, controller)
         /*
          * If littleEndian is true, we can use ab[], aw[] and adw[] directly; well, we can use them
          * whenever the offset is a multiple of 1, 2 or 4, respectively.  Otherwise, we must fallback to
-         * dv.getUint8()/dv.setUint8(), dv.getUint16()/dv.setUint16() and db.getInt32()/dv.setInt32().
+         * dv.getUint8()/dv.setUint8(), dv.getUint16()/dv.setUint16() and dv.getInt32()/dv.setInt32().
          */
         this.ab = new Uint8Array(this.buffer, 0, size);
         this.aw = new Uint16Array(this.buffer, 0, size >> 1);
@@ -937,21 +940,19 @@ Memory.prototype = {
         this.writeLong = this.fReadOnly? Memory.writeNone : this.writeLongDirect;
     },
     /**
-     * setDebugInfo(cpu, dbg, addr, size)
+     * setDebugInfo(cpu, dbg, size)
      *
      * @this {Memory}
      * @param {X86CPU|Component} cpu
      * @param {Debugger|Component} dbg
-     * @param {number} addr of block
      * @param {number} size of block
      */
-    setDebugInfo: function(cpu, dbg, addr, size) {
+    setDebugInfo: function(cpu, dbg, size) {
         if (DEBUGGER) {
             this.cpu = cpu;
             this.dbg = dbg;
-            this.addr = addr;
             this.cReadBreakpoints = this.cWriteBreakpoints = 0;
-            if (this.dbg) this.dbg.redoBreakpoints(addr, size);
+            if (this.dbg) this.dbg.redoBreakpoints(this.addr, size);
         }
     },
     /**

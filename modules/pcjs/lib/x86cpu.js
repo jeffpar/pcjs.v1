@@ -101,8 +101,8 @@ function X86CPU(parmsCPU) {
 
     var nCyclesDefault = 0;
     switch(this.model) {
-    default:
     case X86.MODEL_8088:
+    default:
         nCyclesDefault = 4772727;
         break;
     case X86.MODEL_80286:
@@ -701,6 +701,9 @@ X86CPU.prototype.initProcessor = function()
     this.OPFLAG_NOINTR8086 = X86.OPFLAG.NOINTR;
     this.nShiftCountMask = 0xff;            // on an 8086/8088, all shift counts are used as-is
 
+    /*
+     * TODO: Create an 80386-specific CYCLES table.
+     */
     this.CYCLES = (this.model >= X86.MODEL_80286? X86CPU.CYCLES_80286 : X86CPU.CYCLES_8088);
 
     this.aOps     = X86OpXX.aOps.slice();   // make copies of aOps and others before modifying them
@@ -819,11 +822,26 @@ X86CPU.prototype.resetRegs = function()
     this.regEDI = 0;
 
     /*
+     * The following are internal "registers" that are used to capture intermediate values inside selected helper
+     * functions and use them if they've been modified (or are known to always change); for example, the MUL and DIV
+     * instructions perform calculations that must be propagated to specific registers (eg, AX and/or DX), which
+     * the ModRM decoder functions don't know about.  We initialize them here mainly for documentation purposes.
+     */
+    this.regMD16 = this.regMD32 = -1;
+
+    /*
+     * Another internal "register" we occasionally need is an interim copy of bModRM, set inside selected opcode
+     * handlers so that the helper function can have access to the instruction's bModRM without resorting to a closure
+     * (which, in the Chrome V8 engine, for example, seems to cause constant recompilation).
+     */
+    this.bModRM = 0;
+
+    /*
      * NOTE: Even though the MSW and IDTR are 80286-specific, we initialize them for ALL CPUs, so that
      * functions like X86Help.opHelpINT() can use the same code for both.  The 8086/8088 have no direct way
      * of accessing or changing them, so this internal change should be perfectly safe for those processors.
      */
-    this.regMSW = X86.MSW.SET;
+    this.regCR0 = X86.CR0.MSW.ON;
     this.addrIDT = 0; this.addrIDTLimit = 0x03FF;
     this.nIOPL = 0;             // this should be set before the first setPS() call
 
@@ -844,14 +862,62 @@ X86CPU.prototype.resetRegs = function()
     this.segES     = new X86Seg(this, X86Seg.ID.DATA,  "ES");
     this.segSS     = new X86Seg(this, X86Seg.ID.STACK, "SS");
     this.setSP(0);
+    this.setSS(0);
 
     if (I386 && this.model >= X86.MODEL_80386) {
+        this.regCR0 = X86.CR0.ET;
         this.segFS = new X86Seg(this, X86Seg.ID.DATA,  "FS");
         this.segGS = new X86Seg(this, X86Seg.ID.DATA,  "GS");
     }
 
     this.segNULL = new X86Seg(this, X86Seg.ID.NULL,  "NULL");
-    this.setCSIP(0, 0xFFFF);    // this should be called before the first setPS() call
+
+    /*
+     * The next few initializations mirror what we must do prior to each instruction (ie, inside the stepCPU() function);
+     * note that opPrefixes, along with segData and segStack, are reset only after we've executed a non-prefix instruction.
+     */
+    this.segData = this.segDS;
+    this.segStack = this.segSS;
+    this.opFlags = this.opPrefixes = 0;
+    this.regEA = this.regEAWrite = X86.ADDR_INVALID;
+
+    /*
+     * intFlags contains some internal states we use to indicate whether a hardware interrupt (INTFLAG.INTR) or
+     * Trap software interrupt (INTR.TRAP) has been requested, as well as when we're in a "HLT" state (INTFLAG.HALT)
+     * that requires us to wait for a hardware interrupt (INTFLAG.INTR) before continuing execution.
+     *
+     * intFlags must be cleared only by checkINTR(), whereas opFlags must be cleared prior to every CPU operation.
+     */
+    this.intFlags = X86.INTFLAG.NONE;
+
+    /*
+     * The following contain the (default) OPERAND size (2 for 16 bits, 4 for 32 bits), and the corresponding masks
+     * for isolating the (src) bits of an OPERAND and clearing the (dst) bits of an OPERAND.  These are reset to
+     * their segCS counterparts at the start of every new instruction, but are also set here for documentation purposes.
+     */
+    this.dataSize = this.segCS.dataSize;
+    this.dataMask = this.segCS.dataMask;
+
+    /*
+     * Similarly, the following contain the (default) ADDRESS size (2 for 16 bits, 4 for 32 bits), and the corresponding
+     * masks for isolating the (src) bits of an address and clearing the (dst) bits of an address.  Like the OPERAND size
+     * properties, these are reset to their segCS counterparts at the start of every new instruction.
+     */
+    this.addrSize = this.segCS.addrSize;
+    this.addrMask = this.segCS.addrMask;
+
+    /*
+     * It's also worth noting that instructions that implicitly use the stack also rely on something called STACK size,
+     * which is based on the BIG bit of the last descriptor loaded into SS; use the following segSS properties:
+     *
+     *      segSS.addrSize      (2 or 4)
+     *      segSS.addrMask      (0xffff or 0xffffffff)
+     *
+     * As there is no STACK size instruction prefix override, there's no need to propagate these segSS properties
+     * to separate X86CPU properties, as we do for the OPERAND size and ADDRESS size properties.
+     */
+
+    this.setCSIP(0, 0xffff);    // this should be called before the first setPS() call
 
     if (BACKTRACK) {
         /*
@@ -907,12 +973,12 @@ X86CPU.prototype.resetRegs = function()
         /*
          * TODO: Verify what the 80286 actually sets addrGDT and addrGDTLimit to on reset (or if it leaves them alone).
          */
-        this.addrGDT = 0; this.addrGDTLimit = 0xFFFF;                   // GDTR
+        this.addrGDT = 0; this.addrGDTLimit = 0xffff;                   // GDTR
         this.segLDT = new X86Seg(this, X86Seg.ID.LDT,   "LDT", true);   // LDTR
         this.segTSS = new X86Seg(this, X86Seg.ID.TSS,   "TSS", true);   // TR
         this.segVER = new X86Seg(this, X86Seg.ID.OTHER, "VER", true);   // a scratch segment register for VERR and VERW instructions
-        this.setCSIP(0xFFF0, 0xF000);                   // in real-mode, 0xF000 defaults the CS base address to 0x0F0000
-        this.setCSBase(0xFF0000);                       // which is why we must manually adjust the CS base address to 0xFF0000
+        this.setCSIP(0xfff0, 0xf000);                   // on an 80286 or 80386, the default CS:IP is 0xF000:0xFFF0 instead of 0xFFFF:0x0000
+        this.setCSBase(0xffff0000|0);                   // on an 80286 or 80386, all CS base address bits above bit 15 must be set
     }
 
     /*
@@ -925,66 +991,6 @@ X86CPU.prototype.resetRegs = function()
      * Now that all the segment registers have been created, it's safe to set the current addressing mode.
      */
     this.setProtMode();
-
-    /*
-     * intFlags contains some internal states we use to indicate whether a hardware interrupt (INTFLAG.INTR) or
-     * Trap software interrupt (INTR.TRAP) has been requested, as well as when we're in a "HLT" state (INTFLAG.HALT)
-     * that requires us to wait for a hardware interrupt (INTFLAG.INTR) before continuing execution.
-     *
-     * intFlags must be cleared only by checkINTR(), whereas opFlags must be cleared prior to every CPU operation.
-     */
-    this.intFlags = X86.INTFLAG.NONE;
-
-    /*
-     * The following are internal "registers" that are used to capture intermediate values inside selected helper
-     * functions and use them if they've been modified (or are known to always change); for example, the MUL and DIV
-     * instructions perform calculations that must be propagated to specific registers (eg, AX and/or DX), which
-     * the ModRM decoder functions don't know about.  We initialize them here mainly for documentation purposes.
-     */
-    this.regMD16 = this.regMD32 = -1;
-
-    /*
-     * Another internal "register" we occasionally need is an interim copy of bModRM, set inside selected opcode
-     * handlers so that the helper function can have access to the instruction's bModRM without resorting to a closure
-     * (which, in the Chrome V8 engine, for example, seems to cause constant recompilation).
-     */
-    this.bModRM = 0;
-
-    /*
-     * The next few initializations mirror what we must do prior to each instruction (ie, inside the stepCPU() function);
-     * note that opPrefixes, along with segData and segStack, are reset only after we've executed a non-prefix instruction.
-     */
-    this.regEA = this.regEAWrite = X86.ADDR_INVALID;
-    this.segData = this.segDS;
-    this.segStack = this.segSS;
-    this.opFlags = this.opPrefixes = 0;
-
-    /*
-     * The following contain the (default) OPERAND size (2 for 16 bits, 4 for 32 bits), and the corresponding masks
-     * for isolating the (src) bits of an OPERAND and clearing the (dst) bits of an OPERAND.  These are reset to
-     * their segCS counterparts at the start of every new instruction, but are also set here for documentation purposes.
-     */
-    this.dataSize = this.segCS.dataSize;
-    this.dataMask = this.segCS.dataMask;
-
-    /*
-     * Similarly, the following contain the (default) ADDRESS size (2 for 16 bits, 4 for 32 bits), and the corresponding
-     * masks for isolating the (src) bits of an address and clearing the (dst) bits of an address.  Like the OPERAND size
-     * properties, these are reset to their segCS counterparts at the start of every new instruction.
-     */
-    this.addrSize = this.segCS.addrSize;
-    this.addrMask = this.segCS.addrMask;
-
-    /*
-     * It's also worth noting that instructions that implicitly use the stack also rely on something called STACK size,
-     * which is based on the BIG bit of the last descriptor loaded into SS; use the following segSS properties:
-     *
-     *      segSS.addrSize      (2 or 4)
-     *      segSS.addrMask      (0xffff or 0xffffffff)
-     *
-     * As there is no STACK size instruction prefix override, there's no need to propagate these segSS properties
-     * to separate X86CPU properties, as we do for the OPERAND size and ADDRESS size properties.
-     */
 
     /*
      * The memory dispatch tables; opMem refers to the active set, based on the current OPERAND size (dataSize),
@@ -1176,7 +1182,7 @@ X86CPU.prototype.checkIntReturn = function(addr)
 X86CPU.prototype.setProtMode = function(fProt)
 {
     if (fProt === undefined) {
-        fProt = !!(this.regMSW & X86.MSW.PE);
+        fProt = !!(this.regCR0 & X86.CR0.MSW.PE);
     }
     if (!fProt) {
         this.printMessage("returning to real-mode");
@@ -1199,7 +1205,7 @@ X86CPU.prototype.setProtMode = function(fProt)
 X86CPU.prototype.saveProtMode = function()
 {
     if (this.addrGDT != null) {
-        return [this.regMSW, this.addrGDT, this.addrGDTLimit, this.addrIDT, this.addrIDTLimit, this.segLDT.save(), this.segTSS.save(), this.nIOPL];
+        return [this.regCR0, this.addrGDT, this.addrGDTLimit, this.addrIDT, this.addrIDTLimit, this.segLDT.save(), this.segTSS.save(), this.nIOPL];
     }
     return null;
 };
@@ -1215,7 +1221,7 @@ X86CPU.prototype.saveProtMode = function()
 X86CPU.prototype.restoreProtMode = function(a)
 {
     if (a && a.length) {
-        this.regMSW = a[0];
+        this.regCR0 = a[0];
         this.addrGDT = a[1];
         this.addrGDTLimit = a[2];
         this.addrIDT = a[3];
@@ -1278,11 +1284,16 @@ X86CPU.prototype.restore = function(data)
     this.restoreProtMode(a[5]);
     this.setPS(a[6]);
     /*
-     * Since we're not using setCS() and setSS(), it's important to call setIP() and setSP() *after* the segCS
-     * and segSS loads, so that the CPU's linear IP and SP registers (regLIP and regLSP) will be updated properly.
+     * Since we're not using setCS(), it's important to call setIP() *after* segCS is restored, so that the
+     * CPU's linear IP register (regLIP) will be updated properly.
      */
     this.setIP(a[0]);
+    /*
+     * It's also important to call setSP(), so that the linear SP register (regLSP) will be updated properly;
+     * we also need to call setSS(), to ensure that the lower and upper stack limits are properly initialized.
+     */
     this.setSP(regESP);
+    this.setSS(this.segSS.sel);
     if (I386 && this.model >= X86.MODEL_80386) {
         this.segFS.restore(a[7]);
         this.segGS.restore(a[8]);
@@ -1492,7 +1503,7 @@ X86CPU.prototype.setIP = function(off)
  */
 X86CPU.prototype.setCSIP = function(off, sel, fCall)
 {
-    this.assert(!this.addrMask || (off & this.addrMask) == off);
+    this.assert((off & this.addrMask) == off);
     this.segCS.fCall = fCall;
     /*
      * We break this operation into the following discrete steps (eg, set IP, load CS, and then update IP) so
@@ -1523,7 +1534,7 @@ X86CPU.prototype.setCSIP = function(off, sel, fCall)
 X86CPU.prototype.setCSBase = function(addr)
 {
     var regIP = this.getIP();
-    this.segCS.setBase(addr);
+    addr = this.segCS.setBase(addr);
     this.regLIP = addr + regIP;
     this.regLIPLimit = addr + this.segCS.limit;
 };
@@ -1900,7 +1911,7 @@ X86CPU.prototype.setPS = function(regPS, cpl)
      * This has the added benefit of relieving us from zeroing the effective IOPL (this.nIOPL) whenever
      * we're in real-mode, since we're zeroing the incoming IOPL bits up front now.
      */
-    if (!(this.regMSW & X86.MSW.PE)) {
+    if (!(this.regCR0 & X86.CR0.MSW.PE)) {
         regPS &= ~(X86.PS.IOPL.MASK | X86.PS.NT | X86.PS.BIT15);
     }
 
@@ -2015,7 +2026,7 @@ X86CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
 X86CPU.prototype.getByte = function(addr)
 {
     if (BACKTRACK) this.backTrack.btiMemLo = this.bus.readBackTrack(addr);
-    return this.aMemBlocks[(addr & this.busMask) >> this.blockShift].readByte(addr & this.blockLimit);
+    return this.aMemBlocks[(addr & this.busMask) >>> this.blockShift].readByte(addr & this.blockLimit);
 };
 
 /**
@@ -2028,7 +2039,7 @@ X86CPU.prototype.getByte = function(addr)
 X86CPU.prototype.getShort = function(addr)
 {
     var off = addr & this.blockLimit;
-    var iBlock = (addr & this.busMask) >> this.blockShift;
+    var iBlock = (addr & this.busMask) >>> this.blockShift;
     /*
      * On the 8088, it takes 4 cycles to read the additional byte REGARDLESS whether the address is odd or even.
      * TODO: For the 8086, the penalty is actually "(addr & 0x1) << 2" (4 additional cycles only when the address is odd).
@@ -2055,7 +2066,7 @@ X86CPU.prototype.getShort = function(addr)
 X86CPU.prototype.getLong = function(addr)
 {
     var off = addr & this.blockLimit;
-    var iBlock = (addr & this.busMask) >> this.blockShift;
+    var iBlock = (addr & this.busMask) >>> this.blockShift;
     if (BACKTRACK) {
         this.backTrack.btiMemLo = this.bus.readBackTrack(addr);
         this.backTrack.btiMemHi = this.bus.readBackTrack(addr + 1);
@@ -2077,7 +2088,7 @@ X86CPU.prototype.getLong = function(addr)
 X86CPU.prototype.setByte = function(addr, b)
 {
     if (BACKTRACK) this.bus.writeBackTrack(addr, this.backTrack.btiMemLo);
-    this.aMemBlocks[(addr & this.busMask) >> this.blockShift].writeByte(addr & this.blockLimit, b & 0xff);
+    this.aMemBlocks[(addr & this.busMask) >>> this.blockShift].writeByte(addr & this.blockLimit, b & 0xff);
 };
 
 /**
@@ -2090,7 +2101,7 @@ X86CPU.prototype.setByte = function(addr, b)
 X86CPU.prototype.setShort = function(addr, w)
 {
     var off = addr & this.blockLimit;
-    var iBlock = (addr & this.busMask) >> this.blockShift;
+    var iBlock = (addr & this.busMask) >>> this.blockShift;
     /*
      * On the 8088, it takes 4 cycles to write the additional byte REGARDLESS whether the address is odd or even.
      * TODO: For the 8086, the penalty is actually "(addr & 0x1) << 2" (4 additional cycles only when the address is odd).
@@ -2119,7 +2130,7 @@ X86CPU.prototype.setShort = function(addr, w)
 X86CPU.prototype.setLong = function(addr, l)
 {
     var off = addr & this.blockLimit;
-    var iBlock = (addr & this.busMask) >> this.blockShift;
+    var iBlock = (addr & this.busMask) >>> this.blockShift;
     this.nStepCycles -= this.CYCLES.nWordCyclePenalty;
 
     if (BACKTRACK) {
@@ -2440,7 +2451,7 @@ X86CPU.prototype.getBytePrefetch = function(addr)
          * with side-effects we may not want, and in any case, while it seemed to improve Safari's performance slightly,
          * it did nothing for the oddball Chrome performance I'm seeing with PREFETCH enabled.
          *
-         *      b = this.aMemBlocks[(addr & this.busMask) >> this.blockShift].readByte(addr & this.blockLimit);
+         *      b = this.aMemBlocks[(addr & this.busMask) >>> this.blockShift].readByte(addr & this.blockLimit);
          *      this.nBusCycles += 4;
          *      this.cbPrefetchValid = 0;
          *      this.addrPrefetchHead = (addr + 1) & this.busMask;
@@ -2490,7 +2501,7 @@ X86CPU.prototype.fillPrefetch = function(n)
 {
     while (n-- > 0 && this.cbPrefetchQueued < X86CPU.PREFETCH.QUEUE) {
         var addr = this.addrPrefetchHead;
-        var b = this.aMemBlocks[(addr & this.busMask) >> this.blockShift].readByte(addr & this.blockLimit);
+        var b = this.aMemBlocks[(addr & this.busMask) >>> this.blockShift].readByte(addr & this.blockLimit);
         this.aPrefetch[this.iPrefetchHead] = b | (addr << 8);
         if (MAXDEBUG) this.printMessage("     fillPrefetch[" + this.iPrefetchHead + "]: " + str.toHex(addr) + ":" + str.toHexByte(b));
         this.addrPrefetchHead = (addr + 1) & this.busMask;
@@ -2939,9 +2950,9 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
              * back to the REP.  To emulate this flawed behavior, turn on BUGS_8086.
              */
             this.opLIP = this.regLIP;
-            this.regEA = this.regEAWrite = X86.ADDR_INVALID;
             this.segData = this.segDS;
             this.segStack = this.segSS;
+            this.regEA = this.regEAWrite = X86.ADDR_INVALID;
 
             if (I386) {
                 this.dataSize = this.segCS.dataSize;

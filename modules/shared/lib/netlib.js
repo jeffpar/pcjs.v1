@@ -137,12 +137,12 @@ net.propagateParms = function(sURL, req)
 /**
  * encodeURL(sURL, req, fDebug)
  *
- * Used to encodes any URLs presented on the current page, using this 3-step process:
+ * Used to encodes any URLs presented on the current page, using this 3-step (um, 4-step) process:
  *
  *  1) Replace any backslashes with slashes, in case the URL was derived from a file system path
  *  2) Remap links that begin with "static/" to the corresponding URL at "http://static.pcjs.org/"
- *  3) Massage the result with net.propagateParms(), so that any special parameters are passed along
- *  4) Transform any "htmlspecialchars" into the corresponding entities, to help ensure proper validation
+ *  3) Transform any "htmlspecialchars" into the corresponding entities, using encodeURI()
+ *  4) Massage the result with net.propagateParms(), so that any special parameters are passed along
  *
  * @param {string} sURL
  * @param {Object} req is the web server's (ie, Express) request object, if any
@@ -154,8 +154,9 @@ net.encodeURL = function(sURL, req, fDebug)
     if (sURL) {
         sURL = sURL.replace(/\\/g, '/');
         if (!fDebug) {
-            if (sURL.match(/^[^:?]*static/)) {
-                sURL = "http://static.pcjs.org" + path.join(req.path, sURL).replace("/static/", "/");
+            if (sURL.match(/^[^:?]*static\//)) {
+                if (sURL.charAt(0) != '/') sURL = path.join(req.path, sURL);
+                sURL = "http://static.pcjs.org" + sURL.replace("/static/", "/");
             }
         }
         return net.propagateParms(encodeURI(sURL), req);

@@ -256,13 +256,13 @@ Component.subclass(Component, ChipSet);
 /*
  * Supported Models
  *
- * Unless otherwise noted, all BIOS references refer to the *original* BIOS released with each model
+ * Unless otherwise noted, all BIOS references refer to the *original* BIOS released with each model.
  */
 ChipSet.MODEL_5150      = 5150;         // used in reference to the 1st 5150 BIOS, dated Apr 24, 1981
 ChipSet.MODEL_5160      = 5160;         // used in reference to the 1st 5160 BIOS, dated Nov 8, 1982
 ChipSet.MODEL_5170      = 5170;         // used in reference to the 1st 5170 BIOS, dated Jan 10, 1984
 /*
- * The following are fake model numbers, used only to document issues/features of note in later BIOS revisions
+ * The following are fake model numbers, used only to document issues/features of note in later IBM PC AT BIOS revisions.
  */
 ChipSet.MODEL_5170_REV2 = 5170.2;       // used in reference to the 2nd 5170 BIOS, dated Jun 10, 1985
 ChipSet.MODEL_5170_REV3 = 5170.3;       // used in reference to the 3rd 5170 BIOS, dated Nov 15, 1985

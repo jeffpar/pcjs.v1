@@ -251,7 +251,7 @@ if (DEBUGGER) {
      */
     Debugger.INS = {
         NONE:   0,   AAA:    1,   AAD:    2,   AAM:    3,   AAS:    4,   ADC:    5,   ADD:    6,   AND:    7,
-        ARPL:   8,   ASIZE:  9,   BOUND:  10,  BSF:    11,  BSR:    12,  BT:     13,  BTC:    14,  BTR:    15,
+        ARPL:   8,   AS:     9,   BOUND:  10,  BSF:    11,  BSR:    12,  BT:     13,  BTC:    14,  BTR:    15,
         BTS:    16,  CALL:   17,  CBW:    18,  CLC:    19,  CLD:    20,  CLI:    21,  CLTS:   22,  CMC:    23,
         CMP:    24,  CMPSB:  25,  CMPSW:  26,  CS:     27,  CWD:    28,  DAA:    29,  DAS:    30,  DEC:    31,
         DIV:    32,  DS:     33,  ENTER:  34,  ES:     35,  ESC:    36,  FADD:   37,  FBLD:   38,  FBSTP:  39,
@@ -266,7 +266,7 @@ if (DEBUGGER) {
         LFS:    104, LGDT:   105, LGS:    106, LIDT:   107, LLDT:   108, LMSW:   109, LOADALL:110, LOCK:   111,
         LODSB:  112, LODSW:  113, LOOP:   114, LOOPNZ: 115, LOOPZ:  116, LSL:    117, LSS:    118, LTR:    119,
         MOV:    120, MOVSB:  121, MOVSW:  122, MOVSX:  123, MOVZX:  124, MUL:    125, NEG:    126, NOP:    127,
-        NOT:    128, OR:     129, OSIZE:  130, OUT:    131, OUTS:   132, POP:    133, POPA:   134, POPF:   135,
+        NOT:    128, OR:     129, OS:     130, OUT:    131, OUTS:   132, POP:    133, POPA:   134, POPF:   135,
         PUSH:   136, PUSHA:  137, PUSHF:  138, RCL:    139, RCR:    140, REPNZ:  141, REPZ:   142, RET:    143,
         RETF:   144, ROL:    145, ROR:    146, SAHF:   147, SALC:   148, SAR:    149, SBB:    150, SCASB:  151,
         SCASW:  152, SETBE:  153, SETC:   154, SETG:   155, SETGE:  156, SETL:   157, SETLE:  158, SETNBE: 159,
@@ -686,8 +686,8 @@ if (DEBUGGER) {
     /* 0x63 */ [Debugger.INS.ARPL,  Debugger.TYPE_MODRM  | Debugger.TYPE_WORD  | Debugger.TYPE_OUT,                      Debugger.TYPE_REG   | Debugger.TYPE_WORD   | Debugger.TYPE_IN],
     /* 0x64 */ [Debugger.INS.FS,    Debugger.TYPE_NONE   | Debugger.TYPE_386],
     /* 0x65 */ [Debugger.INS.GS,    Debugger.TYPE_NONE   | Debugger.TYPE_386],
-    /* 0x66 */ [Debugger.INS.OSIZE, Debugger.TYPE_NONE   | Debugger.TYPE_386],
-    /* 0x67 */ [Debugger.INS.ASIZE, Debugger.TYPE_NONE   | Debugger.TYPE_386],
+    /* 0x66 */ [Debugger.INS.OS,    Debugger.TYPE_NONE   | Debugger.TYPE_386],
+    /* 0x67 */ [Debugger.INS.AS,    Debugger.TYPE_NONE   | Debugger.TYPE_386],
 
     /* 0x68 */ [Debugger.INS.PUSH,  Debugger.TYPE_IMM    | Debugger.TYPE_VWORD | Debugger.TYPE_IN   | Debugger.TYPE_286],
     /* 0x69 */ [Debugger.INS.IMUL,  Debugger.TYPE_REG    | Debugger.TYPE_WORD  | Debugger.TYPE_BOTH | Debugger.TYPE_286,   Debugger.TYPE_MODRM | Debugger.TYPE_WORDIW | Debugger.TYPE_IN],
@@ -1763,6 +1763,7 @@ if (DEBUGGER) {
     Debugger.prototype.init = function()
     {
         this.println("Type ? for list of debugger commands");
+        this.updateStatus();
     };
 
     /**
@@ -1878,7 +1879,7 @@ if (DEBUGGER) {
     Debugger.prototype.stopCPU = function(s, fBlockFaults)
     {
         if (s) this.println(s);
-        this.cpu.stopCPU(!fBlockFaults);
+        if (this.cpu) this.cpu.stopCPU(!fBlockFaults);
     };
 
     /**
@@ -1978,6 +1979,7 @@ if (DEBUGGER) {
     {
         this.historyInit();
         this.cInstructions = 0;
+        this.sMessagePrev = null;
         this.nCycles = 0;
         this.aAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
         /*
@@ -2292,7 +2294,7 @@ if (DEBUGGER) {
      * @param {Array} aAddr
      * @param {boolean} [fWrite]
      * @param {number} [cb] is number of extra bytes to check (0 or 1)
-     * @return {number} is the corresponding physical address, or -1 if there's an error
+     * @return {number} is the corresponding physical address, or X86.ADDR_INVALID
      */
     Debugger.prototype.getAddr = function(aAddr, fWrite, cb)
     {
@@ -2312,9 +2314,11 @@ if (DEBUGGER) {
             }
         }
         /*
-         * Map addresses in the top 64Kb (at the top of the 16Mb range) to the top of the 1Mb range.
+         * We used to map addresses at the top 64Kb of the first 16Mb to the top of the first 1Mb,
+         * but post-80286, that's no longer appropriate.
+         *
+         *      if ((addr & 0xFF0000) == 0xFF0000) addr &= 0x0FFFFF;
          */
-        if ((addr & 0xFF0000) == 0xFF0000) addr &= 0x0FFFFF;
         return addr;
     };
 
@@ -2335,7 +2339,7 @@ if (DEBUGGER) {
     {
         var b = 0xff;
         var addr = this.getAddr(aAddr, false, 0);
-        if (addr >= 0) {
+        if (addr != X86.ADDR_INVALID) {
             b = this.bus.getByteDirect(addr);
             this.assert((b == (b & 0xff)), "invalid byte (" + b + ") at address: " + this.hexAddr(aAddr));
             if (inc !== undefined) this.incAddr(aAddr, inc);
@@ -2355,7 +2359,7 @@ if (DEBUGGER) {
     {
         var w = 0xffff;
         var addr = this.getAddr(aAddr, false, 1);
-        if (addr >= 0) {
+        if (addr != X86.ADDR_INVALID) {
             w = this.bus.getShortDirect(addr);
             this.assert((w == (w & 0xffff)), "invalid word (" + w + ") at address: " + this.hexAddr(aAddr));
             if (inc !== undefined) this.incAddr(aAddr, inc);
@@ -2378,7 +2382,7 @@ if (DEBUGGER) {
     Debugger.prototype.setByte = function(aAddr, b, inc)
     {
         var addr = this.getAddr(aAddr, true, 0);
-        if (addr >= 0) {
+        if (addr != X86.ADDR_INVALID) {
             this.bus.setByteDirect(addr, b);
             if (inc !== undefined) this.incAddr(aAddr, inc);
             this.cpu.updateCPU();
@@ -2396,7 +2400,7 @@ if (DEBUGGER) {
     Debugger.prototype.setShort = function(aAddr, w, inc)
     {
         var addr = this.getAddr(aAddr, true, 1);
-        if (addr >= 0) {
+        if (addr != X86.ADDR_INVALID) {
             this.bus.setShortDirect(addr, w);
             if (inc !== undefined) this.incAddr(aAddr, inc);
             this.cpu.updateCPU();
@@ -2705,7 +2709,7 @@ if (DEBUGGER) {
         var cOperands = 2;
         var sOperands = "";
         if (bOpcode >= X86.OPCODE.MOVSB && bOpcode <= X86.OPCODE.CMPSW || bOpcode >= X86.OPCODE.STOSB && bOpcode <= X86.OPCODE.SCASW) {
-            cOperands = 0;              // HACK to suppress display of operands for the string instructions
+            cOperands = 0;              // HACK to suppress display of operands for string instructions
         }
 
         for (var iOperand = 1; iOperand <= cOperands; iOperand++) {
@@ -3032,7 +3036,7 @@ if (DEBUGGER) {
     Debugger.prototype.getRegStr = function(fProt)
     {
         if (fProt === undefined) {
-            fProt = !!(this.cpu.regMSW & X86.MSW.PE);
+            fProt = !!(this.cpu.regCR0 & X86.CR0.MSW.PE);
         }
         var s = "AX=" + str.toHexWord(this.cpu.regEAX) +
                " BX=" + str.toHexWord(this.cpu.regEBX) +
@@ -3049,7 +3053,7 @@ if (DEBUGGER) {
              this.getFlagStr("S") + this.getFlagStr("Z") + this.getFlagStr("A") + this.getFlagStr("P") + this.getFlagStr("C") +
              " PS=" + str.toHexWord(this.cpu.getPS());
         if (fProt) {
-            s += " MS=" + str.toHexWord(this.cpu.regMSW) + '\n' +
+            s += " MS=" + str.toHexWord(this.cpu.regCR0) + '\n' +
                 this.getDTRStr("LD", this.cpu.segLDT.sel, this.cpu.segLDT.base, this.cpu.segLDT.base + this.cpu.segLDT.limit) + ' ' +
                 this.getDTRStr("GD", null, this.cpu.addrGDT, this.cpu.addrGDTLimit) + ' ' +
                 this.getDTRStr("ID", null, this.cpu.addrIDT, this.cpu.addrIDTLimit) + "  TR=" + str.toHexWord(this.cpu.segTSS.sel) +
@@ -3073,10 +3077,11 @@ if (DEBUGGER) {
      * convention for linear addresses and provide a different syntax (eg, "%%") physical memory references.
      *
      * Address evaluation and validation (eg, range checks) are no longer performed at this stage.  That's
-     * done later, by getAddr(), which returns a negative result (-1) for invalid segments, out-of-range offsets,
+     * done later, by getAddr(), which returns X86.ADDR_INVALID for invalid segments, out-of-range offsets,
      * etc.  The Debugger's low-level get/set memory functions verify all getAddr() results, but even if an
      * invalid address is passed through to the Bus memory interfaces, the address will simply be masked with
-     * Bus.busLimit; in the case of -1, that will generally refer to the last byte of physical address space.
+     * Bus.busLimit; in the case of X86.ADDR_INVALID, that will generally refer to the top of the physical
+     * address space.
      *
      * @this {Debugger}
      * @param {string|undefined} sAddr
@@ -4592,8 +4597,8 @@ if (DEBUGGER) {
     Debugger.prototype.doUnassemble = function(sAddr, sAddrEnd, n)
     {
         var aAddr = this.parseAddr(sAddr, Debugger.ADDR_CODE);
-        if (aAddr[0] == null)
-            return;
+
+        if (aAddr[0] == null) return;
 
         if (n === undefined) n = 1;
         var aAddrEnd = this.newAddr(0xffff, aAddr[1], this.bus.busLimit);

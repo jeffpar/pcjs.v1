@@ -468,15 +468,15 @@ var X86Help = {
          * This instruction is always allowed to set MSW.PE, but it cannot clear MSW.PE once set;
          * therefore, we always OR the previous value of MSW.PE into the new value before loading.
          */
-        w |= (this.regMSW & X86.MSW.PE);
-        this.regMSW = (this.regMSW & X86.MSW.SET) | (w & ~X86.MSW.SET);
+        w |= (this.regCR0 & X86.CR0.MSW.PE);
+        this.regCR0 = (this.regCR0 & X86.CR0.MSW.ON) | (w & ~X86.CR0.MSW.ON);
         /*
          * Since the 80286 cannot return to real-mode via this instruction, the only transition we
          * must worry about is to protected-mode.  And don't worry, there's no harm calling setProtMode()
          * if the CPU is already in protected-mode (we could certainly optimize the call out in that
          * case, but this instruction isn't used frequently enough to warrant it).
          */
-        if (this.regMSW & X86.MSW.PE) this.setProtMode(true);
+        if (this.regCR0 & X86.CR0.MSW.PE) this.setProtMode(true);
     },
     /**
      * opHelpCALLF(off, sel)
@@ -577,7 +577,7 @@ var X86Help = {
          * TODO: We assess a fixed cycle cost up front, because at the moment, switchTSS() doesn't assess anything.
          */
         this.nStepCycles -= this.CYCLES.nOpCyclesIRet;
-        if (this.regMSW & X86.MSW.PE) {
+        if (this.regCR0 & X86.CR0.MSW.PE) {
             if (this.regPS & X86.PS.NT) {
                 var addrNew = this.segTSS.base;
                 var sel = this.getShort(addrNew + X86.TSS.PREV_TSS);

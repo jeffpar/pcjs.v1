@@ -996,7 +996,7 @@
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">computer</xsl:with-param>
-			<xsl:with-param name="parms">,buswidth:'<xsl:value-of select="$buswidth"/>',resume:'<xsl:value-of select="$resume"/>',state:'<xsl:value-of select="$state"/>'</xsl:with-param>
+			<xsl:with-param name="parms">,buswidth:<xsl:value-of select="$buswidth"/>,resume:<xsl:value-of select="$resume"/>,state:'<xsl:value-of select="$state"/>'</xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 

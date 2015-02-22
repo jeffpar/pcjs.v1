@@ -165,7 +165,7 @@ var X86Op0F = {
         /*
          * TODO: LOADALL operation still needs to be verified in protected mode....
          */
-        if (DEBUG && DEBUGGER && (this.regMSW & X86.MSW.PE)) this.stopCPU();
+        if (DEBUG && DEBUGGER && (this.regCR0 & X86.CR0.MSW.PE)) this.stopCPU();
     },
     /**
      * @this {X86CPU}
@@ -177,7 +177,7 @@ var X86Op0F = {
             X86Help.opHelpFault.call(this, X86.EXCEPTION.GP_FAULT, 0, true);
             return;
         }
-        this.regMSW &= ~X86.MSW.TS;
+        this.regCR0 &= ~X86.CR0.MSW.TS;
         this.nStepCycles -= 2;
     },
     /**
@@ -429,7 +429,7 @@ var X86Op0F = {
      */
     opSMSW: function(dst, src) {
         this.nStepCycles -= (2 + (this.regEA < 0? 0 : 1));
-        return this.regMSW;
+        return this.regCR0;
     },
     /**
      * @this {X86CPU}

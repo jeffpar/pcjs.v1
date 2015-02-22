@@ -249,7 +249,7 @@ CPU.prototype.powerUp = function(data, fRepower)
             this.resetChecksum();
         }
         /*
-         * Give the Debugger a chance to do/print something once we've powered up (TODO: Review the necessity of this)
+         * Give the Debugger a chance to do/print something once we've powered up
          */
         if (DEBUGGER && this.dbg) {
             this.dbg.init();
