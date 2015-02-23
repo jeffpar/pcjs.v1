@@ -713,8 +713,10 @@ X86CPU.prototype.initProcessor = function()
 
     if (this.model >= X86.MODEL_80186) {
         /*
-         * TODO: I don't go out of my way to make 80186/80188 cycle times accurate, since no IBM PC models used
-         * those processors; beyond the 8086, the next priority is the 80286, but we may revisit the 80186 someday.
+         * I don't go out of my way to make 80186/80188 cycle times accurate, since I'm not aware of any
+         * IBM PC models that used those processors; beyond the 8086, my next priorities are the 80286 and
+         * 80386, but I might revisit the 80186 someday.
+         *
          * Instruction handlers that contain "hard-coded" 80286 cycle times include: opINSb, opINSw, opOUTSb,
          * opOUTSw, opENTER, and opLEAVE.
          */
@@ -805,8 +807,11 @@ X86CPU.prototype.reset = function()
  * or setIP(), whichever is appropriate; in unusual cases where only segCS is changing (eg, undocumented 8086
  * opcodes), use setCS().
  *
- * The other segment registers (DS, SS and ES) have similar setters (for segDS, segSS and segES), but those
- * functions do not mirror any segment:offset values in the same way that regLIP mirrors CS:IP.
+ * Similarly, regLSP mirrors the linear address corresponding to SS:SP, and therefore you must rely on getSP()
+ * to read the current SP, and setSP() and setSS() to update SP and SS.
+ *
+ * The other segment registers, such as segDS and segES, have similar getters and setters, but they do not mirror
+ * any segment:offset values in the same way that regLIP mirrors CS:IP, or that regLSP mirrors SS:SP.
  *
  * @this {X86CPU}
  */
@@ -822,8 +827,8 @@ X86CPU.prototype.resetRegs = function()
     this.regEDI = 0;
 
     /*
-     * The following are internal "registers" that are used to capture intermediate values inside selected helper
-     * functions and use them if they've been modified (or are known to always change); for example, the MUL and DIV
+     * The following are internal "registers" used to capture intermediate values inside selected helper
+     * functions and use them if they've been modified (or are known to change); for example, the MUL and DIV
      * instructions perform calculations that must be propagated to specific registers (eg, AX and/or DX), which
      * the ModRM decoder functions don't know about.  We initialize them here mainly for documentation purposes.
      */
@@ -831,15 +836,15 @@ X86CPU.prototype.resetRegs = function()
 
     /*
      * Another internal "register" we occasionally need is an interim copy of bModRM, set inside selected opcode
-     * handlers so that the helper function can have access to the instruction's bModRM without resorting to a closure
-     * (which, in the Chrome V8 engine, for example, seems to cause constant recompilation).
+     * handlers so that the helper function can have access to the instruction's bModRM without resorting to a
+     * closure (which, in the Chrome V8 engine, for example, seems to cause constant recompilation).
      */
     this.bModRM = 0;
 
     /*
-     * NOTE: Even though the MSW and IDTR are 80286-specific, we initialize them for ALL CPUs, so that
-     * functions like X86Help.opHelpINT() can use the same code for both.  The 8086/8088 have no direct way
-     * of accessing or changing them, so this internal change should be perfectly safe for those processors.
+     * NOTE: Even though the 8086 doesn't have CR0 (aka MSW) and IDTR, we initialize them for ALL CPUs, so
+     * that functions like X86Help.opHelpINT() can use the same code for both.  The 8086/8088 have no direct
+     * way of accessing or changing them, so this internal change should be perfectly safe for those processors.
      */
     this.regCR0 = X86.CR0.MSW.ON;
     this.addrIDT = 0; this.addrIDTLimit = 0x03FF;
@@ -847,15 +852,14 @@ X86CPU.prototype.resetRegs = function()
 
     /*
      * This is set by opHelpFault() and reset (to -1) by resetRegs() and opIRET(); its initial purpose is to
-     * "help" opHelpFault() determine when a nested fault should be converted into either a double-fault
-     * (DF_FAULT) or a triple-fault (ie, a processor reset).
+     * "help" opHelpFault() determine when a nested fault should be converted into either a double-fault (DF_FAULT)
+     * or a triple-fault (ie, a processor reset).
      */
     this.nFault = -1;
 
     /*
-     * Segment registers used to be defined as separate variables (eg, regCS and regCS0 stored the
-     * segment number and base physical address, respectively), but all segment registers are now defined
-     * as X86Seg objects.
+     * Segment registers used to be defined as separate variables (eg, regCS and regCS0 stored the segment
+     * number and base physical address, respectively), but all segment registers are now defined as X86Seg objects.
      */
     this.segCS     = new X86Seg(this, X86Seg.ID.CODE,  "CS");
     this.segDS     = new X86Seg(this, X86Seg.ID.DATA,  "DS");
@@ -865,7 +869,12 @@ X86CPU.prototype.resetRegs = function()
     this.setSS(0);
 
     if (I386 && this.model >= X86.MODEL_80386) {
-        this.regCR0 = X86.CR0.ET;
+        this.regCR0 = X86.CR0.ET;       // formerly MSW
+        this.regCR1 = 0;                // reserved
+        this.regCR2 = 0;                // page fault linear address (PFLA)
+        this.regCR3 = 0;                // page directory base register (PDBR)
+        this.aRegDR = new Array(8);     // Debug Registers DR0-DR7
+        this.aRegTR = new Array(8);     // Test Registers TR0-TR7
         this.segFS = new X86Seg(this, X86Seg.ID.DATA,  "FS");
         this.segGS = new X86Seg(this, X86Seg.ID.DATA,  "GS");
     }

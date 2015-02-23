@@ -173,6 +173,7 @@ var asNonDirectories = [
 var asExtsPlainText = [
     "65v",
     "bas",
+    "hex",
     "map",
     "txt"
 ];

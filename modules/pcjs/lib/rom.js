@@ -317,7 +317,7 @@ ROM.prototype.addROM = function(addr)
 {
     if (addr == null) return true;
     if (this.bus.addMemory(addr, this.sizeROM, Memory.TYPE.ROM)) {
-        if (DEBUG) this.log("addROM(): copying ROM to " + str.toHexAddr(addr) + " (0x" + str.toHex(this.abROM.length) + " bytes)");
+        if (DEBUG) this.log("addROM(): copying ROM to 0x" + str.toHex(addr) + " (0x" + str.toHex(this.abROM.length) + " bytes)");
         var bto = null;
         for (var off = 0; off < this.abROM.length; off++) {
             this.bus.setByteDirect(addr + off, this.abROM[off]);

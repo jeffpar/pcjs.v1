@@ -83,8 +83,11 @@ function Debugger(parmsDbg)
         this.cInstructions = -1;
 
         /*
-         * Default number of hex chars in a physical address (ie, for real-mode); updated by initBus().
+         * Default number of hex chars in a register and a physical address (ie, for real-mode);
+         * updated by initBus().
          */
+        this.cchReg = 4;
+        this.maskReg = 0xffff;
         this.cchAddr = 5;
 
         /*
@@ -1186,8 +1189,14 @@ if (DEBUGGER) {
             this.aaOpDescs[0x0F] = Debugger.aOpDescUndefined;
             if (this.cpu.model >= X86.MODEL_80286) {
                 this.aaOpDescs[0x0F] = Debugger.aOpDesc0F;
+                if (this.cpu.model >= X86.MODEL_80386) {
+                    this.cchReg = 8;
+                    this.maskReg = 0xffffffff|0;
+                }
             }
         }
+
+        this.selectRegs();
 
         this.messageDump(Messages.DESC, function onDumpDesc(s) { dbg.dumpDesc(s); });
         this.messageDump(Messages.TSS,  function onDumpTSS(s)  { dbg.dumpTSS(s); });
@@ -1302,6 +1311,43 @@ if (DEBUGGER) {
     };
 
     /**
+     * selectRegs()
+     *
+     * @this {Debugger}
+     */
+    Debugger.prototype.selectRegs = function()
+    {
+        if (this.cchReg <= 4) {
+            this.regs = {
+                AX: "AX",
+                BX: "BX",
+                CX: "CX",
+                DX: "DX",
+                SP: "SP",
+                BP: "BP",
+                SI: "SI",
+                DI: "DI",
+                IP: "IP",
+                MS: "MS"
+            }
+        } else {
+            this.regs = {
+                AX: "EAX",
+                BX: "EBX",
+                CX: "ECX",
+                DX: "EDX",
+                SP: "ESP",
+                BP: "EBP",
+                SI: "ESI",
+                DI: "EDI",
+                IP: "EIP",
+                MS: "CR0"
+            }
+        }
+        this.regs.PS = "PS";
+    };
+
+    /**
      * setFocus()
      *
      * @this {Debugger}
@@ -1339,7 +1385,7 @@ if (DEBUGGER) {
             var wPID = this.getShort(aAddr, 2);
             var wParas = this.getShort(aAddr, 5);
             if (bSig != 0x4D && bSig != 0x5A) break;
-            this.println(str.toHexAddr(0, seg) + ": '" + String.fromCharCode(bSig) + "' PID=" + str.toHexWord(wPID) + " LEN=" + str.toHexWord(wParas) + ' "' + this.dumpSZ(aAddr, 8) + '"');
+            this.println(this.hexOffset(0, seg) + ": '" + String.fromCharCode(bSig) + "' PID=" + str.toHexWord(wPID) + " LEN=" + str.toHexWord(wParas) + ' "' + this.dumpSZ(aAddr, 8) + '"');
             seg += 1 + wParas;
         }
     };
@@ -1593,7 +1639,7 @@ if (DEBUGGER) {
     Debugger.prototype.message = function(sMessage, fAddress)
     {
         if (fAddress) {
-            sMessage += " @" + str.toHexAddr(this.cpu.getIP(), this.cpu.getCS());
+            sMessage += " @" + this.hexOffset(this.cpu.getIP(), this.cpu.getCS());
         }
 
         if (this.sMessagePrev && sMessage == this.sMessagePrev) return;
@@ -1659,7 +1705,7 @@ if (DEBUGGER) {
              * at the moment.  If that changes, then this will have to change as well.
              */
             addr -= 2;
-            this.message("INT 0x" + str.toHexByte(nInt) + ": AH=" + str.toHexByte(AH) + " @" + str.toHexAddr(addr - this.cpu.segCS.base, this.cpu.getCS()) + sFunc);
+            this.message("INT 0x" + str.toHexByte(nInt) + ": AH=" + str.toHexByte(AH) + " @" + this.hexOffset(addr - this.cpu.segCS.base, this.cpu.getCS()) + sFunc);
         }
         return fMessage;
     };
@@ -1699,7 +1745,7 @@ if (DEBUGGER) {
                 segFrom = this.cpu.getCS();
                 addrFrom -= this.cpu.segCS.base;
             }
-            this.message(component.idComponent + "." + (bOut != null? "outPort" : "inPort") + "(0x" + str.toHexWord(port) + "," + (name? name : "unknown") + (bOut != null? ",0x" + str.toHexByte(bOut) : "") + ")" + (bIn != null? (": 0x" + str.toHexByte(bIn)) : "") + (addrFrom != null? (" @" + str.toHexAddr(addrFrom, segFrom)) : ""));
+            this.message(component.idComponent + "." + (bOut != null? "outPort" : "inPort") + "(0x" + str.toHexWord(port) + "," + (name? name : "unknown") + (bOut != null? ",0x" + str.toHexByte(bOut) : "") + ")" + (bIn != null? (": 0x" + str.toHexByte(bIn)) : "") + (addrFrom != null? (" @" + this.hexOffset(addrFrom, segFrom)) : ""));
         }
     };
 
@@ -1737,7 +1783,7 @@ if (DEBUGGER) {
             if (this.traceEnabled !== undefined && this.traceEnabled[prop]) {
                 var trace = Debugger.TRACE[prop];
                 var len = (trace.size >> 2);
-                var s = str.toHexAddr(this.cpu.opLIP - this.cpu.segCS.base, this.cpu.getCS()) + " " + Debugger.asIns[trace.ins] + "(" + str.toHex(dst, len) + "," + str.toHex(src, len) + "," + (flagsIn === null? "-" : str.toHexWord(flagsIn)) + ") " + str.toHex(result, len) + "," + (flagsOut === null? "-" : str.toHexWord(flagsOut));
+                var s = this.hexOffset(this.cpu.opLIP - this.cpu.segCS.base, this.cpu.getCS()) + " " + Debugger.asIns[trace.ins] + "(" + str.toHex(dst, len) + "," + str.toHex(src, len) + "," + (flagsIn === null? "-" : str.toHexWord(flagsIn)) + ") " + str.toHex(result, len) + "," + (flagsOut === null? "-" : str.toHexWord(flagsOut));
                 if (!this.aTraceBuffer.length) this.aTraceBuffer = new Array(Debugger.TRACE_LIMIT);
                 this.aTraceBuffer[this.iTraceBuffer++] = s;
                 if (this.iTraceBuffer >= this.aTraceBuffer.length) {
@@ -2416,7 +2462,23 @@ if (DEBUGGER) {
      */
     Debugger.prototype.hexAddr = function(aAddr)
     {
-        return aAddr[1] == null? ("%" + str.toHex(aAddr[2])) : str.toHexAddr(aAddr[0], aAddr[1]);
+        return aAddr[1] == null? ("%" + str.toHex(aAddr[2])) : this.hexOffset(aAddr[0], aAddr[1]);
+    };
+
+    /**
+     * hexOffset(off, sel)
+     *
+     * @this {Debugger}
+     * @param {number} off
+     * @param {number} [sel]
+     * @return {string} the hex representation of off (or sel:off)
+     */
+    Debugger.prototype.hexOffset = function(off, sel)
+    {
+        if (sel !== undefined) {
+            return str.toHexWord(sel) + ":" + str.toHex(off, this.cchAddr < 8? 4 : 8);
+        }
+        return str.toHex(off);
     };
 
     /**
@@ -2434,11 +2496,10 @@ if (DEBUGGER) {
         }
         if (aAddr[1] != null) {
             aAddr[0] += inc;
-            /*
-             * TODO: Shouldn't we be using the segment (aAddr[1]) limit instead of 0xffff?
-             */
-            if (aAddr[0] != (aAddr[0] & 0xffff)) {
-                aAddr[0] = aAddr[0] & 0xffff;
+            var limit = this.getSegment(aAddr[1]).limit;
+            if (aAddr[0] > limit) {
+                this.assert(false);
+                aAddr[0] = 0;
                 aAddr[2] = null;
             }
         }
@@ -2995,7 +3056,20 @@ if (DEBUGGER) {
                 b = 0;
                 break;
         }
-        return " " + sFlag + (b? "1" : "0");
+        return sFlag + (b? '1' : '0') + ' ';
+    };
+
+    /**
+     * getRegStr(sName, reg)
+     *
+     * @this {Debugger}
+     * @param {string} sName
+     * @param {number} reg
+     * @return {string}
+     */
+    Debugger.prototype.getRegStr = function(sName, reg)
+    {
+        return sName + '=' + str.toHex(reg, this.cchReg)  + ' ';
     };
 
     /**
@@ -3027,38 +3101,90 @@ if (DEBUGGER) {
     };
 
     /**
-     * getRegStr(fProt)
+     * getRegDump(fProt)
+     *
+     * Example of 8086 and 80286 real-mode register dump:
+     *
+     *      AX=0000 BX=0000 CX=0000 DX=0000 SP=0000 BP=0000 SI=0000 DI=0000
+     *      SS=0000 DS=0000 ES=0000 PS=0002 V0 D0 I0 T0 S0 Z0 A0 P0 C0
+     *      F000:FFF0 EA5BE000F0    JMP      F000:E05B
+     *
+     * Example of 80386 real-mode register dump:
+     *
+     *      EAX=00000000 EBX=00000000 ECX=00000000 EDX=00000000
+     *      ESP=00000000 EBP=00000000 ESI=00000000 EDI=00000000
+     *      SS=0000 DS=0000 ES=0000 PS=00000002 V0 D0 I0 T0 S0 Z0 A0 P0 C0
+     *      F000:0000FFF0 EA05F900F0    JMP      F000:0000F905
+     *
+     * Example of 80286 protected-mode register dump:
+     *
+     *      AX=0000 BX=0000 CX=0000 DX=0000 SP=0000 BP=0000 SI=0000 DI=0000
+     *      SS=0000[000000,FFFF] DS=0000[000000,FFFF] ES=0000[000000,FFFF] A20=ON
+     *      CS=F000[FF0000,FFFF] LD=0000[000000,FFFF] GD=[000000,FFFF] ID=[000000,03FF]
+     *      TR=0000 MS=FFF0 PS=0002 V0 D0 I0 T0 S0 Z0 A0 P0 C0
+     *      F000:FFF0 EA5BE000F0    JMP      F000:E05B
+     *
+     * Example of 80386 protected-mode register dump:
+     *
+     *      EAX=00000000 EBX=00000000 ECX=00000000 EDX=00000000
+     *      ESP=00000000 EBP=00000000 ESI=00000000 EDI=00000000
+     *      SS=0000[00000000,FFFF] DS=0000[00000000,FFFF] ES=0000[00000000,FFFF]
+     *      CS=F000[FFFF0000,FFFF] FS=0000[00000000,FFFF] GS=0000[00000000,FFFF]
+     *      LD=0000[00000000,FFFF] GD=[00000000,FFFF] ID=[00000000,03FF] TR=0000 A20=ON
+     *      CR0=00000010 CR2=00000000 CR3=00000000 PS=00000002 V0 D0 I0 T0 S0 Z0 A0 P0 C0
+     *      F000:0000FFF0 EA05F900F0    JMP      F000:0000F905
+     *
+     * We no longer include CS in real-mode (or EIP in any mode), because that information can be obtained from the
+     * first line of disassembly, which an "r" or "rp" command will also display.
+     *
+     * Note that even when the processor is in real mode, you can always use the "rp" command to force a protected-mode
+     * dump, in case you need to verify any selector base or limit values, since those do affect real-mode operation.
      *
      * @this {Debugger}
      * @param {boolean} [fProt]
      * @return {string}
      */
-    Debugger.prototype.getRegStr = function(fProt)
+    Debugger.prototype.getRegDump = function(fProt)
     {
         if (fProt === undefined) {
             fProt = !!(this.cpu.regCR0 & X86.CR0.MSW.PE);
         }
-        var s = "AX=" + str.toHexWord(this.cpu.regEAX) +
-               " BX=" + str.toHexWord(this.cpu.regEBX) +
-               " CX=" + str.toHexWord(this.cpu.regECX) +
-               " DX=" + str.toHexWord(this.cpu.regEDX) +
-               " SP=" + str.toHexWord(this.cpu.getSP()) +
-               " BP=" + str.toHexWord(this.cpu.regEBP) +
-               " SI=" + str.toHexWord(this.cpu.regESI) +
-               " DI=" + str.toHexWord(this.cpu.regEDI) + '\n';
-        s += this.getSegStr(this.cpu.segDS, fProt) + ' ' + this.getSegStr(this.cpu.segES, fProt) + ' ' + this.getSegStr(this.cpu.segSS, fProt);
-        s += (fProt? '\n' : ' ');
-        s += this.getSegStr(this.cpu.segCS, fProt) + " IP=" + str.toHexWord(this.cpu.getIP()) +
-             this.getFlagStr("V") + this.getFlagStr("D") + this.getFlagStr("I") + this.getFlagStr("T") +
-             this.getFlagStr("S") + this.getFlagStr("Z") + this.getFlagStr("A") + this.getFlagStr("P") + this.getFlagStr("C") +
-             " PS=" + str.toHexWord(this.cpu.getPS());
+        var s = this.getRegStr(this.regs.AX, this.cpu.regEAX) +
+                this.getRegStr(this.regs.BX, this.cpu.regEBX) +
+                this.getRegStr(this.regs.CX, this.cpu.regECX) +
+                this.getRegStr(this.regs.DX, this.cpu.regEDX) + (this.cchReg > 4? '\n' : '') +
+                this.getRegStr(this.regs.SP, this.cpu.getSP()) +
+                this.getRegStr(this.regs.BP, this.cpu.regEBP) +
+                this.getRegStr(this.regs.SI, this.cpu.regESI) +
+                this.getRegStr(this.regs.DI, this.cpu.regEDI) + '\n';
+        s += this.getSegStr(this.cpu.segSS, fProt) + ' ' +
+             this.getSegStr(this.cpu.segDS, fProt) + ' ' +
+             this.getSegStr(this.cpu.segES, fProt) + ' ';
         if (fProt) {
-            s += " MS=" + str.toHexWord(this.cpu.regCR0) + '\n' +
-                this.getDTRStr("LD", this.cpu.segLDT.sel, this.cpu.segLDT.base, this.cpu.segLDT.base + this.cpu.segLDT.limit) + ' ' +
-                this.getDTRStr("GD", null, this.cpu.addrGDT, this.cpu.addrGDTLimit) + ' ' +
-                this.getDTRStr("ID", null, this.cpu.addrIDT, this.cpu.addrIDTLimit) + "  TR=" + str.toHexWord(this.cpu.segTSS.sel) +
-                " A20=" + (this.bus.getA20()? "ON" : "OFF");
+            var sTR = "TR=" + str.toHexWord(this.cpu.segTSS.sel);
+            var sA20 = "A20=" + (this.bus.getA20()? "ON " : "OFF ");
+            if (this.cpu.model < X86.MODEL_80386) {
+                sTR = '\n' + sTR;
+                s += sA20; sA20 = '';
+            }
+            s += '\n' + this.getSegStr(this.cpu.segCS, fProt) + ' ';
+            if (this.cpu.model >= X86.MODEL_80386) {
+                sA20 += '\n';
+                s += this.getSegStr(this.cpu.segFS, fProt) + ' ' +
+                     this.getSegStr(this.cpu.segGS, fProt) + '\n';
+            }
+            s += this.getDTRStr("LD", this.cpu.segLDT.sel, this.cpu.segLDT.base, this.cpu.segLDT.base + this.cpu.segLDT.limit) + ' ' +
+                 this.getDTRStr("GD", null, this.cpu.addrGDT, this.cpu.addrGDTLimit) + ' ' +
+                 this.getDTRStr("ID", null, this.cpu.addrIDT, this.cpu.addrIDTLimit) + ' ';
+            s += sTR + ' ' + sA20;
+            s += this.getRegStr(this.regs.MS, this.cpu.regCR0);
+            if (this.cpu.model >= X86.MODEL_80386) {
+                s += this.getRegStr("CR2", this.cpu.regCR2) + this.getRegStr("CR3", this.cpu.regCR3);
+            }
         }
+        s += this.getRegStr(this.regs.PS, this.cpu.getPS()) +
+             this.getFlagStr("V") + this.getFlagStr("D") + this.getFlagStr("I") + this.getFlagStr("T") +
+             this.getFlagStr("S") + this.getFlagStr("Z") + this.getFlagStr("A") + this.getFlagStr("P") + this.getFlagStr("C");
         return s;
     };
 
@@ -3139,27 +3265,51 @@ if (DEBUGGER) {
             sValue = sValue.toUpperCase();
             switch (sValue) {
                 case "AX":
+                    value = this.cpu.regEAX & 0xffff;
+                    break;
+                case "EAX":
                     value = this.cpu.regEAX;
                     break;
                 case "BX":
+                    value = this.cpu.regEBX & 0xffff;
+                    break;
+                case "EBX":
                     value = this.cpu.regEBX;
                     break;
                 case "CX":
+                    value = this.cpu.regECX & 0xffff;
+                    break;
+                case "ECX":
                     value = this.cpu.regECX;
                     break;
                 case "DX":
+                    value = this.cpu.regEDX & 0xffff;
+                    break;
+                case "EDX":
                     value = this.cpu.regEDX;
                     break;
                 case "SI":
+                    value = this.cpu.regESI & 0xffff;
+                    break;
+                case "ESI":
                     value = this.cpu.regESI;
                     break;
                 case "DI":
+                    value = this.cpu.regEDI & 0xffff;
+                    break;
+                case "EDI":
                     value = this.cpu.regEDI;
                     break;
                 case "BP":
+                    value = this.cpu.regEBP & 0xffff;
+                    break;
+                case "EBP":
                     value = this.cpu.regEBP;
                     break;
                 case "SP":
+                    value = this.cpu.getSP() & 0xffff;
+                    break;
+                case "ESP":
                     value = this.cpu.getSP();
                     break;
                 case "CS":
@@ -3179,6 +3329,9 @@ if (DEBUGGER) {
                  * treat "PC" as an alias for the 16-bit flags register.  So for purposes of parseValue(), "PC" has been removed.
                  */
                 case "IP":
+                    value = this.cpu.getIP() & 0xffff;
+                    break;
+                case "EIP":
                     value = this.cpu.getIP();
                     break;
                 default:
@@ -3319,7 +3472,7 @@ if (DEBUGGER) {
                 if (seg === undefined) seg = (addr >>> 4);
                 var sSymbolOrig = aSymbols[sSymbol]['l'];
                 if (sSymbolOrig) sSymbol = sSymbolOrig;
-                this.println(str.toHexAddr(off, seg) + " " + sSymbol);
+                this.println(this.hexOffset(off, seg) + " " + sSymbol);
             }
         }
     };
@@ -3967,13 +4120,13 @@ if (DEBUGGER) {
                 sDelta = "";
                 nDelta = aAddr[0] - aSymbol[1];
                 if (nDelta) sDelta = " + " + str.toHexWord(nDelta);
-                this.println(aSymbol[0] + " (" + str.toHexAddr(aSymbol[1], aAddr[1]) + ")" + sDelta);
+                this.println(aSymbol[0] + " (" + this.hexOffset(aSymbol[1], aAddr[1]) + ")" + sDelta);
             }
             if (aSymbol.length > 4 && aSymbol[4]) {
                 sDelta = "";
                 nDelta = aSymbol[5] - aAddr[0];
                 if (nDelta) sDelta = " - " + str.toHexWord(nDelta);
-                this.println(aSymbol[4] + " (" + str.toHexAddr(aSymbol[5], aAddr[1]) + ")" + sDelta);
+                this.println(aSymbol[4] + " (" + this.hexOffset(aSymbol[5], aAddr[1]) + ")" + sDelta);
             }
         } else {
             this.println("no symbols");
@@ -4285,55 +4438,82 @@ if (DEBUGGER) {
                 }
                 var w = parseInt(sValue, 16);
                 if (!isNaN(w)) {
-                    sReg = sReg.toUpperCase();
-                    switch (sReg) {
+                    var sRegMatch = sReg.toUpperCase();
+                    if (sRegMatch.charAt(0) == 'E' && this.cchReg <= 4) {
+                        sRegMatch = null;
+                    }
+                    switch (sRegMatch) {
                     case "AL":
-                        this.cpu.regEAX = (this.cpu.regEAX & 0xff00) | (w & 0xff);
+                        this.cpu.regEAX = (this.cpu.regEAX & ~0xff) | (w & 0xff);
                         break;
                     case "AH":
-                        this.cpu.regEAX = (this.cpu.regEAX & 0x00ff) | ((w << 8) & 0xff);
+                        this.cpu.regEAX = (this.cpu.regEAX & ~0xff00) | ((w << 8) & 0xff);
                         break;
                     case "AX":
-                        this.cpu.regEAX = (w & 0xffff);
+                        this.cpu.regEAX = (this.cpu.regEAX & ~0xffff) | (w & 0xffff);
+                        break;
+                    case "EAX":
+                        this.cpu.regEAX = w;
                         break;
                     case "BL":
-                        this.cpu.regEBX = (this.cpu.regEBX & 0xff00) | (w & 0xff);
+                        this.cpu.regEBX = (this.cpu.regEBX & ~0xff) | (w & 0xff);
                         break;
                     case "BH":
-                        this.cpu.regEBX = (this.cpu.regEBX & 0x00ff) | ((w << 8) & 0xff);
+                        this.cpu.regEBX = (this.cpu.regEBX & ~0xff00) | ((w << 8) & 0xff);
                         break;
                     case "BX":
-                        this.cpu.regEBX = (w & 0xffff);
+                        this.cpu.regEBX = (this.cpu.regEBX & ~0xffff) | (w & 0xffff);
+                        break;
+                    case "EBX":
+                        this.cpu.regEBX = w;
                         break;
                     case "CL":
-                        this.cpu.regECX = (this.cpu.regECX & 0xff00) | (w & 0xff);
+                        this.cpu.regECX = (this.cpu.regECX & ~0xff) | (w & 0xff);
                         break;
                     case "CH":
-                        this.cpu.regECX = (this.cpu.regECX & 0x00ff) | ((w << 8) & 0xff);
+                        this.cpu.regECX = (this.cpu.regECX & ~0xff00) | ((w << 8) & 0xff);
                         break;
                     case "CX":
-                        this.cpu.regECX = (w & 0xffff);
+                        this.cpu.regECX = (this.cpu.regECX & ~0xffff) | (w & 0xffff);
+                        break;
+                    case "ECX":
+                        this.cpu.regECX = w;
                         break;
                     case "DL":
-                        this.cpu.regEDX = (this.cpu.regEDX & 0xff00) | (w & 0xff);
+                        this.cpu.regEDX = (this.cpu.regEDX & ~0xff) | (w & 0xff);
                         break;
                     case "DH":
-                        this.cpu.regEDX = (this.cpu.regEDX & 0x00ff) | ((w << 8) & 0xff);
+                        this.cpu.regEDX = (this.cpu.regEDX & ~0xff00) | ((w << 8) & 0xff);
                         break;
                     case "DX":
-                        this.cpu.regEDX = (w & 0xffff);
+                        this.cpu.regEDX = (this.cpu.regEDX & ~0xffff) | (w & 0xffff);
+                        break;
+                    case "EDX":
+                        this.cpu.regEDX = w;
                         break;
                     case "SP":
+                        this.cpu.setSP((this.cpu.getSP() & ~0xffff) | (w & 0xffff));
+                        break;
+                    case "ESP":
                         this.cpu.setSP(w);
                         break;
                     case "BP":
-                        this.cpu.regEBP = (w & 0xffff);
+                        this.cpu.regEBP = (this.cpu.regEBP & ~0xffff) | (w & 0xffff);
+                        break;
+                    case "EBP":
+                        this.cpu.regEBP = w;
                         break;
                     case "SI":
-                        this.cpu.regESI = (w & 0xffff);
+                        this.cpu.regESI = (this.cpu.regESI & ~0xffff) | (w & 0xffff);
+                        break;
+                    case "ESI":
+                        this.cpu.regESI = w;
                         break;
                     case "DI":
-                        this.cpu.regEDI = (w & 0xffff);
+                        this.cpu.regEDI = (this.cpu.regEDI & ~0xffff) | (w & 0xffff);
+                        break;
+                    case "EDI":
+                        this.cpu.regEDI = w;
                         break;
                     case "DS":
                         this.cpu.setDS(w);
@@ -4390,7 +4570,7 @@ if (DEBUGGER) {
                         var fUnknown = true;
                         if (this.cpu.model >= X86.MODEL_80286) {
                             fUnknown = false;
-                            switch(sReg){
+                            switch(sRegMatch){
                             case "MS":
                                 X86Help.opHelpLMSW.call(this.cpu, w);
                                 break;
@@ -4422,7 +4602,7 @@ if (DEBUGGER) {
             }
         }
 
-        this.println((fCompact? '' : '\n') + this.getRegStr(fProt));
+        this.println((fCompact? '' : '\n') + this.getRegDump(fProt));
 
         if (fIns) {
             this.aAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());

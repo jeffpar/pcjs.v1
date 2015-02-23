@@ -167,21 +167,6 @@ str.toHexWord = function(w)
 };
 
 /**
- * toHexAddr(off, sel)
- *
- * @param {number} off
- * @param {number} [sel]
- * @return {string} the hex representation of sel:off
- */
-str.toHexAddr = function(off, sel)
-{
-    if (sel !== undefined) {
-        return str.toHexWord(sel) + ":" + str.toHexWord(off);
-    }
-    return str.toHex(off);
-};
-
-/**
  * getBaseName(sFileName, fStripExt)
  *
  * This is a poor-man's version of Node's path.basename(), which Node-only components should use instead.

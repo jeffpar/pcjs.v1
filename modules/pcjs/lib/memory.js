@@ -232,7 +232,7 @@ Memory.TYPE = {
 Memory.readNone = function readNone(off)
 {
     if (DEBUGGER && this.dbg.messageEnabled(Messages.MEM) /* && !off */) {
-        this.dbg.message("attempt to read invalid block %" + str.toHex(this.addr) + " from " + str.toHexAddr(this.cpu.getIP(), this.cpu.getCS()));
+        this.dbg.message("attempt to read invalid block %" + str.toHex(this.addr) + " from " + this.dbg.hexOffset(this.cpu.getIP(), this.cpu.getCS()));
     }
     return 0;
 };

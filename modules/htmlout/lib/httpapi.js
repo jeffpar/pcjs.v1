@@ -208,7 +208,7 @@ HTTPAPI.redirect = function(req, res, next)
     }
 
     for (sPath in aInternalRedirectPatterns) {
-        var re = new RegExp(sPath);
+        re = new RegExp(sPath);
         if (re.exec(req.url)) {
             req.url = req.url.replace(re, aInternalRedirectPatterns[sPath]);
             break;
@@ -757,18 +757,7 @@ HTTPAPI.processDumpAPI = function(req, res)
             }
             var file = new FileDump(sFormat, fComments, fDecimal, sServerRoot);
             file.loadFile(sFile, 0, 0, function(err) {
-                if (!err) {
-                    file.convertToJSON(function(err, str) {
-                        if (!err) {
-                            nResponse = 200;
-                        } else {
-                            str = err.message;
-                        }
-                        res.status(nResponse).send(str);
-                    });
-                } else {
-                    res.status(nResponse).send(err.message);
-                }
+                HTTPAPI.dumpFile(err, file, res);
             });
             return true;
         }
@@ -789,10 +778,10 @@ HTTPAPI.dumpDisk = function(err, disk, res)
     var nResponse = 400;                // default to "Bad Request"
     var sMIMEType = null;
     var sAttachment = null;
+
     if (err) {
         /*
-         * TODO: Do a better job of mapping the underlying error (eg, err.errno) to
-         * the appropriate HTTP response error.
+         * TODO: Do a better job of mapping the underlying error (eg, err.errno) to an appropriate HTTP response error.
          */
         nResponse = 404;
         sResponse = err.message;
@@ -816,6 +805,63 @@ HTTPAPI.dumpDisk = function(err, disk, res)
             nResponse = 200;
         } else {
             sResponse = "unable to convert disk image: " + disk.sDiskPath;
+        }
+    }
+    if (sMIMEType) {
+        res.set("Content-Type", sMIMEType);
+    }
+    if (sAttachment) {
+        res.set("Content-Disposition", 'attachment; filename="' + sAttachment + '"');
+    }
+    res.status(nResponse).send(sResponse);
+};
+
+/**
+ * dumpFile(err, file, res)
+ *
+ * @param {Error} err
+ * @param {FileDump} file
+ * @param {Object} res
+ */
+HTTPAPI.dumpFile = function(err, file, res)
+{
+    var sResponse = "";
+    var nResponse = 400;                // default to "Bad Request"
+    var sMIMEType = null;
+    var sAttachment = null;
+
+    if (err) {
+        /*
+         * TODO: Do a better job of mapping the underlying error (eg, err.errno) to an appropriate HTTP response error.
+         */
+        nResponse = 404;
+        sResponse = err.message;
+    } else {
+        if (file.sFormat == DumpAPI.FORMAT.ROM) {
+            // sMIMEType = "application/octet-stream";
+            sMIMEType = "application/x-download";
+            sAttachment = path.basename(file.sFilePath);
+            var i = sAttachment.lastIndexOf('.');
+            if (i > 0) sAttachment = sAttachment.substring(0, i+1) + DumpAPI.FORMAT.ROM;
+            sResponse = file.getData();
+        } else {
+            file.convertToJSON(function(err, str) {
+                if (!err) {
+                    nResponse = 200;
+                } else {
+                    str = err.message;
+                }
+                res.status(nResponse).send(str);
+            });
+            return;
+        }
+        /*
+         * Return a successful response ONLY if the file conversion call returned any data
+         */
+        if (sResponse) {
+            nResponse = 200;
+        } else {
+            sResponse = "unable to convert file image: " + file.sFilePath;
         }
     }
     if (sMIMEType) {

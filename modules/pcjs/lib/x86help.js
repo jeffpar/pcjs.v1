@@ -728,7 +728,7 @@ var X86Help = {
         }
 
         if (this.messageEnabled(bitsMessage) || fHalt) {
-            var sMessage = (fHalt? '\n' : '') + "Fault " + str.toHexByte(nFault) + (nError != null? " (" + str.toHexWord(nError) + ")" : "") + " on opcode 0x" + str.toHexByte(bOpcode) + " at " + str.toHexAddr(this.getIP(), this.getCS()) + " (%" + str.toHex(this.regLIP, 6) + ")";
+            var sMessage = (fHalt? '\n' : '') + "Fault " + str.toHexByte(nFault) + (nError != null? " (" + str.toHexWord(nError) + ")" : "") + " on opcode 0x" + str.toHexByte(bOpcode) + " at " + this.dbg.hexOffset(this.getIP(), this.getCS()) + " (%" + str.toHex(this.regLIP, 6) + ")";
             var fRunning = this.aFlags.fRunning;
             if (this.printMessage(sMessage, bitsMessage)) {
                 if (fHalt) {
@@ -767,7 +767,7 @@ var X86Help = {
      */
     opHelpUndefined: function() {
         this.setIP(this.opLIP - this.segCS.base);
-        this.setError("Undefined opcode 0x" + str.toHexByte(this.bus.getByteDirect(this.regLIP)) + " at " + str.toHexAddr(this.getIP(), this.getCS()));
+        this.setError("Undefined opcode 0x" + str.toHexByte(this.bus.getByteDirect(this.regLIP)) + " at 0x" + str.toHex(this.regLIP));
         this.stopCPU();
     }
 };

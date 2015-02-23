@@ -202,7 +202,7 @@ C1PROM.prototype.copyImage = function()
                 this.setError("ROM image size (" + str.toHexWord(cbImage) + ") does not match component-specified size (" + str.toHexWord(this.cbROM) + ")");
                 return;
             }
-            if (DEBUG) this.log("copyImage(): copying ROM to " + str.toHexAddr(this.offROM) + " (0x" + str.toHexWord(cbImage) + " bytes)");
+            if (DEBUG) this.log("copyImage(): copying ROM to 0x" + str.toHexWord(this.offROM) + " (0x" + str.toHexWord(cbImage) + " bytes)");
             for (var i=0; i < cbImage; i++) {
                 this.abMem[this.offROM + i] = this.abImage[i];
             }

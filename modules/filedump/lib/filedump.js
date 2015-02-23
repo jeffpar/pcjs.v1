@@ -235,7 +235,8 @@ FileDump.prototype.loadFile = function(sFile, iStart, nSkip, done)
 {
     var obj = this;
 
-    var options = {encoding: str.endsWith(sFile, ".hex")? "utf8" : null};
+    var sExt = str.getExtension(sFile);
+    var options = {encoding: sExt == DumpAPI.FORMAT.JSON || sExt == DumpAPI.FORMAT.HEX? "utf8" : null};
 
     var sFilePath = net.isRemote(sFile)? sFile : path.join(this.sServerRoot, sFile);
 
@@ -277,22 +278,46 @@ FileDump.prototype.loadFile = function(sFile, iStart, nSkip, done)
  */
 FileDump.prototype.setData = function(buf, iStart, nSkip)
 {
-    var b, i, s;
+    var b, i, j, s;
     if (typeof buf == "string") {
-        /*
-         * We've received a string that must be converted to a Buffer before we continue.
-         *
-         * At the moment, the only string-based file format we support is a ".hex" file,
-         * which contains a series of byte values encoded in hex, separated by whitespace.
-         */
         var ab = [];
-        var as = buf.split(/\s+/);
-        for (i = 0; i < as.length; i++) {
-            s = as[i];
-            if (!s.length) continue;
-            if (isNaN(b = parseInt(s, 16))) break;
-            ab.push(b);
+        if (buf.indexOf('{') >= 0) {
+            /*
+             * Treat the incoming string data as JSON data.
+             */
+            var json;
+            try {
+                json = JSON.parse(buf);
+            } catch (e) {
+                json = null;
+            }
+            if (json && json.data && json.data.length) {
+                for (i = 0; i < json.data.length; i++) {
+                    var dw = json.data[i];
+                    for (j = 0; j < 4; j++) {
+                        ab.push(dw & 0xff);
+                        dw >>>= 8;
+                    }
+                }
+            }
         }
+        else {
+            /*
+             * Treat the incoming string data as HEX (ie, a series of byte values encoded in hex, separated by whitespace)
+             */
+            var as = buf.split(/\s+/);
+            for (i = 0; i < as.length; i++) {
+                s = as[i];
+                if (!s.length) continue;
+                if (isNaN(b = parseInt(s, 16))) break;
+                ab.push(b);
+            }
+        }
+        /*
+         * If we didn't recognize the data, then simply return, leaving this.buf undefined.
+         */
+        if (!ab.length) return;
+
         buf = new Buffer(ab);
     }
     if (!this.buf) {
@@ -310,6 +335,16 @@ FileDump.prototype.setData = function(buf, iStart, nSkip)
     }
 };
 
+/**
+ * getData()
+ *
+ * @this {FileDump}
+ * @return {Buffer|null}
+ */
+FileDump.prototype.getData = function()
+{
+    return this.buf;
+};
 
 /**
  * dumpLine(nIndent, sLine, sComment)
