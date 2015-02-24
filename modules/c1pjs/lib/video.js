@@ -67,17 +67,21 @@
  * to the lack of a "guard band feature."  Similarly, BASIC defaults to a width of 24 columns
  * avoid display problems near the right edge.  BASIC will let you choose a width SMALLER than
  * 24 but not larger. So, while the video buffer supports a theoretical maximum of 32 rows x 32
- * columns, the practical maximum is 24 rows x 24 columns; the last 4 rows of the video buffer
- * are never used, and while content scrolls through the top 4 lines of the buffer, it is never
- * assumed that you can see the top 4 lines.
+ * columns, the practical maximum is 25 rows x 24 columns; the last 4 rows of the video buffer
+ * are never used, and while content DOES scroll through the top 4 lines of the buffer, it should
+ * never be assumed that you can see the top 3 lines.
  *
  * This is partially confirmed by the "C1P Character Graphics Reference Manual", p3, which says
  * that the "the visible character field consists of 25 lines of 25 columns" and that the "first
- * visible character in the upper left of the screen is accessed via address 53379," or 0xD083,
- * confirming that the first 4 lines are not assumed to be visible.  However, the comment
- * regarding "25 lines of 25 columns" seems to be off by one in both dimensions.  And why would
- * they say that the first visible address is 0xD083 instead of 0xD085?  An indentation of 5 bytes,
- * rather than 3, would be more consistent with how the C1P ROMs use video memory.
+ * visible character in the upper left of the screen is accessed via address 53379," or 0xD083.
+ *
+ * They actually meant 0xD085, because as mentioned earlier, the C1P indents every row by 5
+ * characters, not 3.  Even so, the difference between 0xD365 (where the bottom line starts)
+ * and 0xD085 is 0x2E0, or 736.  And 736 divided by 32 gives 23; add the bottom row, and that
+ * gives you 24 visible rows, not 25.  Since we now have screenshots of a C1P monitor displaying
+ * 25 rows (courtesy of Stephan Mühlstrasser <stephan.muehlstrasser@web.de>), C1Pjs now assumes
+ * 25 rows, which means that only the first 3 lines are not visible, which necessarily puts
+ * the address of the first visible character at 0xD065.
  *
  * Model 540 Video Board vs. Model 600 "Superboard II"
  * ---------------------------------------------------
@@ -274,7 +278,7 @@ C1PVideo.prototype.setModel = function(nModel)
      * the only other supported model is 540 (2K video buffer).
      */
     if (this.nModel == 600) {
-        this.setDimensions(this.nDefaultCols, this.nDefaultRows, 4, 24);
+        this.setDimensions(this.nDefaultCols, this.nDefaultRows, 3, 25);
         if (this.cbScreen == 1024 && this.cpu) {
             /*
              * NOTE: We deliberately set the guard address to the LAST byte of the 2K
@@ -466,7 +470,6 @@ C1PVideo.prototype.writeByte = function(offset, b)
 {
     var col = offset % this.nCols;
     var row = Math.floor(offset / this.nCols);
-    // if (b == 0) this.cpu.halt();         // I must have been testing something here...
     return this.updateWindow(col, row, b);
 };
 

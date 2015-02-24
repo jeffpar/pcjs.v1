@@ -807,8 +807,26 @@ X86CPU.prototype.reset = function()
  *      the test. A nonzero value in EAX after self-test indicates that the particular 80386 unit is faulty.
  *      If the self-test is not requested, the contents of EAX after RESET is undefined.
  *
- *      DX holds a component identifier and revision number after RESET as Figure 10-1 illustrates. DH contains 3,
- *      which indicates an 80386 component. DL contains a unique identifier of the revision level.
+ *      DX holds a component identifier and revision number after RESET as Figure 10-1 illustrates. DH contains
+ *      3, which indicates an 80386 component. DL contains a unique identifier of the revision level.
+ *
+ *      EFLAGS      =   0x00000002
+ *      IP          =   0x0000FFF0
+ *      CS selector =   0xF000 (base of 0xFFFF0000 and limit of 0xFFFF)
+ *      DS selector =   0x0000
+ *      ES selector =   0x0000
+ *      SS selector =   0x0000
+ *      FS selector =   0x0000
+ *      GS selector =   0x0000
+ *      IDTR        =   base of 0 and limit of 0x3FF
+ *
+ * All other 80386 registers are undefined after a reset (that is, Intel declined to document precisely how
+ * the hardware initializes any other registers, as if that would stop everyone from making any assumptions).
+ *
+ * We've elected to set DX to 0x0304 on a reset, which is consistent with a 80386-C0, since we have no desire to
+ * try to emulate all the bugs in older (eg, B1) steppings.  At least not initially.  We leave stepping-accurate
+ * emulation for another day.  It's also known that the B1 reported 0x0303 in DX, but other than the B1 and C0
+ * steppings, it's not known exactly what other revision numbers Intel used in 80386 CPUs.
  *
  * We define some additional "registers", such as regLIP. which mirrors the linear address corresponding to
  * CS:IP (the address of the next opcode byte).  In fact, regLIP functions as our internal IP register, so any
@@ -879,7 +897,7 @@ X86CPU.prototype.resetRegs = function()
     this.setSS(0);
 
     if (I386 && this.model >= X86.MODEL_80386) {
-        this.regEDX = 0x0303;           // Intel documentation indicates this is what an 80386-B1 reported
+        this.regEDX = 0x0304;           // Intel errata sheets indicate this is what an 80386-C0 reported
         this.regCR0 = X86.CR0.ET;       // formerly MSW
         this.regCR1 = 0;                // reserved
         this.regCR2 = 0;                // page fault linear address (PFLA)

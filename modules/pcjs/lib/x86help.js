@@ -52,7 +52,7 @@ var X86Help = {
      * @this {X86CPU}
      * @param {number} dst (current value, ignored)
      * @param {number} src (new value)
-     * @return {number} dst (src is overridden, replaced with regMD16, as specified by opMOVSegSrc)
+     * @return {number} dst (src is overridden, replaced with regMD16, as specified by opMOVwsr())
      */
     opHelpMOVSegSrc: function(dst, src) {
         return X86Help.opHelpMOV.call(this, dst, this.regMD16);

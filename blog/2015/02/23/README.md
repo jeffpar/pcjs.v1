@@ -82,7 +82,7 @@ The "S40344" indicates that it's a B1 stepping, although I'm not currently able 
 
 According to [OS/2 Museum](http://os2museum.com) proprietor Michal Necasek, the "L8260347" means:
 
-	[I]t was actually manufactured in mid-1988.	It took me many years to realize how Intel marked the chips.
+	[I]t was actually manufactured in mid-1988. It took me many years to realize how Intel marked the chips.
 	The initial 'L' (or whatever number/letter it is) can be ignored and the following 3 digits (826) are the
 	date code. The first is the last digit of the year.... The last two digits are the week of manufacture,
 	so week 26 of 1988. Many Intel CPUs actually have 2 or 3 date codes on them, probably related to when the
@@ -90,10 +90,10 @@ According to [OS/2 Museum](http://os2museum.com) proprietor Michal Necasek, the 
 	there might be another date code on the bottom side, but if there is, it's not going to be too far apart
 	from the one on the top and it's going to be slightly older.
 
-One good thing about my 80386-B1 CPU is that it's also marked with a "&Sigma;&Sigma;" (double sigma),
-which is how Intel marked parts that tested safe for 32-bit multiplication.  Some 80386 CPUs suffered
-from a manufacturing defect that could occasionally result in multiplication errors; those that Intel
-caught were marked with "16 BIT S/W ONLY" instead of the double sigma.
+Fortunately, my 80386-B1 CPU is also marked with a "&Sigma;&Sigma;" (double sigma), which is how Intel marked
+parts that tested safe for 32-bit multiplication.  Some 80386 CPUs suffered from a manufacturing defect that
+could occasionally result in multiplication errors; defective parts that Intel caught were marked with "16 BIT S/W ONLY"
+instead of the double sigma.
 
 The only other information I have about revision levels comes from a March 30, 1987 document titled
 "**80386-C0 STEPPING INFORMATION**":

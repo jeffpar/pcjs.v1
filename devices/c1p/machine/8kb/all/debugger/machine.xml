@@ -18,7 +18,7 @@
 	<rom id="romNull" size="0x8000"/>
 	<rom id="romBasic" size="0x2000" image="/devices/c1p/rom/basic-gcpatch.hex"/>
 	<rom id="romSystem" size="0x0800" image="/devices/c1p/rom/system.hex"/>
-	<video id="video" screenwidth="512" screenheight="384" cols="32" rows="32" charset="/devices/c1p/video/chargen2x.png" width="512px" padding="8px">
+	<video id="video" screenwidth="512" screenheight="400" cols="32" rows="32" charset="/devices/c1p/video/chargen2x.png" width="512px" padding="8px">
 		<name>Video Display</name>
 	</video>
 	<keyboard id="keyboard" padleft="8px">

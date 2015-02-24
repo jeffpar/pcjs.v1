@@ -1937,21 +1937,21 @@ var X86OpXX = {
         var bModRM = this.getIPByte();
         var reg = (bModRM & 0x38) >> 3;
         switch (reg) {
-            case 0x0:
-                this.regMD16 = this.segES.sel;
-                break;
-            case 0x1:
-                this.regMD16 = this.segCS.sel;
-                break;
+        case 0x0:
+            this.regMD16 = this.segES.sel;
+            break;
+        case 0x1:
+            this.regMD16 = this.segCS.sel;
+            break;
         case 0x2:
-                this.regMD16 = this.segSS.sel;
-                break;
-            case 0x3:
-                this.regMD16 = this.segDS.sel;
-                break;
-            default:
-                X86Help.opHelpUndefined.call(this);
-                return;
+            this.regMD16 = this.segSS.sel;
+            break;
+        case 0x3:
+            this.regMD16 = this.segDS.sel;
+            break;
+        default:
+            X86Help.opHelpUndefined.call(this);
+            return;
         }
         /*
          * Like other MOV operations, the destination does not need to be read, just written.
