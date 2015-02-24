@@ -22,7 +22,7 @@
 	<disk id="disk05" size="368640" chs="40:2:9" img="private/WORD30-DISK5-LEARNMOU.img" href="/disks/pc/apps/microsoft/word/3.0/WORD30-DISK5-LEARNMOU.json" md5="6343da623cd8d1b7b7613174df4d0b6f" md5json="a194294aec182ee668c2b295ad17c471">
 		<name>MS Word 3.0 (Disk 5)</name>
 	</disk>
-	<disk id="disk06" size="368640" chs="40:2:9" img="private/WORD30-DISK6-LEARNKBD-ERRORS.img" href="/disks/pc/apps/microsoft/word/3.0/WORD30-DISK6-LEARNKBD-ERRORS.json" md5="ee4dead3e8b40347e40824e16cf65d9b" md5json="464f5b6884a6817c3ea40ee1242bb384">
+	<disk id="disk06" size="368640" chs="40:2:9" img="private/WORD30-DISK6-LEARNKBD.img" href="/disks/pc/apps/microsoft/word/3.0/WORD30-DISK6-LEARNKBD.json" md5="780ae1479c80f36ca1ba561b4da9e87d" md5json="11e8a031c8348c4d76af061f8258ccab">
 		<name>MS Word 3.0 (Disk 6)</name>
 	</disk>
 </manifest>

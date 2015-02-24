@@ -1993,7 +1993,7 @@ var X86OpXX = {
             temp = this.regEBX;
             break;
         default:
-            if (this.model >= X86.MODEL_80286) {
+            if (this.model == X86.MODEL_80286 || this.model == X86.MODEL_80386 && reg != 0x4 && reg != 0x5) {
                 X86Help.opHelpInvalid.call(this);
                 return;
             }
@@ -2037,11 +2037,19 @@ var X86OpXX = {
             this.regEBX = temp;
             break;
         case 0x4:
-            this.setES(this.getSP());
+            if (I386 && this.model >= X86.MODEL_80386) {
+                this.setFS(this.getSP());
+            } else {
+                this.setES(this.getSP());
+            }
             this.setSP(temp);
             break;
         case 0x5:
-            this.setCS(this.regEBP);
+            if (I386 && this.model >= X86.MODEL_80386) {
+                this.setGS(this.regEBP);
+            } else {
+                this.setCS(this.regEBP);
+            }
             this.regEBP = temp;
             break;
         case 0x6:

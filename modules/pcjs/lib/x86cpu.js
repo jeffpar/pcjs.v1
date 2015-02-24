@@ -800,6 +800,16 @@ X86CPU.prototype.reset = function()
  *      CS Base     = 0xFF0000      DS/ES/SS Base     = 0x000000        IDT Base  = 0x000000
  *      CS Limit    =   0xFFFF      DS/ES/SS Limit    =   0xFFFF        IDT Limit =   0x03FF
  *
+ * And from the "INTEL 80386 PROGRAMMER'S REFERENCE MANUAL 1986", section 10.1:
+ *
+ *      The contents of EAX depend upon the results of the power-up self test. The self-test may be requested
+ *      externally by assertion of BUSY# at the end of RESET. The EAX register holds zero if the 80386 passed
+ *      the test. A nonzero value in EAX after self-test indicates that the particular 80386 unit is faulty.
+ *      If the self-test is not requested, the contents of EAX after RESET is undefined.
+ *
+ *      DX holds a component identifier and revision number after RESET as Figure 10-1 illustrates. DH contains 3,
+ *      which indicates an 80386 component. DL contains a unique identifier of the revision level.
+ *
  * We define some additional "registers", such as regLIP. which mirrors the linear address corresponding to
  * CS:IP (the address of the next opcode byte).  In fact, regLIP functions as our internal IP register, so any
  * code that needs the real IP must call getIP().  This, in turn, means that whenever CS or IP must be modified,
@@ -869,6 +879,7 @@ X86CPU.prototype.resetRegs = function()
     this.setSS(0);
 
     if (I386 && this.model >= X86.MODEL_80386) {
+        this.regEDX = 0x0303;           // Intel documentation indicates this is what an 80386-B1 reported
         this.regCR0 = X86.CR0.ET;       // formerly MSW
         this.regCR1 = 0;                // reserved
         this.regCR2 = 0;                // page fault linear address (PFLA)
@@ -1458,6 +1469,58 @@ X86CPU.prototype.setES = function(sel)
 {
     this.segES.load(sel);
     if (!BUGS_8086) this.opFlags |= this.OPFLAG_NOINTR8086;
+};
+
+/**
+ * getFS()
+ *
+ * NOTE: segFS is defined for I386 only.
+ *
+ * @this {X86CPU}
+ * @return {number}
+ */
+X86CPU.prototype.getFS = function()
+{
+    return this.segFS.sel;
+};
+
+/**
+ * setFS(sel)
+ *
+ * NOTE: segFS is defined for I386 only.
+ *
+ * @this {X86CPU}
+ * @param {number} sel
+ */
+X86CPU.prototype.setFS = function(sel)
+{
+    this.segFS.load(sel);
+};
+
+/**
+ * getGS()
+ *
+ * NOTE: segGS is defined for I386 only.
+ *
+ * @this {X86CPU}
+ * @return {number}
+ */
+X86CPU.prototype.getGS = function()
+{
+    return this.segGS.sel;
+};
+
+/**
+ * setGS(sel)
+ *
+ * NOTE: segGS is defined for I386 only.
+ *
+ * @this {X86CPU}
+ * @param {number} sel
+ */
+X86CPU.prototype.setGS = function(sel)
+{
+    this.segGS.load(sel);
 };
 
 /**

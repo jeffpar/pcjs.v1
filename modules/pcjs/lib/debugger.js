@@ -340,7 +340,7 @@ if (DEBUGGER) {
     Debugger.asRegs = [
         "AL", "CL", "DL", "BL", "AH", "CH", "DH", "BH",
         "AX", "CX", "DX", "BX", "SP", "BP", "SI", "DI",
-        "ES", "CS", "SS", "DS", "IP"
+        "ES", "CS", "SS", "DS", "FS", "GS", "IP"
     ];
 
     Debugger.REG_ES         = 0x00;     // bits 0-1 are standard SegReg encodings
@@ -1189,7 +1189,7 @@ if (DEBUGGER) {
             this.aaOpDescs[0x0F] = Debugger.aOpDescUndefined;
             if (this.cpu.model >= X86.MODEL_80286) {
                 this.aaOpDescs[0x0F] = Debugger.aOpDesc0F;
-                if (this.cpu.model >= X86.MODEL_80386) {
+                if (I386 && this.cpu.model >= X86.MODEL_80386) {
                     this.cchReg = 8;
                     this.maskReg = 0xffffffff|0;
                 }
@@ -1626,7 +1626,9 @@ if (DEBUGGER) {
         this.aMessageRegs[asRegs[17]] = str.toHexWord(cpu.getCS());
         this.aMessageRegs[asRegs[18]] = str.toHexWord(cpu.getSS());
         this.aMessageRegs[asRegs[19]] = str.toHexWord(cpu.getDS());
-        this.aMessageRegs[asRegs[20]] = str.toHexWord(cpu.getIP());
+        this.aMessageRegs[asRegs[20]] = str.toHexWord(cpu.getFS());
+        this.aMessageRegs[asRegs[21]] = str.toHexWord(cpu.getGS());
+        this.aMessageRegs[asRegs[22]] = str.toHexWord(cpu.getIP());
     };
 
     /**
@@ -2908,7 +2910,7 @@ if (DEBUGGER) {
     Debugger.prototype.getRegOperand = function(bReg, type, aAddr)
     {
         if ((type & Debugger.TYPE_MODE) == Debugger.TYPE_SEGREG) {
-            if (bReg >= 4) return null;
+            if (bReg >= 6 || bReg >= 4 && this.cpu.model < X86.MODEL_80386) return null;
             bReg += 16;
         }
         else if ((type & Debugger.TYPE_SIZE) >= Debugger.TYPE_WORD)
@@ -3103,20 +3105,20 @@ if (DEBUGGER) {
     /**
      * getRegDump(fProt)
      *
-     * Example of 8086 and 80286 real-mode register dump:
+     * Sample 8086 and 80286 real-mode register dump:
      *
      *      AX=0000 BX=0000 CX=0000 DX=0000 SP=0000 BP=0000 SI=0000 DI=0000
      *      SS=0000 DS=0000 ES=0000 PS=0002 V0 D0 I0 T0 S0 Z0 A0 P0 C0
      *      F000:FFF0 EA5BE000F0    JMP      F000:E05B
      *
-     * Example of 80386 real-mode register dump:
+     * Sample 80386 real-mode register dump:
      *
      *      EAX=00000000 EBX=00000000 ECX=00000000 EDX=00000000
      *      ESP=00000000 EBP=00000000 ESI=00000000 EDI=00000000
      *      SS=0000 DS=0000 ES=0000 PS=00000002 V0 D0 I0 T0 S0 Z0 A0 P0 C0
      *      F000:0000FFF0 EA05F900F0    JMP      F000:0000F905
      *
-     * Example of 80286 protected-mode register dump:
+     * Sample 80286 protected-mode register dump:
      *
      *      AX=0000 BX=0000 CX=0000 DX=0000 SP=0000 BP=0000 SI=0000 DI=0000
      *      SS=0000[000000,FFFF] DS=0000[000000,FFFF] ES=0000[000000,FFFF] A20=ON
@@ -3124,7 +3126,7 @@ if (DEBUGGER) {
      *      TR=0000 MS=FFF0 PS=0002 V0 D0 I0 T0 S0 Z0 A0 P0 C0
      *      F000:FFF0 EA5BE000F0    JMP      F000:E05B
      *
-     * Example of 80386 protected-mode register dump:
+     * Sample 80386 protected-mode register dump:
      *
      *      EAX=00000000 EBX=00000000 ECX=00000000 EDX=00000000
      *      ESP=00000000 EBP=00000000 ESI=00000000 EDI=00000000
@@ -3134,7 +3136,7 @@ if (DEBUGGER) {
      *      CR0=00000010 CR2=00000000 CR3=00000000 PS=00000002 V0 D0 I0 T0 S0 Z0 A0 P0 C0
      *      F000:0000FFF0 EA05F900F0    JMP      F000:0000F905
      *
-     * We no longer include CS in real-mode (or EIP in any mode), because that information can be obtained from the
+     * This no longer includes CS in real-mode (or EIP in any mode), because that information can be obtained from the
      * first line of disassembly, which an "r" or "rp" command will also display.
      *
      * Note that even when the processor is in real mode, you can always use the "rp" command to force a protected-mode
@@ -3168,7 +3170,7 @@ if (DEBUGGER) {
                 s += sA20; sA20 = '';
             }
             s += '\n' + this.getSegStr(this.cpu.segCS, fProt) + ' ';
-            if (this.cpu.model >= X86.MODEL_80386) {
+            if (I386 && this.cpu.model >= X86.MODEL_80386) {
                 sA20 += '\n';
                 s += this.getSegStr(this.cpu.segFS, fProt) + ' ' +
                      this.getSegStr(this.cpu.segGS, fProt) + '\n';
@@ -3178,8 +3180,13 @@ if (DEBUGGER) {
                  this.getDTRStr("ID", null, this.cpu.addrIDT, this.cpu.addrIDTLimit) + ' ';
             s += sTR + ' ' + sA20;
             s += this.getRegStr(this.regs.MS, this.cpu.regCR0);
-            if (this.cpu.model >= X86.MODEL_80386) {
+            if (I386 && this.cpu.model >= X86.MODEL_80386) {
                 s += this.getRegStr("CR2", this.cpu.regCR2) + this.getRegStr("CR3", this.cpu.regCR3);
+            }
+        } else {
+            if (I386 && this.cpu.model >= X86.MODEL_80386) {
+                s += this.getSegStr(this.cpu.segFS, fProt) + ' ' +
+                     this.getSegStr(this.cpu.segGS, fProt) + ' ';
             }
         }
         s += this.getRegStr(this.regs.PS, this.cpu.getPS()) +
