@@ -2,12 +2,12 @@ Early 80386 CPUs
 ---
 Assembling a detailed and accurate history of the 80386, including a complete listing of all the "steppings"
 (revisions), when they were released, what "errata" (problems) each stepping suffered from, and which of those
-problems were fixed by a later stepping, seems virtually impossible.
+problems were fixed by a later stepping, seems virtually impossible at this late date.
 
 I won't make the attempt here, either.  I'm just going to throw together everything I know into one pile,
 as I begin adding 80386 support to PCjs.
 
-Let's start with steppings (revision levels), then move on to errata, and finally undocumented and deprecated
+Let's start with steppings (revision levels), then move on to errata, and finally undocumented and/or deprecated
 instructions.
 
 ### Steppings
@@ -26,9 +26,9 @@ But what "revision levels" did Intel actually use?
 
 Based on information below (see the ill-fated XBTS instruction), it seems there were A0-B0 steppings.
 However, all we can really infer from that is the existence of A0 and B0 steppings.  It doesn't tell us
-whether there were any intervening (eg, A1, A2) steppings, or what "revision levels" were used on reset.
+whether there were any intervening (eg, A1, A2) steppings, or what revision levels were used on reset.
 
-I've read reports that A steppings had serious problems, like the inability to return to real mode
+I've read reports that A steppings had serious problems, like an inability to return to real mode
 (reminiscent of the 80286).  By all accounts, no A-stepping 80386 CPUs were sold commercially, so we can
 more or less ignore them.
 
@@ -37,7 +37,9 @@ As for the B0 stepping, the October 15, 1991 issue of PC Magazine reported:
 	You can tell if you have a B0 or B1 Step level 386 by looking at the markings on the chip.
 	If it has the ID number S40336 or S40337 stamped on it, then it's a Step B0; if it's marked
 	with S40343, S40344, or S40362, it's a Step B1. Some B0 and B1 chips were marked B0 or B1
-	rather than with an ID number. 
+	rather than with an ID number.
+
+Unfortunately, this doesn't tell us what revision number an 80386-B0 reported.
 
 Most of the information I have about the 80386 begins with the B1 stepping.  From a December 17, 1986
 document titled "**80386-B1 STEPPING INFORMATION**":
@@ -66,8 +68,8 @@ document titled "**80386-B1 STEPPING INFORMATION**":
 	            ii   m  c  i  '85 '86      |
 	                                       |
 
-So, the B1 stepping set DL to 0x03 on reset.  It also seems a safe bet that revision number
-for a B0 stepping was 0x02.  Does that mean the revision number for the A0 was 0x01?  Who knows.
+So, the B1 stepping set DL to 0x03 on reset.  It also seems a safe bet that the revision number
+for a B0 stepping was 0x02.  Does that mean the revision number for the A0 was 0x01?  I can only guess.
 
 The 80386 CPU on my Compaq DeskPro 386 "Version 2" System Board is labeled as:
 
@@ -76,14 +78,22 @@ The 80386 CPU on my Compaq DeskPro 386 "Version 2" System Board is labeled as:
 	            L8260347
 	            (m)(c)i '85 '86
 
-so presumably it's a B1 stepping, although I'm not currently able to power it and run any tests.
-Since I'm not original owner of the motherboard, I can't be certain that the CPU was factory-installed,
-but I'm a little surprised that a motherboard with other components dating from 1988 was still using
-a CPU from 1986.
+The "S40344" indicates that it's a B1 stepping, although I'm not currently able to power it and run any tests.
 
-One good thing about my B1 stepping CPU is that it's also marked with a "double sigma", which is how
-Intel marked 80386 CPUs that were safe for 32-bit multiplication (some CPUs suffered from a manufacturing
-defect that could occasionally result in multiplication errors).
+According to [OS/2 Museum](http://os2museum.com) proprietor Michal Necasek, the "L8260347" means:
+
+	[I]t was actually manufactured in mid-1988.	It took me many years to realize how Intel marked the chips.
+	The initial 'L' (or whatever number/letter it is) can be ignored and the following 3 digits (826) are the
+	date code. The first is the last digit of the year.... The last two digits are the week of manufacture,
+	so week 26 of 1988. Many Intel CPUs actually have 2 or 3 date codes on them, probably related to when the
+	die was made, when the package was assembled, and when it was tested/binned and stamped. On your 386,
+	there might be another date code on the bottom side, but if there is, it's not going to be too far apart
+	from the one on the top and it's going to be slightly older.
+
+One good thing about my 80386-B1 CPU is that it's also marked with a "&Sigma;&Sigma;" (double sigma),
+which is how Intel marked parts that tested safe for 32-bit multiplication.  Some 80386 CPUs suffered
+from a manufacturing defect that could occasionally result in multiplication errors; those that Intel
+caught were marked with "16 BIT S/W ONLY" instead of the double sigma.
 
 The only other information I have about revision levels comes from a March 30, 1987 document titled
 "**80386-C0 STEPPING INFORMATION**":
@@ -91,7 +101,7 @@ The only other information I have about revision levels comes from a March 30, 1
 	80386-C0 component identifier readable in DH after reset: 03H
 	80386-C0 revision  identifier readable in DL after reset: 04H
 
-However, the document does not indicate how a 80386-C0 part is marked.
+However, the document does not indicate how a 80386-C0 part was marked.
 
 ### Errata
 
@@ -145,8 +155,8 @@ the following:
 + Breakpoints Malfunction after Reading CR3, TR6, or TR7
 + Return Address Incorrect for Segment Limit Fault during FNINIT
 
-Finally, the last 80386-B1 errata update I've seen, dated September 1, 1987, continued to list previous
-errata (#1-#17), plus the two errata from April 30 (#18 and #19), and the following new errata:
+On September 1, 1987, the final 80386-B1 errata update that I'm aware of continued to list previous errata (#1-#17),
+plus the two errata from April 30 (#18 and #19), along with the following new errata:
 
 + VERR/VERW/LAR/LSL Instructions Malfunction with Bad Selector
 + Coprocessor Malfunctions with Paging Enabled
@@ -159,7 +169,9 @@ steppings were affected as well.
 
 What follows is some additional information about early 80386 processors from various online sources.
 
-From "[CPU Identification by the Windows Kernel](http://www.geoffchappell.com/studies/windows/km/cpu/index.htm)":
+---
+
+Excerpt from "[CPU Identification by the Windows Kernel](http://www.geoffchappell.com/studies/windows/km/cpu/index.htm)", by Geoff Chappell:
 
 > ### 80386
 
@@ -208,11 +220,11 @@ debugging. If the debugger actually does implement its trace command as a trace,
 where the instruction is calculated to end, then a two-byte REP MOVSB may take many keystrokes to trace through! That
 model 1 stepping 1 traces through a REP MOVSB without interruption may be helpful when debugging, but it is surely a defect.
 
-More examples of problems with early (B1 stepping) 80386 CPUs are available in an "[The Old New Thing](http://blogs.msdn.com/b/oldnewthing/)"
-blog post titled "[My, what strange NOPs you have!](http://blogs.msdn.com/b/oldnewthing/archive/2011/01/12/10114521.aspx)",
-which also explains why Windows 95 ultimately decided not to support the B1 stepping.
+---
 
-Here are some highlights:
+More examples of problems with early 80386 CPUs are posted in "[The Old New Thing](http://blogs.msdn.com/b/oldnewthing/)"
+blog.  Here are some highlights from "[My, what strange NOPs you have!](http://blogs.msdn.com/b/oldnewthing/archive/2011/01/12/10114521.aspx)",
+by Raymond Chen:
 
 > [I]f the instruction following a string operation (such as movs) uses opposite-sized addresses from that in the string
 instruction (for example, if you performed a movs es:[edi], ds:[esi] followed by a mov ax, [bx]) or if the following
@@ -236,6 +248,8 @@ Insert a NOP between the branch and the selector load.
 a floating point coprocessor instruction that accessed memory at an address in the range 0x800000F8 through 0x800000FF,
 then the CPU would end up reading from addresses 0x000000F8 through 0x0000000FF instead. This one was easy to work around:
 Never allocate valid memory at 0x80000xxx.
+
+---
 
 ### Instructions
 
