@@ -68,20 +68,24 @@
  * avoid display problems near the right edge.  BASIC will let you choose a width SMALLER than
  * 24 but not larger. So, while the video buffer supports a theoretical maximum of 32 rows x 32
  * columns, the practical maximum is 25 rows x 24 columns; the last 4 rows of the video buffer
- * are never used, and while content DOES scroll through the top 4 lines of the buffer, it should
+ * are never used, and while content DOES scroll through the top 3 lines of the buffer, it should
  * never be assumed that you can see the top 3 lines.
  *
  * This is partially confirmed by the "C1P Character Graphics Reference Manual", p3, which says
  * that the "the visible character field consists of 25 lines of 25 columns" and that the "first
  * visible character in the upper left of the screen is accessed via address 53379," or 0xD083.
+ * However, they were wrong about both the number of columns and the first visible character.
  *
- * They actually meant 0xD085, because as mentioned earlier, the C1P indents every row by 5
- * characters, not 3.  Even so, the difference between 0xD365 (where the bottom line starts)
- * and 0xD085 is 0x2E0, or 736.  And 736 divided by 32 gives 23; add the bottom row, and that
- * gives you 24 visible rows, not 25.  Since we now have screenshots of a C1P monitor displaying
- * 25 rows (courtesy of Stephan Mühlstrasser <stephan.muehlstrasser@web.de>), C1Pjs now assumes
- * 25 rows, which means that only the first 3 lines are not visible, which necessarily puts
- * the address of the first visible character at 0xD065.
+ * They probably meant 0xD085, because as mentioned earlier, the C1P indents every row by 5
+ * characters, not 3.  But that's not correct either, because the difference between 0xD365
+ * (where the bottom line starts) and 0xD085 is 0x2E0, or 736.  736 divided by 32 equals 23;
+ * add the bottom row, and that would give you 24 visible rows, not 25.  Since we now have
+ * screenshots of a C1P monitor displaying 25 rows (courtesy of Stephan Mühlstrasser), C1Pjs
+ * now assumes that only the first 3 lines are not visible, and that the address of the first
+ * visible character is actually 0xD065 (53349), yielding 25 visible rows.
+ *
+ * All of this explains why we now use setDimensions(iRowTop=3, nRowsVisible=25) instead of
+ * setDimensions(iRowTop=4, nRowsVisible=24) for the Model 600.
  *
  * Model 540 Video Board vs. Model 600 "Superboard II"
  * ---------------------------------------------------

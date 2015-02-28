@@ -218,7 +218,8 @@ Memory.TYPE = {
     RAM:    1,
     ROM:    2,
     VIDEO:  3,
-    NAMES:  ["NONE", "RAM", "ROM", "VIDEO"],
+    CTRL:   4,
+    NAMES:  ["NONE", "RAM", "ROM", "VIDEO", "H/W"],
     COLORS: ["black", "blue", "green", "cyan"]
 };
 

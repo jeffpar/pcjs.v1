@@ -84,11 +84,12 @@ var X86 = {
          * Machine Status Word (MSW) bit definitions
          */
         MSW: {
-            PE: 0x0001,     // protected-mode enabled
-            MP: 0x0002,     // monitor processor extension (ie, coprocessor)
-            EM: 0x0004,     // emulate processor extension
-            TS: 0x0008,     // task switch indicator
-            ON: 0xfff0      // on the 80286, these bits are always on (TODO: Verify)
+            PE:     0x0001, // protected-mode enabled
+            MP:     0x0002, // monitor processor extension (ie, coprocessor)
+            EM:     0x0004, // emulate processor extension
+            TS:     0x0008, // task switch indicator
+            ON:     0xfff0, // on the 80286, these bits are always on (TODO: Verify)
+            MASK:   0xffff  // these are the only (MSW) bits that the 80286 can access (within CR0)
         },
         ET: 0x00000010,     // coprocessor type (80287 or 80387); always 1 on post-80386 CPUs
         PG: 0x80000000|0    // 0: paging disabled
@@ -147,7 +148,7 @@ var X86 = {
                 SHIFT:                      13
             },
             PRESENT:                        0x8000,
-            INVALID: 0      // use X86.DESC.ACC.INVALID for invalid ACC values
+            INVALID:    0   // use X86.DESC.ACC.INVALID for invalid ACC values
         },
         EXT: {              // descriptor extension word (reserved on the 80286; "must be zero")
             OFFSET:     0x6,

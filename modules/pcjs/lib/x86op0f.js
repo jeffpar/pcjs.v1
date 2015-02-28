@@ -40,9 +40,9 @@ if (typeof module !== 'undefined') {
 
 var X86Op0F = {
     /**
-     * @this {X86CPU}
+     * op=0x0F,0x00 (GRP6 rm)
      *
-     * op=0x0F,0x00 (grp6 rm)
+     * @this {X86CPU}
      */
     opGrp6: function() {
         var bModRM = this.getIPByte();
@@ -52,9 +52,9 @@ var X86Op0F = {
         this.aOpModGrpWord[bModRM].call(this, this.aOpGrp6, X86Grps.opGrpNoSrc);
     },
     /**
-     * @this {X86CPU}
+     * op=0x0F,0x01 (GRP7 rm)
      *
-     * op=0x0F,0x01 (grp7 rm)
+     * @this {X86CPU}
      */
     opGrp7: function() {
         var bModRM = this.getIPByte();
@@ -64,23 +64,29 @@ var X86Op0F = {
         this.aOpModGrpWord[bModRM].call(this, X86Op0F.aOpGrp7, X86Grps.opGrpNoSrc);
     },
     /**
-     * @this {X86CPU}
+     * opLAR()
      *
-     * op=0x0F,0x02 (lar reg,rm)
+     * op=0x0F,0x02 (LAR reg,rm)
+     *
+     * @this {X86CPU}
      */
     opLAR: function() {
         this.aOpModRegWord[this.getIPByte()].call(this, X86Help.opHelpLAR);
     },
     /**
-     * @this {X86CPU}
+     * opLSL()
      *
-     * op=0x0F,0x03 (lsl reg,rm)
+     * op=0x0F,0x03 (LSL reg,rm)
+     *
+     * @this {X86CPU}
      */
     opLSL: function() {
         this.aOpModRegWord[this.getIPByte()].call(this, X86Help.opHelpLSL);
     },
     /**
      * opLOADALL()
+     *
+     * op=0x0F,0x05 (LOADALL)
      *
      * From the "Undocumented iAPX 286 Test Instruction" document at http://www.pcjs.org/pubs/pc/reference/intel/80286/loadall/:
      *
@@ -117,8 +123,6 @@ var X86Op0F = {
      * no particular reason.
      *
      * @this {X86CPU}
-     *
-     * op=0x0F,0x05 (loadall)
      */
     opLOADALL: function() {
         if (this.segCS.cpl) {
@@ -168,9 +172,11 @@ var X86Op0F = {
         if (DEBUG && DEBUGGER && (this.regCR0 & X86.CR0.MSW.PE)) this.stopCPU();
     },
     /**
-     * @this {X86CPU}
+     * opCLTS()
      *
-     * op=0x0F,0x06 (clts)
+     * op=0x0F,0x06 (CLTS)
+     *
+     * @this {X86CPU}
      */
     opCLTS: function() {
         if (this.segCS.cpl) {
@@ -181,6 +187,10 @@ var X86Op0F = {
         this.nStepCycles -= 2;
     },
     /**
+     * opSLDT(dst, src)
+     *
+     * op=0x0F,0x00,reg=0x0 (GRP6:SLDT)
+     *
      * @this {X86CPU}
      * @param {number} dst
      * @param {number} src (null)
@@ -191,6 +201,10 @@ var X86Op0F = {
         return this.segLDT.sel;
     },
     /**
+     * opSTR(dst, src)
+     *
+     * op=0x0F,0x00,reg=0x1 (GRP6:STR)
+     *
      * @this {X86CPU}
      * @param {number} dst
      * @param {number} src (null)
@@ -201,6 +215,10 @@ var X86Op0F = {
         return this.segTSS.sel;
     },
     /**
+     * opLLDT(dst, src)
+     *
+     * op=0x0F,0x00,reg=0x2 (GRP6:LLDT)
+     *
      * @this {X86CPU}
      * @param {number} dst
      * @param {number} src (null)
@@ -213,6 +231,10 @@ var X86Op0F = {
         return dst;
     },
     /**
+     * opLTR(dst, src)
+     *
+     * op=0x0F,0x00,reg=0x3 (GRP6:LTR)
+     *
      * @this {X86CPU}
      * @param {number} dst
      * @param {number} src (null)
@@ -228,6 +250,10 @@ var X86Op0F = {
         return dst;
     },
     /**
+     * opVERR(dst, src)
+     *
+     * op=0x0F,0x00,reg=0x4 (GRP6:VERR)
+     *
      * @this {X86CPU}
      * @param {number} dst
      * @param {number} src (null)
@@ -264,6 +290,10 @@ var X86Op0F = {
         return dst;
     },
     /**
+     * opVERW(dst, src)
+     *
+     * op=0x0F,0x00,reg=0x5 (GRP6:VERW)
+     *
      * @this {X86CPU}
      * @param {number} dst
      * @param {number} src (null)
@@ -295,6 +325,10 @@ var X86Op0F = {
         return dst;
     },
     /**
+     * opSGDT(dst, src)
+     *
+     * op=0x0F,0x01,reg=0x0 (GRP7:SGDT)
+     *
      * @this {X86CPU}
      * @param {number} dst
      * @param {number} src (null)
@@ -349,6 +383,10 @@ var X86Op0F = {
         return dst;
     },
     /**
+     * opSIDT(dst, src)
+     *
+     * op=0x0F,0x01,reg=0x1 (GRP7:SIDT)
+     *
      * @this {X86CPU}
      * @param {number} dst
      * @param {number} src (null)
@@ -378,6 +416,8 @@ var X86Op0F = {
     /**
      * opLGDT(dst, src)
      *
+     * op=0x0F,0x01,reg=0x2 (GRP7:LGDT)
+     *
      * The 80286 LGDT instruction expects a 40-bit operand: a 16-bit limit, followed by a 24-bit address;
      * the ModRM decoder has already supplied the first word of the operand (in dst), which corresponds to the
      * limit, so we must fetch the remaining 24 bits ourselves.
@@ -401,6 +441,8 @@ var X86Op0F = {
     /**
      * opLIDT(dst, src)
      *
+     * op=0x0F,0x01,reg=0x3 (GRP7:LIDT)
+     *
      * The 80286 LIDT instruction expects a 40-bit operand: a 16-bit limit, followed by a 24-bit address;
      * the ModRM decoder has already supplied the first word of the operand (in dst), which corresponds to the
      * limit, so we must fetch the remaining 24 bits ourselves.
@@ -422,6 +464,10 @@ var X86Op0F = {
         return dst;
     },
     /**
+     * opSMSW(dst, src)
+     *
+     * op=0x0F,0x01,reg=0x4 (GRP7:SMSW)
+     *
      * @this {X86CPU}
      * @param {number} dst
      * @param {number} src (null)
@@ -432,6 +478,10 @@ var X86Op0F = {
         return this.regCR0;
     },
     /**
+     * opLMSW(dst, src)
+     *
+     * op=0x0F,0x01,reg=0x6 (GRP7:LMSW)
+     *
      * @this {X86CPU}
      * @param {number} dst
      * @param {number} src (null)
@@ -442,6 +492,118 @@ var X86Op0F = {
         this.nStepCycles -= (this.regEA < 0? 3 : 6);
         this.opFlags |= X86.OPFLAG.NOWRITE;
         return dst;
+    },
+    /**
+     * opMOVrcr()
+     *
+     * op=0x0F,0x20 (MOV reg,cr)
+     *
+     * NOTE: Since the ModRM decoders deal only with general-purpose registers, we must move
+     * the appropriate control register into a special variable (regMD16), which our helper function
+     * (opHelpMOVMD16) will use to replace the decoder's src operand.
+     *
+     * @this {X86CPU}
+     */
+    opMOVrcr: function() {
+        var bModRM = this.getIPByte() | 0xc0;
+        /*
+         * Unlike, say, opcode 0x8C (MOV word,sr), this opcode supports only registers, not memory;
+         * however, the 80386 apparently ignores the mod bits, treating any combination as if it was 0xc0.
+         *
+        if ((bModRM & 0xc0) != 0xc0) {
+            X86Help.opHelpInvalid.call(this);
+            return;
+        }
+         */
+        var reg = (bModRM & 0x38) >> 3;
+        switch (reg) {
+        case 0x0:
+            this.regMD16 = this.regCR0;
+            break;
+        case 0x1:
+            this.regMD16 = this.regCR1;
+            break;
+        case 0x2:
+            this.regMD16 = this.regCR2;
+            break;
+        case 0x3:
+            this.regMD16 = this.regCR3;
+            break;
+        default:
+            X86Help.opHelpUndefined.call(this);
+            return;
+        }
+        /*
+         * Like other MOV operations, the destination does not need to be read, just written;
+         * however, it's moot, because we've already restricted this opcode to registers only.
+         *
+         *      this.opFlags |= X86.OPFLAG.NOREAD;
+         */
+        this.aOpModRegWord[bModRM].call(this, X86Help.opHelpMOVMD16);
+    },
+    /**
+     * opMOVcrr()
+     *
+     * op=0x0F,0x22 (MOV cr,reg)
+     *
+     * NOTE: Since the ModRM decoders deal only with general-purpose registers, we have to
+     * make a note of which general-purpose register will be overwritten, so that we can restore it
+     * after moving the modified value to the correct control register.
+     *
+     * @this {X86CPU}
+     */
+    opMOVcrr: function() {
+        var temp;
+        var bModRM = this.getIPByte() | 0xc0;
+        /*
+         * Unlike, say, opcode 0x8E (MOV sr,word), this opcode supports only registers, not memory;
+         * however, the 80386 apparently ignores the mod bits, treating any combination as if it was 0xc0.
+         *
+        if ((bModRM & 0xc0) != 0xc0) {
+            X86Help.opHelpInvalid.call(this);
+            return;
+        }
+         */
+        var reg = (bModRM & 0x38) >> 3;
+        switch(reg) {
+        case 0x0:
+            temp = this.regEAX;
+            break;
+        case 0x1:
+            temp = this.regECX; // TODO: Is setting CR1 actually allowed on an 80386?
+            break;
+        case 0x2:
+            temp = this.regEDX;
+            break;
+        case 0x3:
+            temp = this.regEBX;
+            break;
+        default:
+            X86Help.opHelpInvalid.call(this);
+            return;
+        }
+        this.aOpModRegWord[bModRM].call(this, X86Help.opHelpMOV);
+        switch (reg) {
+        case 0x0:
+            reg = this.regEAX;
+            this.regEAX = temp;
+            X86Help.opHelpLCR0.call(this, reg);
+            break;
+        case 0x1:
+            this.regCR1 = this.regECX;
+            this.regECX = temp;
+            break;
+        case 0x2:
+            this.regCR2 = this.regEDX;
+            this.regEDX = temp;
+            break;
+        case 0x3:
+            this.regCR3 = this.regEBX;
+            this.regEBX = temp;
+            break;
+        default:
+            break;              // there IS no other case, but JavaScript inspections don't know that
+        }
     }
 };
 

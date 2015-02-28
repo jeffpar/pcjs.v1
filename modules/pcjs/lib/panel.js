@@ -447,17 +447,18 @@ Panel.prototype.updateMouse = function(event, fDown)
     this.yMouse = y;
 
     if (MAXDEBUG) this.log("Panel.moveMouse(" + x + "," + y + ")");
-    this.assert(x >= 0 && x < Panel.LIVECANVAS.CX && y >= 0 && y < Panel.LIVECANVAS.CY);
 
-    /*
-     * Convert the mouse position into the corresponding memory address, assuming it's over the live memory area
-     */
-    var addr = this.findAddress(x, y);
-    if (addr != X86.ADDR_INVALID) {
-        addr &= ~0xf;
-        if (addr != this.addrDumpLast) {
-            this.dumpMemory(addr, true);
-            this.addrDumpLast = addr;
+    if (x >= 0 && x < Panel.LIVECANVAS.CX && y >= 0 && y < Panel.LIVECANVAS.CY) {
+        /*
+         * Convert the mouse position into the corresponding memory address, assuming it's over the live memory area
+         */
+        var addr = this.findAddress(x, y);
+        if (addr != X86.ADDR_INVALID) {
+            addr &= ~0xf;
+            if (addr != this.addrDumpLast) {
+                this.dumpMemory(addr, true);
+                this.addrDumpLast = addr;
+            }
         }
     }
 };

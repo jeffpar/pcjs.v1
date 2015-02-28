@@ -88,7 +88,7 @@ str.parseInt = function(s, base)
         }
         var v;
         if (str.isValidInt(s, base) && !isNaN(v = parseInt(s, base))) {
-            value = v;
+            value = v|0;
         }
     }
     return value;

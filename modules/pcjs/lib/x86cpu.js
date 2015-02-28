@@ -706,9 +706,9 @@ X86CPU.prototype.initProcessor = function()
      */
     this.CYCLES = (this.model >= X86.MODEL_80286? X86CPU.CYCLES_80286 : X86CPU.CYCLES_8088);
 
-    this.aOps     = X86OpXX.aOps.slice();   // make copies of aOps and others before modifying them
-    this.aOpGrp4b = X86Grps.aOpGrp4b.slice();
-    this.aOpGrp4w = X86Grps.aOpGrp4w.slice();
+    this.aOps     = X86OpXX.aOps;
+    this.aOpGrp4b = X86Grps.aOpGrp4b;
+    this.aOpGrp4w = X86Grps.aOpGrp4w;
     this.aOpGrp6  = X86Op0F.aOpGrp6Real;    // setProtMode() will ensure that aOpGrp6 is switched
 
     if (this.model >= X86.MODEL_80186) {
@@ -720,6 +720,9 @@ X86CPU.prototype.initProcessor = function()
          * Instruction handlers that contain "hard-coded" 80286 cycle times include: opINSb, opINSw, opOUTSb,
          * opOUTSw, opENTER, and opLEAVE.
          */
+        this.aOps = X86OpXX.aOps.slice();   // make copies of aOps and others before modifying them
+        this.aOpGrp4b = X86Grps.aOpGrp4b.slice();
+        this.aOpGrp4w = X86Grps.aOpGrp4w.slice();
         this.nShiftCountMask = 0x1f;        // on newer processors, all shift counts are MOD 32
         this.aOps[0x0F]                 = X86Help.opHelpInvalid;
         this.aOps[X86.OPCODE.PUSHA]     = X86OpXX.opPUSHA;
@@ -753,15 +756,37 @@ X86CPU.prototype.initProcessor = function()
 
             this.OPFLAG_NOINTR8086 = 0;     // used with instructions that should *not* set NOINTR on an 80286 (eg, non-SS segment loads)
 
+            this.aOps0F = X86Op0F.aOps0F;
             this.aOps[0x0F]              = X86OpXX.op0F;
             this.aOps[X86.OPCODE.ARPL]   = X86OpXX.opARPL;
             this.aOps[X86.OPCODE.PUSHSP] = X86OpXX.opPUSHSP;
 
             if (I386 && this.model >= X86.MODEL_80386) {
+                this.aOps[X86.OPCODE.FS] = X86OpXX.opFS;
+                this.aOps[X86.OPCODE.GS] = X86OpXX.opGS;
                 this.aOps[X86.OPCODE.OS] = X86OpXX.opOS;
                 this.aOps[X86.OPCODE.AS] = X86OpXX.opAS;
+                this.aOps0F = X86Op0F.aOps0F.slice();
+                this.aOps0F[0x20] = X86Op0F.opMOVrcr;
+                this.aOps0F[0x22] = X86Op0F.opMOVcrr;
             }
         }
+    }
+
+    /*
+     * The memory dispatch tables; opMem refers to the active set, based on the current OPERAND size (dataSize),
+     * which is based foremost on segCS.dataSize, but can also be overridden by an OPERAND size instruction prefix.
+     */
+    this.aaOpMem = [];
+    this.aaOpMem[2] = {
+        getWord: this.getShort.bind(this),
+        setWord: this.setShort.bind(this)
+    };
+    if (I386) {
+        this.aaOpMem[4] = {
+            getWord: this.getLong.bind(this),
+            setWord: this.setLong.bind(this)
+        };
     }
 };
 
@@ -928,34 +953,9 @@ X86CPU.prototype.resetRegs = function()
      */
     this.intFlags = X86.INTFLAG.NONE;
 
-    /*
-     * The following contain the (default) OPERAND size (2 for 16 bits, 4 for 32 bits), and the corresponding masks
-     * for isolating the (src) bits of an OPERAND and clearing the (dst) bits of an OPERAND.  These are reset to
-     * their segCS counterparts at the start of every new instruction, but are also set here for documentation purposes.
-     */
-    this.dataSize = this.segCS.dataSize;
-    this.dataMask = this.segCS.dataMask;
-
-    /*
-     * Similarly, the following contain the (default) ADDRESS size (2 for 16 bits, 4 for 32 bits), and the corresponding
-     * masks for isolating the (src) bits of an address and clearing the (dst) bits of an address.  Like the OPERAND size
-     * properties, these are reset to their segCS counterparts at the start of every new instruction.
-     */
-    this.addrSize = this.segCS.addrSize;
-    this.addrMask = this.segCS.addrMask;
-
-    /*
-     * It's also worth noting that instructions that implicitly use the stack also rely on something called STACK size,
-     * which is based on the BIG bit of the last descriptor loaded into SS; use the following segSS properties:
-     *
-     *      segSS.addrSize      (2 or 4)
-     *      segSS.addrMask      (0xffff or 0xffffffff)
-     *
-     * As there is no STACK size instruction prefix override, there's no need to propagate these segSS properties
-     * to separate X86CPU properties, as we do for the OPERAND size and ADDRESS size properties.
-     */
-
     this.setCSIP(0, 0xffff);    // this should be called before the first setPS() call
+
+    if (!I386) this.setSizes();
 
     if (BACKTRACK) {
         /*
@@ -1029,35 +1029,17 @@ X86CPU.prototype.resetRegs = function()
      * Now that all the segment registers have been created, it's safe to set the current addressing mode.
      */
     this.setProtMode();
-
-    /*
-     * The memory dispatch tables; opMem refers to the active set, based on the current OPERAND size (dataSize),
-     * which is based foremost on segCS.dataSize, but can also be overridden by an OPERAND size instruction prefix.
-     */
-    this.aaOpMem = [];
-    this.aaOpMem[2] = {
-        getWord: this.getShort.bind(this),
-        setWord: this.setShort.bind(this)
-    };
-    if (I386) {
-        this.aaOpMem[4] = {
-            getWord: this.getLong.bind(this),
-            setWord: this.setLong.bind(this)
-        };
-    }
-    this.opMem = this.aaOpMem[this.segCS.dataSize];
-    this.setOpMod();
 };
 
 /**
- * setOpMod()
+ * setAddrSize()
  *
  * Select the appropriate ModRM dispatch tables, based on the current ADDRESS size (addrSize), which
  * is based foremost on segCS.addrSize, but can also be overridden by an ADDRESS size instruction prefix.
  *
  * @this {X86CPU}
  */
-X86CPU.prototype.setOpMod = function()
+X86CPU.prototype.setAddrSize = function()
 {
     if (!I386) {
         this.aOpModRegByte = X86ModB.aOpModReg;
@@ -1083,6 +1065,54 @@ X86CPU.prototype.setOpMod = function()
             this.aOpModGrpWord = X86ModW32.aOpModGrp;
         }
     }
+};
+
+/**
+ * setDataSize()
+ *
+ * @this {X86CPU}
+ */
+X86CPU.prototype.setDataSize = function()
+{
+    this.opMem = this.aaOpMem[this.dataSize];
+};
+
+/**
+ * setSizes()
+ *
+ * @this {X86CPU}
+ */
+X86CPU.prototype.setSizes = function()
+{
+    /*
+     * The following contain the (default) ADDRESS size (2 for 16 bits, 4 for 32 bits), and the corresponding
+     * masks for isolating the (src) bits of an address and clearing the (dst) bits of an address.  Like the
+     * OPERAND size properties, these are reset to their segCS counterparts at the start of every new instruction.
+     */
+    this.addrSize = this.segCS.addrSize;
+    this.addrMask = this.segCS.addrMask;
+    /*
+     * It's also worth noting that instructions that implicitly use the stack also rely on STACK size,
+     * which is based on the BIG bit of the last descriptor loaded into SS; use the following segSS properties:
+     *
+     *      segSS.addrSize      (2 or 4)
+     *      segSS.addrMask      (0xffff or 0xffffffff)
+     *
+     * As there is no STACK size instruction prefix override, there's no need to propagate these segSS properties
+     * to separate X86CPU properties, as we do for the OPERAND size and ADDRESS size properties.
+     */
+
+    this.setAddrSize();
+
+    /*
+     * The following contain the (default) OPERAND size (2 for 16 bits, 4 for 32 bits), and the corresponding masks
+     * for isolating the (src) bits of an OPERAND and clearing the (dst) bits of an OPERAND.  These are reset to
+     * their segCS counterparts at the start of every new instruction, but are also set here for documentation purposes.
+     */
+    this.dataSize = this.segCS.dataSize;
+    this.dataMask = this.segCS.dataMask;
+
+    this.setDataSize();
 };
 
 /**
@@ -1230,6 +1260,10 @@ X86CPU.prototype.setProtMode = function(fProt)
     this.segDS.updateMode(fProt);
     this.segSS.updateMode(fProt);
     this.segES.updateMode(fProt);
+    if (I386 && this.model >= X86.MODEL_80386) {
+        this.segFS.updateMode(fProt);
+        this.segGS.updateMode(fProt);
+    }
 };
 
 /**
@@ -1303,8 +1337,7 @@ X86CPU.prototype.save = function()
  */
 X86CPU.prototype.restore = function(data)
 {
-    var a;
-    a = data[0];
+    var a = data[0];
     this.regEAX = a[0];
     this.regEBX = a[1];
     this.regECX = a[2];
@@ -1314,6 +1347,7 @@ X86CPU.prototype.restore = function(data)
     this.regESI = a[6];
     this.regEDI = a[7];
     this.nIOPL = a[8] || 0;
+
     a = data[1];
     this.segCS.restore(a[1]);
     this.segDS.restore(a[2]);
@@ -1321,21 +1355,24 @@ X86CPU.prototype.restore = function(data)
     this.segES.restore(a[4]);
     this.restoreProtMode(a[5]);
     this.setPS(a[6]);
+
     /*
-     * Since we're not using setCS(), it's important to call setIP() *after* segCS is restored, so that the
-     * CPU's linear IP register (regLIP) will be updated properly.
+     * It's important to call setCSIP(), both to ensure that the CPU's linear IP register (regLIP) is updated
+     * properly AND to ensure the CPU's default ADDRESS and OPERAND sizes are set properly.
      */
-    this.setIP(a[0]);
+    this.setCSIP(a[0], this.segCS.sel);
     /*
      * It's also important to call setSP(), so that the linear SP register (regLSP) will be updated properly;
      * we also need to call setSS(), to ensure that the lower and upper stack limits are properly initialized.
      */
     this.setSP(regESP);
     this.setSS(this.segSS.sel);
+
     if (I386 && this.model >= X86.MODEL_80386) {
         this.segFS.restore(a[7]);
         this.segGS.restore(a[8]);
     }
+
     a = data[2];
     this.segData  = a[0] != null && this.getSeg(a[0]) || this.segDS;
     this.segStack = a[1] != null && this.getSeg(a[1]) || this.segSS;
@@ -1344,6 +1381,7 @@ X86CPU.prototype.restore = function(data)
     this.intFlags = a[4];
     this.regEA = a[5];
     this.regEAWrite = a[6];     // save/restore of last EA calculation(s) isn't strictly necessary, but they may be of some interest to, say, the Debugger
+
     a = data[3];                // a[0] was previously nBurstDivisor (no longer used)
     this.nTotalCycles = a[1];
     this.setSpeed(a[2]);        // if we're restoring an old state that doesn't contain a value from getSpeed(), that's OK; setSpeed() checks for an undefined value
@@ -1407,6 +1445,7 @@ X86CPU.prototype.setCS = function(sel)
     var regEIP = this.getIP();
     this.regLIP = this.segCS.load(sel) + regEIP;
     this.regLIPLimit = this.segCS.base + this.segCS.limit;
+    if (I386) this.setSizes();
     if (!BUGS_8086) this.opFlags |= this.OPFLAG_NOINTR8086;
     if (PREFETCH) this.flushPrefetch(this.regLIP);
 };
@@ -1593,7 +1632,6 @@ X86CPU.prototype.setIP = function(off)
  */
 X86CPU.prototype.setCSIP = function(off, sel, fCall)
 {
-    this.assert((off & this.addrMask) == off);
     this.segCS.fCall = fCall;
     /*
      * We break this operation into the following discrete steps (eg, set IP, load CS, and then update IP) so
@@ -1607,6 +1645,7 @@ X86CPU.prototype.setCSIP = function(off, sel, fCall)
     if (base != X86.ADDR_INVALID) {
         this.regLIP = base + this.regEIP;
         this.regLIPLimit = base + this.segCS.limit;
+        if (I386) this.setSizes();
         if (PREFETCH) this.flushPrefetch(this.regLIP);
         return this.segCS.fStackSwitch;
     }
@@ -2983,14 +3022,14 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
     var fDebugCheck = this.aFlags.fDebugCheck = (DEBUGGER && this.dbg && this.dbg.checksEnabled());
 
     /*
-     * fDebugSkip is checked only when fDebugCheck is true, and its sole purpose is to tell the first call
+     * nDebugState is checked only when fDebugCheck is true, and its sole purpose is to tell the first call
      * to checkInstruction() that it can skip breakpoint checks, and that will be true ONLY when fStarting is
      * true OR nMinCycles is zero (the latter means the Debugger is single-stepping).
      *
      * Once we snap fStarting, we clear it, because technically, we've moved beyond "starting" and have
      * officially "started" now.
      */
-    var fDebugSkip = this.aFlags.fStarting || !nMinCycles;
+    var nDebugState = nMinCycles == 0? -1 : (this.aFlags.fStarting? 0 : 1);
     this.aFlags.fStarting = false;
 
     /*
@@ -3044,13 +3083,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
             this.segStack = this.segSS;
             this.regEA = this.regEAWrite = X86.ADDR_INVALID;
 
-            if (I386) {
-                this.dataSize = this.segCS.dataSize;
-                this.dataMask = this.segCS.dataMask;
-                this.addrSize = this.segCS.addrSize;
-                this.addrMask = this.segCS.addrMask;
-                this.opMem = this.aaOpMem[this.dataSize];
-            }
+            if (I386) this.setSizes();
 
             this.opPrefixes = this.opFlags & X86.OPFLAG.REPEAT;
             if (this.intFlags) {
@@ -3088,11 +3121,11 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
         }
 
         if (DEBUGGER && fDebugCheck) {
-            if (this.dbg.checkInstruction(this.regLIP, fDebugSkip)) {
+            if (this.dbg.checkInstruction(this.regLIP, nDebugState)) {
                 this.stopCPU();
                 break;
             }
-            fDebugSkip = false;
+            nDebugState = 1;
         }
 
         if (SAMPLER) {

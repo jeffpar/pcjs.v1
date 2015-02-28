@@ -68,7 +68,20 @@ function ROM(parmsROM)
     this.abROM = null;
     this.addrROM = parmsROM['addr'];
     this.sizeROM = parmsROM['size'];
-    this.addrROMAlias = parmsROM['alias'];
+
+    /*
+     * The new 'alias' property can now be EITHER a single physical address (like 'addr') OR an array of
+     * physical addresses; eg:
+     *
+     *      [0xf0000,0xffff0000,0xffff8000]
+     *
+     * We could have overloaded 'addr' to accomplish the same thing, but I think it's better to have any
+     * aliased locations listed under a separate property.
+     *
+     * Most ROMs are not aliased, in which case the 'alias' property should have the default value of null.
+     */
+    this.addrAlias = parmsROM['alias'];
+
     this.sFilePath = parmsROM['file'];
     this.sFileName = str.getBaseName(this.sFilePath);
     this.idNotify = parmsROM['notify'];
@@ -274,7 +287,17 @@ ROM.prototype.copyROM = function()
                  */
                 this.setError("ROM size (0x" + str.toHex(this.abROM.length) + ") does not match specified size (0x" + str.toHex(this.sizeROM) + ")");
             }
-            else if (this.addROM(this.addrROM) && this.addROM(this.addrROMAlias)) {
+            else if (this.addROM(this.addrROM)) {
+
+                var aliases = [];
+                if (typeof this.addrAlias == "number") {
+                    aliases.push(this.addrAlias);
+                } else if (this.addrAlias != null && this.addrAlias.length) {
+                    aliases = this.addrAlias;
+                }
+                for (var i = 0; i < aliases.length; i++) {
+                    this.addROM(aliases[i]);
+                }
                 /*
                  * If there's a component we should notify, notify it now, and give it the internal byte array, so that
                  * it doesn't have to ask the CPU for the data.  Currently, the only component that uses this notification
@@ -306,16 +329,12 @@ ROM.prototype.copyROM = function()
 /**
  * addROM(addr)
  *
- * If addr is null or undefined, then it's presumably an unused addrROMAlias, which we simply ignore (it's not
- * considered a failure condition).
- *
  * @this {ROM}
  * @param {number} addr
  * @return {boolean}
  */
 ROM.prototype.addROM = function(addr)
 {
-    if (addr == null) return true;
     if (this.bus.addMemory(addr, this.sizeROM, Memory.TYPE.ROM)) {
         if (DEBUG) this.log("addROM(): copying ROM to 0x" + str.toHex(addr) + " (0x" + str.toHex(this.abROM.length) + " bytes)");
         var bto = null;

@@ -92,8 +92,8 @@ According to [OS/2 Museum](http://os2museum.com) proprietor Michal Necasek, the 
 
 Fortunately, my 80386-B1 CPU is also marked with a "&Sigma;&Sigma;" (double sigma), which is how Intel marked
 parts that tested safe for 32-bit multiplication.  Some 80386 CPUs suffered from a manufacturing defect that
-could occasionally result in multiplication errors; defective parts that Intel caught were marked with "16 BIT S/W ONLY"
-instead of the double sigma.
+could occasionally result in multiplication errors; defective parts that Intel caught were marked with
+"16 BIT S/W ONLY" instead of the double sigma.
 
 The only other information I have about revision levels comes from a March 30, 1987 document titled
 "**80386-C0 STEPPING INFORMATION**":
@@ -101,7 +101,9 @@ The only other information I have about revision levels comes from a March 30, 1
 	80386-C0 component identifier readable in DH after reset: 03H
 	80386-C0 revision  identifier readable in DL after reset: 04H
 
-However, the document does not indicate how a 80386-C0 part was marked.
+However, that document does not indicate how a 80386-C0 part was marked, and I've found very little other
+information on the C0 stepping; it may have been quickly superseded by the D0 stepping, which used revision
+identifier 0x05.
 
 ### Errata
 
@@ -164,8 +166,60 @@ plus the two errata from April 30 (#18 and #19), along with the following new er
 This brought the total number of 80386-B1 errata to 21.
 
 There was also a manufacturing problem that caused 32-bit multiplications to fail on some parts, which Intel
-publicly acknowledged in September 1987.  The problem affected the B1 stepping; it's unknown whether other
-steppings were affected as well.
+publicly acknowledged in April 1987.
+
+From the San Jose Mercury News, April 11, 1987:
+
+	INTEL DISCOVERS A BUG IN ITS NEW 80386 CHIP
+	Author(s): CHRISTOPHER H. SCHMITT AND JIM BARTIMO, Mercury News
+	Business Writers Date: April 11, 1987 Section: Business
+	
+	Intel acknowledged Friday that a bug has cropped up in its new flagship microprocessor chip.
+	
+	Microprocessors serve as the electronic brains of devices ranging from personal computers to
+	home appliances.
+	
+	Intel said the bug in its 80386 microprocessor produces incorrect answers when the chip
+	performs certain mathematical operations. "When you multiply one 32-bit number by another
+	32-bit number, you get the error," said Intel spokesman Jim Jarrett. A 32-bit number is one
+	that utilizes the full data path of the chip.
+	
+	However, operating system software that would let the chip fully use its 32-bit characteristics
+	is still being developed, so the problem shouldn't immediately affect personal computer users.
+	Microsoft Corp. of Redmond, Wash., has announced its intention to deliver in early 1988 a 32-bit
+	operating system known as OS/2.
+	
+	Even when using the 32-bit capabilities of the chip, the possibility of an error is "rare,"
+	Jarrett said.
+	
+	Spokesman Bruce LeBoss said not all of the 100,000 80386 chips Intel has produced so far are
+	affected, but he declined to elaborate. Intel is sticking with a previously announced estimate
+	that it will sell from 500,000 to 1 million 80386s this year.
+	
+	To address the problem, Intel said it is notifying computer companies and other customers and
+	extending the chip's warranty from one to two years. Anticipating that it will replace some
+	80386s already in the field, the company charged off an undisclosed amount to cover the
+	expense. One analyst estimated the charge at about $7 million.
+	
+	Intel will test the chips it has already sold to determine which ones have the bug. But it will
+	not replace the chips for free. Instead, Intel will work with customers on an upgrade program.
+	
+	Intel said it will be up to individual computer makers to work with consumers who have
+	purchased machines using the 80386 chip.
+	
+	The problem may be most acutely felt by Houston-based Compaq Computer, which so far has
+	been the biggest producer of 80386-based computers. Compaq said it will disclose by early
+	next week plans for coping with the possibility that versions of its Deskpro 386 computer model
+	contain flawed chips.
+	
+	The bug may cause some shortages of the 80386. The problem won't be fixed until July, so the
+	only guaranteed chips are those that have already been produced and have passed Intel's test.
+	"Everybody wants perfect chips and we'll have fewer of those to go around for a while," Jarrett
+	said. Analysts indicated that in the long run, the bug is more likely to be embarrassing than
+	anything else. "You have a complex chip here," said Daniel Klesken, an analyst for Montgomery
+	Securities in San Francisco. "One should not be surprised that (problems) happen occasionally."
+
+The problem affected the B1 stepping; it's unknown whether other steppings were affected as well.
 
 What follows is some additional information about early 80386 processors from various online sources.
 

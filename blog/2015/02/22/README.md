@@ -10,12 +10,12 @@ post it.
 
 A Compaq DeskPro 386 test configuration is displayed below.  It's located at:
 
-> [/devices/pc/machine/compaq/deskpro386/ega/1152Kb/](/devices/pc/machine/compaq/deskpro386/ega/1152Kb/)
+> [/devices/pc/machine/compaq/deskpro386/ega/2048Kb/](/devices/pc/machine/compaq/deskpro386/ega/2048Kb/)
 	
 The configuration doesn't run, and the debugger can't disassemble 80386-specific code yet, but this is what I will be
 using to test and debug my changes over the next few months.
 
-[Embedded DeskPro 386](/devices/pc/machine/compaq/deskpro386/ega/1152kb/machine.xml "PCjs:deskpro386-ega-1152k::uncompiled:debugger")
+[Embedded DeskPro 386](/devices/pc/machine/compaq/deskpro386/ega/2048kb/machine.xml "PCjs:deskpro386-ega-2048k::uncompiled:debugger")
 
 *[@jeffpar](http://twitter.com/jeffpar)*  
 *February 22, 2015*

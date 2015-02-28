@@ -569,6 +569,12 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
     var ext = cpu.getShort(addrDesc + X86.DESC.EXT.OFFSET);
     var selMasked = sel & X86.SEL.MASK;
 
+    if (I386 && cpu.model >= X86.MODEL_80386) {
+        base |= (ext & X86.DESC.EXT.BASE2431) << 16;
+        limit |= (ext & X86.DESC.EXT.LIMIT1619) << 16;
+        if (ext & X86.DESC.EXT.GRANULARITY) limit = (limit << 12) | 0xfff;
+    }
+
     while (true) {
 
         var selCode, cplPrev, addrTSS, offSP, offSS, regSPPrev, regSSPrev;
@@ -863,11 +869,11 @@ X86Seg.prototype.updateMode = function(fProt)
         this.cpl = this.sel & X86.SEL.RPL;
         this.dpl = (this.acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
         if (this.cpu.model < X86.MODEL_80386 || !(this.ext & X86.DESC.EXT.BIG)) {
-            this.dataSize = 2;
-            this.dataMask = 0xffff;
+            this.addrSize = 2;
+            this.addrMask = 0xffff;
         } else {
-            this.dataSize = 4;
-            this.dataMask = (0xffffffff|0);
+            this.addrSize = 4;
+            this.addrMask = (0xffffffff|0);
         }
     } else {
         this.load = X86Seg.loadReal;
@@ -877,11 +883,11 @@ X86Seg.prototype.updateMode = function(fProt)
         this.limit = 0xffff;
         this.cpl = this.dpl = 0;
         this.addrDesc = X86.ADDR_INVALID;
-        this.dataSize = 2;
-        this.dataMask = 0xffff;
+        this.addrSize = 2;
+        this.addrMask = 0xffff;
     }
-    this.addrSize = this.dataSize;
-    this.addrMask = this.dataMask;
+    this.dataSize = this.addrSize;
+    this.dataMask = this.addrMask;
     return fProt;
 };
 
@@ -904,7 +910,7 @@ X86Seg.prototype.messageSeg = function(sel, base, limit, acc, ext)
             if (this.id == X86Seg.ID.CODE) sDPL += " cpl=" + this.cpl;
             this.dbg.message("loadSeg(" + this.sName + "):" + ch + "sel=" + str.toHexWord(sel) + " base=" + str.toHex(base) + " limit=" + str.toHexWord(limit) + " acc=" + str.toHexWord(acc) + sDPL);
         }
-        this.cpu.assert(/* base != X86.ADDR_INVALID && */ (!ext || ext == X86.DESC.EXT.AVAIL));
+        this.cpu.assert(/* base != X86.ADDR_INVALID && */ (this.cpu.model >= X86.MODEL_80386 || !ext || ext == X86.DESC.EXT.AVAIL));
     }
 };
 

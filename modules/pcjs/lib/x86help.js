@@ -54,7 +54,7 @@ var X86Help = {
      * @param {number} src (new value)
      * @return {number} dst (src is overridden, replaced with regMD16, as specified by opMOVwsr())
      */
-    opHelpMOVSegSrc: function(dst, src) {
+    opHelpMOVMD16: function(dst, src) {
         return X86Help.opHelpMOV.call(this, dst, this.regMD16);
     },
     /**
@@ -468,8 +468,8 @@ var X86Help = {
          * This instruction is always allowed to set MSW.PE, but it cannot clear MSW.PE once set;
          * therefore, we always OR the previous value of MSW.PE into the new value before loading.
          */
-        w |= (this.regCR0 & X86.CR0.MSW.PE);
-        this.regCR0 = (this.regCR0 & X86.CR0.MSW.ON) | (w & ~X86.CR0.MSW.ON);
+        w |= (this.regCR0 & X86.CR0.MSW.PE) | X86.CR0.MSW.ON;
+        this.regCR0 = (this.regCR0 & ~X86.CR0.MSW.MASK) | (w & X86.CR0.MSW.MASK);
         /*
          * Since the 80286 cannot return to real-mode via this instruction, the only transition we
          * must worry about is to protected-mode.  And don't worry, there's no harm calling setProtMode()
@@ -477,6 +477,20 @@ var X86Help = {
          * case, but this instruction isn't used frequently enough to warrant it).
          */
         if (this.regCR0 & X86.CR0.MSW.PE) this.setProtMode(true);
+    },
+    /**
+     * opHelpLCR0(l)
+     *
+     * This called on behalf of 80386 opcodes only (ie, MOV CR0,reg).
+     *
+     * TODO: Determine which CR0 bits, if any, cannot be modified by MOV CR0,reg.
+     *
+     * @this {X86CPU}
+     * @param {number} l
+     */
+    opHelpLCR0: function(l) {
+        this.regCR0 = l;
+        this.setProtMode(!!(this.regCR0 & X86.CR0.MSW.PE));
     },
     /**
      * opHelpCALLF(off, sel)

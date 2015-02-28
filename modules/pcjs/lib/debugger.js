@@ -89,6 +89,7 @@ function Debugger(parmsDbg)
         this.cchReg = 4;
         this.maskReg = 0xffff;
         this.cchAddr = 5;
+        this.maskAddr = 0xfffff;
 
         /*
          * Most commands that require an address call parseAddr(), which defaults to aAddrNextCode
@@ -143,8 +144,8 @@ function Debugger(parmsDbg)
 
         /*
          * Execution history is allocated by historyInit() whenever checksEnabled() conditions change.
-         * Execution history is updated whenever the CPU calls checkInstruction(), which will happen only
-         * when checksEnabled() returns true (eg, whenever one or more breakpoints have been set).
+         * Execution history is updated whenever the CPU calls checkInstruction(), which will happen
+         * only when checksEnabled() returns true (eg, whenever one or more breakpoints have been set).
          * This ensures that, by default, the CPU runs as fast as possible.
          */
         this.historyInit();
@@ -153,15 +154,6 @@ function Debugger(parmsDbg)
          * Initialize Debugger message support
          */
         this.messageInit(parmsDbg['messages']);
-
-        /*
-         * This object is filled in by messageRegs() whenever we need a fresh snapshot.
-         */
-        this.aMessageRegs = {
-            "AL":0, "CL":0, "DL":0, "BL":0, "AH":0, "CH":0, "DH":0, "BH":0,
-            "AX":0, "CX":0, "DX":0, "BX":0, "SP":0, "BP":0, "SI":0, "DI":0,
-            "ES":0, "CS":0, "SS":0, "DS":0, "IP":0
-        };
 
         /*
          * The instruction trace buffer is a lightweight logging mechanism with minimal impact
@@ -246,11 +238,7 @@ if (DEBUGGER) {
     Debugger.ADDR_DATA = 2;
 
     /*
-     * Instruction ordinals (indexes into Debugger.asIns)
-     *
-     * (And yes, there are a number of non-8086/8088 instructions in the following tables;
-     * if I decide to expand CPU support, even if it's just to broaden real-mode support on a simulated
-     * 286 or 386, then I might as well leave some of that support in place, since the impact is minimal).
+     * Instruction ordinals
      */
     Debugger.INS = {
         NONE:   0,   AAA:    1,   AAD:    2,   AAM:    3,   AAS:    4,   ADC:    5,   ADD:    6,   AND:    7,
@@ -282,9 +270,9 @@ if (DEBUGGER) {
     };
 
     /*
-     * Instruction names, indexed by instruction ordinal (above)
+     * Instruction names (mnemonics), indexed by instruction ordinal (above)
      */
-    Debugger.asIns = [
+    Debugger.INS_NAMES = [
         "INVALID","AAA",    "AAD",    "AAM",    "AAS",    "ADC",    "ADD",    "AND",
         "ARPL",   "AS:",    "BOUND",  "BSF",    "BSR",    "BT",     "BTC",    "BTR",
         "BTS",    "CALL",   "CBW",    "CLC",    "CLD",    "CLI",    "CLTS",   "CMC",
@@ -311,36 +299,53 @@ if (DEBUGGER) {
         "SUB",    "TEST",   "VERR",   "VERW",   "WAIT",   "XCHG",   "XLAT",   "XOR"
     ];
 
-    Debugger.CPU_86 = 0;
-    Debugger.CPU_186 = 1;
-    Debugger.CPU_286 = 2;
-    Debugger.CPU_386 = 3;
-    Debugger.CPU = Debugger.CPU_86;     // current CPU definition
+    Debugger.CPU_8086  = 0;
+    Debugger.CPU_80186 = 1;
+    Debugger.CPU_80286 = 2;
+    Debugger.CPU_80386 = 3;
+    Debugger.CPUS = [8086, 80186, 80286, 80386];
 
     /*
      * ModRM masks and definitions
      */
-    Debugger.REG_AL = 0x00;             // bits 0-2 are standard Reg encodings
-    Debugger.REG_CL = 0x01;
-    Debugger.REG_DL = 0x02;
-    Debugger.REG_BL = 0x03;
-    Debugger.REG_AH = 0x04;
-    Debugger.REG_CH = 0x05;
-    Debugger.REG_DH = 0x06;
-    Debugger.REG_BH = 0x07;
-    Debugger.REG_AX = 0x08;             // the rest of these encodings are non-standard (internal only)
-    Debugger.REG_CX = 0x09;
-    Debugger.REG_DX = 0x0A;
-    Debugger.REG_BX = 0x0B;
-    Debugger.REG_SP = 0x0C;
-    Debugger.REG_BP = 0x0D;
-    Debugger.REG_SI = 0x0E;
-    Debugger.REG_DI = 0x0F;
+    Debugger.REG_AL  = 0x00;             // bits 0-2 are standard Reg encodings
+    Debugger.REG_CL  = 0x01;
+    Debugger.REG_DL  = 0x02;
+    Debugger.REG_BL  = 0x03;
+    Debugger.REG_AH  = 0x04;
+    Debugger.REG_CH  = 0x05;
+    Debugger.REG_DH  = 0x06;
+    Debugger.REG_BH  = 0x07;
+    Debugger.REG_AX  = 0x08;
+    Debugger.REG_CX  = 0x09;
+    Debugger.REG_DX  = 0x0A;
+    Debugger.REG_BX  = 0x0B;
+    Debugger.REG_SP  = 0x0C;
+    Debugger.REG_BP  = 0x0D;
+    Debugger.REG_SI  = 0x0E;
+    Debugger.REG_DI  = 0x0F;
+    Debugger.REG_SEG = 0x10;
+    Debugger.REG_IP  = 0x16;
+    Debugger.REG_PS  = 0x17;
+    Debugger.REG_EAX = 0x18;
+    Debugger.REG_ECX = 0x19;
+    Debugger.REG_EDX = 0x1A;
+    Debugger.REG_EBX = 0x1B;
+    Debugger.REG_ESP = 0x1C;
+    Debugger.REG_EBP = 0x1D;
+    Debugger.REG_ESI = 0x1E;
+    Debugger.REG_EDI = 0x1F;
+    Debugger.REG_CR0 = 0x20;
+    Debugger.REG_CR1 = 0x21;
+    Debugger.REG_CR2 = 0x22;
+    Debugger.REG_CR3 = 0x23;
 
-    Debugger.asRegs = [
-        "AL", "CL", "DL", "BL", "AH", "CH", "DH", "BH",
-        "AX", "CX", "DX", "BX", "SP", "BP", "SI", "DI",
-        "ES", "CS", "SS", "DS", "FS", "GS", "IP"
+    Debugger.REGS = [
+        "AL",  "CL",  "DL",  "BL",  "AH",  "CH",  "DH",  "BH",
+        "AX",  "CX",  "DX",  "BX",  "SP",  "BP",  "SI",  "DI",
+        "ES",  "CS",  "SS",  "DS",  "FS",  "GS",  "IP",  "PS",
+        "EAX", "ECX", "EDX", "EBX", "ESP", "EBP", "ESI", "EDI",
+        "CR0", "CR1", "CR2", "CR3"
     ];
 
     Debugger.REG_ES         = 0x00;     // bits 0-1 are standard SegReg encodings
@@ -366,8 +371,9 @@ if (DEBUGGER) {
     Debugger.RM_IMMOFF      = Debugger.RM_BP;       // only if MOD_NODISP
     Debugger.RM_BX          = 0x07;
 
-    Debugger.asRM = [
-        "BX+SI", "BX+DI", "BP+SI", "BP+DI", "SI", "DI", "BP", "BX"
+    Debugger.RMS = [
+        "BX+SI", "BX+DI", "BP+SI", "BP+DI", "SI",    "DI",    "BP",    "BX",
+        "EAX",   "ECX",   "EDX",   "EBX",   "[SIB]", "EBP",   "ESI",   "EDI"
     ];
 
     /*
@@ -390,10 +396,10 @@ if (DEBUGGER) {
     Debugger.TYPE_BYTE      = 0x0001;   // (b) byte, regardless of operand size
     Debugger.TYPE_SBYTE     = 0x0002;   //     byte sign-extended to word
     Debugger.TYPE_WORD      = 0x0003;   // (w) word, regardless...
-    Debugger.TYPE_VWORD     = 0x0004;   // (v) word or double-word, depending...
+    Debugger.TYPE_WORDV     = 0x0004;   // (v) word or double-word, depending...
     Debugger.TYPE_DWORD     = 0x0005;   // (d) double-word, regardless...
     Debugger.TYPE_FARP      = 0x0006;   // (p) 32-bit or 48-bit pointer, depending
-    Debugger.TYPE_2WORDD    = 0x0007;   // (a) two memory operands (BOUND only)
+    Debugger.TYPE_WORD2     = 0x0007;   // (a) two memory operands (BOUND only)
     Debugger.TYPE_DESC      = 0x0008;   // (s) 6 byte pseudo-descriptor
     Debugger.TYPE_WORDIB    = 0x0009;   //     two source operands (eg, IMUL)
     Debugger.TYPE_WORDIW    = 0x000A;   //     two source operands (eg, IMUL)
@@ -432,14 +438,14 @@ if (DEBUGGER) {
     Debugger.TYPE_CH = (Debugger.REG_CH << 8 | Debugger.TYPE_IMPREG | Debugger.TYPE_BYTE);
     Debugger.TYPE_DH = (Debugger.REG_DH << 8 | Debugger.TYPE_IMPREG | Debugger.TYPE_BYTE);
     Debugger.TYPE_BH = (Debugger.REG_BH << 8 | Debugger.TYPE_IMPREG | Debugger.TYPE_BYTE);
-    Debugger.TYPE_AX = (Debugger.REG_AX << 8 | Debugger.TYPE_IMPREG | Debugger.TYPE_WORD);
-    Debugger.TYPE_CX = (Debugger.REG_CX << 8 | Debugger.TYPE_IMPREG | Debugger.TYPE_WORD);
-    Debugger.TYPE_DX = (Debugger.REG_DX << 8 | Debugger.TYPE_IMPREG | Debugger.TYPE_WORD);
-    Debugger.TYPE_BX = (Debugger.REG_BX << 8 | Debugger.TYPE_IMPREG | Debugger.TYPE_WORD);
-    Debugger.TYPE_SP = (Debugger.REG_SP << 8 | Debugger.TYPE_IMPREG | Debugger.TYPE_WORD);
-    Debugger.TYPE_BP = (Debugger.REG_BP << 8 | Debugger.TYPE_IMPREG | Debugger.TYPE_WORD);
-    Debugger.TYPE_SI = (Debugger.REG_SI << 8 | Debugger.TYPE_IMPREG | Debugger.TYPE_WORD);
-    Debugger.TYPE_DI = (Debugger.REG_DI << 8 | Debugger.TYPE_IMPREG | Debugger.TYPE_WORD);
+    Debugger.TYPE_AX = (Debugger.REG_AX << 8 | Debugger.TYPE_IMPREG | Debugger.TYPE_WORDV);
+    Debugger.TYPE_CX = (Debugger.REG_CX << 8 | Debugger.TYPE_IMPREG | Debugger.TYPE_WORDV);
+    Debugger.TYPE_DX = (Debugger.REG_DX << 8 | Debugger.TYPE_IMPREG | Debugger.TYPE_WORDV);
+    Debugger.TYPE_BX = (Debugger.REG_BX << 8 | Debugger.TYPE_IMPREG | Debugger.TYPE_WORDV);
+    Debugger.TYPE_SP = (Debugger.REG_SP << 8 | Debugger.TYPE_IMPREG | Debugger.TYPE_WORDV);
+    Debugger.TYPE_BP = (Debugger.REG_BP << 8 | Debugger.TYPE_IMPREG | Debugger.TYPE_WORDV);
+    Debugger.TYPE_SI = (Debugger.REG_SI << 8 | Debugger.TYPE_IMPREG | Debugger.TYPE_WORDV);
+    Debugger.TYPE_DI = (Debugger.REG_DI << 8 | Debugger.TYPE_IMPREG | Debugger.TYPE_WORDV);
     Debugger.TYPE_ES = (Debugger.REG_ES << 8 | Debugger.TYPE_IMPSEG | Debugger.TYPE_WORD);
     Debugger.TYPE_CS = (Debugger.REG_CS << 8 | Debugger.TYPE_IMPSEG | Debugger.TYPE_WORD);
     Debugger.TYPE_SS = (Debugger.REG_SS << 8 | Debugger.TYPE_IMPSEG | Debugger.TYPE_WORD);
@@ -453,10 +459,11 @@ if (DEBUGGER) {
     Debugger.TYPE_IN    = 0x1000;        // operand is input
     Debugger.TYPE_OUT   = 0x2000;        // operand is output
     Debugger.TYPE_BOTH  = (Debugger.TYPE_IN | Debugger.TYPE_OUT);
-    Debugger.TYPE_86    = (Debugger.CPU_86 << 14);
-    Debugger.TYPE_186   = (Debugger.CPU_186 << 14);
-    Debugger.TYPE_286   = (Debugger.CPU_286 << 14);
-    Debugger.TYPE_386   = (Debugger.CPU_386 << 14);
+    Debugger.TYPE_8086  = (Debugger.CPU_8086 << 14);
+    Debugger.TYPE_80186 = (Debugger.CPU_80186 << 14);
+    Debugger.TYPE_80286 = (Debugger.CPU_80286 << 14);
+    Debugger.TYPE_80386 = (Debugger.CPU_80386 << 14);
+    Debugger.TYPE_CPU_SHIFT = 14;
 
     /*
      * Message categories supported by the messageEnabled() function and other assorted message
@@ -576,74 +583,74 @@ if (DEBUGGER) {
      */
     Debugger.aaOpDescs = [
     /* 0x00 */ [Debugger.INS.ADD,   Debugger.TYPE_MODRM  | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0x01 */ [Debugger.INS.ADD,   Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0x01 */ [Debugger.INS.ADD,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0x02 */ [Debugger.INS.ADD,   Debugger.TYPE_REG    | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0x03 */ [Debugger.INS.ADD,   Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0x03 */ [Debugger.INS.ADD,   Debugger.TYPE_REG    | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0x04 */ [Debugger.INS.ADD,   Debugger.TYPE_AL     | Debugger.TYPE_BOTH,   Debugger.TYPE_IMM | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0x05 */ [Debugger.INS.ADD,   Debugger.TYPE_AX     | Debugger.TYPE_BOTH,   Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0x05 */ [Debugger.INS.ADD,   Debugger.TYPE_AX     | Debugger.TYPE_BOTH,   Debugger.TYPE_IMM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0x06 */ [Debugger.INS.PUSH,  Debugger.TYPE_ES     | Debugger.TYPE_IN],
     /* 0x07 */ [Debugger.INS.POP,   Debugger.TYPE_ES     | Debugger.TYPE_OUT],
 
     /* 0x08 */ [Debugger.INS.OR,    Debugger.TYPE_MODRM  | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0x09 */ [Debugger.INS.OR,    Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0x09 */ [Debugger.INS.OR,    Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0x0A */ [Debugger.INS.OR,    Debugger.TYPE_REG    | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0x0B */ [Debugger.INS.OR,    Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0x0B */ [Debugger.INS.OR,    Debugger.TYPE_REG    | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0x0C */ [Debugger.INS.OR,    Debugger.TYPE_AL     | Debugger.TYPE_BOTH,   Debugger.TYPE_IMM | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0x0D */ [Debugger.INS.OR,    Debugger.TYPE_AX     | Debugger.TYPE_BOTH,   Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0x0D */ [Debugger.INS.OR,    Debugger.TYPE_AX     | Debugger.TYPE_BOTH,   Debugger.TYPE_IMM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0x0E */ [Debugger.INS.PUSH,  Debugger.TYPE_CS     | Debugger.TYPE_IN],
     /* 0x0F */ Debugger.aOpDescPopCS,
 
     /* 0x10 */ [Debugger.INS.ADC,   Debugger.TYPE_MODRM  | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0x11 */ [Debugger.INS.ADC,   Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0x11 */ [Debugger.INS.ADC,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0x12 */ [Debugger.INS.ADC,   Debugger.TYPE_REG    | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0x13 */ [Debugger.INS.ADC,   Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0x13 */ [Debugger.INS.ADC,   Debugger.TYPE_REG    | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0x14 */ [Debugger.INS.ADC,   Debugger.TYPE_AL     | Debugger.TYPE_BOTH,   Debugger.TYPE_IMM | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0x15 */ [Debugger.INS.ADC,   Debugger.TYPE_AX     | Debugger.TYPE_BOTH,   Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0x15 */ [Debugger.INS.ADC,   Debugger.TYPE_AX     | Debugger.TYPE_BOTH,   Debugger.TYPE_IMM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0x16 */ [Debugger.INS.PUSH,  Debugger.TYPE_SS     | Debugger.TYPE_IN],
     /* 0x17 */ [Debugger.INS.POP,   Debugger.TYPE_SS     | Debugger.TYPE_OUT],
 
     /* 0x18 */ [Debugger.INS.SBB,   Debugger.TYPE_MODRM  | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0x19 */ [Debugger.INS.SBB,   Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0x19 */ [Debugger.INS.SBB,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0x1A */ [Debugger.INS.SBB,   Debugger.TYPE_REG    | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0x1B */ [Debugger.INS.SBB,   Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0x1B */ [Debugger.INS.SBB,   Debugger.TYPE_REG    | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0x1C */ [Debugger.INS.SBB,   Debugger.TYPE_AL     | Debugger.TYPE_BOTH,   Debugger.TYPE_IMM | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0x1D */ [Debugger.INS.SBB,   Debugger.TYPE_AX     | Debugger.TYPE_BOTH,   Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0x1D */ [Debugger.INS.SBB,   Debugger.TYPE_AX     | Debugger.TYPE_BOTH,   Debugger.TYPE_IMM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0x1E */ [Debugger.INS.PUSH,  Debugger.TYPE_DS     | Debugger.TYPE_IN],
     /* 0x1F */ [Debugger.INS.POP,   Debugger.TYPE_DS     | Debugger.TYPE_OUT],
 
     /* 0x20 */ [Debugger.INS.AND,   Debugger.TYPE_MODRM  | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0x21 */ [Debugger.INS.AND,   Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0x21 */ [Debugger.INS.AND,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0x22 */ [Debugger.INS.AND,   Debugger.TYPE_REG    | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0x23 */ [Debugger.INS.AND,   Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0x23 */ [Debugger.INS.AND,   Debugger.TYPE_REG    | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0x24 */ [Debugger.INS.AND,   Debugger.TYPE_AL     | Debugger.TYPE_BOTH,   Debugger.TYPE_IMM | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0x25 */ [Debugger.INS.AND,   Debugger.TYPE_AX     | Debugger.TYPE_BOTH,   Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0x25 */ [Debugger.INS.AND,   Debugger.TYPE_AX     | Debugger.TYPE_BOTH,   Debugger.TYPE_IMM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0x26 */ [Debugger.INS.ES,    Debugger.TYPE_PREFIX],
     /* 0x27 */ [Debugger.INS.DAA],
 
     /* 0x28 */ [Debugger.INS.SUB,   Debugger.TYPE_MODRM  | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0x29 */ [Debugger.INS.SUB,   Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0x29 */ [Debugger.INS.SUB,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0x2A */ [Debugger.INS.SUB,   Debugger.TYPE_REG    | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0x2B */ [Debugger.INS.SUB,   Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0x2B */ [Debugger.INS.SUB,   Debugger.TYPE_REG    | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0x2C */ [Debugger.INS.SUB,   Debugger.TYPE_AL     | Debugger.TYPE_BOTH,   Debugger.TYPE_IMM | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0x2D */ [Debugger.INS.SUB,   Debugger.TYPE_AX     | Debugger.TYPE_BOTH,   Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0x2D */ [Debugger.INS.SUB,   Debugger.TYPE_AX     | Debugger.TYPE_BOTH,   Debugger.TYPE_IMM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0x2E */ [Debugger.INS.CS,    Debugger.TYPE_PREFIX],
     /* 0x2F */ [Debugger.INS.DAS],
 
     /* 0x30 */ [Debugger.INS.XOR,   Debugger.TYPE_MODRM  | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0x31 */ [Debugger.INS.XOR,   Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0x31 */ [Debugger.INS.XOR,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0x32 */ [Debugger.INS.XOR,   Debugger.TYPE_REG    | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0x33 */ [Debugger.INS.XOR,   Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0x33 */ [Debugger.INS.XOR,   Debugger.TYPE_REG    | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0x34 */ [Debugger.INS.XOR,   Debugger.TYPE_AL     | Debugger.TYPE_BOTH,   Debugger.TYPE_IMM | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0x35 */ [Debugger.INS.XOR,   Debugger.TYPE_AX     | Debugger.TYPE_BOTH,   Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0x35 */ [Debugger.INS.XOR,   Debugger.TYPE_AX     | Debugger.TYPE_BOTH,   Debugger.TYPE_IMM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0x36 */ [Debugger.INS.SS,    Debugger.TYPE_PREFIX],
     /* 0x37 */ [Debugger.INS.AAA],
 
     /* 0x38 */ [Debugger.INS.CMP,   Debugger.TYPE_MODRM  | Debugger.TYPE_BYTE  | Debugger.TYPE_IN,   Debugger.TYPE_REG   | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0x39 */ [Debugger.INS.CMP,   Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_IN,   Debugger.TYPE_REG   | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0x39 */ [Debugger.INS.CMP,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_IN,   Debugger.TYPE_REG   | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0x3A */ [Debugger.INS.CMP,   Debugger.TYPE_REG    | Debugger.TYPE_BYTE  | Debugger.TYPE_IN,   Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0x3B */ [Debugger.INS.CMP,   Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_IN,   Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0x3B */ [Debugger.INS.CMP,   Debugger.TYPE_REG    | Debugger.TYPE_WORDV | Debugger.TYPE_IN,   Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0x3C */ [Debugger.INS.CMP,   Debugger.TYPE_AL     | Debugger.TYPE_IN,     Debugger.TYPE_IMM | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0x3D */ [Debugger.INS.CMP,   Debugger.TYPE_AX     | Debugger.TYPE_IN,     Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0x3D */ [Debugger.INS.CMP,   Debugger.TYPE_AX     | Debugger.TYPE_IN,     Debugger.TYPE_IMM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0x3E */ [Debugger.INS.DS,    Debugger.TYPE_PREFIX],
     /* 0x3F */ [Debugger.INS.AAS],
 
@@ -683,23 +690,23 @@ if (DEBUGGER) {
     /* 0x5E */ [Debugger.INS.POP,   Debugger.TYPE_SI     | Debugger.TYPE_OUT],
     /* 0x5F */ [Debugger.INS.POP,   Debugger.TYPE_DI     | Debugger.TYPE_OUT],
 
-    /* 0x60 */ [Debugger.INS.PUSHA, Debugger.TYPE_NONE   | Debugger.TYPE_286],
-    /* 0x61 */ [Debugger.INS.POPA,  Debugger.TYPE_NONE   | Debugger.TYPE_286],
-    /* 0x62 */ [Debugger.INS.BOUND, Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_IN   | Debugger.TYPE_286, Debugger.TYPE_MEM   | Debugger.TYPE_2WORDD | Debugger.TYPE_IN],
-    /* 0x63 */ [Debugger.INS.ARPL,  Debugger.TYPE_MODRM  | Debugger.TYPE_WORD  | Debugger.TYPE_OUT,                      Debugger.TYPE_REG   | Debugger.TYPE_WORD   | Debugger.TYPE_IN],
-    /* 0x64 */ [Debugger.INS.FS,    Debugger.TYPE_NONE   | Debugger.TYPE_386],
-    /* 0x65 */ [Debugger.INS.GS,    Debugger.TYPE_NONE   | Debugger.TYPE_386],
-    /* 0x66 */ [Debugger.INS.OS,    Debugger.TYPE_NONE   | Debugger.TYPE_386],
-    /* 0x67 */ [Debugger.INS.AS,    Debugger.TYPE_NONE   | Debugger.TYPE_386],
+    /* 0x60 */ [Debugger.INS.PUSHA, Debugger.TYPE_NONE   | Debugger.TYPE_80286],
+    /* 0x61 */ [Debugger.INS.POPA,  Debugger.TYPE_NONE   | Debugger.TYPE_80286],
+    /* 0x62 */ [Debugger.INS.BOUND, Debugger.TYPE_REG    | Debugger.TYPE_WORDV | Debugger.TYPE_IN   | Debugger.TYPE_80286, Debugger.TYPE_MEM   | Debugger.TYPE_WORD2 | Debugger.TYPE_IN],
+    /* 0x63 */ [Debugger.INS.ARPL,  Debugger.TYPE_MODRM  | Debugger.TYPE_WORD  | Debugger.TYPE_OUT,                        Debugger.TYPE_REG   | Debugger.TYPE_WORD  | Debugger.TYPE_IN],
+    /* 0x64 */ [Debugger.INS.FS,    Debugger.TYPE_NONE   | Debugger.TYPE_80386],
+    /* 0x65 */ [Debugger.INS.GS,    Debugger.TYPE_NONE   | Debugger.TYPE_80386],
+    /* 0x66 */ [Debugger.INS.OS,    Debugger.TYPE_NONE   | Debugger.TYPE_80386],
+    /* 0x67 */ [Debugger.INS.AS,    Debugger.TYPE_NONE   | Debugger.TYPE_80386],
 
-    /* 0x68 */ [Debugger.INS.PUSH,  Debugger.TYPE_IMM    | Debugger.TYPE_VWORD | Debugger.TYPE_IN   | Debugger.TYPE_286],
-    /* 0x69 */ [Debugger.INS.IMUL,  Debugger.TYPE_REG    | Debugger.TYPE_WORD  | Debugger.TYPE_BOTH | Debugger.TYPE_286,   Debugger.TYPE_MODRM | Debugger.TYPE_WORDIW | Debugger.TYPE_IN],
-    /* 0x6A */ [Debugger.INS.PUSH,  Debugger.TYPE_IMM    | Debugger.TYPE_SBYTE | Debugger.TYPE_IN   | Debugger.TYPE_286],
-    /* 0x6B */ [Debugger.INS.IMUL,  Debugger.TYPE_REG    | Debugger.TYPE_WORD  | Debugger.TYPE_BOTH | Debugger.TYPE_286,   Debugger.TYPE_MODRM | Debugger.TYPE_WORDIB | Debugger.TYPE_IN],
-    /* 0x6C */ [Debugger.INS.INS,   Debugger.TYPE_ESDI   | Debugger.TYPE_BYTE  | Debugger.TYPE_OUT  | Debugger.TYPE_286,   Debugger.TYPE_DX    | Debugger.TYPE_IN],
-    /* 0x6D */ [Debugger.INS.INS,   Debugger.TYPE_ESDI   | Debugger.TYPE_VWORD | Debugger.TYPE_OUT  | Debugger.TYPE_286,   Debugger.TYPE_DX    | Debugger.TYPE_IN],
-    /* 0x6E */ [Debugger.INS.OUTS,  Debugger.TYPE_DX     | Debugger.TYPE_IN    | Debugger.TYPE_286,   Debugger.TYPE_DSSI | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0x6F */ [Debugger.INS.OUTS,  Debugger.TYPE_DX     | Debugger.TYPE_IN    | Debugger.TYPE_286,   Debugger.TYPE_DSSI | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0x68 */ [Debugger.INS.PUSH,  Debugger.TYPE_IMM    | Debugger.TYPE_WORDV | Debugger.TYPE_IN   | Debugger.TYPE_80286],
+    /* 0x69 */ [Debugger.INS.IMUL,  Debugger.TYPE_REG    | Debugger.TYPE_WORD  | Debugger.TYPE_BOTH | Debugger.TYPE_80286,   Debugger.TYPE_MODRM | Debugger.TYPE_WORDIW | Debugger.TYPE_IN],
+    /* 0x6A */ [Debugger.INS.PUSH,  Debugger.TYPE_IMM    | Debugger.TYPE_SBYTE | Debugger.TYPE_IN   | Debugger.TYPE_80286],
+    /* 0x6B */ [Debugger.INS.IMUL,  Debugger.TYPE_REG    | Debugger.TYPE_WORD  | Debugger.TYPE_BOTH | Debugger.TYPE_80286,   Debugger.TYPE_MODRM | Debugger.TYPE_WORDIB | Debugger.TYPE_IN],
+    /* 0x6C */ [Debugger.INS.INS,   Debugger.TYPE_ESDI   | Debugger.TYPE_BYTE  | Debugger.TYPE_OUT  | Debugger.TYPE_80286,   Debugger.TYPE_DX    | Debugger.TYPE_IN],
+    /* 0x6D */ [Debugger.INS.INS,   Debugger.TYPE_ESDI   | Debugger.TYPE_WORDV | Debugger.TYPE_OUT  | Debugger.TYPE_80286,   Debugger.TYPE_DX    | Debugger.TYPE_IN],
+    /* 0x6E */ [Debugger.INS.OUTS,  Debugger.TYPE_DX     | Debugger.TYPE_IN    | Debugger.TYPE_80286,   Debugger.TYPE_DSSI | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
+    /* 0x6F */ [Debugger.INS.OUTS,  Debugger.TYPE_DX     | Debugger.TYPE_IN    | Debugger.TYPE_80286,   Debugger.TYPE_DSSI | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
 
     /* 0x70 */ [Debugger.INS.JO,    Debugger.TYPE_IMMREL | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
     /* 0x71 */ [Debugger.INS.JNO,   Debugger.TYPE_IMMREL | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
@@ -720,22 +727,22 @@ if (DEBUGGER) {
     /* 0x7F */ [Debugger.INS.JG,    Debugger.TYPE_IMMREL | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
 
     /* 0x80 */ [Debugger.INS.GRP1B, Debugger.TYPE_MODRM  | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_IMM   | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0x81 */ [Debugger.INS.GRP1W, Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_IMM   | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0x81 */ [Debugger.INS.GRP1W, Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_IMM   | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0x82 */ [Debugger.INS.GRP1B, Debugger.TYPE_MODRM  | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_IMM   | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0x83 */ [Debugger.INS.GRP1SW,Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_IMM   | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
+    /* 0x83 */ [Debugger.INS.GRP1SW,Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_IMM   | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
     /* 0x84 */ [Debugger.INS.TEST,  Debugger.TYPE_MODRM  | Debugger.TYPE_BYTE  | Debugger.TYPE_IN,   Debugger.TYPE_REG   | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0x85 */ [Debugger.INS.TEST,  Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_IN,   Debugger.TYPE_REG   | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0x85 */ [Debugger.INS.TEST,  Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_IN,   Debugger.TYPE_REG   | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0x86 */ [Debugger.INS.XCHG,  Debugger.TYPE_REG    | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_MODRM | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH],
-    /* 0x87 */ [Debugger.INS.XCHG,  Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH],
+    /* 0x87 */ [Debugger.INS.XCHG,  Debugger.TYPE_REG    | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH],
 
     /* 0x88 */ [Debugger.INS.MOV,   Debugger.TYPE_MODRM  | Debugger.TYPE_BYTE  | Debugger.TYPE_OUT,  Debugger.TYPE_REG    | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0x89 */ [Debugger.INS.MOV,   Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_OUT,  Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0x89 */ [Debugger.INS.MOV,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_OUT,  Debugger.TYPE_REG    | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0x8A */ [Debugger.INS.MOV,   Debugger.TYPE_REG    | Debugger.TYPE_BYTE  | Debugger.TYPE_OUT,  Debugger.TYPE_MODRM  | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0x8B */ [Debugger.INS.MOV,   Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_OUT,  Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0x8B */ [Debugger.INS.MOV,   Debugger.TYPE_REG    | Debugger.TYPE_WORDV | Debugger.TYPE_OUT,  Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0x8C */ [Debugger.INS.MOV,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORD  | Debugger.TYPE_OUT,  Debugger.TYPE_SEGREG | Debugger.TYPE_WORD  | Debugger.TYPE_IN],
-    /* 0x8D */ [Debugger.INS.LEA,   Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_OUT,  Debugger.TYPE_MEM    | Debugger.TYPE_VWORD],
+    /* 0x8D */ [Debugger.INS.LEA,   Debugger.TYPE_REG    | Debugger.TYPE_WORDV | Debugger.TYPE_OUT,  Debugger.TYPE_MEM    | Debugger.TYPE_WORDV],
     /* 0x8E */ [Debugger.INS.MOV,   Debugger.TYPE_SEGREG | Debugger.TYPE_WORD  | Debugger.TYPE_OUT,  Debugger.TYPE_MODRM  | Debugger.TYPE_WORD  | Debugger.TYPE_IN],
-    /* 0x8F */ [Debugger.INS.POP,   Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_OUT],
+    /* 0x8F */ [Debugger.INS.POP,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_OUT],
 
     /* 0x90 */ [Debugger.INS.NOP],
     /* 0x91 */ [Debugger.INS.XCHG,  Debugger.TYPE_AX     | Debugger.TYPE_BOTH, Debugger.TYPE_CX | Debugger.TYPE_BOTH],
@@ -756,22 +763,22 @@ if (DEBUGGER) {
     /* 0x9F */ [Debugger.INS.LAHF],
 
     /* 0xA0 */ [Debugger.INS.MOV,   Debugger.TYPE_AL     | Debugger.TYPE_OUT,    Debugger.TYPE_IMMOFF | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0xA1 */ [Debugger.INS.MOV,   Debugger.TYPE_AX     | Debugger.TYPE_OUT,    Debugger.TYPE_IMMOFF | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0xA1 */ [Debugger.INS.MOV,   Debugger.TYPE_AX     | Debugger.TYPE_OUT,    Debugger.TYPE_IMMOFF | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0xA2 */ [Debugger.INS.MOV,   Debugger.TYPE_IMMOFF | Debugger.TYPE_BYTE  | Debugger.TYPE_OUT,     Debugger.TYPE_AL    | Debugger.TYPE_IN],
-    /* 0xA3 */ [Debugger.INS.MOV,   Debugger.TYPE_IMMOFF | Debugger.TYPE_VWORD | Debugger.TYPE_OUT,     Debugger.TYPE_AX    | Debugger.TYPE_IN],
+    /* 0xA3 */ [Debugger.INS.MOV,   Debugger.TYPE_IMMOFF | Debugger.TYPE_WORDV | Debugger.TYPE_OUT,     Debugger.TYPE_AX    | Debugger.TYPE_IN],
     /* 0xA4 */ [Debugger.INS.MOVSB, Debugger.TYPE_ESDI   | Debugger.TYPE_BYTE  | Debugger.TYPE_OUT,     Debugger.TYPE_DSSI  | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0xA5 */ [Debugger.INS.MOVSW, Debugger.TYPE_ESDI   | Debugger.TYPE_VWORD | Debugger.TYPE_OUT,     Debugger.TYPE_DSSI  | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0xA5 */ [Debugger.INS.MOVSW, Debugger.TYPE_ESDI   | Debugger.TYPE_WORDV | Debugger.TYPE_OUT,     Debugger.TYPE_DSSI  | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0xA6 */ [Debugger.INS.CMPSB, Debugger.TYPE_ESDI   | Debugger.TYPE_BYTE  | Debugger.TYPE_IN,      Debugger.TYPE_DSSI  | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0xA7 */ [Debugger.INS.CMPSW, Debugger.TYPE_ESDI   | Debugger.TYPE_VWORD | Debugger.TYPE_IN,      Debugger.TYPE_DSSI  | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0xA7 */ [Debugger.INS.CMPSW, Debugger.TYPE_ESDI   | Debugger.TYPE_WORDV | Debugger.TYPE_IN,      Debugger.TYPE_DSSI  | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
 
     /* 0xA8 */ [Debugger.INS.TEST,  Debugger.TYPE_AL     | Debugger.TYPE_IN,     Debugger.TYPE_IMM  | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0xA9 */ [Debugger.INS.TEST,  Debugger.TYPE_AX     | Debugger.TYPE_IN,     Debugger.TYPE_IMM  | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0xA9 */ [Debugger.INS.TEST,  Debugger.TYPE_AX     | Debugger.TYPE_IN,     Debugger.TYPE_IMM  | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0xAA */ [Debugger.INS.STOSB, Debugger.TYPE_ESDI   | Debugger.TYPE_BYTE  | Debugger.TYPE_OUT,   Debugger.TYPE_AL    | Debugger.TYPE_IN],
-    /* 0xAB */ [Debugger.INS.STOSW, Debugger.TYPE_ESDI   | Debugger.TYPE_VWORD | Debugger.TYPE_OUT,   Debugger.TYPE_AX    | Debugger.TYPE_IN],
+    /* 0xAB */ [Debugger.INS.STOSW, Debugger.TYPE_ESDI   | Debugger.TYPE_WORDV | Debugger.TYPE_OUT,   Debugger.TYPE_AX    | Debugger.TYPE_IN],
     /* 0xAC */ [Debugger.INS.LODSB, Debugger.TYPE_AL     | Debugger.TYPE_OUT,    Debugger.TYPE_DSSI | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0xAD */ [Debugger.INS.LODSW, Debugger.TYPE_AX     | Debugger.TYPE_OUT,    Debugger.TYPE_DSSI | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0xAD */ [Debugger.INS.LODSW, Debugger.TYPE_AX     | Debugger.TYPE_OUT,    Debugger.TYPE_DSSI | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0xAE */ [Debugger.INS.SCASB, Debugger.TYPE_AL     | Debugger.TYPE_IN,     Debugger.TYPE_ESDI | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0xAF */ [Debugger.INS.SCASW, Debugger.TYPE_AX     | Debugger.TYPE_IN,     Debugger.TYPE_ESDI | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0xAF */ [Debugger.INS.SCASW, Debugger.TYPE_AX     | Debugger.TYPE_IN,     Debugger.TYPE_ESDI | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
 
     /* 0xB0 */ [Debugger.INS.MOV,   Debugger.TYPE_AL     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
     /* 0xB1 */ [Debugger.INS.MOV,   Debugger.TYPE_CL     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
@@ -782,26 +789,26 @@ if (DEBUGGER) {
     /* 0xB6 */ [Debugger.INS.MOV,   Debugger.TYPE_DH     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
     /* 0xB7 */ [Debugger.INS.MOV,   Debugger.TYPE_BH     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
 
-    /* 0xB8 */ [Debugger.INS.MOV,   Debugger.TYPE_AX     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-    /* 0xB9 */ [Debugger.INS.MOV,   Debugger.TYPE_CX     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-    /* 0xBA */ [Debugger.INS.MOV,   Debugger.TYPE_DX     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-    /* 0xBB */ [Debugger.INS.MOV,   Debugger.TYPE_BX     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-    /* 0xBC */ [Debugger.INS.MOV,   Debugger.TYPE_SP     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-    /* 0xBD */ [Debugger.INS.MOV,   Debugger.TYPE_BP     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-    /* 0xBE */ [Debugger.INS.MOV,   Debugger.TYPE_SI     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-    /* 0xBF */ [Debugger.INS.MOV,   Debugger.TYPE_DI     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0xB8 */ [Debugger.INS.MOV,   Debugger.TYPE_AX     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
+    /* 0xB9 */ [Debugger.INS.MOV,   Debugger.TYPE_CX     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
+    /* 0xBA */ [Debugger.INS.MOV,   Debugger.TYPE_DX     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
+    /* 0xBB */ [Debugger.INS.MOV,   Debugger.TYPE_BX     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
+    /* 0xBC */ [Debugger.INS.MOV,   Debugger.TYPE_SP     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
+    /* 0xBD */ [Debugger.INS.MOV,   Debugger.TYPE_BP     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
+    /* 0xBE */ [Debugger.INS.MOV,   Debugger.TYPE_SI     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
+    /* 0xBF */ [Debugger.INS.MOV,   Debugger.TYPE_DI     | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
 
-    /* 0xC0 */ [Debugger.INS.GRP2B, Debugger.TYPE_MODRM  | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH | Debugger.TYPE_186, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-    /* 0xC1 */ [Debugger.INS.GRP2W, Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH | Debugger.TYPE_186, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+    /* 0xC0 */ [Debugger.INS.GRP2B, Debugger.TYPE_MODRM  | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH | Debugger.TYPE_80186, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+    /* 0xC1 */ [Debugger.INS.GRP2W, Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH | Debugger.TYPE_80186, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
     /* 0xC2 */ [Debugger.INS.RET,   Debugger.TYPE_IMM    | Debugger.TYPE_WORD  | Debugger.TYPE_IN],
     /* 0xC3 */ [Debugger.INS.RET],
-    /* 0xC4 */ [Debugger.INS.LES,   Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_OUT, Debugger.TYPE_MEM | Debugger.TYPE_FARP  | Debugger.TYPE_IN],
-    /* 0xC5 */ [Debugger.INS.LDS,   Debugger.TYPE_REG    | Debugger.TYPE_VWORD | Debugger.TYPE_OUT, Debugger.TYPE_MEM | Debugger.TYPE_FARP  | Debugger.TYPE_IN],
+    /* 0xC4 */ [Debugger.INS.LES,   Debugger.TYPE_REG    | Debugger.TYPE_WORDV | Debugger.TYPE_OUT, Debugger.TYPE_MEM | Debugger.TYPE_FARP  | Debugger.TYPE_IN],
+    /* 0xC5 */ [Debugger.INS.LDS,   Debugger.TYPE_REG    | Debugger.TYPE_WORDV | Debugger.TYPE_OUT, Debugger.TYPE_MEM | Debugger.TYPE_FARP  | Debugger.TYPE_IN],
     /* 0xC6 */ [Debugger.INS.MOV,   Debugger.TYPE_MODRM  | Debugger.TYPE_BYTE  | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0xC7 */ [Debugger.INS.MOV,   Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0xC7 */ [Debugger.INS.MOV,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_OUT, Debugger.TYPE_IMM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
 
-    /* 0xC8 */ [Debugger.INS.ENTER, Debugger.TYPE_IMM    | Debugger.TYPE_WORD  | Debugger.TYPE_IN | Debugger.TYPE_286,  Debugger.TYPE_IMM   | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-    /* 0xC9 */ [Debugger.INS.LEAVE, Debugger.TYPE_NONE   | Debugger.TYPE_286],
+    /* 0xC8 */ [Debugger.INS.ENTER, Debugger.TYPE_IMM    | Debugger.TYPE_WORD  | Debugger.TYPE_IN | Debugger.TYPE_80286,  Debugger.TYPE_IMM   | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+    /* 0xC9 */ [Debugger.INS.LEAVE, Debugger.TYPE_NONE   | Debugger.TYPE_80286],
     /* 0xCA */ [Debugger.INS.RETF,  Debugger.TYPE_IMM    | Debugger.TYPE_WORD  | Debugger.TYPE_IN],
     /* 0xCB */ [Debugger.INS.RETF],
     /* 0xCC */ [Debugger.INS.INT3],
@@ -810,22 +817,22 @@ if (DEBUGGER) {
     /* 0xCF */ [Debugger.INS.IRET],
 
     /* 0xD0 */ [Debugger.INS.GRP2B1,Debugger.TYPE_MODRM  | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_ONE    | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-    /* 0xD1 */ [Debugger.INS.GRP2W1,Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_ONE    | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+    /* 0xD1 */ [Debugger.INS.GRP2W1,Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_ONE    | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
     /* 0xD2 */ [Debugger.INS.GRP2BC,Debugger.TYPE_MODRM  | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_IMPREG | Debugger.TYPE_CL |   Debugger.TYPE_IN],
-    /* 0xD3 */ [Debugger.INS.GRP2WC,Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_IMPREG | Debugger.TYPE_CL |   Debugger.TYPE_IN],
+    /* 0xD3 */ [Debugger.INS.GRP2WC,Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_IMPREG | Debugger.TYPE_CL |   Debugger.TYPE_IN],
     /* 0xD4 */ [Debugger.INS.AAM,   Debugger.TYPE_IMM    | Debugger.TYPE_BYTE],
     /* 0xD5 */ [Debugger.INS.AAD,   Debugger.TYPE_IMM    | Debugger.TYPE_BYTE],
     /* 0xD6 */ [Debugger.INS.SALC],
     /* 0xD7 */ [Debugger.INS.XLAT],
 
-    /* 0xD8 */ [Debugger.INS.ESC,   Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-    /* 0xD9 */ [Debugger.INS.ESC,   Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-    /* 0xDA */ [Debugger.INS.ESC,   Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-    /* 0xDB */ [Debugger.INS.ESC,   Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-    /* 0xDC */ [Debugger.INS.ESC,   Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-    /* 0xDD */ [Debugger.INS.ESC,   Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-    /* 0xDE */ [Debugger.INS.ESC,   Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-    /* 0xDF */ [Debugger.INS.ESC,   Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0xD8 */ [Debugger.INS.ESC,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
+    /* 0xD9 */ [Debugger.INS.ESC,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
+    /* 0xDA */ [Debugger.INS.ESC,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
+    /* 0xDB */ [Debugger.INS.ESC,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
+    /* 0xDC */ [Debugger.INS.ESC,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
+    /* 0xDD */ [Debugger.INS.ESC,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
+    /* 0xDE */ [Debugger.INS.ESC,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
+    /* 0xDF */ [Debugger.INS.ESC,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
 
     /* 0xE0 */ [Debugger.INS.LOOPNZ,Debugger.TYPE_IMMREL | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
     /* 0xE1 */ [Debugger.INS.LOOPZ, Debugger.TYPE_IMMREL | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
@@ -836,8 +843,8 @@ if (DEBUGGER) {
     /* 0xE6 */ [Debugger.INS.OUT,   Debugger.TYPE_IMM    | Debugger.TYPE_BYTE  | Debugger.TYPE_IN,   Debugger.TYPE_AL   | Debugger.TYPE_IN],
     /* 0xE7 */ [Debugger.INS.OUT,   Debugger.TYPE_IMM    | Debugger.TYPE_BYTE  | Debugger.TYPE_IN,   Debugger.TYPE_AX   | Debugger.TYPE_IN],
 
-    /* 0xE8 */ [Debugger.INS.CALL,  Debugger.TYPE_IMMREL | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-    /* 0xE9 */ [Debugger.INS.JMP,   Debugger.TYPE_IMMREL | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+    /* 0xE8 */ [Debugger.INS.CALL,  Debugger.TYPE_IMMREL | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
+    /* 0xE9 */ [Debugger.INS.JMP,   Debugger.TYPE_IMMREL | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0xEA */ [Debugger.INS.JMP,   Debugger.TYPE_IMM    | Debugger.TYPE_FARP  | Debugger.TYPE_IN],
     /* 0xEB */ [Debugger.INS.JMP,   Debugger.TYPE_IMMREL | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
     /* 0xEC */ [Debugger.INS.IN,    Debugger.TYPE_AL     | Debugger.TYPE_OUT,    Debugger.TYPE_DX | Debugger.TYPE_IN],
@@ -852,7 +859,7 @@ if (DEBUGGER) {
     /* 0xF4 */ [Debugger.INS.HLT],
     /* 0xF5 */ [Debugger.INS.CMC],
     /* 0xF6 */ [Debugger.INS.GRP3B, Debugger.TYPE_MODRM  | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH],
-    /* 0xF7 */ [Debugger.INS.GRP3W, Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH],
+    /* 0xF7 */ [Debugger.INS.GRP3W, Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH],
 
     /* 0xF8 */ [Debugger.INS.CLC],
     /* 0xF9 */ [Debugger.INS.STC],
@@ -861,16 +868,18 @@ if (DEBUGGER) {
     /* 0xFC */ [Debugger.INS.CLD],
     /* 0xFD */ [Debugger.INS.STD],
     /* 0xFE */ [Debugger.INS.GRP4B, Debugger.TYPE_MODRM  | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH],
-    /* 0xFF */ [Debugger.INS.GRP4W, Debugger.TYPE_MODRM  | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH]
+    /* 0xFF */ [Debugger.INS.GRP4W, Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH]
     ];
 
     Debugger.aaOp0FDescs = {
         0x00: [Debugger.INS.GRP6,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORD  |  Debugger.TYPE_BOTH],
         0x01: [Debugger.INS.GRP7,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORD  |  Debugger.TYPE_BOTH],
-        0x02: [Debugger.INS.LAR,    Debugger.TYPE_REG    | Debugger.TYPE_WORD  |  Debugger.TYPE_IN | Debugger.TYPE_286,   Debugger.TYPE_MEM  | Debugger.TYPE_WORD | Debugger.TYPE_IN],
-        0x03: [Debugger.INS.LSL,    Debugger.TYPE_REG    | Debugger.TYPE_WORD  |  Debugger.TYPE_IN | Debugger.TYPE_286,   Debugger.TYPE_MEM  | Debugger.TYPE_WORD | Debugger.TYPE_IN],
-        0x05: [Debugger.INS.LOADALL,Debugger.TYPE_286],
-        0x06: [Debugger.INS.CLTS,   Debugger.TYPE_286]
+        0x02: [Debugger.INS.LAR,    Debugger.TYPE_REG    | Debugger.TYPE_WORD  |  Debugger.TYPE_OUT | Debugger.TYPE_80286, Debugger.TYPE_MEM  | Debugger.TYPE_WORD | Debugger.TYPE_IN],
+        0x03: [Debugger.INS.LSL,    Debugger.TYPE_REG    | Debugger.TYPE_WORD  |  Debugger.TYPE_OUT | Debugger.TYPE_80286, Debugger.TYPE_MEM  | Debugger.TYPE_WORD | Debugger.TYPE_IN],
+        0x05: [Debugger.INS.LOADALL,Debugger.TYPE_80286],
+        0x06: [Debugger.INS.CLTS,   Debugger.TYPE_80286],
+        0x20: [Debugger.INS.MOV,    Debugger.TYPE_REG    | Debugger.TYPE_DWORD |  Debugger.TYPE_OUT | Debugger.TYPE_80386, Debugger.TYPE_CTLREG | Debugger.TYPE_DWORD | Debugger.TYPE_IN],
+        0x22: [Debugger.INS.MOV,    Debugger.TYPE_CTLREG | Debugger.TYPE_DWORD |  Debugger.TYPE_OUT | Debugger.TYPE_80386, Debugger.TYPE_REG    | Debugger.TYPE_DWORD | Debugger.TYPE_IN]
     };
 
     Debugger.aaGrpDescs = [
@@ -887,47 +896,47 @@ if (DEBUGGER) {
       ],
       [
         /* GRP1W */
-        [Debugger.INS.ADD,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-        [Debugger.INS.OR,   Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-        [Debugger.INS.ADC,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-        [Debugger.INS.SBB,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-        [Debugger.INS.AND,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-        [Debugger.INS.SUB,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-        [Debugger.INS.XOR,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-        [Debugger.INS.CMP,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_IN,   Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN]
+        [Debugger.INS.ADD,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_IMM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
+        [Debugger.INS.OR,   Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_IMM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
+        [Debugger.INS.ADC,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_IMM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
+        [Debugger.INS.SBB,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_IMM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
+        [Debugger.INS.AND,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_IMM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
+        [Debugger.INS.SUB,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_IMM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
+        [Debugger.INS.XOR,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_IMM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
+        [Debugger.INS.CMP,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_IN,   Debugger.TYPE_IMM | Debugger.TYPE_WORDV | Debugger.TYPE_IN]
       ],
       [
         /* GRP1SW */
-        [Debugger.INS.ADD,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_IMM | Debugger.TYPE_SBYTE | Debugger.TYPE_IN],
-        [Debugger.INS.OR,   Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_IMM | Debugger.TYPE_SBYTE | Debugger.TYPE_IN],
-        [Debugger.INS.ADC,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_IMM | Debugger.TYPE_SBYTE | Debugger.TYPE_IN],
-        [Debugger.INS.SBB,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_IMM | Debugger.TYPE_SBYTE | Debugger.TYPE_IN],
-        [Debugger.INS.AND,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_IMM | Debugger.TYPE_SBYTE | Debugger.TYPE_IN],
-        [Debugger.INS.SUB,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_IMM | Debugger.TYPE_SBYTE | Debugger.TYPE_IN],
-        [Debugger.INS.XOR,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_IMM | Debugger.TYPE_SBYTE | Debugger.TYPE_IN],
-        [Debugger.INS.CMP,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_IN,   Debugger.TYPE_IMM | Debugger.TYPE_SBYTE | Debugger.TYPE_IN]
+        [Debugger.INS.ADD,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_IMM | Debugger.TYPE_SBYTE | Debugger.TYPE_IN],
+        [Debugger.INS.OR,   Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_IMM | Debugger.TYPE_SBYTE | Debugger.TYPE_IN],
+        [Debugger.INS.ADC,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_IMM | Debugger.TYPE_SBYTE | Debugger.TYPE_IN],
+        [Debugger.INS.SBB,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_IMM | Debugger.TYPE_SBYTE | Debugger.TYPE_IN],
+        [Debugger.INS.AND,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_IMM | Debugger.TYPE_SBYTE | Debugger.TYPE_IN],
+        [Debugger.INS.SUB,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_IMM | Debugger.TYPE_SBYTE | Debugger.TYPE_IN],
+        [Debugger.INS.XOR,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_IMM | Debugger.TYPE_SBYTE | Debugger.TYPE_IN],
+        [Debugger.INS.CMP,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_IN,   Debugger.TYPE_IMM | Debugger.TYPE_SBYTE | Debugger.TYPE_IN]
       ],
       [
         /* GRP2B */
-        [Debugger.INS.ROL,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE | Debugger.TYPE_BOTH | Debugger.TYPE_286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-        [Debugger.INS.ROR,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE | Debugger.TYPE_BOTH | Debugger.TYPE_286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-        [Debugger.INS.RCL,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE | Debugger.TYPE_BOTH | Debugger.TYPE_286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-        [Debugger.INS.RCR,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE | Debugger.TYPE_BOTH | Debugger.TYPE_286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-        [Debugger.INS.SHL,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE | Debugger.TYPE_BOTH | Debugger.TYPE_286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-        [Debugger.INS.SHR,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE | Debugger.TYPE_BOTH | Debugger.TYPE_286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+        [Debugger.INS.ROL,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE | Debugger.TYPE_BOTH | Debugger.TYPE_80286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+        [Debugger.INS.ROR,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE | Debugger.TYPE_BOTH | Debugger.TYPE_80286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+        [Debugger.INS.RCL,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE | Debugger.TYPE_BOTH | Debugger.TYPE_80286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+        [Debugger.INS.RCR,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE | Debugger.TYPE_BOTH | Debugger.TYPE_80286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+        [Debugger.INS.SHL,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE | Debugger.TYPE_BOTH | Debugger.TYPE_80286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+        [Debugger.INS.SHR,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE | Debugger.TYPE_BOTH | Debugger.TYPE_80286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
          Debugger.aOpDescUndefined,
-        [Debugger.INS.SAR,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE | Debugger.TYPE_BOTH | Debugger.TYPE_286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN]
+        [Debugger.INS.SAR,  Debugger.TYPE_MODRM | Debugger.TYPE_BYTE | Debugger.TYPE_BOTH | Debugger.TYPE_80286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN]
       ],
       [
         /* GRP2W */
-        [Debugger.INS.ROL,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH | Debugger.TYPE_286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-        [Debugger.INS.ROR,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH | Debugger.TYPE_286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-        [Debugger.INS.RCL,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH | Debugger.TYPE_286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-        [Debugger.INS.RCR,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH | Debugger.TYPE_286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-        [Debugger.INS.SHL,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH | Debugger.TYPE_286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-        [Debugger.INS.SHR,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH | Debugger.TYPE_286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+        [Debugger.INS.ROL,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH | Debugger.TYPE_80286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+        [Debugger.INS.ROR,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH | Debugger.TYPE_80286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+        [Debugger.INS.RCL,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH | Debugger.TYPE_80286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+        [Debugger.INS.RCR,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH | Debugger.TYPE_80286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+        [Debugger.INS.SHL,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH | Debugger.TYPE_80286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+        [Debugger.INS.SHR,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH | Debugger.TYPE_80286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
          Debugger.aOpDescUndefined,
-        [Debugger.INS.SAR,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH | Debugger.TYPE_286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN]
+        [Debugger.INS.SAR,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH | Debugger.TYPE_80286, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN]
       ],
       [
         /* GRP2B1 */
@@ -942,14 +951,14 @@ if (DEBUGGER) {
       ],
       [
         /* GRP2W1 */
-        [Debugger.INS.ROL,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_ONE | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-        [Debugger.INS.ROR,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_ONE | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-        [Debugger.INS.RCL,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_ONE | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-        [Debugger.INS.RCR,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_ONE | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-        [Debugger.INS.SHL,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_ONE | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-        [Debugger.INS.SHR,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_ONE | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+        [Debugger.INS.ROL,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_ONE | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+        [Debugger.INS.ROR,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_ONE | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+        [Debugger.INS.RCL,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_ONE | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+        [Debugger.INS.RCR,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_ONE | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+        [Debugger.INS.SHL,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_ONE | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+        [Debugger.INS.SHR,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_ONE | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
          Debugger.aOpDescUndefined,
-        [Debugger.INS.SAR,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_ONE | Debugger.TYPE_BYTE | Debugger.TYPE_IN]
+        [Debugger.INS.SAR,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_ONE | Debugger.TYPE_BYTE | Debugger.TYPE_IN]
       ],
       [
         /* GRP2BC */
@@ -964,14 +973,14 @@ if (DEBUGGER) {
       ],
       [
         /* GRP2WC */
-        [Debugger.INS.ROL,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_IMPREG | Debugger.TYPE_CL | Debugger.TYPE_IN],
-        [Debugger.INS.ROR,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_IMPREG | Debugger.TYPE_CL | Debugger.TYPE_IN],
-        [Debugger.INS.RCL,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_IMPREG | Debugger.TYPE_CL | Debugger.TYPE_IN],
-        [Debugger.INS.RCR,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_IMPREG | Debugger.TYPE_CL | Debugger.TYPE_IN],
-        [Debugger.INS.SHL,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_IMPREG | Debugger.TYPE_CL | Debugger.TYPE_IN],
-        [Debugger.INS.SHR,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_IMPREG | Debugger.TYPE_CL | Debugger.TYPE_IN],
+        [Debugger.INS.ROL,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_IMPREG | Debugger.TYPE_CL | Debugger.TYPE_IN],
+        [Debugger.INS.ROR,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_IMPREG | Debugger.TYPE_CL | Debugger.TYPE_IN],
+        [Debugger.INS.RCL,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_IMPREG | Debugger.TYPE_CL | Debugger.TYPE_IN],
+        [Debugger.INS.RCR,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_IMPREG | Debugger.TYPE_CL | Debugger.TYPE_IN],
+        [Debugger.INS.SHL,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_IMPREG | Debugger.TYPE_CL | Debugger.TYPE_IN],
+        [Debugger.INS.SHR,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_IMPREG | Debugger.TYPE_CL | Debugger.TYPE_IN],
          Debugger.aOpDescUndefined,
-        [Debugger.INS.SAR,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH, Debugger.TYPE_IMPREG | Debugger.TYPE_CL | Debugger.TYPE_IN]
+        [Debugger.INS.SAR,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH, Debugger.TYPE_IMPREG | Debugger.TYPE_CL | Debugger.TYPE_IN]
       ],
       [
         /* GRP3B */
@@ -986,14 +995,14 @@ if (DEBUGGER) {
       ],
       [
         /* GRP3W */
-        [Debugger.INS.TEST, Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_IN,   Debugger.TYPE_IMM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+        [Debugger.INS.TEST, Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_IN,   Debugger.TYPE_IMM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
          Debugger.aOpDescUndefined,
-        [Debugger.INS.NOT,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH],
-        [Debugger.INS.NEG,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH],
-        [Debugger.INS.MUL,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-        [Debugger.INS.IMUL, Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH],
-        [Debugger.INS.DIV,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
-        [Debugger.INS.IDIV, Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH]
+        [Debugger.INS.NOT,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH],
+        [Debugger.INS.NEG,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH],
+        [Debugger.INS.MUL,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
+        [Debugger.INS.IMUL, Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH],
+        [Debugger.INS.DIV,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
+        [Debugger.INS.IDIV, Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH]
       ],
       [
         /* GRP4B */
@@ -1008,13 +1017,13 @@ if (DEBUGGER) {
       ],
       [
         /* GRP4W */
-        [Debugger.INS.INC,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH],
-        [Debugger.INS.DEC,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_BOTH],
-        [Debugger.INS.CALL, Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+        [Debugger.INS.INC,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH],
+        [Debugger.INS.DEC,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_BOTH],
+        [Debugger.INS.CALL, Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
         [Debugger.INS.CALL, Debugger.TYPE_MODRM | Debugger.TYPE_FARP  | Debugger.TYPE_IN],
-        [Debugger.INS.JMP,  Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+        [Debugger.INS.JMP,  Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
         [Debugger.INS.JMP,  Debugger.TYPE_MODRM | Debugger.TYPE_FARP  | Debugger.TYPE_IN],
-        [Debugger.INS.PUSH, Debugger.TYPE_MODRM | Debugger.TYPE_VWORD | Debugger.TYPE_IN],
+        [Debugger.INS.PUSH, Debugger.TYPE_MODRM | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
          Debugger.aOpDescUndefined
       ],
       [ /* OP0F */ ],
@@ -1182,6 +1191,7 @@ if (DEBUGGER) {
         if (MAXDEBUG) this.chipset = cmp.getComponentByType("ChipSet");
 
         this.cchAddr = bus.getWidth() >> 2;
+        this.maskAddr = bus.busLimit;
 
         this.aaOpDescs = Debugger.aaOpDescs;
         if (this.cpu.model >= X86.MODEL_80186) {
@@ -1195,8 +1205,6 @@ if (DEBUGGER) {
                 }
             }
         }
-
-        this.selectRegs();
 
         this.messageDump(Messages.DESC, function onDumpDesc(s) { dbg.dumpDesc(s); });
         this.messageDump(Messages.TSS,  function onDumpTSS(s)  { dbg.dumpTSS(s); });
@@ -1308,43 +1316,6 @@ if (DEBUGGER) {
             break;
         }
         return false;
-    };
-
-    /**
-     * selectRegs()
-     *
-     * @this {Debugger}
-     */
-    Debugger.prototype.selectRegs = function()
-    {
-        if (this.cchReg <= 4) {
-            this.regs = {
-                AX: "AX",
-                BX: "BX",
-                CX: "CX",
-                DX: "DX",
-                SP: "SP",
-                BP: "BP",
-                SI: "SI",
-                DI: "DI",
-                IP: "IP",
-                MS: "MS"
-            }
-        } else {
-            this.regs = {
-                AX: "EAX",
-                BX: "EBX",
-                CX: "ECX",
-                DX: "EDX",
-                SP: "ESP",
-                BP: "EBP",
-                SI: "ESI",
-                DI: "EDI",
-                IP: "EIP",
-                MS: "CR0"
-            }
-        }
-        this.regs.PS = "PS";
     };
 
     /**
@@ -1493,9 +1464,14 @@ if (DEBUGGER) {
         if (fGate) {
             sDump = "seg=" + str.toHexWord(seg.base & 0xffff) + " off=" + str.toHexWord(seg.limit);
         } else {
-            sDump = "base=" + str.toHex(seg.base, this.cchAddr) + " limit=" + str.toHexWord(seg.limit);
+            sDump = "base=" + str.toHex(seg.base, this.cchAddr) + " limit=" + str.toHex(seg.limit, (seg.limit & ~0xffff)? 8 : 4);
         }
-        this.println(sDump + " dpl=" + str.toHexByte(seg.dpl) + " type=" + str.toHexByte(seg.type >> 8) + " (" + sType + ")");
+        /*
+         * When we dump the EXT word, we mask off the LIMIT1619 and BASE2431 bits, because those have already
+         * been incorporated into the limit and base properties of the segment register; all we care about here
+         * are whether EXT contains any of the AVAIL (0x10), BIG (0x40) or GRANULARITY (0x80) bits.
+         */
+        this.println(sDump + " dpl=" + str.toHexByte(seg.dpl) + " type=" + str.toHexByte(seg.type >> 8) + " (" + sType + ")" + " ext=" + str.toHexWord(seg.ext & ~(X86.DESC.EXT.LIMIT1619 | X86.DESC.EXT.BASE2431)));
     };
 
     /**
@@ -1599,36 +1575,158 @@ if (DEBUGGER) {
     };
 
     /**
-     * messageRegs()
+     * getRegIndex(sReg)
      *
      * @this {Debugger}
+     * @param {string} sReg
+     * @return {number}
      */
-    Debugger.prototype.messageRegs = function() {
-        var cpu = this.cpu;
-        var asRegs = Debugger.asRegs;
-        this.aMessageRegs[asRegs[0]]  = str.toHexByte(cpu.regEAX & 0xff);
-        this.aMessageRegs[asRegs[1]]  = str.toHexByte(cpu.regECX & 0xff);
-        this.aMessageRegs[asRegs[2]]  = str.toHexByte(cpu.regEDX & 0xff);
-        this.aMessageRegs[asRegs[3]]  = str.toHexByte(cpu.regEBX & 0xff);
-        this.aMessageRegs[asRegs[4]]  = str.toHexByte(cpu.regEAX >> 8);
-        this.aMessageRegs[asRegs[5]]  = str.toHexByte(cpu.regECX >> 8);
-        this.aMessageRegs[asRegs[6]]  = str.toHexByte(cpu.regEDX >> 8);
-        this.aMessageRegs[asRegs[7]]  = str.toHexByte(cpu.regEBX >> 8);
-        this.aMessageRegs[asRegs[8]]  = str.toHexWord(cpu.regEAX);
-        this.aMessageRegs[asRegs[9]]  = str.toHexWord(cpu.regECX);
-        this.aMessageRegs[asRegs[10]] = str.toHexWord(cpu.regEDX);
-        this.aMessageRegs[asRegs[11]] = str.toHexWord(cpu.regEBX);
-        this.aMessageRegs[asRegs[12]] = str.toHexWord(cpu.getSP());
-        this.aMessageRegs[asRegs[13]] = str.toHexWord(cpu.regEBP);
-        this.aMessageRegs[asRegs[14]] = str.toHexWord(cpu.regESI);
-        this.aMessageRegs[asRegs[15]] = str.toHexWord(cpu.regEDI);
-        this.aMessageRegs[asRegs[16]] = str.toHexWord(cpu.getES());
-        this.aMessageRegs[asRegs[17]] = str.toHexWord(cpu.getCS());
-        this.aMessageRegs[asRegs[18]] = str.toHexWord(cpu.getSS());
-        this.aMessageRegs[asRegs[19]] = str.toHexWord(cpu.getDS());
-        this.aMessageRegs[asRegs[20]] = str.toHexWord(cpu.getFS());
-        this.aMessageRegs[asRegs[21]] = str.toHexWord(cpu.getGS());
-        this.aMessageRegs[asRegs[22]] = str.toHexWord(cpu.getIP());
+    Debugger.prototype.getRegIndex = function(sReg) {
+        return Debugger.REGS.indexOf(sReg.toUpperCase())
+    };
+
+    /**
+     * getRegValue(iReg)
+     *
+     * @this {Debugger}
+     * @param {number} iReg
+     * @return {string}
+     */
+    Debugger.prototype.getRegValue = function(iReg) {
+        var s = "??";
+        if (iReg >= 0) {
+            var n, cch;
+            var cpu = this.cpu;
+            switch(iReg) {
+            case Debugger.REG_AL:
+                n = cpu.regEAX;  cch = 2;
+                break;
+            case Debugger.REG_CL:
+                n = cpu.regECX;  cch = 2;
+                break;
+            case Debugger.REG_DL:
+                n = cpu.regEDX;  cch = 2;
+                break;
+            case Debugger.REG_BL:
+                n = cpu.regEBX;  cch = 2;
+                break;
+            case Debugger.REG_AH:
+                n = cpu.regEAX >> 8; cch = 2;
+                break;
+            case Debugger.REG_CH:
+                n = cpu.regECX >> 8; cch = 2;
+                break;
+            case Debugger.REG_DH:
+                n = cpu.regEDX >> 8; cch = 2;
+                break;
+            case Debugger.REG_BH:
+                n = cpu.regEBX >> 8; cch = 2;
+                break;
+            case Debugger.REG_AX:
+                n = cpu.regEAX;  cch = 4;
+                break;
+            case Debugger.REG_CX:
+                n = cpu.regECX;  cch = 4;
+                break;
+            case Debugger.REG_DX:
+                n = cpu.regEDX;  cch = 4;
+                break;
+            case Debugger.REG_BX:
+                n = cpu.regEBX;  cch = 4;
+                break;
+            case Debugger.REG_SP:
+                n = cpu.getSP(); cch = 4;
+                break;
+            case Debugger.REG_BP:
+                n = cpu.regEBP;  cch = 4;
+                break;
+            case Debugger.REG_SI:
+                n = cpu.regESI;  cch = 4;
+                break;
+            case Debugger.REG_DI:
+                n = cpu.regEDI;  cch = 4;
+                break;
+            case Debugger.REG_SEG + Debugger.REG_ES:
+                n = cpu.getES(); cch = 4;
+                break;
+            case Debugger.REG_SEG + Debugger.REG_CS:
+                n = cpu.getCS(); cch = 4;
+                break;
+            case Debugger.REG_SEG + Debugger.REG_SS:
+                n = cpu.getSS(); cch = 4;
+                break;
+            case Debugger.REG_SEG + Debugger.REG_DS:
+                n = cpu.getDS(); cch = 4;
+                break;
+            case Debugger.REG_SEG + Debugger.REG_FS:
+                n = cpu.getFS(); cch = 4;
+                break;
+            case Debugger.REG_SEG + Debugger.REG_GS:
+                n = cpu.getGS(); cch = 4;
+                break;
+            case Debugger.REG_IP:
+                n = cpu.getIP(); cch = this.cchReg;
+                break;
+            case Debugger.REG_PS:
+                n = cpu.getPS(); cch = this.cchReg;
+                break;
+            case Debugger.REG_EAX:
+                n = cpu.regEAX;  cch = 8;
+                break;
+            case Debugger.REG_ECX:
+                n = cpu.regECX;  cch = 8;
+                break;
+            case Debugger.REG_EDX:
+                n = cpu.regEDX;  cch = 8;
+                break;
+            case Debugger.REG_EBX:
+                n = cpu.regEBX;  cch = 8;
+                break;
+            case Debugger.REG_ESP:
+                n = cpu.getSP(); cch = 8;
+                break;
+            case Debugger.REG_EBP:
+                n = cpu.regEBP;  cch = 8;
+                break;
+            case Debugger.REG_ESI:
+                n = cpu.regESI;  cch = 8;
+                break;
+            case Debugger.REG_EDI:
+                n = cpu.regEDI;  cch = 8;
+                break;
+            case Debugger.REG_CR0:
+                n = cpu.regCR0;  cch = 8;
+                break;
+            case Debugger.REG_CR1:
+                n = cpu.regCR1;  cch = 8;
+                break;
+            case Debugger.REG_CR2:
+                n = cpu.regCR2;  cch = 8;
+                break;
+            case Debugger.REG_CR3:
+                n = cpu.regCR3;  cch = 8;
+                break;
+            }
+            if (cch) s = str.toHex(n, cch);
+        }
+        return s;
+    };
+
+    /**
+     * replaceRegs()
+     *
+     * @this {Debugger}
+     * @param {string} s
+     * @return {string}
+     */
+    Debugger.prototype.replaceRegs = function(s) {
+        for (var iReg = 0; iReg < Debugger.REGS.length; iReg++) {
+            var sReg = Debugger.REGS[iReg];
+            if (s.indexOf(sReg) >= 0) {
+                s = str.replaceAll(sReg, this.getRegValue(iReg), s);
+            }
+        }
+        return s;
     };
 
     /**
@@ -1697,10 +1795,7 @@ if (DEBUGGER) {
         if (fMessage) {
             var aFuncs = Debugger.INT_FUNCS[nInt];
             var sFunc = (aFuncs && aFuncs[AH]) || "";
-            if (sFunc) {
-                this.messageRegs();
-                sFunc = " " + str.replaceArray(this.aMessageRegs, sFunc);
-            }
+            if (sFunc) sFunc = ' ' + this.replaceRegs(sFunc);
             /*
              * For purposes of display only, rewind addr to the address of the responsible "INT n" instruction; we
              * know it's the two-byte "INT n" instruction because that's the only opcode handler that calls checkIntNotify()
@@ -1785,7 +1880,7 @@ if (DEBUGGER) {
             if (this.traceEnabled !== undefined && this.traceEnabled[prop]) {
                 var trace = Debugger.TRACE[prop];
                 var len = (trace.size >> 2);
-                var s = this.hexOffset(this.cpu.opLIP - this.cpu.segCS.base, this.cpu.getCS()) + " " + Debugger.asIns[trace.ins] + "(" + str.toHex(dst, len) + "," + str.toHex(src, len) + "," + (flagsIn === null? "-" : str.toHexWord(flagsIn)) + ") " + str.toHex(result, len) + "," + (flagsOut === null? "-" : str.toHexWord(flagsOut));
+                var s = this.hexOffset(this.cpu.opLIP - this.cpu.segCS.base, this.cpu.getCS()) + " " + Debugger.INS_NAMES[trace.ins] + "(" + str.toHex(dst, len) + "," + str.toHex(src, len) + "," + (flagsIn === null? "-" : str.toHexWord(flagsIn)) + ") " + str.toHex(result, len) + "," + (flagsOut === null? "-" : str.toHexWord(flagsOut));
                 if (!this.aTraceBuffer.length) this.aTraceBuffer = new Array(Debugger.TRACE_LIMIT);
                 this.aTraceBuffer[this.iTraceBuffer++] = s;
                 if (this.iTraceBuffer >= this.aTraceBuffer.length) {
@@ -1839,8 +1934,8 @@ if (DEBUGGER) {
             this.aOpcodeHistory = new Array(10000);
             for (i = 0; i < this.aOpcodeHistory.length; i++) {
                 /*
-                 * Preallocate dummy Addr (Array) objects in every history slot, so that checkInstruction()
-                 * doesn't need to call newAddr() on every slot update.
+                 * Preallocate dummy Addr (Array) objects in every history slot, so that
+                 * checkInstruction() doesn't need to call newAddr() on every slot update.
                  */
                 this.aOpcodeHistory[i] = [0, null, 0];
             }
@@ -1885,11 +1980,11 @@ if (DEBUGGER) {
         do {
             if (!nCycles) {
                 /*
-                 * In the single-step case (n == 0), the CPU won't call checkInstruction(), which
-                 * is good for avoiding breakpoints, but bad for our instruction data collection if
-                 * checks are enabled.
+                 * When single-stepping, the CPU won't call checkInstruction(), which is good for
+                 * avoiding breakpoints, but bad for instruction data collection if checks are enabled.
+                 * So we call checkInstruction() ourselves.
                  */
-                if (this.checksEnabled()) this.checkInstruction(this.cpu.regLIP, true);
+                if (this.checksEnabled()) this.checkInstruction(this.cpu.regLIP, 0);
             }
             try {
                 var nCyclesStep = this.cpu.stepCPU(nCycles);
@@ -2164,6 +2259,72 @@ if (DEBUGGER) {
     };
 
     /**
+     * newAddr(off, seg, addr)
+     *
+     * @this {Debugger}
+     * @param {number} off
+     * @param {number} seg
+     * @param {number} [addr] is the physical address, if known
+     * @return {Array} containing [off, seg, addr]
+     */
+    Debugger.prototype.newAddr = function(off, seg, addr)
+    {
+        return [off, seg, addr];
+    };
+
+    /**
+     * incAddr(aAddr, inc)
+     *
+     * @this {Debugger}
+     * @param {Array} aAddr containing [off, seg, addr]
+     * @param {number|undefined} inc contains value to increment by (default is 1)
+     */
+    Debugger.prototype.incAddr = function(aAddr, inc)
+    {
+        inc = (inc === undefined? 1 : inc);
+        if (aAddr[2] != null) {
+            aAddr[2] += inc;
+        }
+        if (aAddr[1] != null) {
+            aAddr[0] += inc;
+            var limit = this.getSegment(aAddr[1]).limit;
+            if (aAddr[0] > limit) {
+                this.assert(false);
+                aAddr[0] = 0;
+                aAddr[2] = null;
+            }
+        }
+    };
+
+    /**
+     * hexAddr(aAddr)
+     *
+     * @this {Debugger}
+     * @param {Array} aAddr containing [off, seg]
+     * @return {string} the hex representation of the address
+     */
+    Debugger.prototype.hexAddr = function(aAddr)
+    {
+        return aAddr[1] == null? ("%" + str.toHex(aAddr[2])) : this.hexOffset(aAddr[0], aAddr[1]);
+    };
+
+    /**
+     * hexOffset(off, sel)
+     *
+     * @this {Debugger}
+     * @param {number} off
+     * @param {number} [sel]
+     * @return {string} the hex representation of off (or sel:off)
+     */
+    Debugger.prototype.hexOffset = function(off, sel)
+    {
+        if (sel !== undefined) {
+            return str.toHexWord(sel) + ":" + str.toHex(off, this.cchAddr < 8? 4 : 8);
+        }
+        return str.toHex(off);
+    };
+
+    /**
      * checksEnabled(fRelease)
      *
      * This "check" function is called by the CPU; we indicate whether or not every instruction needs to be checked.
@@ -2182,24 +2343,29 @@ if (DEBUGGER) {
     };
 
     /**
-     * checkInstruction(addr, fSkipBP)
+     * checkInstruction(addr, nState)
      *
      * This "check" function is called by the CPU to inform us about the next instruction to be executed,
      * giving us an opportunity to look for "exec" breakpoints and update opcode frequencies and instruction history.
      *
      * @this {Debugger}
      * @param {number} addr
-     * @param {boolean} [fSkipBP] is true to skip breakpoint check
+     * @param {number} nState is < 0 if stepping, 0 if starting, or > 0 if running
      * @return {boolean} true if breakpoint hit, false if not
      */
-    Debugger.prototype.checkInstruction = function(addr, fSkipBP)
+    Debugger.prototype.checkInstruction = function(addr, nState)
     {
-        if (!fSkipBP && this.cpu.segCS.cpl == 3 && !(this.cpu.regPS & X86.PS.IF)) {
-            return true;
-        }
-
-        if (!fSkipBP && this.checkBreakpoint(addr, this.aBreakExec)) {
-            return true;
+        if (nState > 0) {
+            if (this.checkBreakpoint(addr, this.aBreakExec)) {
+                return true;
+            }
+            /*
+             * Halt whenever ring 3 code is running with interrupts disabled, because that's likely an
+             * error (technically, we should also check the IOPL, too, because if IOPL is 3, this is OK).
+             */
+            if (this.cpu.segCS.cpl == 3 && !(this.cpu.regPS & X86.PS.IF)) {
+                return true;
+            }
         }
 
         /*
@@ -2208,8 +2374,7 @@ if (DEBUGGER) {
          * other than adding/removing breakpoints, simply because it's breakpoints that trigger the call to
          * checkInstruction() -- well, OK, and a few other things now, like enabling MESSAGE_INT messages.
          */
-        if (this.aaOpcodeCounts.length) {
-
+        if (nState >= 0 && this.aaOpcodeCounts.length) {
             this.cInstructions++;
             var bOpcode = this.bus.getByteDirect(addr);
             this.aaOpcodeCounts[bOpcode][1]++;
@@ -2347,10 +2512,10 @@ if (DEBUGGER) {
     Debugger.prototype.getAddr = function(aAddr, fWrite, cb)
     {
         /*
-         * Some addresses (eg, breakpoint addresses) save their original physical address
-         * in aAddr[2], so we want to use that if it's there, but otherwise, aAddr is assumed
-         * to be a virtual address ([off, seg]) whose physical address must be calculated based
-         * on current machine state (mode, active descriptor tables, etc).
+         * Some addresses (eg, breakpoint addresses) save their original physical address in aAddr[2],
+         * so we want to use that if it's there, but otherwise, aAddr is assumed to be a virtual address
+         * ([off, seg]) whose physical address must be calculated based on current machine state
+         * (mode, active descriptor tables, etc).
          */
         var addr = aAddr[2];
         if (addr == null) {
@@ -2360,10 +2525,12 @@ if (DEBUGGER) {
             } else {
                 addr = seg.checkWrite(aAddr[0], cb || 0, true);
             }
+            aAddr[2] = addr;
         }
         /*
-         * We used to map addresses at the top 64Kb of the first 16Mb to the top of the first 1Mb,
-         * but post-80286, that's no longer appropriate.
+         * Finally, we would map all addresses in the top 64Kb (of the 80286's 16Mb address space) to the top of
+         * the 1Mb range, but now that mapBreakpoint() takes care of that in a processor-agnostic manner, at least
+         * for breakpoint addresses, it seems unnecessary for getAddr() to do this anymore.
          *
          *      if ((addr & 0xFF0000) == 0xFF0000) addr &= 0x0FFFFF;
          */
@@ -2416,6 +2583,25 @@ if (DEBUGGER) {
     };
 
     /**
+     * getLong(aAddr, inc)
+     *
+     * @this {Debugger}
+     * @param {Array} aAddr
+     * @param {number} [inc]
+     * @return {number}
+     */
+    Debugger.prototype.getLong = function(aAddr, inc)
+    {
+        var l = -1;
+        var addr = this.getAddr(aAddr, false, 3);
+        if (addr != X86.ADDR_INVALID) {
+            l = this.bus.getLongDirect(addr);
+            if (inc !== undefined) this.incAddr(aAddr, inc);
+        }
+        return l;
+    };
+
+    /**
      * setByte(aAddr, b, inc)
      *
      * setByte() should be used for all Debugger memory writes (eg, doAssemble, doEdit), to insure
@@ -2453,72 +2639,6 @@ if (DEBUGGER) {
             if (inc !== undefined) this.incAddr(aAddr, inc);
             this.cpu.updateCPU();
         }
-    };
-
-    /**
-     * hexAddr(aAddr)
-     *
-     * @this {Debugger}
-     * @param {Array} aAddr containing [off, seg]
-     * @return {string} the hex representation of the address
-     */
-    Debugger.prototype.hexAddr = function(aAddr)
-    {
-        return aAddr[1] == null? ("%" + str.toHex(aAddr[2])) : this.hexOffset(aAddr[0], aAddr[1]);
-    };
-
-    /**
-     * hexOffset(off, sel)
-     *
-     * @this {Debugger}
-     * @param {number} off
-     * @param {number} [sel]
-     * @return {string} the hex representation of off (or sel:off)
-     */
-    Debugger.prototype.hexOffset = function(off, sel)
-    {
-        if (sel !== undefined) {
-            return str.toHexWord(sel) + ":" + str.toHex(off, this.cchAddr < 8? 4 : 8);
-        }
-        return str.toHex(off);
-    };
-
-    /**
-     * incAddr(aAddr, inc)
-     *
-     * @this {Debugger}
-     * @param {Array} aAddr containing [off, seg, addr]
-     * @param {number|undefined} inc contains value to increment by (default is 1)
-     */
-    Debugger.prototype.incAddr = function(aAddr, inc)
-    {
-        inc = (inc === undefined? 1 : inc);
-        if (aAddr[2] != null) {
-            aAddr[2] += inc;
-        }
-        if (aAddr[1] != null) {
-            aAddr[0] += inc;
-            var limit = this.getSegment(aAddr[1]).limit;
-            if (aAddr[0] > limit) {
-                this.assert(false);
-                aAddr[0] = 0;
-                aAddr[2] = null;
-            }
-        }
-    };
-
-    /**
-     * newAddr(off, seg, addr)
-     *
-     * @this {Debugger}
-     * @param {number} off
-     * @param {number} seg
-     * @param {number} [addr] is the physical address, if known
-     * @return {Array} containing [off, seg, addr]
-     */
-    Debugger.prototype.newAddr = function(off, seg, addr)
-    {
-        return [off, seg, addr];
     };
 
     /**
@@ -2568,8 +2688,8 @@ if (DEBUGGER) {
              *
              *      aAddr[2] = this.getAddr(aAddr);
              *
-             * The way to create a real-mode breakpoint that will regardless of mode is to use the
-             * physical address of the real-mode memory location.
+             * The way to create a real-mode breakpoint that will break regardless of mode is to
+             * use the physical address of the real-mode memory location.
              */
             aAddr[3] = fTemp;
             aBreak.push(aAddr);
@@ -2595,10 +2715,10 @@ if (DEBUGGER) {
     Debugger.prototype.findBreakpoint = function(aBreak, aAddr, fRemove)
     {
         var fFound = false;
-        var addr = this.getAddr(aAddr);
+        var addr = this.mapBreakpoint(this.getAddr(aAddr));
         for (var i = 1; i < aBreak.length; i++) {
             var aAddrBreak = aBreak[i];
-            if (addr == this.getAddr(aAddrBreak)) {
+            if (addr == this.mapBreakpoint(this.getAddr(aAddrBreak))) {
                 fFound = true;
                 if (fRemove) {
                     aBreak.splice(i, 1);
@@ -2698,6 +2818,28 @@ if (DEBUGGER) {
     };
 
     /**
+     * mapBreakpoint(addr)
+     *
+     * @this {Debugger}
+     * @param {number} addr
+     * @return {number}
+     */
+    Debugger.prototype.mapBreakpoint = function(addr)
+    {
+        /*
+         * Map addresses in the top 64Kb at the top of the address space (assuming either a 16Mb or 4Gb
+         * address space) to the top of the 1Mb range.
+         *
+         * The fact that those two 64Kb regions are aliases of each other on an 80286 is a pain in the BUTT,
+         * because any CS-based breakpoint you set immediately after a CPU reset will have a physical address
+         * in the top 16Mb, yet after the first inter-segment JMP, you will be running in the first 1Mb.
+         */
+        var mask = (this.maskAddr & ~0xffff);
+        if ((addr & mask) == mask) addr &= 0x000fffff;
+        return addr;
+    };
+
+    /**
      * checkBreakpoint(addr, aBreak, fTemp)
      *
      * @this {Debugger}
@@ -2713,19 +2855,10 @@ if (DEBUGGER) {
          * or history data (see checkInstruction), since we might not actually execute the current instruction.
          */
         var fBreak = false;
-
-        /*
-         * Map addresses in the top 64Kb (at the top of the 16Mb range) to the top of the 1Mb range.
-         *
-         * The fact that those two 64Kb regions are aliases of each other on an 80286 is a pain in the BUTT,
-         * because any CS-based breakpoint you set immediately after a CPU reset will have a physical address
-         * in the top 16Mb, yet after the first inter-segment JMP, you will be running in the first 1Mb.
-         */
-        if ((addr & 0xFF0000) == 0xFF0000) addr &= 0x0FFFFF;
-
+        addr = this.mapBreakpoint(addr);
         for (var i = 1; i < aBreak.length; i++) {
             var aAddrBreak = aBreak[i];
-            if (addr == this.getAddr(aAddrBreak)) {
+            if (addr == this.mapBreakpoint(this.getAddr(aAddrBreak))) {
                 if (aAddrBreak[3]) {
                     this.findBreakpoint(aBreak, aAddrBreak, true);
                 } else if (!fTemp) {
@@ -2763,25 +2896,27 @@ if (DEBUGGER) {
             iIns = aOpDesc[0];
         }
 
-        if (iIns >= Debugger.asIns.length) {
+        if (iIns >= Debugger.INS_NAMES.length) {
             bModRM = this.getByte(aAddr, 1);
-            aOpDesc = Debugger.aaGrpDescs[iIns - Debugger.asIns.length][(bModRM >> 3) & 0x7];
+            aOpDesc = Debugger.aaGrpDescs[iIns - Debugger.INS_NAMES.length][(bModRM >> 3) & 0x7];
         }
 
-        var sOpcode = Debugger.asIns[aOpDesc[0]];
+        var sOpcode = Debugger.INS_NAMES[aOpDesc[0]];
         var cOperands = 2;
         var sOperands = "";
-        if (bOpcode >= X86.OPCODE.MOVSB && bOpcode <= X86.OPCODE.CMPSW || bOpcode >= X86.OPCODE.STOSB && bOpcode <= X86.OPCODE.SCASW) {
-            cOperands = 0;              // HACK to suppress display of operands for string instructions
-        }
+        if (this.isStringIns(bOpcode)) cOperands = 0;   // suppress display of operands for string instructions
 
+        var typeCPU = null;
         for (var iOperand = 1; iOperand <= cOperands; iOperand++) {
             var sOperand = "";
             var type = aOpDesc[iOperand];
             if (type === undefined) continue;
+
+            if (typeCPU == null) typeCPU = type >> Debugger.TYPE_CPU_SHIFT;
+
             var typeSize = type & Debugger.TYPE_SIZE;
-            if (typeSize == Debugger.TYPE_NONE || typeSize == Debugger.TYPE_PREFIX)
-                continue;
+            if (typeSize == Debugger.TYPE_NONE || typeSize == Debugger.TYPE_PREFIX) continue;
+
             var typeMode = type & Debugger.TYPE_MODE;
             if (typeMode >= Debugger.TYPE_MODRM) {
                 if (bModRM < 0) {
@@ -2790,7 +2925,7 @@ if (DEBUGGER) {
                 if (typeMode >= Debugger.TYPE_REG) {
                     sOperand = this.getRegOperand((bModRM >> 3) & 0x7, type, aAddr);
                 }
-                else if (typeMode >= Debugger.TYPE_MODRM) {
+                else {
                     sOperand = this.getModRMOperand(bModRM, type, aAddr);
                 }
             }
@@ -2798,7 +2933,7 @@ if (DEBUGGER) {
                 sOperand = "1";
             }
             else if (typeMode == Debugger.TYPE_IMM) {
-                sOperand = this.getImmediateOperand(type, aAddr);
+                sOperand = this.getImmOperand(type, aAddr);
             }
             else if (typeMode == Debugger.TYPE_IMMOFF) {
                 sOperand = "[" + str.toHexWord(this.getShort(aAddr, 2)) + "]";
@@ -2817,10 +2952,10 @@ if (DEBUGGER) {
                 sOperand = aSymbol[0] || str.toHexWord(offset);
             }
             else if (typeMode == Debugger.TYPE_IMPREG) {
-                sOperand = Debugger.asRegs[(type & Debugger.TYPE_IREG) >> 8];
+                sOperand = this.getRegOperand((type & Debugger.TYPE_IREG) >> 8, type, aAddr);
             }
             else if (typeMode == Debugger.TYPE_IMPSEG) {
-                sOperand = Debugger.asRegs[((type & Debugger.TYPE_IREG) >> 8) + 16];
+                sOperand = this.getRegOperand((type & Debugger.TYPE_IREG) >> 8, Debugger.TYPE_SEGREG, aAddr);
             }
             else if (typeMode == Debugger.TYPE_DSSI) {
                 sOperand = "DS:[SI]";
@@ -2840,17 +2975,19 @@ if (DEBUGGER) {
         var sBytes = "";
         do {
             sBytes += str.toHexByte(this.getByte(aAddrIns, 1));
-        } while (aAddrIns[0] != aAddr[0]);
+        } while (aAddrIns[2] != aAddr[2]);
         sLine += (sBytes + "            ").substr(0, 14);
         sLine += (sOpcode + "       ").substr(0, 8);
         if (sOperands) sLine += " " + sOperands;
 
+        if (this.cpu.model < Debugger.CPUS[typeCPU]) {
+            sComment = Debugger.CPUS[typeCPU] + " CPU only";
+        }
+
         if (sComment) {
-            sLine += "                         ";
-            sLine = sLine.substr(0, 50);
-            sLine += ";";
+            sLine = str.pad(sLine, 50) + ';' + sComment;
             if (!this.cpu.aFlags.fChecksum) {
-                sLine += sComment + (nSequence != null? '=' + nSequence.toString() : "");
+                sLine += (nSequence != null? '=' + nSequence.toString() : "");
             } else {
                 var nCycles = this.cpu.getCycles();
                 sLine += "cycles=" + nCycles.toString() + " cs=" + str.toHex(this.cpu.aCounts.nChecksum);
@@ -2860,14 +2997,14 @@ if (DEBUGGER) {
     };
 
     /**
-     * getImmediateOperand(type, aAddr)
+     * getImmOperand(type, aAddr)
      *
      * @this {Debugger}
      * @param {number} type
      * @param {Array} aAddr
      * @return {string} operand
      */
-    Debugger.prototype.getImmediateOperand = function(type, aAddr)
+    Debugger.prototype.getImmOperand = function(type, aAddr)
     {
         var sOperand = " ";
         var typeSize = type & Debugger.TYPE_SIZE;
@@ -2885,8 +3022,13 @@ if (DEBUGGER) {
             case Debugger.TYPE_SBYTE:
                 sOperand = str.toHexWord((this.getByte(aAddr, 1) << 24) >> 24);
                 break;
+            case Debugger.TYPE_WORDV:
+                if (aAddr[4]) {
+                    sOperand = str.toHex(this.getLong(aAddr, 4));
+                    break;
+                }
+                /* falls through */
             case Debugger.TYPE_WORD:
-            case Debugger.TYPE_VWORD:
                 sOperand = str.toHexWord(this.getShort(aAddr, 2));
                 break;
             case Debugger.TYPE_FARP:
@@ -2905,17 +3047,31 @@ if (DEBUGGER) {
      * @param {number} bReg
      * @param {number} type
      * @param {Array} aAddr
-     * @return {string|null} operand
+     * @return {string} operand
      */
     Debugger.prototype.getRegOperand = function(bReg, type, aAddr)
     {
-        if ((type & Debugger.TYPE_MODE) == Debugger.TYPE_SEGREG) {
-            if (bReg >= 6 || bReg >= 4 && this.cpu.model < X86.MODEL_80386) return null;
-            bReg += 16;
+        var typeMode = type & Debugger.TYPE_MODE;
+        if (typeMode == Debugger.TYPE_SEGREG) {
+            if (bReg > Debugger.REG_GS ||
+                bReg >= Debugger.REG_FS && this.cpu.model < X86.MODEL_80386) return "??";
+            bReg += Debugger.REG_SEG;
         }
-        else if ((type & Debugger.TYPE_SIZE) >= Debugger.TYPE_WORD)
-            bReg += 8;
-        return Debugger.asRegs[bReg];
+        else if (typeMode == Debugger.TYPE_CTLREG) {
+            bReg += Debugger.REG_CR0;
+        }
+        else {
+            var typeSize = type & Debugger.TYPE_SIZE;
+            if (typeSize >= Debugger.TYPE_WORD) {
+                if (bReg < Debugger.REG_AX) {
+                    bReg += Debugger.REG_AX - Debugger.REG_AL;
+                }
+                if (typeSize == Debugger.TYPE_DWORD || typeSize == Debugger.TYPE_WORDV && aAddr[4]) {
+                    bReg += Debugger.REG_EAX - Debugger.REG_AX;
+                }
+            }
+        }
+        return Debugger.REGS[bReg];
     };
 
     /**
@@ -2939,7 +3095,8 @@ if (DEBUGGER) {
                 sOperand = str.toHexWord(disp);
             }
             else {
-                sOperand = Debugger.asRM[bRM];
+                if (aAddr[5]) bRM += 8;
+                sOperand = Debugger.RMS[bRM];
                 if (bMod == 1) {
                     disp = this.getByte(aAddr, 1);
                     if (!(disp & 0x80)) {
@@ -2958,7 +3115,8 @@ if (DEBUGGER) {
             sOperand = "[" + sOperand + "]";
         }
         else {
-            sOperand = Debugger.asRegs[bRM + ((type & Debugger.TYPE_SIZE) == Debugger.TYPE_BYTE? 0 : 8)];
+            sOperand = this.getRegOperand(bRM, type, aAddr);
+            // sOperand = Debugger.REGS[bRM + ((type & Debugger.TYPE_SIZE) == Debugger.TYPE_BYTE? 0 : 8)];
         }
         return sOperand;
     };
@@ -3062,33 +3220,33 @@ if (DEBUGGER) {
     };
 
     /**
-     * getRegStr(sName, reg)
+     * getRegString(iReg)
      *
      * @this {Debugger}
-     * @param {string} sName
-     * @param {number} reg
+     * @param {number} iReg
      * @return {string}
      */
-    Debugger.prototype.getRegStr = function(sName, reg)
+    Debugger.prototype.getRegString = function(iReg)
     {
-        return sName + '=' + str.toHex(reg, this.cchReg)  + ' ';
+        if (iReg >= Debugger.REG_AX && iReg <= Debugger.REG_DI && this.cchReg > 4) iReg += Debugger.REG_EAX - Debugger.REG_AX;
+        return Debugger.REGS[iReg] + '=' + this.getRegValue(iReg) + ' ';
     };
 
     /**
-     * getSegStr(seg)
+     * getSegString(seg)
      *
      * @this {Debugger}
      * @param {X86Seg} seg
      * @param {boolean} [fProt]
      * @return {string}
      */
-    Debugger.prototype.getSegStr = function(seg, fProt)
+    Debugger.prototype.getSegString = function(seg, fProt)
     {
-        return seg.sName + '=' + str.toHexWord(seg.sel) + (fProt? '[' + str.toHex(seg.base, this.cchAddr) + ',' + str.toHexWord(seg.limit) + ']' : "");
+        return seg.sName + '=' + str.toHexWord(seg.sel) + (fProt? '[' + str.toHex(seg.base, this.cchAddr) + ',' + str.toHex(seg.limit, (seg.limit & ~0xffff)? 8 : 4) + ']' : "");
     };
 
     /**
-     * getDTRStr(seg)
+     * getDTRString(seg)
      *
      * @this {Debugger}
      * @param {string} sName
@@ -3097,7 +3255,7 @@ if (DEBUGGER) {
      * @param {number} addrLimit
      * @return {string}
      */
-    Debugger.prototype.getDTRStr = function(sName, sel, addr, addrLimit)
+    Debugger.prototype.getDTRString = function(sName, sel, addr, addrLimit)
     {
         return sName + '=' + (sel != null? str.toHexWord(sel) : "") + '[' + str.toHex(addr, this.cchAddr) + ',' + str.toHexWord(addrLimit - addr) + ']';
     };
@@ -3148,20 +3306,21 @@ if (DEBUGGER) {
      */
     Debugger.prototype.getRegDump = function(fProt)
     {
+        var s;
         if (fProt === undefined) {
             fProt = !!(this.cpu.regCR0 & X86.CR0.MSW.PE);
         }
-        var s = this.getRegStr(this.regs.AX, this.cpu.regEAX) +
-                this.getRegStr(this.regs.BX, this.cpu.regEBX) +
-                this.getRegStr(this.regs.CX, this.cpu.regECX) +
-                this.getRegStr(this.regs.DX, this.cpu.regEDX) + (this.cchReg > 4? '\n' : '') +
-                this.getRegStr(this.regs.SP, this.cpu.getSP()) +
-                this.getRegStr(this.regs.BP, this.cpu.regEBP) +
-                this.getRegStr(this.regs.SI, this.cpu.regESI) +
-                this.getRegStr(this.regs.DI, this.cpu.regEDI) + '\n';
-        s += this.getSegStr(this.cpu.segSS, fProt) + ' ' +
-             this.getSegStr(this.cpu.segDS, fProt) + ' ' +
-             this.getSegStr(this.cpu.segES, fProt) + ' ';
+        s = this.getRegString(Debugger.REG_AX) +
+            this.getRegString(Debugger.REG_BX) +
+            this.getRegString(Debugger.REG_CX) +
+            this.getRegString(Debugger.REG_DX) + (this.cchReg > 4? '\n' : '') +
+            this.getRegString(Debugger.REG_SP) +
+            this.getRegString(Debugger.REG_BP) +
+            this.getRegString(Debugger.REG_SI) +
+            this.getRegString(Debugger.REG_DI) + '\n' +
+            this.getSegString(this.cpu.segSS, fProt) + ' ' +
+            this.getSegString(this.cpu.segDS, fProt) + ' ' +
+            this.getSegString(this.cpu.segES, fProt) + ' ';
         if (fProt) {
             var sTR = "TR=" + str.toHexWord(this.cpu.segTSS.sel);
             var sA20 = "A20=" + (this.bus.getA20()? "ON " : "OFF ");
@@ -3169,27 +3328,27 @@ if (DEBUGGER) {
                 sTR = '\n' + sTR;
                 s += sA20; sA20 = '';
             }
-            s += '\n' + this.getSegStr(this.cpu.segCS, fProt) + ' ';
+            s += '\n' + this.getSegString(this.cpu.segCS, fProt) + ' ';
             if (I386 && this.cpu.model >= X86.MODEL_80386) {
                 sA20 += '\n';
-                s += this.getSegStr(this.cpu.segFS, fProt) + ' ' +
-                     this.getSegStr(this.cpu.segGS, fProt) + '\n';
+                s += this.getSegString(this.cpu.segFS, fProt) + ' ' +
+                     this.getSegString(this.cpu.segGS, fProt) + '\n';
             }
-            s += this.getDTRStr("LD", this.cpu.segLDT.sel, this.cpu.segLDT.base, this.cpu.segLDT.base + this.cpu.segLDT.limit) + ' ' +
-                 this.getDTRStr("GD", null, this.cpu.addrGDT, this.cpu.addrGDTLimit) + ' ' +
-                 this.getDTRStr("ID", null, this.cpu.addrIDT, this.cpu.addrIDTLimit) + ' ';
+            s += this.getDTRString("LD", this.cpu.segLDT.sel, this.cpu.segLDT.base, this.cpu.segLDT.base + this.cpu.segLDT.limit) + ' ' +
+                 this.getDTRString("GD", null, this.cpu.addrGDT, this.cpu.addrGDTLimit) + ' ' +
+                 this.getDTRString("ID", null, this.cpu.addrIDT, this.cpu.addrIDTLimit) + ' ';
             s += sTR + ' ' + sA20;
-            s += this.getRegStr(this.regs.MS, this.cpu.regCR0);
+            s += this.getRegString(Debugger.REG_CR0);
             if (I386 && this.cpu.model >= X86.MODEL_80386) {
-                s += this.getRegStr("CR2", this.cpu.regCR2) + this.getRegStr("CR3", this.cpu.regCR3);
+                s += this.getRegString(Debugger.REG_CR2) + this.getRegString(Debugger.REG_CR3);
             }
         } else {
             if (I386 && this.cpu.model >= X86.MODEL_80386) {
-                s += this.getSegStr(this.cpu.segFS, fProt) + ' ' +
-                     this.getSegStr(this.cpu.segGS, fProt) + ' ';
+                s += this.getSegString(this.cpu.segFS, fProt) + ' ' +
+                     this.getSegString(this.cpu.segGS, fProt) + ' ';
             }
         }
-        s += this.getRegStr(this.regs.PS, this.cpu.getPS()) +
+        s += this.getRegString(Debugger.REG_PS) +
              this.getFlagStr("V") + this.getFlagStr("D") + this.getFlagStr("I") + this.getFlagStr("T") +
              this.getFlagStr("S") + this.getFlagStr("Z") + this.getFlagStr("A") + this.getFlagStr("P") + this.getFlagStr("C");
         return s;
@@ -3269,83 +3428,10 @@ if (DEBUGGER) {
     {
         var value;
         if (sValue !== undefined) {
-            sValue = sValue.toUpperCase();
-            switch (sValue) {
-                case "AX":
-                    value = this.cpu.regEAX & 0xffff;
-                    break;
-                case "EAX":
-                    value = this.cpu.regEAX;
-                    break;
-                case "BX":
-                    value = this.cpu.regEBX & 0xffff;
-                    break;
-                case "EBX":
-                    value = this.cpu.regEBX;
-                    break;
-                case "CX":
-                    value = this.cpu.regECX & 0xffff;
-                    break;
-                case "ECX":
-                    value = this.cpu.regECX;
-                    break;
-                case "DX":
-                    value = this.cpu.regEDX & 0xffff;
-                    break;
-                case "EDX":
-                    value = this.cpu.regEDX;
-                    break;
-                case "SI":
-                    value = this.cpu.regESI & 0xffff;
-                    break;
-                case "ESI":
-                    value = this.cpu.regESI;
-                    break;
-                case "DI":
-                    value = this.cpu.regEDI & 0xffff;
-                    break;
-                case "EDI":
-                    value = this.cpu.regEDI;
-                    break;
-                case "BP":
-                    value = this.cpu.regEBP & 0xffff;
-                    break;
-                case "EBP":
-                    value = this.cpu.regEBP;
-                    break;
-                case "SP":
-                    value = this.cpu.getSP() & 0xffff;
-                    break;
-                case "ESP":
-                    value = this.cpu.getSP();
-                    break;
-                case "CS":
-                    value = this.cpu.getCS();
-                    break;
-                case "DS":
-                    value = this.cpu.getDS();
-                    break;
-                case "ES":
-                    value = this.cpu.getES();
-                    break;
-                case "SS":
-                    value = this.cpu.getSS();
-                    break;
-                /*
-                 * I used to alias "PC" to "IP", until I discovered that early (perhaps even ALL) versions of DEBUG.COM
-                 * treat "PC" as an alias for the 16-bit flags register.  So for purposes of parseValue(), "PC" has been removed.
-                 */
-                case "IP":
-                    value = this.cpu.getIP() & 0xffff;
-                    break;
-                case "EIP":
-                    value = this.cpu.getIP();
-                    break;
-                default:
-                    value = str.parseInt(sValue);
-                    if (value === undefined) this.println("invalid " + (sName? sName : "value") + ": " + sValue);
-                    break;
-            }
+            var iReg = this.getRegIndex(sValue);
+            if (iReg >= 0) sValue = this.getRegValue(iReg);
+            value = str.parseInt(sValue);
+            if (value === undefined) this.println("invalid " + (sName? sName : "value") + ": " + sValue);
         } else {
             this.println("missing " + (sName || "value"));
         }
@@ -3821,6 +3907,11 @@ if (DEBUGGER) {
             this.dumpSymbols();
             return;
         }
+        if (sCmd == "ds") {     // transform a "ds" command into a "d desc" command
+            sCmd = 'd';
+            sLen = sAddr;
+            sAddr = "desc";
+        }
         for (m in Debugger.MESSAGES) {
             if (sAddr == m) {
                 var fnDumper = this.afnDumpers[m];
@@ -3934,7 +4025,7 @@ if (DEBUGGER) {
                     var bOpcode = aaSortedOpcodeCounts[i][0];
                     var cFreq = aaSortedOpcodeCounts[i][1];
                     if (cFreq) {
-                        this.println((Debugger.asIns[this.aaOpDescs[bOpcode][0]] + "  ").substr(0, 5) + " (" + str.toHexByte(bOpcode) + "): " + cFreq + " times");
+                        this.println((Debugger.INS_NAMES[this.aaOpDescs[bOpcode][0]] + "  ").substr(0, 5) + " (" + str.toHexByte(bOpcode) + "): " + cFreq + " times");
                         cData++;
                     }
                 }
@@ -4060,11 +4151,11 @@ if (DEBUGGER) {
                 var fEnable = (sEnable == "on");
                 for (var prop in this.traceEnabled) {
                     var trace = Debugger.TRACE[prop];
-                    if (sCategory === undefined || sCategory == "ALL" || sCategory == Debugger.asIns[trace.ins]) {
+                    if (sCategory === undefined || sCategory == "ALL" || sCategory == Debugger.INS_NAMES[trace.ins]) {
                         if (fEnable !== undefined) {
                             this.traceEnabled[prop] = fEnable;
                         }
-                        this.println(Debugger.asIns[trace.ins] + trace.size + ": " + (this.traceEnabled[prop]? "on" : "off"));
+                        this.println(Debugger.INS_NAMES[trace.ins] + trace.size + ": " + (this.traceEnabled[prop]? "on" : "off"));
                         fPrint = true;
                     }
                 }
@@ -4774,6 +4865,35 @@ if (DEBUGGER) {
     };
 
     /**
+     * isPrefixIns(bOpcode)
+     *
+     * @this {Debugger}
+     * @param {number} bOpcode
+     * @return {boolean} true if prefix, false if not
+     */
+    Debugger.prototype.isPrefixIns = function(bOpcode)
+    {
+        return (bOpcode == X86.OPCODE.ES || bOpcode == X86.OPCODE.CS || bOpcode == X86.OPCODE.SS || bOpcode == X86.OPCODE.DS ||
+                bOpcode == X86.OPCODE.FS || bOpcode == X86.OPCODE.GS || bOpcode == X86.OPCODE.OS || bOpcode == X86.OPCODE.AS ||
+                bOpcode == X86.OPCODE.LOCK ||
+                bOpcode == X86.OPCODE.REPNZ ||
+                bOpcode == X86.OPCODE.REPZ
+        );
+    };
+
+    /**
+     * isStringIns(bOpcode)
+     *
+     * @this {Debugger}
+     * @param {number} bOpcode
+     * @return {boolean} true if string instruction, false if not
+     */
+    Debugger.prototype.isStringIns = function(bOpcode)
+    {
+        return (bOpcode >= X86.OPCODE.MOVSB && bOpcode <= X86.OPCODE.CMPSW || bOpcode >= X86.OPCODE.STOSB && bOpcode <= X86.OPCODE.SCASW);
+    };
+
+    /**
      * doUnassemble(sAddr, sAddrEnd, n)
      *
      * @this {Debugger}
@@ -4784,17 +4904,19 @@ if (DEBUGGER) {
     Debugger.prototype.doUnassemble = function(sAddr, sAddrEnd, n)
     {
         var aAddr = this.parseAddr(sAddr, Debugger.ADDR_CODE);
-
         if (aAddr[0] == null) return;
 
         if (n === undefined) n = 1;
-        var aAddrEnd = this.newAddr(0xffff, aAddr[1], this.bus.busLimit);
+        var aAddrEnd = this.newAddr(this.maskReg, aAddr[1], this.bus.busLimit);
 
+        var cb = 0x100;
         if (sAddrEnd !== undefined) {
+
             aAddrEnd = this.parseAddr(sAddrEnd, Debugger.ADDR_CODE);
-            if (aAddrEnd[0] == null || aAddrEnd[0] < aAddr[0])
-                return;
-            if (!DEBUG && (aAddrEnd[0] - aAddr[0]) > 0x100) {
+            if (aAddrEnd[0] == null || aAddrEnd[0] < aAddr[0]) return;
+
+            cb = aAddrEnd[0] - aAddr[0];
+            if (!DEBUG && cb > 0x100) {
                 /*
                  * Limiting the amount of disassembled code to 256 bytes in non-DEBUG builds is partly to
                  * prevent the user from wedging the browser by dumping too many lines, but also a recognition
@@ -4803,28 +4925,43 @@ if (DEBUGGER) {
                 this.println("range too large");
                 return;
             }
-            aAddrEnd[0]++;
             n = -1;
         }
 
         var fBlank = (aAddr[0] != this.aAddrNextCode[0]);
 
-        while (n && (aAddr[1] != null? (aAddr[0] < aAddrEnd[0]) : (aAddr[2] < aAddrEnd[2]))) {
-            /*
-             * I pass nCycles instead of cInstructions to getInstruction() now, to assist with visual
-             * verification of the accuracy (or inaccuracy) of instruction cycle counts.
-             */
-            n--;
+        var cLines = 0;
+        var fInitSize = true;
+        while (cb > 0 && n--) {
             var bOpcode = this.getByte(aAddr);
+            var addr = aAddr[2];
+            var nSequence = (this.isBusy(false) || this.fProcStep)? this.nCycles : null;
             /*
-             * We don't want to leave the disassembly ending with a prefix, especially now that stepCPU(0) continues
+             * We don't want to leave the disassembly ending on a prefix, especially now that stepCPU(0) continues
              * executing until it reaches a non-prefix instruction.  So if a prefix is the last instruction, bump the
              * count and force one more instruction to be disassembled.
              */
-            var nSequence = (this.isBusy(false) || this.fProcStep)? this.nCycles : null;
-            if (bOpcode == X86.OPCODE.ES || bOpcode == X86.OPCODE.CS || bOpcode == X86.OPCODE.SS || bOpcode == X86.OPCODE.DS || bOpcode == X86.OPCODE.LOCK || bOpcode == X86.OPCODE.REPNZ || bOpcode == X86.OPCODE.REPZ) {
-                nSequence = null;
+            if (fInitSize) {
+                /*
+                 * For proper disassembly of instructions preceded by an OPERAND (0x66) size prefix, we set aAddr[4]
+                 * to true whenever the operand size is 32-bit; similarly, for an ADDRESS (0x67) size prefix, we set
+                 * aAddr[5] to true whenever the address size is 32-bit.  Initially, both fields must be set to match
+                 * the size of the current code segment.
+                 */
+                aAddr[4] = (this.cpu.segCS.dataSize == 4);
+                aAddr[5] = (this.cpu.segCS.addrSize == 4);
+                fInitSize = false;
+            }
+            if (this.isPrefixIns(bOpcode)) {
+                if (bOpcode == X86.OPCODE.OS) {
+                    aAddr[4] = !aAddr[4];
+                } else if (bOpcode == X86.OPCODE.AS) {
+                    aAddr[5] = !aAddr[5];
+                }
                 if (!n) n++;
+                nSequence = null;
+            } else {
+                fInitSize = true;
             }
             var sComment = (nSequence != null? "cycles" : null);
             var aSymbol = this.findSymbolAtAddr(aAddr);
@@ -4842,9 +4979,10 @@ if (DEBUGGER) {
             var sIns = this.getInstruction(aAddr, sComment, nSequence);
             this.println(sIns);
             this.aAddrNextCode = aAddr;
+            cb -= aAddr[2] - addr;
             fBlank = false;
+            cLines++;
         }
-        if (n) this.println("end of memory");
     };
 
     /**

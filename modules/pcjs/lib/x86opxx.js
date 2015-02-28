@@ -218,7 +218,7 @@ var X86OpXX = {
      * @this {X86CPU}
      */
     op0F: function() {
-        X86Op0F.aOps0F[this.getIPByte()].call(this);
+        this.aOps0F[this.getIPByte()].call(this);
     },
     /**
      * op=0x10 (ADC byte,reg)
@@ -1328,6 +1328,36 @@ var X86OpXX = {
         this.aOpModMemWord[this.getIPByte()].call(this, X86Help.opHelpARPL);
     },
     /**
+     * op=0x64 (FS:)
+     *
+     * @this {X86CPU}
+     */
+    opFS: function() {
+        /*
+         * NOTE: The fact that we're setting NOINTR along with SEG is really just for documentation purposes;
+         * the way stepCPU() is written, the presence of any prefix bypasses normal interrupt processing anyway.
+         */
+        this.opFlags |= X86.OPFLAG.SEG | X86.OPFLAG.NOINTR;
+        this.segData = this.segStack = this.segFS;
+        this.nStepCycles -= this.CYCLES.nOpCyclesPrefix;
+        this.stopCPU();
+    },
+    /**
+     * op=0x65 (GS:)
+     *
+     * @this {X86CPU}
+     */
+    opGS: function() {
+        /*
+         * NOTE: The fact that we're setting NOINTR along with SEG is really just for documentation purposes;
+         * the way stepCPU() is written, the presence of any prefix bypasses normal interrupt processing anyway.
+         */
+        this.opFlags |= X86.OPFLAG.SEG | X86.OPFLAG.NOINTR;
+        this.segData = this.segStack = this.segGS;
+        this.nStepCycles -= this.CYCLES.nOpCyclesPrefix;
+        this.stopCPU();
+    },
+    /**
      * op=0x66 (OS:) (80386 and up)
      *
      * TODO: Review other effective operand-size criteria, cycle count, etc.
@@ -1339,8 +1369,9 @@ var X86OpXX = {
             this.opFlags |= X86.OPFLAG.SEG;
             this.dataSize ^= 0x6;               // that which is 2 shall become 4, and vice versa
             this.dataMask ^= (0xffff0000|0);    // that which is 0x0000ffff shall become 0xffffffff, and vice versa
-            this.opMem = this.aaOpMem[this.dataSize];
+            this.setDataSize();
             this.nStepCycles -= this.CYCLES.nOpCyclesPrefix;
+            this.stopCPU();
         }
     },
     /**
@@ -1355,8 +1386,9 @@ var X86OpXX = {
             this.opFlags |= X86.OPFLAG.SEG;
             this.addrSize ^= 0x06;              // that which is 2 shall become 4, and vice versa
             this.addrMask ^= (0xffff0000|0);    // that which is 0x0000ffff shall become 0xffffffff, and vice versa
-            this.setOpMod();
+            this.setAddrSize();
             this.nStepCycles -= this.CYCLES.nOpCyclesPrefix;
+            this.stopCPU();
         }
     },
     /**
@@ -1929,7 +1961,7 @@ var X86OpXX = {
      *
      * NOTE: Since the ModRM decoders deal only with general-purpose registers, we must move
      * the appropriate segment register into a special variable (regMD16), which our helper function
-     * (opHelpMOVSegSrc) will use to replace the decoder's src operand.
+     * (opHelpMOVMD16) will use to replace the decoder's src operand.
      *
      * @this {X86CPU}
      */
@@ -1957,7 +1989,7 @@ var X86OpXX = {
          * Like other MOV operations, the destination does not need to be read, just written.
          */
         this.opFlags |= X86.OPFLAG.NOREAD;
-        this.aOpModMemWord[bModRM].call(this, X86Help.opHelpMOVSegSrc);
+        this.aOpModMemWord[bModRM].call(this, X86Help.opHelpMOVMD16);
     },
     /**
      * op=0x8D (LEA reg,word)

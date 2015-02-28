@@ -54,8 +54,8 @@ if (typeof module !== 'undefined') {
  * @extends Component
  * @param {Object} parmsRAM
  */
-function RAM(parmsRAM) {
-
+function RAM(parmsRAM)
+{
     Component.call(this, "RAM", parmsRAM, RAM);
 
     this.addrRAM = parmsRAM['addr'];
@@ -76,7 +76,8 @@ Component.subclass(Component, RAM);
  * @param {X86CPU} cpu
  * @param {Debugger} dbg
  */
-RAM.prototype.initBus = function(cmp, bus, cpu, dbg) {
+RAM.prototype.initBus = function(cmp, bus, cpu, dbg)
+{
     this.bus = bus;
     this.cpu = cpu;
     this.chipset = cmp.getComponentByType("ChipSet");
@@ -91,7 +92,8 @@ RAM.prototype.initBus = function(cmp, bus, cpu, dbg) {
  * @param {boolean} [fRepower]
  * @return {boolean} true if successful, false if failure
  */
-RAM.prototype.powerUp = function(data, fRepower) {
+RAM.prototype.powerUp = function(data, fRepower)
+{
     if (!fRepower) {
         /*
          * The Computer powers up the CPU last, at which point the X86 state is restored,
@@ -117,7 +119,8 @@ RAM.prototype.powerUp = function(data, fRepower) {
  * @param {boolean} fSave
  * @return {Object|boolean}
  */
-RAM.prototype.powerDown = function(fSave) {
+RAM.prototype.powerDown = function(fSave)
+{
     /*
      * The Computer powers down the CPU first, at which point the X86 state is saved,
      * which includes the Bus state, and since we use the Bus component to allocate all
@@ -148,7 +151,8 @@ RAM.prototype.powerDown = function(fSave) {
  *
  * @this {RAM}
  */
-RAM.prototype.reset = function() {
+RAM.prototype.reset = function()
+{
     if (!this.addrRAM && !this.fInstalled && this.chipset) {
         var baseRAM = this.chipset.getSWMemorySize() * 1024;
         if (this.sizeRAM && baseRAM != this.sizeRAM) {
@@ -168,6 +172,30 @@ RAM.prototype.reset = function() {
              * for these components, which the Computer component will display as it "powers up" components.
              */
             if (MAXDEBUG && this.fInstalled) this.status("specified size overrides SW1");
+            /*
+             * Memory with an ID of "ramCPQ" is reserved for built-in memory located just below the 16Mb
+             * boundary on Compaq DeskPro 386 machines.
+             *
+             * Technically, that memory is part of the first 1Mb of memory that also provides up to 640Kb
+             * of conventional memory (ie, memory below 1Mb).
+             *
+             * However, PCjs doesn't support individual memory allocations that (a) are discontiguous
+             * or (b) dynamically change location.  Components must simulate those features by performing
+             * a separate allocation for each starting address, and removing/adding memory allocations
+             * whenever their starting address changes.
+             *
+             * Therefore, a DeskPro 386's first 1Mb of physical memory is allocated by PCjs in two pieces,
+             * and the second piece must have an ID of "ramCPQ", triggering the additional allocation of
+             * Compaq-specific memory-mapped registers.
+             *
+             * See CompaqController for more details.
+             */
+            if (COMPAQ386) {
+                if (this.idComponent == "ramCPQ") {
+                    this.controller = new CompaqController(this);
+                    this.bus.addMemory(CompaqController.ADDR, 1, Memory.TYPE.CTRL, this.controller);
+                }
+            }
         }
     }
     if (this.fAllocated) {
@@ -193,7 +221,8 @@ RAM.prototype.reset = function() {
  * attribute, invoking the constructor to create a RAM component, and then binding
  * any associated HTML controls to the new component.
  */
-RAM.init = function() {
+RAM.init = function()
+{
     var aeRAM = Component.getElementsByClass(window.document, PCJSCLASS, "ram");
     for (var iRAM = 0; iRAM < aeRAM.length; iRAM++) {
         var eRAM = aeRAM[iRAM];
@@ -201,6 +230,121 @@ RAM.init = function() {
         var ram = new RAM(parmsRAM);
         Component.bindComponentControls(ram, eRAM, PCJSCLASS);
     }
+};
+
+/**
+ * CompaqController(ram)
+ *
+ * DeskPro 386 machines came with a minimum of 1Mb of RAM, which could be configured (via jumpers)
+ * for 256Kb, 512Kb or 640Kb of conventional memory, starting at address 0x00000000, with the
+ * remainder (768Kb, 512Kb, or 384Kb) accessible only at addresses just below 0x01000000.  This
+ * second chunk of RAM must have an ID of "ramCPQ".
+ *
+ * The typical configuration was 640Kb of conventional memory, leaving 384Kb accessible at 0x00FA0000.
+ * Presumably, the other configurations (256Kb and 512Kb) would leave 768Kb and 512Kb accessible at
+ * 0x00F40000 and 0x00F80000, respectively.
+ *
+ * The DeskPro 386 also contained two memory-mapped registers at 0x80C00000.  The first is a write-only
+ * mapping register that provides the ability to map the 128Kb at 0x00FE0000 to 0x000E0000, replacing
+ * any ROMs in the range 0x000E0000-0x000FFFFF, and optionally write-protecting that 128Kb.  The second
+ * register is a read-only diagnostics register that indicates jumper configuration and parity errors.
+ *
+ * To emulate the memory-mapped registers at 0x80C00000, the RAM component allocates a block at that
+ * address using this custom controller once it sees an allocation for "ramCPQ".
+ *
+ * Later, when the addressibility of "ramCPQ" memory is altered, we record the blocks in all the
+ * memory slots spanning 0x000E0000-0x000FFFFF, and then update those slots with the blocks from
+ * 0x00FE0000-0x00FFFFFF.  Note that only the top 128Kb of "ramCPQ" addressibility is affected; the
+ * rest of that memory, ranging anywhere from 256Kb to 640Kb, remains addressible at its original
+ * location.  Compaq's CEMM and VDISK utilities were generally the only software able to access that
+ * remaining memory.
+ *
+ * @constructor
+ * @param {RAM} ram
+ */
+function CompaqController(ram)
+{
+    this.ram = ram;
+    this.bMapping = CompaqController.MAPPING.DEFAULT;
+    this.bSettings = CompaqController.SETTINGS.BASE_640KB;
+}
+
+CompaqController.ADDR = 0x80C00000;
+
+/*
+ * Bit definitions for the 8-bit write-only memory-mapping register (bMapping)
+ */
+CompaqController.MAPPING = {
+    NORELOC:    0x01,               // is this bit is CLEAR, the last 128Kb (at 0x00FE0000) is relocated to 0x000E0000
+    READWRITE:  0x02,               // if this bit is CLEAR, the last 128Kb (at 0x00FE0000) is read-only (ie, write-protected)
+    RESERVED:   0xFC,               // the remaining 6 bits are reserved and should always be SET
+    DEFAULT:    0xFF
+};
+
+/*
+ * Bit definitions for the 8-bit read-only settings/diagnostics register (bSettings)
+ */
+CompaqController.SETTINGS = {
+    B0_PARITY:  0x01,
+    B1_PARITY:  0x02,
+    B2_PARITY:  0x04,
+    B3_PARITY:  0x08,
+    BASE_640KB: 0x00,
+    BASE_ERROR: 0x10,
+    BASE_512KB: 0x20,
+    BASE_256KB: 0x30,
+    ADDED_1MB:  0x40,
+    PIGGYBACK:  0x80
+};
+
+/**
+ * readByte(off)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @return {number}
+ */
+CompaqController.readByte = function readCompaqControllerByte(off)
+{
+    return this.controller.bSettings;
+};
+
+/**
+ * writeByte(off, b)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @param {number} b (which should already be pre-masked to 8 bits; see Bus.prototype.setByteDirect)
+ */
+CompaqController.writeByte = function writeCompaqControllerByte(off, b)
+{
+    this.controller.bMapping = b;
+};
+
+CompaqController.ACCESS = [CompaqController.readByte, CompaqController.readByte, CompaqController.readByte,
+                           CompaqController.writeByte, CompaqController.writeByte, CompaqController.writeByte];
+
+/**
+ * getMemoryBuffer(addr)
+ *
+ * @this {CompaqController}
+ * @param {number} addr
+ * @return {Array} containing the buffer (and an offset within that buffer)
+ */
+CompaqController.prototype.getMemoryBuffer = function(addr)
+{
+    return [null, 0];
+};
+
+/**
+ * getMemoryAccess()
+ *
+ * @this {CompaqController}
+ * @return {Array.<function()>}
+ */
+CompaqController.prototype.getMemoryAccess = function()
+{
+    return CompaqController.ACCESS;
 };
 
 /*

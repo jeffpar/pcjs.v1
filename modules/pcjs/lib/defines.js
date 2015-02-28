@@ -125,6 +125,13 @@ var BUGS_8086 = false;
  */
 var I386 = true;
 
+/**
+ * @define {boolean}
+ *
+ * Enables Compaq DeskPro 386 support.
+ */
+var COMPAQ386 = true;
+
 if (typeof module !== 'undefined') {
     global.PCJSCLASS = PCJSCLASS;
     global.DEBUGGER = DEBUGGER;
@@ -135,6 +142,7 @@ if (typeof module !== 'undefined') {
     global.SAMPLER = SAMPLER;
     global.BUGS_8086 = BUGS_8086;
     global.I386 = I386;
+    global.COMPAQ386 = COMPAQ386;
     /*
      * TODO: When we're "required" by Node, should we return anything via module.exports?
      */
