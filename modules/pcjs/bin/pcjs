@@ -115,7 +115,7 @@ function loadComponents(asFiles)
                 }
             }
             if (sName == "component") {
-                fn.println = function(s, type) {
+                fn.log = fn.println = function(s, type) {
                     console.log((type !== undefined? (type + ": ") : "") + (s || ""));
                 };      // jshint ignore:line
             }
