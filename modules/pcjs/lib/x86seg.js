@@ -36,7 +36,6 @@ if (typeof module !== 'undefined') {
     var str         = require("../../shared/lib/strlib");
     var Messages    = require("./messages");
     var X86         = require("./x86");
-    var X86Help     = require("./x86help");
 }
 
 /**
@@ -190,7 +189,7 @@ X86Seg.loadProt = function loadProt(sel, fSuppress)
             return this.loadDesc8(addrDesc, sel, fSuppress);
         }
         if (!fSuppress) {
-            X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel);
+            X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel);
         }
     }
     return X86.ADDR_INVALID;
@@ -237,14 +236,14 @@ X86Seg.loadIDTProt = function loadIDTProt(nIDT)
     if (addrDesc + 7 <= cpu.addrIDTLimit) {
         return this.loadDesc8(addrDesc, nIDT) + cpu.regEIP;
     }
-    X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, nIDT | X86.ERRCODE.IDT | X86.ERRCODE.EXT, true);
+    X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, nIDT | X86.ERRCODE.IDT | X86.ERRCODE.EXT, true);
     return X86.ADDR_INVALID;
 };
 
 /**
  * checkReadReal(off, cb, fSuppress)
  *
- * TODO: Invoke X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT) if off is 0xffff and cb is 1;
+ * TODO: Invoke X86.fnFault.call(this.cpu, X86.EXCEPTION.GP_FAULT) if off is 0xffff and cb is 1;
  * also, whether or not the opHelpFault() call should include an error code, since this is happening in real-mode.
  *
  * @this {X86Seg}
@@ -261,7 +260,7 @@ X86Seg.checkReadReal = function checkReadReal(off, cb, fSuppress)
 /**
  * checkWriteReal(off, cb, fSuppress)
  *
- * TODO: Invoke X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT) if off is 0xffff and cb is 1;
+ * TODO: Invoke X86.fnFault.call(this.cpu, X86.EXCEPTION.GP_FAULT) if off is 0xffff and cb is 1;
  * also, whether or not the opHelpFault() call should include an error code, since this is happening in real-mode.
  *
  * @this {X86Seg}
@@ -321,7 +320,7 @@ X86Seg.checkReadProtDown = function checkReadProtDown(off, cb, fSuppress)
 X86Seg.checkReadProtDisallowed = function checkReadProtDisallowed(off, cb, fSuppress)
 {
     if (!fSuppress) {
-        X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, 0);
+        X86.fnFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, 0);
     }
     return X86.ADDR_INVALID;
 };
@@ -372,7 +371,7 @@ X86Seg.checkWriteProtDown = function checkWriteProtDown(off, cb, fSuppress)
 X86Seg.checkWriteProtDisallowed = function checkWriteProtDisallowed(off, cb, fSuppress)
 {
     if (!fSuppress) {
-        X86Help.opHelpFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, 0);
+        X86.fnFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, 0);
     }
     return X86.ADDR_INVALID;
 };
@@ -411,7 +410,7 @@ X86Seg.switchTSS = function switchTSS(selNew, fNest)
     var selOld = cpu.segTSS.sel;
     if (!fNest) {
         if (cpu.segTSS.type != X86.DESC.ACC.TYPE.TSS_BUSY) {
-            X86Help.opHelpFault.call(cpu, X86.EXCEPTION.TS_FAULT, selNew, true);
+            X86.fnFault.call(cpu, X86.EXCEPTION.TS_FAULT, selNew, true);
             return false;
         }
         cpu.setShort(cpu.segTSS.addrDesc + X86.DESC.ACC.OFFSET, (cpu.segTSS.acc & ~X86.DESC.ACC.TYPE.TSS_BUSY) | X86.DESC.ACC.TYPE.TSS);
@@ -425,7 +424,7 @@ X86Seg.switchTSS = function switchTSS(selNew, fNest)
     }
     if (fNest) {
         if (cpu.segTSS.type == X86.DESC.ACC.TYPE.TSS_BUSY) {
-            X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, selNew, true);
+            X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, selNew, true);
             return false;
         }
         cpu.setShort(cpu.segTSS.addrDesc + X86.DESC.ACC.OFFSET, cpu.segTSS.acc |= X86.DESC.ACC.TYPE.TSS_BUSY);
@@ -502,7 +501,7 @@ X86Seg.prototype.loadAcc = function(sel, fGDT)
             return cpu.getShort(addrDesc + X86.DESC.ACC.OFFSET);
         }
     }
-    X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel);
+    X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel);
     return X86.DESC.ACC.INVALID;
 };
 
@@ -684,13 +683,13 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                     return this.base;
                 }
                 cpu.assert(false);
-                if (!fSuppress) X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, nFaultError, true);
+                if (!fSuppress) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, nFaultError, true);
                 base = X86.ADDR_INVALID;
                 break;
             }
             else if (fGate !== false) {
                 cpu.assert(false);
-                if (!fSuppress) X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, true);
+                if (!fSuppress) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, true);
                 base = X86.ADDR_INVALID;
                 break;
             }
@@ -719,7 +718,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                      *
                      * Anyway, because of this, if acc is zero, we won't set fHalt on this GP_FAULT.
                      */
-                    if (!fSuppress) X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, !!acc);
+                    if (!fSuppress) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, !!acc);
                     base = X86.ADDR_INVALID;
                     break;
                 }
@@ -727,14 +726,14 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
         }
         else if (this.id == X86Seg.ID.STACK) {
             if (!selMasked || type < X86.DESC.ACC.TYPE.DATA_READONLY || (type & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.READABLE)) == X86.DESC.ACC.TYPE.CODE) {
-                if (!fSuppress) X86Help.opHelpFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, true);
+                if (!fSuppress) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, true);
                 base = X86.ADDR_INVALID;
                 break;
             }
         }
         else if (this.id == X86Seg.ID.TSS) {
             if (!selMasked || type != X86.DESC.ACC.TYPE.TSS && type != X86.DESC.ACC.TYPE.TSS_BUSY) {
-                if (!fSuppress) X86Help.opHelpFault.call(cpu, X86.EXCEPTION.TS_FAULT, sel, true);
+                if (!fSuppress) X86.fnFault.call(cpu, X86.EXCEPTION.TS_FAULT, sel, true);
                 base = X86.ADDR_INVALID;
                 break;
             }

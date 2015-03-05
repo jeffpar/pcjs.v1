@@ -240,8 +240,8 @@ var X86 = {
         MASK:       0xfff8      // index of corresponding entry in GDT, LDT or IDT
     },
     RESULT: {
-        SIZE_BYTE:  0x00100,    // mask for byte arithmetic instructions (after subtracting 1)
-        SIZE_WORD:  0x10000,    // mask for word arithmetic instructions (after subtracting 1)
+        SIZE_BYTE:  0x00100,
+        SIZE_WORD:  0x10000,
         AUXOVF_AF:  0x00010,
         AUXOVF_OF:  0x08080,
         AUXOVF_CF:  0x10100

@@ -42,12 +42,11 @@ if (typeof module !== 'undefined') {
     var CPU         = require("./cpu");
     var X86         = require("./x86");
     var X86Seg      = require("./x86seg");
-    var X86Grps     = require("./x86grps");
-    var X86Help     = require("./x86help");
-    var X86ModB     = require("./x86modb");
-    var X86ModW     = require("./x86modw");
+    var X86Func     = require("./x86func");
     var X86OpXX     = require("./x86opxx");
     var X86Op0F     = require("./x86op0f");
+    var X86ModB     = require("./x86modb");
+    var X86ModW     = require("./x86modw");
 }
 
 if (I386) {
@@ -482,7 +481,7 @@ X86CPU.PREFETCH = {
  * regLIP has been set, so flushPrefetch() expects to receive that address.
  *
  * If the prefetch queue does not contain any (or enough) bytes to satisfy a getBytePrefetch()
- * or getWordPrefetch() request, we force the queue to be filled with the necessary number
+ * or getShortPrefetch() request, we force the queue to be filled with the necessary number
  * of bytes first.
  *
  * @this {X86CPU}
@@ -706,10 +705,10 @@ X86CPU.prototype.initProcessor = function()
      */
     this.CYCLES = (this.model >= X86.MODEL_80286? X86CPU.CYCLES_80286 : X86CPU.CYCLES_8088);
 
-    this.aOps     = X86OpXX.aOps;
-    this.aOpGrp4b = X86Grps.aOpGrp4b;
-    this.aOpGrp4w = X86Grps.aOpGrp4w;
-    this.aOpGrp6  = X86Op0F.aOpGrp6Real;    // setProtMode() will ensure that aOpGrp6 is switched
+    this.aOps     = X86.aOps;
+    this.aOpGrp4b = X86.aOpGrp4b;
+    this.aOpGrp4w = X86.aOpGrp4w;
+    this.aOpGrp6  = X86.aOpGrp6Real;    // setProtMode() will ensure that aOpGrp6 is switched
 
     if (this.model >= X86.MODEL_80186) {
         /*
@@ -720,34 +719,34 @@ X86CPU.prototype.initProcessor = function()
          * Instruction handlers that contain "hard-coded" 80286 cycle times include: opINSb, opINSw, opOUTSb,
          * opOUTSw, opENTER, and opLEAVE.
          */
-        this.aOps = X86OpXX.aOps.slice();   // make copies of aOps and others before modifying them
-        this.aOpGrp4b = X86Grps.aOpGrp4b.slice();
-        this.aOpGrp4w = X86Grps.aOpGrp4w.slice();
+        this.aOps = X86.aOps.slice();       // make copies of aOps and others before modifying them
+        this.aOpGrp4b = X86.aOpGrp4b.slice();
+        this.aOpGrp4w = X86.aOpGrp4w.slice();
         this.nShiftCountMask = 0x1f;        // on newer processors, all shift counts are MOD 32
-        this.aOps[0x0F]                 = X86Help.opHelpInvalid;
-        this.aOps[X86.OPCODE.PUSHA]     = X86OpXX.opPUSHA;
-        this.aOps[X86.OPCODE.POPA]      = X86OpXX.opPOPA;
-        this.aOps[X86.OPCODE.BOUND]     = X86OpXX.opBOUND;
-        this.aOps[X86.OPCODE.ARPL]      = X86Help.opHelpInvalid;
-        this.aOps[X86.OPCODE.FS]        = X86Help.opHelpInvalid;
-        this.aOps[X86.OPCODE.GS]        = X86Help.opHelpInvalid;
-        this.aOps[X86.OPCODE.OS]        = X86Help.opHelpInvalid;
-        this.aOps[X86.OPCODE.AS]        = X86Help.opHelpInvalid;
-        this.aOps[X86.OPCODE.PUSH16]    = X86OpXX.opPUSH16;
-        this.aOps[X86.OPCODE.IMUL16]    = X86OpXX.opIMUL16;
-        this.aOps[X86.OPCODE.PUSH8]     = X86OpXX.opPUSH8;
-        this.aOps[X86.OPCODE.IMUL8]     = X86OpXX.opIMUL8;
-        this.aOps[X86.OPCODE.INSB]      = X86OpXX.opINSb;
-        this.aOps[X86.OPCODE.INSW]      = X86OpXX.opINSw;
-        this.aOps[X86.OPCODE.OUTSB]     = X86OpXX.opOUTSb;
-        this.aOps[X86.OPCODE.OUTSW]     = X86OpXX.opOUTSw;
-        this.aOps[0xC0]                 = X86OpXX.opGrp2bi;
-        this.aOps[0xC1]                 = X86OpXX.opGrp2wi;
-        this.aOps[X86.OPCODE.ENTER]     = X86OpXX.opENTER;
-        this.aOps[X86.OPCODE.LEAVE]     = X86OpXX.opLEAVE;
-        this.aOps[0xF1]                 = X86OpXX.opINT1;
-        this.aOpGrp4b[0x07]             = X86Grps.opGrpInvalid;
-        this.aOpGrp4w[0x07]             = X86Grps.opGrpInvalid;
+        this.aOps[0x0F]                 = X86.opInvalid;
+        this.aOps[X86.OPCODE.PUSHA]     = X86.opPUSHA;
+        this.aOps[X86.OPCODE.POPA]      = X86.opPOPA;
+        this.aOps[X86.OPCODE.BOUND]     = X86.opBOUND;
+        this.aOps[X86.OPCODE.ARPL]      = X86.opInvalid;
+        this.aOps[X86.OPCODE.FS]        = X86.opInvalid;
+        this.aOps[X86.OPCODE.GS]        = X86.opInvalid;
+        this.aOps[X86.OPCODE.OS]        = X86.opInvalid;
+        this.aOps[X86.OPCODE.AS]        = X86.opInvalid;
+        this.aOps[X86.OPCODE.PUSH16]    = X86.opPUSH16;
+        this.aOps[X86.OPCODE.IMUL16]    = X86.opIMUL16;
+        this.aOps[X86.OPCODE.PUSH8]     = X86.opPUSH8;
+        this.aOps[X86.OPCODE.IMUL8]     = X86.opIMUL8;
+        this.aOps[X86.OPCODE.INSB]      = X86.opINSb;
+        this.aOps[X86.OPCODE.INSW]      = X86.opINSw;
+        this.aOps[X86.OPCODE.OUTSB]     = X86.opOUTSb;
+        this.aOps[X86.OPCODE.OUTSW]     = X86.opOUTSw;
+        this.aOps[0xC0]                 = X86.opGrp2bi;
+        this.aOps[0xC1]                 = X86.opGrp2wi;
+        this.aOps[X86.OPCODE.ENTER]     = X86.opENTER;
+        this.aOps[X86.OPCODE.LEAVE]     = X86.opLEAVE;
+        this.aOps[0xF1]                 = X86.opINT1;
+        this.aOpGrp4b[0x07]             = X86.fnGRPInvalid;
+        this.aOpGrp4w[0x07]             = X86.fnGRPInvalid;
 
         if (this.model >= X86.MODEL_80286) {
 
@@ -756,19 +755,23 @@ X86CPU.prototype.initProcessor = function()
 
             this.OPFLAG_NOINTR8086 = 0;     // used with instructions that should *not* set NOINTR on an 80286 (eg, non-SS segment loads)
 
-            this.aOps0F = X86Op0F.aOps0F;
-            this.aOps[0x0F]              = X86OpXX.op0F;
-            this.aOps[X86.OPCODE.ARPL]   = X86OpXX.opARPL;
-            this.aOps[X86.OPCODE.PUSHSP] = X86OpXX.opPUSHSP;
+            this.aOps0F = X86.aOps0F;
+            this.aOps[0x0F]              = X86.op0F;
+            this.aOps[X86.OPCODE.ARPL]   = X86.opARPL;
+            this.aOps[X86.OPCODE.PUSHSP] = X86.opPUSHSP;
 
             if (I386 && this.model >= X86.MODEL_80386) {
-                this.aOps[X86.OPCODE.FS] = X86OpXX.opFS;
-                this.aOps[X86.OPCODE.GS] = X86OpXX.opGS;
-                this.aOps[X86.OPCODE.OS] = X86OpXX.opOS;
-                this.aOps[X86.OPCODE.AS] = X86OpXX.opAS;
-                this.aOps0F = X86Op0F.aOps0F.slice();
-                this.aOps0F[0x20] = X86Op0F.opMOVrcr;
-                this.aOps0F[0x22] = X86Op0F.opMOVcrr;
+                this.aOps[X86.OPCODE.FS] = X86.opFS;
+                this.aOps[X86.OPCODE.GS] = X86.opGS;
+                this.aOps[X86.OPCODE.OS] = X86.opOS;
+                this.aOps[X86.OPCODE.AS] = X86.opAS;
+                this.aOps0F = X86.aOps0F.slice();
+                this.aOps0F[0x20] = X86.opMOVrcr;
+                this.aOps0F[0x22] = X86.opMOVcrr;
+                this.aOps = this.aOps.concat(this.aOps);
+                for (var bOpcode in X86.aOpsD) {
+                    this.aOps[parseInt(bOpcode, 10) + 256] = X86.aOpsD[bOpcode];
+                }
             }
         }
     }
@@ -896,7 +899,7 @@ X86CPU.prototype.resetRegs = function()
 
     /*
      * NOTE: Even though the 8086 doesn't have CR0 (aka MSW) and IDTR, we initialize them for ALL CPUs, so
-     * that functions like X86Help.opHelpINT() can use the same code for both.  The 8086/8088 have no direct
+     * that functions like X86.fnINT() can use the same code for both.  The 8086/8088 have no direct
      * way of accessing or changing them, so this internal change should be perfectly safe for those processors.
      */
     this.regCR0 = X86.CR0.MSW.ON;
@@ -1075,6 +1078,7 @@ X86CPU.prototype.setAddrSize = function()
 X86CPU.prototype.setDataSize = function()
 {
     this.opMem = this.aaOpMem[this.dataSize];
+    this.bOpcodeBias = (this.dataSize == 4? 256 : 0);
 };
 
 /**
@@ -1091,6 +1095,7 @@ X86CPU.prototype.setSizes = function()
      */
     this.addrSize = this.segCS.addrSize;
     this.addrMask = this.segCS.addrMask;
+
     /*
      * It's also worth noting that instructions that implicitly use the stack also rely on STACK size,
      * which is based on the BIG bit of the last descriptor loaded into SS; use the following segSS properties:
@@ -1255,7 +1260,7 @@ X86CPU.prototype.setProtMode = function(fProt)
     if (!fProt) {
         this.printMessage("returning to real-mode");
     }
-    this.aOpGrp6 = (fProt? X86Op0F.aOpGrp6Prot : X86Op0F.aOpGrp6Real);
+    this.aOpGrp6 = (fProt? X86.aOpGrp6Prot : X86.aOpGrp6Real);
     this.segCS.updateMode(fProt);
     this.segDS.updateMode(fProt);
     this.segSS.updateMode(fProt);
@@ -1718,6 +1723,38 @@ X86CPU.prototype.setSP = function(off)
 /**
  * getCF()
  *
+ * Notes regarding carry following a 32-bit addition:
+ *
+ * The following table summarizes bit 31 of dst, src, and result, along with the expected carry bit:
+ *
+ *      dst src res carry
+ *      --- --- --- -----
+ *      0   0   0   0       no
+ *      0   0   1   0       no (there must have been a carry out of bit 30, but it was "absorbed")
+ *      0   1   0   1       yes (there must have been a carry out of bit 30, but it was NOT "absorbed")
+ *      0   1   1   0       no
+ *      1   0   0   1       yes (same as the preceding "yes" case)
+ *      1   0   1   0       no
+ *      1   1   0   1       yes (since the addition of two ones must always produce a carry)
+ *      1   1   1   1       yes (since the addition of two ones must always produce a carry)
+ *
+ * So, we could use “(dst ^ ((dst ^ src) & (src ^ res))) >>> 15” to shift the calculated carry bit (bit 31)
+ * into the conventional SIZE_WORD position (bit 16); eg:
+ *
+ *      resultZeroCarry = ((resultZeroCarry >>> 16) | (resultZeroCarry & 0xffff)) | (((dst ^ ((dst ^ src) & (src ^ resultZeroCarry))) >>> 15) & SIZE_WORD);
+ *
+ * Essentially, we’d be “cramming” all 32 result bits into the low 16 bits (which would effectively represent the
+ * zero flag), and then setting bit 16 to the effective carry flag.  This transforms the zero and carry conditions
+ * for a DWORD computation into the corresponding conditions for a WORD computation.  This would slow down 32-bit
+ * addition, but it would allow 8-bit and 16-bit addition to remain fast.  Languages that support 64-bit values in
+ * conjunction with bit-wise operators can omit that one-line transformation, allowing us to set SIZE_WORD to a
+ * 33-bit value, but sadly, we cannot do that in JavaScript.
+ *
+ * Alternatively, we could store the src and dst operands into their own result variables (eg, resultSrc and resultDst)
+ * and compute carry lazily, but that would affect MUCH more existing code (eg, all code that currently inspects carry
+ * with a single bit test).  I think the DWORD-to-WORD flag conversion for 32-bit instructions that modify zero
+ * and/or carry) is a more reasonable first step.
+ *
  * @this {X86CPU}
  * @return {number}
  */
@@ -2011,6 +2048,32 @@ X86CPU.prototype.setOF = function()
 X86CPU.prototype.getPS = function()
 {
     return (this.regPS & ~X86.PS.INDIRECT) | (this.getCF() | this.getPF() | this.getAF() | this.getZF() | this.getSF() | this.getOF());
+};
+
+/**
+ * setMSW(w)
+ *
+ * Factored out of x86op0f.js, since both opLMSW and opLOADALL are capable of setting a new MSW.
+ * The caller is responsible for assessing the appropriate cycle cost.
+ *
+ * @this {X86CPU}
+ * @param {number} w
+ */
+X86CPU.prototype.setMSW = function(w)
+{
+    /*
+     * This instruction is always allowed to set MSW.PE, but it cannot clear MSW.PE once set;
+     * therefore, we always OR the previous value of MSW.PE into the new value before loading.
+     */
+    w |= (this.regCR0 & X86.CR0.MSW.PE) | X86.CR0.MSW.ON;
+    this.regCR0 = (this.regCR0 & ~X86.CR0.MSW.MASK) | (w & X86.CR0.MSW.MASK);
+    /*
+     * Since the 80286 cannot return to real-mode via this instruction, the only transition we
+     * must worry about is to protected-mode.  And don't worry, there's no harm calling setProtMode()
+     * if the CPU is already in protected-mode (we could certainly optimize the call out in that
+     * case, but this instruction isn't used frequently enough to warrant it).
+     */
+    if (this.regCR0 & X86.CR0.MSW.PE) this.setProtMode(true);
 };
 
 /**
@@ -2598,9 +2661,9 @@ X86CPU.prototype.getBytePrefetch = function(addr)
 };
 
 /**
- * getWordPrefetch(addr)
+ * getShortPrefetch(addr)
  *
- * Return the next word from the prefetch queue.  There are 3 cases to consider:
+ * Return the next short from the prefetch queue.  There are 3 cases to consider:
  *
  *  1) Both bytes have been prefetched; no bytes need be fetched from memory
  *  2) Only the low byte has been prefetched; the high byte must be fetched from memory
@@ -2611,11 +2674,38 @@ X86CPU.prototype.getBytePrefetch = function(addr)
  *
  * @this {X86CPU}
  * @param {number} addr is a physical (non-segmented) address
- * @return {number} word (16-bit) value at that address
+ * @return {number} short (16-bit) value at that address
+ */
+X86CPU.prototype.getShortPrefetch = function(addr)
+{
+    return this.getBytePrefetch(addr) | (this.getBytePrefetch(addr + 1) << 8);
+};
+
+/**
+ * getLongPrefetch(addr)
+ *
+ * Return the next long from the prefetch queue.  Similar to getShortPrefetch(), we take the
+ * easy way out and call getShortPrefetch() twice.
+ *
+ * @this {X86CPU}
+ * @param {number} addr is a physical (non-segmented) address
+ * @return {number} long (32-bit) value at that address
+ */
+X86CPU.prototype.getLongPrefetch = function(addr)
+{
+    return this.getShortPrefetch(addr) | (this.getShortPrefetch(addr + 2) << 16);
+};
+
+/**
+ * getWordPrefetch(addr)
+ *
+ * @this {X86CPU}
+ * @param {number} addr is a physical (non-segmented) address
+ * @return {number} short (16-bit) or long (32-bit value as appropriate
  */
 X86CPU.prototype.getWordPrefetch = function(addr)
 {
-    return this.getBytePrefetch(addr) | (this.getBytePrefetch(addr + 1) << 8);
+    return (I386 && this.addrSize == 4? this.getLongPrefetch(addr) : this.getShortPrefetch(addr));
 };
 
 /**
@@ -2714,6 +2804,46 @@ X86CPU.prototype.getIPDisp = function()
         this.setIP(this.regLIP - this.segCS.base);
     }
     return w & (I386? this.addrMask : 0xffff);
+};
+
+/**
+ * getIPShort()
+ *
+ * @this {X86CPU}
+ * @return {number} short at the current IP; IP advanced by 2
+ */
+X86CPU.prototype.getIPShort = function()
+{
+    var w = (PREFETCH? this.getShortPrefetch(this.regLIP) : this.getShort(this.regLIP));
+    if (BACKTRACK) {
+        this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
+        this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMemHi);
+    }
+    this.regLIP += 2;
+    if (this.regLIP > this.regLIPLimit) {
+        this.setIP(this.regLIP - this.segCS.base);
+    }
+    return w;
+};
+
+/**
+ * getIPLong()
+ *
+ * @this {X86CPU}
+ * @return {number} long at the current IP; IP advanced by 4
+ */
+X86CPU.prototype.getIPLong = function()
+{
+    var l = (PREFETCH? this.getLongPrefetch(this.regLIP) : this.getLong(this.regLIP));
+    if (BACKTRACK) {
+        this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
+        this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMemHi);
+    }
+    this.regLIP += 4;
+    if (this.regLIP > this.regLIPLimit) {
+        this.setIP(this.regLIP - this.segCS.base);
+    }
+    return l;
 };
 
 /**
@@ -2868,14 +2998,14 @@ X86CPU.prototype.checkINTR = function()
                 this.intFlags &= ~X86.INTFLAG.INTR;
                 if (nIDT >= 0) {
                     this.intFlags &= ~X86.INTFLAG.HALT;
-                    X86Help.opHelpINT.call(this, nIDT, null, 11);
+                    X86.fnINT.call(this, nIDT, null, 11);
                     return true;
                 }
             }
         }
         else if ((this.intFlags & X86.INTFLAG.TRAP)) {
             this.intFlags &= ~X86.INTFLAG.TRAP;
-            X86Help.opHelpINT.call(this, X86.EXCEPTION.TRAP, null, 11);
+            X86.fnINT.call(this, X86.EXCEPTION.TRAP, null, 11);
             return true;
         }
     }
@@ -3162,7 +3292,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
             this.nSnapCycles = this.nStepCycles;
         }
 
-        this.aOps[this.getIPByte()].call(this);
+        this.aOps[this.getIPByte() + (I386? this.bOpcodeBias : 0)].call(this);
 
         if (PREFETCH) {
             var nSpareCycles = (this.nSnapCycles - this.nStepCycles) - this.nBusCycles;
@@ -3217,10 +3347,6 @@ if (typeof APP_PCJS !== 'undefined') {
     APP_PCJS.X86 = X86;
     APP_PCJS.X86.X86CPU = X86CPU;
     APP_PCJS.X86.X86Seg = X86Seg;
-    APP_PCJS.X86.X86Grps = X86Grps;
-    APP_PCJS.X86.X86Help = X86Help;
-    APP_PCJS.X86.X86Op0F = X86Op0F;
-    APP_PCJS.X86.X86OpXX = X86OpXX;
 }
 
 if (typeof module !== 'undefined') module.exports = X86CPU;

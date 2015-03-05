@@ -11,7 +11,7 @@ So it's best to refer to these files generically as "modules", and more specific
 whenever they implement a specific device (or set of devices, in the case of [*ChipSet*](/docs/pcjs/chipset/)).
 
 Examples of non-device modules include UI modules like [panel.js](panel.js) and [debugger.js](debugger.js),
-and sub-modules like [x86opxx.js](x86opxx.js) and [x86help.js](x86help.js) that separate the CPU functionality
+and sub-modules like [x86opxx.js](x86opxx.js) and [x86func.js](x86func.js) that separate the CPU functionality
 of [x86.js](x86.js) into more manageable pieces.
 
 These modules should always be loaded or compiled in the order listed by the *pcJSFiles* property in
@@ -37,8 +37,7 @@ At the time of this writing, the order is:
 * [pcjs/x86.js](x86.js)
 * [pcjs/x86seg.js](x86seg.js)
 * [pcjs/x86cpu.js](x86cpu.js)
-* [pcjs/x86grps.js](x86grps.js)
-* [pcjs/x86help.js](x86help.js)
+* [pcjs/x86func.js](x86func.js)
 * [pcjs/x86modb.js](x86modb.js)
 * [pcjs/x86modw.js](x86modw.js)
 * [pcjs/x86modb16.js](x86modb16.js)

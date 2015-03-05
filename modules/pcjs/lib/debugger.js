@@ -2541,9 +2541,7 @@ if (DEBUGGER) {
      * getByte(aAddr, inc)
      *
      * getByte() should be used for all Debugger memory reads (eg, doDump, doUnassemble), to ensure
-     * all notification handlers are bypassed for physical addresses; for segmented addresses, we must
-     * use the CPU's X86Seg load() logic, but we don't call the CPU's getSOByte() or getByte() functions,
-     * to avoid triggering any memory read notifications.
+     * all notification handlers are bypassed for physical addresses.
      *
      * @this {Debugger}
      * @param {Array} aAddr
@@ -2689,7 +2687,7 @@ if (DEBUGGER) {
              *      aAddr[2] = this.getAddr(aAddr);
              *
              * The way to create a real-mode breakpoint that will break regardless of mode is to
-             * use the physical address of the real-mode memory location.
+             * use the physical address of the real-mode memory location instead.
              */
             aAddr[3] = fTemp;
             aBreak.push(aAddr);
@@ -4670,7 +4668,7 @@ if (DEBUGGER) {
                             fUnknown = false;
                             switch(sRegMatch){
                             case "MS":
-                                X86Help.opHelpLMSW.call(this.cpu, w);
+                                this.cpu.setMSW(w);
                                 break;
                             case "TR":
                                 this.cpu.segTSS.load(w);
