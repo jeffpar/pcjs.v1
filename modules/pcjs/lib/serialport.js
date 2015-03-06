@@ -761,6 +761,4 @@ SerialPort.init = function() {
  */
 web.onInit(SerialPort.init);
 
-if (typeof APP_PCJS !== 'undefined') APP_PCJS.SerialPort = SerialPort;
-
 if (typeof module !== 'undefined') module.exports = SerialPort;

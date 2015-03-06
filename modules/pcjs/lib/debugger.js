@@ -5188,8 +5188,6 @@ if (DEBUGGER) {
      */
     web.onInit(Debugger.init);
 
-    if (typeof APP_PCJS !== 'undefined') APP_PCJS.Debugger = Debugger;
-
 }   // endif DEBUGGER
 
 if (typeof module !== 'undefined') module.exports = Debugger;

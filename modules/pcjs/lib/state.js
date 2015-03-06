@@ -414,6 +414,4 @@ State.prototype = {
     }
 };
 
-if (typeof APP_PCJS !== 'undefined') APP_PCJS.State = State;
-
 if (typeof module !== 'undefined') module.exports = State;

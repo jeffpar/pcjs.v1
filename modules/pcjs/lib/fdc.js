@@ -2497,6 +2497,4 @@ FDC.init = function() {
  */
 web.onInit(FDC.init);
 
-if (typeof APP_PCJS !== 'undefined') APP_PCJS.FDC = FDC;
-
 if (typeof module !== 'undefined') module.exports = FDC;

@@ -2166,6 +2166,4 @@ Disk.prototype.dumpSector = function(sector, pba, sDesc)
     return sDump;
 };
 
-if (typeof APP_PCJS !== 'undefined') APP_PCJS.Disk = Disk;
-
 if (typeof module !== 'undefined') module.exports = Disk;

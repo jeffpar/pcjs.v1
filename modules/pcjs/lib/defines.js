@@ -33,14 +33,6 @@
 "use strict";
 
 /**
- * APP_PCJS collects all PCjs application globals in one convenient place
- */
-if (DEBUG) {
-    var APP_PCJS = {Component: null};
-    if (typeof Component === 'function') APP_PCJS.Component = Component;
-}
-
-/**
  * @define {string}
  */
 var PCJSCLASS = "pcjs";         // this @define is the default application class (formerly APPCLASS) to use for PCjs

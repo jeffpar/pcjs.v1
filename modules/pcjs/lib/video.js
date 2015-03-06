@@ -66,7 +66,7 @@ if (typeof module !== 'undefined') {
  *      switches: string representing EGA switches (see "SW1-SW4" documentation below)
  *      memory: the size of the EGA's on-board memory (overrides EGA's Video.cardSpecs)
  *
- * This calls the CPU to allocate a video buffer at the appropriate memory location whenever
+ * This calls the Bus to allocate a video buffer at the appropriate memory location whenever
  * a reset() or setMode() occurs; setMode() is called whenever a mode change is detected at
  * the port level, and whenever reset() is called.  setMode() also invokes updateScreen(true),
  * which forces reallocation of our internal buffer (aCellCache) that mirrors the video buffer.
@@ -5347,7 +5347,5 @@ Video.init = function()
  * Initialize every Video module on the page.
  */
 web.onInit(Video.init);
-
-if (typeof APP_PCJS !== 'undefined') {APP_PCJS.Card = Card; APP_PCJS.Video = Video;}
 
 if (typeof module !== 'undefined') module.exports = Video;

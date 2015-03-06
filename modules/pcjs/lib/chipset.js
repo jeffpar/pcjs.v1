@@ -5020,6 +5020,4 @@ ChipSet.init = function()
  */
 web.onInit(ChipSet.init);
 
-if (typeof APP_PCJS !== 'undefined') APP_PCJS.ChipSet = ChipSet;
-
 if (typeof module !== 'undefined') module.exports = ChipSet;

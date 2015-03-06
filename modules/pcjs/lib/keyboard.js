@@ -2234,6 +2234,4 @@ Keyboard.init = function()
  */
 web.onInit(Keyboard.init);
 
-if (typeof APP_PCJS !== 'undefined') APP_PCJS.Keyboard = Keyboard;
-
 if (typeof module !== 'undefined') module.exports = Keyboard;

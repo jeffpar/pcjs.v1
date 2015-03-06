@@ -955,6 +955,4 @@ Panel.init = function()
  */
 web.onInit(Panel.init);
 
-if (typeof APP_PCJS !== 'undefined') APP_PCJS.Panel = Panel;
-
 if (typeof module !== 'undefined') module.exports = Panel;

@@ -1466,6 +1466,4 @@ Bus.prototype.reportError = function(op, addr, size)
     return false;
 };
 
-if (typeof APP_PCJS !== 'undefined') APP_PCJS.Bus = Bus;
-
 if (typeof module !== 'undefined') module.exports = Bus;

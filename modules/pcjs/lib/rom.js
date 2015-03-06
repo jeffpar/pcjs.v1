@@ -377,6 +377,4 @@ ROM.init = function()
  */
 web.onInit(ROM.init);
 
-if (typeof APP_PCJS !== 'undefined') APP_PCJS.ROM = ROM;
-
 if (typeof module !== 'undefined') module.exports = ROM;

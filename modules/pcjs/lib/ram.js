@@ -359,6 +359,4 @@ CompaqController.prototype.getMemoryAccess = function()
  */
 web.onInit(RAM.init);
 
-if (typeof APP_PCJS !== 'undefined') APP_PCJS.RAM = RAM;
-
 if (typeof module !== 'undefined') module.exports = RAM;

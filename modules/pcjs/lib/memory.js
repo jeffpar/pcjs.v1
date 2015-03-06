@@ -1006,6 +1006,4 @@ Memory.prototype = {
     }
 };
 
-if (typeof APP_PCJS !== 'undefined') APP_PCJS.Memory = Memory;
-
 if (typeof module !== 'undefined') module.exports = Memory;

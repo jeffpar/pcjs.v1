@@ -656,6 +656,4 @@ Mouse.init = function()
  */
 web.onInit(Mouse.init);
 
-if (typeof APP_PCJS !== 'undefined') APP_PCJS.Mouse = Mouse;
-
 if (typeof module !== 'undefined') module.exports = Mouse;

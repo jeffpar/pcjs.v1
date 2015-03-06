@@ -3334,10 +3334,4 @@ X86CPU.init = function()
  */
 web.onInit(X86CPU.init);
 
-if (typeof APP_PCJS !== 'undefined') {
-    APP_PCJS.X86 = X86;
-    APP_PCJS.X86.X86CPU = X86CPU;
-    APP_PCJS.X86.X86Seg = X86Seg;
-}
-
 if (typeof module !== 'undefined') module.exports = X86CPU;

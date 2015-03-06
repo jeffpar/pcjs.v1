@@ -1137,6 +1137,4 @@ CPU.prototype.yieldCPU = function()
     this.updateCPU();
 };
 
-if (typeof APP_PCJS !== 'undefined') APP_PCJS.CPU = CPU;
-
 if (typeof module !== 'undefined') module.exports = CPU;

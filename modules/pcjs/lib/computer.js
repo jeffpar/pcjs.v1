@@ -1355,6 +1355,4 @@ web.onInit(Computer.init);
 web.onShow(Computer.show);
 web.onExit(Computer.exit);
 
-if (typeof APP_PCJS !== 'undefined') APP_PCJS.Computer = Computer;
-
 if (typeof module !== 'undefined') module.exports = Computer;

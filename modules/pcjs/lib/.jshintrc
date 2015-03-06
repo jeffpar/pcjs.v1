@@ -6,7 +6,6 @@
   "sub": true,
   "globalstrict": true,
   "globals": {
-    "APP_PCJS": true,
     "APPNAME": false,
     "APPVERSION": false,
     "SITEHOST": false,

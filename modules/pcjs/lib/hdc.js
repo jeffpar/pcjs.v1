@@ -2854,6 +2854,4 @@ HDC.init = function()
  */
 web.onInit(HDC.init);
 
-if (typeof APP_PCJS !== 'undefined') APP_PCJS.HDC = HDC;
-
 if (typeof module !== 'undefined') module.exports = HDC;
