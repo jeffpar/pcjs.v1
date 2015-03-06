@@ -775,22 +775,6 @@ X86CPU.prototype.initProcessor = function()
             }
         }
     }
-
-    /*
-     * The memory dispatch tables; opMem refers to the active set, based on the current OPERAND size (dataSize),
-     * which is based foremost on segCS.dataSize, but can also be overridden by an OPERAND size instruction prefix.
-     */
-    this.aaOpMem = [];
-    this.aaOpMem[2] = {
-        getWord: this.getShort.bind(this),
-        setWord: this.setShort.bind(this)
-    };
-    if (I386) {
-        this.aaOpMem[4] = {
-            getWord: this.getLong.bind(this),
-            setWord: this.setLong.bind(this)
-        };
-    }
 };
 
 /**
@@ -1077,8 +1061,15 @@ X86CPU.prototype.setAddrSize = function()
  */
 X86CPU.prototype.setDataSize = function()
 {
-    this.opMem = this.aaOpMem[this.dataSize];
-    this.bOpcodeBias = (this.dataSize == 4? 256 : 0);
+    if (this.dataSize == 2) {
+        this.bOpcodeBias = 0;
+        this.getWord = this.getShort;
+        this.setWord = this.setShort;
+    } else {
+        this.bOpcodeBias = 256;
+        this.getWord = this.getLong;
+        this.setWord = this.setLong;
+    }
 };
 
 /**
@@ -2397,7 +2388,7 @@ X86CPU.prototype.getEAWord = function(seg, off)
     this.segEA = seg;
     this.regEA = seg.checkRead(this.offEA = off, (I386? this.dataSize-1 : 1));
     if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
-    var w = I386? this.opMem.getWord(this.regEA) : this.getShort(this.regEA);
+    var w = this.getWord(this.regEA);
     if (BACKTRACK) {
         this.backTrack.btiEALo = this.backTrack.btiMemLo;
         this.backTrack.btiEAHi = this.backTrack.btiMemHi;
@@ -2484,7 +2475,7 @@ X86CPU.prototype.modEAWord = function(seg, off)
     this.segEA = seg;
     this.regEAWrite = this.regEA = seg.checkRead(this.offEA = off, (I386? this.dataSize-1 : 1));
     if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
-    var w = I386? this.opMem.getWord(this.regEA) : this.getShort(this.regEA);
+    var w = this.getWord(this.regEA);
     if (BACKTRACK) {
         this.backTrack.btiEALo = this.backTrack.btiMemLo;
         this.backTrack.btiEAHi = this.backTrack.btiMemHi;
@@ -2545,7 +2536,7 @@ X86CPU.prototype.setEAWord = function(w)
     if (!I386) {
         this.setShort(this.segEA.checkWrite(this.offEA, 1), w);
     } else {
-        this.opMem.setWord(this.segEA.checkWrite(this.offEA, this.dataSize-1), w);
+        this.setWord(this.segEA.checkWrite(this.offEA, this.dataSize-1), w);
     }
 };
 
@@ -2579,7 +2570,7 @@ X86CPU.prototype.getSOWord = function(seg, off)
     if (!I386) {
         return this.getShort(seg.checkRead(off, 1));
     } else {
-        return this.opMem.getWord(seg.checkRead(off, this.dataSize-1));
+        return this.getWord(seg.checkRead(off, this.dataSize-1));
     }
 };
 
@@ -2613,7 +2604,7 @@ X86CPU.prototype.setSOWord = function(seg, off, w)
     if (!I386) {
         this.setShort(seg.checkWrite(off, 1), w);
     } else {
-        this.opMem.setWord(seg.checkWrite(off, this.dataSize-1), w);
+        this.setWord(seg.checkWrite(off, this.dataSize-1), w);
     }
 };
 
@@ -2854,7 +2845,7 @@ X86CPU.prototype.getIPLong = function()
  */
 X86CPU.prototype.getIPWord = function()
 {
-    var w = (PREFETCH? this.getWordPrefetch(this.regLIP) : (I386? this.opMem.getWord(this.regLIP) : this.getShort(this.regLIP)));
+    var w = (PREFETCH? this.getWordPrefetch(this.regLIP) : this.getWord(this.regLIP));
     if (BACKTRACK) {
         this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
         this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMemHi);
@@ -2891,7 +2882,7 @@ X86CPU.prototype.getSIBAddr = function(mod)
  */
 X86CPU.prototype.popWord = function()
 {
-    var w = (I386? this.opMem.getWord(this.regLSP) : this.getShort(this.regLSP));
+    var w = this.getWord(this.regLSP);
     this.regLSP += (I386? this.dataSize : 2);
     if (this.regLSP > this.regLSPLimit) {
         // TODO: Generate exception in protected mode
@@ -2914,7 +2905,7 @@ X86CPU.prototype.pushWord = function(w)
         // TODO: Generate exception in protected mode (and bail)
         this.setSP(this.regLSP - this.segSS.base);
     }
-    if (!I386) this.setShort(this.regLSP, w); else this.opMem.setWord(this.regLSP, w);
+    this.setWord(this.regLSP, w);
 };
 
 /**

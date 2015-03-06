@@ -164,7 +164,14 @@ RAM.prototype.reset = function()
     if (!this.fAllocated && this.sizeRAM) {
         if (this.bus.addMemory(this.addrRAM, this.sizeRAM, Memory.TYPE.RAM)) {
             this.fAllocated = true;
-            this.status(Math.floor(this.sizeRAM / 1024) + "Kb");
+
+            var status = Math.floor(this.sizeRAM / 1024) + "Kb";
+            if (this.comment) {
+                status += " (" + this.comment + ")";
+                this.comment = null;
+            }
+            this.status(status);
+
             /*
              * NOTE: I'm specifying MAXDEBUG for status() messages because I'm not yet sure I want these
              * messages buried in the app, since they're seen only when a Control Panel is active.  Another
