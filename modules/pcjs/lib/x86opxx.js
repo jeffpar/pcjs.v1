@@ -1609,12 +1609,11 @@ X86.opGS = function GS()
 X86.opOS = function OS()
 {
     if (I386) {
-        this.opFlags |= X86.OPFLAG.SEG;
+        this.opFlags |= X86.OPFLAG.DATASIZE;
         this.dataSize ^= 0x6;               // that which is 2 shall become 4, and vice versa
         this.dataMask ^= (0xffff0000|0);    // that which is 0x0000ffff shall become 0xffffffff, and vice versa
         this.setDataSize();
         this.nStepCycles -= this.CYCLES.nOpCyclesPrefix;
-        this.stopCPU();
     }
 };
 
@@ -1628,12 +1627,11 @@ X86.opOS = function OS()
 X86.opAS = function AS()
 {
     if (I386) {
-        this.opFlags |= X86.OPFLAG.SEG;
+        this.opFlags |= X86.OPFLAG.ADDRSIZE;
         this.addrSize ^= 0x06;              // that which is 2 shall become 4, and vice versa
         this.addrMask ^= (0xffff0000|0);    // that which is 0x0000ffff shall become 0xffffffff, and vice versa
         this.setAddrSize();
         this.nStepCycles -= this.CYCLES.nOpCyclesPrefix;
-        this.stopCPU();
     }
 };
 
@@ -2618,7 +2616,7 @@ X86.opCWD = function CWD()
  */
 X86.opCALLF = function CALLF()
 {
-    X86.fnCALLF.call(this, this.getIPWord(), this.getIPWord());
+    X86.fnCALLF.call(this, this.getIPWord(), this.getIPShort());
     this.nStepCycles -= this.CYCLES.nOpCyclesCallF;
 };
 
@@ -3887,7 +3885,7 @@ X86.opJMP = function JMP()
  */
 X86.opJMPF = function JMPF()
 {
-    this.setCSIP(this.getIPWord(), this.getIPWord());
+    this.setCSIP(this.getIPWord(), this.getIPShort());
     this.nStepCycles -= this.CYCLES.nOpCyclesJmpF;
 };
 

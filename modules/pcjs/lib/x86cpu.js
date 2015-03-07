@@ -942,7 +942,7 @@ X86CPU.prototype.resetRegs = function()
 
     this.setCSIP(0, 0xffff);    // this should be called before the first setPS() call
 
-    if (!I386) this.setSizes();
+    if (!I386) this.resetSizes();
 
     if (BACKTRACK) {
         /*
@@ -1073,11 +1073,11 @@ X86CPU.prototype.setDataSize = function()
 };
 
 /**
- * setSizes()
+ * resetSizes()
  *
  * @this {X86CPU}
  */
-X86CPU.prototype.setSizes = function()
+X86CPU.prototype.resetSizes = function()
 {
     /*
      * The following contain the (default) ADDRESS size (2 for 16 bits, 4 for 32 bits), and the corresponding
@@ -1109,6 +1109,8 @@ X86CPU.prototype.setSizes = function()
     this.dataMask = this.segCS.dataMask;
 
     this.setDataSize();
+
+    this.opPrefixes &= ~(X86.OPFLAG.ADDRSIZE | X86.OPFLAG.DATASIZE);
 };
 
 /**
@@ -1441,7 +1443,7 @@ X86CPU.prototype.setCS = function(sel)
     var regEIP = this.getIP();
     this.regLIP = this.segCS.load(sel) + regEIP;
     this.regLIPLimit = this.segCS.base + this.segCS.limit;
-    if (I386) this.setSizes();
+    if (I386) this.resetSizes();
     if (!BUGS_8086) this.opFlags |= this.OPFLAG_NOINTR8086;
     if (PREFETCH) this.flushPrefetch(this.regLIP);
 };
@@ -1641,7 +1643,7 @@ X86CPU.prototype.setCSIP = function(off, sel, fCall)
     if (base != X86.ADDR_INVALID) {
         this.regLIP = base + this.regEIP;
         this.regLIPLimit = base + this.segCS.limit;
-        if (I386) this.setSizes();
+        if (I386) this.resetSizes();
         if (PREFETCH) this.flushPrefetch(this.regLIP);
         return this.segCS.fStackSwitch;
     }
@@ -3196,17 +3198,25 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
              * NOTE: The way we restart string instructions actually fixes an 8086/8088 flaw, because string
              * instructions with multiple prefixes (eg, a REP and a segment override) would not be restarted
              * properly following a hardware interrupt.  The recommended workarounds were to either turn off
-             * interrupts or make sure the REP prefix was first and follow the string instruction with a LOOPNZ
-             * back to the REP.  To emulate this flawed behavior, turn on BUGS_8086.
+             * interrupts or to follow the string instruction with a LOOPNZ back to the first prefix byte.
+             * To emulate this flawed behavior, turn on BUGS_8086.
              */
             this.opLIP = this.regLIP;
             this.segData = this.segDS;
             this.segStack = this.segSS;
             this.regEA = this.regEAWrite = X86.ADDR_INVALID;
 
-            if (I386) this.setSizes();
+            if (I386 && (this.opPrefixes & (X86.OPFLAG.ADDRSIZE | X86.OPFLAG.DATASIZE))) {
+                this.resetSizes();
+                if (DEBUG && DEBUGGER) {
+                    this.println("80386 override processed");
+                    this.stopCPU();
+                    break;
+                }
+            }
 
             this.opPrefixes = this.opFlags & X86.OPFLAG.REPEAT;
+
             if (this.intFlags) {
                 if (this.checkINTR()) {
                     if (!nMinCycles) {

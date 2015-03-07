@@ -253,12 +253,14 @@ var X86 = {
         NOREAD:     0x0001,
         NOWRITE:    0x0002,
         NOINTR:     0x0004,     // indicates a segreg has been set, or a prefix, or an STI (delay INTR acknowledgement)
-        SEG:        0x0010,
-        LOCK:       0x0020,
+        SEG:        0x0010,     // segment override
+        LOCK:       0x0020,     // lock prefix
         REPZ:       0x0040,     // repeat while Z (NOTE: this value MUST match PS.ZF; see opCMPSb/opCMPSw/opSCASb/opSCASw)
         REPNZ:      0x0080,     // repeat while NZ
-        REPEAT:     0x0100,     // this indicates that an instruction is being repeated (ie, some iteration AFTER the first)
-        PUSHSP:     0x0200      // the SP register is potentially being referenced by a PUSH SP opcode, adjustment may be required
+        REPEAT:     0x0100,     // indicates that an instruction is being repeated (ie, some iteration AFTER the first)
+        PUSHSP:     0x0200,     // the SP register is potentially being referenced by a PUSH SP opcode, adjustment may be required
+        DATASIZE:   0x1000,     // data size override
+        ADDRSIZE:   0x2000      // address size override
     },
     /*
      * Bit values for intFlags
@@ -375,6 +377,6 @@ X86.PS.SAHF =       (X86.PS.CF | X86.PS.PF | X86.PS.AF | X86.PS.ZF | X86.PS.SF);
  * into opPrefixes; otherwise, opPrefixes is zeroed as well.  This gives prefix-conscious instructions like LODS, MOVS,
  * STOS, CMPS, etc, a way of determining which prefixes, if any, immediately preceded them.
  */
-X86.OPFLAG.PREFIXES = (X86.OPFLAG.SEG | X86.OPFLAG.LOCK | X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ);
+X86.OPFLAG.PREFIXES = (X86.OPFLAG.SEG | X86.OPFLAG.LOCK | X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ | X86.OPFLAG.DATASIZE | X86.OPFLAG.ADDRSIZE);
 
 if (typeof module !== 'undefined') module.exports = X86;

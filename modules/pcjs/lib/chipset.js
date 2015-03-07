@@ -4789,15 +4789,15 @@ ChipSet.prototype.setSpeaker = function(fOn)
                 if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker set to " + freq + "hz", true);
             } else {
                 this.sourceAudio = this.contextAudio['createOscillator']();
-                this.sourceAudio['type'] = 1;       // 0: sine wave, 1: square wave, 2: sawtooth wave, 3: triangle wave
+                this.sourceAudio['type'] = "square";    // any of: "sine", "square", "sawtooth", "triangle", "custom"
                 this.sourceAudio['connect'](this.contextAudio['destination']);
                 this.sourceAudio['frequency']['value'] = freq;
                 if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker on at  " + freq + "hz", true);
-                this.sourceAudio['noteOn'](0);      // aka start()
+                this.sourceAudio['start'](0);
             }
         } else {
             if (this.sourceAudio) {
-                this.sourceAudio['noteOff'](0);     // aka stop()
+                this.sourceAudio['stop'](0);
                 this.sourceAudio['disconnect']();   // QUESTION: is this automatic following a stop(), since this particular source cannot be started again?
                 delete this.sourceAudio;            // QUESTION: ditto?
                 if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker off at " + freq + "hz", true);

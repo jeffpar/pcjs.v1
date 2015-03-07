@@ -373,7 +373,7 @@ if (DEBUGGER) {
 
     Debugger.RMS = [
         "BX+SI", "BX+DI", "BP+SI", "BP+DI", "SI",    "DI",    "BP",    "BX",
-        "EAX",   "ECX",   "EDX",   "EBX",   "[SIB]", "EBP",   "ESI",   "EDI"
+        "EAX",   "ECX",   "EDX",   "EBX",   "ESP",   "EBP",   "ESI",   "EDI"
     ];
 
     /*
@@ -2506,7 +2506,7 @@ if (DEBUGGER) {
      * @this {Debugger}
      * @param {Array} aAddr
      * @param {boolean} [fWrite]
-     * @param {number} [cb] is number of extra bytes to check (0 or 1)
+     * @param {number} [cb] is number of extra bytes to check (0, 1 or 3)
      * @return {number} is the corresponding physical address, or X86.ADDR_INVALID
      */
     Debugger.prototype.getAddr = function(aAddr, fWrite, cb)
@@ -2983,7 +2983,7 @@ if (DEBUGGER) {
         }
 
         if (sComment) {
-            sLine = str.pad(sLine, 50) + ';' + sComment;
+            sLine = str.pad(sLine, 52) + ';' + sComment;
             if (!this.cpu.aFlags.fChecksum) {
                 sLine += (nSequence != null? '=' + nSequence.toString() : "");
             } else {
@@ -3044,7 +3044,7 @@ if (DEBUGGER) {
      * @this {Debugger}
      * @param {number} bReg
      * @param {number} type
-     * @param {Array} aAddr
+     * @param {Array} aAddr (aAddr[4] is true if 32-bit operands, aAddr[5] is true if 32-bit addressing)
      * @return {string} operand
      */
     Debugger.prototype.getRegOperand = function(bReg, type, aAddr)
@@ -3073,12 +3073,38 @@ if (DEBUGGER) {
     };
 
     /**
+     * getSIBOperand(bMod, aAddr)
+     *
+     * @this {Debugger}
+     * @param {number} bMod
+     * @param {Array} aAddr (aAddr[4] is true if 32-bit operands, aAddr[5] is true if 32-bit addressing)
+     * @return {string} operand
+     */
+    Debugger.prototype.getSIBOperand = function(bMod, aAddr)
+    {
+        var bSIB = this.getByte(aAddr, 1);
+        var bScale = bSIB >> 6;
+        var bIndex = (bSIB >> 3) & 0x7;
+        var bBase = bSIB & 0x7;
+        var sOperand = "";
+        if (bMod || bBase != 5) {
+            sOperand = Debugger.RMS[bBase + 8];
+        }
+        if (bIndex != 4) {
+            if (sOperand) sOperand += '+';
+            sOperand += Debugger.RMS[bIndex + 8];
+            if (bScale) sOperand += '*' + (0x1 << bScale);
+        }
+        return sOperand;
+    };
+
+    /**
      * getModRMOperand(bModRM, type, aAddr)
      *
      * @this {Debugger}
      * @param {number} bModRM
      * @param {number} type
-     * @param {Array} aAddr
+     * @param {Array} aAddr (aAddr[4] is true if 32-bit operands, aAddr[5] is true if 32-bit addressing)
      * @return {string} operand
      */
     Debugger.prototype.getModRMOperand = function(bModRM, type, aAddr)
@@ -3088,33 +3114,42 @@ if (DEBUGGER) {
         var bRM = bModRM & 0x7;
         if (bMod < 3) {
             var disp;
-            if (!bMod && bRM == 6) {
-                disp = this.getShort(aAddr, 2);
-                sOperand = str.toHexWord(disp);
-            }
-            else {
-                if (aAddr[5]) bRM += 8;
-                sOperand = Debugger.RMS[bRM];
-                if (bMod == 1) {
-                    disp = this.getByte(aAddr, 1);
-                    if (!(disp & 0x80)) {
-                        sOperand += "+" + str.toHexByte(disp);
-                    }
-                    else {
-                        disp = ((disp << 24) >> 24);
-                        sOperand += "-" + str.toHexByte(-disp);
+            if (!bMod && (!aAddr[5] && bRM == 6 || aAddr[5] && bRM == 5)) {
+                bMod = 2;
+            } else {
+                if (aAddr[5]) {
+                    if (bRM != 4) {
+                        bRM += 8;
+                    } else {
+                        sOperand = this.getSIBOperand(bMod, aAddr);
                     }
                 }
-                else if (bMod == 2) {
+                if (!sOperand) sOperand = Debugger.RMS[bRM];
+            }
+            if (bMod == 1) {
+                disp = this.getByte(aAddr, 1);
+                if (!(disp & 0x80)) {
+                    sOperand += "+" + str.toHexByte(disp);
+                }
+                else {
+                    disp = ((disp << 24) >> 24);
+                    sOperand += "-" + str.toHexByte(-disp);
+                }
+            }
+            else if (bMod == 2) {
+                if (sOperand) sOperand += '+';
+                if (!aAddr[5]) {
                     disp = this.getShort(aAddr, 2);
-                    sOperand += "+" + str.toHexWord(disp);
+                    sOperand += str.toHexWord(disp);
+                } else {
+                    disp = this.getLong(aAddr, 4);
+                    sOperand += str.toHex(disp);
                 }
             }
             sOperand = "[" + sOperand + "]";
         }
         else {
             sOperand = this.getRegOperand(bRM, type, aAddr);
-            // sOperand = Debugger.REGS[bRM + ((type & Debugger.TYPE_SIZE) == Debugger.TYPE_BYTE? 0 : 8)];
         }
         return sOperand;
     };
@@ -3744,7 +3779,6 @@ if (DEBUGGER) {
         var aOpBytes = this.parseInstruction(asArgs[2], asArgs[3], aAddr);
         if (aOpBytes.length) {
             for (var i = 0; i < aOpBytes.length; i++) {
-                // this.println(this.hexAddr(aAddr) + ": " + str.toHexByte(aOpBytes[i]));
                 this.setByte(aAddr, aOpBytes[i], 1);
             }
             /*
@@ -4946,8 +4980,8 @@ if (DEBUGGER) {
                  * aAddr[5] to true whenever the address size is 32-bit.  Initially, both fields must be set to match
                  * the size of the current code segment.
                  */
-                aAddr[4] = (this.cpu.segCS.dataSize == 4);
-                aAddr[5] = (this.cpu.segCS.addrSize == 4);
+                aAddr[4] = (this.cpu.dataSize == 4);
+                aAddr[5] = (this.cpu.addrSize == 4);
                 fInitSize = false;
             }
             if (this.isPrefixIns(bOpcode)) {
