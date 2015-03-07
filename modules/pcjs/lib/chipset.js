@@ -233,10 +233,14 @@ function ChipSet(parmsChipSet)
      */
     this.fSpeaker = false;
     if (parmsChipSet['sound']) {
-        if (window && 'webkitAudioContext' in window) {
-            this.contextAudio = new window['webkitAudioContext']();
+        this.classAudio = this.contextAudio = null;
+        if (window) {
+            this.classAudio = window['AudioContext'] || window['webkitAudioContext'];
+        }
+        if (this.classAudio) {
+            this.contextAudio = new this.classAudio();
         } else {
-            if (DEBUG) this.log("webkitAudioContext not available");
+            if (DEBUG) this.log("AudioContext not available");
         }
     }
 
@@ -4771,37 +4775,56 @@ ChipSet.prototype.parseSwitches = function(s, def)
 ChipSet.prototype.setSpeaker = function(fOn)
 {
     if (this.contextAudio) {
-        if (fOn !== undefined) {
-            this.fSpeaker = fOn;
-        } else {
-            fOn = this.fSpeaker && this.cpu && this.cpu.isRunning();
-        }
-        var freq = Math.round(ChipSet.TIMER_TICKS_PER_SEC / this.getTimerInit(ChipSet.TIMER2.INDEX));
-        /*
-         * Treat frequencies outside the normal hearing range (below 20hz or above 20Khz) as a clever attempt
-         * to turn sound off; we have to explicitly turn the sound off in those cases, to prevent the Audio API
-         * from "easing" the audio to the target frequency and creating odd sound effects.
-         */
-        if (freq < 20 || freq > 20000) fOn = false;
-        if (fOn) {
-            if (this.sourceAudio) {
-                this.sourceAudio['frequency']['value'] = freq;
-                if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker set to " + freq + "hz", true);
+        try {
+            if (fOn !== undefined) {
+                this.fSpeaker = fOn;
             } else {
-                this.sourceAudio = this.contextAudio['createOscillator']();
-                this.sourceAudio['type'] = "square";    // any of: "sine", "square", "sawtooth", "triangle", "custom"
-                this.sourceAudio['connect'](this.contextAudio['destination']);
-                this.sourceAudio['frequency']['value'] = freq;
-                if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker on at  " + freq + "hz", true);
-                this.sourceAudio['start'](0);
+                fOn = this.fSpeaker && this.cpu && this.cpu.isRunning();
             }
-        } else {
-            if (this.sourceAudio) {
-                this.sourceAudio['stop'](0);
-                this.sourceAudio['disconnect']();       // QUESTION: is this automatic following a stop(), since this particular source cannot be started again?
-                delete this.sourceAudio;                // QUESTION: ditto?
-                if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker off at " + freq + "hz", true);
+            var freq = Math.round(ChipSet.TIMER_TICKS_PER_SEC / this.getTimerInit(ChipSet.TIMER2.INDEX));
+            /*
+             * Treat frequencies outside the normal hearing range (below 20hz or above 20Khz) as a clever attempt
+             * to turn sound off; we have to explicitly turn the sound off in those cases, to prevent the Audio API
+             * from "easing" the audio to the target frequency and creating odd sound effects.
+             */
+            if (freq < 20 || freq > 20000) fOn = false;
+            if (fOn) {
+                if (this.sourceAudio) {
+                    this.sourceAudio['frequency']['value'] = freq;
+                    if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker set to " + freq + "hz", true);
+                } else {
+                    this.sourceAudio = this.contextAudio['createOscillator']();
+                    if (this.sourceAudio) {
+                        if (typeof this.sourceAudio['type'] == "number") {
+                            this.sourceAudio['type'] = 1;   // deprecated: 0: "sine", 1: "square", 2: "sawtooth", 3: "triangle"
+                        } else {
+                            this.sourceAudio['type'] = "square";
+                        }
+                        this.sourceAudio['connect'](this.contextAudio['destination']);
+                        this.sourceAudio['frequency']['value'] = freq;
+                        if ('start' in this.sourceAudio) {
+                            this.sourceAudio['start'](0);
+                        } else {
+                            this.sourceAudio['noteOn'](0);  // deprecated: this.sourceAudio['noteOn'](0)
+                        }
+                        if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker on at  " + freq + "hz", true);
+                    }
+                }
+            } else {
+                if (this.sourceAudio) {
+                    if ('stop' in this.sourceAudio) {
+                        this.sourceAudio['stop'](0);
+                    } else {
+                        this.sourceAudio['noteOff'](0);     // deprecated: this.sourceAudio['noteOff'](0)
+                    }
+                    this.sourceAudio['disconnect']();       // QUESTION: is this automatic following a stop(), since this particular source cannot be started again?
+                    delete this.sourceAudio;                // QUESTION: ditto?
+                    if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker off at " + freq + "hz", true);
+                }
             }
+        } catch(e) {
+            this.notice("AudioContext exception: " + e.message);
+            this.contextAudio = null;
         }
     } else if (fOn) {
         this.printMessage("BEEP", Messages.SPEAKER);

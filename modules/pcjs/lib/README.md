@@ -3,20 +3,22 @@ PCjs Sources
 
 Structure
 ---
-All the code for PCjs is contained in the following JavaScript files, which roughly divide the
-functionality into major PC components, aka "devices".  However, not every file implements a device,
-and "component" is an overloaded term, since *[Component](/docs/pcjs/component/)* is also the name of
-the shared base class used for most PCjs devices (see [component.js](../../shared/lib/component.js)).
-So it's best to refer to these files generically as "modules", and more specifically as "device modules"
-whenever they implement a specific device (or set of devices, in the case of [*ChipSet*](/docs/pcjs/chipset/)).
+These JavaScript files divide PCjs functionality into major PC components.  Most of the files are device
+components, implementing a specific device (or set of devices, in the case of [chipset.js](chipset.js)).
 
-Examples of non-device modules include UI modules like [panel.js](panel.js) and [debugger.js](debugger.js),
-and sub-modules like [x86opxx.js](x86opxx.js) and [x86func.js](x86func.js) that separate the CPU functionality
-of [x86.js](x86.js) into more manageable pieces.
+Be aware that *component* is an overloaded term, since **Component** is also the name of the
+shared base class in [component.js](../../shared/lib/component.js) used by most machine components.
+A few low-level components (eg, the **Memory** and **State** components, the Card class of the **Video**
+component, the Color and Rectangle classes of the **Panel** component, etc) do not extend **Component**,
+so don't assume that every PCjs object has access to [component.js](../../shared/lib/component.js) methods.
 
-These modules should always be loaded or compiled in the order listed by the *pcJSFiles* property in
-[package.json](../../../package.json), which includes all the necessary *shared* modules as well.
-At the time of this writing, the order is:
+Examples of non-device components include UI components like [panel.js](panel.js) and [debugger.js](debugger.js),
+and sub-components like [x86opxx.js](x86opxx.js) and [x86func.js](x86func.js) that separate the CPU
+functionality of [x86.js](x86.js) into more manageable pieces.
+
+These components should always be loaded or compiled in the order listed by the *pcJSFiles* property in
+[package.json](../../../package.json), which includes all the necessary *shared* components as well.
+At the time of this writing, the recommended order is:
 
 * [shared/defines.js](../../shared/lib/defines.js)
 * [shared/diskapi.js](../../shared/lib/diskapi.js)
@@ -38,6 +40,8 @@ At the time of this writing, the order is:
 * [pcjs/x86seg.js](x86seg.js)
 * [pcjs/x86cpu.js](x86cpu.js)
 * [pcjs/x86func.js](x86func.js)
+* [pcjs/x86opxx.js](x86opxx.js)
+* [pcjs/x86op0f.js](x86op0f.js)
 * [pcjs/x86modb.js](x86modb.js)
 * [pcjs/x86modw.js](x86modw.js)
 * [pcjs/x86modb16.js](x86modb16.js)
@@ -45,8 +49,6 @@ At the time of this writing, the order is:
 * [pcjs/x86modb32.js](x86modb32.js)
 * [pcjs/x86modw32.js](x86modw32.js)
 * [pcjs/x86modsib.js](x86modsib.js)
-* [pcjs/x86opxx.js](x86opxx.js)
-* [pcjs/x86op0f.js](x86op0f.js)
 * [pcjs/chipset.js](chipset.js)
 * [pcjs/rom.js](rom.js)
 * [pcjs/ram.js](ram.js)
@@ -62,16 +64,16 @@ At the time of this writing, the order is:
 * [pcjs/computer.js](computer.js)
 * [shared/embed.js](../../shared/lib/embed.js)
 
-Some of the modules *can* be reordered or even omitted (eg, [debugger.js](debugger.js) or
+Some of the components *can* be reordered or even omitted (eg, [debugger.js](debugger.js) or
 [embed.js](../../shared/lib/embed.js)), but you should observe the following:
 
-* [component.js](../../shared/lib/component.js) must be listed before any module that extends [*Component*](/docs/pcjs/component/)
+* [component.js](../../shared/lib/component.js) must be listed before any component that extends **Component**
 * [panel.js](panel.js) should be loaded early to initialize the Control Panel (if any) as soon as possible
-* [computer.js](computer.js) should be the last device module, as it supervises and notifies all the other device modules
+* [computer.js](computer.js) should be the last device component, as it supervises and notifies all the other device components
 
-To minimize ordering requirements, the init() handlers and constructors of all modules should avoid
-referencing other modules.  Device modules should define an initBus() notification handler, which the
-[*Computer*](/docs/pcjs/computer/) will call after it has created/initialized the *Bus* object.
+To minimize ordering requirements, the init() handlers and constructors of all components should avoid
+referencing other components.  Device components should define an initBus() notification handler, which the
+*Computer* component will call after it has created/initialized the *Bus* component.
 
 Features
 ---
