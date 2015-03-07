@@ -4798,8 +4798,8 @@ ChipSet.prototype.setSpeaker = function(fOn)
         } else {
             if (this.sourceAudio) {
                 this.sourceAudio['stop'](0);
-                this.sourceAudio['disconnect']();   // QUESTION: is this automatic following a stop(), since this particular source cannot be started again?
-                delete this.sourceAudio;            // QUESTION: ditto?
+                this.sourceAudio['disconnect']();       // QUESTION: is this automatic following a stop(), since this particular source cannot be started again?
+                delete this.sourceAudio;                // QUESTION: ditto?
                 if (this.messageEnabled(Messages.SPEAKER)) this.printMessage("speaker off at " + freq + "hz", true);
             }
         }
