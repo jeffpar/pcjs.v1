@@ -3199,7 +3199,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
              * instructions with multiple prefixes (eg, a REP and a segment override) would not be restarted
              * properly following a hardware interrupt.  The recommended workarounds were to either turn off
              * interrupts or to follow the string instruction with a LOOPNZ back to the first prefix byte.
-             * To emulate this flawed behavior, turn on BUGS_8086.
+             * To emulate the flawed behavior, turn on BUGS_8086.
              */
             this.opLIP = this.regLIP;
             this.segData = this.segDS;

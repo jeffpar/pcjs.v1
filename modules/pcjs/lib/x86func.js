@@ -51,7 +51,7 @@ X86.fnADCb = function ADCb(dst, src)
     this.resultAuxOverflow = dst ^ src;
     this.resultZeroCarry = this.resultParitySign = dst + src + ((this.resultZeroCarry & this.resultSize)? 1 : 0);
     this.resultSize = X86.RESULT.SIZE_BYTE;
-    this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
+    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
     return this.resultZeroCarry & 0xff;
 };
 
@@ -69,7 +69,7 @@ X86.fnADCw = function ADCw(dst, src)
     this.resultAuxOverflow = dst ^ src;
     this.resultZeroCarry = this.resultParitySign = dst + src + ((this.resultZeroCarry & this.resultSize)? 1 : 0);
     this.resultSize = X86.RESULT.SIZE_WORD;
-    this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
+    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
     return this.resultZeroCarry & 0xffff;
 };
 
@@ -85,7 +85,7 @@ X86.fnADDb = function ADDb(dst, src)
 {
     this.resultAuxOverflow = dst ^ src;
     this.resultSize = X86.RESULT.SIZE_BYTE;
-    this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
+    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
     return (this.resultZeroCarry = this.resultParitySign = dst + src) & 0xff;
 };
 
@@ -101,7 +101,7 @@ X86.fnADDw = function ADDw(dst, src)
 {
     this.resultAuxOverflow = dst ^ src;
     this.resultSize = X86.RESULT.SIZE_WORD;
-    this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
+    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
     return (this.resultZeroCarry = this.resultParitySign = dst + src) & 0xffff;
 };
 
@@ -114,7 +114,7 @@ X86.fnADDw = function ADDw(dst, src)
 X86.fnANDb = function ANDb(dst, src)
 {
     this.resultSize = X86.RESULT.SIZE_BYTE;
-    this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
+    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
     return (this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst & src) & 0xff;
 };
 
@@ -127,7 +127,7 @@ X86.fnANDb = function ANDb(dst, src)
 X86.fnANDw = function ANDw(dst, src)
 {
     this.resultSize = X86.RESULT.SIZE_WORD;
-    this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
+    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
     return (this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst & src) & 0xffff;
 };
 
@@ -140,7 +140,7 @@ X86.fnANDw = function ANDw(dst, src)
 X86.fnANDd = function ANDd(dst, src)
 {
     this.resultSize = X86.RESULT.SIZE_WORD;
-    this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
+    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
     var dw = this.resultParitySign = this.resultAuxOverflow = (dst & src);
     this.resultZeroCarry = ((dw >>> 16) | (dw & 0xffff));
     return dw;
@@ -154,7 +154,7 @@ X86.fnANDd = function ANDd(dst, src)
  */
 X86.fnARPL = function ARPL(dst, src)
 {
-    this.nStepCycles -= (10 + (this.regEA < 0? 0 : 1));
+    this.nStepCycles -= (10 + (this.regEA === X86.ADDR_INVALID? 0 : 1));
     if ((dst & X86.SEL.RPL) < (src & X86.SEL.RPL)) {
         dst = (dst & ~X86.SEL.RPL) | (src & X86.SEL.RPL);
         this.setZF();
@@ -172,7 +172,7 @@ X86.fnARPL = function ARPL(dst, src)
  */
 X86.fnBOUND = function BOUND(dst, src)
 {
-    if (this.regEA < 0) {
+    if (this.regEA === X86.ADDR_INVALID) {
         /*
          * Generate UD_FAULT (INT 0x06: Invalid Opcode) if src is not a memory operand.
          */
@@ -229,7 +229,7 @@ X86.fnCALLw = function CALLw(dst, src)
 {
     this.pushWord(this.getIP());
     this.setIP(dst);
-    this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesCallWR : this.CYCLES.nOpCyclesCallWM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesCallWR : this.CYCLES.nOpCyclesCallWM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
 };
@@ -242,7 +242,7 @@ X86.fnCALLw = function CALLw(dst, src)
  */
 X86.fnCALLFdw = function CALLFdw(dst, src)
 {
-    if (this.regEA < 0) {
+    if (this.regEA === X86.ADDR_INVALID) {
         return X86.fnGRPUndefined.call(this, dst, src);
     }
     X86.fnCALLF.call(this, dst, this.getShort(this.regEA + 2));
@@ -264,7 +264,7 @@ X86.fnCMPb = function CMPb(dst, src)
     this.resultAuxOverflow = dst ^ src;
     this.resultSize = X86.RESULT.SIZE_BYTE;
     this.resultZeroCarry = this.resultParitySign = dst - src;
-    this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesCompareRM) : this.CYCLES.nOpCyclesArithRM);
+    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesCompareRM) : this.CYCLES.nOpCyclesArithRM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
 };
@@ -280,7 +280,7 @@ X86.fnCMPw = function CMPw(dst, src)
     this.resultAuxOverflow = dst ^ src;
     this.resultSize = X86.RESULT.SIZE_WORD;
     this.resultZeroCarry = this.resultParitySign = dst - src;
-    this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesCompareRM) : this.CYCLES.nOpCyclesArithRM);
+    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesCompareRM) : this.CYCLES.nOpCyclesArithRM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
 };
@@ -297,7 +297,7 @@ X86.fnDECb = function DECb(dst, src)
     dst = (this.resultParitySign = dst - 1) & 0xff;
     this.resultZeroCarry = dst | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 8);
     this.resultSize = X86.RESULT.SIZE_BYTE;
-    this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesIncR : this.CYCLES.nOpCyclesIncM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesIncR : this.CYCLES.nOpCyclesIncM);
     return dst;
 };
 
@@ -313,7 +313,7 @@ X86.fnDECw = function DECw(dst, src)
     dst = (this.resultParitySign = dst - 1) & 0xffff;
     this.resultZeroCarry = dst | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
     this.resultSize = X86.RESULT.SIZE_WORD;
-    this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesIncR : this.CYCLES.nOpCyclesIncM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesIncR : this.CYCLES.nOpCyclesIncM);
     return dst;
 };
 
@@ -353,7 +353,7 @@ X86.fnDIVb = function DIVb(dst, src)
      * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
      */
     if (DEBUG && DEBUGGER) this.traceLog('DIVB', src, dst, null, this.getPS(), this.regMD16);
-    this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesDivBR : this.CYCLES.nOpCyclesDivBM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesDivBR : this.CYCLES.nOpCyclesDivBM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
 };
@@ -400,7 +400,7 @@ X86.fnDIVw = function DIVw(dst, src)
      * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
      */
     if (DEBUG && DEBUGGER) this.traceLog('DIVW', src, dst, null, this.getPS(), this.regMD16 | (this.regMD32 << 16));
-    this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesDivWR : this.CYCLES.nOpCyclesDivWM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesDivWR : this.CYCLES.nOpCyclesDivWM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
 };
@@ -460,7 +460,7 @@ X86.fnIDIVb = function IDIVb(dst, src)
      * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
      */
     if (DEBUG && DEBUGGER) this.traceLog('IDIVB', src, dst, null, this.getPS(), this.regMD16);
-    this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesIDivBR : this.CYCLES.nOpCyclesIDivBM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesIDivBR : this.CYCLES.nOpCyclesIDivBM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
 };
@@ -512,7 +512,7 @@ X86.fnIDIVw = function IDIVw(dst, src)
      * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
      */
     if (DEBUG && DEBUGGER) this.traceLog('IDIVW', src, dst, null, this.getPS(), this.regMD16 | (this.regMD32 << 16));
-    this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesIDivWR : this.CYCLES.nOpCyclesIDivWM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesIDivWR : this.CYCLES.nOpCyclesIDivWM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
 };
@@ -553,7 +553,7 @@ X86.fnIMUL8 = function IMUL8(dst, src)
      * 22-25 and 29-32 instead of 21 and 24, respectively.  However, accurate cycle counts for the 80186/80188 is
      * not super-critical. TODO: Fix this someday.
      */
-    this.nStepCycles -= (this.regEA < 0? 21 : 24);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 21 : 24);
     return result;
 };
 
@@ -593,7 +593,7 @@ X86.fnIMUL16 = function IMUL16(dst, src)
      * 22-25 and 29-32 instead of 21 and 24, respectively.  However, accurate cycle counts for the 80186/80188 is
      * not super-critical. TODO: Fix this someday.
      */
-    this.nStepCycles -= (this.regEA < 0? 21 : 24);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 21 : 24);
     return result;
 };
 
@@ -638,7 +638,7 @@ X86.fnIMULb = function IMULb(dst, src)
      * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
      */
     if (DEBUG && DEBUGGER) this.traceLog('IMULB', src, dst, null, this.getPS(), this.regMD16);
-    this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesIMulBR : this.CYCLES.nOpCyclesIMulBM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesIMulBR : this.CYCLES.nOpCyclesIMulBM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
 };
@@ -685,7 +685,7 @@ X86.fnIMULw = function IMULw(dst, src)
      * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
      */
     if (DEBUG && DEBUGGER) this.traceLog('IMULW', src, dst, null, this.getPS(), this.regMD16 | (this.regMD32 << 16));
-    this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesIMulWR : this.CYCLES.nOpCyclesIMulWM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesIMulWR : this.CYCLES.nOpCyclesIMulWM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
 };
@@ -702,7 +702,7 @@ X86.fnINCb = function INCb(dst, src)
     dst = (this.resultParitySign = dst + 1) & 0xff;
     this.resultZeroCarry = dst | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 8);
     this.resultSize = X86.RESULT.SIZE_BYTE;
-    this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesIncR : this.CYCLES.nOpCyclesIncM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesIncR : this.CYCLES.nOpCyclesIncM);
     return dst;
 };
 
@@ -718,7 +718,7 @@ X86.fnINCw = function INCw(dst, src)
     dst = (this.resultParitySign = dst + 1) & 0xffff;
     this.resultZeroCarry = dst | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
     this.resultSize = X86.RESULT.SIZE_WORD;
-    this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesIncR : this.CYCLES.nOpCyclesIncM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesIncR : this.CYCLES.nOpCyclesIncM);
     return dst;
 };
 
@@ -796,7 +796,7 @@ X86.fnIRET = function IRET()
  */
 X86.fnJMPFdw = function JMPFdw(dst, src)
 {
-    if (this.regEA < 0) {
+    if (this.regEA === X86.ADDR_INVALID) {
         return X86.fnGRPUndefined.call(this, dst, src);
     }
     this.setCSIP(dst, this.getShort(this.regEA + 2));
@@ -815,7 +815,7 @@ X86.fnJMPFdw = function JMPFdw(dst, src)
 X86.fnJMPw = function JMPw(dst, src)
 {
     this.setIP(dst);
-    this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesJmpWR : this.CYCLES.nOpCyclesJmpWM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesJmpWR : this.CYCLES.nOpCyclesJmpWM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
 };
@@ -828,7 +828,7 @@ X86.fnJMPw = function JMPw(dst, src)
  */
 X86.fnLAR = function LAR(dst, src)
 {
-    this.nStepCycles -= (14 + (this.regEA < 0? 0 : 2));
+    this.nStepCycles -= (14 + (this.regEA === X86.ADDR_INVALID? 0 : 2));
     /*
      * Currently, segVER.load() will return an error only if the selector is beyond the bounds of the
      * descriptor table or the descriptor is not for a segment.
@@ -870,7 +870,7 @@ X86.fnLCR0 = function LCR0(l)
  */
 X86.fnLDS = function LDS(dst, src)
 {
-    if (this.regEA < 0) {
+    if (this.regEA === X86.ADDR_INVALID) {
         X86.opUndefined.call(this);
         return dst;
     }
@@ -887,7 +887,7 @@ X86.fnLDS = function LDS(dst, src)
  */
 X86.fnLEA = function LEA(dst, src)
 {
-    if (this.regEA < 0) {
+    if (this.regEA === X86.ADDR_INVALID) {
         /*
          * TODO: After reading http://www.os2museum.com/wp/undocumented-8086-opcodes/, it seems that this
          * form of LEA (eg, "LEA AX,DX") simply returns the last calculated EA.  Since we always reset regEA
@@ -920,7 +920,7 @@ X86.fnLEA = function LEA(dst, src)
  */
 X86.fnLGDT = function LGDT(dst, src)
 {
-    if (this.regEA < 0) {
+    if (this.regEA === X86.ADDR_INVALID) {
         X86.opInvalid.call(this);
     } else {
         this.addrGDT = this.getShort(this.regEA + 2) | (this.getByte(this.regEA + 4) << 16);
@@ -939,7 +939,7 @@ X86.fnLGDT = function LGDT(dst, src)
  */
 X86.fnLES = function LES(dst, src)
 {
-    if (this.regEA < 0) {
+    if (this.regEA === X86.ADDR_INVALID) {
         X86.opUndefined.call(this);
         return dst;
     }
@@ -964,7 +964,7 @@ X86.fnLES = function LES(dst, src)
  */
 X86.fnLIDT = function LIDT(dst, src)
 {
-    if (this.regEA < 0) {
+    if (this.regEA === X86.ADDR_INVALID) {
         X86.opInvalid.call(this);
     } else {
         this.addrIDT = this.getShort(this.regEA + 2) | (this.getByte(this.regEA + 4) << 16);
@@ -988,7 +988,7 @@ X86.fnLIDT = function LIDT(dst, src)
 X86.fnLLDT = function LLDT(dst, src) {
     this.opFlags |= X86.OPFLAG.NOWRITE;
     this.segLDT.load(dst);
-    this.nStepCycles -= (17 + (this.regEA < 0? 0 : 2));
+    this.nStepCycles -= (17 + (this.regEA === X86.ADDR_INVALID? 0 : 2));
     return dst;
 };
 
@@ -1005,7 +1005,7 @@ X86.fnLLDT = function LLDT(dst, src) {
 X86.fnLMSW = function LMSW(dst, src)
 {
     this.setMSW(dst);
-    this.nStepCycles -= (this.regEA < 0? 3 : 6);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 3 : 6);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
 };
@@ -1021,7 +1021,7 @@ X86.fnLSL = function LSL(dst, src)
     /*
      * TODO: Is this an invalid operation if regEAWrite is set?  dst is required to be a register.
      */
-    this.nStepCycles -= (14 + (this.regEA < 0? 0 : 2));
+    this.nStepCycles -= (14 + (this.regEA === X86.ADDR_INVALID? 0 : 2));
     /*
      * Currently, segVER.load() will return an error only if the selector is beyond the bounds of the
      * descriptor table or the descriptor is not for a segment.
@@ -1057,7 +1057,7 @@ X86.fnLTR = function LTR(dst, src)
         this.setShort(this.segTSS.addrDesc + X86.DESC.ACC.OFFSET, this.segTSS.acc |= X86.DESC.ACC.TYPE.LDT);
         this.segTSS.type = X86.DESC.ACC.TYPE.TSS_BUSY;
     }
-    this.nStepCycles -= (17 + (this.regEA < 0? 0 : 2));
+    this.nStepCycles -= (17 + (this.regEA === X86.ADDR_INVALID? 0 : 2));
     return dst;
 };
 
@@ -1069,7 +1069,7 @@ X86.fnLTR = function LTR(dst, src)
  */
 X86.fnMOV = function MOV(dst, src)
 {
-    this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesMovRR : this.CYCLES.nOpCyclesMovRM) : this.CYCLES.nOpCyclesMovMR);
+    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesMovRR : this.CYCLES.nOpCyclesMovRM) : this.CYCLES.nOpCyclesMovMR);
     return src;
 };
 
@@ -1081,7 +1081,7 @@ X86.fnMOV = function MOV(dst, src)
  */
 X86.fnMOVImm = function MOVImm(dst, src)
 {
-    this.nStepCycles -= (this.regEAWrite < 0? this.CYCLES.nOpCyclesMovRI : this.CYCLES.nOpCyclesMovMI);
+    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? this.CYCLES.nOpCyclesMovRI : this.CYCLES.nOpCyclesMovMI);
     return src;
 };
 
@@ -1123,7 +1123,7 @@ X86.fnMULb = function MULb(dst, src)
      * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
      */
     if (DEBUG && DEBUGGER) this.traceLog('MULB', src, dst, null, this.getPS(), this.regMD16);
-    this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesMulBR : this.CYCLES.nOpCyclesMulBM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesMulBR : this.CYCLES.nOpCyclesMulBM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
 };
@@ -1156,7 +1156,7 @@ X86.fnMULw = function MULw(dst, src)
      * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
      */
     if (DEBUG && DEBUGGER) this.traceLog('MULW', src, dst, null, this.getPS(), this.regMD16 | (this.regMD32 << 16));
-    this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesMulWR : this.CYCLES.nOpCyclesMulWM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesMulWR : this.CYCLES.nOpCyclesMulWM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
 };
@@ -1172,7 +1172,7 @@ X86.fnNEGb = function NEGb(dst, src)
     src = 0;
     this.resultAuxOverflow = dst ^ src;
     this.resultSize = X86.RESULT.SIZE_BYTE;
-    this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesNegR : this.CYCLES.nOpCyclesNegM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesNegR : this.CYCLES.nOpCyclesNegM);
     return (this.resultZeroCarry = this.resultParitySign = src - dst) & 0xff;
 };
 
@@ -1187,7 +1187,7 @@ X86.fnNEGw = function NEGw(dst, src)
     src = 0;
     this.resultAuxOverflow = dst ^ src;
     this.resultSize = X86.RESULT.SIZE_WORD;
-    this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesNegR : this.CYCLES.nOpCyclesNegM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesNegR : this.CYCLES.nOpCyclesNegM);
     return (this.resultZeroCarry = this.resultParitySign = src - dst) & 0xffff;
 };
 
@@ -1199,7 +1199,7 @@ X86.fnNEGw = function NEGw(dst, src)
  */
 X86.fnNOTb = function NOTb(dst, src)
 {
-    this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesNegR : this.CYCLES.nOpCyclesNegM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesNegR : this.CYCLES.nOpCyclesNegM);
     return dst ^ 0xff;
 };
 
@@ -1211,7 +1211,7 @@ X86.fnNOTb = function NOTb(dst, src)
  */
 X86.fnNOTw = function NOTw(dst, src)
 {
-    this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesNegR : this.CYCLES.nOpCyclesNegM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesNegR : this.CYCLES.nOpCyclesNegM);
     return dst ^ 0xffff;
 };
 
@@ -1224,7 +1224,7 @@ X86.fnNOTw = function NOTw(dst, src)
 X86.fnORb = function ORb(dst, src)
 {
     this.resultSize = X86.RESULT.SIZE_BYTE;
-    this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
+    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
     return (this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst | src) & 0xff;
 };
 
@@ -1237,7 +1237,7 @@ X86.fnORb = function ORb(dst, src)
 X86.fnORw = function ORw(dst, src)
 {
     this.resultSize = X86.RESULT.SIZE_WORD;
-    this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
+    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
     return (this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst | src) & 0xffff;
 };
 
@@ -1249,7 +1249,7 @@ X86.fnORw = function ORw(dst, src)
  */
 X86.fnPOPw = function POPw(dst, src)
 {
-    this.nStepCycles -= (this.regEAWrite < 0? this.CYCLES.nOpCyclesPopReg : this.CYCLES.nOpCyclesPopMem);
+    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? this.CYCLES.nOpCyclesPopReg : this.CYCLES.nOpCyclesPopMem);
     return src;
 };
 
@@ -1275,7 +1275,7 @@ X86.fnPUSHw = function PUSHw(dst, src)
         if (this.model < X86.MODEL_80286) w = dst;
     }
     this.pushWord(w);
-    this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesPushReg : this.CYCLES.nOpCyclesPushMem);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesPushReg : this.CYCLES.nOpCyclesPushMem);
     /*
      * The PUSH is the only write that needs to occur; dst was the source operand and does not need to be rewritten.
      */
@@ -1571,7 +1571,7 @@ X86.fnSBBb = function SBBb(dst, src)
     this.resultAuxOverflow = dst ^ src;
     this.resultZeroCarry = this.resultParitySign = dst - src - ((this.resultZeroCarry & this.resultSize)? 1 : 0);
     this.resultSize = X86.RESULT.SIZE_BYTE;
-    this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
+    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
     return this.resultZeroCarry & 0xff;
 };
 
@@ -1589,7 +1589,7 @@ X86.fnSBBw = function SBBw(dst, src)
     this.resultAuxOverflow = dst ^ src;
     this.resultZeroCarry = this.resultParitySign = dst - src - ((this.resultZeroCarry & this.resultSize)? 1 : 0);
     this.resultSize = X86.RESULT.SIZE_WORD;
-    this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
+    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
     return this.resultZeroCarry & 0xffff;
 };
 
@@ -1605,7 +1605,7 @@ X86.fnSBBw = function SBBw(dst, src)
  */
 X86.fnSGDT = function SGDT(dst, src)
 {
-    if (this.regEA < 0) {
+    if (this.regEA === X86.ADDR_INVALID) {
         X86.opInvalid.call(this);
     } else {
         /*
@@ -1779,7 +1779,7 @@ X86.fnSHRw = function SHRw(dst, src)
  */
 X86.fnSIDT = function SIDT(dst, src)
 {
-    if (this.regEA < 0) {
+    if (this.regEA === X86.ADDR_INVALID) {
         X86.opInvalid.call(this);
     } else {
         /*
@@ -1812,7 +1812,7 @@ X86.fnSIDT = function SIDT(dst, src)
  */
 X86.fnSLDT = function SLDT(dst, src)
 {
-    this.nStepCycles -= (2 + (this.regEA < 0? 0 : 1));
+    this.nStepCycles -= (2 + (this.regEA === X86.ADDR_INVALID? 0 : 1));
     return this.segLDT.sel;
 };
 
@@ -1828,7 +1828,7 @@ X86.fnSLDT = function SLDT(dst, src)
  */
 X86.fnSMSW = function SMSW(dst, src)
 {
-    this.nStepCycles -= (2 + (this.regEA < 0? 0 : 1));
+    this.nStepCycles -= (2 + (this.regEA === X86.ADDR_INVALID? 0 : 1));
     return this.regCR0;
 };
 
@@ -1844,7 +1844,7 @@ X86.fnSMSW = function SMSW(dst, src)
  */
 X86.fnSTR = function STR(dst, src)
 {
-    this.nStepCycles -= (2 + (this.regEA < 0? 0 : 1));
+    this.nStepCycles -= (2 + (this.regEA === X86.ADDR_INVALID? 0 : 1));
     return this.segTSS.sel;
 };
 
@@ -1858,7 +1858,7 @@ X86.fnSUBb = function SUBb(dst, src)
 {
     this.resultAuxOverflow = dst ^ src;
     this.resultSize = X86.RESULT.SIZE_BYTE;
-    this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
+    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
     return (this.resultZeroCarry = this.resultParitySign = dst - src) & 0xff;
 };
 
@@ -1872,7 +1872,7 @@ X86.fnSUBw = function SUBw(dst, src)
 {
     this.resultAuxOverflow = dst ^ src;
     this.resultSize = X86.RESULT.SIZE_WORD;
-    this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
+    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
     return (this.resultZeroCarry = this.resultParitySign = dst - src) & 0xffff;
 };
 
@@ -1887,7 +1887,7 @@ X86.fnTEST8 = function TEST8(dst, src)
     src = this.getIPByte();
     this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst & src;
     this.resultSize = X86.RESULT.SIZE_BYTE;
-    this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesTestRI : this.CYCLES.nOpCyclesTestMI);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesTestRI : this.CYCLES.nOpCyclesTestMI);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
 };
@@ -1903,7 +1903,7 @@ X86.fnTEST16 = function TEST16(dst, src)
     src = this.getIPWord();
     this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst & src;
     this.resultSize = X86.RESULT.SIZE_WORD;
-    this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesTestRI : this.CYCLES.nOpCyclesTestMI);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesTestRI : this.CYCLES.nOpCyclesTestMI);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
 };
@@ -1918,7 +1918,7 @@ X86.fnTESTb = function TESTb(dst, src)
 {
     this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst & src;
     this.resultSize = X86.RESULT.SIZE_BYTE;
-    this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesTestRR : this.CYCLES.nOpCyclesTestRM) : this.CYCLES.nOpCyclesTestRM);
+    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesTestRR : this.CYCLES.nOpCyclesTestRM) : this.CYCLES.nOpCyclesTestRM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
 };
@@ -1933,7 +1933,7 @@ X86.fnTESTw = function TESTw(dst, src)
 {
     this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst & src;
     this.resultSize = X86.RESULT.SIZE_WORD;
-    this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesTestRR : this.CYCLES.nOpCyclesTestRM) : this.CYCLES.nOpCyclesTestRM);
+    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesTestRR : this.CYCLES.nOpCyclesTestRM) : this.CYCLES.nOpCyclesTestRM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
 };
@@ -1955,7 +1955,7 @@ X86.fnVERR = function VERR(dst, src)
      * Currently, segVER.load() will return an error only if the selector is beyond the bounds of the
      * descriptor table or the descriptor is not for a segment.
      */
-    this.nStepCycles -= (14 + (this.regEA < 0? 0 : 2));
+    this.nStepCycles -= (14 + (this.regEA === X86.ADDR_INVALID? 0 : 2));
     if (this.segVER.load(dst, true) != X86.ADDR_INVALID) {
         /*
          * Verify that this is a readable segment; that is, of these four combinations (code+readable,
@@ -1997,7 +1997,7 @@ X86.fnVERW = function VERW(dst, src)
      * Currently, segVER.load() will return an error only if the selector is beyond the bounds of the
      * descriptor table or the descriptor is not for a segment.
      */
-    this.nStepCycles -= (14 + (this.regEA < 0? 0 : 2));
+    this.nStepCycles -= (14 + (this.regEA === X86.ADDR_INVALID? 0 : 2));
     if (this.segVER.load(dst, true) != X86.ADDR_INVALID) {
         /*
          * Verify that this is a writable data segment
@@ -2043,7 +2043,7 @@ X86.fnVERW = function VERW(dst, src)
  */
 X86.fnXCHGrb = function XCHGRb(dst, src)
 {
-    if (this.regEA < 0) {
+    if (this.regEA === X86.ADDR_INVALID) {
         /*
          * Decode which register was src
          */
@@ -2107,7 +2107,7 @@ X86.fnXCHGrb = function XCHGRb(dst, src)
  */
 X86.fnXCHGrw = function XCHGRw(dst, src)
 {
-    if (this.regEA < 0) {
+    if (this.regEA === X86.ADDR_INVALID) {
         /*
          * Decode which register was src
          */
@@ -2162,7 +2162,7 @@ X86.fnXCHGrw = function XCHGRw(dst, src)
 X86.fnXORb = function XORb(dst, src)
 {
     this.resultSize = X86.RESULT.SIZE_BYTE;
-    this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
+    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
     return (this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst ^ src) & 0xff;
 };
 
@@ -2175,7 +2175,7 @@ X86.fnXORb = function XORb(dst, src)
 X86.fnXORw = function XORw(dst, src)
 {
     this.resultSize = X86.RESULT.SIZE_WORD;
-    this.nStepCycles -= (this.regEAWrite < 0? (this.regEA < 0? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
+    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
     return (this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst ^ src) & 0xffff;
 };
 
@@ -2210,7 +2210,7 @@ X86.fnRotateFlags = function(result, size)
  * @return {number}
  */
 X86.fnGRPCount1 = function() {
-    this.nStepCycles -= (this.regEA < 0? 2 : this.CYCLES.nOpCyclesShift1M);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 2 : this.CYCLES.nOpCyclesShift1M);
     return 1;
 };
 
@@ -2220,7 +2220,7 @@ X86.fnGRPCount1 = function() {
  */
 X86.fnGRPCountCL = function() {
     var count = this.regECX & this.nShiftCountMask;
-    this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesShiftCR : this.CYCLES.nOpCyclesShiftCM) + (count << this.CYCLES.nOpCyclesShiftCS);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesShiftCR : this.CYCLES.nOpCyclesShiftCM) + (count << this.CYCLES.nOpCyclesShiftCS);
     return count;
 };
 
@@ -2230,7 +2230,7 @@ X86.fnGRPCountCL = function() {
  */
 X86.fnGRPCountImm = function() {
     var count = this.getIPByte();
-    this.nStepCycles -= (this.regEA < 0? this.CYCLES.nOpCyclesShiftCR : this.CYCLES.nOpCyclesShiftCM) + (count << this.CYCLES.nOpCyclesShiftCS);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesShiftCR : this.CYCLES.nOpCyclesShiftCM) + (count << this.CYCLES.nOpCyclesShiftCS);
     return count;
 };
 

@@ -50,11 +50,12 @@ var X86 = {
      * we must add checks to those functions or throw a special JavaScript exception to bypass them.
      *
      * This value is also used to indicate non-existent EA address calculations, which are usually
-     * detected with "regEA < 0" and "regEAWrite < 0" tests, so be careful if you change this value.
-     * If/when we ever extend our physical address space beyond 24 bits (ie, when we break the 2Gb barrier),
-     * negative 32-bit values values will become valid addresses, so those tests will have to be revised.
+     * detected with "regEA === ADDR_INVALID" and "regEAWrite === ADDR_INVALID" tests.  In a 32-bit CPU,
+     * -1 could actually be a valid address, so consider changing it to NaN or null; my concern is that,
+     * by mixing non-numbers (specifically, values outside the range of 32-bit integers), performance
+     * may suffer.
      */
-    ADDR_INVALID:   -4,
+    ADDR_INVALID:   -1,
 
     /*
      * Processor Status flag definitions (stored in regPS)

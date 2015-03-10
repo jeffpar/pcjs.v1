@@ -3044,7 +3044,7 @@ if (DEBUGGER) {
      * @this {Debugger}
      * @param {number} bReg
      * @param {number} type
-     * @param {Array} aAddr (aAddr[4] is true if 32-bit operands, aAddr[5] is true if 32-bit addressing)
+     * @param {Array} aAddr (aAddr[4] is true if 32-bit operands, aAddr[5] is true if 32-bit addresses)
      * @return {string} operand
      */
     Debugger.prototype.getRegOperand = function(bReg, type, aAddr)
@@ -3077,7 +3077,7 @@ if (DEBUGGER) {
      *
      * @this {Debugger}
      * @param {number} bMod
-     * @param {Array} aAddr (aAddr[4] is true if 32-bit operands, aAddr[5] is true if 32-bit addressing)
+     * @param {Array} aAddr (aAddr[4] is true if 32-bit operands, aAddr[5] is true if 32-bit addresses)
      * @return {string} operand
      */
     Debugger.prototype.getSIBOperand = function(bMod, aAddr)
@@ -3104,7 +3104,7 @@ if (DEBUGGER) {
      * @this {Debugger}
      * @param {number} bModRM
      * @param {number} type
-     * @param {Array} aAddr (aAddr[4] is true if 32-bit operands, aAddr[5] is true if 32-bit addressing)
+     * @param {Array} aAddr (aAddr[4] is true if 32-bit operands, aAddr[5] is true if 32-bit addresses)
      * @return {string} operand
      */
     Debugger.prototype.getModRMOperand = function(bModRM, type, aAddr)

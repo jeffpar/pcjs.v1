@@ -47,10 +47,13 @@ X86.opADDmb = function ADDmb()
 {
     var b = this.getIPByte();
     /*
-     * Opcode bytes 0x00 0x00 are sufficiently uncommon that it's more likely we've started executing
-     * in the weeds, so we'll stop the CPU if we're in DEBUG mode.
+     * Opcode bytes 0x00 0x00 are sufficiently uncommon that it's more likely we've started
+     * executing in the weeds, so we'll print a warning if Messages.CPU is enabled (at which
+     * point you can also choose to halt if Messages.HALT is enabled).
      */
-    if (DEBUG && DEBUGGER && !b) this.stopCPU();
+    if (DEBUG && !b) {
+        this.printMessage("suspicious opcode: 0x00 0x00");
+    }
     this.aOpModMemByte[b].call(this, X86.fnADDb);
 };
 
@@ -2133,7 +2136,7 @@ X86.opJNLE = function JNLE()
 X86.opGrp1b = function GRP1b()
 {
     this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp1b, this.getIPByte);
-    this.nStepCycles -= (this.regEAWrite < 0? 1 : this.CYCLES.nOpCyclesArithMID);
+    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? 1 : this.CYCLES.nOpCyclesArithMID);
 };
 
 /**
@@ -2144,7 +2147,7 @@ X86.opGrp1b = function GRP1b()
 X86.opGrp1w = function GRP1w()
 {
     this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp1w, this.getIPWord);
-    this.nStepCycles -= (this.regEAWrite < 0? 1 : this.CYCLES.nOpCyclesArithMID);
+    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? 1 : this.CYCLES.nOpCyclesArithMID);
 };
 
 /**
@@ -2155,7 +2158,7 @@ X86.opGrp1w = function GRP1w()
 X86.opGrp1sw = function GRP1sw()
 {
     this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp1w, this.getIPDisp);
-    this.nStepCycles -= (this.regEAWrite < 0? 1 : this.CYCLES.nOpCyclesArithMID);
+    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? 1 : this.CYCLES.nOpCyclesArithMID);
 };
 
 /**
@@ -2627,7 +2630,7 @@ X86.opCALLF = function CALLF()
  */
 X86.opWAIT = function WAIT()
 {
-    this.printMessage("WAIT not implemented", Messages.CPU);
+    this.printMessage("WAIT not implemented");
     this.nStepCycles--;
 };
 

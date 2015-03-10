@@ -22,73 +22,329 @@ If the self-test is not requested, the contents of EAX after RESET is undefined.
 > DX holds a component identifier and revision number after RESET as Figure 10-1 illustrates. DH contains 3,
 which indicates an 80386 component. DL contains a unique identifier of the revision level.
 
-But what "revision levels" did Intel actually use?
+But what steppings did Intel produce, and what "revision level" was associated with each stepping?
 
-Based on information below (see the ill-fated XBTS instruction), it seems there were A0-B0 steppings.
-However, all we can really infer from that is the existence of A0 and B0 steppings.  It doesn't tell us
-whether there were any intervening (eg, A1, A2) steppings, or what revision levels were used on reset.
+I've read reports that the first stepping (A0) had serious problems, like an inability to return to real mode
+(reminiscent of the 80286).  Since it was never released commercially, and we know so little about it, let's move
+on to the A1 stepping.
 
-I've read reports that A steppings had serious problems, like an inability to return to real mode
-(reminiscent of the 80286).  By all accounts, no A-stepping 80386 CPUs were sold commercially, so we can
-more or less ignore them.
+From "Advanced 80386 Programming Techniques" by James L. Turley (C) 1988:
 
-As for the B0 stepping, the October 15, 1991 issue of PC Magazine reported:
+> ### Evolution of the 80386
 
-	You can tell if you have a B0 or B1 Step level 386 by looking at the markings on the chip.
-	If it has the ID number S40336 or S40337 stamped on it, then it's a Step B0; if it's marked
-	with S40343, S40344, or S40362, it's a Step B1. Some B0 and B1 chips were marked B0 or B1
-	rather than with an ID number.
+> #### A1 Stepping
 
-Unfortunately, this doesn't tell us what revision number an 80386-B0 reported.
+> This is the first revision after the initial (A0) introduction of the 80386 [in late 1985]. The A1
+stepping became available around the first of the year in 1986.
 
-Most of the information I have about the 80386 begins with the B1 stepping.  From a December 17, 1986
-document titled "**80386-B1 STEPPING INFORMATION**":
+> + *Hardware Peculiarity*: Unless pin F13 of the 80386 is connected to the +5V power supply, the 80386
+never terminates a memory cycle, hanging the processor.
++ *Loading LDTR with a Null Selector*: If you load the local descriptor table register with a null
+selector (0000 through 0003) without performing a memory read immediately afterward, the 80386 behaves
+erratically. LDTR can be loaded either as the result of an LLDT instruction or as part of a task-switch
+operation if the incoming TSS has a null selector in its LDT field.
++ *Loading Bad Stack Selectors*: The 80386 does not check the privilege level of the desired stack
+segment selector during an LSS instruction. Normally, the RPL of the selector and the DPL of the segment
+must exactly equal the DPL of the currently executing code segment.
++ *Misaligned Selectors*: If a 16-bit memory operand is loaded into a segment register, the 80386 hangs
+if the selector is not word-aligned. This can happen with a MOV instruction and with the LDS, LES, LFS,
+LGS, and LSS instructions.
++ *Testing Null Selectors*: The 80386 hangs if an LAR, LSL, VERR, or VERW instruction is used to test
+a null selector.
++ *Popping Selectors*: When popping a segment selector from the stack, the 80386 performs all of the
+privilege-related checks backward. That is, you are allowed to pop a selector to a segment with more
+privilege, but not to one with less privilege.
++ *Indirect FAR JMP to Same Privilege Level*: An indirect JMP instruction is one in which the new segment
+selector and offset are stored in memory. If the new code segment is at the same privilege level as the
+current code segment, the 80386 does not read the selector portion of the JMP operand. The result is a
+NEAR JMP to a new offset within the current code segment.
++ *Spurious Breakpoint Exceptions*: A MOV instruction into or out of the debug registers while hardware
+breakpoints are enabled may cause a breakpoint fault to be reported. You should temporarily disable the
+hardware breakpoints while reading or writing the debug registers and then execute a JMP instruction
+to flush the prefetch queue before reenabling them.
++ *Successive Floating-Point Instructions*: If two floating-point instructions are executed close together,
+the 80386 may force the coprocessor to start the second one too soon if the first one did not require any
+memory operands.
++ *Bad Floating-Point Instructions*: The execution of certain undefined floating-point instructions causes
+the 80386 to hang rather than reporting an invalid instruction fault.
++ *Misaligned Floating-Point Instructions*: If 80287 and/or 80387 instructions are not word-aligned, the
+80386 passes the wrong instruction to the coprocessor, causing unpredictable behavior.
++ *Misaligned Descriptor Tables*: All segment descriptors should be dword-aligned, or the 80386 may not
+read them correctly.
++ *Incorrect Interrupt Vector*: If a maskable interrupt occurs immediately after the 80386 has executed an
+instruction with an 8-bit operand, the interrupt is always assigned a vector number of 0.
++ *Handling Exceptions with 80286 Tasks*: If an exception that pushes an error code is handled through a
+task gate to an 80286 task, the 80386 generates a double fault (exception 8) as soon as the 80286 task
+switch is completed.
++ *Page Fault During Task Switch*: If the new task uses different page tables than the old task and a page
+fault occurs during the task-switch operation, the 80386 hangs instead of reporting the page fault.
++ *Returning from a Nested Task*: If you execute an IRET instruction when the NT (Nested Task) flag in
+EFLAGS is set, the 80386 returns to your "parent" task. However, it will neglect to clear NT in the outgoing
+task's TSS.
++ *Task-Switch Trap Bit*: When a task switch occurs and the incoming TSS has its task-switch bit set, the
+80386 generates a debug fault (exception 1). However, it will neglect to set the BT flag in register DR6
+before invoking the exception 1 handler.
++ *Invalid TSS Faults*: When an invalid TSS fault (exception 10) occurs as the result of a task-switch
+operation, the 80386 pushes the wrong values for EIP and ESP on the error handler's stack.
++ *Wrong Paging Information During Task Switch*: When a task switch occurs and the new task uses a different
+set of page tables than the old task (that is, CR3 in the TSS is different), the 80386 reads the new TSS
+descriptor and updates the old TSS using the page tables of the new task.
++ *Masking NMI*: If an NMI is serviced through a task gate, the 80386 neglects to reenable NMI inputs after
+the NMI-handling task terminates. The 80386 does not recognize NMI inputs while it is servicing an NMI.
++ *Incorrect Error Code*: If an exception that pushes an error code is handled through a task gate, the
+80386 may push an error code of 0 instead of the correct error code.
++ *Not-Present LDT*: If a task switch occurs and the new task's TSS selector selects an LDT descriptor
+that is marked no present, the 80386 reports a not-present fault (exception 11), instead of an invalid TSS
+(exception 10).
++ *Self-test*: The self-test feature does not work on the A1 stepping of the 80386.
++ *Interlevel Transfers*: If you perform a control transfer to a higher privilege level and the procedure
+at that level uses an expand-down stack segment for its stack, as opposed to an expand-up data segment,
+the 80386 generates a spurious stack fault (exception 12).
++ *Debug Access Fault*: If an attempt is made to read or write the debug registers while GD is set in DR7,
+the 80386 generates a debug fault (exception 1). However, the wrong value for EIP will be pushed onto the
+exception handler's stack.
++ *Multiply and Divide Errors*: If the 80386 executes a MUL, IMUL, DIV, or IDIV instruction with a memory
+operand and general protection fault (exception 13) occurs, the processor hangs rather than reporting the fault.
++ *Intersegment Transfers*: If the last 2 bytes of a direct FAR JMP or FAR CALL instruction are beyond the
+end of the code segment, the 80386 hangs rather than reporting a general protection fault.
++ *Intersegment Transfers II*: If the last 2 bytes of a direct FAR JMP or FAR CALL instruction lie on the
+other side of a page boundary, the 80386 hangs, regardless of whether the other page is present or not.
+Remember, a page boundary occurs every 4kb.
++ *Bit-Test Instructions*: The bit-test instructions that perform read-modify-write cycles to memory (BTC,
+BTR, and BTS) do not work properly unless your memory runs without wait states.
++ *Bit Scan Forward Instruction*: If a BSF instruction is executed with a memory operand, and a general
+protection fault (exception 13) or a page fault (exception 14) occurs, the 80386 hangs rather than reporting
+the fault.
++ *Accessing CR3, TR6, and TR7*: Reading or writing registers CR3, TR6, or TR7 produces incorrect results
+if your memory requires wait states. This is particularly obscure, since these instructions do not reference
+memory.
 
-	80386-B1 component identifier readable in DH after reset: 03H
-	80386-B1 revision  identifier readable in DL after reset: 03H
+> #### B0 Stepping
+
+> The B0 stepping became available around the middle of 1986. As is the case with earlier steppings, the
+"B0" marking can sometimes be found on the outside of the device. If not, the code "S40336" or "S40337" may
+appear. Starting with the B0 stepping, the 80386 would leave the component identifier, 3, in DH and the
+revision identifier, also 3, in DL [Surprisingly, these are the same values that the B1 stepping reports
+as well. -JP]
+
+> + *Interrupts and Privilege Violations*: If a hardware interrupt occurs immediately before an IOPL-sensitive
+instruction when CPL is greater than IOPL, the 80386 behaves erratically. Generally, it will produce spurious
+stack faults (exception 12). Note that this occurs only if the IOPL-sensitive instruction was going to fail.
++ *Infinite Page Faults*: If a page fault (exception 14) occurs while the 80386 is attempting to invoke a
+page fault handler, it generates another page fault rather than reporting a double fault (exception 8).
++ *Invalid TSS Fault*: If an invalid TSS fault (exception 10) is caused by an attempt to switch to a TSS that
+is too small, and the exception is handled through a task gate, the 80386 shuts down.
++ *Invalid TSS Fault II*: If you execute an IRET instruction while the NT (Nested Task) flag is set in EFLAGS,
+and the "parent" TSS is too small, the 80386 generates a double fault (exception 8).
++ *Invalid TSS Fault III*: If the previous error occurs and the double fault is handled through a trap gate,
+the 80386 shuts down.
++ *Invalid TSS Fault IV*: If the gate descriptor for an invalid TSS fault (exception 10) is bad and an
+invalid TSS fault occurs for any reason, the 80386 shuts down.
++ *Tracing a REP MOVS Instruction*: The 80386 does not correctly single-step (trace) repeated string move
+instructions. Instead, it generates a debug trap after every *other* iteration of the repeated MOVS instruction.
++ *Breakpointing a REP MOVS Instruction*: If a data breakpoint is enabled and it is hit during a repeated
+string move instruction, the 80386 reports it only after an even number of iterations. This gives you a
+fifty-fifty chance of learning about your breakpoint one instruction late.
++ *16-Bit and 32-Bit Control Transfers*: Whenever control is transferred from 16-bit code to 32-bit code
+through a task gate or through a gate that causes a change in privilege level, the 80386 discards the upper
+half of the offset address in EIP. If the destination address was greater than 64Kb, this will cause a
+program error.
++ *16-Bit and 32-Bit Control Transfers II*: When an IRET instruction that transfers control to a Virtual
+8086 mode task is executed, the 80386 neglects to truncate the offset address on the stack to 16 bits.
++ *16-Bit and 32-Bit Control Transfers III*: If a 32-bit call, trap, or interrupt gate is used to transfer
+control from a 16-bit code segment to a 32-bit code segment without changing privilege levels, the 80386
+treats the gate as a 16-bit gate.
++ *Mixing Address Sizes*: If a LOOP, MOVS, LODS, STOS, CMPS, INS, or OUTS instruction is followed by an
+instruction that uses a different address size, the 80386 may use the incorrect address size when updating
+either the loop counter or the string index.
+
+> #### B1 Stepping
+
+> The B1 stepping became available in late 1986. It corrected many of the bugs in earlier versions, but
+new ones were either introduced or discovered. The best known of these was the widely publicized multiply
+failure discovered in mid-1987. The B1 stepping is identifiable either by the "B1" mark or by the code
+"S40343," "S40344," or "S40362." As is the case with the B0 stepping, the B1 revision leaves a binary three
+in DL after reset. [Surprisingly, these are the same values that the B0 stepping reports as well. -JP]
+
+> + *IBTS and XBTS Instructions Removed*: The Insert Bit String (IBTS) and Extract Bit String (XBTS)
+instructions were removed from the 80386's instruction set. It was determined that they took up too much
+space on the microprocessor and that their functionality could be duplicated with the SHLD and SHRD
+instructions. The opcodes 0F A6 and 0F A7 now produce invalid opcode faults.
++ *Multiplication Errors*: Certain 80386 microprocessors produce erroneous results when performing
+multiplication. Not all B1 stepping 80386s suffer from this bug. It is aggravated by increases in the
+processor's operating frequency, elevations in the ambient temperature, or decreases in the power supply
+voltage. This failure is extremely pattern sensitive; certain patterns will produce errors readily, while
+others never will. [See sample program below]
++ *Double Page Faults*: The bug that appeared in the B0 stepping regarding page faults that occurred
+during page faults has been made a permanent feature of the 80386, with one minor change. If a third page
+fault occurs while the processor is servicing the first two, the 80386 shuts down. [See Intel Errata #18 below]
++ *Disabling Page Translation*: The 80386 does not stop translating linear addresses to physical addresses
+when paging is disabled. Any page-translation entries that are still in the cache will be used, regardless
+of the setting of PG in CR0. To completely disable paging, flush the TLB by clearing CR3.
++ *Page Translation Affects I/O Addresses*: When paging is enabled, the MMU sometimes erroneously translates
+I/O addresses above 0FFF as well as memory addresses. Coprocessor references (which appear in the I/O space)
+are also affected. The I/O addresses are translated as though they were linear memory addresses, using the
+memory translation tables cached in the TLB. If the "linear" I/O address is not in the cache, no translation
+will take place; only cached entries produce this effect. [See Intel Errata #10 below]
++ *Page Fault Error Codes*: Under certain circumstances, the 80386 pushes an incorrect error code onto the
+page fault handler's stack. [See Intel Errata #9 below]
++ *Four-Gigabyte Code Segments*: If you define a 4Gb code segment (limit = FFFFF, G = 1), the base address
+of that segment must be dword-aligned, or the 80386 generates a general protection fault (exception 13)
+when it fetches an instruction from the beginning of the segment. This feature is expected to become permanent.
++ *Wrong Loop Counter*: After a REP INS instruction finishes its last iteration, register ECX holds the value
+FFFFFFFF instead of 0, if the next instruction after the REP INS references memory. [See Intel Errata #11 below]
++ *LSL Instruction and Stack Pointer*: If the LSL instruction is followed by an instruction that references
+the stack, register ESP may become corrupted. [See Intel Errata #14 below]
++ *Not-Present LDT*: If a task switch occurs to a Virtual 8086 mode task and the incoming task's TSS holds
+a selector to an LDT descriptor that is marked not present, the 80386 generates a not-present fault
+(exception 11) rather than reporting an invalid TSS fault (exception 10). [See Intel Errata #16 below]
++ *Reading from CR3, TR6, or TR7*: If hardware breakpoints are enabled, reading from CR3, TR6, or TR7 may
+cause spurious debug faults to be reported. It is recommended that you disable breakpoints and then execute
+the MOV instruction followed by a JMP instruction before reenabling breakpoints.
++ *Privilege Checking a Null Selector*: If you perform an LAR, LSL, VERR, or VERw instruction using a null
+selector (0000 through 0003), the 80386 actually checks the descriptor in slot 0 of the GDT instead of
+always failing. [See Intel Errata #15 below]
++ *Privilege Checking Bad Selectors*: An LAR, LSL, VERR, or VERW instruction that checks an unreachable
+selector causes the 80386 to hang unless there is a JMP, CALL, or memory-related instruction already in the
+prefetch queue. An unreachable selector is one that either is beyond the limit of its descriptor table
+or references a non-existent LDT. The processor will remain hung until it receives an interrupt.
++ *Faulting Floating-Point Instructions*: If the second byte of a floating-point instruction is located
+in the first byte of a page that will cause a page fault (either because it is not present or because of an
+impending privilege violation), the 80386 hangs. The processor will remain hung until it receives an interrupt.
+ [See Intel Errata #17 below]
+
+> The following sample program has been calculated to produce the [multiplication] error. An 80386 that
+fails one or more of these multiply instructions is obviously faulty. However, passing does not guarantee
+a perfect part. To their credit, Intel agreed to test all 80386s for a limited time and report on their
+success or failure. Since then, all 80386s have been tested before shipping. Those that fail have been marked
+"For Sixteen-Bit Software Only." [I believe the exact marking was "16 BIT S/W ONLY" -JP] Those that passed
+have been marked with a double sigma sign. All 80386s produced after the B1 stepping should be free of this
+defect.
+
+	; Perform various 16-bit and 32-bit multiply operations...
 	
-	At this time, B1 stepping parts are identified with one of the marks shown
-	below:
+	K1      DD      41h                 ;memory-based constant 1
+	K2      DD      81h                 ;memory-based constant 2
 	
-	                                       |
-	            ii                         |    ii
-	                                       |
-	            ii  A80386-16              |    ii  A80386-20
-	            ii  S40344                 |    ii  S40362
-	            ii  (FPO number)           |    ii  (FPO number)
-	            ii   m  c  i '85 '86       |    ii   m  c  i  '85 '86
-	                                       |	           
-	    ----------------------------------- ----------------------------------
-	                                       |
-	            ii                         |
-	                                       |
-	            ii  A80386 ES B1           |
-	            ii                         |
-	            ii                         |
-	            ii   m  c  i  '85 '86      |
-	                                       |
+			MOV     EAX,0042E8h         ;load EAX with operand
+			MUL     K1                  ;EAX = EAX * 41H
+			CMP     EAX,10FCE8h         ;check answer
+			JNE     fail                ;failure if not equal
+	
+			MOV     EAX,085D00h
+			MUL     K1
+			CMP     EAX,021F9D00h
+			JNE     fail
+	
+			MOV     EAX,042E80000h
+			MUL     K1
+			CMP     EAX,0FCE80000h
+			JNE     fail
+			CMP     EDX,010h
+			JNE     fail
+	
+			MOV     EAX,0417A000h
+			MUL     K2
+			CMP     EAX,0FE7A000h
+			JNE     fail
+			CMP     EDX,0002h
+			JNE     fail
+	
+			MOV     DX,0AB66h
+			MOV     AX,09AE8h
+			MUL     DX
+			CMP     AX,0B070h
+			JNE     fail
+	
+			MOV     DX,0FDF3h
+			MOV     AX,09AE8h
+			MUL     DX
+			CMP     AX,05238h
+			JNE     fail
+	
+			MOV     DX,0B554h
+			MOV     AX,0E8EAh
+			MUL     DX
+			CMP     DX,0A4F9h
+			JNE     fail
+	
+			MOV     DX,0B4C6h
+			MOV     AX,0E8EAh
+			MUL     DX
+			CMP     AX,0ACFCh
+			JNE     fail
+			CMP     DX,0A478h
+			JNE     fail
+	
+			MOV     DX,0B318h
+			MOV     AX,0E8EAh
+			MUL     DX
+			CMP     DX,0A2F1h
+			JNE     fail
+	
+			MOV     DX,0B43Bh
+			MOV     AX,0E8EAh
+			MUL     DX
+			CMP     DX,0A3FAh
+			JNE     fail
+
+---
+
+As for the B0 stepping, the October 15, 1991 issue of PC Magazine confirms what Turley noted above:
+
+    You can tell if you have a B0 or B1 Step level 386 by looking at the markings on the chip.
+    If it has the ID number S40336 or S40337 stamped on it, then it's a Step B0; if it's marked
+    with S40343, S40344, or S40362, it's a Step B1. Some B0 and B1 chips were marked B0 or B1
+    rather than with an ID number.
+
+Most of the information I have obtained about the 80386 begins with the B1 stepping.  From a December
+17, 1986 Intel document titled "**80386-B1 STEPPING INFORMATION**":
+
+    80386-B1 component identifier readable in DH after reset: 03H
+    80386-B1 revision  identifier readable in DL after reset: 03H
+
+    At this time, B1 stepping parts are identified with one of the marks shown
+    below:
+
+                                           |
+                ii                         |    ii
+                                           |
+                ii  A80386-16              |    ii  A80386-20
+                ii  S40344                 |    ii  S40362
+                ii  (FPO number)           |    ii  (FPO number)
+                ii   m  c  i '85 '86       |    ii   m  c  i  '85 '86
+                                           |
+        ----------------------------------- ----------------------------------
+                                           |
+                ii                         |
+                                           |
+                ii  A80386 ES B1           |
+                ii                         |
+                ii                         |
+                ii   m  c  i  '85 '86      |
+                                           |
 
 So, the B1 stepping set DL to 0x03 on reset.  It also seems a safe bet that the revision number
 for a B0 stepping was 0x02.  Does that mean the revision number for the A0 was 0x01?  I can only guess.
 
 The 80386 CPU on my Compaq DeskPro 386 "Version 2" System Board is labeled as:
 
-	            A80386-16
-	            S40344
-	            L8260347
-	            (m)(c)i '85 '86
+                A80386-16
+                S40344
+                L8260347
+                (m)(c)i '85 '86
 
 The "S40344" indicates that it's a B1 stepping, although I'm not currently able to power it and run any tests.
 
 According to [OS/2 Museum](http://os2museum.com) proprietor Michal Necasek, the "L8260347" means:
 
-	[I]t was actually manufactured in mid-1988. It took me many years to realize how Intel marked the chips.
-	The initial 'L' (or whatever number/letter it is) can be ignored and the following 3 digits (826) are the
-	date code. The first is the last digit of the year.... The last two digits are the week of manufacture,
-	so week 26 of 1988. Many Intel CPUs actually have 2 or 3 date codes on them, probably related to when the
-	die was made, when the package was assembled, and when it was tested/binned and stamped. On your 386,
-	there might be another date code on the bottom side, but if there is, it's not going to be too far apart
-	from the one on the top and it's going to be slightly older.
+    [I]t was actually manufactured in mid-1988. It took me many years to realize how Intel marked the chips.
+    The initial 'L' (or whatever number/letter it is) can be ignored and the following 3 digits (826) are the
+    date code. The first is the last digit of the year.... The last two digits are the week of manufacture,
+    so week 26 of 1988. Many Intel CPUs actually have 2 or 3 date codes on them, probably related to when the
+    die was made, when the package was assembled, and when it was tested/binned and stamped. On your 386,
+    there might be another date code on the bottom side, but if there is, it's not going to be too far apart
+    from the one on the top and it's going to be slightly older.
 
 Fortunately, my 80386-B1 CPU is also marked with a "&Sigma;&Sigma;" (double sigma), which is how Intel marked
 parts that tested safe for 32-bit multiplication.  Some 80386 CPUs suffered from a manufacturing defect that
@@ -98,8 +354,8 @@ could occasionally result in multiplication errors; defective parts that Intel c
 The only other information I have about revision levels comes from a March 30, 1987 document titled
 "**80386-C0 STEPPING INFORMATION**":
 
-	80386-C0 component identifier readable in DH after reset: 03H
-	80386-C0 revision  identifier readable in DL after reset: 04H
+    80386-C0 component identifier readable in DH after reset: 03H
+    80386-C0 revision  identifier readable in DL after reset: 04H
 
 However, that document does not indicate how a 80386-C0 part was marked, and I've found very little other
 information on the C0 stepping; it may have been quickly superseded by the D0 stepping, which used revision
@@ -127,7 +383,7 @@ that time:
 12. NMI Doesn't Always Bring Chip Out of Shutdown in Obscure Condition with Paging Enabled
 13. HOLD Input During Protected Mode Interlevel IRET when Paging is Enabled
 14. Protected Mode LSL Instruction Should not be Followed by PUSH/POP
-15. LSL/LAR/VERR/VERW. Instructions Malfunction with Null Selector
+15. LSL/LAR/VERR/VERW Instructions Malfunction with Null Selector
 16. "Not Present" LDT in VM86 Task Raises Wrong Exception
 17. Coprocessor Instructions Crossing Page/Segment Boundaries
 18. Double Page Faults Do Not Raise Double Fault Exception
@@ -170,56 +426,57 @@ publicly acknowledged in April 1987.
 
 From the San Jose Mercury News, April 11, 1987:
 
-	INTEL DISCOVERS A BUG IN ITS NEW 80386 CHIP
-	Author(s): CHRISTOPHER H. SCHMITT AND JIM BARTIMO, Mercury News
-	Business Writers Date: April 11, 1987 Section: Business
-	
-	Intel acknowledged Friday that a bug has cropped up in its new flagship microprocessor chip.
-	
-	Microprocessors serve as the electronic brains of devices ranging from personal computers to
-	home appliances.
-	
-	Intel said the bug in its 80386 microprocessor produces incorrect answers when the chip
-	performs certain mathematical operations. "When you multiply one 32-bit number by another
-	32-bit number, you get the error," said Intel spokesman Jim Jarrett. A 32-bit number is one
-	that utilizes the full data path of the chip.
-	
-	However, operating system software that would let the chip fully use its 32-bit characteristics
-	is still being developed, so the problem shouldn't immediately affect personal computer users.
-	Microsoft Corp. of Redmond, Wash., has announced its intention to deliver in early 1988 a 32-bit
-	operating system known as OS/2.
-	
-	Even when using the 32-bit capabilities of the chip, the possibility of an error is "rare,"
-	Jarrett said.
-	
-	Spokesman Bruce LeBoss said not all of the 100,000 80386 chips Intel has produced so far are
-	affected, but he declined to elaborate. Intel is sticking with a previously announced estimate
-	that it will sell from 500,000 to 1 million 80386s this year.
-	
-	To address the problem, Intel said it is notifying computer companies and other customers and
-	extending the chip's warranty from one to two years. Anticipating that it will replace some
-	80386s already in the field, the company charged off an undisclosed amount to cover the
-	expense. One analyst estimated the charge at about $7 million.
-	
-	Intel will test the chips it has already sold to determine which ones have the bug. But it will
-	not replace the chips for free. Instead, Intel will work with customers on an upgrade program.
-	
-	Intel said it will be up to individual computer makers to work with consumers who have
-	purchased machines using the 80386 chip.
-	
-	The problem may be most acutely felt by Houston-based Compaq Computer, which so far has
-	been the biggest producer of 80386-based computers. Compaq said it will disclose by early
-	next week plans for coping with the possibility that versions of its Deskpro 386 computer model
-	contain flawed chips.
-	
-	The bug may cause some shortages of the 80386. The problem won't be fixed until July, so the
-	only guaranteed chips are those that have already been produced and have passed Intel's test.
-	"Everybody wants perfect chips and we'll have fewer of those to go around for a while," Jarrett
-	said. Analysts indicated that in the long run, the bug is more likely to be embarrassing than
-	anything else. "You have a complex chip here," said Daniel Klesken, an analyst for Montgomery
-	Securities in San Francisco. "One should not be surprised that (problems) happen occasionally."
+    INTEL DISCOVERS A BUG IN ITS NEW 80386 CHIP
+    Author(s): CHRISTOPHER H. SCHMITT AND JIM BARTIMO, Mercury News
+    Business Writers Date: April 11, 1987 Section: Business
 
-The problem affected the B1 stepping; it's unknown whether other steppings were affected as well.
+    Intel acknowledged Friday that a bug has cropped up in its new flagship microprocessor chip.
+
+    Microprocessors serve as the electronic brains of devices ranging from personal computers to
+    home appliances.
+
+    Intel said the bug in its 80386 microprocessor produces incorrect answers when the chip
+    performs certain mathematical operations. "When you multiply one 32-bit number by another
+    32-bit number, you get the error," said Intel spokesman Jim Jarrett. A 32-bit number is one
+    that utilizes the full data path of the chip.
+
+    However, operating system software that would let the chip fully use its 32-bit characteristics
+    is still being developed, so the problem shouldn't immediately affect personal computer users.
+    Microsoft Corp. of Redmond, Wash., has announced its intention to deliver in early 1988 a 32-bit
+    operating system known as OS/2.
+
+    Even when using the 32-bit capabilities of the chip, the possibility of an error is "rare,"
+    Jarrett said.
+
+    Spokesman Bruce LeBoss said not all of the 100,000 80386 chips Intel has produced so far are
+    affected, but he declined to elaborate. Intel is sticking with a previously announced estimate
+    that it will sell from 500,000 to 1 million 80386s this year.
+
+    To address the problem, Intel said it is notifying computer companies and other customers and
+    extending the chip's warranty from one to two years. Anticipating that it will replace some
+    80386s already in the field, the company charged off an undisclosed amount to cover the
+    expense. One analyst estimated the charge at about $7 million.
+
+    Intel will test the chips it has already sold to determine which ones have the bug. But it will
+    not replace the chips for free. Instead, Intel will work with customers on an upgrade program.
+
+    Intel said it will be up to individual computer makers to work with consumers who have
+    purchased machines using the 80386 chip.
+
+    The problem may be most acutely felt by Houston-based Compaq Computer, which so far has
+    been the biggest producer of 80386-based computers. Compaq said it will disclose by early
+    next week plans for coping with the possibility that versions of its Deskpro 386 computer model
+    contain flawed chips.
+
+    The bug may cause some shortages of the 80386. The problem won't be fixed until July, so the
+    only guaranteed chips are those that have already been produced and have passed Intel's test.
+    "Everybody wants perfect chips and we'll have fewer of those to go around for a while," Jarrett
+    said. Analysts indicated that in the long run, the bug is more likely to be embarrassing than
+    anything else. "You have a complex chip here," said Daniel Klesken, an analyst for Montgomery
+    Securities in San Francisco. "One should not be surprised that (problems) happen occasionally."
+
+The problem affected the B1 stepping; it's unknown whether other (earlier) steppings were affected
+as well.
 
 What follows is some additional information about early 80386 processors from various online sources.
 
@@ -236,20 +493,20 @@ processor that passes all tests, the model and stepping leap ahead to 3 and 1. V
 support the 80386 (and only then in a single-processor configuration), rejects any 80386 that does not pass all these
 tests.
 
-	Family  Model   Stepping    Test
-	------  -----   --------    ----
-	  3       0       0         32-bit MUL not reliably correct
-	  3       1       0         supports XBTS instruction
-	  3       1       1         set TF bit (0x0100) in EFLAGS causes Debug exception (interrupt 0x01) only at completion of REP MOVSB
-	  3       3       1
+    Family  Model   Stepping    Test
+    ------  -----   --------    ----
+      3       0       0         32-bit MUL not reliably correct
+      3       1       0         supports XBTS instruction
+      3       1       1         set TF bit (0x0100) in EFLAGS causes Debug exception (interrupt 0x01) only at completion of REP MOVSB
+      3       3       1
 
 > The particular multiplication that distinguishes model 0 is of 0x81 by 0x0417A000. This same test was used by Microsoft
 at least as far back as Windows 3.10 Enhanced Mode, to advise:
 
-	The Intel 80386 processor in this computer does not reliably execute 32-bit
-	multiply operations. Windows usually works correctly on computers with this
-	problem but may occasionally fail. You may want to replace your 80386 processor.
-	Press any key to continue...
+    The Intel 80386 processor in this computer does not reliably execute 32-bit
+    multiply operations. Windows usually works correctly on computers with this
+    problem but may occasionally fail. You may want to replace your 80386 processor.
+    Press any key to continue...
 
 > The instruction whose support is tested for model 1 stepping 0 has opcode bytes 0x0F 0xA6 followed by a Mod R/M byte
 and by whatever more this byte indicates is needed for the operand. This opcode is disassembled as XBTS by Microsoft’s
@@ -260,10 +517,10 @@ with zero and ECX with 0xFF00. If executing XBTS ECX,EDX does not cause an Inval
 zero (which CMPXCHG ECX,EDX would not), then XBTS is deemed to be supported and the processor is model 1 stepping 0.
 This case of 80386 processor also was known to Windows 3.10 Enhanced Mode, and was rejected as fatal:
 
-	Windows may not run correctly with the 80386 processor in this computer.
- 
-	Upgrade your 80386 processor or start Windows in standard mode by typing
-	WIN /s at the MS-DOS prompt.
+    Windows may not run correctly with the 80386 processor in this computer.
+
+    Upgrade your 80386 processor or start Windows in standard mode by typing
+    WIN /s at the MS-DOS prompt.
 
 > When string instructions such as MOVSB are repeated because of a REP prefix, each operation is ordinarily interruptible.
 As Intel says (for REP in the [Intel 64 and IA-32 Architectures Software Developer’s Manual Volume 2B: Instruction Set Reference N-Z](http://www.intel.com/design/processor/manuals/253667.pdf)),
@@ -307,39 +564,70 @@ Never allocate valid memory at 0x80000xxx.
 
 ### Instructions
 
-Regarding [Opcode XBTS](http://asm.inightmare.org/opcodelst/index.php?op=XBTS):
+Here's more information on the opcodes (IBTS and XBTS) that were removed from the B1 stepping.
 
-	Opcode XBTS
+[IBTS (0x0F 0xA7)](http://asm.inightmare.org/opcodelst/index.php?op=IBTS)
+
+	Opcode IBTS
 	
 	CPU: 80386 step A0-B0 only 
 	Type of Instruction: User 
 	
-	Instruction: XBTS dest,base,bitoffset,len 
+	Instruction: IBTS base,bitoffset,len,sorc 
 	
 	Description: 
-	Write bit string length bits from bitfield, defined by 
-	and bitsoffset from this base to start of 
-	the field to read. String read from this start field bit to 
-	higher memory addresses or register bits. 
-	And after it string placed to operand, lowest bit of 
-	register or memory to bit 0 of . 
-	
-	Note:	Use SHLD/SHRD instructions for extract bits strings. 
-	On 80386 steps B1+ this opcode generation INT 6, 
-	and on some of 486 other instruction replace this 
-	instruction opcode. 
+	Write bit string length bits from 
+	[bits .. 0 ]	(lowest bits) to bitfield, 
+	defined by and bitsoffset from this base 
+	to start of the field to write. String write from this start 
+	field bit to higher memory addresses or register bits. 
 	
 	Flags Affected: None 
 	
 	CPU mode: RM,PM,VM 
 	
 	+++++++++++++++++++++++ 
-	Physical Form:	XBTS	r16,r/m16,AX,CL 
-	XBTS	r32,r/m32,EAX,CL 
-	COP (Code of Operation)	: 0FH A6H Postbyte 
+	Physical Form:	IBTS	r/m16,AX,CL,r16 
+	IBTS	r/m32,EAX,CL,r32 
+	COP (Code of Operation)	: 0FH A7H Postbyte 
 	
-	Clocks:	XBTS 
-	80386:	6/13 
+	Clocks:	IBTS 
+	80386:	12/19
 
-*[@jeffpar](http://twitter.com/jeffpar)*  
+[XBTS (0x0F 0xA6)](http://asm.inightmare.org/opcodelst/index.php?op=XBTS):
+
+    Opcode XBTS
+
+    CPU: 80386 step A0-B0 only
+    Type of Instruction: User
+
+    Instruction: XBTS dest,base,bitoffset,len
+
+    Description:
+    Write bit string length bits from bitfield, defined by
+    and bitsoffset from this base to start of
+    the field to read. String read from this start field bit to
+    higher memory addresses or register bits.
+    And after it string placed to operand, lowest bit of
+    register or memory to bit 0 of .
+
+    Note:   Use SHLD/SHRD instructions for extract bits strings.
+    On 80386 steps B1+ this opcode generation INT 6,
+    and on some of 486 other instruction replace this
+    instruction opcode.
+
+    Flags Affected: None
+
+    CPU mode: RM,PM,VM
+
+    +++++++++++++++++++++++
+    Physical Form:  XBTS    r16,r/m16,AX,CL
+    XBTS    r32,r/m32,EAX,CL
+    COP (Code of Operation) : 0FH A6H Postbyte
+
+    Clocks: XBTS
+    80386:  6/13
+
+*[@jeffpar](http://twitter.com/jeffpar)*
 *February 23, 2015*
+*(Updated March 9, 2015 with information from "Advanced 80386 Programming Techniques")* 
