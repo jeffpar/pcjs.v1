@@ -244,8 +244,8 @@ RAM.init = function()
  *
  * DeskPro 386 machines came with a minimum of 1Mb of RAM, which could be configured (via jumpers)
  * for 256Kb, 512Kb or 640Kb of conventional memory, starting at address 0x00000000, with the
- * remainder (768Kb, 512Kb, or 384Kb) accessible only at addresses just below 0x01000000.  This
- * second chunk of RAM must have an ID of "ramCPQ".
+ * remainder (768Kb, 512Kb, or 384Kb) accessible only at addresses just below 0x01000000.  In PCjs,
+ * this second chunk of RAM must be separately allocated, with an ID of "ramCPQ".
  *
  * The typical configuration was 640Kb of conventional memory, leaving 384Kb accessible at 0x00FA0000.
  * Presumably, the other configurations (256Kb and 512Kb) would leave 768Kb and 512Kb accessible at
@@ -253,8 +253,11 @@ RAM.init = function()
  *
  * The DeskPro 386 also contained two memory-mapped registers at 0x80C00000.  The first is a write-only
  * mapping register that provides the ability to map the 128Kb at 0x00FE0000 to 0x000E0000, replacing
- * any ROMs in the range 0x000E0000-0x000FFFFF, and optionally write-protecting that 128Kb.  The second
- * register is a read-only diagnostics register that indicates jumper configuration and parity errors.
+ * any ROMs in the range 0x000E0000-0x000FFFFF, and optionally write-protecting that 128Kb; internally,
+ * this register corresponds to bMapping.
+ *
+ * The second register is a read-only diagnostics register that indicates jumper configuration and
+ * parity errors; internally, this register corresponds to bSettings.
  *
  * To emulate the memory-mapped registers at 0x80C00000, the RAM component allocates a block at that
  * address using this custom controller once it sees an allocation for "ramCPQ".

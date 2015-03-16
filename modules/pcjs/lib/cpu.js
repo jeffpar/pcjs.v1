@@ -424,26 +424,28 @@ CPU.prototype.displayChecksum = function()
 };
 
 /**
- * displayReg(sReg, nVal, cch)
+ * displayValue(sLabel, nValue, cch)
+ *
+ * This is principally for displaying register values, but in reality, it can be used to display any
+ * numeric (hex) value bound to the given label.
  *
  * @this {CPU}
- * @param {string} sReg
- * @param {number} nVal
- * @param {number} [cch] default is 4
+ * @param {string} sLabel
+ * @param {number} nValue
+ * @param {number} cch
  */
-CPU.prototype.displayReg = function(sReg, nVal, cch)
+CPU.prototype.displayValue = function(sLabel, nValue, cch)
 {
-    if (this.bindings[sReg]) {
-        if (cch === undefined) cch = 4;
-        if (nVal === undefined) {
-            this.setError("Register " + sReg + " is invalid");
+    if (this.bindings[sLabel]) {
+        if (nValue === undefined) {
+            this.setError("Value for " + sLabel + " is invalid");
             this.stopCPU();
         }
         var sVal;
         if (!this.aFlags.fRunning || this.aFlags.fDisplayLiveRegs) {
-            sVal = str.toHex(nVal, cch);
+            sVal = str.toHex(nValue, cch);
         } else {
-            sVal = "----".substr(0, cch);
+            sVal = "--------".substr(0, cch);
         }
         /*
          * TODO: Determine if this test actually avoids any redrawing when a register hasn't changed, and/or if
@@ -451,7 +453,7 @@ CPU.prototype.displayReg = function(sReg, nVal, cch)
          * string values that will have to garbage-collected), and/or if this is actually slower, and/or if I'm being
          * too obsessive.
          */
-        if (this.bindings[sReg].textContent != sVal) this.bindings[sReg].textContent = sVal;
+        if (this.bindings[sLabel].textContent != sVal) this.bindings[sLabel].textContent = sVal;
     }
 };
 

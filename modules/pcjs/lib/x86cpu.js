@@ -768,6 +768,12 @@ X86CPU.prototype.initProcessor = function()
                 this.aOps0F = X86.aOps0F.slice();
                 this.aOps0F[0x20] = X86.opMOVrcr;
                 this.aOps0F[0x22] = X86.opMOVcrr;
+                /*
+                 * Extend the opcode table by creating a mirror of the first 256 opcodes, but with dword-based
+                 * opcode handlers (as defined in aOpsD) instead word-based opcode handlers.  Whenever dataSize
+                 * is changed from 2 bytes to 4, we trigger the appropriate set of opcode handlers by changing
+                 * bOpcodeBias from 0 to 256.
+                 */
                 this.aOps = this.aOps.concat(this.aOps);
                 for (var bOpcode in X86.aOpsD) {
                     this.aOps[parseInt(bOpcode, 10) + 256] = X86.aOpsD[bOpcode];
@@ -889,6 +895,11 @@ X86CPU.prototype.resetRegs = function()
     this.regCR0 = X86.CR0.MSW.ON;
     this.addrIDT = 0; this.addrIDTLimit = 0x03FF;
     this.nIOPL = 0;             // this should be set before the first setPS() call
+
+    /*
+     * Define the result variables that setPS() relies on for arithmetic and logical flags
+     */
+    this.resultDst = this.resultSrc = this.resultArith = this.resultLogic = 0;
 
     /*
      * This is set by opHelpFault() and reset (to -1) by resetRegs() and opIRET(); its initial purpose is to
@@ -1714,11 +1725,122 @@ X86CPU.prototype.setSP = function(off)
 };
 
 /**
+ * setArithResult(dst, src, value, type, fSubtract)
+ *
+ * Updates the flags for arithmetic instructions; use setLogicResult() for logical instructions.
+ *
+ * The type parameter indicates both the size of the result (BYTE, WORD or DWORD) and which of the
+ * flags should now be considered "cached" by the new result variables.  If the previous resultType
+ * specifies any flags not contained in the new type parameter, then those flags must be immediately
+ * calculated and written to the appropriate bit(s) in resultFlags.
+ *
+ * The fSubtract parameter is used to indicate a "subtracted" result (eg, CMP, DEC, SUB, SBB); the
+ * default assumes an "added" result (eg, ADD, ADC, INC).
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @param {number} value
+ * @param {number} type
+ * @param {boolean} [fSubtract]
+ */
+X86CPU.prototype.setArithResult = function(dst, src, value, type, fSubtract)
+{
+    if ((type & X86.RESULT.ALL) != X86.RESULT.ALL && type != this.resultType) {
+        var diff = ((type ^ this.resultType) & this.resultType);
+        if (diff) {
+            if (diff & X86.RESULT.CF) this.getCF();
+            if (diff & X86.RESULT.PF) this.getPF();
+            if (diff & X86.RESULT.AF) this.getAF();
+            if (diff & X86.RESULT.ZF) this.getZF();
+            if (diff & X86.RESULT.SF) this.getSF();
+            if (diff & X86.RESULT.OF) this.getOF();
+        }
+    }
+    if (!fSubtract) {
+        this.resultDst = dst;
+        this.resultArith = value;
+    } else {
+        this.resultDst = value;
+        this.resultArith = dst;
+    }
+    this.resultSrc = src;
+    this.resultLogic = value;
+    this.resultType = type;
+    if (DEBUG) this.verifyFlags(type);
+};
+
+/**
+ * setLogicResult(value, type, carry, overflow)
+ *
+ * Updates the flags for logical instructions (eg, AND, OR, TEST, XOR); ie, instructions
+ * that update PF, ZF, and SF, while clearing CF and OF.  AF is considered undefined.  CF and OF
+ * are automatically cleared unless explicitly set.
+ *
+ * @this {X86CPU}
+ * @param {number} value
+ * @param {number} type
+ * @param {number} [carry]
+ * @param {number} [overflow]
+ * @return {number} value
+ */
+X86CPU.prototype.setLogicResult = function(value, type, carry, overflow)
+{
+    this.resultType = type | X86.RESULT.LOGIC;
+    this.resultLogic = value;
+    if (carry) this.setCF(); else this.clearCF();
+    if (overflow) this.setOF(); else this.clearOF();
+    if (DEBUG) this.verifyFlags(X86.RESULT.LOGIC | X86.RESULT.CF | X86.RESULT.OF);
+    return value;
+};
+
+/**
+ * verifyFlags(flags)
+ *
+ * @this {X86CPU}
+ * @param {number} flags
+ */
+X86CPU.prototype.verifyFlags = function(flags)
+{
+    if (DEBUG) {
+        if (flags & X86.RESULT.CF) {
+            this.assert(!this.getCF() == !(this.resultFlags & X86.PS.CF));
+        }
+        if (flags & X86.RESULT.PF) {
+            this.assert(!this.getPF() == !(this.resultFlags & X86.PS.PF));
+        }
+        if (flags & X86.RESULT.AF) {
+            this.assert(!this.getAF() == !(this.resultFlags & X86.PS.AF));
+        }
+        if (flags & X86.RESULT.ZF) {
+            this.assert(!this.getZF() == !(this.resultFlags & X86.PS.ZF));
+        }
+        if (flags & X86.RESULT.SF) {
+            this.assert(!this.getSF() == !(this.resultFlags & X86.PS.SF));
+        }
+        if (flags & X86.RESULT.OF) {
+            this.assert(!this.getOF() == !(this.resultFlags & X86.PS.OF));
+        }
+    }
+};
+
+/**
+ * getCarry()
+ *
+ * @this {X86CPU}
+ * @return {number} 0 or 1, depending on whether CF is clear or set
+ */
+X86CPU.prototype.getCarry = function()
+{
+    return this.getCF()? 1 : 0;
+};
+
+/**
  * getCF()
  *
- * Notes regarding carry following a 32-bit addition:
+ * Notes regarding carry following an I386 addition:
  *
- * The following table summarizes bit 31 of dst, src, and result, along with the expected carry bit:
+ * The following table summarizes bit 31 of dst, src, and result, along with the expected carry:
  *
  *      dst src res carry
  *      --- --- --- -----
@@ -1731,29 +1853,27 @@ X86CPU.prototype.setSP = function(off)
  *      1   1   0   1       yes (since the addition of two ones must always produce a carry)
  *      1   1   1   1       yes (since the addition of two ones must always produce a carry)
  *
- * So, we could use “(dst ^ ((dst ^ src) & (src ^ res))) >>> 15” to shift the calculated carry bit (bit 31)
- * into the conventional SIZE_WORD position (bit 16); eg:
+ * So, we use the following calculation:
  *
- *      resultZeroCarry = ((resultZeroCarry >>> 16) | (resultZeroCarry & 0xffff)) | (((dst ^ ((dst ^ src) & (src ^ resultZeroCarry))) >>> 15) & SIZE_WORD);
- *
- * Essentially, we’d be “cramming” all 32 result bits into the low 16 bits (which would effectively represent the
- * zero flag), and then setting bit 16 to the effective carry flag.  This transforms the zero and carry conditions
- * for a DWORD computation into the corresponding conditions for a WORD computation.  This would slow down 32-bit
- * addition, but it would allow 8-bit and 16-bit addition to remain fast.  Languages that support 64-bit values in
- * conjunction with bit-wise operators can omit that one-line transformation, allowing us to set SIZE_WORD to a
- * 33-bit value, but sadly, we cannot do that in JavaScript.
- *
- * Alternatively, we could store the src and dst operands into their own result variables (eg, resultSrc and resultDst)
- * and compute carry lazily, but that would affect MUCH more existing code (eg, all code that currently inspects carry
- * with a single bit test).  I think the DWORD-to-WORD flag conversion for 32-bit instructions that modify zero
- * and/or carry) is a more reasonable first step.
+ *      (resultDst ^ ((resultDst ^ resultSrc) & (resultSrc ^ resultArith))) & resultType
  *
  * @this {X86CPU}
- * @return {number}
+ * @return {number} 0 or X86.PS.CF
  */
 X86CPU.prototype.getCF = function()
 {
-    return (this.resultZeroCarry & this.resultSize)? X86.PS.CF : 0;
+    var flag = (this.resultZeroCarry & this.resultSize)? X86.PS.CF : 0;
+    if (I386) {
+        if (this.resultType & X86.RESULT.CF) {
+            this.resultFlags &= ~X86.PS.CF;
+            if ((this.resultDst ^ ((this.resultDst ^ this.resultSrc) & (this.resultSrc ^ this.resultArith))) & (this.resultType & X86.RESULT.TYPE)) {
+                this.resultFlags |= X86.PS.CF;
+            }
+            this.resultType &= ~X86.RESULT.CF;
+        }
+        if (!OLDFLAGS) return this.resultFlags & X86.PS.CF;
+    }
+    return flag;
 };
 
 /**
@@ -1779,63 +1899,162 @@ X86CPU.prototype.getCF = function()
  * has EVEN parity; the above calculation yields ODD parity, so we use the conditional operator to invert the result.
  *
  * @this {X86CPU}
- * @return {number}
+ * @return {number} 0 or X86.PS.PF
  */
 X86CPU.prototype.getPF = function()
 {
-    var v = this.resultParitySign;
-    return ((0x6996 >> ((v ^ (v >> 4)) & 0xf)) & 1)? 0 : X86.PS.PF;
+    var flag = this.resultParitySign;
+    flag = ((0x6996 >> ((flag ^ (flag >> 4)) & 0xf)) & 1)? 0 : X86.PS.PF;
+    if (I386) {
+        if (this.resultType & X86.RESULT.PF) {
+            this.resultFlags &= ~X86.PS.PF;
+            if ((0x9669 >> ((this.resultLogic ^ (this.resultLogic >> 4)) & 0xf)) & 1) {
+                this.resultFlags |= X86.PS.PF;
+            }
+            this.resultType &= ~X86.RESULT.PF;
+        }
+        if (!OLDFLAGS) return this.resultFlags & X86.PS.PF;
+    }
+    return flag;
 };
 
 /**
  * getAF()
  *
+ * Notes regarding auxiliary carry following an I386 addition:
+ *
+ * To determine if there's been a carry out of the low 4 bits of an arithmetic operation,
+ * we look at all the possible inputs for bit 4, and calculate AF = PS^(D^S):
+ *
+ *      D   S   A   D^S AF
+ *      -   -   -   --- --
+ *      0   0   0   0   0
+ *      0   0   1   0   1
+ *      0   1   0   1   1
+ *      0   1   1   1   0
+ *      1   0   0   1   1
+ *      1   0   1   1   0
+ *      1   1   0   0   0
+ *      1   1   1   0   1
+ *
+ * The final calculation looks like:
+ *
+ *      (resultArith ^ (resultDst ^ resultSrc)) & AUXOVF_AF
+ *
  * @this {X86CPU}
- * @return {number}
+ * @return {number} 0 or X86.PS.AF
  */
 X86CPU.prototype.getAF = function()
 {
-    return ((this.resultParitySign ^ this.resultAuxOverflow) & X86.RESULT.AUXOVF_AF)? X86.PS.AF : 0;
+    var flag = ((this.resultParitySign ^ this.resultAuxOverflow) & X86.RESULT.AUXOVF_AF)? X86.PS.AF : 0;
+    if (I386) {
+        if (this.resultType & X86.RESULT.AF) {
+            this.resultFlags &= ~X86.PS.AF;
+            if ((this.resultArith ^ (this.resultDst ^ this.resultSrc)) & X86.RESULT.AUXOVF_AF) {
+                this.resultFlags |= X86.PS.AF;
+            }
+            this.resultType &= ~X86.RESULT.AF;
+        }
+        if (!OLDFLAGS) return this.resultFlags & X86.PS.AF;
+    }
+    return flag;
 };
 
 /**
  * getZF()
  *
  * @this {X86CPU}
- * @return {number}
+ * @return {number} 0 or X86.PS.ZF
  */
 X86CPU.prototype.getZF = function()
 {
-    return (this.resultZeroCarry & (this.resultSize - 1))? 0 : X86.PS.ZF;
+    var flag = (this.resultZeroCarry & (this.resultSize - 1))? 0 : X86.PS.ZF;
+    if (I386) {
+        if (this.resultType & X86.RESULT.ZF) {
+            this.resultFlags &= ~X86.PS.ZF;
+            if (!(this.resultLogic & (((this.resultType & X86.RESULT.TYPE) - 1) | (this.resultType & X86.RESULT.TYPE)))) {
+                this.resultFlags |= X86.PS.ZF;
+            }
+            this.resultType &= ~X86.RESULT.ZF;
+        }
+        if (!OLDFLAGS) return this.resultFlags & X86.PS.ZF;
+    }
+    return flag;
 };
 
 /**
  * getSF()
  *
  * @this {X86CPU}
- * @return {number}
+ * @return {number} 0 or X86.PS.SF
  */
 X86CPU.prototype.getSF = function()
 {
-    return (this.resultParitySign & (this.resultSize >> 1))? X86.PS.SF : 0;
+    var flag = (this.resultParitySign & (this.resultSize >> 1))? X86.PS.SF : 0;
+    if (I386) {
+        if (this.resultType & X86.RESULT.SF) {
+            this.resultFlags &= ~X86.PS.SF;
+            if (this.resultLogic & (this.resultType & X86.RESULT.TYPE)) {
+                this.resultFlags |= X86.PS.SF;
+            }
+            this.resultType &= ~X86.RESULT.SF;
+        }
+        if (!OLDFLAGS) return this.resultFlags & X86.PS.SF;
+    }
+    return flag;
 };
 
 /**
  * getOF()
  *
+ * Overflow was originally calculated as:
+ *
+ *      (resultParitySign ^ resultAuxOverflow ^ (resultParitySign >> 1)) & (resultSize >> 1)
+ *
+ * but as you can see, that calculation depends on the carry out of the 8/16/32-bit result in
+ * resultParitySign, which we don't have access to for 32-bit results.  So we fall-back to the
+ * following:
+ *
+ *      ((resultDst ^ resultArith) & (resultSrc ^ resultArith)) & resultType
+ *
+ * which you can verify from the following table of sign bits (where x1 is resultDst ^ resultArith,
+ * and x2 is resultSrc ^ resultArith):
+ *
+ *      D   S   A   x1  x2  OF
+ *      -   -   -   --  --  --
+ *      0   0   0   0   0   0
+ *      0   0   1   1   1   1 (adding two positive values yielded a negative value)
+ *      0   1   0   0   1   0
+ *      0   1   1   1   0   0
+ *      1   0   0   1   0   0
+ *      1   0   1   0   1   0
+ *      1   1   0   1   1   1 (adding two negative values yielded a positive value)
+ *      1   1   1   0   0   0
+ *
  * @this {X86CPU}
- * @return {number}
+ * @return {number} 0 or X86.PS.OF
  */
 X86CPU.prototype.getOF = function()
 {
-    return ((this.resultParitySign ^ this.resultAuxOverflow ^ (this.resultParitySign >> 1)) & (this.resultSize >> 1))? X86.PS.OF : 0;
+    var flag = ((this.resultParitySign ^ this.resultAuxOverflow ^ (this.resultParitySign >> 1)) & (this.resultSize >> 1))? X86.PS.OF : 0;
+    if (I386) {
+        if (this.resultType & X86.RESULT.OF) {
+            this.resultFlags &= ~X86.PS.OF;
+            if (((this.resultDst ^ this.resultArith) & (this.resultSrc ^ this.resultArith)) & (this.resultType & X86.RESULT.TYPE)) {
+                this.resultFlags |= X86.PS.OF;
+            }
+            this.resultType &= ~X86.RESULT.OF;
+        }
+        if (!OLDFLAGS) return this.resultFlags & X86.PS.OF;
+    }
+    return flag;
 };
 
 /**
  * getTF()
  *
  * @this {X86CPU}
- * @return {number}
+ * @return {number} 0 or X86.PS.TF
  */
 X86CPU.prototype.getTF = function()
 {
@@ -1846,7 +2065,7 @@ X86CPU.prototype.getTF = function()
  * getIF()
  *
  * @this {X86CPU}
- * @return {number}
+ * @return {number} 0 or X86.PS.IF
  */
 X86CPU.prototype.getIF = function()
 {
@@ -1857,7 +2076,7 @@ X86CPU.prototype.getIF = function()
  * getDF()
  *
  * @this {X86CPU}
- * @return {number}
+ * @return {number} 0 or X86.PS.DF
  */
 X86CPU.prototype.getDF = function()
 {
@@ -1872,6 +2091,10 @@ X86CPU.prototype.getDF = function()
 X86CPU.prototype.clearCF = function()
 {
     this.resultZeroCarry &= ~this.resultSize;
+    if (I386) {
+        this.resultType &= ~X86.RESULT.CF;
+        this.resultFlags &= ~X86.PS.CF;
+    }
 };
 
 /**
@@ -1882,6 +2105,10 @@ X86CPU.prototype.clearCF = function()
 X86CPU.prototype.clearPF = function()
 {
     if (this.getPF()) this.resultParitySign ^= 0x1;
+    if (I386) {
+        this.resultType &= ~X86.RESULT.PF;
+        this.resultFlags &= ~X86.PS.PF;
+    }
 };
 
 /**
@@ -1892,6 +2119,10 @@ X86CPU.prototype.clearPF = function()
 X86CPU.prototype.clearAF = function()
 {
     this.resultAuxOverflow = (this.resultParitySign & X86.RESULT.AUXOVF_AF) | (this.resultAuxOverflow & ~X86.RESULT.AUXOVF_AF);
+    if (I386) {
+        this.resultType &= ~X86.RESULT.AF;
+        this.resultFlags &= ~X86.PS.AF;
+    }
 };
 
 /**
@@ -1902,6 +2133,10 @@ X86CPU.prototype.clearAF = function()
 X86CPU.prototype.clearZF = function()
 {
     this.resultZeroCarry |= (this.resultSize - 1);
+    if (I386) {
+        this.resultType &= ~X86.RESULT.ZF;
+        this.resultFlags &= ~X86.PS.ZF;
+    }
 };
 
 /**
@@ -1914,6 +2149,10 @@ X86CPU.prototype.clearSF = function()
     if (this.getSF()) {
         this.resultParitySign ^= (this.resultSize >> 1) | (this.resultSize >> 2);
         this.resultAuxOverflow ^= X86.RESULT.AUXOVF_OF;
+    }
+    if (I386) {
+        this.resultType &= ~X86.RESULT.SF;
+        this.resultFlags &= ~X86.PS.SF;
     }
 };
 
@@ -1946,6 +2185,10 @@ X86CPU.prototype.clearOF = function()
 {
     this.resultParitySign &= ~this.resultSize;
     this.resultAuxOverflow = (this.resultParitySign & X86.RESULT.AUXOVF_OF) | (this.resultAuxOverflow & ~X86.RESULT.AUXOVF_OF);
+    if (I386) {
+        this.resultType &= ~X86.RESULT.OF;
+        this.resultFlags &= ~X86.PS.OF;
+    }
 };
 
 /**
@@ -1956,6 +2199,10 @@ X86CPU.prototype.clearOF = function()
 X86CPU.prototype.setCF = function()
 {
     this.resultZeroCarry |= this.resultSize;
+    if (I386) {
+        this.resultType &= ~X86.RESULT.CF;
+        this.resultFlags |= X86.PS.CF;
+    }
 };
 
 /**
@@ -1966,6 +2213,10 @@ X86CPU.prototype.setCF = function()
 X86CPU.prototype.setPF = function()
 {
     if (!this.getPF()) this.resultParitySign ^= 0x1;
+    if (I386) {
+        this.resultType &= ~X86.RESULT.PF;
+        this.resultFlags |= X86.PS.PF;
+    }
 };
 
 /**
@@ -1976,6 +2227,10 @@ X86CPU.prototype.setPF = function()
 X86CPU.prototype.setAF = function()
 {
     this.resultAuxOverflow = ~(this.resultParitySign & X86.RESULT.AUXOVF_AF) & X86.RESULT.AUXOVF_AF | (this.resultAuxOverflow & ~X86.RESULT.AUXOVF_AF);
+    if (I386) {
+        this.resultType &= ~X86.RESULT.AF;
+        this.resultFlags |= X86.PS.AF;
+    }
 };
 
 /**
@@ -1986,6 +2241,10 @@ X86CPU.prototype.setAF = function()
 X86CPU.prototype.setZF = function()
 {
     this.resultZeroCarry &= ~(this.resultSize - 1);
+    if (I386) {
+        this.resultType &= ~X86.RESULT.ZF;
+        this.resultFlags |= X86.PS.ZF;
+    }
 };
 
 /**
@@ -1998,6 +2257,10 @@ X86CPU.prototype.setSF = function()
     if (!this.getSF()) {
         this.resultParitySign ^= (this.resultSize >> 1) | (this.resultSize >> 2);
         this.resultAuxOverflow ^= X86.RESULT.AUXOVF_OF;
+    }
+    if (I386) {
+        this.resultType &= ~X86.RESULT.SF;
+        this.resultFlags |= X86.PS.SF;
     }
 };
 
@@ -2028,6 +2291,10 @@ X86CPU.prototype.setDF = function()
  */
 X86CPU.prototype.setOF = function()
 {
+    if (I386) {
+        this.resultType &= ~X86.RESULT.OF;
+        this.resultFlags |= X86.PS.OF;
+    }
     this.resultParitySign |= this.resultSize;
     this.resultAuxOverflow = (this.resultParitySign & X86.RESULT.AUXOVF_OF) | (this.resultAuxOverflow & ~X86.RESULT.AUXOVF_OF);
 };
@@ -2078,15 +2345,20 @@ X86CPU.prototype.setMSW = function(w)
  */
 X86CPU.prototype.setPS = function(regPS, cpl)
 {
-    this.resultSize = X86.RESULT.SIZE_BYTE;         // NOTE: We could have chosen SIZE_WORD, too; it's irrelevant
-    this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = 0;
-
-    if (regPS & X86.PS.CF) this.setCF();
-    if (!(regPS & X86.PS.PF)) this.resultParitySign |= 0x1;
-    if (regPS & X86.PS.AF) this.resultAuxOverflow |= X86.RESULT.AUXOVF_AF;
-    if (!(regPS & X86.PS.ZF)) this.clearZF();
-    if (regPS & X86.PS.SF) this.setSF();
-    if (regPS & X86.PS.OF) this.setOF();
+    if (I386) {
+        this.resultType = X86.RESULT.BYTE;
+        this.resultFlags = regPS & (X86.PS.CF | X86.PS.PF | X86.PS.AF | X86.PS.ZF | X86.PS.SF | X86.PS.OF);
+    }
+    if (OLDFLAGS) {
+        this.resultSize = X86.RESULT.SIZE_BYTE;
+        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = 0;
+        if (regPS & X86.PS.CF) this.setCF();
+        if (!(regPS & X86.PS.PF)) this.resultParitySign |= 0x1;
+        if (regPS & X86.PS.AF) this.resultAuxOverflow |= X86.RESULT.AUXOVF_AF;
+        if (!(regPS & X86.PS.ZF)) this.clearZF();
+        if (regPS & X86.PS.SF) this.setSF();
+        if (regPS & X86.PS.OF) this.setOF();
+    }
 
     /*
      * OS/2 1.0 discriminates between an 80286 and an 80386 based on whether an IRET in real-mode that
@@ -2166,37 +2438,46 @@ X86CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
 {
     var fBound = false;
     switch (sBinding) {
-        case "AX":
-        case "BX":
-        case "CX":
-        case "DX":
-        case "SP":
-        case "BP":
-        case "SI":
-        case "DI":
-        case "CS":
-        case "DS":
-        case "SS":
-        case "ES":
-        case "IP":
-        case "PC":      // deprecated as an alias for "IP" (still used by older XML files, like the one at http://tpoindex.github.io/crobots/)
-        case "PS":      // this refers to "Processor Status", aka the 16-bit flags register (although DEBUG.COM refers to this as "PC", surprisingly)
-        case "C":
-        case "P":
-        case "A":
-        case "Z":
-        case "S":
-        case "T":
-        case "I":
-        case "D":
-        case "V":
-            this.bindings[sBinding] = control;
-            this.cLiveRegs++;
-            fBound = true;
-            break;
-        default:
-            fBound = this.parent.setBinding.call(this, sHTMLType, sBinding, control);
-            break;
+    case "EAX":
+    case "EBX":
+    case "ECX":
+    case "EDX":
+    case "ESP":
+    case "EBP":
+    case "ESI":
+    case "EDI":
+    case "EIP":
+    case "AX":
+    case "BX":
+    case "CX":
+    case "DX":
+    case "SP":
+    case "BP":
+    case "SI":
+    case "DI":
+    case "IP":
+    case "PC":      // deprecated as an alias for "IP" (still used by older XML files, like the one at http://tpoindex.github.io/crobots/)
+    case "CS":
+    case "DS":
+    case "SS":
+    case "ES":
+    case "PS":      // this refers to "Processor Status", aka the 16-bit flags register (although DEBUG.COM refers to this as "PC", surprisingly)
+    case "C":
+    case "P":
+    case "A":
+    case "Z":
+    case "S":
+    case "T":
+    case "I":
+    case "D":
+    case "V":
+        this.bindings[sBinding] = control;
+        this.cLiveRegs++;
+        fBound = true;
+        break;
+    default:
+        fBound = this.parent.setBinding.call(this, sHTMLType, sBinding, control);
+        break;
     }
     return fBound;
 };
@@ -3056,13 +3337,43 @@ X86CPU.prototype.delayINTR = function()
 };
 
 /**
+ * updateReg(sReg, nValue)
+ *
+ * This function helps updateStatus() by massaging the register names and values according to
+ * CPU type before passing the call to displayValue(); in the "old days", updateStatus() called
+ * displayValue() directly (although then it was called displayReg()).
+ *
+ * @this {X86CPU}
+ * @param {string} sReg
+ * @param {number} nValue
+ */
+X86CPU.prototype.updateReg = function(sReg, nValue)
+{
+    var cch = 4;
+    if (sReg.length == 1) {
+        cch = 1;
+        nValue = nValue? 1 : 0;
+    }
+    if (this.model < 80386) {
+        if (sReg.length > 2) {
+            sReg = sReg.substr(0, 2);
+        }
+    } else {
+        if (sReg == "PS" || sReg.length > 2) {
+            cch = 8;
+        }
+    }
+    this.displayValue(sReg, nValue, cch);
+};
+
+/**
  * updateStatus()
  *
  * This provides periodic Control Panel updates (eg, a few times per second; see STATUS_UPDATES_PER_SECOND).
  * this is where we take care of any DOM updates (eg, register values) while the CPU is running.
  *
- * Any high-frequency updates should be performed in updateVideo(), which should avoid DOM updates, since
- * updateVideo() can be called up to 60 times per second (see VIDEO_UPDATES_PER_SECOND).
+ * Any high-frequency updates should be performed in updateVideo(), which should avoid DOM updates, since updateVideo()
+ * can be called up to 60 times per second (see VIDEO_UPDATES_PER_SECOND).
  *
  * @this {X86CPU}
  * @param {boolean} [fForce] (true will display registers even if the CPU is running and "live" registers are not enabled)
@@ -3071,30 +3382,30 @@ X86CPU.prototype.updateStatus = function(fForce)
 {
     if (this.cLiveRegs) {
         if (fForce || !this.aFlags.fRunning || this.aFlags.fDisplayLiveRegs) {
-            this.displayReg("AX", this.regEAX);
-            this.displayReg("BX", this.regEBX);
-            this.displayReg("CX", this.regECX);
-            this.displayReg("DX", this.regEDX);
-            this.displayReg("SP", this.getSP());
-            this.displayReg("BP", this.regEBP);
-            this.displayReg("SI", this.regESI);
-            this.displayReg("DI", this.regEDI);
-            this.displayReg("CS", this.getCS());
-            this.displayReg("DS", this.getDS());
-            this.displayReg("SS", this.getSS());
-            this.displayReg("ES", this.getES());
-            this.displayReg("IP", this.getIP());
+            this.updateReg("EAX", this.regEAX);
+            this.updateReg("EBX", this.regEBX);
+            this.updateReg("ECX", this.regECX);
+            this.updateReg("EDX", this.regEDX);
+            this.updateReg("ESP", this.getSP());
+            this.updateReg("EBP", this.regEBP);
+            this.updateReg("ESI", this.regESI);
+            this.updateReg("EDI", this.regEDI);
+            this.updateReg("CS", this.getCS());
+            this.updateReg("DS", this.getDS());
+            this.updateReg("SS", this.getSS());
+            this.updateReg("ES", this.getES());
+            this.updateReg("EIP", this.getIP());
             var regPS = this.getPS();
-            this.displayReg("PS", regPS);
-            this.displayReg("V", (regPS & X86.PS.OF)? 1 : 0, 1);
-            this.displayReg("D", (regPS & X86.PS.DF)? 1 : 0, 1);
-            this.displayReg("I", (regPS & X86.PS.IF)? 1 : 0, 1);
-            this.displayReg("T", (regPS & X86.PS.TF)? 1 : 0, 1);
-            this.displayReg("S", (regPS & X86.PS.SF)? 1 : 0, 1);
-            this.displayReg("Z", (regPS & X86.PS.ZF)? 1 : 0, 1);
-            this.displayReg("A", (regPS & X86.PS.AF)? 1 : 0, 1);
-            this.displayReg("P", (regPS & X86.PS.PF)? 1 : 0, 1);
-            this.displayReg("C", (regPS & X86.PS.CF)? 1 : 0, 1);
+            this.updateReg("PS", regPS);
+            this.updateReg("V", (regPS & X86.PS.OF));
+            this.updateReg("D", (regPS & X86.PS.DF));
+            this.updateReg("I", (regPS & X86.PS.IF));
+            this.updateReg("T", (regPS & X86.PS.TF));
+            this.updateReg("S", (regPS & X86.PS.SF));
+            this.updateReg("Z", (regPS & X86.PS.ZF));
+            this.updateReg("A", (regPS & X86.PS.AF));
+            this.updateReg("P", (regPS & X86.PS.PF));
+            this.updateReg("C", (regPS & X86.PS.CF));
         }
     }
 

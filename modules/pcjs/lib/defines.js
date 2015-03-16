@@ -120,6 +120,13 @@ var I386 = true;
 /**
  * @define {boolean}
  *
+ * Retain support for old flags.
+ */
+var OLDFLAGS = true;
+
+/**
+ * @define {boolean}
+ *
  * Enables Compaq DeskPro 386 support.
  */
 var COMPAQ386 = true;

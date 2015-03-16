@@ -544,7 +544,7 @@ X86.opANDAX = function ANDAX()
  *
  * @this {X86CPU}
  */
-X86.opANDEAX = function ANDEAX()
+X86.opANDAXd = function ANDAXd()
 {
     this.regEAX = X86.fnANDd.call(this, this.regEAX, this.getIPLong());
     if (BACKTRACK) {
@@ -581,20 +581,27 @@ X86.opES = function ES()
 X86.opDAA = function DAA()
 {
     var AL = this.regEAX & 0xff;
-    var fAuxCarry = this.getAF();
-    var fCarry = (this.resultZeroCarry & this.resultSize);
-    if ((AL & 0xf) > 9 || fAuxCarry) {
+    var AF = this.getAF();
+    var CF = this.getCF();
+    if ((AL & 0xf) > 9 || AF) {
         AL += 0x6;
-        fAuxCarry = true;
+        AF = X86.PS.AF;
     }
-    if (AL > 0x9f || fCarry) {
+    if (AL > 0x9f || CF) {
         AL += 0x60;
-        fCarry = true;
+        CF = X86.PS.CF;
     }
-    this.regEAX = (this.regEAX & ~0xff) | (this.resultZeroCarry = this.resultParitySign = (AL & 0xff));
-    this.resultSize = X86.RESULT.SIZE_WORD;
-    if (fCarry) this.resultZeroCarry |= this.resultSize;
-    if (fAuxCarry) this.setAF(); else this.clearAF();
+    var b = (AL & 0xff);
+    this.regEAX = (this.regEAX & ~0xff) | b;
+    if (OLDFLAGS) {
+        this.resultSize = X86.RESULT.SIZE_BYTE;
+        this.resultZeroCarry = this.resultParitySign = b;
+    }
+    if (I386) {
+        this.setLogicResult(b, X86.RESULT.BYTE);
+    }
+    if (CF) this.setCF(); else this.clearCF();
+    if (AF) this.setAF(); else this.clearAF();
     this.nStepCycles -= this.CYCLES.nOpCyclesAAA;          // AAA and DAA have the same cycle times
 };
 
@@ -696,20 +703,27 @@ X86.opCS = function CS()
 X86.opDAS = function DAS()
 {
     var AL = this.regEAX & 0xff;
-    var fAuxCarry = this.getAF();
-    var fCarry = (this.resultZeroCarry & this.resultSize);
-    if ((AL & 0xf) > 9 || fAuxCarry) {
+    var AF = this.getAF();
+    var CF = this.getCF();
+    if ((AL & 0xf) > 9 || AF) {
         AL -= 0x6;
-        fAuxCarry = true;
+        AF = X86.PS.AF;
     }
-    if (AL > 0x9f || fCarry) {
+    if (AL > 0x9f || CF) {
         AL -= 0x60;
-        fCarry = true;
+        CF = X86.PS.CF;
     }
-    this.regEAX = (this.regEAX & ~0xff) | (this.resultZeroCarry = this.resultParitySign = (AL & 0xff));
-    this.resultSize = X86.RESULT.SIZE_WORD;
-    if (fCarry) this.resultZeroCarry |= this.resultSize;
-    if (fAuxCarry) this.setAF(); else this.clearAF();
+    var b = (AL & 0xff);
+    this.regEAX = (this.regEAX & ~0xff) | b;
+    if (OLDFLAGS) {
+        this.resultSize = X86.RESULT.SIZE_BYTE;
+        this.resultZeroCarry = this.resultParitySign = b;
+    }
+    if (I386) {
+        this.setLogicResult(b, X86.RESULT.BYTE);
+    }
+    if (CF) this.setCF(); else this.clearCF();
+    if (AF) this.setAF(); else this.clearAF();
     this.nStepCycles -= this.CYCLES.nOpCyclesAAA;          // AAA and DAS have the same cycle times
 };
 
@@ -754,6 +768,16 @@ X86.opXORrw = function XORrw()
 };
 
 /**
+ * op=0x33 (XOR reg,dword)
+ *
+ * @this {X86CPU}
+ */
+X86.opXORrd = function XORrd()
+{
+    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnXORd);
+};
+
+/**
  * op=0x34 (XOR AL,imm8)
  *
  * @this {X86CPU}
@@ -763,8 +787,8 @@ X86.opXORALb = function XORALb()
     this.regEAX = (this.regEAX & ~0xff) | X86.fnXORb.call(this, this.regEAX & 0xff, this.getIPByte());
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
     /*
-     * In the absence of any EA calculations, opGrpXORb() will deduct nOpCyclesArithRR, and for all CPUs through
-     * the 80286, we need deduct only one more cycle.
+     * In the absence of any EA calculations, opGrpXORb() will deduct nOpCyclesArithRR, and for all CPUs
+     * through the 80286, we need deduct only one more cycle.
      */
     this.nStepCycles--;
 };
@@ -781,8 +805,8 @@ X86.opXORAXw = function XORAXw()
         this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
     }
     /*
-     * In the absence of any EA calculations, opGrpXORw() will deduct nOpCyclesArithRR, and for all CPUs through
-     * the 80286, we need deduct only one more cycle.
+     * In the absence of any EA calculations, opGrpXORw() will deduct nOpCyclesArithRR, and for all CPUs
+     * through the 80286, we need deduct only one more cycle.
      */
     this.nStepCycles--;
 };
@@ -810,21 +834,19 @@ X86.opSS = function SS()
  */
 X86.opAAA = function AAA()
 {
+    var CF, AF;
     var AL = this.regEAX & 0xff;
-    var AH = this.regEAX >> 8;
-    var fCarry;
-    var fAuxCarry = this.getAF();
-    if ((AL & 0xf) > 9 || fAuxCarry) {
+    var AH = (this.regEAX >> 8) & 0xff;
+    if ((AL & 0xf) > 9 || this.getAF()) {
         AL = (AL + 0x6) & 0xf;
         AH = (AH + 1) & 0xff;
-        fCarry = fAuxCarry = true;
+        CF = AF = 1;
     } else {
-        fCarry = fAuxCarry = false;
+        CF = AF = 0;
     }
-    this.regEAX = (this.regEAX & ~0xffff) | (AH << 8) | (this.resultZeroCarry = AL);
-    this.resultSize = X86.RESULT.SIZE_WORD;
-    if (fCarry) this.resultZeroCarry |= this.resultSize;
-    if (fAuxCarry) this.setAF(); else this.clearAF();
+    this.regEAX = (this.regEAX & ~0xffff) | ((AH << 8) | AL);
+    if (CF) this.setCF(); else this.clearCF();
+    if (AF) this.setAF(); else this.clearAF();
     this.nStepCycles -= this.CYCLES.nOpCyclesAAA;
 };
 
@@ -917,32 +939,23 @@ X86.opDS = function DS()
 /**
  * op=0x3D (AAS)
  *
- * From "The 8086 Book":
- *
- *  1. If the low-order four bits of the AL register are between 0 and 9 and the AF flag is 0, then go to Step 3.
- *  2. If the low-order four bits of the AL register are between A and F or the AF flag is 1, then subtract 6 from the AL register, subtract 1 from the AH register, and set the AF flag to 1.
- *  3. Clear the high-order four bits of the AL register.
- *  4. Set the CF flag to the value of the AF flag.
- *
  * @this {X86CPU}
  */
 X86.opAAS = function AAS()
 {
+    var CF, AF;
     var AL = this.regEAX & 0xff;
-    var AH = this.regEAX >> 8;
-    var fCarry;
-    var fAuxCarry = this.getAF();
-    if ((AL & 0xf) > 9 || fAuxCarry) {
+    var AH = (this.regEAX >> 8) & 0xff;
+    if ((AL & 0xf) > 9 || this.getAF()) {
         AL = (AL - 0x6) & 0xf;
         AH = (AH - 1) & 0xff;
-        fCarry = fAuxCarry = true;
+        CF = AF = 1;
     } else {
-        fCarry = fAuxCarry = false;
+        CF = AF = 0;
     }
-    this.regEAX = (this.regEAX & ~0xffff) | (AH << 8) | (this.resultZeroCarry = AL);
-    this.resultSize = X86.RESULT.SIZE_WORD;
-    if (fCarry) this.resultZeroCarry |= this.resultSize;
-    if (fAuxCarry) this.setAF(); else this.clearAF();
+    this.regEAX = (this.regEAX & ~0xffff) | ((AH << 8) | AL);
+    if (CF) this.setCF(); else this.clearCF();
+    if (AF) this.setAF(); else this.clearAF();
     this.nStepCycles -= this.CYCLES.nOpCyclesAAA;   // AAA and AAS have the same cycle times
 };
 
@@ -953,16 +966,7 @@ X86.opAAS = function AAS()
  */
 X86.opINCAX = function INCAX()
 {
-    this.resultParitySign = (this.resultAuxOverflow = this.regEAX) + 1;
-    if (I386) {
-        this.regEAX = (this.regEAX & ~this.dataMask) | (this.resultParitySign & this.dataMask);
-        this.resultZeroCarry = (((this.regEAX) & this.dataMask) >>> 16) | (this.regEAX & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-    } else {
-        this.regEAX = this.resultParitySign & 0xffff;
-        this.resultZeroCarry = this.regEAX | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-    }
-    this.resultSize = X86.RESULT.SIZE_WORD;
-    this.nStepCycles -= 2;                          // this form of INC takes 2 cycles on all CPUs
+    this.regEAX = X86.fnINCr.call(this, this.regEAX);
 };
 
 /**
@@ -972,16 +976,7 @@ X86.opINCAX = function INCAX()
  */
 X86.opINCCX = function INCCX()
 {
-    this.resultParitySign = (this.resultAuxOverflow = this.regECX) + 1;
-    if (I386) {
-        this.regECX = (this.regECX & ~this.dataMask) | (this.resultParitySign & this.dataMask);
-        this.resultZeroCarry = (((this.regECX) & this.dataMask) >>> 16) | (this.regECX & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-    } else {
-        this.regECX = this.resultParitySign & 0xffff;
-        this.resultZeroCarry = this.regECX | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-    }
-    this.resultSize = X86.RESULT.SIZE_WORD;
-    this.nStepCycles -= 2;                          // this form of INC takes 2 cycles on all CPUs
+    this.regECX = X86.fnINCr.call(this, this.regECX);
 };
 
 /**
@@ -991,16 +986,7 @@ X86.opINCCX = function INCCX()
  */
 X86.opINCDX = function INCDX()
 {
-    this.resultParitySign = (this.resultAuxOverflow = this.regEDX) + 1;
-    if (I386) {
-        this.regEDX = (this.regEDX & ~this.dataMask) | (this.resultParitySign & this.dataMask);
-        this.resultZeroCarry = (((this.regEDX) & this.dataMask) >>> 16) | (this.regEDX & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-    } else {
-        this.regEDX = this.resultParitySign & 0xffff;
-        this.resultZeroCarry = this.regEDX | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-    }
-    this.resultSize = X86.RESULT.SIZE_WORD;
-    this.nStepCycles -= 2;                          // this form of INC takes 2 cycles on all CPUs
+    this.regEDX = X86.fnINCr.call(this, this.regEDX);
 };
 
 /**
@@ -1010,16 +996,7 @@ X86.opINCDX = function INCDX()
  */
 X86.opINCBX = function INCBX()
 {
-    this.resultParitySign = (this.resultAuxOverflow = this.regEBX) + 1;
-    if (I386) {
-        this.regEBX = (this.regEBX & ~this.dataMask) | (this.resultParitySign & this.dataMask);
-        this.resultZeroCarry = (((this.regEBX) & this.dataMask) >>> 16) | (this.regEBX & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-    } else {
-        this.regEBX = this.resultParitySign & 0xffff;
-        this.resultZeroCarry = this.regEBX | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-    }
-    this.resultSize = X86.RESULT.SIZE_WORD;
-    this.nStepCycles -= 2;                          // this form of INC takes 2 cycles on all CPUs
+    this.regEBX = X86.fnINCr.call(this, this.regEBX);
 };
 
 /**
@@ -1029,12 +1006,7 @@ X86.opINCBX = function INCBX()
  */
 X86.opINCSP = function INCSP()
 {
-    var regESP;
-    this.resultParitySign = (this.resultAuxOverflow = this.getSP()) + 1;
-    this.setSP(regESP = (this.resultAuxOverflow & ~this.dataMask) | (this.resultParitySign & this.dataMask));
-    this.resultZeroCarry = (((regESP) & this.dataMask) >>> 16) | (regESP & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-    this.resultSize = X86.RESULT.SIZE_WORD;
-    this.nStepCycles -= 2;                          // this form of INC takes 2 cycles on all CPUs
+    this.setSP(X86.fnINCr.call(this, this.getSP()));
 };
 
 /**
@@ -1044,16 +1016,7 @@ X86.opINCSP = function INCSP()
  */
 X86.opINCBP = function INCBP()
 {
-    this.resultParitySign = (this.resultAuxOverflow = this.regEBP) + 1;
-    if (I386) {
-        this.regEBP = (this.regEBP & ~this.dataMask) | (this.resultParitySign & this.dataMask);
-        this.resultZeroCarry = (((this.regEBP) & this.dataMask) >>> 16) | (this.regEBP & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-    } else {
-        this.regEBP = this.resultParitySign & 0xffff;
-        this.resultZeroCarry = this.regEBP | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-    }
-    this.resultSize = X86.RESULT.SIZE_WORD;
-    this.nStepCycles -= 2;                          // this form of INC takes 2 cycles on all CPUs
+    this.regEBP = X86.fnINCr.call(this, this.regEBP);
 };
 
 /**
@@ -1063,16 +1026,7 @@ X86.opINCBP = function INCBP()
  */
 X86.opINCSI = function INCSI()
 {
-    this.resultParitySign = (this.resultAuxOverflow = this.regESI) + 1;
-    if (I386) {
-        this.regESI = (this.regESI & ~this.dataMask) | (this.resultParitySign & this.dataMask);
-        this.resultZeroCarry = (((this.regESI) & this.dataMask) >>> 16) | (this.regESI & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-    } else {
-        this.regESI = this.resultParitySign & 0xffff;
-        this.resultZeroCarry = this.regESI | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-    }
-    this.resultSize = X86.RESULT.SIZE_WORD;
-    this.nStepCycles -= 2;                          // this form of INC takes 2 cycles on all CPUs
+    this.regESI = X86.fnINCr.call(this, this.regESI);
 };
 
 /**
@@ -1082,16 +1036,7 @@ X86.opINCSI = function INCSI()
  */
 X86.opINCDI = function INCDI()
 {
-    this.resultParitySign = (this.resultAuxOverflow = this.regEDI) + 1;
-    if (I386) {
-        this.regEDI = (this.regEDI & ~this.dataMask) | (this.resultParitySign & this.dataMask);
-        this.resultZeroCarry = (((this.regEDI) & this.dataMask) >>> 16) | (this.regEDI & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-    } else {
-        this.regEDI = this.resultParitySign & 0xffff;
-        this.resultZeroCarry = this.regEDI | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-    }
-    this.resultSize = X86.RESULT.SIZE_WORD;
-    this.nStepCycles -= 2;                          // this form of INC takes 2 cycles on all CPUs
+    this.regEDI = X86.fnINCr.call(this, this.regEDI);
 };
 
 /**
@@ -1101,16 +1046,7 @@ X86.opINCDI = function INCDI()
  */
 X86.opDECAX = function DECAX()
 {
-    this.resultParitySign = (this.resultAuxOverflow = this.regEAX) - 1;
-    if (I386) {
-        this.regEAX = (this.regEAX & ~this.dataMask) | (this.resultParitySign & this.dataMask);
-        this.resultZeroCarry = (((this.regEAX) & this.dataMask) >>> 16) | (this.regEAX & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-    } else {
-        this.regEAX = this.resultParitySign & 0xffff;
-        this.resultZeroCarry = this.regEAX | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-    }
-    this.resultSize = X86.RESULT.SIZE_WORD;
-    this.nStepCycles -= 2;                          // this form of DEC takes 2 cycles on all CPUs
+    this.regEAX = X86.fnDECr.call(this, this.regEAX);
 };
 
 /**
@@ -1120,11 +1056,7 @@ X86.opDECAX = function DECAX()
  */
 X86.opDECCX = function DECCX()
 {
-    this.resultParitySign = (this.resultAuxOverflow = this.regECX) - 1;
-    this.regECX = (I386? (this.regECX & ~this.dataMask) | (this.resultParitySign & this.dataMask) : this.resultParitySign & 0xffff);
-    this.resultZeroCarry = this.regECX | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-    this.resultSize = X86.RESULT.SIZE_WORD;
-    this.nStepCycles -= 2;                          // this form of DEC takes 2 cycles on all CPUs
+    this.regECX = X86.fnDECr.call(this, this.regECX);
 };
 
 /**
@@ -1134,11 +1066,7 @@ X86.opDECCX = function DECCX()
  */
 X86.opDECDX = function DECDX()
 {
-    this.resultParitySign = (this.resultAuxOverflow = this.regEDX) - 1;
-    this.regEDX = (I386? (this.regEDX & ~this.dataMask) | (this.resultParitySign & this.dataMask) : this.resultParitySign & 0xffff);
-    this.resultZeroCarry = this.regEDX | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-    this.resultSize = X86.RESULT.SIZE_WORD;
-    this.nStepCycles -= 2;                          // this form of DEC takes 2 cycles on all CPUs
+    this.regEDX = X86.fnDECr.call(this, this.regEDX);
 };
 
 /**
@@ -1148,16 +1076,7 @@ X86.opDECDX = function DECDX()
  */
 X86.opDECBX = function DECBX()
 {
-    this.resultParitySign = (this.resultAuxOverflow = this.regEBX) - 1;
-    if (I386) {
-        this.regEBX = (this.regEBX & ~this.dataMask) | (this.resultParitySign & this.dataMask);
-        this.resultZeroCarry = (((this.regEBX) & this.dataMask) >>> 16) | (this.regEBX & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-    } else {
-        this.regEBX = this.resultParitySign & 0xffff;
-        this.resultZeroCarry = this.regEBX | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-    }
-    this.resultSize = X86.RESULT.SIZE_WORD;
-    this.nStepCycles -= 2;                          // this form of DEC takes 2 cycles on all CPUs
+    this.regEBX = X86.fnDECr.call(this, this.regEBX);
 };
 
 /**
@@ -1167,12 +1086,7 @@ X86.opDECBX = function DECBX()
  */
 X86.opDECSP = function DECSP()
 {
-    var regESP;
-    this.resultParitySign = (this.resultAuxOverflow = this.getSP()) - 1;
-    this.setSP(regESP = (this.resultAuxOverflow & ~this.dataMask) | (this.resultParitySign & this.dataMask));
-    this.resultZeroCarry = (((regESP) & this.dataMask) >>> 16) | (regESP & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-    this.resultSize = X86.RESULT.SIZE_WORD;
-    this.nStepCycles -= 2;                          // this form of DEC takes 2 cycles on all CPUs
+    this.setSP(X86.fnDECr.call(this, this.getSP()));
 };
 
 /**
@@ -1182,16 +1096,7 @@ X86.opDECSP = function DECSP()
  */
 X86.opDECBP = function DECBP()
 {
-    this.resultParitySign = (this.resultAuxOverflow = this.regEBP) - 1;
-    if (I386) {
-        this.regEBP = (this.regEBP & ~this.dataMask) | (this.resultParitySign & this.dataMask);
-        this.resultZeroCarry = (((this.regEBP) & this.dataMask) >>> 16) | (this.regEBP & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-    } else {
-        this.regEBP = this.resultParitySign & 0xffff;
-        this.resultZeroCarry = this.regEBP | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-    }
-    this.resultSize = X86.RESULT.SIZE_WORD;
-    this.nStepCycles -= 2;                          // this form of DEC takes 2 cycles on all CPUs
+    this.regEBP = X86.fnDECr.call(this, this.regEBP);
 };
 
 /**
@@ -1201,16 +1106,7 @@ X86.opDECBP = function DECBP()
  */
 X86.opDECSI = function DECSI()
 {
-    this.resultParitySign = (this.resultAuxOverflow = this.regESI) - 1;
-    if (I386) {
-        this.regESI = (this.regESI & ~this.dataMask) | (this.resultParitySign & this.dataMask);
-        this.resultZeroCarry = (((this.regESI) & this.dataMask) >>> 16) | (this.regESI & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-    } else {
-        this.regESI = this.resultParitySign & 0xffff;
-        this.resultZeroCarry = this.regESI | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-    }
-    this.resultSize = X86.RESULT.SIZE_WORD;
-    this.nStepCycles -= 2;                          // this form of DEC takes 2 cycles on all CPUs
+    this.regESI = X86.fnDECr.call(this, this.regESI);
 };
 
 /**`
@@ -1220,16 +1116,7 @@ X86.opDECSI = function DECSI()
  */
 X86.opDECDI = function DECDI()
 {
-    this.resultParitySign = (this.resultAuxOverflow = this.regEDI) - 1;
-    if (I386) {
-        this.regEDI = (this.regEDI & ~this.dataMask) | (this.resultParitySign & this.dataMask);
-        this.resultZeroCarry = (((this.regEDI) & this.dataMask) >>> 16) | (this.regEDI & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-    } else {
-        this.regEDI = this.resultParitySign & 0xffff;
-        this.resultZeroCarry = this.regEDI | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-    }
-    this.resultSize = X86.RESULT.SIZE_WORD;
-    this.nStepCycles -= 2;                          // this form of DEC takes 2 cycles on all CPUs
+    this.regEDI = X86.fnDECr.call(this, this.regEDI);
 };
 
 /**
@@ -2921,8 +2808,14 @@ X86.opCMPSw = function CMPSw()
  */
 X86.opTESTALb = function TESTALb()
 {
-    this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = this.regEAX & this.getIPByte();
-    this.resultSize = X86.RESULT.SIZE_BYTE;
+    var src = this.getIPByte();
+    if (OLDFLAGS) {
+        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = this.regEAX & src;
+        this.resultSize = X86.RESULT.SIZE_BYTE;
+    }
+    if (I386) {
+        this.setLogicResult(this.regEAX & src, X86.RESULT.BYTE);
+    }
     this.nStepCycles -= this.CYCLES.nOpCyclesAAA;
 };
 
@@ -2933,8 +2826,14 @@ X86.opTESTALb = function TESTALb()
  */
 X86.opTESTAXw = function TESTAXw()
 {
-    this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = this.regEAX & this.getIPWord();
-    this.resultSize = X86.RESULT.SIZE_WORD;
+    var src = this.getIPWord();
+    if (OLDFLAGS) {
+        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = this.regEAX & src;
+        this.resultSize = X86.RESULT.SIZE_WORD;
+    }
+    if (I386) {
+        this.setLogicResult(this.regEAX & src, X86.RESULT.WORD);
+    }
     this.nStepCycles -= this.CYCLES.nOpCyclesAAA;
 };
 
@@ -3654,23 +3553,32 @@ X86.opGrp2wCL = function GRP2wCL()
  *
  * From "The 8086 Book":
  *
- *  1. Divide the AL register by OA16. Store the quotient in the AH register. Store the remainder in the AL register.
- *  2. Set the flags in the following manner:
- *      Parity: based on the AL register
- *      Sign : based on the high-order bit of the AL register Zero: based on the AL register
- *      Carry, Overflow, and Arithmetic: undefined
+ *  1. Divide AL by 0x0A; store the quotient in AH and the remainder in AL
+ *  2. Set PF, SF, and ZF based on the AL register (CF, OF, and AF are undefined)
  *
  * @this {X86CPU}
  */
 X86.opAAM = function AAM()
 {
     var bDivisor = this.getIPByte();
+    if (!bDivisor) {
+        /*
+         * TODO: Generate a divide-by-zero exception, if appropriate for the current CPU
+         */
+        return;
+    }
     var AL = this.regEAX & 0xff;
-    var bQuotient = (AL / bDivisor) & 0xff;
-    var bRemainder = AL % bDivisor;
-    this.regEAX = (bQuotient << 8) | bRemainder;
-    this.resultSize = X86.RESULT.SIZE_BYTE;
-    this.resultZeroCarry = this.resultParitySign = AL;
+    this.regEAX = (this.regEAX & ~0xffff) | ((AL / bDivisor) << 8) | (AL % bDivisor);
+    if (OLDFLAGS) {
+        this.resultSize = X86.RESULT.SIZE_BYTE;
+        this.resultZeroCarry = this.resultParitySign = this.regEAX;
+    }
+    if (I386) {
+        /*
+         * setLogicResult() is slightly overkill, because technically, we don't need to clear CF and OF....
+         */
+        this.setLogicResult(this.regEAX, X86.RESULT.BYTE);
+    }
     this.nStepCycles -= this.CYCLES.nOpCyclesAAM;
 };
 
@@ -3679,22 +3587,25 @@ X86.opAAM = function AAM()
  *
  * From "The 8086 Book":
  *
- *  1. Multiply the contents of the AH register by 0x0A
- *  2. Add AH to AL.
- *  3. Store 0x00 into the AH register.
- *  4. Set the flags in the following manner:
- *      Parity: based on the AL register
- *      Zero: based on the AL register
- *      Sign: based on the high-order bit of the AL register
- *      Carry, Overflow, Arithmetic: undefined
+ *  1. Multiply AH by 0x0A, add AH to AL, and store 0x00 in AH
+ *  2. Set PF, SF, and ZF based on the AL register (CF, OF, and AF are undefined)
  *
  * @this {X86CPU}
  */
 X86.opAAD = function AAD()
 {
     var bMultiplier = this.getIPByte();
-    this.resultZeroCarry = this.resultParitySign = this.regEAX = (((this.regEAX >> 8) * bMultiplier) + this.regEAX) & 0xff;
-    this.resultSize = X86.RESULT.SIZE_BYTE;
+    this.regEAX = (this.regEAX & ~0xffff) | (((((this.regEAX >> 8) & 0xff) * bMultiplier) + this.regEAX) & 0xff);
+    if (OLDFLAGS) {
+        this.resultZeroCarry = this.resultParitySign = this.regEAX;
+        this.resultSize = X86.RESULT.SIZE_BYTE;
+    }
+    if (I386) {
+        /*
+         * setLogicResult() is slightly overkill, because technically, we don't need to clear CF and OF....
+         */
+        this.setLogicResult(this.regEAX, X86.RESULT.BYTE);
+    }
     this.nStepCycles -= this.CYCLES.nOpCyclesAAD;
 };
 
@@ -3747,7 +3658,7 @@ X86.opESC = function ESC()
 X86.opLOOPNZ = function LOOPNZ()
 {
     var disp = this.getIPDisp();
-    if ((this.regECX = (this.regECX - 1) & this.addrMask) && (this.resultZeroCarry & (this.resultSize - 1))) {
+    if ((this.regECX = (this.regECX - 1) & this.addrMask) && !this.getZF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.CYCLES.nOpCyclesLoopNZ;
         return;
@@ -3763,7 +3674,7 @@ X86.opLOOPNZ = function LOOPNZ()
 X86.opLOOPZ = function LOOPZ()
 {
     var disp = this.getIPDisp();
-    if ((this.regECX = (this.regECX - 1) & this.addrMask) && !(this.resultZeroCarry & (this.resultSize - 1))) {
+    if ((this.regECX = (this.regECX - 1) & this.addrMask) && this.getZF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.CYCLES.nOpCyclesLoopZ;
         return;
@@ -4121,7 +4032,7 @@ X86.opGrp3w = function GRP3w()
  */
 X86.opCLC = function CLC()
 {
-    this.resultZeroCarry &= ~this.resultSize;
+    this.clearCF();
     this.nStepCycles -= 2;                          // CLC takes 2 cycles on all CPUs
 };
 
@@ -4132,7 +4043,7 @@ X86.opCLC = function CLC()
  */
 X86.opSTC = function STC()
 {
-    this.resultZeroCarry |= this.resultSize;
+    this.setCF();
     this.nStepCycles -= 2;                          // STC takes 2 cycles on all CPUs
 };
 
@@ -4221,6 +4132,17 @@ X86.opUndefined = function()
 {
     this.setIP(this.opLIP - this.segCS.base);
     this.setError("Undefined opcode 0x" + str.toHexByte(this.bus.getByteDirect(this.regLIP)) + " at 0x" + str.toHex(this.regLIP));
+    this.stopCPU();
+};
+
+/**
+ * opTBDd()
+ *
+ * @this {X86CPU}
+ */
+X86.opTBDd = function()
+{
+    this.printMessage("unimplemented 80386 opcode", true);
     this.stopCPU();
 };
 
@@ -4405,9 +4327,33 @@ X86.aOpGrp4w = [
 ];
 
 if (I386) {
+    /*
+     * Until we have *d() forms of all *w() opcode handlers, we need to put in placeholders (ie, opTBDd())
+     */
     X86.aOpsD = {
-        0x21:     X86.opANDmd,
-        0x23:     X86.opANDrd,
-        0x25:     X86.opANDEAX
+        0x01:   X86.opTBDd,     // opADDmd()
+        0x03:   X86.opTBDd,     // opADDrd()
+        0x05:   X86.opTBDd,     // opADDAXd()
+        0x09:   X86.opTBDd,     // opORmd()
+        0x0B:   X86.opTBDd,     // opORrd()
+        0x0D:   X86.opTBDd,     // opORAXd()
+        0x11:   X86.opTBDd,     // opADCmd()
+        0x13:   X86.opTBDd,     // opADCrd()
+        0x15:   X86.opTBDd,     // opADCAXd()
+        0x19:   X86.opTBDd,     // opSBBmd()
+        0x1B:   X86.opTBDd,     // opSBBrd()
+        0x1D:   X86.opTBDd,     // opSBBAXd()
+        0x21:   X86.opANDmd,
+        0x23:   X86.opANDrd,
+        0x25:   X86.opANDAXd,
+        0x29:   X86.opTBDd,     // opSUBmd()
+        0x2B:   X86.opTBDd,     // opSUBrd()
+        0x2D:   X86.opTBDd,     // opSUBAXd()
+        0x31:   X86.opTBDd,     // opXORmd()
+        0x33:   X86.opXORrd,
+        0x35:   X86.opTBDd,     // opXORAXd()
+        0x39:   X86.opTBDd,     // opCMPmd()
+        0x3B:   X86.opTBDd,     // opCMPrd()
+        0x3D:   X86.opTBDd      // opCMPAXd()
     };
 }

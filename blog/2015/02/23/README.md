@@ -124,8 +124,8 @@ memory.
 > The B0 stepping became available around the middle of 1986. As is the case with earlier steppings, the
 "B0" marking can sometimes be found on the outside of the device. If not, the code "S40336" or "S40337" may
 appear. Starting with the B0 stepping, the 80386 would leave the component identifier, 3, in DH and the
-revision identifier, also 3, in DL [Surprisingly, these are the same values that the B1 stepping reports
-as well. -JP]
+revision identifier, also 3, in DL [These B0 values need to be independently confirmed, because they are
+the same values reported for the B1 stepping. -JP]
 
 > + *Interrupts and Privilege Violations*: If a hardware interrupt occurs immediately before an IOPL-sensitive
 instruction when CPL is greater than IOPL, the 80386 behaves erratically. Generally, it will produce spurious
@@ -164,7 +164,7 @@ either the loop counter or the string index.
 new ones were either introduced or discovered. The best known of these was the widely publicized multiply
 failure discovered in mid-1987. The B1 stepping is identifiable either by the "B1" mark or by the code
 "S40343," "S40344," or "S40362." As is the case with the B0 stepping, the B1 revision leaves a binary three
-in DL after reset. [Surprisingly, these are the same values that the B0 stepping reports as well. -JP]
+in DL after reset. [Again, I would like to see the B0 values independently confirmed. -JP]
 
 > + *IBTS and XBTS Instructions Removed*: The Insert Bit String (IBTS) and Extract Bit String (XBTS)
 instructions were removed from the 80386's instruction set. It was determined that they took up too much
@@ -213,13 +213,12 @@ in the first byte of a page that will cause a page fault (either because it is n
 impending privilege violation), the 80386 hangs. The processor will remain hung until it receives an interrupt.
  [See Intel Errata #17 below]
 
-> The following sample program has been calculated to produce the [multiplication] error. An 80386 that
-fails one or more of these multiply instructions is obviously faulty. However, passing does not guarantee
-a perfect part. To their credit, Intel agreed to test all 80386s for a limited time and report on their
+> The following sample program has been calculated to produce the [aforementioned multiplication] error.
+An 80386 that fails one or more of these multiply instructions is obviously faulty. However, passing does not
+guarantee a perfect part. To their credit, Intel agreed to test all 80386s for a limited time and report on their
 success or failure. Since then, all 80386s have been tested before shipping. Those that fail have been marked
-"For Sixteen-Bit Software Only." [I believe the exact marking was "16 BIT S/W ONLY" -JP] Those that passed
-have been marked with a double sigma sign. All 80386s produced after the B1 stepping should be free of this
-defect.
+"For Sixteen-Bit Software Only." [To be exact: "16 BIT S/W ONLY" -JP] Those that passed have been marked with
+a double sigma sign. All 80386s produced after the B1 stepping should be free of this defect.
 
 	; Perform various 16-bit and 32-bit multiply operations...
 	
@@ -324,8 +323,9 @@ Most of the information I have obtained about the 80386 begins with the B1 stepp
                 ii   m  c  i  '85 '86      |
                                            |
 
-So, the B1 stepping set DL to 0x03 on reset.  It also seems a safe bet that the revision number
-for a B0 stepping was 0x02.  Does that mean the revision number for the A0 was 0x01?  I can only guess.
+So, the B1 stepping set DL to 0x03 on reset.  This would lead one to believe that the revision number
+for a B0 stepping was 0x02, but according to Turley (see above), the B0 and B1 steppings report the *same*
+revision; as I noted above, it would be nice to see some independent confirmation.
 
 The 80386 CPU on my Compaq DeskPro 386 "Version 2" System Board is labeled as:
 
@@ -589,7 +589,7 @@ Here's more information on the opcodes (IBTS and XBTS) that were removed from th
 	+++++++++++++++++++++++ 
 	Physical Form:	IBTS	r/m16,AX,CL,r16 
 	IBTS	r/m32,EAX,CL,r32 
-	COP (Code of Operation)	: 0FH A7H Postbyte 
+	COP (Code of Operation)	: 0FH A7H 
 	
 	Clocks:	IBTS 
 	80386:	12/19
@@ -623,7 +623,7 @@ Here's more information on the opcodes (IBTS and XBTS) that were removed from th
     +++++++++++++++++++++++
     Physical Form:  XBTS    r16,r/m16,AX,CL
     XBTS    r32,r/m32,EAX,CL
-    COP (Code of Operation) : 0FH A6H Postbyte
+    COP (Code of Operation) : 0FH A6H
 
     Clocks: XBTS
     80386:  6/13

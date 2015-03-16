@@ -241,11 +241,57 @@ var X86 = {
         MASK:       0xfff8      // index of corresponding entry in GDT, LDT or IDT
     },
     RESULT: {
+        /*
+         * Flags were originally computed based on the following:
+         *
+         *      CF: resultZeroCarry & resultSize
+         *      PF: resultParitySign & 0xff
+         *      AF: (resultParitySign ^ resultAuxOverflow) & 0x0010 (AUXOVF_AF)
+         *      ZF: resultZeroCarry & (resultSize - 1)
+         *      SF: resultParitySign & (resultSize >> 1)
+         *      OF: (resultParitySign ^ resultAuxOverflow ^ (resultParitySign >> 1)) & (resultSize >> 1)
+         *
+         * I386 builds now rely on the following result variables:
+         *
+         *      resultDst, resultSrc, resultArith, resultLogic, resultType, and resultFlags
+         *
+         * and the flags are computed as follows:
+         *
+         *      CF: ((resultDst ^ ((resultDst ^ resultSrc) & (resultSrc ^ resultArith))) & resultType)
+         *      PF: (resultLogic & 0xff)
+         *      AF: ((resultArith ^ (resultDst ^ resultSrc)) & AUXOVF_AF)
+         *      ZF: (resultLogic & ((resultType - 1) | resultType))
+         *      SF: (resultLogic & resultType)
+         *      OF: (((resultDst ^ resultArith) & (resultSrc ^ resultArith)) & resultType)
+         *
+         * Arithmetic operations should call:
+         *
+         *      setArithResult(dst, src, value, type)
+         * eg:
+         *      setArithResult(dst, src, dst+src, X86.RESULT.BYTE | X86.RESULT.ALL)
+         *
+         * The 4th parameter, type, indicates both the size of the result (BYTE, WORD or DWORD) and which of
+         * the flags should now be considered "cached" by the new result variables.  If the previous resultType
+         * specifies any flags not contained in the new type parameter, then those flags must be immediately
+         * calculated and written to the appropriate bit(s) in resultFlags.
+         */
+        BYTE:       0x80,
+        WORD:       0x8000,
+        DWORD:      0x80000000|0,
+        TYPE:       0x80008080|0,
+        CF:         0x01,
+        PF:         0x02,
+        AF:         0x04,
+        ZF:         0x08,
+        SF:         0x10,
+        OF:         0x20,
+        ALL:        0x3F,
+        LOGIC:      0x1A,
+        NOTCF:      0x3E,
         SIZE_BYTE:  0x00100,
         SIZE_WORD:  0x10000,
         AUXOVF_AF:  0x00010,
-        AUXOVF_OF:  0x08080,
-        AUXOVF_CF:  0x10100
+        AUXOVF_OF:  0x08080
     },
     /*
      * Bit values for opFlags, which are all reset to zero prior to each instruction

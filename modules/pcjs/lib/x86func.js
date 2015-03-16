@@ -38,8 +38,7 @@ if (typeof module !== 'undefined') {
 }
 
 /**
- * NOTE: Notice that some of the simpler math functions could get away with updating resultSize before
- * the calculation, but here the calculation depends on the incoming carry value.
+ * fnADCb(dst, src)
  *
  * @this {X86CPU}
  * @param {number} dst
@@ -48,16 +47,21 @@ if (typeof module !== 'undefined') {
  */
 X86.fnADCb = function ADCb(dst, src)
 {
-    this.resultAuxOverflow = dst ^ src;
-    this.resultZeroCarry = this.resultParitySign = dst + src + ((this.resultZeroCarry & this.resultSize)? 1 : 0);
-    this.resultSize = X86.RESULT.SIZE_BYTE;
+    var b = (dst + src + this.getCarry())|0;
+    if (OLDFLAGS) {
+        this.resultAuxOverflow = dst ^ src;
+        this.resultZeroCarry = this.resultParitySign = b;
+        this.resultSize = X86.RESULT.SIZE_BYTE;
+    }
+    if (I386) {
+        this.setArithResult(dst, src, b, X86.RESULT.BYTE | X86.RESULT.ALL);
+    }
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
-    return this.resultZeroCarry & 0xff;
+    return b & 0xff;
 };
 
 /**
- * NOTE: Notice that some of the simpler math functions could get away with updating resultSize before
- * the calculation, but here the calculation depends on the incoming carry value.
+ * fnADCw(dst, src)
  *
  * @this {X86CPU}
  * @param {number} dst
@@ -66,11 +70,17 @@ X86.fnADCb = function ADCb(dst, src)
  */
 X86.fnADCw = function ADCw(dst, src)
 {
-    this.resultAuxOverflow = dst ^ src;
-    this.resultZeroCarry = this.resultParitySign = dst + src + ((this.resultZeroCarry & this.resultSize)? 1 : 0);
-    this.resultSize = X86.RESULT.SIZE_WORD;
+    var w = (dst + src + this.getCarry())|0;
+    if (OLDFLAGS) {
+        this.resultAuxOverflow = dst ^ src;
+        this.resultZeroCarry = this.resultParitySign = w;
+        this.resultSize = X86.RESULT.SIZE_WORD;
+    }
+    if (I386) {
+        this.setArithResult(dst, src, w, X86.RESULT.WORD | X86.RESULT.ALL);
+    }
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
-    return this.resultZeroCarry & 0xffff;
+    return w & 0xffff;
 };
 
 /**
@@ -83,10 +93,17 @@ X86.fnADCw = function ADCw(dst, src)
  */
 X86.fnADDb = function ADDb(dst, src)
 {
-    this.resultAuxOverflow = dst ^ src;
-    this.resultSize = X86.RESULT.SIZE_BYTE;
+    var b = (dst + src)|0;
+    if (OLDFLAGS) {
+        this.resultAuxOverflow = dst ^ src;
+        this.resultSize = X86.RESULT.SIZE_BYTE;
+        this.resultZeroCarry = this.resultParitySign = b;
+    }
+    if (I386) {
+        this.setArithResult(dst, src, b, X86.RESULT.BYTE | X86.RESULT.ALL);
+    }
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
-    return (this.resultZeroCarry = this.resultParitySign = dst + src) & 0xff;
+    return b & 0xff;
 };
 
 /**
@@ -99,13 +116,22 @@ X86.fnADDb = function ADDb(dst, src)
  */
 X86.fnADDw = function ADDw(dst, src)
 {
-    this.resultAuxOverflow = dst ^ src;
-    this.resultSize = X86.RESULT.SIZE_WORD;
+    var w = (dst + src)|0;
+    if (OLDFLAGS) {
+        this.resultAuxOverflow = dst ^ src;
+        this.resultSize = X86.RESULT.SIZE_WORD;
+        this.resultZeroCarry = this.resultParitySign = w;
+    }
+    if (I386) {
+        this.setArithResult(dst, src, w, X86.RESULT.WORD | X86.RESULT.ALL);
+    }
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
-    return (this.resultZeroCarry = this.resultParitySign = dst + src) & 0xffff;
+    return w & 0xffff;
 };
 
 /**
+ * fnANDb(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src
@@ -113,12 +139,21 @@ X86.fnADDw = function ADDw(dst, src)
  */
 X86.fnANDb = function ANDb(dst, src)
 {
-    this.resultSize = X86.RESULT.SIZE_BYTE;
+    var b = dst & src;
+    if (OLDFLAGS) {
+        this.resultSize = X86.RESULT.SIZE_BYTE;
+        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = b;
+    }
+    if (I386) {
+        this.setLogicResult(b, X86.RESULT.BYTE);
+    }
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
-    return (this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst & src) & 0xff;
+    return b;
 };
 
 /**
+ * fnANDw(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src
@@ -126,12 +161,21 @@ X86.fnANDb = function ANDb(dst, src)
  */
 X86.fnANDw = function ANDw(dst, src)
 {
-    this.resultSize = X86.RESULT.SIZE_WORD;
+    var w = dst & src;
+    if (OLDFLAGS) {
+        this.resultSize = X86.RESULT.SIZE_WORD;
+        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = w;
+    }
+    if (I386) {
+        this.setLogicResult(w, X86.RESULT.WORD);
+    }
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
-    return (this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst & src) & 0xffff;
+    return w;
 };
 
 /**
+ * fnANDd(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src
@@ -139,14 +183,13 @@ X86.fnANDw = function ANDw(dst, src)
  */
 X86.fnANDd = function ANDd(dst, src)
 {
-    this.resultSize = X86.RESULT.SIZE_WORD;
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
-    var dw = this.resultParitySign = this.resultAuxOverflow = (dst & src);
-    this.resultZeroCarry = ((dw >>> 16) | (dw & 0xffff));
-    return dw;
+    return this.setLogicResult(dst & src, X86.RESULT.DWORD);
 };
 
 /**
+ * fnARPL(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src
@@ -165,6 +208,8 @@ X86.fnARPL = function ARPL(dst, src)
 };
 
 /**
+ * fnBOUND(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src
@@ -200,6 +245,23 @@ X86.fnBOUND = function BOUND(dst, src)
 };
 
 /**
+ * fnCALLw(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src (null)
+ * @return {number}
+ */
+X86.fnCALLw = function CALLw(dst, src)
+{
+    this.pushWord(this.getIP());
+    this.setIP(dst);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesCallWR : this.CYCLES.nOpCyclesCallWM);
+    this.opFlags |= X86.OPFLAG.NOWRITE;
+    return dst;
+};
+
+/**
  * fnCALLF(off, sel)
  *
  * For protected-mode, this function must attempt to load the new code segment first, because if the new segment
@@ -220,21 +282,8 @@ X86.fnCALLF = function CALLF(off, sel)
 };
 
 /**
- * @this {X86CPU}
- * @param {number} dst
- * @param {number} src (null)
- * @return {number}
- */
-X86.fnCALLw = function CALLw(dst, src)
-{
-    this.pushWord(this.getIP());
-    this.setIP(dst);
-    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesCallWR : this.CYCLES.nOpCyclesCallWM);
-    this.opFlags |= X86.OPFLAG.NOWRITE;
-    return dst;
-};
-
-/**
+ * fnCALLFdw(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src (null)
@@ -261,15 +310,23 @@ X86.fnCALLFdw = function CALLFdw(dst, src)
  */
 X86.fnCMPb = function CMPb(dst, src)
 {
-    this.resultAuxOverflow = dst ^ src;
-    this.resultSize = X86.RESULT.SIZE_BYTE;
-    this.resultZeroCarry = this.resultParitySign = dst - src;
+    var b = (dst - src)|0;
+    if (OLDFLAGS) {
+        this.resultAuxOverflow = dst ^ src;
+        this.resultSize = X86.RESULT.SIZE_BYTE;
+        this.resultZeroCarry = this.resultParitySign = b;
+    }
+    if (I386) {
+        this.setArithResult(dst, src, b, X86.RESULT.BYTE | X86.RESULT.ALL, true);
+    }
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesCompareRM) : this.CYCLES.nOpCyclesArithRM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
 };
 
 /**
+ * fnCMPw(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src
@@ -277,15 +334,23 @@ X86.fnCMPb = function CMPb(dst, src)
  */
 X86.fnCMPw = function CMPw(dst, src)
 {
-    this.resultAuxOverflow = dst ^ src;
-    this.resultSize = X86.RESULT.SIZE_WORD;
-    this.resultZeroCarry = this.resultParitySign = dst - src;
+    var w = (dst - src)|0;
+    if (OLDFLAGS) {
+        this.resultAuxOverflow = dst ^ src;
+        this.resultSize = X86.RESULT.SIZE_WORD;
+        this.resultZeroCarry = this.resultParitySign = w;
+    }
+    if (I386) {
+        this.setArithResult(dst, src, w, X86.RESULT.WORD | X86.RESULT.ALL, true);
+    }
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesCompareRM) : this.CYCLES.nOpCyclesArithRM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
 };
 
 /**
+ * fnDECb(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src (null)
@@ -293,15 +358,46 @@ X86.fnCMPw = function CMPw(dst, src)
  */
 X86.fnDECb = function DECb(dst, src)
 {
-    this.resultAuxOverflow = dst;
-    dst = (this.resultParitySign = dst - 1) & 0xff;
-    this.resultZeroCarry = dst | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 8);
-    this.resultSize = X86.RESULT.SIZE_BYTE;
+    var b = (dst - 1)|0;
+    if (OLDFLAGS) {
+        this.resultAuxOverflow = dst;
+        this.resultParitySign = b;
+        this.resultZeroCarry = (b & 0xff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 8);
+        this.resultSize = X86.RESULT.SIZE_BYTE;
+    }
+    if (I386) {
+        this.setArithResult(dst, 1, b, X86.RESULT.BYTE | X86.RESULT.NOTCF, true);
+    }
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesIncR : this.CYCLES.nOpCyclesIncM);
-    return dst;
+    return b & 0xff;
 };
 
 /**
+ * fnDECr(w)
+ *
+ * @this {X86CPU}
+ * @param {number} w
+ * @return {number}
+ */
+X86.fnDECr = function DECr(w)
+{
+    var result = ((w & this.dataMask) - 1)|0;
+    if (OLDFLAGS) {
+        this.resultAuxOverflow = w;
+        this.resultParitySign = result;
+        this.resultZeroCarry = (result & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
+        this.resultSize = X86.RESULT.SIZE_WORD;
+    }
+    if (I386) {
+        this.setArithResult(w, 1, result, X86.RESULT.WORD | X86.RESULT.NOTCF, true);
+    }
+    this.nStepCycles -= 2;                          // the register form of INC takes 2 cycles on all CPUs
+    return (w & ~this.dataMask) | (result & this.dataMask);
+};
+
+/**
+ * fnDECw(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src (null)
@@ -309,15 +405,23 @@ X86.fnDECb = function DECb(dst, src)
  */
 X86.fnDECw = function DECw(dst, src)
 {
-    this.resultAuxOverflow = dst;
-    dst = (this.resultParitySign = dst - 1) & 0xffff;
-    this.resultZeroCarry = dst | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-    this.resultSize = X86.RESULT.SIZE_WORD;
+    var w = (dst - 1)|0;
+    if (OLDFLAGS) {
+        this.resultAuxOverflow = dst;
+        this.resultParitySign = w;
+        this.resultZeroCarry = (w & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
+        this.resultSize = X86.RESULT.SIZE_WORD;
+    }
+    if (I386) {
+        this.setArithResult(dst, 1, w, X86.RESULT.WORD | X86.RESULT.NOTCF, true);
+    }
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesIncR : this.CYCLES.nOpCyclesIncM);
-    return dst;
+    return w & 0xffff;
 };
 
 /**
+ * fnDIVb(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src (null)
@@ -342,11 +446,6 @@ X86.fnDIVb = function DIVb(dst, src)
     }
     this.regMD16 = this.regEAX = (uQuotient & 0xff) | (((this.regEAX % dst) & 0xff) << 8);
     /*
-     * TODO: Verify that all of the arithmetic flags are "undefined" after DIV, and that this code unnecessary
-     */
-    this.resultParitySign = this.resultAuxOverflow = (this.resultZeroCarry = uQuotient | X86.RESULT.SIZE_BYTE);
-    this.resultSize = X86.RESULT.SIZE_BYTE;
-    /*
      * Multiply/divide instructions specify only a single operand, which the decoders pass to us
      * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX).
      * However, src is technically an output, and dst is merely an input (which is why we must return
@@ -359,6 +458,8 @@ X86.fnDIVb = function DIVb(dst, src)
 };
 
 /**
+ * fnDIVw(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src (null)
@@ -389,11 +490,6 @@ X86.fnDIVw = function DIVw(dst, src)
     this.regMD16 = this.regEAX = (uQuotient & 0xffff);
     this.regMD32 = this.regEDX = (src % dst) & 0xffff;
     /*
-     * TODO: Verify that all of the arithmetic flags are "undefined" after DIV, and that this code unnecessary
-     */
-    this.resultParitySign = this.resultAuxOverflow = (this.resultZeroCarry = uQuotient | X86.RESULT.SIZE_WORD);
-    this.resultSize = X86.RESULT.SIZE_WORD;
-    /*
      * Multiply/divide instructions specify only a single operand, which the decoders pass to us
      * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX).
      * However, src is technically an output, and dst is merely an input (which is why we must return
@@ -406,6 +502,8 @@ X86.fnDIVw = function DIVw(dst, src)
 };
 
 /**
+ * fnESC(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src
@@ -417,10 +515,7 @@ X86.fnESC = function ESC(dst, src)
 };
 
 /**
- * @this {X86CPU}
- * @param {number} dst
- * @param {number} src (null)
- * @return {number} (we return dst unchanged, since it's actually AX that's modified)
+ * fnIDIVb(dst, src)
  *
  * TODO: Implement the following difference, from "AP-186: Introduction to the 80186 Microprocessor, March 1983":
  *
@@ -429,6 +524,11 @@ X86.fnESC = function ESC(dst, src)
  *      The 80186 has expanded the range of negative numbers allowed as a quotient by 1 to include 8000H and 80H.
  *      These numbers represent the most negative numbers representable using 2's complement arithmetic (equaling
  *      -32768 and -128 in decimal, respectively)."
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src (null)
+ * @return {number} (we return dst unchanged, since it's actually AX that's modified)
  */
 X86.fnIDIVb = function IDIVb(dst, src)
 {
@@ -449,11 +549,6 @@ X86.fnIDIVb = function IDIVb(dst, src)
     }
     this.regMD16 = this.regEAX = (lQuotient & 0xff) | (((((this.regEAX << 16) >> 16) % ((dst << 24) >> 24)) & 0xff) << 8);
     /*
-     * TODO: Verify that all of the arithmetic flags are "undefined" after IDIV, and that this code unnecessary
-     */
-    this.resultParitySign = this.resultAuxOverflow = (this.resultZeroCarry = lQuotient | X86.RESULT.SIZE_BYTE);
-    this.resultSize = X86.RESULT.SIZE_BYTE;
-    /*
      * Multiply/divide instructions specify only a single operand, which the decoders pass to us
      * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX).
      * However, src is technically an output, and dst is merely an input (which is why we must return
@@ -466,10 +561,7 @@ X86.fnIDIVb = function IDIVb(dst, src)
 };
 
 /**
- * @this {X86CPU}
- * @param {number} dst
- * @param {number} src (null)
- * @return {number} (we return dst unchanged, since it's actually DX:AX that's modified)
+ * fnIDIVw(dst, src)
  *
  * TODO: Implement the following difference, from "AP-186: Introduction to the 80186 Microprocessor, March 1983":
  *
@@ -478,6 +570,11 @@ X86.fnIDIVb = function IDIVb(dst, src)
  *      The 80186 has expanded the range of negative numbers allowed as a quotient by 1 to include 8000H and 80H.
  *      These numbers represent the most negative numbers representable using 2's complement arithmetic (equaling
  *      -32768 and -128 in decimal, respectively)."
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src (null)
+ * @return {number} (we return dst unchanged, since it's actually DX:AX that's modified)
  */
 X86.fnIDIVw = function IDIVw(dst, src)
 {
@@ -501,11 +598,6 @@ X86.fnIDIVw = function IDIVw(dst, src)
     this.regMD16 = this.regEAX = (lQuotient & 0xffff);
     this.regMD32 = this.regEDX = (src % lDivisor) & 0xffff;
     /*
-     * TODO: Verify that all of the arithmetic flags are "undefined" after IDIV, and that this code unnecessary
-     */
-    this.resultParitySign = this.resultAuxOverflow = (this.resultZeroCarry = lQuotient | X86.RESULT.SIZE_WORD);
-    this.resultSize = X86.RESULT.SIZE_WORD;
-    /*
      * Multiply/divide instructions specify only a single operand, which the decoders pass to us
      * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX).
      * However, src is technically an output, and dst is merely an input (which is why we must return
@@ -518,10 +610,7 @@ X86.fnIDIVw = function IDIVw(dst, src)
 };
 
 /**
- * @this {X86CPU}
- * @param {number} dst
- * @param {number} src
- * @return {number}
+ * fnIMUL8(dst, src)
  *
  * 80286_and_80287_Programmers_Reference_Manual_1987.pdf, p.B-44 (p.254) notes that:
  *
@@ -531,16 +620,15 @@ X86.fnIDIVw = function IDIVw(dst, src)
  * However, we still sign-extend the operands before multiplying, making it easier to range-check the result.
  *
  * (80186/80188 and up)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
  */
 X86.fnIMUL8 = function IMUL8(dst, src)
 {
     var result = ((src << 16) >> 16) * ((this.getIPByte() << 24) >> 24);
-    this.resultZeroCarry = this.resultAuxOverflow = this.resultParitySign = result;
-    this.resultSize = X86.RESULT.SIZE_BYTE;
-    /*
-     * TODO: Look into a more efficient way of setting/synchronizing CF and OF; this code works,
-     * but it somewhat defeats the purpose of the indirect result variables that we've set above.
-     */
     if (result > 32767 || result < -32768) {
         this.setCF(); this.setOF();
     } else {
@@ -558,10 +646,7 @@ X86.fnIMUL8 = function IMUL8(dst, src)
 };
 
 /**
- * @this {X86CPU}
- * @param {number} dst
- * @param {number} src
- * @return {number}
+ * fnIMUL16(dst, src)
  *
  * 80286_and_80287_Programmers_Reference_Manual_1987.pdf, p.B-44 (p.254) notes that:
  *
@@ -571,16 +656,15 @@ X86.fnIMUL8 = function IMUL8(dst, src)
  * However, we still sign-extend the operands before multiplying, making it easier to range-check the result.
  *
  * (80186/80188 and up)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
  */
 X86.fnIMUL16 = function IMUL16(dst, src)
 {
     var result = ((src << 16) >> 16) * ((this.getIPWord() << 16) >> 16);
-    this.resultZeroCarry = this.resultAuxOverflow = this.resultParitySign = result;
-    this.resultSize = X86.RESULT.SIZE_WORD;
-    /*
-     * TODO: Look into a more efficient way of setting/synchronizing CF and OF; this code works,
-     * but it somewhat defeats the purpose of the indirect result variables that we've set above.
-     */
     if (result > 32767 || result < -32768) {
         this.setCF(); this.setOF();
     } else {
@@ -598,6 +682,8 @@ X86.fnIMUL16 = function IMUL16(dst, src)
 };
 
 /**
+ * fnIMULb(dst, src)
+ *
  * This 16-bit multiplication must indicate when the upper 8 bits are simply a sign-extension of the
  * lower 8 bits (carry clear) and when the upper 8 bits contain significant bits (carry set).  The latter
  * will occur whenever a positive result is > 127 (0x007f) and whenever a negative result is < -128
@@ -620,12 +706,6 @@ X86.fnIMULb = function IMULb(dst, src)
 {
     var result = (((src = this.regEAX) << 24) >> 24) * ((dst << 24) >> 24);
     this.regEAX = this.regMD16 = result & 0xffff;
-    this.resultZeroCarry = this.resultAuxOverflow = this.resultParitySign = result;
-    this.resultSize = X86.RESULT.SIZE_BYTE;
-    /*
-     * TODO: Look into a more efficient way of setting/synchronizing CF and OF; this code works,
-     * but it somewhat defeats the purpose of the indirect result variables that we've set above.
-     */
     if (result > 127 || result < -128) {
         this.setCF(); this.setOF();
     } else {
@@ -644,6 +724,8 @@ X86.fnIMULb = function IMULb(dst, src)
 };
 
 /**
+ * fnIMULw(dst, src)
+ *
  * This 32-bit multiplication must indicate when the upper 16 bits are simply a sign-extension of the
  * lower 16 bits (carry clear) and when the upper 16 bits contain significant bits (carry set).  The latter
  * will occur whenever a positive result is > 32767 (0x00007fff) and whenever a negative result is < -32768
@@ -667,12 +749,6 @@ X86.fnIMULw = function IMULw(dst, src)
     var result = (((src = this.regEAX) << 16) >> 16) * ((dst << 16) >> 16);
     this.regEAX = this.regMD16 = result & 0xffff;
     this.regEDX = this.regMD32 = (result >> 16) & 0xffff;
-    this.resultZeroCarry = this.resultAuxOverflow = this.resultParitySign = result;
-    this.resultSize = X86.RESULT.SIZE_WORD;
-    /*
-     * TODO: Look into a more efficient way of setting/synchronizing CF and OF; this code works,
-     * but it somewhat defeats the purpose of the indirect result variables that we've set above.
-     */
     if (result > 32767 || result < -32768) {
         this.setCF(); this.setOF();
     } else {
@@ -691,6 +767,8 @@ X86.fnIMULw = function IMULw(dst, src)
 };
 
 /**
+ * fnINCb(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src (null)
@@ -698,15 +776,46 @@ X86.fnIMULw = function IMULw(dst, src)
  */
 X86.fnINCb = function INCb(dst, src)
 {
-    this.resultAuxOverflow = dst;
-    dst = (this.resultParitySign = dst + 1) & 0xff;
-    this.resultZeroCarry = dst | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 8);
-    this.resultSize = X86.RESULT.SIZE_BYTE;
+    var b = (dst + 1)|0;
+    if (OLDFLAGS) {
+        this.resultAuxOverflow = dst;
+        this.resultParitySign = b;
+        this.resultZeroCarry = (b & 0xff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 8);
+        this.resultSize = X86.RESULT.SIZE_BYTE;
+    }
+    if (I386) {
+        this.setArithResult(dst, 1, b, X86.RESULT.BYTE | X86.RESULT.NOTCF);
+    }
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesIncR : this.CYCLES.nOpCyclesIncM);
-    return dst;
+    return b & 0xff;
 };
 
 /**
+ * fnINCr(w)
+ *
+ * @this {X86CPU}
+ * @param {number} w
+ * @return {number}
+ */
+X86.fnINCr = function INCr(w)
+{
+    var result = ((w & this.dataMask) + 1)|0;
+    if (OLDFLAGS) {
+        this.resultAuxOverflow = w;
+        this.resultParitySign = result;
+        this.resultZeroCarry = result | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
+        this.resultSize = X86.RESULT.SIZE_WORD;
+    }
+    if (I386) {
+        this.setArithResult(w, 1, result, X86.RESULT.WORD | X86.RESULT.NOTCF);
+    }
+    this.nStepCycles -= 2;                          // the register form of INC takes 2 cycles on all CPUs
+    return (w & ~this.dataMask) | (result & this.dataMask);
+};
+
+/**
+ * fnINCw(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src (null)
@@ -714,12 +823,18 @@ X86.fnINCb = function INCb(dst, src)
  */
 X86.fnINCw = function INCw(dst, src)
 {
-    this.resultAuxOverflow = dst;
-    dst = (this.resultParitySign = dst + 1) & 0xffff;
-    this.resultZeroCarry = dst | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-    this.resultSize = X86.RESULT.SIZE_WORD;
+    var w = (dst + 1)|0;
+    if (OLDFLAGS) {
+        this.resultAuxOverflow = dst;
+        this.resultParitySign = w;
+        this.resultZeroCarry = (w & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
+        this.resultSize = X86.RESULT.SIZE_WORD;
+    }
+    if (I386) {
+        this.setArithResult(dst, 1, w, X86.RESULT.WORD | X86.RESULT.NOTCF);
+    }
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesIncR : this.CYCLES.nOpCyclesIncM);
-    return dst;
+    return w & 0xffff;
 };
 
 /**
@@ -789,6 +904,24 @@ X86.fnIRET = function IRET()
 };
 
 /**
+ * fnJMPw(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src (null)
+ * @return {number}
+ */
+X86.fnJMPw = function JMPw(dst, src)
+{
+    this.setIP(dst);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesJmpWR : this.CYCLES.nOpCyclesJmpWM);
+    this.opFlags |= X86.OPFLAG.NOWRITE;
+    return dst;
+};
+
+/**
+ * fnJMPFdw(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src (null)
@@ -807,20 +940,8 @@ X86.fnJMPFdw = function JMPFdw(dst, src)
 };
 
 /**
- * @this {X86CPU}
- * @param {number} dst
- * @param {number} src (null)
- * @return {number}
- */
-X86.fnJMPw = function JMPw(dst, src)
-{
-    this.setIP(dst);
-    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesJmpWR : this.CYCLES.nOpCyclesJmpWM);
-    this.opFlags |= X86.OPFLAG.NOWRITE;
-    return dst;
-};
-
-/**
+ * fnLAR(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src
@@ -863,6 +984,8 @@ X86.fnLCR0 = function LCR0(l)
 };
 
 /**
+ * fnLDS(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src
@@ -880,6 +1003,8 @@ X86.fnLDS = function LDS(dst, src)
 };
 
 /**
+ * fnLEA(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src
@@ -902,6 +1027,25 @@ X86.fnLEA = function LEA(dst, src)
     }
     this.nStepCycles -= this.CYCLES.nOpCyclesLEA;
     return this.regEA;
+};
+
+/**
+ * fnLES(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnLES = function LES(dst, src)
+{
+    if (this.regEA === X86.ADDR_INVALID) {
+        X86.opUndefined.call(this);
+        return dst;
+    }
+    this.setES(this.getShort(this.regEA + 2));
+    this.nStepCycles -= this.CYCLES.nOpCyclesLS;
+    return src;
 };
 
 /**
@@ -929,23 +1073,6 @@ X86.fnLGDT = function LGDT(dst, src)
         this.nStepCycles -= 11;
     }
     return dst;
-};
-
-/**
- * @this {X86CPU}
- * @param {number} dst
- * @param {number} src
- * @return {number}
- */
-X86.fnLES = function LES(dst, src)
-{
-    if (this.regEA === X86.ADDR_INVALID) {
-        X86.opUndefined.call(this);
-        return dst;
-    }
-    this.setES(this.getShort(this.regEA + 2));
-    this.nStepCycles -= this.CYCLES.nOpCyclesLS;
-    return src;
 };
 
 /**
@@ -1011,6 +1138,8 @@ X86.fnLMSW = function LMSW(dst, src)
 };
 
 /**
+ * fnLSL(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src (the selector)
@@ -1062,6 +1191,8 @@ X86.fnLTR = function LTR(dst, src)
 };
 
 /**
+ * fnMOV(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst (current value, ignored)
  * @param {number} src (new value)
@@ -1074,6 +1205,8 @@ X86.fnMOV = function MOV(dst, src)
 };
 
 /**
+ * fnMOVimm(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst (current value, ignored)
  * @param {number} src (new value)
@@ -1086,6 +1219,8 @@ X86.fnMOVImm = function MOVImm(dst, src)
 };
 
 /**
+ * fnMOVMD16(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst (current value, ignored)
  * @param {number} src (new value)
@@ -1097,6 +1232,8 @@ X86.fnMOVMD16 = function MOVMD16(dst, src)
 };
 
 /**
+ * fnMULb(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src (null)
@@ -1105,12 +1242,6 @@ X86.fnMOVMD16 = function MOVMD16(dst, src)
 X86.fnMULb = function MULb(dst, src)
 {
     this.regEAX = this.regMD16 = (this.resultZeroCarry = (src = this.regEAX & 0xff) * dst) & 0xffff;
-    this.resultAuxOverflow = this.resultParitySign = this.resultZeroCarry;
-    this.resultSize = X86.RESULT.SIZE_BYTE;
-    /*
-     * TODO: Look into a more efficient way of setting/synchronizing CF and OF; this code works,
-     * but it somewhat defeats the purpose of the indirect result variables that we've set above.
-     */
     if (this.regEAX & 0xff00) {
         this.setCF(); this.setOF();
     } else {
@@ -1129,6 +1260,8 @@ X86.fnMULb = function MULb(dst, src)
 };
 
 /**
+ * fnMULw(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src (null)
@@ -1138,12 +1271,6 @@ X86.fnMULw = function MULw(dst, src)
 {
     this.regMD16 = this.regEAX = (this.resultZeroCarry = (src = this.regEAX) * dst) & 0xffff;
     this.regMD32 = this.regEDX = (this.resultZeroCarry >> 16) & 0xffff;
-    this.resultAuxOverflow = this.resultParitySign = this.resultZeroCarry;
-    this.resultSize = X86.RESULT.SIZE_WORD;
-    /*
-     * TODO: Look into a more efficient way of setting/synchronizing CF and OF; this code works,
-     * but it somewhat defeats the purpose of the indirect result variables that we've set above.
-     */
     if (this.regEDX) {
         this.setCF(); this.setOF();
     } else {
@@ -1162,6 +1289,8 @@ X86.fnMULw = function MULw(dst, src)
 };
 
 /**
+ * fnNEGb(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src (null)
@@ -1169,14 +1298,22 @@ X86.fnMULw = function MULw(dst, src)
  */
 X86.fnNEGb = function NEGb(dst, src)
 {
-    src = 0;
-    this.resultAuxOverflow = dst ^ src;
-    this.resultSize = X86.RESULT.SIZE_BYTE;
+    var b = (-dst)|0;
+    if (OLDFLAGS) {
+        this.resultAuxOverflow = dst;
+        this.resultSize = X86.RESULT.SIZE_BYTE;
+        this.resultZeroCarry = this.resultParitySign = b;
+    }
+    if (I386) {
+        this.setArithResult(0, dst, b, X86.RESULT.BYTE | X86.RESULT.ALL, true);
+    }
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesNegR : this.CYCLES.nOpCyclesNegM);
-    return (this.resultZeroCarry = this.resultParitySign = src - dst) & 0xff;
+    return b & 0xff;
 };
 
 /**
+ * fnNEGw(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src (null)
@@ -1184,14 +1321,22 @@ X86.fnNEGb = function NEGb(dst, src)
  */
 X86.fnNEGw = function NEGw(dst, src)
 {
-    src = 0;
-    this.resultAuxOverflow = dst ^ src;
-    this.resultSize = X86.RESULT.SIZE_WORD;
+    var w = (-dst)|0;
+    if (OLDFLAGS) {
+        this.resultAuxOverflow = dst;
+        this.resultSize = X86.RESULT.SIZE_WORD;
+        this.resultZeroCarry = this.resultParitySign = w;
+    }
+    if (I386) {
+        this.setArithResult(0, dst, w, X86.RESULT.WORD | X86.RESULT.ALL, true);
+    }
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesNegR : this.CYCLES.nOpCyclesNegM);
-    return (this.resultZeroCarry = this.resultParitySign = src - dst) & 0xffff;
+    return w & 0xffff;
 };
 
 /**
+ * fnNOTb(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src (null)
@@ -1204,6 +1349,8 @@ X86.fnNOTb = function NOTb(dst, src)
 };
 
 /**
+ * fnNOTw(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src (null)
@@ -1216,6 +1363,8 @@ X86.fnNOTw = function NOTw(dst, src)
 };
 
 /**
+ * fnORb(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src
@@ -1223,12 +1372,21 @@ X86.fnNOTw = function NOTw(dst, src)
  */
 X86.fnORb = function ORb(dst, src)
 {
-    this.resultSize = X86.RESULT.SIZE_BYTE;
+    var b = dst | src;
+    if (OLDFLAGS) {
+        this.resultSize = X86.RESULT.SIZE_BYTE;
+        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = b;
+    }
+    if (I386) {
+        this.setLogicResult(b, X86.RESULT.BYTE);
+    }
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
-    return (this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst | src) & 0xff;
+    return b;
 };
 
 /**
+ * fnORw(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src
@@ -1236,12 +1394,21 @@ X86.fnORb = function ORb(dst, src)
  */
 X86.fnORw = function ORw(dst, src)
 {
-    this.resultSize = X86.RESULT.SIZE_WORD;
+    var w = dst | src;
+    if (OLDFLAGS) {
+        this.resultSize = X86.RESULT.SIZE_WORD;
+        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = w;
+    }
+    if (I386) {
+        this.setLogicResult(w, X86.RESULT.WORD);
+    }
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
-    return (this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst | src) & 0xffff;
+    return w;
 };
 
 /**
+ * fnPOPw(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst (current value, ignored)
  * @param {number} src (new value)
@@ -1254,6 +1421,8 @@ X86.fnPOPw = function POPw(dst, src)
 };
 
 /**
+ * fnPUSHw(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src (null)
@@ -1284,6 +1453,8 @@ X86.fnPUSHw = function PUSHw(dst, src)
 };
 
 /**
+ * fnRCLb(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src (1 or CL)
@@ -1295,14 +1466,28 @@ X86.fnRCLb = function RCLb(dst, src)
     var flagsIn = (DEBUG? this.getPS() : 0);
     if (src) {
         var temp;
-        var shift = (src & this.nShiftCountMask) % 0x9;
+        var carry = this.getCarry();
+        var shift = (src & this.nShiftCountMask) % 9;
         if (!shift) {
-            temp = dst | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 8);
+            temp = dst | (carry << 8);
         } else {
-            temp = (dst << shift) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << (shift - 1)) | (dst >> (9 - shift));
+            temp = (dst << shift) | (carry << (shift - 1)) | (dst >> (9 - shift));
             result = temp & 0xff;
         }
         X86.fnRotateFlags.call(this, temp, X86.RESULT.SIZE_BYTE);
+        if (I386) {
+            if (!shift) {
+                carry <<= 7;
+            } else {
+                /*
+                 * shift is 1-8, which means the new carry will come from the dst bit
+                 * at position 7-0.  To force it into position 7, left shift by (shift - 1).
+                 */
+                temp = ((dst << shift) | (carry << (shift - 1)) | (dst >> (9 - shift))) & 0xff;
+                carry = dst << (shift - 1);
+            }
+            X86.setRotateResult.call(this, temp, result, carry, X86.RESULT.BYTE);
+        }
     }
     if (DEBUG && DEBUGGER) this.traceLog('RCLB', dst, src, flagsIn, this.getPS(), result);
     return result;
@@ -1320,20 +1505,36 @@ X86.fnRCLw = function RCLw(dst, src)
     var flagsIn = (DEBUG? this.getPS() : 0);
     if (src) {
         var temp;
-        var shift = (src & this.nShiftCountMask) % 0x11;
+        var carry = this.getCarry();
+        var shift = (src & this.nShiftCountMask) % 17;
         if (!shift) {
-            temp = dst | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
+            temp = dst | (carry << 16);
         } else {
-            temp = (dst << shift) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << (shift - 1)) | (dst >> (17 - shift));
+            temp = (dst << shift) | (carry << (shift - 1)) | (dst >> (17 - shift));
             result = temp & 0xffff;
         }
         X86.fnRotateFlags.call(this, temp, X86.RESULT.SIZE_WORD);
+        if (I386) {
+            if (!shift) {
+                carry <<= 15;
+            } else {
+                /*
+                 * shift is 1-16, which means the new carry will come from the dst bit
+                 * at position 15-0.  To force it into position 15, left shift by (shift - 1).
+                 */
+                temp = ((dst << shift) | (carry << (shift - 1)) | (dst >> (17 - shift))) & 0xffff;
+                carry = dst << (shift - 1);
+            }
+            X86.setRotateResult.call(this, temp, result, carry, X86.RESULT.WORD);
+        }
     }
     if (DEBUG && DEBUGGER) this.traceLog('RCLW', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
 /**
+ * fnRCRb(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src (1 or CL)
@@ -1344,16 +1545,32 @@ X86.fnRCRb = function RCRb(dst, src)
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
     if (src) {
-        var shift = (src & this.nShiftCountMask) % 0x9;
-        result = (dst >> shift) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << (8 - shift)) | (dst << (9 - shift));
+        var carry = this.getCarry();
+        var shift = (src & this.nShiftCountMask) % 9;
+        result = (dst >> shift) | (carry << (8 - shift)) | (dst << (9 - shift));
         X86.fnRotateFlags.call(this, result, X86.RESULT.SIZE_BYTE);
         result &= 0xff;
+        if (I386) {
+            if (!shift) {
+                carry <<= 7;
+            } else {
+                /*
+                 * shift is 1-8, which means the new carry will come from the dst bit
+                 * at position 0-7.  To force it into position 7, left shift by (8 - shift).
+                 */
+                var temp = ((dst >> shift) | (carry << (8 - shift)) | (dst << (9 - shift))) & 0xff;
+                carry = dst << (8 - shift);
+            }
+            X86.setRotateResult.call(this, temp, result, carry, X86.RESULT.BYTE);
+        }
     }
     if (DEBUG && DEBUGGER) this.traceLog('RCRB', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
 /**
+ * fnRCRw(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src (1 or CL)
@@ -1364,10 +1581,24 @@ X86.fnRCRw = function RCRw(dst, src)
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
     if (src) {
-        var shift = (src & this.nShiftCountMask) % 0x11;
-        result = (dst >> shift) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << (16 - shift)) | (dst << (17 - shift));
+        var carry = this.getCarry();
+        var shift = (src & this.nShiftCountMask) % 17;
+        result = (dst >> shift) | (carry << (16 - shift)) | (dst << (17 - shift));
         X86.fnRotateFlags.call(this, result, X86.RESULT.SIZE_WORD);
         result &= 0xffff;
+        if (I386) {
+            if (!shift) {
+                carry <<= 15;
+            } else {
+                /*
+                 * shift is 1-16, which means the new carry will come from the dst bit
+                 * at position 0-15.  To force it into position 15, left shift by (16 - shift).
+                 */
+                var temp = ((dst >> shift) | (carry << (16 - shift)) | (dst << (17 - shift))) & 0xffff;
+                carry = dst << (16 - shift);
+            }
+            X86.setRotateResult.call(this, temp, result, carry, X86.RESULT.WORD);
+        }
     }
     if (DEBUG && DEBUGGER) this.traceLog('RCRW', dst, src, flagsIn, this.getPS(), result);
     return result;
@@ -1412,6 +1643,8 @@ X86.fnRETF = function RETF(n)
 };
 
 /**
+ * fnROLb(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src (1 or CL)
@@ -1430,12 +1663,32 @@ X86.fnROLb = function ROLb(dst, src)
             result = (temp = (dst << shift) | (dst >> (8 - shift))) & 0xff;
         }
         X86.fnRotateFlags.call(this, temp, X86.RESULT.SIZE_BYTE);
+        if (I386) {
+            var carry;
+            if (!shift) {
+                /*
+                 * shift is 8, which means the new carry will come from the dst bit
+                 * at position 0.
+                 */
+                carry = dst << 7;
+            } else {
+                /*
+                 * shift is 1-7, which means the new carry will come from the dst bit
+                 * at position 7-1.  To force it into position 7, left shift by (shift - 1).
+                 */
+                temp = ((dst << shift) | (dst >> (8 - shift))) & 0xff;
+                carry = dst << (shift - 1);
+            }
+            X86.setRotateResult.call(this, temp, result, carry, X86.RESULT.BYTE);
+        }
     }
     if (DEBUG && DEBUGGER) this.traceLog('ROLB', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
 /**
+ * fnROLw(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src (1 or CL)
@@ -1454,12 +1707,28 @@ X86.fnROLw = function ROLw(dst, src)
             result = (temp = (dst << shift) | (dst >> (16 - shift))) & 0xffff;
         }
         X86.fnRotateFlags.call(this, temp, X86.RESULT.SIZE_WORD);
+        if (I386) {
+            var carry;
+            if (!shift) {
+                carry = dst << 15;
+            } else {
+                /*
+                 * shift is 1-15, which means the new carry will come from the dst bit
+                 * at position 15-1.  To force it into position 15, left shift by (shift - 1).
+                 */
+                temp = ((dst << shift) | (dst >> (16 - shift))) & 0xffff;
+                carry = dst << (shift - 1);
+            }
+            X86.setRotateResult.call(this, temp, result, carry, X86.RESULT.WORD);
+        }
     }
     if (DEBUG && DEBUGGER) this.traceLog('ROLW', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
 /**
+ * fnRORb(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src (1 or CL)
@@ -1475,12 +1744,32 @@ X86.fnRORb = function RORb(dst, src)
         result = temp = ((dst >> shift) | (dst << (8 - shift))) & 0xff;
         if (temp & 0x80) temp |= X86.RESULT.SIZE_BYTE;
         X86.fnRotateFlags.call(this, temp, X86.RESULT.SIZE_BYTE);
+        if (I386) {
+            var carry;
+            if (!shift) {
+                /*
+                 * shift is 8, which means the new carry will come from the dst bit
+                 * at position 7.
+                 */
+                carry = dst;
+            } else {
+                /*
+                 * shift is 1-7, which means the new carry will come from the dst bit
+                 * at position 0-6.  To force it into position 7, left shift by (8 - shift).
+                 */
+                temp = ((dst >> shift) | (dst << (8 - shift))) & 0xff;
+                carry = dst << (8 - shift);
+            }
+            X86.setRotateResult.call(this, temp, result, carry, X86.RESULT.BYTE);
+        }
     }
     if (DEBUG && DEBUGGER) this.traceLog('RORB', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
 /**
+ * fnRORw(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src (1 or CL)
@@ -1496,16 +1785,35 @@ X86.fnRORw = function RORw(dst, src)
         result = temp = ((dst >> shift) | (dst << (16 - shift))) & 0xffff;
         if (temp & 0x8000) temp |= X86.RESULT.SIZE_WORD;
         X86.fnRotateFlags.call(this, temp, X86.RESULT.SIZE_WORD);
+        if (I386) {
+            var carry;
+            if (!shift) {
+                /*
+                 * shift is 16, which means the new carry will come from the dst bit
+                 * at position 15.
+                 */
+                carry = dst;
+            } else {
+                /*
+                 * shift is 1-15, which means the new carry will come from the dst bit
+                 * at position 0-14.  To force it into position 15, left shift by (16 - shift).
+                 */
+                temp = ((dst >> shift) | (dst << (16 - shift))) & 0xffff;
+                carry = dst << (16 - shift);
+            }
+            X86.setRotateResult.call(this, temp, result, carry, X86.RESULT.WORD);
+        }
     }
     if (DEBUG && DEBUGGER) this.traceLog('RORW', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
 /**
- * WARNING: Although we set all the arithmetic flags for shift instructions, including
- * AUXCARRY (PS_AF), AUXCARRY isn't properly set on a real 8086/8088; its value is
- * documented as "undefined."  Similarly, OVERFLOW (PS_OF) is documented as "undefined"
- * for shifts > 1.  See fnSHLb() for more details.
+ * fnSARb(dst, src)
+ *
+ * NOTE: Although we set all the arithmetic flags for shift instructions, AF isn't actually
+ * defined on a real 8086/8088.  Similarly, OF is undefined for shifts > 1.  See fnSHLb() for
+ * more details.
  *
  * @this {X86CPU}
  * @param {number} dst
@@ -1524,16 +1832,20 @@ X86.fnSARb = function SARb(dst, src)
             this.resultZeroCarry &= ~X86.RESULT.SIZE_BYTE;
         this.resultAuxOverflow = dst ^ this.resultZeroCarry;
         this.resultSize = X86.RESULT.SIZE_BYTE;
-        dst = this.resultZeroCarry;
+        dst = this.resultZeroCarry & 0xff;
+        if (I386) {
+            this.setLogicResult(dst, X86.RESULT.BYTE, temp & 0x1);
+        }
     }
-    return dst & 0xff;
+    return dst;
 };
 
 /**
- * WARNING: Although we set all the arithmetic flags for shift instructions, including
- * AUXCARRY (PS_AF), AUXCARRY isn't properly set on a real 8086/8088; its value is
- * documented as "undefined."  Similarly, OVERFLOW (PS_OF) is documented as "undefined"
- * for shifts > 1.  See fnSHLb() for more details.
+ * fnSARw(dst, src)
+ *
+ * NOTE: Although we set all the arithmetic flags for shift instructions, AF isn't actually
+ * defined on a real 8086/8088.  Similarly, OF is undefined for shifts > 1.  See fnSHLb() for
+ * more details.
  *
  * @this {X86CPU}
  * @param {number} dst
@@ -1552,14 +1864,16 @@ X86.fnSARw = function SARw(dst, src)
             this.resultZeroCarry &= ~X86.RESULT.SIZE_WORD;
         this.resultAuxOverflow = dst ^ this.resultZeroCarry;
         this.resultSize = X86.RESULT.SIZE_WORD;
-        dst = this.resultZeroCarry;
+        dst = this.resultZeroCarry & 0xffff;
+        if (I386) {
+            this.setLogicResult(dst, X86.RESULT.WORD, temp & 0x1);
+        }
     }
-    return dst & 0xffff;
+    return dst;
 };
 
 /**
- * NOTE: Notice that some of the simpler math functions could get away with updating resultSize before
- * the calculation, but here the calculation depends on the incoming carry value.
+ * fnSBBb(dst, src)
  *
  * @this {X86CPU}
  * @param {number} dst
@@ -1568,16 +1882,21 @@ X86.fnSARw = function SARw(dst, src)
  */
 X86.fnSBBb = function SBBb(dst, src)
 {
-    this.resultAuxOverflow = dst ^ src;
-    this.resultZeroCarry = this.resultParitySign = dst - src - ((this.resultZeroCarry & this.resultSize)? 1 : 0);
-    this.resultSize = X86.RESULT.SIZE_BYTE;
+    var b = (dst - src - this.getCarry())|0;
+    if (OLDFLAGS) {
+        this.resultAuxOverflow = dst ^ src;
+        this.resultZeroCarry = this.resultParitySign = b;
+        this.resultSize = X86.RESULT.SIZE_BYTE;
+    }
+    if (I386) {
+        this.setArithResult(dst, src, b, X86.RESULT.BYTE | X86.RESULT.ALL, true);
+    }
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
-    return this.resultZeroCarry & 0xff;
+    return b & 0xff;
 };
 
 /**
- * NOTE: Notice that some of the simpler math functions could get away with updating resultSize before
- * the calculation, but here the calculation depends on the incoming carry value.
+ * fnSBBw(dst, src)
  *
  * @this {X86CPU}
  * @param {number} dst
@@ -1586,11 +1905,17 @@ X86.fnSBBb = function SBBb(dst, src)
  */
 X86.fnSBBw = function SBBw(dst, src)
 {
-    this.resultAuxOverflow = dst ^ src;
-    this.resultZeroCarry = this.resultParitySign = dst - src - ((this.resultZeroCarry & this.resultSize)? 1 : 0);
-    this.resultSize = X86.RESULT.SIZE_WORD;
+    var w = (dst - src - this.getCarry())|0;
+    if (OLDFLAGS) {
+        this.resultAuxOverflow = dst ^ src;
+        this.resultZeroCarry = this.resultParitySign = w;
+        this.resultSize = X86.RESULT.SIZE_WORD;
+    }
+    if (I386) {
+        this.setArithResult(dst, src, w, X86.RESULT.WORD | X86.RESULT.ALL, true);
+    }
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
-    return this.resultZeroCarry & 0xffff;
+    return w & 0xffff;
 };
 
 /**
@@ -1654,16 +1979,16 @@ X86.fnSGDT = function SGDT(dst, src)
 };
 
 /**
- * WARNING: Although we set all the arithmetic flags for shift instructions, including
- * AUXCARRY (PS_AF), AUXCARRY isn't properly set on a real 8086/8088; its value is
- * documented as "undefined."  Similarly, OVERFLOW (PS_OF) is documented as "undefined"
- * for shifts > 1.
+ * fnSHLb(dst, src)
  *
- * For example, when AL=09, SHL AL,1 may clear PS_AF on a real CPU, but in our case,
- * it will be set.  However, until I see documented 8086/8088 behaviors for PS_AF and PS_OF
- * and/or code that depends on them, I'll continue setting PS_AF and PS_OF "normally".
+ * NOTE: Although we set all the arithmetic flags for shift instructions, AF isn't actually
+ * defined on a real 8086/8088.  Similarly, OF is undefined for shifts > 1.
  *
- * See also: AND, OR, TEST, and XOR (those instructions leave AUXCARRY "undefined" as well).
+ * For example, when AL=09, "SHL AL,1" may clear AF on a real CPU, whereas we will set it.
+ * However, until I find or produce documented 8086/8088 behaviors for AF and OF, and/or code
+ * that depends on them, I'll continue setting AF and OF "normally".
+ *
+ * See also: AND, OR, TEST, and XOR (those instructions leave AF undefined as well).
  *
  * @this {X86CPU}
  * @param {number} dst
@@ -1675,22 +2000,29 @@ X86.fnSHLb = function SHLb(dst, src)
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
     if (src) {
-        if (src > 8)                // this comparison obviates the need to mask with this.nShiftCountMask
+        var carry = 0;
+        if (src > 8) {          // this comparison obviates the need to mask with this.nShiftCountMask
             result = this.resultZeroCarry = this.resultParitySign = 0;
-        else
-            result = (this.resultZeroCarry = this.resultParitySign = (dst << src)) & 0xff;
+        } else {
+            carry = dst << (src - 1);
+            result = (this.resultZeroCarry = this.resultParitySign = (carry << 1)) & 0xff;
+        }
         this.resultAuxOverflow = 0;
         this.resultSize = X86.RESULT.SIZE_BYTE;
+        if (I386) {
+            X86.setRotateResult.call(this, result, result, carry, X86.RESULT.BYTE);
+        }
     }
     if (DEBUG && DEBUGGER) this.traceLog('SHLB', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
 /**
- * WARNING: Although we set all the arithmetic flags for shift instructions, including
- * AUXCARRY (PS_AF), AUXCARRY isn't properly set on a real 8086/8088; its value is
- * documented as "undefined."  Similarly, OVERFLOW (PS_OF) is documented as "undefined"
- * for shifts > 1.  See fnSHLb() for more details.
+ * fnSHLw(dst, src)
+ *
+ * NOTE: Although we set all the arithmetic flags for shift instructions, AF isn't actually
+ * defined on a real 8086/8088.  Similarly, OF is undefined for shifts > 1.  See fnSHLb() for
+ * more details.
  *
  * @this {X86CPU}
  * @param {number} dst
@@ -1702,22 +2034,29 @@ X86.fnSHLw = function SHLw(dst, src)
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
     if (src) {
-        if (src > 16)               // this comparison obviates the need to mask with this.nShiftCountMask
+        var carry = 0;
+        if (src > 16) {         // this comparison obviates the need to mask with this.nShiftCountMask
             result = this.resultZeroCarry = this.resultParitySign = 0;
-        else
-            result = (this.resultZeroCarry = this.resultParitySign = (dst << src)) & 0xffff;
+        } else {
+            carry = dst << (src - 1);
+            result = (this.resultZeroCarry = this.resultParitySign = (carry << 1)) & 0xffff;
+        }
         this.resultAuxOverflow = 0;
         this.resultSize = X86.RESULT.SIZE_WORD;
+        if (I386) {
+            X86.setRotateResult.call(this, result, result, carry, X86.RESULT.WORD);
+        }
     }
     if (DEBUG && DEBUGGER) this.traceLog('SHLW', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
 /**
- * WARNING: Although we set all the arithmetic flags for shift instructions, including
- * AUXCARRY (PS_AF), AUXCARRY isn't properly set on a real 8086/8088; its value is
- * documented as "undefined."  Similarly, OVERFLOW (PS_OF) is documented as "undefined"
- * for shifts > 1.  See fnSHLb() for more details.
+ * fnSHRb(dst, src)
+ *
+ * NOTE: Although we set all the arithmetic flags for shift instructions, AF isn't actually
+ * defined on a real 8086/8088.  Similarly, OF is undefined for shifts > 1.  See fnSHLb() for
+ * more details.
  *
  * @this {X86CPU}
  * @param {number} dst
@@ -1735,16 +2074,20 @@ X86.fnSHRb = function SHRb(dst, src)
             this.resultZeroCarry &= ~X86.RESULT.SIZE_BYTE;
         this.resultAuxOverflow = dst ^ this.resultZeroCarry;
         this.resultSize = X86.RESULT.SIZE_BYTE;
-        dst = this.resultZeroCarry;
+        dst = this.resultZeroCarry & 0xff;
+        if (I386) {
+            this.setLogicResult(dst, X86.RESULT.BYTE, temp & 0x1, dst & X86.RESULT.BYTE);
+        }
     }
-    return dst & 0xff;
+    return dst;
 };
 
 /**
- * WARNING: Although we set all the arithmetic flags for shift instructions, including
- * AUXCARRY (PS_AF), AUXCARRY isn't properly set on a real 8086/8088; its value is
- * documented as "undefined."  Similarly, OVERFLOW (PS_OF) is documented as "undefined"
- * for shifts > 1.  See fnSHLb() for more details.
+ * fnSHRw(dst, src)
+ *
+ * NOTE: Although we set all the arithmetic flags for shift instructions, AF isn't actually
+ * defined on a real 8086/8088.  Similarly, OF is undefined for shifts > 1.  See fnSHLb() for
+ * more details.
  *
  * @this {X86CPU}
  * @param {number} dst
@@ -1762,9 +2105,12 @@ X86.fnSHRw = function SHRw(dst, src)
             this.resultZeroCarry &= ~X86.RESULT.SIZE_WORD;
         this.resultAuxOverflow = dst ^ this.resultZeroCarry;
         this.resultSize = X86.RESULT.SIZE_WORD;
-        dst = this.resultZeroCarry;
+        dst = this.resultZeroCarry & 0xffff;
+        if (I386) {
+            this.setLogicResult(dst, X86.RESULT.WORD, temp & 0x1, dst & X86.RESULT.WORD);
+        }
     }
-    return dst & 0xffff;
+    return dst;
 };
 
 /**
@@ -1849,6 +2195,8 @@ X86.fnSTR = function STR(dst, src)
 };
 
 /**
+ * fnSUBb(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src
@@ -1856,13 +2204,22 @@ X86.fnSTR = function STR(dst, src)
  */
 X86.fnSUBb = function SUBb(dst, src)
 {
-    this.resultAuxOverflow = dst ^ src;
-    this.resultSize = X86.RESULT.SIZE_BYTE;
+    var b = (dst - src)|0;
+    if (OLDFLAGS) {
+        this.resultAuxOverflow = dst ^ src;
+        this.resultZeroCarry = this.resultParitySign = b;
+        this.resultSize = X86.RESULT.SIZE_BYTE;
+    }
+    if (I386) {
+        this.setArithResult(dst, src, b, X86.RESULT.BYTE | X86.RESULT.ALL, true);
+    }
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
-    return (this.resultZeroCarry = this.resultParitySign = dst - src) & 0xff;
+    return b & 0xff;
 };
 
 /**
+ * fnSUBw(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src
@@ -1870,13 +2227,22 @@ X86.fnSUBb = function SUBb(dst, src)
  */
 X86.fnSUBw = function SUBw(dst, src)
 {
-    this.resultAuxOverflow = dst ^ src;
-    this.resultSize = X86.RESULT.SIZE_WORD;
+    var w = (dst - src)|0;
+    if (OLDFLAGS) {
+        this.resultAuxOverflow = dst ^ src;
+        this.resultZeroCarry = this.resultParitySign = w;
+        this.resultSize = X86.RESULT.SIZE_WORD;
+    }
+    if (I386) {
+        this.setArithResult(dst, src, w, X86.RESULT.WORD | X86.RESULT.ALL, true);
+    }
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
-    return (this.resultZeroCarry = this.resultParitySign = dst - src) & 0xffff;
+    return w & 0xffff;
 };
 
 /**
+ * fnTEST8(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src (null; we have to supply the source ourselves)
@@ -1885,14 +2251,21 @@ X86.fnSUBw = function SUBw(dst, src)
 X86.fnTEST8 = function TEST8(dst, src)
 {
     src = this.getIPByte();
-    this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst & src;
-    this.resultSize = X86.RESULT.SIZE_BYTE;
+    if (OLDFLAGS) {
+        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst & src;
+        this.resultSize = X86.RESULT.SIZE_BYTE;
+    }
+    if (I386) {
+        this.setLogicResult(dst & src, X86.RESULT.BYTE);
+    }
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesTestRI : this.CYCLES.nOpCyclesTestMI);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
 };
 
 /**
+ * fnTEST16(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src (null; we have to supply the source ourselves)
@@ -1901,14 +2274,21 @@ X86.fnTEST8 = function TEST8(dst, src)
 X86.fnTEST16 = function TEST16(dst, src)
 {
     src = this.getIPWord();
-    this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst & src;
-    this.resultSize = X86.RESULT.SIZE_WORD;
+    if (OLDFLAGS) {
+        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst & src;
+        this.resultSize = X86.RESULT.SIZE_WORD;
+    }
+    if (I386) {
+        this.setLogicResult(dst & src, X86.RESULT.WORD);
+    }
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesTestRI : this.CYCLES.nOpCyclesTestMI);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
 };
 
 /**
+ * fnTESTb(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src
@@ -1916,14 +2296,21 @@ X86.fnTEST16 = function TEST16(dst, src)
  */
 X86.fnTESTb = function TESTb(dst, src)
 {
-    this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst & src;
-    this.resultSize = X86.RESULT.SIZE_BYTE;
+    if (OLDFLAGS) {
+        this.resultSize = X86.RESULT.SIZE_BYTE;
+        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst & src;
+    }
+    if (I386) {
+        this.setLogicResult(dst & src, X86.RESULT.BYTE);
+    }
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesTestRR : this.CYCLES.nOpCyclesTestRM) : this.CYCLES.nOpCyclesTestRM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
 };
 
 /**
+ * fnTESTw(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src
@@ -1931,8 +2318,13 @@ X86.fnTESTb = function TESTb(dst, src)
  */
 X86.fnTESTw = function TESTw(dst, src)
 {
-    this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst & src;
-    this.resultSize = X86.RESULT.SIZE_WORD;
+    if (OLDFLAGS) {
+        this.resultSize = X86.RESULT.SIZE_WORD;
+        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst & src;
+    }
+    if (I386) {
+        this.setLogicResult(dst & src, X86.RESULT.WORD);
+    }
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesTestRR : this.CYCLES.nOpCyclesTestRM) : this.CYCLES.nOpCyclesTestRM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -2154,6 +2546,8 @@ X86.fnXCHGrw = function XCHGRw(dst, src)
 };
 
 /**
+ * fnXORb(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src
@@ -2161,9 +2555,38 @@ X86.fnXCHGrw = function XCHGRw(dst, src)
  */
 X86.fnXORb = function XORb(dst, src)
 {
-    this.resultSize = X86.RESULT.SIZE_BYTE;
+    var b = dst ^ src;
+    if (OLDFLAGS) {
+        this.resultSize = X86.RESULT.SIZE_BYTE;
+        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = b;
+    }
+    if (I386) {
+        this.setLogicResult(b, X86.RESULT.BYTE);
+    }
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
-    return (this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst ^ src) & 0xff;
+    return b;
+};
+
+/**
+ * fnXORw(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnXORw = function XORw(dst, src)
+{
+    var w = dst ^ src;
+    if (OLDFLAGS) {
+        this.resultSize = X86.RESULT.SIZE_WORD;
+        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = w;
+    }
+    if (I386) {
+        this.setLogicResult(w, X86.RESULT.WORD);
+    }
+    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
+    return w;
 };
 
 /**
@@ -2172,11 +2595,19 @@ X86.fnXORb = function XORb(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnXORw = function XORw(dst, src)
+X86.fnXORd = function XORd(dst, src)
 {
-    this.resultSize = X86.RESULT.SIZE_WORD;
+    var d = dst ^ src;
+    if (OLDFLAGS) {
+        this.resultSize = X86.RESULT.SIZE_WORD;
+        this.resultParitySign = this.resultAuxOverflow = d;
+        this.resultZeroCarry = ((d >>> 16) | (d & 0xffff));
+    }
+    if (I386) {
+        this.setLogicResult(d, X86.RESULT.DWORD);
+    }
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
-    return (this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst ^ src) & 0xffff;
+    return d;
 };
 
 /**
@@ -2203,6 +2634,30 @@ X86.fnRotateFlags = function(result, size)
 {
     this.resultZeroCarry = (this.resultZeroCarry & (this.resultSize - 1)) | ((result & size)? this.resultSize : 0);
     if ((result ^ (result >> 1)) & (size >> 1)) this.setOF(); else this.clearOF();
+};
+
+/**
+ * setRotateResult(result, carry, size)
+ *
+ * Used by all rotate instructions (RCL, RCR, ROL, ROR) to update CF and OF.
+ *
+ * NOTE: Although I've yet to find confirmation of this for the 8086/8088, OF is undefined on modern x86 CPUs
+ * for shift counts > 1 (in fact, on modern CPUs, OF tends to be clear in those situations).  Since I set OF the
+ * same way for all shift counts, my well-defined behavior may or may not match the 8086/8088, but until I see a
+ * defined behavior (or more importantly, some dependency on a different behavior), this seems good enough.
+ *
+ * @this {X86CPU}
+ * @param {number} temp (I386 result)
+ * @param {number} result
+ * @param {number} carry
+ * @param {number} size
+ */
+X86.setRotateResult = function(temp, result, carry, size)
+{
+    this.assert(temp === result && !(carry & size) == !this.getCF() && !((result ^ carry) & size) == !this.getOF());
+    if (carry & size) this.setCF(); else this.clearCF();
+    if ((result ^ carry) & size) this.setOF(); else this.clearOF();
+    this.verifyFlags(X86.RESULT.CF | X86.RESULT.OF);
 };
 
 /**
