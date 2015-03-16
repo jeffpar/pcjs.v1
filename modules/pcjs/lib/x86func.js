@@ -803,7 +803,7 @@ X86.fnINCr = function INCr(w)
     if (OLDFLAGS) {
         this.resultAuxOverflow = w;
         this.resultParitySign = result;
-        this.resultZeroCarry = result | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
+        this.resultZeroCarry = (result & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
         this.resultSize = X86.RESULT.SIZE_WORD;
     }
     if (I386) {
@@ -1247,6 +1247,9 @@ X86.fnMULb = function MULb(dst, src)
     } else {
         this.clearCF(); this.clearOF();
     }
+    if (DEBUG) {
+        if (this.resultZeroCarry & (this.resultSize - 1)) this.clearZF(); else this.setZF();
+    }
     /*
      * Multiply/divide instructions specify only a single operand, which the decoders pass to us
      * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX).
@@ -1275,6 +1278,9 @@ X86.fnMULw = function MULw(dst, src)
         this.setCF(); this.setOF();
     } else {
         this.clearCF(); this.clearOF();
+    }
+    if (DEBUG) {
+        if (this.resultZeroCarry & (this.resultSize - 1)) this.clearZF(); else this.setZF();
     }
     /*
      * Multiply/divide instructions specify only a single operand, which the decoders pass to us
@@ -1465,29 +1471,19 @@ X86.fnRCLb = function RCLb(dst, src)
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
     if (src) {
-        var temp;
         var carry = this.getCarry();
         var shift = (src & this.nShiftCountMask) % 9;
         if (!shift) {
-            temp = dst | (carry << 8);
+            carry <<= 7;
         } else {
-            temp = (dst << shift) | (carry << (shift - 1)) | (dst >> (9 - shift));
-            result = temp & 0xff;
+            /*
+             * shift is 1-8, which means the new carry will come from the dst bit
+             * at position 7-0.  To force it into position 7, left shift by (shift - 1).
+             */
+            result = ((dst << shift) | (carry << (shift - 1)) | (dst >> (9 - shift))) & 0xff;
+            carry = dst << (shift - 1);
         }
-        X86.fnRotateFlags.call(this, temp, X86.RESULT.SIZE_BYTE);
-        if (I386) {
-            if (!shift) {
-                carry <<= 7;
-            } else {
-                /*
-                 * shift is 1-8, which means the new carry will come from the dst bit
-                 * at position 7-0.  To force it into position 7, left shift by (shift - 1).
-                 */
-                temp = ((dst << shift) | (carry << (shift - 1)) | (dst >> (9 - shift))) & 0xff;
-                carry = dst << (shift - 1);
-            }
-            X86.setRotateResult.call(this, temp, result, carry, X86.RESULT.BYTE);
-        }
+        X86.setRotateResult.call(this, result, carry, X86.RESULT.BYTE);
     }
     if (DEBUG && DEBUGGER) this.traceLog('RCLB', dst, src, flagsIn, this.getPS(), result);
     return result;
@@ -1504,29 +1500,19 @@ X86.fnRCLw = function RCLw(dst, src)
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
     if (src) {
-        var temp;
         var carry = this.getCarry();
         var shift = (src & this.nShiftCountMask) % 17;
         if (!shift) {
-            temp = dst | (carry << 16);
+            carry <<= 15;
         } else {
-            temp = (dst << shift) | (carry << (shift - 1)) | (dst >> (17 - shift));
-            result = temp & 0xffff;
+            /*
+             * shift is 1-16, which means the new carry will come from the dst bit
+             * at position 15-0.  To force it into position 15, left shift by (shift - 1).
+             */
+            result = ((dst << shift) | (carry << (shift - 1)) | (dst >> (17 - shift))) & 0xffff;
+            carry = dst << (shift - 1);
         }
-        X86.fnRotateFlags.call(this, temp, X86.RESULT.SIZE_WORD);
-        if (I386) {
-            if (!shift) {
-                carry <<= 15;
-            } else {
-                /*
-                 * shift is 1-16, which means the new carry will come from the dst bit
-                 * at position 15-0.  To force it into position 15, left shift by (shift - 1).
-                 */
-                temp = ((dst << shift) | (carry << (shift - 1)) | (dst >> (17 - shift))) & 0xffff;
-                carry = dst << (shift - 1);
-            }
-            X86.setRotateResult.call(this, temp, result, carry, X86.RESULT.WORD);
-        }
+        X86.setRotateResult.call(this, result, carry, X86.RESULT.WORD);
     }
     if (DEBUG && DEBUGGER) this.traceLog('RCLW', dst, src, flagsIn, this.getPS(), result);
     return result;
@@ -1547,22 +1533,17 @@ X86.fnRCRb = function RCRb(dst, src)
     if (src) {
         var carry = this.getCarry();
         var shift = (src & this.nShiftCountMask) % 9;
-        result = (dst >> shift) | (carry << (8 - shift)) | (dst << (9 - shift));
-        X86.fnRotateFlags.call(this, result, X86.RESULT.SIZE_BYTE);
-        result &= 0xff;
-        if (I386) {
-            if (!shift) {
-                carry <<= 7;
-            } else {
-                /*
-                 * shift is 1-8, which means the new carry will come from the dst bit
-                 * at position 0-7.  To force it into position 7, left shift by (8 - shift).
-                 */
-                var temp = ((dst >> shift) | (carry << (8 - shift)) | (dst << (9 - shift))) & 0xff;
-                carry = dst << (8 - shift);
-            }
-            X86.setRotateResult.call(this, temp, result, carry, X86.RESULT.BYTE);
+        if (!shift) {
+            carry <<= 7;
+        } else {
+            /*
+             * shift is 1-8, which means the new carry will come from the dst bit
+             * at position 0-7.  To force it into position 7, left shift by (8 - shift).
+             */
+            result = ((dst >> shift) | (carry << (8 - shift)) | (dst << (9 - shift))) & 0xff;
+            carry = dst << (8 - shift);
         }
+        X86.setRotateResult.call(this, result, carry, X86.RESULT.BYTE);
     }
     if (DEBUG && DEBUGGER) this.traceLog('RCRB', dst, src, flagsIn, this.getPS(), result);
     return result;
@@ -1583,22 +1564,17 @@ X86.fnRCRw = function RCRw(dst, src)
     if (src) {
         var carry = this.getCarry();
         var shift = (src & this.nShiftCountMask) % 17;
-        result = (dst >> shift) | (carry << (16 - shift)) | (dst << (17 - shift));
-        X86.fnRotateFlags.call(this, result, X86.RESULT.SIZE_WORD);
-        result &= 0xffff;
-        if (I386) {
-            if (!shift) {
-                carry <<= 15;
-            } else {
-                /*
-                 * shift is 1-16, which means the new carry will come from the dst bit
-                 * at position 0-15.  To force it into position 15, left shift by (16 - shift).
-                 */
-                var temp = ((dst >> shift) | (carry << (16 - shift)) | (dst << (17 - shift))) & 0xffff;
-                carry = dst << (16 - shift);
-            }
-            X86.setRotateResult.call(this, temp, result, carry, X86.RESULT.WORD);
+        if (!shift) {
+            carry <<= 15;
+        } else {
+            /*
+             * shift is 1-16, which means the new carry will come from the dst bit
+             * at position 0-15.  To force it into position 15, left shift by (16 - shift).
+             */
+            result = ((dst >> shift) | (carry << (16 - shift)) | (dst << (17 - shift))) & 0xffff;
+            carry = dst << (16 - shift);
         }
+        X86.setRotateResult.call(this, result, carry, X86.RESULT.WORD);
     }
     if (DEBUG && DEBUGGER) this.traceLog('RCRW', dst, src, flagsIn, this.getPS(), result);
     return result;
@@ -1655,32 +1631,23 @@ X86.fnROLb = function ROLb(dst, src)
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
     if (src) {
-        var temp;
+        var carry;
         var shift = src & 0x7;      // this smaller mask obviates the need to mask with this.nShiftCountMask
         if (!shift) {
-            temp = dst << 8;
+            /*
+             * shift is 8, which means the new carry will come from the dst bit
+             * at position 0.
+             */
+            carry = dst << 7;
         } else {
-            result = (temp = (dst << shift) | (dst >> (8 - shift))) & 0xff;
+            /*
+             * shift is 1-7, which means the new carry will come from the dst bit
+             * at position 7-1.  To force it into position 7, left shift by (shift - 1).
+             */
+            result = ((dst << shift) | (dst >> (8 - shift))) & 0xff;
+            carry = dst << (shift - 1);
         }
-        X86.fnRotateFlags.call(this, temp, X86.RESULT.SIZE_BYTE);
-        if (I386) {
-            var carry;
-            if (!shift) {
-                /*
-                 * shift is 8, which means the new carry will come from the dst bit
-                 * at position 0.
-                 */
-                carry = dst << 7;
-            } else {
-                /*
-                 * shift is 1-7, which means the new carry will come from the dst bit
-                 * at position 7-1.  To force it into position 7, left shift by (shift - 1).
-                 */
-                temp = ((dst << shift) | (dst >> (8 - shift))) & 0xff;
-                carry = dst << (shift - 1);
-            }
-            X86.setRotateResult.call(this, temp, result, carry, X86.RESULT.BYTE);
-        }
+        X86.setRotateResult.call(this, result, carry, X86.RESULT.BYTE);
     }
     if (DEBUG && DEBUGGER) this.traceLog('ROLB', dst, src, flagsIn, this.getPS(), result);
     return result;
@@ -1699,28 +1666,19 @@ X86.fnROLw = function ROLw(dst, src)
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
     if (src) {
-        var temp;
+        var carry;
         var shift = src & 0xf;      // this smaller mask obviates the need to mask with this.nShiftCountMask
         if (!shift) {
-            temp = dst << 16;
+            carry = dst << 15;
         } else {
-            result = (temp = (dst << shift) | (dst >> (16 - shift))) & 0xffff;
+            /*
+             * shift is 1-15, which means the new carry will come from the dst bit
+             * at position 15-1.  To force it into position 15, left shift by (shift - 1).
+             */
+            result = ((dst << shift) | (dst >> (16 - shift))) & 0xffff;
+            carry = dst << (shift - 1);
         }
-        X86.fnRotateFlags.call(this, temp, X86.RESULT.SIZE_WORD);
-        if (I386) {
-            var carry;
-            if (!shift) {
-                carry = dst << 15;
-            } else {
-                /*
-                 * shift is 1-15, which means the new carry will come from the dst bit
-                 * at position 15-1.  To force it into position 15, left shift by (shift - 1).
-                 */
-                temp = ((dst << shift) | (dst >> (16 - shift))) & 0xffff;
-                carry = dst << (shift - 1);
-            }
-            X86.setRotateResult.call(this, temp, result, carry, X86.RESULT.WORD);
-        }
+        X86.setRotateResult.call(this, result, carry, X86.RESULT.WORD);
     }
     if (DEBUG && DEBUGGER) this.traceLog('ROLW', dst, src, flagsIn, this.getPS(), result);
     return result;
@@ -1739,29 +1697,23 @@ X86.fnRORb = function RORb(dst, src)
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
     if (src) {
-        var temp;
+        var carry;
         var shift = src & 0x7;      // this smaller mask obviates the need to mask with this.nShiftCountMask
-        result = temp = ((dst >> shift) | (dst << (8 - shift))) & 0xff;
-        if (temp & 0x80) temp |= X86.RESULT.SIZE_BYTE;
-        X86.fnRotateFlags.call(this, temp, X86.RESULT.SIZE_BYTE);
-        if (I386) {
-            var carry;
-            if (!shift) {
-                /*
-                 * shift is 8, which means the new carry will come from the dst bit
-                 * at position 7.
-                 */
-                carry = dst;
-            } else {
-                /*
-                 * shift is 1-7, which means the new carry will come from the dst bit
-                 * at position 0-6.  To force it into position 7, left shift by (8 - shift).
-                 */
-                temp = ((dst >> shift) | (dst << (8 - shift))) & 0xff;
-                carry = dst << (8 - shift);
-            }
-            X86.setRotateResult.call(this, temp, result, carry, X86.RESULT.BYTE);
+        if (!shift) {
+            /*
+             * shift is 8, which means the new carry will come from the dst bit
+             * at position 7.
+             */
+            carry = dst;
+        } else {
+            /*
+             * shift is 1-7, which means the new carry will come from the dst bit
+             * at position 0-6.  To force it into position 7, left shift by (8 - shift).
+             */
+            result = ((dst >> shift) | (dst << (8 - shift))) & 0xff;
+            carry = dst << (8 - shift);
         }
+        X86.setRotateResult.call(this, result, carry, X86.RESULT.BYTE);
     }
     if (DEBUG && DEBUGGER) this.traceLog('RORB', dst, src, flagsIn, this.getPS(), result);
     return result;
@@ -1780,29 +1732,23 @@ X86.fnRORw = function RORw(dst, src)
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
     if (src) {
-        var temp;
+        var carry;
         var shift = src & 0xf;      // this smaller mask obviates the need to mask with this.nShiftCountMask
-        result = temp = ((dst >> shift) | (dst << (16 - shift))) & 0xffff;
-        if (temp & 0x8000) temp |= X86.RESULT.SIZE_WORD;
-        X86.fnRotateFlags.call(this, temp, X86.RESULT.SIZE_WORD);
-        if (I386) {
-            var carry;
-            if (!shift) {
-                /*
-                 * shift is 16, which means the new carry will come from the dst bit
-                 * at position 15.
-                 */
-                carry = dst;
-            } else {
-                /*
-                 * shift is 1-15, which means the new carry will come from the dst bit
-                 * at position 0-14.  To force it into position 15, left shift by (16 - shift).
-                 */
-                temp = ((dst >> shift) | (dst << (16 - shift))) & 0xffff;
-                carry = dst << (16 - shift);
-            }
-            X86.setRotateResult.call(this, temp, result, carry, X86.RESULT.WORD);
+        if (!shift) {
+            /*
+             * shift is 16, which means the new carry will come from the dst bit
+             * at position 15.
+             */
+            carry = dst;
+        } else {
+            /*
+             * shift is 1-15, which means the new carry will come from the dst bit
+             * at position 0-14.  To force it into position 15, left shift by (16 - shift).
+             */
+            result = ((dst >> shift) | (dst << (16 - shift))) & 0xffff;
+            carry = dst << (16 - shift);
         }
+        X86.setRotateResult.call(this, result, carry, X86.RESULT.WORD);
     }
     if (DEBUG && DEBUGGER) this.traceLog('RORW', dst, src, flagsIn, this.getPS(), result);
     return result;
@@ -1825,17 +1771,8 @@ X86.fnSARb = function SARb(dst, src)
     if (src) {
         if (src > 8) src = 9;       // this comparison obviates the need to mask with this.nShiftCountMask
         var temp = ((dst << 24) >> 24) >> (src - 1);
-        this.resultZeroCarry = this.resultParitySign = temp >> 1;
-        if (temp & 0x01)
-            this.resultZeroCarry |= X86.RESULT.SIZE_BYTE;
-        else
-            this.resultZeroCarry &= ~X86.RESULT.SIZE_BYTE;
-        this.resultAuxOverflow = dst ^ this.resultZeroCarry;
-        this.resultSize = X86.RESULT.SIZE_BYTE;
-        dst = this.resultZeroCarry & 0xff;
-        if (I386) {
-            this.setLogicResult(dst, X86.RESULT.BYTE, temp & 0x1);
-        }
+        dst = (temp >> 1) & 0xff;
+        this.setLogicResult(dst, X86.RESULT.BYTE, temp & 0x1);
     }
     return dst;
 };
@@ -1857,17 +1794,8 @@ X86.fnSARw = function SARw(dst, src)
     if (src) {
         if (src > 16) src = 17;     // this comparison obviates the need to mask with this.nShiftCountMask
         var temp = ((dst << 16) >> 16) >> (src - 1);
-        this.resultZeroCarry = this.resultParitySign = temp >> 1;
-        if (temp & 0x01)
-            this.resultZeroCarry |= X86.RESULT.SIZE_WORD;
-        else
-            this.resultZeroCarry &= ~X86.RESULT.SIZE_WORD;
-        this.resultAuxOverflow = dst ^ this.resultZeroCarry;
-        this.resultSize = X86.RESULT.SIZE_WORD;
-        dst = this.resultZeroCarry & 0xffff;
-        if (I386) {
-            this.setLogicResult(dst, X86.RESULT.WORD, temp & 0x1);
-        }
+        dst = (temp >> 1) & 0xffff;
+        this.setLogicResult(dst, X86.RESULT.WORD, temp & 0x1);
     }
     return dst;
 };
@@ -2002,16 +1930,12 @@ X86.fnSHLb = function SHLb(dst, src)
     if (src) {
         var carry = 0;
         if (src > 8) {          // this comparison obviates the need to mask with this.nShiftCountMask
-            result = this.resultZeroCarry = this.resultParitySign = 0;
+            result = 0;
         } else {
             carry = dst << (src - 1);
-            result = (this.resultZeroCarry = this.resultParitySign = (carry << 1)) & 0xff;
+            result = (carry << 1) & 0xff;
         }
-        this.resultAuxOverflow = 0;
-        this.resultSize = X86.RESULT.SIZE_BYTE;
-        if (I386) {
-            X86.setRotateResult.call(this, result, result, carry, X86.RESULT.BYTE);
-        }
+        this.setLogicResult(result, X86.RESULT.BYTE, carry & X86.RESULT.BYTE, (result ^ carry) & X86.RESULT.BYTE);
     }
     if (DEBUG && DEBUGGER) this.traceLog('SHLB', dst, src, flagsIn, this.getPS(), result);
     return result;
@@ -2036,16 +1960,12 @@ X86.fnSHLw = function SHLw(dst, src)
     if (src) {
         var carry = 0;
         if (src > 16) {         // this comparison obviates the need to mask with this.nShiftCountMask
-            result = this.resultZeroCarry = this.resultParitySign = 0;
+            result = 0;
         } else {
             carry = dst << (src - 1);
-            result = (this.resultZeroCarry = this.resultParitySign = (carry << 1)) & 0xffff;
+            result = (carry << 1) & 0xffff;
         }
-        this.resultAuxOverflow = 0;
-        this.resultSize = X86.RESULT.SIZE_WORD;
-        if (I386) {
-            X86.setRotateResult.call(this, result, result, carry, X86.RESULT.WORD);
-        }
+        this.setLogicResult(result, X86.RESULT.WORD, carry & X86.RESULT.WORD, (result ^ carry) & X86.RESULT.WORD);
     }
     if (DEBUG && DEBUGGER) this.traceLog('SHLW', dst, src, flagsIn, this.getPS(), result);
     return result;
@@ -2067,17 +1987,8 @@ X86.fnSHRb = function SHRb(dst, src)
 {
     if (src) {                      // the following comparison obviates the need to mask with this.nShiftCountMask
         var temp = (src > 8? 0 : (dst >> (src - 1)));
-        this.resultZeroCarry = this.resultParitySign = temp >> 1;
-        if (temp & 0x01)
-            this.resultZeroCarry |= X86.RESULT.SIZE_BYTE;
-        else
-            this.resultZeroCarry &= ~X86.RESULT.SIZE_BYTE;
-        this.resultAuxOverflow = dst ^ this.resultZeroCarry;
-        this.resultSize = X86.RESULT.SIZE_BYTE;
-        dst = this.resultZeroCarry & 0xff;
-        if (I386) {
-            this.setLogicResult(dst, X86.RESULT.BYTE, temp & 0x1, dst & X86.RESULT.BYTE);
-        }
+        dst = (temp >> 1) & 0xff;
+        this.setLogicResult(dst, X86.RESULT.BYTE, temp & 0x1, dst & X86.RESULT.BYTE);
     }
     return dst;
 };
@@ -2098,17 +2009,8 @@ X86.fnSHRw = function SHRw(dst, src)
 {
     if (src) {                      // the following comparison obviates the need to mask with this.nShiftCountMask
         var temp = (src > 16? 0 : (dst >> (src - 1)));
-        this.resultZeroCarry = this.resultParitySign = temp >> 1;
-        if (temp & 0x01)
-            this.resultZeroCarry |= X86.RESULT.SIZE_WORD;
-        else
-            this.resultZeroCarry &= ~X86.RESULT.SIZE_WORD;
-        this.resultAuxOverflow = dst ^ this.resultZeroCarry;
-        this.resultSize = X86.RESULT.SIZE_WORD;
-        dst = this.resultZeroCarry & 0xffff;
-        if (I386) {
-            this.setLogicResult(dst, X86.RESULT.WORD, temp & 0x1, dst & X86.RESULT.WORD);
-        }
+        dst = (temp >> 1) & 0xffff;
+        this.setLogicResult(dst, X86.RESULT.WORD, temp & 0x1, dst & X86.RESULT.WORD);
     }
     return dst;
 };
@@ -2647,17 +2549,14 @@ X86.fnRotateFlags = function(result, size)
  * defined behavior (or more importantly, some dependency on a different behavior), this seems good enough.
  *
  * @this {X86CPU}
- * @param {number} temp (I386 result)
  * @param {number} result
  * @param {number} carry
  * @param {number} size
  */
-X86.setRotateResult = function(temp, result, carry, size)
+X86.setRotateResult = function(result, carry, size)
 {
-    this.assert(temp === result && !(carry & size) == !this.getCF() && !((result ^ carry) & size) == !this.getOF());
     if (carry & size) this.setCF(); else this.clearCF();
     if ((result ^ carry) & size) this.setOF(); else this.clearOF();
-    this.verifyFlags(X86.RESULT.CF | X86.RESULT.OF);
 };
 
 /**

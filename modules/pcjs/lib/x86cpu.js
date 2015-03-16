@@ -1767,7 +1767,6 @@ X86CPU.prototype.setArithResult = function(dst, src, value, type, fSubtract)
     this.resultSrc = src;
     this.resultLogic = value;
     this.resultType = type;
-    if (DEBUG) this.verifyFlags(type);
 };
 
 /**
@@ -1790,38 +1789,7 @@ X86CPU.prototype.setLogicResult = function(value, type, carry, overflow)
     this.resultLogic = value;
     if (carry) this.setCF(); else this.clearCF();
     if (overflow) this.setOF(); else this.clearOF();
-    if (DEBUG) this.verifyFlags(X86.RESULT.LOGIC | X86.RESULT.CF | X86.RESULT.OF);
     return value;
-};
-
-/**
- * verifyFlags(flags)
- *
- * @this {X86CPU}
- * @param {number} flags
- */
-X86CPU.prototype.verifyFlags = function(flags)
-{
-    if (DEBUG) {
-        if (flags & X86.RESULT.CF) {
-            this.assert(!this.getCF() == !(this.resultFlags & X86.PS.CF));
-        }
-        if (flags & X86.RESULT.PF) {
-            this.assert(!this.getPF() == !(this.resultFlags & X86.PS.PF));
-        }
-        if (flags & X86.RESULT.AF) {
-            this.assert(!this.getAF() == !(this.resultFlags & X86.PS.AF));
-        }
-        if (flags & X86.RESULT.ZF) {
-            this.assert(!this.getZF() == !(this.resultFlags & X86.PS.ZF));
-        }
-        if (flags & X86.RESULT.SF) {
-            this.assert(!this.getSF() == !(this.resultFlags & X86.PS.SF));
-        }
-        if (flags & X86.RESULT.OF) {
-            this.assert(!this.getOF() == !(this.resultFlags & X86.PS.OF));
-        }
-    }
 };
 
 /**
@@ -1871,7 +1839,7 @@ X86CPU.prototype.getCF = function()
             }
             this.resultType &= ~X86.RESULT.CF;
         }
-        if (!OLDFLAGS) return this.resultFlags & X86.PS.CF;
+        return this.resultFlags & X86.PS.CF;
     }
     return flag;
 };
@@ -1913,7 +1881,7 @@ X86CPU.prototype.getPF = function()
             }
             this.resultType &= ~X86.RESULT.PF;
         }
-        if (!OLDFLAGS) return this.resultFlags & X86.PS.PF;
+        return this.resultFlags & X86.PS.PF;
     }
     return flag;
 };
@@ -1955,7 +1923,7 @@ X86CPU.prototype.getAF = function()
             }
             this.resultType &= ~X86.RESULT.AF;
         }
-        if (!OLDFLAGS) return this.resultFlags & X86.PS.AF;
+        return this.resultFlags & X86.PS.AF;
     }
     return flag;
 };
@@ -1977,7 +1945,7 @@ X86CPU.prototype.getZF = function()
             }
             this.resultType &= ~X86.RESULT.ZF;
         }
-        if (!OLDFLAGS) return this.resultFlags & X86.PS.ZF;
+        return this.resultFlags & X86.PS.ZF;
     }
     return flag;
 };
@@ -1999,7 +1967,7 @@ X86CPU.prototype.getSF = function()
             }
             this.resultType &= ~X86.RESULT.SF;
         }
-        if (!OLDFLAGS) return this.resultFlags & X86.PS.SF;
+        return this.resultFlags & X86.PS.SF;
     }
     return flag;
 };
@@ -2045,7 +2013,7 @@ X86CPU.prototype.getOF = function()
             }
             this.resultType &= ~X86.RESULT.OF;
         }
-        if (!OLDFLAGS) return this.resultFlags & X86.PS.OF;
+        return this.resultFlags & X86.PS.OF;
     }
     return flag;
 };
@@ -2212,7 +2180,7 @@ X86CPU.prototype.setCF = function()
  */
 X86CPU.prototype.setPF = function()
 {
-    if (!this.getPF()) this.resultParitySign ^= 0x1;
+    if ((0x6996 >> ((this.resultParitySign ^ (this.resultParitySign >> 4)) & 0xf)) & 1) this.resultParitySign ^= 0x1;
     if (I386) {
         this.resultType &= ~X86.RESULT.PF;
         this.resultFlags |= X86.PS.PF;
@@ -2254,7 +2222,7 @@ X86CPU.prototype.setZF = function()
  */
 X86CPU.prototype.setSF = function()
 {
-    if (!this.getSF()) {
+    if (!(this.resultParitySign & (this.resultSize >> 1))) {
         this.resultParitySign ^= (this.resultSize >> 1) | (this.resultSize >> 2);
         this.resultAuxOverflow ^= X86.RESULT.AUXOVF_OF;
     }
