@@ -1499,7 +1499,10 @@ X86.fnROLb = function ROLb(dst, src)
     var flagsIn = (DEBUG? this.getPS() : 0);
     if (src) {
         var carry;
-        var shift = src & 0x7;      // this smaller mask obviates the need to mask with this.nShiftCountMask
+        /*
+         * The following mask obviates the need to use nShiftCountMask.
+         */
+        var shift = src & 0x7;
         if (!shift) {
             /*
              * shift is 8, which means the new carry will come from the dst bit
@@ -1534,7 +1537,10 @@ X86.fnROLw = function ROLw(dst, src)
     var flagsIn = (DEBUG? this.getPS() : 0);
     if (src) {
         var carry;
-        var shift = src & 0xf;      // this smaller mask obviates the need to mask with this.nShiftCountMask
+        /*
+         * The following mask obviates the need to use nShiftCountMask.
+         */
+        var shift = src & 0xf;
         if (!shift) {
             carry = dst << 15;
         } else {
@@ -1565,11 +1571,13 @@ X86.fnRORb = function RORb(dst, src)
     var flagsIn = (DEBUG? this.getPS() : 0);
     if (src) {
         var carry;
-        var shift = src & 0x7;      // this smaller mask obviates the need to mask with this.nShiftCountMask
+        /*
+         * The following mask obviates the need to use nShiftCountMask.
+         */
+        var shift = src & 0x7;
         if (!shift) {
             /*
-             * shift is 8, which means the new carry will come from the dst bit
-             * at position 7.
+             * shift is 8, which means the new carry will come from the dst bit at position 7.
              */
             carry = dst;
         } else {
@@ -1600,11 +1608,13 @@ X86.fnRORw = function RORw(dst, src)
     var flagsIn = (DEBUG? this.getPS() : 0);
     if (src) {
         var carry;
-        var shift = src & 0xf;      // this smaller mask obviates the need to mask with this.nShiftCountMask
+        /*
+         * The following mask obviates the need to use nShiftCountMask.
+         */
+        var shift = src & 0xf;
         if (!shift) {
             /*
-             * shift is 16, which means the new carry will come from the dst bit
-             * at position 15.
+             * shift is 16, which means the new carry will come from dst bit 15.
              */
             carry = dst;
         } else {
@@ -1636,7 +1646,10 @@ X86.fnRORw = function RORw(dst, src)
 X86.fnSARb = function SARb(dst, src)
 {
     if (src) {
-        if (src > 8) src = 9;       // this comparison obviates the need to mask with this.nShiftCountMask
+        /*
+         * The following comparison obviates the need to mask src with nShiftCountMask.
+         */
+        if (src > 8) src = 9;
         var temp = ((dst << 24) >> 24) >> (src - 1);
         dst = (temp >> 1) & 0xff;
         this.setLogicResult(dst, X86.RESULT.BYTE, temp & 0x1);
@@ -1659,7 +1672,10 @@ X86.fnSARb = function SARb(dst, src)
 X86.fnSARw = function SARw(dst, src)
 {
     if (src) {
-        if (src > 16) src = 17;     // this comparison obviates the need to mask with this.nShiftCountMask
+        /*
+         * The following comparison obviates the need to mask src with nShiftCountMask.
+         */
+        if (src > 16) src = 17;
         var temp = ((dst << 16) >> 16) >> (src - 1);
         dst = (temp >> 1) & 0xffff;
         this.setLogicResult(dst, X86.RESULT.WORD, temp & 0x1);
@@ -1782,7 +1798,10 @@ X86.fnSHLb = function SHLb(dst, src)
     var flagsIn = (DEBUG? this.getPS() : 0);
     if (src) {
         var carry = 0;
-        if (src > 8) {          // this comparison obviates the need to mask with this.nShiftCountMask
+        /*
+         * The following comparison obviates the need to mask src with nShiftCountMask.
+         */
+        if (src > 8) {
             result = 0;
         } else {
             carry = dst << (src - 1);
@@ -1812,7 +1831,10 @@ X86.fnSHLw = function SHLw(dst, src)
     var flagsIn = (DEBUG? this.getPS() : 0);
     if (src) {
         var carry = 0;
-        if (src > 16) {         // this comparison obviates the need to mask with this.nShiftCountMask
+        /*
+         * The following comparison obviates the need to mask src with nShiftCountMask.
+         */
+        if (src > 16) {
             result = 0;
         } else {
             carry = dst << (src - 1);
@@ -1838,7 +1860,10 @@ X86.fnSHLw = function SHLw(dst, src)
  */
 X86.fnSHRb = function SHRb(dst, src)
 {
-    if (src) {                      // the following comparison obviates the need to mask with this.nShiftCountMask
+    if (src) {
+        /*
+         * The following comparison obviates the need to mask src with nShiftCountMask.
+         */
         var temp = (src > 8? 0 : (dst >> (src - 1)));
         dst = (temp >> 1) & 0xff;
         this.setLogicResult(dst, X86.RESULT.BYTE, temp & 0x1, dst & X86.RESULT.BYTE);
@@ -1860,7 +1885,10 @@ X86.fnSHRb = function SHRb(dst, src)
  */
 X86.fnSHRw = function SHRw(dst, src)
 {
-    if (src) {                      // the following comparison obviates the need to mask with this.nShiftCountMask
+    if (src) {
+        /*
+         * The following comparison obviates the need to mask src with nShiftCountMask.
+         */
         var temp = (src > 16? 0 : (dst >> (src - 1)));
         dst = (temp >> 1) & 0xffff;
         this.setLogicResult(dst, X86.RESULT.WORD, temp & 0x1, dst & X86.RESULT.WORD);
