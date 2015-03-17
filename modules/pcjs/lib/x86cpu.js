@@ -894,10 +894,13 @@ X86CPU.prototype.resetRegs = function()
      */
     this.regCR0 = X86.CR0.MSW.ON;
     this.addrIDT = 0; this.addrIDTLimit = 0x03FF;
-    this.nIOPL = 0;             // this should be set before the first setPS() call
+    this.regPS = this.nIOPL = 0;        // these should be set before the first setPS() call
 
     /*
-     * Define the result variables that setPS() relies on for arithmetic and logical flags
+     * Define all the result registers that setPS() relies on for arithmetic and logical flags.
+     *
+     * In addition, setPS() will initialize resultType, which keeps track of which flags are cached
+     * and the size of the result; initially, none are cached.
      */
     this.resultDst = this.resultSrc = this.resultArith = this.resultLogic = 0;
 
@@ -1732,7 +1735,7 @@ X86CPU.prototype.setSP = function(off)
  * The type parameter indicates both the size of the result (BYTE, WORD or DWORD) and which of the
  * flags should now be considered "cached" by the new result variables.  If the previous resultType
  * specifies any flags not contained in the new type parameter, then those flags must be immediately
- * calculated and written to the appropriate bit(s) in resultFlags.
+ * calculated and written to the appropriate bit(s) in regPS.
  *
  * The fSubtract parameter is used to indicate a "subtracted" result (eg, CMP, DEC, SUB, SBB); the
  * default assumes an "added" result (eg, ADD, ADC, INC).
@@ -1831,13 +1834,13 @@ X86CPU.prototype.getCarry = function()
 X86CPU.prototype.getCF = function()
 {
     if (this.resultType & X86.RESULT.CF) {
-        this.resultFlags &= ~X86.PS.CF;
+        this.regPS &= ~X86.PS.CF;
         if ((this.resultDst ^ ((this.resultDst ^ this.resultSrc) & (this.resultSrc ^ this.resultArith))) & (this.resultType & X86.RESULT.TYPE)) {
-            this.resultFlags |= X86.PS.CF;
+            this.regPS |= X86.PS.CF;
         }
         this.resultType &= ~X86.RESULT.CF;
     }
-    return this.resultFlags & X86.PS.CF;
+    return this.regPS & X86.PS.CF;
 };
 
 /**
@@ -1868,13 +1871,13 @@ X86CPU.prototype.getCF = function()
 X86CPU.prototype.getPF = function()
 {
     if (this.resultType & X86.RESULT.PF) {
-        this.resultFlags &= ~X86.PS.PF;
+        this.regPS &= ~X86.PS.PF;
         if ((0x9669 >> ((this.resultLogic ^ (this.resultLogic >> 4)) & 0xf)) & 1) {
-            this.resultFlags |= X86.PS.PF;
+            this.regPS |= X86.PS.PF;
         }
         this.resultType &= ~X86.RESULT.PF;
     }
-    return this.resultFlags & X86.PS.PF;
+    return this.regPS & X86.PS.PF;
 };
 
 /**
@@ -1906,13 +1909,13 @@ X86CPU.prototype.getPF = function()
 X86CPU.prototype.getAF = function()
 {
     if (this.resultType & X86.RESULT.AF) {
-        this.resultFlags &= ~X86.PS.AF;
+        this.regPS &= ~X86.PS.AF;
         if ((this.resultArith ^ (this.resultDst ^ this.resultSrc)) & 0x0010) {
-            this.resultFlags |= X86.PS.AF;
+            this.regPS |= X86.PS.AF;
         }
         this.resultType &= ~X86.RESULT.AF;
     }
-    return this.resultFlags & X86.PS.AF;
+    return this.regPS & X86.PS.AF;
 };
 
 /**
@@ -1924,13 +1927,13 @@ X86CPU.prototype.getAF = function()
 X86CPU.prototype.getZF = function()
 {
     if (this.resultType & X86.RESULT.ZF) {
-        this.resultFlags &= ~X86.PS.ZF;
+        this.regPS &= ~X86.PS.ZF;
         if (!(this.resultLogic & (((this.resultType & X86.RESULT.TYPE) - 1) | (this.resultType & X86.RESULT.TYPE)))) {
-            this.resultFlags |= X86.PS.ZF;
+            this.regPS |= X86.PS.ZF;
         }
         this.resultType &= ~X86.RESULT.ZF;
     }
-    return this.resultFlags & X86.PS.ZF;
+    return this.regPS & X86.PS.ZF;
 };
 
 /**
@@ -1942,13 +1945,13 @@ X86CPU.prototype.getZF = function()
 X86CPU.prototype.getSF = function()
 {
     if (this.resultType & X86.RESULT.SF) {
-        this.resultFlags &= ~X86.PS.SF;
+        this.regPS &= ~X86.PS.SF;
         if (this.resultLogic & (this.resultType & X86.RESULT.TYPE)) {
-            this.resultFlags |= X86.PS.SF;
+            this.regPS |= X86.PS.SF;
         }
         this.resultType &= ~X86.RESULT.SF;
     }
-    return this.resultFlags & X86.PS.SF;
+    return this.regPS & X86.PS.SF;
 };
 
 /**
@@ -1984,13 +1987,13 @@ X86CPU.prototype.getSF = function()
 X86CPU.prototype.getOF = function()
 {
     if (this.resultType & X86.RESULT.OF) {
-        this.resultFlags &= ~X86.PS.OF;
+        this.regPS &= ~X86.PS.OF;
         if (((this.resultDst ^ this.resultArith) & (this.resultSrc ^ this.resultArith)) & (this.resultType & X86.RESULT.TYPE)) {
-            this.resultFlags |= X86.PS.OF;
+            this.regPS |= X86.PS.OF;
         }
         this.resultType &= ~X86.RESULT.OF;
     }
-    return this.resultFlags & X86.PS.OF;
+    return this.regPS & X86.PS.OF;
 };
 
 /**
@@ -2034,7 +2037,7 @@ X86CPU.prototype.getDF = function()
 X86CPU.prototype.clearCF = function()
 {
     this.resultType &= ~X86.RESULT.CF;
-    this.resultFlags &= ~X86.PS.CF;
+    this.regPS &= ~X86.PS.CF;
 };
 
 /**
@@ -2045,7 +2048,7 @@ X86CPU.prototype.clearCF = function()
 X86CPU.prototype.clearPF = function()
 {
     this.resultType &= ~X86.RESULT.PF;
-    this.resultFlags &= ~X86.PS.PF;
+    this.regPS &= ~X86.PS.PF;
 };
 
 /**
@@ -2056,7 +2059,7 @@ X86CPU.prototype.clearPF = function()
 X86CPU.prototype.clearAF = function()
 {
     this.resultType &= ~X86.RESULT.AF;
-    this.resultFlags &= ~X86.PS.AF;
+    this.regPS &= ~X86.PS.AF;
 };
 
 /**
@@ -2067,7 +2070,7 @@ X86CPU.prototype.clearAF = function()
 X86CPU.prototype.clearZF = function()
 {
     this.resultType &= ~X86.RESULT.ZF;
-    this.resultFlags &= ~X86.PS.ZF;
+    this.regPS &= ~X86.PS.ZF;
 };
 
 /**
@@ -2078,7 +2081,7 @@ X86CPU.prototype.clearZF = function()
 X86CPU.prototype.clearSF = function()
 {
     this.resultType &= ~X86.RESULT.SF;
-    this.resultFlags &= ~X86.PS.SF;
+    this.regPS &= ~X86.PS.SF;
 };
 
 /**
@@ -2109,7 +2112,7 @@ X86CPU.prototype.clearDF = function()
 X86CPU.prototype.clearOF = function()
 {
     this.resultType &= ~X86.RESULT.OF;
-    this.resultFlags &= ~X86.PS.OF;
+    this.regPS &= ~X86.PS.OF;
 };
 
 /**
@@ -2120,7 +2123,7 @@ X86CPU.prototype.clearOF = function()
 X86CPU.prototype.setCF = function()
 {
     this.resultType &= ~X86.RESULT.CF;
-    this.resultFlags |= X86.PS.CF;
+    this.regPS |= X86.PS.CF;
 };
 
 /**
@@ -2131,7 +2134,7 @@ X86CPU.prototype.setCF = function()
 X86CPU.prototype.setPF = function()
 {
     this.resultType &= ~X86.RESULT.PF;
-    this.resultFlags |= X86.PS.PF;
+    this.regPS |= X86.PS.PF;
 };
 
 /**
@@ -2142,7 +2145,7 @@ X86CPU.prototype.setPF = function()
 X86CPU.prototype.setAF = function()
 {
     this.resultType &= ~X86.RESULT.AF;
-    this.resultFlags |= X86.PS.AF;
+    this.regPS |= X86.PS.AF;
 };
 
 /**
@@ -2153,7 +2156,7 @@ X86CPU.prototype.setAF = function()
 X86CPU.prototype.setZF = function()
 {
     this.resultType &= ~X86.RESULT.ZF;
-    this.resultFlags |= X86.PS.ZF;
+    this.regPS |= X86.PS.ZF;
 };
 
 /**
@@ -2164,7 +2167,7 @@ X86CPU.prototype.setZF = function()
 X86CPU.prototype.setSF = function()
 {
     this.resultType &= ~X86.RESULT.SF;
-    this.resultFlags |= X86.PS.SF;
+    this.regPS |= X86.PS.SF;
 };
 
 /**
@@ -2195,7 +2198,7 @@ X86CPU.prototype.setDF = function()
 X86CPU.prototype.setOF = function()
 {
     this.resultType &= ~X86.RESULT.OF;
-    this.resultFlags |= X86.PS.OF;
+    this.regPS |= X86.PS.OF;
 };
 
 /**
@@ -2206,7 +2209,7 @@ X86CPU.prototype.setOF = function()
  */
 X86CPU.prototype.getPS = function()
 {
-    return (this.regPS & ~X86.PS.INDIRECT) | (this.getCF() | this.getPF() | this.getAF() | this.getZF() | this.getSF() | this.getOF());
+    return (this.regPS & ~X86.PS.CACHED) | (this.getCF() | this.getPF() | this.getAF() | this.getZF() | this.getSF() | this.getOF());
 };
 
 /**
@@ -2244,11 +2247,6 @@ X86CPU.prototype.setMSW = function(w)
  */
 X86CPU.prototype.setPS = function(regPS, cpl)
 {
-    if (I386) {
-        this.resultType = X86.RESULT.BYTE;
-        this.resultFlags = regPS & (X86.PS.CF | X86.PS.PF | X86.PS.AF | X86.PS.ZF | X86.PS.SF | X86.PS.OF);
-    }
-
     /*
      * OS/2 1.0 discriminates between an 80286 and an 80386 based on whether an IRET in real-mode that
      * pops 0xF000 into the flags is able to set *any* of flag bits 12-15: if it can, then OS/2 declares
@@ -2283,12 +2281,8 @@ X86CPU.prototype.setPS = function(regPS, cpl)
         regPS = (regPS & ~X86.PS.IF) | (this.regPS & X86.PS.IF);                // IF not allowed to change
     }
 
-    this.regPS = (this.regPS & ~this.PS_DIRECT) | (regPS & this.PS_DIRECT) | this.PS_SET;
-
-    /*
-     * Assert that all requested flag bits now agree with our simulated (PS_INDIRECT) bits
-     */
-    this.assert((regPS & X86.PS.INDIRECT) == (this.getPS() & X86.PS.INDIRECT));
+    this.resultType = X86.RESULT.BYTE;
+    this.regPS = (this.regPS & ~(this.PS_DIRECT|X86.PS.CACHED)) | (regPS & (this.PS_DIRECT|X86.PS.CACHED)) | this.PS_SET;
 
     if (this.regPS & X86.PS.TF) {
         this.intFlags |= X86.INTFLAG.TRAP;

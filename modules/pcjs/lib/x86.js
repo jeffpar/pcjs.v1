@@ -242,7 +242,7 @@ var X86 = {
     },
     RESULT: {
         /*
-         * Flags were originally computed based on the following internal result variables:
+         * Flags were originally computed based on the following internal result registers:
          *
          *      CF: resultZeroCarry & resultSize
          *      PF: resultParitySign & 0xff
@@ -251,9 +251,9 @@ var X86 = {
          *      SF: resultParitySign & (resultSize >> 1)
          *      OF: (resultParitySign ^ resultAuxOverflow ^ (resultParitySign >> 1)) & (resultSize >> 1)
          *
-         * I386 builds now rely on the following new result variables:
+         * I386 builds now rely on the following new result registers:
          *
-         *      resultDst, resultSrc, resultArith, resultLogic, resultType, and resultFlags
+         *      resultDst, resultSrc, resultArith, resultLogic and resultType
          *
          * and flags are now computed as follows:
          *
@@ -271,9 +271,9 @@ var X86 = {
          *      setArithResult(dst, src, dst+src, X86.RESULT.BYTE | X86.RESULT.ALL)
          *
          * The 4th parameter, type, indicates both the size of the result (BYTE, WORD or DWORD) and which of
-         * the flags should now be considered "cached" by the new result variables.  If the previous resultType
+         * the flags should now be considered "cached" by the new result registers.  If the previous resultType
          * specifies any flags not contained in the new type parameter, then those flags must be immediately
-         * calculated and written to the appropriate bit(s) in resultFlags.
+         * calculated and written to the appropriate bit(s) in regPS.
          */
         BYTE:       0x80,
         WORD:       0x8000,
@@ -382,38 +382,27 @@ X86.BACKTRACK = {
 /*
  * Some PS flags are stored directly in regPS, hence the "direct" designation.
  */
-X86.PS.DIRECT =     (X86.PS.TF | X86.PS.IF | X86.PS.DF);
+X86.PS.DIRECT = (X86.PS.TF | X86.PS.IF | X86.PS.DF);
 
 /*
- * However, PS "arithmetic" flags are NOT stored in regPS; they are maintained across
- * separate result registers, hence the "indirect" designation.
+ * However, PS arithmetic and logical flags may be "cached" across result registers.
  */
-X86.PS.INDIRECT =   (X86.PS.CF | X86.PS.PF | X86.PS.AF | X86.PS.ZF | X86.PS.SF | X86.PS.OF);
+X86.PS.CACHED = (X86.PS.CF | X86.PS.PF | X86.PS.AF | X86.PS.ZF | X86.PS.SF | X86.PS.OF);
 
 /*
  * These are the default "always set" PS bits for the 8086/8088; other processors must
- * adjust these bits accordingly.  The final adjusted value is then stored in the X86CPU object
- * as "this.PS_SET"; setPS() must use that value, NOT this one.
+ * adjust these bits accordingly.  The final adjusted value is then stored in the X86CPU
+ * object as "this.PS_SET"; setPS() must use that value, NOT this one.
  *
  * TODO: Verify that PS.BIT1 was always set on reset, even on the 8086/8088.
  */
-X86.PS.SET =        (X86.PS.BIT1 | X86.PS.IOPL.MASK | X86.PS.NT | X86.PS.BIT15);
+X86.PS.SET = (X86.PS.BIT1 | X86.PS.IOPL.MASK | X86.PS.NT | X86.PS.BIT15);
 
 /*
- * getPS() brings all the direct and indirect flags together, and setPS() performs the
- * reverse, setting all the corresponding "result registers" to match the indirect flags.
- *
- * These "result registers" are created/reset by an initial call to setPS(0); they include:
- *
- *      this.resultSize (must be set to one of: SIZE_BYTE or SIZE_WORD)
- *      this.resultZeroCarry
- *      this.resultParitySign
- *      this.resultAuxOverflow
- *
  * PS.SAHF is a subset of the arithmetic flags, and refers only to those flags that the
  * SAHF and LAHF "8080 legacy" opcodes affect.
  */
-X86.PS.SAHF =       (X86.PS.CF | X86.PS.PF | X86.PS.AF | X86.PS.ZF | X86.PS.SF);
+X86.PS.SAHF = (X86.PS.CF | X86.PS.PF | X86.PS.AF | X86.PS.ZF | X86.PS.SF);
 
 /*
  * Before we zero opFlags, we first see if any of the following PREFIX bits were set.  If any were set, they are OR'ed
