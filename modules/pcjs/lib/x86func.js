@@ -403,9 +403,9 @@ X86.fnDIVw = function DIVw(dst, src)
      * is set, JavaScript will create a negative 32-bit number.  So we instead use non-bit-wise operators
      * to force JavaScript to create a floating-point value that won't suffer from 32-bit-math side-effects.
      */
-    src = this.regEAX + this.regEDX * X86.RESULT.SIZE_WORD;
+    src = this.regEAX + this.regEDX * 0x10000;
     var uQuotient = Math.floor(src / dst);
-    if (uQuotient >= X86.RESULT.SIZE_WORD) {
+    if (uQuotient >= 0x10000) {
         X86.fnDIVOverflow.call(this);
         return dst;
     }

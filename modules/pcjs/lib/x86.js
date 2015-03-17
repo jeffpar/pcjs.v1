@@ -46,7 +46,7 @@ var X86 = {
     /*
      * This constant is used to mark points in the code where the physical address being returned
      * is invalid and should not be used.  TODO: There are still functions that will use an invalid
-     * address, which is why we've tried to choose a value that will cause the least harm, but ultimately,
+     * address, which is why we've tried to choose a value that causes the least harm, but ultimately,
      * we must add checks to those functions or throw a special JavaScript exception to bypass them.
      *
      * This value is also used to indicate non-existent EA address calculations, which are usually
@@ -242,24 +242,24 @@ var X86 = {
     },
     RESULT: {
         /*
-         * Flags were originally computed based on the following:
+         * Flags were originally computed based on the following internal result variables:
          *
          *      CF: resultZeroCarry & resultSize
          *      PF: resultParitySign & 0xff
-         *      AF: (resultParitySign ^ resultAuxOverflow) & 0x0010 (AUXOVF_AF)
+         *      AF: (resultParitySign ^ resultAuxOverflow) & 0x0010
          *      ZF: resultZeroCarry & (resultSize - 1)
          *      SF: resultParitySign & (resultSize >> 1)
          *      OF: (resultParitySign ^ resultAuxOverflow ^ (resultParitySign >> 1)) & (resultSize >> 1)
          *
-         * I386 builds now rely on the following result variables:
+         * I386 builds now rely on the following new result variables:
          *
          *      resultDst, resultSrc, resultArith, resultLogic, resultType, and resultFlags
          *
-         * and the flags are computed as follows:
+         * and flags are now computed as follows:
          *
          *      CF: ((resultDst ^ ((resultDst ^ resultSrc) & (resultSrc ^ resultArith))) & resultType)
          *      PF: (resultLogic & 0xff)
-         *      AF: ((resultArith ^ (resultDst ^ resultSrc)) & AUXOVF_AF)
+         *      AF: ((resultArith ^ (resultDst ^ resultSrc)) & 0x0010)
          *      ZF: (resultLogic & ((resultType - 1) | resultType))
          *      SF: (resultLogic & resultType)
          *      OF: (((resultDst ^ resultArith) & (resultSrc ^ resultArith)) & resultType)
@@ -287,11 +287,7 @@ var X86 = {
         OF:         0x20,
         ALL:        0x3F,
         LOGIC:      0x1A,
-        NOTCF:      0x3E,
-        SIZE_BYTE:  0x00100,
-        SIZE_WORD:  0x10000,
-        AUXOVF_AF:  0x00010,
-        AUXOVF_OF:  0x08080
+        NOTCF:      0x3E
     },
     /*
      * Bit values for opFlags, which are all reset to zero prior to each instruction

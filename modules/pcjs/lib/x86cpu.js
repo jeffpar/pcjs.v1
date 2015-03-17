@@ -1898,7 +1898,7 @@ X86CPU.prototype.getPF = function()
  *
  * The final calculation looks like:
  *
- *      (resultArith ^ (resultDst ^ resultSrc)) & AUXOVF_AF
+ *      (resultArith ^ (resultDst ^ resultSrc)) & 0x0010
  *
  * @this {X86CPU}
  * @return {number} 0 or X86.PS.AF
@@ -1907,7 +1907,7 @@ X86CPU.prototype.getAF = function()
 {
     if (this.resultType & X86.RESULT.AF) {
         this.resultFlags &= ~X86.PS.AF;
-        if ((this.resultArith ^ (this.resultDst ^ this.resultSrc)) & X86.RESULT.AUXOVF_AF) {
+        if ((this.resultArith ^ (this.resultDst ^ this.resultSrc)) & 0x0010) {
             this.resultFlags |= X86.PS.AF;
         }
         this.resultType &= ~X86.RESULT.AF;
