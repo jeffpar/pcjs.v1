@@ -242,16 +242,16 @@ var X86 = {
     },
     RESULT: {
         /*
-         * Flags were originally computed based on the following internal result registers:
+         * Flags were originally computed based on the following 16-bit result registers:
          *
-         *      CF: resultZeroCarry & resultSize
+         *      CF: resultZeroCarry & resultSize (ie, 0x100 or 0x10000)
          *      PF: resultParitySign & 0xff
          *      AF: (resultParitySign ^ resultAuxOverflow) & 0x0010
          *      ZF: resultZeroCarry & (resultSize - 1)
          *      SF: resultParitySign & (resultSize >> 1)
          *      OF: (resultParitySign ^ resultAuxOverflow ^ (resultParitySign >> 1)) & (resultSize >> 1)
          *
-         * I386 builds now rely on the following new result registers:
+         * I386 support requires that we now rely on the following 32-bit result registers:
          *
          *      resultDst, resultSrc, resultArith, resultLogic and resultType
          *
@@ -264,30 +264,50 @@ var X86 = {
          *      SF: (resultLogic & resultType)
          *      OF: (((resultDst ^ resultArith) & (resultSrc ^ resultArith)) & resultType)
          *
+         * where resultType contains both a size, which must be one of BYTE (0x80), WORD (0x8000),
+         * or DWORD (0x80000000), along with bits for each of the arithmetic and/or logical flags that
+         * are currently "cached" in result registers (eg, X86.RESULT.CF for carry, X86.RESULT.OF for
+         * overflow, etc).
+         *
+         * WARNING: Do not confuse these RESULT flag definitions with the PS flag definitions.  RESULT
+         * flags are used only as "cached" flag indicators, packed into bits 0-5 of resultType; they do
+         * not match the actual flag bit definitions within the Processor Status (PS) register.
+         *
          * Arithmetic operations should call:
          *
          *      setArithResult(dst, src, value, type)
          * eg:
          *      setArithResult(dst, src, dst+src, X86.RESULT.BYTE | X86.RESULT.ALL)
          *
-         * The 4th parameter, type, indicates both the size of the result (BYTE, WORD or DWORD) and which of
-         * the flags should now be considered "cached" by the new result registers.  If the previous resultType
-         * specifies any flags not contained in the new type parameter, then those flags must be immediately
-         * calculated and written to the appropriate bit(s) in regPS.
+         * and logical operations should call:
+         *
+         *      setLogicResult(value, type [, carry [, overflow]])
+         *
+         * Since most logical operations clear both CF and OF, most calls to setLogicResult() can omit the
+         * two optional parameters.
+         *
+         * The type parameter of these methods indicates both the size of the result (BYTE, WORD or DWORD)
+         * and which of the flags should now be considered "cached" by the result registers.  If the previous
+         * resultType specifies any flags not contained in the new type parameter, then those flags must be
+         * immediately calculated and written to the appropriate bit(s) in regPS.
+         *
+         * Arithmetic operations are assumed to represent an "added" result; if a "subtracted" result is
+         * provided instead (eg, from CMP, DEC, SUB, etc), then setArithResult() must include a 5th parameter
+         * (fSubtract).
          */
-        BYTE:       0x80,
-        WORD:       0x8000,
+        BYTE:       0x80,       // result is byte value
+        WORD:       0x8000,     // result is word value
         DWORD:      0x80000000|0,
         TYPE:       0x80008080|0,
-        CF:         0x01,
-        PF:         0x02,
-        AF:         0x04,
-        ZF:         0x08,
-        SF:         0x10,
-        OF:         0x20,
-        ALL:        0x3F,
-        LOGIC:      0x1A,
-        NOTCF:      0x3E
+        CF:         0x01,       // carry flag is cached
+        PF:         0x02,       // parity flag is cached
+        AF:         0x04,       // aux carry flag is cached
+        ZF:         0x08,       // zero flag is cached
+        SF:         0x10,       // sign flag is cached
+        OF:         0x20,       // overflow flag is cached
+        ALL:        0x3F,       // all result flags are cached
+        LOGIC:      0x1A,       // all logical flags are cached; see setLogicResult()
+        NOTCF:      0x3E        // all result flags EXCEPT carry are cached
     },
     /*
      * Bit values for opFlags, which are all reset to zero prior to each instruction
