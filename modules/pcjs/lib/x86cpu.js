@@ -1830,18 +1830,14 @@ X86CPU.prototype.getCarry = function()
  */
 X86CPU.prototype.getCF = function()
 {
-    var flag = (this.resultZeroCarry & this.resultSize)? X86.PS.CF : 0;
-    if (I386) {
-        if (this.resultType & X86.RESULT.CF) {
-            this.resultFlags &= ~X86.PS.CF;
-            if ((this.resultDst ^ ((this.resultDst ^ this.resultSrc) & (this.resultSrc ^ this.resultArith))) & (this.resultType & X86.RESULT.TYPE)) {
-                this.resultFlags |= X86.PS.CF;
-            }
-            this.resultType &= ~X86.RESULT.CF;
+    if (this.resultType & X86.RESULT.CF) {
+        this.resultFlags &= ~X86.PS.CF;
+        if ((this.resultDst ^ ((this.resultDst ^ this.resultSrc) & (this.resultSrc ^ this.resultArith))) & (this.resultType & X86.RESULT.TYPE)) {
+            this.resultFlags |= X86.PS.CF;
         }
-        return this.resultFlags & X86.PS.CF;
+        this.resultType &= ~X86.RESULT.CF;
     }
-    return flag;
+    return this.resultFlags & X86.PS.CF;
 };
 
 /**
@@ -1871,19 +1867,14 @@ X86CPU.prototype.getCF = function()
  */
 X86CPU.prototype.getPF = function()
 {
-    var flag = this.resultParitySign;
-    flag = ((0x6996 >> ((flag ^ (flag >> 4)) & 0xf)) & 1)? 0 : X86.PS.PF;
-    if (I386) {
-        if (this.resultType & X86.RESULT.PF) {
-            this.resultFlags &= ~X86.PS.PF;
-            if ((0x9669 >> ((this.resultLogic ^ (this.resultLogic >> 4)) & 0xf)) & 1) {
-                this.resultFlags |= X86.PS.PF;
-            }
-            this.resultType &= ~X86.RESULT.PF;
+    if (this.resultType & X86.RESULT.PF) {
+        this.resultFlags &= ~X86.PS.PF;
+        if ((0x9669 >> ((this.resultLogic ^ (this.resultLogic >> 4)) & 0xf)) & 1) {
+            this.resultFlags |= X86.PS.PF;
         }
-        return this.resultFlags & X86.PS.PF;
+        this.resultType &= ~X86.RESULT.PF;
     }
-    return flag;
+    return this.resultFlags & X86.PS.PF;
 };
 
 /**
@@ -1914,18 +1905,14 @@ X86CPU.prototype.getPF = function()
  */
 X86CPU.prototype.getAF = function()
 {
-    var flag = ((this.resultParitySign ^ this.resultAuxOverflow) & X86.RESULT.AUXOVF_AF)? X86.PS.AF : 0;
-    if (I386) {
-        if (this.resultType & X86.RESULT.AF) {
-            this.resultFlags &= ~X86.PS.AF;
-            if ((this.resultArith ^ (this.resultDst ^ this.resultSrc)) & X86.RESULT.AUXOVF_AF) {
-                this.resultFlags |= X86.PS.AF;
-            }
-            this.resultType &= ~X86.RESULT.AF;
+    if (this.resultType & X86.RESULT.AF) {
+        this.resultFlags &= ~X86.PS.AF;
+        if ((this.resultArith ^ (this.resultDst ^ this.resultSrc)) & X86.RESULT.AUXOVF_AF) {
+            this.resultFlags |= X86.PS.AF;
         }
-        return this.resultFlags & X86.PS.AF;
+        this.resultType &= ~X86.RESULT.AF;
     }
-    return flag;
+    return this.resultFlags & X86.PS.AF;
 };
 
 /**
@@ -1936,18 +1923,14 @@ X86CPU.prototype.getAF = function()
  */
 X86CPU.prototype.getZF = function()
 {
-    var flag = (this.resultZeroCarry & (this.resultSize - 1))? 0 : X86.PS.ZF;
-    if (I386) {
-        if (this.resultType & X86.RESULT.ZF) {
-            this.resultFlags &= ~X86.PS.ZF;
-            if (!(this.resultLogic & (((this.resultType & X86.RESULT.TYPE) - 1) | (this.resultType & X86.RESULT.TYPE)))) {
-                this.resultFlags |= X86.PS.ZF;
-            }
-            this.resultType &= ~X86.RESULT.ZF;
+    if (this.resultType & X86.RESULT.ZF) {
+        this.resultFlags &= ~X86.PS.ZF;
+        if (!(this.resultLogic & (((this.resultType & X86.RESULT.TYPE) - 1) | (this.resultType & X86.RESULT.TYPE)))) {
+            this.resultFlags |= X86.PS.ZF;
         }
-        return this.resultFlags & X86.PS.ZF;
+        this.resultType &= ~X86.RESULT.ZF;
     }
-    return flag;
+    return this.resultFlags & X86.PS.ZF;
 };
 
 /**
@@ -1958,18 +1941,14 @@ X86CPU.prototype.getZF = function()
  */
 X86CPU.prototype.getSF = function()
 {
-    var flag = (this.resultParitySign & (this.resultSize >> 1))? X86.PS.SF : 0;
-    if (I386) {
-        if (this.resultType & X86.RESULT.SF) {
-            this.resultFlags &= ~X86.PS.SF;
-            if (this.resultLogic & (this.resultType & X86.RESULT.TYPE)) {
-                this.resultFlags |= X86.PS.SF;
-            }
-            this.resultType &= ~X86.RESULT.SF;
+    if (this.resultType & X86.RESULT.SF) {
+        this.resultFlags &= ~X86.PS.SF;
+        if (this.resultLogic & (this.resultType & X86.RESULT.TYPE)) {
+            this.resultFlags |= X86.PS.SF;
         }
-        return this.resultFlags & X86.PS.SF;
+        this.resultType &= ~X86.RESULT.SF;
     }
-    return flag;
+    return this.resultFlags & X86.PS.SF;
 };
 
 /**
@@ -2004,18 +1983,14 @@ X86CPU.prototype.getSF = function()
  */
 X86CPU.prototype.getOF = function()
 {
-    var flag = ((this.resultParitySign ^ this.resultAuxOverflow ^ (this.resultParitySign >> 1)) & (this.resultSize >> 1))? X86.PS.OF : 0;
-    if (I386) {
-        if (this.resultType & X86.RESULT.OF) {
-            this.resultFlags &= ~X86.PS.OF;
-            if (((this.resultDst ^ this.resultArith) & (this.resultSrc ^ this.resultArith)) & (this.resultType & X86.RESULT.TYPE)) {
-                this.resultFlags |= X86.PS.OF;
-            }
-            this.resultType &= ~X86.RESULT.OF;
+    if (this.resultType & X86.RESULT.OF) {
+        this.resultFlags &= ~X86.PS.OF;
+        if (((this.resultDst ^ this.resultArith) & (this.resultSrc ^ this.resultArith)) & (this.resultType & X86.RESULT.TYPE)) {
+            this.resultFlags |= X86.PS.OF;
         }
-        return this.resultFlags & X86.PS.OF;
+        this.resultType &= ~X86.RESULT.OF;
     }
-    return flag;
+    return this.resultFlags & X86.PS.OF;
 };
 
 /**
@@ -2058,11 +2033,8 @@ X86CPU.prototype.getDF = function()
  */
 X86CPU.prototype.clearCF = function()
 {
-    this.resultZeroCarry &= ~this.resultSize;
-    if (I386) {
-        this.resultType &= ~X86.RESULT.CF;
-        this.resultFlags &= ~X86.PS.CF;
-    }
+    this.resultType &= ~X86.RESULT.CF;
+    this.resultFlags &= ~X86.PS.CF;
 };
 
 /**
@@ -2072,11 +2044,8 @@ X86CPU.prototype.clearCF = function()
  */
 X86CPU.prototype.clearPF = function()
 {
-    if (this.getPF()) this.resultParitySign ^= 0x1;
-    if (I386) {
-        this.resultType &= ~X86.RESULT.PF;
-        this.resultFlags &= ~X86.PS.PF;
-    }
+    this.resultType &= ~X86.RESULT.PF;
+    this.resultFlags &= ~X86.PS.PF;
 };
 
 /**
@@ -2086,11 +2055,8 @@ X86CPU.prototype.clearPF = function()
  */
 X86CPU.prototype.clearAF = function()
 {
-    this.resultAuxOverflow = (this.resultParitySign & X86.RESULT.AUXOVF_AF) | (this.resultAuxOverflow & ~X86.RESULT.AUXOVF_AF);
-    if (I386) {
-        this.resultType &= ~X86.RESULT.AF;
-        this.resultFlags &= ~X86.PS.AF;
-    }
+    this.resultType &= ~X86.RESULT.AF;
+    this.resultFlags &= ~X86.PS.AF;
 };
 
 /**
@@ -2100,11 +2066,8 @@ X86CPU.prototype.clearAF = function()
  */
 X86CPU.prototype.clearZF = function()
 {
-    this.resultZeroCarry |= (this.resultSize - 1);
-    if (I386) {
-        this.resultType &= ~X86.RESULT.ZF;
-        this.resultFlags &= ~X86.PS.ZF;
-    }
+    this.resultType &= ~X86.RESULT.ZF;
+    this.resultFlags &= ~X86.PS.ZF;
 };
 
 /**
@@ -2114,14 +2077,8 @@ X86CPU.prototype.clearZF = function()
  */
 X86CPU.prototype.clearSF = function()
 {
-    if (this.getSF()) {
-        this.resultParitySign ^= (this.resultSize >> 1) | (this.resultSize >> 2);
-        this.resultAuxOverflow ^= X86.RESULT.AUXOVF_OF;
-    }
-    if (I386) {
-        this.resultType &= ~X86.RESULT.SF;
-        this.resultFlags &= ~X86.PS.SF;
-    }
+    this.resultType &= ~X86.RESULT.SF;
+    this.resultFlags &= ~X86.PS.SF;
 };
 
 /**
@@ -2151,12 +2108,8 @@ X86CPU.prototype.clearDF = function()
  */
 X86CPU.prototype.clearOF = function()
 {
-    this.resultParitySign &= ~this.resultSize;
-    this.resultAuxOverflow = (this.resultParitySign & X86.RESULT.AUXOVF_OF) | (this.resultAuxOverflow & ~X86.RESULT.AUXOVF_OF);
-    if (I386) {
-        this.resultType &= ~X86.RESULT.OF;
-        this.resultFlags &= ~X86.PS.OF;
-    }
+    this.resultType &= ~X86.RESULT.OF;
+    this.resultFlags &= ~X86.PS.OF;
 };
 
 /**
@@ -2166,11 +2119,8 @@ X86CPU.prototype.clearOF = function()
  */
 X86CPU.prototype.setCF = function()
 {
-    this.resultZeroCarry |= this.resultSize;
-    if (I386) {
-        this.resultType &= ~X86.RESULT.CF;
-        this.resultFlags |= X86.PS.CF;
-    }
+    this.resultType &= ~X86.RESULT.CF;
+    this.resultFlags |= X86.PS.CF;
 };
 
 /**
@@ -2180,11 +2130,8 @@ X86CPU.prototype.setCF = function()
  */
 X86CPU.prototype.setPF = function()
 {
-    if ((0x6996 >> ((this.resultParitySign ^ (this.resultParitySign >> 4)) & 0xf)) & 1) this.resultParitySign ^= 0x1;
-    if (I386) {
-        this.resultType &= ~X86.RESULT.PF;
-        this.resultFlags |= X86.PS.PF;
-    }
+    this.resultType &= ~X86.RESULT.PF;
+    this.resultFlags |= X86.PS.PF;
 };
 
 /**
@@ -2194,11 +2141,8 @@ X86CPU.prototype.setPF = function()
  */
 X86CPU.prototype.setAF = function()
 {
-    this.resultAuxOverflow = ~(this.resultParitySign & X86.RESULT.AUXOVF_AF) & X86.RESULT.AUXOVF_AF | (this.resultAuxOverflow & ~X86.RESULT.AUXOVF_AF);
-    if (I386) {
-        this.resultType &= ~X86.RESULT.AF;
-        this.resultFlags |= X86.PS.AF;
-    }
+    this.resultType &= ~X86.RESULT.AF;
+    this.resultFlags |= X86.PS.AF;
 };
 
 /**
@@ -2208,11 +2152,8 @@ X86CPU.prototype.setAF = function()
  */
 X86CPU.prototype.setZF = function()
 {
-    this.resultZeroCarry &= ~(this.resultSize - 1);
-    if (I386) {
-        this.resultType &= ~X86.RESULT.ZF;
-        this.resultFlags |= X86.PS.ZF;
-    }
+    this.resultType &= ~X86.RESULT.ZF;
+    this.resultFlags |= X86.PS.ZF;
 };
 
 /**
@@ -2222,14 +2163,8 @@ X86CPU.prototype.setZF = function()
  */
 X86CPU.prototype.setSF = function()
 {
-    if (!(this.resultParitySign & (this.resultSize >> 1))) {
-        this.resultParitySign ^= (this.resultSize >> 1) | (this.resultSize >> 2);
-        this.resultAuxOverflow ^= X86.RESULT.AUXOVF_OF;
-    }
-    if (I386) {
-        this.resultType &= ~X86.RESULT.SF;
-        this.resultFlags |= X86.PS.SF;
-    }
+    this.resultType &= ~X86.RESULT.SF;
+    this.resultFlags |= X86.PS.SF;
 };
 
 /**
@@ -2259,12 +2194,8 @@ X86CPU.prototype.setDF = function()
  */
 X86CPU.prototype.setOF = function()
 {
-    if (I386) {
-        this.resultType &= ~X86.RESULT.OF;
-        this.resultFlags |= X86.PS.OF;
-    }
-    this.resultParitySign |= this.resultSize;
-    this.resultAuxOverflow = (this.resultParitySign & X86.RESULT.AUXOVF_OF) | (this.resultAuxOverflow & ~X86.RESULT.AUXOVF_OF);
+    this.resultType &= ~X86.RESULT.OF;
+    this.resultFlags |= X86.PS.OF;
 };
 
 /**
@@ -2316,16 +2247,6 @@ X86CPU.prototype.setPS = function(regPS, cpl)
     if (I386) {
         this.resultType = X86.RESULT.BYTE;
         this.resultFlags = regPS & (X86.PS.CF | X86.PS.PF | X86.PS.AF | X86.PS.ZF | X86.PS.SF | X86.PS.OF);
-    }
-    if (OLDFLAGS) {
-        this.resultSize = X86.RESULT.SIZE_BYTE;
-        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = 0;
-        if (regPS & X86.PS.CF) this.setCF();
-        if (!(regPS & X86.PS.PF)) this.resultParitySign |= 0x1;
-        if (regPS & X86.PS.AF) this.resultAuxOverflow |= X86.RESULT.AUXOVF_AF;
-        if (!(regPS & X86.PS.ZF)) this.clearZF();
-        if (regPS & X86.PS.SF) this.setSF();
-        if (regPS & X86.PS.OF) this.setOF();
     }
 
     /*

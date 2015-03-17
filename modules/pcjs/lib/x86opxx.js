@@ -593,13 +593,7 @@ X86.opDAA = function DAA()
     }
     var b = (AL & 0xff);
     this.regEAX = (this.regEAX & ~0xff) | b;
-    if (OLDFLAGS) {
-        this.resultSize = X86.RESULT.SIZE_BYTE;
-        this.resultZeroCarry = this.resultParitySign = b;
-    }
-    if (I386) {
-        this.setLogicResult(b, X86.RESULT.BYTE);
-    }
+    this.setLogicResult(b, X86.RESULT.BYTE);
     if (CF) this.setCF(); else this.clearCF();
     if (AF) this.setAF(); else this.clearAF();
     this.nStepCycles -= this.CYCLES.nOpCyclesAAA;          // AAA and DAA have the same cycle times
@@ -715,13 +709,7 @@ X86.opDAS = function DAS()
     }
     var b = (AL & 0xff);
     this.regEAX = (this.regEAX & ~0xff) | b;
-    if (OLDFLAGS) {
-        this.resultSize = X86.RESULT.SIZE_BYTE;
-        this.resultZeroCarry = this.resultParitySign = b;
-    }
-    if (I386) {
-        this.setLogicResult(b, X86.RESULT.BYTE);
-    }
+    this.setLogicResult(b, X86.RESULT.BYTE);
     if (CF) this.setCF(); else this.clearCF();
     if (AF) this.setAF(); else this.clearAF();
     this.nStepCycles -= this.CYCLES.nOpCyclesAAA;          // AAA and DAS have the same cycle times
@@ -2808,14 +2796,7 @@ X86.opCMPSw = function CMPSw()
  */
 X86.opTESTALb = function TESTALb()
 {
-    var src = this.getIPByte();
-    if (OLDFLAGS) {
-        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = this.regEAX & src;
-        this.resultSize = X86.RESULT.SIZE_BYTE;
-    }
-    if (I386) {
-        this.setLogicResult(this.regEAX & src, X86.RESULT.BYTE);
-    }
+    this.setLogicResult(this.regEAX & this.getIPByte(), X86.RESULT.BYTE);
     this.nStepCycles -= this.CYCLES.nOpCyclesAAA;
 };
 
@@ -2826,14 +2807,7 @@ X86.opTESTALb = function TESTALb()
  */
 X86.opTESTAXw = function TESTAXw()
 {
-    var src = this.getIPWord();
-    if (OLDFLAGS) {
-        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = this.regEAX & src;
-        this.resultSize = X86.RESULT.SIZE_WORD;
-    }
-    if (I386) {
-        this.setLogicResult(this.regEAX & src, X86.RESULT.WORD);
-    }
+    this.setLogicResult(this.regEAX & this.getIPWord(), X86.RESULT.WORD);
     this.nStepCycles -= this.CYCLES.nOpCyclesAAA;
 };
 
@@ -3569,16 +3543,10 @@ X86.opAAM = function AAM()
     }
     var AL = this.regEAX & 0xff;
     this.regEAX = (this.regEAX & ~0xffff) | ((AL / bDivisor) << 8) | (AL % bDivisor);
-    if (OLDFLAGS) {
-        this.resultSize = X86.RESULT.SIZE_BYTE;
-        this.resultZeroCarry = this.resultParitySign = this.regEAX;
-    }
-    if (I386) {
-        /*
-         * setLogicResult() is slightly overkill, because technically, we don't need to clear CF and OF....
-         */
-        this.setLogicResult(this.regEAX, X86.RESULT.BYTE);
-    }
+    /*
+     * setLogicResult() is slightly overkill, because technically, we don't need to clear CF and OF....
+     */
+    this.setLogicResult(this.regEAX, X86.RESULT.BYTE);
     this.nStepCycles -= this.CYCLES.nOpCyclesAAM;
 };
 
@@ -3596,16 +3564,10 @@ X86.opAAD = function AAD()
 {
     var bMultiplier = this.getIPByte();
     this.regEAX = (this.regEAX & ~0xffff) | (((((this.regEAX >> 8) & 0xff) * bMultiplier) + this.regEAX) & 0xff);
-    if (OLDFLAGS) {
-        this.resultZeroCarry = this.resultParitySign = this.regEAX;
-        this.resultSize = X86.RESULT.SIZE_BYTE;
-    }
-    if (I386) {
-        /*
-         * setLogicResult() is slightly overkill, because technically, we don't need to clear CF and OF....
-         */
-        this.setLogicResult(this.regEAX, X86.RESULT.BYTE);
-    }
+    /*
+     * setLogicResult() is slightly overkill, because technically, we don't need to clear CF and OF....
+     */
+    this.setLogicResult(this.regEAX, X86.RESULT.BYTE);
     this.nStepCycles -= this.CYCLES.nOpCyclesAAD;
 };
 

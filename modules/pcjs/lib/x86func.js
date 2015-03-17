@@ -48,14 +48,7 @@ if (typeof module !== 'undefined') {
 X86.fnADCb = function ADCb(dst, src)
 {
     var b = (dst + src + this.getCarry())|0;
-    if (OLDFLAGS) {
-        this.resultAuxOverflow = dst ^ src;
-        this.resultZeroCarry = this.resultParitySign = b;
-        this.resultSize = X86.RESULT.SIZE_BYTE;
-    }
-    if (I386) {
-        this.setArithResult(dst, src, b, X86.RESULT.BYTE | X86.RESULT.ALL);
-    }
+    this.setArithResult(dst, src, b, X86.RESULT.BYTE | X86.RESULT.ALL);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
     return b & 0xff;
 };
@@ -71,14 +64,7 @@ X86.fnADCb = function ADCb(dst, src)
 X86.fnADCw = function ADCw(dst, src)
 {
     var w = (dst + src + this.getCarry())|0;
-    if (OLDFLAGS) {
-        this.resultAuxOverflow = dst ^ src;
-        this.resultZeroCarry = this.resultParitySign = w;
-        this.resultSize = X86.RESULT.SIZE_WORD;
-    }
-    if (I386) {
-        this.setArithResult(dst, src, w, X86.RESULT.WORD | X86.RESULT.ALL);
-    }
+    this.setArithResult(dst, src, w, X86.RESULT.WORD | X86.RESULT.ALL);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
     return w & 0xffff;
 };
@@ -94,14 +80,7 @@ X86.fnADCw = function ADCw(dst, src)
 X86.fnADDb = function ADDb(dst, src)
 {
     var b = (dst + src)|0;
-    if (OLDFLAGS) {
-        this.resultAuxOverflow = dst ^ src;
-        this.resultSize = X86.RESULT.SIZE_BYTE;
-        this.resultZeroCarry = this.resultParitySign = b;
-    }
-    if (I386) {
-        this.setArithResult(dst, src, b, X86.RESULT.BYTE | X86.RESULT.ALL);
-    }
+    this.setArithResult(dst, src, b, X86.RESULT.BYTE | X86.RESULT.ALL);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
     return b & 0xff;
 };
@@ -117,14 +96,7 @@ X86.fnADDb = function ADDb(dst, src)
 X86.fnADDw = function ADDw(dst, src)
 {
     var w = (dst + src)|0;
-    if (OLDFLAGS) {
-        this.resultAuxOverflow = dst ^ src;
-        this.resultSize = X86.RESULT.SIZE_WORD;
-        this.resultZeroCarry = this.resultParitySign = w;
-    }
-    if (I386) {
-        this.setArithResult(dst, src, w, X86.RESULT.WORD | X86.RESULT.ALL);
-    }
+    this.setArithResult(dst, src, w, X86.RESULT.WORD | X86.RESULT.ALL);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
     return w & 0xffff;
 };
@@ -140,13 +112,7 @@ X86.fnADDw = function ADDw(dst, src)
 X86.fnANDb = function ANDb(dst, src)
 {
     var b = dst & src;
-    if (OLDFLAGS) {
-        this.resultSize = X86.RESULT.SIZE_BYTE;
-        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = b;
-    }
-    if (I386) {
-        this.setLogicResult(b, X86.RESULT.BYTE);
-    }
+    this.setLogicResult(b, X86.RESULT.BYTE);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
     return b;
 };
@@ -162,13 +128,7 @@ X86.fnANDb = function ANDb(dst, src)
 X86.fnANDw = function ANDw(dst, src)
 {
     var w = dst & src;
-    if (OLDFLAGS) {
-        this.resultSize = X86.RESULT.SIZE_WORD;
-        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = w;
-    }
-    if (I386) {
-        this.setLogicResult(w, X86.RESULT.WORD);
-    }
+    this.setLogicResult(w, X86.RESULT.WORD);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
     return w;
 };
@@ -311,14 +271,7 @@ X86.fnCALLFdw = function CALLFdw(dst, src)
 X86.fnCMPb = function CMPb(dst, src)
 {
     var b = (dst - src)|0;
-    if (OLDFLAGS) {
-        this.resultAuxOverflow = dst ^ src;
-        this.resultSize = X86.RESULT.SIZE_BYTE;
-        this.resultZeroCarry = this.resultParitySign = b;
-    }
-    if (I386) {
-        this.setArithResult(dst, src, b, X86.RESULT.BYTE | X86.RESULT.ALL, true);
-    }
+    this.setArithResult(dst, src, b, X86.RESULT.BYTE | X86.RESULT.ALL, true);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesCompareRM) : this.CYCLES.nOpCyclesArithRM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -335,14 +288,7 @@ X86.fnCMPb = function CMPb(dst, src)
 X86.fnCMPw = function CMPw(dst, src)
 {
     var w = (dst - src)|0;
-    if (OLDFLAGS) {
-        this.resultAuxOverflow = dst ^ src;
-        this.resultSize = X86.RESULT.SIZE_WORD;
-        this.resultZeroCarry = this.resultParitySign = w;
-    }
-    if (I386) {
-        this.setArithResult(dst, src, w, X86.RESULT.WORD | X86.RESULT.ALL, true);
-    }
+    this.setArithResult(dst, src, w, X86.RESULT.WORD | X86.RESULT.ALL, true);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesCompareRM) : this.CYCLES.nOpCyclesArithRM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -359,15 +305,7 @@ X86.fnCMPw = function CMPw(dst, src)
 X86.fnDECb = function DECb(dst, src)
 {
     var b = (dst - 1)|0;
-    if (OLDFLAGS) {
-        this.resultAuxOverflow = dst;
-        this.resultParitySign = b;
-        this.resultZeroCarry = (b & 0xff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 8);
-        this.resultSize = X86.RESULT.SIZE_BYTE;
-    }
-    if (I386) {
-        this.setArithResult(dst, 1, b, X86.RESULT.BYTE | X86.RESULT.NOTCF, true);
-    }
+    this.setArithResult(dst, 1, b, X86.RESULT.BYTE | X86.RESULT.NOTCF, true);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesIncR : this.CYCLES.nOpCyclesIncM);
     return b & 0xff;
 };
@@ -382,15 +320,7 @@ X86.fnDECb = function DECb(dst, src)
 X86.fnDECr = function DECr(w)
 {
     var result = ((w & this.dataMask) - 1)|0;
-    if (OLDFLAGS) {
-        this.resultAuxOverflow = w;
-        this.resultParitySign = result;
-        this.resultZeroCarry = (result & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-        this.resultSize = X86.RESULT.SIZE_WORD;
-    }
-    if (I386) {
-        this.setArithResult(w, 1, result, X86.RESULT.WORD | X86.RESULT.NOTCF, true);
-    }
+    this.setArithResult(w, 1, result, X86.RESULT.WORD | X86.RESULT.NOTCF, true);
     this.nStepCycles -= 2;                          // the register form of INC takes 2 cycles on all CPUs
     return (w & ~this.dataMask) | (result & this.dataMask);
 };
@@ -406,15 +336,7 @@ X86.fnDECr = function DECr(w)
 X86.fnDECw = function DECw(dst, src)
 {
     var w = (dst - 1)|0;
-    if (OLDFLAGS) {
-        this.resultAuxOverflow = dst;
-        this.resultParitySign = w;
-        this.resultZeroCarry = (w & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-        this.resultSize = X86.RESULT.SIZE_WORD;
-    }
-    if (I386) {
-        this.setArithResult(dst, 1, w, X86.RESULT.WORD | X86.RESULT.NOTCF, true);
-    }
+    this.setArithResult(dst, 1, w, X86.RESULT.WORD | X86.RESULT.NOTCF, true);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesIncR : this.CYCLES.nOpCyclesIncM);
     return w & 0xffff;
 };
@@ -777,15 +699,7 @@ X86.fnIMULw = function IMULw(dst, src)
 X86.fnINCb = function INCb(dst, src)
 {
     var b = (dst + 1)|0;
-    if (OLDFLAGS) {
-        this.resultAuxOverflow = dst;
-        this.resultParitySign = b;
-        this.resultZeroCarry = (b & 0xff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 8);
-        this.resultSize = X86.RESULT.SIZE_BYTE;
-    }
-    if (I386) {
-        this.setArithResult(dst, 1, b, X86.RESULT.BYTE | X86.RESULT.NOTCF);
-    }
+    this.setArithResult(dst, 1, b, X86.RESULT.BYTE | X86.RESULT.NOTCF);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesIncR : this.CYCLES.nOpCyclesIncM);
     return b & 0xff;
 };
@@ -800,15 +714,7 @@ X86.fnINCb = function INCb(dst, src)
 X86.fnINCr = function INCr(w)
 {
     var result = ((w & this.dataMask) + 1)|0;
-    if (OLDFLAGS) {
-        this.resultAuxOverflow = w;
-        this.resultParitySign = result;
-        this.resultZeroCarry = (result & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-        this.resultSize = X86.RESULT.SIZE_WORD;
-    }
-    if (I386) {
-        this.setArithResult(w, 1, result, X86.RESULT.WORD | X86.RESULT.NOTCF);
-    }
+    this.setArithResult(w, 1, result, X86.RESULT.WORD | X86.RESULT.NOTCF);
     this.nStepCycles -= 2;                          // the register form of INC takes 2 cycles on all CPUs
     return (w & ~this.dataMask) | (result & this.dataMask);
 };
@@ -824,15 +730,7 @@ X86.fnINCr = function INCr(w)
 X86.fnINCw = function INCw(dst, src)
 {
     var w = (dst + 1)|0;
-    if (OLDFLAGS) {
-        this.resultAuxOverflow = dst;
-        this.resultParitySign = w;
-        this.resultZeroCarry = (w & 0xffff) | (((this.resultZeroCarry & this.resultSize)? 1 : 0) << 16);
-        this.resultSize = X86.RESULT.SIZE_WORD;
-    }
-    if (I386) {
-        this.setArithResult(dst, 1, w, X86.RESULT.WORD | X86.RESULT.NOTCF);
-    }
+    this.setArithResult(dst, 1, w, X86.RESULT.WORD | X86.RESULT.NOTCF);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesIncR : this.CYCLES.nOpCyclesIncM);
     return w & 0xffff;
 };
@@ -1241,14 +1139,11 @@ X86.fnMOVMD16 = function MOVMD16(dst, src)
  */
 X86.fnMULb = function MULb(dst, src)
 {
-    this.regEAX = this.regMD16 = (this.resultZeroCarry = (src = this.regEAX & 0xff) * dst) & 0xffff;
+    this.regEAX = this.regMD16 = ((src = this.regEAX & 0xff) * dst) & 0xffff;
     if (this.regEAX & 0xff00) {
         this.setCF(); this.setOF();
     } else {
         this.clearCF(); this.clearOF();
-    }
-    if (DEBUG) {
-        if (this.resultZeroCarry & (this.resultSize - 1)) this.clearZF(); else this.setZF();
     }
     /*
      * Multiply/divide instructions specify only a single operand, which the decoders pass to us
@@ -1272,15 +1167,13 @@ X86.fnMULb = function MULb(dst, src)
  */
 X86.fnMULw = function MULw(dst, src)
 {
-    this.regMD16 = this.regEAX = (this.resultZeroCarry = (src = this.regEAX) * dst) & 0xffff;
-    this.regMD32 = this.regEDX = (this.resultZeroCarry >> 16) & 0xffff;
+    var result = (src = this.regEAX) * dst;
+    this.regMD16 = this.regEAX = result & 0xffff;
+    this.regMD32 = this.regEDX = (result >> 16) & 0xffff;
     if (this.regEDX) {
         this.setCF(); this.setOF();
     } else {
         this.clearCF(); this.clearOF();
-    }
-    if (DEBUG) {
-        if (this.resultZeroCarry & (this.resultSize - 1)) this.clearZF(); else this.setZF();
     }
     /*
      * Multiply/divide instructions specify only a single operand, which the decoders pass to us
@@ -1305,14 +1198,7 @@ X86.fnMULw = function MULw(dst, src)
 X86.fnNEGb = function NEGb(dst, src)
 {
     var b = (-dst)|0;
-    if (OLDFLAGS) {
-        this.resultAuxOverflow = dst;
-        this.resultSize = X86.RESULT.SIZE_BYTE;
-        this.resultZeroCarry = this.resultParitySign = b;
-    }
-    if (I386) {
-        this.setArithResult(0, dst, b, X86.RESULT.BYTE | X86.RESULT.ALL, true);
-    }
+    this.setArithResult(0, dst, b, X86.RESULT.BYTE | X86.RESULT.ALL, true);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesNegR : this.CYCLES.nOpCyclesNegM);
     return b & 0xff;
 };
@@ -1328,14 +1214,7 @@ X86.fnNEGb = function NEGb(dst, src)
 X86.fnNEGw = function NEGw(dst, src)
 {
     var w = (-dst)|0;
-    if (OLDFLAGS) {
-        this.resultAuxOverflow = dst;
-        this.resultSize = X86.RESULT.SIZE_WORD;
-        this.resultZeroCarry = this.resultParitySign = w;
-    }
-    if (I386) {
-        this.setArithResult(0, dst, w, X86.RESULT.WORD | X86.RESULT.ALL, true);
-    }
+    this.setArithResult(0, dst, w, X86.RESULT.WORD | X86.RESULT.ALL, true);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesNegR : this.CYCLES.nOpCyclesNegM);
     return w & 0xffff;
 };
@@ -1379,13 +1258,7 @@ X86.fnNOTw = function NOTw(dst, src)
 X86.fnORb = function ORb(dst, src)
 {
     var b = dst | src;
-    if (OLDFLAGS) {
-        this.resultSize = X86.RESULT.SIZE_BYTE;
-        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = b;
-    }
-    if (I386) {
-        this.setLogicResult(b, X86.RESULT.BYTE);
-    }
+    this.setLogicResult(b, X86.RESULT.BYTE);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
     return b;
 };
@@ -1401,13 +1274,7 @@ X86.fnORb = function ORb(dst, src)
 X86.fnORw = function ORw(dst, src)
 {
     var w = dst | src;
-    if (OLDFLAGS) {
-        this.resultSize = X86.RESULT.SIZE_WORD;
-        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = w;
-    }
-    if (I386) {
-        this.setLogicResult(w, X86.RESULT.WORD);
-    }
+    this.setLogicResult(w, X86.RESULT.WORD);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
     return w;
 };
@@ -1811,14 +1678,7 @@ X86.fnSARw = function SARw(dst, src)
 X86.fnSBBb = function SBBb(dst, src)
 {
     var b = (dst - src - this.getCarry())|0;
-    if (OLDFLAGS) {
-        this.resultAuxOverflow = dst ^ src;
-        this.resultZeroCarry = this.resultParitySign = b;
-        this.resultSize = X86.RESULT.SIZE_BYTE;
-    }
-    if (I386) {
-        this.setArithResult(dst, src, b, X86.RESULT.BYTE | X86.RESULT.ALL, true);
-    }
+    this.setArithResult(dst, src, b, X86.RESULT.BYTE | X86.RESULT.ALL, true);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
     return b & 0xff;
 };
@@ -1834,14 +1694,7 @@ X86.fnSBBb = function SBBb(dst, src)
 X86.fnSBBw = function SBBw(dst, src)
 {
     var w = (dst - src - this.getCarry())|0;
-    if (OLDFLAGS) {
-        this.resultAuxOverflow = dst ^ src;
-        this.resultZeroCarry = this.resultParitySign = w;
-        this.resultSize = X86.RESULT.SIZE_WORD;
-    }
-    if (I386) {
-        this.setArithResult(dst, src, w, X86.RESULT.WORD | X86.RESULT.ALL, true);
-    }
+    this.setArithResult(dst, src, w, X86.RESULT.WORD | X86.RESULT.ALL, true);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
     return w & 0xffff;
 };
@@ -2107,14 +1960,7 @@ X86.fnSTR = function STR(dst, src)
 X86.fnSUBb = function SUBb(dst, src)
 {
     var b = (dst - src)|0;
-    if (OLDFLAGS) {
-        this.resultAuxOverflow = dst ^ src;
-        this.resultZeroCarry = this.resultParitySign = b;
-        this.resultSize = X86.RESULT.SIZE_BYTE;
-    }
-    if (I386) {
-        this.setArithResult(dst, src, b, X86.RESULT.BYTE | X86.RESULT.ALL, true);
-    }
+    this.setArithResult(dst, src, b, X86.RESULT.BYTE | X86.RESULT.ALL, true);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
     return b & 0xff;
 };
@@ -2130,14 +1976,7 @@ X86.fnSUBb = function SUBb(dst, src)
 X86.fnSUBw = function SUBw(dst, src)
 {
     var w = (dst - src)|0;
-    if (OLDFLAGS) {
-        this.resultAuxOverflow = dst ^ src;
-        this.resultZeroCarry = this.resultParitySign = w;
-        this.resultSize = X86.RESULT.SIZE_WORD;
-    }
-    if (I386) {
-        this.setArithResult(dst, src, w, X86.RESULT.WORD | X86.RESULT.ALL, true);
-    }
+    this.setArithResult(dst, src, w, X86.RESULT.WORD | X86.RESULT.ALL, true);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
     return w & 0xffff;
 };
@@ -2153,13 +1992,7 @@ X86.fnSUBw = function SUBw(dst, src)
 X86.fnTEST8 = function TEST8(dst, src)
 {
     src = this.getIPByte();
-    if (OLDFLAGS) {
-        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst & src;
-        this.resultSize = X86.RESULT.SIZE_BYTE;
-    }
-    if (I386) {
-        this.setLogicResult(dst & src, X86.RESULT.BYTE);
-    }
+    this.setLogicResult(dst & src, X86.RESULT.BYTE);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesTestRI : this.CYCLES.nOpCyclesTestMI);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -2176,13 +2009,7 @@ X86.fnTEST8 = function TEST8(dst, src)
 X86.fnTEST16 = function TEST16(dst, src)
 {
     src = this.getIPWord();
-    if (OLDFLAGS) {
-        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst & src;
-        this.resultSize = X86.RESULT.SIZE_WORD;
-    }
-    if (I386) {
-        this.setLogicResult(dst & src, X86.RESULT.WORD);
-    }
+    this.setLogicResult(dst & src, X86.RESULT.WORD);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesTestRI : this.CYCLES.nOpCyclesTestMI);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -2198,13 +2025,7 @@ X86.fnTEST16 = function TEST16(dst, src)
  */
 X86.fnTESTb = function TESTb(dst, src)
 {
-    if (OLDFLAGS) {
-        this.resultSize = X86.RESULT.SIZE_BYTE;
-        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst & src;
-    }
-    if (I386) {
-        this.setLogicResult(dst & src, X86.RESULT.BYTE);
-    }
+    this.setLogicResult(dst & src, X86.RESULT.BYTE);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesTestRR : this.CYCLES.nOpCyclesTestRM) : this.CYCLES.nOpCyclesTestRM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -2220,13 +2041,7 @@ X86.fnTESTb = function TESTb(dst, src)
  */
 X86.fnTESTw = function TESTw(dst, src)
 {
-    if (OLDFLAGS) {
-        this.resultSize = X86.RESULT.SIZE_WORD;
-        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = dst & src;
-    }
-    if (I386) {
-        this.setLogicResult(dst & src, X86.RESULT.WORD);
-    }
+    this.setLogicResult(dst & src, X86.RESULT.WORD);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesTestRR : this.CYCLES.nOpCyclesTestRM) : this.CYCLES.nOpCyclesTestRM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -2458,13 +2273,7 @@ X86.fnXCHGrw = function XCHGRw(dst, src)
 X86.fnXORb = function XORb(dst, src)
 {
     var b = dst ^ src;
-    if (OLDFLAGS) {
-        this.resultSize = X86.RESULT.SIZE_BYTE;
-        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = b;
-    }
-    if (I386) {
-        this.setLogicResult(b, X86.RESULT.BYTE);
-    }
+    this.setLogicResult(b, X86.RESULT.BYTE);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
     return b;
 };
@@ -2480,13 +2289,7 @@ X86.fnXORb = function XORb(dst, src)
 X86.fnXORw = function XORw(dst, src)
 {
     var w = dst ^ src;
-    if (OLDFLAGS) {
-        this.resultSize = X86.RESULT.SIZE_WORD;
-        this.resultZeroCarry = this.resultParitySign = this.resultAuxOverflow = w;
-    }
-    if (I386) {
-        this.setLogicResult(w, X86.RESULT.WORD);
-    }
+    this.setLogicResult(w, X86.RESULT.WORD);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
     return w;
 };
@@ -2499,43 +2302,8 @@ X86.fnXORw = function XORw(dst, src)
  */
 X86.fnXORd = function XORd(dst, src)
 {
-    var d = dst ^ src;
-    if (OLDFLAGS) {
-        this.resultSize = X86.RESULT.SIZE_WORD;
-        this.resultParitySign = this.resultAuxOverflow = d;
-        this.resultZeroCarry = ((d >>> 16) | (d & 0xffff));
-    }
-    if (I386) {
-        this.setLogicResult(d, X86.RESULT.DWORD);
-    }
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
-    return d;
-};
-
-/**
- * All the rotate instructions (RCL, RCR, ROL, ROR) affect only CARRY and OVERFLOW.  This means that in the process
- * of updating CARRY and OVERFLOW (and possibly changing resultSize from SIZE_BYTE to SIZE_WORD, or vice versa),
- * we must take care to preserve SIGN, ZERO, and the other arithmetic flags.
- *
- * However, in the interest of efficiency, rather than changing resultSize to match the operand size, it's easier
- * to leave resultSize as-is and simply set CARRY and OVERFLOW based on the previous resultSize, since there isn't
- * actually any requirement or dependency (that I can think of) that resultSize always reflect the operand size of
- * the last operation.  Since only 2 of the 6 arithmetic flags need to change, that tips the scales in favor of leaving
- * resultSize alone.
- *
- * NOTE: Although I've yet to find confirmation of this for the 8086/8088, OVERFLOW is "undefined" on modern x86
- * CPUs for shift counts > 1 (in fact, on modern CPUs, OVERFLOW tends to be clear in those situations).  Since I set
- * OVERFLOW the same way for all shift counts, my "well-defined" behavior may or may not match the 8086/8088, but
- * until I see a defined behavior (or more importantly, some dependency on a different behavior), this seems good enough.
- *
- * @this {X86CPU}
- * @param {number} result (untruncated, so that we can inspect it for CARRY and OVERFLOW)
- * @param {number} size
- */
-X86.fnRotateFlags = function(result, size)
-{
-    this.resultZeroCarry = (this.resultZeroCarry & (this.resultSize - 1)) | ((result & size)? this.resultSize : 0);
-    if ((result ^ (result >> 1)) & (size >> 1)) this.setOF(); else this.clearOF();
+    return this.setLogicResult(dst ^ src, X86.RESULT.DWORD);
 };
 
 /**
