@@ -371,7 +371,7 @@ real-mode compatibility with the 8086.
 
 Here's what the world knew about 80386 problems in the B1 stepping, as of December 17, 1986:
 
-1. Opcode Field Incorrect for FSAVE and FSTENV
+1. Opcode Field Incorrect for FSAVE and FSTENV  
 	**Problem**: If an FSAVE or an FSTENV is executed in REAL mode or in VIRTUAL 8086 mode, the opcode field
 	stored in memory is incorrect if it should have referred to a coprocessor instruction which transfers
 	either two bytes or ten bytes from memory to the coprocessor. The instruction and operand linear address
@@ -382,7 +382,7 @@ Here's what the world knew about 80386 problems in the B1 stepping, as of Decemb
 	**Workaround**: In REAL mode or in VIRTUAL 8086 mode, the instruction linear address field can be used to
 	read the opcode from memory. Note that the two bytes fetched need to be swapped to yield the image that
 	FSAVE and FSTENV normally stores.
-2. FSAVE, FRESTOR, FSTENV and FLDENV Anomolies [sic] with Paging
+2. FSAVE, FRESTOR, FSTENV and FLDENV Anomolies [sic] with Paging  
 	**Problem**: If either of the last two bytes of an FSAVE or an FSTENV operand are for any reason not writeable,
 	or either of the last two bytes of an FRESTOR or FLDENV are for any reason not readable, the instruction
 	is not restartable.  
@@ -390,7 +390,7 @@ Here's what the world knew about 80386 problems in the B1 stepping, as of Decemb
 	**Workaround**: This does not not affect typical systems with reasonably-assigned page access rights.
 	In an obscure situation where this problem arises, a workaround is to avoid having the operand of these
 	instructions span a page boundary. This can be accomplished by aligning these operands on any 128-byte boundary.
-3. Wraparound Coprocessor Operands
+3. Wraparound Coprocessor Operands  
 	**Problem**: This can affect only situations where a coprocessor operand straddles the limit of a segment
 	of maximum size (i.e. 0FFFFh for a 16-bit segment or 0FFFFFFFFh for a 32-bit segment) or within 108 bytes of
 	maximum size, thus wrapping around to offset 0 of the segment. Since a wraparound situation is very abnormal
@@ -405,7 +405,7 @@ Here's what the world knew about 80386 problems in the B1 stepping, as of Decemb
 	**Workaround**: In Real Mode, this is not a problem since protection is not enabled. In Protected Mode,
 	this problem is avoided simply by not creating coprocessor operands which wrap around the end of the segment,
 	or by aligning the base of all segments on page boundaries.
-4. IRET to TSS with Limit too Small
+4. IRET to TSS with Limit too Small  
 	**Problem**: If an IRET performs a task switch to a TSS of proper descriptor type but invalid (too small) limit,
 	a Double Fault (exception 8) will result instead of a Invalid TSS Fault (exception 10) as should result.
 	Furthermore, if the Double Fault entry in the IDT is a trap gate, a shutdown results. In a related topic,
@@ -415,7 +415,7 @@ Here's what the world knew about 80386 problems in the B1 stepping, as of Decemb
 	**Workaround**: A working system, one that creates TSS segments of adequate size to hold the processor state
 	(44 bytes for the TSS of a 16-bit task, 104 bytes for the TSS of a 32-bit task), will not encounter any problems
 	here. A working system should also provide a valid gate (interrupt, trap, or task gate) in the IDT for exception 8.
-5. Single-Stepping First Iteration of REP MOVS
+5. Single-Stepping First Iteration of REP MOVS  
 	**Problem**: If a REPeated MOVS instruction is executed when single-stepping is enabled (TF = 1 in EFLAGS register),
 	a single-step trap (exception 1) is taken every two move steps, but should occur each move step. Also, if a data
 	breakpoint is hit during a odd iteration number of REP MOVS, the data breakpoint trap is not taken until after the
@@ -426,14 +426,14 @@ Here's what the world knew about 80386 problems in the B1 stepping, as of Decemb
 	**Workaround**: When using the Trap Flag or data breakpoints with a debugger utility, this minor variation of
 	REP MOVS must be accepted, unless an effort is made to have the debugger emulate the REP MOVS rather than actually
 	execute it.
-6. Task Switch to Virtual 8086 Mode Doesn't Update Prefetch Limit
+6. Task Switch to Virtual 8086 Mode Doesn't Update Prefetch Limit  
 	**Problem**: When a task switch to Virtual 8086 Mode is performed, the prefetch limit is not updated to become 0FFFFh,
 	but instead remains at its previous value.  
 	&nbsp;  
 	**Workaround**: Use the IRET instruction to transfer to Virtual 8086 Mode. Using IRET is the preferred method for
 	most instances, especially when the master OS dispatches a Virtual 8086 Mode program, because IRET can cause the
 	transition without a task switch.
-7. Wrong Register Size for String Instructions in Mixed 16/32-bit Addressing Systems
+7. Wrong Register Size for String Instructions in Mixed 16/32-bit Addressing Systems  
 	**Problem**: If certain string and loop instructions are followed by instructions that either:  
 	&nbsp;  
 	1) use a different address size (that is, if either the string instruction or the following instruction
@@ -457,7 +457,7 @@ Here's what the world knew about 80386 problems in the B1 stepping, as of Decemb
 	has the same address size as the string/loop (i.e., if the string/loop instruction includes an address prefix,
 	place the same address prefix before the NOP; conversely, if the string/loop instruction does not have an address
 	prefix, do not place a prefix before the NOP).
-8. FAR Jump Located Near Page Boundary in Virtual 8086 Mode Paged Systems
+8. FAR Jump Located Near Page Boundary in Virtual 8086 Mode Paged Systems  
 	**Problem**: In Virtual 8086 Mode, if a direct FAR jump (opcode EAh) instruction is located at the end of a
 	page (or within 16 bytes of the end), and the next page is not cached in the TLB, the prefetcher limit is not
 	set by the FAR jump instruction to the "end" on the new code segment, but rather is left at the "end" of the
@@ -481,7 +481,7 @@ Here's what the world knew about 80386 problems in the B1 stepping, as of Decemb
 	be emulated by the master OS, for example, I/O instructions that need to be emulated, CLI/STI instructions that must
 	be emulated, etc. If none of these faults are recognized, the fault handler can assume this errata caused the GP fault
 	and simply IRET back to the instruction.
-9. Page Fault Error Code on Stack Not Reliable
+9. Page Fault Error Code on Stack Not Reliable  
 	**Problem**: When a Page Fault (exception 14) occurs, the 3 defined bits in the error code may be unreliable
 	if a certain sequence of prefetch is happening at the same time.  
 	&nbsp;  
@@ -489,7 +489,7 @@ Here's what the world knew about 80386 problems in the B1 stepping, as of Decemb
 	as described, the page fault linear address stored in register CR2 is always correct. The page fault handler should
 	refer to the page fault linear address in CR2 to access the corresponding page table entry and thereby determine
 	whether the page fault was due to a page "not present" condition, or to a usage violation.
-10. Certain I/O Addresses Incorrect when Paging is Enabled
+10. Certain I/O Addresses Incorrect when Paging is Enabled  
 	**Problem**: When Paging is enabled, accessing I/O addresses in the range 00001000h-0000FFFFh (4K through 64K-1)
 	or accessing coprocessor ports (I/O addresses 800000F8h-800000FFh) as a result of executing coprocessor opcodes,
 	can generate incorrect I/O addresses if paging is enabled and the corresponding linear memory address is marked
@@ -514,7 +514,7 @@ Here's what the world knew about 80386 problems in the B1 stepping, as of Decemb
     To completely disable 80386 paging when paging was previously enabled, the 80386 TLB should be flushed immediately
     after resetting the~PG bit in CRO. The TLB can be flushed, you recall, by writing a Page Table Directory base address
     to register CR3.
-11. Wrong ECX Update by REP INS
+11. Wrong ECX Update by REP INS  
 	**Problem**: The ECX register (or CX in case of 16-bit operations) is not updated properly in the case of a
 	REP INS instruction (INPut string instruction with any REPeat prefix) that is followed by an early-start instruction
 	(e.g. PUSH, POP or memory reference instructions). After any REP-prefixed instruction, ECX is supposed to be 0 (null).
@@ -524,7 +524,7 @@ Here's what the world knew about 80386 problems in the B1 stepping, as of Decemb
 	&nbsp;  
 	**Workaround**: After a REP INS instruction, do not rely on ECX (or CX) being zero. Hence, a new count (if any)
 	should be MOVed into ECX, rather than being ADDed into ECX.
-12. NMI Doesn't Always Bring Chip Out of Shutdown in Obscure Condition with Paging Enabled
+12. NMI Doesn't Always Bring Chip Out of Shutdown in Obscure Condition with Paging Enabled  
 	**Problem**: If paging is enabled, and if the IDT gate for the Double Fault handler (the gate for exception 8)
 	points to the null descriptor slot, descriptor 0, in the GDT (this would be very a strange way to set up a system),
 	and a TLB miss occurs when accessing the null descriptor slot, the chip enters shutdown as it should in this case.
@@ -533,7 +533,7 @@ Here's what the world knew about 80386 problems in the B1 stepping, as of Decemb
 	&nbsp;  
 	**Workaround**: Ensure that the IDT gate for the Double Fault Handler has a non-null selectors for CS, and that
 	SS of the destination level is also non-null.
-13. HOLD Input During Protected Mode Interlevel IRET when Paging is Enabled
+13. HOLD Input During Protected Mode Interlevel IRET when Paging is Enabled  
 	**Problem**: Under specific situations involving paging and the page privilege bits, the HOLD input, and a RET
 	or IRET instruction performing an inter-level return to level 3, a problem can develop. These situations can be
 	avoided by the workarounds given.  
@@ -582,7 +582,7 @@ Here's what the world knew about 80386 problems in the B1 stepping, as of Decemb
 	gate a HOLD request going into the chip. This will prevent a hold request from getting to the 80386 until after
 	the completion of the first cycle after a LOCKed cycle. For the hardware workaround to be sufficient, all stacks
 	must be properly aligned, and BS16# must be tied inactive.
-14. Protected Mode LSL Instruction Should not be Followed by PUSH/POP
+14. Protected Mode LSL Instruction Should not be Followed by PUSH/POP  
 	**Problem**: This item pertains only to Protected Mode. If the Protected Mode LSL instruction (Load Segment
 	Limit instruction, executable only in Protected Mode) is immediately followed by certain instructions that
 	perform a stack operation, such as PUSH or POP (see exact list below), the value of the [E]SP register may be
@@ -596,7 +596,7 @@ Here's what the world knew about 80386 problems in the B1 stepping, as of Decemb
 	be used safely after the Protected Mode LSL. Note that even if a forbidden instruction immediately follows LSL,
 	[E]SP may still be updated correctly, since this problem is data-dependent and only occurs if the LSL operation
 	succeeded (i.e. if LSL set the ZF flag).
-15. LSL/LAR/VERR/VERW Instructions Malfunction with Null Selector
+15. LSL/LAR/VERR/VERW Instructions Malfunction with Null Selector  
 	**Problem**: The Protected Mode instructions LSL, LAR, VERR or VERW executed with a null selector (i.e. bits
 	15 through 2 of the selector set to zero) as the operand will operate on the descriptor at entry 0 of the GDT
 	instead of unconditionally clearing the ZF flag.  
@@ -607,7 +607,7 @@ Here's what the world knew about 80386 problems in the B1 stepping, as of Decemb
 	The failure will be reported with ZF cleared, which is the desired behavior when the operand is a null selector.
 	Note that many systems already have the "null descriptor" in the GDT initialized to zeroes, as is desired for
 	this workaround.
-16. "Not Present" LDT in VM86 Task Raises Wrong Exception
+16. "Not Present" LDT in VM86 Task Raises Wrong Exception  
 	**Problem**: A task switch to a VM86 task that has a "not present" LDT descriptor will cause a Segment Not Present
 	fault (exception 11) rather than an Invalid TSS fault (exception 10).  
 	&nbsp;  
@@ -627,7 +627,7 @@ Here's what the world knew about 80386 problems in the B1 stepping, as of Decemb
 	is reported with the LDT selector as the error code and with the VM bit set to 1 in the EFLAGS image of the caller.
 	Since a VM86 task cannot normally raise a "not present" fault, the "not present" exception handler can detect this
 	case by checking if the stored VM bit is set. If so, the fault can be redirected to the TSS Fault handler.
-17. Coprocessor Instructions Crossing Page/Segment Boundaries
+17. Coprocessor Instructions Crossing Page/Segment Boundaries  
 	**Problem**: If the first byte of a coprocessor (ESC) instruction is located on the last byte of a page or segment,
 	and the second byte is located on a page or segment which would create a fault, then the processor will hang when
 	it tries to signal the fault. The processor remains stopped until an interrupt, NMI, or RESET occurs. This errata
@@ -649,7 +649,7 @@ Here's what the world knew about 80386 problems in the B1 stepping, as of Decemb
 	If all four conditions are true, then the timer routine can assume this errata was encountered, and signal a page
 	fault, which will clear the condition. This workaround should be placed in the Operating System, so that applications
 	programs are unaffected.
-18. Double Page Faults Do Not Raise Double Fault Exception
+18. Double Page Faults Do Not Raise Double Fault Exception  
 	**Problem**: If a second page fault occurs, while the processor is attempting to enter the service routine for the
 	first, then the processor will invoke the page fault (exception 14) handler a second time, rather than the double
 	fault (exception 8) handler. A subsequent fault, though, will lead to shutdown.  
