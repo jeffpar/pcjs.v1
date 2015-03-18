@@ -85,7 +85,7 @@ if (I386) {
  * cycles would hurt overall performance.  Similarly, 8254 timer counters are updated only on-demand.
  *
  * The 8237 and 8254, along with the 8259 interrupt controller and several other "chips", are combined
- * into a single "Chipset" component, to keep the number of components we juggle to a minimum.
+ * into a single ChipSet component, to keep the number of components we juggle to a minimum.
  *
  * All that being said, this does not change the overall goal: to produce as accurate a simulation as
  * possible, within the limits of what JavaScript allows and how precisely/predictably it behaves.

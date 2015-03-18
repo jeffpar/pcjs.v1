@@ -573,6 +573,9 @@ CPU.prototype.setBurstCycles = function(nCycles)
          * NOTE: If nDelta is negative, we will actually be increasing nStepCycles and nBurstCycles.
          * Which is OK, but if we're also taking snapshots of the cycle counts, to make sure that instruction
          * costs are being properly assessed, then we need to update nSnapCycles as well.
+         *
+         * TODO: If the delta is negative, we could simply ignore the request, but we must first carefully
+         * consider the impact on the ChipSet timers.
          */
         if (DEBUG) this.nSnapCycles -= nDelta;
         this.nStepCycles -= nDelta;

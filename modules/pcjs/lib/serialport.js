@@ -157,6 +157,33 @@ SerialPort.THR = {REG: 0};              // Transmitter Holding Register (write)
 SerialPort.DL_DEFAULT       = 0x180;    // we select an arbitrary default Divisor Latch equivalent to 300 baud
 
 /*
+ * The divisor is stored in wDL.  If we take the frequency value 1843200 and divide it by wDL*128, we get the
+ * maximum number of bytes per second that the SerialPort interface should generate.  For example, if a baud
+ * rate of 1200 is being used, the divisor will be 0x60 (96), so we calculate 1843200/(96*128) = 150, which means
+ * there should be a 1000ms/150 or 6.667ms delay between bytes delivered.
+ *
+ * TODO: Enforce that delay.  However, the delay should be converted from real-world milliseconds to the
+ * appropriate number of CPU cycles we can pass to setBurstCycles().  This will also require the CPU to call
+ * us at the start of each burst, to see if advanceRBR() has more data to deliver.  For now, I'm throttling
+ * SerialPort interrupts by passing a hard-coded delay to setIRR().  The setIRR() delay does not ensure any
+ * particular baud rate, it simply gives the underlying Interrupt Service Routine (ISR) some breathing room.
+ *
+ * The Microsoft Windows 1.01 serial mouse driver ISR issues an EOI before it has safely exited, relying solely
+ * on the fact that a 1200 baud serial device would not normally interrupt frequently enough to blow the stack.
+ * However, in PCjs, all you have to do is enable Debugger messages on every serial interrupt and mouse event,
+ * eg:
+ *
+ *      m serial on;m pic on;m mouse on
+ *
+ * to slow the machine down to the point where serial mouse interrupts overwhelm the ISR.  The Debugger messages
+ * display the current stack pointer, which you can watch drop to zero and then wrap around, no doubt trampling
+ * lots of code and data along the way.
+ *
+ * This problem can also occur without being forced by the Debugger; eg, whenever the physical machine's mouse is
+ * configured for a high interrupt rate.
+ */
+
+/*
  * Receiver Buffer Register (RBR.REG, offset 0; eg, 0x3F8 or 0x2F8)
  */
 SerialPort.RBR = {REG: 0};              // (read)
@@ -261,7 +288,8 @@ SerialPort.SCR = {REG: 7};
  * @param {Mouse} mouse component
  * @return {Component} this or null, based on whether or not the specified ID matches
  */
-SerialPort.prototype.attachMouse = function(id, mouse) {
+SerialPort.prototype.attachMouse = function(id, mouse)
+{
     if (id == this.idComponent) {
         this.mouse = mouse;
         return this;
@@ -276,7 +304,8 @@ SerialPort.prototype.attachMouse = function(id, mouse) {
  *
  * @this {SerialPort}
  *
-SerialPort.prototype.syncMouse = function() {
+SerialPort.prototype.syncMouse = function()
+ {
     if (this.mouse) this.mouse.notifyMCR(this.bMCR);
 };
  */
@@ -290,7 +319,8 @@ SerialPort.prototype.syncMouse = function() {
  * @param {Object} control is the HTML control DOM object (eg, HTMLButtonElement)
  * @return {boolean} true if binding was successful, false if unrecognized binding request
  */
-SerialPort.prototype.setBinding = function(sHTMLType, sBinding, control) {
+SerialPort.prototype.setBinding = function(sHTMLType, sBinding, control)
+{
     var serial = this;
     switch (sBinding) {
     case SerialPort.sIOBuffer:
@@ -339,7 +369,8 @@ SerialPort.prototype.setBinding = function(sHTMLType, sBinding, control) {
  * @param {X86CPU} cpu
  * @param {Debugger} dbg
  */
-SerialPort.prototype.initBus = function(cmp, bus, cpu, dbg) {
+SerialPort.prototype.initBus = function(cmp, bus, cpu, dbg)
+{
     this.bus = bus;
     this.cpu = cpu;
     this.dbg = dbg;
@@ -357,7 +388,8 @@ SerialPort.prototype.initBus = function(cmp, bus, cpu, dbg) {
  * @param {boolean} [fRepower]
  * @return {boolean} true if successful, false if failure
  */
-SerialPort.prototype.powerUp = function(data, fRepower) {
+SerialPort.prototype.powerUp = function(data, fRepower)
+{
     if (!fRepower) {
         if (!data || !this.restore) {
             this.reset();
@@ -375,7 +407,8 @@ SerialPort.prototype.powerUp = function(data, fRepower) {
  * @param {boolean} fSave
  * @return {Object|boolean}
  */
-SerialPort.prototype.powerDown = function(fSave) {
+SerialPort.prototype.powerDown = function(fSave)
+{
     return fSave && this.save ? this.save() : true;
 };
 
@@ -384,7 +417,8 @@ SerialPort.prototype.powerDown = function(fSave) {
  *
  * @this {SerialPort}
  */
-SerialPort.prototype.reset = function() {
+SerialPort.prototype.reset = function()
+{
     this.initState();
 };
 
@@ -396,7 +430,8 @@ SerialPort.prototype.reset = function() {
  * @this {SerialPort}
  * @return {Object}
  */
-SerialPort.prototype.save = function() {
+SerialPort.prototype.save = function()
+{
     var state = new State(this);
     state.set(0, this.saveRegisters());
     return state.data();
@@ -411,7 +446,8 @@ SerialPort.prototype.save = function() {
  * @param {Object} data
  * @return {boolean} true if successful, false if failure
  */
-SerialPort.prototype.restore = function(data) {
+SerialPort.prototype.restore = function(data)
+{
     return this.initState(data[0]);
 };
 
@@ -422,7 +458,8 @@ SerialPort.prototype.restore = function(data) {
  * @param {Array} [data]
  * @return {boolean} true if successful, false if failure
  */
-SerialPort.prototype.initState = function(data) {
+SerialPort.prototype.initState = function(data)
+{
     /*
      * The NS8250A spec doesn't explicitly say what the RBR and THR are initialized to on a reset,
      * but I think we can safely assume zeros.  Similarly, we reset the baud rate Divisor Latch (wDL)
@@ -462,7 +499,8 @@ SerialPort.prototype.initState = function(data) {
  * @this {SerialPort}
  * @return {Array}
  */
-SerialPort.prototype.saveRegisters = function() {
+SerialPort.prototype.saveRegisters = function()
+{
     var i = 0;
     var data = [];
     data[i++] = this.bRBR;
@@ -484,7 +522,8 @@ SerialPort.prototype.saveRegisters = function() {
  * @this {SerialPort}
  * @param {Array} ab is an array of bytes to propagate to the bRBR (Receiver Buffer Register)
  */
-SerialPort.prototype.sendRBR = function(ab) {
+SerialPort.prototype.sendRBR = function(ab)
+{
     this.abReceive = this.abReceive.concat(ab);
     this.advanceRBR();
 };
@@ -494,7 +533,8 @@ SerialPort.prototype.sendRBR = function(ab) {
  *
  * @this {SerialPort}
  */
-SerialPort.prototype.advanceRBR = function() {
+SerialPort.prototype.advanceRBR = function()
+{
     if (this.abReceive.length > 0 && !(this.bLSR & SerialPort.LSR.DR)) {
         this.bRBR = this.abReceive.shift();
         this.bLSR |= SerialPort.LSR.DR;
@@ -510,7 +550,8 @@ SerialPort.prototype.advanceRBR = function() {
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number} simulated port value
  */
-SerialPort.prototype.inRBR = function(port, addrFrom) {
+SerialPort.prototype.inRBR = function(port, addrFrom)
+{
     var b = ((this.bLCR & SerialPort.LCR.DLAB) ? (this.wDL & 0xff) : this.bRBR);
     this.printMessageIO(port, null, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLL" : "RBR", b);
     this.bLSR &= ~SerialPort.LSR.DR;
@@ -526,7 +567,8 @@ SerialPort.prototype.inRBR = function(port, addrFrom) {
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number} simulated port value
  */
-SerialPort.prototype.inIER = function(port, addrFrom) {
+SerialPort.prototype.inIER = function(port, addrFrom)
+{
     var b = ((this.bLCR & SerialPort.LCR.DLAB) ? (this.wDL >> 8) : this.bIER);
     this.printMessageIO(port, null, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLM" : "IER", b);
     return b;
@@ -540,7 +582,8 @@ SerialPort.prototype.inIER = function(port, addrFrom) {
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number} simulated port value
  */
-SerialPort.prototype.inIIR = function(port, addrFrom) {
+SerialPort.prototype.inIIR = function(port, addrFrom)
+{
     var b = this.bIIR;
     this.printMessageIO(port, null, addrFrom, "IIR", b);
     return b;
@@ -554,7 +597,8 @@ SerialPort.prototype.inIIR = function(port, addrFrom) {
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number} simulated port value
  */
-SerialPort.prototype.inLCR = function(port, addrFrom) {
+SerialPort.prototype.inLCR = function(port, addrFrom)
+{
     var b = this.bLCR;
     this.printMessageIO(port, null, addrFrom, "LCR", b);
     return b;
@@ -568,7 +612,8 @@ SerialPort.prototype.inLCR = function(port, addrFrom) {
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number} simulated port value
  */
-SerialPort.prototype.inMCR = function(port, addrFrom) {
+SerialPort.prototype.inMCR = function(port, addrFrom)
+{
     var b = this.bMCR;
     this.printMessageIO(port, null, addrFrom, "MCR", b);
     return b;
@@ -582,7 +627,8 @@ SerialPort.prototype.inMCR = function(port, addrFrom) {
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number} simulated port value
  */
-SerialPort.prototype.inLSR = function(port, addrFrom) {
+SerialPort.prototype.inLSR = function(port, addrFrom)
+{
     var b = this.bLSR;
     this.printMessageIO(port, null, addrFrom, "LSR", b);
     return b;
@@ -596,7 +642,8 @@ SerialPort.prototype.inLSR = function(port, addrFrom) {
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number} simulated port value
  */
-SerialPort.prototype.inMSR = function(port, addrFrom) {
+SerialPort.prototype.inMSR = function(port, addrFrom)
+{
     var b = this.bMSR;
     this.printMessageIO(port, null, addrFrom, "MSR", b);
     return b;
@@ -610,7 +657,8 @@ SerialPort.prototype.inMSR = function(port, addrFrom) {
  * @param {number} bOut
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
  */
-SerialPort.prototype.outTHR = function(port, bOut, addrFrom) {
+SerialPort.prototype.outTHR = function(port, bOut, addrFrom)
+{
     this.printMessageIO(port, bOut, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLL" : "THR");
     if (this.bLCR & SerialPort.LCR.DLAB) {
         this.wDL = (this.wDL & ~0xff) | bOut;
@@ -634,7 +682,8 @@ SerialPort.prototype.outTHR = function(port, bOut, addrFrom) {
  * @param {number} bOut
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
  */
-SerialPort.prototype.outIER = function(port, bOut, addrFrom) {
+SerialPort.prototype.outIER = function(port, bOut, addrFrom)
+{
     this.printMessageIO(port, bOut, addrFrom, (this.bLCR & SerialPort.LCR.DLAB) ? "DLM" : "IER");
     if (this.bLCR & SerialPort.LCR.DLAB) {
         this.wDL = (this.wDL & 0xff) | (bOut << 8);
@@ -651,7 +700,8 @@ SerialPort.prototype.outIER = function(port, bOut, addrFrom) {
  * @param {number} bOut
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
  */
-SerialPort.prototype.outLCR = function(port, bOut, addrFrom) {
+SerialPort.prototype.outLCR = function(port, bOut, addrFrom)
+{
     this.printMessageIO(port, bOut, addrFrom, "LCR");
     this.bLCR = bOut;
 };
@@ -664,7 +714,8 @@ SerialPort.prototype.outLCR = function(port, bOut, addrFrom) {
  * @param {number} bOut
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to write the specified port)
  */
-SerialPort.prototype.outMCR = function(port, bOut, addrFrom) {
+SerialPort.prototype.outMCR = function(port, bOut, addrFrom)
+{
     var bPrev = this.bMCR;
     this.printMessageIO(port, bOut, addrFrom, "MCR");
     this.bMCR = bOut;
@@ -678,7 +729,8 @@ SerialPort.prototype.outMCR = function(port, bOut, addrFrom) {
  *
  * @this {SerialPort}
  */
-SerialPort.prototype.updateIRR = function() {
+SerialPort.prototype.updateIRR = function()
+{
     var bIIR = -1;
     if ((this.bLSR & SerialPort.LSR.DR) && (this.bIER & SerialPort.IER.RBR_AVAIL)) {
         bIIR = SerialPort.IIR.INT_RBR;
@@ -686,7 +738,7 @@ SerialPort.prototype.updateIRR = function() {
     if (bIIR >= 0) {
         this.bIIR &= ~(SerialPort.IIR.NO_INT | SerialPort.IIR.INT_BITS);
         this.bIIR |= bIIR;
-        if (this.chipset && this.nIRQ) this.chipset.setIRR(this.nIRQ);
+        if (this.chipset && this.nIRQ) this.chipset.setIRR(this.nIRQ, 100);
     } else {
         this.bIIR |= SerialPort.IIR.NO_INT;
         if (this.chipset && this.nIRQ) this.chipset.clearIRR(this.nIRQ);
@@ -700,7 +752,8 @@ SerialPort.prototype.updateIRR = function() {
  * @param {number} b
  * @return {boolean} true if echoed, false if not
  */
-SerialPort.prototype.echoByte = function(b) {
+SerialPort.prototype.echoByte = function(b)
+{
     if (this.controlIOBuffer) {
         if (b != 0x0D) {
             if (b == 0x08) {
@@ -746,7 +799,8 @@ SerialPort.aPortOutput = {
  * attribute, invoking the constructor to create a SerialPort component, and then binding
  * any associated HTML controls to the new component.
  */
-SerialPort.init = function() {
+SerialPort.init = function()
+{
     var aeSerial = Component.getElementsByClass(window.document, PCJSCLASS, "serial");
     for (var iSerial = 0; iSerial < aeSerial.length; iSerial++) {
         var eSerial = aeSerial[iSerial];

@@ -470,8 +470,8 @@ Mouse.prototype.moveMouse = function(event)
         }
         if (this.xDelta || this.yDelta) {
             /*
-             * As sendPacket() indicates, the x and y coordinates we pass below are for diagnostic purposes
-             * only.  sendPacket() really only cares about xDelta and yDelta, which it then zeroes on completion.
+             * As sendPacket() indicates, any x and y coordinates we supply are for diagnostic purposes only.
+             * sendPacket() only cares about the xDelta and yDelta properties, which it then zeroes on completion.
              */
             this.sendPacket(null, event.clientX, event.clientY);
         }
@@ -499,19 +499,17 @@ Mouse.prototype.clickMouse = function(iButton, fDown)
                 this.fLocked = null;
             }
         }
-        var sDiag;
+        var sDiag = DEBUGGER? ("mouse button" + iButton + ' ' + (fDown? "dn" : "up")) : null;
         switch (iButton) {
         case 0:
             if (this.fButton1 != fDown) {
                 this.fButton1 = fDown;
-                sDiag = DEBUGGER? ("mouse button1 " + (fDown? "dn" : "up")) : null;
                 this.sendPacket(sDiag);
             }
             break;
         case 2:
             if (this.fButton2 != fDown) {
                 this.fButton2 = fDown;
-                sDiag = DEBUGGER? ("mouse button2 " + (fDown? "dn" : "up")) : null;
                 this.sendPacket(sDiag);
             }
             break;

@@ -3043,7 +3043,7 @@ ChipSet.prototype.outPICLo = function(iPIC, bOut, addrFrom)
             var nIRQ = (nIRL == null? undefined : pic.nIRQBase + nIRL);
             if (pic.bISR & bIREnd) {
                 if (DEBUG && this.messageEnabled(this.messageBitsIRQ(nIRQ))) {
-                    this.printMessage("outPIC" + iPIC + "(0x" + str.toHexByte(pic.port) + "): IRQ " + nIRQ + " going out of service", true);
+                    this.printMessage("outPIC" + iPIC + "(0x" + str.toHexByte(pic.port) + "):  IRQ " + nIRQ + " ending @" + this.dbg.hexOffset(this.cpu.getIP(), this.cpu.getCS()) + " stack=" + this.dbg.hexOffset(this.cpu.getSP(), this.cpu.getSS()), true);
                 }
                 pic.bISR &= ~bIREnd;
                 this.checkIRR();
