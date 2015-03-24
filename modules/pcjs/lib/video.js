@@ -2287,9 +2287,6 @@ Video.prototype.captureTouch = function()
  */
 Video.prototype.onFocusChange = function(fFocus)
 {
-    if (this.fHasFocus != fFocus && DEBUG && this.messageEnabled()) {
-        this.printMessage("onFocusChange(" + (fFocus? "true" : "false") + ")", true);
-    }
     /*
      * As per http://stackoverflow.com/questions/6740253/disable-scrolling-when-changing-focus-form-elements-ipad-web-app,
      * I decided to try this work-around to prevent the webpage from scrolling around whenever the canvas is given

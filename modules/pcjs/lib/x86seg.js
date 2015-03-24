@@ -216,7 +216,7 @@ X86Seg.loadIDTReal = function loadIDTReal(nIDT)
     var addrIDT = cpu.addrIDT + (nIDT << 2);
     var off = cpu.getShort(addrIDT);
     cpu.regPS &= ~(X86.PS.TF | X86.PS.IF);
-    return this.load(cpu.getShort(addrIDT + 2)) + off;
+    return (this.load(cpu.getShort(addrIDT + 2)) + off)|0;
 };
 
 /**
@@ -254,7 +254,7 @@ X86Seg.loadIDTProt = function loadIDTProt(nIDT)
  */
 X86Seg.checkReadReal = function checkReadReal(off, cb, fSuppress)
 {
-    return (this.base + off) | 0;
+    return (this.base + off)|0;
 };
 
 /**
@@ -271,7 +271,7 @@ X86Seg.checkReadReal = function checkReadReal(off, cb, fSuppress)
  */
 X86Seg.checkWriteReal = function checkWriteReal(off, cb, fSuppress)
 {
-    return (this.base + off) | 0;
+    return (this.base + off)|0;
 };
 
 /**
@@ -286,7 +286,7 @@ X86Seg.checkWriteReal = function checkWriteReal(off, cb, fSuppress)
 X86Seg.checkReadProt = function checkReadProt(off, cb, fSuppress)
 {
     if (off + cb <= this.limit) {
-        return this.base + off;
+        return (this.base + off)|0;
     }
     return X86Seg.checkReadProtDisallowed.call(this, off, cb, fSuppress);
 };
@@ -303,7 +303,7 @@ X86Seg.checkReadProt = function checkReadProt(off, cb, fSuppress)
 X86Seg.checkReadProtDown = function checkReadProtDown(off, cb, fSuppress)
 {
     if (off + cb > this.limit) {
-        return this.base + off;
+        return (this.base + off)|0;
     }
     return X86Seg.checkReadProtDisallowed.call(this, off, cb, fSuppress);
 };
@@ -337,7 +337,7 @@ X86Seg.checkReadProtDisallowed = function checkReadProtDisallowed(off, cb, fSupp
 X86Seg.checkWriteProt = function checkWriteProt(off, cb, fSuppress)
 {
     if (off + cb <= this.limit) {
-        return this.base + off;
+        return (this.base + off)|0;
     }
     return X86Seg.checkWriteProtDisallowed.call(this, off, cb, fSuppress);
 };
@@ -354,7 +354,7 @@ X86Seg.checkWriteProt = function checkWriteProt(off, cb, fSuppress)
 X86Seg.checkWriteProtDown = function checkWriteProtDown(off, cb, fSuppress)
 {
     if (off + cb > this.limit) {
-        return this.base + off;
+        return (this.base + off)|0;
     }
     return X86Seg.checkWriteProtDisallowed.call(this, off, cb, fSuppress);
 };

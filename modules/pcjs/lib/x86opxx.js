@@ -1632,12 +1632,20 @@ X86.opINSw = function INSw()
     }
     if (nReps--) {
         var addrFrom = this.regLIP - nDelta - 1;
-        var w = this.bus.checkPortInputNotify(this.regEDX, addrFrom);
-        if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiIO;
-        w |= (this.bus.checkPortInputNotify(this.regEDX, addrFrom) << 8);
-        if (BACKTRACK) this.backTrack.btiMemHi = this.backTrack.btiIO;
+        var w = 0, shift = 0;
+        for (var n = 0; n < this.dataSize; n++) {
+            w |= this.bus.checkPortInputNotify(this.regEDX, addrFrom) << shift;
+            shift += 8;
+            if (BACKTRACK) {
+                if (!n) {
+                    this.backTrack.btiMemLo = this.backTrack.btiIO;
+                } else if (n == 1) {
+                    this.backTrack.btiMemHi = this.backTrack.btiIO;
+                }
+            }
+        }
         this.setSOWord(this.segES, this.regEDI & this.addrMask, w);
-        this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -2 : 2)) & this.addrMask);
+        this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -this.dataSize : this.dataSize)) & this.addrMask);
         this.nStepCycles -= nCycles;
         this.regECX -= nDelta;
         if (nReps) {
@@ -1727,14 +1735,21 @@ X86.opOUTSw = function OUTSw()
     }
     if (nReps--) {
         var w = this.getSOWord(this.segDS, this.regESI & this.addrMask);
-        this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + ((this.regPS & X86.PS.DF)? -2 : 2)) & this.addrMask);
+        this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + ((this.regPS & X86.PS.DF)? -this.dataSize : this.dataSize)) & this.addrMask);
         this.nStepCycles -= nCycles;
         this.regECX -= nDelta;
-        var addrFrom = this.regLIP - nDelta - 1;
-        if (BACKTRACK) this.backTrack.btiIO = this.backTrack.btiMemLo;
-        this.bus.checkPortOutputNotify(this.regEDX, w & 0xff, addrFrom);
-        if (BACKTRACK) this.backTrack.btiIO = this.backTrack.btiMemHi;
-        this.bus.checkPortOutputNotify(this.regEDX, w >> 8, addrFrom);
+        var addrFrom = this.regLIP - nDelta - 1, shift = 0;
+        for (var n = 0; n < this.dataSize; n++) {
+            if (BACKTRACK) {
+                if (!n) {
+                    this.backTrack.btiIO = this.backTrack.btiMemLo;
+                } else if (n == 1) {
+                    this.backTrack.btiIO = this.backTrack.btiMemHi;
+                }
+            }
+            this.bus.checkPortOutputNotify(this.regEDX, (w >> shift) & 0xff, addrFrom);
+            shift += 8;
+        }
         if (nReps) {
             if (BUGS_8086) {
                 this.advanceIP(-2);                 // this instruction does not support segment overrides
@@ -2542,15 +2557,15 @@ X86.opPOPF = function POPF()
 X86.opSAHF = function SAHF()
 {
     /*
-     * NOTE: While it make LOOK more efficient to do this:
+     * NOTE: While it make seem more efficient to do this:
      *
      *      this.setPS((this.getPS() & ~X86.PS.SAHF) | ((this.regEAX >> 8) & X86.PS.SAHF));
      *
-     * the call to getPS() forces all the "indirect" flags to be resolved first, and then the call
-     * to setPS() forces them all to be recalculated, so on balance, the code below is probably more
-     * efficient, and may also avoid some unexpected side-effects of slamming the entire PS register.
+     * getPS() forces any "cached" flags to be resolved first, and setPS() must do extra work above
+     * and beyond setting the arithmetic and logical flags, so on balance, the code below may be more
+     * efficient, and may also avoid unexpected side-effects of updating the entire PS register.
      */
-    var ah = this.regEAX >> 8;
+    var ah = (this.regEAX >> 8) & 0xff;
     if (ah & X86.PS.CF) this.setCF(); else this.clearCF();
     if (ah & X86.PS.PF) this.setPF(); else this.clearPF();
     if (ah & X86.PS.AF) this.setAF(); else this.clearAF();
@@ -2567,7 +2582,7 @@ X86.opSAHF = function SAHF()
  */
 X86.opLAHF = function LAHF()
 {
-    this.regEAX = (this.regEAX & 0xff) | (this.getPS() & X86.PS.SAHF) << 8;
+    this.regEAX = (this.regEAX & ~0xff00) | (this.getPS() & X86.PS.SAHF) << 8;
     this.nStepCycles -= this.CYCLES.nOpCyclesLAHF;
 };
 
@@ -2681,7 +2696,7 @@ X86.opMOVSw = function MOVSw()
         if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.CYCLES.nOpCyclesMovSr0;
     }
     if (nReps--) {
-        var nInc = ((this.regPS & X86.PS.DF)? -2 : 2);
+        var nInc = ((this.regPS & X86.PS.DF)? -this.dataSize : this.dataSize);
         this.setSOWord(this.segES, this.regEDI & this.addrMask, this.getSOWord(this.segData, this.regESI));
         this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + nInc) & this.addrMask);
         this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + nInc) & this.addrMask);
@@ -2761,7 +2776,7 @@ X86.opCMPSw = function CMPSw()
         if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.CYCLES.nOpCyclesCmpSr0;
     }
     if (nReps--) {
-        var nInc = ((this.regPS & X86.PS.DF)? -2 : 2);
+        var nInc = ((this.regPS & X86.PS.DF)? -this.dataSize : this.dataSize);
         var wDst = this.getEAWord(this.segData, this.regESI & this.addrMask);
         var wSrc = this.modEAWord(this.segES, this.regEDI & this.addrMask);
         X86.fnCMPw.call(this, wDst, wSrc);
@@ -2830,9 +2845,6 @@ X86.opSTOSb = function STOSb()
         if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.CYCLES.nOpCyclesStoSr0;
     }
     if (nReps--) {
-        /*
-         * NOTE: We rely on setSOByte() to truncate regEAX to 8 bits; if setSOByte() changes, mask AX below.
-         */
         if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAL;
         this.setSOByte(this.segES, this.regEDI & this.addrMask, this.regEAX);
         this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -1 : 1)) & this.addrMask);
@@ -2877,7 +2889,7 @@ X86.opSTOSw = function STOSw()
             this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
         }
         this.setSOWord(this.segES, this.regEDI & this.addrMask, this.regEAX);
-        this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -2 : 2)) & this.addrMask);
+        this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -this.dataSize : this.dataSize)) & this.addrMask);
         this.nStepCycles -= nCycles;
         this.regECX -= nDelta;
         if (nReps) {
@@ -2943,11 +2955,11 @@ X86.opLODSw = function LODSw()
         if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.CYCLES.nOpCyclesLodSr0;
     }
     if (nReps--) {
-        this.regEAX = this.getSOWord(this.segData, this.regESI & this.addrMask);
+        this.regEAX = (this.regEAX & ~this.dataMask) | this.getSOWord(this.segData, this.regESI & this.addrMask);
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
         }
-        this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + ((this.regPS & X86.PS.DF)? -2 : 2)) & this.addrMask);
+        this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + ((this.regPS & X86.PS.DF)? -this.dataSize : this.dataSize)) & this.addrMask);
         this.nStepCycles -= nCycles;
         this.regECX -= nDelta;
         if (nReps) {
@@ -3020,8 +3032,8 @@ X86.opSCASw = function SCASw()
         if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.CYCLES.nOpCyclesScaSr0;
     }
     if (nReps--) {
-        X86.fnCMPw.call(this, this.regEAX, this.modEAWord(this.segES, this.regEDI & this.addrMask));
-        this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -2 : 2)) & this.addrMask);
+        X86.fnCMPw.call(this, this.regEAX & this.dataMask, this.modEAWord(this.segES, this.regEDI & this.addrMask));
+        this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -this.dataSize : this.dataSize)) & this.addrMask);
         /*
          * NOTE: As long as we're calling opGrpCMPb(), all our cycle times must be reduced by nOpCyclesArithRM
          */
@@ -3270,6 +3282,16 @@ X86.opGrp2wi = function GRP2wi()
 };
 
 /**
+ * op=0xC1 (GRP2 dword,imm16) (80186/80188 and up)
+ *
+ * @this {X86CPU}
+ */
+X86.opGrp2di = function GRP2di()
+{
+    this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp2d, X86.fnGRPCountImm);
+};
+
+/**
  * op=0xC2 (RET n)
  *
  * @this {X86CPU}
@@ -3503,6 +3525,16 @@ X86.opGrp2w1 = function GRP2w1()
 };
 
 /**
+ * op=0xD1 (GRP2 dword,1)
+ *
+ * @this {X86CPU}
+ */
+X86.opGrp2d1 = function GRP2d1()
+{
+    this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp2d, X86.fnGRPCount1);
+};
+
+/**
  * op=0xD2 (GRP2 byte,CL)
  *
  * @this {X86CPU}
@@ -3520,6 +3552,16 @@ X86.opGrp2bCL = function GRP2bCL()
 X86.opGrp2wCL = function GRP2wCL()
 {
     this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp2w, X86.fnGRPCountCL);
+};
+
+/**
+ * op=0xD3 (GRP2 dword,CL)
+ *
+ * @this {X86CPU}
+ */
+X86.opGrp2dCL = function GRP2dCL()
+{
+    this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp2d, X86.fnGRPCountCL);
 };
 
 /**
@@ -4098,11 +4140,11 @@ X86.opUndefined = function()
 };
 
 /**
- * opTBDd()
+ * opTBD()
  *
  * @this {X86CPU}
  */
-X86.opTBDd = function()
+X86.opTBD = function()
 {
     this.printMessage("unimplemented 80386 opcode", true);
     this.stopCPU();
@@ -4268,6 +4310,11 @@ X86.aOpGrp2w = [
     X86.fnSHLw,             X86.fnSHRw,             X86.fnGRPUndefined,     X86.fnSARw              // 0xD1/0xD3(reg=0x4-0x7)
 ];
 
+X86.aOpGrp2d = [
+    X86.fnTBD,              X86.fnTBD,              X86.fnRCLd,             X86.fnRCRd,             // 0xD1/0xD3(reg=0x0-0x3)
+    X86.fnTBD,              X86.fnTBD,              X86.fnGRPUndefined,     X86.fnTBD               // 0xD1/0xD3(reg=0x4-0x7)
+];
+
 X86.aOpGrp3b = [
     X86.fnTEST8,            X86.fnGRPUndefined,     X86.fnNOTb,             X86.fnNEGb,             // 0xF6(reg=0x0-0x3)
     X86.fnMULb,             X86.fnIMULb,            X86.fnDIVb,             X86.fnIDIVb             // 0xF6(reg=0x4-0x7)
@@ -4290,32 +4337,35 @@ X86.aOpGrp4w = [
 
 if (I386) {
     /*
-     * Until we have *d() forms of all *w() opcode handlers, we need to put in placeholders (ie, opTBDd())
+     * Until we have *d() forms of all *w() opcode handlers, we need to put in placeholders (ie, opTBD())
      */
     X86.aOpsD = {
-        0x01:   X86.opTBDd,     // opADDmd()
-        0x03:   X86.opTBDd,     // opADDrd()
-        0x05:   X86.opTBDd,     // opADDAXd()
-        0x09:   X86.opTBDd,     // opORmd()
-        0x0B:   X86.opTBDd,     // opORrd()
-        0x0D:   X86.opTBDd,     // opORAXd()
-        0x11:   X86.opTBDd,     // opADCmd()
-        0x13:   X86.opTBDd,     // opADCrd()
-        0x15:   X86.opTBDd,     // opADCAXd()
-        0x19:   X86.opTBDd,     // opSBBmd()
-        0x1B:   X86.opTBDd,     // opSBBrd()
-        0x1D:   X86.opTBDd,     // opSBBAXd()
+        0x01:   X86.opTBD,      // opADDmd()
+        0x03:   X86.opTBD,      // opADDrd()
+        0x05:   X86.opTBD,      // opADDAXd()
+        0x09:   X86.opTBD,      // opORmd()
+        0x0B:   X86.opTBD,      // opORrd()
+        0x0D:   X86.opTBD,      // opORAXd()
+        0x11:   X86.opTBD,      // opADCmd()
+        0x13:   X86.opTBD,      // opADCrd()
+        0x15:   X86.opTBD,      // opADCAXd()
+        0x19:   X86.opTBD,      // opSBBmd()
+        0x1B:   X86.opTBD,      // opSBBrd()
+        0x1D:   X86.opTBD,      // opSBBAXd()
         0x21:   X86.opANDmd,
         0x23:   X86.opANDrd,
         0x25:   X86.opANDAXd,
-        0x29:   X86.opTBDd,     // opSUBmd()
-        0x2B:   X86.opTBDd,     // opSUBrd()
-        0x2D:   X86.opTBDd,     // opSUBAXd()
-        0x31:   X86.opTBDd,     // opXORmd()
+        0x29:   X86.opTBD,      // opSUBmd()
+        0x2B:   X86.opTBD,      // opSUBrd()
+        0x2D:   X86.opTBD,      // opSUBAXd()
+        0x31:   X86.opTBD,      // opXORmd()
         0x33:   X86.opXORrd,
-        0x35:   X86.opTBDd,     // opXORAXd()
-        0x39:   X86.opTBDd,     // opCMPmd()
-        0x3B:   X86.opTBDd,     // opCMPrd()
-        0x3D:   X86.opTBDd      // opCMPAXd()
+        0x35:   X86.opTBD,      // opXORAXd()
+        0x39:   X86.opTBD,      // opCMPmd()
+        0x3B:   X86.opTBD,      // opCMPrd()
+        0x3D:   X86.opTBD,      // opCMPAXd()
+        0xC1:   X86.opGrp2di,
+        0xD1:   X86.opGrp2d1,
+        0xD3:   X86.opGrp2dCL
     };
 }

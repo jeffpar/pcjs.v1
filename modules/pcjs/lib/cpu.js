@@ -1134,6 +1134,7 @@ CPU.prototype.yieldCPU = function()
     this.aCounts.nCyclesNextYield = 0;  // this will break us out of runCPU(), once we break out of stepCPU()
     this.nBurstCycles -= this.nStepCycles;
     this.nStepCycles = 0;               // this will break us out of stepCPU()
+    if (DEBUG) this.nSnapCycles = this.nBurstCycles;
     /*
      * The Debugger calls yieldCPU() after every message() to ensure browser responsiveness, but it looks
      * odd for those messages to show CPU state changes but for the CPU's own status display to not (ditto

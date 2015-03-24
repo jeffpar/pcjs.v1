@@ -4115,9 +4115,11 @@ if (DEBUGGER) {
                 /*
                  * We must create a new aAddr from the address we obtained from aHistory, because
                  * aAddr was a reference, not a copy, and we don't want getInstruction() modifying the original.
+                 *
+                 * TODO: By using a new address for each iteration, history dumps fail to disassemble 32-bit overrides properly.
                  */
                 aAddr = this.newAddr(aAddr[0], aAddr[1], aAddr[2]);
-                this.println(this.getInstruction(aAddr, "history", -n));
+                this.println(this.getInstruction(aAddr, "history", n));
                 if (++iHistory == aHistory.length) iHistory = 0;
                 this.nextHistory = --n;
                 cLines--;
@@ -4384,7 +4386,7 @@ if (DEBUGGER) {
         if (sCategory !== undefined) {
             var bitsMessage = 0;
             if (sCategory == "all") {
-                bitsMessage = (0xffffffff|0) & ~(Messages.HALT | Messages.LOG);
+                bitsMessage = (0xffffffff|0) & ~(Messages.HALT | Messages.KEYS | Messages.LOG);
                 sCategory = null;
             } else if (sCategory == "on") {
                 fCriteria = true;
@@ -4980,8 +4982,8 @@ if (DEBUGGER) {
                  * aAddr[5] to true whenever the address size is 32-bit.  Initially, both fields must be set to match
                  * the size of the current code segment.
                  */
-                aAddr[4] = (this.cpu.dataSize == 4);
-                aAddr[5] = (this.cpu.addrSize == 4);
+                aAddr[4] = (this.cpu.segCS.dataSize == 4);
+                aAddr[5] = (this.cpu.segCS.addrSize == 4);
                 fInitSize = false;
             }
             if (this.isPrefixIns(bOpcode)) {

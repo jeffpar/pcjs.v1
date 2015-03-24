@@ -1337,16 +1337,13 @@ X86.fnRCLb = function RCLb(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
-    if (src) {
+    var shift = src & this.nShiftCountMask;
+    if (shift) {
         var carry = this.getCarry();
-        var shift = (src & this.nShiftCountMask) % 9;
+        shift %= 9;
         if (!shift) {
             carry <<= 7;
         } else {
-            /*
-             * shift is 1-8, which means the new carry will come from the dst bit
-             * at position 7-0.  To force it into position 7, left shift by (shift - 1).
-             */
             result = ((dst << shift) | (carry << (shift - 1)) | (dst >> (9 - shift))) & 0xff;
             carry = dst << (shift - 1);
         }
@@ -1357,6 +1354,8 @@ X86.fnRCLb = function RCLb(dst, src)
 };
 
 /**
+ * fnRCLw(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src (1 or CL)
@@ -1366,22 +1365,42 @@ X86.fnRCLw = function RCLw(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
-    if (src) {
+    var shift = src & this.nShiftCountMask;
+    if (shift) {
         var carry = this.getCarry();
-        var shift = (src & this.nShiftCountMask) % 17;
+        shift %= 17;
         if (!shift) {
             carry <<= 15;
         } else {
-            /*
-             * shift is 1-16, which means the new carry will come from the dst bit
-             * at position 15-0.  To force it into position 15, left shift by (shift - 1).
-             */
             result = ((dst << shift) | (carry << (shift - 1)) | (dst >> (17 - shift))) & 0xffff;
             carry = dst << (shift - 1);
         }
         X86.setRotateResult.call(this, result, carry, X86.RESULT.WORD);
     }
     if (DEBUG && DEBUGGER) this.traceLog('RCLW', dst, src, flagsIn, this.getPS(), result);
+    return result;
+};
+
+/**
+ * fnRCLd(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src (1 or CL)
+ * @return {number}
+ */
+X86.fnRCLd = function RCLd(dst, src)
+{
+    var result = dst;
+    var flagsIn = (DEBUG? this.getPS() : 0);
+    var shift = src & this.nShiftCountMask;
+    if (shift) {
+        var carry = this.getCarry();
+        result = (dst << shift) | (carry << (shift - 1)) | (dst >>> (32 - shift));
+        carry = dst << (shift - 1);
+        X86.setRotateResult.call(this, result, carry, X86.RESULT.DWORD);
+    }
+    if (DEBUG && DEBUGGER) this.traceLog('RCLD', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
@@ -1397,16 +1416,13 @@ X86.fnRCRb = function RCRb(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
-    if (src) {
+    var shift = src & this.nShiftCountMask;
+    if (shift) {
         var carry = this.getCarry();
-        var shift = (src & this.nShiftCountMask) % 9;
+        shift %= 9;
         if (!shift) {
             carry <<= 7;
         } else {
-            /*
-             * shift is 1-8, which means the new carry will come from the dst bit
-             * at position 0-7.  To force it into position 7, left shift by (8 - shift).
-             */
             result = ((dst >> shift) | (carry << (8 - shift)) | (dst << (9 - shift))) & 0xff;
             carry = dst << (8 - shift);
         }
@@ -1428,22 +1444,42 @@ X86.fnRCRw = function RCRw(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
-    if (src) {
+    var shift = src & this.nShiftCountMask;
+    if (shift) {
         var carry = this.getCarry();
-        var shift = (src & this.nShiftCountMask) % 17;
+        shift %= 17;
         if (!shift) {
             carry <<= 15;
         } else {
-            /*
-             * shift is 1-16, which means the new carry will come from the dst bit
-             * at position 0-15.  To force it into position 15, left shift by (16 - shift).
-             */
             result = ((dst >> shift) | (carry << (16 - shift)) | (dst << (17 - shift))) & 0xffff;
             carry = dst << (16 - shift);
         }
         X86.setRotateResult.call(this, result, carry, X86.RESULT.WORD);
     }
     if (DEBUG && DEBUGGER) this.traceLog('RCRW', dst, src, flagsIn, this.getPS(), result);
+    return result;
+};
+
+/**
+ * fnRCRd(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src (1 or CL)
+ * @return {number}
+ */
+X86.fnRCRd = function RCRd(dst, src)
+{
+    var result = dst;
+    var flagsIn = (DEBUG? this.getPS() : 0);
+    var shift = src & this.nShiftCountMask;
+    if (shift) {
+        var carry = this.getCarry();
+        result = (dst >>> shift) | (carry << (32 - shift)) | (dst << (33 - shift));
+        carry = dst << (32 - shift);
+        X86.setRotateResult.call(this, result, carry, X86.RESULT.DWORD);
+    }
+    if (DEBUG && DEBUGGER) this.traceLog('RCRD', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
@@ -1497,23 +1533,13 @@ X86.fnROLb = function ROLb(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
-    if (src) {
+    var shift = src & this.nShiftCountMask;
+    if (shift) {
         var carry;
-        /*
-         * The following mask obviates the need to use nShiftCountMask.
-         */
-        var shift = src & 0x7;
+        shift &= 0x7;
         if (!shift) {
-            /*
-             * shift is 8, which means the new carry will come from the dst bit
-             * at position 0.
-             */
             carry = dst << 7;
         } else {
-            /*
-             * shift is 1-7, which means the new carry will come from the dst bit
-             * at position 7-1.  To force it into position 7, left shift by (shift - 1).
-             */
             result = ((dst << shift) | (dst >> (8 - shift))) & 0xff;
             carry = dst << (shift - 1);
         }
@@ -1535,19 +1561,13 @@ X86.fnROLw = function ROLw(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
-    if (src) {
+    var shift = src & this.nShiftCountMask;
+    if (shift) {
         var carry;
-        /*
-         * The following mask obviates the need to use nShiftCountMask.
-         */
-        var shift = src & 0xf;
+        shift &= 0xf;
         if (!shift) {
             carry = dst << 15;
         } else {
-            /*
-             * shift is 1-15, which means the new carry will come from the dst bit
-             * at position 15-1.  To force it into position 15, left shift by (shift - 1).
-             */
             result = ((dst << shift) | (dst >> (16 - shift))) & 0xffff;
             carry = dst << (shift - 1);
         }
@@ -1569,22 +1589,13 @@ X86.fnRORb = function RORb(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
-    if (src) {
+    var shift = src & this.nShiftCountMask;
+    if (shift) {
         var carry;
-        /*
-         * The following mask obviates the need to use nShiftCountMask.
-         */
-        var shift = src & 0x7;
+        shift &= 0x7;
         if (!shift) {
-            /*
-             * shift is 8, which means the new carry will come from the dst bit at position 7.
-             */
             carry = dst;
         } else {
-            /*
-             * shift is 1-7, which means the new carry will come from the dst bit
-             * at position 0-6.  To force it into position 7, left shift by (8 - shift).
-             */
             result = ((dst >> shift) | (dst << (8 - shift))) & 0xff;
             carry = dst << (8 - shift);
         }
@@ -1606,22 +1617,13 @@ X86.fnRORw = function RORw(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
-    if (src) {
+    var shift = src & this.nShiftCountMask;
+    if (shift) {
         var carry;
-        /*
-         * The following mask obviates the need to use nShiftCountMask.
-         */
-        var shift = src & 0xf;
+        shift &= 0xf;
         if (!shift) {
-            /*
-             * shift is 16, which means the new carry will come from dst bit 15.
-             */
             carry = dst;
         } else {
-            /*
-             * shift is 1-15, which means the new carry will come from the dst bit
-             * at position 0-14.  To force it into position 15, left shift by (16 - shift).
-             */
             result = ((dst >> shift) | (dst << (16 - shift))) & 0xffff;
             carry = dst << (16 - shift);
         }
@@ -1645,12 +1647,10 @@ X86.fnRORw = function RORw(dst, src)
  */
 X86.fnSARb = function SARb(dst, src)
 {
-    if (src) {
-        /*
-         * The following comparison obviates the need to mask src with nShiftCountMask.
-         */
-        if (src > 8) src = 9;
-        var temp = ((dst << 24) >> 24) >> (src - 1);
+    var shift = src & this.nShiftCountMask;
+    if (shift) {
+        if (shift > 8) shift = 9;
+        var temp = ((dst << 24) >> 24) >> (shift - 1);
         dst = (temp >> 1) & 0xff;
         this.setLogicResult(dst, X86.RESULT.BYTE, temp & 0x1);
     }
@@ -1671,12 +1671,10 @@ X86.fnSARb = function SARb(dst, src)
  */
 X86.fnSARw = function SARw(dst, src)
 {
-    if (src) {
-        /*
-         * The following comparison obviates the need to mask src with nShiftCountMask.
-         */
-        if (src > 16) src = 17;
-        var temp = ((dst << 16) >> 16) >> (src - 1);
+    var shift = src & this.nShiftCountMask;
+    if (shift) {
+        if (shift > 16) shift = 17;
+        var temp = ((dst << 16) >> 16) >> (shift - 1);
         dst = (temp >> 1) & 0xffff;
         this.setLogicResult(dst, X86.RESULT.WORD, temp & 0x1);
     }
@@ -1796,15 +1794,13 @@ X86.fnSHLb = function SHLb(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
-    if (src) {
+    var shift = src & this.nShiftCountMask;
+    if (shift) {
         var carry = 0;
-        /*
-         * The following comparison obviates the need to mask src with nShiftCountMask.
-         */
-        if (src > 8) {
+        if (shift > 8) {
             result = 0;
         } else {
-            carry = dst << (src - 1);
+            carry = dst << (shift - 1);
             result = (carry << 1) & 0xff;
         }
         this.setLogicResult(result, X86.RESULT.BYTE, carry & X86.RESULT.BYTE, (result ^ carry) & X86.RESULT.BYTE);
@@ -1829,15 +1825,13 @@ X86.fnSHLw = function SHLw(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
-    if (src) {
+    var shift = src & this.nShiftCountMask;
+    if (shift) {
         var carry = 0;
-        /*
-         * The following comparison obviates the need to mask src with nShiftCountMask.
-         */
-        if (src > 16) {
+        if (shift > 16) {
             result = 0;
         } else {
-            carry = dst << (src - 1);
+            carry = dst << (shift - 1);
             result = (carry << 1) & 0xffff;
         }
         this.setLogicResult(result, X86.RESULT.WORD, carry & X86.RESULT.WORD, (result ^ carry) & X86.RESULT.WORD);
@@ -1860,11 +1854,9 @@ X86.fnSHLw = function SHLw(dst, src)
  */
 X86.fnSHRb = function SHRb(dst, src)
 {
-    if (src) {
-        /*
-         * The following comparison obviates the need to mask src with nShiftCountMask.
-         */
-        var temp = (src > 8? 0 : (dst >> (src - 1)));
+    var shift = src & this.nShiftCountMask;
+    if (shift) {
+        var temp = (shift > 8? 0 : (dst >> (shift - 1)));
         dst = (temp >> 1) & 0xff;
         this.setLogicResult(dst, X86.RESULT.BYTE, temp & 0x1, dst & X86.RESULT.BYTE);
     }
@@ -1885,11 +1877,9 @@ X86.fnSHRb = function SHRb(dst, src)
  */
 X86.fnSHRw = function SHRw(dst, src)
 {
-    if (src) {
-        /*
-         * The following comparison obviates the need to mask src with nShiftCountMask.
-         */
-        var temp = (src > 16? 0 : (dst >> (src - 1)));
+    var shift = src & this.nShiftCountMask;
+    if (shift) {
+        var temp = (shift > 16? 0 : (dst >> (shift - 1)));
         dst = (temp >> 1) & 0xffff;
         this.setLogicResult(dst, X86.RESULT.WORD, temp & 0x1, dst & X86.RESULT.WORD);
     }
@@ -2323,6 +2313,8 @@ X86.fnXORw = function XORw(dst, src)
 };
 
 /**
+ * fnXORd(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src
@@ -2332,6 +2324,21 @@ X86.fnXORd = function XORd(dst, src)
 {
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
     return this.setLogicResult(dst ^ src, X86.RESULT.DWORD);
+};
+
+/**
+ * fnTBD(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnTBD = function TBD(dst, src)
+{
+    this.printMessage("unimplemented 80386 opcode", true);
+    this.stopCPU();
+    return dst;
 };
 
 /**
@@ -2355,43 +2362,57 @@ X86.setRotateResult = function(result, carry, size)
 };
 
 /**
+ * fnGRPCount1()
+ *
  * @this {X86CPU}
  * @return {number}
  */
-X86.fnGRPCount1 = function() {
+X86.fnGRPCount1 = function()
+{
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 2 : this.CYCLES.nOpCyclesShift1M);
     return 1;
 };
 
 /**
+ * fnGRPCountCL()
+ *
  * @this {X86CPU}
  * @return {number}
  */
-X86.fnGRPCountCL = function() {
-    var count = this.regECX & this.nShiftCountMask;
+X86.fnGRPCountCL = function()
+{
+    var count = this.regECX & 0xff;
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesShiftCR : this.CYCLES.nOpCyclesShiftCM) + (count << this.CYCLES.nOpCyclesShiftCS);
     return count;
 };
 
 /**
+ * fnGRPCountImm()
+ *
  * @this {X86CPU}
  * @return {number}
  */
-X86.fnGRPCountImm = function() {
+X86.fnGRPCountImm = function()
+{
     var count = this.getIPByte();
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesShiftCR : this.CYCLES.nOpCyclesShiftCM) + (count << this.CYCLES.nOpCyclesShiftCS);
     return count;
 };
 
 /**
+ * fnGRPSrcNone()
+ *
  * @this {X86CPU}
  * @return {number|null}
  */
-X86.fnGRPSrcNone = function() {
+X86.fnGRPSrcNone = function()
+{
     return null;
 };
 
 /**
+ * fnGRPFault(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src
@@ -2404,6 +2425,8 @@ X86.fnGRPFault = function(dst, src)
 };
 
 /**
+ * fnGRPInvalid(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src
@@ -2416,6 +2439,8 @@ X86.fnGRPInvalid = function(dst, src)
 };
 
 /**
+ * fnGRPUndefined(dst, src)
+ *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src

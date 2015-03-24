@@ -2863,7 +2863,7 @@ X86CPU.prototype.getLongPrefetch = function(addr)
  */
 X86CPU.prototype.getWordPrefetch = function(addr)
 {
-    return (I386 && this.addrSize == 4? this.getLongPrefetch(addr) : this.getShortPrefetch(addr));
+    return (I386 && this.dataSize == 4? this.getLongPrefetch(addr) : this.getShortPrefetch(addr));
 };
 
 /**
@@ -3017,7 +3017,7 @@ X86CPU.prototype.getIPWord = function()
         this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
         this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMemHi);
     }
-    this.regLIP += this.addrSize;
+    this.regLIP += this.dataSize;
     if (this.regLIP > this.regLIPLimit) {
         this.setIP(this.regLIP - this.segCS.base);
     }
