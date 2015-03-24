@@ -28,6 +28,9 @@ h4 a {
 p {
     line-height: 1.5em;
 }
+img {
+    max-width: 100%;
+}
 a img {
     vertical-align: bottom;
 }
