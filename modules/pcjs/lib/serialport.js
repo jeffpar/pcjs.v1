@@ -738,6 +738,10 @@ SerialPort.prototype.updateIRR = function()
     if (bIIR >= 0) {
         this.bIIR &= ~(SerialPort.IIR.NO_INT | SerialPort.IIR.INT_BITS);
         this.bIIR |= bIIR;
+        /*
+         * TODO: Remove this arbitrary 100-instruction delay once we've added support for baud rate throttling
+         * (see TODO above regarding baud rate).
+         */
         if (this.chipset && this.nIRQ) this.chipset.setIRR(this.nIRQ, 100);
     } else {
         this.bIIR |= SerialPort.IIR.NO_INT;

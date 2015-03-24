@@ -1953,7 +1953,7 @@ FDC.prototype.doCmd = function()
 
     default:
         if (DEBUG && this.messageEnabled()) {
-            this.printMessage("FDC operation unsupported (command=0x: " + str.toHexByte(bCmd) + ")");
+            this.printMessage("FDC operation unsupported (command=" + str.toHexByte(bCmd) + ")");
             this.dbg.stopCPU();
         }
         break;
@@ -2034,7 +2034,7 @@ FDC.prototype.popCmd = function(name)
     if (DEBUG && this.messageEnabled(Messages.PORT | Messages.FDC)) {
         var bCmdMasked = bCmd & FDC.REG_DATA.CMD.MASK;
         if (!name && !this.regDataIndex && FDC.aCmdInfo[bCmdMasked]) name = FDC.aCmdInfo[bCmdMasked].name;
-        this.printMessage("FDC.CMD[" + (name || this.regDataIndex) + "]: 0x" + str.toHexByte(bCmd), true);
+        this.printMessage("FDC.CMD[" + (name || this.regDataIndex) + "]: " + str.toHexByte(bCmd), true);
     }
     this.regDataIndex++;
     return bCmd;
@@ -2086,7 +2086,7 @@ FDC.prototype.beginResult = function()
 FDC.prototype.pushResult = function(bResult, name)
 {
     if (DEBUG && this.messageEnabled(Messages.PORT | Messages.FDC)) {
-        this.printMessage("FDC.RES[" + (name || this.regDataTotal) + "]: 0x" + str.toHexByte(bResult), true);
+        this.printMessage("FDC.RES[" + (name || this.regDataTotal) + "]: " + str.toHexByte(bResult), true);
     }
     this.regDataArray[this.regDataTotal++] = bResult;
 };

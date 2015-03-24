@@ -285,7 +285,7 @@ ROM.prototype.copyROM = function()
                  * good idea to stop the machine in its tracks whenever a setError() occurs, but there may also be
                  * times when we'd like to forge ahead anyway.
                  */
-                this.setError("ROM size (0x" + str.toHex(this.abROM.length) + ") does not match specified size (0x" + str.toHex(this.sizeROM) + ")");
+                this.setError("ROM size (" + str.toHexLong(this.abROM.length) + ") does not match specified size (" + str.toHexLong(this.sizeROM) + ")");
             }
             else if (this.addROM(this.addrROM)) {
 
@@ -296,7 +296,7 @@ ROM.prototype.copyROM = function()
                     aliases = this.addrAlias;
                 }
                 for (var i = 0; i < aliases.length; i++) {
-                    this.addROM(aliases[i]);
+                    this.cloneROM(aliases[i]);
                 }
                 /*
                  * If there's a component we should notify, notify it now, and give it the internal byte array, so that
@@ -336,7 +336,7 @@ ROM.prototype.copyROM = function()
 ROM.prototype.addROM = function(addr)
 {
     if (this.bus.addMemory(addr, this.sizeROM, Memory.TYPE.ROM)) {
-        if (DEBUG) this.log("addROM(): copying ROM to 0x" + str.toHex(addr) + " (0x" + str.toHex(this.abROM.length) + " bytes)");
+        if (DEBUG) this.log("addROM(): copying ROM to " + str.toHexLong(addr) + " (" + str.toHexLong(this.abROM.length) + " bytes)");
         var bto = null;
         for (var off = 0; off < this.abROM.length; off++) {
             this.bus.setByteDirect(addr + off, this.abROM[off]);
@@ -351,6 +351,25 @@ ROM.prototype.addROM = function(addr)
      * We don't need to report an error here, because addMemory() already takes care of that.
      */
     return false;
+};
+
+/**
+ * cloneROM(addr)
+ *
+ * For ROMs with one or more alias addresses, we used to call addROM() for each address.  However,
+ * that obviously wasted memory, since each alias was an independent copy, and if you used the
+ * Debugger to edit the ROM in one location, the changes would not appear in the other location(s).
+ *
+ * Now that the Bus component provides low-level getMemoryBlocks() and setMemoryBlocks() methods
+ * to manually get and set the blocks of any memory range, it is now possible to create true aliases.
+ *
+ * @this {ROM}
+ * @param {number} addr
+ */
+ROM.prototype.cloneROM = function(addr)
+{
+    var aBlocks = this.bus.getMemoryBlocks(this.addrROM, this.sizeROM);
+    this.bus.setMemoryBlocks(addr, this.sizeROM, aBlocks);
 };
 
 /**

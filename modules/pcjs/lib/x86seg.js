@@ -415,7 +415,7 @@ X86Seg.switchTSS = function switchTSS(selNew, fNest)
         }
         cpu.setShort(cpu.segTSS.addrDesc + X86.DESC.ACC.OFFSET, (cpu.segTSS.acc & ~X86.DESC.ACC.TYPE.TSS_BUSY) | X86.DESC.ACC.TYPE.TSS);
     }
-    if (cpu.segTSS.load(selNew) == X86.ADDR_INVALID) {
+    if (cpu.segTSS.load(selNew) === X86.ADDR_INVALID) {
         return false;
     }
     var addrNew = cpu.segTSS.base;
@@ -649,7 +649,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                      * TODO: Verify the PRESENT bit of the gate descriptor, and issue NP_FAULT as appropriate.
                      */
                     cplPrev = this.cpl;
-                    if (this.load(selCode, true) == X86.ADDR_INVALID) {
+                    if (this.load(selCode, true) === X86.ADDR_INVALID) {
                         cpu.assert(false);
                         base = X86.ADDR_INVALID;
                         break;
@@ -909,7 +909,7 @@ X86Seg.prototype.messageSeg = function(sel, base, limit, acc, ext)
             if (this.id == X86Seg.ID.CODE) sDPL += " cpl=" + this.cpl;
             this.dbg.message("loadSeg(" + this.sName + "):" + ch + "sel=" + str.toHexWord(sel) + " base=" + str.toHex(base) + " limit=" + str.toHexWord(limit) + " acc=" + str.toHexWord(acc) + sDPL);
         }
-        this.cpu.assert(/* base != X86.ADDR_INVALID && */ (this.cpu.model >= X86.MODEL_80386 || !ext || ext == X86.DESC.EXT.AVAIL));
+        this.cpu.assert(/* base !== X86.ADDR_INVALID && */ (this.cpu.model >= X86.MODEL_80386 || !ext || ext == X86.DESC.EXT.AVAIL));
     }
 };
 

@@ -143,27 +143,40 @@ str.toHex = function(n, cch)
 /**
  * toHexByte(b)
  *
- * Alias for toHex(b, 2)
+ * Alias for "0x" + str.toHex(b, 2)
  *
  * @param {number|undefined} b is a byte value
  * @return {string} the hex representation of b
  */
 str.toHexByte = function(b)
 {
-    return str.toHex(b, 2);
+    return "0x" + str.toHex(b, 2);
 };
 
 /**
  * toHexWord(w)
  *
- * Alias for toHex(w, 4)
+ * Alias for "0x" + str.toHex(w, 4)
  *
  * @param {number|undefined} w is a word (16-bit) value
  * @return {string} the hex representation of w
  */
 str.toHexWord = function(w)
 {
-    return str.toHex(w, 4);
+    return "0x" + str.toHex(w, 4);
+};
+
+/**
+ * toHexLong(l)
+ *
+ * Alias for "0x" + toHex(l)
+ *
+ * @param {number|undefined} l is a dword (32-bit) value
+ * @return {string} the hex representation of w
+ */
+str.toHexLong = function(l)
+{
+    return "0x" + str.toHex(l);
 };
 
 /**

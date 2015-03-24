@@ -1802,7 +1802,7 @@ if (DEBUGGER) {
              * at the moment.  If that changes, then this will have to change as well.
              */
             addr -= 2;
-            this.message("INT 0x" + str.toHexByte(nInt) + ": AH=" + str.toHexByte(AH) + " @" + this.hexOffset(addr - this.cpu.segCS.base, this.cpu.getCS()) + sFunc);
+            this.message("INT " + str.toHexByte(nInt) + ": AH=" + str.toHexByte(AH) + " @" + this.hexOffset(addr - this.cpu.segCS.base, this.cpu.getCS()) + sFunc);
         }
         return fMessage;
     };
@@ -1818,7 +1818,7 @@ if (DEBUGGER) {
      */
     Debugger.prototype.messageIntReturn = function(nInt, nLevel, nCycles, sResult)
     {
-        this.message("INT 0x" + str.toHexByte(nInt) + ": C=" + (this.cpu.getCF()? 1 : 0) + (sResult || "") + " (cycles=" + nCycles + (nLevel? ",level=" + (nLevel+1) : "") + ")");
+        this.message("INT " + str.toHexByte(nInt) + ": C=" + (this.cpu.getCF()? 1 : 0) + (sResult || "") + " (cycles=" + nCycles + (nLevel? ",level=" + (nLevel+1) : "") + ")");
     };
 
     /**
@@ -1842,7 +1842,7 @@ if (DEBUGGER) {
                 segFrom = this.cpu.getCS();
                 addrFrom -= this.cpu.segCS.base;
             }
-            this.message(component.idComponent + "." + (bOut != null? "outPort" : "inPort") + "(0x" + str.toHexWord(port) + "," + (name? name : "unknown") + (bOut != null? ",0x" + str.toHexByte(bOut) : "") + ")" + (bIn != null? (": 0x" + str.toHexByte(bIn)) : "") + (addrFrom != null? (" @" + this.hexOffset(addrFrom, segFrom)) : ""));
+            this.message(component.idComponent + "." + (bOut != null? "outPort" : "inPort") + '(' + str.toHexWord(port) + ',' + (name? name : "unknown") + (bOut != null? ',' + str.toHexByte(bOut) : "") + ")" + (bIn != null? (": " + str.toHexByte(bIn)) : "") + (addrFrom != null? (" @" + this.hexOffset(addrFrom, segFrom)) : ""));
         }
     };
 
@@ -2319,7 +2319,7 @@ if (DEBUGGER) {
     Debugger.prototype.hexOffset = function(off, sel)
     {
         if (sel !== undefined) {
-            return str.toHexWord(sel) + ":" + str.toHex(off, this.cchAddr < 8? 4 : 8);
+            return str.toHex(sel, 4) + ":" + str.toHex(off, this.cchAddr < 8? 4 : 8);
         }
         return str.toHex(off);
     };
@@ -2552,7 +2552,7 @@ if (DEBUGGER) {
     {
         var b = 0xff;
         var addr = this.getAddr(aAddr, false, 0);
-        if (addr != X86.ADDR_INVALID) {
+        if (addr !== X86.ADDR_INVALID) {
             b = this.bus.getByteDirect(addr);
             this.assert((b == (b & 0xff)), "invalid byte (" + b + ") at address: " + this.hexAddr(aAddr));
             if (inc !== undefined) this.incAddr(aAddr, inc);
@@ -2572,7 +2572,7 @@ if (DEBUGGER) {
     {
         var w = 0xffff;
         var addr = this.getAddr(aAddr, false, 1);
-        if (addr != X86.ADDR_INVALID) {
+        if (addr !== X86.ADDR_INVALID) {
             w = this.bus.getShortDirect(addr);
             this.assert((w == (w & 0xffff)), "invalid word (" + w + ") at address: " + this.hexAddr(aAddr));
             if (inc !== undefined) this.incAddr(aAddr, inc);
@@ -2592,7 +2592,7 @@ if (DEBUGGER) {
     {
         var l = -1;
         var addr = this.getAddr(aAddr, false, 3);
-        if (addr != X86.ADDR_INVALID) {
+        if (addr !== X86.ADDR_INVALID) {
             l = this.bus.getLongDirect(addr);
             if (inc !== undefined) this.incAddr(aAddr, inc);
         }
@@ -2614,7 +2614,7 @@ if (DEBUGGER) {
     Debugger.prototype.setByte = function(aAddr, b, inc)
     {
         var addr = this.getAddr(aAddr, true, 0);
-        if (addr != X86.ADDR_INVALID) {
+        if (addr !== X86.ADDR_INVALID) {
             this.bus.setByteDirect(addr, b);
             if (inc !== undefined) this.incAddr(aAddr, inc);
             this.cpu.updateCPU();
@@ -2632,7 +2632,7 @@ if (DEBUGGER) {
     Debugger.prototype.setShort = function(aAddr, w, inc)
     {
         var addr = this.getAddr(aAddr, true, 1);
-        if (addr != X86.ADDR_INVALID) {
+        if (addr !== X86.ADDR_INVALID) {
             this.bus.setShortDirect(addr, w);
             if (inc !== undefined) this.incAddr(aAddr, inc);
             this.cpu.updateCPU();
@@ -2934,7 +2934,7 @@ if (DEBUGGER) {
                 sOperand = this.getImmOperand(type, aAddr);
             }
             else if (typeMode == Debugger.TYPE_IMMOFF) {
-                sOperand = "[" + str.toHexWord(this.getShort(aAddr, 2)) + "]";
+                sOperand = "[" + str.toHex(this.getShort(aAddr, 2), 4) + "]";
             }
             else if (typeMode == Debugger.TYPE_IMMREL) {
                 var disp;
@@ -2947,7 +2947,7 @@ if (DEBUGGER) {
                 }
                 var offset = (aAddr[0] + disp) & 0xffff;
                 var aSymbol = this.findSymbolAtAddr(this.newAddr(offset, aAddr[1]));
-                sOperand = aSymbol[0] || str.toHexWord(offset);
+                sOperand = aSymbol[0] || str.toHex(offset, 4);
             }
             else if (typeMode == Debugger.TYPE_IMPREG) {
                 sOperand = this.getRegOperand((type & Debugger.TYPE_IREG) >> 8, type, aAddr);
@@ -2972,7 +2972,7 @@ if (DEBUGGER) {
         var sLine = this.hexAddr(aAddrIns) + " ";
         var sBytes = "";
         do {
-            sBytes += str.toHexByte(this.getByte(aAddrIns, 1));
+            sBytes += str.toHex(this.getByte(aAddrIns, 1), 2);
         } while (aAddrIns[2] != aAddr[2]);
         sLine += (sBytes + "            ").substr(0, 14);
         sLine += (sOpcode + "       ").substr(0, 8);
@@ -3014,11 +3014,11 @@ if (DEBUGGER) {
                  * or TYPE_OUT designation (and TYPE_BOTH, as the name implies, includes both).
                  */
                 if (type & Debugger.TYPE_BOTH) {
-                    sOperand = str.toHexByte(this.getByte(aAddr, 1));
+                    sOperand = str.toHex(this.getByte(aAddr, 1), 2);
                 }
                 break;
             case Debugger.TYPE_SBYTE:
-                sOperand = str.toHexWord((this.getByte(aAddr, 1) << 24) >> 24);
+                sOperand = str.toHex((this.getByte(aAddr, 1) << 24) >> 24, 4);
                 break;
             case Debugger.TYPE_WORDV:
                 if (aAddr[4]) {
@@ -3027,7 +3027,7 @@ if (DEBUGGER) {
                 }
                 /* falls through */
             case Debugger.TYPE_WORD:
-                sOperand = str.toHexWord(this.getShort(aAddr, 2));
+                sOperand = str.toHex(this.getShort(aAddr, 2), 4);
                 break;
             case Debugger.TYPE_FARP:
                 sOperand = this.hexAddr(this.newAddr(this.getShort(aAddr, 2), this.getShort(aAddr, 2)));
@@ -3129,18 +3129,18 @@ if (DEBUGGER) {
             if (bMod == 1) {
                 disp = this.getByte(aAddr, 1);
                 if (!(disp & 0x80)) {
-                    sOperand += "+" + str.toHexByte(disp);
+                    sOperand += "+" + str.toHex(disp, 2);
                 }
                 else {
                     disp = ((disp << 24) >> 24);
-                    sOperand += "-" + str.toHexByte(-disp);
+                    sOperand += "-" + str.toHex(-disp, 2);
                 }
             }
             else if (bMod == 2) {
                 if (sOperand) sOperand += '+';
                 if (!aAddr[5]) {
                     disp = this.getShort(aAddr, 2);
-                    sOperand += str.toHexWord(disp);
+                    sOperand += str.toHex(disp, 4);
                 } else {
                     disp = this.getLong(aAddr, 4);
                     sOperand += str.toHex(disp);
@@ -3275,7 +3275,7 @@ if (DEBUGGER) {
      */
     Debugger.prototype.getSegString = function(seg, fProt)
     {
-        return seg.sName + '=' + str.toHexWord(seg.sel) + (fProt? '[' + str.toHex(seg.base, this.cchAddr) + ',' + str.toHex(seg.limit, (seg.limit & ~0xffff)? 8 : 4) + ']' : "");
+        return seg.sName + '=' + str.toHex(seg.sel, 4) + (fProt? '[' + str.toHex(seg.base, this.cchAddr) + ',' + str.toHex(seg.limit, (seg.limit & ~0xffff)? 8 : 4) + ']' : "");
     };
 
     /**
@@ -3290,7 +3290,7 @@ if (DEBUGGER) {
      */
     Debugger.prototype.getDTRString = function(sName, sel, addr, addrLimit)
     {
-        return sName + '=' + (sel != null? str.toHexWord(sel) : "") + '[' + str.toHex(addr, this.cchAddr) + ',' + str.toHexWord(addrLimit - addr) + ']';
+        return sName + '=' + (sel != null? str.toHex(sel, 4) : "") + '[' + str.toHex(addr, this.cchAddr) + ',' + str.toHex(addrLimit - addr, 4) + ']';
     };
 
     /**
@@ -3355,7 +3355,7 @@ if (DEBUGGER) {
             this.getSegString(this.cpu.segDS, fProt) + ' ' +
             this.getSegString(this.cpu.segES, fProt) + ' ';
         if (fProt) {
-            var sTR = "TR=" + str.toHexWord(this.cpu.segTSS.sel);
+            var sTR = "TR=" + str.toHex(this.cpu.segTSS.sel, 4);
             var sA20 = "A20=" + (this.bus.getA20()? "ON " : "OFF ");
             if (this.cpu.model < X86.MODEL_80386) {
                 sTR = '\n' + sTR;
@@ -3982,11 +3982,11 @@ if (DEBUGGER) {
                     var b = this.getByte(aAddr, 1);
                     if (fWords) {
                         if (i & 0x1) {
-                            sBytes += str.toHexWord(bPrev | (b << 8)) + (i == 7? " - " : "  ");
+                            sBytes += str.toHex(bPrev | (b << 8), 4) + (i == 7? " - " : "  ");
                         }
                     }
                     else {
-                        sBytes += str.toHexByte(b) + (i == 7? "-" : " ");
+                        sBytes += str.toHex(b, 2) + (i == 7? "-" : " ");
                     }
                     sChars += (b >= 32 && b < 128? String.fromCharCode(b) : ".");
                     bPrev = b;

@@ -1238,14 +1238,14 @@ if (DEBUGGER) {
      */
     C1PDebugger.prototype.getIns = function(addr, nIns)
     {
-        var sLine = str.toHexWord(addr);
+        var sLine = str.toHex(addr, 4);
         var bOpCode = this.getByte(addr++);
         var aOpDesc = this.aaOperations[bOpCode];
         var b = (bOpCode === undefined? 0 : bOpCode);
         var abOperand = [];
         var cb = (aOpDesc[1] === undefined? 0 : aOpDesc[1]);
         do {
-            sLine += " " + str.toHexByte(b);
+            sLine += " " + str.toHex(b, 2);
             if (!(cb--)) break;
             b = this.getByte(addr++);
             if (b === undefined) break;
@@ -1262,11 +1262,11 @@ if (DEBUGGER) {
             var bOpMode = aOpDesc[2];
             sOperand = this.aOpModes[bOpMode];
             if (aOpDesc[1] == 1 && bOpMode == this.MODE_DISP) {
-                sOperand = sOperand.replace(/nnnn/, str.toHexWord(this.addSignedByte(addr, b = abOperand.pop())));
+                sOperand = sOperand.replace(/nnnn/, str.toHex(this.addSignedByte(addr, b = abOperand.pop()), 4));
             }
             else {
                 while (abOperand.length) {
-                    sOperand = sOperand.replace(/nn/, str.toHexByte(b = abOperand.pop()));
+                    sOperand = sOperand.replace(/nn/, str.toHex(b = abOperand.pop(), 2));
                 }
             }
             if (bOpMode == this.MODE_IMM && aOpDesc[1] == 1) {
@@ -1374,7 +1374,7 @@ if (DEBUGGER) {
                     for (i = 0; i < this.aaOperations.length; i++) {
                         if (this.aaOperations[i][0] === iCode) {
                             if (!cModes) this.println("supported opcodes:");
-                            this.println("     " + str.toHexByte(i) + ": " + sCode + (this.aaOperations[i][2] !== undefined? (" " + this.aOpModes[this.aaOperations[i][2]]) : ""));
+                            this.println("     " + str.toHex(i, 2) + ": " + sCode + (this.aaOperations[i][2] !== undefined? (" " + this.aOpModes[this.aaOperations[i][2]]) : ""));
                             cModes++;
                         }
                     }
@@ -1491,12 +1491,12 @@ if (DEBUGGER) {
      */
     C1PDebugger.prototype.getRegs = function()
     {
-        return "A=" + str.toHexByte(this.cpu.regA) +
-              " X=" + str.toHexByte(this.cpu.regX) +
-              " Y=" + str.toHexByte(this.cpu.regY) +
-              " P=" + str.toHexByte(this.cpu.getRegP()) +
-              " S=" + str.toHexWord(this.cpu.regS) +
-              " PC=" + str.toHexWord(this.cpu.regPC);
+        return "A=" + str.toHex(this.cpu.regA, 2) +
+              " X=" + str.toHex(this.cpu.regX, 2) +
+              " Y=" + str.toHex(this.cpu.regY, 2) +
+              " P=" + str.toHex(this.cpu.getRegP(), 2) +
+              " S=" + str.toHex(this.cpu.regS, 4) +
+              " PC=" + str.toHex(this.cpu.regPC, 4);
     };
 
     /**
@@ -1711,11 +1711,11 @@ if (DEBUGGER) {
             for (var i=0; i < 8 && addr < this.offLimit; i++) {
                 var b = this.getByte(addr);
                 if (b === undefined) b = 0;
-                sBytes += str.toHexByte(b) + " ";
+                sBytes += str.toHex(b, 2) + " ";
                 sChars += (b >= 32 && b < 128? String.fromCharCode(b) : ".");
                 addr++;
             }
-            this.println(str.toHexWord(addrLine) + " " + sBytes + sChars);
+            this.println(str.toHex(addrLine, 4) + " " + sBytes + sChars);
         }
         this.nextAddr = addr;
     };
@@ -2044,7 +2044,7 @@ if (DEBUGGER) {
             this.cpu.update();
         }
         this.println(this.getRegs());
-        if (fIns) this.doIns(str.toHexWord(this.nextAddr = this.cpu.regPC));
+        if (fIns) this.doIns(str.toHex(this.nextAddr = this.cpu.regPC, 4));
     };
 
     /**
@@ -2103,7 +2103,7 @@ if (DEBUGGER) {
     {
         if (!sCmd.length) {
             if (dbg.fAssemble) {
-                dbg.println("ended assemble @" + str.toHexWord(dbg.addrAssembleNext));
+                dbg.println("ended assemble @" + str.toHex(dbg.addrAssembleNext, 4));
                 dbg.nextAddr = dbg.addrAssembleNext;
                 dbg.fAssemble = false;
             }
@@ -2114,7 +2114,7 @@ if (DEBUGGER) {
         if (dbg.isReady() && !dbg.isBusy(true) && sCmd.length > 0) {
 
             if (dbg.fAssemble) {
-                sCmd = "a " + str.toHexWord(dbg.addrAssembleNext) + " " + sCmd;
+                sCmd = "a " + str.toHex(dbg.addrAssembleNext, 4) + " " + sCmd;
             }
             else if (sCmd.length > 1 && sCmd.indexOf(" ") != 1) {
                 /*

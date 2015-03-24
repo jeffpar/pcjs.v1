@@ -2195,7 +2195,7 @@ ChipSet.prototype.updateSwitchDesc = function()
     /*
      * TODO: Monitor type 0 used to be "No" (as in "No Monitor"), which was correct in the pre-EGA world,
      * but in the post-EGA world, it depends.  We could ask the Video component for a definitive answer, but
-     * but what we print here isn't that critical.  Most people won't even bother with a Control Panel,
+     * but what we print here isn't that critical, because most people won't bother with a Control Panel,
      * which is really the only beneficiary of this code.
      */
     var asMonitorTypes = {
@@ -2228,7 +2228,7 @@ ChipSet.prototype.dumpPIC = function()
             var sDump = "PIC" + iPIC + ":";
             for (var i = 0; i < pic.aICW.length; i++) {
                 var b = pic.aICW[i];
-                sDump += " IC" + (i + 1) + "=" + str.toHexByte(b);
+                sDump += " IC" + (i + 1) + '=' + str.toHexByte(b);
             }
             sDump += " IMR=" + str.toHexByte(pic.bIMR) + " IRR=" + str.toHexByte(pic.bIRR) + " ISR=" + str.toHexByte(pic.bISR) + " DELAY=" + pic.nDelay;
             this.dbg.println(sDump);
@@ -2272,7 +2272,7 @@ ChipSet.prototype.dumpCMOS = function()
         for (var iCMOS = 0; iCMOS < ChipSet.CMOS.ADDR.TOTAL; iCMOS++) {
             var b = (iCMOS <= ChipSet.CMOS.ADDR.STATUSD? this.getRTCByte(iCMOS) : this.abCMOSData[iCMOS]);
             if (sDump) sDump += '\n';
-            sDump += "CMOS[0x" + str.toHexByte(iCMOS) + "]: 0x" + str.toHexByte(b);
+            sDump += "CMOS[" + str.toHexByte(iCMOS) + "]: " + str.toHexByte(b);
         }
         this.dbg.println(sDump);
     }
@@ -3043,13 +3043,13 @@ ChipSet.prototype.outPICLo = function(iPIC, bOut, addrFrom)
             var nIRQ = (nIRL == null? undefined : pic.nIRQBase + nIRL);
             if (pic.bISR & bIREnd) {
                 if (DEBUG && this.messageEnabled(this.messageBitsIRQ(nIRQ))) {
-                    this.printMessage("outPIC" + iPIC + "(0x" + str.toHexByte(pic.port) + "):  IRQ " + nIRQ + " ending @" + this.dbg.hexOffset(this.cpu.getIP(), this.cpu.getCS()) + " stack=" + this.dbg.hexOffset(this.cpu.getSP(), this.cpu.getSS()), true);
+                    this.printMessage("outPIC" + iPIC + '(' + str.toHexByte(pic.port) + "):  IRQ " + nIRQ + " ending @" + this.dbg.hexOffset(this.cpu.getIP(), this.cpu.getCS()) + " stack=" + this.dbg.hexOffset(this.cpu.getSP(), this.cpu.getSS()), true);
                 }
                 pic.bISR &= ~bIREnd;
                 this.checkIRR();
             } else {
                 if (DEBUG && this.messageEnabled(Messages.PIC | Messages.WARN)) {
-                    this.printMessage("outPIC" + iPIC + "(0x" + str.toHexByte(pic.port) + "): unexpected EOI command, IRQ " + nIRQ + " not in service", true);
+                    this.printMessage("outPIC" + iPIC + '(' + str.toHexByte(pic.port) + "): unexpected EOI command, IRQ " + nIRQ + " not in service", true);
                     if (!SAMPLER && MAXDEBUG) this.dbg.stopCPU();
                 }
             }
@@ -3057,7 +3057,7 @@ ChipSet.prototype.outPICLo = function(iPIC, bOut, addrFrom)
              * TODO: Support EOI commands with automatic rotation (eg, ChipSet.PIC_LO.OCW2_EOI_ROT and ChipSet.PIC_LO.OCW2_EOI_ROTSPEC)
              */
             if (bOCW2 & ChipSet.PIC_LO.OCW2_SET_ROTAUTO) {
-                this.notice("PIC" + iPIC + "(0x" + str.toHexByte(pic.port) + "): unsupported OCW2 rotate command: " + str.toHexByte(bOut));
+                this.notice("PIC" + iPIC + '(' + str.toHexByte(pic.port) + "): unsupported OCW2 rotate command: " + str.toHexByte(bOut));
                 this.cpu.stopCPU();
             }
         }
@@ -3071,7 +3071,7 @@ ChipSet.prototype.outPICLo = function(iPIC, bOut, addrFrom)
             /*
              * TODO: Remaining commands to support: ChipSet.PIC_LO.OCW2_SET_ROTAUTO and ChipSet.PIC_LO.OCW2_CLR_ROTAUTO
              */
-            this.notice("PIC" + iPIC + "(0x" + str.toHexByte(pic.port) + "): unsupported OCW2 automatic EOI command: " + str.toHexByte(bOut));
+            this.notice("PIC" + iPIC + '(' + str.toHexByte(pic.port) + "): unsupported OCW2 automatic EOI command: " + str.toHexByte(bOut));
             this.cpu.stopCPU();
         }
     } else {
@@ -3082,7 +3082,7 @@ ChipSet.prototype.outPICLo = function(iPIC, bOut, addrFrom)
          * that's unfortunate, because I don't support them yet.
          */
         if (bOut & (ChipSet.PIC_LO.OCW3_POLL_CMD | ChipSet.PIC_LO.OCW3_SMM_CMD)) {
-            this.notice("PIC" + iPIC + "(0x" + str.toHexByte(pic.port) + "): unsupported OCW3 command: " + str.toHexByte(bOut));
+            this.notice("PIC" + iPIC + '(' + str.toHexByte(pic.port) + "): unsupported OCW3 command: " + str.toHexByte(bOut));
             this.cpu.stopCPU();
         }
         pic.bOCW3 = bOut;
@@ -4381,7 +4381,7 @@ ChipSet.prototype.set8042OutBuff = function(b)
         this.b8042Status &= ~ChipSet.KBC.STATUS.OUTBUFF_FULL;
         this.b8042Status |= ChipSet.KBC.STATUS.OUTBUFF_DELAY;
         if (DEBUG && this.messageEnabled(Messages.KEYBOARD | Messages.PORT)) {
-            this.printMessage("set8042OutBuff(0x" + str.toHexByte(b) + ")", true);
+            this.printMessage("set8042OutBuff(" + str.toHexByte(b) + ")", true);
         }
     }
 };
@@ -4513,12 +4513,12 @@ ChipSet.prototype.notifyKbdData = function(b)
             }
             else {
                 if (DEBUG && this.messageEnabled(Messages.KEYBOARD | Messages.PORT)) {
-                    this.printMessage("notifyKbdData(0x" + str.toHexByte(b) + "): output buffer full", true);
+                    this.printMessage("notifyKbdData(" + str.toHexByte(b) + "): output buffer full", true);
                 }
             }
         } else {
             if (DEBUG && this.messageEnabled(Messages.KEYBOARD | Messages.PORT)) {
-                this.printMessage("notifyKbdData(0x" + str.toHexByte(b) + "): disabled", true);
+                this.printMessage("notifyKbdData(" + str.toHexByte(b) + "): disabled", true);
             }
         }
     }

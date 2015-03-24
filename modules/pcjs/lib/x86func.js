@@ -2161,7 +2161,7 @@ X86.fnVERW = function VERW(dst, src)
  * src would contain AH, and we would return src, which the caller would then store in AL, and we'd be done.
  *
  * However, that's only half of what XCHG does, so THIS function must perform the other half; in the previous
- * example, that entails storing AL (dst) into AH (src).
+ * example, that means storing the original AL (dst) into AH (src).
  *
  * BACKTRACK support is incomplete without also passing bti values as parameters, because the caller will
  * store btiAH in btiAL, but the original btiAL will be lost.  Similarly, if src is a memory operand, the
@@ -2233,7 +2233,7 @@ X86.fnXCHGrb = function XCHGRb(dst, src)
  * src would contain DX, and we would return src, which the caller would then store in AX, and we'd be done.
  *
  * However, that's only half of what XCHG does, so THIS function must perform the other half; in the previous
- * example, that entails storing AX (dst) into DX (src).
+ * example, that means storing the original AX (dst) into DX (src).
  *
  * TODO: Implement full BACKTRACK support for XCHG instructions (see fnXCHGrb comments).
  *
@@ -2341,8 +2341,7 @@ X86.fnXORd = function XORd(dst, src)
  *
  * NOTE: Although I've yet to find confirmation of this for the 8086/8088, OF is undefined on modern x86 CPUs
  * for shift counts > 1 (in fact, on modern CPUs, OF tends to be clear in those situations).  Since I set OF the
- * same way for all shift counts, my well-defined behavior may or may not match the 8086/8088, but until I see a
- * defined behavior (or more importantly, some dependency on a different behavior), this seems good enough.
+ * same way for all shift counts, my well-defined behavior may or may not match Intel's undefined behavior.
  *
  * @this {X86CPU}
  * @param {number} result
@@ -2540,7 +2539,7 @@ X86.fnFaultMessage = function(nFault, nError, fHalt)
      * and so whenever we see that opcode, we ignore the caller's fHalt flag, and suppress FAULT messages
      * unless CPU messages are also enabled.
      *
-     * When a triple fault shows up, nFault is -1; it displays as "ff" because we display nFault as a byte.
+     * When a triple fault shows up, nFault is -1; it displays as 0xff only because we use toHexByte().
      */
     if (bOpcode == X86.OPCODE.INT3) {
         fHalt = false;
@@ -2550,7 +2549,7 @@ X86.fnFaultMessage = function(nFault, nError, fHalt)
     /*
      * Similarly, the PC AT ROM BIOS deliberately generates a couple of GP faults as part of the POST
      * (Power-On Self Test); we don't want to ignore those, but we don't want to halt on them either.  We
-     * detect those faults by virtue of the LIP being in the range %0F0000 to %0FFFFF.
+     * detect those faults by virtue of the LIP being in the range 0x0F0000 to 0x0FFFFF.
      */
     if (this.regLIP >= 0x0F0000 && this.regLIP <= 0x0FFFFF) {
         fHalt = false;
@@ -2565,7 +2564,7 @@ X86.fnFaultMessage = function(nFault, nError, fHalt)
     }
 
     if (this.messageEnabled(bitsMessage) || fHalt) {
-        var sMessage = (fHalt? '\n' : '') + "Fault " + str.toHexByte(nFault) + (nError != null? " (" + str.toHexWord(nError) + ")" : "") + " on opcode 0x" + str.toHexByte(bOpcode) + " at " + this.dbg.hexOffset(this.getIP(), this.getCS()) + " (%" + str.toHex(this.regLIP, 6) + ")";
+        var sMessage = (fHalt? '\n' : '') + "Fault " + str.toHexByte(nFault) + (nError != null? " (" + str.toHexWord(nError) + ")" : "") + " on opcode " + str.toHexByte(bOpcode) + " at " + this.dbg.hexOffset(this.getIP(), this.getCS()) + " (%" + str.toHex(this.regLIP, 6) + ")";
         var fRunning = this.aFlags.fRunning;
         if (this.printMessage(sMessage, bitsMessage)) {
             if (fHalt) {

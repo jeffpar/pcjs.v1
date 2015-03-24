@@ -327,7 +327,7 @@ Bus.prototype.powerUp = function(data, fRepower)
  * Even so, Bus memory management does NOT provide a general-purpose heap.  Most memory
  * allocations occur during machine initialization and never change.  The only notable
  * exception is the Video frame buffer, which ranges from 4Kb (MDA) to 16Kb (CGA) to
- * 32Kb/64Kb/128Kb (EGA), and only the EGA changes the buffer address post-initialization.
+ * 32Kb/64Kb/128Kb (EGA), and only the EGA changes its buffer address post-initialization.
  *
  * Each Memory block keeps track of a single address (addr) and length (used), indicating
  * the used space within the block; any free space that precedes or follows that used space
@@ -555,6 +555,51 @@ Bus.prototype.removeMemory = function(addr, size)
         return true;
     }
     return this.reportError(4, addr, size);
+};
+
+/**
+ * getMemoryBlocks(addr, size)
+ *
+ * @this {Bus}
+ * @param {number} addr is the starting physical address
+ * @param {number} size of the request, in bytes
+ * @return {Array} of Memory blocks
+ */
+Bus.prototype.getMemoryBlocks = function(addr, size)
+{
+    var aBlocks = [];
+    var iBlock = addr >>> this.blockShift;
+    while (size > 0 && iBlock < this.aMemBlocks.length) {
+        aBlocks.push(this.aMemBlocks[iBlock++]);
+        size -= this.blockSize;
+    }
+    return aBlocks;
+};
+
+/**
+ * setMemoryBlocks(addr, size, aBlocks, type)
+ *
+ * @this {Bus}
+ * @param {number} addr is the starting physical address
+ * @param {number} size of the request, in bytes
+ * @param {Array} aBlocks as returned by getMemoryBlocks()
+ * @param {number} [type] is one of the Memory.TYPE constants
+ */
+Bus.prototype.setMemoryBlocks = function(addr, size, aBlocks, type)
+{
+    var i = 0;
+    var iBlock = addr >>> this.blockShift;
+    while (size > 0 && iBlock < this.aMemBlocks.length) {
+        var block;
+        if (type === undefined) {
+            block = aBlocks[i++];
+        } else {
+            block = new Memory(addr);
+            block.clone(aBlocks[i++], type);
+        }
+        this.aMemBlocks[iBlock++] = block;
+        size -= this.blockSize;
+    }
 };
 
 /**

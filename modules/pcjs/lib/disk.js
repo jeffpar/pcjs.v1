@@ -2149,7 +2149,7 @@ Disk.prototype.dumpSector = function(sector, pba, sDesc)
         for (var i = 0; i < cbSector; i++) {
             if ((i % 16) === 0) {
                 if (sDump) sDump += sBytes + ' ' + sChars + '\n';
-                sDump += str.toHexWord(i) + ": ";
+                sDump += str.toHex(i, 4) + ": ";
                 sBytes = sChars = "";
             }
             if ((i % 4) === 0) {
@@ -2158,7 +2158,7 @@ Disk.prototype.dumpSector = function(sector, pba, sDesc)
             }
             var b = dw & 0xff;
             dw >>>= 8;
-            sBytes += str.toHexByte(b) + (i % 16 == 7? "-" : " ");
+            sBytes += str.toHex(b, 2) + (i % 16 == 7? "-" : " ");
             sChars += (b >= 32 && b < 128? String.fromCharCode(b) : ".");
         }
         if (sBytes) sDump += sBytes + ' ' + sChars;

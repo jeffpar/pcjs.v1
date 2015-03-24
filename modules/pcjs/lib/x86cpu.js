@@ -843,8 +843,9 @@ X86CPU.prototype.reset = function()
  *
  * We've elected to set DX to 0x0304 on a reset, which is consistent with a 80386-C0, since we have no desire to
  * try to emulate all the bugs in older (eg, B1) steppings.  At least not initially.  We leave stepping-accurate
- * emulation for another day.  It's also known that the B1 reported 0x0303 in DX, but other than the B1 and C0
- * steppings, it's not known exactly what other revision numbers Intel used in 80386 CPUs.
+ * emulation for another day.  It's also known that the B1 (and possibly B0) reported 0x0303 in DX, and that
+ * the D0 stepping reported 0x0305; beyond that, it's not known exactly what revision numbers Intel used for
+ * other 80386 CPUs.
  *
  * We define some additional "registers", such as regLIP. which mirrors the linear address corresponding to
  * CS:IP (the address of the next opcode byte).  In fact, regLIP functions as our internal IP register, so any
@@ -889,18 +890,18 @@ X86CPU.prototype.resetRegs = function()
 
     /*
      * NOTE: Even though the 8086 doesn't have CR0 (aka MSW) and IDTR, we initialize them for ALL CPUs, so
-     * that functions like X86.fnINT() can use the same code for both.  The 8086/8088 have no direct
-     * way of accessing or changing them, so this internal change should be perfectly safe for those processors.
+     * that functions like X86.fnINT() can use the same code for both.  The 8086/8088 have no direct way
+     * of accessing or changing them, so this is an implementation detail those processors are unaware of.
      */
     this.regCR0 = X86.CR0.MSW.ON;
     this.addrIDT = 0; this.addrIDTLimit = 0x03FF;
     this.regPS = this.nIOPL = 0;        // these should be set before the first setPS() call
 
     /*
-     * Define all the result registers that setPS() relies on for arithmetic and logical flags.
+     * Define all the result registers that can be used to "cache" arithmetic and logical flags.
      *
-     * In addition, setPS() will initialize resultType, which keeps track of which flags are cached
-     * and the size of the result; initially, none are cached.
+     * In addition, setPS() will initialize resultType, which keeps track of which flags are cached,
+     * and resultSize, which maintains the size of the last result; initially, no flags are cached.
      */
     this.resultDst = this.resultSrc = this.resultArith = this.resultLogic = 0;
 
@@ -913,7 +914,7 @@ X86CPU.prototype.resetRegs = function()
 
     /*
      * Segment registers used to be defined as separate variables (eg, regCS and regCS0 stored the segment
-     * number and base physical address, respectively), but all segment registers are now defined as X86Seg objects.
+     * number and base physical address, respectively), but segment registers are now defined as X86Seg objects.
      */
     this.segCS     = new X86Seg(this, X86Seg.ID.CODE,  "CS");
     this.segDS     = new X86Seg(this, X86Seg.ID.DATA,  "DS");
@@ -1654,7 +1655,7 @@ X86CPU.prototype.setCSIP = function(off, sel, fCall)
      */
     this.regEIP = off;
     var base = this.segCS.load(sel);
-    if (base != X86.ADDR_INVALID) {
+    if (base !== X86.ADDR_INVALID) {
         this.regLIP = base + this.regEIP;
         this.regLIPLimit = base + this.segCS.limit;
         if (I386) this.resetSizes();

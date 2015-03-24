@@ -51,9 +51,9 @@ var X86 = {
      *
      * This value is also used to indicate non-existent EA address calculations, which are usually
      * detected with "regEA === ADDR_INVALID" and "regEAWrite === ADDR_INVALID" tests.  In a 32-bit CPU,
-     * -1 could actually be a valid address, so consider changing it to NaN or null; my concern is that,
-     * by mixing non-numbers (specifically, values outside the range of 32-bit integers), performance
-     * may suffer.
+     * -1 (ie, 0xffffffff) could actually be a valid address, so consider changing it to NaN or null;
+     * my concern is that, by mixing non-numbers (specifically, values outside the range of signed 32-bit
+     * integers), performance may suffer.
      */
     ADDR_INVALID:   -1,
 
@@ -343,50 +343,51 @@ var X86 = {
         CS:         0x2E,       // opCS()
         SS:         0x36,       // opSS()
         DS:         0x3E,       // opDS()
-        PUSHSP:     0x54,
-        PUSHA:      0x60,       // 80186 and up
-        POPA:       0x61,       // 80186 and up
-        BOUND:      0x62,       // 80186 and up
-        ARPL:       0x63,       // 80286 and up
-        FS:         0x64,       // 80386 and up
-        GS:         0x65,       // 80386 and up
-        OS:         0x66,       // 80386 and up
-        AS:         0x67,       // 80386 and up
-        PUSH16:     0x68,       // 80186 and up
-        IMUL16:     0x69,       // 80186 and up
-        PUSH8:      0x6A,       // 80186 and up
-        IMUL8:      0x6B,       // 80186 and up
-        INSB:       0x6C,       // 80186 and up
-        INSW:       0x6D,       // 80186 and up
-        OUTSB:      0x6E,       // 80186 and up
-        OUTSW:      0x6F,       // 80186 and up
-        ENTER:      0xC8,       // 80186 and up
-        LEAVE:      0xC9,       // 80186 and up
-        CALLF:      0x9A,       // opCALLf()
+        PUSHSP:     0x54,       // opPUSHSP()
+        PUSHA:      0x60,       // opPUHSA()    (80186 and up)
+        POPA:       0x61,       // opPOPA()     (80186 and up)
+        BOUND:      0x62,       // opBOUND()    (80186 and up)
+        ARPL:       0x63,       // opARPL()     (80286 and up)
+        FS:         0x64,       // opFS()       (80386 and up)
+        GS:         0x65,       // opGS()       (80386 and up)
+        OS:         0x66,       // opOS()       (80386 and up)
+        AS:         0x67,       // opAS()       (80386 and up)
+        PUSH16:     0x68,       // opPUSH16()   (80186 and up)
+        IMUL16:     0x69,       // opIMUL16()   (80186 and up)
+        PUSH8:      0x6A,       // opPUSH8()    (80186 and up)
+        IMUL8:      0x6B,       // opIMUL8()    (80186 and up)
+        INSB:       0x6C,       // opINSb()     (80186 and up)
+        INSW:       0x6D,       // opINSw()     (80186 and up)
+        OUTSB:      0x6E,       // opOUTSb()    (80186 and up)
+        OUTSW:      0x6F,       // opOUTSw()    (80186 and up)
+        ENTER:      0xC8,       // opENTER()    (80186 and up)
+        LEAVE:      0xC9,       // opLEAVE()    (80186 and up)
+        CALLF:      0x9A,       // opCALLF()
         MOVSB:      0xA4,       // opMOVSb()
         MOVSW:      0xA5,       // opMOVSw()
-        CMPSB:      0xA6,
-        CMPSW:      0xA7,
-        STOSB:      0xAA,
-        STOSW:      0xAB,
-        LODSB:      0xAC,
-        LODSW:      0xAD,
-        SCASB:      0xAE,
-        SCASW:      0xAF,
-        INT3:       0xCC,
-        INTn:       0xCD,
-        INTO:       0xCE,
-        LOOPNZ:     0xE0,
-        LOOPZ:      0xE1,
-        LOOP:       0xE2,
-        CALL:       0xE8,
-        JMP:        0xE9,       // JMP opcode (2-byte displacement)
-        JMPS:       0xEB,       // JMP opcode (1-byte displacement)
-        LOCK:       0xF0,
-        REPNZ:      0xF2,
-        REPZ:       0xF3,
-        CALLW:      0x10FF,
-        CALLDW:     0x18FF,
+        CMPSB:      0xA6,       // opCMPSb()
+        CMPSW:      0xA7,       // opCMPSw()
+        STOSB:      0xAA,       // opSTOSb()
+        STOSW:      0xAB,       // opSTOSw()
+        LODSB:      0xAC,       // opLODSb()
+        LODSW:      0xAD,       // opLODSw()
+        SCASB:      0xAE,       // opSCASb()
+        SCASW:      0xAF,       // opSCASw()
+        INT3:       0xCC,       // opINT3()
+        INTn:       0xCD,       // opINTn()
+        INTO:       0xCE,       // opINTO()
+        LOOPNZ:     0xE0,       // opLOOPNZ()
+        LOOPZ:      0xE1,       // opLOOPZ()
+        LOOP:       0xE2,       // opLOOP()
+        CALL:       0xE8,       // opCALL()
+        JMP:        0xE9,       // opJMP()      (2-byte displacement)
+        JMPF:       0xEA,       // opJMPF()
+        JMPS:       0xEB,       // opJMPs()     (1-byte displacement)
+        LOCK:       0xF0,       // opLOCK()
+        REPNZ:      0xF2,       // opREPNZ()
+        REPZ:       0xF3,       // opREPZ()
+        CALLW:      0x10FF,     // fnCALLw()
+        CALLDW:     0x18FF,     // fnCALLFdw()
         UD2:        0x0B0F      // UD2 (invalid opcode "guaranteed" to generate UD_FAULT on all post-8086 processors)
     }
 };
@@ -413,8 +414,6 @@ X86.PS.CACHED = (X86.PS.CF | X86.PS.PF | X86.PS.AF | X86.PS.ZF | X86.PS.SF | X86
  * These are the default "always set" PS bits for the 8086/8088; other processors must
  * adjust these bits accordingly.  The final adjusted value is then stored in the X86CPU
  * object as "this.PS_SET"; setPS() must use that value, NOT this one.
- *
- * TODO: Verify that PS.BIT1 was always set on reset, even on the 8086/8088.
  */
 X86.PS.SET = (X86.PS.BIT1 | X86.PS.IOPL.MASK | X86.PS.NT | X86.PS.BIT15);
 

@@ -3153,7 +3153,7 @@ Video.prototype.createFontColor = function(font, iColor, rgbColor, nDouble, offD
     /*
      * The colors for cell backgrounds and cursor elements must be converted to CSS color strings.
      */
-    font.aCSSColors[iColor] = "#" + str.toHexByte(rgbColor[0]) + str.toHexByte(rgbColor[1]) + str.toHexByte(rgbColor[2]);
+    font.aCSSColors[iColor] = "#" + str.toHex(rgbColor[0], 2) + str.toHex(rgbColor[1], 2) + str.toHex(rgbColor[2], 2);
     font.aRGBColors[iColor] = rgbColor;
 
     /*
@@ -3440,7 +3440,7 @@ Video.prototype.setAccess = function(nAccess)
     if (nAccess != null && card && nAccess != card.nAccess) {
 
         if (DEBUG && this.messageEnabled()) {
-            this.printMessage("setAccess(0x" + str.toHexWord(nAccess) + ")");
+            this.printMessage("setAccess(" + str.toHexWord(nAccess) + ")");
         }
 
         card.setMemoryAccess(nAccess);
@@ -3777,7 +3777,7 @@ Video.prototype.setMode = function(nMode, fForce)
     if (nMode != null && (nMode != this.nMode || fForce)) {
 
         if (DEBUG && this.messageEnabled()) {
-            this.printMessage("setMode(0x" + str.toHexWord(nMode) + (fForce? ",force" : "") + ")");
+            this.printMessage("setMode(" + str.toHexWord(nMode) + (fForce? ",force" : "") + ")");
         }
 
         this.cUpdates = 0;      // count updateScreen() calls as a means of driving blink updates
@@ -3803,7 +3803,7 @@ Video.prototype.setMode = function(nMode, fForce)
             if (this.addrBuffer) {
 
                 if (DEBUG && this.messageEnabled()) {
-                    this.printMessage("setMode(" + nMode + "): removing 0x" + str.toHex(this.sizeBuffer) + " bytes from 0x" + str.toHex(this.addrBuffer));
+                    this.printMessage("setMode(" + nMode + "): removing " + str.toHexLong(this.sizeBuffer) + " bytes from " + str.toHexLong(this.addrBuffer));
                 }
 
                 if (!this.bus.removeMemory(this.addrBuffer, this.sizeBuffer)) {
@@ -3822,7 +3822,7 @@ Video.prototype.setMode = function(nMode, fForce)
             this.sizeBuffer = card.sizeBuffer;
 
             if (DEBUG && this.messageEnabled()) {
-                this.printMessage("setMode(" + nMode + "): adding 0x" + str.toHex(this.sizeBuffer) + " bytes to 0x" + str.toHex(this.addrBuffer));
+                this.printMessage("setMode(" + nMode + "): adding " + str.toHexLong(this.sizeBuffer) + " bytes to " + str.toHexLong(this.addrBuffer));
             }
 
             var controller = (card === this.cardEGA? card : null);

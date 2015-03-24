@@ -244,7 +244,7 @@ RAM.init = function()
  *
  * DeskPro 386 machines came with a minimum of 1Mb of RAM, which could be configured (via jumpers)
  * for 256Kb, 512Kb or 640Kb of conventional memory, starting at address 0x00000000, with the
- * remainder (768Kb, 512Kb, or 384Kb) accessible only at addresses just below 0x01000000.  In PCjs,
+ * remainder (768Kb, 512Kb, or 384Kb) accessible only at an address just below 0x01000000.  In PCjs,
  * this second chunk of RAM must be separately allocated, with an ID of "ramCPQ".
  *
  * The typical configuration was 640Kb of conventional memory, leaving 384Kb accessible at 0x00FA0000.
@@ -254,7 +254,7 @@ RAM.init = function()
  * The DeskPro 386 also contained two memory-mapped registers at 0x80C00000.  The first is a write-only
  * mapping register that provides the ability to map the 128Kb at 0x00FE0000 to 0x000E0000, replacing
  * any ROMs in the range 0x000E0000-0x000FFFFF, and optionally write-protecting that 128Kb; internally,
- * this register corresponds to bMapping.
+ * this register corresponds to bMappings.
  *
  * The second register is a read-only diagnostics register that indicates jumper configuration and
  * parity errors; internally, this register corresponds to bSettings.
@@ -275,17 +275,21 @@ RAM.init = function()
 function CompaqController(ram)
 {
     this.ram = ram;
-    this.bMapping = CompaqController.MAPPING.DEFAULT;
+    this.bMappings = CompaqController.MAPPINGS.DEFAULT;
     this.bSettings = CompaqController.SETTINGS.BASE_640KB;
+    this.aBlocksDst = null;
 }
 
-CompaqController.ADDR = 0x80C00000;
+CompaqController.ADDR       = 0x80C00000;
+CompaqController.MAP_SRC    = 0x00FE0000;
+CompaqController.MAP_DST    = 0x000E0000;
+CompaqController.MAP_SIZE   = 0x00020000;
 
 /*
- * Bit definitions for the 8-bit write-only memory-mapping register (bMapping)
+ * Bit definitions for the 8-bit write-only memory-mapping register (bMappings)
  */
-CompaqController.MAPPING = {
-    NORELOC:    0x01,               // is this bit is CLEAR, the last 128Kb (at 0x00FE0000) is relocated to 0x000E0000
+CompaqController.MAPPINGS = {
+    UNMAPPED:   0x01,               // is this bit is CLEAR, the last 128Kb (at 0x00FE0000) is mapped to 0x000E0000
     READWRITE:  0x02,               // if this bit is CLEAR, the last 128Kb (at 0x00FE0000) is read-only (ie, write-protected)
     RESERVED:   0xFC,               // the remaining 6 bits are reserved and should always be SET
     DEFAULT:    0xFF
@@ -324,11 +328,31 @@ CompaqController.readByte = function readCompaqControllerByte(off)
  *
  * @this {Memory}
  * @param {number} off
- * @param {number} b (which should already be pre-masked to 8 bits; see Bus.prototype.setByteDirect)
+ * @param {number} b
  */
 CompaqController.writeByte = function writeCompaqControllerByte(off, b)
 {
-    this.controller.bMapping = b;
+    var aBlocks;
+    var controller = this.controller;
+    var bus = controller.bus;
+    if (b != controller.bMappings) {
+        if (!(b & CompaqController.MAPPINGS.UNMAPPED)) {
+            if (!controller.aBlocksDst) {
+                controller.aBlocksDst = bus.getMemoryBlocks(CompaqController.MAP_DST, CompaqController.MAP_SIZE);
+            }
+            aBlocks = bus.getMemoryBlocks(CompaqController.MAP_SRC, CompaqController.MAP_SIZE);
+            var type = (b & CompaqController.MAPPINGS.READWRITE)? Memory.TYPE.RAM : Memory.TYPE.ROM;
+            bus.setMemoryBlocks(CompaqController.MAP_DST, CompaqController.MAP_SIZE, aBlocks, type);
+        }
+        else {
+            if (controller.aBlocksDst) {
+                bus.setMemoryBlocks(CompaqController.MAP_DST, CompaqController.MAP_SIZE, controller.aBlocksDst);
+                controller.aBlocksDst = null;
+            }
+        }
+        controller.bMappings = b;
+    }
+    if (DEBUG) this.cpu.stopCPU();
 };
 
 CompaqController.ACCESS = [CompaqController.readByte, CompaqController.readByte, CompaqController.readByte,

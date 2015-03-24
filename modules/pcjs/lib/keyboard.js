@@ -1254,7 +1254,7 @@ Keyboard.prototype.checkScanCode = function()
         b = this.abScanBuffer[0];
         if (this.chipset) this.chipset.notifyKbdData(b);
     }
-    if (this.messageEnabled()) this.printMessage("scan code 0x" + str.toHexByte(b) + " available");
+    if (this.messageEnabled()) this.printMessage("scan code " + str.toHexByte(b) + " available");
     return b;
 };
 
@@ -1272,7 +1272,7 @@ Keyboard.prototype.readScanCode = function()
     if (this.abScanBuffer.length) {
         b = this.abScanBuffer[0];
     }
-    if (this.messageEnabled()) this.printMessage("scan code 0x" + str.toHexByte(b) + " delivered");
+    if (this.messageEnabled()) this.printMessage("scan code " + str.toHexByte(b) + " delivered");
     return b;
 };
 
@@ -1480,7 +1480,7 @@ Keyboard.prototype.addScanCode = function(bScan)
      */
     if (this.abScanBuffer) {
         if (this.abScanBuffer.length < Keyboard.LIMIT.MAX_SCANCODES) {
-            if (this.messageEnabled()) this.printMessage("scan code 0x" + str.toHexByte(bScan) + " buffered");
+            if (this.messageEnabled()) this.printMessage("scan code " + str.toHexByte(bScan) + " buffered");
             this.abScanBuffer.push(bScan);
             if (this.abScanBuffer.length == 1) {
                 if (this.chipset) this.chipset.notifyKbdData(bScan);

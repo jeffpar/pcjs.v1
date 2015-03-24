@@ -3836,7 +3836,7 @@ C1PCPU.prototype.opSim = function()
              *
              *      eg: %A for this.regA, %X for this.regX, etc
              */
-            s = s.replace(/%A/g, str.toHexByte(this.regA)).replace(/%X/g, str.toHexByte(this.regX)).replace(/%Y/g, str.toHexByte(this.regY));
+            s = s.replace(/%A/g, str.toHex(this.regA, 2)).replace(/%X/g, str.toHex(this.regX, 2)).replace(/%Y/g, str.toHex(this.regY, 2));
             this.println(s);
             /*
              * To make printing "smoother", let's force a yield

@@ -1399,7 +1399,7 @@ HDC.prototype.inATCData = function(port, addrFrom)
             hdc.assert(!fAsync);
             if (BACKTRACK) {
                 if (!off && obj.file && hdc.messageEnabled(Messages.DISK)) {
-                    hdc.printMessage("loading " + obj.file.sPath + '[' + obj.offFile + "] via port 0x" + str.toHexWord(port), true);
+                    hdc.printMessage("loading " + obj.file.sPath + '[' + obj.offFile + "] via port " + str.toHexWord(port), true);
                 }
                 /*
                  * TODO: We could define a cached BTO that's reset prior to a new ATC command, and then pass that
@@ -1846,7 +1846,7 @@ HDC.prototype.doATC = function()
     }
 
     if (DEBUG && this.messageEnabled(Messages.HDC)) {
-        this.printMessage("HDC.doATC(0x" + str.toHexByte(bCmd) + "): " + HDC.aATCCommands[bCmd], true);
+        this.printMessage("HDC.doATC(" + str.toHexByte(bCmd) + "): " + HDC.aATCCommands[bCmd], true);
     }
 
     switch (bCmd & HDC.ATC.COMMAND.MASK) {
@@ -1931,7 +1931,7 @@ HDC.prototype.doATC = function()
 
     default:
         if (DEBUG && this.messageEnabled()) {
-            this.printMessage("HDC.doATC(0x" + str.toHexByte(this.regCommand) + "): " + (bCmd < 0? ("invalid drive (" + iDrive + ")") : "unsupported operation"));
+            this.printMessage("HDC.doATC(" + str.toHexByte(this.regCommand) + "): " + (bCmd < 0? ("invalid drive (" + iDrive + ")") : "unsupported operation"));
             if (bCmd >= 0) this.dbg.stopCPU();
         }
         break;
@@ -2096,7 +2096,7 @@ HDC.prototype.doXTC = function()
         case HDC.XTC.DATA.CMD.RECALIBRATE:      // 0x01
             drive.bControl = bControl;
             if (DEBUG && this.messageEnabled()) {
-                this.printMessage("HDC.doXTC(): drive " + iDrive + " control byte: 0x" + str.toHexByte(bControl));
+                this.printMessage("HDC.doXTC(): drive " + iDrive + " control byte: " + str.toHexByte(bControl));
             }
             this.beginResult(HDC.XTC.DATA.STATUS.OK | bDrive);
             break;
@@ -2134,7 +2134,7 @@ HDC.prototype.doXTC = function()
         default:
             this.beginResult(HDC.XTC.DATA.STATUS.ERROR | bDrive);
             if (DEBUG && this.messageEnabled()) {
-                this.printMessage("HDC.doXTC(0x" + str.toHexByte(bCmdOrig) + "): " + (bCmd < 0? ("invalid drive (" + iDrive + ")") : "unsupported operation"));
+                this.printMessage("HDC.doXTC(" + str.toHexByte(bCmdOrig) + "): " + (bCmd < 0? ("invalid drive (" + iDrive + ")") : "unsupported operation"));
                 if (bCmd >= 0) this.dbg.stopCPU();
             }
             break;
@@ -2155,7 +2155,7 @@ HDC.prototype.popCmd = function()
     if (bCmdIndex < this.regDataTotal) {
         bCmd = this.regDataArray[this.regDataIndex++];
         if (DEBUG && this.messageEnabled((bCmdIndex > 0? Messages.PORT : 0) | Messages.HDC)) {
-            this.printMessage("HDC.CMD[" + bCmdIndex + "]: 0x" + str.toHexByte(bCmd) + (!bCmdIndex && HDC.aXTCCommands[bCmd]? (" (" + HDC.aXTCCommands[bCmd] + ")") : ""), true);
+            this.printMessage("HDC.CMD[" + bCmdIndex + "]: " + str.toHexByte(bCmd) + (!bCmdIndex && HDC.aXTCCommands[bCmd]? (" (" + HDC.aXTCCommands[bCmd] + ")") : ""), true);
         }
     }
     return bCmd;
@@ -2173,7 +2173,7 @@ HDC.prototype.beginResult = function(bResult)
 
     if (bResult !== undefined) {
         if (DEBUG && this.messageEnabled()) {
-            this.printMessage("HDC.beginResult(0x" + str.toHexByte(bResult) + ")");
+            this.printMessage("HDC.beginResult(" + str.toHexByte(bResult) + ")");
         }
         this.pushResult(bResult);
     }
@@ -2195,7 +2195,7 @@ HDC.prototype.beginResult = function(bResult)
 HDC.prototype.pushResult = function(bResult)
 {
     if (DEBUG && this.messageEnabled((this.regDataTotal > 0? Messages.PORT : 0) | Messages.HDC)) {
-        this.printMessage("HDC.RES[" + this.regDataTotal + "]: 0x" + str.toHexByte(bResult), true);
+        this.printMessage("HDC.RES[" + this.regDataTotal + "]: " + str.toHexByte(bResult), true);
     }
     this.regDataArray[this.regDataTotal++] = bResult;
 };

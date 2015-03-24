@@ -248,7 +248,7 @@ Memory.readNone = function readNone(off)
 Memory.writeNone = function writeNone(off, v)
 {
     if (DEBUGGER && this.dbg.messageEnabled(Messages.MEM) /* && !off */) {
-        this.dbg.message("attempt to write 0x" + str.toHexWord(v) + " to invalid block %" + str.toHex(this.addr), true);
+        this.dbg.message("attempt to write " + str.toHexWord(v) + " to invalid block %" + str.toHex(this.addr), true);
     }
 };
 
@@ -780,6 +780,38 @@ if (TYPEDARRAYS) {
 Memory.prototype = {
     constructor: Memory,
     parent: null,
+    /**
+     * clone(mem, type)
+     *
+     * Converts the current Memory block (this) into a clone of the given Memory block (mem),
+     * and optionally overrides the current block's type with the specified type.
+     *
+     * @this {Memory}
+     * @param {Memory} mem
+     * @param {number} [type]
+     */
+    clone: function(mem, type) {
+        this.size = mem.size;
+        if (type) {
+            this.type = type;
+            this.fReadOnly = (type == Memory.TYPE.ROM);
+        }
+        if (TYPEDARRAYS) {
+            this.buffer = mem.buffer;
+            this.dv = mem.dv;
+            this.ab = mem.ab;
+            this.aw = mem.aw;
+            this.adw = mem.adw;
+            this.setAccess(littleEndian? Memory.afnLittleEndian : Memory.afnBigEndian);
+        } else {
+            if (FATARRAYS) {
+                this.ab = mem.ab;
+            } else {
+                this.adw = mem.adw;
+            }
+            this.setAccess(Memory.afnMemory);
+        }
+    },
     /**
      * save()
      *

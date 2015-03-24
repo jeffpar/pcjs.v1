@@ -148,7 +148,7 @@ Color.prototype.randomize = function()
  */
 Color.prototype.toString = function()
 {
-    if (!this.sValue) this.sValue = '#' + str.toHexByte(this.rgb[0]) + str.toHexByte(this.rgb[1]) + str.toHexByte(this.rgb[2]);
+    if (!this.sValue) this.sValue = '#' + str.toHex(this.rgb[0], 2) + str.toHex(this.rgb[1], 2) + str.toHex(this.rgb[2], 2);
     return this.sValue;
 };
 
@@ -453,7 +453,7 @@ Panel.prototype.updateMouse = function(event, fDown)
          * Convert the mouse position into the corresponding memory address, assuming it's over the live memory area
          */
         var addr = this.findAddress(x, y);
-        if (addr != X86.ADDR_INVALID) {
+        if (addr !== X86.ADDR_INVALID) {
             addr &= ~0xf;
             if (addr != this.addrDumpLast) {
                 this.dumpMemory(addr, true);
@@ -644,7 +644,7 @@ Panel.prototype.findRegions = function()
  */
 Panel.prototype.addRegion = function(addr, iBlock, cBlocks, type)
 {
-    if (DEBUG) this.log("region " + this.stats.cRegions + " (addr " + str.toHex(addr) + ", type " + Memory.TYPE.NAMES[type] + ") contains " + cBlocks + " blocks");
+    if (DEBUG) this.log("region " + this.stats.cRegions + " (addr " + str.toHexLong(addr) + ", type " + Memory.TYPE.NAMES[type] + ") contains " + cBlocks + " blocks");
     this.assert(iBlock <= Bus.BLOCK.NUM_MASK && cBlocks <= Bus.BLOCK.COUNT_MASK && type <= Bus.BLOCK.TYPE_MASK);
     return this.stats.aRegions[this.stats.cRegions++] = (iBlock | (cBlocks << Bus.BLOCK.COUNT_SHIFT) | (type << Bus.BLOCK.TYPE_SHIFT));
 };
@@ -730,12 +730,12 @@ Panel.prototype.dumpMemory = function(addr, fDraw)
         if (addr == null) {
             this.drawText("Mouse over memory to dump");
         } else {
-            this.drawText("0x" + str.toHex(addr), null, 0, 1);
+            this.drawText(str.toHexLong(addr), null, 0, 1);
             for (var iLine = 1; iLine <= 16; iLine++) {
                 var sChars = "";
                 for (var iCol = 1; iCol <= 8; iCol++) {
                     var b = this.bus.getByteDirect(addr++);
-                    this.drawText(str.toHexByte(b), null, 1);
+                    this.drawText(str.toHex(b, 2), null, 1);
                     sChars += (b >= 32 && b < 128? String.fromCharCode(b) : ".");
                 }
                 this.drawText(sChars, null, 0, 1);
