@@ -1164,12 +1164,13 @@ Keyboard.prototype.resetDevice = function(fNotify)
      * TODO: There's more to reset, like LED indicators, default type rate, and emptying the scan code buffer.
      */
     this.printMessage("keyboard reset", Messages.KEYBOARD | Messages.PORT);
-    this.abScanBuffer = [Keyboard.CMDRES.BAT_OK];
-    if (fNotify && this.chipset) this.chipset.notifyKbdData(this.abScanBuffer[0]);
+    this.abBuffer = [Keyboard.CMDRES.BAT_OK];
+    this.fAdvance = true;
+    if (fNotify && this.chipset) this.chipset.notifyKbdData(this.abBuffer[0]);
 };
 
 /**
- * setEnable(fData, fClock)
+ * setEnabled(fData, fClock)
  *
  * This is the ChipSet's primary interface for toggling keyboard "data" and "clock" lines.
  * For MODEL_5150 and MODEL_5160 machines, this function is called from the ChipSet's PPI_B
@@ -1181,7 +1182,7 @@ Keyboard.prototype.resetDevice = function(fNotify)
  * @param {boolean} fClock is true if the keyboard's simulated clock line should be enabled
  * @return {boolean} true if keyboard was re-enabled, false if not (or no change)
  */
-Keyboard.prototype.setEnable = function(fData, fClock)
+Keyboard.prototype.setEnabled = function(fData, fClock)
 {
     var fReset = false;
     if (this.fClock !== fClock) {
@@ -1193,6 +1194,10 @@ Keyboard.prototype.setEnable = function(fData, fClock)
          * data line is high as well.
          */
         this.fClock = this.fResetOnEnable = fClock;
+        /*
+         * Allow the next buffered scan code, if any, to advance.
+         */
+        if (fClock) this.fAdvance = true;
     }
     if (this.fData !== fData) {
         if (!COMPILED && this.messageEnabled(Messages.KEYBOARD | Messages.PORT)) {
@@ -1244,14 +1249,18 @@ Keyboard.prototype.sendCmd = function(bCmd)
  *
  * This is the ChipSet's interface for checking data availability.
  *
+ * Note that even if we have data, we don't provide it unless fAdvance is set as well.
+ * This ensures that we wait until the ROM to disable and re-enable the controller before
+ * making more data available.
+ *
  * @this {Keyboard}
  * @return {number} next scan code, or 0 if none
  */
 Keyboard.prototype.checkScanCode = function()
 {
     var b = 0;
-    if (this.abScanBuffer.length) {
-        b = this.abScanBuffer[0];
+    if (this.abBuffer.length && this.fAdvance) {
+        b = this.abBuffer[0];
         if (this.chipset) this.chipset.notifyKbdData(b);
     }
     if (this.messageEnabled()) this.printMessage("scan code " + str.toHexByte(b) + " available");
@@ -1269,8 +1278,8 @@ Keyboard.prototype.checkScanCode = function()
 Keyboard.prototype.readScanCode = function()
 {
     var b = 0;
-    if (this.abScanBuffer.length) {
-        b = this.abScanBuffer[0];
+    if (this.abBuffer.length) {
+        b = this.abBuffer[0];
     }
     if (this.messageEnabled()) this.printMessage("scan code " + str.toHexByte(b) + " delivered");
     return b;
@@ -1285,7 +1294,7 @@ Keyboard.prototype.readScanCode = function()
  */
 Keyboard.prototype.flushScanCode = function()
 {
-    this.abScanBuffer = [];
+    this.abBuffer = [];
     if (this.messageEnabled()) this.printMessage("scan codes flushed");
 };
 
@@ -1299,18 +1308,19 @@ Keyboard.prototype.flushScanCode = function()
  */
 Keyboard.prototype.shiftScanCode = function(fNotify)
 {
-    if (this.abScanBuffer.length > 0) {
+    if (this.abBuffer.length > 0) {
         /*
          * The keyboard interrupt service routine toggles the enable bit after reading a scan code, so
          * presumably this is the proper point at which to shift the last scan code out, and then assert
          * another interrupt if more scan codes exist.
          */
-        this.abScanBuffer.shift();
+        this.abBuffer.shift();
+        this.fAdvance = fNotify;
         if (fNotify) {
-            if (!this.abScanBuffer.length || !this.chipset) {
+            if (!this.abBuffer.length || !this.chipset) {
                 fNotify = false;
             } else {
-                this.chipset.notifyKbdData(this.abScanBuffer[0]);
+                this.chipset.notifyKbdData(this.abBuffer[0]);
             }
         }
         if (this.messageEnabled()) this.printMessage("scan codes shifted, notify " + (fNotify? "true" : "false"));
@@ -1332,7 +1342,7 @@ Keyboard.prototype.powerUp = function(data, fRepower)
          * TODO: Save/restore support for Keyboard is the barest minimum.  In fact, originally, I wasn't
          * saving/restoring anything, and that was OK, but if we don't at least re-initialize fClock/fData,
          * we can get a spurious reset following a restore.  In an ideal world, we might choose to save/restore
-         * abScanBuffer as well, but realistically, I think it's going to be safer to always start with an
+         * abBuffer as well, but realistically, I think it's going to be safer to always start with an
          * empty buffer--and who's going to notice anyway?
          *
          * So, like Debugger, we deviate from the typical save/restore pattern: instead of reset OR restore,
@@ -1377,9 +1387,10 @@ Keyboard.prototype.reset = function()
     this.bitsState = this.bitsStateSim = 0;
 
     /*
-     * New scan codes are "pushed" onto abScanBuffer and then "shifted" off.
+     * New scan codes are "pushed" onto abBuffer and then "shifted" off.
      */
-    this.abScanBuffer = [];
+    this.abBuffer = [];
+    this.fAdvance = true;
 
     this.prevCharDown = 0;
     this.prevKeyDown = 0;
@@ -1430,7 +1441,7 @@ Keyboard.prototype.initState = function(data)
 {
     var i = 0;
     if (data === undefined) data = [];
-    this.fClock = data[i++];
+    this.fClock = this.fAdvance = data[i++];
     this.fData = data[i];
     return true;
 };
@@ -1478,17 +1489,17 @@ Keyboard.prototype.addScanCode = function(bScan)
      * or if we need to protect other methods from prematurely accessing certain Keyboard structures,
      * as a result of calls from any of the key event handlers established by setBinding().
      */
-    if (this.abScanBuffer) {
-        if (this.abScanBuffer.length < Keyboard.LIMIT.MAX_SCANCODES) {
+    if (this.abBuffer) {
+        if (this.abBuffer.length < Keyboard.LIMIT.MAX_SCANCODES) {
             if (this.messageEnabled()) this.printMessage("scan code " + str.toHexByte(bScan) + " buffered");
-            this.abScanBuffer.push(bScan);
-            if (this.abScanBuffer.length == 1) {
+            this.abBuffer.push(bScan);
+            if (this.abBuffer.length == 1) {
                 if (this.chipset) this.chipset.notifyKbdData(bScan);
             }
             return;
         }
-        if (this.abScanBuffer.length == Keyboard.LIMIT.MAX_SCANCODES) {
-            this.abScanBuffer.push(Keyboard.CMDRES.BUFF_FULL);
+        if (this.abBuffer.length == Keyboard.LIMIT.MAX_SCANCODES) {
+            this.abBuffer.push(Keyboard.CMDRES.BUFF_FULL);
         }
         this.printMessage("scan code buffer overflow");
     }

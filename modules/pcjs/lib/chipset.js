@@ -3043,7 +3043,7 @@ ChipSet.prototype.outPICLo = function(iPIC, bOut, addrFrom)
             var nIRQ = (nIRL == null? undefined : pic.nIRQBase + nIRL);
             if (pic.bISR & bIREnd) {
                 if (DEBUG && this.messageEnabled(this.messageBitsIRQ(nIRQ))) {
-                    this.printMessage("outPIC" + iPIC + '(' + str.toHexByte(pic.port) + "):  IRQ " + nIRQ + " ending @" + this.dbg.hexOffset(this.cpu.getIP(), this.cpu.getCS()) + " stack=" + this.dbg.hexOffset(this.cpu.getSP(), this.cpu.getSS()), true);
+                    this.printMessage("outPIC" + iPIC + '(' + str.toHexByte(pic.port) + "): IRQ " + nIRQ + " ending @" + this.dbg.hexOffset(this.cpu.getIP(), this.cpu.getCS()) + " stack=" + this.dbg.hexOffset(this.cpu.getSP(), this.cpu.getSS()), true);
                 }
                 pic.bISR &= ~bIREnd;
                 this.checkIRR();
@@ -3915,7 +3915,7 @@ ChipSet.prototype.outPPIB = function(port, bOut, addrFrom)
 {
     this.printMessageIO(port, bOut, addrFrom, "PPI_B");
     this.updatePPIB(bOut);
-    if (this.kbd) this.kbd.setEnable((bOut & ChipSet.PPI_B.CLEAR_KBD)? false : true, (bOut & ChipSet.PPI_B.CLK_KBD)? true : false);
+    if (this.kbd) this.kbd.setEnabled((bOut & ChipSet.PPI_B.CLEAR_KBD)? false : true, (bOut & ChipSet.PPI_B.CLK_KBD)? true : false);
 };
 
 /**
@@ -4039,6 +4039,26 @@ ChipSet.prototype.outPPICtrl = function(port, bOut, addrFrom)
 
 /**
  * in8042OutBuff(port, addrFrom)
+ *
+ * Return the contents of the OUTBUFF register and clear the OUTBUFF_FULL status bit.
+ *
+ * This function then calls kbd.checkScanCode(), on the theory that the next buffered scan
+ * code, if any, can now be delivered to OUTBUFF.  However, there are applications like
+ * BASICA that install a keyboard interrupt handler that reads OUTBUFF, do some scan code
+ * preprocessing, and then pass control on to the ROM's interrupt handler.  As a result,
+ * OUTBUFF is read multiple times during a single interrupt, so filling it with new data
+ * after every read would result in lost scan codes.
+ *
+ * To avoid that problem, kbd.checkScanCode() also requires that kbd.setEnabled() be called
+ * before it supplies any more data via notifyKbdData().  That will happen as soon as the
+ * ROM re-enables the controller, and is why KBC.CMD.ENABLE_KBD processing also ends with a
+ * call to kbd.checkScanCode().
+ *
+ * Note that, the foregoing notwithstanding, I still clear the OUTBUFF_FULL bit here (as I
+ * believe I should); fortunately, none of the interrupt handlers rely on OUTBUFF_FULL as a
+ * prerequisite for reading OUTBUFF (not the BASICA handler, and not the ROM).  The assumption
+ * seems to be that if an interrupt occurred, OUTBUFF must contain data, regardless of the
+ * state of OUTBUFF_FULL.
  *
  * @this {ChipSet}
  * @param {number} port (0x60)
@@ -4299,8 +4319,8 @@ ChipSet.prototype.out8042InBuffCmd = function(port, bOut, addrFrom)
 
     case ChipSet.KBC.CMD.ENABLE_KBD:        // 0xAE
         this.set8042CmdData(this.b8042CmdData & ~ChipSet.KBC.DATA.CMD.NO_CLOCK);
-        if (this.kbd) this.kbd.checkScanCode();
         if (DEBUG) this.printMessage("keyboard re-enabled", Messages.KEYBOARD | Messages.PORT);
+        if (this.kbd) this.kbd.checkScanCode();
         break;
 
     case ChipSet.KBC.CMD.SELF_TEST:         // 0xAA
@@ -4319,7 +4339,7 @@ ChipSet.prototype.out8042InBuffCmd = function(port, bOut, addrFrom)
         if (bPulseBits & 0x1) {
             /*
              * Bit 0 of the 8042's output port is connected to RESET.  If it's pulsed, the processor resets.
-             * We don't want to clear ALL our internal state (eg, cycle counts), so we call cpu.resetRegs() instead
+             * We don't want to clear *all* CPU state (eg, cycle counts), so we call cpu.resetRegs() instead
              * of cpu.reset().
              */
             this.cpu.resetRegs();
@@ -4354,7 +4374,7 @@ ChipSet.prototype.set8042CmdData = function(b)
          * and enables the keyboard.  The BIOS then waits for OUTBUFF_FULL to be set, at which point it seems
          * to be anticipating an 0xAA response in the output buffer.
          *
-         * And indeed, if we call the original MODEL_5150/MODEL_5160 setEnable() Keyboard interface here,
+         * And indeed, if we call the original MODEL_5150/MODEL_5160 setEnabled() Keyboard interface here,
          * and both the data and clock lines have transitioned high (ie, both parameters are true), then it
          * will call resetDevice(), generating a Keyboard.CMDRES.BAT_OK response.
          *
@@ -4364,7 +4384,7 @@ ChipSet.prototype.set8042CmdData = function(b)
          * a completion code (eg, 0xAA for success, or 0xFC or something else for failure).
          */
         var bClockEnabled = !(b & ChipSet.KBC.DATA.CMD.NO_CLOCK);
-        this.kbd.setEnable(!!(b & ChipSet.KBC.DATA.CMD.NO_INHIBIT), bClockEnabled);
+        this.kbd.setEnabled(!!(b & ChipSet.KBC.DATA.CMD.NO_INHIBIT), bClockEnabled);
     }
 };
 
@@ -4507,7 +4527,7 @@ ChipSet.prototype.notifyKbdData = function(b)
                 this.kbd.shiftScanCode();
                 /*
                  * A delay of 4 instructions was originally requested as part of the the Keyboard's resetDevice()
-                 * response, but a much larger delay (120) is now needed for MODEL_5170 machines, per the discussion above.
+                 * response, but a larger delay (120) is now needed for MODEL_5170 machines, per the discussion above.
                  */
                 this.setIRR(ChipSet.IRQ.KBD, 120);
             }

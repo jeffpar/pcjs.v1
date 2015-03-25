@@ -221,6 +221,9 @@ pre a, code a {
 .md-list li p {
     padding-left: 2em;
 }
+.md-list li p br {
+    line-height: 3em;
+}
 .md-list-compact {
 }
 .md-list-compact li {

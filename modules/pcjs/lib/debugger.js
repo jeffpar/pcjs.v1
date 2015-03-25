@@ -2289,7 +2289,6 @@ if (DEBUGGER) {
             aAddr[0] += inc;
             var limit = this.getSegment(aAddr[1]).limit;
             if (aAddr[0] > limit) {
-                this.assert(false);
                 aAddr[0] = 0;
                 aAddr[2] = null;
             }
@@ -2527,13 +2526,6 @@ if (DEBUGGER) {
             }
             aAddr[2] = addr;
         }
-        /*
-         * Finally, we would map all addresses in the top 64Kb (of the 80286's 16Mb address space) to the top of
-         * the 1Mb range, but now that mapBreakpoint() takes care of that in a processor-agnostic manner, at least
-         * for breakpoint addresses, it seems unnecessary for getAddr() to do this anymore.
-         *
-         *      if ((addr & 0xFF0000) == 0xFF0000) addr &= 0x0FFFFF;
-         */
         return addr;
     };
 
@@ -3566,7 +3558,20 @@ if (DEBUGGER) {
                 if (segment !== undefined) {
                     aAddr[0] = offset;
                     aAddr[1] = segment;
-                    symbol['p'] = this.getAddr(aAddr);
+                    aAddr[2] = null;
+                    /*
+                     * getAddr() computes the corresponding physical address and saves it in aAddr[2].
+                     */
+                    this.getAddr(aAddr);
+                    /*
+                     * The physical address for any symbol located in the top 64Kb of the machine's address space
+                     * should be relocated to the top 64Kb of the first 1Mb, so that we're immune from any changes
+                     * to the A20 line.
+                     */
+                    if ((aAddr[2] & ~0xffff) == (this.bus.busLimit & ~0xffff)) {
+                        aAddr[2] &= 0x000fffff;
+                    }
+                    symbol['p'] = aAddr[2];
                 }
                 usr.binaryInsert(aOffsetPairs, [offset, sSymbol], fnComparePairs);
             }
