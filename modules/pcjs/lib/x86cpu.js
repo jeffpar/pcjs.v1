@@ -838,14 +838,13 @@ X86CPU.prototype.reset = function()
  *      GS selector =   0x0000
  *      IDTR        =   base of 0 and limit of 0x3FF
  *
- * All other 80386 registers are undefined after a reset (that is, Intel declined to document precisely how
- * the hardware initializes any other registers, as if that would stop everyone from making any assumptions).
+ * All other 80386 registers are undefined after a reset (ie, Intel did not document how or if they are set).
  *
  * We've elected to set DX to 0x0304 on a reset, which is consistent with a 80386-C0, since we have no desire to
- * try to emulate all the bugs in older (eg, B1) steppings.  At least not initially.  We leave stepping-accurate
+ * try to emulate all the bugs in older (eg, B1) steppings -- at least not initially.  We leave stepping-accurate
  * emulation for another day.  It's also known that the B1 (and possibly B0) reported 0x0303 in DX, and that
- * the D0 stepping reported 0x0305; beyond that, it's not known exactly what revision numbers Intel used for
- * other 80386 CPUs.
+ * the D0 stepping reported 0x0305; beyond that, it's not known exactly what revision numbers Intel used for all
+ * 80386 revisions.
  *
  * We define some additional "registers", such as regLIP. which mirrors the linear address corresponding to
  * CS:IP (the address of the next opcode byte).  In fact, regLIP functions as our internal IP register, so any
