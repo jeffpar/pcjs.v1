@@ -1316,11 +1316,7 @@ Bus.prototype.addPortInputTable = function(component, table, offset)
 {
     if (offset === undefined) offset = 0;
     for (var port in table) {
-        /*
-         * JavaScript coerces property keys to strings, so we use parseInt() to coerce them back to numbers.
-         */
-        port = parseInt(port, 10);
-        this.addPortInputNotify(port + offset, port + offset, component, table[port]);
+        this.addPortInputNotify(+port + offset, +port + offset, component, table[port]);
     }
 };
 
@@ -1440,11 +1436,7 @@ Bus.prototype.addPortOutputTable = function(component, table, offset)
 {
     if (offset === undefined) offset = 0;
     for (var port in table) {
-        /*
-         * JavaScript converts property keys to strings (brilliant), so we use parseInt() to convert them back to numbers.
-         */
-        port = parseInt(port, 10);
-        this.addPortOutputNotify(port + offset, port + offset, component, table[port]);
+        this.addPortOutputNotify(+port + offset, +port + offset, component, table[port]);
     }
 };
 

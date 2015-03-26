@@ -256,7 +256,7 @@ ROM.prototype.onLoadROM = function(sROMFile, sROMData, nErrorCode)
         var asHexData = sHexData.split(" ");
         this.abROM = new Array(asHexData.length);
         for (var i = 0; i < asHexData.length; i++) {
-            this.abROM[i] = parseInt(asHexData[i], 16);
+            this.abROM[i] = str.parseInt(asHexData[i], 16);
         }
     }
     this.copyROM();

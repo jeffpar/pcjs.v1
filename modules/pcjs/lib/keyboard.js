@@ -1090,7 +1090,7 @@ Keyboard.prototype.findBinding = function(simCode, sType, fDown)
     if (this.cSoftCodes) {
         for (var code in Keyboard.SHIFTED_KEYCODES) {
             if (simCode == Keyboard.SHIFTED_KEYCODES[code]) {
-                simCode = parseInt(code, 10);
+                simCode = +code;
                 code = Keyboard.STUPID_KEYCODES[code];
                 if (code) simCode = code;
                 break;

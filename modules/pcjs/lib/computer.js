@@ -187,10 +187,10 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
     var sStatePath = null;
     var sResume = parmsComputer['resume'];
     if (sResume !== undefined) {
-        if (sResume.length > 1) {
-            sStatePath = this.sResumePath = sResume;
+        if (sResume.length == 1) {
+            this.resume = +sResume;
         } else {
-            this.resume = parseInt(sResume, 10);
+            sStatePath = this.sResumePath = sResume;
         }
     }
 

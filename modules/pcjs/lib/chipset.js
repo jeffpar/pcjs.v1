@@ -2187,7 +2187,7 @@ ChipSet.prototype.toggleSwitch = function(control)
     this.setSwitch(control, f);
     var sID = control.getAttribute("id");
     var asParts = sID.split("-");
-    var b = (0x1 << (parseInt(asParts[1], 10) - 1));
+    var b = (0x1 << (+asParts[1] - 1));
     switch (asParts[0]) {
     case "sw1":
         this.sw1Init = (this.sw1Init & ~b) | (f? 0 : b);
@@ -4795,13 +4795,16 @@ ChipSet.prototype.intBIOSRTC = function(addr)
  * parseSwitches(s, def)
  *
  * @this {ChipSet}
- * @param {string|undefined} s describing switch settings (can't simply use parseInt() with a base of 2, because the bit order is reversed, as well as the bit sense)
+ * @param {string|undefined} s describing switch settings
  * @param {number} def is a default value to use if s is undefined
  * @return {number} value representing the switch settings
  */
 ChipSet.prototype.parseSwitches = function(s, def)
 {
     if (s === undefined) return def;
+    /*
+     * NOTE: We can't simply use parseInt() with a base of 2, because the bit order is reversed, as well as the bit sense.
+     */
     var b = 0, bit = 0x1;
     for (var i = 0; i < s.length; i++) {
         if (s.charAt(i) == "0") b |= bit;

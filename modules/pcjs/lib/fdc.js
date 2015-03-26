@@ -1194,7 +1194,7 @@ FDC.prototype.loadSelectedDrive = function(sDisketteName, sDiskettePath, file)
 {
     var iDrive;
     var controlDrives = this.bindings["listDrives"];
-    if (controlDrives && !isNaN(iDrive = parseInt(controlDrives.value, 10)) && iDrive >= 0 && iDrive < this.aDrives.length) {
+    if (controlDrives && !isNaN(iDrive = str.parseInt(controlDrives.value, 10)) && iDrive >= 0 && iDrive < this.aDrives.length) {
 
         if (!sDiskettePath) {
             this.unloadDrive(iDrive);
@@ -1437,7 +1437,7 @@ FDC.prototype.displayDiskette = function(iDrive, fUpdateDrive)
              * Next, make sure the drive whose disk we're updating is the currently selected drive.
              */
             var i;
-            var iDriveSelected = parseInt(controlDrives.value, 10);
+            var iDriveSelected = str.parseInt(controlDrives.value, 10);
             var sTargetPath = (drive.fLocal? "?" : drive.sDiskettePath);
             if (!isNaN(iDriveSelected) && iDriveSelected == iDrive) {
                 for (i = 0; i < controlDisks.options.length; i++) {
@@ -1452,7 +1452,7 @@ FDC.prototype.displayDiskette = function(iDrive, fUpdateDrive)
             }
             if (fUpdateDrive) {
                 for (i = 0; i < controlDrives.options.length; i++) {
-                    if (parseInt(controlDrives.options[i].value, 10) == drive.iDrive) {
+                    if (str.parseInt(controlDrives.options[i].value, 10) == drive.iDrive) {
                         if (controlDrives.selectedIndex != i) {
                             controlDrives.selectedIndex = i;
                         }

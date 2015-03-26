@@ -761,13 +761,15 @@ X86CPU.prototype.initProcessor = function()
             this.aOps[X86.OPCODE.PUSHSP] = X86.opPUSHSP;
 
             if (I386 && this.model >= X86.MODEL_80386) {
+                var bOpcode;
                 this.aOps[X86.OPCODE.FS] = X86.opFS;
                 this.aOps[X86.OPCODE.GS] = X86.opGS;
                 this.aOps[X86.OPCODE.OS] = X86.opOS;
                 this.aOps[X86.OPCODE.AS] = X86.opAS;
                 this.aOps0F = X86.aOps0F.slice();
-                this.aOps0F[0x20] = X86.opMOVrcr;
-                this.aOps0F[0x22] = X86.opMOVcrr;
+                for (bOpcode in X86.aOps0F386) {
+                    this.aOps0F[+bOpcode] = X86.aOps0F386[bOpcode];
+                }
                 /*
                  * Extend the opcode table by creating a mirror of the first 256 opcodes, but with dword-based
                  * opcode handlers (as defined in aOpsD) instead word-based opcode handlers.  Whenever dataSize
@@ -775,8 +777,8 @@ X86CPU.prototype.initProcessor = function()
                  * bOpcodeBias from 0 to 256.
                  */
                 this.aOps = this.aOps.concat(this.aOps);
-                for (var bOpcode in X86.aOpsD) {
-                    this.aOps[parseInt(bOpcode, 10) + 256] = X86.aOpsD[bOpcode];
+                for (bOpcode in X86.aOpsD) {
+                    this.aOps[+bOpcode + 256] = X86.aOpsD[bOpcode];
                 }
             }
         }

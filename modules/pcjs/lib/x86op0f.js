@@ -311,76 +311,30 @@ X86.opMOVcrr = function MOVcrr()
     }
 };
 
-X86.aOps0F = [
-    X86.opGrp6,             X86.opGrp7,             X86.opLAR,              X86.opLSL,              // 0x00-0x03
-    X86.opUndefined,        X86.opLOADALL,          X86.opCLTS,             X86.opUndefined,        // 0x04-0x07
-    /*
-     * On all processors (except the 8086/8088, of course), 0x0F,0x0B is also referred to as "UD2": an
-     * instruction guaranteed to raise a #UD (Invalid Opcode) exception (INT 0x06) on all future x86 processors.
-     */
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opInvalid,          // 0x08-0x0B
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x0C-0x0F
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x10-0x13
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x14-0x17
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x18-0x1B
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x1C-0x1F
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x20-0x23
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x24-0x27
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x28-0x2B
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x2C-0x2F
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x30-0x33
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x34-0x37
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x38-0x3B
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x3C-0x3F
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x40-0x43
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x44-0x47
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x48-0x4B
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x4C-0x4F
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x50-0x53
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x54-0x57
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x58-0x5B
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x5C-0x5F
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x60-0x63
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x64-0x67
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x68-0x6B
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x6C-0x6F
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x70-0x73
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x74-0x77
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x78-0x7B
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x7C-0x7F
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x80-0x83
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x84-0x87
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x88-0x8B
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x8C-0x8F
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x90-0x93
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x94-0x97
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x98-0x9B
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0x9C-0x9F
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0xA0-0xA3
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0xA4-0xA7
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0xA8-0xAB
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0xAC-0xAF
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0xB0-0xB3
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0xB4-0xB7
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0xB8-0xBB
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0xBC-0xBF
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0xC0-0xC3
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0xC4-0xC7
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0xC8-0xCB
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0xCC-0xCF
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0xD0-0xD3
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0xD4-0xD7
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0xD8-0xDB
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0xDC-0xDF
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0xE0-0xE3
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0xE4-0xE7
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0xE8-0xEB
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0xEC-0xEF
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0xF0-0xF3
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0xF4-0xF7
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        // 0xF8-0xFB
-    X86.opUndefined,        X86.opUndefined,        X86.opUndefined,        X86.opUndefined         // 0xFC-0xFF
-];
+X86.aOps0F = new Array(256);
+
+X86.aOps0F[0x00] = X86.opGrp6;
+X86.aOps0F[0x01] = X86.opGrp7;
+X86.aOps0F[0x02] = X86.opLAR;
+X86.aOps0F[0x03] = X86.opLSL;
+X86.aOps0F[0x05] = X86.opLOADALL;
+X86.aOps0F[0x06] = X86.opCLTS;
+
+/*
+ * On all processors (except the 8086/8088, of course), 0x0F,0x0B is also referred to as "UD2": an
+ * instruction guaranteed to raise a #UD (Invalid Opcode) exception (INT 0x06) on all future x86 processors.
+ */
+X86.aOps0F[0x0B] = X86.opInvalid;
+
+for (var i = 0; i < X86.aOps0F.length; i++) {
+    if (!X86.aOps0F[i]) X86.aOps0F[i] = X86.opUndefined;
+}
+
+if (I386) {
+    X86.aOps0F386 = [];
+    X86.aOps0F386[0x20] = X86.opMOVrcr;
+    X86.aOps0F386[0x22] = X86.opMOVcrr;
+}
 
 /*
  * These instruction groups are not as orthogonal as the original 8086/8088 groups (Grp1 through Grp4): some of

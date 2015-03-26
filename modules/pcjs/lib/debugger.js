@@ -4015,7 +4015,7 @@ if (DEBUGGER) {
             var fWords = (sCmd == "dw");
             if (sLen !== undefined) {
                 if (sLen.charAt(0) == "l") sLen = sLen.substr(1);
-                cLines = parseInt(sLen, 10);
+                cLines = +sLen;
                 if (cLines) cLines = fWords? ((cLines + 7) >> 3) : ((cLines + 15) >> 4);
             }
             if (!cLines) cLines = 8;
@@ -4061,7 +4061,7 @@ if (DEBUGGER) {
         if (aAddr[0] == null)
             return;
         for (var i = 2; i < asArgs.length; i++) {
-            var b = parseInt(asArgs[i], 16);
+            var b = str.parseInt(asArgs[i], 16);
             this.println("setting " + this.hexAddr(aAddr) + " to " + str.toHexByte(b));
             this.setByte(aAddr, b, 1);
         }
@@ -4133,7 +4133,7 @@ if (DEBUGGER) {
         var iHistory = this.iOpcodeHistory;
         var aHistory = this.aOpcodeHistory;
         if (aHistory.length) {
-            var n = (sCount === undefined? this.nextHistory : parseInt(sCount, 10));
+            var n = (sCount === undefined? this.nextHistory : +sCount);
             if (isNaN(n))
                 n = cLines;
             else
@@ -4203,7 +4203,7 @@ if (DEBUGGER) {
             var fPrint = false;
             if (sCategory == "DUMP") {
                 var sDump = "";
-                var cLines = (sEnable === undefined? -1 : parseInt(sEnable, 10));
+                var cLines = (sEnable === undefined? -1 : +sEnable);
                 var i = this.iTraceBuffer;
                 do {
                     var s = this.aTraceBuffer[i++];
@@ -4509,9 +4509,7 @@ if (DEBUGGER) {
         switch (asArgs[1]) {
             case "cs":
                 var nCycles;
-                if (asArgs[3] !== undefined) {
-                    nCycles = parseInt(asArgs[3], 10);
-                }
+                if (asArgs[3] !== undefined) nCycles = +asArgs[3];
                 switch (asArgs[2]) {
                     case "int":
                         this.cpu.aCounts.nCyclesChecksumInterval = nCycles;
@@ -4533,7 +4531,7 @@ if (DEBUGGER) {
                 break;
             case "sp":
                 if (asArgs[2] !== undefined) {
-                    this.cpu.setSpeed(parseInt(asArgs[2], 10));
+                    this.cpu.setSpeed(+asArgs[2]);
                 }
                 this.println("target speed: " + this.cpu.getSpeedTarget() + " (" + this.cpu.getSpeed() + "x)");
                 break;
@@ -4610,7 +4608,7 @@ if (DEBUGGER) {
                     this.println("missing value for " + asArgs[1]);
                     return;
                 }
-                var w = parseInt(sValue, 16);
+                var w = str.parseInt(sValue, 16);
                 if (!isNaN(w)) {
                     var sRegMatch = sReg.toUpperCase();
                     if (sRegMatch.charAt(0) == 'E' && this.cchReg <= 4) {
@@ -4938,7 +4936,7 @@ if (DEBUGGER) {
     {
         var dbg = this;
         var fRegs = (sCmd == "tr");
-        var count = (sCount != null? parseInt(sCount, 10) : 1);
+        var count = (sCount != null? +sCount : 1);
         var nCycles = (count == 1? 0 : 1);
         web.onCountRepeat(
             count,
