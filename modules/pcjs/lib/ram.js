@@ -351,8 +351,8 @@ CompaqController.writeByte = function writeCompaqControllerByte(off, b)
             }
         }
         controller.bMappings = b;
+        if (DEBUG) this.cpu.stopCPU();
     }
-    if (DEBUG) this.cpu.stopCPU();
 };
 
 CompaqController.ACCESS = [CompaqController.readByte, CompaqController.readByte, CompaqController.readByte,

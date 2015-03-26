@@ -121,11 +121,10 @@ X86Seg.ID = {
  */
 X86Seg.loadReal = function loadReal(sel, fSuppress)
 {
-    this.cpu.assert(!(sel & ~0xffff));
-    this.sel = sel;
+    this.sel = sel & 0xffff;
     this.dataSize = this.addrSize = 2;
     this.dataMask = this.addrMask = 0xffff;
-    return this.base = sel << 4;
+    return this.base = this.sel << 4;
 };
 
 /**
@@ -157,7 +156,7 @@ X86Seg.loadProt = function loadProt(sel, fSuppress)
     var addrDTLimit;
     var cpu = this.cpu;
 
-    this.cpu.assert(!(sel & ~0xffff));
+    sel &= 0xffff;
 
     if (!(sel & X86.SEL.LDT)) {
         addrDT = cpu.addrGDT;
@@ -205,7 +204,12 @@ X86Seg.loadProt = function loadProt(sel, fSuppress)
 X86Seg.loadIDTReal = function loadIDTReal(nIDT)
 {
     var cpu = this.cpu;
-    cpu.assert(nIDT >= 0 && nIDT < 256 && !cpu.addrIDT && cpu.addrIDTLimit == 0x03FF);
+    /*
+     * NOTE: The Compaq DeskPro 386 ROM loads the IDTR for the real-mode IDT with a limit of 0xffff instead
+     * of the normal 0x3ff.  A limit higher than 0x3ff is OK, since all real-mode IDT entries are 4 bytes, and
+     * there's no way to issue an interrupt with a vector > 0xff.  Just something to be aware of.
+     */
+    cpu.assert(nIDT >= 0 && nIDT < 256 && !cpu.addrIDT && cpu.addrIDTLimit >= 0x3ff);
     /*
      * Intel documentation for INT/INTO under "REAL ADDRESS MODE EXCEPTIONS" says:
      *

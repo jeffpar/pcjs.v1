@@ -3402,7 +3402,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
 
             if (I386 && (this.opPrefixes & (X86.OPFLAG.ADDRSIZE | X86.OPFLAG.DATASIZE))) {
                 this.resetSizes();
-                if (DEBUG && DEBUGGER) {
+                if (MAXDEBUG && DEBUGGER) {
                     this.println("80386 override processed");
                     this.stopCPU();
                     break;

@@ -1393,10 +1393,15 @@ X86.fnRCLd = function RCLd(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
-    var shift = src & this.nShiftCountMask;
+    var shift = src & this.nShiftCountMask;     // Yes, this 32-bit-only function could mask with 0x1f directly
     if (shift) {
         var carry = this.getCarry();
-        result = (dst << shift) | (carry << (shift - 1)) | (dst >>> (32 - shift));
+        /*
+         * JavaScript Alert: much like a post-8086 Intel CPU, JavaScript shift counts are mod 32,
+         * so "dst >>> 32" is equivalent to "dst >>> 0", which doesn't shift any bits at all.  To
+         * compensate, we shift one bit less than the maximum, and then shift one bit farther.
+         */
+        result = (dst << shift) | (carry << (shift - 1)) | ((dst >>> (32 - shift)) >>> 1);
         carry = dst << (shift - 1);
         X86.setRotateResult.call(this, result, carry, X86.RESULT.DWORD);
     }
@@ -1472,10 +1477,15 @@ X86.fnRCRd = function RCRd(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
-    var shift = src & this.nShiftCountMask;
+    var shift = src & this.nShiftCountMask;     // Yes, this 32-bit-only function could mask with 0x1f directly
     if (shift) {
         var carry = this.getCarry();
-        result = (dst >>> shift) | (carry << (32 - shift)) | (dst << (33 - shift));
+        /*
+         * JavaScript Alert: much like a post-8086 Intel CPU, JavaScript shift counts are mod 32,
+         * so "dst << 32" is equivalent to "dst << 0", which doesn't shift any bits at all.  To
+         * compensate, we shift one bit less than the maximum, and then shift one bit farther.
+         */
+        result = (dst >>> shift) | (carry << (32 - shift)) | ((dst << (32 - shift)) << 1);
         carry = dst << (32 - shift);
         X86.setRotateResult.call(this, result, carry, X86.RESULT.DWORD);
     }
@@ -1507,7 +1517,7 @@ X86.fnRETF = function RETF(n)
          *
          * TODO: I'm not clear on whether a conforming code segment must also be marked readable, so I'm playing
          * it safe and using CODE_CONFORMING instead of CODE_CONFORMING_READABLE.  Also, for the record, I've not
-         * seen this situation occur in OS/2 1.0 yet.
+         * seen this situation occur yet (eg, in OS/2 1.0).
          */
         if ((this.segDS.sel & X86.SEL.MASK) && this.segDS.dpl < this.segCS.cpl && (this.segDS.acc & X86.DESC.ACC.TYPE.CODE_CONFORMING) != X86.DESC.ACC.TYPE.CODE_CONFORMING) {
             this.assert(false);         // I'm not asserting this is bad, I just want to see it in action

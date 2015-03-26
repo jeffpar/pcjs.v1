@@ -4348,6 +4348,13 @@ ChipSet.prototype.out8042InBuffCmd = function(port, bOut, addrFrom)
         this.set8042OutPort(ChipSet.KBC.OUTPORT.NO_RESET | ChipSet.KBC.OUTPORT.A20_ON);
         break;
 
+    case ChipSet.KBC.CMD.INTF_TEST:         // 0xAB
+        /*
+         * TODO: Determine all the side-effects of the Interface Test, if any.
+         */
+        this.set8042OutBuff(ChipSet.KBC.DATA.INTF_TEST.OK);
+        break;
+
     case ChipSet.KBC.CMD.READ_TEST:         // 0xE0
         this.set8042OutBuff((this.b8042CmdData & ChipSet.KBC.DATA.CMD.NO_CLOCK)? 0 : ChipSet.KBC.TESTPORT.KBD_CLOCK);
         break;
