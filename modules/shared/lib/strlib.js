@@ -60,7 +60,7 @@ str.isValidInt = function(s, base)
  * to ensure we don't get partial values (see isValidInt() for details).
  *
  * @param {string} s is the string representation of some number
- * @param {number} [base] is the radix to assume (default is 16)
+ * @param {number} [base] is the default radix to use (default is 16); can be overridden by prefixes/suffixes
  * @return {number|undefined} corresponding value, or undefined if invalid
  */
 str.parseInt = function(s, base)

@@ -1329,6 +1329,74 @@ if (DEBUGGER) {
     };
 
     /**
+     * newAddr(off, seg, addr, fData32, fAddr32)
+     *
+     * @this {Debugger}
+     * @param {number} off
+     * @param {number} seg
+     * @param {number|null} [addr]
+     * @param {boolean} [fData32]
+     * @param {boolean} [fAddr32]
+     * @return {Array} containing [off, seg, addr]
+     */
+    Debugger.prototype.newAddr = function(off, seg, addr, fData32, fAddr32)
+    {
+        return [off, seg, addr, false, fData32, fAddr32];
+    };
+
+    /**
+     * incAddr(aAddr, inc)
+     *
+     * @this {Debugger}
+     * @param {Array} aAddr containing [off, seg, addr]
+     * @param {number|undefined} inc contains value to increment by (default is 1)
+     */
+    Debugger.prototype.incAddr = function(aAddr, inc)
+    {
+        inc = (inc === undefined? 1 : inc);
+        if (aAddr[2] != null) {
+            aAddr[2] += inc;
+        }
+        if (aAddr[1] != null) {
+            aAddr[0] += inc;
+            var limit = this.getSegment(aAddr[1]).limit;
+            if (aAddr[0] > limit) {
+                aAddr[0] = 0;
+                aAddr[2] = null;
+            }
+        }
+    };
+
+    /**
+     * hexAddr(aAddr)
+     *
+     * @this {Debugger}
+     * @param {Array} aAddr containing [off, seg]
+     * @return {string} the hex representation of the address
+     */
+    Debugger.prototype.hexAddr = function(aAddr)
+    {
+        return aAddr[1] == null? ("%" + str.toHex(aAddr[2])) : this.hexOffset(aAddr[0], aAddr[1], aAddr[4]);
+    };
+
+    /**
+     * hexOffset(off, sel)
+     *
+     * @this {Debugger}
+     * @param {number} off
+     * @param {number} [sel]
+     * @param {boolean} [fData32] is true if 32-bit OPERAND size in effect
+     * @return {string} the hex representation of off (or sel:off)
+     */
+    Debugger.prototype.hexOffset = function(off, sel, fData32)
+    {
+        if (sel !== undefined) {
+            return str.toHex(sel, 4) + ":" + str.toHex(off, fData32? 8 : 4);
+        }
+        return str.toHex(off);
+    };
+
+    /**
      * dumpDOS(s)
      *
      * This dumps DOS MCBs (Memory Control Blocks).
@@ -1646,6 +1714,12 @@ if (DEBUGGER) {
             case Debugger.REG_DI:
                 n = cpu.regEDI;  cch = 4;
                 break;
+            case Debugger.REG_IP:
+                n = cpu.getIP(); cch = this.cchReg;
+                break;
+            case Debugger.REG_PS:
+                n = cpu.getPS(); cch = this.cchReg;
+                break;
             case Debugger.REG_SEG + Debugger.REG_ES:
                 n = cpu.getES(); cch = 4;
                 break;
@@ -1658,54 +1732,52 @@ if (DEBUGGER) {
             case Debugger.REG_SEG + Debugger.REG_DS:
                 n = cpu.getDS(); cch = 4;
                 break;
-            case Debugger.REG_SEG + Debugger.REG_FS:
-                n = cpu.getFS(); cch = 4;
-                break;
-            case Debugger.REG_SEG + Debugger.REG_GS:
-                n = cpu.getGS(); cch = 4;
-                break;
-            case Debugger.REG_IP:
-                n = cpu.getIP(); cch = this.cchReg;
-                break;
-            case Debugger.REG_PS:
-                n = cpu.getPS(); cch = this.cchReg;
-                break;
-            case Debugger.REG_EAX:
-                n = cpu.regEAX;  cch = 8;
-                break;
-            case Debugger.REG_ECX:
-                n = cpu.regECX;  cch = 8;
-                break;
-            case Debugger.REG_EDX:
-                n = cpu.regEDX;  cch = 8;
-                break;
-            case Debugger.REG_EBX:
-                n = cpu.regEBX;  cch = 8;
-                break;
-            case Debugger.REG_ESP:
-                n = cpu.getSP(); cch = 8;
-                break;
-            case Debugger.REG_EBP:
-                n = cpu.regEBP;  cch = 8;
-                break;
-            case Debugger.REG_ESI:
-                n = cpu.regESI;  cch = 8;
-                break;
-            case Debugger.REG_EDI:
-                n = cpu.regEDI;  cch = 8;
-                break;
-            case Debugger.REG_CR0:
-                n = cpu.regCR0;  cch = 8;
-                break;
-            case Debugger.REG_CR1:
-                n = cpu.regCR1;  cch = 8;
-                break;
-            case Debugger.REG_CR2:
-                n = cpu.regCR2;  cch = 8;
-                break;
-            case Debugger.REG_CR3:
-                n = cpu.regCR3;  cch = 8;
-                break;
+            }
+            if (I386 && !cch) {
+                switch(iReg) {
+                case Debugger.REG_EAX:
+                    n = cpu.regEAX;  cch = 8;
+                    break;
+                case Debugger.REG_ECX:
+                    n = cpu.regECX;  cch = 8;
+                    break;
+                case Debugger.REG_EDX:
+                    n = cpu.regEDX;  cch = 8;
+                    break;
+                case Debugger.REG_EBX:
+                    n = cpu.regEBX;  cch = 8;
+                    break;
+                case Debugger.REG_ESP:
+                    n = cpu.getSP(); cch = 8;
+                    break;
+                case Debugger.REG_EBP:
+                    n = cpu.regEBP;  cch = 8;
+                    break;
+                case Debugger.REG_ESI:
+                    n = cpu.regESI;  cch = 8;
+                    break;
+                case Debugger.REG_EDI:
+                    n = cpu.regEDI;  cch = 8;
+                    break;
+                case Debugger.REG_CR0:
+                    n = cpu.regCR0;  cch = 8;
+                    break;
+                case Debugger.REG_CR1:
+                    n = cpu.regCR1;  cch = 8;
+                    break;
+                case Debugger.REG_CR2:
+                    n = cpu.regCR2;  cch = 8;
+                    break;
+                case Debugger.REG_CR3:
+                    n = cpu.regCR3;  cch = 8;
+                    break;
+                case Debugger.REG_SEG + Debugger.REG_FS:
+                    n = cpu.getFS(); cch = 4;
+                    break;
+                case Debugger.REG_SEG + Debugger.REG_GS:
+                    n = cpu.getGS(); cch = 4;
+                    break;
+                }
             }
             if (cch) s = str.toHex(n, cch);
         }
@@ -2259,71 +2331,6 @@ if (DEBUGGER) {
     };
 
     /**
-     * newAddr(off, seg, addr)
-     *
-     * @this {Debugger}
-     * @param {number} off
-     * @param {number} seg
-     * @param {number} [addr] is the physical address, if known
-     * @return {Array} containing [off, seg, addr]
-     */
-    Debugger.prototype.newAddr = function(off, seg, addr)
-    {
-        return [off, seg, addr];
-    };
-
-    /**
-     * incAddr(aAddr, inc)
-     *
-     * @this {Debugger}
-     * @param {Array} aAddr containing [off, seg, addr]
-     * @param {number|undefined} inc contains value to increment by (default is 1)
-     */
-    Debugger.prototype.incAddr = function(aAddr, inc)
-    {
-        inc = (inc === undefined? 1 : inc);
-        if (aAddr[2] != null) {
-            aAddr[2] += inc;
-        }
-        if (aAddr[1] != null) {
-            aAddr[0] += inc;
-            var limit = this.getSegment(aAddr[1]).limit;
-            if (aAddr[0] > limit) {
-                aAddr[0] = 0;
-                aAddr[2] = null;
-            }
-        }
-    };
-
-    /**
-     * hexAddr(aAddr)
-     *
-     * @this {Debugger}
-     * @param {Array} aAddr containing [off, seg]
-     * @return {string} the hex representation of the address
-     */
-    Debugger.prototype.hexAddr = function(aAddr)
-    {
-        return aAddr[1] == null? ("%" + str.toHex(aAddr[2])) : this.hexOffset(aAddr[0], aAddr[1]);
-    };
-
-    /**
-     * hexOffset(off, sel)
-     *
-     * @this {Debugger}
-     * @param {number} off
-     * @param {number} [sel]
-     * @return {string} the hex representation of off (or sel:off)
-     */
-    Debugger.prototype.hexOffset = function(off, sel)
-    {
-        if (sel !== undefined) {
-            return str.toHex(sel, 4) + ":" + str.toHex(off, this.cchAddr < 8? 4 : 8);
-        }
-        return str.toHex(off);
-    };
-
-    /**
      * checksEnabled(fRelease)
      *
      * This "check" function is called by the CPU; we indicate whether or not every instruction needs to be checked.
@@ -2360,7 +2367,7 @@ if (DEBUGGER) {
             }
             /*
              * Halt whenever ring 3 code is running with interrupts disabled, because that's likely an
-             * error (technically, we should also check the IOPL, too, because if IOPL is 3, this is OK).
+             * error (TODO: we should also check the IOPL, too, because if IOPL is 3, then this is OK).
              */
             if (this.cpu.segCS.cpl == 3 && !(this.cpu.regPS & X86.PS.IF)) {
                 return true;
@@ -2380,7 +2387,7 @@ if (DEBUGGER) {
 
             /*
              * This is a good example of what NOT to do in a high-frequency function, and defeats
-             * the purpose of preallocating and preinitializing the history array in historyInit():
+             * the purpose of pre-allocating and pre-initializing the history array in historyInit():
              *
              *      this.aOpcodeHistory[this.iOpcodeHistory] = this.newAddr(this.cpu.getIP(), this.cpu.getCS(), addr);
              *
@@ -2491,6 +2498,10 @@ if (DEBUGGER) {
         if (sel == this.cpu.getDS()) return this.cpu.segDS;
         if (sel == this.cpu.getES()) return this.cpu.segES;
         if (sel == this.cpu.getSS()) return this.cpu.segSS;
+        if (I386) {
+            if (sel == this.cpu.getFS()) return this.cpu.segFS;
+            if (sel == this.cpu.getGS()) return this.cpu.segGS;
+        }
         var seg = new X86Seg(this.cpu, X86Seg.ID.DEBUG, "DBG");
         /*
          * TODO: Confirm that it's OK for this function to drop any error from seg.load() on the floor....
@@ -2550,6 +2561,22 @@ if (DEBUGGER) {
             if (inc !== undefined) this.incAddr(aAddr, inc);
         }
         return b;
+    };
+
+    /**
+     * getWord(aAddr, inc)
+     *
+     * @this {Debugger}
+     * @param {Array} aAddr
+     * @param {number} [inc]
+     * @return {number}
+     */
+    Debugger.prototype.getWord = function(aAddr, inc)
+    {
+        if (aAddr[4]) {
+            return this.getLong(aAddr, inc? 4 : 0);
+        }
+        return this.getShort(aAddr, inc? 2 : 0);
     };
 
     /**
@@ -2865,16 +2892,26 @@ if (DEBUGGER) {
      * getInstruction(aAddr, sComment, nSequence)
      *
      * @this {Debugger}
-     * @param {Array} aAddr (updated to next instruction)
+     * @param {Array} aAddr (aAddr[4] is true if 32-bit operands, aAddr[5] is true if 32-bit addresses)
      * @param {string} [sComment] is an associated comment
      * @param {number} [nSequence] is an associated sequence number, undefined if none
-     * @return {string}
+     * @return {string} (and aAddr is updated to the next instruction)
      */
     Debugger.prototype.getInstruction = function(aAddr, sComment, nSequence)
     {
-        var aAddrIns = this.newAddr(aAddr[0], aAddr[1], aAddr[2]);
+        var aAddrIns = this.newAddr(aAddr[0], aAddr[1], aAddr[2], this.cpu.segCS.addrSize == 4);
 
         var bOpcode = this.getByte(aAddr, 1);
+
+        /*
+         * Prior to calling getInstruction(), doUnassemble() checks for these prefixes as well,
+         * updating aAddr[4] and/or aAddr[5] as appropriate; if that's been done, then let's suppress
+         * the display of those prefixes and simply incorporate them into the byte stream.
+         */
+        if (aAddr[4] != null && bOpcode == X86.OPCODE.OS || aAddr[5] != null && bOpcode == X86.OPCODE.AS) {
+            bOpcode = this.getByte(aAddr, 1);
+        }
+
         var aOpDesc = this.aaOpDescs[bOpcode];
         var iIns = aOpDesc[0];
         var bModRM = -1;
@@ -2894,7 +2931,10 @@ if (DEBUGGER) {
         var sOpcode = Debugger.INS_NAMES[aOpDesc[0]];
         var cOperands = 2;
         var sOperands = "";
-        if (this.isStringIns(bOpcode)) cOperands = 0;   // suppress display of operands for string instructions
+        if (this.isStringIns(bOpcode)) {
+            cOperands = 0;              // suppress display of operands for string instructions
+            if (aAddr[4] && sOpcode.slice(-1) == 'W') sOpcode = sOpcode.slice(0, -1) + 'D';
+        }
 
         var typeCPU = null;
         for (var iOperand = 1; iOperand <= cOperands; iOperand++) {
@@ -2991,7 +3031,7 @@ if (DEBUGGER) {
      *
      * @this {Debugger}
      * @param {number} type
-     * @param {Array} aAddr
+     * @param {Array} aAddr (aAddr[4] is true if 32-bit operands, aAddr[5] is true if 32-bit addresses)
      * @return {string} operand
      */
     Debugger.prototype.getImmOperand = function(type, aAddr)
@@ -3022,7 +3062,7 @@ if (DEBUGGER) {
                 sOperand = str.toHex(this.getShort(aAddr, 2), 4);
                 break;
             case Debugger.TYPE_FARP:
-                sOperand = this.hexAddr(this.newAddr(this.getShort(aAddr, 2), this.getShort(aAddr, 2)));
+                sOperand = this.hexAddr(this.newAddr(this.getWord(aAddr, 2), this.getShort(aAddr, 2), null, aAddr[4]));
                 break;
             default:
                 sOperand = "imm(" + str.toHexWord(type) + ")";
@@ -3298,8 +3338,8 @@ if (DEBUGGER) {
      *
      *      EAX=00000000 EBX=00000000 ECX=00000000 EDX=00000000
      *      ESP=00000000 EBP=00000000 ESI=00000000 EDI=00000000
-     *      SS=0000 DS=0000 ES=0000 PS=00000002 V0 D0 I0 T0 S0 Z0 A0 P0 C0
-     *      F000:0000FFF0 EA05F900F0    JMP      F000:0000F905
+     *      SS=0000 DS=0000 ES=0000 FS=0000 GS=0000 PS=00000002 V0 D0 I0 T0 S0 Z0 A0 P0 C0
+     *      F000:FFF0 EA05F900F0    JMP      F000:F905
      *
      * Sample 80286 protected-mode register dump:
      *
@@ -4121,7 +4161,7 @@ if (DEBUGGER) {
                  * We must create a new aAddr from the address we obtained from aHistory, because
                  * aAddr was a reference, not a copy, and we don't want getInstruction() modifying the original.
                  *
-                 * TODO: By using a new address for each iteration, history dumps fail to disassemble 32-bit overrides properly.
+                 * TODO: By using a new address for each line, history dumps fail to disassemble 32-bit overrides properly.
                  */
                 aAddr = this.newAddr(aAddr[0], aAddr[1], aAddr[2]);
                 this.println(this.getInstruction(aAddr, "history", n));
@@ -4554,10 +4594,7 @@ if (DEBUGGER) {
         if (asArgs != null && asArgs.length > 1) {
             var sReg = asArgs[1];
             if (sReg == 'p') {
-                /*
-                 * If the CPU has not defined addrGDT, then there are no protected-mode registers.
-                 */
-                fProt = (this.cpu.addrGDT !== undefined);
+                fProt = (this.cpu.model >= X86.MODEL_80286);
             } else {
              // fIns = false;
                 var sValue = null;
@@ -4589,9 +4626,6 @@ if (DEBUGGER) {
                     case "AX":
                         this.cpu.regEAX = (this.cpu.regEAX & ~0xffff) | (w & 0xffff);
                         break;
-                    case "EAX":
-                        this.cpu.regEAX = w;
-                        break;
                     case "BL":
                         this.cpu.regEBX = (this.cpu.regEBX & ~0xff) | (w & 0xff);
                         break;
@@ -4600,9 +4634,6 @@ if (DEBUGGER) {
                         break;
                     case "BX":
                         this.cpu.regEBX = (this.cpu.regEBX & ~0xffff) | (w & 0xffff);
-                        break;
-                    case "EBX":
-                        this.cpu.regEBX = w;
                         break;
                     case "CL":
                         this.cpu.regECX = (this.cpu.regECX & ~0xff) | (w & 0xff);
@@ -4613,9 +4644,6 @@ if (DEBUGGER) {
                     case "CX":
                         this.cpu.regECX = (this.cpu.regECX & ~0xffff) | (w & 0xffff);
                         break;
-                    case "ECX":
-                        this.cpu.regECX = w;
-                        break;
                     case "DL":
                         this.cpu.regEDX = (this.cpu.regEDX & ~0xff) | (w & 0xff);
                         break;
@@ -4625,32 +4653,17 @@ if (DEBUGGER) {
                     case "DX":
                         this.cpu.regEDX = (this.cpu.regEDX & ~0xffff) | (w & 0xffff);
                         break;
-                    case "EDX":
-                        this.cpu.regEDX = w;
-                        break;
                     case "SP":
                         this.cpu.setSP((this.cpu.getSP() & ~0xffff) | (w & 0xffff));
-                        break;
-                    case "ESP":
-                        this.cpu.setSP(w);
                         break;
                     case "BP":
                         this.cpu.regEBP = (this.cpu.regEBP & ~0xffff) | (w & 0xffff);
                         break;
-                    case "EBP":
-                        this.cpu.regEBP = w;
-                        break;
                     case "SI":
                         this.cpu.regESI = (this.cpu.regESI & ~0xffff) | (w & 0xffff);
                         break;
-                    case "ESI":
-                        this.cpu.regESI = w;
-                        break;
                     case "DI":
                         this.cpu.regEDI = (this.cpu.regEDI & ~0xffff) | (w & 0xffff);
-                        break;
-                    case "EDI":
-                        this.cpu.regEDI = w;
                         break;
                     case "DS":
                         this.cpu.setDS(w);
@@ -4720,6 +4733,47 @@ if (DEBUGGER) {
                              */
                             default:
                                 fUnknown = true;
+                                if (I386 && this.cpu.model >= X86.MODEL_80386) {
+                                    fUnknown = false;
+                                    switch(sRegMatch){
+                                    case "EAX":
+                                        this.cpu.regEAX = w;
+                                        break;
+                                    case "EBX":
+                                        this.cpu.regEBX = w;
+                                        break;
+                                    case "ECX":
+                                        this.cpu.regECX = w;
+                                        break;
+                                    case "EDX":
+                                        this.cpu.regEDX = w;
+                                        break;
+                                    case "ESP":
+                                        this.cpu.setSP(w);
+                                        break;
+                                    case "EBP":
+                                        this.cpu.regEBP = w;
+                                        break;
+                                    case "ESI":
+                                        this.cpu.regESI = w;
+                                        break;
+                                    case "EDI":
+                                        this.cpu.regEDI = w;
+                                        break;
+                                    case "FS":
+                                        this.cpu.setFS(w);
+                                        break;
+                                    case "GS":
+                                        this.cpu.setGS(w);
+                                        break;
+                                    /*
+                                     * TODO: Add support for CR0-CR3, DR0-DR7, and TR6-TR7.
+                                     */
+                                    default:
+                                        fUnknown = true;
+                                        break;
+                                    }
+                                }
                                 break;
                             }
                         }
@@ -4996,9 +5050,14 @@ if (DEBUGGER) {
                     aAddr[4] = !aAddr[4];
                 } else if (bOpcode == X86.OPCODE.AS) {
                     aAddr[5] = !aAddr[5];
+                } else {
+                    /*
+                     * For all prefixes (except for the OPERAND and ADDRESS overrides, which getInstruction()
+                     * now incorporates into the instruction), we will want to dump an additional instruction.
+                     */
+                    if (!n) n++;
+                    nSequence = null;
                 }
-                if (!n) n++;
-                nSequence = null;
             } else {
                 fInitSize = true;
             }

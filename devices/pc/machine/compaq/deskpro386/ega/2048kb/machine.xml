@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.17.4/machine.xsl"?>
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.17.5/machine.xsl"?>
 <machine id="deskpro386" class="pc" border="1" pos="center" style="background-color:#FAEBD7">
 	<computer id="deskpro386-ega-2048k" name="Compaq DeskPro 386" buswidth="32"/>
 	<cpu id="cpu386" model="80386" autostart="false"/>
@@ -14,7 +14,7 @@
 	<panel ref="/devices/pc/panel/btpanel.xml"/>
 	<fdc ref="/disks/pc/library.xml" width="340px" automount='{A: {name: "PC-DOS 3.00 (Disk 1)", path: "/disks/pc/dos/ibm/3.00/PCDOS300-DISK1.json"}, B: {name: "PC-DOS 3.00 (Disk 2)", path: "/disks/pc/dos/ibm/3.00/PCDOS300-DISK2.json"}}'/>
 	<hdc id="hdcAT" type="at" drives='[{name:"20Mb Hard Disk",type:2}]'/>
-	<chipset id="chipset" model="5170" floppies="[1200,1200]"/>
+	<chipset id="chipset" model="deskpro386" floppies="[1200,1200]"/>
 	<serial id="com1" adapter="1"/>
 	<serial id="com2" adapter="2" binding="print"/>
 	<mouse serial="com1"/>

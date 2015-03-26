@@ -47,13 +47,15 @@ var X86 = {
      * This constant is used to mark points in the code where the physical address being returned
      * is invalid and should not be used.  TODO: There are still functions that will use an invalid
      * address, which is why we've tried to choose a value that causes the least harm, but ultimately,
-     * we must add checks to those functions or throw a special JavaScript exception to bypass them.
+     * we must add checks to those functions or throw special JavaScript exceptions to bypass them.
      *
      * This value is also used to indicate non-existent EA address calculations, which are usually
-     * detected with "regEA === ADDR_INVALID" and "regEAWrite === ADDR_INVALID" tests.  In a 32-bit CPU,
-     * -1 (ie, 0xffffffff) could actually be a valid address, so consider changing it to NaN or null;
-     * my concern is that, by mixing non-numbers (specifically, values outside the range of signed 32-bit
-     * integers), performance may suffer.
+     * detected with "regEA === ADDR_INVALID" and "regEAWrite === ADDR_INVALID" tests.  In a 32-bit
+     * CPU, -1 (ie, 0xffffffff) could actually be a valid address, so consider changing ADDR_INVALID
+     * to NaN or null (which is also why all ADDR_INVALID tests should use strict equality operators).
+     *
+     * The main reason I'm NOT using NaN or null now is my concern that, by mixing non-numbers
+     * (specifically, values outside the range of signed 32-bit integers), performance may suffer.
      */
     ADDR_INVALID:   -1,
 
@@ -242,7 +244,7 @@ var X86 = {
     },
     RESULT: {
         /*
-         * Flags were originally computed based on the following 16-bit result registers:
+         * Flags were originally computed using 16-bit result registers:
          *
          *      CF: resultZeroCarry & resultSize (ie, 0x100 or 0x10000)
          *      PF: resultParitySign & 0xff
@@ -251,7 +253,7 @@ var X86 = {
          *      SF: resultParitySign & (resultSize >> 1)
          *      OF: (resultParitySign ^ resultAuxOverflow ^ (resultParitySign >> 1)) & (resultSize >> 1)
          *
-         * I386 support requires that we now rely on the following 32-bit result registers:
+         * I386 support requires that we now rely on 32-bit result registers:
          *
          *      resultDst, resultSrc, resultArith, resultLogic and resultType
          *
@@ -266,8 +268,8 @@ var X86 = {
          *
          * where resultType contains both a size, which must be one of BYTE (0x80), WORD (0x8000),
          * or DWORD (0x80000000), along with bits for each of the arithmetic and/or logical flags that
-         * are currently "cached" in result registers (eg, X86.RESULT.CF for carry, X86.RESULT.OF for
-         * overflow, etc).
+         * are currently "cached" in the result registers (eg, X86.RESULT.CF for carry, X86.RESULT.OF
+         * for overflow, etc).
          *
          * WARNING: Do not confuse these RESULT flag definitions with the PS flag definitions.  RESULT
          * flags are used only as "cached" flag indicators, packed into bits 0-5 of resultType; they do
@@ -284,16 +286,20 @@ var X86 = {
          *      setLogicResult(value, type [, carry [, overflow]])
          *
          * Since most logical operations clear both CF and OF, most calls to setLogicResult() can omit the
-         * two optional parameters.
+         * last two optional parameters.
          *
          * The type parameter of these methods indicates both the size of the result (BYTE, WORD or DWORD)
          * and which of the flags should now be considered "cached" by the result registers.  If the previous
-         * resultType specifies any flags not contained in the new type parameter, then those flags must be
-         * immediately calculated and written to the appropriate bit(s) in regPS.
+         * resultType specifies any flags not present in the new type parameter, then those flags are
+         * calculated and written to the appropriate regPS bit(s) *before* the result registers are updated.
          *
          * Arithmetic operations are assumed to represent an "added" result; if a "subtracted" result is
          * provided instead (eg, from CMP, DEC, SUB, etc), then setArithResult() must include a 5th parameter
-         * (fSubtract).
+         * (fSubtract); eg:
+         *
+         *      setArithResult(dst, src, dst-src, X86.RESULT.BYTE | X86.RESULT.ALL, true)
+         *
+         * TODO: Consider separating setArithResult() into two functions: setAddResult() and setSubResult().
          */
         BYTE:       0x80,       // result is byte value
         WORD:       0x8000,     // result is word value
@@ -401,19 +407,19 @@ X86.BACKTRACK = {
 };
 
 /*
- * Some PS flags are stored directly in regPS, hence the "direct" designation.
+ * Some PS flags are always stored directly in regPS, hence the "direct" designation.
  */
 X86.PS.DIRECT = (X86.PS.TF | X86.PS.IF | X86.PS.DF);
 
 /*
- * However, PS arithmetic and logical flags may be "cached" across result registers.
+ * However, PS arithmetic and logical flags may be "cached" across several result registers.
  */
 X86.PS.CACHED = (X86.PS.CF | X86.PS.PF | X86.PS.AF | X86.PS.ZF | X86.PS.SF | X86.PS.OF);
 
 /*
  * These are the default "always set" PS bits for the 8086/8088; other processors must
  * adjust these bits accordingly.  The final adjusted value is then stored in the X86CPU
- * object as "this.PS_SET"; setPS() must use that value, NOT this one.
+ * object as PS_SET; setPS() must use PS_SET, *not* PS.SET.
  */
 X86.PS.SET = (X86.PS.BIT1 | X86.PS.IOPL.MASK | X86.PS.NT | X86.PS.BIT15);
 
@@ -424,9 +430,10 @@ X86.PS.SET = (X86.PS.BIT1 | X86.PS.IOPL.MASK | X86.PS.NT | X86.PS.BIT15);
 X86.PS.SAHF = (X86.PS.CF | X86.PS.PF | X86.PS.AF | X86.PS.ZF | X86.PS.SF);
 
 /*
- * Before we zero opFlags, we first see if any of the following PREFIX bits were set.  If any were set, they are OR'ed
- * into opPrefixes; otherwise, opPrefixes is zeroed as well.  This gives prefix-conscious instructions like LODS, MOVS,
- * STOS, CMPS, etc, a way of determining which prefixes, if any, immediately preceded them.
+ * Before we zero opFlags, we first see if any of the following PREFIX bits were set.  If any were set,
+ * they are OR'ed into opPrefixes; otherwise, opPrefixes is zeroed as well.  This gives prefix-conscious
+ * instructions like LODS, MOVS, STOS, CMPS, etc, a way of determining which prefixes, if any, immediately
+ * preceded them.
  */
 X86.OPFLAG.PREFIXES = (X86.OPFLAG.SEG | X86.OPFLAG.LOCK | X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ | X86.OPFLAG.DATASIZE | X86.OPFLAG.ADDRSIZE);
 

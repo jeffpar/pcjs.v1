@@ -47,7 +47,7 @@ if (typeof module !== 'undefined') {
  *
  * The ChipSet component has the following component-specific (parmsChipSet) properties:
  *
- *      model:          5150, 5160 or 5170 (should correspond to a ChipSet.MODEL_* constant)
+ *      model:          "5150", "5160", "5170" or "deskpro386" (should be a member of ChipSet.MODELS)
  *      sw1:            8-character binary string representing the SW1 DIP switches (SW1[1-8])
  *      sw2:            8-character binary string representing the SW2 DIP switches (SW2[1-8]) (MODEL_5150 only)
  *      sound:          true to enable (experimental) sound support (default); false to disable
@@ -151,7 +151,7 @@ function ChipSet(parmsChipSet)
     Component.call(this, "ChipSet", parmsChipSet, ChipSet, Messages.CHIPSET);
 
     this.model = parmsChipSet['model'];
-    this.model = (this.model? parseInt(this.model, 10) : ChipSet.MODEL_5150);
+    this.model = this.model && ChipSet.MODELS[this.model] || ChipSet.MODEL_5150;
 
     /*
      * SW1 describes the number of floppy drives, the amount of base memory, the primary monitor type,
@@ -265,11 +265,28 @@ Component.subclass(Component, ChipSet);
 ChipSet.MODEL_5150      = 5150;         // used in reference to the 1st 5150 BIOS, dated Apr 24, 1981
 ChipSet.MODEL_5160      = 5160;         // used in reference to the 1st 5160 BIOS, dated Nov 8, 1982
 ChipSet.MODEL_5170      = 5170;         // used in reference to the 1st 5170 BIOS, dated Jan 10, 1984
+
 /*
  * The following are fake model numbers, used only to document issues/features of note in later IBM PC AT BIOS revisions.
  */
 ChipSet.MODEL_5170_REV2 = 5170.2;       // used in reference to the 2nd 5170 BIOS, dated Jun 10, 1985
 ChipSet.MODEL_5170_REV3 = 5170.3;       // used in reference to the 3rd 5170 BIOS, dated Nov 15, 1985
+
+/*
+ * The following are even more fake model numbers, as we begin to depart from the IBM lineage.  All that
+ * really matters at this point is that MODEL_DESKPRO386 > MODEL_5170.
+ */
+ChipSet.MODEL_DESKPRO386 = 5180;
+
+/*
+ * Last but not least, a complete list of supported model strings, and corresponding internal model numbers.
+ */
+ChipSet.MODELS = {
+    "5150":         ChipSet.MODEL_5150,
+    "5160":         ChipSet.MODEL_5160,
+    "5170":         ChipSet.MODEL_5170,
+    "deskpro386":   ChipSet.MODEL_DESKPRO386
+};
 
 /*
  * Values returned by ChipSet.getSWVideoMonitor()
