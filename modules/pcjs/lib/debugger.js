@@ -879,7 +879,11 @@ if (DEBUGGER) {
         0x05: [Debugger.INS.LOADALL,Debugger.TYPE_80286],
         0x06: [Debugger.INS.CLTS,   Debugger.TYPE_80286],
         0x20: [Debugger.INS.MOV,    Debugger.TYPE_REG    | Debugger.TYPE_DWORD |  Debugger.TYPE_OUT | Debugger.TYPE_80386, Debugger.TYPE_CTLREG | Debugger.TYPE_DWORD | Debugger.TYPE_IN],
-        0x22: [Debugger.INS.MOV,    Debugger.TYPE_CTLREG | Debugger.TYPE_DWORD |  Debugger.TYPE_OUT | Debugger.TYPE_80386, Debugger.TYPE_REG    | Debugger.TYPE_DWORD | Debugger.TYPE_IN]
+        0x22: [Debugger.INS.MOV,    Debugger.TYPE_CTLREG | Debugger.TYPE_DWORD |  Debugger.TYPE_OUT | Debugger.TYPE_80386, Debugger.TYPE_REG    | Debugger.TYPE_DWORD | Debugger.TYPE_IN],
+        0xA0: [Debugger.INS.PUSH,   Debugger.TYPE_FS     | Debugger.TYPE_IN    |  Debugger.TYPE_80386],
+        0xA1: [Debugger.INS.POP,    Debugger.TYPE_FS     | Debugger.TYPE_OUT   |  Debugger.TYPE_80386],
+        0xA8: [Debugger.INS.PUSH,   Debugger.TYPE_GS     | Debugger.TYPE_IN    |  Debugger.TYPE_80386],
+        0xA9: [Debugger.INS.POP,    Debugger.TYPE_GS     | Debugger.TYPE_OUT   |  Debugger.TYPE_80386]
     };
 
     Debugger.aaGrpDescs = [
@@ -4062,6 +4066,10 @@ if (DEBUGGER) {
             return;
         for (var i = 2; i < asArgs.length; i++) {
             var b = str.parseInt(asArgs[i], 16);
+            if (b === undefined) {
+                this.println("unrecognized value: " + str.toHexByte(b));
+                break;
+            }
             this.println("setting " + this.hexAddr(aAddr) + " to " + str.toHexByte(b));
             this.setByte(aAddr, b, 1);
         }

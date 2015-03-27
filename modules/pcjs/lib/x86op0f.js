@@ -311,6 +311,58 @@ X86.opMOVcrr = function MOVcrr()
     }
 };
 
+/**
+ * opPUSHFS()
+ *
+ * op=0x0F,0xA0 (PUSH FS)
+ *
+ * @this {X86CPU}
+ */
+X86.opPUSHFS = function PUSHFS()
+{
+    this.pushWord(this.segFS.sel);
+    this.nStepCycles -= this.CYCLES.nOpCyclesPushSeg;
+};
+
+/**
+ * opPOPFS()
+ *
+ * op=0x0F,0xA1 (POP FS)
+ *
+ * @this {X86CPU}
+ */
+X86.opPOPFS = function POPFS()
+{
+    this.setFS(this.popWord());
+    this.nStepCycles -= this.CYCLES.nOpCyclesPopReg;
+};
+
+/**
+ * opPUSHGS()
+ *
+ * op=0x0F,0xA8 (PUSH GS)
+ *
+ * @this {X86CPU}
+ */
+X86.opPUSHGS = function PUSHGS()
+{
+    this.pushWord(this.segGS.sel);
+    this.nStepCycles -= this.CYCLES.nOpCyclesPushSeg;
+};
+
+/**
+ * opPOPGS()
+ *
+ * op=0x0F,0xA9 (POP GS)
+ *
+ * @this {X86CPU}
+ */
+X86.opPOPGS = function POPGS()
+{
+    this.setGS(this.popWord());
+    this.nStepCycles -= this.CYCLES.nOpCyclesPopReg;
+};
+
 X86.aOps0F = new Array(256);
 
 X86.aOps0F[0x00] = X86.opGrp6;
@@ -334,6 +386,10 @@ if (I386) {
     X86.aOps0F386 = [];
     X86.aOps0F386[0x20] = X86.opMOVrcr;
     X86.aOps0F386[0x22] = X86.opMOVcrr;
+    X86.aOps0F386[0xA0] = X86.opPUSHFS;
+    X86.aOps0F386[0xA1] = X86.opPOPFS;
+    X86.aOps0F386[0xA8] = X86.opPUSHGS;
+    X86.aOps0F386[0xA9] = X86.opPOPGS;
 }
 
 /*

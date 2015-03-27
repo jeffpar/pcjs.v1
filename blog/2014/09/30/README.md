@@ -27,13 +27,13 @@ just ignore it.
 Property names with all UPPER-CASE letters (with optional numbers and/or underscores) represent constants.
 
 I originally adopted this rule in part because it's a popular C language convention, but also because it
-made it easy to write a preprocessing script (see the PCjs Grunt task "prepjs") that replaced all such property
-references with the corresponding property values and then removed the original property definitions.
-Of course, this convention also depended on the properties never being modified *or* enumerated.
+made it easy to write a preprocessing script (see the PCjs Grunt task [prepjs](/modules/grunts/prepjs/))
+that replaced all such property references with the corresponding property values and then removed the original
+property definitions.  Of course, this convention also depended on the properties never being modified *or* enumerated.
   
 I later discovered that Google's Closure Compiler does an excellent job of automatically inlining properties
-that are never modified or enumerated, so the "prepjs" preprocessing script is no longer used, but I've stuck
-with the UPPER-CASE convention.
+that are never modified or enumerated, so the [prepjs](/modules/grunts/prepjs/) preprocessing script is no longer used,
+but I've stuck with the UPPER-CASE convention.
 
 I don't bother with JSDoc *@const* annotations, because 1) the project contains far too many constants, 2)
 all the constants are already effectively annotated by virtue of being UPPER-CASE, and 3) there is no noticeable
@@ -54,7 +54,7 @@ but since the EOI command is actually one of a number Operation Command Words (s
 	ChipSet.OCW2_EOI = 0x20;                // non-specific EOI (end-of-interrupt)
 	
 and since I also like to group constants that are associated with a particular register or port, and since I don't
-want the ChipSet constructor becoming littered with property constants, I first define a "constant object"; in this
+want the ChipSet constructor becoming littered with property constants, I first define a constant object; in this
 case, **PIC_LO**:
 
 	ChipSet.PIC_LO = {};
@@ -63,8 +63,10 @@ case, **PIC_LO**:
 	ChipSet.PIC_LO.OCW2_EOI_ROT = 0xA0;     // rotate on non-specific EOI
 	ChipSet.PIC_LO.OCW2_EOI_ROTSPEC = 0xE0; // rotate on specific EOI
 
-Also, by defining constants using the "long form" above, rather than the more conventional "short form" (ie, standard
-Object notation):
+By using fully-qualified property names for each constant, the code has a more C-like appearance (think *#define*)
+that's also easier to preprocess.
+
+However, I've gradually switched to the more conventional JavaScript object notation for class constants:
  
 	ChipSet.PIC_LO = {
 		OCW2_EOI:           0x20,           // non-specific EOI (end-of-interrupt)
@@ -73,10 +75,8 @@ Object notation):
 		OCW2_EOI_ROTSPEC:   0xE0            // rotate on specific EOI
 	};
 
-the code follows a more traditional, C-like style (think *#define*).  It's also easier to preprocess code that
-uses the "long form."  But again, since the Closure Compiler already does a good job of inlining, it's no longer
-necessary to use the "long form", which is why you'll see newer code using more conventional Object notation to
-define class constants.
+because, again, the Closure Compiler does an excellent job inlining such constants (or indeed any property that is
+never modified *or* enumerated).
 
 ### DEBUG vs. RELEASE
 
