@@ -202,7 +202,7 @@ X86.opCLTS = function CLTS()
  *
  * NOTE: Since the ModRM decoders deal only with general-purpose registers, we must move
  * the appropriate control register into a special variable (regMD16), which our helper function
- * (opHelpMOVMD16) will use to replace the decoder's src operand.
+ * (fnMOVMD16) will use to replace the decoder's src operand.
  *
  * @this {X86CPU}
  */

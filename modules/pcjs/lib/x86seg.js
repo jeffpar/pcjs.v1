@@ -77,7 +77,7 @@ function X86Seg(cpu, id, sName, fProt)
      * to a numerically lower privilege, and fCall === false allows a stack restore and a privilege transition
      * to a numerically greater privilege.
      *
-     * As long as setCSIP() or opHelpINT() are used for all CS changes, fCall is set automatically.
+     * As long as setCSIP() or fnINT() are used for all CS changes, fCall is set automatically.
      *
      * TODO: Consider making fCall a parameter to load(), instead of a property that must be set prior to
      * calling load(); the downside is that such a parameter is meaningless for segments other than segCS.
@@ -248,7 +248,7 @@ X86Seg.loadIDTProt = function loadIDTProt(nIDT)
  * checkReadReal(off, cb, fSuppress)
  *
  * TODO: Invoke X86.fnFault.call(this.cpu, X86.EXCEPTION.GP_FAULT) if off is 0xffff and cb is 1;
- * also, whether or not the opHelpFault() call should include an error code, since this is happening in real-mode.
+ * also, whether or not the fnFault() call should include an error code, since this is happening in real-mode.
  *
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
@@ -265,7 +265,7 @@ X86Seg.checkReadReal = function checkReadReal(off, cb, fSuppress)
  * checkWriteReal(off, cb, fSuppress)
  *
  * TODO: Invoke X86.fnFault.call(this.cpu, X86.EXCEPTION.GP_FAULT) if off is 0xffff and cb is 1;
- * also, whether or not the opHelpFault() call should include an error code, since this is happening in real-mode.
+ * also, whether or not the fnFault() call should include an error code, since this is happening in real-mode.
  *
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset

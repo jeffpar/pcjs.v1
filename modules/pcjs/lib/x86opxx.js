@@ -197,7 +197,7 @@ X86.opORALb = function ORALb()
     this.regEAX = (this.regEAX & ~0xff) | X86.fnORb.call(this, this.regEAX & 0xff, this.getIPByte());
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
     /*
-     * In the absence of any EA calculations, opGrpORb() will deduct nOpCyclesArithRR, and for all CPUs through
+     * In the absence of any EA calculations, fnORb() will deduct nOpCyclesArithRR, and for all CPUs through
      * the 80286, we need deduct only one more cycle.
      */
     this.nStepCycles--;
@@ -215,7 +215,7 @@ X86.opORAXw = function ORAXw()
         this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
     }
     /*
-     * In the absence of any EA calculations, opGrpORw() will deduct nOpCyclesArithRR, and for all CPUs through
+     * In the absence of any EA calculations, fnORw() will deduct nOpCyclesArithRR, and for all CPUs through
      * the 80286, we need deduct only one more cycle.
      */
     this.nStepCycles--;
@@ -233,7 +233,7 @@ X86.opPUSHCS = function PUSHCS()
 };
 
 /**
- * op=0x0F (POP CS) (undocumented on 8086/8088; replaced with opHelpInvalid on 80186/80188, and op0F on 80286 and up)
+ * op=0x0F (POP CS) (undocumented on 8086/8088; replaced with opInvalid on 80186/80188, and op0F on 80286 and up)
  *
  * @this {X86CPU}
  */
@@ -303,7 +303,7 @@ X86.opADCALb = function ADCALb()
     this.regEAX = (this.regEAX & ~0xff) | X86.fnADCb.call(this, this.regEAX & 0xff, this.getIPByte());
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
     /*
-     * In the absence of any EA calculations, opGrpADCb() will deduct nOpCyclesArithRR, and for all CPUs through
+     * In the absence of any EA calculations, fnADCb() will deduct nOpCyclesArithRR, and for all CPUs through
      * the 80286, we need deduct only one more cycle.
      */
     this.nStepCycles--;
@@ -321,7 +321,7 @@ X86.opADCAXw = function ADCAXw()
         this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
     }
     /*
-     * In the absence of any EA calculations, opGrpADCw() will deduct nOpCyclesArithRR, and for all CPUs through
+     * In the absence of any EA calculations, fnADCw() will deduct nOpCyclesArithRR, and for all CPUs through
      * the 80286, we need deduct only one more cycle.
      */
     this.nStepCycles--;
@@ -399,7 +399,7 @@ X86.opSBBALb = function SBBALb()
     this.regEAX = (this.regEAX & ~0xff) | X86.fnSBBb.call(this, this.regEAX & 0xff, this.getIPByte());
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
     /*
-     * In the absence of any EA calculations, opGrpSBBb() will deduct nOpCyclesArithRR, and for all CPUs through
+     * In the absence of any EA calculations, fnSBBb() will deduct nOpCyclesArithRR, and for all CPUs through
      * the 80286, we need deduct only one more cycle.
      */
     this.nStepCycles--;
@@ -417,7 +417,7 @@ X86.opSBBAXw = function SBBAXw()
         this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
     }
     /*
-     * In the absence of any EA calculations, opGrpSBBw() will deduct nOpCyclesArithRR, and for all CPUs through
+     * In the absence of any EA calculations, fnSBBw() will deduct nOpCyclesArithRR, and for all CPUs through
      * the 80286, we need deduct only one more cycle.
      */
     this.nStepCycles--;
@@ -515,7 +515,7 @@ X86.opANDAL = function ANDAL()
     this.regEAX = (this.regEAX & ~0xff) | X86.fnANDb.call(this, this.regEAX & 0xff, this.getIPByte());
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
     /*
-     * In the absence of any EA calculations, opGrpANDb() will deduct nOpCyclesArithRR, and for all CPUs through
+     * In the absence of any EA calculations, fnANDb() will deduct nOpCyclesArithRR, and for all CPUs through
      * the 80286, we need deduct only one more cycle.
      */
     this.nStepCycles--;
@@ -533,7 +533,7 @@ X86.opANDAX = function ANDAX()
         this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
     }
     /*
-     * In the absence of any EA calculations, opGrpANDw() will deduct nOpCyclesArithRR, and for all CPUs through
+     * In the absence of any EA calculations, fnANDw() will deduct nOpCyclesArithRR, and for all CPUs through
      * the 80286, we need deduct only one more cycle.
      */
     this.nStepCycles--;
@@ -551,7 +551,7 @@ X86.opANDAXd = function ANDAXd()
         this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
     }
     /*
-     * In the absence of any EA calculations, opGrpANDd() will deduct nOpCyclesArithRR, and for all CPUs through
+     * In the absence of any EA calculations, fnANDd() will deduct nOpCyclesArithRR, and for all CPUs through
      * the 80286, we need deduct only one more cycle.
      */
     this.nStepCycles--;
@@ -649,7 +649,7 @@ X86.opSUBALb = function SUBALb()
     this.regEAX = (this.regEAX & ~0xff) | X86.fnSUBb.call(this, this.regEAX & 0xff, this.getIPByte());
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
     /*
-     * In the absence of any EA calculations, opGrpSUBb() will deduct nOpCyclesArithRR, and for all CPUs through
+     * In the absence of any EA calculations, fnSUBb() will deduct nOpCyclesArithRR, and for all CPUs through
      * the 80286, we need deduct only one more cycle.
      */
     this.nStepCycles--;
@@ -667,7 +667,7 @@ X86.opSUBAXw = function SUBAXw()
         this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
     }
     /*
-     * In the absence of any EA calculations, opGrpSUBw() will deduct nOpCyclesArithRR, and for all CPUs
+     * In the absence of any EA calculations, fnSUBw() will deduct nOpCyclesArithRR, and for all CPUs
      * through the 80286, we need deduct only one more cycle.
      */
     this.nStepCycles--;
@@ -775,7 +775,7 @@ X86.opXORALb = function XORALb()
     this.regEAX = (this.regEAX & ~0xff) | X86.fnXORb.call(this, this.regEAX & 0xff, this.getIPByte());
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
     /*
-     * In the absence of any EA calculations, opGrpXORb() will deduct nOpCyclesArithRR, and for all CPUs
+     * In the absence of any EA calculations, fnXORb() will deduct nOpCyclesArithRR, and for all CPUs
      * through the 80286, we need deduct only one more cycle.
      */
     this.nStepCycles--;
@@ -793,7 +793,7 @@ X86.opXORAXw = function XORAXw()
         this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
     }
     /*
-     * In the absence of any EA calculations, opGrpXORw() will deduct nOpCyclesArithRR, and for all CPUs
+     * In the absence of any EA calculations, fnXORw() will deduct nOpCyclesArithRR, and for all CPUs
      * through the 80286, we need deduct only one more cycle.
      */
     this.nStepCycles--;
@@ -887,7 +887,7 @@ X86.opCMPALb = function CMPALb()
 {
     X86.fnCMPb.call(this, this.regEAX & 0xff, this.getIPByte());
     /*
-     * In the absence of any EA calculations, opGrpCMPb() will deduct nOpCyclesArithRR, and for all CPUs through
+     * In the absence of any EA calculations, fnCMPb() will deduct nOpCyclesArithRR, and for all CPUs through
      * the 80286, we need deduct only one more cycle.
      */
     this.nStepCycles--;
@@ -902,7 +902,7 @@ X86.opCMPAXw = function CMPAXw()
 {
     X86.fnCMPw.call(this, this.regEAX & this.dataMask, this.getIPWord());
     /*
-     * In the absence of any EA calculations, opGrpCMPw() will deduct nOpCyclesArithRR, and for all CPUs through
+     * In the absence of any EA calculations, fnCMPw() will deduct nOpCyclesArithRR, and for all CPUs through
      * the 80286, we need deduct only one more cycle.
      */
     this.nStepCycles--;
@@ -2075,7 +2075,7 @@ X86.opTESTrw = function TESTrw()
  * op=0x86 (XCHG reg,byte)
  *
  * NOTE: The XCHG instruction is unique in that both src and dst are both read and written;
- * see opHelpXCHGrb() for how we deal with this special case.
+ * see fnXCHGrb() for how we deal with this special case.
  *
  * @this {X86CPU}
  */
@@ -2108,7 +2108,7 @@ X86.opXCHGrb = function XCHGrb()
  * op=0x87 (XCHG reg,word)
  *
  * NOTE: The XCHG instruction is unique in that both src and dst are both read and written;
- * see opHelpXCHGrw() for how we deal with this special case.
+ * see fnXCHGrw() for how we deal with this special case.
  *
  * @this {X86CPU}
  */
@@ -2170,7 +2170,7 @@ X86.opMOVrw = function MOVrw()
  *
  * NOTE: Since the ModRM decoders deal only with general-purpose registers, we must move
  * the appropriate segment register into a special variable (regMD16), which our helper function
- * (opHelpMOVMD16) will use to replace the decoder's src operand.
+ * (fnMOVMD16) will use to replace the decoder's src operand.
  *
  * @this {X86CPU}
  */
@@ -2738,7 +2738,7 @@ X86.opCMPSb = function CMPSb()
         this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + nInc) & this.addrMask);
         this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + nInc) & this.addrMask);
         /*
-         * NOTE: As long as we're calling opGrpCMPb(), all our cycle times must be reduced by nOpCyclesArithRM
+         * NOTE: As long as we're calling fnCMPb(), all our cycle times must be reduced by nOpCyclesArithRM
          */
         this.nStepCycles -= nCycles - this.CYCLES.nOpCyclesArithRM;
         this.regECX -= nDelta;
@@ -2783,7 +2783,7 @@ X86.opCMPSw = function CMPSw()
         this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + nInc) & this.addrMask);
         this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + nInc) & this.addrMask);
         /*
-         * NOTE: As long as we're calling opGrpCMPw(), all our cycle times must be reduced by nOpCyclesArithRM
+         * NOTE: As long as we're calling fnCMPw(), all our cycle times must be reduced by nOpCyclesArithRM
          */
         this.nStepCycles -= nCycles - this.CYCLES.nOpCyclesArithRM;
         this.regECX -= nDelta;
@@ -2994,7 +2994,7 @@ X86.opSCASb = function SCASb()
         X86.fnCMPb.call(this, this.regEAX & 0xff, this.modEAByte(this.segES, this.regEDI & this.addrMask));
         this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -1 : 1)) & this.addrMask);
         /*
-         * NOTE: As long as we're calling opGrpCMPb(), all our cycle times must be reduced by nOpCyclesArithRM
+         * NOTE: As long as we're calling fnCMPb(), all our cycle times must be reduced by nOpCyclesArithRM
          */
         this.nStepCycles -= nCycles - this.CYCLES.nOpCyclesArithRM;
         this.regECX -= nDelta;
@@ -3035,7 +3035,7 @@ X86.opSCASw = function SCASw()
         X86.fnCMPw.call(this, this.regEAX & this.dataMask, this.modEAWord(this.segES, this.regEDI & this.addrMask));
         this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -this.dataSize : this.dataSize)) & this.addrMask);
         /*
-         * NOTE: As long as we're calling opGrpCMPb(), all our cycle times must be reduced by nOpCyclesArithRM
+         * NOTE: As long as we're calling fnCMPw(), all our cycle times must be reduced by nOpCyclesArithRM
          */
         this.nStepCycles -= nCycles - this.CYCLES.nOpCyclesArithRM;
         this.regECX -= nDelta;
@@ -3982,13 +3982,14 @@ X86.opCMC = function CMC()
  *      0xF6 0xE0:  MUL AL
  *      0xF6 0xE4:  MUL AH
  *
- * because the OpModGrpByte decoder function will attempt to put the opGrpMULb() function's
- * return value back into AL or AH, undoing opGrpMULb's update of AX.  And since opGrpMULb doesn't
+ * because the OpModGrpByte decoder function will attempt to put the fnMULb() function's
+ * return value back into AL or AH, undoing fnMULb's update of AX.  And since fnMULb doesn't
  * know what the target is (only the target's value), it cannot easily work around the problem.
  *
- * A simple, albeit kludgy, solution is for opGrpMULb to always save its result in a special "register"
- * (eg, regMD16), which we will then put back into regEAX if it's been updated.  This also relieves us
- * from having to decode any part of the ModRM byte, so maybe it's not such a bad work-around after all.
+ * A simple, albeit kludgy, solution is for fnMULb to always save its result in a special
+ * "register" (eg, regMD16), which we will then put back into regEAX if it's been updated.
+ * This also relieves us from having to decode any part of the ModRM byte, so maybe it's not
+ * such a bad work-around after all.
  *
  * Similar issues with IMUL (and DIV and IDIV) are resolved using the same special variable(s).
  *
@@ -4009,13 +4010,14 @@ X86.opGrp3b = function GRP3b()
  *      0xF7 0xE0:  MUL AX
  *      0xF7 0xE2:  MUL DX
  *
- * because the OpModGrpWord decoder function will attempt to put the opGrpMULw() function's
- * return value back into AX or DX, undoing opGrpMULw's update of DX:AX.  And since opGrpMULw doesn't
+ * because the OpModGrpWord decoder function will attempt to put the fnMULw() function's
+ * return value back into AX or DX, undoing fnMULw's update of DX:AX.  And since fnMULw doesn't
  * know what the target is (only the target's value), it cannot easily work around the problem.
  *
- * A simple, albeit kludgey, solution is for opGrpMULw to always save its result in a special "register"
- * (eg, regMD16/regMD32), which we will then put back into regEAX/regEDX if it's been updated.  This also relieves
- * us from having to decode any part of the ModRM byte, so maybe it's not such a bad work-around after all.
+ * A simple, albeit kludgey, solution is for fnMULw to always save its result in a special
+ * "register" (eg, regMD16/regMD32), which we will then put back into regEAX/regEDX if it's been
+ * updated.  This also relieves us from having to decode any part of the ModRM byte, so maybe
+ * it's not such a bad work-around after all.
  *
  * @this {X86CPU}
  */

@@ -907,8 +907,8 @@ X86CPU.prototype.resetRegs = function()
     this.resultDst = this.resultSrc = this.resultArith = this.resultLogic = 0;
 
     /*
-     * This is set by opHelpFault() and reset (to -1) by resetRegs() and opIRET(); its initial purpose is to
-     * "help" opHelpFault() determine when a nested fault should be converted into either a double-fault (DF_FAULT)
+     * This is set by fnFault() and reset (to -1) by resetRegs() and opIRET(); its initial purpose is to
+     * "help" fnFault() determine when a nested fault should be converted into either a double-fault (DF_FAULT)
      * or a triple-fault (ie, a processor reset).
      */
     this.nFault = -1;
@@ -1228,8 +1228,8 @@ X86CPU.prototype.addIntReturn = function(addr, fn)
 /**
  * checkIntReturn(addr)
  *
- * We check for possible "INT n" software interrupt returns in the cases of "IRET" (opHelpIRET), "RETF 2"
- * (opHelpRETF) and "JMPF [DWORD]" (opGrpJMPFdw).
+ * We check for possible "INT n" software interrupt returns in the cases of "IRET" (fnIRET), "RETF 2"
+ * (fnRETF) and "JMPF [DWORD]" (fnJMPFdw).
  *
  * "JMPF [DWORD]" is an unfortunate choice that newer versions of DOS (as of at least 3.20, and probably
  * earlier) employed in their INT 0x13 hooks; I would have preferred not making this call for that opcode.
