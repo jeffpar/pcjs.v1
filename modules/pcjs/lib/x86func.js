@@ -742,8 +742,8 @@ X86.fnINCw = function INCw(dst, src)
  * only knows how to load GDT and LDT descriptors, whereas interrupts must use setCS.loadIDT(), which
  * deals exclusively with IDT descriptors.
  *
- * This means we must take care to replicate critical features of setCSIP(); eg, setting segCS.fCall before
- * calling loadIDT(), updating LIP, and flushing the prefetch queue.
+ * This means we must take care to replicate critical features of setCSIP(); eg, setting segCS.fCall
+ * before calling loadIDT(), updating LIP, and flushing the prefetch queue.
  *
  * @this {X86CPU}
  * @param {number} nIDT
@@ -2372,55 +2372,6 @@ X86.setRotateResult = function(result, carry, size)
 };
 
 /**
- * fnGRPCount1()
- *
- * @this {X86CPU}
- * @return {number}
- */
-X86.fnGRPCount1 = function()
-{
-    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 2 : this.CYCLES.nOpCyclesShift1M);
-    return 1;
-};
-
-/**
- * fnGRPCountCL()
- *
- * @this {X86CPU}
- * @return {number}
- */
-X86.fnGRPCountCL = function()
-{
-    var count = this.regECX & 0xff;
-    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesShiftCR : this.CYCLES.nOpCyclesShiftCM) + (count << this.CYCLES.nOpCyclesShiftCS);
-    return count;
-};
-
-/**
- * fnGRPCountImm()
- *
- * @this {X86CPU}
- * @return {number}
- */
-X86.fnGRPCountImm = function()
-{
-    var count = this.getIPByte();
-    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesShiftCR : this.CYCLES.nOpCyclesShiftCM) + (count << this.CYCLES.nOpCyclesShiftCS);
-    return count;
-};
-
-/**
- * fnGRPSrcNone()
- *
- * @this {X86CPU}
- * @return {number|null}
- */
-X86.fnGRPSrcNone = function()
-{
-    return null;
-};
-
-/**
  * fnGRPFault(dst, src)
  *
  * @this {X86CPU}
@@ -2428,7 +2379,7 @@ X86.fnGRPSrcNone = function()
  * @param {number} src
  * @return {number}
  */
-X86.fnGRPFault = function(dst, src)
+X86.fnGRPFault = function GRPFault(dst, src)
 {
     X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
     return dst;
@@ -2442,7 +2393,7 @@ X86.fnGRPFault = function(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnGRPInvalid = function(dst, src)
+X86.fnGRPInvalid = function GRPInvalid(dst, src)
 {
     X86.opInvalid.call(this);
     return dst;
@@ -2456,7 +2407,7 @@ X86.fnGRPInvalid = function(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnGRPUndefined = function(dst, src)
+X86.fnGRPUndefined = function GRPUndefined(dst, src)
 {
     X86.opUndefined.call(this);
     return dst;
@@ -2467,13 +2418,62 @@ X86.fnGRPUndefined = function(dst, src)
  *
  * @this {X86CPU}
  */
-X86.fnDIVOverflow = function()
+X86.fnDIVOverflow = function DIVOverflow()
 {
     this.setIP(this.opLIP - this.segCS.base);
     /*
      * TODO: Determine the proper cycle cost.
      */
     X86.fnINT.call(this, X86.EXCEPTION.DIV_ERR, null, 2);
+};
+
+/**
+ * fnSrcCount1()
+ *
+ * @this {X86CPU}
+ * @return {number}
+ */
+X86.fnSrcCount1 = function SrcCount1()
+{
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 2 : this.CYCLES.nOpCyclesShift1M);
+    return 1;
+};
+
+/**
+ * fnSrcCountCL()
+ *
+ * @this {X86CPU}
+ * @return {number}
+ */
+X86.fnSrcCountCL = function SrcCountCL()
+{
+    var count = this.regECX & 0xff;
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesShiftCR : this.CYCLES.nOpCyclesShiftCM) + (count << this.CYCLES.nOpCyclesShiftCS);
+    return count;
+};
+
+/**
+ * fnSrcCountImm()
+ *
+ * @this {X86CPU}
+ * @return {number}
+ */
+X86.fnSrcCountImm = function SrcCountImm()
+{
+    var count = this.getIPByte();
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesShiftCR : this.CYCLES.nOpCyclesShiftCM) + (count << this.CYCLES.nOpCyclesShiftCS);
+    return count;
+};
+
+/**
+ * fnSrcNone()
+ *
+ * @this {X86CPU}
+ * @return {number|null}
+ */
+X86.fnSrcNone = function SrcNone()
+{
+    return null;
 };
 
 /**

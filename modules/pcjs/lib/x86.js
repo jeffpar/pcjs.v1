@@ -407,21 +407,23 @@ X86.BACKTRACK = {
 };
 
 /*
- * Some PS flags are always stored directly in regPS, hence the "direct" designation.
+ * These PS flags are always stored directly in regPS for the 8086/8088, hence the
+ * "direct" designation; other processors must adjust these bits accordingly.  The final
+ * adjusted value is stored in PS_DIRECT.
  */
-X86.PS.DIRECT = (X86.PS.TF | X86.PS.IF | X86.PS.DF);
-
-/*
- * However, PS arithmetic and logical flags may be "cached" across several result registers.
- */
-X86.PS.CACHED = (X86.PS.CF | X86.PS.PF | X86.PS.AF | X86.PS.ZF | X86.PS.SF | X86.PS.OF);
+X86.PS.DIRECT_8086 = (X86.PS.TF | X86.PS.IF | X86.PS.DF);
 
 /*
  * These are the default "always set" PS bits for the 8086/8088; other processors must
- * adjust these bits accordingly.  The final adjusted value is then stored in the X86CPU
- * object as PS_SET; setPS() must use PS_SET, *not* PS.SET.
+ * adjust these bits accordingly.  The final adjusted value is stored in PS_SET.
  */
-X86.PS.SET = (X86.PS.BIT1 | X86.PS.IOPL.MASK | X86.PS.NT | X86.PS.BIT15);
+X86.PS.SET_8086 = (X86.PS.BIT1 | X86.PS.IOPL.MASK | X86.PS.NT | X86.PS.BIT15);
+
+/*
+ * These PS arithmetic and logical flags may be "cached" across several result registers;
+ * whether or not they're currently cached depends on the RESULT bits in resultType.
+ */
+X86.PS.CACHED = (X86.PS.CF | X86.PS.PF | X86.PS.AF | X86.PS.ZF | X86.PS.SF | X86.PS.OF);
 
 /*
  * PS.SAHF is a subset of the arithmetic flags, and refers only to those flags that the

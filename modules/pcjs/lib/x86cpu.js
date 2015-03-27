@@ -694,10 +694,10 @@ X86CPU.prototype.setAddressMask = function(busMask)
  */
 X86CPU.prototype.initProcessor = function()
 {
-    this.PS_SET = X86.PS.SET;
-    this.PS_DIRECT = X86.PS.DIRECT;
+    this.PS_SET = X86.PS.SET_8086;
+    this.PS_DIRECT = X86.PS.DIRECT_8086;
 
-    this.OPFLAG_NOINTR8086 = X86.OPFLAG.NOINTR;
+    this.OPFLAG_NOINTR_8086 = X86.OPFLAG.NOINTR;
     this.nShiftCountMask = 0xff;            // on an 8086/8088, all shift counts are used as-is
 
     /*
@@ -753,7 +753,7 @@ X86CPU.prototype.initProcessor = function()
             this.PS_SET = X86.PS.BIT1;      // on the 80286, only BIT1 of Processor Status (flags) is always set
             this.PS_DIRECT |= X86.PS.IOPL.MASK | X86.PS.NT;
 
-            this.OPFLAG_NOINTR8086 = 0;     // used with instructions that should *not* set NOINTR on an 80286 (eg, non-SS segment loads)
+            this.OPFLAG_NOINTR_8086 = 0;    // used with instructions that should *not* set NOINTR on an 80286 (eg, non-SS segment loads)
 
             this.aOps0F = X86.aOps0F;
             this.aOps[0x0F]              = X86.op0F;
@@ -1460,7 +1460,7 @@ X86CPU.prototype.setCS = function(sel)
     this.regLIP = this.segCS.load(sel) + regEIP;
     this.regLIPLimit = this.segCS.base + this.segCS.limit;
     if (I386) this.resetSizes();
-    if (!BUGS_8086) this.opFlags |= this.OPFLAG_NOINTR8086;
+    if (!BUGS_8086) this.opFlags |= this.OPFLAG_NOINTR_8086;
     if (PREFETCH) this.flushPrefetch(this.regLIP);
 };
 
@@ -1484,7 +1484,7 @@ X86CPU.prototype.getDS = function()
 X86CPU.prototype.setDS = function(sel)
 {
     this.segDS.load(sel);
-    if (!BUGS_8086) this.opFlags |= this.OPFLAG_NOINTR8086;
+    if (!BUGS_8086) this.opFlags |= this.OPFLAG_NOINTR_8086;
 };
 
 /**
@@ -1539,7 +1539,7 @@ X86CPU.prototype.getES = function()
 X86CPU.prototype.setES = function(sel)
 {
     this.segES.load(sel);
-    if (!BUGS_8086) this.opFlags |= this.OPFLAG_NOINTR8086;
+    if (!BUGS_8086) this.opFlags |= this.OPFLAG_NOINTR_8086;
 };
 
 /**

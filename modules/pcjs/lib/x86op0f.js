@@ -47,7 +47,7 @@ X86.opGrp6 = function GRP6()
     if ((bModRM & 0x38) < 0x10) {   // possible reg values: 0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, 0x38
         this.opFlags |= X86.OPFLAG.NOREAD;
     }
-    this.aOpModGrpWord[bModRM].call(this, this.aOpGrp6, X86.fnGRPSrcNone);
+    this.aOpModGrpWord[bModRM].call(this, this.aOpGrp6, X86.fnSrcNone);
 };
 
 /**
@@ -61,7 +61,7 @@ X86.opGrp7 = function GRP7()
     if (!(bModRM & 0x10)) {
         this.opFlags |= X86.OPFLAG.NOREAD;
     }
-    this.aOpModGrpWord[bModRM].call(this, X86.aOpGrp7, X86.fnGRPSrcNone);
+    this.aOpModGrpWord[bModRM].call(this, X86.aOpGrp7, X86.fnSrcNone);
 };
 
 /**
