@@ -1962,7 +1962,7 @@ X86.opJNP = function JNP()
 X86.opJL = function JL()
 {
     var disp = this.getIPDisp();
-    if (!this.getSF() != !this.getOF()) {                   // jshint ignore:line
+    if (!this.getSF() != !this.getOF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
         return;
@@ -1978,7 +1978,7 @@ X86.opJL = function JL()
 X86.opJNL = function JNL()
 {
     var disp = this.getIPDisp();
-    if (!this.getSF() == !this.getOF()) {                   // jshint ignore:line
+    if (!this.getSF() == !this.getOF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
         return;
@@ -1994,7 +1994,7 @@ X86.opJNL = function JNL()
 X86.opJLE = function JLE()
 {
     var disp = this.getIPDisp();
-    if (this.getZF() || !this.getSF() != !this.getOF()) {   // jshint ignore:line
+    if (this.getZF() || !this.getSF() != !this.getOF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
         return;
@@ -2010,7 +2010,7 @@ X86.opJLE = function JLE()
 X86.opJNLE = function JNLE()
 {
     var disp = this.getIPDisp();
-    if (!this.getZF() && !this.getSF() == !this.getOF()) {  // jshint ignore:line
+    if (!this.getZF() && !this.getSF() == !this.getOF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
         return;
@@ -2023,7 +2023,7 @@ X86.opJNLE = function JNLE()
  *
  * @this {X86CPU}
  */
-X86.opGrp1b = function GRP1b()
+X86.opGRP1b = function GRP1b()
 {
     this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp1b, this.getIPByte);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? 1 : this.CYCLES.nOpCyclesArithMID);
@@ -2034,7 +2034,7 @@ X86.opGrp1b = function GRP1b()
  *
  * @this {X86CPU}
  */
-X86.opGrp1w = function GRP1w()
+X86.opGRP1w = function GRP1w()
 {
     this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp1w, this.getIPWord);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? 1 : this.CYCLES.nOpCyclesArithMID);
@@ -2045,7 +2045,7 @@ X86.opGrp1w = function GRP1w()
  *
  * @this {X86CPU}
  */
-X86.opGrp1sw = function GRP1sw()
+X86.opGRP1sw = function GRP1sw()
 {
     this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp1w, this.getIPDisp);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? 1 : this.CYCLES.nOpCyclesArithMID);
@@ -3266,9 +3266,9 @@ X86.opMOVDIw = function MOVDIw()
  *
  * @this {X86CPU}
  */
-X86.opGrp2bi = function GRP2bi()
+X86.opGRP2bn = function GRP2bn()
 {
-    this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp2b, X86.fnSrcCountImm);
+    this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp2b, X86.fnSrcCountN);
 };
 
 /**
@@ -3276,9 +3276,9 @@ X86.opGrp2bi = function GRP2bi()
  *
  * @this {X86CPU}
  */
-X86.opGrp2wi = function GRP2wi()
+X86.opGRP2wn = function GRP2wn()
 {
-    this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp2w, X86.fnSrcCountImm);
+    this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp2w, X86.fnSrcCountN);
 };
 
 /**
@@ -3286,9 +3286,9 @@ X86.opGrp2wi = function GRP2wi()
  *
  * @this {X86CPU}
  */
-X86.opGrp2di = function GRP2di()
+X86.opGRP2dn = function GRP2dn()
 {
-    this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp2d, X86.fnSrcCountImm);
+    this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp2d, X86.fnSrcCountN);
 };
 
 /**
@@ -3352,7 +3352,7 @@ X86.opMOVb = function MOVb()
      * Like other MOV operations, the destination does not need to be read, just written.
      */
     this.opFlags |= X86.OPFLAG.NOREAD;
-    this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrpMOVImm, this.getIPByte);
+    this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrpMOVn, this.getIPByte);
 };
 
 /**
@@ -3366,7 +3366,7 @@ X86.opMOVw = function MOVw()
      * Like other MOV operations, the destination does not need to be read, just written.
      */
     this.opFlags |= X86.OPFLAG.NOREAD;
-    this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrpMOVImm, this.getIPWord);
+    this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrpMOVn, this.getIPWord);
 };
 
 /**
@@ -3509,7 +3509,7 @@ X86.opIRET = function IRET()
  *
  * @this {X86CPU}
  */
-X86.opGrp2b1 = function GRP2b1()
+X86.opGRP2b1 = function GRP2b1()
 {
     this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp2b, X86.fnSrcCount1);
 };
@@ -3519,7 +3519,7 @@ X86.opGrp2b1 = function GRP2b1()
  *
  * @this {X86CPU}
  */
-X86.opGrp2w1 = function GRP2w1()
+X86.opGRP2w1 = function GRP2w1()
 {
     this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp2w, X86.fnSrcCount1);
 };
@@ -3529,7 +3529,7 @@ X86.opGrp2w1 = function GRP2w1()
  *
  * @this {X86CPU}
  */
-X86.opGrp2d1 = function GRP2d1()
+X86.opGRP2d1 = function GRP2d1()
 {
     this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp2d, X86.fnSrcCount1);
 };
@@ -3539,7 +3539,7 @@ X86.opGrp2d1 = function GRP2d1()
  *
  * @this {X86CPU}
  */
-X86.opGrp2bCL = function GRP2bCL()
+X86.opGRP2bCL = function GRP2bCL()
 {
     this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp2b, X86.fnSrcCountCL);
 };
@@ -3549,7 +3549,7 @@ X86.opGrp2bCL = function GRP2bCL()
  *
  * @this {X86CPU}
  */
-X86.opGrp2wCL = function GRP2wCL()
+X86.opGRP2wCL = function GRP2wCL()
 {
     this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp2w, X86.fnSrcCountCL);
 };
@@ -3559,7 +3559,7 @@ X86.opGrp2wCL = function GRP2wCL()
  *
  * @this {X86CPU}
  */
-X86.opGrp2dCL = function GRP2dCL()
+X86.opGRP2dCL = function GRP2dCL()
 {
     this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp2d, X86.fnSrcCountCL);
 };
@@ -3995,7 +3995,7 @@ X86.opCMC = function CMC()
  *
  * @this {X86CPU}
  */
-X86.opGrp3b = function GRP3b()
+X86.opGRP3b = function GRP3b()
 {
     this.regMD16 = -1;
     this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp3b, X86.fnSrcNone);
@@ -4021,7 +4021,7 @@ X86.opGrp3b = function GRP3b()
  *
  * @this {X86CPU}
  */
-X86.opGrp3w = function GRP3w()
+X86.opGRP3w = function GRP3w()
 {
     this.regMD16 = -1;
     this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp3w, X86.fnSrcNone);
@@ -4103,7 +4103,7 @@ X86.opSTD = function STD()
  *
  * @this {X86CPU}
  */
-X86.opGrp4b = function GRP4b()
+X86.opGRP4b = function GRP4b()
 {
     this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp4b, X86.fnSrcNone);
 };
@@ -4113,7 +4113,7 @@ X86.opGrp4b = function GRP4b()
  *
  * @this {X86CPU}
  */
-X86.opGrp4w = function GRP4w()
+X86.opGRP4w = function GRP4w()
 {
     this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp4w, X86.fnSrcNone);
 };
@@ -4205,7 +4205,7 @@ X86.aOps = [
      * to opcode 0x82 as a "reserved" instruction, but also cryptically refers to it as "MOVB AL,imm".  This is
      * assumed to be an error in the manual, because as far as I know, 0x82 has always mirrored 0x80.
      */
-    X86.opGrp1b,            X86.opGrp1w,            X86.opGrp1b,            X86.opGrp1sw,       // 0x80-0x83
+    X86.opGRP1b,            X86.opGRP1w,            X86.opGRP1b,            X86.opGRP1sw,       // 0x80-0x83
     X86.opTESTrb,           X86.opTESTrw,           X86.opXCHGrb,           X86.opXCHGrw,       // 0x84-0x87
     X86.opMOVmb,            X86.opMOVmw,            X86.opMOVrb,            X86.opMOVrw,        // 0x88-0x8B
     X86.opMOVwsr,           X86.opLEA,              X86.opMOVsrw,           X86.opPOPmw,        // 0x8C-0x8F
@@ -4228,7 +4228,7 @@ X86.aOps = [
     X86.opLES,              X86.opLDS,              X86.opMOVb,             X86.opMOVw,         // 0xC4-0xC7
     X86.opRETFn,            X86.opRETF,             X86.opRETFn,            X86.opRETF,         // 0xC8-0xCB
     X86.opINT3,             X86.opINTn,             X86.opINTO,             X86.opIRET,         // 0xCC-0xCF
-    X86.opGrp2b1,           X86.opGrp2w1,           X86.opGrp2bCL,          X86.opGrp2wCL,      // 0xD0-0xD3
+    X86.opGRP2b1,           X86.opGRP2w1,           X86.opGRP2bCL,          X86.opGRP2wCL,      // 0xD0-0xD3
     /*
      * Even as of the Pentium, opcode 0xD6 is still marked as "reserved", but it's always been SALC (aka SETALC).
      */
@@ -4246,9 +4246,9 @@ X86.aOps = [
      * As of the Pentium, opcode 0xF1 is still marked "reserved".
      */
     X86.opLOCK,             X86.opLOCK,             X86.opREPNZ,            X86.opREPZ,         // 0xF0-0xF3
-    X86.opHLT,              X86.opCMC,              X86.opGrp3b,            X86.opGrp3w,        // 0xF4-0xF7
+    X86.opHLT,              X86.opCMC,              X86.opGRP3b,            X86.opGRP3w,        // 0xF4-0xF7
     X86.opCLC,              X86.opSTC,              X86.opCLI,              X86.opSTI,          // 0xF8-0xFB
-    X86.opCLD,              X86.opSTD,              X86.opGrp4b,            X86.opGrp4w         // 0xFC-0xFF
+    X86.opCLD,              X86.opSTD,              X86.opGRP4b,            X86.opGRP4w         // 0xFC-0xFF
 ];
 
 /*
@@ -4261,8 +4261,8 @@ X86.aOps = [
  *      Opcodes     Intel       PCjs                                                PC Mag TechRef
  *      -------     -----       ----                                                --------------
  *      0x80-0x83   Grp1        Grp1b and Grp1w                                     Group A
- *      0xC0-0xC1   Grp2        Grp2b and Grp2w (opGrp2bi/wi)                       Group B
- *      0xD0-0xD3   Grp2        Grp2b and Grp2w (opGrp2b1/w1 and opGrp2bCL/wCL)     Group B
+ *      0xC0-0xC1   Grp2        Grp2b and Grp2w (opGRP2bn/wn)                       Group B
+ *      0xD0-0xD3   Grp2        Grp2b and Grp2w (opGRP2b1/w1 and opGRP2bCL/wCL)     Group B
  *      0xF6-0xF7   Grp3        Grp3b and Grp3w                                     Group C
  *      0xFE        Grp4        Grp4b                                               Group D
  *      0xFF        Grp5        Grp4w                                               Group E
@@ -4278,7 +4278,7 @@ X86.aOps = [
  * remaining group numbers remain in sync with Intel's.
  *
  * To the above list, I also add these "groups of 1": opcode 0x8F uses GrpPOPw, and opcodes 0xC6/0xC7 use
- * GrpMOVImm.  In both of these groups, the only valid (documented) instruction is where reg=0x0.
+ * GrpMOVn.  In both of these groups, the only valid (documented) instruction is where reg=0x0.
  *
  * TODO: Test what happens on real hardware when the reg field is non-zero for opcodes 0x8F and 0xC6/0xC7.
  */
@@ -4297,8 +4297,8 @@ X86.aOpGrpPOPw = [
     X86.fnGRPFault,         X86.fnGRPFault,         X86.fnGRPFault,         X86.fnGRPFault          // 0x8F(reg=0x4-0x7)
 ];
 
-X86.aOpGrpMOVImm = [
-    X86.fnMOVImm,           X86.fnGRPUndefined,     X86.fnGRPUndefined,     X86.fnGRPUndefined,     // 0xC6/0xC7(reg=0x0-0x3)
+X86.aOpGrpMOVn = [
+    X86.fnMOVn,             X86.fnGRPUndefined,     X86.fnGRPUndefined,     X86.fnGRPUndefined,     // 0xC6/0xC7(reg=0x0-0x3)
     X86.fnGRPUndefined,     X86.fnGRPUndefined,     X86.fnGRPUndefined,     X86.fnGRPUndefined      // 0xC6/0xC7(reg=0x4-0x7)
 ];
 
@@ -4366,8 +4366,8 @@ if (I386) {
         0x39:   X86.opTBD,      // opCMPmd()
         0x3B:   X86.opTBD,      // opCMPrd()
         0x3D:   X86.opTBD,      // opCMPAXd()
-        0xC1:   X86.opGrp2di,
-        0xD1:   X86.opGrp2d1,
-        0xD3:   X86.opGrp2dCL
+        0xC1:   X86.opGRP2dn,
+        0xD1:   X86.opGRP2d1,
+        0xD3:   X86.opGRP2dCL
     };
 }

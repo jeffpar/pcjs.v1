@@ -205,6 +205,70 @@ X86.fnBOUND = function BOUND(dst, src)
 };
 
 /**
+ * fnBT(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnBT = function BT(dst, src)
+{
+    if (dst & (1 << (src & 0x1f))) this.setCF(); else this.clearCF();
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? X86CPU.CYCLES_80386.nOpCyclesBitTestR : X86CPU.CYCLES_80386.nOpCyclesBitTestM);
+    this.opFlags |= X86.OPFLAG.NOWRITE;
+    return dst;
+};
+
+/**
+ * fnBTC(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnBTC = function BTC(dst, src)
+{
+    var bit = 1 << (src & 0x1f);
+    if (dst & bit) this.setCF(); else this.clearCF();
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? X86CPU.CYCLES_80386.nOpCyclesBitSetR : X86CPU.CYCLES_80386.nOpCyclesBitSetM);
+    return dst ^ bit;
+};
+
+/**
+ * fnBTR(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnBTR = function BTR(dst, src)
+{
+    var bit = 1 << (src & 0x1f);
+    if (dst & bit) this.setCF(); else this.clearCF();
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? X86CPU.CYCLES_80386.nOpCyclesBitSetR : X86CPU.CYCLES_80386.nOpCyclesBitSetM);
+    return dst & ~bit;
+};
+
+/**
+ * fnBTS(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnBTS = function BTS(dst, src)
+{
+    var bit = 1 << (src & 0x1f);
+    if (dst & bit) this.setCF(); else this.clearCF();
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? X86CPU.CYCLES_80386.nOpCyclesBitSetR : X86CPU.CYCLES_80386.nOpCyclesBitSetM);
+    return dst | bit;
+};
+
+/**
  * fnCALLw(dst, src)
  *
  * @this {X86CPU}
@@ -689,6 +753,48 @@ X86.fnIMULw = function IMULw(dst, src)
 };
 
 /**
+ * fnIMULrw(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnIMULrw = function IMULrw(dst, src)
+{
+    var result = ((dst << 16) >> 16) * ((src << 16) >> 16);
+    if (result > 32767 || result < -32768) {
+        this.setCF(); this.setOF();
+    } else {
+        this.clearCF(); this.clearOF();
+    }
+    result &= 0xffff;
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? X86CPU.CYCLES_80386.nOpCyclesIMulR : X86CPU.CYCLES_80386.nOpCyclesIMulM);
+    return result;
+};
+
+/**
+ * fnIMULrd(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnIMULrd = function IMULrd(dst, src)
+{
+    var result = dst * src;
+    if (result > 2147483647 || result < -2147483648) {
+        this.setCF(); this.setOF();
+    } else {
+        this.clearCF(); this.clearOF();
+    }
+    result |= 0;
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? X86CPU.CYCLES_80386.nOpCyclesIMulR : X86CPU.CYCLES_80386.nOpCyclesIMulM);
+    return result;
+};
+
+/**
  * fnINCb(dst, src)
  *
  * @this {X86CPU}
@@ -1103,14 +1209,14 @@ X86.fnMOV = function MOV(dst, src)
 };
 
 /**
- * fnMOVimm(dst, src)
+ * fnMOVn(dst, src)
  *
  * @this {X86CPU}
  * @param {number} dst (current value, ignored)
  * @param {number} src (new value)
  * @return {number} dst (updated value, from src)
  */
-X86.fnMOVImm = function MOVImm(dst, src)
+X86.fnMOVn = function MOVn(dst, src)
 {
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? this.CYCLES.nOpCyclesMovRI : this.CYCLES.nOpCyclesMovMI);
     return src;
@@ -1337,17 +1443,17 @@ X86.fnRCLb = function RCLb(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
-    var shift = src & this.nShiftCountMask;
-    if (shift) {
+    var count = src & this.nShiftCountMask;
+    if (count) {
         var carry = this.getCarry();
-        shift %= 9;
-        if (!shift) {
+        count %= 9;
+        if (!count) {
             carry <<= 7;
         } else {
-            result = ((dst << shift) | (carry << (shift - 1)) | (dst >> (9 - shift))) & 0xff;
-            carry = dst << (shift - 1);
+            result = ((dst << count) | (carry << (count - 1)) | (dst >> (9 - count))) & 0xff;
+            carry = dst << (count - 1);
         }
-        X86.setRotateResult.call(this, result, carry, X86.RESULT.BYTE);
+        this.setRotateResult(result, carry, X86.RESULT.BYTE);
     }
     if (DEBUG && DEBUGGER) this.traceLog('RCLB', dst, src, flagsIn, this.getPS(), result);
     return result;
@@ -1365,17 +1471,17 @@ X86.fnRCLw = function RCLw(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
-    var shift = src & this.nShiftCountMask;
-    if (shift) {
+    var count = src & this.nShiftCountMask;
+    if (count) {
         var carry = this.getCarry();
-        shift %= 17;
-        if (!shift) {
+        count %= 17;
+        if (!count) {
             carry <<= 15;
         } else {
-            result = ((dst << shift) | (carry << (shift - 1)) | (dst >> (17 - shift))) & 0xffff;
-            carry = dst << (shift - 1);
+            result = ((dst << count) | (carry << (count - 1)) | (dst >> (17 - count))) & 0xffff;
+            carry = dst << (count - 1);
         }
-        X86.setRotateResult.call(this, result, carry, X86.RESULT.WORD);
+        this.setRotateResult(result, carry, X86.RESULT.WORD);
     }
     if (DEBUG && DEBUGGER) this.traceLog('RCLW', dst, src, flagsIn, this.getPS(), result);
     return result;
@@ -1393,17 +1499,17 @@ X86.fnRCLd = function RCLd(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
-    var shift = src & this.nShiftCountMask;     // Yes, this 32-bit-only function could mask with 0x1f directly
-    if (shift) {
+    var count = src & this.nShiftCountMask;     // Yes, this 32-bit-only function could mask with 0x1f directly
+    if (count) {
         var carry = this.getCarry();
         /*
          * JavaScript Alert: much like a post-8086 Intel CPU, JavaScript shift counts are mod 32,
          * so "dst >>> 32" is equivalent to "dst >>> 0", which doesn't shift any bits at all.  To
          * compensate, we shift one bit less than the maximum, and then shift one bit farther.
          */
-        result = (dst << shift) | (carry << (shift - 1)) | ((dst >>> (32 - shift)) >>> 1);
-        carry = dst << (shift - 1);
-        X86.setRotateResult.call(this, result, carry, X86.RESULT.DWORD);
+        result = (dst << count) | (carry << (count - 1)) | ((dst >>> (32 - count)) >>> 1);
+        carry = dst << (count - 1);
+        this.setRotateResult(result, carry, X86.RESULT.DWORD);
     }
     if (DEBUG && DEBUGGER) this.traceLog('RCLD', dst, src, flagsIn, this.getPS(), result);
     return result;
@@ -1421,17 +1527,17 @@ X86.fnRCRb = function RCRb(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
-    var shift = src & this.nShiftCountMask;
-    if (shift) {
+    var count = src & this.nShiftCountMask;
+    if (count) {
         var carry = this.getCarry();
-        shift %= 9;
-        if (!shift) {
+        count %= 9;
+        if (!count) {
             carry <<= 7;
         } else {
-            result = ((dst >> shift) | (carry << (8 - shift)) | (dst << (9 - shift))) & 0xff;
-            carry = dst << (8 - shift);
+            result = ((dst >> count) | (carry << (8 - count)) | (dst << (9 - count))) & 0xff;
+            carry = dst << (8 - count);
         }
-        X86.setRotateResult.call(this, result, carry, X86.RESULT.BYTE);
+        this.setRotateResult(result, carry, X86.RESULT.BYTE);
     }
     if (DEBUG && DEBUGGER) this.traceLog('RCRB', dst, src, flagsIn, this.getPS(), result);
     return result;
@@ -1449,17 +1555,17 @@ X86.fnRCRw = function RCRw(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
-    var shift = src & this.nShiftCountMask;
-    if (shift) {
+    var count = src & this.nShiftCountMask;
+    if (count) {
         var carry = this.getCarry();
-        shift %= 17;
-        if (!shift) {
+        count %= 17;
+        if (!count) {
             carry <<= 15;
         } else {
-            result = ((dst >> shift) | (carry << (16 - shift)) | (dst << (17 - shift))) & 0xffff;
-            carry = dst << (16 - shift);
+            result = ((dst >> count) | (carry << (16 - count)) | (dst << (17 - count))) & 0xffff;
+            carry = dst << (16 - count);
         }
-        X86.setRotateResult.call(this, result, carry, X86.RESULT.WORD);
+        this.setRotateResult(result, carry, X86.RESULT.WORD);
     }
     if (DEBUG && DEBUGGER) this.traceLog('RCRW', dst, src, flagsIn, this.getPS(), result);
     return result;
@@ -1477,17 +1583,17 @@ X86.fnRCRd = function RCRd(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
-    var shift = src & this.nShiftCountMask;     // Yes, this 32-bit-only function could mask with 0x1f directly
-    if (shift) {
+    var count = src & this.nShiftCountMask;     // Yes, this 32-bit-only function could mask with 0x1f directly
+    if (count) {
         var carry = this.getCarry();
         /*
          * JavaScript Alert: much like a post-8086 Intel CPU, JavaScript shift counts are mod 32,
          * so "dst << 32" is equivalent to "dst << 0", which doesn't shift any bits at all.  To
          * compensate, we shift one bit less than the maximum, and then shift one bit farther.
          */
-        result = (dst >>> shift) | (carry << (32 - shift)) | ((dst << (32 - shift)) << 1);
-        carry = dst << (32 - shift);
-        X86.setRotateResult.call(this, result, carry, X86.RESULT.DWORD);
+        result = (dst >>> count) | (carry << (32 - count)) | ((dst << (32 - count)) << 1);
+        carry = dst << (32 - count);
+        this.setRotateResult(result, carry, X86.RESULT.DWORD);
     }
     if (DEBUG && DEBUGGER) this.traceLog('RCRD', dst, src, flagsIn, this.getPS(), result);
     return result;
@@ -1543,17 +1649,17 @@ X86.fnROLb = function ROLb(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
-    var shift = src & this.nShiftCountMask;
-    if (shift) {
+    var count = src & this.nShiftCountMask;
+    if (count) {
         var carry;
-        shift &= 0x7;
-        if (!shift) {
+        count &= 0x7;
+        if (!count) {
             carry = dst << 7;
         } else {
-            result = ((dst << shift) | (dst >> (8 - shift))) & 0xff;
-            carry = dst << (shift - 1);
+            result = ((dst << count) | (dst >> (8 - count))) & 0xff;
+            carry = dst << (count - 1);
         }
-        X86.setRotateResult.call(this, result, carry, X86.RESULT.BYTE);
+        this.setRotateResult(result, carry, X86.RESULT.BYTE);
     }
     if (DEBUG && DEBUGGER) this.traceLog('ROLB', dst, src, flagsIn, this.getPS(), result);
     return result;
@@ -1571,17 +1677,17 @@ X86.fnROLw = function ROLw(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
-    var shift = src & this.nShiftCountMask;
-    if (shift) {
+    var count = src & this.nShiftCountMask;
+    if (count) {
         var carry;
-        shift &= 0xf;
-        if (!shift) {
+        count &= 0xf;
+        if (!count) {
             carry = dst << 15;
         } else {
-            result = ((dst << shift) | (dst >> (16 - shift))) & 0xffff;
-            carry = dst << (shift - 1);
+            result = ((dst << count) | (dst >> (16 - count))) & 0xffff;
+            carry = dst << (count - 1);
         }
-        X86.setRotateResult.call(this, result, carry, X86.RESULT.WORD);
+        this.setRotateResult(result, carry, X86.RESULT.WORD);
     }
     if (DEBUG && DEBUGGER) this.traceLog('ROLW', dst, src, flagsIn, this.getPS(), result);
     return result;
@@ -1599,17 +1705,17 @@ X86.fnRORb = function RORb(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
-    var shift = src & this.nShiftCountMask;
-    if (shift) {
+    var count = src & this.nShiftCountMask;
+    if (count) {
         var carry;
-        shift &= 0x7;
-        if (!shift) {
+        count &= 0x7;
+        if (!count) {
             carry = dst;
         } else {
-            result = ((dst >> shift) | (dst << (8 - shift))) & 0xff;
-            carry = dst << (8 - shift);
+            result = ((dst >> count) | (dst << (8 - count))) & 0xff;
+            carry = dst << (8 - count);
         }
-        X86.setRotateResult.call(this, result, carry, X86.RESULT.BYTE);
+        this.setRotateResult(result, carry, X86.RESULT.BYTE);
     }
     if (DEBUG && DEBUGGER) this.traceLog('RORB', dst, src, flagsIn, this.getPS(), result);
     return result;
@@ -1627,17 +1733,17 @@ X86.fnRORw = function RORw(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
-    var shift = src & this.nShiftCountMask;
-    if (shift) {
+    var count = src & this.nShiftCountMask;
+    if (count) {
         var carry;
-        shift &= 0xf;
-        if (!shift) {
+        count &= 0xf;
+        if (!count) {
             carry = dst;
         } else {
-            result = ((dst >> shift) | (dst << (16 - shift))) & 0xffff;
-            carry = dst << (16 - shift);
+            result = ((dst >> count) | (dst << (16 - count))) & 0xffff;
+            carry = dst << (16 - count);
         }
-        X86.setRotateResult.call(this, result, carry, X86.RESULT.WORD);
+        this.setRotateResult(result, carry, X86.RESULT.WORD);
     }
     if (DEBUG && DEBUGGER) this.traceLog('RORW', dst, src, flagsIn, this.getPS(), result);
     return result;
@@ -1646,10 +1752,6 @@ X86.fnRORw = function RORw(dst, src)
 /**
  * fnSARb(dst, src)
  *
- * NOTE: Although we set all the arithmetic flags for shift instructions, AF isn't actually
- * defined on a real 8086/8088.  Similarly, OF is undefined for shifts > 1.  See fnSHLb() for
- * more details.
- *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src (1 or CL, or an immediate byte for 80186/80188 and up)
@@ -1657,22 +1759,18 @@ X86.fnRORw = function RORw(dst, src)
  */
 X86.fnSARb = function SARb(dst, src)
 {
-    var shift = src & this.nShiftCountMask;
-    if (shift) {
-        if (shift > 8) shift = 9;
-        var temp = ((dst << 24) >> 24) >> (shift - 1);
-        dst = (temp >> 1) & 0xff;
-        this.setLogicResult(dst, X86.RESULT.BYTE, temp & 0x1);
+    var count = src & this.nShiftCountMask;
+    if (count) {
+        if (count > 8) count = 9;
+        var carry = ((dst << 24) >> 24) >> (count - 1);
+        dst = (carry >> 1) & 0xff;
+        this.setLogicResult(dst, X86.RESULT.BYTE, carry & 0x1);
     }
     return dst;
 };
 
 /**
  * fnSARw(dst, src)
- *
- * NOTE: Although we set all the arithmetic flags for shift instructions, AF isn't actually
- * defined on a real 8086/8088.  Similarly, OF is undefined for shifts > 1.  See fnSHLb() for
- * more details.
  *
  * @this {X86CPU}
  * @param {number} dst
@@ -1681,12 +1779,12 @@ X86.fnSARb = function SARb(dst, src)
  */
 X86.fnSARw = function SARw(dst, src)
 {
-    var shift = src & this.nShiftCountMask;
-    if (shift) {
-        if (shift > 16) shift = 17;
-        var temp = ((dst << 16) >> 16) >> (shift - 1);
-        dst = (temp >> 1) & 0xffff;
-        this.setLogicResult(dst, X86.RESULT.WORD, temp & 0x1);
+    var count = src & this.nShiftCountMask;
+    if (count) {
+        if (count > 16) count = 17;
+        var carry = ((dst << 16) >> 16) >> (count - 1);
+        dst = (carry >> 1) & 0xffff;
+        this.setLogicResult(dst, X86.RESULT.WORD, carry & 0x1);
     }
     return dst;
 };
@@ -1721,6 +1819,227 @@ X86.fnSBBw = function SBBw(dst, src)
     this.setArithResult(dst, src, w, X86.RESULT.WORD | X86.RESULT.ALL, true);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesArithRR : this.CYCLES.nOpCyclesArithRM) : this.CYCLES.nOpCyclesArithMR);
     return w & 0xffff;
+};
+
+/**
+ * fnSETcc()
+ *
+ * @this {X86CPU}
+ * @param {function(number,number)} fnSet
+ */
+X86.fnSETcc = function SETcc(fnSet)
+{
+    this.opFlags |= X86.OPFLAG.NOREAD;
+    this.aOpModMemByte[this.getIPByte()].call(this, fnSet);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? X86CPU.CYCLES_80386.nOpCyclesSetR : X86CPU.CYCLES_80386.nOpCyclesSetM);
+};
+
+/**
+ * fnSETO(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst (ignored)
+ * @param {number} src (ignored)
+ * @return {number}
+ */
+X86.fnSETO = function SETO(dst, src)
+{
+    return (this.getOF()? 1 : 0);
+};
+
+/**
+ * fnSETNO(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst (ignored)
+ * @param {number} src (ignored)
+ * @return {number}
+ */
+X86.fnSETNO = function SETNO(dst, src)
+{
+    return (this.getOF()? 0 : 1);
+};
+
+/**
+ * fnSETC(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst (ignored)
+ * @param {number} src (ignored)
+ * @return {number}
+ */
+X86.fnSETC = function SETC(dst, src)
+{
+    return (this.getCF()? 1 : 0);
+};
+
+/**
+ * fnSETNC(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst (ignored)
+ * @param {number} src (ignored)
+ * @return {number}
+ */
+X86.fnSETNC = function SETNC(dst, src)
+{
+    return (this.getCF()? 0 : 1);
+};
+
+/**
+ * fnSETZ(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst (ignored)
+ * @param {number} src (ignored)
+ * @return {number}
+ */
+X86.fnSETZ = function SETZ(dst, src)
+{
+    return (this.getZF()? 1 : 0);
+};
+
+/**
+ * fnSETNZ(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst (ignored)
+ * @param {number} src (ignored)
+ * @return {number}
+ */
+X86.fnSETNZ = function SETNZ(dst, src)
+{
+    return (this.getZF()? 0 : 1);
+};
+
+/**
+ * fnSETBE(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst (ignored)
+ * @param {number} src (ignored)
+ * @return {number}
+ */
+X86.fnSETBE = function SETBE(dst, src)
+{
+    return (this.getCF() || this.getZF()? 1 : 0);
+};
+
+/**
+ * fnSETNBE(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst (ignored)
+ * @param {number} src (ignored)
+ * @return {number}
+ */
+X86.fnSETNBE = function SETNBE(dst, src)
+{
+    return (this.getCF() || this.getZF()? 0 : 1);
+};
+
+/**
+ * fnSETS(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst (ignored)
+ * @param {number} src (ignored)
+ * @return {number}
+ */
+X86.fnSETS = function SETS(dst, src)
+{
+    return (this.getSF()? 1 : 0);
+};
+
+/**
+ * fnSETNS(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst (ignored)
+ * @param {number} src (ignored)
+ * @return {number}
+ */
+X86.fnSETNS = function SETNS(dst, src)
+{
+    return (this.getSF()? 0 : 1);
+};
+
+/**
+ * fnSETP(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst (ignored)
+ * @param {number} src (ignored)
+ * @return {number}
+ */
+X86.fnSETP = function SETP(dst, src)
+{
+    return (this.getPF()? 1 : 0);
+};
+
+/**
+ * fnSETNP(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst (ignored)
+ * @param {number} src (ignored)
+ * @return {number}
+ */
+X86.fnSETNP = function SETNP(dst, src)
+{
+    return (this.getPF()? 0 : 1);
+};
+
+/**
+ * fnSETL(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst (ignored)
+ * @param {number} src (ignored)
+ * @return {number}
+ */
+X86.fnSETL = function SETL(dst, src)
+{
+    return (!this.getSF() != !this.getOF()? 1 : 0);
+};
+
+/**
+ * fnSETNL(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst (ignored)
+ * @param {number} src (ignored)
+ * @return {number}
+ */
+X86.fnSETNL = function SETNL(dst, src)
+{
+    return (!this.getSF() != !this.getOF()? 0 : 1);
+};
+
+/**
+ * fnSETLE(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst (ignored)
+ * @param {number} src (ignored)
+ * @return {number}
+ */
+X86.fnSETLE = function SETLE(dst, src)
+{
+    return (this.getZF() || !this.getSF() != !this.getOF()? 1 : 0);
+};
+
+/**
+ * fnSETNLE(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst (ignored)
+ * @param {number} src (ignored)
+ * @return {number}
+ */
+X86.fnSETNLE = function SETNLE(dst, src)
+{
+    return (this.getZF() || !this.getSF() != !this.getOF()? 0 : 1);
 };
 
 /**
@@ -1786,15 +2105,6 @@ X86.fnSGDT = function SGDT(dst, src)
 /**
  * fnSHLb(dst, src)
  *
- * NOTE: Although we set all the arithmetic flags for shift instructions, AF isn't actually
- * defined on a real 8086/8088.  Similarly, OF is undefined for shifts > 1.
- *
- * For example, when AL=09, "SHL AL,1" may clear AF on a real CPU, whereas we will set it.
- * However, until I find or produce documented 8086/8088 behaviors for AF and OF, and/or code
- * that depends on them, I'll continue setting AF and OF "normally".
- *
- * See also: AND, OR, TEST, and XOR (those instructions leave AF undefined as well).
- *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src (1 or CL, or an immediate byte for 80186/80188 and up)
@@ -1804,13 +2114,13 @@ X86.fnSHLb = function SHLb(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
-    var shift = src & this.nShiftCountMask;
-    if (shift) {
+    var count = src & this.nShiftCountMask;
+    if (count) {
         var carry = 0;
-        if (shift > 8) {
+        if (count > 8) {
             result = 0;
         } else {
-            carry = dst << (shift - 1);
+            carry = dst << (count - 1);
             result = (carry << 1) & 0xff;
         }
         this.setLogicResult(result, X86.RESULT.BYTE, carry & X86.RESULT.BYTE, (result ^ carry) & X86.RESULT.BYTE);
@@ -1822,10 +2132,6 @@ X86.fnSHLb = function SHLb(dst, src)
 /**
  * fnSHLw(dst, src)
  *
- * NOTE: Although we set all the arithmetic flags for shift instructions, AF isn't actually
- * defined on a real 8086/8088.  Similarly, OF is undefined for shifts > 1.  See fnSHLb() for
- * more details.
- *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src (1 or CL, or an immediate byte for 80186/80188 and up)
@@ -1835,13 +2141,13 @@ X86.fnSHLw = function SHLw(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
-    var shift = src & this.nShiftCountMask;
-    if (shift) {
+    var count = src & this.nShiftCountMask;
+    if (count) {
         var carry = 0;
-        if (shift > 16) {
+        if (count > 16) {
             result = 0;
         } else {
-            carry = dst << (shift - 1);
+            carry = dst << (count - 1);
             result = (carry << 1) & 0xffff;
         }
         this.setLogicResult(result, X86.RESULT.WORD, carry & X86.RESULT.WORD, (result ^ carry) & X86.RESULT.WORD);
@@ -1851,11 +2157,101 @@ X86.fnSHLw = function SHLw(dst, src)
 };
 
 /**
- * fnSHRb(dst, src)
+ * fnSHLDw(dst, src, count)
  *
- * NOTE: Although we set all the arithmetic flags for shift instructions, AF isn't actually
- * defined on a real 8086/8088.  Similarly, OF is undefined for shifts > 1.  See fnSHLb() for
- * more details.
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @param {number} count (0-31)
+ * @return {number}
+ */
+X86.fnSHLDw = function SHLDw(dst, src, count)
+{
+    if (count) {
+        if (count > 16) {
+            dst = src;
+            count -= 16;
+        }
+        var carry = dst << (count - 1);
+        dst = ((carry << 1) | (src >> (16 - count))) & 0xffff;
+        this.setLogicResult(dst, X86.RESULT.WORD, carry & X86.RESULT.WORD);
+    }
+    return dst;
+};
+
+/**
+ * fnSHLDd(dst, src, count)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @param {number} count
+ * @return {number}
+ */
+X86.fnSHLDd = function SHLDd(dst, src, count)
+{
+    if (count) {
+        var carry = dst << (count - 1);
+        dst = (carry << 1) | (src >> (32 - count));
+        this.setLogicResult(dst, X86.RESULT.DWORD, carry & X86.RESULT.DWORD);
+    }
+    return dst;
+};
+
+/**
+ * fnSHLDwi(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnSHLDwi = function SHLDwi(dst, src)
+{
+    return X86.fnSHLDw.call(this, dst, src, this.getIPByte());
+};
+
+/**
+ * fnSHLDdi(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnSHLDdi = function SHLDdi(dst, src)
+{
+    return X86.fnSHLDd.call(this, dst, src, this.getIPByte());
+};
+
+/**
+ * fnSHLDwCL(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnSHLDwCL = function SHLDwCL(dst, src)
+{
+    return X86.fnSHLDw.call(this, dst, src, this.regECX & 0x1f);
+};
+
+/**
+ * fnSHLDdCL(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnSHLDdCL = function SHLDdCL(dst, src)
+{
+    return X86.fnSHLDd.call(this, dst, src, this.regECX & 0x1f);
+};
+
+/**
+ * fnSHRb(dst, src)
  *
  * @this {X86CPU}
  * @param {number} dst
@@ -1864,21 +2260,17 @@ X86.fnSHLw = function SHLw(dst, src)
  */
 X86.fnSHRb = function SHRb(dst, src)
 {
-    var shift = src & this.nShiftCountMask;
-    if (shift) {
-        var temp = (shift > 8? 0 : (dst >> (shift - 1)));
-        dst = (temp >> 1) & 0xff;
-        this.setLogicResult(dst, X86.RESULT.BYTE, temp & 0x1, dst & X86.RESULT.BYTE);
+    var count = src & this.nShiftCountMask;
+    if (count) {
+        var carry = (count > 8? 0 : (dst >> (count - 1)));
+        dst = (carry >> 1) & 0xff;
+        this.setLogicResult(dst, X86.RESULT.BYTE, carry & 0x1, dst & X86.RESULT.BYTE);
     }
     return dst;
 };
 
 /**
  * fnSHRw(dst, src)
- *
- * NOTE: Although we set all the arithmetic flags for shift instructions, AF isn't actually
- * defined on a real 8086/8088.  Similarly, OF is undefined for shifts > 1.  See fnSHLb() for
- * more details.
  *
  * @this {X86CPU}
  * @param {number} dst
@@ -1887,13 +2279,107 @@ X86.fnSHRb = function SHRb(dst, src)
  */
 X86.fnSHRw = function SHRw(dst, src)
 {
-    var shift = src & this.nShiftCountMask;
-    if (shift) {
-        var temp = (shift > 16? 0 : (dst >> (shift - 1)));
-        dst = (temp >> 1) & 0xffff;
-        this.setLogicResult(dst, X86.RESULT.WORD, temp & 0x1, dst & X86.RESULT.WORD);
+    var count = src & this.nShiftCountMask;
+    if (count) {
+        var carry = (count > 16? 0 : (dst >> (count - 1)));
+        dst = (carry >> 1) & 0xffff;
+        this.setLogicResult(dst, X86.RESULT.WORD, carry & 0x1, dst & X86.RESULT.WORD);
     }
     return dst;
+};
+
+/**
+ * fnSHRDw(dst, src, count)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @param {number} count (0-31)
+ * @return {number}
+ */
+X86.fnSHRDw = function SHRDw(dst, src, count)
+{
+    if (count) {
+        if (count > 16) {
+            dst = src;
+            count -= 16;
+        }
+        var carry = dst >> (count - 1);
+        dst = ((carry >> 1) | (src << (16 - count))) & 0xffff;
+        this.setLogicResult(dst, X86.RESULT.WORD, carry & 0x1);
+    }
+    return dst;
+};
+
+/**
+ * fnSHRDd(dst, src, count)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @param {number} count
+ * @return {number}
+ */
+X86.fnSHRDd = function SHRDd(dst, src, count)
+{
+    if (count) {
+        var carry = dst >> (count - 1);
+        dst = (carry >> 1) | (src << (32 - count));
+        this.setLogicResult(dst, X86.RESULT.DWORD, carry & 0x1);
+    }
+    return dst;
+};
+
+/**
+ * fnSHRDwi(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnSHRDwi = function SHRDwi(dst, src)
+{
+    return X86.fnSHRDw.call(this, dst, src, this.getIPByte());
+};
+
+/**
+ * fnSHRDdi(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnSHRDdi = function SHRDdi(dst, src)
+{
+    return X86.fnSHRDd.call(this, dst, src, this.getIPByte());
+};
+
+/**
+ * fnSHRDwCL(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnSHRDwCL = function SHRDwCL(dst, src)
+{
+    return X86.fnSHRDw.call(this, dst, src, this.regECX & 0x1f);
+};
+
+/**
+ * fnSHRDdCL(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnSHRDdCL = function SHRDdCL(dst, src)
+{
+    return X86.fnSHRDd.call(this, dst, src, this.regECX & 0x1f);
 };
 
 /**
@@ -2352,26 +2838,6 @@ X86.fnTBD = function TBD(dst, src)
 };
 
 /**
- * setRotateResult(result, carry, size)
- *
- * Used by all rotate instructions (RCL, RCR, ROL, ROR) to update CF and OF.
- *
- * NOTE: Although I've yet to find confirmation of this for the 8086/8088, OF is undefined on modern x86 CPUs
- * for shift counts > 1 (in fact, on modern CPUs, OF tends to be clear in those situations).  Since I set OF the
- * same way for all shift counts, my well-defined behavior may or may not match Intel's undefined behavior.
- *
- * @this {X86CPU}
- * @param {number} result
- * @param {number} carry
- * @param {number} size
- */
-X86.setRotateResult = function(result, carry, size)
-{
-    if (carry & size) this.setCF(); else this.clearCF();
-    if ((result ^ carry) & size) this.setOF(); else this.clearOF();
-};
-
-/**
  * fnGRPFault(dst, src)
  *
  * @this {X86CPU}
@@ -2453,12 +2919,12 @@ X86.fnSrcCountCL = function SrcCountCL()
 };
 
 /**
- * fnSrcCountImm()
+ * fnSrcCountN()
  *
  * @this {X86CPU}
  * @return {number}
  */
-X86.fnSrcCountImm = function SrcCountImm()
+X86.fnSrcCountN = function SrcCountN()
 {
     var count = this.getIPByte();
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesShiftCR : this.CYCLES.nOpCyclesShiftCM) + (count << this.CYCLES.nOpCyclesShiftCS);

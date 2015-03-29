@@ -165,12 +165,7 @@ RAM.prototype.reset = function()
         if (this.bus.addMemory(this.addrRAM, this.sizeRAM, Memory.TYPE.RAM)) {
             this.fAllocated = true;
 
-            var status = Math.floor(this.sizeRAM / 1024) + "Kb";
-            if (this.comment) {
-                status += " (" + this.comment + ")";
-                this.comment = null;
-            }
-            this.status(status);
+            this.status(Math.floor(this.sizeRAM / 1024) + "Kb");
 
             /*
              * NOTE: I'm specifying MAXDEBUG for status() messages because I'm not yet sure I want these

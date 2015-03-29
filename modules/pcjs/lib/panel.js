@@ -545,7 +545,7 @@ Panel.prototype.updateAnimation = function()
                 var cBlocksRemaining = this.stats.cBlocks;
                 for (i = 0; i < this.stats.cRegions; i++) {
                     var cBlocksRegion = (this.stats.aRegions[i] >> Bus.BLOCK.COUNT_SHIFT) & Bus.BLOCK.COUNT_MASK;
-                    this.stats.aRects.push(rect = rectAvail.subDivide(cBlocksRegion, cBlocksRemaining, i == 0));
+                    this.stats.aRects.push(rect = rectAvail.subDivide(cBlocksRegion, cBlocksRemaining, !i));
                     if (MAXDEBUG) this.log("region " + i + " rectangle: (" + rect.x + "," + rect.y + " " + rect.cx + "," + rect.cy + ")");
                     cBlocksRemaining -= cBlocksRegion;
                 }

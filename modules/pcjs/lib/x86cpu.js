@@ -425,6 +425,21 @@ X86CPU.CYCLES_80286 = {
     nOpCyclesXLAT:              5
 };
 
+X86CPU.CYCLES_80386 = {
+    nOpCyclesBitSetR:           6,
+    nOpCyclesBitSetM:           8,
+    nOpCyclesBitSetMExtra:      5,      // extra cycle cost for non-immediate BTC/BTR/BTS opcodes
+    nOpCyclesBitTestR:          3,
+    nOpCyclesBitTestM:          6,
+    nOpCyclesBitTestMExtra:     6,      // extra cycle cost for non-immediate BT opcode
+    nOpCyclesIMulR:             9,
+    nOpCyclesIMulM:             12,
+    nOpCyclesSetR:              4,
+    nOpCyclesSetM:              5,
+    nOpCyclesShiftDR:           3,
+    nOpCyclesShiftDM:           7
+};
+
 /**
  * Memory Simulation Notes
  *
@@ -708,7 +723,7 @@ X86CPU.prototype.initProcessor = function()
     this.aOps     = X86.aOps;
     this.aOpGrp4b = X86.aOpGrp4b;
     this.aOpGrp4w = X86.aOpGrp4w;
-    this.aOpGrp6  = X86.aOpGrp6Real;    // setProtMode() will ensure that aOpGrp6 is switched
+    this.aOpGrp6  = X86.aOpGrp6Real;        // setProtMode() will ensure that aOpGrp6 is switched
 
     if (this.model >= X86.MODEL_80186) {
         /*
@@ -724,27 +739,27 @@ X86CPU.prototype.initProcessor = function()
         this.aOpGrp4w = X86.aOpGrp4w.slice();
         this.nShiftCountMask = 0x1f;        // on newer processors, all shift counts are MOD 32
         this.aOps[0x0F]                 = X86.opInvalid;
-        this.aOps[X86.OPCODE.PUSHA]     = X86.opPUSHA;
-        this.aOps[X86.OPCODE.POPA]      = X86.opPOPA;
-        this.aOps[X86.OPCODE.BOUND]     = X86.opBOUND;
-        this.aOps[X86.OPCODE.ARPL]      = X86.opInvalid;
-        this.aOps[X86.OPCODE.FS]        = X86.opInvalid;
-        this.aOps[X86.OPCODE.GS]        = X86.opInvalid;
-        this.aOps[X86.OPCODE.OS]        = X86.opInvalid;
-        this.aOps[X86.OPCODE.AS]        = X86.opInvalid;
-        this.aOps[X86.OPCODE.PUSH16]    = X86.opPUSH16;
-        this.aOps[X86.OPCODE.IMUL16]    = X86.opIMUL16;
-        this.aOps[X86.OPCODE.PUSH8]     = X86.opPUSH8;
-        this.aOps[X86.OPCODE.IMUL8]     = X86.opIMUL8;
-        this.aOps[X86.OPCODE.INSB]      = X86.opINSb;
-        this.aOps[X86.OPCODE.INSW]      = X86.opINSw;
-        this.aOps[X86.OPCODE.OUTSB]     = X86.opOUTSb;
-        this.aOps[X86.OPCODE.OUTSW]     = X86.opOUTSw;
-        this.aOps[0xC0]                 = X86.opGrp2bi;
-        this.aOps[0xC1]                 = X86.opGrp2wi;
-        this.aOps[X86.OPCODE.ENTER]     = X86.opENTER;
-        this.aOps[X86.OPCODE.LEAVE]     = X86.opLEAVE;
-        this.aOps[0xF1]                 = X86.opINT1;
+        this.aOps[X86.OPCODE.PUSHA]     = X86.opPUSHA;      // 0x60
+        this.aOps[X86.OPCODE.POPA]      = X86.opPOPA;       // 0x61
+        this.aOps[X86.OPCODE.BOUND]     = X86.opBOUND;      // 0x62
+        this.aOps[X86.OPCODE.ARPL]      = X86.opInvalid;    // 0x63
+        this.aOps[X86.OPCODE.FS]        = X86.opInvalid;    // 0x64
+        this.aOps[X86.OPCODE.GS]        = X86.opInvalid;    // 0x65
+        this.aOps[X86.OPCODE.OS]        = X86.opInvalid;    // 0x66
+        this.aOps[X86.OPCODE.AS]        = X86.opInvalid;    // 0x67
+        this.aOps[X86.OPCODE.PUSH16]    = X86.opPUSH16;     // 0x68
+        this.aOps[X86.OPCODE.IMUL16]    = X86.opIMUL16;     // 0x69
+        this.aOps[X86.OPCODE.PUSH8]     = X86.opPUSH8;      // 0x6A
+        this.aOps[X86.OPCODE.IMUL8]     = X86.opIMUL8;      // 0x6B
+        this.aOps[X86.OPCODE.INSB]      = X86.opINSb;       // 0x6C
+        this.aOps[X86.OPCODE.INSW]      = X86.opINSw;       // 0x6D
+        this.aOps[X86.OPCODE.OUTSB]     = X86.opOUTSb;      // 0x6E
+        this.aOps[X86.OPCODE.OUTSW]     = X86.opOUTSw;      // 0x6F
+        this.aOps[0xC0]                 = X86.opGRP2bn;     // 0xC0
+        this.aOps[0xC1]                 = X86.opGRP2wn;     // 0xC1
+        this.aOps[X86.OPCODE.ENTER]     = X86.opENTER;      // 0xC8
+        this.aOps[X86.OPCODE.LEAVE]     = X86.opLEAVE;      // 0xC9
+        this.aOps[0xF1]                 = X86.opINT1;       // 0xF1
         this.aOpGrp4b[0x07]             = X86.fnGRPInvalid;
         this.aOpGrp4w[0x07]             = X86.fnGRPInvalid;
 
@@ -757,15 +772,15 @@ X86CPU.prototype.initProcessor = function()
 
             this.aOps0F = X86.aOps0F;
             this.aOps[0x0F]              = X86.op0F;
-            this.aOps[X86.OPCODE.ARPL]   = X86.opARPL;
-            this.aOps[X86.OPCODE.PUSHSP] = X86.opPUSHSP;
+            this.aOps[X86.OPCODE.PUSHSP] = X86.opPUSHSP;    // 0x54
+            this.aOps[X86.OPCODE.ARPL]   = X86.opARPL;      // 0x63
 
             if (I386 && this.model >= X86.MODEL_80386) {
                 var bOpcode;
-                this.aOps[X86.OPCODE.FS] = X86.opFS;
-                this.aOps[X86.OPCODE.GS] = X86.opGS;
-                this.aOps[X86.OPCODE.OS] = X86.opOS;
-                this.aOps[X86.OPCODE.AS] = X86.opAS;
+                this.aOps[X86.OPCODE.FS] = X86.opFS;        // 0x64
+                this.aOps[X86.OPCODE.GS] = X86.opGS;        // 0x65
+                this.aOps[X86.OPCODE.OS] = X86.opOS;        // 0x66
+                this.aOps[X86.OPCODE.AS] = X86.opAS;        // 0x67
                 this.aOps0F = X86.aOps0F.slice();
                 for (bOpcode in X86.aOps0F386) {
                     this.aOps0F[+bOpcode] = X86.aOps0F386[bOpcode];
@@ -1619,7 +1634,7 @@ X86CPU.prototype.getIP = function()
  */
 X86CPU.prototype.setIP = function(off)
 {
-    this.regLIP = this.segCS.base + (off & (I386? this.addrMask : 0xffff));
+    this.regLIP = this.segCS.base + (off & (I386? this.dataMask : 0xffff));
     if (PREFETCH) this.flushPrefetch(this.regLIP);
 };
 
@@ -1778,8 +1793,12 @@ X86CPU.prototype.setArithResult = function(dst, src, value, type, fSubtract)
  * setLogicResult(value, type, carry, overflow)
  *
  * Updates the flags for logical instructions (eg, AND, OR, TEST, XOR); ie, instructions
- * that update PF, ZF, and SF, while clearing CF and OF.  AF is considered undefined.  CF and OF
- * are automatically cleared unless explicitly set.
+ * that update PF, ZF, and SF, while clearing CF and OF (although CF and OF can be explicitly
+ * set via the carry and overflow parameters as needed).  AF is always considered undefined.
+ *
+ * TODO: We should observe the behavior of AF on real CPUs, and determine if there is a
+ * well-defined behavior, even though none is documented.  Ditto for OF on shift instructions
+ * when the shift count > 1.
  *
  * @this {X86CPU}
  * @param {number} value
@@ -1795,6 +1814,25 @@ X86CPU.prototype.setLogicResult = function(value, type, carry, overflow)
     if (carry) this.setCF(); else this.clearCF();
     if (overflow) this.setOF(); else this.clearOF();
     return value;
+};
+
+/**
+ * setRotateResult(result, carry, size)
+ *
+ * Used by all rotate instructions (ie, RCL, RCR, ROL, ROR) to update CF and OF.
+ *
+ * TODO: We should observe the behavior of OF on real CPUs whenever the rotate count > 1,
+ * and determine if there is a well-defined behavior, even though none is documented.
+ *
+ * @this {X86CPU}
+ * @param {number} result
+ * @param {number} carry
+ * @param {number} size
+ */
+X86CPU.prototype.setRotateResult = function(result, carry, size)
+{
+    if (carry & size) this.setCF(); else this.clearCF();
+    if ((result ^ carry) & size) this.setOF(); else this.clearOF();
 };
 
 /**
@@ -2950,22 +2988,6 @@ X86CPU.prototype.getIPByte = function()
 };
 
 /**
- * getIPDisp()
- *
- * @this {X86CPU}
- * @return {number} sign-extended value from the byte at the current IP; IP advanced by 1
- */
-X86CPU.prototype.getIPDisp = function()
-{
-    var w = ((PREFETCH? this.getBytePrefetch(this.regLIP) : this.getByte(this.regLIP)) << 24) >> 24;
-    if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
-    if (++this.regLIP > this.regLIPLimit) {
-        this.setIP(this.regLIP - this.segCS.base);
-    }
-    return w & (I386? this.addrMask : 0xffff);
-};
-
-/**
  * getIPShort()
  *
  * @this {X86CPU}
@@ -3023,6 +3045,34 @@ X86CPU.prototype.getIPWord = function()
         this.setIP(this.regLIP - this.segCS.base);
     }
     return w;
+};
+
+/**
+ * getIPDisp()
+ *
+ * @this {X86CPU}
+ * @return {number} sign-extended value from the byte at the current IP; IP advanced by 1
+ */
+X86CPU.prototype.getIPDisp = function()
+{
+    var w = ((PREFETCH? this.getBytePrefetch(this.regLIP) : this.getByte(this.regLIP)) << 24) >> 24;
+    if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
+    if (++this.regLIP > this.regLIPLimit) {
+        this.setIP(this.regLIP - this.segCS.base);
+    }
+    return w;
+};
+
+/**
+ * getIPDispWord()
+ *
+ * @this {X86CPU}
+ * @return {number} sign-extended value from the word at the current IP; IP advanced by 2 or 4
+ */
+X86CPU.prototype.getIPDispWord = function()
+{
+    var w = this.getIPWord();
+    return (this.dataSize == 2? ((w << 16) >> 16) : w);
 };
 
 /**
@@ -3348,7 +3398,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
      * Once we snap fStarting, we clear it, because technically, we've moved beyond "starting" and have
      * officially "started" now.
      */
-    var nDebugState = nMinCycles == 0? -1 : (this.aFlags.fStarting? 0 : 1);
+    var nDebugState = (!nMinCycles)? -1 : (this.aFlags.fStarting? 0 : 1);
     this.aFlags.fStarting = false;
 
     /*

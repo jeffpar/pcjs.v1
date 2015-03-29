@@ -1654,7 +1654,7 @@ if (DEBUGGER) {
      * @return {number}
      */
     Debugger.prototype.getRegIndex = function(sReg) {
-        return Debugger.REGS.indexOf(sReg.toUpperCase())
+        return Debugger.REGS.indexOf(sReg.toUpperCase());
     };
 
     /**

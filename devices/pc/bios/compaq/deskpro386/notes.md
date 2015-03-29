@@ -40,3 +40,7 @@ When arrive here:
 and we complain that the IDTR limit for the real-mode IDT isn't 0x3FF (it's been set to 0xFFFF instead).
 That may be OK, but I need to verify that that's what the ROM intended.  If it is, then I'll probably need
 to change our assertion from "cpu.addrIDTLimit == 0x03FF" to "cpu.addrIDTLimit >= 0x03FF".
+
+Checkpoint
+---
+The BIOS now progresses as far as F000:F747 (PUSH GS).

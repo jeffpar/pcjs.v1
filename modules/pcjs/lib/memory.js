@@ -492,7 +492,7 @@ Memory.writeLongChecked = function writeLongChecked(off, l)
         this.dbg.checkMemoryWrite(this.addr + off) ||
         this.dbg.checkMemoryWrite(this.addr + off + 1) ||
         this.dbg.checkMemoryWrite(this.addr + off + 2) ||
-        this.dbg.checkMemoryWrite(this.addr + off + 3)
+        this.dbg.checkMemoryWrite(this.addr + off + 3);
     }
     this.writeLongDirect(off, l);
 };

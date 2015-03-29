@@ -258,7 +258,7 @@ function ChipSet(parmsChipSet)
 Component.subclass(Component, ChipSet);
 
 /*
- * Supported Models
+ * Supported model numbers
  *
  * Unless otherwise noted, all BIOS references refer to the *original* BIOS released with each model.
  */

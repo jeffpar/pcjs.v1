@@ -37,11 +37,11 @@ if (typeof module !== 'undefined') {
 }
 
 /**
- * op=0x0F,0x00 (GRP6 rm)
+ * op=0x0F,0x00 (GRP6 mem/reg)
  *
  * @this {X86CPU}
  */
-X86.opGrp6 = function GRP6()
+X86.opGRP6 = function GRP6()
 {
     var bModRM = this.getIPByte();
     if ((bModRM & 0x38) < 0x10) {   // possible reg values: 0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, 0x38
@@ -51,11 +51,11 @@ X86.opGrp6 = function GRP6()
 };
 
 /**
- * op=0x0F,0x01 (GRP7 rm)
+ * op=0x0F,0x01 (GRP7 mem/reg)
  *
  * @this {X86CPU}
  */
-X86.opGrp7 = function GRP7()
+X86.opGRP7 = function GRP7()
 {
     var bModRM = this.getIPByte();
     if (!(bModRM & 0x10)) {
@@ -67,7 +67,7 @@ X86.opGrp7 = function GRP7()
 /**
  * opLAR()
  *
- * op=0x0F,0x02 (LAR reg,rm)
+ * op=0x0F,0x02 (LAR reg,mem/reg)
  *
  * @this {X86CPU}
  */
@@ -79,7 +79,7 @@ X86.opLAR = function LAR()
 /**
  * opLSL()
  *
- * op=0x0F,0x03 (LSL reg,rm)
+ * op=0x0F,0x03 (LSL reg,mem/reg)
  *
  * @this {X86CPU}
  */
@@ -312,6 +312,486 @@ X86.opMOVcrr = function MOVcrr()
 };
 
 /**
+ * opJOw()
+ *
+ * op=0x0F,0x80 (JO rel16/rel32)
+ *
+ * @this {X86CPU}
+ */
+X86.opJOw = function JOw()
+{
+    var disp = this.getIPDispWord();
+    if (this.getOF()) {
+        this.setIP(this.getIP() + disp);
+        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        return;
+    }
+    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+};
+
+/**
+ * opJNOw()
+ *
+ * op=0x0F,0x81 (JNO rel16/rel32)
+ *
+ * @this {X86CPU}
+ */
+X86.opJNOw = function JNOw()
+{
+    var disp = this.getIPDispWord();
+    if (!this.getOF()) {
+        this.setIP(this.getIP() + disp);
+        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        return;
+    }
+    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+};
+
+/**
+ * opJCw()
+ *
+ * op=0x0F,0x82 (JC rel16/rel32)
+ *
+ * @this {X86CPU}
+ */
+X86.opJCw = function JCw()
+{
+    var disp = this.getIPDispWord();
+    if (this.getCF()) {
+        this.setIP(this.getIP() + disp);
+        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        return;
+    }
+    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+};
+
+/**
+ * opJNCw()
+ *
+ * op=0x0F,0x83 (JNC rel16/rel32)
+ *
+ * @this {X86CPU}
+ */
+X86.opJNCw = function JNCw()
+{
+    var disp = this.getIPDispWord();
+    if (!this.getCF()) {
+        this.setIP(this.getIP() + disp);
+        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        return;
+    }
+    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+};
+
+/**
+ * opJZw()
+ *
+ * op=0x0F,0x84 (JZ rel16/rel32)
+ *
+ * @this {X86CPU}
+ */
+X86.opJZw = function JZw()
+{
+    var disp = this.getIPDispWord();
+    if (this.getZF()) {
+        this.setIP(this.getIP() + disp);
+        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        return;
+    }
+    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+};
+
+/**
+ * opJNZw()
+ *
+ * op=0x0F,0x85 (JNZ rel16/rel32)
+ *
+ * @this {X86CPU}
+ */
+X86.opJNZw = function JNZw()
+{
+    var disp = this.getIPDispWord();
+    if (!this.getZF()) {
+        this.setIP(this.getIP() + disp);
+        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        return;
+    }
+    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+};
+
+/**
+ * opJBEw()
+ *
+ * op=0x0F,0x86 (JBE rel16/rel32)
+ *
+ * @this {X86CPU}
+ */
+X86.opJBEw = function JBEw()
+{
+    var disp = this.getIPDispWord();
+    if (this.getCF() || this.getZF()) {
+        this.setIP(this.getIP() + disp);
+        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        return;
+    }
+    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+};
+
+/**
+ * opJNBEw()
+ *
+ * op=0x0F,0x87 (JNBE rel16/rel32)
+ *
+ * @this {X86CPU}
+ */
+X86.opJNBEw = function JNBEw()
+{
+    var disp = this.getIPDispWord();
+    if (!this.getCF() && !this.getZF()) {
+        this.setIP(this.getIP() + disp);
+        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        return;
+    }
+    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+};
+
+/**
+ * opJSw()
+ *
+ * op=0x0F,0x88 (JS rel16/rel32)
+ *
+ * @this {X86CPU}
+ */
+X86.opJSw = function JSw()
+{
+    var disp = this.getIPDispWord();
+    if (this.getSF()) {
+        this.setIP(this.getIP() + disp);
+        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        return;
+    }
+    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+};
+
+/**
+ * opJNSw()
+ *
+ * op=0x0F,0x89 (JNS rel16/rel32)
+ *
+ * @this {X86CPU}
+ */
+X86.opJNSw = function JNSw()
+{
+    var disp = this.getIPDispWord();
+    if (!this.getSF()) {
+        this.setIP(this.getIP() + disp);
+        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        return;
+    }
+    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+};
+
+/**
+ * opJPw()
+ *
+ * op=0x0F,0x8A (JP rel16/rel32)
+ *
+ * @this {X86CPU}
+ */
+X86.opJPw = function JPw()
+{
+    var disp = this.getIPDispWord();
+    if (this.getPF()) {
+        this.setIP(this.getIP() + disp);
+        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        return;
+    }
+    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+};
+
+/**
+ * opJNPw()
+ *
+ * op=0x0F,0x8B (JNP rel16/rel32)
+ *
+ * @this {X86CPU}
+ */
+X86.opJNPw = function JNPw()
+{
+    var disp = this.getIPDispWord();
+    if (!this.getPF()) {
+        this.setIP(this.getIP() + disp);
+        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        return;
+    }
+    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+};
+
+/**
+ * opJLw()
+ *
+ * op=0x0F,0x8C (JL rel16/rel32)
+ *
+ * @this {X86CPU}
+ */
+X86.opJLw = function JLw()
+{
+    var disp = this.getIPDispWord();
+    if (!this.getSF() != !this.getOF()) {
+        this.setIP(this.getIP() + disp);
+        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        return;
+    }
+    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+};
+
+/**
+ * opJNLw()
+ *
+ * op=0x0F,0x8D (JNL rel16/rel32)
+ *
+ * @this {X86CPU}
+ */
+X86.opJNLw = function JNLw()
+{
+    var disp = this.getIPDispWord();
+    if (!this.getSF() == !this.getOF()) {
+        this.setIP(this.getIP() + disp);
+        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        return;
+    }
+    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+};
+
+/**
+ * opJLEw()
+ *
+ * op=0x0F,0x8E (JLE rel16/rel32)
+ *
+ * @this {X86CPU}
+ */
+X86.opJLEw = function JLEw()
+{
+    var disp = this.getIPDispWord();
+    if (this.getZF() || !this.getSF() != !this.getOF()) {
+        this.setIP(this.getIP() + disp);
+        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        return;
+    }
+    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+};
+
+/**
+ * opJNLEw()
+ *
+ * op=0x0F,0x8F (JNLE rel16/rel32)
+ *
+ * @this {X86CPU}
+ */
+X86.opJNLEw = function JNLEw()
+{
+    var disp = this.getIPDispWord();
+    if (!this.getZF() && !this.getSF() == !this.getOF()) {
+        this.setIP(this.getIP() + disp);
+        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        return;
+    }
+    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+};
+
+/**
+ * opSETO()
+ *
+ * op=0x0F,0x90 (SETO b)
+ *
+ * @this {X86CPU}
+ */
+X86.opSETO = function SETO()
+{
+    X86.fnSETcc.call(this, X86.fnSETO);
+};
+
+/**
+ * opSETNO()
+ *
+ * op=0x0F,0x91 (SETNO b)
+ *
+ * @this {X86CPU}
+ */
+X86.opSETNO = function SETNO()
+{
+    X86.fnSETcc.call(this, X86.fnSETO);
+};
+
+/**
+ * opSETC()
+ *
+ * op=0x0F,0x92 (SETC b)
+ *
+ * @this {X86CPU}
+ */
+X86.opSETC = function SETC()
+{
+    X86.fnSETcc.call(this, X86.fnSETC);
+};
+
+/**
+ * opSETNC()
+ *
+ * op=0x0F,0x93 (SETNC b)
+ *
+ * @this {X86CPU}
+ */
+X86.opSETNC = function SETNC()
+{
+    X86.fnSETcc.call(this, X86.fnSETNC);
+};
+
+/**
+ * opSETZ()
+ *
+ * op=0x0F,0x94 (SETZ b)
+ *
+ * @this {X86CPU}
+ */
+X86.opSETZ = function SETZ()
+{
+    X86.fnSETcc.call(this, X86.fnSETZ);
+};
+
+/**
+ * opSETNZ()
+ *
+ * op=0x0F,0x95 (SETNZ b)
+ *
+ * @this {X86CPU}
+ */
+X86.opSETNZ = function SETNZ()
+{
+    X86.fnSETcc.call(this, X86.fnSETNZ);
+};
+
+/**
+ * opSETBE()
+ *
+ * op=0x0F,0x96 (SETBE b)
+ *
+ * @this {X86CPU}
+ */
+X86.opSETBE = function SETBE()
+{
+    X86.fnSETcc.call(this, X86.fnSETBE);
+};
+
+/**
+ * opSETNBE()
+ *
+ * op=0x0F,0x97 (SETNBE b)
+ *
+ * @this {X86CPU}
+ */
+X86.opSETNBE = function SETNBE()
+{
+    X86.fnSETcc.call(this, X86.fnSETNBE);
+};
+
+/**
+ * opSETS()
+ *
+ * op=0x0F,0x98 (SETS b)
+ *
+ * @this {X86CPU}
+ */
+X86.opSETS = function SETS()
+{
+    X86.fnSETcc.call(this, X86.fnSETS);
+};
+
+/**
+ * opSETNS()
+ *
+ * op=0x0F,0x99 (SETNS b)
+ *
+ * @this {X86CPU}
+ */
+X86.opSETNS = function SETNS()
+{
+    X86.fnSETcc.call(this, X86.fnSETNS);
+};
+
+/**
+ * opSETP()
+ *
+ * op=0x0F,0x9A (SETP b)
+ *
+ * @this {X86CPU}
+ */
+X86.opSETP = function SETP()
+{
+    X86.fnSETcc.call(this, X86.fnSETP);
+};
+
+/**
+ * opSETNP()
+ *
+ * op=0x0F,0x9B (SETNP b)
+ *
+ * @this {X86CPU}
+ */
+X86.opSETNP = function SETNP()
+{
+    X86.fnSETcc.call(this, X86.fnSETNP);
+};
+
+/**
+ * opSETL()
+ *
+ * op=0x0F,0x9C (SETL b)
+ *
+ * @this {X86CPU}
+ */
+X86.opSETL = function SETL()
+{
+    X86.fnSETcc.call(this, X86.fnSETL);
+};
+
+/**
+ * opSETNL()
+ *
+ * op=0x0F,0x9D (SETNL b)
+ *
+ * @this {X86CPU}
+ */
+X86.opSETNL = function SETNL()
+{
+    X86.fnSETcc.call(this, X86.fnSETNL);
+};
+
+/**
+ * opSETLE()
+ *
+ * op=0x0F,0x9E (SETLE b)
+ *
+ * @this {X86CPU}
+ */
+X86.opSETLE = function SETLE()
+{
+    X86.fnSETcc.call(this, X86.fnSETLE);
+};
+
+/**
+ * opSETNLE()
+ *
+ * op=0x0F,0x9F (SETNLE b)
+ *
+ * @this {X86CPU}
+ */
+X86.opSETNLE = function SETNLE()
+{
+    X86.fnSETcc.call(this, X86.fnSETNLE);
+};
+
+/**
  * opPUSHFS()
  *
  * op=0x0F,0xA0 (PUSH FS)
@@ -335,6 +815,55 @@ X86.opPOPFS = function POPFS()
 {
     this.setFS(this.popWord());
     this.nStepCycles -= this.CYCLES.nOpCyclesPopReg;
+};
+
+/**
+ * opBT()
+ *
+ * op=0x0F,0xA3 (BT mem/reg,reg)
+ *
+ * @this {X86CPU}
+ */
+X86.opBT = function BT()
+{
+    this.aOpModMemWord[this.getIPByte()].call(this, X86.fnBT);
+    if (this.regEA !== X86.ADDR_INVALID) this.nStepCycles -= X86CPU.CYCLES_80386.nOpCyclesBitTestMExtra;
+};
+
+/**
+ * opSHLDn()
+ *
+ * op=0x0F,0xA4 (SHLD mem/reg,imm8)
+ *
+ * @this {X86CPU}
+ */
+X86.opSHLDn = function SHLDn()
+{
+    /*
+     * TODO: While we rely on bOpcodeBias to dispatch OPERAND-appropriate handlers for the primary opcode bytes,
+     * we don't (yet) have a similar dispatch mechanism for secondary opcode bytes (ie, 0x0F), so the dispatch check
+     * has to happen below.
+     */
+    this.aOpModMemWord[this.getIPByte()].call(this, this.dataSize == 2? X86.fnSHLDwi : X86.fnSHLDdi);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? X86CPU.CYCLES_80386.nOpCyclesShiftDR : X86CPU.CYCLES_80386.nOpCyclesShiftDM);
+};
+
+/**
+ * opSHLDcl()
+ *
+ * op=0x0F,0xA5 (SHLD mem/reg,CL)
+ *
+ * @this {X86CPU}
+ */
+X86.opSHLDcl = function SHLDcl()
+{
+    /*
+     * TODO: While we rely on bOpcodeBias to dispatch OPERAND-appropriate handlers for the primary opcode bytes,
+     * we don't (yet) have a similar dispatch mechanism for secondary opcode bytes (ie, 0x0F), so the dispatch check
+     * has to happen below.
+     */
+    this.aOpModMemWord[this.getIPByte()].call(this, this.dataSize == 2? X86.fnSHLDwCL : X86.fnSHLDdCL);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? X86CPU.CYCLES_80386.nOpCyclesShiftDR : X86CPU.CYCLES_80386.nOpCyclesShiftDM);
 };
 
 /**
@@ -363,10 +892,112 @@ X86.opPOPGS = function POPGS()
     this.nStepCycles -= this.CYCLES.nOpCyclesPopReg;
 };
 
+/**
+ * opBTS()
+ *
+ * op=0x0F,0xAB (BTC mem/reg,reg)
+ *
+ * @this {X86CPU}
+ */
+X86.opBTS = function BTS()
+{
+    this.aOpModMemWord[this.getIPByte()].call(this, X86.fnBTS);
+    if (this.regEA !== X86.ADDR_INVALID) this.nStepCycles -= X86CPU.CYCLES_80386.nOpCyclesBitSetMExtra;
+};
+
+/**
+ * opSHRDn()
+ *
+ * op=0x0F,0xAC (SHRD mem/reg,imm8)
+ *
+ * @this {X86CPU}
+ */
+X86.opSHRDn = function SHRDn()
+{
+    /*
+     * TODO: While we rely on bOpcodeBias to dispatch OPERAND-appropriate handlers for the primary opcode bytes,
+     * we don't (yet) have a similar dispatch mechanism for secondary opcode bytes (ie, 0x0F), so the dispatch check
+     * has to happen below.
+     */
+    this.aOpModMemWord[this.getIPByte()].call(this, this.dataSize == 2? X86.fnSHRDwi : X86.fnSHRDdi);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? X86CPU.CYCLES_80386.nOpCyclesShiftDR : X86CPU.CYCLES_80386.nOpCyclesShiftDM);
+};
+
+/**
+ * opSHRDcl()
+ *
+ * op=0x0F,0xAD (SHRD mem/reg,CL)
+ *
+ * @this {X86CPU}
+ */
+X86.opSHRDcl = function SHRDcl()
+{
+    /*
+     * TODO: While we rely on bOpcodeBias to dispatch OPERAND-appropriate handlers for the primary opcode bytes,
+     * we don't (yet) have a similar dispatch mechanism for secondary opcode bytes (ie, 0x0F), so the dispatch check
+     * has to happen below.
+     */
+    this.aOpModMemWord[this.getIPByte()].call(this, this.dataSize == 2? X86.fnSHRDwCL : X86.fnSHRDdCL);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? X86CPU.CYCLES_80386.nOpCyclesShiftDR : X86CPU.CYCLES_80386.nOpCyclesShiftDM);
+};
+
+/**
+ * opIMUL()
+ *
+ * op=0x0F,0xAF (IMUL reg,mem/reg) (80386 and up)
+ *
+ * @this {X86CPU}
+ */
+X86.opIMUL = function IMUL()
+{
+    /*
+     * TODO: While we rely on bOpcodeBias to dispatch OPERAND-appropriate handlers for the primary opcode bytes,
+     * we don't (yet) have a similar dispatch mechanism for secondary opcode bytes (ie, 0x0F), so the dispatch check
+     * has to happen below.
+     */
+    this.aOpModRegWord[this.getIPByte()].call(this, this.dataSize == 2? X86.fnIMULrw : X86.fnIMULrd);
+};
+
+/**
+ * opBTR()
+ *
+ * op=0x0F,0xB3 (BTC mem/reg,reg) (80386 and up)
+ *
+ * @this {X86CPU}
+ */
+X86.opBTR = function BTR()
+{
+    this.aOpModMemWord[this.getIPByte()].call(this, X86.fnBTR);
+    if (this.regEA !== X86.ADDR_INVALID) this.nStepCycles -= X86CPU.CYCLES_80386.nOpCyclesBitSetMExtra;
+};
+
+/**
+ * op=0x0F,0xBA (GRP8 mem/reg) (80386 and up)
+ *
+ * @this {X86CPU}
+ */
+X86.opGRP8 = function GRP8()
+{
+    this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp8, this.getIPByte);
+};
+
+/**
+ * opBTC()
+ *
+ * op=0x0F,0xBB (BTC mem/reg,reg)
+ *
+ * @this {X86CPU}
+ */
+X86.opBTC = function BTC()
+{
+    this.aOpModMemWord[this.getIPByte()].call(this, X86.fnBTC);
+    if (this.regEA !== X86.ADDR_INVALID) this.nStepCycles -= X86CPU.CYCLES_80386.nOpCyclesBitSetMExtra;
+};
+
 X86.aOps0F = new Array(256);
 
-X86.aOps0F[0x00] = X86.opGrp6;
-X86.aOps0F[0x01] = X86.opGrp7;
+X86.aOps0F[0x00] = X86.opGRP6;
+X86.aOps0F[0x01] = X86.opGRP7;
 X86.aOps0F[0x02] = X86.opLAR;
 X86.aOps0F[0x03] = X86.opLSL;
 X86.aOps0F[0x05] = X86.opLOADALL;
@@ -386,14 +1017,56 @@ if (I386) {
     X86.aOps0F386 = [];
     X86.aOps0F386[0x20] = X86.opMOVrcr;
     X86.aOps0F386[0x22] = X86.opMOVcrr;
+    X86.aOps0F386[0x80] = X86.opJOw;
+    X86.aOps0F386[0x81] = X86.opJNOw;
+    X86.aOps0F386[0x82] = X86.opJCw;
+    X86.aOps0F386[0x83] = X86.opJNCw;
+    X86.aOps0F386[0x84] = X86.opJZw;
+    X86.aOps0F386[0x85] = X86.opJNZw;
+    X86.aOps0F386[0x86] = X86.opJBEw;
+    X86.aOps0F386[0x87] = X86.opJNBEw;
+    X86.aOps0F386[0x88] = X86.opJSw;
+    X86.aOps0F386[0x89] = X86.opJNSw;
+    X86.aOps0F386[0x8A] = X86.opJPw;
+    X86.aOps0F386[0x8B] = X86.opJNPw;
+    X86.aOps0F386[0x8C] = X86.opJLw;
+    X86.aOps0F386[0x8D] = X86.opJNLw;
+    X86.aOps0F386[0x8E] = X86.opJLEw;
+    X86.aOps0F386[0x8F] = X86.opJNLEw;
+    X86.aOps0F386[0x90] = X86.opSETO;
+    X86.aOps0F386[0x91] = X86.opSETNO;
+    X86.aOps0F386[0x92] = X86.opSETC;
+    X86.aOps0F386[0x93] = X86.opSETNC;
+    X86.aOps0F386[0x94] = X86.opSETZ;
+    X86.aOps0F386[0x95] = X86.opSETNZ;
+    X86.aOps0F386[0x96] = X86.opSETBE;
+    X86.aOps0F386[0x97] = X86.opSETNBE;
+    X86.aOps0F386[0x98] = X86.opSETS;
+    X86.aOps0F386[0x99] = X86.opSETNS;
+    X86.aOps0F386[0x9A] = X86.opSETP;
+    X86.aOps0F386[0x9B] = X86.opSETNP;
+    X86.aOps0F386[0x9C] = X86.opSETL;
+    X86.aOps0F386[0x9D] = X86.opSETNL;
+    X86.aOps0F386[0x9E] = X86.opSETLE;
+    X86.aOps0F386[0x9F] = X86.opSETNLE;
     X86.aOps0F386[0xA0] = X86.opPUSHFS;
     X86.aOps0F386[0xA1] = X86.opPOPFS;
+    X86.aOps0F386[0xA3] = X86.opBT;
+    X86.aOps0F386[0xA4] = X86.opSHLDn;
+    X86.aOps0F386[0xA5] = X86.opSHLDcl;
     X86.aOps0F386[0xA8] = X86.opPUSHGS;
     X86.aOps0F386[0xA9] = X86.opPOPGS;
+    X86.aOps0F386[0xAB] = X86.opBTS;
+    X86.aOps0F386[0xAC] = X86.opSHRDn;
+    X86.aOps0F386[0xAD] = X86.opSHRDcl;
+    X86.aOps0F386[0xAF] = X86.opIMUL;
+    X86.aOps0F386[0xB3] = X86.opBTR;
+    X86.aOps0F386[0xBA] = X86.opGRP8;
+    X86.aOps0F386[0xBB] = X86.opBTC;
 }
 
 /*
- * These instruction groups are not as orthogonal as the original 8086/8088 groups (Grp1 through Grp4): some of
+ * These instruction groups are not as orthogonal as the original 8086/8088 groups (Grp1 through Grp4); some of
  * the instructions in Grp6 and Grp7 only read their dst operand (eg, LLDT), which means the ModRM helper function
  * must insure that setEAWord() is disabled, while others only write their dst operand (eg, SLDT), which means that
  * getEAWord() should be disabled *prior* to calling the ModRM helper function.  This latter case requires that
@@ -410,10 +1083,15 @@ X86.aOpGrp6Real = [
 ];
 
 /*
- * Unlike Grp6, Grp7 does not require separate real-mode and protected-mode dispatch tables, because all Grp7
- * instructions are valid in both modes.
+ * Unlike Grp6, Grp7 does not require separate real-mode and protected-mode dispatch tables,
+ * because all Grp7 instructions are valid in both modes.
  */
 X86.aOpGrp7 = [
     X86.fnSGDT,             X86.fnSIDT,             X86.fnLGDT,             X86.fnLIDT,             // 0x0F,0x01(reg=0x0-0x3)
     X86.fnSMSW,             X86.fnGRPUndefined,     X86.fnLMSW,             X86.fnGRPUndefined      // 0x0F,0x01(reg=0x4-0x7)
+];
+
+X86.aOpGrp8 = [
+    X86.fnGRPUndefined,     X86.fnGRPUndefined,     X86.fnGRPUndefined,     X86.fnGRPUndefined,     // 0x0F,0xBA(reg=0x0-0x3)
+    X86.fnBT,               X86.fnBTS,              X86.fnBTR,              X86.fnBTC               // 0x0F,0xBA(reg=0x4-0x7)
 ];

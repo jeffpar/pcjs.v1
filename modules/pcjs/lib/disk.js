@@ -190,7 +190,7 @@ if (typeof module !== 'undefined') {
  */
 function Disk(controller, drive, mode)
 {
-    Component.call(this, "Disk", {'id': controller.idMachine + ".disk" + ++Disk.nDisks}, Disk, Messages.DISK);
+    Component.call(this, "Disk", {'id': controller.idMachine + ".disk" + (++Disk.nDisks)}, Disk, Messages.DISK);
 
     /*
      * Route all non-Debugger messages (eg, notice() and println() calls) through

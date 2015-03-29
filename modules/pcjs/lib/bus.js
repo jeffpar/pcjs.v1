@@ -36,6 +36,7 @@ if (typeof module !== 'undefined') {
     var str         = require("../../shared/lib/strlib");
     var Component   = require("../../shared/lib/component");
     var Memory      = require("./memory");
+    var Messages    = require("./messages");
     var State       = require("./state");
 }
 
