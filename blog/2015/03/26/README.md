@@ -15,14 +15,17 @@ there are more than enough examples on the web already.
 To avoid unexpected type coercion, and thus unexpected matches and/or mismatches, the usual advice is to *always* use
 strict equality operators ("===" and "!==").
 
-I disagree.  In properly written code, you should always know what type of data your variables contain.  In fact,
-the more you're able to use JSDoc types to declare the data types of all your parameters, return values, and other
-variables, the fewer errors you'll have.  And type coercion will never be a problem as long as you're always comparing
-variables with matching types, because no coercion will be performed.
+I disagree.  In well-written code, the variable data types should always be clear.  In fact, the more you're able to
+use JSDoc types to declare the data types of all your parameters, return values, and other variables, the fewer errors
+you'll have.  Type coercion should never be a problem as long as you're always comparing variables with matching types,
+because no coercion will be performed.
 
-Another problem with strict equality operators is that they require more work to check for both *undefined* and *null*
-values.  For example, when I write a method with optional parameters, I generally allow those parameters to either
-be omitted or set to *null*.  Using "==", you can check for either value with a single comparison:
+Obviously, there will be times when a polymorphic variable is required, especially when dealing with APIs that can
+return multiple types.  But those should be the exception, not the rule.
+
+Another exception is optional parameters.  When I write a method with optional parameters, I generally allow those
+parameters to either be omitted (ie, *undefined*) or set to *null*.  Using "==", you can check for either value with
+a single comparison:
 
 	if (parameter == null) { ... }
 	
@@ -38,23 +41,42 @@ Another common pattern:
 
 is a popular way of checking for "falsy" values (ie, *undefined*, *null*, 0, false, "", NaN, etc).
 Again, another situation where type coercion is beneficial and well understood.  Don't use this technique for
-the *undefined* or *null* parameter however:
+optional parameters though:
 
 	if (!parameter) { ... }
 
 because a valid numeric parameter could include 0, a valid string parameter could include "", etc.
 
-When I recommend *not* using strict comparisons, I'm not saying coercion is good.  I agree that it generally
-should be avoided, except in well-defined situations, as noted above.  Know your variable data types, compare
-variables only of the same type, and you'll be fine.
+I'm not saying *never* use strict comparisons, or that coercion is good, but simply that the more you know all
+your variable data types, and the more you compare variables only of the same type, and better off you'll be.
 
 Problems with type coercion are **NOT** problems caused by a poor choice of operators, so trying to make
-those problems go away by artificially limiting your choice of operators is the wrong solution.  Type coercion
+those problems go away by artificially limiting your choice of operators seems like the wrong solution.  Type coercion
 problems are, by definition, problems involving mismatched types.  Solutions include:
 
 - Don't compare variables of different types; or
-- Manually convert your variables to matching types; or
-- Allow JavaScript to perform coercion only in well-defined situations
+- Convert your variables to matching types first; or
+- Rely on coercion, but be clear about why and when you're doing it
+
+Explicitly convert variables to a single type whenever possible.  For example, I might define a method
+that accepts an optional numeric parameter, with a documented default value when it's omitted.  I think it's
+important make that parameter unambiguously numeric as soon as possible; eg:
+
+	/**
+	 * foo(n)
+	 *
+	 * Performs a mathematical operation on n and returns a result.
+	 *
+	 * @param {number} [n] is an optional parameter (defaults to zero if omitted)
+	 * @return {number}
+	 */
+	function foo(n) {
+		n = n || 0;
+		...
+	}
+
+The expression `n || 0` might seem pointless, because *undefined* and *zero* are equivalent in a "falsy" sense, but
+*undefined* is not a number, and there will be fewer problems downstream if you ensure that n is *always* a number.
 
 ### Enumerating Array or Object Properties
 
@@ -81,19 +103,20 @@ It turns out that shifting an integer value by more than 31 bits in either direc
 you'd expect.  For example:
 
 	n = 0x10000000;
-	n >>>= 32;
+	n >>>= 33;
 
-will not change n at all.  This is because, just like the shift instructions on Intel processors, JavaScript converts
-the shift count to a *mod 32* value (in other words, it truncates the shift count to a 5-bit value).
+will shift n by only *one* bit, not 33 bits, and the result will be 0x08000000, not zero.  This is because,
+just like the shift instructions on Intel processors, JavaScript converts the shift count to a *mod 32* value
+(in other words, it truncates the shift count to a 5-bit value).
 
 So the above example is equivalent to:
 
-	n >>>= 0;
+	n >>>= 1;
 
 If you really need larger shift counts to work in a consistent manner, you can perform multiple shifts, where each
-shift count is in the range 0-31.  For example, here's how you could shift a number by 32 bits:
+shift count is in the range 0-31.  Here's one way to shift a number 33 bits:
 
-	n = (n >>> 31) >>> 1;
+	n = (n >>> 31) >>> 2;
 
 Also, it's not quite correct to say that a shift count of zero has *no* effect on a number:
 
@@ -104,8 +127,10 @@ It's true that the bottom 32 bits of the number were not changed, but a side-eff
 is that all the upper sign bits are stripped from the (64-bit) result.
 
 I consider this an anomaly of JavaScript's bitwise operators, because it breaks the "rule" that bitwise operators
-operate *only* on the low 32 bits of a number.  And as soon as you perform any other bitwise operation on the number,
-even one that does not modify the low 32 bits, the upper bits will revert to the sign of the lower 32-bit value:
+operate *only* on the low 32 bits of a number; there are side-effects on the upper 32 bits as well.
+
+Similarly, ass soon as you perform any other bitwise operation on the number, even one that does not modify the low
+32 bits, the upper bits will revert to the sign of the lower 32-bit value:
 
 	n |= 0;                 // n is displayed as -2004318072 again
 

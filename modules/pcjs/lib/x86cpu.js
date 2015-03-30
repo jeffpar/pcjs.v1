@@ -1639,7 +1639,7 @@ X86CPU.prototype.getIP = function()
  */
 X86CPU.prototype.setIP = function(off)
 {
-    this.regLIP = this.segCS.base + (off & (I386? this.dataMask : 0xffff));
+    this.regLIP = this.segCS.base + (off & (I386? this.segCS.addrMask : 0xffff));
     if (PREFETCH) this.flushPrefetch(this.regLIP);
 };
 
@@ -1649,9 +1649,6 @@ X86CPU.prototype.setIP = function(off)
  * This function is a little different from the other segment setters, only because it turns out that CS is
  * never set without an accompanying IP (well, except for a few undocumented instructions, like POP CS, which
  * were available ONLY on the 8086/8088/80186/80188; see setCS() for details).
- *
- * NOTE: Unlike setIP(), which is often passed a computation, the offsets passed to setCSIP() are assumed to
- * be 16-bit values, so there's no need to mask them with 0xffff (although it doesn't hurt to assert that).
  *
  * And even though this function is called setCSIP(), please note the order of the parameters is IP,CS,
  * which matches the order that CS:IP values are normally stored in memory, allowing us to make calls like this:
@@ -1677,7 +1674,7 @@ X86CPU.prototype.setCSIP = function(off, sel, fCall)
     this.regEIP = off;
     var base = this.segCS.load(sel);
     if (base !== X86.ADDR_INVALID) {
-        this.regLIP = base + this.regEIP;
+        this.regLIP = base + (this.regEIP & (I386? this.segCS.addrMask : 0xffff));
         this.regLIPLimit = base + this.segCS.limit;
         if (I386) this.resetSizes();
         if (PREFETCH) this.flushPrefetch(this.regLIP);

@@ -187,10 +187,15 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
     var sStatePath = null;
     var sResume = parmsComputer['resume'];
     if (sResume !== undefined) {
-        if (sResume.length == 1) {
-            this.resume = +sResume;
-        } else {
+        /*
+         * DEPRECATE: This goofiness is a holdover from when the 'resume' property was a string (either a
+         * single-digit string or a path); now it's always a number, so it never has a 'length' property and
+         * the call to parseInt() is unnecessary.
+         */
+        if (sResume.length > 1) {
             sStatePath = this.sResumePath = sResume;
+        } else {
+            this.resume = parseInt(sResume, 10);
         }
     }
 
