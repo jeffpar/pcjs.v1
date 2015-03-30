@@ -3318,26 +3318,24 @@ X86.opRET = function RET()
 /**
  * op=0xC4 (LES reg,word)
  *
+ * This is like a "MOV reg,rm" operation, but it also loads ES from the next word.
+ *
  * @this {X86CPU}
  */
 X86.opLES = function LES()
 {
-    /*
-     * This is like a "MOV reg,rm" operation, but it also loads ES from the next word.
-     */
     this.aOpModRegWord[this.getIPByte()].call(this, X86.fnLES);
 };
 
 /**
  * op=0xC5 (LDS reg,word)
  *
+ * This is like a "MOV reg,rm" operation, but it also loads DS from the next word.
+ *
  * @this {X86CPU}
  */
 X86.opLDS = function LDS()
 {
-    /*
-     * This is like a "MOV reg,rm" operation, but it also loads DS from the next word.
-     */
     this.aOpModRegWord[this.getIPByte()].call(this, X86.fnLDS);
 };
 

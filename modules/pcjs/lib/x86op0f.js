@@ -219,7 +219,7 @@ X86.opMOVrcr = function MOVrcr()
     }
      */
     var reg = (bModRM & 0x38) >> 3;
-    switch (reg) {
+    switch(reg) {
     case 0x0:
         this.regMD16 = this.regCR0;
         break;
@@ -288,7 +288,7 @@ X86.opMOVcrr = function MOVcrr()
         return;
     }
     this.aOpModRegWord[bModRM].call(this, X86.fnMOV);
-    switch (reg) {
+    switch(reg) {
     case 0x0:
         reg = this.regEAX;
         this.regEAX = temp;
@@ -959,6 +959,20 @@ X86.opIMUL = function IMUL()
 };
 
 /**
+ * opLSS()
+ *
+ * op=0x0F,0xB2 (LSS reg,word)
+ *
+ * This is like a "MOV reg,rm" operation, but it also loads SS from the next word.
+ *
+ * @this {X86CPU}
+ */
+X86.opLSS = function LSS()
+{
+    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnLSS);
+};
+
+/**
  * opBTR()
  *
  * op=0x0F,0xB3 (BTC mem/reg,reg) (80386 and up)
@@ -969,6 +983,146 @@ X86.opBTR = function BTR()
 {
     this.aOpModMemWord[this.getIPByte()].call(this, X86.fnBTR);
     if (this.regEA !== X86.ADDR_INVALID) this.nStepCycles -= X86CPU.CYCLES_80386.nOpCyclesBitSetMExtra;
+};
+
+/**
+ * opLFS()
+ *
+ * op=0x0F,0xB4 (LFS reg,word)
+ *
+ * This is like a "MOV reg,rm" operation, but it also loads FS from the next word.
+ *
+ * @this {X86CPU}
+ */
+X86.opLFS = function LFS()
+{
+    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnLFS);
+};
+
+/**
+ * opLGS()
+ *
+ * op=0x0F,0xB5 (LGS reg,word)
+ *
+ * This is like a "MOV reg,rm" operation, but it also loads GS from the next word.
+ *
+ * @this {X86CPU}
+ */
+X86.opLGS = function LGS()
+{
+    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnLGS);
+};
+
+/**
+ * opMOVZXb()
+ *
+ * op=0x0F,0xB6 (MOVZX reg,byte)
+ *
+ * @this {X86CPU}
+ */
+X86.opMOVZXb = function MOVZXb()
+{
+    /*
+     * The ModRegByte handlers update the registers in the 1st column, but we need to update those in the 2nd column.
+     *
+     *      000:    AL      ->      000:    AX
+     *      001:    CL      ->      001:    CX
+     *      010:    DL      ->      010:    DX
+     *      011:    BL      ->      011:    BX
+     *      100:    AH      ->      100:    SP
+     *      101:    CH      ->      101:    BP
+     *      110:    DH      ->      110:    SI
+     *      111:    BH      ->      111:    DI
+     */
+    var temp;
+    var bModRM = this.getIPByte();
+    var reg = (bModRM & 0x38) >> 3;
+    switch(reg) {
+    case 0x4:
+        temp = this.regEAX;
+        break;
+    case 0x5:
+        temp = this.regECX;
+        break;
+    case 0x6:
+        temp = this.regEDX;
+        break;
+    case 0x7:
+        temp = this.regEBX;
+        break;
+    }
+    this.aOpModRegByte[bModRM].call(this, X86.fnMOVX);
+    switch(reg) {
+    case 0x0:
+        this.regEAX = (this.regEAX & ~this.dataMask) | (this.regEAX & 0xff);
+        break;
+    case 0x1:
+        this.regECX = (this.regECX & ~this.dataMask) | (this.regECX & 0xff);
+        break;
+    case 0x2:
+        this.regEDX = (this.regEDX & ~this.dataMask) | (this.regEDX & 0xff);
+        break;
+    case 0x3:
+        this.regEBX = (this.regEBX & ~this.dataMask) | (this.regEBX & 0xff);
+        break;
+    case 0x4:
+        this.regESP = (this.regESP & ~this.dataMask) | ((this.regEAX >> 8) & 0xff);
+        this.regEAX = temp;
+        break;
+    case 0x5:
+        this.regEBP = (this.regEBP & ~this.dataMask) | ((this.regECX >> 8) & 0xff);
+        this.regECX = temp;
+        break;
+    case 0x6:
+        this.regESI = (this.regESI & ~this.dataMask) | ((this.regEDX >> 8) & 0xff);
+        this.regEDX = temp;
+        break;
+    case 0x7:
+        this.regEDI = (this.regEDI & ~this.dataMask) | ((this.regEBX >> 8) & 0xff);
+        this.regEBX = temp;
+        break;
+    }
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? X86CPU.CYCLES_80386.nOpCyclesMovXR : X86CPU.CYCLES_80386.nOpCyclesMovXM);
+};
+
+/**
+ * opMOVZXw()
+ *
+ * op=0x0F,0xB7 (MOVZX reg,word)
+ *
+ * @this {X86CPU}
+ */
+X86.opMOVZXw = function MOVZXw()
+{
+    var bModRM = this.getIPByte();
+    this.aOpModRegWord[bModRM].call(this, X86.fnMOVX);
+    switch((bModRM & 0x38) >> 3) {
+    case 0x0:
+        this.regEAX = (this.regEAX & 0xffff);
+        break;
+    case 0x1:
+        this.regECX = (this.regECX & 0xffff);
+        break;
+    case 0x2:
+        this.regEDX = (this.regEDX & 0xffff);
+        break;
+    case 0x3:
+        this.regEBX = (this.regEBX & 0xffff);
+        break;
+    case 0x4:
+        this.regESP = (this.regESP & 0xffff);
+        break;
+    case 0x5:
+        this.regEBP = (this.regEBP & 0xffff);
+        break;
+    case 0x6:
+        this.regESI = (this.regESI & 0xffff);
+        break;
+    case 0x7:
+        this.regEDI = (this.regEDI & 0xffff);
+        break;
+    }
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? X86CPU.CYCLES_80386.nOpCyclesMovXR : X86CPU.CYCLES_80386.nOpCyclesMovXM);
 };
 
 /**
@@ -994,6 +1148,142 @@ X86.opBTC = function BTC()
     if (this.regEA !== X86.ADDR_INVALID) this.nStepCycles -= X86CPU.CYCLES_80386.nOpCyclesBitSetMExtra;
 };
 
+/**
+ * opBSF()
+ *
+ * op=0x0F,0xBB (BSF reg,mem/reg)
+ *
+ * @this {X86CPU}
+ */
+X86.opBSF = function BSF()
+{
+    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnBSF);
+};
+
+/**
+ * opBSR()
+ *
+ * op=0x0F,0xBC (BSR reg,mem/reg)
+ *
+ * @this {X86CPU}
+ */
+X86.opBSR = function BSR()
+{
+    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnBSR);
+};
+
+/**
+ * opMOVSXb()
+ *
+ * op=0x0F,0xBE (MOVSX reg,byte)
+ *
+ * @this {X86CPU}
+ */
+X86.opMOVSXb = function MOVSXb()
+{
+    /*
+     * The ModRegByte handlers update the registers in the 1st column, but we need to update those in the 2nd column.
+     *
+     *      000:    AL      ->      000:    AX
+     *      001:    CL      ->      001:    CX
+     *      010:    DL      ->      010:    DX
+     *      011:    BL      ->      011:    BX
+     *      100:    AH      ->      100:    SP
+     *      101:    CH      ->      101:    BP
+     *      110:    DH      ->      110:    SI
+     *      111:    BH      ->      111:    DI
+     */
+    var temp;
+    var bModRM = this.getIPByte();
+    var reg = (bModRM & 0x38) >> 3;
+    switch(reg) {
+    case 0x4:
+        temp = this.regEAX;
+        break;
+    case 0x5:
+        temp = this.regECX;
+        break;
+    case 0x6:
+        temp = this.regEDX;
+        break;
+    case 0x7:
+        temp = this.regEBX;
+        break;
+    }
+    this.aOpModRegByte[bModRM].call(this, X86.fnMOVX);
+    switch(reg) {
+    case 0x0:
+        this.regEAX = (this.regEAX & ~this.dataMask) | ((((this.regEAX & 0xff) << 24) >> 24) & this.dataMask);
+        break;
+    case 0x1:
+        this.regECX = (this.regECX & ~this.dataMask) | ((((this.regECX & 0xff) << 24) >> 24) & this.dataMask);
+        break;
+    case 0x2:
+        this.regEDX = (this.regEDX & ~this.dataMask) | ((((this.regEDX & 0xff) << 24) >> 24) & this.dataMask);
+        break;
+    case 0x3:
+        this.regEBX = (this.regEBX & ~this.dataMask) | ((((this.regEBX & 0xff) << 24) >> 24) & this.dataMask);
+        break;
+    case 0x4:
+        this.regESP = (this.regESP & ~this.dataMask) | (((this.regEAX << 16) >> 24) & this.dataMask);
+        this.regEAX = temp;
+        break;
+    case 0x5:
+        this.regEBP = (this.regEBP & ~this.dataMask) | (((this.regECX << 16) >> 24) & this.dataMask);
+        this.regECX = temp;
+        break;
+    case 0x6:
+        this.regESI = (this.regESI & ~this.dataMask) | (((this.regEDX << 16) >> 24) & this.dataMask);
+        this.regEDX = temp;
+        break;
+    case 0x7:
+        this.regEDI = (this.regEDI & ~this.dataMask) | (((this.regEBX << 16) >> 24) & this.dataMask);
+        this.regEBX = temp;
+        break;
+    }
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? X86CPU.CYCLES_80386.nOpCyclesMovXR : X86CPU.CYCLES_80386.nOpCyclesMovXM);
+};
+
+/**
+ * opMOVSXw()
+ *
+ * op=0x0F,0xBF (MOVSX reg,word)
+ *
+ * @this {X86CPU}
+ */
+X86.opMOVSXw = function MOVSXw()
+{
+    var bModRM = this.getIPByte();
+    this.aOpModRegWord[bModRM].call(this, X86.fnMOVX);
+    switch((bModRM & 0x38) >> 3) {
+    case 0x0:
+        this.regEAX = ((this.regEAX << 16) >> 16);
+        break;
+    case 0x1:
+        this.regECX = ((this.regECX << 16) >> 16);
+        break;
+    case 0x2:
+        this.regEDX = ((this.regEDX << 16) >> 16);
+        break;
+    case 0x3:
+        this.regEBX = ((this.regEBX << 16) >> 16);
+        break;
+    case 0x4:
+        this.regESP = ((this.regESP << 16) >> 16);
+        break;
+    case 0x5:
+        this.regEBP = ((this.regEBP << 16) >> 16);
+        break;
+    case 0x6:
+        this.regESI = ((this.regESI << 16) >> 16);
+        break;
+    case 0x7:
+        this.regEDI = ((this.regEDI << 16) >> 16);
+        break;
+    }
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? X86CPU.CYCLES_80386.nOpCyclesMovXR : X86CPU.CYCLES_80386.nOpCyclesMovXM);
+};
+
 X86.aOps0F = new Array(256);
 
 X86.aOps0F[0x00] = X86.opGRP6;
@@ -1008,10 +1298,6 @@ X86.aOps0F[0x06] = X86.opCLTS;
  * instruction guaranteed to raise a #UD (Invalid Opcode) exception (INT 0x06) on all future x86 processors.
  */
 X86.aOps0F[0x0B] = X86.opInvalid;
-
-for (var i = 0; i < X86.aOps0F.length; i++) {
-    if (!X86.aOps0F[i]) X86.aOps0F[i] = X86.opUndefined;
-}
 
 if (I386) {
     X86.aOps0F386 = [];
@@ -1060,9 +1346,17 @@ if (I386) {
     X86.aOps0F386[0xAC] = X86.opSHRDn;
     X86.aOps0F386[0xAD] = X86.opSHRDcl;
     X86.aOps0F386[0xAF] = X86.opIMUL;
+    X86.aOps0F386[0xB2] = X86.opLSS;
     X86.aOps0F386[0xB3] = X86.opBTR;
+    X86.aOps0F386[0xB4] = X86.opLFS;
+    X86.aOps0F386[0xB5] = X86.opLGS;
+    X86.aOps0F386[0xB6] = X86.opMOVZXb;
+    X86.aOps0F386[0xB7] = X86.opMOVZXw;
     X86.aOps0F386[0xBA] = X86.opGRP8;
     X86.aOps0F386[0xBB] = X86.opBTC;
+    X86.aOps0F386[0xBC] = X86.opBSF;
+    X86.aOps0F386[0xBE] = X86.opMOVSXb;
+    X86.aOps0F386[0xBF] = X86.opMOVSXw;
 }
 
 /*

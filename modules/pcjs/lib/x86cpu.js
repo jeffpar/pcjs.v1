@@ -426,6 +426,7 @@ X86CPU.CYCLES_80286 = {
 };
 
 X86CPU.CYCLES_80386 = {
+    nOpCyclesBitScan:           11,
     nOpCyclesBitSetR:           6,
     nOpCyclesBitSetM:           8,
     nOpCyclesBitSetMExtra:      5,      // extra cycle cost for non-immediate BTC/BTR/BTS opcodes
@@ -434,6 +435,8 @@ X86CPU.CYCLES_80386 = {
     nOpCyclesBitTestMExtra:     6,      // extra cycle cost for non-immediate BT opcode
     nOpCyclesIMulR:             9,
     nOpCyclesIMulM:             12,
+    nOpCyclesMovXR:             3,
+    nOpCyclesMovXM:             6,
     nOpCyclesSetR:              4,
     nOpCyclesSetM:              5,
     nOpCyclesShiftDR:           3,
@@ -770,8 +773,11 @@ X86CPU.prototype.initProcessor = function()
 
             this.OPFLAG_NOINTR_8086 = 0;    // used with instructions that should *not* set NOINTR on an 80286 (eg, non-SS segment loads)
 
-            this.aOps0F = X86.aOps0F;
-            this.aOps[0x0F]              = X86.op0F;
+            this.aOps[0x0F] = X86.op0F;
+            this.aOps0F = X86.aOps0F.slice();
+            for (var i = 0; i < this.aOps0F.length; i++) {
+                if (!this.aOps0F[i]) this.aOps0F[i] = X86.opUndefined;
+            }
             this.aOps[X86.OPCODE.PUSHSP] = X86.opPUSHSP;    // 0x54
             this.aOps[X86.OPCODE.ARPL]   = X86.opARPL;      // 0x63
 
@@ -781,7 +787,6 @@ X86CPU.prototype.initProcessor = function()
                 this.aOps[X86.OPCODE.GS] = X86.opGS;        // 0x65
                 this.aOps[X86.OPCODE.OS] = X86.opOS;        // 0x66
                 this.aOps[X86.OPCODE.AS] = X86.opAS;        // 0x67
-                this.aOps0F = X86.aOps0F.slice();
                 for (bOpcode in X86.aOps0F386) {
                     this.aOps0F[+bOpcode] = X86.aOps0F386[bOpcode];
                 }

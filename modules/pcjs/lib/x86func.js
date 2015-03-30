@@ -205,6 +205,76 @@ X86.fnBOUND = function BOUND(dst, src)
 };
 
 /**
+ * fnBSF(dst, src)
+ *
+ * Scan src starting at bit 0.  If a set bit is found, the bit index is stored in dst and ZF is cleared;
+ * otherwise, ZF is set and dst is unchanged.
+ *
+ * NOTES: Early versions of the 80386 manuals misstated how ZF was set/cleared.  Also, Intel insists that
+ * dst is undefined whenever ZF is set, but in fact, the 80386 leaves dst unchanged when that happens;
+ * unfortunately, some early 80486s would always modify dst, so it is unsafe to rely on dst when ZF is set.
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnBSF = function BSF(dst, src)
+{
+    if (!src) {
+        this.setZF();
+    } else {
+        this.clearZF();
+        var i = 0, bit = 0x1;
+        while (bit & this.dataMask) {
+            if (src & bit) {
+                dst = i;
+                break;
+            }
+            bit <<= 1;
+            i++;
+        }
+    }
+    this.nStepCycles -= X86CPU.CYCLES_80386.nOpCyclesBitScan + i * 3;
+    return dst;
+};
+
+/**
+ * fnBSR(dst, src)
+ *
+ * Scan src starting from the highest bit.  If a set bit is found, the bit index is stored in dst and ZF is
+ * cleared; otherwise, ZF is set and dst is unchanged.
+ *
+ * NOTES: Early versions of the 80386 manuals misstated how ZF was set/cleared.  Also, Intel insists that
+ * dst is undefined whenever ZF is set, but in fact, the 80386 leaves dst unchanged when that happens;
+ * unfortunately, some early 80486s would always modify dst, so it is unsafe to rely on dst when ZF is set.
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnBSR = function BSR(dst, src)
+{
+    if (!src) {
+        this.setZF();
+    } else {
+        this.clearZF();
+        var i = (this.dataSize == 2? 15 : 31), j = i, bit = 1 << i;
+        while (bit) {
+            if (src & bit) {
+                dst = i;
+                break;
+            }
+            bit >>>= 1;
+            i--;
+        }
+    }
+    this.nStepCycles -= X86CPU.CYCLES_80386.nOpCyclesBitScan + (j - i) * 3;
+    return dst;
+};
+
+/**
  * fnBT(dst, src)
  *
  * @this {X86CPU}
@@ -1053,6 +1123,25 @@ X86.fnLES = function LES(dst, src)
 };
 
 /**
+ * fnLFS(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnLFS = function LFS(dst, src)
+{
+    if (this.regEA === X86.ADDR_INVALID) {
+        X86.opUndefined.call(this);
+        return dst;
+    }
+    this.setFS(this.getShort(this.regEA + 2));
+    this.nStepCycles -= this.CYCLES.nOpCyclesLS;
+    return src;
+};
+
+/**
  * fnLGDT(dst, src)
  *
  * op=0x0F,0x01,reg=0x2 (GRP7:LGDT)
@@ -1077,6 +1166,25 @@ X86.fnLGDT = function LGDT(dst, src)
         this.nStepCycles -= 11;
     }
     return dst;
+};
+
+/**
+ * fnLGS(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnLGS = function LGS(dst, src)
+{
+    if (this.regEA === X86.ADDR_INVALID) {
+        X86.opUndefined.call(this);
+        return dst;
+    }
+    this.setGS(this.getShort(this.regEA + 2));
+    this.nStepCycles -= this.CYCLES.nOpCyclesLS;
+    return src;
 };
 
 /**
@@ -1174,6 +1282,25 @@ X86.fnLSL = function LSL(dst, src)
 };
 
 /**
+ * fnLSS(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnLSS = function LSS(dst, src)
+{
+    if (this.regEA === X86.ADDR_INVALID) {
+        X86.opUndefined.call(this);
+        return dst;
+    }
+    this.setSS(this.getShort(this.regEA + 2));
+    this.nStepCycles -= this.CYCLES.nOpCyclesLS;
+    return src;
+};
+
+/**
  * fnLTR(dst, src)
  *
  * op=0x0F,0x00,reg=0x3 (GRP6:LTR)
@@ -1205,6 +1332,19 @@ X86.fnLTR = function LTR(dst, src)
 X86.fnMOV = function MOV(dst, src)
 {
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.CYCLES.nOpCyclesMovRR : this.CYCLES.nOpCyclesMovRM) : this.CYCLES.nOpCyclesMovMR);
+    return src;
+};
+
+/**
+ * fnMOVX(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst (current value, ignored)
+ * @param {number} src (new value)
+ * @return {number} dst (updated value, from src)
+ */
+X86.fnMOVX = function MOVX(dst, src)
+{
     return src;
 };
 
