@@ -562,12 +562,12 @@ Here's what the world knew about 80386 problems in the B1 stepping, as of Decemb
 	The first situation, when the inner level stack (levels 0, 1, and 2) is not dword aligned (or not word aligned
 	in the case of a 16-bit [I]RET), requires that several conditions occur simultaneously:
 
-	> 1. Paging must be enabled, and the page table and directory entries for the inner level stacks must be marked
+	 1. Paging must be enabled, and the page table and directory entries for the inner level stacks must be marked
 	as supervisor access only.
-	> 2. The software must execute an inter-level RET or IRET to a Protected Mode program at privilege level 3.
+	 2. The software must execute an inter-level RET or IRET to a Protected Mode program at privilege level 3.
 	An inter-level IRET to Virtual 8086 Mode does not exhibit this problem. An inter-level RET or IRET to level 1
 	or 2 does not exhibit this problem.
-	> 3. The inner level stack must be unaligned to a dword boundary (word boundary for a 16-bit [I]RET).
+	 3. The inner level stack must be unaligned to a dword boundary (word boundary for a 16-bit [I]RET).
 
 	When the first situation occurs, a page fault (exception 14) occurs spuriously, indicating a page level
 	protection violation during a "user" level read of the inner level stack.
@@ -575,12 +575,12 @@ Here's what the world knew about 80386 problems in the B1 stepping, as of Decemb
 	The second situation, whether or not the inner level stack is dword aligned (or word aligned in the case of a
 	16-bit [I]RET), also requires that several conditions occur simultaneously:
 
-	> 1. Paging must be enabled, and the page table and directory entries for the inner level stacks must be marked
+	 1. Paging must be enabled, and the page table and directory entries for the inner level stacks must be marked
 	as supervisor access only.
-	> 2. The software must execute an inter-level RET or IRET to a Protected Mode program at privilege level 3.
+	 2. The software must execute an inter-level RET or IRET to a Protected Mode program at privilege level 3.
 	An inter-level IRET to Virtual 8086 Mode does not exhibit this problem. An inter-level RET or IRET to level 1
 	or 2 does not exhibit this problem.
-	> 3. The bus HOLD input must be asserted during the read, cycle which pops ESP (or SP) off the inner stack as a
+	 3. The bus HOLD input must be asserted during the read, cycle which pops ESP (or SP) off the inner stack as a
 	result of a RET or IRET instruction.
 
 	When the second situation occurs, no exception is generated, but the processor will drive an incorrect physical
@@ -663,11 +663,11 @@ Here's what the world knew about 80386 problems in the B1 stepping, as of Decemb
 	timer interrupt will always cause the processor to begin interrupt processing. The timer routine should test the
 	following conditions to determine if this errata was encountered.
 
-	> 1. The saved CS:EIP must point within 8 bytes of the end of a page.
-	> 2. The last byte within the page must contain an ESC opcode.
-	> 3. All bytes between the saved CS:EIP and the ESC opcode must contain valid prefix opcodes (segment override 26h,
+	 1. The saved CS:EIP must point within 8 bytes of the end of a page.
+	 2. The last byte within the page must contain an ESC opcode.
+	 3. All bytes between the saved CS:EIP and the ESC opcode must contain valid prefix opcodes (segment override 26h,
 	2Eh, 36h, 3Eh, 64h, 65h, address size override 67h, operand size override 66h).
-	> 4. The next page is not present, or not accessable.
+	 4. The next page is not present, or not accessable.
 
 	If all four conditions are true, then the timer routine can assume this errata was encountered, and signal a page
 	fault, which will clear the condition. This workaround should be placed in the Operating System, so that applications
