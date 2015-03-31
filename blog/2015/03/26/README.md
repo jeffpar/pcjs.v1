@@ -15,10 +15,12 @@ there are more than enough examples on the web already.
 To avoid unexpected type coercion, and thus unexpected matches and/or mismatches, the usual advice is to *always* use
 strict equality operators ("===" and "!==").
 
-I disagree.  In well-written code, the variable data types should always be clear.  In fact, the more you're able to
+I disagree.
+
+In well-written code, the variable data types should always be clear.  In fact, the more you're able to
 use JSDoc types to declare the data types of all your parameters, return values, and other variables, the fewer errors
-you'll have.  Type coercion should never be a problem as long as you're always comparing variables with matching types,
-because no coercion will be performed.
+you'll have.  As long as you're always comparing variables with matching types, there shouldn't be any unexpected
+coercions.
 
 Obviously, there will be times when a polymorphic variable is required, especially when dealing with APIs that can
 return multiple types.  But those should be the exception, not the rule.
@@ -33,28 +35,24 @@ whereas strict equality requires more work:
  
 	if (parameter === undefined || parameter === null) { ... }
 
-This is one of the few times I think coercion (of *undefined* to *null*) is beneficial.
-
-Another common pattern:
+This is one of those times when coercion (of *undefined* to *null*) is beneficial.  Here's another:
 
 	if (!b) { ... }
 
-is a popular way of checking for "falsy" values (ie, *undefined*, *null*, 0, false, "", NaN, etc).
-Again, another situation where type coercion is beneficial and well understood.  Don't use this technique for
-optional parameters though:
+Coercing a value to *boolean* is a popular way of checking for all "falsy" values (ie, *undefined*, *null*,
+0, false, "", NaN, etc).  Again, another situation where type coercion is beneficial and well understood.
+
+However, don't use that technique to check for optional parameters:
 
 	if (!parameter) { ... }
 
 because a valid numeric parameter could include 0, a valid string parameter could include "", etc.
 
-I'm not saying *never* use strict comparisons, or that coercion is good, but simply that the more you know all
-your variable data types, and the more you compare variables only of the same type, and better off you'll be.
-
 Problems with type coercion are **NOT** problems caused by a poor choice of operators, so trying to make
-those problems go away by artificially limiting your choice of operators seems like the wrong solution.  Type coercion
-problems are, by definition, problems involving mismatched types.  Solutions include:
+those problems go away by artificially limiting your choice of operators seems like the wrong solution.
+Type coercion problems are, by definition, problems involving mismatched types.  Solutions include:
 
-- Don't compare variables of different types; or
+- Avoid comparing variables of different types; or
 - Convert your variables to matching types first; or
 - Rely on coercion, but be clear about why and when you're doing it
 
@@ -129,7 +127,7 @@ is that all the upper sign bits are stripped from the (64-bit) result.
 I consider this an anomaly of JavaScript's bitwise operators, because it breaks the "rule" that bitwise operators
 operate *only* on the low 32 bits of a number; there are side-effects on the upper 32 bits as well.
 
-Similarly, ass soon as you perform any other bitwise operation on the number, even one that does not modify the low
+Similarly, as soon as you perform any other bitwise operation on the number, even one that does not modify the low
 32 bits, the upper bits will revert to the sign of the lower 32-bit value:
 
 	n |= 0;                 // n is displayed as -2004318072 again
