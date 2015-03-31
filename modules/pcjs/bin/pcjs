@@ -330,7 +330,7 @@ function doCommand(sCmd)
 var onCommand = function (cmd, context, filename, callback)
 {
     var result = false;
-    var match = cmd.match(/\(\s*(.*)\s*\)/);
+    var match = cmd.match(/^\(?\s*(.*?)\s*\)?$/);
     if (match) {
         result = doCommand(match[1]);
     }

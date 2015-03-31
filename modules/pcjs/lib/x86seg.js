@@ -97,17 +97,13 @@ function X86Seg(cpu, id, sName, fProt)
 X86Seg.ID = {
     NULL:   0,          // "NULL"
     CODE:   1,          // "CS"
-    DATA:   2,          // "DS", "ES"
+    DATA:   2,          // "DS", "ES", "FS", "GS"
     STACK:  3,          // "SS"
     TSS:    4,          // "TSS"
     LDT:    5,          // "LDT"
     OTHER:  6,          // "VER"
     DEBUG:  7           // "DBG"
 };
-
-/*
- * Class methods
- */
 
 /**
  * loadReal(sel, fSuppress)
@@ -119,7 +115,7 @@ X86Seg.ID = {
  * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number} base address of selected segment, or ADDR_INVALID if error (TODO: No error conditions exist yet)
  */
-X86Seg.loadReal = function loadReal(sel, fSuppress)
+X86Seg.prototype.loadReal = function loadReal(sel, fSuppress)
 {
     this.sel = sel & 0xffff;
     this.dataSize = this.addrSize = 2;
@@ -150,7 +146,7 @@ X86Seg.loadReal = function loadReal(sel, fSuppress)
  * @param {boolean} [fSuppress] is true to suppress any errors, cycle assessment, etc
  * @return {number} base address of selected segment, or ADDR_INVALID if error
  */
-X86Seg.loadProt = function loadProt(sel, fSuppress)
+X86Seg.prototype.loadProt = function loadProt(sel, fSuppress)
 {
     var addrDT;
     var addrDTLimit;
@@ -201,7 +197,7 @@ X86Seg.loadProt = function loadProt(sel, fSuppress)
  * @param {number} nIDT
  * @return {number} address from selected vector, or ADDR_INVALID if error (TODO: No error conditions exist yet)
  */
-X86Seg.loadIDTReal = function loadIDTReal(nIDT)
+X86Seg.prototype.loadIDTReal = function loadIDTReal(nIDT)
 {
     var cpu = this.cpu;
     /*
@@ -230,7 +226,7 @@ X86Seg.loadIDTReal = function loadIDTReal(nIDT)
  * @param {number} nIDT
  * @return {number} address from selected vector, or ADDR_INVALID if error (TODO: No error conditions exist yet)
  */
-X86Seg.loadIDTProt = function loadIDTProt(nIDT)
+X86Seg.prototype.loadIDTProt = function loadIDTProt(nIDT)
 {
     var cpu = this.cpu;
     cpu.assert(nIDT >= 0 && nIDT < 256);
@@ -256,7 +252,7 @@ X86Seg.loadIDTProt = function loadIDTProt(nIDT)
  * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number} corresponding physical address if valid, or ADDR_INVALID if error (TODO: No error conditions exist yet)
  */
-X86Seg.checkReadReal = function checkReadReal(off, cb, fSuppress)
+X86Seg.prototype.checkReadReal = function checkReadReal(off, cb, fSuppress)
 {
     return (this.base + off)|0;
 };
@@ -273,7 +269,7 @@ X86Seg.checkReadReal = function checkReadReal(off, cb, fSuppress)
  * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number} corresponding physical address if valid, or ADDR_INVALID if error (TODO: No error conditions exist yet)
  */
-X86Seg.checkWriteReal = function checkWriteReal(off, cb, fSuppress)
+X86Seg.prototype.checkWriteReal = function checkWriteReal(off, cb, fSuppress)
 {
     return (this.base + off)|0;
 };
@@ -287,12 +283,12 @@ X86Seg.checkWriteReal = function checkWriteReal(off, cb, fSuppress)
  * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number} corresponding physical address if valid, or ADDR_INVALID if not
  */
-X86Seg.checkReadProt = function checkReadProt(off, cb, fSuppress)
+X86Seg.prototype.checkReadProt = function checkReadProt(off, cb, fSuppress)
 {
     if (off + cb <= this.limit) {
         return (this.base + off)|0;
     }
-    return X86Seg.checkReadProtDisallowed.call(this, off, cb, fSuppress);
+    return this.checkReadProtDisallowed(off, cb, fSuppress);
 };
 
 /**
@@ -304,12 +300,12 @@ X86Seg.checkReadProt = function checkReadProt(off, cb, fSuppress)
  * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number} corresponding physical address if valid, ADDR_INVALID if not
  */
-X86Seg.checkReadProtDown = function checkReadProtDown(off, cb, fSuppress)
+X86Seg.prototype.checkReadProtDown = function checkReadProtDown(off, cb, fSuppress)
 {
     if (off + cb > this.limit) {
         return (this.base + off)|0;
     }
-    return X86Seg.checkReadProtDisallowed.call(this, off, cb, fSuppress);
+    return this.checkReadProtDisallowed(off, cb, fSuppress);
 };
 
 /**
@@ -321,7 +317,7 @@ X86Seg.checkReadProtDown = function checkReadProtDown(off, cb, fSuppress)
  * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number} corresponding physical address if valid, ADDR_INVALID if not
  */
-X86Seg.checkReadProtDisallowed = function checkReadProtDisallowed(off, cb, fSuppress)
+X86Seg.prototype.checkReadProtDisallowed = function checkReadProtDisallowed(off, cb, fSuppress)
 {
     if (!fSuppress) {
         X86.fnFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, 0);
@@ -338,12 +334,12 @@ X86Seg.checkReadProtDisallowed = function checkReadProtDisallowed(off, cb, fSupp
  * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number} corresponding physical address if valid, ADDR_INVALID if not
  */
-X86Seg.checkWriteProt = function checkWriteProt(off, cb, fSuppress)
+X86Seg.prototype.checkWriteProt = function checkWriteProt(off, cb, fSuppress)
 {
     if (off + cb <= this.limit) {
         return (this.base + off)|0;
     }
-    return X86Seg.checkWriteProtDisallowed.call(this, off, cb, fSuppress);
+    return this.checkWriteProtDisallowed(off, cb, fSuppress);
 };
 
 /**
@@ -355,12 +351,12 @@ X86Seg.checkWriteProt = function checkWriteProt(off, cb, fSuppress)
  * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number} corresponding physical address if valid, ADDR_INVALID if not
  */
-X86Seg.checkWriteProtDown = function checkWriteProtDown(off, cb, fSuppress)
+X86Seg.prototype.checkWriteProtDown = function checkWriteProtDown(off, cb, fSuppress)
 {
     if (off + cb > this.limit) {
         return (this.base + off)|0;
     }
-    return X86Seg.checkWriteProtDisallowed.call(this, off, cb, fSuppress);
+    return this.checkWriteProtDisallowed(off, cb, fSuppress);
 };
 
 /**
@@ -372,7 +368,7 @@ X86Seg.checkWriteProtDown = function checkWriteProtDown(off, cb, fSuppress)
  * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number} corresponding physical address if valid, ADDR_INVALID if not
  */
-X86Seg.checkWriteProtDisallowed = function checkWriteProtDisallowed(off, cb, fSuppress)
+X86Seg.prototype.checkWriteProtDisallowed = function checkWriteProtDisallowed(off, cb, fSuppress)
 {
     if (!fSuppress) {
         X86.fnFault.call(this.cpu, X86.EXCEPTION.GP_FAULT, 0);
@@ -404,7 +400,7 @@ X86Seg.checkWriteProtDisallowed = function checkWriteProtDisallowed(off, cb, fSu
  * @param {boolean} fNest is true if nesting, false if un-nesting
  * @return {boolean} true if successful, false if error
  */
-X86Seg.switchTSS = function switchTSS(selNew, fNest)
+X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
 {
     var cpu = this.cpu;
     cpu.assert(this === cpu.segCS);
@@ -473,10 +469,6 @@ X86Seg.switchTSS = function switchTSS(selNew, fNest)
     cpu.regCR0 |= X86.CR0.MSW.TS;
     return true;
 };
-
-/*
- * Object methods
- */
 
 /**
  * loadAcc(sel, fGDT)
@@ -634,7 +626,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                 cpu.assert(!(acc & 0x1f));
             }
             else if (type == X86.DESC.ACC.TYPE.GATE_TASK) {
-                if (!X86Seg.switchTSS.call(this, base & 0xffff, true)) {
+                if (!this.switchTSS(base & 0xffff, true)) {
                     base = X86.ADDR_INVALID;
                     break;
                 }
@@ -843,29 +835,29 @@ X86Seg.prototype.updateMode = function(fProt)
     }
     this.fExpDown = false;
     if (fProt) {
-        this.load = X86Seg.loadProt;
-        this.loadIDT = X86Seg.loadIDTProt;
-        this.checkRead = X86Seg.checkReadProt;
-        this.checkWrite = X86Seg.checkWriteProt;
+        this.load = this.loadProt;
+        this.loadIDT = this.loadIDTProt;
+        this.checkRead = this.checkReadProt;
+        this.checkWrite = this.checkWriteProt;
         if (this.acc & X86.DESC.ACC.TYPE.SEG) {
             /*
              * If the READABLE bit of CODE_READABLE is not set, then disallow reads
              */
             if ((this.acc & X86.DESC.ACC.TYPE.CODE_READABLE) == X86.DESC.ACC.TYPE.CODE_EXECONLY) {
-                this.checkWrite = X86Seg.checkReadProtDisallowed;
+                this.checkWrite = this.checkReadProtDisallowed;
             }
             /*
              * If the CODE bit is set, or the the WRITABLE bit is not set, then disallow writes
              */
             if ((this.acc & X86.DESC.ACC.TYPE.CODE) || !(this.acc & X86.DESC.ACC.TYPE.WRITABLE)) {
-                this.checkWrite = X86Seg.checkWriteProtDisallowed;
+                this.checkWrite = this.checkWriteProtDisallowed;
             }
             /*
              * If the CODE bit is not set *and* the EXPDOWN bit is set, then invert the limit check
              */
             if ((this.acc & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.EXPDOWN)) == X86.DESC.ACC.TYPE.EXPDOWN) {
-                if (this.checkRead == X86Seg.checkReadProt) this.checkRead = X86Seg.checkReadProtDown;
-                if (this.checkWrite == X86Seg.checkWriteProt) this.checkWrite = X86Seg.checkWriteProtDown;
+                if (this.checkRead == this.checkReadProt) this.checkRead = this.checkReadProtDown;
+                if (this.checkWrite == this.checkWriteProt) this.checkWrite = this.checkWriteProtDown;
                 this.fExpDown = true;
             }
         }
@@ -879,10 +871,10 @@ X86Seg.prototype.updateMode = function(fProt)
             this.addrMask = (0xffffffff|0);
         }
     } else {
-        this.load = X86Seg.loadReal;
-        this.loadIDT = X86Seg.loadIDTReal;
-        this.checkRead = X86Seg.checkReadReal;
-        this.checkWrite = X86Seg.checkWriteReal;
+        this.load = this.loadReal;
+        this.loadIDT = this.loadIDTReal;
+        this.checkRead = this.checkReadReal;
+        this.checkWrite = this.checkWriteReal;
         this.limit = 0xffff;
         this.cpl = this.dpl = 0;
         this.addrDesc = X86.ADDR_INVALID;

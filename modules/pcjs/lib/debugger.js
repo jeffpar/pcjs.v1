@@ -1737,7 +1737,7 @@ if (DEBUGGER) {
                 n = cpu.getDS(); cch = 4;
                 break;
             }
-            if (I386 && !cch) {
+            if (I386 && this.cpu.model >= X86.MODEL_80386 && !cch) {
                 switch(iReg) {
                 case Debugger.REG_EAX:
                     n = cpu.regEAX;  cch = 8;
@@ -2502,7 +2502,7 @@ if (DEBUGGER) {
         if (sel == this.cpu.getDS()) return this.cpu.segDS;
         if (sel == this.cpu.getES()) return this.cpu.segES;
         if (sel == this.cpu.getSS()) return this.cpu.segSS;
-        if (I386) {
+        if (I386 && this.cpu.model >= X86.MODEL_80386) {
             if (sel == this.cpu.getFS()) return this.cpu.segFS;
             if (sel == this.cpu.getGS()) return this.cpu.segGS;
         }
