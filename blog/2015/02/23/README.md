@@ -447,9 +447,9 @@ Here's what the world knew about 80386 problems in the B1 stepping, as of Decemb
 
 	**Problem**: If certain string and loop instructions are followed by instructions that either:
 
-		1. use a different address size (that is, if either the string instruction or the following instruction
+	 1. use a different address size (that is, if either the string instruction or the following instruction
 	uses an address size prefix), or
-		2. reference the stack (e.g. PUSH/POP/CALL/RET) and the "B" bit in the SS descriptor is different from the address
+	 2. reference the stack (e.g. PUSH/POP/CALL/RET) and the "B" bit in the SS descriptor is different from the address
 	size used by the string	instructions,
 
 	then one or more of [E]CX, [E]SI, or [E]DI is not updated properly. The size of the register (16 vs. 32) is
