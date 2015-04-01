@@ -42,9 +42,6 @@ if (typeof module !== 'undefined') {
     var CPU         = require("./cpu");
     var X86         = require("./x86");
     var X86Seg      = require("./x86seg");
-    var X86Func     = require("./x86func");
-    var X86OpXX     = require("./x86opxx");
-    var X86Op0F     = require("./x86op0f");
     var X86ModB     = require("./x86modb");
     var X86ModW     = require("./x86modw");
 }
@@ -712,8 +709,8 @@ X86CPU.prototype.setAddressMask = function(busMask)
  */
 X86CPU.prototype.initProcessor = function()
 {
-    this.PS_SET = X86.PS.SET_8086;
-    this.PS_DIRECT = X86.PS.DIRECT_8086;
+    this.PS_SET = X86.PS_SET_8086;
+    this.PS_DIRECT = X86.PS_DIRECT_8086;
 
     this.OPFLAG_NOINTR_8086 = X86.OPFLAG.NOINTR;
     this.nShiftCountMask = 0xff;            // on an 8086/8088, all shift counts are used as-is
@@ -2251,7 +2248,7 @@ X86CPU.prototype.setOF = function()
  */
 X86CPU.prototype.getPS = function()
 {
-    return (this.regPS & ~X86.PS.CACHED) | (this.getCF() | this.getPF() | this.getAF() | this.getZF() | this.getSF() | this.getOF());
+    return (this.regPS & ~X86.PS_CACHED) | (this.getCF() | this.getPF() | this.getAF() | this.getZF() | this.getSF() | this.getOF());
 };
 
 /**
@@ -2324,7 +2321,7 @@ X86CPU.prototype.setPS = function(regPS, cpl)
     }
 
     this.resultType = X86.RESULT.BYTE;
-    this.regPS = (this.regPS & ~(this.PS_DIRECT|X86.PS.CACHED)) | (regPS & (this.PS_DIRECT|X86.PS.CACHED)) | this.PS_SET;
+    this.regPS = (this.regPS & ~(this.PS_DIRECT|X86.PS_CACHED)) | (regPS & (this.PS_DIRECT|X86.PS_CACHED)) | this.PS_SET;
 
     if (this.regPS & X86.PS.TF) {
         this.intFlags |= X86.INTFLAG.TRAP;
@@ -3432,7 +3429,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
     if (!nMinCycles && !this.messageEnabled(Messages.PIC)) this.opFlags |= X86.OPFLAG.NOINTR;
 
     do {
-        var opPrefixes = this.opFlags & X86.OPFLAG.PREFIXES;
+        var opPrefixes = this.opFlags & X86.OPFLAG_PREFIXES;
         if (opPrefixes) {
             this.opPrefixes |= opPrefixes;
         } else {
@@ -3554,7 +3551,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
             /*
              * Make sure that every instruction is assessing a cycle cost, and that the cost is a net positive.
              */
-            if (this.aFlags.fComplete && this.nStepCycles >= this.nSnapCycles && !(this.opFlags & X86.OPFLAG.PREFIXES)) {
+            if (this.aFlags.fComplete && this.nStepCycles >= this.nSnapCycles && !(this.opFlags & X86.OPFLAG_PREFIXES)) {
                 this.println("cycle miscount: " + (this.nSnapCycles - this.nStepCycles));
                 this.setIP(this.opLIP - this.segCS.base);
                 this.stopCPU();

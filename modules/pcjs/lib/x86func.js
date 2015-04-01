@@ -963,7 +963,7 @@ X86.fnIRET = function IRET()
         if (this.regPS & X86.PS.NT) {
             var addrNew = this.segTSS.base;
             var sel = this.getShort(addrNew + X86.TSS.PREV_TSS);
-            X86Seg.switchTSS.call(this.segCS, sel, false);
+            this.segCS.switchTSS(sel, false);
             return;
         }
     }

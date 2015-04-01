@@ -2075,7 +2075,7 @@ if (DEBUGGER) {
                 this.nCycles = 0;
                 this.cpu.setError(e.message || e);
             }
-        } while (this.cpu.opFlags & X86.OPFLAG.PREFIXES);
+        } while (this.cpu.opFlags & X86.OPFLAG_PREFIXES);
 
         /*
          * Because we called cpu.stepCPU() and not cpu.runCPU(), we must nudge the cpu's update code,

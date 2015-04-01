@@ -2559,7 +2559,7 @@ X86.opSAHF = function SAHF()
     /*
      * NOTE: While it make seem more efficient to do this:
      *
-     *      this.setPS((this.getPS() & ~X86.PS.SAHF) | ((this.regEAX >> 8) & X86.PS.SAHF));
+     *      this.setPS((this.getPS() & ~X86.PS_SAHF) | ((this.regEAX >> 8) & X86.PS_SAHF));
      *
      * getPS() forces any "cached" flags to be resolved first, and setPS() must do extra work above
      * and beyond setting the arithmetic and logical flags, so on balance, the code below may be more
@@ -2572,7 +2572,7 @@ X86.opSAHF = function SAHF()
     if (ah & X86.PS.ZF) this.setZF(); else this.clearZF();
     if (ah & X86.PS.SF) this.setSF(); else this.clearSF();
     this.nStepCycles -= this.CYCLES.nOpCyclesLAHF;
-    this.assert((this.getPS() & X86.PS.SAHF) == (ah & X86.PS.SAHF));
+    this.assert((this.getPS() & X86.PS_SAHF) == (ah & X86.PS_SAHF));
 };
 
 /**
@@ -2582,7 +2582,7 @@ X86.opSAHF = function SAHF()
  */
 X86.opLAHF = function LAHF()
 {
-    this.regEAX = (this.regEAX & ~0xff00) | (this.getPS() & X86.PS.SAHF) << 8;
+    this.regEAX = (this.regEAX & ~0xff00) | (this.getPS() & X86.PS_SAHF) << 8;
     this.nStepCycles -= this.CYCLES.nOpCyclesLAHF;
 };
 
