@@ -229,26 +229,18 @@ function Disk(controller, drive, mode)
 }
 
 /**
- * @class File
- * @property {string} sPath
- * @property {string} sName
- * @property {number} bAttr
- * @property {number} cbSize
- * @property {Array.<number>} apba
- * @property {Disk} disk
+ * @typedef {{
+ *  sPath:  string,
+ *  sName:  string,
+ *  bAttr:  number,
+ *  cbSize: number,
+ *  apba:   Array.<number>,
+ *  disk:   Disk
+ * }}
  */
+var FileInfo;
 
 /**
- * @class Sector
- * @property {number} sector
- * @property {number} length
- * @property {Array.<number>} data
- * @property {number|null} pattern
- * @property {number} iCylinder
- * @property {number} iHead
- * @property {number} iModify
- * @property {number} cModify
- *
  * Every Sector object (once loaded and fully parsed) should have ALL of the following named properties:
  *
  *      'sector':   sector number
@@ -277,7 +269,19 @@ function Disk(controller, drive, mode)
  *
  * TODO: Perhaps we should also maintain a failure count and stop trying to write sectors that reach a certain
  * threshold.  Error-handling, as usual, is the thorniest problem.
+ *
+ * @typedef {{
+ *  sector:     number,
+ *  length:     number,
+ *  data:       Array.<number>,
+ *  pattern:    (number|null),
+ *  iCylinder:  number,
+ *  iHead:      number,
+ *  iModify:    number,
+ *  cModify:    number
+ * }}
  */
+var SectorData;
 
 /**
  * @class SectorInfo

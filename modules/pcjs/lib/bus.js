@@ -41,12 +41,21 @@ if (typeof module !== 'undefined') {
 }
 
 /**
- * @class BackTrack
- * @property {Object} obj
- * @property {number} off
- * @property {number} slot
- * @property {number} refs
+ * BackTrack objects have the following properties:
+ *
+ *      obj:    a reference to the source object (eg, ROM object, Sector object)
+ *      off:    the offset within the source object that this object refers to
+ *      slot:   the slot (+1) in abtObjects which this object currently occupies
+ *      refs:   the number of memory references, as recorded by writeBackTrack()
+ *
+ * @typedef {{
+ *  obj:    Object,
+ *  off:    number,
+ *  slot:   number,
+ *  refs:   number
+ * }}
  */
+var BackTrack;
 
 /**
  * Bus(cpu, dbg)
@@ -173,14 +182,6 @@ function Bus(parmsBus, cpu, dbg)
     this.initMemory();
 
     if (BACKTRACK) {
-        /*
-         * BackTrack objects have the following properties:
-         *
-         *      obj:    a reference to the source object (eg, ROM object, Sector object)
-         *      off:    the offset within the source object that this object refers to
-         *      slot:   the slot (+1) in abtObjects which this object currently occupies
-         *      refs:   the number of memory references, as recorded by writeBackTrack()
-         */
         this.abtObjects = [];
         this.cbtDeletions = 0;
         this.ibtLastAlloc = -1;
@@ -854,9 +855,9 @@ Bus.prototype.setLongDirect = function(addr, l)
  *
  * @this {Bus}
  * @param {Object} obj
- * @param {Object} bto
+ * @param {BackTrack} bto
  * @param {number} off (the offset within obj that this wrapper object is relative to)
- * @return {Object|null}
+ * @return {BackTrack|null}
  */
 Bus.prototype.addBackTrackObject = function(obj, bto, off)
 {
@@ -910,7 +911,7 @@ Bus.prototype.addBackTrackObject = function(obj, bto, off)
  * getBackTrackIndex(bto, off)
  *
  * @this {Bus}
- * @param {Object|null} bto
+ * @param {BackTrack|null} bto
  * @param {number} off
  * @return {number}
  */
@@ -928,7 +929,7 @@ Bus.prototype.getBackTrackIndex = function(bto, off)
  *
  * @this {Bus}
  * @param {number} addr is a physical (non-segmented) address
- * @param {Object|null} bto
+ * @param {BackTrack|null} bto
  * @param {number} off
  */
 Bus.prototype.writeBackTrackObject = function(addr, bto, off)
