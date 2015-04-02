@@ -41,6 +41,7 @@ if (DEBUGGER) {
         var Interrupts  = require("./interrupts");
         var Messages    = require("./messages");
         var Bus         = require("./bus");
+        var Keyboard    = require("./keyboard");
         var State       = require("./state");
         var CPU         = require("./cpu");
         var X86         = require("./x86");

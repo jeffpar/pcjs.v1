@@ -113,13 +113,14 @@ RAM.prototype.powerUp = function(data, fRepower)
 };
 
 /**
- * powerDown(fSave)
+ * powerDown(fSave, fShutdown)
  *
  * @this {RAM}
  * @param {boolean} fSave
- * @return {Object|boolean}
+ * @param {boolean} [fShutdown]
+ * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
  */
-RAM.prototype.powerDown = function(fSave)
+RAM.prototype.powerDown = function(fSave, fShutdown)
 {
     /*
      * The Computer powers down the CPU first, at which point the X86 state is saved,

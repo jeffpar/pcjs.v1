@@ -38,6 +38,7 @@ if (typeof module !== 'undefined') {
     var Component   = require("../../shared/lib/component");
     var Bus         = require("./bus");
     var Memory      = require("./memory");
+    var X86         = require("./x86");
 }
 
 /**
@@ -364,13 +365,14 @@ Panel.prototype.powerUp = function(data, fRepower)
 };
 
 /**
- * powerDown(fSave)
+ * powerDown(fSave, fShutdown)
  *
  * @this {Panel}
  * @param {boolean} fSave
- * @return {Object|boolean}
+ * @param {boolean} [fShutdown]
+ * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
  */
-Panel.prototype.powerDown = function(fSave)
+Panel.prototype.powerDown = function(fSave, fShutdown)
 {
     return true;
 };

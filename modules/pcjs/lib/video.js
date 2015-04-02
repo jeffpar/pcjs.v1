@@ -2451,16 +2451,17 @@ Video.prototype.powerUp = function(data, fRepower)
 };
 
 /**
- * powerDown(fSave)
+ * powerDown(fSave, fShutdown)
  *
  * This is where we might add some method of blanking the display, without the disturbing the video
  * buffer contents, and blocking all further updates to the display.
  *
  * @this {Video}
  * @param {boolean} fSave
- * @return {Object|boolean}
+ * @param {boolean} [fShutdown]
+ * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
  */
-Video.prototype.powerDown = function(fSave)
+Video.prototype.powerDown = function(fSave, fShutdown)
 {
     return fSave && this.save? this.save() : true;
 };

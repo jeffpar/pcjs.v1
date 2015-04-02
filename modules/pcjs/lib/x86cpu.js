@@ -1344,7 +1344,7 @@ X86CPU.prototype.restoreProtMode = function(a)
  * UPDATES: The current speed multiplier from getSpeed() is now saved in group #3, so that your speed is preserved.
  *
  * @this {X86CPU}
- * @return {Object}
+ * @return {Object|null}
  */
 X86CPU.prototype.save = function()
 {

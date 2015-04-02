@@ -1024,13 +1024,14 @@ ChipSet.prototype.powerUp = function(data, fRepower)
 };
 
 /**
- * powerDown(fSave)
+ * powerDown(fSave, fShutdown)
  *
  * @this {ChipSet}
  * @param {boolean} fSave
- * @return {Object|boolean}
+ * @param {boolean} [fShutdown]
+ * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
  */
-ChipSet.prototype.powerDown = function(fSave)
+ChipSet.prototype.powerDown = function(fSave, fShutdown)
 {
     return fSave && this.save? this.save() : true;
 };

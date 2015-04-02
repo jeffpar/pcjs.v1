@@ -174,7 +174,7 @@ ROM.prototype.powerUp = function(data, fRepower)
 };
 
 /**
- * powerDown(fSave)
+ * powerDown(fSave, fShutdown)
  *
  * Since we have nothing to do on powerDown(), and no state to return, we could simply omit
  * this function.  But it doesn't hurt anything, and maybe we'll use our state to save something
@@ -183,9 +183,10 @@ ROM.prototype.powerUp = function(data, fRepower)
  *
  * @this {ROM}
  * @param {boolean} fSave
- * @return {Object|boolean}
+ * @param {boolean} [fShutdown]
+ * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
  */
-ROM.prototype.powerDown = function(fSave)
+ROM.prototype.powerDown = function(fSave, fShutdown)
 {
     return true;
 };

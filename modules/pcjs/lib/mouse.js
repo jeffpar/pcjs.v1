@@ -263,7 +263,7 @@ Mouse.prototype.powerUp = function(data, fRepower)
 };
 
 /**
- * powerDown(fSave)
+ * powerDown(fSave, fShutdown)
  *
  * @this {Mouse}
  * @param {boolean} fSave
