@@ -109,7 +109,7 @@ function SerialPort(parmsSerial) {
  * for third-party apps.
  */
 
-Component.subclass(Component, SerialPort);
+Component.subclass(SerialPort);
 
 /*
  * Internal name used for the I/O buffer control, if any, that we bind to the SerialPort.

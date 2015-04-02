@@ -484,7 +484,7 @@ function C1PDebugger(parmsDbg)
 
 if (DEBUGGER) {
 
-    Component.subclass(Component, C1PDebugger);
+    Component.subclass(C1PDebugger);
 
     /**
      * @this {C1PDebugger}

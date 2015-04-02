@@ -101,7 +101,7 @@ function ROM(parmsROM)
     }
 }
 
-Component.subclass(Component, ROM);
+Component.subclass(ROM);
 
 /*
  * ROM BIOS Data Area (RBDA) definitions, in physical address form, using the same ALL-CAPS names

@@ -51,7 +51,7 @@ function C1PRAM(parmsRAM)
     Component.call(this, "C1PRAM", parmsRAM);
 }
 
-Component.subclass(Component, C1PRAM);
+Component.subclass(C1PRAM);
 
 /**
  * @this {C1PRAM}

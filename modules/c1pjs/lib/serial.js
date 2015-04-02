@@ -53,7 +53,7 @@ function C1PSerialPort(parmsSerial)
     this.reset();
 }
 
-Component.subclass(Component, C1PSerialPort);
+Component.subclass(C1PSerialPort);
 
 /**
  * @this {C1PSerialPort}

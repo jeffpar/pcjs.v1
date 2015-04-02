@@ -65,7 +65,7 @@ function RAM(parmsRAM)
     this.fAllocated = false;
 }
 
-Component.subclass(Component, RAM);
+Component.subclass(RAM);
 
 /**
  * initBus(cmp, bus, cpu, dbg)

@@ -146,7 +146,7 @@ function Keyboard(parmsKbd)
     this.setReady();
 }
 
-Component.subclass(Component, Keyboard);
+Component.subclass(Keyboard);
 
 /**
  * Alphanumeric and other common (printable) ASCII codes.

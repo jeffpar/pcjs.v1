@@ -158,7 +158,7 @@ function Mouse(parmsMouse)
  *      synchronize with the mouse.
  */
 
-Component.subclass(Component, Mouse);
+Component.subclass(Mouse);
 
 Mouse.ID_SERIAL = 0x4D;
 
@@ -267,9 +267,10 @@ Mouse.prototype.powerUp = function(data, fRepower)
  *
  * @this {Mouse}
  * @param {boolean} fSave
- * @return {Object|boolean}
+ * @param {boolean} [fShutdown]
+ * @return {Object|boolean} component state if fSave; otherwise, true if successful, false if failure
  */
-Mouse.prototype.powerDown = function(fSave)
+Mouse.prototype.powerDown = function(fSave, fShutdown)
 {
     return fSave && this.save? this.save() : true;
 };

@@ -139,7 +139,7 @@ function CPU(parmsCPU, nCyclesDefault)
     this.setReady();
 }
 
-Component.subclass(Component, CPU);
+Component.subclass(CPU);
 
 /*
  * Constants that control the frequency at which various updates should occur.

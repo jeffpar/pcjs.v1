@@ -305,7 +305,7 @@ Disk.REMOTE_WRITE_DELAY = 2000;         // 2-second delay
  */
 Disk.nDisks = 0;
 
-Component.subclass(Component, Disk);
+Component.subclass(Disk);
 
 /**
  * initBus(cmp, bus, cpu, dbg)

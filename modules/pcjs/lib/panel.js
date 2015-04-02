@@ -49,8 +49,10 @@ if (typeof module !== 'undefined') {
  * @extends Component
  * @param {Object} parmsPanel
  */
-function Panel(parmsPanel) {
+function Panel(parmsPanel)
+{
     Component.call(this, "Panel", parmsPanel, Panel);
+
     this.canvas = null;
     this.lockMouse = -1;
     this.fMouseDown = false;
@@ -61,7 +63,7 @@ function Panel(parmsPanel) {
     }
 }
 
-Component.subclass(Component, Panel);
+Component.subclass(Panel);
 
 /*
  * The "Live" canvases that we create internally have the following fixed dimensions, to make drawing

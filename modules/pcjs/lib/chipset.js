@@ -255,7 +255,7 @@ function ChipSet(parmsChipSet)
     this.setReady();
 }
 
-Component.subclass(Component, ChipSet);
+Component.subclass(ChipSet);
 
 /*
  * Supported model numbers

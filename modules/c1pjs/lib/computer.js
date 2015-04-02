@@ -98,7 +98,7 @@ C1PComputer.sAppName = APPNAME || "C1Pjs";
 C1PComputer.sAppVer = APPVERSION;
 C1PComputer.sCopyright = "Copyright © 2012-2015 Jeff Parsons <Jeff@pcjs.org>";
 
-Component.subclass(Component, C1PComputer);
+Component.subclass(C1PComputer);
 
 /**
  * @this {C1PComputer}

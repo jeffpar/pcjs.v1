@@ -295,7 +295,7 @@ function C1PKeyboard(parmsKbd)
     this.reset();
 }
 
-Component.subclass(Component, C1PKeyboard);
+Component.subclass(C1PKeyboard);
 
 /**
  * @this {C1PKeyboard}

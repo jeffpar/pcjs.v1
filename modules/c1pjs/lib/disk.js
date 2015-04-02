@@ -433,7 +433,7 @@ function C1PDiskController(parmsDC)
     this.reset(true);
 }
 
-Component.subclass(Component, C1PDiskController);
+Component.subclass(C1PDiskController);
 
 /**
  * @this {C1PDiskController}

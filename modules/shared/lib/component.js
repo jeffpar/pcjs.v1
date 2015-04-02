@@ -185,17 +185,18 @@ Component.extend = function(o, p)
 };
 
 /**
- * Component.subclass(superclass, subclass, methods, statics)
+ * Component.subclass(subclass, superclass, methods, statics)
  *
  * See: Flanagan, David (2011-04-18). JavaScript: The Definitive Guide: The Definitive Guide (Kindle Locations 9854-9903). OReilly Media - A. Kindle Edition (Example 9-11)
  *
- * @param {Object} superclass is the constructor of the superclass
  * @param {Object} subclass is the constructor for the new subclass
+ * @param {Object} [superclass] is the constructor of the superclass (default is Component)
  * @param {Object} [methods] contains all instance methods
  * @param {Object} [statics] contains all class properties and methods
  */
-Component.subclass = function(superclass, subclass, methods, statics)
+Component.subclass = function(subclass, superclass, methods, statics)
 {
+    if (!superclass) superclass = Component;
     subclass.prototype = Component.inherit(superclass.prototype);
     subclass.prototype.constructor = subclass;
     subclass.prototype.parent = superclass.prototype;

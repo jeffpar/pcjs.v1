@@ -117,7 +117,7 @@ function HDC(parmsHDC) {
      */
 }
 
-Component.subclass(Component, HDC);
+Component.subclass(HDC);
 
 /*
  * HDC defaults, in case drive parameters weren't specified

@@ -191,7 +191,7 @@ function Bus(parmsBus, cpu, dbg)
     this.setReady();
 }
 
-Component.subclass(Component, Bus);
+Component.subclass(Bus);
 
 if (BACKTRACK) {
     /*

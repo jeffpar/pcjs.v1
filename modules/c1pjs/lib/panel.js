@@ -47,7 +47,7 @@ function C1PPanel(parmsPanel)
     this.aFlags.fPowered = false;
 }
 
-Component.subclass(Component, C1PPanel);
+Component.subclass(C1PPanel);
 
 /**
  * The Panel doesn't have any bindings of its own; it passes along all binding requests to

@@ -469,7 +469,7 @@ function C1PCPU(parmsCPU)
     ];
 }
 
-Component.subclass(Component, C1PCPU);
+Component.subclass(C1PCPU);
 
 /**
  * @this {C1PCPU}

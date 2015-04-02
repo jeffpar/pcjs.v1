@@ -187,7 +187,7 @@ function FDC(parmsFDC) {
      */
 }
 
-Component.subclass(Component, FDC);
+Component.subclass(FDC);
 
 FDC.DEFAULT_DRIVE_NAME = "Floppy Drive";
 

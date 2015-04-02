@@ -152,7 +152,7 @@ function C1PVideo(parmsVideo, eCanvas, context, imgChars)
     this.addrVideoPort = 0xDE00;        // WARNING: Hard-coded port address -JP
 }
 
-Component.subclass(Component, C1PVideo);
+Component.subclass(C1PVideo);
 
 /**
  * @this {C1PVideo}

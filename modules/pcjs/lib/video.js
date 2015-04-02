@@ -269,7 +269,7 @@ function Video(parmsVideo, canvas, context, textarea, container)
     }
 }
 
-Component.subclass(Component, Video);
+Component.subclass(Video);
 
 Video.TRAPALL = true;           // monitor all I/O by default (not just deltas)
 

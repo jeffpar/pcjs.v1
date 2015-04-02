@@ -50,6 +50,7 @@
 function C1PROM(parmsROM)
 {
     Component.call(this, "C1PROM", parmsROM);
+
     this.abMem = null;
     this.abImage = null;
     this.cbROM = parmsROM['size'];
@@ -70,7 +71,7 @@ function C1PROM(parmsROM)
     }
 }
 
-Component.subclass(Component, C1PROM);
+Component.subclass(C1PROM);
 
 /**
  * @this {C1PROM}

@@ -255,7 +255,7 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
     }
 }
 
-Component.subclass(Component, Computer);
+Component.subclass(Computer);
 
 /*
  * NOTE: 1.01 is the first version to provide limited save/restore support using localStorage.

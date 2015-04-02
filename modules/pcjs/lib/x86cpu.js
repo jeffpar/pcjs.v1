@@ -188,7 +188,7 @@ function X86CPU(parmsCPU) {
     this.resetRegs();
 }
 
-Component.subclass(CPU, X86CPU);
+Component.subclass(X86CPU, CPU);
 
 X86CPU.CYCLES_8088 = {
     nWordCyclePenalty:          4,      // NOTE: accurate for the 8088/80188 only (on the 8086/80186, it applies to odd addresses only)

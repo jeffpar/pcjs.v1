@@ -192,7 +192,7 @@ function Debugger(parmsDbg)
 
 if (DEBUGGER) {
 
-    Component.subclass(Component, Debugger);
+    Component.subclass(Debugger);
 
     /*
      * Information regarding interrupts of interest (used by messageInt() and others)
