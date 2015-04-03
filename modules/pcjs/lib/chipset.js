@@ -3670,14 +3670,14 @@ ChipSet.prototype.resetTimerIndex = function(iTimer)
 /**
  * updateTimer(iTimer, fCycleReset)
  *
- * updateTimer() calculates and updates a timer's current count purely on an "on-demand" basis; we don't actually
- * adjust timer counters every 4 CPU cycles, since updating timers that frequently would be prohibitively slow.  If
- * you're single-stepping the CPU, then yes, updateTimer() will be called after every stepCPU(), via updateAllTimers(),
- * but if we're doing our job correctly here, the frequency of calls to updateTimer() should not affect timer counts
- * across otherwise identical runs.
+ * updateTimer() calculates and updates a timer's current count purely on an "on-demand" basis; we don't
+ * actually adjust timer counters every 4 CPU cycles on a 4.77Mhz PC, since updating timers that frequently
+ * would be prohibitively slow.  If you're single-stepping the CPU, then yes, updateTimer() will be called
+ * after every stepCPU(), via updateAllTimers(), but if we're doing our job correctly here, the frequency
+ * of calls to updateTimer() should not affect timer counts across otherwise identical runs.
  *
- * TODO: Implement support for all TIMER modes, and verify that all the modes currently implemented are "up to spec";
- * they're close enough to make the ROM BIOS happy, but beyond that, I've done very little.
+ * TODO: Implement support for all TIMER modes, and verify that all the modes currently implemented are
+ * "up to spec"; they're close enough to make the ROM BIOS happy, but beyond that, I've done very little.
  *
  * @this {ChipSet}
  * @param {number} iTimer
@@ -3791,8 +3791,11 @@ ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
             if (count <= 0) {
                 count = countInit + count;
                 if (count <= 0) {
-                    if (DEBUG && this.messageEnabled(Messages.TIMER)) {
-                        this.printMessage("updateTimer(" + iTimer + "): underflow=" + count, true);
+                    /*
+                     * TODO: Consider whether we ever care about TIMER1 or TIMER2 underflow
+                     */
+                    if (DEBUG && this.messageEnabled(Messages.TIMER) && !iTimer) {
+                        this.printMessage("updateTimer(" + iTimer + "): mode=2, underflow=" + count, true);
                     }
                     count = countInit;
                 }
@@ -3823,8 +3826,11 @@ ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
                 timer.fOUT = !timer.fOUT;
                 count = countInit + count;
                 if (count <= 0) {
-                    if (DEBUG && this.messageEnabled(Messages.TIMER)) {
-                        this.printMessage("updateTimer(" + iTimer + "): underflow=" + count, true);
+                    /*
+                     * TODO: Consider whether we ever care about TIMER1 or TIMER2 underflow
+                     */
+                    if (DEBUG && this.messageEnabled(Messages.TIMER) && !iTimer) {
+                        this.printMessage("updateTimer(" + iTimer + "): mode=3, underflow=" + count, true);
                     }
                     count = countInit;
                 }
