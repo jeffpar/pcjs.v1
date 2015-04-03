@@ -12,14 +12,10 @@ indent_style = space
 indent_size = 8
 trim_trailing_whitespace = true
 
-[{*.ASM,*.INC}]
+[{*.ASM,*.INC,*.asm,*.inc,*.nasm}]
 indent_style = tab
 indent_size = 8
-trim_trailing_whitespace = false
-
-[*.asm]
-indent_style = tab
-indent_size = 8
+trim_trailing_whitespace = true
 
 [modules/**.js]
 indent_style = space

@@ -12,5 +12,5 @@
 
 all: trace.com
 
-trace.com: trace.asm
-	nasm -f bin trace.asm -l trace.lst -o trace.com
+trace.com: trace.nasm
+	nasm -f bin trace.nasm -l trace.lst -o trace.com
