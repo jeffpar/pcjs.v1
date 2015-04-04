@@ -46,7 +46,7 @@ However, don't use that technique to check for optional parameters:
 
 	if (!parameter) { ... }
 
-because a valid numeric parameter could include 0, a valid string parameter could include "", etc.
+if a valid numeric parameter could include 0, or a valid string parameter could include "", etc.
 
 Problems with type coercion are **NOT** problems caused by a poor choice of operators, so trying to make
 those problems go away by artificially limiting your choice of operators seems like the wrong solution.

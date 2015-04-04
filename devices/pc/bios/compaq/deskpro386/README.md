@@ -62,3 +62,20 @@ the DEVICE OPERATION table indicated that, for a READ operation, /CE and /OE pin
 while the /PGM should be connected to INPUT HIGH VOLTAGE.  So I wired pin 27 (/PGM) to +5V instead of GND, and the dump
 worked perfectly.  The NYC Resistor article implied that every *active low* pin should be connected to GND, but apparently
 there are exceptions to that general rule.
+
+Producing Source Code with NDISASM
+---
+From the current directory, I ran:
+
+	ndisasm -o0x8000 private/1988-01-28.rom > 1988-01-28.nasm
+
+Then I massaged the output with a regex:
+
+	^([0-9A-F]+)\s+([0-9A-F]+)\s+(o32 |a32 |)([^\s]*) *(.*)$  -->  \t$3$4\t$5\t\t\t; $1  $2
+
+Then I ran a TextOut command to vertically align all the comments:
+
+	node ~/Sites/pcjs/modules/textout/bin/textout --file=1988-01-28.nasm --alignvert > t.nasm
+	mv t.nasm 1988-01-28.nasm
+
+To be continued....

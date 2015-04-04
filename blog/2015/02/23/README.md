@@ -358,7 +358,7 @@ The only other information I have about revision levels comes from a March 30, 1
 
 However, that document does not indicate how a 80386-C0 part was marked, and I've found very little other
 information on the C0 stepping; it may have been quickly superseded by the D0 stepping, which used revision
-identifier 0x05.
+identifier 0x05.  D1 and D2 steppings used identifier 0x08.
 
 ### Errata
 
