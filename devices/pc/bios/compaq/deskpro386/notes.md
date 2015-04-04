@@ -6,7 +6,7 @@ Checkpoint
 This code:
 
 	F000:F9E9 B000          MOV      AL,00
-    F000:F9EB E620          OUT      20,AL
+	F000:F9EB E620          OUT      20,AL
 
 triggers the following warning:
 
@@ -35,7 +35,7 @@ There's some CMOS I/O activity, serial and parallel port I/O, more CMOS I/O, and
 When arrive here:
 
 	C000:016D B80700        MOV      AX,0007
-    C000:0170 CD10          INT      10
+	C000:0170 CD10          INT      10
 
 and we complain that the IDTR limit for the real-mode IDT isn't 0x3FF (it's been set to 0xFFFF instead).
 That may be OK, but I need to verify that that's what the ROM intended.  If it is, then I'll probably need

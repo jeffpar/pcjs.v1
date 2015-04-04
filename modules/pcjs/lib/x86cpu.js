@@ -91,8 +91,8 @@ if (I386) {
  * @extends CPU
  * @param {Object} parmsCPU
  */
-function X86CPU(parmsCPU) {
-
+function X86CPU(parmsCPU)
+{
     this.model = parmsCPU['model'] || X86.MODEL_8088;
 
     var nCyclesDefault = 0;
