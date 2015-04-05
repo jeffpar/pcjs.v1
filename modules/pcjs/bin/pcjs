@@ -44,6 +44,7 @@ var fConsole = false;
 var fDebug = false;
 var args = proc.getArgs();
 var argv = args.argv;
+var sCmdPrev = null;
 if (argv['console'] !== undefined) fConsole = argv['console'];
 if (argv['debug'] !== undefined) fDebug = argv['debug'];
 
@@ -272,6 +273,12 @@ function loadMachine(sFile)
  */
 function doCommand(sCmd)
 {
+    if (!sCmd) {
+        sCmd = sCmdPrev;
+    } else {
+        sCmdPrev = sCmd;
+    }
+    
     var result = false;
     var aTokens = sCmd.split(' ');
     
@@ -330,10 +337,12 @@ function doCommand(sCmd)
 var onCommand = function (cmd, context, filename, callback)
 {
     var result = false;
+    /*
+     * WARNING: After updating from Node v0.10.x to v0.11.x, the incoming expression in "cmd" is no longer
+     * parenthesized, so I had to tweak the RegExp below.  But... WTF.  Do we not care what we break, folks?
+     */
     var match = cmd.match(/^\(?\s*(.*?)\s*\)?$/);
-    if (match) {
-        result = doCommand(match[1]);
-    }
+    if (match) result = doCommand(match[1]);
     callback(null, result);
 };
 
