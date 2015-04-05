@@ -73,9 +73,9 @@ Then I massaged the output with a regex:
 
 	^([0-9A-F]+)\s+([0-9A-F]+)\s+(o32 |a32 |)([^\s]*) *(.*)$  -->  \t$3$4\t$5\t\t\t; $1  $2
 
-Then I ran a TextOut command to vertically align all the comments:
+Then I ran a TextOut command to clean up the code:
 
-	node ~/Sites/pcjs/modules/textout/bin/textout --file=1988-01-28.nasm --alignvert > t.nasm
+	node ~/Sites/pcjs/modules/textout/bin/textout --file=1988-01-28.nasm --nasm > t.nasm
 	mv t.nasm 1988-01-28.nasm
 
 To be continued....

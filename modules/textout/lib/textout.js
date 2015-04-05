@@ -37,6 +37,7 @@ var path    = require("path");
 var mkdirp  = require("mkdirp");
 var net     = require("../../shared/lib/netlib");
 var proc    = require("../../shared/lib/proclib");
+var str     = require("../../shared/lib/strlib");
 
 /**
  * TextOut()
@@ -47,10 +48,12 @@ function TextOut()
 {
     this.fDebug = false;
     this.sServerRoot = process.cwd();
-    this.sText = null;
+    this.asLines = [];
     this.nTabWidth = 8;
     this.sTarget = "; ";
 }
+
+TextOut.asTargetRefs = ["call", "jmp", "jz", "jnz", "jc", "jnc", "ja", "jna", "js", "jns", "jo", "jno", "jl", "jnl", "jg", "jng", "jpo", "jpe"];
 
 /*
  * Class methods
@@ -63,25 +66,32 @@ function TextOut()
  *
  * Usage
  * ---
- *      textout --file=({path}|{URL}) [--alignvert]
+ *      textout --file=({path}|{URL}) [--nasm]
  *
  * Arguments
  * ---
- *      --alignvert looks for tabs preceding certain characters (eg, ';') in the first line, and endeavors
- *      to ensure that the same tab+character combination(s) in all subsequent lines start at the same column.
+ *      --nasm performs a variety of NASM-related processing, including:
+ *
+ *          collapseRepeated(): looks for series of lines containing nothing more than a "db",
+ *          "dw", or something equivalent, and collapses them into a single repetition.
+ *
+ *          labelTargets(): looks for all JMP and CALL targets and labels them.
+ *
+ *          alignVertical(): looks for a predefined target string (eg, '; ') in the first line,
+ *          and ensures that the same sequence in all subsequent lines start at the same column.
  *
  *      For now, all output is written to stdout only.
  *
  * Examples
  * ---
- *      node modules/textout/bin/textout --file=devices/pc/bios/compaq/deskpro386/1988-01-28.nasm --alignvert
+ *      node modules/textout/bin/textout --file=devices/pc/bios/compaq/deskpro386/1988-01-28.nasm --nasm
  */
 TextOut.CLI = function()
 {
     var args = proc.getArgs();
 
     if (!args.argc) {
-        console.log("usage: textout --file=({path}|{URL}) [--alignvert]");
+        console.log("usage: textout --file=({path}|{URL}) [--nasm]");
         return;
     }
 
@@ -95,7 +105,9 @@ TextOut.CLI = function()
     var text = new TextOut();
     text.loadFile(sFile, function(err) {
         if (!err) {
-            if (argv['alignvert']) {
+            if (argv['nasm']) {
+                text.collapseRepeated();
+                text.labelTargets();
                 text.alignVertical();
             }
             text.outputText();
@@ -178,11 +190,121 @@ TextOut.prototype.setText = function(buf)
 {
     var b, i, j, s;
     if (typeof buf == "string") {
-        this.sText = buf;
+        this.asLines = buf.split('\n');
         return true;
     }
     TextOut.logError(new Error("setText(): invalid data"));
     return false;
+};
+
+/**
+ * collapseRepeated()
+ *
+ * @this {TextOut}
+ */
+TextOut.prototype.collapseRepeated = function()
+{
+    for (var i = 0; i < this.asLines.length; i++) {
+        var as = this.getLineParts(i);
+        if (!as) continue;
+        if (as[2] != "db" && as[2] != "dw") continue;
+        var cCombine = 0, asLast;
+        for (var j = i + 1; j < this.asLines.length; j++) {
+            var asNext = this.getLineParts(j);
+            if (!asNext) break;
+            if (as[2] != asNext[2] || as[2] != asNext[2]) break;
+            asLast = asNext;
+            cCombine++;
+        }
+        if (cCombine > 2) {
+            this.asLines[i] = "\n\ttimes\t" + (cCombine + 1) + ' ' + as[2] + ' ' + as[3] + "\t\t; " + as[4] + " - " + asLast[4] + '\n';
+            this.asLines.splice(i + 1, cCombine);
+        }
+    }
+};
+
+/**
+ * labelTargets()
+ *
+ * @this {TextOut}
+ */
+TextOut.prototype.labelTargets = function()
+{
+    /*
+     * First pass: find all target references (eg, JMP and CALL instructions)
+     */
+    var i, j, as, target, aTargets = [], aHardTargets = [];
+
+    for (i = 0; i < this.asLines.length; i++) {
+        as = this.getLineParts(i);
+        if (!as) continue;
+        var iTarget = TextOut.asTargetRefs.indexOf(as[2]);
+        if (iTarget < 0) continue;
+        target = str.parseInt(as[3]);
+        if (target == undefined) continue;
+        if (aTargets.indexOf(target) < 0) {
+            aTargets.push(target);
+            if (iTarget < 2) aHardTargets.push(target);
+        }
+        this.asLines[i] = this.asLines[i].replace(as[3], 'l' + target.toString(16));
+    }
+    /*
+     * Second pass: label all targets
+     */
+    var addr, fPrevHard = false;
+    for (i = 0; i < this.asLines.length; i++) {
+        as = this.getLineParts(i);
+        if (!as) continue;
+        addr = str.parseInt(as[4]);
+        if (addr == undefined) continue;
+        j = aTargets.indexOf(addr);
+        if (j >= 0) {
+            var fHard = (aHardTargets.indexOf(addr) >= 0);
+            this.asLines[i] = (fHard || fPrevHard? "\nl" : 'l') + addr.toString(16) + ':' + this.asLines[i];
+            aTargets.splice(j, 1);
+        } else {
+            if (fPrevHard) this.asLines[i] = '\n' + this.asLines[i];
+        }
+        fPrevHard = (as[2] == "jmp" || as[2] == "ret" || as[2] == "retf" || as[2] == "iret");
+    }
+    /*
+     * Third pass: for all targets that turned out to NOT be targets, fix all references
+     */
+    var aMissingTargets = [];
+    if (aTargets.length) {
+        for (i = 0; i < this.asLines.length; i++) {
+            as = this.getLineParts(i);
+            if (!as) continue;
+            if (as[3].charAt(0) == 'l') {
+                addr = str.parseInt(as[3].substr(1));
+                if (aTargets.indexOf(addr) >= 0) {
+                    this.asLines[i] = this.asLines[i].replace(as[3], str.toHexWord(addr));
+                    if (aMissingTargets.indexOf(addr) < 0) aMissingTargets.push(addr);
+                }
+            }
+            if (as[5]) {
+                var sASCII = "";
+                var sBytes = as[5];
+                for (j = 0; j < sBytes.length-1; j+=2) {
+                    var k = str.parseInt(sBytes.substr(j, 2));
+                    sASCII += (k < 0x20 || k >= 0x7f)? '.' : String.fromCharCode(k);
+                }
+                sBytes = "  " + sBytes;
+                /*
+                 * TODO: Determine why replace() fails when there's a trailing '$' in the replacement string;
+                 * I'm working around it by appending a space.
+                 */
+                if (sASCII.slice(-1) == '$') sASCII += ' ';
+                this.asLines[i] = this.asLines[i].replace(sBytes, sBytes + " '" + sASCII + "'");
+            }
+        }
+        if (aTargets.length != aMissingTargets.length) {
+            console.log("; warning: " + aTargets.length + " unprocessed targets (" + aMissingTargets.length + " repaired):");
+            for (j = 0; j < aTargets.length; j++) {
+                if (aMissingTargets.indexOf(aTargets[j]) < 0) console.log(';\t' + str.toHexWord(aTargets[j]));
+            }
+        }
+    }
 };
 
 /**
@@ -192,24 +314,14 @@ TextOut.prototype.setText = function(buf)
  */
 TextOut.prototype.alignVertical = function()
 {
-    if (!this.sText) return;
-
-    var asLines = this.sText.split('\n');
-
-    var iTarget = -1;
-    if (asLines.length) {
-        iTarget = this.findTarget(asLines[0]);
-    }
+    var iTarget = this.asLines.length? this.findTarget(this.asLines[0]) : -1;
     if (iTarget < 0) return;
 
     if (this.fDebug) console.log("target vertical alignment: " + (iTarget + 1));
 
-    var iLine, fModified = false;
-
-    for (iLine = 1; iLine < asLines.length; iLine++) {
+    for (var iLine = 1; iLine < this.asLines.length; iLine++) {
         var iVictim;
-        var sLine = asLines[iLine];
-        var fModifiedLine = false;
+        var sLine = this.asLines[iLine];
         while ((iVictim = this.findTarget(sLine)) != iTarget) {
             if (iVictim < 0) break;
 
@@ -223,20 +335,8 @@ TextOut.prototype.alignVertical = function()
             } else {
                 sLine = sLine.substr(0, this.iTargetIndex) + ' ' + sLine.substr(this.iTargetIndex);
             }
-            fModifiedLine = true;
         }
-        if (fModifiedLine) {
-            asLines[iLine] = sLine;
-            fModified = true;
-        }
-    }
-
-    if (fModified) {
-        this.sText = "";
-        for (iLine = 0; iLine < asLines.length; iLine++) {
-            if (this.sText) this.sText += '\n';
-            this.sText += asLines[iLine];
-        }
+        this.asLines[iLine] = sLine;
     }
 };
 
@@ -278,6 +378,35 @@ TextOut.prototype.findTarget = function(sSrc, fDebug)
 };
 
 /**
+ * getLineParts(iLine)
+ *
+ * Returns the following array:
+ *
+ *      asParts[1]: label
+ *      asParts[2]: operation
+ *      asParts[3]: operand(s)
+ *      asParts[4]: offset
+ *      asParts[5]: byte sequence
+ *
+ * or null if the line does not contain all of the above.
+ *
+ * @this {TextOut}
+ * @param {number} iLine
+ * @return {Array.<string>}
+ */
+TextOut.prototype.getLineParts = function(iLine)
+{
+    var as = this.asLines[iLine].match(/^\n?([^\s:]+:|)\s*([^\s;]+)\s*([^;]*?)\s*;\s*([0-9A-F]+)\s*([0-9A-F]+)\s*$/);
+    if (as) {
+        if (as[2] == "add" && as[3] == "[bx+si],al") {
+            as[2] = "dw";
+            as[3] = "0x0000";
+        }
+    }
+    return as;
+};
+
+/**
  * outputText(sOutputFile, fOverwrite)
  *
  * @this {TextOut}
@@ -286,7 +415,12 @@ TextOut.prototype.findTarget = function(sSrc, fDebug)
  */
 TextOut.prototype.outputText = function(sOutputFile, fOverwrite)
 {
-    if (this.sText) {
+    if (this.asLines.length) {
+        var sText = "";
+        for (var iLine = 0; iLine < this.asLines.length; iLine++) {
+            if (sText) sText += '\n';
+            sText += this.asLines[iLine];
+        }
         if (sOutputFile) {
             try {
                 if (fs.existsSync(sOutputFile) && !fOverwrite) {
@@ -294,14 +428,14 @@ TextOut.prototype.outputText = function(sOutputFile, fOverwrite)
                 } else {
                     var sDirName = path.dirname(sOutputFile);
                     if (!fs.existsSync(sDirName)) mkdirp.sync(sDirName);
-                    fs.writeFileSync(sOutputFile, this.sText);
-                    console.log(this.sText.length + "-byte file saved as " + sOutputFile);
+                    fs.writeFileSync(sOutputFile, sText);
+                    console.log(sText.length + "-byte file saved as " + sOutputFile);
                 }
             } catch(err) {
                 TextOut.logError(err);
             }
         } else {
-            console.log(this.sText);
+            console.log(sText);
         }
     }
 };
