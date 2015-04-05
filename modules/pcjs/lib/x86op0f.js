@@ -323,10 +323,10 @@ X86.opJOw = function JOw()
     var disp = this.getIPDispWord();
     if (this.getOF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmpCFall;
 };
 
 /**
@@ -341,10 +341,10 @@ X86.opJNOw = function JNOw()
     var disp = this.getIPDispWord();
     if (!this.getOF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmpCFall;
 };
 
 /**
@@ -359,10 +359,10 @@ X86.opJCw = function JCw()
     var disp = this.getIPDispWord();
     if (this.getCF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmpCFall;
 };
 
 /**
@@ -377,10 +377,10 @@ X86.opJNCw = function JNCw()
     var disp = this.getIPDispWord();
     if (!this.getCF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmpCFall;
 };
 
 /**
@@ -395,10 +395,10 @@ X86.opJZw = function JZw()
     var disp = this.getIPDispWord();
     if (this.getZF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmpCFall;
 };
 
 /**
@@ -413,10 +413,10 @@ X86.opJNZw = function JNZw()
     var disp = this.getIPDispWord();
     if (!this.getZF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmpCFall;
 };
 
 /**
@@ -431,10 +431,10 @@ X86.opJBEw = function JBEw()
     var disp = this.getIPDispWord();
     if (this.getCF() || this.getZF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmpCFall;
 };
 
 /**
@@ -449,10 +449,10 @@ X86.opJNBEw = function JNBEw()
     var disp = this.getIPDispWord();
     if (!this.getCF() && !this.getZF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmpCFall;
 };
 
 /**
@@ -467,10 +467,10 @@ X86.opJSw = function JSw()
     var disp = this.getIPDispWord();
     if (this.getSF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmpCFall;
 };
 
 /**
@@ -485,10 +485,10 @@ X86.opJNSw = function JNSw()
     var disp = this.getIPDispWord();
     if (!this.getSF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmpCFall;
 };
 
 /**
@@ -503,10 +503,10 @@ X86.opJPw = function JPw()
     var disp = this.getIPDispWord();
     if (this.getPF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmpCFall;
 };
 
 /**
@@ -521,10 +521,10 @@ X86.opJNPw = function JNPw()
     var disp = this.getIPDispWord();
     if (!this.getPF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmpCFall;
 };
 
 /**
@@ -539,10 +539,10 @@ X86.opJLw = function JLw()
     var disp = this.getIPDispWord();
     if (!this.getSF() != !this.getOF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmpCFall;
 };
 
 /**
@@ -557,10 +557,10 @@ X86.opJNLw = function JNLw()
     var disp = this.getIPDispWord();
     if (!this.getSF() == !this.getOF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmpCFall;
 };
 
 /**
@@ -575,10 +575,10 @@ X86.opJLEw = function JLEw()
     var disp = this.getIPDispWord();
     if (this.getZF() || !this.getSF() != !this.getOF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmpCFall;
 };
 
 /**
@@ -593,10 +593,10 @@ X86.opJNLEw = function JNLEw()
     var disp = this.getIPDispWord();
     if (!this.getZF() && !this.getSF() == !this.getOF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmpCFall;
 };
 
 /**
@@ -801,7 +801,7 @@ X86.opSETNLE = function SETNLE()
 X86.opPUSHFS = function PUSHFS()
 {
     this.pushWord(this.segFS.sel);
-    this.nStepCycles -= this.CYCLES.nOpCyclesPushSeg;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPushSeg;
 };
 
 /**
@@ -814,7 +814,7 @@ X86.opPUSHFS = function PUSHFS()
 X86.opPOPFS = function POPFS()
 {
     this.setFS(this.popWord());
-    this.nStepCycles -= this.CYCLES.nOpCyclesPopReg;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;
 };
 
 /**
@@ -827,13 +827,13 @@ X86.opPOPFS = function POPFS()
 X86.opBT = function BT()
 {
     this.aOpModMemWord[this.getIPByte()].call(this, X86.fnBT);
-    if (this.regEA !== X86.ADDR_INVALID) this.nStepCycles -= X86CPU.CYCLES_80386.nOpCyclesBitTestMExtra;
+    if (this.regEA !== X86.ADDR_INVALID) this.nStepCycles -= this.cycleCounts.nOpCyclesBitTestMExtra;
 };
 
 /**
  * opSHLDn()
  *
- * op=0x0F,0xA4 (SHLD mem/reg,imm8)
+ * op=0x0F,0xA4 (SHLD mem/reg,reg,imm8)
  *
  * @this {X86CPU}
  */
@@ -845,13 +845,13 @@ X86.opSHLDn = function SHLDn()
      * has to happen below.
      */
     this.aOpModMemWord[this.getIPByte()].call(this, this.dataSize == 2? X86.fnSHLDwi : X86.fnSHLDdi);
-    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? X86CPU.CYCLES_80386.nOpCyclesShiftDR : X86CPU.CYCLES_80386.nOpCyclesShiftDM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesShiftDR : this.cycleCounts.nOpCyclesShiftDM);
 };
 
 /**
  * opSHLDcl()
  *
- * op=0x0F,0xA5 (SHLD mem/reg,CL)
+ * op=0x0F,0xA5 (SHLD mem/reg,reg,CL)
  *
  * @this {X86CPU}
  */
@@ -863,7 +863,7 @@ X86.opSHLDcl = function SHLDcl()
      * has to happen below.
      */
     this.aOpModMemWord[this.getIPByte()].call(this, this.dataSize == 2? X86.fnSHLDwCL : X86.fnSHLDdCL);
-    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? X86CPU.CYCLES_80386.nOpCyclesShiftDR : X86CPU.CYCLES_80386.nOpCyclesShiftDM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesShiftDR : this.cycleCounts.nOpCyclesShiftDM);
 };
 
 /**
@@ -876,7 +876,7 @@ X86.opSHLDcl = function SHLDcl()
 X86.opPUSHGS = function PUSHGS()
 {
     this.pushWord(this.segGS.sel);
-    this.nStepCycles -= this.CYCLES.nOpCyclesPushSeg;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPushSeg;
 };
 
 /**
@@ -889,7 +889,7 @@ X86.opPUSHGS = function PUSHGS()
 X86.opPOPGS = function POPGS()
 {
     this.setGS(this.popWord());
-    this.nStepCycles -= this.CYCLES.nOpCyclesPopReg;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;
 };
 
 /**
@@ -902,13 +902,13 @@ X86.opPOPGS = function POPGS()
 X86.opBTS = function BTS()
 {
     this.aOpModMemWord[this.getIPByte()].call(this, X86.fnBTS);
-    if (this.regEA !== X86.ADDR_INVALID) this.nStepCycles -= X86CPU.CYCLES_80386.nOpCyclesBitSetMExtra;
+    if (this.regEA !== X86.ADDR_INVALID) this.nStepCycles -= this.cycleCounts.nOpCyclesBitSetMExtra;
 };
 
 /**
  * opSHRDn()
  *
- * op=0x0F,0xAC (SHRD mem/reg,imm8)
+ * op=0x0F,0xAC (SHRD mem/reg,reg,imm8)
  *
  * @this {X86CPU}
  */
@@ -920,13 +920,13 @@ X86.opSHRDn = function SHRDn()
      * has to happen below.
      */
     this.aOpModMemWord[this.getIPByte()].call(this, this.dataSize == 2? X86.fnSHRDwi : X86.fnSHRDdi);
-    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? X86CPU.CYCLES_80386.nOpCyclesShiftDR : X86CPU.CYCLES_80386.nOpCyclesShiftDM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesShiftDR : this.cycleCounts.nOpCyclesShiftDM);
 };
 
 /**
  * opSHRDcl()
  *
- * op=0x0F,0xAD (SHRD mem/reg,CL)
+ * op=0x0F,0xAD (SHRD mem/reg,reg,CL)
  *
  * @this {X86CPU}
  */
@@ -938,7 +938,7 @@ X86.opSHRDcl = function SHRDcl()
      * has to happen below.
      */
     this.aOpModMemWord[this.getIPByte()].call(this, this.dataSize == 2? X86.fnSHRDwCL : X86.fnSHRDdCL);
-    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? X86CPU.CYCLES_80386.nOpCyclesShiftDR : X86CPU.CYCLES_80386.nOpCyclesShiftDM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesShiftDR : this.cycleCounts.nOpCyclesShiftDM);
 };
 
 /**
@@ -982,7 +982,7 @@ X86.opLSS = function LSS()
 X86.opBTR = function BTR()
 {
     this.aOpModMemWord[this.getIPByte()].call(this, X86.fnBTR);
-    if (this.regEA !== X86.ADDR_INVALID) this.nStepCycles -= X86CPU.CYCLES_80386.nOpCyclesBitSetMExtra;
+    if (this.regEA !== X86.ADDR_INVALID) this.nStepCycles -= this.cycleCounts.nOpCyclesBitSetMExtra;
 };
 
 /**
@@ -1082,7 +1082,7 @@ X86.opMOVZXb = function MOVZXb()
         this.regEBX = temp;
         break;
     }
-    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? X86CPU.CYCLES_80386.nOpCyclesMovXR : X86CPU.CYCLES_80386.nOpCyclesMovXM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesMovXR : this.cycleCounts.nOpCyclesMovXM);
 };
 
 /**
@@ -1122,7 +1122,7 @@ X86.opMOVZXw = function MOVZXw()
         this.regEDI = (this.regEDI & 0xffff);
         break;
     }
-    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? X86CPU.CYCLES_80386.nOpCyclesMovXR : X86CPU.CYCLES_80386.nOpCyclesMovXM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesMovXR : this.cycleCounts.nOpCyclesMovXM);
 };
 
 /**
@@ -1145,7 +1145,7 @@ X86.opGRP8 = function GRP8()
 X86.opBTC = function BTC()
 {
     this.aOpModMemWord[this.getIPByte()].call(this, X86.fnBTC);
-    if (this.regEA !== X86.ADDR_INVALID) this.nStepCycles -= X86CPU.CYCLES_80386.nOpCyclesBitSetMExtra;
+    if (this.regEA !== X86.ADDR_INVALID) this.nStepCycles -= this.cycleCounts.nOpCyclesBitSetMExtra;
 };
 
 /**
@@ -1241,7 +1241,7 @@ X86.opMOVSXb = function MOVSXb()
         this.regEBX = temp;
         break;
     }
-    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? X86CPU.CYCLES_80386.nOpCyclesMovXR : X86CPU.CYCLES_80386.nOpCyclesMovXM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesMovXR : this.cycleCounts.nOpCyclesMovXM);
 };
 
 /**
@@ -1281,7 +1281,7 @@ X86.opMOVSXw = function MOVSXw()
         this.regEDI = ((this.regEDI << 16) >> 16);
         break;
     }
-    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? X86CPU.CYCLES_80386.nOpCyclesMovXR : X86CPU.CYCLES_80386.nOpCyclesMovXM);
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesMovXR : this.cycleCounts.nOpCyclesMovXM);
 };
 
 X86.aOps0F = new Array(256);

@@ -423,6 +423,122 @@ X86CPU.CYCLES_80286 = {
 };
 
 X86CPU.CYCLES_80386 = {
+    nWordCyclePenalty:          0,
+    nEACyclesBase:              0,
+    nEACyclesDisp:              0,
+    nEACyclesBaseIndex:         0,
+    nEACyclesBaseIndexExtra:    0,
+    nEACyclesBaseDisp:          0,
+    nEACyclesBaseIndexDisp:     1,
+    nEACyclesBaseIndexDispExtra:1,
+    nOpCyclesAAA:               3,
+    nOpCyclesAAD:               14,
+    nOpCyclesAAM:               16,
+    nOpCyclesArithRR:           2,
+    nOpCyclesArithRM:           7,
+    nOpCyclesArithMR:           7,
+    nOpCyclesArithMID:          0,
+    nOpCyclesCall:              7,      // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesCallF:             13,     // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesCallWR:            7,      // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesCallWM:            11,     // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesCallDM:            16,     // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesCLI:               3,
+    nOpCyclesCompareRM:         6,
+    nOpCyclesCWD:               2,
+    nOpCyclesBound:             13,
+    nOpCyclesInP:               5,
+    nOpCyclesInDX:              5,
+    nOpCyclesIncR:              2,
+    nOpCyclesIncM:              7,
+    nOpCyclesInt:               23,     // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesInt3D:             0,
+    nOpCyclesIntOD:             1,
+    nOpCyclesIntOFall:          3,
+    nOpCyclesIRet:              17,     // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesJmp:               7,      // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesJmpF:              11,     // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesJmpC:              7,      // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesJmpCFall:          3,
+    nOpCyclesJmpWR:             7,      // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesJmpWM:             11,     // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesJmpDM:             15,     // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesLAHF:              2,
+    nOpCyclesLEA:               3,
+    nOpCyclesLS:                7,
+    nOpCyclesLoop:              8,      // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesLoopZ:             8,      // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesLoopNZ:            8,      // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesLoopFall:          4,
+    nOpCyclesLoopZFall:         4,
+    nOpCyclesMovRR:             2,      // this is actually the same as the 8086...
+    nOpCyclesMovRM:             3,
+    nOpCyclesMovMR:             5,
+    nOpCyclesMovRI:             2,
+    nOpCyclesMovMI:             3,
+    nOpCyclesMovAM:             5,      // this is actually slower than the MOD/RM form of MOV AX,mem (see nOpCyclesMovRM)
+    nOpCyclesMovMA:             3,
+    nOpCyclesDivBR:             14,
+    nOpCyclesDivWR:             22,
+    nOpCyclesDivBM:             17,
+    nOpCyclesDivWM:             25,
+    nOpCyclesIDivBR:            17,
+    nOpCyclesIDivWR:            25,
+    nOpCyclesIDivBM:            20,
+    nOpCyclesIDivWM:            28,
+    nOpCyclesMulBR:             13,
+    nOpCyclesMulWR:             21,
+    nOpCyclesMulBM:             16,
+    nOpCyclesMulWM:             24,
+    nOpCyclesIMulBR:            13,
+    nOpCyclesIMulWR:            21,
+    nOpCyclesIMulBM:            16,
+    nOpCyclesIMulWM:            24,
+    nOpCyclesNegR:              2,
+    nOpCyclesNegM:              7,
+    nOpCyclesOutP:              5,
+    nOpCyclesOutDX:             5,
+    nOpCyclesPopAll:            19,
+    nOpCyclesPopReg:            5,
+    nOpCyclesPopMem:            5,
+    nOpCyclesPushAll:           17,
+    nOpCyclesPushReg:           3,
+    nOpCyclesPushMem:           5,
+    nOpCyclesPushSeg:           3,
+    nOpCyclesPrefix:            0,
+    nOpCyclesCmpS:              8,
+    nOpCyclesCmpSr0:            5,
+    nOpCyclesCmpSrn:            9,
+    nOpCyclesLodS:              5,
+    nOpCyclesLodSr0:            5,
+    nOpCyclesLodSrn:            4,
+    nOpCyclesMovS:              5,
+    nOpCyclesMovSr0:            5,
+    nOpCyclesMovSrn:            4,
+    nOpCyclesScaS:              7,
+    nOpCyclesScaSr0:            5,
+    nOpCyclesScaSrn:            8,
+    nOpCyclesStoS:              3,
+    nOpCyclesStoSr0:            4,
+    nOpCyclesStoSrn:            3,
+    nOpCyclesRet:               11,     // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesRetn:              11,     // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesRetF:              15,     // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesRetFn:             15,     // on the 80286, this ALSO includes the number of bytes in the target instruction
+    nOpCyclesShift1M:           7,
+    nOpCyclesShiftCR:           5,
+    nOpCyclesShiftCM:           8,
+    nOpCyclesShiftCS:           0,
+    nOpCyclesTestRR:            2,
+    nOpCyclesTestRM:            6,
+    nOpCyclesTestRI:            3,
+    nOpCyclesTestMI:            6,
+    nOpCyclesXchgRR:            3,
+    nOpCyclesXchgRM:            5,
+    nOpCyclesXLAT:              5,
+    /*
+     * Cycle counts unique to the 80386
+     */
     nOpCyclesBitScan:           11,
     nOpCyclesBitSetR:           6,
     nOpCyclesBitSetM:           8,
@@ -715,10 +831,7 @@ X86CPU.prototype.initProcessor = function()
     this.OPFLAG_NOINTR_8086 = X86.OPFLAG.NOINTR;
     this.nShiftCountMask = 0xff;            // on an 8086/8088, all shift counts are used as-is
 
-    /*
-     * TODO: Create an 80386-specific CYCLES table.
-     */
-    this.CYCLES = (this.model >= X86.MODEL_80286? X86CPU.CYCLES_80286 : X86CPU.CYCLES_8088);
+    this.cycleCounts = (this.model == X86.MODEL_80386? X86CPU.CYCLES_80386 : (this.model == X86.MODEL_80286? X86CPU.CYCLES_80286 : X86CPU.CYCLES_8088));
 
     this.aOps     = X86.aOps;
     this.aOpGrp4b = X86.aOpGrp4b;
@@ -2432,7 +2545,7 @@ X86CPU.prototype.getShort = function(addr)
      * On the 8088, it takes 4 cycles to read the additional byte REGARDLESS whether the address is odd or even.
      * TODO: For the 8086, the penalty is actually "(addr & 0x1) << 2" (4 additional cycles only when the address is odd).
      */
-    this.nStepCycles -= this.CYCLES.nWordCyclePenalty;
+    this.nStepCycles -= this.cycleCounts.nWordCyclePenalty;
 
     if (BACKTRACK) {
         this.backTrack.btiMemLo = this.bus.readBackTrack(addr);
@@ -2494,7 +2607,7 @@ X86CPU.prototype.setShort = function(addr, w)
      * On the 8088, it takes 4 cycles to write the additional byte REGARDLESS whether the address is odd or even.
      * TODO: For the 8086, the penalty is actually "(addr & 0x1) << 2" (4 additional cycles only when the address is odd).
      */
-    this.nStepCycles -= this.CYCLES.nWordCyclePenalty;
+    this.nStepCycles -= this.cycleCounts.nWordCyclePenalty;
 
     if (BACKTRACK) {
         this.bus.writeBackTrack(addr, this.backTrack.btiMemLo);
@@ -2519,7 +2632,7 @@ X86CPU.prototype.setLong = function(addr, l)
 {
     var off = addr & this.blockLimit;
     var iBlock = (addr & this.busMask) >>> this.blockShift;
-    this.nStepCycles -= this.CYCLES.nWordCyclePenalty;
+    this.nStepCycles -= this.cycleCounts.nWordCyclePenalty;
 
     if (BACKTRACK) {
         this.bus.writeBackTrack(addr, this.backTrack.btiMemLo);

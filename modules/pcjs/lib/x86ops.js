@@ -133,7 +133,7 @@ X86.opADDAXw = function ADDAXw()
 X86.opPUSHES = function PUSHES()
 {
     this.pushWord(this.segES.sel);
-    this.nStepCycles -= this.CYCLES.nOpCyclesPushSeg;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPushSeg;
 };
 
 /**
@@ -144,7 +144,7 @@ X86.opPUSHES = function PUSHES()
 X86.opPOPES = function POPES()
 {
     this.setES(this.popWord());
-    this.nStepCycles -= this.CYCLES.nOpCyclesPopReg;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;
 };
 
 /**
@@ -229,7 +229,7 @@ X86.opORAXw = function ORAXw()
 X86.opPUSHCS = function PUSHCS()
 {
     this.pushWord(this.segCS.sel);
-    this.nStepCycles -= this.CYCLES.nOpCyclesPushSeg;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPushSeg;
 };
 
 /**
@@ -240,7 +240,7 @@ X86.opPUSHCS = function PUSHCS()
 X86.opPOPCS = function POPCS()
 {
     this.setCS(this.popWord());
-    this.nStepCycles -= this.CYCLES.nOpCyclesPopReg;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;
 };
 
 /**
@@ -335,7 +335,7 @@ X86.opADCAXw = function ADCAXw()
 X86.opPUSHSS = function PUSHSS()
 {
     this.pushWord(this.segSS.sel);
-    this.nStepCycles -= this.CYCLES.nOpCyclesPushSeg;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPushSeg;
 };
 
 /**
@@ -346,7 +346,7 @@ X86.opPUSHSS = function PUSHSS()
 X86.opPOPSS = function POPSS()
 {
     this.setSS(this.popWord());
-    this.nStepCycles -= this.CYCLES.nOpCyclesPopReg;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;
 };
 
 /**
@@ -431,7 +431,7 @@ X86.opSBBAXw = function SBBAXw()
 X86.opPUSHDS = function PUSHDS()
 {
     this.pushWord(this.segDS.sel);
-    this.nStepCycles -= this.CYCLES.nOpCyclesPushSeg;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPushSeg;
 };
 
 /**
@@ -442,7 +442,7 @@ X86.opPUSHDS = function PUSHDS()
 X86.opPOPDS = function POPDS()
 {
     this.setDS(this.popWord());
-    this.nStepCycles -= this.CYCLES.nOpCyclesPopReg;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;
 };
 
 /**
@@ -570,7 +570,7 @@ X86.opES = function ES()
      */
     this.opFlags |= X86.OPFLAG.SEG | X86.OPFLAG.NOINTR;
     this.segData = this.segStack = this.segES;
-    this.nStepCycles -= this.CYCLES.nOpCyclesPrefix;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPrefix;
 };
 
 /**
@@ -596,7 +596,7 @@ X86.opDAA = function DAA()
     this.setLogicResult(b, X86.RESULT.BYTE);
     if (CF) this.setCF(); else this.clearCF();
     if (AF) this.setAF(); else this.clearAF();
-    this.nStepCycles -= this.CYCLES.nOpCyclesAAA;          // AAA and DAA have the same cycle times
+    this.nStepCycles -= this.cycleCounts.nOpCyclesAAA;          // AAA and DAA have the same cycle times
 };
 
 /**
@@ -686,7 +686,7 @@ X86.opCS = function CS()
      */
     this.opFlags |= X86.OPFLAG.SEG | X86.OPFLAG.NOINTR;
     this.segData = this.segStack = this.segCS;
-    this.nStepCycles -= this.CYCLES.nOpCyclesPrefix;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPrefix;
 };
 
 /**
@@ -712,7 +712,7 @@ X86.opDAS = function DAS()
     this.setLogicResult(b, X86.RESULT.BYTE);
     if (CF) this.setCF(); else this.clearCF();
     if (AF) this.setAF(); else this.clearAF();
-    this.nStepCycles -= this.CYCLES.nOpCyclesAAA;          // AAA and DAS have the same cycle times
+    this.nStepCycles -= this.cycleCounts.nOpCyclesAAA;          // AAA and DAS have the same cycle times
 };
 
 /**
@@ -812,7 +812,7 @@ X86.opSS = function SS()
      */
     this.opFlags |= X86.OPFLAG.SEG | X86.OPFLAG.NOINTR;
     this.segData = this.segStack = this.segSS;      // QUESTION: Is there a case where segStack would not already be segSS? (eg, multiple segment overrides?)
-    this.nStepCycles -= this.CYCLES.nOpCyclesPrefix;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPrefix;
 };
 
 /**
@@ -835,7 +835,7 @@ X86.opAAA = function AAA()
     this.regEAX = (this.regEAX & ~0xffff) | ((AH << 8) | AL);
     if (CF) this.setCF(); else this.clearCF();
     if (AF) this.setAF(); else this.clearAF();
-    this.nStepCycles -= this.CYCLES.nOpCyclesAAA;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesAAA;
 };
 
 /**
@@ -921,7 +921,7 @@ X86.opDS = function DS()
      */
     this.opFlags |= X86.OPFLAG.SEG | X86.OPFLAG.NOINTR;
     this.segData = this.segStack = this.segDS;      // QUESTION: Is there a case where segData would not already be segDS? (eg, multiple segment overrides?)
-    this.nStepCycles -= this.CYCLES.nOpCyclesPrefix;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPrefix;
 };
 
 /**
@@ -944,7 +944,7 @@ X86.opAAS = function AAS()
     this.regEAX = (this.regEAX & ~0xffff) | ((AH << 8) | AL);
     if (CF) this.setCF(); else this.clearCF();
     if (AF) this.setAF(); else this.clearAF();
-    this.nStepCycles -= this.CYCLES.nOpCyclesAAA;   // AAA and AAS have the same cycle times
+    this.nStepCycles -= this.cycleCounts.nOpCyclesAAA;   // AAA and AAS have the same cycle times
 };
 
 /**
@@ -1118,7 +1118,7 @@ X86.opPUSHAX = function PUSHAX()
         this.backTrack.btiMemLo = this.backTrack.btiAL; this.backTrack.btiMemHi = this.backTrack.btiAH;
     }
     this.pushWord(this.regEAX & this.dataMask);
-    this.nStepCycles -= this.CYCLES.nOpCyclesPushReg;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPushReg;
 };
 
 /**
@@ -1132,7 +1132,7 @@ X86.opPUSHCX = function PUSHCX()
         this.backTrack.btiMemLo = this.backTrack.btiCL; this.backTrack.btiMemHi = this.backTrack.btiCH;
     }
     this.pushWord(this.regECX & this.dataMask);
-    this.nStepCycles -= this.CYCLES.nOpCyclesPushReg;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPushReg;
 };
 
 /**
@@ -1146,7 +1146,7 @@ X86.opPUSHDX = function PUSHDX()
         this.backTrack.btiMemLo = this.backTrack.btiDL; this.backTrack.btiMemHi = this.backTrack.btiDH;
     }
     this.pushWord(this.regEDX & this.dataMask);
-    this.nStepCycles -= this.CYCLES.nOpCyclesPushReg;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPushReg;
 };
 
 /**
@@ -1160,7 +1160,7 @@ X86.opPUSHBX = function PUSHBX()
         this.backTrack.btiMemLo = this.backTrack.btiBL; this.backTrack.btiMemHi = this.backTrack.btiBH;
     }
     this.pushWord(this.regEBX & this.dataMask);
-    this.nStepCycles -= this.CYCLES.nOpCyclesPushReg;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPushReg;
 };
 
 /**
@@ -1172,7 +1172,7 @@ X86.opPUSHSP_8086 = function PUSHSP_8086()
 {
     var w = (this.getSP() - this.dataSize) & this.dataMask;
     this.pushWord(w);
-    this.nStepCycles -= this.CYCLES.nOpCyclesPushReg;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPushReg;
 };
 
 /**
@@ -1183,7 +1183,7 @@ X86.opPUSHSP_8086 = function PUSHSP_8086()
 X86.opPUSHSP = function PUSHSP()
 {
     this.pushWord(this.getSP() & this.dataMask);
-    this.nStepCycles -= this.CYCLES.nOpCyclesPushReg;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPushReg;
 };
 
 /**
@@ -1197,7 +1197,7 @@ X86.opPUSHBP = function PUSHBP()
         this.backTrack.btiMemLo = this.backTrack.btiBPLo; this.backTrack.btiMemHi = this.backTrack.btiBPHi;
     }
     this.pushWord(this.regEBP & this.dataMask);
-    this.nStepCycles -= this.CYCLES.nOpCyclesPushReg;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPushReg;
 };
 
 /**
@@ -1211,7 +1211,7 @@ X86.opPUSHSI = function PUSHSI()
         this.backTrack.btiMemLo = this.backTrack.btiSILo; this.backTrack.btiMemHi = this.backTrack.btiSIHi;
     }
     this.pushWord(this.regESI & this.dataMask);
-    this.nStepCycles -= this.CYCLES.nOpCyclesPushReg;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPushReg;
 };
 
 /**
@@ -1225,7 +1225,7 @@ X86.opPUSHDI = function PUSHDI()
         this.backTrack.btiMemLo = this.backTrack.btiDILo; this.backTrack.btiMemHi = this.backTrack.btiDIHi;
     }
     this.pushWord(this.regEDI & this.dataMask);
-    this.nStepCycles -= this.CYCLES.nOpCyclesPushReg;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPushReg;
 };
 
 /**
@@ -1239,7 +1239,7 @@ X86.opPOPAX = function POPAX()
     if (BACKTRACK) {
         this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesPopReg;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;
 };
 
 /**
@@ -1253,7 +1253,7 @@ X86.opPOPCX = function POPCX()
     if (BACKTRACK) {
         this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesPopReg;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;
 };
 
 /**
@@ -1267,7 +1267,7 @@ X86.opPOPDX = function POPDX()
     if (BACKTRACK) {
         this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesPopReg;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;
 };
 
 /**
@@ -1281,7 +1281,7 @@ X86.opPOPBX = function POPBX()
     if (BACKTRACK) {
         this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesPopReg;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;
 };
 
 /**
@@ -1292,7 +1292,7 @@ X86.opPOPBX = function POPBX()
 X86.opPOPSP = function POPSP()
 {
     this.setSP((this.getSP() & ~this.dataMask) | this.popWord());
-    this.nStepCycles -= this.CYCLES.nOpCyclesPopReg;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;
 };
 
 /**
@@ -1306,7 +1306,7 @@ X86.opPOPBP = function POPBP()
     if (BACKTRACK) {
         this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesPopReg;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;
 };
 
 /**
@@ -1320,7 +1320,7 @@ X86.opPOPSI = function POPSI()
     if (BACKTRACK) {
         this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesPopReg;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;
 };
 
 /**
@@ -1334,7 +1334,7 @@ X86.opPOPDI = function POPDI()
     if (BACKTRACK) {
         this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesPopReg;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;
 };
 
 /**
@@ -1377,7 +1377,7 @@ X86.opPUSHA = function PUSHA()
         this.backTrack.btiMemLo = this.backTrack.btiDILo; this.backTrack.btiMemHi = this.backTrack.btiDIHi;
     }
     this.pushWord(this.regEDI & this.dataMask);
-    this.nStepCycles -= this.CYCLES.nOpCyclesPushAll;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPushAll;
 };
 
 /**
@@ -1420,7 +1420,7 @@ X86.opPOPA = function POPA()
     if (BACKTRACK) {
         this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesPopAll;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPopAll;
 };
 
 /**
@@ -1456,7 +1456,7 @@ X86.opFS = function FS()
      */
     this.opFlags |= X86.OPFLAG.SEG | X86.OPFLAG.NOINTR;
     this.segData = this.segStack = this.segFS;
-    this.nStepCycles -= this.CYCLES.nOpCyclesPrefix;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPrefix;
     this.stopCPU();
 };
 
@@ -1473,7 +1473,7 @@ X86.opGS = function GS()
      */
     this.opFlags |= X86.OPFLAG.SEG | X86.OPFLAG.NOINTR;
     this.segData = this.segStack = this.segGS;
-    this.nStepCycles -= this.CYCLES.nOpCyclesPrefix;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPrefix;
     this.stopCPU();
 };
 
@@ -1491,7 +1491,7 @@ X86.opOS = function OS()
         this.dataSize ^= 0x6;               // that which is 2 shall become 4, and vice versa
         this.dataMask ^= (0xffff0000|0);    // that which is 0x0000ffff shall become 0xffffffff, and vice versa
         this.setDataSize();
-        this.nStepCycles -= this.CYCLES.nOpCyclesPrefix;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesPrefix;
     }
 };
 
@@ -1509,7 +1509,7 @@ X86.opAS = function AS()
         this.addrSize ^= 0x06;              // that which is 2 shall become 4, and vice versa
         this.addrMask ^= (0xffff0000|0);    // that which is 0x0000ffff shall become 0xffffffff, and vice versa
         this.setAddrSize();
-        this.nStepCycles -= this.CYCLES.nOpCyclesPrefix;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesPrefix;
     }
 };
 
@@ -1521,7 +1521,7 @@ X86.opAS = function AS()
 X86.opPUSH16 = function PUSH16()
 {
     this.pushWord(this.getIPWord());
-    this.nStepCycles -= this.CYCLES.nOpCyclesPushReg;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPushReg;
 };
 
 /**
@@ -1543,7 +1543,7 @@ X86.opPUSH8 = function PUSH8()
 {
     if (BACKTRACK) this.backTrack.btiMemHi = 0;
     this.pushWord(this.getIPByte());
-    this.nStepCycles -= this.CYCLES.nOpCyclesPushReg;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPushReg;
 };
 
 /**
@@ -1772,10 +1772,10 @@ X86.opJO = function JO()
     var disp = this.getIPDisp();
     if (this.getOF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmpCFall;
 };
 
 /**
@@ -1788,10 +1788,10 @@ X86.opJNO = function JNO()
     var disp = this.getIPDisp();
     if (!this.getOF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmpCFall;
 };
 
 /**
@@ -1804,10 +1804,10 @@ X86.opJC = function JC()
     var disp = this.getIPDisp();
     if (this.getCF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmpCFall;
 };
 
 /**
@@ -1820,10 +1820,10 @@ X86.opJNC = function JNC()
     var disp = this.getIPDisp();
     if (!this.getCF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmpCFall;
 };
 
 /**
@@ -1836,10 +1836,10 @@ X86.opJZ = function JZ()
     var disp = this.getIPDisp();
     if (this.getZF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmpCFall;
 };
 
 /**
@@ -1852,10 +1852,10 @@ X86.opJNZ = function JNZ()
     var disp = this.getIPDisp();
     if (!this.getZF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmpCFall;
 };
 
 /**
@@ -1868,10 +1868,10 @@ X86.opJBE = function JBE()
     var disp = this.getIPDisp();
     if (this.getCF() || this.getZF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmpCFall;
 };
 
 /**
@@ -1884,10 +1884,10 @@ X86.opJNBE = function JNBE()
     var disp = this.getIPDisp();
     if (!this.getCF() && !this.getZF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmpCFall;
 };
 
 /**
@@ -1900,10 +1900,10 @@ X86.opJS = function JS()
     var disp = this.getIPDisp();
     if (this.getSF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmpCFall;
 };
 
 /**
@@ -1916,10 +1916,10 @@ X86.opJNS = function JNS()
     var disp = this.getIPDisp();
     if (!this.getSF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmpCFall;
 };
 
 /**
@@ -1932,10 +1932,10 @@ X86.opJP = function JP()
     var disp = this.getIPDisp();
     if (this.getPF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmpCFall;
 };
 
 /**
@@ -1948,10 +1948,10 @@ X86.opJNP = function JNP()
     var disp = this.getIPDisp();
     if (!this.getPF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmpCFall;
 };
 
 /**
@@ -1964,10 +1964,10 @@ X86.opJL = function JL()
     var disp = this.getIPDisp();
     if (!this.getSF() != !this.getOF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmpCFall;
 };
 
 /**
@@ -1980,10 +1980,10 @@ X86.opJNL = function JNL()
     var disp = this.getIPDisp();
     if (!this.getSF() == !this.getOF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmpCFall;
 };
 
 /**
@@ -1996,10 +1996,10 @@ X86.opJLE = function JLE()
     var disp = this.getIPDisp();
     if (this.getZF() || !this.getSF() != !this.getOF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmpCFall;
 };
 
 /**
@@ -2012,10 +2012,10 @@ X86.opJNLE = function JNLE()
     var disp = this.getIPDisp();
     if (!this.getZF() && !this.getSF() == !this.getOF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesJmpC;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmpCFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmpCFall;
 };
 
 /**
@@ -2026,7 +2026,7 @@ X86.opJNLE = function JNLE()
 X86.opGRP1b = function GRP1b()
 {
     this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp1b, this.getIPByte);
-    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? 1 : this.CYCLES.nOpCyclesArithMID);
+    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? 1 : this.cycleCounts.nOpCyclesArithMID);
 };
 
 /**
@@ -2037,7 +2037,7 @@ X86.opGRP1b = function GRP1b()
 X86.opGRP1w = function GRP1w()
 {
     this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp1w, this.getIPWord);
-    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? 1 : this.CYCLES.nOpCyclesArithMID);
+    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? 1 : this.cycleCounts.nOpCyclesArithMID);
 };
 
 /**
@@ -2048,7 +2048,7 @@ X86.opGRP1w = function GRP1w()
 X86.opGRP1sw = function GRP1sw()
 {
     this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp1w, this.getIPDisp);
-    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? 1 : this.CYCLES.nOpCyclesArithMID);
+    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? 1 : this.cycleCounts.nOpCyclesArithMID);
 };
 
 /**
@@ -2499,7 +2499,7 @@ X86.opCWD = function CWD()
          */
         this.regEDX = (this.regEAX & (0x80000000|0))? -1 : 0;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesCWD;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesCWD;
 };
 
 /**
@@ -2510,7 +2510,7 @@ X86.opCWD = function CWD()
 X86.opCALLF = function CALLF()
 {
     X86.fnCALLF.call(this, this.getIPWord(), this.getIPShort());
-    this.nStepCycles -= this.CYCLES.nOpCyclesCallF;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesCallF;
 };
 
 /**
@@ -2532,7 +2532,7 @@ X86.opWAIT = function WAIT()
 X86.opPUSHF = function PUSHF()
 {
     this.pushWord(this.getPS());
-    this.nStepCycles -= this.CYCLES.nOpCyclesPushReg;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPushReg;
 };
 
 /**
@@ -2546,7 +2546,7 @@ X86.opPOPF = function POPF()
     /*
      * NOTE: I'm assuming that neither POPF nor IRET are required to set NOINTR like STI does.
      */
-    this.nStepCycles -= this.CYCLES.nOpCyclesPopReg;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPopReg;
 };
 
 /**
@@ -2571,7 +2571,7 @@ X86.opSAHF = function SAHF()
     if (ah & X86.PS.AF) this.setAF(); else this.clearAF();
     if (ah & X86.PS.ZF) this.setZF(); else this.clearZF();
     if (ah & X86.PS.SF) this.setSF(); else this.clearSF();
-    this.nStepCycles -= this.CYCLES.nOpCyclesLAHF;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
     this.assert((this.getPS() & X86.PS_SAHF) == (ah & X86.PS_SAHF));
 };
 
@@ -2583,7 +2583,7 @@ X86.opSAHF = function SAHF()
 X86.opLAHF = function LAHF()
 {
     this.regEAX = (this.regEAX & ~0xff00) | (this.getPS() & X86.PS_SAHF) << 8;
-    this.nStepCycles -= this.CYCLES.nOpCyclesLAHF;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
 
 /**
@@ -2595,7 +2595,7 @@ X86.opMOVALm = function MOVALm()
 {
     this.regEAX = (this.regEAX & ~0xff) | this.getSOByte(this.segData, this.getIPWord());
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
-    this.nStepCycles -= this.CYCLES.nOpCyclesMovAM;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesMovAM;
 };
 
 /**
@@ -2609,7 +2609,7 @@ X86.opMOVAXm = function MOVAXm()
     if (BACKTRACK) {
         this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesMovAM;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesMovAM;
 };
 
 /**
@@ -2624,7 +2624,7 @@ X86.opMOVmAL = function MOVmAL()
      * setSOByte() truncates the value as appropriate
      */
     this.setSOByte(this.segData, this.getIPWord(), this.regEAX);
-    this.nStepCycles -= this.CYCLES.nOpCyclesMovMA;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesMovMA;
 };
 
 /**
@@ -2641,7 +2641,7 @@ X86.opMOVmAX = function MOVmAX()
      * setSOWord() truncates the value as appropriate
      */
     this.setSOWord(this.segData, this.getIPWord(), this.regEAX);
-    this.nStepCycles -= this.CYCLES.nOpCyclesMovMA;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesMovMA;
 };
 
 /**
@@ -2653,12 +2653,12 @@ X86.opMOVSb = function MOVSb()
 {
     var nReps = 1;
     var nDelta = 0;
-    var nCycles = this.CYCLES.nOpCyclesMovS;
+    var nCycles = this.cycleCounts.nOpCyclesMovS;
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
         nReps = this.regECX;
         nDelta = 1;
-        nCycles = this.CYCLES.nOpCyclesMovSrn;
-        if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.CYCLES.nOpCyclesMovSr0;
+        nCycles = this.cycleCounts.nOpCyclesMovSrn;
+        if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesMovSr0;
     }
     if (nReps--) {
         var nInc = ((this.regPS & X86.PS.DF)? -1 : 1);
@@ -2688,12 +2688,12 @@ X86.opMOVSw = function MOVSw()
 {
     var nReps = 1;
     var nDelta = 0;
-    var nCycles = this.CYCLES.nOpCyclesMovS;
+    var nCycles = this.cycleCounts.nOpCyclesMovS;
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
         nReps = this.regECX;
         nDelta = 1;
-        nCycles = this.CYCLES.nOpCyclesMovSrn;
-        if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.CYCLES.nOpCyclesMovSr0;
+        nCycles = this.cycleCounts.nOpCyclesMovSrn;
+        if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesMovSr0;
     }
     if (nReps--) {
         var nInc = ((this.regPS & X86.PS.DF)? -this.dataSize : this.dataSize);
@@ -2723,12 +2723,12 @@ X86.opCMPSb = function CMPSb()
 {
     var nReps = 1;
     var nDelta = 0;
-    var nCycles = this.CYCLES.nOpCyclesCmpS;
+    var nCycles = this.cycleCounts.nOpCyclesCmpS;
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
         nReps = this.regECX;
         nDelta = 1;
-        nCycles = this.CYCLES.nOpCyclesCmpSrn;
-        if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.CYCLES.nOpCyclesCmpSr0;
+        nCycles = this.cycleCounts.nOpCyclesCmpSrn;
+        if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesCmpSr0;
     }
     if (nReps--) {
         var nInc = ((this.regPS & X86.PS.DF)? -1 : 1);
@@ -2740,7 +2740,7 @@ X86.opCMPSb = function CMPSb()
         /*
          * NOTE: As long as we're calling fnCMPb(), all our cycle times must be reduced by nOpCyclesArithRM
          */
-        this.nStepCycles -= nCycles - this.CYCLES.nOpCyclesArithRM;
+        this.nStepCycles -= nCycles - this.cycleCounts.nOpCyclesArithRM;
         this.regECX -= nDelta;
         /*
          * Repetition continues while ZF matches bit 0 of the REP prefix.  getZF() returns 0x40 if ZF is
@@ -2768,12 +2768,12 @@ X86.opCMPSw = function CMPSw()
 {
     var nReps = 1;
     var nDelta = 0;
-    var nCycles = this.CYCLES.nOpCyclesCmpS;
+    var nCycles = this.cycleCounts.nOpCyclesCmpS;
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
         nReps = this.regECX;
         nDelta = 1;
-        nCycles = this.CYCLES.nOpCyclesCmpSrn;
-        if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.CYCLES.nOpCyclesCmpSr0;
+        nCycles = this.cycleCounts.nOpCyclesCmpSrn;
+        if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesCmpSr0;
     }
     if (nReps--) {
         var nInc = ((this.regPS & X86.PS.DF)? -this.dataSize : this.dataSize);
@@ -2785,7 +2785,7 @@ X86.opCMPSw = function CMPSw()
         /*
          * NOTE: As long as we're calling fnCMPw(), all our cycle times must be reduced by nOpCyclesArithRM
          */
-        this.nStepCycles -= nCycles - this.CYCLES.nOpCyclesArithRM;
+        this.nStepCycles -= nCycles - this.cycleCounts.nOpCyclesArithRM;
         this.regECX -= nDelta;
         /*
          * Repetition continues while ZF matches bit 0 of the REP prefix.  getZF() returns 0x40 if ZF is
@@ -2812,7 +2812,7 @@ X86.opCMPSw = function CMPSw()
 X86.opTESTALb = function TESTALb()
 {
     this.setLogicResult(this.regEAX & this.getIPByte(), X86.RESULT.BYTE);
-    this.nStepCycles -= this.CYCLES.nOpCyclesAAA;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesAAA;
 };
 
 /**
@@ -2823,7 +2823,7 @@ X86.opTESTALb = function TESTALb()
 X86.opTESTAXw = function TESTAXw()
 {
     this.setLogicResult(this.regEAX & this.getIPWord(), X86.RESULT.WORD);
-    this.nStepCycles -= this.CYCLES.nOpCyclesAAA;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesAAA;
 };
 
 /**
@@ -2837,12 +2837,12 @@ X86.opSTOSb = function STOSb()
 {
     var nReps = 1;
     var nDelta = 0;
-    var nCycles = this.CYCLES.nOpCyclesStoS;
+    var nCycles = this.cycleCounts.nOpCyclesStoS;
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
         nReps = this.regECX;
         nDelta = 1;
-        nCycles = this.CYCLES.nOpCyclesStoSrn;
-        if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.CYCLES.nOpCyclesStoSr0;
+        nCycles = this.cycleCounts.nOpCyclesStoSrn;
+        if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesStoSr0;
     }
     if (nReps--) {
         if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiAL;
@@ -2873,12 +2873,12 @@ X86.opSTOSw = function STOSw()
 {
     var nReps = 1;
     var nDelta = 0;
-    var nCycles = this.CYCLES.nOpCyclesStoS;
+    var nCycles = this.cycleCounts.nOpCyclesStoS;
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
         nReps = this.regECX;
         nDelta = 1;
-        nCycles = this.CYCLES.nOpCyclesStoSrn;
-        if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.CYCLES.nOpCyclesStoSr0;
+        nCycles = this.cycleCounts.nOpCyclesStoSrn;
+        if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesStoSr0;
     }
     if (nReps--) {
         /*
@@ -2913,12 +2913,12 @@ X86.opLODSb = function LODSb()
 {
     var nReps = 1;
     var nDelta = 0;
-    var nCycles = this.CYCLES.nOpCyclesLodS;
+    var nCycles = this.cycleCounts.nOpCyclesLodS;
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
         nReps = this.regECX;
         nDelta = 1;
-        nCycles = this.CYCLES.nOpCyclesLodSrn;
-        if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.CYCLES.nOpCyclesLodSr0;
+        nCycles = this.cycleCounts.nOpCyclesLodSrn;
+        if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesLodSr0;
     }
     if (nReps--) {
         this.regEAX = (this.regEAX & ~0xff) | this.getSOByte(this.segData, this.regESI & this.addrMask);
@@ -2947,12 +2947,12 @@ X86.opLODSw = function LODSw()
 {
     var nReps = 1;
     var nDelta = 0;
-    var nCycles = this.CYCLES.nOpCyclesLodS;
+    var nCycles = this.cycleCounts.nOpCyclesLodS;
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
         nReps = this.regECX;
         nDelta = 1;
-        nCycles = this.CYCLES.nOpCyclesLodSrn;
-        if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.CYCLES.nOpCyclesLodSr0;
+        nCycles = this.cycleCounts.nOpCyclesLodSrn;
+        if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesLodSr0;
     }
     if (nReps--) {
         this.regEAX = (this.regEAX & ~this.dataMask) | this.getSOWord(this.segData, this.regESI & this.addrMask);
@@ -2983,12 +2983,12 @@ X86.opSCASb = function SCASb()
 {
     var nReps = 1;
     var nDelta = 0;
-    var nCycles = this.CYCLES.nOpCyclesScaS;
+    var nCycles = this.cycleCounts.nOpCyclesScaS;
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
         nReps = this.regECX;
         nDelta = 1;
-        nCycles = this.CYCLES.nOpCyclesScaSrn;
-        if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.CYCLES.nOpCyclesScaSr0;
+        nCycles = this.cycleCounts.nOpCyclesScaSrn;
+        if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesScaSr0;
     }
     if (nReps--) {
         X86.fnCMPb.call(this, this.regEAX & 0xff, this.modEAByte(this.segES, this.regEDI & this.addrMask));
@@ -2996,7 +2996,7 @@ X86.opSCASb = function SCASb()
         /*
          * NOTE: As long as we're calling fnCMPb(), all our cycle times must be reduced by nOpCyclesArithRM
          */
-        this.nStepCycles -= nCycles - this.CYCLES.nOpCyclesArithRM;
+        this.nStepCycles -= nCycles - this.cycleCounts.nOpCyclesArithRM;
         this.regECX -= nDelta;
         /*
          * Repetition continues while ZF matches bit 0 of the REP prefix.  getZF() returns 0x40 if ZF is
@@ -3024,12 +3024,12 @@ X86.opSCASw = function SCASw()
 {
     var nReps = 1;
     var nDelta = 0;
-    var nCycles = this.CYCLES.nOpCyclesScaS;
+    var nCycles = this.cycleCounts.nOpCyclesScaS;
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
         nReps = this.regECX;
         nDelta = 1;
-        nCycles = this.CYCLES.nOpCyclesScaSrn;
-        if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.CYCLES.nOpCyclesScaSr0;
+        nCycles = this.cycleCounts.nOpCyclesScaSrn;
+        if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesScaSr0;
     }
     if (nReps--) {
         X86.fnCMPw.call(this, this.regEAX & this.dataMask, this.modEAWord(this.segES, this.regEDI & this.addrMask));
@@ -3037,7 +3037,7 @@ X86.opSCASw = function SCASw()
         /*
          * NOTE: As long as we're calling fnCMPw(), all our cycle times must be reduced by nOpCyclesArithRM
          */
-        this.nStepCycles -= nCycles - this.CYCLES.nOpCyclesArithRM;
+        this.nStepCycles -= nCycles - this.cycleCounts.nOpCyclesArithRM;
         this.regECX -= nDelta;
         /*
          * Repetition continues while ZF matches bit 0 of the REP prefix.  getZF() returns 0x40 if ZF is
@@ -3065,7 +3065,7 @@ X86.opMOVALb = function MOVALb()
 {
     this.regEAX = (this.regEAX & ~0xff) | this.getIPByte();
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
-    this.nStepCycles -= this.CYCLES.nOpCyclesLAHF;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
 
 /**
@@ -3077,7 +3077,7 @@ X86.opMOVCLb = function MOVCLb()
 {
     this.regECX = (this.regECX & ~0xff) | this.getIPByte();
     if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiMemLo;
-    this.nStepCycles -= this.CYCLES.nOpCyclesLAHF;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
 
 /**
@@ -3089,7 +3089,7 @@ X86.opMOVDLb = function MOVDLb()
 {
     this.regEDX = (this.regEDX & ~0xff) | this.getIPByte();
     if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiMemLo;
-    this.nStepCycles -= this.CYCLES.nOpCyclesLAHF;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
 
 /**
@@ -3101,7 +3101,7 @@ X86.opMOVBLb = function MOVBLb()
 {
     this.regEBX = (this.regEBX & ~0xff) | this.getIPByte();
     if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiMemLo;
-    this.nStepCycles -= this.CYCLES.nOpCyclesLAHF;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
 
 /**
@@ -3113,7 +3113,7 @@ X86.opMOVAHb = function MOVAHb()
 {
     this.regEAX = (this.regEAX & 0xff) | (this.getIPByte() << 8);
     if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiMemLo;
-    this.nStepCycles -= this.CYCLES.nOpCyclesLAHF;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
 
 /**
@@ -3125,7 +3125,7 @@ X86.opMOVCHb = function MOVCHb()
 {
     this.regECX = (this.regECX & 0xff) | (this.getIPByte() << 8);
     if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiMemLo;
-    this.nStepCycles -= this.CYCLES.nOpCyclesLAHF;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
 
 /**
@@ -3137,7 +3137,7 @@ X86.opMOVDHb = function MOVDHb()
 {
     this.regEDX = (this.regEDX & 0xff) | (this.getIPByte() << 8);
     if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiMemLo;
-    this.nStepCycles -= this.CYCLES.nOpCyclesLAHF;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
 
 /**
@@ -3149,7 +3149,7 @@ X86.opMOVBHb = function MOVBHb()
 {
     this.regEBX = (this.regEBX & 0xff) | (this.getIPByte() << 8);
     if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiMemLo;
-    this.nStepCycles -= this.CYCLES.nOpCyclesLAHF;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
 
 /**
@@ -3163,7 +3163,7 @@ X86.opMOVAXw = function MOVAXw()
     if (BACKTRACK) {
         this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesLAHF;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
 
 /**
@@ -3177,7 +3177,7 @@ X86.opMOVCXw = function MOVCXw()
     if (BACKTRACK) {
         this.backTrack.btiCL = this.backTrack.btiMemLo; this.backTrack.btiCH = this.backTrack.btiMemHi;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesLAHF;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
 
 /**
@@ -3191,7 +3191,7 @@ X86.opMOVDXw = function MOVDXw()
     if (BACKTRACK) {
         this.backTrack.btiDL = this.backTrack.btiMemLo; this.backTrack.btiDH = this.backTrack.btiMemHi;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesLAHF;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
 
 /**
@@ -3205,7 +3205,7 @@ X86.opMOVBXw = function MOVBXw()
     if (BACKTRACK) {
         this.backTrack.btiBL = this.backTrack.btiMemLo; this.backTrack.btiBH = this.backTrack.btiMemHi;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesLAHF;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
 
 /**
@@ -3216,7 +3216,7 @@ X86.opMOVBXw = function MOVBXw()
 X86.opMOVSPw = function MOVSPw()
 {
     this.setSP((this.getSP() & ~this.dataMask) | this.getIPWord());
-    this.nStepCycles -= this.CYCLES.nOpCyclesLAHF;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
 
 /**
@@ -3230,7 +3230,7 @@ X86.opMOVBPw = function MOVBPw()
     if (BACKTRACK) {
         this.backTrack.btiBPLo = this.backTrack.btiMemLo; this.backTrack.btiBPHi = this.backTrack.btiMemHi;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesLAHF;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
 
 /**
@@ -3244,7 +3244,7 @@ X86.opMOVSIw = function MOVSIw()
     if (BACKTRACK) {
         this.backTrack.btiSILo = this.backTrack.btiMemLo; this.backTrack.btiSIHi = this.backTrack.btiMemHi;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesLAHF;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
 
 /**
@@ -3258,7 +3258,7 @@ X86.opMOVDIw = function MOVDIw()
     if (BACKTRACK) {
         this.backTrack.btiDILo = this.backTrack.btiMemLo; this.backTrack.btiDIHi = this.backTrack.btiMemHi;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesLAHF;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
 
 /**
@@ -3301,7 +3301,7 @@ X86.opRETn = function RETn()
     var n = this.getIPWord() << (this.dataSize >> 2);
     this.setIP(this.popWord());
     if (n) this.setSP(this.getSP() + n);            // TODO: optimize
-    this.nStepCycles -= this.CYCLES.nOpCyclesRetn;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesRetn;
 };
 
 /**
@@ -3312,7 +3312,7 @@ X86.opRETn = function RETn()
 X86.opRET = function RET()
 {
     this.setIP(this.popWord());
-    this.nStepCycles -= this.CYCLES.nOpCyclesRet;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesRet;
 };
 
 /**
@@ -3439,7 +3439,7 @@ X86.opLEAVE = function LEAVE()
 X86.opRETFn = function RETFn()
 {
     X86.fnRETF.call(this, this.getIPWord());
-    this.nStepCycles -= this.CYCLES.nOpCyclesRetFn;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesRetFn;
 };
 
 /**
@@ -3450,7 +3450,7 @@ X86.opRETFn = function RETFn()
 X86.opRETF = function RETF()
 {
     X86.fnRETF.call(this, 0);
-    this.nStepCycles -= this.CYCLES.nOpCyclesRetF;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesRetF;
 };
 
 /**
@@ -3460,7 +3460,7 @@ X86.opRETF = function RETF()
  */
 X86.opINT3 = function INT3()
 {
-    X86.fnINT.call(this, X86.EXCEPTION.BREAKPOINT, null, this.CYCLES.nOpCyclesInt3D);
+    X86.fnINT.call(this, X86.EXCEPTION.BREAKPOINT, null, this.cycleCounts.nOpCyclesInt3D);
 };
 
 /**
@@ -3486,10 +3486,10 @@ X86.opINTn = function INTn()
 X86.opINTO = function INTO()
 {
     if (this.getOF()) {
-        X86.fnINT.call(this, X86.EXCEPTION.OVERFLOW, null, this.CYCLES.nOpCyclesIntOD);
+        X86.fnINT.call(this, X86.EXCEPTION.OVERFLOW, null, this.cycleCounts.nOpCyclesIntOD);
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesIntOFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesIntOFall;
 };
 
 /**
@@ -3587,7 +3587,7 @@ X86.opAAM = function AAM()
      * setLogicResult() is slightly overkill, because technically, we don't need to clear CF and OF....
      */
     this.setLogicResult(this.regEAX, X86.RESULT.BYTE);
-    this.nStepCycles -= this.CYCLES.nOpCyclesAAM;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesAAM;
 };
 
 /**
@@ -3608,7 +3608,7 @@ X86.opAAD = function AAD()
      * setLogicResult() is slightly overkill, because technically, we don't need to clear CF and OF....
      */
     this.setLogicResult(this.regEAX, X86.RESULT.BYTE);
-    this.nStepCycles -= this.CYCLES.nOpCyclesAAD;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesAAD;
 };
 
 /**
@@ -3638,7 +3638,7 @@ X86.opXLAT = function XLAT()
      * I'm masking it as if it does, but I need to run a test on real hardware to be sure.
      */
     this.regEAX = (this.regEAX & ~0xff) | this.getEAByte(this.segData, ((this.regEBX + (this.regEAX & 0xff)) & 0xffff));
-    this.nStepCycles -= this.CYCLES.nOpCyclesXLAT;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesXLAT;
 };
 
 /**
@@ -3662,10 +3662,10 @@ X86.opLOOPNZ = function LOOPNZ()
     var disp = this.getIPDisp();
     if ((this.regECX = (this.regECX - 1) & this.addrMask) && !this.getZF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesLoopNZ;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesLoopNZ;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesLoopFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesLoopFall;
 };
 
 /**
@@ -3678,10 +3678,10 @@ X86.opLOOPZ = function LOOPZ()
     var disp = this.getIPDisp();
     if ((this.regECX = (this.regECX - 1) & this.addrMask) && this.getZF()) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesLoopZ;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesLoopZ;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesLoopZFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesLoopZFall;
 };
 
 /**
@@ -3694,10 +3694,10 @@ X86.opLOOP = function LOOP()
     var disp = this.getIPDisp();
     if ((this.regECX = (this.regECX - 1) & this.addrMask)) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesLoop;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesLoop;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesLoopFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesLoopFall;
 };
 
 /**
@@ -3710,10 +3710,10 @@ X86.opJCXZ = function JCXZ()
     var disp = this.getIPDisp();
     if (!this.regECX) {
         this.setIP(this.getIP() + disp);
-        this.nStepCycles -= this.CYCLES.nOpCyclesLoopZ;
+        this.nStepCycles -= this.cycleCounts.nOpCyclesLoopZ;
         return;
     }
-    this.nStepCycles -= this.CYCLES.nOpCyclesLoopZFall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesLoopZFall;
 };
 
 /**
@@ -3726,7 +3726,7 @@ X86.opINb = function INb()
     var port = this.getIPByte();
     this.regEAX = (this.regEAX & ~0xff) | this.bus.checkPortInputNotify(port, this.regLIP - 2);
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiIO;
-    this.nStepCycles -= this.CYCLES.nOpCyclesInP;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesInP;
 };
 
 /**
@@ -3741,7 +3741,7 @@ X86.opINw = function INw()
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiIO;
     this.regEAX |= (this.bus.checkPortInputNotify((port + 1) & 0xffff, this.regLIP - 2) << 8);
     if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiIO;
-    this.nStepCycles -= this.CYCLES.nOpCyclesInP;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesInP;
 };
 
 /**
@@ -3753,7 +3753,7 @@ X86.opOUTb = function OUTb()
 {
     var port = this.getIPByte();
     this.bus.checkPortOutputNotify(port, this.regEAX & 0xff, this.regLIP - 2);
-    this.nStepCycles -= this.CYCLES.nOpCyclesOutP;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesOutP;
 };
 
 /**
@@ -3766,7 +3766,7 @@ X86.opOUTw = function OUTw()
     var port = this.getIPByte();
     this.bus.checkPortOutputNotify(port, this.regEAX & 0xff, this.regLIP - 2);
     this.bus.checkPortOutputNotify((port + 1) & 0xffff, this.regEAX >> 8, this.regLIP - 2);
-    this.nStepCycles -= this.CYCLES.nOpCyclesOutP;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesOutP;
 };
 
 /**
@@ -3779,7 +3779,7 @@ X86.opCALL = function CALL()
     var disp = this.getIPWord();
     this.pushWord(this.getIP());
     this.setIP(this.getIP() + disp);
-    this.nStepCycles -= this.CYCLES.nOpCyclesCall;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesCall;
 };
 
 /**
@@ -3791,7 +3791,7 @@ X86.opJMP = function JMP()
 {
     var disp = this.getIPWord();
     this.setIP(this.getIP() + disp);
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmp;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmp;
 };
 
 /**
@@ -3802,7 +3802,7 @@ X86.opJMP = function JMP()
 X86.opJMPF = function JMPF()
 {
     this.setCSIP(this.getIPWord(), this.getIPShort());
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmpF;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmpF;
 };
 
 /**
@@ -3814,7 +3814,7 @@ X86.opJMPs = function JMPs()
 {
     var disp = this.getIPDisp();
     this.setIP(this.getIP() + disp);
-    this.nStepCycles -= this.CYCLES.nOpCyclesJmp;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesJmp;
 };
 
 /**
@@ -3826,7 +3826,7 @@ X86.opINDXb = function INDXb()
 {
     this.regEAX = (this.regEAX & ~0xff) | this.bus.checkPortInputNotify(this.regEDX, this.regLIP - 1);
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiIO;
-    this.nStepCycles -= this.CYCLES.nOpCyclesInDX;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesInDX;
 };
 
 /**
@@ -3840,7 +3840,7 @@ X86.opINDXw = function INDXw()
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiIO;
     this.regEAX |= (this.bus.checkPortInputNotify((this.regEDX + 1) & 0xffff, this.regLIP - 1) << 8);
     if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiIO;
-    this.nStepCycles -= this.CYCLES.nOpCyclesInDX;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesInDX;
 };
 
 /**
@@ -3852,7 +3852,7 @@ X86.opOUTDXb = function OUTDXb()
 {
     if (BACKTRACK) this.backTrack.btiIO = this.backTrack.btiAL;
     this.bus.checkPortOutputNotify(this.regEDX, this.regEAX & 0xff, this.regLIP - 1);
-    this.nStepCycles -= this.CYCLES.nOpCyclesOutDX;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesOutDX;
 };
 
 /**
@@ -3866,7 +3866,7 @@ X86.opOUTDXw = function OUTDXw()
     this.bus.checkPortOutputNotify(this.regEDX, this.regEAX & 0xff, this.regLIP - 1);
     if (BACKTRACK) this.backTrack.btiIO = this.backTrack.btiAH;
     this.bus.checkPortOutputNotify((this.regEDX + 1) & 0xffff, this.regEAX >> 8, this.regLIP - 1);
-    this.nStepCycles -= this.CYCLES.nOpCyclesOutDX;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesOutDX;
 };
 
 /**
@@ -3881,7 +3881,7 @@ X86.opLOCK = function LOCK()
      * the way stepCPU() is written, the presence of any prefix bypasses normal interrupt processing anyway.
      */
     this.opFlags |= X86.OPFLAG.LOCK | X86.OPFLAG.NOINTR;
-    this.nStepCycles -= this.CYCLES.nOpCyclesPrefix;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPrefix;
 };
 
 /**
@@ -3908,7 +3908,7 @@ X86.opREPNZ = function REPNZ()
      * the way stepCPU() is written, the presence of any prefix bypasses normal interrupt processing anyway.
      */
     this.opFlags |= X86.OPFLAG.REPNZ | X86.OPFLAG.NOINTR;
-    this.nStepCycles -= this.CYCLES.nOpCyclesPrefix;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPrefix;
 };
 
 /**
@@ -3923,7 +3923,7 @@ X86.opREPZ = function REPZ()
      * the way stepCPU() is written, the presence of any prefix bypasses normal interrupt processing anyway.
      */
     this.opFlags |= X86.OPFLAG.REPZ | X86.OPFLAG.NOINTR;
-    this.nStepCycles -= this.CYCLES.nOpCyclesPrefix;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesPrefix;
 };
 
 /**
@@ -4059,7 +4059,7 @@ X86.opSTC = function STC()
 X86.opCLI = function CLI()
 {
     this.clearIF();
-    this.nStepCycles -= this.CYCLES.nOpCyclesCLI;   // CLI takes LONGER on an 80286
+    this.nStepCycles -= this.cycleCounts.nOpCyclesCLI;   // CLI takes LONGER on an 80286
 };
 
 /**

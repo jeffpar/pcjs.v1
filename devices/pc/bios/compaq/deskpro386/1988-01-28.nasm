@@ -15193,21 +15193,11 @@ lffb3:	pop	ds			; 0000FFB3  1F '.'
 
 	jmp	l9f17			; 0000FFDD  E9379F '.7.'
 
-	mov	dh,0x7f			; 0000FFE0  B67F '..'
-	mov	si,0x477f		; 0000FFE2  BE7F47 '..G'
-	xor	al,0x4a			; 0000FFE5  344A '4J'
-	and	[bx+si],dh		; 0000FFE7  2030 ' 0'
-	xor	ax,[bp+di+0x4f]		; 0000FFE9  33434F '3CO'
-	dec	bp			; 0000FFEC  4D 'M'
-	push	ax			; 0000FFED  50 'P'
-	inc	cx			; 0000FFEE  41 'A'
-	push	cx			; 0000FFEF  51 'Q'
-	jmp	0xf000:0xf905		; 0000FFF0  EA05F900F0 '.....'
+	dw	0x7FB6			; 0000FFE0  B67F
+	dw	0x7FBE			; 0000FFE2  BE7F
+	db	'G4J 03COMPAQ'		; 0000FFE4  47344A203033434F4D504151
+	jmp	0xf000:0xf905		; 0000FFF0  EA05F900F0
 
-	and	[bx+si],dh		; 0000FFF5  2030 ' 0'
-	xor	[bx],bp			; 0000FFF7  312F '1/'
-	xor	bh,[bx+si]		; 0000FFF9  3238 '28'
-	das				; 0000FFFB  2F '/'
-	cmp	[bx+si],bh		; 0000FFFC  3838 '88'
-	cld				; 0000FFFE  FC '.'
-	cbw				; 0000FFFF  98 '.'
+	db	' 01/28/88'
+	db	0xFC			; 0000FFFE  FC
+	db	0x98			; 0000FFFF  98

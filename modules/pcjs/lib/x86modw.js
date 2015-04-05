@@ -50,7 +50,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModRegWord01(fn): mod=00 (src:mem)  reg=000 (dst:AX)  r/m=001 (BX+DI)
@@ -63,7 +63,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModRegWord02(fn): mod=00 (src:mem)  reg=000 (dst:AX)  r/m=010 (BP+SI)
@@ -76,7 +76,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModRegWord03(fn): mod=00 (src:mem)  reg=000 (dst:AX)  r/m=011 (BP+DI)
@@ -89,7 +89,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModRegWord04(fn): mod=00 (src:mem)  reg=000 (dst:AX)  r/m=100 (SI)
@@ -102,7 +102,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModRegWord05(fn): mod=00 (src:mem)  reg=000 (dst:AX)  r/m=101 (DI)
@@ -115,7 +115,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModRegWord06(fn): mod=00 (src:mem)  reg=000 (dst:AX)  r/m=110 (d16)
@@ -128,7 +128,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
      * opModRegWord07(fn): mod=00 (src:mem)  reg=000 (dst:AX)  r/m=111 (BX)
@@ -141,7 +141,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModRegWord08(fn): mod=00 (src:mem)  reg=001 (dst:CX)  r/m=000 (BX+SI)
@@ -154,7 +154,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModRegWord09(fn): mod=00 (src:mem)  reg=001 (dst:CX)  r/m=001 (BX+DI)
@@ -167,7 +167,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModRegWord0A(fn): mod=00 (src:mem)  reg=001 (dst:CX)  r/m=010 (BP+SI)
@@ -180,7 +180,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModRegWord0B(fn): mod=00 (src:mem)  reg=001 (dst:CX)  r/m=011 (BP+DI)
@@ -193,7 +193,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModRegWord0C(fn): mod=00 (src:mem)  reg=001 (dst:CX)  r/m=100 (SI)
@@ -206,7 +206,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModRegWord0D(fn): mod=00 (src:mem)  reg=001 (dst:CX)  r/m=101 (DI)
@@ -219,7 +219,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModRegWord0E(fn): mod=00 (src:mem)  reg=001 (dst:CX)  r/m=110 (d16)
@@ -232,7 +232,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
      * opModRegWord0F(fn): mod=00 (src:mem)  reg=001 (dst:CX)  r/m=111 (BX)
@@ -245,7 +245,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModRegWord10(fn): mod=00 (src:mem)  reg=010 (dst:DX)  r/m=000 (BX+SI)
@@ -258,7 +258,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModRegWord11(fn): mod=00 (src:mem)  reg=010 (dst:DX)  r/m=001 (BX+DI)
@@ -271,7 +271,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModRegWord12(fn): mod=00 (src:mem)  reg=010 (dst:DX)  r/m=010 (BP+SI)
@@ -284,7 +284,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModRegWord13(fn): mod=00 (src:mem)  reg=010 (dst:DX)  r/m=011 (BP+DI)
@@ -297,7 +297,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModRegWord14(fn): mod=00 (src:mem)  reg=010 (dst:DX)  r/m=100 (SI)
@@ -310,7 +310,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModRegWord15(fn): mod=00 (src:mem)  reg=010 (dst:DX)  r/m=101 (DI)
@@ -323,7 +323,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModRegWord16(fn): mod=00 (src:mem)  reg=010 (dst:DX)  r/m=110 (d16)
@@ -336,7 +336,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
      * opModRegWord17(fn): mod=00 (src:mem)  reg=010 (dst:DX)  r/m=111 (BX)
@@ -349,7 +349,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModRegWord18(fn): mod=00 (src:mem)  reg=011 (dst:BX)  r/m=000 (BX+SI)
@@ -362,7 +362,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModRegWord19(fn): mod=00 (src:mem)  reg=011 (dst:BX)  r/m=001 (BX+DI)
@@ -375,7 +375,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModRegWord1A(fn): mod=00 (src:mem)  reg=011 (dst:BX)  r/m=010 (BP+SI)
@@ -388,7 +388,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModRegWord1B(fn): mod=00 (src:mem)  reg=011 (dst:BX)  r/m=011 (BP+DI)
@@ -401,7 +401,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModRegWord1C(fn): mod=00 (src:mem)  reg=011 (dst:BX)  r/m=100 (SI)
@@ -414,7 +414,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModRegWord1D(fn): mod=00 (src:mem)  reg=011 (dst:BX)  r/m=101 (DI)
@@ -427,7 +427,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModRegWord1E(fn): mod=00 (src:mem)  reg=011 (dst:BX)  r/m=110 (d16)
@@ -440,7 +440,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
      * opModRegWord1F(fn): mod=00 (src:mem)  reg=011 (dst:BX)  r/m=111 (BX)
@@ -453,7 +453,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModRegWord20(fn): mod=00 (src:mem)  reg=100 (dst:SP)  r/m=000 (BX+SI)
@@ -463,7 +463,7 @@ X86ModW.aOpModReg = [
      */
     function opModRegWord20(fn) {
         this.setSP(fn.call(this, this.getSP(), this.getEAWordData(this.regEBX + this.regESI)));
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModRegWord21(fn): mod=00 (src:mem)  reg=100 (dst:SP)  r/m=001 (BX+DI)
@@ -473,7 +473,7 @@ X86ModW.aOpModReg = [
      */
     function opModRegWord21(fn) {
         this.setSP(fn.call(this, this.getSP(), this.getEAWordData(this.regEBX + this.regEDI)));
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModRegWord22(fn): mod=00 (src:mem)  reg=100 (dst:SP)  r/m=010 (BP+SI)
@@ -483,7 +483,7 @@ X86ModW.aOpModReg = [
      */
     function opModRegWord22(fn) {
         this.setSP(fn.call(this, this.getSP(), this.getEAWordStack(this.regEBP + this.regESI)));
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModRegWord23(fn): mod=00 (src:mem)  reg=100 (dst:SP)  r/m=011 (BP+DI)
@@ -493,7 +493,7 @@ X86ModW.aOpModReg = [
      */
     function opModRegWord23(fn) {
         this.setSP(fn.call(this, this.getSP(), this.getEAWordStack(this.regEBP + this.regEDI)));
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModRegWord24(fn): mod=00 (src:mem)  reg=100 (dst:SP)  r/m=100 (SI)
@@ -503,7 +503,7 @@ X86ModW.aOpModReg = [
      */
     function opModRegWord24(fn) {
         this.setSP(fn.call(this, this.getSP(), this.getEAWordData(this.regESI)));
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModRegWord25(fn): mod=00 (src:mem)  reg=100 (dst:SP)  r/m=101 (DI)
@@ -513,7 +513,7 @@ X86ModW.aOpModReg = [
      */
     function opModRegWord25(fn) {
         this.setSP(fn.call(this, this.getSP(), this.getEAWordData(this.regEDI)));
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModRegWord26(fn): mod=00 (src:mem)  reg=100 (dst:SP)  r/m=110 (d16)
@@ -523,7 +523,7 @@ X86ModW.aOpModReg = [
      */
     function opModRegWord26(fn) {
         this.setSP(fn.call(this, this.getSP(), this.getEAWordData(this.getIPWord())));
-        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
      * opModRegWord27(fn): mod=00 (src:mem)  reg=100 (dst:SP)  r/m=111 (BX)
@@ -533,7 +533,7 @@ X86ModW.aOpModReg = [
      */
     function opModRegWord27(fn) {
         this.setSP(fn.call(this, this.getSP(), this.getEAWordData(this.regEBX)));
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModRegWord28(fn): mod=00 (src:mem)  reg=101 (dst:BP)  r/m=000 (BX+SI)
@@ -546,7 +546,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModRegWord29(fn): mod=00 (src:mem)  reg=101 (dst:BP)  r/m=001 (BX+DI)
@@ -559,7 +559,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModRegWord2A(fn): mod=00 (src:mem)  reg=101 (dst:BP)  r/m=010 (BP+SI)
@@ -572,7 +572,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModRegWord2B(fn): mod=00 (src:mem)  reg=101 (dst:BP)  r/m=011 (BP+DI)
@@ -585,7 +585,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModRegWord2C(fn): mod=00 (src:mem)  reg=101 (dst:BP)  r/m=100 (SI)
@@ -598,7 +598,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModRegWord2D(fn): mod=00 (src:mem)  reg=101 (dst:BP)  r/m=101 (DI)
@@ -611,7 +611,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModRegWord2E(fn): mod=00 (src:mem)  reg=101 (dst:BP)  r/m=110 (d16)
@@ -624,7 +624,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
      * opModRegWord2F(fn): mod=00 (src:mem)  reg=101 (dst:BP)  r/m=111 (BX)
@@ -637,7 +637,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModRegWord30(fn): mod=00 (src:mem)  reg=110 (dst:SI)  r/m=000 (BX+SI)
@@ -650,7 +650,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModRegWord31(fn): mod=00 (src:mem)  reg=110 (dst:SI)  r/m=001 (BX+DI)
@@ -663,7 +663,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModRegWord32(fn): mod=00 (src:mem)  reg=110 (dst:SI)  r/m=010 (BP+SI)
@@ -676,7 +676,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModRegWord33(fn): mod=00 (src:mem)  reg=110 (dst:SI)  r/m=011 (BP+DI)
@@ -689,7 +689,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModRegWord34(fn): mod=00 (src:mem)  reg=110 (dst:SI)  r/m=100 (SI)
@@ -702,7 +702,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModRegWord35(fn): mod=00 (src:mem)  reg=110 (dst:SI)  r/m=101 (DI)
@@ -715,7 +715,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModRegWord36(fn): mod=00 (src:mem)  reg=110 (dst:SI)  r/m=110 (d16)
@@ -728,7 +728,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
      * opModRegWord37(fn): mod=00 (src:mem)  reg=110 (dst:SI)  r/m=111 (BX)
@@ -741,7 +741,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModRegWord38(fn): mod=00 (src:mem)  reg=111 (dst:DI)  r/m=000 (BX+SI)
@@ -754,7 +754,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModRegWord39(fn): mod=00 (src:mem)  reg=111 (dst:DI)  r/m=001 (BX+DI)
@@ -767,7 +767,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModRegWord3A(fn): mod=00 (src:mem)  reg=111 (dst:DI)  r/m=010 (BP+SI)
@@ -780,7 +780,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModRegWord3B(fn): mod=00 (src:mem)  reg=111 (dst:DI)  r/m=011 (BP+DI)
@@ -793,7 +793,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModRegWord3C(fn): mod=00 (src:mem)  reg=111 (dst:DI)  r/m=100 (SI)
@@ -806,7 +806,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModRegWord3D(fn): mod=00 (src:mem)  reg=111 (dst:DI)  r/m=101 (DI)
@@ -819,7 +819,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModRegWord3E(fn): mod=00 (src:mem)  reg=111 (dst:DI)  r/m=110 (d16)
@@ -832,7 +832,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
      * opModRegWord3F(fn): mod=00 (src:mem)  reg=111 (dst:DI)  r/m=111 (BX)
@@ -845,7 +845,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModRegWord40(fn): mod=01 (src:mem+d8)  reg=000 (dst:AX)  r/m=000 (BX+SI+d8)
@@ -858,7 +858,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModRegWord41(fn): mod=01 (src:mem+d8)  reg=000 (dst:AX)  r/m=001 (BX+DI+d8)
@@ -871,7 +871,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModRegWord42(fn): mod=01 (src:mem+d8)  reg=000 (dst:AX)  r/m=010 (BP+SI+d8)
@@ -884,7 +884,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModRegWord43(fn): mod=01 (src:mem+d8)  reg=000 (dst:AX)  r/m=011 (BP+DI+d8)
@@ -897,7 +897,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModRegWord44(fn): mod=01 (src:mem+d8)  reg=000 (dst:AX)  r/m=100 (SI+d8)
@@ -910,7 +910,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord45(fn): mod=01 (src:mem+d8)  reg=000 (dst:AX)  r/m=101 (DI+d8)
@@ -923,7 +923,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord46(fn): mod=01 (src:mem+d8)  reg=000 (dst:AX)  r/m=110 (BP+d8)
@@ -936,7 +936,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord47(fn): mod=01 (src:mem+d8)  reg=000 (dst:AX)  r/m=111 (BX+d8)
@@ -949,7 +949,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord48(fn): mod=01 (src:mem+d8)  reg=001 (dst:CX)  r/m=000 (BX+SI+d8)
@@ -962,7 +962,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModRegWord49(fn): mod=01 (src:mem+d8)  reg=001 (dst:CX)  r/m=001 (BX+DI+d8)
@@ -975,7 +975,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModRegWord4A(fn): mod=01 (src:mem+d8)  reg=001 (dst:CX)  r/m=010 (BP+SI+d8)
@@ -988,7 +988,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModRegWord4B(fn): mod=01 (src:mem+d8)  reg=001 (dst:CX)  r/m=011 (BP+DI+d8)
@@ -1001,7 +1001,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModRegWord4C(fn): mod=01 (src:mem+d8)  reg=001 (dst:CX)  r/m=100 (SI+d8)
@@ -1014,7 +1014,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord4D(fn): mod=01 (src:mem+d8)  reg=001 (dst:CX)  r/m=101 (DI+d8)
@@ -1027,7 +1027,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord4E(fn): mod=01 (src:mem+d8)  reg=001 (dst:CX)  r/m=110 (BP+d8)
@@ -1040,7 +1040,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord4F(fn): mod=01 (src:mem+d8)  reg=001 (dst:CX)  r/m=111 (BX+d8)
@@ -1053,7 +1053,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord50(fn): mod=01 (src:mem+d8)  reg=010 (dst:DX)  r/m=000 (BX+SI+d8)
@@ -1066,7 +1066,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModRegWord51(fn): mod=01 (src:mem+d8)  reg=010 (dst:DX)  r/m=001 (BX+DI+d8)
@@ -1079,7 +1079,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModRegWord52(fn): mod=01 (src:mem+d8)  reg=010 (dst:DX)  r/m=010 (BP+SI+d8)
@@ -1092,7 +1092,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModRegWord53(fn): mod=01 (src:mem+d8)  reg=010 (dst:DX)  r/m=011 (BP+DI+d8)
@@ -1105,7 +1105,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModRegWord54(fn): mod=01 (src:mem+d8)  reg=010 (dst:DX)  r/m=100 (SI+d8)
@@ -1118,7 +1118,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord55(fn): mod=01 (src:mem+d8)  reg=010 (dst:DX)  r/m=101 (DI+d8)
@@ -1131,7 +1131,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord56(fn): mod=01 (src:mem+d8)  reg=010 (dst:DX)  r/m=110 (BP+d8)
@@ -1144,7 +1144,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord57(fn): mod=01 (src:mem+d8)  reg=010 (dst:DX)  r/m=111 (BX+d8)
@@ -1157,7 +1157,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord58(fn): mod=01 (src:mem+d8)  reg=011 (dst:BX)  r/m=000 (BX+SI+d8)
@@ -1170,7 +1170,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModRegWord59(fn): mod=01 (src:mem+d8)  reg=011 (dst:BX)  r/m=001 (BX+DI+d8)
@@ -1183,7 +1183,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModRegWord5A(fn): mod=01 (src:mem+d8)  reg=011 (dst:BX)  r/m=010 (BP+SI+d8)
@@ -1196,7 +1196,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModRegWord5B(fn): mod=01 (src:mem+d8)  reg=011 (dst:BX)  r/m=011 (BP+DI+d8)
@@ -1209,7 +1209,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModRegWord5C(fn): mod=01 (src:mem+d8)  reg=011 (dst:BX)  r/m=100 (SI+d8)
@@ -1222,7 +1222,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord5D(fn): mod=01 (src:mem+d8)  reg=011 (dst:BX)  r/m=101 (DI+d8)
@@ -1235,7 +1235,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord5E(fn): mod=01 (src:mem+d8)  reg=011 (dst:BX)  r/m=110 (BP+d8)
@@ -1248,7 +1248,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord5F(fn): mod=01 (src:mem+d8)  reg=011 (dst:BX)  r/m=111 (BX+d8)
@@ -1261,7 +1261,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord60(fn): mod=01 (src:mem+d8)  reg=100 (dst:SP)  r/m=000 (BX+SI+d8)
@@ -1271,7 +1271,7 @@ X86ModW.aOpModReg = [
      */
     function opModRegWord60(fn) {
         this.setSP(fn.call(this, this.getSP(), this.getEAWordData(this.regEBX + this.regESI + this.getIPDisp())));
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModRegWord61(fn): mod=01 (src:mem+d8)  reg=100 (dst:SP)  r/m=001 (BX+DI+d8)
@@ -1281,7 +1281,7 @@ X86ModW.aOpModReg = [
      */
     function opModRegWord61(fn) {
         this.setSP(fn.call(this, this.getSP(), this.getEAWordData(this.regEBX + this.regEDI + this.getIPDisp())));
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModRegWord62(fn): mod=01 (src:mem+d8)  reg=100 (dst:SP)  r/m=010 (BP+SI+d8)
@@ -1291,7 +1291,7 @@ X86ModW.aOpModReg = [
      */
     function opModRegWord62(fn) {
         this.setSP(fn.call(this, this.getSP(), this.getEAWordStack(this.regEBP + this.regESI + this.getIPDisp())));
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModRegWord63(fn): mod=01 (src:mem+d8)  reg=100 (dst:SP)  r/m=011 (BP+DI+d8)
@@ -1301,7 +1301,7 @@ X86ModW.aOpModReg = [
      */
     function opModRegWord63(fn) {
         this.setSP(fn.call(this, this.getSP(), this.getEAWordStack(this.regEBP + this.regEDI + this.getIPDisp())));
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModRegWord64(fn): mod=01 (src:mem+d8)  reg=100 (dst:SP)  r/m=100 (SI+d8)
@@ -1311,7 +1311,7 @@ X86ModW.aOpModReg = [
      */
     function opModRegWord64(fn) {
         this.setSP(fn.call(this, this.getSP(), this.getEAWordData(this.regESI + this.getIPDisp())));
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord65(fn): mod=01 (src:mem+d8)  reg=100 (dst:SP)  r/m=101 (DI+d8)
@@ -1321,7 +1321,7 @@ X86ModW.aOpModReg = [
      */
     function opModRegWord65(fn) {
         this.setSP(fn.call(this, this.getSP(), this.getEAWordData(this.regEDI + this.getIPDisp())));
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord66(fn): mod=01 (src:mem+d8)  reg=100 (dst:SP)  r/m=110 (BP+d8)
@@ -1331,7 +1331,7 @@ X86ModW.aOpModReg = [
      */
     function opModRegWord66(fn) {
         this.setSP(fn.call(this, this.getSP(), this.getEAWordStack(this.regEBP + this.getIPDisp())));
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord67(fn): mod=01 (src:mem+d8)  reg=100 (dst:SP)  r/m=111 (BX+d8)
@@ -1341,7 +1341,7 @@ X86ModW.aOpModReg = [
      */
     function opModRegWord67(fn) {
         this.setSP(fn.call(this, this.getSP(), this.getEAWordData(this.regEBX + this.getIPDisp())));
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord68(fn): mod=01 (src:mem+d8)  reg=101 (dst:BP)  r/m=000 (BX+SI+d8)
@@ -1354,7 +1354,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModRegWord69(fn): mod=01 (src:mem+d8)  reg=101 (dst:BP)  r/m=001 (BX+DI+d8)
@@ -1367,7 +1367,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModRegWord6A(fn): mod=01 (src:mem+d8)  reg=101 (dst:BP)  r/m=010 (BP+SI+d8)
@@ -1380,7 +1380,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModRegWord6B(fn): mod=01 (src:mem+d8)  reg=101 (dst:BP)  r/m=011 (BP+DI+d8)
@@ -1393,7 +1393,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModRegWord6C(fn): mod=01 (src:mem+d8)  reg=101 (dst:BP)  r/m=100 (SI+d8)
@@ -1406,7 +1406,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord6D(fn): mod=01 (src:mem+d8)  reg=101 (dst:BP)  r/m=101 (DI+d8)
@@ -1419,7 +1419,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord6E(fn): mod=01 (src:mem+d8)  reg=101 (dst:BP)  r/m=110 (BP+d8)
@@ -1432,7 +1432,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord6F(fn): mod=01 (src:mem+d8)  reg=101 (dst:BP)  r/m=111 (BX+d8)
@@ -1445,7 +1445,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord70(fn): mod=01 (src:mem+d8)  reg=110 (dst:SI)  r/m=000 (BX+SI+d8)
@@ -1458,7 +1458,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModRegWord71(fn): mod=01 (src:mem+d8)  reg=110 (dst:SI)  r/m=001 (BX+DI+d8)
@@ -1471,7 +1471,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModRegWord72(fn): mod=01 (src:mem+d8)  reg=110 (dst:SI)  r/m=010 (BP+SI+d8)
@@ -1484,7 +1484,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModRegWord73(fn): mod=01 (src:mem+d8)  reg=110 (dst:SI)  r/m=011 (BP+DI+d8)
@@ -1497,7 +1497,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModRegWord74(fn): mod=01 (src:mem+d8)  reg=110 (dst:SI)  r/m=100 (SI+d8)
@@ -1510,7 +1510,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord75(fn): mod=01 (src:mem+d8)  reg=110 (dst:SI)  r/m=101 (DI+d8)
@@ -1523,7 +1523,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord76(fn): mod=01 (src:mem+d8)  reg=110 (dst:SI)  r/m=110 (BP+d8)
@@ -1536,7 +1536,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord77(fn): mod=01 (src:mem+d8)  reg=110 (dst:SI)  r/m=111 (BX+d8)
@@ -1549,7 +1549,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord78(fn): mod=01 (src:mem+d8)  reg=111 (dst:DI)  r/m=000 (BX+SI+d8)
@@ -1562,7 +1562,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModRegWord79(fn): mod=01 (src:mem+d8)  reg=111 (dst:DI)  r/m=001 (BX+DI+d8)
@@ -1575,7 +1575,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModRegWord7A(fn): mod=01 (src:mem+d8)  reg=111 (dst:DI)  r/m=010 (BP+SI+d8)
@@ -1588,7 +1588,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModRegWord7B(fn): mod=01 (src:mem+d8)  reg=111 (dst:DI)  r/m=011 (BP+DI+d8)
@@ -1601,7 +1601,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModRegWord7C(fn): mod=01 (src:mem+d8)  reg=111 (dst:DI)  r/m=100 (SI+d8)
@@ -1614,7 +1614,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord7D(fn): mod=01 (src:mem+d8)  reg=111 (dst:DI)  r/m=101 (DI+d8)
@@ -1627,7 +1627,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord7E(fn): mod=01 (src:mem+d8)  reg=111 (dst:DI)  r/m=110 (BP+d8)
@@ -1640,7 +1640,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord7F(fn): mod=01 (src:mem+d8)  reg=111 (dst:DI)  r/m=111 (BX+d8)
@@ -1653,7 +1653,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord80(fn): mod=10 (src:mem+d16)  reg=000 (dst:AX)  r/m=000 (BX+SI+d16)
@@ -1666,7 +1666,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModRegWord81(fn): mod=10 (src:mem+d16)  reg=000 (dst:AX)  r/m=001 (BX+DI+d16)
@@ -1679,7 +1679,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModRegWord82(fn): mod=10 (src:mem+d16)  reg=000 (dst:AX)  r/m=010 (BP+SI+d16)
@@ -1692,7 +1692,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModRegWord83(fn): mod=10 (src:mem+d16)  reg=000 (dst:AX)  r/m=011 (BP+DI+d16)
@@ -1705,7 +1705,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModRegWord84(fn): mod=10 (src:mem+d16)  reg=000 (dst:AX)  r/m=100 (SI+d16)
@@ -1718,7 +1718,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord85(fn): mod=10 (src:mem+d16)  reg=000 (dst:AX)  r/m=101 (DI+d16)
@@ -1731,7 +1731,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord86(fn): mod=10 (src:mem+d16)  reg=000 (dst:AX)  r/m=110 (BP+d16)
@@ -1744,7 +1744,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord87(fn): mod=10 (src:mem+d16)  reg=000 (dst:AX)  r/m=111 (BX+d16)
@@ -1757,7 +1757,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiAL = this.backTrack.btiEALo; this.backTrack.btiAH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord88(fn): mod=10 (src:mem+d16)  reg=001 (dst:CX)  r/m=000 (BX+SI+d16)
@@ -1770,7 +1770,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModRegWord89(fn): mod=10 (src:mem+d16)  reg=001 (dst:CX)  r/m=001 (BX+DI+d16)
@@ -1783,7 +1783,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModRegWord8A(fn): mod=10 (src:mem+d16)  reg=001 (dst:CX)  r/m=010 (BP+SI+d16)
@@ -1796,7 +1796,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModRegWord8B(fn): mod=10 (src:mem+d16)  reg=001 (dst:CX)  r/m=011 (BP+DI+d16)
@@ -1809,7 +1809,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModRegWord8C(fn): mod=10 (src:mem+d16)  reg=001 (dst:CX)  r/m=100 (SI+d16)
@@ -1822,7 +1822,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord8D(fn): mod=10 (src:mem+d16)  reg=001 (dst:CX)  r/m=101 (DI+d16)
@@ -1835,7 +1835,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord8E(fn): mod=10 (src:mem+d16)  reg=001 (dst:CX)  r/m=110 (BP+d16)
@@ -1848,7 +1848,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord8F(fn): mod=10 (src:mem+d16)  reg=001 (dst:CX)  r/m=111 (BX+d16)
@@ -1861,7 +1861,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiCL = this.backTrack.btiEALo; this.backTrack.btiCH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord90(fn): mod=10 (src:mem+d16)  reg=010 (dst:DX)  r/m=000 (BX+SI+d16)
@@ -1874,7 +1874,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModRegWord91(fn): mod=10 (src:mem+d16)  reg=010 (dst:DX)  r/m=001 (BX+DI+d16)
@@ -1887,7 +1887,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModRegWord92(fn): mod=10 (src:mem+d16)  reg=010 (dst:DX)  r/m=010 (BP+SI+d16)
@@ -1900,7 +1900,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModRegWord93(fn): mod=10 (src:mem+d16)  reg=010 (dst:DX)  r/m=011 (BP+DI+d16)
@@ -1913,7 +1913,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModRegWord94(fn): mod=10 (src:mem+d16)  reg=010 (dst:DX)  r/m=100 (SI+d16)
@@ -1926,7 +1926,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord95(fn): mod=10 (src:mem+d16)  reg=010 (dst:DX)  r/m=101 (DI+d16)
@@ -1939,7 +1939,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord96(fn): mod=10 (src:mem+d16)  reg=010 (dst:DX)  r/m=110 (BP+d16)
@@ -1952,7 +1952,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord97(fn): mod=10 (src:mem+d16)  reg=010 (dst:DX)  r/m=111 (BX+d16)
@@ -1965,7 +1965,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDL = this.backTrack.btiEALo; this.backTrack.btiDH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord98(fn): mod=10 (src:mem+d16)  reg=011 (dst:BX)  r/m=000 (BX+SI+d16)
@@ -1978,7 +1978,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModRegWord99(fn): mod=10 (src:mem+d16)  reg=011 (dst:BX)  r/m=001 (BX+DI+d16)
@@ -1991,7 +1991,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModRegWord9A(fn): mod=10 (src:mem+d16)  reg=011 (dst:BX)  r/m=010 (BP+SI+d16)
@@ -2004,7 +2004,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModRegWord9B(fn): mod=10 (src:mem+d16)  reg=011 (dst:BX)  r/m=011 (BP+DI+d16)
@@ -2017,7 +2017,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModRegWord9C(fn): mod=10 (src:mem+d16)  reg=011 (dst:BX)  r/m=100 (SI+d16)
@@ -2030,7 +2030,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord9D(fn): mod=10 (src:mem+d16)  reg=011 (dst:BX)  r/m=101 (DI+d16)
@@ -2043,7 +2043,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord9E(fn): mod=10 (src:mem+d16)  reg=011 (dst:BX)  r/m=110 (BP+d16)
@@ -2056,7 +2056,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWord9F(fn): mod=10 (src:mem+d16)  reg=011 (dst:BX)  r/m=111 (BX+d16)
@@ -2069,7 +2069,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBL = this.backTrack.btiEALo; this.backTrack.btiBH = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWordA0(fn): mod=10 (src:mem+d16)  reg=100 (dst:SP)  r/m=000 (BX+SI+d16)
@@ -2079,7 +2079,7 @@ X86ModW.aOpModReg = [
      */
     function opModRegWordA0(fn) {
         this.setSP(fn.call(this, this.getSP(), this.getEAWordData(this.regEBX + this.regESI + this.getIPWord())));
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModRegWordA1(fn): mod=10 (src:mem+d16)  reg=100 (dst:SP)  r/m=001 (BX+DI+d16)
@@ -2089,7 +2089,7 @@ X86ModW.aOpModReg = [
      */
     function opModRegWordA1(fn) {
         this.setSP(fn.call(this, this.getSP(), this.getEAWordData(this.regEBX + this.regEDI + this.getIPWord())));
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModRegWordA2(fn): mod=10 (src:mem+d16)  reg=100 (dst:SP)  r/m=010 (BP+SI+d16)
@@ -2099,7 +2099,7 @@ X86ModW.aOpModReg = [
      */
     function opModRegWordA2(fn) {
         this.setSP(fn.call(this, this.getSP(), this.getEAWordStack(this.regEBP + this.regESI + this.getIPWord())));
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModRegWordA3(fn): mod=10 (src:mem+d16)  reg=100 (dst:SP)  r/m=011 (BP+DI+d16)
@@ -2109,7 +2109,7 @@ X86ModW.aOpModReg = [
      */
     function opModRegWordA3(fn) {
         this.setSP(fn.call(this, this.getSP(), this.getEAWordStack(this.regEBP + this.regEDI + this.getIPWord())));
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModRegWordA4(fn): mod=10 (src:mem+d16)  reg=100 (dst:SP)  r/m=100 (SI+d16)
@@ -2119,7 +2119,7 @@ X86ModW.aOpModReg = [
      */
     function opModRegWordA4(fn) {
         this.setSP(fn.call(this, this.getSP(), this.getEAWordData(this.regESI + this.getIPWord())));
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWordA5(fn): mod=10 (src:mem+d16)  reg=100 (dst:SP)  r/m=101 (DI+d16)
@@ -2129,7 +2129,7 @@ X86ModW.aOpModReg = [
      */
     function opModRegWordA5(fn) {
         this.setSP(fn.call(this, this.getSP(), this.getEAWordData(this.regEDI + this.getIPWord())));
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWordA6(fn): mod=10 (src:mem+d16)  reg=100 (dst:SP)  r/m=110 (BP+d16)
@@ -2139,7 +2139,7 @@ X86ModW.aOpModReg = [
      */
     function opModRegWordA6(fn) {
         this.setSP(fn.call(this, this.getSP(), this.getEAWordStack(this.regEBP + this.getIPWord())));
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWordA7(fn): mod=10 (src:mem+d16)  reg=100 (dst:SP)  r/m=111 (BX+d16)
@@ -2149,7 +2149,7 @@ X86ModW.aOpModReg = [
      */
     function opModRegWordA7(fn) {
         this.setSP(fn.call(this, this.getSP(), this.getEAWordData(this.regEBX + this.getIPWord())));
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWordA8(fn): mod=10 (src:mem+d16)  reg=101 (dst:BP)  r/m=000 (BX+SI+d16)
@@ -2162,7 +2162,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModRegWordA9(fn): mod=10 (src:mem+d16)  reg=101 (dst:BP)  r/m=001 (BX+DI+d16)
@@ -2175,7 +2175,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModRegWordAA(fn): mod=10 (src:mem+d16)  reg=101 (dst:BP)  r/m=010 (BP+SI+d16)
@@ -2188,7 +2188,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModRegWordAB(fn): mod=10 (src:mem+d16)  reg=101 (dst:BP)  r/m=011 (BP+DI+d16)
@@ -2201,7 +2201,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModRegWordAC(fn): mod=10 (src:mem+d16)  reg=101 (dst:BP)  r/m=100 (SI+d16)
@@ -2214,7 +2214,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWordAD(fn): mod=10 (src:mem+d16)  reg=101 (dst:BP)  r/m=101 (DI+d16)
@@ -2227,7 +2227,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWordAE(fn): mod=10 (src:mem+d16)  reg=101 (dst:BP)  r/m=110 (BP+d16)
@@ -2240,7 +2240,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWordAF(fn): mod=10 (src:mem+d16)  reg=101 (dst:BP)  r/m=111 (BX+d16)
@@ -2253,7 +2253,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiBPLo = this.backTrack.btiEALo; this.backTrack.btiBPHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWordB0(fn): mod=10 (src:mem+d16)  reg=110 (dst:SI)  r/m=000 (BX+SI+d16)
@@ -2266,7 +2266,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModRegWordB1(fn): mod=10 (src:mem+d16)  reg=110 (dst:SI)  r/m=001 (BX+DI+d16)
@@ -2279,7 +2279,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModRegWordB2(fn): mod=10 (src:mem+d16)  reg=110 (dst:SI)  r/m=010 (BP+SI+d16)
@@ -2292,7 +2292,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModRegWordB3(fn): mod=10 (src:mem+d16)  reg=110 (dst:SI)  r/m=011 (BP+DI+d16)
@@ -2305,7 +2305,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModRegWordB4(fn): mod=10 (src:mem+d16)  reg=110 (dst:SI)  r/m=100 (SI+d16)
@@ -2318,7 +2318,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWordB5(fn): mod=10 (src:mem+d16)  reg=110 (dst:SI)  r/m=101 (DI+d16)
@@ -2331,7 +2331,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWordB6(fn): mod=10 (src:mem+d16)  reg=110 (dst:SI)  r/m=110 (BP+d16)
@@ -2344,7 +2344,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWordB7(fn): mod=10 (src:mem+d16)  reg=110 (dst:SI)  r/m=111 (BX+d16)
@@ -2357,7 +2357,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiSILo = this.backTrack.btiEALo; this.backTrack.btiSIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWordB8(fn): mod=10 (src:mem+d16)  reg=111 (dst:DI)  r/m=000 (BX+SI+d16)
@@ -2370,7 +2370,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModRegWordB9(fn): mod=10 (src:mem+d16)  reg=111 (dst:DI)  r/m=001 (BX+DI+d16)
@@ -2383,7 +2383,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModRegWordBA(fn): mod=10 (src:mem+d16)  reg=111 (dst:DI)  r/m=010 (BP+SI+d16)
@@ -2396,7 +2396,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModRegWordBB(fn): mod=10 (src:mem+d16)  reg=111 (dst:DI)  r/m=011 (BP+DI+d16)
@@ -2409,7 +2409,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModRegWordBC(fn): mod=10 (src:mem+d16)  reg=111 (dst:DI)  r/m=100 (SI+d16)
@@ -2422,7 +2422,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWordBD(fn): mod=10 (src:mem+d16)  reg=111 (dst:DI)  r/m=101 (DI+d16)
@@ -2435,7 +2435,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWordBE(fn): mod=10 (src:mem+d16)  reg=111 (dst:DI)  r/m=110 (BP+d16)
@@ -2448,7 +2448,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWordBF(fn): mod=10 (src:mem+d16)  reg=111 (dst:DI)  r/m=111 (BX+d16)
@@ -2461,7 +2461,7 @@ X86ModW.aOpModReg = [
         if (BACKTRACK) {
             this.backTrack.btiDILo = this.backTrack.btiEALo; this.backTrack.btiDIHi = this.backTrack.btiEAHi;
         }
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModRegWordC0(fn): mod=11 (src:reg)  reg=000 (dst:AX)  r/m=000 (AX)
@@ -3201,7 +3201,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModMemWord01(fn): mod=00 (dst:mem)  reg=000 (src:AX)  r/m=001 (BX+DI)
@@ -3215,7 +3215,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModMemWord02(fn): mod=00 (dst:mem)  reg=000 (src:AX)  r/m=010 (BP+SI)
@@ -3229,7 +3229,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModMemWord03(fn): mod=00 (dst:mem)  reg=000 (src:AX)  r/m=011 (BP+DI)
@@ -3243,7 +3243,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModMemWord04(fn): mod=00 (dst:mem)  reg=000 (src:AX)  r/m=100 (SI)
@@ -3257,7 +3257,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModMemWord05(fn): mod=00 (dst:mem)  reg=000 (src:AX)  r/m=101 (DI)
@@ -3271,7 +3271,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModMemWord06(fn): mod=00 (dst:mem)  reg=000 (src:AX)  r/m=110 (d16)
@@ -3285,7 +3285,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
      * opModMemWord07(fn): mod=00 (dst:mem)  reg=000 (src:AX)  r/m=111 (BX)
@@ -3299,7 +3299,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModMemWord08(fn): mod=00 (dst:mem)  reg=001 (src:CX)  r/m=000 (BX+SI)
@@ -3313,7 +3313,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModMemWord09(fn): mod=00 (dst:mem)  reg=001 (src:CX)  r/m=001 (BX+DI)
@@ -3327,7 +3327,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModMemWord0A(fn): mod=00 (dst:mem)  reg=001 (src:CX)  r/m=010 (BP+SI)
@@ -3341,7 +3341,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModMemWord0B(fn): mod=00 (dst:mem)  reg=001 (src:CX)  r/m=011 (BP+DI)
@@ -3355,7 +3355,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModMemWord0C(fn): mod=00 (dst:mem)  reg=001 (src:CX)  r/m=100 (SI)
@@ -3369,7 +3369,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModMemWord0D(fn): mod=00 (dst:mem)  reg=001 (src:CX)  r/m=101 (DI)
@@ -3383,7 +3383,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModMemWord0E(fn): mod=00 (dst:mem)  reg=001 (src:CX)  r/m=110 (d16)
@@ -3397,7 +3397,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
      * opModMemWord0F(fn): mod=00 (dst:mem)  reg=001 (src:CX)  r/m=111 (BX)
@@ -3411,7 +3411,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModMemWord10(fn): mod=00 (dst:mem)  reg=010 (src:DX)  r/m=000 (BX+SI)
@@ -3425,7 +3425,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModMemWord11(fn): mod=00 (dst:mem)  reg=010 (src:DX)  r/m=001 (BX+DI)
@@ -3439,7 +3439,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModMemWord12(fn): mod=00 (dst:mem)  reg=010 (src:DX)  r/m=010 (BP+SI)
@@ -3453,7 +3453,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModMemWord13(fn): mod=00 (dst:mem)  reg=010 (src:DX)  r/m=011 (BP+DI)
@@ -3467,7 +3467,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModMemWord14(fn): mod=00 (dst:mem)  reg=010 (src:DX)  r/m=100 (SI)
@@ -3481,7 +3481,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModMemWord15(fn): mod=00 (dst:mem)  reg=010 (src:DX)  r/m=101 (DI)
@@ -3495,7 +3495,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModMemWord16(fn): mod=00 (dst:mem)  reg=010 (src:DX)  r/m=110 (d16)
@@ -3509,7 +3509,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
      * opModMemWord17(fn): mod=00 (dst:mem)  reg=010 (src:DX)  r/m=111 (BX)
@@ -3523,7 +3523,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModMemWord18(fn): mod=00 (dst:mem)  reg=011 (src:BX)  r/m=000 (BX+SI)
@@ -3537,7 +3537,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModMemWord19(fn): mod=00 (dst:mem)  reg=011 (src:BX)  r/m=001 (BX+DI)
@@ -3551,7 +3551,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModMemWord1A(fn): mod=00 (dst:mem)  reg=011 (src:BX)  r/m=010 (BP+SI)
@@ -3565,7 +3565,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModMemWord1B(fn): mod=00 (dst:mem)  reg=011 (src:BX)  r/m=011 (BP+DI)
@@ -3579,7 +3579,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModMemWord1C(fn): mod=00 (dst:mem)  reg=011 (src:BX)  r/m=100 (SI)
@@ -3593,7 +3593,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModMemWord1D(fn): mod=00 (dst:mem)  reg=011 (src:BX)  r/m=101 (DI)
@@ -3607,7 +3607,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModMemWord1E(fn): mod=00 (dst:mem)  reg=011 (src:BX)  r/m=110 (d16)
@@ -3621,7 +3621,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
      * opModMemWord1F(fn): mod=00 (dst:mem)  reg=011 (src:BX)  r/m=111 (BX)
@@ -3635,7 +3635,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModMemWord20(fn): mod=00 (dst:mem)  reg=100 (src:SP)  r/m=000 (BX+SI)
@@ -3649,7 +3649,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModMemWord21(fn): mod=00 (dst:mem)  reg=100 (src:SP)  r/m=001 (BX+DI)
@@ -3663,7 +3663,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModMemWord22(fn): mod=00 (dst:mem)  reg=100 (src:SP)  r/m=010 (BP+SI)
@@ -3677,7 +3677,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModMemWord23(fn): mod=00 (dst:mem)  reg=100 (src:SP)  r/m=011 (BP+DI)
@@ -3691,7 +3691,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModMemWord24(fn): mod=00 (dst:mem)  reg=100 (src:SP)  r/m=100 (SI)
@@ -3705,7 +3705,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModMemWord25(fn): mod=00 (dst:mem)  reg=100 (src:SP)  r/m=101 (DI)
@@ -3719,7 +3719,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModMemWord26(fn): mod=00 (dst:mem)  reg=100 (src:SP)  r/m=110 (d16)
@@ -3733,7 +3733,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
      * opModMemWord27(fn): mod=00 (dst:mem)  reg=100 (src:SP)  r/m=111 (BX)
@@ -3747,7 +3747,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModMemWord28(fn): mod=00 (dst:mem)  reg=101 (src:BP)  r/m=000 (BX+SI)
@@ -3761,7 +3761,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModMemWord29(fn): mod=00 (dst:mem)  reg=101 (src:BP)  r/m=001 (BX+DI)
@@ -3775,7 +3775,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModMemWord2A(fn): mod=00 (dst:mem)  reg=101 (src:BP)  r/m=010 (BP+SI)
@@ -3789,7 +3789,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModMemWord2B(fn): mod=00 (dst:mem)  reg=101 (src:BP)  r/m=011 (BP+DI)
@@ -3803,7 +3803,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModMemWord2C(fn): mod=00 (dst:mem)  reg=101 (src:BP)  r/m=100 (SI)
@@ -3817,7 +3817,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModMemWord2D(fn): mod=00 (dst:mem)  reg=101 (src:BP)  r/m=101 (DI)
@@ -3831,7 +3831,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModMemWord2E(fn): mod=00 (dst:mem)  reg=101 (src:BP)  r/m=110 (d16)
@@ -3845,7 +3845,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
      * opModMemWord2F(fn): mod=00 (dst:mem)  reg=101 (src:BP)  r/m=111 (BX)
@@ -3859,7 +3859,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModMemWord30(fn): mod=00 (dst:mem)  reg=110 (src:SI)  r/m=000 (BX+SI)
@@ -3873,7 +3873,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModMemWord31(fn): mod=00 (dst:mem)  reg=110 (src:SI)  r/m=001 (BX+DI)
@@ -3887,7 +3887,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModMemWord32(fn): mod=00 (dst:mem)  reg=110 (src:SI)  r/m=010 (BP+SI)
@@ -3901,7 +3901,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModMemWord33(fn): mod=00 (dst:mem)  reg=110 (src:SI)  r/m=011 (BP+DI)
@@ -3915,7 +3915,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModMemWord34(fn): mod=00 (dst:mem)  reg=110 (src:SI)  r/m=100 (SI)
@@ -3929,7 +3929,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModMemWord35(fn): mod=00 (dst:mem)  reg=110 (src:SI)  r/m=101 (DI)
@@ -3943,7 +3943,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModMemWord36(fn): mod=00 (dst:mem)  reg=110 (src:SI)  r/m=110 (d16)
@@ -3957,7 +3957,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
      * opModMemWord37(fn): mod=00 (dst:mem)  reg=110 (src:SI)  r/m=111 (BX)
@@ -3971,7 +3971,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModMemWord38(fn): mod=00 (dst:mem)  reg=111 (src:DI)  r/m=000 (BX+SI)
@@ -3985,7 +3985,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModMemWord39(fn): mod=00 (dst:mem)  reg=111 (src:DI)  r/m=001 (BX+DI)
@@ -3999,7 +3999,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModMemWord3A(fn): mod=00 (dst:mem)  reg=111 (src:DI)  r/m=010 (BP+SI)
@@ -4013,7 +4013,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModMemWord3B(fn): mod=00 (dst:mem)  reg=111 (src:DI)  r/m=011 (BP+DI)
@@ -4027,7 +4027,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModMemWord3C(fn): mod=00 (dst:mem)  reg=111 (src:DI)  r/m=100 (SI)
@@ -4041,7 +4041,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModMemWord3D(fn): mod=00 (dst:mem)  reg=111 (src:DI)  r/m=101 (DI)
@@ -4055,7 +4055,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModMemWord3E(fn): mod=00 (dst:mem)  reg=111 (src:DI)  r/m=110 (d16)
@@ -4069,7 +4069,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
      * opModMemWord3F(fn): mod=00 (dst:mem)  reg=111 (src:DI)  r/m=111 (BX)
@@ -4083,7 +4083,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModMemWord40(fn): mod=01 (dst:mem+d8)  reg=000 (src:AX)  r/m=000 (BX+SI+d8)
@@ -4097,7 +4097,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModMemWord41(fn): mod=01 (dst:mem+d8)  reg=000 (src:AX)  r/m=001 (BX+DI+d8)
@@ -4111,7 +4111,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModMemWord42(fn): mod=01 (dst:mem+d8)  reg=000 (src:AX)  r/m=010 (BP+SI+d8)
@@ -4125,7 +4125,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModMemWord43(fn): mod=01 (dst:mem+d8)  reg=000 (src:AX)  r/m=011 (BP+DI+d8)
@@ -4139,7 +4139,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModMemWord44(fn): mod=01 (dst:mem+d8)  reg=000 (src:AX)  r/m=100 (SI+d8)
@@ -4153,7 +4153,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord45(fn): mod=01 (dst:mem+d8)  reg=000 (src:AX)  r/m=101 (DI+d8)
@@ -4167,7 +4167,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord46(fn): mod=01 (dst:mem+d8)  reg=000 (src:AX)  r/m=110 (BP+d8)
@@ -4181,7 +4181,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord47(fn): mod=01 (dst:mem+d8)  reg=000 (src:AX)  r/m=111 (BX+d8)
@@ -4195,7 +4195,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord48(fn): mod=01 (dst:mem+d8)  reg=001 (src:CX)  r/m=000 (BX+SI+d8)
@@ -4209,7 +4209,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModMemWord49(fn): mod=01 (dst:mem+d8)  reg=001 (src:CX)  r/m=001 (BX+DI+d8)
@@ -4223,7 +4223,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModMemWord4A(fn): mod=01 (dst:mem+d8)  reg=001 (src:CX)  r/m=010 (BP+SI+d8)
@@ -4237,7 +4237,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModMemWord4B(fn): mod=01 (dst:mem+d8)  reg=001 (src:CX)  r/m=011 (BP+DI+d8)
@@ -4251,7 +4251,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModMemWord4C(fn): mod=01 (dst:mem+d8)  reg=001 (src:CX)  r/m=100 (SI+d8)
@@ -4265,7 +4265,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord4D(fn): mod=01 (dst:mem+d8)  reg=001 (src:CX)  r/m=101 (DI+d8)
@@ -4279,7 +4279,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord4E(fn): mod=01 (dst:mem+d8)  reg=001 (src:CX)  r/m=110 (BP+d8)
@@ -4293,7 +4293,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord4F(fn): mod=01 (dst:mem+d8)  reg=001 (src:CX)  r/m=111 (BX+d8)
@@ -4307,7 +4307,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord50(fn): mod=01 (dst:mem+d8)  reg=010 (src:DX)  r/m=000 (BX+SI+d8)
@@ -4321,7 +4321,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModMemWord51(fn): mod=01 (dst:mem+d8)  reg=010 (src:DX)  r/m=001 (BX+DI+d8)
@@ -4335,7 +4335,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModMemWord52(fn): mod=01 (dst:mem+d8)  reg=010 (src:DX)  r/m=010 (BP+SI+d8)
@@ -4349,7 +4349,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModMemWord53(fn): mod=01 (dst:mem+d8)  reg=010 (src:DX)  r/m=011 (BP+DI+d8)
@@ -4363,7 +4363,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModMemWord54(fn): mod=01 (dst:mem+d8)  reg=010 (src:DX)  r/m=100 (SI+d8)
@@ -4377,7 +4377,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord55(fn): mod=01 (dst:mem+d8)  reg=010 (src:DX)  r/m=101 (DI+d8)
@@ -4391,7 +4391,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord56(fn): mod=01 (dst:mem+d8)  reg=010 (src:DX)  r/m=110 (BP+d8)
@@ -4405,7 +4405,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord57(fn): mod=01 (dst:mem+d8)  reg=010 (src:DX)  r/m=111 (BX+d8)
@@ -4419,7 +4419,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord58(fn): mod=01 (dst:mem+d8)  reg=011 (src:BX)  r/m=000 (BX+SI+d8)
@@ -4433,7 +4433,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModMemWord59(fn): mod=01 (dst:mem+d8)  reg=011 (src:BX)  r/m=001 (BX+DI+d8)
@@ -4447,7 +4447,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModMemWord5A(fn): mod=01 (dst:mem+d8)  reg=011 (src:BX)  r/m=010 (BP+SI+d8)
@@ -4461,7 +4461,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModMemWord5B(fn): mod=01 (dst:mem+d8)  reg=011 (src:BX)  r/m=011 (BP+DI+d8)
@@ -4475,7 +4475,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModMemWord5C(fn): mod=01 (dst:mem+d8)  reg=011 (src:BX)  r/m=100 (SI+d8)
@@ -4489,7 +4489,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord5D(fn): mod=01 (dst:mem+d8)  reg=011 (src:BX)  r/m=101 (DI+d8)
@@ -4503,7 +4503,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord5E(fn): mod=01 (dst:mem+d8)  reg=011 (src:BX)  r/m=110 (BP+d8)
@@ -4517,7 +4517,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord5F(fn): mod=01 (dst:mem+d8)  reg=011 (src:BX)  r/m=111 (BX+d8)
@@ -4531,7 +4531,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord60(fn): mod=01 (dst:mem+d8)  reg=100 (src:SP)  r/m=000 (BX+SI+d8)
@@ -4545,7 +4545,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModMemWord61(fn): mod=01 (dst:mem+d8)  reg=100 (src:SP)  r/m=001 (BX+DI+d8)
@@ -4559,7 +4559,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModMemWord62(fn): mod=01 (dst:mem+d8)  reg=100 (src:SP)  r/m=010 (BP+SI+d8)
@@ -4573,7 +4573,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModMemWord63(fn): mod=01 (dst:mem+d8)  reg=100 (src:SP)  r/m=011 (BP+DI+d8)
@@ -4587,7 +4587,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModMemWord64(fn): mod=01 (dst:mem+d8)  reg=100 (src:SP)  r/m=100 (SI+d8)
@@ -4601,7 +4601,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord65(fn): mod=01 (dst:mem+d8)  reg=100 (src:SP)  r/m=101 (DI+d8)
@@ -4615,7 +4615,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord66(fn): mod=01 (dst:mem+d8)  reg=100 (src:SP)  r/m=110 (BP+d8)
@@ -4629,7 +4629,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord67(fn): mod=01 (dst:mem+d8)  reg=100 (src:SP)  r/m=111 (BX+d8)
@@ -4643,7 +4643,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord68(fn): mod=01 (dst:mem+d8)  reg=101 (src:BP)  r/m=000 (BX+SI+d8)
@@ -4657,7 +4657,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModMemWord69(fn): mod=01 (dst:mem+d8)  reg=101 (src:BP)  r/m=001 (BX+DI+d8)
@@ -4671,7 +4671,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModMemWord6A(fn): mod=01 (dst:mem+d8)  reg=101 (src:BP)  r/m=010 (BP+SI+d8)
@@ -4685,7 +4685,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModMemWord6B(fn): mod=01 (dst:mem+d8)  reg=101 (src:BP)  r/m=011 (BP+DI+d8)
@@ -4699,7 +4699,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModMemWord6C(fn): mod=01 (dst:mem+d8)  reg=101 (src:BP)  r/m=100 (SI+d8)
@@ -4713,7 +4713,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord6D(fn): mod=01 (dst:mem+d8)  reg=101 (src:BP)  r/m=101 (DI+d8)
@@ -4727,7 +4727,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord6E(fn): mod=01 (dst:mem+d8)  reg=101 (src:BP)  r/m=110 (BP+d8)
@@ -4741,7 +4741,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord6F(fn): mod=01 (dst:mem+d8)  reg=101 (src:BP)  r/m=111 (BX+d8)
@@ -4755,7 +4755,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord70(fn): mod=01 (dst:mem+d8)  reg=110 (src:SI)  r/m=000 (BX+SI+d8)
@@ -4769,7 +4769,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModMemWord71(fn): mod=01 (dst:mem+d8)  reg=110 (src:SI)  r/m=001 (BX+DI+d8)
@@ -4783,7 +4783,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModMemWord72(fn): mod=01 (dst:mem+d8)  reg=110 (src:SI)  r/m=010 (BP+SI+d8)
@@ -4797,7 +4797,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModMemWord73(fn): mod=01 (dst:mem+d8)  reg=110 (src:SI)  r/m=011 (BP+DI+d8)
@@ -4811,7 +4811,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModMemWord74(fn): mod=01 (dst:mem+d8)  reg=110 (src:SI)  r/m=100 (SI+d8)
@@ -4825,7 +4825,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord75(fn): mod=01 (dst:mem+d8)  reg=110 (src:SI)  r/m=101 (DI+d8)
@@ -4839,7 +4839,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord76(fn): mod=01 (dst:mem+d8)  reg=110 (src:SI)  r/m=110 (BP+d8)
@@ -4853,7 +4853,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord77(fn): mod=01 (dst:mem+d8)  reg=110 (src:SI)  r/m=111 (BX+d8)
@@ -4867,7 +4867,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord78(fn): mod=01 (dst:mem+d8)  reg=111 (src:DI)  r/m=000 (BX+SI+d8)
@@ -4881,7 +4881,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModMemWord79(fn): mod=01 (dst:mem+d8)  reg=111 (src:DI)  r/m=001 (BX+DI+d8)
@@ -4895,7 +4895,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModMemWord7A(fn): mod=01 (dst:mem+d8)  reg=111 (src:DI)  r/m=010 (BP+SI+d8)
@@ -4909,7 +4909,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModMemWord7B(fn): mod=01 (dst:mem+d8)  reg=111 (src:DI)  r/m=011 (BP+DI+d8)
@@ -4923,7 +4923,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModMemWord7C(fn): mod=01 (dst:mem+d8)  reg=111 (src:DI)  r/m=100 (SI+d8)
@@ -4937,7 +4937,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord7D(fn): mod=01 (dst:mem+d8)  reg=111 (src:DI)  r/m=101 (DI+d8)
@@ -4951,7 +4951,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord7E(fn): mod=01 (dst:mem+d8)  reg=111 (src:DI)  r/m=110 (BP+d8)
@@ -4965,7 +4965,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord7F(fn): mod=01 (dst:mem+d8)  reg=111 (src:DI)  r/m=111 (BX+d8)
@@ -4979,7 +4979,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord80(fn): mod=10 (dst:mem+d16)  reg=000 (src:AX)  r/m=000 (BX+SI+d16)
@@ -4993,7 +4993,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModMemWord81(fn): mod=10 (dst:mem+d16)  reg=000 (src:AX)  r/m=001 (BX+DI+d16)
@@ -5007,7 +5007,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModMemWord82(fn): mod=10 (dst:mem+d16)  reg=000 (src:AX)  r/m=010 (BP+SI+d16)
@@ -5021,7 +5021,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModMemWord83(fn): mod=10 (dst:mem+d16)  reg=000 (src:AX)  r/m=011 (BP+DI+d16)
@@ -5035,7 +5035,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModMemWord84(fn): mod=10 (dst:mem+d16)  reg=000 (src:AX)  r/m=100 (SI+d16)
@@ -5049,7 +5049,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord85(fn): mod=10 (dst:mem+d16)  reg=000 (src:AX)  r/m=101 (DI+d16)
@@ -5063,7 +5063,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord86(fn): mod=10 (dst:mem+d16)  reg=000 (src:AX)  r/m=110 (BP+d16)
@@ -5077,7 +5077,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord87(fn): mod=10 (dst:mem+d16)  reg=000 (src:AX)  r/m=111 (BX+d16)
@@ -5091,7 +5091,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiAL; this.backTrack.btiEAHi = this.backTrack.btiAH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord88(fn): mod=10 (dst:mem+d16)  reg=001 (src:CX)  r/m=000 (BX+SI+d16)
@@ -5105,7 +5105,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModMemWord89(fn): mod=10 (dst:mem+d16)  reg=001 (src:CX)  r/m=001 (BX+DI+d16)
@@ -5119,7 +5119,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModMemWord8A(fn): mod=10 (dst:mem+d16)  reg=001 (src:CX)  r/m=010 (BP+SI+d16)
@@ -5133,7 +5133,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModMemWord8B(fn): mod=10 (dst:mem+d16)  reg=001 (src:CX)  r/m=011 (BP+DI+d16)
@@ -5147,7 +5147,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModMemWord8C(fn): mod=10 (dst:mem+d16)  reg=001 (src:CX)  r/m=100 (SI+d16)
@@ -5161,7 +5161,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord8D(fn): mod=10 (dst:mem+d16)  reg=001 (src:CX)  r/m=101 (DI+d16)
@@ -5175,7 +5175,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord8E(fn): mod=10 (dst:mem+d16)  reg=001 (src:CX)  r/m=110 (BP+d16)
@@ -5189,7 +5189,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord8F(fn): mod=10 (dst:mem+d16)  reg=001 (src:CX)  r/m=111 (BX+d16)
@@ -5203,7 +5203,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiCL; this.backTrack.btiEAHi = this.backTrack.btiCH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord90(fn): mod=10 (dst:mem+d16)  reg=010 (src:DX)  r/m=000 (BX+SI+d16)
@@ -5217,7 +5217,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModMemWord91(fn): mod=10 (dst:mem+d16)  reg=010 (src:DX)  r/m=001 (BX+DI+d16)
@@ -5231,7 +5231,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModMemWord92(fn): mod=10 (dst:mem+d16)  reg=010 (src:DX)  r/m=010 (BP+SI+d16)
@@ -5245,7 +5245,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModMemWord93(fn): mod=10 (dst:mem+d16)  reg=010 (src:DX)  r/m=011 (BP+DI+d16)
@@ -5259,7 +5259,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModMemWord94(fn): mod=10 (dst:mem+d16)  reg=010 (src:DX)  r/m=100 (SI+d16)
@@ -5273,7 +5273,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord95(fn): mod=10 (dst:mem+d16)  reg=010 (src:DX)  r/m=101 (DI+d16)
@@ -5287,7 +5287,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord96(fn): mod=10 (dst:mem+d16)  reg=010 (src:DX)  r/m=110 (BP+d16)
@@ -5301,7 +5301,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord97(fn): mod=10 (dst:mem+d16)  reg=010 (src:DX)  r/m=111 (BX+d16)
@@ -5315,7 +5315,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDL; this.backTrack.btiEAHi = this.backTrack.btiDH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord98(fn): mod=10 (dst:mem+d16)  reg=011 (src:BX)  r/m=000 (BX+SI+d16)
@@ -5329,7 +5329,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModMemWord99(fn): mod=10 (dst:mem+d16)  reg=011 (src:BX)  r/m=001 (BX+DI+d16)
@@ -5343,7 +5343,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModMemWord9A(fn): mod=10 (dst:mem+d16)  reg=011 (src:BX)  r/m=010 (BP+SI+d16)
@@ -5357,7 +5357,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModMemWord9B(fn): mod=10 (dst:mem+d16)  reg=011 (src:BX)  r/m=011 (BP+DI+d16)
@@ -5371,7 +5371,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModMemWord9C(fn): mod=10 (dst:mem+d16)  reg=011 (src:BX)  r/m=100 (SI+d16)
@@ -5385,7 +5385,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord9D(fn): mod=10 (dst:mem+d16)  reg=011 (src:BX)  r/m=101 (DI+d16)
@@ -5399,7 +5399,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord9E(fn): mod=10 (dst:mem+d16)  reg=011 (src:BX)  r/m=110 (BP+d16)
@@ -5413,7 +5413,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWord9F(fn): mod=10 (dst:mem+d16)  reg=011 (src:BX)  r/m=111 (BX+d16)
@@ -5427,7 +5427,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBL; this.backTrack.btiEAHi = this.backTrack.btiBH;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWordA0(fn): mod=10 (dst:mem+d16)  reg=100 (src:SP)  r/m=000 (BX+SI+d16)
@@ -5441,7 +5441,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModMemWordA1(fn): mod=10 (dst:mem+d16)  reg=100 (src:SP)  r/m=001 (BX+DI+d16)
@@ -5455,7 +5455,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModMemWordA2(fn): mod=10 (dst:mem+d16)  reg=100 (src:SP)  r/m=010 (BP+SI+d16)
@@ -5469,7 +5469,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModMemWordA3(fn): mod=10 (dst:mem+d16)  reg=100 (src:SP)  r/m=011 (BP+DI+d16)
@@ -5483,7 +5483,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModMemWordA4(fn): mod=10 (dst:mem+d16)  reg=100 (src:SP)  r/m=100 (SI+d16)
@@ -5497,7 +5497,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWordA5(fn): mod=10 (dst:mem+d16)  reg=100 (src:SP)  r/m=101 (DI+d16)
@@ -5511,7 +5511,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWordA6(fn): mod=10 (dst:mem+d16)  reg=100 (src:SP)  r/m=110 (BP+d16)
@@ -5525,7 +5525,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWordA7(fn): mod=10 (dst:mem+d16)  reg=100 (src:SP)  r/m=111 (BX+d16)
@@ -5539,7 +5539,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = X86.BACKTRACK.SP_LO; this.backTrack.btiEAHi = X86.BACKTRACK.SP_HI;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWordA8(fn): mod=10 (dst:mem+d16)  reg=101 (src:BP)  r/m=000 (BX+SI+d16)
@@ -5553,7 +5553,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModMemWordA9(fn): mod=10 (dst:mem+d16)  reg=101 (src:BP)  r/m=001 (BX+DI+d16)
@@ -5567,7 +5567,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModMemWordAA(fn): mod=10 (dst:mem+d16)  reg=101 (src:BP)  r/m=010 (BP+SI+d16)
@@ -5581,7 +5581,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModMemWordAB(fn): mod=10 (dst:mem+d16)  reg=101 (src:BP)  r/m=011 (BP+DI+d16)
@@ -5595,7 +5595,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModMemWordAC(fn): mod=10 (dst:mem+d16)  reg=101 (src:BP)  r/m=100 (SI+d16)
@@ -5609,7 +5609,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWordAD(fn): mod=10 (dst:mem+d16)  reg=101 (src:BP)  r/m=101 (DI+d16)
@@ -5623,7 +5623,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWordAE(fn): mod=10 (dst:mem+d16)  reg=101 (src:BP)  r/m=110 (BP+d16)
@@ -5637,7 +5637,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWordAF(fn): mod=10 (dst:mem+d16)  reg=101 (src:BP)  r/m=111 (BX+d16)
@@ -5651,7 +5651,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiBPLo; this.backTrack.btiEAHi = this.backTrack.btiBPHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWordB0(fn): mod=10 (dst:mem+d16)  reg=110 (src:SI)  r/m=000 (BX+SI+d16)
@@ -5665,7 +5665,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModMemWordB1(fn): mod=10 (dst:mem+d16)  reg=110 (src:SI)  r/m=001 (BX+DI+d16)
@@ -5679,7 +5679,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModMemWordB2(fn): mod=10 (dst:mem+d16)  reg=110 (src:SI)  r/m=010 (BP+SI+d16)
@@ -5693,7 +5693,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModMemWordB3(fn): mod=10 (dst:mem+d16)  reg=110 (src:SI)  r/m=011 (BP+DI+d16)
@@ -5707,7 +5707,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModMemWordB4(fn): mod=10 (dst:mem+d16)  reg=110 (src:SI)  r/m=100 (SI+d16)
@@ -5721,7 +5721,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWordB5(fn): mod=10 (dst:mem+d16)  reg=110 (src:SI)  r/m=101 (DI+d16)
@@ -5735,7 +5735,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWordB6(fn): mod=10 (dst:mem+d16)  reg=110 (src:SI)  r/m=110 (BP+d16)
@@ -5749,7 +5749,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWordB7(fn): mod=10 (dst:mem+d16)  reg=110 (src:SI)  r/m=111 (BX+d16)
@@ -5763,7 +5763,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiSILo; this.backTrack.btiEAHi = this.backTrack.btiSIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWordB8(fn): mod=10 (dst:mem+d16)  reg=111 (src:DI)  r/m=000 (BX+SI+d16)
@@ -5777,7 +5777,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModMemWordB9(fn): mod=10 (dst:mem+d16)  reg=111 (src:DI)  r/m=001 (BX+DI+d16)
@@ -5791,7 +5791,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModMemWordBA(fn): mod=10 (dst:mem+d16)  reg=111 (src:DI)  r/m=010 (BP+SI+d16)
@@ -5805,7 +5805,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModMemWordBB(fn): mod=10 (dst:mem+d16)  reg=111 (src:DI)  r/m=011 (BP+DI+d16)
@@ -5819,7 +5819,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModMemWordBC(fn): mod=10 (dst:mem+d16)  reg=111 (src:DI)  r/m=100 (SI+d16)
@@ -5833,7 +5833,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWordBD(fn): mod=10 (dst:mem+d16)  reg=111 (src:DI)  r/m=101 (DI+d16)
@@ -5847,7 +5847,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWordBE(fn): mod=10 (dst:mem+d16)  reg=111 (src:DI)  r/m=110 (BP+d16)
@@ -5861,7 +5861,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModMemWordBF(fn): mod=10 (dst:mem+d16)  reg=111 (src:DI)  r/m=111 (BX+d16)
@@ -5875,7 +5875,7 @@ X86ModW.aOpModMem = [
             this.backTrack.btiEALo = this.backTrack.btiDILo; this.backTrack.btiEAHi = this.backTrack.btiDIHi;
         }
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     X86ModW.aOpModReg[0xC0],    X86ModW.aOpModReg[0xC8],    X86ModW.aOpModReg[0xD0],    X86ModW.aOpModReg[0xD8],
     X86ModW.aOpModReg[0xE0],    X86ModW.aOpModReg[0xE8],    X86ModW.aOpModReg[0xF0],    X86ModW.aOpModReg[0xF8],
@@ -5906,7 +5906,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord00(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordData(this.regEBX + this.regESI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModGrpWord01(afnGrp, fnSrc): mod=00 (dst:mem)  reg=000 (afnGrp[0])  r/m=001 (BX+DI)
@@ -5918,7 +5918,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord01(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordData(this.regEBX + this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModGrpWord02(afnGrp, fnSrc): mod=00 (dst:mem)  reg=000 (afnGrp[0])  r/m=010 (BP+SI)
@@ -5930,7 +5930,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord02(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordStack(this.regEBP + this.regESI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModGrpWord03(afnGrp, fnSrc): mod=00 (dst:mem)  reg=000 (afnGrp[0])  r/m=011 (BP+DI)
@@ -5942,7 +5942,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord03(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordStack(this.regEBP + this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModGrpWord04(afnGrp, fnSrc): mod=00 (dst:mem)  reg=000 (afnGrp[0])  r/m=100 (SI)
@@ -5954,7 +5954,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord04(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordData(this.regESI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModGrpWord05(afnGrp, fnSrc): mod=00 (dst:mem)  reg=000 (afnGrp[0])  r/m=101 (DI)
@@ -5966,7 +5966,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord05(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordData(this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModGrpWord06(afnGrp, fnSrc): mod=00 (dst:mem)  reg=000 (afnGrp[0])  r/m=110 (d16)
@@ -5978,7 +5978,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord06(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordData(this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
      * opModGrpWord07(afnGrp, fnSrc): mod=00 (dst:mem)  reg=000 (afnGrp[0])  r/m=111 (BX)
@@ -5990,7 +5990,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord07(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordData(this.regEBX), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModGrpWord08(afnGrp, fnSrc): mod=00 (dst:mem)  reg=001 (afnGrp[1])  r/m=000 (BX+SI)
@@ -6002,7 +6002,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord08(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordData(this.regEBX + this.regESI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModGrpWord09(afnGrp, fnSrc): mod=00 (dst:mem)  reg=001 (afnGrp[1])  r/m=001 (BX+DI)
@@ -6014,7 +6014,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord09(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordData(this.regEBX + this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModGrpWord0A(afnGrp, fnSrc): mod=00 (dst:mem)  reg=001 (afnGrp[1])  r/m=010 (BP+SI)
@@ -6026,7 +6026,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord0A(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordStack(this.regEBP + this.regESI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModGrpWord0B(afnGrp, fnSrc): mod=00 (dst:mem)  reg=001 (afnGrp[1])  r/m=011 (BP+DI)
@@ -6038,7 +6038,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord0B(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordStack(this.regEBP + this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModGrpWord0C(afnGrp, fnSrc): mod=00 (dst:mem)  reg=001 (afnGrp[1])  r/m=100 (SI)
@@ -6050,7 +6050,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord0C(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordData(this.regESI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModGrpWord0D(afnGrp, fnSrc): mod=00 (dst:mem)  reg=001 (afnGrp[1])  r/m=101 (DI)
@@ -6062,7 +6062,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord0D(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordData(this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModGrpWord0E(afnGrp, fnSrc): mod=00 (dst:mem)  reg=001 (afnGrp[1])  r/m=110 (d16)
@@ -6074,7 +6074,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord0E(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordData(this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
      * opModGrpWord0F(afnGrp, fnSrc): mod=00 (dst:mem)  reg=001 (afnGrp[1])  r/m=111 (BX)
@@ -6086,7 +6086,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord0F(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordData(this.regEBX), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModGrpWord10(afnGrp, fnSrc): mod=00 (dst:mem)  reg=010 (afnGrp[2])  r/m=000 (BX+SI)
@@ -6098,7 +6098,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord10(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordData(this.regEBX + this.regESI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModGrpWord11(afnGrp, fnSrc): mod=00 (dst:mem)  reg=010 (afnGrp[2])  r/m=001 (BX+DI)
@@ -6110,7 +6110,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord11(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordData(this.regEBX + this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModGrpWord12(afnGrp, fnSrc): mod=00 (dst:mem)  reg=010 (afnGrp[2])  r/m=010 (BP+SI)
@@ -6122,7 +6122,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord12(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordStack(this.regEBP + this.regESI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModGrpWord13(afnGrp, fnSrc): mod=00 (dst:mem)  reg=010 (afnGrp[2])  r/m=011 (BP+DI)
@@ -6134,7 +6134,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord13(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordStack(this.regEBP + this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModGrpWord14(afnGrp, fnSrc): mod=00 (dst:mem)  reg=010 (afnGrp[2])  r/m=100 (SI)
@@ -6146,7 +6146,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord14(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordData(this.regESI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModGrpWord15(afnGrp, fnSrc): mod=00 (dst:mem)  reg=010 (afnGrp[2])  r/m=101 (DI)
@@ -6158,7 +6158,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord15(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordData(this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModGrpWord16(afnGrp, fnSrc): mod=00 (dst:mem)  reg=010 (afnGrp[2])  r/m=110 (d16)
@@ -6170,7 +6170,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord16(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordData(this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
      * opModGrpWord17(afnGrp, fnSrc): mod=00 (dst:mem)  reg=010 (afnGrp[2])  r/m=111 (BX)
@@ -6182,7 +6182,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord17(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordData(this.regEBX), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModGrpWord18(afnGrp, fnSrc): mod=00 (dst:mem)  reg=011 (afnGrp[3])  r/m=000 (BX+SI)
@@ -6194,7 +6194,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord18(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordData(this.regEBX + this.regESI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModGrpWord19(afnGrp, fnSrc): mod=00 (dst:mem)  reg=011 (afnGrp[3])  r/m=001 (BX+DI)
@@ -6206,7 +6206,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord19(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordData(this.regEBX + this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModGrpWord1A(afnGrp, fnSrc): mod=00 (dst:mem)  reg=011 (afnGrp[3])  r/m=010 (BP+SI)
@@ -6218,7 +6218,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord1A(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordStack(this.regEBP + this.regESI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModGrpWord1B(afnGrp, fnSrc): mod=00 (dst:mem)  reg=011 (afnGrp[3])  r/m=011 (BP+DI)
@@ -6230,7 +6230,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord1B(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordStack(this.regEBP + this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModGrpWord1C(afnGrp, fnSrc): mod=00 (dst:mem)  reg=011 (afnGrp[3])  r/m=100 (SI)
@@ -6242,7 +6242,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord1C(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordData(this.regESI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModGrpWord1D(afnGrp, fnSrc): mod=00 (dst:mem)  reg=011 (afnGrp[3])  r/m=101 (DI)
@@ -6254,7 +6254,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord1D(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordData(this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModGrpWord1E(afnGrp, fnSrc): mod=00 (dst:mem)  reg=011 (afnGrp[3])  r/m=110 (d16)
@@ -6266,7 +6266,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord1E(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordData(this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
      * opModGrpWord1F(afnGrp, fnSrc): mod=00 (dst:mem)  reg=011 (afnGrp[3])  r/m=111 (BX)
@@ -6278,7 +6278,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord1F(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordData(this.regEBX), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModGrpWord20(afnGrp, fnSrc): mod=00 (dst:mem)  reg=100 (afnGrp[4])  r/m=000 (BX+SI)
@@ -6290,7 +6290,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord20(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordData(this.regEBX + this.regESI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModGrpWord21(afnGrp, fnSrc): mod=00 (dst:mem)  reg=100 (afnGrp[4])  r/m=001 (BX+DI)
@@ -6302,7 +6302,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord21(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordData(this.regEBX + this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModGrpWord22(afnGrp, fnSrc): mod=00 (dst:mem)  reg=100 (afnGrp[4])  r/m=010 (BP+SI)
@@ -6314,7 +6314,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord22(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordStack(this.regEBP + this.regESI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModGrpWord23(afnGrp, fnSrc): mod=00 (dst:mem)  reg=100 (afnGrp[4])  r/m=011 (BP+DI)
@@ -6326,7 +6326,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord23(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordStack(this.regEBP + this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModGrpWord24(afnGrp, fnSrc): mod=00 (dst:mem)  reg=100 (afnGrp[4])  r/m=100 (SI)
@@ -6338,7 +6338,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord24(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordData(this.regESI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModGrpWord25(afnGrp, fnSrc): mod=00 (dst:mem)  reg=100 (afnGrp[4])  r/m=101 (DI)
@@ -6350,7 +6350,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord25(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordData(this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModGrpWord26(afnGrp, fnSrc): mod=00 (dst:mem)  reg=100 (afnGrp[4])  r/m=110 (d16)
@@ -6362,7 +6362,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord26(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordData(this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
      * opModGrpWord27(afnGrp, fnSrc): mod=00 (dst:mem)  reg=100 (afnGrp[4])  r/m=111 (BX)
@@ -6374,7 +6374,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord27(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordData(this.regEBX), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModGrpWord28(afnGrp, fnSrc): mod=00 (dst:mem)  reg=101 (afnGrp[5])  r/m=000 (BX+SI)
@@ -6386,7 +6386,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord28(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordData(this.regEBX + this.regESI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModGrpWord29(afnGrp, fnSrc): mod=00 (dst:mem)  reg=101 (afnGrp[5])  r/m=001 (BX+DI)
@@ -6398,7 +6398,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord29(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordData(this.regEBX + this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModGrpWord2A(afnGrp, fnSrc): mod=00 (dst:mem)  reg=101 (afnGrp[5])  r/m=010 (BP+SI)
@@ -6410,7 +6410,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord2A(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordStack(this.regEBP + this.regESI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModGrpWord2B(afnGrp, fnSrc): mod=00 (dst:mem)  reg=101 (afnGrp[5])  r/m=011 (BP+DI)
@@ -6422,7 +6422,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord2B(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordStack(this.regEBP + this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModGrpWord2C(afnGrp, fnSrc): mod=00 (dst:mem)  reg=101 (afnGrp[5])  r/m=100 (SI)
@@ -6434,7 +6434,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord2C(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordData(this.regESI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModGrpWord2D(afnGrp, fnSrc): mod=00 (dst:mem)  reg=101 (afnGrp[5])  r/m=101 (DI)
@@ -6446,7 +6446,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord2D(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordData(this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModGrpWord2E(afnGrp, fnSrc): mod=00 (dst:mem)  reg=101 (afnGrp[5])  r/m=110 (d16)
@@ -6458,7 +6458,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord2E(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordData(this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
      * opModGrpWord2F(afnGrp, fnSrc): mod=00 (dst:mem)  reg=101 (afnGrp[5])  r/m=111 (BX)
@@ -6470,7 +6470,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord2F(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordData(this.regEBX), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModGrpWord30(afnGrp, fnSrc): mod=00 (dst:mem)  reg=110 (afnGrp[6])  r/m=000 (BX+SI)
@@ -6482,7 +6482,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord30(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordData(this.regEBX + this.regESI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModGrpWord31(afnGrp, fnSrc): mod=00 (dst:mem)  reg=110 (afnGrp[6])  r/m=001 (BX+DI)
@@ -6494,7 +6494,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord31(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordData(this.regEBX + this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModGrpWord32(afnGrp, fnSrc): mod=00 (dst:mem)  reg=110 (afnGrp[6])  r/m=010 (BP+SI)
@@ -6506,7 +6506,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord32(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordStack(this.regEBP + this.regESI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModGrpWord33(afnGrp, fnSrc): mod=00 (dst:mem)  reg=110 (afnGrp[6])  r/m=011 (BP+DI)
@@ -6518,7 +6518,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord33(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordStack(this.regEBP + this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModGrpWord34(afnGrp, fnSrc): mod=00 (dst:mem)  reg=110 (afnGrp[6])  r/m=100 (SI)
@@ -6530,7 +6530,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord34(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordData(this.regESI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModGrpWord35(afnGrp, fnSrc): mod=00 (dst:mem)  reg=110 (afnGrp[6])  r/m=101 (DI)
@@ -6542,7 +6542,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord35(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordData(this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModGrpWord36(afnGrp, fnSrc): mod=00 (dst:mem)  reg=110 (afnGrp[6])  r/m=110 (d16)
@@ -6554,7 +6554,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord36(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordData(this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
      * opModGrpWord37(afnGrp, fnSrc): mod=00 (dst:mem)  reg=110 (afnGrp[6])  r/m=111 (BX)
@@ -6566,7 +6566,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord37(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordData(this.regEBX), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModGrpWord38(afnGrp, fnSrc): mod=00 (dst:mem)  reg=111 (afnGrp[7])  r/m=000 (BX+SI)
@@ -6578,7 +6578,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord38(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordData(this.regEBX + this.regESI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModGrpWord39(afnGrp, fnSrc): mod=00 (dst:mem)  reg=111 (afnGrp[7])  r/m=001 (BX+DI)
@@ -6590,7 +6590,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord39(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordData(this.regEBX + this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModGrpWord3A(afnGrp, fnSrc): mod=00 (dst:mem)  reg=111 (afnGrp[7])  r/m=010 (BP+SI)
@@ -6602,7 +6602,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord3A(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordStack(this.regEBP + this.regESI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexExtra;
     },
     /**
      * opModGrpWord3B(afnGrp, fnSrc): mod=00 (dst:mem)  reg=111 (afnGrp[7])  r/m=011 (BP+DI)
@@ -6614,7 +6614,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord3B(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordStack(this.regEBP + this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndex;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndex;
     },
     /**
      * opModGrpWord3C(afnGrp, fnSrc): mod=00 (dst:mem)  reg=111 (afnGrp[7])  r/m=100 (SI)
@@ -6626,7 +6626,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord3C(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordData(this.regESI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModGrpWord3D(afnGrp, fnSrc): mod=00 (dst:mem)  reg=111 (afnGrp[7])  r/m=101 (DI)
@@ -6638,7 +6638,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord3D(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordData(this.regEDI), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModGrpWord3E(afnGrp, fnSrc): mod=00 (dst:mem)  reg=111 (afnGrp[7])  r/m=110 (d16)
@@ -6650,7 +6650,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord3E(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordData(this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
     /**
      * opModGrpWord3F(afnGrp, fnSrc): mod=00 (dst:mem)  reg=111 (afnGrp[7])  r/m=111 (BX)
@@ -6662,7 +6662,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord3F(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordData(this.regEBX), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBase;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBase;
     },
     /**
      * opModGrpWord40(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=000 (afnGrp[0])  r/m=000 (BX+SI+d8)
@@ -6674,7 +6674,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord40(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModGrpWord41(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=000 (afnGrp[0])  r/m=001 (BX+DI+d8)
@@ -6686,7 +6686,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord41(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModGrpWord42(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=000 (afnGrp[0])  r/m=010 (BP+SI+d8)
@@ -6698,7 +6698,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord42(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModGrpWord43(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=000 (afnGrp[0])  r/m=011 (BP+DI+d8)
@@ -6710,7 +6710,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord43(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModGrpWord44(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=000 (afnGrp[0])  r/m=100 (SI+d8)
@@ -6722,7 +6722,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord44(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordData(this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord45(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=000 (afnGrp[0])  r/m=101 (DI+d8)
@@ -6734,7 +6734,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord45(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord46(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=000 (afnGrp[0])  r/m=110 (BP+d8)
@@ -6746,7 +6746,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord46(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord47(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=000 (afnGrp[0])  r/m=111 (BX+d8)
@@ -6758,7 +6758,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord47(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord48(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=001 (afnGrp[1])  r/m=000 (BX+SI+d8)
@@ -6770,7 +6770,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord48(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModGrpWord49(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=001 (afnGrp[1])  r/m=001 (BX+DI+d8)
@@ -6782,7 +6782,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord49(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModGrpWord4A(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=001 (afnGrp[1])  r/m=010 (BP+SI+d8)
@@ -6794,7 +6794,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord4A(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModGrpWord4B(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=001 (afnGrp[1])  r/m=011 (BP+DI+d8)
@@ -6806,7 +6806,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord4B(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModGrpWord4C(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=001 (afnGrp[1])  r/m=100 (SI+d8)
@@ -6818,7 +6818,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord4C(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordData(this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord4D(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=001 (afnGrp[1])  r/m=101 (DI+d8)
@@ -6830,7 +6830,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord4D(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord4E(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=001 (afnGrp[1])  r/m=110 (BP+d8)
@@ -6842,7 +6842,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord4E(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord4F(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=001 (afnGrp[1])  r/m=111 (BX+d8)
@@ -6854,7 +6854,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord4F(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord50(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=010 (afnGrp[2])  r/m=000 (BX+SI+d8)
@@ -6866,7 +6866,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord50(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModGrpWord51(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=010 (afnGrp[2])  r/m=001 (BX+DI+d8)
@@ -6878,7 +6878,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord51(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModGrpWord52(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=010 (afnGrp[2])  r/m=010 (BP+SI+d8)
@@ -6890,7 +6890,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord52(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModGrpWord53(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=010 (afnGrp[2])  r/m=011 (BP+DI+d8)
@@ -6902,7 +6902,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord53(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModGrpWord54(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=010 (afnGrp[2])  r/m=100 (SI+d8)
@@ -6914,7 +6914,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord54(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordData(this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord55(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=010 (afnGrp[2])  r/m=101 (DI+d8)
@@ -6926,7 +6926,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord55(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord56(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=010 (afnGrp[2])  r/m=110 (BP+d8)
@@ -6938,7 +6938,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord56(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord57(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=010 (afnGrp[2])  r/m=111 (BX+d8)
@@ -6950,7 +6950,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord57(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord58(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=011 (afnGrp[3])  r/m=000 (BX+SI+d8)
@@ -6962,7 +6962,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord58(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModGrpWord59(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=011 (afnGrp[3])  r/m=001 (BX+DI+d8)
@@ -6974,7 +6974,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord59(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModGrpWord5A(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=011 (afnGrp[3])  r/m=010 (BP+SI+d8)
@@ -6986,7 +6986,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord5A(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModGrpWord5B(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=011 (afnGrp[3])  r/m=011 (BP+DI+d8)
@@ -6998,7 +6998,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord5B(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModGrpWord5C(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=011 (afnGrp[3])  r/m=100 (SI+d8)
@@ -7010,7 +7010,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord5C(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordData(this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord5D(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=011 (afnGrp[3])  r/m=101 (DI+d8)
@@ -7022,7 +7022,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord5D(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord5E(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=011 (afnGrp[3])  r/m=110 (BP+d8)
@@ -7034,7 +7034,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord5E(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord5F(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=011 (afnGrp[3])  r/m=111 (BX+d8)
@@ -7046,7 +7046,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord5F(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord60(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=100 (afnGrp[4])  r/m=000 (BX+SI+d8)
@@ -7058,7 +7058,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord60(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModGrpWord61(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=100 (afnGrp[4])  r/m=001 (BX+DI+d8)
@@ -7070,7 +7070,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord61(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModGrpWord62(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=100 (afnGrp[4])  r/m=010 (BP+SI+d8)
@@ -7082,7 +7082,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord62(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModGrpWord63(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=100 (afnGrp[4])  r/m=011 (BP+DI+d8)
@@ -7094,7 +7094,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord63(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModGrpWord64(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=100 (afnGrp[4])  r/m=100 (SI+d8)
@@ -7106,7 +7106,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord64(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordData(this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord65(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=100 (afnGrp[4])  r/m=101 (DI+d8)
@@ -7118,7 +7118,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord65(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord66(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=100 (afnGrp[4])  r/m=110 (BP+d8)
@@ -7130,7 +7130,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord66(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord67(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=100 (afnGrp[4])  r/m=111 (BX+d8)
@@ -7142,7 +7142,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord67(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord68(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=101 (afnGrp[5])  r/m=000 (BX+SI+d8)
@@ -7154,7 +7154,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord68(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModGrpWord69(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=101 (afnGrp[5])  r/m=001 (BX+DI+d8)
@@ -7166,7 +7166,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord69(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModGrpWord6A(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=101 (afnGrp[5])  r/m=010 (BP+SI+d8)
@@ -7178,7 +7178,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord6A(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModGrpWord6B(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=101 (afnGrp[5])  r/m=011 (BP+DI+d8)
@@ -7190,7 +7190,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord6B(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModGrpWord6C(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=101 (afnGrp[5])  r/m=100 (SI+d8)
@@ -7202,7 +7202,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord6C(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordData(this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord6D(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=101 (afnGrp[5])  r/m=101 (DI+d8)
@@ -7214,7 +7214,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord6D(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord6E(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=101 (afnGrp[5])  r/m=110 (BP+d8)
@@ -7226,7 +7226,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord6E(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord6F(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=101 (afnGrp[5])  r/m=111 (BX+d8)
@@ -7238,7 +7238,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord6F(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord70(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=110 (afnGrp[6])  r/m=000 (BX+SI+d8)
@@ -7250,7 +7250,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord70(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModGrpWord71(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=110 (afnGrp[6])  r/m=001 (BX+DI+d8)
@@ -7262,7 +7262,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord71(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModGrpWord72(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=110 (afnGrp[6])  r/m=010 (BP+SI+d8)
@@ -7274,7 +7274,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord72(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModGrpWord73(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=110 (afnGrp[6])  r/m=011 (BP+DI+d8)
@@ -7286,7 +7286,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord73(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModGrpWord74(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=110 (afnGrp[6])  r/m=100 (SI+d8)
@@ -7298,7 +7298,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord74(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordData(this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord75(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=110 (afnGrp[6])  r/m=101 (DI+d8)
@@ -7310,7 +7310,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord75(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord76(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=110 (afnGrp[6])  r/m=110 (BP+d8)
@@ -7322,7 +7322,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord76(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord77(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=110 (afnGrp[6])  r/m=111 (BX+d8)
@@ -7334,7 +7334,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord77(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord78(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=111 (afnGrp[7])  r/m=000 (BX+SI+d8)
@@ -7346,7 +7346,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord78(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModGrpWord79(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=111 (afnGrp[7])  r/m=001 (BX+DI+d8)
@@ -7358,7 +7358,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord79(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModGrpWord7A(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=111 (afnGrp[7])  r/m=010 (BP+SI+d8)
@@ -7370,7 +7370,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord7A(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModGrpWord7B(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=111 (afnGrp[7])  r/m=011 (BP+DI+d8)
@@ -7382,7 +7382,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord7B(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModGrpWord7C(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=111 (afnGrp[7])  r/m=100 (SI+d8)
@@ -7394,7 +7394,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord7C(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordData(this.regESI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord7D(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=111 (afnGrp[7])  r/m=101 (DI+d8)
@@ -7406,7 +7406,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord7D(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordData(this.regEDI + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord7E(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=111 (afnGrp[7])  r/m=110 (BP+d8)
@@ -7418,7 +7418,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord7E(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordStack(this.regEBP + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord7F(afnGrp, fnSrc): mod=01 (dst:mem+d8)  reg=111 (afnGrp[7])  r/m=111 (BX+d8)
@@ -7430,7 +7430,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord7F(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordData(this.regEBX + this.getIPDisp()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord80(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=000 (afnGrp[0])  r/m=000 (BX+SI+d16)
@@ -7442,7 +7442,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord80(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModGrpWord81(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=000 (afnGrp[0])  r/m=001 (BX+DI+d16)
@@ -7454,7 +7454,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord81(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModGrpWord82(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=000 (afnGrp[0])  r/m=010 (BP+SI+d16)
@@ -7466,7 +7466,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord82(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModGrpWord83(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=000 (afnGrp[0])  r/m=011 (BP+DI+d16)
@@ -7478,7 +7478,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord83(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModGrpWord84(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=000 (afnGrp[0])  r/m=100 (SI+d16)
@@ -7490,7 +7490,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord84(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordData(this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord85(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=000 (afnGrp[0])  r/m=101 (DI+d16)
@@ -7502,7 +7502,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord85(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordData(this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord86(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=000 (afnGrp[0])  r/m=110 (BP+d16)
@@ -7514,7 +7514,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord86(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord87(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=000 (afnGrp[0])  r/m=111 (BX+d16)
@@ -7526,7 +7526,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord87(afnGrp, fnSrc) {
         var w = afnGrp[0].call(this, this.modEAWordData(this.regEBX + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord88(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=001 (afnGrp[1])  r/m=000 (BX+SI+d16)
@@ -7538,7 +7538,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord88(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModGrpWord89(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=001 (afnGrp[1])  r/m=001 (BX+DI+d16)
@@ -7550,7 +7550,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord89(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModGrpWord8A(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=001 (afnGrp[1])  r/m=010 (BP+SI+d16)
@@ -7562,7 +7562,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord8A(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModGrpWord8B(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=001 (afnGrp[1])  r/m=011 (BP+DI+d16)
@@ -7574,7 +7574,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord8B(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModGrpWord8C(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=001 (afnGrp[1])  r/m=100 (SI+d16)
@@ -7586,7 +7586,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord8C(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordData(this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord8D(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=001 (afnGrp[1])  r/m=101 (DI+d16)
@@ -7598,7 +7598,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord8D(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordData(this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord8E(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=001 (afnGrp[1])  r/m=110 (BP+d16)
@@ -7610,7 +7610,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord8E(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord8F(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=001 (afnGrp[1])  r/m=111 (BX+d16)
@@ -7622,7 +7622,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord8F(afnGrp, fnSrc) {
         var w = afnGrp[1].call(this, this.modEAWordData(this.regEBX + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord90(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=010 (afnGrp[2])  r/m=000 (BX+SI+d16)
@@ -7634,7 +7634,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord90(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModGrpWord91(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=010 (afnGrp[2])  r/m=001 (BX+DI+d16)
@@ -7646,7 +7646,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord91(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModGrpWord92(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=010 (afnGrp[2])  r/m=010 (BP+SI+d16)
@@ -7658,7 +7658,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord92(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModGrpWord93(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=010 (afnGrp[2])  r/m=011 (BP+DI+d16)
@@ -7670,7 +7670,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord93(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModGrpWord94(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=010 (afnGrp[2])  r/m=100 (SI+d16)
@@ -7682,7 +7682,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord94(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordData(this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord95(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=010 (afnGrp[2])  r/m=101 (DI+d16)
@@ -7694,7 +7694,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord95(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordData(this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord96(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=010 (afnGrp[2])  r/m=110 (BP+d16)
@@ -7706,7 +7706,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord96(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord97(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=010 (afnGrp[2])  r/m=111 (BX+d16)
@@ -7718,7 +7718,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord97(afnGrp, fnSrc) {
         var w = afnGrp[2].call(this, this.modEAWordData(this.regEBX + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord98(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=011 (afnGrp[3])  r/m=000 (BX+SI+d16)
@@ -7730,7 +7730,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord98(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModGrpWord99(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=011 (afnGrp[3])  r/m=001 (BX+DI+d16)
@@ -7742,7 +7742,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord99(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModGrpWord9A(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=011 (afnGrp[3])  r/m=010 (BP+SI+d16)
@@ -7754,7 +7754,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord9A(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModGrpWord9B(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=011 (afnGrp[3])  r/m=011 (BP+DI+d16)
@@ -7766,7 +7766,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord9B(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModGrpWord9C(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=011 (afnGrp[3])  r/m=100 (SI+d16)
@@ -7778,7 +7778,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord9C(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordData(this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord9D(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=011 (afnGrp[3])  r/m=101 (DI+d16)
@@ -7790,7 +7790,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord9D(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordData(this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord9E(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=011 (afnGrp[3])  r/m=110 (BP+d16)
@@ -7802,7 +7802,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord9E(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWord9F(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=011 (afnGrp[3])  r/m=111 (BX+d16)
@@ -7814,7 +7814,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWord9F(afnGrp, fnSrc) {
         var w = afnGrp[3].call(this, this.modEAWordData(this.regEBX + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWordA0(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=100 (afnGrp[4])  r/m=000 (BX+SI+d16)
@@ -7826,7 +7826,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWordA0(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModGrpWordA1(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=100 (afnGrp[4])  r/m=001 (BX+DI+d16)
@@ -7838,7 +7838,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWordA1(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModGrpWordA2(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=100 (afnGrp[4])  r/m=010 (BP+SI+d16)
@@ -7850,7 +7850,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWordA2(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModGrpWordA3(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=100 (afnGrp[4])  r/m=011 (BP+DI+d16)
@@ -7862,7 +7862,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWordA3(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModGrpWordA4(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=100 (afnGrp[4])  r/m=100 (SI+d16)
@@ -7874,7 +7874,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWordA4(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordData(this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWordA5(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=100 (afnGrp[4])  r/m=101 (DI+d16)
@@ -7886,7 +7886,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWordA5(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordData(this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWordA6(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=100 (afnGrp[4])  r/m=110 (BP+d16)
@@ -7898,7 +7898,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWordA6(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWordA7(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=100 (afnGrp[4])  r/m=111 (BX+d16)
@@ -7910,7 +7910,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWordA7(afnGrp, fnSrc) {
         var w = afnGrp[4].call(this, this.modEAWordData(this.regEBX + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWordA8(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=101 (afnGrp[5])  r/m=000 (BX+SI+d16)
@@ -7922,7 +7922,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWordA8(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModGrpWordA9(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=101 (afnGrp[5])  r/m=001 (BX+DI+d16)
@@ -7934,7 +7934,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWordA9(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModGrpWordAA(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=101 (afnGrp[5])  r/m=010 (BP+SI+d16)
@@ -7946,7 +7946,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWordAA(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModGrpWordAB(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=101 (afnGrp[5])  r/m=011 (BP+DI+d16)
@@ -7958,7 +7958,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWordAB(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModGrpWordAC(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=101 (afnGrp[5])  r/m=100 (SI+d16)
@@ -7970,7 +7970,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWordAC(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordData(this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWordAD(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=101 (afnGrp[5])  r/m=101 (DI+d16)
@@ -7982,7 +7982,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWordAD(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordData(this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWordAE(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=101 (afnGrp[5])  r/m=110 (BP+d16)
@@ -7994,7 +7994,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWordAE(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWordAF(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=101 (afnGrp[5])  r/m=111 (BX+d16)
@@ -8006,7 +8006,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWordAF(afnGrp, fnSrc) {
         var w = afnGrp[5].call(this, this.modEAWordData(this.regEBX + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWordB0(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=110 (afnGrp[6])  r/m=000 (BX+SI+d16)
@@ -8018,7 +8018,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWordB0(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModGrpWordB1(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=110 (afnGrp[6])  r/m=001 (BX+DI+d16)
@@ -8030,7 +8030,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWordB1(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModGrpWordB2(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=110 (afnGrp[6])  r/m=010 (BP+SI+d16)
@@ -8042,7 +8042,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWordB2(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModGrpWordB3(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=110 (afnGrp[6])  r/m=011 (BP+DI+d16)
@@ -8054,7 +8054,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWordB3(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModGrpWordB4(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=110 (afnGrp[6])  r/m=100 (SI+d16)
@@ -8066,7 +8066,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWordB4(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordData(this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWordB5(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=110 (afnGrp[6])  r/m=101 (DI+d16)
@@ -8078,7 +8078,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWordB5(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordData(this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWordB6(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=110 (afnGrp[6])  r/m=110 (BP+d16)
@@ -8090,7 +8090,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWordB6(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWordB7(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=110 (afnGrp[6])  r/m=111 (BX+d16)
@@ -8102,7 +8102,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWordB7(afnGrp, fnSrc) {
         var w = afnGrp[6].call(this, this.modEAWordData(this.regEBX + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWordB8(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=111 (afnGrp[7])  r/m=000 (BX+SI+d16)
@@ -8114,7 +8114,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWordB8(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordData(this.regEBX + this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModGrpWordB9(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=111 (afnGrp[7])  r/m=001 (BX+DI+d16)
@@ -8126,7 +8126,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWordB9(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordData(this.regEBX + this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModGrpWordBA(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=111 (afnGrp[7])  r/m=010 (BP+SI+d16)
@@ -8138,7 +8138,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWordBA(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordStack(this.regEBP + this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDispExtra;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
     /**
      * opModGrpWordBB(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=111 (afnGrp[7])  r/m=011 (BP+DI+d16)
@@ -8150,7 +8150,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWordBB(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordStack(this.regEBP + this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseIndexDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
     /**
      * opModGrpWordBC(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=111 (afnGrp[7])  r/m=100 (SI+d16)
@@ -8162,7 +8162,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWordBC(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordData(this.regESI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWordBD(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=111 (afnGrp[7])  r/m=101 (DI+d16)
@@ -8174,7 +8174,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWordBD(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordData(this.regEDI + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWordBE(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=111 (afnGrp[7])  r/m=110 (BP+d16)
@@ -8186,7 +8186,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWordBE(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordStack(this.regEBP + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWordBF(afnGrp, fnSrc): mod=10 (dst:mem+d16)  reg=111 (afnGrp[7])  r/m=111 (BX+d16)
@@ -8198,7 +8198,7 @@ X86ModW.aOpModGrp = [
     function opModGrpWordBF(afnGrp, fnSrc) {
         var w = afnGrp[7].call(this, this.modEAWordData(this.regEBX + this.getIPWord()), fnSrc.call(this));
         this.setEAWord(w);
-        this.nStepCycles -= this.CYCLES.nEACyclesBaseDisp;
+        this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
     /**
      * opModGrpWordC0(afnGrp, fnSrc): mod=11 (dst:reg)  reg=000 (afnGrp[0])  r/m=000 (AX)

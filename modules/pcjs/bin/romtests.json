@@ -1,0 +1,81 @@
+{
+  "computer": {
+    "id": "pc386.computer",
+    "name": "Compaq DeskPro 386",
+    "resume": 0,
+    "state": ""
+  },
+  "ram": [
+    { "id": "pc386.ramLow",
+      "name": "",
+      "addr": 0x00000,
+      "size": 0xa0000,
+      "test": false
+    }
+  ],
+  "rom": [
+    { "id": "pc386.romTests",
+      "name": "",
+      "addr": 0xf0000,
+      "size": 0x10000,
+      "file": "/tests/pc/80386/tests.json",
+      "notify": ""
+    }
+  ],
+  "video": [
+    { "id": "pc386.videoMDA",
+      "name": "Monochrome Display",
+      "model": "",
+      "mode": 7,
+      "screenWidth": 720,
+      "screenHeight": 350,
+      "scale": true,
+      "charCols": 80,
+      "charRows": 25,
+      "fontROM": "/devices/pc/video/ibm-mda-cga.json",
+      "screenColor": "black",
+      "touchScreen": false
+    }
+  ],
+  "cpu": {
+    "id": "pc386.cpu",
+    "name": "",
+    "model": 80386,
+    "clock": 0,
+    "multiplier": 1,
+    "autoStart": true,
+    "csStart": -1,
+    "csInterval": -1,
+    "csStop": -1
+  },
+  "keyboard": {
+    "id": "pc386.keyboard",
+    "name": "",
+    "model": ""
+  },
+  "fdc": {
+    "id": "pc386.fdcNEC",
+    "name": "",
+    "autoMount": {
+      "A": {
+        "name": "PC-DOS 2.00 (Disk 1)",
+        "path": "/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json"
+      },
+      "B": {
+        "name": "PC-DOS 2.00 (Disk 2)",
+        "path": "/disks/pc/dos/ibm/2.00/PCDOS200-DISK2.json"
+      }
+    }
+  },
+  "chipset": {
+    "id": "pc386.chipset",
+    "name": "",
+    "model": "deskpro386",
+    "sound": false
+  },
+  "debugger": {
+    "id": "pc386.debugger",
+    "name": "",
+    "messages": ""
+  }
+}

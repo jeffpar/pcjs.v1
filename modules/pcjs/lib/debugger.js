@@ -577,6 +577,7 @@ if (DEBUGGER) {
      *      [0]: {number} of the opcode name (see INS.*)
      *      [1]: {number} containing the destination operand descriptor bit(s)
      *      [2]: {number} containing the source operand descriptor bit(s)
+     *      [3]: {number} containing optional third operand descriptor bit(s)
      *
      * These sub-elements are all optional. If [0] is not present, the opcode is undefined; if [1] is not
      * present (or contains zero), the opcode has no (or only implied) operands; and if [2] is not present,
@@ -873,18 +874,22 @@ if (DEBUGGER) {
     ];
 
     Debugger.aaOp0FDescs = {
-        0x00: [Debugger.INS.GRP6,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORD  |  Debugger.TYPE_BOTH],
-        0x01: [Debugger.INS.GRP7,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORD  |  Debugger.TYPE_BOTH],
-        0x02: [Debugger.INS.LAR,    Debugger.TYPE_REG    | Debugger.TYPE_WORD  |  Debugger.TYPE_OUT | Debugger.TYPE_80286, Debugger.TYPE_MEM  | Debugger.TYPE_WORD | Debugger.TYPE_IN],
-        0x03: [Debugger.INS.LSL,    Debugger.TYPE_REG    | Debugger.TYPE_WORD  |  Debugger.TYPE_OUT | Debugger.TYPE_80286, Debugger.TYPE_MEM  | Debugger.TYPE_WORD | Debugger.TYPE_IN],
+        0x00: [Debugger.INS.GRP6,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORD  | Debugger.TYPE_BOTH],
+        0x01: [Debugger.INS.GRP7,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORD  | Debugger.TYPE_BOTH],
+        0x02: [Debugger.INS.LAR,    Debugger.TYPE_REG    | Debugger.TYPE_WORD  | Debugger.TYPE_OUT | Debugger.TYPE_80286, Debugger.TYPE_MEM  | Debugger.TYPE_WORD | Debugger.TYPE_IN],
+        0x03: [Debugger.INS.LSL,    Debugger.TYPE_REG    | Debugger.TYPE_WORD  | Debugger.TYPE_OUT | Debugger.TYPE_80286, Debugger.TYPE_MEM  | Debugger.TYPE_WORD | Debugger.TYPE_IN],
         0x05: [Debugger.INS.LOADALL,Debugger.TYPE_80286],
         0x06: [Debugger.INS.CLTS,   Debugger.TYPE_80286],
-        0x20: [Debugger.INS.MOV,    Debugger.TYPE_REG    | Debugger.TYPE_DWORD |  Debugger.TYPE_OUT | Debugger.TYPE_80386, Debugger.TYPE_CTLREG | Debugger.TYPE_DWORD | Debugger.TYPE_IN],
-        0x22: [Debugger.INS.MOV,    Debugger.TYPE_CTLREG | Debugger.TYPE_DWORD |  Debugger.TYPE_OUT | Debugger.TYPE_80386, Debugger.TYPE_REG    | Debugger.TYPE_DWORD | Debugger.TYPE_IN],
-        0xA0: [Debugger.INS.PUSH,   Debugger.TYPE_FS     | Debugger.TYPE_IN    |  Debugger.TYPE_80386],
-        0xA1: [Debugger.INS.POP,    Debugger.TYPE_FS     | Debugger.TYPE_OUT   |  Debugger.TYPE_80386],
-        0xA8: [Debugger.INS.PUSH,   Debugger.TYPE_GS     | Debugger.TYPE_IN    |  Debugger.TYPE_80386],
-        0xA9: [Debugger.INS.POP,    Debugger.TYPE_GS     | Debugger.TYPE_OUT   |  Debugger.TYPE_80386]
+        0x20: [Debugger.INS.MOV,    Debugger.TYPE_REG    | Debugger.TYPE_DWORD | Debugger.TYPE_OUT | Debugger.TYPE_80386, Debugger.TYPE_CTLREG | Debugger.TYPE_DWORD | Debugger.TYPE_IN],
+        0x22: [Debugger.INS.MOV,    Debugger.TYPE_CTLREG | Debugger.TYPE_DWORD | Debugger.TYPE_OUT | Debugger.TYPE_80386, Debugger.TYPE_REG    | Debugger.TYPE_DWORD | Debugger.TYPE_IN],
+        0xA0: [Debugger.INS.PUSH,   Debugger.TYPE_FS     | Debugger.TYPE_IN    | Debugger.TYPE_80386],
+        0xA1: [Debugger.INS.POP,    Debugger.TYPE_FS     | Debugger.TYPE_OUT   | Debugger.TYPE_80386],
+        0xA4: [Debugger.INS.SHLD,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_OUT  |  Debugger.TYPE_80386, Debugger.TYPE_REG | Debugger.TYPE_WORDV | Debugger.TYPE_IN, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+        0xA5: [Debugger.INS.SHLD,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_OUT  |  Debugger.TYPE_80386, Debugger.TYPE_REG | Debugger.TYPE_WORDV | Debugger.TYPE_IN, Debugger.TYPE_IMPREG | Debugger.TYPE_CL |   Debugger.TYPE_IN],
+        0xA8: [Debugger.INS.PUSH,   Debugger.TYPE_GS     | Debugger.TYPE_IN    | Debugger.TYPE_80386],
+        0xA9: [Debugger.INS.POP,    Debugger.TYPE_GS     | Debugger.TYPE_OUT   | Debugger.TYPE_80386],
+        0xAC: [Debugger.INS.SHRD,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_OUT  |  Debugger.TYPE_80386, Debugger.TYPE_REG | Debugger.TYPE_WORDV | Debugger.TYPE_IN, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+        0xAD: [Debugger.INS.SHRD,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_OUT  |  Debugger.TYPE_80386, Debugger.TYPE_REG | Debugger.TYPE_WORDV | Debugger.TYPE_IN, Debugger.TYPE_IMPREG | Debugger.TYPE_CL |   Debugger.TYPE_IN]
     };
 
     Debugger.aaGrpDescs = [
@@ -2934,7 +2939,7 @@ if (DEBUGGER) {
         }
 
         var sOpcode = Debugger.INS_NAMES[aOpDesc[0]];
-        var cOperands = 2;
+        var cOperands = aOpDesc.length - 1;
         var sOperands = "";
         if (this.isStringIns(bOpcode)) {
             cOperands = 0;              // suppress display of operands for string instructions

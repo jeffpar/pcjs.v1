@@ -78,7 +78,7 @@ TextOut.asTargetRefs = ["call", "jmp", "jz", "jnz", "jc", "jnc", "ja", "jna", "j
  *          labelTargets(): looks for all JMP and CALL targets and labels them.
  *
  *          alignVertical(): looks for a predefined target string (eg, '; ') in the first line,
- *          and ensures that the same sequence in all subsequent lines start at the same column.
+ *          and ensures that the same sequence in all subsequent lines starts at the same column.
  *
  *      For now, all output is written to stdout only.
  *
