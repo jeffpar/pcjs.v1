@@ -1,3 +1,5 @@
+	org	0x8000
+
 	xchg	bh,bl			; 00008000  86FB  '..'
 	xor	bh,bh			; 00008002  32FF  '2.'
 	shl	bx,1			; 00008004  D1E3  '..'
@@ -10604,15 +10606,17 @@ xdfee:	lea	di,[si+0x10]		; 0000DFEE  8D7C10  '.|.'
 	db	0xFF			; 0000DFFE  FF  '.'
 	db	0xFF			; 0000DFFF  FF  '.'
 	jmp	short xe05e		; 0000E000  EB5C  '.\'
+
 	db	'AUTHORS CAB93GLB93RWS93DJC93NPB(C)Copyright COMPAQ Computer Corporation 1982,83,84,85,86'
 
 	sub	al,0xe9			; 0000E05A  2CE9  ',.'
 	dec	cx			; 0000E05C  49  'I'
 	db	0xDA			; 0000E05D  DA  '.'
 xe05e:	jmp	0xf000:0x8e31		; 0000E05E  EA318E00F0  '.1...'
-	db	'((CC))CCooppyyrriigghhtt  CCOOMMPPAAQQ  CCoommppuutteerr  CCoorrppoorraattiioonn  11998822,,8833,,8844,,8855,,8866,,8877--AAllll  rriigghhttss  rreesseerrvveedd..'
-	mov	al,0xd			; 0000E105  B00D  '.',0x0D  0x0D
 
+	db	'((CC))CCooppyyrriigghhtt  CCOOMMPPAAQQ  CCoommppuutteerr  CCoorrppoorraattiioonn  11998822,,8833,,8844,,8855,,8866,,8877--AAllll  rriigghhttss  rreesseerrvveedd..'
+
+	mov	al,0xd			; 0000E105  B00D  '.',0x0D  0x0D
 	out	0x84,al			; 0000E107  E684  '..'
 	mov	al,0x12			; 0000E109  B012  '..'
 	out	0x4b,al			; 0000E10B  E64B  '.K'

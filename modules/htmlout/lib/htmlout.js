@@ -175,6 +175,7 @@ var asExtsPlainText = [
     "bas",
     "hex",
     "map",
+    "nasm",
     "txt"
 ];
 

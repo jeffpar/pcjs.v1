@@ -63,17 +63,33 @@ while the /PGM should be connected to INPUT HIGH VOLTAGE.  So I wired pin 27 (/P
 worked perfectly.  The NYC Resistor article implied that every *active low* pin should be connected to GND, but apparently
 there are exceptions to that general rule.
 
-Producing Source Code with NDISASM
+Producing BIOS Source Code
 ---
-From the current directory, I ran:
+In the current directory, I ran NDISASM (the disassembler included with NASM):
 
 	ndisasm -o0x8000 -se105h -se05ah -se6ffh -sf025h -sf8aah private/1988-01-28.rom > 1988-01-28.nasm
 
-Then I ran the TextOut command, with the *--nasm* option, to clean up the code:
+The `-o0x8000` argument is required to "org" the file at the proper starting address, but the `-s` arguments
+are optional; they simply establish a few sync points within the ROM image that save a little cleanup effort, by
+preventing disassembly in the middle of instructions.
+
+Then I ran the PCjs [TextOut](/modules/textout/lib/) command, with the *--nasm* option, to prepare the code for reassembly:
 
 	node ~/Sites/pcjs/modules/textout/bin/textout --file=1988-01-28.nasm --nasm > t.nasm
 	mv t.nasm 1988-01-28.nasm
 
-The result, [1988-01-28.nasm](1988-01-28.nasm), can then be reassembled:
+The result, [1988-01-28.nasm](1988-01-28.nasm), after a small amount of manual cleanup, can now be successfully reassembled:
 
 	nasm -f bin 1988-01-28.nasm -l 1988-01-28.lst -o 1988-01-28.rom
+
+However, it does NOT produce a binary identical to the original ROM, in part because of instruction ambiguities (ie,
+instructions that can be assembled multiple ways). 
+
+It's possible that reassembled ROM may still work, but more research is required.
+
+One interesting section of the Compaq DeskPro ROM is this string at offset 0xE002:
+ 
+	db	'AUTHORS CAB93GLB93RWS93DJC93NPB(C)Copyright COMPAQ Computer Corporation 1982,83,84,85,86'
+
+Anyone care to take a stab at what `CAB93GLB93RWS93DJC93NPB` means?  I've already confirmed that
+[Google](https://www.google.com/?gws_rd=ssl#q=CAB93GLB93RWS93DJC93NPB) doesn't know.
