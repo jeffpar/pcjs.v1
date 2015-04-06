@@ -85,7 +85,7 @@ The result, [1988-01-28.nasm](1988-01-28.nasm), after a small amount of manual c
 However, it does NOT produce a binary identical to the original ROM, in part because of instruction ambiguities (ie,
 instructions that can be assembled multiple ways). 
 
-It's possible that reassembled ROM may still work, but more research is required.
+It's possible that the reassembled ROM may still work, but more research is required.
 
 One interesting section of the Compaq DeskPro ROM is this string at offset 0xE002:
  
