@@ -75,8 +75,8 @@ preventing disassembly in the middle of instructions.
 
 Then I ran the PCjs [TextOut](/modules/textout/lib/) command, with the *--nasm* option, to prepare the code for reassembly:
 
-	node ~/Sites/pcjs/modules/textout/bin/textout --file=1988-01-28.nasm --nasm > t.nasm
-	mv t.nasm 1988-01-28.nasm
+	node ../../../../../modules/textout/bin/textout --file=1988-01-28.nasm --nasm > temp.nasm
+	mv temp.nasm 1988-01-28.nasm
 
 The result, [1988-01-28.nasm](1988-01-28.nasm), after a small amount of manual cleanup, can now be successfully reassembled:
 
@@ -85,7 +85,7 @@ The result, [1988-01-28.nasm](1988-01-28.nasm), after a small amount of manual c
 However, it does NOT produce a binary identical to the original ROM, in part because of instruction ambiguities (ie,
 instructions that can be assembled multiple ways). 
 
-It's possible that the reassembled ROM may still work, but more research is required.
+It's possible the reassembled ROM may still work, but more research is required.
 
 One interesting section of the Compaq DeskPro ROM is this string at offset 0xE002:
  
