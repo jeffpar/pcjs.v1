@@ -65,15 +65,19 @@ there are exceptions to that general rule.
 
 Producing BIOS Source Code
 ---
-In the current directory, I ran NDISASM (the disassembler included with NASM):
+In the current directory, an original ROM can be regenerated from the JSON-encoded file:
 
-	ndisasm -o0x8000 -se105h -se05ah -se6ffh -sf025h -sf8aah private/1988-01-28.rom > 1988-01-28.nasm
+	node ../../../../../modules/filedump/bin/filedump --file=1988-01-28.json --output=1988-01-28.rom --format=rom
+
+The ROM can then be fed into NDISASM, the disassembler included with NASM:
+
+	ndisasm -o0x8000 -se105h -se05ah -se6ffh -sf025h -sf8aah 1988-01-28.rom > 1988-01-28.nasm
 
 The `-o0x8000` argument is required to "org" the file at the proper starting address, but the `-s` arguments
 are optional; they simply establish a few sync points within the ROM image that save a little cleanup effort, by
 preventing disassembly in the middle of instructions.
 
-Then I ran the PCjs [TextOut](/modules/textout/lib/) command, with the *--nasm* option, to prepare the code for reassembly:
+Next, the PCjs [TextOut](/modules/textout/lib/) command, with the *--nasm* option, prepares the code for reassembly:
 
 	node ../../../../../modules/textout/bin/textout --file=1988-01-28.nasm --nasm > temp.nasm
 	mv temp.nasm 1988-01-28.nasm
