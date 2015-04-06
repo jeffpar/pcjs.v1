@@ -67,15 +67,13 @@ Producing Source Code with NDISASM
 ---
 From the current directory, I ran:
 
-	ndisasm -o0x8000 private/1988-01-28.rom > 1988-01-28.nasm
+	ndisasm -o0x8000 -se105h -se05ah -se6ffh -sf025h -sf8aah private/1988-01-28.rom > 1988-01-28.nasm
 
-Then I massaged the output with a regex:
-
-	^([0-9A-F]+)\s+([0-9A-F]+)\s+(o32 |a32 |)([^\s]*) *(.*)$  -->  \t$3$4\t$5\t\t\t; $1  $2
-
-Then I ran custom TextOut command to clean up the code:
+Then I ran the TextOut command, with the *--nasm* option, to clean up the code:
 
 	node ~/Sites/pcjs/modules/textout/bin/textout --file=1988-01-28.nasm --nasm > t.nasm
 	mv t.nasm 1988-01-28.nasm
 
-The result: [1988-01-28.nasm](1988-01-28.nasm).  Now it needs a human touch.
+The result, [1988-01-28.nasm](1988-01-28.nasm), can then be reassembled:
+
+	nasm -f bin 1988-01-28.nasm -l 1988-01-28.lst -o 1988-01-28.rom

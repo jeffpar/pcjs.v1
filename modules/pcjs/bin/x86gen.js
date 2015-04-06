@@ -443,44 +443,44 @@ function genMode(a, d, w, mrm, sGroup, sRO) {
             case 0:
                 sModAddr = "this.regEBX + this.regESI";
                 sModFunc = "BXSI";
-                nCycles = "this.CYCLES.nEACyclesBaseIndex";        // 8086: 7
+                nCycles = "this.cycleCounts.nEACyclesBaseIndex";        // 8086: 7
                 break;
             case 1:
                 sModAddr = "this.regEBX + this.regEDI";
                 sModFunc = "BXDI";
-                nCycles = "this.CYCLES.nEACyclesBaseIndexExtra";   // 8086: 8
+                nCycles = "this.cycleCounts.nEACyclesBaseIndexExtra";   // 8086: 8
                 break;
             case 2:
                 sModAddr = "this.regEBP + this.regESI";
                 sModFunc = "BPSI";
                 sModRegSeg = "Stack";
-                nCycles = "this.CYCLES.nEACyclesBaseIndexExtra";   // 8086: 8
+                nCycles = "this.cycleCounts.nEACyclesBaseIndexExtra";   // 8086: 8
                 break;
             case 3:
                 sModAddr = "this.regEBP + this.regEDI";
                 sModFunc = "BPDI";
                 sModRegSeg = "Stack";
-                nCycles = "this.CYCLES.nEACyclesBaseIndex";        // 8086: 7
+                nCycles = "this.cycleCounts.nEACyclesBaseIndex";        // 8086: 7
                 break;
             case 4:
                 sModAddr = "this.regESI";
                 sModFunc = "SI";
-                nCycles = "this.CYCLES.nEACyclesBase";             // 8086: 5
+                nCycles = "this.cycleCounts.nEACyclesBase";             // 8086: 5
                 break;
             case 5:
                 sModAddr = "this.regEDI";
                 sModFunc = "DI";
-                nCycles = "this.CYCLES.nEACyclesBase";             // 8086: 5
+                nCycles = "this.cycleCounts.nEACyclesBase";             // 8086: 5
                 break;
             case 6:
                 sModAddr = "this.getIPWord()";
                 sModFunc = "D16";
-                nCycles = "this.CYCLES.nEACyclesDisp";             // 8086: 6
+                nCycles = "this.cycleCounts.nEACyclesDisp";             // 8086: 6
                 break;
             case 7:
                 sModAddr = "this.regEBX";
                 sModFunc = "BX";
-                nCycles = "this.CYCLES.nEACyclesBase";             // 8086: 5
+                nCycles = "this.cycleCounts.nEACyclesBase";             // 8086: 5
                 break;
             default:
                 sError = "unrecognized mod=0 r/m: " + r_m;
@@ -492,45 +492,45 @@ function genMode(a, d, w, mrm, sGroup, sRO) {
             case 0:
                 sModAddr = "this.regEBX + this.regESI + this.getIPDisp()";
                 sModFunc = "BXSID8";
-                nCycles = "this.CYCLES.nEACyclesBaseIndexDisp";        // 8086: 11
+                nCycles = "this.cycleCounts.nEACyclesBaseIndexDisp";        // 8086: 11
                 break;
             case 1:
                 sModAddr = "this.regEBX + this.regEDI + this.getIPDisp()";
                 sModFunc = "BXDID8";
-                nCycles = "this.CYCLES.nEACyclesBaseIndexDispExtra";   // 8086: 12
+                nCycles = "this.cycleCounts.nEACyclesBaseIndexDispExtra";   // 8086: 12
                 break;
             case 2:
                 sModAddr = "this.regEBP + this.regESI + this.getIPDisp()";
                 sModFunc = "BPSID8";
                 sModRegSeg = "Stack";
-                nCycles = "this.CYCLES.nEACyclesBaseIndexDispExtra";   // 8086: 12
+                nCycles = "this.cycleCounts.nEACyclesBaseIndexDispExtra";   // 8086: 12
                 break;
             case 3:
                 sModAddr = "this.regEBP + this.regEDI + this.getIPDisp()";
                 sModFunc = "BPDID8";
                 sModRegSeg = "Stack";
-                nCycles = "this.CYCLES.nEACyclesBaseIndexDisp";        // 8086: 11
+                nCycles = "this.cycleCounts.nEACyclesBaseIndexDisp";        // 8086: 11
                 break;
             case 4:
                 sModAddr = "this.regESI + this.getIPDisp()";
                 sModFunc = "SID8";
-                nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
+                nCycles = "this.cycleCounts.nEACyclesBaseDisp";             // 8086: 9
                 break;
             case 5:
                 sModAddr = "this.regEDI + this.getIPDisp()";
                 sModFunc = "DID8";
-                nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
+                nCycles = "this.cycleCounts.nEACyclesBaseDisp";             // 8086: 9
                 break;
             case 6:
                 sModAddr = "this.regEBP + this.getIPDisp()";
                 sModFunc = "BPD8";
                 sModRegSeg = "Stack";
-                nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
+                nCycles = "this.cycleCounts.nEACyclesBaseDisp";             // 8086: 9
                 break;
             case 7:
                 sModAddr = "this.regEBX + this.getIPDisp()";
                 sModFunc = "BXD8";
-                nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
+                nCycles = "this.cycleCounts.nEACyclesBaseDisp";             // 8086: 9
                 break;
             default:
                 sError = "unrecognized mod=1 r/m: " + r_m;
@@ -542,45 +542,45 @@ function genMode(a, d, w, mrm, sGroup, sRO) {
             case 0:
                 sModAddr = "this.regEBX + this.regESI + this.getIPWord()";
                 sModFunc = "BXSID16";
-                nCycles = "this.CYCLES.nEACyclesBaseIndexDisp";        // 8086: 11
+                nCycles = "this.cycleCounts.nEACyclesBaseIndexDisp";        // 8086: 11
                 break;
             case 1:
                 sModAddr = "this.regEBX + this.regEDI + this.getIPWord()";
                 sModFunc = "BXDID16";
-                nCycles = "this.CYCLES.nEACyclesBaseIndexDispExtra";   // 8086: 12
+                nCycles = "this.cycleCounts.nEACyclesBaseIndexDispExtra";   // 8086: 12
                 break;
             case 2:
                 sModAddr = "this.regEBP + this.regESI + this.getIPWord()";
                 sModFunc = "BPSID16";
                 sModRegSeg = "Stack";
-                nCycles = "this.CYCLES.nEACyclesBaseIndexDispExtra";   // 8086: 12
+                nCycles = "this.cycleCounts.nEACyclesBaseIndexDispExtra";   // 8086: 12
                 break;
             case 3:
                 sModAddr = "this.regEBP + this.regEDI + this.getIPWord()";
                 sModFunc = "BPDID16";
                 sModRegSeg = "Stack";
-                nCycles = "this.CYCLES.nEACyclesBaseIndexDisp";        // 8086: 11
+                nCycles = "this.cycleCounts.nEACyclesBaseIndexDisp";        // 8086: 11
                 break;
             case 4:
                 sModAddr = "this.regESI + this.getIPWord()";
                 sModFunc = "SID16";
-                nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
+                nCycles = "this.cycleCounts.nEACyclesBaseDisp";             // 8086: 9
                 break;
             case 5:
                 sModAddr = "this.regEDI + this.getIPWord()";
                 sModFunc = "DID16";
-                nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
+                nCycles = "this.cycleCounts.nEACyclesBaseDisp";             // 8086: 9
                 break;
             case 6:
                 sModAddr = "this.regEBP + this.getIPWord()";
                 sModFunc = "BPD16";
                 sModRegSeg = "Stack";
-                nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
+                nCycles = "this.cycleCounts.nEACyclesBaseDisp";             // 8086: 9
                 break;
             case 7:
                 sModAddr = "this.regEBX + this.getIPWord()";
                 sModFunc = "BXD16";
-                nCycles = "this.CYCLES.nEACyclesBaseDisp";             // 8086: 9
+                nCycles = "this.cycleCounts.nEACyclesBaseDisp";             // 8086: 9
                 break;
             default:
                 sError = "unrecognized mod=2 r/m: " + r_m;
@@ -706,42 +706,42 @@ function genMode(a, d, w, mrm, sGroup, sRO) {
             case 0:
                 sModAddr = "this.regEAX";
                 sModFunc = "EAX";
-                nCycles = "this.CYCLES.nEACyclesBase";
+                nCycles = "this.cycleCounts.nEACyclesBase";
                 break;
             case 1:
                 sModAddr = "this.regECX";
                 sModFunc = "ECX";
-                nCycles = "this.CYCLES.nEACyclesBase";
+                nCycles = "this.cycleCounts.nEACyclesBase";
                 break;
             case 2:
                 sModAddr = "this.regEDX";
                 sModFunc = "EDX";
-                nCycles = "this.CYCLES.nEACyclesBase";
+                nCycles = "this.cycleCounts.nEACyclesBase";
                 break;
             case 3:
                 sModAddr = "this.regEBX";
                 sModFunc = "EBX";
-                nCycles = "this.CYCLES.nEACyclesBase";
+                nCycles = "this.cycleCounts.nEACyclesBase";
                 break;
             case 4:
                 sModAddr = "this.getSIBAddr(0)";
                 sModFunc = "SIB";
-                nCycles = "this.CYCLES.nEACyclesBase";
+                nCycles = "this.cycleCounts.nEACyclesBase";
                 break;
             case 5:
                 sModAddr = "this.getIPWord()";
                 sModFunc = "D32";
-                nCycles = "this.CYCLES.nEACyclesDisp";
+                nCycles = "this.cycleCounts.nEACyclesDisp";
                 break;
             case 6:
                 sModAddr = "this.regESI";
                 sModFunc = "ESI";
-                nCycles = "this.CYCLES.nEACyclesBase";
+                nCycles = "this.cycleCounts.nEACyclesBase";
                 break;
             case 7:
                 sModAddr = "this.regEDI";
                 sModFunc = "EDI";
-                nCycles = "this.CYCLES.nEACyclesBase";
+                nCycles = "this.cycleCounts.nEACyclesBase";
                 break;
             default:
                 sError = "unrecognized mod=0 r/m: " + r_m;
@@ -753,43 +753,43 @@ function genMode(a, d, w, mrm, sGroup, sRO) {
             case 0:
                 sModAddr = "this.regEAX + this.getIPDisp()";
                 sModFunc = "EAXD8";
-                nCycles = "this.CYCLES.nEACyclesBaseDisp";
+                nCycles = "this.cycleCounts.nEACyclesBaseDisp";
                 break;
             case 1:
                 sModAddr = "this.regECX + this.getIPDisp()";
                 sModFunc = "ECXD8";
-                nCycles = "this.CYCLES.nEACyclesBaseDisp";
+                nCycles = "this.cycleCounts.nEACyclesBaseDisp";
                 break;
             case 2:
                 sModAddr = "this.regEDX + this.getIPDisp()";
                 sModFunc = "EDXD8";
-                nCycles = "this.CYCLES.nEACyclesBaseDisp";
+                nCycles = "this.cycleCounts.nEACyclesBaseDisp";
                 break;
             case 3:
                 sModAddr = "this.regEBX + this.getIPDisp()";
                 sModFunc = "EBXD8";
-                nCycles = "this.CYCLES.nEACyclesBaseDisp";
+                nCycles = "this.cycleCounts.nEACyclesBaseDisp";
                 break;
             case 4:
                 sModAddr = "this.getSIBAddr(1) + this.getIPDisp()";
                 sModFunc = "SIBD8";
-                nCycles = "this.CYCLES.nEACyclesBaseDisp";
+                nCycles = "this.cycleCounts.nEACyclesBaseDisp";
                 break;
             case 5:
                 sModAddr = "this.regEBP + this.getIPDisp()";
                 sModFunc = "EBPD8";
                 sModRegSeg = "Stack";
-                nCycles = "this.CYCLES.nEACyclesBaseDisp";
+                nCycles = "this.cycleCounts.nEACyclesBaseDisp";
                 break;
             case 6:
                 sModAddr = "this.regESI + this.getIPDisp()";
                 sModFunc = "ESID8";
-                nCycles = "this.CYCLES.nEACyclesBaseDisp";
+                nCycles = "this.cycleCounts.nEACyclesBaseDisp";
                 break;
             case 7:
                 sModAddr = "this.regEDI + this.getIPDisp()";
                 sModFunc = "EDID8";
-                nCycles = "this.CYCLES.nEACyclesBaseDisp";
+                nCycles = "this.cycleCounts.nEACyclesBaseDisp";
                 break;
             default:
                 sError = "unrecognized mod=1 r/m: " + r_m;
@@ -801,43 +801,43 @@ function genMode(a, d, w, mrm, sGroup, sRO) {
             case 0:
                 sModAddr = "this.regEAX + this.getIPWord()";
                 sModFunc = "EAXD32";
-                nCycles = "this.CYCLES.nEACyclesBaseDisp";
+                nCycles = "this.cycleCounts.nEACyclesBaseDisp";
                 break;
             case 1:
                 sModAddr = "this.regECX + this.getIPWord()";
                 sModFunc = "ECXD32";
-                nCycles = "this.CYCLES.nEACyclesBaseDisp";
+                nCycles = "this.cycleCounts.nEACyclesBaseDisp";
                 break;
             case 2:
                 sModAddr = "this.regEDX + this.getIPWord()";
                 sModFunc = "EDXD32";
-                nCycles = "this.CYCLES.nEACyclesBaseDisp";
+                nCycles = "this.cycleCounts.nEACyclesBaseDisp";
                 break;
             case 3:
                 sModAddr = "this.regEBX + this.getIPWord()";
                 sModFunc = "EBXD32";
-                nCycles = "this.CYCLES.nEACyclesBaseDisp";
+                nCycles = "this.cycleCounts.nEACyclesBaseDisp";
                 break;
             case 4:
                 sModAddr = "this.getSIBAddr(2) + this.getIPWord()";
                 sModFunc = "SIBD32";
-                nCycles = "this.CYCLES.nEACyclesBaseDisp";
+                nCycles = "this.cycleCounts.nEACyclesBaseDisp";
                 break;
             case 5:
                 sModAddr = "this.regEBP + this.getIPWord()";
                 sModFunc = "EBPD32";
                 sModRegSeg = "Stack";
-                nCycles = "this.CYCLES.nEACyclesBaseDisp";
+                nCycles = "this.cycleCounts.nEACyclesBaseDisp";
                 break;
             case 6:
                 sModAddr = "this.regESI + this.getIPWord()";
                 sModFunc = "ESID32";
-                nCycles = "this.CYCLES.nEACyclesBaseDisp";
+                nCycles = "this.cycleCounts.nEACyclesBaseDisp";
                 break;
             case 7:
                 sModAddr = "this.regEDI + this.getIPWord()";
                 sModFunc = "EDID32";
-                nCycles = "this.CYCLES.nEACyclesBaseDisp";
+                nCycles = "this.cycleCounts.nEACyclesBaseDisp";
                 break;
             default:
                 sError = "unrecognized mod=2 r/m: " + r_m;

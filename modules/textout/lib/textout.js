@@ -47,13 +47,14 @@ var str     = require("../../shared/lib/strlib");
 function TextOut()
 {
     this.fDebug = false;
+    this.fASCII = true;
     this.sServerRoot = process.cwd();
     this.asLines = [];
     this.nTabWidth = 8;
     this.sTarget = "; ";
 }
 
-TextOut.asTargetRefs = ["call", "jmp", "jz", "jnz", "jc", "jnc", "ja", "jna", "js", "jns", "jo", "jno", "jl", "jnl", "jg", "jng", "jpo", "jpe"];
+TextOut.asTargetRefs = ["call", "jmp", "jz", "jnz", "jc", "jnc", "ja", "jna", "js", "jns", "jo", "jno", "jl", "jnl", "jg", "jng", "jpo", "jpe", "loop", "loope", "loopne", "jcxz", "jecxz"];
 
 /*
  * Class methods
@@ -72,13 +73,15 @@ TextOut.asTargetRefs = ["call", "jmp", "jz", "jnz", "jc", "jnc", "ja", "jna", "j
  * ---
  *      --nasm performs a variety of NASM-related processing, including:
  *
- *          collapseRepeated(): looks for series of lines containing nothing more than a "db",
- *          "dw", or something equivalent, and collapses them into a single repetition.
+ *          massageLines(): reorders basic elements of every line to make them "assemble-able"
  *
- *          labelTargets(): looks for all JMP and CALL targets and labels them.
+ *          collapseLines(): looks for series of lines containing nothing more than a "db",
+ *          "dw", or something equivalent, and collapses them into a single repetition
+ *
+ *          labelTargets(): looks for all JMP and CALL targets and labels them
  *
  *          alignVertical(): looks for a predefined target string (eg, '; ') in the first line,
- *          and ensures that the same sequence in all subsequent lines starts at the same column.
+ *          and ensures that the same sequence in all subsequent lines starts at the same column
  *
  *      For now, all output is written to stdout only.
  *
@@ -106,7 +109,8 @@ TextOut.CLI = function()
     text.loadFile(sFile, function(err) {
         if (!err) {
             if (argv['nasm']) {
-                text.collapseRepeated();
+                text.massageLines();
+                text.collapseLines();
                 text.labelTargets();
                 text.alignVertical();
             }
@@ -198,26 +202,131 @@ TextOut.prototype.setText = function(buf)
 };
 
 /**
- * collapseRepeated()
+ * massageLines()
  *
  * @this {TextOut}
  */
-TextOut.prototype.collapseRepeated = function()
+TextOut.prototype.massageLines = function()
+{
+    var iLineASCII = -1, sASCII = "";
+
+    for (var iLine = 0; iLine < this.asLines.length; iLine++) {
+
+        /*
+         * NDISASM sometimes inserts spurious lines containing a hyphen immediately followed by one or more hex bytes;
+         * this seems to happen whenever an instruction longer than 8 bytes is encountered, and it appears that these
+         * extra lines can be completely removed.
+         */
+        var sLine = this.asLines[iLine];
+        if (sLine.match(/^\s*-[0-9A-F]+$/)) {
+            this.asLines.splice(iLine--, 1);
+            continue;
+        }
+
+        sLine = sLine.replace(/^([0-9A-F]+)\s+([0-9A-F]+)\s+(o32 |a32 |)([^\s]*) *(.*)$/, "\t$3$4\t$5\t\t\t; $1  $2");
+
+        var fASCII = false;
+        var match = sLine.match(/([0-9A-F]+)$/);
+        if (match) {
+            fASCII = this.fASCII;
+            var cBytes = 0, c;
+            var sBytes = match[1], sASCIILine = "";
+            for (var i = 0; i < sBytes.length; i += 2) {
+                c = str.parseInt(sBytes.substr(i, 2));
+                if (c != 0x0D && c != 0x0A && (c < 0x20 || c >= 0x7F)) {
+                    c = 0x2E;
+                    fASCII = false;
+                }
+                sASCIILine += String.fromCharCode(c);
+                cBytes++;
+            }
+            /*
+             * Don't interpret single-byte opcodes within the ASCII range as potential ASCII?
+             *
+             *      if (cBytes == 1 && (c >= 0x40 && c <= 0x5F)) fASCII = false;
+             */
+            sLine += "  " + this.encodeASCII(sASCIILine);
+        }
+
+        this.asLines[iLine] = sLine;
+
+        if (fASCII) {
+            if (iLineASCII < 0) iLineASCII = iLine;
+            sASCII += sASCIILine;
+            continue;
+        }
+
+        if (iLineASCII >= 0) {
+            if (iLine - iLineASCII >= 4) {
+                /*
+                 * This seems a better way of discriminating between single-byte opcodes and ASCII:
+                 * output ASCII only when the number of ASCII bytes exceeds the number of opcode bytes.
+                 */
+                if (sASCII.length > iLine - iLineASCII + 1) {
+                    this.asLines[iLineASCII] = "\tdb\t" + this.encodeASCII(sASCII);
+                    this.asLines.splice(iLineASCII+1, iLine - iLineASCII - 1);
+                    iLine = iLineASCII;
+                }
+            }
+            iLineASCII = -1; sASCII = "";
+        }
+    }
+};
+
+/**
+ * encodeASCII(s)
+ *
+ * @param s
+ * @return {string}
+ */
+TextOut.prototype.encodeASCII = function(s)
+{
+    var sNew = "", fInQuotes = false;
+    for (var i = 0; i < s.length; i++) {
+        var c = s.charCodeAt(i);
+        if (c < 0x20 || c == 0x27) {
+            if (fInQuotes) {
+                sNew += "'";
+                fInQuotes = false;
+            }
+            if (sNew) sNew += ',';
+            sNew += str.toHexByte(c);
+            continue;
+        }
+        if (!fInQuotes) {
+            if (sNew) sNew += ',';
+            sNew += "'";
+            fInQuotes = true;
+        }
+        var ch = String.fromCharCode(c);
+        if (ch == "'") ch = "\\'";
+        sNew += ch;
+    }
+    if (fInQuotes) sNew += "'";
+    return sNew;
+};
+
+/**
+ * collapseLines()
+ *
+ * @this {TextOut}
+ */
+TextOut.prototype.collapseLines = function()
 {
     for (var i = 0; i < this.asLines.length; i++) {
-        var as = this.getLineParts(i);
+        var as = this.getLineParts(i, true);
         if (!as) continue;
         if (as[2] != "db" && as[2] != "dw") continue;
         var cCombine = 0, asLast;
         for (var j = i + 1; j < this.asLines.length; j++) {
-            var asNext = this.getLineParts(j);
+            var asNext = this.getLineParts(j, true);
             if (!asNext) break;
             if (as[2] != asNext[2] || as[2] != asNext[2]) break;
             asLast = asNext;
             cCombine++;
         }
         if (cCombine > 2) {
-            this.asLines[i] = "\n\ttimes\t" + (cCombine + 1) + ' ' + as[2] + ' ' + as[3] + "\t\t; " + as[4] + " - " + asLast[4] + '\n';
+            this.asLines[i] = "\n\ttimes\t" + (cCombine + 1) + ' ' + as[2] + ' ' + as[3] + "\t\t; " + as[4] + " - " + asLast[4];
             this.asLines.splice(i + 1, cCombine);
         }
     }
@@ -233,6 +342,7 @@ TextOut.prototype.labelTargets = function()
     /*
      * First pass: find all target references (eg, JMP and CALL instructions)
      */
+    var chPrefix = 'x';
     var i, j, as, target, aTargets = [], aHardTargets = [];
 
     for (i = 0; i < this.asLines.length; i++) {
@@ -240,14 +350,25 @@ TextOut.prototype.labelTargets = function()
         if (!as) continue;
         var iTarget = TextOut.asTargetRefs.indexOf(as[2]);
         if (iTarget < 0) continue;
-        target = str.parseInt(as[3]);
+        var sTarget = as[3];
+        var sShort = "short ";
+        if (sTarget.indexOf(sShort) !== 0) {
+            sShort = "";
+        } else {
+            sTarget = sTarget.substr(sShort.length);
+        }
+        target = str.parseInt(sTarget);
         if (target == undefined) continue;
         if (aTargets.indexOf(target) < 0) {
             aTargets.push(target);
-            if (iTarget < 2) aHardTargets.push(target);
+            /*
+             * For now, we're classifying only "call" targets as "hard" targets, and thus worthy of extra whitespace
+             */
+            if (iTarget < 1) aHardTargets.push(target);
         }
-        this.asLines[i] = this.asLines[i].replace(as[3], 'l' + target.toString(16));
+        this.asLines[i] = this.asLines[i].replace(as[3], sShort + chPrefix + target.toString(16));
     }
+
     /*
      * Second pass: label all targets
      */
@@ -260,48 +381,41 @@ TextOut.prototype.labelTargets = function()
         j = aTargets.indexOf(addr);
         if (j >= 0) {
             var fHard = (aHardTargets.indexOf(addr) >= 0);
-            this.asLines[i] = (fHard || fPrevHard? "\nl" : 'l') + addr.toString(16) + ':' + this.asLines[i];
+            this.asLines[i] = (fHard || fPrevHard? '\n' : '') + chPrefix + addr.toString(16) + ':' + this.asLines[i];
             aTargets.splice(j, 1);
         } else {
             if (fPrevHard) this.asLines[i] = '\n' + this.asLines[i];
         }
         fPrevHard = (as[2] == "jmp" || as[2] == "ret" || as[2] == "retf" || as[2] == "iret");
     }
+
     /*
      * Third pass: for all targets that turned out to NOT be targets, fix all references
      */
-    var aMissingTargets = [];
+    var aRepairs = [];
     if (aTargets.length) {
         for (i = 0; i < this.asLines.length; i++) {
             as = this.getLineParts(i);
             if (!as) continue;
-            if (as[3].charAt(0) == 'l') {
+            if (as[3].charAt(0) == chPrefix) {
                 addr = str.parseInt(as[3].substr(1));
                 if (aTargets.indexOf(addr) >= 0) {
-                    this.asLines[i] = this.asLines[i].replace(as[3], str.toHexWord(addr));
-                    if (aMissingTargets.indexOf(addr) < 0) aMissingTargets.push(addr);
+                    /*
+                     * Instead of putting back the original target address, let's just convert the line to a "db"
+                     */
+                    this.asLines[i] = as[1] + "\tdb\t";
+                    for (j = 0; j < as[5].length; j += 2) {
+                        this.asLines[i] += (j > 0? ',' : '') + "0x" + as[5].substr(j, 2);
+                    }
+                    // this.asLines[i] = this.asLines[i].replace(as[3], str.toHexWord(addr));
+                    if (aRepairs.indexOf(addr) < 0) aRepairs.push(addr);
                 }
-            }
-            if (as[5]) {
-                var sASCII = "";
-                var sBytes = as[5];
-                for (j = 0; j < sBytes.length-1; j+=2) {
-                    var k = str.parseInt(sBytes.substr(j, 2));
-                    sASCII += (k < 0x20 || k >= 0x7f)? '.' : String.fromCharCode(k);
-                }
-                sBytes = "  " + sBytes;
-                /*
-                 * TODO: Determine why replace() fails when there's a trailing '$' in the replacement string;
-                 * I'm working around it by appending a space.
-                 */
-                if (sASCII.slice(-1) == '$') sASCII += ' ';
-                this.asLines[i] = this.asLines[i].replace(sBytes, sBytes + " '" + sASCII + "'");
             }
         }
-        if (aTargets.length != aMissingTargets.length) {
-            console.log("; warning: " + aTargets.length + " unprocessed targets (" + aMissingTargets.length + " repaired):");
+        if (aTargets.length != aRepairs.length) {
+            console.log("; warning: " + aTargets.length + " unprocessed targets (" + aRepairs.length + " repaired):");
             for (j = 0; j < aTargets.length; j++) {
-                if (aMissingTargets.indexOf(aTargets[j]) < 0) console.log(';\t' + str.toHexWord(aTargets[j]));
+                if (aRepairs.indexOf(aTargets[j]) < 0) console.log(';\t' + str.toHexWord(aTargets[j]));
             }
         }
     }
@@ -378,7 +492,7 @@ TextOut.prototype.findTarget = function(sSrc, fDebug)
 };
 
 /**
- * getLineParts(iLine)
+ * getLineParts(iLine, fBogus)
  *
  * Returns the following array:
  *
@@ -387,17 +501,22 @@ TextOut.prototype.findTarget = function(sSrc, fDebug)
  *      asParts[3]: operand(s)
  *      asParts[4]: offset
  *      asParts[5]: byte sequence
+ *      asParts[6]: ASCII sequence, if any
  *
  * or null if the line does not contain all of the above.
  *
  * @this {TextOut}
  * @param {number} iLine
+ * @param {boolean} [fBogus]
  * @return {Array.<string>}
  */
-TextOut.prototype.getLineParts = function(iLine)
+TextOut.prototype.getLineParts = function(iLine, fBogus)
 {
-    var as = this.asLines[iLine].match(/^\n?([^\s:]+:|)\s*([^\s;]+)\s*([^;]*?)\s*;\s*([0-9A-F]+)\s*([0-9A-F]+)\s*$/);
-    if (as) {
+    var as = this.asLines[iLine].match(/^\n?([^\s:]+:|)\s*([^\s;]+)\s*([^;]*?)\s*;\s*([0-9A-F]+)\s*([0-9A-F]+)\s*([^\s]+|)$/);
+    if (as && fBogus) {
+        /*
+         * In most (but not all) cases, an "add [bx+si],al" instruction is bogus (TODO: Come up with an actual bogosity test)
+         */
         if (as[2] == "add" && as[3] == "[bx+si],al") {
             as[2] = "dw";
             as[3] = "0x0000";
