@@ -9,15 +9,26 @@
 # 06-Apr-2015
 #
 
-all: test.rom
+all: 1988-01-28-test.rom 1989-04-14-test.rom
 
 1988-01-28.rom: 1988-01-28.json
 	node ../../../../../modules/filedump/bin/filedump --file=1988-01-28.json --output=1988-01-28.rom --format=rom
 
-test.nasm: 1988-01-28.rom
-	ndisasm -o0x8000 -se105h -se05ah -se6ffh -sf025h -sf8aah 1988-01-28.rom > test.nasm
-	node ../../../../../modules/textout/bin/textout --file=test.nasm --nasm > temp.nasm
-	mv temp.nasm test.nasm
+1988-01-28-test.nasm: 1988-01-28.rom
+	ndisasm -o0x8000 -se105h -se05ah -se6ffh -sf025h -sf8aah 1988-01-28.rom > 1988-01-28-test.nasm
+	node ../../../../../modules/textout/bin/textout --file=1988-01-28-test.nasm --nasm > temp.nasm
+	mv temp.nasm 1988-01-28-test.nasm
 
-test.rom: test.nasm
-	nasm -f bin test.nasm -l test.lst -o test.rom
+1988-01-28-test.rom: 1988-01-28-test.nasm
+	nasm -f bin 1988-01-28-test.nasm -l 1988-01-28-test.lst -o 1988-01-28-test.rom
+
+1989-04-14.rom: 1989-04-14.json
+	node ../../../../../modules/filedump/bin/filedump --file=1989-04-14.json --output=1989-04-14.rom --format=rom
+
+1989-04-14-test.nasm: 1989-04-14.rom
+	ndisasm -o0x8000 1989-04-14.rom > 1989-04-14-test.nasm
+	node ../../../../../modules/textout/bin/textout --file=1989-04-14-test.nasm --nasm > temp.nasm
+	mv temp.nasm 1989-04-14-test.nasm
+
+1989-04-14-test.rom: 1989-04-14-test.nasm
+	nasm -f bin 1989-04-14-test.nasm -l 1989-04-14-test.lst -o 1989-04-14-test.rom

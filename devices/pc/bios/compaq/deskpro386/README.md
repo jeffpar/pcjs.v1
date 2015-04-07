@@ -95,5 +95,6 @@ One interesting section of the Compaq DeskPro ROM is this string at offset 0xE00
  
 	db	'AUTHORS CAB93GLB93RWS93DJC93NPB(C)Copyright COMPAQ Computer Corporation 1982,83,84,85,86'
 
-Anyone care to take a stab at what `CAB93GLB93RWS93DJC93NPB` means?  I've already confirmed that
+Anyone care to take a stab at what `CAB93GLB93RWS93DJC93NPB` means?  Is it the initials of 5 people
+(CAB, GLB, RWS, DJC, NPB), separated by "93"?  I've already confirmed that
 [Google](https://www.google.com/?gws_rd=ssl#q=CAB93GLB93RWS93DJC93NPB) doesn't know.
