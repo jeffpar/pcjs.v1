@@ -100,29 +100,21 @@ X86.opADDALb = function ADDALb()
      * allocated to reflect that fact; however, I'm leaving "perfect" BACKTRACK support for another day.
      */
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
-    /*
-     * In the absence of any EA calculations, fnADDb() will deduct nOpCyclesArithRR, and for all CPUs through
-     * the 80286, we need deduct only one more cycle.
-     */
-    this.nStepCycles--;
+    this.nStepCycles--;         // in the absence of any EA calculations, we need deduct only one more cycle
 };
 
 /**
- * op=0x05 (ADD AX,imm16)
+ * op=0x05 (ADD AX,imm16 or ADD EAX,imm32)
  *
  * @this {X86CPU}
  */
-X86.opADDAXw = function ADDAXw()
+X86.opADDAX = function ADDAX()
 {
     this.regEAX = (this.regEAX & ~this.dataMask) | X86.fnADDw.call(this, this.regEAX & this.dataMask, this.getIPWord());
     if (BACKTRACK) {
         this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
     }
-    /*
-     * In the absence of any EA calculations, fnADDw() will deduct nOpCyclesArithRR, and for all CPUs through
-     * the 80286, we need deduct only one more cycle.
-     */
-    this.nStepCycles--;
+    this.nStepCycles--;         // in the absence of any EA calculations, we need deduct only one more cycle
 };
 
 /**
@@ -196,29 +188,21 @@ X86.opORALb = function ORALb()
 {
     this.regEAX = (this.regEAX & ~0xff) | X86.fnORb.call(this, this.regEAX & 0xff, this.getIPByte());
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
-    /*
-     * In the absence of any EA calculations, fnORb() will deduct nOpCyclesArithRR, and for all CPUs through
-     * the 80286, we need deduct only one more cycle.
-     */
-    this.nStepCycles--;
+    this.nStepCycles--;         // in the absence of any EA calculations, we need deduct only one more cycle
 };
 
 /**
- * op=0x0D (OR AX,imm16)
+ * op=0x0D (OR AX,imm16 or OR EAX,imm32)
  *
  * @this {X86CPU}
  */
-X86.opORAXw = function ORAXw()
+X86.opORAX = function ORAX()
 {
     this.regEAX = (this.regEAX & ~this.dataMask) | X86.fnORw.call(this, this.regEAX & this.dataMask, this.getIPWord());
     if (BACKTRACK) {
         this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
     }
-    /*
-     * In the absence of any EA calculations, fnORw() will deduct nOpCyclesArithRR, and for all CPUs through
-     * the 80286, we need deduct only one more cycle.
-     */
-    this.nStepCycles--;
+    this.nStepCycles--;         // in the absence of any EA calculations, we need deduct only one more cycle
 };
 
 /**
@@ -302,29 +286,21 @@ X86.opADCALb = function ADCALb()
 {
     this.regEAX = (this.regEAX & ~0xff) | X86.fnADCb.call(this, this.regEAX & 0xff, this.getIPByte());
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
-    /*
-     * In the absence of any EA calculations, fnADCb() will deduct nOpCyclesArithRR, and for all CPUs through
-     * the 80286, we need deduct only one more cycle.
-     */
-    this.nStepCycles--;
+    this.nStepCycles--;         // in the absence of any EA calculations, we need deduct only one more cycle
 };
 
 /**
- * op=0x15 (ADC AX,imm16)
+ * op=0x15 (ADC AX,imm16 or ADC EAX,imm32)
  *
  * @this {X86CPU}
  */
-X86.opADCAXw = function ADCAXw()
+X86.opADCAX = function ADCAX()
 {
     this.regEAX = (this.regEAX & ~this.dataMask) | X86.fnADCw.call(this, this.regEAX & this.dataMask, this.getIPWord());
     if (BACKTRACK) {
         this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
     }
-    /*
-     * In the absence of any EA calculations, fnADCw() will deduct nOpCyclesArithRR, and for all CPUs through
-     * the 80286, we need deduct only one more cycle.
-     */
-    this.nStepCycles--;
+    this.nStepCycles--;         // in the absence of any EA calculations, we need deduct only one more cycle
 };
 
 /**
@@ -398,29 +374,21 @@ X86.opSBBALb = function SBBALb()
 {
     this.regEAX = (this.regEAX & ~0xff) | X86.fnSBBb.call(this, this.regEAX & 0xff, this.getIPByte());
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
-    /*
-     * In the absence of any EA calculations, fnSBBb() will deduct nOpCyclesArithRR, and for all CPUs through
-     * the 80286, we need deduct only one more cycle.
-     */
-    this.nStepCycles--;
+    this.nStepCycles--;         // in the absence of any EA calculations, we need deduct only one more cycle
 };
 
 /**
- * op=0x1D (SBB AX,imm16)
+ * op=0x1D (SBB AX,imm16 or SBB EAX,imm32)
  *
  * @this {X86CPU}
  */
-X86.opSBBAXw = function SBBAXw()
+X86.opSBBAX = function SBBAX()
 {
     this.regEAX = (this.regEAX & ~this.dataMask) | X86.fnSBBw.call(this, this.regEAX & this.dataMask, this.getIPWord());
     if (BACKTRACK) {
         this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
     }
-    /*
-     * In the absence of any EA calculations, fnSBBw() will deduct nOpCyclesArithRR, and for all CPUs through
-     * the 80286, we need deduct only one more cycle.
-     */
-    this.nStepCycles--;
+    this.nStepCycles--;         // in the absence of any EA calculations, we need deduct only one more cycle
 };
 
 /**
@@ -466,16 +434,6 @@ X86.opANDmw = function ANDmw()
 };
 
 /**
- * op=0x21 (AND dword,reg)
- *
- * @this {X86CPU}
- */
-X86.opANDmd = function ANDmd()
-{
-    this.aOpModMemWord[this.getIPByte()].call(this, X86.fnANDd);
-};
-
-/**
  * op=0x22 (AND reg,byte)
  *
  * @this {X86CPU}
@@ -496,16 +454,6 @@ X86.opANDrw = function ANDrw()
 };
 
 /**
- * op=0x23 (AND reg,dword)
- *
- * @this {X86CPU}
- */
-X86.opANDrd = function ANDrd()
-{
-    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnANDd);
-};
-
-/**
  * op=0x24 (AND AL,imm8)
  *
  * @this {X86CPU}
@@ -514,47 +462,21 @@ X86.opANDAL = function ANDAL()
 {
     this.regEAX = (this.regEAX & ~0xff) | X86.fnANDb.call(this, this.regEAX & 0xff, this.getIPByte());
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
-    /*
-     * In the absence of any EA calculations, fnANDb() will deduct nOpCyclesArithRR, and for all CPUs through
-     * the 80286, we need deduct only one more cycle.
-     */
-    this.nStepCycles--;
+    this.nStepCycles--;         // in the absence of any EA calculations, we need deduct only one more cycle
 };
 
 /**
- * op=0x25 (AND AX,imm16)
+ * op=0x25 (AND AX,imm16 or AND EAX,imm32)
  *
  * @this {X86CPU}
  */
 X86.opANDAX = function ANDAX()
 {
-    this.regEAX = (this.regEAX & ~0xffff) | X86.fnANDw.call(this, this.regEAX & 0xffff, this.getIPShort());
+    this.regEAX = (this.regEAX & ~this.dataMask) | X86.fnANDw.call(this, this.regEAX & this.dataMask, this.getIPWord());
     if (BACKTRACK) {
         this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
     }
-    /*
-     * In the absence of any EA calculations, fnANDw() will deduct nOpCyclesArithRR, and for all CPUs through
-     * the 80286, we need deduct only one more cycle.
-     */
-    this.nStepCycles--;
-};
-
-/**
- * op=0x25 (AND AX,imm32)
- *
- * @this {X86CPU}
- */
-X86.opANDAXd = function ANDAXd()
-{
-    this.regEAX = X86.fnANDd.call(this, this.regEAX, this.getIPLong());
-    if (BACKTRACK) {
-        this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
-    }
-    /*
-     * In the absence of any EA calculations, fnANDd() will deduct nOpCyclesArithRR, and for all CPUs through
-     * the 80286, we need deduct only one more cycle.
-     */
-    this.nStepCycles--;
+    this.nStepCycles--;         // in the absence of any EA calculations, we need deduct only one more cycle
 };
 
 /**
@@ -648,29 +570,21 @@ X86.opSUBALb = function SUBALb()
 {
     this.regEAX = (this.regEAX & ~0xff) | X86.fnSUBb.call(this, this.regEAX & 0xff, this.getIPByte());
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
-    /*
-     * In the absence of any EA calculations, fnSUBb() will deduct nOpCyclesArithRR, and for all CPUs through
-     * the 80286, we need deduct only one more cycle.
-     */
-    this.nStepCycles--;
+    this.nStepCycles--;         // in the absence of any EA calculations, we need deduct only one more cycle
 };
 
 /**
- * op=0x2D (SUB AX,imm16)
+ * op=0x2D (SUB AX,imm16 or SUB EAX,imm32)
  *
  * @this {X86CPU}
  */
-X86.opSUBAXw = function SUBAXw()
+X86.opSUBAX = function SUBAX()
 {
     this.regEAX = (this.regEAX & ~this.dataMask) | X86.fnSUBw.call(this, this.regEAX & this.dataMask, this.getIPWord());
     if (BACKTRACK) {
         this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
     }
-    /*
-     * In the absence of any EA calculations, fnSUBw() will deduct nOpCyclesArithRR, and for all CPUs
-     * through the 80286, we need deduct only one more cycle.
-     */
-    this.nStepCycles--;
+    this.nStepCycles--;         // in the absence of any EA calculations, we need deduct only one more cycle
 };
 
 /**
@@ -756,16 +670,6 @@ X86.opXORrw = function XORrw()
 };
 
 /**
- * op=0x33 (XOR reg,dword)
- *
- * @this {X86CPU}
- */
-X86.opXORrd = function XORrd()
-{
-    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnXORd);
-};
-
-/**
  * op=0x34 (XOR AL,imm8)
  *
  * @this {X86CPU}
@@ -774,29 +678,21 @@ X86.opXORALb = function XORALb()
 {
     this.regEAX = (this.regEAX & ~0xff) | X86.fnXORb.call(this, this.regEAX & 0xff, this.getIPByte());
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
-    /*
-     * In the absence of any EA calculations, fnXORb() will deduct nOpCyclesArithRR, and for all CPUs
-     * through the 80286, we need deduct only one more cycle.
-     */
-    this.nStepCycles--;
+    this.nStepCycles--;         // in the absence of any EA calculations, we need deduct only one more cycle
 };
 
 /**
- * op=0x35 (XOR AX,imm16)
+ * op=0x35 (XOR AX,imm16 or XOR EAX,imm32)
  *
  * @this {X86CPU}
  */
-X86.opXORAXw = function XORAXw()
+X86.opXORAX = function XORAX()
 {
     this.regEAX = (this.regEAX & ~this.dataMask) | X86.fnXORw.call(this, this.regEAX & this.dataMask, this.getIPWord());
     if (BACKTRACK) {
         this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
     }
-    /*
-     * In the absence of any EA calculations, fnXORw() will deduct nOpCyclesArithRR, and for all CPUs
-     * through the 80286, we need deduct only one more cycle.
-     */
-    this.nStepCycles--;
+    this.nStepCycles--;         // in the absence of any EA calculations, we need deduct only one more cycle
 };
 
 /**
@@ -886,26 +782,18 @@ X86.opCMPrw = function CMPrw()
 X86.opCMPALb = function CMPALb()
 {
     X86.fnCMPb.call(this, this.regEAX & 0xff, this.getIPByte());
-    /*
-     * In the absence of any EA calculations, fnCMPb() will deduct nOpCyclesArithRR, and for all CPUs through
-     * the 80286, we need deduct only one more cycle.
-     */
-    this.nStepCycles--;
+    this.nStepCycles--;         // in the absence of any EA calculations, we need deduct only one more cycle
 };
 
 /**
- * op=0x3D (CMP AX,imm16)
+ * op=0x3D (CMP AX,imm16 or CMP EAX,imm32)
  *
  * @this {X86CPU}
  */
-X86.opCMPAXw = function CMPAXw()
+X86.opCMPAX = function CMPAX()
 {
     X86.fnCMPw.call(this, this.regEAX & this.dataMask, this.getIPWord());
-    /*
-     * In the absence of any EA calculations, fnCMPw() will deduct nOpCyclesArithRR, and for all CPUs through
-     * the 80286, we need deduct only one more cycle.
-     */
-    this.nStepCycles--;
+    this.nStepCycles--;         // in the absence of any EA calculations, we need deduct only one more cycle
 };
 
 /**
@@ -948,7 +836,7 @@ X86.opAAS = function AAS()
 };
 
 /**
- * op=0x40 (INC AX)
+ * op=0x40 (INC [E]AX)
  *
  * @this {X86CPU}
  */
@@ -958,7 +846,7 @@ X86.opINCAX = function INCAX()
 };
 
 /**
- * op=0x41 (INC CX)
+ * op=0x41 (INC [E]CX)
  *
  * @this {X86CPU}
  */
@@ -968,7 +856,7 @@ X86.opINCCX = function INCCX()
 };
 
 /**
- * op=0x42 (INC DX)
+ * op=0x42 (INC [E]DX)
  *
  * @this {X86CPU}
  */
@@ -978,7 +866,7 @@ X86.opINCDX = function INCDX()
 };
 
 /**
- * op=0x43 (INC BX)
+ * op=0x43 (INC [E]BX)
  *
  * @this {X86CPU}
  */
@@ -988,7 +876,7 @@ X86.opINCBX = function INCBX()
 };
 
 /**
- * op=0x44 (INC SP)
+ * op=0x44 (INC [E]SP)
  *
  * @this {X86CPU}
  */
@@ -998,7 +886,7 @@ X86.opINCSP = function INCSP()
 };
 
 /**
- * op=0x45 (INC BP)
+ * op=0x45 (INC [E]BP)
  *
  * @this {X86CPU}
  */
@@ -1008,7 +896,7 @@ X86.opINCBP = function INCBP()
 };
 
 /**
- * op=0x46 (INC SI)
+ * op=0x46 (INC [E]SI)
  *
  * @this {X86CPU}
  */
@@ -1018,7 +906,7 @@ X86.opINCSI = function INCSI()
 };
 
 /**
- * op=0x47 (INC DI)
+ * op=0x47 (INC [E]DI)
  *
  * @this {X86CPU}
  */
@@ -1028,7 +916,7 @@ X86.opINCDI = function INCDI()
 };
 
 /**
- * op=0x48 (DEC AX)
+ * op=0x48 (DEC [E]AX)
  *
  * @this {X86CPU}
  */
@@ -1038,7 +926,7 @@ X86.opDECAX = function DECAX()
 };
 
 /**
- * op=0x49 (DEC CX)
+ * op=0x49 (DEC [E]CX)
  *
  * @this {X86CPU}
  */
@@ -1048,7 +936,7 @@ X86.opDECCX = function DECCX()
 };
 
 /**
- * op=0x4A (DEC DX)
+ * op=0x4A (DEC [E]DX)
  *
  * @this {X86CPU}
  */
@@ -1058,7 +946,7 @@ X86.opDECDX = function DECDX()
 };
 
 /**
- * op=0x4B (DEC BX)
+ * op=0x4B (DEC [E]BX)
  *
  * @this {X86CPU}
  */
@@ -1068,7 +956,7 @@ X86.opDECBX = function DECBX()
 };
 
 /**
- * op=0x4C (DEC SP)
+ * op=0x4C (DEC [E]SP)
  *
  * @this {X86CPU}
  */
@@ -1078,7 +966,7 @@ X86.opDECSP = function DECSP()
 };
 
 /**
- * op=0x4D (DEC BP)
+ * op=0x4D (DEC [E]BP)
  *
  * @this {X86CPU}
  */
@@ -1088,7 +976,7 @@ X86.opDECBP = function DECBP()
 };
 
 /**
- * op=0x4E (DEC SI)
+ * op=0x4E (DEC [E]SI)
  *
  * @this {X86CPU}
  */
@@ -1098,7 +986,7 @@ X86.opDECSI = function DECSI()
 };
 
 /**`
- * op=0x4F (DEC DI)
+ * op=0x4F (DEC [E]DI)
  *
  * @this {X86CPU}
  */
@@ -1108,7 +996,7 @@ X86.opDECDI = function DECDI()
 };
 
 /**
- * op=0x50 (PUSH AX)
+ * op=0x50 (PUSH [E]AX)
  *
  * @this {X86CPU}
  */
@@ -1122,7 +1010,7 @@ X86.opPUSHAX = function PUSHAX()
 };
 
 /**
- * op=0x51 (PUSH CX)
+ * op=0x51 (PUSH [E]CX)
  *
  * @this {X86CPU}
  */
@@ -1136,7 +1024,7 @@ X86.opPUSHCX = function PUSHCX()
 };
 
 /**
- * op=0x52 (PUSH DX)
+ * op=0x52 (PUSH [E]DX)
  *
  * @this {X86CPU}
  */
@@ -1150,7 +1038,7 @@ X86.opPUSHDX = function PUSHDX()
 };
 
 /**
- * op=0x53 (PUSH BX)
+ * op=0x53 (PUSH [E]BX)
  *
  * @this {X86CPU}
  */
@@ -1170,13 +1058,13 @@ X86.opPUSHBX = function PUSHBX()
  */
 X86.opPUSHSP_8086 = function PUSHSP_8086()
 {
-    var w = (this.getSP() - this.dataSize) & this.dataMask;
+    var w = (this.getSP() - 2) & 0xffff;
     this.pushWord(w);
     this.nStepCycles -= this.cycleCounts.nOpCyclesPushReg;
 };
 
 /**
- * op=0x54 (PUSH SP)
+ * op=0x54 (PUSH [E]SP)
  *
  * @this {X86CPU}
  */
@@ -1187,7 +1075,7 @@ X86.opPUSHSP = function PUSHSP()
 };
 
 /**
- * op=0x55 (PUSH BP)
+ * op=0x55 (PUSH [E]BP)
  *
  * @this {X86CPU}
  */
@@ -1201,7 +1089,7 @@ X86.opPUSHBP = function PUSHBP()
 };
 
 /**
- * op=0x56 (PUSH SI)
+ * op=0x56 (PUSH [E]SI)
  *
  * @this {X86CPU}
  */
@@ -1215,7 +1103,7 @@ X86.opPUSHSI = function PUSHSI()
 };
 
 /**
- * op=0x57 (PUSH DI)
+ * op=0x57 (PUSH [E]DI)
  *
  * @this {X86CPU}
  */
@@ -1229,7 +1117,7 @@ X86.opPUSHDI = function PUSHDI()
 };
 
 /**
- * op=0x58 (POP AX)
+ * op=0x58 (POP [E]AX)
  *
  * @this {X86CPU}
  */
@@ -1243,7 +1131,7 @@ X86.opPOPAX = function POPAX()
 };
 
 /**
- * op=0x59 (POP CX)
+ * op=0x59 (POP [E]CX)
  *
  * @this {X86CPU}
  */
@@ -1257,7 +1145,7 @@ X86.opPOPCX = function POPCX()
 };
 
 /**
- * op=0x5A (POP DX)
+ * op=0x5A (POP [E]DX)
  *
  * @this {X86CPU}
  */
@@ -1271,7 +1159,7 @@ X86.opPOPDX = function POPDX()
 };
 
 /**
- * op=0x5B (POP BX)
+ * op=0x5B (POP [E]BX)
  *
  * @this {X86CPU}
  */
@@ -1285,7 +1173,7 @@ X86.opPOPBX = function POPBX()
 };
 
 /**
- * op=0x5C (POP SP)
+ * op=0x5C (POP [E]SP)
  *
  * @this {X86CPU}
  */
@@ -1296,7 +1184,7 @@ X86.opPOPSP = function POPSP()
 };
 
 /**
- * op=0x5D (POP BP)
+ * op=0x5D (POP [E]BP)
  *
  * @this {X86CPU}
  */
@@ -1310,7 +1198,7 @@ X86.opPOPBP = function POPBP()
 };
 
 /**
- * op=0x5E (POP SI)
+ * op=0x5E (POP [E]SI)
  *
  * @this {X86CPU}
  */
@@ -1324,7 +1212,7 @@ X86.opPOPSI = function POPSI()
 };
 
 /**
- * op=0x5F (POP DI)
+ * op=0x5F (POP [E]DI)
  *
  * @this {X86CPU}
  */
@@ -1514,24 +1402,24 @@ X86.opAS = function AS()
 };
 
 /**
- * op=0x68 (PUSH imm16) (80186/80188 and up)
+ * op=0x68 (PUSH imm) (80186/80188 and up)
  *
  * @this {X86CPU}
  */
-X86.opPUSH16 = function PUSH16()
+X86.opPUSHn = function PUSHn()
 {
     this.pushWord(this.getIPWord());
     this.nStepCycles -= this.cycleCounts.nOpCyclesPushReg;
 };
 
 /**
- * op=0x69 (IMUL reg,word,imm16) (80186/80188 and up)
+ * op=0x69 (IMUL reg,word,imm) (80186/80188 and up)
  *
  * @this {X86CPU}
  */
-X86.opIMUL16 = function IMUL16()
+X86.opIMULn = function IMULn()
 {
-    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnIMUL16);
+    this.aOpModRegWord[this.getIPByte()].call(this, X86.fnIMULn);
 };
 
 /**
@@ -2030,7 +1918,7 @@ X86.opGRP1b = function GRP1b()
 };
 
 /**
- * op=0x81 (GRP1 word,imm16)
+ * op=0x81 (GRP1 word,imm)
  *
  * @this {X86CPU}
  */
@@ -2166,7 +2054,7 @@ X86.opMOVrw = function MOVrw()
 };
 
 /**
- * op=0x8C (MOV word,sr)
+ * op=0x8C (MOV word,sreg)
  *
  * NOTE: Since the ModRM decoders deal only with general-purpose registers, we must move
  * the appropriate segment register into a special variable (regMD16), which our helper function
@@ -2215,7 +2103,7 @@ X86.opLEA = function LEA()
 };
 
 /**
- * op=0x8E (MOV sr,word)
+ * op=0x8E (MOV sreg,word)
  *
  * NOTE: Since the ModRM decoders deal only with general-purpose registers, we have to
  * make a note of which general-purpose register will be overwritten, so that we can restore it
@@ -2599,7 +2487,7 @@ X86.opMOVALm = function MOVALm()
 };
 
 /**
- * op=0xA1 (MOV AX,mem)
+ * op=0xA1 (MOV [E]AX,mem)
  *
  * @this {X86CPU}
  */
@@ -2816,13 +2704,13 @@ X86.opTESTALb = function TESTALb()
 };
 
 /**
- * op=0xA9 (TEST AX,imm16)
+ * op=0xA9 (TEST [E]AX,imm)
  *
  * @this {X86CPU}
  */
-X86.opTESTAXw = function TESTAXw()
+X86.opTESTAX = function TESTAX()
 {
-    this.setLogicResult(this.regEAX & this.getIPWord(), X86.RESULT.WORD);
+    this.setLogicResult(this.regEAX & this.getIPWord(), this.dataType);
     this.nStepCycles -= this.cycleCounts.nOpCyclesAAA;
 };
 
@@ -3153,11 +3041,11 @@ X86.opMOVBHb = function MOVBHb()
 };
 
 /**
- * op=0xB8 (MOV AX,imm16)
+ * op=0xB8 (MOV [E]AX,imm)
  *
  * @this {X86CPU}
  */
-X86.opMOVAXw = function MOVAXw()
+X86.opMOVAX = function MOVAX()
 {
     this.regEAX = (this.regEAX & ~this.dataMask) | this.getIPWord();
     if (BACKTRACK) {
@@ -3167,11 +3055,11 @@ X86.opMOVAXw = function MOVAXw()
 };
 
 /**
- * op=0xB9 (MOV CX,imm16)
+ * op=0xB9 (MOV [E]CX,imm)
  *
  * @this {X86CPU}
  */
-X86.opMOVCXw = function MOVCXw()
+X86.opMOVCX = function MOVCX()
 {
     this.regECX = (this.regECX & ~this.dataMask) | this.getIPWord();
     if (BACKTRACK) {
@@ -3181,11 +3069,11 @@ X86.opMOVCXw = function MOVCXw()
 };
 
 /**
- * op=0xBA (MOV DX,imm16)
+ * op=0xBA (MOV [E]DX,imm)
  *
  * @this {X86CPU}
  */
-X86.opMOVDXw = function MOVDXw()
+X86.opMOVDX = function MOVDX()
 {
     this.regEDX = (this.regEDX & ~this.dataMask) | this.getIPWord();
     if (BACKTRACK) {
@@ -3195,11 +3083,11 @@ X86.opMOVDXw = function MOVDXw()
 };
 
 /**
- * op=0xBB (MOV BX,imm16)
+ * op=0xBB (MOV [E]BX,imm)
  *
  * @this {X86CPU}
  */
-X86.opMOVBXw = function MOVBXw()
+X86.opMOVBX = function MOVBX()
 {
     this.regEBX = (this.regEBX & ~this.dataMask) | this.getIPWord();
     if (BACKTRACK) {
@@ -3209,22 +3097,22 @@ X86.opMOVBXw = function MOVBXw()
 };
 
 /**
- * op=0xBC (MOV SP,imm16)
+ * op=0xBC (MOV [E]SP,imm)
  *
  * @this {X86CPU}
  */
-X86.opMOVSPw = function MOVSPw()
+X86.opMOVSP = function MOVSP()
 {
     this.setSP((this.getSP() & ~this.dataMask) | this.getIPWord());
     this.nStepCycles -= this.cycleCounts.nOpCyclesLAHF;
 };
 
 /**
- * op=0xBD (MOV BP,imm16)
+ * op=0xBD (MOV [E]BP,imm)
  *
  * @this {X86CPU}
  */
-X86.opMOVBPw = function MOVBPw()
+X86.opMOVBP = function MOVBP()
 {
     this.regEBP = (this.regEBP & ~this.dataMask) | this.getIPWord();
     if (BACKTRACK) {
@@ -3234,11 +3122,11 @@ X86.opMOVBPw = function MOVBPw()
 };
 
 /**
- * op=0xBE (MOV SI,imm16)
+ * op=0xBE (MOV [E]SI,imm)
  *
  * @this {X86CPU}
  */
-X86.opMOVSIw = function MOVSIw()
+X86.opMOVSI = function MOVSI()
 {
     this.regESI = (this.regESI & ~this.dataMask) | this.getIPWord();
     if (BACKTRACK) {
@@ -3248,11 +3136,11 @@ X86.opMOVSIw = function MOVSIw()
 };
 
 /**
- * op=0xBF (MOV DI,imm16)
+ * op=0xBF (MOV [E]DI,imm)
  *
  * @this {X86CPU}
  */
-X86.opMOVDIw = function MOVDIw()
+X86.opMOVDI = function MOVDI()
 {
     this.regEDI = (this.regEDI & ~this.dataMask) | this.getIPWord();
     if (BACKTRACK) {
@@ -3272,23 +3160,13 @@ X86.opGRP2bn = function GRP2bn()
 };
 
 /**
- * op=0xC1 (GRP2 word,imm16) (80186/80188 and up)
+ * op=0xC1 (GRP2 word,imm) (80186/80188 and up)
  *
  * @this {X86CPU}
  */
 X86.opGRP2wn = function GRP2wn()
 {
-    this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp2w, X86.fnSrcCountN);
-};
-
-/**
- * op=0xC1 (GRP2 dword,imm16) (80186/80188 and up)
- *
- * @this {X86CPU}
- */
-X86.opGRP2dn = function GRP2dn()
-{
-    this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp2d, X86.fnSrcCountN);
+    this.aOpModGrpWord[this.getIPByte()].call(this, this.dataSize == 2? X86.aOpGrp2w : X86.aOpGrp2d, X86.fnSrcCountN);
 };
 
 /**
@@ -3354,7 +3232,7 @@ X86.opMOVb = function MOVb()
 };
 
 /**
- * op=0xC7 (MOV word,imm16)
+ * op=0xC7 (MOV word,imm)
  *
  * @this {X86CPU}
  */
@@ -3368,7 +3246,7 @@ X86.opMOVw = function MOVw()
 };
 
 /**
- * op=0xC8 (ENTER imm16,imm8) (80186/80188 and up)
+ * op=0xC8 (ENTER imm,imm8) (80186/80188 and up)
  *
  * Here's the pseudo-code from http://www.pcjs.org/pubs/pc/reference/intel/80286/progref, p.B-40 (p.250):
  *
@@ -3519,17 +3397,7 @@ X86.opGRP2b1 = function GRP2b1()
  */
 X86.opGRP2w1 = function GRP2w1()
 {
-    this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp2w, X86.fnSrcCount1);
-};
-
-/**
- * op=0xD1 (GRP2 dword,1)
- *
- * @this {X86CPU}
- */
-X86.opGRP2d1 = function GRP2d1()
-{
-    this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp2d, X86.fnSrcCount1);
+    this.aOpModGrpWord[this.getIPByte()].call(this, this.dataSize == 2? X86.aOpGrp2w : X86.aOpGrp2d, X86.fnSrcCount1);
 };
 
 /**
@@ -3549,17 +3417,7 @@ X86.opGRP2bCL = function GRP2bCL()
  */
 X86.opGRP2wCL = function GRP2wCL()
 {
-    this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp2w, X86.fnSrcCountCL);
-};
-
-/**
- * op=0xD3 (GRP2 dword,CL)
- *
- * @this {X86CPU}
- */
-X86.opGRP2dCL = function GRP2dCL()
-{
-    this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp2d, X86.fnSrcCountCL);
+    this.aOpModGrpWord[this.getIPByte()].call(this, this.dataSize == 2? X86.aOpGrp2w : X86.aOpGrp2d, X86.fnSrcCountCL);
 };
 
 /**
@@ -4121,7 +3979,7 @@ X86.opGRP4w = function GRP4w()
  *
  * @this {X86CPU}
  */
-X86.opInvalid = function()
+X86.opInvalid = function opInvalid()
 {
     X86.fnFault.call(this, X86.EXCEPTION.UD_FAULT);
     this.stopCPU();
@@ -4132,7 +3990,7 @@ X86.opInvalid = function()
  *
  * @this {X86CPU}
  */
-X86.opUndefined = function()
+X86.opUndefined = function opUndefined()
 {
     this.setIP(this.opLIP - this.segCS.base);
     this.setError("Undefined opcode " + str.toHexByte(this.bus.getByteDirect(this.regLIP)) + " at " + str.toHexLong(this.regLIP));
@@ -4144,8 +4002,9 @@ X86.opUndefined = function()
  *
  * @this {X86CPU}
  */
-X86.opTBD = function()
+X86.opTBD = function opTBD()
 {
+    this.setIP(this.opLIP - this.segCS.base);
     this.printMessage("unimplemented 80386 opcode", true);
     this.stopCPU();
 };
@@ -4159,21 +4018,21 @@ X86.opTBD = function()
  */
 X86.aOps = [
     X86.opADDmb,            X86.opADDmw,            X86.opADDrb,            X86.opADDrw,        // 0x00-0x03
-    X86.opADDALb,           X86.opADDAXw,           X86.opPUSHES,           X86.opPOPES,        // 0x04-0x07
+    X86.opADDALb,           X86.opADDAX,            X86.opPUSHES,           X86.opPOPES,        // 0x04-0x07
     X86.opORmb,             X86.opORmw,             X86.opORrb,             X86.opORrw,         // 0x08-0x0B
-    X86.opORALb,            X86.opORAXw,            X86.opPUSHCS,           X86.opPOPCS,        // 0x0C-0x0F
+    X86.opORALb,            X86.opORAX,             X86.opPUSHCS,           X86.opPOPCS,        // 0x0C-0x0F
     X86.opADCmb,            X86.opADCmw,            X86.opADCrb,            X86.opADCrw,        // 0x10-0x13
-    X86.opADCALb,           X86.opADCAXw,           X86.opPUSHSS,           X86.opPOPSS,        // 0x14-0x17
+    X86.opADCALb,           X86.opADCAX,            X86.opPUSHSS,           X86.opPOPSS,        // 0x14-0x17
     X86.opSBBmb,            X86.opSBBmw,            X86.opSBBrb,            X86.opSBBrw,        // 0x18-0x1B
-    X86.opSBBALb,           X86.opSBBAXw,           X86.opPUSHDS,           X86.opPOPDS,        // 0x1C-0x1F
+    X86.opSBBALb,           X86.opSBBAX,            X86.opPUSHDS,           X86.opPOPDS,        // 0x1C-0x1F
     X86.opANDmb,            X86.opANDmw,            X86.opANDrb,            X86.opANDrw,        // 0x20-0x23
     X86.opANDAL,            X86.opANDAX,            X86.opES,               X86.opDAA,          // 0x24-0x27
     X86.opSUBmb,            X86.opSUBmw,            X86.opSUBrb,            X86.opSUBrw,        // 0x28-0x2B
-    X86.opSUBALb,           X86.opSUBAXw,           X86.opCS,               X86.opDAS,          // 0x2C-0x2F
+    X86.opSUBALb,           X86.opSUBAX,            X86.opCS,               X86.opDAS,          // 0x2C-0x2F
     X86.opXORmb,            X86.opXORmw,            X86.opXORrb,            X86.opXORrw,        // 0x30-0x33
-    X86.opXORALb,           X86.opXORAXw,           X86.opSS,               X86.opAAA,          // 0x34-0x37
+    X86.opXORALb,           X86.opXORAX,            X86.opSS,               X86.opAAA,          // 0x34-0x37
     X86.opCMPmb,            X86.opCMPmw,            X86.opCMPrb,            X86.opCMPrw,        // 0x38-0x3B
-    X86.opCMPALb,           X86.opCMPAXw,           X86.opDS,               X86.opAAS,          // 0x3C-0x3F
+    X86.opCMPALb,           X86.opCMPAX,            X86.opDS,               X86.opAAS,          // 0x3C-0x3F
     X86.opINCAX,            X86.opINCCX,            X86.opINCDX,            X86.opINCBX,        // 0x40-0x43
     X86.opINCSP,            X86.opINCBP,            X86.opINCSI,            X86.opINCDI,        // 0x44-0x47
     X86.opDECAX,            X86.opDECCX,            X86.opDECDX,            X86.opDECBX,        // 0x48-0x4B
@@ -4213,12 +4072,12 @@ X86.aOps = [
     X86.opPUSHF,            X86.opPOPF,             X86.opSAHF,             X86.opLAHF,         // 0x9C-0x9F
     X86.opMOVALm,           X86.opMOVAXm,           X86.opMOVmAL,           X86.opMOVmAX,       // 0xA0-0xA3
     X86.opMOVSb,            X86.opMOVSw,            X86.opCMPSb,            X86.opCMPSw,        // 0xA4-0xA7
-    X86.opTESTALb,          X86.opTESTAXw,          X86.opSTOSb,            X86.opSTOSw,        // 0xA8-0xAB
+    X86.opTESTALb,          X86.opTESTAX,           X86.opSTOSb,            X86.opSTOSw,        // 0xA8-0xAB
     X86.opLODSb,            X86.opLODSw,            X86.opSCASb,            X86.opSCASw,        // 0xAC-0xAF
     X86.opMOVALb,           X86.opMOVCLb,           X86.opMOVDLb,           X86.opMOVBLb,       // 0xB0-0xB3
     X86.opMOVAHb,           X86.opMOVCHb,           X86.opMOVDHb,           X86.opMOVBHb,       // 0xB4-0xB7
-    X86.opMOVAXw,           X86.opMOVCXw,           X86.opMOVDXw,           X86.opMOVBXw,       // 0xB8-0xBB
-    X86.opMOVSPw,           X86.opMOVBPw,           X86.opMOVSIw,           X86.opMOVDIw,       // 0xBC-0xBF
+    X86.opMOVAX,            X86.opMOVCX,            X86.opMOVDX,            X86.opMOVBX,        // 0xB8-0xBB
+    X86.opMOVSP,            X86.opMOVBP,            X86.opMOVSI,            X86.opMOVDI,        // 0xBC-0xBF
     /*
      * On an 8086/8088, opcodes 0xC0 -> 0xC2, 0xC1 -> 0xC3, 0xC8 -> 0xCA and 0xC9 -> 0xCB.
      */
@@ -4334,38 +4193,3 @@ X86.aOpGrp4w = [
     X86.fnINCw,             X86.fnDECw,             X86.fnCALLw,            X86.fnCALLFdw,          // 0xFF(reg=0x0-0x3)
     X86.fnJMPw,             X86.fnJMPFdw,           X86.fnPUSHw,            X86.fnGRPFault          // 0xFF(reg=0x4-0x7)
 ];
-
-if (I386) {
-    /*
-     * Until we have *d() forms of all *w() opcode handlers, we need to put in placeholders (ie, opTBD())
-     */
-    X86.aOpsD = {
-        0x01:   X86.opTBD,      // opADDmd()
-        0x03:   X86.opTBD,      // opADDrd()
-        0x05:   X86.opTBD,      // opADDAXd()
-        0x09:   X86.opTBD,      // opORmd()
-        0x0B:   X86.opTBD,      // opORrd()
-        0x0D:   X86.opTBD,      // opORAXd()
-        0x11:   X86.opTBD,      // opADCmd()
-        0x13:   X86.opTBD,      // opADCrd()
-        0x15:   X86.opTBD,      // opADCAXd()
-        0x19:   X86.opTBD,      // opSBBmd()
-        0x1B:   X86.opTBD,      // opSBBrd()
-        0x1D:   X86.opTBD,      // opSBBAXd()
-        0x21:   X86.opANDmd,
-        0x23:   X86.opANDrd,
-        0x25:   X86.opANDAXd,
-        0x29:   X86.opTBD,      // opSUBmd()
-        0x2B:   X86.opTBD,      // opSUBrd()
-        0x2D:   X86.opTBD,      // opSUBAXd()
-        0x31:   X86.opTBD,      // opXORmd()
-        0x33:   X86.opXORrd,
-        0x35:   X86.opTBD,      // opXORAXd()
-        0x39:   X86.opTBD,      // opCMPmd()
-        0x3B:   X86.opTBD,      // opCMPrd()
-        0x3D:   X86.opTBD,      // opCMPAXd()
-        0xC1:   X86.opGRP2dn,
-        0xD1:   X86.opGRP2d1,
-        0xD3:   X86.opGRP2dCL
-    };
-}

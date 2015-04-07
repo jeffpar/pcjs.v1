@@ -4127,10 +4127,6 @@ ChipSet.prototype.out8042InBuffData = function(port, bOut, addrFrom)
     if (this.b8042Status & ChipSet.KBC.STATUS.CMD_FLAG) {
         switch (this.b8042InBuff) {
 
-        case ChipSet.KBC.CMD.READ_CMD:
-            this.set8042OutBuff(this.b8042CmdData);
-            break;
-
         case ChipSet.KBC.CMD.WRITE_CMD:
             this.set8042CmdData(bOut);
             break;
@@ -4334,6 +4330,10 @@ ChipSet.prototype.out8042InBuffCmd = function(port, bOut, addrFrom)
     }
 
     switch (this.b8042InBuff) {
+    case ChipSet.KBC.CMD.READ_CMD:          // 0x20
+        this.set8042OutBuff(this.b8042CmdData);
+        break;
+
     case ChipSet.KBC.CMD.WRITE_CMD:         // 0x60
     case ChipSet.KBC.CMD.WRITE_OUTPORT:     // 0xD1
         /*

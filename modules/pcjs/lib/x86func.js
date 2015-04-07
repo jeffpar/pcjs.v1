@@ -64,9 +64,9 @@ X86.fnADCb = function ADCb(dst, src)
 X86.fnADCw = function ADCw(dst, src)
 {
     var w = (dst + src + this.getCarry())|0;
-    this.setArithResult(dst, src, w, X86.RESULT.WORD | X86.RESULT.ALL);
+    this.setArithResult(dst, src, w, this.dataType | X86.RESULT.ALL);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
-    return w & 0xffff;
+    return w & this.dataMask;
 };
 
 /**
@@ -96,9 +96,9 @@ X86.fnADDb = function ADDb(dst, src)
 X86.fnADDw = function ADDw(dst, src)
 {
     var w = (dst + src)|0;
-    this.setArithResult(dst, src, w, X86.RESULT.WORD | X86.RESULT.ALL);
+    this.setArithResult(dst, src, w, this.dataType | X86.RESULT.ALL);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
-    return w & 0xffff;
+    return w & this.dataMask;
 };
 
 /**
@@ -127,24 +127,8 @@ X86.fnANDb = function ANDb(dst, src)
  */
 X86.fnANDw = function ANDw(dst, src)
 {
-    var w = dst & src;
-    this.setLogicResult(w, X86.RESULT.WORD);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
-    return w;
-};
-
-/**
- * fnANDd(dst, src)
- *
- * @this {X86CPU}
- * @param {number} dst
- * @param {number} src
- * @return {number}
- */
-X86.fnANDd = function ANDd(dst, src)
-{
-    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
-    return this.setLogicResult(dst & src, X86.RESULT.DWORD);
+    return this.setLogicResult(dst & src, this.dataType);
 };
 
 /**
@@ -422,7 +406,7 @@ X86.fnCMPb = function CMPb(dst, src)
 X86.fnCMPw = function CMPw(dst, src)
 {
     var w = (dst - src)|0;
-    this.setArithResult(dst, src, w, X86.RESULT.WORD | X86.RESULT.ALL, true);
+    this.setArithResult(dst, src, w, this.dataType | X86.RESULT.ALL, true);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesCompareRM) : this.cycleCounts.nOpCyclesArithRM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -702,7 +686,7 @@ X86.fnIMUL8 = function IMUL8(dst, src)
 };
 
 /**
- * fnIMUL16(dst, src)
+ * fnIMULn(dst, src)
  *
  * 80286_and_80287_Programmers_Reference_Manual_1987.pdf, p.B-44 (p.254) notes that:
  *
@@ -718,7 +702,7 @@ X86.fnIMUL8 = function IMUL8(dst, src)
  * @param {number} src
  * @return {number}
  */
-X86.fnIMUL16 = function IMUL16(dst, src)
+X86.fnIMULn = function IMULn(dst, src)
 {
     var result = ((src << 16) >> 16) * ((this.getIPWord() << 16) >> 16);
     if (result > 32767 || result < -32768) {
@@ -727,7 +711,7 @@ X86.fnIMUL16 = function IMUL16(dst, src)
         this.clearCF(); this.clearOF();
     }
     result &= 0xffff;
-    if (DEBUG && DEBUGGER) this.traceLog('IMUL16', dst, src, null, this.getPS(), result);
+    if (DEBUG && DEBUGGER) this.traceLog('IMULN', dst, src, null, this.getPS(), result);
     /*
      * NOTE: These are the cycle counts for the 80286; the 80186/80188 have slightly different values (ranges):
      * 22-25 and 29-32 instead of 21 and 24, respectively.  However, accurate cycle counts for the 80186/80188 is
@@ -1503,10 +1487,8 @@ X86.fnNOTw = function NOTw(dst, src)
  */
 X86.fnORb = function ORb(dst, src)
 {
-    var b = dst | src;
-    this.setLogicResult(b, X86.RESULT.BYTE);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
-    return b;
+    return this.setLogicResult(dst | src, X86.RESULT.BYTE);
 };
 
 /**
@@ -1519,10 +1501,8 @@ X86.fnORb = function ORb(dst, src)
  */
 X86.fnORw = function ORw(dst, src)
 {
-    var w = dst | src;
-    this.setLogicResult(w, X86.RESULT.WORD);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
-    return w;
+    return this.setLogicResult(dst | src, this.dataType);
 };
 
 /**
@@ -1956,9 +1936,9 @@ X86.fnSBBb = function SBBb(dst, src)
 X86.fnSBBw = function SBBw(dst, src)
 {
     var w = (dst - src - this.getCarry())|0;
-    this.setArithResult(dst, src, w, X86.RESULT.WORD | X86.RESULT.ALL, true);
+    this.setArithResult(dst, src, w, this.dataType | X86.RESULT.ALL, true);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
-    return w & 0xffff;
+    return w & this.dataMask;
 };
 
 /**
@@ -2630,9 +2610,9 @@ X86.fnSUBb = function SUBb(dst, src)
 X86.fnSUBw = function SUBw(dst, src)
 {
     var w = (dst - src)|0;
-    this.setArithResult(dst, src, w, X86.RESULT.WORD | X86.RESULT.ALL, true);
+    this.setArithResult(dst, src, w, this.dataType | X86.RESULT.ALL, true);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
-    return w & 0xffff;
+    return w & this.dataMask;
 };
 
 /**
@@ -2942,24 +2922,8 @@ X86.fnXORb = function XORb(dst, src)
  */
 X86.fnXORw = function XORw(dst, src)
 {
-    var w = dst ^ src;
-    this.setLogicResult(w, X86.RESULT.WORD);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
-    return w;
-};
-
-/**
- * fnXORd(dst, src)
- *
- * @this {X86CPU}
- * @param {number} dst
- * @param {number} src
- * @return {number}
- */
-X86.fnXORd = function XORd(dst, src)
-{
-    this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesArithRR : this.cycleCounts.nOpCyclesArithRM) : this.cycleCounts.nOpCyclesArithMR);
-    return this.setLogicResult(dst ^ src, X86.RESULT.DWORD);
+    return this.setLogicResult(dst ^ src, this.dataType);
 };
 
 /**
@@ -2972,6 +2936,7 @@ X86.fnXORd = function XORd(dst, src)
  */
 X86.fnTBD = function TBD(dst, src)
 {
+    this.setIP(this.opLIP - this.segCS.base);
     this.printMessage("unimplemented 80386 opcode", true);
     this.stopCPU();
     return dst;

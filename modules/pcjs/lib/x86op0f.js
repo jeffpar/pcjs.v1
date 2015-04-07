@@ -196,9 +196,9 @@ X86.opCLTS = function CLTS()
 };
 
 /**
- * opMOVrcr()
+ * opMOVrc()
  *
- * op=0x0F,0x20 (MOV reg,cr)
+ * op=0x0F,0x20 (MOV reg,creg)
  *
  * NOTE: Since the ModRM decoders deal only with general-purpose registers, we must move
  * the appropriate control register into a special variable (regMD16), which our helper function
@@ -206,7 +206,7 @@ X86.opCLTS = function CLTS()
  *
  * @this {X86CPU}
  */
-X86.opMOVrcr = function MOVrcr()
+X86.opMOVrc = function MOVrc()
 {
     var bModRM = this.getIPByte() | 0xc0;
     /*
@@ -246,9 +246,9 @@ X86.opMOVrcr = function MOVrcr()
 };
 
 /**
- * opMOVcrr()
+ * opMOVcr()
  *
- * op=0x0F,0x22 (MOV cr,reg)
+ * op=0x0F,0x22 (MOV creg,reg)
  *
  * NOTE: Since the ModRM decoders deal only with general-purpose registers, we have to
  * make a note of which general-purpose register will be overwritten, so that we can restore it
@@ -256,13 +256,14 @@ X86.opMOVrcr = function MOVrcr()
  *
  * @this {X86CPU}
  */
-X86.opMOVcrr = function MOVcrr()
+X86.opMOVcr = function MOVcr()
 {
     var temp;
     var bModRM = this.getIPByte() | 0xc0;
     /*
-     * Unlike, say, opcode 0x8E (MOV sr,word), this opcode supports only registers, not memory;
+     * Unlike, say, opcode 0x8E (MOV sreg,word), this opcode supports only registers, not memory;
      * however, the 80386 apparently ignores the mod bits, treating any combination as if it was 0xc0.
+     * TODO: Verify.
      *
     if ((bModRM & 0xc0) != 0xc0) {
         X86.opInvalid.call(this);
@@ -279,9 +280,11 @@ X86.opMOVcrr = function MOVcrr()
         break;
     case 0x2:
         temp = this.regEDX;
+        if (DEBUG) this.stopCPU();
         break;
     case 0x3:
         temp = this.regEBX;
+        if (DEBUG) this.stopCPU();
         break;
     default:
         X86.opInvalid.call(this);
@@ -839,11 +842,6 @@ X86.opBT = function BT()
  */
 X86.opSHLDn = function SHLDn()
 {
-    /*
-     * TODO: While we rely on bOpcodeBias to dispatch OPERAND-appropriate handlers for the primary opcode bytes,
-     * we don't (yet) have a similar dispatch mechanism for secondary opcode bytes (ie, 0x0F), so the dispatch check
-     * has to happen below.
-     */
     this.aOpModMemWord[this.getIPByte()].call(this, this.dataSize == 2? X86.fnSHLDwi : X86.fnSHLDdi);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesShiftDR : this.cycleCounts.nOpCyclesShiftDM);
 };
@@ -857,11 +855,6 @@ X86.opSHLDn = function SHLDn()
  */
 X86.opSHLDcl = function SHLDcl()
 {
-    /*
-     * TODO: While we rely on bOpcodeBias to dispatch OPERAND-appropriate handlers for the primary opcode bytes,
-     * we don't (yet) have a similar dispatch mechanism for secondary opcode bytes (ie, 0x0F), so the dispatch check
-     * has to happen below.
-     */
     this.aOpModMemWord[this.getIPByte()].call(this, this.dataSize == 2? X86.fnSHLDwCL : X86.fnSHLDdCL);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesShiftDR : this.cycleCounts.nOpCyclesShiftDM);
 };
@@ -914,11 +907,6 @@ X86.opBTS = function BTS()
  */
 X86.opSHRDn = function SHRDn()
 {
-    /*
-     * TODO: While we rely on bOpcodeBias to dispatch OPERAND-appropriate handlers for the primary opcode bytes,
-     * we don't (yet) have a similar dispatch mechanism for secondary opcode bytes (ie, 0x0F), so the dispatch check
-     * has to happen below.
-     */
     this.aOpModMemWord[this.getIPByte()].call(this, this.dataSize == 2? X86.fnSHRDwi : X86.fnSHRDdi);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesShiftDR : this.cycleCounts.nOpCyclesShiftDM);
 };
@@ -932,11 +920,6 @@ X86.opSHRDn = function SHRDn()
  */
 X86.opSHRDcl = function SHRDcl()
 {
-    /*
-     * TODO: While we rely on bOpcodeBias to dispatch OPERAND-appropriate handlers for the primary opcode bytes,
-     * we don't (yet) have a similar dispatch mechanism for secondary opcode bytes (ie, 0x0F), so the dispatch check
-     * has to happen below.
-     */
     this.aOpModMemWord[this.getIPByte()].call(this, this.dataSize == 2? X86.fnSHRDwCL : X86.fnSHRDdCL);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesShiftDR : this.cycleCounts.nOpCyclesShiftDM);
 };
@@ -950,11 +933,6 @@ X86.opSHRDcl = function SHRDcl()
  */
 X86.opIMUL = function IMUL()
 {
-    /*
-     * TODO: While we rely on bOpcodeBias to dispatch OPERAND-appropriate handlers for the primary opcode bytes,
-     * we don't (yet) have a similar dispatch mechanism for secondary opcode bytes (ie, 0x0F), so the dispatch check
-     * has to happen below.
-     */
     this.aOpModRegWord[this.getIPByte()].call(this, this.dataSize == 2? X86.fnIMULrw : X86.fnIMULrd);
 };
 
@@ -1301,8 +1279,8 @@ X86.aOps0F[0x0B] = X86.opInvalid;
 
 if (I386) {
     X86.aOps0F386 = [];
-    X86.aOps0F386[0x20] = X86.opMOVrcr;
-    X86.aOps0F386[0x22] = X86.opMOVcrr;
+    X86.aOps0F386[0x20] = X86.opMOVrc;
+    X86.aOps0F386[0x22] = X86.opMOVcr;
     X86.aOps0F386[0x80] = X86.opJOw;
     X86.aOps0F386[0x81] = X86.opJNOw;
     X86.aOps0F386[0x82] = X86.opJCw;

@@ -860,8 +860,8 @@ X86CPU.prototype.initProcessor = function()
         this.aOps[X86.OPCODE.GS]        = X86.opInvalid;    // 0x65
         this.aOps[X86.OPCODE.OS]        = X86.opInvalid;    // 0x66
         this.aOps[X86.OPCODE.AS]        = X86.opInvalid;    // 0x67
-        this.aOps[X86.OPCODE.PUSH16]    = X86.opPUSH16;     // 0x68
-        this.aOps[X86.OPCODE.IMUL16]    = X86.opIMUL16;     // 0x69
+        this.aOps[X86.OPCODE.PUSHN]     = X86.opPUSHn;      // 0x68
+        this.aOps[X86.OPCODE.IMULN]     = X86.opIMULn;      // 0x69
         this.aOps[X86.OPCODE.PUSH8]     = X86.opPUSH8;      // 0x6A
         this.aOps[X86.OPCODE.IMUL8]     = X86.opIMUL8;      // 0x6B
         this.aOps[X86.OPCODE.INSB]      = X86.opINSb;       // 0x6C
@@ -899,16 +899,6 @@ X86CPU.prototype.initProcessor = function()
                 this.aOps[X86.OPCODE.AS] = X86.opAS;        // 0x67
                 for (bOpcode in X86.aOps0F386) {
                     this.aOps0F[+bOpcode] = X86.aOps0F386[bOpcode];
-                }
-                /*
-                 * Extend the opcode table by creating a mirror of the first 256 opcodes, but with dword-based
-                 * opcode handlers (as defined in aOpsD) instead word-based opcode handlers.  Whenever dataSize
-                 * is changed from 2 bytes to 4, we trigger the appropriate set of opcode handlers by changing
-                 * bOpcodeBias from 0 to 256.
-                 */
-                this.aOps = this.aOps.concat(this.aOps);
-                for (bOpcode in X86.aOpsD) {
-                    this.aOps[+bOpcode + 256] = X86.aOpsD[bOpcode];
                 }
             }
         }
@@ -1208,11 +1198,11 @@ X86CPU.prototype.setAddrSize = function()
 X86CPU.prototype.setDataSize = function()
 {
     if (this.dataSize == 2) {
-        this.bOpcodeBias = 0;
+        this.dataType = X86.RESULT.WORD;
         this.getWord = this.getShort;
         this.setWord = this.setShort;
     } else {
-        this.bOpcodeBias = 256;
+        this.dataType = X86.RESULT.DWORD;
         this.getWord = this.getLong;
         this.setWord = this.setLong;
     }
@@ -3651,7 +3641,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
             this.nSnapCycles = this.nStepCycles;
         }
 
-        this.aOps[this.getIPByte() + (I386? this.bOpcodeBias : 0)].call(this);
+        this.aOps[this.getIPByte()].call(this);
 
         if (PREFETCH) {
             var nSpareCycles = (this.nSnapCycles - this.nStepCycles) - this.nBusCycles;
