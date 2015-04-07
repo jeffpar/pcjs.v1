@@ -690,12 +690,12 @@ ChipSet.KBC = {
     DATA: {                     // this.b8042OutBuff (PPI_A on previous models, still referred to as "PORT A" by the MODEL_5170 BIOS)
         PORT:           0x60,
         CMD: {                  // this.b8042CmdData (KBC.DATA.CMD "data bytes" written to port 0x60, after writing a KBC.CMD byte to port 0x64)
-            PC_COMPAT:  0x40,   // generate IBM PC-compatible scan codes
-            PC_MODE:    0x20,
-            NO_CLOCK:   0x10,   // disable keyboard by driving "clock" line low
-            NO_INHIBIT: 0x08,   // disable inhibit function
+            INT_ENABLE: 0x01,   // generate an interrupt when the controller places data in the output buffer
             SYS_FLAG:   0x04,   // this value is propagated to ChipSet.KBC.STATUS.SYS_FLAG
-            INT_ENABLE: 0x01    // generate an interrupt when the controller places data in the output buffer
+            NO_INHIBIT: 0x08,   // disable inhibit function
+            NO_CLOCK:   0x10,   // disable keyboard by driving "clock" line low
+            PC_MODE:    0x20,
+            PC_COMPAT:  0x40    // generate IBM PC-compatible scan codes
         },
         SELF_TEST: {            // result of ChipSet.KBC.CMD.SELF_TEST command (0xAA)
             OK:         0x55
@@ -709,15 +709,22 @@ ChipSet.KBC = {
         }
     },
     INPORT: {                   // this.b8042InPort
-        UNDEFINED:      0x0F,   // undefined
+        COMPAQ_50MHZ:   0x01,   // 50Mhz system clock enabled (0=48Mhz); see Compaq 386/25 TechRef p2-106
+        UNDEFINED:      0x02,   // undefined
+        COMPAQ_NO80387: 0x04,   // 80387 coprocessor NOT installed; see Compaq 386/25 TechRef p2-106
+        COMPAQ_NOWEITEK:0x08,   // Weitek coprocessor NOT installed; see Compaq 386/25 TechRef p2-106
         ENABLE_256KB:   0x10,   // enable 2nd 256Kb of system board RAM
+        COMPAQ_HISPEED: 0x10,   // high-speed enabled (0=auto); see Compaq 386/25 TechRef p2-106
         MFG_OFF:        0x20,   // manufacturing jumper not installed
+        COMPAQ_DIP5OFF: 0x20,   // system board DIP switch #5 OFF (0=ON); see Compaq 386/25 TechRef p2-106
         MONO:           0x40,   // monochrome monitor is primary display
-        KBD_ON:         0x80    // keyboard not inhibited
+        COMPAQ_NONDUAL: 0x40,   // Compaq Dual-Mode monitor NOT installed; see Compaq 386/25 TechRef p2-106
+        KBD_UNLOCKED:   0x80    // keyboard not inhibited (in Compaq parlance: security lock is unlocked)
     },
     OUTPORT: {                  // this.b8042OutPort
         NO_RESET:       0x01,   // set by default
         A20_ON:         0x02,   // set by default
+        COMPAQ_SLOWD:   0x08,   // SL0WD* NOT asserted (refer to timer 2, counter 2); see Compaq 386/25 TechRef p2-105
         OUTBUFF_FULL:   0x10,   // output buffer full
         INBUFF_EMPTY:   0x20,   // input buffer empty
         KBD_CLOCK:      0x40,   // keyboard clock (output)
@@ -739,8 +746,11 @@ ChipSet.KBC = {
     },
     CMD: {                      // this.b8042InBuff (on write to port 0x64, interpret this as a CMD)
         PORT:           0x64,
-        READ_CMD:       0x20,
+        READ_CMD:       0x20,   // sends the current CMD byte (this.b8042CmdData) to KBC.DATA.PORT
         WRITE_CMD:      0x60,   // followed by a command byte written to KBC.DATA.PORT (see KBC.DATA.CMD)
+        COMPAQ_SLOWD:   0xA3,   // enable system slow down; see Compaq 386/25 TechRef p2-111
+        COMPAQ_TOGGLE:  0xA4,   // toggle speed-control bit; see Compaq 386/25 TechRef p2-111
+        COMPAQ_SPCREAD: 0xA5,   // special read of "port 2"; see Compaq 386/25 TechRef p2-111
         SELF_TEST:      0xAA,   // self-test (KBC.DATA.SELF_TEST.OK is placed in the output buffer if no errors)
         INTF_TEST:      0xAB,   // interface test
         DIAG_DUMP:      0xAC,   // diagnostic dump
@@ -748,7 +758,7 @@ ChipSet.KBC = {
         ENABLE_KBD:     0xAE,   // enable keyboard
         READ_INPORT:    0xC0,   // read input port and place data in output buffer (use only if output buffer empty)
         READ_OUTPORT:   0xD0,   // read output port and place data in output buffer (use only if output buffer empty)
-        WRITE_OUTPORT:  0xD1,   // next byte written to KBC.DATA.PORT (port 0x60) is placed in the output port (see KBC.DATA.OUTPUT)
+        WRITE_OUTPORT:  0xD1,   // next byte written to KBC.DATA.PORT (port 0x60) is placed in the output port (see KBC.OUTPORT)
         READ_TEST:      0xE0,
         PULSE_OUTPORT:  0xF0    // this is the 1st of 16 commands (0xF0-0xFF) that pulse bits 0-3 of the output port
     },
@@ -758,7 +768,7 @@ ChipSet.KBC = {
         INBUFF_FULL:    0x02,   // set if the controller has received but not yet read data written to the input buffer (not normally set)
         SYS_FLAG:       0x04,
         CMD_FLAG:       0x08,   // set on write to KBC.CMD (port 0x64), clear on write to KBC.DATA (port 0x60)
-        NO_INHIBIT:     0x10,
+        NO_INHIBIT:     0x10,   // (in Compaq parlance: security lock not engaged)
         XMT_TIMEOUT:    0x20,
         RCV_TIMEOUT:    0x40,
         PARITY_ERR:     0x80,   // last byte of data received had EVEN parity (ODD parity is normally expected)
@@ -1109,7 +1119,7 @@ ChipSet.prototype.reset = function(fHard)
         /*
          * TODO: Provide more control over these 8042 "Input Port" bits (eg, the keyboard lock)
          */
-        this.b8042InPort = ChipSet.KBC.INPORT.MFG_OFF | ChipSet.KBC.INPORT.KBD_ON;
+        this.b8042InPort = ChipSet.KBC.INPORT.MFG_OFF | ChipSet.KBC.INPORT.KBD_UNLOCKED;
         if (this.getSWMemorySize() >= 512) this.b8042InPort |= ChipSet.KBC.INPORT.ENABLE_256KB;
         if (this.getSWVideoMonitor() == ChipSet.MONITOR.MONO) this.b8042InPort |= ChipSet.KBC.INPORT.MONO;
 
@@ -4116,6 +4126,10 @@ ChipSet.prototype.out8042InBuffData = function(port, bOut, addrFrom)
 
     if (this.b8042Status & ChipSet.KBC.STATUS.CMD_FLAG) {
         switch (this.b8042InBuff) {
+
+        case ChipSet.KBC.CMD.READ_CMD:
+            this.set8042OutBuff(this.b8042CmdData);
+            break;
 
         case ChipSet.KBC.CMD.WRITE_CMD:
             this.set8042CmdData(bOut);

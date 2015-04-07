@@ -877,14 +877,12 @@ x86db:	mov	word [0x50],0xffff	; 000086DB  C7065000FFFF  '..P...'
 	xchg	bx,[bx+si]		; 0000878F  8718  '..'
 	add	[bx+si],ch		; 00008791  0028  '.('
 	mov	[bx+si],bl		; 00008793  8818  '..'
-	add	[0x10f],ch		; 00008795  002E0F01  '....'
-	push	ss			; 00008799  16  '.'
-	js	x87a3			; 0000879A  7807  'x.'
-	db	0x0F			; 0000879C  0F  '.'
-	and	[bx+si],al		; 0000879D  2000  ' .'
+	add	[0x10f],ch		; 00008795  00
+
+	lgdt	[cs:0x0778]		; 00008796  2E0F01167807
+	mov	eax,cr0			; 0000879C  0F2000
 	or	ax,0x1			; 0000879F  0D0100  0x0D,'..'
-	db	0x0F			; 000087A2  0F  '.'
-x87a3:	and	al,[bx+si]		; 000087A3  2200  '".'
+	mov	cr0,eax			; 000087A2  0F2200
 	jmp	far [cs:0x878a]		; 000087A5  2EFF2E8A87  '.....'
 
 	mov	ax,0x8			; 000087AA  B80800  '...'
@@ -910,22 +908,18 @@ x87a3:	and	al,[bx+si]		; 000087A3  2200  '".'
 	cld				; 000087C5  FC  '.'
 x87c6:	mov	ax,0x10			; 000087C6  B81000  '...'
 	mov	es,ax			; 000087C9  8EC0  '..'
-	db	0x0F			; 000087CB  0F  '.'
-	and	[bx+si],al		; 000087CC  2000  ' .'
+	mov	eax,cr0			; 000087CB  0F2000
 	and	eax,0x7ffffffe		; 000087CE  6625FEFFFF7F  'f%....'
-	db	0x0F			; 000087D4  0F  '.'
-	and	al,[bx+si]		; 000087D5  2200  '".'
-	jmp	0xf000:0x87dc		; 000087D7  EADC8700F0  '.....'
+	mov	cr0,eax			; 000087D4  0F2200
+	jmp	0xf000:x87dc		; 000087D7  EADC8700F0  '.....'
 
-	lidt	[cs:0x784]		; 000087DC  2E0F011E8407  '......'
+x87dc:	lidt	[cs:0x784]		; 000087DC  2E0F011E8407  '......'
 	jmp	bp			; 000087E2  FFE5  '..'
 
 x87e4:	lgdt	[cs:0x778]		; 000087E4  2E0F01167807  '....x.'
-	db	0x0F			; 000087EA  0F  '.'
-	and	[bx+si],al		; 000087EB  2000  ' .'
+	mov	eax,cr0			; 000087EA  0F2000
 	or	ax,0x1			; 000087ED  0D0100  0x0D,'..'
-	db	0x0F			; 000087F0  0F  '.'
-	and	al,[bx+si]		; 000087F1  2200  '".'
+	mov	cr0,eax			; 000087F0  0F2200
 	jmp	far [cs:0x878e]		; 000087F3  2EFF2E8E87  '.....'
 
 	mov	ax,0x8			; 000087F8  B80800  '...'
@@ -941,14 +935,12 @@ x87e4:	lgdt	[cs:0x778]		; 000087E4  2E0F01167807  '....x.'
 	jmp	short x87c6		; 00008812  EBB2  '..'
 
 x8814:	lgdt	[cs:0x8778]		; 00008814  2E0F01167887  '....x.'
-	db	0x0F			; 0000881A  0F  '.'
-	and	[bx+si],al		; 0000881B  2000  ' .'
+	mov	eax,cr0			; 0000881A  0F2000
 	or	ax,0x1			; 0000881D  0D0100  0x0D,'..'
-	db	0x0F			; 00008820  0F  '.'
-	and	al,[bx+si]		; 00008821  2200  '".'
+	mov	cr0,eax			; 00008820  0F2200
 	jmp	far [cs:0x8792]		; 00008823  2EFF2E9287  '.....'
-	mov	ax,0x20			; 00008828  B82000  '. .'
 
+	mov	ax,0x20			; 00008828  B82000  '. .'
 	mov	ds,ax			; 0000882B  8ED8  '..'
 	mov	al,0xc0			; 0000882D  B0C0  '..'
 	out	0x64,al			; 0000882F  E664  '.d'
@@ -1859,18 +1851,17 @@ x8ede:	mov	es,bp			; 00008EDE  8EC5  '..'
 	int	0x21			; 00008EE7  CD21  '.!'
 	retf				; 00008EE9  CB  '.'
 
-	add	[bx+si],al		; 00008EEA  0000  '..'
-	db	0x0D,0x0A,'Insert COMPAQ MS-DOS diskette',0x0D,0x0A,'Enter drive specifier $',0x0D,0x0A,0x0D,0x0A,'Reinsert diskette in drive A if necessary',0x0D,0x0A,'Strike any key when ready',0x0D,0x0A,'$'
-	add	[bp+si+0x41],al		; 00008F6F  004241  '.BA'
-	push	bx			; 00008F72  53  'S'
-	dec	cx			; 00008F73  49  'I'
-	inc	bx			; 00008F74  43  'C'
-	inc	cx			; 00008F75  41  'A'
-	and	[bx+si],ah		; 00008F76  2020  '  '
-	inc	bp			; 00008F78  45  'E'
-	pop	ax			; 00008F79  58  'X'
-	inc	bp			; 00008F7A  45  'E'
-	add	al,ch			; 00008F7B  00E8  '..'
+	dw	0x0000			; 00008EEA  0000  '..'
+
+	db	0x0D,0x0A,'Insert COMPAQ MS-DOS diskette',0x0D,0x0A
+	db	'Enter drive specifier $',0x0D,0x0A,0x0D,0x0A
+	db	'Reinsert diskette in drive A if necessary',0x0D,0x0A
+	db	'Strike any key when ready',0x0D,0x0A,'$'
+	db	0x00
+
+	db	'BASICA  EXE',0x00
+
+	db	0xE8			; 00008F7C  E8  '.'
 	inc	byte [si-0x58]		; 00008F7D  FE44A8  '.D.'
 	add	[si+0x15],si		; 00008F80  017415  '.t.'
 	call	x9190			; 00008F83  E80A02  '.',0x0A,'.'
@@ -2339,8 +2330,7 @@ x95d7:	mov	al,0x13			; 000095D7  B013  '..'
 	mov	di,0x13a0		; 000095E0  BFA013  '...'
 	mov	bx,0x80			; 000095E3  BB8000  '...'
 	mov	ds,bx			; 000095E6  8EDB  '..'
-	db	0x0F			; 000095E8  0F  '.'
-	and	[bx+si],al		; 000095E9  2000  ' .'
+	mov	eax,cr0			; 000095E8  0F2000
 	and	eax,0x80000011		; 000095EB  662511000080  'f%....'
 	mov	cx,[0x6]		; 000095F1  8B0E0600  '....'
 	and	ecx,0xf			; 000095F5  6681E10F000000  'f......'
@@ -3968,11 +3958,9 @@ xa3b6:	mov	al,0x80			; 0000A3B6  B080  '..'
 	mov	es,ax			; 0000A3BF  8EC0  '..'
 	mov	ss,ax			; 0000A3C1  8ED0  '..'
 	push	eax			; 0000A3C3  6650  'fP'
-	db	0x0F			; 0000A3C5  0F  '.'
-	and	[bx+si],al		; 0000A3C6  2000  ' .'
+	mov	eax,cr0			; 0000A3C5  0F2000
 	and	eax,0x7ffffffe		; 0000A3C8  6625FEFFFF7F  'f%....'
-	db	0x0F			; 0000A3CE  0F  '.'
-	and	al,[bx+si]		; 0000A3CF  2200  '".'
+	mov	cr0,eax			; 0000A3CE  0F2200
 	pop	eax			; 0000A3D1  6658  'fX'
 	jmp	0xf000:0xa3d8		; 0000A3D3  EAD8A300F0  '.....'
 
@@ -4416,6 +4404,7 @@ xa7f7:	mov	[0x66],al		; 0000A7F7  A26600  '.f.'
 	mov	al,[0x62]		; 0000A80B  A06200  '.b.'
 	mov	[bp+0x7],al		; 0000A80E  884607  '.F.'
 	ret				; 0000A811  C3  '.'
+
 	db	'((PP((PP'
 
 	add	[bx+si],cl		; 0000A81A  0008  '..'
@@ -4440,6 +4429,7 @@ xa7f7:	mov	[0x66],al		; 0000A7F7  A26600  '.f.'
 	rcr	byte [bp+di],1		; 0000A846  D01B  '..'
 	rcr	byte [bp+di],1		; 0000A848  D01B  '..'
 	ret				; 0000A84A  C3  '.'
+
 	db	0xE2,0xD0
 	sbb	dx,ax			; 0000A84D  1BD0  '..'
 	sbb	dx,[si-0x1]		; 0000A84F  1B54FF  '.T.'
@@ -4491,9 +4481,11 @@ xa7f7:	mov	[0x66],al		; 0000A7F7  A26600  '.f.'
 	add	[bx+di],ax		; 0000A8A6  0101  '..'
 	add	[bx+di],ax		; 0000A8A8  0101  '..'
 	push	ds			; 0000A8AA  1E  '.'
-	add	[0xb000],bh		; 0000A8AB  003E00B0  '.>..'
-	xor	dh,ah			; 0000A8AF  30E6  '0.'
-	test	[bx+si+0x40],bh		; 0000A8B1  84B84000  '..@.'
+	add	[0xb000],bh		; 0000A8AB  003E00
+
+xa8ae:	mov	al,0x30			; 0000A8AE  B030
+	out	0x84,al			; 0000A8B0  E684
+	mov	ax,0x0040		; 0000A8B2  B84000  '..@.'
 	mov	es,ax			; 0000A8B5  8EC0  '..'
 	mov	bx,[0x13]		; 0000A8B7  8B1E1300  '....'
 	pop	dx			; 0000A8BB  5A  'Z'
@@ -5166,10 +5158,11 @@ xadd6:	mov	cl,al			; 0000ADD6  8AC8  '..'
 	mov	dl,0xa3			; 0000AE0B  B2A3  '..'
 	mov	dl,0x44			; 0000AE0D  B244  '.D'
 	mov	dl,0x70			; 0000AE0F  B270  '.p'
-	mov	dl,0x80			; 0000AE11  B280  '..'
-	cli				; 0000AE13  FA  '.'
-	xor	byte [bp+di+0x12],0xcd	; 0000AE14  807312CD  '.s..'
-	inc	ax			; 0000AE18  40  '@'
+	mov	dl,0x80			; 0000AE11  B2
+
+	cmp	dl,0x80			; 0000AE12  80FA80
+	jnc	xae29			; 0000AE15  7312
+	int	0x40			; 0000AE17  CD40
 	push	ax			; 0000AE19  50  'P'
 	pushf				; 0000AE1A  9C  '.'
 	push	bp			; 0000AE1B  55  'U'
@@ -5181,7 +5174,7 @@ xadd6:	mov	cl,al			; 0000ADD6  8AC8  '..'
 	pop	ax			; 0000AE26  58  'X'
 	jmp	short xae71		; 0000AE27  EB48  '.H'
 
-	pusha				; 0000AE29  60  '`'
+xae29:	pusha				; 0000AE29  60  '`'
 	push	ds			; 0000AE2A  1E  '.'
 	push	es			; 0000AE2B  06  '.'
 	push	byte +0x0		; 0000AE2C  6A00  'j.'
@@ -5305,6 +5298,7 @@ xaf31:	dec	byte [bp+0x1]		; 0000AF31  FE4E01  '.N.'
 
 xaf42:	call	xb471			; 0000AF42  E82C05  '.,.'
 xaf45:	ret				; 0000AF45  C3  '.'
+
 	db	'**********************************************************************************************'
 	db	0xE9,0x9C,0x03
 
@@ -5682,6 +5676,7 @@ xb304:	stc				; 0000B304  F9  '.'
 xb305:	pop	cx			; 0000B305  59  'Y'
 	pop	bx			; 0000B306  5B  '['
 	ret				; 0000B307  C3  '.'
+
 	db	'**********************************************************'
 
 	sub	dl,[bx+si+0x1e]		; 0000B342  2A501E  '*P.'
@@ -5909,8 +5904,8 @@ xb506:	mov	byte [0x8e],0x0		; 0000B506  C6068E0000  '.....'
 	pop	cx			; 0000B50B  59  'Y'
 	pop	bx			; 0000B50C  5B  '['
 	ret				; 0000B50D  C3  '.'
-	test	al,0x20			; 0000B50E  A820  '. '
 
+	test	al,0x20			; 0000B50E  A820  '. '
 	jz	xb516			; 0000B510  7404  't.'
 	mov	ah,0xcc			; 0000B512  B4CC  '..'
 	jmp	short xb525		; 0000B514  EB0F  '..'
@@ -6098,31 +6093,44 @@ xb673:	mov	al,[di+0x32]		; 0000B673  8A4532  '.E2'
 	out	dx,al			; 0000B689  EE  '.'
 xb68a:	stc				; 0000B68A  F9  '.'
 	ret				; 0000B68B  C3  '.'
-	db	'102-System Board Failure',0x0D,0x0A,' 201-Memory Error 203-Memory Address Error 205-Memory Error',0x0D,0x0A,' 207-Invalid Memory Configuration',0x0A,0x0D,' Base Modul'
-	add	[gs:bx+si],ah		; 0000B711  650020  'e. '
 
-	dec	bp			; 0000B714  4D  'M'
-	outsw				; 0000B715  6F  'o'
-	fs	jnz 0xb785		; 0000B716  64756C  'dul'
-	and	[gs:bx+di+0x0],al	; 0000B719  65204100  'e A.'
-	and	[di+0x6f],cl		; 0000B71D  204D6F  ' Mo'
-	fs	jnz 0xb78f		; 0000B720  64756C  'dul'
-	and	[gs:bp+si+0x0],al	; 0000B723  65204200  'e B.'
-	and	[di+0x6f],cl		; 0000B727  204D6F  ' Mo'
-	fs	jnz 0xb799		; 0000B72A  64756C  'dul'
-	and	[gs:bp+di+0x0],al	; 0000B72D  65204300  'e C.'
-	db	0x0D,0x0A,'Parity Check 1 '
-	add	[bx+si+0x61],dl		; 0000B742  005061  '.Pa'
-	db	'rity Check 2 '
-	add	[bx],bh			; 0000B752  003F  '.?'
-	aas				; 0000B754  3F  '?'
-	aas				; 0000B755  3F  '?'
-	aas				; 0000B756  3F  '?'
-	aas				; 0000B757  3F  '?'
-	aas				; 0000B758  3F  '?'
-	add	[bx+di],dh		; 0000B759  0031  '.1'
-	db	'01-ROM Error',0x0D,0x0A,' 402-Monochrome Adapter Failure',0x0D,0x0A,' 501-Display Adapter Failure',0x0D,0x0A,' 301-Keyboard Error or Test Fixture Installed',0x0D,0x0A,' 301-Keyboard Error',0x0D,0x0A,' 304-Keyboard or System Unit Error',0x0D,0x0A,'303-Keyboard Controller Error',0x0D,0x0A,' 601-Diskette Controller Error',0x0D,0x0A,' 702-Coprocessor Detection Error, Please Check Installation',0x0D,0x0A,' 101-I/O ROM Error',0x0D,0x0A,' 162-System Options Not Set-(Run Setup)',0x0D,0x0A,'     Insert DIAGNOSTIC diskette in Drive A:',0x0D,0x0A,' 162-System Options Error',0x0D,0x0A,' 164-Memory Size Error',0x0D,0x0A,' 163-Time & Date Not Set',0x0D,0x0A,0x0D,0x0A,' (RESUME = "F1" KEY)',0x0D,0x0A,0x0D,0x0A,' 302-System Unit Security Lock is Locked',0x0D,0x0A,'     - Unlock System Unit Security Lock',0x0D,0x0A,'1790-Disk 0 Error',0x0D,0x0A,'1791-Disk 1 Error',0x0D,0x0A,'1780-Disk 0 Failure',0x0D,0x0A,'1781-Disk 1 Failure',0x0D,0x0A,'1782-Disk Controller Failure',0x0D,0x0A,' 605-Diskette Drive Type Error-(Run Setup)',0x0D,0x0A,'     Insert DIAGNOSTIC diskette in Drive A:',0x0D
-	or	bl,al			; 0000BA76  0AD8  0x0A,'.'
+	db	'102-System Board Failure',0x0D,0x0A
+	db	' 201-Memory Error 203-Memory Address Error 205-Memory Error',0x0D,0x0A
+	db	' 207-Invalid Memory Configuration',0x0A,0x0D,' Base Module',0x00
+	db	' Module A',0x00
+	db	' Module B',0x00
+	db	' Module C',0x00
+	db	0x0D,0x0A
+	db	'Parity Check 1 ',0x00
+	db	'Parity Check 2 ',0x00
+	db	'??????',0x00
+	db	'101-ROM Error',0x0D,0x0A
+	db	' 402-Monochrome Adapter Failure',0x0D,0x0A
+	db	' 501-Display Adapter Failure',0x0D,0x0A
+	db	' 301-Keyboard Error or Test Fixture Installed',0x0D,0x0A
+	db	' 301-Keyboard Error',0x0D,0x0A
+	db	' 304-Keyboard or System Unit Error',0x0D,0x0A
+	db	'303-Keyboard Controller Error',0x0D,0x0A
+	db	' 601-Diskette Controller Error',0x0D,0x0A
+	db	' 702-Coprocessor Detection Error, Please Check Installation',0x0D,0x0A
+	db	' 101-I/O ROM Error',0x0D,0x0A
+	db	' 162-System Options Not Set-(Run Setup)',0x0D,0x0A
+	db	'     Insert DIAGNOSTIC diskette in Drive A:',0x0D,0x0A
+	db	' 162-System Options Error',0x0D,0x0A
+	db	' 164-Memory Size Error',0x0D,0x0A
+	db	' 163-Time & Date Not Set',0x0D,0x0A,0x0D,0x0A
+	db	' (RESUME = "F1" KEY)',0x0D,0x0A,0x0D,0x0A
+	db	' 302-System Unit Security Lock is Locked',0x0D,0x0A
+	db	'     - Unlock System Unit Security Lock',0x0D,0x0A
+	db	'1790-Disk 0 Error',0x0D,0x0A
+	db	'1791-Disk 1 Error',0x0D,0x0A
+	db	'1780-Disk 0 Failure',0x0D,0x0A
+	db	'1781-Disk 1 Failure',0x0D,0x0A
+	db	'1782-Disk Controller Failure',0x0D,0x0A
+	db	' 605-Diskette Drive Type Error-(Run Setup)',0x0D,0x0A
+	db	'     Insert DIAGNOSTIC diskette in Drive A:',0x0D,0x0A
+
+	db	0xD8			; 0000BA77  D8
 	add	dx,sp			; 0000BA78  03D4  '..'
 	sub	[si+0xf0],si		; 0000BA7A  29B4F000  ')...'
 	mov	ax,0x6000		; 0000BA7E  B80060  '..`'
@@ -6331,7 +6339,7 @@ xbc06:	mov	al,0x17			; 0000BC06  B017  '..'
 	mov	sp,0x100		; 0000BC27  BC0001  '...'
 	mov	al,0x19			; 0000BC2A  B019  '..'
 	out	0x84,al			; 0000BC2C  E684  '..'
-	db	0xE8,0x7D,0xEC
+	call	xa8ae			; 0000BC2E  E87DEC
 	mov	al,0xad			; 0000BC31  B0AD  '..'
 	out	0x64,al			; 0000BC33  E664  '.d'
 	mov	cx,0xffff		; 0000BC35  B9FFFF  '...'
@@ -7836,11 +7844,9 @@ xc845:	mov	al,0xd2			; 0000C845  B0D2  '..'
 	mov	ds,ax			; 0000C886  8ED8  '..'
 	mov	es,ax			; 0000C888  8EC0  '..'
 	mov	ss,ax			; 0000C88A  8ED0  '..'
-	db	0x0F			; 0000C88C  0F  '.'
-	and	[bx+si],al		; 0000C88D  2000  ' .'
+	mov	eax,cr0			; 0000C88C  0F2000
 	and	eax,0x7ffffffe		; 0000C88F  6625FEFFFF7F  'f%....'
-	db	0x0F			; 0000C895  0F  '.'
-	and	al,[bx+si]		; 0000C896  2200  '".'
+	mov	cr0,eax			; 0000C895  0F2200
 	jmp	0xf000:0xc89d		; 0000C898  EA9DC800F0  '.....'
 
 	lidt	[cs:0xa151]		; 0000C89D  2E0F011E51A1  '....Q.'
@@ -12297,6 +12303,7 @@ xef37:	call	xef6f			; 0000EF37  E83500  '.5.'
 	test	al,0xc0			; 0000EF3A  A8C0  '..'
 	mov	ah,0x40			; 0000EF3C  B440  '.@'
 xef3e:	ret				; 0000EF3E  C3  '.'
+
 	db	'************************P'
 
 	push	ds			; 0000EF58  1E  '.'
@@ -12345,6 +12352,7 @@ xefaf:	call	xca03			; 0000EFAF  E851DA  '.Q.'
 xefb4:	and	byte [0x3e],0x7f	; 0000EFB4  80263E007F  '.&>..'
 	or	ah,ah			; 0000EFB9  0AE4  0x0A,'.'
 	ret				; 0000EFBB  C3  '.'
+
 	db	'**********'
 
 	sub	bl,bh			; 0000EFC6  2ADF  '*.'
@@ -12912,11 +12920,9 @@ xf373:	pop	ax			; 0000F373  58  'X'
 xf494:	mov	al,0x0			; 0000F494  B000  '..'
 	out	0x80,al			; 0000F496  E680  '..'
 	lgdt	[cs:0x77e]		; 0000F498  2E0F01167E07  '....~.'
-	db	0x0F			; 0000F49E  0F  '.'
-	and	[bx+si],al		; 0000F49F  2000  ' .'
+	mov	eax,cr0			; 0000F49E  0F2000
 	or	ax,0x1			; 0000F4A1  0D0100  0x0D,'..'
-	db	0x0F			; 0000F4A4  0F  '.'
-	and	al,[bx+si]		; 0000F4A5  2200  '".'
+	mov	cr0,eax			; 0000F4A4  0F2200
 	jmp	0x28:0xf4ac		; 0000F4A7  EAACF42800  '...(.'
 
 	mov	ax,0x8			; 0000F4AC  B80800  '...'
@@ -13096,11 +13102,9 @@ xf63b:	mov	ax,0x8			; 0000F63B  B80800  '...'
 xf655:	mov	ax,0x10			; 0000F655  B81000  '...'
 	mov	es,ax			; 0000F658  8EC0  '..'
 	mov	ds,ax			; 0000F65A  8ED8  '..'
-	db	0x0F			; 0000F65C  0F  '.'
-	and	[bx+si],al		; 0000F65D  2000  ' .'
+	mov	eax,cr0			; 0000F65C  0F2000
 	and	eax,0x7ffffffe		; 0000F65F  6625FEFFFF7F  'f%....'
-	db	0x0F			; 0000F665  0F  '.'
-	and	al,[bx+si]		; 0000F666  2200  '".'
+	mov	cr0,eax			; 0000F665  0F2200
 	jmp	0xf000:0xf66d		; 0000F668  EA6DF600F0  '.m...'
 
 	lidt	[cs:0x784]		; 0000F66D  2E0F011E8407  '......'
@@ -13437,7 +13441,8 @@ xf8ba:	sti				; 0000F8BA  FB  '.'
 	add	al,ah			; 0000F8FF  00E0  '..'
 	add	ax,[bx+si]		; 0000F901  0300  '..'
 	add	al,cl			; 0000F903  00C8  '..'
-	mov	al,0x0			; 0000F905  B000  '..'
+
+reset:	mov	al,0x0			; 0000F905  B000  '..'
 	out	0x84,al			; 0000F907  E684  '..'
 	mov	al,0x0			; 0000F909  B000  '..'
 	out	0x85,al			; 0000F90B  E685  '..'
@@ -14284,7 +14289,7 @@ xffb3:	pop	ds			; 0000FFB3  1F  '.'
 	dw	0x7FB6			; 0000FFE0  B67F
 	dw	0x7FBE			; 0000FFE2  BE7F
 	db	'G4J 03COMPAQ'		; 0000FFE4  47344A203033434F4D504151
-	jmp	0xf000:0xf905		; 0000FFF0  EA05F900F0
+	jmp	0xf000:reset		; 0000FFF0  EA05F900F0
 
 	db	' 01/28/88'
 	db	0xFC			; 0000FFFE  FC
