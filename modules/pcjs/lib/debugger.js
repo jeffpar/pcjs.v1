@@ -41,6 +41,7 @@ if (DEBUGGER) {
         var Interrupts  = require("./interrupts");
         var Messages    = require("./messages");
         var Bus         = require("./bus");
+        var Memory      = require("./memory");
         var Keyboard    = require("./keyboard");
         var State       = require("./state");
         var CPU         = require("./cpu");
@@ -487,6 +488,7 @@ if (DEBUGGER) {
         "tss":      Messages.TSS,
         "int":      Messages.INT,
         "fault":    Messages.FAULT,
+        "bus":      Messages.BUS,
         "mem":      Messages.MEM,
         "port":     Messages.PORT,
         "dma":      Messages.DMA,
@@ -560,11 +562,12 @@ if (DEBUGGER) {
      *      On the 80286, it introduced a new (and growing) series of two-byte opcodes
      *
      * Based on the active CPU model, we make every effort to execute and disassemble this (and every other)
-     * opcode appropriately, by setting the opcode's entry in aaOpDescs accordingly.  0x0F defaults to the 8086
-     * entry: aOpDescPopCS.
+     * opcode appropriately, by setting the opcode's entry in aaOpDescs accordingly.  0x0F in aaOpDescs points
+     * to the 8086 table: aOpDescPopCS.
      *
-     * Note that we do NOT modify aaOpDescs directly; this.aaOpDescs is a reference to it if the processor
-     * is an 8086, otherwise we make a copy of the array and THEN modify it.
+     * Note that we must NOT modify aaOpDescs directly.  this.aaOpDescs will point to Debugger.aaOpDescs
+     * if the processor is an 8086, because that's the processor that the hard-coded contents of the table
+     * represent; for all other processors, this.aaOpDescs will contain a copy of the table that we can modify.
      */
     Debugger.aOpDescPopCS     = [Debugger.INS.POP,  Debugger.TYPE_CS   | Debugger.TYPE_OUT];
     Debugger.aOpDescUndefined = [Debugger.INS.NONE, Debugger.TYPE_NONE];
@@ -575,13 +578,13 @@ if (DEBUGGER) {
      * the corresponding opcode. The sub-elements are as follows:
      *
      *      [0]: {number} of the opcode name (see INS.*)
-     *      [1]: {number} containing the destination operand descriptor bit(s)
-     *      [2]: {number} containing the source operand descriptor bit(s)
-     *      [3]: {number} containing optional third operand descriptor bit(s)
+     *      [1]: {number} containing the destination operand descriptor bit(s), if any
+     *      [2]: {number} containing the source operand descriptor bit(s), if any
+     *      [3]: {number} containing the occasional third operand descriptor bit(s), if any
      *
      * These sub-elements are all optional. If [0] is not present, the opcode is undefined; if [1] is not
-     * present (or contains zero), the opcode has no (or only implied) operands; and if [2] is not present,
-     * the opcode has only a single operand.
+     * present (or contains zero), the opcode has no (or only implied) operands; if [2] is not present, the
+     * opcode has only a single operand.  And so on.
      */
     Debugger.aaOpDescs = [
     /* 0x00 */ [Debugger.INS.ADD,   Debugger.TYPE_MODRM  | Debugger.TYPE_BYTE  | Debugger.TYPE_BOTH, Debugger.TYPE_REG   | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
@@ -1216,6 +1219,7 @@ if (DEBUGGER) {
             }
         }
 
+        this.messageDump(Messages.BUS,  function onDumpBus(s)  { dbg.dumpBus(s); });
         this.messageDump(Messages.DESC, function onDumpDesc(s) { dbg.dumpDesc(s); });
         this.messageDump(Messages.TSS,  function onDumpTSS(s)  { dbg.dumpTSS(s); });
         this.messageDump(Messages.DOS,  function onDumpDOS(s)  { dbg.dumpDOS(s); });
@@ -1462,6 +1466,25 @@ if (DEBUGGER) {
         "TASK_SS":      0x26,
         "TASK_DS":      0x28,
         "TASK_LDT":     0x2a
+    };
+
+    /**
+     * dumpBus(s)
+     *
+     * This dumps Bus allocations.
+     *
+     * @this {Debugger}
+     * @param {string} [s]
+     */
+    Debugger.prototype.dumpBus = function(s)
+    {
+        this.println("id       physaddr   blkaddr   used    size    type");
+        this.println("-------- ---------  --------  ------  ------  ----");
+        for (var i = 0; i < this.bus.aMemBlocks.length; i++) {
+            var block = this.bus.aMemBlocks[i];
+            if (block.type === Memory.TYPE.NONE) continue;
+            this.println(str.toHex(block.id) + " %" + str.toHex(i << this.bus.blockShift) + ": " + str.toHex(block.addr) + "  " + str.toHexWord(block.used) + "  " + str.toHexWord(block.size) + "  " + Memory.TYPE.NAMES[block.type]);
+        }
     };
 
     /**
@@ -2703,21 +2726,6 @@ if (DEBUGGER) {
     Debugger.prototype.addBreakpoint = function(aBreak, aAddr, fTemp)
     {
         if (!this.findBreakpoint(aBreak, aAddr)) {
-            /*
-             * We used to calculate the physical address of the breakpoint address now, at the
-             * time the breakpoint is added, and save it in aAddr[2], so that a breakpoint set in
-             * one mode (eg, in real-mode) would still work as intended if the mode changed later
-             * (eg, to protected-mode).
-             *
-             * However, that creates difficulties setting protected-mode breakpoints in segments
-             * that might not be defined yet, or that may move in physical memory; so we're not
-             * doing this anymore:
-             *
-             *      aAddr[2] = this.getAddr(aAddr);
-             *
-             * The way to create a real-mode breakpoint that will break regardless of mode is to
-             * use the physical address of the real-mode memory location instead.
-             */
             aAddr[3] = fTemp;
             aBreak.push(aAddr);
             if (aBreak != this.aBreakExec) {
@@ -2884,7 +2892,28 @@ if (DEBUGGER) {
         var fBreak = false;
         addr = this.mapBreakpoint(addr);
         for (var i = 1; i < aBreak.length; i++) {
+
             var aAddrBreak = aBreak[i];
+
+            /*
+             * We need to zap the physical address field of the breakpoint address before
+             * calling getAddr(), to force it to recalculate the physical address every time,
+             * unless this is a breakpoint on a physical address (as indicated by a -1 offset).
+             */
+            if (aAddrBreak[0] != -1) aAddrBreak[2] = null;
+
+            /*
+             * We used to calculate the physical address of the breakpoint at the time the
+             * breakpoint was added, so that a breakpoint set in one mode (eg, in real-mode)
+             * would still work as intended if the mode changed later (eg, to protected-mode).
+             *
+             * However, that created difficulties setting protected-mode breakpoints in segments
+             * that might not be defined yet, or that could move in physical memory.
+             *
+             * If you want to create a real-mode breakpoint that will break regardless of mode,
+             * use the physical address of the real-mode memory location instead.
+             */
+
             if (addr == this.mapBreakpoint(this.getAddr(aAddrBreak))) {
                 if (aAddrBreak[3]) {
                     this.findBreakpoint(aBreak, aAddrBreak, true);

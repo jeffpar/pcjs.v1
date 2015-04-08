@@ -330,7 +330,7 @@ CompaqController.writeByte = function writeCompaqControllerByte(off, b)
 {
     var aBlocks;
     var controller = this.controller;
-    var bus = controller.bus;
+    var bus = controller.ram.bus;
     if (b != controller.bMappings) {
         if (!(b & CompaqController.MAPPINGS.UNMAPPED)) {
             if (!controller.aBlocksDst) {

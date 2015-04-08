@@ -113,6 +113,7 @@ var littleEndian = (TYPEDARRAYS? (function() {
 function Memory(addr, used, size, type, controller)
 {
     var i;
+    this.id = (Memory.idBlock += 2);
     this.adw = null;
     this.offset = 0;
     this.addr = addr;
@@ -223,6 +224,11 @@ Memory.TYPE = {
     COLORS: ["black", "blue", "green", "cyan"]
 };
 
+/*
+ * Last used block ID
+ */
+Memory.idBlock = 0;
+
 Memory.prototype = {
     constructor: Memory,
     parent: null,
@@ -237,6 +243,12 @@ Memory.prototype = {
      * @param {number} [type]
      */
     clone: function(mem, type) {
+        /*
+         * Original memory block IDs are even; cloned memory block IDs are odd;
+         * the original ID of the current block is lost, but that's OK, since it was
+         * presumably produced merely to become a clone.
+         */
+        this.id = mem.id | 0x1;
         this.size = mem.size;
         if (type) {
             this.type = type;

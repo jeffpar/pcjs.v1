@@ -1130,9 +1130,9 @@ X86.fnLFS = function LFS(dst, src)
  *
  * op=0x0F,0x01,reg=0x2 (GRP7:LGDT)
  *
- * The 80286 LGDT instruction expects a 40-bit operand: a 16-bit limit, followed by a 24-bit address;
- * the ModRM decoder has already supplied the first word of the operand (in dst), which corresponds to the
- * limit, so we must fetch the remaining 24 bits ourselves.
+ * The 80286 LGDT instruction expects a 40-bit operand: a 16-bit limit, followed by a 24-bit address
+ * (or a 32-bit address in 32-bit mode); the ModRM decoder has already supplied the first word of the
+ * operand (in dst), which corresponds to the limit, so we must fetch the remaining bits ourselves.
  *
  * @this {X86CPU}
  * @param {number} dst
@@ -1144,7 +1144,11 @@ X86.fnLGDT = function LGDT(dst, src)
     if (this.regEA === X86.ADDR_INVALID) {
         X86.opInvalid.call(this);
     } else {
-        this.addrGDT = this.getShort(this.regEA + 2) | (this.getByte(this.regEA + 4) << 16);
+        /*
+         * It shouldn't hurt to always fetch 32 bits of physical memory, which we'll then
+         * mask with either a 24-bit or a 32-bit mask.
+         */
+        this.addrGDT = this.getLong(this.regEA + 2) & (this.dataMask | (this.dataMask << 8));
         this.addrGDTLimit = this.addrGDT + dst;
         this.opFlags |= X86.OPFLAG.NOWRITE;
         this.nStepCycles -= 11;
@@ -1176,9 +1180,9 @@ X86.fnLGS = function LGS(dst, src)
  *
  * op=0x0F,0x01,reg=0x3 (GRP7:LIDT)
  *
- * The 80286 LIDT instruction expects a 40-bit operand: a 16-bit limit, followed by a 24-bit address;
- * the ModRM decoder has already supplied the first word of the operand (in dst), which corresponds to the
- * limit, so we must fetch the remaining 24 bits ourselves.
+ * The 80286 LIDT instruction expects a 40-bit operand: a 16-bit limit, followed by a 24-bit address
+ * (or a 32-bit address in 32-bit mode); the ModRM decoder has already supplied the first word of the
+ * operand (in dst), which corresponds to the limit, so we must fetch the remaining bits ourselves.
  *
  * @this {X86CPU}
  * @param {number} dst
@@ -1190,7 +1194,11 @@ X86.fnLIDT = function LIDT(dst, src)
     if (this.regEA === X86.ADDR_INVALID) {
         X86.opInvalid.call(this);
     } else {
-        this.addrIDT = this.getShort(this.regEA + 2) | (this.getByte(this.regEA + 4) << 16);
+        /*
+         * It shouldn't hurt to always fetch 32 bits of physical memory, which we'll then
+         * mask with either a 24-bit or a 32-bit mask.
+         */
+        this.addrIDT = this.getLong(this.regEA + 2) & (this.dataMask | (this.dataMask << 8));
         this.addrIDTLimit = this.addrIDT + dst;
         this.opFlags |= X86.OPFLAG.NOWRITE;
         this.nStepCycles -= 12;
@@ -2182,7 +2190,6 @@ X86.fnSGDT = function SGDT(dst, src)
          * calls us does that automatically with the value we return (dst).
          */
         dst = this.addrGDTLimit - this.addrGDT;
-        this.setShort(this.regEA + 2, this.addrGDT);
         /*
          * We previously left the 6th byte of the target operand "undefined".  But it turns out we have to set
          * it to *something*, because there's processor detection in PC-DOS 7.0 (at least in the SETUP portion)
@@ -2211,12 +2218,10 @@ X86.fnSGDT = function SGDT(dst, src)
          *      145E:4BC2 9D            POPF
          *      145E:4BC3 CB            RETF
          *
-         * This code is expecting SGDT on an 80286 to set the 6th "undefined" byte to 0xFF.  So we use setShort()
-         * instead of setByte() and force the upper byte to 0xFF.
-         *
-         * TODO: Remove the 0xFF00 below on post-80286 processors; also, determine whether this behavior is unique to real-mode.
+         * This code is expecting SGDT on an 80286 to set the 6th "undefined" byte to 0xFF.
          */
-        this.setShort(this.regEA + 4, 0xFF00 | (this.addrGDT >> 16));
+        var addr = this.addrGDT | (this.model == X86.MODEL_80286? 0xff000000 : 0);
+        this.setLong(this.regEA + 2, addr);
         this.nStepCycles -= 11;
     }
     return dst;
@@ -2522,14 +2527,12 @@ X86.fnSIDT = function SIDT(dst, src)
          * us does that automatically with the value we return (dst).
          */
         dst = this.addrIDTLimit - this.addrIDT;
-        this.setShort(this.regEA + 2, this.addrIDT);
         /*
          * As with SGDT, the 6th byte is technically "undefined" on an 80286, but we now set it to 0xFF, for the
          * same reasons discussed in SGDT (above).
-         *
-         * TODO: Remove the 0xFF00 below on post-80286 processors; also, determine whether this behavior is unique to real-mode.
          */
-        this.setShort(this.regEA + 4, 0xFF00 | (this.addrIDT >> 16));
+        var addr = this.addrIDT | (this.model == X86.MODEL_80286? 0xff000000 : 0);
+        this.setLong(this.regEA + 2, addr);
         this.nStepCycles -= 12;
     }
     return dst;

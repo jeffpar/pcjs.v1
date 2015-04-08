@@ -273,6 +273,7 @@ Bus.prototype.initMemory = function()
     for (var iBlock = 0; iBlock < this.blockTotal; iBlock++) {
         var addr = iBlock * this.blockSize;
         var block = this.aMemBlocks[iBlock] = new Memory(addr);
+
         if (DEBUGGER) block.setDebugInfo(this.cpu, this.dbg, this.blockSize);
     }
     this.cpu.initMemory(this.aMemBlocks, this.blockShift, this.blockLimit, this.blockMask);
@@ -597,6 +598,7 @@ Bus.prototype.setMemoryBlocks = function(addr, size, aBlocks, type)
             block = aBlocks[i++];
         } else {
             block = new Memory(addr);
+            if (DEBUGGER) block.setDebugInfo(this.cpu, this.dbg, this.blockSize);
             block.clone(aBlocks[i++], type);
         }
         this.aMemBlocks[iBlock++] = block;

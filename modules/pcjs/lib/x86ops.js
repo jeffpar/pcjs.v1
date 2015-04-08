@@ -2079,9 +2079,22 @@ X86.opMOVwsr = function MOVwsr()
     case 0x3:
         this.regMD16 = this.segDS.sel;
         break;
+    case 0x4:
+        if (I386 && this.model >= X86.MODEL_80386) {
+            this.regMD16 = this.segFS.sel;
+            break;
+        }
+        X86.opInvalid.call(this);
+        break;
+    case 0x5:
+        if (I386 && this.model >= X86.MODEL_80386) {
+            this.regMD16 = this.segGS.sel;
+            break;
+        }
+        /* falls through */
     default:
-        X86.opUndefined.call(this);
-        return;
+        X86.opInvalid.call(this);
+        break;
     }
     /*
      * Like other MOV operations, the destination does not need to be read, just written.

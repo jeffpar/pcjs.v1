@@ -2025,8 +2025,6 @@ X86CPU.prototype.getPF = function()
 /**
  * getAF()
  *
- * Notes regarding auxiliary carry following an I386 addition:
- *
  * To determine if there's been a carry out of the low 4 bits of an arithmetic operation,
  * we look at all the possible inputs for bit 4, and calculate AF = PS^(D^S):
  *
