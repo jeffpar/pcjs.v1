@@ -699,10 +699,10 @@ if (DEBUGGER) {
     /* 0x61 */ [Debugger.INS.POPA,  Debugger.TYPE_NONE   | Debugger.TYPE_80286],
     /* 0x62 */ [Debugger.INS.BOUND, Debugger.TYPE_REG    | Debugger.TYPE_WORDV | Debugger.TYPE_IN   | Debugger.TYPE_80286, Debugger.TYPE_MEM   | Debugger.TYPE_WORD2 | Debugger.TYPE_IN],
     /* 0x63 */ [Debugger.INS.ARPL,  Debugger.TYPE_MODRM  | Debugger.TYPE_WORD  | Debugger.TYPE_OUT,                        Debugger.TYPE_REG   | Debugger.TYPE_WORD  | Debugger.TYPE_IN],
-    /* 0x64 */ [Debugger.INS.FS,    Debugger.TYPE_NONE   | Debugger.TYPE_80386],
-    /* 0x65 */ [Debugger.INS.GS,    Debugger.TYPE_NONE   | Debugger.TYPE_80386],
-    /* 0x66 */ [Debugger.INS.OS,    Debugger.TYPE_NONE   | Debugger.TYPE_80386],
-    /* 0x67 */ [Debugger.INS.AS,    Debugger.TYPE_NONE   | Debugger.TYPE_80386],
+    /* 0x64 */ [Debugger.INS.FS,    Debugger.TYPE_PREFIX | Debugger.TYPE_80386],
+    /* 0x65 */ [Debugger.INS.GS,    Debugger.TYPE_PREFIX | Debugger.TYPE_80386],
+    /* 0x66 */ [Debugger.INS.OS,    Debugger.TYPE_PREFIX | Debugger.TYPE_80386],
+    /* 0x67 */ [Debugger.INS.AS,    Debugger.TYPE_PREFIX | Debugger.TYPE_80386],
 
     /* 0x68 */ [Debugger.INS.PUSH,  Debugger.TYPE_IMM    | Debugger.TYPE_WORDV | Debugger.TYPE_IN   | Debugger.TYPE_80286],
     /* 0x69 */ [Debugger.INS.IMUL,  Debugger.TYPE_REG    | Debugger.TYPE_WORD  | Debugger.TYPE_BOTH | Debugger.TYPE_80286,   Debugger.TYPE_MODRM | Debugger.TYPE_WORDIW | Debugger.TYPE_IN],
@@ -2913,7 +2913,6 @@ if (DEBUGGER) {
              * If you want to create a real-mode breakpoint that will break regardless of mode,
              * use the physical address of the real-mode memory location instead.
              */
-
             if (addr == this.mapBreakpoint(this.getAddr(aAddrBreak))) {
                 if (aAddrBreak[3]) {
                     this.findBreakpoint(aBreak, aAddrBreak, true);
@@ -2943,11 +2942,14 @@ if (DEBUGGER) {
         var bOpcode = this.getByte(aAddr, 1);
 
         /*
-         * Prior to calling getInstruction(), doUnassemble() checks for these prefixes as well,
-         * updating aAddr[4] and/or aAddr[5] as appropriate; if that's been done, then let's suppress
-         * the display of those prefixes and simply incorporate them into the byte stream.
+         * Incorporate the following prefixes into the current instruction's byte stream
          */
-        if (aAddr[4] != null && bOpcode == X86.OPCODE.OS || aAddr[5] != null && bOpcode == X86.OPCODE.AS) {
+        if (bOpcode == X86.OPCODE.OS || bOpcode == X86.OPCODE.AS) {
+            if (bOpcode == X86.OPCODE.OS) {
+                aAddr[4] = !aAddr[4];
+            } else {
+                aAddr[5] = !aAddr[5];
+            }
             bOpcode = this.getByte(aAddr, 1);
         }
 
@@ -2976,7 +2978,10 @@ if (DEBUGGER) {
         }
 
         var typeCPU = null;
+        var fNonPrefix = true;
+
         for (var iOperand = 1; iOperand <= cOperands; iOperand++) {
+
             var sOperand = "";
             var type = aOpDesc[iOperand];
             if (type === undefined) continue;
@@ -2984,8 +2989,13 @@ if (DEBUGGER) {
             if (typeCPU == null) typeCPU = type >> Debugger.TYPE_CPU_SHIFT;
 
             var typeSize = type & Debugger.TYPE_SIZE;
-            if (typeSize == Debugger.TYPE_NONE || typeSize == Debugger.TYPE_PREFIX) continue;
-
+            if (typeSize == Debugger.TYPE_NONE) {
+                continue;
+            }
+            if (typeSize == Debugger.TYPE_PREFIX) {
+                fNonPrefix = false;
+                continue;
+            }
             var typeMode = type & Debugger.TYPE_MODE;
             if (typeMode >= Debugger.TYPE_MODRM) {
                 if (bModRM < 0) {
@@ -3053,7 +3063,7 @@ if (DEBUGGER) {
             sComment = Debugger.CPUS[typeCPU] + " CPU only";
         }
 
-        if (sComment) {
+        if (sComment && fNonPrefix) {
             sLine = str.pad(sLine, 52) + ';' + sComment;
             if (!this.cpu.aFlags.fChecksum) {
                 sLine += (nSequence != null? '=' + nSequence.toString() : "");
@@ -3062,6 +3072,8 @@ if (DEBUGGER) {
                 sLine += "cycles=" + nCycles.toString() + " cs=" + str.toHex(this.cpu.aCounts.nChecksum);
             }
         }
+
+        this.initAddrSize(aAddr, fNonPrefix);
         return sLine;
     };
 
@@ -3851,8 +3863,8 @@ if (DEBUGGER) {
     Debugger.prototype.doAssemble = function(asArgs)
     {
         var aAddr = this.parseAddr(asArgs[1], Debugger.ADDR_CODE);
-        if (aAddr[0] == null)
-            return;
+        if (aAddr[0] == null) return;
+
         this.aAddrAssemble = aAddr;
         if (asArgs[2] === undefined) {
             this.println("begin assemble @" + this.hexAddr(aAddr));
@@ -3860,6 +3872,7 @@ if (DEBUGGER) {
             this.cpu.updateCPU();
             return;
         }
+
         var aOpBytes = this.parseInstruction(asArgs[2], asArgs[3], aAddr);
         if (aOpBytes.length) {
             for (var i = 0; i < aOpBytes.length; i++) {
@@ -4040,7 +4053,7 @@ if (DEBUGGER) {
             }
         }
         var aAddr = this.parseAddr(sAddr, Debugger.ADDR_DATA);
-        if (aAddr[0] == null) return;
+        if (aAddr[0] == null || aAddr[0] == -1 && aAddr[2] == null) return;
 
         var sDump = "";
         if (BACKTRACK && sCmd == "di") {
@@ -4201,10 +4214,10 @@ if (DEBUGGER) {
                 var aAddr = aHistory[iHistory];
                 if (aAddr[1] == null) break;
                 /*
-                 * We must create a new aAddr from the address we obtained from aHistory, because
-                 * aAddr was a reference, not a copy, and we don't want getInstruction() modifying the original.
+                 * We must create a new aAddr from the address we obtained from aHistory, because aAddr
+                 * was a reference, not a copy, and we don't want getInstruction() modifying the original.
                  *
-                 * TODO: By using a new address for each line, history dumps fail to disassemble 32-bit overrides properly.
+                 * TODO: By using a new address each time, history dumps will not disassemble 32-bit overrides properly.
                  */
                 aAddr = this.newAddr(aAddr[0], aAddr[1], aAddr[2]);
                 this.println(this.getInstruction(aAddr, "history", n));
@@ -4887,6 +4900,10 @@ if (DEBUGGER) {
                 case X86.OPCODE.CS:
                 case X86.OPCODE.SS:
                 case X86.OPCODE.DS:
+                case X86.OPCODE.FS:     // I386 only
+                case X86.OPCODE.GS:     // I386 only
+                case X86.OPCODE.OS:     // I386 only
+                case X86.OPCODE.AS:     // I386 only
                 case X86.OPCODE.LOCK:
                     this.incAddr(aAddr, 1);
                     fPrefix = true;
@@ -4915,10 +4932,10 @@ if (DEBUGGER) {
                         this.incAddr(aAddr, 5);
                     }
                     break;
-                case X86.OPCODE.CALLW & 0xff:
+                case X86.OPCODE.GRP4W:
                     if (fCallStep) {
-                        var sIns = this.getInstruction(aAddr);
-                        this.fProcStep = (sIns.indexOf("CALL") >= 0? fProcStep : 0);
+                        var w = this.getWord(aAddr) & X86.OPCODE.CALLMASK;
+                        this.fProcStep = ((w == X86.OPCODE.CALLW || w == X86.OPCODE.CALLFDW)? fProcStep : 0);
                     }
                     break;
                 case X86.OPCODE.REPZ:
@@ -4999,20 +5016,29 @@ if (DEBUGGER) {
     };
 
     /**
-     * isPrefixIns(bOpcode)
+     * initAddrSize(aAddr, fNonPrefix)
      *
      * @this {Debugger}
-     * @param {number} bOpcode
-     * @return {boolean} true if prefix, false if not
+     * @param {Array} aAddr
+     * @param {boolean} fNonPrefix
      */
-    Debugger.prototype.isPrefixIns = function(bOpcode)
+    Debugger.prototype.initAddrSize = function(aAddr, fNonPrefix)
     {
-        return (bOpcode == X86.OPCODE.ES || bOpcode == X86.OPCODE.CS || bOpcode == X86.OPCODE.SS || bOpcode == X86.OPCODE.DS ||
-                bOpcode == X86.OPCODE.FS || bOpcode == X86.OPCODE.GS || bOpcode == X86.OPCODE.OS || bOpcode == X86.OPCODE.AS ||
-                bOpcode == X86.OPCODE.LOCK ||
-                bOpcode == X86.OPCODE.REPNZ ||
-                bOpcode == X86.OPCODE.REPZ
-        );
+        /*
+         * For proper disassembly of instructions preceded by an OPERAND (0x66) size prefix, we set aAddr[4]
+         * to true whenever the operand size is 32-bit; similarly, for an ADDRESS (0x67) size prefix, we set
+         * aAddr[5] to true whenever the address size is 32-bit.  Initially, both fields must be set to match
+         * the size of the current code segment.
+         */
+        if (fNonPrefix) {
+            aAddr[4] = (this.cpu.segCS.dataSize == 4);
+            aAddr[5] = (this.cpu.segCS.addrSize == 4);
+        }
+        /*
+         * We also use aAddr[6] to record whether the caller (ie, getInstruction()) is reporting that it
+         * processed a complete instruction (ie, a non-prefix) or not.
+         */
+        aAddr[6] = fNonPrefix;
     };
 
     /**
@@ -5065,43 +5091,12 @@ if (DEBUGGER) {
         var fBlank = (aAddr[0] != this.aAddrNextCode[0]);
 
         var cLines = 0;
-        var fInitSize = true;
+        this.initAddrSize(aAddr, true);
+
         while (cb > 0 && n--) {
             var bOpcode = this.getByte(aAddr);
             var addr = aAddr[2];
             var nSequence = (this.isBusy(false) || this.fProcStep)? this.nCycles : null;
-            /*
-             * We don't want to leave the disassembly ending on a prefix, especially now that stepCPU(0) continues
-             * executing until it reaches a non-prefix instruction.  So if a prefix is the last instruction, bump the
-             * count and force one more instruction to be disassembled.
-             */
-            if (fInitSize) {
-                /*
-                 * For proper disassembly of instructions preceded by an OPERAND (0x66) size prefix, we set aAddr[4]
-                 * to true whenever the operand size is 32-bit; similarly, for an ADDRESS (0x67) size prefix, we set
-                 * aAddr[5] to true whenever the address size is 32-bit.  Initially, both fields must be set to match
-                 * the size of the current code segment.
-                 */
-                aAddr[4] = (this.cpu.segCS.dataSize == 4);
-                aAddr[5] = (this.cpu.segCS.addrSize == 4);
-                fInitSize = false;
-            }
-            if (this.isPrefixIns(bOpcode)) {
-                if (bOpcode == X86.OPCODE.OS) {
-                    aAddr[4] = !aAddr[4];
-                } else if (bOpcode == X86.OPCODE.AS) {
-                    aAddr[5] = !aAddr[5];
-                } else {
-                    /*
-                     * For all prefixes (except for the OPERAND and ADDRESS overrides, which getInstruction()
-                     * now incorporates into the instruction), we will want to dump an additional instruction.
-                     */
-                    if (!n) n++;
-                    nSequence = null;
-                }
-            } else {
-                fInitSize = true;
-            }
             var sComment = (nSequence != null? "cycles" : null);
             var aSymbol = this.findSymbolAtAddr(aAddr);
             if (aSymbol[0]) {
@@ -5116,6 +5111,14 @@ if (DEBUGGER) {
                 nSequence = null;
             }
             var sIns = this.getInstruction(aAddr, sComment, nSequence);
+
+            /*
+             * If getInstruction() reported that it did not yet process a complete instruction (via aAddr[6]),
+             * then bump the instruction count by one, so that we display one more line (and hopefully the complete
+             * instruction).
+             */
+            if (!aAddr[6] && !n) n++;
+
             this.println(sIns);
             this.aAddrNextCode = aAddr;
             cb -= aAddr[2] - addr;

@@ -249,6 +249,7 @@ Memory.prototype = {
          * presumably produced merely to become a clone.
          */
         this.id = mem.id | 0x1;
+        this.used = mem.used;
         this.size = mem.size;
         if (type) {
             this.type = type;

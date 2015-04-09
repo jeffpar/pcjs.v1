@@ -293,16 +293,44 @@ CompaqController.MAPPINGS = {
 
 /*
  * Bit definitions for the 8-bit read-only settings/diagnostics register (bSettings)
+ *
+ * SW1-7 and SW1-8 are mapped to bits 5 and 4 of bSettings, respectively, as follows:
+ *
+ *      SW1-7   SW1-8   Bit5    Bit4    Amount (of base memory provided by the Compaq 32-bit memory board)
+ *      -----   -----   ----    ----    ------
+ *        ON      ON      0       0     640Kb
+ *        ON      OFF     0       1     Invalid
+ *        OFF     ON      1       0     512Kb
+ *        OFF     OFF     1       1     256Kb
+ *
+ * Other SW1 switches include:
+ *
+ *      SW1-1:  ON enables fail-safe timer
+ *      SW1-2:  ON indicates 80387 coprocessor installed
+ *      SW1-3:  ON sets the memory from 0xC00000 to 0xFFFFFF (between 12 megabytes and 16 megabytes) non-cacheable
+ *      SW1-4:  ON select AUTO system speed (OFF selects HIGH system speed)
+ *      SW1-5:  RESERVED (however, the system can read its state; see below)
+ *      SW1-6:  Compaq Dual-Mode Monitor or Color Monitor (OFF selects Monochrome monitor other than Compaq)
+ *
+ * While SW1-7 and SW1-8 are connected to this memory-mapped register, other SW1 DIP switches are accessible through
+ * the 8042 Keyboard Controller KBC.INPORT register, as follows:
+ *
+ *      SW1-1:  TODO: Determine
+ *      SW1-2:  ChipSet.KBC.INPORT.COMPAQ_NO80387 clear if ON, set (0x04) if OFF
+ *      SW1-3:  TODO: Determine
+ *      SW1-4:  ChipSet.KBC.INPORT.COMPAQ_HISPEED clear if ON, set (0x10) if OFF
+ *      SW1-5:  ChipSet.KBC.INPORT.COMPAQ_DIP5OFF clear if ON, set (0x20) if OFF
+ *      SW1-6:  ChipSet.KBC.INPORT.COMPAQ_NONDUAL clear if ON, set (0x40) if OFF
  */
 CompaqController.SETTINGS = {
     B0_PARITY:  0x01,
     B1_PARITY:  0x02,
     B2_PARITY:  0x04,
     B3_PARITY:  0x08,
-    BASE_640KB: 0x00,
-    BASE_ERROR: 0x10,
-    BASE_512KB: 0x20,
-    BASE_256KB: 0x30,
+    BASE_640KB: 0x00,           // SW1-7,8: ON  ON   Bits 5,4: 00
+    BASE_ERROR: 0x10,           // SW1-7,8: ON  OFF  Bits 5,4: 01
+    BASE_512KB: 0x20,           // SW1-7,8: OFF ON   Bits 5,4: 10
+    BASE_256KB: 0x30,           // SW1-7,8: OFF OFF  Bits 5,4: 11
     ADDED_1MB:  0x40,
     PIGGYBACK:  0x80
 };

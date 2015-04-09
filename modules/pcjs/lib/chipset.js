@@ -765,7 +765,7 @@ ChipSet.KBC = {
     STATUS: {                   // this.b8042Status (on read from port 0x64)
         PORT:           0x64,
         OUTBUFF_FULL:   0x01,
-        INBUFF_FULL:    0x02,   // set if the controller has received but not yet read data written to the input buffer (not normally set)
+        INBUFF_FULL:    0x02,   // set if the controller has received but not yet read data from the input buffer (not normally set)
         SYS_FLAG:       0x04,
         CMD_FLAG:       0x08,   // set on write to KBC.CMD (port 0x64), clear on write to KBC.DATA (port 0x60)
         NO_INHIBIT:     0x10,   // (in Compaq parlance: security lock not engaged)

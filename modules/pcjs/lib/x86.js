@@ -392,8 +392,10 @@ var X86 = {
         LOCK:       0xF0,       // opLOCK()
         REPNZ:      0xF2,       // opREPNZ()
         REPZ:       0xF3,       // opREPZ()
-        CALLW:      0x10FF,     // fnCALLw()
-        CALLDW:     0x18FF,     // fnCALLFdw()
+        GRP4W:      0xFF,
+        CALLW:      0x10FF,     // GRP4W: fnCALLw()
+        CALLFDW:    0x18FF,     // GRP4W: fnCALLFdw()
+        CALLMASK:   0x38FF,     // mask 2-byte GRP4W opcodes with this before comparing to CALLW or CALLFDW
         UD2:        0x0B0F      // UD2 (invalid opcode "guaranteed" to generate UD_FAULT on all post-8086 processors)
     }
 };
