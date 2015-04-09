@@ -879,7 +879,7 @@ x86db:	mov	word [0x50],0xffff	; 000086DB  C7065000FFFF  '..P...'
 	mov	[bx+si],bl		; 00008793  8818  '..'
 	add	[0x10f],ch		; 00008795  00
 
-	lgdt	[cs:0x0778]		; 00008796  2E0F01167807
+x8796:	lgdt	[cs:0x0778]		; 00008796  2E0F01167807
 	mov	eax,cr0			; 0000879C  0F2000
 	or	ax,0x1			; 0000879F  0D0100  0x0D,'..'
 	mov	cr0,eax			; 000087A2  0F2200
@@ -1193,7 +1193,7 @@ x8a0b:	pop	ds			; 00008A0B  1F  '.'
 	pop	ax			; 00008A0F  58  'X'
 	pop	bp			; 00008A10  5D  ']'
 	pop	cx			; 00008A11  59  'Y'
-	db	0xE9,0xBB,0x11
+	jmp	x9bd0			; 00008A12  E9BB11
 
 x8a15:	pop	ds			; 00008A15  1F  '.'
 	pop	es			; 00008A16  07  '.'
@@ -1861,9 +1861,9 @@ x8ede:	mov	es,bp			; 00008EDE  8EC5  '..'
 
 	db	'BASICA  EXE',0x00
 
-	db	0xE8			; 00008F7C  E8  '.'
-	inc	byte [si-0x58]		; 00008F7D  FE44A8  '.D.'
-	add	[si+0x15],si		; 00008F80  017415  '.t.'
+x8f7c:	call	xd47d			; 00008F7C  E8FE44
+	test	al,0x01			; 00008F7F  A801
+	jz	x8f98			; 00008F81  7415
 	call	x9190			; 00008F83  E80A02  '.',0x0A,'.'
 	mov	ah,[bx]			; 00008F86  8A27  '.',0x27
 	call	xd490			; 00008F88  E80545  '..E'
@@ -1873,7 +1873,7 @@ x8ede:	mov	es,bp			; 00008EDE  8EC5  '..'
 	in	al,dx			; 00008F93  EC  '.'
 	test	al,0x80			; 00008F94  A880  '..'
 	jz	x8fa3			; 00008F96  740B  't.'
-	mov	ah,0x6			; 00008F98  B406  '..'
+x8f98:	mov	ah,0x6			; 00008F98  B406  '..'
 	or	word [bp+0x16],0x1	; 00008F9A  814E160100  '.N...'
 	mov	[0x41],ah		; 00008F9F  88264100  '.&A.'
 x8fa3:	ret				; 00008FA3  C3  '.'
@@ -1883,7 +1883,7 @@ x8fa4:	call	xd47d			; 00008FA4  E8D644  '..D'
 	jnz	x8faf			; 00008FA9  7504  'u.'
 	xor	ah,ah			; 00008FAB  32E4  '2.'
 	jmp	short x900f		; 00008FAD  EB60  '.`'
-x8faf:	db	0xE8,0xCA,0xFF
+x8faf:	call    x8f7c			; 00008FAF  E8CAFF
 	jz	x900f			; 00008FB2  745B  't['
 	call	x9190			; 00008FB4  E8D901  '...'
 	test	byte [bx],0x10		; 00008FB7  F60710  '...'
@@ -2270,6 +2270,7 @@ x9303:	cmp	al,0x0			; 00009303  3C00  '<.'
 x930f:	mov	al,0x7			; 0000930F  B007  '..'
 x9311:	cmp	ah,al			; 00009311  3AE0  ':.'
 	ret				; 00009313  C3  '.'
+
 	db	0x0D,0x0A,'Non-System disk or disk error',0x0D,0x0A,'replace and strike any key when ready',0x0D,0x0A,'$',0x0D,0x0A,'602-Diskette Boot Record Error',0x0D,0x0A,'$'
 
 	mov	bx,0x2			; 00009380  BB0200  '...'
@@ -2320,7 +2321,7 @@ x95c5:	cmp	bx,0x50f		; 000095C5  81FB0F05  '....'
 	pop	bx			; 000095D0  5B  '['
 	pop	eax			; 000095D1  6658  'fX'
 	pop	bp			; 000095D3  5D  ']'
-	db	0xE9,0xF9,0x05
+	jmp	x9bd0			; 000095D4  E9F905
 
 x95d7:	mov	al,0x13			; 000095D7  B013  '..'
 	out	0x84,al			; 000095D9  E684  '..'
@@ -2542,13 +2543,12 @@ x97f0:	pop	ax			; 000097F0  58  'X'
 	iret				; 000097F9  CF  '.'
 
 	times	11 db 0xFF		; 000097FA - 00009804
-	db	0xE9,0xC8,0x03
+	jmp	x9bd0			; 00009805  E9C803
 
 	times	74 db 0xFF		; 00009808 - 00009851
-	db	0xE9,0xD3,0x03
+	jmp	x9c28			; 00009852  E9D303
 
 	times	12 db 0xFF		; 00009855 - 00009860
-
 	jmp	x9c1f			; 00009861  E9BB03  '...'
 
 	call	x8da9			; 00009864  E842F5  '.B.'
@@ -2908,80 +2908,34 @@ x9b18:	inc	si			; 00009B18  46  'F'
 x9b1d:	pop	cx			; 00009B1D  59  'Y'
 	ret				; 00009B1E  C3  '.'
 
-	call	far [bp+di]		; 00009B1F  FF1B  '..'
-	mov	cl,0x32			; 00009B21  B132  '.2'
-	mov	bl,0xb4			; 00009B23  B3B4  '..'
-	mov	ch,0x36			; 00009B25  B536  '.6'
-	mov	bh,0xb8			; 00009B27  B7B8  '..'
-	mov	cx,0x2db0		; 00009B29  B9B02D  '..-'
-	mov	bp,0x8908		; 00009B2C  BD0889  '...'
+	db	0xFF,0x1B,0xB1,0x32,0xB3,0xB4,0xB5,0x36,0xB7,0xB8,0xB9,0xB0,0x2D,0xBD,0x08,0x89
 	db	'qwertyuiop[]'
-	or	ax,0x61ff		; 00009B3B  0DFF61  0x0D,'.a'
-	jnc	x9ba4			; 00009B3E  7364  'sd'
-	a32 push	dword 0xbb6c6b6a; 00009B40  6667686A6B6CBB  'fghjkl.'
-	cmpsw				; 00009B47  A7  '.'
-	db	0xE0,0xFF
+	db	0x0D,0xFF
+	db	'asdfghjkl'
+	db	0xBB,0xA7,0xE0,0xFF
 	db	'\zxcvbnm'
-	lodsb				; 00009B52  AC  '.'
-	scasb				; 00009B53  AE  '.'
-	scasw				; 00009B54  AF  '.'
-	jmp	far [bp+si]		; 00009B55  FF2A  '.*'
-	jmp	near [bx+si]		; 00009B57  FF20  '. '
-
-	call	far [bp+di]		; 00009B59  FF1B  '..'
+	db	0xAC,0xAE,0xAF,0xFF,0x2A,0xFF,0x20,0xFF,0x1B
 	db	'!@#$%^&*()_+'
-	or	[bx],cl			; 00009B67  080F  '..'
-	or	ax,[bx+si]		; 00009B69  0B00  '..'
-	sbb	bh,[bp+di+0x1b]		; 00009B6B  1A7B1B  '.{.'
-	jnl	x9b8c			; 00009B6E  7D1C  '}.'
-	db	0x0D,0x27,':(")~+|3<4>5?9 789-456+123'
-x9b8c:	xor	[0xd],ch		; 00009B8C  302E0D00  '0.',0x0D,'.'
-	inc	di			; 00009B90  47  'G'
-	db	0x77,0x49
-	test	[bp+di+0x73],cl		; 00009B93  844B73  '.Ks'
+	db	0x08,0x0F,0x0B,0x00,0x1A,0x7B,0x1B,0x7D,0x1C,0x0D,0x27
+	db	':(")~+|3<4>5?9 789-456+1230.'
+	db	0x0D,0x00
+	db	0x47,0x77,0x49,0x84,0x4B,0x73
 	db	'MtOuQvH'
-	lea	cx,[bp+si-0x72]		; 00009B9D  8D4A8E  '.J.'
-	dec	sp			; 00009BA0  4C  'L'
-	db	0x8F			; 00009BA1  8F  '.'
-	dec	si			; 00009BA2  4E  'N'
-	nop				; 00009BA3  90  '.'
-x9ba4:	push	ax			; 00009BA4  50  'P'
-	xchg	ax,cx			; 00009BA5  91  '.'
-	push	dx			; 00009BA6  52  'R'
-	xchg	ax,dx			; 00009BA7  92  '.'
-	push	bx			; 00009BA8  53  'S'
-	xchg	ax,bx			; 00009BA9  93  '.'
-	push	es			; 00009BAA  06  '.'
-	add	[bx],al			; 00009BAB  0007  '..'
-	push	ds			; 00009BAD  1E  '.'
-	or	al,0x1f			; 00009BAE  0C1F  '..'
-	sbb	bl,[bp+di]		; 00009BB0  1A1B  '..'
-	sbb	bx,[di]			; 00009BB2  1B1D  '..'
-	sbb	al,0xa			; 00009BB4  1C0A  '.',0x0A
-	sub	bx,[si]			; 00009BB6  2B1C  '+.'
-	or	al,[bx+si]		; 00009BB8  0A00  0x0A,'.'
-	inc	di			; 00009BBA  47  'G'
-	xchg	ax,di			; 00009BBB  97  '.'
-	dec	ax			; 00009BBC  48  'H'
-	cbw				; 00009BBD  98  '.'
-	dec	cx			; 00009BBE  49  'I'
-	cwd				; 00009BBF  99  '.'
-	dec	bx			; 00009BC0  4B  'K'
-	wait				; 00009BC1  9B  '.'
-	dec	bp			; 00009BC2  4D  'M'
-	popf				; 00009BC3  9D  '.'
-	dec	di			; 00009BC4  4F  'O'
-	lahf				; 00009BC5  9F  '.'
-	push	ax			; 00009BC6  50  'P'
-	mov	al,[0xa151]		; 00009BC7  A051A1  '.Q.'
-	push	dx			; 00009BCA  52  'R'
-	mov	[0xa353],al		; 00009BCB  A253A3  '.S.'
-	db	0xFF			; 00009BCE  FF  '.'
-	call	near [bx+si-0x50]	; 00009BCF  FF50B0  '.P.'
-	add	si,sp			; 00009BD2  01E6  '..'
-	test	[bx+si+0xe610],si	; 00009BD4  85B010E6  '....'
-	test	[bx+si-0x17],bl		; 00009BD8  8458E9  '.X.'
-	and	cx,[di-0x6]		; 00009BDB  234DFA  '#M.'
+	db	0x8D,0x4A,0x8E
+	db	0x4C,0x8F,0x4E,0x90,0x50,0x91,0x52,0x92,0x53,0x93,0x06,0x00,0x07,0x1E,0x0C,0x1F,0x1A,0x1B,0x1B,0x1D
+	db	0x1C,0x0A,0x2B,0x1C,0x0A,0x00,0x47,0x97,0x48,0x98,0x49,0x99,0x4B,0x9B,0x4D,0x9D,0x4F,0x9F,0x50,0xA0
+	db	0x51,0xA1,0x52,0xA2,0x53,0xA3
+	db	0xFF,0xFF
+
+x9bd0:	push	ax			; 00009BD0  50
+	mov	al,0x01			; 00009BD1  B001
+	out	0x85,al			; 00009BD3  E685
+	mov	al,0x10			; 00009BD5  B010
+	out	0x84,al			; 00009BD7  E684
+	pop	ax			; 00009BD9  58
+	jmp	xe900			; 00009BDA  E9234D
+
+x9bdd:	cli				; 00009BDD  FA
 	and	al,0xf7			; 00009BDE  24F7  '$.'
 	add	dx,byte +0x4		; 00009BE0  83C204  '...'
 	out	dx,al			; 00009BE3  EE  '.'
@@ -2999,8 +2953,8 @@ x9bed:	mov	al,ah			; 00009BED  8AC4  '..'
 	dec	dx			; 00009BF5  4A  'J'
 	loop	x9bed			; 00009BF6  E2F5  '..'
 	jmp	bp			; 00009BF8  FFE5  '..'
-	mov	ax,0x720		; 00009BFA  B82007  '. .'
 
+x9bfa:	mov	ax,0x720		; 00009BFA  B82007  '. .'
 	mov	es,[bx+0x6]		; 00009BFD  8E4706  '.G.'
 	xor	di,di			; 00009C00  33FF  '3.'
 	mov	cx,0x2000		; 00009C02  B90020  '.. '
@@ -3014,9 +2968,10 @@ x9bed:	mov	al,ah			; 00009BED  8AC4  '..'
 
 x9c1f:	jmp	x9cac			; 00009C1F  E98A00  '...'
 
-	times	5 db 0xFF		; 00009C22 - 00009C26
+	times	6 db 0xFF		; 00009C22 - 00009C27
 
-	call	near [bx+si+0x6]	; 00009C27  FF5006  '.P.'
+x9c28:	push	ax			; 00009C28  50
+	push	es			; 00009C29  06
 	mov	al,0x1			; 00009C2A  B001  '..'
 	out	0x85,al			; 00009C2C  E685  '..'
 	mov	al,0x17			; 00009C2E  B017  '..'
@@ -4353,7 +4308,7 @@ xa795:	xor	bh,bh			; 0000A795  32FF  '2.'
 	add	si,bx			; 0000A7A9  03F3  '..'
 	push	si			; 0000A7AB  56  'V'
 	mov	bp,0xa7b2		; 0000A7AC  BDB2A7  '...'
-	db	0xE9,0x2B,0xF4
+	jmp	x9bdd			; 0000A7AF  E92BF4
 
 	sti				; 0000A7B2  FB  '.'
 	pop	si			; 0000A7B3  5E  '^'
@@ -4688,7 +4643,7 @@ xaa6d:	ret				; 0000AA6D  C3  '.'
 	db	0xFF			; 0000AA6E  FF  '.'
 	db	0xFF			; 0000AA6F  FF  '.'
 	db	0xFF			; 0000AA70  FF  '.'
-	db	0xE9,0x9E,0x03
+	jmp	xae12			; 0000AA71  E99E03
 
 xaa74:	mov	al,0x50			; 0000AA74  B050  '.P'
 	out	0x84,al			; 0000AA76  E684  '..'
@@ -4770,7 +4725,7 @@ xaac9:	and	byte [0x10],0xcf	; 0000AAC9  80261000CF  '.&...'
 	jnc	xab1e			; 0000AB0F  730D  's',0x0D
 	mov	al,0x56			; 0000AB11  B056  '.V'
 	out	0x84,al			; 0000AB13  E684  '..'
-	db	0xE8,0x93,0x1C
+	call	xc7ab			; 0000AB15  E8931C
 	call	xc791			; 0000AB18  E8761C  '.v.'
 	call	xc791			; 0000AB1B  E8731C  '.s.'
 xab1e:	ret				; 0000AB1E  C3  '.'
@@ -4883,7 +4838,7 @@ xabf0:	mov	al,0x5c			; 0000ABF0  B05C  '.\'
 	out	0x84,al			; 0000ABF2  E684  '..'
 	pushf				; 0000ABF4  9C  '.'
 	mov	bp,0xabfb		; 0000ABF5  BDFBAB  '...'
-	db	0xE9,0xFF,0xEF
+	jmp	x9bfa			; 0000ABF8  E9FFEF
 
 	xor	cx,cx			; 0000ABFB  33C9  '3.'
 	mov	dl,[bx+0x2]		; 0000ABFD  8A5702  '.W.'
@@ -5160,7 +5115,7 @@ xadd6:	mov	cl,al			; 0000ADD6  8AC8  '..'
 	mov	dl,0x70			; 0000AE0F  B270  '.p'
 	mov	dl,0x80			; 0000AE11  B2
 
-	cmp	dl,0x80			; 0000AE12  80FA80
+xae12:	cmp	dl,0x80			; 0000AE12  80FA80
 	jnc	xae29			; 0000AE15  7312
 	int	0x40			; 0000AE17  CD40
 	push	ax			; 0000AE19  50  'P'
@@ -5272,7 +5227,7 @@ xaefe:	jc	xaf42			; 0000AEFE  7242  'rB'
 	call	xb2e0			; 0000AF00  E8DD03  '...'
 	jc	xaf42			; 0000AF03  723D  'r='
 	mov	bh,al			; 0000AF05  8AF8  '..'
-	db	0xE8,0x04,0x06
+	call	xb50e			; 0000AF07  E80406
 	jnc	xaf1e			; 0000AF0A  7312  's.'
 	cmp	ah,0x11			; 0000AF0C  80FC11  '...'
 	jz	xaf1b			; 0000AF0F  740A  't',0x0A
@@ -5300,7 +5255,8 @@ xaf42:	call	xb471			; 0000AF42  E82C05  '.,.'
 xaf45:	ret				; 0000AF45  C3  '.'
 
 	db	'**********************************************************************************************'
-	db	0xE9,0x9C,0x03
+
+	jmp	xb343			; 0000AFA4  E99C03
 
 	call	xb483			; 0000AFA7  E8D904  '...'
 	jc	xb029			; 0000AFAA  727D  'r}'
@@ -5349,7 +5305,7 @@ xb010:	call	xb4d0			; 0000B010  E8BD04  '...'
 	jc	xb029			; 0000B013  7214  'r.'
 	call	xb2e0			; 0000B015  E8C802  '...'
 	jc	xb029			; 0000B018  720F  'r.'
-	db	0xE8,0xF1,0x04
+	call	xb50e			; 0000B01A  E8F104
 	jc	xb029			; 0000B01D  720A  'r',0x0A
 	dec	byte [bp+0x1]		; 0000B01F  FE4E01  '.N.'
 	jnz	xafff			; 0000B022  75DB  'u.'
@@ -5372,7 +5328,7 @@ xb040:	mov	[0x48],al		; 0000B040  A24800  '.H.'
 	jc	xb05a			; 0000B049  720F  'r.'
 	call	xb2e0			; 0000B04B  E89202  '...'
 	jc	xb05a			; 0000B04E  720A  'r',0x0A
-	db	0xE8,0xBB,0x04
+	call	xb50e			; 0000B050  E8BB04
 	jc	xb05a			; 0000B053  7205  'r.'
 	call	xb468			; 0000B055  E81004  '...'
 	jmp	short xb05d		; 0000B058  EB03  '..'
@@ -5397,7 +5353,7 @@ xb05d:	ret				; 0000B05D  C3  '.'
 	jc	xb098			; 0000B087  720F  'r.'
 	call	xb2e0			; 0000B089  E85402  '.T.'
 	jc	xb098			; 0000B08C  720A  'r',0x0A
-	db	0xE8,0x7D,0x04
+	call	xb50e			; 0000B08E  E87D04
 	jc	xb098			; 0000B091  7205  'r.'
 	call	xb468			; 0000B093  E8D203  '...'
 	jmp	short xb09b		; 0000B096  EB03  '..'
@@ -5469,7 +5425,7 @@ xb0fb:	mov	bl,[es:si+0xe]		; 0000B0FB  268A5C0E  '&.\.'
 	jc	xb135			; 0000B124  720F  'r.'
 	call	xb2e0			; 0000B126  E8B701  '...'
 	jc	xb135			; 0000B129  720A  'r',0x0A
-	db	0xE8,0xE0,0x03
+	call	xb50e			; 0000B12B  E8E003
 	jc	xb135			; 0000B12E  7205  'r.'
 	call	xb468			; 0000B130  E83503  '.5.'
 	jmp	short xb13a		; 0000B133  EB05  '..'
@@ -5496,7 +5452,7 @@ xb151:	mov	byte [0x48],0x70	; 0000B151  C606480070  '..H.p'
 	jc	xb16d			; 0000B15C  720F  'r.'
 	call	xb2e0			; 0000B15E  E87F01  '...'
 	jc	xb16d			; 0000B161  720A  'r',0x0A
-	db	0xE8,0xA8,0x03
+	call	xb50e			; 0000B163  E8A803
 	jc	xb16d			; 0000B166  7205  'r.'
 	call	xb468			; 0000B168  E8FD02  '...'
 	jmp	short xb170		; 0000B16B  EB03  '..'
@@ -5579,7 +5535,7 @@ xb221:	mov	byte [0x48],0x10	; 0000B221  C606480010  '..H..'
 	jc	xb23d			; 0000B22C  720F  'r.'
 	call	xb2e0			; 0000B22E  E8AF00  '...'
 	jc	xb23d			; 0000B231  720A  'r',0x0A
-	db	0xE8,0xD8,0x02
+	call	xb50e			; 0000B233  E8D802
 	jc	xb23d			; 0000B236  7205  'r.'
 	call	xb468			; 0000B238  E82D02  '.-.'
 	jmp	short xb240		; 0000B23B  EB03  '..'
@@ -5597,7 +5553,7 @@ xb240:	mov	[bp+0x14],al		; 0000B240  884614  '.F.'
 	jc	xb26c			; 0000B257  7213  'r.'
 	call	xb2e0			; 0000B259  E88400  '...'
 	jc	xb26c			; 0000B25C  720E  'r.'
-	db	0xE8,0x13,0x01
+	call	xb374			; 0000B25E  E81301
 	xor	ah,ah			; 0000B261  32E4  '2.'
 	mov	[bp+0x14],ax		; 0000B263  894614  '.F.'
 	cmp	al,0x1			; 0000B266  3C01  '<.'
@@ -5677,9 +5633,10 @@ xb305:	pop	cx			; 0000B305  59  'Y'
 	pop	bx			; 0000B306  5B  '['
 	ret				; 0000B307  C3  '.'
 
-	db	'**********************************************************'
+	db	'***********************************************************'
 
-	sub	dl,[bx+si+0x1e]		; 0000B342  2A501E  '*P.'
+xb343:	push	ax			; 0000B343  50
+	push	ds			; 0000B344  1E
 	mov	ax,0x40			; 0000B345  B84000  '.@.'
 	mov	ds,ax			; 0000B348  8ED8  '..'
 	mov	byte [0x8e],0xff	; 0000B34A  C6068E00FF  '.....'
@@ -5704,7 +5661,9 @@ xb364:	mov	dx,0x1f7		; 0000B364  BAF701  '...'
 	add	[si],al			; 0000B36E  0004  '..'
 	add	[bx+si],ah		; 0000B370  0020  '. '
 	inc	ax			; 0000B372  40  '@'
-	add	bh,[bp+si+0x1f1]	; 0000B373  02BAF101  '....'
+	db	0x02			; 0000B373  02
+
+xb374:	mov	dx,0x01f1		; 0000B374  BAF101  '...'
 	in	al,dx			; 0000B377  EC  '.'
 	mov	[0x8d],al		; 0000B378  A28D00  '...'
 	mov	ah,0x20			; 0000B37B  B420  '. '
@@ -5905,14 +5864,14 @@ xb506:	mov	byte [0x8e],0x0		; 0000B506  C6068E0000  '.....'
 	pop	bx			; 0000B50C  5B  '['
 	ret				; 0000B50D  C3  '.'
 
-	test	al,0x20			; 0000B50E  A820  '. '
+xb50e:	test	al,0x20			; 0000B50E  A820  '. '
 	jz	xb516			; 0000B510  7404  't.'
 	mov	ah,0xcc			; 0000B512  B4CC  '..'
 	jmp	short xb525		; 0000B514  EB0F  '..'
 
 xb516:	test	al,0x1			; 0000B516  A801  '..'
 	jz	xb51f			; 0000B518  7405  't.'
-	db	0xE8,0x57,0xFE
+	call	xb374			; 0000B51A  E857FE
 	jmp	short xb525		; 0000B51D  EB06  '..'
 
 xb51f:	test	al,0x4			; 0000B51F  A804  '..'
@@ -5961,7 +5920,7 @@ xb564:	mov	sp,bp			; 0000B564  8BE5  '..'
 	mov	bl,0xff			; 0000B566  B3FF  '..'
 	xor	di,di			; 0000B568  33FF  '3.'
 	mov	bp,0xb570		; 0000B56A  BD70B5  '.p.'
-	db	0xE9,0x26,0xD2
+	jmp	x8796			; 0000B56D  E926D2
 
 xb570:	mov	al,0x41			; 0000B570  B041  '.A'
 	out	0x84,al			; 0000B572  E684  '..'
@@ -6147,7 +6106,8 @@ xb68a:	stc				; 0000B68A  F9  '.'
 	shl	dh,0x71			; 0000BAA0  C0E671  '..q'
 	mov	al,0x40			; 0000BAA3  B040  '.@'
 	out	0x86,al			; 0000BAA5  E686  '..'
-	cli				; 0000BAA7  FA  '.'
+
+xbaa7:	cli				; 0000BAA7  FA  '.'
 	mov	al,0xf			; 0000BAA8  B00F  '..'
 	out	0x84,al			; 0000BAAA  E684  '..'
 	mov	al,0x0			; 0000BAAC  B000  '..'
@@ -6163,7 +6123,7 @@ xb68a:	stc				; 0000B68A  F9  '.'
 
 	and	bl,0xbf			; 0000BACA  80E3BF  '...'
 	mov	bp,0xbad3		; 0000BACD  BDD3BA  '...'
-	db	0xE9,0xC3,0xCC
+	jmp     x8796			; 0000BAD0  E9C3CC
 
 xbad3:	cld				; 0000BAD3  FC  '.'
 	mov	ax,0xf000		; 0000BAD4  B800F0  '...'
@@ -6242,7 +6202,7 @@ xbb6b:	dec	dx			; 0000BB6B  4A  'J'
 	mov	al,0x12			; 0000BB6E  B012  '..'
 	out	0x84,al			; 0000BB70  E684  '..'
 	mov	bp,0xbb78		; 0000BB72  BD78BB  '.x.'
-	db	0xE9,0x82,0xE0
+	jmp	x9bfa			; 0000BB75  E982E0
 
 	xor	cx,cx			; 0000BB78  33C9  '3.'
 	mov	dl,[bx+0x2]		; 0000BB7A  8A5702  '.W.'
@@ -6387,7 +6347,7 @@ xbc71:	call	xa3e0			; 0000BC71  E86CE7  '.l.'
 	call	xcc88			; 0000BC90  E8F50F  '...'
 	mov	al,0x2d			; 0000BC93  B02D  '.-'
 	out	0x84,al			; 0000BC95  E684  '..'
-	db	0xE8,0x6B,0x24
+	call	xe105			; 0000BC97  E86B24
 	mov	al,0x1e			; 0000BC9A  B01E  '..'
 	out	0x84,al			; 0000BC9C  E684  '..'
 	call	xcfdd			; 0000BC9E  E83C13  '.<.'
@@ -6398,7 +6358,7 @@ xbc71:	call	xa3e0			; 0000BC71  E86CE7  '.l.'
 	out	0x84,al			; 0000BCAA  E684  '..'
 	call	xd6dd			; 0000BCAC  E82E1A  '...'
 	call	xc825			; 0000BCAF  E8730B  '.s.'
-	db	0xE8,0xCB,0x37
+	call	xf480			; 0000BCB2  E8CB37
 	call	xe7df			; 0000BCB5  E8272B  '.',0x27,'+'
 	sti				; 0000BCB8  FB  '.'
 	mov	al,0x21			; 0000BCB9  B021  '.!'
@@ -6834,7 +6794,7 @@ xc090:	jmp	xb673			; 0000C090  E9E0F5  '...'
 xc093:	cli				; 0000C093  FA  '.'
 	call	xeb0c			; 0000C094  E8752A  '.u*'
 	sti				; 0000C097  FB  '.'
-	db	0xE9,0xE6,0x29
+	jmp	xea81			; 0000C098  E9E629
 
 xc09b:	test	byte [0x96],0x10	; 0000C09B  F606960010  '.....'
 	jz	xc0b7			; 0000C0A0  7415  't.'
@@ -7494,7 +7454,7 @@ xc603:	dec	ah			; 0000C603  FECC  '..'
 
 xc60c:	dec	ah			; 0000C60C  FECC  '..'
 	jnz	xc615			; 0000C60E  7505  'u.'
-	db	0xE8,0xB8,0x05
+	call	xcbcb			; 0000C610  E8B805
 	jmp	short xc61c		; 0000C613  EB07  '..'
 
 xc615:	dec	ah			; 0000C615  FECC  '..'
@@ -7510,9 +7470,9 @@ xc61c:	pop	bp			; 0000C61C  5D  ']'
 	iret				; 0000C623  CF  '.'
 
 	times	6 db 0xFF		; 0000C624 - 0000C629
-	db	0xE9,0x6A,0x04
+	jmp	xca97			; 0000C62A  E96A04
 
-	adc	[bx+si],al		; 0000C62D  1000  '..'
+	dw	0x0010			; 0000C62D  1000
 
 xc62f:	push	bx			; 0000C62F  53  'S'
 	mov	bx,0x1			; 0000C630  BB0100  '...'
@@ -7530,6 +7490,7 @@ xc638:	push	bp			; 0000C638  55  'U'
 	ret				; 0000C641  C3  '.'
 
 xc642:	mov	cx,bx			; 0000C642  8BCB  '..'
+
 xc644:	pushf				; 0000C644  9C  '.'
 	cli				; 0000C645  FA  '.'
 	mov	al,0x0			; 0000C646  B000  '..'
@@ -7547,6 +7508,7 @@ xc657:	iret				; 0000C657  CF  '.'
 
 xc658:	xchg	al,ah			; 0000C658  86C4  '..'
 	mov	bx,ax			; 0000C65A  8BD8  '..'
+
 xc65c:	pushf				; 0000C65C  9C  '.'
 	cli				; 0000C65D  FA  '.'
 	mov	al,0x0			; 0000C65E  B000  '..'
@@ -7686,7 +7648,7 @@ xc751:	push	bx			; 0000C751  53  'S'
 	push	cx			; 0000C752  51  'Q'
 xc753:	test	dh,0xc0			; 0000C753  F6C6C0  '...'
 	jz	xc760			; 0000C756  7408  't.'
-	db	0xE8,0x50,0x00
+	call	xc7ab			; 0000C758  E85000
 	sub	dh,0x40			; 0000C75B  80EE40  '..@'
 	jmp	short xc753		; 0000C75E  EBF3  '..'
 
@@ -7731,8 +7693,8 @@ xc79e:	mov	bx,0x7d			; 0000C79E  BB7D00  '.}.'
 	mov	bx,0x7d			; 0000C7A4  BB7D00  '.}.'
 	call	xc638			; 0000C7A7  E88EFE  '...'
 	ret				; 0000C7AA  C3  '.'
-	mov	bx,0x320		; 0000C7AB  BB2003  '. .'
 
+xc7ab:	mov	bx,0x320		; 0000C7AB  BB2003  '. .'
 	call	xc7db			; 0000C7AE  E82A00  '.*.'
 	mov	bx,0x100		; 0000C7B1  BB0001  '...'
 	call	xc638			; 0000C7B4  E881FE  '...'
@@ -8077,11 +8039,12 @@ xca78:	mov	bh,[bp+0x7]		; 0000CA78  8A7E07  '.~.'
 	call	xd4c4			; 0000CA87  E83A0A  '.:',0x0A
 	ret				; 0000CA8A  C3  '.'
 
-	times	11 db 0xFF		; 0000CA8B - 0000CA95
+	times	12 db 0xFF		; 0000CA8B - 0000CA96
 
-	call	near [bx+si-0x50]	; 0000CA96  FF50B0  '.P.'
-	and	dh,ah			; 0000CA99  20E6  ' .'
-	mov	al,[0x20e6]		; 0000CA9B  A0E620  '.. '
+xca97:	push	ax			; 0000CA97  50
+	mov	al,0x20			; 0000CA98  B020
+	out	0xa0,al			; 0000CA9A  E6A0
+	out	0x20,al			; 0000CA9C  E620
 	mov	al,0xb			; 0000CA9E  B00B  '..'
 	call	xb544			; 0000CAA0  E8A1EA  '...'
 	mov	ah,al			; 0000CAA3  8AE0  '..'
@@ -8089,9 +8052,9 @@ xca78:	mov	bh,[bp+0x7]		; 0000CA78  8A7E07  '.~.'
 	call	xb544			; 0000CAA7  E89AEA  '...'
 	and	al,ah			; 0000CAAA  22C4  '".'
 	test	al,0x40			; 0000CAAC  A840  '.@'
-	db	0x74,0x03
+	jz	xcab3			; 0000CAAE  7403
 	call	xcac1			; 0000CAB0  E80E00  '...'
-	test	al,0x20			; 0000CAB3  A820  '. '
+xcab3:	test	al,0x20			; 0000CAB3  A820  '. '
 	jz	xcaba			; 0000CAB5  7403  't.'
 	call	xcabc			; 0000CAB7  E80200  '...'
 xcaba:	pop	ax			; 0000CABA  58  'X'
@@ -8247,8 +8210,10 @@ xcbbb:	add	dx,byte +0x4		; 0000CBBB  83C204  '...'
 
 	add	[bx+si],cl		; 0000CBC6  0008  '..'
 	sbb	[bx+si],ch		; 0000CBC8  1828  '.('
-	cmp	[si],bh			; 0000CBCA  383C  '8<'
-	add	bp,si			; 0000CBCC  01F5  '..'
+	db	0x38			; 0000CBCA  38
+
+xcbcb:	cmp	al,0x01			; 0000CBCB  3C01
+	cmc				; 0000CBCD  F5
 	rcr	ah,1			; 0000CBCE  D0DC  '..'
 	rcr	ah,1			; 0000CBD0  D0DC  '..'
 	or	ah,ch			; 0000CBD2  0AE5  0x0A,'.'
@@ -9050,18 +9015,17 @@ xd1fc:	mov	ax,0x601		; 0000D1FC  B80106  '...'
 	pop	cx			; 0000D20C  59  'Y'
 	ret				; 0000D20D  C3  '.'
 
-	sbb	al,0x1d			; 0000D20E  1C1D  '..'
-	sub	dh,[di]			; 0000D210  2A35  '*5'
-	aaa				; 0000D212  37  '7'
-	cmp	[bp+0xa],al		; 0000D213  38460A  '8F',0x0A
-	in	al,0x74			; 0000D216  E474  '.t'
-	add	di,[bx+di+0x5]		; 0000D218  037905  '.y.'
+	db	0x1c,0x1d,'*578F'	; 0000D20E  1C1D2A35373846
+
+xd215:	or	ah,ah			; 0000D215  0AE4
+	jz	xd21c			; 0000D217  7403
+	jns	xd220			; 0000D219  7905
 	stc				; 0000D21B  F9  '.'
 xd21c:	ret				; 0000D21C  C3  '.'
 
 xd21d:	jmp	xd335			; 0000D21D  E91501  '...'
 
-	cmp	ah,0x39			; 0000D220  80FC39  '..9'
+xd220:	cmp	ah,0x39			; 0000D220  80FC39  '..9'
 	jg	xd21c			; 0000D223  7FF7  '..'
 	mov	bl,ah			; 0000D225  8ADC  '..'
 	xor	bh,bh			; 0000D227  32FF  '2.'
@@ -10613,16 +10577,15 @@ xdfee:	lea	di,[si+0x10]		; 0000DFEE  8D7C10  '.|.'
 	db	0xFF			; 0000DFFF  FF  '.'
 	jmp	short xe05e		; 0000E000  EB5C  '.\'
 
-	db	'AUTHORS CAB93GLB93RWS93DJC93NPB(C)Copyright COMPAQ Computer Corporation 1982,83,84,85,86'
+	db	'AUTHORS CAB93GLB93RWS93DJC93NPB(C)Copyright COMPAQ Computer Corporation 1982,83,84,85,86,'
 
-	sub	al,0xe9			; 0000E05A  2CE9  ',.'
-	dec	cx			; 0000E05C  49  'I'
-	db	0xDA			; 0000E05D  DA  '.'
+xe05b:	jmp	xbaa7			; 0000E05B  E949DA
+
 xe05e:	jmp	0xf000:0x8e31		; 0000E05E  EA318E00F0  '.1...'
 
 	db	'((CC))CCooppyyrriigghhtt  CCOOMMPPAAQQ  CCoommppuutteerr  CCoorrppoorraattiioonn  11998822,,8833,,8844,,8855,,8866,,8877--AAllll  rriigghhttss  rreesseerrvveedd..'
 
-	mov	al,0xd			; 0000E105  B00D  '.',0x0D  0x0D
+xe105:	mov	al,0xd			; 0000E105  B00D  '.',0x0D  0x0D
 	out	0x84,al			; 0000E107  E684  '..'
 	mov	al,0x12			; 0000E109  B012  '..'
 	out	0x4b,al			; 0000E10B  E64B  '.K'
@@ -10733,7 +10696,7 @@ xe1e6:	mov	si,bp			; 0000E1E6  8BF5  '..'
 	mov	bl,0xff			; 0000E1E8  B3FF  '..'
 	xor	di,di			; 0000E1EA  33FF  '3.'
 	mov	bp,0xe1f2		; 0000E1EC  BDF2E1  '...'
-	db	0xE9,0xA4,0xA5
+	jmp	x8796			; 0000E1EF  E9A4A5
 
 	mov	bp,si			; 0000E1F2  8BEE  '..'
 	xor	ax,ax			; 0000E1F4  33C0  '3.'
@@ -10748,7 +10711,7 @@ xe1e6:	mov	si,bp			; 0000E1E6  8BF5  '..'
 	mov	bl,0xff			; 0000E206  B3FF  '..'
 	xor	di,di			; 0000E208  33FF  '3.'
 	mov	bp,0xe210		; 0000E20A  BD10E2  '...'
-	db	0xE9,0x86,0xA5
+	jmp	x8796			; 0000E20D  E986A5
 
 	mov	bp,si			; 0000E210  8BEE  '..'
 	in	al,0x61			; 0000E212  E461  '.a'
@@ -11642,7 +11605,7 @@ xe964:	call	xbfc3			; 0000E964  E85CD6  '.\.'
 	jc	xe97b			; 0000E971  7208  'r.'
 	call	xc188			; 0000E973  E812D8  '...'
 	jc	xe97b			; 0000E976  7203  'r.'
-	db	0xE8,0x9A,0xE8
+	call	xd215			; 0000E978  E89AE8
 xe97b:	ret				; 0000E97B  C3  '.'
 
 xe97c:	call	xec2e			; 0000E97C  E8AF02  '...'
@@ -11752,13 +11715,10 @@ xea62:	call	xeb16			; 0000EA62  E8B100  '...'
 	jz	xead1			; 0000EA6A  7465  'te'
 	jmp	short xea8a		; 0000EA6C  EB1C  '..'
 
-	times	18 db 0xFF		; 0000EA6E - 0000EA7F
+	times	19 db 0xFF		; 0000EA6E - 0000EA80
 
-	inc	di			; 0000EA80  FFC7  '..'
-	push	es			; 0000EA82  06  '.'
-	jc	xea85			; 0000EA83  7200  'r.'
-xea85:	xor	al,0x12			; 0000EA85  3412  '4.'
-	db	0xE9,0xD1,0xF5
+xea81:	mov	word [0x0072],0x1234	; 0000EA81  C70672003412
+	jmp	xe05b			; 0000EA87  E9D1F5
 
 xea8a:	cmp	ah,0x54			; 0000EA8A  80FC54  '..T'
 	jz	xea94			; 0000EA8D  7405  't.'
@@ -12685,7 +12645,7 @@ xf2ee:	push	eax			; 0000F2EE  6650  'fP'
 	cli				; 0000F2F3  FA  '.'
 	xor	di,di			; 0000F2F4  33FF  '3.'
 	mov	bp,0xf2fc		; 0000F2F6  BDFCF2  '...'
-	db	0xE9,0x9A,0x94
+	jmp	x8796			; 0000F2F9  E99A94
 
 	popf				; 0000F2FC  9D  '.'
 	pop	es			; 0000F2FD  07  '.'
@@ -12909,9 +12869,11 @@ xf373:	pop	ax			; 0000F373  58  'X'
 	db	0xFF			; 0000F477  FF  '.'
 	db	0x7F,0xFF
 
-	times	5 db 0xFF		; 0000F47A - 0000F47E
-	push	word [bx+si+0xe67d]	; 0000F47F  FFB07DE6  '..}.'
-	test	[bp+0xffe0],bh		; 0000F483  84BEE0FF  '....'
+	times	6 db 0xFF		; 0000F47A - 0000F47F
+
+xf480:	mov	al,0x7d			; 0000F480  B07D
+	out	0x84,al			; 0000F482  E684
+	mov	si,0xffe0		; 0000F484  BEE0FF
 	mov	si,[cs:si]		; 0000F487  2E8B34  '..4'
 	test	word [cs:si],0xf00	; 0000F48A  2EF704000F  '.....'
 	jz	xf494			; 0000F48F  7403  't.'
@@ -14157,8 +14119,9 @@ xfe81:	xor	ah,ah			; 0000FE81  32E4  '2.'
 	popf				; 0000FE92  9D  '.'
 	int1				; 0000FE93  F1  '.'
 	popf				; 0000FE94  9D  '.'
-	inc	word [bx+si+0x3f26]	; 0000FE95  FF80263F  '..&?'
-	add	al,dh			; 0000FE99  00F0  '..'
+	db	0xff
+
+xfe96:	and	byte [0x003f],0xf0	; 0000FE96  80263F00F0
 xfe9b:	int	0x1c			; 0000FE9B  CD1C  '..'
 	mov	al,0x20			; 0000FE9D  B020  '. '
 	out	0x20,al			; 0000FE9F  E620  '. '
@@ -14216,7 +14179,7 @@ xfef7:	dec	byte [0x40]		; 0000FEF7  FE0E4000  '..@.'
 	out	0x86,al			; 0000FF16  E686  '..'
 	mov	al,0x92			; 0000FF18  B092  '..'
 	out	0x4b,al			; 0000FF1A  E64B  '.K'
-	db	0xE9,0x77,0xFF
+	jmp	xfe96			; 0000FF1C  E977FF
 
 	times	4 db 0xFF		; 0000FF1F - 0000FF22
 
@@ -14275,20 +14238,20 @@ xffb3:	pop	ds			; 0000FFB3  1F  '.'
 	popa				; 0000FFB4  61  'a'
 	iret				; 0000FFB5  CF  '.'
 
-	db	0xFF			; 0000FFB6  FF  '.'
-	inc	word [bx+si]		; 0000FFB7  FF00  '..'
-	add	[bx+si],al		; 0000FFB9  0000  '..'
-	add	[bx+si],al		; 0000FFBB  0000  '..'
-	add	[bp+di],al		; 0000FFBD  0003  '..'
-	add	bh,bh			; 0000FFBF  00FF  '..'
+	dw	0xFFFF			; 0000FFB6  FFFF
+	db	0x0000			; 0000FFB8  0000
+	dw	0x0000			; 0000FFBA  0000
+	dw	0x0000			; 0000FFBC  0000
+	dw	0x0003			; 0000FFBE  0300
 
-	times	28 db 0xFF		; 0000FFC1 - 0000FFDC
+	times	29 db 0xFF		; 0000FFC0 - 0000FFDC
 
 	jmp	x9f17			; 0000FFDD  E9379F  '.7.'
 
 	dw	0x7FB6			; 0000FFE0  B67F
 	dw	0x7FBE			; 0000FFE2  BE7F
 	db	'G4J 03COMPAQ'		; 0000FFE4  47344A203033434F4D504151
+
 	jmp	0xf000:reset		; 0000FFF0  EA05F900F0
 
 	db	' 01/28/88'
