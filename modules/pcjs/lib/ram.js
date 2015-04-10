@@ -307,13 +307,13 @@ CompaqController.MAPPINGS = {
  *
  *      SW1-1:  ON enables fail-safe timer
  *      SW1-2:  ON indicates 80387 coprocessor installed
- *      SW1-3:  ON sets the memory from 0xC00000 to 0xFFFFFF (between 12 megabytes and 16 megabytes) non-cacheable
- *      SW1-4:  ON select AUTO system speed (OFF selects HIGH system speed)
+ *      SW1-3:  ON sets memory from 0xC00000 to 0xFFFFFF (between 12 and 16 megabytes) non-cacheable
+ *      SW1-4:  ON selects AUTO system speed (OFF selects HIGH system speed)
  *      SW1-5:  RESERVED (however, the system can read its state; see below)
  *      SW1-6:  Compaq Dual-Mode Monitor or Color Monitor (OFF selects Monochrome monitor other than Compaq)
  *
- * While SW1-7 and SW1-8 are connected to this memory-mapped register, other SW1 DIP switches are accessible through
- * the 8042 Keyboard Controller KBC.INPORT register, as follows:
+ * While SW1-7 and SW1-8 are connected to this memory-mapped register, other SW1 DIP switches are accessible
+ * through the 8042 Keyboard Controller's KBC.INPORT register, as follows:
  *
  *      SW1-1:  TODO: Determine
  *      SW1-2:  ChipSet.KBC.INPORT.COMPAQ_NO80387 clear if ON, set (0x04) if OFF

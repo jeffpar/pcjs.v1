@@ -1,3 +1,12 @@
+;
+; ROM BIOS for Compaq DeskPro 386-16
+; Rev J.4, from parts 109592-001 and 109591-001, dated 1988-Jan-28
+; (C)Copyright COMPAQ Computer Corporation 1982,83,84,85,86,87-All rights reserved.
+;
+; Listing produced by NDISASM, 2015-Apr-04
+; Additional post-processing performed by the PCjs TextOut module
+; All post-processing, comments, etc copyright © 2012-2015 Jeff Parsons <Jeff@pcjs.org>
+;
 	org	0x8000
 
 CMD8042_WRITE_OUTPORT	equ	0xD1

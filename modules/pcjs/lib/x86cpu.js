@@ -3291,6 +3291,8 @@ X86CPU.prototype.pushWord = function(w)
  * by a coprocessor).  As of the 80286, those priorities were inverted, giving the Trap interrupt higher priority
  * than external interrupts.
  *
+ * TODO: Determine the priorities for the 80186.
+ *
  * @this {X86CPU}
  * @return {boolean} true if h/w interrupt (or trap) has just been acknowledged, false if not
  */
@@ -3299,23 +3301,34 @@ X86CPU.prototype.checkINTR = function()
     this.assert(this.intFlags);
     if (!(this.opFlags & X86.OPFLAG.NOINTR)) {
         /*
-         * TODO: Reverse the order of the INTR and TRAP tests if the processor is an 80286 or higher.
+         * As discussed above, the 8086/8088 give hardware interrupts higher priority than the TRAP interrupt,
+         * whereas the 80286 and up give TRAPs higher priority.
          */
-        if ((this.intFlags & X86.INTFLAG.INTR) && (this.regPS & X86.PS.IF)) {
-            var nIDT = this.chipset.getIRRVector();
-            if (nIDT >= -1) {
-                this.intFlags &= ~X86.INTFLAG.INTR;
-                if (nIDT >= 0) {
-                    this.intFlags &= ~X86.INTFLAG.HALT;
-                    X86.fnINT.call(this, nIDT, null, 11);
+        var iPriority = (this.model < X86.MODEL_80286? 0 : 1);
+        for (var nPriorities = 0; nPriorities < 2; nPriorities++) {
+            switch(iPriority) {
+            case 0:
+                if ((this.intFlags & X86.INTFLAG.INTR) && (this.regPS & X86.PS.IF)) {
+                    var nIDT = this.chipset.getIRRVector();
+                    if (nIDT >= -1) {
+                        this.intFlags &= ~X86.INTFLAG.INTR;
+                        if (nIDT >= 0) {
+                            this.intFlags &= ~X86.INTFLAG.HALT;
+                            X86.fnINT.call(this, nIDT, null, 11);
+                            return true;
+                        }
+                    }
+                }
+                break;
+            case 1:
+                if ((this.intFlags & X86.INTFLAG.TRAP)) {
+                    this.intFlags &= ~X86.INTFLAG.TRAP;
+                    X86.fnINT.call(this, X86.EXCEPTION.TRAP, null, 11);
                     return true;
                 }
+                break;
             }
-        }
-        else if ((this.intFlags & X86.INTFLAG.TRAP)) {
-            this.intFlags &= ~X86.INTFLAG.TRAP;
-            X86.fnINT.call(this, X86.EXCEPTION.TRAP, null, 11);
-            return true;
+            iPriority = 1 - iPriority;
         }
     }
     if (this.intFlags & X86.INTFLAG.DMA) {

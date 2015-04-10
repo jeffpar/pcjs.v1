@@ -219,6 +219,9 @@ which reported:
 	    fetch : http://nodejs.org/dist/v0.12.1/node-v0.12.1-darwin-x64.tar.gz
 	installed : v0.12.1
 
-Then I ran:
+Unfortunately, I ran into a [regression](https://github.com/joyent/node/issues/9310) on OS X with Node v0.12.x
+that affects the command-line version of PCjs (specifically, the Node REPL), so I had to revert to v0.11.11.
+
+Next, to update NPM:
 
 	[~/Sites/pcjs] sudo npm update -g
