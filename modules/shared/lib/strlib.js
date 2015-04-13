@@ -145,7 +145,7 @@ str.toHex = function(n, cch)
  *
  * Alias for "0x" + str.toHex(b, 2)
  *
- * @param {number|undefined} b is a byte value
+ * @param {number|null|undefined} b is a byte value
  * @return {string} the hex representation of b
  */
 str.toHexByte = function(b)
@@ -158,7 +158,7 @@ str.toHexByte = function(b)
  *
  * Alias for "0x" + str.toHex(w, 4)
  *
- * @param {number|undefined} w is a word (16-bit) value
+ * @param {number|null|undefined} w is a word (16-bit) value
  * @return {string} the hex representation of w
  */
 str.toHexWord = function(w)
@@ -171,7 +171,7 @@ str.toHexWord = function(w)
  *
  * Alias for "0x" + toHex(l)
  *
- * @param {number|undefined} l is a dword (32-bit) value
+ * @param {number|null|undefined} l is a dword (32-bit) value
  * @return {string} the hex representation of w
  */
 str.toHexLong = function(l)

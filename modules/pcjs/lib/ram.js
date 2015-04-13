@@ -166,7 +166,7 @@ RAM.prototype.reset = function()
         if (this.bus.addMemory(this.addrRAM, this.sizeRAM, Memory.TYPE.RAM)) {
             this.fAllocated = true;
 
-            this.status(Math.floor(this.sizeRAM / 1024) + "Kb");
+            this.status(Math.floor(this.sizeRAM / 1024) + "Kb allocated");
 
             /*
              * NOTE: I'm specifying MAXDEBUG for status() messages because I'm not yet sure I want these
@@ -175,6 +175,7 @@ RAM.prototype.reset = function()
              * for these components, which the Computer component will display as it "powers up" components.
              */
             if (MAXDEBUG && this.fInstalled) this.status("specified size overrides SW1");
+
             /*
              * Memory with an ID of "ramCPQ" is reserved for built-in memory located just below the 16Mb
              * boundary on Compaq DeskPro 386 machines.

@@ -33,6 +33,7 @@
 "use strict";
 
 if (typeof module !== 'undefined') {
+    var str         = require("../../shared/lib/strlib");
     var Component   = require("../../shared/lib/component");
     var Messages    = require("./messages");
     var X86         = require("./x86");
@@ -1562,8 +1563,7 @@ X86.opOUTSb = function OUTSb()
 
     /*
      * NOTE: 5 + 4n is the cycle time for the 80286; the 80186/80188 has different values: 14 cycles for
-     * an unrepeated INS, and 8 + 8n for a repeated INS.  However, accurate cycle times for the 80186/80188 is
-     * low priority. TODO: Fix this someday.
+     * an unrepeated INS, and 8 + 8n for a repeated INS.  TODO: Fix this someday.
      */
     var nCycles = 5;
 
@@ -1608,8 +1608,7 @@ X86.opOUTSw = function OUTSw()
 
     /*
      * NOTE: 5 + 4n is the cycle time for the 80286; the 80186/80188 has different values: 14 cycles for
-     * an unrepeated INS, and 8 + 8n for a repeated INS.  However, accurate cycle times for the 80186/80188 is
-     * low priority. TODO: Fix this someday.
+     * an unrepeated INS, and 8 + 8n for a repeated INS.  TODO: Fix this someday.
      */
     var nCycles = 5;
 
@@ -3190,7 +3189,9 @@ X86.opGRP2wn = function GRP2wn()
 X86.opRETn = function RETn()
 {
     var n = this.getIPWord() << (this.dataSize >> 2);
-    this.setIP(this.popWord());
+    var newIP = this.popWord();
+    if (DEBUG) this.printMessage(" returning to " + str.toHex(this.segCS.sel, 4) + ':' + str.toHex(newIP, this.dataSize << 1), this.bitsMessage, true);
+    this.setIP(newIP);
     if (n) this.setSP(this.getSP() + n);            // TODO: optimize
     this.nStepCycles -= this.cycleCounts.nOpCyclesRetn;
 };
@@ -3202,7 +3203,9 @@ X86.opRETn = function RETn()
  */
 X86.opRET = function RET()
 {
-    this.setIP(this.popWord());
+    var newIP = this.popWord();
+    if (DEBUG) this.printMessage(" returning to " + str.toHex(this.segCS.sel, 4) + ':' + str.toHex(newIP, this.dataSize << 1), this.bitsMessage, true);
+    this.setIP(newIP);
     this.nStepCycles -= this.cycleCounts.nOpCyclesRet;
 };
 
@@ -3286,8 +3289,7 @@ X86.opENTER = function ENTER()
     var bLevel = this.getIPByte() & 0x1f;
     /*
      * NOTE: 11 is the minimum cycle time for the 80286; the 80186/80188 has different cycle times: 15, 25 and
-     * 22 + 16 * (bLevel - 1) for bLevel 0, 1 and > 1, respectively.  However, accurate cycle times for the 80186/80188
-     * is low priority. TODO: Fix this someday.
+     * 22 + 16 * (bLevel - 1) for bLevel 0, 1 and > 1, respectively.  TODO: Fix this someday.
      */
     this.nStepCycles -= 11;
     this.pushWord(this.regEBP);
@@ -3316,8 +3318,7 @@ X86.opLEAVE = function LEAVE()
     this.setSP((this.getSP() & ~this.segSS.addrMask) | (this.regEBP & this.segSS.addrMask));
     this.regEBP = (this.regEBP & ~this.dataMask) | (this.popWord() & this.dataMask);
     /*
-     * NOTE: 5 is the cycle time for the 80286; the 80186/80188 has a cycle time of 8.  However, accurate cycle
-     * counts for the 80186/80188 is low priority. TODO: Fix this someday.
+     * NOTE: 5 is the cycle time for the 80286; the 80186/80188 has a cycle time of 8.  TODO: Fix this someday.
      */
     this.nStepCycles -= 5;
 };
@@ -3648,8 +3649,11 @@ X86.opOUTw = function OUTw()
 X86.opCALL = function CALL()
 {
     var disp = this.getIPWord();
-    this.pushWord(this.getIP());
-    this.setIP(this.getIP() + disp);
+    var oldIP = this.getIP();
+    var newIP = oldIP + disp;
+    if (DEBUG) this.printMessage("calling " + str.toHex(newIP, this.dataSize << 1), this.bitsMessage, true);
+    this.pushWord(oldIP);
+    this.setIP(newIP);
     this.nStepCycles -= this.cycleCounts.nOpCyclesCall;
 };
 

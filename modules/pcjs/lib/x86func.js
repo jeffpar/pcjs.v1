@@ -33,6 +33,7 @@
 "use strict";
 
 if (typeof module !== 'undefined') {
+    var str         = require("../../shared/lib/strlib");
     var Messages    = require("./messages");
     var X86         = require("./x86");
 }
@@ -172,8 +173,8 @@ X86.fnBOUND = function BOUND(dst, src)
      * Note that BOUND performs signed comparisons, so we must transform all arguments into signed values.
      */
     var wIndex = (dst << 16) >> 16;
-    var wLower = (this.getShort(this.regEA) << 16) >> 16;
-    var wUpper = (this.getShort(this.regEA + 2) << 16) >> 16;
+    var wLower = (this.getWord(this.regEA) << 16) >> 16;
+    var wUpper = (this.getWord(this.regEA + this.dataSize) << 16) >> 16;
     this.nStepCycles -= this.cycleCounts.nOpCyclesBound;
     if (wIndex < wLower || wIndex > wUpper) {
         /*
@@ -332,6 +333,7 @@ X86.fnBTS = function BTS(dst, src)
  */
 X86.fnCALLw = function CALLw(dst, src)
 {
+    if (DEBUG) this.printMessage("calling " + str.toHex(dst, this.dataSize << 1), this.bitsMessage, true);
     this.pushWord(this.getIP());
     this.setIP(dst);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesCallWR : this.cycleCounts.nOpCyclesCallWM);
@@ -351,11 +353,12 @@ X86.fnCALLw = function CALLw(dst, src)
  */
 X86.fnCALLF = function CALLF(off, sel)
 {
-    var regCS = this.getCS();
-    var regEIP = this.getIP();
+    if (DEBUG) this.printMessage("calling " + str.toHex(sel, 4) + ':' + str.toHex(off, this.dataSize << 1), this.bitsMessage, true);
+    var oldCS = this.getCS();
+    var oldIP = this.getIP();
     if (this.setCSIP(off, sel, true) != null) {
-        this.pushWord(regCS);
-        this.pushWord(regEIP);
+        this.pushWord(oldCS);
+        this.pushWord(oldIP);
     }
 };
 
@@ -372,7 +375,7 @@ X86.fnCALLFdw = function CALLFdw(dst, src)
     if (this.regEA === X86.ADDR_INVALID) {
         return X86.fnGRPUndefined.call(this, dst, src);
     }
-    X86.fnCALLF.call(this, dst, this.getShort(this.regEA + 2));
+    X86.fnCALLF.call(this, dst, this.getShort(this.regEA + this.dataSize));
     this.nStepCycles -= this.cycleCounts.nOpCyclesCallDM;
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -917,16 +920,16 @@ X86.fnINT = function INT(nIDT, nError, nCycles)
      */
     this.nStepCycles -= this.cycleCounts.nOpCyclesInt + nCycles;
     this.segCS.fCall = true;
-    var regPS = this.getPS();
-    var regCS = this.getCS();
-    var regEIP = this.getIP();
+    var oldPS = this.getPS();
+    var oldCS = this.getCS();
+    var oldIP = this.getIP();
     var addr = this.segCS.loadIDT(nIDT);
     if (addr != X86.ADDR_INVALID) {
         this.regLIP = addr;
         if (PREFETCH) this.flushPrefetch(this.regLIP);
-        this.pushWord(regPS);
-        this.pushWord(regCS);
-        this.pushWord(regEIP);
+        this.pushWord(oldPS);
+        this.pushWord(oldCS);
+        this.pushWord(oldIP);
         if (nError != null) this.pushWord(nError);
         this.nFault = -1;
     }
@@ -952,11 +955,12 @@ X86.fnIRET = function IRET()
         }
     }
     var cpl = this.segCS.cpl;
-    var regEIP = this.popWord();
-    var regCS  = this.popWord();
-    var regPS  = this.popWord();
-    if (this.setCSIP(regEIP, regCS, false) != null) {
-        this.setPS(regPS, cpl);
+    var newIP = this.popWord();
+    var newCS = this.popWord();
+    var newPS = this.popWord();
+    if (DEBUG) this.printMessage(" returning to " + str.toHex(newCS, 4) + ':' + str.toHex(newIP, this.dataSize << 1), this.bitsMessage, true);
+    if (this.setCSIP(newIP, newCS, false) != null) {
+        this.setPS(newPS, cpl);
         if (this.cIntReturn) this.checkIntReturn(this.regLIP);
     }
 };
@@ -990,7 +994,7 @@ X86.fnJMPFdw = function JMPFdw(dst, src)
     if (this.regEA === X86.ADDR_INVALID) {
         return X86.fnGRPUndefined.call(this, dst, src);
     }
-    this.setCSIP(dst, this.getShort(this.regEA + 2));
+    this.setCSIP(dst, this.getShort(this.regEA + this.dataSize));
     if (this.cIntReturn) this.checkIntReturn(this.regLIP);
     this.nStepCycles -= this.cycleCounts.nOpCyclesJmpDM;
     this.opFlags |= X86.OPFLAG.NOWRITE;
@@ -1055,7 +1059,7 @@ X86.fnLDS = function LDS(dst, src)
         X86.opUndefined.call(this);
         return dst;
     }
-    this.setDS(this.getShort(this.regEA + 2));
+    this.setDS(this.getShort(this.regEA + this.dataSize));
     this.nStepCycles -= this.cycleCounts.nOpCyclesLS;
     return src;
 };
@@ -1101,7 +1105,7 @@ X86.fnLES = function LES(dst, src)
         X86.opUndefined.call(this);
         return dst;
     }
-    this.setES(this.getShort(this.regEA + 2));
+    this.setES(this.getShort(this.regEA + this.dataSize));
     this.nStepCycles -= this.cycleCounts.nOpCyclesLS;
     return src;
 };
@@ -1120,7 +1124,7 @@ X86.fnLFS = function LFS(dst, src)
         X86.opUndefined.call(this);
         return dst;
     }
-    this.setFS(this.getShort(this.regEA + 2));
+    this.setFS(this.getShort(this.regEA + this.dataSize));
     this.nStepCycles -= this.cycleCounts.nOpCyclesLS;
     return src;
 };
@@ -1170,7 +1174,7 @@ X86.fnLGS = function LGS(dst, src)
         X86.opUndefined.call(this);
         return dst;
     }
-    this.setGS(this.getShort(this.regEA + 2));
+    this.setGS(this.getShort(this.regEA + this.dataSize));
     this.nStepCycles -= this.cycleCounts.nOpCyclesLS;
     return src;
 };
@@ -1287,7 +1291,7 @@ X86.fnLSS = function LSS(dst, src)
         X86.opUndefined.call(this);
         return dst;
     }
-    this.setSS(this.getShort(this.regEA + 2));
+    this.setSS(this.getShort(this.regEA + this.dataSize));
     this.nStepCycles -= this.cycleCounts.nOpCyclesLS;
     return src;
 };
@@ -1738,11 +1742,12 @@ X86.fnRCRd = function RCRd(dst, src)
  */
 X86.fnRETF = function RETF(n)
 {
-    var regEIP = this.popWord();
-    var regCS = this.popWord();
+    var newIP = this.popWord();
+    var newCS = this.popWord();
+    if (DEBUG) this.printMessage(" returning to " + str.toHex(newCS, 4) + ':' + str.toHex(newIP, this.dataSize << 1), this.bitsMessage, true);
     n <<= (this.dataSize >> 2);
     if (n) this.setSP(this.getSP() + n);            // TODO: optimize
-    if (this.setCSIP(regEIP, regCS, false)) {
+    if (this.setCSIP(newIP, newCS, false)) {
         if (n) this.setSP(this.getSP() + n);        // TODO: optimize
         /*
          * As per Intel documentation: "If any of [the DS or ES] registers refer to segments whose DPL is

@@ -1249,7 +1249,7 @@ Card.ACCESS.WRITE.MASK      = 0xff00;
  */
 Card.ACCESS.readShort = function readShort(off)
 {
-    return this.readByte(off) | (this.readByte(off + 1) << 8);
+    return this.readByteDirect(off) | (this.readByteDirect(off + 1) << 8);
 };
 
 /**
@@ -1261,7 +1261,7 @@ Card.ACCESS.readShort = function readShort(off)
  */
 Card.ACCESS.readLong = function readLong(off)
 {
-    return this.readByte(off) | (this.readByte(off + 1) << 8) | (this.readByte(off + 2) << 16) | (this.readByte(off + 3) << 24);
+    return this.readByteDirect(off) | (this.readByteDirect(off + 1) << 8) | (this.readByteDirect(off + 2) << 16) | (this.readByteDirect(off + 3) << 24);
 };
 
 /**
@@ -1274,8 +1274,8 @@ Card.ACCESS.readLong = function readLong(off)
 Card.ACCESS.writeShort = function writeShort(off, w)
 {
     Component.assert(!(w & ~0xffff));
-    this.writeByte(off, w & 0xff);
-    this.writeByte(off + 1, w >> 8);
+    this.writeByteDirect(off, w & 0xff);
+    this.writeByteDirect(off + 1, w >> 8);
 };
 
 /**
@@ -1287,10 +1287,10 @@ Card.ACCESS.writeShort = function writeShort(off, w)
  */
 Card.ACCESS.writeLong = function writeLong(off, w)
 {
-    this.writeByte(off, w & 0xff);
-    this.writeByte(off + 1, (w >> 8) & 0xff);
-    this.writeByte(off + 2, (w >> 16) & 0xff);
-    this.writeByte(off + 3, (w >>> 24));
+    this.writeByteDirect(off, w & 0xff);
+    this.writeByteDirect(off + 1, (w >> 8) & 0xff);
+    this.writeByteDirect(off + 2, (w >> 16) & 0xff);
+    this.writeByteDirect(off + 3, (w >>> 24));
 };
 
 /**

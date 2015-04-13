@@ -326,7 +326,7 @@ ChipSet.aMonitorSwitches = {
  *  For FDC DMA notes, refer to http://wiki.osdev.org/ISA_DMA
  *  For general DMA notes, refer to http://www.freebsd.org/doc/en/books/developers-handbook/dma.html
  *
- *  TODO: Determine why the MODEL_5150 ROM BIOS sets the page register for channel 1 (port 0x83) to zero
+ *  TODO: Determine why the MODEL_5150 ROM BIOS sets the DMA channel 1 page register (port 0x83) to zero
  */
 ChipSet.DMA0 = {
     INDEX:              0,
@@ -359,7 +359,7 @@ ChipSet.DMA1 = {
         CH6_PAGE:       0x89,   // OUT: DMA channel 6 page register (MODEL_5170)
         CH7_PAGE:       0x8A,   // OUT: DMA channel 7 page register (MODEL_5170)
         CH5_PAGE:       0x8B,   // OUT: DMA channel 5 page register (MODEL_5170)
-        CH4_PAGE:       0x8F,   // OUT: DMA channel 4 page register (MODEL_5170; unusable; aka "refresh" page register?)
+        CH4_PAGE:       0x8F,   // OUT: DMA channel 4 page register (MODEL_5170; unusable; aka "Refresh" page register?)
         CH4_ADDR:       0xC0,   // OUT: starting address        IN: current address
         CH4_COUNT:      0xC2,   // OUT: starting word count     IN: remaining word count
         CH5_ADDR:       0xC4,   // OUT: starting address        IN: current address
@@ -890,22 +890,54 @@ ChipSet.CMOS = {
 };
 
 /*
- * Manufacturing Test Ports (MODEL_5170)
+ * DMA Page Registers
  *
- * The MODEL_5170 TechRef lists 0x80-0x9F as the range for DMA page registers, but that seems a bit
- * overbroad; at one point, it says:
+ * The MODEL_5170 TechRef lists 0x80-0x9F as the range for DMA page registers, but that may be a bit
+ * overbroad.  There are a total of 8 (7 usable) DMA channels on the MODEL_5170, each of which has the
+ * following assigned DMA page registers:
+ *
+ *      Channel #   Page Reg
+ *      ---------   --------
+ *          0         0x87
+ *          1         0x83
+ *          2         0x81
+ *          3         0x82
+ *          4         0x8F (not usable; the 5170 TechRef refers to this as the "Refresh" page register)
+ *          5         0x8B
+ *          6         0x89
+ *          7         0x8A
+ *
+ * That leaves 0x80, 0x84, 0x85, 0x86, 0x88, 0x8C, 0x8D and 0x8E unaccounted for in the range 0x80-0x8F.
+ * (I'm saving the question of what, if anything, is available in the range 0x90-0x9F for another day.)
+ *
+ * As for port 0x80, the TechRef says:
  *
  *      "I/O address hex 080 is used as a diagnostic-checkpoint port or register.
- *      This port corresponds to a read/write register in the DMA page register (74LS6I2)."
+ *      This port corresponds to a read/write register in the DMA page register (74LS612)."
  *
- * 0x80 is the neighborhood, but that particular port is not documented as a DMA page register.
- * We'll refer to it as a "manufacturing port" (see bMFGData).  Be aware that the MODEL_5170 BIOS is
- * littered with manufacturing test ("MFG_TST") code which, if enabled, writes to other DMA page
- * registers, presumably treating them as scratch registers.
+ * so I used to have dedicated handlers and storage (bMFGData) for the register at port 0x80, but I've since
+ * appended it to abDMAPageSpare, an 8-element array that captures all I/O to the 8 unassigned (aka "spare")
+ * DMA page registers.  The 5170 BIOS uses 0x80 as a "checkpoint" register, and the DESKPRO386 uses 0x84 in a
+ * similar fashion.  The 5170 also contains "MFG_TST" code that uses other unassigned DMA page registers as
+ * scratch registers, which come in handy when RAM hasn't been tested/initialized yet.
+ *
+ * Here's our mapping of entries in the abDMAPageSpare array to the unassigned ("spare") DMA page registers:
+ *
+ *      Index #     Page Reg
+ *      --------    --------
+ *          0         0x84
+ *          1         0x85
+ *          2         0x86
+ *          3         0x88
+ *          4         0x8C
+ *          5         0x8D
+ *          6         0x8E
+ *          7         0x80
+ *
+ * The only reason port 0x80 is out of sequence (ie, at the end of the array, at index 7 instead of index 0) is
+ * because it was added the array later, and the entire array gets written to our save/restore data structures, so
+ * reordering the elements would be a bad idea.
  */
-ChipSet.MFG = {                 // this.bMFGData
-    PORT:               0x80
-};
 
 /*
  * NMI Mask Register (MODEL_5150 and MODEL_5160 only)
@@ -1125,8 +1157,7 @@ ChipSet.prototype.reset = function(fHard)
 
         this.b8042OutPort = ChipSet.KBC.OUTPORT.NO_RESET | ChipSet.KBC.OUTPORT.A20_ON;
 
-        this.bMFGData = 0;
-        this.abDMAPageSpare = new Array(7);
+        this.abDMAPageSpare = new Array(8);
 
         this.bCMOSAddr = 0;         // NMI is enabled, since the ChipSet.CMOS.ADDR.NMI_DISABLE bit is not set in bCMOSAddr
 
@@ -1679,7 +1710,7 @@ ChipSet.prototype.save = function()
     if (this.model >= ChipSet.MODEL_5170) {
         state.set(5, [this.b8042Status, this.b8042InBuff, this.b8042CmdData,
                       this.b8042OutBuff, this.b8042InPort, this.b8042OutPort]);
-        state.set(6, [this.bMFGData, this.abDMAPageSpare, this.bCMOSAddr, this.abCMOSData, this.nRTCCyclesLastUpdate, this.nRTCCyclesNextUpdate]);
+        state.set(6, [this.abDMAPageSpare[7], this.abDMAPageSpare, this.bCMOSAddr, this.abCMOSData, this.nRTCCyclesLastUpdate, this.nRTCCyclesNextUpdate]);
     }
     return state.data();
 };
@@ -1739,8 +1770,8 @@ ChipSet.prototype.restore = function(data)
     a = data[6];
     if (a) {
         this.assert(this.model >= ChipSet.MODEL_5170);
-        this.bMFGData = a[0];
         this.abDMAPageSpare = a[1];
+        this.abDMAPageSpare[7] = a[0];  // formerly bMFGData
         this.bCMOSAddr = a[2];
         this.abCMOSData = a[3];
         this.nRTCCyclesLastUpdate = a[4];
@@ -2675,7 +2706,11 @@ ChipSet.prototype.inDMAPageSpare = function(iSpare, port, addrFrom)
  */
 ChipSet.prototype.outDMAPageSpare = function(iSpare, port, bOut, addrFrom)
 {
-    if (this.messageEnabled(Messages.DMA | Messages.PORT)) {
+    /*
+     * TODO: Remove the DEBUG-only DESKPRO386 code once we're done debugging DeskPro 386 ROMs;
+     * it enables logging of all DeskPro ROM checkpoint I/O to port 0x84.
+     */
+    if (this.messageEnabled(Messages.DMA | Messages.PORT) || DEBUG && this.model == ChipSet.MODEL_DESKPRO386 && port == 0x84) {
         this.printMessageIO(port, bOut, addrFrom, "DMA.SPARE" + iSpare + ".PAGE", null, true);
     }
     this.abDMAPageSpare[iSpare] = bOut;
@@ -4681,34 +4716,6 @@ ChipSet.prototype.outCMOSData = function(port, bOut, addrFrom)
 };
 
 /**
- * inMFGData(port, addrFrom)
- *
- * @this {ChipSet}
- * @param {number} port (0x80)
- * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
- * @return {number} simulated port value
- */
-ChipSet.prototype.inMFGData = function(port, addrFrom)
-{
-    this.printMessageIO(port, null, addrFrom, "MFG_DATA", this.bMFGData);
-    return this.bMFGData;
-};
-
-/**
- * outMFGData(port, bOut, addrFrom)
- *
- * @this {ChipSet}
- * @param {number} port (0x80)
- * @param {number} bOut
- * @param {number} [addrFrom] (not defined if the Debugger is trying to write the specified port)
- */
-ChipSet.prototype.outMFGData = function(port, bOut, addrFrom)
-{
-    this.printMessageIO(port, bOut, addrFrom, "MFG_DATA");
-    this.bMFGData = bOut;
-};
-
-/**
  * outNMI(port, bOut, addrFrom)
  *
  * This handler is installed only for models before MODEL_5170.
@@ -4985,7 +4992,7 @@ ChipSet.aPortInput5170 = {
     0x64: ChipSet.prototype.in8042Status,
     0x70: ChipSet.prototype.inCMOSAddr,
     0x71: ChipSet.prototype.inCMOSData,
-    0x80: ChipSet.prototype.inMFGData,
+    0x80: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAPageSpare(7, port, addrFrom); },
     0x84: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAPageSpare(0, port, addrFrom); },
     0x85: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAPageSpare(1, port, addrFrom); },
     0x86: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAPageSpare(2, port, addrFrom); },
@@ -5054,7 +5061,7 @@ ChipSet.aPortOutput5170 = {
     0x64: ChipSet.prototype.out8042InBuffCmd,
     0x70: ChipSet.prototype.outCMOSAddr,
     0x71: ChipSet.prototype.outCMOSData,
-    0x80: ChipSet.prototype.outMFGData,
+    0x80: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAPageSpare(7, port, bOut, addrFrom); },
     0x84: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAPageSpare(0, port, bOut, addrFrom); },
     0x85: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAPageSpare(1, port, bOut, addrFrom); },
     0x86: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAPageSpare(2, port, bOut, addrFrom); },

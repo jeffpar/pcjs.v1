@@ -39,7 +39,7 @@ var usr = {};
  *
  * @param {Array} a is an array
  * @param {number|string|Array|Object} v
- * @param {function((number|string), (number|string))} [fnCompare]
+ * @param {function((number|string|Array|Object), (number|string|Array|Object))} [fnCompare]
  * @return {number} the index of matching entry if non-negative, otherwise the index of the insertion point
  */
 usr.binarySearch = function(a, v, fnCompare) {
@@ -73,7 +73,7 @@ usr.binarySearch = function(a, v, fnCompare) {
  *
  * @param {Array} a is an array
  * @param {number|string|Array|Object} v is the value to insert
- * @param {function((number|string), (number|string))} [fnCompare]
+ * @param {function((number|string|Array|Object), (number|string|Array|Object))} [fnCompare]
  */
 usr.binaryInsert = function(a, v, fnCompare) {
     var index = usr.binarySearch(a, v, fnCompare);

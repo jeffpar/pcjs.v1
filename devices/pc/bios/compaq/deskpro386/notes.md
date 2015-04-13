@@ -182,3 +182,229 @@ But when we stopped here next, it was no longer good:
 	%00FF0740  0000  0000  0000  0000 - 0000  0000  0000  0000   ................
 
 Turns out this is because the A20 line has been disabled.
+
+-------------------------------------------------------------------------------------------------
+
+Let's look at a complete run:
+
+	EAX=00000000 EBX=00000000 ECX=00000000 EDX=00000304 
+	ESP=00000000 EBP=00000000 ESI=00000000 EDI=00000000 
+	SS=0000 DS=0000 ES=0000 FS=0000 GS=0000 PS=00000002 V0 D0 I0 T0 S0 Z0 A0 P0 C0 
+	F000:FFF0 EA05F900F0    JMP      F000:F905
+	
+I want to catch writes to the top-left corner of the screen, so I set a write breakpoint:
+
+	bw b800:0
+
+which reports:
+
+	write breakpoint added to memory block 000B8000
+	breakpoint enabled: B800:0000 (write)
+
+and then we're off:
+
+	running
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x00) @F000:F907
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x01) @F000:F926
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x02) @F000:F93C
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x03) @F000:F942
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x04) @F000:F946
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x05) @F000:F95F
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x06) @F000:F978
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x08) @F000:F9AA
+	notice: PIC0(0x20): unsupported OCW2 automatic EOI command: 0x00
+	stopped (149 ops, 622 cycles, 92 ms, 6761 hz)
+	EAX=0000F000 EBX=00000000 ECX=00000008 EDX=00000020 
+	ESP=00000000 EBP=00000000 ESI=0000F8E7 EDI=00000000 
+	SS=0000 DS=F000 ES=0000 FS=0000 GS=0304 PS=00000046 V0 D0 I0 T0 S0 Z1 A0 P1 C0 
+	F000:F9ED E6A0          OUT      A0,AL
+	running
+	notice: PIC1(0xA0): unsupported OCW2 automatic EOI command: 0x00
+	stopped (150 ops, 5 cycles, 19 ms, 263 hz)
+	EAX=0000F000 EBX=00000000 ECX=00000008 EDX=00000020 
+	ESP=00000000 EBP=00000000 ESI=0000F8E7 EDI=00000000 
+	SS=0000 DS=F000 ES=0000 FS=0000 GS=0304 PS=00000046 V0 D0 I0 T0 S0 Z1 A0 P1 C0 
+	F000:F9EF B009          MOV      AL,09
+	running
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x09) @F000:F9F1
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x0F) @F000:BAAA
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x10) @F000:BAFB
+	bus.outPort(0x004B,unknown,0x12) @F000:BAFF
+	bus.outPort(0x004B,unknown,0x42) @F000:BB03
+	bus.outPort(0x004B,unknown,0x92) @F000:BB07
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x11) @F000:BB29
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x12) @F000:BB70
+	breakpoint hit: B800:0000 (write)
+	stopped (413 ops, 959 cycles, 80 ms, 11988 hz)
+	EAX=00000720 EBX=0000BA77 ECX=00001FFF EDX=000003D8 
+	ESP=00000000 EBP=0000BB78 ESI=0000F0C6 EDI=00000002 
+	SS=0000 DS=F000 ES=B800 FS=0000 GS=0304 PS=00000046 V0 D0 I0 T0 S0 Z1 A0 P1 C0 
+	F000:9C05 F3            REPZ    
+	F000:9C06 AB            STOSW   
+
+This is where screen memory is first initialized ("blanked").
+
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x13) @F000:BB90
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x14) @F000:BBB8
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x15) @F000:BBD8
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x17) @F000:BC08
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x18) @F000:BC14
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x40) @F000:B552
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x2F) @0018:87B4
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x41) @F000:B572
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x42) @F000:B599
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x43) @F000:B5C4
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x44) @F000:B5D2
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x45) @F000:B600
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x43) @F000:B5C4
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x44) @F000:B5D2
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x45) @F000:B600
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x46) @F000:B61C
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x19) @F000:BC2C
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x30) @F000:A8B0
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x31) @F000:A905
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x32) @F000:A91D
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x33) @F000:A93B
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x34) @F000:A953
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x36) @F000:A991
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x38) @F000:A99C
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x39) @F000:A9BC
+	bus.inPort(0x03BC,unknown) @F000:A9CA
+	bus.outPort(0x03BC,unknown,0x00) @F000:A9CD
+	bus.inPort(0x03BC,unknown) @F000:A9D0
+	bus.inPort(0x0378,unknown) @F000:A9CA
+	bus.outPort(0x0378,unknown,0x00) @F000:A9CD
+	bus.inPort(0x0378,unknown) @F000:A9D0
+	bus.inPort(0x0278,unknown) @F000:A9CA
+	bus.outPort(0x0278,unknown,0x00) @F000:A9CD
+	bus.inPort(0x0278,unknown) @F000:A9D0
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x3A) @F000:A9DE
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x3B) @F000:A9FB
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x52) @F000:AA41
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x53) @F000:AA54
+	bus.outPort(0x03B9,unknown,0x30) @F000:9BE7
+	write breakpoint added to memory block 000B8000
+	write breakpoint added to memory block 000B8000
+	breakpoint hit: B800:0000 (write)
+	stopped (1340834 ops, 3291994 cycles, 821 ms, 4009737 hz)
+	EAX=00000720 EBX=00000720 ECX=00003FFF EDX=0000B800 
+	ESP=000000D0 EBP=FFFF2230 ESI=00000CBA EDI=00000002 
+	SS=0030 DS=0000 ES=B800 FS=0000 GS=0304 PS=00000246 V0 D0 I1 T0 S0 Z1 A0 P1 C0 
+	C000:0E93 F3            REPZ    
+	C000:0E94 AB            STOSW   
+
+Now the video card's own BIOS is doing the same thing, followed by more of the same:
+
+	write breakpoint added to memory block 000B8000
+	write breakpoint added to memory block 000B8000
+	breakpoint hit: B800:0000 (write)
+	stopped (1384492 ops, 79242 cycles, 52 ms, 1523885 hz)
+	EAX=00000720 EBX=00000720 ECX=00003FFF EDX=0000B800 
+	ESP=000000C8 EBP=FFFF2230 ESI=00000C3A EDI=00000002 
+	SS=0030 DS=0000 ES=B800 FS=0000 GS=0304 PS=00000246 V0 D0 I1 T0 S0 Z1 A0 P1 C0 
+	C000:0E93 F3            REPZ    
+	C000:0E94 AB            STOSW   
+	running
+	breakpoint hit: B800:0000 (write)
+	stopped (1476959 ops, 347538 cycles, 67 ms, 5187134 hz)
+	EAX=00000FDB EBX=00000FDB ECX=00000050 EDX=000003DA 
+	ESP=000000CC EBP=FFFF00E2 ESI=00000000 EDI=00000002 
+	SS=0030 DS=0000 ES=B800 FS=0000 GS=0304 PS=00000246 V0 D0 I1 T0 S0 Z1 A0 P1 C0 
+	C000:18D7 FB            STI     
+	running
+	write breakpoint added to memory block 000B8000
+	write breakpoint added to memory block 000B8000
+	breakpoint hit: B800:0000 (write)
+	stopped (2824784 ops, 4644466 cycles, 528 ms, 8796337 hz)
+	EAX=00000720 EBX=00000720 ECX=00003FFF EDX=0000B800 
+	ESP=000000C8 EBP=FFFF2230 ESI=00000CBA EDI=00000002 
+	SS=0030 DS=0000 ES=B800 FS=0000 GS=0304 PS=00000246 V0 D0 I1 T0 S0 Z1 A0 P1 C0 
+	C000:0E93 F3            REPZ    
+	C000:0E94 AB            STOSW   
+	running
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x8C) @F000:D05C
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x1A) @F000:BC79
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x50) @F000:AA76
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x51) @F000:AA7F
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x52) @F000:AA9C
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x1B) @F000:BC80
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x1C) @F000:BC87
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x90) @F000:CC53
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x91) @F000:CC85
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x1D) @F000:BC8E
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x93) @F000:CC8A
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x94) @F000:CD06
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x95) @F000:CD3C
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x96) @F000:CD6A
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x2D) @F000:BC95
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x0D) @F000:E107
+	bus.outPort(0x004B,unknown,0x12) @F000:E10B
+	bus.outPort(0x0048,unknown,0x22) @F000:E112
+	bus.outPort(0x004B,unknown,0x00) @F000:E139
+	bus.inPort(0x0048,unknown) @F000:E13B
+	bus.inPort(0x0048,unknown) @F000:E13E
+	bus.outPort(0x004B,unknown,0x12) @F000:E11A
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x0E) @F000:E11E
+	bus.outPort(0x004B,unknown,0x92) @F000:E122
+	bus.outPort(0x004A,unknown,0x22) @F000:E129
+	bus.outPort(0x004B,unknown,0x80) @F000:E139
+	bus.inPort(0x004A,unknown) @F000:E13B
+	bus.inPort(0x004A,unknown) @F000:E13E
+	bus.outPort(0x004B,unknown,0x92) @F000:E131
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x1E) @F000:BC9C
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x80) @F000:CFDF
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x81) @F000:CFF7
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x82) @F000:D011
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x84) @F000:D02D
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x1F) @F000:BCA3
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x75) @F000:F74D
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x76) @F000:F761
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x77) @0030:F772
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x78) @0030:F790
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x00) @F000:F907
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x07) @F000:F986
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x08) @F000:F9AA
+	notice: PIC0(0x20): unsupported OCW2 automatic EOI command: 0x00
+	stopped (19729382 ops, 81457037 cycles, 7165 ms, 11368742 hz)
+	EAX=0000F000 EBX=00000006 ECX=00000008 EDX=00000020 
+	ESP=00000000 EBP=00000000 ESI=0000F8E7 EDI=00000000 
+	SS=0000 DS=F000 ES=0000 FS=0000 GS=0000 PS=00000046 V0 D0 I0 T0 S0 Z1 A0 P1 C0 
+	F000:F9ED E6A0          OUT      A0,AL
+	running
+	notice: PIC1(0xA0): unsupported OCW2 automatic EOI command: 0x00
+	stopped (19729383 ops, 5 cycles, 20 ms, 250 hz)
+	EAX=0000F000 EBX=00000006 ECX=00000008 EDX=00000020 
+	ESP=00000000 EBP=00000000 ESI=0000F8E7 EDI=00000000 
+	SS=0000 DS=F000 ES=0000 FS=0000 GS=0000 PS=00000046 V0 D0 I0 T0 S0 Z1 A0 P1 C0 
+	F000:F9EF B009          MOV      AL,09
+
+We're back in the Compaq BIOS, the video card appears to be fully initialized now, so perhaps the next
+write to video memory will be the first memory test results.
+
+And in fact, it is. But the "bw b800:0" command doesn't work, because the memory test results are being
+performed in protected-mode, and there is no segment 0xB800 mapped to video memory at that point.
+
+So the write breakpoint must be specified as "bw %b8000" instead.  Now we catch it:
+
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x09) @F000:F9F1
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x79) @F000:F7CD
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x7B) @F000:F814
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x20) @F000:BCAA
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x60) @F000:D6E6
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x61) @F000:D704
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x18) @0030:870A
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x18) @0030:8715
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x62) @0030:D719
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x63) @0030:D761
+	chipset.outPort(0x0084,DMA.SPARE0.PAGE,0x70) @0030:DB38
+	breakpoint hit: %000B8000 (write)
+	stopped (19736120 ops, 23810 cycles, 165 ms, 144303 hz)
+	EAX=00000000 EBX=0000000A ECX=0000000A EDX=00000730 
+	ESP=000000D0 EBP=00000080 ESI=00000095 EDI=00008002 
+	SS=0028[00000300,FFFF] DS=0018[0001C000,FFFF] ES=0040[000B0000,FFFF] 
+	CS=0030[000F0000,FFFF] FS=0000[00000000,FFFF] GS=0304[00003040,FFFF]
+	LD=0000[00000000,0000] GD=[0001C000,005F] ID=[000FF821,0007] TR=0000 A20=ON 
+	CR0=0000FFF1 CR2=00000000 CR3=00000000 PS=00000082 V0 D0 I0 T0 S1 Z0 A0 P0 C0 
+	0030:80DA F3            REPZ    
+	0030:80DB A5            MOVSW   
+

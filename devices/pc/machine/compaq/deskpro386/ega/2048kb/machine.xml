@@ -10,7 +10,7 @@
 	<rom id="romBIOS" addr="0xf8000" size="0x8000" alias="[0xf0000,0xffff0000,0xffff8000]" file="/devices/pc/bios/compaq/deskpro386/1988-01-28.json"/>
 	<video ref="/devices/pc/video/video-ega-128kb-lock.xml"/>
 	<keyboard ref="/devices/pc/keyboard/keyboard-minimal-functions.xml"/>
-	<debugger id="debugger" messages="fault" commands=""/>
+	<debugger id="debugger" messages="fault|port" commands=""/>
 	<panel ref="/devices/pc/panel/btpanel.xml"/>
 	<fdc ref="/disks/pc/library.xml" width="340px" automount='{A: {name: "PC-DOS 3.00 (Disk 1)", path: "/disks/pc/dos/ibm/3.00/PCDOS300-DISK1.json"}, B: {name: "PC-DOS 3.00 (Disk 2)", path: "/disks/pc/dos/ibm/3.00/PCDOS300-DISK2.json"}}'/>
 	<hdc id="hdcAT" type="at" drives='[{name:"20Mb Hard Disk",type:2}]'/>

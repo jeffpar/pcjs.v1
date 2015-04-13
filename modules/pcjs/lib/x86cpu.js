@@ -1386,8 +1386,8 @@ X86CPU.prototype.setProtMode = function(fProt)
     if (fProt === undefined) {
         fProt = !!(this.regCR0 & X86.CR0.MSW.PE);
     }
-    if (!fProt) {
-        this.printMessage("returning to real-mode");
+    if (!fProt != !(this.regCR0 & X86.CR0.MSW.PE)) {
+        this.printMessage("CPU switching to " + (fProt? "protected" : "real") + "-mode", this.bitsMessage, true);
     }
     this.aOpGrp6 = (fProt? X86.aOpGrp6Prot : X86.aOpGrp6Real);
     this.segCS.updateMode(fProt);
@@ -2650,7 +2650,7 @@ X86CPU.prototype.setLong = function(addr, l)
 X86CPU.prototype.getEAByte = function(seg, off)
 {
     this.segEA = seg;
-    this.regEA = seg.checkRead(this.offEA = off, 0);
+    this.regEA = seg.checkRead(this.offEA = off, 1);
     if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
     var b = this.getByte(this.regEA);
     if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiMemLo;
@@ -2692,7 +2692,7 @@ X86CPU.prototype.getEAByteStack = function(off)
 X86CPU.prototype.getEAWord = function(seg, off)
 {
     this.segEA = seg;
-    this.regEA = seg.checkRead(this.offEA = off, (I386? this.dataSize-1 : 1));
+    this.regEA = seg.checkRead(this.offEA = off, (I386? this.dataSize : 2));
     if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
     var w = this.getWord(this.regEA);
     if (BACKTRACK) {
@@ -2737,7 +2737,7 @@ X86CPU.prototype.getEAWordStack = function(off)
 X86CPU.prototype.modEAByte = function(seg, off)
 {
     this.segEA = seg;
-    this.regEAWrite = this.regEA = seg.checkRead(this.offEA = off, 0);
+    this.regEAWrite = this.regEA = seg.checkRead(this.offEA = off, 1);
     if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
     var b = this.getByte(this.regEA);
     if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiMemLo;
@@ -2779,7 +2779,7 @@ X86CPU.prototype.modEAByteStack = function(off)
 X86CPU.prototype.modEAWord = function(seg, off)
 {
     this.segEA = seg;
-    this.regEAWrite = this.regEA = seg.checkRead(this.offEA = off, (I386? this.dataSize-1 : 1));
+    this.regEAWrite = this.regEA = seg.checkRead(this.offEA = off, (I386? this.dataSize : 2));
     if (this.opFlags & X86.OPFLAG.NOREAD) return 0;
     var w = this.getWord(this.regEA);
     if (BACKTRACK) {
@@ -2823,7 +2823,7 @@ X86CPU.prototype.setEAByte = function(b)
 {
     if (this.opFlags & X86.OPFLAG.NOWRITE) return;
     if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiEALo;
-    this.setByte(this.segEA.checkWrite(this.offEA, 0), b);
+    this.setByte(this.segEA.checkWrite(this.offEA, 1), b);
 };
 
 /**
@@ -2840,9 +2840,9 @@ X86CPU.prototype.setEAWord = function(w)
         this.backTrack.btiMemHi = this.backTrack.btiEAHi;
     }
     if (!I386) {
-        this.setShort(this.segEA.checkWrite(this.offEA, 1), w);
+        this.setShort(this.segEA.checkWrite(this.offEA, 2), w);
     } else {
-        this.setWord(this.segEA.checkWrite(this.offEA, this.dataSize-1), w);
+        this.setWord(this.segEA.checkWrite(this.offEA, this.dataSize), w);
     }
 };
 
@@ -2858,7 +2858,7 @@ X86CPU.prototype.setEAWord = function(w)
  */
 X86CPU.prototype.getSOByte = function(seg, off)
  {
-    return this.getByte(seg.checkRead(off, 0));
+    return this.getByte(seg.checkRead(off, 1));
 };
 
 /**
@@ -2874,9 +2874,9 @@ X86CPU.prototype.getSOByte = function(seg, off)
 X86CPU.prototype.getSOWord = function(seg, off)
 {
     if (!I386) {
-        return this.getShort(seg.checkRead(off, 1));
+        return this.getShort(seg.checkRead(off, 2));
     } else {
-        return this.getWord(seg.checkRead(off, this.dataSize-1));
+        return this.getWord(seg.checkRead(off, this.dataSize));
     }
 };
 
@@ -2892,7 +2892,7 @@ X86CPU.prototype.getSOWord = function(seg, off)
  */
 X86CPU.prototype.setSOByte = function(seg, off, b)
 {
-    this.setByte(seg.checkWrite(off, 0), b);
+    this.setByte(seg.checkWrite(off, 1), b);
 };
 
 /**
@@ -2908,9 +2908,9 @@ X86CPU.prototype.setSOByte = function(seg, off, b)
 X86CPU.prototype.setSOWord = function(seg, off, w)
 {
     if (!I386) {
-        this.setShort(seg.checkWrite(off, 1), w);
+        this.setShort(seg.checkWrite(off, 2), w);
     } else {
-        this.setWord(seg.checkWrite(off, this.dataSize-1), w);
+        this.setWord(seg.checkWrite(off, this.dataSize), w);
     }
 };
 

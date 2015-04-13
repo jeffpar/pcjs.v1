@@ -243,12 +243,12 @@ X86Seg.prototype.loadIDTProt = function loadIDTProt(nIDT)
 /**
  * checkReadReal(off, cb, fSuppress)
  *
- * TODO: Invoke X86.fnFault.call(this.cpu, X86.EXCEPTION.GP_FAULT) if off is 0xffff and cb is 1;
+ * TODO: Invoke X86.fnFault.call(this.cpu, X86.EXCEPTION.GP_FAULT) if off is 0xffff and cb > 1;
  * also, whether or not the fnFault() call should include an error code, since this is happening in real-mode.
  *
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
- * @param {number} cb is number of extra bytes to check (0 or 1)
+ * @param {number} cb is number of bytes to check (1, 2 or 4)
  * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number} corresponding physical address if valid, or ADDR_INVALID if error (TODO: No error conditions exist yet)
  */
@@ -260,12 +260,12 @@ X86Seg.prototype.checkReadReal = function checkReadReal(off, cb, fSuppress)
 /**
  * checkWriteReal(off, cb, fSuppress)
  *
- * TODO: Invoke X86.fnFault.call(this.cpu, X86.EXCEPTION.GP_FAULT) if off is 0xffff and cb is 1;
+ * TODO: Invoke X86.fnFault.call(this.cpu, X86.EXCEPTION.GP_FAULT) if off is 0xffff and cb > 1;
  * also, whether or not the fnFault() call should include an error code, since this is happening in real-mode.
  *
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
- * @param {number} cb is number of extra bytes to check (0 or 1)
+ * @param {number} cb is number of bytes to check (1, 2 or 4)
  * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number} corresponding physical address if valid, or ADDR_INVALID if error (TODO: No error conditions exist yet)
  */
@@ -279,13 +279,13 @@ X86Seg.prototype.checkWriteReal = function checkWriteReal(off, cb, fSuppress)
  *
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
- * @param {number} cb is number of extra bytes to check (0 or 1)
+ * @param {number} cb is number of bytes to check (1, 2 or 4)
  * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number} corresponding physical address if valid, or ADDR_INVALID if not
  */
 X86Seg.prototype.checkReadProt = function checkReadProt(off, cb, fSuppress)
 {
-    if (off + cb <= this.limit) {
+    if (off + cb - 1 <= this.limit) {
         return (this.base + off)|0;
     }
     return this.checkReadProtDisallowed(off, cb, fSuppress);
@@ -296,13 +296,13 @@ X86Seg.prototype.checkReadProt = function checkReadProt(off, cb, fSuppress)
  *
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
- * @param {number} cb is number of extra bytes to check (0 or 1)
+ * @param {number} cb is number of bytes to check (1, 2 or 4)
  * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number} corresponding physical address if valid, ADDR_INVALID if not
  */
 X86Seg.prototype.checkReadProtDown = function checkReadProtDown(off, cb, fSuppress)
 {
-    if (off + cb > this.limit) {
+    if (off + cb - 1 > this.limit) {
         return (this.base + off)|0;
     }
     return this.checkReadProtDisallowed(off, cb, fSuppress);
@@ -313,7 +313,7 @@ X86Seg.prototype.checkReadProtDown = function checkReadProtDown(off, cb, fSuppre
  *
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
- * @param {number} cb is number of extra bytes to check (0 or 1)
+ * @param {number} cb is number of bytes to check (1, 2 or 4)
  * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number} corresponding physical address if valid, ADDR_INVALID if not
  */
@@ -330,13 +330,13 @@ X86Seg.prototype.checkReadProtDisallowed = function checkReadProtDisallowed(off,
  *
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
- * @param {number} cb is number of extra bytes to check (0 or 1)
+ * @param {number} cb is number of bytes to check (1, 2 or 4)
  * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number} corresponding physical address if valid, ADDR_INVALID if not
  */
 X86Seg.prototype.checkWriteProt = function checkWriteProt(off, cb, fSuppress)
 {
-    if (off + cb <= this.limit) {
+    if (off + cb - 1 <= this.limit) {
         return (this.base + off)|0;
     }
     return this.checkWriteProtDisallowed(off, cb, fSuppress);
@@ -347,13 +347,13 @@ X86Seg.prototype.checkWriteProt = function checkWriteProt(off, cb, fSuppress)
  *
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
- * @param {number} cb is number of extra bytes to check (0 or 1)
+ * @param {number} cb is number of bytes to check (1, 2 or 4)
  * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number} corresponding physical address if valid, ADDR_INVALID if not
  */
 X86Seg.prototype.checkWriteProtDown = function checkWriteProtDown(off, cb, fSuppress)
 {
-    if (off + cb > this.limit) {
+    if (off + cb - 1 > this.limit) {
         return (this.base + off)|0;
     }
     return this.checkWriteProtDisallowed(off, cb, fSuppress);
@@ -364,7 +364,7 @@ X86Seg.prototype.checkWriteProtDown = function checkWriteProtDown(off, cb, fSupp
  *
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
- * @param {number} cb is number of extra bytes to check (0 or 1)
+ * @param {number} cb is number of bytes to check (1, 2 or 4)
  * @param {boolean} [fSuppress] is true to suppress any errors
  * @return {number} corresponding physical address if valid, ADDR_INVALID if not
  */

@@ -67,17 +67,17 @@ function SerialPort(parmsSerial) {
     this.iAdapter = parmsSerial['adapter'];
 
     switch (this.iAdapter) {
-        case 1:
-            this.portBase = 0x3F8;
-            this.nIRQ = ChipSet.IRQ.COM1;
-            break;
-        case 2:
-            this.portBase = 0x2F8;
-            this.nIRQ = ChipSet.IRQ.COM2;
-            break;
-        default:
-            Component.warning("Unrecognized serial adapter #" + this.iAdapter);
-            return;
+    case 1:
+        this.portBase = 0x3F8;
+        this.nIRQ = ChipSet.IRQ.COM1;
+        break;
+    case 2:
+        this.portBase = 0x2F8;
+        this.nIRQ = ChipSet.IRQ.COM2;
+        break;
+    default:
+        Component.warning("Unrecognized serial adapter #" + this.iAdapter);
+        return;
     }
 
     /**
@@ -322,6 +322,7 @@ SerialPort.prototype.syncMouse = function()
 SerialPort.prototype.setBinding = function(sHTMLType, sBinding, control)
 {
     var serial = this;
+
     switch (sBinding) {
     case SerialPort.sIOBuffer:
         this.bindings[sBinding] = this.controlIOBuffer = control;

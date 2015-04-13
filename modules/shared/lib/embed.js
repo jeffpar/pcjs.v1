@@ -32,7 +32,7 @@
 
 "use strict";
 
-/* global window: true, XSLTProcessor: false, web: true, Component: true, APPNAME: false, APPVERSION: false, DEBUG: true */
+/* global window: true, XSLTProcessor: false, APPNAME: false, APPVERSION: false, DEBUG: true */
 
 if (typeof module !== 'undefined') {
     var Component;

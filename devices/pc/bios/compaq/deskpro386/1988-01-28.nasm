@@ -1,6 +1,6 @@
 ;
 ; ROM BIOS for Compaq DeskPro 386-16
-; Rev J.4, from parts 109592-001 and 109591-001, dated 1988-Jan-28
+; Rev J.4, from parts 109592-001 and 109591-001, dated '01/28/88'
 ; (C)Copyright COMPAQ Computer Corporation 1982,83,84,85,86,87-All rights reserved.
 ;
 ; Listing produced by NDISASM, 2015-Apr-04
@@ -2287,7 +2287,7 @@ x9311:	cmp	ah,al			; 00009311  3AE0  ':.'
 
 	db	0x0D,0x0A,'Non-System disk or disk error',0x0D,0x0A,'replace and strike any key when ready',0x0D,0x0A,'$',0x0D,0x0A,'602-Diskette Boot Record Error',0x0D,0x0A,'$'
 
-	mov	bx,0x2			; 00009380  BB0200  '...'
+x9380:	mov	bx,0x2			; 00009380  BB0200  '...'
 	mov	cx,0xfde8		; 00009383  B9E8FD  '...'
 x9386:	mov	al,0x80			; 00009386  B080  '..'
 	out	0x70,al			; 00009388  E670  '.p'
@@ -2968,6 +2968,9 @@ x9bed:	mov	al,ah			; 00009BED  8AC4  '..'
 	loop	x9bed			; 00009BF6  E2F5  '..'
 	jmp	bp			; 00009BF8  FFE5  '..'
 
+	;
+	; Clear the screen (DS=F000, BX=BA77 for CGA or BA86 for Mono)
+	;
 x9bfa:	mov	ax,0x720		; 00009BFA  B82007  '. .'
 	mov	es,[bx+0x6]		; 00009BFD  8E4706  '.G.'
 	xor	di,di			; 00009C00  33FF  '3.'
@@ -4619,7 +4622,7 @@ xa9e9:	cs	rep movsw		; 0000A9E9  F32EA5  '...'
 	and	byte [0x87],0xfb	; 0000AA17  80268700FB  '.&...'
 	jmp	short xaa2f		; 0000AA1C  EB11  '..'
 
-xaa1e:	mov	bx,0xba77		; 0000AA1E  BB77BA  '.w.'
+xaa1e:	mov	bx,xba77		; 0000AA1E  BB77BA  '.w.'
 	mov	es,[cs:bx+0x6]		; 0000AA21  2E8E4706  '..G.'
 	call	x9e1c			; 0000AA25  E8F4F3  '...'
 	jz	xaa2f			; 0000AA28  7405  't.'
@@ -4744,7 +4747,7 @@ xaac9:	and	byte [0x10],0xcf	; 0000AAC9  80261000CF  '.&...'
 	call	xc791			; 0000AB1B  E8731C  '.s.'
 xab1e:	ret				; 0000AB1E  C3  '.'
 
-xab1f:	mov	dx,0xba77		; 0000AB1F  BA77BA  '.w.'
+xab1f:	mov	dx,xba77		; 0000AB1F  BA77BA  '.w.'
 	mov	bx,dx			; 0000AB22  8BDA  '..'
 	add	bx,byte +0xf		; 0000AB24  83C30F  '...'
 	or	al,al			; 0000AB27  0AC0  0x0A,'.'
@@ -4807,7 +4810,7 @@ xab96:	mov	al,0x58			; 0000AB96  B058  '.X'
 	out	0x84,al			; 0000AB98  E684  '..'
 	push	cs			; 0000AB9A  0E  '.'
 	pop	ds			; 0000AB9B  1F  '.'
-	mov	bx,0xba77		; 0000AB9C  BB77BA  '.w.'
+	mov	bx,xba77		; 0000AB9C  BB77BA  '.w.'
 xab9f:	mov	al,0x59			; 0000AB9F  B059  '.Y'
 	out	0x84,al			; 0000ABA1  E684  '..'
 	mov	es,[bx+0x6]		; 0000ABA3  8E4706  '.G.'
@@ -6103,23 +6106,30 @@ xb68a:	stc				; 0000B68A  F9  '.'
 	db	' 605-Diskette Drive Type Error-(Run Setup)',0x0D,0x0A
 	db	'     Insert DIAGNOSTIC diskette in Drive A:',0x0D,0x0A
 
-	db	0xD8			; 0000BA77  D8
-	add	dx,sp			; 0000BA78  03D4  '..'
-	sub	[si+0xf0],si		; 0000BA7A  29B4F000  ')...'
-	mov	ax,0x6000		; 0000BA7E  B80060  '..`'
-	mov	dh,[bx+0x1e]		; 0000BA81  8AB71E00  '....'
-	inc	ax			; 0000BA85  40  '@'
-	mov	ax,0xb403		; 0000BA86  B803B4  '...'
-	sub	sp,dx			; 0000BA89  29D4  ').'
-	lock	add [bx+si+0x6000],dh	; 0000BA8B  F000B00060  '....`'
-	imul	si,[bx+0x21],word 0xbd10; 0000BA90  69B7210010BD  'i.!...'
-	wait				; 0000BA96  9B  '.'
-	mov	dx,0xe5e9		; 0000BA97  BAE9E5  '...'
-	fdiv	dword [bx+si+0xe68e]	; 0000BA9A  D8B08EE6  '....'
-	jo	xbad3			; 0000BA9E  7033  'p3'
-	shl	dh,0x71			; 0000BAA0  C0E671  '..q'
-	mov	al,0x40			; 0000BAA3  B040  '.@'
-	out	0x86,al			; 0000BAA5  E686  '..'
+	;
+	; Video card data
+	;
+xba77:	dw	0x03D8			; 0000BA77  D803 	; +0x00: I/O address of Mode Select Register (CGA)
+	db	0xD4,0x29,0xB4,0xF0	; 0000BA79  D429B4F0
+	dw	0xB800			; 0000BA7D  00B8	; +0x06: real-mode segment of frame buffer
+	db	0x00,0x60,0x8A,0xB7	; 0000BA7F  00608AB7
+	db	0x1E,0x00,0x40		; 0000BA83  1E0040
+
+xba86:	dw	0x03B8			; 0000BA86  B803	; +0x00: I/O address of Mode Select Register (Mono)
+	db	0xB4,0x29,0xD4,0xF0	; 0000BA88  B429D4F0
+	dw	0xB000			; 0000BA8C  00B0	; +0x06: real-mode segment of frame buffer
+	db	0x00,0x60,0x69,0xB7	; 0000BA8E  006069B7
+	db	0x21,0x00,0x10		; 0000BA92  210010
+
+	mov	bp,0xba9b		; 0000BA95  BD9BBA
+	jmp	x9380			; 0000BA98  E9E5D8
+
+	mov	al,0x8e			; 0000BA9B  B08E
+	out	0x70,al			; 0000BA9D  E670
+	xor	ax,ax			; 0000BA9F  33C0
+	out	0x71,al			; 0000BAA1  E671
+	mov	al,0x40			; 0000BAA3  B040
+	out	0x86,al			; 0000BAA5  E686
 
 xbaa7:	cli				; 0000BAA7  FA  '.'
 	mov	al,0xf			; 0000BAA8  B00F  '..'
@@ -9921,11 +9931,15 @@ xd9db:	mov	ax,0x40			; 0000D9DB  B84000  '.@.'
 	or	bx,bx			; 0000D9ED  0BDB  '..'
 	jnz	xd9f4			; 0000D9EF  7503  'u.'
 	jmp	xda8c			; 0000D9F1  E99800  '...'
-
+;
+; At checkpoint 0x6B, the conventional+extended memory test has been completed, and you should
+; see a total at the top of the screen (eg, "01792 KB OK").
+;
 xd9f4:	mov	al,0x6b			; 0000D9F4  B06B  '.k'
 	out	0x84,al			; 0000D9F6  E684  '..'
 	mov	ax,0x1c00		; 0000D9F8  B8001C  '...'
 	mov	ds,ax			; 0000D9FB  8ED8  '..'
+
 	test	word [0x64],0x1		; 0000D9FD  F70664000100  '..d...'
 	jz	xda1b			; 0000DA03  7416  't.'
 	call	xc786			; 0000DA05  E87EED  '.~.'
@@ -9935,6 +9949,7 @@ xd9f4:	mov	al,0x6b			; 0000D9F4  B06B  '.k'
 	mov	cl,[0x69]		; 0000DA10  8A0E6900  '..i.'
 	mov	dx,[0x67]		; 0000DA14  8B166700  '..g.'
 	call	x822d			; 0000DA18  E812A8  '...'
+
 xda1b:	test	word [0x64],0x4		; 0000DA1B  F70664000400  '..d...'
 	jz	xda39			; 0000DA21  7416  't.'
 	call	xc786			; 0000DA23  E860ED  '.`.'
@@ -9944,6 +9959,7 @@ xda1b:	test	word [0x64],0x4		; 0000DA1B  F70664000400  '..d...'
 	mov	cl,[0x6d]		; 0000DA2E  8A0E6D00  '..m.'
 	mov	dx,[0x6b]		; 0000DA32  8B166B00  '..k.'
 	call	x8242			; 0000DA36  E809A8  '...'
+
 xda39:	test	word [0x64],0x2		; 0000DA39  F70664000200  '..d...'
 	jz	xda57			; 0000DA3F  7416  't.'
 	call	xc786			; 0000DA41  E842ED  '.B.'
@@ -9952,7 +9968,13 @@ xda39:	test	word [0x64],0x2		; 0000DA39  F70664000200  '..d...'
 	mov	si,cx			; 0000DA4A  8BF1  '..'
 	mov	cl,[0x71]		; 0000DA4C  8A0E7100  '..q.'
 	mov	dx,[0x6f]		; 0000DA50  8B166F00  '..o.'
+;
+; During the next call, the following additional text may be displayed on the screen:
+;
+;   F00000 02 201-Memory Error
+;
 	call	x822d			; 0000DA54  E8D6A7  '...'
+
 xda57:	test	word [0x64],0x8		; 0000DA57  F70664000800  '..d...'
 	jz	xda75			; 0000DA5D  7416  't.'
 	call	xc786			; 0000DA5F  E824ED  '.$.'
@@ -9961,7 +9983,13 @@ xda57:	test	word [0x64],0x8		; 0000DA57  F70664000800  '..d...'
 	mov	si,cx			; 0000DA68  8BF1  '..'
 	mov	cl,[0x75]		; 0000DA6A  8A0E7500  '..u.'
 	mov	dx,[0x73]		; 0000DA6E  8B167300  '..s.'
+;
+; During the next call, the following additional text may be displayed on the screen:
+;
+;   F00000 FF 203-Memory Address Error
+;
 	call	x8242			; 0000DA72  E8CDA7  '...'
+
 xda75:	test	word [0x64],0x10	; 0000DA75  F70664001000  '..d...'
 	jz	xda8c			; 0000DA7B  740F  't.'
 	call	xc786			; 0000DA7D  E806ED  '...'
@@ -9969,6 +9997,7 @@ xda75:	test	word [0x64],0x10	; 0000DA75  F70664001000  '..d...'
 	mov	bx,0xb68c		; 0000DA83  BB8CB6  '...'
 	mov	cx,0x1a			; 0000DA86  B91A00  '...'
 	call	xc745			; 0000DA89  E8B9EC  '...'
+
 xda8c:	test	word [0x64],0xffff	; 0000DA8C  F7066400FFFF  '..d...'
 	jz	xdaac			; 0000DA92  7418  't.'
 	call	xc786			; 0000DA94  E8EFEC  '...'
@@ -14293,6 +14322,7 @@ xffb3:	pop	ds			; 0000FFB3  1F  '.'
 
 	jmp	0xf000:reset		; 0000FFF0  EA05F900F0
 
-	db	' 01/28/88'
+	db	0x20
+	db	'01/28/88'
 	db	0xFC			; 0000FFFE  FC
 	db	0x98			; 0000FFFF  98

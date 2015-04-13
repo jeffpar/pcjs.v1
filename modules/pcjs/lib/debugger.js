@@ -2549,7 +2549,7 @@ if (DEBUGGER) {
      * @this {Debugger}
      * @param {Array} aAddr
      * @param {boolean} [fWrite]
-     * @param {number} [cb] is number of extra bytes to check (0, 1 or 3)
+     * @param {number} [cb] is number of bytes to check (1, 2 or 4); default is 1
      * @return {number} is the corresponding physical address, or X86.ADDR_INVALID
      */
     Debugger.prototype.getAddr = function(aAddr, fWrite, cb)
@@ -2564,9 +2564,9 @@ if (DEBUGGER) {
         if (addr == null) {
             var seg = this.getSegment(aAddr[1]);
             if (!fWrite) {
-                addr = seg.checkRead(aAddr[0], cb || 0, true);
+                addr = seg.checkRead(aAddr[0], cb || 1, true);
             } else {
-                addr = seg.checkWrite(aAddr[0], cb || 0, true);
+                addr = seg.checkWrite(aAddr[0], cb || 1, true);
             }
             aAddr[2] = addr;
         }
@@ -2587,7 +2587,7 @@ if (DEBUGGER) {
     Debugger.prototype.getByte = function(aAddr, inc)
     {
         var b = 0xff;
-        var addr = this.getAddr(aAddr, false, 0);
+        var addr = this.getAddr(aAddr, false, 1);
         if (addr !== X86.ADDR_INVALID) {
             b = this.bus.getByteDirect(addr);
             this.assert((b == (b & 0xff)), "invalid byte (" + b + ") at address: " + this.hexAddr(aAddr));
@@ -2623,7 +2623,7 @@ if (DEBUGGER) {
     Debugger.prototype.getShort = function(aAddr, inc)
     {
         var w = 0xffff;
-        var addr = this.getAddr(aAddr, false, 1);
+        var addr = this.getAddr(aAddr, false, 2);
         if (addr !== X86.ADDR_INVALID) {
             w = this.bus.getShortDirect(addr);
             this.assert((w == (w & 0xffff)), "invalid word (" + w + ") at address: " + this.hexAddr(aAddr));
@@ -2643,7 +2643,7 @@ if (DEBUGGER) {
     Debugger.prototype.getLong = function(aAddr, inc)
     {
         var l = -1;
-        var addr = this.getAddr(aAddr, false, 3);
+        var addr = this.getAddr(aAddr, false, 4);
         if (addr !== X86.ADDR_INVALID) {
             l = this.bus.getLongDirect(addr);
             if (inc !== undefined) this.incAddr(aAddr, inc);
@@ -2665,7 +2665,7 @@ if (DEBUGGER) {
      */
     Debugger.prototype.setByte = function(aAddr, b, inc)
     {
-        var addr = this.getAddr(aAddr, true, 0);
+        var addr = this.getAddr(aAddr, true, 1);
         if (addr !== X86.ADDR_INVALID) {
             this.bus.setByteDirect(addr, b);
             if (inc !== undefined) this.incAddr(aAddr, inc);
@@ -2683,7 +2683,7 @@ if (DEBUGGER) {
      */
     Debugger.prototype.setShort = function(aAddr, w, inc)
     {
-        var addr = this.getAddr(aAddr, true, 1);
+        var addr = this.getAddr(aAddr, true, 2);
         if (addr !== X86.ADDR_INVALID) {
             this.bus.setShortDirect(addr, w);
             if (inc !== undefined) this.incAddr(aAddr, inc);
