@@ -2328,7 +2328,10 @@ if (DEBUGGER) {
                     var msTotal = ms - this.msStart;
                     var nCyclesPerSecond = (msTotal > 0? Math.round(this.nCycles * 1000 / msTotal) : 0);
                     sStopped += " (";
-                    if (this.checksEnabled()) sStopped += this.cInstructions + " ops, ";
+                    if (this.checksEnabled()) {
+                        sStopped += this.cInstructions + " ops, ";
+                        this.cInstructions = 0;     // remove this line if you want to maintain a longer total
+                    }
                     sStopped += this.nCycles + " cycles, " + msTotal + " ms, " + nCyclesPerSecond + " hz)";
                     if (MAXDEBUG && this.chipset) {
                         var i, c, n;

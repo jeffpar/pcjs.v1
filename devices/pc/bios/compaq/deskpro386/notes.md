@@ -408,3 +408,5 @@ So the write breakpoint must be specified as "bw %b8000" instead.  Now we catch 
 	0030:80DA F3            REPZ    
 	0030:80DB A5            MOVSW   
 
+x8509: Memory test of top 128Kb of top 16Mb?
+	xdb33: 

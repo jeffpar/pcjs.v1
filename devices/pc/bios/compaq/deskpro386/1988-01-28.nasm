@@ -97,6 +97,17 @@ x809c:	xor	ah,ah			; 0000809C  32E4  '2.'
 	pop	bx			; 000080A3  5B  '['
 	ret				; 000080A4  C3  '.'
 
+	;*
+	; Display (AX) as a 5-digit, zero-padded number in the top-left corner of
+	; the display, using (ES) as the segment of the video buffer.
+	;
+	; The number is followed by " KB OK", for a total of 11 (0x0B) characters.
+	;
+	; This function works for both Mono and CGA displays because it writes to both
+	; video buffers (%B0000 via ES:0000 and %B8000 via ES:8000).
+	;
+	; Called by CS:DBD6 in the normal case, where CS == 0x30 and ES == 0x40.
+	;
 x80a5:	push	bx			; 000080A5  53  'S'
 	push	cx			; 000080A6  51  'Q'
 	push	dx			; 000080A7  52  'R'
@@ -374,8 +385,9 @@ x82f5:	lodsb				; 000082F5  AC  '.'
 	loop	x82f5			; 000082F8  E2FB  '..'
 	jz	x830a			; 000082FA  740E  't.'
 	mov	dx,0x5000		; 000082FC  BA0050  '..P'
-	mov	bx,0xb75a		; 000082FF  BB5AB7  '.Z.'
-	mov	cx,0xf			; 00008302  B90F00  '...'
+
+	mov	bx,err101		; 000082FF  BB5AB7  '.Z.'
+	mov	cx,err101_len		; 00008302  B90F00  '...'
 	call	xc745			; 00008305  E83D44  '.=D'
 x8308:	jmp	short x8308		; 00008308  EBFE  '..'
 
@@ -819,7 +831,8 @@ x86db:	mov	word [0x50],0xffff	; 000086DB  C7065000FFFF  '..P...'
 	or	al,0x8			; 00008706  0C08  '..'
 	out	0x61,al			; 00008708  E661  '.a'
 	out	0x84,al			; 0000870A  E684  '..'
-	;
+
+	;*
 	; Read the memory-mapped settings/diagnostic register at 0x80C00000 into BX
 	;
 	mov	bx,[0x0]		; 0000870C  8B1E0000  '....'
@@ -2749,8 +2762,9 @@ x99d5:	lodsw				; 000099D5  AD  '.'
 	mov	ds,ax			; 000099E1  8ED8  '..'
 	or	byte [0x12],0xff	; 000099E3  800E1200FF  '.....'
 	mov	dx,0x5000		; 000099E8  BA0050  '..P'
-	mov	bx,0xb75a		; 000099EB  BB5AB7  '.Z.'
-	mov	cx,0xf			; 000099EE  B90F00  '...'
+
+	mov	bx,err101		; 000099EB  BB5AB7  '.Z.'
+	mov	cx,err101_len		; 000099EE  B90F00  '...'
 	call	xc745			; 000099F1  E8512D  '.Q-'
 	jmp	short x9a09		; 000099F4  EB13  '..'
 
@@ -2968,7 +2982,7 @@ x9bed:	mov	al,ah			; 00009BED  8AC4  '..'
 	loop	x9bed			; 00009BF6  E2F5  '..'
 	jmp	bp			; 00009BF8  FFE5  '..'
 
-	;
+	;*
 	; Clear the screen (DS=F000, BX=BA77 for CGA or BA86 for Mono)
 	;
 x9bfa:	mov	ax,0x720		; 00009BFA  B82007  '. .'
@@ -4280,11 +4294,11 @@ xa742:	pop	es			; 0000A742  07  '.'
 	mov	[0x60],cx		; 0000A743  890E6000  '..`.'
 	mov	al,[0x49]		; 0000A747  A04900  '.I.'
 	cmp	al,0x7			; 0000A74A  3C07  '<.'
-	db	0x74,0x07
+	jz	xa755			; 0000A74C  7407
 	cmp	al,0x4			; 0000A74E  3C04  '<.'
 	mov	ax,0x0			; 0000A750  B80000  '...'
 	jnc	xa758			; 0000A753  7303  's.'
-	mov	ax,0x720		; 0000A755  B82007  '. .'
+xa755:	mov	ax,0x720		; 0000A755  B82007  '. .'
 xa758:	xor	di,di			; 0000A758  33FF  '3.'
 	mov	cx,0x2000		; 0000A75A  B90020  '.. '
 	rep	stosw			; 0000A75D  F3AB  '..'
@@ -5020,6 +5034,17 @@ xad34:	out	dx,al			; 0000AD34  EE  '.'
 	dec	dx			; 0000AD35  4A  'J'
 	jmp	bp			; 0000AD36  FFE5  '..'
 
+	;*
+	; This prepares a request to performed a copy of 0x21 DWORDs (0x84 bytes)
+	; from 0x58:x0F378 (DS:BX) to (ES:DI) for 0x1F0 (DX) times, followed by a
+	; final copy of 0x10 DWORDs (0x40 bytes).  DI advances, BX does not.
+	;
+	; Note that 0x84 * 0x1F0 is 0xFFC0, and 0xFFC0 + 0x40 is 0x10000, or exactly
+	; 64Kb.  Also, DS is pointing to %F0000 and ES is pointing to %FF0000 (the
+	; last 64Kb at the top of 16Mb).
+	;
+	; DS:SI is the hard-coded address of a set of hard-coded values at %FF378.
+	;
 xad38:	push	ds			; 0000AD38  1E  '.'
 	mov	ax,0x58			; 0000AD39  B85800  '.X.'
 	mov	ds,ax			; 0000AD3C  8ED8  '..'
@@ -5030,6 +5055,10 @@ xad41:	mov	dx,0x1f0		; 0000AD41  BAF001  '...'
 	mov	bp,0xad4f		; 0000AD49  BD4FAD  '.O.'
 	jmp	xf68d			; 0000AD4C  E93E49  '.>I'
 
+	;*
+	; Now that the 64Kb buffer at ES:0 has been prepared, call xe80b to verify the
+	; buffer contents.
+	;
 	in	al,0x61			; 0000AD4F  E461  '.a'
 	or	al,0xc			; 0000AD51  0C0C  '..'
 	out	0x61,al			; 0000AD53  E661  '.a'
@@ -5941,6 +5970,10 @@ xb564:	mov	sp,bp			; 0000B564  8BE5  '..'
 
 xb570:	mov	al,0x41			; 0000B570  B041  '.A'
 	out	0x84,al			; 0000B572  E684  '..'
+
+	;*
+	; Verify that RAM refresh is occurring, by confirming that bit 4 (0x10) of port 0x61 is alternating
+	;
 	in	al,0x61			; 0000B574  E461  '.a'
 	not	al			; 0000B576  F6D0  '..'
 	and	al,0x10			; 0000B578  2410  '$.'
@@ -5951,15 +5984,23 @@ xb57f:	in	al,0x61			; 0000B57F  E461  '.a'
 	cmp	al,ah			; 0000B583  3AC4  ':.'
 	jz	xb597			; 0000B585  7410  't.'
 	loop	xb57f			; 0000B587  E2F6  '..'
-	mov	bx,0xb68c		; 0000B589  BB8CB6  '...'
-	mov	cx,0x18			; 0000B58C  B91800  '...'
+
+	;*
+	; Verification failed
+	;
+	mov	bx,err102		; 0000B589  BB8CB6  '...'
+	mov	cx,err102_len-2		; 0000B58C  B91800  '...'
 	mov	bp,0xb595		; 0000B58F  BD95B5  '...'
 	jmp	xc7f7			; 0000B592  E96212  '.b.'
 
 	jmp	short xb570		; 0000B595  EBD9  '..'
 
+	;*
+	; Checkpoint 0x42: Initialize the first 128Kb of (conventional) RAM
+	;
 xb597:	mov	al,0x42			; 0000B597  B042  '.B'
 	out	0x84,al			; 0000B599  E684  '..'
+
 	xor	ebp,ebp			; 0000B59B  6633ED  'f3.'
 xb59e:	mov	dx,0x0			; 0000B59E  BA0000  '...'
 	mov	eax,0x1			; 0000B5A1  66B801000000  'f.....'
@@ -6070,7 +6111,12 @@ xb673:	mov	al,[di+0x32]		; 0000B673  8A4532  '.E2'
 xb68a:	stc				; 0000B68A  F9  '.'
 	ret				; 0000B68B  C3  '.'
 
-	db	'102-System Board Failure',0x0D,0x0A
+	;*
+	; Error messages
+	;
+err102:	db	'102-System Board Failure',0x0D,0x0A
+err102_len equ $-err102
+
 	db	' 201-Memory Error 203-Memory Address Error 205-Memory Error',0x0D,0x0A
 	db	' 207-Invalid Memory Configuration',0x0A,0x0D,' Base Module',0x00
 	db	' Module A',0x00
@@ -6080,7 +6126,10 @@ xb68a:	stc				; 0000B68A  F9  '.'
 	db	'Parity Check 1 ',0x00
 	db	'Parity Check 2 ',0x00
 	db	'??????',0x00
-	db	'101-ROM Error',0x0D,0x0A
+
+err101:	db	'101-ROM Error',0x0D,0x0A
+err101_len equ $-err101
+
 	db	' 402-Monochrome Adapter Failure',0x0D,0x0A
 	db	' 501-Display Adapter Failure',0x0D,0x0A
 	db	' 301-Keyboard Error or Test Fixture Installed',0x0D,0x0A
@@ -6106,18 +6155,18 @@ xb68a:	stc				; 0000B68A  F9  '.'
 	db	' 605-Diskette Drive Type Error-(Run Setup)',0x0D,0x0A
 	db	'     Insert DIAGNOSTIC diskette in Drive A:',0x0D,0x0A
 
-	;
+	;*
 	; Video card data
 	;
 xba77:	dw	0x03D8			; 0000BA77  D803 	; +0x00: I/O address of Mode Select Register (CGA)
 	db	0xD4,0x29,0xB4,0xF0	; 0000BA79  D429B4F0
-	dw	0xB800			; 0000BA7D  00B8	; +0x06: real-mode segment of frame buffer
+	dw	0xB800			; 0000BA7D  00B8	; +0x06: real-mode segment of video buffer
 	db	0x00,0x60,0x8A,0xB7	; 0000BA7F  00608AB7
 	db	0x1E,0x00,0x40		; 0000BA83  1E0040
 
 xba86:	dw	0x03B8			; 0000BA86  B803	; +0x00: I/O address of Mode Select Register (Mono)
 	db	0xB4,0x29,0xD4,0xF0	; 0000BA88  B429D4F0
-	dw	0xB000			; 0000BA8C  00B0	; +0x06: real-mode segment of frame buffer
+	dw	0xB000			; 0000BA8C  00B0	; +0x06: real-mode segment of video buffer
 	db	0x00,0x60,0x69,0xB7	; 0000BA8E  006069B7
 	db	0x21,0x00,0x10		; 0000BA92  210010
 
@@ -6249,8 +6298,9 @@ xbb95:	xor	ax,ax			; 0000BB95  33C0  '3.'
 	in	al,0x40			; 0000BBA1  E440  '.@'
 	cmp	ax,0x0			; 0000BBA3  3D0000  '=..'
 	jnz	xbbb6			; 0000BBA6  750E  'u.'
-	mov	bx,0xb68c		; 0000BBA8  BB8CB6  '...'
-	mov	cx,0x18			; 0000BBAB  B91800  '...'
+
+	mov	bx,err102		; 0000BBA8  BB8CB6  '...'
+	mov	cx,err102_len-2		; 0000BBAB  B91800  '...'
 	mov	bp,0xbbb4		; 0000BBAE  BDB4BB  '...'
 	jmp	xc7f7			; 0000BBB1  E9430C  '.C.'
 
@@ -6382,12 +6432,12 @@ xbc71:	call	xa3e0			; 0000BC71  E86CE7  '.l.'
 	out	0x84,al			; 0000BCAA  E684  '..'
 	call	xd6dd			; 0000BCAC  E82E1A  '...'
 
-	;
+	;*
 	; Enable copy of ROM in "shadow RAM"?
 	;
 	call	xc825			; 0000BCAF  E8730B  '.s.'
 
-	;
+	;*
 	; This function loads the GDTR with [00FF0730,0047], but since the previous call
 	; turned A20 off, the first selector load crashes, because physical address %FF0730
 	; requires A20 on.
@@ -6956,7 +7006,7 @@ xc19d:	mov	al,ah			; 0000C19D  8AC4  '..'
 	test	byte [0x17],0x4		; 0000C1B0  F606170004  '.....'
 	jnz	xc1f9			; 0000C1B5  7542  'uB'
 	test	byte [0x17],0x3		; 0000C1B7  F606170003  '.....'
-	db	0x75,0x32
+	jnz	xc1f0			; 0000C1BC  7532
 	test	byte [0x17],0x20	; 0000C1BE  F606170020  '.... '
 	jnz	xc1db			; 0000C1C3  7516  'u.'
 	test	byte [0x96],0x2		; 0000C1C5  F606960002  '.....'
@@ -6976,8 +7026,8 @@ xc1db:	test	byte [0x96],0x2		; 0000C1DB  F606960002  '.....'
 xc1e9:	call	xd3b4			; 0000C1E9  E8C811  '...'
 xc1ec:	xor	al,al			; 0000C1EC  32C0  '2.'
 	jmp	short xc233		; 0000C1EE  EB43  '.C'
-	test	byte [0x17],0x20	; 0000C1F0  F606170020  '.... '
 
+xc1f0:	test	byte [0x17],0x20	; 0000C1F0  F606170020  '.... '
 	jnz	xc1cc			; 0000C1F5  75D5  'u.'
 	jmp	short xc1db		; 0000C1F7  EBE2  '..'
 
@@ -7649,7 +7699,7 @@ xc704:	xchg	ch,cl			; 0000C704  86E9  '..'
 	mov	cx,0x4			; 0000C718  B90400  '...'
 	call	xc72b			; 0000C71B  E80D00  '.',0x0D,'.'
 	mov	al,0x20			; 0000C71E  B020  '. '
-	call	xc7d3			; 0000C720  E8B000  '...'
+	call	int10_print		; 0000C720  E8B000  '...'
 	pop	dx			; 0000C723  5A  'Z'
 	mov	cx,0x2			; 0000C724  B90200  '...'
 	call	xc72b			; 0000C727  E80100  '...'
@@ -7666,7 +7716,7 @@ xc72c:	xchg	ax,dx			; 0000C72C  92  '.'
 	push	dx			; 0000C739  52  'R'
 	push	cx			; 0000C73A  51  'Q'
 	push	ax			; 0000C73B  50  'P'
-	call	xc7d3			; 0000C73C  E89400  '...'
+	call	int10_print		; 0000C73C  E89400  '...'
 	pop	ax			; 0000C73F  58  'X'
 	pop	cx			; 0000C740  59  'Y'
 	pop	dx			; 0000C741  5A  'Z'
@@ -7681,6 +7731,7 @@ xc745:	push	ds			; 0000C745  1E  '.'
 
 xc751:	push	bx			; 0000C751  53  'S'
 	push	cx			; 0000C752  51  'Q'
+
 xc753:	test	dh,0xc0			; 0000C753  F6C6C0  '...'
 	jz	xc760			; 0000C756  7408  't.'
 	call	xc7ab			; 0000C758  E85000
@@ -7695,26 +7746,37 @@ xc760:	test	dh,0x30			; 0000C760  F6C630  '..0'
 
 xc76d:	pop	cx			; 0000C76D  59  'Y'
 	pop	bx			; 0000C76E  5B  '['
+
 xc76f:	mov	al,[cs:bx]		; 0000C76F  2E8A07  '...'
 	push	bx			; 0000C772  53  'S'
-	call	xc7d3			; 0000C773  E85D00  '.].'
+	call	int10_print		; 0000C773  E85D00  '.].'
 	pop	bx			; 0000C776  5B  '['
 	inc	bx			; 0000C777  43  'C'
 	loop	xc76f			; 0000C778  E2F5  '..'
 	ret				; 0000C77A  C3  '.'
 
-xc77b:	mov	al,[bx]			; 0000C77B  8A07  '..'
+	;**
+	; print_str(BX -> string, CX == length)
+	;
+	; TODO: Is this dead code?
+	;
+print_str:
+	mov	al,[bx]			; 0000C77B  8A07  '..'
 	push	bx			; 0000C77D  53  'S'
-	call	xc7d3			; 0000C77E  E85200  '.R.'
+	call	int10_print		; 0000C77E  E85200  '.R.'
 	pop	bx			; 0000C781  5B  '['
 	inc	bx			; 0000C782  43  'C'
-	loop	xc77b			; 0000C783  E2F6  '..'
+	loop	print_str		; 0000C783  E2F6  '..'
 	ret				; 0000C785  C3  '.'
 
-xc786:	mov	al,0xd			; 0000C786  B00D  '.',0x0D
-	call	xc7d3			; 0000C788  E84800  '.H.'
+	;**
+	; print_crlf()
+	;
+print_crlf:
+	mov	al,0xd			; 0000C786  B00D  '.',0x0D
+	call	int10_print		; 0000C788  E84800  '.H.'
 	mov	al,0xa			; 0000C78B  B00A  '.',0x0A
-	call	xc7d3			; 0000C78D  E84300  '.C.'
+	call	int10_print		; 0000C78D  E84300  '.C.'
 	ret				; 0000C790  C3  '.'
 
 xc791:	mov	bx,0xfa			; 0000C791  BBFA00  '...'
@@ -7748,10 +7810,11 @@ xc7c7:	and	al,0xf			; 0000C7C7  240F  '$.'
 	daa				; 0000C7CB  27  0x27
 	adc	al,0x40			; 0000C7CC  1440  '.@'
 	daa				; 0000C7CE  27  0x27
-	call	xc7d3			; 0000C7CF  E80100  '...'
+	call	int10_print		; 0000C7CF  E80100  '...'
 	ret				; 0000C7D2  C3  '.'
 
-xc7d3:	mov	bx,0x7			; 0000C7D3  BB0700  '...'
+int10_print:
+	mov	bx,0x7			; 0000C7D3  BB0700  '...'
 	mov	ah,0xe			; 0000C7D6  B40E  '..'
 	int	0x10			; 0000C7D8  CD10  '..'
 	ret				; 0000C7DA  C3  '.'
@@ -7797,8 +7860,8 @@ xc817:	mov	al,[bx]			; 0000C817  8A07  '..'
 	pop	es			; 0000C823  07  '.'
 	ret				; 0000C824  C3  '.'
 
-	;
-	; Copy ROM into reserved extended RAM?
+	;**
+	; Copy ROM into reserved RAM?
 	;
 	; This function ends by disabling A20 and zeroing all conventional memory.
 	;
@@ -7858,11 +7921,13 @@ xc89d:	lidt	[cs:0xa151]		; 0000C89D  2E0F011E51A1  '....Q.'
 	mov	ds,ax			; 0000C8AA  8ED8  '..'
 	mov	ss,[0x69]		; 0000C8AC  8E166900  '..i.'
 	mov	sp,[0x67]		; 0000C8B0  8B266700  '.&g.'
-	;
+
+	;*
 	; Disable A20
 	;
 	call	xa478			; 0000C8B4  E8C1DB  '...'
-	;
+
+	;*
 	; Get the (conventional) memory size in Kb from 0x40:0x0013, divide by 64 (0x40) to yield
 	; the number of 64Kb blocks of RAM below 1Mb, and then zero each 64Kb block with "rep stosd".
 	;
@@ -7896,8 +7961,8 @@ xc8eb:	pop	es			; 0000C8EB  07  '.'
 	ret				; 0000C8EE  C3  '.'
 
 xc8ef:	mov	dx,0x0			; 0000C8EF  BA0000  '...'
-	mov	bx,0xb68c		; 0000C8F2  BB8CB6  '...'
-	mov	cx,0x1a			; 0000C8F5  B91A00  '...'
+	mov	bx,err102		; 0000C8F2  BB8CB6  '...'
+	mov	cx,err102_len		; 0000C8F5  B91A00  '...'
 	call	xc745			; 0000C8F8  E84AFE  '.J.'
 	hlt				; 0000C8FB  F4  '.'
 
@@ -8350,8 +8415,9 @@ xcc5f:	cs	lodsb			; 0000CC5F  2EAC  '..'
 	mov	al,0x92			; 0000CC71  B092  '..'
 	out	0x84,al			; 0000CC73  E684  '..'
 	mov	dx,0x0			; 0000CC75  BA0000  '...'
-	mov	bx,0xb68c		; 0000CC78  BB8CB6  '...'
-	mov	cx,0x1a			; 0000CC7B  B91A00  '...'
+
+	mov	bx,err102		; 0000CC78  BB8CB6  '...'
+	mov	cx,err102_len		; 0000CC7B  B91A00  '...'
 	call	xc745			; 0000CC7E  E8C4FA  '...'
 xcc81:	jmp	short xcc81		; 0000CC81  EBFE  '..'
 
@@ -8452,8 +8518,8 @@ xcd1d:	in	al,dx			; 0000CD1D  EC  '.'
 	jmp	xcc9c			; 0000CD29  E970FF  '.p.'
 
 xcd2c:	mov	dx,0x0			; 0000CD2C  BA0000  '...'
-	mov	bx,0xb68c		; 0000CD2F  BB8CB6  '...'
-	mov	cx,0x1a			; 0000CD32  B91A00  '...'
+	mov	bx,err102		; 0000CD2F  BB8CB6  '...'
+	mov	cx,err102_len		; 0000CD32  B91A00  '...'
 	call	xc745			; 0000CD35  E80DFA  '.',0x0D,'.'
 xcd38:	jmp	short xcd38		; 0000CD38  EBFE  '..'
 
@@ -8577,14 +8643,15 @@ xce0c:	push	es			; 0000CE0C  06  '.'
 	mov	bx,0x3c			; 0000CE2D  BB3C00  '.<.'
 	call	xc638			; 0000CE30  E805F8  '...'
 	test	byte [0x6b],0x1		; 0000CE33  F6066B0001  '..k..'
-	db	0x75,0x0E
+	jnz	xce48			; 0000CE38  750E
+
 	mov	dx,0x0			; 0000CE3A  BA0000  '...'
-	mov	bx,0xb68c		; 0000CE3D  BB8CB6  '...'
-	mov	cx,0x1a			; 0000CE40  B91A00  '...'
+	mov	bx,err102		; 0000CE3D  BB8CB6  '...'
+	mov	cx,err102_len		; 0000CE40  B91A00  '...'
 	call	xc745			; 0000CE43  E8FFF8  '...'
 xce46:	jmp	short xce46		; 0000CE46  EBFE  '..'
-	mov	[es:0x20],bp		; 0000CE48  26892E2000  '&.. .'
 
+xce48:	mov	[es:0x20],bp		; 0000CE48  26892E2000  '&.. .'
 	and	byte [0x6b],0xfe	; 0000CE4D  80266B00FE  '.&k..'
 	pop	es			; 0000CE52  07  '.'
 	ret				; 0000CE53  C3  '.'
@@ -9112,7 +9179,7 @@ xd272:	or	al,al			; 0000D272  0AC0  0x0A,'.'
 	cmp	ah,0x1c			; 0000D280  80FC1C  '...'
 	jz	xd2e1			; 0000D283  745C  't\'
 	cmp	ah,0x37			; 0000D285  80FC37  '..7'
-	db	0x75,0x1A
+	jnz	xd2a4			; 0000D288  751A
 	test	byte [0x96],0x10	; 0000D28A  F606960010  '.....'
 	jz	xd2d7			; 0000D28F  7446  'tF'
 	test	byte [0x96],0x2		; 0000D291  F606960002  '.....'
@@ -9122,9 +9189,15 @@ xd272:	or	al,al			; 0000D272  0AC0  0x0A,'.'
 
 xd29d:	and	byte [0x96],0xfd	; 0000D29D  80269600FD  '.&...'
 	jmp	short xd2d7		; 0000D2A2  EB33  '.3'
-	db	'< ~',0x0A,'<a|5<{}1'
 
+xd2a4:	cmp	al,0x20			; 0000D2A4  3C20
+	jng	xd2b2			; 0000D2A6  7E0A
+	cmp	al,0x61			; 0000D2A8  3C61
+	jl	xd2e1			; 0000D2AA  7C35
+	cmp	al,0x7b			; 0000D2AC  3C7B
+	jnl	xd2e1			; 0000D2AE  7D31
 	and	al,0x1f			; 0000D2B0  241F  '$.'
+
 xd2b2:	test	byte [0x96],0x2		; 0000D2B2  F606960002  '.....'
 	jz	xd2d2			; 0000D2B7  7419  't.'
 	push	ax			; 0000D2B9  50  'P'
@@ -9926,15 +9999,16 @@ xd9db:	mov	ax,0x40			; 0000D9DB  B84000  '.@.'
 	mov	ss,[0x69]		; 0000D9E0  8E166900  '..i.'
 	mov	sp,[0x67]		; 0000D9E4  8B266700  '.&g.'
 	push	bx			; 0000D9E8  53  'S'
-	call	xc786			; 0000D9E9  E89AED  '...'
+	call	print_crlf		; 0000D9E9  E89AED  '...'
 	pop	bx			; 0000D9EC  5B  '['
 	or	bx,bx			; 0000D9ED  0BDB  '..'
 	jnz	xd9f4			; 0000D9EF  7503  'u.'
 	jmp	xda8c			; 0000D9F1  E99800  '...'
-;
-; At checkpoint 0x6B, the conventional+extended memory test has been completed, and you should
-; see a total at the top of the screen (eg, "01792 KB OK").
-;
+
+	;*
+	; At checkpoint 0x6B, the conventional+extended memory test has been completed, and you should
+	; see a total at the top of the screen (eg, "01792 KB OK").
+	;
 xd9f4:	mov	al,0x6b			; 0000D9F4  B06B  '.k'
 	out	0x84,al			; 0000D9F6  E684  '..'
 	mov	ax,0x1c00		; 0000D9F8  B8001C  '...'
@@ -9942,7 +10016,7 @@ xd9f4:	mov	al,0x6b			; 0000D9F4  B06B  '.k'
 
 	test	word [0x64],0x1		; 0000D9FD  F70664000100  '..d...'
 	jz	xda1b			; 0000DA03  7416  't.'
-	call	xc786			; 0000DA05  E87EED  '.~.'
+	call	print_crlf		; 0000DA05  E87EED  '.~.'
 	xor	ch,ch			; 0000DA08  32ED  '2.'
 	mov	cl,[0x66]		; 0000DA0A  8A0E6600  '..f.'
 	mov	si,cx			; 0000DA0E  8BF1  '..'
@@ -9952,7 +10026,7 @@ xd9f4:	mov	al,0x6b			; 0000D9F4  B06B  '.k'
 
 xda1b:	test	word [0x64],0x4		; 0000DA1B  F70664000400  '..d...'
 	jz	xda39			; 0000DA21  7416  't.'
-	call	xc786			; 0000DA23  E860ED  '.`.'
+	call	print_crlf		; 0000DA23  E860ED  '.`.'
 	xor	ch,ch			; 0000DA26  32ED  '2.'
 	mov	cl,[0x6a]		; 0000DA28  8A0E6A00  '..j.'
 	mov	si,cx			; 0000DA2C  8BF1  '..'
@@ -9962,45 +10036,47 @@ xda1b:	test	word [0x64],0x4		; 0000DA1B  F70664000400  '..d...'
 
 xda39:	test	word [0x64],0x2		; 0000DA39  F70664000200  '..d...'
 	jz	xda57			; 0000DA3F  7416  't.'
-	call	xc786			; 0000DA41  E842ED  '.B.'
+	call	print_crlf		; 0000DA41  E842ED  '.B.'
 	xor	ch,ch			; 0000DA44  32ED  '2.'
 	mov	cl,[0x6e]		; 0000DA46  8A0E6E00  '..n.'
 	mov	si,cx			; 0000DA4A  8BF1  '..'
 	mov	cl,[0x71]		; 0000DA4C  8A0E7100  '..q.'
 	mov	dx,[0x6f]		; 0000DA50  8B166F00  '..o.'
-;
-; During the next call, the following additional text may be displayed on the screen:
-;
-;   F00000 02 201-Memory Error
-;
+
+	;*
+	; During the next call, the following additional text may be displayed on the screen:
+	;
+	;   F00000 02 201-Memory Error
+	;
 	call	x822d			; 0000DA54  E8D6A7  '...'
 
 xda57:	test	word [0x64],0x8		; 0000DA57  F70664000800  '..d...'
 	jz	xda75			; 0000DA5D  7416  't.'
-	call	xc786			; 0000DA5F  E824ED  '.$.'
+	call	print_crlf		; 0000DA5F  E824ED  '.$.'
 	xor	ch,ch			; 0000DA62  32ED  '2.'
 	mov	cl,[0x72]		; 0000DA64  8A0E7200  '..r.'
 	mov	si,cx			; 0000DA68  8BF1  '..'
 	mov	cl,[0x75]		; 0000DA6A  8A0E7500  '..u.'
 	mov	dx,[0x73]		; 0000DA6E  8B167300  '..s.'
-;
-; During the next call, the following additional text may be displayed on the screen:
-;
-;   F00000 FF 203-Memory Address Error
-;
+
+	;*
+	; During the next call, the following additional text may be displayed on the screen:
+	;
+	;   F00000 FF 203-Memory Address Error
+	;
 	call	x8242			; 0000DA72  E8CDA7  '...'
 
 xda75:	test	word [0x64],0x10	; 0000DA75  F70664001000  '..d...'
 	jz	xda8c			; 0000DA7B  740F  't.'
-	call	xc786			; 0000DA7D  E806ED  '...'
+	call	print_crlf		; 0000DA7D  E806ED  '...'
 	mov	dx,0x0			; 0000DA80  BA0000  '...'
-	mov	bx,0xb68c		; 0000DA83  BB8CB6  '...'
-	mov	cx,0x1a			; 0000DA86  B91A00  '...'
+	mov	bx,err102		; 0000DA83  BB8CB6  '...'
+	mov	cx,err102_len		; 0000DA86  B91A00  '...'
 	call	xc745			; 0000DA89  E8B9EC  '...'
 
 xda8c:	test	word [0x64],0xffff	; 0000DA8C  F7066400FFFF  '..d...'
 	jz	xdaac			; 0000DA92  7418  't.'
-	call	xc786			; 0000DA94  E8EFEC  '...'
+	call	print_crlf		; 0000DA94  E8EFEC  '...'
 	test	word [0x64],0x40	; 0000DA97  F70664004000  '..d.@.'
 	jz	xdaa2			; 0000DA9D  7403  't.'
 	jmp	xd9c7			; 0000DA9F  E925FF  '.%.'
@@ -10068,6 +10144,20 @@ xdb2b:	clc				; 0000DB2B  F8  '.'
 xdb31:	pop	bx			; 0000DB31  5B  '['
 	ret				; 0000DB32  C3  '.'
 
+	;**
+	; Memory test
+	;
+	; When called from x8509:
+	;
+	;	word [0x82]:	0x80
+	;	byte [0x8f]:	0xff
+	;	byte [0x92]:	0x01
+	;	(BP): 		0x80
+	;	(AH):		0xFE (64Kb block number? Copied to byte [0x4c] on entry)
+	;
+	; 	I think we're testing 128Kb starting at %fe0000, but it looks like we've already
+	;	tested 128Kb somewhere else first.  Need to track that down.
+	;
 xdb33:	push	bx			; 0000DB33  53  'S'
 	push	di			; 0000DB34  57  'W'
 	push	es			; 0000DB35  06  '.'
@@ -10078,18 +10168,30 @@ xdb33:	push	bx			; 0000DB33  53  'S'
 	xor	ah,ah			; 0000DB40  32E4  '2.'
 	mov	di,ax			; 0000DB42  8BF8  '..'
 	mov	bx,0x0			; 0000DB44  BB0000  '...'
+
+	;*
+	; [0x92] contains 0x01
+	;
 	cmp	byte [0x92],0x1		; 0000DB47  803E920001  '.>...'
 	jnz	xdb58			; 0000DB4C  750A  'u',0x0A
+
+	;*
+	; Display the Kb value in (BP)
+	;
 	mov	ax,0x40			; 0000DB4E  B84000  '.@.'
 	mov	es,ax			; 0000DB51  8EC0  '..'
 	mov	ax,bp			; 0000DB53  8BC5  '..'
 	call	x80a5			; 0000DB55  E84DA5  '.M.'
+
 xdb58:	cmp	word [0x82],byte +0x0	; 0000DB58  833E820000  '.>...'
 	jnz	xdb6b			; 0000DB5D  750C  'u.'
 	mov	ax,0x0			; 0000DB5F  B80000  '...'
 	mov	word [0x84],0x0		; 0000DB62  C70684000000  '......'
 	jmp	xdbf1			; 0000DB68  E98600  '...'
 
+	;*
+	; Test another 64Kb of memory
+	;
 xdb6b:	mov	al,0x71			; 0000DB6B  B071  '.q'
 	out	0x84,al			; 0000DB6D  E684  '..'
 	mov	ax,0x48			; 0000DB6F  B84800  '.H.'
@@ -10101,10 +10203,15 @@ xdb6b:	mov	al,0x71			; 0000DB6B  B071  '.q'
 	mov	al,[0x8f]		; 0000DB78  A08F00  '...'
 	cmp	[0x4c],al		; 0000DB7B  38064C00  '8.L.'
 	ja	xdb86			; 0000DB7F  7705  'w.'
+
+	;*
+	; Test the memory at segment (ES), carry clear if success
+	;
 	call	xad38			; 0000DB81  E8B4D1  '...'
 	jmp	short xdb89		; 0000DB84  EB03  '..'
 
 xdb86:	call	x8c7e			; 0000DB86  E8F5B0  '...'
+
 xdb89:	pop	bp			; 0000DB89  5D  ']'
 	pop	di			; 0000DB8A  5F  '_'
 	pop	si			; 0000DB8B  5E  '^'
@@ -10113,8 +10220,8 @@ xdb89:	pop	bp			; 0000DB89  5D  ']'
 	mov	ch,[0x4c]		; 0000DB8F  8A2E4C00  '..L.'
 	mov	ax,0x1			; 0000DB93  B80100  '...'
 	jmp	short xdbed		; 0000DB96  EB55  '.U'
-
 	nop				; 0000DB98  90  '.'
+
 xdb99:	add	bx,byte +0x40		; 0000DB99  83C340  '..@'
 	cld				; 0000DB9C  FC  '.'
 	push	di			; 0000DB9D  57  'W'
@@ -10143,7 +10250,15 @@ xdbc2:	stosw				; 0000DBC2  AB  '.'
 	mov	es,ax			; 0000DBD0  8EC0  '..'
 	mov	ax,bp			; 0000DBD2  8BC5  '..'
 	add	ax,bx			; 0000DBD4  03C3  '..'
-	call	x80a5			; 0000DBD6  E8CCA4  '...'
+
+	;*
+	; Display (AX) as a 5-digit value in the top-left corner of the screen, followed by " KB OK"
+	;
+	call	x80a5			; 0000DBD6  E8CCA4
+
+	;*
+	; After displaying "00192 KB OK", BX is 0x40 and [0x82] contains 0x80.
+	;
 xdbd9:	cmp	[0x82],bx		; 0000DBD9  391E8200  '9...'
 	ja	xdbe5			; 0000DBDD  7706  'w.'
 	mov	ax,0x0			; 0000DBDF  B80000  '...'
@@ -10153,6 +10268,9 @@ xdbd9:	cmp	[0x82],bx		; 0000DBD9  391E8200  '9...'
 xdbe5:	add	byte [0x4c],0x1		; 0000DBE5  80064C0001  '..L..'
 	jmp	xdb6b			; 0000DBEA  E97EFF  '.~.'
 
+	;*
+	; Now we're on to a new phase, after displaying "00256 KB OK"
+	;
 xdbed:	mov	[0x84],bx		; 0000DBED  891E8400  '....'
 xdbf1:	push	ax			; 0000DBF1  50  'P'
 	mov	al,0x73			; 0000DBF2  B073  '.s'
@@ -10688,8 +10806,9 @@ xe137:	mov	al,bl			; 0000E137  8AC3  '..'
 	out	0x4b,al			; 0000E148  E64B  '.K'
 	mov	al,0x12			; 0000E14A  B012  '..'
 	out	0x4b,al			; 0000E14C  E64B  '.K'
-	mov	bx,0xb68c		; 0000E14E  BB8CB6  '...'
-	mov	cx,0x18			; 0000E151  B91800  '...'
+
+	mov	bx,err102		; 0000E14E  BB8CB6  '...'
+	mov	cx,err102_len-2		; 0000E151  B91800  '...'
 	mov	bp,0xe15a		; 0000E154  BD5AE1  '.Z.'
 	jmp	xc7f7			; 0000E157  E99DE6  '...'
 
@@ -10885,15 +11004,15 @@ xe2c8:	mov	al,0xe			; 0000E2C8  B00E  '..'
 	or	ah,0x20			; 0000E2D8  80CC20  '.. '
 xe2db:	mov	al,ah			; 0000E2DB  8AC4  '..'
 	test	al,0xc0			; 0000E2DD  A8C0  '..'
-	db	0x74,0x13
+	jz	xe2f4			; 0000E2DF  7413
 	mov	dx,0x2000		; 0000E2E1  BA0020  '.. '
 	mov	bx,0xb8a0		; 0000E2E4  BBA0B8  '...'
 	mov	cx,0x56			; 0000E2E7  B95600  '.V.'
 	call	xc745			; 0000E2EA  E858E4  '.X.'
 	or	byte [0x12],0xff	; 0000E2ED  800E1200FF  '.....'
 	jmp	short xe336		; 0000E2F2  EB42  '.B'
-	test	al,0x20			; 0000E2F4  A820  '. '
 
+xe2f4:	test	al,0x20			; 0000E2F4  A820  '. '
 	jz	xe309			; 0000E2F6  7411  't.'
 	mov	dx,0x2000		; 0000E2F8  BA0020  '.. '
 	mov	bx,0xb8a0		; 0000E2FB  BBA0B8  '...'
@@ -11465,7 +11584,7 @@ xe7d0:	cld				; 0000E7D0  FC  '.'
 xe7d1:	cs	lodsb			; 0000E7D1  2EAC  '..'
 	cmp	al,0x24			; 0000E7D3  3C24  '<$'
 	jz	xe7dc			; 0000E7D5  7405  't.'
-	call	xc7d3			; 0000E7D7  E8F9DF  '...'
+	call	int10_print		; 0000E7D7  E8F9DF  '...'
 	jmp	short xe7d1		; 0000E7DA  EBF5  '..'
 
 xe7dc:	ret				; 0000E7DC  C3  '.'
@@ -11489,6 +11608,9 @@ xe7f0:	and	ah,0xc0			; 0000E7F0  80E4C0  '...'
 	call	xf30a			; 0000E807  E8000B  '...'
 xe80a:	ret				; 0000E80A  C3  '.'
 
+	;*
+	; Compare DS:BX to ES:DI; return carry CLEAR if success, or carry SET if failure
+	;
 xe80b:	mov	si,bx			; 0000E80B  8BF3  '..'
 	mov	cx,0x21			; 0000E80D  B92100  '.!.'
 	repe	cmpsd			; 0000E810  66F3A7  'f..'
@@ -11690,10 +11812,10 @@ xe97c:	call	xec2e_wait_8042_ready	; 0000E97C  E8AF02  '...'
 	jz	xe9b2			; 0000E995  741B  't.'
 	in	al,0x60			; 0000E997  E460  '.`'
 	cmp	al,0xab			; 0000E999  3CAB  '<.'
-	db	0x75,0x0A
+	jnz	xe9a7			; 0000E99B  750A
 	or	byte [0x96],0x40	; 0000E99D  800E960040  '....@'
 	and	byte [0x96],0x7f	; 0000E9A2  802696007F  '.&...'
-	mov	al,0x20			; 0000E9A7  B020  '. '
+xe9a7:	mov	al,0x20			; 0000E9A7  B020  '. '
 	out	0x20,al			; 0000E9A9  E620  '. '
 	sti				; 0000E9AB  FB  '.'
 	mov	bp,0xffff		; 0000E9AC  BDFFFF  '...'
@@ -11703,7 +11825,7 @@ xe9b2:	test	byte [0x96],0x40	; 0000E9B2  F606960040  '....@'
 	jz	xe9fa			; 0000E9B7  7441  'tA'
 	in	al,0x60			; 0000E9B9  E460  '.`'
 	cmp	al,0x41			; 0000E9BB  3C41  '<A'
-	db	0x75,0xE8
+	jnz	xe9a7			; 0000E9BD  75E8
 	and	byte [0x96],0xbf	; 0000E9BF  80269600BF  '.&...'
 	or	byte [0x96],0x10	; 0000E9C4  800E960010  '.....'
 	or	byte [0x17],0x20	; 0000E9C9  800E170020  '.... '
@@ -11743,17 +11865,17 @@ xe9fa:	mov	di,0x17			; 0000E9FA  BF1700  '...'
 xea16:	mov	ah,al			; 0000EA16  8AE0  '..'
 	push	ax			; 0000EA18  50  'P'
 	cmp	al,0x46			; 0000EA19  3C46  '<F'
-	db	0x75,0x15
+	jnz	xea32			; 0000EA1B  7515
 	test	byte [0x18],0x8		; 0000EA1D  F606180008  '.....'
-	db	0x75,0x0E
+	jnz 	xea32			; 0000EA22  750E
 	call	xc0e9			; 0000EA24  E8C2D6  '...'
-	db	0x73,0x09
+	jnc	xea32			; 0000EA27  7309
 	cli				; 0000EA29  FA  '.'
 	mov	al,0x20			; 0000EA2A  B020  '. '
 	out	0x20,al			; 0000EA2C  E620  '. '
 	sti				; 0000EA2E  FB  '.'
 	jmp	xead4			; 0000EA2F  E9A200  '...'
-	mov	al,0x20			; 0000EA32  B020  '. '
+xea32:	mov	al,0x20			; 0000EA32  B020  '. '
 	out	0x20,al			; 0000EA34  E620  '. '
 
 	sti				; 0000EA36  FB  '.'
@@ -12440,71 +12562,16 @@ xf065:	sti				; 0000F065  FB  '.'
 	push	ax			; 0000F06E  50  'P'
 	jmp	short xf025		; 0000F06F  EBB4  '..'
 
-	times	51 db 0xFF		; 0000F071 - 0000F0A3
+	times	47 db 0xFF		; 0000F071 - 0000F09F
 
-	cmp	[bx+si],ch		; 0000F0A4  3828  '8('
-	sub	ax,0x1f0a		; 0000F0A6  2D0A1F  '-',0x0A,'.'
-	push	es			; 0000F0A9  06  '.'
-	sbb	[si],bx			; 0000F0AA  191C  '..'
-	add	al,[bx]			; 0000F0AC  0207  '..'
-	push	es			; 0000F0AE  06  '.'
-	pop	es			; 0000F0AF  07  '.'
-	add	[bx+si],al		; 0000F0B0  0000  '..'
-	add	[bx+si],al		; 0000F0B2  0000  '..'
-	jno	xf106			; 0000F0B4  7150  'qP'
-	pop	dx			; 0000F0B6  5A  'Z'
-	or	bl,[bx]			; 0000F0B7  0A1F  0x0A,'.'
-	push	es			; 0000F0B9  06  '.'
-	sbb	[si],bx			; 0000F0BA  191C  '..'
-	add	al,[bx]			; 0000F0BC  0207  '..'
-	push	es			; 0000F0BE  06  '.'
-	pop	es			; 0000F0BF  07  '.'
-	add	[bx+si],al		; 0000F0C0  0000  '..'
-	add	[bx+si],al		; 0000F0C2  0000  '..'
-	cmp	[bx+si],ch		; 0000F0C4  3828  '8('
-	sub	ax,0x7f0a		; 0000F0C6  2D0A7F  '-',0x0A,'.'
-	push	es			; 0000F0C9  06  '.'
-	fs	jo 0xf0cf		; 0000F0CA  647002  'dp.'
-	add	[0x7],ax		; 0000F0CD  01060700  '....'
-	add	[bx+si],al		; 0000F0D1  0000  '..'
-	add	[bx+di+0x50],ah		; 0000F0D3  006150  '.aP'
-	push	dx			; 0000F0D6  52  'R'
-	db	0x0F			; 0000F0D7  0F  '.'
-	sbb	[0x1919],ax		; 0000F0D8  19061919  '....'
-	add	cl,[di]			; 0000F0DC  020D  '.',0x0D
-	or	cx,[si]			; 0000F0DE  0B0C  '..'
-	add	[bx+si],al		; 0000F0E0  0000  '..'
-	add	[bx+si],al		; 0000F0E2  0000  '..'
-	cmp	[bx+si],ch		; 0000F0E4  3828  '8('
-	sub	ax,0x1f0a		; 0000F0E6  2D0A1F  '-',0x0A,'.'
-	push	es			; 0000F0E9  06  '.'
-	sbb	[si],bx			; 0000F0EA  191C  '..'
-	add	al,[bx]			; 0000F0EC  0207  '..'
-	push	es			; 0000F0EE  06  '.'
-	pop	es			; 0000F0EF  07  '.'
-	add	[bx+si],al		; 0000F0F0  0000  '..'
-	add	[bx+si],al		; 0000F0F2  0000  '..'
-	db	0x71,0x50
-	pop	dx			; 0000F0F6  5A  'Z'
-	or	bl,[bx+di]		; 0000F0F7  0A19  0x0A,'.'
-	push	es			; 0000F0F9  06  '.'
-	sbb	[bx+di],bx		; 0000F0FA  1919  '..'
-	add	cl,[di]			; 0000F0FC  020D  '.',0x0D
-	or	cx,[si]			; 0000F0FE  0B0C  '..'
-	add	[bx+si],al		; 0000F100  0000  '..'
-	add	[bx+si],al		; 0000F102  0000  '..'
-	cmp	[bx+si],ch		; 0000F104  3828  '8('
-xf106:	sub	ax,0x7f0a		; 0000F106  2D0A7F  '-',0x0A,'.'
-	push	es			; 0000F109  06  '.'
-	fs	jo 0xf10f		; 0000F10A  647002  'dp.'
-	add	[0x7],ax		; 0000F10D  01060700  '....'
-	add	[bx+si],al		; 0000F111  0000  '..'
-	add	[bx+di+0x50],ah		; 0000F113  006150  '.aP'
-	push	dx			; 0000F116  52  'R'
-	db	0x0F			; 0000F117  0F  '.'
-	sbb	[0x1919],ax		; 0000F118  19061919  '....'
-	add	cl,[di]			; 0000F11C  020D  '.',0x0D
-	or	cx,[si]			; 0000F11E  0B0C  '..'
+	db	0xFF,0xFF,0xFF,0xFF,0x38,0x28,0x2D,0x0A,0x1F,0x06,0x19,0x1C,0x02,0x07,0x06,0x07	; 0000F0A0
+	db	0x00,0x00,0x00,0x00,0x71,0x50,0x5A,0x0A,0x1F,0x06,0x19,0x1C,0x02,0x07,0x06,0x07 ; 0000F0B0
+	db	0x00,0x00,0x00,0x00,0x38,0x28,0x2D,0x0A,0x7F,0x06,0x64,0x70,0x02,0x01,0x06,0x07 ; 0000F0C0
+	db	0x00,0x00,0x00,0x00,0x61,0x50,0x52,0x0F,0x19,0x06,0x19,0x19,0x02,0x0D,0x0B,0x0C ; 0000F0D0
+	db	0x00,0x00,0x00,0x00,0x38,0x28,0x2D,0x0A,0x1F,0x06,0x19,0x1C,0x02,0x07,0x06,0x07 ; 0000F0E0
+	db	0x00,0x00,0x00,0x00,0x71,0x50,0x5A,0x0A,0x19,0x06,0x19,0x19,0x02,0x0D,0x0B,0x0C ; 0000F0F0
+	db	0x00,0x00,0x00,0x00,0x38,0x28,0x2D,0x0A,0x7F,0x06,0x64,0x70,0x02,0x01,0x06,0x07 ; 0000F100
+	db	0x00,0x00,0x00,0x00,0x61,0x50,0x52,0x0F,0x19,0x06,0x19,0x19,0x02,0x0D,0x0B,0x0C ; 0000F110
 
 	times	8 dw 0x0000		; 0000F120 - 0000F12E
 
@@ -12991,10 +13058,10 @@ xf4fa:	lodsd				; 0000F4FA  66AD  'f.'
 	jmp	xf599			; 0000F501  E99500  '...'
 
 xf504:	dec	cx			; 0000F504  49  'I'
-	db	0x74,0x02
+	jz	xf509			; 0000F505  7402
 	jmp	short xf4fa		; 0000F507  EBF1  '..'
-	mov	cx,0x2000		; 0000F509  B90020  '.. '
 
+xf509:	mov	cx,0x2000		; 0000F509  B90020  '.. '
 	xor	di,di			; 0000F50C  33FF  '3.'
 	mov	eax,0x6db66db6		; 0000F50E  66B8B66DB66D  'f..m.m'
 	rep	stosd			; 0000F514  66F3AB  'f..'
@@ -13007,10 +13074,10 @@ xf524:	lodsd				; 0000F524  66AD  'f.'
 	cmp	eax,ebx			; 0000F526  663BC3  'f;.'
 	jnz	xf599			; 0000F529  756E  'un'
 	dec	cx			; 0000F52B  49  'I'
-	db	0x74,0x02
+	jz	xf530			; 0000F52C  7402
 	jmp	short xf524		; 0000F52E  EBF4  '..'
-	mov	cx,0x2000		; 0000F530  B90020  '.. '
 
+xf530:	mov	cx,0x2000		; 0000F530  B90020  '.. '
 	xor	di,di			; 0000F533  33FF  '3.'
 	mov	eax,0x55555555		; 0000F535  66B855555555  'f.UUUU'
 	rep	stosd			; 0000F53B  66F3AB  'f..'
@@ -13151,6 +13218,10 @@ xf684:	mov	al,0x7e			; 0000F684  B07E  '.~'
 	out	0x80,al			; 0000F68A  E680  '..'
 	ret				; 0000F68C  C3  '.'
 
+	;*
+	; Repeatedly copies 0x84 bytes from DS:BX to ES:DI for DX iterations, followed by AX more
+	; bytes after DX is exhausted.  DI advances, BX does not.  Returns to BP.
+	;
 xf68d:	mov	si,bx			; 0000F68D  8BF3  '..'
 	mov	cx,0x21			; 0000F68F  B92100  '.!.'
 	rep	movsd			; 0000F692  66F3A5  'f..'
@@ -13330,17 +13401,19 @@ xf7ea:	in	al,0x80			; 0000F7EA  E480  '..'
 	test	cl,0x2			; 0000F7EE  F6C102  '...'
 	jz	xf800			; 0000F7F1  740D  't',0x0D
 	mov	dx,0x0			; 0000F7F3  BA0000  '...'
-	mov	bx,0xb68c		; 0000F7F6  BB8CB6  '...'
-	mov	cx,0x1a			; 0000F7F9  B91A00  '...'
+	mov	bx,err102		; 0000F7F6  BB8CB6  '...'
+	mov	cx,err102_len		; 0000F7F9  B91A00  '...'
 	call	xc745			; 0000F7FC  E846CF  '.F.'
 	hlt				; 0000F7FF  F4  '.'
+
 xf800:	test	cl,0x1			; 0000F800  F6C101  '...'
 	jz	xf812			; 0000F803  740D  't',0x0D
 	mov	dx,0x0			; 0000F805  BA0000  '...'
-	mov	bx,0xb68c		; 0000F808  BB8CB6  '...'
-	mov	cx,0x1a			; 0000F80B  B91A00  '...'
+	mov	bx,err102		; 0000F808  BB8CB6  '...'
+	mov	cx,err102_len		; 0000F80B  B91A00  '...'
 	call	xc745			; 0000F80E  E834CF  '.4.'
 	hlt				; 0000F811  F4  '.'
+
 xf812:	mov	al,0x7b			; 0000F812  B07B  '.{'
 	out	0x84,al			; 0000F814  E684  '..'
 	pop	fs			; 0000F816  0FA1  '..'
@@ -13578,11 +13651,11 @@ xf9d2:	mov	al,0xb			; 0000F9D2  B00B  '..'
 	out	dx,al			; 0000F9D4  EE  '.'
 	in	al,dx			; 0000F9D5  EC  '.'
 	or	al,al			; 0000F9D6  0AC0  0x0A,'.'
-	db	0x74,0x05
+	jz	xf9df			; 0000F9D8  7405
 	mov	al,0x20			; 0000F9DA  B020  '. '
 	out	dx,al			; 0000F9DC  EE  '.'
 	loop	xf9d2			; 0000F9DD  E2F3  '..'
-	cmp	dx,byte +0x20		; 0000F9DF  83FA20  '.. '
+xf9df:	cmp	dx,byte +0x20		; 0000F9DF  83FA20  '.. '
 	jz	xf9e9			; 0000F9E2  7405  't.'
 	mov	dx,0x20			; 0000F9E4  BA2000  '. .'
 	jmp	short xf9cf		; 0000F9E7  EBE6  '..'
@@ -14237,12 +14310,12 @@ xfef7:	dec	byte [0x40]		; 0000FEF7  FE0E4000  '..@.'
 	mov	dx,0x3f2		; 0000FEFF  BAF203  '...'
 	out	dx,al			; 0000FF02  EE  '.'
 	test	byte [0x3f],0x7		; 0000FF03  F6063F0007  '..?..'
-	db	0x74,0x8C
+	jz	xfe96			; 0000FF08  748C
 	in	al,0x86			; 0000FF0A  E486  '..'
 	test	al,0x80			; 0000FF0C  A880  '..'
-	db	0x75,0x86
+	jnz	xfe96			; 0000FF0E  7586
 	test	al,0x40			; 0000FF10  A840  '.@'
-	db	0x75,0x82
+	jnz	xfe96			; 0000FF12  7582
 	or	al,0xc0			; 0000FF14  0CC0  '..'
 	out	0x86,al			; 0000FF16  E686  '..'
 	mov	al,0x92			; 0000FF18  B092  '..'

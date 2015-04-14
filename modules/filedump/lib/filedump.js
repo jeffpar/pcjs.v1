@@ -388,7 +388,7 @@ FileDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offData)
     this.sKey = sKey;
 
     if (this.sFormat != DumpAPI.FORMAT.HEX) {
-        chOpen = '['; chClose = ']'; chSep = ','; sHexPrefix = "0x";
+        chOpen = '['; chClose = ']'; chSep = ',';
     }
 
     var sDump = this.dumpLine(2, (sKey? '"' + sKey + '":' : "") + this.sJSONWhitespace + chOpen);
@@ -424,7 +424,7 @@ FileDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offData)
             if (this.fDecimal) {
                 sLine += v;
             } else {
-                sLine += sHexPrefix + str.toHexByte(v);
+                sLine += str.toHexByte(v);
             }
             if (!sASCII) sASCII = "0x" + str.toHex(offData + off) + " ";
             sASCII += (v >= 0x20 && v < 0x7F && v != 0x3C && v != 0x3E? String.fromCharCode(v) : ".");

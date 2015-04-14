@@ -736,12 +736,13 @@ ChipSet.KBC = {
     },
     RWREG: {                    // this.bPPIB (since CLK_TIMER2 and SPK_TIMER2 are in both PPI_B and KBC.RWREG)
         PORT:           0x61,
-        CLK_TIMER2:     0x01,   // set to enable clock to TIMER2
-        SPK_TIMER2:     0x02,   // set to connect output of TIMER2 to speaker
-        DISABLE_CHK:    0x0C,   // set these bits to disable I/O and RAM parity checks, clear them to enable checks
-        REFRESH_BIT:    0x10,   // indicates memory refresh
-        IO_CHK:         0x40,   // indicates I/O check
-        PARITY_CHK:     0x80,   // indicates RAM parity check
+        CLK_TIMER2:     0x01,   // set to enable clock to TIMER2 (R/W)
+        SPK_TIMER2:     0x02,   // set to connect output of TIMER2 to speaker (R/W)
+        DISABLE_CHK:    0x0C,   // set to disable I/O and RAM parity checks, clear to enable (R/W)
+        REFRESH_BIT:    0x10,   // 0 if RAM refresh occurring, 1 if RAM not in refresh cycle (R/O)
+        OUT_TIMER2:     0x20,   // state of TIMER2 output signal (R/O, DESKPRO386)
+        IO_CHK:         0x40,   // indicates I/O check (R/O); to reset, pulse bit 3 (0x08)
+        PARITY_CHK:     0x80,   // indicates RAM parity check (R/O); to reset, pulse bit 2 (0x04)
         PARITY_ERR:     0xC0
     },
     CMD: {                      // this.b8042InBuff (on write to port 0x64, interpret this as a CMD)

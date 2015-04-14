@@ -939,7 +939,7 @@ DiskDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offData)
             sLine += v;
         }
         else {
-            sLine += "0x" + str.toHexByte(v);
+            sLine += str.toHexByte(v);
             if (!sASCII) sASCII = "0x" + str.toHex(offData + off) + " ";
             sASCII += (v >= 0x20 && v < 0x7F && v != 0x3C && v != 0x3E? String.fromCharCode(v) : ".");
         }
@@ -1534,7 +1534,7 @@ DiskDump.prototype.buildFAT = function(abFAT, aFiles, iCluster, cbCluster)
             while (cFileClusters-- > 0) {
                 var iNextCluster = iCluster + 1;
                 if (!cFileClusters) iNextCluster = 0xFFF;
-                // if (fDebug) DiskDump.logConsole(aFiles[iFile].FILE_NAME + ": setting cluster entry " + iCluster + " to 0x" + str.toHexWord(iNextCluster));
+                // if (fDebug) DiskDump.logConsole(aFiles[iFile].FILE_NAME + ": setting cluster entry " + iCluster + " to " + str.toHexWord(iNextCluster));
                 this.buildFATEntry(abFAT, iCluster++, iNextCluster);
             }
         }
