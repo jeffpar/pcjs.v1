@@ -498,6 +498,18 @@ Memory.prototype = {
     /**
      * readNone(off)
      *
+     * Previously, this always returned 0x00, but the initial memory probe by the Compaq DeskPro 386 ROM BIOS
+     * writes 0x0000 to the first word of every 64Kb block in the nearly 16Mb address space it supports, and so
+     * it would initially think that LOTS of RAM existed, only to be disappointed later when it performed a more
+     * exhaustive memory test, and generating error messages in the process.
+     *
+     * TODO: Determine if we should have separate readByteNone(), readShortNone() and readLongNone() functions
+     * to return 0xff, 0xffff and 0xffffffff|0, respectively.  This seems sufficient, as it seems unlikely
+     * that a system would require nonexistent memory locations to have all bits set.
+     *
+     * Also, I'm reluctant to address that potential issue by simply returning -1, because to date, the Memory
+     * component has always provided return values that are properly masked, and some callers may depend on that.
+     *
      * @this {Memory}
      * @param {number} off
      * @return {number}
@@ -506,7 +518,7 @@ Memory.prototype = {
         if (DEBUGGER && this.dbg.messageEnabled(Messages.MEM) /* && !off */) {
             this.dbg.message("attempt to read invalid block %" + str.toHex(this.addr) + " from " + this.dbg.hexOffset(this.cpu.getIP(), this.cpu.getCS()));
         }
-        return 0;
+        return 0xff;
     },
     /**
      * writeNone(off, v)

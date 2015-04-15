@@ -211,7 +211,13 @@ RAM.prototype.reset = function()
             if (MAXDEBUG) this.status("ROM BIOS memory test has been disabled");
             this.bus.setShortDirect(ROM.BIOS.RESET_FLAG, ROM.BIOS.RESET_FLAG_WARMBOOT);
         }
-        if (this.chipset) this.chipset.addCMOSMemory(this.addrRAM, this.sizeRAM);
+        /*
+         * Don't add the "ramCPQ" memory to the CMOS total, because addCMOSMemory() will add it to the extended
+         * memory total, which will just confuse the Compaq BIOS.
+         */
+        if (!COMPAQ386 || this.idComponent != "ramCPQ") {
+            if (this.chipset) this.chipset.addCMOSMemory(this.addrRAM, this.sizeRAM);
+        }
     } else {
         Component.error("No RAM allocated");
     }

@@ -7,6 +7,30 @@
 ; Additional post-processing performed by the PCjs TextOut module
 ; All post-processing, comments, etc copyright © 2012-2015 Jeff Parsons <Jeff@pcjs.org>
 ;
+; NOTE: This 32Kb ROM image is ORG'ed at 0x8000, because it needs to run at real-mode
+; addresses F000:8000 through F000:FFFF, as well as protected-mode physical addresses
+; %FFFF8000 through %FFFFFFFF.  Additionally, DeskPro 386 systems mirror this 32Kb ROM
+; at real-mode addresses F000:0000 through F000:7FFF, as well as protected-mode physical
+; addresses %FFFF0000 through %FFFF7FFF.
+;
+; In other words, both 32Kb halves of the top 64Kb of both the first megabyte and the
+; 16th megabyte are physically mapped to this ROM image.
+;
+; Finally, the DeskPro 386 has a "RAM Relocation" feature that allows 128Kb of RAM at
+; %FE0000 through %FFFFFF to be mapped to %0E0000 through %0FFFFF, effectively replacing
+; the ROM in the first megabyte with write-protected RAM; the top 64Kb of that RAM must
+; first be initialized with the 64Kb at %0F0000 prior to remapping.  It's also possible
+; to copy external ROMs from %0E0000 through %0EFFFF into the bottom 64Kb of that RAM, but
+; this is only done for ROMs known to contain relocatable code (eg, a Compaq Enhanced
+; Video Graphics card).
+;
+; Every DeskPro 386 system must have a MINIMUM of 1Mb of RAM, of which either 256Kb, 512Kb,
+; or 640Kb can be physically mapped as conventional memory (at the bottom of the first
+; megabyte), with the remainder (either 768Kb, 512Kb, or 384Kb) physically mapped to the
+; top of the 16th megabyte (ending at address %FFFFFF), the last 128Kb of which is
+; used by the "RAM Relocation" feature.  The remaining memory immediately below that
+; 128Kb (ie, below %FE0000) can only be accessed by special system software, such as CEMM.
+;
 	org	0x8000
 
 CMD8042_WRITE_OUTPORT	equ	0xD1
@@ -33,34 +57,50 @@ CMD8042_WRITE_OUTPORT	equ	0xD1
 	in	al,dx			; 00008026  EC  '.'
 	ret				; 00008027  C3  '.'
 
+	;;
+	;; Protected-mode memory probe
+	;;
 x8028:	push	ax			; 00008028  50  'P'
 	push	bx			; 00008029  53  'S'
 	push	cx			; 0000802A  51  'Q'
 	push	es			; 0000802B  06  '.'
 	mov	ax,0x48			; 0000802C  B84800  '.H.'
 	mov	es,ax			; 0000802F  8EC0  '..'
+
 	mov	cl,0x2			; 00008031  B102  '..'
 	mov	ch,0x9			; 00008033  B509  '..'
 	mov	al,0x1			; 00008035  B001  '..'
 	call	x8051			; 00008037  E81700  '...'
+
 	add	ax,0x80			; 0000803A  058000  '...'
 	mov	[0x7c],ax		; 0000803D  A37C00  '.|.'
+
 	mov	cl,0x10			; 00008040  B110  '..'
 	mov	ch,0xfd			; 00008042  B5FD  '..'
 	mov	al,0x1			; 00008044  B001  '..'
 	call	x8051			; 00008046  E80800  '...'
+
 	mov	[0x7e],ax		; 00008049  A37E00  '.~.'
+
 	pop	es			; 0000804C  07  '.'
 	pop	cx			; 0000804D  59  'Y'
 	pop	bx			; 0000804E  5B  '['
 	pop	ax			; 0000804F  58  'X'
 	ret				; 00008050  C3  '.'
 
+	;;
+	;; (AL) == block increment (eg, 0x1)
+	;; (CL) == starting 64Kb block number (eg, 0x02, or 0x10)
+	;; (CH) == maximum 64Kb block number (eg, 0x09, or 0xFD)
+	;;
 x8051:	push	bx			; 00008051  53  'S'
 	push	dx			; 00008052  52  'R'
 	push	bp			; 00008053  55  'U'
 	mov	dl,al			; 00008054  8AD0  '..'
 	mov	bp,es			; 00008056  8CC5  '..'
+	;;
+	;; 0x4C is the base portion of the descriptor at DS:0x48
+	;;
 	mov	[0x4c],cl		; 00008058  880E4C00  '..L.'
 x805c:	mov	es,bp			; 0000805C  8EC5  '..'
 	mov	bx,0x0			; 0000805E  BB0000  '...'
@@ -84,6 +124,9 @@ x805c:	mov	es,bp			; 0000805C  8EC5  '..'
 	nop				; 00008088  90  '.'
 x8089:	cmp	[0x4c],ch		; 00008089  382E4C00  '8.L.'
 	jz	x8095			; 0000808D  7406  't.'
+	;;
+	;; Bump the base portion of the descriptor at DS:0x48 to the next 64Kb block
+	;;
 	add	[0x4c],dl		; 0000808F  00164C00  '..L.'
 	jmp	short x805c		; 00008093  EBC7  '..'
 
@@ -98,16 +141,16 @@ x809c:	xor	ah,ah			; 0000809C  32E4  '2.'
 	ret				; 000080A4  C3  '.'
 
 	;;
-	; Display (AX) as a 5-digit, zero-padded number in the top-left corner of
-	; the display, using (ES) as the segment of the video buffer.
-	;
-	; The number is followed by " KB OK", for a total of 11 (0x0B) characters.
-	;
-	; This function works for both Mono and CGA displays because it writes to both
-	; video buffers (%B0000 via ES:0000 and %B8000 via ES:8000).
-	;
-	; Called by CS:DBD6 in the normal case, where CS == 0x30 and ES == 0x40.
-	;
+	;; Display (AX) as a 5-digit, zero-padded number in the top-left corner of
+	;; the display, using (ES) as the segment of the video buffer.
+	;;
+	;; The number is followed by " KB OK", for a total of 11 (0x0B) characters.
+	;;
+	;; This function works for both Mono and CGA displays because it writes to both
+	;; video buffers (%B0000 via ES:0000 and %B8000 via ES:8000).
+	;;
+	;; Called by CS:DBD6 in the normal case, where CS == 0x30 and ES == 0x40.
+	;;
 x80a5:	push	bx			; 000080A5  53  'S'
 	push	cx			; 000080A6  51  'Q'
 	push	dx			; 000080A7  52  'R'
@@ -292,8 +335,8 @@ x822d:	push	si			; 0000822D  56  'V'
 	pop	bx			; 00008231  5B  '['
 	call	x8257			; 00008232  E82200  '.".'
 	mov	dx,0x0			; 00008235  BA0000  '...'
-	mov	bx,0xb6a6		; 00008238  BBA6B6  '...'
-	mov	cx,0x11			; 0000823B  B91100  '...'
+	mov	bx,err201		; 00008238  BBA6B6  '...'
+	mov	cx,err201_len		; 0000823B  B91100  '...'
 	call	xc745			; 0000823E  E80445  '..E'
 	ret				; 00008241  C3  '.'
 
@@ -645,6 +688,9 @@ x84f9:	sub	bx,0x80			; 000084F9  81EB8000  '....'
 x8507:	pop	es			; 00008507  07  '.'
 	ret				; 00008508  C3  '.'
 
+	;;
+	;; Wrapper around xdb33 to test memory at %FE0000
+	;;
 x8509:	mov	ah,0xfe			; 00008509  B4FE  '..'
 	mov	word [0x82],0x80	; 0000850B  C70682008000  '......'
 	mov	byte [0x8f],0xff	; 00008511  C6068F00FF  '.....'
@@ -660,6 +706,9 @@ x8509:	mov	ah,0xfe			; 00008509  B4FE  '..'
 	or	word [0x64],0x41	; 00008535  810E64004100  '..d.A.'
 x853b:	ret				; 0000853B  C3  '.'
 
+	;;
+	;; Copy ROM from %0F0000 to %FF0000
+	;;
 x853c:	mov	al,0x7f			; 0000853C  B07F  '..'
 	out	0x84,al			; 0000853E  E684  '..'
 	mov	word [0x50],0xffff	; 00008540  C7065000FFFF  '..P...'
@@ -681,13 +730,24 @@ x853c:	mov	al,0x7f			; 0000853C  B07F  '..'
 	mov	es,ax			; 00008586  8EC0  '..'
 	xor	si,si			; 00008588  33F6  '3.'
 	xor	di,di			; 0000858A  33FF  '3.'
+
+	;;
+	;; Copy 64Kb from %0F0000 to %FF0000
+	;;
 	mov	cx,0x4000		; 0000858C  B90040  '..@'
 	cld				; 0000858F  FC  '.'
 	rep	movsd			; 00008590  66F3A5  'f..'
-	mov	bx,0xffe0		; 00008593  BBE0FF  '...'
+
+	mov	bx,rombuf1		; 00008593  BBE0FF  '...'
 	mov	di,[bx]			; 00008596  8B3F  '.?'
-	mov	bx,0xffe2		; 00008598  BBE2FF  '...'
+	;;
+	;; (DI) == 0x7FB6
+	;;
+	mov	bx,rombuf2		; 00008598  BBE2FF  '...'
 	mov	si,[bx]			; 0000859B  8B37  '.7'
+	;;
+	;; (SI) == 0x7FBE
+	;;
 	pop	ds			; 0000859D  1F  '.'
 	mov	word [0x50],0xffff	; 0000859E  C7065000FFFF  '..P...'
 	mov	word [0x52],0x0		; 000085A4  C70652000000  '..R...'
@@ -696,20 +756,39 @@ x853c:	mov	al,0x7f			; 0000853C  B07F  '..'
 	mov	byte [0x56],0x0		; 000085B4  C606560000  '..V..'
 	mov	byte [0x57],0x80	; 000085B9  C606570080  '..W..'
 	mov	bx,[0x8d]		; 000085BE  8B1E8D00  '....'
+	;;
+	;; (BX) is 0x100 (256Kb)
+	;;
 	push	ds			; 000085C2  1E  '.'
 	mov	ax,0x50			; 000085C3  B85000  '.P.'
 	mov	ds,ax			; 000085C6  8ED8  '..'
+	;;
+	;; (DS) -> 0x80C00000
+	;;
 	in	al,0x61			; 000085C8  E461  '.a'
 	push	ax			; 000085CA  50  'P'
 	or	al,0x8			; 000085CB  0C08  '..'
 	out	0x61,al			; 000085CD  E661  '.a'
+	;;
+	;; Load the RAM Diagnostics Register from 0x80C00000
+	;;
 	mov	al,[0x0]		; 000085CF  A00000  '...'
 	mov	byte [0x0],0xff		; 000085D2  C6060000FF  '.....'
+	;;
+	;; Isolate the base memory settings in bits 5-4 (00=640Kb, 10=512Kb, 11=256Kb)
+	;;
 	and	al,0xf0			; 000085D7  24F0  '$.'
+	;;
+	;; Update %FF7FB7 with base memory settings
+	;;
 	mov	[es:di+0x1],al		; 000085D9  26884501  '&.E.'
 	pop	ax			; 000085DD  58  'X'
 	out	0x61,al			; 000085DE  E661  '.a'
-	mov	byte [es:di],0x10	; 000085E0  26C60510  '&...'
+	;;
+	;; Update %FF7FB6 with 0x10
+	;;
+	mov	byte [es:di],0x10	; 000085E0  26C60510
+
 	mov	al,0xb1			; 000085E4  B0B1  '..'
 	out	0x70,al			; 000085E6  E670  '.p'
 	in	al,0x71			; 000085E8  E471  '.q'
@@ -717,23 +796,44 @@ x853c:	mov	al,0x7f			; 0000853C  B07F  '..'
 	mov	al,0xb0			; 000085EC  B0B0  '..'
 	out	0x70,al			; 000085EE  E670  '.p'
 	in	al,0x71			; 000085F0  E471  '.q'
+	;;
+	;; (AX) contains CMOS EXTMEM2 value (0x400)
+	;;
 	add	ax,0x400		; 000085F2  050004  '...'
 	mov	cx,0x3f80		; 000085F5  B9803F  '..?'
+	;;
+	;; (CX) contains 0x3F80 (maximum # of supported Kb)
+	;;
 	sub	cx,bx			; 000085F8  2BCB  '+.'
+	;;
+	;; Compare (AX), total conventional+extended memory, to (CX)
+	;;
 	cmp	ax,cx			; 000085FA  3BC1  ';.'
 	jc	x8600			; 000085FC  7202  'r.'
 	xor	bx,bx			; 000085FE  33DB  '3.'
 x8600:	shl	bx,0x6			; 00008600  C1E306  '...'
+	;;
+	;; Move 0x4000 to %FF7FB8 and %FF7FBA
+	;;
 	mov	[es:di+0x2],bx		; 00008603  26895D02  '&.].'
 	mov	[es:di+0x4],bx		; 00008607  26895D04  '&.].'
 	mov	ch,0xfe			; 0000860B  B5FE  '..'
 	xor	cl,cl			; 0000860D  32C9  '2.'
 	shl	cx,0x4			; 0000860F  C1E104  '...'
+	;;
+	;; Move 0xE000 to %FF7FBC
+	;;
 	mov	[es:di+0x6],cx		; 00008612  26894D06  '&.M.'
 	mov	di,si			; 00008616  8BFE  '..'
 	mov	ax,gs			; 00008618  8CE8  '..'
+	;;
+	;; (AX) now contains the processor type and revision (AH=0x03, AL=0x04)
+	;;
+	;; Store the type in %FF7FBE and the revision in %FF7FBF
+	;;
 	mov	[es:di],ah		; 0000861A  268825  '&.%'
 	mov	[es:di+0x1],al		; 0000861D  26884501  '&.E.'
+
 	mov	cx,0x7fff		; 00008621  B9FF7F  '...'
 	mov	si,0x8000		; 00008624  BE0080  '...'
 	xor	ah,ah			; 00008627  32E4  '2.'
@@ -744,6 +844,9 @@ x862a:	es	lodsb			; 0000862A  26AC  '&.'
 	not	ah			; 00008630  F6D4  '..'
 	inc	ah			; 00008632  FEC4  '..'
 	mov	[es:si],ah		; 00008634  268824  '&.$'
+	;;
+	;; Relocate RAM at %FF0000 to %0F0000
+	;;
 	mov	byte [0x0],0xfc		; 00008637  C6060000FC  '.....'
 	pop	ds			; 0000863C  1F  '.'
 	pop	es			; 0000863D  07  '.'
@@ -834,8 +937,8 @@ x86db:	mov	word [0x50],0xffff	; 000086DB  C7065000FFFF  '..P...'
 	out	0x84,al			; 0000870A  E684  '..'
 
 	;;
-	; Read the memory-mapped settings/diagnostic register at 0x80C00000 into BX
-	;
+	;; Read the memory-mapped settings/diagnostic register at 0x80C00000 into BX
+	;;
 	mov	bx,[0x0]		; 0000870C  8B1E0000  '....'
 	mov	byte [0x0],0xff		; 00008710  C6060000FF  '.....'
 	out	0x84,al			; 00008715  E684  '..'
@@ -862,52 +965,24 @@ x86db:	mov	word [0x50],0xffff	; 000086DB  C7065000FFFF  '..P...'
 	pop	ds			; 0000872E  1F  '.'
 	ret				; 0000872F  C3  '.'
 
-	times	4 dw 0x0000		; 00008730 - 00008736
+romgdt:					; 00008730
+	db	0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, 0xFF,0xFF,0x00,0x00,0xC0,0x92,0x00,0x80
+	db	0xFF,0xFF,0x00,0x00,0x00,0x92,0x00,0x00, 0xFF,0xFF,0x00,0x00,0x0F,0x9A,0x00,0x00
+	db	0xFF,0xFF,0x00,0x00,0x00,0x92,0x00,0xC0, 0xFF,0xFF,0x00,0x00,0xFF,0x9A,0x00,0x00
+	db	0xFF,0xFF,0x00,0x00,0xFF,0x92,0x00,0x00, 0xFF,0xFF,0x00,0x00,0x0E,0x92,0x00,0x00
+	db	0xFF,0xFF,0x00,0x00,0xFD,0x92,0x00,0x00
 
-	db	0xFF			; 00008738  FF  '.'
-	inc	word [bx+si]		; 00008739  FF00  '..'
-	add	al,al			; 0000873B  00C0  '..'
-	xchg	ax,dx			; 0000873D  92  '.'
-	add	[bx+si+0xffff],al	; 0000873E  0080FFFF  '....'
-	add	[bx+si],al		; 00008742  0000  '..'
-	add	[bp+si+0x0],dl		; 00008744  00920000  '....'
-	db	0xFF			; 00008748  FF  '.'
-	inc	word [bx+si]		; 00008749  FF00  '..'
-	add	[bx],cl			; 0000874B  000F  '..'
-	call	0xffff:0x0		; 0000874D  9A0000FFFF  '.....'
-	add	[bx+si],al		; 00008752  0000  '..'
-	add	[bp+si+0xc000],dl	; 00008754  009200C0  '....'
-	db	0xFF			; 00008758  FF  '.'
-	inc	word [bx+si]		; 00008759  FF00  '..'
-	add	bh,bh			; 0000875B  00FF  '..'
-	call	0xffff:0x0		; 0000875D  9A0000FFFF  '.....'
-	add	[bx+si],al		; 00008762  0000  '..'
-	call	near [bp+si+0x0]	; 00008764  FF920000  '....'
-	db	0xFF			; 00008768  FF  '.'
-	inc	word [bx+si]		; 00008769  FF00  '..'
-	add	[0x92],cl		; 0000876B  000E9200  '....'
-	add	bh,bh			; 0000876F  00FF  '..'
-	inc	word [bx+si]		; 00008771  FF00  '..'
-	add	ch,bh			; 00008773  00FD  '..'
-	xchg	ax,dx			; 00008775  92  '.'
-	add	[bx+si],al		; 00008776  0000  '..'
-	inc	di			; 00008778  47  'G'
-	add	[bx+si],dh		; 00008779  0030  '.0'
-	pop	es			; 0000877B  07  '.'
-	sldt	[bx+0x0]		; 0000877C  0F004700  '..G.'
-	xor	[bx],al			; 00008780  3007  '0.'
-	inc	word [bx+si]		; 00008782  FF00  '..'
-	db	0xFF			; 00008784  FF  '.'
-	inc	word [bx+si]		; 00008785  FF00  '..'
-	add	[bx+si],al		; 00008787  0000  '..'
-	add	[bp+si+0x1887],ch	; 00008789  00AA8718  '....'
-	add	al,bh			; 0000878D  00F8  '..'
-	xchg	bx,[bx+si]		; 0000878F  8718  '..'
-	add	[bx+si],ch		; 00008791  0028  '.('
-	mov	[bx+si],bl		; 00008793  8818  '..'
-	add	[0x10f],ch		; 00008795  00
+gdtr_lo:				; accessed via offset 0x0778 (and also 0x8778)
+	dw	0x0047,0x0730,0x000F	; 00008778  GDTR referencing the above GDT in the 0th Mb
+gdtr_hi:				; accessed via offset 0x077E
+	dw	0x0047,0x0730,0x00FF	; 0000877E  GDTR referencing the above GDT in the 15th Mb
+idtr_lo:				; accessed via offset 0x0784
+	dw	0xFFFF,0x0000,0x0000	; 00008784  IDTR
 
-x8796:	lgdt	[cs:0x0778]		; 00008796  2E0F01167807
+	db	0xAA,0x87,0x18,0x00,0xF8,0x87
+	db	0x18,0x00,0x28,0x88,0x18,0x00
+
+x8796:	lgdt	[cs:0x0778]		; 00008796  load [gdtr_lo] into GDTR
 	mov	eax,cr0			; 0000879C  0F2000
 	or	ax,0x1			; 0000879F  0D0100  0x0D,'..'
 	mov	cr0,eax			; 000087A2  0F2200
@@ -941,10 +1016,10 @@ x87c6:	mov	ax,0x10			; 000087C6  B81000  '...'
 	mov	cr0,eax			; 000087D4  0F2200
 	jmp	0xf000:x87dc		; 000087D7  EADC8700F0  '.....'
 
-x87dc:	lidt	[cs:0x784]		; 000087DC  2E0F011E8407  '......'
+x87dc:	lidt	[cs:0x0784]		; 000087DC  load [idtr_lo] into IDTR
 	jmp	bp			; 000087E2  FFE5  '..'
 
-x87e4:	lgdt	[cs:0x778]		; 000087E4  2E0F01167807  '....x.'
+x87e4:	lgdt	[cs:0x0778]		; 000087E4  load [gdtr_lo] into GDTR
 	mov	eax,cr0			; 000087EA  0F2000
 	or	ax,0x1			; 000087ED  0D0100  0x0D,'..'
 	mov	cr0,eax			; 000087F0  0F2200
@@ -962,7 +1037,7 @@ x87e4:	lgdt	[cs:0x778]		; 000087E4  2E0F01167807  '....x.'
 	out	0x61,al			; 00008810  E661  '.a'
 	jmp	short x87c6		; 00008812  EBB2  '..'
 
-x8814:	lgdt	[cs:0x8778]		; 00008814  2E0F01167887  '....x.'
+x8814:	lgdt	[cs:0x8778]		; 00008814  load [gdtr_lo] into GDTR
 	mov	eax,cr0			; 0000881A  0F2000
 	or	ax,0x1			; 0000881D  0D0100  0x0D,'..'
 	mov	cr0,eax			; 00008820  0F2200
@@ -2988,8 +3063,8 @@ x9bed:	mov	al,ah			; 00009BED  8AC4  '..'
 	jmp	bp			; 00009BF8  FFE5  '..'
 
 	;;
-	; Clear the screen (DS=F000, BX=BA77 for CGA or BA86 for Mono)
-	;
+	;; Clear the screen (DS=F000, BX=BA77 for CGA or BA86 for Mono)
+	;;
 x9bfa:	mov	ax,0x720		; 00009BFA  B82007  '. .'
 	mov	es,[bx+0x6]		; 00009BFD  8E4706  '.G.'
 	xor	di,di			; 00009C00  33FF  '3.'
@@ -3958,10 +4033,13 @@ xa3b6:	mov	al,0x80			; 0000A3B6  B080  '..'
 	lidt	[cs:0xa151]		; 0000A3D8  2E0F011E51A1  '....Q.'
 	jmp	short xa43c		; 0000A3DE  EB5C  '.\'
 
+	;;
+	;; Enable A20
+	;;
 xa3e0:	cli				; 0000A3E0  FA  '.'
 	call	xec2e_wait_8042_ready	; 0000A3E1  E84A48  '.JH'
 	jnz	xa3ff			; 0000A3E4  7519  'u.'
-	mov	al,0xd1			; 0000A3E6  B0D1  '..'
+	mov	al,CMD8042_WRITE_OUTPORT; 0000A3E6  B0D1  '..'
 	out	0x64,al			; 0000A3E8  E664  '.d'
 	call	xec2e_wait_8042_ready	; 0000A3EA  E84148  '.AH'
 	jnz	xa3ff			; 0000A3ED  7510  'u.'
@@ -4013,6 +4091,9 @@ xa43c:	mov	ax,0x40			; 0000A43C  B84000  '.@.'
 	mov	ds,ax			; 0000A43F  8ED8  '..'
 	mov	ss,[0x69]		; 0000A441  8E166900  '..i.'
 	mov	sp,[0x67]		; 0000A445  8B266700  '.&g.'
+	;;
+	;; Disable A20
+	;;
 	call	xa478			; 0000A449  E82C00  '.,.'
 	mov	al,0x0			; 0000A44C  B000  '..'
 	out	0x70,al			; 0000A44E  E670  '.p'
@@ -4035,6 +4116,9 @@ xa46c:	and	word [bp+0x6],0xffbf	; 0000A46C  816606BFFF  '.f...'
 xa476:	pop	bp			; 0000A476  5D  ']'
 	iret				; 0000A477  CF  '.'
 
+	;;
+	;; Disable A20
+	;;
 xa478:	call	xec2e_wait_8042_ready	; 0000A478  E8B347  '..G'
 	jnz	xa498			; 0000A47B  751B  'u.'
 	mov	al,CMD8042_WRITE_OUTPORT; 0000A47D  B0D1  '..'
@@ -4145,7 +4229,7 @@ xa544:	push	bx			; 0000A544  53  'S'
 	mov	byte [bx+0x5],0x92	; 0000A564  C6470592  '.G..'
 	mov	ax,0x20			; 0000A568  B82000  '. .'
 	mov	es,ax			; 0000A56B  8EC0  '..'
-	mov	bx,0xffe0		; 0000A56D  BBE0FF  '...'
+	mov	bx,rombuf1		; 0000A56D  BBE0FF  '...'
 	mov	bx,[es:bx]		; 0000A570  268B1F  '&..'
 	test	word [es:bx],0xf00	; 0000A573  26F707000F  '&....'
 	jnz	xa57f			; 0000A578  7505  'u.'
@@ -5041,16 +5125,16 @@ xad34:	out	dx,al			; 0000AD34  EE  '.'
 	jmp	bp			; 0000AD36  FFE5  '..'
 
 	;;
-	; This prepares a request to performed a copy of 0x21 DWORDs (0x84 bytes)
-	; from 0x58:x0F378 (DS:BX) to (ES:DI) for 0x1F0 (DX) times, followed by a
-	; final copy of 0x10 DWORDs (0x40 bytes).  DI advances, BX does not.
-	;
-	; Note that 0x84 * 0x1F0 is 0xFFC0, and 0xFFC0 + 0x40 is 0x10000, or exactly
-	; 64Kb.  Also, DS is pointing to %F0000 and ES is pointing to %FF0000 (the
-	; last 64Kb at the top of 16Mb).
-	;
-	; DS:SI is the hard-coded address of a set of hard-coded values at %FF378.
-	;
+	;; This prepares a request to performed a copy of 0x21 DWORDs (0x84 bytes)
+	;; from 0x58:x0F378 (DS:BX) to (ES:DI) for 0x1F0 (DX) times, followed by a
+	;; final copy of 0x10 DWORDs (0x40 bytes).  DI advances, BX does not.
+	;;
+	;; Note that 0x84 * 0x1F0 is 0xFFC0, and 0xFFC0 + 0x40 is 0x10000, or exactly
+	;; 64Kb.  Also, DS is pointing to %F0000 and ES is pointing to %FF0000 (the
+	;; last 64Kb at the top of 16Mb).
+	;;
+	;; DS:SI is the hard-coded address of a set of hard-coded values at %FF378.
+	;;
 xad38:	push	ds			; 0000AD38  1E  '.'
 	mov	ax,0x58			; 0000AD39  B85800  '.X.'
 	mov	ds,ax			; 0000AD3C  8ED8  '..'
@@ -5062,9 +5146,9 @@ xad41:	mov	dx,0x1f0		; 0000AD41  BAF001  '...'
 	jmp	xf68d			; 0000AD4C  E93E49  '.>I'
 
 	;;
-	; Now that the 64Kb buffer at ES:0 has been prepared, call xe80b to verify the
-	; buffer contents.
-	;
+	;; Now that the 64Kb buffer at ES:0 has been prepared, call xe80b to verify the
+	;; buffer contents.
+	;;
 	in	al,0x61			; 0000AD4F  E461  '.a'
 	or	al,0xc			; 0000AD51  0C0C  '..'
 	out	0x61,al			; 0000AD53  E661  '.a'
@@ -5089,9 +5173,9 @@ xad74:	in	al,0x61			; 0000AD74  E461  '.a'
 	test	al,0x40			; 0000AD76  A840  '.@'
 	mov	eax,0x0			; 0000AD78  66B800000000  'f.....'
 	jnz	xad8f			; 0000AD7E  750F  'u.'
-	cmp	bx,0xf3fc		; 0000AD80  81FBFCF3  '....'
+	cmp	bx,pattern2		; 0000AD80  81FBFCF3  '....'
 	jz	xad8b			; 0000AD84  7405  't.'
-	mov	bx,0xf3fc		; 0000AD86  BBFCF3  '...'
+	mov	bx,pattern2		; 0000AD86  BBFCF3  '...'
 	jmp	short xad41		; 0000AD89  EBB6  '..'
 
 xad8b:	xor	ax,ax			; 0000AD8B  33C0  '3.'
@@ -5978,8 +6062,8 @@ xb570:	mov	al,0x41			; 0000B570  B041  '.A'
 	out	0x84,al			; 0000B572  E684  '..'
 
 	;;
-	; Verify that RAM refresh is occurring, by confirming that bit 4 (0x10) of port 0x61 is alternating
-	;
+	;; Verify that RAM refresh is occurring, by confirming that bit 4 (0x10) of port 0x61 is alternating
+	;;
 	in	al,0x61			; 0000B574  E461  '.a'
 	not	al			; 0000B576  F6D0  '..'
 	and	al,0x10			; 0000B578  2410  '$.'
@@ -5992,8 +6076,8 @@ xb57f:	in	al,0x61			; 0000B57F  E461  '.a'
 	loop	xb57f			; 0000B587  E2F6  '..'
 
 	;;
-	; Verification failed
-	;
+	;; Verification failed
+	;;
 	mov	bx,err102		; 0000B589  BB8CB6  '...'
 	mov	cx,err102_len-2		; 0000B58C  B91800  '...'
 	mov	bp,0xb595		; 0000B58F  BD95B5  '...'
@@ -6002,8 +6086,8 @@ xb57f:	in	al,0x61			; 0000B57F  E461  '.a'
 	jmp	short xb570		; 0000B595  EBD9  '..'
 
 	;;
-	; Checkpoint 0x42: Memory test of the first 128Kb of (conventional) RAM
-	;
+	;; Checkpoint 0x42: Memory test of the first 128Kb of (conventional) RAM
+	;;
 xb597:	mov	al,0x42			; 0000B597  B042  '.B'
 	out	0x84,al			; 0000B599  E684  '..'
 
@@ -6084,8 +6168,8 @@ xb63d:	xor	al,al			; 0000B63D  32C0  '2.'
 	nop				; 0000B641  90  '.'
 
 	;;
-	; The first 128Kb failed the above memory test
-	;
+	;; The first 128Kb failed the above memory test
+	;;
 xb642:	mov	cx,0x4			; 0000B642  B90400  '...'
 	sub	si,cx			; 0000B645  2BF1  '+.'
 xb647:	test	al,0xff			; 0000B647  A8FF  '..'
@@ -6123,8 +6207,8 @@ xb68a:	stc				; 0000B68A  F9  '.'
 	ret				; 0000B68B  C3  '.'
 
 	;;
-	; Error messages
-	;
+	;; Error messages
+	;;
 err102:	db	'102-System Board Failure',0x0D,0x0A
 err102_len equ $-err102
 
@@ -6178,8 +6262,8 @@ err101_len equ $-err101
 	db	'     Insert DIAGNOSTIC diskette in Drive A:',0x0D,0x0A
 
 	;;
-	; Video card data
-	;
+	;; Video card data
+	;;
 xba77:	dw	0x03D8			; 0000BA77  D803 	; +0x00: I/O address of Mode Select Register (CGA)
 	db	0xD4,0x29,0xB4,0xF0	; 0000BA79  D429B4F0
 	dw	0xB800			; 0000BA7D  00B8	; +0x06: real-mode segment of video buffer
@@ -6226,11 +6310,11 @@ xbad3:	cld				; 0000BAD3  FC  '.'
 	mov	al,0xff			; 0000BAD9  B0FF  '..'
 	out	0x21,al			; 0000BADB  E621  '.!'
 	out	0xa1,al			; 0000BADD  E6A1  '..'
-	mov	bx,0xffe0		; 0000BADF  BBE0FF  '...'
+	mov	bx,rombuf1		; 0000BADF  BBE0FF  '...'
 	mov	bx,[bx]			; 0000BAE2  8B1F  '..'
 	test	word [bx],0xf00		; 0000BAE4  F707000F  '....'
 	jnz	xbaf5			; 0000BAE8  750B  'u.'
-	mov	bx,0xffe2		; 0000BAEA  BBE2FF  '...'
+	mov	bx,rombuf2		; 0000BAEA  BBE2FF  '...'
 	mov	bx,[bx]			; 0000BAED  8B1F  '..'
 	mov	ax,[bx]			; 0000BAEF  8B07  '..'
 	xchg	al,ah			; 0000BAF1  86C4  '..'
@@ -6455,15 +6539,15 @@ xbc71:	call	xa3e0			; 0000BC71  E86CE7  '.l.'
 	call	xd6dd			; 0000BCAC  E82E1A  '...'
 
 	;;
-	; Enable copy of ROM in "shadow RAM"?
-	;
+	;; Relocate the ROM and initialize conventional RAM
+	;;
 	call	xc825			; 0000BCAF  E8730B  '.s.'
 
 	;;
-	; This function loads the GDTR with [00FF0730,0047], but since the previous call
-	; turned A20 off, the first selector load crashes, because physical address %FF0730
-	; requires A20 on.
-	;
+	;; This function loads the GDTR with [00FF0730,0047], but since the previous call
+	;; turned A20 off, the first selector load crashes, because physical address %FF0730
+	;; requires A20 on.
+	;;
 	call	xf480			; 0000BCB2  E8CB37
 
 	call	xe7df			; 0000BCB5  E8272B  '.',0x27,'+'
@@ -7727,9 +7811,12 @@ xc704:	xchg	ch,cl			; 0000C704  86E9  '..'
 	call	xc72b			; 0000C727  E80100  '...'
 	ret				; 0000C72A  C3  '.'
 
+	;;
+	;; Print the value in (DX) as (CX) hex digits
+	;;
 xc72b:	cld				; 0000C72B  FC  '.'
 xc72c:	xchg	ax,dx			; 0000C72C  92  '.'
-	mul	word [cs:0xc62d]	; 0000C72D  2EF7262DC6  '..&-.'
+	mul	word [cs:0xc62d]	; multiply by 16
 	xchg	ax,dx			; 0000C732  92  '.'
 	add	al,0x90			; 0000C733  0490  '..'
 	daa				; 0000C735  27  0x27
@@ -7777,11 +7864,11 @@ xc76f:	mov	al,[cs:bx]		; 0000C76F  2E8A07  '...'
 	loop	xc76f			; 0000C778  E2F5  '..'
 	ret				; 0000C77A  C3  '.'
 
-	;;;
-	; print_str(BX -> string, CX == length)
-	;
-	; TODO: Is this dead code?
-	;
+	;;
+	;; print_str(BX -> string, CX == length)
+	;;
+	;; NOTE: This appears to be dead code
+	;;
 print_str:
 	mov	al,[bx]			; 0000C77B  8A07  '..'
 	push	bx			; 0000C77D  53  'S'
@@ -7791,9 +7878,9 @@ print_str:
 	loop	print_str		; 0000C783  E2F6  '..'
 	ret				; 0000C785  C3  '.'
 
-	;;;
-	; print_crlf()
-	;
+	;;
+	;; print_crlf()
+	;;
 print_crlf:
 	mov	al,0xd			; 0000C786  B00D  '.',0x0D
 	call	print_char		; 0000C788  E84800  '.H.'
@@ -7882,11 +7969,11 @@ xc817:	mov	al,[bx]			; 0000C817  8A07  '..'
 	pop	es			; 0000C823  07  '.'
 	ret				; 0000C824  C3  '.'
 
-	;;;
-	; Copy ROM into reserved RAM?
-	;
-	; This function ends by disabling A20 and zeroing all conventional memory.
-	;
+	;;
+	;; Copy ROM to RAM
+	;;
+	;; This function ends by disabling A20 and zeroing all conventional memory.
+	;;
 xc825:	pusha				; 0000C825  60  '`'
 	push	ds			; 0000C826  1E  '.'
 	push	es			; 0000C827  06  '.'
@@ -7924,6 +8011,10 @@ xc845:	mov	al,0xd2			; 0000C845  B0D2  '..'
 	mov	bh,al			; 0000C873  8AF8  '..'
 	mov	bl,[0x8c]		; 0000C875  8A1E8C00  '....'
 	call	xc8fc			; 0000C879  E88000  '...'
+
+	;;
+	;; Relocate the ROM
+	;;
 	call	x853c			; 0000C87C  E8BDBC  '...'
 	mov	al,0xd3			; 0000C87F  B0D3  '..'
 	out	0x84,al			; 0000C881  E684  '..'
@@ -7945,14 +8036,14 @@ xc89d:	lidt	[cs:0xa151]		; 0000C89D  2E0F011E51A1  '....Q.'
 	mov	sp,[0x67]		; 0000C8B0  8B266700  '.&g.'
 
 	;;
-	; Disable A20
-	;
+	;; Disable A20
+	;;
 	call	xa478			; 0000C8B4  E8C1DB  '...'
 
 	;;
-	; Get the (conventional) memory size in Kb from 0x40:0x0013, divide by 64 (0x40) to yield
-	; the number of 64Kb blocks of RAM below 1Mb, and then zero each 64Kb block with "rep stosd".
-	;
+	;; Get the (conventional) memory size in Kb from 0x40:0x0013, divide by 64 (0x40) to yield
+	;; the number of 64Kb blocks of RAM below 1Mb, and then zero each 64Kb block with "rep stosd".
+	;;
 	mov	ax,[0x13]		; 0000C8B7  A11300  '...'
 	xor	dx,dx			; 0000C8BA  33D2  '3.'
 	mov	bx,0x40			; 0000C8BC  BB4000  '.@.'
@@ -7960,8 +8051,8 @@ xc89d:	lidt	[cs:0xa151]		; 0000C89D  2E0F011E51A1  '....Q.'
 	cmp	ax,0x0			; 0000C8C1  3D0000  '=..'
 	jnz	xc8c9			; 0000C8C4  7503  'u.'
 	jmp	short xc8eb		; 0000C8C6  EB23  '.#'
-
 	nop				; 0000C8C8  90  '.'
+
 xc8c9:	sub	ax,0x1			; 0000C8C9  2D0100  '-..'
 	mov	bh,al			; 0000C8CC  8AF8  '..'
 	mov	dx,0x1000		; 0000C8CE  BA0010  '...'
@@ -9824,22 +9915,42 @@ xd77d:	mov	bx,[0x7c]		; 0000D77D  8B1E7C00  '..|.'
 	mov	bx,[0x7e]		; 0000D785  8B1E7E00  '..~.'
 	mov	[0x78],bx		; 0000D789  891E7800  '..x.'
 xd78d:	call	x84a5			; 0000D78D  E815AD  '...'
+
+	;;
+	;; Call this xdb33 wrapper to test 128Kb of memory at %FE0000
+	;;
 	call	x8509			; 0000D790  E876AD  '.v.'
 	or	ax,ax			; 0000D793  0BC0  '..'
 	jz	xd79a			; 0000D795  7403  't.'
 	jmp	xd988			; 0000D797  E9EE01  '...'
 
 xd79a:	mov	bx,[0x76]		; 0000D79A  8B1E7600  '..v.'
+	;;
+	;; (BX) contains 0x280 (640)
+	;;
 	sub	bx,0x80			; 0000D79E  81EB8000  '....'
+	;;
+	;; (BX) is reduced by 128 for a total of 512
+	;;
 	mov	[0x7a],bx		; 0000D7A2  891E7A00  '..z.'
+
+	;;
+	;; (BX) again contains 0x280 (640), again is reduced by 128, and again stored elsewhere
+	;;
 	mov	bx,[0x7c]		; 0000D7A6  8B1E7C00  '..|.'
 	sub	bx,0x80			; 0000D7AA  81EB8000  '....'
 	mov	[0x80],bx		; 0000D7AE  891E8000  '....'
+
 	mov	al,[0x90]		; 0000D7B2  A09000  '...'
+	;;
+	;; (AL) contains 0x09
+	;;
 	mov	[0x8f],al		; 0000D7B5  A28F00  '...'
+
 	mov	ah,0x2			; 0000D7B8  B402  '..'
 	mov	byte [0x92],0x1		; 0000D7BA  C606920001  '.....'
 	call	xdabb			; 0000D7BF  E8F902  '...'
+
 	mov	bx,[0x8a]		; 0000D7C2  8B1E8A00  '....'
 	add	bx,0x80			; 0000D7C6  81C38000  '....'
 	mov	[0x86],bx		; 0000D7CA  891E8600  '....'
@@ -9849,19 +9960,35 @@ xd79a:	mov	bx,[0x76]		; 0000D79A  8B1E7600  '..v.'
 	mov	[0x66],ch		; 0000D7D8  882E6600  '..f.'
 	mov	[0x67],dx		; 0000D7DC  89166700  '..g.'
 	mov	[0x69],cl		; 0000D7E0  880E6900  '..i.'
+
 xd7e4:	mov	al,0x65			; 0000D7E4  B065  '.e'
 	out	0x84,al			; 0000D7E6  E684  '..'
+
+	;;
+	;; (BX) becomes 0x400 (the amount of extended memory in Kb)
+	;;
 	mov	bx,[0x78]		; 0000D7E8  8B1E7800  '..x.'
 	mov	[0x7a],bx		; 0000D7EC  891E7A00  '..z.'
+	;;
+	;; (BX) becomes 0x3B80 (not sure where this number comes from)
+	;;
 	mov	bx,[0x7e]		; 0000D7F0  8B1E7E00  '..~.'
 	mov	[0x80],bx		; 0000D7F4  891E8000  '....'
+
 	mov	bp,[0x86]		; 0000D7F8  8B2E8600  '....'
 	add	bp,0x80			; 0000D7FC  81C58000  '....'
+	;;
+	;; (BP) is now 0x280 + 0x80, for a total of 0x300
+	;;
+	;; (AL) becomes 0x9F
+	;;
 	mov	al,[0x91]		; 0000D800  A09100  '...'
 	mov	[0x8f],al		; 0000D803  A28F00  '...'
+
 	mov	ah,0x10			; 0000D806  B410  '..'
 	mov	byte [0x92],0x1		; 0000D808  C606920001  '.....'
 	call	xdabb			; 0000D80D  E8AB02  '...'
+
 	mov	bx,[0x8a]		; 0000D810  8B1E8A00  '....'
 	mov	[0x88],bx		; 0000D814  891E8800  '....'
 	or	ax,ax			; 0000D818  0BC0  '..'
@@ -9891,6 +10018,12 @@ xd82e:	mov	ax,[0x88]		; 0000D82E  A18800  '...'
 	mov	[0x6e],ch		; 0000D86C  882E6E00  '..n.'
 	mov	[0x6f],dx		; 0000D870  89166F00  '..o.'
 	mov	[0x71],cl		; 0000D874  880E7100  '..q.'
+
+	;;
+	;; We now restart the memory verification process, by redisplaying "00128 KB OK",
+	;; and then calling xdbfb for each region of RAM identified earlier.  As before, (AH)
+	;; contains the 64Kb block number of the region to verify.
+	;;
 xd878:	push	es			; 0000D878  06  '.'
 	mov	ax,0x40			; 0000D879  B84000  '.@.'
 	mov	es,ax			; 0000D87C  8EC0  '..'
@@ -9958,6 +10091,9 @@ xd90b:	mov	ax,[0x88]		; 0000D90B  A18800  '...'
 xd940:	mov	al,0x66			; 0000D940  B066  '.f'
 	out	0x84,al			; 0000D942  E684  '..'
 	mov	bx,[0x86]		; 0000D944  8B1E8600  '....'
+	;;
+	;; Store the total amount of conventional RAM (in Kb) into the ROM BIOS Data Area at 0x40:0x13
+	;;
 	mov	[es:0x13],bx		; 0000D948  26891E1300  '&....'
 	mov	bx,[0x88]		; 0000D94D  8B1E8800  '....'
 	mov	al,0xb0			; 0000D951  B0B0  '..'
@@ -9987,8 +10123,13 @@ xd988:	mov	ah,0x2			; 0000D988  B402  '..'
 	mov	ah,0x3			; 0000D992  B403  '..'
 xd994:	mov	al,0x8f			; 0000D994  B08F  '..'
 	call	xb549			; 0000D996  E8B0DB  '...'
+
 	mov	al,0x68			; 0000D999  B068  '.h'
 	out	0x84,al			; 0000D99B  E684  '..'
+
+	;;
+	;; Set SYS_FLAG (0x04) in the 8042 CMD byte, and then pulse OUTPORT to return to real-mode
+	;;
 	in	al,0x60			; 0000D99D  E460  '.`'
 	mov	al,0x20			; 0000D99F  B020  '. '
 	out	0x64,al			; 0000D9A1  E664  '.d'
@@ -10009,6 +10150,9 @@ xd9a6:	in	al,0x64			; 0000D9A6  E464  '.d'
 	call	xec2e_wait_8042_ready	; 0000D9C0  E86B12  '.k.'
 	mov	al,0xfe			; 0000D9C3  B0FE  '..'
 	out	0x64,al			; 0000D9C5  E664  '.d'
+	;;
+	;; The following hang is temporary; the 8042 should reset the processor, returning us to real-mode
+	;;
 xd9c7:	hlt				; 0000D9C7  F4  '.'
 	jmp	short xd9c7		; 0000D9C8  EBFD  '..'
 
@@ -10016,11 +10160,15 @@ xd9c7:	hlt				; 0000D9C7  F4  '.'
 	out	0x84,al			; 0000D9CC  E684  '..'
 	mov	bx,0x0			; 0000D9CE  BB0000  '...'
 	jmp	short xd9db		; 0000D9D1  EB08  '..'
-
 	nop				; 0000D9D3  90  '.'
-	mov	al,0x6a			; 0000D9D4  B06A  '.j'
+
+	;;
+	;; Code for CMOS SHUTDOWN byte 0x03
+	;;
+xd9d4:	mov	al,0x6a			; 0000D9D4  B06A  '.j'
 	out	0x84,al			; 0000D9D6  E684  '..'
 	mov	bx,0x1			; 0000D9D8  BB0100  '...'
+
 xd9db:	mov	ax,0x40			; 0000D9DB  B84000  '.@.'
 	mov	ds,ax			; 0000D9DE  8ED8  '..'
 	mov	ss,[0x69]		; 0000D9E0  8E166900  '..i.'
@@ -10033,11 +10181,12 @@ xd9db:	mov	ax,0x40			; 0000D9DB  B84000  '.@.'
 	jmp	xda8c			; 0000D9F1  E99800  '...'
 
 	;;
-	; At checkpoint 0x6B, the conventional+extended memory test has been completed, and you should
-	; see a total at the top of the screen (eg, "01792 KB OK").
-	;
+	;; At checkpoint 0x6B, the conventional+extended memory test has been completed,
+	;; and you should see a total at the top of the screen (eg, "01792 KB OK").
+	;;
 xd9f4:	mov	al,0x6b			; 0000D9F4  B06B  '.k'
 	out	0x84,al			; 0000D9F6  E684  '..'
+
 	mov	ax,0x1c00		; 0000D9F8  B8001C  '...'
 	mov	ds,ax			; 0000D9FB  8ED8  '..'
 
@@ -10071,10 +10220,10 @@ xda39:	test	word [0x64],0x2		; 0000DA39  F70664000200  '..d...'
 	mov	dx,[0x6f]		; 0000DA50  8B166F00  '..o.'
 
 	;;
-	; During the next call, the following additional text may be displayed on the screen:
-	;
-	;   F00000 02 201-Memory Error
-	;
+	;; The next call prints an address, value, and error message; eg:
+	;;
+	;;	F00000 02 201-Memory Error
+	;;
 	call	x822d			; 0000DA54  E8D6A7  '...'
 
 xda57:	test	word [0x64],0x8		; 0000DA57  F70664000800  '..d...'
@@ -10087,10 +10236,10 @@ xda57:	test	word [0x64],0x8		; 0000DA57  F70664000800  '..d...'
 	mov	dx,[0x73]		; 0000DA6E  8B167300  '..s.'
 
 	;;
-	; During the next call, the following additional text may be displayed on the screen:
-	;
-	;   F00000 FF 203-Memory Address Error
-	;
+	;; The next call prints an address, value, and error message; eg:
+	;;
+	;;	F00000 FF 203-Memory Address Error
+	;;
 	call	x8242			; 0000DA72  E8CDA7  '...'
 
 xda75:	test	word [0x64],0x10	; 0000DA75  F70664001000  '..d...'
@@ -10123,14 +10272,35 @@ xdaac:	call	xd079			; 0000DAAC  E8CAF5  '...'
 	popa				; 0000DAB9  61  'a'
 	ret				; 0000DABA  C3  '.'
 
+	;;
+	;; Another wrapper around the xdb33 memory test
+	;;
+	;; When called for conventional memory:
+	;;
+	;; 	(AH) == starting 64Kb block number (eg, 0x02)
+	;; 	(AL) == 0x09, which came from byte [0x90]
+	;; 	(BX) == amount of memory in Kb to test (eg, 0x200 or 512)
+	;;
+	;; When called for extended memory:
+	;;
+	;; 	(AH) == starting 64Kb block number (eg, 0x10)
+	;; 	(AL) == 0x9F, which came from byte [0x91]
+	;; 	(BX) == amount of memory in Kb to test (eg, 0x3B80 or 15232)
+	;;
 xdabb:	push	bx			; 0000DABB  53  'S'
 	mov	bl,al			; 0000DABC  8AD8  '..'
 	mov	al,0x6d			; 0000DABE  B06D  '.m'
 	out	0x84,al			; 0000DAC0  E684  '..'
+	;;
+	;; This is special: move BL into AL, and then move AL back into BL.
+	;; We'll give Compaq the benefit of the doubt and assume this is macro nonsense.
+	;;
 	mov	al,bl			; 0000DAC2  8AC3  '..'
 	mov	bl,al			; 0000DAC4  8AD8  '..'
+
 	mov	al,0x6e			; 0000DAC6  B06E  '.n'
 	out	0x84,al			; 0000DAC8  E684  '..'
+
 	mov	al,bl			; 0000DACA  8AC3  '..'
 	mov	bx,[0x80]		; 0000DACC  8B1E8000  '....'
 	cmp	[0x7a],bx		; 0000DAD0  391E7A00  '9.z.'
@@ -10151,11 +10321,19 @@ xdafc:	jz	xdb16			; 0000DAFC  7418  't.'
 	or	word [0x64],0x80	; 0000DAFE  810E64008000  '..d...'
 	mov	[0x82],bx		; 0000DB04  891E8200  '....'
 	call	xdb33			; 0000DB08  E82800  '.(.'
+	;;
+	;; Assuming another 1024Kb of extended RAM has been successfully tested, (BX) will
+	;; be loaded with 0x400 (1024).
+	;;
 	mov	bx,[0x84]		; 0000DB0B  8B1E8400  '....'
 	mov	[0x8a],bx		; 0000DB0F  891E8A00  '....'
 	jmp	short xdb2b		; 0000DB13  EB16  '..'
-
 	nop				; 0000DB15  90  '.'
+
+	;;
+	;; This is where we end up testing the remaining 512Kb of the first 640Kb, because
+	;; the value in word [0x80] (0x200) matched the value in word [0x7a] (0x200).
+	;;
 xdb16:	push	ax			; 0000DB16  50  'P'
 	mov	al,0x6f			; 0000DB17  B06F  '.o'
 	out	0x84,al			; 0000DB19  E684  '..'
@@ -10171,24 +10349,35 @@ xdb2b:	clc				; 0000DB2B  F8  '.'
 xdb31:	pop	bx			; 0000DB31  5B  '['
 	ret				; 0000DB32  C3  '.'
 
-	;;;
-	; Protected-mode Memory Test
-	;
-	; When called from x8509 (ie, the initial call):
-	;
-	;	word [0x82]:	0x80
-	;	byte [0x8f]:	0xff
-	;	byte [0x92]:	0x01 (this means display the value in BP immediately)
-	;	(BP): 		0x80 (128)
-	;	(AH):		0xFE (64Kb block number, copied to byte [0x4c] on entry)
-	;
-	; On the initial call, the first 128Kb has already been tested and initialized (see init_128kb),
-	; which is why BP is set to 128 for immediate display of "00128 KB OK".
-	;
-	; We then proceed to test the 128Kb starting at %FE0000 through %FFFFFF (the top of the 16Mb range),
-	; which is where this ROM (and potentially other ROMs) will be copied and then mapped to %0E0000
-	; through %0FFFFF.
-	;
+	;;
+	;; Protected-mode Memory Test
+	;;
+	;; When called from x8509 (ie, the initial call):
+	;;
+	;;	word [0x82]:	0x80
+	;;	byte [0x8f]:	0xff
+	;;	byte [0x92]:	0x01 (this means display the value in BP immediately)
+	;;	(BP): 		0x80 (128)
+	;;	(AH):		0xFE (64Kb block number, copied to byte [0x4c] on entry)
+	;;
+	;; On the initial call, the first 128Kb has already been tested and initialized (see init_128kb),
+	;; which is why BP is set to 128 for immediate display of "00128 KB OK".
+	;;
+	;; We then proceed to test the 128Kb starting at %FE0000 through %FFFFFF (the top of the 16Mb range),
+	;; which is where this ROM (and potentially other ROMs) will be copied and then mapped to %0E0000
+	;; through %0FFFFF.  Compaq refers to this as "relocatable RAM".
+	;;
+	;; On the second call (from xdb16), AH is 0x02 (the first 64Kb block after the first 128Kb), and on
+	;; successful completion of that call, "00768 KB OK" will be displayed, referring to the first 640Kb
+	;; of conventional RAM plus the 128Kb of "relocatable RAM" tested earlier.
+	;;
+	;; On the third call (from xdafc), AH is 0x10 (the first 64Kb block above 1Mb).  Assuming this call
+	;; successfully tests another 1024Kb, a total of "01792 KB OK" will be displayed.
+	;;
+	;; There appears to be a fourth call (from xd82e), where AH is 0xF0 (the first 64Kb of the last 1Mb
+	;; of the first 16Mb); we place no memory there, and Compaq memory maps typically show no memory there,
+	;; so I'm not sure what that's all about. -JP
+	;;
 xdb33:	push	bx			; 0000DB33  53  'S'
 	push	di			; 0000DB34  57  'W'
 	push	es			; 0000DB35  06  '.'
@@ -10204,8 +10393,8 @@ xdb33:	push	bx			; 0000DB33  53  'S'
 	jnz	xdb58			; 0000DB4C  750A  'u',0x0A
 
 	;;
-	; Display the Kb value in (BP)
-	;
+	;; Display the Kb value in (BP)
+	;;
 	mov	ax,0x40			; segment 0x40 mapped to %B0000
 	mov	es,ax			; (ES) -> video buffers
 	mov	ax,bp			; (AX) == value to display (in Kb)
@@ -10218,8 +10407,8 @@ xdb58:	cmp	word [0x82],byte +0x0	; 0000DB58  833E820000  '.>...'
 	jmp	xdbf1			; 0000DB68  E98600  '...'
 
 	;;
-	; Test another 64Kb of memory
-	;
+	;; Test another 64Kb of memory
+	;;
 xdb6b:	mov	al,0x71			; 0000DB6B  B071  '.q'
 	out	0x84,al			; 0000DB6D  E684  '..'
 	mov	ax,0x48			; 0000DB6F  B84800  '.H.'
@@ -10233,8 +10422,8 @@ xdb6b:	mov	al,0x71			; 0000DB6B  B071  '.q'
 	ja	xdb86			; 0000DB7F  7705  'w.'
 
 	;;
-	; Test the memory at segment 0x48 (ES), carry clear if success
-	;
+	;; Test the memory at segment 0x48 (ES), carry clear if success
+	;;
 	call	xad38			; 0000DB81  E8B4D1  '...'
 	jmp	short xdb89		; 0000DB84  EB03  '..'
 
@@ -10280,13 +10469,13 @@ xdbc2:	stosw				; 0000DBC2  AB  '.'
 	add	ax,bx			; 0000DBD4  03C3  '..'
 
 	;;
-	; Display (AX) as a 5-digit value in the top-left corner of the screen, followed by " KB OK"
-	;
+	;; Display (AX) as a 5-digit value in the top-left corner of the screen, followed by " KB OK"
+	;;
 	call	x80a5			; 0000DBD6  E8CCA4
 
 	;;
-	; After displaying "00192 KB OK", BX is 0x40 and [0x82] contains 0x80.
-	;
+	;; After displaying "00192 KB OK", BX is 0x40 and [0x82] contains 0x80.
+	;;
 xdbd9:	cmp	[0x82],bx		; 0000DBD9  391E8200  '9...'
 	ja	xdbe5			; 0000DBDD  7706  'w.'
 	mov	ax,0x0			; 0000DBDF  B80000  '...'
@@ -10297,8 +10486,8 @@ xdbe5:	add	byte [0x4c],0x1		; 0000DBE5  80064C0001  '..L..'
 	jmp	xdb6b			; 0000DBEA  E97EFF  '.~.'
 
 	;;
-	; Now we're on to a new phase, after displaying "00256 KB OK"
-	;
+	;; Now we're on to a new phase, after displaying "00256 KB OK"
+	;;
 xdbed:	mov	[0x84],bx		; 0000DBED  891E8400  '....'
 xdbf1:	push	ax			; 0000DBF1  50  'P'
 	mov	al,0x73			; 0000DBF2  B073  '.s'
@@ -10712,7 +10901,7 @@ xdf34:	mov	bx,0x2			; 0000DF34  BB0200  '...'
 	lea	si,[si+0x18]		; 0000DF48  8D7418  '.t.'
 	call	xdfbc			; 0000DF4B  E86E00  '.n.'
 	mov	si,bx			; 0000DF4E  8BF3  '..'
-	mov	di,0xffe0		; 0000DF50  BFE0FF  '...'
+	mov	di,rombuf1		; 0000DF50  BFE0FF  '...'
 	mov	di,[cs:di]		; 0000DF53  2E8B3D  '..='
 	test	word [cs:di],0xf00	; 0000DF56  2EF705000F  '.....'
 	lea	di,[si+0x38]		; 0000DF5B  8D7C38  '.|8'
@@ -11206,8 +11395,8 @@ xe3ef:	mov	ah,0x0			; 0000E3EF  B400  '..'
 	db	0xC4,0x06 									; 0000E700
 
 	;;
-	; Start of warm boot code: read first sector from boot drive
-	;
+	;; Start of warm boot code: read first sector from boot drive
+	;;
 	sti				; 0000E702  FB  '.'
 	cld				; 0000E703  FC  '.'
 	mov	al,0xf			; 0000E704  B00F  '..'
@@ -11232,7 +11421,7 @@ xe71b:	push	cx			; 0000E71B  51  'Q'
 	jc	xe73c			; 0000E72E  720C  'r.'
 
 	times	9 db 0xFF		; 0000E730 - 0000E738
-	jmp	xc5c0			; 0000E739  E984DE (TODO: This JMP doesn't appear reachable)
+	jmp	xc5c0			; 0000E739  E984DE (NOTE: This JMP doesn't appear reachable)
 
 xe73c:	loop	xe71b			; 0000E73C  E2DD  '..'
 	mov	al,0xbb			; 0000E73E  B0BB  '..'
@@ -11258,8 +11447,8 @@ xe73c:	loop	xe71b			; 0000E73C  E2DD  '..'
 	jmp	short xe714		; 0000E76C  EBA6  '..'
 
 	;;
-	; On warm boot failure, pass control to the traditional ROM BASIC entry point
-	;
+	;; On warm boot failure, pass control to the traditional ROM BASIC entry point
+	;;
 xe76e:	int	0x18			; 0000E76E  CD18  '..'
 
 xe770:	test	dl,0x80			; 0000E770  F6C280  '...'
@@ -11289,8 +11478,8 @@ xe793:	mov	al,0x33			; 0000E793  B033  '.3'
 	call	xb549			; 0000E79E  E8A8CD  '...'
 
 	;;
-	; Verify the boot sector signature (0xAA55)
-	;
+	;; Verify the boot sector signature (0xAA55)
+	;;
 	cmp	word [bx+0x1fe],0xaa55	; 0000E7A1  81BFFE0155AA  '....U.'
 	jnz	xe76e			; 0000E7A7  75C5  'u.'
 xe7a9:	in	al,0x86			; 0000E7A9  E486  '..'
@@ -11304,8 +11493,8 @@ xe7b7:	mov	al,0xbc			; 0000E7B7  B0BC  '..'
 	out	0x84,al			; 0000E7B9  E684  '..'
 
 	;;
-	; Jump to the start of the boot sector
-	;
+	;; Jump to the start of the boot sector
+	;;
 	jmp	0x0:0x7c00		; 0000E7BB  EA007C0000  '..|..'
 
 xe7c0:	add	sp,byte +0x6		; 0000E7C0  83C406  '...'
@@ -11317,8 +11506,8 @@ xe7c0:	add	sp,byte +0x6		; 0000E7C0  83C406  '...'
 	int	0x19			; 0000E7CE  CD19  '..'
 
 	;;
-	; print_str$(CS:SI -> $-terminated string)
-	;
+	;; print_str$(CS:SI -> $-terminated string)
+	;;
 print_str$:
 	cld				; 0000E7D0  FC  '.'
 xe7d1:	cs	lodsb			; 0000E7D1  2EAC  '..'
@@ -11328,9 +11517,9 @@ xe7d1:	cs	lodsb			; 0000E7D1  2EAC  '..'
 	jmp	short xe7d1		; 0000E7DA  EBF5  '..'
 xe7dc:	ret				; 0000E7DC  C3  '.'
 
-	sub	al,0x2d			; 0000E7DD  2C2D  ',-' (TODO: Reachable instruction?)
+	sub	al,0x2d			; 0000E7DD  2C2D  ',-' (NOTE: This instruction doesn't appear reachable)
 
-xe7df:	mov	si,0xffe0		; 0000E7DF  BEE0FF  '...'
+xe7df:	mov	si,rombuf1		; 0000E7DF  BEE0FF  '...'
 	mov	si,[cs:si]		; 0000E7E2  2E8B34  '..4'
 	mov	ax,[cs:si]		; 0000E7E5  2E8B04  '...'
 	test	ax,0xf00		; 0000E7E8  A9000F  '...'
@@ -11348,8 +11537,8 @@ xe7f0:	and	ah,0xc0			; 0000E7F0  80E4C0  '...'
 xe80a:	ret				; 0000E80A  C3  '.'
 
 	;;
-	; Compare DS:BX to ES:DI; return carry CLEAR if success, or carry SET if failure
-	;
+	;; Compare DS:BX to ES:DI; return carry CLEAR if success, SET if failure
+	;;
 xe80b:	mov	si,bx			; 0000E80B  8BF3  '..'
 	mov	cx,0x21			; 0000E80D  B92100  '.!.'
 	repe	cmpsd			; 0000E810  66F3A7  'f..'
@@ -12457,7 +12646,7 @@ xf273:	cmp	bx,byte +0x0		; 0000F273  83FB00  '...'
 	sub	ax,bx			; 0000F287  2BC3  '+.'
 	mov	cx,0xf000		; 0000F289  B900F0  '...'
 	mov	es,cx			; 0000F28C  8EC1  '..'
-	mov	di,0xffe0		; 0000F28E  BFE0FF  '...'
+	mov	di,rombuf1		; 0000F28E  BFE0FF  '...'
 	mov	di,[es:di]		; 0000F291  268B3D  '&.='
 	mov	[es:di],al		; 0000F294  268805  '&..'
 xf297:	ret				; 0000F297  C3  '.'
@@ -12602,6 +12791,10 @@ xf373:	pop	ax			; 0000F373  58  'X'
 
 	dw	0xFFFF			; 0000F376  FFFF
 
+	;;
+	;; Pattern buffers for memory tests
+	;;
+pattern1:
 	db	0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x02						; 0000F378
 	db	0x00,0x00,0x00,0x04,0x00,0x00,0x00,0x08,0x00,0x00,0x00,0x10,0x00,0x00,0x00,0x20 ; 0000F380
 	db	0x00,0x00,0x00,0x40,0x00,0x00,0x00,0x80,0x00,0x00,0x01,0x00,0x00,0x00,0x02,0x00 ; 0000F390
@@ -12610,7 +12803,9 @@ xf373:	pop	ax			; 0000F373  58  'X'
 	db	0x00,0x04,0x00,0x00,0x00,0x08,0x00,0x00,0x00,0x10,0x00,0x00,0x00,0x20,0x00,0x00 ; 0000F3C0
 	db	0x00,0x40,0x00,0x00,0x00,0x80,0x00,0x00,0x01,0x00,0x00,0x00,0x02,0x00,0x00,0x00 ; 0000F3D0
 	db	0x04,0x00,0x00,0x00,0x08,0x00,0x00,0x00,0x10,0x00,0x00,0x00,0x20,0x00,0x00,0x00 ; 0000F3E0
-	db	0x40,0x00,0x00,0x00,0x80,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xFF,0xFF,0xFF,0xFE ; 0000F3F0
+	db	0x40,0x00,0x00,0x00,0x80,0x00,0x00,0x00,0x00,0x00,0x00,0x00			; 0000F3F0
+pattern2:
+	db	0xFF,0xFF,0xFF,0xFE 								; 0000F3FC
 	db	0xFF,0xFF,0xFF,0xFD,0xFF,0xFF,0xFF,0xFB,0xFF,0xFF,0xFF,0xF7,0xFF,0xFF,0xFF,0xEF ; 0000F400
 	db	0xFF,0xFF,0xFF,0xDF,0xFF,0xFF,0xFF,0xBF,0xFF,0xFF,0xFF,0x7F,0xFF,0xFF,0xFE,0xFF ; 0000F410
 	db	0xFF,0xFF,0xFD,0xFF,0xFF,0xFF,0xFB,0xFF,0xFF,0xFF,0xF7,0xFF,0xFF,0xFF,0xEF,0xFF ; 0000F420
@@ -12622,7 +12817,7 @@ xf373:	pop	ax			; 0000F373  58  'X'
 
 xf480:	mov	al,0x7d			; 0000F480  B07D
 	out	0x84,al			; 0000F482  E684
-	mov	si,0xffe0		; 0000F484  BEE0FF
+	mov	si,rombuf1		; 0000F484  BEE0FF
 	mov	si,[cs:si]		; 0000F487  2E8B34  '..4'
 	test	word [cs:si],0xf00	; 0000F48A  2EF704000F  '.....'
 	jz	xf494			; 0000F48F  7403  't.'
@@ -12630,13 +12825,21 @@ xf480:	mov	al,0x7d			; 0000F480  B07D
 
 xf494:	mov	al,0x0			; 0000F494  B000  '..'
 	out	0x80,al			; 0000F496  E680  '..'
-	lgdt	[cs:0x77e]		; 0000F498  2E0F01167E07  '....~.'
+	;;
+	;; TODO: Determine why the ROM uses gdtr_hi instead of gdtr_lo this time.
+	;;
+	;; When we arrive here, the A20 line has been disabled, so in theory, the GDT-in-ROM
+	;; is accessible only at the "lo" ROM address (%0F0730), not the "hi" address (%FF0730).
+	;; Which means the following JMP through selector 0x28 (indeed, any selector access)
+	;; should immediately fail.  Yet somehow this code still works?
+	;;
+	lgdt	[cs:0x077e]		; 0000F498  load [gdtr_hi] into GDTR
 	mov	eax,cr0			; 0000F49E  0F2000
-	or	ax,0x1			; 0000F4A1  0D0100  0x0D,'..'
+	or	ax,0x1			; 0000F4A1  0D0100
 	mov	cr0,eax			; 0000F4A4  0F2200
-	jmp	0x28:0xf4ac		; 0000F4A7  EAACF42800  '...(.'
+	jmp	0x28:xf4ac		; 0000F4A7  EAACF42800
 
-	mov	ax,0x8			; 0000F4AC  B80800  '...'
+xf4ac:	mov	ax,0x8			; 0000F4AC  B80800  '...'
 	mov	ds,ax			; 0000F4AF  8ED8  '..'
 	in	al,0x61			; 0000F4B1  E461  '.a'
 	mov	ah,al			; 0000F4B3  8AE0  '..'
@@ -12709,7 +12912,7 @@ xf54b:	lodsd				; 0000F54B  66AD  'f.'
 
 xf557:	mov	ax,0x30			; 0000F557  B83000  '.0.'
 	mov	ds,ax			; 0000F55A  8ED8  '..'
-	mov	bx,0xf378		; 0000F55C  BB78F3  '.x.'
+	mov	bx,pattern1		; 0000F55C  BB78F3  '.x.'
 xf55f:	mov	ax,0x4			; 0000F55F  B80400  '...'
 	mov	dx,0x7c			; 0000F562  BA7C00  '.|.'
 	xor	di,di			; 0000F565  33FF  '3.'
@@ -12730,9 +12933,9 @@ xf55f:	mov	ax,0x4			; 0000F55F  B80400  '...'
 	jmp	xe80b			; 0000F589  E97FF2  '...'
 
 	jc	xf599			; 0000F58C  720B  'r.'
-	cmp	bx,0xf3fc		; 0000F58E  81FBFCF3  '....'
+	cmp	bx,pattern2		; 0000F58E  81FBFCF3  '....'
 	jz	xf5a0			; 0000F592  740C  't.'
-	mov	bx,0xf3fc		; 0000F594  BBFCF3  '...'
+	mov	bx,pattern2		; 0000F594  BBFCF3  '...'
 	jmp	short xf55f		; 0000F597  EBC6  '..'
 
 xf599:	mov	al,0x1			; 0000F599  B001  '..'
@@ -12745,7 +12948,7 @@ xf5a0:	mov	ax,0x8			; 0000F5A0  B80800  '...'
 	mov	ax,0x40			; 0000F5AB  B84000  '.@.'
 	mov	es,ax			; 0000F5AE  8EC0  '..'
 	mov	ax,0x4			; 0000F5B0  B80400  '...'
-	mov	bx,0xf378		; 0000F5B3  BB78F3  '.x.'
+	mov	bx,pattern1		; 0000F5B3  BB78F3  '.x.'
 	mov	dx,0x7c			; 0000F5B6  BA7C00  '.|.'
 	xor	di,di			; 0000F5B9  33FF  '3.'
 	mov	bp,0xf5c1		; 0000F5BB  BDC1F5  '...'
@@ -12773,7 +12976,7 @@ xf5a0:	mov	ax,0x8			; 0000F5A0  B80800  '...'
 
 	jc	xf599			; 0000F5F2  72A5  'r.'
 	mov	ax,0x4			; 0000F5F4  B80400  '...'
-	mov	bx,0xf3fc		; 0000F5F7  BBFCF3  '...'
+	mov	bx,pattern2		; 0000F5F7  BBFCF3  '...'
 	mov	dx,0x7c			; 0000F5FA  BA7C00  '.|.'
 	xor	di,di			; 0000F5FD  33FF  '3.'
 	mov	bp,0xf605		; 0000F5FF  BD05F6  '...'
@@ -12818,7 +13021,7 @@ xf655:	mov	ax,0x10			; 0000F655  B81000  '...'
 	mov	cr0,eax			; 0000F665  0F2200
 	jmp	0xf000:0xf66d		; 0000F668  EA6DF600F0  '.m...'
 
-	lidt	[cs:0x784]		; 0000F66D  2E0F011E8407  '......'
+	lidt	[cs:0x0784]		; 0000F66D  load [idtr_lo] into IDTR
 	in	al,0x80			; 0000F673  E480  '..'
 	cmp	al,0x0			; 0000F675  3C00  '<.'
 	jz	xf684			; 0000F677  740B  't.'
@@ -12826,6 +13029,7 @@ xf655:	mov	ax,0x10			; 0000F655  B81000  '...'
 	mov	cx,err205_len		; 0000F67B  B91300  '...'
 	mov	bx,err205		; 0000F67E  BBD0B6  '...'
 	call	xc745			; 0000F681  E8C1D0  '...'
+
 xf684:	mov	al,0x7e			; 0000F684  B07E  '.~'
 	out	0x84,al			; 0000F686  E684  '..'
 	xor	al,al			; 0000F688  32C0  '2.'
@@ -12833,9 +13037,9 @@ xf684:	mov	al,0x7e			; 0000F684  B07E  '.~'
 	ret				; 0000F68C  C3  '.'
 
 	;;
-	; Repeatedly copies 0x84 bytes from DS:BX to ES:DI for DX iterations, followed by AX more
-	; bytes after DX is exhausted.  DI advances, BX does not.  Returns to BP.
-	;
+	;; Repeatedly copies 0x84 bytes from DS:BX to ES:DI for DX iterations, followed by AX more
+	;; bytes after DX is exhausted.  DI advances, BX does not.  Returns to BP.
+	;;
 xf68d:	mov	si,bx			; 0000F68D  8BF3  '..'
 	mov	cx,0x21			; 0000F68F  B92100  '.!.'
 	rep	movsd			; 0000F692  66F3A5  'f..'
@@ -13133,31 +13337,46 @@ xf8ba:	sti				; 0000F8BA  FB  '.'
 	xor	ah,ah			; 0000F8CE  32E4  '2.'
 	iret				; 0000F8D0  CF  '.'
 
-	int1				; 0000F8D1  F1  '.'
-	add	[bx+si],ah		; 0000F8D2  0020  '. '
-	adc	[bx+di],sp		; 0000F8D4  1121  '.!'
-	or	[bx+di],ah		; 0000F8D6  0821  '.!'
-	add	al,0x21			; 0000F8D8  0421  '.!'
-	add	[bx+di],sp		; 0000F8DA  0121  '.!'
-	jmp	near [bx+si+0xa111]	; 0000F8DC  FFA011A1  '....'
-	db	0x70,0xA1
-	add	ah,[bx+di+0xa101]	; 0000F8E2  02A101A1  '....'
-	call	near [di+0x95ba]	; 0000F8E6  FF95BA95  '....'
-	mov	dx,0xd9ca		; 0000F8EA  BACAD9  '...'
-	aam	0xd9			; 0000F8ED  D4D9  '..'
-	and	dx,di			; 0000F8EF  21FA  '!.'
-	pop	ss			; 0000F8F1  17  '.'
-	cli				; 0000F8F2  FA  '.'
-	retf				; 0000F8F3  CB  '.'
+	;;
+	;; 11 pairs of I/O ports/values for early I/O port (eg, PIC) initialization
+	;;
+xf8d1:	db	0xF1,0x00
+	db	0x20,0x11
+	db	0x21,0x08
+	db	0x21,0x04
+	db	0x21,0x01
+	db	0x21,0xFF
+	db	0xA0,0x11
+	db	0xA1,0x70
+	db	0xA1,0x02
+	db	0xA1,0x01
+	db	0xA1,0xFF
 
-	not	bx			; 0000F8F4  F7D3  '..'
-	not	bx			; 0000F8F6  F7D3  '..'
-	test	word [bx+si],0xa00	; 0000F8F8  F700000A  '...',0x0A
-	cli				; 0000F8FC  FA  '.'
-	add	ax,[bx+si]		; 0000F8FD  0300  '..'
-	add	al,ah			; 0000F8FF  00E0  '..'
-	add	ax,[bx+si]		; 0000F901  0300  '..'
-	add	al,cl			; 0000F903  00C8  '..'
+xf8e7:	dw	0xba95			; SHUTDOWN 0x00
+	dw	0xba95			; SHUTDOWN 0x01
+	dw	0xd9ca			; SHUTDOWN 0x02
+	dw	0xd9d4			; SHUTDOWN 0x03
+	dw	0xfa21			; SHUTDOWN 0x04
+	dw	0xfa17			; SHUTDOWN 0x05
+	dw	0xf7cb			; SHUTDOWN 0x06
+	dw	0xf7d3			; SHUTDOWN 0x07
+	dw	0xf7d3			; SHUTDOWN 0x08
+	;;
+	;; The entry for 0x09 is empty because the ROM dispatches directly to xa43c,
+	;; bypassing I/O port (eg, PIC) re-initialization.
+	;;
+	dw	0x0000			; SHUTDOWN 0x09
+	;;
+	;; The entry for 0x0a seems useless, because the ROM dispatches directly to xfa0a,
+	;; also bypassing I/O port (eg, PIC) re-initialization.
+	;;
+	dw	0xfa0a			; SHUTDOWN 0x0a
+
+	;;
+	;; ROM dispatch addresses
+	;;
+xf8fd:	dw	0x0003,0xe000
+xf901:	dw	0x0003,0xc800
 
 reset:	mov	al,0x0			; 0000F905  B000  '..'
 	out	0x84,al			; 0000F907  E684  '..'
@@ -13184,8 +13403,8 @@ xf92f:	in	al,0x64			; 0000F92F  E464  '.d'
 	jnz	xf93a			; 0000F933  7505  'u.'
 	loop	xf92f			; 0000F935  E2F8  '..'
 	jmp	short xf976		; 0000F937  EB3D  '.='
-
 	nop				; 0000F939  90  '.'
+
 xf93a:	mov	al,0x2			; 0000F93A  B002  '..'
 	out	0x84,al			; 0000F93C  E684  '..'
 	in	al,0x60			; 0000F93E  E460  '.`'
@@ -13220,28 +13439,33 @@ xf976:	mov	al,0x6			; 0000F976  B006  '..'
 
 xf984:	mov	al,0x7			; 0000F984  B007  '..'
 	out	0x84,al			; 0000F986  E684  '..'
+	;;
+	;; Request the CMOS SHUTDOWN byte at CMOS address 0x0F, and then zero it
+	;;
 	mov	al,0x8f			; 0000F988  B08F  '..'
 	out	0x70,al			; 0000F98A  E670  '.p'
-	jmp	short xf98e		; 0000F98C  EB00  '..'
-
-xf98e:	jmp	short xf990		; 0000F98E  EB00  '..'
-
-xf990:	in	al,0x71			; 0000F990  E471  '.q'
+	jmp	$+2			; 0000F98C  EB00  '..'
+	jmp	$+2			; 0000F98E  EB00  '..'
+	in	al,0x71			; 0000F990  E471  '.q'
 xf992:	mov	bx,ax			; 0000F992  8BD8  '..'
 	mov	al,0x8f			; 0000F994  B08F  '..'
 	out	0x70,al			; 0000F996  E670  '.p'
-	jmp	short xf99a		; 0000F998  EB00  '..'
-
-xf99a:	jmp	short xf99c		; 0000F99A  EB00  '..'
-
-xf99c:	mov	al,0x0			; 0000F99C  B000  '..'
+	jmp	$+2			; 0000F998  EB00  '..'
+	jmp	$+2			; 0000F99A  EB00  '..'
+	mov	al,0x0			; 0000F99C  B000  '..'
 	out	0x71,al			; 0000F99E  E671  '.q'
+	;;
+	;; Special CMOS SHUTDOWN dispatch for 0x09
+	;;
 	cmp	bl,0x9			; 0000F9A0  80FB09  '...'
 	jnz	xf9a8			; 0000F9A3  7503  'u.'
 	jmp	xa43c			; 0000F9A5  E994AA  '...'
 
 xf9a8:	mov	al,0x8			; 0000F9A8  B008  '..'
 	out	0x84,al			; 0000F9AA  E684  '..'
+	;;
+	;; Special CMOS SHUTDOWN dispatch for 0x0a
+	;;
 	cmp	bl,0xa			; 0000F9AC  80FB0A  '..',0x0A
 	jnz	xf9b4			; 0000F9AF  7503  'u.'
 	jmp	short xfa0a		; 0000F9B1  EB57  '.W'
@@ -13252,7 +13476,7 @@ xf9b4:	xor	al,al			; 0000F9B4  32C0  '2.'
 	mov	ax,0xf000		; 0000F9B8  B800F0  '...'
 	mov	ds,ax			; 0000F9BB  8ED8  '..'
 	xor	dx,dx			; 0000F9BD  33D2  '3.'
-	mov	si,0xf8d1		; 0000F9BF  BED1F8  '...'
+	mov	si,xf8d1		; 0000F9BF  BED1F8  '...'
 	mov	cx,0xb			; 0000F9C2  B90B00  '...'
 xf9c5:	lodsb				; 0000F9C5  AC  '.'
 	mov	dl,al			; 0000F9C6  8AD0  '..'
@@ -13279,12 +13503,22 @@ xf9e9:	mov	al,0x0			; 0000F9E9  B000  '..'
 	out	0xa0,al			; 0000F9ED  E6A0  '..'
 	mov	al,0x9			; 0000F9EF  B009  '..'
 	out	0x84,al			; 0000F9F1  E684  '..'
+
+	;;
+	;; Verify that the CMOS SHUTDOWN byte is <= 0x0B (and if not, set it to 0x00)
+	;;
+	;; NOTE: This test permits 0x0B, but there is no entry for 0x0B in the table at xf8e7.
+	;;
 	cmp	bl,0xb			; 0000F9F3  80FB0B  '...'
 	jna	xf9fa			; 0000F9F6  7602  'v.'
 	mov	bl,0x0			; 0000F9F8  B300  '..'
+
+	;;
+	;; Dispatch according to the CMOS SHUTDOWN byte
+	;;
 xf9fa:	xor	bh,bh			; 0000F9FA  32FF  '2.'
 	shl	bl,1			; 0000F9FC  D0E3  '..'
-	mov	si,[cs:bx+0xf8e7]	; 0000F9FE  2E8BB7E7F8  '.....'
+	mov	si,[cs:bx+xf8e7]	; 0000F9FE  2E8BB7E7F8  '.....'
 	mov	ax,0x40			; 0000FA03  B84000  '.@.'
 	mov	ds,ax			; 0000FA06  8ED8  '..'
 	jmp	si			; 0000FA08  FFE6  '..'
@@ -13310,8 +13544,8 @@ xfa0a:	mov	al,0xa			; 0000FA0A  B00A  '.',0x0A
 	out	0x70,al			; 0000FA2D  E670  '.p'
 
 	;;
-	; Begin warm boot
-	;
+	;; Begin warm boot
+	;;
 	int	0x19			; 0000FA2F  CD19  '..'
 
 	db	0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF     	; 0000FA31
@@ -13519,14 +13753,15 @@ xffb3:	pop	ds			; 0000FFB3  1F  '.'
 	db	0x0000			; 0000FFB8  0000
 	dw	0x0000			; 0000FFBA  0000
 	dw	0x0000			; 0000FFBC  0000
-	dw	0x0003			; 0000FFBE  0300
+	dw	0x0003			; 0000FFBE  0300 (replaced during ROM relocation with 0x03nn where nn is the CPU revision identifier)
 
 	times	29 db 0xFF		; 0000FFC0 - 0000FFDC
 
 	jmp	x9f17			; 0000FFDD  E9379F  '.7.'
 
-	dw	0x7FB6			; 0000FFE0  B67F
-	dw	0x7FBE			; 0000FFE2  BE7F
+rombuf1:dw	0x7FB6			; 0000FFE0  B67F
+rombuf2:dw	0x7FBE			; 0000FFE2  BE7F
+
 	db	'G4J 03COMPAQ'		; 0000FFE4  47344A203033434F4D504151
 
 	jmp	0xf000:reset		; 0000FFF0  EA05F900F0

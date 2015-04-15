@@ -540,24 +540,37 @@ ChipSet.IRQ = {
 
 /*
  * 8253 Programmable Interval Timer (PIT) I/O ports
+ *
+ * Although technically, a PIT provides 3 "counters" rather than 3 "timers", we have
+ * adopted IBM's TechRef nomenclature, which refers to the PIT's counters as TIMER0,
+ * TIMER1, and TIMER2.  For machines with a second PIT (eg, the DeskPro 386), we refer
+ * to those additional counters as TIMER3, TIMER4, and TIMER5.
+ *
+ * In addition, if there's a need to refer to a specfic PIT, use PIT0 for the first PIT
+ * and PIT1 for the second.  This mirrors how we refer to multiple DMA controllers
+ * (eg, DMA0 and DMA1) and multiple PICs (eg, PIC0 and PIC1).
+ *
+ * This differs from Compaq's nomenclature, which used "Timer 1" to refer to the first
+ * PIT, and "Timer 2" for the second PIT, and then referred to "Counter 0", "Counter 1",
+ * and "Counter 2" within each PIT.
  */
-ChipSet.TIMER0 = {
-    INDEX:              0,
-    PORT:               0x40    // used for time-of-day (prior to MODEL_5170)
+ChipSet.PIT0 = {
+    PORT:               0x40,
+    TIMER0:             0,      // used for time-of-day (prior to MODEL_5170)
+    TIMER1:             1,      // used for memory refresh
+    TIMER2:             2       // used for speaker tone generation
 };
 
-ChipSet.TIMER1 = {
-    INDEX:              1,
-    PORT:               0x41    // used for memory refresh
+ChipSet.PIT1 = {
+    PORT:               0x48,   // MODEL_DESKPRO386 only
+    TIMER3:             0,      // used for fail-safe clock
+    TIMER4:             1,      // N/A
+    TIMER5:             2       // used for refresher request extend/speed control
 };
 
-ChipSet.TIMER2 = {
-    INDEX:              2,
-    PORT:               0x42    // used for speaker tone generation
-};
-
-ChipSet.TIMER_CTRL = {
-    PORT:               0x43,   // write-only control register (use the Read-Back command to get status)
+ChipSet.PIT_CTRL = {
+    PORT1:              0x43,   // write-only control register (use the Read-Back command to get status)
+    PORT2:              0x4B,   // write-only control register (use the Read-Back command to get status)
     BCD:                0x01,
     MODE:               0x0E,
     MODE0:              0x00,   // interrupt on Terminal Count (TC)
@@ -734,7 +747,7 @@ ChipSet.KBC = {
         KBD_CLOCK:      0x01,   // keyboard clock (input)
         KBD_DATA:       0x02    // keyboard data (input)
     },
-    RWREG: {                    // this.bPPIB (since CLK_TIMER2 and SPK_TIMER2 are in both PPI_B and KBC.RWREG)
+    RWREG: {                    // this.bPPIB (since CLK_TIMER2 and SPK_TIMER2 are in both PPI_B and RWREG)
         PORT:           0x61,
         CLK_TIMER2:     0x01,   // set to enable clock to TIMER2 (R/W)
         SPK_TIMER2:     0x02,   // set to connect output of TIMER2 to speaker (R/W)
@@ -1097,7 +1110,7 @@ ChipSet.prototype.reset = function(fHard)
     this.updateSwitchDesc();
 
     /*
-     * DMA Controller initialization
+     * DMA (Direct Memory Access) Controller initialization
      */
     this.aDMACs = new Array(this.cDMACs);
     for (i = 0; i < this.cDMACs; i++) {
@@ -1105,7 +1118,7 @@ ChipSet.prototype.reset = function(fHard)
     }
 
     /*
-     * PIC initialization
+     * PIC (Programmable Interupt Controller) initialization
      */
     this.aPICs = new Array(this.cPICs);
     this.initPIC(ChipSet.PIC0.INDEX, ChipSet.PIC0.PORT_LO);
@@ -1114,10 +1127,16 @@ ChipSet.prototype.reset = function(fHard)
     }
 
     /*
-     * Timer initialization
+     * PIT (Programmable Interval Timer) initialization
+     *
+     * Although the DeskPro 386 refers to the timers in the first PIT as "Timer 1, Counter 0",
+     * "Timer 1, Counter 1" and "Timer 1, Counter 2", we're sticking with IBM's nomenclature:
+     * TIMER0, TIMER1 and TIMER2.  Which means that we refer to the "counters" in the second PIT
+     * as TIMER3, TIMER4 and TIMER5; that numbering also matches their indexes in the aTimers array.
      */
-    this.bTimerCtrl = null;         // tracks writes to port 0x43
-    this.aTimers = new Array(3);
+    this.bPIT1Ctrl = null;          // tracks writes to port 0x43
+    this.bPIT2Ctrl = null;          // tracks writes to port 0x4B (MODEL_DESKPRO386 only)
+    this.aTimers = new Array(this.model == ChipSet.MODEL_DESKPRO386? 6 : 3);
     for (i = 0; i < this.aTimers.length; i++) {
         this.initTimer(i);
     }
@@ -1706,7 +1725,7 @@ ChipSet.prototype.save = function()
     state.set(0, [this.sw1Init, this.sw2Init, this.sw1, this.sw2]);
     state.set(1, [this.saveDMAControllers()]);
     state.set(2, [this.savePICs()]);
-    state.set(3, [this.bTimerCtrl, this.saveTimers()]);
+    state.set(3, [this.bPIT1Ctrl, this.saveTimers(), this.bPIT2Ctrl]);
     state.set(4, [this.bPPIA, this.bPPIB, this.bPPIC, this.bPPICtrl, this.bNMI]);
     if (this.model >= ChipSet.MODEL_5170) {
         state.set(5, [this.b8042Status, this.b8042InBuff, this.b8042CmdData,
@@ -1745,7 +1764,8 @@ ChipSet.prototype.restore = function(data)
     }
 
     a = data[3];
-    this.bTimerCtrl = a[0];
+    this.bPIT1Ctrl = a[0];
+    this.bPIT2Ctrl = a[2];
     for (i = 0; i < this.aTimers.length; i++) {
         this.initTimer(i, a[1][i]);
     }
@@ -2358,11 +2378,12 @@ ChipSet.prototype.inDMAChannelAddr = function(iDMAC, iChannel, port, addrFrom)
     }
     controller.bIndex ^= 0x1;
     /*
-     * Technically, aTimers[ChipSet.TIMER1.INDEX].fOut is what drives DMA requests for DMA channel 0 (ChipSet.DMA_REFRESH),
+     * Technically, aTimers[1].fOut is what drives DMA requests for DMA channel 0 (ChipSet.DMA_REFRESH),
      * every 15us, once the BIOS has initialized the channel's "mode" with MODE_SINGLE, INCREMENT, AUTOINIT, and XFER_READ (0x58)
      * and initialized TIMER1 appropriately.
      *
-     * However, we don't need to be that particular.  Simply simulate an ever-increasing address after every read of the full DMA channel 0 address.
+     * However, we don't need to be that particular.  Simply simulate an ever-increasing address after every read of the full
+     * DMA channel 0 address.
      */
     if (!iDMAC && iChannel == ChipSet.DMA_REFRESH && !controller.bIndex) {
         channel.addrCurrent[0]++;
@@ -2418,9 +2439,9 @@ ChipSet.prototype.inDMAChannelCount = function(iDMAC, iChannel, port, addrFrom)
     }
     controller.bIndex ^= 0x1;
     /*
-     * Technically, aTimers[ChipSet.TIMER1.INDEX].fOut is what drives DMA requests for DMA channel 0 (ChipSet.DMA_REFRESH),
-     * every 15us, once the BIOS has initialized the channel's "mode" with MODE_SINGLE, INCREMENT, AUTOINIT, and XFER_READ (0x58)
-     * and initialized TIMER1 appropriately.
+     * Technically, aTimers[1].fOut is what drives DMA requests for DMA channel 0 (ChipSet.DMA_REFRESH),
+     * every 15us, once the BIOS has initialized the channel's "mode" with MODE_SINGLE, INCREMENT, AUTOINIT,
+     * and XFER_READ (0x58) and initialized TIMER1 appropriately.
      *
      * However, we don't need to be that particular.  Simply simulate an ever-decreasing count after every read of the full DMA channel 0 count.
      */
@@ -3122,7 +3143,6 @@ ChipSet.prototype.outPICLo = function(iPIC, bOut, addrFrom)
              */
             if (bOCW2 & ChipSet.PIC_LO.OCW2_SET_ROTAUTO) {
                 this.notice("PIC" + iPIC + '(' + str.toHexByte(pic.port) + "): unsupported OCW2 rotate command: " + str.toHexByte(bOut));
-                this.cpu.stopCPU();
             }
         }
         else  if (bOCW2 == ChipSet.PIC_LO.OCW2_SET_PRI) {
@@ -3136,7 +3156,6 @@ ChipSet.prototype.outPICLo = function(iPIC, bOut, addrFrom)
              * TODO: Remaining commands to support: ChipSet.PIC_LO.OCW2_SET_ROTAUTO and ChipSet.PIC_LO.OCW2_CLR_ROTAUTO
              */
             this.notice("PIC" + iPIC + '(' + str.toHexByte(pic.port) + "): unsupported OCW2 automatic EOI command: " + str.toHexByte(bOut));
-            this.cpu.stopCPU();
         }
     } else {
         /*
@@ -3147,7 +3166,6 @@ ChipSet.prototype.outPICLo = function(iPIC, bOut, addrFrom)
          */
         if (bOut & (ChipSet.PIC_LO.OCW3_POLL_CMD | ChipSet.PIC_LO.OCW3_SMM_CMD)) {
             this.notice("PIC" + iPIC + '(' + str.toHexByte(pic.port) + "): unsupported OCW3 command: " + str.toHexByte(bOut));
-            this.cpu.stopCPU();
         }
         pic.bOCW3 = bOut;
     }
@@ -3413,11 +3431,12 @@ ChipSet.prototype.getIRRVector = function(iPIC)
  * inTimer(iTimer, addrFrom)
  *
  * @this {ChipSet}
- * @param {number} iTimer (ports 0x40, 0x41, 0x42)
+ * @param {number} iTimer
+ * @param {number} port (0x40, 0x41, 0x42, etc)
  * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  * @return {number} simulated port value
  */
-ChipSet.prototype.inTimer = function(iTimer, addrFrom)
+ChipSet.prototype.inTimer = function(iTimer, port, addrFrom)
 {
     var b;
     var timer = this.aTimers[iTimer];
@@ -3428,13 +3447,13 @@ ChipSet.prototype.inTimer = function(iTimer, addrFrom)
     this.updateTimer(iTimer);
     b = timer.countCurrent[timer.countIndex++];
     if (this.messageEnabled(Messages.TIMER | Messages.PORT)) {
-        this.printMessageIO(ChipSet.TIMER0.PORT + iTimer, null, addrFrom, "TIMER" + iTimer, b, true);
+        this.printMessageIO(port, null, addrFrom, "TIMER" + iTimer, b, true);
     }
     return b;
 };
 
 /**
- * outTimer(iTimer, bOut, addrFrom)
+ * outTimer(iTimer, port, bOut, addrFrom)
  *
  * We now rely EXCLUSIVELY on setBurstCycles() to address situations where quick timer interrupt turn-around
  * is expected; eg, by the ROM BIOS POST when it sets TIMER0 to a low test count (0x16); since we typically
@@ -3446,14 +3465,15 @@ ChipSet.prototype.inTimer = function(iTimer, addrFrom)
  * OK with that.
  *
  * @this {ChipSet}
- * @param {number} iTimer (ports 0x40, 0x41, 0x42)
+ * @param {number} iTimer
+ * @param {number} port (0x40, 0x41, 0x42, etc)
  * @param {number} bOut
  * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  */
-ChipSet.prototype.outTimer = function(iTimer, bOut, addrFrom)
+ChipSet.prototype.outTimer = function(iTimer, port, bOut, addrFrom)
 {
     if (this.messageEnabled(Messages.TIMER | Messages.PORT)) {
-        this.printMessageIO(ChipSet.TIMER0.PORT + iTimer, bOut, addrFrom, "TIMER" + iTimer, null, true);
+        this.printMessageIO(port, bOut, addrFrom, "TIMER" + iTimer, null, true);
     }
     var timer = this.aTimers[iTimer];
     if (timer.countIndex == timer.countBytes) this.resetTimerIndex(iTimer);
@@ -3463,7 +3483,7 @@ ChipSet.prototype.outTimer = function(iTimer, bOut, addrFrom)
          * In general, writing a new count to a timer that's already counting isn't supposed to affect the current
          * count, with the notable exceptions of MODE0 and MODE4.
          */
-        if (!timer.fCounting || timer.mode == ChipSet.TIMER_CTRL.MODE0 || timer.mode == ChipSet.TIMER_CTRL.MODE4) {
+        if (!timer.fCounting || timer.mode == ChipSet.PIT_CTRL.MODE0 || timer.mode == ChipSet.PIT_CTRL.MODE4) {
             timer.fLatched = false;
             timer.countCurrent[0] = timer.countStart[0] = timer.countInit[0];
             timer.countCurrent[1] = timer.countStart[1] = timer.countInit[1];
@@ -3476,67 +3496,65 @@ ChipSet.prototype.outTimer = function(iTimer, bOut, addrFrom)
              * on the original PC is that an interrupt is requested only when the corresponding "OUT" transitions from
              * "low" to "high".
              */
-            timer.fOUT = (timer.mode != ChipSet.TIMER_CTRL.MODE0);
+            timer.fOUT = (timer.mode != ChipSet.PIT_CTRL.MODE0);
 
-            if (iTimer == ChipSet.TIMER0.INDEX) {
+            if (iTimer == ChipSet.PIT0.TIMER0) {
                 /*
                  * TODO: Determine if there are situations/modes where I should NOT automatically clear IRQ0 on behalf of TIMER0.
                  */
                 this.clearIRR(ChipSet.IRQ.TIMER0);
-                var countInit = this.getTimerInit(ChipSet.TIMER0.INDEX);
+                var countInit = this.getTimerInit(ChipSet.PIT0.TIMER0);
                 var nCyclesRemain = (countInit * this.nTicksDivisor) | 0;
-                if (timer.mode == ChipSet.TIMER_CTRL.MODE3) nCyclesRemain >>= 1;
+                if (timer.mode == ChipSet.PIT_CTRL.MODE3) nCyclesRemain >>= 1;
                 this.cpu.setBurstCycles(nCyclesRemain);
             }
         }
 
-        if (iTimer == ChipSet.TIMER2.INDEX) {
-            this.setSpeaker();
-        }
+        if (iTimer == ChipSet.PIT0.TIMER2) this.setSpeaker();
     }
 };
 
 /**
- * inTimerCtrl(port, addrFrom)
+ * inPIT1Ctrl(port, addrFrom)
  *
  * @this {ChipSet}
  * @param {number} port (0x43)
  * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  * @return {number|null} simulated port value
  */
-ChipSet.prototype.inTimerCtrl = function(port, addrFrom)
+ChipSet.prototype.inPIT1Ctrl = function(port, addrFrom)
 {
-    this.printMessageIO(port, null, addrFrom, "TIMER_CTRL", null, Messages.TIMER);
-    if (DEBUG) this.printMessage("TIMER_CTRL: Read-Back command not supported (yet)", Messages.TIMER);
+    this.printMessageIO(port, null, addrFrom, "PIT1_CTRL", null, Messages.TIMER);
+    if (DEBUG) this.printMessage("PIT1_CTRL: Read-Back command not supported (yet)", Messages.TIMER);
     return null;
 };
 
 /**
- * outTimerCtrl(port, bOut, addrFrom)
+ * outPIT1Ctrl(port, bOut, addrFrom)
  *
  * @this {ChipSet}
  * @param {number} port (0x43)
  * @param {number} bOut
  * @param {number} [addrFrom] (not defined if the Debugger is trying to read the specified port)
  */
-ChipSet.prototype.outTimerCtrl = function(port, bOut, addrFrom)
+ChipSet.prototype.outPIT1Ctrl = function(port, bOut, addrFrom)
 {
-    this.bTimerCtrl = bOut;
-    this.printMessageIO(port, bOut, addrFrom, "TIMER_CTRL", null, Messages.TIMER);
+    this.bPIT1Ctrl = bOut;
+    this.printMessageIO(port, bOut, addrFrom, "PIT1_CTRL", null, Messages.TIMER);
     /*
      * Extract the SC (Select Counter) bits
      */
-    var iTimer = (bOut & ChipSet.TIMER_CTRL.SC) >> 6;
+    var iTimer = (bOut & ChipSet.PIT_CTRL.SC) >> 6;
     if (iTimer == 0x3) {
-        if (DEBUG) this.printMessage("TIMER_CTRL: Read-Back command not supported (yet)", Messages.TIMER);
+        if (DEBUG) this.printMessage("PIT1_CTRL: Read-Back command not supported (yet)", Messages.TIMER);
         return;
     }
     /*
      * Extract the BCD, MODE, and RW bits, which we simply store as-is (see setTimerMode)
      */
-    var bcd = (bOut & ChipSet.TIMER_CTRL.BCD);
-    var mode = (bOut & ChipSet.TIMER_CTRL.MODE);
-    var rw = (bOut & ChipSet.TIMER_CTRL.RW);
+    var bcd = (bOut & ChipSet.PIT_CTRL.BCD);
+    var mode = (bOut & ChipSet.PIT_CTRL.MODE);
+    var rw = (bOut & ChipSet.PIT_CTRL.RW);
     if (!rw) {
         this.latchTimer(iTimer);
     } else {
@@ -3559,7 +3577,7 @@ ChipSet.prototype.outTimerCtrl = function(port, bOut, addrFrom)
          *
          * TODO: Determine if there are situations/modes where I should NOT automatically clear IRQ0 on behalf of TIMER0.
          */
-        if (iTimer == ChipSet.TIMER0.INDEX) this.clearIRR(ChipSet.IRQ.TIMER0);
+        if (iTimer == ChipSet.PIT0.TIMER0) this.clearIRR(ChipSet.IRQ.TIMER0);
 
         /*
          * Another TIMER0 HACK: The "CASSETTE DATA WRAP TEST" @F000:E51E occasionally reports an error when the second of
@@ -3572,7 +3590,7 @@ ChipSet.prototype.outTimerCtrl = function(port, bOut, addrFrom)
          * FWIW, I believe the cassette hardware was discontinued after MODEL_5150, and even if the test fails, it's non-fatal;
          * the ROM BIOS displays an error (131) and moves on.
          */
-        if (iTimer == ChipSet.TIMER2.INDEX) {
+        if (iTimer == ChipSet.PIT0.TIMER2) {
             var pic = this.aPICs[0];
             if (pic.bIMR == 0xff && this.bPPIB == (ChipSet.PPI_B.CLK_TIMER2 | ChipSet.PPI_B.ENABLE_SW2 | ChipSet.PPI_B.CASS_MOTOR_OFF | ChipSet.PPI_B.CLK_KBD)) {
                 var timer = this.aTimers[0];
@@ -3637,10 +3655,10 @@ ChipSet.prototype.getTimerCycleLimit = function(iTimer, nCycles)
         this.assert(ticksElapsed >= 0);
         var countStart = this.getTimerStart(iTimer);
         var count = countStart - ticksElapsed;
-        if (timer.mode == ChipSet.TIMER_CTRL.MODE3) count -= ticksElapsed;
+        if (timer.mode == ChipSet.PIT_CTRL.MODE3) count -= ticksElapsed;
         this.assert(count > 0);
         var nCyclesRemain = (count * this.nTicksDivisor) | 0;
-        if (timer.mode == ChipSet.TIMER_CTRL.MODE3) nCyclesRemain >>= 1;
+        if (timer.mode == ChipSet.PIT_CTRL.MODE3) nCyclesRemain >>= 1;
         if (nCycles > nCyclesRemain) nCycles = nCyclesRemain;
     }
     return nCycles;
@@ -3709,8 +3727,8 @@ ChipSet.prototype.setTimerMode = function(iTimer, bcd, mode, rw)
 ChipSet.prototype.resetTimerIndex = function(iTimer)
 {
     var timer = this.aTimers[iTimer];
-    timer.countIndex = (timer.rw == ChipSet.TIMER_CTRL.RW_MSB? 1 : 0);
-    timer.countBytes = (timer.rw == ChipSet.TIMER_CTRL.RW_BOTH? 2 : 1);
+    timer.countIndex = (timer.rw == ChipSet.PIT_CTRL.RW_MSB? 1 : 0);
+    timer.countBytes = (timer.rw == ChipSet.PIT_CTRL.RW_BOTH? 2 : 1);
 };
 
 /**
@@ -3741,7 +3759,7 @@ ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
      * Every timer's counting state is gated by its own fCounting flag; TIMER2 is further gated by PPI_B's
      * CLK_TIMER2 bit.
      */
-    if (timer.fCounting && (iTimer != ChipSet.TIMER2.INDEX || (this.bPPIB & ChipSet.PPI_B.CLK_TIMER2))) {
+    if (timer.fCounting && (iTimer != ChipSet.PIT0.TIMER2 || (this.bPPIB & ChipSet.PPI_B.CLK_TIMER2))) {
         /*
          * We determine the current timer count based on how many instruction cycles have elapsed since we started
          * the timer.  Timers are supposed to be "ticking" at a rate of 1193181.8181 times per second, which is
@@ -3800,7 +3818,7 @@ ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
          * neither too slowly nor too quickly.  As a result, I've had to add some corresponding trickery
          * in outTimer() to force interrupt simulation immediately after a low initial count (0x16) has been set.
          */
-        if (timer.mode == ChipSet.TIMER_CTRL.MODE0) {
+        if (timer.mode == ChipSet.PIT_CTRL.MODE0) {
             if (count <= 0) count = 0;
             if (DEBUG && this.messageEnabled(Messages.TIMER)) {
                 this.printMessage("updateTimer(" + iTimer + "): MODE0 timer count=" + count, true);
@@ -3832,7 +3850,7 @@ ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
          * is "illegal", whatever that means.
          */
         else
-        if (timer.mode == ChipSet.TIMER_CTRL.MODE2) {
+        if (timer.mode == ChipSet.PIT_CTRL.MODE2) {
             timer.fOUT = (count != 1);          // yes, this line does seem rather pointless....
             if (count <= 0) {
                 count = countInit + count;
@@ -3866,7 +3884,7 @@ ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
          * to be "high" for (N + 1) / 2 ticks and "low" for (N - 1) / 2 ticks.
          */
         else
-        if (timer.mode == ChipSet.TIMER_CTRL.MODE3) {
+        if (timer.mode == ChipSet.PIT_CTRL.MODE3) {
             count -= ticksElapsed;
             if (count <= 0) {
                 timer.fOUT = !timer.fOUT;
@@ -4047,7 +4065,7 @@ ChipSet.prototype.inPPIC = function(port, addrFrom)
     }
 
     if (this.bPPIB & ChipSet.PPI_B.CLK_TIMER2) {
-        var timer = this.updateTimer(ChipSet.TIMER2.INDEX);
+        var timer = this.updateTimer(ChipSet.PIT0.TIMER2);
         if (timer.fOUT) {
             if (this.bPPIB & ChipSet.PPI_B.SPK_TIMER2)
                 b |= ChipSet.PPI_C.TIMER2_OUT;
@@ -4857,7 +4875,7 @@ ChipSet.prototype.setSpeaker = function(fOn)
             } else {
                 fOn = this.fSpeaker && this.cpu && this.cpu.isRunning();
             }
-            var freq = Math.round(ChipSet.TIMER_TICKS_PER_SEC / this.getTimerInit(ChipSet.TIMER2.INDEX));
+            var freq = Math.round(ChipSet.TIMER_TICKS_PER_SEC / this.getTimerInit(ChipSet.PIT0.TIMER2));
             /*
              * Treat frequencies outside the normal hearing range (below 20hz or above 20Khz) as a clever attempt
              * to turn sound off; we have to explicitly turn the sound off in those cases, to prevent the Audio API
@@ -4970,10 +4988,10 @@ ChipSet.aPortInput = {
     0x08: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAStatus(ChipSet.DMA0.INDEX, port, addrFrom); },
     0x20: /** @this {ChipSet} */ function(port, addrFrom) { return this.inPICLo(ChipSet.PIC0.INDEX, addrFrom); },
     0x21: /** @this {ChipSet} */ function(port, addrFrom) { return this.inPICHi(ChipSet.PIC0.INDEX, addrFrom); },
-    0x40: /** @this {ChipSet} */ function(port, addrFrom) { return this.inTimer(ChipSet.TIMER0.INDEX, addrFrom); },
-    0x41: /** @this {ChipSet} */ function(port, addrFrom) { return this.inTimer(ChipSet.TIMER1.INDEX, addrFrom); },
-    0x42: /** @this {ChipSet} */ function(port, addrFrom) { return this.inTimer(ChipSet.TIMER2.INDEX, addrFrom); },
-    0x43: ChipSet.prototype.inTimerCtrl,
+    0x40: /** @this {ChipSet} */ function(port, addrFrom) { return this.inTimer(ChipSet.PIT0.TIMER0, port, addrFrom); },
+    0x41: /** @this {ChipSet} */ function(port, addrFrom) { return this.inTimer(ChipSet.PIT0.TIMER1, port, addrFrom); },
+    0x42: /** @this {ChipSet} */ function(port, addrFrom) { return this.inTimer(ChipSet.PIT0.TIMER2, port, addrFrom); },
+    0x43: ChipSet.prototype.inPIT1Ctrl,
     0x81: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAPageReg(ChipSet.DMA0.INDEX, 2, port, addrFrom); },
     0x82: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAPageReg(ChipSet.DMA0.INDEX, 3, port, addrFrom); },
     0x83: /** @this {ChipSet} */ function(port, addrFrom) { return this.inDMAPageReg(ChipSet.DMA0.INDEX, 1, port, addrFrom); },
@@ -5038,10 +5056,10 @@ ChipSet.aPortOutput = {
     0x0D: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAMasterClear(ChipSet.DMA0.INDEX, port, bOut, addrFrom); },
     0x20: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outPICLo(ChipSet.PIC0.INDEX, bOut, addrFrom); },
     0x21: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outPICHi(ChipSet.PIC0.INDEX, bOut, addrFrom); },
-    0x40: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outTimer(ChipSet.TIMER0.INDEX, bOut, addrFrom); },
-    0x41: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outTimer(ChipSet.TIMER1.INDEX, bOut, addrFrom); },
-    0x42: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outTimer(ChipSet.TIMER2.INDEX, bOut, addrFrom); },
-    0x43: ChipSet.prototype.outTimerCtrl,
+    0x40: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outTimer(ChipSet.PIT0.TIMER0, port, bOut, addrFrom); },
+    0x41: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outTimer(ChipSet.PIT0.TIMER1, port, bOut, addrFrom); },
+    0x42: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outTimer(ChipSet.PIT0.TIMER2, port, bOut, addrFrom); },
+    0x43: ChipSet.prototype.outPIT1Ctrl,
     0x81: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAPageReg(ChipSet.DMA0.INDEX, 2, port, bOut, addrFrom); },
     0x82: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAPageReg(ChipSet.DMA0.INDEX, 3, port, bOut, addrFrom); },
     0x83: /** @this {ChipSet} */ function(port, bOut, addrFrom) { this.outDMAPageReg(ChipSet.DMA0.INDEX, 1, port, bOut, addrFrom); },
