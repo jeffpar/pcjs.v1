@@ -7,7 +7,9 @@
 ; Additional post-processing performed by the PCjs TextOut module
 ; All post-processing, comments, etc copyright © 2012-2015 Jeff Parsons <Jeff@pcjs.org>
 ;
-; NOTE: This 32Kb ROM image is ORG'ed at 0x8000, because it needs to run at real-mode
+; Overview
+; --------
+; This 32Kb ROM image is ORG'ed at 0x8000, because it needs to run at real-mode
 ; addresses F000:8000 through F000:FFFF, as well as protected-mode physical addresses
 ; %FFFF8000 through %FFFFFFFF.  Additionally, DeskPro 386 systems mirror this 32Kb ROM
 ; at real-mode addresses F000:0000 through F000:7FFF, as well as protected-mode physical
@@ -20,16 +22,44 @@
 ; %FE0000 through %FFFFFF to be mapped to %0E0000 through %0FFFFF, effectively replacing
 ; the ROM in the first megabyte with write-protected RAM; the top 64Kb of that RAM must
 ; first be initialized with the 64Kb at %0F0000 prior to remapping.  It's also possible
-; to copy external ROMs from %0E0000 through %0EFFFF into the bottom 64Kb of that RAM, but
-; this is only done for ROMs known to contain relocatable code (eg, a Compaq Enhanced
+; to copy external ROMs from %0C0000 through %0EFFFF into the bottom 64Kb of that RAM,
+; but this is only done for ROMs known to contain relocatable code (eg, a Compaq Enhanced
 ; Video Graphics card).
 ;
-; Every DeskPro 386 system must have a MINIMUM of 1Mb of RAM, of which either 256Kb, 512Kb,
-; or 640Kb can be physically mapped as conventional memory (at the bottom of the first
-; megabyte), with the remainder (either 768Kb, 512Kb, or 384Kb) physically mapped to the
-; top of the 16th megabyte (ending at address %FFFFFF), the last 128Kb of which is
-; used by the "RAM Relocation" feature.  The remaining memory immediately below that
+; Every DeskPro 386 system must have a MINIMUM of 1Mb of RAM, of which either 256Kb,
+; 512Kb, or 640Kb can be physically mapped as conventional memory (at the bottom of the
+; first megabyte), with the remainder (either 768Kb, 512Kb, or 384Kb) physically mapped
+; to the top of the 16th megabyte (ending at address %FFFFFF), the last 128Kb of which
+; is used by the "RAM Relocation" feature.  The remaining memory immediately below that
 ; 128Kb (ie, below %FE0000) can only be accessed by special system software, such as CEMM.
+;
+; Compaq refers to that remaining memory as "Compaq Built-in Memory".
+;
+; As the Compaq 386/25 TechRef explains:
+;
+;	A data structure in memory indicates how much of the COMPAQ Built-in Memory (F40000h
+;	to FE0000h) is [available and] in use. This memory is allocated downward (decreasing
+;	addresses) starting at address FE0000h. Applications developed specifically for the
+;	COMPAQ DESKPRO	386/25 Personal Computer, such as CEMM, read and modify this data
+;	structure to allocate and deallocate portions of the COMPAQ Built-in Memory for their
+;	use. The built-in memory data structure is located in write-protected memory at segment
+;	F000h. The offset is specified by the word at F000:FFE0.
+;
+;	The format of the data structure is given [below]. Because the data structure resides
+;	in write-protected memory, the write-protection must be disabled when updating the data
+;	structure.
+;
+;	Word	Description
+;	----	-----------
+;	   0	FFFFh indicates that no COMPAQ Built-in Memory is available. Otherwise, words
+;		1, 2, and 3 define the amount of memory available.
+;
+;	   1	Total COMPAQ Built-in Memory size in 16-byte blocks.
+;
+;	   2	Available built-in memory in 16-byte blocks.
+;
+;	   3	Address for the last-used byte. The byte below (lower address) this byte is the
+;		first free byte in the COMPAQ Built-in Memory.
 ;
 	org	0x8000
 
@@ -98,6 +128,7 @@ x8051:	push	bx			; 00008051  53  'S'
 	push	bp			; 00008053  55  'U'
 	mov	dl,al			; 00008054  8AD0  '..'
 	mov	bp,es			; 00008056  8CC5  '..'
+
 	;;
 	;; 0x4C is the base portion of the descriptor at DS:0x48
 	;;
@@ -738,16 +769,18 @@ x853c:	mov	al,0x7f			; 0000853C  B07F  '..'
 	cld				; 0000858F  FC  '.'
 	rep	movsd			; 00008590  66F3A5  'f..'
 
-	mov	bx,rombuf1		; 00008593  BBE0FF  '...'
+	;;
+	;; (DI) -> 0x7FB6
+	;;
+	mov	bx,bim_table_offset	; 00008593  BBE0FF  '...'
 	mov	di,[bx]			; 00008596  8B3F  '.?'
+
 	;;
-	;; (DI) == 0x7FB6
+	;; (SI) -> 0x7FBE
 	;;
-	mov	bx,rombuf2		; 00008598  BBE2FF  '...'
+	mov	bx,cpu_idrev_offset	; 00008598  BBE2FF  '...'
 	mov	si,[bx]			; 0000859B  8B37  '.7'
-	;;
-	;; (SI) == 0x7FBE
-	;;
+
 	pop	ds			; 0000859D  1F  '.'
 	mov	word [0x50],0xffff	; 0000859E  C7065000FFFF  '..P...'
 	mov	word [0x52],0x0		; 000085A4  C70652000000  '..R...'
@@ -755,37 +788,58 @@ x853c:	mov	al,0x7f			; 0000853C  B07F  '..'
 	mov	byte [0x55],0x92	; 000085AF  C606550092  '..U..'
 	mov	byte [0x56],0x0		; 000085B4  C606560000  '..V..'
 	mov	byte [0x57],0x80	; 000085B9  C606570080  '..W..'
-	mov	bx,[0x8d]		; 000085BE  8B1E8D00  '....'
+
 	;;
 	;; (BX) is 0x100 (256Kb)
 	;;
+	mov	bx,[0x8d]		; 000085BE  8B1E8D00  '....'
+
 	push	ds			; 000085C2  1E  '.'
-	mov	ax,0x50			; 000085C3  B85000  '.P.'
-	mov	ds,ax			; 000085C6  8ED8  '..'
+
 	;;
 	;; (DS) -> 0x80C00000
+	;;
+	mov	ax,0x50			; 000085C3  B85000  '.P.'
+	mov	ds,ax			; 000085C6  8ED8  '..'
+
+	;;
+	;; Disable IOCHK NMI, since it is possible to generate a
+	;; parity error by simply reading the RAM Diagnostics Register.
 	;;
 	in	al,0x61			; 000085C8  E461  '.a'
 	push	ax			; 000085CA  50  'P'
 	or	al,0x8			; 000085CB  0C08  '..'
 	out	0x61,al			; 000085CD  E661  '.a'
+
 	;;
-	;; Load the RAM Diagnostics Register from 0x80C00000
+	;; (AL) == RAM Diagnostics Register (from 0x80C00000)
 	;;
 	mov	al,[0x0]		; 000085CF  A00000  '...'
+
+	;;
+	;; Ensure that relocatable RAM at %FE0000 is NEITHER currently remapped NOR write-protected
+	;;
 	mov	byte [0x0],0xff		; 000085D2  C6060000FF  '.....'
+
 	;;
 	;; Isolate the base memory settings in bits 5-4 (00=640Kb, 10=512Kb, 11=256Kb)
 	;;
 	and	al,0xf0			; 000085D7  24F0  '$.'
+
 	;;
-	;; Update %FF7FB7 with base memory settings
+	;; Update [bim_table_offset]+1 (eg, %FF7FB7) with base memory settings
 	;;
 	mov	[es:di+0x1],al		; 000085D9  26884501  '&.E.'
 	pop	ax			; 000085DD  58  'X'
 	out	0x61,al			; 000085DE  E661  '.a'
+
 	;;
-	;; Update %FF7FB6 with 0x10
+	;; Update [bim_table_offset]+0 (eg, %FF7FB6) with 0x10; that will set the
+	;; first word of the built-in memory table to one of these values:
+	;;
+	;;	0x0010		256kb (1024 - 640 - 128)
+	;;	0x2010		384Kb (1024 - 512 - 128)
+	;;	0x3010		640Kb (1024 - 256 - 128)
 	;;
 	mov	byte [es:di],0x10	; 000085E0  26C60510
 
@@ -796,40 +850,54 @@ x853c:	mov	al,0x7f			; 0000853C  B07F  '..'
 	mov	al,0xb0			; 000085EC  B0B0  '..'
 	out	0x70,al			; 000085EE  E670  '.p'
 	in	al,0x71			; 000085F0  E471  '.q'
+
 	;;
-	;; (AX) contains CMOS EXTMEM2 value (0x400)
+	;; (AX) contains CMOS EXTMEM2 value (eg, 0x400 or 1024Kb),
+	;; to which we add another 1024Kb (for conventional memory)
 	;;
 	add	ax,0x400		; 000085F2  050004  '...'
 	mov	cx,0x3f80		; 000085F5  B9803F  '..?'
+
 	;;
-	;; (CX) contains 0x3F80 (maximum # of supported Kb)
+	;; (CX) contains 0x3F80 (maximum # of supported Kb), reduced
+	;; by the amount of built-in memory
 	;;
 	sub	cx,bx			; 000085F8  2BCB  '+.'
+
 	;;
 	;; Compare (AX), total conventional+extended memory, to (CX)
 	;;
 	cmp	ax,cx			; 000085FA  3BC1  ';.'
 	jc	x8600			; 000085FC  7202  'r.'
 	xor	bx,bx			; 000085FE  33DB  '3.'
-x8600:	shl	bx,0x6			; 00008600  C1E306  '...'
+
 	;;
-	;; Move 0x4000 to %FF7FB8 and %FF7FBA
+	;; Assuming no problems, convert Kb of built-in memory to paragraphs,
+	;; by multiplying by 64
+	;;
+x8600:	shl	bx,0x6			; 00008600  C1E306  '...'
+
+	;;
+	;; If (BX) was 0x100 (256Kb), we'll move the equivalent number of paragraphs
+	;; (0x4000) to [bim_table_offset]+2 and +4 (eg, %FF7FB8 and %FF7FBA).
 	;;
 	mov	[es:di+0x2],bx		; 00008603  26895D02  '&.].'
 	mov	[es:di+0x4],bx		; 00008607  26895D04  '&.].'
 	mov	ch,0xfe			; 0000860B  B5FE  '..'
 	xor	cl,cl			; 0000860D  32C9  '2.'
 	shl	cx,0x4			; 0000860F  C1E104  '...'
+
 	;;
-	;; Move 0xE000 to %FF7FBC
+	;; Move 0xE000 to [bim_table_offset]+6 (eg, %FF7FBC)
 	;;
 	mov	[es:di+0x6],cx		; 00008612  26894D06  '&.M.'
 	mov	di,si			; 00008616  8BFE  '..'
 	mov	ax,gs			; 00008618  8CE8  '..'
+
 	;;
-	;; (AX) now contains the processor type and revision (AH=0x03, AL=0x04)
-	;;
-	;; Store the type in %FF7FBE and the revision in %FF7FBF
+	;; (AX) contains the processor type and revision (AH=0x03, AL=0x04),
+	;; which were preserved on reset in (GS); store them at the offset specified
+	;; by cpu_idrev_offset (eg, type in %FF7FBE and revision in %FF7FBF).
 	;;
 	mov	[es:di],ah		; 0000861A  268825  '&.%'
 	mov	[es:di+0x1],al		; 0000861D  26884501  '&.E.'
@@ -844,6 +912,7 @@ x862a:	es	lodsb			; 0000862A  26AC  '&.'
 	not	ah			; 00008630  F6D4  '..'
 	inc	ah			; 00008632  FEC4  '..'
 	mov	[es:si],ah		; 00008634  268824  '&.$'
+
 	;;
 	;; Relocate RAM at %FF0000 to %0F0000
 	;;
@@ -4229,7 +4298,7 @@ xa544:	push	bx			; 0000A544  53  'S'
 	mov	byte [bx+0x5],0x92	; 0000A564  C6470592  '.G..'
 	mov	ax,0x20			; 0000A568  B82000  '. .'
 	mov	es,ax			; 0000A56B  8EC0  '..'
-	mov	bx,rombuf1		; 0000A56D  BBE0FF  '...'
+	mov	bx,bim_table_offset	; 0000A56D  BBE0FF  '...'
 	mov	bx,[es:bx]		; 0000A570  268B1F  '&..'
 	test	word [es:bx],0xf00	; 0000A573  26F707000F  '&....'
 	jnz	xa57f			; 0000A578  7505  'u.'
@@ -6310,11 +6379,11 @@ xbad3:	cld				; 0000BAD3  FC  '.'
 	mov	al,0xff			; 0000BAD9  B0FF  '..'
 	out	0x21,al			; 0000BADB  E621  '.!'
 	out	0xa1,al			; 0000BADD  E6A1  '..'
-	mov	bx,rombuf1		; 0000BADF  BBE0FF  '...'
+	mov	bx,bim_table_offset	; 0000BADF  BBE0FF  '...'
 	mov	bx,[bx]			; 0000BAE2  8B1F  '..'
 	test	word [bx],0xf00		; 0000BAE4  F707000F  '....'
 	jnz	xbaf5			; 0000BAE8  750B  'u.'
-	mov	bx,rombuf2		; 0000BAEA  BBE2FF  '...'
+	mov	bx,cpu_idrev_offset	; 0000BAEA  BBE2FF  '...'
 	mov	bx,[bx]			; 0000BAED  8B1F  '..'
 	mov	ax,[bx]			; 0000BAEF  8B07  '..'
 	xchg	al,ah			; 0000BAF1  86C4  '..'
@@ -10901,7 +10970,7 @@ xdf34:	mov	bx,0x2			; 0000DF34  BB0200  '...'
 	lea	si,[si+0x18]		; 0000DF48  8D7418  '.t.'
 	call	xdfbc			; 0000DF4B  E86E00  '.n.'
 	mov	si,bx			; 0000DF4E  8BF3  '..'
-	mov	di,rombuf1		; 0000DF50  BFE0FF  '...'
+	mov	di,bim_table_offset	; 0000DF50  BFE0FF  '...'
 	mov	di,[cs:di]		; 0000DF53  2E8B3D  '..='
 	test	word [cs:di],0xf00	; 0000DF56  2EF705000F  '.....'
 	lea	di,[si+0x38]		; 0000DF5B  8D7C38  '.|8'
@@ -11519,7 +11588,7 @@ xe7dc:	ret				; 0000E7DC  C3  '.'
 
 	sub	al,0x2d			; 0000E7DD  2C2D  ',-' (NOTE: This instruction doesn't appear reachable)
 
-xe7df:	mov	si,rombuf1		; 0000E7DF  BEE0FF  '...'
+xe7df:	mov	si,bim_table_offset	; 0000E7DF  BEE0FF  '...'
 	mov	si,[cs:si]		; 0000E7E2  2E8B34  '..4'
 	mov	ax,[cs:si]		; 0000E7E5  2E8B04  '...'
 	test	ax,0xf00		; 0000E7E8  A9000F  '...'
@@ -12646,7 +12715,7 @@ xf273:	cmp	bx,byte +0x0		; 0000F273  83FB00  '...'
 	sub	ax,bx			; 0000F287  2BC3  '+.'
 	mov	cx,0xf000		; 0000F289  B900F0  '...'
 	mov	es,cx			; 0000F28C  8EC1  '..'
-	mov	di,rombuf1		; 0000F28E  BFE0FF  '...'
+	mov	di,bim_table_offset	; 0000F28E  BFE0FF  '...'
 	mov	di,[es:di]		; 0000F291  268B3D  '&.='
 	mov	[es:di],al		; 0000F294  268805  '&..'
 xf297:	ret				; 0000F297  C3  '.'
@@ -12817,21 +12886,23 @@ pattern2:
 
 xf480:	mov	al,0x7d			; 0000F480  B07D
 	out	0x84,al			; 0000F482  E684
-	mov	si,rombuf1		; 0000F484  BEE0FF
-	mov	si,[cs:si]		; 0000F487  2E8B34  '..4'
-	test	word [cs:si],0xf00	; 0000F48A  2EF704000F  '.....'
-	jz	xf494			; 0000F48F  7403  't.'
-	jmp	xf684			; 0000F491  E9F001  '...'
+	mov	si,bim_table_offset	; 0000F484  BEE0FF
+	mov	si,[cs:si]		; 0000F487  2E8B34
+	test	word [cs:si],0x0f00	; 0000F48A  2EF704000F
+	jz	xf494			; 0000F48F  7403
+	jmp	xf684			; 0000F491  E9F001
 
-xf494:	mov	al,0x0			; 0000F494  B000  '..'
-	out	0x80,al			; 0000F496  E680  '..'
-	;;
-	;; TODO: Determine why the ROM uses gdtr_hi instead of gdtr_lo this time.
+xf494:	mov	al,0x0			; 0000F494  B000
+	out	0x80,al			; 0000F496  E680
+
 	;;
 	;; When we arrive here, the A20 line has been disabled, so in theory, the GDT-in-ROM
 	;; is accessible only at the "lo" ROM address (%0F0730), not the "hi" address (%FF0730).
 	;; Which means the following JMP through selector 0x28 (indeed, any selector access)
-	;; should immediately fail.  Yet somehow this code still works?
+	;; should immediately fail.  TODO: Determine how this code works in "real life"
+	;;
+	;; It seems this code doesn't really do much PROVIDED bits 6 and 7 of the RAM Settings
+	;; register are set to anything other than 0x40.
 	;;
 	lgdt	[cs:0x077e]		; 0000F498  load [gdtr_hi] into GDTR
 	mov	eax,cr0			; 0000F49E  0F2000
@@ -12849,9 +12920,13 @@ xf4ac:	mov	ax,0x8			; 0000F4AC  B80800  '...'
 	xchg	ah,al			; 0000F4BC  86E0  '..'
 	out	0x61,al			; 0000F4BE  E661  '.a'
 	and	ah,0xc0			; 0000F4C0  80E4C0  '...'
-	cmp	ah,0x40			; 0000F4C3  80FC40  '..@'
-	jz	xf4cb			; 0000F4C6  7403  't.'
-	jmp	xf655			; 0000F4C8  E98A01  '...'
+
+	;;
+	;; (AH) contains only bits 6 and 7 from the RAM Settings/Diagnostics register
+	;;
+	cmp	ah,0x40			; 0000F4C3  80FC40
+	jz	xf4cb			; 0000F4C6  7403
+	jmp	xf655			; 0000F4C8  E98A01
 
 xf4cb:	or	byte [0x2],0x40		; 0000F4CB  800E020040  '....@'
 	mov	ax,0x38			; 0000F4D0  B83800  '.8.'
@@ -13013,6 +13088,7 @@ xf63b:	mov	ax,0x8			; 0000F63B  B80800  '...'
 	cmp	al,0x0			; 0000F64C  3C00  '<.'
 	jnz	xf655			; 0000F64E  7505  'u.'
 	or	byte [0x2],0x40		; 0000F650  800E020040  '....@'
+
 xf655:	mov	ax,0x10			; 0000F655  B81000  '...'
 	mov	es,ax			; 0000F658  8EC0  '..'
 	mov	ds,ax			; 0000F65A  8ED8  '..'
@@ -13757,16 +13833,31 @@ xffb3:	pop	ds			; 0000FFB3  1F  '.'
 
 	times	29 db 0xFF		; 0000FFC0 - 0000FFDC
 
-	jmp	x9f17			; 0000FFDD  E9379F  '.7.'
+	jmp	x9f17			; 0000FFDD  E9379F
 
-rombuf1:dw	0x7FB6			; 0000FFE0  B67F
-rombuf2:dw	0x7FBE			; 0000FFE2  BE7F
+	;;
+	;; Offset for storing built-in memory table
+	;;
+	;; (Refer to "Compaq Built-in Memory" description at the top of this file)
+	;;
+bim_table_offset:
+	dw	0x7FB6			; 0000FFE0  B67F
 
-	db	'G4J 03COMPAQ'		; 0000FFE4  47344A203033434F4D504151
+	;;
+	;; Offset for storing CPU identifier (low byte) and revision number (high byte)
+	;;
+cpu_idrev_offset:
+	dw	0x7FBE			; 0000FFE2  BE7F
+
+	db	'G'			; 0000FFE4  Product Family Code
+	db	'4'			; 0000FFE5  Point-Release Code
+	db	'J '			; 0000FFE6  Revision Code
+	db	'03'			; 0000FFE8  BIOS Type Code
+	db	'COMPAQ'		; 0000FFEA  Machine ID
 
 	jmp	0xf000:reset		; 0000FFF0  EA05F900F0
 
-	db	0x20
-	db	'01/28/88'
-	db	0xFC			; 0000FFFE  FC
-	db	0x98			; 0000FFFF  98
+	db	0x20			; 0000FFF5
+	db	'01/28/88'		; 0000FFF6  BIOS Revision Date
+	db	0xFC			; 0000FFFE  Machine Type Code
+	db	0x98			; 0000FFFF  Checksum

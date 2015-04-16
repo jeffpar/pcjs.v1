@@ -386,12 +386,12 @@ Memory.prototype = {
      */
     setReadAccess: function(afn, fDirect) {
         this.readByte = afn[0] || this.readNone;
-        this.readShort = afn[1] || this.readNone;
-        this.readLong = afn[2] || this.readNone;
+        this.readShort = afn[1] || this.readShortDefault;
+        this.readLong = afn[2] || this.readLongDefault;
         if (fDirect) {
             this.readByteDirect = afn[0] || this.readNone;
-            this.readShortDirect = afn[1] || this.readNone;
-            this.readLongDirect = afn[2] || this.readNone;
+            this.readShortDirect = afn[1] || this.readShortDefault;
+            this.readLongDirect = afn[2] || this.readLongDefault;
         }
     },
     /**
@@ -403,12 +403,12 @@ Memory.prototype = {
      */
     setWriteAccess: function(afn, fDirect) {
         this.writeByte = !this.fReadOnly && afn[3] || this.writeNone;
-        this.writeShort = !this.fReadOnly && afn[4] || this.writeNone;
-        this.writeLong = !this.fReadOnly && afn[5] || this.writeNone;
+        this.writeShort = !this.fReadOnly && afn[4] || this.writeShortDefault;
+        this.writeLong = !this.fReadOnly && afn[5] || this.writeLongDefault;
         if (fDirect) {
             this.writeByteDirect = afn[3] || this.writeNone;
-            this.writeShortDirect = afn[4] || this.writeNone;
-            this.writeLongDirect = afn[5] || this.writeNone;
+            this.writeShortDirect = afn[4] || this.writeShortDefault;
+            this.writeLongDirect = afn[5] || this.writeLongDefault;
         }
     },
     /**
@@ -532,6 +532,55 @@ Memory.prototype = {
         if (DEBUGGER && this.dbg.messageEnabled(Messages.MEM) /* && !off */) {
             this.dbg.message("attempt to write " + str.toHexWord(v) + " to invalid block %" + str.toHex(this.addr), true);
         }
+    },
+    /**
+     * readShortDefault(off)
+     *
+     * @this {Memory}
+     * @param {number} off
+     * @return {number}
+     */
+    readShortDefault: function readShortDefault(off)
+    {
+        return this.readByteDirect(off) | (this.readByteDirect(off + 1) << 8);
+    },
+    /**
+     * readLongDefault(off)
+     *
+     * @this {Memory}
+     * @param {number} off
+     * @return {number}
+     */
+    readLongDefault: function readLongDefault(off)
+    {
+        return this.readByteDirect(off) | (this.readByteDirect(off + 1) << 8) | (this.readByteDirect(off + 2) << 16) | (this.readByteDirect(off + 3) << 24);
+    },
+    /**
+     * writeShortDefault(off, w)
+     *
+     * @this {Memory}
+     * @param {number} off
+     * @param {number} w
+     */
+    writeShortDefault: function writeShortDefault(off, w)
+    {
+        Component.assert(!(w & ~0xffff));
+        this.writeByteDirect(off, w & 0xff);
+        this.writeByteDirect(off + 1, w >> 8);
+    },
+    /**
+     * writeLongDefault(off, w)
+     *
+     * @this {Memory}
+     * @param {number} off
+     * @param {number} w
+     */
+    writeLongDefault: function writeLongDefault(off, w)
+    {
+        this.writeByteDirect(off, w & 0xff);
+        this.writeByteDirect(off + 1, (w >> 8) & 0xff);
+        this.writeByteDirect(off + 2, (w >> 16) & 0xff);
+        this.writeByteDirect(off + 3, (w >>> 24));
     },
     /**
      * readByteMemory(off)

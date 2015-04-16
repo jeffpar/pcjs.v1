@@ -33,6 +33,7 @@
 "use strict";
 
 if (typeof module !== 'undefined') {
+    var str         = require("../../shared/lib/strlib");
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
     var Memory      = require("./memory");
@@ -80,6 +81,7 @@ RAM.prototype.initBus = function(cmp, bus, cpu, dbg)
 {
     this.bus = bus;
     this.cpu = cpu;
+    this.dbg = dbg;
     this.chipset = cmp.getComponentByType("ChipSet");
     this.setReady();
 };
@@ -257,10 +259,10 @@ RAM.init = function()
  * The DeskPro 386 also contained two memory-mapped registers at 0x80C00000.  The first is a write-only
  * mapping register that provides the ability to map the 128Kb at 0x00FE0000 to 0x000E0000, replacing
  * any ROMs in the range 0x000E0000-0x000FFFFF, and optionally write-protecting that 128Kb; internally,
- * this register corresponds to bMappings.
+ * this register corresponds to wMappings.
  *
  * The second register is a read-only diagnostics register that indicates jumper configuration and
- * parity errors; internally, this register corresponds to bSettings.
+ * parity errors; internally, this register corresponds to wSettings.
  *
  * To emulate the memory-mapped registers at 0x80C00000, the RAM component allocates a block at that
  * address using this custom controller once it sees an allocation for "ramCPQ".
@@ -278,8 +280,12 @@ RAM.init = function()
 function CompaqController(ram)
 {
     this.ram = ram;
-    this.bMappings = CompaqController.MAPPINGS.DEFAULT;
-    this.bSettings = CompaqController.SETTINGS.BASE_640KB;
+    this.wMappings = CompaqController.MAPPINGS.DEFAULT;
+    /*
+     * TODO: wSettings needs to reflect the actual amount of configured memory....
+     */
+    this.wSettings = CompaqController.SETTINGS.DEFAULT;
+    this.wRAMSetup = CompaqController.RAMSETUP.DEFAULT;
     this.aBlocksDst = null;
 }
 
@@ -289,19 +295,23 @@ CompaqController.MAP_DST    = 0x000E0000;
 CompaqController.MAP_SIZE   = 0x00020000;
 
 /*
- * Bit definitions for the 8-bit write-only memory-mapping register (bMappings)
+ * Bit definitions for the 16-bit write-only memory-mapping register (wMappings)
+ *
+ * NOTE: Although Compaq says the memory at %FE0000 is "relocated", it actually remains addressable
+ * at %FE0000; it simply becomes addressable at %0E0000 as well, displacing any ROMs that used to be
+ * addressable at %0E0000 through %0FFFFF.
  */
 CompaqController.MAPPINGS = {
-    UNMAPPED:   0x01,               // is this bit is CLEAR, the last 128Kb (at 0x00FE0000) is mapped to 0x000E0000
-    READWRITE:  0x02,               // if this bit is CLEAR, the last 128Kb (at 0x00FE0000) is read-only (ie, write-protected)
-    RESERVED:   0xFC,               // the remaining 6 bits are reserved and should always be SET
-    DEFAULT:    0xFF
+    UNMAPPED:   0x0001,             // is this bit is CLEAR, the last 128Kb (at 0x00FE0000) is mapped to 0x000E0000
+    READWRITE:  0x0002,             // if this bit is CLEAR, the last 128Kb (at 0x00FE0000) is read-only (ie, write-protected)
+    RESERVED:   0xFFFC,             // the remaining 6 bits are reserved and should always be SET
+    DEFAULT:    0xFFFF              // our default settings (no mapping, no write-protection)
 };
 
 /*
- * Bit definitions for the 8-bit read-only settings/diagnostics register (bSettings)
+ * Bit definitions for the 16-bit read-only settings/diagnostics register (wSettings)
  *
- * SW1-7 and SW1-8 are mapped to bits 5 and 4 of bSettings, respectively, as follows:
+ * SW1-7 and SW1-8 are mapped to bits 5 and 4 of wSettings, respectively, as follows:
  *
  *      SW1-7   SW1-8   Bit5    Bit4    Amount (of base memory provided by the Compaq 32-bit memory board)
  *      -----   -----   ----    ----    ------
@@ -330,64 +340,123 @@ CompaqController.MAPPINGS = {
  *      SW1-6:  ChipSet.KBC.INPORT.COMPAQ_NONDUAL clear if ON, set (0x40) if OFF
  */
 CompaqController.SETTINGS = {
-    B0_PARITY:  0x01,
-    B1_PARITY:  0x02,
-    B2_PARITY:  0x04,
-    B3_PARITY:  0x08,
-    BASE_640KB: 0x00,           // SW1-7,8: ON  ON   Bits 5,4: 00
-    BASE_ERROR: 0x10,           // SW1-7,8: ON  OFF  Bits 5,4: 01
-    BASE_512KB: 0x20,           // SW1-7,8: OFF ON   Bits 5,4: 10
-    BASE_256KB: 0x30,           // SW1-7,8: OFF OFF  Bits 5,4: 11
-    ADDED_1MB:  0x40,
-    PIGGYBACK:  0x80
+    B0_PARITY:  0x0001,         // parity OK in byte 0
+    B1_PARITY:  0x0002,         // parity OK in byte 1
+    B2_PARITY:  0x0004,         // parity OK in byte 2
+    B3_PARITY:  0x0008,         // parity OK in byte 3
+    BASE_640KB: 0x0000,         // SW1-7,8: ON  ON   Bits 5,4: 00
+    BASE_ERROR: 0x0010,         // SW1-7,8: ON  OFF  Bits 5,4: 01
+    BASE_512KB: 0x0020,         // SW1-7,8: OFF ON   Bits 5,4: 10
+    BASE_256KB: 0x0030,         // SW1-7,8: OFF OFF  Bits 5,4: 11
+    /*
+     * TODO: The DeskPro 386/25 TechRef says bit 6 (0x40) is always set,
+     * but setting it results in memory configuration errors; review.
+     */
+    ADDED_1MB:  0x0040,
+    /*
+     * TODO: The DeskPro 386/25 TechRef says bit 7 (0x80) is always clear; review.
+     */
+    PIGGYBACK:  0x0080,
+    SYS_4MB:    0x0100,         // 4Mb on system board
+    SYS_1MB:    0x0200,         // 1Mb on system board
+    SYS_NONE:   0x0300,         // no memory on system board
+    MODA_4MB:   0x0400,         // 4Mb on module A board
+    MODA_1MB:   0x0800,         // 1Mb on module A board
+    MODA_NONE:  0x0C00,         // no memory on module A board
+    MODB_4MB:   0x1000,         // 4Mb on module B board
+    MODB_1MB:   0x2000,         // 1Mb on module B board
+    MODB_NONE:  0x3000,         // no memory on module B board
+    MODC_4MB:   0x4000,         // 4Mb on module C board
+    MODC_1MB:   0x8000,         // 1Mb on module C board
+    MODC_NONE:  0xC000,         // no memory on module C board
+    /*
+     * NOTE: It doesn't seem to matter to the ROM whether I set any of bits 8-15 or not....
+     */
+    DEFAULT:    0x0A0F          // our default settings (ie, parity OK, 640Kb base memory, 1Mb system memory, 1Mb module A memory)
+};
+
+CompaqController.RAMSETUP = {
+    SETUP:      0x000F,
+    CACHE:      0x0040,
+    RESERVED:   0xFFB0,
+    DEFAULT:    0x0002          // our default settings (ie, 2Mb, cache disabled)
 };
 
 /**
  * readByte(off)
  *
  * @this {Memory}
- * @param {number} off
+ * @param {number} off (relative to 0x80C00000)
  * @return {number}
  */
 CompaqController.readByte = function readCompaqControllerByte(off)
 {
-    return this.controller.bSettings;
+    var b = 0xff;
+    if (off < 0x02) {
+        b = (off & 0x1)? (this.controller.wSettings >> 8) : (this.controller.wSettings & 0xff);
+    }
+    else if (off < 0x4) {
+        b = (off & 0x1)? (this.controller.wRAMSetup >> 8) : (this.controller.wRAMSetup & 0xff);
+    }
+    if (DEBUG) {
+        this.controller.ram.printMessage("CompaqController.readByte(" + str.toHexWord(off) + ") returned " + str.toHexByte(b), true, true);
+        if (MAXDEBUG && DEBUGGER && off >= 0x2) this.cpu.stopCPU();
+    }
+    return b;
 };
 
 /**
  * writeByte(off, b)
  *
  * @this {Memory}
- * @param {number} off
+ * @param {number} off (relative to 0x80C00000)
  * @param {number} b
  */
 CompaqController.writeByte = function writeCompaqControllerByte(off, b)
 {
-    var aBlocks;
     var controller = this.controller;
-    var bus = controller.ram.bus;
-    if (b != controller.bMappings) {
-        if (!(b & CompaqController.MAPPINGS.UNMAPPED)) {
-            if (!controller.aBlocksDst) {
-                controller.aBlocksDst = bus.getMemoryBlocks(CompaqController.MAP_DST, CompaqController.MAP_SIZE);
+
+    /*
+     * Check for write to 0x80C00000
+     */
+    if (!off) {
+        if (b != (controller.wMappings & 0xff)) {
+            var bus = controller.ram.bus;
+            if (!(b & CompaqController.MAPPINGS.UNMAPPED)) {
+                if (!controller.aBlocksDst) {
+                    controller.aBlocksDst = bus.getMemoryBlocks(CompaqController.MAP_DST, CompaqController.MAP_SIZE);
+                }
+                var aBlocks = bus.getMemoryBlocks(CompaqController.MAP_SRC, CompaqController.MAP_SIZE);
+                var type = (b & CompaqController.MAPPINGS.READWRITE)? Memory.TYPE.RAM : Memory.TYPE.ROM;
+                bus.setMemoryBlocks(CompaqController.MAP_DST, CompaqController.MAP_SIZE, aBlocks, type);
             }
-            aBlocks = bus.getMemoryBlocks(CompaqController.MAP_SRC, CompaqController.MAP_SIZE);
-            var type = (b & CompaqController.MAPPINGS.READWRITE)? Memory.TYPE.RAM : Memory.TYPE.ROM;
-            bus.setMemoryBlocks(CompaqController.MAP_DST, CompaqController.MAP_SIZE, aBlocks, type);
-        }
-        else {
-            if (controller.aBlocksDst) {
-                bus.setMemoryBlocks(CompaqController.MAP_DST, CompaqController.MAP_SIZE, controller.aBlocksDst);
-                controller.aBlocksDst = null;
+            else {
+                if (controller.aBlocksDst) {
+                    bus.setMemoryBlocks(CompaqController.MAP_DST, CompaqController.MAP_SIZE, controller.aBlocksDst);
+                    controller.aBlocksDst = null;
+                }
             }
+            controller.wMappings = (controller.wMappings & ~0xff) | b;
+            if (MAXDEBUG && DEBUGGER) this.cpu.stopCPU();
         }
-        controller.bMappings = b;
-        if (DEBUG) this.cpu.stopCPU();
+    }
+    /*
+     * Check for write to 0x80C00002
+     */
+    else if (off == 0x2) {
+        controller.wRAMSetup = (controller.wRAMSetup & ~0xff) | b;
+        if (MAXDEBUG && DEBUGGER) this.cpu.stopCPU();
+    }
+    /*
+     * All bits in 0x80C00001 and 0x80C00003 are reserved, so we can simply ignore those writes.
+     */
+    if (DEBUG) {
+        this.controller.ram.printMessage("CompaqController.writeByte(" + str.toHexWord(off) + "," + str.toHexByte(b) + ")", true, true);
     }
 };
 
-CompaqController.ACCESS = [CompaqController.readByte, CompaqController.readByte, CompaqController.readByte,
-                           CompaqController.writeByte, CompaqController.writeByte, CompaqController.writeByte];
+CompaqController.BUFFER = [null, 0];
+CompaqController.ACCESS = [CompaqController.readByte, null, null, CompaqController.writeByte, null, null];
 
 /**
  * getMemoryBuffer(addr)
@@ -398,7 +467,7 @@ CompaqController.ACCESS = [CompaqController.readByte, CompaqController.readByte,
  */
 CompaqController.prototype.getMemoryBuffer = function(addr)
 {
-    return [null, 0];
+    return CompaqController.BUFFER;
 };
 
 /**

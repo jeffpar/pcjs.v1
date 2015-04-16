@@ -1241,59 +1241,6 @@ Card.ACCESS.WRITE.MODE2XOR  = 0xE000;
 Card.ACCESS.WRITE.MASK      = 0xff00;
 
 /**
- * readShort(off)
- *
- * @this {Memory}
- * @param {number} off
- * @return {number}
- */
-Card.ACCESS.readShort = function readShort(off)
-{
-    return this.readByteDirect(off) | (this.readByteDirect(off + 1) << 8);
-};
-
-/**
- * readLong(off)
- *
- * @this {Memory}
- * @param {number} off
- * @return {number}
- */
-Card.ACCESS.readLong = function readLong(off)
-{
-    return this.readByteDirect(off) | (this.readByteDirect(off + 1) << 8) | (this.readByteDirect(off + 2) << 16) | (this.readByteDirect(off + 3) << 24);
-};
-
-/**
- * writeShort(off, w)
- *
- * @this {Memory}
- * @param {number} off
- * @param {number} w
- */
-Card.ACCESS.writeShort = function writeShort(off, w)
-{
-    Component.assert(!(w & ~0xffff));
-    this.writeByteDirect(off, w & 0xff);
-    this.writeByteDirect(off + 1, w >> 8);
-};
-
-/**
- * writeLong(off, w)
- *
- * @this {Memory}
- * @param {number} off
- * @param {number} w
- */
-Card.ACCESS.writeLong = function writeLong(off, w)
-{
-    this.writeByteDirect(off, w & 0xff);
-    this.writeByteDirect(off + 1, (w >> 8) & 0xff);
-    this.writeByteDirect(off + 2, (w >> 16) & 0xff);
-    this.writeByteDirect(off + 3, (w >>> 24));
-};
-
-/**
  * readByteMode0(off)
  *
  * @this {Memory}
@@ -1952,9 +1899,7 @@ Card.prototype.setMemoryAccess = function(nAccess)
                 fnWriteByte = Card.ACCESS.afn[Card.ACCESS.WRITE.EVENODD];
             }
         }
-        if (!this.afnAccess) {
-            this.afnAccess  = [null, Card.ACCESS.readShort, Card.ACCESS.readLong, null, Card.ACCESS.writeShort, Card.ACCESS.writeLong];
-        }
+        if (!this.afnAccess) this.afnAccess = new Array(6);
         this.afnAccess[0] = fnReadByte;
         this.afnAccess[3] = fnWriteByte;
         this.nAccess = nAccess;

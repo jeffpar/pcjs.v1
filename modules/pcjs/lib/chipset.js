@@ -683,8 +683,8 @@ ChipSet.PPI_SW = {
  * READ WRITE REGISTER", but it is not otherwise discussed in the MODEL_5170 TechRef's 8042 documentation.
  *
  * There are brief references to bits 0 and 1 (KBC.RWREG.CLK_TIMER2 and KBC.RWREG.SPK_TIMER2), and the BIOS sets
- * bits 2-7 to "DISABLE PARITY CHECKERS" (principally KBC.RWREG.DISABLE_CHK, which are bits 2 and 3); why the BIOS
- * also sets bits 4-7 (or if those bits are even settable) is unclear, since it uses 11111100B rather than defined
+ * bits 2-7 to "DISABLE PARITY CHECKERS" (principally KBC.RWREG.DISABLE_NMI, which are bits 2 and 3); why the BIOS
+ * also sets bits 4-7 (or if those bits are even settable) is unclear, since it uses 11111100b rather than defined
  * constants.
  *
  * The bottom line: on a MODEL_5170, port 0x61 is still used for speaker control and parity checking, so we use
@@ -751,12 +751,14 @@ ChipSet.KBC = {
         PORT:           0x61,
         CLK_TIMER2:     0x01,   // set to enable clock to TIMER2 (R/W)
         SPK_TIMER2:     0x02,   // set to connect output of TIMER2 to speaker (R/W)
-        DISABLE_CHK:    0x0C,   // set to disable I/O and RAM parity checks, clear to enable (R/W)
+        COMPAQ_FSNMI:   0x04,   // set to disable RAM/FS NMI (R/W, DESKPRO386)
+        COMPAQ_IONMI:   0x08,   // set to disable IOCHK NMI (R/W, DESKPRO386)
+        DISABLE_NMI:    0x0C,   // set to disable IOCHK and RAM/FS NMI, clear to enable (R/W)
         REFRESH_BIT:    0x10,   // 0 if RAM refresh occurring, 1 if RAM not in refresh cycle (R/O)
         OUT_TIMER2:     0x20,   // state of TIMER2 output signal (R/O, DESKPRO386)
-        IO_CHK:         0x40,   // indicates I/O check (R/O); to reset, pulse bit 3 (0x08)
-        PARITY_CHK:     0x80,   // indicates RAM parity check (R/O); to reset, pulse bit 2 (0x04)
-        PARITY_ERR:     0xC0
+        IOCHK_NMI:      0x40,   // IOCHK NMI (R/O); to reset, pulse bit 3 (0x08)
+        RAMFS_NMI:      0x80,   // RAM/FS (parity or fail-safe) NMI (R/O); to reset, pulse bit 2 (0x04)
+        NMI_ERROR:      0xC0
     },
     CMD: {                      // this.b8042InBuff (on write to port 0x64, interpret this as a CMD)
         PORT:           0x64,
@@ -4275,7 +4277,7 @@ ChipSet.prototype.in8042RWReg = function(port, addrFrom)
 {
     /*
      * Normally, we return whatever was last written to this port, but we do need to mask the
-     * two upper-most bits (KBC.RWREG.PARITY_ERR), as those are output-only bits used to signal
+     * two upper-most bits (KBC.RWREG.NMI_ERROR), as those are output-only bits used to signal
      * parity errors.
      *
      * Also, "TEST.09" of the MODEL_5170 BIOS expects the REFRESH_BIT to alternate, so we used to
@@ -4297,7 +4299,7 @@ ChipSet.prototype.in8042RWReg = function(port, addrFrom)
      * in 1us, 64 cycles represents 8us, so that might be a bit fast for "WAITF", but bit 6
      * is the only choice that also satisfies the pre-"TEST.11A" test as well.
      */
-    var b = this.bPPIB & ~(ChipSet.KBC.RWREG.PARITY_ERR | ChipSet.KBC.RWREG.REFRESH_BIT) | ((this.cpu.getCycles() & 0x40)? ChipSet.KBC.RWREG.REFRESH_BIT : 0);
+    var b = this.bPPIB & ~(ChipSet.KBC.RWREG.NMI_ERROR | ChipSet.KBC.RWREG.REFRESH_BIT) | ((this.cpu.getCycles() & 0x40)? ChipSet.KBC.RWREG.REFRESH_BIT : 0);
     /*
      * Thanks to the WAITF function, this has become a very "busy" port, so let's not generate messages
      * unless both MESSAGE_8042 *and* MESSAGE_LOG are set.
