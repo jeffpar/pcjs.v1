@@ -186,6 +186,11 @@ function X86CPU(parmsCPU)
      * so that if/when we call restore(), it will have something to fill in.
      */
     this.resetRegs();
+
+    /*
+     * Initially, the logical A20 state should be true, but from this point on, it's up to the machine to decide.
+     */
+    this.fA20 = true;
 }
 
 Component.subclass(X86CPU, CPU);
@@ -638,9 +643,41 @@ X86CPU.prototype.initMemory = function(aMemBlocks, blockShift, blockLimit, block
 };
 
 /**
+ * setA20(fEnable)
+ *
+ * setA20() used to ONLY be a Bus function, but we now route all setA20() calls through the CPU,
+ * so that the CPU can maintain a logical A20 state (fA20), separate from the physical A20 state.
+ *
+ * In real-mode, all cpu.setA20() calls go straight to bus.setA20(), and we update the logical
+ * A20 state (fA20); in protected-mode, we only update the logical A20 state (fA20).
+ *
+ * In addition, when transitioning from real-mode to protected-mode, we call bus.setA20(true), and
+ * when transitioning back to real-mode, we call bus.setA20(fA20).  See setProtMode() for details.
+ *
+ * This gives the CPU an unusual amount of control over the A20 line, but it protects us from "bad"
+ * protected-mode code that fails to ensure A20 is enabled; I've run into code in the Compaq DeskPro
+ * 386 ROM BIOS that fails without this work-around.  This seems like a fairly safe hack, because
+ * it's hard to imagine any real-world protected-mode code relying on A20 being off.  However, that
+ * doesn't change the fact that this hack should NOT be necessary.
+ *
+ * TODO: Figure out why the DeskPro 386 ROM BIOS misbehaves under emulation, necessitating this hack.
+ *
+ * @this {X86CPU}
+ * @param {boolean} fEnable is true to enable A20, false to disable
+ */
+X86CPU.prototype.setA20 = function(fEnable)
+{
+    this.fA20 = fEnable;
+    if (!(this.regCR0 & X86.CR0.MSW.PE)) {
+        this.bus.setA20(fEnable);
+    }
+};
+
+/**
  * setAddressMask(busMask)
  *
- * Notification from Bus.setA20(), called whenever the A20 line changes.
+ * Notification from Bus.setA20(), called whenever the physical A20 line changes; this is
+ * independent of the CPU's own logical A20 state (fA20).
  *
  * @this {X86CPU}
  * @param {number} busMask
@@ -1173,6 +1210,7 @@ X86CPU.prototype.setAddrSize = function()
         this.aOpModGrpWord = X86ModW.aOpModGrp;
     } else {
         if (this.addrSize == 2) {
+            this.getAddr = this.getShort;
             this.aOpModRegByte = X86ModB16.aOpModReg;
             this.aOpModMemByte = X86ModB16.aOpModMem;
             this.aOpModGrpByte = X86ModB16.aOpModGrp;
@@ -1180,6 +1218,7 @@ X86CPU.prototype.setAddrSize = function()
             this.aOpModMemWord = X86ModW16.aOpModMem;
             this.aOpModGrpWord = X86ModW16.aOpModGrp;
         } else {
+            this.getAddr = this.getLong;
             this.aOpModRegByte = X86ModB32.aOpModReg;
             this.aOpModMemByte = X86ModB32.aOpModMem;
             this.aOpModGrpByte = X86ModB32.aOpModGrp;
@@ -1304,7 +1343,7 @@ X86CPU.prototype.checkIntNotify = function(nInt)
         }
     }
     /*
-     * The enabling of MESSAGE_INT messages is one of the criteria that's also included in the Debugger's
+     * The enabling of INT messages is one of the criteria that's also included in the Debugger's
      * checksEnabled() function, and therefore in fDebugCheck, so for maximum speed, we check fDebugCheck first.
      */
     if (DEBUGGER && this.aFlags.fDebugCheck) {
@@ -1378,6 +1417,9 @@ X86CPU.prototype.checkIntReturn = function(addr)
  * (ie, LLDT, LTR, SLDT, STR are invalid instructions in real-mode, and are among the opcode handlers that we
  * update here).
  *
+ * NOTE: Ideally, this function would do its work ONLY on mode *transitions*, but we assume calls to setProtMode()
+ * are sufficiently infrequent that it doesn't really matter.
+ *
  * @this {X86CPU}
  * @param {boolean} [fProt] (use the current MSW PE bit if not specified)
  */
@@ -1398,6 +1440,16 @@ X86CPU.prototype.setProtMode = function(fProt)
         this.segFS.updateMode(fProt);
         this.segGS.updateMode(fProt);
     }
+    /*
+     * Work-around to update the A20 line whenever transitioning modes; see cpu.setA20() for details.
+     *
+     * Unfortunately, we can't immediately update the physical A20 line on return to real-mode, because
+     * segment registers are likely still loaded with base addresses above 1Mb, so we leave the physical
+     * A20 line enabled for now.
+     *
+     *      if (this.bus) this.bus.setA20(fProt? true : this.fA20);
+     */
+    if (this.bus && fProt) this.bus.setA20(true);
 };
 
 /**
@@ -1411,7 +1463,7 @@ X86CPU.prototype.setProtMode = function(fProt)
 X86CPU.prototype.saveProtMode = function()
 {
     if (this.addrGDT != null) {
-        return [this.regCR0, this.addrGDT, this.addrGDTLimit, this.addrIDT, this.addrIDTLimit, this.segLDT.save(), this.segTSS.save(), this.nIOPL];
+        return [this.regCR0, this.addrGDT, this.addrGDTLimit, this.addrIDT, this.addrIDTLimit, this.segLDT.save(), this.segTSS.save(), this.nIOPL, this.fA20];
     }
     return null;
 };
@@ -1435,6 +1487,7 @@ X86CPU.prototype.restoreProtMode = function(a)
         this.segLDT.restore(a[5]);
         this.segTSS.restore(a[6]);
         this.nIOPL = a[7];
+        this.fA20 = (a[8] !== undefined? a[8] : this.bus.getA20());
         this.setProtMode();
     }
 };
@@ -1495,6 +1548,7 @@ X86CPU.prototype.restore = function(data)
      * properly AND to ensure the CPU's default ADDRESS and OPERAND sizes are set properly.
      */
     this.setCSIP(a[0], this.segCS.sel);
+
     /*
      * It's also important to call setSP(), so that the linear SP register (regLSP) will be updated properly;
      * we also need to call setSS(), to ensure that the lower and upper stack limits are properly initialized.
@@ -2370,8 +2424,8 @@ X86CPU.prototype.setMSW = function(w)
     w |= (this.regCR0 & X86.CR0.MSW.PE) | X86.CR0.MSW.ON;
     this.regCR0 = (this.regCR0 & ~X86.CR0.MSW.MASK) | (w & X86.CR0.MSW.MASK);
     /*
-     * Since the 80286 cannot return to real-mode via this instruction, the only transition we
-     * must worry about is to protected-mode.  And don't worry, there's no harm calling setProtMode()
+     * Since the 80286 cannot return to real-mode via this instruction, the only transition
+     * we must worry about is to protected-mode.  And there's no harm calling setProtMode()
      * if the CPU is already in protected-mode (we could certainly optimize the call out in that
      * case, but this instruction isn't used frequently enough to warrant it).
      */
@@ -3128,10 +3182,33 @@ X86CPU.prototype.getIPLong = function()
 };
 
 /**
+ * getIPAddr()
+ *
+ * @this {X86CPU}
+ * @return {number} word at the current IP; IP advanced by 2 or 4, depending on address size
+ */
+X86CPU.prototype.getIPAddr = function()
+{
+    /*
+     * TODO: Add PREFETCH support to this function
+     */
+    var w = this.getAddr(this.regLIP);
+    if (BACKTRACK) {
+        this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
+        this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMemHi);
+    }
+    this.regLIP += this.addrSize;
+    if (this.regLIP > this.regLIPLimit) {
+        this.setIP(this.regLIP - this.segCS.base);
+    }
+    return w;
+};
+
+/**
  * getIPWord()
  *
  * @this {X86CPU}
- * @return {number} word at the current IP; IP advanced by 2 or 4
+ * @return {number} word at the current IP; IP advanced by 2 or 4, depending on operand size
  */
 X86CPU.prototype.getIPWord = function()
 {

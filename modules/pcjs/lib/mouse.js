@@ -616,7 +616,7 @@ Mouse.prototype.notifyMCR = function(bMCR)
              * driver shuts down and Windows exits, since it DID turn RTS on), that doesn't appear to actually happen.
              * At the very least, Windows will have (re)masked the serial port's IRQ, so what does it matter?  Not much,
              * I just would have preferred that fActive properly reflect whether we should continue dispatching mouse
-             * events, displaying MESSAGE_MOUSE messages, etc.
+             * events, displaying MOUSE messages, etc.
              *
              * We could ask the ChipSet component to notify the SerialPort component whenever its IRQ is masked/unmasked,
              * and then have the SerialPort pass that notification on to us, but I'm assuming that in the real world,

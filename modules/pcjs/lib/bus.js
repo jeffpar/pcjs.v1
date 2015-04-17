@@ -476,13 +476,6 @@ Bus.prototype.getA20 = function()
  */
 Bus.prototype.setA20 = function(fEnable)
 {
-    /*
-     * TODO: Until I determine why the Compaq DeskPro 386 ROM is switching to protected-mode
-     * with the A20 line disabled, resulting in an almost immediate crash, I'm ignoring its requests
-     * to turn A20 off.
-     */
-    if (I386 && COMPAQ386) fEnable = true;
-
     if (this.nBusWidth > 20) {
         var addrMask = (this.busMask & ~0x100000) | (fEnable? 0x100000 : 0);
         if (addrMask != this.busMask) {

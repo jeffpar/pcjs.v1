@@ -210,7 +210,7 @@ if (DEBUGGER) {
         0x33:       Messages.MOUSE
     };
 
-    Debugger.aCommands = {
+    Debugger.COMMANDS = {
         '?':     "help",
         'a [#]': "assemble",
         'b [#]': "breakpoint",
@@ -1660,7 +1660,7 @@ if (DEBUGGER) {
      * messageDump(bitMessage, fnDumper)
      *
      * @this {Debugger}
-     * @param {number} bitMessage is one Debugger MESSAGE_* category flag
+     * @param {number} bitMessage is one Messages category flag
      * @param {function(string)} fnDumper is a function the Debugger can use to dump data for that category
      * @return {boolean} true if successfully registered, false if not
      */
@@ -1936,7 +1936,7 @@ if (DEBUGGER) {
      * @param {number|null} [addrFrom]
      * @param {string|null} [name] of the port, if any
      * @param {number|null} [bIn] is the input value, if known, on an input operation
-     * @param {number} [bitsMessage] is one or more Debugger MESSAGE_* category flag(s)
+     * @param {number} [bitsMessage] is one or more Messages category flag(s)
      */
     Debugger.prototype.messageIO = function(component, port, bOut, addrFrom, name, bIn, bitsMessage)
     {
@@ -2414,7 +2414,7 @@ if (DEBUGGER) {
          * The rest of the instruction tracking logic can only be performed if historyInit() has allocated
          * the necessary data structures; note that there is no explicit UI for enabling/disabling history,
          * other than adding/removing breakpoints, simply because it's breakpoints that trigger the call to
-         * checkInstruction() -- well, OK, and a few other things now, like enabling MESSAGE_INT messages.
+         * checkInstruction() -- well, OK, and a few other things now, like enabling Messages.INT messages.
          */
         if (nState >= 0 && this.aaOpcodeCounts.length) {
             this.cInstructions++;
@@ -2734,7 +2734,17 @@ if (DEBUGGER) {
             if (aBreak != this.aBreakExec) {
                 this.bus.addMemBreak(this.getAddr(aAddr), aBreak == this.aBreakWrite);
             }
-            if (!fTemp) this.println("breakpoint enabled: " + this.hexAddr(aAddr) + " (" + aBreak[0] + ")");
+            if (fTemp) {
+                /*
+                 * Force temporary breakpoints to be interpreted as physical breakpoints
+                 * (hence the assertion that there IS a physical address stored in aAddr);
+                 * this allows us to step over calls or interrupts that change the processor mode
+                 */
+                aAddr[0] = -1;
+                this.assert(aAddr[2]);
+            } else {
+                this.println("breakpoint enabled: " + this.hexAddr(aAddr) + " (" + aBreak[0] + ")");
+            }
             this.historyInit();
             return true;
         }
@@ -3826,8 +3836,8 @@ if (DEBUGGER) {
     Debugger.prototype.doHelp = function()
     {
         var s = "commands:";
-        for (var sCommand in Debugger.aCommands) {
-            s += '\n' + sCommand + "       ".substr(0, 7-sCommand.length) + Debugger.aCommands[sCommand];
+        for (var sCommand in Debugger.COMMANDS) {
+            s += '\n' + sCommand + "       ".substr(0, 7-sCommand.length) + Debugger.COMMANDS[sCommand];
         }
         if (!this.checksEnabled()) s += "\nnote: frequency/history disabled if no exec breakpoints";
         this.println(s);
@@ -4969,6 +4979,7 @@ if (DEBUGGER) {
                     break;
                 }
             } while (fPrefix);
+
             if (this.fProcStep) {
                 this.setTempBreakpoint(aAddr);
                 if (!this.runCPU()) {

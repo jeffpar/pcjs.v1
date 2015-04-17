@@ -1042,7 +1042,7 @@ X86.fnLAR = function LAR(dst, src)
 X86.fnLCR0 = function LCR0(l)
 {
     this.regCR0 = l;
-    this.setProtMode(!!(this.regCR0 & X86.CR0.MSW.PE));
+    this.setProtMode();
 };
 
 /**

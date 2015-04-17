@@ -215,6 +215,13 @@ x80b3:	xor	dx,dx			; 000080B3  33D2  '3.'
 	pop	bx			; 000080E0  5B  '['
 	ret				; 000080E1  C3  '.'
 
+	;;
+	;; Use INT 0x15, (AH) == 0x89, to enter protected-mode
+	;;
+	;; Returns ZF set if successful
+	;;
+	;; See Compaq 386/25 TechRef, p.4-98 for details
+	;;
 x80e2:	push	bx			; 000080E2  53  'S'
 	push	cx			; 000080E3  51  'Q'
 	push	dx			; 000080E4  52  'R'
@@ -236,6 +243,11 @@ x80e2:	push	bx			; 000080E2  53  'S'
 	pop	bx			; 00008100  5B  '['
 	ret				; 00008101  C3  '.'
 
+	;;
+	;; Descriptor table initialization
+	;;
+	;; Used by x80e2 to prepare for an INT 0x15 call to enter protected-mode
+	;;
 x8102:	pusha				; 00008102  60  '`'
 	push	ds			; 00008103  1E  '.'
 	push	es			; 00008104  06  '.'
@@ -314,6 +326,11 @@ x8102:	pusha				; 00008102  60  '`'
 	popa				; 000081C9  61  'a'
 	ret				; 000081CA  C3  '.'
 
+	;;
+	;; Descriptor initializer
+	;;
+	;; Used by x8102 to initialize a descriptor table
+	;;
 x81cb:	mov	word [si],0xffff	; 000081CB  C704FFFF  '....'
 	mov	bh,ah			; 000081CF  8AFC  '..'
 	shl	ax,0x4			; 000081D1  C1E004  '...'
@@ -4160,6 +4177,7 @@ xa43c:	mov	ax,0x40			; 0000A43C  B84000  '.@.'
 	mov	ds,ax			; 0000A43F  8ED8  '..'
 	mov	ss,[0x69]		; 0000A441  8E166900  '..i.'
 	mov	sp,[0x67]		; 0000A445  8B266700  '.&g.'
+
 	;;
 	;; Disable A20
 	;;
@@ -8054,6 +8072,10 @@ xc825:	pusha				; 0000C825  60  '`'
 	mov	[0x69],ss		; 0000C835  8C166900  '..i.'
 	mov	al,0xd1			; 0000C839  B0D1  '..'
 	out	0x84,al			; 0000C83B  E684  '..'
+
+	;;
+	;; Enter protected-mode
+	;;
 	call	x80e2			; 0000C83D  E8A2B8  '...'
 	jz	xc845			; 0000C840  7403  't.'
 	jmp	xc8ef			; 0000C842  E9AA00  '...'
@@ -8071,7 +8093,13 @@ xc845:	mov	al,0xd2			; 0000C845  B0D2  '..'
 	mov	bh,al			; 0000C85C  8AF8  '..'
 	mov	bl,0x10			; 0000C85E  B310  '..'
 	call	xc8fc			; 0000C860  E89900  '...'
+
+	;;
+	;; The next function writes 0xFF to 0x80C00000, presumably to ensure that
+	;; Compaq Built-in Memory at 0xFE0000 is NOT mapped to 0x0E000 at the moment
+	;;
 	call	x84a5			; 0000C863  E83FBC  '.?.'
+
 	mov	ax,[0x8d]		; 0000C866  A18D00  '...'
 	add	ax,0x80			; 0000C869  058000  '...'
 	xor	dx,dx			; 0000C86C  33D2  '3.'
@@ -8084,7 +8112,14 @@ xc845:	mov	al,0xd2			; 0000C845  B0D2  '..'
 	;;
 	;; Relocate the ROM
 	;;
+	;; On return, we should now be running in RAM (ie, a copy of the ROM in 128Kb of RAM
+	;; now mapped to %0E0000 through %0FFFFF)
+	;;
 	call	x853c			; 0000C87C  E8BDBC  '...'
+
+	;;
+	;; Return to real-mode
+	;;
 	mov	al,0xd3			; 0000C87F  B0D3  '..'
 	out	0x84,al			; 0000C881  E684  '..'
 	mov	ax,0x28			; 0000C883  B82800  '.(.'
@@ -9691,9 +9726,13 @@ xd509:	mov	[0x41],ah		; 0000D509  88264100  '.&A.'
 	pop	ax			; 0000D50D  58  'X'
 	ret				; 0000D50E  C3  '.'
 
+	;;
+	;; Check the FDC's ST0 response
+	;;
 xd50f:	mov	al,[0x42]		; 0000D50F  A04200  '.B.'
 	test	al,0xc0			; 0000D512  A8C0  '..'
-	jz	xd53d			; 0000D514  7427  't',0x27
+	jz	xd53d			; 0000D514  No problems
+
 	test	al,0x8			; 0000D516  A808  '..'
 	jz	xd51e			; 0000D518  7404  't.'
 	mov	ah,0x80			; 0000D51A  B480  '..'
@@ -11479,8 +11518,16 @@ xe714:	mov	al,0xb9			; 0000E714  B0B9  '..'
 	out	0x84,al			; 0000E716  E684  '..'
 	mov	cx,0x3			; 0000E718  B90300  '...'
 xe71b:	push	cx			; 0000E71B  51  'Q'
+
+	;;
+	;; Reset the disk controller
+	;;
 	mov	ah,0x0			; 0000E71C  B400  '..'
 	int	0x13			; 0000E71E  CD13  '..'
+
+	;;
+	;; Read the boot sector
+	;;
 	mov	bx,0x7c00		; 0000E720  BB007C  '..|'
 	mov	cx,0x1			; 0000E723  B90100  '...'
 	mov	ax,0x201		; 0000E726  B80102  '...'
@@ -11520,14 +11567,37 @@ xe73c:	loop	xe71b			; 0000E73C  E2DD  '..'
 	;;
 xe76e:	int	0x18			; 0000E76E  CD18  '..'
 
+	;;
+	;; Boot sector successfully read
+	;;
 xe770:	test	dl,0x80			; 0000E770  F6C280  '...'
 	jnz	xe793			; 0000E773  751E  'u.'
+
+	;;
+	;; More disk I/O (TODO: Investigate)
+	;;
 	push	bx			; 0000E775  53  'S'
 	call	xd540			; 0000E776  E8C7ED  '...'
 	pop	bx			; 0000E779  5B  '['
+
+	;;
+	;; Check the ROM progress byte for 0xBD (value I've seen: 0xB9)
+	;;
 	in	al,0x84			; 0000E77A  E484  '..'
 	cmp	al,0xbd			; 0000E77C  3CBD  '<.'
 	jz	xe714			; 0000E77E  7494  't.'
+
+	;;
+	;; This code looks broken: ES:BX points to the boot sector just loaded
+	;; (0x0000:0x7C00), and apparently it wants to scan the first 9 words of
+	;; the boot sector, to see if they all match the 1st word; if they do,
+	;; then it's likely the boot sector is invalid (hence the "boot_error"
+	;; message).  However, it's loading (AX) with the 1st word from DS:BX
+	;; (0x0040:0x7C00) rather than ES:BX, which increases the likelihood that
+	;; this code will always see a difference and never trigger the error.
+	;;
+	;; The value in (AX) is typically 0x0000.
+	;;
 	mov	ax,[bx]			; 0000E780  8B07  '..'
 	mov	cx,0x9			; 0000E782  B90900  '...'
 	mov	di,bx			; 0000E785  8BFB  '..'
@@ -11539,6 +11609,9 @@ xe770:	test	dl,0x80			; 0000E770  F6C280  '...'
 	;; Hang
 xe791:	jmp	short xe791		; 0000E791  EBFE  '..'
 
+	;;
+	;; Hard disk sector validation (as opposed to the preceding floppy disk sector validation)
+	;;
 xe793:	mov	al,0x33			; 0000E793  B033  '.3'
 	mov	ah,al			; 0000E795  8AE0  '..'
 	call	xb544			; 0000E797  E8AACD  '...'
@@ -11547,10 +11620,11 @@ xe793:	mov	al,0x33			; 0000E793  B033  '.3'
 	call	xb549			; 0000E79E  E8A8CD  '...'
 
 	;;
-	;; Verify the boot sector signature (0xAA55)
+	;; Verify the hard disk boot sector signature (0xAA55)
 	;;
 	cmp	word [bx+0x1fe],0xaa55	; 0000E7A1  81BFFE0155AA  '....U.'
 	jnz	xe76e			; 0000E7A7  75C5  'u.'
+
 xe7a9:	in	al,0x86			; 0000E7A9  E486  '..'
 	test	al,0x80			; 0000E7AB  A880  '..'
 	jnz	xe7b7			; 0000E7AD  7508  'u.'
@@ -12105,24 +12179,13 @@ xec32:	in	al,0x64			; 0000EC32  E464  '.d'
 	pop	cx			; 0000EC38  59  'Y'
 	ret				; 0000EC39  C3  '.'
 
-	times	4 db 0xFF		; 0000EC3A - 0000EC3D
+  	db	0xFF,0xFF,0xFF,0xFF,0xFF,0x34,0xC9,0x45,0xC9,0xC0,0xEC,0xC0,0xEC,0xC0,0xEC,0xE1
+  	db	0xED,0xA6,0xEC,0xA6,0xEC,0x48,0x9F,0x63,0x91,0x7C,0x8F,0x10,0x90,0x38,0xA0
 
-	push	word [si]		; 0000EC3E  FF34  '.4'
-	leave				; 0000EC40  C9  '.'
-	inc	bp			; 0000EC41  45  'E'
-	leave				; 0000EC42  C9  '.'
-	shr	ah,0xc0			; 0000EC43  C0ECC0  '...'
-	in	al,dx			; 0000EC46  EC  '.'
-	shr	ah,0xe1			; 0000EC47  C0ECE1  '...'
-	in	ax,dx			; 0000EC4A  ED  '.'
-	cmpsb				; 0000EC4B  A6  '.'
-	in	al,dx			; 0000EC4C  EC  '.'
-	cmpsb				; 0000EC4D  A6  '.'
-	in	al,dx			; 0000EC4E  EC  '.'
-	dec	ax			; 0000EC4F  48  'H'
-	lahf				; 0000EC50  9F  '.'
-	arpl	[bx+di+0x8f7c],dx	; 0000EC51  63917C8F  'c.|.'
-	adc	[bx+si+0xa038],dl	; 0000EC55  109038A0  '..8.'
+	;;
+	;; This address (F000:EC59) is stored in the IDT vector for INT 0x40 when a hard disk controls INT 0x13
+	;;
+int13_diskette:
 	sti				; 0000EC59  FB  '.'
 	push	bp			; 0000EC5A  55  'U'
 	push	ds			; 0000EC5B  1E  '.'
@@ -12161,6 +12224,7 @@ xec95:	mov	bl,al			; 0000EC95  8AD8  '..'
 xeca2:	cmp	al,0x1			; 0000ECA2  3C01  '<.'
 	jna	xec95			; 0000ECA4  76EF  'v.'
 xeca6:	call	xd3e8			; 0000ECA6  E83FE7  '.?.'
+
 xeca9:	mov	bl,[es:si+0x2]		; 0000ECA9  268A5C02  '&.\.'
 	mov	[0x40],bl		; 0000ECAD  881E4000  '..@.'
 	or	word [bp+0x16],0x200	; 0000ECB1  814E160002  '.N...'
@@ -12179,9 +12243,15 @@ xeca9:	mov	bl,[es:si+0x2]		; 0000ECA9  268A5C02  '&.\.'
 	jnz	xecd4			; 0000ECC3  750F  'u.'
 	call	x9061			; 0000ECC5  E899A3  '...'
 	jc	xecd4			; 0000ECC8  720A  'r',0x0A
+
+	;;
+	;; Perform FDC operation (eg, read); ZF set on success
+	;;
 	call	xecf0			; 0000ECCA  E82300  '.#.'
 	jz	xecd4			; 0000ECCD  7405  't.'
+
 	or	word [bp+0x16],0x1	; 0000ECCF  814E160100  '.N...'
+
 xecd4:	ret				; 0000ECD4  C3  '.'
 
 xecd5:	mov	al,0x6			; 0000ECD5  B006  '..'
@@ -12283,8 +12353,13 @@ xedb8:	sub	si,byte +0x5		; 0000EDB8  83EE05  '...'
 
 xedbb:	call	xef85			; 0000EDBB  E8C701  '...'
 	jnz	xedd7			; 0000EDBE  7517  'u.'
+
+	;;
+	;; Read 7 FDC response bytes, starting with ST0, storing them at 0x40:0x42
+	;;
 	mov	cx,0x7			; 0000EDC0  B90700  '...'
 	mov	di,0x42			; 0000EDC3  BF4200  '.B.'
+
 xedc6:	call	xc9bf			; 0000EDC6  E8F6DB  '...'
 	jz	xedc6			; 0000EDC9  74FB  't.'
 	call	x919a			; 0000EDCB  E8CCA3  '...'
@@ -12292,9 +12367,19 @@ xedc6:	call	xc9bf			; 0000EDC6  E8F6DB  '...'
 	mov	[di],al			; 0000EDCF  8805  '..'
 	inc	di			; 0000EDD1  47  'G'
 	loop	xedc6			; 0000EDD2  E2F2  '..'
+
+	;;
+	;; If the FDC's response in ST0 is good, this will return (AH) == 0x00
+	;;
 	call	xd50f			; 0000EDD4  E838E7  '.8.'
+
 xedd7:	mov	[0x41],ah		; 0000EDD7  88264100  '.&A.'
+
+	;;
+	;; This appears to validate the rest of the FDC response bytes; (AX) should be zero on success
+	;;
 	call	xecd5			; 0000EDDB  E8F7FE  '...'
+
 	or	ah,ah			; 0000EDDE  0AE4  0x0A,'.'
 	ret				; 0000EDE0  C3  '.'
 
@@ -12896,12 +12981,14 @@ xf494:	mov	al,0x0			; 0000F494  B000
 	out	0x80,al			; 0000F496  E680
 
 	;;
-	;; When we arrive here, the A20 line has been disabled, so in theory, the GDT-in-ROM
-	;; is accessible only at the "lo" ROM address (%0F0730), not the "hi" address (%FF0730).
-	;; Which means the following JMP through selector 0x28 (indeed, any selector access)
-	;; should immediately fail.  TODO: Determine how this code works in "real life"
+	;; When we arrive here, the A20 line has been disabled, so in theory, the GDT is
+	;; accessible only at the "low" ROM address (%0F0730), not the "high" address (%FF0730).
+	;; And even if we DID access it from the "low" address, it contains base addresses (eg,
+	;; for selector 0x28) located at %FFxxxx, so we're still screwed if A20 is disabled.
 	;;
-	;; It seems this code doesn't really do much PROVIDED bits 6 and 7 of the RAM Settings
+	;; TODO: Determine how this code works in "real life"
+	;;
+	;; FYI, it seems this code doesn't do anything PROVIDED bits 6 and 7 of the RAM Settings
 	;; register are set to anything other than 0x40.
 	;;
 	lgdt	[cs:0x077e]		; 0000F498  load [gdtr_hi] into GDTR

@@ -267,7 +267,7 @@ ChipSet.MODEL_5160      = 5160;         // used in reference to the 1st 5160 BIO
 ChipSet.MODEL_5170      = 5170;         // used in reference to the 1st 5170 BIOS, dated Jan 10, 1984
 
 /*
- * The following are fake model numbers, used only to document issues/features of note in later IBM PC AT BIOS revisions.
+ * The following are fake model numbers, used only to document issues/features in later IBM PC AT BIOS revisions.
  */
 ChipSet.MODEL_5170_REV2 = 5170.2;       // used in reference to the 2nd 5170 BIOS, dated Jun 10, 1985
 ChipSet.MODEL_5170_REV3 = 5170.3;       // used in reference to the 3rd 5170 BIOS, dated Nov 15, 1985
@@ -408,14 +408,14 @@ ChipSet.DMA_MASK = {
 };
 
 ChipSet.DMA_MODE = {
-    CHANNEL:            0x03,
-    XFER:               0x0C,
-    XFER_VERIFY:        0x00,
-    XFER_WRITE:         0x04,
-    XFER_READ:          0x08,
+    CHANNEL:            0x03,   // bits 0-1 select 1 of 4 possible channels
+    TYPE:               0x0C,   // bits 2-3 select 1 of 3 valid (4 possible) transfer types
+    TYPE_VERIFY:        0x00,   // pseudo transfer (generates addresses, responds to EOP, but nothing is moved)
+    TYPE_WRITE:         0x04,   // write to memory (move data FROM an I/O device; eg, reading a sector from a disk)
+    TYPE_READ:          0x08,   // read from memory (move data TO an I/O device; eg, writing a sector to a disk)
     AUTOINIT:           0x10,
     DECREMENT:          0x20,   // clear for INCREMENT
-    MODE:               0xC0,
+    MODE:               0xC0,   // bits 6-7 select 1 of 4 possible transfer modes
     MODE_DEMAND:        0x00,
     MODE_SINGLE:        0x40,
     MODE_BLOCK:         0x80,
@@ -1174,8 +1174,18 @@ ChipSet.prototype.reset = function(fHard)
          * TODO: Provide more control over these 8042 "Input Port" bits (eg, the keyboard lock)
          */
         this.b8042InPort = ChipSet.KBC.INPORT.MFG_OFF | ChipSet.KBC.INPORT.KBD_UNLOCKED;
-        if (this.getSWMemorySize() >= 512) this.b8042InPort |= ChipSet.KBC.INPORT.ENABLE_256KB;
-        if (this.getSWVideoMonitor() == ChipSet.MONITOR.MONO) this.b8042InPort |= ChipSet.KBC.INPORT.MONO;
+
+        if (this.getSWMemorySize() >= 512) {
+            this.b8042InPort |= ChipSet.KBC.INPORT.ENABLE_256KB;
+        }
+
+        if (this.getSWVideoMonitor() == ChipSet.MONITOR.MONO) {
+            this.b8042InPort |= ChipSet.KBC.INPORT.MONO;
+        }
+
+        if (COMPAQ386 && this.model == ChipSet.MODEL_DESKPRO386) {
+            this.b8042InPort |= ChipSet.KBC.INPORT.COMPAQ_NO80387 | ChipSet.KBC.INPORT.COMPAQ_NOWEITEK;
+        }
 
         this.b8042OutPort = ChipSet.KBC.OUTPORT.NO_RESET | ChipSet.KBC.OUTPORT.A20_ON;
 
@@ -2381,11 +2391,11 @@ ChipSet.prototype.inDMAChannelAddr = function(iDMAC, iChannel, port, addrFrom)
     controller.bIndex ^= 0x1;
     /*
      * Technically, aTimers[1].fOut is what drives DMA requests for DMA channel 0 (ChipSet.DMA_REFRESH),
-     * every 15us, once the BIOS has initialized the channel's "mode" with MODE_SINGLE, INCREMENT, AUTOINIT, and XFER_READ (0x58)
-     * and initialized TIMER1 appropriately.
+     * every 15us, once the BIOS has initialized the channel's "mode" with MODE_SINGLE, INCREMENT, AUTOINIT,
+     * and TYPE_READ (0x58) and initialized TIMER1 appropriately.
      *
-     * However, we don't need to be that particular.  Simply simulate an ever-increasing address after every read of the full
-     * DMA channel 0 address.
+     * However, we don't need to be that particular.  Simply simulate an ever-increasing address after every
+     * read of the full DMA channel 0 address.
      */
     if (!iDMAC && iChannel == ChipSet.DMA_REFRESH && !controller.bIndex) {
         channel.addrCurrent[0]++;
@@ -2443,9 +2453,10 @@ ChipSet.prototype.inDMAChannelCount = function(iDMAC, iChannel, port, addrFrom)
     /*
      * Technically, aTimers[1].fOut is what drives DMA requests for DMA channel 0 (ChipSet.DMA_REFRESH),
      * every 15us, once the BIOS has initialized the channel's "mode" with MODE_SINGLE, INCREMENT, AUTOINIT,
-     * and XFER_READ (0x58) and initialized TIMER1 appropriately.
+     * and TYPE_READ (0x58) and initialized TIMER1 appropriately.
      *
-     * However, we don't need to be that particular.  Simply simulate an ever-decreasing count after every read of the full DMA channel 0 count.
+     * However, we don't need to be that particular.  Simply simulate an ever-decreasing count after every
+     * read of the full DMA channel 0 count.
      */
     if (!iDMAC && iChannel == ChipSet.DMA_REFRESH && !controller.bIndex) {
         channel.countCurrent[0]--;
@@ -2731,7 +2742,7 @@ ChipSet.prototype.inDMAPageSpare = function(iSpare, port, addrFrom)
 ChipSet.prototype.outDMAPageSpare = function(iSpare, port, bOut, addrFrom)
 {
     /*
-     * TODO: Remove the DEBUG-only DESKPRO386 code once we're done debugging DeskPro 386 ROMs;
+     * TODO: Remove this DEBUG-only DESKPRO386 code once we're done debugging DeskPro 386 ROMs;
      * it enables logging of all DeskPro ROM checkpoint I/O to port 0x84.
      */
     if (this.messageEnabled(Messages.DMA | Messages.PORT) || DEBUG && this.model == ChipSet.MODEL_DESKPRO386 && port == 0x84) {
@@ -2789,10 +2800,10 @@ ChipSet.prototype.connectDMA = function(iDMAChannel, component, sFunction, obj)
  * @param {number} iDMAChannel
  * @param {function(boolean)} [done]
  *
- * For DMA_MODE_XFER_WRITE transfers, fnTransfer(-1) must return bytes as long as we request them (although it may
+ * For DMA_MODE.TYPE_WRITE transfers, fnTransfer(-1) must return bytes as long as we request them (although it may
  * return -1 if it runs out of bytes prematurely).
  *
- * Similarly, for DMA_MODE_XFER_READ transfers, fnTransfer(b) must accept bytes as long as we deliver them (although
+ * Similarly, for DMA_MODE.TYPE_READ transfers, fnTransfer(b) must accept bytes as long as we deliver them (although
  * it is certainly free to ignore bytes it no longer wants).
  */
 ChipSet.prototype.requestDMA = function(iDMAChannel, done)
@@ -2846,7 +2857,7 @@ ChipSet.prototype.advanceDMA = function(channel, fInit)
 {
     if (fInit) {
         channel.count = (channel.countCurrent[1] << 8) | channel.countCurrent[0];
-        channel.xfer = (channel.mode & ChipSet.DMA_MODE.XFER);
+        channel.type = (channel.mode & ChipSet.DMA_MODE.TYPE);
         channel.fWarning = channel.fError = false;
         if (DEBUG && DEBUGGER) {
             channel.cbDebug = channel.count + 1;
@@ -2876,12 +2887,12 @@ ChipSet.prototype.advanceDMA = function(channel, fInit)
             var addr = (channel.bPage << 16) | (channel.addrCurrent[1] << 8) | channel.addrCurrent[0];
             if (DEBUG && DEBUGGER && channel.sAddrDebug === null) {
                 channel.sAddrDebug = str.toHex(addr >> 4, 4) + ":" + str.toHex(addr & 0xf, 4);
-                if (this.messageEnabled(this.messageBitsDMA(iDMAChannel)) && channel.xfer != ChipSet.DMA_MODE.XFER_WRITE) {
+                if (this.messageEnabled(this.messageBitsDMA(iDMAChannel)) && channel.type != ChipSet.DMA_MODE.TYPE_WRITE) {
                     this.printMessage("advanceDMA(" + iDMAChannel + ") transferring " + channel.cbDebug + " bytes from " + channel.sAddrDebug, true);
                     this.dbg.doDump("db", channel.sAddrDebug, "l" + channel.cbDebug);
                 }
             }
-            if (channel.xfer == ChipSet.DMA_MODE.XFER_WRITE) {
+            if (channel.type == ChipSet.DMA_MODE.TYPE_WRITE) {
                 fAsyncRequest = true;
                 (function advanceDMAWrite(addrCur) {
                     channel.fnTransfer.call(channel.component, channel.obj, -1, function onTransferDMA(b, fAsync, obj, off) {
@@ -2893,7 +2904,7 @@ ChipSet.prototype.advanceDMA = function(channel, fInit)
                                 channel.fWarning = true;
                             }
                             /*
-                             * TODO: Determine whether to abort, as we do for DMA_MODE_XFER_READ.
+                             * TODO: Determine whether to abort, as we do for DMA_MODE.TYPE_READ.
                              */
                             b = 0xff;
                         }
@@ -2916,7 +2927,7 @@ ChipSet.prototype.advanceDMA = function(channel, fInit)
                     });
                 }(addr));
             }
-            else if (channel.xfer == ChipSet.DMA_MODE.XFER_READ) {
+            else if (channel.type == ChipSet.DMA_MODE.TYPE_READ) {
                 /*
                  * TODO: Determine whether we should support async dmaWrite() functions (currently not required)
                  */
@@ -2924,15 +2935,20 @@ ChipSet.prototype.advanceDMA = function(channel, fInit)
                 if (channel.fnTransfer.call(channel.component, channel.obj, b) < 0) {
                     /*
                      * In this case, I think I have no choice but to terminate the DMA operation in response to a failure,
-                     * because the ROM BIOS FDC.REG_DATA.CMD.FORMAT_TRACK command specifies a count that is MUCH too large (a side-effect
-                     * of the ROM BIOS using the same "DMA_SETUP" code for reads, writes AND formats).
+                     * because the ROM BIOS FDC.REG_DATA.CMD.FORMAT_TRACK command specifies a count that is MUCH too large
+                     * (a side-effect of the ROM BIOS using the same "DMA_SETUP" code for reads, writes AND formats).
                      */
                     channel.fError = true;
                 }
             }
+            else if (channel.type == ChipSet.DMA_MODE.TYPE_VERIFY) {
+                /*
+                 * Nothing to read or write; just call updateDMA()
+                 */
+            }
             else {
                 if (DEBUG && this.messageEnabled(Messages.DMA | Messages.WARN)) {
-                    this.printMessage("advanceDMA(" + iDMAChannel + ") unsupported xfer mode: " + str.toHexWord(channel.xfer), true);
+                    this.printMessage("advanceDMA(" + iDMAChannel + ") unsupported transfer type: " + str.toHexWord(channel.type), true);
                 }
                 channel.fError = true;
             }
@@ -2986,7 +3002,7 @@ ChipSet.prototype.updateDMA = function(channel)
         channel.component = channel.obj = null;
     }
 
-    if (DEBUG && this.messageEnabled(this.messageBitsDMA(iDMAChannel)) && channel.xfer == ChipSet.DMA_MODE.XFER_WRITE && channel.sAddrDebug) {
+    if (DEBUG && this.messageEnabled(this.messageBitsDMA(iDMAChannel)) && channel.type == ChipSet.DMA_MODE.TYPE_WRITE && channel.sAddrDebug) {
         this.printMessage("updateDMA(" + iDMAChannel + ") transferred " + channel.cbDebug + " bytes to " + channel.sAddrDebug, true);
         this.dbg.doDump("db", channel.sAddrDebug, "l" + channel.cbDebug);
     }
@@ -4078,7 +4094,7 @@ ChipSet.prototype.inPPIC = function(port, addrFrom)
 
     /*
      * The ROM BIOS polls this port incessantly during its memory tests, checking for memory parity errors
-     * (which of course we never report), so we further restrict these port messages to MESSAGE_MEM.
+     * (which of course we never report), so we further restrict these port messages to Messages.MEM.
      */
     this.printMessageIO(port, null, addrFrom, "PPI_C", b, Messages.CHIPSET | Messages.MEM);
     return b;
@@ -4301,8 +4317,8 @@ ChipSet.prototype.in8042RWReg = function(port, addrFrom)
      */
     var b = this.bPPIB & ~(ChipSet.KBC.RWREG.NMI_ERROR | ChipSet.KBC.RWREG.REFRESH_BIT) | ((this.cpu.getCycles() & 0x40)? ChipSet.KBC.RWREG.REFRESH_BIT : 0);
     /*
-     * Thanks to the WAITF function, this has become a very "busy" port, so let's not generate messages
-     * unless both MESSAGE_8042 *and* MESSAGE_LOG are set.
+     * Thanks to the WAITF function, this has become a very "busy" port, so if this generates too
+     * many messages, try adding Messages.LOG to the criteria.
      */
     this.printMessageIO(port, null, addrFrom, "8042_RWREG", b, Messages.C8042);
     return b;
@@ -4347,7 +4363,7 @@ ChipSet.prototype.in8042Status = function(port, addrFrom)
      *
      * This provides a single poll delay, so that the aforementioned "flush" won't toss our response.
      * If longer delays are needed down the road, we may need to set a delay count in the upper (hidden)
-     * bits of b8042Status, instead of using a single "OUTBUFF_DELAY" bit.
+     * bits of b8042Status, instead of using a single delay bit.
      */
     if (this.b8042Status & ChipSet.KBC.STATUS.OUTBUFF_DELAY) {
         this.b8042Status |= ChipSet.KBC.STATUS.OUTBUFF_FULL;
@@ -4391,14 +4407,9 @@ ChipSet.prototype.out8042InBuffCmd = function(port, bOut, addrFrom)
         break;
 
     case ChipSet.KBC.CMD.WRITE_CMD:         // 0x60
-    case ChipSet.KBC.CMD.WRITE_OUTPORT:     // 0xD1
         /*
-         * No further action required for this first group of commands; more data is expected via out8042InBuffData()
+         * No further action required for this command; more data is expected via out8042InBuffData()
          */
-        break;
-
-    case ChipSet.KBC.CMD.READ_INPORT:       // 0xC0
-        this.set8042OutBuff(this.b8042InPort);
         break;
 
     case ChipSet.KBC.CMD.DISABLE_KBD:       // 0xAD
@@ -4430,6 +4441,20 @@ ChipSet.prototype.out8042InBuffCmd = function(port, bOut, addrFrom)
          * TODO: Determine all the side-effects of the Interface Test, if any.
          */
         this.set8042OutBuff(ChipSet.KBC.DATA.INTF_TEST.OK);
+        break;
+
+    case ChipSet.KBC.CMD.READ_INPORT:       // 0xC0
+        this.set8042OutBuff(this.b8042InPort);
+        break;
+
+    case ChipSet.KBC.CMD.READ_OUTPORT:      // 0xD0
+        this.set8042OutBuff(this.b8042OutPort);
+        break;
+
+    case ChipSet.KBC.CMD.WRITE_OUTPORT:     // 0xD1
+        /*
+         * No further action required for this command; more data is expected via out8042InBuffData()
+         */
         break;
 
     case ChipSet.KBC.CMD.READ_TEST:         // 0xE0
@@ -4516,7 +4541,9 @@ ChipSet.prototype.set8042OutBuff = function(b)
 ChipSet.prototype.set8042OutPort = function(b)
 {
     this.b8042OutPort = b;
-    this.bus.setA20(!!(b & ChipSet.KBC.OUTPORT.A20_ON));
+
+    this.cpu.setA20(!!(b & ChipSet.KBC.OUTPORT.A20_ON));
+
     if (!(b & ChipSet.KBC.OUTPORT.NO_RESET)) {
         /*
          * Bit 0 of the 8042's output port is connected to RESET.  Normally, it's "pulsed" with the

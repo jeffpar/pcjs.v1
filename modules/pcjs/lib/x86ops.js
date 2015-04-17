@@ -53,7 +53,8 @@ X86.opADDmb = function ADDmb()
      * point you can also choose to halt if Messages.HALT is enabled).
      */
     if (DEBUG && !b) {
-        this.printMessage("suspicious opcode: 0x00 0x00");
+        this.printMessage("suspicious opcode: 0x00 0x00", DEBUGGER || this.bitsMessage);
+        if (DEBUGGER) this.stopCPU();
     }
     this.aOpModMemByte[b].call(this, X86.fnADDb);
 };
@@ -2493,7 +2494,7 @@ X86.opLAHF = function LAHF()
  */
 X86.opMOVALm = function MOVALm()
 {
-    this.regEAX = (this.regEAX & ~0xff) | this.getSOByte(this.segData, this.getIPWord());
+    this.regEAX = (this.regEAX & ~0xff) | this.getSOByte(this.segData, this.getIPAddr());
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
     this.nStepCycles -= this.cycleCounts.nOpCyclesMovAM;
 };
@@ -2505,7 +2506,7 @@ X86.opMOVALm = function MOVALm()
  */
 X86.opMOVAXm = function MOVAXm()
 {
-    this.regEAX = (this.regEAX & ~this.dataMask) | this.getSOWord(this.segData, this.getIPWord());
+    this.regEAX = (this.regEAX & ~this.dataMask) | this.getSOWord(this.segData, this.getIPAddr());
     if (BACKTRACK) {
         this.backTrack.btiAL = this.backTrack.btiMemLo; this.backTrack.btiAH = this.backTrack.btiMemHi;
     }
@@ -2523,7 +2524,7 @@ X86.opMOVmAL = function MOVmAL()
     /*
      * setSOByte() truncates the value as appropriate
      */
-    this.setSOByte(this.segData, this.getIPWord(), this.regEAX);
+    this.setSOByte(this.segData, this.getIPAddr(), this.regEAX);
     this.nStepCycles -= this.cycleCounts.nOpCyclesMovMA;
 };
 
@@ -2540,7 +2541,7 @@ X86.opMOVmAX = function MOVmAX()
     /*
      * setSOWord() truncates the value as appropriate
      */
-    this.setSOWord(this.segData, this.getIPWord(), this.regEAX);
+    this.setSOWord(this.segData, this.getIPAddr(), this.regEAX);
     this.nStepCycles -= this.cycleCounts.nOpCyclesMovMA;
 };
 
@@ -3188,7 +3189,7 @@ X86.opGRP2wn = function GRP2wn()
  */
 X86.opRETn = function RETn()
 {
-    var n = this.getIPWord() << (this.dataSize >> 2);
+    var n = this.getIPShort() << (this.dataSize >> 2);
     var newIP = this.popWord();
     if (DEBUG) this.printMessage(" returning to " + str.toHex(this.segCS.sel, 4) + ':' + str.toHex(newIP, this.dataSize << 1), this.bitsMessage, true);
     this.setIP(newIP);
@@ -3285,7 +3286,7 @@ X86.opMOVw = function MOVw()
  */
 X86.opENTER = function ENTER()
 {
-    var wLocal = this.getIPWord();
+    var wLocal = this.getIPShort();
     var bLevel = this.getIPByte() & 0x1f;
     /*
      * NOTE: 11 is the minimum cycle time for the 80286; the 80186/80188 has different cycle times: 15, 25 and
@@ -3330,7 +3331,7 @@ X86.opLEAVE = function LEAVE()
  */
 X86.opRETFn = function RETFn()
 {
-    X86.fnRETF.call(this, this.getIPWord());
+    X86.fnRETF.call(this, this.getIPShort());
     this.nStepCycles -= this.cycleCounts.nOpCyclesRetFn;
 };
 

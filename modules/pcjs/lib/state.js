@@ -389,7 +389,7 @@ State.prototype = {
      * messageEnabled(bitsMessage)
      *
      * @this {State}
-     * @param {number} [bitsMessage] is one or more Debugger MESSAGE_* category flag(s)
+     * @param {number} [bitsMessage] is one or more Messages category flag(s)
      * @return {boolean}
      */
     messageEnabled: function(bitsMessage) {
