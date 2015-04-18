@@ -9,29 +9,34 @@
 ;
 ; Overview
 ; --------
-; This 32Kb ROM image is ORG'ed at 0x8000, because it needs to run at real-mode
-; addresses F000:8000 through F000:FFFF, as well as protected-mode physical addresses
-; %FFFF8000 through %FFFFFFFF.  Additionally, DeskPro 386 systems mirror this 32Kb ROM
-; at real-mode addresses F000:0000 through F000:7FFF, as well as protected-mode physical
-; addresses %FFFF0000 through %FFFF7FFF.
+; This 32Kb ROM image is ORG'ed at 0x8000, because most of its code is designed to run
+; at real-mode addresses F000:8000 through F000:FFFF.
 ;
-; In other words, both 32Kb halves of the top 64Kb of both the first megabyte and the
-; 16th megabyte are physically mapped to this ROM image.
+; And even though the 80386 resets with CS:IP set to F000:FFF0, the physical base address
+; of CS is set to %FFFF0000, which means the ROM must also be mapped at physical addresses
+; %FFFF8000 through %FFFFFFFF.
+;
+; Additionally, DeskPro 386 systems mirror this 32Kb ROM at real-mode address F000:0000
+; through F000:7FFF.  And that region is similarly mirrored at physical addresses %FFFF0000
+; through %FFFF7FFFF.
+;
+; In other words, both 32Kb halves of the last 64Kb of both the first and last megabyte
+; of the 80386's 32Gb address space are physically mapped to this ROM image.
 ;
 ; Finally, the DeskPro 386 has a "RAM Relocation" feature that allows 128Kb of RAM at
-; %FE0000 through %FFFFFF to be mapped to %0E0000 through %0FFFFF, effectively replacing
-; the ROM in the first megabyte with write-protected RAM; the top 64Kb of that RAM must
-; first be initialized with the 64Kb at %0F0000 prior to remapping.  It's also possible
-; to copy external ROMs from %0C0000 through %0EFFFF into the bottom 64Kb of that RAM,
-; but this is only done for ROMs known to contain relocatable code (eg, a Compaq Enhanced
-; Video Graphics card).
+; %00FE0000 through %00FFFFFF to be mapped to %000E0000 through %000FFFFF, effectively
+; replacing the ROM in the first megabyte with write-protected RAM; the top 64Kb of that
+; RAM must first be initialized with the 64Kb at %000F0000 prior to remapping.  It's also
+; possible to copy external ROMs from %000C0000 through %000EFFFF into the bottom 64Kb of
+; that RAM, but this is only done for ROMs known to contain relocatable code (eg, a Compaq
+; Enhanced Video Graphics card).
 ;
 ; Every DeskPro 386 system must have a MINIMUM of 1Mb of RAM, of which either 256Kb,
 ; 512Kb, or 640Kb can be physically mapped as conventional memory (at the bottom of the
 ; first megabyte), with the remainder (either 768Kb, 512Kb, or 384Kb) physically mapped
-; to the top of the 16th megabyte (ending at address %FFFFFF), the last 128Kb of which
+; to the top of the 16th megabyte (ending at address %00FFFFFF), the last 128Kb of which
 ; is used by the "RAM Relocation" feature.  The remaining memory immediately below that
-; 128Kb (ie, below %FE0000) can only be accessed by special system software, such as CEMM.
+; 128Kb (ie, below %00FE0000) can only be accessed by special system software, such as CEMM.
 ;
 ; Compaq refers to that remaining memory as "Compaq Built-in Memory".
 ;
@@ -6626,12 +6631,13 @@ xbc71:	call	xa3e0			; 0000BC71  E86CE7  '.l.'
 	call	xd6dd			; 0000BCAC  E82E1A  '...'
 
 	;;
-	;; Relocate the ROM and initialize conventional RAM
+	;; Switch to protected-mode, relocate the ROM, switch back to real-mode, disable
+	;; the A20 line, and then initialize all conventional RAM.
 	;;
 	call	xc825			; 0000BCAF  E8730B
 
 	;;
-	;; This function loads the GDTR with [00FF0730,0047], but since the previous call
+	;; The next function loads the GDTR with [00FF0730,0047], but since the previous call
 	;; disabled the A20 line, the first selector load crashes, because physical address
 	;; %FF0730 requires A20.
 	;;
