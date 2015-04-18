@@ -97,7 +97,7 @@ bugs involving the A20 line in protected-mode -- including this "bug" in the Com
 
 Here's my Compaq DeskPro 386/16 PCjs test configuration.  Set a breakpoint at F000:F498 ("bp f000:f498")
 in the Debugger panel and see what *you* think.  Use the "rp" command to see all registers, including
-the current base and limit values loaded into the selectors.
+the current base and limit values loaded into the segment registers.
 
 [Embedded DeskPro 386](/devices/pc/machine/compaq/deskpro386/ega/2048kb/machine.xml "PCjs:deskpro386-ega-2048k::uncompiled:debugger")
 
