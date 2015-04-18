@@ -21,7 +21,7 @@
 ; through %FFFF7FFFF.
 ;
 ; In other words, both 32Kb halves of the last 64Kb of both the first and last megabyte
-; of the 80386's 32Gb address space are physically mapped to this ROM image.
+; of the 80386's 4Gb address space are physically mapped to this ROM image.
 ;
 ; Finally, the DeskPro 386 has a "RAM Relocation" feature that allows 128Kb of RAM at
 ; %00FE0000 through %00FFFFFF to be mapped to %000E0000 through %000FFFFF, effectively
