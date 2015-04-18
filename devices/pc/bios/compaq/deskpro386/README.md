@@ -63,7 +63,7 @@ while the /PGM should be connected to INPUT HIGH VOLTAGE.  So I wired pin 27 (/P
 worked perfectly.  The NYC Resistor article implied that every *active low* pin should be connected to GND, but apparently
 there are exceptions to that general rule.
 
-Producing BIOS Source Code
+Producing ROM Source Code
 ---
 In the current directory, an original ROM can be regenerated from the JSON-encoded file:
 

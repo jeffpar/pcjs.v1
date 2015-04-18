@@ -1,6 +1,6 @@
 Compaq DeskPro 386
 ---
-I finally dumped the [Compaq DeskPro 386-16 ROMs](/devices/pc/bios/compaq/deskpro386/) from the motherboard I bought
+I finally dumped the [Compaq DeskPro 386/16 ROMs](/devices/pc/bios/compaq/deskpro386/) from the motherboard I bought
 on ebay last year, so I'm ready to begin adding 80386 support to PCjs.
 
 I'd also like to locate a copy of the "Compaq DeskPro 386 Technical Reference Guide, Volumes 1 and 2".  It's not hard

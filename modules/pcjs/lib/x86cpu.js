@@ -660,7 +660,7 @@ X86CPU.prototype.initMemory = function(aMemBlocks, blockShift, blockLimit, block
  * it's hard to imagine any real-world protected-mode code relying on A20 being off.  However, that
  * doesn't change the fact that this hack should NOT be necessary.
  *
- * TODO: Figure out why the DeskPro 386 ROM BIOS misbehaves under emulation, necessitating this hack.
+ * TODO: Figure out why the DeskPro 386 ROM BIOS misbehaves under emulation, and eliminate this hack.
  *
  * @this {X86CPU}
  * @param {boolean} fEnable is true to enable A20, false to disable

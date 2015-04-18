@@ -6628,12 +6628,12 @@ xbc71:	call	xa3e0			; 0000BC71  E86CE7  '.l.'
 	;;
 	;; Relocate the ROM and initialize conventional RAM
 	;;
-	call	xc825			; 0000BCAF  E8730B  '.s.'
+	call	xc825			; 0000BCAF  E8730B
 
 	;;
 	;; This function loads the GDTR with [00FF0730,0047], but since the previous call
-	;; turned A20 off, the first selector load crashes, because physical address %FF0730
-	;; requires A20 on.
+	;; disabled the A20 line, the first selector load crashes, because physical address
+	;; %FF0730 requires A20.
 	;;
 	call	xf480			; 0000BCB2  E8CB37
 
@@ -8142,7 +8142,7 @@ xc89d:	lidt	[cs:0xa151]		; 0000C89D  2E0F011E51A1  '....Q.'
 	;;
 	;; Disable A20
 	;;
-	call	xa478			; 0000C8B4  E8C1DB  '...'
+	call	xa478			; 0000C8B4  E8C1DB
 
 	;;
 	;; Get the (conventional) memory size in Kb from 0x40:0x0013, divide by 64 (0x40) to yield
@@ -11574,14 +11574,14 @@ xe770:	test	dl,0x80			; 0000E770  F6C280  '...'
 	jnz	xe793			; 0000E773  751E  'u.'
 
 	;;
-	;; More disk I/O (TODO: Investigate)
+	;; More diskette I/O (TODO: Investigate)
 	;;
 	push	bx			; 0000E775  53  'S'
 	call	xd540			; 0000E776  E8C7ED  '...'
 	pop	bx			; 0000E779  5B  '['
 
 	;;
-	;; Check the ROM progress byte for 0xBD (value I've seen: 0xB9)
+	;; Check the ROM status byte for 0xBD (values I've seen: 0xB9)
 	;;
 	in	al,0x84			; 0000E77A  E484  '..'
 	cmp	al,0xbd			; 0000E77C  3CBD  '<.'
@@ -11589,14 +11589,15 @@ xe770:	test	dl,0x80			; 0000E770  F6C280  '...'
 
 	;;
 	;; This code looks broken: ES:BX points to the boot sector just loaded
-	;; (0x0000:0x7C00), and apparently it wants to scan the first 9 words of
-	;; the boot sector, to see if they all match the 1st word; if they do,
+	;; (0x0000:0x7C00), and apparently the ROM wants to scan the first 9 words
+	;; of the boot sector, to see if they all match the 1st word; if they do,
 	;; then it's likely the boot sector is invalid (hence the "boot_error"
-	;; message).  However, it's loading (AX) with the 1st word from DS:BX
-	;; (0x0040:0x7C00) rather than ES:BX, which increases the likelihood that
-	;; this code will always see a difference and never trigger the error.
+	;; message).  However, it's loading AX with the 1st word from DS:BX
+	;; (0x0040:0x7C00) rather than ES:BX, which aside from being the wrong word,
+	;; also increases the likelihood that this code will always see a difference
+	;; and never trigger the error.
 	;;
-	;; The value in (AX) is typically 0x0000.
+	;; The value in AX is typically 0x0000.
 	;;
 	mov	ax,[bx]			; 0000E780  8B07  '..'
 	mov	cx,0x9			; 0000E782  B90900  '...'
@@ -12986,10 +12987,11 @@ xf494:	mov	al,0x0			; 0000F494  B000
 	;; And even if we DID access it from the "low" address, it contains base addresses (eg,
 	;; for selector 0x28) located at %FFxxxx, so we're still screwed if A20 is disabled.
 	;;
-	;; TODO: Determine how this code works in "real life"
+	;; TODO: Determine how this code worked in "real life"
 	;;
-	;; FYI, it seems this code doesn't do anything PROVIDED bits 6 and 7 of the RAM Settings
-	;; register are set to anything other than 0x40.
+	;; FYI, it seems this code doesn't do anything if bits 6 and 7 of the RAM Settings
+	;; register are set to anything other than 0x40 (ie, it returns to real-mode almost
+	;; immediately after entering protected-mode).
 	;;
 	lgdt	[cs:0x077e]		; 0000F498  load [gdtr_hi] into GDTR
 	mov	eax,cr0			; 0000F49E  0F2000
