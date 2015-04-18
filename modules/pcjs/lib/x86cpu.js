@@ -1202,6 +1202,7 @@ X86CPU.prototype.resetRegs = function()
 X86CPU.prototype.setAddrSize = function()
 {
     if (!I386) {
+        this.getAddr = this.getShort;
         this.aOpModRegByte = X86ModB.aOpModReg;
         this.aOpModMemByte = X86ModB.aOpModMem;
         this.aOpModGrpByte = X86ModB.aOpModGrp;
