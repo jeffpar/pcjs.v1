@@ -28,8 +28,8 @@
 ; replacing the ROM in the first megabyte with write-protected RAM; the top 64Kb of that
 ; RAM must first be initialized with the 64Kb at %000F0000 prior to remapping.  It's also
 ; possible to copy external ROMs from %000C0000 through %000EFFFF into the bottom 64Kb of
-; that RAM, but this is only done for ROMs known to contain relocatable code (eg, a Compaq
-; Enhanced Video Graphics card).
+; that RAM, but this is only done for ROMs known to contain relocatable code; eg, a Compaq
+; Video Graphics Controller (VGC) Board.
 ;
 ; Every DeskPro 386 system must have a MINIMUM of 1Mb of RAM, of which either 256Kb,
 ; 512Kb, or 640Kb can be physically mapped as conventional memory (at the bottom of the
@@ -6636,14 +6636,10 @@ xbc71:	call	xa3e0			; 0000BC71  E86CE7  '.l.'
 	;;
 	call	xc825			; 0000BCAF  E8730B
 
-	;;
-	;; The next function loads the GDTR with [00FF0730,0047], but since the previous call
-	;; disabled the A20 line, the first selector load crashes, because physical address
-	;; %FF0730 requires A20.
-	;;
 	call	xf480			; 0000BCB2  E8CB37
 
-	call	xe7df			; 0000BCB5  E8272B  '.',0x27,'+'
+	call	xe7df			; 0000BCB5  E8272B
+
 	sti				; 0000BCB8  FB  '.'
 	mov	al,0x21			; 0000BCB9  B021  '.!'
 	out	0x84,al			; 0000BCBB  E684  '..'
@@ -12988,12 +12984,11 @@ xf494:	mov	al,0x0			; 0000F494  B000
 	out	0x80,al			; 0000F496  E680
 
 	;;
-	;; When we arrive here, the A20 line has been disabled, so in theory, the GDT is
-	;; accessible only at the "low" ROM address (%0F0730), not the "high" address (%FF0730).
-	;; And even if we DID access it from the "low" address, it contains base addresses (eg,
-	;; for selector 0x28) located at %FFxxxx, so we're still screwed if A20 is disabled.
-	;;
-	;; TODO: Determine how this code worked in "real life"
+	;; When we arrive here, the A20 line has been disabled; on most systems, that would
+	;; mean that the ROM's GDT would only be accessible at the "low" ROM address (%0F0730),
+	;; not the "high" address (%FF0730).  But fortunately, A20 management on Compaq
+	;; DeskPros affects wrap-around only from the 1st to the 2nd megabyte; no other address
+	;; range is affected.
 	;;
 	;; FYI, it seems this code doesn't do anything if bits 6 and 7 of the RAM Settings
 	;; register are set to anything other than 0x40 (ie, it returns to real-mode almost

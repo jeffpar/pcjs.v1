@@ -32,8 +32,8 @@ of the 80386's 4Gb address space are physically mapped to this ROM image.
 replacing the ROM in the first megabyte with write-protected RAM; the top 64Kb of that
 RAM must first be initialized with the 64Kb at %000F0000 prior to remapping.  It's also
 possible to copy external ROMs from %000C0000 through %000EFFFF into the bottom 64Kb of
-that RAM, but this is only done for ROMs known to contain relocatable code (eg, a Compaq
-Enhanced Video Graphics card).
+that RAM, but this is only done for ROMs known to contain relocatable code; eg, a Compaq
+Video Graphics Controller (VGC) Board.
 
 > Every DeskPro 386 system must have a MINIMUM of 1Mb of RAM, of which either 256Kb,
 512Kb, or 640Kb can be physically mapped as conventional memory (at the bottom of the
@@ -61,44 +61,51 @@ not run with paging enabled, so any physical address is as easy to access as any
 Unless, of course, the A20 line is disabled.  In that case, only the first range is
 accessible; the other two are not.
 
-And unfortunately, I've come across a code path in the ROM that attempts to switch to
-protected-mode while the A20 line is still disabled, with the GDTR pointing to memory
-that requires A20.  The result is an immediate crash.  Here's the code:
+April 19, 2015 Update
+---
+Thanks to some sleuthing by [Michal Necasek](http://os2museum.com/), it turns out that my
+assumptions about A20 management on the Compaq DeskPro 386 were incorrect.
+
+He noted that, on page 398 of "DOS Internals" by Geoff Chappell, (c) 1994, the author says:
+
+> On a machine that controls the A20 by passing the address line through an AND gate with a
+signal from some bit at an I/O port, the A20MAP program should produce a map similar to:
+
+	Memory mapping with disabled A20 line:
+	
+	    0MB ->  0MB
+	    1MB ->  0MB
+	    2MB ->  2MB
+	    3MB ->  2MB
+	    4MB ->  4MB
+	    5MB ->  4MB
+	    6MB ->  6MB
+	    7MB ->  6MB
+
+> showing wrap-around for every second megabyte. It is also possible to include other address lines
+in the controlling mechanism, which may reduce the incidence of wrap-around, as with a Compaq
+DeskPro:
+
+	    0MB ->  0MB
+	    1MB ->  0MB
+	    2MB ->  2MB
+	    3MB ->  3MB
+	    4MB ->  4MB
+
+---
+
+This means that the DeskPro ROM BIOS can, in fact, access its own code and data at ANY of the above
+three physical address ranges at any time, regardless whether A20 is disabled or not.
+
+Which is a good thing, because I came across at least one code sequence in the ROM BIOS that enters
+protected-mode with A20 disabled -- an unwise thing to do on most machines: 
 
 	;;
-	;; Switch to protected-mode, relocate the ROM, switch back to real-mode, disable
-	;; the A20 line, and then initialize all conventional RAM.
-	;;
-	call    xc825           ; 0000BCAF  E8730B
-
-	;;
-	;; The next function loads the GDTR with [00FF0730,0047], but since the previous call
-	;; disabled the A20 line, the first selector load crashes, because physical address
-	;; %FF0730 requires A20.
-	;;
-	call    xf480           ; 0000BCB2  E8CB37
-
-The code at C825 is a long, fairly linear function that includes a call to A478, a small
-function whose sole purpose is to issue an 8042 Keyboard Controller command that disables
-the A20 line.
-
-	;;
-	;; Disable A20
-	;;
-	call    xa478           ; 0000C8B4  E8C1DB
-
-After disabling A20, the code at C825 then performs a series of `rep stosd` to zero all
-conventional (below 1Mb) RAM, and then it returns to BCB2, which in turn calls F480.
-
-The code at F480 almost immediately attempts to enter protected-mode:
-
-	;;
-	;; When we arrive here, the A20 line has been disabled, so in theory, the GDT is
-	;; accessible only at the "low" ROM address (%0F0730), not the "high" address (%FF0730).
-	;; And even if we DID access it from the "low" address, it contains base addresses (eg,
-	;; for selector 0x28) located at %FFxxxx, so we're still screwed if A20 is disabled.
-	;;
-	;; TODO: Determine how this code worked in "real life"
+	;; When we arrive here, the A20 line has been disabled; on most systems, that would
+	;; mean that the ROM's GDT would only be accessible at the "low" ROM address (%0F0730),
+	;; not the "high" address (%FF0730).  But fortunately, A20 management on Compaq
+	;; DeskPros affects wrap-around only from the 1st to the 2nd megabyte; no other address
+	;; range is affected.
 	;;
 	;; FYI, it seems this code doesn't do anything if bits 6 and 7 of the RAM Settings
 	;; register are set to anything other than 0x40 (ie, it returns to real-mode almost
@@ -110,48 +117,26 @@ The code at F480 almost immediately attempts to enter protected-mode:
 	mov     cr0,eax         ; 0000F4A4  0F2200
 	jmp     0x28:xf4ac      ; 0000F4A7  EAACF42800
 
-The JMP instruction will invariably fault, because the GDT is located in memory that cannot be
-accessed when A20 is disabled.
+Before fully understanding the DeskPro's unusual A20 management, PCjs worked around it by
+redirecting all A20 changes from the Bus component to the CPU component, giving the CPU first
+crack at any changes to A20.  If the CPU was in real-mode, it would simply pass the A20 request
+on to the Bus. However, if the CPU was in protected-mode, it would maintain the requested
+"logical" A20 state but ensure that the "physical" state of A20 was always enabled.  In short,
+it was no longer possible for the CPU to be in protected-mode AND for the A20 line to be disabled;
+when one was enabled, the other was enabled as well.
 
-The code at F498 is not called from any other place.  It can only be reached by running the
-preceding code which, among other things, disables A20.  And there's only one branch between that
-code and the code that enters protected-mode that could possibly make any difference:
-
-	test    word [cs:si],0x0f00 ; 0000F48A  2EF704000F
-	jz      xf494               ; 0000F48F  7403
-
-But the high byte of the word at [cs:si] (part of Compaq's Built-In Memory table) is initialized
-earlier with a value from AL that was first masked with 0xF0:
-
-	;;
-	;; Isolate the base memory settings in bits 5-4 (00=640Kb, 10=512Kb, 11=256Kb)
-	;;
-	and     al,0xf0         ; 000085D7  24F0  '$.'
-
-	;;
-	;; Update [bim_table_offset]+1 (eg, %FF7FB7) with base memory settings
-	;;
-	mov     [es:di+0x1],al  ; 000085D9  26884501  '&.E.'
-
-and I'm not aware of any intervening code that could have altered that byte, so it's not clear how the
-high byte of the word at [cs:si] would ever contain any set bits that coincide with 0x0F.
-
-I've worked around this problem for now by changing how PCjs manages the A20 line.  All A20 changes
-now go through the CPU component, instead of directly to the Bus component, giving the CPU first crack
-at any changes to A20.  If the CPU is in real-mode, it simply passes the A20 request on to the Bus.
-However, if the CPU is in protected-mode, it maintains the requested "logical" A20 state, but ensures
-that the "physical" state of A20 is always enabled.  In short, it is no longer possible for the CPU
-to be in protected-mode AND for the A20 line to be disabled; when one is enabled, the other is enabled
-as well.
- 
-That's obviously NOT how the actual hardware works, but it does have the advantage of avoiding strange
-bugs involving the A20 line in protected-mode -- including this "bug" in the Compaq DeskPro 386 ROM BIOS.
+I'm in the process of replacing that work-around with a much more compatible change, at least
+on 32-bit bus configurations, which involves changing the physical address map for the 2nd megabyte
+to match that of the 1st megabyte whenever A20 is disabled.  I could probably get away with remapping
+only the first 64Kb of the 2nd megabyte, but until I'm actually able to run some tests on a real
+DeskPro 386, I'm going to assume Compaq's A20 implementation affected the entire 2nd megabyte.
 
 Here's my Compaq DeskPro 386/16 PCjs test configuration.  Set a breakpoint at F000:F498 ("bp f000:f498")
-in the Debugger panel and see what *you* think.  Use the "rp" command to see all registers, including
-the current base and limit values loaded into the segment registers.
+in the Debugger panel to see the above code in action.  When the machine is operating in real-mode, you
+can use the "rp" command to dump all the registers, including the current base and limit values loaded into
+the segment registers.
 
 [Embedded DeskPro 386](/devices/pc/machine/compaq/deskpro386/ega/2048kb/machine.xml "PCjs:deskpro386-ega-2048k::uncompiled:debugger")
 
 *[@jeffpar](http://twitter.com/jeffpar)*  
-*April 16, 2015*
+*April 16-19, 2015*
