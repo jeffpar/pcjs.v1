@@ -186,11 +186,6 @@ function X86CPU(parmsCPU)
      * so that if/when we call restore(), it will have something to fill in.
      */
     this.resetRegs();
-
-    /*
-     * Initially, the logical A20 state should be true, but from this point on, it's up to the machine to decide.
-     */
-    this.fA20 = true;
 }
 
 Component.subclass(X86CPU, CPU);
@@ -643,41 +638,9 @@ X86CPU.prototype.initMemory = function(aMemBlocks, blockShift, blockLimit, block
 };
 
 /**
- * setA20(fEnable)
- *
- * setA20() used to ONLY be a Bus function, but we now route all setA20() calls through the CPU,
- * so that the CPU can maintain a logical A20 state (fA20), separate from the physical A20 state.
- *
- * In real-mode, all cpu.setA20() calls go straight to bus.setA20(), and we update the logical
- * A20 state (fA20); in protected-mode, we only update the logical A20 state (fA20).
- *
- * In addition, when transitioning from real-mode to protected-mode, we call bus.setA20(true), and
- * when transitioning back to real-mode, we call bus.setA20(fA20).  See setProtMode() for details.
- *
- * This gives the CPU an unusual amount of control over the A20 line, but it protects us from "bad"
- * protected-mode code that fails to ensure A20 is enabled; I've run into code in the Compaq DeskPro
- * 386 ROM BIOS that fails without this work-around.  This seems like a fairly safe hack, because
- * it's hard to imagine any real-world protected-mode code relying on A20 being off.  However, that
- * doesn't change the fact that this hack should NOT be necessary.
- *
- * TODO: Figure out why the DeskPro 386 ROM BIOS misbehaves under emulation, and eliminate this hack.
- *
- * @this {X86CPU}
- * @param {boolean} fEnable is true to enable A20, false to disable
- */
-X86CPU.prototype.setA20 = function(fEnable)
-{
-    this.fA20 = fEnable;
-    if (!(this.regCR0 & X86.CR0.MSW.PE)) {
-        this.bus.setA20(fEnable);
-    }
-};
-
-/**
  * setAddressMask(busMask)
  *
- * Notification from Bus.setA20(), called whenever the physical A20 line changes; this is
- * independent of the CPU's own logical A20 state (fA20).
+ * Notification from Bus.setA20(), called whenever the physical A20 line changes
  *
  * @this {X86CPU}
  * @param {number} busMask
@@ -1441,16 +1404,6 @@ X86CPU.prototype.setProtMode = function(fProt)
         this.segFS.updateMode(fProt);
         this.segGS.updateMode(fProt);
     }
-    /*
-     * Work-around to update the A20 line whenever transitioning modes; see cpu.setA20() for details.
-     *
-     * Unfortunately, we can't immediately update the physical A20 line on return to real-mode, because
-     * segment registers are likely still loaded with base addresses above 1Mb, so we leave the physical
-     * A20 line enabled for now.
-     *
-     *      if (this.bus) this.bus.setA20(fProt? true : this.fA20);
-     */
-    if (this.bus && fProt) this.bus.setA20(true);
 };
 
 /**
@@ -1464,7 +1417,7 @@ X86CPU.prototype.setProtMode = function(fProt)
 X86CPU.prototype.saveProtMode = function()
 {
     if (this.addrGDT != null) {
-        return [this.regCR0, this.addrGDT, this.addrGDTLimit, this.addrIDT, this.addrIDTLimit, this.segLDT.save(), this.segTSS.save(), this.nIOPL, this.fA20];
+        return [this.regCR0, this.addrGDT, this.addrGDTLimit, this.addrIDT, this.addrIDTLimit, this.segLDT.save(), this.segTSS.save(), this.nIOPL];
     }
     return null;
 };
@@ -1488,7 +1441,6 @@ X86CPU.prototype.restoreProtMode = function(a)
         this.segLDT.restore(a[5]);
         this.segTSS.restore(a[6]);
         this.nIOPL = a[7];
-        this.fA20 = (a[8] !== undefined? a[8] : this.bus.getA20());
         this.setProtMode();
     }
 };

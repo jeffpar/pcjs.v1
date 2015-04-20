@@ -272,7 +272,7 @@ RAM.init = function()
  * 0x00FE0000-0x00FFFFFF.  Note that only the top 128Kb of "ramCPQ" addressibility is affected; the
  * rest of that memory, ranging anywhere from 256Kb to 640Kb, remains addressible at its original
  * location.  Compaq's CEMM and VDISK utilities were generally the only software able to access that
- * remaining memory.
+ * remaining memory (what Compaq refers to as "Compaq Built-in Memory").
  *
  * @constructor
  * @param {RAM} ram
@@ -426,6 +426,12 @@ CompaqController.writeByte = function writeCompaqControllerByte(off, b)
                 if (!controller.aBlocksDst) {
                     controller.aBlocksDst = bus.getMemoryBlocks(CompaqController.MAP_DST, CompaqController.MAP_SIZE);
                 }
+                /*
+                 * You might think that the next three lines could ALSO be moved to the preceding IF,
+                 * but it's possible for the write-protection feature to be enabled/disabled separately
+                 * from the mapping feature.  We could avoid executing this code as well by checking the
+                 * current read-write state, but this is an infrequent operation, so there's no point.
+                 */
                 var aBlocks = bus.getMemoryBlocks(CompaqController.MAP_SRC, CompaqController.MAP_SIZE);
                 var type = (b & CompaqController.MAPPINGS.READWRITE)? Memory.TYPE.RAM : Memory.TYPE.ROM;
                 bus.setMemoryBlocks(CompaqController.MAP_DST, CompaqController.MAP_SIZE, aBlocks, type);

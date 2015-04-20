@@ -465,18 +465,43 @@ Bus.prototype.scanMemory = function(stats, addr, size)
  */
 Bus.prototype.getA20 = function()
 {
-    return this.busLimit == this.busMask;
+    return !this.aBlocks2Mb && this.busLimit == this.busMask;
 };
 
 /**
  * setA20(fEnable)
+ *
+ * On 32-bit bus machines, I've adopted the approach that Compaq took with DeskPro 386 machines,
+ * which is to map the 1st Mb to the 2nd Mb whenever A20 is disabled, rather than blindly masking
+ * the A20 address bit from all addresses; this is what the DeskPro 386 ROM BIOS requires.
+ *
+ * For 24-bit bus machines, we take the same approach that most if not all 80286 systems took, which
+ * is simply masking the A20 address bit.
+ *
+ * TODO: On machines with a 32-bit bus, look into whether we can eliminate address masking altogether,
+ * which seems feasible, provided all incoming addresses are already pre-truncated to 32 bits.  Also,
+ * confirm that DeskPro 386 machines mapped the ENTIRE 1st Mb to the 2nd, and not simply the first 64Kb,
+ * which is technically all that 8086 address wrap-around compatibility would require.
  *
  * @this {Bus}
  * @param {boolean} fEnable is true to enable A20 (default), false to disable
  */
 Bus.prototype.setA20 = function(fEnable)
 {
-    if (this.nBusWidth > 20) {
+    if (this.nBusWidth == 32) {
+        if (fEnable) {
+            if (this.aBlocks2Mb) {
+                this.setMemoryBlocks(0x100000, 0x100000, this.aBlocks2Mb);
+                this.aBlocks2Mb = null;
+            }
+        } else {
+            if (!this.aBlocks2Mb) {
+                this.aBlocks2Mb = this.getMemoryBlocks(0x100000, 0x100000);
+                this.setMemoryBlocks(0x100000, 0x100000, this.getMemoryBlocks(0x0, 0x100000));
+            }
+        }
+    }
+    else if (this.nBusWidth > 20) {
         var addrMask = (this.busMask & ~0x100000) | (fEnable? 0x100000 : 0);
         if (addrMask != this.busMask) {
             this.busMask = addrMask;
@@ -579,6 +604,12 @@ Bus.prototype.getMemoryBlocks = function(addr, size)
 /**
  * setMemoryBlocks(addr, size, aBlocks, type)
  *
+ * If no type is specified, then specified address range uses all the provided blocks as-is;
+ * this form of setMemoryBlocks() is used for complete physical aliases.
+ *
+ * Otherwise, new blocks are allocated with the specified type; the underlying memory from the
+ * provided blocks is still used, but the new blocks may have different access to that memory.
+ *
  * @this {Bus}
  * @param {number} addr is the starting physical address
  * @param {number} size of the request, in bytes
@@ -590,13 +621,14 @@ Bus.prototype.setMemoryBlocks = function(addr, size, aBlocks, type)
     var i = 0;
     var iBlock = addr >>> this.blockShift;
     while (size > 0 && iBlock < this.aMemBlocks.length) {
-        var block;
-        if (type === undefined) {
-            block = aBlocks[i++];
-        } else {
-            block = new Memory(addr);
-            if (DEBUGGER) block.setDebugInfo(this.cpu, this.dbg, this.blockSize);
-            block.clone(aBlocks[i++], type);
+        var block = aBlocks[i++];
+        this.assert(block);
+        if (!block) break;
+        if (type !== undefined) {
+            var blockNew = new Memory(addr);
+            if (DEBUGGER) blockNew.setDebugInfo(this.cpu, this.dbg, this.blockSize);
+            blockNew.clone(block, type);
+            block = blockNew;
         }
         this.aMemBlocks[iBlock++] = block;
         size -= this.blockSize;

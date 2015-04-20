@@ -4542,7 +4542,7 @@ ChipSet.prototype.set8042OutPort = function(b)
 {
     this.b8042OutPort = b;
 
-    this.cpu.setA20(!!(b & ChipSet.KBC.OUTPORT.A20_ON));
+    this.bus.setA20(!!(b & ChipSet.KBC.OUTPORT.A20_ON));
 
     if (!(b & ChipSet.KBC.OUTPORT.NO_RESET)) {
         /*
