@@ -1469,7 +1469,7 @@ X86.opINSb = function INSb()
      * The (normal) REP prefix, if used, is REPNZ (0xf2), but either one works....
      */
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
-        nReps = this.regECX;
+        nReps = this.regECX & this.addrMask;
         nDelta = 1;
         if (this.opPrefixes & X86.OPFLAG.REPEAT) nCycles = 4;
     }
@@ -1480,10 +1480,10 @@ X86.opINSb = function INSb()
         this.setSOByte(this.segES, this.regEDI & this.addrMask, b);
         this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -1 : 1)) & this.addrMask);
         this.nStepCycles -= nCycles;
-        this.regECX -= nDelta;
+        this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         if (nReps) {
             if (BUGS_8086) {
-                this.advanceIP(-2);                 // this instruction does not support segment overrides
+                this.advanceIP(-2);                 // this instruction does not support multiple overrides
                 this.assert(this.regLIP == this.opLIP);
             } else {
                 this.regLIP = this.opLIP;
@@ -1516,7 +1516,7 @@ X86.opINSw = function INSw()
      * The (normal) REP prefix, if used, is REPNZ (0xf2), but either one works....
      */
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
-        nReps = this.regECX;
+        nReps = this.regECX & this.addrMask;
         nDelta = 1;
         if (this.opPrefixes & X86.OPFLAG.REPEAT) nCycles = 4;
     }
@@ -1537,10 +1537,10 @@ X86.opINSw = function INSw()
         this.setSOWord(this.segES, this.regEDI & this.addrMask, w);
         this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -this.dataSize : this.dataSize)) & this.addrMask);
         this.nStepCycles -= nCycles;
-        this.regECX -= nDelta;
+        this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         if (nReps) {
             if (BUGS_8086) {
-                this.advanceIP(-2);                 // this instruction does not support segment overrides
+                this.advanceIP(-2);                 // this instruction does not support multiple overrides
                 this.assert(this.regLIP == this.opLIP);
             } else {
                 this.regLIP = this.opLIP;
@@ -1572,7 +1572,7 @@ X86.opOUTSb = function OUTSb()
      * The (normal) REP prefix, if used, is REPNZ (0xf2), but either one works....
      */
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
-        nReps = this.regECX;
+        nReps = this.regECX & this.addrMask;
         nDelta = 1;
         if (this.opPrefixes & X86.OPFLAG.REPEAT) nCycles = 4;
     }
@@ -1580,12 +1580,12 @@ X86.opOUTSb = function OUTSb()
         var b = this.getSOByte(this.segDS, this.regESI & this.addrMask);
         this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + ((this.regPS & X86.PS.DF)? -1 : 1)) & this.addrMask);
         this.nStepCycles -= nCycles;
-        this.regECX -= nDelta;
         if (BACKTRACK) this.backTrack.btiIO = this.backTrack.btiMemLo;
         this.bus.checkPortOutputNotify(this.regEDX, b, this.regLIP - nDelta - 1);
+        this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         if (nReps) {
             if (BUGS_8086) {
-                this.advanceIP(-2);                 // this instruction does not support segment overrides
+                this.advanceIP(-2);                 // this instruction does not support multiple overrides
                 this.assert(this.regLIP == this.opLIP);
             } else {
                 this.regLIP = this.opLIP;
@@ -1617,7 +1617,7 @@ X86.opOUTSw = function OUTSw()
      * The (normal) REP prefix, if used, is REPNZ (0xf2), but either one works....
      */
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
-        nReps = this.regECX;
+        nReps = this.regECX & this.addrMask;
         nDelta = 1;
         if (this.opPrefixes & X86.OPFLAG.REPEAT) nCycles = 4;
     }
@@ -1625,7 +1625,6 @@ X86.opOUTSw = function OUTSw()
         var w = this.getSOWord(this.segDS, this.regESI & this.addrMask);
         this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + ((this.regPS & X86.PS.DF)? -this.dataSize : this.dataSize)) & this.addrMask);
         this.nStepCycles -= nCycles;
-        this.regECX -= nDelta;
         var addrFrom = this.regLIP - nDelta - 1, shift = 0;
         for (var n = 0; n < this.dataSize; n++) {
             if (BACKTRACK) {
@@ -1638,9 +1637,10 @@ X86.opOUTSw = function OUTSw()
             this.bus.checkPortOutputNotify(this.regEDX, (w >> shift) & 0xff, addrFrom);
             shift += 8;
         }
+        this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         if (nReps) {
             if (BUGS_8086) {
-                this.advanceIP(-2);                 // this instruction does not support segment overrides
+                this.advanceIP(-2);                 // this instruction does not support multiple overrides
                 this.assert(this.regLIP == this.opLIP);
             } else {
                 this.regLIP = this.opLIP;
@@ -2556,7 +2556,7 @@ X86.opMOVSb = function MOVSb()
     var nDelta = 0;
     var nCycles = this.cycleCounts.nOpCyclesMovS;
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
-        nReps = this.regECX;
+        nReps = this.regECX & this.addrMask;
         nDelta = 1;
         nCycles = this.cycleCounts.nOpCyclesMovSrn;
         if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesMovSr0;
@@ -2567,7 +2567,7 @@ X86.opMOVSb = function MOVSb()
         this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + nInc) & this.addrMask);
         this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + nInc) & this.addrMask);
         this.nStepCycles -= nCycles;
-        this.regECX -= nDelta;
+        this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         if (nReps) {
             if (BUGS_8086) {
                 this.advanceIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
@@ -2591,7 +2591,7 @@ X86.opMOVSw = function MOVSw()
     var nDelta = 0;
     var nCycles = this.cycleCounts.nOpCyclesMovS;
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
-        nReps = this.regECX;
+        nReps = this.regECX & this.addrMask;
         nDelta = 1;
         nCycles = this.cycleCounts.nOpCyclesMovSrn;
         if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesMovSr0;
@@ -2602,7 +2602,7 @@ X86.opMOVSw = function MOVSw()
         this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + nInc) & this.addrMask);
         this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + nInc) & this.addrMask);
         this.nStepCycles -= nCycles;
-        this.regECX -= nDelta;
+        this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         if (nReps) {
             if (BUGS_8086) {
                 this.advanceIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
@@ -2626,7 +2626,7 @@ X86.opCMPSb = function CMPSb()
     var nDelta = 0;
     var nCycles = this.cycleCounts.nOpCyclesCmpS;
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
-        nReps = this.regECX;
+        nReps = this.regECX & this.addrMask;
         nDelta = 1;
         nCycles = this.cycleCounts.nOpCyclesCmpSrn;
         if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesCmpSr0;
@@ -2642,7 +2642,7 @@ X86.opCMPSb = function CMPSb()
          * NOTE: As long as we're calling fnCMPb(), all our cycle times must be reduced by nOpCyclesArithRM
          */
         this.nStepCycles -= nCycles - this.cycleCounts.nOpCyclesArithRM;
-        this.regECX -= nDelta;
+        this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         /*
          * Repetition continues while ZF matches bit 0 of the REP prefix.  getZF() returns 0x40 if ZF is
          * set, and OP_REPZ (which represents the REP prefix whose bit 0 is set) is 0x40 as well, so when those
@@ -2671,7 +2671,7 @@ X86.opCMPSw = function CMPSw()
     var nDelta = 0;
     var nCycles = this.cycleCounts.nOpCyclesCmpS;
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
-        nReps = this.regECX;
+        nReps = this.regECX & this.addrMask;
         nDelta = 1;
         nCycles = this.cycleCounts.nOpCyclesCmpSrn;
         if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesCmpSr0;
@@ -2687,7 +2687,7 @@ X86.opCMPSw = function CMPSw()
          * NOTE: As long as we're calling fnCMPw(), all our cycle times must be reduced by nOpCyclesArithRM
          */
         this.nStepCycles -= nCycles - this.cycleCounts.nOpCyclesArithRM;
-        this.regECX -= nDelta;
+        this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         /*
          * Repetition continues while ZF matches bit 0 of the REP prefix.  getZF() returns 0x40 if ZF is
          * set, and OP_REPZ (which represents the REP prefix whose bit 0 is set) is 0x40 as well, so when those
@@ -2740,7 +2740,7 @@ X86.opSTOSb = function STOSb()
     var nDelta = 0;
     var nCycles = this.cycleCounts.nOpCyclesStoS;
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
-        nReps = this.regECX;
+        nReps = this.regECX & this.addrMask;
         nDelta = 1;
         nCycles = this.cycleCounts.nOpCyclesStoSrn;
         if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesStoSr0;
@@ -2750,10 +2750,10 @@ X86.opSTOSb = function STOSb()
         this.setSOByte(this.segES, this.regEDI & this.addrMask, this.regEAX);
         this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -1 : 1)) & this.addrMask);
         this.nStepCycles -= nCycles;
-        this.regECX -= nDelta;
+        this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         if (nReps) {
             if (BUGS_8086) {
-                this.advanceIP(-2);                 // this instruction does not support segment overrides
+                this.advanceIP(-2);                 // this instruction does not support multiple overrides
                 this.assert(this.regLIP == this.opLIP);
             } else {
                 this.regLIP = this.opLIP;
@@ -2776,7 +2776,7 @@ X86.opSTOSw = function STOSw()
     var nDelta = 0;
     var nCycles = this.cycleCounts.nOpCyclesStoS;
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
-        nReps = this.regECX;
+        nReps = this.regECX & this.addrMask;
         nDelta = 1;
         nCycles = this.cycleCounts.nOpCyclesStoSrn;
         if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesStoSr0;
@@ -2792,10 +2792,10 @@ X86.opSTOSw = function STOSw()
         this.setSOWord(this.segES, this.regEDI & this.addrMask, this.regEAX);
         this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -this.dataSize : this.dataSize)) & this.addrMask);
         this.nStepCycles -= nCycles;
-        this.regECX -= nDelta;
+        this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         if (nReps) {
             if (BUGS_8086) {
-                this.advanceIP(-2);                 // this instruction does not support segment overrides
+                this.advanceIP(-2);                 // this instruction does not support multiple overrides
                 this.assert(this.regLIP == this.opLIP);
             } else {
                 this.regLIP = this.opLIP;
@@ -2816,7 +2816,7 @@ X86.opLODSb = function LODSb()
     var nDelta = 0;
     var nCycles = this.cycleCounts.nOpCyclesLodS;
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
-        nReps = this.regECX;
+        nReps = this.regECX & this.addrMask;
         nDelta = 1;
         nCycles = this.cycleCounts.nOpCyclesLodSrn;
         if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesLodSr0;
@@ -2826,7 +2826,7 @@ X86.opLODSb = function LODSb()
         if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiMemLo;
         this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + ((this.regPS & X86.PS.DF)? -1 : 1)) & this.addrMask);
         this.nStepCycles -= nCycles;
-        this.regECX -= nDelta;
+        this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         if (nReps) {
             if (BUGS_8086) {
                 this.advanceIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
@@ -2850,7 +2850,7 @@ X86.opLODSw = function LODSw()
     var nDelta = 0;
     var nCycles = this.cycleCounts.nOpCyclesLodS;
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
-        nReps = this.regECX;
+        nReps = this.regECX & this.addrMask;
         nDelta = 1;
         nCycles = this.cycleCounts.nOpCyclesLodSrn;
         if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesLodSr0;
@@ -2862,7 +2862,7 @@ X86.opLODSw = function LODSw()
         }
         this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + ((this.regPS & X86.PS.DF)? -this.dataSize : this.dataSize)) & this.addrMask);
         this.nStepCycles -= nCycles;
-        this.regECX -= nDelta;
+        this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         if (nReps) {
             if (BUGS_8086) {
                 this.advanceIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
@@ -2886,7 +2886,7 @@ X86.opSCASb = function SCASb()
     var nDelta = 0;
     var nCycles = this.cycleCounts.nOpCyclesScaS;
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
-        nReps = this.regECX;
+        nReps = this.regECX & this.addrMask;
         nDelta = 1;
         nCycles = this.cycleCounts.nOpCyclesScaSrn;
         if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesScaSr0;
@@ -2898,7 +2898,7 @@ X86.opSCASb = function SCASb()
          * NOTE: As long as we're calling fnCMPb(), all our cycle times must be reduced by nOpCyclesArithRM
          */
         this.nStepCycles -= nCycles - this.cycleCounts.nOpCyclesArithRM;
-        this.regECX -= nDelta;
+        this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         /*
          * Repetition continues while ZF matches bit 0 of the REP prefix.  getZF() returns 0x40 if ZF is
          * set, and OP_REPZ (which represents the REP prefix whose bit 0 is set) is 0x40 as well, so when those
@@ -2906,7 +2906,7 @@ X86.opSCASb = function SCASb()
          */
         if (nReps && this.getZF() == (this.opPrefixes & X86.OPFLAG.REPZ)) {
             if (BUGS_8086) {
-                this.advanceIP(-2);                 // this instruction does not support segment overrides
+                this.advanceIP(-2);                 // this instruction does not support multiple overrides
                 this.assert(this.regLIP == this.opLIP);
             } else {
                 this.regLIP = this.opLIP;
@@ -2927,7 +2927,7 @@ X86.opSCASw = function SCASw()
     var nDelta = 0;
     var nCycles = this.cycleCounts.nOpCyclesScaS;
     if (this.opPrefixes & (X86.OPFLAG.REPZ | X86.OPFLAG.REPNZ)) {
-        nReps = this.regECX;
+        nReps = this.regECX & this.addrMask;
         nDelta = 1;
         nCycles = this.cycleCounts.nOpCyclesScaSrn;
         if (!(this.opPrefixes & X86.OPFLAG.REPEAT)) this.nStepCycles -= this.cycleCounts.nOpCyclesScaSr0;
@@ -2939,7 +2939,7 @@ X86.opSCASw = function SCASw()
          * NOTE: As long as we're calling fnCMPw(), all our cycle times must be reduced by nOpCyclesArithRM
          */
         this.nStepCycles -= nCycles - this.cycleCounts.nOpCyclesArithRM;
-        this.regECX -= nDelta;
+        this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         /*
          * Repetition continues while ZF matches bit 0 of the REP prefix.  getZF() returns 0x40 if ZF is
          * set, and OP_REPZ (which represents the REP prefix whose bit 0 is set) is 0x40 as well, so when those
@@ -2947,7 +2947,7 @@ X86.opSCASw = function SCASw()
          */
         if (nReps && this.getZF() == (this.opPrefixes & X86.OPFLAG.REPZ)) {
             if (BUGS_8086) {
-                this.advanceIP(-2);                 // this instruction does not support segment overrides
+                this.advanceIP(-2);                 // this instruction does not support multiple overrides
                 this.assert(this.regLIP == this.opLIP);
             } else {
                 this.regLIP = this.opLIP;

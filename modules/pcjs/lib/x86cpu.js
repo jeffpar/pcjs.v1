@@ -1746,7 +1746,7 @@ X86CPU.prototype.getIP = function()
  */
 X86CPU.prototype.setIP = function(off)
 {
-    this.regLIP = this.segCS.base + (off & (I386? this.segCS.addrMask : 0xffff));
+    this.regLIP = this.segCS.base + (off & (I386? this.dataMask : 0xffff));
     if (PREFETCH) this.flushPrefetch(this.regLIP);
 };
 
@@ -1781,7 +1781,7 @@ X86CPU.prototype.setCSIP = function(off, sel, fCall)
     this.regEIP = off;
     var base = this.segCS.load(sel);
     if (base !== X86.ADDR_INVALID) {
-        this.regLIP = base + (this.regEIP & (I386? this.segCS.addrMask : 0xffff));
+        this.regLIP = base + (this.regEIP & (I386? this.dataMask : 0xffff));
         this.regLIPLimit = base + this.segCS.limit;
         if (I386) this.resetSizes();
         if (PREFETCH) this.flushPrefetch(this.regLIP);
