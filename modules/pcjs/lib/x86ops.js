@@ -3263,24 +3263,7 @@ X86.opMOVw = function MOVw()
 };
 
 /**
- * op=0xC8 (ENTER imm,imm8) (80186/80188 and up)
- *
- * Here's the pseudo-code from http://www.pcjs.org/pubs/pc/reference/intel/80286/progref, p.B-40 (p.250):
- *
- *      LEVEL := LEVEL MOD 32
- *      Push BP
- *      Set a temporary value FRAME_PTR := SP
- *      If LEVEL > 0 then
- *          Repeat (LEVEL-1) times:
- *              BP := BP - 2
- *              Push the word pointed to by BP
- *          End repeat
- *          Push FRAME_PTR
- *      End if
- *      BP := FRAME_PTR
- *      SP := SP - first operand
- *
- * TODO: Verify that this pseudo-code is identical on the 80186/80188 (eg, is LEVEL MOD 32 performed in both instances?)
+ * op=0xC8 (ENTER imm16,imm8) (80186/80188 and up)
  *
  * @this {X86CPU}
  */
@@ -3294,23 +3277,21 @@ X86.opENTER = function ENTER()
      */
     this.nStepCycles -= 11;
     this.pushWord(this.regEBP);
-    var wFrame = this.getSP() & this.segSS.addrMask;
+    var wFrame = this.getSP() & this.dataMask;
     if (bLevel > 0) {
         this.nStepCycles -= (bLevel << 2) + (bLevel > 1? 1 : 0);
         while (--bLevel) {
-            this.regEBP = (this.regEBP & ~this.segSS.addrMask) | ((this.regEBP - this.dataSize) & this.segSS.addrMask);
-            this.pushWord(this.getSOWord(this.segSS, this.regEBP & this.segSS.addrMask));
+            this.regEBP = (this.regEBP & ~this.dataMask) | ((this.regEBP - this.dataSize) & this.dataMask);
+            this.pushWord(this.getSOWord(this.segSS, this.regEBP & this.dataMask));
         }
         this.pushWord(wFrame);
     }
-    this.regEBP = (this.regEBP & ~this.segSS.addrMask) | wFrame;
+    this.regEBP = (this.regEBP & ~this.dataMask) | wFrame;
     this.setSP((this.getSP() & ~this.segSS.addrMask) | ((this.getSP() - wLocal) & this.segSS.addrMask));
 };
 
 /**
  * op=0xC9 (LEAVE) (80186/80188 and up)
- *
- * Set SP to BP, then pop BP.
  *
  * @this {X86CPU}
  */
@@ -3489,7 +3470,7 @@ X86.opAAD = function AAD()
  *
  * Sets AL to 0xFF if CF=1, 0x00 otherwise; no flags are affected (similar to SBB AL,AL, but without side-effects)
  *
- * WARNING: I have no idea how many clocks this instruction originally consumed, so for now, I'm going with the minimum of 2.
+ * WARNING: I have no idea how many clocks this instruction originally required, so for now, I'm going with a minimum of 2.
  *
  * @this {X86CPU}
  */
@@ -3581,7 +3562,7 @@ X86.opLOOP = function LOOP()
 X86.opJCXZ = function JCXZ()
 {
     var disp = this.getIPDisp();
-    if (!this.regECX) {
+    if (!(this.regECX & this.addrMask)) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesLoopZ;
         return;
@@ -3833,7 +3814,6 @@ X86.opHLT = function HLT()
     if (!this.getIF()) {
         if (DEBUGGER && this.dbg) this.advanceIP(-1);
         this.stopCPU();
-     // return;
     }
 };
 

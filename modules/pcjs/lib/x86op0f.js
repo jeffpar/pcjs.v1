@@ -1272,7 +1272,7 @@ X86.aOps0F[0x05] = X86.opLOADALL;
 X86.aOps0F[0x06] = X86.opCLTS;
 
 /*
- * On all processors (except the 8086/8088, of course), 0x0F,0x0B is also referred to as "UD2": an
+ * On all processors (except the 8086/8088, of course), X86.OPCODE.UD2 (0x0F,0x0B), aka "UD2", is an
  * instruction guaranteed to raise a #UD (Invalid Opcode) exception (INT 0x06) on all future x86 processors.
  */
 X86.aOps0F[0x0B] = X86.opInvalid;
