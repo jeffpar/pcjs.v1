@@ -179,7 +179,7 @@ DiskDump.sNotice = DiskDump.sAPIURL + " " + DiskDump.sCopyright;
 DiskDump.sUsage = "Usage: " + DiskDump.sAPIURL + "?" + DumpAPI.QUERY.PATH + "={url}&amp;" + DumpAPI.QUERY.FORMAT + "=json|data|hex|bytes|img";
 
 /*
- * MY_VOL_LABEL is our default label, used whenever a more suitable label (eg, based on the disk image's folder name)
+ * MY_VOL_LABEL is our default label, used whenever a more suitable label (eg, the disk image's folder name)
  * is not available or not supplied, and MY_OEM_STRING is inserted into any DiskDump-generated diskette images.
  */
 DiskDump.MY_VOL_LABEL = "PCJSDISK";
@@ -192,7 +192,8 @@ DiskDump.MY_OEM_STRING = "PCJS.ORG";
 DiskDump.aDefaultBPBs = [
   [                             // define BPB for 160Kb diskette
     0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
-    0x49, 0x42, 0x4D, 0x20, 0x20, 0x31, 0x2E, 0x30,     // "IBM  1.0" (this is a fake OEM signature)
+    0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // MY_OEM_STRING
+ // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x31, 0x2E, 0x30,     // "IBM  1.0" (this is a fake OEM signature)
     0x00, 0x02,                 // 0x0B: bytes per sector (0x200 or 512)
     0x01,                       // 0x0D: sectors per cluster (1)
     0x01, 0x00,                 // 0x0E: reserved sectors; ie, # sectors preceding the first FAT--usually just the boot sector (1)
@@ -207,7 +208,8 @@ DiskDump.aDefaultBPBs = [
   ],
   [                             // define BPB for 360Kb diskette
     0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
-    0x49, 0x42, 0x4D, 0x20, 0x20, 0x32, 0x2E, 0x30,     // "IBM  2.0" (this is a real OEM signature)
+    0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // MY_OEM_STRING
+ // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x32, 0x2E, 0x30,     // "IBM  2.0" (this is a real OEM signature)
     0x00, 0x02,                 // 0x0B: bytes per sector (0x200 or 512)
     0x02,                       // 0x0D: sectors per cluster (2)
     0x01, 0x00,                 // 0x0E: reserved sectors; ie, # sectors preceding the first FAT--usually just the boot sector (1)
@@ -222,7 +224,8 @@ DiskDump.aDefaultBPBs = [
   ],
   [                             // define BPB for 1.2Mb diskette
     0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
-    0x49, 0x42, 0x4D, 0x20, 0x31, 0x30, 0x2E, 0x31,     // "IBM 10.0" (which I believe was used on IBM OS/2 1.0 diskettes)
+    0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // MY_OEM_STRING
+ // 0x49, 0x42, 0x4D, 0x20, 0x31, 0x30, 0x2E, 0x31,     // "10.0" (which I believe was used on IBM OS/2 1.0 diskettes)
     0x00, 0x02,                 // 0x0B: bytes per sector (0x200 or 512)
     0x01,                       // 0x0D: sectors per cluster (1)
     0x01, 0x00,                 // 0x0E: reserved sectors; ie, # sectors preceding the first FAT--usually just the boot sector (1)
@@ -237,7 +240,8 @@ DiskDump.aDefaultBPBs = [
   ],
   [                             // define BPB for 1.44Mb diskette
     0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
-    0x4d, 0x53, 0x44, 0x4F, 0x53, 0x35, 0x2E, 0x30,     // "MSDOS5.0" (an actual OEM signature, arbitrarily chosen for use here)
+    0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // MY_OEM_STRING
+ // 0x4d, 0x53, 0x44, 0x4F, 0x53, 0x35, 0x2E, 0x30,     // "MSDOS5.0" (an actual OEM signature, arbitrarily chosen for use here)
     0x00, 0x02,                 // 0x0B: bytes per sector (0x200 or 512)
     0x01,                       // 0x0D: sectors per cluster (1)
     0x01, 0x00,                 // 0x0E: reserved sectors; ie, # sectors preceding the first FAT--usually just the boot sector (1)
@@ -252,7 +256,8 @@ DiskDump.aDefaultBPBs = [
   ],
   [                             // define BPB for 10Mb hard disk
     0xEB, 0xFE, 0x90,           // 0x00: JMP instruction, following by 8-byte OEM signature
-    0x49, 0x42, 0x4D, 0x20, 0x20, 0x32, 0x2E, 0x30,     // "IBM  2.0" (this is a real OEM signature)
+    0x50, 0x43, 0x4A, 0x53, 0x2E, 0x4F, 0x52, 0x47,     // MY_OEM_STRING
+ // 0x49, 0x42, 0x4D, 0x20, 0x20, 0x32, 0x2E, 0x30,     // "IBM  2.0" (this is a real OEM signature)
     0x00, 0x02,                 // 0x0B: bytes per sector (0x200 or 512)
     0x08,                       // 0x0D: sectors per cluster (8)
     0x01, 0x00,                 // 0x0E: reserved sectors; ie, # sectors preceding the first FAT--usually just the boot sector (1)

@@ -309,8 +309,6 @@ X86.opMOVcr = function MOVcr()
         this.regCR3 = this.regEBX;
         this.regEBX = temp;
         break;
-    default:
-        break;              // there IS no other case, but JavaScript inspections don't know that
     }
 };
 

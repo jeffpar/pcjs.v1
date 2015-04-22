@@ -206,21 +206,22 @@ X86.fnBOUND = function BOUND(dst, src)
  */
 X86.fnBSF = function BSF(dst, src)
 {
+    var n = 0;
     if (!src) {
         this.setZF();
     } else {
         this.clearZF();
-        var i = 0, bit = 0x1;
+        var bit = 0x1;
         while (bit & this.dataMask) {
             if (src & bit) {
-                dst = i;
+                dst = n;
                 break;
             }
             bit <<= 1;
-            i++;
+            n++;                // TODO: Determine if n should be incremented before the bailout for an accurate cycle count
         }
     }
-    this.nStepCycles -= this.cycleCounts.nOpCyclesBitScan + i * 3;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesBitScan + n * 3;
     return dst;
 };
 
@@ -241,21 +242,23 @@ X86.fnBSF = function BSF(dst, src)
  */
 X86.fnBSR = function BSR(dst, src)
 {
+    var n = 0;
     if (!src) {
         this.setZF();
     } else {
         this.clearZF();
-        var i = (this.dataSize == 2? 15 : 31), j = i, bit = 1 << i;
+        var i = (this.dataSize == 2? 15 : 31), bit = 1 << i;
         while (bit) {
             if (src & bit) {
                 dst = i;
                 break;
             }
             bit >>>= 1;
-            i--;
+            n++; i--;           // TODO: Determine if n should be incremented before the bailout for an accurate cycle count
         }
+
     }
-    this.nStepCycles -= this.cycleCounts.nOpCyclesBitScan + (j - i) * 3;
+    this.nStepCycles -= this.cycleCounts.nOpCyclesBitScan + n * 3;
     return dst;
 };
 

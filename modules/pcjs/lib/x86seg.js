@@ -152,6 +152,10 @@ X86Seg.prototype.loadProt = function loadProt(sel, fSuppress)
     var addrDTLimit;
     var cpu = this.cpu;
 
+    /*
+     * Some instructions (eg, CALLF) load a 32-bit value for the selector, while others (eg, LDS) do not;
+     * however, in ALL cases, only the low 16 bits are significant.
+     */
     sel &= 0xffff;
 
     if (!(sel & X86.SEL.LDT)) {
