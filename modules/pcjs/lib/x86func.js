@@ -466,11 +466,169 @@ X86.fnDECw = function DECw(dst, src)
 };
 
 /**
+ * fnSet64(lo, hi)
+ *
+ * @param {number} lo
+ * @param {number} hi
+ */
+X86.fnSet64 = function Set64(lo, hi)
+{
+    return [lo >>> 0, hi >>> 0];
+};
+
+/**
+ * fnAdd64(dst, src)
+ *
+ * Adds src to dst.
+ *
+ * @param {Array} dst is a 64-bit value
+ * @param {Array} src is a 64-bit value
+ */
+X86.fnAdd64 = function Add64(dst, src)
+{
+    dst[0] += src[0];
+    dst[1] += src[1];
+    if (dst[0] > 0xffffffff) {
+        dst[0] >>>= 0;          // truncate dst[0] to 32 bits AND keep it unsigned
+        dst[1]++;
+    }
+};
+
+/**
+ * fnCmp64(dst, src)
+ *
+ * Compares dst to src, by computing dst - src.
+ *
+ * @param {Array} dst is a 64-bit value
+ * @param {Array} src is a 64-bit value
+ * @return {number} > 0 if dst > src, == 0 if dst == src, < 0 if dst < src
+ */
+X86.fnCmp64 = function Cmp64(dst, src)
+{
+    var result = dst[1] - src[1];
+    if (!result) result = dst[0] - src[0];
+    return result;
+};
+
+/**
+ * fnSub64(dst, src)
+ *
+ * Subtracts src from dst.
+ *
+ * @param {Array} dst is a 64-bit value
+ * @param {Array} src is a 64-bit value
+ */
+X86.fnSub64 = function Sub64(dst, src)
+{
+    dst[0] -= src[0];
+    dst[1] -= src[1];
+    if (dst[0] < 0) {
+        dst[0] >>>= 0;          // truncate dst[0] to 32 bits AND keep it unsigned
+        dst[1]--;
+    }
+};
+
+/**
+ * fnShr64(dst)
+ *
+ * Shifts dst right one bit.
+ *
+ * @param {Array} dst is a 64-bit value
+ */
+X86.fnShr64 = function Shr64(dst)
+{
+    dst[0] >>>= 1;
+    if (dst[1] & 0x1) {
+        dst[0] = (dst[0] | 0x80000000) >>> 0;
+    }
+    dst[1] >>>= 1;
+};
+
+/**
+ * fnDIV32(dstLo, dstHi, src)
+ *
+ * This sets regMDLo to dstHi:dstLo / src, and regMDHi to dstHi:dstLo % src; all inputs are treated as unsigned.
+ *
+ * If fMDset is not set, however, then there was a divide exception (ie, the divisor was either zero or too small).
+ *
+ * Refer to: http://lxr.linux.no/linux+v2.6.22/lib/div64.c
+ *
+ * @this {X86CPU}
+ * @param {number} dstLo (low 32-bit portion of dividend)
+ * @param {number} dstHi (high 32-bit portion of dividend)
+ * @param {number} src (32-bit divisor)
+ */
+X86.fnDIV32 = function DIV32(dstLo, dstHi, src)
+{
+    this.fMDSet = false;
+
+    src >>>= 0;
+    if (!src || src <= (dstHi >>> 0)) return;
+
+    var result = 0, bit = 1;
+
+    var div = X86.fnSet64(src, 0);
+    var rem = X86.fnSet64(dstLo, dstHi);
+
+    while (X86.fnCmp64(rem, div) > 0) {
+        X86.fnAdd64(div, div);
+        bit += bit;
+    }
+    do {
+        if (X86.fnCmp64(rem, div) >= 0) {
+            X86.fnSub64(rem, div);
+            result += bit;
+        }
+        X86.fnShr64(div);
+        bit >>>= 1;
+    } while (bit);
+
+    this.assert(result <= 0xffffffff && !rem[1]);
+
+    this.regMDLo = result;              // result is the quotient, which callers expect in the low MD register
+    this.regMDHi = rem[0];              // rem[0] is the remainder, which callers expect in the high MD register
+    this.fMDSet = true;
+};
+
+/**
+ * fnIDIV32(dstLo, dstHi, src)
+ *
+ * This sets regMDLo to dstHi:dstLo / src, and regMDHi to dstHi:dstLo % src; all inputs are treated as signed.
+ *
+ * If fMDset is not set, however, then there was a divide exception (ie, the divisor was either zero or too small).
+ *
+ * Refer to: http://lxr.linux.no/linux+v2.6.22/lib/div64.c
+ *
+ * @this {X86CPU}
+ * @param {number} dstLo (low 32-bit portion of dividend)
+ * @param {number} dstHi (high 32-bit portion of dividend)
+ * @param {number} src (32-bit divisor)
+ */
+X86.fnIDIV32 = function IDIV32(dstLo, dstHi, src)
+{
+    var fNegLo = false, fNegHi = false;
+    if (src < 0) {
+        src = -src|0;
+        fNegLo = !fNegLo;
+    }
+    if (dstHi < 0) {
+        dstLo = -dstLo|0;
+        dstHi = (~dstHi + (dstLo? 0 : 1))|0;
+        fNegHi = true;
+        fNegLo = !fNegLo;
+    }
+    X86.fnDIV32.call(this, dstLo, dstHi, src);
+    if (this.regMDLo > 0x7fffffff) this.fMDSet = false;
+    if (fNegLo) this.regMDLo = -this.regMDLo;
+    if (fNegHi) this.regMDHi = -this.regMDHi;
+};
+
+/**
  * fnDIVb(dst, src)
  *
  * @this {X86CPU}
- * @param {number} dst
- * @param {number} src (null)
+ * @param {number} dst (the divisor)
+ * @param {number} src (null; AX is the implied src)
  * @return {number} (we return dst unchanged, since it's actually AX that's modified)
  */
 X86.fnDIVb = function DIVb(dst, src)
@@ -486,14 +644,14 @@ X86.fnDIVb = function DIVb(dst, src)
     /*
      * Detect too-small divisor (quotient overflow)
      */
-    var result = ((src = this.regEAX) / dst);
+    var result = ((src = this.regEAX & 0xffff) / dst);
     if (result > 0xff) {
         X86.fnDIVOverflow.call(this);
         return dst;
     }
 
     this.fMDSet = true;
-    this.regMDLo = (result & 0xff) | (((this.regEAX % dst) & 0xff) << 8);
+    this.regMDLo = (result & 0xff) | (((src % dst) & 0xff) << 8);
 
     /*
      * Multiply/divide instructions specify only a single operand, which the decoders pass to us
@@ -511,37 +669,46 @@ X86.fnDIVb = function DIVb(dst, src)
  * fnDIVw(dst, src)
  *
  * @this {X86CPU}
- * @param {number} dst
- * @param {number} src (null)
+ * @param {number} dst (the divisor)
+ * @param {number} src (null; DX:AX or EDX:EAX is the implied src)
  * @return {number} (we return dst unchanged, since it's actually DX:AX that's modified)
  */
 X86.fnDIVw = function DIVw(dst, src)
 {
-    /*
-     * Detect zero divisor
-     */
-    if (!dst) {
-        X86.fnDIVOverflow.call(this);
-        return dst;
+    if (this.dataSize == 2) {
+        /*
+         * Detect zero divisor
+         */
+        if (!dst) {
+            X86.fnDIVOverflow.call(this);
+            return dst;
+        }
+        /*
+         * Detect too-small divisor (quotient overflow)
+         *
+         * WARNING: We CANNOT simply do "src = (this.regEDX << 16) | this.regEAX", because if bit 15 of DX
+         * is set, JavaScript will create a negative 32-bit number.  So we instead use non-bit-wise operators
+         * to force JavaScript to create a floating-point value that won't suffer from 32-bit-math side-effects.
+         */
+        src = (this.regEDX & 0xffff) * 0x10000 + (this.regEAX & 0xffff);
+        var result = (src / dst)|0;
+        if (result >= 0x10000) {
+            X86.fnDIVOverflow.call(this);
+            return dst;
+        }
+        this.fMDSet = true;
+        this.regMDLo = (result & 0xffff);
+        this.regMDHi = (src % dst) & 0xffff;
     }
-
-    /*
-     * Detect too-small divisor (quotient overflow)
-     *
-     * WARNING: We CANNOT simply do "src = (this.regEDX << 16) | this.regEAX", because if bit 15 of DX
-     * is set, JavaScript will create a negative 32-bit number.  So we instead use non-bit-wise operators
-     * to force JavaScript to create a floating-point value that won't suffer from 32-bit-math side-effects.
-     */
-    src = this.regEAX + this.regEDX * 0x10000;
-    var result = (src / dst)|0;
-    if (result >= 0x10000) {
-        X86.fnDIVOverflow.call(this);
-        return dst;
+    else {
+        X86.fnDIV32.call(this, this.regEAX, this.regEDX, dst);
+        if (!this.fMDSet) {
+            X86.fnDIVOverflow.call(this);
+            return dst;
+        }
+        this.regMDLo |= 0;
+        this.regMDHi |= 0;
     }
-
-    this.fMDSet = true;
-    this.regMDLo = (result & 0xffff);
-    this.regMDHi = (src % dst) & 0xffff;
 
     /*
      * Multiply/divide instructions specify only a single operand, which the decoders pass to us
@@ -549,7 +716,13 @@ X86.fnDIVw = function DIVw(dst, src)
      * However, src is technically an output, and dst is merely an input (which is why we must return
      * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
      */
-    if (DEBUG && DEBUGGER) this.traceLog('DIVW', src, dst, null, this.getPS(), this.regMDLo | (this.regMDHi << 16));
+    if (DEBUG && DEBUGGER) {
+        if (this.dataSize == 2) {
+            this.traceLog('DIVW', src, dst, null, this.getPS(), this.regMDLo | (this.regMDHi << 16));
+        } else {
+            this.traceLog('DIVD', src, dst, null, this.getPS(), this.regMDLo, this.regMDHi);
+        }
+    }
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesDivWR : this.cycleCounts.nOpCyclesDivWM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -571,17 +744,9 @@ X86.fnESC = function ESC(dst, src)
 /**
  * fnIDIVb(dst, src)
  *
- * TODO: Implement the following difference, from "AP-186: Introduction to the 80186 Microprocessor, March 1983":
- *
- *      "The 8086 will cause a divide error whenever the absolute value of the quotient is greater then 7FFFH
- *      (for word operations) or if the absolute value of the quotient is greater than 7FH (for byte operations).
- *      The 80186 has expanded the range of negative numbers allowed as a quotient by 1 to include 8000H and 80H.
- *      These numbers represent the most negative numbers representable using 2's complement arithmetic (equaling
- *      -32768 and -128 in decimal, respectively)."
- *
  * @this {X86CPU}
- * @param {number} dst
- * @param {number} src (null)
+ * @param {number} dst (the divisor)
+ * @param {number} src (null; AX is the implied src)
  * @return {number} (we return dst unchanged, since it's actually AX that's modified)
  */
 X86.fnIDIVb = function IDIVb(dst, src)
@@ -600,7 +765,16 @@ X86.fnIDIVb = function IDIVb(dst, src)
     var div = ((dst << 24) >> 24);
     var result = ((src = (this.regEAX << 16) >> 16) / div)|0;
 
-    if (result != ((result << 24) >> 24)) {
+    /*
+     * Note the following difference, from "AP-186: Introduction to the 80186 Microprocessor, March 1983":
+     *
+     *      "The 8086 will cause a divide error whenever the absolute value of the quotient is greater then 7FFFH
+     *      (for word operations) or if the absolute value of the quotient is greater than 7FH (for byte operations).
+     *      The 80186 has expanded the range of negative numbers allowed as a quotient by 1 to include 8000H and 80H.
+     *      These numbers represent the most negative numbers representable using 2's complement arithmetic (equaling
+     *      -32768 and -128 in decimal, respectively)."
+     */
+    if (result != ((result << 24) >> 24) || this.model == X86.MODEL_8086 && result == -128) {
         X86.fnDIVOverflow.call(this);
         return dst;
     }
@@ -623,43 +797,55 @@ X86.fnIDIVb = function IDIVb(dst, src)
 /**
  * fnIDIVw(dst, src)
  *
- * TODO: Implement the following difference, from "AP-186: Introduction to the 80186 Microprocessor, March 1983":
- *
- *      "The 8086 will cause a divide error whenever the absolute value of the quotient is greater then 7FFFH
- *      (for word operations) or if the absolute value of the quotient is greater than 7FH (for byte operations).
- *      The 80186 has expanded the range of negative numbers allowed as a quotient by 1 to include 8000H and 80H.
- *      These numbers represent the most negative numbers representable using 2's complement arithmetic (equaling
- *      -32768 and -128 in decimal, respectively)."
- *
  * @this {X86CPU}
- * @param {number} dst
- * @param {number} src (null)
+ * @param {number} dst (the divisor)
+ * @param {number} src (null; DX:AX or EDX:EAX is the implied src)
  * @return {number} (we return dst unchanged, since it's actually DX:AX that's modified)
  */
 X86.fnIDIVw = function IDIVw(dst, src)
 {
-    /*
-     * Detect zero divisor
-     */
-    if (!dst) {
-        X86.fnDIVOverflow.call(this);
-        return dst;
+    if (this.dataSize == 2) {
+        /*
+         * Detect zero divisor
+         */
+        if (!dst) {
+            X86.fnDIVOverflow.call(this);
+            return dst;
+        }
+
+        /*
+         * Detect too-small divisor (quotient overflow)
+         */
+        var div = ((dst << 16) >> 16);
+        var result = ((src = (this.regEDX << 16) | (this.regEAX & 0xffff)) / div)|0;
+
+        /*
+         * Note the following difference, from "AP-186: Introduction to the 80186 Microprocessor, March 1983":
+         *
+         *      "The 8086 will cause a divide error whenever the absolute value of the quotient is greater then 7FFFH
+         *      (for word operations) or if the absolute value of the quotient is greater than 7FH (for byte operations).
+         *      The 80186 has expanded the range of negative numbers allowed as a quotient by 1 to include 8000H and 80H.
+         *      These numbers represent the most negative numbers representable using 2's complement arithmetic (equaling
+         *      -32768 and -128 in decimal, respectively)."
+         */
+        if (result != ((result << 16) >> 16) || this.model == X86.MODEL_8086 && result == -32768) {
+            X86.fnDIVOverflow.call(this);
+            return dst;
+        }
+
+        this.fMDSet = true;
+        this.regMDLo = (result & 0xffff);
+        this.regMDHi = (src % div) & 0xffff;
     }
-
-    /*
-     * Detect too-small divisor (quotient overflow)
-     */
-    var div = ((dst << 16) >> 16);
-    var result = ((src = (this.regEDX << 16) | this.regEAX) / div)|0;
-
-    if (result != ((result << 16) >> 16)) {
-        X86.fnDIVOverflow.call(this);
-        return dst;
+    else {
+        X86.fnIDIV32.call(this, this.regEAX, this.regEDX, dst);
+        if (!this.fMDSet) {
+            X86.fnDIVOverflow.call(this);
+            return dst;
+        }
+        this.regMDLo |= 0;
+        this.regMDHi |= 0;
     }
-
-    this.fMDSet = true;
-    this.regMDLo = (result & 0xffff);
-    this.regMDHi = (src % div) & 0xffff;
 
     /*
      * Multiply/divide instructions specify only a single operand, which the decoders pass to us
@@ -667,7 +853,13 @@ X86.fnIDIVw = function IDIVw(dst, src)
      * However, src is technically an output, and dst is merely an input (which is why we must return
      * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
      */
-    if (DEBUG && DEBUGGER) this.traceLog('IDIVW', src, dst, null, this.getPS(), this.regMDLo | (this.regMDHi << 16));
+    if (DEBUG && DEBUGGER) {
+        if (this.dataSize == 2) {
+            this.traceLog('IDIVW', src, dst, null, this.getPS(), this.regMDLo | (this.regMDHi << 16));
+        } else {
+            this.traceLog('IDIVD', src, dst, null, this.getPS(), this.regMDLo, this.regMDHi);
+        }
+    }
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIDivWR : this.cycleCounts.nOpCyclesIDivWM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -731,7 +923,7 @@ X86.fnIMUL8 = function IMUL8(dst, src)
  *
  * @this {X86CPU}
  * @param {number} dst
- * @param {number} src (null)
+ * @param {number} src (null; AL is the implied src)
  * @return {number} (we return dst unchanged, since it's actually AX that's modified)
  */
 X86.fnIMULb = function IMULb(dst, src)
@@ -806,6 +998,40 @@ X86.fnIMULn = function IMULn(dst, src)
      */
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 21 : 24);
     return result;
+};
+
+/**
+ * fnIMUL32(dst, src)
+ *
+ * This sets regMDHi:regMDLo to the 64-bit result of dst * src, both of which are treated as signed.
+ *
+ * TODO: Some potential optimizations include:
+ *
+ *  1) Early outs if either parameter is zero, since the result will obviously be zero
+ *  2) Using "normal" JavaScript multiplication if both parameters are >= -32768 && <= 32767
+ *
+ * Refer to: http://stackoverflow.com/questions/13597364/32-bit-signed-multiplication-with-a-64-bit-result-in-javascript
+ *
+ * @this {X86CPU}
+ * @param {number} dst (any 32-bit number, treated as signed)
+ * @param {number} src (any 32-bit number, treated as signed)
+ */
+X86.fnIMUL32 = function IMUL32(dst, src)
+{
+    var fNeg = false;
+    if (src < 0) {
+        src = -src|0;
+        fNeg = !fNeg;
+    }
+    if (dst < 0) {
+        dst = -dst|0;
+        fNeg = !fNeg;
+    }
+    X86.fnMUL32.call(this, dst, src);
+    if (fNeg) {
+        this.regMDLo = (~this.regMDLo + 1)|0;
+        this.regMDHi = (~this.regMDHi + (this.regMDLo? 0 : 1))|0;
+    }
 };
 
 /**
@@ -1496,40 +1722,6 @@ X86.fnMUL32 = function MUL32(dst, src)
     this.fMDSet = true;
     this.regMDLo = (mul16 << 16) | (mul00 & 0xffff);
     this.regMDHi = mul32|0;
-};
-
-/**
- * fnIMUL32(dst, src)
- *
- * This sets regMDHi:regMDLo to the 64-bit result of dst * src, both of which are treated as signed.
- *
- * TODO: Some potential optimizations include:
- *
- *  1) Early outs if either parameter is zero, since the result will obviously be zero
- *  2) Using "normal" JavaScript multiplication if both parameters are >= -32768 && <= 32767
- *
- * Refer to: http://stackoverflow.com/questions/13597364/32-bit-signed-multiplication-with-a-64-bit-result-in-javascript
- *
- * @this {X86CPU}
- * @param {number} dst (any 32-bit number, treated as signed)
- * @param {number} src (any 32-bit number, treated as signed)
- */
-X86.fnIMUL32 = function IMUL32(dst, src)
-{
-    var fNeg = false;
-    if (src < 0) {
-        src = -src|0;
-        fNeg = !fNeg;
-    }
-    if (dst < 0) {
-        dst = -dst|0;
-        fNeg = !fNeg;
-    }
-    X86.fnMUL32.call(this, dst, src);
-    if (fNeg) {
-        this.regMDLo = (~this.regMDLo + 1)|0;
-        this.regMDHi = (~this.regMDHi + (this.regMDLo? 0 : 1))|0;
-    }
 };
 
 /**

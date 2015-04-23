@@ -6,8 +6,9 @@
 	bits	16
 
 start:	mov	eax,0x44332211
-	mov	edx,0x88776655
-	mul	edx
+	mov	ecx,0x88776655
+	mul	ecx
+	div	ecx
 
 	call	dword 0xf000:start
 
