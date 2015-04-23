@@ -482,16 +482,19 @@ X86.fnDIVb = function DIVb(dst, src)
         X86.fnDIVOverflow.call(this);
         return dst;
     }
+
     /*
-     * Detect small divisor (quotient overflow)
+     * Detect too-small divisor (quotient overflow)
      */
-    var uQuotient = ((src = this.regEAX) / dst);
-    if (uQuotient > 0xff) {
+    var result = ((src = this.regEAX) / dst);
+    if (result > 0xff) {
         X86.fnDIVOverflow.call(this);
         return dst;
     }
+
     this.fMDSet = true;
-    this.regMDLo = this.regEAX = (uQuotient & 0xff) | (((this.regEAX % dst) & 0xff) << 8);
+    this.regMDLo = (result & 0xff) | (((this.regEAX % dst) & 0xff) << 8);
+
     /*
      * Multiply/divide instructions specify only a single operand, which the decoders pass to us
      * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX).
@@ -521,22 +524,25 @@ X86.fnDIVw = function DIVw(dst, src)
         X86.fnDIVOverflow.call(this);
         return dst;
     }
+
     /*
-     * Detect small divisor (quotient overflow)
+     * Detect too-small divisor (quotient overflow)
      *
      * WARNING: We CANNOT simply do "src = (this.regEDX << 16) | this.regEAX", because if bit 15 of DX
      * is set, JavaScript will create a negative 32-bit number.  So we instead use non-bit-wise operators
      * to force JavaScript to create a floating-point value that won't suffer from 32-bit-math side-effects.
      */
     src = this.regEAX + this.regEDX * 0x10000;
-    var uQuotient = Math.floor(src / dst);
-    if (uQuotient >= 0x10000) {
+    var result = (src / dst)|0;
+    if (result >= 0x10000) {
         X86.fnDIVOverflow.call(this);
         return dst;
     }
+
     this.fMDSet = true;
-    this.regMDLo = this.regEAX = (uQuotient & 0xffff);
-    this.regMDHi = this.regEDX = (src % dst) & 0xffff;
+    this.regMDLo = (result & 0xffff);
+    this.regMDHi = (src % dst) & 0xffff;
+
     /*
      * Multiply/divide instructions specify only a single operand, which the decoders pass to us
      * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX).
@@ -587,16 +593,21 @@ X86.fnIDIVb = function IDIVb(dst, src)
         X86.fnDIVOverflow.call(this);
         return dst;
     }
+
     /*
-     * Detect small divisor (quotient overflow)
+     * Detect too-small divisor (quotient overflow)
      */
-    var lQuotient = ((((src = this.regEAX) << 16) >> 16) / ((dst << 24) >> 24));
-    if (lQuotient > ((lQuotient << 24) >> 24) & 0xffff) {
+    var div = ((dst << 24) >> 24);
+    var result = ((src = (this.regEAX << 16) >> 16) / div)|0;
+
+    if (result != ((result << 24) >> 24)) {
         X86.fnDIVOverflow.call(this);
         return dst;
     }
+
     this.fMDSet = true;
-    this.regMDLo = this.regEAX = (lQuotient & 0xff) | (((((this.regEAX << 16) >> 16) % ((dst << 24) >> 24)) & 0xff) << 8);
+    this.regMDLo = (result & 0xff) | (((src % div) & 0xff) << 8);
+
     /*
      * Multiply/divide instructions specify only a single operand, which the decoders pass to us
      * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX).
@@ -634,19 +645,22 @@ X86.fnIDIVw = function IDIVw(dst, src)
         X86.fnDIVOverflow.call(this);
         return dst;
     }
+
     /*
-     * Detect small divisor (quotient overflow)
+     * Detect too-small divisor (quotient overflow)
      */
-    var lDivisor = ((dst << 16) >> 16);
-    src = (this.regEDX << 16) | this.regEAX;
-    var lQuotient = Math.floor(src / lDivisor);
-    if (lQuotient != ((lQuotient & 0xffff) << 16) >> 16) {
+    var div = ((dst << 16) >> 16);
+    var result = ((src = (this.regEDX << 16) | this.regEAX) / div)|0;
+
+    if (result != ((result << 16) >> 16)) {
         X86.fnDIVOverflow.call(this);
         return dst;
     }
+
     this.fMDSet = true;
-    this.regMDLo = this.regEAX = (lQuotient & 0xffff);
-    this.regMDHi = this.regEDX = (src % lDivisor) & 0xffff;
+    this.regMDLo = (result & 0xffff);
+    this.regMDHi = (src % div) & 0xffff;
+
     /*
      * Multiply/divide instructions specify only a single operand, which the decoders pass to us
      * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX).
@@ -678,50 +692,18 @@ X86.fnIDIVw = function IDIVw(dst, src)
  */
 X86.fnIMUL8 = function IMUL8(dst, src)
 {
-    var result = ((src << 16) >> 16) * ((this.getIPByte() << 24) >> 24);
+    dst = this.getIPByte();
+    var result = (((src << 16) >> 16) * ((dst << 24) >> 24))|0;
+
     if (result > 32767 || result < -32768) {
         this.setCF(); this.setOF();
     } else {
         this.clearCF(); this.clearOF();
     }
+
     result &= 0xffff;
     if (DEBUG && DEBUGGER) this.traceLog('IMUL8', dst, src, null, this.getPS(), result);
-    /*
-     * NOTE: These are the cycle counts for the 80286; the 80186/80188 have slightly different values (ranges):
-     * 22-25 and 29-32 instead of 21 and 24, respectively.  However, accurate cycle counts for the 80186/80188 is
-     * not super-critical. TODO: Fix this someday.
-     */
-    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 21 : 24);
-    return result;
-};
 
-/**
- * fnIMULn(dst, src)
- *
- * 80286_and_80287_Programmers_Reference_Manual_1987.pdf, p.B-44 (p.254) notes that:
- *
- *      "The low 16 bits of the product of a 16-bit signed multiply are the same as those of an
- *      unsigned multiply. The three operand IMUL instruction can be used for unsigned operands as well."
- *
- * However, we still sign-extend the operands before multiplying, making it easier to range-check the result.
- *
- * (80186/80188 and up)
- *
- * @this {X86CPU}
- * @param {number} dst
- * @param {number} src
- * @return {number}
- */
-X86.fnIMULn = function IMULn(dst, src)
-{
-    var result = ((src << 16) >> 16) * ((this.getIPWord() << 16) >> 16);
-    if (result > 32767 || result < -32768) {
-        this.setCF(); this.setOF();
-    } else {
-        this.clearCF(); this.clearOF();
-    }
-    result &= 0xffff;
-    if (DEBUG && DEBUGGER) this.traceLog('IMULN', dst, src, null, this.getPS(), result);
     /*
      * NOTE: These are the cycle counts for the 80286; the 80186/80188 have slightly different values (ranges):
      * 22-25 and 29-32 instead of 21 and 24, respectively.  However, accurate cycle counts for the 80186/80188 is
@@ -754,14 +736,17 @@ X86.fnIMULn = function IMULn(dst, src)
  */
 X86.fnIMULb = function IMULb(dst, src)
 {
-    var result = (((src = this.regEAX) << 24) >> 24) * ((dst << 24) >> 24);
+    var result = ((((src = this.regEAX) << 24) >> 24) * ((dst << 24) >> 24))|0;
+
     this.fMDSet = true;
-    this.regEAX = this.regMDLo = result & 0xffff;
+    this.regMDLo = result & 0xffff;
+
     if (result > 127 || result < -128) {
         this.setCF(); this.setOF();
     } else {
         this.clearCF(); this.clearOF();
     }
+
     /*
      * Multiply/divide instructions specify only a single operand, which the decoders pass to us
      * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX).
@@ -769,13 +754,64 @@ X86.fnIMULb = function IMULb(dst, src)
      * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
      */
     if (DEBUG && DEBUGGER) this.traceLog('IMULB', src, dst, null, this.getPS(), this.regMDLo);
+
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIMulBR : this.cycleCounts.nOpCyclesIMulBM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
 };
 
 /**
+ * fnIMULn(dst, src)
+ *
+ * 80286_and_80287_Programmers_Reference_Manual_1987.pdf, p.B-44 (p.254) notes that:
+ *
+ *      "The low 16 bits of the product of a 16-bit signed multiply are the same as those of an
+ *      unsigned multiply. The three operand IMUL instruction can be used for unsigned operands as well."
+ *
+ * However, we still sign-extend the operands before multiplying, making it easier to range-check the result.
+ *
+ * (80186/80188 and up)
+ *
+ * @this {X86CPU}
+ * @param {number} dst (not used)
+ * @param {number} src
+ * @return {number}
+ */
+X86.fnIMULn = function IMULn(dst, src)
+{
+    var fOverflow, result;
+    dst = this.getIPWord();
+    if (this.dataSize == 2) {
+        result = (((src << 16) >> 16) * ((dst << 16) >> 16))|0;
+        fOverflow = (result > 32767 || result < -32768);
+    } else {
+        result = (src * dst);
+        fOverflow = (result > 2147483647 || result < -2147483648);
+        this.assert(fOverflow == (result != (result|0)));
+    }
+
+    if (fOverflow) {
+        this.setCF(); this.setOF();
+    } else {
+        this.clearCF(); this.clearOF();
+    }
+
+    result &= this.dataMask;
+    if (DEBUG && DEBUGGER) this.traceLog('IMULN', dst, src, null, this.getPS(), result);
+
+    /*
+     * NOTE: These are the cycle counts for the 80286; the 80186/80188 have slightly different values (ranges):
+     * 22-25 and 29-32 instead of 21 and 24, respectively.  However, accurate cycle counts for the 80186/80188 is
+     * not super-critical. TODO: Fix this someday.
+     */
+    this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? 21 : 24);
+    return result;
+};
+
+/**
  * fnIMULw(dst, src)
+ *
+ * regMDHi:regMDLo = dst * regEAX
  *
  * This 32-bit multiplication must indicate when the upper 16 bits are simply a sign-extension of the
  * lower 16 bits (carry clear) and when the upper 16 bits contain significant bits (carry set).  The latter
@@ -792,27 +828,43 @@ X86.fnIMULb = function IMULb(dst, src)
  *
  * @this {X86CPU}
  * @param {number} dst
- * @param {number} src (null)
+ * @param {number} src (null; AX or EAX is the implied src)
  * @return {number} (we return dst unchanged, since it's actually DX:AX that's modified)
  */
 X86.fnIMULw = function IMULw(dst, src)
 {
-    var result = (((src = this.regEAX) << 16) >> 16) * ((dst << 16) >> 16);
-    this.fMDSet = true;
-    this.regEAX = this.regMDLo = result & 0xffff;
-    this.regEDX = this.regMDHi = (result >> 16) & 0xffff;
-    if (result > 32767 || result < -32768) {
+    var fOverflow;
+    if (this.dataSize == 2) {
+        src = this.regEAX & 0xffff;
+        var result = (((src << 16) >> 16) * ((dst << 16) >> 16))|0;
+        this.fMDSet = true;
+        this.regMDLo = result & 0xffff;
+        this.regMDHi = (result >> 16) & 0xffff;
+        fOverflow = (result > 32767 || result < -32768);
+    } else {
+        X86.fnIMUL32.call(this, dst, this.regEAX);
+        fOverflow = (this.regMDHi != (this.regMDLo >> 31));
+    }
+
+    if (fOverflow) {
         this.setCF(); this.setOF();
     } else {
         this.clearCF(); this.clearOF();
     }
+
     /*
      * Multiply/divide instructions specify only a single operand, which the decoders pass to us
      * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX).
      * However, src is technically an output, and dst is merely an input (which is why we must return
      * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
      */
-    if (DEBUG && DEBUGGER) this.traceLog('IMULW', src, dst, null, this.getPS(), this.regMDLo | (this.regMDHi << 16));
+    if (DEBUG && DEBUGGER) {
+        if (this.dataSize == 2) {
+            this.traceLog('IMULW', src, dst, null, this.getPS(), this.regMDLo | (this.regMDHi << 16));
+        } else {
+            this.traceLog('IMULD', src, dst, null, this.getPS(), this.regMDLo, this.regMDHi);
+        }
+    }
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIMulWR : this.cycleCounts.nOpCyclesIMulWM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -828,7 +880,7 @@ X86.fnIMULw = function IMULw(dst, src)
  */
 X86.fnIMULrw = function IMULrw(dst, src)
 {
-    var result = ((dst << 16) >> 16) * ((src << 16) >> 16);
+    var result = (((dst << 16) >> 16) * ((src << 16) >> 16))|0;
     if (result > 32767 || result < -32768) {
         this.setCF(); this.setOF();
     } else {
@@ -1449,7 +1501,7 @@ X86.fnMUL32 = function MUL32(dst, src)
 /**
  * fnIMUL32(dst, src)
  *
- * This sets regMDHi:regMDLo to the 64-bit result of dst * src, either of which may be signed or unsigned.
+ * This sets regMDHi:regMDLo to the 64-bit result of dst * src, both of which are treated as signed.
  *
  * TODO: Some potential optimizations include:
  *
@@ -1483,16 +1535,18 @@ X86.fnIMUL32 = function IMUL32(dst, src)
 /**
  * fnMULw(dst, src)
  *
+ * regMDHi:regMDLo = dst * regEAX
+ *
  * @this {X86CPU}
  * @param {number} dst
- * @param {number} src (null)
+ * @param {number} src (null; AX or EAX is the implied src)
  * @return {number} (we return dst unchanged, since it's actually DX:AX that's modified)
  */
 X86.fnMULw = function MULw(dst, src)
 {
     if (this.dataSize == 2) {
         src = this.regEAX & 0xffff;
-        var result = src * dst;
+        var result = (src * dst)|0;
         this.fMDSet = true;
         this.regMDLo = result & 0xffff;
         this.regMDHi = (result >> 16) & 0xffff;
