@@ -7,7 +7,7 @@
 
 start:	mov	eax,0x44332211
 	mov	edx,0x88776655
-	shrd	eax,edx,4
+	mul	edx
 
 	call	dword 0xf000:start
 

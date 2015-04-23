@@ -1969,7 +1969,7 @@ if (DEBUGGER) {
     };
 
     /**
-     * traceLog(prop, dst, src, flagsIn, flagsOut, result)
+     * traceLog(prop, dst, src, flagsIn, flagsOut, resultLo, resultHi)
      *
      * @this {Debugger}
      * @param {string} prop
@@ -1977,15 +1977,16 @@ if (DEBUGGER) {
      * @param {number} src
      * @param {number|null} flagsIn
      * @param {number|null} flagsOut
-     * @param {number} result
+     * @param {number} resultLo
+     * @param {number} [resultHi]
      */
-    Debugger.prototype.traceLog = function(prop, dst, src, flagsIn, flagsOut, result)
+    Debugger.prototype.traceLog = function(prop, dst, src, flagsIn, flagsOut, resultLo, resultHi)
     {
         if (DEBUG) {
             if (this.traceEnabled !== undefined && this.traceEnabled[prop]) {
                 var trace = Debugger.TRACE[prop];
                 var len = (trace.size >> 2);
-                var s = this.hexOffset(this.cpu.opLIP - this.cpu.segCS.base, this.cpu.getCS()) + " " + Debugger.INS_NAMES[trace.ins] + "(" + str.toHex(dst, len) + "," + str.toHex(src, len) + "," + (flagsIn === null? "-" : str.toHexWord(flagsIn)) + ") " + str.toHex(result, len) + "," + (flagsOut === null? "-" : str.toHexWord(flagsOut));
+                var s = this.hexOffset(this.cpu.opLIP - this.cpu.segCS.base, this.cpu.getCS()) + " " + Debugger.INS_NAMES[trace.ins] + "(" + str.toHex(dst, len) + "," + str.toHex(src, len) + "," + (flagsIn === null? "-" : str.toHexWord(flagsIn)) + ") " + str.toHex(resultLo, len) + "," + (flagsOut === null? "-" : str.toHexWord(flagsOut));
                 if (!this.aTraceBuffer.length) this.aTraceBuffer = new Array(Debugger.TRACE_LIMIT);
                 this.aTraceBuffer[this.iTraceBuffer++] = s;
                 if (this.iTraceBuffer >= this.aTraceBuffer.length) {

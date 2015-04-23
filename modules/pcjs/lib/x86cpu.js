@@ -1000,7 +1000,9 @@ X86CPU.prototype.resetRegs = function()
      * instructions perform calculations that must be propagated to specific registers (eg, AX and/or DX), which
      * the ModRM decoder functions don't know about.  We initialize them here mainly for documentation purposes.
      */
-    this.regMD16 = this.regMD32 = -1;
+    this.fMDSet = false;        // regMDHi and/or regMDLo are invalid unless fMDSet is true
+    this.regMDLo = this.regMDHi = 0;
+    this.regXX = 0;             // internal register for segment register and control register moves
 
     /*
      * Another internal "register" we occasionally need is an interim copy of bModRM, set inside selected opcode
@@ -2438,7 +2440,7 @@ X86CPU.prototype.setPS = function(regPS, cpl)
 };
 
 /**
- * traceLog(prop, dst, src, flagsIn, flagsOut, result)
+ * traceLog(prop, dst, src, flagsIn, flagsOut, resultLo, resultHi)
  *
  * @this {X86CPU}
  * @param {string} prop
@@ -2446,12 +2448,13 @@ X86CPU.prototype.setPS = function(regPS, cpl)
  * @param {number} src
  * @param {number|null} flagsIn
  * @param {number|null} flagsOut
- * @param {number} result
+ * @param {number} resultLo
+ * @param {number} [resultHi]
  */
-X86CPU.prototype.traceLog = function(prop, dst, src, flagsIn, flagsOut, result)
+X86CPU.prototype.traceLog = function(prop, dst, src, flagsIn, flagsOut, resultLo, resultHi)
 {
     if (DEBUG && this.dbg) {
-        this.dbg.traceLog(prop, dst, src, flagsIn, flagsOut, result);
+        this.dbg.traceLog(prop, dst, src, flagsIn, flagsOut, resultLo, resultHi);
     }
 };
 

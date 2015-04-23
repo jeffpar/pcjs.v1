@@ -201,8 +201,8 @@ X86.opCLTS = function CLTS()
  * op=0x0F,0x20 (MOV reg,creg)
  *
  * NOTE: Since the ModRM decoders deal only with general-purpose registers, we must move
- * the appropriate control register into a special variable (regMD16), which our helper function
- * (fnMOVMD16) will use to replace the decoder's src operand.
+ * the appropriate control register into a special variable (regXX), which our helper function
+ * (fnMOVxx) will use to replace the decoder's src operand.
  *
  * @this {X86CPU}
  */
@@ -221,16 +221,16 @@ X86.opMOVrc = function MOVrc()
     var reg = (bModRM & 0x38) >> 3;
     switch(reg) {
     case 0x0:
-        this.regMD16 = this.regCR0;
+        this.regXX = this.regCR0;
         break;
     case 0x1:
-        this.regMD16 = this.regCR1;
+        this.regXX = this.regCR1;
         break;
     case 0x2:
-        this.regMD16 = this.regCR2;
+        this.regXX = this.regCR2;
         break;
     case 0x3:
-        this.regMD16 = this.regCR3;
+        this.regXX = this.regCR3;
         break;
     default:
         X86.opUndefined.call(this);
@@ -242,7 +242,7 @@ X86.opMOVrc = function MOVrc()
      *
      *      this.opFlags |= X86.OPFLAG.NOREAD;
      */
-    this.aOpModRegWord[bModRM].call(this, X86.fnMOVMD16);
+    this.aOpModRegWord[bModRM].call(this, X86.fnMOVxx);
 };
 
 /**

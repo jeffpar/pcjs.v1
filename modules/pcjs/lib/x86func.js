@@ -490,14 +490,15 @@ X86.fnDIVb = function DIVb(dst, src)
         X86.fnDIVOverflow.call(this);
         return dst;
     }
-    this.regMD16 = this.regEAX = (uQuotient & 0xff) | (((this.regEAX % dst) & 0xff) << 8);
+    this.fMDSet = true;
+    this.regMDLo = this.regEAX = (uQuotient & 0xff) | (((this.regEAX % dst) & 0xff) << 8);
     /*
      * Multiply/divide instructions specify only a single operand, which the decoders pass to us
      * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX).
      * However, src is technically an output, and dst is merely an input (which is why we must return
      * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
      */
-    if (DEBUG && DEBUGGER) this.traceLog('DIVB', src, dst, null, this.getPS(), this.regMD16);
+    if (DEBUG && DEBUGGER) this.traceLog('DIVB', src, dst, null, this.getPS(), this.regMDLo);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesDivBR : this.cycleCounts.nOpCyclesDivBM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -533,15 +534,16 @@ X86.fnDIVw = function DIVw(dst, src)
         X86.fnDIVOverflow.call(this);
         return dst;
     }
-    this.regMD16 = this.regEAX = (uQuotient & 0xffff);
-    this.regMD32 = this.regEDX = (src % dst) & 0xffff;
+    this.fMDSet = true;
+    this.regMDLo = this.regEAX = (uQuotient & 0xffff);
+    this.regMDHi = this.regEDX = (src % dst) & 0xffff;
     /*
      * Multiply/divide instructions specify only a single operand, which the decoders pass to us
      * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX).
      * However, src is technically an output, and dst is merely an input (which is why we must return
      * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
      */
-    if (DEBUG && DEBUGGER) this.traceLog('DIVW', src, dst, null, this.getPS(), this.regMD16 | (this.regMD32 << 16));
+    if (DEBUG && DEBUGGER) this.traceLog('DIVW', src, dst, null, this.getPS(), this.regMDLo | (this.regMDHi << 16));
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesDivWR : this.cycleCounts.nOpCyclesDivWM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -593,14 +595,15 @@ X86.fnIDIVb = function IDIVb(dst, src)
         X86.fnDIVOverflow.call(this);
         return dst;
     }
-    this.regMD16 = this.regEAX = (lQuotient & 0xff) | (((((this.regEAX << 16) >> 16) % ((dst << 24) >> 24)) & 0xff) << 8);
+    this.fMDSet = true;
+    this.regMDLo = this.regEAX = (lQuotient & 0xff) | (((((this.regEAX << 16) >> 16) % ((dst << 24) >> 24)) & 0xff) << 8);
     /*
      * Multiply/divide instructions specify only a single operand, which the decoders pass to us
      * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX).
      * However, src is technically an output, and dst is merely an input (which is why we must return
      * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
      */
-    if (DEBUG && DEBUGGER) this.traceLog('IDIVB', src, dst, null, this.getPS(), this.regMD16);
+    if (DEBUG && DEBUGGER) this.traceLog('IDIVB', src, dst, null, this.getPS(), this.regMDLo);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIDivBR : this.cycleCounts.nOpCyclesIDivBM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -641,15 +644,16 @@ X86.fnIDIVw = function IDIVw(dst, src)
         X86.fnDIVOverflow.call(this);
         return dst;
     }
-    this.regMD16 = this.regEAX = (lQuotient & 0xffff);
-    this.regMD32 = this.regEDX = (src % lDivisor) & 0xffff;
+    this.fMDSet = true;
+    this.regMDLo = this.regEAX = (lQuotient & 0xffff);
+    this.regMDHi = this.regEDX = (src % lDivisor) & 0xffff;
     /*
      * Multiply/divide instructions specify only a single operand, which the decoders pass to us
      * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX).
      * However, src is technically an output, and dst is merely an input (which is why we must return
      * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
      */
-    if (DEBUG && DEBUGGER) this.traceLog('IDIVW', src, dst, null, this.getPS(), this.regMD16 | (this.regMD32 << 16));
+    if (DEBUG && DEBUGGER) this.traceLog('IDIVW', src, dst, null, this.getPS(), this.regMDLo | (this.regMDHi << 16));
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIDivWR : this.cycleCounts.nOpCyclesIDivWM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -751,7 +755,8 @@ X86.fnIMULn = function IMULn(dst, src)
 X86.fnIMULb = function IMULb(dst, src)
 {
     var result = (((src = this.regEAX) << 24) >> 24) * ((dst << 24) >> 24);
-    this.regEAX = this.regMD16 = result & 0xffff;
+    this.fMDSet = true;
+    this.regEAX = this.regMDLo = result & 0xffff;
     if (result > 127 || result < -128) {
         this.setCF(); this.setOF();
     } else {
@@ -763,7 +768,7 @@ X86.fnIMULb = function IMULb(dst, src)
      * However, src is technically an output, and dst is merely an input (which is why we must return
      * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
      */
-    if (DEBUG && DEBUGGER) this.traceLog('IMULB', src, dst, null, this.getPS(), this.regMD16);
+    if (DEBUG && DEBUGGER) this.traceLog('IMULB', src, dst, null, this.getPS(), this.regMDLo);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIMulBR : this.cycleCounts.nOpCyclesIMulBM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -793,8 +798,9 @@ X86.fnIMULb = function IMULb(dst, src)
 X86.fnIMULw = function IMULw(dst, src)
 {
     var result = (((src = this.regEAX) << 16) >> 16) * ((dst << 16) >> 16);
-    this.regEAX = this.regMD16 = result & 0xffff;
-    this.regEDX = this.regMD32 = (result >> 16) & 0xffff;
+    this.fMDSet = true;
+    this.regEAX = this.regMDLo = result & 0xffff;
+    this.regEDX = this.regMDHi = (result >> 16) & 0xffff;
     if (result > 32767 || result < -32768) {
         this.setCF(); this.setOF();
     } else {
@@ -806,7 +812,7 @@ X86.fnIMULw = function IMULw(dst, src)
      * However, src is technically an output, and dst is merely an input (which is why we must return
      * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
      */
-    if (DEBUG && DEBUGGER) this.traceLog('IMULW', src, dst, null, this.getPS(), this.regMD16 | (this.regMD32 << 16));
+    if (DEBUG && DEBUGGER) this.traceLog('IMULW', src, dst, null, this.getPS(), this.regMDLo | (this.regMDHi << 16));
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIMulWR : this.cycleCounts.nOpCyclesIMulWM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -1362,16 +1368,16 @@ X86.fnMOVn = function MOVn(dst, src)
 };
 
 /**
- * fnMOVMD16(dst, src)
+ * fnMOVxx(dst, src)
  *
  * @this {X86CPU}
  * @param {number} dst (current value, ignored)
  * @param {number} src (new value)
- * @return {number} dst (src is overridden, replaced with regMD16, as specified by opMOVwsr())
+ * @return {number} dst (src is overridden, replaced with regXX, as specified by opMOVwsr())
  */
-X86.fnMOVMD16 = function MOVMD16(dst, src)
+X86.fnMOVxx = function MOVxx(dst, src)
 {
-    return X86.fnMOV.call(this, dst, this.regMD16);
+    return X86.fnMOV.call(this, dst, this.regXX);
 };
 
 /**
@@ -1384,22 +1390,94 @@ X86.fnMOVMD16 = function MOVMD16(dst, src)
  */
 X86.fnMULb = function MULb(dst, src)
 {
-    this.regEAX = this.regMD16 = ((src = this.regEAX & 0xff) * dst) & 0xffff;
-    if (this.regEAX & 0xff00) {
+    this.fMDSet = true;
+    this.regMDLo = ((src = this.regEAX & 0xff) * dst) & 0xffff;
+
+    if (this.regMDLo & 0xff00) {
         this.setCF(); this.setOF();
     } else {
         this.clearCF(); this.clearOF();
     }
+
     /*
      * Multiply/divide instructions specify only a single operand, which the decoders pass to us
      * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX).
      * However, src is technically an output, and dst is merely an input (which is why we must return
      * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
      */
-    if (DEBUG && DEBUGGER) this.traceLog('MULB', src, dst, null, this.getPS(), this.regMD16);
+    if (DEBUG && DEBUGGER) this.traceLog('MULB', src, dst, null, this.getPS(), this.regMDLo);
+
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesMulBR : this.cycleCounts.nOpCyclesMulBM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
+};
+
+/**
+ * fnMUL32(dst, src)
+ *
+ * This sets regMDHi:regMDLo to the 64-bit result of dst * src, both of which are treated as unsigned.
+ *
+ * TODO: Some potential optimizations include:
+ *
+ *  1) Early outs if either parameter is zero, since the result will obviously be zero
+ *  2) Using "normal" JavaScript multiplication if both parameters are < 32767
+ *
+ * Refer to: http://stackoverflow.com/questions/13597364/32-bit-signed-multiplication-with-a-64-bit-result-in-javascript
+ *
+ * @this {X86CPU}
+ * @param {number} dst (any 32-bit number, treated as unsigned)
+ * @param {number} src (any 32-bit number, treated as unsigned)
+ */
+X86.fnMUL32 = function MUL32(dst, src)
+{
+    var srcLo = src & 0xffff;
+    var srcHi = src >>> 16;
+    var dstLo = dst & 0xffff;
+    var dstHi = dst >>> 16;
+
+    var mul00 = srcLo * dstLo;
+    var mul16 = ((mul00 >>> 16) + (srcHi * dstLo));
+    var mul32 = mul16 >>> 16;
+    mul16 = ((mul16 & 0xffff) + (srcLo * dstHi));
+    mul32 += ((mul16 >>> 16) + (srcHi * dstHi));
+
+    this.fMDSet = true;
+    this.regMDLo = (mul16 << 16) | (mul00 & 0xffff);
+    this.regMDHi = mul32|0;
+};
+
+/**
+ * fnIMUL32(dst, src)
+ *
+ * This sets regMDHi:regMDLo to the 64-bit result of dst * src, either of which may be signed or unsigned.
+ *
+ * TODO: Some potential optimizations include:
+ *
+ *  1) Early outs if either parameter is zero, since the result will obviously be zero
+ *  2) Using "normal" JavaScript multiplication if both parameters are >= -32768 && <= 32767
+ *
+ * Refer to: http://stackoverflow.com/questions/13597364/32-bit-signed-multiplication-with-a-64-bit-result-in-javascript
+ *
+ * @this {X86CPU}
+ * @param {number} dst (any 32-bit number, treated as signed)
+ * @param {number} src (any 32-bit number, treated as signed)
+ */
+X86.fnIMUL32 = function IMUL32(dst, src)
+{
+    var fNeg = false;
+    if (src < 0) {
+        src = -src|0;
+        fNeg = !fNeg;
+    }
+    if (dst < 0) {
+        dst = -dst|0;
+        fNeg = !fNeg;
+    }
+    X86.fnMUL32.call(this, dst, src);
+    if (fNeg) {
+        this.regMDLo = (~this.regMDLo + 1)|0;
+        this.regMDHi = (~this.regMDHi + (this.regMDLo? 0 : 1))|0;
+    }
 };
 
 /**
@@ -1412,21 +1490,35 @@ X86.fnMULb = function MULb(dst, src)
  */
 X86.fnMULw = function MULw(dst, src)
 {
-    var result = (src = this.regEAX) * dst;
-    this.regMD16 = this.regEAX = result & 0xffff;
-    this.regMD32 = this.regEDX = (result >> 16) & 0xffff;
-    if (this.regEDX) {
+    if (this.dataSize == 2) {
+        src = this.regEAX & 0xffff;
+        var result = src * dst;
+        this.fMDSet = true;
+        this.regMDLo = result & 0xffff;
+        this.regMDHi = (result >> 16) & 0xffff;
+    } else {
+        X86.fnMUL32.call(this, dst, this.regEAX);
+    }
+
+    if (this.regMDHi) {
         this.setCF(); this.setOF();
     } else {
         this.clearCF(); this.clearOF();
     }
+
     /*
      * Multiply/divide instructions specify only a single operand, which the decoders pass to us
      * via the dst parameter, so we set src to the other implied operand (either AX or DX:AX).
      * However, src is technically an output, and dst is merely an input (which is why we must return
      * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
      */
-    if (DEBUG && DEBUGGER) this.traceLog('MULW', src, dst, null, this.getPS(), this.regMD16 | (this.regMD32 << 16));
+    if (DEBUG && DEBUGGER) {
+        if (this.dataSize == 2) {
+            this.traceLog('MULW', src, dst, null, this.getPS(), this.regMDLo | (this.regMDHi << 16));
+        } else {
+            this.traceLog('MULD', src, dst, null, this.getPS(), this.regMDLo, this.regMDHi);
+        }
+    }
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesMulWR : this.cycleCounts.nOpCyclesMulWM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;

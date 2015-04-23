@@ -2057,8 +2057,8 @@ X86.opMOVrw = function MOVrw()
  * op=0x8C (MOV word,sreg)
  *
  * NOTE: Since the ModRM decoders deal only with general-purpose registers, we must move
- * the appropriate segment register into a special variable (regMD16), which our helper function
- * (fnMOVMD16) will use to replace the decoder's src operand.
+ * the appropriate segment register into a special variable (regXX), which our helper function
+ * (fnMOVxx) will use to replace the decoder's src operand.
  *
  * @this {X86CPU}
  */
@@ -2068,27 +2068,27 @@ X86.opMOVwsr = function MOVwsr()
     var reg = (bModRM & 0x38) >> 3;
     switch (reg) {
     case 0x0:
-        this.regMD16 = this.segES.sel;
+        this.regXX = this.segES.sel;
         break;
     case 0x1:
-        this.regMD16 = this.segCS.sel;
+        this.regXX = this.segCS.sel;
         break;
     case 0x2:
-        this.regMD16 = this.segSS.sel;
+        this.regXX = this.segSS.sel;
         break;
     case 0x3:
-        this.regMD16 = this.segDS.sel;
+        this.regXX = this.segDS.sel;
         break;
     case 0x4:
         if (I386 && this.model >= X86.MODEL_80386) {
-            this.regMD16 = this.segFS.sel;
+            this.regXX = this.segFS.sel;
             break;
         }
         X86.opInvalid.call(this);
         break;
     case 0x5:
         if (I386 && this.model >= X86.MODEL_80386) {
-            this.regMD16 = this.segGS.sel;
+            this.regXX = this.segGS.sel;
             break;
         }
         /* falls through */
@@ -2100,7 +2100,7 @@ X86.opMOVwsr = function MOVwsr()
      * Like other MOV operations, the destination does not need to be read, just written.
      */
     this.opFlags |= X86.OPFLAG.NOREAD;
-    this.aOpModMemWord[bModRM].call(this, X86.fnMOVMD16);
+    this.aOpModMemWord[bModRM].call(this, X86.fnMOVxx);
 };
 
 /**
@@ -2207,8 +2207,6 @@ X86.opMOVsrw = function MOVsrw()
         this.setDS(this.regEDI);
         this.regEDI = temp;
         break;
-    default:
-        break;              // there IS no other case, but JavaScript inspections don't know that
     }
 };
 
@@ -3841,7 +3839,7 @@ X86.opCMC = function CMC()
  * know what the target is (only the target's value), it cannot easily work around the problem.
  *
  * A simple, albeit kludgy, solution is for fnMULb to always save its result in a special
- * "register" (eg, regMD16), which we will then put back into regEAX if it's been updated.
+ * "register" (eg, regMDLo), which we will then put back into regEAX if it's been updated.
  * This also relieves us from having to decode any part of the ModRM byte, so maybe it's not
  * such a bad work-around after all.
  *
@@ -3851,9 +3849,9 @@ X86.opCMC = function CMC()
  */
 X86.opGRP3b = function GRP3b()
 {
-    this.regMD16 = -1;
+    this.fMDSet = false;
     this.aOpModGrpByte[this.getIPByte()].call(this, X86.aOpGrp3b, X86.fnSrcNone);
-    if (this.regMD16 >= 0) this.regEAX = this.regMD16;
+    if (this.fMDSet) this.regEAX = (this.regEAX & ~this.dataMask) | (this.regMDLo & this.dataMask);
 };
 
 /**
@@ -3869,7 +3867,7 @@ X86.opGRP3b = function GRP3b()
  * know what the target is (only the target's value), it cannot easily work around the problem.
  *
  * A simple, albeit kludgey, solution is for fnMULw to always save its result in a special
- * "register" (eg, regMD16/regMD32), which we will then put back into regEAX/regEDX if it's been
+ * "register" (eg, regMDLo/regMDHi), which we will then put back into regEAX/regEDX if it's been
  * updated.  This also relieves us from having to decode any part of the ModRM byte, so maybe
  * it's not such a bad work-around after all.
  *
@@ -3877,11 +3875,11 @@ X86.opGRP3b = function GRP3b()
  */
 X86.opGRP3w = function GRP3w()
 {
-    this.regMD16 = -1;
+    this.fMDSet = false;
     this.aOpModGrpWord[this.getIPByte()].call(this, X86.aOpGrp3w, X86.fnSrcNone);
-    if (this.regMD16 >= 0) {
-        this.regEAX = this.regMD16;
-        this.regEDX = this.regMD32;
+    if (this.fMDSet) {
+        this.regEAX = (this.regEAX & ~this.dataMask) | (this.regMDLo & this.dataMask);
+        this.regEDX = (this.regEDX & ~this.dataMask) | (this.regMDHi & this.dataMask);
     }
 };
 
