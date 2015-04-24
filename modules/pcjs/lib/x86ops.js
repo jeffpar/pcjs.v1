@@ -2361,16 +2361,11 @@ X86.opXCHGDI = function XCHGDI()
  */
 X86.opCBW = function CBW()
 {
-    if (this.dataSize == 2) {
-        /*
-         * CBW
-         */
+    if (this.dataSize == 2) {   // CBW
         this.regEAX = (this.regEAX & ~0xffff) | (((this.regEAX << 24) >> 24) & 0xffff);
         if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiAL;
-    } else {
-        /*
-         * CWDE
-         */
+    }
+    else {                      // CWDE
         this.regEAX = ((this.regEAX << 16) >> 16);
     }
     this.nStepCycles -= 2;                          // CBW takes 2 cycles on all CPUs through 80286
@@ -2386,16 +2381,11 @@ X86.opCBW = function CBW()
  */
 X86.opCWD = function CWD()
 {
-    if (this.dataSize == 2) {
-        /*
-         * CWD
-         */
+    if (this.dataSize == 2) {   // CWD
         this.regEDX = (this.regEDX & ~0xffff) | ((this.regEAX & 0x8000)? 0xffff : 0);
         if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiDH = this.backTrack.btiAH;
-    } else {
-        /*
-         * CDQ
-         */
+    }
+    else {                      // CDQ
         this.regEDX = (this.regEAX & (0x80000000|0))? -1 : 0;
     }
     this.nStepCycles -= this.cycleCounts.nOpCyclesCWD;
@@ -4122,7 +4112,7 @@ X86.aOps = [
  *      0x0F,0x00   Grp6        Grp6 (SLDT, STR, LLDT, LTR, VERR, VERW)             Group F
  *      0x0F,0x01   Grp7        Grp7 (SGDT, SIDT, LGDT, LIDT, SMSW, LMSW, INVLPG)   Group G
  *      0x0F,0xBA   Grp8        Grp8 (BT, BTS, BTR, BTC)                            Group H
- *      0x0F,0xC7   Grp9        Grp9 (CMPXCH)                                       (N/A, 80386 and up)
+ *      0x0F,0xC7   Grp9        Grp9 (CMPXCH)                                       (N/A, 80486 and up)
  *
  * My only serious deviation is Grp5, which I refer to as Grp4w, because it contains word forms of
  * the INC and DEC instructions found in Grp4b.  Granted, Grp4w also contains versions of the CALL,
@@ -4130,8 +4120,8 @@ X86.aOps = [
  * Grp4w, so I think my nomenclature makes more sense.  To compensate, I don't use Grp5, so that the
  * remaining group numbers remain in sync with Intel's.
  *
- * To the above list, I also add these "groups of 1": opcode 0x8F uses GrpPOPw, and opcodes 0xC6/0xC7 use
- * GrpMOVn.  In both of these groups, the only valid (documented) instruction is where reg=0x0.
+ * To the above list, I've added a few "single-serving" groups: opcode 0x8F uses GrpPOPw, and opcodes 0xC6/0xC7
+ * use GrpMOVn.  In both of these groups, the only valid (documented) instruction is where reg=0x0.
  *
  * TODO: Test what happens on real hardware when the reg field is non-zero for opcodes 0x8F and 0xC6/0xC7.
  */
