@@ -249,7 +249,7 @@ Component.log = function(s, type)
                 Component.msStart = usr.getTime();
             }
             msElapsed = usr.getTime() - Component.msStart;
-            console.log(msElapsed + "ms: " + sMsg.replace(/\n/g, " "));
+            if (window && window.console) console.log(msElapsed + "ms: " + sMsg.replace(/\n/g, " "));
         }
     }
 };
@@ -658,7 +658,7 @@ Component.prototype = {
                         }
                         control.value += s + "\n";
                         control.scrollTop = control.scrollHeight;
-                        if (DEBUG) console.log(s);
+                        if (DEBUG && window && window.console) console.log(s);
                     };
                 }(control));
                 /**

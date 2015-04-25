@@ -2720,8 +2720,12 @@ Video.prototype.onLoadSetFonts = function(sFontFile, sFontData, nErrorCode)
     }
     /*
      * If we're still here, then we're ready!
+     *
+     * UPDATE: Per issue #21, I'm issuing setReady() *only* if a valid contextScreen exists *or* a Debugger is attached.
+     *
+     * TODO: Consider a more general-purpose solution for deciding whether or not the user wants to run in a "headless" mode.
      */
-    this.setReady();
+    if (this.contextScreen || this.dbg) this.setReady();
 };
 
 /**
@@ -5197,8 +5201,8 @@ Video.init = function()
         var parmsVideo = Component.getComponentParms(eVideo);
 
         var eCanvas = window.document.createElement("canvas");
-        if (eCanvas === undefined) {
-            eVideo.innerHTML = "<br/>Missing &lt;canvas&gt; support; try a new web browser.";
+        if (eCanvas === undefined || !eCanvas.getContext) {
+            eVideo.innerHTML = "<br/>Missing &lt;canvas&gt; support. Please try a newer web browser.";
             return;
         }
 

@@ -1648,7 +1648,7 @@ if (DEBUGGER) {
         var aEnable = this.parseCommand(sEnable.replace("keys","key").replace("kbd","keyboard"));
         if (aEnable.length) {
             for (var m in Debugger.MESSAGES) {
-                if (aEnable.indexOf(m) >= 0) {
+                if (usr.indexOf(aEnable, m) >= 0) {
                     this.bitsMessage |= Debugger.MESSAGES[m];
                     this.println(m + " messages enabled");
                 }
@@ -1683,7 +1683,7 @@ if (DEBUGGER) {
      * @return {number}
      */
     Debugger.prototype.getRegIndex = function(sReg) {
-        return Debugger.REGS.indexOf(sReg.toUpperCase());
+        return usr.indexOf(Debugger.REGS, sReg.toUpperCase());
     };
 
     /**

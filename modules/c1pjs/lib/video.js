@@ -541,8 +541,8 @@ C1PVideo.init = function()
          * "autocapitalize" work here.
          */
         var eCanvas = window.document.createElement("canvas");
-        if (eCanvas === undefined) {
-            eVideo.innerHTML = "<br/>Missing &lt;canvas&gt; support; try a new web browser.";
+        if (eCanvas === undefined || !eCanvas.getContext) {
+            eVideo.innerHTML = "<br/>Missing &lt;canvas&gt; support. Please try a newer web browser.";
             return;
         }
         eCanvas.setAttribute("class", C1PJSCLASS + "-canvas");

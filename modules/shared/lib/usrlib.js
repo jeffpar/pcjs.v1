@@ -35,6 +35,28 @@
 var usr = {};
 
 /**
+ * indexOf(a, t, i)
+ *
+ * @param {Array} a
+ * @param {*} t
+ * @param {number} [i]
+ * @returns {number}
+ */
+usr.indexOf = function(a, t, i)
+{
+    if (Array.prototype.indexOf) {
+        return a.indexOf(t, i);
+    }
+    i = i || 0;
+    if (i < 0) i += a.length;
+    if (i < 0) i = 0;
+    for (var n = a.length; i < n; i++) {
+        if (i in a && a[i] === t) return i;
+    }
+    return -1;
+};
+
+/**
  * binarySearch(a, v, fnCompare)
  *
  * @param {Array} a is an array

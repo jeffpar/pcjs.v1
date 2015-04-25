@@ -163,6 +163,10 @@ var aMachineFileTypes = {
     'body': [".js"]
 };
 
+/*
+ * Since we have a small server-side optimization that assumes any directory entry without an extension is
+ * a directory, this is a list of known exceptions (ie, entries that are NOT directories despite no extension).
+ */
 var asNonDirectories = [
     "COPYING",
     "LICENSE",
@@ -170,6 +174,9 @@ var asNonDirectories = [
     "makefile"
 ];
 
+/*
+ * A list of plain-text file types that we want the server to serve up with mime-type "text/plain".
+ */
 var asExtsPlainText = [
     "65v",
     "bas",
@@ -201,6 +208,7 @@ var asFilesNonListed = [
     "package.json",
     "server.js",
     "index.html",
+    "notes.md",
     "README.md",
     "robots.txt",
     "machine.xml",
