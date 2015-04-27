@@ -44,7 +44,7 @@ var fConsole = false;
 var fDebug = false;
 var args = proc.getArgs();
 var argv = args.argv;
-var sCmdPrev = null;
+var sCmdPrev = "";
 if (argv['console'] !== undefined) fConsole = argv['console'];
 if (argv['debug'] !== undefined) fDebug = argv['debug'];
 
@@ -57,8 +57,8 @@ try {
 }
 
 /*
- * We will build an array of components whose names will match the component names used
- * in a JSON machine definition file; eg:
+ * We will build an array of components whose names will match the component names
+ * used in a JSON machine definition file; eg:
  * 
  *  [
  *      {name: "panel",
@@ -359,6 +359,7 @@ if (argv['cmd'] !== undefined) {
     for (var i = 0; i < aCmds.length; i++) {
         doCommand(aCmds[i]);
     }
+    sCmdPrev = "";
 }
 
 repl.start({

@@ -174,7 +174,10 @@ FileDump.CLI = function()
                     }
                 });
             }
-            if (!cMergesPending) file.convertToFile(sOutputFile, fOverwrite);
+            if (!cMergesPending) {
+                if (argv['checksum']) console.log("checksum: " + file.getChecksum());
+                file.convertToFile(sOutputFile, fOverwrite);
+            }
         }
     });
 };
@@ -344,6 +347,22 @@ FileDump.prototype.setData = function(buf, iStart, nSkip)
 FileDump.prototype.getData = function()
 {
     return this.buf;
+};
+
+/**
+ * getChecksum()
+ *
+ * @this {FileDump}
+ * @return {number|null}
+ */
+FileDump.prototype.getChecksum = function()
+{
+    if (!this.buf) return null;
+    var b = 0;
+    for (var i = 0; i < this.buf.length; i++) {
+        b += this.buf.readUInt8(i);
+    }
+    return b & 0xff;
 };
 
 /**
