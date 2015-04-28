@@ -35,28 +35,6 @@
 var usr = {};
 
 /**
- * indexOf(a, t, i)
- *
- * @param {Array} a
- * @param {*} t
- * @param {number} [i]
- * @returns {number}
- */
-usr.indexOf = function(a, t, i)
-{
-    if (Array.prototype.indexOf) {
-        return a.indexOf(t, i);
-    }
-    i = i || 0;
-    if (i < 0) i += a.length;
-    if (i < 0) i = 0;
-    for (var n = a.length; i < n; i++) {
-        if (i in a && a[i] === t) return i;
-    }
-    return -1;
-};
-
-/**
  * binarySearch(a, v, fnCompare)
  *
  * @param {Array} a is an array
@@ -188,45 +166,154 @@ usr.formatDate = function(sFormat, date) {
     for (var i = 0; i < sFormat.length; i++) {
         var ch;
         switch((ch = sFormat.charAt(i))) {
-            case 'a':
-                sDate += (iHour < 12? "am" : "pm");
-                break;
-            case 'd':
-                sDate += ('0' + iDay).slice(-2);
-                break;
-            case 'g':
-                sDate += (!iHour? 12 : (iHour > 12? iHour - 12 : iHour));
-                break;
-            case 'i':
-                sDate += ('0' + date.getMinutes()).slice(-2);
-                break;
-            case 'j':
-                sDate += iDay;
-                break;
-            case 'l':
-                sDate += usr.asDays[date.getDay()];
-                break;
-            case 'm':
-                sDate += ('0' + iMonth).slice(-2);
-                break;
-            case 's':
-                sDate += ('0' + date.getSeconds()).slice(-2);
-                break;
-            case 'F':
-                sDate += usr.asMonths[iMonth - 1];
-                break;
-            case 'H':
-                sDate += ('0' + iHour).slice(-2);
-                break;
-            case 'Y':
-                sDate += date.getFullYear();
-                break;
-            default:
-                sDate += ch;
-                break;
+        case 'a':
+            sDate += (iHour < 12? "am" : "pm");
+            break;
+        case 'd':
+            sDate += ('0' + iDay).slice(-2);
+            break;
+        case 'g':
+            sDate += (!iHour? 12 : (iHour > 12? iHour - 12 : iHour));
+            break;
+        case 'i':
+            sDate += ('0' + date.getMinutes()).slice(-2);
+            break;
+        case 'j':
+            sDate += iDay;
+            break;
+        case 'l':
+            sDate += usr.asDays[date.getDay()];
+            break;
+        case 'm':
+            sDate += ('0' + iMonth).slice(-2);
+            break;
+        case 's':
+            sDate += ('0' + date.getSeconds()).slice(-2);
+            break;
+        case 'F':
+            sDate += usr.asMonths[iMonth - 1];
+            break;
+        case 'H':
+            sDate += ('0' + iHour).slice(-2);
+            break;
+        case 'Y':
+            sDate += date.getFullYear();
+            break;
+        default:
+            sDate += ch;
+            break;
         }
     }
     return sDate;
+};
+
+/**
+ * @typedef {{
+ *  mask:       number,
+ *  shift:      number
+ * }}
+ */
+var BitField;
+
+/**
+ * @typedef {Object.<BitField>}
+ */
+var BitFields;
+
+/**
+ * defineBitFields(bfs)
+ *
+ * Prepares a bit field definition for use with getBitField() and setBitField(); eg:
+ *
+ *      var bfs = usr.defineBitFields({num:20, count:8, btmod:1, type:3});
+ *
+ * The above defines a set of bit fields containg four fields: num (bits 0-19), count (bits 20-27), btmod (bit 28), and type (bits 29-31).
+ *
+ *      usr.setBitField(bfs.num, n, 1);
+ *
+ * The above set bit field "bfs.num" in numeric variable "n" to the value 1.
+ *
+ * @param {Object} bfs
+ * @return {*} (technically, we transform the bfs object into a BitFields object, but the Closure Compiler won't let us specify that)
+ */
+usr.defineBitFields = function(bfs)
+{
+    var bit = 0;
+    for (var f in bfs) {
+        var width = bfs[f];
+        var mask = ((1 << width) - 1) << bit;
+        bfs[f] = {mask: mask, shift: bit};
+        bit += width;
+    }
+    // Component.assert(bit <= 32);
+    return bfs;
+};
+
+/**
+ * initBitFields(bfs, ...)
+ *
+ * @param {BitFields} bfs
+ * @param {...number} var_args
+ * @return {number} a value containing all supplied bit fields
+ */
+usr.initBitFields = function(bfs, var_args)
+{
+    var v = 0, i = 1;
+    for (var f in bfs) {
+        if (i >= arguments.length) break;
+        v = usr.setBitField(bfs[f], v, arguments[i++]);
+    }
+    return v;
+};
+
+/**
+ * getBitField(bf, v)
+ *
+ * @param {BitField} bf
+ * @param {number} v is a value containing bit fields
+ * @return {number} the value of the bit field in v defined by bf
+ */
+usr.getBitField = function(bf, v)
+{
+    return (v & bf.mask) >> bf.shift;
+};
+
+/**
+ * setBitField(bf, v, n)
+ *
+ * @param {BitField} bf
+ * @param {number} v is a value containing bit fields
+ * @param {number} n is a value to store in v in the bit field defined by bf
+ * @return {number} updated v
+ */
+usr.setBitField = function(bf, v, n)
+{
+    // Component.assert(!(n & ~(bf.mask >>> bf.shift)));
+    return (v & ~bf.mask) | ((n << bf.shift) & bf.mask);
+};
+
+/**
+ * indexOf(a, t, i)
+ *
+ * Use this instead of Array.prototype.indexOf() if you can't be sure the browser supports it.
+ *
+ * @param {Array} a
+ * @param {*} t
+ * @param {number} [i]
+ * @returns {number}
+ */
+usr.indexOf = function(a, t, i)
+{
+    if (Array.prototype.indexOf) {
+        return a.indexOf(t, i);
+    }
+    i = i || 0;
+    if (i < 0) i += a.length;
+    if (i < 0) i = 0;
+    for (var n = a.length; i < n; i++) {
+        if (i in a && a[i] === t) return i;
+    }
+    return -1;
 };
 
 if (typeof module !== 'undefined') module.exports = usr;

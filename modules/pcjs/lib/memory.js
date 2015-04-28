@@ -104,7 +104,7 @@ var littleEndian = (TYPEDARRAYS? (function() {
  * is available).
  *
  * @constructor
- * @param {number} addr of lowest used address in block
+ * @param {number} [addr] of lowest used address in block
  * @param {number} [used] portion of block in bytes (0 for none); must be a multiple of 4
  * @param {number} [size] of block's buffer in bytes (0 for none); must be a multiple of 4
  * @param {number} [type] is one of the Memory.TYPE constants (default is Memory.TYPE.NONE)
@@ -432,19 +432,21 @@ Memory.prototype = {
         this.writeLong = this.fReadOnly? this.writeNone : this.writeLongDirect;
     },
     /**
-     * setDebugInfo(cpu, dbg, size)
+     * setDebugInfo(cpu, dbg, addr, size)
      *
      * @this {Memory}
      * @param {X86CPU|Component} cpu
      * @param {Debugger|Component} dbg
+     * @param {number} addr of block
      * @param {number} size of block
      */
-    setDebugInfo: function(cpu, dbg, size) {
+    setDebugInfo: function(cpu, dbg, addr, size) {
         if (DEBUGGER) {
             this.cpu = cpu;
             this.dbg = dbg;
             this.cReadBreakpoints = this.cWriteBreakpoints = 0;
-            if (this.dbg) this.dbg.redoBreakpoints(this.addr, size);
+            Component.assert(this.dbg);
+            this.dbg.redoBreakpoints(addr, size);
         }
     },
     /**
@@ -455,7 +457,7 @@ Memory.prototype = {
      * @param {boolean} fWrite
      */
     addBreakpoint: function(off, fWrite) {
-        if (DEBUGGER) {
+        if (DEBUGGER && this.dbg) {
             if (!fWrite) {
                 if (this.cReadBreakpoints++ === 0) {
                     this.setReadAccess(Memory.afnChecked);
@@ -478,7 +480,7 @@ Memory.prototype = {
      * @param {boolean} fWrite
      */
     removeBreakpoint: function(off, fWrite) {
-        if (DEBUGGER) {
+        if (DEBUGGER && this.dbg) {
             if (!fWrite) {
                 if (--this.cReadBreakpoints === 0) {
                     this.resetReadAccess();
@@ -515,7 +517,7 @@ Memory.prototype = {
      * @return {number}
      */
     readNone: function readNone(off) {
-        if (DEBUGGER && this.dbg.messageEnabled(Messages.MEM) /* && !off */) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.MEM) /* && !off */) {
             this.dbg.message("attempt to read invalid block %" + str.toHex(this.addr) + " from " + this.dbg.hexOffset(this.cpu.getIP(), this.cpu.getCS()));
         }
         return 0xff;
@@ -529,7 +531,7 @@ Memory.prototype = {
      */
     writeNone: function writeNone(off, v)
     {
-        if (DEBUGGER && this.dbg.messageEnabled(Messages.MEM) /* && !off */) {
+        if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.MEM) /* && !off */) {
             this.dbg.message("attempt to write " + str.toHexWord(v) + " to invalid block %" + str.toHex(this.addr), true);
         }
     },
@@ -736,7 +738,7 @@ Memory.prototype = {
      */
     readByteChecked: function readByteChecked(off)
     {
-        if (DEBUGGER) this.dbg.checkMemoryRead(this.addr + off);
+        if (DEBUGGER && this.dbg) this.dbg.checkMemoryRead(this.addr + off);
         return this.readByteDirect(off);
     },
     /**
@@ -748,7 +750,7 @@ Memory.prototype = {
      */
     readShortChecked: function readShortChecked(off)
     {
-        if (DEBUGGER) {
+        if (DEBUGGER && this.dbg) {
             this.dbg.checkMemoryRead(this.addr + off) ||
             this.dbg.checkMemoryRead(this.addr + off + 1);
         }
@@ -763,7 +765,7 @@ Memory.prototype = {
      */
     readLongChecked: function readLongChecked(off)
     {
-        if (DEBUGGER) {
+        if (DEBUGGER && this.dbg) {
             this.dbg.checkMemoryRead(this.addr + off) ||
             this.dbg.checkMemoryRead(this.addr + off + 1) ||
             this.dbg.checkMemoryRead(this.addr + off + 2) ||
@@ -780,7 +782,7 @@ Memory.prototype = {
      */
     writeByteChecked: function writeByteChecked(off, b)
     {
-        if (DEBUGGER) this.dbg.checkMemoryWrite(this.addr + off);
+        if (DEBUGGER && this.dbg) this.dbg.checkMemoryWrite(this.addr + off);
         this.writeByteDirect(off, b);
     },
     /**
@@ -792,7 +794,7 @@ Memory.prototype = {
      */
     writeShortChecked: function writeShortChecked(off, w)
     {
-        if (DEBUGGER) {
+        if (DEBUGGER && this.dbg) {
             this.dbg.checkMemoryWrite(this.addr + off) ||
             this.dbg.checkMemoryWrite(this.addr + off + 1);
         }
@@ -807,7 +809,7 @@ Memory.prototype = {
      */
     writeLongChecked: function writeLongChecked(off, l)
     {
-        if (DEBUGGER) {
+        if (DEBUGGER && this.dbg) {
             this.dbg.checkMemoryWrite(this.addr + off) ||
             this.dbg.checkMemoryWrite(this.addr + off + 1) ||
             this.dbg.checkMemoryWrite(this.addr + off + 2) ||

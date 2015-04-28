@@ -34,28 +34,12 @@
 
 if (typeof module !== 'undefined') {
     var str         = require("../../shared/lib/strlib");
+    var usr         = require("../../shared/lib/usrlib");
     var Component   = require("../../shared/lib/component");
     var Memory      = require("./memory");
     var Messages    = require("./messages");
     var State       = require("./state");
 }
-
-/**
- * BackTrack objects have the following properties:
- *
- *      obj:    a reference to the source object (eg, ROM object, Sector object)
- *      off:    the offset within the source object that this object refers to
- *      slot:   the slot (+1) in abtObjects which this object currently occupies
- *      refs:   the number of memory references, as recorded by writeBackTrack()
- *
- * @typedef {{
- *  obj:    Object,
- *  off:    number,
- *  slot:   number,
- *  refs:   number
- * }}
- */
-var BackTrack;
 
 /**
  * Bus(cpu, dbg)
@@ -96,32 +80,32 @@ function Bus(parmsBus, cpu, dbg)
     this.nBusWidth = parmsBus['buswidth'] || 20;
 
     /*
-     * Compute all the Bus memory block addressing values that we rely on, based on the width of the bus.
+     * Compute all Bus memory block parameters, based on the width of the bus.
      *
-     * Regarding this.blockTotal, we want to avoid address-overflow-detection expressions like:
+     * Regarding blockTotal, we want to avoid using block overflow expressions like:
      *
      *      iBlock < this.blockTotal? iBlock : 0
      *
-     * and as long as we know that this.blockTotal is a power-of-two (eg, 256 or 0x100, in the case
-     * of nBusWidth == 20), we can define this.blockMask as (this.blockTotal - 1) and rewrite the previous
-     * expression as:
+     * As long as we know that blockTotal is a power of two (eg, 256 or 0x100, in the case of
+     * nBusWidth == 20 and blockSize == 4096), we can define blockMask as (blockTotal - 1) and
+     * rewrite the previous expression as:
      *
      *      iBlock & this.blockMask
      *
-     * While we *could* say that we mask addresses with this.busMask to simulate "A20 wrap", the simple
-     * fact is it relieves us from bounds-checking every aMemBlocks index.  Address wrapping at the 1Mb
-     * boundary (ie, the A20 address line) is something we'll have to deal with more carefully on the 80286.
+     * Similarly, we mask addresses with busMask to enforce "A20 wrap" on 20-bit busses.
+     * For larger busses, A20 wrap can be simulated by either clearing bit 20 of busMask or by
+     * changing all the block entries for the 2nd megabyte to match those in the 1st megabyte.
      *
-     *      New property        Old property        Old hard-coded values (when nBusWidth was always 20)
-     *      ------------        ------------        ----------------------------------------------------
-     *      this.busLimit       Bus.ADDR.LIMIT      0xfffff
-     *      this.busMask        N/A                 N/A
-     *      this.blockSize      Bus.BLOCK.SIZE      4096
-     *      this.blockLen       Bus.BLOCK.LEN       (this.blockSize >> 2)
-     *      this.blockShift     Bus.BLOCK.SHIFT     12
-     *      this.blockLimit     Bus.BLOCK.LIMIT     0xfff
-     *      this.blockTotal     Bus.BLOCK.TOTAL     ((this.busLimit + this.blockSize) / this.blockSize) | 0
-     *      this.blockMask      Bus.BLOCK.MASK      (this.blockTotal - 1)   (ie, 0xff)
+     *      Bus Property        Old hard-coded values (when nBusWidth was always 20)
+     *      ------------        ----------------------------------------------------
+     *      this.busLimit       0xfffff
+     *      this.busMask        N/A
+     *      this.blockSize      4096
+     *      this.blockLen       (this.blockSize >> 2)
+     *      this.blockShift     12
+     *      this.blockLimit     0xfff
+     *      this.blockTotal     ((this.busLimit + this.blockSize) / this.blockSize) | 0
+     *      this.blockMask      (this.blockTotal - 1)   (ie, 0xff)
      *
      * Note that we choose a blockShift value (and thus a physical memory block size) based on "buswidth":
      *
@@ -136,18 +120,17 @@ function Bus(parmsBus, cpu, dbg)
      * requirements.  Your choices, for the moment, are either to ensure the allocations are performed in
      * order, or to choose smaller blockShift values (at the expense of a generating a larger block array).
      *
-     * Be aware that this is strictly a physical memory implementation detail, which should have no bearing
-     * on segment or page granularity of any future virtual memory implementation.
+     * However, if PAGEBLOCKS is set, then for a bus width of 32 bits, the block size is fixed at 4Kb.
      */
     this.addrTotal = Math.pow(2, this.nBusWidth);
     this.busLimit = this.busMask = (this.addrTotal - 1) | 0;
-    this.blockShift = (this.nBusWidth <= 20? 12 : (this.nBusWidth <= 24? 14 : 15));
+    this.blockShift = (PAGEBLOCKS && this.nBusWidth == 32 || this.nBusWidth <= 20)? 12 : (this.nBusWidth <= 24? 14 : 15);
     this.blockSize = 1 << this.blockShift;
     this.blockLen = this.blockSize >> 2;
     this.blockLimit = this.blockSize - 1;
     this.blockTotal = (this.addrTotal / this.blockSize) | 0;
     this.blockMask = this.blockTotal - 1;
-    this.assert(this.blockMask <= Bus.BLOCK.NUM_MASK);
+    this.assert(this.blockMask <= Bus.BlockInfo.num.mask);
 
     /*
      * Lists of I/O notification functions: aPortInputNotify and aPortOutputNotify are arrays, indexed by
@@ -194,6 +177,23 @@ function Bus(parmsBus, cpu, dbg)
 Component.subclass(Bus);
 
 if (BACKTRACK) {
+    /**
+     * BackTrack object definition
+     *
+     *  obj:        reference to the source object (eg, ROM object, Sector object)
+     *  off:        the offset within the source object that this object refers to
+     *  slot:       the slot (+1) in abtObjects which this object currently occupies
+     *  refs:       the number of memory references, as recorded by writeBackTrack()
+     *
+     * @typedef {{
+     *  obj:        Object,
+     *  off:        number,
+     *  slot:       number,
+     *  refs:       number
+     * }}
+     */
+    var BackTrack;
+
     /*
      * BackTrack indexes are 31-bit values, where bits 0-8 store an object offset (0-511) and bits 16-30 store
      * an object number (1-32767).  Object number 0 is reserved for dynamic data (ie, data created independent
@@ -245,20 +245,37 @@ if (BACKTRACK) {
     };
 }
 
-/*
- * scanMemory() records block numbers in bits 0-16, a BackTrack "mod" bit in bit 17, and a block type at bit 28;
- * the bits reserved for a count are not used.
+/**
+ * @typedef {number}
  */
-Bus.BLOCK = {
-    NUM_SHIFT:      0,
-    NUM_MASK:       0x1ffff,
-    BTMOD_SHIFT:    17,
-    BTMOD_MASK:     0x1,
-    COUNT_SHIFT:    18,
-    COUNT_MASK:     0x03ff,
-    TYPE_SHIFT:     28,
-    TYPE_MASK:      0x7
-};
+var BlockInfo;
+
+/**
+ * This defines the BlockInfo bit fields used by scanMemory() when it creates the aBlocks array.
+ *
+ * @typedef {{
+ *  num:    BitField,
+ *  count:  BitField,
+ *  btmod:  BitField,
+ *  type:   BitField
+ * }}
+ */
+Bus.BlockInfo = usr.defineBitFields({num:20, count:8, btmod:1, type:3});
+
+/**
+ * BusInfo object definition (returned by scanMemory())
+ *
+ *  cbTotal:    total bytes allocated
+ *  cBlocks:    total Memory blocks allocated
+ *  aBlocks:    array of allocated Memory block numbers
+ *
+ * @typedef {{
+ *  cbTotal:    number,
+ *  cBlocks:    number,
+ *  aBlocks:    Array.<BlockInfo>
+ * }}
+ */
+var BusInfo;
 
 /**
  * initMemory()
@@ -269,12 +286,10 @@ Bus.BLOCK = {
  */
 Bus.prototype.initMemory = function()
 {
+    var block = new Memory();
     this.aMemBlocks = new Array(this.blockTotal);
     for (var iBlock = 0; iBlock < this.blockTotal; iBlock++) {
-        var addr = iBlock * this.blockSize;
-        var block = this.aMemBlocks[iBlock] = new Memory(addr);
-
-        if (DEBUGGER) block.setDebugInfo(this.cpu, this.dbg, this.blockSize);
+        this.aMemBlocks[iBlock] = block;
     }
     this.cpu.initMemory(this.aMemBlocks, this.blockShift, this.blockLimit, this.blockMask);
     this.cpu.setAddressMask(this.busMask);
@@ -352,6 +367,7 @@ Bus.prototype.addMemory = function(addr, size, type, controller)
         var block = this.aMemBlocks[iBlock];
         var addrBlock = iBlock * this.blockSize;
         var sizeBlock = size > this.blockSize? this.blockSize : size;
+
         if (block && block.size) {
             if (block.type == type && block.controller == controller) {
                 /*
@@ -378,7 +394,7 @@ Bus.prototype.addMemory = function(addr, size, type, controller)
             return this.reportError(1, addr, size);
         }
         block = this.aMemBlocks[iBlock++] = new Memory(addr, sizeBlock, this.blockSize, type, controller);
-        if (DEBUGGER) block.setDebugInfo(this.cpu, this.dbg, this.blockSize);
+        if (DEBUGGER && this.dbg) block.setDebugInfo(this.cpu, this.dbg, addr, this.blockSize);
         size -= sizeBlock;
         addr = addrBlock + this.blockSize;
     }
@@ -412,49 +428,38 @@ Bus.prototype.cleanMemory = function(addr, size)
 };
 
 /**
- * scanMemory(stats, addr, size)
+ * scanMemory(info, addr, size)
  *
- * Returns a Stats object for the specified address range with the following properties:
- *
- *      cbTotal:    total bytes allocated
- *      cBlocks:    total Memory blocks allocated
- *      aBlocks:    array of allocated Memory block numbers
- *
- * aBlocks is preallocated to its maximum size, so don't rely on its length; at any given moment,
- * only the first cBlocks entries will be valid.
+ * Returns a BusInfo object for the specified address range.
  *
  * @this {Bus}
- * @param {Object} [stats] previous stats, if any
+ * @param {Object} [info] previous BusInfo, if any
  * @param {number} [addr] starting address of range (0 if none provided)
  * @param {number} [size] size of range, in bytes (up to end of address space if none provided)
- * @return {Object} updated stats (or new stats if no previous stats provided)
+ * @return {Object} updated info (or new info if no previous info provided)
  */
-Bus.prototype.scanMemory = function(stats, addr, size)
+Bus.prototype.scanMemory = function(info, addr, size)
 {
     if (addr == null) addr = 0;
     if (size == null) size = (this.addrTotal - addr) | 0;
-    if (stats == null) stats = {cbTotal: 0, cBlocks: 0, aBlocks: new Array(this.blockTotal)};
+    if (info == null) info = {cbTotal: 0, cBlocks: 0, aBlocks: []};
 
     var iBlock = addr >>> this.blockShift;
     var iBlockMax = ((addr + size - 1) >>> this.blockShift);
 
-    stats.cbTotal = 0;
-    stats.cBlocks = 0;
+    info.cbTotal = 0;
+    info.cBlocks = 0;
     while (iBlock <= iBlockMax) {
         var block = this.aMemBlocks[iBlock];
-        stats.cbTotal += block.size;
+        info.cbTotal += block.size;
         if (block.size) {
-            var nBlock = iBlock;
-            nBlock |= (block.type << Bus.BLOCK.TYPE_SHIFT);
-            if (BACKTRACK) {
-                var fMod = block.modBackTrack(false);
-                if (fMod) nBlock |= (1 << Bus.BLOCK.BTMOD_SHIFT);
-            }
-            stats.aBlocks[stats.cBlocks++] = nBlock;
+            var btmod = (BACKTRACK && block.modBackTrack(false)? 1 : 0);
+            info.aBlocks.push(usr.initBitFields(Bus.BlockInfo, iBlock, 0, btmod, block.type));
+            info.cBlocks++
         }
         iBlock++;
     }
-    return stats;
+    return info;
 };
 
 /**
@@ -574,7 +579,7 @@ Bus.prototype.removeMemory = function(addr, size)
         while (size > 0) {
             addr = iBlock * this.blockSize;
             var block = this.aMemBlocks[iBlock++] = new Memory(addr);
-            if (DEBUGGER) block.setDebugInfo(this.cpu, this.dbg, this.blockSize);
+            if (DEBUGGER && this.dbg) block.setDebugInfo(this.cpu, this.dbg, addr, this.blockSize);
             size -= this.blockSize;
         }
         return true;
@@ -626,7 +631,7 @@ Bus.prototype.setMemoryBlocks = function(addr, size, aBlocks, type)
         if (!block) break;
         if (type !== undefined) {
             var blockNew = new Memory(addr);
-            if (DEBUGGER) blockNew.setDebugInfo(this.cpu, this.dbg, this.blockSize);
+            if (DEBUGGER && this.dbg) blockNew.setDebugInfo(this.cpu, this.dbg, addr, this.blockSize);
             blockNew.clone(block, type);
             block = blockNew;
         }

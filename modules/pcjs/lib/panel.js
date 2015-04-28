@@ -34,6 +34,7 @@
 
 if (typeof module !== 'undefined') {
     var str         = require("../../shared/lib/strlib");
+    var usr         = require("../../shared/lib/usrlib");
     var web         = require("../../shared/lib/weblib");
     var Component   = require("../../shared/lib/component");
     var Bus         = require("./bus");
@@ -59,7 +60,7 @@ function Panel(parmsPanel)
     this.fMouseDown = false;
     this.xMouse = this.yMouse = -1;
     if (BACKTRACK) {
-        this.stats = null;
+        this.busInfo = null;
         this.fBackTrack = false;
     }
 }
@@ -477,19 +478,17 @@ Panel.prototype.updateMouse = function(event, fDown)
  */
 Panel.prototype.findAddress = function(x, y)
 {
-    if (x < Panel.LIVEMEM.CX && this.stats && this.stats.aRects) {
+    if (x < Panel.LIVEMEM.CX && this.busInfo && this.busInfo.aRects) {
         var i, rect;
-        for (i = 0; i < this.stats.aRects.length; i++) {
-            rect = this.stats.aRects[i];
+        for (i = 0; i < this.busInfo.aRects.length; i++) {
+            rect = this.busInfo.aRects[i];
             if (rect.contains(x, y)) {
                 x -= rect.x;
                 y -= rect.y;
-                var nRegion = this.stats.aRegions[i];
-                var iBlock = this.stats.aBlocks[nRegion & Bus.BLOCK.NUM_MASK] & Bus.BLOCK.NUM_MASK;
-                var cBlocks = (nRegion >> Bus.BLOCK.COUNT_SHIFT) & Bus.BLOCK.COUNT_MASK;
-                var type = (nRegion >> Bus.BLOCK.TYPE_SHIFT) & Bus.BLOCK.TYPE_MASK;
+                var region = this.busInfo.aRegions[i];
+                var iBlock = usr.getBitField(Bus.BlockInfo.num, this.busInfo.aBlocks[region.iBlock]);
                 var addr = iBlock * this.bus.blockSize;
-                var addrLimit = (iBlock + cBlocks) * this.bus.blockSize - 1;
+                var addrLimit = (iBlock + region.cBlocks) * this.bus.blockSize - 1;
 
                 /*
                  * If you want memory to be arranged "vertically" instead of "horizontally", do this:
@@ -502,7 +501,7 @@ Panel.prototype.findAddress = function(x, y)
 
                 addr |= 0;
                 if (addr > addrLimit) addr = addrLimit;
-                if (MAXDEBUG) this.log("Panel.findAddress(" + x + "," + y + ") found type " + Memory.TYPE.NAMES[type] + ", address %" + str.toHex(addr));
+                if (MAXDEBUG) this.log("Panel.findAddress(" + x + "," + y + ") found type " + Memory.TYPE.NAMES[region.type] + ", address %" + str.toHex(addr));
                 return addr;
             }
         }
@@ -525,19 +524,19 @@ Panel.prototype.updateAnimation = function()
 
         if (this.fBackTrack) {
             if (DEBUG) this.log("begin scanMemory()");
-            this.stats = this.bus.scanMemory(this.stats);
+            this.busInfo = this.bus.scanMemory(this.busInfo);
             /*
              * Calculate the pixel-to-memory-address ratio
              */
-            this.ratioMemoryToPixels = (this.stats.cBlocks * this.bus.blockSize) / (Panel.LIVEMEM.CX * Panel.LIVEMEM.CY);
+            this.ratioMemoryToPixels = (this.busInfo.cBlocks * this.bus.blockSize) / (Panel.LIVEMEM.CX * Panel.LIVEMEM.CY);
             /*
-             * Update the Stats object with region information (cRegions and aRegions); return true if region
+             * Update the BusInfo object with region information (cRegions and aRegions); return true if region
              * information has changed since the last call.
              */
             if (this.findRegions()) {
                 /*
                  * For each region, I choose a slice of the LiveMem canvas and record the corresponding rectangle
-                 * within an aRects array (parallel to the aRegions array) in the Stats object.
+                 * within an aRects array (parallel to the aRegions array) in the BusInfo object.
                  *
                  * I don't need a sophisticated Treemap algorithm, because at this level, the data is not hierarchical.
                  * subDivide() makes a simple horizontal or vertical slicing decision based on the ratio of region blocks
@@ -545,33 +544,34 @@ Panel.prototype.updateAnimation = function()
                  */
                 var i, rect;
                 var rectAvail = new Rectangle(0, 0, this.canvasLiveMem.width, this.canvasLiveMem.height);
-                this.stats.aRects = [];
-                var cBlocksRemaining = this.stats.cBlocks;
-                for (i = 0; i < this.stats.cRegions; i++) {
-                    var cBlocksRegion = (this.stats.aRegions[i] >> Bus.BLOCK.COUNT_SHIFT) & Bus.BLOCK.COUNT_MASK;
-                    this.stats.aRects.push(rect = rectAvail.subDivide(cBlocksRegion, cBlocksRemaining, !i));
+                this.busInfo.aRects = [];
+                var cBlocksRemaining = this.busInfo.cBlocks;
+
+                for (i = 0; i < this.busInfo.cRegions; i++) {
+                    var cBlocksRegion = this.busInfo.aRegions[i].cBlocks;
+                    this.busInfo.aRects.push(rect = rectAvail.subDivide(cBlocksRegion, cBlocksRemaining, !i));
                     if (MAXDEBUG) this.log("region " + i + " rectangle: (" + rect.x + "," + rect.y + " " + rect.cx + "," + rect.cy + ")");
                     cBlocksRemaining -= cBlocksRegion;
                 }
+
                 /*
                  * Assert that not only did all the specified regions account for all the specified blocks, but also that
                  * the series of subDivide() calls exhausted the original rectangle to one of either zero width or zero height.
                  */
                 this.assert(!cBlocksRemaining && (!rectAvail.cx || !rectAvail.cy));
+
                 /*
                  * Now draw all the rectangles produced by the series of subDivide() calls.
                  */
-                for (i = 0; i < this.stats.aRects.length; i++) {
-                    var nRegion = this.stats.aRegions[i];
-                    var type = (nRegion >> Bus.BLOCK.TYPE_SHIFT) & Bus.BLOCK.TYPE_MASK;
-                    var cBlocks = (nRegion >> Bus.BLOCK.COUNT_SHIFT) & Bus.BLOCK.COUNT_MASK;
-                    rect = this.stats.aRects[i];
-                    rect.drawWith(this.contextLiveMem, Memory.TYPE.COLORS[type]);
+                for (i = 0; i < this.busInfo.aRects.length; i++) {
+                    var region = this.busInfo.aRegions[i];
+                    rect = this.busInfo.aRects[i];
+                    rect.drawWith(this.contextLiveMem, Memory.TYPE.COLORS[region.type]);
                     this.centerPen(rect);
-                    this.centerText(Memory.TYPE.NAMES[type] + " (" + (((cBlocks * this.bus.blockSize) / 1024) | 0) + "Kb)");
+                    this.centerText(Memory.TYPE.NAMES[region.type] + " (" + (((region.cBlocks * this.bus.blockSize) / 1024) | 0) + "Kb)");
                 }
             }
-            if (DEBUG) this.log("end scanMemory(): total bytes: " + this.stats.cbTotal + ", total blocks: " + this.stats.cBlocks + ", total regions: " + this.stats.cRegions);
+            if (DEBUG) this.log("end scanMemory(): total bytes: " + this.busInfo.cbTotal + ", total blocks: " + this.busInfo.cBlocks + ", total regions: " + this.busInfo.cRegions);
         } else {
             this.drawText("This space intentionally left blank");
         }
@@ -599,10 +599,10 @@ Panel.prototype.updateStatus = function()
 /**
  * findRegions()
  *
- * This takes the Stats object produced by scanMemory() and adds the following:
+ * This takes the BusInfo object produced by scanMemory() and adds the following:
  *
  *      cRegions:   number of contiguous memory regions
- *      aRegions:   array of aBlocks indexes (bits 0-14) combined with block counts (bits 16-27) and block types (bits 28-31)
+ *      aRegions:   array of aBlocks [index, count, type] objects
  *
  * It calls addRegion() for each discrete region (set of contiguous blocks with the same type) that it finds.
  *
@@ -612,29 +612,48 @@ Panel.prototype.updateStatus = function()
 Panel.prototype.findRegions = function()
 {
     var checksum = 0;
-    this.stats.cRegions = 0;
-    if (!this.stats.aRegions) this.stats.aRegions = [];
+    this.busInfo.cRegions = 0;
+    if (!this.busInfo.aRegions) this.busInfo.aRegions = [];
+
     var typeRegion = -1, iBlockRegion = 0, addrRegion = 0, nBlockPrev = -1;
-    for (var iBlock = 0; iBlock < this.stats.cBlocks; iBlock++) {
-        var nBlock = this.stats.aBlocks[iBlock];
-        var type = nBlock >>> Bus.BLOCK.TYPE_SHIFT;
-        var nBlockCurr = (nBlock & Bus.BLOCK.NUM_MASK);
-        if (type != typeRegion || nBlockCurr != nBlockPrev + 1) {
+
+    for (var iBlock = 0; iBlock < this.busInfo.cBlocks; iBlock++) {
+        var blockInfo = this.busInfo.aBlocks[iBlock];
+        var typeBlock = usr.getBitField(Bus.BlockInfo.type, blockInfo);
+        var nBlockCurr = usr.getBitField(Bus.BlockInfo.num, blockInfo);
+        if (typeBlock != typeRegion || nBlockCurr != nBlockPrev + 1) {
             var cBlocks = iBlock - iBlockRegion;
             if (cBlocks) {
                 checksum += this.addRegion(addrRegion, iBlockRegion, cBlocks, typeRegion);
             }
-            typeRegion = type;
+            typeRegion = typeBlock;
             iBlockRegion = iBlock;
-            addrRegion = (nBlock & Bus.BLOCK.NUM_MASK) << this.bus.blockShift;
+            addrRegion = nBlockCurr << this.bus.blockShift;
         }
         nBlockPrev = nBlockCurr;
     }
+
     checksum += this.addRegion(addrRegion, iBlockRegion, iBlock - iBlockRegion, typeRegion);
-    var fChanged = (this.stats.checksumRegions != checksum);
-    this.stats.checksumRegions = checksum;
+
+    var fChanged = (this.busInfo.checksumRegions != checksum);
+    this.busInfo.checksumRegions = checksum;
     return fChanged;
 };
+
+/**
+ * Region object definition
+ *
+ *  iBlock:     starting block number
+ *  cBlocks:    number of blocks spanned by region
+ *  type:       type of all blocks in the region (see Memory.TYPE.*)
+ *
+ * @typedef {{
+ *  iBlock:     number,
+ *  cBlocks:    number,
+ *  type:       number
+ * }}
+ */
+var Region;
 
 /**
  * addRegion(addr, iBlock, cBlocks, type)
@@ -644,13 +663,13 @@ Panel.prototype.findRegions = function()
  * @param {number} iBlock
  * @param {number} cBlocks
  * @param {number} type
- * @return {number} region data added
+ * @return {number} bitfield containing the above values (used for checksum)
  */
 Panel.prototype.addRegion = function(addr, iBlock, cBlocks, type)
 {
-    if (DEBUG) this.log("region " + this.stats.cRegions + " (addr " + str.toHexLong(addr) + ", type " + Memory.TYPE.NAMES[type] + ") contains " + cBlocks + " blocks");
-    this.assert(iBlock <= Bus.BLOCK.NUM_MASK && cBlocks <= Bus.BLOCK.COUNT_MASK && type <= Bus.BLOCK.TYPE_MASK);
-    return this.stats.aRegions[this.stats.cRegions++] = (iBlock | (cBlocks << Bus.BLOCK.COUNT_SHIFT) | (type << Bus.BLOCK.TYPE_SHIFT));
+    if (DEBUG) this.log("region " + this.busInfo.cRegions + " (addr " + str.toHexLong(addr) + ", type " + Memory.TYPE.NAMES[type] + ") contains " + cBlocks + " blocks");
+    this.busInfo.aRegions[this.busInfo.cRegions++] = {iBlock: iBlock, cBlocks: cBlocks, type: type};
+    return usr.initBitFields(Bus.BlockInfo, iBlock, cBlocks, 0, type);
 };
 
 /**

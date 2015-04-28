@@ -33,11 +33,11 @@ ROMs for their earliest 80386-based systems.
 	cd 1988-01-28
 	filedump --file=109592-001.hex --merge=109591-001.hex --output=1988-01-28.json
 
-For a more human-readable dump, use this command:
+For a more human-readable dump, use the `--comments` option:
 
-	filedump --file=109592-001.hex --merge=109591-001.hex --comments
+	filedump --file=109592-001.hex --merge=109591-001.hex --output=1988-01-28.dump --comments
 
-And for those who prefer a binary file, the FileDump API can be used to recreate binary data from JSON data:
+And for those who want a binary file, the FileDump API can be used to recreate binary data from JSON data:
 
 > [http://www.pcjs.org/api/v1/dump?file=http://www.pcjs.org/devices/pc/bios/compaq/deskpro386/1988-01-28/1988-01-28.json&format=rom](http://www.pcjs.org/api/v1/dump?file=http://www.pcjs.org/devices/pc/bios/compaq/deskpro386/1988-01-28/1988-01-28.json&format=rom)
 
@@ -48,6 +48,8 @@ from the two 16Kb BIN files provided by [Al Kossow](http://www.vintage-computer.
 	filedump --file=private/109592-005.U11.bin --merge=private/109591-005.U13.bin --output=private/1989-04-14.rom --format=rom
 	filedump --file=private/1989-04-14.rom --output=1989-04-14.json
 
+Reading the ROMs
+---
 The *.hex* files for the 1988-01-28 DeskPro ROM were produced by running [eeprom_read](http://github.com/phooky/PROM/blob/master/tools/eeprom_read/eeprom_read.pde)
 on a [chipKIT Uno32](http://www.digilentinc.com/Products/Detail.cfm?NavPath=2,892,893&Prod=CHIPKIT-UNO32) Arduino-compatible
 prototyping board, and capturing the serial port output on my MacBook Pro -- as outlined in

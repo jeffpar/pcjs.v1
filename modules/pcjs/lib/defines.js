@@ -82,16 +82,16 @@ var TYPEDARRAYS = (typeof ArrayBuffer !== 'undefined');
 /**
  * @define {boolean}
  *
- * Enables backtracking (disabled in compiled versions).  Backtracking is a mechanism that allows us to tag
- * every byte of incoming data and follow the flow of that data.
+ * BACKTRACK enables backtracking (disabled in compiled versions).  Backtracking is a mechanism that allows
+ * us to tag every byte of incoming data and follow the flow of that data.
  */
 var BACKTRACK = !COMPILED;
 
 /**
  * @define {boolean}
  *
- * Enables instruction sampling (a work-in-progress).  This was used briefly as an internal debugging aid, to
- * periodically record LIP values in a fixed-length sampling buffer, halting execution once the sampling buffer
+ * SAMPLER enables instruction sampling (a work-in-progress).  This was used briefly as an internal debugging aid,
+ * to periodically record LIP values in a fixed-length sampling buffer, halting execution once the sampling buffer
  * was full, and then compare those sampled LIP values to corresponding LIP values on subsequent runs, to look
  * for deviations.  In theory, every run is supposed to be absolutely identical, even if you interrupt execution
  * with the Debugger or enable/disable different sets of messages, but in practice, that's hard to guarantee.
@@ -101,9 +101,9 @@ var SAMPLER = false;
 /**
  * @define {boolean}
  *
- * Enables support for known 8086 bugs.  It's turned off by default, because 1) it adds overhead, and 2) it's
- * hard to imagine any software actually being dependent on any of the bugs covered by this (eg, the failure to
- * properly restart string instructions with multiple prefixes, or the failure to inhibit hardware interrupts
+ * BUGS_8086 enables support for known 8086 bugs.  It's turned off by default, because 1) it adds overhead, and
+ * 2) it's hard to imagine any software actually being dependent on any of the bugs covered by this (eg, the failure
+ * to properly restart string instructions with multiple prefixes, or the failure to inhibit hardware interrupts
  * following SS segment loads).
  */
 var BUGS_8086 = false;
@@ -111,18 +111,32 @@ var BUGS_8086 = false;
 /**
  * @define {boolean}
  *
- * Enables 80386 support.  My preference continues to be one "binary" that supports all implemented CPUs, but
+ * I386 enables 80386 support.  My preference continues to be one "binary" that supports all implemented CPUs, but
  * I'm providing this to enable a slimmed-down binary, at least until 80386 support is actually finished; at the
- * moment, there's just a lot of scaffolding that bloats the compiled version without adding real functionality.
+ * moment, there's just a lot of scaffolding that bloats the compiled version without adding any real functionality.
  */
 var I386 = true;
 
 /**
  * @define {boolean}
  *
- * Enables Compaq DeskPro 386 support.
+ * COMPAQ386 enables Compaq DeskPro 386 support.
  */
 var COMPAQ386 = true;
+
+/**
+ * @define {boolean}
+ *
+ * PAGEBLOCKS enables 80386 paging support with assistance from the Bus component.  This affects how the Bus component
+ * defines physical memory parameters for a 32-bit bus.  With the 8086 and 80286 processors, the Bus component was free
+ * to choose any block size for physical memory allocations that made sense for the bus width (eg, 4Kb blocks for a
+ * 20-bit bus, or 16Kb blocks for 24-bit bus).
+ *
+ * However, for the 80386 processor, it makes more sense to choose a block size that matches the page size (ie, 4Kb),
+ * because then we have the option of altering the address-to-memory mapping for any block to match whatever page table
+ * mapping is in effect for that address, if any, without requiring another layer of address translation.
+ */
+var PAGEBLOCKS = I386;
 
 if (typeof module !== 'undefined') {
     global.PCJSCLASS = PCJSCLASS;
