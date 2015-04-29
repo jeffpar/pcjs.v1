@@ -99,13 +99,13 @@ function Bus(parmsBus, cpu, dbg)
      *      Bus Property        Old hard-coded values (when nBusWidth was always 20)
      *      ------------        ----------------------------------------------------
      *      this.busLimit       0xfffff
-     *      this.busMask        N/A
+     *      this.busMask        [same as busLimit]
      *      this.blockSize      4096
      *      this.blockLen       (this.blockSize >> 2)
      *      this.blockShift     12
      *      this.blockLimit     0xfff
      *      this.blockTotal     ((this.busLimit + this.blockSize) / this.blockSize) | 0
-     *      this.blockMask      (this.blockTotal - 1)   (ie, 0xff)
+     *      this.blockMask      (this.blockTotal - 1) [ie, 0xff]
      *
      * Note that we choose a blockShift value (and thus a physical memory block size) based on "buswidth":
      *
@@ -120,7 +120,7 @@ function Bus(parmsBus, cpu, dbg)
      * requirements.  Your choices, for the moment, are either to ensure the allocations are performed in
      * order, or to choose smaller blockShift values (at the expense of a generating a larger block array).
      *
-     * However, if PAGEBLOCKS is set, then for a bus width of 32 bits, the block size is fixed at 4Kb.
+     * Note that if PAGEBLOCKS is set, then for a bus width of 32 bits, the block size is fixed at 4Kb.
      */
     this.addrTotal = Math.pow(2, this.nBusWidth);
     this.busLimit = this.busMask = (this.addrTotal - 1) | 0;
@@ -169,6 +169,11 @@ function Bus(parmsBus, cpu, dbg)
         this.cbtDeletions = 0;
         this.ibtLastAlloc = -1;
         this.ibtLastDelete = 0;
+    }
+
+    if (PAGEBLOCKS) {
+        this.addrPD = null;
+        this.aPhysBlocks = null;
     }
 
     this.setReady();
@@ -394,7 +399,9 @@ Bus.prototype.addMemory = function(addr, size, type, controller)
             return this.reportError(1, addr, size);
         }
         block = this.aMemBlocks[iBlock++] = new Memory(addr, sizeBlock, this.blockSize, type, controller);
-        if (DEBUGGER && this.dbg) block.setDebugInfo(this.cpu, this.dbg, addr, this.blockSize);
+        if (DEBUGGER && this.dbg) {
+            block.setDebugger(this.dbg, addr, this.blockSize);
+        }
         size -= sizeBlock;
         addr = addrBlock + this.blockSize;
     }
@@ -478,10 +485,10 @@ Bus.prototype.getA20 = function()
  *
  * On 32-bit bus machines, I've adopted the approach that Compaq took with DeskPro 386 machines,
  * which is to map the 1st Mb to the 2nd Mb whenever A20 is disabled, rather than blindly masking
- * the A20 address bit from all addresses; this is what the DeskPro 386 ROM BIOS requires.
+ * the A20 address bit from all addresses; in fact, this is what the DeskPro 386 ROM BIOS requires.
  *
  * For 24-bit bus machines, we take the same approach that most if not all 80286 systems took, which
- * is simply masking the A20 address bit.
+ * is simply masking the A20 address bit.  A lot of 32-bit machines probably took the same approach.
  *
  * TODO: On machines with a 32-bit bus, look into whether we can eliminate address masking altogether,
  * which seems feasible, provided all incoming addresses are already pre-truncated to 32 bits.  Also,
@@ -579,7 +586,9 @@ Bus.prototype.removeMemory = function(addr, size)
         while (size > 0) {
             addr = iBlock * this.blockSize;
             var block = this.aMemBlocks[iBlock++] = new Memory(addr);
-            if (DEBUGGER && this.dbg) block.setDebugInfo(this.cpu, this.dbg, addr, this.blockSize);
+            if (DEBUGGER && this.dbg) {
+                block.setDebugger(this.dbg, addr, this.blockSize);
+            }
             size -= this.blockSize;
         }
         return true;
@@ -631,13 +640,69 @@ Bus.prototype.setMemoryBlocks = function(addr, size, aBlocks, type)
         if (!block) break;
         if (type !== undefined) {
             var blockNew = new Memory(addr);
-            if (DEBUGGER && this.dbg) blockNew.setDebugInfo(this.cpu, this.dbg, addr, this.blockSize);
+            if (DEBUGGER && this.dbg) {
+                blockNew.setDebugger(this.dbg, addr, this.blockSize);
+            }
             blockNew.clone(block, type);
             block = blockNew;
         }
         this.aMemBlocks[iBlock++] = block;
         size -= this.blockSize;
     }
+};
+
+/**
+ * enablePageBlocks(addrPD)
+ *
+ * Whenever the CPU turns on paging and/or updates CR3, this function is called to leverage the Bus's
+ * memory-mapping abilities and simulate the effects of the CPU's page directory and page table entries.
+ * Whenever the CPU turns paging off, disablePageBlocks() must be called to restore the original physical
+ * memory mapping.
+ *
+ * This also requires that PAGEBLOCKS be true, ensuring that the Bus is preconfigured with 4Kb memory
+ * mapping granularity.
+ *
+ * The first time this function is called, aMemBlocks is stashed in aPhysBlocks, and aMemBlocks is then
+ * reinitialized with special "unpaged" Memory blocks that know how to perform page directory/page table
+ * lookup and replace themselves with special "paged" Memory blocks that reference memory from the
+ * appropriate block in aPhysBlocks.  A parallel array, aMemPaged, keeps track of which blocks have been
+ * "paged", so that whenever CR3 is updated, just those blocks can be "unpaged" again.
+ *
+ * @this {Bus}
+ * @param {number} addrPD is the starting physical address of the CPU's page directory
+ */
+Bus.prototype.enablePageBlocks = function(addrPD)
+{
+    if (!PAGEBLOCKS) {
+        Component.error("PAGEBLOCK support missing");
+        return;
+    }
+    this.addrPD = addrPD;
+    if (!this.aPhysBlocks) {
+        this.aPhysBlocks = this.aMemBlocks;
+        var block = new Memory(null, 0, 0, Memory.TYPE.UNPAGED, null, this);
+        this.aMemBlocks = new Array(this.blockTotal);
+        for (var iBlock = 0; iBlock < this.blockTotal; iBlock++) {
+            this.aMemBlocks[iBlock] = block;
+        }
+    }
+};
+
+/**
+ * mapPageBlock(addr)
+ *
+ * If addr is a valid linear address, then we must obtain the following information:
+ *
+ *      (1) the physical Memory object corresponding to the linear address in addr
+ *      (2) the physical Memory object containing that memory's PTE
+ *      (3) the offset within the preceding physical Memory object of that memory's PTE
+ *
+ * Item (1) allows us to convert an "unpaged" Memory block in to a "paged" Memory block, and the combination of
+ * (2) and (3) allows us to efficiently update the PTE whenever the page is accesssed and/or modified.
+ */
+Bus.prototype.mapPageBlock = function(addr)
+{
+    return null;
 };
 
 /**
@@ -652,7 +717,7 @@ Bus.prototype.setMemoryBlocks = function(addr, size, aBlocks, type)
  */
 Bus.prototype.getByte = function(addr)
 {
-    return this.aMemBlocks[(addr & this.busMask) >>> this.blockShift].readByte(addr & this.blockLimit);
+    return this.aMemBlocks[(addr & this.busMask) >>> this.blockShift].readByte(addr & this.blockLimit, addr);
 };
 
 /**
@@ -666,7 +731,7 @@ Bus.prototype.getByte = function(addr)
  */
 Bus.prototype.getByteDirect = function(addr)
 {
-    return this.aMemBlocks[(addr & this.busMask) >>> this.blockShift].readByteDirect(addr & this.blockLimit);
+    return this.aMemBlocks[(addr & this.busMask) >>> this.blockShift].readByteDirect(addr & this.blockLimit, addr);
 };
 
 /**
@@ -685,9 +750,9 @@ Bus.prototype.getShort = function(addr)
     var off = addr & this.blockLimit;
     var iBlock = (addr & this.busMask) >>> this.blockShift;
     if (off != this.blockLimit) {
-        return this.aMemBlocks[iBlock].readShort(off);
+        return this.aMemBlocks[iBlock].readShort(off, addr);
     }
-    return this.aMemBlocks[iBlock++].readByte(off) | (this.aMemBlocks[iBlock & this.blockMask].readByte(0) << 8);
+    return this.aMemBlocks[iBlock++].readByte(off, addr) | (this.aMemBlocks[iBlock & this.blockMask].readByte(0, addr + 1) << 8);
 };
 
 /**
@@ -704,9 +769,9 @@ Bus.prototype.getShortDirect = function(addr)
     var off = addr & this.blockLimit;
     var iBlock = (addr & this.busMask) >>> this.blockShift;
     if (off != this.blockLimit) {
-        return this.aMemBlocks[iBlock].readShortDirect(off);
+        return this.aMemBlocks[iBlock].readShortDirect(off, addr);
     }
-    return this.aMemBlocks[iBlock++].readByteDirect(off) | (this.aMemBlocks[iBlock & this.blockMask].readByteDirect(0) << 8);
+    return this.aMemBlocks[iBlock++].readByteDirect(off, addr) | (this.aMemBlocks[iBlock & this.blockMask].readByteDirect(0, addr + 1) << 8);
 };
 
 /**
@@ -725,10 +790,10 @@ Bus.prototype.getLong = function(addr)
     var off = addr & this.blockLimit;
     var iBlock = (addr & this.busMask) >>> this.blockShift;
     if (off < this.blockLimit - 2) {
-        return this.aMemBlocks[iBlock].readLong(off);
+        return this.aMemBlocks[iBlock].readLong(off, addr);
     }
     var nShift = (off & 0x3) << 3;
-    return (this.aMemBlocks[iBlock].readLong(off & ~0x3) >>> nShift) | (this.aMemBlocks[(iBlock + 1) & this.blockMask].readLong(0) << (32 - nShift));
+    return (this.aMemBlocks[iBlock].readLong(off & ~0x3, addr) >>> nShift) | (this.aMemBlocks[(iBlock + 1) & this.blockMask].readLong(0, addr + 3) << (32 - nShift));
 };
 
 /**
@@ -745,10 +810,10 @@ Bus.prototype.getLongDirect = function(addr)
     var off = addr & this.blockLimit;
     var iBlock = (addr & this.busMask) >>> this.blockShift;
     if (off < this.blockLimit - 2) {
-        return this.aMemBlocks[iBlock].readLongDirect(off);
+        return this.aMemBlocks[iBlock].readLongDirect(off, addr);
     }
     var nShift = (off & 0x3) << 3;
-    return (this.aMemBlocks[iBlock].readLongDirect(off & ~0x3) >>> nShift) | (this.aMemBlocks[(iBlock + 1) & this.blockMask].readLongDirect(0) << (32 - nShift));
+    return (this.aMemBlocks[iBlock].readLongDirect(off & ~0x3, addr) >>> nShift) | (this.aMemBlocks[(iBlock + 1) & this.blockMask].readLongDirect(0, addr + 3) << (32 - nShift));
 };
 
 /**
@@ -763,7 +828,7 @@ Bus.prototype.getLongDirect = function(addr)
  */
 Bus.prototype.setByte = function(addr, b)
 {
-    this.aMemBlocks[(addr & this.busMask) >>> this.blockShift].writeByte(addr & this.blockLimit, b & 0xff);
+    this.aMemBlocks[(addr & this.busMask) >>> this.blockShift].writeByte(addr & this.blockLimit, b & 0xff, addr);
 };
 
 /**
@@ -778,7 +843,7 @@ Bus.prototype.setByte = function(addr, b)
  */
 Bus.prototype.setByteDirect = function(addr, b)
 {
-    this.aMemBlocks[(addr & this.busMask) >>> this.blockShift].writeByteDirect(addr & this.blockLimit, b & 0xff);
+    this.aMemBlocks[(addr & this.busMask) >>> this.blockShift].writeByteDirect(addr & this.blockLimit, b & 0xff, addr);
 };
 
 /**
@@ -797,11 +862,11 @@ Bus.prototype.setShort = function(addr, w)
     var off = addr & this.blockLimit;
     var iBlock = (addr & this.busMask) >>> this.blockShift;
     if (off != this.blockLimit) {
-        this.aMemBlocks[iBlock].writeShort(off, w & 0xffff);
+        this.aMemBlocks[iBlock].writeShort(off, w & 0xffff, addr);
         return;
     }
-    this.aMemBlocks[iBlock++].writeByte(off, w & 0xff);
-    this.aMemBlocks[iBlock & this.blockMask].writeByte(0, (w >> 8) & 0xff);
+    this.aMemBlocks[iBlock++].writeByte(off, w & 0xff, addr);
+    this.aMemBlocks[iBlock & this.blockMask].writeByte(0, (w >> 8) & 0xff, addr + 1);
 };
 
 /**
@@ -819,11 +884,11 @@ Bus.prototype.setShortDirect = function(addr, w)
     var off = addr & this.blockLimit;
     var iBlock = (addr & this.busMask) >>> this.blockShift;
     if (off != this.blockLimit) {
-        this.aMemBlocks[iBlock].writeShortDirect(off, w & 0xffff);
+        this.aMemBlocks[iBlock].writeShortDirect(off, w & 0xffff, addr);
         return;
     }
-    this.aMemBlocks[iBlock++].writeByteDirect(off, w & 0xff);
-    this.aMemBlocks[iBlock & this.blockMask].writeByteDirect(0, (w >> 8) & 0xff);
+    this.aMemBlocks[iBlock++].writeByteDirect(off, w & 0xff, addr);
+    this.aMemBlocks[iBlock & this.blockMask].writeByteDirect(0, (w >> 8) & 0xff, addr + 1);
 };
 
 /**
@@ -847,11 +912,12 @@ Bus.prototype.setLong = function(addr, l)
     }
     var lPrev, nShift = (off & 0x3) << 3;
     off &= ~0x3;
-    lPrev = this.aMemBlocks[iBlock].readLong(off);
-    this.aMemBlocks[iBlock].writeLong(off, (lPrev & ~((0xffffffff|0) << nShift)) | (l << nShift));
+    lPrev = this.aMemBlocks[iBlock].readLong(off, addr);
+    this.aMemBlocks[iBlock].writeLong(off, (lPrev & ~((0xffffffff|0) << nShift)) | (l << nShift), addr);
     iBlock = (iBlock + 1) & this.blockMask;
-    lPrev = this.aMemBlocks[iBlock].readLong(0);
-    this.aMemBlocks[iBlock].writeLong(0, (lPrev & ((0xffffffff|0) << nShift)) | (l >>> (32 - nShift)));
+    addr += 3;
+    lPrev = this.aMemBlocks[iBlock].readLong(0, addr);
+    this.aMemBlocks[iBlock].writeLong(0, (lPrev & ((0xffffffff|0) << nShift)) | (l >>> (32 - nShift)), addr);
 };
 
 /**
@@ -869,16 +935,17 @@ Bus.prototype.setLongDirect = function(addr, l)
     var off = addr & this.blockLimit;
     var iBlock = (addr & this.busMask) >>> this.blockShift;
     if (off < this.blockLimit - 2) {
-        this.aMemBlocks[iBlock].writeLongDirect(off, l);
+        this.aMemBlocks[iBlock].writeLongDirect(off, l, addr);
         return;
     }
     var lPrev, nShift = (off & 0x3) << 3;
     off &= ~0x3;
-    lPrev = this.aMemBlocks[iBlock].readLongDirect(off);
-    this.aMemBlocks[iBlock].writeLongDirect(off, (lPrev & ~((0xffffffff|0) << nShift)) | (l << nShift));
+    lPrev = this.aMemBlocks[iBlock].readLongDirect(off, addr);
+    this.aMemBlocks[iBlock].writeLongDirect(off, (lPrev & ~((0xffffffff|0) << nShift)) | (l << nShift), addr);
     iBlock = (iBlock + 1) & this.blockMask;
-    lPrev = this.aMemBlocks[iBlock].readLongDirect(0);
-    this.aMemBlocks[iBlock].writeLongDirect(0, (lPrev & ((0xffffffff|0) << nShift)) | (l >>> (32 - nShift)));
+    addr += 3;
+    lPrev = this.aMemBlocks[iBlock].readLongDirect(0, addr);
+    this.aMemBlocks[iBlock].writeLongDirect(0, (lPrev & ((0xffffffff|0) << nShift)) | (l >>> (32 - nShift)), addr);
 };
 
 /**

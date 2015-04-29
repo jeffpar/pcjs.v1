@@ -814,7 +814,7 @@ HDC.prototype.initDrive = function(iDrive, drive, driveConfig, data, fHard)
 
     /*
      * errorCode could be an HDC global, but in order to insulate HDC state from the operation of various functions
-     * that operate on drive objects (eg, readByte and writeByte), I've made it a per-drive variable.  This choice may
+     * that operate on drive objects (eg, readData and writeData), I've made it a per-drive variable.  This choice may
      * be contrary to how the actual hardware works, but I prefer this approach, as long as it doesn't expose any
      * incompatibilities that any software actually cares about.
      */
@@ -1039,7 +1039,7 @@ HDC.prototype.verifyDrive = function(drive, type)
  *
  * Also note that in an actual HDC request, drive.nBytes is initialized to the size of a single sector; the extent
  * of the entire transfer is actually determined by a count that has been pre-loaded into the DMA controller.  The HDC
- * isn't aware of the extent of the transfer, so in the case of a read request, all readByte() can do is return bytes
+ * isn't aware of the extent of the transfer, so in the case of a read request, all readData() can do is return bytes
  * until the current track (or, in the case of a multi-track request, the current cylinder) has been exhausted.
  *
  * Since seekDrive() is for use with non-DMA requests, we use nBytes to specify the length of the entire transfer.
@@ -1082,7 +1082,7 @@ HDC.prototype.seekDrive = function(drive, iSector, nSectors)
                 drive.errorCode = HDC.XTC.DATA.ERR.NONE;
                 /*
                  * At this point, we've finished simulating what an HDC.XTC.DATA.CMD.READ_DATA command would have performed,
-                 * up through doDMARead().  Now it's the caller responsibility to call readByte(), like the DMA Controller would.
+                 * up through doDMARead().  Now it's the caller responsibility to call readData(), like the DMA Controller would.
                  */
                 return true;
             }
@@ -1389,13 +1389,13 @@ HDC.prototype.inATCData = function(port, addrFrom)
 
     if (this.drive) {
         /*
-         * We use the synchronous form of readByte() at this point because we have no choice; an I/O instruction
+         * We use the synchronous form of readData() at this point because we have no choice; an I/O instruction
          * has just occurred and cannot be delayed.  The good news is that doATCommand() should have already primed
          * the pump; all we can do is assert that the pump has something in it.  If bIn is inexplicably negative,
          * well, then the caller will get 0xff.
          */
         var hdc = this;
-        bIn = this.readByte(this.drive, function(b, fAsync, obj, off) {
+        bIn = this.readData(this.drive, function(b, fAsync, obj, off) {
             hdc.assert(!fAsync);
             if (BACKTRACK) {
                 if (!off && obj.file && hdc.messageEnabled(Messages.DISK)) {
@@ -1440,7 +1440,7 @@ HDC.prototype.inATCData = function(port, addrFrom)
              */
             if (this.drive.nBytes >= this.drive.cbSector) {
                 hdc.regStatus = HDC.ATC.STATUS.BUSY | HDC.ATC.STATUS.DATA_REQ;
-                this.readByte(this.drive, function(b, fAsync) {
+                this.readData(this.drive, function(b, fAsync) {
                     if (b >= 0) {
                         hdc.setATCIRR();
                         hdc.regStatus = HDC.ATC.STATUS.READY | HDC.ATC.STATUS.SEEK_OK;
@@ -1475,7 +1475,7 @@ HDC.prototype.outATCData = function(port, bOut, addrFrom)
 {
     if (this.drive) {
         if (this.drive.nBytes >= this.drive.cbSector) {
-            if (this.writeByte(this.drive, bOut) < 0) {
+            if (this.writeData(this.drive, bOut) < 0) {
                 /*
                  * TODO: It would be nice to be a bit more specific about the error (if any) that just occurred.
                  * Consult drive.errorCode (it uses older XTC error codes, but mapping those codes should be trivial).
@@ -1833,11 +1833,11 @@ HDC.prototype.doATC = function()
         /*
          * Since the ATC doesn't use DMA, we must now set some additional Drive state for the benefit of any
          * follow-up I/O instructions.  For example, any subsequent inATCData() and outATCData() calls need to
-         * know which drive to talk to ("this.drive"), to issue their own readByte() and writeByte() calls.
+         * know which drive to talk to ("this.drive"), to issue their own readData() and writeData() calls.
          *
          * The XTC didn't need this, because it used doDMARead(), doDMAWrite(), doDMAFormat() helper functions,
          * which reset the current drive's "sector" and "errorCode" properties themselves and then used DMA
-         * functions that delivered drive data with direct calls to readByte() and writeByte().
+         * functions that delivered drive data with direct calls to readData() and writeData().
          */
         drive.sector = null;
         drive.ibSector = 0;
@@ -1856,7 +1856,7 @@ HDC.prototype.doATC = function()
             this.printMessage("HDC.doRead(" + iDrive + ',' + drive.wCylinder + ':' + drive.bHead + ':' + drive.bSector + ',' + nSectors + ")", true);
         }
         /*
-         * We're using a call to readByte() that disables auto-increment, so that once we've got the first
+         * We're using a call to readData() that disables auto-increment, so that once we've got the first
          * byte of the next sector, we can signal an interrupt without also consuming the first byte, allowing
          * inATCData() to begin with that byte.
          *
@@ -1865,7 +1865,7 @@ HDC.prototype.doATC = function()
          */
         hdc.regStatus = HDC.ATC.STATUS.BUSY | HDC.ATC.STATUS.DATA_REQ;
 
-        this.readByte(drive, function(b, fAsync) {
+        this.readData(drive, function(b, fAsync) {
             if (b >= 0 && hdc.chipset) {
                 hdc.setATCIRR();
                 hdc.regStatus = HDC.ATC.STATUS.READY | HDC.ATC.STATUS.SEEK_OK;
@@ -2211,7 +2211,7 @@ HDC.prototype.pushResult = function(bResult)
 HDC.prototype.dmaRead = function(drive, b, done)
 {
     if (b === undefined || b < 0) {
-        this.readByte(drive, done);
+        this.readData(drive, done);
         return;
     }
     /*
@@ -2232,7 +2232,7 @@ HDC.prototype.dmaRead = function(drive, b, done)
 HDC.prototype.dmaWrite = function(drive, b)
 {
     if (b !== undefined && b >= 0)
-        return this.writeByte(drive, b);
+        return this.writeData(drive, b);
     /*
      * The DMA controller should be GIVING us data, not ASKING for data; this suggests an internal DMA miscommunication
      */
@@ -2298,7 +2298,7 @@ HDC.prototype.doDMARead = function(drive, done)
         if (this.chipset) {
             /*
              * We need to reverse the original logic, and default to success unless/until an actual error occurs;
-             * otherwise dmaRead()/readByte() will bail on us.  The original approach used to work because requestDMA()
+             * otherwise dmaRead()/readData() will bail on us.  The original approach used to work because requestDMA()
              * would immediately call us back with fComplete set to true EVEN if the DMA channel was not yet unmasked;
              * now the callback is deferred until the DMA channel has been unmasked and the DMA request has finished.
              */
@@ -2342,7 +2342,7 @@ HDC.prototype.doDMAWrite = function(drive, done)
         if (this.chipset) {
             /*
              * We need to reverse the original logic, and default to success unless/until an actual error occurs;
-             * otherwise dmaWrite()/writeByte() will bail on us.  The original approach would work because requestDMA()
+             * otherwise dmaWrite()/writeData() will bail on us.  The original approach would work because requestDMA()
              * would immediately call us back with fComplete set to true EVEN if the DMA channel was not yet unmasked;
              * now the callback is deferred until the DMA channel has been unmasked and the DMA request has finished.
              */
@@ -2474,7 +2474,7 @@ HDC.prototype.doDMAFormat = function(drive, done)
  */
 
 /**
- * readByte(drive, done)
+ * readData(drive, done)
  *
  * The following drive variable properties must have been setup prior to our first call:
  *
@@ -2483,11 +2483,11 @@ HDC.prototype.doDMAFormat = function(drive, done)
  *      drive.bSector
  *      drive.sector (initialized to null)
  *
- * On the first readByte() request, since drive.sector will be null, we ask the Disk object to look
+ * On the first readData() request, since drive.sector will be null, we ask the Disk object to look
  * up the first sector of the request.  We then ask the Disk for bytes from that sector until the sector
  * is exhausted, and then we look up the next sector and continue the process.
  *
- * NOTE: Since the HDC isn't aware of the extent of the transfer, all readByte() can do is return bytes
+ * NOTE: Since the HDC isn't aware of the extent of the transfer, all readData() can do is return bytes
  * until the current track (or, in the case of a multi-track request, the current cylinder) has been exhausted.
  *
  * @this {HDC}
@@ -2496,7 +2496,7 @@ HDC.prototype.doDMAFormat = function(drive, done)
  * @param {boolean} [fAutoInc] (default is true to auto-increment)
  * @return {number} the requested byte, or -1 if unavailable
  */
-HDC.prototype.readByte = function(drive, done, fAutoInc)
+HDC.prototype.readData = function(drive, done, fAutoInc)
 {
     var b = -1;
     var obj = null, off = 0;    // these variables are purely for BACKTRACK purposes
@@ -2535,7 +2535,7 @@ HDC.prototype.readByte = function(drive, done, fAutoInc)
                     off = drive.ibSector = 0;
                     /*
                      * We "pre-advance" bSector et al now, instead of waiting to advance it right before the seek().
-                     * This allows the initial call to readByte() to perform a seek without triggering an unwanted advance.
+                     * This allows the initial call to readData() to perform a seek without triggering an unwanted advance.
                      */
                     hdc.advanceSector(drive);
                     b = drive.disk.read(drive.sector, drive.ibSector);
@@ -2554,7 +2554,7 @@ HDC.prototype.readByte = function(drive, done, fAutoInc)
 };
 
 /**
- * writeByte(drive, b)
+ * writeData(drive, b)
  *
  * The following drive variable properties must have been setup prior to our first call:
  *
@@ -2563,11 +2563,11 @@ HDC.prototype.readByte = function(drive, done, fAutoInc)
  *      drive.bSector
  *      drive.sector (initialized to null)
  *
- * On the first writeByte() request, since drive.sector will be null, we ask the Disk object to look
+ * On the first writeData() request, since drive.sector will be null, we ask the Disk object to look
  * up the first sector of the request.  We then send the Disk bytes for that sector until the sector
  * is full, and then we look up the next sector and continue the process.
  *
- * NOTE: Since the HDC isn't aware of the extent of the transfer, all writeByte() can do is accept bytes
+ * NOTE: Since the HDC isn't aware of the extent of the transfer, all writeData() can do is accept bytes
  * until the current track (or, in the case of a multi-track request, the current cylinder) has been exhausted.
  *
  * @this {HDC}
@@ -2575,7 +2575,7 @@ HDC.prototype.readByte = function(drive, done, fAutoInc)
  * @param {number} b containing next byte to write
  * @return {number} (b unchanged; return -1 if command should be terminated)
  */
-HDC.prototype.writeByte = function(drive, b)
+HDC.prototype.writeData = function(drive, b)
 {
     if (drive.errorCode) return -1;
     do {
@@ -2603,7 +2603,7 @@ HDC.prototype.writeByte = function(drive, b)
         drive.ibSector = 0;
         /*
          * We "pre-advance" bSector et al now, instead of waiting to advance it right before the seek().
-         * This allows the initial call to writeByte() to perform a seek without triggering an unwanted advance.
+         * This allows the initial call to writeData() to perform a seek without triggering an unwanted advance.
          */
         this.advanceSector(drive);
     } while (true);
@@ -2691,7 +2691,7 @@ HDC.prototype.writeFormat = function(drive, b)
         }
 
         for (var i = 0; i < drive.nBytes; i++) {
-            if (this.writeByte(drive, drive.bFiller) < 0) {
+            if (this.writeData(drive, drive.bFiller) < 0) {
                 return -1;
             }
         }

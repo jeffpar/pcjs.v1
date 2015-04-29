@@ -30,22 +30,6 @@
  * any copyright as to their contents.
  */
 
-/*
- * Historical Notes
- *
- * To minimize possible future confusion with regard to the 80386's page tables
- * and page-based virtual memory, the original Page component was converted into
- * this new Memory component, which provides callers with "blocks" of physical
- * memory rather than "pages".  Callers have been updated to refer to their Memory
- * allocations as "blocks" as well.
- *
- * Note that the Bus component continues to specify a default block size of 4Kb (for
- * the default "buswidth" of 20), but only because that seems to strike a good balance
- * between data structure overhead and the memory granularity requirements of most
- * system components.  For larger bus widths, larger physical block sizes may be used;
- * see the Bus constructor for details.
- */
-
 "use strict";
 
 if (typeof module !== 'undefined') {
@@ -104,13 +88,14 @@ var littleEndian = (TYPEDARRAYS? (function() {
  * is available).
  *
  * @constructor
- * @param {number} [addr] of lowest used address in block
+ * @param {number|null} [addr] of lowest used address in block
  * @param {number} [used] portion of block in bytes (0 for none); must be a multiple of 4
  * @param {number} [size] of block's buffer in bytes (0 for none); must be a multiple of 4
  * @param {number} [type] is one of the Memory.TYPE constants (default is Memory.TYPE.NONE)
  * @param {Object} [controller] is an optional memory controller component
+ * @param {Bus} [bus]
  */
-function Memory(addr, used, size, type, controller)
+function Memory(addr, used, size, type, controller, bus)
 {
     var i;
     this.id = (Memory.idBlock += 2);
@@ -122,6 +107,7 @@ function Memory(addr, used, size, type, controller)
     this.type = type || Memory.TYPE.NONE;
     this.fReadOnly = (type == Memory.TYPE.ROM);
     this.controller = null;
+    this.bus = bus;
     this.fDirty = this.fDirtyEver = false;
 
     if (BACKTRACK) {
@@ -142,7 +128,7 @@ function Memory(addr, used, size, type, controller)
 
     /*
      * For empty memory blocks, all we need to do is ensure all access functions
-     * are mapped to "none" handlers.
+     * are mapped to "none" handlers (or "unpaged" handlers if paging is enabled).
      */
     if (!size) {
         this.setAccess();
@@ -168,7 +154,7 @@ function Memory(addr, used, size, type, controller)
      * know how to deal with this simple 1-1 mapping of addresses to bytes and words.
      *
      * TODO: Consider initializing the memory array to random (or pseudo-random) values in DEBUG
-     * mode; pseudo-random might be best, because if it uncovers a bug, the bug should be reproducible.
+     * mode; pseudo-random might be best, to help make any bugs reproducible.
      */
     if (TYPEDARRAYS) {
         this.buffer = new ArrayBuffer(size);
@@ -220,6 +206,7 @@ Memory.TYPE = {
     ROM:    2,
     VIDEO:  3,
     CTRL:   4,
+    UNPAGED:5,
     NAMES:  ["NONE", "RAM", "ROM", "VIDEO", "H/W"],
     COLORS: ["black", "blue", "green", "cyan"]
 };
@@ -367,12 +354,14 @@ Memory.prototype = {
     /**
      * setAccess(afn)
      *
+     * If no afn is specified, a default is selected based on the Memory type.
+     *
      * @this {Memory}
      * @param {Array.<function()>} [afn]
      * @param {boolean} [fDirect]
      */
     setAccess: function(afn, fDirect) {
-        if (!afn) afn = [];
+        afn = afn || (this.type == Memory.TYPE.UNPAGED? Memory.afnUnpaged : Memory.afnNone);
         if (fDirect === undefined) fDirect = true;      // TODO: Verify that this is desired default behavior
         this.setReadAccess(afn, fDirect);
         this.setWriteAccess(afn, fDirect);
@@ -432,22 +421,30 @@ Memory.prototype = {
         this.writeLong = this.fReadOnly? this.writeNone : this.writeLongDirect;
     },
     /**
-     * setDebugInfo(cpu, dbg, addr, size)
+     * setDebugger(dbg, addr, size)
      *
      * @this {Memory}
-     * @param {X86CPU|Component} cpu
      * @param {Debugger|Component} dbg
      * @param {number} addr of block
      * @param {number} size of block
      */
-    setDebugInfo: function(cpu, dbg, addr, size) {
+    setDebugger: function(dbg, addr, size) {
         if (DEBUGGER) {
-            this.cpu = cpu;
             this.dbg = dbg;
             this.cReadBreakpoints = this.cWriteBreakpoints = 0;
             Component.assert(this.dbg);
             this.dbg.redoBreakpoints(addr, size);
         }
+    },
+    /**
+     * setPageBlock(addr)
+     *
+     * @this {Memory}
+     * @param {number} addr
+     * @return {Memory}
+     */
+    setPageBlock: function(addr) {
+        return this.bus.mapPageBlock(addr);
     },
     /**
      * addBreakpoint(off, fWrite)
@@ -514,85 +511,86 @@ Memory.prototype = {
      *
      * @this {Memory}
      * @param {number} off
+     * @param {number} addr
      * @return {number}
      */
-    readNone: function readNone(off) {
+    readNone: function readNone(off, addr) {
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.MEM) /* && !off */) {
-            this.dbg.message("attempt to read invalid block %" + str.toHex(this.addr) + " from " + this.dbg.hexOffset(this.cpu.getIP(), this.cpu.getCS()));
+            this.dbg.message("attempt to read invalid block %" + str.toHex(this.addr), true);
         }
         return 0xff;
     },
     /**
-     * writeNone(off, v)
+     * writeNone(off, v, addr)
      *
      * @this {Memory}
      * @param {number} off
      * @param {number} v (could be either a byte or word value, since we use the same handler for both kinds of accesses)
+     * @param {number} addr
      */
-    writeNone: function writeNone(off, v)
-    {
+    writeNone: function writeNone(off, v, addr) {
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.MEM) /* && !off */) {
             this.dbg.message("attempt to write " + str.toHexWord(v) + " to invalid block %" + str.toHex(this.addr), true);
         }
     },
     /**
-     * readShortDefault(off)
+     * readShortDefault(off, addr)
      *
      * @this {Memory}
      * @param {number} off
+     * @param {number} addr
      * @return {number}
      */
-    readShortDefault: function readShortDefault(off)
-    {
-        return this.readByteDirect(off) | (this.readByteDirect(off + 1) << 8);
+    readShortDefault: function readShortDefault(off, addr) {
+        return this.readByteDirect(off, addr) | (this.readByteDirect(off + 1, addr) << 8);
     },
     /**
-     * readLongDefault(off)
+     * readLongDefault(off, addr)
      *
      * @this {Memory}
      * @param {number} off
+     * @param {number} addr
      * @return {number}
      */
-    readLongDefault: function readLongDefault(off)
-    {
-        return this.readByteDirect(off) | (this.readByteDirect(off + 1) << 8) | (this.readByteDirect(off + 2) << 16) | (this.readByteDirect(off + 3) << 24);
+    readLongDefault: function readLongDefault(off, addr) {
+        return this.readByteDirect(off, addr) | (this.readByteDirect(off + 1, addr) << 8) | (this.readByteDirect(off + 2, addr) << 16) | (this.readByteDirect(off + 3, addr) << 24);
     },
     /**
-     * writeShortDefault(off, w)
+     * writeShortDefault(off, w, addr)
      *
      * @this {Memory}
      * @param {number} off
      * @param {number} w
+     * @param {number} addr
      */
-    writeShortDefault: function writeShortDefault(off, w)
-    {
+    writeShortDefault: function writeShortDefault(off, w, addr) {
         Component.assert(!(w & ~0xffff));
         this.writeByteDirect(off, w & 0xff);
         this.writeByteDirect(off + 1, w >> 8);
     },
     /**
-     * writeLongDefault(off, w)
+     * writeLongDefault(off, w, addr)
      *
      * @this {Memory}
      * @param {number} off
      * @param {number} w
+     * @param {number} addr
      */
-    writeLongDefault: function writeLongDefault(off, w)
-    {
+    writeLongDefault: function writeLongDefault(off, w, addr) {
         this.writeByteDirect(off, w & 0xff);
         this.writeByteDirect(off + 1, (w >> 8) & 0xff);
         this.writeByteDirect(off + 2, (w >> 16) & 0xff);
         this.writeByteDirect(off + 3, (w >>> 24));
     },
     /**
-     * readByteMemory(off)
+     * readByteMemory(off, addr)
      *
      * @this {Memory}
      * @param {number} off
+     * @param {number} addr
      * @return {number}
      */
-    readByteMemory: function readByteMemory(off)
-    {
+    readByteMemory: function readByteMemory(off, addr) {
         Component.assert(off >= 0 && off < this.size);
         if (FATARRAYS) {
             return this.ab[off];
@@ -600,14 +598,14 @@ Memory.prototype = {
         return ((this.adw[off >> 2] >>> ((off & 0x3) << 3)) & 0xff);
     },
     /**
-     * readShortMemory(off)
+     * readShortMemory(off, addr)
      *
      * @this {Memory}
      * @param {number} off
+     * @param {number} addr
      * @return {number}
      */
-    readShortMemory: function readShortMemory(off)
-    {
+    readShortMemory: function readShortMemory(off, addr) {
         Component.assert(off >= 0 && off < this.size - 1);
         if (FATARRAYS) {
             return this.ab[off] | (this.ab[off + 1] << 8);
@@ -624,14 +622,14 @@ Memory.prototype = {
         return w;
     },
     /**
-     * readLongMemory(off)
+     * readLongMemory(off, addr)
      *
      * @this {Memory}
      * @param {number} off
+     * @param {number} addr
      * @return {number}
      */
-    readLongMemory: function readLongMemory(off)
-    {
+    readLongMemory: function readLongMemory(off, addr) {
         Component.assert(off >= 0 && off < this.size - 3);
         if (FATARRAYS) {
             return this.ab[off] | (this.ab[off + 1] << 8) | (this.ab[off + 2] << 16) | (this.ab[off + 3] << 24);
@@ -646,14 +644,14 @@ Memory.prototype = {
         return l;
     },
     /**
-     * writeByteMemory(off, b)
+     * writeByteMemory(off, b, addr)
      *
      * @this {Memory}
      * @param {number} off
      * @param {number} b
+     * @param {number} addr
      */
-    writeByteMemory: function writeByteMemory(off, b)
-    {
+    writeByteMemory: function writeByteMemory(off, b, addr) {
         Component.assert(off >= 0 && off < this.size && (b & 0xff) == b);
         if (FATARRAYS) {
             this.ab[off] = b;
@@ -665,14 +663,14 @@ Memory.prototype = {
         this.fDirty = true;
     },
     /**
-     * writeShortMemory(off, w)
+     * writeShortMemory(off, w, addr)
      *
      * @this {Memory}
      * @param {number} off
      * @param {number} w
+     * @param {number} addr
      */
-    writeShortMemory: function writeShortMemory(off, w)
-    {
+    writeShortMemory: function writeShortMemory(off, w, addr) {
         Component.assert(off >= 0 && off < this.size - 1 && (w & 0xffff) == w);
         if (FATARRAYS) {
             this.ab[off] = (w & 0xff);
@@ -696,14 +694,14 @@ Memory.prototype = {
         this.fDirty = true;
     },
     /**
-     * writeLongMemory(off, l)
+     * writeLongMemory(off, l, addr)
      *
      * @this {Memory}
      * @param {number} off
      * @param {number} l
+     * @param {number} addr
      */
-    writeLongMemory: function writeLongMemory(off, l)
-    {
+    writeLongMemory: function writeLongMemory(off, l, addr) {
         Component.assert(off >= 0 && off < this.size - 3);
         if (FATARRAYS) {
             this.ab[off] = (l & 0xff);
@@ -730,85 +728,85 @@ Memory.prototype = {
         this.fDirty = true;
     },
     /**
-     * readByteChecked(off)
+     * readByteChecked(off, addr)
      *
      * @this {Memory}
      * @param {number} off
+     * @param {number} addr
      * @return {number}
      */
-    readByteChecked: function readByteChecked(off)
-    {
-        if (DEBUGGER && this.dbg) this.dbg.checkMemoryRead(this.addr + off);
-        return this.readByteDirect(off);
+    readByteChecked: function readByteChecked(off, addr) {
+        if (DEBUGGER && this.dbg) this.dbg.checkMemoryRead(addr);
+        return this.readByteDirect(off, addr);
     },
     /**
-     * readShortChecked(off)
+     * readShortChecked(off, addr)
      *
      * @this {Memory}
      * @param {number} off
+     * @param {number} addr
      * @return {number}
      */
-    readShortChecked: function readShortChecked(off)
-    {
+    readShortChecked: function readShortChecked(off, addr) {
         if (DEBUGGER && this.dbg) {
-            this.dbg.checkMemoryRead(this.addr + off) ||
-            this.dbg.checkMemoryRead(this.addr + off + 1);
+            this.dbg.checkMemoryRead(addr) ||
+            this.dbg.checkMemoryRead(addr + 1);
         }
-        return this.readShortDirect(off);
+        return this.readShortDirect(off, addr);
     },
     /**
-     * readLongChecked(off)
+     * readLongChecked(off, addr)
      *
      * @this {Memory}
      * @param {number} off
+     * @param {number} addr
      * @return {number}
      */
-    readLongChecked: function readLongChecked(off)
-    {
+    readLongChecked: function readLongChecked(off, addr) {
         if (DEBUGGER && this.dbg) {
-            this.dbg.checkMemoryRead(this.addr + off) ||
-            this.dbg.checkMemoryRead(this.addr + off + 1) ||
-            this.dbg.checkMemoryRead(this.addr + off + 2) ||
-            this.dbg.checkMemoryRead(this.addr + off + 3);
+            this.dbg.checkMemoryRead(addr) ||
+            this.dbg.checkMemoryRead(addr + 1) ||
+            this.dbg.checkMemoryRead(addr + 2) ||
+            this.dbg.checkMemoryRead(addr + 3);
         }
-        return this.readLongDirect(off);
+        return this.readLongDirect(off, addr);
     },
     /**
-     * writeByteChecked(off, b)
+     * writeByteChecked(off, b, addr)
      *
      * @this {Memory}
      * @param {number} off
+     * @param {number} addr
      * @param {number} b
      */
-    writeByteChecked: function writeByteChecked(off, b)
-    {
-        if (DEBUGGER && this.dbg) this.dbg.checkMemoryWrite(this.addr + off);
-        this.writeByteDirect(off, b);
+    writeByteChecked: function writeByteChecked(off, b, addr) {
+        if (DEBUGGER && this.dbg) this.dbg.checkMemoryWrite(addr);
+        this.writeByteDirect(off, b, addr);
     },
     /**
-     * writeShortChecked(off, w)
+     * writeShortChecked(off, w, addr)
      *
      * @this {Memory}
      * @param {number} off
+     * @param {number} addr
      * @param {number} w
      */
-    writeShortChecked: function writeShortChecked(off, w)
-    {
+    writeShortChecked: function writeShortChecked(off, w, addr) {
         if (DEBUGGER && this.dbg) {
-            this.dbg.checkMemoryWrite(this.addr + off) ||
-            this.dbg.checkMemoryWrite(this.addr + off + 1);
+            this.dbg.checkMemoryWrite(addr) ||
+            this.dbg.checkMemoryWrite(addr + 1);
         }
-        this.writeShortDirect(off, w);
+        this.writeShortDirect(off, w, addr);
     },
     /**
-     * writeLongChecked(off, l)
+     * writeLongChecked(off, l, addr)
      *
      * @this {Memory}
      * @param {number} off
      * @param {number} l
+     * @param {number} addr
      */
-    writeLongChecked: function writeLongChecked(off, l)
-    {
+    writeLongChecked: function writeLongChecked(off, l, addr) {
         if (DEBUGGER && this.dbg) {
             this.dbg.checkMemoryWrite(this.addr + off) ||
             this.dbg.checkMemoryWrite(this.addr + off + 1) ||
@@ -818,50 +816,116 @@ Memory.prototype = {
         this.writeLongDirect(off, l);
     },
     /**
-     * readByteBigEndian(off)
+     * readByteUnpaged(off, addr)
      *
      * @this {Memory}
      * @param {number} off
+     * @param {number} addr
      * @return {number}
      */
-    readByteBigEndian: function readByteBigEndian(off)
-    {
+    readByteUnpaged: function readByteUnpaged(off, addr) {
+        return this.setPageBlock(addr).readByte(off, addr);
+    },
+    /**
+     * readShortUnpaged(off, addr)
+     *
+     * @this {Memory}
+     * @param {number} off
+     * @param {number} addr
+     * @return {number}
+     */
+    readShortUnpaged: function readShortUnpaged(off, addr) {
+        return this.setPageBlock(addr).readShort(off, addr);
+    },
+    /**
+     * readLongUnpaged(off, addr)
+     *
+     * @this {Memory}
+     * @param {number} off
+     * @param {number} addr
+     * @return {number}
+     */
+    readLongUnpaged: function readLongUnpaged(off, addr) {
+        return this.setPageBlock(addr).readLong(off, addr);
+    },
+    /**
+     * writeByteUnpaged(off, b, addr)
+     *
+     * @this {Memory}
+     * @param {number} off
+     * @param {number} b
+     * @param {number} addr
+     */
+    writeByteUnpaged: function writeByteUnpaged(off, b, addr) {
+        this.setPageBlock(addr).writeByte(off, b, addr);
+    },
+    /**
+     * writeShortUnpaged(off, w, addr)
+     *
+     * @this {Memory}
+     * @param {number} off
+     * @param {number} w
+     * @param {number} addr
+     */
+    writeShortUnpaged: function writeShortUnpaged(off, w, addr) {
+        this.setPageBlock(addr).writeShort(off, w, addr);
+    },
+    /**
+     * writeLongUnpaged(off, l, addr)
+     *
+     * @this {Memory}
+     * @param {number} off
+     * @param {number} l
+     * @param {number} addr
+     */
+    writeLongUnpaged: function writeLongUnpaged(off, l, addr) {
+        this.setPageBlock(addr).writeLong(off, l, addr);
+    },
+    /**
+     * readByteBigEndian(off, addr)
+     *
+     * @this {Memory}
+     * @param {number} off
+     * @param {number} addr
+     * @return {number}
+     */
+    readByteBigEndian: function readByteBigEndian(off, addr) {
         Component.assert(off >= 0 && off < this.size);
         return this.ab[off];
     },
     /**
-     * readByteLittleEndian(off)
+     * readByteLittleEndian(off, addr)
      *
      * @this {Memory}
      * @param {number} off
+     * @param {number} addr
      * @return {number}
      */
-    readByteLittleEndian: function readByteLittleEndian(off)
-    {
+    readByteLittleEndian: function readByteLittleEndian(off, addr) {
         Component.assert(off >= 0 && off < this.size);
         return this.ab[off];
     },
     /**
-     * readShortBigEndian(off)
+     * readShortBigEndian(off, addr)
      *
      * @this {Memory}
      * @param {number} off
+     * @param {number} addr
      * @return {number}
      */
-    readShortBigEndian: function readShortBigEndian(off)
-    {
+    readShortBigEndian: function readShortBigEndian(off, addr) {
         Component.assert(off >= 0 && off < this.size - 1);
         return this.dv.getUint16(off, true);
     },
     /**
-     * readShortLittleEndian(off)
+     * readShortLittleEndian(off, addr)
      *
      * @this {Memory}
      * @param {number} off
+     * @param {number} addr
      * @return {number}
      */
-    readShortLittleEndian: function readShortLittleEndian(off)
-    {
+    readShortLittleEndian: function readShortLittleEndian(off, addr) {
         Component.assert(off >= 0 && off < this.size - 1);
         /*
          * TODO: It remains to be seen if there's any advantage to checking the offset
@@ -871,26 +935,26 @@ Memory.prototype = {
         return (off & 0x1)? (this.ab[off] | (this.ab[off+1] << 8)) : this.aw[off >> 1];
     },
     /**
-     * readLongBigEndian(off)
+     * readLongBigEndian(off, addr)
      *
      * @this {Memory}
      * @param {number} off
+     * @param {number} addr
      * @return {number}
      */
-    readLongBigEndian: function readLongBigEndian(off)
-    {
+    readLongBigEndian: function readLongBigEndian(off, addr) {
         Component.assert(off >= 0 && off < this.size - 3);
         return this.dv.getInt32(off, true);
     },
     /**
-     * readLongLittleEndian(off)
+     * readLongLittleEndian(off, addr)
      *
      * @this {Memory}
      * @param {number} off
+     * @param {number} addr
      * @return {number}
      */
-    readLongLittleEndian: function readLongLittleEndian(off)
-    {
+    readLongLittleEndian: function readLongLittleEndian(off, addr) {
         Component.assert(off >= 0 && off < this.size - 3);
         /*
          * TODO: It remains to be seen if there's any advantage to checking the offset
@@ -900,53 +964,53 @@ Memory.prototype = {
         return (off & 0x3)? (this.ab[off] | (this.ab[off+1] << 8) | (this.ab[off+2] << 16) | (this.ab[off+3] << 24)) : this.adw[off >> 2];
     },
     /**
-     * writeByteBigEndian(off, b)
+     * writeByteBigEndian(off, b, addr)
      *
      * @this {Memory}
      * @param {number} off
      * @param {number} b
+     * @param {number} addr
      */
-    writeByteBigEndian: function writeByteBigEndian(off, b)
-    {
+    writeByteBigEndian: function writeByteBigEndian(off, b, addr) {
         Component.assert(off >= 0 && off < this.size);
         this.ab[off] = b;
         this.fDirty = true;
     },
     /**
-     * writeByteLittleEndian(off, b)
+     * writeByteLittleEndian(off, b, addr)
      *
      * @this {Memory}
      * @param {number} off
+     * @param {number} addr
      * @param {number} b
      */
-    writeByteLittleEndian: function writeByteLittleEndian(off, b)
-    {
+    writeByteLittleEndian: function writeByteLittleEndian(off, b, addr) {
         Component.assert(off >= 0 && off < this.size);
         this.ab[off] = b;
         this.fDirty = true;
     },
     /**
-     * writeShortBigEndian(off, w)
+     * writeShortBigEndian(off, w, addr)
      *
      * @this {Memory}
      * @param {number} off
+     * @param {number} addr
      * @param {number} w
      */
-    writeShortBigEndian: function writeShortBigEndian(off, w)
-    {
+    writeShortBigEndian: function writeShortBigEndian(off, w, addr) {
         Component.assert(off >= 0 && off < this.size - 1);
         this.dv.setUint16(off, w, true);
         this.fDirty = true;
     },
     /**
-     * writeShortLittleEndian(off, w)
+     * writeShortLittleEndian(off, w, addr)
      *
      * @this {Memory}
      * @param {number} off
+     * @param {number} addr
      * @param {number} w
      */
-    writeShortLittleEndian: function writeShortLittleEndian(off, w)
-    {
+    writeShortLittleEndian: function writeShortLittleEndian(off, w, addr) {
         Component.assert(off >= 0 && off < this.size - 1);
         /*
          * TODO: It remains to be seen if there's any advantage to checking the offset
@@ -962,27 +1026,27 @@ Memory.prototype = {
         this.fDirty = true;
     },
     /**
-     * writeLongBigEndian(off, l)
+     * writeLongBigEndian(off, l, addr)
      *
      * @this {Memory}
      * @param {number} off
      * @param {number} l
+     * @param {number} addr
      */
-    writeLongBigEndian: function writeLongBigEndian(off, l)
-    {
+    writeLongBigEndian: function writeLongBigEndian(off, l, addr) {
         Component.assert(off >= 0 && off < this.size - 3);
         this.dv.setInt32(off, l, true);
         this.fDirty = true;
     },
     /**
-     * writeLongLittleEndian(off, l)
+     * writeLongLittleEndian(off, l, addr)
      *
      * @this {Memory}
      * @param {number} off
      * @param {number} l
+     * @param {number} addr
      */
-    writeLongLittleEndian: function writeLongLittleEndian(off, l)
-    {
+    writeLongLittleEndian: function writeLongLittleEndian(off, l, addr) {
         Component.assert(off >= 0 && off < this.size - 3);
         /*
          * TODO: It remains to be seen if there's any advantage to checking the offset
@@ -1006,8 +1070,7 @@ Memory.prototype = {
      * @param {number} off
      * @return {number}
      */
-    readBackTrackNone: function readBackTrackNone(off)
-    {
+    readBackTrackNone: function readBackTrackNone(off) {
         return 0;
     },
     /**
@@ -1017,8 +1080,7 @@ Memory.prototype = {
      * @param {number} off
      * @param {number} bti
      */
-    writeBackTrackNone: function writeBackTrackNone(off, bti)
-    {
+    writeBackTrackNone: function writeBackTrackNone(off, bti) {
     },
     /**
      * modBackTrackNone(fMod)
@@ -1026,8 +1088,7 @@ Memory.prototype = {
      * @this {Memory}
      * @param {boolean} fMod
      */
-    modBackTrackNone: function modBackTrackNone(fMod)
-    {
+    modBackTrackNone: function modBackTrackNone(fMod) {
         return false;
     },
     /**
@@ -1037,8 +1098,7 @@ Memory.prototype = {
      * @param {number} off
      * @return {number}
      */
-    readBackTrackIndex: function readBackTrackIndex(off)
-    {
+    readBackTrackIndex: function readBackTrackIndex(off) {
         Component.assert(off >= 0 && off < this.size);
         return this.abtIndexes[off];
     },
@@ -1050,8 +1110,7 @@ Memory.prototype = {
      * @param {number} bti
      * @return {number} previous bti (0 if none)
      */
-    writeBackTrackIndex: function writeBackTrackIndex(off, bti)
-    {
+    writeBackTrackIndex: function writeBackTrackIndex(off, bti) {
         var btiPrev;
         Component.assert(off >= 0 && off < this.size);
         btiPrev = this.abtIndexes[off];
@@ -1065,20 +1124,32 @@ Memory.prototype = {
      * @param {boolean} fMod
      * @return {boolean} previous value
      */
-    modBackTrackIndex: function modBackTrackIndex(fMod)
-    {
+    modBackTrackIndex: function modBackTrackIndex(fMod) {
         var fModPrev = this.fModBackTrack;
         this.fModBackTrack = fMod;
         return fModPrev;
     }
 };
 
-Memory.afnMemory           = [Memory.prototype.readByteMemory,  Memory.prototype.readShortMemory,  Memory.prototype.readLongMemory,  Memory.prototype.writeByteMemory,  Memory.prototype.writeShortMemory,  Memory.prototype.writeLongMemory];
-Memory.afnChecked          = [Memory.prototype.readByteChecked, Memory.prototype.readShortChecked, Memory.prototype.readLongChecked, Memory.prototype.writeByteChecked, Memory.prototype.writeShortChecked, Memory.prototype.writeLongChecked];
+/*
+ * This is the effective definition of afnNone, but we need not fully define it, because setAccess() already
+ * uses these defaults when any of the 6 handlers (ie, 3 read handlers followed by 3 write handlers) are undefined.
+ *
+Memory.afnNone              = [Memory.prototype.readNone,        Memory.prototype.readShortDefault, Memory.prototype.readLongDefault, Memory.prototype.writeNone,        Memory.prototype.writeShortDefault, Memory.prototype.writeLongDefault];
+ */
+
+Memory.afnNone              = [];
+Memory.afnMemory            = [Memory.prototype.readByteMemory,  Memory.prototype.readShortMemory,  Memory.prototype.readLongMemory,  Memory.prototype.writeByteMemory,  Memory.prototype.writeShortMemory,  Memory.prototype.writeLongMemory];
+Memory.afnChecked           = [Memory.prototype.readByteChecked, Memory.prototype.readShortChecked, Memory.prototype.readLongChecked, Memory.prototype.writeByteChecked, Memory.prototype.writeShortChecked, Memory.prototype.writeLongChecked];
+
+if (PAGEBLOCKS) {
+//  Memory.afnPaged         = [Memory.prototype.readBytePaged,   Memory.prototype.readShortPaged,   Memory.prototype.readLongPaged,   Memory.prototype.writeBytePaged,   Memory.prototype.writeShortPaged,   Memory.prototype.writeLongPaged];
+    Memory.afnUnpaged       = [Memory.prototype.readByteUnpaged, Memory.prototype.readShortUnpaged, Memory.prototype.readLongUnpaged, Memory.prototype.writeByteUnpaged, Memory.prototype.writeShortUnpaged, Memory.prototype.writeLongUnpaged];
+}
 
 if (TYPEDARRAYS) {
-    Memory.afnBigEndian    = [Memory.prototype.readByteBigEndian,    Memory.prototype.readShortBigEndian,    Memory.prototype.readLongBigEndian,    Memory.prototype.writeByteBigEndian,    Memory.prototype.writeShortBigEndian,    Memory.prototype.writeLongBigEndian];
-    Memory.afnLittleEndian = [Memory.prototype.readByteLittleEndian, Memory.prototype.readShortLittleEndian, Memory.prototype.readLongLittleEndian, Memory.prototype.writeByteLittleEndian, Memory.prototype.writeShortLittleEndian, Memory.prototype.writeLongLittleEndian];
+    Memory.afnBigEndian     = [Memory.prototype.readByteBigEndian,    Memory.prototype.readShortBigEndian,    Memory.prototype.readLongBigEndian,    Memory.prototype.writeByteBigEndian,    Memory.prototype.writeShortBigEndian,    Memory.prototype.writeLongBigEndian];
+    Memory.afnLittleEndian  = [Memory.prototype.readByteLittleEndian, Memory.prototype.readShortLittleEndian, Memory.prototype.readLongLittleEndian, Memory.prototype.writeByteLittleEndian, Memory.prototype.writeShortLittleEndian, Memory.prototype.writeLongLittleEndian];
 }
 
 if (typeof module !== 'undefined') module.exports = Memory;

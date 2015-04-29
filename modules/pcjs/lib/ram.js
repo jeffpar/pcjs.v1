@@ -383,13 +383,14 @@ CompaqController.RAMSETUP = {
 };
 
 /**
- * readByte(off)
+ * readByte(off, addr)
  *
  * @this {Memory}
  * @param {number} off (relative to 0x80C00000)
+ * @param {number} [addr]
  * @return {number}
  */
-CompaqController.readByte = function readCompaqControllerByte(off)
+CompaqController.readByte = function readCompaqControllerByte(off, addr)
 {
     var b = 0xff;
     if (off < 0x02) {
@@ -400,19 +401,20 @@ CompaqController.readByte = function readCompaqControllerByte(off)
     }
     if (DEBUG) {
         this.controller.ram.printMessage("CompaqController.readByte(" + str.toHexWord(off) + ") returned " + str.toHexByte(b), true, true);
-        if (MAXDEBUG && DEBUGGER && off >= 0x2) this.cpu.stopCPU();
+        if (MAXDEBUG && DEBUGGER && off >= 0x2) this.dbg.stopCPU();
     }
     return b;
 };
 
 /**
- * writeByte(off, b)
+ * writeByte(off, b, addr)
  *
  * @this {Memory}
  * @param {number} off (relative to 0x80C00000)
  * @param {number} b
+ * @param {number} [addr]
  */
-CompaqController.writeByte = function writeCompaqControllerByte(off, b)
+CompaqController.writeByte = function writeCompaqControllerByte(off, b, addr)
 {
     var controller = this.controller;
 
@@ -443,7 +445,7 @@ CompaqController.writeByte = function writeCompaqControllerByte(off, b)
                 }
             }
             controller.wMappings = (controller.wMappings & ~0xff) | b;
-            if (MAXDEBUG && DEBUGGER) this.cpu.stopCPU();
+            if (MAXDEBUG && DEBUGGER) this.dbg.stopCPU();
         }
     }
     /*
@@ -451,7 +453,7 @@ CompaqController.writeByte = function writeCompaqControllerByte(off, b)
      */
     else if (off == 0x2) {
         controller.wRAMSetup = (controller.wRAMSetup & ~0xff) | b;
-        if (MAXDEBUG && DEBUGGER) this.cpu.stopCPU();
+        if (MAXDEBUG && DEBUGGER) this.dbg.stopCPU();
     }
     /*
      * All bits in 0x80C00001 and 0x80C00003 are reserved, so we can simply ignore those writes.

@@ -2525,7 +2525,7 @@ X86CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
 X86CPU.prototype.getByte = function(addr)
 {
     if (BACKTRACK) this.backTrack.btiMemLo = this.bus.readBackTrack(addr);
-    return this.aMemBlocks[(addr & this.busMask) >>> this.blockShift].readByte(addr & this.blockLimit);
+    return this.aMemBlocks[(addr & this.busMask) >>> this.blockShift].readByte(addr & this.blockLimit, addr);
 };
 
 /**
@@ -2550,9 +2550,9 @@ X86CPU.prototype.getShort = function(addr)
         this.backTrack.btiMemHi = this.bus.readBackTrack(addr + 1);
     }
     if (off < this.blockLimit) {
-        return this.aMemBlocks[iBlock].readShort(off);
+        return this.aMemBlocks[iBlock].readShort(off, addr);
     }
-    return this.aMemBlocks[iBlock].readByte(off) | (this.aMemBlocks[(iBlock + 1) & this.blockMask].readByte(0) << 8);
+    return this.aMemBlocks[iBlock].readByte(off, addr) | (this.aMemBlocks[(iBlock + 1) & this.blockMask].readByte(0, addr + 1) << 8);
 };
 
 /**
@@ -2571,10 +2571,10 @@ X86CPU.prototype.getLong = function(addr)
         this.backTrack.btiMemHi = this.bus.readBackTrack(addr + 1);
     }
     if (off < this.blockLimit - 2) {
-        return this.aMemBlocks[iBlock].readLong(off);
+        return this.aMemBlocks[iBlock].readLong(off, addr);
     }
     var nShift = (off & 0x3) << 3;
-    return (this.aMemBlocks[iBlock].readLong(off & ~0x3) >>> nShift) | (this.aMemBlocks[(iBlock + 1) & this.blockMask].readLong(0) << (32 - nShift));
+    return (this.aMemBlocks[iBlock].readLong(off & ~0x3, addr) >>> nShift) | (this.aMemBlocks[(iBlock + 1) & this.blockMask].readLong(0, addr + 3) << (32 - nShift));
 };
 
 /**
@@ -2587,7 +2587,7 @@ X86CPU.prototype.getLong = function(addr)
 X86CPU.prototype.setByte = function(addr, b)
 {
     if (BACKTRACK) this.bus.writeBackTrack(addr, this.backTrack.btiMemLo);
-    this.aMemBlocks[(addr & this.busMask) >>> this.blockShift].writeByte(addr & this.blockLimit, b & 0xff);
+    this.aMemBlocks[(addr & this.busMask) >>> this.blockShift].writeByte(addr & this.blockLimit, b & 0xff, addr);
 };
 
 /**
@@ -2612,11 +2612,11 @@ X86CPU.prototype.setShort = function(addr, w)
         this.bus.writeBackTrack(addr + 1, this.backTrack.btiMemHi);
     }
     if (off < this.blockLimit) {
-        this.aMemBlocks[iBlock].writeShort(off, w & 0xffff);
+        this.aMemBlocks[iBlock].writeShort(off, w & 0xffff, addr);
         return;
     }
-    this.aMemBlocks[iBlock++].writeByte(off, w & 0xff);
-    this.aMemBlocks[iBlock & this.blockMask].writeByte(0, (w >> 8) & 0xff);
+    this.aMemBlocks[iBlock++].writeByte(off, w & 0xff, addr);
+    this.aMemBlocks[iBlock & this.blockMask].writeByte(0, (w >> 8) & 0xff, addr + 1);
 };
 
 /**
@@ -2637,16 +2637,17 @@ X86CPU.prototype.setLong = function(addr, l)
         this.bus.writeBackTrack(addr + 1, this.backTrack.btiMemHi);
     }
     if (off < this.blockLimit - 2) {
-        this.aMemBlocks[iBlock].writeLong(off, l);
+        this.aMemBlocks[iBlock].writeLong(off, l, addr);
         return;
     }
     var lPrev, nShift = (off & 0x3) << 3;
     off &= ~0x3;
-    lPrev = this.aMemBlocks[iBlock].readLong(off);
-    this.aMemBlocks[iBlock].writeLong(off, (lPrev & ~(-1 << nShift)) | (l << nShift));
+    lPrev = this.aMemBlocks[iBlock].readLong(off, addr);
+    this.aMemBlocks[iBlock].writeLong(off, (lPrev & ~(-1 << nShift)) | (l << nShift), addr);
     iBlock = (iBlock + 1) & this.blockMask;
-    lPrev = this.aMemBlocks[iBlock].readLong(0);
-    this.aMemBlocks[iBlock].writeLong(0, (lPrev & (-1 << nShift)) | (l >>> (32 - nShift)));
+    addr += 3;
+    lPrev = this.aMemBlocks[iBlock].readLong(0, addr);
+    this.aMemBlocks[iBlock].writeLong(0, (lPrev & (-1 << nShift)) | (l >>> (32 - nShift)), addr);
 };
 
 /**
@@ -2950,7 +2951,7 @@ X86CPU.prototype.getBytePrefetch = function(addr)
          * with side-effects we may not want, and in any case, while it seemed to improve Safari's performance slightly,
          * it did nothing for the oddball Chrome performance I'm seeing with PREFETCH enabled.
          *
-         *      b = this.aMemBlocks[(addr & this.busMask) >>> this.blockShift].readByte(addr & this.blockLimit);
+         *      b = this.aMemBlocks[(addr & this.busMask) >>> this.blockShift].readByte(addr & this.blockLimit, addr);
          *      this.nBusCycles += 4;
          *      this.cbPrefetchValid = 0;
          *      this.addrPrefetchHead = (addr + 1) & this.busMask;
@@ -3027,7 +3028,7 @@ X86CPU.prototype.fillPrefetch = function(n)
 {
     while (n-- > 0 && this.cbPrefetchQueued < X86CPU.PREFETCH.QUEUE) {
         var addr = this.addrPrefetchHead;
-        var b = this.aMemBlocks[(addr & this.busMask) >>> this.blockShift].readByte(addr & this.blockLimit);
+        var b = this.aMemBlocks[(addr & this.busMask) >>> this.blockShift].readByte(addr & this.blockLimit, addr);
         this.aPrefetch[this.iPrefetchHead] = b | (addr << 8);
         if (MAXDEBUG) this.printMessage("     fillPrefetch[" + this.iPrefetchHead + "]: " + str.toHex(addr) + ":" + str.toHexByte(b));
         this.addrPrefetchHead = (addr + 1) & this.busMask;

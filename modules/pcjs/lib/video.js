@@ -1241,13 +1241,14 @@ Card.ACCESS.WRITE.MODE2XOR  = 0xE000;
 Card.ACCESS.WRITE.MASK      = 0xff00;
 
 /**
- * readByteMode0(off)
+ * readByteMode0(off, addr)
  *
  * @this {Memory}
  * @param {number} off
+ * @param {number} [addr]
  * @return {number}
  */
-Card.ACCESS.readByteMode0 = function readByteMode0(off)
+Card.ACCESS.readByteMode0 = function readByteMode0(off, addr)
 {
     off += this.offset;
     var dw = this.controller.latches = this.adw[off];
@@ -1255,13 +1256,14 @@ Card.ACCESS.readByteMode0 = function readByteMode0(off)
 };
 
 /**
- * readByteMode0EvenOdd(off)
+ * readByteMode0EvenOdd(off, addr)
  *
  * @this {Memory}
  * @param {number} off
+ * @param {number} [addr]
  * @return {number}
  */
-Card.ACCESS.readByteMode0EvenOdd = function readByteMode0EvenOdd(off)
+Card.ACCESS.readByteMode0EvenOdd = function readByteMode0EvenOdd(off, addr)
 {
     off += this.offset;
     var idw = off & ~0x1;
@@ -1269,13 +1271,14 @@ Card.ACCESS.readByteMode0EvenOdd = function readByteMode0EvenOdd(off)
 };
 
 /**
- * readByteMode1(off)
+ * readByteMode1(off, addr)
  *
  * @this {Memory}
  * @param {number} off
+ * @param {number} [addr]
  * @return {number}
  */
-Card.ACCESS.readByteMode1 = function readByteMode1(off)
+Card.ACCESS.readByteMode1 = function readByteMode1(off, addr)
 {
     off += this.offset;
     var dw = this.adw[off];
@@ -1290,13 +1293,14 @@ Card.ACCESS.readByteMode1 = function readByteMode1(off)
 };
 
 /**
- * writeByteMode0(off, b)
+ * writeByteMode0(off, b, addr)
  *
  * @this {Memory}
  * @param {number} off
  * @param {number} b (which should already be pre-masked to 8 bits; see Bus.prototype.setByteDirect)
+ * @param {number} [addr]
  */
-Card.ACCESS.writeByteMode0 = function writeByteMode0(off, b)
+Card.ACCESS.writeByteMode0 = function writeByteMode0(off, b, addr)
 {
     var idw = off + this.offset;
     var dw = b | (b << 8) | (b << 16) | (b << 24);
@@ -1309,13 +1313,14 @@ Card.ACCESS.writeByteMode0 = function writeByteMode0(off, b)
 };
 
 /**
- * writeByteMode0EvenOdd(off, b)
+ * writeByteMode0EvenOdd(off, b, addr)
  *
  * @this {Memory}
  * @param {number} off
  * @param {number} b (which should already be pre-masked to 8 bits; see Bus.prototype.setByteDirect)
+ * @param {number} [addr]
  */
-Card.ACCESS.writeByteMode0EvenOdd = function writeByteMode0EvenOdd(off, b)
+Card.ACCESS.writeByteMode0EvenOdd = function writeByteMode0EvenOdd(off, b, addr)
 {
     off += this.offset;
     var dw = b | (b << 8) | (b << 16) | (b << 24);
@@ -1334,7 +1339,7 @@ Card.ACCESS.writeByteMode0EvenOdd = function writeByteMode0EvenOdd(off, b)
 };
 
 /**
- * writeByteMode0Rot(off, b)
+ * writeByteMode0Rot(off, b, addr)
  *
  * Supporting Set/Reset means that for every plane for which Set/Reset is enabled, we must
  * replace the corresponding byte in "dw" with a byte of zeros or ones.  This is accomplished with
@@ -1352,8 +1357,9 @@ Card.ACCESS.writeByteMode0EvenOdd = function writeByteMode0EvenOdd(off, b)
  * @this {Memory}
  * @param {number} off
  * @param {number} b (which should already be pre-masked to 8 bits; see Bus.prototype.setByteDirect)
+ * @param {number} [addr]
  */
-Card.ACCESS.writeByteMode0Rot = function writeByteMode0Rot(off, b)
+Card.ACCESS.writeByteMode0Rot = function writeByteMode0Rot(off, b, addr)
 {
     var idw = off + this.offset;
     b = ((b >> this.controller.nDataRotate) | (b << (8 - this.controller.nDataRotate)) & 0xff);
@@ -1368,13 +1374,14 @@ Card.ACCESS.writeByteMode0Rot = function writeByteMode0Rot(off, b)
 };
 
 /**
- * writeByteMode0And(off, b)
+ * writeByteMode0And(off, b, addr)
  *
  * @this {Memory}
  * @param {number} off
  * @param {number} b (which should already be pre-masked to 8 bits; see Bus.prototype.setByteDirect)
+ * @param {number} [addr]
  */
-Card.ACCESS.writeByteMode0And = function writeByteMode0And(off, b)
+Card.ACCESS.writeByteMode0And = function writeByteMode0And(off, b, addr)
 {
     var idw = off + this.offset;
     b = ((b >> this.controller.nDataRotate) | (b << (8 - this.controller.nDataRotate)) & 0xff);
@@ -1390,13 +1397,14 @@ Card.ACCESS.writeByteMode0And = function writeByteMode0And(off, b)
 };
 
 /**
- * writeByteMode0Or(off, b)
+ * writeByteMode0Or(off, b, addr)
  *
  * @this {Memory}
  * @param {number} off
  * @param {number} b (which should already be pre-masked to 8 bits; see Bus.prototype.setByteDirect)
+ * @param {number} [addr]
  */
-Card.ACCESS.writeByteMode0Or = function writeByteMode0Or(off, b)
+Card.ACCESS.writeByteMode0Or = function writeByteMode0Or(off, b, addr)
 {
     var idw = off + this.offset;
     b = ((b >> this.controller.nDataRotate) | (b << (8 - this.controller.nDataRotate)) & 0xff);
@@ -1412,13 +1420,14 @@ Card.ACCESS.writeByteMode0Or = function writeByteMode0Or(off, b)
 };
 
 /**
- * writeByteMode0Xor(off, b)
+ * writeByteMode0Xor(off, b, addr)
  *
  * @this {Memory}
  * @param {number} off
  * @param {number} b (which should already be pre-masked to 8 bits; see Bus.prototype.setByteDirect)
+ * @param {number} [addr]
  */
-Card.ACCESS.writeByteMode0Xor = function writeByteMode0Xor(off, b)
+Card.ACCESS.writeByteMode0Xor = function writeByteMode0Xor(off, b, addr)
 {
     var idw = off + this.offset;
     b = ((b >> this.controller.nDataRotate) | (b << (8 - this.controller.nDataRotate)) & 0xff);
@@ -1434,13 +1443,14 @@ Card.ACCESS.writeByteMode0Xor = function writeByteMode0Xor(off, b)
 };
 
 /**
- * writeByteMode1(off, b)
+ * writeByteMode1(off, b, addr)
  *
  * @this {Memory}
  * @param {number} off
  * @param {number} b (ignored; the EGA latches provide the source data)
+ * @param {number} [addr]
  */
-Card.ACCESS.writeByteMode1 = function writeByteMode1(off, b)
+Card.ACCESS.writeByteMode1 = function writeByteMode1(off, b, addr)
 {
     var idw = off + this.offset;
     var dw = (this.adw[idw] & ~this.controller.nWriteMapMask) | (this.controller.latches & this.controller.nWriteMapMask);
@@ -1451,13 +1461,14 @@ Card.ACCESS.writeByteMode1 = function writeByteMode1(off, b)
 };
 
 /**
- * writeByteMode2(off, b)
+ * writeByteMode2(off, b, addr)
  *
  * @this {Memory}
  * @param {number} off
  * @param {number} b (which should already be pre-masked to 8 bits; see Bus.prototype.setByteDirect)
+ * @param {number} [addr]
  */
-Card.ACCESS.writeByteMode2 = function writeByteMode2(off, b)
+Card.ACCESS.writeByteMode2 = function writeByteMode2(off, b, addr)
 {
     var idw = off + this.offset;
     var dw = Video.aEGAByteToDW[b & 0xf];
@@ -1470,13 +1481,14 @@ Card.ACCESS.writeByteMode2 = function writeByteMode2(off, b)
 };
 
 /**
- * writeByteMode2And(off, b)
+ * writeByteMode2And(off, b, addr)
  *
  * @this {Memory}
  * @param {number} off
  * @param {number} b (which should already be pre-masked to 8 bits; see Bus.prototype.setByteDirect)
+ * @param {number} [addr]
  */
-Card.ACCESS.writeByteMode2And = function writeByteMode2And(off, b)
+Card.ACCESS.writeByteMode2And = function writeByteMode2And(off, b, addr)
 {
     var idw = off + this.offset;
     var dw = Video.aEGAByteToDW[b & 0xf];
@@ -1490,13 +1502,14 @@ Card.ACCESS.writeByteMode2And = function writeByteMode2And(off, b)
 };
 
 /**
- * writeByteMode2Or(off, b)
+ * writeByteMode2Or(off, b, addr)
  *
  * @this {Memory}
  * @param {number} off
  * @param {number} b (which should already be pre-masked to 8 bits; see Bus.prototype.setByteDirect)
+ * @param {number} [addr]
  */
-Card.ACCESS.writeByteMode2Or = function writeByteMode2Or(off, b)
+Card.ACCESS.writeByteMode2Or = function writeByteMode2Or(off, b, addr)
 {
     var idw = off + this.offset;
     var dw = Video.aEGAByteToDW[b & 0xf];
@@ -1510,13 +1523,14 @@ Card.ACCESS.writeByteMode2Or = function writeByteMode2Or(off, b)
 };
 
 /**
- * writeByteMode2Xor(off, b)
+ * writeByteMode2Xor(off, b, addr)
  *
  * @this {Memory}
  * @param {number} off
  * @param {number} b (which should already be pre-masked to 8 bits; see Bus.prototype.setByteDirect)
+ * @param {number} [addr]
  */
-Card.ACCESS.writeByteMode2Xor = function writeByteMode2Xor(off, b)
+Card.ACCESS.writeByteMode2Xor = function writeByteMode2Xor(off, b, addr)
 {
     var idw = off + this.offset;
     var dw = Video.aEGAByteToDW[b & 0xf];

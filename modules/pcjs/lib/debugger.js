@@ -2807,7 +2807,7 @@ if (DEBUGGER) {
      * redoBreakpoints()
      *
      * This function is for the Memory component: whenever the Bus allocates a new Memory block, it calls
-     * the block's setDebugInfo() method, which clears the memory block's breakpoint counts.  setDebugInfo(),
+     * the block's setDebugger() method, which clears the memory block's breakpoint counts.  setDebugger(),
      * in turn, must call this function to re-apply any existing breakpoints to that block.
      *
      * This ensures that, even if a memory region is remapped (which creates new Memory blocks in the process),

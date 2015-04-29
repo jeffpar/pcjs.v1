@@ -861,7 +861,7 @@ FDC.prototype.initDrive = function(drive, iDrive, data)
 
     /*
      * resCode used to be an FDC global, but in order to insulate FDC state from the operation of various functions
-     * that operate on drive objects (eg, readByte and writeByte), I've made it a per-drive variable.  This choice,
+     * that operate on drive objects (eg, readData and writeData), I've made it a per-drive variable.  This choice,
      * similar to my choice for handling PCN, may be contrary to how the actual hardware works, but I prefer this
      * approach, as long as it doesn't expose any incompatibilities that any software actually cares about.
      */
@@ -1110,7 +1110,7 @@ FDC.prototype.copyDrive = function(iDrive)
  *
  * Also note that in an actual FDC request, drive.nBytes is initialized to the size of a single sector; the extent
  * of the entire transfer is actually determined by a count that has been pre-loaded into the DMA controller.  The FDC
- * isn't even aware of the extent of the transfer, so in the case of a read request, all readByte() can do is return
+ * isn't even aware of the extent of the transfer, so in the case of a read request, all readData() can do is return
  * bytes until the current track (or, in the case of a multi-track request, the current cylinder) has been exhausted.
  *
  * Since seekDrive() is for use with non-DMA requests, we use nBytes to specify the length of the entire transfer.
@@ -1144,7 +1144,7 @@ FDC.prototype.seekDrive = function(drive, iSector, nSectors)
             drive.resCode = FDC.REG_DATA.RES.NONE;
             /*
              * At this point, we've finished simulating what an FDC.REG_DATA.CMD.READ_DATA command would have performed,
-             * up through doRead().  Now it's the caller responsibility to call readByte(), just like the DMA Controller would.
+             * up through doRead().  Now it's the caller responsibility to call readData(), just like the DMA Controller would.
              */
             return true;
         }
@@ -2147,7 +2147,7 @@ FDC.prototype.pushST3 = function(drive)
 FDC.prototype.dmaRead = function(drive, b, done)
 {
     if (b === undefined || b < 0) {
-        this.readByte(drive, done);
+        this.readData(drive, done);
         return;
     }
     /*
@@ -2168,7 +2168,7 @@ FDC.prototype.dmaRead = function(drive, b, done)
 FDC.prototype.dmaWrite = function(drive, b)
 {
     if (b !== undefined && b >= 0)
-        return this.writeByte(drive, b);
+        return this.writeData(drive, b);
     /*
      * The DMA controller should be GIVING us data, not ASKING for data; this suggests an internal DMA miscommunication
      */
@@ -2285,7 +2285,7 @@ FDC.prototype.doFormat = function(drive)
 };
 
 /**
- * readByte(drive, done)
+ * readData(drive, done)
  *
  * The following drive properties must have been setup prior to our first call:
  *
@@ -2294,11 +2294,11 @@ FDC.prototype.doFormat = function(drive)
  *      drive.bSector
  *      drive.sector (initialized to null)
  *
- * On the first readByte() request, since drive.sector will be null, we ask the Disk object to look
+ * On the first readData() request, since drive.sector will be null, we ask the Disk object to look
  * up the first sector of the request.  We then ask the Disk for bytes from that sector until the sector
  * is exhausted, and then we look up the next sector and continue the process.
  *
- * NOTE: Since the FDC isn't aware of the extent of the transfer, all readByte() can do is return bytes
+ * NOTE: Since the FDC isn't aware of the extent of the transfer, all readData() can do is return bytes
  * until the current track (or, in the case of a multi-track request, the current cylinder) has been exhausted.
  *
  * TODO: Research the requirements, if any, for multi-track I/O and determine what else needs to be done.
@@ -2307,7 +2307,7 @@ FDC.prototype.doFormat = function(drive)
  * @param {Object} drive
  * @param {function(number,boolean,Object,number)} done (number is next available byte from drive, or -1 if no more bytes available)
  */
-FDC.prototype.readByte = function(drive, done)
+FDC.prototype.readData = function(drive, done)
 {
     var b = -1;
     var obj = null, off = 0;    // these variables are purely for BACKTRACK purposes
@@ -2332,7 +2332,7 @@ FDC.prototype.readByte = function(drive, done)
             drive.ibSector = 0;
             /*
              * We "pre-advance" bSector et al now, instead of waiting to advance it right before the seek().
-             * This allows the initial call to readByte() to perform a seek without triggering an unwanted advance.
+             * This allows the initial call to readData() to perform a seek without triggering an unwanted advance.
              */
             this.advanceSector(drive);
         } while (true);
@@ -2341,7 +2341,7 @@ FDC.prototype.readByte = function(drive, done)
 };
 
 /**
- * writeByte(drive, b)
+ * writeData(drive, b)
  *
  * The following drive properties must have been setup prior to our first call:
  *
@@ -2350,11 +2350,11 @@ FDC.prototype.readByte = function(drive, done)
  *      drive.bSector
  *      drive.sector (initialized to null)
  *
- * On the first writeByte() request, since drive.sector will be null, we ask the Disk object to look
+ * On the first writeData() request, since drive.sector will be null, we ask the Disk object to look
  * up the first sector of the request.  We then send the Disk bytes for that sector until the sector
  * is full, and then we look up the next sector and continue the process.
  *
- * NOTE: Since the FDC isn't aware of the extent of the transfer, all writeByte() can do is accept bytes
+ * NOTE: Since the FDC isn't aware of the extent of the transfer, all writeData() can do is accept bytes
  * until the current track (or, in the case of a multi-track request, the current cylinder) has been exhausted.
  *
  * TODO: Research the requirements, if any, for multi-track I/O and determine what else needs to be done.
@@ -2364,7 +2364,7 @@ FDC.prototype.readByte = function(drive, done)
  * @param {number} b containing next byte to write
  * @return {number} (b unchanged; return -1 if command should be terminated)
  */
-FDC.prototype.writeByte = function(drive, b)
+FDC.prototype.writeData = function(drive, b)
 {
     if (drive.resCode || !drive.disk) return -1;
     do {
@@ -2387,7 +2387,7 @@ FDC.prototype.writeByte = function(drive, b)
         drive.ibSector = 0;
         /*
          * We "pre-advance" bSector et al now, instead of waiting to advance it right before the seek().
-         * This allows the initial call to writeByte() to perform a seek without triggering an unwanted advance.
+         * This allows the initial call to writeData() to perform a seek without triggering an unwanted advance.
          */
         this.advanceSector(drive);
     } while (true);
@@ -2441,7 +2441,7 @@ FDC.prototype.writeFormat = function(drive, b)
             this.printMessage("writeFormat(head=" + str.toHexByte(drive.bHead) + ",cyl=" + str.toHexByte(drive.bCylinder) + ",sec=" + str.toHexByte(drive.bSector) + ",len=" + str.toHexWord(drive.nBytes) + ")");
         }
         for (var i = 0; i < drive.nBytes; i++) {
-            if (this.writeByte(drive, drive.bFiller) < 0) {
+            if (this.writeData(drive, drive.bFiller) < 0) {
                 return -1;
             }
         }
