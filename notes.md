@@ -26,7 +26,7 @@ Since a simple `git push` will report:
     
         git push --set-upstream origin 386dev
 
-do this instead:
+do what it recommends (*-u* is shorthand for *--set-upstream*):
 
 	git push -u origin 386dev
 
