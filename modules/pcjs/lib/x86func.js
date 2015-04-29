@@ -3462,6 +3462,26 @@ X86.fnFault = function(nFault, nError, fHalt)
 };
 
 /**
+ * fnPageFault(addr, fPresent, fWrite)
+ *
+ * Helper to dispatch page faults.
+ *
+ * @this {X86CPU}
+ * @param {number} addr
+ * @param {boolean} fPresent
+ * @param {boolean} fWrite
+ */
+X86.fnPageFault = function(addr, fPresent, fWrite)
+{
+    this.regCR2 = addr;
+    var nError = 0;
+    if (fPresent) nError |= X86.PTE.PRESENT;
+    if (fWrite) nError |= X86.PTE.READWRITE;
+    if (this.segCS.cpl == 3) nError |= X86.PTE.USER;
+    X86.fnFault.call(this, X86.EXCEPTION.PG_FAULT, nError);
+};
+
+/**
  * fnFaultMessage()
  *
  * Aside from giving the Debugger an opportunity to report every fault, this also gives us the ability to

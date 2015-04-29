@@ -36,6 +36,7 @@ if (typeof module !== 'undefined') {
     var str         = require("../../shared/lib/strlib");
     var Component   = require("../../shared/lib/component");
     var Messages    = require("./messages");
+    var X86         = require("./x86");
 }
 
 /**
@@ -201,14 +202,15 @@ function Memory(addr, used, size, type, controller, bus)
  * empty (that is, their data arrays are uninitialized) and the memory type is NONE.
  */
 Memory.TYPE = {
-    NONE:   0,
-    RAM:    1,
-    ROM:    2,
-    VIDEO:  3,
-    CTRL:   4,
-    UNPAGED:5,
-    NAMES:  ["NONE", "RAM", "ROM", "VIDEO", "H/W"],
-    COLORS: ["black", "blue", "green", "cyan"]
+    NONE:       0,
+    RAM:        1,
+    ROM:        2,
+    VIDEO:      3,
+    CTRL:       4,
+    UNPAGED:    5,
+    PAGED:      6,
+    NAMES:      ["NONE",  "RAM",  "ROM",   "VIDEO", "H/W", "UNPAGED", "PAGED"],
+    COLORS:     ["black", "blue", "green", "cyan"]
 };
 
 /*
@@ -232,8 +234,8 @@ Memory.prototype = {
     clone: function(mem, type) {
         /*
          * Original memory block IDs are even; cloned memory block IDs are odd;
-         * the original ID of the current block is lost, but that's OK, since it was
-         * presumably produced merely to become a clone.
+         * the original ID of the current block is lost, but that's OK, since it was presumably
+         * produced merely to become a clone.
          */
         this.id = mem.id | 0x1;
         this.used = mem.used;
@@ -361,7 +363,17 @@ Memory.prototype = {
      * @param {boolean} [fDirect]
      */
     setAccess: function(afn, fDirect) {
-        afn = afn || (this.type == Memory.TYPE.UNPAGED? Memory.afnUnpaged : Memory.afnNone);
+        if (!afn) {
+            if (this.type == Memory.TYPE.UNPAGED) {
+                afn = Memory.afnUnpaged;
+            }
+            else if (this.type == Memory.TYPE.PAGED) {
+                afn = Memory.afnPaged;
+            } else {
+                Component.assert(this.type == Memory.TYPE.NONE);
+                afn = Memory.afnNone;
+            }
+        }
         if (fDirect === undefined) fDirect = true;      // TODO: Verify that this is desired default behavior
         this.setReadAccess(afn, fDirect);
         this.setWriteAccess(afn, fDirect);
@@ -424,7 +436,7 @@ Memory.prototype = {
      * setDebugger(dbg, addr, size)
      *
      * @this {Memory}
-     * @param {Debugger|Component} dbg
+     * @param {Debugger} dbg
      * @param {number} addr of block
      * @param {number} size of block
      */
@@ -437,14 +449,48 @@ Memory.prototype = {
         }
     },
     /**
-     * setPageBlock(addr)
+     * adjustEndian(dw)
+     *
+     * @this {Memory}
+     * @param {number} dw
+     * @return {number}
+     */
+    adjustEndian: function(dw) {
+        if (TYPEDARRAYS && !littleEndian) {
+            dw = (dw << 24) | ((dw << 8) & 0x00ff0000) | ((dw >> 8) & 0x0000ff00) | (dw >>> 24);
+        }
+        return dw;
+    },
+    /**
+     * getPageBlock(addr, fWrite)
      *
      * @this {Memory}
      * @param {number} addr
+     * @param {boolean} fWrite (true if called for a write, false if for a read)
      * @return {Memory}
      */
-    setPageBlock: function(addr) {
-        return this.bus.mapPageBlock(addr);
+    getPageBlock: function(addr, fWrite) {
+        var block = this.bus.mapPageBlock(addr, fWrite);
+        return block || this;
+    },
+    /**
+     * setPhysBlock(blockPhys, blockPDE, offPDE, blockPTE, offPTE)
+     *
+     * @this {Memory}
+     * @param {Memory} blockPhys
+     * @param {Memory} blockPDE
+     * @param {number} offPDE
+     * @param {Memory} blockPTE
+     * @param {number} offPTE
+     */
+    setPhysBlock: function(blockPhys, blockPDE, offPDE, blockPTE, offPTE) {
+        this.blockPhys = blockPhys;
+        this.blockPDE = blockPDE;
+        this.iPDE = offPDE >> 2;    // convert offPDE into an adw index (iPDE)
+        this.blockPTE = blockPTE;
+        this.iPTE = offPTE >> 2;    // convert offPTE into an adw index (iPTE)
+        this.bitPTEDirty = this.adjustEndian(X86.PTE.ACCESSED | X86.PTE.DIRTY);
+        this.bitPTEAccessed = this.adjustEndian(X86.PTE.ACCESSED);
     },
     /**
      * addBreakpoint(off, fWrite)
@@ -679,11 +725,6 @@ Memory.prototype = {
             var idw = off >> 2;
             var nShift = (off & 0x3) << 3;
             if (nShift < 24) {
-                /*
-                 *  0:  0xffff0000
-                 *  8:  0xff0000ff
-                 * 16:  0x0000ffff
-                 */
                 this.adw[idw] = (this.adw[idw] & ~(0xffff << nShift)) | (w << nShift);
             } else {
                 this.adw[idw] = (this.adw[idw] & 0x00ffffff) | (w << 24);
@@ -714,11 +755,6 @@ Memory.prototype = {
             if (!nShift) {
                 this.adw[idw] = l;
             } else {
-                /*
-                 *  8:  0xffffff00
-                 * 16:  0xffff0000
-                 * 24:  0xff000000
-                 */
                 var mask = (0xffffffff|0) << nShift;
                 this.adw[idw] = (this.adw[idw] & ~mask) | (l << nShift);
                 idw++;
@@ -816,6 +852,84 @@ Memory.prototype = {
         this.writeLongDirect(off, l);
     },
     /**
+     * readBytePaged(off, addr)
+     *
+     * @this {Memory}
+     * @param {number} off
+     * @param {number} addr
+     * @return {number}
+     */
+    readBytePaged: function readBytePaged(off, addr) {
+        this.blockPDE.adw[this.iPDE] |= this.bitPTEAccessed;
+        this.blockPTE.adw[this.iPTE] |= this.bitPTEAccessed;
+        return this.blockPhys.readByte(off, addr);
+    },
+    /**
+     * readShortPaged(off, addr)
+     *
+     * @this {Memory}
+     * @param {number} off
+     * @param {number} addr
+     * @return {number}
+     */
+    readShortPaged: function readShortPaged(off, addr) {
+        this.blockPDE.adw[this.iPDE] |= this.bitPTEAccessed;
+        this.blockPTE.adw[this.iPTE] |= this.bitPTEAccessed;
+        return this.blockPhys.readShort(off, addr);
+    },
+    /**
+     * readLongPaged(off, addr)
+     *
+     * @this {Memory}
+     * @param {number} off
+     * @param {number} addr
+     * @return {number}
+     */
+    readLongPaged: function readLongPaged(off, addr) {
+        this.blockPDE.adw[this.iPDE] |= this.bitPTEAccessed;
+        this.blockPTE.adw[this.iPTE] |= this.bitPTEAccessed;
+        return this.blockPhys.readLong(off, addr);
+    },
+    /**
+     * writeBytePaged(off, b, addr)
+     *
+     * @this {Memory}
+     * @param {number} off
+     * @param {number} b
+     * @param {number} addr
+     */
+    writeBytePaged: function writeBytePaged(off, b, addr) {
+        this.blockPDE.adw[this.iPDE] |= this.bitPTEAccessed;
+        this.blockPTE.adw[this.iPTE] |= this.bitPTEDirty;
+        this.blockPhys.writeByte(off, b, addr);
+    },
+    /**
+     * writeShortPaged(off, w, addr)
+     *
+     * @this {Memory}
+     * @param {number} off
+     * @param {number} w
+     * @param {number} addr
+     */
+    writeShortPaged: function writeShortPaged(off, w, addr) {
+        this.blockPDE.adw[this.iPDE] |= this.bitPTEAccessed;
+        this.blockPTE.adw[this.iPTE] |= this.bitPTEDirty;
+        this.blockPhys.writeShort(off, w, addr);
+    },
+    /**
+     * writeLongPaged(off, l, addr)
+     *
+     * @this {Memory}
+     * @param {number} off
+     * @param {number} l
+     * @param {number} addr
+     */
+    writeLongPaged: function writeLongPaged(off, l, addr) {
+        this.blockPDE.adw[this.iPDE] |= this.bitPTEAccessed;
+        this.blockPTE.adw[this.iPTE] |= this.bitPTEDirty;
+        this.blockPhys.writeLong(off, l, addr);
+    },
+    /**
      * readByteUnpaged(off, addr)
      *
      * @this {Memory}
@@ -824,7 +938,7 @@ Memory.prototype = {
      * @return {number}
      */
     readByteUnpaged: function readByteUnpaged(off, addr) {
-        return this.setPageBlock(addr).readByte(off, addr);
+        return this.getPageBlock(addr, false).readByte(off, addr);
     },
     /**
      * readShortUnpaged(off, addr)
@@ -835,7 +949,7 @@ Memory.prototype = {
      * @return {number}
      */
     readShortUnpaged: function readShortUnpaged(off, addr) {
-        return this.setPageBlock(addr).readShort(off, addr);
+        return this.getPageBlock(addr, false).readShort(off, addr);
     },
     /**
      * readLongUnpaged(off, addr)
@@ -846,7 +960,7 @@ Memory.prototype = {
      * @return {number}
      */
     readLongUnpaged: function readLongUnpaged(off, addr) {
-        return this.setPageBlock(addr).readLong(off, addr);
+        return this.getPageBlock(addr, false).readLong(off, addr);
     },
     /**
      * writeByteUnpaged(off, b, addr)
@@ -857,7 +971,7 @@ Memory.prototype = {
      * @param {number} addr
      */
     writeByteUnpaged: function writeByteUnpaged(off, b, addr) {
-        this.setPageBlock(addr).writeByte(off, b, addr);
+        this.getPageBlock(addr, true).writeByte(off, b, addr);
     },
     /**
      * writeShortUnpaged(off, w, addr)
@@ -868,7 +982,7 @@ Memory.prototype = {
      * @param {number} addr
      */
     writeShortUnpaged: function writeShortUnpaged(off, w, addr) {
-        this.setPageBlock(addr).writeShort(off, w, addr);
+        this.getPageBlock(addr, true).writeShort(off, w, addr);
     },
     /**
      * writeLongUnpaged(off, l, addr)
@@ -879,7 +993,7 @@ Memory.prototype = {
      * @param {number} addr
      */
     writeLongUnpaged: function writeLongUnpaged(off, l, addr) {
-        this.setPageBlock(addr).writeLong(off, l, addr);
+        this.getPageBlock(addr, true).writeLong(off, l, addr);
     },
     /**
      * readByteBigEndian(off, addr)
@@ -1132,8 +1246,8 @@ Memory.prototype = {
 };
 
 /*
- * This is the effective definition of afnNone, but we need not fully define it, because setAccess() already
- * uses these defaults when any of the 6 handlers (ie, 3 read handlers followed by 3 write handlers) are undefined.
+ * This is the effective definition of afnNone, but we need not fully define it, because setAccess()
+ * uses these defaults when any of the 6 handlers (ie, 3 read handlers and 3 write handlers) are undefined.
  *
 Memory.afnNone              = [Memory.prototype.readNone,        Memory.prototype.readShortDefault, Memory.prototype.readLongDefault, Memory.prototype.writeNone,        Memory.prototype.writeShortDefault, Memory.prototype.writeLongDefault];
  */
@@ -1143,7 +1257,7 @@ Memory.afnMemory            = [Memory.prototype.readByteMemory,  Memory.prototyp
 Memory.afnChecked           = [Memory.prototype.readByteChecked, Memory.prototype.readShortChecked, Memory.prototype.readLongChecked, Memory.prototype.writeByteChecked, Memory.prototype.writeShortChecked, Memory.prototype.writeLongChecked];
 
 if (PAGEBLOCKS) {
-//  Memory.afnPaged         = [Memory.prototype.readBytePaged,   Memory.prototype.readShortPaged,   Memory.prototype.readLongPaged,   Memory.prototype.writeBytePaged,   Memory.prototype.writeShortPaged,   Memory.prototype.writeLongPaged];
+    Memory.afnPaged         = [Memory.prototype.readBytePaged,   Memory.prototype.readShortPaged,   Memory.prototype.readLongPaged,   Memory.prototype.writeBytePaged,   Memory.prototype.writeShortPaged,   Memory.prototype.writeLongPaged];
     Memory.afnUnpaged       = [Memory.prototype.readByteUnpaged, Memory.prototype.readShortUnpaged, Memory.prototype.readLongUnpaged, Memory.prototype.writeByteUnpaged, Memory.prototype.writeShortUnpaged, Memory.prototype.writeLongUnpaged];
 }
 

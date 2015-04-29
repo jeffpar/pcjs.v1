@@ -39,6 +39,7 @@ if (typeof module !== 'undefined') {
     var Memory      = require("./memory");
     var Messages    = require("./messages");
     var State       = require("./state");
+    var X86         = require("./x86");
 }
 
 /**
@@ -67,8 +68,8 @@ if (typeof module !== 'undefined') {
  * @constructor
  * @extends Component
  * @param {Object} parmsBus
- * @param {X86CPU|Component} cpu
- * @param {Debugger|Component} dbg
+ * @param {X86CPU} cpu
+ * @param {Debugger} dbg
  */
 function Bus(parmsBus, cpu, dbg)
 {
@@ -689,20 +690,59 @@ Bus.prototype.enablePageBlocks = function(addrPD)
 };
 
 /**
- * mapPageBlock(addr)
+ * mapPageBlock(addr, fWrite)
  *
- * If addr is a valid linear address, then we must obtain the following information:
+ * Locate the corresponding physical PDE, PTE and memory blocks for the given linear address.
  *
- *      (1) the physical Memory object corresponding to the linear address in addr
- *      (2) the physical Memory object containing that memory's PTE
- *      (3) the offset within the preceding physical Memory object of that memory's PTE
- *
- * Item (1) allows us to convert an "unpaged" Memory block in to a "paged" Memory block, and the combination of
- * (2) and (3) allows us to efficiently update the PTE whenever the page is accesssed and/or modified.
+ * @this {Bus}
+ * @param {number} addr is a linear address
+ * @param {boolean} fWrite (true if called for a write, false if for a read)
+ * @return {Memory|null}
  */
-Bus.prototype.mapPageBlock = function(addr)
+Bus.prototype.mapPageBlock = function(addr, fWrite)
 {
-    return null;
+    var offPDE = (addr & X86.LADDR.PDE.MASK) >>> X86.LADDR.PDE.SHIFT;
+    var addrPDE = this.cpu.regCR3 + offPDE;                             // TODO: adding offPDE could be eliminated, along with the busMask mask
+    var blockPDE = this.aPhysBlocks[(addrPDE & this.busMask) >>> this.blockShift];
+    var pde = blockPDE.readLong(offPDE);
+
+    if (!(pde & X86.PTE.PRESENT)) {
+        X86.fnPageFault.call(this.cpu, addr, false, fWrite);
+        return null;
+    }
+
+    if (!(pde & X86.PTE.USER) && this.cpu.segCS.cpl == 3) {
+        X86.fnPageFault.call(this.cpu, addr, true, fWrite);
+        return null;
+    }
+
+    var offPTE = (addr & X86.LADDR.PTE.MASK) >>> X86.LADDR.PTE.SHIFT;
+    var addrPTE = (pde & X86.PTE.FRAME) + offPTE;                       // TODO: adding offPTE could be eliminated, along with the busMask mask
+    var blockPTE = this.aPhysBlocks[(addrPTE & this.busMask) >>> this.blockShift];
+    var pte = blockPTE.readLong(offPTE);
+
+    if (!(pte & X86.PTE.PRESENT)) {
+        X86.fnPageFault.call(this.cpu, addr, false, fWrite);
+        return null;
+    }
+
+    if (!(pte & X86.PTE.USER) && this.cpu.segCS.cpl == 3) {
+        X86.fnPageFault.call(this.cpu, addr, true, fWrite);
+        return null;
+    }
+
+    var addrPhys = (pte & X86.PTE.FRAME) + (addr & X86.LADDR.OFFSET);   // TODO: Adding OFFSET could be eliminated, along with the busMask mask
+    var blockPhys = this.aPhysBlocks[(addrPhys & this.busMask) >>> this.blockShift];
+
+    /*
+     * So we have the block containing the physical memory corresponding to the given linear address.
+     *
+     * Now we create a new "paged" Memory block and record the physical block info using setPhysBlock().
+     */
+    var addrPage = addr & ~X86.LADDR.OFFSET;
+    var blockPage = new Memory(addrPage, 0, this.blockSize, Memory.TYPE.PAGED);
+    blockPage.setPhysBlock(blockPage, blockPDE, offPDE, blockPTE, offPTE);
+    return blockPage;
 };
 
 /**

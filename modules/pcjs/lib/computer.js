@@ -140,13 +140,17 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
 
     /*
      * Find the appropriate CPU (and Debugger and Control Panel, if any)
+     *
+     * CLOSURE COMPILER TIP: To override the type of a right-hand expression (as we need to do here,
+     * where we know getComponentByType() will only return an X86CPU object or null), wrap the expression
+     * in parentheses.  I never knew this until I stumbled across it in "Closure: The Definitive Guide".
      */
-    this.cpu = Component.getComponentByType("CPU", this.id);
+    this.cpu = /** @type {X86CPU} */ (Component.getComponentByType("CPU", this.id));
     if (!this.cpu) {
         Component.error("Unable to find CPU component");
         return;
     }
-    this.dbg = Component.getComponentByType("Debugger", this.id);
+    this.dbg = /** @type {Debugger} */ (Component.getComponentByType("Debugger", this.id));
 
     /*
      * Initialize the Bus component

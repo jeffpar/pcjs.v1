@@ -171,6 +171,25 @@ var X86 = {
         },
         INVALID: 0          // use X86.DESC.INVALID for invalid DESC values
     },
+    LADDR: {                // linear address
+        PDE: {              // index of page directory entry
+            MASK:   0xffc00000,
+            SHIFT:  20      // (addr & DIR.MASK) >>> DIR.SHIFT yields a page directory offset (ie, index * 4)
+        },
+        PTE: {              // index of page table entry
+            MASK:   0x003ff000,
+            SHIFT:  10      // (addr & PAGE.MASK) >>> PAGE.SHIFT yields a page table offset (ie, index * 4)
+        },
+        OFFSET:     0x00000fff
+    },
+    PTE: {
+        FRAME:      0xfffff000,
+        DIRTY:      0x00000040,         // page has been modified
+        ACCESSED:   0x00000020,         // page has been accessed
+        USER:       0x00000004,         // set for user level (CPL 3), clear for supervisor level (CPL 0-2)
+        READWRITE:  0x00000002,         // set for read/write, clear for read-only (affects CPL 3 only)
+        PRESENT:    0x00000001          // set for present page, clear for not-present page
+    },
     TSS: {
         PREV_TSS:   0x00,
         CPL0_SP:    0x02,   // start of values altered by task switches
@@ -234,6 +253,7 @@ var X86 = {
         NP_FAULT:   0x0B,       // Not Present Fault (protected-mode only)
         SS_FAULT:   0x0C,       // Stack Fault (protected-mode only)
         GP_FAULT:   0x0D,       // General Protection Fault
+        PG_FAULT:   0x0E,       // Page Fault
         MF_FAULT:   0x10        // Math Fault (see ESC or WAIT)
     },
     ERRCODE: {

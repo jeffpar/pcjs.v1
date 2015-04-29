@@ -307,6 +307,11 @@ X86.opMOVcr = function MOVcr()
         break;
     case 0x3:
         this.regCR3 = this.regEBX;
+        /*
+         * Normal use of regCR3 involves adding a 0-4K (12-bit) offset to obtain a page directory entry, so
+         * let's ensure that the low 12 bits of regCR3 are always zero.
+         */
+        this.assert(!(this.regCR3 & X86.LADDR.OFFSET));
         this.regEBX = temp;
         break;
     }

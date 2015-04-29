@@ -149,6 +149,7 @@ if (typeof module !== 'undefined') {
     global.BUGS_8086 = BUGS_8086;
     global.I386 = I386;
     global.COMPAQ386 = COMPAQ386;
+    global.PAGEBLOCKS = PAGEBLOCKS;
     /*
      * TODO: When we're "required" by Node, should we return anything via module.exports?
      */
