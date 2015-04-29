@@ -48,6 +48,23 @@ You can also do this with files from other branches, and such. `man git-checkout
 The rest of the Internet will tell you to use `git reset --hard`, but this resets all uncommitted changes you’ve
 made in your working copy. Type this with care.
 
+Amending a commit
+---
+
+Sometimes I'm too quick with the "Commit and Push" button, and I've left a stale comment in the comment field.
+To correct that:
+
+	git commit --amend -m "New comment"
+
+Unfortunately, updating the remote is not as simple as `git push`, which will complain:
+
+	Updates were rejected because the tip of your current branch is behind its remote counterpart.
+	Integrate the remote changes (e.g. 'git pull ...') before pushing again.
+
+But in this case, there's nothing to pull, so force the push (this example assumes the current branch is *master*):
+
+	git push -f origin master
+
 Node "Cheat Sheet"
 ===
 
