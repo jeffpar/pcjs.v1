@@ -659,7 +659,7 @@ X86.fnDIVb = function DIVb(dst, src)
      * However, src is technically an output, and dst is merely an input (which is why we must return
      * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
      */
-    if (DEBUG && DEBUGGER) this.traceLog('DIVB', src, dst, null, this.getPS(), this.regMDLo);
+    if (DEBUG && DEBUGGER) this.traceLog('DIVb', src, dst, null, this.getPS(), this.regMDLo);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesDivBR : this.cycleCounts.nOpCyclesDivBM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -718,9 +718,9 @@ X86.fnDIVw = function DIVw(dst, src)
      */
     if (DEBUG && DEBUGGER) {
         if (this.dataSize == 2) {
-            this.traceLog('DIVW', src, dst, null, this.getPS(), this.regMDLo | (this.regMDHi << 16));
+            this.traceLog('DIVw', src, dst, null, this.getPS(), this.regMDLo | (this.regMDHi << 16));
         } else {
-            this.traceLog('DIVD', src, dst, null, this.getPS(), this.regMDLo, this.regMDHi);
+            this.traceLog('DIVd', src, dst, null, this.getPS(), this.regMDLo, this.regMDHi);
         }
     }
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesDivWR : this.cycleCounts.nOpCyclesDivWM);
@@ -788,7 +788,7 @@ X86.fnIDIVb = function IDIVb(dst, src)
      * However, src is technically an output, and dst is merely an input (which is why we must return
      * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
      */
-    if (DEBUG && DEBUGGER) this.traceLog('IDIVB', src, dst, null, this.getPS(), this.regMDLo);
+    if (DEBUG && DEBUGGER) this.traceLog('IDIVb', src, dst, null, this.getPS(), this.regMDLo);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIDivBR : this.cycleCounts.nOpCyclesIDivBM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -855,9 +855,9 @@ X86.fnIDIVw = function IDIVw(dst, src)
      */
     if (DEBUG && DEBUGGER) {
         if (this.dataSize == 2) {
-            this.traceLog('IDIVW', src, dst, null, this.getPS(), this.regMDLo | (this.regMDHi << 16));
+            this.traceLog('IDIVw', src, dst, null, this.getPS(), this.regMDLo | (this.regMDHi << 16));
         } else {
-            this.traceLog('IDIVD', src, dst, null, this.getPS(), this.regMDLo, this.regMDHi);
+            this.traceLog('IDIVd', src, dst, null, this.getPS(), this.regMDLo, this.regMDHi);
         }
     }
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIDivWR : this.cycleCounts.nOpCyclesIDivWM);
@@ -945,7 +945,7 @@ X86.fnIMULb = function IMULb(dst, src)
      * However, src is technically an output, and dst is merely an input (which is why we must return
      * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
      */
-    if (DEBUG && DEBUGGER) this.traceLog('IMULB', src, dst, null, this.getPS(), this.regMDLo);
+    if (DEBUG && DEBUGGER) this.traceLog('IMULb', src, dst, null, this.getPS(), this.regMDLo);
 
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIMulBR : this.cycleCounts.nOpCyclesIMulBM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
@@ -989,7 +989,7 @@ X86.fnIMULn = function IMULn(dst, src)
     }
 
     result &= this.dataMask;
-    if (DEBUG && DEBUGGER) this.traceLog('IMULN', dst, src, null, this.getPS(), result);
+    if (DEBUG && DEBUGGER) this.traceLog('IMULn', dst, src, null, this.getPS(), result);
 
     /*
      * NOTE: These are the cycle counts for the 80286; the 80186/80188 have slightly different values (ranges):
@@ -1086,9 +1086,9 @@ X86.fnIMULw = function IMULw(dst, src)
      */
     if (DEBUG && DEBUGGER) {
         if (this.dataSize == 2) {
-            this.traceLog('IMULW', src, dst, null, this.getPS(), this.regMDLo | (this.regMDHi << 16));
+            this.traceLog('IMULw', src, dst, null, this.getPS(), this.regMDLo | (this.regMDHi << 16));
         } else {
-            this.traceLog('IMULD', src, dst, null, this.getPS(), this.regMDLo, this.regMDHi);
+            this.traceLog('IMULd', src, dst, null, this.getPS(), this.regMDLo, this.regMDHi);
         }
     }
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIMulWR : this.cycleCounts.nOpCyclesIMulWM);
@@ -1683,7 +1683,7 @@ X86.fnMULb = function MULb(dst, src)
      * However, src is technically an output, and dst is merely an input (which is why we must return
      * dst unchanged). So, to make traceLog() more consistent, we reverse the order of dst and src.
      */
-    if (DEBUG && DEBUGGER) this.traceLog('MULB', src, dst, null, this.getPS(), this.regMDLo);
+    if (DEBUG && DEBUGGER) this.traceLog('MULb', src, dst, null, this.getPS(), this.regMDLo);
 
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesMulBR : this.cycleCounts.nOpCyclesMulBM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
@@ -1760,9 +1760,9 @@ X86.fnMULw = function MULw(dst, src)
      */
     if (DEBUG && DEBUGGER) {
         if (this.dataSize == 2) {
-            this.traceLog('MULW', src, dst, null, this.getPS(), this.regMDLo | (this.regMDHi << 16));
+            this.traceLog('MULw', src, dst, null, this.getPS(), this.regMDLo | (this.regMDHi << 16));
         } else {
-            this.traceLog('MULD', src, dst, null, this.getPS(), this.regMDLo, this.regMDHi);
+            this.traceLog('MULd', src, dst, null, this.getPS(), this.regMDLo, this.regMDHi);
         }
     }
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesMulWR : this.cycleCounts.nOpCyclesMulWM);
@@ -1928,7 +1928,7 @@ X86.fnRCLb = function RCLb(dst, src)
         }
         this.setRotateResult(result, carry, X86.RESULT.BYTE);
     }
-    if (DEBUG && DEBUGGER) this.traceLog('RCLB', dst, src, flagsIn, this.getPS(), result);
+    if (DEBUG && DEBUGGER) this.traceLog('RCLb', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
@@ -1956,7 +1956,7 @@ X86.fnRCLw = function RCLw(dst, src)
         }
         this.setRotateResult(result, carry, X86.RESULT.WORD);
     }
-    if (DEBUG && DEBUGGER) this.traceLog('RCLW', dst, src, flagsIn, this.getPS(), result);
+    if (DEBUG && DEBUGGER) this.traceLog('RCLw', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
@@ -1972,7 +1972,7 @@ X86.fnRCLd = function RCLd(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
-    var count = src & this.nShiftCountMask;     // Yes, this 32-bit-only function could mask with 0x1f directly
+    var count = src & this.nShiftCountMask;     // this 32-bit-only function could mask with 0x1f directly
     if (count) {
         var carry = this.getCarry();
         /*
@@ -1984,7 +1984,7 @@ X86.fnRCLd = function RCLd(dst, src)
         carry = dst << (count - 1);
         this.setRotateResult(result, carry, X86.RESULT.DWORD);
     }
-    if (DEBUG && DEBUGGER) this.traceLog('RCLD', dst, src, flagsIn, this.getPS(), result);
+    if (DEBUG && DEBUGGER) this.traceLog('RCLd', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
@@ -2012,7 +2012,7 @@ X86.fnRCRb = function RCRb(dst, src)
         }
         this.setRotateResult(result, carry, X86.RESULT.BYTE);
     }
-    if (DEBUG && DEBUGGER) this.traceLog('RCRB', dst, src, flagsIn, this.getPS(), result);
+    if (DEBUG && DEBUGGER) this.traceLog('RCRb', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
@@ -2040,7 +2040,7 @@ X86.fnRCRw = function RCRw(dst, src)
         }
         this.setRotateResult(result, carry, X86.RESULT.WORD);
     }
-    if (DEBUG && DEBUGGER) this.traceLog('RCRW', dst, src, flagsIn, this.getPS(), result);
+    if (DEBUG && DEBUGGER) this.traceLog('RCRw', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
@@ -2056,7 +2056,7 @@ X86.fnRCRd = function RCRd(dst, src)
 {
     var result = dst;
     var flagsIn = (DEBUG? this.getPS() : 0);
-    var count = src & this.nShiftCountMask;     // Yes, this 32-bit-only function could mask with 0x1f directly
+    var count = src & this.nShiftCountMask;     // this 32-bit-only function could mask with 0x1f directly
     if (count) {
         var carry = this.getCarry();
         /*
@@ -2068,7 +2068,7 @@ X86.fnRCRd = function RCRd(dst, src)
         carry = dst << (32 - count);
         this.setRotateResult(result, carry, X86.RESULT.DWORD);
     }
-    if (DEBUG && DEBUGGER) this.traceLog('RCRD', dst, src, flagsIn, this.getPS(), result);
+    if (DEBUG && DEBUGGER) this.traceLog('RCRd', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
@@ -2130,12 +2130,12 @@ X86.fnROLb = function ROLb(dst, src)
         if (!count) {
             carry = dst << 7;
         } else {
-            result = ((dst << count) | (dst >> (8 - count))) & 0xff;
             carry = dst << (count - 1);
+            result = ((dst << count) | (dst >> (8 - count))) & 0xff;
         }
         this.setRotateResult(result, carry, X86.RESULT.BYTE);
     }
-    if (DEBUG && DEBUGGER) this.traceLog('ROLB', dst, src, flagsIn, this.getPS(), result);
+    if (DEBUG && DEBUGGER) this.traceLog('ROLb', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
@@ -2158,12 +2158,34 @@ X86.fnROLw = function ROLw(dst, src)
         if (!count) {
             carry = dst << 15;
         } else {
-            result = ((dst << count) | (dst >> (16 - count))) & 0xffff;
             carry = dst << (count - 1);
+            result = ((dst << count) | (dst >> (16 - count))) & 0xffff;
         }
         this.setRotateResult(result, carry, X86.RESULT.WORD);
     }
-    if (DEBUG && DEBUGGER) this.traceLog('ROLW', dst, src, flagsIn, this.getPS(), result);
+    if (DEBUG && DEBUGGER) this.traceLog('ROLw', dst, src, flagsIn, this.getPS(), result);
+    return result;
+};
+
+/**
+ * fnROLd(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src (1 or CL)
+ * @return {number}
+ */
+X86.fnROLd = function ROLd(dst, src)
+{
+    var result = dst;
+    var flagsIn = (DEBUG? this.getPS() : 0);
+    var count = src & this.nShiftCountMask;
+    if (count) {
+        var carry = dst << (count - 1);
+        result = (dst << count) | (dst >>> (32 - count));
+        this.setRotateResult(result, carry, X86.RESULT.DWORD);
+    }
+    if (DEBUG && DEBUGGER) this.traceLog('ROLd', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
@@ -2186,12 +2208,12 @@ X86.fnRORb = function RORb(dst, src)
         if (!count) {
             carry = dst;
         } else {
-            result = ((dst >> count) | (dst << (8 - count))) & 0xff;
             carry = dst << (8 - count);
+            result = ((dst >>> count) | carry) & 0xff;
         }
         this.setRotateResult(result, carry, X86.RESULT.BYTE);
     }
-    if (DEBUG && DEBUGGER) this.traceLog('RORB', dst, src, flagsIn, this.getPS(), result);
+    if (DEBUG && DEBUGGER) this.traceLog('RORb', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
@@ -2214,12 +2236,34 @@ X86.fnRORw = function RORw(dst, src)
         if (!count) {
             carry = dst;
         } else {
-            result = ((dst >> count) | (dst << (16 - count))) & 0xffff;
             carry = dst << (16 - count);
+            result = ((dst >>> count) | carry) & 0xffff;
         }
         this.setRotateResult(result, carry, X86.RESULT.WORD);
     }
-    if (DEBUG && DEBUGGER) this.traceLog('RORW', dst, src, flagsIn, this.getPS(), result);
+    if (DEBUG && DEBUGGER) this.traceLog('RORw', dst, src, flagsIn, this.getPS(), result);
+    return result;
+};
+
+/**
+ * fnRORd(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src (1 or CL)
+ * @return {number}
+ */
+X86.fnRORd = function RORd(dst, src)
+{
+    var result = dst;
+    var flagsIn = (DEBUG? this.getPS() : 0);
+    var count = src & this.nShiftCountMask;
+    if (count) {
+        var carry = dst << (32 - count);
+        result = (dst >>> count) | carry;
+        this.setRotateResult(result, carry, X86.RESULT.DWORD);
+    }
+    if (DEBUG && DEBUGGER) this.traceLog('RORd', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
@@ -2235,7 +2279,7 @@ X86.fnSARb = function SARb(dst, src)
 {
     var count = src & this.nShiftCountMask;
     if (count) {
-        if (count > 8) count = 9;
+        if (count > 9) count = 9;
         var carry = ((dst << 24) >> 24) >> (count - 1);
         dst = (carry >> 1) & 0xff;
         this.setLogicResult(dst, X86.RESULT.BYTE, carry & 0x1);
@@ -2255,10 +2299,29 @@ X86.fnSARw = function SARw(dst, src)
 {
     var count = src & this.nShiftCountMask;
     if (count) {
-        if (count > 16) count = 17;
+        if (count > 17) count = 17;
         var carry = ((dst << 16) >> 16) >> (count - 1);
         dst = (carry >> 1) & 0xffff;
         this.setLogicResult(dst, X86.RESULT.WORD, carry & 0x1);
+    }
+    return dst;
+};
+
+/**
+ * fnSARd(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src (1 or CL, or an immediate byte for 80186/80188 and up)
+ * @return {number}
+ */
+X86.fnSARd = function SARd(dst, src)
+{
+    var count = src & this.nShiftCountMask;
+    if (count) {
+        var carry = dst >> (count - 1);
+        dst = (carry >> 1);
+        this.setLogicResult(dst, X86.RESULT.DWORD, carry & 0x1);
     }
     return dst;
 };
@@ -2596,7 +2659,7 @@ X86.fnSHLb = function SHLb(dst, src)
         }
         this.setLogicResult(result, X86.RESULT.BYTE, carry & X86.RESULT.BYTE, (result ^ carry) & X86.RESULT.BYTE);
     }
-    if (DEBUG && DEBUGGER) this.traceLog('SHLB', dst, src, flagsIn, this.getPS(), result);
+    if (DEBUG && DEBUGGER) this.traceLog('SHLb', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
@@ -2623,7 +2686,29 @@ X86.fnSHLw = function SHLw(dst, src)
         }
         this.setLogicResult(result, X86.RESULT.WORD, carry & X86.RESULT.WORD, (result ^ carry) & X86.RESULT.WORD);
     }
-    if (DEBUG && DEBUGGER) this.traceLog('SHLW', dst, src, flagsIn, this.getPS(), result);
+    if (DEBUG && DEBUGGER) this.traceLog('SHLw', dst, src, flagsIn, this.getPS(), result);
+    return result;
+};
+
+/**
+ * fnSHLd(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src (1 or CL, or an immediate byte for 80186/80188 and up)
+ * @return {number}
+ */
+X86.fnSHLd = function SHLd(dst, src)
+{
+    var result = dst;
+    var flagsIn = (DEBUG? this.getPS() : 0);
+    var count = src & this.nShiftCountMask;     // this 32-bit-only function could mask with 0x1f directly
+    if (count) {
+        var carry = dst << (count - 1);
+        result = (carry << 1);
+        this.setLogicResult(result, X86.RESULT.DWORD, carry & X86.RESULT.DWORD, (result ^ carry) & X86.RESULT.DWORD);
+    }
+    if (DEBUG && DEBUGGER) this.traceLog('SHLd', dst, src, flagsIn, this.getPS(), result);
     return result;
 };
 
@@ -2733,8 +2818,8 @@ X86.fnSHRb = function SHRb(dst, src)
 {
     var count = src & this.nShiftCountMask;
     if (count) {
-        var carry = (count > 8? 0 : (dst >> (count - 1)));
-        dst = (carry >> 1) & 0xff;
+        var carry = (count > 8? 0 : (dst >>> (count - 1)));
+        dst = (carry >>> 1) & 0xff;
         this.setLogicResult(dst, X86.RESULT.BYTE, carry & 0x1, dst & X86.RESULT.BYTE);
     }
     return dst;
@@ -2752,9 +2837,28 @@ X86.fnSHRw = function SHRw(dst, src)
 {
     var count = src & this.nShiftCountMask;
     if (count) {
-        var carry = (count > 16? 0 : (dst >> (count - 1)));
-        dst = (carry >> 1) & 0xffff;
+        var carry = (count > 16? 0 : (dst >>> (count - 1)));
+        dst = (carry >>> 1) & 0xffff;
         this.setLogicResult(dst, X86.RESULT.WORD, carry & 0x1, dst & X86.RESULT.WORD);
+    }
+    return dst;
+};
+
+/**
+ * fnSHRd(dst, src)
+ *
+ * @this {X86CPU}
+ * @param {number} dst
+ * @param {number} src (1 or CL, or an immediate byte for 80186/80188 and up)
+ * @return {number}
+ */
+X86.fnSHRd = function SHRd(dst, src)
+{
+    var count = src & this.nShiftCountMask;
+    if (count) {
+        var carry = (dst >>> (count - 1));
+        dst = (carry >>> 1);
+        this.setLogicResult(dst, X86.RESULT.DWORD, carry & 0x1, dst & X86.RESULT.DWORD);
     }
     return dst;
 };

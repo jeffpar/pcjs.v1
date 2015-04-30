@@ -18,7 +18,7 @@
 			<disk path="">None</disk>
 			<manifest ref="/disks/pc/cpm/manifest.xml" disk="*"/>
 		</control>
-		<control type="button" binding="loadDrive">Load Drive</control>
+		<control type="button" binding="loadDrive">Load</control>
 		<control type="description" binding="descDisk" padleft="8px"/>
 	</fdc>
 	<chipset id="chipset" model="5150" sw1="01000001" sw2="11110000"/>

@@ -377,7 +377,7 @@
 					<form class="{$APPCLASS}-binding" data-value="{$type},{$binding}">
 						<fieldset class="{$APPCLASS}-fieldset">
 							<input type="file"/>
-							<input type="submit" value="Load" disabled="true"/>
+							<input type="submit" value="Mount" disabled="true"/>
 						</fieldset>
 					</form>
 				</xsl:when>

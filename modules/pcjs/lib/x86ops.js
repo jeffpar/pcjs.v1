@@ -4146,18 +4146,18 @@ X86.aOpGrpMOVn = [
 ];
 
 X86.aOpGrp2b = [
-    X86.fnROLb,             X86.fnRORb,             X86.fnRCLb,             X86.fnRCRb,             // 0xD0/0xD2(reg=0x0-0x3)
-    X86.fnSHLb,             X86.fnSHRb,             X86.fnGRPUndefined,     X86.fnSARb              // 0xD0/0xD2(reg=0x4-0x7)
+    X86.fnROLb,             X86.fnRORb,             X86.fnRCLb,             X86.fnRCRb,             // 0xC0/0xD0/0xD2(reg=0x0-0x3)
+    X86.fnSHLb,             X86.fnSHRb,             X86.fnGRPUndefined,     X86.fnSARb              // 0xC0/0xD0/0xD2(reg=0x4-0x7)
 ];
 
 X86.aOpGrp2w = [
-    X86.fnROLw,             X86.fnRORw,             X86.fnRCLw,             X86.fnRCRw,             // 0xD1/0xD3(reg=0x0-0x3)
-    X86.fnSHLw,             X86.fnSHRw,             X86.fnGRPUndefined,     X86.fnSARw              // 0xD1/0xD3(reg=0x4-0x7)
+    X86.fnROLw,             X86.fnRORw,             X86.fnRCLw,             X86.fnRCRw,             // 0xC1/0xD1/0xD3(reg=0x0-0x3)
+    X86.fnSHLw,             X86.fnSHRw,             X86.fnGRPUndefined,     X86.fnSARw              // 0xC1/0xD1/0xD3(reg=0x4-0x7)
 ];
 
 X86.aOpGrp2d = [
-    X86.fnTBD,              X86.fnTBD,              X86.fnRCLd,             X86.fnRCRd,             // 0xD1/0xD3(reg=0x0-0x3)
-    X86.fnTBD,              X86.fnTBD,              X86.fnGRPUndefined,     X86.fnTBD               // 0xD1/0xD3(reg=0x4-0x7)
+    X86.fnROLd,             X86.fnRORd,             X86.fnRCLd,             X86.fnRCRd,             // 0xC1/0xD1/0xD3(reg=0x0-0x3)
+    X86.fnSHLd,             X86.fnSHRd,             X86.fnGRPUndefined,     X86.fnSARd              // 0xC1/0xD1/0xD3(reg=0x4-0x7)
 ];
 
 X86.aOpGrp3b = [

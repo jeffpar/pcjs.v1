@@ -879,20 +879,38 @@ if (DEBUGGER) {
     Debugger.aaOp0FDescs = {
         0x00: [Debugger.INS.GRP6,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORD  | Debugger.TYPE_BOTH],
         0x01: [Debugger.INS.GRP7,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORD  | Debugger.TYPE_BOTH],
-        0x02: [Debugger.INS.LAR,    Debugger.TYPE_REG    | Debugger.TYPE_WORD  | Debugger.TYPE_OUT | Debugger.TYPE_80286, Debugger.TYPE_MEM  | Debugger.TYPE_WORD | Debugger.TYPE_IN],
-        0x03: [Debugger.INS.LSL,    Debugger.TYPE_REG    | Debugger.TYPE_WORD  | Debugger.TYPE_OUT | Debugger.TYPE_80286, Debugger.TYPE_MEM  | Debugger.TYPE_WORD | Debugger.TYPE_IN],
+        0x02: [Debugger.INS.LAR,    Debugger.TYPE_REG    | Debugger.TYPE_WORD  | Debugger.TYPE_OUT  | Debugger.TYPE_80286, Debugger.TYPE_MEM    | Debugger.TYPE_WORD | Debugger.TYPE_IN],
+        0x03: [Debugger.INS.LSL,    Debugger.TYPE_REG    | Debugger.TYPE_WORD  | Debugger.TYPE_OUT  | Debugger.TYPE_80286, Debugger.TYPE_MEM    | Debugger.TYPE_WORD | Debugger.TYPE_IN],
         0x05: [Debugger.INS.LOADALL,Debugger.TYPE_80286],
         0x06: [Debugger.INS.CLTS,   Debugger.TYPE_80286],
-        0x20: [Debugger.INS.MOV,    Debugger.TYPE_REG    | Debugger.TYPE_DWORD | Debugger.TYPE_OUT | Debugger.TYPE_80386, Debugger.TYPE_CTLREG | Debugger.TYPE_DWORD | Debugger.TYPE_IN],
-        0x22: [Debugger.INS.MOV,    Debugger.TYPE_CTLREG | Debugger.TYPE_DWORD | Debugger.TYPE_OUT | Debugger.TYPE_80386, Debugger.TYPE_REG    | Debugger.TYPE_DWORD | Debugger.TYPE_IN],
+        0x20: [Debugger.INS.MOV,    Debugger.TYPE_REG    | Debugger.TYPE_DWORD | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_CTLREG | Debugger.TYPE_DWORD | Debugger.TYPE_IN],
+        0x22: [Debugger.INS.MOV,    Debugger.TYPE_CTLREG | Debugger.TYPE_DWORD | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_REG    | Debugger.TYPE_DWORD | Debugger.TYPE_IN],
+        0x80: [Debugger.INS.JO,     Debugger.TYPE_IMMREL | Debugger.TYPE_WORDV | Debugger.TYPE_IN   | Debugger.TYPE_80386],
+        0x81: [Debugger.INS.JNO,    Debugger.TYPE_IMMREL | Debugger.TYPE_WORDV | Debugger.TYPE_IN   | Debugger.TYPE_80386],
+        0x82: [Debugger.INS.JC,     Debugger.TYPE_IMMREL | Debugger.TYPE_WORDV | Debugger.TYPE_IN   | Debugger.TYPE_80386],
+        0x83: [Debugger.INS.JNC,    Debugger.TYPE_IMMREL | Debugger.TYPE_WORDV | Debugger.TYPE_IN   | Debugger.TYPE_80386],
+        0x84: [Debugger.INS.JZ,     Debugger.TYPE_IMMREL | Debugger.TYPE_WORDV | Debugger.TYPE_IN   | Debugger.TYPE_80386],
+        0x85: [Debugger.INS.JNZ,    Debugger.TYPE_IMMREL | Debugger.TYPE_WORDV | Debugger.TYPE_IN   | Debugger.TYPE_80386],
+        0x86: [Debugger.INS.JBE,    Debugger.TYPE_IMMREL | Debugger.TYPE_WORDV | Debugger.TYPE_IN   | Debugger.TYPE_80386],
+        0x87: [Debugger.INS.JNBE,   Debugger.TYPE_IMMREL | Debugger.TYPE_WORDV | Debugger.TYPE_IN   | Debugger.TYPE_80386],
+        0x88: [Debugger.INS.JS,     Debugger.TYPE_IMMREL | Debugger.TYPE_WORDV | Debugger.TYPE_IN   | Debugger.TYPE_80386],
+        0x89: [Debugger.INS.JNS,    Debugger.TYPE_IMMREL | Debugger.TYPE_WORDV | Debugger.TYPE_IN   | Debugger.TYPE_80386],
+        0x8A: [Debugger.INS.JP,     Debugger.TYPE_IMMREL | Debugger.TYPE_WORDV | Debugger.TYPE_IN   | Debugger.TYPE_80386],
+        0x8B: [Debugger.INS.JNP,    Debugger.TYPE_IMMREL | Debugger.TYPE_WORDV | Debugger.TYPE_IN   | Debugger.TYPE_80386],
+        0x8C: [Debugger.INS.JL,     Debugger.TYPE_IMMREL | Debugger.TYPE_WORDV | Debugger.TYPE_IN   | Debugger.TYPE_80386],
+        0x8D: [Debugger.INS.JGE,    Debugger.TYPE_IMMREL | Debugger.TYPE_WORDV | Debugger.TYPE_IN   | Debugger.TYPE_80386],
+        0x8E: [Debugger.INS.JLE,    Debugger.TYPE_IMMREL | Debugger.TYPE_WORDV | Debugger.TYPE_IN   | Debugger.TYPE_80386],
+        0x8F: [Debugger.INS.JG,     Debugger.TYPE_IMMREL | Debugger.TYPE_WORDV | Debugger.TYPE_IN   | Debugger.TYPE_80386],
         0xA0: [Debugger.INS.PUSH,   Debugger.TYPE_FS     | Debugger.TYPE_IN    | Debugger.TYPE_80386],
         0xA1: [Debugger.INS.POP,    Debugger.TYPE_FS     | Debugger.TYPE_OUT   | Debugger.TYPE_80386],
-        0xA4: [Debugger.INS.SHLD,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_OUT  |  Debugger.TYPE_80386, Debugger.TYPE_REG | Debugger.TYPE_WORDV | Debugger.TYPE_IN, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-        0xA5: [Debugger.INS.SHLD,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_OUT  |  Debugger.TYPE_80386, Debugger.TYPE_REG | Debugger.TYPE_WORDV | Debugger.TYPE_IN, Debugger.TYPE_IMPREG | Debugger.TYPE_CL |   Debugger.TYPE_IN],
+        0xA4: [Debugger.INS.SHLD,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_REG    | Debugger.TYPE_WORDV | Debugger.TYPE_IN, Debugger.TYPE_IMM    | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+        0xA5: [Debugger.INS.SHLD,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_REG    | Debugger.TYPE_WORDV | Debugger.TYPE_IN, Debugger.TYPE_IMPREG | Debugger.TYPE_CL   | Debugger.TYPE_IN],
         0xA8: [Debugger.INS.PUSH,   Debugger.TYPE_GS     | Debugger.TYPE_IN    | Debugger.TYPE_80386],
         0xA9: [Debugger.INS.POP,    Debugger.TYPE_GS     | Debugger.TYPE_OUT   | Debugger.TYPE_80386],
-        0xAC: [Debugger.INS.SHRD,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_OUT  |  Debugger.TYPE_80386, Debugger.TYPE_REG | Debugger.TYPE_WORDV | Debugger.TYPE_IN, Debugger.TYPE_IMM | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-        0xAD: [Debugger.INS.SHRD,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_OUT  |  Debugger.TYPE_80386, Debugger.TYPE_REG | Debugger.TYPE_WORDV | Debugger.TYPE_IN, Debugger.TYPE_IMPREG | Debugger.TYPE_CL |   Debugger.TYPE_IN]
+        0xAC: [Debugger.INS.SHRD,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_REG    | Debugger.TYPE_WORDV | Debugger.TYPE_IN, Debugger.TYPE_IMM    | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+        0xAD: [Debugger.INS.SHRD,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_REG    | Debugger.TYPE_WORDV | Debugger.TYPE_IN, Debugger.TYPE_IMPREG | Debugger.TYPE_CL   | Debugger.TYPE_IN],
+        0xB6: [Debugger.INS.MOVZX,  Debugger.TYPE_REG    | Debugger.TYPE_WORDV | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_MODRM  | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+        0xB7: [Debugger.INS.MOVZX,  Debugger.TYPE_REG    | Debugger.TYPE_DWORD | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_MODRM  | Debugger.TYPE_WORD | Debugger.TYPE_IN]
     };
 
     Debugger.aaGrpDescs = [
@@ -2421,15 +2439,6 @@ if (DEBUGGER) {
             this.cInstructions++;
             var bOpcode = this.bus.getByteDirect(addr);
             this.aaOpcodeCounts[bOpcode][1]++;
-
-            /*
-             * This is a good example of what NOT to do in a high-frequency function, and defeats
-             * the purpose of pre-allocating and pre-initializing the history array in historyInit():
-             *
-             *      this.aOpcodeHistory[this.iOpcodeHistory] = this.newAddr(this.cpu.getIP(), this.cpu.getCS(), addr);
-             *
-             * As the name implies, newAddr() returns a new "Addr" (Array) object every time it's called.
-             */
             var a = this.aOpcodeHistory[this.iOpcodeHistory];
             a[0] = this.cpu.getIP();
             a[1] = this.cpu.getCS();
@@ -4225,18 +4234,23 @@ if (DEBUGGER) {
                 this.println(n + " instructions earlier:");
             }
             while (cLines && iHistory != this.iOpcodeHistory) {
-                var aAddr = aHistory[iHistory];
+                var aAddr = aHistory[iHistory++];
                 if (aAddr[1] == null) break;
                 /*
                  * We must create a new aAddr from the address we obtained from aHistory, because aAddr
                  * was a reference, not a copy, and we don't want getInstruction() modifying the original.
-                 *
-                 * TODO: By using a new address each time, history dumps will not disassemble 32-bit overrides properly.
                  */
                 aAddr = this.newAddr(aAddr[0], aAddr[1], aAddr[2]);
-                this.println(this.getInstruction(aAddr, "history", n));
-                if (++iHistory == aHistory.length) iHistory = 0;
-                this.nextHistory = --n;
+                this.println(this.getInstruction(aAddr, "history", n--));
+                /*
+                 * If there was an OPERAND or ADDRESS override on the previous instruction, getInstruction()
+                 * will have automatically disassembled the next instruction, so skip one more history entry.
+                 */
+                if (aAddr[6]) {
+                    iHistory++; n--;
+                }
+                if (iHistory >= aHistory.length) iHistory = 0;
+                this.nextHistory = n;
                 cLines--;
             }
         }
@@ -5040,6 +5054,10 @@ if (DEBUGGER) {
     Debugger.prototype.initAddrSize = function(aAddr, fNonPrefix)
     {
         /*
+         * Use aAddr[6] to record whether we previously processed any OPERAND or ADDRESS overrides.
+         */
+        aAddr[6] = (aAddr[4] || aAddr[5]);
+        /*
          * For proper disassembly of instructions preceded by an OPERAND (0x66) size prefix, we set aAddr[4]
          * to true whenever the operand size is 32-bit; similarly, for an ADDRESS (0x67) size prefix, we set
          * aAddr[5] to true whenever the address size is 32-bit.  Initially, both fields must be set to match
@@ -5050,10 +5068,10 @@ if (DEBUGGER) {
             aAddr[5] = (this.cpu.segCS.addrSize == 4);
         }
         /*
-         * We also use aAddr[6] to record whether the caller (ie, getInstruction()) is reporting that it
+         * We also use aAddr[7] to record whether the caller (ie, getInstruction()) is reporting that it
          * processed a complete instruction (ie, a non-prefix) or not.
          */
-        aAddr[6] = fNonPrefix;
+        aAddr[7] = fNonPrefix;
     };
 
     /**
@@ -5128,11 +5146,11 @@ if (DEBUGGER) {
             var sIns = this.getInstruction(aAddr, sComment, nSequence);
 
             /*
-             * If getInstruction() reported that it did not yet process a complete instruction (via aAddr[6]),
+             * If getInstruction() reported that it did not yet process a complete instruction (via aAddr[7]),
              * then bump the instruction count by one, so that we display one more line (and hopefully the complete
              * instruction).
              */
-            if (!aAddr[6] && !n) n++;
+            if (!aAddr[7] && !n) n++;
 
             this.println(sIns);
             this.aAddrNextCode = aAddr;

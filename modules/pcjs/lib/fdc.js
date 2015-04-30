@@ -1203,7 +1203,7 @@ FDC.prototype.loadSelectedDrive = function(sDisketteName, sDiskettePath, file)
         }
 
         if (sDiskettePath == "?") {
-            this.notice('Use "Choose File" and "Load" to select and load a local disk.');
+            this.notice('Use "Choose File" and "Mount" to select and load a local disk.');
             return;
         }
 
@@ -1337,14 +1337,14 @@ FDC.prototype.doneLoadDiskette = function onFDCLoadNotify(drive, disk, sDiskette
 
         /*
          * Adding local disk image names to the disk list seems like a nice idea, but it's too confusing,
-         * because then it looks like the "Load" button should be able to (re)load them, and that can NEVER
+         * because then it looks like the "Mount" button should be able to (re)load them, and that can NEVER
          * happen, for security reasons; local disk images can ONLY be loaded via the "Mount" button after
          * the user has selected them via the "Choose File" button.
          *
          *      this.addDiskette(sDisketteName, sDiskettePath);
          *
          * So we're going to take a different approach: when displayDiskette() is asked to display the name
-         * of a local disk image, it will map all such disks to "Local Disk", and any attempt to "Load" such
+         * of a local disk image, it will map all such disks to "Local Disk", and any attempt to "Mount" such
          * a disk, will essentially result in a "Disk not found" error.
          */
 

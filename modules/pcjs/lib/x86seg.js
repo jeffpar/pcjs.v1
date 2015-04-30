@@ -54,13 +54,12 @@ function X86Seg(cpu, id, sName, fProt)
     this.id = id;
     this.sName = sName || "";
     this.sel = 0;
-    this.base = 0;
-    this.limit = 0xffff;
-    this.acc = 0;
-    this.ext = 0;
+    this.limit = 0xffff;    // in protected-mode, this is descriptor word 0x0 (word 0x6 on the 80386 supplements limit bits 16-19)
+    this.base = 0;          // in protected-mode, this is descriptor word 0x2 (word 0x6 on the 80386 supplements base bits 24-31)
+    this.acc = 0;           // in protected-mode, this is descriptor word 0x4, masked with 0xff00 (bits 0-7 supplement base bits 16-23)
+    this.ext = 0;           // in protected-mode, this is descriptor word 0x6 (used only on the 80386)
+    this.cpl = this.dpl = 0;
     this.addrDesc = X86.ADDR_INVALID;
-    this.cpl = 0;
-    this.dpl = 0;
     /*
      * The following properties are used for CODE segments only (ie, segCS); if the process of loading
      * CS also requires a stack switch, then fStackSwitch will be set to true; additionally, if the stack
@@ -839,6 +838,15 @@ X86Seg.prototype.updateMode = function(fProt)
     }
     this.fExpDown = false;
     if (fProt) {
+        /*
+         * If we've just transitioned from real-mode, then CPL (which is meaningful for segCS only)
+         * should be left alone (ie, should remain at zero).  On the first protected-mode CS selector
+         * load (normally an intersegment JMP immediately following the protected-mode switch), CPL
+         * (along with the rest of the segment settings) will be properly set.
+         */
+        if (this.load !== this.loadReal) {
+            this.cpl = this.sel & X86.SEL.RPL;
+        }
         this.load = this.loadProt;
         this.loadIDT = this.loadIDTProt;
         this.checkRead = this.checkReadProt;
@@ -865,7 +873,6 @@ X86Seg.prototype.updateMode = function(fProt)
                 this.fExpDown = true;
             }
         }
-        this.cpl = this.sel & X86.SEL.RPL;
         this.dpl = (this.acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
         if (this.cpu.model < X86.MODEL_80386 || !(this.ext & X86.DESC.EXT.BIG)) {
             this.addrSize = 2;
@@ -880,6 +887,7 @@ X86Seg.prototype.updateMode = function(fProt)
         this.checkRead = this.checkReadReal;
         this.checkWrite = this.checkWriteReal;
         this.limit = 0xffff;
+        this.acc = this.ext = 0;
         this.cpl = this.dpl = 0;
         this.addrDesc = X86.ADDR_INVALID;
         this.addrSize = 2;

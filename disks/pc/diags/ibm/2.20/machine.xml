@@ -21,7 +21,7 @@
 			<manifest ref="/disks/pc/dos/ibm/2.00/manifest.xml" disk="*"/>
 			<manifest ref="/disks/pc/diags/ibm/2.20/manifest.xml" disk="*"/>
 		</control>
-		<control type="button" binding="loadDrive">Load Drive</control>
+		<control type="button" binding="loadDrive">Load</control>
 		<control type="description" binding="descDisk" padleft="8px"/>
 	</fdc>
 	<chipset id="chipset" model="5150" sw1="01000001" sw2="11110000"/>
