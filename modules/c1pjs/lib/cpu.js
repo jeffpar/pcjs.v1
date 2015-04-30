@@ -1114,7 +1114,7 @@ C1PCPU.prototype.run = function()
         this.halt();
         this.update();
         this.setBusy(false);
-        this.setError(e.message);
+        this.setError(e.stack || e.message);
         return;
     }
     setTimeout(function(cpu) { return function() {cpu.run();}; }(this), this.calcRemainingTime());

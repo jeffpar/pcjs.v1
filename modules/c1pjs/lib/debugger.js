@@ -794,7 +794,7 @@ if (DEBUGGER) {
         }
         catch(e) {
             fCompleted = undefined;
-            this.cpu.setError(e.message || e);
+            this.cpu.setError(e.stack || e.message);
         }
         if (fCompleted !== undefined) this.cIns++;
         /*
