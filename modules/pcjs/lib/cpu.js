@@ -1031,7 +1031,7 @@ CPU.prototype.runCPU = function(fOnClick)
         this.updateCPU();
         if (this.cmp) this.cmp.stop(usr.getTime(), this.getCycles());
         this.setBusy(false);
-        this.setError(e.message);
+        this.setError(e.stack || e.message);
         return;
     }
     setTimeout(this.onRunTimeout, this.calcRemainingTime());

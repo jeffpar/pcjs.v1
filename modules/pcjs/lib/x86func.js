@@ -3380,22 +3380,6 @@ X86.fnXORw = function XORw(dst, src)
 };
 
 /**
- * fnTBD(dst, src)
- *
- * @this {X86CPU}
- * @param {number} dst
- * @param {number} src
- * @return {number}
- */
-X86.fnTBD = function TBD(dst, src)
-{
-    this.setIP(this.opLIP - this.segCS.base);
-    this.printMessage("unimplemented 80386 opcode", true);
-    this.stopCPU();
-    return dst;
-};
-
-/**
  * fnGRPFault(dst, src)
  *
  * @this {X86CPU}

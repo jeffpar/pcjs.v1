@@ -261,7 +261,7 @@ Component.log = function(s, type)
  *
  * The Closure Compiler should automatically remove all references to Component.assert() in non-DEBUG builds.
  *
- * TODO: Add a task to the build process that "asserts" there are no occurrences of "assertion failure" in the final code.
+ * TODO: Add a task to the build process that "asserts" there are no instances of "assertion failure" in RELEASE builds.
  *
  * @param {boolean} f is the expression we are asserting to be true
  * @param {string} [s] is description of the assertion on failure
@@ -270,9 +270,6 @@ Component.assert = function(f, s)
 {
     if (DEBUG) {
         if (!f) {
-            /*
-             * TODO: An accompanying source file/line number/function call (eg, stack trace) would be nice.
-             */
             if (!s) s = "assertion failure";
             Component.log(s);
             throw new Error(s);
@@ -705,7 +702,7 @@ Component.prototype = {
      * the Closure Compiler can't be sure that this instance method hasn't been overridden, so it refuses to treat it as
      * dead code in non-DEBUG builds.
      *
-     * TODO: Add a task to the build process that "asserts" there are no occurrences of "assertion failure" in the final code.
+     * TODO: Add a task to the build process that "asserts" there are no instances of "assertion failure" in RELEASE builds.
      *
      * @param {boolean} f is the expression we are asserting to be true
      * @param {string} [s] is description of the assertion on failure
@@ -713,28 +710,29 @@ Component.prototype = {
     assert: function(f, s) {
         if (DEBUG) {
             if (!f) {
-                /*
-                 * TODO: An accompanying source file/line number/function call (eg, stack trace) would be nice.
-                 */
                 s = "assertion failure in " + (this.id || this.type) + (s? ": " + s : "");
                 if (DEBUGGER && this.dbg) {
-                    this.dbg.stopCPU(s, true);
+                    this.dbg.stopCPU();
                     /*
                      * Why do we throw an Error only to immediately catch and ignore it?  Simply to give
                      * any IDE the opportunity to inspect the application's state.  Even when the IDE has
                      * control, you should still be able to invoke Debugger commands from the IDE's REPL,
-                     * using the '$' global function that the Debugger constructor sets up; eg:
+                     * using the '$' global function that the Debugger constructor defines; eg:
                      *
                      *      $('r')
                      *      $('dw 0:0')
                      *      $('h')
                      *      ...
                      *
-                     * If you have no desire to stop on assertions, consider this a no-op.
+                     * If you have no desire to stop on assertions, consider this a no-op.  However, another
+                     * potential benefit of creating an Error object is that, for browsers like Chrome, we get
+                     * a stack trace, too.
                      */
                     try {
                         throw new Error(s);
-                    } catch(e) {}
+                    } catch(e) {
+                        this.println(e.stack || e.message);
+                    }
                     return;
                 }
                 this.log(s);
@@ -794,7 +792,7 @@ Component.prototype = {
      */
     setError: function(s) {
         this.aFlags.fError = true;
-        this.notice("Fatal error: " + s);
+        this.notice(s);         // TODO: Any cases where we should still prefix this string with "Fatal error: "?
     },
     /**
      * clearError()

@@ -1873,7 +1873,7 @@ if (DEBUGGER) {
 
         if (this.cpu) {
             if (this.bitsMessage & Messages.HALT) {
-                this.cpu.stopCPU();
+                this.stopCPU();
             }
             /*
              * We have no idea what the frequency of println() calls might be; all we know is that they easily
@@ -2121,7 +2121,7 @@ if (DEBUGGER) {
             }
             catch (e) {
                 this.nCycles = 0;
-                this.cpu.setError(e.message || e);
+                this.cpu.setError(e.stack || e.message);
             }
         } while (this.cpu.opFlags & X86.OPFLAG_PREFIXES);
 
@@ -2137,16 +2137,14 @@ if (DEBUGGER) {
     };
 
     /**
-     * stopCPU(s)
+     * stopCPU()
      *
      * @this {Debugger}
-     * @param {string} [s]
-     * @param {boolean} [fBlockFaults]
+     * @param {boolean} [fComplete]
      */
-    Debugger.prototype.stopCPU = function(s, fBlockFaults)
+    Debugger.prototype.stopCPU = function(fComplete)
     {
-        if (s) this.println(s);
-        if (this.cpu) this.cpu.stopCPU(!fBlockFaults);
+        if (this.cpu) this.cpu.stopCPU(fComplete);
     };
 
     /**
@@ -2461,7 +2459,7 @@ if (DEBUGGER) {
     Debugger.prototype.checkMemoryRead = function(addr)
     {
         if (this.checkBreakpoint(addr, this.aBreakRead)) {
-            this.cpu.stopCPU(true);
+            this.stopCPU(true);
             return true;
         }
         return false;
@@ -2480,7 +2478,7 @@ if (DEBUGGER) {
     Debugger.prototype.checkMemoryWrite = function(addr)
     {
         if (this.checkBreakpoint(addr, this.aBreakWrite)) {
-            this.cpu.stopCPU(true);
+            this.stopCPU(true);
             return true;
         }
         return false;
@@ -2502,7 +2500,7 @@ if (DEBUGGER) {
          * We trust that the Bus component won't call us unless we told it to, so we halt unconditionally
          */
         this.println("break on input from port " + str.toHexWord(port) + ": " + str.toHexByte(bIn));
-        this.cpu.stopCPU(true);
+        this.stopCPU(true);
         return true;
     };
 
@@ -2522,7 +2520,7 @@ if (DEBUGGER) {
          * We trust that the Bus component won't call us unless we told it to, so we halt unconditionally
          */
         this.println("break on output to port " + str.toHexWord(port) + ": " + str.toHexByte(bOut));
-        this.cpu.stopCPU(true);
+        this.stopCPU(true);
         return true;
     };
 
@@ -4204,7 +4202,7 @@ if (DEBUGGER) {
     {
         if (this.aFlags.fRunning && sCount === undefined) {
             this.println("halting");
-            this.cpu.stopCPU();
+            this.stopCPU();
             return;
         }
         var sMore = "";
