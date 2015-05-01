@@ -48,7 +48,7 @@ from the two 16Kb BIN files provided by [Al Kossow](http://www.vintage-computer.
 	filedump --file=private/109592-005.U11.bin --merge=private/109591-005.U13.bin --output=private/1989-04-14.rom --format=rom
 	filedump --file=private/1989-04-14.rom --output=1989-04-14.json
 
-Reading the ROMs
+Dumping the ROMs
 ---
 The *.hex* files for the 1988-01-28 DeskPro ROM were produced by running [eeprom_read](http://github.com/phooky/PROM/blob/master/tools/eeprom_read/eeprom_read.pde)
 on a [chipKIT Uno32](http://www.digilentinc.com/Products/Detail.cfm?NavPath=2,892,893&Prod=CHIPKIT-UNO32) Arduino-compatible
@@ -67,7 +67,7 @@ while the /PGM should be connected to INPUT HIGH VOLTAGE.  So I wired pin 27 (/P
 worked perfectly.  The NYC Resistor article implied that every *active low* pin should be connected to GND, but apparently
 there are exceptions to that general rule.
 
-Producing ROM Source Code
+Recreating ROM Source Code
 ---
 In the current directory, an original ROM can be regenerated from the JSON-encoded file:
 
@@ -87,19 +87,18 @@ Next, the PCjs [TextOut](/modules/textout/lib/) command, with the *--nasm* optio
 	node ../../../../../../modules/textout/bin/textout --file=1988-01-28.nasm --nasm > temp.nasm
 	mv temp.nasm 1988-01-28.nasm
 
-The result, [1988-01-28.nasm](1988-01-28/1988-01-28.nasm), after a small amount of manual cleanup, can now be successfully reassembled:
+The result, [1988-01-28.nasm](1988-01-28/1988-01-28.nasm), after a small amount of manual cleanup, can now be
+successfully reassembled:
 
 	nasm -f bin 1988-01-28.nasm -l 1988-01-28.lst -o 1988-01-28.rom
 
 However, it does NOT produce a binary identical to the original ROM, in part because of instruction ambiguities (ie,
-instructions that can be assembled multiple ways). 
-
-It's possible the reassembled ROM may still work, but more research is required.
+instructions that can be assembled multiple ways). It's possible the reassembled ROM may still work, but more research
+is required.
 
 One interesting section of the Compaq DeskPro ROM is this string at offset 0xE002:
  
 	db	'AUTHORS CAB93GLB93RWS93DJC93NPB(C)Copyright COMPAQ Computer Corporation 1982,83,84,85,86'
 
-Anyone care to take a stab at what `CAB93GLB93RWS93DJC93NPB` means?  Is it the initials of 5 people
-(CAB, GLB, RWS, DJC, NPB), separated by "93"?  I've already confirmed that
-[Google](https://www.google.com/?gws_rd=ssl#q=CAB93GLB93RWS93DJC93NPB) doesn't know.
+which appears to list the initials of 5 authors: **CAB**, **GLB**, **RWS**, **DJC**, and **NPB**.  The meaning of the
+"93" sequences is unknown; they may have simply been a form of obfuscation.
