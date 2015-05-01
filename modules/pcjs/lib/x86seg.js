@@ -288,7 +288,11 @@ X86Seg.prototype.checkWriteReal = function checkWriteReal(off, cb, fSuppress)
  */
 X86Seg.prototype.checkReadProt = function checkReadProt(off, cb, fSuppress)
 {
-    if (off + cb - 1 <= this.limit) {
+    /*
+     * Since "off" could be a 32-bit value with the sign bit (bit 31) set, we must convert
+     * it to an unsigned value using ">>>"; limit was already converted at segment load time.
+     */
+    if ((off >>> 0) + cb - 1 <= this.limit) {
         return (this.base + off)|0;
     }
     return this.checkReadProtDisallowed(off, cb, fSuppress);
@@ -305,7 +309,11 @@ X86Seg.prototype.checkReadProt = function checkReadProt(off, cb, fSuppress)
  */
 X86Seg.prototype.checkReadProtDown = function checkReadProtDown(off, cb, fSuppress)
 {
-    if (off + cb - 1 > this.limit) {
+    /*
+     * Since "off" could be a 32-bit value with the sign bit (bit 31) set, we must convert
+     * it to an unsigned value using ">>>"; limit was already converted at segment load time.
+     */
+    if ((off >>> 0) + cb - 1 > this.limit) {
         return (this.base + off)|0;
     }
     return this.checkReadProtDisallowed(off, cb, fSuppress);
@@ -339,7 +347,11 @@ X86Seg.prototype.checkReadProtDisallowed = function checkReadProtDisallowed(off,
  */
 X86Seg.prototype.checkWriteProt = function checkWriteProt(off, cb, fSuppress)
 {
-    if (off + cb - 1 <= this.limit) {
+    /*
+     * Since "off" could be a 32-bit value with the sign bit (bit 31) set, we must convert
+     * it to an unsigned value using ">>>"; limit was already converted at segment load time.
+     */
+    if ((off >>> 0) + cb - 1 <= this.limit) {
         return (this.base + off)|0;
     }
     return this.checkWriteProtDisallowed(off, cb, fSuppress);
@@ -356,7 +368,11 @@ X86Seg.prototype.checkWriteProt = function checkWriteProt(off, cb, fSuppress)
  */
 X86Seg.prototype.checkWriteProtDown = function checkWriteProtDown(off, cb, fSuppress)
 {
-    if (off + cb - 1 > this.limit) {
+    /*
+     * Since "off" could be a 32-bit value with the sign bit (bit 31) set, we must convert
+     * it to an unsigned value using ">>>"; limit was already converted at segment load time.
+     */
+    if ((off >>> 0) + cb - 1 > this.limit) {
         return (this.base + off)|0;
     }
     return this.checkWriteProtDisallowed(off, cb, fSuppress);
@@ -748,7 +764,11 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
         }
         this.sel = sel;
         this.base = base;
-        this.limit = limit;
+        /*
+         * Since limit could be a 32-bit value with the sign bit (bit 31) set, we convert
+         * it to an unsigned value now, using ">>>", so that the limit checks won't have to.
+         */
+        this.limit = (limit >>> 0);
         this.acc = acc;
         this.type = type;
         this.ext = ext;

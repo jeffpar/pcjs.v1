@@ -1373,7 +1373,26 @@ if (DEBUGGER) {
      */
     Debugger.prototype.newAddr = function(off, seg, addr, fData32, fAddr32)
     {
+        if (fData32 === undefined) fData32 = (this.cpu.segCS.dataSize == 4);
+        if (fAddr32 === undefined) fAddr32 = (this.cpu.segCS.addrSize == 4);
         return [off, seg, addr, false, fData32, fAddr32];
+    };
+
+    /**
+     * checkLimit(aAddr)
+     *
+     * @this {Debugger}
+     * @param {Array} aAddr containing [off, seg, addr]
+     */
+    Debugger.prototype.checkLimit = function(aAddr)
+    {
+        if (aAddr[1] != null) {
+            var limit = this.getSegment(aAddr[1]).limit;
+            if (aAddr[0] > limit) {
+                aAddr[0] = 0;
+                aAddr[2] = null;
+            }
+        }
     };
 
     /**
@@ -1391,11 +1410,7 @@ if (DEBUGGER) {
         }
         if (aAddr[1] != null) {
             aAddr[0] += inc;
-            var limit = this.getSegment(aAddr[1]).limit;
-            if (aAddr[0] > limit) {
-                aAddr[0] = 0;
-                aAddr[2] = null;
-            }
+            this.checkLimit(aAddr);
         }
     };
 
@@ -1408,22 +1423,22 @@ if (DEBUGGER) {
      */
     Debugger.prototype.hexAddr = function(aAddr)
     {
-        return aAddr[1] == null? ("%" + str.toHex(aAddr[2])) : this.hexOffset(aAddr[0], aAddr[1], aAddr[4]);
+        return aAddr[1] == null? ("%" + str.toHex(aAddr[2])) : this.hexOffset(aAddr[0], aAddr[1], aAddr[5]);
     };
 
     /**
-     * hexOffset(off, sel)
+     * hexOffset(off, sel, fAddr32)
      *
      * @this {Debugger}
      * @param {number} off
      * @param {number} [sel]
-     * @param {boolean} [fData32] is true if 32-bit OPERAND size in effect
+     * @param {boolean} [fAddr32] is true to force 32-bit ADDRESS size
      * @return {string} the hex representation of off (or sel:off)
      */
-    Debugger.prototype.hexOffset = function(off, sel, fData32)
+    Debugger.prototype.hexOffset = function(off, sel, fAddr32)
     {
         if (sel !== undefined) {
-            return str.toHex(sel, 4) + ":" + str.toHex(off, fData32? 8 : 4);
+            return str.toHex(sel, 4) + ":" + str.toHex(off, (off & (0xffff0000|0)) || fAddr32? 8 : 4);
         }
         return str.toHex(off);
     };
@@ -2958,14 +2973,16 @@ if (DEBUGGER) {
      */
     Debugger.prototype.getInstruction = function(aAddr, sComment, nSequence)
     {
-        var aAddrIns = this.newAddr(aAddr[0], aAddr[1], aAddr[2], this.cpu.segCS.addrSize == 4);
+        var aAddrIns = this.newAddr(aAddr[0], aAddr[1], aAddr[2]);
 
         var bOpcode = this.getByte(aAddr, 1);
 
         /*
-         * Incorporate the following prefixes into the current instruction's byte stream
+         * Incorporate the following prefixes into the current instruction byte stream.
+         * TODO: Determine the actual effect of multiple OS (and/or multiple AS) prefixes.
          */
-        if (bOpcode == X86.OPCODE.OS || bOpcode == X86.OPCODE.AS) {
+        var cMax = 2;           // let's make sure unfortunate memory contents don't screw us
+        while ((bOpcode == X86.OPCODE.OS || bOpcode == X86.OPCODE.AS) && cMax--) {
             if (bOpcode == X86.OPCODE.OS) {
                 aAddr[4] = !aAddr[4];
             } else {
@@ -3134,7 +3151,7 @@ if (DEBUGGER) {
                 sOperand = str.toHex(this.getShort(aAddr, 2), 4);
                 break;
             case Debugger.TYPE_FARP:
-                sOperand = this.hexAddr(this.newAddr(this.getWord(aAddr, 2), this.getShort(aAddr, 2), null, aAddr[4]));
+                sOperand = this.hexAddr(this.newAddr(this.getWord(aAddr, 2), this.getShort(aAddr, 2), null, aAddr[4], aAddr[5]));
                 break;
             default:
                 sOperand = "imm(" + str.toHexWord(type) + ")";
@@ -3550,7 +3567,9 @@ if (DEBUGGER) {
                 addr = null;
             }
         }
-        return [off, seg, addr];
+        var aAddr = [off, seg, addr];
+        this.checkLimit(aAddr);
+        return aAddr;
     };
 
     /**
@@ -4021,14 +4040,13 @@ if (DEBUGGER) {
      * because we always display whole lines.  If sLen is omitted/undefined, then we default to 8 lines, regardless
      * whether dumping bytes or words.
      *
-     * Also, unlike sAddr, sLen is interpreted as a decimal number, unless a radix specifier in included (eg, "0x100").
-     *
-     * And finally, sLen also support the DEBUG.COM-style syntax of a preceding "l" (eg, "l16").
+     * Also, unlike sAddr, sLen is interpreted as a decimal number, unless a radix specifier is included (eg, "0x100");
+     * sLen also supports the DEBUG.COM-style syntax of a preceding "l" (eg, "l16").
      *
      * @this {Debugger}
      * @param {string} sCmd
      * @param {string|undefined} sAddr
-     * @param {string|undefined} sLen (if present, it can be preceded by an "l", which we simply ignore; this is purely for historical reasons)
+     * @param {string|undefined} sLen (if present, it can be preceded by an "l", which we simply ignore)
      */
     Debugger.prototype.doDump = function(sCmd, sAddr, sLen)
     {
@@ -4046,6 +4064,7 @@ if (DEBUGGER) {
             this.println("\tdb [a] [#]    dump # bytes at address a");
             if (BACKTRACK) this.println("\tdi [a]        dump backtrack info at address a");
             this.println("\tdw [a] [#]    dump # words at address a");
+            this.println("\tdd [a] [#]    dump # dwords at address a");
             if (sDumpers.length) this.println("dump extensions:\n\t" + sDumpers);
             return;
         }
@@ -4085,32 +4104,30 @@ if (DEBUGGER) {
         }
         else {
             var cLines = 0;
-            var fWords = (sCmd == "dw");
-            if (sLen !== undefined) {
+            var cBytes = (sCmd == "dd"? 4 : (sCmd == "dw"? 2 : 1));
+            var cNumbers = (16 / cBytes)|0;
+            if (sLen) {
                 if (sLen.charAt(0) == "l") sLen = sLen.substr(1);
                 cLines = +sLen;
-                if (cLines) cLines = fWords? ((cLines + 7) >> 3) : ((cLines + 15) >> 4);
+                if (cLines) cLines = ((cLines + cNumbers - 1) / cNumbers)|0;
             }
             if (!cLines) cLines = 8;
             for (var iLine = 0; iLine < cLines; iLine++) {
-                var bPrev = 0;
-                var sBytes = "", sChars = "";
+                var data = 0, iByte = 0;
+                var sData = "", sChars = "";
                 sAddr = this.hexAddr(aAddr);
                 for (var i = 0; i < 16; i++) {
                     var b = this.getByte(aAddr, 1);
-                    if (fWords) {
-                        if (i & 0x1) {
-                            sBytes += str.toHex(bPrev | (b << 8), 4) + (i == 7? " - " : "  ");
-                        }
-                    }
-                    else {
-                        sBytes += str.toHex(b, 2) + (i == 7? "-" : " ");
+                    data |= (b << (iByte++ << 3));
+                    if (iByte == cBytes) {
+                        sData += str.toHex(data, cBytes * 2);
+                        sData += (cBytes == 1? (i == 7? '-' : ' ') : "  ");
+                        data = iByte = 0;
                     }
                     sChars += (b >= 32 && b < 128? String.fromCharCode(b) : ".");
-                    bPrev = b;
                 }
                 if (sDump) sDump += "\n";
-                sDump += sAddr + "  " + sBytes + " " + sChars;
+                sDump += sAddr + "  " + sData + " " + sChars;
             }
         }
         if (sDump) this.println(sDump);

@@ -23,7 +23,7 @@
 			<manifest ref="/apps/pc/1981/visicalc/manifest.xml" disk="*"/>
 			<manifest ref="/apps/pc/1982/esuite/manifest.xml" disk="*"/>
 		</control>
-		<control type="button" binding="loadDrive">Download</control>
+		<control type="button" binding="loadDrive">Load</control>
 		<control type="description" binding="descDisk" padleft="8px"/>
 		<control type="file" binding="mountDrive" padtop="8px"/>
 	</fdc>

@@ -173,7 +173,7 @@ var X86 = {
     },
     LADDR: {                // linear address
         PDE: {              // index of page directory entry
-            MASK:   0xffc00000,
+            MASK:   0xffc00000|0,
             SHIFT:  20      // (addr & DIR.MASK) >>> DIR.SHIFT yields a page directory offset (ie, index * 4)
         },
         PTE: {              // index of page table entry
@@ -183,7 +183,7 @@ var X86 = {
         OFFSET:     0x00000fff
     },
     PTE: {
-        FRAME:      0xfffff000,
+        FRAME:      0xfffff000|0,
         DIRTY:      0x00000040,         // page has been modified
         ACCESSED:   0x00000020,         // page has been accessed
         USER:       0x00000004,         // set for user level (CPL 3), clear for supervisor level (CPL 0-2)

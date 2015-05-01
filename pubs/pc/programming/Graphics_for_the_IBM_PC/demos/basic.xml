@@ -10,7 +10,7 @@
 		<manifest ref="/apps/pc/1981/visicalc/manifest.xml" disk="*"/>
 		<disk path="/api/v1/dump?dir=/pubs/pc/programming/Graphics_for_the_IBM_PC/programs">BASIC Programs</disk>
 	</control>
-	<control type="button" binding="loadDrive" padright="8px">Download</control>
+	<control type="button" binding="loadDrive" padright="8px">Load</control>
 	<control type="description" binding="descDisk" padright="8px"/>
 	<control type="file" binding="mountDrive"/>
 </fdc>

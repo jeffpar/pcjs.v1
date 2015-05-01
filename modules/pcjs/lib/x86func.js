@@ -2629,7 +2629,7 @@ X86.fnSGDT = function SGDT(dst, src)
          *
          * This code is expecting SGDT on an 80286 to set the 6th "undefined" byte to 0xFF.
          */
-        var addr = this.addrGDT | (this.model == X86.MODEL_80286? 0xff000000 : 0);
+        var addr = this.addrGDT | (this.model == X86.MODEL_80286? (0xff000000|0) : 0);
         this.setLong(this.regEA + 2, addr);
         this.nStepCycles -= 11;
     }
@@ -2981,7 +2981,7 @@ X86.fnSIDT = function SIDT(dst, src)
          * As with SGDT, the 6th byte is technically "undefined" on an 80286, but we now set it to 0xFF, for the
          * same reasons discussed in SGDT (above).
          */
-        var addr = this.addrIDT | (this.model == X86.MODEL_80286? 0xff000000 : 0);
+        var addr = this.addrIDT | (this.model == X86.MODEL_80286? (0xff000000|0) : 0);
         this.setLong(this.regEA + 2, addr);
         this.nStepCycles -= 12;
     }

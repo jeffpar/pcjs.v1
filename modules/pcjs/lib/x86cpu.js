@@ -2522,7 +2522,7 @@ X86CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
  * @param {number} addr is a physical (non-segmented) address
  * @return {number} byte (8-bit) value at that address
  */
-X86CPU.prototype.getByte = function(addr)
+X86CPU.prototype.getByte = function getByte(addr)
 {
     if (BACKTRACK) this.backTrack.btiMemLo = this.bus.readBackTrack(addr);
     return this.aMemBlocks[(addr & this.busMask) >>> this.blockShift].readByte(addr & this.blockLimit, addr);
@@ -2535,7 +2535,7 @@ X86CPU.prototype.getByte = function(addr)
  * @param {number} addr is a physical (non-segmented) address
  * @return {number} word (16-bit) value at that address
  */
-X86CPU.prototype.getShort = function(addr)
+X86CPU.prototype.getShort = function getShort(addr)
 {
     var off = addr & this.blockLimit;
     var iBlock = (addr & this.busMask) >>> this.blockShift;
@@ -2562,7 +2562,7 @@ X86CPU.prototype.getShort = function(addr)
  * @param {number} addr is a physical (non-segmented) address
  * @return {number} long (32-bit) value at that address
  */
-X86CPU.prototype.getLong = function(addr)
+X86CPU.prototype.getLong = function getLong(addr)
 {
     var off = addr & this.blockLimit;
     var iBlock = (addr & this.busMask) >>> this.blockShift;
@@ -2584,7 +2584,7 @@ X86CPU.prototype.getLong = function(addr)
  * @param {number} addr is a physical (non-segmented) address
  * @param {number} b is the byte (8-bit) value to write (which we truncate to 8 bits; required by opSTOSb)
  */
-X86CPU.prototype.setByte = function(addr, b)
+X86CPU.prototype.setByte = function setByte(addr, b)
 {
     if (BACKTRACK) this.bus.writeBackTrack(addr, this.backTrack.btiMemLo);
     this.aMemBlocks[(addr & this.busMask) >>> this.blockShift].writeByte(addr & this.blockLimit, b & 0xff, addr);
@@ -2597,7 +2597,7 @@ X86CPU.prototype.setByte = function(addr, b)
  * @param {number} addr is a physical (non-segmented) address
  * @param {number} w is the word (16-bit) value to write (which we truncate to 16 bits to be safe)
  */
-X86CPU.prototype.setShort = function(addr, w)
+X86CPU.prototype.setShort = function setShort(addr, w)
 {
     var off = addr & this.blockLimit;
     var iBlock = (addr & this.busMask) >>> this.blockShift;
@@ -2626,7 +2626,7 @@ X86CPU.prototype.setShort = function(addr, w)
  * @param {number} addr is a physical (non-segmented) address
  * @param {number} l is the long (32-bit) value to write
  */
-X86CPU.prototype.setLong = function(addr, l)
+X86CPU.prototype.setLong = function setLong(addr, l)
 {
     var off = addr & this.blockLimit;
     var iBlock = (addr & this.busMask) >>> this.blockShift;

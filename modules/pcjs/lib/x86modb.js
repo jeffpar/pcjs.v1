@@ -118,7 +118,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte06(fn) {
-        var b = fn.call(this, this.regEAX & 0xff, this.getEAByteData(this.getIPWord()));
+        var b = fn.call(this, this.regEAX & 0xff, this.getEAByteData(this.getIPAddr()));
         this.regEAX = (this.regEAX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
@@ -214,7 +214,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte0E(fn) {
-        var b = fn.call(this, this.regECX & 0xff, this.getEAByteData(this.getIPWord()));
+        var b = fn.call(this, this.regECX & 0xff, this.getEAByteData(this.getIPAddr()));
         this.regECX = (this.regECX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
@@ -310,7 +310,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte16(fn) {
-        var b = fn.call(this, this.regEDX & 0xff, this.getEAByteData(this.getIPWord()));
+        var b = fn.call(this, this.regEDX & 0xff, this.getEAByteData(this.getIPAddr()));
         this.regEDX = (this.regEDX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
@@ -406,7 +406,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte1E(fn) {
-        var b = fn.call(this, this.regEBX & 0xff, this.getEAByteData(this.getIPWord()));
+        var b = fn.call(this, this.regEBX & 0xff, this.getEAByteData(this.getIPAddr()));
         this.regEBX = (this.regEBX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
@@ -502,7 +502,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte26(fn) {
-        var b = fn.call(this, this.regEAX >> 8, this.getEAByteData(this.getIPWord()));
+        var b = fn.call(this, this.regEAX >> 8, this.getEAByteData(this.getIPAddr()));
         this.regEAX = (this.regEAX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
@@ -598,7 +598,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte2E(fn) {
-        var b = fn.call(this, this.regECX >> 8, this.getEAByteData(this.getIPWord()));
+        var b = fn.call(this, this.regECX >> 8, this.getEAByteData(this.getIPAddr()));
         this.regECX = (this.regECX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
@@ -694,7 +694,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte36(fn) {
-        var b = fn.call(this, this.regEDX >> 8, this.getEAByteData(this.getIPWord()));
+        var b = fn.call(this, this.regEDX >> 8, this.getEAByteData(this.getIPAddr()));
         this.regEDX = (this.regEDX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
@@ -790,7 +790,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte3E(fn) {
-        var b = fn.call(this, this.regEBX >> 8, this.getEAByteData(this.getIPWord()));
+        var b = fn.call(this, this.regEBX >> 8, this.getEAByteData(this.getIPAddr()));
         this.regEBX = (this.regEBX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
@@ -1582,7 +1582,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte80(fn) {
-        var b = fn.call(this, this.regEAX & 0xff, this.getEAByteData(this.regEBX + this.regESI + this.getIPWord()));
+        var b = fn.call(this, this.regEAX & 0xff, this.getEAByteData(this.regEBX + this.regESI + this.getIPAddr()));
         this.regEAX = (this.regEAX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -1594,7 +1594,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte81(fn) {
-        var b = fn.call(this, this.regEAX & 0xff, this.getEAByteData(this.regEBX + this.regEDI + this.getIPWord()));
+        var b = fn.call(this, this.regEAX & 0xff, this.getEAByteData(this.regEBX + this.regEDI + this.getIPAddr()));
         this.regEAX = (this.regEAX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -1606,7 +1606,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte82(fn) {
-        var b = fn.call(this, this.regEAX & 0xff, this.getEAByteStack(this.regEBP + this.regESI + this.getIPWord()));
+        var b = fn.call(this, this.regEAX & 0xff, this.getEAByteStack(this.regEBP + this.regESI + this.getIPAddr()));
         this.regEAX = (this.regEAX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -1618,7 +1618,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte83(fn) {
-        var b = fn.call(this, this.regEAX & 0xff, this.getEAByteStack(this.regEBP + this.regEDI + this.getIPWord()));
+        var b = fn.call(this, this.regEAX & 0xff, this.getEAByteStack(this.regEBP + this.regEDI + this.getIPAddr()));
         this.regEAX = (this.regEAX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -1630,7 +1630,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte84(fn) {
-        var b = fn.call(this, this.regEAX & 0xff, this.getEAByteData(this.regESI + this.getIPWord()));
+        var b = fn.call(this, this.regEAX & 0xff, this.getEAByteData(this.regESI + this.getIPAddr()));
         this.regEAX = (this.regEAX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -1642,7 +1642,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte85(fn) {
-        var b = fn.call(this, this.regEAX & 0xff, this.getEAByteData(this.regEDI + this.getIPWord()));
+        var b = fn.call(this, this.regEAX & 0xff, this.getEAByteData(this.regEDI + this.getIPAddr()));
         this.regEAX = (this.regEAX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -1654,7 +1654,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte86(fn) {
-        var b = fn.call(this, this.regEAX & 0xff, this.getEAByteStack(this.regEBP + this.getIPWord()));
+        var b = fn.call(this, this.regEAX & 0xff, this.getEAByteStack(this.regEBP + this.getIPAddr()));
         this.regEAX = (this.regEAX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -1666,7 +1666,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte87(fn) {
-        var b = fn.call(this, this.regEAX & 0xff, this.getEAByteData(this.regEBX + this.getIPWord()));
+        var b = fn.call(this, this.regEAX & 0xff, this.getEAByteData(this.regEBX + this.getIPAddr()));
         this.regEAX = (this.regEAX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -1678,7 +1678,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte88(fn) {
-        var b = fn.call(this, this.regECX & 0xff, this.getEAByteData(this.regEBX + this.regESI + this.getIPWord()));
+        var b = fn.call(this, this.regECX & 0xff, this.getEAByteData(this.regEBX + this.regESI + this.getIPAddr()));
         this.regECX = (this.regECX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -1690,7 +1690,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte89(fn) {
-        var b = fn.call(this, this.regECX & 0xff, this.getEAByteData(this.regEBX + this.regEDI + this.getIPWord()));
+        var b = fn.call(this, this.regECX & 0xff, this.getEAByteData(this.regEBX + this.regEDI + this.getIPAddr()));
         this.regECX = (this.regECX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -1702,7 +1702,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte8A(fn) {
-        var b = fn.call(this, this.regECX & 0xff, this.getEAByteStack(this.regEBP + this.regESI + this.getIPWord()));
+        var b = fn.call(this, this.regECX & 0xff, this.getEAByteStack(this.regEBP + this.regESI + this.getIPAddr()));
         this.regECX = (this.regECX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -1714,7 +1714,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte8B(fn) {
-        var b = fn.call(this, this.regECX & 0xff, this.getEAByteStack(this.regEBP + this.regEDI + this.getIPWord()));
+        var b = fn.call(this, this.regECX & 0xff, this.getEAByteStack(this.regEBP + this.regEDI + this.getIPAddr()));
         this.regECX = (this.regECX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -1726,7 +1726,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte8C(fn) {
-        var b = fn.call(this, this.regECX & 0xff, this.getEAByteData(this.regESI + this.getIPWord()));
+        var b = fn.call(this, this.regECX & 0xff, this.getEAByteData(this.regESI + this.getIPAddr()));
         this.regECX = (this.regECX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -1738,7 +1738,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte8D(fn) {
-        var b = fn.call(this, this.regECX & 0xff, this.getEAByteData(this.regEDI + this.getIPWord()));
+        var b = fn.call(this, this.regECX & 0xff, this.getEAByteData(this.regEDI + this.getIPAddr()));
         this.regECX = (this.regECX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -1750,7 +1750,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte8E(fn) {
-        var b = fn.call(this, this.regECX & 0xff, this.getEAByteStack(this.regEBP + this.getIPWord()));
+        var b = fn.call(this, this.regECX & 0xff, this.getEAByteStack(this.regEBP + this.getIPAddr()));
         this.regECX = (this.regECX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -1762,7 +1762,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte8F(fn) {
-        var b = fn.call(this, this.regECX & 0xff, this.getEAByteData(this.regEBX + this.getIPWord()));
+        var b = fn.call(this, this.regECX & 0xff, this.getEAByteData(this.regEBX + this.getIPAddr()));
         this.regECX = (this.regECX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiCL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -1774,7 +1774,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte90(fn) {
-        var b = fn.call(this, this.regEDX & 0xff, this.getEAByteData(this.regEBX + this.regESI + this.getIPWord()));
+        var b = fn.call(this, this.regEDX & 0xff, this.getEAByteData(this.regEBX + this.regESI + this.getIPAddr()));
         this.regEDX = (this.regEDX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -1786,7 +1786,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte91(fn) {
-        var b = fn.call(this, this.regEDX & 0xff, this.getEAByteData(this.regEBX + this.regEDI + this.getIPWord()));
+        var b = fn.call(this, this.regEDX & 0xff, this.getEAByteData(this.regEBX + this.regEDI + this.getIPAddr()));
         this.regEDX = (this.regEDX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -1798,7 +1798,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte92(fn) {
-        var b = fn.call(this, this.regEDX & 0xff, this.getEAByteStack(this.regEBP + this.regESI + this.getIPWord()));
+        var b = fn.call(this, this.regEDX & 0xff, this.getEAByteStack(this.regEBP + this.regESI + this.getIPAddr()));
         this.regEDX = (this.regEDX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -1810,7 +1810,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte93(fn) {
-        var b = fn.call(this, this.regEDX & 0xff, this.getEAByteStack(this.regEBP + this.regEDI + this.getIPWord()));
+        var b = fn.call(this, this.regEDX & 0xff, this.getEAByteStack(this.regEBP + this.regEDI + this.getIPAddr()));
         this.regEDX = (this.regEDX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -1822,7 +1822,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte94(fn) {
-        var b = fn.call(this, this.regEDX & 0xff, this.getEAByteData(this.regESI + this.getIPWord()));
+        var b = fn.call(this, this.regEDX & 0xff, this.getEAByteData(this.regESI + this.getIPAddr()));
         this.regEDX = (this.regEDX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -1834,7 +1834,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte95(fn) {
-        var b = fn.call(this, this.regEDX & 0xff, this.getEAByteData(this.regEDI + this.getIPWord()));
+        var b = fn.call(this, this.regEDX & 0xff, this.getEAByteData(this.regEDI + this.getIPAddr()));
         this.regEDX = (this.regEDX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -1846,7 +1846,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte96(fn) {
-        var b = fn.call(this, this.regEDX & 0xff, this.getEAByteStack(this.regEBP + this.getIPWord()));
+        var b = fn.call(this, this.regEDX & 0xff, this.getEAByteStack(this.regEBP + this.getIPAddr()));
         this.regEDX = (this.regEDX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -1858,7 +1858,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte97(fn) {
-        var b = fn.call(this, this.regEDX & 0xff, this.getEAByteData(this.regEBX + this.getIPWord()));
+        var b = fn.call(this, this.regEDX & 0xff, this.getEAByteData(this.regEBX + this.getIPAddr()));
         this.regEDX = (this.regEDX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiDL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -1870,7 +1870,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte98(fn) {
-        var b = fn.call(this, this.regEBX & 0xff, this.getEAByteData(this.regEBX + this.regESI + this.getIPWord()));
+        var b = fn.call(this, this.regEBX & 0xff, this.getEAByteData(this.regEBX + this.regESI + this.getIPAddr()));
         this.regEBX = (this.regEBX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -1882,7 +1882,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte99(fn) {
-        var b = fn.call(this, this.regEBX & 0xff, this.getEAByteData(this.regEBX + this.regEDI + this.getIPWord()));
+        var b = fn.call(this, this.regEBX & 0xff, this.getEAByteData(this.regEBX + this.regEDI + this.getIPAddr()));
         this.regEBX = (this.regEBX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -1894,7 +1894,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte9A(fn) {
-        var b = fn.call(this, this.regEBX & 0xff, this.getEAByteStack(this.regEBP + this.regESI + this.getIPWord()));
+        var b = fn.call(this, this.regEBX & 0xff, this.getEAByteStack(this.regEBP + this.regESI + this.getIPAddr()));
         this.regEBX = (this.regEBX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -1906,7 +1906,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte9B(fn) {
-        var b = fn.call(this, this.regEBX & 0xff, this.getEAByteStack(this.regEBP + this.regEDI + this.getIPWord()));
+        var b = fn.call(this, this.regEBX & 0xff, this.getEAByteStack(this.regEBP + this.regEDI + this.getIPAddr()));
         this.regEBX = (this.regEBX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -1918,7 +1918,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte9C(fn) {
-        var b = fn.call(this, this.regEBX & 0xff, this.getEAByteData(this.regESI + this.getIPWord()));
+        var b = fn.call(this, this.regEBX & 0xff, this.getEAByteData(this.regESI + this.getIPAddr()));
         this.regEBX = (this.regEBX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -1930,7 +1930,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte9D(fn) {
-        var b = fn.call(this, this.regEBX & 0xff, this.getEAByteData(this.regEDI + this.getIPWord()));
+        var b = fn.call(this, this.regEBX & 0xff, this.getEAByteData(this.regEDI + this.getIPAddr()));
         this.regEBX = (this.regEBX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -1942,7 +1942,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte9E(fn) {
-        var b = fn.call(this, this.regEBX & 0xff, this.getEAByteStack(this.regEBP + this.getIPWord()));
+        var b = fn.call(this, this.regEBX & 0xff, this.getEAByteStack(this.regEBP + this.getIPAddr()));
         this.regEBX = (this.regEBX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -1954,7 +1954,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByte9F(fn) {
-        var b = fn.call(this, this.regEBX & 0xff, this.getEAByteData(this.regEBX + this.getIPWord()));
+        var b = fn.call(this, this.regEBX & 0xff, this.getEAByteData(this.regEBX + this.getIPAddr()));
         this.regEBX = (this.regEBX & ~0xff) | b;
         if (BACKTRACK) this.backTrack.btiBL = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -1966,7 +1966,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByteA0(fn) {
-        var b = fn.call(this, this.regEAX >> 8, this.getEAByteData(this.regEBX + this.regESI + this.getIPWord()));
+        var b = fn.call(this, this.regEAX >> 8, this.getEAByteData(this.regEBX + this.regESI + this.getIPAddr()));
         this.regEAX = (this.regEAX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -1978,7 +1978,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByteA1(fn) {
-        var b = fn.call(this, this.regEAX >> 8, this.getEAByteData(this.regEBX + this.regEDI + this.getIPWord()));
+        var b = fn.call(this, this.regEAX >> 8, this.getEAByteData(this.regEBX + this.regEDI + this.getIPAddr()));
         this.regEAX = (this.regEAX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -1990,7 +1990,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByteA2(fn) {
-        var b = fn.call(this, this.regEAX >> 8, this.getEAByteStack(this.regEBP + this.regESI + this.getIPWord()));
+        var b = fn.call(this, this.regEAX >> 8, this.getEAByteStack(this.regEBP + this.regESI + this.getIPAddr()));
         this.regEAX = (this.regEAX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -2002,7 +2002,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByteA3(fn) {
-        var b = fn.call(this, this.regEAX >> 8, this.getEAByteStack(this.regEBP + this.regEDI + this.getIPWord()));
+        var b = fn.call(this, this.regEAX >> 8, this.getEAByteStack(this.regEBP + this.regEDI + this.getIPAddr()));
         this.regEAX = (this.regEAX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -2014,7 +2014,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByteA4(fn) {
-        var b = fn.call(this, this.regEAX >> 8, this.getEAByteData(this.regESI + this.getIPWord()));
+        var b = fn.call(this, this.regEAX >> 8, this.getEAByteData(this.regESI + this.getIPAddr()));
         this.regEAX = (this.regEAX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -2026,7 +2026,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByteA5(fn) {
-        var b = fn.call(this, this.regEAX >> 8, this.getEAByteData(this.regEDI + this.getIPWord()));
+        var b = fn.call(this, this.regEAX >> 8, this.getEAByteData(this.regEDI + this.getIPAddr()));
         this.regEAX = (this.regEAX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -2038,7 +2038,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByteA6(fn) {
-        var b = fn.call(this, this.regEAX >> 8, this.getEAByteStack(this.regEBP + this.getIPWord()));
+        var b = fn.call(this, this.regEAX >> 8, this.getEAByteStack(this.regEBP + this.getIPAddr()));
         this.regEAX = (this.regEAX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -2050,7 +2050,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByteA7(fn) {
-        var b = fn.call(this, this.regEAX >> 8, this.getEAByteData(this.regEBX + this.getIPWord()));
+        var b = fn.call(this, this.regEAX >> 8, this.getEAByteData(this.regEBX + this.getIPAddr()));
         this.regEAX = (this.regEAX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -2062,7 +2062,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByteA8(fn) {
-        var b = fn.call(this, this.regECX >> 8, this.getEAByteData(this.regEBX + this.regESI + this.getIPWord()));
+        var b = fn.call(this, this.regECX >> 8, this.getEAByteData(this.regEBX + this.regESI + this.getIPAddr()));
         this.regECX = (this.regECX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -2074,7 +2074,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByteA9(fn) {
-        var b = fn.call(this, this.regECX >> 8, this.getEAByteData(this.regEBX + this.regEDI + this.getIPWord()));
+        var b = fn.call(this, this.regECX >> 8, this.getEAByteData(this.regEBX + this.regEDI + this.getIPAddr()));
         this.regECX = (this.regECX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -2086,7 +2086,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByteAA(fn) {
-        var b = fn.call(this, this.regECX >> 8, this.getEAByteStack(this.regEBP + this.regESI + this.getIPWord()));
+        var b = fn.call(this, this.regECX >> 8, this.getEAByteStack(this.regEBP + this.regESI + this.getIPAddr()));
         this.regECX = (this.regECX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -2098,7 +2098,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByteAB(fn) {
-        var b = fn.call(this, this.regECX >> 8, this.getEAByteStack(this.regEBP + this.regEDI + this.getIPWord()));
+        var b = fn.call(this, this.regECX >> 8, this.getEAByteStack(this.regEBP + this.regEDI + this.getIPAddr()));
         this.regECX = (this.regECX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -2110,7 +2110,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByteAC(fn) {
-        var b = fn.call(this, this.regECX >> 8, this.getEAByteData(this.regESI + this.getIPWord()));
+        var b = fn.call(this, this.regECX >> 8, this.getEAByteData(this.regESI + this.getIPAddr()));
         this.regECX = (this.regECX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -2122,7 +2122,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByteAD(fn) {
-        var b = fn.call(this, this.regECX >> 8, this.getEAByteData(this.regEDI + this.getIPWord()));
+        var b = fn.call(this, this.regECX >> 8, this.getEAByteData(this.regEDI + this.getIPAddr()));
         this.regECX = (this.regECX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -2134,7 +2134,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByteAE(fn) {
-        var b = fn.call(this, this.regECX >> 8, this.getEAByteStack(this.regEBP + this.getIPWord()));
+        var b = fn.call(this, this.regECX >> 8, this.getEAByteStack(this.regEBP + this.getIPAddr()));
         this.regECX = (this.regECX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -2146,7 +2146,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByteAF(fn) {
-        var b = fn.call(this, this.regECX >> 8, this.getEAByteData(this.regEBX + this.getIPWord()));
+        var b = fn.call(this, this.regECX >> 8, this.getEAByteData(this.regEBX + this.getIPAddr()));
         this.regECX = (this.regECX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiCH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -2158,7 +2158,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByteB0(fn) {
-        var b = fn.call(this, this.regEDX >> 8, this.getEAByteData(this.regEBX + this.regESI + this.getIPWord()));
+        var b = fn.call(this, this.regEDX >> 8, this.getEAByteData(this.regEBX + this.regESI + this.getIPAddr()));
         this.regEDX = (this.regEDX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -2170,7 +2170,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByteB1(fn) {
-        var b = fn.call(this, this.regEDX >> 8, this.getEAByteData(this.regEBX + this.regEDI + this.getIPWord()));
+        var b = fn.call(this, this.regEDX >> 8, this.getEAByteData(this.regEBX + this.regEDI + this.getIPAddr()));
         this.regEDX = (this.regEDX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -2182,7 +2182,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByteB2(fn) {
-        var b = fn.call(this, this.regEDX >> 8, this.getEAByteStack(this.regEBP + this.regESI + this.getIPWord()));
+        var b = fn.call(this, this.regEDX >> 8, this.getEAByteStack(this.regEBP + this.regESI + this.getIPAddr()));
         this.regEDX = (this.regEDX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -2194,7 +2194,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByteB3(fn) {
-        var b = fn.call(this, this.regEDX >> 8, this.getEAByteStack(this.regEBP + this.regEDI + this.getIPWord()));
+        var b = fn.call(this, this.regEDX >> 8, this.getEAByteStack(this.regEBP + this.regEDI + this.getIPAddr()));
         this.regEDX = (this.regEDX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -2206,7 +2206,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByteB4(fn) {
-        var b = fn.call(this, this.regEDX >> 8, this.getEAByteData(this.regESI + this.getIPWord()));
+        var b = fn.call(this, this.regEDX >> 8, this.getEAByteData(this.regESI + this.getIPAddr()));
         this.regEDX = (this.regEDX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -2218,7 +2218,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByteB5(fn) {
-        var b = fn.call(this, this.regEDX >> 8, this.getEAByteData(this.regEDI + this.getIPWord()));
+        var b = fn.call(this, this.regEDX >> 8, this.getEAByteData(this.regEDI + this.getIPAddr()));
         this.regEDX = (this.regEDX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -2230,7 +2230,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByteB6(fn) {
-        var b = fn.call(this, this.regEDX >> 8, this.getEAByteStack(this.regEBP + this.getIPWord()));
+        var b = fn.call(this, this.regEDX >> 8, this.getEAByteStack(this.regEBP + this.getIPAddr()));
         this.regEDX = (this.regEDX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -2242,7 +2242,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByteB7(fn) {
-        var b = fn.call(this, this.regEDX >> 8, this.getEAByteData(this.regEBX + this.getIPWord()));
+        var b = fn.call(this, this.regEDX >> 8, this.getEAByteData(this.regEBX + this.getIPAddr()));
         this.regEDX = (this.regEDX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiDH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -2254,7 +2254,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByteB8(fn) {
-        var b = fn.call(this, this.regEBX >> 8, this.getEAByteData(this.regEBX + this.regESI + this.getIPWord()));
+        var b = fn.call(this, this.regEBX >> 8, this.getEAByteData(this.regEBX + this.regESI + this.getIPAddr()));
         this.regEBX = (this.regEBX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -2266,7 +2266,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByteB9(fn) {
-        var b = fn.call(this, this.regEBX >> 8, this.getEAByteData(this.regEBX + this.regEDI + this.getIPWord()));
+        var b = fn.call(this, this.regEBX >> 8, this.getEAByteData(this.regEBX + this.regEDI + this.getIPAddr()));
         this.regEBX = (this.regEBX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -2278,7 +2278,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByteBA(fn) {
-        var b = fn.call(this, this.regEBX >> 8, this.getEAByteStack(this.regEBP + this.regESI + this.getIPWord()));
+        var b = fn.call(this, this.regEBX >> 8, this.getEAByteStack(this.regEBP + this.regESI + this.getIPAddr()));
         this.regEBX = (this.regEBX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -2290,7 +2290,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByteBB(fn) {
-        var b = fn.call(this, this.regEBX >> 8, this.getEAByteStack(this.regEBP + this.regEDI + this.getIPWord()));
+        var b = fn.call(this, this.regEBX >> 8, this.getEAByteStack(this.regEBP + this.regEDI + this.getIPAddr()));
         this.regEBX = (this.regEBX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -2302,7 +2302,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByteBC(fn) {
-        var b = fn.call(this, this.regEBX >> 8, this.getEAByteData(this.regESI + this.getIPWord()));
+        var b = fn.call(this, this.regEBX >> 8, this.getEAByteData(this.regESI + this.getIPAddr()));
         this.regEBX = (this.regEBX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -2314,7 +2314,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByteBD(fn) {
-        var b = fn.call(this, this.regEBX >> 8, this.getEAByteData(this.regEDI + this.getIPWord()));
+        var b = fn.call(this, this.regEBX >> 8, this.getEAByteData(this.regEDI + this.getIPAddr()));
         this.regEBX = (this.regEBX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -2326,7 +2326,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByteBE(fn) {
-        var b = fn.call(this, this.regEBX >> 8, this.getEAByteStack(this.regEBP + this.getIPWord()));
+        var b = fn.call(this, this.regEBX >> 8, this.getEAByteStack(this.regEBP + this.getIPAddr()));
         this.regEBX = (this.regEBX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -2338,7 +2338,7 @@ X86ModB.aOpModReg = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModRegByteBF(fn) {
-        var b = fn.call(this, this.regEBX >> 8, this.getEAByteData(this.regEBX + this.getIPWord()));
+        var b = fn.call(this, this.regEBX >> 8, this.getEAByteData(this.regEBX + this.getIPAddr()));
         this.regEBX = (this.regEBX & 0xff) | (b << 8);
         if (BACKTRACK) this.backTrack.btiBH = this.backTrack.btiEALo;
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -3121,7 +3121,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte06(fn) {
-        var b = fn.call(this, this.modEAByteData(this.getIPWord()), this.regEAX & 0xff);
+        var b = fn.call(this, this.modEAByteData(this.getIPAddr()), this.regEAX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
@@ -3217,7 +3217,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte0E(fn) {
-        var b = fn.call(this, this.modEAByteData(this.getIPWord()), this.regECX & 0xff);
+        var b = fn.call(this, this.modEAByteData(this.getIPAddr()), this.regECX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
@@ -3313,7 +3313,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte16(fn) {
-        var b = fn.call(this, this.modEAByteData(this.getIPWord()), this.regEDX & 0xff);
+        var b = fn.call(this, this.modEAByteData(this.getIPAddr()), this.regEDX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
@@ -3409,7 +3409,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte1E(fn) {
-        var b = fn.call(this, this.modEAByteData(this.getIPWord()), this.regEBX & 0xff);
+        var b = fn.call(this, this.modEAByteData(this.getIPAddr()), this.regEBX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
@@ -3505,7 +3505,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte26(fn) {
-        var b = fn.call(this, this.modEAByteData(this.getIPWord()), this.regEAX >> 8);
+        var b = fn.call(this, this.modEAByteData(this.getIPAddr()), this.regEAX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
@@ -3601,7 +3601,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte2E(fn) {
-        var b = fn.call(this, this.modEAByteData(this.getIPWord()), this.regECX >> 8);
+        var b = fn.call(this, this.modEAByteData(this.getIPAddr()), this.regECX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
@@ -3697,7 +3697,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte36(fn) {
-        var b = fn.call(this, this.modEAByteData(this.getIPWord()), this.regEDX >> 8);
+        var b = fn.call(this, this.modEAByteData(this.getIPAddr()), this.regEDX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
@@ -3793,7 +3793,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte3E(fn) {
-        var b = fn.call(this, this.modEAByteData(this.getIPWord()), this.regEBX >> 8);
+        var b = fn.call(this, this.modEAByteData(this.getIPAddr()), this.regEBX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
@@ -4585,7 +4585,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte80(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regEBX + this.regESI + this.getIPWord()), this.regEAX & 0xff);
+        var b = fn.call(this, this.modEAByteData(this.regEBX + this.regESI + this.getIPAddr()), this.regEAX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -4597,7 +4597,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte81(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regEBX + this.regEDI + this.getIPWord()), this.regEAX & 0xff);
+        var b = fn.call(this, this.modEAByteData(this.regEBX + this.regEDI + this.getIPAddr()), this.regEAX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -4609,7 +4609,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte82(fn) {
-        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.regESI + this.getIPWord()), this.regEAX & 0xff);
+        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.regESI + this.getIPAddr()), this.regEAX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -4621,7 +4621,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte83(fn) {
-        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.regEDI + this.getIPWord()), this.regEAX & 0xff);
+        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.regEDI + this.getIPAddr()), this.regEAX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -4633,7 +4633,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte84(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regESI + this.getIPWord()), this.regEAX & 0xff);
+        var b = fn.call(this, this.modEAByteData(this.regESI + this.getIPAddr()), this.regEAX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -4645,7 +4645,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte85(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regEDI + this.getIPWord()), this.regEAX & 0xff);
+        var b = fn.call(this, this.modEAByteData(this.regEDI + this.getIPAddr()), this.regEAX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -4657,7 +4657,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte86(fn) {
-        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.getIPWord()), this.regEAX & 0xff);
+        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.getIPAddr()), this.regEAX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -4669,7 +4669,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte87(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regEBX + this.getIPWord()), this.regEAX & 0xff);
+        var b = fn.call(this, this.modEAByteData(this.regEBX + this.getIPAddr()), this.regEAX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -4681,7 +4681,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte88(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regEBX + this.regESI + this.getIPWord()), this.regECX & 0xff);
+        var b = fn.call(this, this.modEAByteData(this.regEBX + this.regESI + this.getIPAddr()), this.regECX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -4693,7 +4693,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte89(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regEBX + this.regEDI + this.getIPWord()), this.regECX & 0xff);
+        var b = fn.call(this, this.modEAByteData(this.regEBX + this.regEDI + this.getIPAddr()), this.regECX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -4705,7 +4705,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte8A(fn) {
-        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.regESI + this.getIPWord()), this.regECX & 0xff);
+        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.regESI + this.getIPAddr()), this.regECX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -4717,7 +4717,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte8B(fn) {
-        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.regEDI + this.getIPWord()), this.regECX & 0xff);
+        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.regEDI + this.getIPAddr()), this.regECX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -4729,7 +4729,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte8C(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regESI + this.getIPWord()), this.regECX & 0xff);
+        var b = fn.call(this, this.modEAByteData(this.regESI + this.getIPAddr()), this.regECX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -4741,7 +4741,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte8D(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regEDI + this.getIPWord()), this.regECX & 0xff);
+        var b = fn.call(this, this.modEAByteData(this.regEDI + this.getIPAddr()), this.regECX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -4753,7 +4753,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte8E(fn) {
-        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.getIPWord()), this.regECX & 0xff);
+        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.getIPAddr()), this.regECX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -4765,7 +4765,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte8F(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regEBX + this.getIPWord()), this.regECX & 0xff);
+        var b = fn.call(this, this.modEAByteData(this.regEBX + this.getIPAddr()), this.regECX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -4777,7 +4777,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte90(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regEBX + this.regESI + this.getIPWord()), this.regEDX & 0xff);
+        var b = fn.call(this, this.modEAByteData(this.regEBX + this.regESI + this.getIPAddr()), this.regEDX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -4789,7 +4789,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte91(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regEBX + this.regEDI + this.getIPWord()), this.regEDX & 0xff);
+        var b = fn.call(this, this.modEAByteData(this.regEBX + this.regEDI + this.getIPAddr()), this.regEDX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -4801,7 +4801,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte92(fn) {
-        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.regESI + this.getIPWord()), this.regEDX & 0xff);
+        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.regESI + this.getIPAddr()), this.regEDX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -4813,7 +4813,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte93(fn) {
-        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.regEDI + this.getIPWord()), this.regEDX & 0xff);
+        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.regEDI + this.getIPAddr()), this.regEDX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -4825,7 +4825,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte94(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regESI + this.getIPWord()), this.regEDX & 0xff);
+        var b = fn.call(this, this.modEAByteData(this.regESI + this.getIPAddr()), this.regEDX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -4837,7 +4837,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte95(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regEDI + this.getIPWord()), this.regEDX & 0xff);
+        var b = fn.call(this, this.modEAByteData(this.regEDI + this.getIPAddr()), this.regEDX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -4849,7 +4849,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte96(fn) {
-        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.getIPWord()), this.regEDX & 0xff);
+        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.getIPAddr()), this.regEDX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -4861,7 +4861,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte97(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regEBX + this.getIPWord()), this.regEDX & 0xff);
+        var b = fn.call(this, this.modEAByteData(this.regEBX + this.getIPAddr()), this.regEDX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -4873,7 +4873,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte98(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regEBX + this.regESI + this.getIPWord()), this.regEBX & 0xff);
+        var b = fn.call(this, this.modEAByteData(this.regEBX + this.regESI + this.getIPAddr()), this.regEBX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -4885,7 +4885,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte99(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regEBX + this.regEDI + this.getIPWord()), this.regEBX & 0xff);
+        var b = fn.call(this, this.modEAByteData(this.regEBX + this.regEDI + this.getIPAddr()), this.regEBX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -4897,7 +4897,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte9A(fn) {
-        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.regESI + this.getIPWord()), this.regEBX & 0xff);
+        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.regESI + this.getIPAddr()), this.regEBX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -4909,7 +4909,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte9B(fn) {
-        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.regEDI + this.getIPWord()), this.regEBX & 0xff);
+        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.regEDI + this.getIPAddr()), this.regEBX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -4921,7 +4921,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte9C(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regESI + this.getIPWord()), this.regEBX & 0xff);
+        var b = fn.call(this, this.modEAByteData(this.regESI + this.getIPAddr()), this.regEBX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -4933,7 +4933,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte9D(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regEDI + this.getIPWord()), this.regEBX & 0xff);
+        var b = fn.call(this, this.modEAByteData(this.regEDI + this.getIPAddr()), this.regEBX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -4945,7 +4945,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte9E(fn) {
-        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.getIPWord()), this.regEBX & 0xff);
+        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.getIPAddr()), this.regEBX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -4957,7 +4957,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByte9F(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regEBX + this.getIPWord()), this.regEBX & 0xff);
+        var b = fn.call(this, this.modEAByteData(this.regEBX + this.getIPAddr()), this.regEBX & 0xff);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBL;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -4969,7 +4969,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByteA0(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regEBX + this.regESI + this.getIPWord()), this.regEAX >> 8);
+        var b = fn.call(this, this.modEAByteData(this.regEBX + this.regESI + this.getIPAddr()), this.regEAX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -4981,7 +4981,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByteA1(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regEBX + this.regEDI + this.getIPWord()), this.regEAX >> 8);
+        var b = fn.call(this, this.modEAByteData(this.regEBX + this.regEDI + this.getIPAddr()), this.regEAX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -4993,7 +4993,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByteA2(fn) {
-        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.regESI + this.getIPWord()), this.regEAX >> 8);
+        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.regESI + this.getIPAddr()), this.regEAX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -5005,7 +5005,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByteA3(fn) {
-        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.regEDI + this.getIPWord()), this.regEAX >> 8);
+        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.regEDI + this.getIPAddr()), this.regEAX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -5017,7 +5017,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByteA4(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regESI + this.getIPWord()), this.regEAX >> 8);
+        var b = fn.call(this, this.modEAByteData(this.regESI + this.getIPAddr()), this.regEAX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -5029,7 +5029,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByteA5(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regEDI + this.getIPWord()), this.regEAX >> 8);
+        var b = fn.call(this, this.modEAByteData(this.regEDI + this.getIPAddr()), this.regEAX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -5041,7 +5041,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByteA6(fn) {
-        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.getIPWord()), this.regEAX >> 8);
+        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.getIPAddr()), this.regEAX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -5053,7 +5053,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByteA7(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regEBX + this.getIPWord()), this.regEAX >> 8);
+        var b = fn.call(this, this.modEAByteData(this.regEBX + this.getIPAddr()), this.regEAX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiAH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -5065,7 +5065,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByteA8(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regEBX + this.regESI + this.getIPWord()), this.regECX >> 8);
+        var b = fn.call(this, this.modEAByteData(this.regEBX + this.regESI + this.getIPAddr()), this.regECX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -5077,7 +5077,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByteA9(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regEBX + this.regEDI + this.getIPWord()), this.regECX >> 8);
+        var b = fn.call(this, this.modEAByteData(this.regEBX + this.regEDI + this.getIPAddr()), this.regECX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -5089,7 +5089,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByteAA(fn) {
-        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.regESI + this.getIPWord()), this.regECX >> 8);
+        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.regESI + this.getIPAddr()), this.regECX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -5101,7 +5101,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByteAB(fn) {
-        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.regEDI + this.getIPWord()), this.regECX >> 8);
+        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.regEDI + this.getIPAddr()), this.regECX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -5113,7 +5113,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByteAC(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regESI + this.getIPWord()), this.regECX >> 8);
+        var b = fn.call(this, this.modEAByteData(this.regESI + this.getIPAddr()), this.regECX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -5125,7 +5125,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByteAD(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regEDI + this.getIPWord()), this.regECX >> 8);
+        var b = fn.call(this, this.modEAByteData(this.regEDI + this.getIPAddr()), this.regECX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -5137,7 +5137,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByteAE(fn) {
-        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.getIPWord()), this.regECX >> 8);
+        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.getIPAddr()), this.regECX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -5149,7 +5149,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByteAF(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regEBX + this.getIPWord()), this.regECX >> 8);
+        var b = fn.call(this, this.modEAByteData(this.regEBX + this.getIPAddr()), this.regECX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiCH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -5161,7 +5161,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByteB0(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regEBX + this.regESI + this.getIPWord()), this.regEDX >> 8);
+        var b = fn.call(this, this.modEAByteData(this.regEBX + this.regESI + this.getIPAddr()), this.regEDX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -5173,7 +5173,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByteB1(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regEBX + this.regEDI + this.getIPWord()), this.regEDX >> 8);
+        var b = fn.call(this, this.modEAByteData(this.regEBX + this.regEDI + this.getIPAddr()), this.regEDX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -5185,7 +5185,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByteB2(fn) {
-        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.regESI + this.getIPWord()), this.regEDX >> 8);
+        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.regESI + this.getIPAddr()), this.regEDX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -5197,7 +5197,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByteB3(fn) {
-        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.regEDI + this.getIPWord()), this.regEDX >> 8);
+        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.regEDI + this.getIPAddr()), this.regEDX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -5209,7 +5209,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByteB4(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regESI + this.getIPWord()), this.regEDX >> 8);
+        var b = fn.call(this, this.modEAByteData(this.regESI + this.getIPAddr()), this.regEDX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -5221,7 +5221,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByteB5(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regEDI + this.getIPWord()), this.regEDX >> 8);
+        var b = fn.call(this, this.modEAByteData(this.regEDI + this.getIPAddr()), this.regEDX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -5233,7 +5233,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByteB6(fn) {
-        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.getIPWord()), this.regEDX >> 8);
+        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.getIPAddr()), this.regEDX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -5245,7 +5245,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByteB7(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regEBX + this.getIPWord()), this.regEDX >> 8);
+        var b = fn.call(this, this.modEAByteData(this.regEBX + this.getIPAddr()), this.regEDX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiDH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -5257,7 +5257,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByteB8(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regEBX + this.regESI + this.getIPWord()), this.regEBX >> 8);
+        var b = fn.call(this, this.modEAByteData(this.regEBX + this.regESI + this.getIPAddr()), this.regEBX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -5269,7 +5269,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByteB9(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regEBX + this.regEDI + this.getIPWord()), this.regEBX >> 8);
+        var b = fn.call(this, this.modEAByteData(this.regEBX + this.regEDI + this.getIPAddr()), this.regEBX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -5281,7 +5281,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByteBA(fn) {
-        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.regESI + this.getIPWord()), this.regEBX >> 8);
+        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.regESI + this.getIPAddr()), this.regEBX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
@@ -5293,7 +5293,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByteBB(fn) {
-        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.regEDI + this.getIPWord()), this.regEBX >> 8);
+        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.regEDI + this.getIPAddr()), this.regEBX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
@@ -5305,7 +5305,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByteBC(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regESI + this.getIPWord()), this.regEBX >> 8);
+        var b = fn.call(this, this.modEAByteData(this.regESI + this.getIPAddr()), this.regEBX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -5317,7 +5317,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByteBD(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regEDI + this.getIPWord()), this.regEBX >> 8);
+        var b = fn.call(this, this.modEAByteData(this.regEDI + this.getIPAddr()), this.regEBX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -5329,7 +5329,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByteBE(fn) {
-        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.getIPWord()), this.regEBX >> 8);
+        var b = fn.call(this, this.modEAByteStack(this.regEBP + this.getIPAddr()), this.regEBX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -5341,7 +5341,7 @@ X86ModB.aOpModMem = [
      * @param {function(number,number)} fn (dst,src)
      */
     function opModMemByteBF(fn) {
-        var b = fn.call(this, this.modEAByteData(this.regEBX + this.getIPWord()), this.regEBX >> 8);
+        var b = fn.call(this, this.modEAByteData(this.regEBX + this.getIPAddr()), this.regEBX >> 8);
         if (BACKTRACK) this.backTrack.btiEALo = this.backTrack.btiBH;
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
@@ -5445,7 +5445,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte06(afnGrp, fnSrc) {
-        var b = afnGrp[0].call(this, this.modEAByteData(this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[0].call(this, this.modEAByteData(this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
@@ -5541,7 +5541,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte0E(afnGrp, fnSrc) {
-        var b = afnGrp[1].call(this, this.modEAByteData(this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[1].call(this, this.modEAByteData(this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
@@ -5637,7 +5637,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte16(afnGrp, fnSrc) {
-        var b = afnGrp[2].call(this, this.modEAByteData(this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[2].call(this, this.modEAByteData(this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
@@ -5733,7 +5733,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte1E(afnGrp, fnSrc) {
-        var b = afnGrp[3].call(this, this.modEAByteData(this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[3].call(this, this.modEAByteData(this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
@@ -5829,7 +5829,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte26(afnGrp, fnSrc) {
-        var b = afnGrp[4].call(this, this.modEAByteData(this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[4].call(this, this.modEAByteData(this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
@@ -5925,7 +5925,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte2E(afnGrp, fnSrc) {
-        var b = afnGrp[5].call(this, this.modEAByteData(this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[5].call(this, this.modEAByteData(this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
@@ -6021,7 +6021,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte36(afnGrp, fnSrc) {
-        var b = afnGrp[6].call(this, this.modEAByteData(this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[6].call(this, this.modEAByteData(this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
@@ -6117,7 +6117,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte3E(afnGrp, fnSrc) {
-        var b = afnGrp[7].call(this, this.modEAByteData(this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[7].call(this, this.modEAByteData(this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesDisp;
     },
@@ -6909,7 +6909,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte80(afnGrp, fnSrc) {
-        var b = afnGrp[0].call(this, this.modEAByteData(this.regEBX + this.regESI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[0].call(this, this.modEAByteData(this.regEBX + this.regESI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
@@ -6921,7 +6921,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte81(afnGrp, fnSrc) {
-        var b = afnGrp[0].call(this, this.modEAByteData(this.regEBX + this.regEDI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[0].call(this, this.modEAByteData(this.regEBX + this.regEDI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
@@ -6933,7 +6933,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte82(afnGrp, fnSrc) {
-        var b = afnGrp[0].call(this, this.modEAByteStack(this.regEBP + this.regESI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[0].call(this, this.modEAByteStack(this.regEBP + this.regESI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
@@ -6945,7 +6945,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte83(afnGrp, fnSrc) {
-        var b = afnGrp[0].call(this, this.modEAByteStack(this.regEBP + this.regEDI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[0].call(this, this.modEAByteStack(this.regEBP + this.regEDI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
@@ -6957,7 +6957,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte84(afnGrp, fnSrc) {
-        var b = afnGrp[0].call(this, this.modEAByteData(this.regESI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[0].call(this, this.modEAByteData(this.regESI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
@@ -6969,7 +6969,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte85(afnGrp, fnSrc) {
-        var b = afnGrp[0].call(this, this.modEAByteData(this.regEDI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[0].call(this, this.modEAByteData(this.regEDI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
@@ -6981,7 +6981,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte86(afnGrp, fnSrc) {
-        var b = afnGrp[0].call(this, this.modEAByteStack(this.regEBP + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[0].call(this, this.modEAByteStack(this.regEBP + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
@@ -6993,7 +6993,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte87(afnGrp, fnSrc) {
-        var b = afnGrp[0].call(this, this.modEAByteData(this.regEBX + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[0].call(this, this.modEAByteData(this.regEBX + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
@@ -7005,7 +7005,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte88(afnGrp, fnSrc) {
-        var b = afnGrp[1].call(this, this.modEAByteData(this.regEBX + this.regESI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[1].call(this, this.modEAByteData(this.regEBX + this.regESI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
@@ -7017,7 +7017,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte89(afnGrp, fnSrc) {
-        var b = afnGrp[1].call(this, this.modEAByteData(this.regEBX + this.regEDI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[1].call(this, this.modEAByteData(this.regEBX + this.regEDI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
@@ -7029,7 +7029,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte8A(afnGrp, fnSrc) {
-        var b = afnGrp[1].call(this, this.modEAByteStack(this.regEBP + this.regESI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[1].call(this, this.modEAByteStack(this.regEBP + this.regESI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
@@ -7041,7 +7041,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte8B(afnGrp, fnSrc) {
-        var b = afnGrp[1].call(this, this.modEAByteStack(this.regEBP + this.regEDI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[1].call(this, this.modEAByteStack(this.regEBP + this.regEDI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
@@ -7053,7 +7053,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte8C(afnGrp, fnSrc) {
-        var b = afnGrp[1].call(this, this.modEAByteData(this.regESI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[1].call(this, this.modEAByteData(this.regESI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
@@ -7065,7 +7065,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte8D(afnGrp, fnSrc) {
-        var b = afnGrp[1].call(this, this.modEAByteData(this.regEDI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[1].call(this, this.modEAByteData(this.regEDI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
@@ -7077,7 +7077,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte8E(afnGrp, fnSrc) {
-        var b = afnGrp[1].call(this, this.modEAByteStack(this.regEBP + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[1].call(this, this.modEAByteStack(this.regEBP + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
@@ -7089,7 +7089,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte8F(afnGrp, fnSrc) {
-        var b = afnGrp[1].call(this, this.modEAByteData(this.regEBX + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[1].call(this, this.modEAByteData(this.regEBX + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
@@ -7101,7 +7101,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte90(afnGrp, fnSrc) {
-        var b = afnGrp[2].call(this, this.modEAByteData(this.regEBX + this.regESI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[2].call(this, this.modEAByteData(this.regEBX + this.regESI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
@@ -7113,7 +7113,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte91(afnGrp, fnSrc) {
-        var b = afnGrp[2].call(this, this.modEAByteData(this.regEBX + this.regEDI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[2].call(this, this.modEAByteData(this.regEBX + this.regEDI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
@@ -7125,7 +7125,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte92(afnGrp, fnSrc) {
-        var b = afnGrp[2].call(this, this.modEAByteStack(this.regEBP + this.regESI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[2].call(this, this.modEAByteStack(this.regEBP + this.regESI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
@@ -7137,7 +7137,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte93(afnGrp, fnSrc) {
-        var b = afnGrp[2].call(this, this.modEAByteStack(this.regEBP + this.regEDI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[2].call(this, this.modEAByteStack(this.regEBP + this.regEDI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
@@ -7149,7 +7149,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte94(afnGrp, fnSrc) {
-        var b = afnGrp[2].call(this, this.modEAByteData(this.regESI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[2].call(this, this.modEAByteData(this.regESI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
@@ -7161,7 +7161,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte95(afnGrp, fnSrc) {
-        var b = afnGrp[2].call(this, this.modEAByteData(this.regEDI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[2].call(this, this.modEAByteData(this.regEDI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
@@ -7173,7 +7173,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte96(afnGrp, fnSrc) {
-        var b = afnGrp[2].call(this, this.modEAByteStack(this.regEBP + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[2].call(this, this.modEAByteStack(this.regEBP + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
@@ -7185,7 +7185,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte97(afnGrp, fnSrc) {
-        var b = afnGrp[2].call(this, this.modEAByteData(this.regEBX + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[2].call(this, this.modEAByteData(this.regEBX + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
@@ -7197,7 +7197,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte98(afnGrp, fnSrc) {
-        var b = afnGrp[3].call(this, this.modEAByteData(this.regEBX + this.regESI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[3].call(this, this.modEAByteData(this.regEBX + this.regESI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
@@ -7209,7 +7209,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte99(afnGrp, fnSrc) {
-        var b = afnGrp[3].call(this, this.modEAByteData(this.regEBX + this.regEDI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[3].call(this, this.modEAByteData(this.regEBX + this.regEDI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
@@ -7221,7 +7221,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte9A(afnGrp, fnSrc) {
-        var b = afnGrp[3].call(this, this.modEAByteStack(this.regEBP + this.regESI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[3].call(this, this.modEAByteStack(this.regEBP + this.regESI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
@@ -7233,7 +7233,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte9B(afnGrp, fnSrc) {
-        var b = afnGrp[3].call(this, this.modEAByteStack(this.regEBP + this.regEDI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[3].call(this, this.modEAByteStack(this.regEBP + this.regEDI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
@@ -7245,7 +7245,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte9C(afnGrp, fnSrc) {
-        var b = afnGrp[3].call(this, this.modEAByteData(this.regESI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[3].call(this, this.modEAByteData(this.regESI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
@@ -7257,7 +7257,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte9D(afnGrp, fnSrc) {
-        var b = afnGrp[3].call(this, this.modEAByteData(this.regEDI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[3].call(this, this.modEAByteData(this.regEDI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
@@ -7269,7 +7269,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte9E(afnGrp, fnSrc) {
-        var b = afnGrp[3].call(this, this.modEAByteStack(this.regEBP + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[3].call(this, this.modEAByteStack(this.regEBP + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
@@ -7281,7 +7281,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByte9F(afnGrp, fnSrc) {
-        var b = afnGrp[3].call(this, this.modEAByteData(this.regEBX + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[3].call(this, this.modEAByteData(this.regEBX + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
@@ -7293,7 +7293,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByteA0(afnGrp, fnSrc) {
-        var b = afnGrp[4].call(this, this.modEAByteData(this.regEBX + this.regESI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[4].call(this, this.modEAByteData(this.regEBX + this.regESI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
@@ -7305,7 +7305,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByteA1(afnGrp, fnSrc) {
-        var b = afnGrp[4].call(this, this.modEAByteData(this.regEBX + this.regEDI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[4].call(this, this.modEAByteData(this.regEBX + this.regEDI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
@@ -7317,7 +7317,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByteA2(afnGrp, fnSrc) {
-        var b = afnGrp[4].call(this, this.modEAByteStack(this.regEBP + this.regESI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[4].call(this, this.modEAByteStack(this.regEBP + this.regESI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
@@ -7329,7 +7329,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByteA3(afnGrp, fnSrc) {
-        var b = afnGrp[4].call(this, this.modEAByteStack(this.regEBP + this.regEDI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[4].call(this, this.modEAByteStack(this.regEBP + this.regEDI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
@@ -7341,7 +7341,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByteA4(afnGrp, fnSrc) {
-        var b = afnGrp[4].call(this, this.modEAByteData(this.regESI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[4].call(this, this.modEAByteData(this.regESI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
@@ -7353,7 +7353,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByteA5(afnGrp, fnSrc) {
-        var b = afnGrp[4].call(this, this.modEAByteData(this.regEDI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[4].call(this, this.modEAByteData(this.regEDI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
@@ -7365,7 +7365,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByteA6(afnGrp, fnSrc) {
-        var b = afnGrp[4].call(this, this.modEAByteStack(this.regEBP + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[4].call(this, this.modEAByteStack(this.regEBP + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
@@ -7377,7 +7377,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByteA7(afnGrp, fnSrc) {
-        var b = afnGrp[4].call(this, this.modEAByteData(this.regEBX + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[4].call(this, this.modEAByteData(this.regEBX + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
@@ -7389,7 +7389,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByteA8(afnGrp, fnSrc) {
-        var b = afnGrp[5].call(this, this.modEAByteData(this.regEBX + this.regESI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[5].call(this, this.modEAByteData(this.regEBX + this.regESI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
@@ -7401,7 +7401,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByteA9(afnGrp, fnSrc) {
-        var b = afnGrp[5].call(this, this.modEAByteData(this.regEBX + this.regEDI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[5].call(this, this.modEAByteData(this.regEBX + this.regEDI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
@@ -7413,7 +7413,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByteAA(afnGrp, fnSrc) {
-        var b = afnGrp[5].call(this, this.modEAByteStack(this.regEBP + this.regESI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[5].call(this, this.modEAByteStack(this.regEBP + this.regESI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
@@ -7425,7 +7425,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByteAB(afnGrp, fnSrc) {
-        var b = afnGrp[5].call(this, this.modEAByteStack(this.regEBP + this.regEDI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[5].call(this, this.modEAByteStack(this.regEBP + this.regEDI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
@@ -7437,7 +7437,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByteAC(afnGrp, fnSrc) {
-        var b = afnGrp[5].call(this, this.modEAByteData(this.regESI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[5].call(this, this.modEAByteData(this.regESI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
@@ -7449,7 +7449,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByteAD(afnGrp, fnSrc) {
-        var b = afnGrp[5].call(this, this.modEAByteData(this.regEDI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[5].call(this, this.modEAByteData(this.regEDI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
@@ -7461,7 +7461,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByteAE(afnGrp, fnSrc) {
-        var b = afnGrp[5].call(this, this.modEAByteStack(this.regEBP + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[5].call(this, this.modEAByteStack(this.regEBP + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
@@ -7473,7 +7473,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByteAF(afnGrp, fnSrc) {
-        var b = afnGrp[5].call(this, this.modEAByteData(this.regEBX + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[5].call(this, this.modEAByteData(this.regEBX + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
@@ -7485,7 +7485,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByteB0(afnGrp, fnSrc) {
-        var b = afnGrp[6].call(this, this.modEAByteData(this.regEBX + this.regESI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[6].call(this, this.modEAByteData(this.regEBX + this.regESI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
@@ -7497,7 +7497,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByteB1(afnGrp, fnSrc) {
-        var b = afnGrp[6].call(this, this.modEAByteData(this.regEBX + this.regEDI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[6].call(this, this.modEAByteData(this.regEBX + this.regEDI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
@@ -7509,7 +7509,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByteB2(afnGrp, fnSrc) {
-        var b = afnGrp[6].call(this, this.modEAByteStack(this.regEBP + this.regESI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[6].call(this, this.modEAByteStack(this.regEBP + this.regESI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
@@ -7521,7 +7521,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByteB3(afnGrp, fnSrc) {
-        var b = afnGrp[6].call(this, this.modEAByteStack(this.regEBP + this.regEDI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[6].call(this, this.modEAByteStack(this.regEBP + this.regEDI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
@@ -7533,7 +7533,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByteB4(afnGrp, fnSrc) {
-        var b = afnGrp[6].call(this, this.modEAByteData(this.regESI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[6].call(this, this.modEAByteData(this.regESI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
@@ -7545,7 +7545,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByteB5(afnGrp, fnSrc) {
-        var b = afnGrp[6].call(this, this.modEAByteData(this.regEDI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[6].call(this, this.modEAByteData(this.regEDI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
@@ -7557,7 +7557,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByteB6(afnGrp, fnSrc) {
-        var b = afnGrp[6].call(this, this.modEAByteStack(this.regEBP + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[6].call(this, this.modEAByteStack(this.regEBP + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
@@ -7569,7 +7569,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByteB7(afnGrp, fnSrc) {
-        var b = afnGrp[6].call(this, this.modEAByteData(this.regEBX + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[6].call(this, this.modEAByteData(this.regEBX + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
@@ -7581,7 +7581,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByteB8(afnGrp, fnSrc) {
-        var b = afnGrp[7].call(this, this.modEAByteData(this.regEBX + this.regESI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[7].call(this, this.modEAByteData(this.regEBX + this.regESI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
@@ -7593,7 +7593,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByteB9(afnGrp, fnSrc) {
-        var b = afnGrp[7].call(this, this.modEAByteData(this.regEBX + this.regEDI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[7].call(this, this.modEAByteData(this.regEBX + this.regEDI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
@@ -7605,7 +7605,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByteBA(afnGrp, fnSrc) {
-        var b = afnGrp[7].call(this, this.modEAByteStack(this.regEBP + this.regESI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[7].call(this, this.modEAByteStack(this.regEBP + this.regESI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDispExtra;
     },
@@ -7617,7 +7617,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByteBB(afnGrp, fnSrc) {
-        var b = afnGrp[7].call(this, this.modEAByteStack(this.regEBP + this.regEDI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[7].call(this, this.modEAByteStack(this.regEBP + this.regEDI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseIndexDisp;
     },
@@ -7629,7 +7629,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByteBC(afnGrp, fnSrc) {
-        var b = afnGrp[7].call(this, this.modEAByteData(this.regESI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[7].call(this, this.modEAByteData(this.regESI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
@@ -7641,7 +7641,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByteBD(afnGrp, fnSrc) {
-        var b = afnGrp[7].call(this, this.modEAByteData(this.regEDI + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[7].call(this, this.modEAByteData(this.regEDI + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
@@ -7653,7 +7653,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByteBE(afnGrp, fnSrc) {
-        var b = afnGrp[7].call(this, this.modEAByteStack(this.regEBP + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[7].call(this, this.modEAByteStack(this.regEBP + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },
@@ -7665,7 +7665,7 @@ X86ModB.aOpModGrp = [
      * @param {function()} fnSrc
      */
     function opModGrpByteBF(afnGrp, fnSrc) {
-        var b = afnGrp[7].call(this, this.modEAByteData(this.regEBX + this.getIPWord()), fnSrc.call(this));
+        var b = afnGrp[7].call(this, this.modEAByteData(this.regEBX + this.getIPAddr()), fnSrc.call(this));
         this.setEAByte(b);
         this.nStepCycles -= this.cycleCounts.nEACyclesBaseDisp;
     },

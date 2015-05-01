@@ -9,6 +9,6 @@
 		<manifest ref="/disks/pc/games/infocom/zork2/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/games/infocom/zork3/manifest.xml" disk="*"/>
 	</control>
-	<control type="button" binding="loadDrive" padright="8px">Download</control>
+	<control type="button" binding="loadDrive" padright="8px">Load</control>
 	<control type="description" binding="descDisk" padright="8px"/>
 </fdc>

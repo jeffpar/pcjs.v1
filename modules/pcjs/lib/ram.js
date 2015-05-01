@@ -289,7 +289,7 @@ function CompaqController(ram)
     this.aBlocksDst = null;
 }
 
-CompaqController.ADDR       = 0x80C00000;
+CompaqController.ADDR       =(0x80C00000|0);
 CompaqController.MAP_SRC    = 0x00FE0000;
 CompaqController.MAP_DST    = 0x000E0000;
 CompaqController.MAP_SIZE   = 0x00020000;
