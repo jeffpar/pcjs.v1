@@ -3546,7 +3546,7 @@ X86.fnFault = function(nFault, nError, fHalt)
      *
      * TODO: Throw a special JavaScript exception that cpu.js must intercept and quietly ignore.
      */
-    this.opFlags &= ~(X86.OPFLAG.NOREAD | X86.OPFLAG.NOWRITE);
+    this.opFlags |= (X86.OPFLAG.NOREAD | X86.OPFLAG.NOWRITE);
 };
 
 /**
