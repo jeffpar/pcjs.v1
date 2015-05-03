@@ -282,7 +282,7 @@ ROM.prototype.copyROM = function()
             if (this.abROM.length != this.sizeROM) {
                 /*
                  * Note that setError() sets the component's fError flag, which in turn prevents setReady() from
-                 * marking the component ready.  TODO: Revisit this decision.  One the one hand, it sounds like a
+                 * marking the component ready.  TODO: Revisit this decision.  On the one hand, it sounds like a
                  * good idea to stop the machine in its tracks whenever a setError() occurs, but there may also be
                  * times when we'd like to forge ahead anyway.
                  */

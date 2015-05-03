@@ -2599,6 +2599,7 @@ X86.fnSGDT = function SGDT(dst, src)
          * calls us does that automatically with the value we return (dst).
          */
         dst = this.addrGDTLimit - this.addrGDT;
+        this.assert(!(dst & ~0xffff));
         /*
          * We previously left the 6th byte of the target operand "undefined".  But it turns out we have to set
          * it to *something*, because there's processor detection in PC-DOS 7.0 (at least in the SETUP portion)
@@ -2628,8 +2629,26 @@ X86.fnSGDT = function SGDT(dst, src)
          *      145E:4BC3 CB            RETF
          *
          * This code is expecting SGDT on an 80286 to set the 6th "undefined" byte to 0xFF.
+         *
+         * The 80386 adds an additional wrinkle: the 6th byte must be 0x00 if the OPERAND size is 2, whereas
+         * it must passed through if the OPERAND size is 4.
+         *
+         * In addition, when the OPERAND size is 4, the ModRM group decoder will call setLong(dst) rather than
+         * setShort(dst); we could fix that by forcing the dataSize to 2, but it seems simpler to set the high
+         * bits (16-31) of dst to match the low bits (0-15) of addr, so that the caller will harmlessly rewrite
+         * what we already wrote with the setLong() below.
          */
-        var addr = this.addrGDT | (this.model == X86.MODEL_80286? (0xff000000|0) : 0);
+        var addr = this.addrGDT;
+        if (this.model == X86.MODEL_80286) {
+            addr |= (0xff000000|0);
+        }
+        else if (this.model >= X86.MODEL_80386) {
+            if (this.dataSize == 2) {
+                addr &= 0x00ffffff;
+            } else {
+                dst |= (addr << 16);
+            }
+        }
         this.setLong(this.regEA + 2, addr);
         this.nStepCycles -= 11;
     }
@@ -2977,11 +2996,22 @@ X86.fnSIDT = function SIDT(dst, src)
          * us does that automatically with the value we return (dst).
          */
         dst = this.addrIDTLimit - this.addrIDT;
+        this.assert(!(dst & ~0xffff));
         /*
          * As with SGDT, the 6th byte is technically "undefined" on an 80286, but we now set it to 0xFF, for the
          * same reasons discussed in SGDT (above).
          */
-        var addr = this.addrIDT | (this.model == X86.MODEL_80286? (0xff000000|0) : 0);
+        var addr = this.addrIDT;
+        if (this.model == X86.MODEL_80286) {
+            addr |= (0xff000000|0);
+        }
+        else if (this.model >= X86.MODEL_80386) {
+            if (this.dataSize == 2) {
+                addr &= 0x00ffffff;
+            } else {
+                dst |= (addr << 16);
+            }
+        }
         this.setLong(this.regEA + 2, addr);
         this.nStepCycles -= 12;
     }
