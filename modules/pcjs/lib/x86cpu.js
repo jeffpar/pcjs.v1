@@ -2379,10 +2379,10 @@ X86CPU.prototype.setMSW = function(w)
     w |= (this.regCR0 & X86.CR0.MSW.PE) | X86.CR0.MSW.ON;
     this.regCR0 = (this.regCR0 & ~X86.CR0.MSW.MASK) | (w & X86.CR0.MSW.MASK);
     /*
-     * Since the 80286 cannot return to real-mode via this instruction, the only transition
-     * we must worry about is to protected-mode.  And there's no harm calling setProtMode()
-     * if the CPU is already in protected-mode (we could certainly optimize the call out in that
-     * case, but this instruction isn't used frequently enough to warrant it).
+     * Since the 80286 cannot return to real-mode via this instruction, the only transition we
+     * must worry about is to protected-mode.  And there's no harm calling setProtMode() if the
+     * CPU is already in protected-mode; we could certainly optimize out the call in that case,
+     * but the instruction isn't used frequently enough to warrant it.
      */
     if (this.regCR0 & X86.CR0.MSW.PE) this.setProtMode(true);
 };

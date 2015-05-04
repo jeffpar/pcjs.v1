@@ -1319,7 +1319,7 @@ X86.fnLAR = function LAR(dst, src)
 /**
  * fnLCR0(l)
  *
- * This called on behalf of 80386 opcodes only (ie, MOV CR0,reg).
+ * This is called by an 80386 control instruction (ie, MOV CR0,reg).
  *
  * TODO: Determine which CR0 bits, if any, cannot be modified by MOV CR0,reg.
  *
@@ -1330,6 +1330,30 @@ X86.fnLCR0 = function LCR0(l)
 {
     this.regCR0 = l;
     this.setProtMode();
+    if (this.regCR0 & X86.CR0.PG) {
+        this.bus.enablePageBlocks(this.regCR3);
+    } else {
+        this.bus.disablePageBlocks();
+    }
+};
+
+/**
+ * fnLCR3(l)
+ *
+ * This is called by an 80386 control instruction (ie, MOV CR3,reg) or an 80386 task switch.
+ *
+ * @this {X86CPU}
+ * @param {number} l
+ */
+X86.fnLCR3 = function LCR3(l)
+{
+    this.regCR3 = l;
+    /*
+     * Normal use of regCR3 involves adding a 0-4K (12-bit) offset to obtain a page directory entry,
+     * so let's ensure that the low 12 bits of regCR3 are always zero.
+     */
+    this.assert(!(this.regCR3 & X86.LADDR.OFFSET));
+    if (this.regCR0 & X86.CR0.PG) this.bus.enablePageBlocks(this.regCR3);
 };
 
 /**
@@ -3521,7 +3545,7 @@ X86.fnSrcNone = function SrcNone()
  *
  * @this {X86CPU}
  * @param {number} nFault
- * @param {number} [nError]
+ * @param {number} [nError] (if omitted, no error code will be pushed)
  * @param {boolean} [fHalt] will halt the CPU if true *and* a Debugger is loaded
  */
 X86.fnFault = function(nFault, nError, fHalt)
@@ -3612,7 +3636,7 @@ X86.fnPageFault = function(addr, fPresent, fWrite)
  *
  * @this {X86CPU}
  * @param {number} nFault
- * @param {number} [nError]
+ * @param {number} [nError] (if omitted, no error code will be reported)
  * @param {boolean} [fHalt] true if the CPU should always be halted, false if "it depends"
  * @return {boolean|undefined} true to block the fault (often desirable when fHalt is true), otherwise dispatch it
  */

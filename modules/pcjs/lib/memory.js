@@ -471,6 +471,11 @@ Memory.prototype = {
      */
     getPageBlock: function(addr, fWrite) {
         var block = this.bus.mapPageBlock(addr, fWrite);
+        /*
+         * If mapPageBlock() fails -- which can easily happen if the page is not present or has insufficient
+         * privileges -- then a fault will be triggered and block will be null.  We still have to return a block,
+         * but it will be our old "unpaged" self.
+         */
         return block || this;
     },
     /**
@@ -486,9 +491,9 @@ Memory.prototype = {
     setPhysBlock: function(blockPhys, blockPDE, offPDE, blockPTE, offPTE) {
         this.blockPhys = blockPhys;
         this.blockPDE = blockPDE;
-        this.iPDE = offPDE >> 2;    // convert offPDE into an adw index (iPDE)
+        this.iPDE = offPDE >> 2;    // convert offPDE into iPDE (an adw index)
         this.blockPTE = blockPTE;
-        this.iPTE = offPTE >> 2;    // convert offPTE into an adw index (iPTE)
+        this.iPTE = offPTE >> 2;    // convert offPTE into iPTE (an adw index)
         this.bitPTEDirty = this.adjustEndian(X86.PTE.ACCESSED | X86.PTE.DIRTY);
         this.bitPTEAccessed = this.adjustEndian(X86.PTE.ACCESSED);
     },

@@ -660,17 +660,17 @@ Bus.prototype.setMemoryBlocks = function(addr, size, aBlocks, type)
  * Whenever the CPU turns paging off, disablePageBlocks() must be called to restore the original physical
  * memory mapping.
  *
- * This also requires that PAGEBLOCKS be true, ensuring that the Bus is preconfigured with 4Kb memory
+ * This also requires that PAGEBLOCKS be enabled, to ensure that the Bus is preconfigured with 4Kb memory
  * mapping granularity.
  *
  * The first time this function is called, aMemBlocks is stashed in aPhysBlocks, and aMemBlocks is then
  * reinitialized with special "unpaged" Memory blocks that know how to perform page directory/page table
  * lookup and replace themselves with special "paged" Memory blocks that reference memory from the
- * appropriate block in aPhysBlocks.  A parallel array, aMemPaged, keeps track of which blocks have been
- * "paged", so that whenever CR3 is updated, just those blocks can be "unpaged" again.
+ * appropriate block in aPhysBlocks.  A parallel array, aPageBlockNums, keeps track of which block numbers
+ * have been "paged", so that whenever CR3 is updated, just those blocks can be "unpaged" again.
  *
  * @this {Bus}
- * @param {number} addrPD is the starting physical address of the CPU's page directory
+ * @param {number} addrPD is the starting physical address of the CPU's page directory (ie, from regCR3)
  */
 Bus.prototype.enablePageBlocks = function(addrPD)
 {
@@ -681,18 +681,44 @@ Bus.prototype.enablePageBlocks = function(addrPD)
     this.addrPD = addrPD;
     if (!this.aPhysBlocks) {
         this.aPhysBlocks = this.aMemBlocks;
-        var block = new Memory(null, 0, 0, Memory.TYPE.UNPAGED, null, this);
+        this.blockUnpaged = new Memory(null, 0, 0, Memory.TYPE.UNPAGED, null, this);
         this.aMemBlocks = new Array(this.blockTotal);
         for (var iBlock = 0; iBlock < this.blockTotal; iBlock++) {
-            this.aMemBlocks[iBlock] = block;
+            this.aMemBlocks[iBlock] = this.blockUnpaged;
+        }
+    } else {
+        for (var i = 0; i < this.aPageBlockNums.length; i++) {
+            this.aMemBlocks[this.aPageBlockNums[i]] = this.blockUnpaged;
         }
     }
+    this.aPageBlockNums = [];
 };
 
 /**
  * mapPageBlock(addr, fWrite)
  *
- * Locate the corresponding physical PDE, PTE and memory blocks for the given linear address.
+ * Locate the corresponding physical PDE, PTE and memory blocks for the given linear address, and then
+ * upgrade the block from an "unpaged" Memory block to a new "paged" Memory block; all future accesses to
+ * the current page will go directly to that block, instead of coming here through the "unpaged" block
+ * handlers.
+ *
+ * Note that since the incoming address (addr) is a linear address, we never need to mask it with busMask,
+ * but all the intermediate (PDE, PTE) and final physical addresses we calculate should still be masked.
+ *
+ * Granted, busMask on a 32-bit bus is generally going to be 0xffffffff (-1), so making might seem like
+ * a waste of time; however, if we decide to once again rely on busMask for emulating A20 wrap-around
+ * (instead of changing the physical memory map to alias the 2nd Mb to the 1st Mb), then performing
+ * consistent masking will be important.
+ *
+ * Also, addrPDE, addrPTE and addrPhys do not need any offsets added to them, because we immediately shift
+ * the offset portion of those addresses out (see TODOs below).  But for now, at least for debugging and
+ * documentation purposes, my preference is to perform full address calculations.
+ *
+ * Besides, this should not be a performance-critical function; it's normally called only once per "unpaged"
+ * page.  Obviously, if CR3 is constantly being updated, that will trigger repeated calls to enablePageBlocks(),
+ * which will perform our equivalent of a TLB flush (ie, resetting all "paged" blocks back to "unpaged" blocks).
+ * That would hurt our performance, but it would hurt performance on a real machine as well, so let's see
+ * what real-world scenarios we run into.
  *
  * @this {Bus}
  * @param {number} addr is a linear address
@@ -702,7 +728,7 @@ Bus.prototype.enablePageBlocks = function(addrPD)
 Bus.prototype.mapPageBlock = function(addr, fWrite)
 {
     var offPDE = (addr & X86.LADDR.PDE.MASK) >>> X86.LADDR.PDE.SHIFT;
-    var addrPDE = this.cpu.regCR3 + offPDE;                             // TODO: adding offPDE could be eliminated, along with the busMask mask
+    var addrPDE = this.addrPD + offPDE;                                 // TODO: adding offPDE could be eliminated
     var blockPDE = this.aPhysBlocks[(addrPDE & this.busMask) >>> this.blockShift];
     var pde = blockPDE.readLong(offPDE);
 
@@ -717,7 +743,7 @@ Bus.prototype.mapPageBlock = function(addr, fWrite)
     }
 
     var offPTE = (addr & X86.LADDR.PTE.MASK) >>> X86.LADDR.PTE.SHIFT;
-    var addrPTE = (pde & X86.PTE.FRAME) + offPTE;                       // TODO: adding offPTE could be eliminated, along with the busMask mask
+    var addrPTE = (pde & X86.PTE.FRAME) + offPTE;                       // TODO: adding offPTE could be eliminated
     var blockPTE = this.aPhysBlocks[(addrPTE & this.busMask) >>> this.blockShift];
     var pte = blockPTE.readLong(offPTE);
 
@@ -731,18 +757,40 @@ Bus.prototype.mapPageBlock = function(addr, fWrite)
         return null;
     }
 
-    var addrPhys = (pte & X86.PTE.FRAME) + (addr & X86.LADDR.OFFSET);   // TODO: Adding OFFSET could be eliminated, along with the busMask mask
+    var addrPhys = (pte & X86.PTE.FRAME) + (addr & X86.LADDR.OFFSET);   // TODO: Adding OFFSET could be eliminated
     var blockPhys = this.aPhysBlocks[(addrPhys & this.busMask) >>> this.blockShift];
 
     /*
      * So we have the block containing the physical memory corresponding to the given linear address.
      *
-     * Now we create a new "paged" Memory block and record the physical block info using setPhysBlock().
+     * Now we can create a new "paged" Memory block and record the physical block info using setPhysBlock().
      */
     var addrPage = addr & ~X86.LADDR.OFFSET;
     var blockPage = new Memory(addrPage, 0, this.blockSize, Memory.TYPE.PAGED);
-    blockPage.setPhysBlock(blockPage, blockPDE, offPDE, blockPTE, offPTE);
+    blockPage.setPhysBlock(blockPhys, blockPDE, offPDE, blockPTE, offPTE);
+
+    var iBlock = addr >>> this.blockShift;
+    this.aMemBlocks[iBlock] = blockPage;
+    this.aPageBlockNums.push(iBlock);
     return blockPage;
+};
+
+/**
+ * disablePageBlocks()
+ *
+ * Whenever the CPU turns off paging, this function restores the original aMemBlocks.
+ *
+ * @this {Bus}
+ */
+Bus.prototype.disablePageBlocks = function()
+{
+    if (this.aPhysBlocks) {
+        this.aMemBlocks = this.aPhysBlocks;
+        this.aPhysBlocks = null;
+        this.blockUnpaged = null;
+        this.aPageBlockNums = null;
+    }
+    this.addrPD = X86.ADDR_INVALID;
 };
 
 /**

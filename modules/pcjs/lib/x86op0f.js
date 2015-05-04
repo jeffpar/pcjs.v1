@@ -133,7 +133,7 @@ X86.opLOADALL = function LOADALL()
 {
     if (this.segCS.cpl) {
         /*
-         * You're not allowed to use LOADALL if the current privilege level is something other than zero
+         * You're not allowed to use LOADALL if the current privilege level is something other than zero.
          */
         X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0, true);
         return;
@@ -188,7 +188,7 @@ X86.opLOADALL = function LOADALL()
 X86.opCLTS = function CLTS()
 {
     if (this.segCS.cpl) {
-        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0, true);
+        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
     }
     this.regCR0 &= ~X86.CR0.MSW.TS;
@@ -204,20 +204,35 @@ X86.opCLTS = function CLTS()
  * the appropriate control register into a special variable (regXX), which our helper function
  * (fnMOVxx) will use to replace the decoder's src operand.
  *
+ * From PCMag_Prog_TechRef, p.476: "The 80386 executes the MOV to/from control registers (CRn)
+ * regardless of the setting of the MOD field.  The MOD field should be set to 0b11, but an early
+ * 80386 documentation error indicated that the MOD field value was a don't care.  Early versions
+ * of the 80486 detect a MOD != 0b11 as an illegal opcode.  This was changed in later versions to
+ * ignore the value of MOD.  Assemblers that generate MOD != 0b11 for these instructions will fail
+ * on some 80486s."
+ *
  * @this {X86CPU}
  */
 X86.opMOVrc = function MOVrc()
 {
-    var bModRM = this.getIPByte() | 0xc0;
     /*
-     * Unlike, say, opcode 0x8C (MOV word,sr), this opcode supports only registers, not memory;
-     * however, the 80386 apparently ignores the mod bits, treating any combination as if it was 0xc0.
+     * We address the MOD field problem (see above) by coercing it to 0b11 (0xc0), regardless.
      *
-    if ((bModRM & 0xc0) != 0xc0) {
-        X86.opInvalid.call(this);
+     * TODO: One issue not clearly addressed is if, when an assembler/compiler generated a bogus MOD value,
+     * it also generated the additional displacement bytes, if any, that would typically accompany such a MOD
+     * value.  I assume not.
+     */
+    var bModRM = this.getIPByte() | 0xc0;
+
+    if (this.segCS.cpl) {
+        /*
+         * You're not allowed to read control registers if the current privilege level is not zero
+         * (TODO: I'm issuing this AFTER fetching the ModRM byte, but I assume it makes no difference).
+         */
+        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
     }
-     */
+
     var reg = (bModRM & 0x38) >> 3;
     switch(reg) {
     case 0x0:
@@ -250,26 +265,40 @@ X86.opMOVrc = function MOVrc()
  *
  * op=0x0F,0x22 (MOV creg,reg)
  *
- * NOTE: Since the ModRM decoders deal only with general-purpose registers, we have to
- * make a note of which general-purpose register will be overwritten, so that we can restore it
- * after moving the modified value to the correct control register.
+ * NOTE: Since the ModRM decoders deal only with general-purpose registers, we have to make a note
+ * of which general-purpose register will be overwritten, so that we can restore it after moving the
+ * modified value to the correct control register.
+ *
+ * From PCMag_Prog_TechRef, p.476: "The 80386 executes the MOV to/from control registers (CRn)
+ * regardless of the setting of the MOD field.  The MOD field should be set to 0b11, but an early
+ * 80386 documentation error indicated that the MOD field value was a don't care.  Early versions
+ * of the 80486 detect a MOD != 0b11 as an illegal opcode.  This was changed in later versions to
+ * ignore the value of MOD.  Assemblers that generate MOD != 0b11 for these instructions will fail
+ * on some 80486s."
  *
  * @this {X86CPU}
  */
 X86.opMOVcr = function MOVcr()
 {
     var temp;
-    var bModRM = this.getIPByte() | 0xc0;
     /*
-     * Unlike, say, opcode 0x8E (MOV sreg,word), this opcode supports only registers, not memory;
-     * however, the 80386 apparently ignores the mod bits, treating any combination as if it was 0xc0.
-     * TODO: Verify.
+     * We address the MOD field problem (see above) by coercing it to 0b11 (0xc0), regardless.
      *
-    if ((bModRM & 0xc0) != 0xc0) {
-        X86.opInvalid.call(this);
+     * TODO: One issue not clearly addressed is if, when an assembler/compiler generated a bogus MOD value,
+     * it also generated the additional displacement bytes, if any, that would typically accompany such a MOD
+     * value.  I assume not.
+     */
+    var bModRM = this.getIPByte() | 0xc0;
+
+    if (this.segCS.cpl) {
+        /*
+         * You're not allowed to write control registers if the current privilege level is not zero
+         * (TODO: I'm issuing this AFTER fetching the ModRM byte, but I assume it makes no difference).
+         */
+        X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
         return;
     }
-     */
+
     var reg = (bModRM & 0x38) >> 3;
     switch(reg) {
     case 0x0:
@@ -306,13 +335,9 @@ X86.opMOVcr = function MOVcr()
         this.regEDX = temp;
         break;
     case 0x3:
-        this.regCR3 = this.regEBX;
-        /*
-         * Normal use of regCR3 involves adding a 0-4K (12-bit) offset to obtain a page directory entry, so
-         * let's ensure that the low 12 bits of regCR3 are always zero.
-         */
-        this.assert(!(this.regCR3 & X86.LADDR.OFFSET));
+        reg = this.regEBX;
         this.regEBX = temp;
+        X86.fnLCR3.call(this, reg);
         break;
     }
 };

@@ -414,6 +414,8 @@ X86Seg.prototype.checkWriteProtDisallowed = function checkWriteProtDisallowed(of
  * Of course, that all could have been avoided if IBM had heeded Intel's advice and not used Intel-reserved IDT
  * entries for PC interrupts.
  *
+ * TODO: Add 80386 TSS support (including CR3 support).
+ *
  * @this {X86Seg}
  * @param {number} selNew
  * @param {boolean} fNest is true if nesting, false if un-nesting
