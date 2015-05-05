@@ -588,7 +588,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
     if (I386 && cpu.model >= X86.MODEL_80386) {
         base |= (ext & X86.DESC.EXT.BASE2431) << 16;
         limit |= (ext & X86.DESC.EXT.LIMIT1619) << 16;
-        if (ext & X86.DESC.EXT.GRANULARITY) limit = (limit << 12) | 0xfff;
+        if (ext & X86.DESC.EXT.LIMITPAGES) limit = (limit << 12) | 0xfff;
     }
 
     while (true) {

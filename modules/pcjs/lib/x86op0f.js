@@ -342,6 +342,23 @@ X86.opMOVcr = function MOVcr()
     }
 };
 
+/*
+ * NOTE: The following 16 new conditional jumps actually rely on the OPERAND override setting
+ * for determining whether a signed 16-bit or 32-bit displacement will be fetched, even though
+ * the ADDRESS override might seem more intuitive.  Think of them as instructions that are loading
+ * a new operand into IP/EIP.
+ *
+ * Also, in 16-bit code, even though a signed rel16 value would seem to imply a range of -32768
+ * to +32767, any location within a 64Kb code segment outside that range can be reached by choosing
+ * a displacement in the opposite direction, causing the 16-bit value in EIP to underflow or overflow;
+ * any underflow or overflow doesn't matter, because only the low 16 bits of EIP are used when a
+ * 16-bit OPERAND size is in effect.
+ *
+ * In fact, for 16-bit jumps, it's simpler to always think of rel16 as an UNSIGNED value added to
+ * the current EIP, where the result is then truncated to a 16-bit value.  This is why we don't have
+ * to sign-extend rel16 before adding it to the current EIP.
+ */
+
 /**
  * opJOw()
  *
@@ -351,7 +368,7 @@ X86.opMOVcr = function MOVcr()
  */
 X86.opJOw = function JOw()
 {
-    var disp = this.getIPDispWord();
+    var disp = this.getIPWord();
     if (this.getOF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -369,7 +386,7 @@ X86.opJOw = function JOw()
  */
 X86.opJNOw = function JNOw()
 {
-    var disp = this.getIPDispWord();
+    var disp = this.getIPWord();
     if (!this.getOF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -387,7 +404,7 @@ X86.opJNOw = function JNOw()
  */
 X86.opJCw = function JCw()
 {
-    var disp = this.getIPDispWord();
+    var disp = this.getIPWord();
     if (this.getCF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -405,7 +422,7 @@ X86.opJCw = function JCw()
  */
 X86.opJNCw = function JNCw()
 {
-    var disp = this.getIPDispWord();
+    var disp = this.getIPWord();
     if (!this.getCF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -423,7 +440,7 @@ X86.opJNCw = function JNCw()
  */
 X86.opJZw = function JZw()
 {
-    var disp = this.getIPDispWord();
+    var disp = this.getIPWord();
     if (this.getZF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -441,7 +458,7 @@ X86.opJZw = function JZw()
  */
 X86.opJNZw = function JNZw()
 {
-    var disp = this.getIPDispWord();
+    var disp = this.getIPWord();
     if (!this.getZF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -459,7 +476,7 @@ X86.opJNZw = function JNZw()
  */
 X86.opJBEw = function JBEw()
 {
-    var disp = this.getIPDispWord();
+    var disp = this.getIPWord();
     if (this.getCF() || this.getZF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -477,7 +494,7 @@ X86.opJBEw = function JBEw()
  */
 X86.opJNBEw = function JNBEw()
 {
-    var disp = this.getIPDispWord();
+    var disp = this.getIPWord();
     if (!this.getCF() && !this.getZF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -495,7 +512,7 @@ X86.opJNBEw = function JNBEw()
  */
 X86.opJSw = function JSw()
 {
-    var disp = this.getIPDispWord();
+    var disp = this.getIPWord();
     if (this.getSF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -513,7 +530,7 @@ X86.opJSw = function JSw()
  */
 X86.opJNSw = function JNSw()
 {
-    var disp = this.getIPDispWord();
+    var disp = this.getIPWord();
     if (!this.getSF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -531,7 +548,7 @@ X86.opJNSw = function JNSw()
  */
 X86.opJPw = function JPw()
 {
-    var disp = this.getIPDispWord();
+    var disp = this.getIPWord();
     if (this.getPF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -549,7 +566,7 @@ X86.opJPw = function JPw()
  */
 X86.opJNPw = function JNPw()
 {
-    var disp = this.getIPDispWord();
+    var disp = this.getIPWord();
     if (!this.getPF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -567,7 +584,7 @@ X86.opJNPw = function JNPw()
  */
 X86.opJLw = function JLw()
 {
-    var disp = this.getIPDispWord();
+    var disp = this.getIPWord();
     if (!this.getSF() != !this.getOF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -585,7 +602,7 @@ X86.opJLw = function JLw()
  */
 X86.opJNLw = function JNLw()
 {
-    var disp = this.getIPDispWord();
+    var disp = this.getIPWord();
     if (!this.getSF() == !this.getOF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -603,7 +620,7 @@ X86.opJNLw = function JNLw()
  */
 X86.opJLEw = function JLEw()
 {
-    var disp = this.getIPDispWord();
+    var disp = this.getIPWord();
     if (this.getZF() || !this.getSF() != !this.getOF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -621,7 +638,7 @@ X86.opJLEw = function JLEw()
  */
 X86.opJNLEw = function JNLEw()
 {
-    var disp = this.getIPDispWord();
+    var disp = this.getIPWord();
     if (!this.getZF() && !this.getSF() == !this.getOF()) {
         this.setIP(this.getIP() + disp);
         this.nStepCycles -= this.cycleCounts.nOpCyclesJmpC;
@@ -1301,7 +1318,7 @@ X86.aOps0F[0x06] = X86.opCLTS;
 
 /*
  * On all processors (except the 8086/8088, of course), X86.OPCODE.UD2 (0x0F,0x0B), aka "UD2", is an
- * instruction guaranteed to raise a #UD (Invalid Opcode) exception (INT 0x06) on all future x86 processors.
+ * instruction guaranteed to raise a #UD (Invalid Opcode) exception (INT 0x06) on all post-8086 processors.
  */
 X86.aOps0F[0x0B] = X86.opInvalid;
 

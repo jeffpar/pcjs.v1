@@ -100,8 +100,8 @@ A BackTrack index is encoded as a 32-bit value with three parts:
 
 This represents a total of 31 bits, with bit 31 reserved.
 
-For example, look at one of the last things a ROM does during boot: load a disk sector into RAM.  It will be up to the
-disk controller (or DMA controller if one is used) to create a BackTrack object representing the sector that was read,
+For example, look at one of the last things a ROM does during boot: loading a disk sector into RAM.  It will be up to the
+disk controller (or DMA controller, if used) to create a BackTrack object representing the sector that was read,
 adding that object to the global BackTrack object array, and then associating the corresponding BackTrack index with
 the first byte of RAM where the sector was loaded.  Subsequent bytes of RAM containing the rest of the sector will refer
 to the same BackTrack object, using BackTrack indexes containing offsets 1-511.

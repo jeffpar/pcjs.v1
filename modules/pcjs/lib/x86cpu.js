@@ -3198,18 +3198,6 @@ X86CPU.prototype.getIPDisp = function()
 };
 
 /**
- * getIPDispWord()
- *
- * @this {X86CPU}
- * @return {number} sign-extended value from the word at the current IP; IP advanced by 2 or 4
- */
-X86CPU.prototype.getIPDispWord = function()
-{
-    var w = this.getIPWord();
-    return (this.dataSize == 2? ((w << 16) >> 16) : w);
-};
-
-/**
  * getSIBAddr(mod)
  *
  * @this {X86CPU}

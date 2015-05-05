@@ -103,10 +103,10 @@ var X86 = {
         MASK:   0xfff8      // table index
     },
     DESC: {                 // Descriptor Table Entry
-        LIMIT: {
+        LIMIT: {            // LIMIT bits 0-15
             OFFSET:     0x0
         },
-        BASE: {
+        BASE: {             // BASE bits 0-15
             OFFSET:     0x2
         },
         ACC: {              // bit definitions for the access word (offset 0x4)
@@ -166,7 +166,7 @@ var X86 = {
              * is 0xffffffff instead of 0xffff.
              */
             BIG:                            0x0040,     // clear if default operand/address size is 16-bit, set if 32-bit
-            GRANULARITY:                    0x0080,     // clear if limit is bytes, set if limit is 4Kb pages
+            LIMITPAGES:                     0x0080,     // clear if limit granularity is bytes, set if limit granularity is 4Kb pages
             BASE2431:                       0xff00
         },
         INVALID: 0          // use X86.DESC.INVALID for invalid DESC values

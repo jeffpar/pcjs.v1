@@ -8,16 +8,16 @@
   "ram": [
     { "id": "pc386.ramLow",
       "name": "",
-      "addr": 0x00000,
-      "size": 0xa0000,
+      "addr": 0,
+      "size": 655360,
       "test": false
     }
   ],
   "rom": [
     { "id": "pc386.romTests",
       "name": "",
-      "addr": 0xf0000,
-      "size": 0x10000,
+      "addr": 983296,
+      "size": 65280,
       "file": "/tests/pc/80386/tests.json",
       "notify": ""
     }

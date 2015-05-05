@@ -1603,7 +1603,7 @@ if (DEBUGGER) {
         /*
          * When we dump the EXT word, we mask off the LIMIT1619 and BASE2431 bits, because those have already
          * been incorporated into the limit and base properties of the segment register; all we care about here
-         * are whether EXT contains any of the AVAIL (0x10), BIG (0x40) or GRANULARITY (0x80) bits.
+         * are whether EXT contains any of the AVAIL (0x10), BIG (0x40) or LIMITPAGES (0x80) bits.
          */
         this.println(sDump + " dpl=" + str.toHexByte(seg.dpl) + " type=" + str.toHexByte(seg.type >> 8) + " (" + sType + ")" + " ext=" + str.toHexWord(seg.ext & ~(X86.DESC.EXT.LIMIT1619 | X86.DESC.EXT.BASE2431)));
     };

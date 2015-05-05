@@ -3497,6 +3497,10 @@ X86.opESC = function ESC()
 /**
  * op=0xE0 (LOOPNZ disp)
  *
+ * NOTE: All the instructions in this group (LOOPNZ, LOOPZ, LOOP, and JCXZ) actually
+ * rely on the ADDRESS override setting for determining whether CX or ECX will be used,
+ * even though it seems counter-intuitive; ditto for the REP prefix.
+ *
  * @this {X86CPU}
  */
 X86.opLOOPNZ = function LOOPNZ()
@@ -3512,6 +3516,10 @@ X86.opLOOPNZ = function LOOPNZ()
 
 /**
  * op=0xE1 (LOOPZ disp)
+ *
+ * NOTE: All the instructions in this group (LOOPNZ, LOOPZ, LOOP, and JCXZ) actually
+ * rely on the ADDRESS override setting for determining whether CX or ECX will be used,
+ * even though it seems counter-intuitive; ditto for the REP prefix.
  *
  * @this {X86CPU}
  */
@@ -3529,6 +3537,10 @@ X86.opLOOPZ = function LOOPZ()
 /**
  * op=0xE2 (LOOP disp)
  *
+ * NOTE: All the instructions in this group (LOOPNZ, LOOPZ, LOOP, and JCXZ) actually
+ * rely on the ADDRESS override setting for determining whether CX or ECX will be used,
+ * even though it seems counter-intuitive; ditto for the REP prefix.
+ *
  * @this {X86CPU}
  */
 X86.opLOOP = function LOOP()
@@ -3543,7 +3555,11 @@ X86.opLOOP = function LOOP()
 };
 
 /**
- * op=0xE3 (JCXZ disp)
+ * op=0xE3 (JCXZ/JECXZ disp)
+ *
+ * NOTE: All the instructions in this group (LOOPNZ, LOOPZ, LOOP, and JCXZ) actually
+ * rely on the ADDRESS override setting for determining whether CX or ECX will be used,
+ * even though it seems counter-intuitive; ditto for the REP prefix.
  *
  * @this {X86CPU}
  */
