@@ -1325,14 +1325,14 @@ X86CPU.prototype.resetRegs = function()
 };
 
 /**
- * setAddrSize()
+ * updateAddrSize()
  *
  * Select the appropriate ModRM dispatch tables, based on the current ADDRESS size (addrSize), which
  * is based foremost on segCS.addrSize, but can also be overridden by an ADDRESS size instruction prefix.
  *
  * @this {X86CPU}
  */
-X86CPU.prototype.setAddrSize = function()
+X86CPU.prototype.updateAddrSize = function()
 {
     if (!I386) {
         this.getAddr = this.getShort;
@@ -1364,11 +1364,30 @@ X86CPU.prototype.setAddrSize = function()
 };
 
 /**
- * setDataSize()
+ * setDataSize(size)
+ *
+ * This is used by opcodes that require a particular OPERAND size, which we enforce by
+ * internally simulating an OPERAND size override, if needed.
+ *
+ * @this {X86CPU}
+ * @param {number} size (2 for 2-byte/16-bit operands, or 4 for 4-byte/32-bit operands)
+ */
+X86CPU.prototype.setDataSize = function(size)
+{
+    if (this.dataSize != size) {
+        this.opPrefixes |= X86.OPFLAG.DATASIZE;
+        this.dataSize = size;
+        this.dataMask = (size == 2? 0xffff : (0xffffffff|0));
+        this.updateDataSize();
+    }
+};
+
+/**
+ * updateDataSize()
  *
  * @this {X86CPU}
  */
-X86CPU.prototype.setDataSize = function()
+X86CPU.prototype.updateDataSize = function()
 {
     if (this.dataSize == 2) {
         this.dataType = X86.RESULT.WORD;
@@ -1407,7 +1426,7 @@ X86CPU.prototype.resetSizes = function()
      * to separate X86CPU properties, as we do for the OPERAND size and ADDRESS size properties.
      */
 
-    this.setAddrSize();
+    this.updateAddrSize();
 
     /*
      * The following contain the (default) OPERAND size (2 for 16 bits, 4 for 32 bits), and the corresponding masks
@@ -1417,7 +1436,7 @@ X86CPU.prototype.resetSizes = function()
     this.dataSize = this.segCS.dataSize;
     this.dataMask = this.segCS.dataMask;
 
-    this.setDataSize();
+    this.updateDataSize();
 
     this.opPrefixes &= ~(X86.OPFLAG.ADDRSIZE | X86.OPFLAG.DATASIZE);
 };
@@ -3775,11 +3794,6 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
 
             if (I386 && (this.opPrefixes & (X86.OPFLAG.ADDRSIZE | X86.OPFLAG.DATASIZE))) {
                 this.resetSizes();
-                if (MAXDEBUG && DEBUGGER) {
-                    this.println("80386 override processed");
-                    this.stopCPU();
-                    break;
-                }
             }
 
             this.opPrefixes = this.opFlags & X86.OPFLAG.REPEAT;

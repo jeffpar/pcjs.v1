@@ -3,7 +3,8 @@
     "id": "pc386.computer",
     "name": "Compaq DeskPro 386",
     "resume": 0,
-    "state": ""
+    "state": "",
+    "busWidth": 32
   },
   "ram": [
     { "id": "pc386.ramLow",
@@ -18,6 +19,7 @@
       "name": "",
       "addr": 983296,
       "size": 65280,
+      "alias": 4294902016,
       "file": "/tests/pc/80386/tests.json",
       "notify": ""
     }

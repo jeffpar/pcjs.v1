@@ -1675,7 +1675,7 @@ X86.fnMOVn = function MOVn(dst, src)
  * @this {X86CPU}
  * @param {number} dst (current value, ignored)
  * @param {number} src (new value)
- * @return {number} dst (src is overridden, replaced with regXX, as specified by opMOVwsr())
+ * @return {number} dst (src is overridden, replaced with regXX, as specified by opMOVwsr() or opMOVrc())
  */
 X86.fnMOVxx = function MOVxx(dst, src)
 {

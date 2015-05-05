@@ -46,11 +46,15 @@ start:	mov	eax,0x44332211
 	jnz	near goProt		; apparently we have to tell NASM "near" because this is a forward reference
 	times	32768 nop		; lots of NOPs to force a 16-bit conditional jump
 
+addrGDT:dw	romGDTEnd - romGDT - 1	; 16-bit limit of romGDT
+	dw	romGDT, 0xffff		; 32-bit base address of romGDT (works as long as we're aliased at 0xffff0000)
+
 romGDT:	defDesc	0			; the first descriptor in any descriptor table is always a dud (it corresponds to the null descriptor)
 	defDesc	0x000f0000,0x0000ffff,ACC_TYPE_CODE_READABLE
 	defDesc	0x00000000,0x000fffff,ACC_TYPE_DATA_WRITABLE
+romGDTEnd:
 
-goProt:	lgdt	[cs:romGDT]
+goProt:	o32 lgdt [cs:addrGDT]
 	mov	eax,cr0
 	or	eax,CR0_MSW_PE
 	mov	cr0,eax

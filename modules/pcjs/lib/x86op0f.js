@@ -256,7 +256,11 @@ X86.opMOVrc = function MOVrc()
      * however, it's moot, because we've already restricted this opcode to registers only.
      *
      *      this.opFlags |= X86.OPFLAG.NOREAD;
+     *
+     * Another issue, however, is that this instruction always assumes a 32-bit OPERAND size,
+     * so we must call setDataSize(4) first.
      */
+    this.setDataSize(4);
     this.aOpModRegWord[bModRM].call(this, X86.fnMOVxx);
 };
 
@@ -319,7 +323,13 @@ X86.opMOVcr = function MOVcr()
         X86.opInvalid.call(this);
         return;
     }
+
+    /*
+     * This instruction always assumes a 32-bit OPERAND size, so we must call setDataSize(4) first.
+     */
+    this.setDataSize(4);
     this.aOpModRegWord[bModRM].call(this, X86.fnMOV);
+
     switch(reg) {
     case 0x0:
         reg = this.regEAX;

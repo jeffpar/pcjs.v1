@@ -89,7 +89,7 @@ if (typeof module !== 'undefined') {
  * The Computer component has no required (parmsComputer) properties, but does
  * support the following:
  *
- *      buswidth: number of memory address lines (address bits) on the computer's "bus";
+ *      busWidth: number of memory address lines (address bits) on the computer's "bus";
  *      20 is the minimum (and the default), which implies 8086/8088 real-mode addressing,
  *      while 24 is required for 80286 protected-mode addressing.  This value is passed
  *      directly through to the Bus component; see that component for more details.
@@ -125,7 +125,10 @@ function Computer(parmsComputer, parmsMachine, fSuspended) {
     Component.call(this, "Computer", parmsComputer, Computer, Messages.COMPUTER);
 
     this.aFlags.fPowered = false;
-    this.nBusWidth = parmsComputer['buswidth'];
+    /*
+     * TODO: Deprecate 'buswidth' (it should have always used camelCase)
+     */
+    this.nBusWidth = parmsComputer['busWidth'] || parmsComputer['buswidth'];
     this.resume = Computer.RESUME_NONE;
     this.sStateData = null;
     this.fServerState = false;

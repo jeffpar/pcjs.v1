@@ -974,7 +974,7 @@
 	<xsl:template match="computer[not(@ref)]">
 		<xsl:param name="machine" select="''"/>
 		<xsl:param name="machineState" select="''"/>
-		<xsl:variable name="buswidth">
+		<xsl:variable name="busWidth">
 			<xsl:choose>
 				<xsl:when test="@buswidth"><xsl:value-of select="@buswidth"/></xsl:when>
 				<xsl:otherwise>20</xsl:otherwise>
@@ -996,7 +996,7 @@
 		<xsl:call-template name="component">
 			<xsl:with-param name="machine" select="$machine"/>
 			<xsl:with-param name="class">computer</xsl:with-param>
-			<xsl:with-param name="parms">,buswidth:<xsl:value-of select="$buswidth"/>,resume:<xsl:value-of select="$resume"/>,state:'<xsl:value-of select="$state"/>'</xsl:with-param>
+			<xsl:with-param name="parms">,busWidth:<xsl:value-of select="$busWidth"/>,resume:<xsl:value-of select="$resume"/>,state:'<xsl:value-of select="$state"/>'</xsl:with-param>
 		</xsl:call-template>
 	</xsl:template>
 

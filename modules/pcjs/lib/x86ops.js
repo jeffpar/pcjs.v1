@@ -1380,7 +1380,7 @@ X86.opOS = function OS()
         this.opFlags |= X86.OPFLAG.DATASIZE;
         this.dataSize ^= 0x6;               // that which is 2 shall become 4, and vice versa
         this.dataMask ^= (0xffff0000|0);    // that which is 0x0000ffff shall become 0xffffffff, and vice versa
-        this.setDataSize();
+        this.updateDataSize();
         this.nStepCycles -= this.cycleCounts.nOpCyclesPrefix;
     }
 };
@@ -1398,7 +1398,7 @@ X86.opAS = function AS()
         this.opFlags |= X86.OPFLAG.ADDRSIZE;
         this.addrSize ^= 0x06;              // that which is 2 shall become 4, and vice versa
         this.addrMask ^= (0xffff0000|0);    // that which is 0x0000ffff shall become 0xffffffff, and vice versa
-        this.setAddrSize();
+        this.updateAddrSize();
         this.nStepCycles -= this.cycleCounts.nOpCyclesPrefix;
     }
 };
