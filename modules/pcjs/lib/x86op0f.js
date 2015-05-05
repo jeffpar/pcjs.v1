@@ -351,7 +351,7 @@ X86.opMOVcr = function MOVcr()
  * Also, in 16-bit code, even though a signed rel16 value would seem to imply a range of -32768
  * to +32767, any location within a 64Kb code segment outside that range can be reached by choosing
  * a displacement in the opposite direction, causing the 16-bit value in EIP to underflow or overflow;
- * any underflow or overflow doesn't matter, because only the low 16 bits of EIP are used when a
+ * any underflow or overflow doesn't matter, because only the low 16 bits of EIP are updated when a
  * 16-bit OPERAND size is in effect.
  *
  * In fact, for 16-bit jumps, it's simpler to always think of rel16 as an UNSIGNED value added to

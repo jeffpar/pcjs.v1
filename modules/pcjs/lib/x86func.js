@@ -1331,9 +1331,9 @@ X86.fnLCR0 = function LCR0(l)
     this.regCR0 = l;
     this.setProtMode();
     if (this.regCR0 & X86.CR0.PG) {
-        this.bus.enablePageBlocks(this.regCR3);
+        this.enablePageBlocks();
     } else {
-        this.bus.disablePageBlocks();
+        this.disablePageBlocks();
     }
 };
 
@@ -1353,7 +1353,7 @@ X86.fnLCR3 = function LCR3(l)
      * so let's ensure that the low 12 bits of regCR3 are always zero.
      */
     this.assert(!(this.regCR3 & X86.LADDR.OFFSET));
-    if (this.regCR0 & X86.CR0.PG) this.bus.enablePageBlocks(this.regCR3);
+    if (this.regCR0 & X86.CR0.PG) this.enablePageBlocks();
 };
 
 /**

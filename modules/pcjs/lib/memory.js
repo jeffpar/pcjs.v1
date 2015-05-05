@@ -94,9 +94,9 @@ var littleEndian = (TYPEDARRAYS? (function() {
  * @param {number} [size] of block's buffer in bytes (0 for none); must be a multiple of 4
  * @param {number} [type] is one of the Memory.TYPE constants (default is Memory.TYPE.NONE)
  * @param {Object} [controller] is an optional memory controller component
- * @param {Bus} [bus]
+ * @param {X86CPU} [cpu] is required for UNPAGED memory blocks, so that the CPU can map it to a PAGED block
  */
-function Memory(addr, used, size, type, controller, bus)
+function Memory(addr, used, size, type, controller, cpu)
 {
     var i;
     this.id = (Memory.idBlock += 2);
@@ -108,7 +108,7 @@ function Memory(addr, used, size, type, controller, bus)
     this.type = type || Memory.TYPE.NONE;
     this.fReadOnly = (type == Memory.TYPE.ROM);
     this.controller = null;
-    this.bus = bus;
+    this.cpu = cpu;
     this.fDirty = this.fDirtyEver = false;
 
     if (BACKTRACK) {
@@ -470,7 +470,7 @@ Memory.prototype = {
      * @return {Memory}
      */
     getPageBlock: function(addr, fWrite) {
-        var block = this.bus.mapPageBlock(addr, fWrite);
+        var block = this.cpu.mapPageBlock(addr, fWrite);
         /*
          * If mapPageBlock() fails -- which can easily happen if the page is not present or has insufficient
          * privileges -- then a fault will be triggered and block will be null.  We still have to return a block,

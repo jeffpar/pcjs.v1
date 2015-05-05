@@ -38,6 +38,7 @@ if (typeof module !== 'undefined') {
     var Component   = require("../../shared/lib/component");
     var Messages    = require("./messages");
     var Bus         = require("./bus");
+    var Memory      = require("./memory");
     var State       = require("./state");
     var CPU         = require("./cpu");
     var X86         = require("./x86");
@@ -164,8 +165,9 @@ function X86CPU(parmsCPU)
      * We're just declaring aMemBlocks and associated Bus parameters here; they'll be initialized by initMemory()
      * when the Bus is initialized.
      */
-    this.aMemBlocks = [];
-    this.busMask = this.blockShift = this.blockLimit = this.blockMask = 0;
+    this.aBusBlocks = this.aMemBlocks = [];
+    this.busMask = this.memMask = 0;
+    this.blockShift = this.blockSize = this.blockLimit = this.blockTotal = this.blockMask = 0;
 
     if (SAMPLER) {
         /*
@@ -574,7 +576,7 @@ X86CPU.PREFETCH = {
 };
 
 /**
- * initMemory(aMemBlocks, busMask, blockShift, blockLimit, blockMask)
+ * initMemory(aMemBlocks, blockShift)
  *
  * Notification from Bus.initMemory(), giving us direct access to the entire memory space
  * (aMemBlocks).
@@ -588,7 +590,7 @@ X86CPU.PREFETCH = {
  *      ...
  *      7:  [ -1, 0]
  *
- * where tag is the physical address of the byte that's been prefetched, and b is the
+ * where tag is the linear address of the byte that's been prefetched, and b is the
  * value of the byte.  N is currently 8 (PREFETCH.ARRAY), but it can be any power-of-two
  * that is equal to or greater than (PREFETCH.QUEUE), the effective size of the prefetch
  * queue (6 on an 8086, 4 on an 8088; currently hard-coded to the latter).  All slots
@@ -618,15 +620,21 @@ X86CPU.PREFETCH = {
  * @this {X86CPU}
  * @param {Array} aMemBlocks
  * @param {number} blockShift
- * @param {number} blockLimit
- * @param {number} blockMask
  */
-X86CPU.prototype.initMemory = function(aMemBlocks, blockShift, blockLimit, blockMask)
+X86CPU.prototype.initMemory = function(aMemBlocks, blockShift)
 {
+    /*
+     * aBusBlocks preserves the Bus block array for the life of the machine, whereas aMemBlocks
+     * will be altered if/when the CPU enables paging.  PAGEBLOCKS must be true when using Memory
+     * blocks to simulate paging, ensuring that physical blocks and pages have the same size (4Kb).
+     */
+    this.aBusBlocks = aMemBlocks;
     this.aMemBlocks = aMemBlocks;
     this.blockShift = blockShift;
-    this.blockLimit = blockLimit;
-    this.blockMask = blockMask;
+    this.blockSize = 1 << this.blockShift;
+    this.blockLimit = this.blockSize - 1;
+    this.blockTotal = aMemBlocks.length;
+    this.blockMask = this.blockTotal - 1;
     if (PREFETCH) {
         this.nBusCycles = 0;
         this.aPrefetch = new Array(X86CPU.PREFETCH.ARRAY);
@@ -640,14 +648,174 @@ X86CPU.prototype.initMemory = function(aMemBlocks, blockShift, blockLimit, block
 /**
  * setAddressMask(busMask)
  *
- * Notification from Bus.setA20(), called whenever the physical A20 line changes
+ * Notification from Bus.initMemory() and Bus.setA20(); the latter calls us whenever the physical
+ * A20 line changes (note that on a 20-bit bus machine, address lines A20 and higher are always zero).
+ *
+ * For 32-bit bus machines (eg, 80386), busMask is never changed after the initial call, because A20
+ * wrap-around is simulated by changing the physical memory map rather than altering the A20 bit in busMask.
+ *
+ * We maintain memMask separate from busMask, because when paging is enabled on the 80386, the CPU memory
+ * functions are now dealing with linear addresses rather than physical addresses, so it would be incorrect
+ * to apply busMask to those addresses; memMask must remain 0xffffffff (-1) for the duration.  If we change
+ * how A20 is simulated on the 80386, then enablePageBlocks() and disablePageBlocks() will need to override
+ * memMask appropriately.
+ *
+ * TODO: Ideally, we would eliminate masking altogether of 32-bit addresses, but that would require different
+ * sets of memory access functions for different machines.
  *
  * @this {X86CPU}
  * @param {number} busMask
  */
 X86CPU.prototype.setAddressMask = function(busMask)
 {
-    this.busMask = busMask;
+    this.busMask = this.memMask = busMask;
+};
+
+/**
+ * enablePageBlocks()
+ *
+ * Whenever the CPU turns on paging and/or updates CR3, this function is called to update our copy
+ * of the Bus block array, to simulate paging.  Whenever the CPU turns paging off, disablePageBlocks()
+ * must be called to restore our copy of the Bus block array to its original (physical) mapping.
+ *
+ * This also requires PAGEBLOCKS be enabled, ensuring that the Bus is configured with a 4Kb block size.
+ *
+ * The first time this function is called, aMemBlocks and aBusBlocks are identical, so aMemBlocks is
+ * reinitialized with special UNPAGED Memory blocks that know how to perform page directory/page table
+ * lookup and replace themselves with special PAGED Memory blocks that reference memory from the
+ * appropriate block in aBusBlocks.  A parallel array, aBlocksPaged, keeps track (by block number) of
+ * which blocks have been PAGED, so that whenever CR3 is updated, those blocks can be UNPAGED again.
+ *
+ * @this {X86CPU}
+ */
+X86CPU.prototype.enablePageBlocks = function()
+{
+    if (!PAGEBLOCKS) {
+        this.setError("PAGEBLOCK support required");
+        return;
+    }
+    if (this.aMemBlocks === this.aBusBlocks) {
+        this.aMemBlocks = new Array(this.blockTotal);
+        this.blockUnpaged = new Memory(null, 0, 0, Memory.TYPE.UNPAGED, null, this);
+        for (var iBlock = 0; iBlock < this.blockTotal; iBlock++) {
+            this.aMemBlocks[iBlock] = this.blockUnpaged;
+        }
+    } else {
+        for (var i = 0; i < this.aBlocksPaged.length; i++) {
+            this.aMemBlocks[this.aBlocksPaged[i]] = this.blockUnpaged;
+        }
+    }
+    this.aBlocksPaged = [];
+};
+
+/**
+ * mapPageBlock(addr, fWrite)
+ *
+ * Locate the corresponding physical PDE, PTE and memory blocks for the given linear address, and then
+ * upgrade the block from an UNPAGED Memory block to a new PAGED Memory block; all future accesses to
+ * the current page will go directly to that block, instead of coming here through the UNPAGED block
+ * handlers.
+ *
+ * Note that since the incoming address (addr) is a linear address, we never need to mask it with busMask,
+ * but all the intermediate (PDE, PTE) and final physical addresses we calculate should still be masked.
+ *
+ * Granted, busMask on a 32-bit bus is generally going to be 0xffffffff (-1), so making might seem like
+ * a waste of time; however, if we decide to once again rely on busMask for emulating A20 wrap-around
+ * (instead of changing the physical memory map to alias the 2nd Mb to the 1st Mb), then performing
+ * consistent masking will be important.
+ *
+ * Also, addrPDE, addrPTE and addrPhys do not need any offsets added to them, because we immediately shift
+ * the offset portion of those addresses out.  But for now, at least for debugging and documentation purposes,
+ * my preference is to perform full address calculations.
+ *
+ * Besides, this should not be a performance-critical function; it's normally called only once per UNPAGED
+ * page.  Obviously, if CR3 is constantly being updated, that will trigger repeated calls to enablePageBlocks(),
+ * which will perform our equivalent of a TLB flush (ie, resetting all PAGED blocks back to UNPAGED blocks).
+ * That would hurt our performance, but it would hurt performance on a real machine as well, so let's see
+ * what real-world scenarios we run into.
+ *
+ * @this {X86CPU}
+ * @param {number} addr is a linear address
+ * @param {boolean} fWrite (true if called for a write, false if for a read)
+ * @return {Memory|null}
+ */
+X86CPU.prototype.mapPageBlock = function(addr, fWrite)
+{
+    var offPDE = (addr & X86.LADDR.PDE.MASK) >>> X86.LADDR.PDE.SHIFT;
+    var addrPDE = this.regCR3 + offPDE;
+
+    /*
+     * bus.getLong(addrPDE) would be simpler, but setPhysBlock() needs to know blockPDE and offPDE, too.
+     * TODO: Since we're immediately shifting addrPDE by blockShift, then we could also skip adding offPDE.
+     */
+    var blockPDE = this.aBusBlocks[(addrPDE & this.busMask) >>> this.blockShift];
+    var pde = blockPDE.readLong(offPDE);
+
+    if (!(pde & X86.PTE.PRESENT)) {
+        X86.fnPageFault.call(this, addr, false, fWrite);
+        return null;
+    }
+
+    if (!(pde & X86.PTE.USER) && this.segCS.cpl == 3) {
+        X86.fnPageFault.call(this, addr, true, fWrite);
+        return null;
+    }
+
+    var offPTE = (addr & X86.LADDR.PTE.MASK) >>> X86.LADDR.PTE.SHIFT;
+    var addrPTE = (pde & X86.PTE.FRAME) + offPTE;
+
+    /*
+     * bus.getLong(addrPTE) would be simpler, but setPhysBlock() needs to know blockPTE and offPTE, too.
+     * TODO: Since we're immediately shifting addrPDE by blockShift, then we could also skip adding offPTE.
+     */
+    var blockPTE = this.aBusBlocks[(addrPTE & this.busMask) >>> this.blockShift];
+    var pte = blockPTE.readLong(offPTE);
+
+    if (!(pte & X86.PTE.PRESENT)) {
+        X86.fnPageFault.call(this, addr, false, fWrite);
+        return null;
+    }
+
+    if (!(pte & X86.PTE.USER) && this.segCS.cpl == 3) {
+        X86.fnPageFault.call(this, addr, true, fWrite);
+        return null;
+    }
+
+    var addrPhys = (pte & X86.PTE.FRAME) + (addr & X86.LADDR.OFFSET);
+    /*
+     * TODO: Since we're immediately shifting addrPhys by blockShift, we could also skip adding the addr's offset.
+     */
+    var blockPhys = this.aBusBlocks[(addrPhys & this.busMask) >>> this.blockShift];
+
+    /*
+     * So we have the block containing the physical memory corresponding to the given linear address.
+     *
+     * Now we can create a new PAGED Memory block and record the physical block info using setPhysBlock().
+     */
+    var addrPage = addr & ~X86.LADDR.OFFSET;
+    var blockPage = new Memory(addrPage, 0, this.blockSize, Memory.TYPE.PAGED);
+    blockPage.setPhysBlock(blockPhys, blockPDE, offPDE, blockPTE, offPTE);
+
+    var iBlock = addr >>> this.blockShift;
+    this.aMemBlocks[iBlock] = blockPage;
+    this.aBlocksPaged.push(iBlock);
+    return blockPage;
+};
+
+/**
+ * disablePageBlocks()
+ *
+ * Whenever the CPU turns off paging, this function restores the CPU's original aMemBlocks.
+ *
+ * @this {X86CPU}
+ */
+X86CPU.prototype.disablePageBlocks = function()
+{
+    if (this.aMemBlocks != this.aBusBlocks) {
+        this.aMemBlocks = this.aBusBlocks;
+        this.blockUnpaged = null;
+        this.aBlocksPaged = null;
+    }
 };
 
 /**
@@ -1037,7 +1205,7 @@ X86CPU.prototype.resetRegs = function()
 
     /*
      * Segment registers used to be defined as separate variables (eg, regCS and regCS0 stored the segment
-     * number and base physical address, respectively), but segment registers are now defined as X86Seg objects.
+     * number and base linear address, respectively), but segment registers are now defined as X86Seg objects.
      */
     this.segCS     = new X86Seg(this, X86Seg.ID.CODE,  "CS");
     this.segDS     = new X86Seg(this, X86Seg.ID.DATA,  "DS");
@@ -1337,7 +1505,7 @@ X86CPU.prototype.checkIntNotify = function(nInt)
  * another interrupt notification function is intercepting, so use it as an advisory value only.
  *
  * @this {X86CPU}
- * @param {number} addr is a physical (non-segmented) address
+ * @param {number} addr is a linear address
  * @param {function(number)} fn is an interrupt-return notification function
  */
 X86CPU.prototype.addIntReturn = function(addr, fn)
@@ -1363,7 +1531,7 @@ X86CPU.prototype.addIntReturn = function(addr, fn)
  * if the count is zero, for maximum performance.
  *
  * @this {X86CPU}
- * @param {number} addr is a physical (non-segmented) address
+ * @param {number} addr is a linear address
  */
 X86CPU.prototype.checkIntReturn = function(addr)
 {
@@ -1552,7 +1720,7 @@ X86CPU.prototype.getSeg = function(sName)
         return this.segNULL;
     default:
         /*
-         * HACK: We return a fake segment register object in which only the base physical address is valid,
+         * HACK: We return a fake segment register object in which only the base linear address is valid,
          * because that's all the caller provided (ie, we must be restoring from an older state).
          */
         this.assert(typeof sName == "number");
@@ -2518,27 +2686,33 @@ X86CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
 /**
  * getByte(addr)
  *
+ * Use bus.getByte() for physical addresses, and cpu.getByte() for linear addresses; the latter takes care
+ * of paging, cycle counts, and BACKTRACK states, if any.
+ *
  * @this {X86CPU}
- * @param {number} addr is a physical (non-segmented) address
+ * @param {number} addr is a linear address
  * @return {number} byte (8-bit) value at that address
  */
 X86CPU.prototype.getByte = function getByte(addr)
 {
     if (BACKTRACK) this.backTrack.btiMemLo = this.bus.readBackTrack(addr);
-    return this.aMemBlocks[(addr & this.busMask) >>> this.blockShift].readByte(addr & this.blockLimit, addr);
+    return this.aMemBlocks[(addr & this.memMask) >>> this.blockShift].readByte(addr & this.blockLimit, addr);
 };
 
 /**
  * getShort(addr)
  *
+ * Use bus.getShort() for physical addresses, and cpu.getShort() for linear addresses; the latter takes care
+ * of paging, cycle counts, and BACKTRACK states, if any.
+ *
  * @this {X86CPU}
- * @param {number} addr is a physical (non-segmented) address
+ * @param {number} addr is a linear address
  * @return {number} word (16-bit) value at that address
  */
 X86CPU.prototype.getShort = function getShort(addr)
 {
     var off = addr & this.blockLimit;
-    var iBlock = (addr & this.busMask) >>> this.blockShift;
+    var iBlock = (addr & this.memMask) >>> this.blockShift;
     /*
      * On the 8088, it takes 4 cycles to read the additional byte REGARDLESS whether the address is odd or even.
      * TODO: For the 8086, the penalty is actually "(addr & 0x1) << 2" (4 additional cycles only when the address is odd).
@@ -2558,14 +2732,17 @@ X86CPU.prototype.getShort = function getShort(addr)
 /**
  * getLong(addr)
  *
+ * Use bus.getLong() for physical addresses, and cpu.getLong() for linear addresses; the latter takes care
+ * of paging, cycle counts, and BACKTRACK states, if any.
+ *
  * @this {X86CPU}
- * @param {number} addr is a physical (non-segmented) address
+ * @param {number} addr is a linear address
  * @return {number} long (32-bit) value at that address
  */
 X86CPU.prototype.getLong = function getLong(addr)
 {
     var off = addr & this.blockLimit;
-    var iBlock = (addr & this.busMask) >>> this.blockShift;
+    var iBlock = (addr & this.memMask) >>> this.blockShift;
     if (BACKTRACK) {
         this.backTrack.btiMemLo = this.bus.readBackTrack(addr);
         this.backTrack.btiMemHi = this.bus.readBackTrack(addr + 1);
@@ -2580,27 +2757,33 @@ X86CPU.prototype.getLong = function getLong(addr)
 /**
  * setByte(addr, b)
  *
+ * Use bus.setByte() for physical addresses, and cpu.setByte() for linear addresses; the latter takes care
+ * of paging, cycle counts, and BACKTRACK states, if any.
+ *
  * @this {X86CPU}
- * @param {number} addr is a physical (non-segmented) address
+ * @param {number} addr is a linear address
  * @param {number} b is the byte (8-bit) value to write (which we truncate to 8 bits; required by opSTOSb)
  */
 X86CPU.prototype.setByte = function setByte(addr, b)
 {
     if (BACKTRACK) this.bus.writeBackTrack(addr, this.backTrack.btiMemLo);
-    this.aMemBlocks[(addr & this.busMask) >>> this.blockShift].writeByte(addr & this.blockLimit, b & 0xff, addr);
+    this.aMemBlocks[(addr & this.memMask) >>> this.blockShift].writeByte(addr & this.blockLimit, b & 0xff, addr);
 };
 
 /**
  * setShort(addr, w)
  *
+ * Use bus.setShort() for physical addresses, and cpu.setShort() for linear addresses; the latter takes care
+ * of paging, cycle counts, and BACKTRACK states, if any.
+ *
  * @this {X86CPU}
- * @param {number} addr is a physical (non-segmented) address
+ * @param {number} addr is a linear address
  * @param {number} w is the word (16-bit) value to write (which we truncate to 16 bits to be safe)
  */
 X86CPU.prototype.setShort = function setShort(addr, w)
 {
     var off = addr & this.blockLimit;
-    var iBlock = (addr & this.busMask) >>> this.blockShift;
+    var iBlock = (addr & this.memMask) >>> this.blockShift;
     /*
      * On the 8088, it takes 4 cycles to write the additional byte REGARDLESS whether the address is odd or even.
      * TODO: For the 8086, the penalty is actually "(addr & 0x1) << 2" (4 additional cycles only when the address is odd).
@@ -2622,14 +2805,17 @@ X86CPU.prototype.setShort = function setShort(addr, w)
 /**
  * setLong(addr, l)
  *
+ * Use bus.setLong() for physical addresses, and cpu.setLong() for linear addresses; the latter takes care
+ * of paging, cycle counts, and BACKTRACK states, if any.
+ *
  * @this {X86CPU}
- * @param {number} addr is a physical (non-segmented) address
+ * @param {number} addr is a linear address
  * @param {number} l is the long (32-bit) value to write
  */
 X86CPU.prototype.setLong = function setLong(addr, l)
 {
     var off = addr & this.blockLimit;
-    var iBlock = (addr & this.busMask) >>> this.blockShift;
+    var iBlock = (addr & this.memMask) >>> this.blockShift;
     this.nStepCycles -= this.cycleCounts.nWordCyclePenalty;
 
     if (BACKTRACK) {
@@ -2931,7 +3117,7 @@ X86CPU.prototype.setSOWord = function(seg, off, w)
  * Return the next byte from the prefetch queue, prefetching it now if necessary.
  *
  * @this {X86CPU}
- * @param {number} addr is a physical (non-segmented) address
+ * @param {number} addr is a linear address
  * @return {number} byte (8-bit) value at that address
  */
 X86CPU.prototype.getBytePrefetch = function(addr)
@@ -2951,10 +3137,10 @@ X86CPU.prototype.getBytePrefetch = function(addr)
          * with side-effects we may not want, and in any case, while it seemed to improve Safari's performance slightly,
          * it did nothing for the oddball Chrome performance I'm seeing with PREFETCH enabled.
          *
-         *      b = this.aMemBlocks[(addr & this.busMask) >>> this.blockShift].readByte(addr & this.blockLimit, addr);
+         *      b = this.aMemBlocks[(addr & this.memMask) >>> this.blockShift].readByte(addr & this.blockLimit, addr);
          *      this.nBusCycles += 4;
          *      this.cbPrefetchValid = 0;
-         *      this.addrPrefetchHead = (addr + 1) & this.busMask;
+         *      this.addrPrefetchHead = (addr + 1) & this.memMask;
          *      return b;
          */
     }
@@ -2981,7 +3167,7 @@ X86CPU.prototype.getBytePrefetch = function(addr)
  * the prefetch queue, we're taking the easy way out and simply calling getBytePrefetch() twice.
  *
  * @this {X86CPU}
- * @param {number} addr is a physical (non-segmented) address
+ * @param {number} addr is a linear address
  * @return {number} short (16-bit) value at that address
  */
 X86CPU.prototype.getShortPrefetch = function(addr)
@@ -2996,7 +3182,7 @@ X86CPU.prototype.getShortPrefetch = function(addr)
  * easy way out and call getShortPrefetch() twice.
  *
  * @this {X86CPU}
- * @param {number} addr is a physical (non-segmented) address
+ * @param {number} addr is a linear address
  * @return {number} long (32-bit) value at that address
  */
 X86CPU.prototype.getLongPrefetch = function(addr)
@@ -3008,7 +3194,7 @@ X86CPU.prototype.getLongPrefetch = function(addr)
  * getWordPrefetch(addr)
  *
  * @this {X86CPU}
- * @param {number} addr is a physical (non-segmented) address
+ * @param {number} addr is a linear address
  * @return {number} short (16-bit) or long (32-bit value as appropriate
  */
 X86CPU.prototype.getWordPrefetch = function(addr)
@@ -3028,10 +3214,10 @@ X86CPU.prototype.fillPrefetch = function(n)
 {
     while (n-- > 0 && this.cbPrefetchQueued < X86CPU.PREFETCH.QUEUE) {
         var addr = this.addrPrefetchHead;
-        var b = this.aMemBlocks[(addr & this.busMask) >>> this.blockShift].readByte(addr & this.blockLimit, addr);
+        var b = this.aMemBlocks[(addr & this.memMask) >>> this.blockShift].readByte(addr & this.blockLimit, addr);
         this.aPrefetch[this.iPrefetchHead] = b | (addr << 8);
         if (MAXDEBUG) this.printMessage("     fillPrefetch[" + this.iPrefetchHead + "]: " + str.toHex(addr) + ":" + str.toHexByte(b));
-        this.addrPrefetchHead = (addr + 1) & this.busMask;
+        this.addrPrefetchHead = (addr + 1) & this.memMask;
         this.iPrefetchHead = (this.iPrefetchHead + 1) & X86CPU.PREFETCH.MASK;
         this.cbPrefetchQueued++;
         /*
@@ -3049,7 +3235,7 @@ X86CPU.prototype.fillPrefetch = function(n)
  * Empty the prefetch queue.
  *
  * @this {X86CPU}
- * @param {number} addr is a physical (non-segmented) address of the current program counter (regLIP)
+ * @param {number} addr is a linear address of the current program counter (regLIP)
  */
 X86CPU.prototype.flushPrefetch = function(addr)
 {

@@ -53,8 +53,8 @@ if (typeof module !== 'undefined') {
  * which then calls the initBus() method of all the other components.
  *
  * When initMemory() initializes the entire address space, it also passes aMemBlocks
- * to the CPU object, so that the CPU can perform all its own address-to-block and memory
- * block accesses directly.
+ * to the CPU object, so that the CPU can perform its own address-to-block calculations
+ * (essential, for example, when the CPU enables paging).
  *
  * For memory beyond the simple needs of the ROM and RAM components (ie, memory-mapped
  * devices), the address space must still be allocated through the Bus component via
@@ -141,7 +141,7 @@ function Bus(parmsBus, cpu, dbg)
      *      [1]: registered function to call for every I/O access
      *
      * The registered function is called with the port address, and if the access was triggered by the CPU,
-     * the linear address (LIP) that the access occurred from.
+     * the linear instruction pointer (LIP) at the point of access.
      *
      * WARNING: Unlike the (old) read and write memory notification functions, these support only one
      * pair of input/output functions per port.  A more sophisticated architecture could support a list
@@ -170,11 +170,6 @@ function Bus(parmsBus, cpu, dbg)
         this.cbtDeletions = 0;
         this.ibtLastAlloc = -1;
         this.ibtLastDelete = 0;
-    }
-
-    if (PAGEBLOCKS) {
-        this.addrPD = null;
-        this.aPhysBlocks = null;
     }
 
     this.setReady();
@@ -297,7 +292,7 @@ Bus.prototype.initMemory = function()
     for (var iBlock = 0; iBlock < this.blockTotal; iBlock++) {
         this.aMemBlocks[iBlock] = block;
     }
-    this.cpu.initMemory(this.aMemBlocks, this.blockShift, this.blockLimit, this.blockMask);
+    this.cpu.initMemory(this.aMemBlocks, this.blockShift);
     this.cpu.setAddressMask(this.busMask);
 };
 
@@ -518,9 +513,6 @@ Bus.prototype.setA20 = function(fEnable)
         var addrMask = (this.busMask & ~0x100000) | (fEnable? 0x100000 : 0);
         if (addrMask != this.busMask) {
             this.busMask = addrMask;
-            /*
-             * This callback is required only because the CPU "insists" on using its own memory access functions.
-             */
             if (this.cpu) this.cpu.setAddressMask(addrMask);
         }
     }
@@ -653,154 +645,12 @@ Bus.prototype.setMemoryBlocks = function(addr, size, aBlocks, type)
 };
 
 /**
- * enablePageBlocks(addrPD)
- *
- * Whenever the CPU turns on paging and/or updates CR3, this function is called to leverage the Bus's
- * memory-mapping abilities and simulate the effects of the CPU's page directory and page table entries.
- * Whenever the CPU turns paging off, disablePageBlocks() must be called to restore the original physical
- * memory mapping.
- *
- * This also requires that PAGEBLOCKS be enabled, to ensure that the Bus is preconfigured with 4Kb memory
- * mapping granularity.
- *
- * The first time this function is called, aMemBlocks is stashed in aPhysBlocks, and aMemBlocks is then
- * reinitialized with special "unpaged" Memory blocks that know how to perform page directory/page table
- * lookup and replace themselves with special "paged" Memory blocks that reference memory from the
- * appropriate block in aPhysBlocks.  A parallel array, aPageBlockNums, keeps track of which block numbers
- * have been "paged", so that whenever CR3 is updated, just those blocks can be "unpaged" again.
- *
- * @this {Bus}
- * @param {number} addrPD is the starting physical address of the CPU's page directory (ie, from regCR3)
- */
-Bus.prototype.enablePageBlocks = function(addrPD)
-{
-    if (!PAGEBLOCKS) {
-        Component.error("PAGEBLOCK support missing");
-        return;
-    }
-    this.addrPD = addrPD;
-    if (!this.aPhysBlocks) {
-        this.aPhysBlocks = this.aMemBlocks;
-        this.blockUnpaged = new Memory(null, 0, 0, Memory.TYPE.UNPAGED, null, this);
-        this.aMemBlocks = new Array(this.blockTotal);
-        for (var iBlock = 0; iBlock < this.blockTotal; iBlock++) {
-            this.aMemBlocks[iBlock] = this.blockUnpaged;
-        }
-    } else {
-        for (var i = 0; i < this.aPageBlockNums.length; i++) {
-            this.aMemBlocks[this.aPageBlockNums[i]] = this.blockUnpaged;
-        }
-    }
-    this.aPageBlockNums = [];
-};
-
-/**
- * mapPageBlock(addr, fWrite)
- *
- * Locate the corresponding physical PDE, PTE and memory blocks for the given linear address, and then
- * upgrade the block from an "unpaged" Memory block to a new "paged" Memory block; all future accesses to
- * the current page will go directly to that block, instead of coming here through the "unpaged" block
- * handlers.
- *
- * Note that since the incoming address (addr) is a linear address, we never need to mask it with busMask,
- * but all the intermediate (PDE, PTE) and final physical addresses we calculate should still be masked.
- *
- * Granted, busMask on a 32-bit bus is generally going to be 0xffffffff (-1), so making might seem like
- * a waste of time; however, if we decide to once again rely on busMask for emulating A20 wrap-around
- * (instead of changing the physical memory map to alias the 2nd Mb to the 1st Mb), then performing
- * consistent masking will be important.
- *
- * Also, addrPDE, addrPTE and addrPhys do not need any offsets added to them, because we immediately shift
- * the offset portion of those addresses out (see TODOs below).  But for now, at least for debugging and
- * documentation purposes, my preference is to perform full address calculations.
- *
- * Besides, this should not be a performance-critical function; it's normally called only once per "unpaged"
- * page.  Obviously, if CR3 is constantly being updated, that will trigger repeated calls to enablePageBlocks(),
- * which will perform our equivalent of a TLB flush (ie, resetting all "paged" blocks back to "unpaged" blocks).
- * That would hurt our performance, but it would hurt performance on a real machine as well, so let's see
- * what real-world scenarios we run into.
- *
- * @this {Bus}
- * @param {number} addr is a linear address
- * @param {boolean} fWrite (true if called for a write, false if for a read)
- * @return {Memory|null}
- */
-Bus.prototype.mapPageBlock = function(addr, fWrite)
-{
-    var offPDE = (addr & X86.LADDR.PDE.MASK) >>> X86.LADDR.PDE.SHIFT;
-    var addrPDE = this.addrPD + offPDE;                                 // TODO: adding offPDE could be eliminated
-    var blockPDE = this.aPhysBlocks[(addrPDE & this.busMask) >>> this.blockShift];
-    var pde = blockPDE.readLong(offPDE);
-
-    if (!(pde & X86.PTE.PRESENT)) {
-        X86.fnPageFault.call(this.cpu, addr, false, fWrite);
-        return null;
-    }
-
-    if (!(pde & X86.PTE.USER) && this.cpu.segCS.cpl == 3) {
-        X86.fnPageFault.call(this.cpu, addr, true, fWrite);
-        return null;
-    }
-
-    var offPTE = (addr & X86.LADDR.PTE.MASK) >>> X86.LADDR.PTE.SHIFT;
-    var addrPTE = (pde & X86.PTE.FRAME) + offPTE;                       // TODO: adding offPTE could be eliminated
-    var blockPTE = this.aPhysBlocks[(addrPTE & this.busMask) >>> this.blockShift];
-    var pte = blockPTE.readLong(offPTE);
-
-    if (!(pte & X86.PTE.PRESENT)) {
-        X86.fnPageFault.call(this.cpu, addr, false, fWrite);
-        return null;
-    }
-
-    if (!(pte & X86.PTE.USER) && this.cpu.segCS.cpl == 3) {
-        X86.fnPageFault.call(this.cpu, addr, true, fWrite);
-        return null;
-    }
-
-    var addrPhys = (pte & X86.PTE.FRAME) + (addr & X86.LADDR.OFFSET);   // TODO: Adding OFFSET could be eliminated
-    var blockPhys = this.aPhysBlocks[(addrPhys & this.busMask) >>> this.blockShift];
-
-    /*
-     * So we have the block containing the physical memory corresponding to the given linear address.
-     *
-     * Now we can create a new "paged" Memory block and record the physical block info using setPhysBlock().
-     */
-    var addrPage = addr & ~X86.LADDR.OFFSET;
-    var blockPage = new Memory(addrPage, 0, this.blockSize, Memory.TYPE.PAGED);
-    blockPage.setPhysBlock(blockPhys, blockPDE, offPDE, blockPTE, offPTE);
-
-    var iBlock = addr >>> this.blockShift;
-    this.aMemBlocks[iBlock] = blockPage;
-    this.aPageBlockNums.push(iBlock);
-    return blockPage;
-};
-
-/**
- * disablePageBlocks()
- *
- * Whenever the CPU turns off paging, this function restores the original aMemBlocks.
- *
- * @this {Bus}
- */
-Bus.prototype.disablePageBlocks = function()
-{
-    if (this.aPhysBlocks) {
-        this.aMemBlocks = this.aPhysBlocks;
-        this.aPhysBlocks = null;
-        this.blockUnpaged = null;
-        this.aPageBlockNums = null;
-    }
-    this.addrPD = X86.ADDR_INVALID;
-};
-
-/**
  * getByte(addr)
  *
- * The CPU could use this, but the CPU also needs to update BACKTRACK states.  There may also be a slight
- * performance advantage calling its own getByte() method vs. calling through another object (ie, the Bus object).
+ * For physical addresses only; for linear addresses, use cpu.getByte().
  *
  * @this {Bus}
- * @param {number} addr is a physical (non-segmented) address
+ * @param {number} addr is a physical address
  * @return {number} byte (8-bit) value at that address
  */
 Bus.prototype.getByte = function(addr)
@@ -814,7 +664,7 @@ Bus.prototype.getByte = function(addr)
  * This is useful for the Debugger and other components that want to bypass getByte() breakpoint detection.
  *
  * @this {Bus}
- * @param {number} addr is a physical (non-segmented) address
+ * @param {number} addr is a physical address
  * @return {number} byte (8-bit) value at that address
  */
 Bus.prototype.getByteDirect = function(addr)
@@ -825,12 +675,10 @@ Bus.prototype.getByteDirect = function(addr)
 /**
  * getShort(addr)
  *
- * The CPU could use this, but the CPU also needs to update cycle counts, along with BACKTRACK states.
- * There may also be a slight performance advantage calling its own getShort() method vs. calling through another
- * object (ie, the Bus object).
+ * For physical addresses only; for linear addresses, use cpu.getShort().
  *
  * @this {Bus}
- * @param {number} addr is a physical (non-segmented) address
+ * @param {number} addr is a physical address
  * @return {number} word (16-bit) value at that address
  */
 Bus.prototype.getShort = function(addr)
@@ -849,7 +697,7 @@ Bus.prototype.getShort = function(addr)
  * This is useful for the Debugger and other components that want to bypass getShort() breakpoint detection.
  *
  * @this {Bus}
- * @param {number} addr is a physical (non-segmented) address
+ * @param {number} addr is a physical address
  * @return {number} word (16-bit) value at that address
  */
 Bus.prototype.getShortDirect = function(addr)
@@ -865,12 +713,10 @@ Bus.prototype.getShortDirect = function(addr)
 /**
  * getLong(addr)
  *
- * The CPU could use this, but the CPU also needs to update cycle counts, along with BACKTRACK states.
- * There may also be a slight performance advantage calling its own getLong() method vs. calling through another
- * object (ie, the Bus object).
+ * For physical addresses only; for linear addresses, use cpu.getLong().
  *
  * @this {Bus}
- * @param {number} addr is a physical (non-segmented) address
+ * @param {number} addr is a physical address
  * @return {number} long (32-bit) value at that address
  */
 Bus.prototype.getLong = function(addr)
@@ -890,7 +736,7 @@ Bus.prototype.getLong = function(addr)
  * This is useful for the Debugger and other components that want to bypass getLong() breakpoint detection.
  *
  * @this {Bus}
- * @param {number} addr is a physical (non-segmented) address
+ * @param {number} addr is a physical address
  * @return {number} long (32-bit) value at that address
  */
 Bus.prototype.getLongDirect = function(addr)
@@ -907,11 +753,10 @@ Bus.prototype.getLongDirect = function(addr)
 /**
  * setByte(addr, b)
  *
- * The CPU could use this, but the CPU also needs to update BACKTRACK states.  There may also be a slight
- * performance advantage calling its own setByte() method vs. calling through another object (ie, the Bus object).
+ * For physical addresses only; for linear addresses, use cpu.setByte().
  *
  * @this {Bus}
- * @param {number} addr is a physical (non-segmented) address
+ * @param {number} addr is a physical address
  * @param {number} b is the byte (8-bit) value to write (we truncate it to 8 bits to be safe)
  */
 Bus.prototype.setByte = function(addr, b)
@@ -926,7 +771,7 @@ Bus.prototype.setByte = function(addr, b)
  * memory protection (for example, this is an interface the ROM component could use to initialize ROM contents).
  *
  * @this {Bus}
- * @param {number} addr is a physical (non-segmented) address
+ * @param {number} addr is a physical address
  * @param {number} b is the byte (8-bit) value to write (we truncate it to 8 bits to be safe)
  */
 Bus.prototype.setByteDirect = function(addr, b)
@@ -937,12 +782,10 @@ Bus.prototype.setByteDirect = function(addr, b)
 /**
  * setShort(addr, w)
  *
- * The CPU could use this, but the CPU also needs to update cycle counts, along with BACKTRACK states.
- * There may also be a slight performance advantage calling its own setShort() method vs. calling through another
- * object (ie, the Bus object).
+ * For physical addresses only; for linear addresses, use cpu.setShort().
  *
  * @this {Bus}
- * @param {number} addr is a physical (non-segmented) address
+ * @param {number} addr is a physical address
  * @param {number} w is the word (16-bit) value to write (we truncate it to 16 bits to be safe)
  */
 Bus.prototype.setShort = function(addr, w)
@@ -964,7 +807,7 @@ Bus.prototype.setShort = function(addr, w)
  * memory protection (for example, this is an interface the ROM component could use to initialize ROM contents).
  *
  * @this {Bus}
- * @param {number} addr is a physical (non-segmented) address
+ * @param {number} addr is a physical address
  * @param {number} w is the word (16-bit) value to write (we truncate it to 16 bits to be safe)
  */
 Bus.prototype.setShortDirect = function(addr, w)
@@ -982,12 +825,10 @@ Bus.prototype.setShortDirect = function(addr, w)
 /**
  * setLong(addr, l)
  *
- * The CPU could use this, but the CPU also needs to update cycle counts, along with BACKTRACK states.
- * There may also be a slight performance advantage calling its own setLong() method vs. calling through another
- * object (ie, the Bus object).
+ * For physical addresses only; for linear addresses, use cpu.setLong().
  *
  * @this {Bus}
- * @param {number} addr is a physical (non-segmented) address
+ * @param {number} addr is a physical address
  * @param {number} l is the long (32-bit) value to write
  */
 Bus.prototype.setLong = function(addr, l)
@@ -1015,7 +856,7 @@ Bus.prototype.setLong = function(addr, l)
  * memory protection (for example, this is an interface the ROM component could use to initialize ROM contents).
  *
  * @this {Bus}
- * @param {number} addr is a physical (non-segmented) address
+ * @param {number} addr is a physical address
  * @param {number} l is the long (32-bit) value to write
  */
 Bus.prototype.setLongDirect = function(addr, l)
@@ -1119,7 +960,7 @@ Bus.prototype.getBackTrackIndex = function(bto, off)
  * writeBackTrackObject(addr, bto, off)
  *
  * @this {Bus}
- * @param {number} addr is a physical (non-segmented) address
+ * @param {number} addr is a physical address
  * @param {BackTrack|null} bto
  * @param {number} off
  */
@@ -1136,7 +977,7 @@ Bus.prototype.writeBackTrackObject = function(addr, bto, off)
  * readBackTrack(addr)
  *
  * @this {Bus}
- * @param {number} addr is a physical (non-segmented) address
+ * @param {number} addr is a physical address
  * @return {number}
  */
 Bus.prototype.readBackTrack = function(addr)
@@ -1151,7 +992,7 @@ Bus.prototype.readBackTrack = function(addr)
  * writeBackTrack(addr, bti)
  *
  * @this {Bus}
- * @param {number} addr is a physical (non-segmented) address
+ * @param {number} addr is a physical address
  * @param {number} bti
  */
 Bus.prototype.writeBackTrack = function(addr, bti)
@@ -1247,7 +1088,7 @@ Bus.prototype.isBackTrackWeak = function(bti)
  * updateBackTrackCode(addr, bti)
  *
  * @this {Bus}
- * @param {number} addr is a physical (non-segmented) address
+ * @param {number} addr is a physical address
  * @param {number} bti
  */
 Bus.prototype.updateBackTrackCode = function(addr, bti)
@@ -1514,17 +1355,17 @@ Bus.prototype.addPortInputTable = function(component, table, offset)
 };
 
 /**
- * checkPortInputNotify(port, addrFrom)
+ * checkPortInputNotify(port, addrLIP)
  *
  * @this {Bus}
  * @param {number} port
- * @param {number} [addrFrom] is the LIP value at the time of the input
+ * @param {number} [addrLIP] is the LIP value at the time of the input
  * @return {number} simulated port value (0xff if none)
  *
  * NOTE: It seems that at least parts of the ROM BIOS (like the RS-232 probes around F000:E5D7 in the 5150 BIOS)
  * assume that ports for non-existent hardware return 0xff rather than 0x00, hence my new default (0xff) below.
  */
-Bus.prototype.checkPortInputNotify = function(port, addrFrom)
+Bus.prototype.checkPortInputNotify = function(port, addrLIP)
 {
     var bIn = 0xff;
     var aNotify = this.aPortInputNotify[port];
@@ -1534,7 +1375,7 @@ Bus.prototype.checkPortInputNotify = function(port, addrFrom)
     }
     if (aNotify !== undefined) {
         if (aNotify[1]) {
-            bIn = aNotify[1].call(aNotify[0], port, addrFrom);
+            bIn = aNotify[1].call(aNotify[0], port, addrLIP);
         }
         if (DEBUGGER && this.dbg && this.fPortInputBreakAll != aNotify[2]) {
             this.dbg.checkPortInput(port, bIn);
@@ -1542,7 +1383,7 @@ Bus.prototype.checkPortInputNotify = function(port, addrFrom)
     }
     else {
         if (DEBUGGER && this.dbg) {
-            this.dbg.messageIO(this, port, null, addrFrom);
+            this.dbg.messageIO(this, port, null, addrLIP);
             if (this.fPortInputBreakAll) this.dbg.checkPortInput(port, bIn);
         }
     }
@@ -1634,19 +1475,19 @@ Bus.prototype.addPortOutputTable = function(component, table, offset)
 };
 
 /**
- * checkPortOutputNotify(port, bOut, addrFrom)
+ * checkPortOutputNotify(port, bOut, addrLIP)
  *
  * @this {Bus}
  * @param {number} port
  * @param {number} bOut
- * @param {number} [addrFrom] is the LIP value at the time of the output
+ * @param {number} [addrLIP] is the LIP value at the time of the output
  */
-Bus.prototype.checkPortOutputNotify = function(port, bOut, addrFrom)
+Bus.prototype.checkPortOutputNotify = function(port, bOut, addrLIP)
 {
     var aNotify = this.aPortOutputNotify[port];
     if (aNotify !== undefined) {
         if (aNotify[1]) {
-            aNotify[1].call(aNotify[0], port, bOut, addrFrom);
+            aNotify[1].call(aNotify[0], port, bOut, addrLIP);
         }
         if (DEBUGGER && this.dbg && this.fPortOutputBreakAll != aNotify[2]) {
             this.dbg.checkPortOutput(port, bOut);
@@ -1654,7 +1495,7 @@ Bus.prototype.checkPortOutputNotify = function(port, bOut, addrFrom)
     }
     else {
         if (DEBUGGER && this.dbg) {
-            this.dbg.messageIO(this, port, bOut, addrFrom);
+            this.dbg.messageIO(this, port, bOut, addrLIP);
             if (this.fPortOutputBreakAll) this.dbg.checkPortOutput(port, bOut);
         }
     }
