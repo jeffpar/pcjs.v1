@@ -605,6 +605,13 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
             var fGate, regPSMask, nFaultError, regSP;
             var rpl = sel & X86.SEL.RPL;
             var dpl = (acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
+
+            if (selMasked && !(acc & X86.DESC.ACC.PRESENT)) {
+                if (!fSuppress) X86.fnFault.call(cpu, X86.EXCEPTION.NP_FAULT, sel);
+                base = X86.ADDR_INVALID;
+                break;
+            }
+
             /*
              * Since we are X86Seg.ID.CODE, we can use this.cpl instead of the more generic cpu.segCS.cpl
              */
@@ -713,7 +720,12 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
         }
         else if (this.id == X86Seg.ID.DATA) {
             if (selMasked) {
-                if (type < X86.DESC.ACC.TYPE.DATA_READONLY || (type & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.READABLE)) == X86.DESC.ACC.TYPE.CODE) {
+                if (!(acc & X86.DESC.ACC.PRESENT)) {
+                    if (!fSuppress) X86.fnFault.call(cpu, X86.EXCEPTION.NP_FAULT, sel);
+                    base = X86.ADDR_INVALID;
+                    break;
+                }
+                if (type < X86.DESC.ACC.TYPE.SEG || (type & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.READABLE)) == X86.DESC.ACC.TYPE.CODE) {
                     /*
                      * OS/2 1.0 triggers this "Empty Descriptor" GP_FAULT multiple times during boot; eg:
                      *
@@ -742,7 +754,12 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
             }
         }
         else if (this.id == X86Seg.ID.STACK) {
-            if (!selMasked || type < X86.DESC.ACC.TYPE.DATA_READONLY || (type & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.READABLE)) == X86.DESC.ACC.TYPE.CODE) {
+            if (!(acc & X86.DESC.ACC.PRESENT)) {
+                if (!fSuppress) X86.fnFault.call(cpu, X86.EXCEPTION.SS_FAULT, sel);
+                base = X86.ADDR_INVALID;
+                break;
+            }
+            if (!selMasked || type < X86.DESC.ACC.TYPE.SEG || (type & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.WRITABLE)) != X86.DESC.ACC.TYPE.WRITABLE) {
                 if (!fSuppress) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, true);
                 base = X86.ADDR_INVALID;
                 break;

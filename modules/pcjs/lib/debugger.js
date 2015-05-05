@@ -1513,10 +1513,10 @@ if (DEBUGGER) {
     {
         this.println("id       physaddr   blkaddr   used    size    type");
         this.println("-------- ---------  --------  ------  ------  ----");
-        for (var i = 0; i < this.bus.aMemBlocks.length; i++) {
-            var block = this.bus.aMemBlocks[i];
+        for (var i = 0; i < this.cpu.aMemBlocks.length; i++) {
+            var block = this.cpu.aMemBlocks[i];
             if (block.type === Memory.TYPE.NONE) continue;
-            this.println(str.toHex(block.id) + " %" + str.toHex(i << this.bus.blockShift) + ": " + str.toHex(block.addr) + "  " + str.toHexWord(block.used) + "  " + str.toHexWord(block.size) + "  " + Memory.TYPE.NAMES[block.type]);
+            this.println(str.toHex(block.id) + " %" + str.toHex(i << this.cpu.blockShift) + ": " + str.toHex(block.addr) + "  " + str.toHexWord(block.used) + "  " + str.toHexWord(block.size) + "  " + Memory.TYPE.NAMES[block.type]);
         }
     };
 
@@ -1636,7 +1636,7 @@ if (DEBUGGER) {
         for (var sField in Debugger.aTSSFields) {
             var off = Debugger.aTSSFields[sField];
             var ch = (sField.length < 8? ' ' : '');
-            var w = this.bus.getShortDirect(seg.base + off);
+            var w = this.cpu.getShort(seg.base + off);
             if (sDump) sDump += '\n';
             sDump += str.toHexWord(off) + " " + sField + ": " + ch + str.toHexWord(w);
         }
@@ -2450,7 +2450,7 @@ if (DEBUGGER) {
          */
         if (nState >= 0 && this.aaOpcodeCounts.length) {
             this.cInstructions++;
-            var bOpcode = this.bus.getByteDirect(addr);
+            var bOpcode = this.cpu.getByte(addr);
             this.aaOpcodeCounts[bOpcode][1]++;
             var a = this.aOpcodeHistory[this.iOpcodeHistory];
             a[0] = this.cpu.getIP();
@@ -2602,8 +2602,7 @@ if (DEBUGGER) {
     /**
      * getByte(aAddr, inc)
      *
-     * getByte() should be used for all Debugger memory reads (eg, doDump, doUnassemble), to ensure
-     * all notification handlers are bypassed for physical addresses.
+     * We must route all our memory requests through the CPU now, in case paging is enabled.
      *
      * @this {Debugger}
      * @param {Array} aAddr
@@ -2615,8 +2614,9 @@ if (DEBUGGER) {
         var b = 0xff;
         var addr = this.getAddr(aAddr, false, 1);
         if (addr !== X86.ADDR_INVALID) {
-            b = this.bus.getByteDirect(addr);
-            this.assert((b == (b & 0xff)), "invalid byte (" + b + ") at address: " + this.hexAddr(aAddr));
+            this.nSuppress++;
+            b = this.cpu.getByte(addr);
+            this.nSuppress--;
             if (inc !== undefined) this.incAddr(aAddr, inc);
         }
         return b;
@@ -2651,8 +2651,9 @@ if (DEBUGGER) {
         var w = 0xffff;
         var addr = this.getAddr(aAddr, false, 2);
         if (addr !== X86.ADDR_INVALID) {
-            w = this.bus.getShortDirect(addr);
-            this.assert((w == (w & 0xffff)), "invalid word (" + w + ") at address: " + this.hexAddr(aAddr));
+            this.nSuppress++;
+            w = this.cpu.getShort(addr);
+            this.nSuppress--;
             if (inc !== undefined) this.incAddr(aAddr, inc);
         }
         return w;
@@ -2671,7 +2672,9 @@ if (DEBUGGER) {
         var l = -1;
         var addr = this.getAddr(aAddr, false, 4);
         if (addr !== X86.ADDR_INVALID) {
-            l = this.bus.getLongDirect(addr);
+            this.nSuppress++;
+            l = this.cpu.getLong(addr);
+            this.nSuppress--;
             if (inc !== undefined) this.incAddr(aAddr, inc);
         }
         return l;
@@ -2679,10 +2682,6 @@ if (DEBUGGER) {
 
     /**
      * setByte(aAddr, b, inc)
-     *
-     * setByte() should be used for all Debugger memory writes (eg, doAssemble, doEdit), to insure
-     * all memory notification handlers are bypassed; in addition, we want the Debugger to be able to
-     * change the contents of the simulated ROM images.
      *
      * @this {Debugger}
      * @param {Array} aAddr
@@ -2693,7 +2692,9 @@ if (DEBUGGER) {
     {
         var addr = this.getAddr(aAddr, true, 1);
         if (addr !== X86.ADDR_INVALID) {
-            this.bus.setByteDirect(addr, b);
+            this.nSuppress++;
+            this.cpu.setByte(addr, b);
+            this.nSuppress--;
             if (inc !== undefined) this.incAddr(aAddr, inc);
             this.cpu.updateCPU();
         }
@@ -2711,7 +2712,9 @@ if (DEBUGGER) {
     {
         var addr = this.getAddr(aAddr, true, 2);
         if (addr !== X86.ADDR_INVALID) {
-            this.bus.setShortDirect(addr, w);
+            this.nSuppress++;
+            this.cpu.setShort(addr, w);
+            this.nSuppress--;
             if (inc !== undefined) this.incAddr(aAddr, inc);
             this.cpu.updateCPU();
         }
@@ -2738,6 +2741,7 @@ if (DEBUGGER) {
             }
         }
         this.aBreakWrite = ["write"];
+        this.nSuppress = 0;
     };
 
     /**
@@ -2921,6 +2925,8 @@ if (DEBUGGER) {
      */
     Debugger.prototype.checkBreakpoint = function(addr, aBreak, fTemp)
     {
+        if (this.nSuppress) return false;
+
         /*
          * Time to check for execution breakpoints; note that this should be done BEFORE updating frequency
          * or history data (see checkInstruction), since we might not actually execute the current instruction.
@@ -3536,8 +3542,8 @@ if (DEBUGGER) {
      */
     Debugger.prototype.parseAddr = function(sAddr, type)
     {
+        var aAddr;
         var aAddrNext = (type == Debugger.ADDR_DATA? this.aAddrNextData : this.aAddrNextCode);
-
         var off = aAddrNext[0], seg = aAddrNext[1], addr = aAddrNext[2];
 
         if (sAddr !== undefined) {
@@ -3549,7 +3555,7 @@ if (DEBUGGER) {
                 addr = 0;
             }
 
-            var aAddr = this.findSymbolAddr(sAddr);
+            aAddr = this.findSymbolAddr(sAddr);
             if (aAddr && aAddr.length) return aAddr;
 
             var iColon = sAddr.indexOf(":");
@@ -3567,7 +3573,8 @@ if (DEBUGGER) {
                 addr = null;
             }
         }
-        var aAddr = [off, seg, addr];
+
+        aAddr = [off, seg, addr];
         this.checkLimit(aAddr);
         return aAddr;
     };

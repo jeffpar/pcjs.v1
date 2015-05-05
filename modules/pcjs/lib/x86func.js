@@ -3643,7 +3643,7 @@ X86.fnPageFault = function(addr, fPresent, fWrite)
 X86.fnFaultMessage = function(nFault, nError, fHalt)
 {
     var bitsMessage = Messages.FAULT;
-    var bOpcode = this.bus.getByteDirect(this.regLIP);
+    var bOpcode = this.getByte(this.regLIP);
 
     /*
      * OS/2 1.0 uses an INT3 (0xCC) opcode in conjunction with an invalid IDT to trigger a triple-fault
