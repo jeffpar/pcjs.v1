@@ -1592,6 +1592,7 @@ X86CPU.prototype.setProtMode = function(fProt)
     if (I386 && this.model >= X86.MODEL_80386) {
         this.segFS.updateMode(fProt);
         this.segGS.updateMode(fProt);
+        this.resetSizes();
     }
 };
 

@@ -925,7 +925,18 @@ X86Seg.prototype.updateMode = function(fProt)
         this.loadIDT = this.loadIDTReal;
         this.checkRead = this.checkReadReal;
         this.checkWrite = this.checkWriteReal;
-        this.limit = 0xffff;
+        /*
+         * Like the base, we don't want to mess with the limit, so that features like "Unreal" mode
+         * (or "Big Real" mode as it's called in the HIMEM source code) will work, at least until the
+         * next explicit segment load.
+         *
+         * See http://www.os2museum.com/wp/himem-sys-unreal-mode-and-loadall/ for more details.
+         *
+         *      this.limit = 0xffff;
+         *
+         * TODO: The checkReadReal() and checkWriteReal() functions need to generate GP faults for offsets
+         * beyond the current real-mode limit.
+         */
         this.acc = this.ext = 0;
         this.cpl = this.dpl = 0;
         this.addrDesc = X86.ADDR_INVALID;

@@ -3134,33 +3134,34 @@ if (DEBUGGER) {
         var sOperand = " ";
         var typeSize = type & Debugger.TYPE_SIZE;
         switch (typeSize) {
-            case Debugger.TYPE_BYTE:
-                /*
-                 * There's the occasional immediate byte we don't need to display (eg, the 0x0A
-                 * following an AAM or AAD instruction), so we suppress the byte if it lacks a TYPE_IN
-                 * or TYPE_OUT designation (and TYPE_BOTH, as the name implies, includes both).
-                 */
-                if (type & Debugger.TYPE_BOTH) {
-                    sOperand = str.toHex(this.getByte(aAddr, 1), 2);
-                }
+        case Debugger.TYPE_BYTE:
+            /*
+             * There's the occasional immediate byte we don't need to display (eg, the 0x0A
+             * following an AAM or AAD instruction), so we suppress the byte if it lacks a TYPE_IN
+             * or TYPE_OUT designation (and TYPE_BOTH, as the name implies, includes both).
+             */
+            if (type & Debugger.TYPE_BOTH) {
+                sOperand = str.toHex(this.getByte(aAddr, 1), 2);
+            }
+            break;
+        case Debugger.TYPE_SBYTE:
+            sOperand = str.toHex((this.getByte(aAddr, 1) << 24) >> 24, 4);
+            break;
+        case Debugger.TYPE_WORDV:
+            if (aAddr[4]) {
+                sOperand = str.toHex(this.getLong(aAddr, 4));
                 break;
-            case Debugger.TYPE_SBYTE:
-                sOperand = str.toHex((this.getByte(aAddr, 1) << 24) >> 24, 4);
-                break;
-            case Debugger.TYPE_WORDV:
-                if (aAddr[4]) {
-                    sOperand = str.toHex(this.getLong(aAddr, 4));
-                    break;
-                }
-                /* falls through */
-            case Debugger.TYPE_WORD:
-                sOperand = str.toHex(this.getShort(aAddr, 2), 4);
-                break;
-            case Debugger.TYPE_FARP:
-                sOperand = this.hexAddr(this.newAddr(this.getWord(aAddr, 2), this.getShort(aAddr, 2), null, aAddr[4], aAddr[5]));
-                break;
-            default:
-                sOperand = "imm(" + str.toHexWord(type) + ")";
+            }
+            /* falls through */
+        case Debugger.TYPE_WORD:
+            sOperand = str.toHex(this.getShort(aAddr, 2), 4);
+            break;
+        case Debugger.TYPE_FARP:
+            sOperand = this.hexAddr(this.newAddr(this.getWord(aAddr, 2), this.getShort(aAddr, 2), null, aAddr[4], aAddr[5]));
+            break;
+        default:
+            sOperand = "imm(" + str.toHexWord(type) + ")";
+            break;
         }
         return sOperand;
     };
@@ -3345,36 +3346,36 @@ if (DEBUGGER) {
     {
         var b;
         switch (sFlag) {
-            case "V":
-                b = this.cpu.getOF();
-                break;
-            case "D":
-                b = this.cpu.getDF();
-                break;
-            case "I":
-                b = this.cpu.getIF();
-                break;
-            case "T":
-                b = this.cpu.getTF();
-                break;
-            case "S":
-                b = this.cpu.getSF();
-                break;
-            case "Z":
-                b = this.cpu.getZF();
-                break;
-            case "A":
-                b = this.cpu.getAF();
-                break;
-            case "P":
-                b = this.cpu.getPF();
-                break;
-            case "C":
-                b = this.cpu.getCF();
-                break;
-            default:
-                b = 0;
-                break;
+        case "V":
+            b = this.cpu.getOF();
+            break;
+        case "D":
+            b = this.cpu.getDF();
+            break;
+        case "I":
+            b = this.cpu.getIF();
+            break;
+        case "T":
+            b = this.cpu.getTF();
+            break;
+        case "S":
+            b = this.cpu.getSF();
+            break;
+        case "Z":
+            b = this.cpu.getZF();
+            break;
+        case "A":
+            b = this.cpu.getAF();
+            break;
+        case "P":
+            b = this.cpu.getPF();
+            break;
+        case "C":
+            b = this.cpu.getCF();
+            break;
+        default:
+            b = 0;
+            break;
         }
         return sFlag + (b? '1' : '0') + ' ';
     };
