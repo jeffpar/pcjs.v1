@@ -1445,9 +1445,13 @@ X86.fnLFS = function LFS(dst, src)
  *
  * op=0x0F,0x01,reg=0x2 (GRP7:LGDT)
  *
- * The 80286 LGDT instruction expects a 40-bit operand: a 16-bit limit, followed by a 24-bit address
- * (or a 32-bit address in 32-bit mode); the ModRM decoder has already supplied the first word of the
- * operand (in dst), which corresponds to the limit, so we must fetch the remaining bits ourselves.
+ * The 80286 LGDT instruction assumes a 40-bit operand: a 16-bit limit followed by a 24-bit base address;
+ * the ModRM decoder has already supplied the first word of the operand (in dst), which corresponds to
+ * the limit, so we must fetch the remaining bits ourselves.
+ *
+ * The 80386 LGDT instruction assumes a 48-bit operand: a 16-bit limit followed by a 32-bit base address,
+ * but it ignores the last 8 bits of the base address if the OPERAND size is 16 bits; we interpret that to
+ * mean that the 24-bit base address should be zero-extended to 32 bits.
  *
  * @this {X86CPU}
  * @param {number} dst
@@ -1460,10 +1464,15 @@ X86.fnLGDT = function LGDT(dst, src)
         X86.opInvalid.call(this);
     } else {
         /*
-         * It shouldn't hurt to always fetch 32 bits of physical memory, which we'll then
-         * mask with either a 24-bit or a 32-bit mask.
+         * Hopefully it won't hurt to always fetch a 32-bit base address (even on an 80286), which we then
+         * mask apppropriately.
          */
         this.addrGDT = this.getLong(this.regEA + 2) & (this.dataMask | (this.dataMask << 8));
+        /*
+         * An idiosyncrasy of our ModRM decoders is that, if the OPERAND size is 32 bits, then it will have
+         * fetched a 32-bit dst operand; we mask off those extra bits now.
+         */
+        dst &= 0xffff;
         this.addrGDTLimit = this.addrGDT + dst;
         this.opFlags |= X86.OPFLAG.NOWRITE;
         this.nStepCycles -= 11;
@@ -1495,9 +1504,13 @@ X86.fnLGS = function LGS(dst, src)
  *
  * op=0x0F,0x01,reg=0x3 (GRP7:LIDT)
  *
- * The 80286 LIDT instruction expects a 40-bit operand: a 16-bit limit, followed by a 24-bit address
- * (or a 32-bit address in 32-bit mode); the ModRM decoder has already supplied the first word of the
- * operand (in dst), which corresponds to the limit, so we must fetch the remaining bits ourselves.
+ * The 80286 LIDT instruction assumes a 40-bit operand: a 16-bit limit followed by a 24-bit base address;
+ * the ModRM decoder has already supplied the first word of the operand (in dst), which corresponds to
+ * the limit, so we must fetch the remaining bits ourselves.
+ *
+ * The 80386 LIDT instruction assumes a 48-bit operand: a 16-bit limit followed by a 32-bit base address,
+ * but it ignores the last 8 bits of the base address if the OPERAND size is 16 bits; we interpret that to
+ * mean that the 24-bit base address should be zero-extended to 32 bits.
  *
  * @this {X86CPU}
  * @param {number} dst
@@ -1510,10 +1523,15 @@ X86.fnLIDT = function LIDT(dst, src)
         X86.opInvalid.call(this);
     } else {
         /*
-         * It shouldn't hurt to always fetch 32 bits of physical memory, which we'll then
-         * mask with either a 24-bit or a 32-bit mask.
+         * Hopefully it won't hurt to always fetch a 32-bit base address (even on an 80286), which we then
+         * mask apppropriately.
          */
         this.addrIDT = this.getLong(this.regEA + 2) & (this.dataMask | (this.dataMask << 8));
+        /*
+         * An idiosyncrasy of our ModRM decoders is that, if the OPERAND size is 32 bits, then it will have
+         * fetched a 32-bit dst operand; we mask off those extra bits now.
+         */
+        dst &= 0xffff;
         this.addrIDTLimit = this.addrIDT + dst;
         this.opFlags |= X86.OPFLAG.NOWRITE;
         this.nStepCycles -= 12;

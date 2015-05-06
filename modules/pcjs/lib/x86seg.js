@@ -157,12 +157,18 @@ X86Seg.prototype.loadProt = function loadProt(sel, fSuppress)
      */
     sel &= 0xffff;
 
+    /*
+     * When comparing descriptor addresses, we must be mindful that any addresses above 2Gb will be negative;
+     * that in itself is not a problem UNLESS the descriptor table straddles the 2Gb boundary, meaning the
+     * starting address is positive but the ending (limit) address is negative.  Although that situation is
+     * highly unlikely, the safest thing to do is coerce the bounding addresses to unsigned values, using ">>> 0."
+     */
     if (!(sel & X86.SEL.LDT)) {
-        addrDT = cpu.addrGDT;
-        addrDTLimit = cpu.addrGDTLimit;
+        addrDT = cpu.addrGDT >>> 0;
+        addrDTLimit = cpu.addrGDTLimit >>> 0;
     } else {
-        addrDT = cpu.segLDT.base;
-        addrDTLimit = addrDT + cpu.segLDT.limit;
+        addrDT = cpu.segLDT.base >>> 0;
+        addrDTLimit = addrDT + cpu.segLDT.limit;    // segment limit properties are already coerced unsigned
     }
     /*
      * The ROM BIOS POST executes some test code in protected-mode without properly initializing the LDT,

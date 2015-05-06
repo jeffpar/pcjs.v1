@@ -2098,6 +2098,10 @@ X86.opMOVwsr = function MOVwsr()
     }
     /*
      * Like other MOV operations, the destination does not need to be read, just written.
+     *
+     * TODO: Confirm this instruction's behavior on the 80386; ie, if a 32-bit OPERAND size is
+     * in effect, does it still write only 16 bits? If so, we must add a setDataSize(2) override.
+     * Confirm for both register and memory destinations.
      */
     this.opFlags |= X86.OPFLAG.NOREAD;
     this.aOpModMemWord[bModRM].call(this, X86.fnMOVxx);
