@@ -11,6 +11,24 @@
 ;
 ; See the machine definition file in /modules/pcjs/bin/romtests.json for a sample ROM configuration.
 ;
+; PMODE_32BIT Notes
+; -----------------
+; PMODE_32BIT is NOT enabled by default, because based on what I've seen in VirtualBox (and notes
+; at http://geezer.osdevbrasil.net/johnfine/segments.htm), if CS is loaded with a 32-bit code segment
+; while in protected-mode and we then return to real-mode, even if we immediately perform a FAR JMP
+; with a real-mode CS, the base and limit of CS will be updated, but other CS attributes, like EXT_BIG,
+; will NOT be updated.  As a result, the processor will crash as soon as it starts executing 16-bit
+; real-mode code, because it's being misinterpreted as 32-bit code, and there doesn't appear to be
+; anything you can do about it from real-mode.
+;
+; The work-around: switch to a 16-bit code segment BEFORE returning to real-mode.
+;
+; "Unreal mode" works by setting other segment registers (eg, DS, ES) to 32-bit segments, not CS.
+; SS should not be set to a 32-bit segment either, because that causes implicit pushes to use ESP
+; instead of SP, even in real-mode.
+;
+; TODO: Verify that a 80386 cannot successfully return to real-mode when CS contains a 32-bit code segment.
+;
 	cpu	386
 	org	0x100
 	section .text
@@ -99,7 +117,7 @@ CR0_MSW_PE	equ	0x0001
 	%assign selDesc selDesc+8
 %endmacro
 
-start:	nop
+start:	cli
 	mov	eax,0x44332211
 	mov	ebx,eax
 	mov	ecx,0x88776655
@@ -138,8 +156,13 @@ addrGDT:dw	myGDTEnd - myGDT - 1	; 16-bit limit of myGDT
 ; TODO: Why do I need to provide a 2nd parameter for "defDesc NULL"? Is this a NASM 0.98.x bug?
 ;
 myGDT:	defDesc	NULL,0			; the first descriptor in any descriptor table is always a dud (it corresponds to the null selector)
+    %ifdef PMODE_32BIT
+	defDesc	CSEG_PROT,0x000f0000,0x0000ffff,ACC_TYPE_CODE_READABLE,EXT_BIG
+	defDesc	DSEG_PROT,0x00000000,0x000fffff,ACC_TYPE_DATA_WRITABLE,EXT_BIG
+    %else
 	defDesc	CSEG_PROT,0x000f0000,0x0000ffff,ACC_TYPE_CODE_READABLE,EXT_NONE
 	defDesc	DSEG_PROT,0x00000000,0x000fffff,ACC_TYPE_DATA_WRITABLE,EXT_NONE
+    %endif
 myGDTEnd:
 
 initGDT:
@@ -159,7 +182,7 @@ initGDT:
 	mov	word [RAM_RETF+2],cs
     %else
     ;
-    ; This code will have no effect if we're in ROM (in that case, myGDT et al should already be set correctly)
+    ; This code will have no effect if we're in ROM (but in that case, everything should already be initialized correctly)
     ;
     	xor	eax,eax
 	mov	ax,cs
@@ -172,7 +195,11 @@ initGDT:
 	mov	eax,edx				; recover the base address of the current CS
 	add	eax,myGDT			; EAX = physical address of myGDT
 	mov	[cs:addrGDT+2],eax		; update the 32-bit base address of myGDT in addrGDT
-	mov	[cs:jmpReal+3],cs		; update the segment of the far jmp that returns us to real-mode
+    %ifdef PMODE_32BIT
+	mov	[cs:jmpReal+5],cs		; update the segment of the far jmp that returns us to real-mode
+    %else
+	mov	[cs:jmpReal+3],cs
+    %endif
 	mov	[cs:jmpStart+3],cs		; ditto for the far jmp that returns us to the start of the image
     %endif
 
@@ -184,7 +211,10 @@ goProt:	o32 lgdt [cs:addrGDT]
 jmpProt:
 	jmp	CSEG_PROT:toProt
 
-toProt:	; bits	32				; only if we define the CSEG_PROT descriptor with EXT_BIG
+toProt:
+    %ifdef PMODE_32BIT
+	bits	32				; only if we define the CSEG_PROT descriptor with EXT_BIG
+    %endif
 	mov	ax,DSEG_PROT
 	mov	ds,ax
 	mov	es,ax
@@ -198,7 +228,10 @@ goReal:	mov	eax,cr0
 jmpReal:
 	jmp	CSEG_REAL:toReal
 
-toReal:	; bits	16				; only if we define the CSEG_PROT descriptor with EXT_BIG
+toReal:
+    %ifdef PMODE_32BIT
+	bits	16				; only if we define the CSEG_PROT descriptor with EXT_BIG
+    %endif
 	mov	ax,cs
 	cmp	ax,CSEG_REAL			; is CS equal to 0xf000?
 	je	near jmpStart			; yes
