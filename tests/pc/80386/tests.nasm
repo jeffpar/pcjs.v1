@@ -4,47 +4,40 @@
 ;
 ; When used as a ROM, it should be installed at physical address 983296 (0xf0100) and aliased at
 ; physical address 4294902016 (0xffff0100).  The jump at jmpStart should align with the CPU reset
-; address (%0xfffffff0), which will transfer control to 0xf000:0x0100.
+; address (%0xfffffff0), which will transfer control to 0xf000:0x0100.  From that point on,
+; all memory accesses should remain within the first 1Mb.
 ;
 ; The code which attempts to update myGDT and addrGDT will have no effect when installed as a ROM,
 ; which is fine, because those data structures are predefined with appropriate ROM-based addresses.
 ;
-; See the machine definition file in /modules/pcjs/bin/romtests.json for a sample ROM configuration.
+; See the machine definition file in /modules/pcjs/bin/romtests.json for a configuration that can
+; load this file as a ROM image.
 ;
-; PMODE_32BIT Notes
+; PROT32 Notes
 ; -----------------
-; PMODE_32BIT is NOT enabled by default, because based on what I've seen in VirtualBox (and notes
+; PROT32 is NOT enabled by default, because based on what I've seen in VirtualBox (and notes
 ; at http://geezer.osdevbrasil.net/johnfine/segments.htm), if CS is loaded with a 32-bit code segment
-; while in protected-mode and we then return to real-mode, even if we immediately perform a FAR JMP
-; with a real-mode CS, the base and limit of CS will be updated, but other CS attributes, like EXT_BIG,
-; will NOT be updated.  As a result, the processor will crash as soon as it starts executing 16-bit
-; real-mode code, because it's being misinterpreted as 32-bit code, and there doesn't appear to be
-; anything you can do about it from real-mode.
+; while in protected-mode and we then return to real-mode, even if we immediately perform a FAR jump
+; with a real-mode CS, the base of CS will be updated, but all the other segment attributes, like
+; EXT_BIG, remain unchanged.  As a result, the processor will crash as soon as it starts executing
+; 16-bit real-mode code, because it's being misinterpreted as 32-bit code, and there doesn't appear
+; to be anything you can do about it from real-mode.
 ;
-; The work-around: switch to a 16-bit code segment BEFORE returning to real-mode.
+; The work-around: load CS with a 16-bit code segment BEFORE returning to real-mode.
 ;
 ; "Unreal mode" works by setting other segment registers (eg, DS, ES) to 32-bit segments, not CS.
 ; SS should not be set to a 32-bit segment either, because that causes implicit pushes to use ESP
 ; instead of SP, even in real-mode.
 ;
-; TODO: Verify that a 80386 cannot successfully return to real-mode when CS contains a 32-bit code segment.
-;
 	cpu	386
 	org	0x100
 	section .text
 
+	%include "dos.inc"
+	%include "misc.inc"
+	%include "x86.inc"
+
 	bits	16
-
-ACC_TYPE_SEG		equ	0x1000
-ACC_PRESENT		equ	0x8000
-ACC_TYPE_CODE		equ	0x0800
-ACC_TYPE_READABLE	equ	0x0200
-ACC_TYPE_WRITABLE	equ	0x0200
-ACC_TYPE_CODE_READABLE	equ	0x1a00
-ACC_TYPE_DATA_WRITABLE	equ	0x1200
-
-EXT_NONE		equ	0x0000
-EXT_BIG			equ	0x0040
 
 ;
 ; If we built our data structures in RAM, we might use the first page of RAM (0x0000-0x0fff) like so:
@@ -66,25 +59,9 @@ EXT_BIG			equ	0x0040
 ;RAM_RETF	equ	0x0d10
 
 CSEG_REAL	equ	0xf000
-CSEG_PROT	equ	0x0008
-DSEG_PROT	equ	0x0010
-
-CR0_MSW_PE	equ	0x0001
-
-;
-; The "set" macro initializes a register to the specified value (eg, "set eax,0")
-;
-%macro	set	2
-    %ifnum %2
-      %if %2 = 0
-	xor	%1,%1
-      %else
-    	mov	%1,%2
-      %endif
-    %else
-    	mov	%1,%2
-    %endif
-%endmacro
+CSEG_PROT16	equ	0x0008
+CSEG_PROT32	equ	0x0010
+DSEG_PROT16	equ	0x0018
 
 ;
 ; The "defDesc" macro defines a descriptor, given a name (%1), base (%2), limit (%3), type (%4), and ext (%5)
@@ -118,14 +95,29 @@ CR0_MSW_PE	equ	0x0001
 %endmacro
 
 start:	cli
+    ;
+    ; Test unsigned 32-bit multiplication and division
+    ;
 	mov	eax,0x44332211
 	mov	ebx,eax
 	mov	ecx,0x88776655
 	mul	ecx
 	div	ecx
 	cmp	eax,ebx
-	je	near initGDT		; apparently we have to tell NASM "near" because this is a forward reference
+	jne	near exitErr		; apparently we have to tell NASM "near" because this is a forward reference
+
+	xor	dx,dx
+	mov	ds,dx			; DS -> 0x0000
+    ;
+    ; Test moving a segment register to a 32-bit register
+    ;
+	mov	eax,ds
+	test	eax,eax
+	jnz	near exitErr
+
+	jmp	initGDT
 	times	32768 nop		; lots of NOPs to force a 16-bit conditional jump
+
 ;
 ; storeDesc(EBX=base, ECX=limit, DX=type, AX=ext, DI=address of descriptor)
 ;
@@ -150,19 +142,15 @@ storeDesc:
 	ret
 
 addrGDT:dw	myGDTEnd - myGDT - 1	; 16-bit limit of myGDT
-	dw	myGDT, 0xffff		; 32-bit base address of myGDT (works as long as we're aliased at 0xffff0000)
+	dw	myGDT, 0x000f		; 32-bit base address of myGDT
 
 ;
 ; TODO: Why do I need to provide a 2nd parameter for "defDesc NULL"? Is this a NASM 0.98.x bug?
 ;
 myGDT:	defDesc	NULL,0			; the first descriptor in any descriptor table is always a dud (it corresponds to the null selector)
-    %ifdef PMODE_32BIT
-	defDesc	CSEG_PROT,0x000f0000,0x0000ffff,ACC_TYPE_CODE_READABLE,EXT_BIG
-	defDesc	DSEG_PROT,0x00000000,0x000fffff,ACC_TYPE_DATA_WRITABLE,EXT_BIG
-    %else
-	defDesc	CSEG_PROT,0x000f0000,0x0000ffff,ACC_TYPE_CODE_READABLE,EXT_NONE
-	defDesc	DSEG_PROT,0x00000000,0x000fffff,ACC_TYPE_DATA_WRITABLE,EXT_NONE
-    %endif
+	defDesc	CSEG_PROT16,0x000f0000,0x0000ffff,ACC_TYPE_CODE_READABLE,EXT_NONE
+	defDesc	CSEG_PROT32,0x000f0000,0x0000ffff,ACC_TYPE_CODE_READABLE,EXT_BIG
+	defDesc	DSEG_PROT16,0x00000000,0x000fffff,ACC_TYPE_DATA_WRITABLE,EXT_NONE
 myGDTEnd:
 
 initGDT:
@@ -173,8 +161,9 @@ initGDT:
 	xor	eax,eax
 	mov	ax,cs
 	shl	eax,4
-	setDesc	CSEG_PROT,eax,0x0000ffff,ACC_TYPE_CODE_READABLE,EXT_NONE
-	setDesc	DSEG_PROT,0x0,0x000fffff,ACC_TYPE_DATA_WRITABLE,EXT_NONE
+	setDesc	CSEG_PROT16,eax,0x0000ffff,ACC_TYPE_CODE_READABLE,EXT_NONE
+	setDesc	CSEG_PROT32,eax,0x0000ffff,ACC_TYPE_CODE_READABLE,EXT_BIG
+	setDesc	DSEG_PROT16,0x0,0x000fffff,ACC_TYPE_DATA_WRITABLE,EXT_NONE
 	sub	edi,RAM_GDT
 	dec	edi
 	mov	[RAM_GDTR],di
@@ -182,65 +171,177 @@ initGDT:
 	mov	word [RAM_RETF+2],cs
     %else
     ;
-    ; This code will have no effect if we're in ROM (but in that case, everything should already be initialized correctly)
+    ; This code fixes the GDT and all our FAR jumps if we're running in RAM
     ;
     	xor	eax,eax
 	mov	ax,cs
-	shl	eax,4				; EAX = base address of the current CS
+	shl	eax,4				; EAX == base address of the current CS
 	mov	edx,eax				; save it in EDX
-	mov	[cs:myGDT+CSEG_PROT+2],ax	; update the base portions of the descriptor for CSEG_PROT
+	mov	[cs:myGDT+CSEG_PROT16+2],ax	; update the base portions of the descriptor for CSEG_PROT16 and CSEG_PROT32
+	mov	[cs:myGDT+CSEG_PROT32+2],ax
 	shr	eax,16
-	mov	[cs:myGDT+CSEG_PROT+4],al
-	mov	[cs:myGDT+CSEG_PROT+7],ah
+	mov	[cs:myGDT+CSEG_PROT16+4],al
+	mov	[cs:myGDT+CSEG_PROT32+4],al
+	mov	[cs:myGDT+CSEG_PROT16+7],ah
+	mov	[cs:myGDT+CSEG_PROT32+7],ah
 	mov	eax,edx				; recover the base address of the current CS
-	add	eax,myGDT			; EAX = physical address of myGDT
+	add	eax,myGDT			; EAX == physical address of myGDT
 	mov	[cs:addrGDT+2],eax		; update the 32-bit base address of myGDT in addrGDT
-    %ifdef PMODE_32BIT
-	mov	[cs:jmpReal+5],cs		; update the segment of the far jmp that returns us to real-mode
-    %else
-	mov	[cs:jmpReal+3],cs
+	mov	ax,cs
+      %ifdef PROT32
+	mov	[cs:jmpReal+5],ax		; update the segment of the FAR jump that returns us to real-mode
+      %else
+	mov	[cs:jmpReal+3],ax
+      %endif
+	mov	[cs:jmpStart+3],ax		; ditto for the FAR jump that returns us to the start of the image
     %endif
-	mov	[cs:jmpStart+3],cs		; ditto for the far jmp that returns us to the start of the image
-    %endif
+    ;
+    ; Now we want to build a page directory and a page table, but we need two pages of
+    ; 4K-aligned physical memory.  We can use hard-coded addresses in we're running in ROM,
+    ; otherwise we ask DOS for some memory.
+    ;
+    	cmp	ax,CSEG_REAL
+    	mov	edi,0x1000			; default to the 2nd physical page in low memory
+    	je	initPages
+    	mov	bx,0x1000			; 4K paragraphs == 64K bytes
+    	mov	ah,DOS_SETBLOCK			; resize the current block so we can allocate a new block
+    	int	INT_DOS
+    	jnc	allocPages
+exitErrDOSMem:
+    	mov	dx,errDOSMem
+exitErrDOS:
+	mov	ah,DOS_STD_CON_STRING_OUTPUT
+	int	INT_DOS
+	int	INT_DOSEXIT
+
+errDOSMem:
+	db     "Insufficient memory",CR,LF,'$'
+
+exitErr:nop
+	int3
+	jmp	exitErr
+
+allocPages:
+	mov	bx,0x1000			; 4K paragraphs == 64K bytes
+	mov	ah,DOS_ALLOC
+	int	INT_DOS
+	jc	errDOSMem
+    ;
+    ; AX == segment of 64K memory block
+    ;
+    	movzx	eax,ax
+    	shl	eax,4
+    	add	eax,0xfff
+    	and	eax,~0xfff
+	mov	edi,eax				; EDI == first physical 4K-aligned page within the 64K
+
+initPages:
+    	mov	esi,edi				; ESI == saved copy of EDI
+    ;
+    ; Build a page directory at EDI with only 1 valid PDE (the first one)
+    ;
+	cld
+	mov	eax,edi
+	add	eax,0x1000			; EAX == page frame address (of the next page)
+	or	eax,PTE_USER | PTE_READWRITE | PTE_PRESENT
+	stosd
+    	mov	ecx,1024-1			; ECX == number of (remaining) PDEs to write
+    	sub	eax,eax
+	rep	stosd
+    ;
+    ; Build a page table at EDI with only 256 (out of 1024) valid PTEs, which will map the first 1Mb of the
+    ; first 4Mb as linear == physical.
+    ;
+	mov	eax,PTE_USER | PTE_READWRITE | PTE_PRESENT
+    	mov	ecx,256				; ECX == number of PTEs to write
+initPT:	stosd
+	add	eax,0x1000
+	loop	initPT
+    	mov	ecx,1024-256			; ECX == number of (remaining) PTEs to write
+    	sub	eax,eax
+    	rep	stosd
 
 goProt:	o32 lgdt [cs:addrGDT]
+	mov	cr3,esi
 	mov	eax,cr0
+    %ifdef PAGING
+	or	eax,CR0_MSW_PE | CR0_PG
+    %else
 	or	eax,CR0_MSW_PE
-	mov	cr0,eax
-	nop
-jmpProt:
-	jmp	CSEG_PROT:toProt
-
-toProt:
-    %ifdef PMODE_32BIT
-	bits	32				; only if we define the CSEG_PROT descriptor with EXT_BIG
     %endif
-	mov	ax,DSEG_PROT
+	mov	cr0,eax
+jmpProt:
+	jmp	CSEG_PROT32:toProt32
+
+toProt32:
+	bits	32
+
+	mov	ax,DSEG_PROT16
 	mov	ds,ax
 	mov	es,ax
-;
-; Do some protected-mode tests now...
-;
+    ;
+    ; Test moving a segment register to a 32-bit memory location
+    ;
+	mov	edx,[0x0000]		; save the DWORD at 0x0000:0x0000 in EDX
+	or	eax,-1
+	mov	[0x0000],eax
+	mov	[0x0000],ds
+	mov	eax,ds
+	cmp	eax,[0x0000]
+err1:	jne	err1
+	mov	[0x0000],edx		; restore the DWORD at 0x0000:0x0000 from EDX
+
+    ;
+    ; Test moving a byte to a 32-bit register with sign-extension
+    ;
+	movsx	eax,byte [0xfffff]
+	cmp	eax,0xffffff80
+err2:	jne	err2
+
+    ;
+    ; Test moving a word to a 32-bit register with sign-extension
+    ;
+	movsx	eax,word [0xffffe]
+	cmp	eax,0xffff80fc
+err3:	jne	err3
+
+    ;
+    ; Test moving a byte to a 32-bit register with zero-extension
+    ;
+	movzx	eax,byte [0xfffff]
+	cmp	eax,0x00000080
+err4:	jne	err4
+
+    ;
+    ; Test moving a word to a 32-bit register with zero-extension
+    ;
+	movzx	eax,word [0xffffe]
+	cmp	eax,0x000080fc
+err5:	jne	err5
+
+    ;
+    ; Return to real-mode now, after first loading CS with a 16-bit code segment
+    ;
+	jmp	CSEG_PROT16:toProt16
+
+toProt16:
+	bits	16
+
 goReal:	mov	eax,cr0
-	and	eax,~CR0_MSW_PE
+	and	eax,~(CR0_MSW_PE | CR0_PG)
 	mov	cr0,eax
-	nop
 jmpReal:
 	jmp	CSEG_REAL:toReal
 
 toReal:
-    %ifdef PMODE_32BIT
-	bits	16				; only if we define the CSEG_PROT descriptor with EXT_BIG
-    %endif
 	mov	ax,cs
 	cmp	ax,CSEG_REAL			; is CS equal to 0xf000?
-	je	near jmpStart			; yes
-	int	0x20				; no, so assume we're running under DOS and exit
-
-	;
-	; Fill the remaining space with NOPs until we get to target offset 0xFFF0.
-	; Note that we subtract 0x100 from the target offset because we're ORG'ed at 0x100.
-	;
+	je	near jmpStart			; yes, so loop around, only because we have nowhere else to go
+	int	INT_DOSEXIT			; no, so assume we're running under DOS and exit
+    ;
+    ; Fill the remaining space with NOPs until we get to target offset 0xFFF0.
+    ; Note that we subtract 0x100 from the target offset because we're ORG'ed at 0x100.
+    ;
 	times	0xfff0-0x100-($-$$) nop
 
 jmpStart:
@@ -249,4 +350,4 @@ jmpStart:
 	db	0x20
 	db	'04/04/15'
 	db	0xFC				; 0000FFFE  FC (Model ID byte)
-	db	0x00				; 0000FFFF  00 (location of checksum byte)
+	db	0x80				; 0000FFFF  80 (normally, location of a checksum byte)

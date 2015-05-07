@@ -78,6 +78,7 @@
   "debugger": {
     "id": "pc386.debugger",
     "name": "",
+    "commands": "",
     "messages": ""
   }
 }

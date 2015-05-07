@@ -744,9 +744,9 @@ if (DEBUGGER) {
     /* 0x89 */ [Debugger.INS.MOV,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_OUT,  Debugger.TYPE_REG    | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0x8A */ [Debugger.INS.MOV,   Debugger.TYPE_REG    | Debugger.TYPE_BYTE  | Debugger.TYPE_OUT,  Debugger.TYPE_MODRM  | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
     /* 0x8B */ [Debugger.INS.MOV,   Debugger.TYPE_REG    | Debugger.TYPE_WORDV | Debugger.TYPE_OUT,  Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
-    /* 0x8C */ [Debugger.INS.MOV,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORD  | Debugger.TYPE_OUT,  Debugger.TYPE_SEGREG | Debugger.TYPE_WORD  | Debugger.TYPE_IN],
+    /* 0x8C */ [Debugger.INS.MOV,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_OUT,  Debugger.TYPE_SEGREG | Debugger.TYPE_WORD  | Debugger.TYPE_IN],
     /* 0x8D */ [Debugger.INS.LEA,   Debugger.TYPE_REG    | Debugger.TYPE_WORDV | Debugger.TYPE_OUT,  Debugger.TYPE_MEM    | Debugger.TYPE_WORDV],
-    /* 0x8E */ [Debugger.INS.MOV,   Debugger.TYPE_SEGREG | Debugger.TYPE_WORD  | Debugger.TYPE_OUT,  Debugger.TYPE_MODRM  | Debugger.TYPE_WORD  | Debugger.TYPE_IN],
+    /* 0x8E */ [Debugger.INS.MOV,   Debugger.TYPE_SEGREG | Debugger.TYPE_WORD  | Debugger.TYPE_OUT,  Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_IN],
     /* 0x8F */ [Debugger.INS.POP,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_OUT],
 
     /* 0x90 */ [Debugger.INS.NOP],
@@ -883,8 +883,8 @@ if (DEBUGGER) {
         0x03: [Debugger.INS.LSL,    Debugger.TYPE_REG    | Debugger.TYPE_WORD  | Debugger.TYPE_OUT  | Debugger.TYPE_80286, Debugger.TYPE_MEM    | Debugger.TYPE_WORD | Debugger.TYPE_IN],
         0x05: [Debugger.INS.LOADALL,Debugger.TYPE_80286],
         0x06: [Debugger.INS.CLTS,   Debugger.TYPE_80286],
-        0x20: [Debugger.INS.MOV,    Debugger.TYPE_REG    | Debugger.TYPE_DWORD | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_CTLREG | Debugger.TYPE_DWORD | Debugger.TYPE_IN],
-        0x22: [Debugger.INS.MOV,    Debugger.TYPE_CTLREG | Debugger.TYPE_DWORD | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_REG    | Debugger.TYPE_DWORD | Debugger.TYPE_IN],
+        0x20: [Debugger.INS.MOV,    Debugger.TYPE_MODRM  | Debugger.TYPE_DWORD | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_CTLREG | Debugger.TYPE_DWORD | Debugger.TYPE_IN],
+        0x22: [Debugger.INS.MOV,    Debugger.TYPE_CTLREG | Debugger.TYPE_DWORD | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_MODRM  | Debugger.TYPE_DWORD | Debugger.TYPE_IN],
         0x80: [Debugger.INS.JO,     Debugger.TYPE_IMMREL | Debugger.TYPE_WORDV | Debugger.TYPE_IN   | Debugger.TYPE_80386],
         0x81: [Debugger.INS.JNO,    Debugger.TYPE_IMMREL | Debugger.TYPE_WORDV | Debugger.TYPE_IN   | Debugger.TYPE_80386],
         0x82: [Debugger.INS.JC,     Debugger.TYPE_IMMREL | Debugger.TYPE_WORDV | Debugger.TYPE_IN   | Debugger.TYPE_80386],
@@ -910,7 +910,9 @@ if (DEBUGGER) {
         0xAC: [Debugger.INS.SHRD,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_REG    | Debugger.TYPE_WORDV | Debugger.TYPE_IN, Debugger.TYPE_IMM    | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
         0xAD: [Debugger.INS.SHRD,   Debugger.TYPE_MODRM  | Debugger.TYPE_WORDV | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_REG    | Debugger.TYPE_WORDV | Debugger.TYPE_IN, Debugger.TYPE_IMPREG | Debugger.TYPE_CL   | Debugger.TYPE_IN],
         0xB6: [Debugger.INS.MOVZX,  Debugger.TYPE_REG    | Debugger.TYPE_WORDV | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_MODRM  | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
-        0xB7: [Debugger.INS.MOVZX,  Debugger.TYPE_REG    | Debugger.TYPE_DWORD | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_MODRM  | Debugger.TYPE_WORD | Debugger.TYPE_IN]
+        0xB7: [Debugger.INS.MOVZX,  Debugger.TYPE_REG    | Debugger.TYPE_DWORD | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_MODRM  | Debugger.TYPE_WORD | Debugger.TYPE_IN],
+        0xBE: [Debugger.INS.MOVSX,  Debugger.TYPE_REG    | Debugger.TYPE_WORDV | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_MODRM  | Debugger.TYPE_BYTE | Debugger.TYPE_IN],
+        0xBF: [Debugger.INS.MOVSX,  Debugger.TYPE_REG    | Debugger.TYPE_DWORD | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_MODRM  | Debugger.TYPE_WORD | Debugger.TYPE_IN]
     };
 
     Debugger.aaGrpDescs = [
@@ -1243,12 +1245,6 @@ if (DEBUGGER) {
         this.messageDump(Messages.DOS,  function onDumpDOS(s)  { dbg.dumpDOS(s); });
 
         this.setReady();
-
-        if (this.sInitCommands) {
-            var a = this.parseCommand(this.sInitCommands);
-            delete this.sInitCommands;
-            for (var s in a) this.doCommand(a[s]);
-        }
     };
 
     /**
@@ -1514,7 +1510,7 @@ if (DEBUGGER) {
         this.println("id       physaddr   blkaddr   used    size    type");
         this.println("-------- ---------  --------  ------  ------  ----");
         for (var i = 0; i < this.cpu.aMemBlocks.length; i++) {
-            var block = this.cpu.aMemBlocks[i];
+            var block = this.cpu.aBusBlocks[i];
             if (block.type === Memory.TYPE.NONE) continue;
             this.println(str.toHex(block.id) + " %" + str.toHex(i << this.cpu.blockShift) + ": " + str.toHex(block.addr) + "  " + str.toHexWord(block.used) + "  " + str.toHexWord(block.size) + "  " + Memory.TYPE.NAMES[block.type]);
         }
@@ -2046,6 +2042,11 @@ if (DEBUGGER) {
     {
         this.println("Type ? for list of debugger commands");
         this.updateStatus();
+        if (this.sInitCommands) {
+            var a = this.parseCommand(this.sInitCommands);
+            delete this.sInitCommands;
+            for (var s in a) this.doCommand(a[s]);
+        }
     };
 
     /**
@@ -2225,7 +2226,9 @@ if (DEBUGGER) {
              * we always reset and then perform a (potentially limited) restore.
              */
             this.reset(true);
-            this.println(data? "resuming" : "powering up");
+
+            // this.println(data? "resuming" : "powering up");
+
             if (data && this.restore) {
                 if (!this.restore(data)) return false;
             }
@@ -5358,7 +5361,7 @@ if (DEBUGGER) {
                 }
             }
         } catch(e) {
-            this.println("debugger sad: " + e.message);
+            this.println("debugger error: " + (e.stack || e.message));
             result = false;
         }
         return result;

@@ -313,11 +313,9 @@ X86.opMOVcr = function MOVcr()
         break;
     case 0x2:
         temp = this.regEDX;
-        if (DEBUG) this.stopCPU();
         break;
     case 0x3:
         temp = this.regEBX;
-        if (DEBUG) this.stopCPU();
         break;
     default:
         X86.opInvalid.call(this);
@@ -1128,6 +1126,7 @@ X86.opMOVZXb = function MOVZXb()
 X86.opMOVZXw = function MOVZXw()
 {
     var bModRM = this.getIPByte();
+    this.setDataSize(2);
     this.aOpModRegWord[bModRM].call(this, X86.fnMOVX);
     switch((bModRM & 0x38) >> 3) {
     case 0x0:
@@ -1287,6 +1286,7 @@ X86.opMOVSXb = function MOVSXb()
 X86.opMOVSXw = function MOVSXw()
 {
     var bModRM = this.getIPByte();
+    this.setDataSize(2);
     this.aOpModRegWord[bModRM].call(this, X86.fnMOVX);
     switch((bModRM & 0x38) >> 3) {
     case 0x0:

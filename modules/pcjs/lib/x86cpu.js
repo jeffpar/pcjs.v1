@@ -793,7 +793,7 @@ X86CPU.prototype.mapPageBlock = function(addr, fWrite)
      * Now we can create a new PAGED Memory block and record the physical block info using setPhysBlock().
      */
     var addrPage = addr & ~X86.LADDR.OFFSET;
-    var blockPage = new Memory(addrPage, 0, this.blockSize, Memory.TYPE.PAGED);
+    var blockPage = new Memory(addrPage, 0, 0, Memory.TYPE.PAGED);
     blockPage.setPhysBlock(blockPhys, blockPDE, offPDE, blockPTE, offPTE);
 
     var iBlock = addr >>> this.blockShift;
