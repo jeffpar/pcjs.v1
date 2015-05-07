@@ -1581,17 +1581,17 @@ X86CPU.prototype.setProtMode = function(fProt)
     if (fProt === undefined) {
         fProt = !!(this.regCR0 & X86.CR0.MSW.PE);
     }
-    if (!fProt != !(this.regCR0 & X86.CR0.MSW.PE)) {
+    if (!fProt != !(this.regCR0 & X86.CR0.MSW.PE) && this.messageEnabled()) {
         this.printMessage("CPU switching to " + (fProt? "protected" : "real") + "-mode", this.bitsMessage, true);
     }
     this.aOpGrp6 = (fProt? X86.aOpGrp6Prot : X86.aOpGrp6Real);
-    this.segCS.updateMode(fProt);
-    this.segDS.updateMode(fProt);
-    this.segSS.updateMode(fProt);
-    this.segES.updateMode(fProt);
+    this.segCS.updateMode();
+    this.segDS.updateMode();
+    this.segSS.updateMode();
+    this.segES.updateMode();
     if (I386 && this.model >= X86.MODEL_80386) {
-        this.segFS.updateMode(fProt);
-        this.segGS.updateMode(fProt);
+        this.segFS.updateMode();
+        this.segGS.updateMode();
         this.resetSizes();
     }
 };

@@ -85,7 +85,7 @@ function Debugger(parmsDbg)
         this.cInstructions = -1;
 
         /*
-         * Default number of hex chars in a register and a physical address (ie, for real-mode);
+         * Default number of hex chars in a register and a linear address (ie, for real-mode);
          * updated by initBus().
          */
         this.cchReg = 4;
@@ -99,8 +99,8 @@ function Debugger(parmsDbg)
          * update aAddrNextData and aAddrNextCode, respectively, when they're done.
          *
          * The format of all aAddr variables is [off, seg, addr], where seg:off is the segmented
-         * address and addr is the corresponding physical address (if known).  For certain segmented
-         * addresses (eg, breakpoint addresses), we pre-compute the physical address and save that
+         * address and addr is the corresponding linear address (if known).  For certain segmented
+         * addresses (eg, breakpoint addresses), we pre-compute the linear address and save that
          * in aAddr[2], so that the breakpoint will still operate as intended even if the mode changes
          * later (eg, from real-mode to protected-mode).
          *
@@ -2576,14 +2576,14 @@ if (DEBUGGER) {
      * @param {Array} aAddr
      * @param {boolean} [fWrite]
      * @param {number} [cb] is number of bytes to check (1, 2 or 4); default is 1
-     * @return {number} is the corresponding physical address, or X86.ADDR_INVALID
+     * @return {number} is the corresponding linear address, or X86.ADDR_INVALID
      */
     Debugger.prototype.getAddr = function(aAddr, fWrite, cb)
     {
         /*
-         * Some addresses (eg, breakpoint addresses) save their original physical address in aAddr[2],
+         * Some addresses (eg, breakpoint addresses) save their original linear address in aAddr[2],
          * so we want to use that if it's there, but otherwise, aAddr is assumed to be a virtual address
-         * ([off, seg]) whose physical address must be calculated based on current machine state
+         * ([off, seg]) whose linear address must be calculated based on current machine state
          * (mode, active descriptor tables, etc).
          */
         var addr = aAddr[2];
@@ -2763,8 +2763,8 @@ if (DEBUGGER) {
             }
             if (fTemp) {
                 /*
-                 * Force temporary breakpoints to be interpreted as physical breakpoints
-                 * (hence the assertion that there IS a physical address stored in aAddr);
+                 * Force temporary breakpoints to be interpreted as linear breakpoints
+                 * (hence the assertion that there IS a linear address stored in aAddr);
                  * this allows us to step over calls or interrupts that change the processor mode
                  */
                 aAddr[0] = -1;
@@ -2814,7 +2814,7 @@ if (DEBUGGER) {
     /**
      * listBreakpoints(aBreak)
      *
-     * TODO: We may need to start listing the physical addresses of breakpoints, because
+     * TODO: We may need to start listing the linear addresses of breakpoints, because
      * segmented address can be ambiguous.
      *
      * @this {Debugger}
@@ -2938,14 +2938,14 @@ if (DEBUGGER) {
             var aAddrBreak = aBreak[i];
 
             /*
-             * We need to zap the physical address field of the breakpoint address before
-             * calling getAddr(), to force it to recalculate the physical address every time,
-             * unless this is a breakpoint on a physical address (as indicated by a -1 offset).
+             * We need to zap the linear address field of the breakpoint address before
+             * calling getAddr(), to force it to recalculate the linear address every time,
+             * unless this is a breakpoint on a linear address (as indicated by a -1 offset).
              */
             if (aAddrBreak[0] != -1) aAddrBreak[2] = null;
 
             /*
-             * We used to calculate the physical address of the breakpoint at the time the
+             * We used to calculate the linear address of the breakpoint at the time the
              * breakpoint was added, so that a breakpoint set in one mode (eg, in real-mode)
              * would still work as intended if the mode changed later (eg, to protected-mode).
              *
@@ -3519,11 +3519,11 @@ if (DEBUGGER) {
      * parseAddr(sAddr, type)
      *
      * As discussed above, the format of aAddr variables is [off, seg, addr]; they represent a segmented
-     * address (seg:off) when seg is defined or a physical address (addr) when seg is undefined (or null).
+     * address (seg:off) when seg is defined or a linear address (addr) when seg is undefined (or null).
      *
-     * To create a segmented address, specify two values separated by ":"; for a physical address, use
+     * To create a segmented address, specify two values separated by ":"; for a linear address, use
      * a "%" prefix.  We check for ":" after "%", so if for some strange reason you specify both, the
-     * address will be treated as segmented, not physical.
+     * address will be treated as segmented, not linear.
      *
      * The "%" syntax is similar to that used by the Windows 80386 kernel debugger (wdeb386) for linear
      * addresses.  If/when we add support for processors with page tables, we will likely adopt the same
@@ -3938,10 +3938,10 @@ if (DEBUGGER) {
      *
      * As the "help" output below indicates, the following breakpoint commands are supported:
      *
-     *      bp [a]  set exec breakpoint on physical addr [a]
-     *      br [a]  set read breakpoint on physical addr [a]
-     *      bw [a]  set write breakpoint on physical addr [a]
-     *      bc [a]  clear breakpoint on physical addr [a] (use "*" for all breakpoints)
+     *      bp [a]  set exec breakpoint on linear addr [a]
+     *      br [a]  set read breakpoint on linear addr [a]
+     *      bw [a]  set write breakpoint on linear addr [a]
+     *      bc [a]  clear breakpoint on linear addr [a] (use "*" for all breakpoints)
      *      bl      list breakpoints
      *
      * to which we have recently added the following I/O breakpoint commands:

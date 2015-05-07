@@ -54,12 +54,14 @@ function X86Seg(cpu, id, sName, fProt)
     this.id = id;
     this.sName = sName || "";
     this.sel = 0;
-    this.limit = 0xffff;    // in protected-mode, this is descriptor word 0x0 (word 0x6 on the 80386 supplements limit bits 16-19)
-    this.base = 0;          // in protected-mode, this is descriptor word 0x2 (word 0x6 on the 80386 supplements base bits 24-31)
-    this.acc = 0;           // in protected-mode, this is descriptor word 0x4, masked with 0xff00 (bits 0-7 supplement base bits 16-23)
-    this.ext = 0;           // in protected-mode, this is descriptor word 0x6 (used only on the 80386)
+    this.limit = 0xffff;        // in protected-mode, this is descriptor word 0x0
+    this.base = 0;              // in protected-mode, this is descriptor word 0x2
+    this.acc = this.type = 0;   // in protected-mode, this is descriptor word 0x4, masked with 0xff00 (bits 0-7 supplement base bits 16-23)
+    this.ext = 0;               // in protected-mode, this is descriptor word 0x6 (80386 only; supplements limit bits 16-19 and base bits 24-31)
     this.cpl = this.dpl = 0;
     this.addrDesc = X86.ADDR_INVALID;
+    this.dataSize = this.addrSize = 2;
+    this.dataMask = this.addrMask = 0xffff;
     /*
      * The following properties are used for CODE segments only (ie, segCS); if the process of loading
      * CS also requires a stack switch, then fStackSwitch will be set to true; additionally, if the stack
@@ -84,13 +86,7 @@ function X86Seg(cpu, id, sName, fProt)
     this.awParms = (this.id == X86Seg.ID.CODE? new Array(32) : []);
     this.fCall = null;
     this.fStackSwitch = false;
-    /*
-     * The following properties are used for STACK segments only (ie, segSS); we want to make it easier
-     * for setSS() to set stack lower and upper limits, which requires knowing whether or not the segment is
-     * marked as EXPDOWN.
-     */
-    this.fExpDown = false;
-    this.updateMode(fProt);
+    this.updateMode(true, fProt);
 }
 
 X86Seg.ID = {
@@ -117,8 +113,17 @@ X86Seg.ID = {
 X86Seg.prototype.loadReal = function loadReal(sel, fSuppress)
 {
     this.sel = sel & 0xffff;
-    this.dataSize = this.addrSize = 2;
-    this.dataMask = this.addrMask = 0xffff;
+    /*
+     * Apparently, loading a new value into a segment register in real-mode alters NEITHER the limit NOR these
+     * other attributes, so I've since moved these defaults into the constructor.  If you run any code that switches
+     * to protected-mode, loads a 32-bit code segment, and then switches back to real-mode, it is THAT code's
+     * responsibility to load a 16-bit segment into CS before returning to real-mode; otherwise, you're probably toast.
+     *
+     *      this.dataSize = this.addrSize = 2;
+     *      this.dataMask = this.addrMask = 0xffff;
+     *
+     * Only the selector and base portions of a segment register can be changed in real-mode.
+     */
     return this.base = this.sel << 4;
 };
 
@@ -556,7 +561,7 @@ X86Seg.prototype.loadDesc6 = function(addrDesc, sel)
     this.type = (acc & X86.DESC.ACC.TYPE.MASK);
     this.ext = 0;
     this.addrDesc = addrDesc;
-    this.updateMode();
+    this.updateMode(true);
 
     this.messageSeg(sel, base, limit, acc);
 
@@ -798,7 +803,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
         this.type = type;
         this.ext = ext;
         this.addrDesc = addrDesc;
-        this.updateMode();
+        this.updateMode(true);
         break;
     }
     if (!fSuppress) this.messageSeg(sel, base, limit, acc, ext);
@@ -867,20 +872,26 @@ X86Seg.prototype.restore = function(a)
 };
 
 /**
- * updateMode(fProt)
+ * updateMode(fLoad, fProt)
  *
  * Ensures that the segment register's access (ie, load and check methods) matches the specified (or current)
  * operating mode (real or protected).
  *
  * @this {X86Seg}
+ * @param {boolean} [fLoad] true if the segment was just (re)loaded, false if not
  * @param {boolean} [fProt] true for protected-mode access, false for real-mode access, undefined for current mode
  * @return {boolean}
  */
-X86Seg.prototype.updateMode = function(fProt)
+X86Seg.prototype.updateMode = function(fLoad, fProt)
 {
     if (fProt === undefined) {
         fProt = !!(this.cpu.regCR0 & X86.CR0.MSW.PE);
     }
+    /*
+     * The following properties are used for STACK segments only (ie, segSS); we want to make it easier
+     * for setSS() to set stack lower and upper limits, which requires knowing whether or not the segment is
+     * marked as EXPDOWN.
+     */
     this.fExpDown = false;
     if (fProt) {
         /*
@@ -919,12 +930,21 @@ X86Seg.prototype.updateMode = function(fProt)
             }
         }
         this.dpl = (this.acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
-        if (this.cpu.model < X86.MODEL_80386 || !(this.ext & X86.DESC.EXT.BIG)) {
-            this.addrSize = 2;
-            this.addrMask = 0xffff;
-        } else {
-            this.addrSize = 4;
-            this.addrMask = (0xffffffff|0);
+        if (fLoad) {
+            /*
+             * Any update to the OPERAND and ADDRESS sizes should happen only on segment loads, not simply when
+             * we're updating the segment register as part of a mode change.  Note that there is no counterpart to
+             * this for real-mode, because real-mode segment loads never change these attributes.
+             */
+            if (this.cpu.model < X86.MODEL_80386 || !(this.ext & X86.DESC.EXT.BIG)) {
+                this.dataSize = 2;
+                this.dataMask = 0xffff;
+            } else {
+                this.dataSize = 4;
+                this.dataMask = (0xffffffff|0);
+            }
+            this.addrSize = this.dataSize;
+            this.addrMask = this.dataMask;
         }
     } else {
         this.load = this.loadReal;
@@ -932,25 +952,25 @@ X86Seg.prototype.updateMode = function(fProt)
         this.checkRead = this.checkReadReal;
         this.checkWrite = this.checkWriteReal;
         /*
-         * Like the base, we don't want to mess with the limit, so that features like "Unreal" mode
-         * (or "Big Real" mode as it's called in the HIMEM source code) will work, at least until the
-         * next explicit segment load.
+         * We don't want to mess with the limit, so that features like "Unreal" mode (or "Big Real" mode
+         * as it's called in the HIMEM source code) will work, at least until the next explicit segment load.
          *
          * See http://www.os2museum.com/wp/himem-sys-unreal-mode-and-loadall/ for more details.
          *
+         * Ditto for other attributes such as acc, type, ext, and the OPERAND and ADDRESS sizes, which are derived
+         * from the ext property.  Even an explicit segment load in real-mode does not alter these properties.
+         *
          *      this.limit = 0xffff;
+         *      this.acc = this.type = this.ext = 0;
+         *      this.dataSize = this.addrSize = 2;
+         *      this.dataMask = this.addrMask = 0xffff;
          *
          * TODO: The checkReadReal() and checkWriteReal() functions need to generate GP faults for offsets
          * beyond the current real-mode limit.
          */
-        this.acc = this.ext = 0;
-        this.cpl = this.dpl = 0;
         this.addrDesc = X86.ADDR_INVALID;
-        this.addrSize = 2;
-        this.addrMask = 0xffff;
+        this.cpl = this.dpl = 0;
     }
-    this.dataSize = this.addrSize;
-    this.dataMask = this.addrMask;
     return fProt;
 };
 
