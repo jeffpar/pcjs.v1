@@ -2704,6 +2704,24 @@ X86CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
 };
 
 /**
+ * probeAddr(addr)
+ *
+ * Used by the Debugger to probe addresses without risk of triggering a page fault, and by internal
+ * functions, like fnFaultMessage(), that also need to avoid triggering faults, since they're not part
+ * of standard CPU operation.
+ *
+ * @this {X86CPU}
+ * @param {number} addr is a linear address
+ * @return {number|null} byte (8-bit) value at that address, or null if invalid
+ */
+X86CPU.prototype.probeAddr = function(addr)
+{
+    var block = this.aMemBlocks[(addr & this.memMask) >>> this.blockShift];
+    if (block.type == Memory.TYPE.UNPAGED) return null;
+    return block.readByteDirect(addr & this.blockLimit, addr);
+};
+
+/**
  * getByte(addr)
  *
  * Use bus.getByte() for physical addresses, and cpu.getByte() for linear addresses; the latter takes care

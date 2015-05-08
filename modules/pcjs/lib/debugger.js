@@ -1460,7 +1460,7 @@ if (DEBUGGER) {
         var addr = this.getAddr(dbgAddr, false, 1);
         if (addr !== X86.ADDR_INVALID) {
             this.nSuppress++;
-            b = this.cpu.getByte(addr);
+            b = this.cpu.probeAddr(addr) | 0;
             this.nSuppress--;
             if (inc) this.incAddr(dbgAddr, inc);
         }
@@ -1497,7 +1497,7 @@ if (DEBUGGER) {
         var addr = this.getAddr(dbgAddr, false, 2);
         if (addr !== X86.ADDR_INVALID) {
             this.nSuppress++;
-            w = this.cpu.getShort(addr);
+            w = this.cpu.probeAddr(addr) | (this.cpu.probeAddr(addr + 1) << 8);
             this.nSuppress--;
             if (inc) this.incAddr(dbgAddr, inc);
         }
@@ -1518,7 +1518,7 @@ if (DEBUGGER) {
         var addr = this.getAddr(dbgAddr, false, 4);
         if (addr !== X86.ADDR_INVALID) {
             this.nSuppress++;
-            l = this.cpu.getLong(addr);
+            l = this.cpu.probeAddr(addr) | (this.cpu.probeAddr(addr + 1) << 8) | (this.cpu.probeAddr(addr + 2) << 16) | (this.cpu.probeAddr(addr + 3) << 24);
             this.nSuppress--;
             if (inc) this.incAddr(dbgAddr, inc);
         }
@@ -1887,7 +1887,8 @@ if (DEBUGGER) {
         for (var sField in Debugger.aTSSFields) {
             var off = Debugger.aTSSFields[sField];
             var ch = (sField.length < 8? ' ' : '');
-            var w = this.cpu.getShort(seg.base + off);
+            var addr = seg.base + off;
+            var w = this.cpu.probeAddr(addr) | (this.cpu.probeAddr(addr + 1) << 8);
             if (sDump) sDump += '\n';
             sDump += str.toHexWord(off) + " " + sField + ": " + ch + str.toHexWord(w);
         }
@@ -2686,7 +2687,7 @@ if (DEBUGGER) {
          */
         if (nState >= 0 && this.aaOpcodeCounts.length) {
             this.cInstructions++;
-            var bOpcode = this.cpu.getByte(addr);
+            var bOpcode = this.cpu.probeAddr(addr);
             this.aaOpcodeCounts[bOpcode][1]++;
             var a = this.aOpcodeHistory[this.iOpcodeHistory];
             a[0] = this.cpu.getIP();
