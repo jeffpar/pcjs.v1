@@ -51,6 +51,31 @@ if (DEBUGGER) {
 }
 
 /**
+ * DbgAddr object definition
+ *
+ *  off:        offset, if any
+ *  sel:        selector, if any
+ *  addr:       linear address, if any
+ *  fData32:    true if 32-bit operand size in effect
+ *  fAddr32:    true if 32-bit address size in effect
+ *  fOverride:  true if any overrides were processed with this address
+ *  fComplete:  true if a complete instruction was processed with this address
+ *  fTempBreak: true if temporary breakpoint address
+ *
+ * @typedef {{
+ *  off:        (number|null|undefined),
+ *  sel:        (number|null|undefined),
+ *  addr:       (number|null|undefined),
+ *  fData32:    (boolean|undefined),
+ *  fAddr32:    (boolean|undefined),
+ *  fOverride:  (boolean|undefined),
+ *  fComplete:  (boolean|undefined),
+ *  fTempBreak: (boolean|undefined)
+ * }}
+ */
+var DbgAddr;
+
+/**
  * Debugger(parmsDbg)
  *
  * @constructor
@@ -94,21 +119,21 @@ function Debugger(parmsDbg)
         this.maskAddr = 0xfffff;
 
         /*
-         * Most commands that require an address call parseAddr(), which defaults to aAddrNextCode
-         * or aAddrNextData when no address has been given.  doDump() and doUnassemble(), in turn,
-         * update aAddrNextData and aAddrNextCode, respectively, when they're done.
+         * Most commands that require an address call parseAddr(), which defaults to dbgAddrNextCode
+         * or dbgAddrNextData when no address has been given.  doDump() and doUnassemble(), in turn,
+         * update dbgAddrNextData and dbgAddrNextCode, respectively, when they're done.
          *
-         * The format of all aAddr variables is [off, seg, addr], where seg:off is the segmented
-         * address and addr is the corresponding linear address (if known).  For certain segmented
-         * addresses (eg, breakpoint addresses), we pre-compute the linear address and save that
-         * in aAddr[2], so that the breakpoint will still operate as intended even if the mode changes
+         * All dbgAddr variables contain properties off, sel, and addr, where sel:off represents the
+         * segmented address and addr is the corresponding linear address (if known).  For certain
+         * segmented addresses (eg, breakpoint addresses), we pre-compute the linear address and save
+         * that in addr, so that the breakpoint will still operate as intended even if the mode changes
          * later (eg, from real-mode to protected-mode).
          *
-         * Finally, for TEMPORARY breakpoint addresses, we set aAddr[3] to true, so that they can be
+         * Finally, for TEMPORARY breakpoint addresses, we set fTempBreak to true, so that they can be
          * automatically cleared when they're hit.
          */
-        this.aAddrNextCode = [0, 0];
-        this.aAddrNextData = [0, 0];
+        this.dbgAddrNextCode = this.newAddr(0, 0);
+        this.dbgAddrNextData = this.newAddr(0, 0);
 
         /*
          * This maintains command history.  New commands are inserted at index 0 of the array.
@@ -121,7 +146,7 @@ function Debugger(parmsDbg)
          * fAssemble is true when "assemble mode" is active, false when not.
          */
         this.fAssemble = false;
-        this.aAddrAssemble = [0, 0];
+        this.dbgAddrAssemble = this.newAddr(0, 0);
 
         /*
          * aSymbolTable is an array of 4-element arrays, one per ROM or other chunk of address space.
@@ -234,7 +259,7 @@ if (DEBUGGER) {
     };
 
     /*
-     * Address types for parseAddr(), to help choose between aAddrNextCode and aAddrNextData
+     * Address types for parseAddr(), to help choose between dbgAddrNextCode and dbgAddrNextData
      */
     Debugger.ADDR_CODE = 1;
     Debugger.ADDR_DATA = 2;
@@ -418,7 +443,7 @@ if (DEBUGGER) {
     Debugger.TYPE_DSSI      = 0x0040;   // (X) memory addressed by DS:SI
     Debugger.TYPE_ESDI      = 0x0050;   // (Y) memory addressed by ES:DI
     Debugger.TYPE_IMPREG    = 0x0060;   //     implicit register in TYPE_IREG
-    Debugger.TYPE_IMPSEG    = 0x0070;   //     implicit seg. register in TYPE_IREG
+    Debugger.TYPE_IMPSEG    = 0x0070;   //     implicit segment register in TYPE_IREG
     Debugger.TYPE_MODRM     = 0x0080;   // (E) standard ModRM decoding
     Debugger.TYPE_MEM       = 0x0090;   // (M) ModRM refers to memory only
     Debugger.TYPE_REG       = 0x00A0;   // (G) standard Reg decoding
@@ -1365,259 +1390,308 @@ if (DEBUGGER) {
      * switched the processor from real to protected mode.  Actually loading the selector from the GDT/LDT
      * should be done only as a last resort.
      *
-     * @param {number} sel
+     * @param {number|null|undefined} sel
      * @return {X86Seg} seg
      */
     Debugger.prototype.getSegment = function(sel)
     {
-        if (sel == this.cpu.getCS()) return this.cpu.segCS;
-        if (sel == this.cpu.getDS()) return this.cpu.segDS;
-        if (sel == this.cpu.getES()) return this.cpu.segES;
-        if (sel == this.cpu.getSS()) return this.cpu.segSS;
+        if (sel === this.cpu.getCS()) return this.cpu.segCS;
+        if (sel === this.cpu.getDS()) return this.cpu.segDS;
+        if (sel === this.cpu.getES()) return this.cpu.segES;
+        if (sel === this.cpu.getSS()) return this.cpu.segSS;
         if (I386 && this.cpu.model >= X86.MODEL_80386) {
-            if (sel == this.cpu.getFS()) return this.cpu.segFS;
-            if (sel == this.cpu.getGS()) return this.cpu.segGS;
+            if (sel === this.cpu.getFS()) return this.cpu.segFS;
+            if (sel === this.cpu.getGS()) return this.cpu.segGS;
         }
         var seg = new X86Seg(this.cpu, X86Seg.ID.DEBUG, "DBG");
         /*
-         * TODO: Confirm that it's OK for this function to drop any error from seg.load() on the floor....
+         * Note the load() function's fSuppress parameter, which the Debugger should ALWAYS set to true
+         * to avoid triggering a fault.
+         *
+         * TODO: Confirm that it's OK for getSegment() to drop any error from seg.load() on the floor....
          */
         seg.load(sel, true);
         return seg;
     };
 
     /**
-     * getAddr(aAddr, fWrite, cb)
+     * getAddr(dbgAddr, fWrite, cb)
      *
      * @this {Debugger}
-     * @param {Array} aAddr
+     * @param {DbgAddr} dbgAddr
      * @param {boolean} [fWrite]
      * @param {number} [cb] is number of bytes to check (1, 2 or 4); default is 1
      * @return {number} is the corresponding linear address, or X86.ADDR_INVALID
      */
-    Debugger.prototype.getAddr = function(aAddr, fWrite, cb)
+    Debugger.prototype.getAddr = function(dbgAddr, fWrite, cb)
     {
         /*
-         * Some addresses (eg, breakpoint addresses) save their original linear address in aAddr[2],
-         * so we want to use that if it's there, but otherwise, aAddr is assumed to be a virtual address
-         * ([off, seg]) whose linear address must be calculated based on current machine state
-         * (mode, active descriptor tables, etc).
+         * Some addresses (eg, breakpoint addresses) save their original linear address in dbgAddr.addr,
+         * so we want to use that if it's there, but otherwise, dbgAddr is assumed to be a segmented address
+         * whose linear address must always be (re)calculated based on current machine state (mode, active
+         * descriptor tables, etc).
          */
-        var addr = aAddr[2];
+        var addr = dbgAddr.addr;
         if (addr == null) {
-            var seg = this.getSegment(aAddr[1]);
+            var seg = this.getSegment(dbgAddr.sel);
             if (!fWrite) {
-                addr = seg.checkRead(aAddr[0], cb || 1, true);
+                addr = seg.checkRead(dbgAddr.off, cb || 1, true);
             } else {
-                addr = seg.checkWrite(aAddr[0], cb || 1, true);
+                addr = seg.checkWrite(dbgAddr.off, cb || 1, true);
             }
-            aAddr[2] = addr;
+            dbgAddr.addr = addr;
         }
         return addr;
     };
 
     /**
-     * getByte(aAddr, inc)
+     * getByte(dbgAddr, inc)
      *
      * We must route all our memory requests through the CPU now, in case paging is enabled.
      *
      * @this {Debugger}
-     * @param {Array} aAddr
+     * @param {DbgAddr} dbgAddr
      * @param {number} [inc]
      * @return {number}
      */
-    Debugger.prototype.getByte = function(aAddr, inc)
+    Debugger.prototype.getByte = function(dbgAddr, inc)
     {
         var b = 0xff;
-        var addr = this.getAddr(aAddr, false, 1);
+        var addr = this.getAddr(dbgAddr, false, 1);
         if (addr !== X86.ADDR_INVALID) {
             this.nSuppress++;
             b = this.cpu.getByte(addr);
             this.nSuppress--;
-            if (inc) this.incAddr(aAddr, inc);
+            if (inc) this.incAddr(dbgAddr, inc);
         }
         return b;
     };
 
     /**
-     * getWord(aAddr, fAdvance)
+     * getWord(dbgAddr, fAdvance)
      *
      * @this {Debugger}
-     * @param {Array} aAddr
+     * @param {DbgAddr} dbgAddr
      * @param {boolean} [fAdvance]
      * @return {number}
      */
-    Debugger.prototype.getWord = function(aAddr, fAdvance)
+    Debugger.prototype.getWord = function(dbgAddr, fAdvance)
     {
-        if (!aAddr[4]) {
-            return this.getShort(aAddr, fAdvance? 2 : 0);
+        if (!dbgAddr.fData32) {
+            return this.getShort(dbgAddr, fAdvance? 2 : 0);
         }
-        return this.getLong(aAddr, fAdvance? 4 : 0);
+        return this.getLong(dbgAddr, fAdvance? 4 : 0);
     };
 
     /**
-     * getShort(aAddr, inc)
+     * getShort(dbgAddr, inc)
      *
      * @this {Debugger}
-     * @param {Array} aAddr
+     * @param {DbgAddr} dbgAddr
      * @param {number} [inc]
      * @return {number}
      */
-    Debugger.prototype.getShort = function(aAddr, inc)
+    Debugger.prototype.getShort = function(dbgAddr, inc)
     {
         var w = 0xffff;
-        var addr = this.getAddr(aAddr, false, 2);
+        var addr = this.getAddr(dbgAddr, false, 2);
         if (addr !== X86.ADDR_INVALID) {
             this.nSuppress++;
             w = this.cpu.getShort(addr);
             this.nSuppress--;
-            if (inc) this.incAddr(aAddr, inc);
+            if (inc) this.incAddr(dbgAddr, inc);
         }
         return w;
     };
 
     /**
-     * getLong(aAddr, inc)
+     * getLong(dbgAddr, inc)
      *
      * @this {Debugger}
-     * @param {Array} aAddr
+     * @param {DbgAddr} dbgAddr
      * @param {number} [inc]
      * @return {number}
      */
-    Debugger.prototype.getLong = function(aAddr, inc)
+    Debugger.prototype.getLong = function(dbgAddr, inc)
     {
         var l = -1;
-        var addr = this.getAddr(aAddr, false, 4);
+        var addr = this.getAddr(dbgAddr, false, 4);
         if (addr !== X86.ADDR_INVALID) {
             this.nSuppress++;
             l = this.cpu.getLong(addr);
             this.nSuppress--;
-            if (inc) this.incAddr(aAddr, inc);
+            if (inc) this.incAddr(dbgAddr, inc);
         }
         return l;
     };
 
     /**
-     * setByte(aAddr, b, inc)
+     * setByte(dbgAddr, b, inc)
      *
      * @this {Debugger}
-     * @param {Array} aAddr
+     * @param {DbgAddr} dbgAddr
      * @param {number} b
      * @param {number} [inc]
      */
-    Debugger.prototype.setByte = function(aAddr, b, inc)
+    Debugger.prototype.setByte = function(dbgAddr, b, inc)
     {
-        var addr = this.getAddr(aAddr, true, 1);
+        var addr = this.getAddr(dbgAddr, true, 1);
         if (addr !== X86.ADDR_INVALID) {
             this.nSuppress++;
             this.cpu.setByte(addr, b);
             this.nSuppress--;
-            if (inc) this.incAddr(aAddr, inc);
+            if (inc) this.incAddr(dbgAddr, inc);
             this.cpu.updateCPU();
         }
     };
 
     /**
-     * setShort(aAddr, w, inc)
+     * setShort(dbgAddr, w, inc)
      *
      * @this {Debugger}
-     * @param {Array} aAddr
+     * @param {DbgAddr} dbgAddr
      * @param {number} w
      * @param {number} [inc]
      */
-    Debugger.prototype.setShort = function(aAddr, w, inc)
+    Debugger.prototype.setShort = function(dbgAddr, w, inc)
     {
-        var addr = this.getAddr(aAddr, true, 2);
+        var addr = this.getAddr(dbgAddr, true, 2);
         if (addr !== X86.ADDR_INVALID) {
             this.nSuppress++;
             this.cpu.setShort(addr, w);
             this.nSuppress--;
-            if (inc) this.incAddr(aAddr, inc);
+            if (inc) this.incAddr(dbgAddr, inc);
             this.cpu.updateCPU();
         }
     };
 
     /**
-     * newAddr(off, seg, addr, fData32, fAddr32)
+     * newAddr(off, sel, addr, fData32, fAddr32)
      *
      * @this {Debugger}
-     * @param {number} off
-     * @param {number} seg
-     * @param {number|null} [addr]
+     * @param {number|null|undefined} [off]
+     * @param {number|null|undefined} [sel]
+     * @param {number|null|undefined} [addr]
      * @param {boolean} [fData32]
      * @param {boolean} [fAddr32]
-     * @return {Array} containing [off, seg, addr]
+     * @return {DbgAddr}
      */
-    Debugger.prototype.newAddr = function(off, seg, addr, fData32, fAddr32)
+    Debugger.prototype.newAddr = function(off, sel, addr, fData32, fAddr32)
     {
-        if (fData32 === undefined) fData32 = (this.cpu.segCS.dataSize == 4);
-        if (fAddr32 === undefined) fAddr32 = (this.cpu.segCS.addrSize == 4);
-        return [off, seg, addr, false, fData32, fAddr32];
+        if (fData32 === undefined) fData32 = (this.cpu && this.cpu.segCS.dataSize == 4);
+        if (fAddr32 === undefined) fAddr32 = (this.cpu && this.cpu.segCS.addrSize == 4);
+        return {off: off, sel: sel, addr: addr, fTempBreak: false, fData32: fData32 || false, fAddr32: fAddr32 || false};
     };
 
     /**
-     * checkLimit(aAddr)
+     * packAddr(dbgAddr)
      *
      * @this {Debugger}
-     * @param {Array} aAddr containing [off, seg, addr]
+     * @param {DbgAddr} dbgAddr
+     * @return {Array}
      */
-    Debugger.prototype.checkLimit = function(aAddr)
+    Debugger.prototype.packAddr = function(dbgAddr)
     {
-        if (aAddr[1] != null) {
-            var limit = this.getSegment(aAddr[1]).limit;
-            if (aAddr[0] > limit) {
-                aAddr[0] = 0;
-                aAddr[2] = null;
+        return [dbgAddr.off, dbgAddr.sel, dbgAddr.addr, dbgAddr.fTempBreak, dbgAddr.fData32, dbgAddr.fAddr32, dbgAddr.fOverride, dbgAddr.fComplete];
+    };
+
+    /**
+     * unpackAddr(aAddr)
+     *
+     * @this {Debugger}
+     * @param {Array} aAddr
+     * @return {DbgAddr}
+     */
+    Debugger.prototype.unpackAddr = function(aAddr)
+    {
+        return {off: aAddr[0], sel: aAddr[1], addr: aAddr[2], fTempBreak: aAddr[3], fData32: aAddr[4], fAddr32: aAddr[5], fOverride: aAddr[6], fComplete: aAddr[7]};
+    };
+
+    /**
+     * checkLimit(dbgAddr)
+     *
+     * @this {Debugger}
+     * @param {DbgAddr} dbgAddr
+     */
+    Debugger.prototype.checkLimit = function(dbgAddr)
+    {
+        if (dbgAddr.sel != null) {
+            var limit = this.getSegment(dbgAddr.sel).limit;
+            if (dbgAddr.off > limit) {
+                dbgAddr.off = 0;
+                dbgAddr.addr = null;
             }
         }
     };
 
     /**
-     * incAddr(aAddr, inc)
+     * incAddr(dbgAddr, inc)
      *
      * @this {Debugger}
-     * @param {Array} aAddr containing [off, seg, addr]
-     * @param {number|undefined} inc contains value to increment by (default is 1)
+     * @param {DbgAddr} dbgAddr
+     * @param {number|undefined} inc contains value to increment dbgAddr by (default is 1)
      */
-    Debugger.prototype.incAddr = function(aAddr, inc)
+    Debugger.prototype.incAddr = function(dbgAddr, inc)
     {
-        inc = (inc === undefined? 1 : inc);
-        if (aAddr[2] != null) {
-            aAddr[2] += inc;
+        inc = inc || 1;
+        if (dbgAddr.addr != null) {
+            dbgAddr.addr += inc;
         }
-        if (aAddr[1] != null) {
-            aAddr[0] += inc;
-            this.checkLimit(aAddr);
+        if (dbgAddr.sel != null) {
+            dbgAddr.off += inc;
+            this.checkLimit(dbgAddr);
         }
-    };
-
-    /**
-     * hexAddr(aAddr)
-     *
-     * @this {Debugger}
-     * @param {Array} aAddr containing [off, seg]
-     * @return {string} the hex representation of the address
-     */
-    Debugger.prototype.hexAddr = function(aAddr)
-    {
-        return aAddr[1] == null? ("%" + str.toHex(aAddr[2])) : this.hexOffset(aAddr[0], aAddr[1], aAddr[5]);
     };
 
     /**
      * hexOffset(off, sel, fAddr32)
      *
      * @this {Debugger}
-     * @param {number} off
-     * @param {number} [sel]
-     * @param {boolean} [fAddr32] is true to force 32-bit ADDRESS size
+     * @param {number|null} [off]
+     * @param {number|null} [sel]
+     * @param {boolean} [fAddr32] is true for 32-bit ADDRESS size
      * @return {string} the hex representation of off (or sel:off)
      */
     Debugger.prototype.hexOffset = function(off, sel, fAddr32)
     {
-        if (sel !== undefined) {
+        if (sel != null) {
             return str.toHex(sel, 4) + ":" + str.toHex(off, (off & (0xffff0000|0)) || fAddr32? 8 : 4);
         }
         return str.toHex(off);
+    };
+
+    /**
+     * hexAddr(dbgAddr)
+     *
+     * @this {Debugger}
+     * @param {DbgAddr} dbgAddr
+     * @return {string} the hex representation of the address
+     */
+    Debugger.prototype.hexAddr = function(dbgAddr)
+    {
+        return dbgAddr.sel == null? ("%" + str.toHex(dbgAddr.addr)) : this.hexOffset(dbgAddr.off, dbgAddr.sel, dbgAddr.fAddr32);
+    };
+
+    /**
+     * dumpSZ(dbgAddr, cchMax)
+     *
+     * Dump helper for zero-terminated strings.
+     *
+     * @this {Debugger}
+     * @param {DbgAddr} dbgAddr
+     * @param {number} [cchMax]
+     * @return {string} (and dbgAddr advanced past the terminating zero)
+     */
+    Debugger.prototype.dumpSZ = function(dbgAddr, cchMax)
+    {
+        var sChars = "";
+        cchMax = cchMax || 256;
+        while (sChars.length < cchMax) {
+            var b = this.getByte(dbgAddr, 1);
+            if (!b) break;
+            sChars += (b >= 32 && b < 128? String.fromCharCode(b) : ".");
+        }
+        return sChars;
     };
 
     /**
@@ -1641,15 +1715,15 @@ if (DEBUGGER) {
          * If s is provided and str.parseInt(s) succeeds, then we assume it represents a starting
          * MCB (Memory Control Block) segment, and we dump the corresponding blocks.
          */
-        var seg = this.parseValue(s);
-        while (seg) {
-            var aAddr = this.newAddr(0, seg);
-            var bSig = this.getByte(aAddr, 1);
-            var wPID = this.getShort(aAddr, 2);
-            var wParas = this.getShort(aAddr, 5);
+        var sel = this.parseValue(s);
+        while (sel) {
+            var dbgAddr = this.newAddr(0, sel);
+            var bSig = this.getByte(dbgAddr, 1);
+            var wPID = this.getShort(dbgAddr, 2);
+            var wParas = this.getShort(dbgAddr, 5);
             if (bSig != 0x4D && bSig != 0x5A) break;
-            this.println(this.hexOffset(0, seg) + ": '" + String.fromCharCode(bSig) + "' PID=" + str.toHexWord(wPID) + " LEN=" + str.toHexWord(wParas) + ' "' + this.dumpSZ(aAddr, 8) + '"');
-            seg += 1 + wParas;
+            this.println(this.hexOffset(0, sel) + ": '" + String.fromCharCode(bSig) + "' PID=" + str.toHexWord(wPID) + " LEN=" + str.toHexWord(wParas) + ' "' + this.dumpSZ(dbgAddr, 8) + '"');
+            sel += 1 + wParas;
         }
     };
 
@@ -1819,28 +1893,6 @@ if (DEBUGGER) {
         }
 
         this.println(sDump);
-    };
-
-    /**
-     * dumpSZ(aAddr, cchMax)
-     *
-     * Dump helper for zero-terminated strings.
-     *
-     * @this {Debugger}
-     * @param {Array} aAddr
-     * @param {number} [cchMax]
-     * @return {string} (and aAddr advanced past the terminating zero)
-     */
-    Debugger.prototype.dumpSZ = function(aAddr, cchMax)
-    {
-        var sChars = "";
-        cchMax = cchMax || 256;
-        while (sChars.length < cchMax) {
-            var b = this.getByte(aAddr, 1);
-            if (!b) break;
-            sChars += (b >= 32 && b < 128? String.fromCharCode(b) : ".");
-        }
-        return sChars;
     };
 
     /**
@@ -2152,12 +2204,12 @@ if (DEBUGGER) {
     {
         bitsMessage |= Messages.PORT;
         if (addrFrom == null || (this.bitsMessage & bitsMessage) == bitsMessage) {
-            var segFrom = null;
+            var selFrom = null;
             if (addrFrom != null) {
-                segFrom = this.cpu.getCS();
+                selFrom = this.cpu.getCS();
                 addrFrom -= this.cpu.segCS.base;
             }
-            this.message(component.idComponent + "." + (bOut != null? "outPort" : "inPort") + '(' + str.toHexWord(port) + ',' + (name? name : "unknown") + (bOut != null? ',' + str.toHexByte(bOut) : "") + ")" + (bIn != null? (": " + str.toHexByte(bIn)) : "") + (addrFrom != null? (" @" + this.hexOffset(addrFrom, segFrom)) : ""));
+            this.message(component.idComponent + "." + (bOut != null? "outPort" : "inPort") + '(' + str.toHexWord(port) + ',' + (name? name : "unknown") + (bOut != null? ',' + str.toHexByte(bOut) : "") + ")" + (bIn != null? (": " + str.toHexByte(bIn)) : "") + (addrFrom != null? (" @" + this.hexOffset(addrFrom, selFrom)) : ""));
         }
     };
 
@@ -2356,7 +2408,7 @@ if (DEBUGGER) {
         if (fRegs === undefined) fRegs = true;
         if (fCompact === undefined) fCompact = true;
 
-        this.aAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
+        this.dbgAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
         /*
          * this.fProcStep used to be a simple boolean, but now it's 0 (or undefined)
          * if inactive, 1 if stepping over an instruction without a register dump, or 2
@@ -2445,7 +2497,7 @@ if (DEBUGGER) {
         this.cInstructions = 0;
         this.sMessagePrev = null;
         this.nCycles = 0;
-        this.aAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
+        this.dbgAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
         /*
          * fRunning is set by start() and cleared by stop().  In addition, we clear
          * it here, so that if the CPU is reset while running, we can prevent stop()
@@ -2468,8 +2520,8 @@ if (DEBUGGER) {
     Debugger.prototype.save = function()
     {
         var state = new State(this);
-        state.set(0, this.aAddrNextCode);
-        state.set(1, this.aAddrAssemble);
+        state.set(0, this.packAddr(this.dbgAddrNextCode));
+        state.set(1, this.packAddr(this.dbgAddrAssemble));
         state.set(2, [this.aPrevCmds, this.fAssemble, this.bitsMessage]);
         return state.data();
     };
@@ -2487,8 +2539,8 @@ if (DEBUGGER) {
     {
         var i = 0;
         if (data[2] !== undefined) {
-            this.aAddrNextCode = data[i++];
-            this.aAddrAssemble = data[i++];
+            this.dbgAddrNextCode = this.unpackAddr(data[i++]);
+            this.dbgAddrAssemble = this.unpackAddr(data[i++]);
             this.aPrevCmds = data[i][0];
             if (typeof this.aPrevCmds == "string") this.aPrevCmds = [this.aPrevCmds];
             this.fAssemble = data[i][1];
@@ -2748,32 +2800,32 @@ if (DEBUGGER) {
     };
 
     /**
-     * addBreakpoint(aBreak, aAddr, fTemp)
+     * addBreakpoint(aBreak, dbgAddr, fTempBreak)
      *
      * @this {Debugger}
      * @param {Array} aBreak
-     * @param {Array} aAddr
-     * @param {boolean} [fTemp]
+     * @param {DbgAddr} dbgAddr
+     * @param {boolean} [fTempBreak]
      * @return {boolean} true if breakpoint added, false if already exists
      */
-    Debugger.prototype.addBreakpoint = function(aBreak, aAddr, fTemp)
+    Debugger.prototype.addBreakpoint = function(aBreak, dbgAddr, fTempBreak)
     {
-        if (!this.findBreakpoint(aBreak, aAddr)) {
-            aAddr[3] = fTemp;
-            aBreak.push(aAddr);
+        if (!this.findBreakpoint(aBreak, dbgAddr)) {
+            dbgAddr.fTempBreak = fTempBreak;
+            aBreak.push(dbgAddr);
             if (aBreak != this.aBreakExec) {
-                this.bus.addMemBreak(this.getAddr(aAddr), aBreak == this.aBreakWrite);
+                this.bus.addMemBreak(this.getAddr(dbgAddr), aBreak == this.aBreakWrite);
             }
-            if (fTemp) {
+            if (fTempBreak) {
                 /*
                  * Force temporary breakpoints to be interpreted as linear breakpoints
-                 * (hence the assertion that there IS a linear address stored in aAddr);
+                 * (hence the assertion that there IS a linear address stored in dbgAddr);
                  * this allows us to step over calls or interrupts that change the processor mode
                  */
-                aAddr[0] = -1;
-                this.assert(aAddr[2]);
+                dbgAddr.off = -1;
+                this.assert(dbgAddr.addr);
             } else {
-                this.println("breakpoint enabled: " + this.hexAddr(aAddr) + " (" + aBreak[0] + ")");
+                this.println("breakpoint enabled: " + this.hexAddr(dbgAddr) + " (" + aBreak[0] + ")");
             }
             this.historyInit();
             return true;
@@ -2782,32 +2834,32 @@ if (DEBUGGER) {
     };
 
     /**
-     * findBreakpoint(aBreak, aAddr, fRemove)
+     * findBreakpoint(aBreak, dbgAddr, fRemove)
      *
      * @this {Debugger}
      * @param {Array} aBreak
-     * @param {Array} aAddr
+     * @param {DbgAddr} dbgAddr
      * @param {boolean} [fRemove]
      * @return {boolean} true if found, false if not
      */
-    Debugger.prototype.findBreakpoint = function(aBreak, aAddr, fRemove)
+    Debugger.prototype.findBreakpoint = function(aBreak, dbgAddr, fRemove)
     {
         var fFound = false;
-        var addr = this.mapBreakpoint(this.getAddr(aAddr));
+        var addr = this.mapBreakpoint(this.getAddr(dbgAddr));
         for (var i = 1; i < aBreak.length; i++) {
-            var aAddrBreak = aBreak[i];
-            if (addr == this.mapBreakpoint(this.getAddr(aAddrBreak))) {
+            var dbgAddrBreak = aBreak[i];
+            if (addr == this.mapBreakpoint(this.getAddr(dbgAddrBreak))) {
                 fFound = true;
                 if (fRemove) {
                     aBreak.splice(i, 1);
                     if (aBreak != this.aBreakExec) {
                         this.bus.removeMemBreak(addr, aBreak == this.aBreakWrite);
                     }
-                    if (!aAddrBreak[3]) this.println("breakpoint cleared: " + this.hexAddr(aAddrBreak) + " (" + aBreak[0] + ")");
+                    if (!dbgAddrBreak.fTempBreak) this.println("breakpoint cleared: " + this.hexAddr(dbgAddrBreak) + " (" + aBreak[0] + ")");
                     this.historyInit();
                     break;
                 }
-                this.println("breakpoint exists: " + this.hexAddr(aAddrBreak) + " (" + aBreak[0] + ")");
+                this.println("breakpoint exists: " + this.hexAddr(dbgAddrBreak) + " (" + aBreak[0] + ")");
                 break;
             }
         }
@@ -2863,14 +2915,14 @@ if (DEBUGGER) {
     };
 
     /**
-     * setTempBreakpoint(aAddr)
+     * setTempBreakpoint(dbgAddr)
      *
      * @this {Debugger}
-     * @param {Array} aAddr of new temp breakpoint
+     * @param {DbgAddr} dbgAddr of new temp breakpoint
      */
-    Debugger.prototype.setTempBreakpoint = function(aAddr)
+    Debugger.prototype.setTempBreakpoint = function(dbgAddr)
     {
-        this.addBreakpoint(this.aBreakExec, aAddr, true);
+        this.addBreakpoint(this.aBreakExec, dbgAddr, true);
     };
 
     /**
@@ -2886,9 +2938,9 @@ if (DEBUGGER) {
             this.fProcStep = 0;
         } else {
             for (var i = 1; i < this.aBreakExec.length; i++) {
-                var aAddrBreak = this.aBreakExec[i];
-                if (aAddrBreak[3]) {
-                    if (!this.findBreakpoint(this.aBreakExec, aAddrBreak, true)) break;
+                var dbgAddrBreak = this.aBreakExec[i];
+                if (dbgAddrBreak.fTempBreak) {
+                    if (!this.findBreakpoint(this.aBreakExec, dbgAddrBreak, true)) break;
                     i = 0;
                 }
             }
@@ -2938,14 +2990,14 @@ if (DEBUGGER) {
         addr = this.mapBreakpoint(addr);
         for (var i = 1; i < aBreak.length; i++) {
 
-            var aAddrBreak = aBreak[i];
+            var dbgAddrBreak = aBreak[i];
 
             /*
              * We need to zap the linear address field of the breakpoint address before
              * calling getAddr(), to force it to recalculate the linear address every time,
              * unless this is a breakpoint on a linear address (as indicated by a -1 offset).
              */
-            if (aAddrBreak[0] != -1) aAddrBreak[2] = null;
+            if (dbgAddrBreak.off != -1) dbgAddrBreak.addr = null;
 
             /*
              * We used to calculate the linear address of the breakpoint at the time the
@@ -2958,11 +3010,11 @@ if (DEBUGGER) {
              * If you want to create a real-mode breakpoint that will break regardless of mode,
              * use the physical address of the real-mode memory location instead.
              */
-            if (addr == this.mapBreakpoint(this.getAddr(aAddrBreak))) {
-                if (aAddrBreak[3]) {
-                    this.findBreakpoint(aBreak, aAddrBreak, true);
+            if (addr == this.mapBreakpoint(this.getAddr(dbgAddrBreak))) {
+                if (dbgAddrBreak.fTempBreak) {
+                    this.findBreakpoint(aBreak, dbgAddrBreak, true);
                 } else if (!fTemp) {
-                    this.println("breakpoint hit: " + this.hexAddr(aAddrBreak) + " (" + aBreak[0] + ")");
+                    this.println("breakpoint hit: " + this.hexAddr(dbgAddrBreak) + " (" + aBreak[0] + ")");
                 }
                 fBreak = true;
                 break;
@@ -2972,19 +3024,19 @@ if (DEBUGGER) {
     };
 
     /**
-     * getInstruction(aAddr, sComment, nSequence)
+     * getInstruction(dbgAddr, sComment, nSequence)
      *
      * @this {Debugger}
-     * @param {Array} aAddr (aAddr[4] is true if 32-bit operands, aAddr[5] is true if 32-bit addresses)
+     * @param {DbgAddr} dbgAddr
      * @param {string} [sComment] is an associated comment
      * @param {number} [nSequence] is an associated sequence number, undefined if none
-     * @return {string} (and aAddr is updated to the next instruction)
+     * @return {string} (and dbgAddr is updated to the next instruction)
      */
-    Debugger.prototype.getInstruction = function(aAddr, sComment, nSequence)
+    Debugger.prototype.getInstruction = function(dbgAddr, sComment, nSequence)
     {
-        var aAddrIns = this.newAddr(aAddr[0], aAddr[1], aAddr[2]);
+        var dbgAddrIns = this.newAddr(dbgAddr.off, dbgAddr.sel, dbgAddr.addr);
 
-        var bOpcode = this.getByte(aAddr, 1);
+        var bOpcode = this.getByte(dbgAddr, 1);
 
         /*
          * Incorporate the following prefixes into the current instruction byte stream.
@@ -2993,11 +3045,11 @@ if (DEBUGGER) {
         var cMax = 2;           // let's make sure unfortunate memory contents don't screw us
         while ((bOpcode == X86.OPCODE.OS || bOpcode == X86.OPCODE.AS) && cMax--) {
             if (bOpcode == X86.OPCODE.OS) {
-                aAddr[4] = !aAddr[4];
+                dbgAddr.fData32 = !dbgAddr.fData32;
             } else {
-                aAddr[5] = !aAddr[5];
+                dbgAddr.fAddr32 = !dbgAddr.fAddr32;
             }
-            bOpcode = this.getByte(aAddr, 1);
+            bOpcode = this.getByte(dbgAddr, 1);
         }
 
         var aOpDesc = this.aaOpDescs[bOpcode];
@@ -3005,14 +3057,14 @@ if (DEBUGGER) {
         var bModRM = -1;
 
         if (iIns == Debugger.INS.OP0F) {
-            var b = this.getByte(aAddr, 1);
+            var b = this.getByte(dbgAddr, 1);
             aOpDesc = Debugger.aaOp0FDescs[b] || Debugger.aOpDescUndefined;
             bOpcode |= (b << 8);
             iIns = aOpDesc[0];
         }
 
         if (iIns >= Debugger.INS_NAMES.length) {
-            bModRM = this.getByte(aAddr, 1);
+            bModRM = this.getByte(dbgAddr, 1);
             aOpDesc = Debugger.aaGrpDescs[iIns - Debugger.INS_NAMES.length][(bModRM >> 3) & 0x7];
         }
 
@@ -3021,7 +3073,7 @@ if (DEBUGGER) {
         var sOperands = "";
         if (this.isStringIns(bOpcode)) {
             cOperands = 0;              // suppress display of operands for string instructions
-            if (aAddr[4] && sOpcode.slice(-1) == 'W') sOpcode = sOpcode.slice(0, -1) + 'D';
+            if (dbgAddr.fData32 && sOpcode.slice(-1) == 'W') sOpcode = sOpcode.slice(0, -1) + 'D';
         }
 
         var typeCPU = null;
@@ -3047,47 +3099,47 @@ if (DEBUGGER) {
             var typeMode = type & Debugger.TYPE_MODE;
             if (typeMode >= Debugger.TYPE_MODRM) {
                 if (bModRM < 0) {
-                    bModRM = this.getByte(aAddr, 1);
+                    bModRM = this.getByte(dbgAddr, 1);
                 }
                 if (typeMode >= Debugger.TYPE_REG) {
-                    sOperand = this.getRegOperand((bModRM >> 3) & 0x7, type, aAddr);
+                    sOperand = this.getRegOperand((bModRM >> 3) & 0x7, type, dbgAddr);
                 }
                 else {
-                    sOperand = this.getModRMOperand(bModRM, type, aAddr);
+                    sOperand = this.getModRMOperand(bModRM, type, dbgAddr);
                 }
             }
             else if (typeMode == Debugger.TYPE_ONE) {
                 sOperand = "1";
             }
             else if (typeMode == Debugger.TYPE_IMM) {
-                sOperand = this.getImmOperand(type, aAddr);
+                sOperand = this.getImmOperand(type, dbgAddr);
             }
             else if (typeMode == Debugger.TYPE_IMMOFF) {
-                if (!aAddr[5]) {
+                if (!dbgAddr.fAddr32) {
                     cch = 4;
-                    offset = this.getShort(aAddr, 2);
+                    offset = this.getShort(dbgAddr, 2);
                 } else {
                     cch = 8;
-                    offset = this.getLong(aAddr, 4);
+                    offset = this.getLong(dbgAddr, 4);
                 }
                 sOperand = "[" + str.toHex(offset, cch) + "]";
             }
             else if (typeMode == Debugger.TYPE_IMMREL) {
                 if (typeSize == Debugger.TYPE_BYTE) {
-                    disp = ((this.getByte(aAddr, 1) << 24) >> 24);
+                    disp = ((this.getByte(dbgAddr, 1) << 24) >> 24);
                 }
                 else {
-                    disp = this.getWord(aAddr, true);
+                    disp = this.getWord(dbgAddr, true);
                 }
-                offset = (aAddr[0] + disp) & (aAddr[4]? -1 : 0xffff);
-                var aSymbol = this.findSymbolAtAddr(this.newAddr(offset, aAddr[1]));
-                sOperand = aSymbol[0] || str.toHex(offset, aAddr[4]? 8: 4);
+                offset = (dbgAddr.off + disp) & (dbgAddr.fData32? -1 : 0xffff);
+                var aSymbol = this.findSymbolAtAddr(this.newAddr(offset, dbgAddr.sel));
+                sOperand = aSymbol[0] || str.toHex(offset, dbgAddr.fData32? 8: 4);
             }
             else if (typeMode == Debugger.TYPE_IMPREG) {
-                sOperand = this.getRegOperand((type & Debugger.TYPE_IREG) >> 8, type, aAddr);
+                sOperand = this.getRegOperand((type & Debugger.TYPE_IREG) >> 8, type, dbgAddr);
             }
             else if (typeMode == Debugger.TYPE_IMPSEG) {
-                sOperand = this.getRegOperand((type & Debugger.TYPE_IREG) >> 8, Debugger.TYPE_SEGREG, aAddr);
+                sOperand = this.getRegOperand((type & Debugger.TYPE_IREG) >> 8, Debugger.TYPE_SEGREG, dbgAddr);
             }
             else if (typeMode == Debugger.TYPE_DSSI) {
                 sOperand = "DS:[SI]";
@@ -3103,11 +3155,11 @@ if (DEBUGGER) {
             sOperands += sOperand;
         }
 
-        var sLine = this.hexAddr(aAddrIns) + " ";
+        var sLine = this.hexAddr(dbgAddrIns) + " ";
         var sBytes = "";
         do {
-            sBytes += str.toHex(this.getByte(aAddrIns, 1), 2);
-        } while (aAddrIns[2] != aAddr[2]);
+            sBytes += str.toHex(this.getByte(dbgAddrIns, 1), 2);
+        } while (dbgAddrIns.addr != dbgAddr.addr);
 
         sLine += str.pad(sBytes, 16);
         sLine += str.pad(sOpcode, 8);
@@ -3127,19 +3179,19 @@ if (DEBUGGER) {
             }
         }
 
-        this.initAddrSize(aAddr, fNonPrefix);
+        this.initAddrSize(dbgAddr, fNonPrefix);
         return sLine;
     };
 
     /**
-     * getImmOperand(type, aAddr)
+     * getImmOperand(type, dbgAddr)
      *
      * @this {Debugger}
      * @param {number} type
-     * @param {Array} aAddr (aAddr[4] is true if 32-bit operands, aAddr[5] is true if 32-bit addresses)
+     * @param {DbgAddr} dbgAddr
      * @return {string} operand
      */
-    Debugger.prototype.getImmOperand = function(type, aAddr)
+    Debugger.prototype.getImmOperand = function(type, dbgAddr)
     {
         var sOperand = " ";
         var typeSize = type & Debugger.TYPE_SIZE;
@@ -3151,24 +3203,24 @@ if (DEBUGGER) {
              * or TYPE_OUT designation (and TYPE_BOTH, as the name implies, includes both).
              */
             if (type & Debugger.TYPE_BOTH) {
-                sOperand = str.toHex(this.getByte(aAddr, 1), 2);
+                sOperand = str.toHex(this.getByte(dbgAddr, 1), 2);
             }
             break;
         case Debugger.TYPE_SBYTE:
-            sOperand = str.toHex((this.getByte(aAddr, 1) << 24) >> 24, 4);
+            sOperand = str.toHex((this.getByte(dbgAddr, 1) << 24) >> 24, 4);
             break;
         case Debugger.TYPE_VWORD:
         case Debugger.TYPE_2WORD:
-            if (aAddr[4]) {
-                sOperand = str.toHex(this.getLong(aAddr, 4));
+            if (dbgAddr.fData32) {
+                sOperand = str.toHex(this.getLong(dbgAddr, 4));
                 break;
             }
             /* falls through */
         case Debugger.TYPE_WORD:
-            sOperand = str.toHex(this.getShort(aAddr, 2), 4);
+            sOperand = str.toHex(this.getShort(dbgAddr, 2), 4);
             break;
         case Debugger.TYPE_FARP:
-            sOperand = this.hexAddr(this.newAddr(this.getWord(aAddr, true), this.getShort(aAddr, 2), null, aAddr[4], aAddr[5]));
+            sOperand = this.hexAddr(this.newAddr(this.getWord(dbgAddr, true), this.getShort(dbgAddr, 2), null, dbgAddr.fData32, dbgAddr.fAddr32));
             break;
         default:
             sOperand = "imm(" + str.toHexWord(type) + ")";
@@ -3178,15 +3230,15 @@ if (DEBUGGER) {
     };
 
     /**
-     * getRegOperand(bReg, type, aAddr)
+     * getRegOperand(bReg, type, dbgAddr)
      *
      * @this {Debugger}
      * @param {number} bReg
      * @param {number} type
-     * @param {Array} aAddr (aAddr[4] is true if 32-bit operands, aAddr[5] is true if 32-bit addresses)
+     * @param {DbgAddr} dbgAddr
      * @return {string} operand
      */
-    Debugger.prototype.getRegOperand = function(bReg, type, aAddr)
+    Debugger.prototype.getRegOperand = function(bReg, type, dbgAddr)
     {
         var typeMode = type & Debugger.TYPE_MODE;
         if (typeMode == Debugger.TYPE_SEGREG) {
@@ -3203,7 +3255,7 @@ if (DEBUGGER) {
                 if (bReg < Debugger.REG_AX) {
                     bReg += Debugger.REG_AX - Debugger.REG_AL;
                 }
-                if (typeSize == Debugger.TYPE_DWORD || typeSize == Debugger.TYPE_VWORD && aAddr[4]) {
+                if (typeSize == Debugger.TYPE_DWORD || typeSize == Debugger.TYPE_VWORD && dbgAddr.fData32) {
                     bReg += Debugger.REG_EAX - Debugger.REG_AX;
                 }
             }
@@ -3212,16 +3264,16 @@ if (DEBUGGER) {
     };
 
     /**
-     * getSIBOperand(bMod, aAddr)
+     * getSIBOperand(bMod, dbgAddr)
      *
      * @this {Debugger}
      * @param {number} bMod
-     * @param {Array} aAddr (aAddr[4] is true if 32-bit operands, aAddr[5] is true if 32-bit addresses)
+     * @param {DbgAddr} dbgAddr
      * @return {string} operand
      */
-    Debugger.prototype.getSIBOperand = function(bMod, aAddr)
+    Debugger.prototype.getSIBOperand = function(bMod, dbgAddr)
     {
-        var bSIB = this.getByte(aAddr, 1);
+        var bSIB = this.getByte(dbgAddr, 1);
         var bScale = bSIB >> 6;
         var bIndex = (bSIB >> 3) & 0x7;
         var bBase = bSIB & 0x7;
@@ -3238,35 +3290,35 @@ if (DEBUGGER) {
     };
 
     /**
-     * getModRMOperand(bModRM, type, aAddr)
+     * getModRMOperand(bModRM, type, dbgAddr)
      *
      * @this {Debugger}
      * @param {number} bModRM
      * @param {number} type
-     * @param {Array} aAddr (aAddr[4] is true if 32-bit operands, aAddr[5] is true if 32-bit addresses)
+     * @param {DbgAddr} dbgAddr
      * @return {string} operand
      */
-    Debugger.prototype.getModRMOperand = function(bModRM, type, aAddr)
+    Debugger.prototype.getModRMOperand = function(bModRM, type, dbgAddr)
     {
         var sOperand = "";
         var bMod = bModRM >> 6;
         var bRM = bModRM & 0x7;
         if (bMod < 3) {
             var disp;
-            if (!bMod && (!aAddr[5] && bRM == 6 || aAddr[5] && bRM == 5)) {
+            if (!bMod && (!dbgAddr.fAddr32 && bRM == 6 || dbgAddr.fAddr32 && bRM == 5)) {
                 bMod = 2;
             } else {
-                if (aAddr[5]) {
+                if (dbgAddr.fAddr32) {
                     if (bRM != 4) {
                         bRM += 8;
                     } else {
-                        sOperand = this.getSIBOperand(bMod, aAddr);
+                        sOperand = this.getSIBOperand(bMod, dbgAddr);
                     }
                 }
                 if (!sOperand) sOperand = Debugger.RMS[bRM];
             }
             if (bMod == 1) {
-                disp = this.getByte(aAddr, 1);
+                disp = this.getByte(dbgAddr, 1);
                 if (!(disp & 0x80)) {
                     sOperand += "+" + str.toHex(disp, 2);
                 }
@@ -3277,18 +3329,18 @@ if (DEBUGGER) {
             }
             else if (bMod == 2) {
                 if (sOperand) sOperand += '+';
-                if (!aAddr[5]) {
-                    disp = this.getShort(aAddr, 2);
+                if (!dbgAddr.fAddr32) {
+                    disp = this.getShort(dbgAddr, 2);
                     sOperand += str.toHex(disp, 4);
                 } else {
-                    disp = this.getLong(aAddr, 4);
+                    disp = this.getLong(dbgAddr, 4);
                     sOperand += str.toHex(disp);
                 }
             }
             sOperand = "[" + sOperand + "]";
         }
         else {
-            sOperand = this.getRegOperand(bRM, type, aAddr);
+            sOperand = this.getRegOperand(bRM, type, dbgAddr);
         }
         return sOperand;
     };
@@ -3336,10 +3388,10 @@ if (DEBUGGER) {
      * @this {Debugger}
      * @param {string} sOp
      * @param {string|undefined} sOperand
-     * @param {Array} aAddr of memory where this instruction is being assembled
+     * @param {DbgAddr} dbgAddr of memory where this instruction is being assembled
      * @return {Array.<number>} of opcode bytes; if the instruction can't be parsed, the array will be empty
      */
-    Debugger.prototype.parseInstruction = function(sOp, sOperand, aAddr)
+    Debugger.prototype.parseInstruction = function(sOp, sOperand, dbgAddr)
     {
         var aOpBytes = [];
         this.println("not supported yet");
@@ -3405,7 +3457,7 @@ if (DEBUGGER) {
     };
 
     /**
-     * getSegString(seg)
+     * getSegString(seg, fProt)
      *
      * @this {Debugger}
      * @param {X86Seg} seg
@@ -3418,7 +3470,7 @@ if (DEBUGGER) {
     };
 
     /**
-     * getDTRString(seg)
+     * getDTRString(sName, sel, addr, addrLimit)
      *
      * @this {Debugger}
      * @param {string} sName
@@ -3529,8 +3581,9 @@ if (DEBUGGER) {
     /**
      * parseAddr(sAddr, type)
      *
-     * As discussed above, the format of aAddr variables is [off, seg, addr]; they represent a segmented
-     * address (seg:off) when seg is defined or a linear address (addr) when seg is undefined (or null).
+     * As discussed above, dbgAddr variables contain one or more of: off, sel, and addr.  They represent
+     * a segmented address (sel:off) when sel is defined or a linear address (addr) when sel is undefined
+     * (or null).
      *
      * To create a segmented address, specify two values separated by ":"; for a linear address, use
      * a "%" prefix.  We check for ":" after "%", so if for some strange reason you specify both, the
@@ -3550,29 +3603,29 @@ if (DEBUGGER) {
      * @this {Debugger}
      * @param {string|undefined} sAddr
      * @param {number|undefined} type is the address segment type, in case sAddr doesn't specify a segment
-     * @return {Array} aAddr
+     * @return {DbgAddr}
      */
     Debugger.prototype.parseAddr = function(sAddr, type)
     {
-        var aAddr;
-        var aAddrNext = (type == Debugger.ADDR_DATA? this.aAddrNextData : this.aAddrNextCode);
-        var off = aAddrNext[0], seg = aAddrNext[1], addr = aAddrNext[2];
+        var dbgAddr;
+        var dbgAddrNext = (type == Debugger.ADDR_DATA? this.dbgAddrNextData : this.dbgAddrNextCode);
+        var off = dbgAddrNext.off, sel = dbgAddrNext.sel, addr = dbgAddrNext.addr;
 
         if (sAddr !== undefined) {
 
             if (sAddr.charAt(0) == '%') {
                 sAddr = sAddr.substr(1);
                 off = -1;
-                seg = null;
+                sel = null;
                 addr = 0;
             }
 
-            aAddr = this.findSymbolAddr(sAddr);
-            if (aAddr && aAddr.length) return aAddr;
+            dbgAddr = this.findSymbolAddr(sAddr);
+            if (dbgAddr && dbgAddr.off != null) return dbgAddr;
 
             var iColon = sAddr.indexOf(":");
             if (iColon < 0) {
-                if (seg != null) {
+                if (sel != null) {
                     off = this.parseValue(sAddr);
                     addr = null;
                 } else {
@@ -3580,15 +3633,15 @@ if (DEBUGGER) {
                 }
             }
             else {
-                seg = this.parseValue(sAddr.substring(0, iColon));
+                sel = this.parseValue(sAddr.substring(0, iColon));
                 off = this.parseValue(sAddr.substring(iColon + 1));
                 addr = null;
             }
         }
 
-        aAddr = [off, seg, addr];
-        this.checkLimit(aAddr);
-        return aAddr;
+        dbgAddr = this.newAddr(off, sel, addr);
+        this.checkLimit(dbgAddr);
+        return dbgAddr;
     };
 
     /**
@@ -3691,7 +3744,7 @@ if (DEBUGGER) {
      */
     Debugger.prototype.addSymbols = function(addr, size, aSymbols)
     {
-        var aAddr = [];
+        var dbgAddr = {};
         var aOffsetPairs = [];
         var fnComparePairs = function(p1, p2) {
             return p1[0] > p2[0]? 1 : p1[0] < p2[0]? -1 : 0;
@@ -3701,29 +3754,29 @@ if (DEBUGGER) {
             if (typeof symbol == "number") {
                 aSymbols[sSymbol] = symbol = {'o': symbol};
             }
-            var offset = symbol['o'];
-            var segment = symbol['s'];
+            var off = symbol['o'];
+            var sel = symbol['s'];
             var sAnnotation = symbol['a'];
-            if (offset !== undefined) {
-                if (segment !== undefined) {
-                    aAddr[0] = offset;
-                    aAddr[1] = segment;
-                    aAddr[2] = null;
+            if (off !== undefined) {
+                if (sel !== undefined) {
+                    dbgAddr.off = off;
+                    dbgAddr.sel = sel;
+                    dbgAddr.addr = null;
                     /*
-                     * getAddr() computes the corresponding physical address and saves it in aAddr[2].
+                     * getAddr() computes the corresponding physical address and saves it in dbgAddr.addr.
                      */
-                    this.getAddr(aAddr);
+                    this.getAddr(dbgAddr);
                     /*
                      * The physical address for any symbol located in the top 64Kb of the machine's address space
                      * should be relocated to the top 64Kb of the first 1Mb, so that we're immune from any changes
                      * to the A20 line.
                      */
-                    if ((aAddr[2] & ~0xffff) == (this.bus.busLimit & ~0xffff)) {
-                        aAddr[2] &= 0x000fffff;
+                    if ((dbgAddr.addr & ~0xffff) == (this.bus.busLimit & ~0xffff)) {
+                        dbgAddr.addr &= 0x000fffff;
                     }
-                    symbol['p'] = aAddr[2];
+                    symbol['p'] = dbgAddr.addr;
                 }
-                usr.binaryInsert(aOffsetPairs, [offset, sSymbol], fnComparePairs);
+                usr.binaryInsert(aOffsetPairs, [off, sSymbol], fnComparePairs);
             }
             if (sAnnotation) symbol['a'] = sAnnotation.replace(/''/g, "\"");
         }
@@ -3749,11 +3802,11 @@ if (DEBUGGER) {
                 var symbol = aSymbols[sSymbol];
                 var off = symbol['o'];
                 if (off === undefined) continue;
-                var seg = symbol['s'];
-                if (seg === undefined) seg = (addr >>> 4);
+                var sel = symbol['s'];
+                if (sel === undefined) sel = (addr >>> 4);
                 var sSymbolOrig = aSymbols[sSymbol]['l'];
                 if (sSymbolOrig) sSymbol = sSymbolOrig;
-                this.println(this.hexOffset(off, seg) + " " + sSymbol);
+                this.println(this.hexOffset(off, sel) + " " + sSymbol);
             }
         }
     };
@@ -3761,17 +3814,17 @@ if (DEBUGGER) {
     /**
      * findSymbolAddr(sSymbol)
      *
-     * Search aSymbolTable for sSymbol, and if found, return an aAddr (using the same format as parseAddr())
+     * Search aSymbolTable for sSymbol, and if found, return a dbgAddr (same as parseAddr())
      *
      * @this {Debugger}
      * @param {string} sSymbol
-     * @return {Array|null} a valid aAddr if a valid symbol, an empty aAddr if an unknown symbol, or null if not a symbol
+     * @return {DbgAddr|null} a valid dbgAddr if a valid symbol, an empty dbgAddr if an unknown symbol, or null if not a symbol
      */
     Debugger.prototype.findSymbolAddr = function(sSymbol)
     {
-        var aAddr = null;
+        var dbgAddr = null;
         if (sSymbol.match(/^[a-z_][a-z0-9_]*$/i)) {
-            aAddr = [];
+            dbgAddr = {};
             var sUpperCase = sSymbol.toUpperCase();
             for (var i = 0; i < this.aSymbolTable.length; i++) {
                 var addr = this.aSymbolTable[i][0];
@@ -3779,19 +3832,19 @@ if (DEBUGGER) {
                 var aSymbols = this.aSymbolTable[i][2];
                 var symbol = aSymbols[sUpperCase];
                 if (symbol !== undefined) {
-                    var offset = symbol['o'];
-                    if (offset !== undefined) {
+                    var off = symbol['o'];
+                    if (off !== undefined) {
                         /*
                          * We assume that every ROM is ORG'ed at 0x0000, and therefore unless the symbol has an
                          * explicitly-defined segment, we return the segment as "addr >>> 4".  Down the road, we may
                          * want/need to support a special symbol entry (eg, ".ORG") that defines an alternate origin.
                          */
-                        var segment = symbol['s'];
-                        if (segment === undefined) segment = addr >>> 4;
-                        // aAddr = this.newAddr(offset, segment);
-                        aAddr[0] = offset;
-                        aAddr[1] = segment;
-                        if (symbol['p'] !== undefined) aAddr[2] = symbol['p'];
+                        var sel = symbol['s'];
+                        if (sel === undefined) sel = addr >>> 4;
+                        // dbgAddr = this.newAddr(off, sel);
+                        dbgAddr.off = off;
+                        dbgAddr.sel = sel;
+                        if (symbol['p'] !== undefined) dbgAddr.addr = symbol['p'];
                     }
                     /*
                      * The symbol matched, but it wasn't for an address (no "o" offset), and there's no point
@@ -3801,31 +3854,31 @@ if (DEBUGGER) {
                 }
             }
         }
-        return aAddr;
+        return dbgAddr;
     };
 
     /**
-     * findSymbolAtAddr(aAddr, fNearest)
+     * findSymbolAtAddr(dbgAddr, fNearest)
      *
-     * Search aSymbolTable for aAddr, and return an Array for the corresponding symbol (empty if not found).
+     * Search aSymbolTable for dbgAddr, and return an Array for the corresponding symbol (empty if not found).
      *
      * If fNearest is true, and no exact match was found, then the Array returned will contain TWO sets of
      * entries: [0]-[3] will refer to closest preceding symbol, and [4]-[7] will refer to the closest subsequent symbol.
      *
      * @this {Debugger}
-     * @param {Array} aAddr
+     * @param {DbgAddr} dbgAddr
      * @param {boolean} [fNearest]
      * @return {Array|null} where [0] == symbol name, [1] == symbol value, [2] == any annotation, and [3] == any associated comment
      */
-    Debugger.prototype.findSymbolAtAddr = function(aAddr, fNearest)
+    Debugger.prototype.findSymbolAtAddr = function(dbgAddr, fNearest)
     {
         var aSymbol = [];
-        var addr = this.getAddr(aAddr);
+        var addr = this.getAddr(dbgAddr);
         for (var iTable = 0; iTable < this.aSymbolTable.length; iTable++) {
             var addrSymbol = this.aSymbolTable[iTable][0];
             var sizeSymbol = this.aSymbolTable[iTable][1];
             if (addr >= addrSymbol && addr < addrSymbol + sizeSymbol) {
-                var offset = aAddr[0];
+                var offset = dbgAddr.off;
                 var aOffsetPairs = this.aSymbolTable[iTable][3];
                 var fnComparePairs = function(p1, p2)
                 {
@@ -3911,7 +3964,7 @@ if (DEBUGGER) {
      *      ...
      *
      * without ever entering "assemble mode", but of course, that requires more typing and doesn't take advantage
-     * of automatic target address advancement (see aAddrAssemble).
+     * of automatic target address advancement (see dbgAddrAssemble).
      *
      * NOTE: As the previous example implies, you can even assemble new instructions into ROM address space;
      * as our setByte() function explains, the ROM write-notification handlers only refuse writes from the CPU.
@@ -3921,26 +3974,26 @@ if (DEBUGGER) {
      */
     Debugger.prototype.doAssemble = function(asArgs)
     {
-        var aAddr = this.parseAddr(asArgs[1], Debugger.ADDR_CODE);
-        if (aAddr[0] == null) return;
+        var dbgAddr = this.parseAddr(asArgs[1], Debugger.ADDR_CODE);
+        if (dbgAddr.off == null) return;
 
-        this.aAddrAssemble = aAddr;
+        this.dbgAddrAssemble = dbgAddr;
         if (asArgs[2] === undefined) {
-            this.println("begin assemble @" + this.hexAddr(aAddr));
+            this.println("begin assemble @" + this.hexAddr(dbgAddr));
             this.fAssemble = true;
             this.cpu.updateCPU();
             return;
         }
 
-        var aOpBytes = this.parseInstruction(asArgs[2], asArgs[3], aAddr);
+        var aOpBytes = this.parseInstruction(asArgs[2], asArgs[3], dbgAddr);
         if (aOpBytes.length) {
             for (var i = 0; i < aOpBytes.length; i++) {
-                this.setByte(aAddr, aOpBytes[i], 1);
+                this.setByte(dbgAddr, aOpBytes[i], 1);
             }
             /*
-             * Since getInstruction() also updates the specified address, aAddrAssemble is automatically advanced.
+             * Since getInstruction() also updates the specified address, dbgAddrAssemble is automatically advanced.
              */
-            this.println(this.getInstruction(this.aAddrAssemble));
+            this.println(this.getInstruction(this.dbgAddrAssemble));
         }
     };
 
@@ -3993,46 +4046,46 @@ if (DEBUGGER) {
             this.println("missing breakpoint address");
             return;
         }
-        var aAddr = [];
+        var dbgAddr = {};
         if (sAddr != "*") {
-            aAddr = this.parseAddr(sAddr, Debugger.ADDR_CODE);
-            if (aAddr[0] == null) return;
+            dbgAddr = this.parseAddr(sAddr, Debugger.ADDR_CODE);
+            if (dbgAddr.off == null) return;
         }
-        sAddr = (aAddr[0] == null? sAddr : str.toHexWord(aAddr[0]));
+        sAddr = (dbgAddr.off == null? sAddr : str.toHexWord(dbgAddr.off));
         if (sParm == "c") {
-            if (aAddr[0] == null) {
+            if (dbgAddr.off == null) {
                 this.clearBreakpoints();
                 this.println("all breakpoints cleared");
                 return;
             }
-            if (this.findBreakpoint(this.aBreakExec, aAddr, true))
+            if (this.findBreakpoint(this.aBreakExec, dbgAddr, true))
                 return;
-            if (this.findBreakpoint(this.aBreakRead, aAddr, true))
+            if (this.findBreakpoint(this.aBreakRead, dbgAddr, true))
                 return;
-            if (this.findBreakpoint(this.aBreakWrite, aAddr, true))
+            if (this.findBreakpoint(this.aBreakWrite, dbgAddr, true))
                 return;
-            this.println("breakpoint missing: " + this.hexAddr(aAddr));
+            this.println("breakpoint missing: " + this.hexAddr(dbgAddr));
             return;
         }
         if (sParm == "i") {
-            this.println("breakpoint " + (this.bus.addPortInputBreak(aAddr[0])? "enabled" : "cleared") + ": port " + sAddr + " (input)");
+            this.println("breakpoint " + (this.bus.addPortInputBreak(dbgAddr.off)? "enabled" : "cleared") + ": port " + sAddr + " (input)");
             return;
         }
         if (sParm == "o") {
-            this.println("breakpoint " + (this.bus.addPortOutputBreak(aAddr[0])? "enabled" : "cleared") + ": port " + sAddr + " (output)");
+            this.println("breakpoint " + (this.bus.addPortOutputBreak(dbgAddr.off)? "enabled" : "cleared") + ": port " + sAddr + " (output)");
             return;
         }
-        if (aAddr[0] == null) return;
+        if (dbgAddr.off == null) return;
         if (sParm == "p") {
-            this.addBreakpoint(this.aBreakExec, aAddr);
+            this.addBreakpoint(this.aBreakExec, dbgAddr);
             return;
         }
         if (sParm == "r") {
-            this.addBreakpoint(this.aBreakRead, aAddr);
+            this.addBreakpoint(this.aBreakRead, dbgAddr);
             return;
         }
         if (sParm == "w") {
-            this.addBreakpoint(this.aBreakWrite, aAddr);
+            this.addBreakpoint(this.aBreakWrite, dbgAddr);
             return;
         }
         this.println("unknown breakpoint command: " + sParm);
@@ -4111,12 +4164,12 @@ if (DEBUGGER) {
                 return;
             }
         }
-        var aAddr = this.parseAddr(sAddr, Debugger.ADDR_DATA);
-        if (aAddr[0] == null || aAddr[0] == -1 && aAddr[2] == null) return;
+        var dbgAddr = this.parseAddr(sAddr, Debugger.ADDR_DATA);
+        if (dbgAddr.off == null || dbgAddr.off == -1 && dbgAddr.addr == null) return;
 
         var sDump = "";
         if (BACKTRACK && sCmd == "di") {
-            var addr = this.getAddr(aAddr);
+            var addr = this.getAddr(dbgAddr);
             sDump += '%' + str.toHex(addr) + ": ";
             var sInfo = this.bus.getBackTrackInfoFromAddr(addr);
             sDump += sInfo || "no information";
@@ -4134,9 +4187,9 @@ if (DEBUGGER) {
             for (var iLine = 0; iLine < cLines; iLine++) {
                 var data = 0, iByte = 0;
                 var sData = "", sChars = "";
-                sAddr = this.hexAddr(aAddr);
+                sAddr = this.hexAddr(dbgAddr);
                 for (var i = 0; i < 16; i++) {
-                    var b = this.getByte(aAddr, 1);
+                    var b = this.getByte(dbgAddr, 1);
                     data |= (b << (iByte++ << 3));
                     if (iByte == cBytes) {
                         sData += str.toHex(data, cBytes * 2);
@@ -4150,7 +4203,7 @@ if (DEBUGGER) {
             }
         }
         if (sDump) this.println(sDump);
-        this.aAddrNextData = aAddr;
+        this.dbgAddrNextData = dbgAddr;
     };
 
     /**
@@ -4166,17 +4219,16 @@ if (DEBUGGER) {
             this.println("missing address");
             return;
         }
-        var aAddr = this.parseAddr(sAddr, Debugger.ADDR_DATA);
-        if (aAddr[0] == null)
-            return;
+        var dbgAddr = this.parseAddr(sAddr, Debugger.ADDR_DATA);
+        if (dbgAddr.off == null) return;
         for (var i = 2; i < asArgs.length; i++) {
             var b = str.parseInt(asArgs[i], 16);
             if (b === undefined) {
                 this.println("unrecognized value: " + str.toHexByte(b));
                 break;
             }
-            this.println("setting " + this.hexAddr(aAddr) + " to " + str.toHexByte(b));
-            this.setByte(aAddr, b, 1);
+            this.println("setting " + this.hexAddr(dbgAddr) + " to " + str.toHexByte(b));
+            this.setByte(dbgAddr, b, 1);
         }
     };
 
@@ -4268,19 +4320,19 @@ if (DEBUGGER) {
                 this.println(n + " instructions earlier:");
             }
             while (cLines && iHistory != this.iOpcodeHistory) {
-                var aAddr = aHistory[iHistory++];
-                if (aAddr[1] == null) break;
+                var dbgAddr = aHistory[iHistory++];
+                if (dbgAddr.sel == null) break;
                 /*
-                 * We must create a new aAddr from the address we obtained from aHistory, because aAddr
+                 * We must create a new dbgAddr from the address we obtained from aHistory, because dbgAddr
                  * was a reference, not a copy, and we don't want getInstruction() modifying the original.
                  */
-                aAddr = this.newAddr(aAddr[0], aAddr[1], aAddr[2]);
-                this.println(this.getInstruction(aAddr, "history", n--));
+                dbgAddr = this.newAddr(dbgAddr.off, dbgAddr.sel, dbgAddr.addr);
+                this.println(this.getInstruction(dbgAddr, "history", n--));
                 /*
                  * If there was an OPERAND or ADDRESS override on the previous instruction, getInstruction()
                  * will have automatically disassembled the next instruction, so skip one more history entry.
                  */
-                if (aAddr[6]) {
+                if (dbgAddr.fOverride) {
                     iHistory++; n--;
                 }
                 if (iHistory >= aHistory.length) iHistory = 0;
@@ -4400,28 +4452,28 @@ if (DEBUGGER) {
      */
     Debugger.prototype.doList = function(sSymbol)
     {
-        var aAddr = this.parseAddr(sSymbol, Debugger.ADDR_CODE);
+        var dbgAddr = this.parseAddr(sSymbol, Debugger.ADDR_CODE);
 
-        if (aAddr[0] == null && aAddr[2] == null) return;
+        if (dbgAddr.off == null && dbgAddr.addr == null) return;
 
-        var addr = this.getAddr(aAddr);
+        var addr = this.getAddr(dbgAddr);
         sSymbol = sSymbol? (sSymbol + ": ") : "";
-        this.println(sSymbol + this.hexAddr(aAddr) + " (%" + str.toHex(addr, this.cchAddr) + ")");
+        this.println(sSymbol + this.hexAddr(dbgAddr) + " (%" + str.toHex(addr, this.cchAddr) + ")");
 
-        var aSymbol = this.findSymbolAtAddr(aAddr, true);
+        var aSymbol = this.findSymbolAtAddr(dbgAddr, true);
         if (aSymbol.length) {
             var nDelta, sDelta;
             if (aSymbol[0]) {
                 sDelta = "";
-                nDelta = aAddr[0] - aSymbol[1];
+                nDelta = dbgAddr.off - aSymbol[1];
                 if (nDelta) sDelta = " + " + str.toHexWord(nDelta);
-                this.println(aSymbol[0] + " (" + this.hexOffset(aSymbol[1], aAddr[1]) + ")" + sDelta);
+                this.println(aSymbol[0] + " (" + this.hexOffset(aSymbol[1], dbgAddr.sel) + ")" + sDelta);
             }
             if (aSymbol.length > 4 && aSymbol[4]) {
                 sDelta = "";
-                nDelta = aSymbol[5] - aAddr[0];
+                nDelta = aSymbol[5] - dbgAddr.off;
                 if (nDelta) sDelta = " - " + str.toHexWord(nDelta);
-                this.println(aSymbol[4] + " (" + this.hexOffset(aSymbol[5], aAddr[1]) + ")" + sDelta);
+                this.println(aSymbol[4] + " (" + this.hexOffset(aSymbol[5], dbgAddr.sel) + ")" + sDelta);
             }
         } else {
             this.println("no symbols");
@@ -4461,7 +4513,7 @@ if (DEBUGGER) {
 
         var fJSON = (asArgs[1] == "json");
         var iDrive, iSector = 0, nSectors = 0;
-        var aAddr = (fJSON? [] : this.parseAddr(asArgs[1], Debugger.ADDR_DATA));
+        var dbgAddr = (fJSON? {} : this.parseAddr(asArgs[1], Debugger.ADDR_DATA));
 
         iDrive = this.parseValue(asArgs[2], "drive #");
         if (iDrive === undefined) return;
@@ -4504,19 +4556,19 @@ if (DEBUGGER) {
                     if (dc.seekDrive(drive, iSector, nSectors)) {
                         var cb = 0;
                         var fAbort = false;
-                        var sAddr = this.hexAddr(aAddr);
+                        var sAddr = this.hexAddr(dbgAddr);
                         while (!fAbort && drive.nBytes-- > 0) {
-                            (function(dbg, aAddrCur) {
+                            (function(dbg, dbgAddrCur) {
                                 dc.readByte(drive, function(b, fAsync) {
                                     if (b < 0) {
-                                        dbg.println("out of data at address " + dbg.hexAddr(aAddrCur));
+                                        dbg.println("out of data at address " + dbg.hexAddr(dbgAddrCur));
                                         fAbort = true;
                                         return;
                                     }
-                                    dbg.setByte(aAddrCur, b, 1);
+                                    dbg.setByte(dbgAddrCur, b, 1);
                                     cb++;
                                 });
-                            }(this, aAddr));
+                            }(this, dbgAddr));
                         }
                         this.println(cb + " bytes read at " + sAddr);
                     } else {
@@ -4793,12 +4845,12 @@ if (DEBUGGER) {
                     case "CS":
                      // fIns = true;
                         this.cpu.setCS(w);
-                        this.aAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
+                        this.dbgAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
                         break;
                     case "IP":
                      // fIns = true;
                         this.cpu.setIP(w);
-                        this.aAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
+                        this.dbgAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
                         break;
                     /*
                      * I used to alias "PC" to "IP", until I discovered that early (perhaps ALL) versions of
@@ -4841,7 +4893,7 @@ if (DEBUGGER) {
                                 this.cpu.setMSW(w);
                                 break;
                             case "TR":
-                                this.cpu.segTSS.load(w);
+                                this.cpu.segTSS.load(w, true);
                                 break;
                             /*
                              * TODO: Add support for GDTR (addr and limit), IDTR (addr and limit), and perhaps
@@ -4912,8 +4964,8 @@ if (DEBUGGER) {
         this.println((fCompact? '' : '\n') + this.getRegDump(fProt));
 
         if (fIns) {
-            this.aAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
-            this.doUnassemble(this.hexAddr(this.aAddrNextCode));
+            this.dbgAddrNextCode = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
+            this.doUnassemble(this.hexAddr(this.dbgAddrNextCode));
         }
     };
 
@@ -4926,9 +4978,9 @@ if (DEBUGGER) {
     Debugger.prototype.doRun = function(sAddr)
     {
         if (sAddr !== undefined) {
-            var aAddr = this.parseAddr(sAddr, Debugger.ADDR_CODE);
-            if (aAddr[0] == null) return;
-            this.setTempBreakpoint(aAddr);
+            var dbgAddr = this.parseAddr(sAddr, Debugger.ADDR_CODE);
+            if (dbgAddr.off == null) return;
+            this.setTempBreakpoint(dbgAddr);
         }
         if (!this.runCPU(true)) {
             this.println('cpu not available, "g" command ignored');
@@ -4953,10 +5005,10 @@ if (DEBUGGER) {
         if (!this.fProcStep) {
             var fPrefix;
             var fRepeat = false;
-            var aAddr = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
+            var dbgAddr = this.newAddr(this.cpu.getIP(), this.cpu.getCS());
             do {
                 fPrefix = false;
-                var bOpcode = this.getByte(aAddr);
+                var bOpcode = this.getByte(dbgAddr);
                 switch (bOpcode) {
                 case X86.OPCODE.ES:
                 case X86.OPCODE.CS:
@@ -4967,42 +5019,42 @@ if (DEBUGGER) {
                 case X86.OPCODE.OS:     // I386 only
                 case X86.OPCODE.AS:     // I386 only
                 case X86.OPCODE.LOCK:
-                    this.incAddr(aAddr, 1);
+                    this.incAddr(dbgAddr, 1);
                     fPrefix = true;
                     break;
                 case X86.OPCODE.INT3:
                 case X86.OPCODE.INTO:
                     this.fProcStep = fProcStep;
-                    this.incAddr(aAddr, 1);
+                    this.incAddr(dbgAddr, 1);
                     break;
                 case X86.OPCODE.INTn:
                 case X86.OPCODE.LOOPNZ:
                 case X86.OPCODE.LOOPZ:
                 case X86.OPCODE.LOOP:
                     this.fProcStep = fProcStep;
-                    this.incAddr(aAddr, 2);
+                    this.incAddr(dbgAddr, 2);
                     break;
                 case X86.OPCODE.CALL:
                     if (fCallStep) {
                         this.fProcStep = fProcStep;
-                        this.incAddr(aAddr, 3);
+                        this.incAddr(dbgAddr, 3);
                     }
                     break;
                 case X86.OPCODE.CALLF:
                     if (fCallStep) {
                         this.fProcStep = fProcStep;
-                        this.incAddr(aAddr, 5);
+                        this.incAddr(dbgAddr, 5);
                     }
                     break;
                 case X86.OPCODE.GRP4W:
                     if (fCallStep) {
-                        var w = this.getWord(aAddr) & X86.OPCODE.CALLMASK;
+                        var w = this.getWord(dbgAddr) & X86.OPCODE.CALLMASK;
                         this.fProcStep = ((w == X86.OPCODE.CALLW || w == X86.OPCODE.CALLFDW)? fProcStep : 0);
                     }
                     break;
                 case X86.OPCODE.REPZ:
                 case X86.OPCODE.REPNZ:
-                    this.incAddr(aAddr, 1);
+                    this.incAddr(dbgAddr, 1);
                     fRepeat = fPrefix = true;
                     break;
                 case X86.OPCODE.INSB:
@@ -5021,7 +5073,7 @@ if (DEBUGGER) {
                 case X86.OPCODE.SCASW:
                     if (fRepeat) {
                         this.fProcStep = fProcStep;
-                        this.incAddr(aAddr, 1);
+                        this.incAddr(dbgAddr, 1);
                     }
                     break;
                 default:
@@ -5030,7 +5082,7 @@ if (DEBUGGER) {
             } while (fPrefix);
 
             if (this.fProcStep) {
-                this.setTempBreakpoint(aAddr);
+                this.setTempBreakpoint(dbgAddr);
                 if (!this.runCPU()) {
                     this.cpu.setFocus();
                     this.fProcStep = 0;
@@ -5079,33 +5131,33 @@ if (DEBUGGER) {
     };
 
     /**
-     * initAddrSize(aAddr, fNonPrefix)
+     * initAddrSize(dbgAddr, fNonPrefix)
      *
      * @this {Debugger}
-     * @param {Array} aAddr
+     * @param {DbgAddr} dbgAddr
      * @param {boolean} fNonPrefix
      */
-    Debugger.prototype.initAddrSize = function(aAddr, fNonPrefix)
+    Debugger.prototype.initAddrSize = function(dbgAddr, fNonPrefix)
     {
         /*
-         * Use aAddr[6] to record whether we previously processed any OPERAND or ADDRESS overrides.
+         * Use dbgAddr.fOverride to record whether we previously processed any OPERAND or ADDRESS overrides.
          */
-        aAddr[6] = (aAddr[4] || aAddr[5]);
+        dbgAddr.fOverride = (dbgAddr.fData32 || dbgAddr.fAddr32);
         /*
-         * For proper disassembly of instructions preceded by an OPERAND (0x66) size prefix, we set aAddr[4]
-         * to true whenever the operand size is 32-bit; similarly, for an ADDRESS (0x67) size prefix, we set
-         * aAddr[5] to true whenever the address size is 32-bit.  Initially, both fields must be set to match
-         * the size of the current code segment.
+         * For proper disassembly of instructions preceded by an OPERAND (0x66) size prefix, we set
+         * dbgAddr.fData32 to true whenever the operand size is 32-bit; similarly, for an ADDRESS (0x67)
+         * size prefix, we set dbgAddr.fAddr32 to true whenever the address size is 32-bit.  Initially,
+         * both fields must be set to match the size of the current code segment.
          */
         if (fNonPrefix) {
-            aAddr[4] = (this.cpu.segCS.dataSize == 4);
-            aAddr[5] = (this.cpu.segCS.addrSize == 4);
+            dbgAddr.fData32 = (this.cpu.segCS.dataSize == 4);
+            dbgAddr.fAddr32 = (this.cpu.segCS.addrSize == 4);
         }
         /*
-         * We also use aAddr[7] to record whether the caller (ie, getInstruction()) is reporting that it
-         * processed a complete instruction (ie, a non-prefix) or not.
+         * We also use dbgAddr.fComplete to record whether the caller (ie, getInstruction()) is reporting that
+         * it processed a complete instruction (ie, a non-prefix) or not.
          */
-        aAddr[7] = fNonPrefix;
+        dbgAddr.fComplete = fNonPrefix;
     };
 
     /**
@@ -5130,19 +5182,19 @@ if (DEBUGGER) {
      */
     Debugger.prototype.doUnassemble = function(sAddr, sAddrEnd, n)
     {
-        var aAddr = this.parseAddr(sAddr, Debugger.ADDR_CODE);
-        if (aAddr[0] == null) return;
+        var dbgAddr = this.parseAddr(sAddr, Debugger.ADDR_CODE);
+        if (dbgAddr.off == null) return;
 
         if (n === undefined) n = 1;
-        var aAddrEnd = this.newAddr(this.maskReg, aAddr[1], this.bus.busLimit);
+        var dbgAddrEnd = this.newAddr(this.maskReg, dbgAddr.sel, this.bus.busLimit);
 
         var cb = 0x100;
         if (sAddrEnd !== undefined) {
 
-            aAddrEnd = this.parseAddr(sAddrEnd, Debugger.ADDR_CODE);
-            if (aAddrEnd[0] == null || aAddrEnd[0] < aAddr[0]) return;
+            dbgAddrEnd = this.parseAddr(sAddrEnd, Debugger.ADDR_CODE);
+            if (dbgAddrEnd.off == null || dbgAddrEnd.off < dbgAddr.off) return;
 
-            cb = aAddrEnd[0] - aAddr[0];
+            cb = dbgAddrEnd.off - dbgAddr.off;
             if (!DEBUG && cb > 0x100) {
                 /*
                  * Limiting the amount of disassembled code to 256 bytes in non-DEBUG builds is partly to
@@ -5155,18 +5207,18 @@ if (DEBUGGER) {
             n = -1;
         }
 
-        var fBlank = (aAddr[0] != this.aAddrNextCode[0]);
+        var fBlank = (dbgAddr.off != this.dbgAddrNextCode.off);
 
         var cLines = 0;
-        this.initAddrSize(aAddr, true);
+        this.initAddrSize(dbgAddr, true);
 
         while (cb > 0 && n--) {
 
-            var bOpcode = this.getByte(aAddr);
-            var addr = aAddr[2];
+            var bOpcode = this.getByte(dbgAddr);
+            var addr = dbgAddr.addr;
             var nSequence = (this.isBusy(false) || this.fProcStep)? this.nCycles : null;
             var sComment = (nSequence != null? "cycles" : null);
-            var aSymbol = this.findSymbolAtAddr(aAddr);
+            var aSymbol = this.findSymbolAtAddr(dbgAddr);
 
             if (aSymbol[0]) {
                 var sLabel = aSymbol[0] + ":";
@@ -5182,18 +5234,18 @@ if (DEBUGGER) {
                 nSequence = null;
             }
 
-            var sIns = this.getInstruction(aAddr, sComment, nSequence);
+            var sIns = this.getInstruction(dbgAddr, sComment, nSequence);
 
             /*
-             * If getInstruction() reported that it did not yet process a complete instruction (via aAddr[7]),
+             * If getInstruction() reported that it did not yet process a complete instruction (via dbgAddr.fComplete),
              * then bump the instruction count by one, so that we display one more line (and hopefully the complete
              * instruction).
              */
-            if (!aAddr[7] && !n) n++;
+            if (!dbgAddr.fComplete && !n) n++;
 
             this.println(sIns);
-            this.aAddrNextCode = aAddr;
-            cb -= aAddr[2] - addr;
+            this.dbgAddrNextCode = dbgAddr;
+            cb -= dbgAddr.addr - addr;
             fBlank = false;
             cLines++;
         }
@@ -5245,8 +5297,8 @@ if (DEBUGGER) {
         try {
             if (!sCmd.length) {
                 if (this.fAssemble) {
-                    this.println("ended assemble @" + this.hexAddr(this.aAddrAssemble));
-                    this.aAddrNextCode = this.aAddrAssemble;
+                    this.println("ended assemble @" + this.hexAddr(this.dbgAddrAssemble));
+                    this.dbgAddrNextCode = this.dbgAddrAssemble;
                     this.fAssemble = false;
                 } else {
                     sCmd = '?';
@@ -5262,7 +5314,7 @@ if (DEBUGGER) {
             if (this.isReady() /* && !this.isBusy(true) */ && sCmd.length > 0) {
 
                 if (this.fAssemble) {
-                    sCmd = "a " + this.hexAddr(this.aAddrAssemble) + " " + sCmd;
+                    sCmd = "a " + this.hexAddr(this.dbgAddrAssemble) + " " + sCmd;
                 }
                 else {
                     /*
