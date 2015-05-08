@@ -189,17 +189,38 @@ function Memory(addr, used, size, type, controller, cpu)
 /*
  * Basic memory types
  *
- * The type that is most critical is ROM, because it determines the fReadOnly setting for allocated
- * memory blocks.  Both RAM and VIDEO memory are always considered writable, and even ROM can be written
- * using the Bus setByteDirect() interface (which in turn uses the Memory writeByteDirect() interface),
- * allowing the ROM component to initialize its own memory.  Only the Memory interfaces used by the CPU
- * are designed to ignore writes to ROM.
+ * RAM is the most conventional memory type, providing full read/write capability to x86-compatible (ie,
+ * 'little endian") storage.  ROM is equally conventional, except that the fReadOnly property is set,
+ * disabling writes.  VIDEO is treated exactly like RAM, unless a controller is provided.  Both RAM and
+ * VIDEO memory are always considered writable, and even ROM can be written using the Bus setByteDirect()
+ * interface (which in turn uses the Memory writeByteDirect() interface), allowing the ROM component to
+ * initialize its own memory.  The CTRL type is used to identify memory-mapped devices that do not need
+ * any default storage and always provide their own controller.
  *
- * The other purpose these types serve is to provide the Control Panel with the ability to highlight
- * memory regions according to one of the following types.
+ * UNPAGED and PAGED blocks are created by the CPU when paging is enabled; the role of an UNPAGED block
+ * is simply to perform page translation and replace itself with a PAGED block, which redirects read/write
+ * requests to the physical page located during translation.  UNPAGED and PAGED blocks are considered
+ * "logical" blocks that don't contain any storage of their own; all other block types represent "physical"
+ * memory (or a memory-mapped device).
  *
- * Unallocated regions of the address space also contain memory blocks, but the blocks themselves are
- * empty (that is, their data arrays are uninitialized) and the memory type is NONE.
+ * Unallocated regions of the address space contain a special memory block of type NONE that contains
+ * no storage.  Mapping every addressible location to a memory block allows all accesses to be routed in
+ * exactly the same manner, without resorting to any range or processor checks.
+ *
+ * Originally, the Debugger always went through the Bus interfaces, and could therefore modify ROMs as well,
+ * but with the introduction of protected mode memory segmentation (and later paging), where logical and
+ * phsycial addresses were no longer the same, that is no longer true.  For coherency, all Debugger memory
+ * accesses now go through the X86Seg and X86CPU memory interfaces, so that the user sees the same segment
+ * and page translation that the CPU sees.  However, the Debugger uses special "fSuppress" flags to prevent
+ * those X86 interfaces from triggering segment and/or page faults when invalid or not-present segments
+ * or pages are accessed.
+ *
+ * These types are not mutually exclusive.  For example, VIDEO memory could be allocated as RAM, with or
+ * without a custom controller (the original Monochrome and CGA video cards used read/write storage that
+ * was indistiguishable from RAM), and CTRL memory could be allocated as an empty block of any type, with
+ * a custom controller.  A few types are required for certain features (eg, ROM is required if you want
+ * read-only memory), but the larger purpose of these types is to help document the caller's intent and to
+ * provide the Control Panel with the ability to highlight memory regions accordingly.
  */
 Memory.TYPE = {
     NONE:       0,
@@ -214,7 +235,7 @@ Memory.TYPE = {
 };
 
 /*
- * Last used block ID
+ * Last used block ID (used for debugging only)
  */
 Memory.idBlock = 0;
 
@@ -356,13 +377,12 @@ Memory.prototype = {
     /**
      * setAccess(afn)
      *
-     * If no afn is specified, a default is selected based on the Memory type.
+     * If no function table is specified, a default is selected based on the Memory type.
      *
      * @this {Memory}
-     * @param {Array.<function()>} [afn]
-     * @param {boolean} [fDirect]
+     * @param {Array.<function()>} [afn] function table
      */
-    setAccess: function(afn, fDirect) {
+    setAccess: function(afn) {
         if (!afn) {
             if (this.type == Memory.TYPE.UNPAGED) {
                 afn = Memory.afnUnpaged;
@@ -374,9 +394,8 @@ Memory.prototype = {
                 afn = Memory.afnNone;
             }
         }
-        if (fDirect === undefined) fDirect = true;      // TODO: Verify that this is desired default behavior
-        this.setReadAccess(afn, fDirect);
-        this.setWriteAccess(afn, fDirect);
+        this.setReadAccess(afn, true);
+        this.setWriteAccess(afn, true);
     },
     /**
      * setReadAccess(afn, fDirect)
@@ -549,16 +568,16 @@ Memory.prototype = {
      * readNone(off)
      *
      * Previously, this always returned 0x00, but the initial memory probe by the Compaq DeskPro 386 ROM BIOS
-     * writes 0x0000 to the first word of every 64Kb block in the nearly 16Mb address space it supports, and so
-     * it would initially think that LOTS of RAM existed, only to be disappointed later when it performed a more
-     * exhaustive memory test, and generating error messages in the process.
+     * writes 0x0000 to the first word of every 64Kb block in the nearly 16Mb address space it supports, and
+     * if it reads back 0x0000, it will initially think that LOTS of RAM exists, only to be disappointed later
+     * when it performs a more exhaustive memory test, generating unwanted error messages in the process.
      *
      * TODO: Determine if we should have separate readByteNone(), readShortNone() and readLongNone() functions
-     * to return 0xff, 0xffff and 0xffffffff|0, respectively.  This seems sufficient, as it seems unlikely
-     * that a system would require nonexistent memory locations to have all bits set.
+     * to return 0xff, 0xffff and 0xffffffff|0, respectively.  This seems sufficient for now, as it seems unlikely
+     * that a system would require nonexistent memory locations to return ALL bits set.
      *
-     * Also, I'm reluctant to address that potential issue by simply returning -1, because to date, the Memory
-     * component has always provided return values that are properly masked, and some callers may depend on that.
+     * Also, I'm reluctant to address that potential issue by simply returning -1, because to date, the above
+     * Memory interfaces have always returned values that are properly masked to 8, 16 or 32 bits, respectively.
      *
      * @this {Memory}
      * @param {number} off
@@ -822,7 +841,7 @@ Memory.prototype = {
      */
     writeByteChecked: function writeByteChecked(off, b, addr) {
         if (DEBUGGER && this.dbg) this.dbg.checkMemoryWrite(addr);
-        this.writeByteDirect(off, b, addr);
+        if (this.fReadOnly) this.writeNone(off, b, addr); else this.writeByteDirect(off, b, addr);
     },
     /**
      * writeShortChecked(off, w, addr)
@@ -837,7 +856,7 @@ Memory.prototype = {
             this.dbg.checkMemoryWrite(addr) ||
             this.dbg.checkMemoryWrite(addr + 1);
         }
-        this.writeShortDirect(off, w, addr);
+        if (this.fReadOnly) this.writeNone(off, w, addr); else this.writeShortDirect(off, w, addr);
     },
     /**
      * writeLongChecked(off, l, addr)
@@ -854,7 +873,7 @@ Memory.prototype = {
             this.dbg.checkMemoryWrite(this.addr + off + 2) ||
             this.dbg.checkMemoryWrite(this.addr + off + 3);
         }
-        this.writeLongDirect(off, l);
+        if (this.fReadOnly) this.writeNone(off, l, addr); else this.writeLongDirect(off, l, addr);
     },
     /**
      * readBytePaged(off, addr)
