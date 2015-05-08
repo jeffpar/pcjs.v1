@@ -13,9 +13,9 @@
 ; See the machine definition file in /modules/pcjs/bin/romtests.json for a configuration that can
 ; load this file as a ROM image.
 ;
-; PROT32 Notes
-; -----------------
-; PROT32 is NOT enabled by default, because based on what I've seen in VirtualBox (and notes
+; REAL32 Notes
+; ------------
+; REAL32 is NOT enabled by default, because based on what I've seen in VirtualBox (and notes
 ; at http://geezer.osdevbrasil.net/johnfine/segments.htm), if CS is loaded with a 32-bit code segment
 ; while in protected-mode and we then return to real-mode, even if we immediately perform a FAR jump
 ; with a real-mode CS, the base of CS will be updated, but all the other segment attributes, like
@@ -25,9 +25,9 @@
 ;
 ; The work-around: load CS with a 16-bit code segment BEFORE returning to real-mode.
 ;
-; "Unreal mode" works by setting other segment registers (eg, DS, ES) to 32-bit segments, not CS.
-; SS should not be set to a 32-bit segment either, because that causes implicit pushes to use ESP
-; instead of SP, even in real-mode.
+; "Unreal mode" works by setting other segment registers (eg, DS, ES) to 32-bit segments before
+; returning to real-mode -- just not CS.  SS shouldn't be set to a 32-bit segment either, because
+; that causes implicit pushes to use ESP instead of SP, even in real-mode.
 ;
 	cpu	386
 	org	0x100
@@ -190,7 +190,7 @@ initGDT:
 	add	eax,myGDT			; EAX == physical address of myGDT
 	mov	[cs:addrGDT+2],eax		; update the 32-bit base address of myGDT in addrGDT
 	mov	ax,cs
-      %ifdef PROT32
+      %ifdef REAL32
 	mov	[cs:jmpReal+5],ax		; update the segment of the FAR jump that returns us to real-mode
       %else
 	mov	[cs:jmpReal+3],ax
@@ -272,7 +272,6 @@ goProt:	o32 lgdt [cs:addrGDT]
 	or	eax,CR0_MSW_PE
     %endif
 	mov	cr0,eax
-jmpProt:
 	jmp	CSEG_PROT32:toProt32
 
 toProt32:
@@ -284,54 +283,57 @@ toProt32:
     ;
     ; Test moving a segment register to a 32-bit memory location
     ;
-	mov	edx,[0x0000]		; save the DWORD at 0x0000:0x0000 in EDX
+test1:	mov	edx,[0x0000]		; save the DWORD at 0x0000:0x0000 in EDX
 	or	eax,-1
 	mov	[0x0000],eax
 	mov	[0x0000],ds
 	mov	ax,ds
 	cmp	eax,[0x0000]
-err1a:	jne	err1a
+	jne	error
 	mov	eax,ds
 	xor	eax,0xffff0000
 	cmp	eax,[0x0000]
-err1b:	jne	err1b
+	jne	error
 	mov	[0x0000],edx		; restore the DWORD at 0x0000:0x0000 from EDX
 	jmp	test2
     ;
     ; Test moving a byte to a 32-bit register with sign-extension
     ;
-test2:	movsx	eax,byte [hiByte]
+test2:	movsx	eax,byte [0xfffff]
 	cmp	eax,0xffffff80
-err2:	; jne	err2
-
+	jne	error
     ;
     ; Test moving a word to a 32-bit register with sign-extension
     ;
-	movsx	eax,word [hiWord]
+test3:	movsx	eax,word [0xffffe]
 	cmp	eax,0xffff80fc
-err3:	; jne	err3
-
+	jne	error
     ;
     ; Test moving a byte to a 32-bit register with zero-extension
     ;
-	movzx	eax,byte [hiByte]
+test4:	movzx	eax,byte [0xfffff]
 	cmp	eax,0x00000080
-err4:	; jne	err4
-
+	jne	error
     ;
     ; Test moving a word to a 32-bit register with zero-extension
     ;
-	movzx	eax,word [hiWord]
+test5:	movzx	eax,word [0xffffe]
 	cmp	eax,0x000080fc
-err5:	; jne	err5
+	jne	error
+	jmp	doneProt
 
+error:	nop
+
+doneProt:
+
+    %ifndef REAL32
     ;
     ; Return to real-mode now, after first loading CS with a 16-bit code segment
     ;
 	jmp	CSEG_PROT16:toProt16
-
 toProt16:
 	bits	16
+    %endif
 
 goReal:	mov	eax,cr0
 	and	eax,~(CR0_MSW_PE | CR0_PG)
@@ -355,5 +357,5 @@ jmpStart:
 
 	db	0x20
 	db	'04/04/15'
-hiWord:	db	0xFC				; 0000FFFE  FC (Model ID byte)
-hiByte: db	0x80				; 0000FFFF  80 (normally, location of a checksum byte)
+	db	0xFC				; 0000FFFE  FC (Model ID byte)
+	db	0x80				; 0000FFFF  80 (normally, location of a checksum byte)
