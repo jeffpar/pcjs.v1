@@ -172,9 +172,14 @@ X86.fnBOUND = function BOUND(dst, src)
     /*
      * Note that BOUND performs signed comparisons, so we must transform all arguments into signed values.
      */
-    var wIndex = (dst << 16) >> 16;
-    var wLower = (this.getWord(this.regEA) << 16) >> 16;
-    var wUpper = (this.getWord(this.regEA + this.dataSize) << 16) >> 16;
+    var wIndex = dst;
+    var wLower = this.getWord(this.regEA);
+    var wUpper = this.getWord(this.regEA + this.dataSize);
+    if (this.dataSize == 2) {
+        wIndex = (dst << 16) >> 16;
+        wLower = (wLower << 16) >> 16;
+        wUpper = (wUpper << 16) >> 16;
+    }
     this.nStepCycles -= this.cycleCounts.nOpCyclesBound;
     if (wIndex < wLower || wIndex > wUpper) {
         /*

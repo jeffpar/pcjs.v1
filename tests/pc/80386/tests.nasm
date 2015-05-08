@@ -290,11 +290,11 @@ toProt32:
 	cmp	eax,[0x0000]
 err1:	jne	err1
 	mov	[0x0000],edx		; restore the DWORD at 0x0000:0x0000 from EDX
-
+	jmp	test2
     ;
     ; Test moving a byte to a 32-bit register with sign-extension
     ;
-	movsx	eax,byte [0xfffff]
+test2:	movsx	eax,byte [0xfffff]
 	cmp	eax,0xffffff80
 err2:	jne	err2
 
