@@ -39,6 +39,8 @@
 
 	bits	16
 
+PAGING equ 1
+
 ;
 ; If we built our data structures in RAM, we might use the first page of RAM (0x0000-0x0fff) like so:
 ;
@@ -264,7 +266,7 @@ initPT:	stosd
 goProt:	o32 lgdt [cs:addrGDT]
 	mov	cr3,esi
 	mov	eax,cr0
-    %ifdef PAGING
+    %if PAGING
 	or	eax,CR0_MSW_PE | CR0_PG
     %else
 	or	eax,CR0_MSW_PE

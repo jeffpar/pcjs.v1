@@ -2688,12 +2688,14 @@ if (DEBUGGER) {
         if (nState >= 0 && this.aaOpcodeCounts.length) {
             this.cInstructions++;
             var bOpcode = this.cpu.probeAddr(addr);
-            this.aaOpcodeCounts[bOpcode][1]++;
-            var a = this.aOpcodeHistory[this.iOpcodeHistory];
-            a[0] = this.cpu.getIP();
-            a[1] = this.cpu.getCS();
-            a[2] = addr;
-            if (++this.iOpcodeHistory == this.aOpcodeHistory.length) this.iOpcodeHistory = 0;
+            if (bOpcode != null) {
+                this.aaOpcodeCounts[bOpcode][1]++;
+                var a = this.aOpcodeHistory[this.iOpcodeHistory];
+                a[0] = this.cpu.getIP();
+                a[1] = this.cpu.getCS();
+                a[2] = addr;
+                if (++this.iOpcodeHistory == this.aOpcodeHistory.length) this.iOpcodeHistory = 0;
+            }
         }
         return false;
     };

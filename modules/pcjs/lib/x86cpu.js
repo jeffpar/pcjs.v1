@@ -737,9 +737,10 @@ X86CPU.prototype.enablePageBlocks = function()
  * @this {X86CPU}
  * @param {number} addr is a linear address
  * @param {boolean} fWrite (true if called for a write, false if for a read)
+ * @param {boolean} [fSuppress] (true if any faults, remapping, etc should be suppressed)
  * @return {Memory|null}
  */
-X86CPU.prototype.mapPageBlock = function(addr, fWrite)
+X86CPU.prototype.mapPageBlock = function(addr, fWrite, fSuppress)
 {
     var offPDE = (addr & X86.LADDR.PDE.MASK) >>> X86.LADDR.PDE.SHIFT;
     var addrPDE = this.regCR3 + offPDE;
@@ -752,12 +753,12 @@ X86CPU.prototype.mapPageBlock = function(addr, fWrite)
     var pde = blockPDE.readLong(offPDE);
 
     if (!(pde & X86.PTE.PRESENT)) {
-        X86.fnPageFault.call(this, addr, false, fWrite);
+        if (!fSuppress) X86.fnPageFault.call(this, addr, false, fWrite);
         return null;
     }
 
     if (!(pde & X86.PTE.USER) && this.segCS.cpl == 3) {
-        X86.fnPageFault.call(this, addr, true, fWrite);
+        if (!fSuppress) X86.fnPageFault.call(this, addr, true, fWrite);
         return null;
     }
 
@@ -771,13 +772,13 @@ X86CPU.prototype.mapPageBlock = function(addr, fWrite)
     var blockPTE = this.aBusBlocks[(addrPTE & this.busMask) >>> this.blockShift];
     var pte = blockPTE.readLong(offPTE);
 
-    if (!(pte & X86.PTE.PRESENT)) {
-        X86.fnPageFault.call(this, addr, false, fWrite);
+    if (!(pte & X86.PTE.PRESENT) && !fSuppress) {
+        if (!fSuppress) X86.fnPageFault.call(this, addr, false, fWrite);
         return null;
     }
 
     if (!(pte & X86.PTE.USER) && this.segCS.cpl == 3) {
-        X86.fnPageFault.call(this, addr, true, fWrite);
+        if (!fSuppress) X86.fnPageFault.call(this, addr, true, fWrite);
         return null;
     }
 
@@ -786,6 +787,7 @@ X86CPU.prototype.mapPageBlock = function(addr, fWrite)
      * TODO: Since we're immediately shifting addrPhys by blockShift, we could also skip adding the addr's offset.
      */
     var blockPhys = this.aBusBlocks[(addrPhys & this.busMask) >>> this.blockShift];
+    if (fSuppress) return blockPhys;
 
     /*
      * So we have the block containing the physical memory corresponding to the given linear address.
@@ -2717,7 +2719,10 @@ X86CPU.prototype.setBinding = function(sHTMLType, sBinding, control)
 X86CPU.prototype.probeAddr = function(addr)
 {
     var block = this.aMemBlocks[(addr & this.memMask) >>> this.blockShift];
-    if (block.type == Memory.TYPE.UNPAGED) return null;
+    if (block.type == Memory.TYPE.UNPAGED) {
+        block = this.mapPageBlock(addr, false, true);
+        if (!block) return null;
+    }
     return block.readByteDirect(addr & this.blockLimit, addr);
 };
 
