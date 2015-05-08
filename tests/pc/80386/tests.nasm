@@ -39,7 +39,7 @@
 
 	bits	16
 
-PAGING equ 1
+PAGING equ 0
 
 ;
 ; If we built our data structures in RAM, we might use the first page of RAM (0x0000-0x0fff) like so:
@@ -288,38 +288,42 @@ toProt32:
 	or	eax,-1
 	mov	[0x0000],eax
 	mov	[0x0000],ds
-	mov	eax,ds
+	mov	ax,ds
 	cmp	eax,[0x0000]
-err1:	jne	err1
+err1a:	jne	err1a
+	mov	eax,ds
+	xor	eax,0xffff0000
+	cmp	eax,[0x0000]
+err1b:	jne	err1b
 	mov	[0x0000],edx		; restore the DWORD at 0x0000:0x0000 from EDX
 	jmp	test2
     ;
     ; Test moving a byte to a 32-bit register with sign-extension
     ;
-test2:	movsx	eax,byte [0xfffff]
+test2:	movsx	eax,byte [hiByte]
 	cmp	eax,0xffffff80
-err2:	jne	err2
+err2:	; jne	err2
 
     ;
     ; Test moving a word to a 32-bit register with sign-extension
     ;
-	movsx	eax,word [0xffffe]
+	movsx	eax,word [hiWord]
 	cmp	eax,0xffff80fc
-err3:	jne	err3
+err3:	; jne	err3
 
     ;
     ; Test moving a byte to a 32-bit register with zero-extension
     ;
-	movzx	eax,byte [0xfffff]
+	movzx	eax,byte [hiByte]
 	cmp	eax,0x00000080
-err4:	jne	err4
+err4:	; jne	err4
 
     ;
     ; Test moving a word to a 32-bit register with zero-extension
     ;
-	movzx	eax,word [0xffffe]
+	movzx	eax,word [hiWord]
 	cmp	eax,0x000080fc
-err5:	jne	err5
+err5:	; jne	err5
 
     ;
     ; Return to real-mode now, after first loading CS with a 16-bit code segment
@@ -351,5 +355,5 @@ jmpStart:
 
 	db	0x20
 	db	'04/04/15'
-	db	0xFC				; 0000FFFE  FC (Model ID byte)
-	db	0x80				; 0000FFFF  80 (normally, location of a checksum byte)
+hiWord:	db	0xFC				; 0000FFFE  FC (Model ID byte)
+hiByte: db	0x80				; 0000FFFF  80 (normally, location of a checksum byte)

@@ -1702,6 +1702,14 @@ X86.fnMOVn = function MOVn(dst, src)
  */
 X86.fnMOVxx = function MOVxx(dst, src)
 {
+    if (this.regEAWrite !== X86.ADDR_INVALID) {
+        /*
+         * When a 32-bit OPERAND size is in effect, opMOVwsr() will write 32 bits (zero-extended) if the destination
+         * is a register, but only 16 bits if the destination is memory.  The only other caller, opMOVrc(), is not
+         * affected, because it writes only to register destinations.
+         */
+        this.setDataSize(2);
+    }
     return X86.fnMOV.call(this, dst, this.regXX);
 };
 
