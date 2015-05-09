@@ -39,7 +39,7 @@
 
 	bits	16
 
-PAGING equ 0
+PAGING equ 1
 
 ;
 ; If we built our data structures in RAM, we might use the first page of RAM (0x0000-0x0fff) like so:
@@ -199,18 +199,21 @@ initGDT:
     %endif
     ;
     ; Now we want to build a page directory and a page table, but we need two pages of
-    ; 4K-aligned physical memory.  We can use hard-coded addresses in we're running in ROM,
-    ; otherwise we ask DOS for some memory.
+    ; 4K-aligned physical memory.  We can use a hard-coded address (segment 0x100, corresponding
+    ; to physical address 0x1000) if we're running in ROM; otherwise, we ask DOS for some memory.
     ;
     	cmp	ax,CSEG_REAL
-    	mov	edi,0x1000			; default to the 2nd physical page in low memory
+    	mov	ax,0x100			; default to the 2nd physical page in low memory
     	je	initPages
+
     	mov	bx,0x1000			; 4K paragraphs == 64K bytes
     	mov	ah,DOS_SETBLOCK			; resize the current block so we can allocate a new block
     	int	INT_DOS
     	jnc	allocPages
+
 exitErrDOSMem:
     	mov	dx,errDOSMem
+
 exitErrDOS:
 	mov	ah,DOS_STD_CON_STRING_OUTPUT
 	int	INT_DOS
@@ -231,20 +234,21 @@ allocPages:
     ;
     ; AX == segment of 64K memory block
     ;
+initPages:
     	movzx	eax,ax
     	shl	eax,4
     	add	eax,0xfff
     	and	eax,~0xfff
-	mov	edi,eax				; EDI == first physical 4K-aligned page within the 64K
-
-initPages:
-    	mov	esi,edi				; ESI == saved copy of EDI
+	mov	esi,eax				; ESI == first physical 4K-aligned page within the given segment
+    	shr	eax,4
+    	mov	es,ax
+    	xor	edi,edi
     ;
-    ; Build a page directory at EDI with only 1 valid PDE (the first one)
+    ; Build a page directory at ES:EDI with only 1 valid PDE (the first one)
     ;
 	cld
 	cli					; make sure interrupts are still off (in case any DOS calls turned them back on)
-	mov	eax,edi
+	mov	eax,esi
 	add	eax,0x1000			; EAX == page frame address (of the next page)
 	or	eax,PTE_USER | PTE_READWRITE | PTE_PRESENT
 	stosd
@@ -284,7 +288,7 @@ toProt32:
     ;
     ; Test moving a segment register to a 32-bit memory location
     ;
-test1:	mov	edx,[0x0000]		; save the DWORD at 0x0000:0x0000 in EDX
+test1:	mov	edx,[0x0000]			; save the DWORD at 0x0000:0x0000 in EDX
 	or	eax,-1
 	mov	[0x0000],eax
 	mov	[0x0000],ds
@@ -295,7 +299,7 @@ test1:	mov	edx,[0x0000]		; save the DWORD at 0x0000:0x0000 in EDX
 	xor	eax,0xffff0000
 	cmp	eax,[0x0000]
 	jne	error
-	mov	[0x0000],edx		; restore the DWORD at 0x0000:0x0000 from EDX
+	mov	[0x0000],edx			; restore the DWORD at 0x0000:0x0000 from EDX
 	jmp	test2
     ;
     ; Test moving a byte to a 32-bit register with sign-extension

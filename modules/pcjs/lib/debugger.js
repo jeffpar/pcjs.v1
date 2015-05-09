@@ -1594,7 +1594,7 @@ if (DEBUGGER) {
      * @this {Debugger}
      * @param {number|null|undefined} [off] (default is zero)
      * @param {number|null|undefined} [sel] (default is null)
-     * @param {number|null|undefined} [addr] (default is zero)
+     * @param {number|null|undefined} [addr] (default is undefined)
      * @param {boolean} [fData32] (default is false)
      * @param {boolean} [fAddr32] (default is false)
      * @return {{DbgAddr}}
@@ -1603,7 +1603,7 @@ if (DEBUGGER) {
     {
         if (fData32 === undefined) fData32 = (this.cpu && this.cpu.segCS.dataSize == 4);
         if (fAddr32 === undefined) fAddr32 = (this.cpu && this.cpu.segCS.addrSize == 4);
-        return {off: off || 0, sel: sel || null, addr: addr || 0, fTempBreak: false, fData32: fData32 || false, fAddr32: fAddr32 || false};
+        return {off: off || 0, sel: sel || null, addr: addr, fTempBreak: false, fData32: fData32 || false, fAddr32: fAddr32 || false};
     };
 
     /**
