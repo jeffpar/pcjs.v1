@@ -1183,7 +1183,7 @@ X86.opBTC = function BTC()
 /**
  * opBSF()
  *
- * op=0x0F,0xBB (BSF reg,mem/reg)
+ * op=0x0F,0xBC (BSF reg,mem/reg)
  *
  * @this {X86CPU}
  */
@@ -1195,7 +1195,7 @@ X86.opBSF = function BSF()
 /**
  * opBSR()
  *
- * op=0x0F,0xBC (BSR reg,mem/reg)
+ * op=0x0F,0xBD (BSR reg,mem/reg)
  *
  * @this {X86CPU}
  */
@@ -1388,6 +1388,7 @@ if (I386) {
     X86.aOps0F386[0xBA] = X86.opGRP8;
     X86.aOps0F386[0xBB] = X86.opBTC;
     X86.aOps0F386[0xBC] = X86.opBSF;
+    X86.aOps0F386[0xBD] = X86.opBSR;
     X86.aOps0F386[0xBE] = X86.opMOVSXb;
     X86.aOps0F386[0xBF] = X86.opMOVSXw;
 }
