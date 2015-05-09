@@ -51,29 +51,23 @@ if (DEBUGGER) {
 }
 
 /**
- * DbgAddr object definition
+ * Debugger Address Object
  *
- *  off:        offset, if any
- *  sel:        selector, if any
- *  addr:       linear address, if any
- *  fData32:    true if 32-bit operand size in effect
- *  fAddr32:    true if 32-bit address size in effect
- *  fOverride:  true if any overrides were processed with this address
- *  fComplete:  true if a complete instruction was processed with this address
- *  fTempBreak: true if temporary breakpoint address
+ * NOTE: I originally tried to define DbgAddr as a record typedef, which allowed me to reference the
+ * type as {DbgAddr} instead of {{DbgAddr}}, but my IDE (WebStorm) did not recognize all instances of {DbgAddr}.
+ * Using this @class definition is a bit cleaner, and it makes both WebStorm and the Closure Compiler happier,
+ * at the expense of making all references {{DbgAddr}}.  Defining a typedef based on this class doesn't help.
  *
- * @typedef {{
- *  off:        (number|null|undefined),
- *  sel:        (number|null|undefined),
- *  addr:       (number|null|undefined),
- *  fData32:    (boolean|undefined),
- *  fAddr32:    (boolean|undefined),
- *  fOverride:  (boolean|undefined),
- *  fComplete:  (boolean|undefined),
- *  fTempBreak: (boolean|undefined)
- * }}
+ * @class DbgAddr
+ * @property {number|null|undefined} off (offset, if any)
+ * @property {number|null|undefined} sel (selector, if any)
+ * @property {number|null|undefined} addr (linear address, if any)
+ * @property {boolean|undefined} fData32 (true if 32-bit operand size in effect)
+ * @property {boolean|undefined} fAddr32 (true if 32-bit address size in effect)
+ * @property {boolean|undefined} fOverride (true if any overrides were processed with this address)
+ * @property {boolean|undefined} fComplete (true if a complete instruction was processed with this address)
+ * @property {boolean|undefined} fTempBreak (true if this is a temporary breakpoint address)
  */
-var DbgAddr;
 
 /**
  * Debugger(parmsDbg)
@@ -1418,7 +1412,7 @@ if (DEBUGGER) {
      * getAddr(dbgAddr, fWrite, cb)
      *
      * @this {Debugger}
-     * @param {DbgAddr} dbgAddr
+     * @param {{DbgAddr}} dbgAddr
      * @param {boolean} [fWrite]
      * @param {number} [cb] is number of bytes to check (1, 2 or 4); default is 1
      * @return {number} is the corresponding linear address, or X86.ADDR_INVALID
@@ -1450,7 +1444,7 @@ if (DEBUGGER) {
      * We must route all our memory requests through the CPU now, in case paging is enabled.
      *
      * @this {Debugger}
-     * @param {DbgAddr} dbgAddr
+     * @param {{DbgAddr}} dbgAddr
      * @param {number} [inc]
      * @return {number}
      */
@@ -1471,7 +1465,7 @@ if (DEBUGGER) {
      * getWord(dbgAddr, fAdvance)
      *
      * @this {Debugger}
-     * @param {DbgAddr} dbgAddr
+     * @param {{DbgAddr}} dbgAddr
      * @param {boolean} [fAdvance]
      * @return {number}
      */
@@ -1487,7 +1481,7 @@ if (DEBUGGER) {
      * getShort(dbgAddr, inc)
      *
      * @this {Debugger}
-     * @param {DbgAddr} dbgAddr
+     * @param {{DbgAddr}} dbgAddr
      * @param {number} [inc]
      * @return {number}
      */
@@ -1508,7 +1502,7 @@ if (DEBUGGER) {
      * getLong(dbgAddr, inc)
      *
      * @this {Debugger}
-     * @param {DbgAddr} dbgAddr
+     * @param {{DbgAddr}} dbgAddr
      * @param {number} [inc]
      * @return {number}
      */
@@ -1529,7 +1523,7 @@ if (DEBUGGER) {
      * setByte(dbgAddr, b, inc)
      *
      * @this {Debugger}
-     * @param {DbgAddr} dbgAddr
+     * @param {{DbgAddr}} dbgAddr
      * @param {number} b
      * @param {number} [inc]
      */
@@ -1549,7 +1543,7 @@ if (DEBUGGER) {
      * setShort(dbgAddr, w, inc)
      *
      * @this {Debugger}
-     * @param {DbgAddr} dbgAddr
+     * @param {{DbgAddr}} dbgAddr
      * @param {number} w
      * @param {number} [inc]
      */
@@ -1569,25 +1563,25 @@ if (DEBUGGER) {
      * newAddr(off, sel, addr, fData32, fAddr32)
      *
      * @this {Debugger}
-     * @param {number|null|undefined} [off]
-     * @param {number|null|undefined} [sel]
-     * @param {number|null|undefined} [addr]
-     * @param {boolean} [fData32]
-     * @param {boolean} [fAddr32]
-     * @return {DbgAddr}
+     * @param {number|null|undefined} [off] (default is zero)
+     * @param {number|null|undefined} [sel] (default is null)
+     * @param {number|null|undefined} [addr] (default is zero)
+     * @param {boolean} [fData32] (default is false)
+     * @param {boolean} [fAddr32] (default is false)
+     * @return {{DbgAddr}}
      */
     Debugger.prototype.newAddr = function(off, sel, addr, fData32, fAddr32)
     {
         if (fData32 === undefined) fData32 = (this.cpu && this.cpu.segCS.dataSize == 4);
         if (fAddr32 === undefined) fAddr32 = (this.cpu && this.cpu.segCS.addrSize == 4);
-        return {off: off, sel: sel, addr: addr, fTempBreak: false, fData32: fData32 || false, fAddr32: fAddr32 || false};
+        return {off: off || 0, sel: sel || null, addr: addr || 0, fTempBreak: false, fData32: fData32 || false, fAddr32: fAddr32 || false};
     };
 
     /**
      * packAddr(dbgAddr)
      *
      * @this {Debugger}
-     * @param {DbgAddr} dbgAddr
+     * @param {{DbgAddr}} dbgAddr
      * @return {Array}
      */
     Debugger.prototype.packAddr = function(dbgAddr)
@@ -1600,7 +1594,7 @@ if (DEBUGGER) {
      *
      * @this {Debugger}
      * @param {Array} aAddr
-     * @return {DbgAddr}
+     * @return {{DbgAddr}}
      */
     Debugger.prototype.unpackAddr = function(aAddr)
     {
@@ -1611,7 +1605,7 @@ if (DEBUGGER) {
      * checkLimit(dbgAddr)
      *
      * @this {Debugger}
-     * @param {DbgAddr} dbgAddr
+     * @param {{DbgAddr}} dbgAddr
      */
     Debugger.prototype.checkLimit = function(dbgAddr)
     {
@@ -1628,7 +1622,7 @@ if (DEBUGGER) {
      * incAddr(dbgAddr, inc)
      *
      * @this {Debugger}
-     * @param {DbgAddr} dbgAddr
+     * @param {{DbgAddr}} dbgAddr
      * @param {number|undefined} inc contains value to increment dbgAddr by (default is 1)
      */
     Debugger.prototype.incAddr = function(dbgAddr, inc)
@@ -1664,7 +1658,7 @@ if (DEBUGGER) {
      * hexAddr(dbgAddr)
      *
      * @this {Debugger}
-     * @param {DbgAddr} dbgAddr
+     * @param {{DbgAddr}} dbgAddr
      * @return {string} the hex representation of the address
      */
     Debugger.prototype.hexAddr = function(dbgAddr)
@@ -1678,7 +1672,7 @@ if (DEBUGGER) {
      * Dump helper for zero-terminated strings.
      *
      * @this {Debugger}
-     * @param {DbgAddr} dbgAddr
+     * @param {{DbgAddr}} dbgAddr
      * @param {number} [cchMax]
      * @return {string} (and dbgAddr advanced past the terminating zero)
      */
@@ -2311,7 +2305,7 @@ if (DEBUGGER) {
                  * Preallocate dummy Addr (Array) objects in every history slot, so that
                  * checkInstruction() doesn't need to call newAddr() on every slot update.
                  */
-                this.aOpcodeHistory[i] = [0, null, 0];
+                this.aOpcodeHistory[i] = this.newAddr();
             }
             this.iOpcodeHistory = 0;
         }
@@ -2690,10 +2684,10 @@ if (DEBUGGER) {
             var bOpcode = this.cpu.probeAddr(addr);
             if (bOpcode != null) {
                 this.aaOpcodeCounts[bOpcode][1]++;
-                var a = this.aOpcodeHistory[this.iOpcodeHistory];
-                a[0] = this.cpu.getIP();
-                a[1] = this.cpu.getCS();
-                a[2] = addr;
+                var dbgAddr = this.aOpcodeHistory[this.iOpcodeHistory];
+                dbgAddr.off = this.cpu.getIP();
+                dbgAddr.sel = this.cpu.getCS();
+                dbgAddr.addr = addr;
                 if (++this.iOpcodeHistory == this.aOpcodeHistory.length) this.iOpcodeHistory = 0;
             }
         }
@@ -2807,7 +2801,7 @@ if (DEBUGGER) {
      *
      * @this {Debugger}
      * @param {Array} aBreak
-     * @param {DbgAddr} dbgAddr
+     * @param {{DbgAddr}} dbgAddr
      * @param {boolean} [fTempBreak]
      * @return {boolean} true if breakpoint added, false if already exists
      */
@@ -2841,7 +2835,7 @@ if (DEBUGGER) {
      *
      * @this {Debugger}
      * @param {Array} aBreak
-     * @param {DbgAddr} dbgAddr
+     * @param {{DbgAddr}} dbgAddr
      * @param {boolean} [fRemove]
      * @return {boolean} true if found, false if not
      */
@@ -2921,7 +2915,7 @@ if (DEBUGGER) {
      * setTempBreakpoint(dbgAddr)
      *
      * @this {Debugger}
-     * @param {DbgAddr} dbgAddr of new temp breakpoint
+     * @param {{DbgAddr}} dbgAddr of new temp breakpoint
      */
     Debugger.prototype.setTempBreakpoint = function(dbgAddr)
     {
@@ -3030,7 +3024,7 @@ if (DEBUGGER) {
      * getInstruction(dbgAddr, sComment, nSequence)
      *
      * @this {Debugger}
-     * @param {DbgAddr} dbgAddr
+     * @param {{DbgAddr}} dbgAddr
      * @param {string} [sComment] is an associated comment
      * @param {number} [nSequence] is an associated sequence number, undefined if none
      * @return {string} (and dbgAddr is updated to the next instruction)
@@ -3191,7 +3185,7 @@ if (DEBUGGER) {
      *
      * @this {Debugger}
      * @param {number} type
-     * @param {DbgAddr} dbgAddr
+     * @param {{DbgAddr}} dbgAddr
      * @return {string} operand
      */
     Debugger.prototype.getImmOperand = function(type, dbgAddr)
@@ -3238,7 +3232,7 @@ if (DEBUGGER) {
      * @this {Debugger}
      * @param {number} bReg
      * @param {number} type
-     * @param {DbgAddr} dbgAddr
+     * @param {{DbgAddr}} dbgAddr
      * @return {string} operand
      */
     Debugger.prototype.getRegOperand = function(bReg, type, dbgAddr)
@@ -3271,7 +3265,7 @@ if (DEBUGGER) {
      *
      * @this {Debugger}
      * @param {number} bMod
-     * @param {DbgAddr} dbgAddr
+     * @param {{DbgAddr}} dbgAddr
      * @return {string} operand
      */
     Debugger.prototype.getSIBOperand = function(bMod, dbgAddr)
@@ -3298,7 +3292,7 @@ if (DEBUGGER) {
      * @this {Debugger}
      * @param {number} bModRM
      * @param {number} type
-     * @param {DbgAddr} dbgAddr
+     * @param {{DbgAddr}} dbgAddr
      * @return {string} operand
      */
     Debugger.prototype.getModRMOperand = function(bModRM, type, dbgAddr)
@@ -3391,7 +3385,7 @@ if (DEBUGGER) {
      * @this {Debugger}
      * @param {string} sOp
      * @param {string|undefined} sOperand
-     * @param {DbgAddr} dbgAddr of memory where this instruction is being assembled
+     * @param {{DbgAddr}} dbgAddr of memory where this instruction is being assembled
      * @return {Array.<number>} of opcode bytes; if the instruction can't be parsed, the array will be empty
      */
     Debugger.prototype.parseInstruction = function(sOp, sOperand, dbgAddr)
@@ -3606,7 +3600,7 @@ if (DEBUGGER) {
      * @this {Debugger}
      * @param {string|undefined} sAddr
      * @param {number|undefined} type is the address segment type, in case sAddr doesn't specify a segment
-     * @return {DbgAddr}
+     * @return {{DbgAddr}}
      */
     Debugger.prototype.parseAddr = function(sAddr, type)
     {
@@ -3821,7 +3815,7 @@ if (DEBUGGER) {
      *
      * @this {Debugger}
      * @param {string} sSymbol
-     * @return {DbgAddr|null} a valid dbgAddr if a valid symbol, an empty dbgAddr if an unknown symbol, or null if not a symbol
+     * @return {{DbgAddr}|null} a valid dbgAddr if a valid symbol, an empty dbgAddr if an unknown symbol, or null if not a symbol
      */
     Debugger.prototype.findSymbolAddr = function(sSymbol)
     {
@@ -3869,7 +3863,7 @@ if (DEBUGGER) {
      * entries: [0]-[3] will refer to closest preceding symbol, and [4]-[7] will refer to the closest subsequent symbol.
      *
      * @this {Debugger}
-     * @param {DbgAddr} dbgAddr
+     * @param {{DbgAddr}} dbgAddr
      * @param {boolean} [fNearest]
      * @return {Array|null} where [0] == symbol name, [1] == symbol value, [2] == any annotation, and [3] == any associated comment
      */
@@ -5137,7 +5131,7 @@ if (DEBUGGER) {
      * initAddrSize(dbgAddr, fNonPrefix)
      *
      * @this {Debugger}
-     * @param {DbgAddr} dbgAddr
+     * @param {{DbgAddr}} dbgAddr
      * @param {boolean} fNonPrefix
      */
     Debugger.prototype.initAddrSize = function(dbgAddr, fNonPrefix)

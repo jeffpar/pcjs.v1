@@ -52,8 +52,8 @@ PAGING equ 0
 ;	0x0d10-0x0d13	RAM_RETF (Real-mode return address)
 ;	0x0d14-0x0fff	reserved
 ;
-; And in the second page (0x1000-0x1fff), we might build a page directory, followed by a single page table that
-; allows us to map up to 4Mb (although we'd likely only create PTEs for the first 1Mb).
+; And in the second page (0x1000-0x1fff), we might build a page directory, followed by a single page table
+; that allows us to map up to 4Mb (although we'd likely only create PTEs for the first 1Mb).
 ;
 ;RAM_GDT	equ	0x0c00
 ;RAM_IDTR	equ	0x0d00
@@ -243,6 +243,7 @@ initPages:
     ; Build a page directory at EDI with only 1 valid PDE (the first one)
     ;
 	cld
+	cli					; make sure interrupts are still off (in case any DOS calls turned them back on)
 	mov	eax,edi
 	add	eax,0x1000			; EAX == page frame address (of the next page)
 	or	eax,PTE_USER | PTE_READWRITE | PTE_PRESENT

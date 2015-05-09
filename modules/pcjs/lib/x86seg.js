@@ -39,6 +39,19 @@ if (typeof module !== 'undefined') {
 }
 
 /**
+ * @class X86Seg
+ * @property {number} sel
+ * @property {number} limit (in protected-mode, this comes from descriptor word 0x0)
+ * @property {number} base (in protected-mode, this comes from descriptor word 0x2)
+ * @property {number} acc (in protected-mode, this comes from descriptor word 0x4, masked with 0xff00; bits 0-7 supplement base bits 16-23)
+ * @property {number} ext (in protected-mode, this is descriptor word 0x6, 80386 only; supplements limit bits 16-19 and base bits 24-31)
+ *
+ * TODO: Determine what good, if any, these class annotations are for either an IDE like WebStorm or a tool like
+ * the Closure Compiler.  More importantly, what good do they do at runtime?  Is it better to simply ensure that all
+ * object properties are explicitly initialized in the constructor, and document them there instead?
+ */
+
+/**
  * X86Seg(cpu, sName)
  *
  * @constructor
@@ -54,10 +67,10 @@ function X86Seg(cpu, id, sName, fProt)
     this.id = id;
     this.sName = sName || "";
     this.sel = 0;
-    this.limit = 0xffff;        // in protected-mode, this is descriptor word 0x0
-    this.base = 0;              // in protected-mode, this is descriptor word 0x2
-    this.acc = this.type = 0;   // in protected-mode, this is descriptor word 0x4, masked with 0xff00 (bits 0-7 supplement base bits 16-23)
-    this.ext = 0;               // in protected-mode, this is descriptor word 0x6 (80386 only; supplements limit bits 16-19 and base bits 24-31)
+    this.limit = 0xffff;
+    this.base = 0;
+    this.acc = this.type = 0;
+    this.ext = 0;
     this.cpl = this.dpl = 0;
     this.addrDesc = X86.ADDR_INVALID;
     this.dataSize = this.addrSize = 2;
@@ -108,7 +121,7 @@ X86Seg.ID = {
  * @this {X86Seg}
  * @param {number} sel
  * @param {boolean} [fSuppress] is true to suppress any errors
- * @return {number} base address of selected segment, or ADDR_INVALID if error (TODO: No error conditions exist yet)
+ * @return {number} base address of selected segment, or ADDR_INVALID if error (TODO: No error conditions yet)
  */
 X86Seg.prototype.loadReal = function loadReal(sel, fSuppress)
 {
@@ -122,7 +135,7 @@ X86Seg.prototype.loadReal = function loadReal(sel, fSuppress)
      *      this.dataSize = this.addrSize = 2;
      *      this.dataMask = this.addrMask = 0xffff;
      *
-     * Only the selector and base portions of a segment register can be changed in real-mode.
+     * In short, only the selector and base portions of a segment register can be changed in real-mode.
      */
     return this.base = this.sel << 4;
 };
@@ -209,7 +222,7 @@ X86Seg.prototype.loadProt = function loadProt(sel, fSuppress)
  *
  * @this {X86Seg}
  * @param {number} nIDT
- * @return {number} address from selected vector, or ADDR_INVALID if error (TODO: No error conditions exist yet)
+ * @return {number} address from selected vector, or ADDR_INVALID if error (TODO: No error conditions yet)
  */
 X86Seg.prototype.loadIDTReal = function loadIDTReal(nIDT)
 {
@@ -238,7 +251,7 @@ X86Seg.prototype.loadIDTReal = function loadIDTReal(nIDT)
  *
  * @this {X86Seg}
  * @param {number} nIDT
- * @return {number} address from selected vector, or ADDR_INVALID if error (TODO: No error conditions exist yet)
+ * @return {number} address from selected vector, or ADDR_INVALID if error (TODO: No error conditions yet)
  */
 X86Seg.prototype.loadIDTProt = function loadIDTProt(nIDT)
 {
@@ -264,7 +277,7 @@ X86Seg.prototype.loadIDTProt = function loadIDTProt(nIDT)
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of bytes to check (1, 2 or 4)
  * @param {boolean} [fSuppress] is true to suppress any errors
- * @return {number} corresponding physical address if valid, or ADDR_INVALID if error (TODO: No error conditions exist yet)
+ * @return {number} corresponding physical address if valid, or ADDR_INVALID if error (TODO: No error conditions yet)
  */
 X86Seg.prototype.checkReadReal = function checkReadReal(off, cb, fSuppress)
 {
@@ -281,7 +294,7 @@ X86Seg.prototype.checkReadReal = function checkReadReal(off, cb, fSuppress)
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of bytes to check (1, 2 or 4)
  * @param {boolean} [fSuppress] is true to suppress any errors
- * @return {number} corresponding physical address if valid, or ADDR_INVALID if error (TODO: No error conditions exist yet)
+ * @return {number} corresponding physical address if valid, or ADDR_INVALID if error (TODO: No error conditions yet)
  */
 X86Seg.prototype.checkWriteReal = function checkWriteReal(off, cb, fSuppress)
 {
