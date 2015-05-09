@@ -1492,9 +1492,7 @@ if (DEBUGGER) {
         var b = 0xff;
         var addr = this.getAddr(dbgAddr, false, 1);
         if (addr !== X86.ADDR_INVALID) {
-            this.nSuppress++;
             b = this.cpu.probeAddr(addr) | 0;
-            this.nSuppress--;
             if (inc) this.incAddr(dbgAddr, inc);
         }
         return b;
@@ -1529,9 +1527,7 @@ if (DEBUGGER) {
         var w = 0xffff;
         var addr = this.getAddr(dbgAddr, false, 2);
         if (addr !== X86.ADDR_INVALID) {
-            this.nSuppress++;
             w = this.cpu.probeAddr(addr) | (this.cpu.probeAddr(addr + 1) << 8);
-            this.nSuppress--;
             if (inc) this.incAddr(dbgAddr, inc);
         }
         return w;
@@ -1550,9 +1546,7 @@ if (DEBUGGER) {
         var l = -1;
         var addr = this.getAddr(dbgAddr, false, 4);
         if (addr !== X86.ADDR_INVALID) {
-            this.nSuppress++;
             l = this.cpu.probeAddr(addr) | (this.cpu.probeAddr(addr + 1) << 8) | (this.cpu.probeAddr(addr + 2) << 16) | (this.cpu.probeAddr(addr + 3) << 24);
-            this.nSuppress--;
             if (inc) this.incAddr(dbgAddr, inc);
         }
         return l;
@@ -1570,9 +1564,7 @@ if (DEBUGGER) {
     {
         var addr = this.getAddr(dbgAddr, true, 1);
         if (addr !== X86.ADDR_INVALID) {
-            this.nSuppress++;
             this.cpu.setByte(addr, b);
-            this.nSuppress--;
             if (inc) this.incAddr(dbgAddr, inc);
             this.cpu.updateCPU();
         }
@@ -1590,9 +1582,7 @@ if (DEBUGGER) {
     {
         var addr = this.getAddr(dbgAddr, true, 2);
         if (addr !== X86.ADDR_INVALID) {
-            this.nSuppress++;
             this.cpu.setShort(addr, w);
-            this.nSuppress--;
             if (inc) this.incAddr(dbgAddr, inc);
             this.cpu.updateCPU();
         }
@@ -2832,7 +2822,6 @@ if (DEBUGGER) {
             }
         }
         this.aBreakWrite = ["write"];
-        this.nSuppress = 0;
     };
 
     /**
@@ -3016,8 +3005,6 @@ if (DEBUGGER) {
      */
     Debugger.prototype.checkBreakpoint = function(addr, aBreak, fTemp)
     {
-        if (this.nSuppress) return false;
-
         /*
          * Time to check for execution breakpoints; note that this should be done BEFORE updating frequency
          * or history data (see checkInstruction), since we might not actually execute the current instruction.
