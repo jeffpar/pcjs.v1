@@ -68,6 +68,7 @@ function X86Seg(cpu, id, sName, fProt)
     this.sName = sName || "";
     this.sel = 0;
     this.limit = 0xffff;
+    this.offMax = this.limit + 1;
     this.base = 0;
     this.acc = this.type = 0;
     this.ext = 0;
@@ -127,15 +128,11 @@ X86Seg.prototype.loadReal = function loadReal(sel, fSuppress)
 {
     this.sel = sel & 0xffff;
     /*
-     * Apparently, loading a new value into a segment register in real-mode alters NEITHER the limit NOR these
-     * other attributes, so I've since moved these defaults into the constructor.  If you run any code that switches
-     * to protected-mode, loads a 32-bit code segment, and then switches back to real-mode, it is THAT code's
-     * responsibility to load a 16-bit segment into CS before returning to real-mode; otherwise, you're probably toast.
-     *
-     *      this.dataSize = this.addrSize = 2;
-     *      this.dataMask = this.addrMask = 0xffff;
-     *
-     * In short, only the selector and base portions of a segment register can be changed in real-mode.
+     * Loading a new value into a segment register in real-mode alters ONLY the selector and the base;
+     * all other attributes (eg, limit, operand size, address size, etc) are unchanged.  If you run any
+     * code that switches to protected-mode, loads a 32-bit code segment, and then switches back to
+     * real-mode, it is THAT code's responsibility to load a 16-bit segment into CS before returning to
+     * real-mode; otherwise, your machine will probably be toast.
      */
     return this.base = this.sel << 4;
 };
@@ -175,18 +172,12 @@ X86Seg.prototype.loadProt = function loadProt(sel, fSuppress)
      */
     sel &= 0xffff;
 
-    /*
-     * When comparing descriptor addresses, we must be mindful that any addresses above 2Gb will be negative;
-     * that in itself is not a problem UNLESS the descriptor table straddles the 2Gb boundary, meaning the
-     * starting address is positive but the ending (limit) address is negative.  Although that situation is
-     * highly unlikely, the safest thing to do is coerce the bounding addresses to unsigned values, using ">>> 0."
-     */
     if (!(sel & X86.SEL.LDT)) {
-        addrDT = cpu.addrGDT >>> 0;
-        addrDTLimit = cpu.addrGDTLimit >>> 0;
+        addrDT = cpu.addrGDT;
+        addrDTLimit = cpu.addrGDTLimit;
     } else {
-        addrDT = cpu.segLDT.base >>> 0;
-        addrDTLimit = addrDT + cpu.segLDT.limit;    // segment limit properties are already coerced unsigned
+        addrDT = cpu.segLDT.base;
+        addrDTLimit = (addrDT + cpu.segLDT.limit)|0;
     }
     /*
      * The ROM BIOS POST executes some test code in protected-mode without properly initializing the LDT,
@@ -199,8 +190,8 @@ X86Seg.prototype.loadProt = function loadProt(sel, fSuppress)
      * of the CPU that prevents the GDT or LDT being located at physical address zero.
      */
     if (!fSuppress || addrDT) {
-        var addrDesc = addrDT + (sel & X86.SEL.MASK);
-        if (addrDesc + 7 <= addrDTLimit) {
+        var addrDesc = (addrDT + (sel & X86.SEL.MASK))|0;
+        if ((addrDTLimit - addrDesc)|0 >= 7) {
             /*
              * TODO: This is only the first of many steps toward accurately counting cycles in protected mode;
              * I simply noted that "POP segreg" takes 5 cycles in real mode and 20 in protected mode, so I'm
@@ -259,8 +250,8 @@ X86Seg.prototype.loadIDTProt = function loadIDTProt(nIDT)
     cpu.assert(nIDT >= 0 && nIDT < 256);
 
     nIDT <<= 3;
-    var addrDesc = cpu.addrIDT + nIDT;
-    if (addrDesc + 7 <= cpu.addrIDTLimit) {
+    var addrDesc = (cpu.addrIDT + nIDT)|0;
+    if (((cpu.addrIDTLimit - addrDesc)|0) >= 7) {
         return this.loadDesc8(addrDesc, nIDT) + cpu.regEIP;
     }
     X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, nIDT | X86.ERRCODE.IDT | X86.ERRCODE.EXT, true);
@@ -270,8 +261,8 @@ X86Seg.prototype.loadIDTProt = function loadIDTProt(nIDT)
 /**
  * checkReadReal(off, cb, fSuppress)
  *
- * TODO: Invoke X86.fnFault.call(this.cpu, X86.EXCEPTION.GP_FAULT) if off is 0xffff and cb > 1;
- * also, whether or not the fnFault() call should include an error code, since this is happening in real-mode.
+ * TODO: Invoke X86.fnFault.call(this.cpu, X86.EXCEPTION.GP_FAULT) if off+cb is beyond offMax on 80186 and up;
+ * also, determine whether fnFault() call should include an error code, since this is happening in real-mode.
  *
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
@@ -287,8 +278,8 @@ X86Seg.prototype.checkReadReal = function checkReadReal(off, cb, fSuppress)
 /**
  * checkWriteReal(off, cb, fSuppress)
  *
- * TODO: Invoke X86.fnFault.call(this.cpu, X86.EXCEPTION.GP_FAULT) if off is 0xffff and cb > 1;
- * also, whether or not the fnFault() call should include an error code, since this is happening in real-mode.
+ * TODO: Invoke X86.fnFault.call(this.cpu, X86.EXCEPTION.GP_FAULT) if off+cb is beyond offMax on 80186 and up;
+ * also, determine whether fnFault() call should include an error code, since this is happening in real-mode.
  *
  * @this {X86Seg}
  * @param {number} off is a segment-relative offset
@@ -313,10 +304,10 @@ X86Seg.prototype.checkWriteReal = function checkWriteReal(off, cb, fSuppress)
 X86Seg.prototype.checkReadProt = function checkReadProt(off, cb, fSuppress)
 {
     /*
-     * Since "off" could be a 32-bit value with the sign bit (bit 31) set, we must convert
-     * it to an unsigned value using ">>>"; limit was already converted at segment load time.
+     * Since off could be a 32-bit value with the sign bit (bit 31) set, we must convert
+     * it to an unsigned value using ">>>"; offMax was already converted at segment load time.
      */
-    if ((off >>> 0) + cb - 1 <= this.limit) {
+    if ((off >>> 0) + cb <= this.offMax) {
         return (this.base + off)|0;
     }
     return this.checkReadProtDisallowed(off, cb, fSuppress);
@@ -334,10 +325,10 @@ X86Seg.prototype.checkReadProt = function checkReadProt(off, cb, fSuppress)
 X86Seg.prototype.checkReadProtDown = function checkReadProtDown(off, cb, fSuppress)
 {
     /*
-     * Since "off" could be a 32-bit value with the sign bit (bit 31) set, we must convert
-     * it to an unsigned value using ">>>"; limit was already converted at segment load time.
+     * Since off could be a 32-bit value with the sign bit (bit 31) set, we must convert
+     * it to an unsigned value using ">>>"; offMax was already converted at segment load time.
      */
-    if ((off >>> 0) + cb - 1 > this.limit) {
+    if ((off >>> 0) + cb > this.offMax) {
         return (this.base + off)|0;
     }
     return this.checkReadProtDisallowed(off, cb, fSuppress);
@@ -372,10 +363,10 @@ X86Seg.prototype.checkReadProtDisallowed = function checkReadProtDisallowed(off,
 X86Seg.prototype.checkWriteProt = function checkWriteProt(off, cb, fSuppress)
 {
     /*
-     * Since "off" could be a 32-bit value with the sign bit (bit 31) set, we must convert
-     * it to an unsigned value using ">>>"; limit was already converted at segment load time.
+     * Since off could be a 32-bit value with the sign bit (bit 31) set, we must convert
+     * it to an unsigned value using ">>>"; offMax was already converted at segment load time.
      */
-    if ((off >>> 0) + cb - 1 <= this.limit) {
+    if ((off >>> 0) + cb <= this.offMax) {
         return (this.base + off)|0;
     }
     return this.checkWriteProtDisallowed(off, cb, fSuppress);
@@ -393,10 +384,10 @@ X86Seg.prototype.checkWriteProt = function checkWriteProt(off, cb, fSuppress)
 X86Seg.prototype.checkWriteProtDown = function checkWriteProtDown(off, cb, fSuppress)
 {
     /*
-     * Since "off" could be a 32-bit value with the sign bit (bit 31) set, we must convert
-     * it to an unsigned value using ">>>"; limit was already converted at segment load time.
+     * Since off could be a 32-bit value with the sign bit (bit 31) set, we must convert
+     * it to an unsigned value using ">>>"; offMax was already converted at segment load time.
      */
-    if ((off >>> 0) + cb - 1 > this.limit) {
+    if ((off >>> 0) + cb > this.offMax) {
         return (this.base + off)|0;
     }
     return this.checkWriteProtDisallowed(off, cb, fSuppress);
@@ -534,11 +525,11 @@ X86Seg.prototype.loadAcc = function(sel, fGDT)
         addrDTLimit = cpu.addrGDTLimit;
     } else if (!fGDT) {
         addrDT = cpu.segLDT.base;
-        addrDTLimit = addrDT + cpu.segLDT.limit;
+        addrDTLimit = (addrDT + cpu.segLDT.limit)|0;
     }
     if (addrDT !== undefined) {
-        var addrDesc = addrDT + (sel & X86.SEL.MASK);
-        if (addrDesc + 7 <= addrDTLimit) {
+        var addrDesc = (addrDT + (sel & X86.SEL.MASK))|0;
+        if (((addrDTLimit - addrDesc)|0) >= 7) {
             return cpu.getShort(addrDesc + X86.DESC.ACC.OFFSET);
         }
     }
@@ -570,6 +561,7 @@ X86Seg.prototype.loadDesc6 = function(addrDesc, sel)
     this.sel = sel;
     this.base = base;
     this.limit = limit;
+    this.offMax = (limit >>> 0) + 1;
     this.acc = acc & X86.DESC.ACC.MASK;
     this.type = (acc & X86.DESC.ACC.TYPE.MASK);
     this.ext = 0;
@@ -807,11 +799,8 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
         }
         this.sel = sel;
         this.base = base;
-        /*
-         * Since limit could be a 32-bit value with the sign bit (bit 31) set, we convert
-         * it to an unsigned value now, using ">>>", so that the limit checks won't have to.
-         */
-        this.limit = (limit >>> 0);
+        this.limit = limit;
+        this.offMax = (limit >>> 0) + 1;
         this.acc = acc;
         this.type = type;
         this.ext = ext;
@@ -855,7 +844,23 @@ X86Seg.prototype.setBase = function(addr)
  */
 X86Seg.prototype.save = function()
 {
-    return [this.sel, this.base, this.limit, this.acc, this.id, this.sName, this.cpl, this.dpl, this.addrDesc];
+    return [
+        this.sel,
+        this.base,
+        this.limit,
+        this.acc,
+        this.id,
+        this.sName,
+        this.cpl,
+        this.dpl,
+        this.addrDesc,
+        this.addrSize,
+        this.addrMask,
+        this.dataSize,
+        this.dataMask,
+        this.type,
+        this.offMax
+    ];
 };
 
 /**
@@ -881,6 +886,12 @@ X86Seg.prototype.restore = function(a)
         this.cpl      = a[6];
         this.dpl      = a[7];
         this.addrDesc = a[8];
+        this.addrSize = a[9];
+        this.addrMask = a[10];
+        this.dataSize = a[11];
+        this.dataMask = a[12];
+        this.type     = a[13];
+        this.offMax   = a[14];
     }
 };
 
@@ -957,19 +968,6 @@ X86Seg.prototype.updateMode = function(fLoad, fProt)
         this.loadIDT = this.loadIDTReal;
         this.checkRead = this.checkReadReal;
         this.checkWrite = this.checkWriteReal;
-        /*
-         * We don't want to mess with the limit, so that features like "Unreal" mode (or "Big Real" mode
-         * as it's called in the HIMEM source code) will work, at least until the next explicit segment load.
-         *
-         * See http://www.os2museum.com/wp/himem-sys-unreal-mode-and-loadall/ for more details.
-         *
-         * Ditto for other attributes such as acc, type, and ext (and the OPERAND and ADDRESS sizes, which
-         * are derived from the ext property).  Even an explicit segment load in real-mode does not alter those
-         * properties.
-         *
-         * TODO: The checkReadReal() and checkWriteReal() functions need to generate GP faults for offsets
-         * beyond the current real-mode limit.
-         */
         this.cpl = this.dpl = 0;
         this.addrDesc = X86.ADDR_INVALID;
     }
