@@ -210,14 +210,14 @@ The REPL handles a few special commands (eg, "load", "quit") and passes anything
 If no Debugger component has been created yet, or if the Debugger didn't recognize the command, then it's passed on to *eval()*,
 like a good little REPL.
 
-Use the "load" command to load a JSON machine configuration file.  A sample [machine.json](modules/pcjs/bin/machine.json)
+Use the "load" command to load a JSON machine configuration file.  A sample [ibm5150.json](modules/pcjs/bin/ibm5150.json)
 is provided in the *bin* directory, which is a "JSON-ified" version of the [machine.xml](devices/pc/machine/5150/mda/64kb/machine.xml)
 displayed on the [pcjs.org](/) home page.
 
 The command-line loader creates all the JSON-defined machine components in the same order that the browser creates
 XML-defined components.  You can also issue the "load" command directly from the command-line:
 
-    node pcjs --cmd="load machine.json"
+    node pcjs --cmd="load ibm5150.json"
 
 In fact, any number of "--cmd" arguments can be included on the command-line.  A batch file syntax will eventually be
 added, too.
