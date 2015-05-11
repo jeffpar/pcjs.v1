@@ -114,6 +114,7 @@ var X86 = {
             BASE1623:                       0x00ff,
             MASK:                           0xff00,
             TYPE: {
+                OFFSET: 0x5,
                 MASK:                       0x1f00,
                 SEG:                        0x1000,
                 NONSEG:                     0x0f00,

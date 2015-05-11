@@ -903,8 +903,8 @@ if (DEBUGGER) {
         0x03: [Debugger.INS.LSL,    Debugger.TYPE_REG    | Debugger.TYPE_WORD  | Debugger.TYPE_OUT  | Debugger.TYPE_80286, Debugger.TYPE_MEM    | Debugger.TYPE_WORD | Debugger.TYPE_IN],
         0x05: [Debugger.INS.LOADALL,Debugger.TYPE_80286],
         0x06: [Debugger.INS.CLTS,   Debugger.TYPE_80286],
-        0x20: [Debugger.INS.MOV,    Debugger.TYPE_MODRM  | Debugger.TYPE_DWORD | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_CTLREG | Debugger.TYPE_DWORD | Debugger.TYPE_IN],
-        0x22: [Debugger.INS.MOV,    Debugger.TYPE_CTLREG | Debugger.TYPE_DWORD | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_MODRM  | Debugger.TYPE_DWORD | Debugger.TYPE_IN],
+        0x20: [Debugger.INS.MOV,    Debugger.TYPE_REG    | Debugger.TYPE_DWORD | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_CTLREG | Debugger.TYPE_DWORD | Debugger.TYPE_IN],
+        0x22: [Debugger.INS.MOV,    Debugger.TYPE_CTLREG | Debugger.TYPE_DWORD | Debugger.TYPE_OUT  | Debugger.TYPE_80386, Debugger.TYPE_REG    | Debugger.TYPE_DWORD | Debugger.TYPE_IN],
         0x80: [Debugger.INS.JO,     Debugger.TYPE_IMMREL | Debugger.TYPE_VWORD | Debugger.TYPE_IN   | Debugger.TYPE_80386],
         0x81: [Debugger.INS.JNO,    Debugger.TYPE_IMMREL | Debugger.TYPE_VWORD | Debugger.TYPE_IN   | Debugger.TYPE_80386],
         0x82: [Debugger.INS.JC,     Debugger.TYPE_IMMREL | Debugger.TYPE_VWORD | Debugger.TYPE_IN   | Debugger.TYPE_80386],
@@ -1282,7 +1282,7 @@ if (DEBUGGER) {
         if (MAXDEBUG) this.chipset = cmp.getComponentByType("ChipSet");
 
         this.cchAddr = bus.getWidth() >> 2;
-        this.maskAddr = bus.busLimit;
+        this.maskAddr = bus.nBusLimit;
 
         this.aaOpDescs = Debugger.aaOpDescs;
         if (this.cpu.model >= X86.MODEL_80186) {
@@ -1790,7 +1790,7 @@ if (DEBUGGER) {
         for (var i = 0; i < this.cpu.aMemBlocks.length; i++) {
             var block = this.cpu.aBusBlocks[i];
             if (block.type === Memory.TYPE.NONE) continue;
-            this.println(str.toHex(block.id) + " %" + str.toHex(i << this.cpu.blockShift) + ": " + str.toHex(block.addr) + "  " + str.toHexWord(block.used) + "  " + str.toHexWord(block.size) + "  " + Memory.TYPE.NAMES[block.type]);
+            this.println(str.toHex(block.id) + " %" + str.toHex(i << this.cpu.nBlockShift) + ": " + str.toHex(block.addr) + "  " + str.toHexWord(block.used) + "  " + str.toHexWord(block.size) + "  " + Memory.TYPE.NAMES[block.type]);
         }
     };
 
@@ -3620,7 +3620,7 @@ if (DEBUGGER) {
      * done later, by getAddr(), which returns X86.ADDR_INVALID for invalid segments, out-of-range offsets,
      * etc.  The Debugger's low-level get/set memory functions verify all getAddr() results, but even if an
      * invalid address is passed through to the Bus memory interfaces, the address will simply be masked with
-     * Bus.busLimit; in the case of X86.ADDR_INVALID, that will generally refer to the top of the physical
+     * Bus.nBusLimit; in the case of X86.ADDR_INVALID, that will generally refer to the top of the physical
      * address space.
      *
      * @this {Debugger}
@@ -3794,7 +3794,7 @@ if (DEBUGGER) {
                      * should be relocated to the top 64Kb of the first 1Mb, so that we're immune from any changes
                      * to the A20 line.
                      */
-                    if ((dbgAddr.addr & ~0xffff) == (this.bus.busLimit & ~0xffff)) {
+                    if ((dbgAddr.addr & ~0xffff) == (this.bus.nBusLimit & ~0xffff)) {
                         dbgAddr.addr &= 0x000fffff;
                     }
                     symbol['p'] = dbgAddr.addr;
@@ -5209,7 +5209,7 @@ if (DEBUGGER) {
         if (dbgAddr.off == null) return;
 
         if (n === undefined) n = 1;
-        var dbgAddrEnd = this.newAddr(this.maskReg, dbgAddr.sel, this.bus.busLimit);
+        var dbgAddrEnd = this.newAddr(this.maskReg, dbgAddr.sel, this.bus.nBusLimit);
 
         var cb = 0x100;
         if (sAddrEnd !== undefined) {

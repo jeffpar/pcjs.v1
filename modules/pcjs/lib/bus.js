@@ -85,13 +85,13 @@ function Bus(parmsBus, cpu, dbg)
      *
      * Regarding blockTotal, we want to avoid using block overflow expressions like:
      *
-     *      iBlock < this.blockTotal? iBlock : 0
+     *      iBlock < this.nBlockTotal? iBlock : 0
      *
      * As long as we know that blockTotal is a power of two (eg, 256 or 0x100, in the case of
      * nBusWidth == 20 and blockSize == 4096), we can define blockMask as (blockTotal - 1) and
      * rewrite the previous expression as:
      *
-     *      iBlock & this.blockMask
+     *      iBlock & this.nBlockMask
      *
      * Similarly, we mask addresses with busMask to enforce "A20 wrap" on 20-bit busses.
      * For larger busses, A20 wrap can be simulated by either clearing bit 20 of busMask or by
@@ -99,16 +99,16 @@ function Bus(parmsBus, cpu, dbg)
      *
      *      Bus Property        Old hard-coded values (when nBusWidth was always 20)
      *      ------------        ----------------------------------------------------
-     *      this.busLimit       0xfffff
-     *      this.busMask        [same as busLimit]
-     *      this.blockSize      4096
-     *      this.blockLen       (this.blockSize >> 2)
-     *      this.blockShift     12
-     *      this.blockLimit     0xfff
-     *      this.blockTotal     ((this.busLimit + this.blockSize) / this.blockSize) | 0
-     *      this.blockMask      (this.blockTotal - 1) [ie, 0xff]
+     *      this.nBusLimit      0xfffff
+     *      this.nBusMask       [same as busLimit]
+     *      this.nBlockSize     4096
+     *      this.nBlockLen      (this.nBlockSize >> 2)
+     *      this.nBlockShift    12
+     *      this.nBlockLimit    0xfff
+     *      this.nBlockTotal    ((this.nBusLimit + this.nBlockSize) / this.nBlockSize) | 0
+     *      this.nBlockMask     (this.nBlockTotal - 1) [ie, 0xff]
      *
-     * Note that we choose a blockShift value (and thus a physical memory block size) based on "buswidth":
+     * Note that we choose a nBlockShift value (and thus a physical memory block size) based on "buswidth":
      *
      *      Bus Width                       Block Shift     Block Size
      *      ---------                       -----------     ----------
@@ -119,19 +119,19 @@ function Bus(parmsBus, cpu, dbg)
      * The coarser block granularities (ie, 16Kb and 32Kb) may cause problems for certain RAM and/or ROM
      * allocations that are contiguous but are allocated out of order, or that have different controller
      * requirements.  Your choices, for the moment, are either to ensure the allocations are performed in
-     * order, or to choose smaller blockShift values (at the expense of a generating a larger block array).
+     * order, or to choose smaller nBlockShift values (at the expense of a generating a larger block array).
      *
      * Note that if PAGEBLOCKS is set, then for a bus width of 32 bits, the block size is fixed at 4Kb.
      */
     this.addrTotal = Math.pow(2, this.nBusWidth);
-    this.busLimit = this.busMask = (this.addrTotal - 1) | 0;
-    this.blockShift = (PAGEBLOCKS && this.nBusWidth == 32 || this.nBusWidth <= 20)? 12 : (this.nBusWidth <= 24? 14 : 15);
-    this.blockSize = 1 << this.blockShift;
-    this.blockLen = this.blockSize >> 2;
-    this.blockLimit = this.blockSize - 1;
-    this.blockTotal = (this.addrTotal / this.blockSize) | 0;
-    this.blockMask = this.blockTotal - 1;
-    this.assert(this.blockMask <= Bus.BlockInfo.num.mask);
+    this.nBusLimit = this.nBusMask = (this.addrTotal - 1) | 0;
+    this.nBlockShift = (PAGEBLOCKS && this.nBusWidth == 32 || this.nBusWidth <= 20)? 12 : (this.nBusWidth <= 24? 14 : 15);
+    this.nBlockSize = 1 << this.nBlockShift;
+    this.nBlockLen = this.nBlockSize >> 2;
+    this.nBlockLimit = this.nBlockSize - 1;
+    this.nBlockTotal = (this.addrTotal / this.nBlockSize) | 0;
+    this.nBlockMask = this.nBlockTotal - 1;
+    this.assert(this.nBlockMask <= Bus.BlockInfo.num.mask);
 
     /*
      * Lists of I/O notification functions: aPortInputNotify and aPortOutputNotify are arrays, indexed by
@@ -288,12 +288,12 @@ var BusInfo;
 Bus.prototype.initMemory = function()
 {
     var block = new Memory();
-    this.aMemBlocks = new Array(this.blockTotal);
-    for (var iBlock = 0; iBlock < this.blockTotal; iBlock++) {
+    this.aMemBlocks = new Array(this.nBlockTotal);
+    for (var iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
         this.aMemBlocks[iBlock] = block;
     }
-    this.cpu.initMemory(this.aMemBlocks, this.blockShift);
-    this.cpu.setAddressMask(this.busMask);
+    this.cpu.initMemory(this.aMemBlocks, this.nBlockShift);
+    this.cpu.setAddressMask(this.nBusMask);
 };
 
 /**
@@ -363,11 +363,11 @@ Bus.prototype.powerUp = function(data, fRepower)
  */
 Bus.prototype.addMemory = function(addr, size, type, controller)
 {
-    var iBlock = addr >>> this.blockShift;
+    var iBlock = addr >>> this.nBlockShift;
     while (size > 0 && iBlock < this.aMemBlocks.length) {
         var block = this.aMemBlocks[iBlock];
-        var addrBlock = iBlock * this.blockSize;
-        var sizeBlock = size > this.blockSize? this.blockSize : size;
+        var addrBlock = iBlock * this.nBlockSize;
+        var sizeBlock = size > this.nBlockSize? this.nBlockSize : size;
 
         if (block && block.size) {
             if (block.type == type && block.controller == controller) {
@@ -388,18 +388,18 @@ Bus.prototype.addMemory = function(addr, size, type, controller)
                     if (sizeAvail > size) sizeAvail = size;
                     block.used = addr - block.addr + sizeAvail;
                     size -= sizeAvail;
-                    addr = addrBlock + this.blockSize;
+                    addr = addrBlock + this.nBlockSize;
                     continue;
                 }
             }
             return this.reportError(1, addr, size);
         }
-        block = this.aMemBlocks[iBlock++] = new Memory(addr, sizeBlock, this.blockSize, type, controller);
+        block = this.aMemBlocks[iBlock++] = new Memory(addr, sizeBlock, this.nBlockSize, type, controller);
         if (DEBUGGER && this.dbg) {
-            block.setDebugger(this.dbg, addr, this.blockSize);
+            block.setDebugger(this.dbg, addr, this.nBlockSize);
         }
         size -= sizeBlock;
-        addr = addrBlock + this.blockSize;
+        addr = addrBlock + this.nBlockSize;
     }
     if (size > 0) {
         return this.reportError(2, addr, size);
@@ -418,13 +418,13 @@ Bus.prototype.addMemory = function(addr, size, type, controller)
 Bus.prototype.cleanMemory = function(addr, size)
 {
     var fClean = true;
-    var iBlock = addr >>> this.blockShift;
+    var iBlock = addr >>> this.nBlockShift;
     while (size > 0 && iBlock < this.aMemBlocks.length) {
         if (this.aMemBlocks[iBlock].fDirty) {
             this.aMemBlocks[iBlock].fDirty = fClean = false;
             this.aMemBlocks[iBlock].fDirtyEver = true;
         }
-        size -= this.blockSize;
+        size -= this.nBlockSize;
         iBlock++;
     }
     return fClean;
@@ -447,8 +447,8 @@ Bus.prototype.scanMemory = function(info, addr, size)
     if (size == null) size = (this.addrTotal - addr) | 0;
     if (info == null) info = {cbTotal: 0, cBlocks: 0, aBlocks: []};
 
-    var iBlock = addr >>> this.blockShift;
-    var iBlockMax = ((addr + size - 1) >>> this.blockShift);
+    var iBlock = addr >>> this.nBlockShift;
+    var iBlockMax = ((addr + size - 1) >>> this.nBlockShift);
 
     info.cbTotal = 0;
     info.cBlocks = 0;
@@ -473,7 +473,7 @@ Bus.prototype.scanMemory = function(info, addr, size)
  */
 Bus.prototype.getA20 = function()
 {
-    return !this.aBlocks2Mb && this.busLimit == this.busMask;
+    return !this.aBlocks2Mb && this.nBusLimit == this.nBusMask;
 };
 
 /**
@@ -510,9 +510,9 @@ Bus.prototype.setA20 = function(fEnable)
         }
     }
     else if (this.nBusWidth > 20) {
-        var addrMask = (this.busMask & ~0x100000) | (fEnable? 0x100000 : 0);
-        if (addrMask != this.busMask) {
-            this.busMask = addrMask;
+        var addrMask = (this.nBusMask & ~0x100000) | (fEnable? 0x100000 : 0);
+        if (addrMask != this.nBusMask) {
+            this.nBusMask = addrMask;
             if (this.cpu) this.cpu.setAddressMask(addrMask);
         }
     }
@@ -544,15 +544,15 @@ Bus.prototype.getWidth = function()
  */
 Bus.prototype.setMemoryAccess = function(addr, size, afn)
 {
-    if (!(addr & this.blockLimit) && size && !(size & this.blockLimit)) {
-        var iBlock = addr >>> this.blockShift;
+    if (!(addr & this.nBlockLimit) && size && !(size & this.nBlockLimit)) {
+        var iBlock = addr >>> this.nBlockShift;
         while (size > 0) {
             var block = this.aMemBlocks[iBlock];
             if (!block.controller) {
                 return this.reportError(5, addr, size);
             }
             block.setAccess(afn);
-            size -= this.blockSize;
+            size -= this.nBlockSize;
             iBlock++;
         }
         return true;
@@ -574,15 +574,15 @@ Bus.prototype.setMemoryAccess = function(addr, size, afn)
  */
 Bus.prototype.removeMemory = function(addr, size)
 {
-    if (!(addr & this.blockLimit) && size && !(size & this.blockLimit)) {
-        var iBlock = addr >>> this.blockShift;
+    if (!(addr & this.nBlockLimit) && size && !(size & this.nBlockLimit)) {
+        var iBlock = addr >>> this.nBlockShift;
         while (size > 0) {
-            addr = iBlock * this.blockSize;
+            addr = iBlock * this.nBlockSize;
             var block = this.aMemBlocks[iBlock++] = new Memory(addr);
             if (DEBUGGER && this.dbg) {
-                block.setDebugger(this.dbg, addr, this.blockSize);
+                block.setDebugger(this.dbg, addr, this.nBlockSize);
             }
-            size -= this.blockSize;
+            size -= this.nBlockSize;
         }
         return true;
     }
@@ -600,10 +600,10 @@ Bus.prototype.removeMemory = function(addr, size)
 Bus.prototype.getMemoryBlocks = function(addr, size)
 {
     var aBlocks = [];
-    var iBlock = addr >>> this.blockShift;
+    var iBlock = addr >>> this.nBlockShift;
     while (size > 0 && iBlock < this.aMemBlocks.length) {
         aBlocks.push(this.aMemBlocks[iBlock++]);
-        size -= this.blockSize;
+        size -= this.nBlockSize;
     }
     return aBlocks;
 };
@@ -626,7 +626,7 @@ Bus.prototype.getMemoryBlocks = function(addr, size)
 Bus.prototype.setMemoryBlocks = function(addr, size, aBlocks, type)
 {
     var i = 0;
-    var iBlock = addr >>> this.blockShift;
+    var iBlock = addr >>> this.nBlockShift;
     while (size > 0 && iBlock < this.aMemBlocks.length) {
         var block = aBlocks[i++];
         this.assert(block);
@@ -634,13 +634,13 @@ Bus.prototype.setMemoryBlocks = function(addr, size, aBlocks, type)
         if (type !== undefined) {
             var blockNew = new Memory(addr);
             if (DEBUGGER && this.dbg) {
-                blockNew.setDebugger(this.dbg, addr, this.blockSize);
+                blockNew.setDebugger(this.dbg, addr, this.nBlockSize);
             }
             blockNew.clone(block, type);
             block = blockNew;
         }
         this.aMemBlocks[iBlock++] = block;
-        size -= this.blockSize;
+        size -= this.nBlockSize;
     }
 };
 
@@ -655,7 +655,7 @@ Bus.prototype.setMemoryBlocks = function(addr, size, aBlocks, type)
  */
 Bus.prototype.getByte = function(addr)
 {
-    return this.aMemBlocks[(addr & this.busMask) >>> this.blockShift].readByte(addr & this.blockLimit, addr);
+    return this.aMemBlocks[(addr & this.nBusMask) >>> this.nBlockShift].readByte(addr & this.nBlockLimit, addr);
 };
 
 /**
@@ -669,7 +669,7 @@ Bus.prototype.getByte = function(addr)
  */
 Bus.prototype.getByteDirect = function(addr)
 {
-    return this.aMemBlocks[(addr & this.busMask) >>> this.blockShift].readByteDirect(addr & this.blockLimit, addr);
+    return this.aMemBlocks[(addr & this.nBusMask) >>> this.nBlockShift].readByteDirect(addr & this.nBlockLimit, addr);
 };
 
 /**
@@ -683,12 +683,12 @@ Bus.prototype.getByteDirect = function(addr)
  */
 Bus.prototype.getShort = function(addr)
 {
-    var off = addr & this.blockLimit;
-    var iBlock = (addr & this.busMask) >>> this.blockShift;
-    if (off != this.blockLimit) {
+    var off = addr & this.nBlockLimit;
+    var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+    if (off != this.nBlockLimit) {
         return this.aMemBlocks[iBlock].readShort(off, addr);
     }
-    return this.aMemBlocks[iBlock++].readByte(off, addr) | (this.aMemBlocks[iBlock & this.blockMask].readByte(0, addr + 1) << 8);
+    return this.aMemBlocks[iBlock++].readByte(off, addr) | (this.aMemBlocks[iBlock & this.nBlockMask].readByte(0, addr + 1) << 8);
 };
 
 /**
@@ -702,12 +702,12 @@ Bus.prototype.getShort = function(addr)
  */
 Bus.prototype.getShortDirect = function(addr)
 {
-    var off = addr & this.blockLimit;
-    var iBlock = (addr & this.busMask) >>> this.blockShift;
-    if (off != this.blockLimit) {
+    var off = addr & this.nBlockLimit;
+    var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+    if (off != this.nBlockLimit) {
         return this.aMemBlocks[iBlock].readShortDirect(off, addr);
     }
-    return this.aMemBlocks[iBlock++].readByteDirect(off, addr) | (this.aMemBlocks[iBlock & this.blockMask].readByteDirect(0, addr + 1) << 8);
+    return this.aMemBlocks[iBlock++].readByteDirect(off, addr) | (this.aMemBlocks[iBlock & this.nBlockMask].readByteDirect(0, addr + 1) << 8);
 };
 
 /**
@@ -721,13 +721,13 @@ Bus.prototype.getShortDirect = function(addr)
  */
 Bus.prototype.getLong = function(addr)
 {
-    var off = addr & this.blockLimit;
-    var iBlock = (addr & this.busMask) >>> this.blockShift;
-    if (off < this.blockLimit - 2) {
+    var off = addr & this.nBlockLimit;
+    var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+    if (off < this.nBlockLimit - 2) {
         return this.aMemBlocks[iBlock].readLong(off, addr);
     }
     var nShift = (off & 0x3) << 3;
-    return (this.aMemBlocks[iBlock].readLong(off & ~0x3, addr) >>> nShift) | (this.aMemBlocks[(iBlock + 1) & this.blockMask].readLong(0, addr + 3) << (32 - nShift));
+    return (this.aMemBlocks[iBlock].readLong(off & ~0x3, addr) >>> nShift) | (this.aMemBlocks[(iBlock + 1) & this.nBlockMask].readLong(0, addr + 3) << (32 - nShift));
 };
 
 /**
@@ -741,13 +741,13 @@ Bus.prototype.getLong = function(addr)
  */
 Bus.prototype.getLongDirect = function(addr)
 {
-    var off = addr & this.blockLimit;
-    var iBlock = (addr & this.busMask) >>> this.blockShift;
-    if (off < this.blockLimit - 2) {
+    var off = addr & this.nBlockLimit;
+    var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+    if (off < this.nBlockLimit - 2) {
         return this.aMemBlocks[iBlock].readLongDirect(off, addr);
     }
     var nShift = (off & 0x3) << 3;
-    return (this.aMemBlocks[iBlock].readLongDirect(off & ~0x3, addr) >>> nShift) | (this.aMemBlocks[(iBlock + 1) & this.blockMask].readLongDirect(0, addr + 3) << (32 - nShift));
+    return (this.aMemBlocks[iBlock].readLongDirect(off & ~0x3, addr) >>> nShift) | (this.aMemBlocks[(iBlock + 1) & this.nBlockMask].readLongDirect(0, addr + 3) << (32 - nShift));
 };
 
 /**
@@ -761,7 +761,7 @@ Bus.prototype.getLongDirect = function(addr)
  */
 Bus.prototype.setByte = function(addr, b)
 {
-    this.aMemBlocks[(addr & this.busMask) >>> this.blockShift].writeByte(addr & this.blockLimit, b & 0xff, addr);
+    this.aMemBlocks[(addr & this.nBusMask) >>> this.nBlockShift].writeByte(addr & this.nBlockLimit, b & 0xff, addr);
 };
 
 /**
@@ -776,7 +776,7 @@ Bus.prototype.setByte = function(addr, b)
  */
 Bus.prototype.setByteDirect = function(addr, b)
 {
-    this.aMemBlocks[(addr & this.busMask) >>> this.blockShift].writeByteDirect(addr & this.blockLimit, b & 0xff, addr);
+    this.aMemBlocks[(addr & this.nBusMask) >>> this.nBlockShift].writeByteDirect(addr & this.nBlockLimit, b & 0xff, addr);
 };
 
 /**
@@ -790,14 +790,14 @@ Bus.prototype.setByteDirect = function(addr, b)
  */
 Bus.prototype.setShort = function(addr, w)
 {
-    var off = addr & this.blockLimit;
-    var iBlock = (addr & this.busMask) >>> this.blockShift;
-    if (off != this.blockLimit) {
+    var off = addr & this.nBlockLimit;
+    var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+    if (off != this.nBlockLimit) {
         this.aMemBlocks[iBlock].writeShort(off, w & 0xffff, addr);
         return;
     }
     this.aMemBlocks[iBlock++].writeByte(off, w & 0xff, addr);
-    this.aMemBlocks[iBlock & this.blockMask].writeByte(0, (w >> 8) & 0xff, addr + 1);
+    this.aMemBlocks[iBlock & this.nBlockMask].writeByte(0, (w >> 8) & 0xff, addr + 1);
 };
 
 /**
@@ -812,14 +812,14 @@ Bus.prototype.setShort = function(addr, w)
  */
 Bus.prototype.setShortDirect = function(addr, w)
 {
-    var off = addr & this.blockLimit;
-    var iBlock = (addr & this.busMask) >>> this.blockShift;
-    if (off != this.blockLimit) {
+    var off = addr & this.nBlockLimit;
+    var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+    if (off != this.nBlockLimit) {
         this.aMemBlocks[iBlock].writeShortDirect(off, w & 0xffff, addr);
         return;
     }
     this.aMemBlocks[iBlock++].writeByteDirect(off, w & 0xff, addr);
-    this.aMemBlocks[iBlock & this.blockMask].writeByteDirect(0, (w >> 8) & 0xff, addr + 1);
+    this.aMemBlocks[iBlock & this.nBlockMask].writeByteDirect(0, (w >> 8) & 0xff, addr + 1);
 };
 
 /**
@@ -833,9 +833,9 @@ Bus.prototype.setShortDirect = function(addr, w)
  */
 Bus.prototype.setLong = function(addr, l)
 {
-    var off = addr & this.blockLimit;
-    var iBlock = (addr & this.busMask) >>> this.blockShift;
-    if (off < this.blockLimit - 2) {
+    var off = addr & this.nBlockLimit;
+    var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+    if (off < this.nBlockLimit - 2) {
         this.aMemBlocks[iBlock].writeLong(off, l);
         return;
     }
@@ -843,7 +843,7 @@ Bus.prototype.setLong = function(addr, l)
     off &= ~0x3;
     lPrev = this.aMemBlocks[iBlock].readLong(off, addr);
     this.aMemBlocks[iBlock].writeLong(off, (lPrev & ~((0xffffffff|0) << nShift)) | (l << nShift), addr);
-    iBlock = (iBlock + 1) & this.blockMask;
+    iBlock = (iBlock + 1) & this.nBlockMask;
     addr += 3;
     lPrev = this.aMemBlocks[iBlock].readLong(0, addr);
     this.aMemBlocks[iBlock].writeLong(0, (lPrev & ((0xffffffff|0) << nShift)) | (l >>> (32 - nShift)), addr);
@@ -861,9 +861,9 @@ Bus.prototype.setLong = function(addr, l)
  */
 Bus.prototype.setLongDirect = function(addr, l)
 {
-    var off = addr & this.blockLimit;
-    var iBlock = (addr & this.busMask) >>> this.blockShift;
-    if (off < this.blockLimit - 2) {
+    var off = addr & this.nBlockLimit;
+    var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+    if (off < this.nBlockLimit - 2) {
         this.aMemBlocks[iBlock].writeLongDirect(off, l, addr);
         return;
     }
@@ -871,7 +871,7 @@ Bus.prototype.setLongDirect = function(addr, l)
     off &= ~0x3;
     lPrev = this.aMemBlocks[iBlock].readLongDirect(off, addr);
     this.aMemBlocks[iBlock].writeLongDirect(off, (lPrev & ~((0xffffffff|0) << nShift)) | (l << nShift), addr);
-    iBlock = (iBlock + 1) & this.blockMask;
+    iBlock = (iBlock + 1) & this.nBlockMask;
     addr += 3;
     lPrev = this.aMemBlocks[iBlock].readLongDirect(0, addr);
     this.aMemBlocks[iBlock].writeLongDirect(0, (lPrev & ((0xffffffff|0) << nShift)) | (l >>> (32 - nShift)), addr);
@@ -983,7 +983,7 @@ Bus.prototype.writeBackTrackObject = function(addr, bto, off)
 Bus.prototype.readBackTrack = function(addr)
 {
     if (BACKTRACK) {
-        return this.aMemBlocks[(addr & this.busMask) >>> this.blockShift].readBackTrack(addr & this.blockLimit);
+        return this.aMemBlocks[(addr & this.nBusMask) >>> this.nBlockShift].readBackTrack(addr & this.nBlockLimit);
     }
     return 0;
 };
@@ -999,8 +999,8 @@ Bus.prototype.writeBackTrack = function(addr, bti)
 {
     if (BACKTRACK) {
         var slot = bti >>> Bus.BACKTRACK.SLOT_SHIFT;
-        var iBlock = (addr & this.busMask) >>> this.blockShift;
-        var btiPrev = this.aMemBlocks[iBlock].writeBackTrack(addr & this.blockLimit, bti);
+        var iBlock = (addr & this.nBusMask) >>> this.nBlockShift;
+        var btiPrev = this.aMemBlocks[iBlock].writeBackTrack(addr & this.nBlockLimit, bti);
         var slotPrev = btiPrev >>> Bus.BACKTRACK.SLOT_SHIFT;
         if (slot != slotPrev) {
             this.aMemBlocks[iBlock].modBackTrack(true);
@@ -1101,7 +1101,7 @@ Bus.prototype.updateBackTrackCode = function(addr, bti)
         } else {
             return;
         }
-        this.aMemBlocks[(addr & this.busMask) >>> this.blockShift].writeBackTrack(addr & this.blockLimit, bti);
+        this.aMemBlocks[(addr & this.nBusMask) >>> this.nBlockShift].writeBackTrack(addr & this.nBlockLimit, bti);
     }
 };
 
@@ -1204,7 +1204,7 @@ Bus.prototype.saveMemory = function()
 {
     var i = 0;
     var a = [];
-    for (var iBlock = 0; iBlock < this.blockTotal; iBlock++) {
+    for (var iBlock = 0; iBlock < this.nBlockTotal; iBlock++) {
         var block = this.aMemBlocks[iBlock];
         /*
          * We have to check both fDirty and fDirtyEver, because we may have called cleanMemory() on some of
@@ -1243,8 +1243,8 @@ Bus.prototype.restoreMemory = function(a)
     for (i = 0; i < a.length - 1; i += 2) {
         var iBlock = a[i];
         var adw = a[i+1];
-        if (adw && adw.length < this.blockLen) {
-            adw = State.decompress(adw, this.blockLen);
+        if (adw && adw.length < this.nBlockLen) {
+            adw = State.decompress(adw, this.nBlockLen);
         }
         var block = this.aMemBlocks[iBlock];
         if (!block || !block.restore(adw)) {
@@ -1271,8 +1271,8 @@ Bus.prototype.restoreMemory = function(a)
 Bus.prototype.addMemBreak = function(addr, fWrite)
 {
     if (DEBUGGER) {
-        var iBlock = addr >>> this.blockShift;
-        this.aMemBlocks[iBlock].addBreakpoint(addr & this.blockLimit, fWrite);
+        var iBlock = addr >>> this.nBlockShift;
+        this.aMemBlocks[iBlock].addBreakpoint(addr & this.nBlockLimit, fWrite);
     }
 };
 
@@ -1286,8 +1286,8 @@ Bus.prototype.addMemBreak = function(addr, fWrite)
 Bus.prototype.removeMemBreak = function(addr, fWrite)
 {
     if (DEBUGGER) {
-        var iBlock = addr >>> this.blockShift;
-        this.aMemBlocks[iBlock].removeBreakpoint(addr & this.blockLimit, fWrite);
+        var iBlock = addr >>> this.nBlockShift;
+        this.aMemBlocks[iBlock].removeBreakpoint(addr & this.nBlockLimit, fWrite);
     }
 };
 

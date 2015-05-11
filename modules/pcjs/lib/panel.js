@@ -487,8 +487,8 @@ Panel.prototype.findAddress = function(x, y)
                 y -= rect.y;
                 var region = this.busInfo.aRegions[i];
                 var iBlock = usr.getBitField(Bus.BlockInfo.num, this.busInfo.aBlocks[region.iBlock]);
-                var addr = iBlock * this.bus.blockSize;
-                var addrLimit = (iBlock + region.cBlocks) * this.bus.blockSize - 1;
+                var addr = iBlock * this.bus.nBlockSize;
+                var addrLimit = (iBlock + region.cBlocks) * this.bus.nBlockSize - 1;
 
                 /*
                  * If you want memory to be arranged "vertically" instead of "horizontally", do this:
@@ -528,7 +528,7 @@ Panel.prototype.updateAnimation = function()
             /*
              * Calculate the pixel-to-memory-address ratio
              */
-            this.ratioMemoryToPixels = (this.busInfo.cBlocks * this.bus.blockSize) / (Panel.LIVEMEM.CX * Panel.LIVEMEM.CY);
+            this.ratioMemoryToPixels = (this.busInfo.cBlocks * this.bus.nBlockSize) / (Panel.LIVEMEM.CX * Panel.LIVEMEM.CY);
             /*
              * Update the BusInfo object with region information (cRegions and aRegions); return true if region
              * information has changed since the last call.
@@ -568,7 +568,7 @@ Panel.prototype.updateAnimation = function()
                     rect = this.busInfo.aRects[i];
                     rect.drawWith(this.contextLiveMem, Memory.TYPE.COLORS[region.type]);
                     this.centerPen(rect);
-                    this.centerText(Memory.TYPE.NAMES[region.type] + " (" + (((region.cBlocks * this.bus.blockSize) / 1024) | 0) + "Kb)");
+                    this.centerText(Memory.TYPE.NAMES[region.type] + " (" + (((region.cBlocks * this.bus.nBlockSize) / 1024) | 0) + "Kb)");
                 }
             }
             if (DEBUG) this.log("end scanMemory(): total bytes: " + this.busInfo.cbTotal + ", total blocks: " + this.busInfo.cBlocks + ", total regions: " + this.busInfo.cRegions);
@@ -628,7 +628,7 @@ Panel.prototype.findRegions = function()
             }
             typeRegion = typeBlock;
             iBlockRegion = iBlock;
-            addrRegion = nBlockCurr << this.bus.blockShift;
+            addrRegion = nBlockCurr << this.bus.nBlockShift;
         }
         nBlockPrev = nBlockCurr;
     }

@@ -59,8 +59,8 @@ var littleEndian = (TYPEDARRAYS? (function() {
  * Memory(addr, used, size, type, controller)
  *
  * The Bus component allocates Memory objects so that each has a memory buffer with a
- * block-granular starting address and an address range equal to bus.blockSize; however,
- * the size of any given Memory object's underlying buffer can be either zero or bus.blockSize;
+ * block-granular starting address and an address range equal to bus.nBlockSize; however,
+ * the size of any given Memory object's underlying buffer can be either zero or bus.nBlockSize;
  * memory read/write functions for empty (buffer-less) blocks are mapped to readNone/writeNone.
  *
  * The Bus allocates empty blocks for the entire address space during initialization, so that
@@ -238,6 +238,19 @@ Memory.TYPE = {
  * Last used block ID (used for debugging only)
  */
 Memory.idBlock = 0;
+
+/**
+ * adjustEndian(dw)
+ *
+ * @param {number} dw
+ * @return {number}
+ */
+Memory.adjustEndian = function(dw) {
+    if (TYPEDARRAYS && !littleEndian) {
+        dw = (dw << 24) | ((dw << 8) & 0x00ff0000) | ((dw >> 8) & 0x0000ff00) | (dw >>> 24);
+    }
+    return dw;
+};
 
 Memory.prototype = {
     constructor: Memory,
@@ -468,19 +481,6 @@ Memory.prototype = {
         }
     },
     /**
-     * adjustEndian(dw)
-     *
-     * @this {Memory}
-     * @param {number} dw
-     * @return {number}
-     */
-    adjustEndian: function(dw) {
-        if (TYPEDARRAYS && !littleEndian) {
-            dw = (dw << 24) | ((dw << 8) & 0x00ff0000) | ((dw >> 8) & 0x0000ff00) | (dw >>> 24);
-        }
-        return dw;
-    },
-    /**
      * getPageBlock(addr, fWrite)
      *
      * @this {Memory}
@@ -513,8 +513,8 @@ Memory.prototype = {
         this.iPDE = offPDE >> 2;    // convert offPDE into iPDE (an adw index)
         this.blockPTE = blockPTE;
         this.iPTE = offPTE >> 2;    // convert offPTE into iPTE (an adw index)
-        this.bitPTEDirty = this.adjustEndian(X86.PTE.ACCESSED | X86.PTE.DIRTY);
-        this.bitPTEAccessed = this.adjustEndian(X86.PTE.ACCESSED);
+        this.bitPTEDirty = Memory.adjustEndian(X86.PTE.ACCESSED | X86.PTE.DIRTY);
+        this.bitPTEAccessed = Memory.adjustEndian(X86.PTE.ACCESSED);
     },
     /**
      * addBreakpoint(off, fWrite)
