@@ -188,7 +188,7 @@ X86Seg.prototype.loadProt = function loadProt(sel, fSuppress)
      * segment lookup if the descriptor table being referenced is zero.
      *
      * TODO: This could probably be simplified to a test of addrDT; however, there's nothing in the design
-     * of the CPU that prevents the GDT or LDT being located at physical address zero.
+     * of the CPU that prevents the GDT or LDT being located at linear address zero.
      */
     if (!fSuppress || addrDT) {
         var addrDesc = (addrDT + (sel & X86.SEL.MASK))|0;
@@ -269,7 +269,7 @@ X86Seg.prototype.loadIDTProt = function loadIDTProt(nIDT)
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of bytes to check (1, 2 or 4)
  * @param {boolean} [fSuppress] is true to suppress any errors
- * @return {number} corresponding physical address if valid, or ADDR_INVALID if error (TODO: No error conditions yet)
+ * @return {number} corresponding linear address if valid, or ADDR_INVALID if error (TODO: No error conditions yet)
  */
 X86Seg.prototype.checkReadReal = function checkReadReal(off, cb, fSuppress)
 {
@@ -286,7 +286,7 @@ X86Seg.prototype.checkReadReal = function checkReadReal(off, cb, fSuppress)
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of bytes to check (1, 2 or 4)
  * @param {boolean} [fSuppress] is true to suppress any errors
- * @return {number} corresponding physical address if valid, or ADDR_INVALID if error (TODO: No error conditions yet)
+ * @return {number} corresponding linear address if valid, or ADDR_INVALID if error (TODO: No error conditions yet)
  */
 X86Seg.prototype.checkWriteReal = function checkWriteReal(off, cb, fSuppress)
 {
@@ -300,7 +300,7 @@ X86Seg.prototype.checkWriteReal = function checkWriteReal(off, cb, fSuppress)
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of bytes to check (1, 2 or 4)
  * @param {boolean} [fSuppress] is true to suppress any errors
- * @return {number} corresponding physical address if valid, or ADDR_INVALID if not
+ * @return {number} corresponding linear address if valid, or ADDR_INVALID if not
  */
 X86Seg.prototype.checkReadProt = function checkReadProt(off, cb, fSuppress)
 {
@@ -322,7 +322,7 @@ X86Seg.prototype.checkReadProt = function checkReadProt(off, cb, fSuppress)
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of bytes to check (1, 2 or 4)
  * @param {boolean} [fSuppress] is true to suppress any errors
- * @return {number} corresponding physical address if valid, ADDR_INVALID if not
+ * @return {number} corresponding linear address if valid, ADDR_INVALID if not
  */
 X86Seg.prototype.checkReadProtDown = function checkReadProtDown(off, cb, fSuppress)
 {
@@ -344,7 +344,7 @@ X86Seg.prototype.checkReadProtDown = function checkReadProtDown(off, cb, fSuppre
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of bytes to check (1, 2 or 4)
  * @param {boolean} [fSuppress] is true to suppress any errors
- * @return {number} corresponding physical address if valid, ADDR_INVALID if not
+ * @return {number} corresponding linear address if valid, ADDR_INVALID if not
  */
 X86Seg.prototype.checkReadProtDisallowed = function checkReadProtDisallowed(off, cb, fSuppress)
 {
@@ -361,7 +361,7 @@ X86Seg.prototype.checkReadProtDisallowed = function checkReadProtDisallowed(off,
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of bytes to check (1, 2 or 4)
  * @param {boolean} [fSuppress] is true to suppress any errors
- * @return {number} corresponding physical address if valid, ADDR_INVALID if not
+ * @return {number} corresponding linear address if valid, ADDR_INVALID if not
  */
 X86Seg.prototype.checkWriteProt = function checkWriteProt(off, cb, fSuppress)
 {
@@ -383,7 +383,7 @@ X86Seg.prototype.checkWriteProt = function checkWriteProt(off, cb, fSuppress)
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of bytes to check (1, 2 or 4)
  * @param {boolean} [fSuppress] is true to suppress any errors
- * @return {number} corresponding physical address if valid, ADDR_INVALID if not
+ * @return {number} corresponding linear address if valid, ADDR_INVALID if not
  */
 X86Seg.prototype.checkWriteProtDown = function checkWriteProtDown(off, cb, fSuppress)
 {
@@ -405,7 +405,7 @@ X86Seg.prototype.checkWriteProtDown = function checkWriteProtDown(off, cb, fSupp
  * @param {number} off is a segment-relative offset
  * @param {number} cb is number of bytes to check (1, 2 or 4)
  * @param {boolean} [fSuppress] is true to suppress any errors
- * @return {number} corresponding physical address if valid, ADDR_INVALID if not
+ * @return {number} corresponding linear address if valid, ADDR_INVALID if not
  */
 X86Seg.prototype.checkWriteProtDisallowed = function checkWriteProtDisallowed(off, cb, fSuppress)
 {
@@ -629,7 +629,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
 
             if (selMasked && !(acc & X86.DESC.ACC.PRESENT)) {
                 if (!fSuppress) X86.fnFault.call(cpu, X86.EXCEPTION.NP_FAULT, sel);
-                base = X86.ADDR_INVALID;
+                base = addrDesc = X86.ADDR_INVALID;
                 break;
             }
 
@@ -646,7 +646,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                      * case either DPL == CPL *or* the new segment is conforming and DPL <= CPL.
                      */
                     if (fCall !== false && !(dpl == this.cpl || (acc & X86.DESC.ACC.TYPE.CONFORMING) && dpl <= this.cpl)) {
-                        base = X86.ADDR_INVALID;
+                        base = addrDesc = X86.ADDR_INVALID;
                         break;
                     }
                     regSP = cpu.popWord();
@@ -676,7 +676,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
             }
             else if (type == X86.DESC.ACC.TYPE.GATE_TASK) {
                 if (!this.switchTSS(base & 0xffff, true)) {
-                    base = X86.ADDR_INVALID;
+                    base = addrDesc = X86.ADDR_INVALID;
                     break;
                 }
                 return this.base;
@@ -696,14 +696,14 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                     cplPrev = this.cpl;
                     if (this.load(selCode, true) === X86.ADDR_INVALID) {
                         cpu.assert(false);
-                        base = X86.ADDR_INVALID;
+                        base = addrDesc = X86.ADDR_INVALID;
                         break;
                     }
                     cpu.regEIP = limit;
                     if (this.cpl < cplPrev) {
                         if (fCall !== true) {
                             cpu.assert(false);
-                            base = X86.ADDR_INVALID;
+                            base = addrDesc = X86.ADDR_INVALID;
                             break;
                         }
                         regSP = cpu.getSP();
@@ -729,13 +729,13 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                 }
                 cpu.assert(false);
                 if (!fSuppress) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, nFaultError, true);
-                base = X86.ADDR_INVALID;
+                base = addrDesc = X86.ADDR_INVALID;
                 break;
             }
             else if (fGate !== false) {
                 cpu.assert(false);
                 if (!fSuppress) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, true);
-                base = X86.ADDR_INVALID;
+                base = addrDesc = X86.ADDR_INVALID;
                 break;
             }
         }
@@ -743,7 +743,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
             if (selMasked) {
                 if (!(acc & X86.DESC.ACC.PRESENT)) {
                     if (!fSuppress) X86.fnFault.call(cpu, X86.EXCEPTION.NP_FAULT, sel);
-                    base = X86.ADDR_INVALID;
+                    base = addrDesc = X86.ADDR_INVALID;
                     break;
                 }
                 if (type < X86.DESC.ACC.TYPE.SEG || (type & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.READABLE)) == X86.DESC.ACC.TYPE.CODE) {
@@ -769,7 +769,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                      * Anyway, because of this, if acc is zero, we won't set fHalt on this GP_FAULT.
                      */
                     if (!fSuppress) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, !!acc);
-                    base = X86.ADDR_INVALID;
+                    base = addrDesc = X86.ADDR_INVALID;
                     break;
                 }
             }
@@ -777,19 +777,19 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
         else if (this.id == X86Seg.ID.STACK) {
             if (!(acc & X86.DESC.ACC.PRESENT)) {
                 if (!fSuppress) X86.fnFault.call(cpu, X86.EXCEPTION.SS_FAULT, sel);
-                base = X86.ADDR_INVALID;
+                base = addrDesc = X86.ADDR_INVALID;
                 break;
             }
             if (!selMasked || type < X86.DESC.ACC.TYPE.SEG || (type & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.WRITABLE)) != X86.DESC.ACC.TYPE.WRITABLE) {
                 if (!fSuppress) X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, sel, true);
-                base = X86.ADDR_INVALID;
+                base = addrDesc = X86.ADDR_INVALID;
                 break;
             }
         }
         else if (this.id == X86Seg.ID.TSS) {
             if (!selMasked || type != X86.DESC.ACC.TYPE.TSS && type != X86.DESC.ACC.TYPE.TSS_BUSY) {
                 if (!fSuppress) X86.fnFault.call(cpu, X86.EXCEPTION.TS_FAULT, sel, true);
-                base = X86.ADDR_INVALID;
+                base = addrDesc = X86.ADDR_INVALID;
                 break;
             }
         }
@@ -798,7 +798,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
              * For LSL, we must support any descriptor marked X86.DESC.ACC.TYPE.SEG, as well as TSS and LDT descriptors.
              */
             if (!(acc & X86.DESC.ACC.TYPE.SEG) && type > X86.DESC.ACC.TYPE.TSS_BUSY) {
-                base = X86.ADDR_INVALID;
+                base = addrDesc = X86.ADDR_INVALID;
                 break;
             }
         }
@@ -929,63 +929,64 @@ X86Seg.prototype.updateMode = function(fLoad, fProt)
         this.loadIDT = this.loadIDTProt;
         this.checkRead = this.checkReadProt;
         this.checkWrite = this.checkWriteProt;
+
+        this.iACC = this.bitACC = 0;
         if (this.acc & X86.DESC.ACC.TYPE.SEG) {
             /*
-             * If the READABLE bit of CODE_READABLE is not set, then disallow reads
+             * If the READABLE bit of CODE_READABLE is not set, then disallow reads.
              */
             if ((this.acc & X86.DESC.ACC.TYPE.CODE_READABLE) == X86.DESC.ACC.TYPE.CODE_EXECONLY) {
                 this.checkWrite = this.checkReadProtDisallowed;
             }
             /*
-             * If the CODE bit is set, or the the WRITABLE bit is not set, then disallow writes
+             * If the CODE bit is set, or the the WRITABLE bit is not set, then disallow writes.
              */
             if ((this.acc & X86.DESC.ACC.TYPE.CODE) || !(this.acc & X86.DESC.ACC.TYPE.WRITABLE)) {
                 this.checkWrite = this.checkWriteProtDisallowed;
             }
             /*
-             * If the CODE bit is not set *and* the EXPDOWN bit is set, then invert the limit check
+             * If the CODE bit is not set *and* the EXPDOWN bit is set, then invert the limit check.
              */
             if ((this.acc & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.EXPDOWN)) == X86.DESC.ACC.TYPE.EXPDOWN) {
                 if (this.checkRead == this.checkReadProt) this.checkRead = this.checkReadProtDown;
                 if (this.checkWrite == this.checkWriteProt) this.checkWrite = this.checkWriteProtDown;
                 this.fExpDown = true;
             }
-        }
-
-        /*
-         * Here begins the four-step process of computing the block, index and bit mask required
-         * to update the descriptor's ACCESSED bit whenever the segment is accessed.
-         *
-         * Step 1: Compute address of the descriptor byte containing the ACCESSED bit (offset 0x5);
-         * note that it's perfectly normal for addrDesc to occasionally be invalid (eg, when the CPU
-         * is creating protected-mode-only segment registers like LDT and TSS, or when the CPU has
-         * transitioned from real-mode to protected-mode and new selector(s) have not been loaded yet).
-         */
-        this.iACC = this.bitACC = 0;
-        if (this.addrDesc != X86.ADDR_INVALID) {
-            var addrAcc = this.addrDesc + X86.DESC.ACC.TYPE.OFFSET;
             /*
-             * Step 2: Compute the logical block number containing that byte, and record the block.
+             * Here begins the multi-step process of computing block, dword index and bit mask required
+             * to update the descriptor's ACCESSED bit whenever the segment is accessed.
+             *
+             * Step 1: Compute address of the descriptor byte containing the ACCESSED bit (offset 0x5);
+             * note that it's perfectly normal for addrDesc to occasionally be invalid (eg, when the CPU
+             * is creating protected-mode-only segment registers like LDT and TSS, or when the CPU has
+             * transitioned from real-mode to protected-mode and new selector(s) have not been loaded yet).
              */
-            this.blockACC = this.cpu.aMemBlocks[(addrAcc & this.cpu.nMemMask) >>> this.cpu.nBlockShift];
-            this.cpu.assert(this.blockACC && this.blockACC.adw);
-            /*
-             * It's critical that we check fReadOnly, because ROMs often use GDTs that are also located
-             * in ROM, in which case the ACCESSED bit cannot be set (ie, we must ensure that blockACC is
-             * set to a dummy block).
-             */
-            if (this.blockACC && !this.blockACC.fReadOnly && this.blockACC.adw) {
+            if (this.addrDesc != X86.ADDR_INVALID) {
+                var addrAcc = this.addrDesc + X86.DESC.ACC.TYPE.OFFSET;
                 /*
-                 * Step 3: Compute the index of the DWORD (adw entry) containing that byte.
+                 * Step 2: Compute the logical block number containing that byte, and record the block.
                  */
-                this.iACC = (addrAcc & this.cpu.nBlockLimit) >> 2;
+                this.blockACC = this.cpu.aMemBlocks[(addrAcc & this.cpu.nMemMask) >>> this.cpu.nBlockShift];
+                this.cpu.assert(this.blockACC && this.blockACC.adw);
                 /*
-                 * Step 4: Compute the bit that must be OR'ed into that DWORD in order to set the ACCESSED bit;
-                 * we right-shift the bit into byte 0, and then left-shift it into byte 0, 1, 2 or 3 as appropriate.
+                 * It's critical that we check fReadOnly, because ROMs often use GDTs that are also located
+                 * in ROM, in which case the ACCESSED bit cannot be set (ie, we must ensure that blockACC is
+                 * set to a dummy block).
                  */
-                this.bitACC = Memory.adjustEndian((X86.DESC.ACC.TYPE.ACCESSED >> 8) << ((addrAcc & 0x3) << 3));
+                if (this.blockACC && !this.blockACC.fReadOnly && this.blockACC.adw) {
+                    /*
+                     * Step 3: Compute the index of the DWORD (adw entry) containing that byte.
+                     */
+                    this.iACC = (addrAcc & this.cpu.nBlockLimit) >> 2;
+                    /*
+                     * Step 4: Compute the bit that must be OR'ed into that DWORD in order to set the ACCESSED bit;
+                     * we right-shift the bit into byte 0, and then left-shift it into byte 0, 1, 2 or 3 as appropriate.
+                     */
+                    this.bitACC = Memory.adjustEndian((X86.DESC.ACC.TYPE.ACCESSED >> 8) << ((addrAcc & 0x3) << 3));
+                }
             }
         }
+
         if (!this.bitACC) {
             if (!this.cpu.blockDummy) this.cpu.blockDummy = new Memory(0, 0, 4);
             this.blockACC = this.cpu.blockDummy;
