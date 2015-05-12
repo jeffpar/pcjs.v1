@@ -309,7 +309,6 @@ X86Seg.prototype.checkReadProt = function checkReadProt(off, cb, fSuppress)
      * it to an unsigned value using ">>>"; offMax was already converted at segment load time.
      */
     if ((off >>> 0) + cb <= this.offMax) {
-        this.blockACC.adw[this.iACC] |= this.bitACC;
         return (this.base + off)|0;
     }
     return this.checkReadProtDisallowed(off, cb, fSuppress);
@@ -331,7 +330,6 @@ X86Seg.prototype.checkReadProtDown = function checkReadProtDown(off, cb, fSuppre
      * it to an unsigned value using ">>>"; offMax was already converted at segment load time.
      */
     if ((off >>> 0) + cb > this.offMax) {
-        this.blockACC.adw[this.iACC] |= this.bitACC;
         return (this.base + off)|0;
     }
     return this.checkReadProtDisallowed(off, cb, fSuppress);
@@ -370,7 +368,6 @@ X86Seg.prototype.checkWriteProt = function checkWriteProt(off, cb, fSuppress)
      * it to an unsigned value using ">>>"; offMax was already converted at segment load time.
      */
     if ((off >>> 0) + cb <= this.offMax) {
-        this.blockACC.adw[this.iACC] |= this.bitACC;
         return (this.base + off)|0;
     }
     return this.checkWriteProtDisallowed(off, cb, fSuppress);
@@ -392,7 +389,6 @@ X86Seg.prototype.checkWriteProtDown = function checkWriteProtDown(off, cb, fSupp
      * it to an unsigned value using ">>>"; offMax was already converted at segment load time.
      */
     if ((off >>> 0) + cb > this.offMax) {
-        this.blockACC.adw[this.iACC] |= this.bitACC;
         return (this.base + off)|0;
     }
     return this.checkWriteProtDisallowed(off, cb, fSuppress);
@@ -930,13 +926,23 @@ X86Seg.prototype.updateMode = function(fLoad, fProt)
         this.checkRead = this.checkReadProt;
         this.checkWrite = this.checkWriteProt;
 
-        this.iACC = this.bitACC = 0;
-        if (this.acc & X86.DESC.ACC.TYPE.SEG) {
+        /*
+         * TODO: For null GDT selectors, should we rely on the descriptor being invalid, or should we assume that
+         * the null descriptor might contain uninitialized (or other) data?  I'm assuming the latter, hence the
+         * following null selector test.  However, if we're not going to consult the descriptor, is there anything
+         * else we should (or should not) be doing for null GDT selectors?
+         */
+        if (!(this.sel & ~X86.SEL.RPL)) {
+            this.checkRead = this.checkReadProtDisallowed;
+            this.checkWrite = this.checkWriteProtDisallowed;
+
+        }
+        else if (this.acc & X86.DESC.ACC.TYPE.SEG) {
             /*
              * If the READABLE bit of CODE_READABLE is not set, then disallow reads.
              */
             if ((this.acc & X86.DESC.ACC.TYPE.CODE_READABLE) == X86.DESC.ACC.TYPE.CODE_EXECONLY) {
-                this.checkWrite = this.checkReadProtDisallowed;
+                this.checkRead = this.checkReadProtDisallowed;
             }
             /*
              * If the CODE bit is set, or the the WRITABLE bit is not set, then disallow writes.
@@ -952,51 +958,34 @@ X86Seg.prototype.updateMode = function(fLoad, fProt)
                 if (this.checkWrite == this.checkWriteProt) this.checkWrite = this.checkWriteProtDown;
                 this.fExpDown = true;
             }
+        }
+        /*
+         * TODO: For non-SEG descriptors, are there other checks or functions we should establish?
+         */
+
+        /*
+         * Any update to the following properties must occur only on segment loads, not simply when
+         * we're updating segment registers as part of a mode change.
+         */
+        if (fLoad) {
             /*
-             * Here begins the multi-step process of computing block, dword index and bit mask required
-             * to update the descriptor's ACCESSED bit whenever the segment is accessed.
+             * We must update the descriptor's ACCESSED bit whenever the segment is "accessed" (ie,
+             * loaded); unlike the ACCESSED and DIRTY bits in PTEs, a descriptor ACCESSED bit is only
+             * updated on loads, not on every memory access.
              *
-             * Step 1: Compute address of the descriptor byte containing the ACCESSED bit (offset 0x5);
+             * We compute address of the descriptor byte containing the ACCESSED bit (offset 0x5);
              * note that it's perfectly normal for addrDesc to occasionally be invalid (eg, when the CPU
              * is creating protected-mode-only segment registers like LDT and TSS, or when the CPU has
              * transitioned from real-mode to protected-mode and new selector(s) have not been loaded yet).
+             *
+             * TODO: Note I do NOT update the ACCESSED bit for null GDT selectors, because I assume the
+             * hardware does not update it either.  In fact, I've seen code that uses the null GDT descriptor
+             * for other purposes, on the assumption that that descriptor is completely unused.
              */
-            if (this.addrDesc != X86.ADDR_INVALID) {
-                var addrAcc = this.addrDesc + X86.DESC.ACC.TYPE.OFFSET;
-                /*
-                 * Step 2: Compute the logical block number containing that byte, and record the block.
-                 */
-                this.blockACC = this.cpu.aMemBlocks[(addrAcc & this.cpu.nMemMask) >>> this.cpu.nBlockShift];
-                this.cpu.assert(this.blockACC && this.blockACC.adw);
-                /*
-                 * It's critical that we check fReadOnly, because ROMs often use GDTs that are also located
-                 * in ROM, in which case the ACCESSED bit cannot be set (ie, we must ensure that blockACC is
-                 * set to a dummy block).
-                 */
-                if (this.blockACC && !this.blockACC.fReadOnly && this.blockACC.adw) {
-                    /*
-                     * Step 3: Compute the index of the DWORD (adw entry) containing that byte.
-                     */
-                    this.iACC = (addrAcc & this.cpu.nBlockLimit) >> 2;
-                    /*
-                     * Step 4: Compute the bit that must be OR'ed into that DWORD in order to set the ACCESSED bit;
-                     * we right-shift the bit into byte 0, and then left-shift it into byte 0, 1, 2 or 3 as appropriate.
-                     */
-                    this.bitACC = Memory.adjustEndian((X86.DESC.ACC.TYPE.ACCESSED >> 8) << ((addrAcc & 0x3) << 3));
-                }
+            if ((this.sel & ~X86.SEL.RPL) && this.addrDesc != X86.ADDR_INVALID) {
+                var addrACC = this.addrDesc + X86.DESC.ACC.TYPE.OFFSET;
+                this.cpu.setByte(addrACC, this.cpu.getByte(addrACC) | (X86.DESC.ACC.TYPE.ACCESSED >> 8));
             }
-        }
-
-        if (!this.bitACC) {
-            if (!this.cpu.blockDummy) this.cpu.blockDummy = new Memory(0, 0, 4);
-            this.blockACC = this.cpu.blockDummy;
-        }
-
-        if (fLoad) {
-            /*
-             * Any update to the following properties must occur only on segment loads, not simply when
-             * we're updating segment registers as part of a mode change.
-             */
             this.cpl = this.sel & X86.SEL.RPL;
             this.dpl = (this.acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
             if (this.cpu.model < X86.MODEL_80386 || !(this.ext & X86.DESC.EXT.BIG)) {

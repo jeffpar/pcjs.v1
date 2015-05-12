@@ -110,6 +110,7 @@ function Memory(addr, used, size, type, controller, cpu)
     this.controller = null;
     this.cpu = cpu;
     this.fDirty = this.fDirtyEver = false;
+    this.setPhysBlock();
 
     if (BACKTRACK) {
         if (!size || controller) {
@@ -501,11 +502,11 @@ Memory.prototype = {
      * setPhysBlock(blockPhys, blockPDE, offPDE, blockPTE, offPTE)
      *
      * @this {Memory}
-     * @param {Memory} blockPhys
-     * @param {Memory} blockPDE
-     * @param {number} offPDE
-     * @param {Memory} blockPTE
-     * @param {number} offPTE
+     * @param {Memory|null} [blockPhys]
+     * @param {Memory|null} [blockPDE]
+     * @param {number} [offPDE]
+     * @param {Memory|null} [blockPTE]
+     * @param {number} [offPTE]
      */
     setPhysBlock: function(blockPhys, blockPDE, offPDE, blockPTE, offPTE) {
         this.blockPhys = blockPhys;
@@ -513,8 +514,8 @@ Memory.prototype = {
         this.iPDE = offPDE >> 2;    // convert offPDE into iPDE (an adw index)
         this.blockPTE = blockPTE;
         this.iPTE = offPTE >> 2;    // convert offPTE into iPTE (an adw index)
-        this.bitPTEDirty = Memory.adjustEndian(X86.PTE.ACCESSED | X86.PTE.DIRTY);
-        this.bitPTEAccessed = Memory.adjustEndian(X86.PTE.ACCESSED);
+        this.bitPTEDirty = blockPhys? Memory.adjustEndian(X86.PTE.ACCESSED | X86.PTE.DIRTY) : 0;
+        this.bitPTEAccessed = blockPhys? Memory.adjustEndian(X86.PTE.ACCESSED) : 0;
     },
     /**
      * addBreakpoint(off, fWrite)

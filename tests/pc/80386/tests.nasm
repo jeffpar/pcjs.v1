@@ -64,6 +64,7 @@ CSEG_REAL	equ	0xf000
 CSEG_PROT16	equ	0x0008
 CSEG_PROT32	equ	0x0010
 DSEG_PROT16	equ	0x0018
+DSEG_PROT32	equ	0x0020
 
 ;
 ; The "defDesc" macro defines a descriptor, given a name (%1), base (%2), limit (%3), type (%4), and ext (%5)
@@ -96,9 +97,9 @@ DSEG_PROT16	equ	0x0018
 	%assign selDesc selDesc+8
 %endmacro
 
-start:	cli
+start:	nop
     ;
-    ; Test unsigned 32-bit multiplication and division
+    ; Quick test of unsigned 32-bit multiplication and division
     ;
 	mov	eax,0x44332211
 	mov	ebx,eax
@@ -111,7 +112,7 @@ start:	cli
 	xor	dx,dx
 	mov	ds,dx			; DS -> 0x0000
     ;
-    ; Test moving a segment register to a 32-bit register
+    ; Quick test of moving a segment register to a 32-bit register
     ;
 	mov	eax,ds
 	test	eax,eax
@@ -153,6 +154,7 @@ myGDT:	defDesc	NULL,0			; the first descriptor in any descriptor table is always
 	defDesc	CSEG_PROT16,0x000f0000,0x0000ffff,ACC_TYPE_CODE_READABLE,EXT_NONE
 	defDesc	CSEG_PROT32,0x000f0000,0x0000ffff,ACC_TYPE_CODE_READABLE,EXT_BIG
 	defDesc	DSEG_PROT16,0x00000000,0x000fffff,ACC_TYPE_DATA_WRITABLE,EXT_NONE
+	defDesc	DSEG_PROT32,0x00000000,0x000fffff,ACC_TYPE_DATA_WRITABLE,EXT_BIG
 myGDTEnd:
 
 initGDT:
@@ -166,6 +168,7 @@ initGDT:
 	setDesc	CSEG_PROT16,eax,0x0000ffff,ACC_TYPE_CODE_READABLE,EXT_NONE
 	setDesc	CSEG_PROT32,eax,0x0000ffff,ACC_TYPE_CODE_READABLE,EXT_BIG
 	setDesc	DSEG_PROT16,0x0,0x000fffff,ACC_TYPE_DATA_WRITABLE,EXT_NONE
+	setDesc	DSEG_PROT32,0x0,0x000fffff,ACC_TYPE_DATA_WRITABLE,EXT_BIG
 	sub	edi,RAM_GDT
 	dec	edi
 	mov	[RAM_GDTR],di
@@ -244,10 +247,10 @@ initPages:
     	mov	es,ax
     	xor	edi,edi
     ;
-    ; Build a page directory at ES:EDI with only 1 valid PDE (the first one)
+    ; Build a page directory at ES:EDI with only 1 valid PDE (the first one),
+    ; because we're not going to access any memory outside the first 4Mb.
     ;
 	cld
-	cli					; make sure interrupts are still off (in case any DOS calls turned them back on)
 	mov	eax,esi
 	add	eax,0x1000			; EAX == page frame address (of the next page)
 	or	eax,PTE_USER | PTE_READWRITE | PTE_PRESENT
@@ -256,7 +259,7 @@ initPages:
     	sub	eax,eax
 	rep	stosd
     ;
-    ; Build a page table at EDI with only 256 (out of 1024) valid PTEs, which will map the first 1Mb of the
+    ; Build a page table at EDI with 256 (out of 1024) valid PTEs, mapping the first 1Mb of the
     ; first 4Mb as linear == physical.
     ;
 	mov	eax,PTE_USER | PTE_READWRITE | PTE_PRESENT
@@ -268,7 +271,9 @@ initPT:	stosd
     	sub	eax,eax
     	rep	stosd
 
-goProt:	o32 lgdt [cs:addrGDT]
+goProt:
+	cli					; make sure interrupts are off now, since we've not initialized the IDT yet
+	o32 lgdt [cs:addrGDT]
 	mov	cr3,esi
 	mov	eax,cr0
     %if PAGING
@@ -286,6 +291,45 @@ toProt32:
 	mov	ds,ax
 	mov	es,ax
     ;
+    ; Of the 64Kb of scratch memory we allocated, the first 8Kb (0x2000) is being used for a
+    ; page directory and a single page table, so we have at least another 52Kb, at ESI+0x2000,
+    ; to play with (I'm rounding down by 4Kb to be safe).
+    ;
+    ; Let's use the top of that memory, ESI+0xd000, as the top of our stack.  Note, however, that
+    ; that guarantees ESI will be be greater than 0xffff, so as long as SS contains a 16-bit data
+    ; segment, pushes will NOT be occurring where you expect.
+    ;
+	add	esi,0x2000			; ESI -> bottom of scratch memory
+	mov	ss,ax
+	lea	esp,[esi+0xe000]		; set ESP to bottom of scratch + 52K
+	lea	ebp,[esp-4]
+	and	ebp,0xffff			; EBP now mirrors SP instead of ESP
+	mov	edx,[ebp]
+	mov	eax,0x11223344
+	push	eax
+	cmp	[ebp],eax			; did the push use SP instead of ESP?
+	jne	near error			; no, error
+	pop	eax
+	push	ax
+	cmp	[ebp+2],ax
+	jne	near error
+	pop	ax
+	mov	[ebp+2],edx			; restore dword trashed by the above pushes
+	mov	ax,DSEG_PROT32
+	mov	ss,ax
+	lea	esp,[esi+0xe000]		; SS:ESP should now be a valid 32-bit pointer
+	lea	ebp,[esp-4]
+	mov	edx,[ebp]
+	mov	eax,0x11223344
+	push	eax
+	cmp	[ebp],eax			; did the push use ESP instead of SP?
+	jne	near error			; no, error
+	pop	eax
+	push	ax
+	cmp	[ebp+2],ax
+	jne	near error
+	pop	ax
+    ;
     ; Test moving a segment register to a 32-bit memory location
     ;
 test1:	mov	edx,[0x0000]			; save the DWORD at 0x0000:0x0000 in EDX
@@ -294,11 +338,11 @@ test1:	mov	edx,[0x0000]			; save the DWORD at 0x0000:0x0000 in EDX
 	mov	[0x0000],ds
 	mov	ax,ds
 	cmp	eax,[0x0000]
-	jne	error
+	jne	near error
 	mov	eax,ds
 	xor	eax,0xffff0000
 	cmp	eax,[0x0000]
-	jne	error
+	jne	near error
 	mov	[0x0000],edx			; restore the DWORD at 0x0000:0x0000 from EDX
 	jmp	test2
     ;

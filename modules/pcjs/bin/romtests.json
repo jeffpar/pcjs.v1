@@ -78,7 +78,7 @@
   "debugger": {
     "id": "pc386.debugger",
     "name": "",
-    "commands": "",
+    "commands": "bp F000:8271;g",
     "messages": ""
   }
 }

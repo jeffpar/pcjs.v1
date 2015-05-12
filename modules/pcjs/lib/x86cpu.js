@@ -46,11 +46,21 @@ if (typeof module !== 'undefined') {
 }
 
 if (!I386) {
+    /*
+     * These are the original ModRM decoders, which were simpler and faster because they could treat all
+     * word instructions as 16-bit, assume bits 15-31 of all registers were always zero, and use masking
+     * constants instead of variables.  If I386 is enabled, these decoders are not used, and the compiler
+     * will eliminate them from the compiled code.
+     */
     if (typeof module !== 'undefined') {
         var X86ModB     = require("./x86modb");
         var X86ModW     = require("./x86modw");
     }
 } else {
+    /*
+     * These are the more general-purpose ModRM decoders, required for I386 suppport.  The current addressing
+     * mode (16-bit or 32-bit) dynamically selects the appropriate byte and word decoders.
+     */
     if (typeof module !== 'undefined') {
         var X86ModB16   = require("./x86modb16");
         var X86ModW16   = require("./x86modw16");
@@ -171,7 +181,6 @@ function X86CPU(parmsCPU)
     this.aBusBlocks = this.aMemBlocks = [];
     this.nBusMask = this.nMemMask = 0;
     this.nBlockShift = this.nBlockSize = this.nBlockLimit = this.nBlockTotal = this.nBlockMask = 0;
-    this.blockDummy = null;
 
     if (SAMPLER) {
         /*
@@ -428,6 +437,10 @@ X86CPU.CYCLES_80286 = {
     nOpCyclesXLAT:              5
 };
 
+/*
+ * TODO: Except for the cycle counts at the end of this table (ie, those marked "unique to the 80386"), all these
+ * values were simply copied from the 80286 table and still need to be modified and verified.
+ */
 X86CPU.CYCLES_80386 = {
     nWordCyclePenalty:          0,
     nEACyclesBase:              0,
@@ -658,14 +671,14 @@ X86CPU.prototype.initMemory = function(aMemBlocks, nBlockShift)
  * For 32-bit bus machines (eg, 80386), nBusMask is never changed after the initial call, because A20
  * wrap-around is simulated by changing the physical memory map rather than altering the A20 bit in nBusMask.
  *
- * We maintain memMask separate from nBusMask, because when paging is enabled on the 80386, the CPU memory
+ * We maintain nMemMask separate from nBusMask, because when paging is enabled on the 80386, the CPU memory
  * functions are now dealing with linear addresses rather than physical addresses, so it would be incorrect
- * to apply nBusMask to those addresses; memMask must remain 0xffffffff (-1) for the duration.  If we change
+ * to apply nBusMask to those addresses; nMemMask must remain 0xffffffff (-1) for the duration.  If we change
  * how A20 is simulated on the 80386, then enablePageBlocks() and disablePageBlocks() will need to override
- * memMask appropriately.
+ * nMemMask appropriately.
  *
  * TODO: Ideally, we would eliminate masking altogether of 32-bit addresses, but that would require different
- * sets of memory access functions for different machines.
+ * sets of memory access functions for different machines (ie, those with 20-bit or 24-bit buses).
  *
  * @this {X86CPU}
  * @param {number} nBusMask
@@ -688,7 +701,7 @@ X86CPU.prototype.setAddressMask = function(nBusMask)
  * reinitialized with special UNPAGED Memory blocks that know how to perform page directory/page table
  * lookup and replace themselves with special PAGED Memory blocks that reference memory from the
  * appropriate block in aBusBlocks.  A parallel array, aBlocksPaged, keeps track (by block number) of
- * which blocks have been PAGED, so that whenever CR3 is updated, those blocks can be UNPAGED again.
+ * which blocks have been PAGED, so that whenever CR3 is updated, those blocks can be quickly UNPAGED.
  *
  * @this {X86CPU}
  */
@@ -1181,7 +1194,7 @@ X86CPU.prototype.resetRegs = function()
     /*
      * Another internal "register" we occasionally need is an interim copy of bModRM, set inside selected opcode
      * handlers so that the helper function can have access to the instruction's bModRM without resorting to a
-     * closure (which, in the Chrome V8 engine, for example, seems to cause constant recompilation).
+     * closure (which, in the Chrome V8 engine, for example, may cause constant recompilation).
      */
     this.bModRM = 0;
 
@@ -3557,10 +3570,10 @@ X86CPU.prototype.pushWord = function(w)
  * I/O (ie, even while we're waiting for the remote I/O to finish), so the ChipSet component should avoid
  * calling setDMA() whenever possible.
  *
- * TODO: While comparing SYMDEB tracing in both PCjs and VMware, I noticed that after single-stepping
- * ANY segment-load instruction, SYMDEB would get control immediately after that instruction in VMware,
- * whereas I delay acknowledgment of the Trap flag until the *following* instruction, so in PCjs, SYMDEB
- * doesn't get control until the following instruction.  I think PCjs behavior is correct, at least for SS.
+ * TODO: While comparing SYMDEB tracing in both PCjs and VMware, I noticed that after single-stepping ANY
+ * segment-load instruction, SYMDEB would get control immediately after that instruction in VMware, whereas
+ * I delay acknowledgment of the Trap flag until the *following* instruction, so in PCjs, SYMDEB doesn't get
+ * control until the following instruction.  I think PCjs behavior is correct, at least for SS.
  *
  * ERRATA: Early revisions of the 8086/8088 failed to suppress hardware interrupts (and possibly also Trap
  * acknowledgements) after an SS load, but Intel corrected the problem at some point; however, I don't know when
@@ -3588,7 +3601,7 @@ X86CPU.prototype.checkINTR = function()
          * whereas the 80286 and up give TRAPs higher priority.
          */
         var iPriority = (this.model < X86.MODEL_80286? 0 : 1);
-        for (var nPriorities = 0; nPriorities < 2; nPriorities++) {
+        for (var cPriorities = 0; cPriorities < 2; cPriorities++) {
             switch(iPriority) {
             case 0:
                 if ((this.intFlags & X86.INTFLAG.INTR) && (this.regPS & X86.PS.IF)) {
