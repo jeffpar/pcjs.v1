@@ -280,9 +280,9 @@ Conversely, if the server is in debug mode but you want to test a compiled versi
 and the server will serve compiled JavaScript files, regardless whether the server is running in debug mode or
 release mode.
 
-Another useful gort command is "gort=nodebug", which is like "gort=debug" but also sets the client-side **DEBUG**
-variable to *false*, disabling all debug-only runtime checks in the client and allowing the simulation to run much
-faster:
+Another useful gort command is "gort=nodebug", which is like "gort=debug" in that it serves uncompiled files, but
+it *also* sets the client-side **DEBUG** variable to **false**, disabling all debug-only runtime checks in the client
+and allowing the simulation to run much faster (although not as fast as compiled code):
 
 	http://localhost:8088/?gort=nodebug
 
