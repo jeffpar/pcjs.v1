@@ -43,11 +43,14 @@ if (typeof module !== 'undefined') {
     var CPU         = require("./cpu");
     var X86         = require("./x86");
     var X86Seg      = require("./x86seg");
-    var X86ModB     = require("./x86modb");
-    var X86ModW     = require("./x86modw");
 }
 
-if (I386) {
+if (!I386) {
+    if (typeof module !== 'undefined') {
+        var X86ModB     = require("./x86modb");
+        var X86ModW     = require("./x86modw");
+    }
+} else {
     if (typeof module !== 'undefined') {
         var X86ModB16   = require("./x86modb16");
         var X86ModW16   = require("./x86modw16");
@@ -1610,7 +1613,24 @@ X86CPU.prototype.setProtMode = function(fProt)
 X86CPU.prototype.saveProtMode = function()
 {
     if (this.addrGDT != null) {
-        return [this.regCR0, this.addrGDT, this.addrGDTLimit, this.addrIDT, this.addrIDTLimit, this.segLDT.save(), this.segTSS.save(), this.nIOPL];
+        var a = [
+            this.regCR0,
+            this.addrGDT,
+            this.addrGDTLimit,
+            this.addrIDT,
+            this.addrIDTLimit,
+            this.segLDT.save(),
+            this.segTSS.save(),
+            this.nIOPL
+        ];
+        if (I386) {
+            a.push(this.regCR1);
+            a.push(this.regCR2);
+            a.push(this.regCR3);
+            a.push(this.aRegDR);
+            a.push(this.aRegTR);
+        }
+        return a;
     }
     return null;
 };
@@ -1634,6 +1654,13 @@ X86CPU.prototype.restoreProtMode = function(a)
         this.segLDT.restore(a[5]);
         this.segTSS.restore(a[6]);
         this.nIOPL = a[7];
+        if (I386 && this.model >= X86.MODEL_80386) {
+            this.regCR1 = a[8];
+            this.regCR2 = a[9];
+            this.regCR3 = a[10];
+            this.aRegDR = a[11];
+            this.aRegTR = a[12];
+        }
         this.setProtMode();
     }
 };
@@ -1651,8 +1678,13 @@ X86CPU.prototype.restoreProtMode = function(a)
 X86CPU.prototype.save = function()
 {
     var state = new State(this);
-    state.set(0, [this.regEAX, this.regEBX, this.regECX, this.regEDX, this.getSP(), this.regEBP, this.regESI, this.regEDI, this.nIOPL]);
-    state.set(1, [this.getIP(), this.segCS.save(), this.segDS.save(), this.segSS.save(), this.segES.save(), this.saveProtMode(), this.getPS()]);
+    state.set(0, [this.regEAX, this.regEBX, this.regECX, this.regEDX, this.getSP(), this.regEBP, this.regESI, this.regEDI]);
+    var a = [this.getIP(), this.segCS.save(), this.segDS.save(), this.segSS.save(), this.segES.save(), this.saveProtMode(), this.getPS()];
+    if (I386 && this.model >= X86.MODEL_80386) {
+        a.push(this.segFS.save());
+        a.push(this.segGS.save());
+    }
+    state.set(1, a);
     state.set(2, [this.segData.sName, this.segStack.sName, this.opFlags, this.opPrefixes, this.intFlags, this.regEA, this.regEAWrite]);
     state.set(3, [0, this.nTotalCycles, this.getSpeed()]);
     state.set(4, this.bus.saveMemory());
@@ -1679,7 +1711,6 @@ X86CPU.prototype.restore = function(data)
     this.regEBP = a[5];
     this.regESI = a[6];
     this.regEDI = a[7];
-    this.nIOPL = a[8] || 0;
 
     a = data[1];
     this.segCS.restore(a[1]);

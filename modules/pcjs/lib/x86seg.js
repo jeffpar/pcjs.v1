@@ -891,12 +891,12 @@ X86Seg.prototype.restore = function(a)
         this.cpl      = a[6];
         this.dpl      = a[7];
         this.addrDesc = a[8];
-        this.addrSize = a[9];
-        this.addrMask = a[10];
-        this.dataSize = a[11];
-        this.dataMask = a[12];
-        this.type     = a[13];
-        this.offMax   = a[14];
+        this.addrSize = a[9]  || 2;
+        this.addrMask = a[10] || 0xffff;
+        this.dataSize = a[11] || 2;
+        this.dataMask = a[12] || 0xffff;
+        this.type     = a[13] || (this.acc & X86.DESC.ACC.TYPE.MASK);
+        this.offMax   = a[14] || (this.limit >>> 0) + 1;
     }
 };
 
