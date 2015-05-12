@@ -1777,7 +1777,11 @@ HTMLOut.prototype.processMachines = function(aMachines, done)
         var fDebugger = infoMachine['debugger'];
         if (fDebugger === undefined) fDebugger = false;         // default to no debugger
 
-        var fNoDebug = !this.fDebug || net.hasParm(net.GORT_COMMAND, net.GORT_NODEBUG, this.req);
+        var fNoDebug = !this.fDebug;
+        if (net.hasParm(net.GORT_COMMAND, net.GORT_NODEBUG, this.req)) {
+            fNoDebug = true;
+            fCompiled = false;
+        }
 
         var sScriptEmbed = "";
         if (infoMachine['func']) {
