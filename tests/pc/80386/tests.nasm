@@ -292,16 +292,16 @@ toProt32:
 	mov	es,ax
     ;
     ; Of the 64Kb of scratch memory we allocated, the first 8Kb (0x2000) is being used for a
-    ; page directory and a single page table, so we have at least another 52Kb, at ESI+0x2000,
-    ; to play with (I'm rounding down by 4Kb to be safe).
+    ; page directory and a single page table, so we have at least another 56Kb, at ESI+0x2000,
+    ; to play with.
     ;
-    ; Let's use the top of that memory, ESI+0xd000, as the top of our stack.  Note, however, that
+    ; Let's use the top of that memory, ESI+0xe000, as the top of our stack.  Note, however, that
     ; that guarantees ESI will be be greater than 0xffff, so as long as SS contains a 16-bit data
-    ; segment, pushes will NOT be occurring where you expect.
+    ; segment, pushes will NOT be occurring where you'd normally expect.
     ;
 	add	esi,0x2000			; ESI -> bottom of scratch memory
 	mov	ss,ax
-	lea	esp,[esi+0xe000]		; set ESP to bottom of scratch + 52K
+	lea	esp,[esi+0xe000]		; set ESP to bottom of scratch + 56K
 	lea	ebp,[esp-4]
 	and	ebp,0xffff			; EBP now mirrors SP instead of ESP
 	mov	edx,[ebp]
