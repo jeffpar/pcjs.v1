@@ -982,7 +982,7 @@ X86Seg.prototype.updateMode = function(fLoad, fProt)
              * hardware does not update it either.  In fact, I've seen code that uses the null GDT descriptor
              * for other purposes, on the assumption that that descriptor is completely unused.
              */
-            if ((this.sel & ~X86.SEL.RPL) && this.addrDesc != X86.ADDR_INVALID) {
+            if ((this.sel & ~X86.SEL.RPL) && this.addrDesc !== X86.ADDR_INVALID) {
                 var addrACC = this.addrDesc + X86.DESC.ACC.TYPE.OFFSET;
                 this.cpu.setByte(addrACC, this.cpu.getByte(addrACC) | (X86.DESC.ACC.TYPE.ACCESSED >> 8));
             }

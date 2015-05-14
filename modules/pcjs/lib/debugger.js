@@ -410,9 +410,8 @@ if (DEBUGGER) {
     Debugger.TYPE_OTHER     = 0xF000;   // "other" field
 
     /*
-     * TYPE_SIZE values.  Note that some of the values (eg, TYPE_WORDIB
-     * and TYPE_WORDIW) imply the presence of a third operand, for those
-     * weird cases....
+     * TYPE_SIZE values.  Some of the values (eg, TYPE_WORDIB and TYPE_WORDIW)
+     * imply the presence of a third operand, for those weird cases....
      */
     Debugger.TYPE_NONE      = 0x0000;   //     (all other TYPE fields ignored)
     Debugger.TYPE_BYTE      = 0x0001;   // (b) byte, regardless of operand size
@@ -428,7 +427,7 @@ if (DEBUGGER) {
     Debugger.TYPE_PREFIX    = 0x000F;   //     (treat similarly to TYPE_NONE)
 
     /*
-     * TYPE_MODE values.  Note that order is somewhat important, as all values implying
+     * TYPE_MODE values.  Order is somewhat important, as all values implying
      * the presence of a ModRM byte are assumed to be >= TYPE_MODRM.
      */
     Debugger.TYPE_IMM       = 0x0000;   // (I) immediate data
