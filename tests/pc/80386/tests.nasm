@@ -15,19 +15,26 @@
 ;
 ; REAL32 Notes
 ; ------------
-; REAL32 is NOT enabled by default, because based on what I've seen in VirtualBox (and notes
-; at http://geezer.osdevbrasil.net/johnfine/segments.htm), if CS is loaded with a 32-bit code segment
+; REAL32 is NOT enabled by default, because based on what I've seen in VirtualBox (and notes at
+; http://geezer.osdevbrasil.net/johnfine/segments.htm), if CS is loaded with a 32-bit code segment
 ; while in protected-mode and we then return to real-mode, even if we immediately perform a FAR jump
 ; with a real-mode CS, the base of CS will be updated, but all the other segment attributes, like
-; EXT_BIG, remain unchanged.  As a result, the processor will crash as soon as it starts executing
-; 16-bit real-mode code, because it's being misinterpreted as 32-bit code, and there doesn't appear
-; to be anything you can do about it from real-mode.
+; the 32-bit EXT_BIG attribute, remain unchanged.  As a result, the processor will crash as soon as
+; it starts executing 16-bit real-mode code, because it's being misinterpreted as 32-bit code, and
+; there doesn't appear to be anything you can do about it from real-mode.
 ;
-; The work-around: load CS with a 16-bit code segment BEFORE returning to real-mode.
+; The work-around: you MUST load CS with a 16-bit code segment BEFORE returning to real-mode.
 ;
-; "Unreal mode" works by setting other segment registers (eg, DS, ES) to 32-bit segments before
-; returning to real-mode -- just not CS.  SS shouldn't be set to a 32-bit segment either, because
-; that causes implicit pushes to use ESP instead of SP, even in real-mode.
+; "Unreal mode" works by setting OTHER segment registers, like DS and ES, to 32-bit segments before
+; returning to real-mode -- just not CS.  SS probably shouldn't be set to a 32-bit segment either,
+; because that causes implicit pushes to use ESP instead of SP, even in real-mode.
+;
+; The code below ensures that, before returning to real-mode, all of CS, DS, ES, and SS contain
+; 16-bit protected-mode selectors; note, however, that my 16-bit protected-mode data descriptor uses
+; a full 20-bit limit, so DS, ES, and SS will still have a limit of 1Mb instead of the usual 64Kb,
+; even after returning to real-mode.  I use the larger limit because it's convenient to have access
+; to the first 1Mb in protected-mode, with or without a 32-bit data segment, and the larger data
+; segment limit shouldn't affect any 16-bit real-mode operations.
 ;
 	cpu	386
 	org	0x100
@@ -230,7 +237,7 @@ exitErr:nop
 	jmp	exitErr
 
 allocPages:
-	mov	bx,0x1000			; 4K paragraphs == 64K bytes
+	mov	bx,0x2000			; 8K paragraphs == 128K bytes
 	mov	ah,DOS_ALLOC
 	int	INT_DOS
 	jc	errDOSMem
@@ -248,7 +255,7 @@ initPages:
     	xor	edi,edi
     ;
     ; Build a page directory at ES:EDI with only 1 valid PDE (the first one),
-    ; because we're not going to access any memory outside the first 4Mb.
+    ; because we're not going to access any memory outside the first 1Mb (of the first 4Mb).
     ;
 	cld
 	mov	eax,esi
@@ -291,20 +298,20 @@ toProt32:
 	mov	ds,ax
 	mov	es,ax
     ;
-    ; Of the 64Kb of scratch memory we allocated, the first 8Kb (0x2000) is being used for a
-    ; page directory and a single page table, so we have at least another 56Kb, at ESI+0x2000,
-    ; to play with.
+    ; Of the 128Kb of scratch memory we allocated, we may have lost as much as 4Kb-1 rounding
+    ; up to the first physical 4Kb page; the next 8Kb (0x2000) was used for a page directory and a
+    ; single page table, leaving us with a minimum of 116Kb to play with, starting at ESI+0x2000.
     ;
-    ; Let's use the top of that memory, ESI+0xe000, as the top of our stack.  Note, however, that
-    ; that guarantees ESI will be be greater than 0xffff, so as long as SS contains a 16-bit data
-    ; segment, pushes will NOT be occurring where you'd normally expect.
+    ; We'll set the top of our stack to ESI+0xe000.  This guarantees an ESP greater than 0xffff,
+    ; and so for the next few tests, with a 16-bit data segment in SS, we expect all pushes/pops
+    ; will occur at SP rather than ESP.
     ;
 	add	esi,0x2000			; ESI -> bottom of scratch memory
 	mov	ss,ax
 	lea	esp,[esi+0xe000]		; set ESP to bottom of scratch + 56K
 	lea	ebp,[esp-4]
 	and	ebp,0xffff			; EBP now mirrors SP instead of ESP
-	mov	edx,[ebp]
+	mov	edx,[ebp]			; save dword about to be trashed by pushes
 	mov	eax,0x11223344
 	push	eax
 	cmp	[ebp],eax			; did the push use SP instead of ESP?
@@ -314,7 +321,7 @@ toProt32:
 	cmp	[ebp+2],ax
 	jne	near error
 	pop	ax
-	mov	[ebp+2],edx			; restore dword trashed by the above pushes
+	mov	[ebp],edx			; restore dword trashed by the above pushes
 	mov	ax,DSEG_PROT32
 	mov	ss,ax
 	lea	esp,[esi+0xe000]		; SS:ESP should now be a valid 32-bit pointer
@@ -374,6 +381,9 @@ test5:	movzx	eax,word [0xffffe]
 error:	nop
 
 doneProt:
+	mov	ax,DSEG_PROT16
+	mov	ss,ax
+	sub	esp,esp
 
     %ifndef REAL32
     ;
@@ -392,6 +402,11 @@ jmpReal:
 
 toReal:
 	mov	ax,cs
+	mov	ds,ax
+	mov	es,ax
+	mov	ss,ax
+	sub	sp,sp
+
 	cmp	ax,CSEG_REAL			; is CS equal to 0xf000?
 	je	near jmpStart			; yes, so loop around, only because we have nowhere else to go
 	int	INT_DOSEXIT			; no, so assume we're running under DOS and exit
