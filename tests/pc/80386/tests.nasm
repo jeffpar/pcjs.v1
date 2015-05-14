@@ -339,7 +339,7 @@ toProt32:
     ;
     ; Test moving a segment register to a 32-bit memory location
     ;
-test1:	mov	edx,[0x0000]			; save the DWORD at 0x0000:0x0000 in EDX
+	mov	edx,[0x0000]			; save the DWORD at 0x0000:0x0000 in EDX
 	or	eax,-1
 	mov	[0x0000],eax
 	mov	[0x0000],ds
@@ -351,29 +351,37 @@ test1:	mov	edx,[0x0000]			; save the DWORD at 0x0000:0x0000 in EDX
 	cmp	eax,[0x0000]
 	jne	near error
 	mov	[0x0000],edx			; restore the DWORD at 0x0000:0x0000 from EDX
-	jmp	test2
+	jmp	testROM
+
+    ;
+    ; The next few tests currently work only when running as a ROM image; they rely not only on
+    ; the contents of the last two bytes at the top of the first 1Mb, but also on their location,
+    ; because if the processor improperly reads beyond those bytes, a fault should occur.
+    ;
+testROM:
+
     ;
     ; Test moving a byte to a 32-bit register with sign-extension
     ;
-test2:	movsx	eax,byte [0xfffff]
+	movsx	eax,byte [0xfffff]
 	cmp	eax,0xffffff80
 	jne	error
     ;
     ; Test moving a word to a 32-bit register with sign-extension
     ;
-test3:	movsx	eax,word [0xffffe]
+	movsx	eax,word [0xffffe]
 	cmp	eax,0xffff80fc
 	jne	error
     ;
     ; Test moving a byte to a 32-bit register with zero-extension
     ;
-test4:	movzx	eax,byte [0xfffff]
+	movzx	eax,byte [0xfffff]
 	cmp	eax,0x00000080
 	jne	error
     ;
     ; Test moving a word to a 32-bit register with zero-extension
     ;
-test5:	movzx	eax,word [0xffffe]
+	movzx	eax,word [0xffffe]
 	cmp	eax,0x000080fc
 	jne	error
 	jmp	doneProt
@@ -401,11 +409,11 @@ jmpReal:
 	jmp	CSEG_REAL:toReal
 
 toReal:
-	mov	ax,cs
+	mov	ax,cs				; revert to the usual .COM register conventions
 	mov	ds,ax
 	mov	es,ax
 	mov	ss,ax
-	sub	sp,sp
+	mov	sp,0xfffe
 
 	cmp	ax,CSEG_REAL			; is CS equal to 0xf000?
 	je	near jmpStart			; yes, so loop around, only because we have nowhere else to go

@@ -2052,50 +2052,57 @@ if (DEBUGGER) {
                 n = cpu.getDS(); cch = 4;
                 break;
             }
-            if (I386 && this.cpu.model >= X86.MODEL_80386 && !cch) {
-                switch(iReg) {
-                case Debugger.REG_EAX:
-                    n = cpu.regEAX;  cch = 8;
-                    break;
-                case Debugger.REG_ECX:
-                    n = cpu.regECX;  cch = 8;
-                    break;
-                case Debugger.REG_EDX:
-                    n = cpu.regEDX;  cch = 8;
-                    break;
-                case Debugger.REG_EBX:
-                    n = cpu.regEBX;  cch = 8;
-                    break;
-                case Debugger.REG_ESP:
-                    n = cpu.getSP(); cch = 8;
-                    break;
-                case Debugger.REG_EBP:
-                    n = cpu.regEBP;  cch = 8;
-                    break;
-                case Debugger.REG_ESI:
-                    n = cpu.regESI;  cch = 8;
-                    break;
-                case Debugger.REG_EDI:
-                    n = cpu.regEDI;  cch = 8;
-                    break;
-                case Debugger.REG_CR0:
-                    n = cpu.regCR0;  cch = 8;
-                    break;
-                case Debugger.REG_CR1:
-                    n = cpu.regCR1;  cch = 8;
-                    break;
-                case Debugger.REG_CR2:
-                    n = cpu.regCR2;  cch = 8;
-                    break;
-                case Debugger.REG_CR3:
-                    n = cpu.regCR3;  cch = 8;
-                    break;
-                case Debugger.REG_SEG + Debugger.REG_FS:
-                    n = cpu.getFS(); cch = 4;
-                    break;
-                case Debugger.REG_SEG + Debugger.REG_GS:
-                    n = cpu.getGS(); cch = 4;
-                    break;
+            if (!cch) {
+                if (this.cpu.model == X86.MODEL_80286) {
+                    if (iReg == Debugger.REG_CR0) {
+                        n = cpu.regCR0;  cch = 4;
+                    }
+                }
+                else if (I386 && this.cpu.model >= X86.MODEL_80386) {
+                    switch(iReg) {
+                    case Debugger.REG_EAX:
+                        n = cpu.regEAX;  cch = 8;
+                        break;
+                    case Debugger.REG_ECX:
+                        n = cpu.regECX;  cch = 8;
+                        break;
+                    case Debugger.REG_EDX:
+                        n = cpu.regEDX;  cch = 8;
+                        break;
+                    case Debugger.REG_EBX:
+                        n = cpu.regEBX;  cch = 8;
+                        break;
+                    case Debugger.REG_ESP:
+                        n = cpu.getSP(); cch = 8;
+                        break;
+                    case Debugger.REG_EBP:
+                        n = cpu.regEBP;  cch = 8;
+                        break;
+                    case Debugger.REG_ESI:
+                        n = cpu.regESI;  cch = 8;
+                        break;
+                    case Debugger.REG_EDI:
+                        n = cpu.regEDI;  cch = 8;
+                        break;
+                    case Debugger.REG_CR0:
+                        n = cpu.regCR0;  cch = 8;
+                        break;
+                    case Debugger.REG_CR1:
+                        n = cpu.regCR1;  cch = 8;
+                        break;
+                    case Debugger.REG_CR2:
+                        n = cpu.regCR2;  cch = 8;
+                        break;
+                    case Debugger.REG_CR3:
+                        n = cpu.regCR3;  cch = 8;
+                        break;
+                    case Debugger.REG_SEG + Debugger.REG_FS:
+                        n = cpu.getFS(); cch = 4;
+                        break;
+                    case Debugger.REG_SEG + Debugger.REG_GS:
+                        n = cpu.getGS(); cch = 4;
+                        break;
+                    }
                 }
             }
             if (cch) s = str.toHex(n, cch);
@@ -3476,7 +3483,9 @@ if (DEBUGGER) {
     Debugger.prototype.getRegString = function(iReg)
     {
         if (iReg >= Debugger.REG_AX && iReg <= Debugger.REG_DI && this.cchReg > 4) iReg += Debugger.REG_EAX - Debugger.REG_AX;
-        return Debugger.REGS[iReg] + '=' + this.getRegValue(iReg) + ' ';
+        var sReg = Debugger.REGS[iReg];
+        if (iReg == Debugger.REG_CR0 && this.cpu.model == X86.MODEL_80286) sReg = "MS";
+        return sReg + '=' + this.getRegValue(iReg) + ' ';
     };
 
     /**
@@ -4801,8 +4810,10 @@ if (DEBUGGER) {
                     this.println("missing value for " + asArgs[1]);
                     return;
                 }
+                var fValid = false;
                 var w = str.parseInt(sValue, 16);
                 if (!isNaN(w)) {
+                    fValid = true;
                     var sRegMatch = sReg.toUpperCase();
                     if (sRegMatch.charAt(0) == 'E' && this.cchReg <= 4) {
                         sRegMatch = null;
@@ -4916,7 +4927,9 @@ if (DEBUGGER) {
                                 this.cpu.setMSW(w);
                                 break;
                             case "TR":
-                                this.cpu.segTSS.load(w, true);
+                                if (this.cpu.segTSS.load(w, true) === X86.ADDR_INVALID) {
+                                    fValid = false;
+                                }
                                 break;
                             /*
                              * TODO: Add support for GDTR (addr and limit), IDTR (addr and limit), and perhaps
@@ -4957,8 +4970,17 @@ if (DEBUGGER) {
                                     case "GS":
                                         this.cpu.setGS(w);
                                         break;
+                                    case "CR0":
+                                        this.cpu.regCR0 = w;
+                                        break;
+                                    case "CR2":
+                                        this.cpu.regCR2 = w;
+                                        break;
+                                    case "CR3":
+                                        this.cpu.regCR3 = w;
+                                        break;
                                     /*
-                                     * TODO: Add support for CR0-CR3, DR0-DR7, and TR6-TR7.
+                                     * TODO: Add support for DR0-DR7 and TR6-TR7.
                                      */
                                     default:
                                         fUnknown = true;
@@ -4974,7 +4996,7 @@ if (DEBUGGER) {
                         }
                     }
                 }
-                else {
+                if (!fValid) {
                     this.println("invalid value: " + sValue);
                     return;
                 }
