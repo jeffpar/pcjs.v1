@@ -1311,13 +1311,16 @@ X86.fnLAR = function LAR(dst, src)
      * TODO: This instruction's 80286 documentation does not discuss conforming code segments; determine
      * if we need a special check for them.
      */
+    this.clearZF();
     if (this.segVER.load(src, true) !== X86.ADDR_INVALID) {
         if (this.segVER.dpl >= this.segCS.cpl && this.segVER.dpl >= (src & X86.SEL.RPL)) {
             this.setZF();
-            return this.segVER.acc & X86.DESC.ACC.MASK;
+            dst = this.segVER.acc & ~X86.DESC.ACC.BASE1623;
+            if (this.dataSize > 2) {
+                dst |= ((this.segVER.ext & ~X86.DESC.EXT.BASE2431) << 16);
+            }
         }
     }
-    this.clearZF();
     return dst;
 };
 

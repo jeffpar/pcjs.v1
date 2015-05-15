@@ -457,7 +457,7 @@
 		<xsl:param name="disk"><xsl:value-of select="@disk"/></xsl:param>
 		<xsl:if test="$disk != ''">
 			<xsl:variable name="prefix">
-				<xsl:if test="title[@prefix]"><xsl:value-of select="title"/><xsl:text>: </xsl:text></xsl:if>
+				<xsl:if test="title/@prefix"><xsl:value-of select="title/@prefix"/><xsl:text>: </xsl:text></xsl:if>
 			</xsl:variable>
 			<xsl:for-each select="disk">
 				<xsl:if test="$disk = @id or $disk = '*'">

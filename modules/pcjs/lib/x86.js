@@ -103,16 +103,15 @@ var X86 = {
         MASK:   0xfff8      // table index
     },
     DESC: {                 // Descriptor Table Entry
-        LIMIT: {            // LIMIT bits 0-15
+        LIMIT: {            // LIMIT bits 0-15 (or OFFSET if this is an INTERRUPT or TRAP gate)
             OFFSET:     0x0
         },
-        BASE: {             // BASE bits 0-15
+        BASE: {             // BASE bits 0-15 (or SELECTOR if this is a TASK, INTERRUPT or TRAP gate)
             OFFSET:     0x2
         },
         ACC: {              // bit definitions for the access word (offset 0x4)
             OFFSET:     0x4,
-            BASE1623:                       0x00ff,
-            MASK:                           0xff00,
+            BASE1623:                       0x00ff,     // (not used if this a TASK, INTERRUPT or TRAP gate; bits 0-5 are parm count for CALL gates)
             TYPE: {
                 OFFSET: 0x5,
                 MASK:                       0x1f00,

@@ -538,7 +538,7 @@ DiskDump.getManifestAttr = function(sID, sTag)
  */
 DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, fOverwrite, sTitle, md5Disk, md5JSON)
 {
-    var fUnchanged, fExists = false, sXML, err = null;
+    var i, fUnchanged, fExists = false, sXML, err = null;
     var sMatchDisk = null, sIDDisk = null, sMD5Disk = null, sMD5JSON = null;
 
     try {
@@ -551,7 +551,10 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
             if (sTitle) {
                 sTitle = sTitle.charAt(0).toUpperCase() + sTitle.substr(1);
             }
-            sPrefix = ' type="prefix"';
+        }
+        if (sTitle) {
+            i = sTitle.indexOf(':');
+            if (i > 0) sPrefix = ' prefix="' + sTitle.substr(0, i) + '"';
         }
         sXML = '<?xml version="1.0" encoding="UTF-8"?>\n';
         sXML += '<?xml-stylesheet type="text/xsl" href="/versions/pcjs/' + pkg.version + '/manifest.xsl"?>\n';
@@ -560,7 +563,7 @@ DiskDump.updateManifest = function(disk, sManifestFile, sDiskPath, sOutputFile, 
         sXML += '</manifest>';
     }
 
-    var i = sOutputFile.indexOf("/disks/");
+    i = sOutputFile.indexOf("/disks/");
     if (i > 0) {
         sOutputFile = sOutputFile.substr(i);
     } else {

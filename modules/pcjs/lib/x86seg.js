@@ -185,16 +185,14 @@ X86Seg.prototype.loadProt = function loadProt(sel, fSuppress)
      * which has no bearing on the ROM's own code, because it never loads any LDT selectors, but if at the same
      * time our Debugger attempts to validate a selector in one of its breakpoints, that could cause some
      * grief here.  We avoid that grief by 1) relying on the Debugger setting fSuppress to true, and 2) skipping
-     * segment lookup if the descriptor table being referenced is zero.
-     *
-     * TODO: This could probably be simplified to a test of addrDT; however, there's nothing in the design
-     * of the CPU that prevents the GDT or LDT being located at linear address zero.
+     * segment lookup if the descriptor table being referenced is zero.  Both tests are required, because
+     * there's nothing in the design of the CPU that prevents the GDT or LDT being at linear address zero.
      */
     if (!fSuppress || addrDT) {
         var addrDesc = (addrDT + (sel & X86.SEL.MASK))|0;
         if ((addrDTLimit - addrDesc)|0 >= 7) {
             /*
-             * TODO: This is only the first of many steps toward accurately counting cycles in protected mode;
+             * TODO: This is the first of many steps toward accurately counting cycles in protected mode;
              * I simply noted that "POP segreg" takes 5 cycles in real mode and 20 in protected mode, so I'm
              * starting with a 15-cycle difference.  Obviously the difference will vary with the instruction,
              * and will be much greater whenever the load fails.
@@ -563,7 +561,7 @@ X86Seg.prototype.loadDesc6 = function(addrDesc, sel)
     this.base = base;
     this.limit = limit;
     this.offMax = (limit >>> 0) + 1;
-    this.acc = acc & X86.DESC.ACC.MASK;
+    this.acc = acc;
     this.type = (acc & X86.DESC.ACC.TYPE.MASK);
     this.ext = 0;
     this.addrDesc = addrDesc;
@@ -641,7 +639,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                      * Otherwise, we must be dealing with a CALLF or JMPF to a less privileged segment, in which
                      * case either DPL == CPL *or* the new segment is conforming and DPL <= CPL.
                      */
-                    if (fCall !== false && !(dpl == this.cpl || (acc & X86.DESC.ACC.TYPE.CONFORMING) && dpl <= this.cpl)) {
+                    if (fCall !== false && !(dpl == this.cpl || (type & X86.DESC.ACC.TYPE.CONFORMING) && dpl <= this.cpl)) {
                         base = addrDesc = X86.ADDR_INVALID;
                         break;
                     }
@@ -793,7 +791,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
             /*
              * For LSL, we must support any descriptor marked X86.DESC.ACC.TYPE.SEG, as well as TSS and LDT descriptors.
              */
-            if (!(acc & X86.DESC.ACC.TYPE.SEG) && type > X86.DESC.ACC.TYPE.TSS_BUSY) {
+            if (!(type & X86.DESC.ACC.TYPE.SEG) && type > X86.DESC.ACC.TYPE.TSS_BUSY) {
                 base = addrDesc = X86.ADDR_INVALID;
                 break;
             }
@@ -937,23 +935,23 @@ X86Seg.prototype.updateMode = function(fLoad, fProt)
             this.checkWrite = this.checkWriteProtDisallowed;
 
         }
-        else if (this.acc & X86.DESC.ACC.TYPE.SEG) {
+        else if (this.type & X86.DESC.ACC.TYPE.SEG) {
             /*
              * If the READABLE bit of CODE_READABLE is not set, then disallow reads.
              */
-            if ((this.acc & X86.DESC.ACC.TYPE.CODE_READABLE) == X86.DESC.ACC.TYPE.CODE_EXECONLY) {
+            if ((this.type & X86.DESC.ACC.TYPE.CODE_READABLE) == X86.DESC.ACC.TYPE.CODE_EXECONLY) {
                 this.checkRead = this.checkReadProtDisallowed;
             }
             /*
              * If the CODE bit is set, or the the WRITABLE bit is not set, then disallow writes.
              */
-            if ((this.acc & X86.DESC.ACC.TYPE.CODE) || !(this.acc & X86.DESC.ACC.TYPE.WRITABLE)) {
+            if ((this.type & X86.DESC.ACC.TYPE.CODE) || !(this.type & X86.DESC.ACC.TYPE.WRITABLE)) {
                 this.checkWrite = this.checkWriteProtDisallowed;
             }
             /*
              * If the CODE bit is not set *and* the EXPDOWN bit is set, then invert the limit check.
              */
-            if ((this.acc & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.EXPDOWN)) == X86.DESC.ACC.TYPE.EXPDOWN) {
+            if ((this.type & (X86.DESC.ACC.TYPE.CODE | X86.DESC.ACC.TYPE.EXPDOWN)) == X86.DESC.ACC.TYPE.EXPDOWN) {
                 if (this.checkRead == this.checkReadProt) this.checkRead = this.checkReadProtDown;
                 if (this.checkWrite == this.checkWriteProt) this.checkWrite = this.checkWriteProtDown;
                 this.fExpDown = true;
@@ -983,8 +981,8 @@ X86Seg.prototype.updateMode = function(fLoad, fProt)
              * for other purposes, on the assumption that that descriptor is completely unused.
              */
             if ((this.sel & ~X86.SEL.RPL) && this.addrDesc !== X86.ADDR_INVALID) {
-                var addrACC = this.addrDesc + X86.DESC.ACC.TYPE.OFFSET;
-                this.cpu.setByte(addrACC, this.cpu.getByte(addrACC) | (X86.DESC.ACC.TYPE.ACCESSED >> 8));
+                var addrType = this.addrDesc + X86.DESC.ACC.TYPE.OFFSET;
+                this.cpu.setByte(addrType, this.cpu.getByte(addrType) | (X86.DESC.ACC.TYPE.ACCESSED >> 8));
             }
             this.cpl = this.sel & X86.SEL.RPL;
             this.dpl = (this.acc & X86.DESC.ACC.DPL.MASK) >> X86.DESC.ACC.DPL.SHIFT;
