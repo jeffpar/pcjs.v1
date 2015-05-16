@@ -44,7 +44,7 @@ if (typeof module !== 'undefined') {
  * @property {number} sel
  * @property {number} limit (in protected-mode, this comes from descriptor word 0x0)
  * @property {number} base (in protected-mode, this comes from descriptor word 0x2)
- * @property {number} acc (in protected-mode, this comes from descriptor word 0x4, masked with 0xff00; bits 0-7 supplement base bits 16-23)
+ * @property {number} acc (in protected-mode, this comes from descriptor word 0x4; bits 0-7 supplement base bits 16-23)
  * @property {number} ext (in protected-mode, this is descriptor word 0x6, 80386 only; supplements limit bits 16-19 and base bits 24-31)
  *
  * TODO: Determine what good, if any, these class annotations are for either an IDE like WebStorm or a tool like
@@ -410,102 +410,6 @@ X86Seg.prototype.checkWriteProtDisallowed = function checkWriteProtDisallowed(of
 };
 
 /**
- * switchTSS(selNew, fNest)
- *
- * Implements TSS (Task State Segment) task switching.
- *
- * NOTES: This typically occurs during double-fault processing, because the IDT entry for DF_FAULT normally
- * contains a task gate.  Interestingly, if we force a GP_FAULT to occur at a sufficiently early point in the
- * OS/2 1.0 initialization code, OS/2 does a nice job of displaying the GP fault and then shutting down:
- *
- *      0090:067B FB            STI
- *      0090:067C EBFD          JMP      067B
- *
- * but it may not have yet reprogrammed the master PIC to re-vector hardware interrupts to IDT entries 0x50-0x57,
- * so when the next timer interrupt (IRQ 0) occurs, it vectors through IDT entry 0x08, which is the DF_FAULT
- * vector. A spurious double-fault is generated, and a clean shutdown turns into a messy crash.
- *
- * Of course, that all could have been avoided if IBM had heeded Intel's advice and not used Intel-reserved IDT
- * entries for PC interrupts.
- *
- * TODO: Add 80386 TSS support (including CR3 support).
- *
- * @this {X86Seg}
- * @param {number} selNew
- * @param {boolean} fNest is true if nesting, false if un-nesting
- * @return {boolean} true if successful, false if error
- */
-X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
-{
-    var cpu = this.cpu;
-    cpu.assert(this === cpu.segCS);
-
-    var addrOld = cpu.segTSS.base;
-    var cplOld = this.cpl;
-    var selOld = cpu.segTSS.sel;
-    if (!fNest) {
-        if (cpu.segTSS.type != X86.DESC.ACC.TYPE.TSS_BUSY) {
-            X86.fnFault.call(cpu, X86.EXCEPTION.TS_FAULT, selNew, true);
-            return false;
-        }
-        cpu.setShort(cpu.segTSS.addrDesc + X86.DESC.ACC.OFFSET, (cpu.segTSS.acc & ~X86.DESC.ACC.TYPE.TSS_BUSY) | X86.DESC.ACC.TYPE.TSS);
-    }
-    if (cpu.segTSS.load(selNew) === X86.ADDR_INVALID) {
-        return false;
-    }
-    var addrNew = cpu.segTSS.base;
-    if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.TSS)) {
-        this.dbg.message((fNest? "Task switch" : "Task return") + ": TR " + str.toHexWord(selOld) + " (%" + str.toHex(addrOld, 6) + "), new TR " + str.toHexWord(selNew) + " (%" + str.toHex(addrNew, 6) + ")");
-    }
-    if (fNest) {
-        if (cpu.segTSS.type == X86.DESC.ACC.TYPE.TSS_BUSY) {
-            X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, selNew, true);
-            return false;
-        }
-        cpu.setShort(cpu.segTSS.addrDesc + X86.DESC.ACC.OFFSET, cpu.segTSS.acc |= X86.DESC.ACC.TYPE.TSS_BUSY);
-        cpu.segTSS.type = X86.DESC.ACC.TYPE.TSS_BUSY;
-    }
-    cpu.setShort(addrOld + X86.TSS.TASK_IP, cpu.getIP());
-    cpu.setShort(addrOld + X86.TSS.TASK_PS, cpu.getPS());
-    cpu.setShort(addrOld + X86.TSS.TASK_AX, cpu.regEAX);
-    cpu.setShort(addrOld + X86.TSS.TASK_CX, cpu.regECX);
-    cpu.setShort(addrOld + X86.TSS.TASK_DX, cpu.regEDX);
-    cpu.setShort(addrOld + X86.TSS.TASK_BX, cpu.regEBX);
-    cpu.setShort(addrOld + X86.TSS.TASK_SP, cpu.getSP());
-    cpu.setShort(addrOld + X86.TSS.TASK_BP, cpu.regEBP);
-    cpu.setShort(addrOld + X86.TSS.TASK_SI, cpu.regESI);
-    cpu.setShort(addrOld + X86.TSS.TASK_DI, cpu.regEDI);
-    cpu.setShort(addrOld + X86.TSS.TASK_ES, cpu.segES.sel);
-    cpu.setShort(addrOld + X86.TSS.TASK_CS, cpu.segCS.sel);
-    cpu.setShort(addrOld + X86.TSS.TASK_SS, cpu.segSS.sel);
-    cpu.setShort(addrOld + X86.TSS.TASK_DS, cpu.segDS.sel);
-    var offSS = X86.TSS.TASK_SS;
-    var offSP = X86.TSS.TASK_SP;
-    cpu.setPS(cpu.getShort(addrNew + X86.TSS.TASK_PS) | (fNest? X86.PS.NT : 0));
-    cpu.assert(!fNest || !!(cpu.regPS & X86.PS.NT));
-    cpu.regEAX = cpu.getShort(addrNew + X86.TSS.TASK_AX);
-    cpu.regECX = cpu.getShort(addrNew + X86.TSS.TASK_CX);
-    cpu.regEDX = cpu.getShort(addrNew + X86.TSS.TASK_DX);
-    cpu.regEBX = cpu.getShort(addrNew + X86.TSS.TASK_BX);
-    cpu.regEBP = cpu.getShort(addrNew + X86.TSS.TASK_BP);
-    cpu.regESI = cpu.getShort(addrNew + X86.TSS.TASK_SI);
-    cpu.regEDI = cpu.getShort(addrNew + X86.TSS.TASK_DI);
-    cpu.segES.load(cpu.getShort(addrNew + X86.TSS.TASK_ES));
-    cpu.segDS.load(cpu.getShort(addrNew + X86.TSS.TASK_DS));
-    cpu.setCSIP(cpu.getShort(addrNew + X86.TSS.TASK_IP), cpu.getShort(addrNew + X86.TSS.TASK_CS));
-    if (this.cpl < cplOld) {
-        offSP = (this.cpl << 2) + X86.TSS.CPL0_SP;
-        offSS = offSP + 2;
-    }
-    cpu.setSS(cpu.getShort(addrNew + offSS), true);
-    cpu.setSP(cpu.getShort(addrNew + offSP));
-    cpu.segLDT.load(cpu.getShort(addrNew + X86.TSS.TASK_LDT));
-    if (fNest) cpu.setShort(addrNew + X86.TSS.PREV_TSS, selOld);
-    cpu.regCR0 |= X86.CR0.MSW.TS;
-    return true;
-};
-
-/**
  * loadAcc(sel, fGDT)
  *
  * @this {X86Seg}
@@ -567,7 +471,7 @@ X86Seg.prototype.loadDesc6 = function(addrDesc, sel)
     this.addrDesc = addrDesc;
     this.updateMode(true);
 
-    this.messageSeg(sel, base, limit, acc);
+    this.messageSeg(sel, base, limit, this.type);
 
     return base;
 };
@@ -649,6 +553,14 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                     this.fStackSwitch = true;
                 }
                 fGate = false;
+            }
+            else if (type == X86.DESC.ACC.TYPE.TSS) {
+                if (!this.switchTSS(sel, true)) {
+                    base = addrDesc = X86.ADDR_INVALID;
+                    break;
+                }
+                if (DEBUG) cpu.stopCPU();
+                return this.base;
             }
             else if (type == X86.DESC.ACC.TYPE.GATE_CALL) {
                 fGate = true;
@@ -807,8 +719,104 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
         this.updateMode(true);
         break;
     }
-    if (!fSuppress) this.messageSeg(sel, base, limit, acc, ext);
+    if (!fSuppress) this.messageSeg(sel, base, limit, type, ext);
     return base;
+};
+
+/**
+ * switchTSS(selNew, fNest)
+ *
+ * Implements TSS (Task State Segment) task switching.
+ *
+ * NOTES: This typically occurs during double-fault processing, because the IDT entry for DF_FAULT normally
+ * contains a task gate.  Interestingly, if we force a GP_FAULT to occur at a sufficiently early point in the
+ * OS/2 1.0 initialization code, OS/2 does a nice job of displaying the GP fault and then shutting down:
+ *
+ *      0090:067B FB            STI
+ *      0090:067C EBFD          JMP      067B
+ *
+ * but it may not have yet reprogrammed the master PIC to re-vector hardware interrupts to IDT entries 0x50-0x57,
+ * so when the next timer interrupt (IRQ 0) occurs, it vectors through IDT entry 0x08, which is the DF_FAULT
+ * vector. A spurious double-fault is generated, and a clean shutdown turns into a messy crash.
+ *
+ * Of course, that all could have been avoided if IBM had heeded Intel's advice and not used Intel-reserved IDT
+ * entries for PC interrupts.
+ *
+ * TODO: Add 80386 TSS support (including CR3 support).
+ *
+ * @this {X86Seg}
+ * @param {number} selNew
+ * @param {boolean} fNest is true if nesting, false if un-nesting
+ * @return {boolean} true if successful, false if error
+ */
+X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
+{
+    var cpu = this.cpu;
+    cpu.assert(this === cpu.segCS);
+
+    var addrOld = cpu.segTSS.base;
+    var cplOld = this.cpl;
+    var selOld = cpu.segTSS.sel;
+    if (!fNest) {
+        if (cpu.segTSS.type != X86.DESC.ACC.TYPE.TSS_BUSY) {
+            X86.fnFault.call(cpu, X86.EXCEPTION.TS_FAULT, selNew, true);
+            return false;
+        }
+        cpu.setShort(cpu.segTSS.addrDesc + X86.DESC.ACC.OFFSET, (cpu.segTSS.acc & ~X86.DESC.ACC.TYPE.TSS_BUSY) | X86.DESC.ACC.TYPE.TSS);
+    }
+    if (cpu.segTSS.load(selNew) === X86.ADDR_INVALID) {
+        return false;
+    }
+    var addrNew = cpu.segTSS.base;
+    if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.TSS)) {
+        this.dbg.message((fNest? "Task switch" : "Task return") + ": TR " + str.toHexWord(selOld) + " (%" + str.toHex(addrOld, 6) + "), new TR " + str.toHexWord(selNew) + " (%" + str.toHex(addrNew, 6) + ")");
+    }
+    if (fNest) {
+        if (cpu.segTSS.type == X86.DESC.ACC.TYPE.TSS_BUSY) {
+            X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, selNew, true);
+            return false;
+        }
+        cpu.setShort(cpu.segTSS.addrDesc + X86.DESC.ACC.OFFSET, cpu.segTSS.acc |= X86.DESC.ACC.TYPE.TSS_BUSY);
+        cpu.segTSS.type = X86.DESC.ACC.TYPE.TSS_BUSY;
+    }
+    cpu.setShort(addrOld + X86.TSS.TASK_IP, cpu.getIP());
+    cpu.setShort(addrOld + X86.TSS.TASK_PS, cpu.getPS());
+    cpu.setShort(addrOld + X86.TSS.TASK_AX, cpu.regEAX);
+    cpu.setShort(addrOld + X86.TSS.TASK_CX, cpu.regECX);
+    cpu.setShort(addrOld + X86.TSS.TASK_DX, cpu.regEDX);
+    cpu.setShort(addrOld + X86.TSS.TASK_BX, cpu.regEBX);
+    cpu.setShort(addrOld + X86.TSS.TASK_SP, cpu.getSP());
+    cpu.setShort(addrOld + X86.TSS.TASK_BP, cpu.regEBP);
+    cpu.setShort(addrOld + X86.TSS.TASK_SI, cpu.regESI);
+    cpu.setShort(addrOld + X86.TSS.TASK_DI, cpu.regEDI);
+    cpu.setShort(addrOld + X86.TSS.TASK_ES, cpu.segES.sel);
+    cpu.setShort(addrOld + X86.TSS.TASK_CS, cpu.segCS.sel);
+    cpu.setShort(addrOld + X86.TSS.TASK_SS, cpu.segSS.sel);
+    cpu.setShort(addrOld + X86.TSS.TASK_DS, cpu.segDS.sel);
+    var offSS = X86.TSS.TASK_SS;
+    var offSP = X86.TSS.TASK_SP;
+    cpu.setPS(cpu.getShort(addrNew + X86.TSS.TASK_PS) | (fNest? X86.PS.NT : 0));
+    cpu.assert(!fNest || !!(cpu.regPS & X86.PS.NT));
+    cpu.regEAX = cpu.getShort(addrNew + X86.TSS.TASK_AX);
+    cpu.regECX = cpu.getShort(addrNew + X86.TSS.TASK_CX);
+    cpu.regEDX = cpu.getShort(addrNew + X86.TSS.TASK_DX);
+    cpu.regEBX = cpu.getShort(addrNew + X86.TSS.TASK_BX);
+    cpu.regEBP = cpu.getShort(addrNew + X86.TSS.TASK_BP);
+    cpu.regESI = cpu.getShort(addrNew + X86.TSS.TASK_SI);
+    cpu.regEDI = cpu.getShort(addrNew + X86.TSS.TASK_DI);
+    cpu.segES.load(cpu.getShort(addrNew + X86.TSS.TASK_ES));
+    cpu.segDS.load(cpu.getShort(addrNew + X86.TSS.TASK_DS));
+    cpu.setCSIP(cpu.getShort(addrNew + X86.TSS.TASK_IP), cpu.getShort(addrNew + X86.TSS.TASK_CS));
+    if (this.cpl < cplOld) {
+        offSP = (this.cpl << 2) + X86.TSS.CPL0_SP;
+        offSS = offSP + 2;
+    }
+    cpu.setSS(cpu.getShort(addrNew + offSS), true);
+    cpu.setSP(cpu.getShort(addrNew + offSP));
+    cpu.segLDT.load(cpu.getShort(addrNew + X86.TSS.TASK_LDT));
+    if (fNest) cpu.setShort(addrNew + X86.TSS.PREV_TSS, selOld);
+    cpu.regCR0 |= X86.CR0.MSW.TS;
+    return true;
 };
 
 /**
@@ -1008,23 +1016,23 @@ X86Seg.prototype.updateMode = function(fLoad, fProt)
 };
 
 /**
- * messageSeg(sel, base, limit, acc, ext)
+ * messageSeg(sel, base, limit, type, ext)
  *
  * @this {X86Seg}
  * @param {number} sel
  * @param {number} base
  * @param {number} limit
- * @param {number} acc
+ * @param {number} type
  * @param {number} [ext]
  */
-X86Seg.prototype.messageSeg = function(sel, base, limit, acc, ext)
+X86Seg.prototype.messageSeg = function(sel, base, limit, type, ext)
 {
     if (DEBUG) {
         if (DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.SEG)) {
             var ch = (this.sName.length < 3? " " : "");
             var sDPL = " dpl=" + this.dpl;
             if (this.id == X86Seg.ID.CODE) sDPL += " cpl=" + this.cpl;
-            this.dbg.message("loadSeg(" + this.sName + "):" + ch + "sel=" + str.toHexWord(sel) + " base=" + str.toHex(base) + " limit=" + str.toHexWord(limit) + " acc=" + str.toHexWord(acc) + sDPL);
+            this.dbg.message("loadSeg(" + this.sName + "):" + ch + "sel=" + str.toHexWord(sel) + " base=" + str.toHex(base) + " limit=" + str.toHexWord(limit) + " type=" + str.toHexWord(type) + sDPL, true);
         }
         this.cpu.assert(/* base !== X86.ADDR_INVALID && */ (this.cpu.model >= X86.MODEL_80386 || !ext || ext == X86.DESC.EXT.AVAIL));
     }

@@ -3802,11 +3802,10 @@ X86.opHLT = function HLT()
     this.intFlags |= X86.INTFLAG.HALT;
     this.nStepCycles -= 2;
     /*
-     * If a Debugger is present AND Debugger checks are enabled (eg, one or more breakpoints are set,
-     * or the global DEBUG flag is set, etc), then we REALLY halt the CPU, on the theory that whoever's
-     * using the Debugger would like to see HLTs.
+     * If a Debugger is present and the HALT message category is enabled, then we REALLY halt the CPU,
+     * on the theory that whoever's using the Debugger would like to see HLTs.
      */
-    if (DEBUGGER && this.dbg && this.dbg.checksEnabled(true)) {
+    if (DEBUGGER && this.dbg && this.messageEnabled(Messages.HALT)) {
         this.advanceIP(-1);     // this is purely for the Debugger's benefit, to show the HLT
         this.stopCPU();
         return;

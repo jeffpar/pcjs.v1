@@ -1424,7 +1424,7 @@ if (DEBUGGER) {
      * should be done only as a last resort.
      *
      * @param {number|null|undefined} sel
-     * @return {X86Seg} seg
+     * @return {X86Seg|null} seg
      */
     Debugger.prototype.getSegment = function(sel)
     {
@@ -1436,6 +1436,7 @@ if (DEBUGGER) {
             if (sel === this.cpu.getFS()) return this.cpu.segFS;
             if (sel === this.cpu.getGS()) return this.cpu.segGS;
         }
+        if (this.nBreakSuppress) return null;
         var seg = new X86Seg(this.cpu, X86Seg.ID.DEBUG, "DBG");
         /*
          * Note the load() function's fSuppress parameter, which the Debugger should ALWAYS set to true
@@ -1466,13 +1467,16 @@ if (DEBUGGER) {
          */
         var addr = dbgAddr.addr;
         if (addr == null) {
+            addr = X86.ADDR_INVALID;
             var seg = this.getSegment(dbgAddr.sel);
-            if (!fWrite) {
-                addr = seg.checkRead(dbgAddr.off, cb || 1, true);
-            } else {
-                addr = seg.checkWrite(dbgAddr.off, cb || 1, true);
+            if (seg) {
+                if (!fWrite) {
+                    addr = seg.checkRead(dbgAddr.off, cb || 1, true);
+                } else {
+                    addr = seg.checkWrite(dbgAddr.off, cb || 1, true);
+                }
+                dbgAddr.addr = addr;
             }
-            dbgAddr.addr = addr;
         }
         return addr;
     };
@@ -1639,8 +1643,8 @@ if (DEBUGGER) {
     Debugger.prototype.checkLimit = function(dbgAddr)
     {
         if (dbgAddr.sel != null) {
-            var limit = this.getSegment(dbgAddr.sel).limit;
-            if (dbgAddr.off > limit) {
+            var seg = this.getSegment(dbgAddr.sel);
+            if (!seg || dbgAddr.off > seg.limit) {
                 dbgAddr.off = 0;
                 dbgAddr.addr = null;
             }
@@ -1816,8 +1820,8 @@ if (DEBUGGER) {
         }
 
         var seg = this.getSegment(sel);
-
-        this.println("dumpDesc(" + str.toHexWord(seg.sel) + "): %" + str.toHex(seg.addrDesc, this.cchAddr));
+        this.println("dumpDesc(" + str.toHexWord(seg? seg.sel : sel) + "): %" + str.toHex(seg? seg.addrDesc : null, this.cchAddr));
+        if (!seg) return;
 
         var sType;
         var fGate = false;
@@ -1879,7 +1883,68 @@ if (DEBUGGER) {
          * been incorporated into the limit and base properties of the segment register; all we care about here
          * are whether EXT contains any of the AVAIL (0x10), BIG (0x40) or LIMITPAGES (0x80) bits.
          */
-        this.println(sDump + " dpl=" + str.toHexByte(seg.dpl) + " type=" + str.toHexByte(seg.type >> 8) + " (" + sType + ")" + " ext=" + str.toHexWord(seg.ext & ~(X86.DESC.EXT.LIMIT1619 | X86.DESC.EXT.BASE2431)));
+        this.println(sDump + " type=" + str.toHexByte(seg.type >> 8) + " (" + sType + ")" + " ext=" + str.toHexWord(seg.ext & ~(X86.DESC.EXT.LIMIT1619 | X86.DESC.EXT.BASE2431)) + " dpl=" + str.toHexByte(seg.dpl));
+    };
+
+    /**
+     * dumpHistory(sCount)
+     *
+     * @this {Debugger}
+     * @param {string|undefined} sCount is the number of instructions to rewind to (default is 10)
+     */
+    Debugger.prototype.dumpHistory = function(sCount)
+    {
+        var sMore = "";
+        var cLines = 10;
+        var iHistory = this.iOpcodeHistory;
+        var aHistory = this.aOpcodeHistory;
+        if (aHistory.length) {
+            var n = (sCount === undefined? this.nextHistory : +sCount);
+            if (isNaN(n))
+                n = cLines;
+            else
+                sMore = "more ";
+            if (n > aHistory.length) {
+                this.println("note: only " + aHistory.length + " available");
+                n = aHistory.length;
+            }
+            iHistory -= n;
+            if (iHistory < 0) {
+                if (aHistory[aHistory.length - 1][1] != null) {
+                    iHistory += aHistory.length;
+                } else {
+                    n = iHistory + n;
+                    iHistory = 0;
+                }
+            }
+            if (sCount !== undefined) {
+                this.println(n + " instructions earlier:");
+            }
+            while (cLines && iHistory != this.iOpcodeHistory) {
+                var dbgAddr = aHistory[iHistory++];
+                if (dbgAddr.sel == null) break;
+                /*
+                 * We must create a new dbgAddr from the address we obtained from aHistory, because dbgAddr
+                 * was a reference, not a copy, and we don't want getInstruction() modifying the original.
+                 */
+                dbgAddr = this.newAddr(dbgAddr.off, dbgAddr.sel, dbgAddr.addr);
+                this.println(this.getInstruction(dbgAddr, "history", n--));
+                /*
+                 * If there was an OPERAND or ADDRESS override on the previous instruction, getInstruction()
+                 * will have automatically disassembled the next instruction, so skip one more history entry.
+                 */
+                if (dbgAddr.fOverride) {
+                    iHistory++; n--;
+                }
+                if (iHistory >= aHistory.length) iHistory = 0;
+                this.nextHistory = n;
+                cLines--;
+            }
+        }
+        if (cLines == 10) {
+            this.println("no " + sMore + "history available");
+            this.nextHistory = undefined;
+        }
     };
 
     /**
@@ -1904,7 +1969,8 @@ if (DEBUGGER) {
             seg = this.getSegment(sel);
         }
 
-        this.println("dumpTSS(" + str.toHexWord(seg.sel) + "): %" + str.toHex(seg.base, this.cchAddr));
+        this.println("dumpTSS(" + str.toHexWord(seg? seg.sel : sel) + "): %" + str.toHex(seg? seg.base : null, this.cchAddr));
+        if (!seg) return;
 
         var sDump = "";
         for (var sField in Debugger.aTSSFields) {
@@ -2829,6 +2895,12 @@ if (DEBUGGER) {
             }
         }
         this.aBreakWrite = ["write"];
+        /*
+         * nBreakSuppress ensures we can't get into an infinite loop where a breakpoint lookup requires
+         * reading a segment descriptor via getSegment(), and that triggers more memory reads, which triggers
+         * more breakpoint checks.
+         */
+        this.nBreakSuppress = 0;
     };
 
     /**
@@ -3017,39 +3089,42 @@ if (DEBUGGER) {
          * or history data (see checkInstruction), since we might not actually execute the current instruction.
          */
         var fBreak = false;
-        addr = this.mapBreakpoint(addr);
-        for (var i = 1; i < aBreak.length; i++) {
+        if (!this.nBreakSuppress++) {
+            addr = this.mapBreakpoint(addr);
+            for (var i = 1; i < aBreak.length; i++) {
 
-            var dbgAddrBreak = aBreak[i];
+                var dbgAddrBreak = aBreak[i];
 
-            /*
-             * We need to zap the linear address field of the breakpoint address before
-             * calling getAddr(), to force it to recalculate the linear address every time,
-             * unless this is a breakpoint on a linear address (as indicated by a -1 offset).
-             */
-            if (dbgAddrBreak.off != -1) dbgAddrBreak.addr = null;
+                /*
+                 * We need to zap the linear address field of the breakpoint address before
+                 * calling getAddr(), to force it to recalculate the linear address every time,
+                 * unless this is a breakpoint on a linear address (as indicated by a -1 offset).
+                 */
+                if (dbgAddrBreak.off != -1) dbgAddrBreak.addr = null;
 
-            /*
-             * We used to calculate the linear address of the breakpoint at the time the
-             * breakpoint was added, so that a breakpoint set in one mode (eg, in real-mode)
-             * would still work as intended if the mode changed later (eg, to protected-mode).
-             *
-             * However, that created difficulties setting protected-mode breakpoints in segments
-             * that might not be defined yet, or that could move in physical memory.
-             *
-             * If you want to create a real-mode breakpoint that will break regardless of mode,
-             * use the physical address of the real-mode memory location instead.
-             */
-            if (addr == this.mapBreakpoint(this.getAddr(dbgAddrBreak))) {
-                if (dbgAddrBreak.fTempBreak) {
-                    this.findBreakpoint(aBreak, dbgAddrBreak, true);
-                } else if (!fTemp) {
-                    this.println("breakpoint hit: " + this.hexAddr(dbgAddrBreak) + " (" + aBreak[0] + ")");
+                /*
+                 * We used to calculate the linear address of the breakpoint at the time the
+                 * breakpoint was added, so that a breakpoint set in one mode (eg, in real-mode)
+                 * would still work as intended if the mode changed later (eg, to protected-mode).
+                 *
+                 * However, that created difficulties setting protected-mode breakpoints in segments
+                 * that might not be defined yet, or that could move in physical memory.
+                 *
+                 * If you want to create a real-mode breakpoint that will break regardless of mode,
+                 * use the physical address of the real-mode memory location instead.
+                 */
+                if (addr == this.mapBreakpoint(this.getAddr(dbgAddrBreak))) {
+                    if (dbgAddrBreak.fTempBreak) {
+                        this.findBreakpoint(aBreak, dbgAddrBreak, true);
+                    } else if (!fTemp) {
+                        this.println("breakpoint hit: " + this.hexAddr(dbgAddrBreak) + " (" + aBreak[0] + ")");
+                    }
+                    fBreak = true;
+                    break;
                 }
-                fBreak = true;
-                break;
             }
         }
+        this.nBreakSuppress--;
         return fBreak;
     };
 
@@ -4167,9 +4242,10 @@ if (DEBUGGER) {
             sDumpers += ",state,symbols";
             this.println("\ndump commands:");
             this.println("\tdb [a] [#]    dump # bytes at address a");
-            if (BACKTRACK) this.println("\tdi [a]        dump backtrack info at address a");
             this.println("\tdw [a] [#]    dump # words at address a");
             this.println("\tdd [a] [#]    dump # dwords at address a");
+            this.println("\tdh [#]        dump # instructions prior");
+            if (BACKTRACK) this.println("\tdi [a]        dump backtrack info at address a");
             if (sDumpers.length) this.println("dump extensions:\n\t" + sDumpers);
             return;
         }
@@ -4179,6 +4255,10 @@ if (DEBUGGER) {
         }
         if (sAddr == "symbols") {
             this.dumpSymbols();
+            return;
+        }
+        if (sCmd == "dh") {
+            this.dumpHistory(sAddr);
             return;
         }
         if (sCmd == "ds") {     // transform a "ds" command into a "d desc" command
@@ -4326,57 +4406,7 @@ if (DEBUGGER) {
             this.stopCPU();
             return;
         }
-        var sMore = "";
-        var cLines = 10;
-        var iHistory = this.iOpcodeHistory;
-        var aHistory = this.aOpcodeHistory;
-        if (aHistory.length) {
-            var n = (sCount === undefined? this.nextHistory : +sCount);
-            if (isNaN(n))
-                n = cLines;
-            else
-                sMore = "more ";
-            if (n > aHistory.length) {
-                this.println("note: only " + aHistory.length + " available");
-                n = aHistory.length;
-            }
-            iHistory -= n;
-            if (iHistory < 0) {
-                if (aHistory[aHistory.length - 1][1] != null) {
-                    iHistory += aHistory.length;
-                } else {
-                    n = iHistory + n;
-                    iHistory = 0;
-                }
-            }
-            if (sCount !== undefined) {
-                this.println(n + " instructions earlier:");
-            }
-            while (cLines && iHistory != this.iOpcodeHistory) {
-                var dbgAddr = aHistory[iHistory++];
-                if (dbgAddr.sel == null) break;
-                /*
-                 * We must create a new dbgAddr from the address we obtained from aHistory, because dbgAddr
-                 * was a reference, not a copy, and we don't want getInstruction() modifying the original.
-                 */
-                dbgAddr = this.newAddr(dbgAddr.off, dbgAddr.sel, dbgAddr.addr);
-                this.println(this.getInstruction(dbgAddr, "history", n--));
-                /*
-                 * If there was an OPERAND or ADDRESS override on the previous instruction, getInstruction()
-                 * will have automatically disassembled the next instruction, so skip one more history entry.
-                 */
-                if (dbgAddr.fOverride) {
-                    iHistory++; n--;
-                }
-                if (iHistory >= aHistory.length) iHistory = 0;
-                this.nextHistory = n;
-                cLines--;
-            }
-        }
-        if (cLines == 10) {
-            this.println("no " + sMore + "history available");
-            this.nextHistory = undefined;
-        }
+        this.dumpHistory(sCount);
     };
 
     /**
