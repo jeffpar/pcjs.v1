@@ -53,6 +53,12 @@ if (DEBUGGER) {
 /**
  * Debugger Address Object
  *
+ * When off is null, the entire address is considered invalid.
+ *
+ * When sel is null, addr must be set to a valid linear address.
+ *
+ * When addr is null (or reset to null), it will be recomputed from sel:off.
+ *
  * NOTE: I originally tried to define DbgAddr as a record typedef, which allowed me to reference the type
  * as {DbgAddr} instead of {{DbgAddr}}, but my IDE (WebStorm) did not recognize all instances of {DbgAddr}.
  * Using this @class definition is a bit cleaner, and it makes both WebStorm and the Closure Compiler happier,
@@ -1597,7 +1603,7 @@ if (DEBUGGER) {
      *
      * @this {Debugger}
      * @param {number|null|undefined} [off] (default is zero)
-     * @param {number|null|undefined} [sel] (default is null)
+     * @param {number|null|undefined} [sel] (default is undefined)
      * @param {number|null|undefined} [addr] (default is undefined)
      * @param {boolean} [fData32] (default is false)
      * @param {boolean} [fAddr32] (default is false)
@@ -1607,7 +1613,7 @@ if (DEBUGGER) {
     {
         if (fData32 === undefined) fData32 = (this.cpu && this.cpu.segCS.dataSize == 4);
         if (fAddr32 === undefined) fAddr32 = (this.cpu && this.cpu.segCS.addrSize == 4);
-        return {off: off || 0, sel: sel || null, addr: addr, fTempBreak: false, fData32: fData32 || false, fAddr32: fAddr32 || false};
+        return {off: off || 0, sel: sel, addr: addr, fTempBreak: false, fData32: fData32 || false, fAddr32: fAddr32 || false};
     };
 
     /**
@@ -2926,7 +2932,7 @@ if (DEBUGGER) {
                  * (hence the assertion that there IS a linear address stored in dbgAddr);
                  * this allows us to step over calls or interrupts that change the processor mode
                  */
-                dbgAddr.off = -1;
+                dbgAddr.sel = null;
                 this.assert(dbgAddr.addr);
             } else {
                 this.println("breakpoint enabled: " + this.hexAddr(dbgAddr) + " (" + aBreak[0] + ")");
@@ -3098,9 +3104,9 @@ if (DEBUGGER) {
                 /*
                  * We need to zap the linear address field of the breakpoint address before
                  * calling getAddr(), to force it to recalculate the linear address every time,
-                 * unless this is a breakpoint on a linear address (as indicated by a -1 offset).
+                 * unless this is a breakpoint on a linear address (as indicated by a null sel).
                  */
-                if (dbgAddrBreak.off != -1) dbgAddrBreak.addr = null;
+                if (dbgAddrBreak.sel != null) dbgAddrBreak.addr = null;
 
                 /*
                  * We used to calculate the linear address of the breakpoint at the time the
@@ -3723,7 +3729,7 @@ if (DEBUGGER) {
 
             if (sAddr.charAt(0) == '%') {
                 sAddr = sAddr.substr(1);
-                off = -1;
+                off = 0;
                 sel = null;
                 addr = 0;
             }
@@ -4278,7 +4284,7 @@ if (DEBUGGER) {
             }
         }
         var dbgAddr = this.parseAddr(sAddr, Debugger.ADDR_DATA);
-        if (dbgAddr.off == null || dbgAddr.off == -1 && dbgAddr.addr == null) return;
+        if (dbgAddr.off == null || dbgAddr.sel == null && dbgAddr.addr == null) return;
 
         var sDump = "";
         if (BACKTRACK && sCmd == "di") {
