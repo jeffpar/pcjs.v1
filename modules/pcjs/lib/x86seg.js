@@ -555,11 +555,10 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                 fGate = false;
             }
             else if (type == X86.DESC.ACC.TYPE.TSS) {
-                if (!this.switchTSS(sel, true)) {
+                if (!this.switchTSS(sel, fCall)) {
                     base = addrDesc = X86.ADDR_INVALID;
                     break;
                 }
-                if (DEBUG) cpu.stopCPU();
                 return this.base;
             }
             else if (type == X86.DESC.ACC.TYPE.GATE_CALL) {
@@ -581,7 +580,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
                 cpu.assert(!(acc & 0x1f));
             }
             else if (type == X86.DESC.ACC.TYPE.GATE_TASK) {
-                if (!this.switchTSS(base & 0xffff, true)) {
+                if (!this.switchTSS(base & 0xffff, fCall)) {
                     base = addrDesc = X86.ADDR_INVALID;
                     break;
                 }
@@ -746,7 +745,7 @@ X86Seg.prototype.loadDesc8 = function(addrDesc, sel, fSuppress)
  *
  * @this {X86Seg}
  * @param {number} selNew
- * @param {boolean} fNest is true if nesting, false if un-nesting
+ * @param {boolean|null} [fNest] is true if nesting, false if un-nesting, null if neither
  * @return {boolean} true if successful, false if error
  */
 X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
@@ -758,6 +757,9 @@ X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
     var cplOld = this.cpl;
     var selOld = cpu.segTSS.sel;
     if (!fNest) {
+        /*
+         * TODO: Verify that it is (always) correct to require that the BUSY bit be currently set.
+         */
         if (cpu.segTSS.type != X86.DESC.ACC.TYPE.TSS_BUSY) {
             X86.fnFault.call(cpu, X86.EXCEPTION.TS_FAULT, selNew, true);
             return false;
@@ -771,7 +773,12 @@ X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
     if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.TSS)) {
         this.dbg.message((fNest? "Task switch" : "Task return") + ": TR " + str.toHexWord(selOld) + " (%" + str.toHex(addrOld, 6) + "), new TR " + str.toHexWord(selNew) + " (%" + str.toHex(addrNew, 6) + ")");
     }
-    if (fNest) {
+    if (fNest === false) {
+        if (cpu.segTSS.type != X86.DESC.ACC.TYPE.TSS_BUSY) {
+            X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, selNew, true);
+            return false;
+        }
+    } else {
         if (cpu.segTSS.type == X86.DESC.ACC.TYPE.TSS_BUSY) {
             X86.fnFault.call(cpu, X86.EXCEPTION.GP_FAULT, selNew, true);
             return false;
