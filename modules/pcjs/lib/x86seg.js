@@ -756,6 +756,7 @@ X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
     var addrOld = cpu.segTSS.base;
     var cplOld = this.cpl;
     var selOld = cpu.segTSS.sel;
+
     if (!fNest) {
         /*
          * TODO: Verify that it is (always) correct to require that the BUSY bit be currently set.
@@ -766,9 +767,11 @@ X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
         }
         cpu.setShort(cpu.segTSS.addrDesc + X86.DESC.ACC.OFFSET, (cpu.segTSS.acc & ~X86.DESC.ACC.TYPE.TSS_BUSY) | X86.DESC.ACC.TYPE.TSS);
     }
+
     if (cpu.segTSS.load(selNew) === X86.ADDR_INVALID) {
         return false;
     }
+
     var addrNew = cpu.segTSS.base;
     if (DEBUG && DEBUGGER && this.dbg && this.dbg.messageEnabled(Messages.TSS)) {
         this.dbg.message((fNest? "Task switch" : "Task return") + ": TR " + str.toHexWord(selOld) + " (%" + str.toHex(addrOld, 6) + "), new TR " + str.toHexWord(selNew) + " (%" + str.toHex(addrNew, 6) + ")");
@@ -786,6 +789,10 @@ X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
         cpu.setShort(cpu.segTSS.addrDesc + X86.DESC.ACC.OFFSET, cpu.segTSS.acc |= X86.DESC.ACC.TYPE.TSS_BUSY);
         cpu.segTSS.type = X86.DESC.ACC.TYPE.TSS_BUSY;
     }
+
+    /*
+     * Update the old TSS
+     */
     cpu.setShort(addrOld + X86.TSS.TASK_IP, cpu.getIP());
     cpu.setShort(addrOld + X86.TSS.TASK_PS, cpu.getPS());
     cpu.setShort(addrOld + X86.TSS.TASK_AX, cpu.regEAX);
@@ -800,8 +807,13 @@ X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
     cpu.setShort(addrOld + X86.TSS.TASK_CS, cpu.segCS.sel);
     cpu.setShort(addrOld + X86.TSS.TASK_SS, cpu.segSS.sel);
     cpu.setShort(addrOld + X86.TSS.TASK_DS, cpu.segDS.sel);
-    var offSS = X86.TSS.TASK_SS;
-    var offSP = X86.TSS.TASK_SP;
+
+    /*
+     * Reload all registers from the new TSS; it's important to reload the LDTR sooner
+     * rather than later, so that as segment registers are reloaded, any LDT selectors will
+     * will be located in the correct table.
+     */
+    cpu.segLDT.load(cpu.getShort(addrNew + X86.TSS.TASK_LDT));
     cpu.setPS(cpu.getShort(addrNew + X86.TSS.TASK_PS) | (fNest? X86.PS.NT : 0));
     cpu.assert(!fNest || !!(cpu.regPS & X86.PS.NT));
     cpu.regEAX = cpu.getShort(addrNew + X86.TSS.TASK_AX);
@@ -814,14 +826,18 @@ X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
     cpu.segES.load(cpu.getShort(addrNew + X86.TSS.TASK_ES));
     cpu.segDS.load(cpu.getShort(addrNew + X86.TSS.TASK_DS));
     cpu.setCSIP(cpu.getShort(addrNew + X86.TSS.TASK_IP), cpu.getShort(addrNew + X86.TSS.TASK_CS));
+
+    var offSS = X86.TSS.TASK_SS;
+    var offSP = X86.TSS.TASK_SP;
     if (this.cpl < cplOld) {
         offSP = (this.cpl << 2) + X86.TSS.CPL0_SP;
         offSS = offSP + 2;
     }
     cpu.setSS(cpu.getShort(addrNew + offSS), true);
     cpu.setSP(cpu.getShort(addrNew + offSP));
-    cpu.segLDT.load(cpu.getShort(addrNew + X86.TSS.TASK_LDT));
+
     if (fNest) cpu.setShort(addrNew + X86.TSS.PREV_TSS, selOld);
+
     cpu.regCR0 |= X86.CR0.MSW.TS;
     return true;
 };
