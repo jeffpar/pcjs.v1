@@ -3700,7 +3700,7 @@ X86CPU.prototype.updateReg = function(sReg, nValue)
     }
     if (this.model < 80386) {
         if (sReg.length > 2) {
-            sReg = sReg.substr(0, 2);
+            sReg = sReg.substr(1, 2);
         }
     } else {
         if (sReg == "PS" || sReg.length > 2) {
