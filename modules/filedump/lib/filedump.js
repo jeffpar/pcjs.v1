@@ -52,9 +52,11 @@ var DumpAPI = require("../../shared/lib/dumpapi");
  * @param {string|undefined} sFormat should be one of "json"|"data"|"hex"|"bytes"|"rom" (see the FORMAT constants)
  * @param {boolean|string|undefined} fComments enables comments and other readability enhancements in the JSON output
  * @param {boolean|string|undefined} fDecimal forces decimal output if not undefined
+ * @param {number|string|undefined} offDump
+ * @param {number|string|undefined} nWidthDump
  * @param {string} [sServerRoot]
  */
-function FileDump(sFormat, fComments, fDecimal, sServerRoot)
+function FileDump(sFormat, fComments, fDecimal, offDump, nWidthDump, sServerRoot)
 {
     this.fDebug = false;
     this.sFormat = (sFormat || DumpAPI.FORMAT.JSON);
@@ -63,6 +65,8 @@ function FileDump(sFormat, fComments, fDecimal, sServerRoot)
     this.fJSONComments = fComments;
     this.sJSONWhitespace = (this.fJSONComments? " " : "");
     this.fDecimal = fDecimal;
+    this.offDump = +offDump || 0;
+    this.nWidthDump = +nWidthDump || 16;
     this.sServerRoot = sServerRoot || process.cwd();
     this.buf = null;
     /*
@@ -96,7 +100,7 @@ FileDump.asBadExts = [
  * Usage
  * ---
  *      filedump --file=({path}|{URL}) [--merge=({path}|{url})] [--format=(json|data|hex|bytes|rom)] [--comments]
- *               [--decimal] [--output={path}] [--overwrite]
+ *               [--decimal] [--offset={number}] [--width={number}] [--output={path}] [--overwrite]
  *
  * Arguments
  * ---
@@ -153,7 +157,7 @@ FileDump.CLI = function()
     }
 
     var sMergeFile, asMergeFiles = [];
-    var file = new FileDump(sFormat, argv['comments'], argv['decimal']);
+    var file = new FileDump(sFormat, argv['comments'], argv['decimal'], argv['offset'], argv['width']);
     if (argv['merge']) {
         if (typeof argv['merge'] == "string") {
             asMergeFiles.push(argv['merge']);
@@ -390,17 +394,18 @@ FileDump.prototype.dumpLine = function(nIndent, sLine, sComment)
 };
 
 /**
- * dumpBuffer(sKey, buf, len, cbItem, offData)
+ * dumpBuffer(sKey, buf, len, cbItem, offDump, nWidthDump)
  *
  * @this {FileDump}
  * @param {string|null} sKey is name of buffer data element
  * @param {Buffer} buf is a Buffer containing the bytes to dump
  * @param {number} len is the number of bytes to dump
  * @param {number} cbItem is either 1 or 4, to dump bytes or dwords respectively
- * @param {number} [offData] is a relative offset of this data within the parent (for display purposes only)
+ * @param {number} [offDump] is a relative offset (default is 0; see constructor)
+ * @param {number} [nWidthDump] is an alternate width (default is 16; see constructor)
  * @return {string} hex (or decimal) representation of the data
  */
-FileDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offData)
+FileDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offDump, nWidthDump)
 {
     var chOpen = '', chClose = '', chSep = ' ', sHexPrefix = "";
 
@@ -410,14 +415,16 @@ FileDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offData)
         chOpen = '['; chClose = ']'; chSep = ',';
     }
 
+    offDump = offDump || this.offDump;
+    nWidthDump = nWidthDump || this.nWidthDump;
+
     var sDump = this.dumpLine(2, (sKey? '"' + sKey + '":' : "") + this.sJSONWhitespace + chOpen);
 
     var sLine = "";
     var sASCII = "";
-    var cMaxCols = 16 * cbItem;
-    if (offData === undefined) offData = 0;
+    var cMaxCols = nWidthDump * cbItem;
 
-    for (var off = 0; off < len; off += cbItem) {
+    for (var off = offDump; off < len; off += cbItem) {
 
         /*
          * WARNING: Whenever the following condition arises, you probably have a non-dword-granular
@@ -429,9 +436,9 @@ FileDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offData)
 
         var v = (cbItem == 1? buf.readUInt8(off) : buf.readInt32LE(off));
 
-        if (off) {
+        if (off > offDump) {
             sLine += chSep;
-            if (!(off % cMaxCols)) {    // jshint ignore:line
+            if (!((off - offDump) % cMaxCols)) {    // jshint ignore:line
                 sDump += this.dumpLine(0, sLine, sASCII);
                 sLine = sASCII = "";
             }
@@ -445,7 +452,7 @@ FileDump.prototype.dumpBuffer = function(sKey, buf, len, cbItem, offData)
             } else {
                 sLine += str.toHexByte(v);
             }
-            if (!sASCII) sASCII = "0x" + str.toHex(offData + off) + " ";
+            if (!sASCII) sASCII = "0x" + str.toHex(off) + " ";
             sASCII += (v >= 0x20 && v < 0x7F && v != 0x3C && v != 0x3E? String.fromCharCode(v) : ".");
         }
     }
