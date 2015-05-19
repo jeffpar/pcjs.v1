@@ -4515,17 +4515,35 @@ ChipSet.prototype.set8042CmdData = function(b)
 };
 
 /**
- * set8042OutBuff(b)
+ * set8042OutBuff(b, fNoDelay)
+ *
+ * The 5170 ROM BIOS assumed there would be a slight delay after certain 8042 commands, like SELF_TEST
+ * (0xAA), before there was an OUTBUFF response; in fact, there is BIOS code that will fail without such
+ * a delay.  This is discussed in greater detail in in8042Status().
+ *
+ * So we default to a "single poll" delay, setting OUTBUFF_DELAY instead of OUTBUFF_FULL, unless the caller
+ * explicitly asks for no delay.  The fNoDelay parameter was added later, so that notifyKbdData() could
+ * request immediate delivery of keyboard scan codes, because some operating systems (eg, Microport's 1986
+ * version of Unix for PC AT machines) poll the status port only once, immediately giving up if no data is
+ * available.
+ *
+ * TODO: Determine if we can/should invert the fNoDelay default (from false to true) and delay only in
+ * specific cases; perhaps only the SELF_TEST command required a delay.
  *
  * @this {ChipSet}
  * @param {number} b
+ * @param {boolean} [fNoDelay]
  */
-ChipSet.prototype.set8042OutBuff = function(b)
+ChipSet.prototype.set8042OutBuff = function(b, fNoDelay)
 {
     if (b >= 0) {
         this.b8042OutBuff = b;
-        this.b8042Status &= ~ChipSet.KBC.STATUS.OUTBUFF_FULL;
-        this.b8042Status |= ChipSet.KBC.STATUS.OUTBUFF_DELAY;
+        if (fNoDelay) {
+            this.b8042Status |= ChipSet.KBC.STATUS.OUTBUFF_FULL;
+        } else {
+            this.b8042Status &= ~ChipSet.KBC.STATUS.OUTBUFF_FULL;
+            this.b8042Status |= ChipSet.KBC.STATUS.OUTBUFF_DELAY;
+        }
         if (DEBUG && this.messageEnabled(Messages.KEYBOARD | Messages.PORT)) {
             this.printMessage("set8042OutBuff(" + str.toHexByte(b) + ")", true);
         }
@@ -4563,7 +4581,7 @@ ChipSet.prototype.set8042OutPort = function(b)
  *
  * In the old days of PCjs, the Keyboard component would simply call setIRR() when it had some data for the
  * keyboard controller.  However, the Keyboard's sole responsibility is to emulate an actual keyboard and call
- * notifyKbdData() whenever it has some data; it's not supposed to mess with IRQ lines.
+ * notifyKbdData() whenever it has some data; it's not allowed to mess with IRQ lines.
  *
  * If there's an 8042, we check (this.b8042CmdData & ChipSet.KBC.DATA.CMD.NO_CLOCK); if NO_CLOCK is clear,
  * we can raise the IRQ immediately.  Well, not quite immediately....
@@ -4651,7 +4669,7 @@ ChipSet.prototype.notifyKbdData = function(b)
              * which will call notifyKbdData() again if there's still keyboard data to process.
              */
             if (!(this.b8042Status & (ChipSet.KBC.STATUS.OUTBUFF_FULL | ChipSet.KBC.STATUS.OUTBUFF_DELAY))) {
-                this.set8042OutBuff(b);
+                this.set8042OutBuff(b, true);
                 this.kbd.shiftScanCode();
                 /*
                  * A delay of 4 instructions was originally requested as part of the the Keyboard's resetDevice()
