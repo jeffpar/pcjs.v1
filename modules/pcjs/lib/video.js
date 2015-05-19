@@ -101,24 +101,22 @@ function Video(parmsVideo, canvas, context, textarea, container)
     Component.call(this, "Video", parmsVideo, Video, Messages.VIDEO);
 
     /*
-     * This records the model specified (eg, "mda", "cga", "ega" or "" if none specified);
+     * This records the model specified (eg, "mda", "cga", "ega", "vga" or "" if none specified);
      * when a model is specified, it overrides whatever model we infer from the ChipSet's switches
      * (since those motherboard switches tell us only the type of monitor, not the type of card).
      */
     this.model = parmsVideo['model'];
-    this.cbMemory = 0;
+    this.nCard = Video.CARD.NAMES[this.model] || Video.CARD.MDA;
 
-    if (this.model == "ega") {
-        this.sEGASW = parmsVideo['switches'];
-        this.cbMemory = parmsVideo['memory'] || 0;      // zero means fallback to the cardSpec's default size
-    }
+    this.cbMemory = parmsVideo['memory'] || 0;  // zero means fallback to the cardSpec's default size
+    this.sSwitches = parmsVideo['switches'];
 
     /*
      * powerUp() uses the default mode ONLY if ChipSet doesn't give us a default.
      */
     this.nModeDefault = parmsVideo['mode'];
     if (this.nModeDefault === undefined || Video.aModeParms[this.nModeDefault] === undefined) {
-        this.nModeDefault = Video.MODES.MDA_80X25;
+        this.nModeDefault = Video.MODE.MDA_80X25;
     }
 
     /*
@@ -336,12 +334,20 @@ Video.TRAPALL = true;           // monitor all I/O by default (not just deltas)
 /*
  * Supported Cards
  *
- * Note that we choose IDs that match the default font ID for each card as well, just for consistency.
+ * Note that we choose IDs that match the default font ID for each card as well, for convenience.
  */
-Video.CARDS = {};
-Video.CARDS.MDA = 1;
-Video.CARDS.CGA = 3;
-Video.CARDS.EGA = 5;
+Video.CARD = {
+    MDA: 1,
+    CGA: 3,
+    EGA: 5,
+    VGA: 7,
+    NAMES: {
+        "mda": 1,
+        "cga": 3,
+        "ega": 5,
+        "vga": 7
+    }
+};
 
 /*
  * Supported Monitors
@@ -448,7 +454,7 @@ Video.monitorSpecs[ChipSet.MONITOR.EGACOLOR] = {
  *      0x0: return SW4
  *
  * These 4 bits are also copied to the byte at 40:88h by the EGA BIOS, where bit 0 is SW1, bit 1 is SW2,
- * bit 2 is SW3 and bit 3 is SW4.  Our switch settings come from bEGASW, which in turn comes from sEGASW,
+ * bit 2 is SW3 and bit 3 is SW4.  Our switch settings come from bEGASwitches, which in turn comes from sSwitches,
  * which in turn comes from the "switches" property passed to the Video component, if any.
  *
  * As usual, the switch settings are reversed in both direction and sense from the switch settings; the
@@ -462,7 +468,7 @@ Video.aEGAMonitorSwitches = {
     0x06: [ChipSet.MONITOR.TV,           ChipSet.MONITOR.MONO,  true],  // "1001"
     0x07: [ChipSet.MONITOR.COLOR,        ChipSet.MONITOR.MONO,  true],  // "0001"
     0x08: [ChipSet.MONITOR.EGAEMULATION, ChipSet.MONITOR.MONO,  true],  // "1110"
-    0x09: [ChipSet.MONITOR.EGACOLOR,     ChipSet.MONITOR.MONO,  true],  // "0110" [our default; see bEGASW below]
+    0x09: [ChipSet.MONITOR.EGACOLOR,     ChipSet.MONITOR.MONO,  true],  // "0110" [our default; see bEGASwitches below]
     0x0a: [ChipSet.MONITOR.MONO,         ChipSet.MONITOR.TV,    true],  // "1010"
     0x0b: [ChipSet.MONITOR.MONO,         ChipSet.MONITOR.COLOR, true],  // "0010"
     0x00: [ChipSet.MONITOR.TV,           ChipSet.MONITOR.MONO,  false], // "1111"
@@ -490,20 +496,24 @@ Video.aEGAMonitorSwitches = {
  * situations as best they can (and when they don't, it should be considered a bug if some application is
  * broken as a result), but realistically, this is never going to be a 100% accurate hardware emulation.
  */
-Video.MODES = {};
-Video.MODES.CGA_40X25_BW     = 0;
-Video.MODES.CGA_40X25        = 1;
-Video.MODES.CGA_80X25_BW     = 2;
-Video.MODES.CGA_80X25        = 3;
-Video.MODES.CGA_320X200      = 4;
-Video.MODES.CGA_320X200_BW   = 5;
-Video.MODES.CGA_640X200      = 6;
-Video.MODES.MDA_80X25        = 7;
-Video.MODES.EGA_320X200      = 0x0D;    // mapped at A000:0000
-Video.MODES.EGA_640X200      = 0x0E;    // mapped at A000:0000
-Video.MODES.EGA_640X350_MONO = 0x0F;    // mapped at A000:0000, monochrome
-Video.MODES.EGA_640X350      = 0x10;    // mapped at A000:0000, color
-Video.MODES.UNKNOWN          = 0xFF;
+Video.MODE = {
+    CGA_40X25_BW:       0,
+    CGA_40X25:          1,
+    CGA_80X25_BW:       2,
+    CGA_80X25:          3,
+    CGA_320X200:        4,
+    CGA_320X200_BW:     5,
+    CGA_640X200:        6,
+    MDA_80X25:          7,
+    EGA_320X200:        0x0D,   // mapped at A000:0000
+    EGA_640X200:        0x0E,   // mapped at A000:0000
+    EGA_640X350_MONO:   0x0F,   // mapped at A000:0000, monochrome
+    EGA_640X350:        0x10,   // mapped at A000:0000, color
+    VGA_640X480_MONO:   0x11,   // mapped at A000:0000, monochrome
+    VGA_640X480:        0x12,   // mapped at A000:0000, color
+    VGA_320X200:        0x13,   // mapped at A000:0000, color
+    UNKNOWN:            0xFF
+};
 
 /**
  * @class Font
@@ -535,13 +545,16 @@ Video.MODES.UNKNOWN          = 0xFF;
  *      dot patterns for 256 different characters. The character sets are identical to those provided by the
  *      IBM Monochrome Display Adapter and the IBM Color/Graphics Monitor Adapter."
  */
-Video.FONTS = {};
-Video.FONTS.MDA     = 1;        // 9x14 monochrome font
-Video.FONTS.MDAD    = 2;        // 18x28 monochrome font (this is the 9x14 font doubled)
-Video.FONTS.CGA     = 3;        // 8x8 color font
-Video.FONTS.CGAD    = 6;        // 16x16 color font (this is the 8x8 CGA font doubled)
-Video.FONTS.EGA     = 5;        // 9x14 color font
-Video.FONTS.EGAD    = 10;       // 18x28 color font (this is the 9x14 EGA font doubled)
+Video.FONT = {
+    MDA:    1,          // 9x14 monochrome font
+    MDAD:   2,          // 18x28 monochrome font (this is the 9x14 font doubled)
+    CGA:    3,          // 8x8 color font
+    CGAD:   6,          // 16x16 color font (this is the 8x8 CGA font doubled)
+    EGA:    5,          // 8x14 color font
+    EGAD:   10,         // 16x28 color font (this is the 8x14 EGA font doubled)
+    VGA:    7,          // 8x16 color font
+    VGAD:   14          // 16x32 color font (this is the 8x16 VGA font doubled)
+};
 
 /*
  * For each video mode, we need to know the following pieces of information:
@@ -563,19 +576,22 @@ Video.FONTS.EGAD    = 10;       // 18x28 color font (this is the 9x14 EGA font d
  * and it might not always be the best fit.
  */
 Video.aModeParms = [];                                                                              // Mode
-Video.aModeParms[Video.MODES.CGA_40X25]         = [ 40,  25,  1,   0, Video.FONTS.CGA];             // 0x00
-Video.aModeParms[Video.MODES.CGA_80X25]         = [ 80,  25,  1,   0, Video.FONTS.CGA];             // 0x02
-Video.aModeParms[Video.MODES.CGA_320X200]       = [320, 200,  8, 192];                              // 0x04
-Video.aModeParms[Video.MODES.CGA_640X200]       = [640, 200, 16, 192];                              // 0x06
-Video.aModeParms[Video.MODES.MDA_80X25]         = [ 80,  25,  1,   0, Video.FONTS.MDA];             // 0x07
-Video.aModeParms[Video.MODES.EGA_320X200]       = [320, 200, 16];                                   // 0x0D
-Video.aModeParms[Video.MODES.EGA_640X200]       = [640, 200, 16];                                   // 0x0E
-Video.aModeParms[Video.MODES.EGA_640X350_MONO]  = [640, 350, 16];                                   // 0x0F
-Video.aModeParms[Video.MODES.EGA_640X350]       = [640, 350, 16];                                   // 0x10
+Video.aModeParms[Video.MODE.CGA_40X25]          = [ 40,  25,  1,   0, Video.FONT.CGA];              // 0x00
+Video.aModeParms[Video.MODE.CGA_80X25]          = [ 80,  25,  1,   0, Video.FONT.CGA];              // 0x02
+Video.aModeParms[Video.MODE.CGA_320X200]        = [320, 200,  8, 192];                              // 0x04
+Video.aModeParms[Video.MODE.CGA_640X200]        = [640, 200, 16, 192];                              // 0x06
+Video.aModeParms[Video.MODE.MDA_80X25]          = [ 80,  25,  1,   0, Video.FONT.MDA];              // 0x07
+Video.aModeParms[Video.MODE.EGA_320X200]        = [320, 200, 16];                                   // 0x0D
+Video.aModeParms[Video.MODE.EGA_640X200]        = [640, 200, 16];                                   // 0x0E
+Video.aModeParms[Video.MODE.EGA_640X350_MONO]   = [640, 350, 16];                                   // 0x0F
+Video.aModeParms[Video.MODE.EGA_640X350]        = [640, 350, 16];                                   // 0x10
+Video.aModeParms[Video.MODE.VGA_640X480_MONO]   = [640, 480, 16];                                   // 0x11
+Video.aModeParms[Video.MODE.VGA_640X480]        = [640, 480, 16];                                   // 0x12
+Video.aModeParms[Video.MODE.VGA_320X200]        = [320, 200, 16];                                   // 0x13
 
-Video.aModeParms[Video.MODES.CGA_40X25_BW]      = Video.aModeParms[Video.MODES.CGA_40X25];          // 0x01
-Video.aModeParms[Video.MODES.CGA_80X25_BW]      = Video.aModeParms[Video.MODES.CGA_80X25];          // 0x03
-Video.aModeParms[Video.MODES.CGA_320X200_BW]    = Video.aModeParms[Video.MODES.CGA_320X200];        // 0x05
+Video.aModeParms[Video.MODE.CGA_40X25_BW]       = Video.aModeParms[Video.MODE.CGA_40X25];           // 0x01
+Video.aModeParms[Video.MODE.CGA_80X25_BW]       = Video.aModeParms[Video.MODE.CGA_80X25];           // 0x03
+Video.aModeParms[Video.MODE.CGA_320X200_BW]     = Video.aModeParms[Video.MODE.CGA_320X200];         // 0x05
 
 /*
  * MDA attribute byte definitions
@@ -746,7 +762,7 @@ Video.aEGADWToByte[0x80808080|0] = 0xf;
  *
  * @constructor
  * @param {Video} [video]
- * @param {number} [iCard] (see Video.CARDS.*)
+ * @param {number} [iCard] (see Video.CARD.*)
  * @param {Array|null} [data]
  * @param {number} [cbMemory] is specified if the card must allocate its own memory buffer
  */
@@ -806,7 +822,7 @@ function Card(video, iCard, data, cbMemory)
         this.nCRTCRegs = Card.CRTC.TOTAL_REGS;
         this.asCRTCRegs = DEBUGGER? Card.CRTC.REGS : [];
 
-        if (iCard == Video.CARDS.EGA) {
+        if (iCard >= Video.CARD.EGA) {
             this.nCRTCRegs = Card.CRTC.EGA.TOTAL_REGS;
             this.asCRTCRegs = DEBUGGER? Card.CRTC.EGA_REGS : [];
             this.initEGA(data[6], nMonitorType);
@@ -1055,9 +1071,10 @@ Card.FEAT_CTRL.BITS         = 0x03;     // feature control bits
 
 Card.STATUS0 = {};
 Card.STATUS0.PORT           = 0x3C2;    // read-only (aka STATUS0, to distinguish it from PORT_CGA_STATUS)
+Card.STATUS0.RESERVED       = 0x0F;
 Card.STATUS0.SWSENSE        = 0x10;
 Card.STATUS0.SWSENSE_SHIFT = 4;
-Card.STATUS0.FEAT           = 0x60;
+Card.STATUS0.FEAT           = 0x60;     // VGA: reserved
 Card.STATUS0.INTERRUPT      = 0x80;     // 1: video is being displayed; 0: vertical retrace is occurring
 
 /*
@@ -1707,7 +1724,7 @@ Card.prototype.saveCard = function()
         data[3] = this.statusReg;
         data[4] = this.iCRTCReg | (this.iCRTCPrev << 8);
         data[5] = this.aCRTCRegs;
-        if (this.iCard == Video.CARDS.EGA) {
+        if (this.iCard >= Video.CARD.EGA) {
             data[6] = this.saveEGA();
         }
         data[7] = this.nInitCycles;
@@ -1765,16 +1782,16 @@ Card.prototype.dumpCard = function()
          */
         this.dumpRegs("CRTC", this.iCRTCReg, this.aCRTCRegs, this.asCRTCRegs);
 
-        if (this.iCard == Video.CARDS.MDA || this.iCard == Video.CARDS.CGA) {
+        if (this.iCard == Video.CARD.MDA || this.iCard == Video.CARD.CGA) {
             this.dumpRegs(" MODEREG", this.modeReg);
             this.dumpRegs(" STATUS1", this.statusReg);
         }
 
-        if (this.iCard == Video.CARDS.CGA) {
+        if (this.iCard == Video.CARD.CGA) {
             this.dumpRegs("   COLOR", this.colorReg);
         }
 
-        if (this.iCard == Video.CARDS.EGA) {
+        if (this.iCard >= Video.CARD.EGA) {
             this.dbg.println(" ATCDATA: " + this.fATCData);
             this.dumpRegs(" ATC", this.iATCReg, this.aATCRegs, this.asATCRegs);
             this.dumpRegs(" GRC", this.iGRCReg, this.aGRCRegs, this.asGRCRegs);
@@ -1947,9 +1964,10 @@ Card.prototype.setMemoryAccess = function(nAccess)
  * to access the buffer directly, instead of going through the Bus memory interface.
  */
 Video.cardSpecs = [];
-Video.cardSpecs[Video.CARDS.MDA] = ["MDA", Card.MDA.CRTC.INDX.PORT, 0xB0000, 0x01000, 0, ChipSet.MONITOR.MONO];
-Video.cardSpecs[Video.CARDS.CGA] = ["CGA", Card.CGA.CRTC.INDX.PORT, 0xB8000, 0x04000, 0, ChipSet.MONITOR.COLOR];
-Video.cardSpecs[Video.CARDS.EGA] = ["EGA", Card.CGA.CRTC.INDX.PORT, 0xB8000, 0x04000, 0x10000, ChipSet.MONITOR.EGACOLOR];
+Video.cardSpecs[Video.CARD.MDA] = ["MDA", Card.MDA.CRTC.INDX.PORT, 0xB0000, 0x01000, 0, ChipSet.MONITOR.MONO];
+Video.cardSpecs[Video.CARD.CGA] = ["CGA", Card.CGA.CRTC.INDX.PORT, 0xB8000, 0x04000, 0, ChipSet.MONITOR.COLOR];
+Video.cardSpecs[Video.CARD.EGA] = ["EGA", Card.CGA.CRTC.INDX.PORT, 0xB8000, 0x04000, 0x10000, ChipSet.MONITOR.EGACOLOR];
+Video.cardSpecs[Video.CARD.VGA] = ["VGA", Card.CGA.CRTC.INDX.PORT, 0xB8000, 0x04000, 0x10000, ChipSet.MONITOR.VGACOLOR];
 
 /**
  * initBus(cmp, bus, cpu, dbg)
@@ -1972,7 +1990,7 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
     bus.addPortInputTable(this, Video.aPortInput);
     bus.addPortOutputTable(this, Video.aPortOutput);
 
-    if (this.model == "ega") {
+    if (this.nCard >= Video.CARD.EGA) {
         bus.addPortInputTable(this, Video.aEGAPortInput);
         bus.addPortOutputTable(this, Video.aEGAPortOutput);
     }
@@ -1996,10 +2014,10 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
         this.kbd.setBinding(this.textareaScreen? "textarea" : "canvas", "kbd", this.inputScreen);
     }
 
-    this.bEGASW = 0x09;         // our default "switches" setting (see aEGAMonitorSwitches)
+    this.bEGASwitches = 0x09;   // our default "switches" setting (see aEGAMonitorSwitches)
     this.chipset = cmp.getComponentByType("ChipSet");
-    if (this.chipset && this.sEGASW) {
-        this.bEGASW = this.chipset.parseSwitches(this.sEGASW, this.bEGASW);
+    if (this.chipset && this.sSwitches) {
+        if (this.nCard == Video.CARD.EGA) this.bEGASwitches = this.chipset.parseSwitches(this.sSwitches, this.bEGASwitches);
     }
 
     if (this.kbd && this.fTouchScreen) this.captureTouch();
@@ -2444,28 +2462,27 @@ Video.prototype.reset = function()
         nMonitorType = this.chipset.getSWVideoMonitor();
     }
 
-    var fEGA = false;
-    if (this.model) {
-        switch (this.model) {
-        case "ega":
-            fEGA = true;
-            var aMonitors = Video.aEGAMonitorSwitches[this.bEGASW];
-            /*
-             * TODO: Figure out how to deal with aMonitors[2], the boolean which indicates
-             * whether the EGA is driving the primary monitor (true) or the secondary monitor (false).
-             */
-            if (aMonitors) nMonitorType = aMonitors[0];
-            if (!nMonitorType) nMonitorType = ChipSet.MONITOR.EGACOLOR;
-            break;
-        case "mda":
-            nMonitorType = ChipSet.MONITOR.MONO;
-            break;
-        case "cga":
-            /* falls through */
-        default:
-            nMonitorType = ChipSet.MONITOR.COLOR;
-            break;
-        }
+    switch (this.nCard) {
+    case Video.CARD.VGA:
+        nMonitorType = ChipSet.MONITOR.VGACOLOR;
+        break;
+    case Video.CARD.EGA:
+        var aMonitors = Video.aEGAMonitorSwitches[this.bEGASwitches];
+        /*
+         * TODO: Figure out how to deal with aMonitors[2], the boolean which indicates
+         * whether the EGA is driving the primary monitor (true) or the secondary monitor (false).
+         */
+        if (aMonitors) nMonitorType = aMonitors[0];
+        if (!nMonitorType) nMonitorType = ChipSet.MONITOR.EGACOLOR;
+        break;
+    case Video.CARD.MDA:
+        nMonitorType = ChipSet.MONITOR.MONO;
+        break;
+    case Video.CARD.CGA:
+        /* falls through */
+    default:
+        nMonitorType = ChipSet.MONITOR.COLOR;
+        break;
     }
 
     if (this.nMonitorType !== nMonitorType) {
@@ -2474,16 +2491,14 @@ Video.prototype.reset = function()
     }
 
     this.cardActive = null;
-    this.cardMono = this.cardMDA = new Card(this, Video.CARDS.MDA);
-    this.cardColor = this.cardCGA = new Card(this, Video.CARDS.CGA);
+    this.cardMono = this.cardMDA = new Card(this, Video.CARD.MDA);
+    this.cardColor = this.cardCGA = new Card(this, Video.CARD.CGA);
 
-    if (!fEGA) {
-        /*
-         * Define a dummy (uninitialized) EGA card for now
-         */
-        this.cardEGA = new Card();
-    } else {
-        this.cardEGA = new Card(this, Video.CARDS.EGA, null, this.cbMemory);
+    if (this.nCard < Video.CARD.EGA) {
+        this.cardEGA = new Card();      // define a dummy (uninitialized) EGA card for now
+    }
+    else {
+        this.cardEGA = new Card(this, this.nCard, null, this.cbMemory);
         this.enableEGA();
     }
 
@@ -2493,7 +2508,7 @@ Video.prototype.reset = function()
     this.buildFonts();
 
     this.nMode = null;
-    this.nModeDefault = (nMonitorType == ChipSet.MONITOR.MONO? Video.MODES.MDA_80X25 : Video.MODES.CGA_80X25);
+    this.nModeDefault = (nMonitorType == ChipSet.MONITOR.MONO? Video.MODE.MDA_80X25 : Video.MODE.CGA_80X25);
 
     this.iCellCursor = -1;  // initially, there is no visible cursor cell
     this.cBlinks = -1;      // initially, blinking is not active
@@ -2524,7 +2539,7 @@ Video.prototype.reset = function()
         for (var addrScreen = this.cardActive.addrBuffer; addrScreen < addrScreenLimit; addrScreen += 2) {
             var dataRandom = Math.floor(Math.random() * 0x10000);
             var bChar, bAttr;
-            if (this.nMonitorType == ChipSet.MONITOR.EGACOLOR) {
+            if (this.nMonitorType == ChipSet.MONITOR.EGACOLOR || this.nMonitorType == ChipSet.MONITOR.VGACOLOR) {
                 /*
                  * For the EGA, we choose sequential characters; for random characters, copy the MDA/CGA code below.
                  */
@@ -2596,13 +2611,13 @@ Video.prototype.restore = function(data)
     this.nMode = a[2];
 
     this.cardActive = null;
-    this.cardMono = this.cardMDA = new Card(this, Video.CARDS.MDA, data[0]);
-    this.cardColor = this.cardCGA = new Card(this, Video.CARDS.CGA, data[1]);
+    this.cardMono = this.cardMDA = new Card(this, Video.CARD.MDA, data[0]);
+    this.cardColor = this.cardCGA = new Card(this, Video.CARD.CGA, data[1]);
 
     /*
      * If no EGA was originally initialized, then cardEGA will remain uninitialized.
      */
-    this.cardEGA = new Card(this, Video.CARDS.EGA, data[3], this.cbMemory);
+    this.cardEGA = new Card(this, this.nCard, data[3], this.cbMemory);
     if (this.cardEGA.fActive) this.enableEGA();
 
     /*
@@ -2747,10 +2762,10 @@ Video.prototype.onLoadSetFonts = function(sFontFile, sFontData, nErrorCode)
  *
  * Called by copyROM() whenever a ROM with a 'notify' attribute set to our component ID has been loaded.
  *
- * If model is "ega", then we assume the associated ROM is the original IBM EGA ROM, which stores
- * its 8x14 font data at 0x2230 (and unlike the MDA/CGA character generator ROM, which splits the first
- * 8 rows and remaining 6 rows of each character across separate 2K chunks, the bytes for all the EGA
- * character rows are contiguous); the total size of the 8x14 font is 0xE00 bytes.
+ * For IBM EGA cards, we assume the associated ROM is the original IBM EGA ROM, which stores its 8x14 font
+ * data at 0x2230 (and unlike the MDA/CGA character generator ROM, which splits the first 8 rows and
+ * remaining 6 rows of each character across separate 2K chunks, the bytes for all the EGA character rows
+ * are contiguous); the total size of the 8x14 font is 0xE00 bytes.
  *
  * At 0x3030, there is an "ALPHA SUPPLEMENT" table, which contains 15 bytes per row instead of 14,
  * because each row is preceded by one byte containing the corresponding ASCII code; there are 20 entries
@@ -2765,18 +2780,28 @@ Video.prototype.onLoadSetFonts = function(sFontFile, sFontData, nErrorCode)
  * font generation to support it (as opposed to "init-time" generation, which is all we do now).  There's
  * probably a similar need for user-defined fonts; for now, they're just not supported.
  *
+ * IBM VGA NOTES: The IBM VGA "ALPHA SUPPLEMENT" table appears at the same delta (+0x0E00) as the IBM EGA
+ * table (ie, 0x3f8d + 0x0e00 = 0x4d8d).  If we assume the same length for the supplement table (20 chars,
+ * 15 bytes per char, for a total of 0x12c bytes, rounded up to 0x130), that would put the 8x8 data at
+ * offset 0x4ebd.  I suspect the data ends at around 0x5eb9, meaning it's organized as 16 bytes per char
+ * instead of 8.
+ *
  * @this {Video}
  * @param {Array.<number>} abROM
  */
 Video.prototype.onROMLoad = function(abROM)
 {
-    if (this.model == "ega") {
+    if (this.nCard == Video.CARD.EGA) {
         /*
          * TODO: Unlike the MDA/CGA font data, we may want to hang onto this data, so that we can
          * regenerate the color font(s) whenever the foreground and/or background colors have changed.
          */
         if (DEBUG) this.printMessage("onROMLoad(): EGA fonts loaded");
         this.setFontData(abROM, [0x2230, 0x3160], 8);
+    }
+    else if (this.nCard == Video.CARD.VGA) {
+        if (DEBUG) this.printMessage("onROMLoad(): VGA fonts loaded");
+        this.setFontData(abROM, [0x3f8d, 0x0000], 8);
     }
     this.setReady();
 };
@@ -2909,27 +2934,26 @@ Video.prototype.buildFonts = function()
     var fChanges = false;
 
     /*
-     * There's no point building any fonts if (a) we're in a non-windowed (eg, command-line) environment or
-     * (b) no font data was loaded.
+     * There's no point building any fonts if we're in a non-windowed (eg, command-line) environment or no font data was loaded.
      */
     if (window && this.abFontData) {
 
         var offSplit = this.cxFontChar? 0 : 0x0800;
         var cxChar = this.cxFontChar? this.cxFontChar : 9;
 
-        if (this.buildFont(Video.FONTS.MDA, this.aFontOffsets[0], offSplit, cxChar, 14, this.abFontData, Video.aMDAColors, Video.aMDAColorMap)) {
+        if (this.buildFont(Video.FONT.MDA, this.aFontOffsets[0], offSplit, cxChar, 14, this.abFontData, Video.aMDAColors, Video.aMDAColorMap)) {
             fChanges = true;
         }
 
         var aRGBColors = this.getCardColors();
         offSplit = 0x0000;
         cxChar = this.cxFontChar? this.cxFontChar : 8;
-        if (this.buildFont(Video.FONTS.CGA, this.aFontOffsets[1], offSplit, cxChar, 8, this.abFontData, aRGBColors)) {
+        if (this.buildFont(Video.FONT.CGA, this.aFontOffsets[1], offSplit, cxChar, 8, this.abFontData, aRGBColors)) {
             fChanges = true;
         }
 
         if (this.cxFontChar) {
-            if (this.buildFont(Video.FONTS.EGA, this.aFontOffsets[0], 0, this.cxFontChar, 14, this.abFontData, aRGBColors)) {
+            if (this.buildFont(this.nCard, this.aFontOffsets[0], 0, this.cxFontChar, 14, this.abFontData, aRGBColors)) {
                 fChanges = true;
             }
         }
@@ -2944,7 +2968,7 @@ Video.prototype.buildFonts = function()
  *
  * @this {Video}
  * @param {number} nFont
- * @param {number} offData is the offset of the font data
+ * @param {number} offData is the offset of the font data, zero if none
  * @param {number} offSplit is the offset of any split font data, or zero if not split
  * @param {number} cxChar is the width of the font characters
  * @param {number} cyChar is the height of the font characters
@@ -2957,22 +2981,23 @@ Video.prototype.buildFont = function(nFont, offData, offSplit, cxChar, cyChar, a
 {
     var fChanges = false;
 
-    if (DEBUG && this.messageEnabled()) {
-        this.printMessage("buildFont(" + nFont + "): building " + Video.cardSpecs[nFont][0] + " font");
-    }
-    if (this.createFont(nFont, offData, offSplit, cxChar, cyChar, abFontData, aRGBColors, aColorMap)) fChanges = true;
-
-    /*
-     * If font-doubling is enabled, then load a double-size version of the font as well, as it provides
-     * sharper rendering, especially when the screen cell size is a multiple of the above font cell size;
-     * in the case of the CGA, this may also be useful for 40-column modes.
-     */
-    if (this.fDoubleFont) {
-        nFont <<= 1;
+    if (offData) {
         if (DEBUG && this.messageEnabled()) {
-            this.printMessage("buildFont(" + nFont + "): building " + Video.cardSpecs[nFont >> 1][0] + " double-size font");
+            this.printMessage("buildFont(" + nFont + "): building " + Video.cardSpecs[nFont][0] + " font");
         }
         if (this.createFont(nFont, offData, offSplit, cxChar, cyChar, abFontData, aRGBColors, aColorMap)) fChanges = true;
+        /*
+         * If font-doubling is enabled, then load a double-size version of the font as well, as it provides
+         * sharper rendering, especially when the screen cell size is a multiple of the above font cell size;
+         * in the case of the CGA, this may also be useful for 40-column modes.
+         */
+        if (this.fDoubleFont) {
+            nFont <<= 1;
+            if (DEBUG && this.messageEnabled()) {
+                this.printMessage("buildFont(" + nFont + "): building " + Video.cardSpecs[nFont >> 1][0] + " double-size font");
+            }
+            if (this.createFont(nFont, offData, offSplit, cxChar, cyChar, abFontData, aRGBColors, aColorMap)) fChanges = true;
+        }
     }
     return fChanges;
 };
@@ -3226,9 +3251,9 @@ Video.prototype.checkCursor = function()
      * HACK: The original EGA BIOS has a cursor emulation bug when 43-line mode is enabled, so we attempt to detect
      * that particular combination of bad values and automatically fix them.
      */
-    var fEGA = false;
+    var fEGAHack = false;
     if (this.cardActive === this.cardEGA) {
-        fEGA = true;
+        fEGAHack = true;
         if (bCursorMax == 7 && bCursorStart == 4 && !bCursorEnd) bCursorEnd = 7;
     }
 
@@ -3240,7 +3265,7 @@ Video.prototype.checkCursor = function()
      * TODO: Verify whether the second test (bCursorStart > bCursorMax) should also result in a hidden cursor;
      * ThinkTank sets both start and end values to 0x0f, which doesn't make sense on a CGA, where the max is 0x07.
      */
-    if ((bCursorFlags & Card.CRTC.CURSOR_START.BLINKOFF) || bCursorStart > bCursorEnd && !fEGA || bCursorStart > bCursorMax) {
+    if ((bCursorFlags & Card.CRTC.CURSOR_START.BLINKOFF) || bCursorStart > bCursorEnd && !fEGAHack || bCursorStart > bCursorMax) {
         this.removeCursor();
         return false;
     }
@@ -3427,17 +3452,19 @@ Video.prototype.setDimensions = function()
     this.nFont = 0;
     this.nCols = this.nDefaultCols;
     this.nRows = this.nDefaultRows;
-    this.nCellsPerWord = Video.aModeParms[Video.MODES.MDA_80X25][2];
+    this.nCellsPerWord = Video.aModeParms[Video.MODE.MDA_80X25][2];
 
     var cbPadding = 0;
     var modeParms = Video.aModeParms[this.nMode];
     if (modeParms) {
+
         this.nCols = modeParms[0];
         this.nRows = modeParms[1];
         this.nCellsPerWord = modeParms[2];
         cbPadding = modeParms[3] || 0;
         this.nFont = modeParms[4];      // this will be undefined for graphics modes
-        if (this.nMonitorType == ChipSet.MONITOR.EGACOLOR) {
+
+        if (this.nMonitorType == ChipSet.MONITOR.EGACOLOR || this.nMonitorType == ChipSet.MONITOR.VGACOLOR) {
             /*
              * When an EGA is connected to a CGA monitor, the old aModeParms table is correct: we must
              * use the hard-coded 8x8 "CGA_80" font.  But when it's connected to an EGA monitor, we want
@@ -3446,7 +3473,7 @@ Video.prototype.setDimensions = function()
              * TODO: Can an EGA with a monochrome monitor be programmed for 43-line mode as well?  If so,
              * then we'll need to load another MDA font variation, because we only load an 9x14 font for MDA.
              */
-            if (this.cardActive === this.cardEGA && this.nFont == Video.FONTS.CGA) {
+            if (this.cardActive === this.cardEGA && this.nFont == Video.FONT.CGA) {
                 if (this.cardEGA.aCRTCRegs[Card.CRTC.MAX_SCAN_LINE] == 7) {
                     /*
                      * Vertical resolution of 350 divided by 8 (ie, scan lines 0-7) yields 43 whole rows.
@@ -3460,8 +3487,11 @@ Video.prototype.setDimensions = function()
                 else /* if (this.cardEGA.aCRTCRegs[Card.CRTC.MAX_SCAN_LINE] == 13) */ {
                     /*
                      * Vertical resolution of 350 divided by 14 (ie, scan lines 0-13) yields exactly 25 rows.
+                     *
+                     * Note that a card's default font matches its card ID (eg, Video.CARD.EGA == Video.FONT.EGA,
+                     * and Video.CARD.VGA == Video.FONT.VGA)
                      */
-                    this.nFont = Video.FONTS.EGA;
+                    this.nFont = this.nCard;
                 }
             }
         }
@@ -3471,7 +3501,7 @@ Video.prototype.setDimensions = function()
     this.nCellCache = (this.nCells / this.nCellsPerWord);
     this.cbScreen = (this.nCellCache << 1) + cbPadding;
     this.cbSplit = (cbPadding? ((this.cbScreen + cbPadding) >> 1) : 0);
-    if (this.nMode >= Video.MODES.EGA_320X200) this.nCellCache <<= 1;
+    if (this.nMode >= Video.MODE.EGA_320X200) this.nCellCache <<= 1;
 
     /*
      * If no fonts were successfully loaded, there's no point in initializing the remaining drawing parameters.
@@ -3617,10 +3647,10 @@ Video.prototype.checkMode = function(fForce)
         if (nMode == null) nMode = this.nModeDefault;
     }
     else {
-        if (card.iCard == Video.CARDS.MDA) {
-            nMode = Video.MODES.MDA_80X25;
+        if (card.iCard == Video.CARD.MDA) {
+            nMode = Video.MODE.MDA_80X25;
         }
-        else if (card.iCard == Video.CARDS.EGA) {
+        else if (card.iCard == Video.CARD.EGA) {
             /*
              * The sizeBuffer we choose reflects the amount of physical address space that all 4 planes
              * of EGA memory normally span, NOT the total amount of EGA memory.  So for a 64Kb EGA card,
@@ -3640,22 +3670,22 @@ Video.prototype.checkMode = function(fForce)
                 case Card.GRC.MISC.MAPA0128:
                     card.addrBuffer = 0xA0000;
                     card.sizeBuffer = cbBuffer;     // 0x20000
-                    nMode = Video.MODES.UNKNOWN;    // no BIOS mode uses this mapping, but we don't want to leave nMode null if we've come this far
+                    nMode = Video.MODE.UNKNOWN;     // no BIOS mode uses this mapping, but we don't want to leave nMode null if we've come this far
                     break;
                 case Card.GRC.MISC.MAPA064:
                     card.addrBuffer = 0xA0000;
                     card.sizeBuffer = cbBuffer;     // 0x10000
-                    nMode = (this.nMonitorType == ChipSet.MONITOR.MONO? Video.MODES.EGA_640X350_MONO : Video.MODES.EGA_640X350);
+                    nMode = (this.nMonitorType == ChipSet.MONITOR.MONO? Video.MODE.EGA_640X350_MONO : Video.MODE.EGA_640X350);
                     break;
                 case Card.GRC.MISC.MAPB032:
                     card.addrBuffer = 0xB0000;
                     card.sizeBuffer = cbBufferText;
-                    nMode = Video.MODES.MDA_80X25;
+                    nMode = Video.MODE.MDA_80X25;
                     break;
                 case Card.GRC.MISC.MAPB832:
                     card.addrBuffer = 0xB8000;
                     card.sizeBuffer = cbBufferText;
-                    nMode = (this.nMonitorType == ChipSet.MONITOR.MONO? Video.MODES.CGA_80X25_BW : Video.MODES.CGA_80X25);
+                    nMode = (this.nMonitorType == ChipSet.MONITOR.MONO? Video.MODE.CGA_80X25_BW : Video.MODE.CGA_80X25);
                     break;
                 default:
                     break;
@@ -3664,7 +3694,7 @@ Video.prototype.checkMode = function(fForce)
                 var fSEQDotClock = (card.aSEQRegs[Card.SEQ.CLK.INDX] & Card.SEQ.CLK.DOTCLOCK);
                 var nCRTCVertTotal = card.aCRTCRegs[Card.CRTC.EGA.VERT_TOTAL] | ((card.aCRTCRegs[Card.CRTC.EGA.OVERFLOW.INDX] & Card.CRTC.EGA.OVERFLOW.VERT_TOTAL) << 8);
 
-                if (nMode != Video.MODES.UNKNOWN) {
+                if (nMode != Video.MODE.UNKNOWN) {
                     if (!(regGRCMisc & Card.GRC.MISC.GRAPHICS)) {
                         if (fSEQDotClock) nMode -= 2;
                     } else {
@@ -3673,14 +3703,14 @@ Video.prototype.checkMode = function(fForce)
                             // Since nMode will have been assigned a default of either 0x02 or 0x03, convert that to either
                             // 0x05 or 0x04 if we're in a low-res graphics mode, 0x06 otherwise.
                             //
-                            nMode = fSEQDotClock? (7 - nMode) : Video.MODES.CGA_640X200;
+                            nMode = fSEQDotClock? (7 - nMode) : Video.MODE.CGA_640X200;
                         } else {
                             //
                             // card.addrBuffer must be 0xA0000, so we need to discriminate between modes 0x0D through 0x10;
                             // we've already defaulted to 0x0F or 0x10, so determine if it's 0x0D or 0x0E (ie, a 200-row mode)
                             // and then which one (ie, 320 wide or 640 wide).
                             //
-                            if (nCRTCVertTotal < 350) nMode = (fSEQDotClock? Video.MODES.EGA_320X200 : Video.MODES.EGA_640X200);
+                            if (nCRTCVertTotal < 350) nMode = (fSEQDotClock? Video.MODE.EGA_320X200 : Video.MODE.EGA_640X200);
                         }
                     }
                 }
@@ -3695,10 +3725,10 @@ Video.prototype.checkMode = function(fForce)
              * off, using a hard-coded mode value (0x25) that does NOT necessarily match the the CGA video mode currently in effect.
              */
             if (!(card.modeReg & Card.CGA.MODE.GRAPHIC_SEL)) {
-                nMode = ((card.modeReg & Card.CGA.MODE._80X25)? Video.MODES.CGA_80X25 : Video.MODES.CGA_40X25);
+                nMode = ((card.modeReg & Card.CGA.MODE._80X25)? Video.MODE.CGA_80X25 : Video.MODE.CGA_40X25);
                 if (card.modeReg & Card.CGA.MODE.BW_SEL) nMode -= 1;
             } else {
-                nMode = ((card.modeReg & Card.CGA.MODE.HIRES_BW)? Video.MODES.CGA_640X200 : Video.MODES.CGA_320X200_BW);
+                nMode = ((card.modeReg & Card.CGA.MODE.HIRES_BW)? Video.MODE.CGA_640X200 : Video.MODE.CGA_320X200_BW);
                 if (!(card.modeReg & Card.CGA.MODE.BW_SEL)) nMode -= 1;
             }
         }
@@ -3755,7 +3785,7 @@ Video.prototype.setMode = function(nMode, fForce)
          * (MDA or CGA) don't allocate/manage their own memory buffer, but even then, it's still a good idea
          * to always force this operation (eg, in case a switch setting changed the active video card).
          */
-        var card = this.cardActive || (nMode == Video.MODES.MDA_80X25? this.cardMono : this.cardColor);
+        var card = this.cardActive || (nMode == Video.MODE.MDA_80X25? this.cardMono : this.cardColor);
 
         if (card != this.cardActive || card.addrBuffer != this.addrBuffer || card.sizeBuffer != this.sizeBuffer) {
 
@@ -4527,7 +4557,7 @@ Video.prototype.outATC = function(port, bOut, addrFrom)
 Video.prototype.inStatus0 = function(port, addrFrom)
 {
     var iBit = 3 - ((this.cardEGA.miscReg & Card.MISC.CLK_SELECT) >> 2);    // this is the desired SW # (0-3)
-    var bSWBit = (this.bEGASW & (1 << iBit)) << (Card.STATUS0.SWSENSE_SHIFT - iBit);
+    var bSWBit = (this.bEGASwitches & (1 << iBit)) << (Card.STATUS0.SWSENSE_SHIFT - iBit);
     var b = ((this.cardEGA.status0 & ~Card.STATUS0.SWSENSE) | bSWBit);
     /*
      * TODO: Figure out where Card.STATUS0.FEAT bits should come from....

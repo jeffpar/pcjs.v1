@@ -53,7 +53,7 @@ if (typeof module !== 'undefined') {
  *      sound:          true to enable (experimental) sound support (default); false to disable
  *      scaleTimers:    true to divide timer cycle counts by the CPU's cycle multiplier (default is false)
  *      floppies:       array of floppy drive sizes in Kb (default is "[360, 360]" if no sw1 value provided)
- *      monitor:        none|tv|color|mono (if no sw1 value provided, default is "ega" for 5170, "mono" otherwise)
+ *      monitor:        none|tv|color|mono|ega|vga (if no sw1 value provided, default is "ega" for 5170, "mono" otherwise)
  *      rtcDate:        optional RTC date/time (in GMT) to use on reset; use the ISO 8601 format; eg: "2014-10-01T08:00:00"
  *
  * The conventions used for the sw1 and sw2 strings are that the left-most character represents DIP switch [1],
@@ -297,7 +297,8 @@ ChipSet.MONITOR = {
     COLOR:              2,  // Color Display (5153)
     MONO:               3,  // Monochrome Display (5151)
     EGACOLOR:           4,  // Enhanced Color Display (5154) in High-Res Mode
-    EGAEMULATION:       6   // Enhanced Color Display (5154) in Emulation Mode
+    EGAEMULATION:       6,  // Enhanced Color Display (5154) in Emulation Mode
+    VGACOLOR:           7   // VGA Color Display
 };
 
 /*
@@ -309,7 +310,8 @@ ChipSet.aMonitorSwitches = {
     "tv":               0x1,
     "color":            0x2,
     "mono":             0x3,
-    "ega":              0x0
+    "ega":              0x0,
+    "vga":              0x0
 };
 
 /*
