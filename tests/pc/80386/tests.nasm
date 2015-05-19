@@ -72,6 +72,7 @@ CSEG_PROT16	equ	0x0008
 CSEG_PROT32	equ	0x0010
 DSEG_PROT16	equ	0x0018
 DSEG_PROT32	equ	0x0020
+SSEG_PROT32	equ	0x0028
 
 ;
 ; The "defDesc" macro defines a descriptor, given a name (%1), base (%2), limit (%3), type (%4), and ext (%5)
@@ -162,6 +163,7 @@ myGDT:	defDesc	NULL,0			; the first descriptor in any descriptor table is always
 	defDesc	CSEG_PROT32,0x000f0000,0x0000ffff,ACC_TYPE_CODE_READABLE,EXT_BIG
 	defDesc	DSEG_PROT16,0x00000000,0x000fffff,ACC_TYPE_DATA_WRITABLE,EXT_NONE
 	defDesc	DSEG_PROT32,0x00000000,0x000fffff,ACC_TYPE_DATA_WRITABLE,EXT_BIG
+	defDesc	SSEG_PROT32,0x00010000,0x000effff,ACC_TYPE_DATA_WRITABLE,EXT_BIG
 myGDTEnd:
 
 initGDT:
@@ -174,8 +176,9 @@ initGDT:
 	shl	eax,4
 	setDesc	CSEG_PROT16,eax,0x0000ffff,ACC_TYPE_CODE_READABLE,EXT_NONE
 	setDesc	CSEG_PROT32,eax,0x0000ffff,ACC_TYPE_CODE_READABLE,EXT_BIG
-	setDesc	DSEG_PROT16,0x0,0x000fffff,ACC_TYPE_DATA_WRITABLE,EXT_NONE
-	setDesc	DSEG_PROT32,0x0,0x000fffff,ACC_TYPE_DATA_WRITABLE,EXT_BIG
+	setDesc	DSEG_PROT16,0x00000000,0x000fffff,ACC_TYPE_DATA_WRITABLE,EXT_NONE
+	setDesc	DSEG_PROT32,0x00000000,0x000fffff,ACC_TYPE_DATA_WRITABLE,EXT_BIG
+	setDesc	SSEG_PROT32,0x00010000,0x000effff,ACC_TYPE_DATA_WRITABLE,EXT_BIG
 	sub	edi,RAM_GDT
 	dec	edi
 	mov	[RAM_GDTR],di
@@ -365,13 +368,13 @@ testROM:
     ;
 	movsx	eax,byte [0xfffff]
 	cmp	eax,0xffffff80
-	jne	error
+	jne	near error
     ;
     ; Test moving a word to a 32-bit register with sign-extension
     ;
 	movsx	eax,word [0xffffe]
 	cmp	eax,0xffff80fc
-	jne	error
+	jne	near error
     ;
     ; Test moving a byte to a 32-bit register with zero-extension
     ;
@@ -384,6 +387,45 @@ testROM:
 	movzx	eax,word [0xffffe]
 	cmp	eax,0x000080fc
 	jne	error
+    ;
+    ; Test assorted 32-bit addressing modes
+    ;
+    	mov	ax,SSEG_PROT32		; we're not going to use the stack, but we want SS != DS for the next tests
+    	mov	ss,ax
+    	sub	esp,esp
+
+    	mov	edx,[0x40000]		; save word at scratch address 0x40000
+    	mov	eax,0x11223344
+    	mov	[0x40000],eax		; store a known word at the scratch address
+
+    	mov	ecx,0x40000		; now access that scratch address using various addressing modes
+    	cmp	[ecx],eax
+    	jne	error
+
+    	add	ecx,64
+    	cmp	[ecx-64],eax
+    	jne	error
+    	sub	ecx,64
+
+    	shr	ecx,1
+    	cmp	[ecx+0x20000],eax
+    	jne	error
+
+    	cmp	[ecx+ecx],eax
+    	jne	error
+
+    	shr	ecx,1
+    	cmp	[ecx+ecx*2+0x10000],eax
+    	jne	error
+
+    	cmp	[ecx*4],eax
+    	jne	error
+
+    	mov	ebp,ecx
+    	cmp	[ebp+ecx*2+0x10000],eax
+    	je	error			; since SS != DS, this better be a mismatch
+
+	mov	[0x40000],edx		; restore word at scratch address 0x40000
 	jmp	doneProt
 
 error:	nop

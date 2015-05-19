@@ -2774,29 +2774,23 @@ Video.prototype.onLoadSetFonts = function(sFontFile, sFontData, nErrorCode)
  *
  * Called by copyROM() whenever a ROM with a 'notify' attribute set to our component ID has been loaded.
  *
- * For IBM EGA cards, we assume the associated ROM is the original IBM EGA ROM, which stores its 8x14 font
- * data at 0x2230 (and unlike the MDA/CGA character generator ROM, which splits the first 8 rows and
+ * For IBM EGA cards, we assume the associated ROM is the original IBM EGA ROM, which stores its 8x14
+ * font data at 0x2230 (and unlike the MDA/CGA character generator ROM, which splits the first 8 rows and
  * remaining 6 rows of each character across separate 2K chunks, the bytes for all the EGA character rows
  * are contiguous); the total size of the 8x14 font is 0xE00 bytes.
  *
  * At 0x3030, there is an "ALPHA SUPPLEMENT" table, which contains 15 bytes per row instead of 14,
  * because each row is preceded by one byte containing the corresponding ASCII code; there are 20 entries
- * in the "ALPHA SUPPLEMENT" table, for a total size of 0x12C bytes.
+ * in the supplemental table, for a total size of 0x12C bytes.
  *
  * Finally, at 0x3160, we have the 8x8 font data (also known as the thicker "double dot" CGA font);
  * the total size of the 8x8 font is 0x800 bytes.  No other font data is present in the EGA ROM;
  * the thin 5x7 "single dot" CGA font is notably absent, which is fine, because we never loaded it for
  * the MDA/CGA either.
  *
- * TODO: Determine how the "ALPHA SUPPLEMENT" table is used and whether we need to add some "run-time"
- * font generation to support it (as opposed to "init-time" generation, which is all we do now).  There's
- * probably a similar need for user-defined fonts; for now, they're just not supported.
- *
- * IBM VGA NOTES: The IBM VGA "ALPHA SUPPLEMENT" table appears at the same delta (+0x0E00) as the IBM EGA
- * table (ie, 0x3f8d + 0x0e00 = 0x4d8d).  If we assume the same length for the supplement table (20 chars,
- * 15 bytes per char, for a total of 0x12c bytes, rounded up to 0x130), that would put the 8x8 data at
- * offset 0x4ebd.  I suspect the data ends at around 0x5eb9, meaning it's organized as 16 bytes per char
- * instead of 8.
+ * TODO: Determine how the supplemental table is used and whether we need to add some "run-time"
+ * font generation to support it (as opposed to "init-time" generation, which is all we do now).
+ * There's probably a similar need for user-defined fonts; for now, they're simply not supported.
  *
  * @this {Video}
  * @param {Array.<number>} abROM
@@ -2813,7 +2807,12 @@ Video.prototype.onROMLoad = function(abROM)
     }
     else if (this.nCard == Video.CARD.VGA) {
         if (DEBUG) this.printMessage("onROMLoad(): VGA fonts loaded");
-        this.setFontData(abROM, [0x3f8d, 0x0000], 8);
+        /*
+         * The IBM VGA contains an 8x14 font at 0x3F8D (and corresponding supplemental table at 0x4D8D)
+         * and an 8x8 font at 0x378D; however, it also contains an 8x16 font at 0x4EBA (and corresponding
+         * supplemental table at 0x5EBA).  See our reconstructed source code in ibm-vga.nasm.
+         */
+        this.setFontData(abROM, [0x3f8d, 0x378d], 8);
     }
     this.setReady();
 };

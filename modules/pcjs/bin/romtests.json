@@ -34,7 +34,7 @@
       "scale": true,
       "charCols": 80,
       "charRows": 25,
-      "fontROM": "/devices/pc/video/ibm-mda-cga.json",
+      "fontROM": "/devices/pc/video/ibm/mda/ibm-mda.json",
       "screenColor": "black",
       "touchScreen": false
     }
@@ -78,7 +78,7 @@
   "debugger": {
     "id": "pc386.debugger",
     "name": "",
-    "commands": "bp F000:8271;g",
+    "commands": "",
     "messages": ""
   }
 }
