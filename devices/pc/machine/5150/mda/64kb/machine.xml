@@ -6,7 +6,7 @@
 	<ram id="ramLow" addr="0x00000"/>
 	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pc/basic/ibm-basic-1.00.json"/>
 	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pc/bios/5150/1981-04-24.json"/>
-	<video ref="/devices/pc/video/video-mda.xml"/>
+	<video ref="/devices/pc/video/ibm/mda/ibm-mda.xml"/>
 	<cpu id="cpu8088" model="8088" autostart="true" padleft="8px">
 		<control type="button" binding="run">Run</control>
 		<control type="button" binding="reset">Reset</control>

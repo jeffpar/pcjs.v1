@@ -308,6 +308,8 @@ ROM.prototype.copyROM = function()
                     var component = Component.getComponentByID(this.idNotify, this.id);
                     if (component) {
                         component.onROMLoad(this.abROM);
+                    } else {
+                        this.notice("Unable to find component: " + this.idNotify);
                     }
                 }
                 /*

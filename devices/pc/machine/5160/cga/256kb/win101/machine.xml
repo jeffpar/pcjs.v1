@@ -7,7 +7,7 @@
 	<rom id="romHDC" addr="0xc8000" size="0x2000" file="/devices/pc/hdc/ibm-xebec-1982.json"/>
 	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pc/basic/ibm-basic-1.10.json"/>
 	<rom id="romBIOS" addr="0xfe000" size="0x2000" file="/devices/pc/bios/5160/1982-11-08.json"/>
-	<video ref="/devices/pc/video/video-cga-lock.xml"/>
+	<video ref="/devices/pc/video/ibm/cga/ibm-cga-lock.xml"/>
 	<cpu id="cpu8088" model="8088" autostart="true" pos="left" padleft="8px">
 		<control type="button" binding="run">Run</control>
 		<control type="button" binding="reset">Reset</control>

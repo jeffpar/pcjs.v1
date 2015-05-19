@@ -24,13 +24,3 @@ After booting, the following code is executed:
 For virtual machines that don't support word I/O to port 0x64, patch IN AX,DX with IN AL,DX; eg:
 
 	e 12e8:1da ec
-
-Here's where the first task switch (far jump using a TSS selector) occurs:
-
-	AX=02F0 BX=0008 CX=0000 DX=0000 SP=037E BP=037E SI=1852 DI=0000 
-    SS=0044[001800,07FF] DS=0228[009E00,851B] ES=0220[001000,8DFB] A20=ON 
-    CS=0200[012320,FFFD] LD=02E0[002000,01FF] GD=[001006,072F] ID=[0053E2,07FF] 
-    TR=02D0 MS=FFF5 PS=0016 V0 D0 I0 T0 S0 Z0 A1 P1 C0 
-    0200:016D FF6E06          JMP      FAR [BP+06]
-
-The far address at [BP+6] is 02F0:0000.

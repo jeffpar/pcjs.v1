@@ -7,7 +7,7 @@
 	<ram id="ramLow" addr="0x00000" test="false"/>
 	<rom id="romBASIC" addr="0xf6000" size="0x8000" file="/devices/pc/basic/private/ibm-basic-1.00.rom"/>
 	<rom id="romBIOS"  addr="0xfe000" size="0x2000" file="/devices/pc/bios/5150/private/1981-04-24.rom"/>
-	<video ref="/devices/pc/video/video-cga.xml"/>
+	<video ref="/devices/pc/video/ibm/cga/ibm-cga.xml"/>
 	<keyboard id="keyboard" pos="left" padleft="8px">
 		<control type="button" binding="esc">ESC</control>
 		<control type="button" binding="ctrl-c">CTRL-C</control>

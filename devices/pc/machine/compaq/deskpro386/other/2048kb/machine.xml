@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.18.0/machine.xsl"?>
 <machine id="deskpro386" class="pc" border="1" pos="center" style="background-color:#FAEBD7">
-	<computer id="deskpro386-ega-2048k" name="Compaq DeskPro 386" buswidth="32"/>
+	<computer id="deskpro386-vga-2048k" name="Compaq DeskPro 386" buswidth="32"/>
 	<cpu id="cpu386" model="80386" autostart="false"/>
 	<ram id="ramLow" addr="0x00000" test="true" size="0xa0000" comment="ROM BIOS memory test has NOT been disabled"/>
 	<ram id="ramCPQ" addr="0xfa0000" size="0x60000" comment="Compaq memory at 0xFA0000"/>
 	<ram id="ramExt" addr="0x100000" size="0x100000" comment="Extended memory at 0x100000"/>
-	<rom id="romEGA" addr="0xc0000" size="0x4000" file="/devices/pc/video/ibm/ega/ibm-ega.json" notify="videoEGA"/>
+	<rom id="romVGA" addr="0xc0000" size="0x8000" file="/devices/pc/video/compaq/vga/109360-001/1987-10-27.json" notify="videoVGA"/>
 	<rom id="romBIOS" addr="0xf8000" size="0x8000" alias="[0xf0000,0xffff0000,0xffff8000]" file="/devices/pc/bios/compaq/deskpro386/1988-01-28/1988-01-28.json"/>
-	<video ref="/devices/pc/video/ibm/ega/ibm-ega-128kb-lock.xml"/>
+	<video ref="/devices/pc/video/compaq/vga/compaq-vga-lock.xml"/>
 	<keyboard ref="/devices/pc/keyboard/keyboard-minimal-functions.xml"/>
 	<debugger id="debugger" messages="fault|port" commands=""/>
 	<panel ref="/devices/pc/panel/btpanel.xml"/>
