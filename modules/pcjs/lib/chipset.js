@@ -328,7 +328,7 @@ ChipSet.aMonitorSwitches = {
  *  For FDC DMA notes, refer to http://wiki.osdev.org/ISA_DMA
  *  For general DMA notes, refer to http://www.freebsd.org/doc/en/books/developers-handbook/dma.html
  *
- *  TODO: Determine why the MODEL_5150 ROM BIOS sets the DMA channel 1 page register (port 0x83) to zero
+ *  TODO: Determine why the MODEL_5150 ROM BIOS sets the DMA channel 1 page register (port 0x83) to zero.
  */
 ChipSet.DMA0 = {
     INDEX:              0,

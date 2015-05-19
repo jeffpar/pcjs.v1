@@ -442,6 +442,18 @@ Video.monitorSpecs[ChipSet.MONITOR.EGACOLOR] = {
     percentVertActive: 96
 };
 
+/**
+ * @type {{MonitorSpecs}}
+ *
+ * TODO: This needs to be filled in with accurate values.
+ */
+Video.monitorSpecs[ChipSet.MONITOR.VGACOLOR] = {
+    nHorzPeriodsPerSec: 21850,
+    nHorzPeriodsPerFrame: 364,
+    percentHorzActive: 85,
+    percentVertActive: 96
+};
+
 /*
  * EGA Miscellaneous ports and SW1-Sw4
  *
@@ -482,19 +494,19 @@ Video.aEGAMonitorSwitches = {
 /*
  * Supported Modes
  *
- * Although this component is designed to be a video hardware emulation, not a "BIOS simulation", we DO
+ * Although this component is designed to be a video hardware emulation, not a BIOS simulation, we DO
  * look for changes to the hardware state that correspond to standard BIOS mode settings, so our internal
- * mode setting will normally match the current BIOS mode.  Since 99.9% of applications use only standard
- * BIOS modes, knowing that mode is often helpful.  However, this doesn't mean we're dependent on the BIOS;
- * we simply use common, familiar values wherever it makes sense to do so.  We do have some "BIOS awareness",
- * (eg, when we look for a ROM-based font, or when we're trying to ensure all the BIOS diagnostics pass),
- * but for the most part, we are treating the BIOS as just another (ROM-based) application.
+ * mode setting will normally match the current BIOS mode setting; however, this a debugging convenience,
+ * not an attempt to monitor or emulate the BIOS.
+ *
+ * We do have some BIOS awareness (eg, when loading ROM-based fonts, and some special code to ensure all
+ * the BIOS diagnostics pass), but for the most part, we treat the BIOS like any other application code.
  *
  * As we expand support to include more programmable cards like the EGA, it becomes quite easy for the card
  * to enter a "mode" that has no BIOS counterpart (eg, non-standard combinations of frame buffer address,
  * memory access modes, fonts, display regions, etc).  Our hardware emulation routines will cope with those
  * situations as best they can (and when they don't, it should be considered a bug if some application is
- * broken as a result), but realistically, this is never going to be a 100% accurate hardware emulation.
+ * broken as a result), but realistically, our hardware emulation is never likely to be 100% accurate.
  */
 Video.MODE = {
     CGA_40X25_BW:       0,
