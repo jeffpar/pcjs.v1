@@ -95,6 +95,29 @@ However, a more elegant solution is to use the unary "+" operator to coerce the 
 
 	+i;
 
+The same problem arises with objects using numeric properties.  And watch out for JavaScript's automatic base
+conversion of numeric properties.  For example, when you enumerate the properties of object "o":
+
+	var o = {
+		0x20: ' ',
+		0x41: 'A'
+	};
+
+you will get the strings "32" and "65", not "0x20" and "0x41".  You must quote your property names to prevent
+any conversion; eg:
+
+	var o = {
+		"0x20": ' ',
+		"0x41": 'A'
+	};
+
+Numeric properties can safely be converted from strings to numbers using the unary "+" operator, regardless whether
+they were quoted or not.
+
+The unary "+" is a great alternative to parseInt(), but be mindful of their differences.  One important difference
+is that parseInt() will stop when it encounters an invalid digit, returning whatever value was parsed up to that point,
+whereas unary "+" conversion will return *NaN* if there are any invalid digits in the string.
+
 ### Shift Counts For Bitwise Shifts
 
 It turns out that shifting an integer value by more than 31 bits in either direction may not shift as many bits as
