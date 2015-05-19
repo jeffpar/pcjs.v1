@@ -20,7 +20,7 @@
 	mov	[0x4aa],cs		; 0000006F  8C0EAA04  '....'
 	mov	word [0x7c],0x3b8d	; 00000073  C7067C008D3B  '..|..;'
 	mov	[0x7e],cs		; 00000079  8C0E7E00  '..~.'
-	mov	word [0x10c],0x378d	; 0000007D  C7060C018D37  '.....7'
+	mov	word [0x10c],font_8x8	; 0000007D  C7060C018D37  '.....7'
 	mov	[0x10e],cs		; 00000083  8C0E0E01  '....'
 	sti				; 00000087  FB  '.'
 	mov	byte [0x489],0x11	; 00000088  C606890411  '.....'
@@ -1733,28 +1733,18 @@ xe5d:	cmp	al,0x0			; 00000E5D  3C00  '<.'
 	jz	xe74			; 00000E5F  7413  't.'
 	cmp	al,0x2			; 00000E61  3C02  '<.'
 	jz	xe7b			; 00000E63  7416  't.'
-	;
-	; Deducing that the 8x14 font is stored at offset 0x3F8D
-	;
-	mov	bp,0x3f8d		; 00000E65  BD8D3F  '..?'
+	mov	bp,font_8x14		; 00000E65  BD8D3F  '..?'
 	mov	bh,0xe			; 00000E68  B70E  '..'
 	cmp	ah,0x7			; 00000E6A  80FC07  '...'
 	jnz	xe83			; 00000E6D  7514  'u.'
 	or	bl,0x80			; 00000E6F  80CB80  '...'
 	jmp	short xe83		; 00000E72  EB0F  '..'
 
-	;
-	; Deducing that the 8x8 font is stored at offset 0x378D;
-	; It precedes the 8x14 font by exactly 0x800 (2048) bytes: 8 bytes per character, 256 characters.
-	;
-xe74:	mov	bp,0x378d		; 00000E74  BD8D37  '..7'
+xe74:	mov	bp,font_8x8		; 00000E74  BD8D37  '..7'
 	mov	bh,0x8			; 00000E77  B708  '..'
 	jmp	short xe83		; 00000E79  EB08  '..'
 
-	;
-	; Deducing that the 8x16 font is stored at offset 0x4EBA
-	;
-xe7b:	mov	bp,0x4eba		; 00000E7B  BDBA4E  '..N'
+xe7b:	mov	bp,font_8x16		; 00000E7B  BDBA4E  '..N'
 	mov	bh,0x10			; 00000E7E  B710  '..'
 	or	bl,0x80			; 00000E80  80CB80  '...'
 xe83:	mov	cx,0x100		; 00000E83  B90001  '...'
@@ -3269,7 +3259,7 @@ x1b2b:	and	byte [0x488],0xf0	; 00001B2B  80268804F0  '.&...'
 
 x1b36:	mov	al,0x0			; 00001B36  B000  '..'
 x1b38:	cli				; 00001B38  FA  '.'
-	mov	word [0x10c],0x378d	; 00001B39  C7060C018D37  '.....7'
+	mov	word [0x10c],font_8x8	; 00001B39  C7060C018D37  '.....7'
 	mov	[0x10e],cs		; 00001B3F  8C0E0E01  '....'
 	sti				; 00001B43  FB  '.'
 	and	byte [0x487],0xf3	; 00001B44  80268704F3  '.&...'
@@ -6678,15 +6668,15 @@ x35e1:	push	ds			; 000035E1  1E  '.'
 	cmp	ah,0x0			; 000035F1  80FC00  '...'
 	jz	x3617			; 000035F4  7421  't!'
 	mov	bh,0xe			; 000035F6  B70E  '..'
-	mov	bp,0x3f8d		; 000035F8  BD8D3F  '..?'
+	mov	bp,font_8x14		; 000035F8  BD8D3F  '..?'
 	cmp	ah,0x1			; 000035FB  80FC01  '...'
 	jz	x360f			; 000035FE  740F  't.'
 	mov	bh,0x8			; 00003600  B708  '..'
-	mov	bp,0x378d		; 00003602  BD8D37  '..7'
+	mov	bp,font_8x8		; 00003602  BD8D37  '..7'
 	cmp	ah,0x2			; 00003605  80FC02  '...'
 	jz	x360f			; 00003608  7405  't.'
 	mov	bh,0x10			; 0000360A  B710  '..'
-	mov	bp,0x4eba		; 0000360C  BDBA4E  '..N'
+	mov	bp,font_8x16		; 0000360C  BDBA4E  '..N'
 x360f:	mov	dx,0x0			; 0000360F  BA0000  '...'
 	mov	cx,0x100		; 00003612  B90001  '...'
 	push	cs			; 00003615  0E  '.'
@@ -6722,17 +6712,17 @@ x364d:	sub	al,0x20			; 0000364D  2C20  ', '
 	dec	al			; 0000365A  FEC8  '..'
 	jnz	x3666			; 0000365C  7508  'u.'
 	mov	cx,0xe			; 0000365E  B90E00  '...'
-	mov	bp,0x3f8d		; 00003661  BD8D3F  '..?'
+	mov	bp,font_8x14		; 00003661  BD8D3F  '..?'
 	jmp	short x3678		; 00003664  EB12  '..'
 
 x3666:	dec	al			; 00003666  FEC8  '..'
 	jnz	x3672			; 00003668  7508  'u.'
 	mov	cx,0x8			; 0000366A  B90800  '...'
-	mov	bp,0x378d		; 0000366D  BD8D37  '..7'
+	mov	bp,font_8x8		; 0000366D  BD8D37  '..7'
 	jmp	short x3678		; 00003670  EB06  '..'
 
 x3672:	mov	cx,0x10			; 00003672  B91000  '...'
-	mov	bp,0x4eba		; 00003675  BDBA4E  '..N'
+	mov	bp,font_8x16		; 00003675  BDBA4E  '..N'
 x3678:	cli				; 00003678  FA  '.'
 	mov	[0x10c],bp		; 00003679  892E0C01  '....'
 	mov	[0x10e],es		; 0000367D  8C060E01  '....'
@@ -6854,16 +6844,17 @@ x3765:	dec	ax			; 00003765  48  'H'
 	mov	[0x44c],ax		; 0000377D  A34C04  '.L.'
 	ret				; 00003780  C3  '.'
 
-	lea	di,[bx]			; 00003781  8D3F  '.?'
-	lea	si,[bx]			; 00003783  8D37  '.7'
-	lea	di,[bp+di]		; 00003785  8D3B  '.;'
-	lea	cx,[di-0x46]		; 00003787  8D4DBA  '.M.'
-	dec	si			; 0000378A  4E  'N'
-	dw	0x5eba			; 0000378B  BA5E  '.^'
+	dw	font_8x14		; 00003781  8D3F  '.?'
+	dw	font_8x8		; 00003783  8D37  '.7'
+	dw	font_8x8_hi		; 00003785  8D3B  '.;'
+	dw	font_8x14_supp		; 00003787  8D4D  '.M'
+	dw	font_8x16		; 0000378A  BA4E  '.N'
+	dw	font_8x16_supp		; 0000378B  BA5E  '.^'
 
 	;
-	; 8x8 font
+	; 8x8 font (8 bytes per row, one row per character)
 	;
+font_8x8:
 	db	0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00						; 0x0000378D ........
 	db	0x7E,0x81,0xA5,0x81,0xBD,0x99,0x81,0x7E						; 0x00003795 ~......~
 	db	0x7E,0xFF,0xDB,0xFF,0xC3,0xE7,0xFF,0x7E						; 0x0000379D ~......~
@@ -6992,6 +6983,7 @@ x3765:	dec	ax			; 00003765  48  'H'
 	db	0xE0,0x30,0x30,0x1C,0x30,0x30,0xE0,0x00						; 0x00003B75 .00.00..
 	db	0x76,0xDC,0x00,0x00,0x00,0x00,0x00,0x00						; 0x00003B7D v.......
 	db	0x00,0x10,0x38,0x6C,0xC6,0xC6,0xFE,0x00						; 0x00003B85 ..8l....
+font_8x8_hi:
 	db	0x78,0xCC,0xC0,0xCC,0x78,0x18,0x0C,0x78						; 0x00003B8D x...x..x
 	db	0x00,0xCC,0x00,0xCC,0xCC,0xCC,0x7E,0x00						; 0x00003B95 ......~.
 	db	0x1C,0x00,0x78,0xCC,0xFC,0xC0,0x78,0x00						; 0x00003B9D ..x...x.
@@ -7122,8 +7114,9 @@ x3765:	dec	ax			; 00003765  48  'H'
 	db	0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00						; 0x00003F85 ........
 
 	;
-	; 8x14 font
+	; 8x14 font (14 bytes per row, one row per character)
 	;
+font_8x14:
 	db	0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00		; 0x00003F8D ..............
 	db	0x00,0x00,0x7E,0x81,0xA5,0x81,0x81,0xBD,0x99,0x81,0x7E,0x00,0x00,0x00		; 0x00003F9B ..~.......~...
 	db	0x00,0x00,0x7E,0xFF,0xDB,0xFF,0xFF,0xC3,0xE7,0xFF,0x7E,0x00,0x00,0x00		; 0x00003FA9 ..~.......~...
@@ -7384,6 +7377,7 @@ x3765:	dec	ax			; 00003765  48  'H'
 	;
 	; 8x14 supplemental
 	;
+font_8x14_supp:
 	db	0x1D,0x00,0x00,0x00,0x00,0x24,0x66,0xFF,0x66,0x24,0x00,0x00,0x00,0x00,0x00	; 0x00004D8D .....$f.f$.....
 	db	0x22,0x00,0x63,0x63,0x63,0x22,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00	; 0x00004D9C ".ccc".........
 	db	0x2B,0x00,0x00,0x00,0x18,0x18,0x18,0xFF,0x18,0x18,0x18,0x00,0x00,0x00,0x00	; 0x00004DAB +..............
@@ -7407,8 +7401,9 @@ x3765:	dec	ax			; 00003765  48  'H'
 	db	0x00	; end-of-supplemental terminator
 
 	;
-	; 8x16 font
+	; 8x16 font (16 bytes per row, one row per character)
 	;
+font_8x16:
 	db	0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00	; 0x00004EBA ................
 	db	0x00,0x00,0x7E,0x81,0xA5,0x81,0x81,0xBD,0x99,0x81,0x81,0x7E,0x00,0x00,0x00,0x00	; 0x00004ECA ..~........~....
 	db	0x00,0x00,0x7E,0xFF,0xDB,0xFF,0xFF,0xC3,0xE7,0xFF,0xFF,0x7E,0x00,0x00,0x00,0x00	; 0x00004EDA ..~........~....
@@ -7669,6 +7664,7 @@ x3765:	dec	ax			; 00003765  48  'H'
 	;
 	; 8x16 supplemental
 	;
+font_8x16_supp:
 	db	0x1D,0x00,0x00,0x00,0x00,0x00,0x24,0x66,0xFF,0x66,0x24,0x00,0x00,0x00,0x00,0x00,0x00	; 0x00005EBA ......$f.f$......
 	db	0x30,0x00,0x00,0x3C,0x66,0xC3,0xC3,0xDB,0xDB,0xC3,0xC3,0x66,0x3C,0x00,0x00,0x00,0x00	; 0x00005ECB 0...f......f.....
 	db	0x4D,0x00,0x00,0xC3,0xE7,0xFF,0xFF,0xDB,0xC3,0xC3,0xC3,0xC3,0xC3,0x00,0x00,0x00,0x00	; 0x00005EDC M................
