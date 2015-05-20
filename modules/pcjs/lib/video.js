@@ -2979,7 +2979,7 @@ Video.prototype.buildFonts = function()
  *
  * @this {Video}
  * @param {number} nFont
- * @param {number} offData is the offset of the font data, zero if none
+ * @param {number|null} offData is the offset of the font data, null if none
  * @param {number} offSplit is the offset of any split font data, or zero if not split
  * @param {number} cxChar is the width of the font characters
  * @param {number} cyChar is the height of the font characters
@@ -2992,7 +2992,7 @@ Video.prototype.buildFont = function(nFont, offData, offSplit, cxChar, cyChar, a
 {
     var fChanges = false;
 
-    if (offData) {
+    if (offData != null) {
         if (DEBUG && this.messageEnabled()) {
             this.printMessage("buildFont(" + nFont + "): building " + Video.cardSpecs[nFont][0] + " font");
         }
