@@ -1411,8 +1411,8 @@ X86.aOpGrp6Real = [
 ];
 
 /*
- * Unlike Grp6, Grp7 does not require separate real-mode and protected-mode dispatch tables,
- * because all Grp7 instructions are valid in both modes.
+ * Unlike Grp6, Grp7 and Grp8 do not require separate real-mode and protected-mode dispatch tables, because
+ * all Grp7 and Grp8 instructions are valid in both modes.
  */
 X86.aOpGrp7 = [
     X86.fnSGDT,             X86.fnSIDT,             X86.fnLGDT,             X86.fnLIDT,             // 0x0F,0x01(reg=0x0-0x3)

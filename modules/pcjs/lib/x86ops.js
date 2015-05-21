@@ -49,12 +49,12 @@ X86.opADDmb = function ADDmb()
     var b = this.getIPByte();
     /*
      * Opcode bytes 0x00 0x00 are sufficiently uncommon that it's more likely we've started
-     * executing in the weeds, so we'll print a warning if Messages.CPU is enabled (at which
-     * point you can also choose to halt if Messages.HALT is enabled).
+     * executing in the weeds, so we'll print a warning if you're in DEBUG mode, and optionally
+     * stop the CPU if a Debugger is available.
      */
     if (DEBUG && !b) {
         this.printMessage("suspicious opcode: 0x00 0x00", DEBUGGER || this.bitsMessage);
-        if (DEBUGGER) this.stopCPU();
+        if (DEBUGGER && this.dbg) this.stopCPU();
     }
     this.aOpModMemByte[b].call(this, X86.fnADDb);
 };

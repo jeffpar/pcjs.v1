@@ -2303,8 +2303,9 @@ ChipSet.prototype.updateSwitchDesc = function()
         sText += this.getSWMemorySize(true) + "Kb";
         sText += ", " + asMonitorTypes[this.getSWVideoMonitor(true)] + " Monitor";
         sText += ", " + this.getSWFloppyDrives(true) + " Floppy Drives";
-        if (this.sw1 != null && this.sw1 != this.sw1Init || this.sw2 != null && this.sw2 != this.sw2Init)
+        if (this.sw1 != null && this.sw1 != this.sw1Init || this.sw2 != null && this.sw2 != this.sw2Init) {
             sText += " (Reset required)";
+        }
         controlDesc.textContent = sText;
     }
 };
@@ -3869,8 +3870,7 @@ ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
          * FYI, technically, it appears that the count is never supposed to reach 0, and that an initial count of 1
          * is "illegal", whatever that means.
          */
-        else
-        if (timer.mode == ChipSet.PIT_CTRL.MODE2) {
+        else if (timer.mode == ChipSet.PIT_CTRL.MODE2) {
             timer.fOUT = (count != 1);          // yes, this line does seem rather pointless....
             if (count <= 0) {
                 count = countInit + count;
@@ -3903,8 +3903,7 @@ ChipSet.prototype.updateTimer = function(iTimer, fCycleReset)
          * TODO: Implement the correct behavior for this mode when the count is ODD.  In that case, fOUT is supposed
          * to be "high" for (N + 1) / 2 ticks and "low" for (N - 1) / 2 ticks.
          */
-        else
-        if (timer.mode == ChipSet.PIT_CTRL.MODE3) {
+        else if (timer.mode == ChipSet.PIT_CTRL.MODE3) {
             count -= ticksElapsed;
             if (count <= 0) {
                 timer.fOUT = !timer.fOUT;

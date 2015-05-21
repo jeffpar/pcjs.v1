@@ -241,4 +241,4 @@ that affects the command-line version of PCjs (specifically, the Node REPL), so 
 
 Next, to update NPM:
 
-	[~/Sites/pcjs] sudo npm update -g
+	[~/Sites/pcjs] sudo npm -g install npm@latest

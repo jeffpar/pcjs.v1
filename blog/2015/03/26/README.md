@@ -6,11 +6,11 @@ Also, see my previous posts on [PCjs Coding Conventions](/blog/2014/09/30/) and 
 
 ### Strict Equality
 
-Most sites will advise you to *never* use the "==" and "!=" JavaScript operators, because when they compare variables
-containing different data types, JavaScript will coerce one of the operands to a matching type, sometimes in unexpected
-ways.  We can thank the early days of JavaScript for this feature, when it was trying to be extraordinarily forgiving
-of sloppy code.  I'm not going to list all the odd results that can arise from JavaScript's operand coercion, because
-there are more than enough examples on the web already.
+Many JavaScript websites will advise you to *never* use the "==" and "!=" JavaScript operators, because when they compare
+variables containing different data types, JavaScript will coerce one of the operands to a matching type, sometimes in
+unexpected ways.  We can thank the early days of JavaScript for this feature, when it was trying to be extraordinarily
+forgiving of sloppy code.  I'm not going to list all the odd results that can arise from JavaScript's operand coercion,
+because there are more than enough examples on the web already.
 
 To avoid unexpected type coercion, and thus unexpected matches and/or mismatches, the usual advice is to *always* use
 strict equality operators ("===" and "!==").
@@ -18,9 +18,9 @@ strict equality operators ("===" and "!==").
 I disagree.
 
 In well-written code, the variable data types should always be clear.  In fact, the more you're able to
-use JSDoc types to declare the data types of all your parameters, return values, and other variables, the fewer errors
-you'll have.  As long as you're always comparing variables with matching types, there shouldn't be any unexpected
-coercions.
+use [JSDoc](http://developers.google.com/closure/compiler/docs/js-for-compiler) types to declare the data types
+of all your parameters, return values, and other variables, the fewer errors you'll have.  As long as you're always
+comparing variables with matching types, there shouldn't be any unexpected coercions.
 
 Obviously, there will be times when a polymorphic variable is required, especially when dealing with APIs that can
 return multiple types.  But those should be the exception, not the rule.
@@ -35,18 +35,30 @@ whereas strict equality requires more work:
  
 	if (parameter === undefined || parameter === null) { ... }
 
-This is one of those times when coercion (of *undefined* to *null*) is beneficial.  Here's another:
+This is one of those times when coercion (of *undefined* to *null*), and the use of "non-strict" operators, is beneficial.
+Here's another:
 
 	if (!b) { ... }
 
 Coercing a value to *boolean* is a popular way of checking for all "falsy" values (ie, *undefined*, *null*,
-0, false, "", NaN, etc).  Again, another situation where type coercion is beneficial and well understood.
+0, false, "", NaN, etc).  It is shorthand for:
 
-However, don't use that technique to check for optional parameters:
+	if (b == false) { ... }
+
+yet I suspect the proponents of strict equality would embrace the former while rejecting the latter.
+
+However, I don't recommend "falsy" checks for optional parameters:
 
 	if (!parameter) { ... }
 
-if a valid numeric parameter could include 0, or a valid string parameter could include "", etc.
+because often a valid numeric parameter might include 0, or a valid string parameter might include "", so it's better
+to do this:
+
+	if (parameter == null) { ... }
+
+and obviously if *null* is also a acceptable value, then you should definitely use strict equality:
+	
+	if (parameter === undefined) { ... }
 
 Problems with type coercion are **NOT** problems caused by a poor choice of operators, so trying to make
 those problems go away by artificially limiting your choice of operators seems like the wrong solution.
@@ -54,7 +66,7 @@ Type coercion problems are, by definition, problems involving mismatched types. 
 
 - Avoid comparing variables of different types; or
 - Convert your variables to matching types first; or
-- Rely on coercion, but be clear about why and when you're doing it
+- Use strict equality operators (just don't use them mindlessly)
 
 Explicitly convert variables to a single type whenever possible.  For example, I might define a method
 that accepts an optional numeric parameter, with a documented default value when it's omitted.  I think it's
@@ -83,8 +95,8 @@ When using *for*...*in* loops like this:
 	var a = [100, 200, 300];
 	for (var i in a) { ... }
 	
-the type of variable *i* will be **string** rather than **number**; that is, it will contain "0", "1" and "2" rather
-than 0, 1 and 2.  If you then use *i* to set a matching element in another array, that element will not be stored in
+the type of variable *i* will be **string** rather than **number**; that is, it will contain "0", "1", and "2" rather
+than 0, 1, and 2.  If you then use *i* to set a matching element in another array, that element will not be stored in
 the same (numeric) position as the original array.
 
 One solution is to convert *i* to a **number**:
@@ -111,8 +123,8 @@ any conversion; eg:
 		"0x41": 'A'
 	};
 
-Numeric properties can safely be converted from strings to numbers using the unary "+" operator, regardless whether
-they were quoted or not.
+Numeric properties can always be safely converted using the unary "+" operator, regardless whether they were quoted
+or not.
 
 The unary "+" is a great alternative to parseInt(), but be mindful of their differences.  One important difference
 is that parseInt() will stop when it encounters an invalid digit, returning whatever value was parsed up to that point,
@@ -127,7 +139,7 @@ you'd expect.  For example:
 	n >>>= 33;
 
 will shift n by only *one* bit, not 33 bits, and the result will be 0x08000000, not zero.  This is because,
-just like the shift instructions on Intel processors, JavaScript converts the shift count to a *mod 32* value
+just like the shift instructions on 32-bit Intel processors, JavaScript converts the shift count to a *mod 32* value
 (in other words, it truncates the shift count to a 5-bit value).
 
 So the above example is equivalent to:
@@ -146,9 +158,6 @@ Also, it's not quite correct to say that a shift count of zero has *no* effect o
 
 It's true that the bottom 32 bits of the number were not changed, but a side-effect of the unsigned shift operator
 is that all the upper sign bits are stripped from the (64-bit) result.
-
-I consider this an anomaly of JavaScript's bitwise operators, because it breaks the "rule" that bitwise operators
-operate *only* on the low 32 bits of a number; there are side-effects on the upper 32 bits as well.
 
 Similarly, as soon as you perform any other bitwise operation on the number, even one that does not modify the low
 32 bits, the upper bits will revert to the sign of the lower 32-bit value:
