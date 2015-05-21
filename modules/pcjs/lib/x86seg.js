@@ -853,6 +853,9 @@ X86Seg.prototype.switchTSS = function switchTSS(selNew, fNest)
  * but the CS base must be set to 0x00FF0000 or 0xFFFF0000, respectively.  To simplify life for setBase()
  * callers, we allow them to specify 32-bit bases, which we then truncate to 24 bits as needed.
  *
+ * WARNING: Since the CPU must maintain regLIP as the sum of the CS base and the current IP, all calls
+ * to segCS.setBase() need to go through setCSBase().
+ *
  * @this {X86Seg}
  * @param {number} addr
  * @return {number} addr, truncated as needed

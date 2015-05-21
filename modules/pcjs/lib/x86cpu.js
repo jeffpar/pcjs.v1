@@ -1821,8 +1821,8 @@ X86CPU.prototype.getCS = function()
 X86CPU.prototype.setCS = function(sel)
 {
     var regEIP = this.getIP();
-    this.regLIP = this.segCS.load(sel) + regEIP;
-    this.regLIPLimit = this.segCS.base + this.segCS.limit;
+    this.regLIP = (this.segCS.load(sel) + regEIP)|0;
+    this.regLIPLimit = (this.segCS.base + this.segCS.limit)|0;
     if (I386) this.resetSizes();
     if (!BUGS_8086) this.opFlags |= this.OPFLAG_NOINTR_8086;
     if (PREFETCH) this.flushPrefetch(this.regLIP);
@@ -1872,12 +1872,12 @@ X86CPU.prototype.getSS = function()
 X86CPU.prototype.setSS = function(sel, fInterruptable)
 {
     var regESP = this.getSP();
-    this.regLSP = this.segSS.load(sel) + regESP;
+    this.regLSP = (this.segSS.load(sel) + regESP)|0;
     if (this.segSS.fExpDown) {
-        this.regLSPLimit = this.segSS.base + this.segSS.addrMask;
-        this.regLSPLimitLow = this.segSS.base + this.segSS.limit;
+        this.regLSPLimit = (this.segSS.base + this.segSS.addrMask)|0;
+        this.regLSPLimitLow = (this.segSS.base + this.segSS.limit)|0;
     } else {
-        this.regLSPLimit = this.segSS.base + this.segSS.limit;
+        this.regLSPLimit = (this.segSS.base + this.segSS.limit)|0;
         this.regLSPLimitLow = this.segSS.base;
     }
     if (!BUGS_8086 && !fInterruptable) this.opFlags |= X86.OPFLAG.NOINTR;
@@ -1966,7 +1966,7 @@ X86CPU.prototype.setGS = function(sel)
  */
 X86CPU.prototype.getIP = function()
 {
-    return this.regLIP - this.segCS.base;
+    return (this.regLIP - this.segCS.base)|0;
 };
 
 /**
@@ -1983,7 +1983,7 @@ X86CPU.prototype.getIP = function()
  */
 X86CPU.prototype.setIP = function(off)
 {
-    this.regLIP = this.segCS.base + (off & (I386? this.dataMask : 0xffff));
+    this.regLIP = (this.segCS.base + (off & (I386? this.dataMask : 0xffff)))|0;
     if (PREFETCH) this.flushPrefetch(this.regLIP);
 };
 
@@ -2018,8 +2018,8 @@ X86CPU.prototype.setCSIP = function(off, sel, fCall)
     this.regEIP = off;
     var base = this.segCS.load(sel);
     if (base !== X86.ADDR_INVALID) {
-        this.regLIP = base + (this.regEIP & (I386? this.dataMask : 0xffff));
-        this.regLIPLimit = base + this.segCS.limit;
+        this.regLIP = (base + (this.regEIP & (I386? this.dataMask : 0xffff)))|0;
+        this.regLIPLimit = (base + this.segCS.limit)|0;
         if (I386) this.resetSizes();
         if (PREFETCH) this.flushPrefetch(this.regLIP);
         return this.segCS.fStackSwitch;
@@ -2039,23 +2039,76 @@ X86CPU.prototype.setCSBase = function(addr)
 {
     var regIP = this.getIP();
     addr = this.segCS.setBase(addr);
-    this.regLIP = addr + regIP;
-    this.regLIPLimit = addr + this.segCS.limit;
+    this.regLIP = (addr + regIP)|0;
+    this.regLIPLimit = (addr + this.segCS.limit)|0;
 };
 
 /**
  * advanceIP(inc)
  *
  * @this {X86CPU}
- * @param {number} inc (may be +/-)
+ * @param {number} inc (positive)
  */
 X86CPU.prototype.advanceIP = function(inc)
 {
-    this.regLIP += inc;
-    if (this.regLIP <= this.regLIPLimit) {
-        if (PREFETCH) this.advancePrefetch(inc);
-    } else {
-        this.setIP(this.regLIP - this.segCS.base);
+    this.assert(inc > 0);
+    this.regLIP = (this.regLIP + inc)|0;
+    /*
+     * Properly comparing regLIP to regLIPLimit would normally require coercing both to unsigned
+     * (ie, floating-point) values.  But instead, we do a subtraction, (regLIPLimit - regLIP), and
+     * if the result is negative, we need only be concerned if the signs of both numbers are the same
+     * (ie, the sign of their XOR'ed union is positive).
+     *
+     * TODO: I'm combining the old 8088 address-wrap check with the new segment-limit check,
+     * even though the correct time to do the latter is immediately BEFORE a fetch, not AFTER; eg,
+     * consider the following code:
+     *
+     *      AX=0100 BX=0015 CX=0080 DX=F859 SP=0A62 BP=0A98 SI=0000 DI=0000
+     *      SS=0038[1759E0,0B5F] DS=02E8[0107A0,017F] ES=0970[009700,6949] A20=ON
+     *      CS=02E0[010080,06FB] LD=0028[000000,0000] GD=[11AEE0,4977] ID=[120082,03FF]
+     *      TR=0010 MS=FFF3 PS=3202 V0 D0 I1 T0 S0 Z0 A0 P0 C0
+     *      02E0:06F9 C20400          RET      0004
+     *
+     * After fetching the 3rd byte of the "RET 0004" opcode at CS:06FB, the CPU wants to automatically
+     * advance IP to 06FC, which of course, exceeds the limit, but that doesn't matter unless we actually
+     * fetch a byte from 06FC, which won't happen.  I'm working around this for now by applying a -1
+     * fudge factor to the fault check.
+     */
+    var off = (this.regLIPLimit - this.regLIP)|0;
+    if (off < 0 && (this.regLIPLimit ^ this.regLIP) >= 0) {
+        if (this.model <= X86.MODEL_8088) {
+            this.setIP(this.regLIP - this.segCS.base);
+        } else if (off < -1) {          // fudge factor
+            X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        }
+    }
+};
+
+/**
+ * rewindIP(dec)
+ *
+ * @this {X86CPU}
+ * @param {number} dec (negative)
+ */
+X86CPU.prototype.rewindIP = function(dec)
+{
+    this.assert(dec < 0);
+    this.regLIP = (this.regLIP + dec)|0;
+    /*
+     * Properly comparing regLIP to regLIPLimit would normally require coercing both to unsigned
+     * (ie, floating-point) values.  But instead, we do a subtraction, (regLIPLimit - regLIP), and
+     * if the result is negative, we need only be concerned if the signs of both numbers are the same
+     * (ie, the sign of their XOR'ed union is positive).
+     */
+    if (((this.regLIPLimit - this.regLIP)|0) >= 0) {
+        if (PREFETCH) this.advancePrefetch(dec);
+    }
+    else if ((this.regLIPLimit ^ this.regLIP) >= 0) {
+        if (this.model <= X86.MODEL_8088) {
+            this.setIP(this.regLIP - this.segCS.base);
+        } else {
+            X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
+        }
     }
 };
 
@@ -2071,7 +2124,7 @@ X86CPU.prototype.getSP = function()
         this.assert(!((this.regLSP - this.segSS.base) & ~this.segSS.addrMask));
         return (this.regESP & ~this.segSS.addrMask) | (this.regLSP - this.segSS.base);
     }
-    return this.regLSP - this.segSS.base;
+    return (this.regLSP - this.segSS.base)|0;
 };
 
 /**
@@ -2084,9 +2137,9 @@ X86CPU.prototype.setSP = function(off)
 {
     if (I386) {
         this.regESP = off;
-        this.regLSP = this.segSS.base + (off & this.segSS.addrMask);
+        this.regLSP = (this.segSS.base + (off & this.segSS.addrMask))|0;
     } else {
-        this.regLSP = this.segSS.base + off;
+        this.regLSP = (this.segSS.base + off)|0;
     }
 };
 
@@ -3366,9 +3419,7 @@ X86CPU.prototype.getIPByte = function()
 {
     var b = (PREFETCH? this.getBytePrefetch(this.regLIP) : this.getByte(this.regLIP));
     if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
-    if (++this.regLIP > this.regLIPLimit) {
-        this.setIP(this.regLIP - this.segCS.base);
-    }
+    this.advanceIP(1);
     return b;
 };
 
@@ -3385,10 +3436,7 @@ X86CPU.prototype.getIPShort = function()
         this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
         this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMemHi);
     }
-    this.regLIP += 2;
-    if (this.regLIP > this.regLIPLimit) {
-        this.setIP(this.regLIP - this.segCS.base);
-    }
+    this.advanceIP(2);
     return w;
 };
 
@@ -3405,10 +3453,7 @@ X86CPU.prototype.getIPLong = function()
         this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
         this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMemHi);
     }
-    this.regLIP += 4;
-    if (this.regLIP > this.regLIPLimit) {
-        this.setIP(this.regLIP - this.segCS.base);
-    }
+    this.advanceIP(4);
     return l;
 };
 
@@ -3428,10 +3473,7 @@ X86CPU.prototype.getIPAddr = function()
         this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
         this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMemHi);
     }
-    this.regLIP += this.addrSize;
-    if (this.regLIP > this.regLIPLimit) {
-        this.setIP(this.regLIP - this.segCS.base);
-    }
+    this.advanceIP(this.addrSize);
     return w;
 };
 
@@ -3448,10 +3490,7 @@ X86CPU.prototype.getIPWord = function()
         this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
         this.bus.updateBackTrackCode(this.regLIP + 1, this.backTrack.btiMemHi);
     }
-    this.regLIP += this.dataSize;
-    if (this.regLIP > this.regLIPLimit) {
-        this.setIP(this.regLIP - this.segCS.base);
-    }
+    this.advanceIP(this.dataSize);
     return w;
 };
 
@@ -3465,9 +3504,7 @@ X86CPU.prototype.getIPDisp = function()
 {
     var w = ((PREFETCH? this.getBytePrefetch(this.regLIP) : this.getByte(this.regLIP)) << 24) >> 24;
     if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
-    if (++this.regLIP > this.regLIPLimit) {
-        this.setIP(this.regLIP - this.segCS.base);
-    }
+    this.advanceIP(1);
     return w;
 };
 
@@ -3482,9 +3519,7 @@ X86CPU.prototype.getSIBAddr = function(mod)
 {
     var b = PREFETCH? this.getBytePrefetch(this.regLIP) : this.getByte(this.regLIP);
     if (BACKTRACK) this.bus.updateBackTrackCode(this.regLIP, this.backTrack.btiMemLo);
-    if (++this.regLIP > this.regLIPLimit) {
-        this.setIP(this.regLIP - this.segCS.base);
-    }
+    this.advanceIP(1);
     return X86ModSIB.aOpModSIB[b].call(this, mod);
 };
 
@@ -3497,10 +3532,24 @@ X86CPU.prototype.getSIBAddr = function(mod)
 X86CPU.prototype.popWord = function()
 {
     var w = this.getWord(this.regLSP);
-    this.regLSP += (I386? this.dataSize : 2);
-    if (this.regLSP > this.regLSPLimit) {
-        // TODO: Generate exception in protected mode
-        this.setSP(this.regLSP - this.segSS.base);
+    this.regLSP = (this.regLSP + (I386? this.dataSize : 2))|0;
+    /*
+     * Properly comparing regLSP to regLSPLimit would normally require coercing both to unsigned
+     * (ie, floating-point) values.  But instead, we do a subtraction, (regLSPLimit - regLSP), and
+     * if the result is negative, we need only be concerned if the signs of both numbers are the same
+     * (ie, the sign of their XOR'ed union is positive).
+     *
+     * TODO: I'm combining the old 8088 address-wrap check with the new segment-limit check,
+     * even though the correct time to do the latter is immediately BEFORE the fetch, not AFTER;
+     * I'm working around this for now by applying a -1 fudge factor to the fault check.
+     */
+    var off = ((this.regLSPLimit - this.regLSP)|0);
+    if (off < 0 && (this.regLSPLimit ^ this.regLSP) >= 0) {
+        if (this.model <= X86.MODEL_8088) {
+            this.setSP(this.regLSP - this.segSS.base);
+        } else if (off < -1) {          // fudge factor
+            X86.fnFault.call(this, X86.EXCEPTION.SS_FAULT, 0);
+        }
     }
     return w;
 };
@@ -3514,10 +3563,19 @@ X86CPU.prototype.popWord = function()
 X86CPU.prototype.pushWord = function(w)
 {
     this.assert((w & this.dataMask) == w);
-    this.regLSP -= (I386? this.dataSize : 2);
-    if (this.regLSP < this.regLSPLimitLow) {
-        // TODO: Generate exception in protected mode (and bail)
-        this.setSP(this.regLSP - this.segSS.base);
+    this.regLSP = (this.regLSP - (I386? this.dataSize : 2))|0;
+    /*
+     * Properly comparing regLSP to regLSPLimitLow would normally require coercing both to unsigned
+     * (ie, floating-point) values.  But instead, we do a subtraction, (regLSP - regLSPLimitLow), and
+     * if the result is negative, we need only be concerned if the signs of both numbers are the same
+     * (ie, the sign of their XOR'ed union is positive).
+     */
+    if (((this.regLSP - this.regLSPLimitLow)|0) < 0 && (this.regLSPLimitLow ^ this.regLSP) >= 0) {
+        if (this.model <= X86.MODEL_8088) {
+            this.setSP(this.regLSP - this.segSS.base);
+        } else {
+            X86.fnFault.call(this, X86.EXCEPTION.SS_FAULT, 0);
+        }
     }
     this.setWord(this.regLSP, w);
 };

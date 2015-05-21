@@ -1483,7 +1483,7 @@ X86.opINSb = function INSb()
         this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         if (nReps) {
             if (BUGS_8086) {
-                this.advanceIP(-2);                 // this instruction does not support multiple overrides
+                this.rewindIP(-2);              // this instruction does not support multiple overrides
                 this.assert(this.regLIP == this.opLIP);
             } else {
                 this.regLIP = this.opLIP;
@@ -1540,7 +1540,7 @@ X86.opINSw = function INSw()
         this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         if (nReps) {
             if (BUGS_8086) {
-                this.advanceIP(-2);                 // this instruction does not support multiple overrides
+                this.rewindIP(-2);              // this instruction does not support multiple overrides
                 this.assert(this.regLIP == this.opLIP);
             } else {
                 this.regLIP = this.opLIP;
@@ -1585,7 +1585,7 @@ X86.opOUTSb = function OUTSb()
         this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         if (nReps) {
             if (BUGS_8086) {
-                this.advanceIP(-2);                 // this instruction does not support multiple overrides
+                this.rewindIP(-2);              // this instruction does not support multiple overrides
                 this.assert(this.regLIP == this.opLIP);
             } else {
                 this.regLIP = this.opLIP;
@@ -1640,7 +1640,7 @@ X86.opOUTSw = function OUTSw()
         this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         if (nReps) {
             if (BUGS_8086) {
-                this.advanceIP(-2);                 // this instruction does not support multiple overrides
+                this.rewindIP(-2);              // this instruction does not support multiple overrides
                 this.assert(this.regLIP == this.opLIP);
             } else {
                 this.regLIP = this.opLIP;
@@ -2558,7 +2558,7 @@ X86.opMOVSb = function MOVSb()
         this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         if (nReps) {
             if (BUGS_8086) {
-                this.advanceIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
+                this.rewindIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
                 this.assert(this.regLIP == this.opLIP);
             } else {
                 this.regLIP = this.opLIP;
@@ -2593,7 +2593,7 @@ X86.opMOVSw = function MOVSw()
         this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         if (nReps) {
             if (BUGS_8086) {
-                this.advanceIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
+                this.rewindIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
                 this.assert(this.regLIP == this.opLIP);
             } else {
                 this.regLIP = this.opLIP;
@@ -2638,7 +2638,7 @@ X86.opCMPSb = function CMPSb()
          */
         if (nReps && this.getZF() == (this.opPrefixes & X86.OPFLAG.REPZ)) {
             if (BUGS_8086) {
-                this.advanceIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
+                this.rewindIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
                 this.assert(this.regLIP == this.opLIP);
             } else {
                 this.regLIP = this.opLIP;
@@ -2683,7 +2683,7 @@ X86.opCMPSw = function CMPSw()
          */
         if (nReps && this.getZF() == (this.opPrefixes & X86.OPFLAG.REPZ)) {
             if (BUGS_8086) {
-                this.advanceIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
+                this.rewindIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
                 this.assert(this.regLIP == this.opLIP);
             } else {
                 this.regLIP = this.opLIP;
@@ -2741,7 +2741,7 @@ X86.opSTOSb = function STOSb()
         this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         if (nReps) {
             if (BUGS_8086) {
-                this.advanceIP(-2);                 // this instruction does not support multiple overrides
+                this.rewindIP(-2);              // this instruction does not support multiple overrides
                 this.assert(this.regLIP == this.opLIP);
             } else {
                 this.regLIP = this.opLIP;
@@ -2783,7 +2783,7 @@ X86.opSTOSw = function STOSw()
         this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         if (nReps) {
             if (BUGS_8086) {
-                this.advanceIP(-2);                 // this instruction does not support multiple overrides
+                this.rewindIP(-2);              // this instruction does not support multiple overrides
                 this.assert(this.regLIP == this.opLIP);
             } else {
                 this.regLIP = this.opLIP;
@@ -2817,7 +2817,7 @@ X86.opLODSb = function LODSb()
         this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         if (nReps) {
             if (BUGS_8086) {
-                this.advanceIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
+                this.rewindIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
                 this.assert(this.regLIP == this.opLIP);
             } else {
                 this.regLIP = this.opLIP;
@@ -2853,7 +2853,7 @@ X86.opLODSw = function LODSw()
         this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         if (nReps) {
             if (BUGS_8086) {
-                this.advanceIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
+                this.rewindIP(((this.opPrefixes & X86.OPFLAG.SEG)? -3 : -2));
                 this.assert(this.regLIP == this.opLIP);
             } else {
                 this.regLIP = this.opLIP;
@@ -2894,7 +2894,7 @@ X86.opSCASb = function SCASb()
          */
         if (nReps && this.getZF() == (this.opPrefixes & X86.OPFLAG.REPZ)) {
             if (BUGS_8086) {
-                this.advanceIP(-2);                 // this instruction does not support multiple overrides
+                this.rewindIP(-2);              // this instruction does not support multiple overrides
                 this.assert(this.regLIP == this.opLIP);
             } else {
                 this.regLIP = this.opLIP;
@@ -2935,7 +2935,7 @@ X86.opSCASw = function SCASw()
          */
         if (nReps && this.getZF() == (this.opPrefixes & X86.OPFLAG.REPZ)) {
             if (BUGS_8086) {
-                this.advanceIP(-2);                 // this instruction does not support multiple overrides
+                this.rewindIP(-2);              // this instruction does not support multiple overrides
                 this.assert(this.regLIP == this.opLIP);
             } else {
                 this.regLIP = this.opLIP;
@@ -3806,7 +3806,7 @@ X86.opHLT = function HLT()
      * on the theory that whoever's using the Debugger would like to see HLTs.
      */
     if (DEBUGGER && this.dbg && this.messageEnabled(Messages.HALT)) {
-        this.advanceIP(-1);     // this is purely for the Debugger's benefit, to show the HLT
+        this.rewindIP(-1);      // this is purely for the Debugger's benefit, to show the HLT
         this.stopCPU();
         return;
     }
@@ -3815,7 +3815,7 @@ X86.opHLT = function HLT()
      * in the water (we have no NMI generation mechanism at the moment).
      */
     if (!this.getIF()) {
-        if (DEBUGGER && this.dbg) this.advanceIP(-1);
+        if (DEBUGGER && this.dbg) this.rewindIP(-1);
         this.stopCPU();
     }
 };
