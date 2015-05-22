@@ -2069,14 +2069,18 @@ X86CPU.prototype.advanceIP = function(inc)
      *      TR=0010 MS=FFF3 PS=3202 V0 D0 I1 T0 S0 Z0 A0 P0 C0
      *      02E0:06F9 C20400          RET      0004
      *
-     * After fetching the 3rd byte of the "RET 0004" opcode at CS:06FB, the CPU wants to automatically
+     * After fetching the 3rd byte of the "RET 0004" instruction at CS:06FB, the CPU wants to automatically
      * advance IP to 06FC, which of course, exceeds the limit, but that doesn't matter unless we actually
      * fetch a byte from 06FC, which won't happen.  I'm working around this for now by applying a -1
-     * fudge factor to the fault check.
+     * fudge factor to the fault check below.
      */
     var off = (this.regLIPLimit - this.regLIP)|0;
     if (off < 0 && (this.regLIPLimit ^ this.regLIP) >= 0) {
-        if (this.model <= X86.MODEL_8088) {
+        /*
+         * There's no such thing as a GP fault on the 8086/8088, and I'm assuming that, on newer
+         * processors, when the segment limit is set to the maximum, it's OK for IP to wrap.
+         */
+        if (this.model <= X86.MODEL_8088 || this.segCS.limit == this.segCS.addrMask) {
             this.setIP(this.regLIP - this.segCS.base);
         } else if (off < -1) {          // fudge factor
             X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
@@ -2095,21 +2099,10 @@ X86CPU.prototype.rewindIP = function(dec)
     this.assert(dec < 0);
     this.regLIP = (this.regLIP + dec)|0;
     /*
-     * Properly comparing regLIP to regLIPLimit would normally require coercing both to unsigned
-     * (ie, floating-point) values.  But instead, we do a subtraction, (regLIPLimit - regLIP), and
-     * if the result is negative, we need only be concerned if the signs of both numbers are the same
-     * (ie, the sign of their XOR'ed union is positive).
+     * Since rewindIP() is used only for discrete "intra-instruction" IP adjustments, there should be no need
+     * to perform all the same limit checks as advanceIP().
      */
-    if (((this.regLIPLimit - this.regLIP)|0) >= 0) {
-        if (PREFETCH) this.advancePrefetch(dec);
-    }
-    else if ((this.regLIPLimit ^ this.regLIP) >= 0) {
-        if (this.model <= X86.MODEL_8088) {
-            this.setIP(this.regLIP - this.segCS.base);
-        } else {
-            X86.fnFault.call(this, X86.EXCEPTION.GP_FAULT, 0);
-        }
-    }
+    if (PREFETCH) this.advancePrefetch(dec);
 };
 
 /**
@@ -3541,11 +3534,15 @@ X86CPU.prototype.popWord = function()
      *
      * TODO: I'm combining the old 8088 address-wrap check with the new segment-limit check,
      * even though the correct time to do the latter is immediately BEFORE the fetch, not AFTER;
-     * I'm working around this for now by applying a -1 fudge factor to the fault check.
+     * I'm working around this for now by applying a -1 fudge factor to the fault check below.
      */
     var off = ((this.regLSPLimit - this.regLSP)|0);
     if (off < 0 && (this.regLSPLimit ^ this.regLSP) >= 0) {
-        if (this.model <= X86.MODEL_8088) {
+        /*
+         * There's no such thing as an SS fault on the 8086/8088, and I'm assuming that, on newer
+         * processors, when the stack segment limit is set to the maximum, it's OK for the stack to wrap.
+         */
+        if (this.model <= X86.MODEL_8088 || this.segSS.limit == this.segSS.addrMask) {
             this.setSP(this.regLSP - this.segSS.base);
         } else if (off < -1) {          // fudge factor
             X86.fnFault.call(this, X86.EXCEPTION.SS_FAULT, 0);
@@ -3571,7 +3568,12 @@ X86CPU.prototype.pushWord = function(w)
      * (ie, the sign of their XOR'ed union is positive).
      */
     if (((this.regLSP - this.regLSPLimitLow)|0) < 0 && (this.regLSPLimitLow ^ this.regLSP) >= 0) {
-        if (this.model <= X86.MODEL_8088) {
+        /*
+         * There's no such thing as an SS fault on the 8086/8088, and I'm assuming that, on newer
+         * processors, when the stack segment is expand-down and the limit is set to the "maximum" of
+         * zero, it's OK for the stack to wrap.
+         */
+        if (this.model <= X86.MODEL_8088 || this.segSS.fExpDown && !this.segSS.limit) {
             this.setSP(this.regLSP - this.segSS.base);
         } else {
             X86.fnFault.call(this, X86.EXCEPTION.SS_FAULT, 0);

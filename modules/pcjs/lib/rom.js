@@ -84,7 +84,27 @@ function ROM(parmsROM)
 
     this.sFilePath = parmsROM['file'];
     this.sFileName = str.getBaseName(this.sFilePath);
+
+    /*
+     * The 'notify' property can now (as of v1.18.2) contain an array of parameters that the notified
+     * component (typically Video) may use as it sees fit.  For example, the Video component is generally
+     * interested in knowing the offsets of specific font tables within the ROM, which used to be hard-coded
+     * when all we supported were a few specific IBM video cards, but that's no longer feasible as we move
+     * beyond the original handful of IBM cards.
+     *
+     * It's up to the notified component to decide how to interpret the parameters it receives, if any.
+     */
     this.idNotify = parmsROM['notify'];
+    this.aNotifyParms = null;
+    if (this.idNotify) {
+        var i = this.idNotify.indexOf('[');
+        if (i > 0) {
+            try {
+                this.aNotifyParms = eval(this.idNotify.substr(i));
+            } catch (e) {}
+            this.idNotify = this.idNotify.substr(0, i);
+        }
+    }
     if (this.sFilePath) {
         var sFileURL = this.sFilePath;
         if (DEBUG) this.log('load("' + sFileURL + '")');
@@ -307,7 +327,7 @@ ROM.prototype.copyROM = function()
                 if (this.idNotify) {
                     var component = Component.getComponentByID(this.idNotify, this.id);
                     if (component) {
-                        component.onROMLoad(this.abROM);
+                        component.onROMLoad(this.abROM, this.aNotifyParms);
                     } else {
                         this.notice("Unable to find component: " + this.idNotify);
                     }
