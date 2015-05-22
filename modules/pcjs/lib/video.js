@@ -2474,6 +2474,16 @@ Video.prototype.reset = function()
         nMonitorType = this.chipset.getSWVideoMonitor();
     }
 
+    /*
+     * As we noted in the constructor, when a model is specified, that takes precedence over any monitor
+     * switch settings.  Conversely, when no model is specified, the nCard setting is considered provisional.
+     */
+    if (!this.model) {
+        this.nCard = (nMonitorType == ChipSet.MONITOR.MONO? Video.CARD.MDA : Video.CARD.CGA);
+    }
+
+    this.nModeDefault = Video.MODE.CGA_80X25;
+
     switch (this.nCard) {
     case Video.CARD.VGA:
         nMonitorType = ChipSet.MONITOR.VGACOLOR;
@@ -2489,6 +2499,7 @@ Video.prototype.reset = function()
         break;
     case Video.CARD.MDA:
         nMonitorType = ChipSet.MONITOR.MONO;
+        this.nModeDefault = Video.MODE.MDA_80X25;
         break;
     case Video.CARD.CGA:
         /* falls through */
@@ -2520,8 +2531,6 @@ Video.prototype.reset = function()
     this.buildFonts();
 
     this.nMode = null;
-    this.nModeDefault = (nMonitorType == ChipSet.MONITOR.MONO? Video.MODE.MDA_80X25 : Video.MODE.CGA_80X25);
-
     this.iCellCursor = -1;  // initially, there is no visible cursor cell
     this.cBlinks = -1;      // initially, blinking is not active
     this.cBlinkVisible = 0; // no visible blinking characters (yet)
