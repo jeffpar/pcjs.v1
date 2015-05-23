@@ -824,14 +824,14 @@ function Card(video, iCard, data, cbMemory)
             this.sizeBuffer = Math.min(this.cbMemory >> 2, 0x8000);
         }
 
-        this.fActive   = data[0];
-        this.modeReg   = data[1];       // see MDA.MODE* or CGA.MODE_* (use (MDA.MODE.HIRES | MDA.MODE.VIDEO_ENABLE | MDA.MODE.BLINK_ENABLE) if you want to test blinking immediately after the initial power-on reset)
-        this.colorReg  = data[2];       // see CGA.COLOR.* (undefined on MDA)
-        this.statusReg = data[3];       // see MDA.STATUS.* or CGA.STATUS.*
-        this.iCRTCReg  = data[4] & 0xff;
-        this.iCRTCPrev = (data[4] >> 8) & 0xff;
-        this.aCRTCRegs = data[5];
-        this.nCRTCRegs = Card.CRTC.TOTAL_REGS;
+        this.fActive    = data[0];
+        this.regMode    = data[1];      // see MDA.MODE* or CGA.MODE_* (use (MDA.MODE.HIRES | MDA.MODE.VIDEO_ENABLE | MDA.MODE.BLINK_ENABLE) if you want to test blinking immediately after the initial power-on reset)
+        this.regColor   = data[2];      // see CGA.COLOR.* (undefined on MDA)
+        this.regStatus  = data[3];      // see MDA.STATUS.* or CGA.STATUS.*
+        this.regCRTIndx = data[4] & 0xff;
+        this.regCRTPrev = (data[4] >> 8) & 0xff;
+        this.regCRTData = data[5];
+        this.nCRTCRegs  = Card.CRTC.TOTAL_REGS;
         this.asCRTCRegs = DEBUGGER? Card.CRTC.REGS : [];
 
         if (iCard >= Video.CARD.EGA) {
@@ -854,74 +854,84 @@ function Card(video, iCard, data, cbMemory)
 /*
  * MDA I/O ports
  */
-Card.MDA = {};
-Card.MDA.CRTC = {};
-Card.MDA.CRTC.INDX = {};
-Card.MDA.CRTC.INDX.PORT     = 0x3B4;    // NOTE: the low byte of this port address (0xB4) is mirrored at 40:0063 (0x0463)
-Card.MDA.CRTC.INDX.MASK     = 0x1F;
-Card.MDA.CRTC.DATA = {};
-Card.MDA.CRTC.DATA.PORT     = 0x3B5;
-
-Card.MDA.MODE = {};
-Card.MDA.MODE.PORT          = 0x3B8;    // Mode Select Register, aka CRT Control Port 1 (write-only); the BIOS mirrors this register at 40:0065 (0x0465)
-Card.MDA.MODE.HIRES         = 0x01;
-Card.MDA.MODE.VIDEO_ENABLE  = 0x08;
-Card.MDA.MODE.BLINK_ENABLE  = 0x20;
-
-Card.MDA.STATUS = {};
-Card.MDA.STATUS.PORT        = 0x3BA;
-Card.MDA.STATUS.HDRIVE      = 0x01;
-Card.MDA.STATUS.BWVIDEO     = 0x08;
-
-Card.MDA.PRT_DATA = {};
-Card.MDA.PRT_DATA.PORT      = 0x3BC;
-Card.MDA.PRT_STATUS = {};
-Card.MDA.PRT_STATUS.PORT    = 0x3BD;
-Card.MDA.PRT_CTRL = {};
-Card.MDA.PRT_CTRL.PORT      = 0x3BE;
+Card.MDA = {
+    CRTC: {
+        INDX: {
+            PORT:           0x3B4,      // NOTE: the low byte of this port address (0xB4) is mirrored at 40:0063 (0x0463)
+            MASK:           0x1F
+        },
+        DATA: {
+            PORT:           0x3B5
+        }
+    },
+    MODE: {
+        PORT:               0x3B8,      // Mode Select Register, aka CRT Control Port 1 (write-only); the BIOS mirrors this register at 40:0065 (0x0465)
+        HIRES:              0x01,
+        VIDEO_ENABLE:       0x08,
+        BLINK_ENABLE:       0x20
+    },
+    STATUS: {
+        PORT:               0x3BA,
+        HDRIVE:             0x01,
+        BWVIDEO:            0x08
+    },
+    PRT_DATA: {
+        PORT:               0x3BC
+    },
+    PRT_STATUS: {
+        PORT:               0x3BD
+    },
+    PRT_CTRL: {
+        PORT:               0x3BE
+    }
+};
 
 /*
  * CGA I/O ports
  */
-Card.CGA = {};
-Card.CGA.CRTC = {};
-Card.CGA.CRTC.INDX = {};
-Card.CGA.CRTC.INDX.PORT     = 0x3D4;    // NOTE: the low byte of this port address (0xB4) is mirrored at 40:0063 (0x0463)
-Card.CGA.CRTC.INDX.MASK     = 0x1F;
-Card.CGA.CRTC.DATA = {};
-Card.CGA.CRTC.DATA.PORT     = 0x3D5;
-
-Card.CGA.MODE = {};
-Card.CGA.MODE.PORT          = 0x3D8;    // Mode Select Register (write-only); the BIOS mirrors this register at 40:0065 (0x0465)
-Card.CGA.MODE._80X25        = 0x01;
-Card.CGA.MODE.GRAPHIC_SEL   = 0x02;
-Card.CGA.MODE.BW_SEL        = 0x04;
-Card.CGA.MODE.VIDEO_ENABLE  = 0x08;     // same as MDA.MODE.VIDEO_ENABLE
-Card.CGA.MODE.HIRES_BW      = 0x10;
-Card.CGA.MODE.BLINK_ENABLE  = 0x20;     // same as MDA.MODE.BLINK_ENABLE
-
-Card.CGA.COLOR = {};
-Card.CGA.COLOR.PORT         = 0x3D9;    // write-only
-Card.CGA.COLOR.BORDER       = 0x07;
-Card.CGA.COLOR.BRIGHT       = 0x08;
-Card.CGA.COLOR.BGND_ALT     = 0x10;     // alternate, intensified background colors in text mode
-Card.CGA.COLOR.COLORSET2    = 0x20;     // selects aCGAColorSet2 colors for 320x200 graphics mode; aCGAColorSet1 otherwise
-
-Card.CGA.STATUS = {};
-Card.CGA.STATUS.PORT        = 0x3DA;    // read-only; same for EGA (although the EGA calls this STATUS1, to distinguish it from STATUS0)
-Card.CGA.STATUS.DISP_ENABLE = 0x01;
-Card.CGA.STATUS.PEN_TRIGGER = 0x02;
-Card.CGA.STATUS.PEN_ON      = 0x04;
-Card.CGA.STATUS.VERT_RETRACE= 0x08;     // when set, this indicates the CGA is performing a vertical retrace
-
-Card.CGA.CLEAR_PEN = {};
-Card.CGA.CLEAR_PEN.PORT     = 0x3DB;
-
-Card.CGA.PRESET_PEN = {};
-Card.CGA.PRESET_PEN.PORT    = 0x3DC;
+Card.CGA = {
+    CRTC: {
+        INDX: {
+            PORT:           0x3D4,      // NOTE: the low byte of this port address (0xB4) is mirrored at 40:0063 (0x0463)
+            MASK:           0x1F
+        },
+        DATA: {
+            PORT:           0x3D5
+        }
+    },
+    MODE: {
+        PORT:               0x3D8,      // Mode Select Register (write-only); the BIOS mirrors this register at 40:0065 (0x0465)
+        _80X25:             0x01,
+        GRAPHIC_SEL:        0x02,
+        BW_SEL:             0x04,
+        VIDEO_ENABLE:       0x08,       // same as MDA.MODE.VIDEO_ENABLE
+        HIRES_BW:           0x10,
+        BLINK_ENABLE:       0x20        // same as MDA.MODE.BLINK_ENABLE
+    },
+    COLOR: {
+        PORT:               0x3D9,      // write-only
+        BORDER:             0x07,
+        BRIGHT:             0x08,
+        BGND_ALT:           0x10,       // alternate, intensified background colors in text mode
+        COLORSET2:          0x20        // selects aCGAColorSet2 colors for 320x200 graphics mode; aCGAColorSet1 otherwise
+    },
+    STATUS: {
+        PORT:               0x3DA,      // read-only; same for EGA (although the EGA calls this STATUS1, to distinguish it from STATUS0)
+        DISP_ENABLE:        0x01,
+        PEN_TRIGGER:        0x02,
+        PEN_ON:             0x04,
+        VERT_RETRACE:       0x08        // when set, this indicates the CGA is performing a vertical retrace
+    },
+    CLEAR_PEN: {
+        PORT:               0x3DB
+    },
+    PRESET_PEN: {
+        PORT:               0x3DC
+    }
+};
 
 /*
- * Common CRT hardware registers, accessed via Card.XXA.CRTC.INDX.PORT and Card.XXA.CRTC.DATA.PORT
+ * Common CRT hardware registers, accessed via Card.xxA.CRTC.INDX.PORT and Card.xxA.CRTC.DATA.PORT
  *
  * NOTE: In this implementation, because we have to make at least two of the registers readable (CURSOR_ADDR_HI and CURSOR_ADDR_LO),
  * we end up making ALL the registers readable, otherwise we would have to explicitly block any register marked write-only.  I don't
@@ -932,60 +942,77 @@ Card.CGA.PRESET_PEN.PORT    = 0x3DC;
  * registers, so the vertical retrace registers cannot actually be read that way.  I'm sure the VGA solved that problem, but I haven't
  * looked into it yet.
  */
-Card.CRTC = {};
-Card.CRTC.EGA = {};
-Card.CRTC.HORZ_TOTAL            = 0x00;
-Card.CRTC.HORZ_DISP             = 0x01;     Card.CRTC.EGA.HORZ_DISP_END      = 0x01;
-Card.CRTC.HORZ_SYNC_POS         = 0x02;     Card.CRTC.EGA.HORZ_BLANK_START   = 0x02;
-Card.CRTC.HORZ_SYNC_WIDTH       = 0x03;     Card.CRTC.EGA.HORZ_BLANK_END     = 0x03;
-Card.CRTC.VERT_TOTAL            = 0x04;     Card.CRTC.EGA.HORZ_RETRACE_START = 0x04;
-Card.CRTC.VERT_TOTAL_ADJ        = 0x05;     Card.CRTC.EGA.HORZ_RETRACE_END   = 0x05;
-Card.CRTC.VERT_DISP_TOTAL       = 0x06;     Card.CRTC.EGA.VERT_TOTAL         = 0x06;
-Card.CRTC.VERT_SYNC_POS         = 0x07;     Card.CRTC.EGA.OVERFLOW           = {INDX: 0x07, VERT_TOTAL: 0x01};
-Card.CRTC.INTERLACE_POS         = 0x08;     Card.CRTC.EGA.PRESET_ROW_SCAN    = 0x08;
-Card.CRTC.MAX_SCAN_LINE         = 0x09;
-Card.CRTC.CURSOR_START = {};
-Card.CRTC.CURSOR_START.INDX     = 0x0A;
-Card.CRTC.CURSOR_START.MASK     = 0x1F;
-/*
- * I don't entirely understand these cursor blink control bits.  Here's what the MC6845 datasheet says:
- *
- *      Bit 5 is the blink timing control.  When bit 5 is low, the blink frequency is 1/16 of the vertical field rate,
- *      and when bit 5 is high, the blink frequency is 1/32 of the vertical field rate.  Bit 6 is used to enable a blink.
- */
-Card.CRTC.CURSOR_START.BLINKON  = 0x00;     // (supposedly, 0x04 has the same effect as 0x00)
-Card.CRTC.CURSOR_START.BLINKOFF = 0x20;     // if blinking is disabled, the cursor is effectively hidden
-Card.CRTC.CURSOR_START.BLINKFAST= 0x60;     // default is 1/16 of the frame rate; this switches to 1/32 of the frame rate
+Card.CRTC = {
+    HORZ_TOTAL:             0x00,
+    HORZ_DISP:              0x01,
+    HORZ_SYNC_POS:          0x02,
+    HORZ_SYNC_WIDTH:        0x03,
+    VERT_TOTAL:             0x04,
+    VERT_TOTAL_ADJ:         0x05,
+    VERT_DISP_TOTAL:        0x06,
+    VERT_SYNC_POS:          0x07,
+    INTERLACE_POS:          0x08,
+    MAX_SCAN_LINE:          0x09,
+    CURSOR_START: {
+        INDX:               0x0A,
+        MASK:               0x1F,
+        /*
+         * I don't entirely understand these cursor blink control bits.  Here's what the MC6845 datasheet says:
+         *
+         *      Bit 5 is the blink timing control.  When bit 5 is low, the blink frequency is 1/16 of the vertical field rate,
+         *      and when bit 5 is high, the blink frequency is 1/32 of the vertical field rate.  Bit 6 is used to enable a blink.
+         */
+        BLINKON:            0x00,       // (supposedly, 0x04 has the same effect as 0x00)
+        BLINKOFF:           0x20,       // if blinking is disabled, the cursor is effectively hidden
+        BLINKFAST:          0x60        // default is 1/16 of the frame rate; this switches to 1/32 of the frame rate
+    },
+    CURSOR_END: {
+        INDX:               0x0B,
+        MASK:               0x1F
+    },
+    START_ADDR_HI:          0x0C,
+    START_ADDR_LO:          0x0D,
+    CURSOR_ADDR_HI:         0x0E,
+    CURSOR_ADDR_LO:         0x0F,
+    LIGHT_PEN_HI:           0x10,
+    LIGHT_PEN_LO:           0x11,
+    TOTAL_REGS:             0x12,       // total CRT registers on MDA/CGA
+    EGA: {
+        HORZ_DISP_END:      0x01,
+        HORZ_BLANK_START:   0x02,
+        HORZ_BLANK_END:     0x03,
+        HORZ_RETRACE_START: 0x04,
+        HORZ_RETRACE_END:   0x05,
+        VERT_TOTAL:         0x06,
+        OVERFLOW: {
+            INDX:           0x07,
+            VERT_TOTAL:     0x01
+        },
+        PRESET_ROW_SCAN:    0x08,
+        VERT_RETRACE_START: 0x10,
+        VERT_RETRACE_END:   0x11,
+        VERT_DISP_END:      0x12,
+        OFFSET:             0x13,
+        UNDERLINE:          0x14,
+        VERT_BLANK_START:   0x15,
+        VERT_BLANK_END:     0x16,
+        MODE_CTRL: {
+            INDX:           0x17,
+            CMS:            0x01,       // Compatibility Mode Support (CGA A13 control)
+            SRSC:           0x02,       // Select Row Scan Counter
+            HRS:            0x04,       // Horizontal Retrace Select
+            CBT:            0x08,       // Count By Two
+            OC:             0x10,       // Output Control
+            AW:             0x20,       // Address Wrap (in Word mode, 1 maps A15 to A0 and 0 maps A13; use the latter when only 64Kb is installed)
+            BM:             0x40,       // Byte Mode (1 selects Byte Mode; 0 selects Word Mode)
+            HR:             0x80        // Hardware Reset
+        },
+        LINE_COMPARE:       0x18,
+        TOTAL_REGS:         0x19        // total CRT registers on EGA
+    },
+    ADDR_HI_MASK:           0x3F
+};
 
-Card.CRTC.CURSOR_END = {};
-Card.CRTC.CURSOR_END.INDX       = 0x0B;
-Card.CRTC.CURSOR_END.MASK       = 0x1F;
-Card.CRTC.START_ADDR_HI         = 0x0C;
-Card.CRTC.START_ADDR_LO         = 0x0D;
-Card.CRTC.CURSOR_ADDR_HI        = 0x0E;
-Card.CRTC.CURSOR_ADDR_LO        = 0x0F;
-Card.CRTC.LIGHT_PEN_HI          = 0x10;     Card.CRTC.EGA.VERT_RETRACE_START = 0x10;
-Card.CRTC.LIGHT_PEN_LO          = 0x11;     Card.CRTC.EGA.VERT_RETRACE_END   = 0x11;
-Card.CRTC.TOTAL_REGS            = 0x12;     // total CRT registers on MDA/CGA
-Card.CRTC.EGA.VERT_DISP_END     = 0x12;
-Card.CRTC.EGA.OFFSET            = 0x13;
-Card.CRTC.EGA.UNDERLINE         = 0x14;
-Card.CRTC.EGA.VERT_BLANK_START  = 0x15;
-Card.CRTC.EGA.VERT_BLANK_END    = 0x16;
-Card.CRTC.EGA.MODE_CTRL = {};
-Card.CRTC.EGA.MODE_CTRL.INDX    = 0x17;
-Card.CRTC.EGA.MODE_CTRL.CMS     = 0x01;     // Compatibility Mode Support (CGA A13 control)
-Card.CRTC.EGA.MODE_CTRL.SRSC    = 0x02;     // Select Row Scan Counter
-Card.CRTC.EGA.MODE_CTRL.HRS     = 0x04;     // Horizontal Retrace Select
-Card.CRTC.EGA.MODE_CTRL.CBT     = 0x08;     // Count By Two
-Card.CRTC.EGA.MODE_CTRL.OC      = 0x10;     // Output Control
-Card.CRTC.EGA.MODE_CTRL.AW      = 0x20;     // Address Wrap (in Word mode, 1 maps A15 to A0 and 0 maps A13; use the latter when only 64Kb is installed)
-Card.CRTC.EGA.MODE_CTRL.BM      = 0x40;     // Byte Mode (1 selects Byte Mode; 0 selects Word Mode)
-Card.CRTC.EGA.MODE_CTRL.HR      = 0x80;     // Hardware Reset
-Card.CRTC.EGA.LINE_COMPARE      = 0x18;
-Card.CRTC.EGA.TOTAL_REGS        = 0x19;     // total CRT registers on EGA
-
-Card.CRTC.ADDR_HI_MASK          = 0x3F;
 
 if (DEBUGGER) {
     Card.CRTC.REGS      = ["HORZ_TOTAL","HORZ_DISP","HORZ_SYNC_POS","HORZ_SYNC_WIDTH","VERT_TOTAL","VERT_TOTAL_ADJ",
@@ -999,11 +1026,8 @@ if (DEBUGGER) {
 }
 
 /*
- * EGA Status port
- */
-Card.STATUS1 = {};
-Card.STATUS1.PORT           = 0x3DA;
-/*
+ * EGA/VGA Input Status 1 Register
+ *
  * STATUS1 diagnostic bits 5 and 4 are set according to the Card.ATC.PLANES.MUX bits:
  *
  *      MUX     Bit 5   Bit 4
@@ -1013,13 +1037,16 @@ Card.STATUS1.PORT           = 0x3DA;
  *      10:     SecRed  SecGreen
  *      11:     unused  unused
  */
-Card.STATUS1.DIAGNOSTIC     = 0x30;     // these bits are controlled by the Card.ATC.PLANES.MUX bits
+Card.STATUS1 = {
+    PORT:                   0x3DA,
+    DIAGNOSTIC:             0x30        // these bits are controlled by the Card.ATC.PLANES.MUX bits
+};
 
 /*
- * EGA Attribute Controller (ATC) ports
+ * EGA/VGA Attribute Controller Registers (regATCIndx and regATCData)
  *
- * The current ATC INDX value is stored in cardEGA.iATCReg (including the Card.ATC.INDX_ENABLE bit), and the
- * ATC DATA values are stored in cardEGA.aATCRegs.  Also, the state of the ATC INDX/DATA flip-flop is stored in fATCData.
+ * The current ATC INDX value is stored in cardEGA.regATCIndx (including the Card.ATC.INDX_ENABLE bit), and the
+ * ATC DATA values are stored in cardEGA.regATCData.  Also, the state of the ATC INDX/DATA flip-flop is stored in fATCData.
  *
  * Note that the ATC palette registers (0x0-0xf) all use the following 6 bit assignments, with bits 6 and 7 unused:
  *
@@ -1030,31 +1057,37 @@ Card.STATUS1.DIAGNOSTIC     = 0x30;     // these bits are controlled by the Card
  *      4: SecGreen (or intensity)
  *      5: SecRed
  */
-Card.ATC = {};
-Card.ATC.PORT               = 0x3C0;    // write-only
-Card.ATC.INDX_MASK          = 0x1F;
-Card.ATC.INDX_PAL_ENABLE    = 0x20;     // must be clear when loading palette registers
-Card.ATC.PALETTE = {};
-Card.ATC.PALETTE.INDX       = 0x00;     // 16 registers: 0x00 - 0x0F
-Card.ATC.PALETTE.BLUE       = 0x01;
-Card.ATC.PALETTE.GREEN      = 0x02;
-Card.ATC.PALETTE.RED        = 0x04;
-Card.ATC.PALETTE.SECBLUE    = 0x08;
-Card.ATC.PALETTE.BRIGHT     = 0x10;     // NOTE: The IBM EGA manual (p.56) also calls this the "intensity" bit
-Card.ATC.PALETTE.SECGREEN   = 0x10;
-Card.ATC.PALETTE.SECRED     = 0x20;
-Card.ATC.PALETTE_REGS       = 0x10;     // 16 total palette registers
-Card.ATC.MODE = {};
-Card.ATC.MODE.INDX          = 0x10;     // MODE CONTROL
-Card.ATC.OVRSCAN = {};
-Card.ATC.OVRSCAN.INDX       = 0x11;     // OVERSCAN COLOR
-Card.ATC.PLANES = {};
-Card.ATC.PLANES.INDX        = 0x12;     // COLOR PLANES
-Card.ATC.PLANES.MASK        = 0x0F;
-Card.ATC.PLANES.MUX         = 0x30;
-Card.ATC.HORZPAN = {};
-Card.ATC.HORZPAN.INDX       = 0x13;     // HORZ PANNING
-Card.ATC.TOTAL_REGS         = 0x14;
+Card.ATC = {
+    PORT:                   0x3C0,
+    INDX_MASK:              0x1F,
+    INDX_PAL_ENABLE:        0x20,       // must be clear when loading palette registers
+    PALETTE: {
+        INDX:               0x00,       // 16 registers: 0x00 - 0x0F
+        BLUE:               0x01,
+        GREEN:              0x02,
+        RED:                0x04,
+        SECBLUE:            0x08,
+        BRIGHT:             0x10,       // NOTE: The IBM EGA manual (p.56) also calls this the "intensity" bit
+        SECGREEN:           0x10,
+        SECRED:             0x20
+    },
+    PALETTE_REGS:           0x10,       // 16 total palette registers
+    MODE: {
+        INDX:               0x10        // MODE CONTROL
+    },
+    OVRSCAN: {
+        INDX:               0x11        // OVERSCAN COLOR
+    },
+    PLANES: {
+        INDX:               0x12,       // COLOR PLANES
+        MASK:               0x0F,
+        MUX:                0x30
+    },
+    HORZPAN: {
+        INDX:               0x13        // HORZ PANNING
+    },
+    TOTAL_REGS:             0x14
+};
 
 if (DEBUGGER) {
     Card.ATC.REGS = ["PAL00","PAL01","PAL02","PAL03","PAL04","PAL05","PAL06","PAL07",
@@ -1062,127 +1095,169 @@ if (DEBUGGER) {
                      "MODE","OVRSCAN","PLANES","HORZPAN"];
 }
 
-Card.MISC = {};
-Card.MISC.PORT              = 0x3C2;    // write-only (apparently on a VGA, you can read the MISC register at port 0x3CC)
-Card.MISC.IO_SELECT         = 0x01;     // 0 sets CRT ports to 0x3Bn, 1 sets CRT ports to 0x3Dn
-Card.MISC.ENABLE_RAM        = 0x02;     // 0 disables video RAM, 1 enables
-Card.MISC.CLK_SELECT        = 0x0C;     // 0x0: 14Mhz I/O clock, 0x4: 16Mhz on-board clock, 0x8: external clock, 0xC: unused
-Card.MISC.DISABLE_DRV       = 0x10;     // 0 activates internal video drivers, 1 activates feature connector direct drive outputs
-Card.MISC.PAGE_ODD_EVEN     = 0x20;     // 0 selects the low 64Kb page of video RAM for text modes, 1 selects the high page
-Card.MISC.HORZ_POLARITY     = 0x40;     // 0 selects positive horizontal retrace
-Card.MISC.VERT_POLARITY     = 0x80;     // 0 selects positive vertical retrace
+/*
+ * EGA/VGA Miscellaneous Output Register (regMisc)
+ */
+Card.MISC = {
+    PORT_WRITE:             0x3C2,      // write port address (EGA and VGA)
+    PORT_READ:              0x3CC,      // read port addresss (VGA only)
+    IO_SELECT:              0x01,       // 0 sets CRT ports to 0x3Bn, 1 sets CRT ports to 0x3Dn
+    ENABLE_RAM:             0x02,       // 0 disables video RAM, 1 enables
+    CLK_SELECT:             0x0C,       // 0x0: 14Mhz I/O clock, 0x4: 16Mhz on-board clock, 0x8: external clock, 0xC: unused
+    DISABLE_DRV:            0x10,       // 0 activates internal video drivers, 1 activates feature connector direct drive outputs
+    PAGE_ODD_EVEN:          0x20,       // 0 selects the low 64Kb page of video RAM for text modes, 1 selects the high page
+    HORZ_POLARITY:          0x40,       // 0 selects positive horizontal retrace
+    VERT_POLARITY:          0x80        // 0 selects positive vertical retrace
+};
 
 /*
+ * EGA/VGA Feature Control Register (regFeat)
+ *
  * The EGA BIOS writes 0x1 to Card.FEAT_CTRL.BITS and reads Card.STATUS0.FEAT, then writes 0x2 to
  * Card.FEAT_CTRL.BITS and reads Card.STATUS0.FEAT.  The bits from the first and second reads are shifted
  * into the high nibble of the byte at 40:88h.
  */
-Card.FEAT_CTRL = {};
-Card.FEAT_CTRL.PORT         = 0x3DA;    // or 0x3BA; write-only (other than the two bits below, the rest are reserved and/or unused)
-Card.FEAT_CTRL.BITS         = 0x03;     // feature control bits
-
-Card.STATUS0 = {};
-Card.STATUS0.PORT           = 0x3C2;    // read-only (aka STATUS0, to distinguish it from PORT_CGA_STATUS)
-Card.STATUS0.RESERVED       = 0x0F;
-Card.STATUS0.SWSENSE        = 0x10;
-Card.STATUS0.SWSENSE_SHIFT = 4;
-Card.STATUS0.FEAT           = 0x60;     // VGA: reserved
-Card.STATUS0.INTERRUPT      = 0x80;     // 1: video is being displayed; 0: vertical retrace is occurring
+Card.FEAT_CTRL = {
+    PORT_MONO:              0x3BA,      // write port address (other than the two bits below, the rest are reserved and/or unused)
+    PORT_COLOR:             0x3DA,      // write port address (other than the two bits below, the rest are reserved and/or unused)
+    PORT_READ:              0x3CA,      // read port address (VGA only)
+    BITS:                   0x03        // feature control bits
+};
 
 /*
- * EGA Sequencer (SEQ) ports
+ * EGA/VGA Input Status 0 Register (regStatus0)
  */
-Card.SEQ = {};
-Card.SEQ.INDX = {};
-Card.SEQ.INDX.PORT          = 0x3C4;
-Card.SEQ.INDX.MASK          = 0x1F;
-Card.SEQ.DATA = {};
-Card.SEQ.DATA.PORT          = 0x3C5;
-Card.SEQ.RESET = {};
-Card.SEQ.RESET.INDX         = 0x00;     // RESET
-Card.SEQ.RESET.ASYNC        = 0x01;
-Card.SEQ.RESET.SYNC         = 0x02;
-Card.SEQ.CLK = {};
-Card.SEQ.CLK.INDX           = 0x01;     // CLOCKING MODE
-Card.SEQ.CLK.DOTS8          = 0x01;     // 1: 8 dots; 0: 9 dots
-Card.SEQ.CLK.BANDWIDTH      = 0x02;     // 0: CRTC has access 4 out of every 5 cycles (for high-res modes); 1: CRTC has access 2 out of 5
-Card.SEQ.CLK.SHIFTLOAD      = 0x04;
-Card.SEQ.CLK.DOTCLOCK       = 0x08;     // 0: normal dot clock; 1: master clock divided by two (used for 320x200 modes: 0, 1, 4, 5, and D)
-Card.SEQ.MAPMASK = {};
-Card.SEQ.MAPMASK.INDX       = 0x02;     // MAP MASK
-Card.SEQ.MAPMASK.PL0        = 0x01;
-Card.SEQ.MAPMASK.PL1        = 0x02;
-Card.SEQ.MAPMASK.PL2        = 0x04;
-Card.SEQ.MAPMASK.PL3        = 0x08;
-Card.SEQ.MAPMASK.MAPS       = 0x0f;
-Card.SEQ.CHARMAP = {};
-Card.SEQ.CHARMAP.INDX       = 0x03;     // CHAR MAP SELECT
-Card.SEQ.CHARMAP.SELB       = 0x03;     // 0x0: 1st 8Kb of plane 2; 0x1: 2nd 8Kb; 0x2: 3rd 8Kb; 0x3: 4th 8Kb
-Card.SEQ.CHARMAP.SELA       = 0x0C;     // 0x0: 1st 8Kb of plane 2; 0x4: 2nd 8Kb; 0x8: 3rd 8Kb; 0xC: 4th 8Kb
-Card.SEQ.MODE = {};
-Card.SEQ.MODE.INDX          = 0x04;     // MEMORY MODE
-Card.SEQ.MODE.ALPHA         = 0x01;     // 1: alphanumeric (A/N) mode active; 0: graphics (APA or "All Points Addressable") mode active
-Card.SEQ.MODE.EXT           = 0x02;     // 1: memory expansion installed; 0: not installed
-Card.SEQ.MODE.SEQUENTIAL    = 0x04;     // 1: memory is sequential; 0: even addresses mapped to planes 0/2, odd addresses to planes 1/3
-Card.SEQ.TOTAL_REGS         = 0x05;
+Card.STATUS0 = {
+    PORT:                   0x3C2,      // read-only (aka STATUS0, to distinguish it from PORT_CGA_STATUS)
+    RESERVED:               0x0F,
+    SWSENSE:                0x10,
+    SWSENSE_SHIFT:          4,
+    FEAT:                   0x60,       // VGA: reserved
+    INTERRUPT:              0x80        // 1: video is being displayed; 0: vertical retrace is occurring
+};
+
+/*
+ * VGA Subsystem Enable Register (regVGAEnable)
+ */
+Card.VGA_ENABLE = {
+    PORT:                   0x3C3,
+    ENABLED:                0x01,       // when set, all VGA I/O and memory decoding is enabled; otherwise disabled (TODO: Implement)
+    RESERVED:               0xFE
+};
+
+/*
+ * EGA/VGA Sequencer Registers (regSEQIndx and regSEQData)
+ */
+Card.SEQ = {
+    INDX: {
+        PORT:               0x3C4,
+        MASK:               0x1F
+    },
+    DATA: {
+        PORT:               0x3C5
+    },
+    RESET: {
+        INDX:               0x00,       // RESET
+        ASYNC:              0x01,
+        SYNC:               0x02
+    },
+    CLK: {
+        INDX:               0x01,       // CLOCKING MODE
+        DOTS8:              0x01,       // 1: 8 dots; 0: 9 dots
+        BANDWIDTH:          0x02,       // 0: CRTC has access 4 out of every 5 cycles (for high-res modes); 1: CRTC has access 2 out of 5
+        SHIFTLOAD:          0x04,
+        DOTCLOCK:           0x08        // 0: normal dot clock; 1: master clock divided by two (used for 320x200 modes: 0, 1, 4, 5, and D)
+    },
+    MAPMASK: {
+        INDX:               0x02,       // MAP MASK
+        PL0:                0x01,
+        PL1:                0x02,
+        PL2:                0x04,
+        PL3:                0x08,
+        MAPS:               0x0f
+    },
+    CHARMAP: {
+        INDX:               0x03,       // CHAR MAP SELECT
+        SELB:               0x03,       // 0x0: 1st 8Kb of plane 2; 0x1: 2nd 8Kb; 0x2: 3rd 8Kb; 0x3: 4th 8Kb
+        SELA:               0x0C        // 0x0: 1st 8Kb of plane 2; 0x4: 2nd 8Kb; 0x8: 3rd 8Kb; 0xC: 4th 8Kb
+    },
+    MODE: {
+        INDX:               0x04,       // MEMORY MODE
+        ALPHA:              0x01,       // 1: alphanumeric (A/N) mode active; 0: graphics (APA or "All Points Addressable") mode active
+        EXT:                0x02,       // 1: memory expansion installed; 0: not installed
+        SEQUENTIAL:         0x04        // 1: memory is sequential; 0: even addresses mapped to planes 0/2, odd addresses to planes 1/3
+    },
+    TOTAL_REGS:             0x05
+};
 
 if (DEBUGGER) Card.SEQ.REGS = ["RESET","CLK","MAPMASK","CHARMAP","MODE"];
 
 /*
- * EGA Graphics Controller (GRC) ports
+ * EGA/VGA Graphics Controller Registers (regGRCIndx and regGRCData)
  */
-Card.GRC = {};
-Card.GRC.POS1_PORT          = 0x3CC;
-Card.GRC.POS2_PORT          = 0x3CA;
-Card.GRC.INDX = {};
-Card.GRC.INDX.PORT          = 0x3CE;
-Card.GRC.INDX.MASK          = 0x0F;
-Card.GRC.DATA = {};
-Card.GRC.DATA.PORT          = 0x3CF;
-
-Card.GRC.SRESET = {};
-Card.GRC.SRESET.INDX        = 0x00;     // SET/RESET (write-only; each bit used only if WRITE_MODE is 0 and corresponding ESR bit set)
-Card.GRC.ESRESET = {};
-Card.GRC.ESRESET.INDX       = 0x01;     // ENABLE SET/RESET
-Card.GRC.COLRCMP = {};
-Card.GRC.COLRCMP.INDX       = 0x02;     // COLOR COMPARE
-Card.GRC.DATAROT = {};
-Card.GRC.DATAROT.INDX       = 0x03;     // DATA ROTATE
-Card.GRC.DATAROT.COUNT      = 0x07;
-Card.GRC.DATAROT.AND        = 0x08;
-Card.GRC.DATAROT.OR         = 0x10;
-Card.GRC.DATAROT.XOR        = 0x18;
-Card.GRC.DATAROT.FUNC       = 0x18;
-Card.GRC.DATAROT.MASK       = 0x1F;
-Card.GRC.READMAP = {};
-Card.GRC.READMAP.INDX       = 0x04;     // READ MAP SELECT
-Card.GRC.READMAP.NUM        = 0x03;
-Card.GRC.MODE = {};
-Card.GRC.MODE.INDX          = 0x05;     // MODE REGISTER
-Card.GRC.MODE.WRITE_MODE0   = 0x00;     // write mode 0x0: each plane written with CPU data, rotated as needed, unless SR enabled
-Card.GRC.MODE.WRITE_MODE1   = 0x01;     // write mode 0x1: each plane written with contents of the processor latches (loaded by a read)
-Card.GRC.MODE.WRITE_MODE2   = 0x02;     // write mode 0x2: memory plane N is written with 8 bits matching data bit N
-Card.GRC.MODE.WRITE_MODE3   = 0x03;     // write mode 0x3: VGA only
-Card.GRC.MODE.WRITE         = 0x03;
-Card.GRC.MODE.TEST          = 0x04;
-Card.GRC.MODE.READ_MODE0    = 0x00;     // read mode 0x0: read map mode
-Card.GRC.MODE.READ_MODE1    = 0x08;     // read mode 0x1: color compare mode
-Card.GRC.MODE.EVENODD       = 0x10;
-Card.GRC.MODE.SHIFT         = 0x20;
-Card.GRC.MISC = {};
-Card.GRC.MISC.INDX          = 0x06;     // MISCELLANEOUS
-Card.GRC.MISC.GRAPHICS      = 0x01;     // set for graphics mode addressing, clear for text mode addressing
-Card.GRC.MISC.CHAIN         = 0x02;     // set for odd/even planes selected with odd/even values of the processor AO bit
-Card.GRC.MISC.MAPMEM        = 0x0C;     //
-Card.GRC.MISC.MAPA0128      = 0x00;     //
-Card.GRC.MISC.MAPA064       = 0x04;     //
-Card.GRC.MISC.MAPB032       = 0x08;     //
-Card.GRC.MISC.MAPB832       = 0x0C;     //
-Card.GRC.COLRDC = {};
-Card.GRC.COLRDC.INDX        = 0x07;     // COLOR DON'T CARE
-Card.GRC.BITMASK = {};
-Card.GRC.BITMASK.INDX       = 0x08;     // BIT MASK
-Card.GRC.TOTAL_REGS         = 0x09;
+Card.GRC = {
+    POS1_PORT:              0x3CC,
+    POS2_PORT:              0x3CA,
+    INDX: {
+        PORT:               0x3CE,
+        MASK:               0x0F
+    },
+    DATA: {
+        PORT:               0x3CF
+    },
+    SRESET: {
+        INDX:               0x00        // SET/RESET (write-only; each bit used only if WRITE_MODE is 0 and corresponding ESR bit set)
+    },
+    ESRESET: {
+        INDX:               0x01        // ENABLE SET/RESET
+    },
+    COLRCMP: {
+        INDX:               0x02        // COLOR COMPARE
+    },
+    DATAROT: {
+        INDX:               0x03,       // DATA ROTATE
+        COUNT:              0x07,
+        AND:                0x08,
+        OR:                 0x10,
+        XOR:                0x18,
+        FUNC:               0x18,
+        MASK:               0x1F
+    },
+    READMAP: {
+        INDX:               0x04,       // READ MAP SELECT
+        NUM:                0x03
+    },
+    MODE: {
+        INDX:               0x05,       // MODE REGISTER
+        WRITE_MODE0:        0x00,       // write mode 0x0: each plane written with CPU data, rotated as needed, unless SR enabled
+        WRITE_MODE1:        0x01,       // write mode 0x1: each plane written with contents of the processor latches (loaded by a read)
+        WRITE_MODE2:        0x02,       // write mode 0x2: memory plane N is written with 8 bits matching data bit N
+        WRITE_MODE3:        0x03,       // write mode 0x3: VGA only
+        WRITE:              0x03,
+        TEST:               0x04,
+        READ_MODE0:         0x00,       // read mode 0x0: read map mode
+        READ_MODE1:         0x08,       // read mode 0x1: color compare mode
+        EVENODD:            0x10,
+        SHIFT:              0x20
+    },
+    MISC: {
+        INDX:               0x06,       // MISCELLANEOUS
+        GRAPHICS:           0x01,       // set for graphics mode addressing, clear for text mode addressing
+        CHAIN:              0x02,       // set for odd/even planes selected with odd/even values of the processor AO bit
+        MAPMEM:             0x0C,       //
+        MAPA0128:           0x00,       //
+        MAPA064:            0x04,       //
+        MAPB032:            0x08,       //
+        MAPB832:            0x0C        //
+    },
+    COLRDC: {
+        INDX:               0x07        // COLOR DON'T CARE
+    },
+    BITMASK: {
+        INDX:               0x08        // BIT MASK
+    },
+    TOTAL_REGS:             0x09
+};
 
 if (DEBUGGER) Card.GRC.REGS = ["SRESET","ESRESET","COLRCMP","DATAROT","READMAP","MODE","MISC","COLRDC","BITMASK"];
 
@@ -1224,7 +1299,7 @@ if (DEBUGGER) Card.GRC.REGS = ["SRESET","ESRESET","COLRCMP","DATAROT","READMAP",
  * The latter claims to work by forming each 2-bit pixel with even bits from plane 0 and odd bits from plane 1;
  * however, I'm unclear how that works if even bytes are only written to plane 0 and odd bytes are only written to
  * plane 1, as Card.GRC.MODE.EVENODD implies, because plane 0 would never have any bits for the odd bytes, and
- * plane 1 would never have any bits for the even bytes.  Clearly, I'm missing something.
+ * plane 1 would never have any bits for the even bytes.  TODO: Figure this out.
  *
  *
  * Even/Odd Memory Access Functions
@@ -1244,30 +1319,32 @@ if (DEBUGGER) Card.GRC.REGS = ["SRESET","ESRESET","COLRCMP","DATAROT","READMAP",
  * bit and set to zero for addressing purposes, meaning that only the EVEN bytes in EGA memory will ever be used.
  */
 
-Card.ACCESS = {};
-
 /*
  * Values returned by getAccess(); the low byte describes the current "read mode", while the high byte describes the
  * current "write mode".
  */
-Card.ACCESS.READ = {};
-Card.ACCESS.READ.EVENODD    = 0x0001;           // this can also be OR'ed with the other read modes
-Card.ACCESS.READ.MODE0      = 0x0002;
-Card.ACCESS.READ.MODE1      = 0x0010;
-Card.ACCESS.READ.MASK       = 0x00ff;
-Card.ACCESS.WRITE = {};
-Card.ACCESS.WRITE.EVENODD   = 0x0100;           // this can also be OR'ed with the other write modes
-Card.ACCESS.WRITE.MODE0     = 0x0200;
-Card.ACCESS.WRITE.MODE0ROT  = 0x0400;
-Card.ACCESS.WRITE.MODE0AND  = 0x0600;
-Card.ACCESS.WRITE.MODE0OR   = 0x0A00;
-Card.ACCESS.WRITE.MODE0XOR  = 0x0E00;
-Card.ACCESS.WRITE.MODE1     = 0x1000;
-Card.ACCESS.WRITE.MODE2     = 0x2000;
-Card.ACCESS.WRITE.MODE2AND  = 0x6000;
-Card.ACCESS.WRITE.MODE2OR   = 0xA000;
-Card.ACCESS.WRITE.MODE2XOR  = 0xE000;
-Card.ACCESS.WRITE.MASK      = 0xff00;
+Card.ACCESS = {
+    READ: {                             // READ values are designed to be OR'ed with WRITE values
+        EVENODD:            0x0001,
+        MODE0:              0x0002,
+        MODE1:              0x0010,
+        MASK:               0x00ff
+    },
+    WRITE: {                            // and WRITE values are designed to be OR'ed with READ values
+        EVENODD:            0x0100,
+        MODE0:              0x0200,
+        MODE0ROT:           0x0400,
+        MODE0AND:           0x0600,
+        MODE0OR:            0x0A00,
+        MODE0XOR:           0x0E00,
+        MODE1:              0x1000,
+        MODE2:              0x2000,
+        MODE2AND:           0x6000,
+        MODE2OR:            0xA000,
+        MODE2XOR:           0xE000,
+        MASK:               0xff00
+    }
+};
 
 /**
  * readByteMode0(off, addr)
@@ -1657,19 +1734,19 @@ Card.prototype.initEGA = function(data, nMonitorType)
     }
 
     this.fATCData   = data[0];
-    this.iATCReg    = data[1];
-    this.aATCRegs   = data[2];
+    this.regATCIndx = data[1];
+    this.regATCData = data[2];
     this.asATCRegs  = DEBUGGER? Card.ATC.REGS : [];
-    this.status0    = data[3];      // aka STATUS0 (not to be confused with this.statusReg, which the EGA refers to as STATUS1)
-    this.miscReg    = data[4];
-    this.featReg    = data[5];      // for feature control bits, see Card.FEAT_CTRL.BITS; for feature status bits, see Card.STATUS0.FEAT
-    this.iSEQReg    = data[6];
-    this.aSEQRegs   = data[7];
+    this.regStatus0 = data[3];      // aka STATUS0 (not to be confused with this.regStatus, which the EGA refers to as STATUS1)
+    this.regMisc    = data[4];
+    this.regFeat    = data[5];      // for feature control bits, see Card.FEAT_CTRL.BITS; for feature status bits, see Card.STATUS0.FEAT
+    this.regSEQIndx = data[6];
+    this.regSEQData = data[7];
     this.asSEQRegs  = DEBUGGER? Card.SEQ.REGS : [];
-    this.iGRCPos1   = data[8];
-    this.iGRCPos2   = data[9];
-    this.iGRCReg    = data[10];
-    this.aGRCRegs   = data[11];
+    this.regGRCPos1 = data[8];
+    this.regGRCPos2 = data[9];
+    this.regGRCIndx = data[10];
+    this.regGRCData = data[11];
     this.asGRCRegs  = DEBUGGER? Card.GRC.REGS : [];
     this.latches    = data[12];
 
@@ -1718,6 +1795,7 @@ Card.prototype.initEGA = function(data, nMonitorType)
     this.nSetMapBits    = data[22];
     this.nColorCompare  = data[23];
     this.nColorDontCare = data[24];
+    this.regVGAEnable   = data[25];
 };
 
 /**
@@ -1731,11 +1809,11 @@ Card.prototype.saveCard = function()
     var data = [];
     if (this.iCard !== undefined) {
         data[0] = this.fActive;
-        data[1] = this.modeReg;
-        data[2] = this.colorReg;
-        data[3] = this.statusReg;
-        data[4] = this.iCRTCReg | (this.iCRTCPrev << 8);
-        data[5] = this.aCRTCRegs;
+        data[1] = this.regMode;
+        data[2] = this.regColor;
+        data[3] = this.regStatus;
+        data[4] = this.regCRTIndx | (this.regCRTPrev << 8);
+        data[5] = this.regCRTData;
         if (this.iCard >= Video.CARD.EGA) {
             data[6] = this.saveEGA();
         }
@@ -1754,17 +1832,17 @@ Card.prototype.saveEGA = function()
 {
     var data = [];
     data[0]  = this.fATCData;
-    data[1]  = this.iATCReg;
-    data[2]  = this.aATCRegs;
-    data[3]  = this.status0;
-    data[4]  = this.miscReg;
-    data[5]  = this.featReg;
-    data[6]  = this.iSEQReg;
-    data[7]  = this.aSEQRegs;
-    data[8]  = this.iGRCPos1;
-    data[9]  = this.iGRCPos2;
-    data[10] = this.iGRCReg;
-    data[11] = this.aGRCRegs;
+    data[1]  = this.regATCIndx;
+    data[2]  = this.regATCData;
+    data[3]  = this.regStatus0;
+    data[4]  = this.regMisc;
+    data[5]  = this.regFeat;
+    data[6]  = this.regSEQIndx;
+    data[7]  = this.regSEQData;
+    data[8]  = this.regGRCPos1;
+    data[9]  = this.regGRCPos2;
+    data[10] = this.regGRCIndx;
+    data[11] = this.regGRCData;
     data[12] = this.latches;
     data[13] = [this.addrBuffer, this.sizeBuffer, this.cbMemory];
     data[14] = State.compressEvenOdd(this.adwMemory);
@@ -1778,6 +1856,7 @@ Card.prototype.saveEGA = function()
     data[22] = this.nSetMapBits;
     data[23] = this.nColorCompare;
     data[24] = this.nColorDontCare;
+    data[25] = this.regVGAEnable;
     return data;
 };
 
@@ -1792,25 +1871,25 @@ Card.prototype.dumpCard = function()
         /*
          * Start with registers that are common to all cards....
          */
-        this.dumpRegs("CRTC", this.iCRTCReg, this.aCRTCRegs, this.asCRTCRegs);
+        this.dumpRegs("CRTC", this.regCRTIndx, this.regCRTData, this.asCRTCRegs);
 
         if (this.iCard == Video.CARD.MDA || this.iCard == Video.CARD.CGA) {
-            this.dumpRegs(" MODEREG", this.modeReg);
-            this.dumpRegs(" STATUS1", this.statusReg);
+            this.dumpRegs(" MODEREG", this.regMode);
+            this.dumpRegs(" STATUS1", this.regStatus);
         }
 
         if (this.iCard == Video.CARD.CGA) {
-            this.dumpRegs("   COLOR", this.colorReg);
+            this.dumpRegs("   COLOR", this.regColor);
         }
 
         if (this.iCard >= Video.CARD.EGA) {
             this.dbg.println(" ATCDATA: " + this.fATCData);
-            this.dumpRegs(" ATC", this.iATCReg, this.aATCRegs, this.asATCRegs);
-            this.dumpRegs(" GRC", this.iGRCReg, this.aGRCRegs, this.asGRCRegs);
-            this.dumpRegs(" SEQ", this.iSEQReg, this.aSEQRegs, this.asSEQRegs);
-            this.dumpRegs("    FEAT", this.featReg);
-            this.dumpRegs("    MISC", this.miscReg);
-            this.dumpRegs(" STATUS0", this.status0);
+            this.dumpRegs(" ATC", this.regATCIndx, this.regATCData, this.asATCRegs);
+            this.dumpRegs(" GRC", this.regGRCIndx, this.regGRCData, this.asGRCRegs);
+            this.dumpRegs(" SEQ", this.regSEQIndx, this.regSEQData, this.asSEQRegs);
+            this.dumpRegs("    FEAT", this.regFeat);
+            this.dumpRegs("    MISC", this.regMisc);
+            this.dumpRegs(" STATUS0", this.regStatus0);
             this.dumpRegs(" LATCHES", this.latches);
             this.dbg.println("  ACCESS: " + str.toHexWord(this.nAccess));
             this.dbg.println("Use 'dump video buffer' to dump video memory");
@@ -1971,8 +2050,8 @@ Card.prototype.setMemoryAccess = function(nAccess)
  * to map it to the frame buffer address.  The latter approach gives us total control over the buffer;
  * refer to getMemoryAccess().
  *
- * TODO: Consider allocating our own buffer for all video cards, not just EGA.  For MDA/CGA, I'm not sure
- * it would offer any benefits, other than allowing our internal update functions, like updateScreen(),
+ * TODO: Consider allocating our own buffer for all video cards, not just EGA/VGA.  For MDA/CGA, I'm not
+ * sure it would offer any benefits, other than allowing our internal update functions, like updateScreen(),
  * to access the buffer directly, instead of going through the Bus memory interface.
  */
 Video.cardSpecs = [];
@@ -2005,6 +2084,11 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
     if (this.nCard >= Video.CARD.EGA) {
         bus.addPortInputTable(this, Video.aEGAPortInput);
         bus.addPortOutputTable(this, Video.aEGAPortOutput);
+    }
+
+    if (this.nCard == Video.CARD.VGA) {
+        bus.addPortInputTable(this, Video.aVGAPortInput);
+        bus.addPortOutputTable(this, Video.aVGAPortOutput);
     }
 
     if (DEBUGGER && dbg) {
@@ -2588,7 +2672,7 @@ Video.prototype.reset = function()
  */
 Video.prototype.enableEGA = function()
 {
-    if (!(this.cardEGA.miscReg & Card.MISC.IO_SELECT)) {
+    if (!(this.cardEGA.regMisc & Card.MISC.IO_SELECT)) {
         this.cardMono = this.cardEGA;
         this.cardColor = this.cardCGA;  // this is done mainly to siphon away any CGA I/O
     } else {
@@ -2849,7 +2933,7 @@ Video.prototype.getCardColors = function(nBitsPerPixel)
 
     if (nBitsPerPixel == 2) {
         /*
-         * Of the 4 colors returned, the first color comes from colorReg and the other 3 come from one of
+         * Of the 4 colors returned, the first color comes from regColor and the other 3 come from one of
          * the two hard-coded CGA color sets:
          *
          *      Color Set 1             Color Set 2
@@ -2860,18 +2944,18 @@ Video.prototype.getCardColors = function(nBitsPerPixel)
          *      Brown      (0x16)       White      (0x17)
          *
          * The numbers in parentheses are the EGA ATC palette register values that the EGA BIOS uses for each
-         * color set; on an EGA, I synthesize a fake CGA colorReg value, until I figure out exactly how the EGA
+         * color set; on an EGA, I synthesize a fake CGA regColor value, until I figure out exactly how the EGA
          * simulates the CGA color palette.  TODO: Figure it out.
          */
-        var colorReg = this.cardActive.colorReg;
+        var regColor = this.cardActive.regColor;
         if (this.cardActive === this.cardEGA) {
-            var bBackground = this.cardEGA.aATCRegs[0];
-            colorReg = bBackground & Card.CGA.COLOR.BORDER;
-            if (bBackground & Card.ATC.PALETTE.BRIGHT) colorReg |= Card.CGA.COLOR.BRIGHT;
-            if (this.cardEGA.aATCRegs[1] != 0x12) colorReg |= Card.CGA.COLOR.COLORSET2;
+            var bBackground = this.cardEGA.regATCData[0];
+            regColor = bBackground & Card.CGA.COLOR.BORDER;
+            if (bBackground & Card.ATC.PALETTE.BRIGHT) regColor |= Card.CGA.COLOR.BRIGHT;
+            if (this.cardEGA.regATCData[1] != 0x12) regColor |= Card.CGA.COLOR.COLORSET2;
         }
-        this.aRGB[0] = Video.aCGAColors[colorReg & (Card.CGA.COLOR.BORDER | Card.CGA.COLOR.BRIGHT)];
-        var aColorSet = (colorReg & Card.CGA.COLOR.COLORSET2)? Video.aCGAColorSet2 : Video.aCGAColorSet1;
+        this.aRGB[0] = Video.aCGAColors[regColor & (Card.CGA.COLOR.BORDER | Card.CGA.COLOR.BRIGHT)];
+        var aColorSet = (regColor & Card.CGA.COLOR.COLORSET2)? Video.aCGAColorSet2 : Video.aCGAColorSet1;
         for (var iColor = 0; iColor < aColorSet.length; iColor++) {
             this.aRGB[iColor+1] = Video.aCGAColors[aColorSet[iColor]];
         }
@@ -2887,7 +2971,7 @@ Video.prototype.getCardColors = function(nBitsPerPixel)
 
     this.assert(this.cardColor === this.cardEGA);
 
-    var aRegs = (this.cardEGA.aATCRegs[15] != null? this.cardEGA.aATCRegs : Video.aEGAPalDef);
+    var aRegs = (this.cardEGA.regATCData[15] != null? this.cardEGA.regATCData : Video.aEGAPalDef);
     for (var i = 0; i < this.aRGB.length; i++) {
         var b = aRegs[i] || 0;
         var bRed =   (((b & 0x04)? 0xaa : 0) | ((b & 0x20)? 0x55 : 0));
@@ -3261,14 +3345,14 @@ Video.prototype.checkCursor = function()
     if (!this.nFont) return false;
 
     for (var i = Card.CRTC.CURSOR_START.INDX; i <= Card.CRTC.CURSOR_ADDR_LO; i++) {
-        if (this.cardActive.aCRTCRegs[i] == null)
+        if (this.cardActive.regCRTData[i] == null)
             return false;
     }
 
-    var bCursorFlags = this.cardActive.aCRTCRegs[Card.CRTC.CURSOR_START.INDX];
+    var bCursorFlags = this.cardActive.regCRTData[Card.CRTC.CURSOR_START.INDX];
     var bCursorStart = bCursorFlags & Card.CRTC.CURSOR_START.MASK;
-    var bCursorEnd = this.cardActive.aCRTCRegs[Card.CRTC.CURSOR_END.INDX] & Card.CRTC.CURSOR_END.MASK;
-    var bCursorMax = this.cardActive.aCRTCRegs[Card.CRTC.MAX_SCAN_LINE] & Card.CRTC.CURSOR_END.MASK;
+    var bCursorEnd = this.cardActive.regCRTData[Card.CRTC.CURSOR_END.INDX] & Card.CRTC.CURSOR_END.MASK;
+    var bCursorMax = this.cardActive.regCRTData[Card.CRTC.MAX_SCAN_LINE] & Card.CRTC.CURSOR_END.MASK;
 
     /*
      * HACK: The original EGA BIOS has a cursor emulation bug when 43-line mode is enabled, so we attempt to detect
@@ -3296,7 +3380,7 @@ Video.prototype.checkCursor = function()
     /*
      * The most compatible way of disabling the cursor is to simply move the cursor to an off-screen position.
      */
-    var iCellCursor = (this.cardActive.aCRTCRegs[Card.CRTC.CURSOR_ADDR_LO] + ((this.cardActive.aCRTCRegs[Card.CRTC.CURSOR_ADDR_HI] & Card.CRTC.ADDR_HI_MASK) << 8));
+    var iCellCursor = (this.cardActive.regCRTData[Card.CRTC.CURSOR_ADDR_LO] + ((this.cardActive.regCRTData[Card.CRTC.CURSOR_ADDR_HI] & Card.CRTC.ADDR_HI_MASK) << 8));
     if (this.iCellCursor != iCellCursor) {
         if (DEBUG && this.messageEnabled()) {
             this.printMessage("checkCursor(): cursor moved from " + this.iCellCursor + " to " + iCellCursor);
@@ -3374,12 +3458,12 @@ Video.prototype.getAccess = function()
     var nAccess;
     var card = this.cardActive;
 
-    var regGRCMode = card.aGRCRegs[Card.GRC.MODE.INDX];
+    var regGRCMode = card.regGRCData[Card.GRC.MODE.INDX];
     if (regGRCMode != null) {
         var nReadAccess = Card.ACCESS.READ.MODE0;
         var nWriteAccess = Card.ACCESS.WRITE.MODE0;
         var nWriteMode = regGRCMode & Card.GRC.MODE.WRITE;
-        var regDataRotate = card.aGRCRegs[Card.GRC.DATAROT.INDX] & Card.GRC.DATAROT.MASK;
+        var regDataRotate = card.regGRCData[Card.GRC.DATAROT.INDX] & Card.GRC.DATAROT.MASK;
         switch (nWriteMode) {
         case Card.GRC.MODE.WRITE_MODE0:
             if (regDataRotate) {
@@ -3497,7 +3581,7 @@ Video.prototype.setDimensions = function()
              * then we'll need to load another MDA font variation, because we only load an 9x14 font for MDA.
              */
             if (this.cardActive === this.cardEGA && this.nFont == Video.FONT.CGA) {
-                if (this.cardEGA.aCRTCRegs[Card.CRTC.MAX_SCAN_LINE] == 7) {
+                if (this.cardEGA.regCRTData[Card.CRTC.MAX_SCAN_LINE] == 7) {
                     /*
                      * Vertical resolution of 350 divided by 8 (ie, scan lines 0-7) yields 43 whole rows.
                      */
@@ -3507,7 +3591,7 @@ Video.prototype.setDimensions = function()
                  * Since we can also be called before any hardware registers have been initialized,
                  * it may be best to not perform the following test (which is why it's commented out).
                  */
-                else /* if (this.cardEGA.aCRTCRegs[Card.CRTC.MAX_SCAN_LINE] == 13) */ {
+                else /* if (this.cardEGA.regCRTData[Card.CRTC.MAX_SCAN_LINE] == 13) */ {
                     /*
                      * Vertical resolution of 350 divided by 14 (ie, scan lines 0-13) yields exactly 25 rows.
                      *
@@ -3686,7 +3770,7 @@ Video.prototype.checkMode = function(fForce)
             var cbBuffer = card.cbMemory >> 2;
             var cbBufferText = (cbBuffer > 0x8000? 0x8000 : cbBuffer);
 
-            var regGRCMisc = card.aGRCRegs[Card.GRC.MISC.INDX];
+            var regGRCMisc = card.regGRCData[Card.GRC.MISC.INDX];
             if (regGRCMisc != null) {
 
                 switch(regGRCMisc & Card.GRC.MISC.MAPMEM) {
@@ -3714,8 +3798,8 @@ Video.prototype.checkMode = function(fForce)
                     break;
                 }
 
-                var fSEQDotClock = (card.aSEQRegs[Card.SEQ.CLK.INDX] & Card.SEQ.CLK.DOTCLOCK);
-                var nCRTCVertTotal = card.aCRTCRegs[Card.CRTC.EGA.VERT_TOTAL] | ((card.aCRTCRegs[Card.CRTC.EGA.OVERFLOW.INDX] & Card.CRTC.EGA.OVERFLOW.VERT_TOTAL) << 8);
+                var fSEQDotClock = (card.regSEQData[Card.SEQ.CLK.INDX] & Card.SEQ.CLK.DOTCLOCK);
+                var nCRTCVertTotal = card.regCRTData[Card.CRTC.EGA.VERT_TOTAL] | ((card.regCRTData[Card.CRTC.EGA.OVERFLOW.INDX] & Card.CRTC.EGA.OVERFLOW.VERT_TOTAL) << 8);
 
                 if (nMode != Video.MODE.UNKNOWN) {
                     if (!(regGRCMisc & Card.GRC.MISC.GRAPHICS)) {
@@ -3741,18 +3825,18 @@ Video.prototype.checkMode = function(fForce)
                 nAccess = this.getAccess();
             }
         }
-        else if (card.modeReg & Card.CGA.MODE.VIDEO_ENABLE) {
+        else if (card.regMode & Card.CGA.MODE.VIDEO_ENABLE) {
             /*
              * NOTE: For the CGA, we precondition any mode change on CGA.MODE.VIDEO_ENABLE being set, otherwise
              * we'll get spoofed by the ROM BIOS scroll code, which waits for vertical retrace and then turns CGA.MODE.VIDEO_ENABLE
              * off, using a hard-coded mode value (0x25) that does NOT necessarily match the the CGA video mode currently in effect.
              */
-            if (!(card.modeReg & Card.CGA.MODE.GRAPHIC_SEL)) {
-                nMode = ((card.modeReg & Card.CGA.MODE._80X25)? Video.MODE.CGA_80X25 : Video.MODE.CGA_40X25);
-                if (card.modeReg & Card.CGA.MODE.BW_SEL) nMode -= 1;
+            if (!(card.regMode & Card.CGA.MODE.GRAPHIC_SEL)) {
+                nMode = ((card.regMode & Card.CGA.MODE._80X25)? Video.MODE.CGA_80X25 : Video.MODE.CGA_40X25);
+                if (card.regMode & Card.CGA.MODE.BW_SEL) nMode -= 1;
             } else {
-                nMode = ((card.modeReg & Card.CGA.MODE.HIRES_BW)? Video.MODE.CGA_640X200 : Video.MODE.CGA_320X200_BW);
-                if (!(card.modeReg & Card.CGA.MODE.BW_SEL)) nMode -= 1;
+                nMode = ((card.regMode & Card.CGA.MODE.HIRES_BW)? Video.MODE.CGA_640X200 : Video.MODE.CGA_320X200_BW);
+                if (!(card.regMode & Card.CGA.MODE.BW_SEL)) nMode -= 1;
             }
         }
     }
@@ -4077,10 +4161,10 @@ Video.prototype.updateScreen = function(fForce)
     var fEnabled = false;
     if (this.cardActive) {
         if (this.cardActive === this.cardEGA) {
-            if (this.cardEGA.iATCReg & Card.ATC.INDX_PAL_ENABLE) fEnabled = true;
+            if (this.cardEGA.regATCIndx & Card.ATC.INDX_PAL_ENABLE) fEnabled = true;
         }
         else {
-            if (this.cardActive.modeReg & Card.CGA.MODE.VIDEO_ENABLE) fEnabled = true;
+            if (this.cardActive.regMode & Card.CGA.MODE.VIDEO_ENABLE) fEnabled = true;
         }
     }
 
@@ -4120,7 +4204,7 @@ Video.prototype.updateScreen = function(fForce)
      */
     var addrScreen = this.cardActive.addrBuffer;
     var addrScreenLimit = addrScreen + this.cardActive.sizeBuffer;
-    var offScreen = (this.cardActive.aCRTCRegs[Card.CRTC.START_ADDR_HI] << 8) + this.cardActive.aCRTCRegs[Card.CRTC.START_ADDR_LO];
+    var offScreen = (this.cardActive.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + this.cardActive.regCRTData[Card.CRTC.START_ADDR_LO];
 
     /*
      * Any screen (aka "page") offset must be doubled for text modes, due to the attribute bytes.
@@ -4211,7 +4295,7 @@ Video.prototype.updateScreenText = function(addrScreen, addrScreenLimit, iCell, 
     var dataBlink = 0;
     var dataDraw = (Video.ATTRS.DRAW_FGND << 8);
     var dataMask = 0xfffff;
-    if (this.cardActive.modeReg & Card.MDA.MODE.BLINK_ENABLE) {
+    if (this.cardActive.regMode & Card.MDA.MODE.BLINK_ENABLE) {
         dataBlink = (Video.ATTRS.BGND_BLINK << 8);
         dataMask &= ~dataBlink;
         if (!(this.cBlinks & 0x2)) dataMask &= ~dataDraw;
@@ -4506,7 +4590,7 @@ Video.prototype.inMDAStatus = function(port, addrFrom)
  */
 Video.prototype.outFeat = function(port, bOut, addrFrom)
 {
-    this.cardEGA.featReg = (this.cardEGA.featReg & ~Card.FEAT_CTRL.BITS) | (bOut & Card.FEAT_CTRL.BITS);
+    this.cardEGA.regFeat = (this.cardEGA.regFeat & ~Card.FEAT_CTRL.BITS) | (bOut & Card.FEAT_CTRL.BITS);
     this.printMessageIO(port, bOut, addrFrom, "FEAT");
 };
 
@@ -4520,9 +4604,9 @@ Video.prototype.outFeat = function(port, bOut, addrFrom)
  */
 Video.prototype.inATC = function(port, addrFrom)
 {
-    var b = this.cardEGA.fATCData? this.cardEGA.aATCRegs[this.cardEGA.iATCReg & Card.ATC.INDX_MASK] : this.cardEGA.iATCReg;
+    var b = this.cardEGA.fATCData? this.cardEGA.regATCData[this.cardEGA.regATCIndx & Card.ATC.INDX_MASK] : this.cardEGA.regATCIndx;
     if (this.messageEnabled()) {
-        this.printMessageIO(Card.ATC.PORT, null, addrFrom, "ATC." + (this.cardEGA.fATCData? this.cardEGA.asATCRegs[this.cardEGA.iATCReg & Card.ATC.INDX_MASK] : "INDX"), b);
+        this.printMessageIO(Card.ATC.PORT, null, addrFrom, "ATC." + (this.cardEGA.fATCData? this.cardEGA.asATCRegs[this.cardEGA.regATCIndx & Card.ATC.INDX_MASK] : "INDX"), b);
     }
     this.cardEGA.fATCData = !this.cardEGA.fATCData;
     return b;
@@ -4538,9 +4622,9 @@ Video.prototype.inATC = function(port, addrFrom)
  */
 Video.prototype.outATC = function(port, bOut, addrFrom)
 {
-    var fPalEnabled = (this.cardEGA.iATCReg & Card.ATC.INDX_PAL_ENABLE);
+    var fPalEnabled = (this.cardEGA.regATCIndx & Card.ATC.INDX_PAL_ENABLE);
     if (!this.cardEGA.fATCData) {
-        this.cardEGA.iATCReg = bOut;
+        this.cardEGA.regATCIndx = bOut;
         this.printMessageIO(port, bOut, addrFrom, "ATC.INDX");
         this.cardEGA.fATCData = true;
         if ((bOut & Card.ATC.INDX_PAL_ENABLE) && !fPalEnabled) {
@@ -4556,13 +4640,13 @@ Video.prototype.outATC = function(port, bOut, addrFrom)
             }
         }
     } else {
-        var iReg = this.cardEGA.iATCReg & Card.ATC.INDX_MASK;
+        var iReg = this.cardEGA.regATCIndx & Card.ATC.INDX_MASK;
         if (iReg >= Card.ATC.PALETTE_REGS || !fPalEnabled) {
-            if (Video.TRAPALL || this.cardEGA.aATCRegs[iReg] !== bOut) {
+            if (Video.TRAPALL || this.cardEGA.regATCData[iReg] !== bOut) {
                 if (this.messageEnabled()) {
                     this.printMessageIO(port, bOut, addrFrom, "ATC." + this.cardEGA.asATCRegs[iReg]);
                 }
-                this.cardEGA.aATCRegs[iReg] = bOut;
+                this.cardEGA.regATCData[iReg] = bOut;
             }
         }
         this.cardEGA.fATCData = false;
@@ -4579,13 +4663,13 @@ Video.prototype.outATC = function(port, bOut, addrFrom)
  */
 Video.prototype.inStatus0 = function(port, addrFrom)
 {
-    var iBit = 3 - ((this.cardEGA.miscReg & Card.MISC.CLK_SELECT) >> 2);    // this is the desired SW # (0-3)
+    var iBit = 3 - ((this.cardEGA.regMisc & Card.MISC.CLK_SELECT) >> 2);    // this is the desired SW # (0-3)
     var bSWBit = (this.bEGASwitches & (1 << iBit)) << (Card.STATUS0.SWSENSE_SHIFT - iBit);
-    var b = ((this.cardEGA.status0 & ~Card.STATUS0.SWSENSE) | bSWBit);
+    var b = ((this.cardEGA.regStatus0 & ~Card.STATUS0.SWSENSE) | bSWBit);
     /*
      * TODO: Figure out where Card.STATUS0.FEAT bits should come from....
      */
-    this.cardEGA.status0 = b;
+    this.cardEGA.regStatus0 = b;
     this.printMessageIO(Card.STATUS0.PORT, null, addrFrom, "STATUS0", b);
     return b;
 };
@@ -4598,9 +4682,38 @@ Video.prototype.inStatus0 = function(port, addrFrom)
  */
 Video.prototype.outMisc = function(port, bOut, addrFrom)
 {
-    this.cardEGA.miscReg = bOut;
+    this.cardEGA.regMisc = bOut;
     this.enableEGA();
-    this.printMessageIO(Card.MISC.PORT, bOut, addrFrom, "MISC");
+    this.printMessageIO(Card.MISC.PORT_WRITE, bOut, addrFrom, "MISC");
+};
+
+/**
+ * inVGAEnable(port, addrFrom)
+ *
+ * @this {Video}
+ * @param {number} port (0x3C3)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+ * @return {number}
+ */
+Video.prototype.inVGAEnable = function(port, addrFrom)
+{
+    var b = this.cardEGA.regVGAEnable;
+    this.printMessageIO(Card.VGA_ENABLE.PORT, null, addrFrom, "VGA_ENABLE", b);
+    return b;
+};
+
+/**
+ * outVGAEnable(port, bOut, addrFrom)
+ *
+ * @this {Video}
+ * @param {number} port (0x3C3)
+ * @param {number} bOut
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+ */
+Video.prototype.outVGAEnable = function(port, bOut, addrFrom)
+{
+    this.cardEGA.regVGAEnable = bOut;
+    this.printMessageIO(Card.VGA_ENABLE.PORT, bOut, addrFrom, "VGA_ENABLE");
 };
 
 /**
@@ -4613,7 +4726,7 @@ Video.prototype.outMisc = function(port, bOut, addrFrom)
  */
 Video.prototype.inSEQIndx = function(port, addrFrom)
 {
-    var b = this.cardEGA.iSEQReg;
+    var b = this.cardEGA.regSEQIndx;
     this.printMessageIO(Card.SEQ.INDX.PORT, null, addrFrom, "SEQ.INDX", b);
     return b;
 };
@@ -4628,7 +4741,7 @@ Video.prototype.inSEQIndx = function(port, addrFrom)
  */
 Video.prototype.outSEQIndx = function(port, bOut, addrFrom)
 {
-    this.cardEGA.iSEQReg = bOut;
+    this.cardEGA.regSEQIndx = bOut;
     this.printMessageIO(Card.SEQ.INDX.PORT, bOut, addrFrom, "SEQ.INDX");
 };
 
@@ -4642,9 +4755,9 @@ Video.prototype.outSEQIndx = function(port, bOut, addrFrom)
  */
 Video.prototype.inSEQData = function(port, addrFrom)
 {
-    var b = this.cardEGA.aSEQRegs[this.cardEGA.iSEQReg];
+    var b = this.cardEGA.regSEQData[this.cardEGA.regSEQIndx];
     if (this.messageEnabled()) {
-        this.printMessageIO(Card.SEQ.DATA.PORT, null, addrFrom, "SEQ" + this.cardEGA.asSEQRegs[this.cardEGA.iSEQReg], b);
+        this.printMessageIO(Card.SEQ.DATA.PORT, null, addrFrom, "SEQ" + this.cardEGA.asSEQRegs[this.cardEGA.regSEQIndx], b);
     }
     return b;
 };
@@ -4659,64 +4772,29 @@ Video.prototype.inSEQData = function(port, addrFrom)
  */
 Video.prototype.outSEQData = function(port, bOut, addrFrom)
 {
-    if (Video.TRAPALL || this.cardEGA.aSEQRegs[this.cardEGA.iSEQReg] !== bOut) {
+    if (Video.TRAPALL || this.cardEGA.regSEQData[this.cardEGA.regSEQIndx] !== bOut) {
         if (this.messageEnabled()) {
-            this.printMessageIO(Card.SEQ.DATA.PORT, bOut, addrFrom, "SEQ." + this.cardEGA.asSEQRegs[this.cardEGA.iSEQReg]);
+            this.printMessageIO(Card.SEQ.DATA.PORT, bOut, addrFrom, "SEQ." + this.cardEGA.asSEQRegs[this.cardEGA.regSEQIndx]);
         }
-        this.cardEGA.aSEQRegs[this.cardEGA.iSEQReg] = bOut;
+        this.cardEGA.regSEQData[this.cardEGA.regSEQIndx] = bOut;
     }
-    if (this.cardEGA.iSEQReg == Card.SEQ.MAPMASK.INDX) {
+    if (this.cardEGA.regSEQIndx == Card.SEQ.MAPMASK.INDX) {
         this.cardEGA.nWriteMapMask = Video.aEGAByteToDW[bOut & Card.SEQ.MAPMASK.MAPS];
     }
 };
 
 /**
- * inGRCPos1(port, addrFrom)
- *
- * @this {Video}
- * @param {number} port (0x3CC)
- * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
- * @return {number}
- */
-Video.prototype.inGRCPos1 = function(port, addrFrom)
-{
-    var b = this.cardEGA.iGRCPos1;
-    this.printMessageIO(Card.GRC.POS1_PORT, null, addrFrom, "GRC1", b);
-    return b;
-};
-
-/**
- * outGRCPos1(port, bOut, addrFrom)
- *
- * "The EGA was originally implemented by IBM using two Graphics Controller Chips. It was necessary to program
- * each to respond to a different set of two consecutive bits of the 8-bit host data bus. In the IBM EGA implementation,
- * a 0 must be loaded into this register. In the VGA, there is no analogous register."
- *
- * "A zero should be loaded into this location to map host data bus bits 0 and 1 to display planes 0 and 1 respectively."
- *
- * @this {Video}
- * @param {number} port (0x3CC)
- * @param {number} bOut
- * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
- */
-Video.prototype.outGRCPos1 = function(port, bOut, addrFrom)
-{
-    this.cardEGA.iGRCPos1 = bOut;
-    this.printMessageIO(Card.GRC.POS1_PORT, bOut, addrFrom, "GRC1");
-};
-
-/**
- * inGRCPos2(port, addrFrom)
+ * inVGAFeat(port, addrFrom)
  *
  * @this {Video}
  * @param {number} port (0x3CA)
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number}
  */
-Video.prototype.inGRCPos2 = function(port, addrFrom)
+Video.prototype.inVGAFeat = function(port, addrFrom)
 {
-    var b = this.cardEGA.iGRCPos2;
-    this.printMessageIO(Card.GRC.POS2_PORT, null, addrFrom, "GRC2", b);
+    var b = this.cardEGA.regFeat;
+    this.printMessageIO(Card.FEAT_CTRL.PORT_READ, null, addrFrom, "FEAT", b);
     return b;
 };
 
@@ -4735,8 +4813,45 @@ Video.prototype.inGRCPos2 = function(port, addrFrom)
  */
 Video.prototype.outGRCPos2 = function(port, bOut, addrFrom)
 {
-    this.cardEGA.iGRCPos2 = bOut;
+    this.cardEGA.regGRCPos2 = bOut;
     this.printMessageIO(Card.GRC.POS2_PORT, bOut, addrFrom, "GRC2");
+};
+
+/**
+ * inVGAMisc(port, addrFrom)
+ *
+ * @this {Video}
+ * @param {number} port (0x3CC)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+ * @return {number}
+ */
+Video.prototype.inVGAMisc = function(port, addrFrom)
+{
+    var b = this.cardEGA.regMisc;
+    this.printMessageIO(Card.MISC.PORT_READ, null, addrFrom, "MISC", b);
+    return b;
+};
+
+/**
+ * outGRCPos1(port, bOut, addrFrom)
+ *
+ * "The EGA was originally implemented by IBM using two Graphics Controller Chips. It was necessary to program
+ * each to respond to a different set of two consecutive bits of the 8-bit host data bus. In the IBM EGA implementation,
+ * a 0 must be loaded into this register. In the VGA, there is no analogous register."
+ *
+ * "A zero should be loaded into this location to map host data bus bits 0 and 1 to display planes 0 and 1 respectively."
+ *
+ * Note that this register was not readable on the EGA, and when the VGA came along, reads of this port read the Misc reg.
+ *
+ * @this {Video}
+ * @param {number} port (0x3CC)
+ * @param {number} bOut
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+ */
+Video.prototype.outGRCPos1 = function(port, bOut, addrFrom)
+{
+    this.cardEGA.regGRCPos1 = bOut;
+    this.printMessageIO(Card.GRC.POS1_PORT, bOut, addrFrom, "GRC1");
 };
 
 /**
@@ -4749,7 +4864,7 @@ Video.prototype.outGRCPos2 = function(port, bOut, addrFrom)
  */
 Video.prototype.inGRCIndx = function(port, addrFrom)
 {
-    var b = this.cardEGA.iGRCReg;
+    var b = this.cardEGA.regGRCIndx;
     this.printMessageIO(Card.GRC.INDX.PORT, null, addrFrom, "GRC.INDX", b);
     return b;
 };
@@ -4764,7 +4879,7 @@ Video.prototype.inGRCIndx = function(port, addrFrom)
  */
 Video.prototype.outGRCIndx = function(port, bOut, addrFrom)
 {
-    this.cardEGA.iGRCReg = bOut;
+    this.cardEGA.regGRCIndx = bOut;
     this.printMessageIO(Card.GRC.INDX.PORT, bOut, addrFrom, "GRC.INDX");
 };
 
@@ -4778,9 +4893,9 @@ Video.prototype.outGRCIndx = function(port, bOut, addrFrom)
  */
 Video.prototype.inGRCData = function(port, addrFrom)
 {
-    var b = this.cardEGA.aGRCRegs[this.cardEGA.iGRCReg];
+    var b = this.cardEGA.regGRCData[this.cardEGA.regGRCIndx];
     if (this.messageEnabled()) {
-        this.printMessageIO(Card.GRC.DATA.PORT, null, addrFrom, "GRC." + this.cardEGA.asGRCRegs[this.cardEGA.iGRCReg], b);
+        this.printMessageIO(Card.GRC.DATA.PORT, null, addrFrom, "GRC." + this.cardEGA.asGRCRegs[this.cardEGA.regGRCIndx], b);
     }
     return b;
 };
@@ -4795,13 +4910,13 @@ Video.prototype.inGRCData = function(port, addrFrom)
  */
 Video.prototype.outGRCData = function(port, bOut, addrFrom)
 {
-    if (Video.TRAPALL || this.cardEGA.aGRCRegs[this.cardEGA.iGRCReg] !== bOut) {
+    if (Video.TRAPALL || this.cardEGA.regGRCData[this.cardEGA.regGRCIndx] !== bOut) {
         if (this.messageEnabled()) {
-            this.printMessageIO(Card.GRC.DATA.PORT, bOut, addrFrom, "GRC." + this.cardEGA.asGRCRegs[this.cardEGA.iGRCReg]);
+            this.printMessageIO(Card.GRC.DATA.PORT, bOut, addrFrom, "GRC." + this.cardEGA.asGRCRegs[this.cardEGA.regGRCIndx]);
         }
-        this.cardEGA.aGRCRegs[this.cardEGA.iGRCReg] = bOut;
+        this.cardEGA.regGRCData[this.cardEGA.regGRCIndx] = bOut;
     }
-    switch(this.cardEGA.iGRCReg) {
+    switch(this.cardEGA.regGRCIndx) {
     case Card.GRC.SRESET.INDX:
         this.cardEGA.nSetMapData = Video.aEGAByteToDW[bOut & 0xf];
         this.cardEGA.nSetMapBits = this.cardEGA.nSetMapData & ~this.cardEGA.nSetMapMask;
@@ -4922,7 +5037,7 @@ Video.prototype.outCGAMode = function(port, bOut, addrFrom)
  */
 Video.prototype.inCGAColor = function(port, addrFrom)
 {
-    var b = this.cardColor.colorReg;
+    var b = this.cardColor.regColor;
     if (this.messageEnabled()) {
         this.printMessageIO(this.cardColor.port + 5, null, addrFrom, this.cardColor.type + ".COLOR", b);
     }
@@ -4942,8 +5057,8 @@ Video.prototype.outCGAColor = function(port, bOut, addrFrom)
     if (this.messageEnabled()) {
         this.printMessageIO(this.cardColor.port + 5, bOut, addrFrom, this.cardColor.type + ".COLOR");
     }
-    if (this.cardColor.colorReg !== bOut) {
-        this.cardColor.colorReg = bOut;
+    if (this.cardColor.regColor !== bOut) {
+        this.cardColor.regColor = bOut;
         /*
          * When this color register changes, it can automatically change the appearance of any number of cells, so we make
          * a special call to initCellCache() to invalidate every cell, forcing all cells to be redrawn on the next updateScreen().
@@ -4975,7 +5090,7 @@ Video.prototype.inCGAStatus = function(port, addrFrom)
  */
 Video.prototype.inCRTCIndx = function(card, addrFrom)
 {
-    var b = card.iCRTCReg;
+    var b = card.regCRTIndx;
     this.printMessageIO(card.port, null, addrFrom, "CRTC.INDX", b);
     return b;
 };
@@ -4990,8 +5105,8 @@ Video.prototype.inCRTCIndx = function(card, addrFrom)
  */
 Video.prototype.outCRTCIndx = function(card, bOut, addrFrom)
 {
-    card.iCRTCPrev = card.iCRTCReg;
-    card.iCRTCReg = bOut & Card.CGA.CRTC.INDX.MASK;
+    card.regCRTPrev = card.regCRTIndx;
+    card.regCRTIndx = bOut & Card.CGA.CRTC.INDX.MASK;
     this.printMessageIO(card.port, bOut, addrFrom, "CRTC.INDX");
 };
 
@@ -5006,9 +5121,9 @@ Video.prototype.outCRTCIndx = function(card, bOut, addrFrom)
 Video.prototype.inCRTCData = function(card, addrFrom)
 {
     var b;
-    if (card.iCRTCReg < card.nCRTCRegs) b = card.aCRTCRegs[card.iCRTCReg];
+    if (card.regCRTIndx < card.nCRTCRegs) b = card.regCRTData[card.regCRTIndx];
     if (this.messageEnabled()) {
-        this.printMessageIO(card.port + 1, null, addrFrom, "CRTC." + card.asCRTCRegs[card.iCRTCReg], b);
+        this.printMessageIO(card.port + 1, null, addrFrom, "CRTC." + card.asCRTCRegs[card.regCRTIndx], b);
     }
     return b;
 };
@@ -5023,12 +5138,12 @@ Video.prototype.inCRTCData = function(card, addrFrom)
  */
 Video.prototype.outCRTCData = function(card, bOut, addrFrom)
 {
-    if (card.iCRTCReg < card.nCRTCRegs) {
-        if (Video.TRAPALL || card.aCRTCRegs[card.iCRTCReg] !== bOut) {
+    if (card.regCRTIndx < card.nCRTCRegs) {
+        if (Video.TRAPALL || card.regCRTData[card.regCRTIndx] !== bOut) {
             if (this.messageEnabled()) {
-                this.printMessageIO(card.port + 1, bOut, addrFrom, "CRTC." + card.asCRTCRegs[card.iCRTCReg]);
+                this.printMessageIO(card.port + 1, bOut, addrFrom, "CRTC." + card.asCRTCRegs[card.regCRTIndx]);
             }
-            card.aCRTCRegs[card.iCRTCReg] = bOut;
+            card.regCRTData[card.regCRTIndx] = bOut;
         }
         /*
          * During mode changes on the EGA, all the CRTC regs are typically programmed in sequence,
@@ -5039,13 +5154,13 @@ Video.prototype.outCRTCData = function(card, bOut, addrFrom)
          * yes, we want to force setMode() to call setDimensions(), which is key to setting the proper
          * number of screen rows.
          */
-        if (card.iCRTCReg == Card.CRTC.MAX_SCAN_LINE && card.iCRTCPrev != Card.CRTC.MAX_SCAN_LINE-1) {
+        if (card.regCRTIndx == Card.CRTC.MAX_SCAN_LINE && card.regCRTPrev != Card.CRTC.MAX_SCAN_LINE-1) {
             this.checkMode(true);
         }
         this.checkCursor();
     } else {
         if (DEBUG && this.messageEnabled()) {
-            this.printMessage("outCRTCData(): ignoring unexpected write to CRTC[" + str.toHexByte(card.iCRTCReg) + "]: " + str.toHexByte(bOut));
+            this.printMessage("outCRTCData(): ignoring unexpected write to CRTC[" + str.toHexByte(card.regCRTIndx) + "]: " + str.toHexByte(bOut));
         }
     }
 };
@@ -5060,7 +5175,7 @@ Video.prototype.outCRTCData = function(card, bOut, addrFrom)
  */
 Video.prototype.inCardMode = function(card, addrFrom)
 {
-    var b = card.modeReg;
+    var b = card.regMode;
     this.printMessageIO(card.port + 4, null, addrFrom, "MODE", b);
     return b;
 };
@@ -5076,7 +5191,7 @@ Video.prototype.inCardMode = function(card, addrFrom)
 Video.prototype.outCardMode = function(card, bOut, addrFrom)
 {
     this.printMessageIO(card.port + 4, bOut, addrFrom, "MODE");
-    card.modeReg = bOut;
+    card.regMode = bOut;
     this.checkMode(false);
 };
 
@@ -5133,7 +5248,7 @@ Video.prototype.inCardStatus = function(card, addrFrom)
          * Depending on where we are in the horizontal and vertical periods (which can be inferred from the
          * same elapsed cycle count that we used to simulate the retrace bits above), we could extract 4 bits
          * from a corresponding region of the video buffer, "and" them with Card.ATC.PLANES.MASK, use
-         * that to index into the palette registers (cardEGA.aATCRegs), and use the resulting palette register
+         * that to index into the palette registers (cardEGA.regATCData), and use the resulting palette register
          * bits to set these diagnostics bits.  However, that's all rather tedious, and the process of extracting
          * 4 appropriate bits from the video buffer varies depending on the video mode.
          *
@@ -5144,7 +5259,7 @@ Video.prototype.inCardStatus = function(card, addrFrom)
          *
          * TODO: Faithful emulation of these bits is certainly doable, so consider doing that at some point.
          */
-        b |= ((card.statusReg & Card.STATUS1.DIAGNOSTIC) ^ Card.STATUS1.DIAGNOSTIC);
+        b |= ((card.regStatus & Card.STATUS1.DIAGNOSTIC) ^ Card.STATUS1.DIAGNOSTIC);
 
         /*
          * Last but not least, we must reset the EGA's ATC flip-flop whenever this register is read.
@@ -5159,9 +5274,9 @@ Video.prototype.inCardStatus = function(card, addrFrom)
          * Also, according to http://www.seasip.info/VintagePC/mda.html, on an MDA, bits 7-4 are always ON and bits 2-1
          * are always OFF, hence the "OR" of 0xf0.
          */
-        b = (card.statusReg ^= (Card.CGA.STATUS.DISP_ENABLE | Card.CGA.STATUS.VERT_RETRACE)) | 0xf0;
+        b = (card.regStatus ^= (Card.CGA.STATUS.DISP_ENABLE | Card.CGA.STATUS.VERT_RETRACE)) | 0xf0;
     }
-    card.statusReg = b;
+    card.regStatus = b;
     this.printMessageIO(card.port + 6, null, addrFrom, (card === this.cardEGA? "STATUS1" : "STATUS"), b);
     return b;
 };
@@ -5191,9 +5306,9 @@ Video.prototype.dumpVideo = function(sParm)
 /*
  * Port input/output notification tables
  *
- * TODO: I added some "duplicate" entries for the MDA because, according to docs I'd read, MDA ports are
- * decoded at multiple addresses.  However, if this is important, then it should be verified and implemented
- * consistently (eg, for CGA as well).  For now, I'm decoding only the standard port addresses.
+ * TODO: At one point, I'd added some "duplicate" entries for the MDA because, according to docs I'd read,
+ * MDA ports are decoded at multiple addresses.  However, if this is important, then it should be verified
+ * and implemented consistently (eg, for CGA as well).  For now, I'm decoding only the standard port addresses.
  */
 Video.aPortInput = {
 //  0x3B1: Video.prototype.inMDAData,           // duplicate
@@ -5232,8 +5347,6 @@ Video.aEGAPortInput = {
     0x3C2: Video.prototype.inStatus0,
     0x3C4: Video.prototype.inSEQIndx,           // technically, not actually readable, but I want the Debugger to be able to read this
     0x3C5: Video.prototype.inSEQData,           // technically, not actually readable, but I want the Debugger to be able to read this
-    0x3CA: Video.prototype.inGRCPos2,           // technically, not actually readable, but I want the Debugger to be able to read this
-    0x3CC: Video.prototype.inGRCPos1,           // technically, not actually readable, but I want the Debugger to be able to read this
     0x3CE: Video.prototype.inGRCIndx,           // technically, not actually readable, but I want the Debugger to be able to read this
     0x3CF: Video.prototype.inGRCData            // technically, not actually readable, but I want the Debugger to be able to read this
 };
@@ -5250,6 +5363,16 @@ Video.aEGAPortOutput = {
     0x3CE: Video.prototype.outGRCIndx,
     0x3CF: Video.prototype.outGRCData,
     0x3DA: Video.prototype.outFeat
+};
+
+Video.aVGAPortInput = {
+    0x3C3: Video.prototype.inVGAEnable,
+    0x3CA: Video.prototype.inVGAFeat,
+    0x3CC: Video.prototype.inVGAMisc
+};
+
+Video.aVGAPortOutput = {
+    0x3C3: Video.prototype.outVGAEnable
 };
 
 /**
