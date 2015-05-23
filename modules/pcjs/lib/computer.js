@@ -1214,7 +1214,7 @@ Computer.prototype.onReset = function()
  *
  * @this {Computer}
  * @param {string} sType
- * @param {Component} [componentPrev] of previously returned component, if any
+ * @param {Component|null} [componentPrev] of previously returned component, if any
  * @return {Component|null}
  */
 Computer.prototype.getComponentByType = function(sType, componentPrev)

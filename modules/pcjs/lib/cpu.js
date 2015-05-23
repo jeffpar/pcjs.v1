@@ -133,6 +133,11 @@ function CPU(parmsCPU, nCyclesDefault)
     this.aCounts.nCyclesChecksumInterval = parmsCPU["csInterval"];
     this.aCounts.nCyclesChecksumStop = parmsCPU["csStop"];
 
+    /*
+     * Initially, no video devices are attached that require CPU-driven updates.  initBus() will update this.
+     */
+    this.aVideo = [];
+
     var cpu = this;
     this.onRunTimeout = function() { cpu.runCPU(); };
 
@@ -181,7 +186,9 @@ CPU.prototype.initBus = function(cmp, bus, cpu, dbg)
      * Attach the Video component to the CPU, so that the CPU can periodically update
      * the video display via updateVideo(), as cycles permit.
      */
-    this.video = cmp.getComponentByType("Video");
+    for (var video = null; (video = cmp.getComponentByType("Video", video));) {
+        this.aVideo.push(video);
+    }
     /*
      * Attach the ChipSet component to the CPU, so that it can obtain the IDT vector number of
      * pending hardware interrupts, in response to ChipSet's updateINTR() notifications.
@@ -482,7 +489,9 @@ CPU.prototype.updateStatus = function(fForce)
  */
 CPU.prototype.updateVideo = function()
 {
-    if (this.video) this.video.updateScreen();
+    for (var i = 0; i < this.aVideo.length; i++) {
+        this.aVideo[i].updateScreen();
+    }
     if (this.cmp && this.cmp.panel) this.cmp.panel.updateAnimation();
 };
 
@@ -493,7 +502,7 @@ CPU.prototype.updateVideo = function()
  */
 CPU.prototype.setFocus = function()
 {
-    if (this.video) this.video.setFocus();
+    if (this.aVideo.length) this.aVideo[0].setFocus();
 };
 
 /**

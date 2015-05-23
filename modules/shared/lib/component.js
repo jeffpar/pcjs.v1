@@ -412,7 +412,7 @@ Component.getComponentByID = function(id, idRelated)
  *
  * @param {string} sType of the desired component
  * @param {string} [idRelated] of related component
- * @param {Component} [componentPrev] of previously returned component, if any
+ * @param {Component|null} [componentPrev] of previously returned component, if any
  * @return {Component|null}
  */
 Component.getComponentByType = function(sType, idRelated, componentPrev)

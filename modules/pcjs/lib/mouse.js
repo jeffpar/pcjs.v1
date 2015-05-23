@@ -78,7 +78,14 @@ function Mouse(parmsMouse)
         this.sAdapterType = "SerialPort";
     }
     this.setActive(false);
-    this.fLocked = false;
+    this.fCaptured = this.fLocked = false;
+
+    /*
+     * Initially, no video devices, and therefore no input devices, are attached.  initBus() will update aVideo,
+     * and powerUp() will update aInput.
+     */
+    this.aVideo = [];
+    this.aInput = [];
     this.setReady();
 }
 
@@ -177,7 +184,13 @@ Mouse.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.bus = bus;
     this.cpu = cpu;
     this.dbg = dbg;
-    this.video = this.cmp.getComponentByType("Video");
+    /*
+     * Attach the Video component to the CPU, so that the CPU can periodically update
+     * the video display via updateVideo(), as cycles permit.
+     */
+    for (var video = null; (video = cmp.getComponentByType("Video", video));) {
+        this.aVideo.push(video);
+    }
 };
 
 /**
@@ -204,7 +217,7 @@ Mouse.prototype.setActive = function(fActive)
      * It's currently not possible to automatically lock the pointer outside the context of a user action
      * (eg, a button or screen click), so this code is for naught.
      *
-     *      if (this.video) this.video.notifyPointerActive(fActive);
+     *      if (this.aVideo.length) this.aVideo[0].notifyPointerActive(fActive);
      *
      * We now rely on similar code in clickMouse().
      */
@@ -234,13 +247,13 @@ Mouse.prototype.powerUp = function(data, fRepower)
                     if (this.componentAdapter) {
                         /*
                          * It's possible that the SerialPort we've just attached to might want to bring us "up to speed"
-                         * on the adapter's state, which is why I envisioned a subsequent syncMouse() call.  And you would want
-                         * to do that as a separate call, not as part of attachMouse(), because componentAdapter isn't
-                         * set until attachMouse() returns.
+                         * on the adapter's state, which is why I envisioned a subsequent syncMouse() call.  And you would
+                         * want to do that as a separate call, not as part of attachMouse(), because componentAdapter
+                         * isn't set until attachMouse() returns.
                          *
                          * However, syncMouse() seems unnecessary, given that SerialPort initializes its MCR to an "inactive"
-                         * state, and even when restoring a previous state, if we've done our job properly, both SerialPort and Mouse
-                         * should be restored in sync, making any explicit attempt at sync'ing unnecessary (or so I hope).
+                         * state, and even when restoring a previous state, if we've done our job properly, both SerialPort
+                         * and Mouse should be restored in sync, making any explicit attempt at sync'ing unnecessary (or so I hope).
                          */
                         // this.componentAdapter.syncMouse();
                         break;
@@ -248,15 +261,19 @@ Mouse.prototype.powerUp = function(data, fRepower)
                 }
             }
             if (this.componentAdapter) {
-                if (this.video) this.inputScreen = this.video.getInput(this);
+                this.aInput = [];       // ensure the input device array is empty before (re)filling it
+                for (var i = 0; i < this.aVideo.length; i++) {
+                    var input = this.aVideo[i].getInput(this);
+                    if (input) this.aInput.push(input);
+                }
             } else {
                 Component.warning(this.id + ": " + this.sAdapterType + " " + this.idAdapter + " unavailable");
             }
         }
         if (this.fActive) {
-            this.captureMouse(this.inputScreen);
+            this.captureAll();
         } else {
-            this.releaseMouse(this.inputScreen);
+            this.releaseAll();
         }
     }
     return true;
@@ -369,6 +386,34 @@ Mouse.prototype.notifyPointerLocked = function(fLocked)
 };
 
 /**
+ * captureAll()
+ *
+ * @this {Mouse}
+ */
+Mouse.prototype.captureAll = function()
+{
+    if (!this.fCaptured) {
+        for (var i = 0; i < this.aInput.length; i++) {
+            if (this.captureMouse(this.aInput[i])) this.fCaptured = true;
+        }
+    }
+};
+
+/**
+ * releaseAll()
+ *
+ * @this {Mouse}
+ */
+Mouse.prototype.releaseAll = function()
+{
+    if (this.fCaptured) {
+        for (var i = 0; i < this.aInput.length; i++) {
+            if (this.releaseMouse(this.aInput[i])) this.fCaptured = false;
+        }
+    }
+};
+
+/**
  * captureMouse(control)
  *
  * NOTE: addEventListener() wasn't supported in Internet Explorer until IE9, but that's OK, because
@@ -376,35 +421,33 @@ Mouse.prototype.notifyPointerLocked = function(fLocked)
  *
  * @this {Mouse}
  * @param {Object} control from the HTML DOM (eg, the control for the simulated screen)
+ * @return {boolean} true if event handlers were actually added, false if not
  */
 Mouse.prototype.captureMouse = function(control)
 {
     if (control) {
         var mouse = this;
-        if (!this.fCaptured) {
-            control.addEventListener(
-                'mousemove',
-                function onMouseMove(event) {
-                    mouse.moveMouse(event);
-                },
-                false               // we'll specify false for the 'useCapture' parameter for now...
-            );
-            control.addEventListener(
-                'mousedown',
-                function onMouseDown(event) {
-                    mouse.clickMouse(event.button, true);
-                },
-                false               // we'll specify false for the 'useCapture' parameter for now...
-            );
-            control.addEventListener(
-                'mouseup',
-                function onMouseUp(event) {
-                    mouse.clickMouse(event.button, false);
-                },
-                false               // we'll specify false for the 'useCapture' parameter for now...
-            );
-            this.fCaptured = true;
-        }
+        control.addEventListener(
+            'mousemove',
+            function onMouseMove(event) {
+                mouse.moveMouse(event);
+            },
+            false               // we'll specify false for the 'useCapture' parameter for now...
+        );
+        control.addEventListener(
+            'mousedown',
+            function onMouseDown(event) {
+                mouse.clickMouse(event.button, true);
+            },
+            false               // we'll specify false for the 'useCapture' parameter for now...
+        );
+        control.addEventListener(
+            'mouseup',
+            function onMouseUp(event) {
+                mouse.clickMouse(event.button, false);
+            },
+            false               // we'll specify false for the 'useCapture' parameter for now...
+        );
         /*
          * None of these tricks seemed to work for IE10, so I'm giving up hiding the browser's mouse pointer in IE for now.
          *
@@ -417,24 +460,28 @@ Mouse.prototype.captureMouse = function(control)
          * to run this app from a different server, so think about that as well.
          */
         control['style']['cursor'] = "none";
+        return true;
     }
+    return false;
 };
 
 /**
  * releaseMouse(control)
  *
- * TODO: Use removeEventListener() if fCaptured, to clean up our handlers; since I'm currently using
- * anonymous functions, and since I'm not seeing any compelling reason to remove the handlers once they've
- * been established, it's less code to leave them in place.
+ * TODO: Use removeEventListener() to clean up our handlers; since I'm currently using anonymous functions,
+ * and since I'm not seeing any compelling reason to remove the handlers once they've been established, it's
+ * less code to leave them in place.
  *
  * @this {Mouse}
  * @param {Object} control from the HTML DOM
+ * @return {boolean} true if event handlers were actually released, false if not
  */
 Mouse.prototype.releaseMouse = function(control)
 {
     if (control) {
         control['style']['cursor'] = "auto";
     }
+    return false;
 };
 
 /**
@@ -496,7 +543,7 @@ Mouse.prototype.clickMouse = function(iButton, fDown)
              * If there's no support for automatic pointer locking in the Video component, then notifyPointerActive()
              * will return false, and we will set fLocked to null, ensuring that we never attempt this again.
              */
-            if (!this.video || !this.video.notifyPointerActive(true)) {
+            if (!this.aVideo.length || !this.aVideo[0].notifyPointerActive(true)) {
                 this.fLocked = null;
             }
         }
@@ -606,7 +653,7 @@ Mouse.prototype.notifyMCR = function(bMCR)
                 this.componentAdapter.sendRBR([Mouse.ID_SERIAL, Mouse.ID_SERIAL]);
                 this.printMessage("serial mouse ID sent");
             }
-            this.captureMouse(this.inputScreen);
+            this.captureAll();
             this.setActive(fActive);
         }
     } else {
@@ -624,7 +671,7 @@ Mouse.prototype.notifyMCR = function(bMCR)
              * polling the serial port, it might expect to see that data.  Unlikely, but not impossible.
              */
             this.printMessage("serial mouse inactive");
-            this.releaseMouse(this.inputScreen);
+            this.releaseAll();
             this.setActive(fActive);
         }
     }
