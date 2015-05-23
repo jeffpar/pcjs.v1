@@ -13,6 +13,7 @@ Here you'll find sample Machine Configurations for all the IBM PC models that PC
 * [IBM PC, MDA, 64K, Debugger](/devices/pc/machine/5150/mda/64kb/debugger/)
 * [IBM PC, CGA, 64K, DONKEY.BAS](/devices/pc/machine/5150/cga/64kb/donkey/)
 * [IBM PC, CGA, 64K, DONKEY.BAS, Debugger](/devices/pc/machine/5150/cga/64kb/donkey/debugger/)
+* [IBM PC, Dual Display, 64K](/devices/pc/machine/5150/dual/64kb/)
 
 ### Model 5160 Machine Configurations
 

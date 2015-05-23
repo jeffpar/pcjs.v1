@@ -984,7 +984,14 @@ Keyboard.prototype.setBinding = function(sHTMLType, sBinding, control)
     if (this.bindings[id] === undefined) {
         switch (sBinding) {
         case "kbd":
-            this.bindings[id] = control;
+            /*
+             * Recording the binding ID prevents multiple controls (or components) from attempting to erroneously
+             * bind a control to the same ID, but in the case of a "dual display" configuration, we actually want
+             * to allow BOTH video components to call setBinding() for "kbd", so that it doesn't matter which
+             * display the user gives focus to.
+             *
+             *      this.bindings[id] = control;
+             */
             control.onkeydown = function onKeyDown(event) {
                 return kbd.onKeyDown(event, true);
             };

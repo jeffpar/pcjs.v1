@@ -38,8 +38,9 @@ Some pre-configured machines are shown below, ready to run BASIC, DOS, Windows 1
 ![IBM PC w/CGA, Zork I](/disks/pc/games/infocom/zork1/thumbnail.jpg "link:/disks/pc/games/infocom/zork1/:200:100")
 
 Check out the rest of the PCjs [Application](/apps/pc/), [Boot Disk](/disks/pc/) and [Machine](/devices/pc/machine/)
-demos, including the [IBM PC XT "Server Array"](/devices/pc/machine/5160/cga/256kb/array/) and
-[Windows 1.01 "Server Array"](/devices/pc/machine/5160/ega/640kb/array/) demos of multiple PCs running side-by-side.
+demos, including an [IBM PC Dual Display System](/devices/pc/machine/5150/dual/64kb/) demo of multiple monitor support,
+and [IBM PC XT "Server Array"](/devices/pc/machine/5160/cga/256kb/array/) and [Windows 1.01 "Server Array"](/devices/pc/machine/5160/ega/640kb/array/)
+demos of multiple machines running side-by-side.
 
 C1Pjs
 ---

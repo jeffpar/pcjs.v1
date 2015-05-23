@@ -1046,7 +1046,7 @@ Card.STATUS1 = {
  * EGA/VGA Attribute Controller Registers (regATCIndx and regATCData)
  *
  * The current ATC INDX value is stored in cardEGA.regATCIndx (including the Card.ATC.INDX_ENABLE bit), and the
- * ATC DATA values are stored in cardEGA.regATCData.  Also, the state of the ATC INDX/DATA flip-flop is stored in fATCData.
+ * ATC DATA values are stored in cardEGA.regATCData.  The state of the ATC INDX/DATA flip-flop is stored in fATCData.
  *
  * Note that the ATC palette registers (0x0-0xf) all use the following 6 bit assignments, with bits 6 and 7 unused:
  *
@@ -2078,9 +2078,32 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.cpu = cpu;
     this.dbg = dbg;
 
-    bus.addPortInputTable(this, Video.aPortInput);
-    bus.addPortOutputTable(this, Video.aPortOutput);
+    /*
+     * The only time we do NOT want to trap MDA ports is when the model has been specifically set to CGA.
+     */
+    if (Video.CARD.NAMES[this.model] != Video.CARD.CGA) {
+        bus.addPortInputTable(this, Video.aMDAPortInput);
+        bus.addPortOutputTable(this, Video.aMDAPortOutput);
+    }
 
+    /*
+     * Similarly, the only time we do NOT want to trap CGA ports is when the model has been specifically set to MDA.
+     */
+    if (Video.CARD.NAMES[this.model] != Video.CARD.MDA) {
+        bus.addPortInputTable(this, Video.aCGAPortInput);
+        bus.addPortOutputTable(this, Video.aCGAPortOutput);
+    }
+
+    /*
+     * Note that in the case of EGA and VGA models, the above code ensures that we will trap both MDA and CGA
+     * port ranges -- which is good, because both the EGA and VGA can be reprogrammed to respond to those ports,
+     * but also potentially bad if you want to simulate a "dual display" system, where one of the displays is
+     * driven by either an MDA or CGA.
+     *
+     * However, you should still be able to make that work by loading the MDA or CGA video component first, because
+     * components should be initialized in the order they appear in the machine configuration file.  Any attempt
+     * by another component to trap the same ports should be ignored.
+     */
     if (this.nCard >= Video.CARD.EGA) {
         bus.addPortInputTable(this, Video.aEGAPortInput);
         bus.addPortOutputTable(this, Video.aEGAPortOutput);
@@ -2560,7 +2583,8 @@ Video.prototype.reset = function()
 
     /*
      * As we noted in the constructor, when a model is specified, that takes precedence over any monitor
-     * switch settings.  Conversely, when no model is specified, the nCard setting is considered provisional.
+     * switch settings.  Conversely, when no model is specified, the nCard setting is considered provisional,
+     * so the monitor switch settings, if any, are allowed to determine the card type.
      */
     if (!this.model) {
         this.nCard = (nMonitorType == ChipSet.MONITOR.MONO? Video.CARD.MDA : Video.CARD.CGA);
@@ -5309,15 +5333,24 @@ Video.prototype.dumpVideo = function(sParm)
  * TODO: At one point, I'd added some "duplicate" entries for the MDA because, according to docs I'd read,
  * MDA ports are decoded at multiple addresses.  However, if this is important, then it should be verified
  * and implemented consistently (eg, for CGA as well).  For now, I'm decoding only the standard port addresses.
+ *
+ * For example, 0x3B5 is apparently also decoded at 0x3B1, 0x3B3, and 0x3B7, while 0x3B4 is also decoded at
+ * 0x3B0, 0x3B2, and 0x3B6.
  */
-Video.aPortInput = {
-//  0x3B1: Video.prototype.inMDAData,           // duplicate
-//  0x3B3: Video.prototype.inMDAData,           // duplicate
+Video.aMDAPortInput = {
     0x3B4: Video.prototype.inMDAIndx,           // technically, not actually readable, but I want the Debugger to be able to read this
     0x3B5: Video.prototype.inMDAData,           // technically, the only Data registers that are readable are R14-R17
-//  0x3B7: Video.prototype.inMDAData,           // duplicate
     0x3B8: Video.prototype.inMDAMode,           // technically, not actually readable, but I want the Debugger to be able to read this
-    0x3BA: Video.prototype.inMDAStatus,
+    0x3BA: Video.prototype.inMDAStatus
+};
+
+Video.aMDAPortOutput = {
+    0x3B4: Video.prototype.outMDAIndx,
+    0x3B5: Video.prototype.outMDAData,
+    0x3B8: Video.prototype.outMDAMode
+};
+
+Video.aCGAPortInput = {
     0x3D4: Video.prototype.inCGAIndx,           // technically, not actually readable, but I want the Debugger to be able to read this
     0x3D5: Video.prototype.inCGAData,           // technically, the only Data registers that are readable are R14-R17
     0x3D8: Video.prototype.inCGAMode,           // technically, not actually readable, but I want the Debugger to be able to read this
@@ -5325,16 +5358,7 @@ Video.aPortInput = {
     0x3DA: Video.prototype.inCGAStatus
 };
 
-Video.aPortOutput = {
-//  0x3B0: Video.prototype.outMDAIndx,          // duplicate
-//  0x3B1: Video.prototype.outMDAData,          // duplicate
-//  0x3B2: Video.prototype.outMDAIndx,          // duplicate
-//  0x3B3: Video.prototype.outMDAData,          // duplicate
-    0x3B4: Video.prototype.outMDAIndx,          // 0x3B4 is decoded at 0x3B0, 0x3B2 and 0x3B6 as well (at least on an MDA), hence the duplicate mappings
-    0x3B5: Video.prototype.outMDAData,          // 0x3B5 is decoded at 0x3B1, 0x3B3 and 0x3B7 as well (at least on an MDA), hence the duplicate mappings
-//  0x3B6: Video.prototype.outMDAIndx,          // duplicate
-//  0x3B7: Video.prototype.outMDAData,          // duplicate
-    0x3B8: Video.prototype.outMDAMode,
+Video.aCGAPortOutput = {
     0x3D4: Video.prototype.outCGAIndx,
     0x3D5: Video.prototype.outCGAData,
     0x3D8: Video.prototype.outCGAMode,
@@ -5342,13 +5366,13 @@ Video.aPortOutput = {
 };
 
 Video.aEGAPortInput = {
-    0x3C0: Video.prototype.inATC,               // technically, not actually readable, but I want the Debugger to be able to read this
-    0x3C1: Video.prototype.inATC,               // technically, not actually readable, but I want the Debugger to be able to read this
+    0x3C0: Video.prototype.inATC,               // technically, only readable on a VGA, but I want the Debugger to be able to read this, too
+    0x3C1: Video.prototype.inATC,               // technically, only readable on a VGA, but I want the Debugger to be able to read this, too
     0x3C2: Video.prototype.inStatus0,
-    0x3C4: Video.prototype.inSEQIndx,           // technically, not actually readable, but I want the Debugger to be able to read this
-    0x3C5: Video.prototype.inSEQData,           // technically, not actually readable, but I want the Debugger to be able to read this
-    0x3CE: Video.prototype.inGRCIndx,           // technically, not actually readable, but I want the Debugger to be able to read this
-    0x3CF: Video.prototype.inGRCData            // technically, not actually readable, but I want the Debugger to be able to read this
+    0x3C4: Video.prototype.inSEQIndx,           // technically, only readable on a VGA, but I want the Debugger to be able to read this, too
+    0x3C5: Video.prototype.inSEQData,           // technically, only readable on a VGA, but I want the Debugger to be able to read this, too
+    0x3CE: Video.prototype.inGRCIndx,           // technically, only readable on a VGA, but I want the Debugger to be able to read this, too
+    0x3CF: Video.prototype.inGRCData            // technically, only readable on a VGA, but I want the Debugger to be able to read this, too
 };
 
 Video.aEGAPortOutput = {
