@@ -274,28 +274,29 @@ Video.TRAPALL = true;           // monitor all I/O by default (not just deltas)
 /*
  * MDA/CGA Support
  *
- * This component implements a combination of the MDA and CGA cards, with the ability to
- * dynamically switch between the two, by simply toggling the SW1 motherboard switch settings
- * and resetting the virtual machine. As a result, this component always installs I/O port
- * handlers for both MDA and CGA, regardless which card is initially active.
+ * Since there's a lot of similarity between the MDA and CGA (eg, their text-mode video buffer
+ * format, and their use of the 6845 CRT controller), since the MDA ROM contains the fonts used
+ * by both devices, and since the same ROM BIOS supports both (in fact, the BIOS indiscriminately
+ * initializes both, regardless which is actually installed), this same component emulates both
+ * devices.
  *
- * Since there's a lot of similarity between the two cards (eg, their text-mode video buffer
- * format, and their use of the 6845 CRT controller), since the MDA ROM contains the fonts
- * used by both devices, and since the same ROM BIOS supports both (in fact, the BIOS rather
- * indiscriminately initializes both, regardless which is actually installed), I decided to
- * use the same component to emulate both devices.  Note that it was possible for an IBM PC
- * to have both an MDA and CGA running in the same machine, so if that's something we want to
- * support later, it can be done by instantiating this component twice, with some additional
- * properties to force each instance to register only those I/O ports belonging to its specific
- * configuration.
+ * When no model is specified, this component supports the ability to dynamically switch between
+ * MDA and CGA emulation, by simply toggling the SW1 motherboard "monitor type" switch settings
+ * and resetting the machine.  In that model-less configuration, we install I/O port handlers for
+ * both MDA and CGA cards, regardless which monitor type is initially selected.
  *
- * While supporting both devices is mostly a convenience, it also creates a few inconveniences.
- * For one, the MDA prefers a native window size of 720x350, as it supports only one video mode,
- * 80x25, with a 9x14 cell size.  The CGA, on the other hand, has an 8x8 cell size, so when using
- * an MDA-size window, an 80x25 CGA screen will end up with 40-pixel borders on the left and right,
- * and 75-pixel borders on the top and bottom.  The result is a rather tiny CGA font surrounded
- * by lots of wasted space, so it's best to turn on font scaling (see the "scale" property) and
- * go with a larger window size of, say, 960x400 (50% larger in width, 100% larger in height).
+ * To simulate an IBM PC containing both an MDA and CGA (ie, a "dual display" system), the machine
+ * configuration simply defines two video components, one with model "mda" and the other with model
+ * "cga", resulting in two displays; setting a specific model forces each instance of this component
+ * to register only those I/O ports belonging to that model.
+ *
+ * In a single-display system, dynamically switching cards (ie, between MDA and CGA) creates some
+ * visual challenges.  For one, the MDA prefers a native window size of 720x350, as it supports only
+ * one video mode, 80x25, with a 9x14 cell size.  The CGA, on the other hand, has an 8x8 cell size,
+ * so when using an MDA-size window, an 80x25 CGA screen will end up with 40-pixel borders on the
+ * left and right, and 75-pixel borders on the top and bottom.  The result is a rather tiny CGA font
+ * surrounded by lots of wasted space, so it's best to turn on font scaling (see the "scale" property)
+ * and go with a larger window size of, say, 960x400 (50% larger in width, 100% larger in height).
  *
  * I've also added support for font-doubling in createFont().  We use the 8x8 font for 80-column
  * modes and the "doubled" 16x16 font for 40-column modes OR whenever the screen is large enough
@@ -309,7 +310,9 @@ Video.TRAPALL = true;           // monitor all I/O by default (not just deltas)
  * TODO: Whenever there are borders, they should be filled with the CGA's overscan colors.  However,
  * in the case of graphics modes (and text modes whenever font scaling is enabled), we don't reserve
  * any space for borders, so if borders are important, explicit border support will be required.
- *
+ */
+
+/*
  * EGA Support
  *
  * EGA support piggy-backs on the existing MDA/CGA support.  All the existing MDA/CGA port handlers
@@ -329,6 +332,116 @@ Video.TRAPALL = true;           // monitor all I/O by default (not just deltas)
  * control certain assumptions about the virtual display's capabilities (ie, Color Display vs. Enhanced
  * Color Display).  P3 can switch all the I/O ports from 0x3nn to 0x2nn; the default is 0x3nn, and
  * that's the only port range the EGA ROM supports as well.
+ */
+
+/*
+ * VGA Support
+ *
+ * More will be said here about PCjs VGA support later.  But first, a word from IBM: "Video Graphics Array [VGA]
+ * Programming Considerations":
+ *
+ *      Certain internal timings must be guaranteed by the user, in order to have the CRTC perform properly.
+ *      This is due to the physical design of the chip. These timings can be guaranteed by ensuring that the
+ *      rules listed below are followed when programming the CRTC.
+ *
+ *           1. The Horizontal Total [HORZ_TOTAL] register (R0) must be greater than or equal to a value of
+ *              25 decimal.
+ *
+ *           2. The minimum positive pulse width of the HSYNC output must be four character clock units.
+ *
+ *           3. Register R5, Horizontal Sync End [HORZ_RETRACE_END], must be programmed such that the HSYNC
+ *              output goes to a logic 0 a minimum of one character clock time before the 'horizontal display enable'
+ *              signal goes to a logical 1.
+ *
+ *           4. Register R16, Vsync Start [VERT_RETRACE_START], must be a minimum of one horizontal scan line greater
+ *              than register R18 [VERT_DISP_END].  Register R18 defines where the 'vertical display enable' signal ends.
+ *
+ *     When bit 5 of the Attribute Mode Control register equals 1, a successful line compare (see Line Compare
+ *     [LINE_COMPARE] register) in the CRT Controller forces the output of the PEL Panning register to 0's until Vsync
+ *     occurs.  When Vsync occurs, the output returns to the programmed value.  This allows the portion of the screen
+ *     indicated by the Line Compare register to be operated on by the PEL Panning register.
+ *
+ *     A write to the Character Map Select register becomes valid on the next whole character line.  No deformed
+ *     characters are displayed by changing character generators in the middle of a character scan line.
+ *
+ *     For 256-color 320 x 200 graphics mode hex 13, the attribute controller is configured so that the 8-bit attribute
+ *     stored in video memory for each PEL becomes the 8-bit address (P0 - P7) into the integrated DAC.  The user should
+ *     not modify the contents of the internal Palette registers when using this mode.
+ *
+ *     The following sequence should be followed when accessing any of the Attribute Data registers pointed to by the
+ *     Attribute Index register:
+ *
+ *           1. Disable interrupts
+ *           2. Reset read/write flip/flop
+ *           3. Write to Index register
+ *           4. Read from or write to a data register
+ *           5. Enable interrupts
+ *
+ *      The Color Select register in the Attribute Controller section may be used to rapidly switch between sets of colors
+ *      in the video DAC.  When bit 7 of the Attribute Mode Control register equals 0, the 8-bit color value presented to the
+ *      video DAC is composed of 6 bits from the internal Palette registers and bits 2 and 3 from the Color Select register.
+ *      When bit 7 of the Attribute Mode Control register equals 1, the 8-bit color value presented to the video DAC is
+ *      composed of the lower four bits from the internal Palette registers and the four bits in the Color Select register.
+ *      By changing the value in the Color Select register, software rapidly switches between sets of colors in the video DAC.
+ *      Note that BIOS does not support multiple sets of colors in the video DAC.  The user must load these colors if this
+ *      function is to be used.  Also see the Attribute Controller block diagram on page 4-26.  Note that the above discussion
+ *      applies to all modes except 256 Color Graphics mode.  In this mode the Color Select register is not used to switch
+ *      between sets of colors.
+ *
+ *      An application that saves the "Video State" must store the 4 bytes of information contained in the system microprocessor
+ *      latches in the graphics controller subsection. These latches are loaded with 32 bits from video memory (8 bits per map)
+ *      each time the system microprocessor does a read from video memory.  The application needs to:
+ *
+ *           1. Use write mode 1 to write the values in the latches to a location in video memory that is not part of
+ *              the display buffer.  The last location in the address range is a good choice.
+ *
+ *           2. Save the values of the latches by reading them back from video memory.
+ *
+ *           Note: If in a chain 4 or odd/even mode, it will be necessary to reconfigure the memory organization as four
+ *           sequential maps prior to performing the sequence above.  BIOS provides support for completely saving and
+ *           restoring video state.  See the IBM Personal System/2 and Personal Computer BIOS Interface Technical Reference
+ *           for more information.
+ *
+ *      The description of the Horizontal PEL Panning register includes a figure showing the number of PELs shifted left
+ *      for each valid value of the PEL Panning register and each valid video mode.  Further panning beyond that shown in
+ *      the figure may be accomplished by changing the start address in the CRT Controller registers, Start Address High
+ *      and Start Address Low.  The sequence involved in further panning would be as follows:
+ *
+ *           1. Use the PEL Panning register to shift the maximum number of bits to the left. See Figure 4-103 on page
+ *              4-106 for the appropriate values.
+ *
+ *           2. Increment the start address.
+ *
+ *           3. If you are not using Modes 0 + , 1 + , 2 + , 3 + ,7, or7 + , set the PEL Panning register to 0.  If you
+ *              are using these modes, set the PEL Panning register to 8.  The screen will now be shifted one PEL left
+ *              of the position it was in at the end of step 1.  Step 1 through Step 3 may be repeated as desired.
+ *
+ *      The Line Compare register (CRTC register hex 18) should be programmed with even values in 200 line modes when
+ *      used in split screen applications that scroll a second screen on top of a first screen.  This is a requirement
+ *      imposed by the scan doubling logic in the CRTC.
+ *
+ *      If the Cursor Start register (CRTC register hex 0A) is programmed with a value greater than that in the Cursor End
+ *      register (CRTC register hex 0B), then no cursor is displayed.  A split cursor is not possible.
+ *
+ *      In 8-dot character modes, the underline attribute produces a solid line across adjacent characters, as in the IBM
+ *      Color/Graphics Monitor Adapter, Monochrome Display Adapter and the Enhanced Graphics Adapter.  In 9-dot modes, the
+ *      underline across adjacent characters is dashed, as in the IBM 327X display terminals.  In 9-dot modes, the line
+ *      graphics characters (C0 - DF character codes) have solid underlines.
+ *
+ *      For compatibility with the IBM Enhanced Graphics Adapter (EGA), the internal VGA palette is programmed the same
+ *      as the EGA.  The video DAC is programmed by BIOS so that the compatible values in the internal VGA palette produce
+ *      a color compatible with what was produced by EGA.  Mode hex 13 (256 colors) is programmed so that the first 16
+ *      locations in the DAC produce compatible colors.
+ *
+ *      Summing: When BIOS is used to load the video DAC palette for a color mode and a monochrome display is connected
+ *      to the system unit, the color palette is changed.  The colors are summed to produce shades of gray that allow
+ *      color applications to produce a readable screen.
+ *
+ *      There are 4 bits that should not be modified unless the sequencer is reset by setting bit 1 of the Reset register
+ *      to 0.  These bits are:
+ *
+ *           • Bit 3, or bit 0 of the Clocking Mode register
+ *           • Bit 3, or bit 2 of the Miscellaneous Output register
  */
 
 /*
@@ -1164,9 +1277,12 @@ Card.SEQ = {
     CLK: {
         INDX:               0x01,       // CLOCKING MODE
         DOTS8:              0x01,       // 1: 8 dots; 0: 9 dots
-        BANDWIDTH:          0x02,       // 0: CRTC has access 4 out of every 5 cycles (for high-res modes); 1: CRTC has access 2 out of 5
+        BANDWIDTH:          0x02,       // 0: CRTC has access 4 out of every 5 cycles (for high-res modes); 1: CRTC has access 2 out of 5 (VGA: reserved)
         SHIFTLOAD:          0x04,
-        DOTCLOCK:           0x08        // 0: normal dot clock; 1: master clock divided by two (used for 320x200 modes: 0, 1, 4, 5, and D)
+        DOTCLOCK:           0x08,       // 0: normal dot clock; 1: master clock divided by two (used for 320x200 modes: 0, 1, 4, 5, and D)
+        SHIFT4:             0x10,       // VGA only
+        SCREEN_OFF:         0x20,       // VGA only
+        RESERVED:           0xC0
     },
     MAPMASK: {
         INDX:               0x02,       // MAP MASK
@@ -1191,6 +1307,37 @@ Card.SEQ = {
 };
 
 if (DEBUGGER) Card.SEQ.REGS = ["RESET","CLK","MAPMASK","CHARMAP","MODE"];
+
+/*
+ * VGA Digital-to-Analog Converter (DAC) Registers (regDACMask, regDACState, regDACAddr, and regDACData)
+ *
+ * To write PEL data, write an address to DAC.ADDR.PORT_WRITE, then write 3 bytes to DAC.DATA.PORT; the low 6 bits
+ * of each byte will be concatenated to form an 18-bit DAC value (red is least significant, followed by green, then blue).
+ * When the final byte is received, the 18-bit DAC value is updated and regDACAddr is auto-incremented.
+ *
+ * To read PEL data, the process is similar, but the initial address is written to DAC.ADDR.PORT_READ instead.
+ *
+ * DAC.STATE.PORT and DAC.ADDR.PORT_WRITE can be read at any time and will not interfere with a read or write operation
+ * in progress.  To prevent "snow", reading or writing DAC values should be limited to retrace intervals (see regStatus1),
+ * or by using the SCREEN_OFF bit in the SEQ.CLK register.
+ */
+Card.DAC = {
+    MASK: {
+        PORT:               0x3C6       // initialized to 0xFF and should not be changed
+    },
+    STATE: {
+        PORT:               0x3C7,
+        MODE_WRITE:         0x00,       // the DAC is in write mode if bits 0 and 1 are clear
+        MODE_READ:          0x03        // the DAC is in read mode if bits 0 and 1 are set
+    },
+    ADDR: {
+        PORT_READ:          0x3C7,      // write to initiate a read
+        PORT_WRITE:         0x3C8       // write to initiate a write; read to determine the current ADDR
+    },
+    DATA: {
+        PORT:               0x3C9
+    }
+};
 
 /*
  * EGA/VGA Graphics Controller Registers (regGRCIndx and regGRCData)
