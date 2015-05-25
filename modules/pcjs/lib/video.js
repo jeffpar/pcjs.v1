@@ -1199,6 +1199,13 @@ Card.ATC = {
     HORZPAN: {
         INDX:               0x13        // HORZ PANNING
     },
+    COLOR_SELECT: {
+        INDX:               0x14,       // VGA ONLY: Color Select Register
+        S_COLOR_7:          0x08,       // selects bit 7 of 8-bit color values sent to DAC (except 256-color modes)
+        S_COLOR_6:          0x04,       // selects bit 6 of 8-bit color values sent to DAC (except 256-color modes)
+        S_COLOR_5:          0x02,       // selects bit 5 of 8-bit color values sent to DAC
+        S_COLOR_4:          0x01        // selects bit 4 of 8-bit color values sent to DAC
+    },
     TOTAL_REGS:             0x14
 };
 
