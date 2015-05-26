@@ -1186,20 +1186,30 @@ Card.ATC = {
     },
     PALETTE_REGS:           0x10,       // 16 total palette registers
     MODE: {
-        INDX:               0x10        // MODE CONTROL
+        INDX:               0x10,       // Mode Control Register
+        GRAPHICS:           0x01,       // bit 0: set for graphics mode, clear for alphanumeric mode
+        MONOEM:             0x02,       // bit 1: set for monochrome emulation mode, clear for color emulation
+        TEXTGRCC:           0x04,       // bit 2: set for line graphics in character codes 0xC0-0xDF, clear otherwise
+        TEXTBLINK:          0x08,       // bit 3: set for text blink attribute, clear for background intensity attribute
+        RESERVED:           0x10,       // bit 4: reserved
+        PANCOMPAT:          0x20,       // bit 5: set for PEL panning compatibility
+        PELWIDTH:           0x40,       // bit 6: set for 256-color modes, clear for all other modes
+        COLORSEL:           0x80        // bit 7: set for P5,P4 mapped to bits 1,0 of the Color Select register
     },
     OVRSCAN: {
-        INDX:               0x11        // OVERSCAN COLOR
+        INDX:               0x11        // Overscan Color Register
     },
     PLANES: {
-        INDX:               0x12,       // COLOR PLANES
+        INDX:               0x12,       // Color Plane Enable Register
         MASK:               0x0F,
-        MUX:                0x30
+        MUX:                0x30,
+        RESERVED:           0xC0
     },
     HORZPAN: {
-        INDX:               0x13        // HORZ PANNING
+        INDX:               0x13,       // Horizontal PEL Panning Register
+        SHIFT_LEFT:         0x0F        // bits 0-3 indicate # of PELs to shift left
     },
-    COLOR_SELECT: {
+    COLORSEL: {
         INDX:               0x14,       // VGA ONLY: Color Select Register
         S_COLOR_7:          0x08,       // selects bit 7 of 8-bit color values sent to DAC (except 256-color modes)
         S_COLOR_6:          0x04,       // selects bit 6 of 8-bit color values sent to DAC (except 256-color modes)
