@@ -965,7 +965,7 @@ function Card(video, iCard, data, cbMemory)
 }
 
 /*
- * MDA I/O ports
+ * MDA Registers
  */
 Card.MDA = {
     CRTC: {
@@ -1000,7 +1000,7 @@ Card.MDA = {
 };
 
 /*
- * CGA I/O ports
+ * CGA Registers
  */
 Card.CGA = {
     CRTC: {
