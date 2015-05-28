@@ -915,7 +915,7 @@ function Card(video, iCard, data, cbMemory)
             this.port = specs[1];
         }
 
-        this.iCard = iCard;
+        this.nCard = iCard;
         this.addrBuffer = specs[2];     // default (physical) frame buffer address
         this.sizeBuffer = specs[3];     // default frame buffer length (this is the total size, not the current visible size; this.cbScreen is calculated on the fly to reflect the latter)
 
@@ -1135,11 +1135,16 @@ if (DEBUGGER) {
     Card.CRTC.EGA_REGS  = ["HORZ_TOTAL","HORZ_DISP_END","HORZ_BLANK_START","HORZ_BLANK_END","HORZ_RETRACE_START","HORZ_RETRACE_END",
                            "VERT_TOTAL","CRTC_OVERFLOW","PRESET_ROW_SCAN","MAX_SCAN_LINE","CURSOR_START","CURSOR_END",
                            "START_ADDR_HI","START_ADDR_LO","CURSOR_ADDR_HI","CURSOR_ADDR_LO","LIGHT_PEN_HI","LIGHT_PEN_LO",
-                           "VERT_DISP_END","OFFSET","UNDERLINE","VERT_BLANK_START","VERT_BLANK_END","MODE_CTRL","LONE_COMPARE"];
+                           "VERT_DISP_END","OFFSET","UNDERLINE","VERT_BLANK_START","VERT_BLANK_END","MODE_CTRL","LINE_COMPARE"];
 }
 
 /*
  * EGA/VGA Input Status 1 Register
+ *
+ * STATUS1 bit 0 has confusing documentation: the EGA Tech Ref says "Logical 0 indicates the CRT raster is in a
+ * horizontal or vertical retrace interval", whereas the VGA Tech Ref says "Logical 1 indicates a horizontal or
+ * vertical retrace interval."  The name of the status bit suggests that the EGA is right and the VGA is wrong,
+ * but this needs to be confirmed.
  *
  * STATUS1 diagnostic bits 5 and 4 are set according to the Card.ATC.PLANES.MUX bits:
  *
@@ -1152,7 +1157,10 @@ if (DEBUGGER) {
  */
 Card.STATUS1 = {
     PORT:                   0x3DA,
-    DIAGNOSTIC:             0x30        // these bits are controlled by the Card.ATC.PLANES.MUX bits
+    DISP_ENABLED:           0x01,       // bit 0: logical OR of horizontal and vertical retrace states
+    VERT_RETRACE:           0x08,       // bit 3: set during vertical retrace interval
+    DIAGNOSTIC:             0x30,       // bits 5,4 are controlled by the Card.ATC.PLANES.MUX bits
+    RESERVED:               0xC6
 };
 
 /*
@@ -1226,6 +1234,20 @@ if (DEBUGGER) {
 }
 
 /*
+ * EGA/VGA Feature Control Register (regFeat)
+ *
+ * The EGA BIOS writes 0x1 to Card.FEAT_CTRL.BITS and reads Card.STATUS0.FEAT, then writes 0x2 to
+ * Card.FEAT_CTRL.BITS and reads Card.STATUS0.FEAT.  The bits from the first and second reads are shifted
+ * into the high nibble of the byte at 40:88h.
+ */
+Card.FEAT_CTRL = {
+    PORT_MONO:              0x3BA,      // write port address (other than the two bits below, the rest are reserved and/or unused)
+    PORT_COLOR:             0x3DA,      // write port address (other than the two bits below, the rest are reserved and/or unused)
+    PORT_READ:              0x3CA,      // read port address (VGA only)
+    BITS:                   0x03        // feature control bits
+};
+
+/*
  * EGA/VGA Miscellaneous Output Register (regMisc)
  */
 Card.MISC = {
@@ -1238,20 +1260,6 @@ Card.MISC = {
     PAGE_ODD_EVEN:          0x20,       // 0 selects the low 64Kb page of video RAM for text modes, 1 selects the high page
     HORZ_POLARITY:          0x40,       // 0 selects positive horizontal retrace
     VERT_POLARITY:          0x80        // 0 selects positive vertical retrace
-};
-
-/*
- * EGA/VGA Feature Control Register (regFeat)
- *
- * The EGA BIOS writes 0x1 to Card.FEAT_CTRL.BITS and reads Card.STATUS0.FEAT, then writes 0x2 to
- * Card.FEAT_CTRL.BITS and reads Card.STATUS0.FEAT.  The bits from the first and second reads are shifted
- * into the high nibble of the byte at 40:88h.
- */
-Card.FEAT_CTRL = {
-    PORT_MONO:              0x3BA,      // write port address (other than the two bits below, the rest are reserved and/or unused)
-    PORT_COLOR:             0x3DA,      // write port address (other than the two bits below, the rest are reserved and/or unused)
-    PORT_READ:              0x3CA,      // read port address (VGA only)
-    BITS:                   0x03        // feature control bits
 };
 
 /*
@@ -1281,18 +1289,18 @@ Card.VGA_ENABLE = {
 Card.SEQ = {
     INDX: {
         PORT:               0x3C4,
-        MASK:               0x1F
+        MASK:               0x07
     },
     DATA: {
         PORT:               0x3C5
     },
     RESET: {
-        INDX:               0x00,       // RESET
+        INDX:               0x00,       // Sequencer Reset Register
         ASYNC:              0x01,
         SYNC:               0x02
     },
     CLK: {
-        INDX:               0x01,       // CLOCKING MODE
+        INDX:               0x01,       // Sequencer Clocking Mode Register
         DOTS8:              0x01,       // 1: 8 dots; 0: 9 dots
         BANDWIDTH:          0x02,       // 0: CRTC has access 4 out of every 5 cycles (for high-res modes); 1: CRTC has access 2 out of 5 (VGA: reserved)
         SHIFTLOAD:          0x04,
@@ -1302,23 +1310,27 @@ Card.SEQ = {
         RESERVED:           0xC0
     },
     MAPMASK: {
-        INDX:               0x02,       // MAP MASK
+        INDX:               0x02,       // Sequencer Map Mask Register
         PL0:                0x01,
         PL1:                0x02,
         PL2:                0x04,
         PL3:                0x08,
-        MAPS:               0x0f
+        MAPS:               0x0F,
+        RESERVED:           0xF0
     },
     CHARMAP: {
-        INDX:               0x03,       // CHAR MAP SELECT
+        INDX:               0x03,       // Sequencer Character Map Select Register
         SELB:               0x03,       // 0x0: 1st 8Kb of plane 2; 0x1: 2nd 8Kb; 0x2: 3rd 8Kb; 0x3: 4th 8Kb
-        SELA:               0x0C        // 0x0: 1st 8Kb of plane 2; 0x4: 2nd 8Kb; 0x8: 3rd 8Kb; 0xC: 4th 8Kb
+        SELA:               0x0C,       // 0x0: 1st 8Kb of plane 2; 0x4: 2nd 8Kb; 0x8: 3rd 8Kb; 0xC: 4th 8Kb
+        SELB_HIGH:          0x10,       // VGA only
+        SELA_HIGH:          0x20        // VGA only
     },
     MODE: {
-        INDX:               0x04,       // MEMORY MODE
-        ALPHA:              0x01,       // 1: alphanumeric (A/N) mode active; 0: graphics (APA or "All Points Addressable") mode active
-        EXT:                0x02,       // 1: memory expansion installed; 0: not installed
-        SEQUENTIAL:         0x04        // 1: memory is sequential; 0: even addresses mapped to planes 0/2, odd addresses to planes 1/3
+        INDX:               0x04,       // Sequencer Memory Mode Register
+        ALPHA:              0x01,       // set for alphanumeric (A/N) mode, clear for graphics (APA or "All Points Addressable") mode (EGA only)
+        EXT:                0x02,       // set if memory expansion installed, clear if not installed
+        SEQUENTIAL:         0x04,       // set for sequential memory access, clear for mapping even addresses to planes 0/2, odd addresses to planes 1/3
+        CHAIN4:             0x08        // VGA only: set to select memory map (plane) based on low 2 bits of address
     },
     TOTAL_REGS:             0x05
 };
@@ -1839,21 +1851,19 @@ Card.ACCESS.afn[Card.ACCESS.WRITE.MODE2XOR] = Card.ACCESS.writeByteMode2Xor;
  * arrays of nulls, which means that any uninitialized register arrays whose elements were all originally
  * undefined come back via the JSON round-trip as *initialized* arrays whose elements are now all null.
  *
- * I'm a bit surprised, because JavaScript purists want us to use the '===' operator to determine
- * whether an element is initialized (eg, 'aReg[i] === undefined'), but because of this JSON stupidity,
- * that would require all such tests to become 'aReg[i] === undefined || aReg[i] === null'.  Great.
+ * I'm a bit surprised, because JavaScript purists tell us to always use the '===' operator (eg, use
+ * 'aReg[i] === undefined' to determine if an element is initialized), but because of this JSON stupidity,
+ * that would require all such tests to become 'aReg[i] === undefined || aReg[i] === null'.  I'm puzzled
+ * why the coercion of '==' is considered evil but JSON's coercion of undefined to null is perfectly fine.
  *
  * The simple solution is to change such comparisons to 'aReg[i] == null', because undefined is coerced
  * to null, whereas numeric values are not.
  *
- * Someday, perhaps a purist can explain to me why the coercion of '==' is evil, but JSON's coercion of
- * 'undefined' values to 'null' values is not.
- *
  * [What do I mean by "another" frustration?  Let me talk to you some day about disallowing hex constants,
  * or insisting that property names be quoted, or refusing to allow comments.  I think it's fine for
  * JSON.stringify() to produce output that adheres to rules like that -- although some parameters to control
- * the output would be nice -- but refusing to let JSON.parse() parse objects that are, in fact, perfectly
- * parseable, is just JSON being a dick.]
+ * the output would be nice -- but it's completely unnecessary for JSON.parse() to refuse to parse objects
+ * that are perfectly valid.]
  *
  * @this {Card}
  * @param {Array|undefined} data
@@ -1971,14 +1981,14 @@ Card.prototype.initEGA = function(data, nMonitorType)
 Card.prototype.saveCard = function()
 {
     var data = [];
-    if (this.iCard !== undefined) {
+    if (this.nCard !== undefined) {
         data[0] = this.fActive;
         data[1] = this.regMode;
         data[2] = this.regColor;
         data[3] = this.regStatus;
         data[4] = this.regCRTIndx | (this.regCRTPrev << 8);
         data[5] = this.regCRTData;
-        if (this.iCard >= Video.CARD.EGA) {
+        if (this.nCard >= Video.CARD.EGA) {
             data[6] = this.saveEGA();
         }
         data[7] = this.nInitCycles;
@@ -2037,16 +2047,16 @@ Card.prototype.dumpCard = function()
          */
         this.dumpRegs("CRTC", this.regCRTIndx, this.regCRTData, this.asCRTCRegs);
 
-        if (this.iCard == Video.CARD.MDA || this.iCard == Video.CARD.CGA) {
+        if (this.nCard == Video.CARD.MDA || this.nCard == Video.CARD.CGA) {
             this.dumpRegs(" MODEREG", this.regMode);
             this.dumpRegs(" STATUS1", this.regStatus);
         }
 
-        if (this.iCard == Video.CARD.CGA) {
+        if (this.nCard == Video.CARD.CGA) {
             this.dumpRegs("   COLOR", this.regColor);
         }
 
-        if (this.iCard >= Video.CARD.EGA) {
+        if (this.nCard >= Video.CARD.EGA) {
             this.dbg.println(" ATCDATA: " + this.fATCData);
             this.dumpRegs(" ATC", this.regATCIndx, this.regATCData, this.asATCRegs);
             this.dumpRegs(" GRC", this.regGRCIndx, this.regGRCData, this.asGRCRegs);
@@ -3942,10 +3952,10 @@ Video.prototype.checkMode = function(fForce)
         if (nMode == null) nMode = this.nModeDefault;
     }
     else {
-        if (card.iCard == Video.CARD.MDA) {
+        if (card.nCard == Video.CARD.MDA) {
             nMode = Video.MODE.MDA_80X25;
         }
-        else if (card.iCard == Video.CARD.EGA) {
+        else if (card.nCard == Video.CARD.EGA) {
             /*
              * The sizeBuffer we choose reflects the amount of physical address space that all 4 planes
              * of EGA memory normally span, NOT the total amount of EGA memory.  So for a 64Kb EGA card,
