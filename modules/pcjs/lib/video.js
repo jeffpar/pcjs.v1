@@ -5549,6 +5549,11 @@ Video.aEGAPortInput = {
     0x3CF: Video.prototype.inGRCData            // technically, only readable on a VGA, but I want the Debugger to be able to read this, too
 };
 
+/*
+ * WARNING: Unlike the EGA, a standard VGA does not support writes to 0x3C1, but it's easier for me to leave that
+ * ability in place, treating the VGA as a superset of the EGA as much as possible; will any code break because word
+ * I/O to port 0x3C0 actually works?  Possibly, but highly unlikely.
+ */
 Video.aEGAPortOutput = {
     0x3BA: Video.prototype.outFeat,
     0x3C0: Video.prototype.outATC,
