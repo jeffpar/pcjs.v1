@@ -2035,6 +2035,38 @@ Card.prototype.saveEGA = function()
 };
 
 /**
+ * dumpRegs()
+ *
+ * Since we don't pre-allocate the register arrays (eg, ATC, CRTC, GRC, etc) on a Card, we can't
+ * rely on their array length, so we instead rely on the number of register names supplied in asRegs.
+ *
+ * @this {Card}
+ * @param {string} sName
+ * @param {number} iReg
+ * @param {Array} [aRegs]
+ * @param {Array} [asRegs]
+ */
+Card.prototype.dumpRegs = function(sName, iReg, aRegs, asRegs)
+{
+    if (DEBUGGER) {
+        if (!aRegs) {
+            this.dbg.println(sName + ": " + str.toHexByte(iReg));
+            return;
+        }
+        var s = "", i, cchMax = 0;
+        for (i = 0; i < asRegs.length; i++) {
+            if (cchMax < asRegs[i].length) cchMax = asRegs[i].length;
+        }
+        cchMax++;
+        for (i = 0; i < asRegs.length; i++) {
+            if (s) s += '\n';
+            s += sName + "[" + str.toHexByte(i) + "]: " + str.pad(asRegs[i], cchMax) + str.toHexByte(aRegs[i]) + (i === iReg? "*" : "");
+        }
+        this.dbg.println(s);
+    }
+};
+
+/**
  * dumpCard()
  *
  * @this {Card}
@@ -2049,23 +2081,24 @@ Card.prototype.dumpCard = function()
 
         if (this.nCard == Video.CARD.MDA || this.nCard == Video.CARD.CGA) {
             this.dumpRegs(" MODEREG", this.regMode);
-            this.dumpRegs(" STATUS1", this.regStatus);
         }
+
+        this.dumpRegs(" STATUS1", this.regStatus);
 
         if (this.nCard == Video.CARD.CGA) {
             this.dumpRegs("   COLOR", this.regColor);
         }
 
         if (this.nCard >= Video.CARD.EGA) {
-            this.dbg.println(" ATCDATA: " + this.fATCData);
+            this.dbg.println("   ATCDATA: " + this.fATCData);
             this.dumpRegs(" ATC", this.regATCIndx, this.regATCData, this.asATCRegs);
             this.dumpRegs(" GRC", this.regGRCIndx, this.regGRCData, this.asGRCRegs);
             this.dumpRegs(" SEQ", this.regSEQIndx, this.regSEQData, this.asSEQRegs);
-            this.dumpRegs("    FEAT", this.regFeat);
-            this.dumpRegs("    MISC", this.regMisc);
-            this.dumpRegs(" STATUS0", this.regStatus0);
-            this.dumpRegs(" LATCHES", this.latches);
-            this.dbg.println("  ACCESS: " + str.toHexWord(this.nAccess));
+            this.dumpRegs("      FEAT", this.regFeat);
+            this.dumpRegs("      MISC", this.regMisc);
+            this.dumpRegs("   STATUS0", this.regStatus0);
+            this.dumpRegs("   LATCHES", this.latches);
+            this.dbg.println("    ACCESS: " + str.toHexWord(this.nAccess));
             this.dbg.println("Use 'dump video buffer' to dump video memory");
             /*
              * There are few more EGA regs we could dump, like GRCPos1, GRCPos2, but does anyone care?
@@ -2102,38 +2135,6 @@ Card.prototype.dumpBuffer = function(sParm)
         }
         if (sDump) this.dbg.println(sDump);
         this.prevDump = idw;
-    }
-};
-
-/**
- * dumpRegs()
- *
- * Since we don't pre-allocate the register arrays (eg, ATC, CRTC, GRC, etc) on a Card, we can't
- * rely on their array length, so we instead rely on the number of register names supplied in asRegs.
- *
- * @this {Card}
- * @param {string} sName
- * @param {number} iReg
- * @param {Array} [aRegs]
- * @param {Array} [asRegs]
- */
-Card.prototype.dumpRegs = function(sName, iReg, aRegs, asRegs)
-{
-    if (DEBUGGER) {
-        if (!aRegs) {
-            this.dbg.println(sName + ": " + str.toHexByte(iReg));
-            return;
-        }
-        var s = "", i, cchMax = 0;
-        for (i = 0; i < asRegs.length; i++) {
-            if (cchMax < asRegs[i].length) cchMax = asRegs[i].length;
-        }
-        cchMax++;
-        for (i = 0; i < asRegs.length; i++) {
-            if (s) s += '\n';
-            s += sName + "[" + str.toHexByte(i) + "]: " + str.pad(asRegs[i], cchMax) + str.toHexByte(aRegs[i]) + (i === iReg? "*" : "");
-        }
-        this.dbg.println(s);
     }
 };
 
@@ -3955,7 +3956,7 @@ Video.prototype.checkMode = function(fForce)
         if (card.nCard == Video.CARD.MDA) {
             nMode = Video.MODE.MDA_80X25;
         }
-        else if (card.nCard == Video.CARD.EGA) {
+        else if (card.nCard >= Video.CARD.EGA) {
             /*
              * The sizeBuffer we choose reflects the amount of physical address space that all 4 planes
              * of EGA memory normally span, NOT the total amount of EGA memory.  So for a 64Kb EGA card,
