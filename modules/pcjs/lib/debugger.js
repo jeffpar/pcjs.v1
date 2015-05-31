@@ -132,8 +132,8 @@ function Debugger(parmsDbg)
          * Finally, for TEMPORARY breakpoint addresses, we set fTempBreak to true, so that they can be
          * automatically cleared when they're hit.
          */
-        this.dbgAddrNextCode = this.newAddr(0, 0);
-        this.dbgAddrNextData = this.newAddr(0, 0);
+        this.dbgAddrNextCode = this.newAddr();
+        this.dbgAddrNextData = this.newAddr();
 
         /*
          * This maintains command history.  New commands are inserted at index 0 of the array.
@@ -146,7 +146,7 @@ function Debugger(parmsDbg)
          * fAssemble is true when "assemble mode" is active, false when not.
          */
         this.fAssemble = false;
-        this.dbgAddrAssemble = this.newAddr(0, 0);
+        this.dbgAddrAssemble = this.newAddr();
 
         /*
          * aSymbolTable is an array of 4-element arrays, one per ROM or other chunk of address space.
@@ -229,7 +229,7 @@ if (DEBUGGER) {
         0x13:       Messages.FDC,
         0x15:       Messages.CHIPSET,
         0x16:       Messages.KEYBOARD,
-     // 0x1a:       Messages.RTC,       // ChipSet contains its own specialized messageInt() handler for the RTC
+     // 0x1a:       Messages.RTC,       // ChipSet contains its own custom messageInt() handler for the RTC
         0x1c:       Messages.TIMER,
         0x21:       Messages.DOS,
         0x33:       Messages.MOUSE
@@ -246,6 +246,7 @@ if (DEBUGGER) {
         'g [#]': "go [to #]",
         'h [#]': "halt/history",
         'i [#]': "input port #",
+        'k':     "stack trace",
         'l':     "load sector(s)",
         'm':     "messages",
         'o [#]': "output port #",
@@ -5183,6 +5184,35 @@ if (DEBUGGER) {
     };
 
     /**
+     * doStackTrace()
+     *
+     * @this {Debugger}
+     */
+    Debugger.prototype.doStackTrace = function()
+    {
+        var cFrames = 0;
+        var dbgAddrCall = this.newAddr();
+        var dbgAddrStack = this.newAddr(this.cpu.getSP(), this.cpu.getSS());
+        while (cFrames++ < 10) {
+            var fFound = false;
+            while ((dbgAddrStack.off >>> 0) < (this.cpu.regLSPLimit >>> 0)) {
+                dbgAddrCall.off = this.getWord(dbgAddrCall);
+                dbgAddrCall.sel = this.cpu.segCS.sel;
+                /*
+                 * Check the near-call case first
+                 */
+                dbgAddrCall.off -= 3;
+                if (this.getByte(dbgAddrCall) == X86.OPCODE.CALL) {
+                    fFound = true;
+                }
+                dbgAddrStack.off += this.cpu.segCS.dataSize;
+            }
+            if (!fFound) return;
+            this.println(this.getInstruction(dbgAddrCall));
+        }
+    };
+
+    /**
      * doStep(sCmd, sCount)
      *
      * @this {Debugger}
@@ -5468,6 +5498,9 @@ if (DEBUGGER) {
                     break;
                 case "i":
                     this.doInput(asArgs[1]);
+                    break;
+                case "k":
+                    this.doStackTrace();
                     break;
                 case "l":
                     this.doLoad(asArgs);
