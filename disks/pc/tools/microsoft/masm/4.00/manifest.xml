@@ -6,7 +6,7 @@
 	<category>Assembler</category>
 	<author>Microsoft</author>
 	<releaseDate/>
-	<disk id="disk01" size="368640" chs="40:2:9" img="private/MASM-016014-400.img" href="/disks/pc/tools/microsoft/masm/4.00/MASM-016014-400.json" md5="33f524ba4f3a2773a60b1d02d70032a7" md5json="96b0cb675eeb508ffe1056a708859cb5">
+	<disk id="disk01" size="368640" chs="40:2:9" img="static/MASM-016014-400.img" href="/disks/pc/tools/microsoft/masm/4.00/MASM-016014-400.json" md5="33f524ba4f3a2773a60b1d02d70032a7" md5json="96b0cb675eeb508ffe1056a708859cb5">
 		<name>MS MASM 4.00</name>
 	</disk>
 </manifest>

@@ -7,10 +7,10 @@
 	<category>Operating System</category>
 	<author>IBM/Microsoft</author>
 	<releaseDate/>
-	<disk id="disk01" size="368640" chs="40:2:9" img="private/PCDOS320-DISK1.img" href="/disks/pc/dos/ibm/3.20/PCDOS320-DISK1.json" md5="c9a60b93b7a039fffa85f803ab5f9d80" md5json="c8ed4a0369c331547187a61bda5b3f41">
+	<disk id="disk01" size="368640" chs="40:2:9" img="static/PCDOS320-DISK1.img" href="/disks/pc/dos/ibm/3.20/PCDOS320-DISK1.json" md5="c9a60b93b7a039fffa85f803ab5f9d80" md5json="c8ed4a0369c331547187a61bda5b3f41">
 		<name>PC-DOS 3.20 (Disk 1)</name>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="private/PCDOS320-DISK2.img" href="/disks/pc/dos/ibm/3.20/PCDOS320-DISK2.json" md5="72bf14f727977e4717823e9b72bf67b7" md5json="d2406cfd3ed34e591344aa6ea97db2b2">
+	<disk id="disk02" size="368640" chs="40:2:9" img="static/PCDOS320-DISK2.img" href="/disks/pc/dos/ibm/3.20/PCDOS320-DISK2.json" md5="72bf14f727977e4717823e9b72bf67b7" md5json="d2406cfd3ed34e591344aa6ea97db2b2">
 		<name>PC-DOS 3.20 (Disk 2)</name>
 	</disk>
 </manifest>

@@ -7,13 +7,13 @@
 	<category>Operating System</category>
 	<author>IBM/Microsoft</author>
 	<releaseDate/>
-	<disk id="disk01" size="368640" chs="40:2:9" img="private/PCDOS330-DISK1.img" href="/disks/pc/dos/ibm/3.30/PCDOS330-DISK1.json" md5="12dd70c60e57ce97b4e5aabd0f05c71a" md5json="91e4986390ea0f96ce17d4d476e0c747">
+	<disk id="disk01" size="368640" chs="40:2:9" img="static/PCDOS330-DISK1.img" href="/disks/pc/dos/ibm/3.30/PCDOS330-DISK1.json" md5="12dd70c60e57ce97b4e5aabd0f05c71a" md5json="91e4986390ea0f96ce17d4d476e0c747">
 		<name>PC-DOS 3.30 (Disk 1)</name>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" img="private/PCDOS330-DISK2.img" href="/disks/pc/dos/ibm/3.30/PCDOS330-DISK2.json" md5="2e1ec52cc9cdbf8d93f9fabf27aafe51" md5json="60ad4ea3178515adfba39248e30ed1e6">
+	<disk id="disk02" size="368640" chs="40:2:9" img="static/PCDOS330-DISK2.img" href="/disks/pc/dos/ibm/3.30/PCDOS330-DISK2.json" md5="2e1ec52cc9cdbf8d93f9fabf27aafe51" md5json="60ad4ea3178515adfba39248e30ed1e6">
 		<name>PC-DOS 3.30 (Disk 2)</name>
 	</disk>
-	<disk id="disk03" size="737280" chs="80:2:9" img="private/PCDOS330-DISK1-720K.img" href="/disks/pc/dos/ibm/3.30/PCDOS330-DISK1-720K.json" md5="497c26a4a8316806902f3a51a6ceb2be" md5json="0995b031d5b9e1bf5bf82fb9540440e1">
+	<disk id="disk03" size="737280" chs="80:2:9" img="static/PCDOS330-DISK1-720K.img" href="/disks/pc/dos/ibm/3.30/PCDOS330-DISK1-720K.json" md5="497c26a4a8316806902f3a51a6ceb2be" md5json="0995b031d5b9e1bf5bf82fb9540440e1">
 		<name>PC-DOS 3.30 (720K Disk)</name>
 	</disk>
 </manifest>

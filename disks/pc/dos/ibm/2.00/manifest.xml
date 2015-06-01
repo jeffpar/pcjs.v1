@@ -7,10 +7,10 @@
 	<category>Operating System</category>
 	<author>IBM/Microsoft</author>
 	<releaseDate/>
-	<disk id="disk01" size="184320" chs="40:1:9" img="private/PCDOS200-DISK1.img" href="/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json" md5="d57ceef82122790d1c0ff7bebc12f90a" md5json="2507c02da6cbafe9a94a35cbdd993be2">
+	<disk id="disk01" size="184320" chs="40:1:9" img="static/PCDOS200-DISK1.img" href="/disks/pc/dos/ibm/2.00/PCDOS200-DISK1.json" md5="d57ceef82122790d1c0ff7bebc12f90a" md5json="2507c02da6cbafe9a94a35cbdd993be2">
 		<name>PC-DOS 2.00 (Disk 1)</name>
 	</disk>
-	<disk id="disk02" size="184320" chs="40:1:9" img="private/PCDOS200-DISK2.img" href="/disks/pc/dos/ibm/2.00/PCDOS200-DISK2.json" md5="1c7aac53c78446992f8821cf42d04c4a" md5json="b66e296319c1f97990b596b1aa376d39">
+	<disk id="disk02" size="184320" chs="40:1:9" img="static/PCDOS200-DISK2.img" href="/disks/pc/dos/ibm/2.00/PCDOS200-DISK2.json" md5="1c7aac53c78446992f8821cf42d04c4a" md5json="b66e296319c1f97990b596b1aa376d39">
 		<name>PC-DOS 2.00 (Disk 2)</name>
 	</disk>
 </manifest>

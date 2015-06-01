@@ -76,7 +76,7 @@ have saved that JSON-encoded image as static file on the server, and then added 
 &lt;disk&gt; entry:
 
 	<manifest>
-		<disk id="disk01" dir="/apps/pc/1981/visicalc/private/" href="/apps/pc/1981/visicalc/disk.json">
+		<disk id="disk01" dir="/apps/pc/1981/visicalc/static/" href="/apps/pc/1981/visicalc/disk.json">
 			...
 		</disk>
 	</manifest>

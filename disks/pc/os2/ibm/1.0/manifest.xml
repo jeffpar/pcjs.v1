@@ -3,16 +3,16 @@
 <manifest type="software">
 	<title>IBM OS/2 1.0</title>
 	<machine href="/disks/pc/os2/ibm/1.0/machine.xml"/>
-	<disk id="disk00" size="1474560" chs="80:2:18" img="private/OS210-INSTALL.img" href="/disks/pc/os2/ibm/1.0/OS210-INSTALL.json" md5="b0410a7cd0d8bf188028729d1634bf75" md5json="4e690e5d55de300077c442762c7b7f97">
+	<disk id="disk00" size="1474560" chs="80:2:18" img="static/OS210-INSTALL.img" href="/disks/pc/os2/ibm/1.0/OS210-INSTALL.json" md5="b0410a7cd0d8bf188028729d1634bf75" md5json="4e690e5d55de300077c442762c7b7f97">
 		<name>OS/2 1.0 (1.44Mb Install)</name>
 	</disk>
-	<disk id="disk01" size="1474560" chs="80:2:18" img="private/OS210-DISK1.img" href="/disks/pc/os2/ibm/1.0/OS210-DISK1.json" md5="11efee476f78824cab1201a2dd3fb8f5" md5json="29fd631c5a5ca00cf6598fb8288b7c35">
+	<disk id="disk01" size="1474560" chs="80:2:18" img="static/OS210-DISK1.img" href="/disks/pc/os2/ibm/1.0/OS210-DISK1.json" md5="11efee476f78824cab1201a2dd3fb8f5" md5json="29fd631c5a5ca00cf6598fb8288b7c35">
 		<name>OS/2 1.0 (1.44Mb Disk 1)</name>
 	</disk>
-	<disk id="disk02" size="1474560" chs="80:2:18" img="private/OS210-DISK2.img" href="/disks/pc/os2/ibm/1.0/OS210-DISK2.json" md5="d5c03e696497729fdd89dce0e18ad7ff" md5json="d50dfed5f7d55408d9af75b382afde89">
+	<disk id="disk02" size="1474560" chs="80:2:18" img="static/OS210-DISK2.img" href="/disks/pc/os2/ibm/1.0/OS210-DISK2.json" md5="d5c03e696497729fdd89dce0e18ad7ff" md5json="d50dfed5f7d55408d9af75b382afde89">
 		<name>OS/2 1.0 (1.44Mb Disk 2)</name>
 	</disk>
-	<disk id="disk03" size="1474560" chs="80:2:18" img="private/OS210-DISK3.img" href="/disks/pc/os2/ibm/1.0/OS210-DISK3.json" md5="fd80ec4dc815bcdacf7879c50b7aa44a" md5json="7d10df7177f4a80da285d8b7b586740d">
+	<disk id="disk03" size="1474560" chs="80:2:18" img="static/OS210-DISK3.img" href="/disks/pc/os2/ibm/1.0/OS210-DISK3.json" md5="fd80ec4dc815bcdacf7879c50b7aa44a" md5json="7d10df7177f4a80da285d8b7b586740d">
 		<name>OS/2 1.0 (1.44Mb Disk 3)</name>
 	</disk>
 </manifest>

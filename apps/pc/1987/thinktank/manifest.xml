@@ -7,7 +7,7 @@
 	<category>Productivity</category>
 	<company>Living Videotext</company>
 	<releaseDate>September 25, 1987</releaseDate>
-	<disk id="disk01" size="368640" chs="40:2:9" dir="private/" href="/apps/pc/1987/thinktank/disk.json" md5="94053339672452fba42da85481893d68" md5json="bd39020bff244db9af3ac9eb656e7878">
+	<disk id="disk01" size="368640" chs="40:2:9" dir="static/" href="/apps/pc/1987/thinktank/disk.json" md5="94053339672452fba42da85481893d68" md5json="bd39020bff244db9af3ac9eb656e7878">
 		<name>ThinkTank 2.41NP</name>
 		<file size="6" time="2012-11-20 15:29:40" attr="0x20" md5="50b68f3f99eda119c661b2b50cb9f4de">AUTOEXEC.BAT</file>
 		<file size="8192" time="2012-11-20 15:29:35" attr="0x20" md5="3355afbc122700f13647ee0d1bbf9ed7">READ_ME.DB</file>

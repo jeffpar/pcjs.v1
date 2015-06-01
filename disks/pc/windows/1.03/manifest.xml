@@ -2,7 +2,7 @@
 <?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.18.2/manifest.xsl"?>
 <manifest type="software">
 	<title>Microsoft Windows 1.03</title>
-	<disk id="disk01" size="368640" chs="40:2:9" dir="private/01-SETUP/" href="/disks/pc/windows/1.03/WIN103-DISK1-SETUP.json" md5="6cdc68e0fc237c858fc5099957e5fb3d" md5json="09605e98952fbec2e0bf39524c1106f3">
+	<disk id="disk01" size="368640" chs="40:2:9" dir="static/01-SETUP/" href="/disks/pc/windows/1.03/WIN103-DISK1-SETUP.json" md5="6cdc68e0fc237c858fc5099957e5fb3d" md5json="09605e98952fbec2e0bf39524c1106f3">
 		<name>Windows 1.03 (SETUP)</name>
 		<file size="15776" time="1986-05-23 18:22:58" attr="0x20" md5="bcbfab1443115fe31409b02575897acd">ATTDC.DRV</file>
 		<file size="17824" time="1986-05-23 15:23:10" attr="0x20" md5="17799cc158ecfeed3cc8dec0d60e3a45">ATTDEB.DRV</file>
@@ -49,7 +49,7 @@
 		<file size="4005" time="1986-07-20 18:27:14" attr="0x20" md5="7fe39cc5606a53c988a9e98df504cf81">USA.DRV</file>
 		<file size="47" time="1986-08-11 13:02:32" attr="0x20" md5="e9721f6396ab02d63a64cc19fc0a699f">WRITE.DAT</file>
 	</disk>
-	<disk id="disk02" size="368640" chs="40:2:9" dir="private/02-BUILD/" href="/disks/pc/windows/1.03/WIN103-DISK2-BUILD.json" md5="48f381b45d820c8602d9b53f4caaf655" md5json="f402e9c07203eb248f8e9d731b24a138">
+	<disk id="disk02" size="368640" chs="40:2:9" dir="static/02-BUILD/" href="/disks/pc/windows/1.03/WIN103-DISK2-BUILD.json" md5="48f381b45d820c8602d9b53f4caaf655" md5json="f402e9c07203eb248f8e9d731b24a138">
 		<name>Windows 1.03 (BUILD)</name>
 		<file size="1307" time="1986-02-22 10:34:02" attr="0x20" md5="e664fdc7580527b66f13b185f2760ce2">ATTDC.GRB</file>
 		<file size="2916" time="1986-05-28 12:30:52" attr="0x20" md5="bb12b0b1796809f7dc7d031e5dcc6ad1">ATTDC.LGO</file>
@@ -79,7 +79,7 @@
 		<file size="2093" time="1986-05-22 14:50:36" attr="0x20" md5="4ee2801e187df84ebdb15248f26b13c5">WIN.INI</file>
 		<file size="19824" time="1986-08-01 04:16:58" attr="0x20" md5="c528b57046cdbeefd5a4a7ae2b04d97e">WINOLDAP.MOD</file>
 	</disk>
-	<disk id="disk03" size="368640" chs="40:2:9" dir="private/03-UTILITY/" href="/disks/pc/windows/1.03/WIN103-DISK3-UTILITY.json" md5="dc5f79ccb7b75ec3b2b9a91713ea8484" md5json="a7ea164d131c9ab98c023ed20dc3b2a2">
+	<disk id="disk03" size="368640" chs="40:2:9" dir="static/03-UTILITY/" href="/disks/pc/windows/1.03/WIN103-DISK3-UTILITY.json" md5="dc5f79ccb7b75ec3b2b9a91713ea8484" md5json="a7ea164d131c9ab98c023ed20dc3b2a2">
 		<name>Windows 1.03 (UTILITY)</name>
 		<file size="12016" time="1986-05-22 11:58:02" attr="0x20" md5="3409c27aa4b804de3eacedcf68eb079d">CITOH.DRV</file>
 		<file size="14352" time="1986-05-22 12:07:52" attr="0x20" md5="87ac6cf916a5b9f66e5f83548b49e03a">EPSON.DRV</file>
@@ -104,7 +104,7 @@
 		<file size="11" time="1986-08-14 21:41:06" attr="0x20" md5="759b6a2860ff7ac70b0d51d20833d00b">UTILITY.LBL</file>
 		<file size="21024" time="1986-08-14 21:05:26" attr="0x20" md5="a289857e4cdccaeac2132a1054af7f2f">XER4020.DRV</file>
 	</disk>
-	<disk id="disk04" size="368640" chs="40:2:9" dir="private/04-FONT/" href="/disks/pc/windows/1.03/WIN103-DISK4-FONT.json" md5="11d85178e6768deea17663608c3d1d98" md5json="3e283e034baa118b392224a49d23ec93">
+	<disk id="disk04" size="368640" chs="40:2:9" dir="static/04-FONT/" href="/disks/pc/windows/1.03/WIN103-DISK4-FONT.json" md5="11d85178e6768deea17663608c3d1d98" md5json="3e283e034baa118b392224a49d23ec93">
 		<name>Windows 1.03 (FONT)</name>
 		<file size="8720" time="1986-07-29 17:43:18" attr="0x20" md5="361fced75dec2fefc482baa78f1f6c6a">COURA.FON</file>
 		<file size="12304" time="1986-07-29 17:43:30" attr="0x20" md5="c8158ce9e796699ad4ec47aade5e2f09">COURB.FON</file>
@@ -123,7 +123,7 @@
 		<file size="25824" time="1986-07-29 17:47:06" attr="0x20" md5="51187b4c191241d9b1c12207c1cc84bc">TMSRC.FON</file>
 		<file size="45200" time="1986-07-29 17:47:24" attr="0x20" md5="b36d7e946e62cb713196cd2e14a9b0fe">TMSRD.FON</file>
 	</disk>
-	<disk id="disk05" size="368640" chs="40:2:9" dir="private/05-APPS/" href="/disks/pc/windows/1.03/WIN103-DISK5-APPS.json" md5="cecfaaa0274665979bf09a769e419013" md5json="eea7495765434569711d07ba0d50f286">
+	<disk id="disk05" size="368640" chs="40:2:9" dir="static/05-APPS/" href="/disks/pc/windows/1.03/WIN103-DISK5-APPS.json" md5="cecfaaa0274665979bf09a769e419013" md5json="eea7495765434569711d07ba0d50f286">
 		<name>Windows 1.03 (APPS)</name>
 		<file size="42" time="1985-06-04 10:07:36" attr="0x20" md5="353472a7d9a5ca979ec01c65729a3314">ABC.TXT</file>
 		<file size="25008" time="1986-05-22 05:33:36" attr="0x20" md5="a87888b37c03400a03d96cb69105661d">CALC.EXE</file>
@@ -138,7 +138,7 @@
 		<file size="14864" time="1986-05-22 05:28:28" attr="0x20" md5="b1a7fdc1f11215267ff6fdf2eb227df9">REVERSI.EXE</file>
 		<file size="47344" time="1986-06-12 12:22:48" attr="0x20" md5="5202a5979b2245e79d659bfdae560a2a">TERMINAL.EXE</file>
 	</disk>
-	<disk id="disk06" size="368640" chs="40:2:9" dir="private/06-WRITE/" href="/disks/pc/windows/1.03/WIN103-DISK6-WRITE.json" md5="44d14cbdf45c59cbb701ed4da82f4726" md5json="733c6bcccf79296a18de7e2f2045de98">
+	<disk id="disk06" size="368640" chs="40:2:9" dir="static/06-WRITE/" href="/disks/pc/windows/1.03/WIN103-DISK6-WRITE.json" md5="44d14cbdf45c59cbb701ed4da82f4726" md5json="733c6bcccf79296a18de7e2f2045de98">
 		<name>Windows 1.03 (WRITE)</name>
 		<file size="2944" time="1985-09-09 16:04:14" attr="0x20" md5="b7ce592cd474ff286bed94b9c6492f39">PRACTICE.WRI</file>
 		<file size="11196" time="1986-08-01 15:21:04" attr="0x20" md5="369f20a68320d77be073431fc953baaa">README.TXT</file>
