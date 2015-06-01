@@ -2080,13 +2080,13 @@ Card.prototype.dumpCard = function()
         this.dumpRegs("CRTC", this.regCRTIndx, this.regCRTData, this.asCRTCRegs);
 
         if (this.nCard == Video.CARD.MDA || this.nCard == Video.CARD.CGA) {
-            this.dumpRegs(" MODEREG", this.regMode);
+            this.dumpRegs("   MODEREG", this.regMode);
         }
 
-        this.dumpRegs(" STATUS1", this.regStatus);
+        this.dumpRegs("   STATUS1", this.regStatus);
 
         if (this.nCard == Video.CARD.CGA) {
-            this.dumpRegs("   COLOR", this.regColor);
+            this.dumpRegs("     COLOR", this.regColor);
         }
 
         if (this.nCard >= Video.CARD.EGA) {

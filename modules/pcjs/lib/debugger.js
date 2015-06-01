@@ -1652,6 +1652,9 @@ if (DEBUGGER) {
         if (dbgAddr.sel != null) {
             var seg = this.getSegment(dbgAddr.sel);
             if (!seg || dbgAddr.off > seg.limit) {
+                /*
+                 * TODO: This automatic wrap-to-zero is OK for normal segments, but for expand-down segments, not so much.
+                 */
                 dbgAddr.off = 0;
                 dbgAddr.addr = null;
             }
@@ -5184,32 +5187,78 @@ if (DEBUGGER) {
     };
 
     /**
+     * getCall(dbgAddr, fFar)
+     *
+     * @this {Debugger}
+     * @param {{DbgAddr}} dbgAddr
+     * @param {boolean} [fFar]
+     * @return {string|null} CALL instruction at or near dbgAddr, or null if none
+     */
+    Debugger.prototype.getCall = function(dbgAddr, fFar)
+    {
+        var sCall = null;
+        var off = dbgAddr.off;
+        var offOrig = off;
+        for (var n = 1; n <= 6; n++) {
+            if (n > 2) {
+                dbgAddr.off = off;
+                dbgAddr.addr = null;
+                var s = this.getInstruction(dbgAddr);
+                if (s.indexOf("CALL") > 0 || fFar && s.indexOf("INT") > 0) {
+                    sCall = s;
+                    break;
+                }
+            }
+            if (!--off) break;
+        }
+        dbgAddr.off = offOrig;
+        return sCall;
+    };
+
+    /**
      * doStackTrace()
      *
      * @this {Debugger}
      */
     Debugger.prototype.doStackTrace = function()
     {
-        var cFrames = 0;
+        var nFrames = 10, cFrames = 0;
+        var selCode = this.cpu.segCS.sel;
         var dbgAddrCall = this.newAddr();
         var dbgAddrStack = this.newAddr(this.cpu.getSP(), this.cpu.getSS());
-        while (cFrames++ < 10) {
-            var fFound = false;
+        this.println("stack trace for " + this.hexAddr(dbgAddrStack) + ':');
+        while (cFrames < nFrames) {
+            var sCall = null, cTests = 256;
             while ((dbgAddrStack.off >>> 0) < (this.cpu.regLSPLimit >>> 0)) {
-                dbgAddrCall.off = this.getWord(dbgAddrCall);
-                dbgAddrCall.sel = this.cpu.segCS.sel;
+                dbgAddrCall.off = this.getWord(dbgAddrStack, true);
                 /*
-                 * Check the near-call case first
+                 * Because we're using the auto-increment feature of getWord(), and because that will automatically
+                 * wrap the offset around the end of the segment, we must also check the addr property to detect the wrap.
                  */
-                dbgAddrCall.off -= 3;
-                if (this.getByte(dbgAddrCall) == X86.OPCODE.CALL) {
-                    fFound = true;
+                if (dbgAddrStack.addr == null || !cTests--) break;
+                dbgAddrCall.sel = selCode;
+                sCall = this.getCall(dbgAddrCall);
+                if (sCall) {
+                    break;
                 }
-                dbgAddrStack.off += this.cpu.segCS.dataSize;
+                dbgAddrCall.sel = this.getWord(dbgAddrStack);
+                sCall = this.getCall(dbgAddrCall, true);
+                if (sCall) {
+                    selCode = this.getWord(dbgAddrStack, true);
+                    /*
+                     * It's not strictly necessary that we skip over the flags word that's pushed as part of any INT
+                     * instruction, but it reduces the risk of misinterpreting it as a return address on the next iteration.
+                     */
+                    if (sCall.indexOf("INT") > 0) this.getWord(dbgAddrStack, true);
+                    break;
+                }
             }
-            if (!fFound) return;
-            this.println(this.getInstruction(dbgAddrCall));
+            if (!sCall) break;
+            sCall = str.pad(sCall, 56) + ";SS:SP=" + this.hexAddr(dbgAddrStack);
+            this.println(sCall);
+            cFrames++;
         }
+        if (!cFrames) this.println("no return addresses found");
     };
 
     /**
