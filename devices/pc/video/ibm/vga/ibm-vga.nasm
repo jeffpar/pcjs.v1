@@ -24,8 +24,31 @@
 	mov	[0x10e],cs		; 00000083  8C0E0E01  '....'
 	sti				; 00000087  FB  '.'
 	mov	byte [0x489],0x11	; 00000088  C606890411  '.....'
-	mov	byte [0x487],0x60	; 0000008D  C606870460  '....`'
-	call	x100			; 00000092  E86B00  '.k.'
+
+	;
+	;   Initialize the ROM BIOS Video Mode Options byte @40:0087 (default to color and 256Kb of RAM)
+	;
+	mov	byte [0x487],0x60	; 0000008D
+	;
+	;   The x100 subroutine alternately enables port 0x3B? and 0x3D? decoding, verifying that there is
+	;   no response on opposing ports 0x3D? and 0x3B?, respectively; otherwise, it assumes that another
+	;   video card must exist and attempts to select co-existing settings for the VGA.  For example, if
+	;   there is an unexpected response on the color ports, the VGA ROM will default to mono operation.
+	;
+	call	x100			; 00000092
+;
+;   From the "IBM Personal System/2 Model 50 and 60 Technical Reference: I/O Controllers, Video Subsystem", p.4-29:
+;
+;	When in setup mode (I/O address hex 0094, bit 5 equals 0), the VGA responds to a single option select byte
+;	at I/O address hex 0102 and treats the LSB (bit 0) of that byte as the VGA sleep bit.  When the LSB equals 0,
+;	the VGA does not respond to commands, addresses, or data, on the data bus.  When the LSB equals 1, the VGA
+;	responds.  If the VGA was set up and is generating video output when the LSB is set to 0, the output is still
+;	generated.
+;
+;	The VGA responds only to address hex 0102 when in the setup mode.  No other addresses are valid at that time.
+;	Conversely, the VGA ignores address hex 0102 when in the enabled mode (I/O address hex 0094, bit 5 equals 1),
+;	and decodes normal I/O and memory addresses.
+;
 	cli				; 00000095  FA  '.'
 	mov	dx,0x46e8		; 00000096  BAE846  '..F'
 	mov	ax,0x16			; 00000099  B81600  '...'
@@ -42,14 +65,35 @@
 	sti				; 000000B1  FB  '.'
 	push	cs			; 000000B2  0E  '.'
 	pop	es			; 000000B3  07  '.'
+
+	;
+	;   Default to mono settings
+	;
 	mov	di,0x3b4		; 000000B4  BFB403  '...'
 	mov	bx,0x1602		; 000000B7  BB0216  '...'
+
+	;
+	;   Test bit 1 of ROM BIOS Video Mode Options byte @40:0087 (set if mono, clear if color)
+	;
 	test	byte [0x487],0x2	; 000000BA  F606870402  '.....'
 	jnz	xc7			; 000000BF  7506  'u.'
+
+	;
+	;   Choose color settings
+	;
 	mov	di,0x3d4		; 000000C1  BFD403  '...'
 	mov	bx,0x1642		; 000000C4  BB4216  '.B.'
+
+	;
+	;   Set the CRTC base port address (0x3B4 for mono, 0x3D4 for color)
+	;
 xc7:	mov	[0x463],di		; 000000C7  893E6304  '.>c.'
+
+	;
+	;   Program the card for a default mode
+	;
 	call	x1127			; 000000CB  E85910  '.Y.'
+
 	xor	al,al			; 000000CE  32C0  '2.'
 	out	dx,al			; 000000D0  EE  '.'
 	call	x547			; 000000D1  E87304  '.s.'
@@ -2105,7 +2149,19 @@ x1122:	mov	dx,0x3c8		; 00001122  BAC803  '...'
 	out	dx,al			; 00001125  EE  '.'
 x1126:	ret				; 00001126  C3  '.'
 
-x1127:	mov	dx,0x3c4		; 00001127  BAC403  '...'
+;
+; Programs the card using data from [BX]; CRTC port address is in DI (0x3B4 or 0x3D4).
+;
+; 	Writes 0x01 to SEQ register 0x00 (SEQ.RESET).
+;	Writes values starting at [BX+0x05] to SEQ registers 0x01-0x04.
+; 	Writes [BX+0x09] to Miscellaneous Output register (MISC).
+;	Writes 0x03 to SEQ register 0x00 (SEQ.RESET).
+;	Writes 0x00 to CRTC register 0x11 (CRTC.VERT_RETRACE_END).
+;	Writes values starting at [BX+0x0A] to CRTC registers 0x00-0x18.
+;	Writes values starting at [BX+0x33] to ATC registers 0x10, 0x12 and 0x13
+;	Writes values starting at [BX+0x37] to GRC registers 0x00-0x08.
+;
+x1127:	mov	dx,0x3c4		; (DX) == SEQ port address (0x3C4)
 	mov	ax,0x100		; 0000112A  B80001  '...'
 	pushf				; 0000112D  9C  '.'
 	cli				; 0000112E  FA  '.'
@@ -2116,14 +2172,14 @@ x1127:	mov	dx,0x3c4		; 00001127  BAC403  '...'
 	mov	al,0x1			; 00001137  B001  '..'
 	call	x1201			; 00001139  E8C500  '...'
 	pop	bx			; 0000113C  5B  '['
-	mov	dl,0xc2			; 0000113D  B2C2  '..'
+	mov	dl,0xc2			; (DX) == MISC port address (0x3C2)
 	mov	al,[es:bx+0x9]		; 0000113F  268A4709  '&.G.'
 	out	dx,al			; 00001143  EE  '.'
-	mov	dl,0xc4			; 00001144  B2C4  '..'
+	mov	dl,0xc4			; (DX) == SEQ port address (0x3C4)
 	mov	ax,0x300		; 00001146  B80003  '...'
 	out	dx,ax			; 00001149  EF  '.'
 	popf				; 0000114A  9D  '.'
-	mov	dx,di			; 0000114B  8BD7  '..'
+	mov	dx,di			; (DX) == CRTC port address (0x3B4 or 0x3D4)
 	mov	al,0x11			; 0000114D  B011  '..'
 	xor	ah,ah			; 0000114F  32E4  '2.'
 	out	dx,ax			; 00001151  EF  '.'
@@ -2134,12 +2190,12 @@ x1127:	mov	dx,0x3c4		; 00001127  BAC403  '...'
 	call	x1201			; 0000115B  E8A300  '...'
 	pop	bx			; 0000115E  5B  '['
 	mov	dx,di			; 0000115F  8BD7  '..'
-	add	dl,0x6			; 00001161  80C206  '...'
+	add	dl,0x6			; (DX) == STATUS1 port address (0x3BA or 0x3DA)
 	push	dx			; 00001164  52  'R'
 	pushf				; 00001165  9C  '.'
 	cli				; 00001166  FA  '.'
 	in	al,dx			; 00001167  EC  '.'
-	mov	dl,0xc0			; 00001168  B2C0  '..'
+	mov	dl,0xc0			; (DX) == ATC port address (0x3C0)
 	mov	al,0x10			; 0000116A  B010  '..'
 	out	dx,al			; 0000116C  EE  '.'
 	mov	al,[es:bx+0x33]		; 0000116D  268A4733  '&.G3'
@@ -2154,7 +2210,7 @@ x1127:	mov	dx,0x3c4		; 00001127  BAC403  '...'
 	out	dx,al			; 00001181  EE  '.'
 	popf				; 00001182  9D  '.'
 	push	bx			; 00001183  53  'S'
-	mov	dl,0xce			; 00001184  B2CE  '..'
+	mov	dl,0xce			; (DX) == GRC port address (0x3CE)
 	add	bx,byte +0x37		; 00001186  83C337  '..7'
 	mov	cx,0x9			; 00001189  B90900  '...'
 	xor	al,al			; 0000118C  32C0  '2.'

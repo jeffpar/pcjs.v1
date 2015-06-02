@@ -2114,7 +2114,7 @@ X86CPU.prototype.rewindIP = function(dec)
 X86CPU.prototype.getSP = function()
 {
     if (I386) {
-        this.assert(!((this.regLSP - this.segSS.base) & ~this.segSS.addrMask));
+        // assert(!((this.regLSP - this.segSS.base) & ~this.segSS.addrMask));
         return (this.regESP & ~this.segSS.addrMask) | (this.regLSP - this.segSS.base);
     }
     return (this.regLSP - this.segSS.base)|0;

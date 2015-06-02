@@ -1375,7 +1375,8 @@ Bus.prototype.checkPortInputNotify = function(port, addrLIP)
     }
     if (aNotify !== undefined) {
         if (aNotify[1]) {
-            bIn = aNotify[1].call(aNotify[0], port, addrLIP);
+            var b = aNotify[1].call(aNotify[0], port, addrLIP);
+            if (b !== undefined) bIn = b;
         }
         if (DEBUGGER && this.dbg && this.fPortInputBreakAll != aNotify[2]) {
             this.dbg.checkPortInput(port, bIn);

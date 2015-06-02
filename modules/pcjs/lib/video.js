@@ -463,6 +463,42 @@ Video.CARD = {
 };
 
 /*
+ * Supported Modes
+ *
+ * Although this component is designed to be a video hardware emulation, not a BIOS simulation, we DO
+ * look for changes to the hardware state that correspond to standard BIOS mode settings, so our internal
+ * mode setting will normally match the current BIOS mode setting; however, this a debugging convenience,
+ * not an attempt to monitor or emulate the BIOS.
+ *
+ * We do have some BIOS awareness (eg, when loading ROM-based fonts, and some special code to ensure all
+ * the BIOS diagnostics pass), but for the most part, we treat the BIOS like any other application code.
+ *
+ * As we expand support to include more programmable cards like the EGA, it becomes quite easy for the card
+ * to enter a "mode" that has no BIOS counterpart (eg, non-standard combinations of frame buffer address,
+ * memory access modes, fonts, display regions, etc).  Our hardware emulation routines will cope with those
+ * situations as best they can (and when they don't, it should be considered a bug if some application is
+ * broken as a result), but realistically, our hardware emulation is never likely to be 100% accurate.
+ */
+Video.MODE = {
+    CGA_40X25_BW:       0,
+    CGA_40X25:          1,
+    CGA_80X25_BW:       2,
+    CGA_80X25:          3,
+    CGA_320X200:        4,
+    CGA_320X200_BW:     5,
+    CGA_640X200:        6,
+    MDA_80X25:          7,
+    EGA_320X200:        0x0D,   // mapped at A000:0000
+    EGA_640X200:        0x0E,   // mapped at A000:0000
+    EGA_640X350_MONO:   0x0F,   // mapped at A000:0000, monochrome
+    EGA_640X350:        0x10,   // mapped at A000:0000, color
+    VGA_640X480_MONO:   0x11,   // mapped at A000:0000, monochrome
+    VGA_640X480:        0x12,   // mapped at A000:0000, color
+    VGA_320X200:        0x13,   // mapped at A000:0000, color
+    UNKNOWN:            0xFF
+};
+
+/*
  * Supported Monitors
  *
  * The MDA monitor displays 350 lines of vertical resolution, 720 lines of horizontal resolution, and refreshes
@@ -602,42 +638,6 @@ Video.aEGAMonitorSwitches = {
     0x03: [ChipSet.MONITOR.EGACOLOR,     ChipSet.MONITOR.MONO,  false], // "0011"
     0x04: [ChipSet.MONITOR.MONO,         ChipSet.MONITOR.TV,    false], // "1101"
     0x05: [ChipSet.MONITOR.MONO,         ChipSet.MONITOR.COLOR, false]  // "0101"
-};
-
-/*
- * Supported Modes
- *
- * Although this component is designed to be a video hardware emulation, not a BIOS simulation, we DO
- * look for changes to the hardware state that correspond to standard BIOS mode settings, so our internal
- * mode setting will normally match the current BIOS mode setting; however, this a debugging convenience,
- * not an attempt to monitor or emulate the BIOS.
- *
- * We do have some BIOS awareness (eg, when loading ROM-based fonts, and some special code to ensure all
- * the BIOS diagnostics pass), but for the most part, we treat the BIOS like any other application code.
- *
- * As we expand support to include more programmable cards like the EGA, it becomes quite easy for the card
- * to enter a "mode" that has no BIOS counterpart (eg, non-standard combinations of frame buffer address,
- * memory access modes, fonts, display regions, etc).  Our hardware emulation routines will cope with those
- * situations as best they can (and when they don't, it should be considered a bug if some application is
- * broken as a result), but realistically, our hardware emulation is never likely to be 100% accurate.
- */
-Video.MODE = {
-    CGA_40X25_BW:       0,
-    CGA_40X25:          1,
-    CGA_80X25_BW:       2,
-    CGA_80X25:          3,
-    CGA_320X200:        4,
-    CGA_320X200_BW:     5,
-    CGA_640X200:        6,
-    MDA_80X25:          7,
-    EGA_320X200:        0x0D,   // mapped at A000:0000
-    EGA_640X200:        0x0E,   // mapped at A000:0000
-    EGA_640X350_MONO:   0x0F,   // mapped at A000:0000, monochrome
-    EGA_640X350:        0x10,   // mapped at A000:0000, color
-    VGA_640X480_MONO:   0x11,   // mapped at A000:0000, monochrome
-    VGA_640X480:        0x12,   // mapped at A000:0000, color
-    VGA_320X200:        0x13,   // mapped at A000:0000, color
-    UNKNOWN:            0xFF
 };
 
 /**
@@ -1121,7 +1121,7 @@ Card.CRTC = {
             HR:             0x80        // Hardware Reset
         },
         LINE_COMPARE:       0x18,
-        TOTAL_REGS:         0x19        // total CRT registers on EGA
+        TOTAL_REGS:         0x19        // total CRT registers on EGA/VGA
     },
     ADDR_HI_MASK:           0x3F
 };
@@ -1134,7 +1134,7 @@ if (DEBUGGER) {
 
     Card.CRTC.EGA_REGS  = ["HORZ_TOTAL","HORZ_DISP_END","HORZ_BLANK_START","HORZ_BLANK_END","HORZ_RETRACE_START","HORZ_RETRACE_END",
                            "VERT_TOTAL","CRTC_OVERFLOW","PRESET_ROW_SCAN","MAX_SCAN_LINE","CURSOR_START","CURSOR_END",
-                           "START_ADDR_HI","START_ADDR_LO","CURSOR_ADDR_HI","CURSOR_ADDR_LO","LIGHT_PEN_HI","LIGHT_PEN_LO",
+                           "START_ADDR_HI","START_ADDR_LO","CURSOR_ADDR_HI","CURSOR_ADDR_LO","VERT_RETRACE_START","VERT_RETRACE_END",
                            "VERT_DISP_END","OFFSET","UNDERLINE","VERT_BLANK_START","VERT_BLANK_END","MODE_CTRL","LINE_COMPARE"];
 }
 
@@ -1352,7 +1352,8 @@ if (DEBUGGER) Card.SEQ.REGS = ["RESET","CLK","MAPMASK","CHARMAP","MODE"];
  */
 Card.DAC = {
     MASK: {
-        PORT:               0x3C6       // initialized to 0xFF and should not be changed
+        PORT:               0x3C6,      // initialized to 0xFF and should not be changed
+        DEFAULT:            0xFF
     },
     STATE: {
         PORT:               0x3C7,
@@ -1365,15 +1366,16 @@ Card.DAC = {
     },
     DATA: {
         PORT:               0x3C9
-    }
+    },
+    TOTAL_REGS:             0x100
 };
 
 /*
  * EGA/VGA Graphics Controller Registers (regGRCIndx and regGRCData)
  */
 Card.GRC = {
-    POS1_PORT:              0x3CC,
-    POS2_PORT:              0x3CA,
+    POS1_PORT:              0x3CC,      // EGA only, write-only
+    POS2_PORT:              0x3CA,      // EGA only, write-only
     INDX: {
         PORT:               0x3CE,
         MASK:               0x0F
@@ -1903,7 +1905,13 @@ Card.prototype.initEGA = function(data, nMonitorType)
             /*21*/  0xffffffff|0,
             /*22*/  0,
             /*23*/  0,
-            /*24*/  0
+            /*24*/  0,
+            /*25*/  Card.VGA_ENABLE.ENABLED,
+            /*26*/  Card.DAC.MASK.DEFAULT,
+            /*27*/  0,
+            /*28*/  0,
+            /*29*/  Card.DAC.STATE.MODE_WRITE,
+            /*30*/  new Array(Card.DAC.TOTAL_REGS)
         ];
     }
 
@@ -1969,7 +1977,15 @@ Card.prototype.initEGA = function(data, nMonitorType)
     this.nSetMapBits    = data[22];
     this.nColorCompare  = data[23];
     this.nColorDontCare = data[24];
-    this.regVGAEnable   = data[25];
+
+    if (this.nCard == Video.CARD.VGA) {
+        this.regVGAEnable   = data[25];
+        this.regDACMask     = data[26];
+        this.regDACAddr     = data[27];
+        this.regDACShift    = data[28];
+        this.regDACState    = data[29];
+        this.regDACData     = data[30];
+    }
 };
 
 /**
@@ -2030,7 +2046,15 @@ Card.prototype.saveEGA = function()
     data[22] = this.nSetMapBits;
     data[23] = this.nColorCompare;
     data[24] = this.nColorDontCare;
-    data[25] = this.regVGAEnable;
+
+    if (this.nCard == Video.CARD.VGA) {
+        data[25] = this.regVGAEnable;
+        data[26] = this.regDACMask;
+        data[27] = this.regDACAddr;
+        data[28] = this.regDACShift;
+        data[29] = this.regDACState;
+        data[30] = this.regDACData;
+    }
     return data;
 };
 
@@ -4016,7 +4040,16 @@ Video.prototype.checkMode = function(fForce)
                             // we've already defaulted to 0x0F or 0x10, so determine if it's 0x0D or 0x0E (ie, a 200-row mode)
                             // and then which one (ie, 320 wide or 640 wide).
                             //
-                            if (nCRTCVertTotal < 350) nMode = (fSEQDotClock? Video.MODE.EGA_320X200 : Video.MODE.EGA_640X200);
+                            if (nCRTCVertTotal > 480) {
+                                nMode = Video.MODE.VGA_640X480;
+                            }
+                            else if (nCRTCVertTotal < 350) {
+                                nMode = (fSEQDotClock? Video.MODE.EGA_320X200 : Video.MODE.EGA_640X200);
+                            }
+                            if (DEBUG && this.messageEnabled()) {
+                                this.printMessage("checkMode(): nCRTCVertTotal=" + nCRTCVertTotal + ", mode=" + str.toHexByte(nMode));
+                                this.cpu.stopCPU();
+                            }
                         }
                     }
                 }
@@ -4074,7 +4107,7 @@ Video.prototype.setMode = function(nMode, fForce)
     if (nMode != null && (nMode != this.nMode || fForce)) {
 
         if (DEBUG && this.messageEnabled()) {
-            this.printMessage("setMode(" + str.toHexWord(nMode) + (fForce? ",force" : "") + ")");
+            this.printMessage("setMode(" + str.toHexByte(nMode) + (fForce? ",force" : "") + ")");
         }
 
         this.cUpdates = 0;      // count updateScreen() calls as a means of driving blink updates
@@ -4100,7 +4133,7 @@ Video.prototype.setMode = function(nMode, fForce)
             if (this.addrBuffer) {
 
                 if (DEBUG && this.messageEnabled()) {
-                    this.printMessage("setMode(" + nMode + "): removing " + str.toHexLong(this.sizeBuffer) + " bytes from " + str.toHexLong(this.addrBuffer));
+                    this.printMessage("setMode(" + str.toHexByte(nMode) + "): removing " + str.toHexLong(this.sizeBuffer) + " bytes from " + str.toHexLong(this.addrBuffer));
                 }
 
                 if (!this.bus.removeMemory(this.addrBuffer, this.sizeBuffer)) {
@@ -4119,7 +4152,7 @@ Video.prototype.setMode = function(nMode, fForce)
             this.sizeBuffer = card.sizeBuffer;
 
             if (DEBUG && this.messageEnabled()) {
-                this.printMessage("setMode(" + nMode + "): adding " + str.toHexLong(this.sizeBuffer) + " bytes to " + str.toHexLong(this.addrBuffer));
+                this.printMessage("setMode(" + str.toHexByte(nMode) + "): adding " + str.toHexLong(this.sizeBuffer) + " bytes to " + str.toHexLong(this.addrBuffer));
             }
 
             var controller = (card === this.cardEGA? card : null);
@@ -4692,11 +4725,11 @@ Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
  * @this {Video}
  * @param {number} port (0x3B4)
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
- * @return {number}
+ * @return {number|undefined}
  */
 Video.prototype.inMDAIndx = function(port, addrFrom)
 {
-    return this.inCRTCIndx(this.cardMono, addrFrom);
+    return this.inCRTCIndx(this.cardMono, port, addrFrom);
 };
 
 /**
@@ -4709,7 +4742,7 @@ Video.prototype.inMDAIndx = function(port, addrFrom)
  */
 Video.prototype.outMDAIndx = function(port, bOut, addrFrom)
 {
-    this.outCRTCIndx(this.cardMono, bOut, addrFrom);
+    this.outCRTCIndx(this.cardMono, port, bOut, addrFrom);
 };
 
 /**
@@ -4722,7 +4755,7 @@ Video.prototype.outMDAIndx = function(port, bOut, addrFrom)
  */
 Video.prototype.inMDAData = function(port, addrFrom)
 {
-    return this.inCRTCData(this.cardMono, addrFrom);
+    return this.inCRTCData(this.cardMono, port, addrFrom);
 };
 
 /**
@@ -4735,7 +4768,7 @@ Video.prototype.inMDAData = function(port, addrFrom)
  */
 Video.prototype.outMDAData = function(port, bOut, addrFrom)
 {
-    this.outCRTCData(this.cardMono, bOut, addrFrom);
+    this.outCRTCData(this.cardMono, port, bOut, addrFrom);
 };
 
 /**
@@ -4983,6 +5016,138 @@ Video.prototype.outSEQData = function(port, bOut, addrFrom)
 };
 
 /**
+ * inDACMask(port, addrFrom)
+ *
+ * @this {Video}
+ * @param {number} port (0x3C6)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+ * @return {number}
+ */
+Video.prototype.inDACMask = function(port, addrFrom)
+{
+    var b = this.cardEGA.regDACMask;
+    if (this.messageEnabled()) {
+        this.printMessageIO(Card.DAC.MASK.PORT, null, addrFrom, "DAC.MASK", b);
+    }
+    return b;
+};
+
+/**
+ * outDACMask(port, bOut, addrFrom)
+ *
+ * @this {Video}
+ * @param {number} port (0x3C6)
+ * @param {number} bOut
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+ */
+Video.prototype.outDACMask = function(port, bOut, addrFrom)
+{
+    if (Video.TRAPALL || this.cardEGA.regDACMask !== bOut) {
+        if (this.messageEnabled()) {
+            this.printMessageIO(Card.DAC.MASK.PORT, bOut, addrFrom, "DAC.MASK");
+        }
+        this.cardEGA.regDACMask = bOut;
+    }
+};
+
+/**
+ * inDACState(port, addrFrom)
+ *
+ * @this {Video}
+ * @param {number} port (0x3C7)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+ * @return {number}
+ */
+Video.prototype.inDACState = function(port, addrFrom)
+{
+    var b = this.cardEGA.regDACState;
+    if (this.messageEnabled()) {
+        this.printMessageIO(Card.DAC.STATE.PORT, null, addrFrom, "DAC.STATE", b);
+    }
+    return b;
+};
+
+/**
+ * outDACRead(port, bOut, addrFrom)
+ *
+ * @this {Video}
+ * @param {number} port (0x3C7)
+ * @param {number} bOut
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+ */
+Video.prototype.outDACRead = function(port, bOut, addrFrom)
+{
+    if (this.messageEnabled()) {
+        this.printMessageIO(Card.DAC.ADDR.PORT_READ, bOut, addrFrom, "DAC.READ");
+    }
+    this.cardEGA.regDACAddr = bOut;
+    this.cardEGA.regDACState = Card.DAC.STATE.MODE_READ;
+    this.cardEGA.regDACShift = 0;
+};
+
+/**
+ * outDACWrite(port, bOut, addrFrom)
+ *
+ * @this {Video}
+ * @param {number} port (0x3C8)
+ * @param {number} bOut
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+ */
+Video.prototype.outDACWrite = function(port, bOut, addrFrom)
+{
+    if (this.messageEnabled()) {
+        this.printMessageIO(Card.DAC.ADDR.PORT_WRITE, bOut, addrFrom, "DAC.WRITE");
+    }
+    this.cardEGA.regDACAddr = bOut;
+    this.cardEGA.regDACState = Card.DAC.STATE.MODE_WRITE;
+    this.cardEGA.regDACShift = 0;
+};
+
+/**
+ * inDACData(port, addrFrom)
+ *
+ * @this {Video}
+ * @param {number} port (0x3C9)
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+ * @return {number}
+ */
+Video.prototype.inDACData = function(port, addrFrom)
+{
+    var b = (this.cardEGA.regDACData[this.cardEGA.regDACAddr] >> this.cardEGA.regDACShift) & 0x3f;
+    if (this.messageEnabled()) {
+        this.printMessageIO(Card.DAC.DATA.PORT, null, addrFrom, "DAC.DATA[" + str.toHexByte(this.cardEGA.regDACAddr) + "][" + str.toHexByte(this.cardEGA.regDACShift) + "]", b);
+    }
+    this.cardEGA.regDACShift += 6;
+    if (this.cardEGA.regDACShift > 12) {
+        this.cardEGA.regDACShift = 0;
+        this.cardEGA.regDACAddr = (this.cardEGA.regDACAddr + 1) & (Card.DAC.TOTAL_REGS-1);
+    }
+    return b;
+};
+
+/**
+ * outDACData(port, bOut, addrFrom)
+ *
+ * @this {Video}
+ * @param {number} port (0x3C9)
+ * @param {number} bOut
+ * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
+ */
+Video.prototype.outDACData = function(port, bOut, addrFrom)
+{
+    var dw = this.cardEGA.regDACData[this.cardEGA.regDACAddr];
+    if (this.messageEnabled()) {
+        this.printMessageIO(Card.DAC.DATA.PORT, bOut, addrFrom, "DAC.DATA[" + str.toHexByte(this.cardEGA.regDACAddr) + "][" + str.toHexByte(this.cardEGA.regDACShift) + "]");
+    }
+    this.cardEGA.regDACData[this.cardEGA.regDACAddr] = (dw & ~(0x3f << this.cardEGA.regDACShift)) | ((bOut & 0x3f) << this.cardEGA.regDACShift);
+    this.cardEGA.regDACShift += 6;
+    if (this.cardEGA.regDACShift > 12) {
+        this.cardEGA.regDACShift = 0;
+        this.cardEGA.regDACAddr = (this.cardEGA.regDACAddr + 1) & (Card.DAC.TOTAL_REGS-1);
+    }
+};
+
+/**
  * inVGAFeat(port, addrFrom)
  *
  * @this {Video}
@@ -5154,11 +5319,11 @@ Video.prototype.outGRCData = function(port, bOut, addrFrom)
  * @this {Video}
  * @param {number} port (0x3D4)
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
- * @return {number}
+ * @return {number|undefined}
  */
 Video.prototype.inCGAIndx = function(port, addrFrom)
 {
-    return this.inCRTCIndx(this.cardColor, addrFrom);
+    return this.inCRTCIndx(this.cardColor, port, addrFrom);
 };
 
 /**
@@ -5171,7 +5336,7 @@ Video.prototype.inCGAIndx = function(port, addrFrom)
  */
 Video.prototype.outCGAIndx = function(port, bOut, addrFrom)
 {
-    this.outCRTCIndx(this.cardColor, bOut, addrFrom);
+    this.outCRTCIndx(this.cardColor, port, bOut, addrFrom);
 };
 
 /**
@@ -5184,7 +5349,7 @@ Video.prototype.outCGAIndx = function(port, bOut, addrFrom)
  */
 Video.prototype.inCGAData = function(port, addrFrom)
 {
-    return this.inCRTCData(this.cardColor, addrFrom);
+    return this.inCRTCData(this.cardColor, port, addrFrom);
 };
 
 /**
@@ -5197,7 +5362,7 @@ Video.prototype.inCGAData = function(port, addrFrom)
  */
 Video.prototype.outCGAData = function(port, bOut, addrFrom)
 {
-    this.outCRTCData(this.cardColor, bOut, addrFrom);
+    this.outCRTCData(this.cardColor, port, bOut, addrFrom);
 };
 
 /**
@@ -5238,7 +5403,7 @@ Video.prototype.inCGAColor = function(port, addrFrom)
 {
     var b = this.cardColor.regColor;
     if (this.messageEnabled()) {
-        this.printMessageIO(this.cardColor.port + 5, null, addrFrom, this.cardColor.type + ".COLOR", b);
+        this.printMessageIO(port /* this.cardColor.port + 5 */, null, addrFrom, this.cardColor.type + ".COLOR", b);
     }
     return b;
 };
@@ -5254,7 +5419,7 @@ Video.prototype.inCGAColor = function(port, addrFrom)
 Video.prototype.outCGAColor = function(port, bOut, addrFrom)
 {
     if (this.messageEnabled()) {
-        this.printMessageIO(this.cardColor.port + 5, bOut, addrFrom, this.cardColor.type + ".COLOR");
+        this.printMessageIO(port /* this.cardColor.port + 5 */, bOut, addrFrom, this.cardColor.type + ".COLOR");
     }
     if (this.cardColor.regColor !== bOut) {
         this.cardColor.regColor = bOut;
@@ -5280,67 +5445,92 @@ Video.prototype.inCGAStatus = function(port, addrFrom)
 };
 
 /**
- * inCRTCIndx(card, addrFrom)
+ * inCRTCIndx(card, port, addrFrom)
  *
  * @this {Video}
  * @param {Object} card
+ * @param {number} port
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
- * @return {number}
+ * @return {number|undefined}
  */
-Video.prototype.inCRTCIndx = function(card, addrFrom)
+Video.prototype.inCRTCIndx = function(card, port, addrFrom)
 {
-    var b = card.regCRTIndx;
-    this.printMessageIO(card.port, null, addrFrom, "CRTC.INDX", b);
+    var b;
+    /*
+     * The IBM VGA ROM makes some hardware determinations based on how the CRTC controller responds when
+     * the IO_SELECT bit in the Miscellaneous Output Register is cleared; normally, that would mean ports
+     * 0x3B? are decoded and ports 0x3D? are ignored.  We didn't used to bother ignoring them, but the
+     * VGA ROM's logic requires it, so now we also check fActive.  However, we ignore only CTRC reads;
+     * we retain any writes in case that information proves useful later.
+     *
+     * Note that returning an undefined value now signals the Bus component to return whatever default value
+     * it prefers (normally 0xff).
+     */
+    if (card.fActive) b = card.regCRTIndx;
+    this.printMessageIO(port, null, addrFrom, "CRTC.INDX", b);
     return b;
 };
 
 /**
- * outCRTCIndx(card, bOut, addrFrom)
+ * outCRTCIndx(card, port, bOut, addrFrom)
  *
  * @this {Video}
  * @param {Object} card
+ * @param {number} port
  * @param {number} bOut
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  */
-Video.prototype.outCRTCIndx = function(card, bOut, addrFrom)
+Video.prototype.outCRTCIndx = function(card, port, bOut, addrFrom)
 {
     card.regCRTPrev = card.regCRTIndx;
     card.regCRTIndx = bOut & Card.CGA.CRTC.INDX.MASK;
-    this.printMessageIO(card.port, bOut, addrFrom, "CRTC.INDX");
+    this.printMessageIO(port /* card.port */, bOut, addrFrom, "CRTC.INDX");
 };
 
 /**
- * inCRTCData(card, addrFrom)
+ * inCRTCData(card, port, addrFrom)
  *
  * @this {Video}
  * @param {Object} card
+ * @param {number} port
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  * @return {number|undefined}
  */
-Video.prototype.inCRTCData = function(card, addrFrom)
+Video.prototype.inCRTCData = function(card, port, addrFrom)
 {
     var b;
-    if (card.regCRTIndx < card.nCRTCRegs) b = card.regCRTData[card.regCRTIndx];
+    /*
+     * The IBM VGA ROM makes some hardware determinations based on how the CRTC controller responds when
+     * the IO_SELECT bit in the Miscellaneous Output Register is cleared; normally, that would mean ports
+     * 0x3B? are decoded and ports 0x3D? are ignored.  We didn't used to bother ignoring them, but the
+     * VGA ROM's logic requires it, so now we also check fActive.  However, we ignore only CTRC reads;
+     * we retain any writes in case that information proves useful later.
+     *
+     * Note that returning an undefined value now signals the Bus component to return whatever default value
+     * it prefers (normally 0xff).
+     */
+    if (card.fActive && card.regCRTIndx < card.nCRTCRegs) b = card.regCRTData[card.regCRTIndx];
     if (this.messageEnabled()) {
-        this.printMessageIO(card.port + 1, null, addrFrom, "CRTC." + card.asCRTCRegs[card.regCRTIndx], b);
+        this.printMessageIO(port /* card.port + 1 */, null, addrFrom, "CRTC." + card.asCRTCRegs[card.regCRTIndx], b);
     }
     return b;
 };
 
 /**
- * outCRTCData(card, bOut, addrFrom)
+ * outCRTCData(card, port, bOut, addrFrom)
  *
  * @this {Video}
  * @param {Object} card
+ * @param {number} port
  * @param {number} bOut
  * @param {number} [addrFrom] (not defined whenever the Debugger tries to read the specified port)
  */
-Video.prototype.outCRTCData = function(card, bOut, addrFrom)
+Video.prototype.outCRTCData = function(card, port, bOut, addrFrom)
 {
     if (card.regCRTIndx < card.nCRTCRegs) {
         if (Video.TRAPALL || card.regCRTData[card.regCRTIndx] !== bOut) {
             if (this.messageEnabled()) {
-                this.printMessageIO(card.port + 1, bOut, addrFrom, "CRTC." + card.asCRTCRegs[card.regCRTIndx]);
+                this.printMessageIO(port /* card.port + 1 */, bOut, addrFrom, "CRTC." + card.asCRTCRegs[card.regCRTIndx]);
             }
             card.regCRTData[card.regCRTIndx] = bOut;
         }
@@ -5571,12 +5761,19 @@ Video.aEGAPortOutput = {
 
 Video.aVGAPortInput = {
     0x3C3: Video.prototype.inVGAEnable,
+    0x3C6: Video.prototype.inDACMask,
+    0x3C7: Video.prototype.inDACState,
+    0x3C9: Video.prototype.inDACData,
     0x3CA: Video.prototype.inVGAFeat,
     0x3CC: Video.prototype.inVGAMisc
 };
 
 Video.aVGAPortOutput = {
-    0x3C3: Video.prototype.outVGAEnable
+    0x3C3: Video.prototype.outVGAEnable,
+    0x3C6: Video.prototype.outDACMask,
+    0x3C7: Video.prototype.outDACRead,
+    0x3C8: Video.prototype.outDACWrite,
+    0x3C9: Video.prototype.outDACData
 };
 
 /**

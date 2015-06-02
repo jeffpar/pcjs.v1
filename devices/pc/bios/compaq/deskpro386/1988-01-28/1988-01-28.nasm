@@ -4805,6 +4805,11 @@ xa9e9:	cs	rep movsw		; 0000A9E9  F32EA5  '...'
 	mov	al,0x3b			; 0000A9F9  B03B  '.;'
 	out	0x84,al			; 0000A9FB  E684  '..'
 	call	xc259			; 0000A9FD  E85918  '.Y.'
+	;
+	;   Set bit 2 (reserved?) and bit 4 (memory size?) of ROM BIOS Video Mode Options byte @40:0087.
+	;   It would appear that Compaq had a different conception of this byte; however, in the case of an
+	;   adapter like the IBM VGA, it doesn't matter, since the IBM VGA ROM will rewrite this byte anyway.
+	;
 	or	byte [0x87],0x14	; 0000AA00  800E870014  '.....'
 	mov	al,0x8e			; 0000AA05  B08E  '..'
 	call	xb544			; 0000AA07  E83A0B  '.:.'
