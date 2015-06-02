@@ -39,7 +39,7 @@ The Video component installs I/O port handlers for all possible I/O ranges; when
 associated I/O operations are redirected to a dummy Card, so that the active Card isn't affected.  Here,
 however, that was insufficient.  If the VGA is the only installed video card, the VGA ROM expects *NO RESPONSE*
 on inactive CRTC ports.  So I've changed the CRTC I/O handlers to check the Card's fActive flag.  This seems
-like a safe and logical change, but we'll still have to check for backward-compatibility issues with older ROMs.
+like a safe and logical change, but I still have to check for backward-compatibility issues with older ROMs.
 
 The VGA ROM programs the card for the first time here:
 

@@ -3542,8 +3542,8 @@ X86CPU.prototype.popWord = function()
          * There's no such thing as an SS fault on the 8086/8088, and I'm assuming that, on newer
          * processors, when the stack segment limit is set to the maximum, it's OK for the stack to wrap.
          */
-        if (this.model <= X86.MODEL_8088 || this.segSS.limit == this.segSS.addrMask) {
-            this.setSP(this.regLSP - this.segSS.base);
+        if (this.model <= X86.MODEL_8088 || !this.segSS.fExpDown && this.segSS.limit == this.segSS.addrMask || this.segSS.fExpDown && !this.segSS.limit) {
+            this.setSP((this.regLSP - this.segSS.base) & this.segSS.addrMask);
         } else if (off < -1) {          // fudge factor
             X86.fnFault.call(this, X86.EXCEPTION.SS_FAULT, 0);
         }
@@ -3570,11 +3570,10 @@ X86CPU.prototype.pushWord = function(w)
     if (((this.regLSP - this.regLSPLimitLow)|0) < 0 && (this.regLSPLimitLow ^ this.regLSP) >= 0) {
         /*
          * There's no such thing as an SS fault on the 8086/8088, and I'm assuming that, on newer
-         * processors, when the stack segment is expand-down and the limit is set to the "maximum" of
-         * zero, it's OK for the stack to wrap.
+         * processors, when the stack segment limit is set to the maximum, it's OK for the stack to wrap.
          */
-        if (this.model <= X86.MODEL_8088 || this.segSS.fExpDown && !this.segSS.limit) {
-            this.setSP(this.regLSP - this.segSS.base);
+        if (this.model <= X86.MODEL_8088 || !this.segSS.fExpDown && this.segSS.limit == this.segSS.addrMask || this.segSS.fExpDown && !this.segSS.limit) {
+            this.setSP((this.regLSP - this.segSS.base) & this.segSS.addrMask);
         } else {
             X86.fnFault.call(this, X86.EXCEPTION.SS_FAULT, 0);
         }
