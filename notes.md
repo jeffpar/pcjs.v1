@@ -242,3 +242,47 @@ that affects the command-line version of PCjs (specifically, the Node REPL), so 
 Next, to update NPM:
 
 	[~/Sites/pcjs] sudo npm -g install npm@latest
+
+Connecting to a VMware Fusion Serial Port
+---
+
+Step 1: Add a custom serial port to a VM, by appending the following lines to its *.vmx* file; eg:
+
+	serial0.present = "TRUE"
+    serial0.fileType = "pipe"
+    serial0.yieldOnMsrRead = "TRUE"
+    serial0.startConnected = "TRUE"
+    serial0.fileName = "/tmp/serial0"
+
+If this is the VM's first serial port, then it should appear as COM1.  If the VM is running Windows 95,
+add the following to its *system.ini*:
+
+	[386Enh]
+    device=wdeb386.exe
+    device=debugcmd.vxd
+    LoadDebugOnlyObjs=Yes
+    debugcmd=y /n
+    debugcom=1
+    debugbaud=9600
+    debugsym=dos386.sym vmm.sym
+    debugsym=krnl386.sym gdif.sym userf.sym kernel32.sym gdi32.sym user32.sym
+
+Step 2: Run *netcat* (aka *nc* on OS X):
+
+	stty raw && nc -U /tmp/serial0
+
+Alternatively, you can run *socat* instead of *netcat*:
+
+	socat -d -d UNIX-CONNECT:/tmp/serial0 PTY
+
+which will report:
+
+	PTY is /dev/ttys002
+
+indicating the name of serial device to connect to:
+
+	screen /dev/ttys002
+
+The advantage of using *nc* is that no "middle man" is required: your terminal window will be connected directly
+to the virtual serial port.  And *nc* is included with OS X, whereas *socat* must installed separately (see
+[http://www.dest-unreach.org/socat/](http://www.dest-unreach.org/socat/)).
