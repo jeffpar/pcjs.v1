@@ -605,11 +605,11 @@ ChipSet.TIMER_TICKS_PER_SEC = 1193181;
  * I'm guessing that's just part of some "diagnostic mode", because all it writes to PPI_A.PORT are a series
  * of "checkpoint" values (ie, 0x01, 0x02, and 0x03) before updating PPI_CTRL.PORT with the usual 0x99.
  */
-ChipSet.PPI_A = {               // this.bPPIA
+ChipSet.PPI_A = {               // this.bPPIA (port 0x60)
     PORT:               0x60    // INPUT: keyboard scan code (PPI_B.CLEAR_KBD must be clear)
 };
 
-ChipSet.PPI_B = {               // this.bPPIB
+ChipSet.PPI_B = {               // this.bPPIB (port 0x61)
     PORT:               0x61,   // OUTPUT (although it has to be treated as INPUT, too: the keyboard interrupt handler reads it, OR's PPI_B.CLEAR_KBD, writes it, and then rewrites the original read value)
     CLK_TIMER2:         0x01,   // ALL: set to enable clock to TIMER2
     SPK_TIMER2:         0x02,   // ALL: set to connect output of TIMER2 to speaker (MODEL_5150: clear for cassette)
@@ -622,7 +622,7 @@ ChipSet.PPI_B = {               // this.bPPIB
     CLEAR_KBD:          0x80    // ALL: clear to enable keyboard scan codes (MODEL_5150: set to enable SW1 through PPI_A.PORT)
 };
 
-ChipSet.PPI_C = {               // this.bPPIC
+ChipSet.PPI_C = {               // this.bPPIC (port 0x62)
     PORT:               0x62,   // INPUT (see below)
     SW:                 0x0F,   // MODEL_5150: SW2[1-4] or SW2[5], depending on whether PPI_B.ENABLE_SW2 is set or clear; MODEL_5160: SW1[1-4] or SW1[5-8], depending on whether PPI_B.ENABLE_SW_HI is clear or set
     CASS_DATA_IN:       0x10,
@@ -631,7 +631,7 @@ ChipSet.PPI_C = {               // this.bPPIC
     RW_PARITY_CHK:      0x80    // used by NMI handler to detect R/W memory parity errors
 };
 
-ChipSet.PPI_CTRL = {            // this.bPPICtrl
+ChipSet.PPI_CTRL = {            // this.bPPICtrl (port 0x63)
     PORT:               0x63,   // OUTPUT: initialized to 0x99, defining PPI_A and PPI_C as INPUT and PPI_B as OUTPUT
     A_IN:               0x10,
     B_IN:               0x02,

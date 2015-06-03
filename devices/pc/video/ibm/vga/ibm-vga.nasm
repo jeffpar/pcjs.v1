@@ -24,30 +24,29 @@
 	mov	[0x10e],cs		; 00000083  8C0E0E01  '....'
 	sti				; 00000087  FB  '.'
 	mov	byte [0x489],0x11	; 00000088  C606890411  '.....'
-
-	;
-	;   Initialize the ROM BIOS Video Mode Options byte @40:0087 (default to color and 256Kb of RAM)
-	;
+;
+;   Initialize the ROM BIOS Video Mode Options byte @40:0087 (default to color and 256Kb of RAM)
+;
 	mov	byte [0x487],0x60	; 0000008D
-	;
-	;   The x100 subroutine alternately enables port 0x3B? and 0x3D? decoding, verifying that there is
-	;   no response on opposing ports 0x3D? and 0x3B?, respectively; otherwise, it assumes that another
-	;   video card must exist and attempts to select co-existing settings for the VGA.  For example, if
-	;   there is an unexpected response on the color ports, the VGA ROM will default to mono operation.
-	;
+;
+;   The x100 subroutine alternately enables port 0x3B? and 0x3D? decoding, verifying that there is
+;   no response on opposing ports 0x3D? and 0x3B?, respectively; otherwise, it assumes that another
+;   video card must exist and attempts to select co-existing settings for the VGA.  For example, if
+;   there is an unexpected response on the color ports, the VGA ROM will default to mono operation.
+;
 	call	x100			; 00000092
 ;
 ;   From the "IBM Personal System/2 Model 50 and 60 Technical Reference: I/O Controllers, Video Subsystem", p.4-29:
 ;
-;	When in setup mode (I/O address hex 0094, bit 5 equals 0), the VGA responds to a single option select byte
-;	at I/O address hex 0102 and treats the LSB (bit 0) of that byte as the VGA sleep bit.  When the LSB equals 0,
-;	the VGA does not respond to commands, addresses, or data, on the data bus.  When the LSB equals 1, the VGA
-;	responds.  If the VGA was set up and is generating video output when the LSB is set to 0, the output is still
-;	generated.
+;   When in setup mode (I/O address hex 0094, bit 5 equals 0), the VGA responds to a single option select byte
+;   at I/O address hex 0102 and treats the LSB (bit 0) of that byte as the VGA sleep bit.  When the LSB equals 0,
+;   the VGA does not respond to commands, addresses, or data, on the data bus.  When the LSB equals 1, the VGA
+;   responds.  If the VGA was set up and is generating video output when the LSB is set to 0, the output is still
+;   generated.
 ;
-;	The VGA responds only to address hex 0102 when in the setup mode.  No other addresses are valid at that time.
-;	Conversely, the VGA ignores address hex 0102 when in the enabled mode (I/O address hex 0094, bit 5 equals 1),
-;	and decodes normal I/O and memory addresses.
+;   The VGA responds only to address hex 0102 when in the setup mode.  No other addresses are valid at that time.
+;   Conversely, the VGA ignores address hex 0102 when in the enabled mode (I/O address hex 0094, bit 5 equals 1),
+;   and decodes normal I/O and memory addresses.
 ;
 	cli				; 00000095  FA  '.'
 	mov	dx,0x46e8		; 00000096  BAE846  '..F'
@@ -65,33 +64,28 @@
 	sti				; 000000B1  FB  '.'
 	push	cs			; 000000B2  0E  '.'
 	pop	es			; 000000B3  07  '.'
-
-	;
-	;   Default to mono settings
-	;
+;
+;   Default to mono settings
+;
 	mov	di,0x3b4		; 000000B4  BFB403  '...'
 	mov	bx,0x1602		; 000000B7  BB0216  '...'
-
-	;
-	;   Test bit 1 of ROM BIOS Video Mode Options byte @40:0087 (set if mono, clear if color)
-	;
+;
+;   Test bit 1 of ROM BIOS Video Mode Options byte @40:0087 (set if mono, clear if color)
+;
 	test	byte [0x487],0x2	; 000000BA  F606870402  '.....'
 	jnz	xc7			; 000000BF  7506  'u.'
-
-	;
-	;   Choose color settings
-	;
+;
+;   Choose color settings
+;
 	mov	di,0x3d4		; 000000C1  BFD403  '...'
 	mov	bx,0x1642		; 000000C4  BB4216  '.B.'
-
-	;
-	;   Set the CRTC base port address (0x3B4 for mono, 0x3D4 for color)
-	;
+;
+;   Set the CRTC base port address (0x3B4 for mono, 0x3D4 for color)
+;
 xc7:	mov	[0x463],di		; 000000C7  893E6304  '.>c.'
-
-	;
-	;   Program the card for a default mode
-	;
+;
+;   Program the card for a default mode
+;
 	call	x1127			; 000000CB  E85910  '.Y.'
 
 	xor	al,al			; 000000CE  32C0  '2.'
@@ -6906,10 +6900,9 @@ x3765:	dec	ax			; 00003765  48  'H'
 	dw	font_8x14_supp		; 00003787  8D4D  '.M'
 	dw	font_8x16		; 0000378A  BA4E  '.N'
 	dw	font_8x16_supp		; 0000378B  BA5E  '.^'
-
-	;
-	; 8x8 font (8 bytes per row, one row per character)
-	;
+;
+;   8x8 font (8 bytes per row, one row per character)
+;
 font_8x8:
 	db	0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00						; 0x0000378D ........
 	db	0x7E,0x81,0xA5,0x81,0xBD,0x99,0x81,0x7E						; 0x00003795 ~......~
@@ -7168,10 +7161,9 @@ font_8x8_hi:
 	db	0x70,0x18,0x30,0x60,0x78,0x00,0x00,0x00						; 0x00003F75 p.0`x...
 	db	0x00,0x00,0x3C,0x3C,0x3C,0x3C,0x00,0x00						; 0x00003F7D ........
 	db	0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00						; 0x00003F85 ........
-
-	;
-	; 8x14 font (14 bytes per row, one row per character)
-	;
+;
+;   8x14 font (14 bytes per row, one row per character)
+;
 font_8x14:
 	db	0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00		; 0x00003F8D ..............
 	db	0x00,0x00,0x7E,0x81,0xA5,0x81,0x81,0xBD,0x99,0x81,0x7E,0x00,0x00,0x00		; 0x00003F9B ..~.......~...
@@ -7429,10 +7421,9 @@ font_8x14:
 	db	0x00,0x70,0xD8,0x30,0x60,0xC8,0xF8,0x00,0x00,0x00,0x00,0x00,0x00,0x00		; 0x00004D63 .p.0`.........
 	db	0x00,0x00,0x00,0x00,0x7C,0x7C,0x7C,0x7C,0x7C,0x7C,0x00,0x00,0x00,0x00		; 0x00004D71 ....||||||....
 	db	0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00		; 0x00004D7F ..............
-
-	;
-	; 8x14 supplemental
-	;
+;
+;   8x14 supplemental
+;
 font_8x14_supp:
 	db	0x1D,0x00,0x00,0x00,0x00,0x24,0x66,0xFF,0x66,0x24,0x00,0x00,0x00,0x00,0x00	; 0x00004D8D .....$f.f$.....
 	db	0x22,0x00,0x63,0x63,0x63,0x22,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00	; 0x00004D9C ".ccc".........
@@ -7455,10 +7446,9 @@ font_8x14_supp:
 	db	0xF1,0x00,0x00,0x18,0x18,0x18,0xFF,0x18,0x18,0x18,0x00,0xFF,0x00,0x00,0x00	; 0x00004E9B ...............
 	db	0xF6,0x00,0x00,0x18,0x18,0x00,0x00,0xFF,0x00,0x00,0x18,0x18,0x00,0x00,0x00	; 0x00004EAA ...............
 	db	0x00	; end-of-supplemental terminator
-
-	;
-	; 8x16 font (16 bytes per row, one row per character)
-	;
+;
+;   8x16 font (16 bytes per row, one row per character)
+;
 font_8x16:
 	db	0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00	; 0x00004EBA ................
 	db	0x00,0x00,0x7E,0x81,0xA5,0x81,0x81,0xBD,0x99,0x81,0x81,0x7E,0x00,0x00,0x00,0x00	; 0x00004ECA ..~........~....
@@ -7716,10 +7706,9 @@ font_8x16:
 	db	0x00,0x70,0xD8,0x30,0x60,0xC8,0xF8,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00	; 0x00005E8A .p.0`...........
 	db	0x00,0x00,0x00,0x00,0x7C,0x7C,0x7C,0x7C,0x7C,0x7C,0x7C,0x00,0x00,0x00,0x00,0x00	; 0x00005E9A ....|||||||.....
 	db	0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00	; 0x00005EAA ................
-
-	;
-	; 8x16 supplemental
-	;
+;
+;   8x16 supplemental
+;
 font_8x16_supp:
 	db	0x1D,0x00,0x00,0x00,0x00,0x00,0x24,0x66,0xFF,0x66,0x24,0x00,0x00,0x00,0x00,0x00,0x00	; 0x00005EBA ......$f.f$......
 	db	0x30,0x00,0x00,0x3C,0x66,0xC3,0xC3,0xDB,0xDB,0xC3,0xC3,0x66,0x3C,0x00,0x00,0x00,0x00	; 0x00005ECB 0...f......f.....
