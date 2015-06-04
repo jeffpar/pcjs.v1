@@ -280,7 +280,7 @@ if (DEBUGGER) {
         FS:     64,  FST:    65,  FSTP:   66,  FSUB:   67,  FSUBR:  68,  GS:     69,  HLT:    70,  IDIV:   71,
         IMUL:   72,  IN:     73,  INC:    74,  INS:    75,  INT:    76,  INT3:   77,  INTO:   78,  IRET:   79,
         JBE:    80,  JC:     81,  JCXZ:   82,  JG:     83,  JGE:    84,  JL:     85,  JLE:    86,  JMP:    87,
-        JNBE:   88,  JNC:    89,  JNO:    90,  JNP:    91,  JNS:    92,  JNZ:    93,  JO:     94,  JP:     95,
+        JA:     88,  JNC:    89,  JNO:    90,  JNP:    91,  JNS:    92,  JNZ:    93,  JO:     94,  JP:     95,
         JS:     96,  JZ:     97,  LAHF:   98,  LAR:    99,  LDS:    100, LEA:    101, LEAVE:  102, LES:    103,
         LFS:    104, LGDT:   105, LGS:    106, LIDT:   107, LLDT:   108, LMSW:   109, LOADALL:110, LOCK:   111,
         LODSB:  112, LODSW:  113, LOOP:   114, LOOPNZ: 115, LOOPZ:  116, LSL:    117, LSS:    118, LTR:    119,
@@ -313,7 +313,7 @@ if (DEBUGGER) {
         "FS:",    "FST",    "FSTP",   "FSUB",   "FSUBR",  "GS:",    "HLT",    "IDIV",
         "IMUL",   "IN",     "INC",    "INS",    "INT",    "INT3",   "INTO",   "IRET",
         "JBE",    "JC",     "JCXZ",   "JG",     "JGE",    "JL",     "JLE",    "JMP",
-        "JNBE",   "JNC",    "JNO",    "JNP",    "JNS",    "JNZ",    "JO",     "JP",
+        "JA",     "JNC",    "JNO",    "JNP",    "JNS",    "JNZ",    "JO",     "JP",
         "JS",     "JZ",     "LAHF",   "LAR",    "LDS",    "LEA",    "LEAVE",  "LES",
         "LFS",    "LGDT",   "LGS",    "LIDT",   "LLDT",   "LMSW",   "LOADALL","LOCK",
         "LODSB",  "LODSW",  "LOOP",   "LOOPNZ", "LOOPZ",  "LSL",    "LSS",    "LTR",
@@ -747,7 +747,7 @@ if (DEBUGGER) {
     /* 0x74 */ [Debugger.INS.JZ,    Debugger.TYPE_IMMREL | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
     /* 0x75 */ [Debugger.INS.JNZ,   Debugger.TYPE_IMMREL | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
     /* 0x76 */ [Debugger.INS.JBE,   Debugger.TYPE_IMMREL | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
-    /* 0x77 */ [Debugger.INS.JNBE,  Debugger.TYPE_IMMREL | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
+    /* 0x77 */ [Debugger.INS.JA,    Debugger.TYPE_IMMREL | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
 
     /* 0x78 */ [Debugger.INS.JS,    Debugger.TYPE_IMMREL | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
     /* 0x79 */ [Debugger.INS.JNS,   Debugger.TYPE_IMMREL | Debugger.TYPE_BYTE  | Debugger.TYPE_IN],
@@ -919,7 +919,7 @@ if (DEBUGGER) {
         0x84: [Debugger.INS.JZ,     Debugger.TYPE_IMMREL | Debugger.TYPE_VWORD | Debugger.TYPE_IN   | Debugger.TYPE_80386],
         0x85: [Debugger.INS.JNZ,    Debugger.TYPE_IMMREL | Debugger.TYPE_VWORD | Debugger.TYPE_IN   | Debugger.TYPE_80386],
         0x86: [Debugger.INS.JBE,    Debugger.TYPE_IMMREL | Debugger.TYPE_VWORD | Debugger.TYPE_IN   | Debugger.TYPE_80386],
-        0x87: [Debugger.INS.JNBE,   Debugger.TYPE_IMMREL | Debugger.TYPE_VWORD | Debugger.TYPE_IN   | Debugger.TYPE_80386],
+        0x87: [Debugger.INS.JA,     Debugger.TYPE_IMMREL | Debugger.TYPE_VWORD | Debugger.TYPE_IN   | Debugger.TYPE_80386],
         0x88: [Debugger.INS.JS,     Debugger.TYPE_IMMREL | Debugger.TYPE_VWORD | Debugger.TYPE_IN   | Debugger.TYPE_80386],
         0x89: [Debugger.INS.JNS,    Debugger.TYPE_IMMREL | Debugger.TYPE_VWORD | Debugger.TYPE_IN   | Debugger.TYPE_80386],
         0x8A: [Debugger.INS.JP,     Debugger.TYPE_IMMREL | Debugger.TYPE_VWORD | Debugger.TYPE_IN   | Debugger.TYPE_80386],
@@ -2983,8 +2983,7 @@ if (DEBUGGER) {
     /**
      * listBreakpoints(aBreak)
      *
-     * TODO: We may need to start listing the linear addresses of breakpoints, because
-     * segmented address can be ambiguous.
+     * TODO: We may need to start listing linear addresses also, because segmented address can be ambiguous.
      *
      * @this {Debugger}
      * @param {Array} aBreak
@@ -5226,7 +5225,7 @@ if (DEBUGGER) {
         var selCode = this.cpu.segCS.sel;
         var dbgAddrCall = this.newAddr();
         var dbgAddrStack = this.newAddr(this.cpu.getSP(), this.cpu.getSS());
-        this.println("stack trace for " + this.hexAddr(dbgAddrStack) + ':');
+        this.println("stack trace for " + this.hexAddr(dbgAddrStack));
         while (cFrames < nFrames) {
             var sCall = null, cTests = 256;
             while ((dbgAddrStack.off >>> 0) < (this.cpu.regLSPLimit >>> 0)) {
@@ -5254,7 +5253,7 @@ if (DEBUGGER) {
                 }
             }
             if (!sCall) break;
-            sCall = str.pad(sCall, 56) + ";SS:SP=" + this.hexAddr(dbgAddrStack);
+            sCall = str.pad(sCall, 50) + ";stack=" + this.hexAddr(dbgAddrStack) + " return=" + this.hexAddr(dbgAddrCall);
             this.println(sCall);
             cFrames++;
         }

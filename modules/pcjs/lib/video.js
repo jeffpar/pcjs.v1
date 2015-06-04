@@ -592,21 +592,22 @@ Video.monitorSpecs[ChipSet.MONITOR.EGACOLOR] = {
 };
 
 /**
- * @type {{MonitorSpecs}}
+ * NOTE: As above, the following values are based purely on trial-and-error, to yield results that fall
+ * squarely within the bounds of the IBM VGA ROM timing requirements; see the IBM VGA ROM code at C000:024A.
  *
- * TODO: This needs to be filled in with accurate values.
+ * @type {{MonitorSpecs}}
  */
 Video.monitorSpecs[ChipSet.MONITOR.VGACOLOR] = {
-    nHorzPeriodsPerSec: 21850,
-    nHorzPeriodsPerFrame: 364,
+    nHorzPeriodsPerSec: 16700,
+    nHorzPeriodsPerFrame: 480,
     percentHorzActive: 85,
-    percentVertActive: 96
+    percentVertActive: 83
 };
 
 /*
  * EGA Miscellaneous ports and SW1-Sw4
  *
- * The Card.MISC.CLK_SELECT bits determine which of the EGA board's 4 configuration switches are
+ * The Card.MISC.CLOCK_SELECT bits determine which of the EGA board's 4 configuration switches are
  * returned via Card.STATUS0.SWSENSE (when SWSENSE is zero, the switch is closed):
  *
  *      0xC: return SW1
@@ -965,7 +966,7 @@ function Card(video, iCard, data, cbMemory)
 }
 
 /*
- * MDA Registers
+ * MDA Registers (ports 0x3B4, 0x3B5, 0x3B8, and 0x3BA)
  */
 Card.MDA = {
     CRTC: {
@@ -988,6 +989,9 @@ Card.MDA = {
         HDRIVE:             0x01,
         BWVIDEO:            0x08
     },
+    /*
+     * TODO: Add support for parallel port(s) someday....
+     */
     PRT_DATA: {
         PORT:               0x3BC
     },
@@ -1000,7 +1004,7 @@ Card.MDA = {
 };
 
 /*
- * CGA Registers
+ * CGA Registers (ports 0x3D4, 0x3D5, 0x3D8, 0x3D9, and 0x3DA)
  */
 Card.CGA = {
     CRTC: {
@@ -1030,11 +1034,14 @@ Card.CGA = {
     },
     STATUS: {
         PORT:               0x3DA,      // read-only; same for EGA (although the EGA calls this STATUS1, to distinguish it from STATUS0)
-        DISP_ENABLE:        0x01,
+        DISP_RETRACE:       0x01,
         PEN_TRIGGER:        0x02,
         PEN_ON:             0x04,
         VERT_RETRACE:       0x08        // when set, this indicates the CGA is performing a vertical retrace
     },
+    /*
+     * TODO: Add support for light pen port(s) someday....
+     */
     CLEAR_PEN: {
         PORT:               0x3DB
     },
@@ -1044,7 +1051,7 @@ Card.CGA = {
 };
 
 /*
- * Common CRT hardware registers, accessed via Card.xxA.CRTC.INDX.PORT and Card.xxA.CRTC.DATA.PORT
+ * Common CRT hardware registers (ports 0x3B4/0x3B5 or 0x3D4/0x3D5)
  *
  * NOTE: In this implementation, because we have to make at least two of the registers readable (CURSOR_ADDR_HI and CURSOR_ADDR_LO),
  * we end up making ALL the registers readable, otherwise we would have to explicitly block any register marked write-only.  I don't
@@ -1098,10 +1105,19 @@ Card.CRTC = {
         HORZ_RETRACE_END:   0x05,
         VERT_TOTAL:         0x06,
         OVERFLOW: {
-            INDX:           0x07,
-            VERT_TOTAL:     0x01
+            INDX:                   0x07,
+            VERT_TOTAL_BIT8:        0x01,   // bit 8 of register 0x06
+            VERT_DISP_END_BIT8:     0x02,   // bit 8 of register 0x12
+            VERT_RETRACE_START_BIT8:0x04,   // bit 8 of register 0x10
+            VERT_BLANK_START_BIT8:  0x08,   // bit 8 of register 0x15
+            LINE_COMPARE_BIT8:      0x10,   // bit 8 of register 0x18
+            CURSOR_START_BIT8:      0x20,   // bit 8 of register 0x0A (EGA only)
+            VERT_TOTAL_BIT9:        0x20,   // bit 9 of register 0x06 (VGA only)
+            VERT_DISP_END_BIT9:     0x40,   // bit 9 of register 0x12 (VGA only, unused on EGA)
+            VERT_RETRACE_START_BIT9:0x80    // bit 9 of register 0x10 (VGA only, unused on EGA)
         },
         PRESET_ROW_SCAN:    0x08,
+        /* EGA/VGA CRTC registers 0x09-0x0F are the same as the MDA/CGA CRTC registers defined above */
         VERT_RETRACE_START: 0x10,
         VERT_RETRACE_END:   0x11,
         VERT_DISP_END:      0x12,
@@ -1133,18 +1149,18 @@ if (DEBUGGER) {
                            "START_ADDR_HI","START_ADDR_LO","CURSOR_ADDR_HI","CURSOR_ADDR_LO","LIGHT_PEN_HI","LIGHT_PEN_LO"];
 
     Card.CRTC.EGA_REGS  = ["HORZ_TOTAL","HORZ_DISP_END","HORZ_BLANK_START","HORZ_BLANK_END","HORZ_RETRACE_START","HORZ_RETRACE_END",
-                           "VERT_TOTAL","CRTC_OVERFLOW","PRESET_ROW_SCAN","MAX_SCAN_LINE","CURSOR_START","CURSOR_END",
+                           "VERT_TOTAL","OVERFLOW","PRESET_ROW_SCAN","MAX_SCAN_LINE","CURSOR_START","CURSOR_END",
                            "START_ADDR_HI","START_ADDR_LO","CURSOR_ADDR_HI","CURSOR_ADDR_LO","VERT_RETRACE_START","VERT_RETRACE_END",
                            "VERT_DISP_END","OFFSET","UNDERLINE","VERT_BLANK_START","VERT_BLANK_END","MODE_CTRL","LINE_COMPARE"];
 }
 
 /*
- * EGA/VGA Input Status 1 Register
+ * EGA/VGA Input Status 1 Register (port 0x3DA)
  *
  * STATUS1 bit 0 has confusing documentation: the EGA Tech Ref says "Logical 0 indicates the CRT raster is in a
  * horizontal or vertical retrace interval", whereas the VGA Tech Ref says "Logical 1 indicates a horizontal or
- * vertical retrace interval."  The name of the status bit suggests that the EGA is right and the VGA is wrong,
- * but this needs to be confirmed.
+ * vertical retrace interval," but then clarifies: "This bit is the real-time status of the INVERTED display enable
+ * signal".  So, instead of calling bit 0 DISP_ENABLE (or more precisely, DISP_ENABLE_INVERTED), it's simply DISP_RETRACE.
  *
  * STATUS1 diagnostic bits 5 and 4 are set according to the Card.ATC.PLANES.MUX bits:
  *
@@ -1157,14 +1173,14 @@ if (DEBUGGER) {
  */
 Card.STATUS1 = {
     PORT:                   0x3DA,
-    DISP_ENABLED:           0x01,       // bit 0: logical OR of horizontal and vertical retrace states
+    DISP_RETRACE:           0x01,       // bit 0: logical OR of horizontal and vertical retrace
     VERT_RETRACE:           0x08,       // bit 3: set during vertical retrace interval
     DIAGNOSTIC:             0x30,       // bits 5,4 are controlled by the Card.ATC.PLANES.MUX bits
     RESERVED:               0xC6
 };
 
 /*
- * EGA/VGA Attribute Controller Registers (regATCIndx and regATCData)
+ * EGA/VGA Attribute Controller Registers (port 0x3C0: regATCIndx and regATCData)
  *
  * The current ATC INDX value is stored in cardEGA.regATCIndx (including the Card.ATC.INDX_ENABLE bit), and the
  * ATC DATA values are stored in cardEGA.regATCData.  The state of the ATC INDX/DATA flip-flop is stored in fATCData.
@@ -1204,7 +1220,7 @@ Card.ATC = {
         PELWIDTH:           0x40,       // bit 6: set for 256-color modes, clear for all other modes
         COLORSEL:           0x80        // bit 7: set for P5,P4 mapped to bits 1,0 of the Color Select register
     },
-    OVRSCAN: {
+    OVERSCAN: {
         INDX:               0x11        // Overscan Color Register
     },
     PLANES: {
@@ -1230,11 +1246,11 @@ Card.ATC = {
 if (DEBUGGER) {
     Card.ATC.REGS = ["PAL00","PAL01","PAL02","PAL03","PAL04","PAL05","PAL06","PAL07",
                      "PAL08","PAL09","PAL0A","PAL0B","PAL0C","PAL0D","PAL0E","PAL0F",
-                     "MODE","OVRSCAN","PLANES","HORZPAN"];
+                     "MODE","OVERSCAN","PLANES","HORZPAN"];
 }
 
 /*
- * EGA/VGA Feature Control Register (regFeat)
+ * EGA/VGA Feature Control Register (port 0x3BA or 0x3DA: regFeat)
  *
  * The EGA BIOS writes 0x1 to Card.FEAT_CTRL.BITS and reads Card.STATUS0.FEAT, then writes 0x2 to
  * Card.FEAT_CTRL.BITS and reads Card.STATUS0.FEAT.  The bits from the first and second reads are shifted
@@ -1248,14 +1264,14 @@ Card.FEAT_CTRL = {
 };
 
 /*
- * EGA/VGA Miscellaneous Output Register (regMisc)
+ * EGA/VGA Miscellaneous Output Register (port 0x3C2: regMisc)
  */
 Card.MISC = {
     PORT_WRITE:             0x3C2,      // write port address (EGA and VGA)
     PORT_READ:              0x3CC,      // read port addresss (VGA only)
     IO_SELECT:              0x01,       // 0 sets CRT ports to 0x3Bn, 1 sets CRT ports to 0x3Dn
     ENABLE_RAM:             0x02,       // 0 disables video RAM, 1 enables
-    CLK_SELECT:             0x0C,       // 0x0: 14Mhz I/O clock, 0x4: 16Mhz on-board clock, 0x8: external clock, 0xC: unused
+    CLOCK_SELECT:           0x0C,       // 0x0: 14Mhz I/O clock, 0x4: 16Mhz on-board clock, 0x8: external clock, 0xC: unused
     DISABLE_DRV:            0x10,       // 0 activates internal video drivers, 1 activates feature connector direct drive outputs
     PAGE_ODD_EVEN:          0x20,       // 0 selects the low 64Kb page of video RAM for text modes, 1 selects the high page
     HORZ_POLARITY:          0x40,       // 0 selects positive horizontal retrace
@@ -1263,7 +1279,7 @@ Card.MISC = {
 };
 
 /*
- * EGA/VGA Input Status 0 Register (regStatus0)
+ * EGA/VGA Input Status 0 Register (port 0x3C2: regStatus0)
  */
 Card.STATUS0 = {
     PORT:                   0x3C2,      // read-only (aka STATUS0, to distinguish it from PORT_CGA_STATUS)
@@ -1275,7 +1291,7 @@ Card.STATUS0 = {
 };
 
 /*
- * VGA Subsystem Enable Register (regVGAEnable)
+ * VGA Subsystem Enable Register (port 0x3C3: regVGAEnable)
  */
 Card.VGA_ENABLE = {
     PORT:                   0x3C3,
@@ -1284,7 +1300,7 @@ Card.VGA_ENABLE = {
 };
 
 /*
- * EGA/VGA Sequencer Registers (regSEQIndx and regSEQData)
+ * EGA/VGA Sequencer Registers (ports 0x3C4/0x3C5: regSEQIndx and regSEQData)
  */
 Card.SEQ = {
     INDX: {
@@ -1299,7 +1315,7 @@ Card.SEQ = {
         ASYNC:              0x01,
         SYNC:               0x02
     },
-    CLK: {
+    CLOCKING: {
         INDX:               0x01,       // Sequencer Clocking Mode Register
         DOTS8:              0x01,       // 1: 8 dots; 0: 9 dots
         BANDWIDTH:          0x02,       // 0: CRTC has access 4 out of every 5 cycles (for high-res modes); 1: CRTC has access 2 out of 5 (VGA: reserved)
@@ -1335,7 +1351,7 @@ Card.SEQ = {
     TOTAL_REGS:             0x05
 };
 
-if (DEBUGGER) Card.SEQ.REGS = ["RESET","CLK","MAPMASK","CHARMAP","MODE"];
+if (DEBUGGER) Card.SEQ.REGS = ["RESET","CLOCKING","MAPMASK","CHARMAP","MODE"];
 
 /*
  * VGA Digital-to-Analog Converter (DAC) Registers (regDACMask, regDACState, regDACAddr, and regDACData)
@@ -1348,7 +1364,7 @@ if (DEBUGGER) Card.SEQ.REGS = ["RESET","CLK","MAPMASK","CHARMAP","MODE"];
  *
  * DAC.STATE.PORT and DAC.ADDR.PORT_WRITE can be read at any time and will not interfere with a read or write operation
  * in progress.  To prevent "snow", reading or writing DAC values should be limited to retrace intervals (see regStatus1),
- * or by using the SCREEN_OFF bit in the SEQ.CLK register.
+ * or by using the SCREEN_OFF bit in the SEQ.CLOCKING register.
  */
 Card.DAC = {
     MASK: {
@@ -1371,7 +1387,14 @@ Card.DAC = {
 };
 
 /*
- * EGA/VGA Graphics Controller Registers (regGRCIndx and regGRCData)
+ * EGA/VGA Graphics Controller Registers (ports 0x3CE/0x3CF: regGRCIndx and regGRCData)
+ *
+ * The VGA added Write Mode 3, which is described as follows:
+ *
+ *      "Each map is written with 8 bits of the value contained in the Set/Reset register for that map
+ *      (the Enable Set/Reset register has no effect). Rotated system microprocessor data is ANDed with the
+ *      Bit Mask register data to form an 8-bit value that performs the same function as the Bit Mask register
+ *      does in write modes 0 and 2."
  */
 Card.GRC = {
     POS1_PORT:              0x3CC,      // EGA only, write-only
@@ -1389,7 +1412,7 @@ Card.GRC = {
     ESRESET: {
         INDX:               0x01        // ENABLE SET/RESET
     },
-    COLRCMP: {
+    COLORCMP: {
         INDX:               0x02        // COLOR COMPARE
     },
     DATAROT: {
@@ -1416,7 +1439,8 @@ Card.GRC = {
         READ_MODE0:         0x00,       // read mode 0x0: read map mode
         READ_MODE1:         0x08,       // read mode 0x1: color compare mode
         EVENODD:            0x10,
-        SHIFT:              0x20
+        SHIFT:              0x20,
+        COLOR256:           0x40        // VGA only
     },
     MISC: {
         INDX:               0x06,       // MISCELLANEOUS
@@ -1428,7 +1452,7 @@ Card.GRC = {
         MAPB032:            0x08,       //
         MAPB832:            0x0C        //
     },
-    COLRDC: {
+    COLORDC: {
         INDX:               0x07        // COLOR DON'T CARE
     },
     BITMASK: {
@@ -1437,7 +1461,7 @@ Card.GRC = {
     TOTAL_REGS:             0x09
 };
 
-if (DEBUGGER) Card.GRC.REGS = ["SRESET","ESRESET","COLRCMP","DATAROT","READMAP","MODE","MISC","COLRDC","BITMASK"];
+if (DEBUGGER) Card.GRC.REGS = ["SRESET","ESRESET","COLORCMP","DATAROT","READMAP","MODE","MISC","COLORDC","BITMASK"];
 
 /*
  * EGA Memory Access Functions
@@ -1495,6 +1519,7 @@ if (DEBUGGER) Card.GRC.REGS = ["SRESET","ESRESET","COLRCMP","DATAROT","READMAP",
  *
  * These functions, however, don't yet deal with all those subtleties: A0 is currently used only as a "plane select"
  * bit and set to zero for addressing purposes, meaning that only the EVEN bytes in EGA memory will ever be used.
+ * TODO: Implement the subtleties.
  */
 
 /*
@@ -1557,6 +1582,18 @@ Card.ACCESS.readByteMode0EvenOdd = function readByteMode0EvenOdd(off, addr)
 /**
  * readByteMode1(off, addr)
  *
+ * This mode requires us to step through each of the 8 sets of 4 bits in the specified DWORD of video memory,
+ * returning a 1 wherever all 4 match the Color Compare (COLORCMP) Register and a 0 otherwise.  An added wrinkle
+ * is that the Color Don't Care (COLORDC) Register can specify that any/all/none of the 4 bits must be ignored.
+ *
+ * We perform the comparison from most to least significant bit, because that matches how the nColorCompare and
+ * nColorDontCare masks are initialized; we could have gone either way, but this is more consistent with the rest
+ * of the component (eg, pixels are drawn across the screen from left to right, starting with the most significant
+ * bit of each byte).
+ *
+ * Also note that, while not well-documented, this mode also affects the internal latches, so we make sure those
+ * are updated as well.
+ *
  * @this {Memory}
  * @param {number} off
  * @param {number} [addr]
@@ -1565,13 +1602,17 @@ Card.ACCESS.readByteMode0EvenOdd = function readByteMode0EvenOdd(off, addr)
 Card.ACCESS.readByteMode1 = function readByteMode1(off, addr)
 {
     off += this.offset;
-    var dw = this.adw[off];
-    var nColorCompare = this.controller.nColorCompare & this.controller.nColorDontCare;
+    var dw = this.controller.latches = this.adw[off];
+    /*
+     * Minor optimization: we could pre-mask nColorCompare with nColorDontCare, whenever either register is updated,
+     * but that's a drop in the bucket compared to all the other work this function must do.
+     */
+    var mask = this.controller.nColorDontCare;
+    var color = this.controller.nColorCompare & mask;
     var b = 0, bit = 0x80;
     while (bit) {
-        if ((dw & nColorCompare) == nColorCompare) b |= bit;
-        nColorCompare >>>= 1;
-        bit >>= 1;
+        if ((dw & mask) == color) b |= bit;
+        color >>>= 1;  mask >>>= 1;  bit >>= 1;
     }
     return b;
 };
@@ -4021,8 +4062,12 @@ Video.prototype.checkMode = function(fForce)
                     break;
                 }
 
-                var fSEQDotClock = (card.regSEQData[Card.SEQ.CLK.INDX] & Card.SEQ.CLK.DOTCLOCK);
-                var nCRTCVertTotal = card.regCRTData[Card.CRTC.EGA.VERT_TOTAL] | ((card.regCRTData[Card.CRTC.EGA.OVERFLOW.INDX] & Card.CRTC.EGA.OVERFLOW.VERT_TOTAL) << 8);
+                var fSEQDotClock = (card.regSEQData[Card.SEQ.CLOCKING.INDX] & Card.SEQ.CLOCKING.DOTCLOCK);
+                var nCRTCVertTotal = card.regCRTData[Card.CRTC.EGA.VERT_TOTAL];
+                nCRTCVertTotal |= ((card.regCRTData[Card.CRTC.EGA.OVERFLOW.INDX] & Card.CRTC.EGA.OVERFLOW.VERT_TOTAL_BIT8)? 0x100 : 0);
+                if (card.nCard == Video.CARD.VGA) {
+                    nCRTCVertTotal |= ((card.regCRTData[Card.CRTC.EGA.OVERFLOW.INDX] & Card.CRTC.EGA.OVERFLOW.VERT_TOTAL_BIT9)? 0x200 : 0);
+                }
 
                 if (nMode != Video.MODE.UNKNOWN) {
                     if (!(regGRCMisc & Card.GRC.MISC.GRAPHICS)) {
@@ -4040,11 +4085,12 @@ Video.prototype.checkMode = function(fForce)
                             // we've already defaulted to 0x0F or 0x10, so determine if it's 0x0D or 0x0E (ie, a 200-row mode)
                             // and then which one (ie, 320 wide or 640 wide).
                             //
-                            if (nCRTCVertTotal > 480) {
-                                nMode = Video.MODE.VGA_640X480;
-                            }
-                            else if (nCRTCVertTotal < 350) {
-                                nMode = (fSEQDotClock? Video.MODE.EGA_320X200 : Video.MODE.EGA_640X200);
+                            if (nCRTCVertTotal < 400) {
+                                if (nCRTCVertTotal < 350) {
+                                    nMode = (fSEQDotClock? Video.MODE.EGA_320X200 : Video.MODE.EGA_640X200);
+                                }
+                            } else {
+                                nMode = (this.nMonitorType == ChipSet.MONITOR.MONO? Video.MODE.VGA_640X480_MONO : Video.MODE.VGA_640X480);
                             }
                             if (DEBUG && this.messageEnabled()) {
                                 this.printMessage("checkMode(): nCRTCVertTotal=" + nCRTCVertTotal + ", mode=" + str.toHexByte(nMode));
@@ -4895,8 +4941,52 @@ Video.prototype.outATC = function(port, bOut, addrFrom)
  */
 Video.prototype.inStatus0 = function(port, addrFrom)
 {
-    var iBit = 3 - ((this.cardEGA.regMisc & Card.MISC.CLK_SELECT) >> 2);    // this is the desired SW # (0-3)
-    var bSWBit = (this.bEGASwitches & (1 << iBit)) << (Card.STATUS0.SWSENSE_SHIFT - iBit);
+    var bSWBit = 0;
+    if (this.nCard == Video.CARD.EGA) {
+        var iBit = 3 - ((this.cardEGA.regMisc & Card.MISC.CLOCK_SELECT) >> 2);    // this is the desired SW # (0-3)
+        bSWBit = (this.bEGASwitches & (1 << iBit)) << (Card.STATUS0.SWSENSE_SHIFT - iBit);
+    } else {
+        /*
+         * The IBM VGA ROM expects the SWSENSE bit to change according to how the DAC is programmed.
+         *
+         * At C000:0391, the ROM selects the following array at 0x0454:
+         *
+         *      db  0x12,0x12,0x12,0x10
+         *
+         * and writes the first 3 bytes to DAC register #0, and then compares SWSENSE to the 4th byte (0x10).
+         *
+         * If the 4th byte matches (and I think it should), then the ROM clears the BIOS "monochrome monitor" bit,
+         * and does the same thing with 5 more arrays:
+         *
+         *      db	0x14,0x14,0x14,0x10
+         *      db	0x2D,0x14,0x14,0x00
+         *      db	0x14,0x2D,0x14,0x00
+         *      db	0x14,0x14,0x2D,0x00
+         *      db	0x2D,0x2D,0x2D,0x00
+         *
+         * I've not found any documentation that explains how the SWSENSE bit should reflect changes to the DAC
+         * in relation to the type of monitor, but it's clear from the ROM BIOS that all 5 of the 4th bytes must
+         * match SWSENSE after each DAC change, or we get error beeps.
+         *
+         * So I will force that result by clearing SWSENSE if any of the three 6-bit DAC values contain 0x2D, and
+         * setting it otherwise.  This hard-coded behavior assumes a color monitor.  If you really want to simulate
+         * a monochrome monitor, then first array will have to miscompare, and the 4th byte of the following arrays
+         * must match instead:
+         *
+         *      db	0x04,0x12,0x04,0x10
+         *      db	0x1E,0x12,0x04,0x00
+         *      db	0x04,0x2D,0x04,0x00
+         *      db	0x04,0x16,0x15,0x00
+         *      db	0x00,0x00,0x00,0x10
+         *
+         * In other words, for the monochrome monitor case, set SWSENSE only when DAC register #0 matches the
+         * first and last rows.
+         */
+        var dwDAC = this.cardEGA.regDACData[0];
+        if ((dwDAC & 0x3f) != 0x2d && (dwDAC & (0x3f << 6)) != (0x2d << 6) && (dwDAC & (0x3f << 12)) != (0x2d << 12)) {
+            bSWBit |= Card.STATUS0.SWSENSE;
+        }
+    }
     var b = ((this.cardEGA.regStatus0 & ~Card.STATUS0.SWSENSE) | bSWBit);
     /*
      * TODO: Figure out where Card.STATUS0.FEAT bits should come from....
@@ -5289,7 +5379,7 @@ Video.prototype.outGRCData = function(port, bOut, addrFrom)
         this.cardEGA.nSetMapMask = ~Video.aEGAByteToDW[bOut & 0xf];
         this.cardEGA.nSetMapBits = this.cardEGA.nSetMapData & ~this.cardEGA.nSetMapMask;
         break;
-    case Card.GRC.COLRCMP.INDX:
+    case Card.GRC.COLORCMP.INDX:
         this.cardEGA.nColorCompare = Video.aEGAByteToDW[bOut & 0xf] & (0x80808080|0);
         break;
     case Card.GRC.DATAROT.INDX:
@@ -5302,8 +5392,8 @@ Video.prototype.outGRCData = function(port, bOut, addrFrom)
     case Card.GRC.MISC.INDX:
         this.checkMode(false);
         break;
-    case Card.GRC.COLRDC.INDX:
-        this.cardEGA.nColorDontCare = Video.aEGAByteToDW[(bOut & 0xf) ^ 0xf] & (0x80808080|0);
+    case Card.GRC.COLORDC.INDX:
+        this.cardEGA.nColorDontCare = Video.aEGAByteToDW[bOut & 0xf] & (0x80808080|0);
         break;
     case Card.GRC.BITMASK.INDX:
         this.cardEGA.nBitMapMask = bOut | (bOut << 8) | (bOut << 16) | (bOut << 24);
@@ -5602,7 +5692,7 @@ Video.prototype.inCardStatus = function(card, addrFrom)
     var b = 0;
 
     /*
-     * NOTE: The CGA bits CGA.STATUS.DISP_ENABLE (0x01) and CGA.STATUS.VERT_RETRACE (0x08) match the EGA definitions,
+     * NOTE: The CGA bits CGA.STATUS.DISP_RETRACE (0x01) and CGA.STATUS.VERT_RETRACE (0x08) match the EGA definitions,
      * and they also correspond to the MDA bits MDA.STATUS.HDRIVE (0x01) and MDA.STATUS.BWVIDEO (0x08); I'm not sure why
      * the MDA uses different designations, but the bits appear to serve the same purpose.
      *
@@ -5613,7 +5703,7 @@ Video.prototype.inCardStatus = function(card, addrFrom)
     var nElapsedCycles = nCycles - card.nInitCycles;
     if (nElapsedCycles < 0) nElapsedCycles = 0;         // TODO: Determine if this ever happens
     var nCyclesHorzRemain = nElapsedCycles % card.nCyclesHorzPeriod;
-    if (nCyclesHorzRemain > card.nCyclesHorzActive) b |= Card.CGA.STATUS.DISP_ENABLE;
+    if (nCyclesHorzRemain > card.nCyclesHorzActive) b |= Card.CGA.STATUS.DISP_RETRACE;
     var nCyclesVertRemain = nElapsedCycles % card.nCyclesVertPeriod;
     if (nCyclesVertRemain > card.nCyclesVertActive) b |= Card.CGA.STATUS.VERT_RETRACE;
     /*
@@ -5660,10 +5750,10 @@ Video.prototype.inCardStatus = function(card, addrFrom)
          * On the MDA/CGA, to satisfy ROM BIOS testing ("TEST.10"), it's sufficient to do a simple toggle of
          * bits 0 and 3 on every read.
          *
-         * Also, according to http://www.seasip.info/VintagePC/mda.html, on an MDA, bits 7-4 are always ON and bits 2-1
-         * are always OFF, hence the "OR" of 0xf0.
+         * Also, according to http://www.seasip.info/VintagePC/mda.html, on an MDA, bits 7-4 are always ON and
+         * bits 2-1 are always OFF, hence the "OR" of 0xf0.
          */
-        b = (card.regStatus ^= (Card.CGA.STATUS.DISP_ENABLE | Card.CGA.STATUS.VERT_RETRACE)) | 0xf0;
+        b = (card.regStatus ^= (Card.CGA.STATUS.DISP_RETRACE | Card.CGA.STATUS.VERT_RETRACE)) | 0xf0;
     }
     card.regStatus = b;
     this.printMessageIO(card.port + 6, null, addrFrom, (card === this.cardEGA? "STATUS1" : "STATUS"), b);
