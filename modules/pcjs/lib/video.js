@@ -3164,11 +3164,11 @@ Video.prototype.onLoadSetFonts = function(sFontFile, sFontData, nErrorCode)
              * font, unless overridden by a jumper setting on the CGA card, so it is our default CGA font as well (although
              * someday we may provide a virtual jumper setting that allows you to select the thinner font).
              *
-             * The first offset we pass to setFontData() is the offset of the MDA font.  For the second (CGA) font offset,
-             * we choose the thicker "double dot" CGA font at 0x1800 (which was the PC's default font as well), instead
-             * of the thinner "single dot" font at 0x1000.
+             * The first offset we must pass to setFontData() is the offset of the CGA font; we choose the thicker "double dot"
+             * CGA font at 0x1800 (which was the PC's default font as well), instead of the thinner "single dot" font at 0x1000.
+             * The second offset is for the MDA font.
              */
-            this.setFontData(abFontData, [0x0000, 0x1800]);
+            this.setFontData(abFontData, [0x1800, 0x0000]);
         }
         else {
             this.notice("Unrecognized font data length (" + abFontData.length + ")");
@@ -3225,7 +3225,7 @@ Video.prototype.onROMLoad = function(abROM, aParms)
          * font generation to support it (as opposed to "init-time" generation, which is all we do now).
          * There's probably a similar need for user-defined fonts; for now, they're simply not supported.
          */
-        this.setFontData(abROM, aParms || [0x2230, 0x3160], 8);
+        this.setFontData(abROM, aParms || [0x3160, 0x2230], 8);
     }
     else if (this.nCard == Video.CARD.VGA) {
         if (DEBUG) this.printMessage("onROMLoad(): VGA fonts loaded");
@@ -3235,7 +3235,7 @@ Video.prototype.onROMLoad = function(abROM, aParms)
          * and an 8x8 font at 0x378D; however, it also contains an 8x16 font at 0x4EBA (and corresponding
          * supplemental table at 0x5EBA).  See our reconstructed source code in ibm-vga.nasm.
          */
-        this.setFontData(abROM, aParms || [0x3f8d, 0x378d], 8);
+        this.setFontData(abROM, aParms || [0x378d, 0x3f8d], 8);
     }
     this.setReady();
 };
@@ -3324,7 +3324,7 @@ Video.prototype.getCardColors = function(nBitsPerPixel)
  *
  * @this {Video}
  * @param {*} abFontData is the raw font data, from the ROM font file
- * @param {Array.<number>} aFontOffsets contains offsets into abFontData: [0] for MDA, [1] for CGA
+ * @param {Array.<number>} aFontOffsets contains offsets into abFontData: [0] for CGA, [1] for MDA
  * @param {number} [cxFontChar] is a fixed character width to use for all fonts; undefined to use MDA/CGA defaults
  */
 Video.prototype.setFontData = function(abFontData, aFontOffsets, cxFontChar)
@@ -3372,22 +3372,21 @@ Video.prototype.buildFonts = function()
      */
     if (window && this.abFontData) {
 
-        var offSplit = this.cxFontChar? 0 : 0x0800;
-        var cxChar = this.cxFontChar? this.cxFontChar : 9;
-
-        if (this.buildFont(Video.FONT.MDA, this.aFontOffsets[0], offSplit, cxChar, 14, this.abFontData, Video.aMDAColors, Video.aMDAColorMap)) {
+        var aRGBColors = this.getCardColors();
+        var offSplit = 0x0000;
+        var cxChar = this.cxFontChar? this.cxFontChar : 8;
+        if (this.buildFont(Video.FONT.CGA, this.aFontOffsets[0], offSplit, cxChar, 8, this.abFontData, aRGBColors)) {
             fChanges = true;
         }
 
-        var aRGBColors = this.getCardColors();
-        offSplit = 0x0000;
-        cxChar = this.cxFontChar? this.cxFontChar : 8;
-        if (this.buildFont(Video.FONT.CGA, this.aFontOffsets[1], offSplit, cxChar, 8, this.abFontData, aRGBColors)) {
+        offSplit = this.cxFontChar? 0 : 0x0800;
+        cxChar = this.cxFontChar? this.cxFontChar : 9;
+        if (this.buildFont(Video.FONT.MDA, this.aFontOffsets[1], offSplit, cxChar, 14, this.abFontData, Video.aMDAColors, Video.aMDAColorMap)) {
             fChanges = true;
         }
 
         if (this.cxFontChar) {
-            if (this.buildFont(this.nCard, this.aFontOffsets[0], 0, this.cxFontChar, 14, this.abFontData, aRGBColors)) {
+            if (this.buildFont(this.nCard, this.aFontOffsets[1], 0, this.cxFontChar, 14, this.abFontData, aRGBColors)) {
                 fChanges = true;
             }
         }
