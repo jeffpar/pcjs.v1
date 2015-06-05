@@ -4511,8 +4511,8 @@ if (DEBUGGER) {
         }
         var port = this.parseValue(sPort);
         if (port !== undefined) {
-            var data = this.bus.checkPortInputNotify(port);
-            this.println(str.toHexWord(port) + ": " + str.toHexByte(data));
+            var byte = this.bus.checkPortInputNotify(port);
+            this.println(str.toHexWord(port) + ": " + str.toHexByte(byte));
         }
     };
 
@@ -4784,17 +4784,17 @@ if (DEBUGGER) {
     };
 
     /**
-     * doOutput(sPort, sData)
+     * doOutput(sPort, sByte)
      *
      * @this {Debugger}
      * @param {string|undefined} sPort
-     * @param {string|undefined} sData
+     * @param {string|undefined} sByte (string representation of 1 byte)
      */
-    Debugger.prototype.doOutput = function(sPort, sData)
+    Debugger.prototype.doOutput = function(sPort, sByte)
     {
         if (!sPort || sPort == "?") {
             this.println("\noutput commands:");
-            this.println("\to [p] [d]\twrite data [d] to port [p]");
+            this.println("\to [p] [b]\twrite byte [b] to port [p]");
             /*
              * NOTE: Regarding this warning, it might be nice if we had an "Unchecked" version of
              * bus.checkPortOutputNotify(), since all Debugger memory accesses are unchecked, too.
@@ -4807,9 +4807,10 @@ if (DEBUGGER) {
             return;
         }
         var port = this.parseValue(sPort, "port #");
-        var data = this.parseValue(sData);
-        if (port !== undefined && data !== undefined) {
-            this.bus.checkPortOutputNotify(port, data);
+        var byte = this.parseValue(sByte);
+        if (port !== undefined && byte !== undefined) {
+            this.bus.checkPortOutputNotify(port, byte);
+            this.println(str.toHexWord(port) + ": " + str.toHexByte(byte));
         }
     };
 
