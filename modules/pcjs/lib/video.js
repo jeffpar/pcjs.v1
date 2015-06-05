@@ -884,7 +884,7 @@ Video.aEGADWToByte[0x80808080|0] = 0xf;
  *
  * WARNING: Since Card objects are low-level objects that have no UI requirements,
  * they do not inherit from the Component class, so you should only use class methods
- * of Component, such as Component.assert(), or Debugger methods if the Debugger is available.
+ * of Component, such as Component.assert(), or methods of the parent (video) object.
  *
  * @constructor
  * @param {Video} [video]
@@ -899,6 +899,8 @@ function Card(video, iCard, data, cbMemory)
      * so we need to detect that case and continue indicating that the card is not present.
      */
     if (iCard !== undefined && (!data || data.length)) {
+
+        this.video = video;
 
         var specs = Video.cardSpecs[iCard];
         var nMonitorType = video.nMonitorType || specs[5];
@@ -1523,31 +1525,55 @@ if (DEBUGGER) Card.GRC.REGS = ["SRESET","ESRESET","COLORCMP","DATAROT","READMAP"
  */
 
 /*
- * Values returned by getAccess(); the low byte describes the current "read mode", while the high byte describes the
- * current "write mode".
+ * Values returned by getAccess(); the high byte describes the read mode, and the low byte describes the write mode.
+ *
+ * V2 should never appear in any values used by getAccess() or setAccess()/setMemoryAccess(); the sole purpose of V2 is
+ * to distinguish newer (V2) access values from older (V1) access values in saved contexts.  It's set when the context
+ * is saved, and cleared when the context is restored.  Thus, if V2 is not set on restore, we assume we're dealing with
+ * a V1 value, so we run it through the V1 table (below) to produce a V2 value.  Hopefully at some point V1 contexts
+ * can be deprecated, and the V2 bit can be eliminated/repurposed.
  */
 Card.ACCESS = {
     READ: {                             // READ values are designed to be OR'ed with WRITE values
-        EVENODD:            0x0001,
-        MODE0:              0x0002,
-        MODE1:              0x0010,
-        MASK:               0x00ff
+        MODE0:              0x4000,
+        MODE1:              0x4100,
+        EVENODD:            0x1000,
+        MASK:               0xFF00
     },
     WRITE: {                            // and WRITE values are designed to be OR'ed with READ values
-        EVENODD:            0x0100,
-        MODE0:              0x0200,
-        MODE0ROT:           0x0400,
-        MODE0AND:           0x0600,
-        MODE0OR:            0x0A00,
-        MODE0XOR:           0x0E00,
-        MODE1:              0x1000,
-        MODE2:              0x2000,
-        MODE2AND:           0x6000,
-        MODE2OR:            0xA000,
-        MODE2XOR:           0xE000,
-        MASK:               0xff00
-    }
+        MODE0:              0x0000,
+        MODE1:              0x0001,
+        MODE2:              0x0002,
+        MODE3:              0x0003,     // VGA only
+        EVENODD:            0x0010,
+        ROT:                0x0020,
+        AND:                0x0060,
+        OR:                 0x00A0,
+        XOR:                0x00E0,
+        MASK:               0x00FB      // 0xFB ensures we strip any lingering V2 bit from the value
+    },
+    V2:                     0x0004      // this is a signature bit used ONLY to differentiate V2 access values from V1
 };
+
+/*
+ * Table of older (V1) access values and their corresponding new values; the new values are similar but a little
+ * more rational (for example, using common values for all the logical operations across modes).
+ */
+Card.ACCESS.V1 = [];
+Card.ACCESS.V1[0x0002] = Card.ACCESS.READ.MODE0;
+Card.ACCESS.V1[0x0003] = Card.ACCESS.READ.MODE0 | Card.ACCESS.READ.EVENODD;
+Card.ACCESS.V1[0x0010] = Card.ACCESS.READ.MODE1;
+Card.ACCESS.V1[0x0200] = Card.ACCESS.WRITE.MODE0;
+Card.ACCESS.V1[0x0400] = Card.ACCESS.WRITE.MODE0 | Card.ACCESS.WRITE.ROT;
+Card.ACCESS.V1[0x0600] = Card.ACCESS.WRITE.MODE0 | Card.ACCESS.WRITE.AND;
+Card.ACCESS.V1[0x0A00] = Card.ACCESS.WRITE.MODE0 | Card.ACCESS.WRITE.OR;
+Card.ACCESS.V1[0x0E00] = Card.ACCESS.WRITE.MODE0 | Card.ACCESS.WRITE.XOR;
+Card.ACCESS.V1[0x0300] = Card.ACCESS.WRITE.MODE0 | Card.ACCESS.WRITE.EVENODD;
+Card.ACCESS.V1[0x1000] = Card.ACCESS.WRITE.MODE1;
+Card.ACCESS.V1[0x2000] = Card.ACCESS.WRITE.MODE2;
+Card.ACCESS.V1[0x6000] = Card.ACCESS.WRITE.MODE2 | Card.ACCESS.WRITE.AND;
+Card.ACCESS.V1[0xA000] = Card.ACCESS.WRITE.MODE2 | Card.ACCESS.WRITE.OR;
+Card.ACCESS.V1[0xE000] = Card.ACCESS.WRITE.MODE2 | Card.ACCESS.WRITE.XOR;
 
 /**
  * readByteMode0(off, addr)
@@ -1576,7 +1602,8 @@ Card.ACCESS.readByteMode0EvenOdd = function readByteMode0EvenOdd(off, addr)
 {
     off += this.offset;
     var idw = off & ~0x1;
-    return (!(off & 1)? this.adw[idw] : (this.adw[idw] >> 8)) & 0xff;
+    var dw = this.controller.latches = this.adw[idw];
+    return (!(off & 1)? dw : (dw >> 8)) & 0xff;
 };
 
 /**
@@ -1786,6 +1813,30 @@ Card.ACCESS.writeByteMode1 = function writeByteMode1(off, b, addr)
 };
 
 /**
+ * writeByteMode1EvenOdd(off, b, addr)
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @param {number} b (ignored; the EGA latches provide the source data)
+ * @param {number} [addr]
+ */
+Card.ACCESS.writeByteMode1EvenOdd = function writeByteMode1EvenOdd(off, b, addr)
+{
+    off += this.offset;
+    //
+    // When even/odd addressing is enabled, nWriteMapMask must be cleared for planes 1 and 3 if
+    // the address is even, and cleared for planes 0 and 2 if the address is odd.
+    //
+    var idw = off & ~0x1;
+    var maskMaps = this.controller.nWriteMapMask & (idw == off? 0x00ff00ff : (0xff00ff00|0));
+    var dw = (this.adw[idw] & ~maskMaps) | (this.controller.latches & maskMaps);
+    if (this.adw[idw] != dw) {
+        this.adw[idw] = dw;
+        this.fDirty = true;
+    }
+};
+
+/**
  * writeByteMode2(off, b, addr)
  *
  * @this {Memory}
@@ -1872,20 +1923,23 @@ Card.ACCESS.writeByteMode2Xor = function writeByteMode2Xor(off, b, addr)
  * Mappings from getAccess() values to access functions above
  */
 Card.ACCESS.afn = [];
-Card.ACCESS.afn[Card.ACCESS.READ.MODE0]     = Card.ACCESS.readByteMode0;
-Card.ACCESS.afn[Card.ACCESS.READ.MODE0  | Card.ACCESS.READ.EVENODD]  = Card.ACCESS.readByteMode0EvenOdd;
-Card.ACCESS.afn[Card.ACCESS.READ.MODE1]     = Card.ACCESS.readByteMode1;
-Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0]    = Card.ACCESS.writeByteMode0;
-Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0ROT] = Card.ACCESS.writeByteMode0Rot;
-Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0AND] = Card.ACCESS.writeByteMode0And;
-Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0OR]  = Card.ACCESS.writeByteMode0Or;
-Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0XOR] = Card.ACCESS.writeByteMode0Xor;
-Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0 | Card.ACCESS.WRITE.EVENODD] = Card.ACCESS.writeByteMode0EvenOdd;
-Card.ACCESS.afn[Card.ACCESS.WRITE.MODE1]    = Card.ACCESS.writeByteMode1;
-Card.ACCESS.afn[Card.ACCESS.WRITE.MODE2]    = Card.ACCESS.writeByteMode2;
-Card.ACCESS.afn[Card.ACCESS.WRITE.MODE2AND] = Card.ACCESS.writeByteMode2And;
-Card.ACCESS.afn[Card.ACCESS.WRITE.MODE2OR]  = Card.ACCESS.writeByteMode2Or;
-Card.ACCESS.afn[Card.ACCESS.WRITE.MODE2XOR] = Card.ACCESS.writeByteMode2Xor;
+
+Card.ACCESS.afn[Card.ACCESS.READ.MODE0]  = Card.ACCESS.readByteMode0;
+Card.ACCESS.afn[Card.ACCESS.READ.MODE0  |  Card.ACCESS.READ.EVENODD]  = Card.ACCESS.readByteMode0EvenOdd;
+Card.ACCESS.afn[Card.ACCESS.READ.MODE1]  = Card.ACCESS.readByteMode1;
+
+Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0] = Card.ACCESS.writeByteMode0;
+Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0 |  Card.ACCESS.WRITE.ROT] = Card.ACCESS.writeByteMode0Rot;
+Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0 |  Card.ACCESS.WRITE.AND] = Card.ACCESS.writeByteMode0And;
+Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0 |  Card.ACCESS.WRITE.OR]  = Card.ACCESS.writeByteMode0Or;
+Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0 |  Card.ACCESS.WRITE.XOR] = Card.ACCESS.writeByteMode0Xor;
+Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0 |  Card.ACCESS.WRITE.EVENODD] = Card.ACCESS.writeByteMode0EvenOdd;
+Card.ACCESS.afn[Card.ACCESS.WRITE.MODE1] = Card.ACCESS.writeByteMode1;
+Card.ACCESS.afn[Card.ACCESS.WRITE.MODE1 |  Card.ACCESS.WRITE.EVENODD] = Card.ACCESS.writeByteMode1EvenOdd;
+Card.ACCESS.afn[Card.ACCESS.WRITE.MODE2] = Card.ACCESS.writeByteMode2;
+Card.ACCESS.afn[Card.ACCESS.WRITE.MODE2 |  Card.ACCESS.WRITE.AND] = Card.ACCESS.writeByteMode2And;
+Card.ACCESS.afn[Card.ACCESS.WRITE.MODE2 |  Card.ACCESS.WRITE.OR]  = Card.ACCESS.writeByteMode2Or;
+Card.ACCESS.afn[Card.ACCESS.WRITE.MODE2 |  Card.ACCESS.WRITE.XOR] = Card.ACCESS.writeByteMode2Xor;
 
 /**
  * initEGA(data)
@@ -1937,7 +1991,7 @@ Card.prototype.initEGA = function(data, nMonitorType)
              * characters and attributes are typically stored (ie, in planes 0 and 1, respectively).  As soon as the machine
              * starts up and initializes the hardware itself, these defaults won't matter.
              */
-            /*15*/  Card.ACCESS.READ.MODE0 | Card.ACCESS.READ.EVENODD | Card.ACCESS.WRITE.MODE0 | Card.ACCESS.WRITE.EVENODD,
+            /*15*/  Card.ACCESS.READ.MODE0 | Card.ACCESS.READ.EVENODD | Card.ACCESS.WRITE.MODE0 | Card.ACCESS.WRITE.EVENODD | Card.ACCESS.V2,
             /*16*/  0,
             /*17*/  0xffffffff|0,
             /*18*/  0,
@@ -1989,14 +2043,24 @@ Card.prototype.initEGA = function(data, nMonitorType)
     }
     this.addrBuffer = a[0];
     this.sizeBuffer = a[1];
-    Component.assert(this.cbMemory === a[2]);
+    this.video.assert(this.cbMemory === a[2]);
 
     var cdw = this.cbMemory >> 2;
     this.adwMemory  = data[14];
     if (this.adwMemory && this.adwMemory.length < cdw) {
         this.adwMemory = State.decompressEvenOdd(this.adwMemory, cdw);
     }
-    this.setMemoryAccess(data[15]);
+
+    var nAccess = data[15];
+    if (nAccess) {
+        if (nAccess & Card.ACCESS.V2) {
+            nAccess &= ~Card.ACCESS.V2;
+        } else {
+            this.video.assert(Card.ACCESS.V1[nAccess & 0xff00] !== undefined && Card.ACCESS.V1[nAccess & 0xff] !== undefined);
+            nAccess = Card.ACCESS.V1[nAccess & 0xff00] | Card.ACCESS.V1[nAccess & 0xff];
+        }
+    }
+    this.setMemoryAccess(nAccess);
 
     /*
      * nReadMapShift must perfectly track how the GRC.READMAP register is programmed, so that Card.ACCESS.READ.MODE0
@@ -2077,7 +2141,7 @@ Card.prototype.saveEGA = function()
     data[12] = this.latches;
     data[13] = [this.addrBuffer, this.sizeBuffer, this.cbMemory];
     data[14] = State.compressEvenOdd(this.adwMemory);
-    data[15] = this.nAccess;
+    data[15] = this.nAccess | Card.ACCESS.V2;
     data[16] = this.nReadMapShift;
     data[17] = this.nWriteMapMask;
     data[18] = this.nDataRotate;
@@ -3731,16 +3795,16 @@ Video.prototype.getAccess = function()
         switch (nWriteMode) {
         case Card.GRC.MODE.WRITE_MODE0:
             if (regDataRotate) {
-                nWriteAccess = Card.ACCESS.WRITE.MODE0ROT;
+                nWriteAccess = Card.ACCESS.WRITE.MODE0 | Card.ACCESS.WRITE.ROT;
                 switch (regDataRotate & Card.GRC.DATAROT.FUNC) {
                 case Card.GRC.DATAROT.AND:
-                    nWriteAccess = Card.ACCESS.WRITE.MODE0AND;
+                    nWriteAccess = Card.ACCESS.WRITE.MODE0 | Card.ACCESS.WRITE.AND;
                     break;
                 case Card.GRC.DATAROT.OR:
-                    nWriteAccess = Card.ACCESS.WRITE.MODE0OR;
+                    nWriteAccess = Card.ACCESS.WRITE.MODE0 | Card.ACCESS.WRITE.OR;
                     break;
                 case Card.GRC.DATAROT.XOR:
-                    nWriteAccess = Card.ACCESS.WRITE.MODE0XOR;
+                    nWriteAccess = Card.ACCESS.WRITE.MODE0 | Card.ACCESS.WRITE.XOR;
                     break;
                 default:
                     break;
@@ -3757,13 +3821,13 @@ Video.prototype.getAccess = function()
                 nWriteAccess = Card.ACCESS.WRITE.MODE2;
                 break;
             case Card.GRC.DATAROT.AND:
-                nWriteAccess = Card.ACCESS.WRITE.MODE2AND;
+                nWriteAccess = Card.ACCESS.WRITE.MODE2 | Card.ACCESS.WRITE.AND;
                 break;
             case Card.GRC.DATAROT.OR:
-                nWriteAccess = Card.ACCESS.WRITE.MODE2OR;
+                nWriteAccess = Card.ACCESS.WRITE.MODE2 | Card.ACCESS.WRITE.OR;
                 break;
             case Card.GRC.DATAROT.XOR:
-                nWriteAccess = Card.ACCESS.WRITE.MODE2XOR;
+                nWriteAccess = Card.ACCESS.WRITE.MODE2 | Card.ACCESS.WRITE.XOR;
                 break;
             }
             break;
@@ -3794,7 +3858,7 @@ Video.prototype.getAccess = function()
 Video.prototype.setAccess = function(nAccess)
 {
     var card = this.cardActive;
-    if (nAccess != null && card && nAccess != card.nAccess) {
+    if (card && nAccess != null && nAccess != card.nAccess) {
 
         if (DEBUG && this.messageEnabled()) {
             this.printMessage("setAccess(" + str.toHexWord(nAccess) + ")");
@@ -4955,8 +5019,9 @@ Video.prototype.inStatus0 = function(port, addrFrom)
          *
          * and writes the first 3 bytes to DAC register #0, and then compares SWSENSE to the 4th byte (0x10).
          *
-         * If the 4th byte matches (and I think it should), then the ROM clears the BIOS "monochrome monitor" bit,
-         * and does the same thing with 5 more arrays:
+         * If the 4th byte matches, then the ROM clears the BIOS "monochrome monitor" bit, and does the same
+         * thing again with 5 more arrays, expecting the 4th byte in all 5 arrays to match SWSENSE, and being
+         * very unhappy if they don't:
          *
          *      db	0x14,0x14,0x14,0x10
          *      db	0x2D,0x14,0x14,0x00
@@ -4964,14 +5029,10 @@ Video.prototype.inStatus0 = function(port, addrFrom)
          *      db	0x14,0x14,0x2D,0x00
          *      db	0x2D,0x2D,0x2D,0x00
          *
-         * I've not found any documentation that explains how the SWSENSE bit should reflect changes to the DAC
-         * in relation to the type of monitor, but it's clear from the ROM BIOS that all 5 of the 4th bytes must
-         * match SWSENSE after each DAC change, or we get error beeps.
+         * So I ensure happiness by setting SWSENSE unless any of the three 6-bit DAC values contain 0x2D.
          *
-         * So I will force that result by clearing SWSENSE if any of the three 6-bit DAC values contain 0x2D, and
-         * setting it otherwise.  This hard-coded behavior assumes a color monitor.  If you really want to simulate
-         * a monochrome monitor, then first array will have to miscompare, and the 4th byte of the following arrays
-         * must match instead:
+         * This hard-coded behavior assumes a color monitor.  If you really want to simulate a monochrome monitor,
+         * then the 1st array (above) must mismatch, and a different set of arrays must all match:
          *
          *      db	0x04,0x12,0x04,0x10
          *      db	0x1E,0x12,0x04,0x00
@@ -4979,8 +5040,8 @@ Video.prototype.inStatus0 = function(port, addrFrom)
          *      db	0x04,0x16,0x15,0x00
          *      db	0x00,0x00,0x00,0x10
          *
-         * In other words, for the monochrome monitor case, set SWSENSE only when DAC register #0 matches the
-         * first and last rows.
+         * In other words, for a monochrome monitor, set SWSENSE only when DAC register #0 matches the first and last
+         * sets of values.
          */
         var dwDAC = this.cardEGA.regDACData[0];
         if ((dwDAC & 0x3f) != 0x2d && (dwDAC & (0x3f << 6)) != (0x2d << 6) && (dwDAC & (0x3f << 12)) != (0x2d << 12)) {
