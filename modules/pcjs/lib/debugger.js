@@ -4511,8 +4511,8 @@ if (DEBUGGER) {
         }
         var port = this.parseValue(sPort);
         if (port !== undefined) {
-            var byte = this.bus.checkPortInputNotify(port);
-            this.println(str.toHexWord(port) + ": " + str.toHexByte(byte));
+            var bIn = this.bus.checkPortInputNotify(port);
+            this.println(str.toHexWord(port) + ": " + str.toHexByte(bIn));
         }
     };
 
@@ -4807,10 +4807,10 @@ if (DEBUGGER) {
             return;
         }
         var port = this.parseValue(sPort, "port #");
-        var byte = this.parseValue(sByte);
-        if (port !== undefined && byte !== undefined) {
-            this.bus.checkPortOutputNotify(port, byte);
-            this.println(str.toHexWord(port) + ": " + str.toHexByte(byte));
+        var bOut = this.parseValue(sByte);
+        if (port !== undefined && bOut !== undefined) {
+            this.bus.checkPortOutputNotify(port, bOut);
+            this.println(str.toHexWord(port) + ": " + str.toHexByte(bOut));
         }
     };
 

@@ -2950,22 +2950,19 @@ Video.prototype.reset = function()
 
     if (this.cardActive.addrBuffer && fRandomize) {
         /*
-         * On the initial power-on, we initialize the video buffer to random characters,
-         * as a way of testing whether our font(s) were successfully loaded.  It's assumed
-         * that our default display mode is a text mode, and that since this is a reset,
-         * the CRTC.START_ADDR registers are zero as well.
+         * On the initial power-on, we initialize the video buffer to random characters, as a way of testing
+         * whether our font(s) were successfully loaded.  It's assumed that our default display mode is a text mode,
+         * and that since this is a reset, the CRTC.START_ADDR registers are zero as well.
          *
-         * If this is an MDA device, then the buffer should reside at 0xB0000 through 0xB0FFF,
-         * for a total length of 4Kb (0x1000), where every even byte contains a character code,
-         * and every odd byte contains an attribute code.  See the ATTR bit definitions above for
-         * applicable color, intensity, and blink values.  On a CGA device, the buffer resides
-         * at 0xB8000 through 0xBBFFF, for a total length of 16Kb.
+         * If this is an MDA device, then the buffer should reside at 0xB0000 through 0xB0FFF, for a total length
+         * of 4Kb (0x1000), where every even byte contains a character code, and every odd byte contains an attribute
+         * code.  See the ATTR bit definitions above for applicable color, intensity, and blink values.  On a CGA
+         * device, the buffer resides at 0xB8000 through 0xBBFFF, for a total length of 16Kb.
          *
-         * Note that the only valid MDA display mode (7) is the 80x25 text mode, which uses 4000
-         * bytes (2000 character bytes + 2000 attribute bytes), not all 4096 bytes; addrScreenLimit
-         * reflects the visible limit, not the physical limit.  Also, as noted in updateScreen(),
-         * this simplistic calculation of the extent of visible screen memory is valid only for
-         * text modes; in general, it's safer to use cardActive.sizeBuffer as the extent.
+         * Note that the only valid MDA display mode (7) is the 80x25 text mode, which uses 4000 bytes (2000 character
+         * bytes + 2000 attribute bytes), not all 4096 bytes; addrScreenLimit reflects the visible limit, not the
+         * physical limit.  Also, as noted in updateScreen(), this simplistic calculation of the extent of visible
+         * screen memory is valid only for text modes; in general, it's safer to use cardActive.sizeBuffer as the extent.
          */
         var addrScreenLimit = this.cardActive.addrBuffer + this.cbScreen;
         for (var addrScreen = this.cardActive.addrBuffer; addrScreen < addrScreenLimit; addrScreen += 2) {
@@ -3154,10 +3151,11 @@ Video.prototype.onLoadSetFonts = function(sFontFile, sFontData, nErrorCode)
              *      that give continuous lines and filled areas. This is unusual for a display with a 9x14 character box
              *      because the character generator provides a row only eight dots wide. On most displays, a blank 9th
              *      dot is then inserted between characters. On the monochrome display, there is circuitry that duplicates
-             *      the 8th dot into the 9th dot position for characters whose ASCII codes are 0xB0 through 0xDF."
+             *      the 8th dot into the 9th dot position for characters whose ASCII codes are 0xB0 [sic] through 0xDF."
              *
-             * The only question is: is the range actually 0xC0-0xDF, or 0xB0-0xDF???  I'll assume the latter, since
-             * 0xB0 is where the line-drawing/area-fill characters appear to begin.
+             * However, the above text is mistaken about the start of the range.  While there ARE line-drawing characters
+             * in the range 0xB0-0xBF, none of them extend all the way to the left edge; IBM carefully segregated them.
+             * And in fact, characters 0xB0-0xB2 contain hash patterns that you would NOT want extended into the 9th column.
              *
              * The CGA font is part of the same ROM.  In fact, there are TWO CGA fonts in the ROM: a thin 5x7 "single dot"
              * font located at offset 0x1000, and a thick 7x7 "double dot" font at offset 0x1800.  The latter is the default
@@ -3550,11 +3548,11 @@ Video.prototype.createFontColor = function(font, iColor, rgbColor, nDouble, offD
             for (var nRowDoubler = 0; nRowDoubler <= nDouble; nRowDoubler++) {
                 for (x = 0; x < cxChar; x++) {
                     /*
-                     * This "bit" of logic takes care of those characters (0xB0-0xDF) whose 9th bit must mirror the 8th bit;
+                     * This "bit" of logic takes care of those characters (0xC0-0xDF) whose 9th bit must mirror the 8th bit;
                      * in all other cases, any bit past the 8th bit is automatically zero.  It also takes care of embedding a solid
                      * row of bits whenever fUnderline is true.
                      */
-                    var bit = (fUnderline? 1 : (b & (0x80 >> (x >= 8 && iChar >= 0xB0 && iChar <= 0xDF? 7 : x))));
+                    var bit = (fUnderline? 1 : (b & (0x80 >> (x >= 8 && iChar >= 0xC0 && iChar <= 0xDF? 7 : x))));
                     var xDst = (x << nDouble);
                     var yDst = (y << nDouble) + nRowDoubler;
                     var rgb = (bit? rgbColor : rgbOff);
