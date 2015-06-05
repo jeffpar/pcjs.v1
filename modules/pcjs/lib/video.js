@@ -1196,7 +1196,7 @@ Card.STATUS1 = {
  *      5: SecRed
  */
 Card.ATC = {
-    PORT:                   0x3C0,
+    PORT:                   0x3C0,      // ATC Index/Data Port
     INDX_MASK:              0x1F,
     INDX_PAL_ENABLE:        0x20,       // must be clear when loading palette registers
     PALETTE: {
@@ -1211,7 +1211,7 @@ Card.ATC = {
     },
     PALETTE_REGS:           0x10,       // 16 total palette registers
     MODE: {
-        INDX:               0x10,       // Mode Control Register
+        INDX:               0x10,       // ATC Mode Control Register
         GRAPHICS:           0x01,       // bit 0: set for graphics mode, clear for alphanumeric mode
         MONOEM:             0x02,       // bit 1: set for monochrome emulation mode, clear for color emulation
         TEXTGRCC:           0x04,       // bit 2: set for line graphics in character codes 0xC0-0xDF, clear otherwise
@@ -1222,20 +1222,20 @@ Card.ATC = {
         COLORSEL:           0x80        // bit 7: set for P5,P4 mapped to bits 1,0 of the Color Select register
     },
     OVERSCAN: {
-        INDX:               0x11        // Overscan Color Register
+        INDX:               0x11        // ATC Overscan Color Register
     },
     PLANES: {
-        INDX:               0x12,       // Color Plane Enable Register
+        INDX:               0x12,       // ATC Color Plane Enable Register
         MASK:               0x0F,
         MUX:                0x30,
         RESERVED:           0xC0
     },
     HORZPAN: {
-        INDX:               0x13,       // Horizontal PEL Panning Register
+        INDX:               0x13,       // ATC Horizontal PEL Panning Register
         SHIFT_LEFT:         0x0F        // bits 0-3 indicate # of PELs to shift left
     },
     COLORSEL: {
-        INDX:               0x14,       // VGA ONLY: Color Select Register
+        INDX:               0x14,       // ATC Color Select Register (VGA only)
         S_COLOR_7:          0x08,       // selects bit 7 of 8-bit color values sent to DAC (except 256-color modes)
         S_COLOR_6:          0x04,       // selects bit 6 of 8-bit color values sent to DAC (except 256-color modes)
         S_COLOR_5:          0x02,       // selects bit 5 of 8-bit color values sent to DAC
@@ -1305,11 +1305,11 @@ Card.VGA_ENABLE = {
  */
 Card.SEQ = {
     INDX: {
-        PORT:               0x3C4,
+        PORT:               0x3C4,      // Sequencer Index Port
         MASK:               0x07
     },
     DATA: {
-        PORT:               0x3C5
+        PORT:               0x3C5       // Sequencer Data Port
     },
     RESET: {
         INDX:               0x00,       // Sequencer Reset Register
@@ -1401,23 +1401,23 @@ Card.GRC = {
     POS1_PORT:              0x3CC,      // EGA only, write-only
     POS2_PORT:              0x3CA,      // EGA only, write-only
     INDX: {
-        PORT:               0x3CE,
+        PORT:               0x3CE,      // GRC Index Port
         MASK:               0x0F
     },
     DATA: {
-        PORT:               0x3CF
+        PORT:               0x3CF       // GRC Data Port
     },
     SRESET: {
-        INDX:               0x00        // SET/RESET (write-only; each bit used only if WRITE_MODE is 0 and corresponding ESR bit set)
+        INDX:               0x00        // GRC Set/Reset Register (write-only; each bit used only if WRITE_MODE is 0 and corresponding ESR bit set)
     },
     ESRESET: {
-        INDX:               0x01        // ENABLE SET/RESET
+        INDX:               0x01        // GRC Enable Set/Reset Register
     },
     COLORCMP: {
-        INDX:               0x02        // COLOR COMPARE
+        INDX:               0x02        // GRC Color Compare Register
     },
     DATAROT: {
-        INDX:               0x03,       // DATA ROTATE
+        INDX:               0x03,       // GRC Data Rotate Register
         COUNT:              0x07,
         AND:                0x08,
         OR:                 0x10,
@@ -1426,11 +1426,11 @@ Card.GRC = {
         MASK:               0x1F
     },
     READMAP: {
-        INDX:               0x04,       // READ MAP SELECT
+        INDX:               0x04,       // GRC Read Map Select Register
         NUM:                0x03
     },
     MODE: {
-        INDX:               0x05,       // MODE REGISTER
+        INDX:               0x05,       // GRC Mode Register
         WRITE_MODE0:        0x00,       // write mode 0x0: each plane written with CPU data, rotated as needed, unless SR enabled
         WRITE_MODE1:        0x01,       // write mode 0x1: each plane written with contents of the processor latches (loaded by a read)
         WRITE_MODE2:        0x02,       // write mode 0x2: memory plane N is written with 8 bits matching data bit N
@@ -1444,7 +1444,7 @@ Card.GRC = {
         COLOR256:           0x40        // VGA only
     },
     MISC: {
-        INDX:               0x06,       // MISCELLANEOUS
+        INDX:               0x06,       // GRC Miscellaneous Register
         GRAPHICS:           0x01,       // set for graphics mode addressing, clear for text mode addressing
         CHAIN:              0x02,       // set for odd/even planes selected with odd/even values of the processor AO bit
         MAPMEM:             0x0C,       //
@@ -1454,10 +1454,10 @@ Card.GRC = {
         MAPB832:            0x0C        //
     },
     COLORDC: {
-        INDX:               0x07        // COLOR DON'T CARE
+        INDX:               0x07        // GRC Color "Don't Care" Register
     },
     BITMASK: {
-        INDX:               0x08        // BIT MASK
+        INDX:               0x08        // GRC Bit Mask Register
     },
     TOTAL_REGS:             0x09
 };
@@ -1534,8 +1534,8 @@ if (DEBUGGER) Card.GRC.REGS = ["SRESET","ESRESET","COLORCMP","DATAROT","READMAP"
  */
 Card.ACCESS = {
     READ: {                             // READ values are designed to be OR'ed with WRITE values
-        MODE0:              0x4000,
-        MODE1:              0x4100,
+        MODE0:              0x0400,
+        MODE1:              0x0500,
         EVENODD:            0x1000,
         MASK:               0xFF00
     },
@@ -1549,9 +1549,9 @@ Card.ACCESS = {
         AND:                0x0060,
         OR:                 0x00A0,
         XOR:                0x00E0,
-        MASK:               0x00FB      // 0xFB ensures we strip any lingering V2 bit from the value
+        MASK:               0x00F7      // 0xF7 ensures we strip any lingering V2 bit from the value
     },
-    V2:                     0x0004      // this is a signature bit used ONLY to differentiate V2 access values from V1
+    V2:                     0x0008      // this is a signature bit used ONLY to differentiate V2 access values from V1
 };
 
 /*
