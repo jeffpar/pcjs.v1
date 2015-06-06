@@ -1,10 +1,10 @@
 The Strange Case of the EGA Graphics Scroll Bug 
 ---
 
-For reasons I've forgotten, I was playing with different video modes in this
-[IBM PC AT w/EGA](/devices/pc/machine/5170/ega/640kb/rev1/) machine, and I discovered some odd problems.
+I was playing with different video modes using this [IBM PC AT w/EGA](/devices/pc/machine/5170/ega/640kb/rev1/),
+and I discovered an odd problem.
 
-For example, run this code:
+For example, when I ran this code:
 
 	A>b:debug
     -a
@@ -14,15 +14,15 @@ For example, run this code:
     0CE0:0106  
     -g
 
-and the following "text" will appear at the top of the screen, in 640x200 16-color graphics mode 0x0E:
+the following "text" appeared at the top of the screen, in 640x200 16-color graphics mode 0x0E:
 
     AX=0B01  BX=0000  CX=0000  DX=0000  SP=FFEE  BP=0000  SI=0000  DI=0000  
     DS=0CE0  ES=0CE0  SS=0CE0  CS=0CE0  IP=0105   NV UP EI PL NZ NA PO NC 
     0CE0:0105 CC            INT     3                                  
     -
 
-If I typed "q", then "cls" and finally "dir", the screen would properly fill with DOS directory contents.
-However, as soon as the screen started to scroll, the screen contents became garbled.  Other EGA graphics modes,
+When I typed "q", then "cls" and finally "dir", the screen filled with DOS directory contents.  But as
+soon as the screen started to scroll, the screen contents became garbled.  Other EGA graphics modes,
 like 640x350 16-color mode 0x10, didn't have this problem.
 
 To investigate, I set a breakpoint in the IBM EGA ROM where the scrolling starts, at 0xC000:12EA (see p.130 of the
@@ -42,11 +42,11 @@ To investigate, I set a breakpoint in the IBM EGA ROM where the scrolling starts
 		POP     CX
 		LOOP    CRANK_A
 
-CX arrives as 0xC0 (192), which is the number of scan-lines to move up, and BX is 0x50 (80), the number
+CX contains 0xC0 (192), which is the number of scan-lines to move up, and BX contains 0x50 (80), the number
 of bytes per scan-line.
 
 When the breakpoint was hit, I dumped the video hardware state, using the Debugger's "*d video*" command.
-For reference purposes, I've pasted the corresponding video state for mode 0x10 on the right-hand side.
+For comparison purposes, I've pasted the corresponding video state for mode 0x10 on the right-hand side.
 
 	breakpoint hit: C000:12EA (exec)
 	stopped (175707689 ops, 800060264 cycles, 133470 ms, 5994308 hz)
@@ -122,7 +122,7 @@ For reference purposes, I've pasted the corresponding video state for mode 0x10 
 	   LATCHES: 0x00000000                     LATCHES: 0x00000000
 		ACCESS: 0x1411                          ACCESS: 0x0400
 
-One of the apparent oddities is that, for mode 0x0E, GRC[MODE] has been programmed with 0x11, whereas
+One of the apparent oddities is that, for mode 0x0E, the GRC Mode Register was programmed with 0x11, whereas
 for mode 0x10, it was programmed with 0x00.  Why would mode 0x0E want to set the ODDEVEN bit during the scroll,
 when it hadn't been set during any other writes to the screen?
 
@@ -139,7 +139,7 @@ At this point, I dumped the instruction history buffer a bit ("*dh 100*"), and n
 	C000:0D1B EE              OUT      DX,AL                ;history=25
 	C000:0D1C 4A              DEC      DX                   ;history=24
 
-So I looked back farther and saw where BP was set:
+So I looked farther back and saw where BP was set:
 
 	C000:1522 BA00A0          MOV      DX,A000              ;history=97
 	C000:1525 BD1105          MOV      BP,0511              ;history=96
@@ -159,12 +159,12 @@ Here's the complete function:
 OK, so any (EGA) graphics mode below 0x0F is going to the trigger the use of Write Mode 1 with the ODDEVEN bit set.
 And sure enough, the scrolling bug also occurs when using 320x200 16-color mode 0x0D.
 
-It's also worth noting that, whenver the ODDEVEN bit of the GRC Mode Register is set, the SEQUENTIAL bit in the Sequencer
-Memory Mode Register is supposed to be clear (and vice versa -- those two bits are always supposed to be oppositely set).
+It's also worth noting that, whenever the ODDEVEN bit of the GRC Mode Register is set, the SEQUENTIAL bit in the Sequencer
+Memory Mode Register is supposed to be clear (and vice versa -- those two bits are supposed to always be oppositely set).
 But here, the IBM EGA BIOS hasn't done that.  One wonders if that was a mistake....
 
 Another bit of trivia: while dumping the frame buffer in a VGA text mode in a different emulator, I discovered that
-if I turned off the ODDEVEN bit in the GRC Mode Register, odd bytes would still appear from plane 1; it wasn't until I
+when I turned off the ODDEVEN bit in the GRC Mode Register, odd bytes would still appear from plane 1; it wasn't until I
 *also* turned off the CHAIN bit in the GRC Miscellaneous Register that the odd bytes would no longer appear.  But,
 that could have just been an idiosyncrasy of that particular emulator.
 
