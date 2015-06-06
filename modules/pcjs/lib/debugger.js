@@ -4499,7 +4499,7 @@ if (DEBUGGER) {
             this.println("\ninput commands:");
             this.println("\ti [p]\tread port [p]");
             /*
-             * NOTE: Regarding this warning, it might be nice if we had an "unchecked" version of
+             * TODO: Regarding this warning, consider adding an "unchecked" version of
              * bus.checkPortInputNotify(), since all Debugger memory accesses are unchecked, too.
              *
              * All port I/O handlers ARE aware when the Debugger is calling (addrFrom is undefined),
@@ -4796,7 +4796,7 @@ if (DEBUGGER) {
             this.println("\noutput commands:");
             this.println("\to [p] [b]\twrite byte [b] to port [p]");
             /*
-             * NOTE: Regarding this warning, it might be nice if we had an "Unchecked" version of
+             * TODO: Regarding this warning, consider adding an "unchecked" version of
              * bus.checkPortOutputNotify(), since all Debugger memory accesses are unchecked, too.
              *
              * All port I/O handlers ARE aware when the Debugger is calling (addrFrom is undefined),

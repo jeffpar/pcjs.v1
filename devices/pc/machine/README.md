@@ -1,11 +1,17 @@
 IBM PC Machine Configurations
 ---
 
-Here you'll find sample Machine Configurations for all the IBM PC models that PCjs currently supports.
+PCjs supports the following IBM PC models:
 
 * [Model 5150](/devices/pc/machine/#model-5150-machine-configurations)
 * [Model 5160](/devices/pc/machine/#model-5160-machine-configurations)
 * [Model 5170](/devices/pc/machine/#model-5170-machine-configurations)
+
+Configurations for the [Challenger 1P](/devices/c1p/machine/) and other non-IBM machines are available [here](/devices/).
+
+Support is also being added for a few IBM PC-compatible machines, starting with the [Compaq DeskPro 386](compaq/deskpro386/) series.
+
+---
 
 ### Model 5150 Machine Configurations
 

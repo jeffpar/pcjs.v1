@@ -1342,7 +1342,7 @@ Card.SEQ = {
         SELB_HIGH:          0x10,       // VGA only
         SELA_HIGH:          0x20        // VGA only
     },
-    MODE: {
+    MEMMODE: {
         INDX:               0x04,       // Sequencer Memory Mode Register
         ALPHA:              0x01,       // set for alphanumeric (A/N) mode, clear for graphics (APA or "All Points Addressable") mode (EGA only)
         EXT:                0x02,       // set if memory expansion installed, clear if not installed
@@ -1352,7 +1352,7 @@ Card.SEQ = {
     TOTAL_REGS:             0x05
 };
 
-if (DEBUGGER) Card.SEQ.REGS = ["RESET","CLOCKING","MAPMASK","CHARMAP","MODE"];
+if (DEBUGGER) Card.SEQ.REGS = ["RESET","CLOCKING","MAPMASK","CHARMAP","MEMMODE"];
 
 /*
  * VGA Digital-to-Analog Converter (DAC) Registers (regDACMask, regDACState, regDACAddr, and regDACData)
@@ -1507,8 +1507,8 @@ if (DEBUGGER) Card.GRC.REGS = ["SRESET","ESRESET","COLORCMP","DATAROT","READMAP"
  *
  * Even/Odd Memory Access Functions
  *
- * The "EVENODD" functions deal with the EGA's default text-mode addressing, where every EVEN address is mapped to
- * plane 0 (and plane 2) and every ODD address is mapped to plane 1 (and plane 3).  This occurs when SEQ.MODE.SEQUENTIAL
+ * The "EVENODD" functions deal with the EGA's default text-mode addressing, where EVEN addresses are mapped to
+ * plane 0 (and 2) and ODD addresses are mapped to plane 1 (and 3).  This occurs when SEQ.MEMMODE.SEQUENTIAL
  * is clear (and GRC.MODE.EVENODD is set), turning address bit 0 (A0) into a "plane select" bit.  Whether A0 is
  * also used as a memory address bit depends on CRTC.MODE_CTRL.BM: if it's set, then we're in "Byte Mode" and A0 is
  * used as-is; if it's clear, then we're in "Word Mode", and either A15 (when CRTC.MODE_CTRL.AW is set) or A13
@@ -1599,6 +1599,11 @@ Card.ACCESS.readByteMode0 = function readByteMode0(off, addr)
  */
 Card.ACCESS.readByteMode0EvenOdd = function readByteMode0EvenOdd(off, addr)
 {
+    /*
+     * TODO: As discussed in getAccess(), we need to run some tests on real EGA/VGA hardware to determine
+     * exactly what gets latched (ie, from which address) when EVENODD is in effect.  Whatever we learn may
+     * also dictate a special EVENODD function for Read Mode 1 as well.
+     */
     off += this.offset;
     var idw = off & ~0x1;
     var dw = this.controller.latches = this.adw[idw];
@@ -1821,6 +1826,10 @@ Card.ACCESS.writeByteMode1 = function writeByteMode1(off, b, addr)
  */
 Card.ACCESS.writeByteMode1EvenOdd = function writeByteMode1EvenOdd(off, b, addr)
 {
+    /*
+     * TODO: As discussed in getAccess(), we need to run some tests on real EGA/VGA hardware to determine
+     * exactly where latches are written (ie, to which address) when EVENODD is in effect.
+     */
     off += this.offset;
     //
     // When even/odd addressing is enabled, nWriteMapMask must be cleared for planes 1 and 3 if
@@ -2225,9 +2234,9 @@ Card.prototype.dumpCard = function()
             this.dumpRegs("      FEAT", this.regFeat);
             this.dumpRegs("      MISC", this.regMisc);
             this.dumpRegs("   STATUS0", this.regStatus0);
-            this.dumpRegs("   LATCHES", this.latches);
+            this.dbg.println("   LATCHES: 0x" + str.toHex(this.latches));
             this.dbg.println("    ACCESS: " + str.toHexWord(this.nAccess));
-            this.dbg.println("Use 'dump video buffer' to dump video memory");
+            this.dbg.println("Use 'dump video [addr]' to dump video memory");
             /*
              * There are few more EGA regs we could dump, like GRCPos1, GRCPos2, but does anyone care?
              */
@@ -3836,9 +3845,38 @@ Video.prototype.getAccess = function()
         if (regGRCMode & Card.GRC.MODE.READ_MODE1) {
             nReadAccess = Card.ACCESS.READ.MODE1;
         }
-        if (regGRCMode & Card.GRC.MODE.EVENODD) {
-            nReadAccess |= Card.ACCESS.READ.EVENODD;
-            nWriteAccess |= Card.ACCESS.WRITE.EVENODD;
+        /*
+         * I discovered that when the IBM EGA ROM scrolls the screen in graphics modes 0x0D and 0x0E, it
+         * reprograms this register for WRITE_MODE1 (which is fine) *and* EVENODD (which is, um, very odd).
+         * Moreover, it does NOT make the complementary change to the SEQ.MEMMODE.SEQUENTIAL bit; under
+         * "normal" circumstances, those two bits are always supposed to programmed oppositely.
+         *
+         * Until I can perform some tests on real hardware, I have to assume that the EGA scroll operation
+         * is supposed to actually WORK in modes 0x0D and 0x0E, so I've decided to tie the trigger for my own
+         * EVENODD functions to SEQ.MEMMODE.SEQUENTIAL being clear, instead of GRC.MODE.EVENODD being set.
+         *
+         * It's also possible that my EVENODD read/write functions are not implemented properly; when EVENODD
+         * is in effect, which addresses get latched by a read, and to which addresses are latches written?
+         * If EVENODD has no effect on the effective address used with the latches, then I should change the
+         * EVENODD read/write functions accordingly.
+         *
+         * However, I've also done some limited testing with an emulated VGA running in text mode, and I've
+         * discovered that toggling the GRC.MODE.EVENODD bit *alone* doesn't seem to affect the delivery of
+         * text mode attributes from plane 1.  So maybe this is the wiser change after all.
+         *
+         * TODO: Perform some tests on actual EGA/VGA hardware, to determine the proper course of action.
+         *
+         *  if (regGRCMode & Card.GRC.MODE.EVENODD) {
+         *      nReadAccess |= Card.ACCESS.READ.EVENODD;
+         *      nWriteAccess |= Card.ACCESS.WRITE.EVENODD;
+         *  }
+         */
+        var regSEQMode = card.regSEQData[Card.SEQ.MEMMODE.INDX];
+        if (regSEQMode != null) {
+            if (!(regSEQMode & Card.SEQ.MEMMODE.SEQUENTIAL)) {
+                nReadAccess |= Card.ACCESS.READ.EVENODD;
+                nWriteAccess |= Card.ACCESS.WRITE.EVENODD;
+            }
         }
         nAccess = nReadAccess | nWriteAccess;
     }
@@ -5157,8 +5195,15 @@ Video.prototype.outSEQData = function(port, bOut, addrFrom)
         }
         this.cardEGA.regSEQData[this.cardEGA.regSEQIndx] = bOut;
     }
-    if (this.cardEGA.regSEQIndx == Card.SEQ.MAPMASK.INDX) {
+    switch(this.cardEGA.regSEQIndx) {
+    case Card.SEQ.MAPMASK.INDX:
         this.cardEGA.nWriteMapMask = Video.aEGAByteToDW[bOut & Card.SEQ.MAPMASK.MAPS];
+        break;
+    case Card.SEQ.MEMMODE.INDX:
+        this.setAccess(this.getAccess());
+        break;
+    default:
+        break;
     }
 };
 

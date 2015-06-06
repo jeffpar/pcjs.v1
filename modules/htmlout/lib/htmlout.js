@@ -240,6 +240,8 @@ var asFilesNonServed = [
     "web.config"        // Azure/IISNode-specific
 ];
 
+var nBlogExcerpts = 20;
+
 /**
  * HTMLOut()
  *
@@ -1167,10 +1169,10 @@ HTMLOut.prototype.getBlog = function(sToken, sIndent, aParms)
              * strings) that can hold the excerpts.  We'll plug the excerpts into aExcerpts as they
              * come in, and then we'll assemble them all at the end.
              *
-             * We also take this opportunity to cap the number of (most recent) excerpts at 10.
+             * We also take this opportunity to cap the number of (most recent) excerpts.
              */
             var i;
-            var cExcerpts = Math.min(asPaths.length, 10);
+            var cExcerpts = Math.min(asPaths.length, nBlogExcerpts);
             var aExcerpts = new Array(cExcerpts);
             var cExcerptsRemaining = aExcerpts.length;
             for (i = 0; i < cExcerpts; i++) {
