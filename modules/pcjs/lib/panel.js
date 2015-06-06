@@ -699,7 +699,7 @@ Panel.prototype.dumpRegisters = function()
         this.drawText(this.cpu.getSpeedCurrent());
         this.skipLines(2);
         this.initCols(8);
-        this.initNumberFormat(16, 4);
+        this.initNumberFormat(16, this.cpu.model < X86.MODEL_80386? 4 : 8);
         this.drawText("AX", this.cpu.regEAX, 2);
         this.drawText("DS", this.cpu.getDS(), 0, 1);
         this.drawText("DX", this.cpu.regEDX, 2);
@@ -715,6 +715,12 @@ Panel.prototype.dumpRegisters = function()
         var regPS;
         this.drawText("PS", regPS = this.cpu.getPS(), 2);
         this.drawText("BP", this.cpu.regEBP, 0, 1.5);
+        if (this.cpu.model >= X86.MODEL_80386) {
+            this.drawText("FS", this.cpu.getFS(), 2);
+            this.drawText("CR0", this.cpu.regCR0, 0, 1);
+            this.drawText("GS", this.cpu.getGS(), 2);
+            this.drawText("CR3", this.cpu.regCR3, 0, 1.5);
+        }
         this.initCols(9);
         this.drawText("V" + ((regPS & X86.PS.OF)? 1 : 0));
         this.drawText("D" + ((regPS & X86.PS.DF)? 1 : 0));
@@ -900,9 +906,12 @@ Panel.prototype.drawText = function(sText, nValue, nColsSkip, nLinesSkip)
     this.contextText.fillText(sText, this.xText, this.yText);
     this.xText += this.cxColumn;
     if (nValue != null) {
-        var sValue = nValue.toString();
-        if (this.nDefaultBase == 16) {
-            sValue = "0x" + str.toHex(nValue, this.nDefaultDigits);
+        var sValue;
+        if (this.nDefaultBase != 16) {
+            sValue = nValue.toString();
+        } else {
+            sValue = this.nDefaultDigits < 8? "0x" : "";
+            sValue += str.toHex(nValue, this.nDefaultDigits);
         }
         this.contextText.fillText(sValue, this.xText, this.yText);
         this.xText += this.cxColumn;
