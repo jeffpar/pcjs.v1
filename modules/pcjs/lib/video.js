@@ -4819,24 +4819,26 @@ Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
                 /*
                  * JavaScript Alert: if adwMemory contains a 32-bit value such as -1526726656, and then we mask
                  * it with 0x80808080, we end up with -2147483648, which in a perfect 32-bit world, would be equal
-                 * to 0x80000000, which means that when we look up "Video.aEGADWToByte[0x80000000]", we should get
-                 * the entry containing 0x8.  But no, in JavaScript, since the original value was negative, the
-                 * masked value is still negative, because there are 52 "significand" bits in JavaScript numbers,
-                 * and bit-wise operations operate ONLY on the low 32 bits, leaving the higher sign bits intact.
+                 * to 0x80000000, so that when we look up "Video.aEGADWToByte[0x80000000]", we get the entry
+                 * containing 0x8.  But no, in JavaScript, 0x80000000 is a positive value (2147483648), so the array
+                 * lookup fails.  To fix this, the array must be initialized using negative indexes whenever bit 31
+                 * is set.
                  *
-                 * This can be confirmed by looking at dwPixel.toString(16), which returns "-80000000".  One solution
-                 * is to add 4294967296 (0x100000000) to any negative 32-bit value for which we need the positive
-                 * representation.  A better solution (ie, one that doesn't require 33-bit values, triggering floating
-                 * point arithmetic) is storing negative indexes in the lookup array (aEGADWToByte).  However, you CANNOT
-                 * do that by simply writing a value like 0x80000080 as "-0x80000080", because JavaScript will interpret
-                 * that as the negation of 2147483776, yielding -2147483776, the low 32 bits of which are 0x7FFFFFF80,
-                 * not 0x80000080 as intended.  So, the safest way to write a constant like that is "0x80000080|0".
+                 * The easiest way to do that is to follow this golden JavaScript rule: append "|0" to all hex constants
+                 * where bit 31 is set.  The innocuous use of the bit-wise OR operator has the side-effect of producing
+                 * a negative value.  So now we initialize the above array entry using "Video.aEGADWToByte[0x80000000|0]".
                  *
                  * And, since assertions don't fix problems (only catch them, and only in DEBUG builds), I'm also
                  * ensuring that bPixel will always default to 0 if an undefined value ever slips through again.
                  */
                 var dwPixel = data & (0x80808080|0);
-                // if (dwPixel < 0) dwPixel += 0x100000000;
+                /*
+                 * This was the old fix to the above problem, which mapped any negative number to its corresponding
+                 * positive value, without altering the low 32 bits.  But it's not ideal, because it means using values
+                 * both here and in the array that are outside the signed 32-bit range, requiring floating-point.
+                 *
+                 *      if (dwPixel < 0) dwPixel += 0x100000000;
+                 */
                 this.assert(Video.aEGADWToByte[dwPixel] !== undefined);
                 var bPixel = Video.aEGADWToByte[dwPixel] || 0;
                 this.setPixel(this.imageScreenBuffer, x++, y, aPixelColors[bPixel]);
