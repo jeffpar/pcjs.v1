@@ -5069,7 +5069,7 @@ if (DEBUGGER) {
             this.setTempBreakpoint(dbgAddr);
         }
         if (!this.runCPU(true)) {
-            this.println('cpu not available, "g" command ignored');
+            this.println('cpu busy, "g" command ignored');
         }
     };
 

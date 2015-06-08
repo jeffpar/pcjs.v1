@@ -2190,11 +2190,14 @@ Card.prototype.dumpRegs = function(sName, iReg, aRegs, asRegs)
             this.dbg.println(sName + ": " + str.toHexByte(iReg));
             return;
         }
+        var i, cchMax = 19, s = "";
+        /*
         var s = "", i, cchMax = 0;
         for (i = 0; i < asRegs.length; i++) {
             if (cchMax < asRegs[i].length) cchMax = asRegs[i].length;
         }
         cchMax++;
+         */
         for (i = 0; i < asRegs.length; i++) {
             if (s) s += '\n';
             s += sName + "[" + str.toHexByte(i) + "]: " + str.pad(asRegs[i], cchMax) + str.toHexByte(aRegs[i]) + (i === iReg? "*" : "");
@@ -2216,24 +2219,30 @@ Card.prototype.dumpCard = function()
          */
         this.dumpRegs("CRTC", this.regCRTIndx, this.regCRTData, this.asCRTCRegs);
 
-        if (this.nCard == Video.CARD.MDA || this.nCard == Video.CARD.CGA) {
-            this.dumpRegs("   MODEREG", this.regMode);
+        if (this.nCard >= Video.CARD.EGA) {
+            this.dumpRegs(" GRC", this.regGRCIndx, this.regGRCData, this.asGRCRegs);
+            this.dumpRegs(" SEQ", this.regSEQIndx, this.regSEQData, this.asSEQRegs);
+            this.dumpRegs(" ATC", this.regATCIndx, this.regATCData, this.asATCRegs);
+            this.dbg.println("   ATCDATA: " + this.fATCData);
+            this.dumpRegs("      FEAT", this.regFeat);
+            this.dumpRegs("      MISC", this.regMisc);
+            this.dumpRegs("   STATUS0", this.regStatus0);
+            /*
+             * There are few more EGA regs we could dump, like GRCPos1, GRCPos2, but does anyone care?
+             */
         }
 
         this.dumpRegs("   STATUS1", this.regStatus);
+
+        if (this.nCard == Video.CARD.MDA || this.nCard == Video.CARD.CGA) {
+            this.dumpRegs("   MODEREG", this.regMode);
+        }
 
         if (this.nCard == Video.CARD.CGA) {
             this.dumpRegs("     COLOR", this.regColor);
         }
 
         if (this.nCard >= Video.CARD.EGA) {
-            this.dbg.println("   ATCDATA: " + this.fATCData);
-            this.dumpRegs(" ATC", this.regATCIndx, this.regATCData, this.asATCRegs);
-            this.dumpRegs(" GRC", this.regGRCIndx, this.regGRCData, this.asGRCRegs);
-            this.dumpRegs(" SEQ", this.regSEQIndx, this.regSEQData, this.asSEQRegs);
-            this.dumpRegs("      FEAT", this.regFeat);
-            this.dumpRegs("      MISC", this.regMisc);
-            this.dumpRegs("   STATUS0", this.regStatus0);
             this.dbg.println("   LATCHES: 0x" + str.toHex(this.latches));
             this.dbg.println("    ACCESS: " + str.toHexWord(this.nAccess));
             this.dbg.println("Use 'dump video [addr]' to dump video memory");
