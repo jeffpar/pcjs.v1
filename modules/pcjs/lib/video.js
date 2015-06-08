@@ -2320,7 +2320,10 @@ Card.prototype.setMemoryAccess = function(nAccess)
         var nReadAccess = nAccess & Card.ACCESS.READ.MASK;
         var fnReadByte = Card.ACCESS.afn[nReadAccess];
         if (!fnReadByte) {
-            if (DEBUG && this.dbg) this.dbg.message("Card.setMemoryAccess(" + str.toHexWord(nAccess) + "): missing readByte handler");
+            if (DEBUG && this.dbg) {
+                this.dbg.message("Card.setMemoryAccess(" + str.toHexWord(nAccess) + "): missing readByte handler");
+                this.dbg.stopCPU();     // let's take a look
+            }
             if (nReadAccess & Card.ACCESS.READ.EVENODD) {
                 fnReadByte = Card.ACCESS.afn[Card.ACCESS.READ.EVENODD];
             }
@@ -2328,7 +2331,10 @@ Card.prototype.setMemoryAccess = function(nAccess)
         var nWriteAccess = nAccess & Card.ACCESS.WRITE.MASK;
         var fnWriteByte = Card.ACCESS.afn[nWriteAccess];
         if (!fnWriteByte) {
-            if (DEBUG && this.dbg) this.dbg.message("Card.setMemoryAccess(" + str.toHexWord(nAccess) + "): missing writeByte handler");
+            if (DEBUG && this.dbg) {
+                this.dbg.message("Card.setMemoryAccess(" + str.toHexWord(nAccess) + "): missing writeByte handler");
+                this.dbg.stopCPU();     // let's take a look
+            }
             if (nWriteAccess & Card.ACCESS.WRITE.EVENODD) {
                 fnWriteByte = Card.ACCESS.afn[Card.ACCESS.WRITE.EVENODD];
             }

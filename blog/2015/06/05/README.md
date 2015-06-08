@@ -14,15 +14,16 @@ For example, when I ran this code:
     0CE0:0106  
     -g
 
-the following "text" appeared at the top of the screen, in 640x200 16-color graphics mode 0x0E:
+the following "text" correctly appeared at the top of the screen, in 640x200 16-color graphics mode 0x0E:
 
     AX=0B01  BX=0000  CX=0000  DX=0000  SP=FFEE  BP=0000  SI=0000  DI=0000  
     DS=0CE0  ES=0CE0  SS=0CE0  CS=0CE0  IP=0105   NV UP EI PL NZ NA PO NC 
     0CE0:0105 CC            INT     3                                  
     -
 
-When I typed "q", then "cls" and finally "dir", the screen filled with DOS directory contents.  But as
-soon as the screen started to scroll, the screen contents became garbled.  Other EGA graphics modes,
+And when I typed "q", then "cls" and finally "dir", the screen filled with DOS directory contents.
+
+But as soon as the screen started to scroll, the screen contents became garbled.  Other EGA graphics modes,
 like 640x350 16-color mode 0x10, didn't have this problem.
 
 To investigate, I set a breakpoint in the IBM EGA ROM where the scrolling starts, at 0xC000:12EA (see p.130 of the
