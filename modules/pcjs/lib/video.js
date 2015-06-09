@@ -3246,7 +3246,7 @@ Video.prototype.onLoadSetFonts = function(sFontFile, sFontData, nErrorCode)
              *      the 8th dot into the 9th dot position for characters whose ASCII codes are 0xB0 [sic] through 0xDF."
              *
              * However, the above text is mistaken about the start of the range.  While there ARE line-drawing characters
-             * in the range 0xB0-0xBF, none of them extend all the way to the left edge; IBM carefully segregated them.
+             * in the range 0xB0-0xBF, none of them extend all the way to the right edge; IBM carefully segregated them.
              * And in fact, characters 0xB0-0xB2 contain hash patterns that you would NOT want extended into the 9th column.
              *
              * The CGA font is part of the same ROM.  In fact, there are TWO CGA fonts in the ROM: a thin 5x7 "single dot"
