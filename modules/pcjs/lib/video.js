@@ -194,24 +194,37 @@ function Video(parmsVideo, canvas, context, textarea, container)
     var video = this;
 
     /*
-     * All the gross code to handle full-screen support across all supported browsers (standards? hello?)
+     * All the gross code to handle full-screen support across all supported browsers (standards? hello?).
+     * Browsers can't agree whether to use 'request' or 'Request', 'screen' or 'Screen', and while some browsers
+     * honor other browser prefixes, other browsers don't.
      */
+    this.fGecko = web.isUserAgent("Gecko");
+    var i, sEvent, asPrefixes = ['', 'moz', 'webkit', 'ms'];
+
     this.container = container;
     if (this.container) {
         this.container.doFullScreen = container['requestFullscreen'] || container['msRequestFullscreen'] || container['mozRequestFullScreen'] || container['webkitRequestFullscreen'];
         if (this.container.doFullScreen) {
-            var onFullScreenChange = function() {
-                var fFullScreen = (document['fullscreenElement'] || document['mozFullScreenElement'] || document['webkitFullscreenElement'] || document['msFullscreenElement']);
-                video.notifyFullScreen(fFullScreen? true : false);
-            };
-            if ('onfullscreenchange' in document) {
-                document.addEventListener('fullscreenchange', onFullScreenChange, false);
-            } else if ('onmozfullscreenchange' in document) {
-                document.addEventListener('mozfullscreenchange', onFullScreenChange, false);
-            } else if ('onwebkitfullscreenchange' in document) {
-                document.addEventListener('webkitfullscreenchange', onFullScreenChange, false);
-            } else if ('onmsfullscreenchange' in document) {
-                document.addEventListener('msfullscreenchange', onFullScreenChange, false);
+            for (i = 0; i < asPrefixes.length; i++) {
+                sEvent = asPrefixes[i] + 'fullscreenchange';
+                if ('on' + sEvent in document) {
+                    var onFullScreenChange = function() {
+                        var fFullScreen = (document['fullscreenElement'] || document['mozFullScreenElement'] || document['webkitFullscreenElement'] || document['msFullscreenElement']);
+                        video.notifyFullScreen(fFullScreen? true : false);
+                    };
+                    document.addEventListener(sEvent, onFullScreenChange, false);
+                    break;
+                }
+            }
+            for (i = 0; i < asPrefixes.length; i++) {
+                sEvent = asPrefixes[i] + 'fullscreenerror';
+                if ('on' + sEvent in document) {
+                    var onFullScreenError = function() {
+                        video.notifyFullScreen(null);
+                    };
+                    document.addEventListener(sEvent, onFullScreenError, false);
+                    break;
+                }
             }
         }
     }
@@ -2567,7 +2580,55 @@ Video.prototype.doFullScreen = function()
     var fSuccess = false;
     if (this.container) {
         if (this.container.doFullScreen) {
-            this.container.style.width = this.container.style.height = "100%";
+            /*
+             * Styling the container with a width of "100%" and a height of "auto" works great when the aspect ratio
+             * of our virtual screen is at least roughly equivalent to the physical screen's aspect ratio, but now that
+             * we support virtual VGA screens with an aspect ratio of 1.33, that's very much out of step with modern
+             * wide-screen monitors, which usually have an aspect ratio of 1.6 or greater.
+             *
+             * And unfortunately, none of the browsers I've tested appear to make any attempt to scale our container to
+             * the physical screen's dimensions, so the bottom of our screen gets clipped.  To prevent that, I reduce
+             * the width from 100% to whatever percentage will accommodate the entire height of the virtual screen.
+             *
+             * NOTE: Mozilla recommends both a width and a height of "100%", but all my tests suggest that using "auto"
+             * for height works equally well, so I'm sticking with it, because "auto" is also consistent with how I've
+             * implemented a responsive canvas when the browser window is being resized.
+             */
+            var sWidth = "100%";
+            var sHeight = "auto";
+            if (screen && screen.width && screen.height) {
+                var aspectPhys = screen.width / screen.height;
+                var aspectVirt = this.cxScreen / this.cyScreen;
+                if (aspectPhys > aspectVirt) {
+                    sWidth = Math.round(aspectVirt / aspectPhys * 100) + '%';
+                }
+                // TODO: We may need to someday consider the case of a physical screen with an aspect ratio < 1.0....
+            }
+            if (!this.fGecko) {
+                this.container.style.width = sWidth;
+                this.container.style.height = sHeight;
+            } else {
+                /*
+                 * Sadly, the above code doesn't work for Firefox, because as http://developer.mozilla.org/en-US/docs/Web/Guide/API/DOM/Using_full_screen_mode
+                 * explains:
+                 *
+                 *      'It's worth noting a key difference here between the Gecko and WebKit implementations at this time:
+                 *      Gecko automatically adds CSS rules to the element to stretch it to fill the screen: "width: 100%; height: 100%".
+                 *
+                 * Which would be OK if Gecko did that BEFORE we're called, but apparently it does that AFTER, effectively
+                 * overwriting our careful calculations.  So we style the inner element (canvasScreen) instead, which
+                 * requires even more work to ensure that the canvas is properly centered.  FYI, this solution is consistent
+                 * with Mozilla's recommendation for working around their automatic CSS rules:
+                 *
+                 *      '[I]f you're trying to emulate WebKit's behavior on Gecko, you need to place the element you want
+                 *      to present inside another element, which you'll make fullscreen instead, and use CSS rules to adjust
+                 *      the inner element to match the appearance you want.'
+                 */
+                this.canvasScreen.style.width = sWidth;
+                this.canvasScreen.style.width = sWidth;
+                this.canvasScreen.style.display = "block";
+                this.canvasScreen.style.margin = "auto";
+            }
             this.container.style.backgroundColor = "black";
             this.container.doFullScreen();
             fSuccess = true;
@@ -2581,10 +2642,17 @@ Video.prototype.doFullScreen = function()
  * notifyFullScreen(fFullScreen)
  *
  * @this {Video}
- * @param {boolean} fFullScreen
+ * @param {boolean|null} fFullScreen (null if there was a full-screen error)
  */
 Video.prototype.notifyFullScreen = function(fFullScreen)
 {
+    if (!fFullScreen && this.container) {
+        if (!this.fGecko) {
+            this.container.style.width = this.container.style.height = "";
+        } else {
+            this.canvasScreen.style.width = this.canvasScreen.style.height = "";
+        }
+    }
     this.printMessage("notifyFullScreen(" + fFullScreen + ")", true);
     if (this.kbd) this.kbd.notifyEscape(fFullScreen);
 };
