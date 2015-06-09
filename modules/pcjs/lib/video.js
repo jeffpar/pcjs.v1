@@ -198,7 +198,7 @@ function Video(parmsVideo, canvas, context, textarea, container)
      * Browsers can't agree whether to use 'request' or 'Request', 'screen' or 'Screen', and while some browsers
      * honor other browser prefixes, other browsers don't.
      */
-    this.fGecko = web.isUserAgent("Gecko");
+    this.fGecko = web.isUserAgent("Gecko/");
     var i, sEvent, asPrefixes = ['', 'moz', 'webkit', 'ms'];
 
     this.container = container;
