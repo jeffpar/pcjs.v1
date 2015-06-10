@@ -1162,7 +1162,7 @@ DiskDump.prototype.addManifestInfo = function(fileInfo)
     this.aManifestInfo.push(fileInfo);
 };
 
-DiskDump.asTextFileExts = [".MD", ".ME", ".BAS", ".TXT", ".XML"];
+DiskDump.asTextFileExts = [".MD", ".ME", ".ASM", ".BAS", ".TXT", ".XML"];
 
 /**
  * isTextFile(sFileName)

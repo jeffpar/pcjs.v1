@@ -143,5 +143,8 @@ graphics modes &gt;= 0x0D are misdetected as BIOSMODE 0x12.
 
 All these issues are under investigation.
 
+In addition, I've created a [VGA Tests](/tests/pc/vga/) directory to hold VGA test and sample code that I want PCjs
+to run successfully.  See that directory for more details.
+
 *[@jeffpar](http://twitter.com/jeffpar)*  
-*June 1, 2015*
+*June 1, 2015 (Updated June 10, 2015)*
