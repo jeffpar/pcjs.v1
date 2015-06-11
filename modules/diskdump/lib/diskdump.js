@@ -188,6 +188,11 @@ DiskDump.MY_OEM_STRING = "PCJS.ORG";
 /**
  * The BPBs that buildImage() currently supports; these BPBs should be in order of smallest to largest capacity,
  * to help ensure we don't select a disk format larger than necessary.
+ *
+ * TODO: For now, the code that chooses a default BPB is starting with #1 instead of #0, because Windows 95 (at least
+ * when running under VMware) fails to read the contents of such disks correctly.  Whether that's my fault or Windows 95's
+ * fault is still TBD (although it's probably mine -- perhaps 160Kb diskettes aren't supposed to have BPBs?)  The simple
+ * work-around is to avoid creating 160Kb diskette images.
  */
 DiskDump.aDefaultBPBs = [
   [                             // define BPB for 160Kb diskette
@@ -1975,7 +1980,7 @@ DiskDump.prototype.buildImageFromFiles = function(aFiles, done)
      * Find or build a BPB with enough capacity, and at the same time, calculate all
      * the other values we'll need, including total number of data sectors (cDataSectors).
      */
-    for (var iBPB = 0; iBPB < DiskDump.aDefaultBPBs.length; iBPB++) {
+    for (var iBPB = 1; iBPB < DiskDump.aDefaultBPBs.length; iBPB++) {
         /*
          * If this BPB is for a hard disk but a hard disk size was not specified, skip it.
          */

@@ -52,13 +52,13 @@ if (typeof module !== 'undefined') {
  *      model: model (eg, "mda" for Monochrome Display Adapter)
  *      mode: mode number (hardware-specific, 7 is the default)
  *      memory: amount of installed memory (ignored for MDA/CGA)
- *      screenWidth: width of the screen window, in pixels
- *      screenHeight: height of the screen window, in pixels
+ *      screenWidth: width of the screen canvas, in pixels
+ *      screenHeight: height of the screen canvas, in pixels
  *      scale: true for font scaling, false (default) to center the display on the screen
  *      charCols: number of character columns
  *      charRows: number of character rows
  *      fontROM: path to .rom file (or a JSON representation) that defines the character set
- *      screenColor: background color of the screen window (default is black)
+ *      screenColor: background color of the screen canvas (default is black)
  *      autoLock: true to (attempt to) automatically lock the mouse to the canvas (default is false)
  *
  * An EGA may specify the following additional properties:
@@ -74,8 +74,8 @@ if (typeof module !== 'undefined') {
  * The CPU periodically calls updateScreen(), at an assumed rate of 60 times/second,
  * to update any blinking elements (the cursor and any characters with the blink attribute),
  * to compare/update the contents of our internal buffer with the video buffer, and to render
- * any differences between the two buffers in the associated window, via either updateChar()
- * or setPixel().
+ * any differences between the two buffers into the associated screen canvas, via either
+ * updateChar() or setPixel().
  *
  * Thanks to the CPU's new block-based memory manager that allows us to sparse-allocate memory
  * (in 4Kb increments on 20-bit buses, 16Kb increments on 24-bit buses), updateScreen()
@@ -194,9 +194,9 @@ function Video(parmsVideo, canvas, context, textarea, container)
     var video = this;
 
     /*
-     * All the gross code to handle full-screen support across all supported browsers (standards? hello?).
-     * Browsers can't agree whether to use 'request' or 'Request', 'screen' or 'Screen', and while some browsers
-     * honor other browser prefixes, other browsers don't.
+     * Here's the gross code to handle full-screen support across all supported browsers.  The lack of standards
+     * is exasperating; browsers can't agree on 'full' or 'Full, 'request' or 'Request', 'screen' or 'Screen', and
+     * while some browsers honor other browser prefixes, most browsers don't.
      */
     this.fGecko = web.isUserAgent("Gecko/");
     var i, sEvent, asPrefixes = ['', 'moz', 'webkit', 'ms'];
@@ -230,7 +230,10 @@ function Video(parmsVideo, canvas, context, textarea, container)
     }
 
     /*
-     * All the gross code to handle pointer-locking support across all supported browsers (standards? hello?)
+     * More gross code to handle pointer-locking support across all supported browsers.
+     *
+     * TODO: Consider "upgrading" this code to use the same asPrefixes array as above, especially once Microsoft
+     * finally releases a browser that supports pointer-locking (post-Windows 10?)
      */
     if (this.inputScreen) {
         this.inputScreen.onfocus = function onFocusScreen() {
@@ -304,12 +307,12 @@ Video.TRAPALL = true;           // monitor all I/O by default (not just deltas)
  * to register only those I/O ports belonging to that model.
  *
  * In a single-display system, dynamically switching cards (ie, between MDA and CGA) creates some
- * visual challenges.  For one, the MDA prefers a native window size of 720x350, as it supports only
+ * visual challenges.  For one, the MDA prefers a native screen size of 720x350, as it supports only
  * one video mode, 80x25, with a 9x14 cell size.  The CGA, on the other hand, has an 8x8 cell size,
- * so when using an MDA-size window, an 80x25 CGA screen will end up with 40-pixel borders on the
+ * so when using an MDA-size screen, an 80x25 CGA screen will end up with 40-pixel borders on the
  * left and right, and 75-pixel borders on the top and bottom.  The result is a rather tiny CGA font
  * surrounded by lots of wasted space, so it's best to turn on font scaling (see the "scale" property)
- * and go with a larger window size of, say, 960x400 (50% larger in width, 100% larger in height).
+ * and go with a larger screen size of, say, 960x400 (50% larger in width, 100% larger in height).
  *
  * I've also added support for font-doubling in createFont().  We use the 8x8 font for 80-column
  * modes and the "doubled" 16x16 font for 40-column modes OR whenever the screen is large enough
@@ -317,8 +320,8 @@ Video.TRAPALL = true;           // monitor all I/O by default (not just deltas)
  * In fact, there's special logic in setDimensions() to ignore fScaleFont in certain cases (eg,
  * 40-column modes, to improve sharpness and avoid stretching the font beyond readability).
  *
- * Graphics modes, on the other hand, are always scaled to the window size.  Pixels are captured
- * in an off-screen buffer, which is then drawn to match the size of the virtual display window.
+ * Graphics modes, on the other hand, are always scaled to the screen size.  Pixels are captured
+ * in an off-screen buffer, which is then drawn to match the size of the virtual screen.
  *
  * TODO: Whenever there are borders, they should be filled with the CGA's overscan colors.  However,
  * in the case of graphics modes (and text modes whenever font scaling is enabled), we don't reserve
@@ -672,8 +675,8 @@ Video.aEGAMonitorSwitches = {
  * and the second and third (CGA) fonts reside in the two 2K halves of the second 4Kb.
  *
  * It may seem odd that the cell size for FONT_CGAD is *larger* than the cell size for FONT_CGA,
- * since 40-column mode is actually lower resolution, but since we don't shrink the window when we shrink
- * the mode, the characters must be drawn larger, and they look better if we don't have to scale them.
+ * since 40-column mode is actually lower resolution, but since we don't shrink the screen canvas when we
+ * shrink the mode, the characters must be drawn larger, and they look better if we don't have to scale them.
  *
  * From the IBM EGA Manual (p.5):
  *
