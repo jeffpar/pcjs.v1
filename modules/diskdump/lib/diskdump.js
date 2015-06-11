@@ -109,7 +109,7 @@ function DiskDump(sDiskPath, asExclude, sFormat, fComments, mbHD, sServerRoot, s
      */
     this.sServerRoot = sServerRoot;
     this.sDiskPath = (net.isRemote(sDiskPath)? sDiskPath : path.join(this.sServerRoot, sDiskPath));
-    this.asExclude = asExclude;
+    this.asExclude = asExclude || DiskDump.asExclusions;
     this.mbHD = mbHD? parseInt(mbHD, 10) : 0;
     this.sFormat = (sFormat || DumpAPI.FORMAT.JSON);
     this.fJSONNative = (this.sFormat == DumpAPI.FORMAT.JSON && !fComments);
@@ -275,6 +275,9 @@ DiskDump.aDefaultBPBs = [
     0x01, 0x00, 0x00, 0x00      // 0x1C: number of hidden sectors (always 0 for non-partitioned media)
   ]
 ];
+
+DiskDump.asExclusions = [".*", ".IMG"];
+DiskDump.asTextFileExts = [".MD", ".ME", ".ASM", ".BAS", ".TXT", ".XML"];
 
 /*
  * Class methods
@@ -788,9 +791,16 @@ DiskDump.readFile = function(sPath, sEncoding, done)
  */
 DiskDump.prototype.isExcluded = function(sName)
 {
-    if (this.asExclude) {
-        for (var i = 0; i < this.asExclude.length; i++) {
-            if (sName.toUpperCase() == this.asExclude[i].toUpperCase()) return true;
+    sName = sName.toUpperCase();
+    for (var i = 0; i < this.asExclude.length; i++) {
+        var sExclude = this.asExclude[i].toUpperCase();
+        if (sName == sExclude) return true;
+        if (sExclude.charAt(0) == '.') {
+            if (sExclude.charAt(1) == '*') {
+                if (sName.charAt(0) == '.') return true;
+            } else {
+                if (str.endsWith(sName, sExclude)) return true;
+            }
         }
     }
     return false;
@@ -1161,8 +1171,6 @@ DiskDump.prototype.addManifestInfo = function(fileInfo)
 {
     this.aManifestInfo.push(fileInfo);
 };
-
-DiskDump.asTextFileExts = [".MD", ".ME", ".ASM", ".BAS", ".TXT", ".XML"];
 
 /**
  * isTextFile(sFileName)

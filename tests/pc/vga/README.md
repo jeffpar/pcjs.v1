@@ -40,7 +40,12 @@ assumed to be a directory, and so PCjs will ask the server to enumerate the cont
 JSON-encoded disk image containing all the files in that directory (including any subdirectories).
 
 Since the contents of this directory will probably be in flux for a while, I've opted for this approach.  Once
-things settle down, I'll generate a JSON-encoded disk image containing a snapshot of this directory.
+things settle down, I'll generate a JSON-encoded disk image containing a snapshot of this directory, like so:
+
+	diskdump --dir=. --format=img --output=TESTVGA.img
+
+One advantage of using the PCjs [DiskDump](/modules/diskdump/) module is that it automatically converts linefeeds in
+known text files (including ASM files) into DOS-compatible CR/LF sequences.
 
 I've updated a [Compaq DeskPro 386 Machine](/devices/pc/machine/compaq/deskpro386/vga/2048kb/) to use the
 [Library](/disks/pc/library.xml) disk collection and automatically load the above disk:
