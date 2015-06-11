@@ -30,22 +30,23 @@ List of VGA Samples from [Michael Abrash's Graphics Programming Black Book](http
 
 ---
 
-Also, I've updated the PCjs [Library](/disks/pc/library.xml) disk collection to include the following disk image:
+Also, I've updated the PCjs [Library](/disks/pc/library.xml) disk collection to include a disk image of this directory:
 
 	<disk path="/tests/pc/vga/">VGA Tests (Black Book)</disk>
 
-But wait, you say, that *path* refers to a directory, not a disk image.  And that's true; normally the *path* for a disk
-entry will refer to either an IMG file *or* a JSON-encoded IMG file.  However, if the *path* ends with a slash, then it's
-assumed to be a directory, and so PCjs will ask the server to enumerate the contents of that directory and send back a
-JSON-encoded disk image containing all the files in that directory (including any subdirectories).
+When *path* refers to a directory (ending with a slash) instead of a disk image, the PCjs client will ask the PCjs web
+server to enumerate the contents of that directory and send back a JSON-encoded disk image containing all the files in
+that directory (including any subdirectories) every time that disk is requested.  Since this puts an added burden on the
+server, it's best to do this only when running PCjs from a local PCjs web server.
 
-Since the contents of this directory will probably be in flux for a while, I've opted for this approach.  Once
-things settle down, I'll generate a JSON-encoded disk image containing a snapshot of this directory, like so:
+Since the contents of this particular directory will probably be in flux for a while, I've opted for this approach.
+Once things settle down, I'll generate a JSON-encoded disk image containing a snapshot of this directory, using the
+PCjs [DiskDump](/modules/diskdump/) module:
 
 	diskdump --dir=. --format=img --output=TESTVGA.img
 
-One advantage of using the PCjs [DiskDump](/modules/diskdump/) module is that it automatically converts linefeeds in
-known text files (including ASM files) into DOS-compatible CR/LF sequences.
+One advantage of using [DiskDump](/modules/diskdump/) is that it automatically converts linefeeds in known text files
+(including ASM files) into DOS-compatible CR/LF sequences.
 
 I've updated a [Compaq DeskPro 386 Machine](/devices/pc/machine/compaq/deskpro386/vga/2048kb/) to use the
 [Library](/disks/pc/library.xml) disk collection and automatically load the above disk:
