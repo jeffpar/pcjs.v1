@@ -1139,6 +1139,12 @@ Card.CRTC = {
         VERT_RETRACE_START: 0x10,
         VERT_RETRACE_END:   0x11,
         VERT_DISP_END:      0x12,
+        /*
+         * The OFFSET register (bits 0-7) specifies the logical line width of the screen.  The starting memory address
+         * for the next character row is larger than the current character row by two or four times this amount.
+         * The OFFSET register is programmed with a word address.  Depending on the method of clocking the CRT Controller,
+         * this word address is [effectively] either a word or doubleword address. #IBMVGATechRef
+         */
         OFFSET:             0x13,
         UNDERLINE:          0x14,
         VERT_BLANK_START:   0x15,
@@ -3061,7 +3067,7 @@ Video.prototype.reset = function()
          */
         var addrScreenLimit = this.cardActive.addrBuffer + this.cbScreen;
         for (var addrScreen = this.cardActive.addrBuffer; addrScreen < addrScreenLimit; addrScreen += 2) {
-            var dataRandom = Math.floor(Math.random() * 0x10000);
+            var dataRandom = (Math.random() * 0x10000)|0;
             var bChar, bAttr;
             if (this.nMonitorType == ChipSet.MONITOR.EGACOLOR || this.nMonitorType == ChipSet.MONITOR.VGACOLOR) {
                 /*
@@ -3775,7 +3781,7 @@ Video.prototype.checkCursor = function()
 
     /*
      * HACK: The original EGA BIOS has a cursor emulation bug when 43-line mode is enabled, so we attempt to detect
-     * that particular combination of bad values and automatically fix them.
+     * that particular combination of bad values and automatically fix them (we're so thoughtful!)
      */
     var fEGAHack = false;
     if (this.cardActive === this.cardEGA) {
@@ -3840,7 +3846,7 @@ Video.prototype.removeCursor = function()
             if (data & drawCursor) {
                 data &= ~drawCursor;
                 var col = this.iCellCursor % this.nCols;
-                var row = Math.floor(this.iCellCursor / this.nCols);
+                var row = (this.iCellCursor / this.nCols)|0;
                 if (this.nFont && this.aFonts[this.nFont]) {
                     /*
                      * If we're using an off-screen buffer in text mode, then we need to keep it in sync with "reality".
@@ -4052,9 +4058,9 @@ Video.prototype.setDimensions = function()
         }
     }
 
-    this.nCells = this.nCols * this.nRows;
-    this.nCellCache = (this.nCells / this.nCellsPerWord);
-    this.cbScreen = (this.nCellCache << 1) + cbPadding;
+    this.nCells = (this.nCols * this.nRows)|0;
+    this.nCellCache = (this.nCells / this.nCellsPerWord)|0;
+    this.cbScreen = ((this.nCellCache << 1) + cbPadding)|0;
     this.cbSplit = (cbPadding? ((this.cbScreen + cbPadding) >> 1) : 0);
     if (this.nMode >= Video.MODE.EGA_320X200) this.nCellCache <<= 1;
 
@@ -4063,8 +4069,8 @@ Video.prototype.setDimensions = function()
      */
     if (!this.aFonts.length) return;
 
-    this.cxScreenCell = Math.floor(this.cxScreen / this.nCols);
-    this.cyScreenCell = Math.floor(this.cyScreen / this.nRows);
+    this.cxScreenCell = (this.cxScreen / this.nCols)|0;
+    this.cyScreenCell = (this.cyScreen / this.nRows)|0;
 
     /*
      * Now we make the all-important scaling determination: if the font cell dimensions (cxCell, cyCell)
@@ -4438,8 +4444,7 @@ Video.prototype.initCellCache = function(fNew)
 {
     var nCells;
     if (!fNew) {
-        if (this.aCellCache === undefined)
-            return;
+        if (this.aCellCache === undefined) return;
         nCells = this.aCellCache.length;
     } else {
         nCells = this.nCellCache;
@@ -4579,15 +4584,15 @@ Video.prototype.updateChar = function(col, row, data, context)
         var cyCursor = this.cyCursor;
         if (context) {
             if (this.cyCursorCell && this.cyCursorCell !== font.cyCell) {
-                yCursor = Math.floor((yCursor * font.cyCell) / this.cyCursorCell);
-                cyCursor = Math.floor((cyCursor * font.cyCell) / this.cyCursorCell);
+                yCursor = ((yCursor * font.cyCell) / this.cyCursorCell)|0;
+                cyCursor = ((cyCursor * font.cyCell) / this.cyCursorCell)|0;
             }
             context.fillStyle = font.aCSSColors[iFgnd];
             context.fillRect(xDst, yDst + yCursor, font.cxCell, cyCursor);
         } else {
             if (this.cyCursorCell && this.cyCursorCell !== this.cyScreenCell) {
-                yCursor = Math.floor((yCursor * this.cyScreenCell) / this.cyCursorCell);
-                cyCursor = Math.floor((cyCursor * this.cyScreenCell) / this.cyCursorCell);
+                yCursor = ((yCursor * this.cyScreenCell) / this.cyCursorCell)|0;
+                cyCursor = ((cyCursor * this.cyScreenCell) / this.cyCursorCell)|0;
             }
             this.contextScreen.fillStyle = font.aCSSColors[iFgnd];
             this.contextScreen.fillRect(xDst, yDst + yCursor, this.cxScreenCell, cyCursor);
@@ -4598,7 +4603,7 @@ Video.prototype.updateChar = function(col, row, data, context)
 /**
  * updateScreen(fForce)
  *
- * Propagates the video buffer to the cell cache and updates the window with any changes.  Forced updates
+ * Propagates the video buffer to the cell cache and updates the screen with any changes.  Forced updates
  * are generally internal updates triggered by an I/O operation or other state change, while non-forced updates
  * are the periodic updates coming from the CPU.
  *
@@ -4677,10 +4682,29 @@ Video.prototype.updateScreen = function(fForce)
 
     addrScreen += offScreen;
     var cbScreen = this.cbScreen;
+
+    // if (this.nCard >= Video.CARD.EGA) {
+        /*
+         * Pre-EGA, the extent of visible screen memory (cbScreen) was derived from nCols * nRows,
+         * but since then, the logical width of screen memory can differ from the visible width (nCols).
+         * We now calculate the logical width, and the compute a new cbScreen in much the same way the
+         * original cbScreen was computed (but without any CGA-related padding considerations).
+         *
+         * Other variables that are affected include:
+         *
+         *      this.nCells = (this.nCols * this.nRows)|0;
+         *      this.nCellCache = (this.nCells / this.nCellsPerWord)|0;
+         */
+        // var nCols = this.cardActive.regCRTData[Card.CRTC.EGA.OFFSET] << 1;
+        // cbScreen = ((nCols * this.nRows) / this.nCellsPerWord) << 1;
+        // this.assert(cbScreen === this.cbScreen);
+    // }
+
     if (addrScreen + cbScreen > addrScreenLimit) {
         cbScreen = addrScreenLimit - addrScreen;
         if (cbScreen < 0) cbScreen = 0;
     }
+
     /*
      * addrScreenLimit was initially the limit of the entire frame buffer, but we now adjust it
      * to the limit of what's visible, since that's all we want to draw.
@@ -4705,8 +4729,7 @@ Video.prototype.updateScreen = function(fForce)
     if (!fForce && this.bus.cleanMemory(addrScreen, cbScreen)) {
         if (!fBlinkUpdate) return;
         if (!this.cBlinkVisible) {
-            if (this.iCellCursor < 0)
-                return;
+            if (this.iCellCursor < 0) return;
             iCell = this.iCellCursor;
             nCells = iCell + 1;
         }
@@ -4777,7 +4800,7 @@ Video.prototype.updateScreenText = function(addrScreen, addrScreenLimit, iCell, 
         dataCache = this.aCellCache[iCell];
         if (dataCache != data) {
             var col = iCell % this.nCols;
-            var row = Math.floor(iCell / this.nCols);
+            var row = (iCell / this.nCols)|0;
             this.updateChar(col, row, data, this.contextScreenBuffer);
             this.aCellCache[iCell] = data;
             cUpdated++;
@@ -4903,19 +4926,9 @@ Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
             if (x < xDirty) xDirty = x;
             for (var iPixel = 0; iPixel < nPixelsPerCell; iPixel++) {
                 /*
-                 * JavaScript Alert: if adwMemory contains a 32-bit value such as -1526726656, and then we mask
-                 * it with 0x80808080, we end up with -2147483648, which in a perfect 32-bit world, would be equal
-                 * to 0x80000000, so that when we look up "Video.aEGADWToByte[0x80000000]", we get the entry
-                 * containing 0x8.  But no, in JavaScript, 0x80000000 is a positive value (2147483648), so the array
-                 * lookup fails.  To fix this, the array must be initialized using negative indexes whenever bit 31
-                 * is set.
-                 *
-                 * The easiest way to do that is to follow this golden JavaScript rule: append "|0" to all hex constants
-                 * where bit 31 is set.  The innocuous use of the bit-wise OR operator has the side-effect of producing
-                 * a negative value.  So now we initialize the above array entry using "Video.aEGADWToByte[0x80000000|0]".
-                 *
-                 * And, since assertions don't fix problems (only catch them, and only in DEBUG builds), I'm also
-                 * ensuring that bPixel will always default to 0 if an undefined value ever slips through again.
+                 * We must follow the golden JavaScript rule of appending "|0" to all hex constants with bit 31 set.
+                 * The innocuous use of the bit-wise OR operator has the side-effect of producing a negative value,
+                 * matching how entries in Video.aEGADWToByte are initialized (eg, "Video.aEGADWToByte[0x80000000|0]").
                  */
                 var dwPixel = data & (0x80808080|0);
                 /*
@@ -4926,6 +4939,10 @@ Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
                  *      if (dwPixel < 0) dwPixel += 0x100000000;
                  */
                 this.assert(Video.aEGADWToByte[dwPixel] !== undefined);
+                /*
+                 * Since assertions don't fix problems (only catch them, and only in DEBUG builds), I'm also ensuring
+                 * that bPixel will always default to 0 if an undefined value ever slips through again.
+                 */
                 var bPixel = Video.aEGADWToByte[dwPixel] || 0;
                 this.setPixel(this.imageScreenBuffer, x++, y, aPixelColors[bPixel]);
                 data <<= 1;
