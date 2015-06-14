@@ -922,7 +922,7 @@ function Card(video, iCard, data, cbMemory)
         var nMonitorType = video.nMonitorType || specs[5];
 
         if (!data || data.length < 6) {
-            data = [false, 0, null, null, 0, new Array(Card.CRTC.TOTAL_REGS)];
+            data = [false, 0, null, null, 0, new Array(iCard < Video.CARD.EGA? Card.CRTC.TOTAL_REGS : Card.CRTC.EGA.TOTAL_REGS)];
         }
 
         /*
@@ -4671,7 +4671,7 @@ Video.prototype.updateScreen = function(fForce)
      */
     var addrScreen = this.cardActive.addrBuffer;
     var addrScreenLimit = addrScreen + this.cardActive.sizeBuffer;
-    var offScreen = (this.cardActive.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + this.cardActive.regCRTData[Card.CRTC.START_ADDR_LO];
+    var offScreen = ((this.cardActive.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + this.cardActive.regCRTData[Card.CRTC.START_ADDR_LO])|0;
 
     /*
      * Any screen (aka "page") offset must be doubled for text modes, due to the attribute bytes.
