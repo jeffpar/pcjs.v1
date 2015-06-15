@@ -4015,14 +4015,14 @@ Video.prototype.setDimensions = function()
     this.nRows = this.nDefaultRows;
     this.nCellsPerWord = Video.aModeParms[Video.MODE.MDA_80X25][2];
 
-    var cbPadding = 0;
+    this.cbPadding = 0;
     var modeParms = Video.aModeParms[this.nMode];
     if (modeParms) {
 
         this.nCols = modeParms[0];
         this.nRows = modeParms[1];
         this.nCellsPerWord = modeParms[2];
-        cbPadding = modeParms[3] || 0;
+        this.cbPadding = modeParms[3] || 0;
         this.nFont = modeParms[4];      // this will be undefined for graphics modes
 
         if (this.nMonitorType == ChipSet.MONITOR.EGACOLOR || this.nMonitorType == ChipSet.MONITOR.VGACOLOR) {
@@ -4060,8 +4060,8 @@ Video.prototype.setDimensions = function()
 
     this.nCells = (this.nCols * this.nRows)|0;
     this.nCellCache = (this.nCells / this.nCellsPerWord)|0;
-    this.cbScreen = ((this.nCellCache << 1) + cbPadding)|0;
-    this.cbSplit = (cbPadding? ((this.cbScreen + cbPadding) >> 1) : 0);
+    this.cbScreen = ((this.nCellCache << 1) + this.cbPadding)|0;
+    this.cbSplit = (this.cbPadding? ((this.cbScreen + this.cbPadding) >> 1) : 0);
     if (this.nMode >= Video.MODE.EGA_320X200) this.nCellCache <<= 1;
 
     /*
@@ -4683,22 +4683,17 @@ Video.prototype.updateScreen = function(fForce)
     addrScreen += offScreen;
     var cbScreen = this.cbScreen;
 
-    // if (this.nCard >= Video.CARD.EGA) {
+    if (this.nCard >= Video.CARD.EGA && this.cardActive.regCRTData[Card.CRTC.EGA.OFFSET]) {
         /*
          * Pre-EGA, the extent of visible screen memory (cbScreen) was derived from nCols * nRows,
          * but since then, the logical width of screen memory can differ from the visible width (nCols).
          * We now calculate the logical width, and the compute a new cbScreen in much the same way the
          * original cbScreen was computed (but without any CGA-related padding considerations).
-         *
-         * Other variables that are affected include:
-         *
-         *      this.nCells = (this.nCols * this.nRows)|0;
-         *      this.nCellCache = (this.nCells / this.nCellsPerWord)|0;
          */
-        // var nCols = this.cardActive.regCRTData[Card.CRTC.EGA.OFFSET] << 1;
-        // cbScreen = ((nCols * this.nRows) / this.nCellsPerWord) << 1;
-        // this.assert(cbScreen === this.cbScreen);
-    // }
+        var nCols = this.cardActive.regCRTData[Card.CRTC.EGA.OFFSET] << (this.nFont? 1 : 4);
+        cbScreen = ((((nCols * this.nRows) / this.nCellsPerWord) << 1) + this.cbPadding)|0;
+        this.assert(cbScreen === this.cbScreen);
+    }
 
     if (addrScreen + cbScreen > addrScreenLimit) {
         cbScreen = addrScreenLimit - addrScreen;
