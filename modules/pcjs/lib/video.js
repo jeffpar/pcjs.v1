@@ -122,11 +122,11 @@ function Video(parmsVideo, canvas, context, textarea, container)
     /*
      * setDimensions() uses these values ONLY if it doesn't recognize the video mode.
      */
-    this.nDefaultCols = parmsVideo['charCols'];
-    this.nDefaultRows = parmsVideo['charRows'];
-    if (this.nDefaultCols === undefined || this.nDefaultRows === undefined) {
-        this.nDefaultCols = Video.aModeParms[this.nModeDefault][0];
-        this.nDefaultRows = Video.aModeParms[this.nModeDefault][1];
+    this.nColsDefault = parmsVideo['charCols'];
+    this.nRowsDefault = parmsVideo['charRows'];
+    if (this.nColsDefault === undefined || this.nRowsDefault === undefined) {
+        this.nColsDefault = Video.aModeParms[this.nModeDefault][0];
+        this.nRowsDefault = Video.aModeParms[this.nModeDefault][1];
     }
 
     /*
@@ -142,7 +142,7 @@ function Video(parmsVideo, canvas, context, textarea, container)
      * the default FONT cell size.
      */
     this.fScaleFont = parmsVideo['scale'];
-    this.fDoubleFont = Math.round(this.cxScreen / this.nDefaultCols) >= 12;
+    this.fDoubleFont = Math.round(this.cxScreen / this.nColsDefault) >= 12;
 
     this.fTouchScreen = parmsVideo['touchScreen'];
 
@@ -4011,8 +4011,9 @@ Video.prototype.setAccess = function(nAccess)
 Video.prototype.setDimensions = function()
 {
     this.nFont = 0;
-    this.nCols = this.nDefaultCols;
-    this.nRows = this.nDefaultRows;
+    this.nCols = this.nColsDefault;
+    this.nRows = this.nRowsDefault;
+    this.nColsLogical = this.nCols;
     this.nCellsPerWord = Video.aModeParms[Video.MODE.MDA_80X25][2];
 
     this.cbPadding = 0;
@@ -4690,9 +4691,8 @@ Video.prototype.updateScreen = function(fForce)
          * We now calculate the logical width, and the compute a new cbScreen in much the same way the
          * original cbScreen was computed (but without any CGA-related padding considerations).
          */
-        var nCols = this.cardActive.regCRTData[Card.CRTC.EGA.OFFSET] << (this.nFont? 1 : 4);
-        cbScreen = ((((nCols * this.nRows) / this.nCellsPerWord) << 1) + this.cbPadding)|0;
-        this.assert(cbScreen === this.cbScreen);
+        this.nColsLogical = this.cardActive.regCRTData[Card.CRTC.EGA.OFFSET] << (this.nFont? 1 : 4);
+        cbScreen = ((((this.nColsLogical * this.nRows) / this.nCellsPerWord) << 1) + this.cbPadding)|0;
     }
 
     if (addrScreen + cbScreen > addrScreenLimit) {
@@ -4927,9 +4927,9 @@ Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
                  */
                 var dwPixel = data & (0x80808080|0);
                 /*
-                 * This was the old fix to the above problem, which mapped any negative number to its corresponding
-                 * positive value, without altering the low 32 bits.  But it's not ideal, because it means using values
-                 * both here and in the array that are outside the signed 32-bit range, requiring floating-point.
+                 * This was the old approach to dealing with negative hex values, by converting them to positive
+                 * values that didn't alter the low 32 bits.  But it's not ideal, because it requires using values here
+                 * and in the array that are outside the signed 32-bit range, potentially triggering floating-point.
                  *
                  *      if (dwPixel < 0) dwPixel += 0x100000000;
                  */
@@ -4950,6 +4950,12 @@ Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
         if (x >= this.nCols) {
             x = 0;
             if (++y > this.nRows) break;
+            if (this.nColsLogical > this.nCols) {
+                addr += (this.nColsLogical - this.nCols) >> 3;
+            }
+            /*
+             * TODO: What should happen if the card is programmed such that nColsLogical is LESS THAN nCols?
+             */
         }
     }
     /*
