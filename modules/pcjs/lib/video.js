@@ -490,7 +490,7 @@ Video.CARD = {
  * the BIOS diagnostics pass), but for the most part, we treat the BIOS like any other application code.
  *
  * As we expand support to include more programmable cards like the EGA, it becomes quite easy for the card
- * to enter a "mode" that has no BIOS counterpart (eg, non-standard combinations of frame buffer address,
+ * to enter a "mode" that has no BIOS counterpart (eg, non-standard combinations of video buffer address,
  * memory access modes, fonts, display regions, etc).  Our hardware emulation routines will cope with those
  * situations as best they can (and when they don't, it should be considered a bug if some application is
  * broken as a result), but realistically, our hardware emulation is never likely to be 100% accurate.
@@ -935,21 +935,21 @@ function Card(video, iCard, data, cbMemory)
         }
 
         this.nCard = iCard;
-        this.addrBuffer = specs[2];     // default (physical) frame buffer address
-        this.sizeBuffer = specs[3];     // default frame buffer length (this is the total size, not the current visible size; this.cbScreen is calculated on the fly to reflect the latter)
+        this.addrBuffer = specs[2];     // default (physical) video buffer address
+        this.sizeBuffer = specs[3];     // default video buffer length (this is the total size, not the current visible size; this.cbScreen is calculated on the fly to reflect the latter)
 
         /*
          * If no memory size is specified, then setMode() will use addMemory() to automatically add enough
-         * memory blocks to cover the frame buffer specified above; otherwise, it instructs addMemory() to call
+         * memory blocks to cover the video buffer specified above; otherwise, it instructs addMemory() to call
          * getMemoryBuffer(), which will return a portion of the buffer (adwMemory) allocated below.  This allows
-         * a card like the EGA to move/resize its frame buffer as needed, as well as giving it total control over
+         * a card like the EGA to move/resize its video buffer as needed, as well as giving it total control over
          * the underlying memory.
          */
         this.cbMemory = cbMemory || specs[4];
 
         /*
-         * All of our cardSpec frame buffer sizes are based on the default text mode (eg, 4Kb for an MDA, 16Kb for
-         * a CGA), but for a card with 64Kb or more of memory (ie, any EGA card), the default text mode frame buffer
+         * All of our cardSpec video buffer sizes are based on the default text mode (eg, 4Kb for an MDA, 16Kb for
+         * a CGA), but for a card with 64Kb or more of memory (ie, any EGA card), the default text mode video buffer
          * size should be dynamically recalculated as the smaller of: cbMemory divided by 4, or 32Kb.
          */
         if (this.cbMemory >= 0x10000 && this.addrBuffer >= 0xB0000) {
@@ -1516,7 +1516,7 @@ if (DEBUGGER) Card.GRC.REGS = ["SRESET","ESRESET","COLORCMP","DATAROT","READMAP"
  *
  * Modes 4/5 (320x200 low-res graphics) emulate the same buffer format that the CGA uses.  To recap: 1 byte contains
  * 4 pixels (pixel 0 in bits 7-6, pixel 1 in bits 5-4, etc), and thus one row of pixels is 80 (0x50) bytes long.
- * Moreover, all even rows are stored in the first 8K of the frame buffer (at 0xB8000), and all odd rows are stored
+ * Moreover, all even rows are stored in the first 8K of the video buffer (at 0xB8000), and all odd rows are stored
  * in the second 8K (at 0xBA000).  Of each 8K, only 8000 (0x1F40) bytes are used (80 bytes X 100 rows); the remaining
  * 192 bytes of each 8K are unused.
  *
@@ -2058,11 +2058,11 @@ Card.prototype.initEGA = function(data, nMonitorType)
     this.latches    = data[12];
 
     /*
-     * Since we originally neglected to save/restore the card's active frame buffer address and length,
+     * Since we originally neglected to save/restore the card's active video buffer address and length,
      * we're now stashing all that information in data[13].  So if we're presented with an old data entry
      * that contains only the card's memory size, fix it up.
      *
-     * TODO: This code just creates the required array; the correct frame buffer address and length would
+     * TODO: This code just creates the required array; the correct video buffer address and length would
      * still need to be calculated from the current GRC registers; checkMode() knows how to do that, but I'm
      * not prepared to shoehorn in a call to checkMode() here, and potentially create more issues, for an
      * old problem that will eventually disappear anyway.
@@ -2389,14 +2389,14 @@ Card.prototype.setMemoryAccess = function(nAccess)
  *
  *      [0]: card descriptor
  *      [1]: default CRTC port address
- *      [2]: default frame buffer address
- *      [3]: default frame buffer size
+ *      [2]: default video buffer address
+ *      [3]: default video buffer size
  *      [4]: total on-board memory (if no "memory" parm was specified)
  *      [5]: default monitor type
  *
- * If total on-board memory is zero, then addMemory() will simply add the specified frame buffer
+ * If total on-board memory is zero, then addMemory() will simply add the specified video buffer
  * to the address space; otherwise, we will allocate an internal buffer (adwMemory) and tell addMemory()
- * to map it to the frame buffer address.  The latter approach gives us total control over the buffer;
+ * to map it to the video buffer address.  The latter approach gives us total control over the buffer;
  * refer to getMemoryAccess().
  *
  * TODO: Consider allocating our own buffer for all video cards, not just EGA/VGA.  For MDA/CGA, I'm not
@@ -4063,7 +4063,13 @@ Video.prototype.setDimensions = function()
     this.nCellCache = (this.nCells / this.nCellsPerWord)|0;
     this.cbScreen = ((this.nCellCache << 1) + this.cbPadding)|0;
     this.cbSplit = (this.cbPadding? ((this.cbScreen + this.cbPadding) >> 1) : 0);
-    if (this.nMode >= Video.MODE.EGA_320X200) this.nCellCache <<= 1;
+    if (this.nMode >= Video.MODE.EGA_320X200) {
+        /*
+         * Double nCellCache when every cell is a byte rather than a word, and add an extra byte for every row
+         * to handle instances where horizontal panning is used.
+         */
+        this.nCellCache += (this.nCellCache + this.nRows);
+    }
 
     /*
      * If no fonts were successfully loaded, there's no point in initializing the remaining drawing parameters.
@@ -4276,7 +4282,7 @@ Video.prototype.checkMode = function(fForce)
                             // we've already defaulted to 0x0F or 0x10, so determine if it's 0x0D or 0x0E (ie, a 200-row mode)
                             // and then which one (ie, 320 wide or 640 wide).
                             //
-                            if (nCRTCVertTotal < 400) {
+                            if (nCRTCVertTotal < 500) {
                                 if (nCRTCVertTotal < 350) {
                                     nMode = (fSEQDotClock? Video.MODE.EGA_320X200 : Video.MODE.EGA_640X200);
                                 }
@@ -4352,12 +4358,12 @@ Video.prototype.setMode = function(nMode, fForce)
 
         /*
          * On an EGA, it's CRITICAL that a reset() invalidate cardActive, to ensure that the code below
-         * releases the previous frame buffer and installs a new one, even if there was no change in the
-         * frame buffer address or size, because otherwise the Memory blocks installed at the frame buffer
+         * releases the previous video buffer and installs a new one, even if there was no change in the
+         * video buffer address or size, because otherwise the Memory blocks installed at the video buffer
          * address may still be using blocks of the EGA's previous memory buffer.
          *
          * When the EGA is reinitialized, a new memory buffer (adwMemory) is allocated (see initEGA()), and
-         * this is where the mapping of that EGA memory buffer to the frame buffer occurs.  Other cards
+         * this is where the mapping of that EGA memory buffer to the video buffer occurs.  Other cards
          * (MDA or CGA) don't allocate/manage their own memory buffer, but even then, it's still a good idea
          * to always force this operation (eg, in case a switch setting changed the active video card).
          */
@@ -4686,13 +4692,13 @@ Video.prototype.updateScreen = function(fForce)
 
     if (this.nCard >= Video.CARD.EGA && this.cardActive.regCRTData[Card.CRTC.EGA.OFFSET]) {
         /*
-         * Pre-EGA, the extent of visible screen memory (cbScreen) was derived from nCols * nRows,
-         * but since then, the logical width of screen memory can differ from the visible width (nCols).
-         * We now calculate the logical width, and the compute a new cbScreen in much the same way the
-         * original cbScreen was computed (but without any CGA-related padding considerations).
+         * Pre-EGA, the extent of visible screen memory (cbScreen) was derived from nCols * nRows, but since
+         * then, the logical width of screen memory (nColsLogical) can differ from the visible width (nCols).
+         * We now calculate the logical width, and the compute a new cbScreen in much the same way the original
+         * cbScreen was computed (but without any CGA-related padding considerations).
          */
         this.nColsLogical = this.cardActive.regCRTData[Card.CRTC.EGA.OFFSET] << (this.nFont? 1 : 4);
-        cbScreen = ((((this.nColsLogical * this.nRows) / this.nCellsPerWord) << 1) + this.cbPadding)|0;
+        cbScreen = ((((this.nColsLogical * (this.nRows-1) + this.nCols) / this.nCellsPerWord) << 1) + this.cbPadding)|0;
     }
 
     if (addrScreen + cbScreen > addrScreenLimit) {
@@ -4701,7 +4707,7 @@ Video.prototype.updateScreen = function(fForce)
     }
 
     /*
-     * addrScreenLimit was initially the limit of the entire frame buffer, but we now adjust it
+     * addrScreenLimit was initially the limit of the entire video buffer, but we now adjust it
      * to the limit of what's visible, since that's all we want to draw.
      */
     addrScreenLimit = addrScreen + cbScreen;
@@ -4902,24 +4908,48 @@ Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
 
     addr = addrScreen;
     this.cBlinkVisible = 0;
-    var iCell = 0, nPixelsPerCell = 8;
+
+    var iCell = 0;
     var aPixelColors = this.getCardColors();
     var adwMemory = this.cardActive.adwMemory;
 
     var x = 0, y = 0;
     var xDirty = this.nCols, xMaxDirty = 0, yDirty = this.nRows, yMaxDirty = 0;
+
+    var iPixelFirst = this.cardActive.regATCData[Card.ATC.HORZPAN.INDX] & Card.ATC.HORZPAN.SHIFT_LEFT;
+    /*
+     * TODO: What should happen if the card is programmed such that nColsLogical is LESS THAN nCols?
+     */
+    var nRowAdjust = (this.nColsLogical > this.nCols? ((this.nColsLogical - this.nCols - iPixelFirst) >> 3) : 0);
+    var nCellAdjust = (iPixelFirst == 0? 1 : 0);
+
     while (addr < addrScreenLimit) {
         var idw = addr++ - this.addrBuffer;
         this.assert(idw >= 0 && idw < adwMemory.length);
         data = adwMemory[idw];
         this.assert(iCell < this.aCellCache.length);
         dataCache = this.aCellCache[iCell];
-        if (dataCache === data) {
-            x += nPixelsPerCell;
+
+        /*
+         * Figure out how many visible pixels this byte represents; usually 8, unless panning is being used.
+         */
+        var iPixel, nPixels = 8;
+        if (!x) {
+            data <<= iPixelFirst;
+            dataCache <<= iPixelFirst;
+            nPixels -= iPixelFirst;
+            this.assert(iCell == y * ((this.nCols >> 3) + 1));
+        } else {
+            iPixel = this.nCols - x;
+            if (nPixels > iPixel) nPixels = iPixel;
+        }
+
+        if (data === dataCache) {
+            x += nPixels;
         } else {
             this.aCellCache[iCell] = data;
             if (x < xDirty) xDirty = x;
-            for (var iPixel = 0; iPixel < nPixelsPerCell; iPixel++) {
+            for (iPixel = 0; iPixel < nPixels; iPixel++) {
                 /*
                  * We must follow the golden JavaScript rule of appending "|0" to all hex constants with bit 31 set.
                  * The innocuous use of the bit-wise OR operator has the side-effect of producing a negative value,
@@ -4946,16 +4976,15 @@ Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
             if (y < yDirty) yDirty = y;
             if (y >= yMaxDirty) yMaxDirty = y + 1;
         }
+
         iCell++;
+        this.assert(x <= this.nCols);
+
         if (x >= this.nCols) {
             x = 0;
             if (++y > this.nRows) break;
-            if (this.nColsLogical > this.nCols) {
-                addr += (this.nColsLogical - this.nCols) >> 3;
-            }
-            /*
-             * TODO: What should happen if the card is programmed such that nColsLogical is LESS THAN nCols?
-             */
+            addr += nRowAdjust;
+            iCell += nCellAdjust;
         }
     }
     /*
