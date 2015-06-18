@@ -4063,13 +4063,7 @@ Video.prototype.setDimensions = function()
     this.nCellCache = (this.nCells / this.nCellsPerWord)|0;
     this.cbScreen = ((this.nCellCache << 1) + this.cbPadding)|0;
     this.cbSplit = (this.cbPadding? ((this.cbScreen + this.cbPadding) >> 1) : 0);
-    if (this.nMode >= Video.MODE.EGA_320X200) {
-        /*
-         * Double nCellCache when every cell is a byte rather than a word, and add an extra byte for every row
-         * to handle instances where horizontal panning is used.
-         */
-        this.nCellCache += (this.nCellCache + this.nRows);
-    }
+    if (this.nMode >= Video.MODE.EGA_320X200) this.nCellCache <<= 1;    // double nCellCache (every cell is a byte)
 
     /*
      * If no fonts were successfully loaded, there's no point in initializing the remaining drawing parameters.
@@ -4445,24 +4439,22 @@ Video.prototype.setPixel = function(imageData, x, y, rgb)
  * Invalidates the contents of our internal cell cache.
  *
  * @this {Video}
- * @param {boolean} fNew is true to reallocate/resize the cell cache; in any case, it's still reinitialized
+ * @param {boolean} [fNew] is true to reallocate/resize the cell cache; in any case, it's still reinitialized
  */
 Video.prototype.initCellCache = function(fNew)
 {
-    var nCells;
-    if (!fNew) {
-        if (this.aCellCache === undefined) return;
-        nCells = this.aCellCache.length;
-    } else {
-        nCells = this.nCellCache;
+    this.cBlinkVisible = -1;                // invalidate the visible blinking character count, to force updateScreen() to recount
+    this.fCellCacheValid = false;
+    if (fNew) {
+        var nCells = this.nCellCache;
         if (this.aCellCache === undefined || this.aCellCache.length != nCells) {
             this.aCellCache = new Array(nCells);
+            /*
+             * TODO: Determine whether, with the introduction of fCellCacheValid, this array initialization is useful
+             */
+            for (var iCell = 0; iCell < nCells; iCell++) this.aCellCache[iCell] = -1;
         }
     }
-    for (var iCell = 0; iCell < nCells; iCell++) {
-        this.aCellCache[iCell] = -1;        // invalidate every cell of our internal cell cache (-1 is an invalid cell value)
-    }
-    this.cBlinkVisible = -1;                // also invalidate the visible blinking character count, to force updateScreen() to recount
 };
 
 /**
@@ -4765,7 +4757,7 @@ Video.prototype.updateScreen = function(fForce)
  */
 Video.prototype.updateScreenText = function(addrScreen, addrScreenLimit, iCell, nCells)
 {
-    var addr, data, dataCache, cUpdated = 0;
+    var addr, data, cUpdated = 0;
 
     /*
      * If MDA.MODE.BLINK_ENABLE is set and a cell's blink bit is set, then if (cBlinks & 0x2) != 0,
@@ -4786,6 +4778,7 @@ Video.prototype.updateScreenText = function(addrScreen, addrScreenLimit, iCell, 
         dataMask &= ~dataBlink;
         if (!(this.cBlinks & 0x2)) dataMask &= ~dataDraw;
     }
+
     addr = addrScreen + (iCell << 1);
     while (addr < addrScreenLimit && iCell < nCells) {
         data = this.bus.getShortDirect(addr);
@@ -4798,8 +4791,7 @@ Video.prototype.updateScreenText = function(addrScreen, addrScreenLimit, iCell, 
             data |= ((this.cBlinks & 0x1)? (Video.ATTRS.DRAW_CURSOR << 8) : 0);
         }
         this.assert(iCell < this.aCellCache.length);
-        dataCache = this.aCellCache[iCell];
-        if (dataCache != data) {
+        if (!this.fCellCacheValid || data !== this.aCellCache[iCell]) {
             var col = iCell % this.nCols;
             var row = (iCell / this.nCols)|0;
             this.updateChar(col, row, data, this.contextScreenBuffer);
@@ -4809,6 +4801,9 @@ Video.prototype.updateScreenText = function(addrScreen, addrScreenLimit, iCell, 
         addr += 2;
         iCell++;
     }
+
+    this.fCellCacheValid = true;
+
     if (cUpdated && this.contextScreenBuffer) {
         this.contextScreen.drawImage(this.canvasScreenBuffer, 0, 0, this.cxBuffer, this.cyBuffer, this.xScreenOffset, this.yScreenOffset, this.cxScreenOffset, this.cyScreenOffset);
     }
@@ -4822,7 +4817,7 @@ Video.prototype.updateScreenText = function(addrScreen, addrScreenLimit, iCell, 
  */
 Video.prototype.updateScreenGraphicsCGA = function(addrScreen, addrScreenLimit)
 {
-    var addr, data, dataCache;
+    var addr, data;
 
     /*
      * This is the CGA graphics-mode update case, where cells are pixels spread across two halves of the buffer.
@@ -4839,8 +4834,7 @@ Video.prototype.updateScreenGraphicsCGA = function(addrScreen, addrScreenLimit)
     while (addr < addrScreenLimit) {
         data = this.bus.getShortDirect(addr);
         this.assert(iCell < this.aCellCache.length);
-        dataCache = this.aCellCache[iCell];
-        if (dataCache === data) {
+        if (this.fCellCacheValid && data === this.aCellCache[iCell]) {
             x += nPixelsPerCell;
         } else {
             this.aCellCache[iCell] = data;
@@ -4868,6 +4862,9 @@ Video.prototype.updateScreenGraphicsCGA = function(addrScreen, addrScreenLimit)
             }
         }
     }
+
+    this.fCellCacheValid = true;
+
     /*
      * Instead of blasting the ENTIRE imageScreenBuffer into contextScreenBuffer, and then blasting the ENTIRE
      * canvasScreenBuffer onto contextScreen, even for the smallest change, let's try to be a bit smarter about
@@ -4904,7 +4901,7 @@ Video.prototype.updateScreenGraphicsCGA = function(addrScreen, addrScreenLimit)
  */
 Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
 {
-    var addr, data, dataCache;
+    var addr, data;
 
     addr = addrScreen;
     this.cBlinkVisible = 0;
@@ -4921,33 +4918,47 @@ Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
      * TODO: What should happen if the card is programmed such that nColsLogical is LESS THAN nCols?
      */
     var nRowAdjust = (this.nColsLogical > this.nCols? ((this.nColsLogical - this.nCols - iPixelFirst) >> 3) : 0);
-    var nCellAdjust = (iPixelFirst == 0? 1 : 0);
 
     while (addr < addrScreenLimit) {
         var idw = addr++ - this.addrBuffer;
         this.assert(idw >= 0 && idw < adwMemory.length);
         data = adwMemory[idw];
-        this.assert(iCell < this.aCellCache.length);
-        dataCache = this.aCellCache[iCell];
 
         /*
          * Figure out how many visible pixels this byte represents; usually 8, unless panning is being used.
          */
         var iPixel, nPixels = 8;
-        if (!x) {
-            data <<= iPixelFirst;
-            dataCache <<= iPixelFirst;
-            nPixels -= iPixelFirst;
-            this.assert(iCell == y * ((this.nCols >> 3) + 1));
+
+        if (iPixelFirst) {
+            /*
+             * Notice that we're not using the cell cache when panning is active, because the cached cell data no
+             * longer aligns with the data we're pulling out of the video buffer, and it's not clear that the effort
+             * to realign the data and make a valid cache comparison would save enough work to make it worthwhile.
+             */
+            if (!x) {
+                data <<= iPixelFirst;
+                nPixels -= iPixelFirst;
+                /*
+                 * This is as good a place as any to invalidate the cell cache when panning is active; this ensures
+                 * we don't rely on stale cache contents once panning stops.
+                 */
+                this.fCellCacheValid = false;
+            } else {
+                iPixel = this.nCols - x;
+                if (nPixels > iPixel) nPixels = iPixel;
+            }
         } else {
-            iPixel = this.nCols - x;
-            if (nPixels > iPixel) nPixels = iPixel;
+            this.assert(iCell < this.aCellCache.length);
+            if (this.fCellCacheValid && data === this.aCellCache[iCell]) {
+                x += nPixels;
+                nPixels = 0;
+            } else {
+                this.aCellCache[iCell] = data;
+            }
+            iCell++;
         }
 
-        if (data === dataCache) {
-            x += nPixels;
-        } else {
-            this.aCellCache[iCell] = data;
+        if (nPixels) {
             if (x < xDirty) xDirty = x;
             for (iPixel = 0; iPixel < nPixels; iPixel++) {
                 /*
@@ -4977,16 +4988,17 @@ Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
             if (y >= yMaxDirty) yMaxDirty = y + 1;
         }
 
-        iCell++;
         this.assert(x <= this.nCols);
 
         if (x >= this.nCols) {
             x = 0;
             if (++y > this.nRows) break;
             addr += nRowAdjust;
-            iCell += nCellAdjust;
         }
     }
+
+    if (!iPixelFirst) this.fCellCacheValid = true;
+
     /*
      * For a fascinating discussion of the best way to update the screen canvas at this point, see updateScreenGraphicsCGA().
      */
@@ -5754,7 +5766,7 @@ Video.prototype.outCGAColor = function(port, bOut, addrFrom)
          * When this color register changes, it can automatically change the appearance of any number of cells, so we make
          * a special call to initCellCache() to invalidate every cell, forcing all cells to be redrawn on the next updateScreen().
          */
-        this.initCellCache(false);
+        this.initCellCache();
     }
 };
 
