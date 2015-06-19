@@ -108,6 +108,7 @@
     clear: both;
     height: auto;
     position: relative;
+    line-height: 0;
 }
 .pcjs-video-object textarea {
     position: absolute;
