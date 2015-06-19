@@ -2257,6 +2257,10 @@ Card.prototype.dumpCard = function()
              */
         }
 
+        /*
+         * TODO: This simply dumps the last value read from the STATUS1 register, not necessarily
+         * its current state; consider dumping getRetraceBits() instead of (or in addition to) this.
+         */
         this.dumpRegs("   STATUS1", this.regStatus);
 
         if (this.nCard == Video.CARD.MDA || this.nCard == Video.CARD.CGA) {
