@@ -3099,8 +3099,21 @@ if (DEBUGGER) {
          */
         var fBreak = false;
         if (!this.nBreakSuppress++) {
+
             addr = this.mapBreakpoint(addr);
-            for (var i = 1; i < aBreak.length; i++) {
+
+            /*
+             * As discussed in opINT3(), I decided to check for INT3 instructions here: we'll tell the CPU to
+             * stop on INT3 whenever both the INT and HALT message bits are set; a simple "g" command allows you
+             * to continue.
+             */
+            if (this.messageEnabled(Messages.INT | Messages.HALT)) {
+                if (this.cpu.probeAddr(addr) == X86.OPCODE.INT3) {
+                    fBreak = true;
+                }
+            }
+
+            for (var i = 1; !fBreak && i < aBreak.length; i++) {
 
                 var dbgAddrBreak = aBreak[i];
 
@@ -3129,7 +3142,6 @@ if (DEBUGGER) {
                         this.println("breakpoint hit: " + this.hexAddr(dbgAddrBreak) + " (" + aBreak[0] + ")");
                     }
                     fBreak = true;
-                    break;
                 }
             }
         }

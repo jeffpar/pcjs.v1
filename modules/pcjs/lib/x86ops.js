@@ -3322,6 +3322,32 @@ X86.opRETF = function RETF()
  */
 X86.opINT3 = function INT3()
 {
+    /*
+     * To give our own Debugger the ability to stop execution on INT3, I thought about treating this as
+     * a fault rather than an interrupt, in order to leverage the existing Debugger logic inside fnFault()
+     * processing, but that has the unwanted side-effect of rewinding EIP to the INT3 prior to issuing
+     * the interrupt, and the corresponding IRET takes us right back to the INT3.
+     *
+     *      X86.fnFault.call(this, X86.EXCEPTION.BREAKPOINT, null, false, this.cycleCounts.nOpCyclesInt3D);
+     *
+     * Then I had the idea of using the fnFaultMessage() function, in much the same way that fnFault()
+     * does for actual faults: if the user turned on the FAULT and HALT message bits, then fnFaultMessage()
+     * would tell us to halt; otherwise, we'd perform the normal fnINT() call.
+     *
+     *      if (X86.fnFaultMessage.call(this, X86.EXCEPTION.BREAKPOINT)) {
+     *          this.setIP(this.opLIP - this.segCS.base);
+     *          return;
+     *      }
+     *
+     * However, that makes it a little tedious to get past the INT3 (you have to use a Debugger command
+     * like "t;g"), and a somewhat confusing fault message is displayed; eg:
+     *
+     *      Fault 0x03 on opcode 0xB4 at 09CE:0155 (%009E35)
+     *
+     * The best solution was to leave this function alone, and change the Debugger's checkBreakpoint()
+     * function to stop execution on INT3 whenever both the INT and HALT message bits are set; a simple "g"
+     * command allows you to continue.
+     */
     X86.fnINT.call(this, X86.EXCEPTION.BREAKPOINT, null, this.cycleCounts.nOpCyclesInt3D);
 };
 

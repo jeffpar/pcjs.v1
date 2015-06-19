@@ -3576,7 +3576,7 @@ X86.fnSrcNone = function SrcNone()
 };
 
 /**
- * fnFault(nFault, nError, fHalt)
+ * fnFault(nFault, nError, fHalt, nCycles)
  *
  * Helper to dispatch faults.
  *
@@ -3584,8 +3584,9 @@ X86.fnSrcNone = function SrcNone()
  * @param {number} nFault
  * @param {number} [nError] (if omitted, no error code will be pushed)
  * @param {boolean} [fHalt] will halt the CPU if true *and* a Debugger is loaded
+ * @param {number} [nCycles] cycle count to pass through to fnINT(), if any
  */
-X86.fnFault = function(nFault, nError, fHalt)
+X86.fnFault = function(nFault, nError, fHalt, nCycles)
 {
     if (!this.aFlags.fComplete) {
         this.printMessage("Fault " + str.toHexByte(nFault) + " blocked by Debugger", Messages.WARN);
@@ -3623,7 +3624,7 @@ X86.fnFault = function(nFault, nError, fHalt)
         fDispatch = false;
     }
 
-    if (fDispatch) X86.fnINT.call(this, this.nFault = nFault, nError, 0);
+    if (fDispatch) X86.fnINT.call(this, this.nFault = nFault, nError, nCycles || 0);
 
     /*
      * Since this fault is likely being issued in the context of an instruction that hasn't finished
@@ -3696,7 +3697,7 @@ X86.fnFaultMessage = function(nFault, nError, fHalt)
      *
      * When a triple fault shows up, nFault is -1; it displays as 0xff only because we use toHexByte().
      */
-    if (bOpcode == X86.OPCODE.INT3) {
+    if (bOpcode == X86.OPCODE.INT3 && !this.addrIDTLimit) {
         fHalt = false;
         bitsMessage |= Messages.CPU;
     }

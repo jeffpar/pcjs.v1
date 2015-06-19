@@ -975,11 +975,11 @@ function Card(video, iCard, data, cbMemory)
         var monitorSpecs = Video.monitorSpecs[nMonitorType] || Video.monitorSpecs[ChipSet.MONITOR.MONO];
 
         var nCyclesPerSecond = video.cpu.getCyclesPerSecond();      // eg, 4772727
-        this.nCyclesHorzPeriod = (nCyclesPerSecond / monitorSpecs.nHorzPeriodsPerSec) | 0;
-        this.nCyclesHorzActive = (this.nCyclesHorzPeriod * monitorSpecs.percentHorzActive / 100) | 0;
-        this.nCyclesVertPeriod = this.nCyclesHorzPeriod * monitorSpecs.nHorzPeriodsPerFrame;
-        this.nCyclesVertActive = (this.nCyclesVertPeriod * monitorSpecs.percentVertActive / 100) | 0;
-        this.nInitCycles = (data[7] == null? 0 : data[7]);
+        this.nCyclesHorzPeriod = (nCyclesPerSecond / monitorSpecs.nHorzPeriodsPerSec)|0;
+        this.nCyclesHorzActive = (this.nCyclesHorzPeriod * monitorSpecs.percentHorzActive / 100)|0;
+        this.nCyclesVertPeriod = (this.nCyclesHorzPeriod * monitorSpecs.nHorzPeriodsPerFrame)|0;
+        this.nCyclesVertActive = (this.nCyclesVertPeriod * monitorSpecs.percentVertActive / 100)|0;
+        this.nInitCycles = (data[7] || 0);
     }
 }
 
@@ -2031,12 +2031,13 @@ Card.prototype.initEGA = function(data, nMonitorType)
             /*22*/  0,
             /*23*/  0,
             /*24*/  0,
-            /*25*/  Card.VGA_ENABLE.ENABLED,
-            /*26*/  Card.DAC.MASK.DEFAULT,
-            /*27*/  0,
+            /*25*/  0,
+            /*26*/  Card.VGA_ENABLE.ENABLED,
+            /*27*/  Card.DAC.MASK.DEFAULT,
             /*28*/  0,
-            /*29*/  Card.DAC.STATE.MODE_WRITE,
-            /*30*/  new Array(Card.DAC.TOTAL_REGS)
+            /*29*/  0,
+            /*30*/  Card.DAC.STATE.MODE_WRITE,
+            /*31*/  new Array(Card.DAC.TOTAL_REGS)
         ];
     }
 
@@ -2112,14 +2113,15 @@ Card.prototype.initEGA = function(data, nMonitorType)
     this.nSetMapBits    = data[22];
     this.nColorCompare  = data[23];
     this.nColorDontCare = data[24];
+    this.nStartAddress  = data[25];     // this is the last CRTC start address latched from CRTC.START_ADDR_HI,CRTC.START_ADDR_LO
 
     if (this.nCard == Video.CARD.VGA) {
-        this.regVGAEnable   = data[25];
-        this.regDACMask     = data[26];
-        this.regDACAddr     = data[27];
-        this.regDACShift    = data[28];
-        this.regDACState    = data[29];
-        this.regDACData     = data[30];
+        this.regVGAEnable   = data[26];
+        this.regDACMask     = data[27];
+        this.regDACAddr     = data[28];
+        this.regDACShift    = data[29];
+        this.regDACState    = data[30];
+        this.regDACData     = data[31];
     }
 };
 
@@ -2181,14 +2183,15 @@ Card.prototype.saveEGA = function()
     data[22] = this.nSetMapBits;
     data[23] = this.nColorCompare;
     data[24] = this.nColorDontCare;
+    data[25] = this.nStartAddress;
 
     if (this.nCard == Video.CARD.VGA) {
-        data[25] = this.regVGAEnable;
-        data[26] = this.regDACMask;
-        data[27] = this.regDACAddr;
-        data[28] = this.regDACShift;
-        data[29] = this.regDACState;
-        data[30] = this.regDACData;
+        data[26] = this.regVGAEnable;
+        data[27] = this.regDACMask;
+        data[28] = this.regDACAddr;
+        data[29] = this.regDACShift;
+        data[30] = this.regDACState;
+        data[31] = this.regDACData;
     }
     return data;
 };
@@ -4625,12 +4628,14 @@ Video.prototype.updateScreen = function(fForce)
      * unless fForce is set.
      */
     var fEnabled = false;
-    if (this.cardActive) {
-        if (this.cardActive === this.cardEGA) {
-            if (this.cardEGA.regATCIndx & Card.ATC.INDX_PAL_ENABLE) fEnabled = true;
+    var card = this.cardActive;
+
+    if (card) {
+        if (card !== this.cardEGA) {
+            if (card.regMode & Card.CGA.MODE.VIDEO_ENABLE) fEnabled = true;
         }
         else {
-            if (this.cardActive.regMode & Card.CGA.MODE.VIDEO_ENABLE) fEnabled = true;
+            if (card.regATCIndx & Card.ATC.INDX_PAL_ENABLE) fEnabled = true;
         }
     }
 
@@ -4668,9 +4673,25 @@ Video.prototype.updateScreen = function(fForce)
      * to follow.  FYI, in these calculations, offScreen does not refer to "off-screen" memory,
      * but rather the "offset" of the start of visible screen memory.
      */
-    var addrScreen = this.cardActive.addrBuffer;
-    var addrScreenLimit = addrScreen + this.cardActive.sizeBuffer;
-    var offScreen = ((this.cardActive.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + this.cardActive.regCRTData[Card.CRTC.START_ADDR_LO])|0;
+    var addrScreen = card.addrBuffer;
+    var addrScreenLimit = addrScreen + card.sizeBuffer;
+
+    /*
+     * HACK: nStartAddress is supposed to be "latched" ONLY at the start of every VERT_RETRACE interval;
+     * this is an attempt to honor that behavior, but unfortunately, updateScreen() is currently called at
+     * the CPU's discretion, not necessarily in sync with nCyclesVertPeriod.  As a result, we must rely
+     * on other "triggers" to update our latched CRTC start address (eg, see outATC()).
+     *
+     * TODO: Consider matching the CPU's nCyclesNextVideoUpdate to the card's nCyclesVertPeriod, ensuring
+     * that CPU bursts are in sync with VERT_RETRACE.  Note, however, that that will be complicated by other
+     * factors, such as the horizontal retrace interval, and the timing requirements of other cards in a
+     * multi-display configuration.
+     */
+    if (this.getRetraceBits(card) & Card.CGA.STATUS.VERT_RETRACE) {
+        card.nStartAddress = ((card.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + card.regCRTData[Card.CRTC.START_ADDR_LO])|0;
+    }
+
+    var offScreen = card.nStartAddress;
 
     /*
      * Any screen (aka "page") offset must be doubled for text modes, due to the attribute bytes.
@@ -4682,14 +4703,14 @@ Video.prototype.updateScreen = function(fForce)
     addrScreen += offScreen;
     var cbScreen = this.cbScreen;
 
-    if (this.nCard >= Video.CARD.EGA && this.cardActive.regCRTData[Card.CRTC.EGA.OFFSET]) {
+    if (this.nCard >= Video.CARD.EGA && card.regCRTData[Card.CRTC.EGA.OFFSET]) {
         /*
          * Pre-EGA, the extent of visible screen memory (cbScreen) was derived from nCols * nRows, but since
          * then, the logical width of screen memory (nColsLogical) can differ from the visible width (nCols).
          * We now calculate the logical width, and the compute a new cbScreen in much the same way the original
          * cbScreen was computed (but without any CGA-related padding considerations).
          */
-        this.nColsLogical = this.cardActive.regCRTData[Card.CRTC.EGA.OFFSET] << (this.nFont? 1 : 4);
+        this.nColsLogical = card.regCRTData[Card.CRTC.EGA.OFFSET] << (this.nFont? 1 : 4);
         cbScreen = ((((this.nColsLogical * (this.nRows-1) + this.nCols) / this.nCellsPerWord) << 1) + this.cbPadding)|0;
     }
 
@@ -5011,6 +5032,48 @@ Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
 };
 
 /**
+ * getRetraceBits(card)
+ *
+ * This returns a byte value with two bits set or clear as appropriate: DISP_RETRACE and VERT_RETRACE.
+ *
+ * @this {Video}
+ * @param {Object} card
+ * @return {number}
+ */
+Video.prototype.getRetraceBits = function(card)
+{
+    var b = 0;
+
+    /*
+     * NOTE: The CGA bits CGA.STATUS.DISP_RETRACE (0x01) and CGA.STATUS.VERT_RETRACE (0x08) match the EGA definitions,
+     * and they also correspond to the MDA bits MDA.STATUS.HDRIVE (0x01) and MDA.STATUS.BWVIDEO (0x08); I'm not sure why
+     * the MDA uses different designations, but the bits appear to serve the same purpose.
+     *
+     * TODO: Decide whether this more faithful emulation of the retrace bits should be extended to the MDA/CGA, too;
+     * doing so might slow down the BIOS scroll code a bit, though.
+     */
+    var nCycles = this.cpu.getCycles();
+    var nElapsedCycles = nCycles - card.nInitCycles;
+    if (nElapsedCycles < 0) nElapsedCycles = 0;         // TODO: Determine if this ever happens
+    var nCyclesHorzRemain = nElapsedCycles % card.nCyclesHorzPeriod;
+    if (nCyclesHorzRemain > card.nCyclesHorzActive) b |= Card.CGA.STATUS.DISP_RETRACE;
+    var nCyclesVertRemain = nElapsedCycles % card.nCyclesVertPeriod;
+    if (nCyclesVertRemain > card.nCyclesVertActive) b |= Card.CGA.STATUS.VERT_RETRACE | Card.CGA.STATUS.DISP_RETRACE;
+    /*
+     * This is optional: the number of CPU cycles that remain in the current vertical period is all we need to keep
+     * track of (the number of cycles since the card was initialized is fine, too, but that delta can become extremely
+     * large after a while).
+     *
+     *      card.nInitCycles = nCycles - nCyclesVertRemain;
+     *
+     * NOTE: Now that we're calling getRetraceBits() more frequently (ie, for internal checks), resetting nInitCycles
+     * in this fashion preserves the vertical period at the expense of the horizontal period, which in turn can cause
+     * grief in ROM BIOS code that requires strict horizontal retrace times.  So the above code is now disabled.
+     */
+    return b;
+};
+
+/**
  * inMDAIndx(port, addrFrom)
  *
  * @this {Video}
@@ -5162,6 +5225,11 @@ Video.prototype.outATC = function(port, bOut, addrFrom)
                 this.updateScreen(true);
             }
         }
+        /*
+         * HACK: nStartAddress is supposed to be "latched" ONLY at the start of every VERT_RETRACE interval,
+         * but other "triggers" are currently required; see updateScreen() for details.
+         */
+        this.cardEGA.nStartAddress = ((this.cardEGA.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + this.cardEGA.regCRTData[Card.CRTC.START_ADDR_LO])|0;
     } else {
         var iReg = this.cardEGA.regATCIndx & Card.ATC.INDX_MASK;
         if (iReg >= Card.ATC.PALETTE_REGS || !fPalEnabled) {
@@ -5873,6 +5941,15 @@ Video.prototype.outCRTCData = function(card, port, bOut, addrFrom)
             }
             card.regCRTData[card.regCRTIndx] = bOut;
         }
+        if (card.regCRTIndx == Card.CRTC.START_ADDR_HI || card.regCRTIndx == Card.CRTC.START_ADDR_LO) {
+            /*
+             * HACK: nStartAddress is supposed to be "latched" ONLY at the start of every VERT_RETRACE interval,
+             * but the best we can currently do is latch it during retrace, as well as other times (eg, see outATC()).
+             */
+            if (this.getRetraceBits(card) & Card.CGA.STATUS.DISP_RETRACE) {
+                card.nStartAddress = ((card.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + card.regCRTData[Card.CRTC.START_ADDR_LO])|0;
+            }
+        }
         /*
          * During mode changes on the EGA, all the CRTC regs are typically programmed in sequence,
          * and if that's all that's happening with Card.CRTC.MAX_SCAN_LINE, then we don't want to treat
@@ -5938,29 +6015,7 @@ Video.prototype.outCardMode = function(card, bOut, addrFrom)
  */
 Video.prototype.inCardStatus = function(card, addrFrom)
 {
-    var b = 0;
-
-    /*
-     * NOTE: The CGA bits CGA.STATUS.DISP_RETRACE (0x01) and CGA.STATUS.VERT_RETRACE (0x08) match the EGA definitions,
-     * and they also correspond to the MDA bits MDA.STATUS.HDRIVE (0x01) and MDA.STATUS.BWVIDEO (0x08); I'm not sure why
-     * the MDA uses different designations, but the bits appear to serve the same purpose.
-     *
-     * TODO: Decide whether this more faithful emulation of the retrace bits should be extended to the MDA/CGA, too;
-     * doing so might slow down the BIOS scroll code a bit, though.
-     */
-    var nCycles = this.cpu.getCycles();
-    var nElapsedCycles = nCycles - card.nInitCycles;
-    if (nElapsedCycles < 0) nElapsedCycles = 0;         // TODO: Determine if this ever happens
-    var nCyclesHorzRemain = nElapsedCycles % card.nCyclesHorzPeriod;
-    if (nCyclesHorzRemain > card.nCyclesHorzActive) b |= Card.CGA.STATUS.DISP_RETRACE;
-    var nCyclesVertRemain = nElapsedCycles % card.nCyclesVertPeriod;
-    if (nCyclesVertRemain > card.nCyclesVertActive) b |= Card.CGA.STATUS.VERT_RETRACE;
-    /*
-     * This is optional: the number of CPU cycles that remain in the current vertical period is all we need to keep
-     * track of (the number of cycles since the card was initialized is fine, too, but that delta can become extremely
-     * large after a while).
-     */
-    card.nInitCycles = nCycles - nCyclesVertRemain;
+    var b = this.getRetraceBits(card);
 
     if (card === this.cardEGA) {
         /*
@@ -6001,9 +6056,13 @@ Video.prototype.inCardStatus = function(card, addrFrom)
          *
          * Also, according to http://www.seasip.info/VintagePC/mda.html, on an MDA, bits 7-4 are always ON and
          * bits 2-1 are always OFF, hence the "OR" of 0xf0.
+         *
+         * TODO: Decide whether to preserve the bits from getRetraceBits() on the MDA/CGA; we're continuing
+         * to do a simple toggle, partly on the theory that that may speed up the CGA BIOS scroll code a bit.
          */
         b = (card.regStatus ^= (Card.CGA.STATUS.DISP_RETRACE | Card.CGA.STATUS.VERT_RETRACE)) | 0xf0;
     }
+
     card.regStatus = b;
     this.printMessageIO(card.port + 6, null, addrFrom, (card === this.cardEGA? "STATUS1" : "STATUS"), b);
     return b;
