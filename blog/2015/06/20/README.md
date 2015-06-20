@@ -2,7 +2,7 @@ Compaq DeskPro 386 Disk Controller
 ---
 In short, it isn't working.
 
-So let's boot a [DeskPro 386](/devices/pc/machine/compaq/deskpro386/ega/2048kb/) machine,
+So let's boot a [DeskPro 386](/devices/pc/machine/compaq/deskpro386/ega/2048kb/?gort=debug) machine,
 enable HDC and Port messages in the Debugger (`m hdc on;m port on`), and see what's up.
 
 	notice: Type 2 "20Mb Hard Disk" is fixed disk 0
