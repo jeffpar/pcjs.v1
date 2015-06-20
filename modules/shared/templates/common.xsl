@@ -30,7 +30,7 @@
 				</ul>
 			</div>
 			<div class="common-top-right">
-				<p>Powered by <a href="http://nodejs.org" target="_blank">Node.js</a> and <a href="http://aws.amazon.com/about-aws/whats-new/2013/03/11/announcing-aws-elastic-beanstalk-for-node-js/" target="_blank">AWS</a></p>
+				<p>Powered by <a href="http://nodejs.org" target="_blank">Node.js</a> and <a href="http://aws.amazon.com/elasticbeanstalk/" target="_blank">AWS</a> | <a href="http://github.com/jeffpar/pcjs" target="_blank">GitHub</a></p>
 			</div>
 		</div>
 	</xsl:template>
