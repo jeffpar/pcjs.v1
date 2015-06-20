@@ -82,8 +82,13 @@ var TYPEDARRAYS = (typeof ArrayBuffer !== 'undefined');
 /**
  * @define {boolean}
  *
- * BACKTRACK enables backtracking (disabled in compiled versions).  Backtracking is a mechanism that allows
- * us to tag every byte of incoming data and follow the flow of that data.
+ * BACKTRACK enables backtracking: a mechanism that allows us to tag every byte of incoming data and follow the
+ * flow of that data.
+ *
+ * This is set to !COMPILED, disabling backtracking in all compiled versions, but we may eventually set it to
+ * match the DEBUGGER setting -- unless it slows down machines using the built-in Debugger too much, in which case
+ * we'll have to rethink that choice OR provide a Debugger command that dynamically enables/disables as much of
+ * the backtracking support as possible.
  */
 var BACKTRACK = !COMPILED;
 
