@@ -179,8 +179,10 @@ var asNonDirectories = [
  */
 var asExtsPlainText = [
     "65v",
+    "asm",
     "bas",
     "hex",
+    "inc",
     "map",
     "nasm",
     "txt"
@@ -231,7 +233,7 @@ var asFilesNonServed = [
     "logs",
     "node.log",
     "node_modules",
-    "tests",
+ // "tests",            // not sure there's any reason to NOT display /tests, now that this is on GitHub
     "tmp",
     "users",
     "users.log",
