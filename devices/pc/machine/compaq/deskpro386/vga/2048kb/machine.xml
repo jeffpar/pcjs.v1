@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.18.2/machine.xsl"?>
-<machine id="deskpro386" class="pc" border="1" pos="center" style="background-color:#FAEBD7">
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.18.3/machine.xsl"?>
+<machine id="deskpro386" class="pc" border="1" pos="center" background="#FAEBD7">
 	<computer id="deskpro386-vga-2048k" name="Compaq DeskPro 386" buswidth="32"/>
 	<cpu id="cpu386" model="80386" autostart="false"/>
 	<ram id="ramLow" addr="0x00000" test="true" size="0xa0000" comment="ROM BIOS memory test has NOT been disabled"/>
@@ -12,7 +12,7 @@
 	<keyboard ref="/devices/pc/keyboard/keyboard-minimal-functions.xml"/>
 	<debugger id="debugger" messages="fault|port" commands=""/>
 	<panel ref="/devices/pc/panel/btpanel.xml"/>
-	<fdc ref="/disks/pc/library.xml" width="340px" automount='{A: {name: "PC-DOS 3.00 (Disk 1)", path: "/disks/pc/dos/ibm/3.00/PCDOS300-DISK1.json"}, B: {name: "VGA Tests (Black Book)", path: "/tests/pc/vga/"}}'/>
+	<fdc ref="/disks/pc/library.xml" automount='{A: {name: "PC-DOS 3.00 (Disk 1)", path: "/disks/pc/dos/ibm/3.00/PCDOS300-DISK1.json"}, B: {name: "VGA Tests (Black Book)", path: "/tests/pc/vga/"}}'/>
 	<hdc id="hdcAT" type="at" drives='[{name:"20Mb Hard Disk",type:2}]'/>
 	<chipset id="chipset" model="deskpro386" floppies="[1200,1200]" monitor="vga"/>
 	<serial id="com1" adapter="1"/>

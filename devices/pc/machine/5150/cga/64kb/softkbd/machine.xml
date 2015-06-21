@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.18.2/machine.xsl"?>
-<machine id="ibm5150" class="pc" border="1" width="1000px" pos="center" style="background-color:white">
+<?xml-stylesheet type="text/xsl" href="/versions/pcjs/1.18.3/machine.xsl"?>
+<machine id="ibm5150" class="pc" border="1" width="1000px" pos="center" background="white">
 	<name>IBM PC (Model 5150), CGA, 64K</name>
 	<computer id="pc-cga-64k" name="IBM PC"/>
 	<cpu id="cpu8088" model="8088"/>

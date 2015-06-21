@@ -8,7 +8,7 @@
 
 	<xsl:variable name="MACHINECLASS">pc</xsl:variable>
 	<xsl:variable name="APPCLASS">pcjs</xsl:variable>
-	<xsl:variable name="APPVERSION">1.18.2</xsl:variable>
+	<xsl:variable name="APPVERSION">1.18.3</xsl:variable>
 	<xsl:variable name="SITEHOST">www.pcjs.org</xsl:variable>
 
 	<xsl:template name="componentStyles">
@@ -182,6 +182,7 @@
 		</xsl:variable>
 		<xsl:variable name="style">
 			<xsl:if test="$component = 'machine'">overflow:auto;width:100%;</xsl:if>
+			<xsl:if test="@background">background-color:<xsl:value-of select="@background"/>;</xsl:if>
 			<xsl:if test="@style"><xsl:value-of select="@style"/></xsl:if>
 		</xsl:variable>
 		<xsl:variable name="componentClass">
