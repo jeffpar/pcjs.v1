@@ -822,7 +822,7 @@ Video.ATTRS.BGND_RED        = 0x40;
 Video.ATTRS.BGND_MAGENTA    = 0x50;
 Video.ATTRS.BGND_BROWN      = 0x60;
 
-/* For the MDA, the length of aMDAColors is 5, based on the following supported FGND attribute values:
+/* For the MDA, the number of unique "colors" is 5, based on the following supported FGND attribute values:
  *
  *      0x0: black font (attribute value 0x8 is mapped to 0x0)
  *      0x1: green font with underline
@@ -831,32 +831,36 @@ Video.ATTRS.BGND_BROWN      = 0x60;
  *      0xf: bright green font without underline (attribute values 0xa-0xe are mapped to 0xf)
  *
  * I'm still not sure about 0x8 (dark green?); for now, I'm mapping it to 0x0, but it may become a 6th supported color.
+ *
+ * MDA attributes form an index into aMDAColorMap, which produces an index (0-4) into aMDAColors.
  */
-Video.aMDAColors = new Array(5);
-Video.aMDAColors[0] = [0x00, 0x00, 0x00, 0xff];
-Video.aMDAColors[1] = [0x7f, 0xc0, 0x7f, 0xff];
-Video.aMDAColors[2] = [0x7f, 0xc0, 0x7f, 0xff];
-Video.aMDAColors[3] = [0x7f, 0xff, 0x7f, 0xff];
-Video.aMDAColors[4] = [0x7f, 0xff, 0x7f, 0xff];
-Video.aMDAColorMap  = [0x0, 0x1, 0x2, 0x2, 0x2, 0x2, 0x2, 0x2, 0x0, 0x3, 0x4, 0x4, 0x4, 0x4, 0x4, 0x4];
+Video.aMDAColors = [
+    [0x00, 0x00, 0x00, 0xff],
+    [0x7f, 0xc0, 0x7f, 0xff],
+    [0x7f, 0xc0, 0x7f, 0xff],
+    [0x7f, 0xff, 0x7f, 0xff],
+    [0x7f, 0xff, 0x7f, 0xff]
+];
+Video.aMDAColorMap = [0x0, 0x1, 0x2, 0x2, 0x2, 0x2, 0x2, 0x2, 0x0, 0x3, 0x4, 0x4, 0x4, 0x4, 0x4, 0x4];
 
-Video.aCGAColors = new Array(16);
-Video.aCGAColors[0]  = [0x00, 0x00, 0x00, 0xff];    // ATTR_FGND_BLACK
-Video.aCGAColors[1]  = [0x00, 0x00, 0xaa, 0xff];    // ATTR_FGND_BLUE
-Video.aCGAColors[2]  = [0x00, 0xaa, 0x00, 0xff];    // ATTR_FGND_GREEN
-Video.aCGAColors[3]  = [0x00, 0xaa, 0xaa, 0xff];    // ATTR_FGND_CYAN
-Video.aCGAColors[4]  = [0xaa, 0x00, 0x00, 0xff];    // ATTR_FGND_RED
-Video.aCGAColors[5]  = [0xaa, 0x00, 0xaa, 0xff];    // ATTR_FGND_MAGENTA
-Video.aCGAColors[6]  = [0xaa, 0x55, 0x00, 0xff];    // ATTR_FGND_BROWN
-Video.aCGAColors[7]  = [0xaa, 0xaa, 0xaa, 0xff];    // ATTR_FGND_WHITE                      (aka light gray)
-Video.aCGAColors[8]  = [0x55, 0x55, 0x55, 0xff];    // ATTR_FGND_BLACK   | ATTR_FGND_BRIGHT (aka gray)
-Video.aCGAColors[9]  = [0x55, 0x55, 0xff, 0xff];    // ATTR_FGND_BLUE    | ATTR_FGND_BRIGHT
-Video.aCGAColors[10] = [0x55, 0xff, 0x55, 0xff];    // ATTR_FGND_GREEN   | ATTR_FGND_BRIGHT
-Video.aCGAColors[11] = [0x55, 0xff, 0xff, 0xff];    // ATTR_FGND_CYAN    | ATTR_FGND_BRIGHT
-Video.aCGAColors[12] = [0xff, 0x55, 0x55, 0xff];    // ATTR_FGND_RED     | ATTR_FGND_BRIGHT
-Video.aCGAColors[13] = [0xff, 0x55, 0xff, 0xff];    // ATTR_FGND_MAGENTA | ATTR_FGND_BRIGHT
-Video.aCGAColors[14] = [0xff, 0xff, 0x55, 0xff];    // ATTR_FGND_BROWN   | ATTR_FGND_BRIGHT (aka yellow)
-Video.aCGAColors[15] = [0xff, 0xff, 0xff, 0xff];    // ATTR_FGND_WHITE   | ATTR_FGND_BRIGHT (aka white)
+Video.aCGAColors = [
+    [0x00, 0x00, 0x00, 0xff],   // 0x00: ATTR_FGND_BLACK
+    [0x00, 0x00, 0xaa, 0xff],   // 0x01: ATTR_FGND_BLUE
+    [0x00, 0xaa, 0x00, 0xff],   // 0x02: ATTR_FGND_GREEN
+    [0x00, 0xaa, 0xaa, 0xff],   // 0x03: ATTR_FGND_CYAN
+    [0xaa, 0x00, 0x00, 0xff],   // 0x04: ATTR_FGND_RED
+    [0xaa, 0x00, 0xaa, 0xff],   // 0x05: ATTR_FGND_MAGENTA
+    [0xaa, 0x55, 0x00, 0xff],   // 0x06: ATTR_FGND_BROWN
+    [0xaa, 0xaa, 0xaa, 0xff],   // 0x07: ATTR_FGND_WHITE                      (aka light gray)
+    [0x55, 0x55, 0x55, 0xff],   // 0x08: ATTR_FGND_BLACK   | ATTR_FGND_BRIGHT (aka gray)
+    [0x55, 0x55, 0xff, 0xff],   // 0x09: ATTR_FGND_BLUE    | ATTR_FGND_BRIGHT
+    [0x55, 0xff, 0x55, 0xff],   // 0x0A: ATTR_FGND_GREEN   | ATTR_FGND_BRIGHT
+    [0x55, 0xff, 0xff, 0xff],   // 0x0B: ATTR_FGND_CYAN    | ATTR_FGND_BRIGHT
+    [0xff, 0x55, 0x55, 0xff],   // 0x0C: ATTR_FGND_RED     | ATTR_FGND_BRIGHT
+    [0xff, 0x55, 0xff, 0xff],   // 0x0D: ATTR_FGND_MAGENTA | ATTR_FGND_BRIGHT
+    [0xff, 0xff, 0x55, 0xff],   // 0x0E: ATTR_FGND_BROWN   | ATTR_FGND_BRIGHT (aka yellow)
+    [0xff, 0xff, 0xff, 0xff]    // 0x0F: ATTR_FGND_WHITE   | ATTR_FGND_BRIGHT (aka white)
+];
 
 Video.aCGAColorSet1 = [Video.ATTRS.FGND_GREEN, Video.ATTRS.FGND_RED,     Video.ATTRS.FGND_BROWN];
 Video.aCGAColorSet2 = [Video.ATTRS.FGND_CYAN,  Video.ATTRS.FGND_MAGENTA, Video.ATTRS.FGND_WHITE];
@@ -4457,7 +4461,7 @@ Video.prototype.initCellCache = function(fNew)
         if (this.aCellCache === undefined || this.aCellCache.length != nCells) {
             this.aCellCache = new Array(nCells);
             /*
-             * TODO: Determine whether, with the introduction of fCellCacheValid, this array initialization is useful
+             * TODO: Determine whether, with the introduction of fCellCacheValid, this array initialization is useful.
              */
             for (var iCell = 0; iCell < nCells; iCell++) this.aCellCache[iCell] = -1;
         }
@@ -6106,7 +6110,7 @@ Video.prototype.dumpVideo = function(sParm)
  */
 Video.aMDAPortInput = {
     0x3B4: Video.prototype.inMDAIndx,           // technically, not actually readable, but I want the Debugger to be able to read this
-    0x3B5: Video.prototype.inMDAData,           // technically, the only Data registers that are readable are R14-R17
+    0x3B5: Video.prototype.inMDAData,           // technically, the only CRTC Data registers that are readable are R14-R17
     0x3B8: Video.prototype.inMDAMode,           // technically, not actually readable, but I want the Debugger to be able to read this
     0x3BA: Video.prototype.inMDAStatus
 };
@@ -6119,7 +6123,7 @@ Video.aMDAPortOutput = {
 
 Video.aCGAPortInput = {
     0x3D4: Video.prototype.inCGAIndx,           // technically, not actually readable, but I want the Debugger to be able to read this
-    0x3D5: Video.prototype.inCGAData,           // technically, the only Data registers that are readable are R14-R17
+    0x3D5: Video.prototype.inCGAData,           // technically, the only CRTC Data registers that are readable are R14-R17
     0x3D8: Video.prototype.inCGAMode,           // technically, not actually readable, but I want the Debugger to be able to read this
     0x3D9: Video.prototype.inCGAColor,          // technically, not actually readable, but I want the Debugger to be able to read this
     0x3DA: Video.prototype.inCGAStatus
@@ -6211,9 +6215,7 @@ Video.init = function()
          * once employed as only a work-around for Android devices is now our default.
          *
          *      eCanvas.setAttribute("contenteditable", "true");
-         */
-
-        /*
+         *
          * HACK: A canvas style of "auto" provides for excellent responsive canvas scaling in EVERY browser
          * except IE9/IE10, so I recalculate the appropriate CSS height every time the parent DIV is resized;
          * IE11 works without this hack, so we take advantage of the fact that IE11 doesn't report itself as "MSIE".
