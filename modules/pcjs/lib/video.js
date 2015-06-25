@@ -1147,7 +1147,7 @@ Card.CRTC = {
          * The OFFSET register (bits 0-7) specifies the logical line width of the screen.  The starting memory address
          * for the next character row is larger than the current character row by two or four times this amount.
          * The OFFSET register is programmed with a word address.  Depending on the method of clocking the CRT Controller,
-         * this word address is [effectively] either a word or doubleword address. #IBMVGATechRef
+         * this word address is [effectively] either a word or double-word address. #IBMVGATechRef
          */
         OFFSET:             0x13,
         UNDERLINE:          0x14,
