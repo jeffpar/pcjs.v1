@@ -26,7 +26,9 @@ Development of PCjs VGA support has just begun (June 2015), so don't expect *any
 List of VGA Samples from [Michael Abrash's Graphics Programming Black Book](https://github.com/jeffpar/abrash-black-book):
 
  * [Chapter 23](https://github.com/jeffpar/abrash-black-book/blob/master/src/chapter-23.md)
-	 * [L23-1.ASM](https://github.com/jeffpar/abrash-black-book/blob/master/code/L23-1.ASM) 
+	 * [L23-1.ASM](L23-1.ASM) 
+ * [Chapter 24](https://github.com/jeffpar/abrash-black-book/blob/master/src/chapter-24.md)
+	 * [L24-1.ASM](L24-1.ASM) 
 
 ---
 
