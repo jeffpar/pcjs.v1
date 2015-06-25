@@ -26,9 +26,14 @@ Development of PCjs VGA support has just begun (June 2015), so don't expect *any
 List of VGA Samples from [Michael Abrash's Graphics Programming Black Book](https://github.com/jeffpar/abrash-black-book):
 
  * [Chapter 23](https://github.com/jeffpar/abrash-black-book/blob/master/src/chapter-23.md)
-	 * [L23-1.ASM](L23-1.ASM) 
+	 * [L23-1.ASM: Animates four balls bouncing around a playfield by using page flipping and panning](L23-1.ASM) 
  * [Chapter 24](https://github.com/jeffpar/abrash-black-book/blob/master/src/chapter-24.md)
-	 * [L24-1.ASM](L24-1.ASM) 
+	 * [L24-1.ASM: Illustrates operation of ALUs and latches of the VGA's Graphics Controller](L24-1.ASM) 
+ * [Chapter 25](https://github.com/jeffpar/abrash-black-book/blob/master/src/chapter-25.md)
+	 * [L25-1.ASM: Illustrates operation of data rotate and bit mask features of Graphics Controller](L25-1.ASM) 
+	 * [L25-2.ASM: Illustrates operation of Map Mask register when drawing to memory that already contains data](L25-2.ASM) 
+	 * [L25-3.ASM: Illustrates operation of set/reset circuitry to force setting of memory that already contains data](L25-3.ASM) 
+	 * [L25-4.ASM: Illustrates operation of set/reset circuitry in conjunction with CPU data](L25-4.ASM) 
 
 ---
 
