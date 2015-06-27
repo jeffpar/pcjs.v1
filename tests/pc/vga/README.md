@@ -5,8 +5,8 @@ To aid in the development of PCjs VGA support, I've started adding some VGA test
 only "tests" are samples taken directly from [Michael Abrash's Graphics Programming Black Book](https://github.com/jeffpar/abrash-black-book).
 
 Abrash's book is available on many sites, but I'm partial to the Markdown version that [James Gregory](https://github.com/jagregory)
-has made available on GitHub, because (a) it's a brilliant way to share the text, and (b) it apparently has Abrash's blessing, so
-I feel more comfortable forking it, using it, and resharing it.
+has made available on GitHub, because (a) it's a brilliant way to render and share the text, and (b) it apparently has
+Abrash's blessing, so I feel more comfortable forking it, using it, and resharing it.
 
 The main reasons for my [fork](https://github.com/jeffpar/abrash-black-book): to make the book's
 images display properly on GitHub, and to extract and add assorted source code listings as I need them.  Since that
