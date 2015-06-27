@@ -23,10 +23,10 @@ VERTICAL_BOX_WIDTH_IN_BYTES equ 10	;width in bytes of the box used to
 ;
 ; VGA register equates.
 ;
-GC_INDEX	equ	3ceh	;GC index register
-GC_ROTATE	equ	3	;GC data rotate/logical function
-				; register index
-GC_MODE		equ	5	;GC mode register index
+GC_INDEX	equ	3ceh		;GC index register
+GC_ROTATE	equ	3		;GC data rotate/logical function
+					; register index
+GC_MODE		equ	5		;GC mode register index
 ;
 dseg	segment para common 'DATA'
 ;
@@ -40,10 +40,13 @@ LABEL_STRING_LENGTH	equ	$-LabelString
 ;
 FillPatternFF	db	'Fill Pattern: 0FFh'
 FILL_PATTERN_FF_LENGTH	equ	$ - FillPatternFF
+
 FillPattern00	db	'Fill Pattern: 000h'
 FILL_PATTERN_00_LENGTH	equ	$ - FillPattern00
+
 FillPatternVert db	'Fill Pattern: Vertical Bar'
-FILL_PATTERN_VERT_LENGTH	equ	$ - FillPatternVert
+FILL_PATTERN_VERT_LENGTH equ	$ - FillPatternVert
+
 FillPatternHorz db	'Fill Pattern: Horizontal Bar'
 FILL_PATTERN_HORZ_LENGTH equ	$ - FillPatternHorz
 ;
@@ -65,9 +68,9 @@ TEXT_UP macro	TEXT_STRING, TEXT_LENGTH, ROW, COLUMN
 	mov	ah,13h			;BIOS write string function
 	mov	bp,offset TEXT_STRING	;ES:BP points to string
 	mov	cx,TEXT_LENGTH
-	mov	dx,(ROW SHL 8) OR COLUMN	;position
-	sub	al,al		;string is chars only, cursor not moved
-	mov	bl,7		;text attribute is white (light gray)
+	mov	dx,(ROW SHL 8) OR COLUMN;position
+	sub	al,al			;string is chars only, cursor not moved
+	mov	bl,7			;text attribute is white (light gray)
 	int	10h
 	endm
 ;
@@ -90,19 +93,19 @@ start	proc	near
 ; Draw background of horizontal bars.
 ;
 	mov	dx,SCREEN_HEIGHT/4
-				;# of bars to draw (each 4 pixels high)
-	sub	di,di		;start at offset 0 in display memory
-	mov	ax,0ffffh	;fill pattern for light areas of bars
+					;# of bars to draw (each 4 pixels high)
+	sub	di,di			;start at offset 0 in display memory
+	mov	ax,0ffffh		;fill pattern for light areas of bars
 	mov	bx,DEMO_AREA_WIDTH_IN_BYTES / 2 ;length of each bar
 	mov	si,SCREEN_WIDTH_IN_BYTES - DEMO_AREA_WIDTH_IN_BYTES
 	mov	bp,(SCREEN_WIDTH_IN_BYTES * 3) - DEMO_AREA_WIDTH_IN_BYTES
 BackgroundLoop:
-	mov	cx,bx		;length of bar
-    rep stosw			;draw top half of bar
-	add	di,si		;point to start of bottom half of bar
-	mov	cx,bx		;length of bar
-    rep stosw			;draw bottom half of bar
-	add	di,bp		;point to start of top of next bar
+	mov	cx,bx			;length of bar
+	rep stosw			;draw top half of bar
+	add	di,si			;point to start of bottom half of bar
+	mov	cx,bx			;length of bar
+	rep stosw			;draw bottom half of bar
+	add	di,bp			;point to start of top of next bar
 	dec	dx
 	jnz	BackgroundLoop
 ;
@@ -204,12 +207,12 @@ ColumnLoop:
 ;
 DrawVerticalBox proc	near
 	DRAW_BOX_QUARTER	0ffh, VERTICAL_BOX_WIDTH_IN_BYTES
-					;first fill pattern: solid fill
+				;first fill pattern: solid fill
 	DRAW_BOX_QUARTER	0, VERTICAL_BOX_WIDTH_IN_BYTES
-					;second fill pattern: empty fill
+				;second fill pattern: empty fill
 	DRAW_BOX_QUARTER	033h, VERTICAL_BOX_WIDTH_IN_BYTES
-					;third fill pattern: double-pixel
-					; wide vertical bars
+				;third fill pattern: double-pixel
+				; wide vertical bars
 	mov	dx,DEMO_AREA_HEIGHT / 4 / 4
 				;fourth fill pattern: horizontal bars in
 				; sets of 4 scan lines

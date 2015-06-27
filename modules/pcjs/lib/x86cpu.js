@@ -166,7 +166,7 @@ function X86CPU(parmsCPU)
      * A variety of stepCPU() state variables that don't strictly need to be initialized before the first
      * stepCPU() call, but it's good form to do so.
      */
-    this.nBurstCycles = 0;
+    this.resetCycles();
     this.aFlags.fComplete = this.aFlags.fDebugCheck = false;
 
     /*

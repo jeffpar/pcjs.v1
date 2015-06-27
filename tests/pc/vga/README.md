@@ -19,7 +19,7 @@ I assume something similar was done on the CD-ROM that accompanied the Black Boo
 book or its CD-ROM, I'm extracting the source code directly from the Markdown text, and then "tabifying" it with 8-column
 tab stops.
 
-Development of PCjs VGA support has just begun (June 2015), so don't expect *anything* here to to run properly yet.
+Development of PCjs VGA support has just begun (June 2015), so don't expect everything here to to run properly yet.
 
 ---
 
@@ -50,7 +50,7 @@ Since the contents of this particular directory will probably be in flux for a w
 Once things settle down, I'll generate a JSON-encoded disk image containing a snapshot of this directory, using the
 PCjs [DiskDump](/modules/diskdump/) module:
 
-	diskdump --dir=. --format=img --output=TESTVGA.img
+	diskdump --dir=. --format=img --output=TESTVGA.img --overwrite
 
 One advantage of using [DiskDump](/modules/diskdump/) is that it automatically converts linefeeds in known text files
 (including ASM files) into DOS-compatible CR/LF sequences.

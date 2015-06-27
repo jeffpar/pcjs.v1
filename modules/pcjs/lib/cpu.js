@@ -690,7 +690,7 @@ CPU.prototype.calcCycles = function(fRecalc)
  */
 CPU.prototype.getCycles = function(fScaled)
 {
-    var nCycles = this.nTotalCycles + this.nRunCycles + this.nBurstCycles - this.nStepCycles;
+    var nCycles = (this.nTotalCycles + this.nRunCycles + this.nBurstCycles - this.nStepCycles)|0;
     if (fScaled && this.aCounts.nCyclesMultiplier > 1 && this.aCounts.mhz > this.aCounts.mhzDefault) {
         /*
          * We could scale the current cycle count by the current effective speed (this.aCounts.mhz); eg:
@@ -787,10 +787,11 @@ CPU.prototype.getSpeedTarget = function()
 /**
  * setSpeed(nMultiplier, fOnClick)
  *
+ * NOTE: This used to return the target speed, in mhz, but no callers appear to care at this point.
+ *
  * @this {CPU}
  * @param {number} [nMultiplier] is the new proposed multiplier (reverts to 1 if the target was too high)
  * @param {boolean} [fOnClick] is true if called from a click handler that might have stolen focus
- * @return {number} the target speed, in mhz
  * @desc Whenever the speed is changed, the running cycle count and corresponding start time must be reset,
  * so that the next effective speed calculation obtains sensible results.  In fact, when runCPU() initially calls
  * setSpeed() with no parameters, that's all this function does (it doesn't change the current speed setting).
@@ -819,7 +820,6 @@ CPU.prototype.setSpeed = function(nMultiplier, fOnClick)
     this.aCounts.msStartRun = usr.getTime();
     this.aCounts.msEndThisRun = 0;
     this.calcCycles();
-    return this.aCounts.mhzTarget;
 };
 
 /**

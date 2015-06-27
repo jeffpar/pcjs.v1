@@ -1677,6 +1677,19 @@ Card.ACCESS.readByteMode1 = function readByteMode1(off, addr)
 /**
  * writeByteMode0(off, b, addr)
  *
+ * Supporting Set/Reset means that for every plane for which Set/Reset is enabled, we must
+ * replace the corresponding byte in "dw" with a byte of zeros or ones.  This is accomplished with
+ * nSetMapMask, nSetMapData, and nSetMapBits.  nSetMapMask is the inverse of the ESRESET bits,
+ * because we use it to mask the processor data; nSetMapData records the desired SRESET bits; and
+ * nSetMapBits contains the bits to replace those that we masked in the processor data.
+ *
+ * We could have done this:
+ *
+ *      dw = (dw & this.controller.nSetMapMask) | (this.controller.nSetMapData & ~this.controller.nSetMapMask)
+ *
+ * but by maintaining nSetMapBits equal to (nSetMapData & ~nSetMapMask), we are able to make the writes
+ * slightly more efficient.
+ *
  * @this {Memory}
  * @param {number} off
  * @param {number} b (which should already be pre-masked to 8 bits; see Bus.prototype.setByteDirect)
@@ -1686,7 +1699,8 @@ Card.ACCESS.writeByteMode0 = function writeByteMode0(off, b, addr)
 {
     var idw = off + this.offset;
     var dw = b | (b << 8) | (b << 16) | (b << 24);
-    dw = (this.adw[idw] & ~this.controller.nWriteMapMask) | (dw & this.controller.nWriteMapMask);
+    dw = (dw & this.controller.nSetMapMask) | this.controller.nSetMapBits;
+    dw = (dw & this.controller.nWriteMapMask) | (this.adw[idw] & ~this.controller.nWriteMapMask);
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
@@ -1722,19 +1736,6 @@ Card.ACCESS.writeByteMode0EvenOdd = function writeByteMode0EvenOdd(off, b, addr)
 
 /**
  * writeByteMode0Rot(off, b, addr)
- *
- * Supporting Set/Reset means that for every plane for which Set/Reset is enabled, we must
- * replace the corresponding byte in "dw" with a byte of zeros or ones.  This is accomplished with
- * nSetMapMask, nSetMapData, and nSetMapBits.  nSetMapMask is the inverse of the ESRESET bits,
- * because we use it to mask the processor data; nSetMapData records the desired SRESET bits; and
- * nSetMapBits contains the bits to replace those that we masked in the processor data.
- *
- * We could have done this:
- *
- *      dw = (dw & this.controller.nSetMapMask) | (this.controller.nSetMapData & ~this.controller.nSetMapMask)
- *
- * but by maintaining nSetMapBits equal to (nSetMapData & ~nSetMapMask), we are able to make the writes
- * slightly more efficient.
  *
  * @this {Memory}
  * @param {number} off
@@ -5062,7 +5063,11 @@ Video.prototype.getRetraceBits = function(card)
      */
     var nCycles = this.cpu.getCycles();
     var nElapsedCycles = nCycles - card.nInitCycles;
-    if (nElapsedCycles < 0) nElapsedCycles = 0;         // TODO: Determine if this ever happens
+    if (nElapsedCycles < 0) {
+        this.assert(nCycles === 0);
+        card.nInitCycles = nElapsedCycles;
+        nElapsedCycles = -nElapsedCycles|0;
+    }
     var nCyclesHorzRemain = nElapsedCycles % card.nCyclesHorzPeriod;
     if (nCyclesHorzRemain > card.nCyclesHorzActive) b |= Card.CGA.STATUS.DISP_RETRACE;
     var nCyclesVertRemain = nElapsedCycles % card.nCyclesVertPeriod;
@@ -5076,7 +5081,7 @@ Video.prototype.getRetraceBits = function(card)
      *
      * NOTE: Now that we're calling getRetraceBits() more frequently (ie, for internal checks), resetting nInitCycles
      * in this fashion preserves the vertical period at the expense of the horizontal period, which in turn can cause
-     * grief in ROM BIOS code that requires strict horizontal retrace times.  So the above code is now disabled.
+     * grief in ROM BIOS code that requires strict horizontal retrace times.  TODO: Figure out how to re-enable this code.
      */
     return b;
 };

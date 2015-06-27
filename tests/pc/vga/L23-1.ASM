@@ -15,39 +15,39 @@ VIDEO_SEGMENT	equ	0a000h		;display memory segment for
 LOGICAL_SCREEN_WIDTH	equ	672/8	;width in bytes and height in scan
 LOGICAL_SCREEN_HEIGHT	equ	384	; lines of the virtual screen
 					; we'll work with
-PAGE0		equ	0	;flag for page 0 when page flipping
-PAGE1		equ	1	;flag for page 1 when page flipping
-PAGE0_OFFSET	equ	0	;start offset of page 0 in VGA memory
+PAGE0		equ	0		;flag for page 0 when page flipping
+PAGE1		equ	1		;flag for page 1 when page flipping
+PAGE0_OFFSET	equ	0		;start offset of page 0 in VGA memory
 PAGE1_OFFSET	equ	LOGICAL_SCREEN_WIDTH * LOGICAL_SCREEN_HEIGHT
-				;start offset of page 1 (both pages
-				; are 672x384 virtual screens)
-BALL_WIDTH	equ	24/8	;width of ball in display memory bytes
-BALL_HEIGHT	equ	24	;height of ball in scan lines
-BLANK_OFFSET	equ	PAGE1_OFFSET * 2	;start of blank image
-						; in VGA memory
+					;start offset of page 1 (both pages
+					; are 672x384 virtual screens)
+BALL_WIDTH	equ	24/8		;width of ball in display memory bytes
+BALL_HEIGHT	equ	24		;height of ball in scan lines
+BLANK_OFFSET	equ	PAGE1_OFFSET * 2;start of blank image
+					; in VGA memory
 BALL_OFFSET	equ	BLANK_OFFSET + (BALL_WIDTH * BALL_HEIGHT)
-				;start offset of ball image in VGA memory
-NUM_BALLS	equ	4	;number of balls to animate
+					;start offset of ball image in VGA memory
+NUM_BALLS	equ	4		;number of balls to animate
 ;
 ; VGA register equates.
 ;
-SC_INDEX	equ	3c4h	;SC index register
-MAP_MASK	equ	2	;SC map mask register
-GC_INDEX	equ	3ceh	;GC index register
-GC_MODE		equ	5	;GC mode register
-CRTC_INDEX	equ	03d4h	;CRTC index register
-START_ADDRESS_HIGH equ	0ch	;CRTC start address high byte
-START_ADDRESS_LOW equ	0dh	;CRTC start address low byte
-CRTC_OFFSET	equ	13h	;CRTC offset register
-INPUT_STATUS_1	equ	03dah	;VGA status register
-VSYNC_MASK	equ	08h	;vertical sync bit in status register 1
-DE_MASK		equ	01h	;display enable bit in status register 1
-AC_INDEX	equ	03c0h	;AC index register
-HPELPAN		equ	20h OR 13h   ;AC horizontal pel panning register
-				     ; (bit 7 is high to keep palette RAM
-				     ; addressing on)
+SC_INDEX	equ	3c4h		;SC index register
+MAP_MASK	equ	2		;SC map mask register
+GC_INDEX	equ	3ceh		;GC index register
+GC_MODE		equ	5		;GC mode register
+CRTC_INDEX	equ	03d4h		;CRTC index register
+START_ADDRESS_HIGH equ	0ch		;CRTC start address high byte
+START_ADDRESS_LOW equ	0dh		;CRTC start address low byte
+CRTC_OFFSET	equ	13h		;CRTC offset register
+INPUT_STATUS_1	equ	03dah		;VGA status register
+VSYNC_MASK	equ	08h		;vertical sync bit in status register 1
+DE_MASK		equ	01h		;display enable bit in status register 1
+AC_INDEX	equ	03c0h		;AC index register
+HPELPAN		equ	20h OR 13h	;AC horizontal pel panning register
+					; (bit 7 is high to keep palette RAM
+					; addressing on)
 dseg	segment para common 'DATA'
-CurrentPage		db	PAGE1		;page to draw to
+CurrentPage		db	PAGE1	;page to draw to
 CurrentPageOffset	dw	PAGE1_OFFSET
 ;
 ; Four plane's worth of multicolored ball image.
@@ -128,15 +128,15 @@ PanningControlString	dw	32, 1, 0, 34, 0, 1, 32, -1, 0, 34, 0, -1, 0
 else
 PanningControlString	dw	32, 1, 0, 184, 0, 1, 32, -1, 0, 184, 0, -1, 0
 endif
-PanningControl	dw	PanningControlString   ;pointer to current location
-					       ; in panning control string
-PanningRep	dw	1      ;# times to pan according to current
-			       ; panning increments
-PanningXInc	dw	1      ;x panning factor
-PanningYInc	dw	0      ;y panning factor
-HPan		db	0      ;horizontal pel panning setting
-PanningStartOffset dw	0      ;start offset adjustment to produce vertical
-			       ; panning & coarse horizontal panning
+PanningControl	dw	PanningControlString	;pointer to current location
+						; in panning control string
+PanningRep	dw	1	;# times to pan according to current
+				; panning increments
+PanningXInc	dw	1	;x panning factor
+PanningYInc	dw	0	;y panning factor
+HPan		db	0	;horizontal pel panning setting
+PanningStartOffset dw	0	;start offset adjustment to produce vertical
+				; panning & coarse horizontal panning
 dseg	ends
 ;
 ; Macro to set indexed register P2 of chip with index register
@@ -172,31 +172,31 @@ endif
 ; Draw border around playfield in both pages.
 ;
 	mov	di,PAGE0_OFFSET
-	call	DrawBorder	;page 0 border
+	call	DrawBorder		;page 0 border
 	mov	di,PAGE1_OFFSET
-	call	DrawBorder	;page 1 border
+	call	DrawBorder		;page 1 border
 ;
 ; Draw all four plane's worth of the ball to undisplayed VGA memory.
 ;
-	mov	al,01h		;enable plane 0
+	mov	al,01h			;enable plane 0
 	SETREG	SC_INDEX, MAP_MASK
 	mov	si,offset BallPlane0Image
 	mov	di,BALL_OFFSET
 	mov	cx,BALL_WIDTH * BALL_HEIGHT
 	rep movsb
-	mov	al,02h		;enable plane 1
+	mov	al,02h			;enable plane 1
 	SETREG	SC_INDEX, MAP_MASK
 	mov	si,offset BallPlane1Image
 	mov	di,BALL_OFFSET
 	mov	cx,BALL_WIDTH * BALL_HEIGHT
 	rep movsb
-	mov	al,04h		;enable plane 2
+	mov	al,04h			;enable plane 2
 	SETREG	SC_INDEX, MAP_MASK
 	mov	si,offset BallPlane2Image
 	mov	di,BALL_OFFSET
 	mov	cx,BALL_WIDTH * BALL_HEIGHT
 	rep movsb
-	mov	al,08h		;enable plane 3
+	mov	al,08h			;enable plane 3
 	SETREG	SC_INDEX, MAP_MASK
 	mov	si,offset BallPlane3Image
 	mov	di,BALL_OFFSET
@@ -205,8 +205,8 @@ endif
 ;
 ; Draw a blank image the size of the ball to undisplayed VGA memory.
 ;
-	mov	al,0fh		       ;enable all memory planes, since the
-	SETREG	SC_INDEX, MAP_MASK     ; blank has to erase all planes
+	mov	al,0fh			;enable all memory planes, since the
+	SETREG	SC_INDEX, MAP_MASK	; blank has to erase all planes
 	mov	di,BLANK_OFFSET
 	mov	cx,BALL_WIDTH * BALL_HEIGHT
 	sub	al,al
@@ -216,13 +216,13 @@ endif
 ;
 	mov	dx,GC_INDEX
 	mov	al,GC_MODE
-	out	dx,al		;point GC Index to GC Mode register
-	inc	dx		;point to GC Data register
-	jmp	$+2		;delay to let bus settle
-	in	al,dx		;get current state of GC Mode
-	and	al,not 3	;clear the write mode bits
-	or	al,1		;set the write mode field to 1
-	jmp	$+2		;delay to let bus settle
+	out	dx,al			;point GC Index to GC Mode register
+	inc	dx			;point to GC Data register
+	jmp	$+2			;delay to let bus settle
+	in	al,dx			;get current state of GC Mode
+	and	al,not 3		;clear the write mode bits
+	or	al,1			;set the write mode field to 1
+	jmp	$+2			;delay to let bus settle
 	out	dx,al
 ;
 ; Set VGA offset register in words to define logical screen width.
@@ -253,12 +253,12 @@ EachBallLoop:
 ;
 ; Change the ball movement values if it's time to do so.
 ;
-	dec	[BallRep+bx]	       ;has current repeat factor run out?
+	dec	[BallRep+bx]		;has current repeat factor run out?
 	jnz	MoveBall
-	mov	si,[BallControl+bx]    ;it's time to change movement values
-	lodsw			       ;get new repeat factor from
-				       ; control string
-	and	ax,ax		       ;at end of control string?
+	mov	si,[BallControl+bx]	;it's time to change movement values
+	lodsw				;get new repeat factor from
+					; control string
+	and	ax,ax			;at end of control string?
 	jnz	SetNewMove
 	mov	si,[BallControlString+bx]	;reset control string
 	lodsw				;get new repeat factor
@@ -366,18 +366,18 @@ start	endp
 ;
 DrawBall	proc	near
 	mov	ax,LOGICAL_SCREEN_WIDTH
-	mul	dx	;offset of start of top image scan line
-	add	ax,cx	;offset of upper left of image
+	mul	dx			;offset of start of top image scan line
+	add	ax,cx			;offset of upper left of image
 	add	ax,[CurrentPageOffset]	;offset of start of page
 	mov	di,ax
 	mov	bp,BALL_HEIGHT
 	push	ds
 	push	es
-	pop	ds	;move from VGA memory to VGA memory
+	pop	ds			;move from VGA memory to VGA memory
 DrawBallLoop:
 	push	di
 	mov	cx,BALL_WIDTH
-	rep movsb	;draw a scan line of image
+	rep movsb			;draw a scan line of image
 	pop	di
 	add	di,LOGICAL_SCREEN_WIDTH ;point to next destination scan line
 	dec	bp
@@ -418,7 +418,7 @@ WaitDisplayEnable	endp
 ; Perform horizontal/vertical panning.
 ;
 AdjustPanning	proc	near
-	dec	[PanningRep]	;time to get new panning values?
+	dec	[PanningRep]		;time to get new panning values?
 	jnz	DoPan
 	mov	si,[PanningControl]	;point to current location in
 					; panning control string
@@ -483,10 +483,10 @@ DrawBorder	proc	near
 	push	di
 	mov	cx,LOGICAL_SCREEN_HEIGHT / 16
 DrawLeftBorderLoop:
-	mov	al,0ch		;select red color for block
+	mov	al,0ch			;select red color for block
 	call	DrawBorderBlock
 	add	di,LOGICAL_SCREEN_WIDTH * 8
-	mov	al,0eh		;select yellow color for block
+	mov	al,0eh			;select yellow color for block
 	call	DrawBorderBlock
 	add	di,LOGICAL_SCREEN_WIDTH * 8
 	loop	DrawLeftBorderLoop
@@ -498,10 +498,10 @@ DrawLeftBorderLoop:
 	add	di,LOGICAL_SCREEN_WIDTH - 1
 	mov	cx,LOGICAL_SCREEN_HEIGHT / 16
 DrawRightBorderLoop:
-	mov	al,0eh		;select yellow color for block
+	mov	al,0eh			;select yellow color for block
 	call	DrawBorderBlock
 	add	di,LOGICAL_SCREEN_WIDTH * 8
-	mov	al,0ch		;select red color for block
+	mov	al,0ch			;select red color for block
 	call	DrawBorderBlock
 	add	di,LOGICAL_SCREEN_WIDTH * 8
 	loop	DrawRightBorderLoop
@@ -513,10 +513,10 @@ DrawRightBorderLoop:
 	mov	cx,(LOGICAL_SCREEN_WIDTH - 2) / 2
 DrawTopBorderLoop:
 	inc	di
-	mov	al,0eh		;select yellow color for block
+	mov	al,0eh			;select yellow color for block
 	call	DrawBorderBlock
 	inc	di
-	mov	al,0ch		;select red color for block
+	mov	al,0ch			;select red color for block
 	call	DrawBorderBlock
 	loop	DrawTopBorderLoop
 	pop	di
@@ -527,10 +527,10 @@ DrawTopBorderLoop:
 	mov	cx,(LOGICAL_SCREEN_WIDTH - 2) / 2
 DrawBottomBorderLoop:
 	inc	di
-	mov	al,0ch		;select red color for block
+	mov	al,0ch			;select red color for block
 	call	DrawBorderBlock
 	inc	di
-	mov	al,0eh		;select yellow color for block
+	mov	al,0eh			;select yellow color for block
 	call	DrawBorderBlock
 	loop	DrawBottomBorderLoop
 	ret

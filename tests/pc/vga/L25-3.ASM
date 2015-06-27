@@ -77,6 +77,7 @@ HorzBarLoop:
 	SETGC	GC_SET_RESET,01h	;set/reset value is 0ffh for plane 0
 					; (the blue plane) and 0 for other
 					; planes
+	int 3
 	sub	di,di
 	mov	cx,80*480		;# bytes per screen
 	mov	al,0ffh			;since set/reset is enabled for all
