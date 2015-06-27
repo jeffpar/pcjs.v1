@@ -34,6 +34,9 @@ List of VGA Samples from [Michael Abrash's Graphics Programming Black Book](http
 	 * [L25-2.ASM: Illustrates operation of Map Mask register when drawing to memory that already contains data](L25-2.ASM) 
 	 * [L25-3.ASM: Illustrates operation of set/reset circuitry to force setting of memory that already contains data](L25-3.ASM) 
 	 * [L25-4.ASM: Illustrates operation of set/reset circuitry in conjunction with CPU data](L25-4.ASM) 
+ * [Chapter 26](https://github.com/jeffpar/abrash-black-book/blob/master/src/chapter-26.md)
+	 * [L26-1.ASM: Illustrates operation of write mode 3 of the VGA](L26-1.ASM) 
+	 * [L26-2.ASM: Illustrates high-speed text-drawing operation of write mode 3 of the VGA](L26-2.ASM) 
 
 ---
 
