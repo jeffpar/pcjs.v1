@@ -690,7 +690,7 @@ CPU.prototype.calcCycles = function(fRecalc)
  */
 CPU.prototype.getCycles = function(fScaled)
 {
-    var nCycles = (this.nTotalCycles + this.nRunCycles + this.nBurstCycles - this.nStepCycles)|0;
+    var nCycles = this.nTotalCycles + this.nRunCycles + this.nBurstCycles - this.nStepCycles;
     if (fScaled && this.aCounts.nCyclesMultiplier > 1 && this.aCounts.mhz > this.aCounts.mhzDefault) {
         /*
          * We could scale the current cycle count by the current effective speed (this.aCounts.mhz); eg:
