@@ -22,7 +22,7 @@ SC_MAP_MASK	equ	2	;SC map mask register index
 GC_INDEX	equ	3ceh	;GC index register
 GC_SET_RESET	equ	0	;GC set/reset register index
 GC_ENABLE_SET_RESET equ 1	;GC enable set/reset register index
-GC_ROTATE	equ	3	;GC data rotate/logical function
+GC_ROTATE	equ	3	;GC data rint 3otate/logical function
 				; register index
 GC_MODE		equ	5	;GC Mode register
 GC_BIT_MASK	equ	8	;GC bit mask register index

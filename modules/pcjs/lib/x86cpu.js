@@ -1468,8 +1468,8 @@ X86CPU.prototype.resetSizes = function()
  */
 X86CPU.prototype.getChecksum = function()
 {
-    var sum = (this.regEAX + this.regEBX + this.regECX + this.regEDX + this.getSP() + this.regEBP + this.regESI + this.regEDI) | 0;
-    sum = (sum + this.getIP() + this.getCS() + this.getDS() + this.getSS() + this.getES() + this.getPS()) | 0;
+    var sum = (this.regEAX + this.regEBX + this.regECX + this.regEDX + this.getSP() + this.regEBP + this.regESI + this.regEDI)|0;
+    sum = (sum + this.getIP() + this.getCS() + this.getDS() + this.getSS() + this.getES() + this.getPS())|0;
     return sum;
 };
 

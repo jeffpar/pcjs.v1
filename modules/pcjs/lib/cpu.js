@@ -399,7 +399,7 @@ CPU.prototype.updateChecksum = function(nCycles)
          * Get a 32-bit summation of the current CPU state and add it to our running 32-bit checksum
          */
         var fDisplay = false;
-        this.aCounts.nChecksum = (this.aCounts.nChecksum + this.getChecksum()) | 0;
+        this.aCounts.nChecksum = (this.aCounts.nChecksum + this.getChecksum())|0;
         this.aCounts.nCyclesChecksumNext -= nCycles;
         if (this.aCounts.nCyclesChecksumNext <= 0) {
             this.aCounts.nCyclesChecksumNext += this.aCounts.nCyclesChecksumInterval;
