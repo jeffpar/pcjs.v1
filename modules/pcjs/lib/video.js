@@ -1434,7 +1434,7 @@ Card.GRC = {
         PORT:               0x3CF       // GRC Data Port
     },
     SRESET: {
-        INDX:               0x00        // GRC Set/Reset Register (write-only; each bit used only if WRITE_MODE is 0 and corresponding ESR bit set)
+        INDX:               0x00        // GRC Set/Reset Register (write-only; each bit used only if WRITE.MODE0 and corresponding ESR bit set)
     },
     ESRESET: {
         INDX:               0x01        // GRC Enable Set/Reset Register
@@ -1457,14 +1457,19 @@ Card.GRC = {
     },
     MODE: {
         INDX:               0x05,       // GRC Mode Register
-        WRITE_MODE0:        0x00,       // write mode 0x0: each plane written with CPU data, rotated as needed, unless SR enabled
-        WRITE_MODE1:        0x01,       // write mode 0x1: each plane written with contents of the processor latches (loaded by a read)
-        WRITE_MODE2:        0x02,       // write mode 0x2: memory plane N is written with 8 bits matching data bit N
-        WRITE_MODE3:        0x03,       // write mode 0x3: VGA only
-        WRITE:              0x03,
+        WRITE: {
+            MODE0:          0x00,       // write mode 0: each plane written with CPU data, rotated as needed, unless SR enabled
+            MODE1:          0x01,       // write mode 1: each plane written with contents of the processor latches (loaded by a read)
+            MODE2:          0x02,       // write mode 2: memory plane N is written with 8 bits matching data bit N
+            MODE3:          0x03,       // write mode 3: VGA only
+            MASK:           0x03
+        },
         TEST:               0x04,
-        READ_MODE0:         0x00,       // read mode 0x0: read map mode
-        READ_MODE1:         0x08,       // read mode 0x1: color compare mode
+        READ: {
+            MODE0:          0x00,       // read mode 0: read map mode
+            MODE1:          0x08,       // read mode 1: color compare mode
+            MASK:           0x08
+        },
         EVENODD:            0x10,
         SHIFT:              0x20,
         COLOR256:           0x40        // VGA only
@@ -1628,7 +1633,7 @@ Card.ACCESS.readByteMode0EvenOdd = function readByteMode0EvenOdd(off, addr)
     /*
      * TODO: As discussed in getAccess(), we need to run some tests on real EGA/VGA hardware to determine
      * exactly what gets latched (ie, from which address) when EVENODD is in effect.  Whatever we learn may
-     * also dictate a special EVENODD function for Read Mode 1 as well.
+     * also dictate a special EVENODD function for READ.MODE1 as well.
      */
     off += this.offset;
     var idw = off & ~0x1;
@@ -1661,8 +1666,8 @@ Card.ACCESS.readByteMode1 = function readByteMode1(off, addr)
     off += this.offset;
     var dw = this.controller.latches = this.adw[off];
     /*
-     * Minor optimization: we could pre-mask nColorCompare with nColorDontCare, whenever either register is updated,
-     * but that's a drop in the bucket compared to all the other work this function must do.
+     * Minor optimization: we could pre-mask nColorCompare with nColorDontCare, whenever either register
+     * is updated, but that's a drop in the bucket compared to all the other work this function must do.
      */
     var mask = this.controller.nColorDontCare;
     var color = this.controller.nColorCompare & mask;
@@ -1678,9 +1683,9 @@ Card.ACCESS.readByteMode1 = function readByteMode1(off, addr)
  * writeByteMode0(off, b, addr)
  *
  * Supporting Set/Reset means that for every plane for which Set/Reset is enabled, we must
- * replace the corresponding byte in "dw" with a byte of zeros or ones.  This is accomplished with
+ * replace the corresponding byte in dw with a byte of zeros or ones.  This is accomplished with
  * nSetMapMask, nSetMapData, and nSetMapBits.  nSetMapMask is the inverse of the ESRESET bits,
- * because we use it to mask the processor data; nSetMapData records the desired SRESET bits; and
+ * because we use it to mask the processor data, nSetMapData records the desired SRESET bits, and
  * nSetMapBits contains the bits to replace those that we masked in the processor data.
  *
  * We could have done this:
@@ -1700,8 +1705,8 @@ Card.ACCESS.writeByteMode0 = function writeByteMode0(off, b, addr)
     var idw = off + this.offset;
     var dw = b | (b << 8) | (b << 16) | (b << 24);
     dw = (dw & this.controller.nSetMapMask) | this.controller.nSetMapBits;
-    dw = (dw & this.controller.nWriteMapMask) | (this.adw[idw] & ~this.controller.nWriteMapMask);
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
+    dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
         this.fDirty = true;
@@ -1721,13 +1726,13 @@ Card.ACCESS.writeByteMode0EvenOdd = function writeByteMode0EvenOdd(off, b, addr)
     off += this.offset;
     var dw = b | (b << 8) | (b << 16) | (b << 24);
     //
-    // When even/odd addressing is enabled, nWriteMapMask must be cleared for planes 1 and 3 if
-    // the address is even, and cleared for planes 0 and 2 if the address is odd.
+    // When even/odd addressing is enabled, nSeqMapMask must be cleared for planes 1 and 3
+    // if the address is even, and cleared for planes 0 and 2 if the address is odd.
     //
     var idw = off & ~0x1;
-    var maskMaps = this.controller.nWriteMapMask & (idw == off? 0x00ff00ff : (0xff00ff00|0));
-    dw = (dw & maskMaps) | (this.adw[idw] & ~maskMaps);
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
+    var maskMaps = this.controller.nSeqMapMask & (idw == off? 0x00ff00ff : (0xff00ff00|0));
+    dw = (dw & maskMaps) | (this.adw[idw] & ~maskMaps);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
         this.fDirty = true;
@@ -1748,8 +1753,8 @@ Card.ACCESS.writeByteMode0Rot = function writeByteMode0Rot(off, b, addr)
     b = ((b >> this.controller.nDataRotate) | (b << (8 - this.controller.nDataRotate)) & 0xff);
     var dw = b | (b << 8) | (b << 16) | (b << 24);
     dw = (dw & this.controller.nSetMapMask) | this.controller.nSetMapBits;
-    dw = (dw & this.controller.nWriteMapMask) | (this.adw[idw] & ~this.controller.nWriteMapMask);
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
+    dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
         this.fDirty = true;
@@ -1771,8 +1776,8 @@ Card.ACCESS.writeByteMode0And = function writeByteMode0And(off, b, addr)
     var dw = b | (b << 8) | (b << 16) | (b << 24);
     dw = (dw & this.controller.nSetMapMask) | this.controller.nSetMapBits;
     dw &= this.controller.latches;
-    dw = (dw & this.controller.nWriteMapMask) | (this.adw[idw] & ~this.controller.nWriteMapMask);
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
+    dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
         this.fDirty = true;
@@ -1794,8 +1799,8 @@ Card.ACCESS.writeByteMode0Or = function writeByteMode0Or(off, b, addr)
     var dw = b | (b << 8) | (b << 16) | (b << 24);
     dw = (dw & this.controller.nSetMapMask) | this.controller.nSetMapBits;
     dw |= this.controller.latches;
-    dw = (dw & this.controller.nWriteMapMask) | (this.adw[idw] & ~this.controller.nWriteMapMask);
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
+    dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
         this.fDirty = true;
@@ -1817,8 +1822,8 @@ Card.ACCESS.writeByteMode0Xor = function writeByteMode0Xor(off, b, addr)
     var dw = b | (b << 8) | (b << 16) | (b << 24);
     dw = (dw & this.controller.nSetMapMask) | this.controller.nSetMapBits;
     dw ^= this.controller.latches;
-    dw = (dw & this.controller.nWriteMapMask) | (this.adw[idw] & ~this.controller.nWriteMapMask);
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
+    dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
         this.fDirty = true;
@@ -1836,7 +1841,7 @@ Card.ACCESS.writeByteMode0Xor = function writeByteMode0Xor(off, b, addr)
 Card.ACCESS.writeByteMode1 = function writeByteMode1(off, b, addr)
 {
     var idw = off + this.offset;
-    var dw = (this.adw[idw] & ~this.controller.nWriteMapMask) | (this.controller.latches & this.controller.nWriteMapMask);
+    var dw = (this.adw[idw] & ~this.controller.nSeqMapMask) | (this.controller.latches & this.controller.nSeqMapMask);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
         this.fDirty = true;
@@ -1859,11 +1864,11 @@ Card.ACCESS.writeByteMode1EvenOdd = function writeByteMode1EvenOdd(off, b, addr)
      */
     off += this.offset;
     //
-    // When even/odd addressing is enabled, nWriteMapMask must be cleared for planes 1 and 3 if
+    // When even/odd addressing is enabled, nSeqMapMask must be cleared for planes 1 and 3 if
     // the address is even, and cleared for planes 0 and 2 if the address is odd.
     //
     var idw = off & ~0x1;
-    var maskMaps = this.controller.nWriteMapMask & (idw == off? 0x00ff00ff : (0xff00ff00|0));
+    var maskMaps = this.controller.nSeqMapMask & (idw == off? 0x00ff00ff : (0xff00ff00|0));
     var dw = (this.adw[idw] & ~maskMaps) | (this.controller.latches & maskMaps);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
@@ -1883,8 +1888,8 @@ Card.ACCESS.writeByteMode2 = function writeByteMode2(off, b, addr)
 {
     var idw = off + this.offset;
     var dw = Video.aEGAByteToDW[b & 0xf];
-    dw = (dw & this.controller.nWriteMapMask) | (this.adw[idw] & ~this.controller.nWriteMapMask);
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
+    dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
         this.fDirty = true;
@@ -1904,8 +1909,8 @@ Card.ACCESS.writeByteMode2And = function writeByteMode2And(off, b, addr)
     var idw = off + this.offset;
     var dw = Video.aEGAByteToDW[b & 0xf];
     dw &= this.controller.latches;
-    dw = (dw & this.controller.nWriteMapMask) | (this.adw[idw] & ~this.controller.nWriteMapMask);
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
+    dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
         this.fDirty = true;
@@ -1925,8 +1930,8 @@ Card.ACCESS.writeByteMode2Or = function writeByteMode2Or(off, b, addr)
     var idw = off + this.offset;
     var dw = Video.aEGAByteToDW[b & 0xf];
     dw |= this.controller.latches;
-    dw = (dw & this.controller.nWriteMapMask) | (this.adw[idw] & ~this.controller.nWriteMapMask);
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
+    dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
         this.fDirty = true;
@@ -1946,8 +1951,36 @@ Card.ACCESS.writeByteMode2Xor = function writeByteMode2Xor(off, b, addr)
     var idw = off + this.offset;
     var dw = Video.aEGAByteToDW[b & 0xf];
     dw ^= this.controller.latches;
-    dw = (dw & this.controller.nWriteMapMask) | (this.adw[idw] & ~this.controller.nWriteMapMask);
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
+    dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
+    if (this.adw[idw] != dw) {
+        this.adw[idw] = dw;
+        this.fDirty = true;
+    }
+};
+
+/**
+ * writeByteMode3(off, b, addr)
+ *
+ * In MODE3, Set/Reset is always enabled, so the ESRESET bits (and therefore nSetMapMask and nSetMapBits)
+ * are ignored; we look only at the SRESET bits, which are stored in nSetMapData.
+ *
+ * Unlike MODE0, we currently have no non-rotate function for MODE3.  If performance dictates, we can add one;
+ * ditto for other features like the Sequencer's MAPMASK register (nSeqMapMask).
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @param {number} b (which should already be pre-masked to 8 bits; see Bus.prototype.setByteDirect)
+ * @param {number} [addr]
+ */
+Card.ACCESS.writeByteMode3 = function writeByteMode3(off, b, addr)
+{
+    var idw = off + this.offset;
+    b = ((b >> this.controller.nDataRotate) | (b << (8 - this.controller.nDataRotate)) & 0xff);
+    var dw = b | (b << 8) | (b << 16) | (b << 24);
+    var dwMask = (dw & this.controller.nBitMapMask);
+    dw = (this.controller.nSetMapData & dwMask) | (this.controller.latches & ~dwMask);
+    dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
         this.fDirty = true;
@@ -1975,6 +2008,7 @@ Card.ACCESS.afn[Card.ACCESS.WRITE.MODE2] = Card.ACCESS.writeByteMode2;
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE2 |  Card.ACCESS.WRITE.AND] = Card.ACCESS.writeByteMode2And;
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE2 |  Card.ACCESS.WRITE.OR]  = Card.ACCESS.writeByteMode2Or;
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE2 |  Card.ACCESS.WRITE.XOR] = Card.ACCESS.writeByteMode2Xor;
+Card.ACCESS.afn[Card.ACCESS.WRITE.MODE3] = Card.ACCESS.writeByteMode3;
 
 /**
  * initEGA(data)
@@ -2106,11 +2140,11 @@ Card.prototype.initEGA = function(data, nMonitorType)
     this.nReadMapShift  = data[16];
 
     /*
-     * Similarly, nWriteMapMask must perfectly track how the SEQ.MAPMASK register is programmed, so that memory write
+     * Similarly, nSeqMapMask must perfectly track how the SEQ.MAPMASK register is programmed, so that memory write
      * functions write the appropriate plane(s).  Again, this default is not terribly critical, unless Card.ACCESS.WRITE.MODE0
      * is chosen as our default AND you want the screen randomizer to work.
      */
-    this.nWriteMapMask  = data[17];
+    this.nSeqMapMask    = data[17];
     this.nDataRotate    = data[18];
     this.nBitMapMask    = data[19];
     this.nSetMapData    = data[20];
@@ -2180,7 +2214,7 @@ Card.prototype.saveEGA = function()
     data[14] = State.compressEvenOdd(this.adwMemory);
     data[15] = this.nAccess | Card.ACCESS.V2;
     data[16] = this.nReadMapShift;
-    data[17] = this.nWriteMapMask;
+    data[17] = this.nSeqMapMask;
     data[18] = this.nDataRotate;
     data[19] = this.nBitMapMask;
     data[20] = this.nSetMapData;
@@ -3899,10 +3933,10 @@ Video.prototype.getAccess = function()
     if (regGRCMode != null) {
         var nReadAccess = Card.ACCESS.READ.MODE0;
         var nWriteAccess = Card.ACCESS.WRITE.MODE0;
-        var nWriteMode = regGRCMode & Card.GRC.MODE.WRITE;
+        var nWriteMode = regGRCMode & Card.GRC.MODE.WRITE.MASK;
         var regDataRotate = card.regGRCData[Card.GRC.DATAROT.INDX] & Card.GRC.DATAROT.MASK;
         switch (nWriteMode) {
-        case Card.GRC.MODE.WRITE_MODE0:
+        case Card.GRC.MODE.WRITE.MODE0:
             if (regDataRotate) {
                 nWriteAccess = Card.ACCESS.WRITE.MODE0 | Card.ACCESS.WRITE.ROT;
                 switch (regDataRotate & Card.GRC.DATAROT.FUNC) {
@@ -3921,10 +3955,10 @@ Video.prototype.getAccess = function()
                 card.nDataRotate = regDataRotate & Card.GRC.DATAROT.COUNT;
             }
             break;
-        case Card.GRC.MODE.WRITE_MODE1:
+        case Card.GRC.MODE.WRITE.MODE1:
             nWriteAccess = Card.ACCESS.WRITE.MODE1;
             break;
-        case Card.GRC.MODE.WRITE_MODE2:
+        case Card.GRC.MODE.WRITE.MODE2:
             switch (regDataRotate & Card.GRC.DATAROT.FUNC) {
             default:
                 nWriteAccess = Card.ACCESS.WRITE.MODE2;
@@ -3940,20 +3974,25 @@ Video.prototype.getAccess = function()
                 break;
             }
             break;
+        case Card.GRC.MODE.WRITE.MODE3:
+            if (this.nCard == Video.CARD.VGA) {
+                nWriteAccess = Card.ACCESS.WRITE.MODE3;
+            }
+            break;
         default:
             if (DEBUG && this.messageEnabled()) {
                 this.printMessage("getAccess(): invalid GRC mode (" + str.toHexByte(regGRCMode) + ")");
             }
             break;
         }
-        if (regGRCMode & Card.GRC.MODE.READ_MODE1) {
+        if (regGRCMode & Card.GRC.MODE.READ.MODE1) {
             nReadAccess = Card.ACCESS.READ.MODE1;
         }
         /*
          * I discovered that when the IBM EGA ROM scrolls the screen in graphics modes 0x0D and 0x0E, it
-         * reprograms this register for WRITE_MODE1 (which is fine) *and* EVENODD (which is, um, very odd).
+         * reprograms this register for WRITE.MODE1 (which is fine) *and* EVENODD (which is, um, very odd).
          * Moreover, it does NOT make the complementary change to the SEQ.MEMMODE.SEQUENTIAL bit; under
-         * "normal" circumstances, those two bits are always supposed to programmed oppositely.
+         * normal circumstances, those two bits are always supposed to programmed oppositely.
          *
          * Until I can perform some tests on real hardware, I have to assume that the EGA scroll operation
          * is supposed to actually WORK in modes 0x0D and 0x0E, so I've decided to tie the trigger for my own
@@ -5425,7 +5464,7 @@ Video.prototype.outSEQData = function(port, bOut, addrFrom)
     }
     switch(this.cardEGA.regSEQIndx) {
     case Card.SEQ.MAPMASK.INDX:
-        this.cardEGA.nWriteMapMask = Video.aEGAByteToDW[bOut & Card.SEQ.MAPMASK.MAPS];
+        this.cardEGA.nSeqMapMask = Video.aEGAByteToDW[bOut & Card.SEQ.MAPMASK.MAPS];
         break;
     case Card.SEQ.MEMMODE.INDX:
         this.setAccess(this.getAccess());
