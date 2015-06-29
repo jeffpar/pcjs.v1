@@ -45,6 +45,14 @@ List of VGA Samples from [Michael Abrash's Graphics Programming Black Book](http
 	 * [L28-1.ASM: Illustrates the use of the Read Map register in read mode 0](L28-1.ASM) 
 	 * [L28-2.ASM: Illustrates use of read mode 1 (color compare mode) to detect collisions in display memory](L28-2.ASM) 
 	 * [L28-3.ASM: Illustrates the use of Color Don't Care to support fast read-modify-write operations](L28-3.ASM) 
+ * [Chapter 29](https://github.com/jeffpar/abrash-black-book/blob/master/src/chapter-29.md)
+	 * [L29-1.ASM: Puts up a mode 10h EGA graphics screen, then saves it to the file SNAPSHOT.SCR](L29-1.ASM) 
+	 * [L29-2.ASM: Restores a mode 10h EGA graphics screen from the file SNAPSHOT.SCR](L29-2.ASM) 
+	 * [L29-3.ASM: Illustrates the color mapping capabilities of the EGA's palette registers](L29-3.ASM) 
+	 * [L29-4.ASM: Demonstrates screen blanking via bit 5 of the Attribute Controller Index register](L29-4.ASM) 
+ * [Chapter 30](https://github.com/jeffpar/abrash-black-book/blob/master/src/chapter-30.md)
+	 * [L30-1.ASM: Demonstrates the VGA/EGA split screen in action](L30-1.ASM) 
+	 * [L30-2.ASM: Demonstrates the interaction of the split screen and horizontal pel panning](L30-2.ASM) 
 
 ---
 
