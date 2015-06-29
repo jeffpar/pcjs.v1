@@ -37,6 +37,10 @@ List of VGA Samples from [Michael Abrash's Graphics Programming Black Book](http
  * [Chapter 26](https://github.com/jeffpar/abrash-black-book/blob/master/src/chapter-26.md)
 	 * [L26-1.ASM: Illustrates operation of write mode 3 of the VGA](L26-1.ASM) 
 	 * [L26-2.ASM: Illustrates high-speed text-drawing operation of write mode 3 of the VGA](L26-2.ASM) 
+ * [Chapter 27](https://github.com/jeffpar/abrash-black-book/blob/master/src/chapter-27.md)
+	 * [L27-1.ASM: Illustrates one use of write mode 2 of the VGA and EGA by animating the image of an "A"](L27-1.ASM) 
+	 * [L27-2.ASM: Illustrates one use of write mode 2 of the VGA and EGA by drawing lines in color patterns](L27-2.ASM) 
+	 * [L27-3.ASM: Illustrates flipping from bit-mapped graphics mode to text mode and back](L27-3.ASM) 
 
 ---
 
