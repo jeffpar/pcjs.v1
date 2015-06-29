@@ -41,6 +41,10 @@ List of VGA Samples from [Michael Abrash's Graphics Programming Black Book](http
 	 * [L27-1.ASM: Illustrates one use of write mode 2 of the VGA and EGA by animating the image of an "A"](L27-1.ASM) 
 	 * [L27-2.ASM: Illustrates one use of write mode 2 of the VGA and EGA by drawing lines in color patterns](L27-2.ASM) 
 	 * [L27-3.ASM: Illustrates flipping from bit-mapped graphics mode to text mode and back](L27-3.ASM) 
+ * [Chapter 28](https://github.com/jeffpar/abrash-black-book/blob/master/src/chapter-28.md)
+	 * [L28-1.ASM: Illustrates the use of the Read Map register in read mode 0](L28-1.ASM) 
+	 * [L28-2.ASM: Illustrates use of read mode 1 (color compare mode) to detect collisions in display memory](L28-2.ASM) 
+	 * [L28-3.ASM: Illustrates the use of Color Don't Care to support fast read-modify-write operations](L28-3.ASM) 
 
 ---
 
