@@ -267,4 +267,3 @@ Done:					;we're done with this line
 	ret				;done
 _DrawWuLine endp
 	end
-
