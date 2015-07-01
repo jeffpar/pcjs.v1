@@ -703,7 +703,7 @@ Video.FONT = {
  *
  *      0: # of columns (nCols)
  *      1: # of rows (nRows)
- *      2: # cells per word (nCellsPerWord: # of characters or pixels per word)
+ *      2: # cells per word (nCellsPerWord: # of characters or pixels per 16-bit word)
  *      3: # bytes of visible screen padding, if any (used for CGA graphics modes only)
  *      4: font ID (nFont: undefined if graphics mode)
  *
@@ -729,7 +729,7 @@ Video.aModeParms[Video.MODE.EGA_640X350_MONO]   = [640, 350, 16];               
 Video.aModeParms[Video.MODE.EGA_640X350]        = [640, 350, 16];                                   // 0x10
 Video.aModeParms[Video.MODE.VGA_640X480_MONO]   = [640, 480, 16];                                   // 0x11
 Video.aModeParms[Video.MODE.VGA_640X480]        = [640, 480, 16];                                   // 0x12
-Video.aModeParms[Video.MODE.VGA_320X200]        = [320, 200, 16];                                   // 0x13
+Video.aModeParms[Video.MODE.VGA_320X200]        = [320, 200, 2];                                    // 0x13
 
 Video.aModeParms[Video.MODE.CGA_40X25_BW]       = Video.aModeParms[Video.MODE.CGA_40X25];           // 0x01
 Video.aModeParms[Video.MODE.CGA_80X25_BW]       = Video.aModeParms[Video.MODE.CGA_80X25];           // 0x03
@@ -1243,7 +1243,7 @@ Card.ATC = {
         TEXTGRCC:           0x04,       // bit 2: set for line graphics in character codes 0xC0-0xDF, clear otherwise
         TEXTBLINK:          0x08,       // bit 3: set for text blink attribute, clear for background intensity attribute
         RESERVED:           0x10,       // bit 4: reserved
-        PANCOMPAT:          0x20,       // bit 5: set for PEL panning compatibility
+        PANCOMPAT:          0x20,       // bit 5: set for pixel-panning compatibility
         PELWIDTH:           0x40,       // bit 6: set for 256-color modes, clear for all other modes
         COLORSEL:           0x80        // bit 7: set for P5,P4 mapped to bits 1,0 of the Color Select register
     },
@@ -1258,7 +1258,7 @@ Card.ATC = {
     },
     HORZPAN: {
         INDX:               0x13,       // ATC Horizontal PEL Panning Register
-        SHIFT_LEFT:         0x0F        // bits 0-3 indicate # of PELs to shift left
+        SHIFT_LEFT:         0x0F        // bits 0-3 indicate # of pixels to shift left
     },
     COLORSEL: {
         INDX:               0x14,       // ATC Color Select Register (VGA only)
@@ -1383,11 +1383,11 @@ if (DEBUGGER) Card.SEQ.REGS = ["RESET","CLOCKING","MAPMASK","CHARMAP","MEMMODE"]
 /*
  * VGA Digital-to-Analog Converter (DAC) Registers (regDACMask, regDACState, regDACAddr, and regDACData)
  *
- * To write PEL data, write an address to DAC.ADDR.PORT_WRITE, then write 3 bytes to DAC.DATA.PORT; the low 6 bits
+ * To write DAC data, write an address to DAC.ADDR.PORT_WRITE, then write 3 bytes to DAC.DATA.PORT; the low 6 bits
  * of each byte will be concatenated to form an 18-bit DAC value (red is least significant, followed by green, then blue).
  * When the final byte is received, the 18-bit DAC value is updated and regDACAddr is auto-incremented.
  *
- * To read PEL data, the process is similar, but the initial address is written to DAC.ADDR.PORT_READ instead.
+ * To read DAC data, the process is similar, but the initial address is written to DAC.ADDR.PORT_READ instead.
  *
  * DAC.STATE.PORT and DAC.ADDR.PORT_WRITE can be read at any time and will not interfere with a read or write operation
  * in progress.  To prevent "snow", reading or writing DAC values should be limited to retrace intervals (see regStatus1),
@@ -1568,6 +1568,7 @@ Card.ACCESS = {
         MODE0:              0x0400,
         MODE1:              0x0500,
         EVENODD:            0x1000,
+        CHAIN4:             0x4000,
         MASK:               0xFF00
     },
     WRITE: {                            // and WRITE values are designed to be OR'ed with READ values
@@ -1575,6 +1576,7 @@ Card.ACCESS = {
         MODE1:              0x0001,
         MODE2:              0x0002,
         MODE3:              0x0003,     // VGA only
+        CHAIN4:             0x0004,
         EVENODD:            0x0010,
         ROT:                0x0020,
         AND:                0x0060,
@@ -1618,6 +1620,23 @@ Card.ACCESS.readByteMode0 = function readByteMode0(off, addr)
     off += this.offset;
     var dw = this.controller.latches = this.adw[off];
     return (dw >> this.controller.nReadMapShift) & 0xff;
+};
+
+/**
+ * readByteMode0Chain4(off, addr)
+ *
+ * See writeByteMode0Chain4 for a description of how writes are distributed across planes.
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @param {number} [addr]
+ * @return {number}
+ */
+Card.ACCESS.readByteMode0Chain4 = function readByteMode0Chain4(off, addr)
+{
+    var idw = (off & ~0x3) + this.offset;
+    var shift = (off & 0x3) << 3;
+    return ((this.controller.latches = this.adw[idw]) >> shift) & 0xff;
 };
 
 /**
@@ -1714,6 +1733,44 @@ Card.ACCESS.writeByteMode0 = function writeByteMode0(off, b, addr)
 };
 
 /**
+ * writeByteMode0Chain4(off, b, addr)
+ *
+ * This is how we distribute a write of 0xff across the address space to the planes, assuming that
+ * all planes are enabled by the Sequencer's MAPMASK register (which we assume still controls access):
+ *
+ *      off     idw     adw[idw]
+ *      ------  ------  ----------
+ *      0x0000: 0x0000  0x000000ff
+ *      0x0001: 0x0000  0x0000ff00
+ *      0x0002: 0x0000  0x00ff0000
+ *      0x0003: 0x0000  0xff000000
+ *      0x0004: 0x0001  0x000000ff
+ *      0x0005: 0x0001  0x0000ff00
+ *      0x0006: 0x0001  0x00ff0000
+ *      0x0007: 0x0001  0xff000000
+ *      ...
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @param {number} b (which should already be pre-masked to 8 bits; see Bus.prototype.setByteDirect)
+ * @param {number} [addr]
+ */
+Card.ACCESS.writeByteMode0Chain4 = function writeByteMode0Chain4(off, b, addr)
+{
+    var idw = (off & ~0x3) + this.offset;
+    var shift = (off & 0x3) << 3;
+    /*
+     * TODO: Consider adding a separate "unmasked" version of this CHAIN4 write function whenever nSeqMapMask is -1
+     * (or removing nSeqMapMask from the equation altogether, if no one uses CHAIN4 with anything less than all planes enabled).
+     */
+    var dw = ((b << shift) & this.controller.nSeqMapMask) | (this.adw[idw] & ~((0xff << shift) & this.controller.nSeqMapMask));
+    if (this.adw[idw] != dw) {
+        this.adw[idw] = dw;
+        this.fDirty = true;
+    }
+};
+
+/**
  * writeByteMode0EvenOdd(off, b, addr)
  *
  * @this {Memory}
@@ -1726,8 +1783,8 @@ Card.ACCESS.writeByteMode0EvenOdd = function writeByteMode0EvenOdd(off, b, addr)
     off += this.offset;
     var dw = b | (b << 8) | (b << 16) | (b << 24);
     //
-    // When even/odd addressing is enabled, nSeqMapMask must be cleared for planes 1 and 3
-    // if the address is even, and cleared for planes 0 and 2 if the address is odd.
+    // When even/odd addressing is enabled, nSeqMapMask must be cleared for planes 1
+    // and 3 if the address is even, and cleared for planes 0 and 2 if the address is odd.
     //
     var idw = off & ~0x1;
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
@@ -1859,8 +1916,8 @@ Card.ACCESS.writeByteMode1 = function writeByteMode1(off, b, addr)
 Card.ACCESS.writeByteMode1EvenOdd = function writeByteMode1EvenOdd(off, b, addr)
 {
     /*
-     * TODO: As discussed in getAccess(), we need to run some tests on real EGA/VGA hardware to determine
-     * exactly where latches are written (ie, to which address) when EVENODD is in effect.
+     * TODO: As discussed in getAccess(), we need to run some tests on real EGA/VGA hardware to
+     * determine exactly where latches are written (ie, to which address) when EVENODD is in effect.
      */
     off += this.offset;
     //
@@ -1993,7 +2050,8 @@ Card.ACCESS.writeByteMode3 = function writeByteMode3(off, b, addr)
 Card.ACCESS.afn = [];
 
 Card.ACCESS.afn[Card.ACCESS.READ.MODE0]  = Card.ACCESS.readByteMode0;
-Card.ACCESS.afn[Card.ACCESS.READ.MODE0  |  Card.ACCESS.READ.EVENODD]  = Card.ACCESS.readByteMode0EvenOdd;
+Card.ACCESS.afn[Card.ACCESS.READ.MODE0  |  Card.ACCESS.READ.CHAIN4]  = Card.ACCESS.readByteMode0Chain4;
+Card.ACCESS.afn[Card.ACCESS.READ.MODE0  |  Card.ACCESS.READ.EVENODD] = Card.ACCESS.readByteMode0EvenOdd;
 Card.ACCESS.afn[Card.ACCESS.READ.MODE1]  = Card.ACCESS.readByteMode1;
 
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0] = Card.ACCESS.writeByteMode0;
@@ -2001,6 +2059,7 @@ Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0 |  Card.ACCESS.WRITE.ROT] = Card.ACCESS.
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0 |  Card.ACCESS.WRITE.AND] = Card.ACCESS.writeByteMode0And;
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0 |  Card.ACCESS.WRITE.OR]  = Card.ACCESS.writeByteMode0Or;
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0 |  Card.ACCESS.WRITE.XOR] = Card.ACCESS.writeByteMode0Xor;
+Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0 |  Card.ACCESS.WRITE.CHAIN4]  = Card.ACCESS.writeByteMode0Chain4;
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0 |  Card.ACCESS.WRITE.EVENODD] = Card.ACCESS.writeByteMode0EvenOdd;
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE1] = Card.ACCESS.writeByteMode1;
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE1 |  Card.ACCESS.WRITE.EVENODD] = Card.ACCESS.writeByteMode1EvenOdd;
@@ -3929,6 +3988,7 @@ Video.prototype.getAccess = function()
     var nAccess;
     var card = this.cardActive;
 
+    this.fLinear = false;
     var regGRCMode = card.regGRCData[Card.GRC.MODE.INDX];
     if (regGRCMode != null) {
         var nReadAccess = Card.ACCESS.READ.MODE0;
@@ -4019,6 +4079,11 @@ Video.prototype.getAccess = function()
             if (!(regSEQMode & Card.SEQ.MEMMODE.SEQUENTIAL)) {
                 nReadAccess |= Card.ACCESS.READ.EVENODD;
                 nWriteAccess |= Card.ACCESS.WRITE.EVENODD;
+            }
+            if (regSEQMode & Card.SEQ.MEMMODE.CHAIN4) {
+                nReadAccess |= Card.ACCESS.READ.CHAIN4;
+                nWriteAccess |= Card.ACCESS.WRITE.CHAIN4;
+                this.fLinear = true;
             }
         }
         nAccess = nReadAccess | nWriteAccess;
@@ -4114,6 +4179,7 @@ Video.prototype.setDimensions = function()
     this.nCellCache = (this.nCells / this.nCellsPerWord)|0;
     this.cbScreen = ((this.nCellCache << 1) + this.cbPadding)|0;
     this.cbSplit = (this.cbPadding? ((this.cbScreen + this.cbPadding) >> 1) : 0);
+    this.fLinear = false;                                               // set for 8bpp "linear" VGA modes only
     if (this.nMode >= Video.MODE.EGA_320X200) this.nCellCache <<= 1;    // double nCellCache (every cell is a byte)
 
     /*
@@ -4316,18 +4382,21 @@ Video.prototype.checkMode = function(fForce)
                         if (fSEQDotClock) nMode -= 2;
                     } else {
                         if (card.addrBuffer == 0xB8000) {
-                            //
-                            // Since nMode will have been assigned a default of either 0x02 or 0x03, convert that to either
-                            // 0x05 or 0x04 if we're in a low-res graphics mode, 0x06 otherwise.
-                            //
+                            /*
+                             * Since nMode will have been assigned a default of either 0x02 or 0x03, convert that to either
+                             * 0x05 or 0x04 if we're in a low-res graphics mode, 0x06 otherwise.
+                             */
                             nMode = fSEQDotClock? (7 - nMode) : Video.MODE.CGA_640X200;
                         } else {
-                            //
-                            // card.addrBuffer must be 0xA0000, so we need to discriminate between modes 0x0D through 0x10;
-                            // we've already defaulted to 0x0F or 0x10, so determine if it's 0x0D or 0x0E (ie, a 200-row mode)
-                            // and then which one (ie, 320 wide or 640 wide).
-                            //
-                            if (nCRTCVertTotal < 500) {
+                            /*
+                             * card.addrBuffer must be 0xA0000, so we need to discriminate between modes 0x0D through 0x10;
+                             * we've already defaulted to 0x0F or 0x10, so determine if it's 0x0D or 0x0E (ie, a 200-row mode)
+                             * and then which one (ie, 320 wide or 640 wide).
+                             */
+                            if (card.regSEQData[Card.SEQ.MEMMODE.INDX] & Card.SEQ.MEMMODE.CHAIN4) {
+                                nMode = Video.MODE.VGA_320X200;
+                            }
+                            else if (nCRTCVertTotal < 500) {
                                 if (nCRTCVertTotal < 350) {
                                     nMode = (fSEQDotClock? Video.MODE.EGA_320X200 : Video.MODE.EGA_640X200);
                                 }
@@ -4811,8 +4880,11 @@ Video.prototype.updateScreen = function(fForce)
     else if (this.cbSplit) {
         this.updateScreenGraphicsCGA(addrScreen, addrScreenLimit);
     }
-    else {
+    else if (!this.fLinear) {
         this.updateScreenGraphicsEGA(addrScreen, addrScreenLimit);
+    }
+    else {
+        this.updateScreenGraphicsVGA(addrScreen, addrScreenLimit);
     }
 };
 
@@ -4994,7 +5066,7 @@ Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
         data = adwMemory[idw];
 
         /*
-         * Figure out how many visible pixels this byte represents; usually 8, unless panning is being used.
+         * Figure out how many visible pixels this data represents; usually 8, unless panning is being used.
          */
         var iPixel, nPixels = 8;
 
@@ -5051,6 +5123,110 @@ Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
                 var bPixel = Video.aEGADWToByte[dwPixel] || 0;
                 this.setPixel(this.imageScreenBuffer, x++, y, aPixelColors[bPixel]);
                 data <<= 1;
+            }
+            if (x > xMaxDirty) xMaxDirty = x;
+            if (y < yDirty) yDirty = y;
+            if (y >= yMaxDirty) yMaxDirty = y + 1;
+        }
+
+        this.assert(x <= this.nCols);
+
+        if (x >= this.nCols) {
+            x = 0;
+            if (++y > this.nRows) break;
+            addr += nRowAdjust;
+        }
+    }
+
+    if (!iPixelFirst) this.fCellCacheValid = true;
+
+    /*
+     * For a fascinating discussion of the best way to update the screen canvas at this point, see updateScreenGraphicsCGA().
+     */
+    if (xDirty < this.nCols) {
+        var cxDirty = xMaxDirty - xDirty;
+        var cyDirty = yMaxDirty - yDirty;
+        this.contextScreenBuffer.putImageData(this.imageScreenBuffer, 0, 0, xDirty, yDirty, cxDirty, cyDirty);
+        this.contextScreen.drawImage(this.canvasScreenBuffer, 0, 0, this.nCols, this.nRows, 0, 0, this.cxScreen, this.cyScreen);
+    }
+};
+
+/**
+ * updateScreenGraphicsVGA(addrScreen, addrScreenLimit)
+ *
+ * The name is a slight misnomer: updateScreenGraphicsEGA() takes care of all the "planar" video modes, which were
+ * first introduced by the EGA and later expanded by the VGA, whereas this function takes care of just the "linear"
+ * video modes introduced by the VGA, such as mode 0x13 (320x200x256).  Those modes may also be referred to as CHAIN4
+ * modes, since I think all of them require that the CHAIN4 bit in the Sequencer's MEMMODE register be set.
+ *
+ * @param addrScreen
+ * @param addrScreenLimit
+ */
+Video.prototype.updateScreenGraphicsVGA = function(addrScreen, addrScreenLimit)
+{
+    var addr, data;
+
+    addr = addrScreen;
+    this.cBlinkVisible = 0;
+
+    var iCell = 0;
+    var aPixelColors = this.getCardColors();
+    var adwMemory = this.cardActive.adwMemory;
+
+    var x = 0, y = 0;
+    var xDirty = this.nCols, xMaxDirty = 0, yDirty = this.nRows, yMaxDirty = 0;
+
+    var iPixelFirst = this.cardActive.regATCData[Card.ATC.HORZPAN.INDX] & Card.ATC.HORZPAN.SHIFT_LEFT;
+    /*
+     * TODO: What should happen if the card is programmed such that nColsLogical is LESS THAN nCols?
+     */
+    var nRowAdjust = (this.nColsLogical > this.nCols? ((this.nColsLogical - this.nCols - iPixelFirst) >> 3) : 0);
+
+    while (addr < addrScreenLimit) {
+        var idw = addr++ - this.addrBuffer;
+        this.assert(idw >= 0 && idw < adwMemory.length);
+        data = adwMemory[idw];
+
+        /*
+         * Figure out how many visible pixels this data represents; usually 4, unless panning is being used.
+         */
+        var iPixel, nPixels = 4;
+
+        if (iPixelFirst) {
+            /*
+             * Notice that we're not using the cell cache when panning is active, because the cached cell data no
+             * longer aligns with the data we're pulling out of the video buffer, and it's not clear that the effort
+             * to realign the data and make a valid cache comparison would save enough work to make it worthwhile.
+             */
+            if (!x) {
+                data <<= iPixelFirst;
+                nPixels -= iPixelFirst;
+                /*
+                 * This is as good a place as any to invalidate the cell cache when panning is active; this ensures
+                 * we don't rely on stale cache contents once panning stops.
+                 */
+                this.fCellCacheValid = false;
+            } else {
+                iPixel = this.nCols - x;
+                if (nPixels > iPixel) nPixels = iPixel;
+            }
+        } else {
+            this.assert(iCell < this.aCellCache.length);
+            if (this.fCellCacheValid && data === this.aCellCache[iCell]) {
+                x += nPixels;
+                nPixels = 0;
+            } else {
+                this.aCellCache[iCell] = data;
+            }
+            iCell++;
+        }
+
+        if (nPixels) {
+            if (x < xDirty) xDirty = x;
+            for (iPixel = 0; iPixel < nPixels; iPixel++) {
+                var bPixel = data & 0xff;
+                this.setPixel(this.imageScreenBuffer, x++, y, aPixelColors[bPixel]);
+                data >>>= 8;
             }
             if (x > xMaxDirty) xMaxDirty = x;
             if (y < yDirty) yDirty = y;
