@@ -3,11 +3,11 @@ Debugging Notes
 
 The boot sector contains the following code:
 
-0000:7C3E B003            MOV      AL,03
-0000:7C40 B200            MOV      DL,00
-0000:7C42 B417            MOV      AH,17
-0000:7C44 CD13            INT      13
-0000:7C46 72B8            JC       7C00
+	0000:7C3E B003            MOV      AL,03
+	0000:7C40 B200            MOV      DL,00
+	0000:7C42 B417            MOV      AH,17
+	0000:7C44 CD13            INT      13
+	0000:7C46 72B8            JC       7C00
 
 For BIOSes that don't support INT 0x13, AH function 0x17, patch the JC with two NOPs; eg:
 
