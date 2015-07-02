@@ -53,6 +53,9 @@ List of VGA Samples from [Michael Abrash's Graphics Programming Black Book](http
  * [Chapter 30](https://github.com/jeffpar/abrash-black-book/blob/master/src/chapter-30.md)
 	 * [L30-1.ASM: Demonstrates the VGA/EGA split screen in action](L30-1.ASM) 
 	 * [L30-2.ASM: Demonstrates the interaction of the split screen and horizontal pel panning](L30-2.ASM) 
+ * [Chapter 31](https://github.com/jeffpar/abrash-black-book/blob/master/src/chapter-31.md)
+	 * [L31-1.ASM: Demonstrates pixel drawing in 320x400 256-color mode on the VGA](L31-1.ASM) 
+	 * [L31-2.ASM: Demonstrate the two pages available in 320x400 256-color modes on a VGA](L31-2.ASM) 
 
 ---
 
