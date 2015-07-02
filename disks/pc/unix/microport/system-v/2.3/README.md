@@ -15,11 +15,11 @@ For BIOSes that don't support INT 0x13, AH function 0x17, patch the JC with two 
 
 After booting, the following code is executed:
 
-12E8:01D3 52              PUSH     DX                   ;history=5
-12E8:01D4 51              PUSH     CX                   ;history=4
-12E8:01D5 2BC9            SUB      CX,CX                ;history=3
-12E8:01D7 BA6400          MOV      DX,0064              ;history=2
-12E8:01DA ED              IN       AX,DX                ;history=1
+	12E8:01D3 52              PUSH     DX                   ;history=5
+	12E8:01D4 51              PUSH     CX                   ;history=4
+	12E8:01D5 2BC9            SUB      CX,CX                ;history=3
+	12E8:01D7 BA6400          MOV      DX,0064              ;history=2
+	12E8:01DA ED              IN       AX,DX                ;history=1
 
 For virtual machines that don't support word I/O to port 0x64, patch IN AX,DX with IN AL,DX; eg:
 
