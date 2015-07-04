@@ -180,9 +180,12 @@ function Video(parmsVideo, canvas, context, textarea, container)
 
     /*
      * Instead of (re)allocating a new color array every time getCardColors() is called, we preallocate
-     * an array now and simply update the entries as needed.
+     * an array now and simply update the entries as needed.  Note that for an EGA (or a VGA operating
+     * in an EGA-compatible mode), only the first 16 entries get used (derived from the ATC); only when
+     * a VGA is operating in an 8bpp mode are 256 entries used (derived from the DAC rather than the ATC).
      */
-    this.aRGB = new Array(16);
+    this.aRGB = new Array(this.nCard == Video.CARD.VGA? 256 : 16);
+    this.fRGBValid = false;     // whenever this is false, it signals getCardColors() to rebuild aRGB
 
     /*
      * Since I've not found clear documentation on a reliable way to check whether a particular DOM element
@@ -1150,7 +1153,12 @@ Card.CRTC = {
          * this word address is [effectively] either a word or double-word address. #IBMVGATechRef
          */
         OFFSET:             0x13,
-        UNDERLINE:          0x14,
+        UNDERLINE: {
+            INDX:           0x14,
+            ROWSCAN:        0x1f,
+            COUNTBY4:       0x20,
+            DWORD:          0x40
+        },
         VERT_BLANK_START:   0x15,
         VERT_BLANK_END:     0x16,
         MODE_CTRL: {
@@ -3502,14 +3510,48 @@ Video.prototype.getCardColors = function(nBitsPerPixel)
 
     this.assert(this.cardColor === this.cardEGA);
 
-    var aRegs = (this.cardEGA.regATCData[15] != null? this.cardEGA.regATCData : Video.aEGAPalDef);
-    for (var i = 0; i < this.aRGB.length; i++) {
-        var b = aRegs[i] || 0;
-        var bRed =   (((b & 0x04)? 0xaa : 0) | ((b & 0x20)? 0x55 : 0));
-        var bGreen = (((b & 0x02)? 0xaa : 0) | ((b & 0x10)? 0x55 : 0));
-        var bBlue =  (((b & 0x01)? 0xaa : 0) | ((b & 0x08)? 0x55 : 0));
-        this.aRGB[i] = [bRed, bGreen, bBlue, 0xff];
+    if (this.fRGBValid && nBitsPerPixel && !this.aRGB[16]) {
+        this.assert(false);
+        this.fRGBValid = false;
     }
+
+    if (!this.fRGBValid) {
+        var aRegs, i, bRed, bGreen, bBlue;
+        if (nBitsPerPixel == 8) {
+            /*
+             * The card must be a VGA, and it's using a (8bpp) mode that bypasses the ATC, so we need
+             * to pull RGB data exclusively from the 256-entry DAC; each entry contains 6-bit red, green,
+             * and blue values packed into bits 0-5, 6-11, and 12-17, respectively, each of which we
+             * effectively shift left 2 bits, for a crude 6-to-8-bit conversion.
+             */
+            aRegs = this.cardEGA.regDACData;
+            for (i = 0; i < 256; i++) {
+                var dw = aRegs[i] || 0;
+                bRed =   (dw << 2) & 0xfc;
+                bGreen = (dw >> 4) & 0xfc;
+                bBlue =  (dw >> 10) & 0xfc;
+                this.aRGB[i] = [bRed, bGreen, bBlue, 0xff];
+            }
+            this.fRGBValid = true;
+        } else {
+            /*
+             * We need to pull RGB data from the ATC; moreover, if the ATC hasn't been initialized yet,
+             * we go with a default EGA-compatible 16-color palette.
+             *
+             * TODO: If the card is really a VGA, the DAC plays a role as well; need to update this code.
+             */
+            aRegs = (this.cardEGA.regATCData[15] != null? this.cardEGA.regATCData : Video.aEGAPalDef);
+            for (i = 0; i < 16; i++) {
+                var b = aRegs[i] || 0;
+                bRed =   (((b & 0x04)? 0xaa : 0) | ((b & 0x20)? 0x55 : 0));
+                bGreen = (((b & 0x02)? 0xaa : 0) | ((b & 0x10)? 0x55 : 0));
+                bBlue =  (((b & 0x01)? 0xaa : 0) | ((b & 0x08)? 0x55 : 0));
+                this.aRGB[i] = [bRed, bGreen, bBlue, 0xff];
+            }
+            this.fRGBValid = true;
+        }
+    }
+
     return this.aRGB;
 };
 
@@ -3576,15 +3618,17 @@ Video.prototype.buildFonts = function()
      */
     if (window && this.abFontData) {
 
-        var aRGBColors = this.getCardColors();
         var offSplit = 0x0000;
         var cxChar = this.cxFontChar? this.cxFontChar : 8;
+        var aRGBColors = this.getCardColors();
+
         if (this.buildFont(Video.FONT.CGA, this.aFontOffsets[0], offSplit, cxChar, 8, this.abFontData, aRGBColors)) {
             fChanges = true;
         }
 
         offSplit = this.cxFontChar? 0 : 0x0800;
         cxChar = this.cxFontChar? this.cxFontChar : 9;
+
         if (this.buildFont(Video.FONT.MDA, this.aFontOffsets[1], offSplit, cxChar, 14, this.abFontData, Video.aMDAColors, Video.aMDAColorMap)) {
             fChanges = true;
         }
@@ -3666,17 +3710,18 @@ Video.prototype.createFont = function(nFont, offData, offSplit, cxChar, cyChar, 
     var fChanges = false;
     var nDouble = (nFont & 0x1)? 0 : 1;
     var font = this.aFonts[nFont];
+    var nColors = (aRGBColors.length < 16? aRGBColors.length : 16);
     if (!font) {
         font = {
             cxCell:     cxChar << nDouble,
             cyCell:     cyChar << nDouble,
-            aCSSColors: new Array(aRGBColors.length),
-            aRGBColors: aRGBColors.slice(),     // using the Array slice() method to simply make a copy
+            aCSSColors: new Array(nColors),
+            aRGBColors: aRGBColors.slice(0, nColors),   // using the Array slice() method to simply make a copy
             aColorMap:  aColorMap,
-            aCanvas:    new Array(aRGBColors.length)
+            aCanvas:    new Array(nColors)
         };
     }
-    for (var iColor = 0; iColor < aRGBColors.length; iColor++) {
+    for (var iColor = 0; iColor < nColors; iColor++) {
         var rgbColor = aRGBColors[iColor];
         var rgbColorOrig = font.aCSSColors[iColor]? font.aRGBColors[iColor] : [];
         if (rgbColor[0] !== rgbColorOrig[0] || rgbColor[1] !== rgbColorOrig[1] || rgbColor[2] !== rgbColorOrig[2]) {
@@ -4179,7 +4224,6 @@ Video.prototype.setDimensions = function()
     this.nCellCache = (this.nCells / this.nCellsPerWord)|0;
     this.cbScreen = ((this.nCellCache << 1) + this.cbPadding)|0;
     this.cbSplit = (this.cbPadding? ((this.cbScreen + this.cbPadding) >> 1) : 0);
-    this.fLinear = false;                                               // set for 8bpp "linear" VGA modes only
     if (this.nMode >= Video.MODE.EGA_320X200) this.nCellCache <<= 1;    // double nCellCache (every cell is a byte)
 
     /*
@@ -4469,6 +4513,7 @@ Video.prototype.setMode = function(nMode, fForce)
 
         this.cUpdates = 0;      // count updateScreen() calls as a means of driving blink updates
         this.nMode = nMode;
+        this.fRGBValid = false;
 
         /*
          * On an EGA, it's CRITICAL that a reset() invalidate cardActive, to ensure that the code below
@@ -4827,7 +4872,7 @@ Video.prototype.updateScreen = function(fForce)
          * We now calculate the logical width, and the compute a new cbScreen in much the same way the original
          * cbScreen was computed (but without any CGA-related padding considerations).
          */
-        this.nColsLogical = card.regCRTData[Card.CRTC.EGA.OFFSET] << (this.nFont? 1 : 4);
+        this.nColsLogical = card.regCRTData[Card.CRTC.EGA.OFFSET] << (this.nFont? 1 : (card.regCRTData[Card.CRTC.EGA.UNDERLINE.INDX] & Card.CRTC.EGA.UNDERLINE.DWORD)? 3 : 4);
         cbScreen = ((((this.nColsLogical * (this.nRows-1) + this.nCols) / this.nCellsPerWord) << 1) + this.cbPadding)|0;
     }
 
@@ -5170,12 +5215,13 @@ Video.prototype.updateScreenGraphicsVGA = function(addrScreen, addrScreenLimit)
     this.cBlinkVisible = 0;
 
     var iCell = 0;
-    var aPixelColors = this.getCardColors();
+    var aPixelColors = this.getCardColors(8);
     var adwMemory = this.cardActive.adwMemory;
 
     var x = 0, y = 0;
     var xDirty = this.nCols, xMaxDirty = 0, yDirty = this.nRows, yMaxDirty = 0;
 
+    var cbInc = (this.cardActive.regSEQData[Card.SEQ.MEMMODE.INDX] & Card.SEQ.MEMMODE.CHAIN4)? 4 : 1;
     var iPixelFirst = this.cardActive.regATCData[Card.ATC.HORZPAN.INDX] & Card.ATC.HORZPAN.SHIFT_LEFT;
     /*
      * TODO: What should happen if the card is programmed such that nColsLogical is LESS THAN nCols?
@@ -5183,7 +5229,7 @@ Video.prototype.updateScreenGraphicsVGA = function(addrScreen, addrScreenLimit)
     var nRowAdjust = (this.nColsLogical > this.nCols? ((this.nColsLogical - this.nCols - iPixelFirst) >> 3) : 0);
 
     while (addr < addrScreenLimit) {
-        var idw = addr++ - this.addrBuffer;
+        var idw = addr - this.addrBuffer;
         this.assert(idw >= 0 && idw < adwMemory.length);
         data = adwMemory[idw];
 
@@ -5234,6 +5280,8 @@ Video.prototype.updateScreenGraphicsVGA = function(addrScreen, addrScreenLimit)
         }
 
         this.assert(x <= this.nCols);
+
+        addr += cbInc;
 
         if (x >= this.nCols) {
             x = 0;
@@ -5450,6 +5498,7 @@ Video.prototype.outATC = function(port, bOut, addrFrom)
                 if (DEBUG && (!addrFrom || this.messageEnabled())) {
                     this.printMessage("outATC(" + str.toHexByte(bOut) + "): redraw screen for font changes");
                 }
+                this.fRGBValid = false;
                 this.updateScreen(true);
             }
         }
@@ -5466,6 +5515,7 @@ Video.prototype.outATC = function(port, bOut, addrFrom)
                     this.printMessageIO(port, bOut, addrFrom, "ATC." + this.cardEGA.asATCRegs[iReg]);
                 }
                 this.cardEGA.regATCData[iReg] = bOut;
+                this.fRGBValid = false;
             }
         }
         this.cardEGA.fATCData = false;
@@ -5780,6 +5830,7 @@ Video.prototype.outDACData = function(port, bOut, addrFrom)
         this.cardEGA.regDACShift = 0;
         this.cardEGA.regDACAddr = (this.cardEGA.regDACAddr + 1) & (Card.DAC.TOTAL_REGS-1);
     }
+    this.fRGBValid = false;
 };
 
 /**
