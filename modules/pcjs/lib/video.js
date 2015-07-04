@@ -363,17 +363,17 @@ Video.TRAPALL = true;           // monitor all I/O by default (not just deltas)
  *      This is due to the physical design of the chip. These timings can be guaranteed by ensuring that the
  *      rules listed below are followed when programming the CRTC.
  *
- *           1. The Horizontal Total [HORZ_TOTAL] register (R0) must be greater than or equal to a value of
+ *           1. The Horizontal Total [HTOTAL] register (R0) must be greater than or equal to a value of
  *              25 decimal.
  *
  *           2. The minimum positive pulse width of the HSYNC output must be four character clock units.
  *
- *           3. Register R5, Horizontal Sync End [HORZ_RETRACE_END], must be programmed such that the HSYNC
+ *           3. Register R5, Horizontal Sync End [HRETRACE_END], must be programmed such that the HSYNC
  *              output goes to a logic 0 a minimum of one character clock time before the 'horizontal display enable'
  *              signal goes to a logical 1.
  *
- *           4. Register R16, Vsync Start [VERT_RETRACE_START], must be a minimum of one horizontal scan line greater
- *              than register R18 [VERT_DISP_END].  Register R18 defines where the 'vertical display enable' signal ends.
+ *           4. Register R16, Vsync Start [VRETRACE_START], must be a minimum of one horizontal scan line greater
+ *              than register R18 [VDISP_END].  Register R18 defines where the 'vertical display enable' signal ends.
  *
  *     When bit 5 of the Attribute Mode Control register equals 1, a successful line compare (see Line Compare
  *     [LINE_COMPARE] register) in the CRT Controller forces the output of the PEL Panning register to 0's until Vsync
@@ -514,6 +514,7 @@ Video.MODE = {
     VGA_640X480_MONO:   0x11,   // mapped at A000:0000, monochrome
     VGA_640X480:        0x12,   // mapped at A000:0000, color
     VGA_320X200:        0x13,   // mapped at A000:0000, color
+    VGA_320X400:        0x26,
     UNKNOWN:            0xFF
 };
 
@@ -733,6 +734,7 @@ Video.aModeParms[Video.MODE.EGA_640X350]        = [640, 350, 16];               
 Video.aModeParms[Video.MODE.VGA_640X480_MONO]   = [640, 480, 16];                                   // 0x11
 Video.aModeParms[Video.MODE.VGA_640X480]        = [640, 480, 16];                                   // 0x12
 Video.aModeParms[Video.MODE.VGA_320X200]        = [320, 200, 2];                                    // 0x13
+Video.aModeParms[Video.MODE.VGA_320X400]        = [320, 400, 16];                                   // 0x26
 
 Video.aModeParms[Video.MODE.CGA_40X25_BW]       = Video.aModeParms[Video.MODE.CGA_40X25];           // 0x01
 Video.aModeParms[Video.MODE.CGA_80X25_BW]       = Video.aModeParms[Video.MODE.CGA_80X25];           // 0x03
@@ -1059,10 +1061,10 @@ Card.CGA = {
     },
     STATUS: {
         PORT:               0x3DA,      // read-only; same for EGA (although the EGA calls this STATUS1, to distinguish it from STATUS0)
-        DISP_RETRACE:       0x01,
+        RETRACE:            0x01,
         PEN_TRIGGER:        0x02,
         PEN_ON:             0x04,
-        VERT_RETRACE:       0x08        // when set, this indicates the CGA is performing a vertical retrace
+        VRETRACE:           0x08        // when set, this indicates the CGA is performing a vertical retrace
     },
     /*
      * TODO: Add support for light pen port(s) someday....
@@ -1088,16 +1090,22 @@ Card.CGA = {
  * looked into it yet.
  */
 Card.CRTC = {
-    HORZ_TOTAL:             0x00,
-    HORZ_DISP:              0x01,
-    HORZ_SYNC_POS:          0x02,
-    HORZ_SYNC_WIDTH:        0x03,
-    VERT_TOTAL:             0x04,
-    VERT_TOTAL_ADJ:         0x05,
-    VERT_DISP_TOTAL:        0x06,
-    VERT_SYNC_POS:          0x07,
+    HTOTAL:                 0x00,
+    HDISP:                  0x01,
+    HSYNC_POS:              0x02,
+    HSYNC_WIDTH:            0x03,
+    VTOTAL:                 0x04,
+    VTOTAL_ADJ:             0x05,
+    VDISP_TOTAL:            0x06,
+    VSYNC_POS:              0x07,
     INTERLACE_POS:          0x08,
-    MAX_SCAN_LINE:          0x09,
+    MAX_SCAN: {
+        INDX:               0x09,
+        SCAN_LINE:          0x1f,
+        VBLANK_START_BIT9:  0x20,
+        LINE_COMPARE_BIT9:  0x40,
+        CONVERT400:         0x80
+    },
     CURSOR_START: {
         INDX:               0x0A,
         MASK:               0x1F,
@@ -1123,29 +1131,29 @@ Card.CRTC = {
     LIGHT_PEN_LO:           0x11,
     TOTAL_REGS:             0x12,       // total CRT registers on MDA/CGA
     EGA: {
-        HORZ_DISP_END:      0x01,
-        HORZ_BLANK_START:   0x02,
-        HORZ_BLANK_END:     0x03,
-        HORZ_RETRACE_START: 0x04,
-        HORZ_RETRACE_END:   0x05,
-        VERT_TOTAL:         0x06,
+        HDISP_END:          0x01,
+        HBLANK_START:       0x02,
+        HBLANK_END:         0x03,
+        HRETRACE_START:     0x04,
+        HRETRACE_END:       0x05,
+        VTOTAL:             0x06,
         OVERFLOW: {
-            INDX:                   0x07,
-            VERT_TOTAL_BIT8:        0x01,   // bit 8 of register 0x06
-            VERT_DISP_END_BIT8:     0x02,   // bit 8 of register 0x12
-            VERT_RETRACE_START_BIT8:0x04,   // bit 8 of register 0x10
-            VERT_BLANK_START_BIT8:  0x08,   // bit 8 of register 0x15
-            LINE_COMPARE_BIT8:      0x10,   // bit 8 of register 0x18
-            CURSOR_START_BIT8:      0x20,   // bit 8 of register 0x0A (EGA only)
-            VERT_TOTAL_BIT9:        0x20,   // bit 9 of register 0x06 (VGA only)
-            VERT_DISP_END_BIT9:     0x40,   // bit 9 of register 0x12 (VGA only, unused on EGA)
-            VERT_RETRACE_START_BIT9:0x80    // bit 9 of register 0x10 (VGA only, unused on EGA)
+            INDX:               0x07,
+            VTOTAL_BIT8:        0x01,   // bit 8 of register 0x06
+            VDISP_END_BIT8:     0x02,   // bit 8 of register 0x12
+            VRETRACE_START_BIT8:0x04,   // bit 8 of register 0x10
+            VBLANK_START_BIT8:  0x08,   // bit 8 of register 0x15
+            LINE_COMPARE_BIT8:  0x10,   // bit 8 of register 0x18
+            CURSOR_START_BIT8:  0x20,   // bit 8 of register 0x0A (EGA only)
+            VTOTAL_BIT9:        0x20,   // bit 9 of register 0x06 (VGA only)
+            VDISP_END_BIT9:     0x40,   // bit 9 of register 0x12 (VGA only, unused on EGA)
+            VRETRACE_START_BIT9:0x80    // bit 9 of register 0x10 (VGA only, unused on EGA)
         },
-        PRESET_ROW_SCAN:    0x08,
+        PRESET_SCAN:        0x08,
         /* EGA/VGA CRTC registers 0x09-0x0F are the same as the MDA/CGA CRTC registers defined above */
-        VERT_RETRACE_START: 0x10,
-        VERT_RETRACE_END:   0x11,
-        VERT_DISP_END:      0x12,
+        VRETRACE_START:     0x10,
+        VRETRACE_END:       0x11,
+        VDISP_END:          0x12,
         /*
          * The OFFSET register (bits 0-7) specifies the logical line width of the screen.  The starting memory address
          * for the next character row is larger than the current character row by two or four times this amount.
@@ -1159,8 +1167,8 @@ Card.CRTC = {
             COUNTBY4:       0x20,
             DWORD:          0x40
         },
-        VERT_BLANK_START:   0x15,
-        VERT_BLANK_END:     0x16,
+        VBLANK_START:       0x15,
+        VBLANK_END:         0x16,
         MODE_CTRL: {
             INDX:           0x17,
             CMS:            0x01,       // Compatibility Mode Support (CGA A13 control)
@@ -1179,14 +1187,14 @@ Card.CRTC = {
 };
 
 if (DEBUGGER) {
-    Card.CRTC.REGS      = ["HORZ_TOTAL","HORZ_DISP","HORZ_SYNC_POS","HORZ_SYNC_WIDTH","VERT_TOTAL","VERT_TOTAL_ADJ",
-                           "VERT_DISP","VERT_SYNC_POS","INTERLACE_POS","MAX_SCAN_LINE","CURSOR_START","CURSOR_END",
+    Card.CRTC.REGS      = ["HTOTAL","HDISP","HSYNC_POS","HSYNC_WIDTH","VTOTAL","VTOTAL_ADJ",
+                           "VDISP","VSYNC_POS","INTERLACE_POS","MAX_SCAN","CURSOR_START","CURSOR_END",
                            "START_ADDR_HI","START_ADDR_LO","CURSOR_ADDR_HI","CURSOR_ADDR_LO","LIGHT_PEN_HI","LIGHT_PEN_LO"];
 
-    Card.CRTC.EGA_REGS  = ["HORZ_TOTAL","HORZ_DISP_END","HORZ_BLANK_START","HORZ_BLANK_END","HORZ_RETRACE_START","HORZ_RETRACE_END",
-                           "VERT_TOTAL","OVERFLOW","PRESET_ROW_SCAN","MAX_SCAN_LINE","CURSOR_START","CURSOR_END",
-                           "START_ADDR_HI","START_ADDR_LO","CURSOR_ADDR_HI","CURSOR_ADDR_LO","VERT_RETRACE_START","VERT_RETRACE_END",
-                           "VERT_DISP_END","OFFSET","UNDERLINE","VERT_BLANK_START","VERT_BLANK_END","MODE_CTRL","LINE_COMPARE"];
+    Card.CRTC.EGA_REGS  = ["HTOTAL","HDISP_END","HBLANK_START","HBLANK_END","HRETRACE_START","HRETRACE_END",
+                           "VTOTAL","OVERFLOW","PRESET_SCAN","MAX_SCAN","CURSOR_START","CURSOR_END",
+                           "START_ADDR_HI","START_ADDR_LO","CURSOR_ADDR_HI","CURSOR_ADDR_LO","VRETRACE_START","VRETRACE_END",
+                           "VDISP_END","OFFSET","UNDERLINE","VBLANK_START","VBLANK_END","MODE_CTRL","LINE_COMPARE"];
 }
 
 /*
@@ -1195,7 +1203,7 @@ if (DEBUGGER) {
  * STATUS1 bit 0 has confusing documentation: the EGA Tech Ref says "Logical 0 indicates the CRT raster is in a
  * horizontal or vertical retrace interval", whereas the VGA Tech Ref says "Logical 1 indicates a horizontal or
  * vertical retrace interval," but then clarifies: "This bit is the real-time status of the INVERTED display enable
- * signal".  So, instead of calling bit 0 DISP_ENABLE (or more precisely, DISP_ENABLE_INVERTED), it's simply DISP_RETRACE.
+ * signal".  So, instead of calling bit 0 DISP_ENABLE (or more precisely, DISP_ENABLE_INVERTED), it's simply RETRACE.
  *
  * STATUS1 diagnostic bits 5 and 4 are set according to the Card.ATC.PLANES.MUX bits:
  *
@@ -1208,8 +1216,8 @@ if (DEBUGGER) {
  */
 Card.STATUS1 = {
     PORT:                   0x3DA,
-    DISP_RETRACE:           0x01,       // bit 0: logical OR of horizontal and vertical retrace
-    VERT_RETRACE:           0x08,       // bit 3: set during vertical retrace interval
+    RETRACE:                0x01,       // bit 0: logical OR of horizontal and vertical retrace
+    VRETRACE:               0x08,       // bit 3: set during vertical retrace interval
     DIAGNOSTIC:             0x30,       // bits 5,4 are controlled by the Card.ATC.PLANES.MUX bits
     RESERVED:               0xC6
 };
@@ -1309,8 +1317,8 @@ Card.MISC = {
     CLOCK_SELECT:           0x0C,       // 0x0: 14Mhz I/O clock, 0x4: 16Mhz on-board clock, 0x8: external clock, 0xC: unused
     DISABLE_DRV:            0x10,       // 0 activates internal video drivers, 1 activates feature connector direct drive outputs
     PAGE_ODD_EVEN:          0x20,       // 0 selects the low 64Kb page of video RAM for text modes, 1 selects the high page
-    HORZ_POLARITY:          0x40,       // 0 selects positive horizontal retrace
-    VERT_POLARITY:          0x80        // 0 selects positive vertical retrace
+    HPOLARITY:              0x40,       // 0 selects positive horizontal retrace
+    VPOLARITY:              0x80        // 0 selects positive vertical retrace
 };
 
 /*
@@ -1577,6 +1585,7 @@ Card.ACCESS = {
         MODE1:              0x0500,
         EVENODD:            0x1000,
         CHAIN4:             0x4000,
+        CHAIN1:             0x8000,
         MASK:               0xFF00
     },
     WRITE: {                            // and WRITE values are designed to be OR'ed with READ values
@@ -1585,14 +1594,15 @@ Card.ACCESS = {
         MODE2:              0x0002,
         MODE3:              0x0003,     // VGA only
         CHAIN4:             0x0004,
+        CHAIN1:             0x0008,
         EVENODD:            0x0010,
         ROT:                0x0020,
         AND:                0x0060,
         OR:                 0x00A0,
         XOR:                0x00E0,
-        MASK:               0x00F7      // 0xF7 ensures we strip any lingering V2 bit from the value
+        MASK:               0x00FF
     },
-    V2:                     0x0008      // this is a signature bit used ONLY to differentiate V2 access values from V1
+    V2:             (0x80000000|0)      // this is a signature bit used ONLY to differentiate V2 access values from V1
 };
 
 /*
@@ -1643,6 +1653,23 @@ Card.ACCESS.readByteMode0 = function readByteMode0(off, addr)
 Card.ACCESS.readByteMode0Chain4 = function readByteMode0Chain4(off, addr)
 {
     var idw = (off & ~0x3) + this.offset;
+    var shift = (off & 0x3) << 3;
+    return ((this.controller.latches = this.adw[idw]) >> shift) & 0xff;
+};
+
+/**
+ * readByteMode0Chain1(off, addr)
+ *
+ * See writeByteMode0Chain1 for a description of how writes are distributed across planes.
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @param {number} [addr]
+ * @return {number}
+ */
+Card.ACCESS.readByteMode0Chain1 = function readByteMode0Chain1(off, addr)
+{
+    var idw = (off >> 2) + this.offset;
     var shift = (off & 0x3) << 3;
     return ((this.controller.latches = this.adw[idw]) >> shift) & 0xff;
 };
@@ -1743,8 +1770,60 @@ Card.ACCESS.writeByteMode0 = function writeByteMode0(off, b, addr)
 /**
  * writeByteMode0Chain4(off, b, addr)
  *
- * This is how we distribute a write of 0xff across the address space to the planes, assuming that
- * all planes are enabled by the Sequencer's MAPMASK register (which we assume still controls access):
+ * This is how we distribute writes of 0xff across the address space to the planes (assuming that all
+ * planes are enabled by the Sequencer's MAPMASK register):
+ *
+ *      off     idw     adw[idw]
+ *      ------  ------  ----------
+ *      0x0000: 0x0000  0x000000ff
+ *      0x0001: 0x0000  0x0000ff00
+ *      0x0002: 0x0000  0x00ff0000
+ *      0x0003: 0x0000  0xff000000
+ *      0x0004: 0x0004  0x000000ff
+ *      0x0005: 0x0004  0x0000ff00
+ *      0x0006: 0x0004  0x00ff0000
+ *      0x0007: 0x0004  0xff000000
+ *      ...
+ *
+ * Some VGA emulations calculate the video buffer index (idw) by shifting the offset (off) right 2 bits,
+ * instead of simply masking off the low 2 bits, as we do here.  That would be a more "pleasing" arrangement,
+ * because we would be using sequential video buffer locations, instead of multiples of 4; that's also how
+ * "Mode X" works.  However, I don't think that's how CHAIN4 modes operate (although that still needs to be
+ * confirmed, because multiple sources conflict on this point).  TODO: Confirm CHAIN4 operation on actual
+ * VGA hardware.
+ *
+ * It probably doesn't matter that much, as long as both the read and write CHAIN4 functions decode their
+ * addresses in exactly the same manner; we'd only get into trouble with software that "unchained" or
+ * reconfigured the planes and then made assumptions about existing data in the video buffer.
+ *
+ * NOTE: We do implement the alternate address decoding scheme, because that's what "Mode X" uses, but we call
+ * it CHAIN1 instead of CHAIN4.
+ *
+ * @this {Memory}
+ * @param {number} off
+ * @param {number} b (which should already be pre-masked to 8 bits; see Bus.prototype.setByteDirect)
+ * @param {number} [addr]
+ */
+Card.ACCESS.writeByteMode0Chain4 = function writeByteMode0Chain4(off, b, addr)
+{
+    var idw = (off & ~0x3) + this.offset;
+    var shift = (off & 0x3) << 3;
+    /*
+     * TODO: Consider adding a separate "unmasked" version of this CHAIN4 write function when nSeqMapMask is -1
+     * (or removing nSeqMapMask from the equation altogether, if CHAIN4 is never used with any planes disabled).
+     */
+    var dw = ((b << shift) & this.controller.nSeqMapMask) | (this.adw[idw] & ~((0xff << shift) & this.controller.nSeqMapMask));
+    if (this.adw[idw] != dw) {
+        this.adw[idw] = dw;
+        this.fDirty = true;
+    }
+};
+
+/**
+ * writeByteMode0Chain1(off, b, addr)
+ *
+ * This is how we distribute writes of 0xff across the address space to the planes (assuming that
+ * all planes are enabled by the Sequencer's MAPMASK register); this is what "Mode X" uses.
  *
  *      off     idw     adw[idw]
  *      ------  ------  ----------
@@ -1763,13 +1842,13 @@ Card.ACCESS.writeByteMode0 = function writeByteMode0(off, b, addr)
  * @param {number} b (which should already be pre-masked to 8 bits; see Bus.prototype.setByteDirect)
  * @param {number} [addr]
  */
-Card.ACCESS.writeByteMode0Chain4 = function writeByteMode0Chain4(off, b, addr)
+Card.ACCESS.writeByteMode0Chain1 = function writeByteMode0Chain1(off, b, addr)
 {
-    var idw = (off & ~0x3) + this.offset;
+    var idw = (off >> 2) + this.offset;
     var shift = (off & 0x3) << 3;
     /*
-     * TODO: Consider adding a separate "unmasked" version of this CHAIN4 write function whenever nSeqMapMask is -1
-     * (or removing nSeqMapMask from the equation altogether, if no one uses CHAIN4 with anything less than all planes enabled).
+     * TODO: Consider adding a separate "unmasked" version of this CHAIN1 write function when nSeqMapMask is -1
+     * (or removing nSeqMapMask from the equation altogether, if CHAIN1 is never used with any planes disabled).
      */
     var dw = ((b << shift) & this.controller.nSeqMapMask) | (this.adw[idw] & ~((0xff << shift) & this.controller.nSeqMapMask));
     if (this.adw[idw] != dw) {
@@ -2059,6 +2138,7 @@ Card.ACCESS.afn = [];
 
 Card.ACCESS.afn[Card.ACCESS.READ.MODE0]  = Card.ACCESS.readByteMode0;
 Card.ACCESS.afn[Card.ACCESS.READ.MODE0  |  Card.ACCESS.READ.CHAIN4]  = Card.ACCESS.readByteMode0Chain4;
+Card.ACCESS.afn[Card.ACCESS.READ.MODE0  |  Card.ACCESS.READ.CHAIN1]  = Card.ACCESS.readByteMode0Chain1;
 Card.ACCESS.afn[Card.ACCESS.READ.MODE0  |  Card.ACCESS.READ.EVENODD] = Card.ACCESS.readByteMode0EvenOdd;
 Card.ACCESS.afn[Card.ACCESS.READ.MODE1]  = Card.ACCESS.readByteMode1;
 
@@ -2068,6 +2148,7 @@ Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0 |  Card.ACCESS.WRITE.AND] = Card.ACCESS.
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0 |  Card.ACCESS.WRITE.OR]  = Card.ACCESS.writeByteMode0Or;
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0 |  Card.ACCESS.WRITE.XOR] = Card.ACCESS.writeByteMode0Xor;
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0 |  Card.ACCESS.WRITE.CHAIN4]  = Card.ACCESS.writeByteMode0Chain4;
+Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0 |  Card.ACCESS.WRITE.CHAIN1]  = Card.ACCESS.writeByteMode0Chain1;
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0 |  Card.ACCESS.WRITE.EVENODD] = Card.ACCESS.writeByteMode0EvenOdd;
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE1] = Card.ACCESS.writeByteMode1;
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE1 |  Card.ACCESS.WRITE.EVENODD] = Card.ACCESS.writeByteMode1EvenOdd;
@@ -3901,7 +3982,7 @@ Video.prototype.checkBlink = function()
  * visibility of the cursor (more than these, actually, but I'm going to limit my initial support to standard
  * ROM BIOS controller settings):
  *
- *      CRTC.MAX_SCAN_LINE
+ *      CRTC.MAX_SCAN
  *      CRTC.CURSOR_START
  *      CRTC.CURSOR_END
  *      CRTC.START_ADDR_HI
@@ -3927,7 +4008,7 @@ Video.prototype.checkCursor = function()
     var bCursorFlags = this.cardActive.regCRTData[Card.CRTC.CURSOR_START.INDX];
     var bCursorStart = bCursorFlags & Card.CRTC.CURSOR_START.MASK;
     var bCursorEnd = this.cardActive.regCRTData[Card.CRTC.CURSOR_END.INDX] & Card.CRTC.CURSOR_END.MASK;
-    var bCursorMax = this.cardActive.regCRTData[Card.CRTC.MAX_SCAN_LINE] & Card.CRTC.CURSOR_END.MASK;
+    var bCursorMax = this.cardActive.regCRTData[Card.CRTC.MAX_SCAN.INDX] & Card.CRTC.CURSOR_END.MASK;
 
     /*
      * HACK: The original EGA BIOS has a cursor emulation bug when 43-line mode is enabled, so we attempt to detect
@@ -4033,7 +4114,7 @@ Video.prototype.getAccess = function()
     var nAccess;
     var card = this.cardActive;
 
-    this.fLinear = false;
+    this.fColor256 = false;
     var regGRCMode = card.regGRCData[Card.GRC.MODE.INDX];
     if (regGRCMode != null) {
         var nReadAccess = Card.ACCESS.READ.MODE0;
@@ -4125,10 +4206,15 @@ Video.prototype.getAccess = function()
                 nReadAccess |= Card.ACCESS.READ.EVENODD;
                 nWriteAccess |= Card.ACCESS.WRITE.EVENODD;
             }
-            if (regSEQMode & Card.SEQ.MEMMODE.CHAIN4) {
-                nReadAccess |= Card.ACCESS.READ.CHAIN4;
-                nWriteAccess |= Card.ACCESS.WRITE.CHAIN4;
-                this.fLinear = true;
+            if (regGRCMode & Card.GRC.MODE.COLOR256) {
+                if (regSEQMode & Card.SEQ.MEMMODE.CHAIN4) {
+                    nReadAccess |= Card.ACCESS.READ.CHAIN4;
+                    nWriteAccess |= Card.ACCESS.WRITE.CHAIN4;
+                } else {
+                    nReadAccess |= Card.ACCESS.READ.CHAIN1;
+                    nWriteAccess |= Card.ACCESS.WRITE.CHAIN1;
+                }
+                this.fColor256 = true;
             }
         }
         nAccess = nReadAccess | nWriteAccess;
@@ -4197,7 +4283,7 @@ Video.prototype.setDimensions = function()
              * then we'll need to load another MDA font variation, because we only load an 9x14 font for MDA.
              */
             if (this.cardActive === this.cardEGA && this.nFont == Video.FONT.CGA) {
-                if (this.cardEGA.regCRTData[Card.CRTC.MAX_SCAN_LINE] == 7) {
+                if (this.cardEGA.regCRTData[Card.CRTC.MAX_SCAN.INDX] == 7) {
                     /*
                      * Vertical resolution of 350 divided by 8 (ie, scan lines 0-7) yields 43 whole rows.
                      */
@@ -4207,7 +4293,7 @@ Video.prototype.setDimensions = function()
                  * Since we can also be called before any hardware registers have been initialized,
                  * it may be best to not perform the following test (which is why it's commented out).
                  */
-                else /* if (this.cardEGA.regCRTData[Card.CRTC.MAX_SCAN_LINE] == 13) */ {
+                else /* if (this.cardEGA.regCRTData[Card.CRTC.MAX_SCAN.INDX] == 13) */ {
                     /*
                      * Vertical resolution of 350 divided by 14 (ie, scan lines 0-13) yields exactly 25 rows.
                      *
@@ -4415,10 +4501,10 @@ Video.prototype.checkMode = function(fForce)
                 }
 
                 var fSEQDotClock = (card.regSEQData[Card.SEQ.CLOCKING.INDX] & Card.SEQ.CLOCKING.DOTCLOCK);
-                var nCRTCVertTotal = card.regCRTData[Card.CRTC.EGA.VERT_TOTAL];
-                nCRTCVertTotal |= ((card.regCRTData[Card.CRTC.EGA.OVERFLOW.INDX] & Card.CRTC.EGA.OVERFLOW.VERT_TOTAL_BIT8)? 0x100 : 0);
+                var nCRTCVertTotal = card.regCRTData[Card.CRTC.EGA.VTOTAL];
+                nCRTCVertTotal |= ((card.regCRTData[Card.CRTC.EGA.OVERFLOW.INDX] & Card.CRTC.EGA.OVERFLOW.VTOTAL_BIT8)? 0x100 : 0);
                 if (card.nCard == Video.CARD.VGA) {
-                    nCRTCVertTotal |= ((card.regCRTData[Card.CRTC.EGA.OVERFLOW.INDX] & Card.CRTC.EGA.OVERFLOW.VERT_TOTAL_BIT9)? 0x200 : 0);
+                    nCRTCVertTotal |= ((card.regCRTData[Card.CRTC.EGA.OVERFLOW.INDX] & Card.CRTC.EGA.OVERFLOW.VTOTAL_BIT9)? 0x200 : 0);
                 }
 
                 if (nMode != Video.MODE.UNKNOWN) {
@@ -4437,8 +4523,11 @@ Video.prototype.checkMode = function(fForce)
                              * we've already defaulted to 0x0F or 0x10, so determine if it's 0x0D or 0x0E (ie, a 200-row mode)
                              * and then which one (ie, 320 wide or 640 wide).
                              */
-                            if (card.regSEQData[Card.SEQ.MEMMODE.INDX] & Card.SEQ.MEMMODE.CHAIN4) {
+                            if (card.regGRCData[Card.GRC.MODE.INDX] & Card.GRC.MODE.COLOR256) {
                                 nMode = Video.MODE.VGA_320X200;
+                                if (!(card.regCRTData[Card.CRTC.MAX_SCAN.INDX] & Card.CRTC.MAX_SCAN.SCAN_LINE)) {
+                                    nMode = Video.MODE.VGA_320X400;
+                                }
                             }
                             else if (nCRTCVertTotal < 500) {
                                 if (nCRTCVertTotal < 350) {
@@ -4839,17 +4928,17 @@ Video.prototype.updateScreen = function(fForce)
     var addrScreenLimit = addrScreen + card.sizeBuffer;
 
     /*
-     * HACK: nStartAddress is supposed to be "latched" ONLY at the start of every VERT_RETRACE interval;
+     * HACK: nStartAddress is supposed to be "latched" ONLY at the start of every VRETRACE interval;
      * this is an attempt to honor that behavior, but unfortunately, updateScreen() is currently called at
      * the CPU's discretion, not necessarily in sync with nCyclesVertPeriod.  As a result, we must rely
      * on other "triggers" to update our latched CRTC start address (eg, see outATC()).
      *
      * TODO: Consider matching the CPU's nCyclesNextVideoUpdate to the card's nCyclesVertPeriod, ensuring
-     * that CPU bursts are in sync with VERT_RETRACE.  Note, however, that that will be complicated by other
+     * that CPU bursts are in sync with VRETRACE.  Note, however, that that will be complicated by other
      * factors, such as the horizontal retrace interval, and the timing requirements of other cards in a
      * multi-display configuration.
      */
-    if (this.getRetraceBits(card) & Card.CGA.STATUS.VERT_RETRACE) {
+    if (this.getRetraceBits(card) & Card.CGA.STATUS.VRETRACE) {
         card.nStartAddress = ((card.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + card.regCRTData[Card.CRTC.START_ADDR_LO])|0;
     }
 
@@ -4865,15 +4954,18 @@ Video.prototype.updateScreen = function(fForce)
     addrScreen += offScreen;
     var cbScreen = this.cbScreen;
 
-    if (this.nCard >= Video.CARD.EGA && card.regCRTData[Card.CRTC.EGA.OFFSET]) {
+    if (this.nCard >= Video.CARD.EGA && card.regCRTData[Card.CRTC.EGA.OFFSET] && (card.regCRTData[Card.CRTC.EGA.OFFSET] << 1) != card.regCRTData[Card.CRTC.EGA.HDISP_END] + 1) {
         /*
          * Pre-EGA, the extent of visible screen memory (cbScreen) was derived from nCols * nRows, but since
          * then, the logical width of screen memory (nColsLogical) can differ from the visible width (nCols).
          * We now calculate the logical width, and the compute a new cbScreen in much the same way the original
          * cbScreen was computed (but without any CGA-related padding considerations).
+         *
+         * TODO: I'm taking a lot of shortcuts in this calculation (eg, relying on nFont to detect text modes,
+         * ignoring MODE_CTRL.BM, etc); generalize this someday.
          */
         this.nColsLogical = card.regCRTData[Card.CRTC.EGA.OFFSET] << (this.nFont? 1 : (card.regCRTData[Card.CRTC.EGA.UNDERLINE.INDX] & Card.CRTC.EGA.UNDERLINE.DWORD)? 3 : 4);
-        cbScreen = ((((this.nColsLogical * (this.nRows-1) + this.nCols) / this.nCellsPerWord) << 1) + this.cbPadding)|0;
+        cbScreen = (((this.nColsLogical * (this.nRows-1) + this.nCols) / this.nCellsPerWord) << 1)|0;
     }
 
     if (addrScreen + cbScreen > addrScreenLimit) {
@@ -4925,7 +5017,7 @@ Video.prototype.updateScreen = function(fForce)
     else if (this.cbSplit) {
         this.updateScreenGraphicsCGA(addrScreen, addrScreenLimit);
     }
-    else if (!this.fLinear) {
+    else if (!this.fColor256) {
         this.updateScreenGraphicsEGA(addrScreen, addrScreenLimit);
     }
     else {
@@ -5199,10 +5291,11 @@ Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
 /**
  * updateScreenGraphicsVGA(addrScreen, addrScreenLimit)
  *
- * The name is a slight misnomer: updateScreenGraphicsEGA() takes care of all the "planar" video modes, which were
- * first introduced by the EGA and later expanded by the VGA, whereas this function takes care of just the "linear"
- * video modes introduced by the VGA, such as mode 0x13 (320x200x256).  Those modes may also be referred to as CHAIN4
- * modes, since I think all of them require that the CHAIN4 bit in the Sequencer's MEMMODE register be set.
+ * This function name is a slight misnomer: updateScreenGraphicsEGA() takes care of all the "planar" video modes
+ * (first introduced by the EGA and later expanded by the VGA), where each pixel's bits are spread across multiple
+ * planes, whereas this function takes care of just the "linear" video modes introduced by the VGA, such as mode 0x13
+ * (320x200x256), where each pixel's bits are contained within a single plane.  This is basically all 256-color 8bpp
+ * (CHAIN4, CHAIN1, etc) modes, hence the hard-coded call to getCardColors(8).
  *
  * @param addrScreen
  * @param addrScreenLimit
@@ -5306,7 +5399,7 @@ Video.prototype.updateScreenGraphicsVGA = function(addrScreen, addrScreenLimit)
 /**
  * getRetraceBits(card)
  *
- * This returns a byte value with two bits set or clear as appropriate: DISP_RETRACE and VERT_RETRACE.
+ * This returns a byte value with two bits set or clear as appropriate: RETRACE and VRETRACE.
  *
  * @this {Video}
  * @param {Object} card
@@ -5317,7 +5410,7 @@ Video.prototype.getRetraceBits = function(card)
     var b = 0;
 
     /*
-     * NOTE: The CGA bits CGA.STATUS.DISP_RETRACE (0x01) and CGA.STATUS.VERT_RETRACE (0x08) match the EGA definitions,
+     * NOTE: The CGA bits CGA.STATUS.RETRACE (0x01) and CGA.STATUS.VRETRACE (0x08) match the EGA definitions,
      * and they also correspond to the MDA bits MDA.STATUS.HDRIVE (0x01) and MDA.STATUS.BWVIDEO (0x08); I'm not sure why
      * the MDA uses different designations, but the bits appear to serve the same purpose.
      *
@@ -5332,9 +5425,9 @@ Video.prototype.getRetraceBits = function(card)
         nElapsedCycles = -nElapsedCycles|0;
     }
     var nCyclesHorzRemain = nElapsedCycles % card.nCyclesHorzPeriod;
-    if (nCyclesHorzRemain > card.nCyclesHorzActive) b |= Card.CGA.STATUS.DISP_RETRACE;
+    if (nCyclesHorzRemain > card.nCyclesHorzActive) b |= Card.CGA.STATUS.RETRACE;
     var nCyclesVertRemain = nElapsedCycles % card.nCyclesVertPeriod;
-    if (nCyclesVertRemain > card.nCyclesVertActive) b |= Card.CGA.STATUS.VERT_RETRACE | Card.CGA.STATUS.DISP_RETRACE;
+    if (nCyclesVertRemain > card.nCyclesVertActive) b |= Card.CGA.STATUS.VRETRACE | Card.CGA.STATUS.RETRACE;
     /*
      * This is optional: the number of CPU cycles that remain in the current vertical period is all we need to keep
      * track of (the number of cycles since the card was initialized is fine, too, but that delta can become extremely
@@ -5503,7 +5596,7 @@ Video.prototype.outATC = function(port, bOut, addrFrom)
             }
         }
         /*
-         * HACK: nStartAddress is supposed to be "latched" ONLY at the start of every VERT_RETRACE interval,
+         * HACK: nStartAddress is supposed to be "latched" ONLY at the start of every VRETRACE interval,
          * but other "triggers" are currently required; see updateScreen() for details.
          */
         this.cardEGA.nStartAddress = ((this.cardEGA.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + this.cardEGA.regCRTData[Card.CRTC.START_ADDR_LO])|0;
@@ -6222,23 +6315,23 @@ Video.prototype.outCRTCData = function(card, port, bOut, addrFrom)
         }
         if (card.regCRTIndx == Card.CRTC.START_ADDR_HI || card.regCRTIndx == Card.CRTC.START_ADDR_LO) {
             /*
-             * HACK: nStartAddress is supposed to be "latched" ONLY at the start of every VERT_RETRACE interval,
+             * HACK: nStartAddress is supposed to be "latched" ONLY at the start of every VRETRACE interval,
              * but the best we can currently do is latch it during retrace, as well as other times (eg, see outATC()).
              */
-            if (this.getRetraceBits(card) & Card.CGA.STATUS.DISP_RETRACE) {
+            if (this.getRetraceBits(card) & Card.CGA.STATUS.RETRACE) {
                 card.nStartAddress = ((card.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + card.regCRTData[Card.CRTC.START_ADDR_LO])|0;
             }
         }
         /*
          * During mode changes on the EGA, all the CRTC regs are typically programmed in sequence,
-         * and if that's all that's happening with Card.CRTC.MAX_SCAN_LINE, then we don't want to treat
+         * and if that's all that's happening with Card.CRTC.MAX_SCAN.INDX, then we don't want to treat
          * it special; let the mode change be detected normally (eg, when the GRC regs are written later).
          *
-         * On the other hand, if this was an out-of-sequence write to Card.CRTC.MAX_SCAN_LINE, then
+         * On the other hand, if this was an out-of-sequence write to Card.CRTC.MAX_SCAN.INDX, then
          * yes, we want to force setMode() to call setDimensions(), which is key to setting the proper
          * number of screen rows.
          */
-        if (card.regCRTIndx == Card.CRTC.MAX_SCAN_LINE && card.regCRTPrev != Card.CRTC.MAX_SCAN_LINE-1) {
+        if (card.regCRTIndx == Card.CRTC.MAX_SCAN.INDX && card.regCRTPrev != Card.CRTC.MAX_SCAN.INDX-1) {
             this.checkMode(true);
         }
         this.checkCursor();
@@ -6339,7 +6432,7 @@ Video.prototype.inCardStatus = function(card, addrFrom)
          * TODO: Decide whether to preserve the bits from getRetraceBits() on the MDA/CGA; we're continuing
          * to do a simple toggle, partly on the theory that that may speed up the CGA BIOS scroll code a bit.
          */
-        b = (card.regStatus ^= (Card.CGA.STATUS.DISP_RETRACE | Card.CGA.STATUS.VERT_RETRACE)) | 0xf0;
+        b = (card.regStatus ^= (Card.CGA.STATUS.RETRACE | Card.CGA.STATUS.VRETRACE)) | 0xf0;
     }
 
     card.regStatus = b;
