@@ -734,7 +734,7 @@ Video.aModeParms[Video.MODE.EGA_640X350]        = [640, 350, 16];               
 Video.aModeParms[Video.MODE.VGA_640X480_MONO]   = [640, 480, 16];                                   // 0x11
 Video.aModeParms[Video.MODE.VGA_640X480]        = [640, 480, 16];                                   // 0x12
 Video.aModeParms[Video.MODE.VGA_320X200]        = [320, 200, 2];                                    // 0x13
-Video.aModeParms[Video.MODE.VGA_320X400]        = [320, 400, 16];                                   // 0x26
+Video.aModeParms[Video.MODE.VGA_320X400]        = [320, 400, 8];                                    // 0x26
 
 Video.aModeParms[Video.MODE.CGA_40X25_BW]       = Video.aModeParms[Video.MODE.CGA_40X25];           // 0x01
 Video.aModeParms[Video.MODE.CGA_80X25_BW]       = Video.aModeParms[Video.MODE.CGA_80X25];           // 0x03
@@ -1660,7 +1660,8 @@ Card.ACCESS.readByteMode0Chain4 = function readByteMode0Chain4(off, addr)
 /**
  * readByteMode0Chain1(off, addr)
  *
- * See writeByteMode0Chain1 for a description of how writes are distributed across planes.
+ * TODO: Although this function is used only for 8bpp modes, its operation does not differ from readByteMode0(),
+ * so if that continues to hold true, we should eliminate this function and map CHAIN1 support to readByteMode0().
  *
  * @this {Memory}
  * @param {number} off
@@ -1669,9 +1670,9 @@ Card.ACCESS.readByteMode0Chain4 = function readByteMode0Chain4(off, addr)
  */
 Card.ACCESS.readByteMode0Chain1 = function readByteMode0Chain1(off, addr)
 {
-    var idw = (off >> 2) + this.offset;
-    var shift = (off & 0x3) << 3;
-    return ((this.controller.latches = this.adw[idw]) >> shift) & 0xff;
+    off += this.offset;
+    var dw = this.controller.latches = this.adw[off];
+    return (dw >> this.controller.nReadMapShift) & 0xff;
 };
 
 /**
@@ -1787,17 +1788,14 @@ Card.ACCESS.writeByteMode0 = function writeByteMode0(off, b, addr)
  *
  * Some VGA emulations calculate the video buffer index (idw) by shifting the offset (off) right 2 bits,
  * instead of simply masking off the low 2 bits, as we do here.  That would be a more "pleasing" arrangement,
- * because we would be using sequential video buffer locations, instead of multiples of 4; that's also how
- * "Mode X" works.  However, I don't think that's how CHAIN4 modes operate (although that still needs to be
- * confirmed, because multiple sources conflict on this point).  TODO: Confirm CHAIN4 operation on actual
- * VGA hardware.
+ * because we would be using sequential video buffer locations, instead of multiples of 4, and would match how
+ * pixels are stored in "Mode X".  However, I don't think that's how CHAIN4 modes operate (although that still
+ * needs to be confirmed, because multiple sources conflict on this point).  TODO: Confirm CHAIN4 operation on
+ * actual VGA hardware.
  *
  * It probably doesn't matter that much, as long as both the read and write CHAIN4 functions decode their
  * addresses in exactly the same manner; we'd only get into trouble with software that "unchained" or
  * reconfigured the planes and then made assumptions about existing data in the video buffer.
- *
- * NOTE: We do implement the alternate address decoding scheme, because that's what "Mode X" uses, but we call
- * it CHAIN1 instead of CHAIN4.
  *
  * @this {Memory}
  * @param {number} off
@@ -1822,20 +1820,9 @@ Card.ACCESS.writeByteMode0Chain4 = function writeByteMode0Chain4(off, b, addr)
 /**
  * writeByteMode0Chain1(off, b, addr)
  *
- * This is how we distribute writes of 0xff across the address space to the planes (assuming that
- * all planes are enabled by the Sequencer's MAPMASK register); this is what "Mode X" uses.
- *
- *      off     idw     adw[idw]
- *      ------  ------  ----------
- *      0x0000: 0x0000  0x000000ff
- *      0x0001: 0x0000  0x0000ff00
- *      0x0002: 0x0000  0x00ff0000
- *      0x0003: 0x0000  0xff000000
- *      0x0004: 0x0001  0x000000ff
- *      0x0005: 0x0001  0x0000ff00
- *      0x0006: 0x0001  0x00ff0000
- *      0x0007: 0x0001  0xff000000
- *      ...
+ * TODO: Although this function is similar to writeByteMode0(), it's used only for 8bpp modes, so it remains to
+ * be seen how much of the former will need to be folded into this function; if it's everything, then we can eliminate
+ * this function and map CHAIN1 support to writeByteMode0().
  *
  * @this {Memory}
  * @param {number} off
@@ -1844,13 +1831,9 @@ Card.ACCESS.writeByteMode0Chain4 = function writeByteMode0Chain4(off, b, addr)
  */
 Card.ACCESS.writeByteMode0Chain1 = function writeByteMode0Chain1(off, b, addr)
 {
-    var idw = (off >> 2) + this.offset;
-    var shift = (off & 0x3) << 3;
-    /*
-     * TODO: Consider adding a separate "unmasked" version of this CHAIN1 write function when nSeqMapMask is -1
-     * (or removing nSeqMapMask from the equation altogether, if CHAIN1 is never used with any planes disabled).
-     */
-    var dw = ((b << shift) & this.controller.nSeqMapMask) | (this.adw[idw] & ~((0xff << shift) & this.controller.nSeqMapMask));
+    var idw = off + this.offset;
+    var dw = b | (b << 8) | (b << 16) | (b << 24);
+    dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
         this.fDirty = true;
@@ -1869,10 +1852,10 @@ Card.ACCESS.writeByteMode0EvenOdd = function writeByteMode0EvenOdd(off, b, addr)
 {
     off += this.offset;
     var dw = b | (b << 8) | (b << 16) | (b << 24);
-    //
-    // When even/odd addressing is enabled, nSeqMapMask must be cleared for planes 1
-    // and 3 if the address is even, and cleared for planes 0 and 2 if the address is odd.
-    //
+    /*
+     * When even/odd addressing is enabled, nSeqMapMask must be cleared for planes 1
+     * and 3 if the address is even, and cleared for planes 0 and 2 if the address is odd.
+     */
     var idw = off & ~0x1;
     dw = (dw & this.controller.nBitMapMask) | (this.controller.latches & ~this.controller.nBitMapMask);
     var maskMaps = this.controller.nSeqMapMask & (idw == off? 0x00ff00ff : (0xff00ff00|0));
