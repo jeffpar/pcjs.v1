@@ -3589,10 +3589,10 @@ Video.prototype.getCardColors = function(nBitsPerPixel)
 
         if (nBitsPerPixel == 8) {
             /*
-             * The card must be a VGA, and it's using an (8bpp) mode that bypasses the ATC, so we need
-             * to pull RGB data exclusively from the 256-entry DAC; each entry contains 6-bit red, green,
-             * and blue values packed into bits 0-5, 6-11, and 12-17, respectively, each of which we
-             * effectively shift left 2 bits: a crude 6-to-8-bit color conversion.
+             * The card must be a VGA, and it's using an (8bpp) mode that bypasses the ATC, so we need to pull
+             * RGB data exclusively from the 256-entry DAC; each entry contains 6-bit red, green, and blue values
+             * packed into bits 0-5, 6-11, and 12-17, respectively, each of which we effectively shift left 2 bits:
+             * a crude 6-to-8-bit color conversion.
              */
             for (i = 0; i < 256; i++) {
                 dw = aDAC[i] || 0;
@@ -3605,12 +3605,22 @@ Video.prototype.getCardColors = function(nBitsPerPixel)
         } else {
             /*
              * We need to pull RGB data from the ATC; moreover, if the ATC hasn't been initialized yet,
-             * we go with a default EGA-compatible 16-color palette.
+             * we go with a default EGA-compatible 16-color palette.  We'll also use the DAC if there is one
+             * (ie, this is actually a VGA) and it appears to be initialized (ie, the VGA BIOS has been run).
              */
             var fDAC = (aDAC && aDAC[255]);
             aRegs = (card.regATCData[15] != null? card.regATCData : Video.aEGAPalDef);
             for (i = 0; i < 16; i++) {
                 b = aRegs[i] & Card.ATC.PALETTE.MASK;
+                /*
+                 * If the DAC is valid, we need to supplement the 6 bits of each ATC palette entry with the values
+                 * for bits 6 and 7 from the ATC COLORSEL register (and overwrite bits 4 and 5 if ATC.MODE.COLORSEL_ALL
+                 * is set as well).
+                 *
+                 * The only reason the DAC wouldn't be valid is if 1) we're trying to display an image before the machine
+                 * and its BIOS have had a chance to initialize the DAC (because we don't preset it to anything, although
+                 * perhaps we should), or 2) this is an EGA, which doesn't have a DAC.
+                 */
                 if (fDAC) {
                     b |= (card.regATCData[Card.ATC.COLORSEL.INDX] & (Card.ATC.COLORSEL.DAC_BIT7 | Card.ATC.COLORSEL.DAC_BIT6)) << 4;
                     if (card.regATCData[Card.ATC.MODE.INDX] & Card.ATC.MODE.COLORSEL_ALL) {
