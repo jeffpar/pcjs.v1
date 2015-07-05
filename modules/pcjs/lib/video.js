@@ -180,9 +180,9 @@ function Video(parmsVideo, canvas, context, textarea, container)
 
     /*
      * Instead of (re)allocating a new color array every time getCardColors() is called, we preallocate
-     * an array now and simply update the entries as needed.  Note that for an EGA (or a VGA operating
-     * in an EGA-compatible mode), only the first 16 entries get used (derived from the ATC); only when
-     * a VGA is operating in an 8bpp mode are 256 entries used (derived from the DAC rather than the ATC).
+     * an array and simply update the entries as needed.  Note that for an EGA (or a VGA operating in an
+     * EGA-compatible mode), only the first 16 entries get used (derived from the ATC); only when a VGA
+     * is operating in an 8bpp mode are 256 entries used (derived from the DAC rather than the ATC).
      */
     this.aRGB = new Array(this.nCard == Video.CARD.VGA? 256 : 16);
     this.fRGBValid = false;     // whenever this is false, it signals getCardColors() to rebuild aRGB
@@ -1243,6 +1243,7 @@ Card.ATC = {
     INDX_PAL_ENABLE:        0x20,       // must be clear when loading palette registers
     PALETTE: {
         INDX:               0x00,       // 16 registers: 0x00 - 0x0F
+        MASK:               0x3f,
         BLUE:               0x01,
         GREEN:              0x02,
         RED:                0x04,
@@ -1261,7 +1262,7 @@ Card.ATC = {
         RESERVED:           0x10,       // bit 4: reserved
         PANCOMPAT:          0x20,       // bit 5: set for pixel-panning compatibility
         PELWIDTH:           0x40,       // bit 6: set for 256-color modes, clear for all other modes
-        COLORSEL:           0x80        // bit 7: set for P5,P4 mapped to bits 1,0 of the Color Select register
+        COLORSEL_ALL:       0x80        // bit 7: set to enable all COLORSEL bits (ie, COLORSEL.DAC_BIT5 and COLORSEL.DAC_BIT4)
     },
     OVERSCAN: {
         INDX:               0x11        // ATC Overscan Color Register
@@ -1272,16 +1273,16 @@ Card.ATC = {
         MUX:                0x30,
         RESERVED:           0xC0
     },
-    HORZPAN: {
+    HPAN: {
         INDX:               0x13,       // ATC Horizontal PEL Panning Register
         SHIFT_LEFT:         0x0F        // bits 0-3 indicate # of pixels to shift left
     },
     COLORSEL: {
         INDX:               0x14,       // ATC Color Select Register (VGA only)
-        S_COLOR_7:          0x08,       // selects bit 7 of 8-bit color values sent to DAC (except 256-color modes)
-        S_COLOR_6:          0x04,       // selects bit 6 of 8-bit color values sent to DAC (except 256-color modes)
-        S_COLOR_5:          0x02,       // selects bit 5 of 8-bit color values sent to DAC
-        S_COLOR_4:          0x01        // selects bit 4 of 8-bit color values sent to DAC
+        DAC_BIT7:           0x08,       // specifies bit 7 of DAC values (ignored in 256-color modes)
+        DAC_BIT6:           0x04,       // specifies bit 6 of DAC values (ignored in 256-color modes)
+        DAC_BIT5:           0x02,       // specifies bit 5 of DAC values (if ATC.MODE.COLORSEL_ALL is set; ignored in 256-color modes)
+        DAC_BIT4:           0x01        // specifies bit 4 of DAC values (if ATC.MODE.COLORSEL_ALL is set; ignored in 256-color modes)
     },
     TOTAL_REGS:             0x14
 };
@@ -1289,7 +1290,7 @@ Card.ATC = {
 if (DEBUGGER) {
     Card.ATC.REGS = ["PAL00","PAL01","PAL02","PAL03","PAL04","PAL05","PAL06","PAL07",
                      "PAL08","PAL09","PAL0A","PAL0B","PAL0C","PAL0D","PAL0E","PAL0F",
-                     "MODE","OVERSCAN","PLANES","HORZPAN"];
+                     "MODE","OVERSCAN","PLANES","HPAN"];
 }
 
 /*
@@ -1791,7 +1792,8 @@ Card.ACCESS.writeByteMode0 = function writeByteMode0(off, b, addr)
  * because we would be using sequential video buffer locations, instead of multiples of 4, and would match how
  * pixels are stored in "Mode X".  However, I don't think that's how CHAIN4 modes operate (although that still
  * needs to be confirmed, because multiple sources conflict on this point).  TODO: Confirm CHAIN4 operation on
- * actual VGA hardware.
+ * actual VGA hardware, including the extent to which ALU and other writeByteMode0() operations need to be
+ * folded into this.
  *
  * It probably doesn't matter that much, as long as both the read and write CHAIN4 functions decode their
  * addresses in exactly the same manner; we'd only get into trouble with software that "unchained" or
@@ -1821,8 +1823,8 @@ Card.ACCESS.writeByteMode0Chain4 = function writeByteMode0Chain4(off, b, addr)
  * writeByteMode0Chain1(off, b, addr)
  *
  * TODO: Although this function is similar to writeByteMode0(), it's used only for 8bpp modes, so it remains to
- * be seen how much of the former will need to be folded into this function; if it's everything, then we can eliminate
- * this function and map CHAIN1 support to writeByteMode0().
+ * be seen how much of the former will need to be folded into this; if it's everything, then we can eliminate this
+ * function and map CHAIN1 support to writeByteMode0().
  *
  * @this {Memory}
  * @param {number} off
@@ -3547,8 +3549,8 @@ Video.prototype.getCardColors = function(nBitsPerPixel)
          *      Brown      (0x16)       White      (0x17)
          *
          * The numbers in parentheses are the EGA ATC palette register values that the EGA BIOS uses for each
-         * color set; on an EGA, I synthesize a fake CGA regColor value, until I figure out exactly how the EGA
-         * simulates the CGA color palette.  TODO: Figure it out.
+         * color set; on an EGA, I synthesize a fake CGA regColor value, until I (TODO:) figure out exactly how
+         * the EGA simulates the CGA color palette.
          */
         var regColor = this.cardActive.regColor;
         if (this.cardActive === this.cardEGA) {
@@ -3580,40 +3582,56 @@ Video.prototype.getCardColors = function(nBitsPerPixel)
     }
 
     if (!this.fRGBValid) {
-        var aRegs, i, bRed, bGreen, bBlue;
+
+        var card = this.cardEGA;
+        var aDAC = card.regDACData;
+        var aRegs, i, dw, b, bRed, bGreen, bBlue;
+
         if (nBitsPerPixel == 8) {
             /*
-             * The card must be a VGA, and it's using a (8bpp) mode that bypasses the ATC, so we need
+             * The card must be a VGA, and it's using an (8bpp) mode that bypasses the ATC, so we need
              * to pull RGB data exclusively from the 256-entry DAC; each entry contains 6-bit red, green,
              * and blue values packed into bits 0-5, 6-11, and 12-17, respectively, each of which we
-             * effectively shift left 2 bits, for a crude 6-to-8-bit conversion.
+             * effectively shift left 2 bits: a crude 6-to-8-bit color conversion.
              */
-            aRegs = this.cardEGA.regDACData;
             for (i = 0; i < 256; i++) {
-                var dw = aRegs[i] || 0;
+                dw = aDAC[i] || 0;
+                this.assert(dw >= 0 && dw <= 0x3ffff);
                 bRed =   (dw << 2) & 0xfc;
                 bGreen = (dw >> 4) & 0xfc;
                 bBlue =  (dw >> 10) & 0xfc;
                 this.aRGB[i] = [bRed, bGreen, bBlue, 0xff];
             }
-            this.fRGBValid = true;
         } else {
             /*
              * We need to pull RGB data from the ATC; moreover, if the ATC hasn't been initialized yet,
              * we go with a default EGA-compatible 16-color palette.
-             *
-             * TODO: If the card is really a VGA, the DAC plays a role as well; need to update this code.
              */
-            aRegs = (this.cardEGA.regATCData[15] != null? this.cardEGA.regATCData : Video.aEGAPalDef);
+            var fDAC = (aDAC && aDAC[255]);
+            aRegs = (card.regATCData[15] != null? card.regATCData : Video.aEGAPalDef);
             for (i = 0; i < 16; i++) {
-                var b = aRegs[i] || 0;
-                bRed =   (((b & 0x04)? 0xaa : 0) | ((b & 0x20)? 0x55 : 0));
-                bGreen = (((b & 0x02)? 0xaa : 0) | ((b & 0x10)? 0x55 : 0));
-                bBlue =  (((b & 0x01)? 0xaa : 0) | ((b & 0x08)? 0x55 : 0));
+                b = aRegs[i] & Card.ATC.PALETTE.MASK;
+                if (fDAC) {
+                    b |= (card.regATCData[Card.ATC.COLORSEL.INDX] & (Card.ATC.COLORSEL.DAC_BIT7 | Card.ATC.COLORSEL.DAC_BIT6)) << 4;
+                    if (card.regATCData[Card.ATC.MODE.INDX] & Card.ATC.MODE.COLORSEL_ALL) {
+                        b &= ~0x30;
+                        b |= (card.regATCData[Card.ATC.COLORSEL.INDX] & (Card.ATC.COLORSEL.DAC_BIT5 | Card.ATC.COLORSEL.DAC_BIT4)) << 4;
+                    }
+                    this.assert(b >= 0 && b <= 255);
+                    dw = aDAC[b];
+                    this.assert(dw >= 0 && dw <= 0x3ffff);
+                    bRed =   (dw << 2) & 0xfc;
+                    bGreen = (dw >> 4) & 0xfc;
+                    bBlue =  (dw >> 10) & 0xfc;
+                } else {
+                    bRed =   (((b & 0x04)? 0xaa : 0) | ((b & 0x20)? 0x55 : 0));
+                    bGreen = (((b & 0x02)? 0xaa : 0) | ((b & 0x10)? 0x55 : 0));
+                    bBlue =  (((b & 0x01)? 0xaa : 0) | ((b & 0x08)? 0x55 : 0));
+                }
                 this.aRGB[i] = [bRed, bGreen, bBlue, 0xff];
             }
-            this.fRGBValid = true;
         }
+        this.fRGBValid = true;
     }
 
     return this.aRGB;
@@ -5174,7 +5192,7 @@ Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
     var x = 0, y = 0;
     var xDirty = this.nCols, xMaxDirty = 0, yDirty = this.nRows, yMaxDirty = 0;
 
-    var iPixelFirst = this.cardActive.regATCData[Card.ATC.HORZPAN.INDX] & Card.ATC.HORZPAN.SHIFT_LEFT;
+    var iPixelFirst = this.cardActive.regATCData[Card.ATC.HPAN.INDX] & Card.ATC.HPAN.SHIFT_LEFT;
     /*
      * TODO: What should happen if the card is programmed such that nColsLogical is LESS THAN nCols?
      */
@@ -5298,7 +5316,7 @@ Video.prototype.updateScreenGraphicsVGA = function(addrScreen, addrScreenLimit)
     var xDirty = this.nCols, xMaxDirty = 0, yDirty = this.nRows, yMaxDirty = 0;
 
     var cbInc = (this.cardActive.regSEQData[Card.SEQ.MEMMODE.INDX] & Card.SEQ.MEMMODE.CHAIN4)? 4 : 1;
-    var iPixelFirst = this.cardActive.regATCData[Card.ATC.HORZPAN.INDX] & Card.ATC.HORZPAN.SHIFT_LEFT;
+    var iPixelFirst = this.cardActive.regATCData[Card.ATC.HPAN.INDX] & Card.ATC.HPAN.SHIFT_LEFT;
     /*
      * TODO: What should happen if the card is programmed such that nColsLogical is LESS THAN nCols?
      */
@@ -5632,7 +5650,7 @@ Video.prototype.inStatus0 = function(port, addrFrom)
          *      db	0x14,0x14,0x2D,0x00
          *      db	0x2D,0x2D,0x2D,0x00
          *
-         * So I ensure happiness by setting SWSENSE unless any of the three 6-bit DAC values contain 0x2D.
+         * I ensure much happiness by setting SWSENSE unless any of the three 6-bit DAC values contain 0x2D.
          *
          * This hard-coded behavior assumes a color monitor.  If you really want to simulate a monochrome monitor,
          * then the 1st array (above) must mismatch, and a different set of arrays must all match:

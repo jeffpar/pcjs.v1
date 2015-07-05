@@ -199,6 +199,7 @@ Set320By400Mode proc	near
 ; line twice.
 ;
 	mov	dx,CRTC_INDEX
+    IF 1			; the following code can be disabled to test memory access in 320x200 mode -JP
 	mov	al,MAX_SCAN_LINE
 	out	dx,al
 	inc	dx
@@ -206,6 +207,7 @@ Set320By400Mode proc	near
 	and	al,not 1fh	;set maximum scan line = 0
 	out	dx,al
 	dec	dx
+    ENDIF
 ;
 ; Change CRTC scanning from doubleword mode to byte mode, allowing
 ; the CRTC to scan more than 64K of video data.
