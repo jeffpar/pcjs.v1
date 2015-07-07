@@ -1177,14 +1177,14 @@ Card.CRTC = {
         VBLANK_END:         0x16,
         MODE_CTRL: {
             INDX:           0x17,
-            CMS:            0x01,       // Compatibility Mode Support (CGA A13 control)
-            SRSC:           0x02,       // Select Row Scan Counter
-            HRS:            0x04,       // Horizontal Retrace Select
-            CBT:            0x08,       // Count By Two
-            OC:             0x10,       // Output Control
-            AW:             0x20,       // Address Wrap (in Word mode, 1 maps A15 to A0 and 0 maps A13; use the latter when only 64Kb is installed)
-            BM:             0x40,       // Byte Mode (1 selects Byte Mode; 0 selects Word Mode)
-            HR:             0x80        // Hardware Reset
+            COMPAT_MODE:    0x01,       // Compatibility Mode Support (CGA A13 control)
+            SEL_ROW_SCAN:   0x02,       // Select Row Scan Counter
+            SEL_HRETRACE:   0x04,       // Horizontal Retrace Select
+            COUNTBY2:       0x08,       // Count By Two
+            OUTPUT_CTRL:    0x10,       // Output Control
+            ADDR_WRAP:      0x20,       // Address Wrap (in Word mode, 1 maps A15 to A0 and 0 maps A13; use the latter when only 64Kb is installed)
+            BYTE_MODE:      0x40,       // Byte Mode (1 selects Byte Mode; 0 selects Word Mode)
+            HARD_RESET:     0x80        // Hardware Reset
         },
         LINE_COMPARE:       0x18,
         TOTAL_REGS:         0x19        // total CRT registers on EGA/VGA
@@ -1562,11 +1562,11 @@ if (DEBUGGER) Card.GRC.REGS = ["SRESET","ESRESET","COLORCMP","DATAROT","READMAP"
  * Even/Odd Memory Access Functions
  *
  * The "EVENODD" functions deal with the EGA's default text-mode addressing, where EVEN addresses are mapped to
- * plane 0 (and 2) and ODD addresses are mapped to plane 1 (and 3).  This occurs when SEQ.MEMMODE.SEQUENTIAL
- * is clear (and GRC.MODE.EVENODD is set), turning address bit 0 (A0) into a "plane select" bit.  Whether A0 is
- * also used as a memory address bit depends on CRTC.MODE_CTRL.BM: if it's set, then we're in "Byte Mode" and A0 is
- * used as-is; if it's clear, then we're in "Word Mode", and either A15 (when CRTC.MODE_CTRL.AW is set) or A13
- * (when CRTC.MODE_CTRL.AW is clear, typically when only 64Kb of EGA memory is installed) is substituted for A0.
+ * plane 0 (and 2) and ODD addresses are mapped to plane 1 (and 3).  This occurs when SEQ.MEMMODE.SEQUENTIAL is
+ * clear (and GRC.MODE.EVENODD is set), turning address bit 0 (A0) into a "plane select" bit.  Whether A0 is also
+ * used as a memory address bit depends on CRTC.MODE_CTRL.BYTE_MODE: if it's set, then we're in "Byte Mode" and A0 is
+ * used as-is; if it's clear, then we're in "Word Mode", and either A15 (when CRTC.MODE_CTRL.ADDR_WRAP is set) or A13
+ * (when CRTC.MODE_CTRL.ADDR_WRAP is clear, typically when only 64Kb of EGA memory is installed) is substituted for A0.
  *
  * Note that A13 remains clear until addresses reach 8K, at which point we've spanned 32Kb of EGA memory, so it makes
  * sense to propagate A13 to A0 at that point, so that the next 8K of addresses start using ODD instead of EVEN bytes,
@@ -5002,7 +5002,7 @@ Video.prototype.updateScreen = function(fForce)
          * cbScreen was computed (but without any CGA-related padding considerations).
          *
          * TODO: I'm taking a lot of shortcuts in this calculation (eg, relying on nFont to detect text modes,
-         * ignoring MODE_CTRL.BM, etc); generalize this someday.
+         * ignoring MODE_CTRL.BYTE_MODE, etc); generalize this someday.
          */
         this.nColsLogical = card.regCRTData[Card.CRTC.EGA.OFFSET] << (this.nFont? 1 : (card.regCRTData[Card.CRTC.EGA.UNDERLINE.INDX] & Card.CRTC.EGA.UNDERLINE.DWORD)? 3 : 4);
         cbScreen = ((this.nColsLogical * (this.nRows-1) + this.nCols) / this.nCellsPerWord)|0;
@@ -6373,8 +6373,14 @@ Video.prototype.outCRTCData = function(card, port, bOut, addrFrom)
          * On the other hand, if this was an out-of-sequence write to Card.CRTC.MAX_SCAN.INDX, then
          * yes, we want to force setMode() to call setDimensions(), which is key to setting the proper
          * number of screen rows.
+         *
+         * The second part of the check is required to promptly detect a switch to "Mode X"; if we assume
+         * that anyone switching to "Mode X" will first switch to mode 0x13, then it's a given that they
+         * must reprogram the VDISP_END register, and that they will change it from 0x8F to 0xDF.  However,
+         * I'm not going to make the test that restrictive, to help ensure I catch minor variations to
+         * "Mode X", at the expense of triggering potentially unnecessary calls to checkMode().
          */
-        if (card.regCRTIndx == Card.CRTC.MAX_SCAN.INDX && card.regCRTPrev != Card.CRTC.MAX_SCAN.INDX-1) {
+        if (card.regCRTIndx == Card.CRTC.MAX_SCAN.INDX && card.regCRTPrev != Card.CRTC.MAX_SCAN.INDX-1 || card.regCRTIndx == Card.CRTC.EGA.VDISP_END) {
             this.checkMode(true);
         }
         this.checkCursor();
