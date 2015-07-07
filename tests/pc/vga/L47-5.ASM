@@ -26,10 +26,10 @@ PageBase dw	?		;base offset in display memory of page in
 Color	dw	?		;color in which to draw pixel
 parms ends
 
-StartOffset equ	 -2		;local storage for start offset of rectangle
-Width	 equ	 -4		;local storage for address width of rectangle
-Height	 equ	 -6		;local storage for height of rectangle
-PlaneInfo equ	 -8		;local storage for plane # and plane mask
+_StartOffset equ -2		;local storage for start offset of rectangle
+_Width	 equ	 -4		;local storage for address width of rectangle
+_Height	 equ	 -6		;local storage for height of rectangle
+_PlaneInfo equ	 -8		;local storage for plane # and plane mask
 STACK_FRAME_SIZE equ 8
 
 	.model	small
@@ -54,14 +54,14 @@ _FillRectangleX proc	near
 				; display memory
 	mov	ax,SCREEN_SEG
 	mov	es,ax		;point ES:DI to the first rectangle pixel's
-	mov	[bp+StartOffset],di ; address
+	mov	[bp+_StartOffset],di ; address
 	mov	dx,SC_INDEX	;set the Sequence Controller Index to
 	mov	al,MAP_MASK	; point to the Map Mask register
 	out	dx,al
 	mov	bx,[bp+EndY]
 	sub	bx,[bp+StartY]	;BX = height of rectangle
 	jle	FillDone	;skip if 0 or negative height
-	mov	[bp+Height],bx
+	mov	[bp+_Height],bx
 	mov	dx,[bp+EndX]
 	mov	cx,[bp+StartX]
 	cmp	dx,cx
@@ -72,16 +72,16 @@ _FillRectangleX proc	near
 	shr	dx,1
 	shr	dx,1
 	inc	dx		;# of addresses across rectangle to fill
-	mov	[bp+Width],dx
-	mov	word ptr [bp+PlaneInfo],0001h
+	mov	[bp+_Width],dx
+	mov	word ptr [bp+_PlaneInfo],0001h
 				;lower byte = plane mask for plane 0,
 				; upper byte = plane # for plane 0
 FillPlanesLoop:
-	mov	ax,word ptr [bp+PlaneInfo]
+	mov	ax,word ptr [bp+_PlaneInfo]
 	mov	dx,SC_INDEX+1	;point DX to the SC Data register
 	out	dx,al		;set the plane for this pixel
-	mov	di,[bp+StartOffset] ;point ES:DI to rectangle start
-	mov	dx,[bp+Width]
+	mov	di,[bp+_StartOffset] ;point ES:DI to rectangle start
+	mov	dx,[bp+_Width]
 	mov	cl,byte ptr [bp+StartX]
 	and	cl,011b		;plane # of first pixel in initial byte
 	cmp	ah,cl		;do we draw this plane in the initial byte?
@@ -101,7 +101,7 @@ WidthSet:
 	mov	si,SCREEN_WIDTH
 	sub	si,dx		;distance from end of one scan line to start
 				; of next
-	mov	bx,[bp+Height]	;# of lines to fill
+	mov	bx,[bp+_Height]	;# of lines to fill
 	mov	al,byte ptr [bp+Color] ;color with which to fill
 FillRowsLoop:
 	mov	cx,dx		;# of bytes across scan line
@@ -111,10 +111,10 @@ FillRowsLoop:
 	dec	bx		;count down scan lines
 	jnz	FillRowsLoop
 FillLoopBottom:
-	mov	ax,word ptr [bp+PlaneInfo]
+	mov	ax,word ptr [bp+_PlaneInfo]
 	shl	al,1		;set the plane bit to the next plane
 	inc	ah		;increment the plane #
-	mov	word ptr [bp+PlaneInfo],ax
+	mov	word ptr [bp+_PlaneInfo],ax
 	cmp	ah,4		;have we done all planes?
 	jnz	FillPlanesLoop	;continue if any more planes
 FillDone:
