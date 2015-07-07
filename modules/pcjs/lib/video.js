@@ -1592,7 +1592,6 @@ Card.ACCESS = {
         MODE1:              0x0500,
         EVENODD:            0x1000,
         CHAIN4:             0x4000,
-        CHAIN1:             0x8000,
         MASK:               0xFF00
     },
     WRITE: {                            // and WRITE values are designed to be OR'ed with READ values
@@ -1601,7 +1600,6 @@ Card.ACCESS = {
         MODE2:              0x0002,
         MODE3:              0x0003,     // VGA only
         CHAIN4:             0x0004,
-        CHAIN1:             0x0008,
         EVENODD:            0x0010,
         ROT:                0x0020,
         AND:                0x0060,
@@ -1662,24 +1660,6 @@ Card.ACCESS.readByteMode0Chain4 = function readByteMode0Chain4(off, addr)
     var idw = (off & ~0x3) + this.offset;
     var shift = (off & 0x3) << 3;
     return ((this.controller.latches = this.adw[idw]) >> shift) & 0xff;
-};
-
-/**
- * readByteMode0Chain1(off, addr)
- *
- * TODO: Although this function is used only for 8bpp modes, its operation does not differ from readByteMode0(),
- * so if that continues to hold true, we should eliminate this function and map CHAIN1 support to readByteMode0().
- *
- * @this {Memory}
- * @param {number} off
- * @param {number} [addr]
- * @return {number}
- */
-Card.ACCESS.readByteMode0Chain1 = function readByteMode0Chain1(off, addr)
-{
-    off += this.offset;
-    var dw = this.controller.latches = this.adw[off];
-    return (dw >> this.controller.nReadMapShift) & 0xff;
 };
 
 /**
@@ -1819,29 +1799,6 @@ Card.ACCESS.writeByteMode0Chain4 = function writeByteMode0Chain4(off, b, addr)
      * (or removing nSeqMapMask from the equation altogether, if CHAIN4 is never used with any planes disabled).
      */
     var dw = ((b << shift) & this.controller.nSeqMapMask) | (this.adw[idw] & ~((0xff << shift) & this.controller.nSeqMapMask));
-    if (this.adw[idw] != dw) {
-        this.adw[idw] = dw;
-        this.fDirty = true;
-    }
-};
-
-/**
- * writeByteMode0Chain1(off, b, addr)
- *
- * TODO: Although this function is similar to writeByteMode0(), it's used only for 8bpp modes, so it remains to
- * be seen how much of the former will need to be folded into this; if it's everything, then we can eliminate this
- * function and map CHAIN1 support to writeByteMode0().
- *
- * @this {Memory}
- * @param {number} off
- * @param {number} b (which should already be pre-masked to 8 bits; see Bus.prototype.setByteDirect)
- * @param {number} [addr]
- */
-Card.ACCESS.writeByteMode0Chain1 = function writeByteMode0Chain1(off, b, addr)
-{
-    var idw = off + this.offset;
-    var dw = b | (b << 8) | (b << 16) | (b << 24);
-    dw = (dw & this.controller.nSeqMapMask) | (this.adw[idw] & ~this.controller.nSeqMapMask);
     if (this.adw[idw] != dw) {
         this.adw[idw] = dw;
         this.fDirty = true;
@@ -2129,7 +2086,6 @@ Card.ACCESS.afn = [];
 
 Card.ACCESS.afn[Card.ACCESS.READ.MODE0]  = Card.ACCESS.readByteMode0;
 Card.ACCESS.afn[Card.ACCESS.READ.MODE0  |  Card.ACCESS.READ.CHAIN4]  = Card.ACCESS.readByteMode0Chain4;
-Card.ACCESS.afn[Card.ACCESS.READ.MODE0  |  Card.ACCESS.READ.CHAIN1]  = Card.ACCESS.readByteMode0Chain1;
 Card.ACCESS.afn[Card.ACCESS.READ.MODE0  |  Card.ACCESS.READ.EVENODD] = Card.ACCESS.readByteMode0EvenOdd;
 Card.ACCESS.afn[Card.ACCESS.READ.MODE1]  = Card.ACCESS.readByteMode1;
 
@@ -2139,7 +2095,6 @@ Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0 |  Card.ACCESS.WRITE.AND] = Card.ACCESS.
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0 |  Card.ACCESS.WRITE.OR]  = Card.ACCESS.writeByteMode0Or;
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0 |  Card.ACCESS.WRITE.XOR] = Card.ACCESS.writeByteMode0Xor;
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0 |  Card.ACCESS.WRITE.CHAIN4]  = Card.ACCESS.writeByteMode0Chain4;
-Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0 |  Card.ACCESS.WRITE.CHAIN1]  = Card.ACCESS.writeByteMode0Chain1;
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE0 |  Card.ACCESS.WRITE.EVENODD] = Card.ACCESS.writeByteMode0EvenOdd;
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE1] = Card.ACCESS.writeByteMode1;
 Card.ACCESS.afn[Card.ACCESS.WRITE.MODE1 |  Card.ACCESS.WRITE.EVENODD] = Card.ACCESS.writeByteMode1EvenOdd;
@@ -4229,9 +4184,6 @@ Video.prototype.getAccess = function()
                 if (regSEQMode & Card.SEQ.MEMMODE.CHAIN4) {
                     nReadAccess |= Card.ACCESS.READ.CHAIN4;
                     nWriteAccess |= Card.ACCESS.WRITE.CHAIN4;
-                } else {
-                    nReadAccess |= Card.ACCESS.READ.CHAIN1;
-                    nWriteAccess |= Card.ACCESS.WRITE.CHAIN1;
                 }
                 this.fColor256 = true;
             }
@@ -5340,7 +5292,7 @@ Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
  * (first introduced by the EGA and later expanded by the VGA), where each pixel's bits are spread across the 4
  * planes, whereas this function takes care of just the 8bpp video modes introduced by the VGA, such as mode 0x13
  * (320x200x256), where each pixel's bits are contained within a single plane.  This is essentially all 256-color
- * (CHAIN4, CHAIN1, etc) modes, hence the hard-coded call to getCardColors(8).
+ * modes (CHAIN4, "Mode X", etc), hence the hard-coded call to getCardColors(8).
  *
  * @param addrScreen
  * @param addrScreenLimit
