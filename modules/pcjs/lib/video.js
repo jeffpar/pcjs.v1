@@ -4179,6 +4179,7 @@ Video.prototype.getAccess = function()
         case Card.GRC.MODE.WRITE.MODE3:
             if (this.nCard == Video.CARD.VGA) {
                 nWriteAccess = Card.ACCESS.WRITE.MODE3;
+                card.nDataRotate = regDataRotate & Card.GRC.DATAROT.COUNT;
             }
             break;
         default:
