@@ -2291,7 +2291,9 @@ Card.prototype.initEGA = function(data, nMonitorType)
     this.nSetMapBits    = data[22];
     this.nColorCompare  = data[23];
     this.nColorDontCare = data[24];
-    this.nStartAddress  = data[25];     // this is the last CRTC start address latched from CRTC.START_ADDR_HI,CRTC.START_ADDR_LO
+    this.offStartAddr   = data[25];     // this is the last CRTC start address latched from CRTC.START_ADDR_HI,CRTC.START_ADDR_LO
+
+    this.nVertPeriods = this.nVertPeriodsStartAddr = 0;
 
     if (this.nCard == Video.CARD.VGA) {
         this.regVGAEnable   = data[26];
@@ -2361,7 +2363,7 @@ Card.prototype.saveEGA = function()
     data[22] = this.nSetMapBits;
     data[23] = this.nColorCompare;
     data[24] = this.nColorDontCare;
-    data[25] = this.nStartAddress;
+    data[25] = this.offStartAddr;
 
     if (this.nCard == Video.CARD.VGA) {
         data[26] = this.regVGAEnable;
@@ -4969,21 +4971,23 @@ Video.prototype.updateScreen = function(fForce)
     var addrScreenLimit = addrScreen + card.sizeBuffer;
 
     /*
-     * HACK: nStartAddress is supposed to be "latched" ONLY at the start of every VRETRACE interval;
-     * this is an attempt to honor that behavior, but unfortunately, updateScreen() is currently called at
-     * the CPU's discretion, not necessarily in sync with nCyclesVertPeriod.  As a result, we must rely
-     * on other "triggers" to update our latched CRTC start address (eg, see outATC()).
+     * HACK: The CRTC's START_ADDR_HI and START_ADDR_LO registers are supposed to be "latched" into
+     * offStartAddr ONLY at the start of every VRETRACE interval; this is an attempt to honor that behavior,
+     * but unfortunately, updateScreen() is currently called at the CPU's discretion, not necessarily in
+     * sync with nCyclesVertPeriod.  As a result, we must rely on other criteria, like the number of vertical
+     * periods that have elapsed since the last CRTC write, writes to the ATC (see outATC()), etc.
      *
      * TODO: Consider matching the CPU's nCyclesNextVideoUpdate to the card's nCyclesVertPeriod, ensuring
      * that CPU bursts are in sync with VRETRACE.  Note, however, that that will be complicated by other
      * factors, such as the horizontal retrace interval, and the timing requirements of other cards in a
      * multi-display configuration.
      */
-    if (this.getRetraceBits(card) & Card.CGA.STATUS.VRETRACE) {
-        card.nStartAddress = ((card.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + card.regCRTData[Card.CRTC.START_ADDR_LO])|0;
+    if ((this.getRetraceBits(card) & Card.CGA.STATUS.VRETRACE) || card.nVertPeriodsStartAddr && card.nVertPeriodsStartAddr < card.nVertPeriods) {
+        card.offStartAddr = ((card.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + card.regCRTData[Card.CRTC.START_ADDR_LO])|0;
+        card.nVertPeriodsStartAddr = 0;
     }
 
-    var offScreen = card.nStartAddress;
+    var offScreen = card.offStartAddr;
 
     /*
      * Any screen (aka "page") offset must be doubled for text modes, due to the attribute bytes.
@@ -5457,11 +5461,13 @@ Video.prototype.getRetraceBits = function(card)
      *
      * TODO: Decide whether this more faithful emulation of the retrace bits should be extended to the MDA/CGA, too;
      * doing so might slow down the BIOS scroll code a bit, though.
+     *
+     * TODO: Verify that when a saved machine state is restored, both the CPU's cycle count AND the card's nInitCycles
+     * are properly restored.  It's probably not a big deal, but details like that bother me.
      */
     var nCycles = this.cpu.getCycles();
     var nElapsedCycles = nCycles - card.nInitCycles;
-    if (nElapsedCycles < 0) {
-        this.assert(nCycles === 0);
+    if (nElapsedCycles < 0) {           // perhaps the CPU decided to reset its cycle count?
         card.nInitCycles = nElapsedCycles;
         nElapsedCycles = -nElapsedCycles|0;
     }
@@ -5470,15 +5476,24 @@ Video.prototype.getRetraceBits = function(card)
     var nCyclesVertRemain = nElapsedCycles % card.nCyclesVertPeriod;
     if (nCyclesVertRemain > card.nCyclesVertActive) b |= Card.CGA.STATUS.VRETRACE | Card.CGA.STATUS.RETRACE;
     /*
-     * This is optional: the number of CPU cycles that remain in the current vertical period is all we need to keep
-     * track of (the number of cycles since the card was initialized is fine, too, but that delta can become extremely
-     * large after a while).
+     * Some callers also want to know how many vertical retrace periods have occurred since the last time they checked,
+     * so we compute that now.
+     */
+    card.nVertPeriods = (nElapsedCycles / card.nCyclesVertPeriod)|0;
+    /*
+     * The number of CPU cycles that remain in the current vertical period is all we USED to keep track of, since
+     * keeping track of the total number of cycles since the card was initialized can result in an extremely large
+     * delta after a while.
      *
      *      card.nInitCycles = nCycles - nCyclesVertRemain;
      *
-     * NOTE: Now that we're calling getRetraceBits() more frequently (ie, for internal checks), resetting nInitCycles
-     * in this fashion preserves the vertical period at the expense of the horizontal period, which in turn can cause
-     * grief in ROM BIOS code that requires strict horizontal retrace times.  TODO: Figure out how to re-enable this code.
+     * HOWEVER, now that we're calling getRetraceBits() more frequently (ie, for internal retrace checks), resetting
+     * nInitCycles in this fashion alters the horizontal period too much, causing grief in ROM BIOS code that requires
+     * strict horizontal retrace times.  Also, the CPU reserves the right to occasionally reset its own cycle count.
+     * A final complication is that nVertPeriods would no longer be accurate if we constantly reduced nInitCycles.
+     *
+     * None of those are insurmountable problems, but the simple solution is to never reduce nInitCycles (well, except
+     * when forced to by a reduction in the CPU's cycle count).
      */
     return b;
 };
@@ -5637,10 +5652,11 @@ Video.prototype.outATC = function(port, bOut, addrFrom)
             }
         }
         /*
-         * HACK: nStartAddress is supposed to be "latched" ONLY at the start of every VRETRACE interval,
-         * but other "triggers" are currently required; see updateScreen() for details.
+         * HACK: offStartAddr is supposed to be "latched" ONLY at the start of every VRETRACE interval,
+         * but other "triggers" are helpful; see updateScreen() for details.
          */
-        card.nStartAddress = ((card.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + card.regCRTData[Card.CRTC.START_ADDR_LO])|0;
+        card.offStartAddr = ((card.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + card.regCRTData[Card.CRTC.START_ADDR_LO])|0;
+        card.nVertPeriodsStartAddr = 0;
     } else {
         card.fATCData = false;
         var iReg = card.regATCIndx & Card.ATC.INDX_MASK;
@@ -6359,11 +6375,14 @@ Video.prototype.outCRTCData = function(card, port, bOut, addrFrom)
         }
         if (card.regCRTIndx == Card.CRTC.START_ADDR_HI || card.regCRTIndx == Card.CRTC.START_ADDR_LO) {
             /*
-             * HACK: nStartAddress is supposed to be "latched" ONLY at the start of every VRETRACE interval,
-             * but the best we can currently do is latch it during retrace, as well as other times (eg, see outATC()).
+             * HACK: offStartAddr is supposed to be "latched" ONLY at the start of every VRETRACE interval,
+             * but the best we can currently do is latch it during retrace; beyond that, all we can do is snap
+             * the vertical period count and latch it later, in updateScreen(), once the count has advanced.
              */
             if (this.getRetraceBits(card) & Card.CGA.STATUS.RETRACE) {
-                card.nStartAddress = ((card.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + card.regCRTData[Card.CRTC.START_ADDR_LO])|0;
+                card.offStartAddr = ((card.regCRTData[Card.CRTC.START_ADDR_HI] << 8) + card.regCRTData[Card.CRTC.START_ADDR_LO])|0;
+            } else if (!card.nVertPeriodsStartAddr) {
+                card.nVertPeriodsStartAddr = card.nVertPeriods;
             }
         }
         /*
@@ -6378,8 +6397,8 @@ Video.prototype.outCRTCData = function(card, port, bOut, addrFrom)
          * The second part of the check is required to promptly detect a switch to "Mode X"; if we assume
          * that anyone switching to "Mode X" will first switch to mode 0x13, then it's a given that they
          * must reprogram the VDISP_END register, and that they will change it from 0x8F to 0xDF.  However,
-         * I'm not going to make the test that restrictive, to help ensure I catch minor variations to
-         * "Mode X", at the expense of triggering potentially unnecessary calls to checkMode().
+         * I'm not going to make the test that restrictive, to help catch other mode variations (but at the
+         * expense of triggering potentially unnecessary calls to checkMode()).
          */
         if (card.regCRTIndx == Card.CRTC.MAX_SCAN.INDX && card.regCRTPrev != Card.CRTC.MAX_SCAN.INDX-1 || card.regCRTIndx == Card.CRTC.EGA.VDISP_END) {
             this.checkMode(true);
