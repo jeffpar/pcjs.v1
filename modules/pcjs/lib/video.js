@@ -789,7 +789,7 @@ Video.ATTRS.DRAW_CURSOR = 0x200;        // this is an internal attribute bit, in
  *    **0xF0: blinking reverse                  ATTR_FGND_WHITE | ATTR_FGND_BRIGHT | ATTR_BGND_BLINK (or bright background if blink disabled)
  *
  * Unsupported attributes reportedly display as "normal" (ATTR_FGND_WHITE | ATTR_BGND_BLACK).  However, precisely which
- * attributes are unsupported on the MDA varies depending on the source. Some sources (eg, the IBM Tech Ref) imply that
+ * attributes are unsupported on the MDA varies depending on the source.  Some sources (eg, the IBM Tech Ref) imply that
  * only those marked by * are supported, while others (eg, some--but not all--Peter Norton guides) include those marked
  * by **, and still others include ALL the combinations listed above.
  *
@@ -816,7 +816,7 @@ Video.ATTRS.DRAW_CURSOR = 0x200;        // this is an internal attribute bit, in
  */
 
 /*
- * CGA attribute byte definitions;  these simply extend the set of MDA attributes, with the exception of ATTR_FNGD_ULINE,
+ * CGA attribute byte definitions; these simply extend the set of MDA attributes, with the exception of ATTR_FNGD_ULINE,
  * which the CGA can treat only as ATTR_FGND_BLUE.
  */
 Video.ATTRS.FGND_BLUE       = 0x01;
@@ -833,7 +833,8 @@ Video.ATTRS.BGND_RED        = 0x40;
 Video.ATTRS.BGND_MAGENTA    = 0x50;
 Video.ATTRS.BGND_BROWN      = 0x60;
 
-/* For the MDA, the number of unique "colors" is 5, based on the following supported FGND attribute values:
+/*
+ * For the MDA, the number of unique "colors" is 5, based on the following supported FGND attribute values:
  *
  *      0x0: black font (attribute value 0x8 is mapped to 0x0)
  *      0x1: green font with underline
@@ -843,7 +844,7 @@ Video.ATTRS.BGND_BROWN      = 0x60;
  *
  * I'm still not sure about 0x8 (dark green?); for now, I'm mapping it to 0x0, but it may become a 6th supported color.
  *
- * MDA attributes form an index into aMDAColorMap, which produces an index (0-4) into aMDAColors.
+ * MDA attributes form an index into aMDAColorMap, which in turn provides an index (0-4) into aMDAColors.
  */
 Video.aMDAColors = [
     [0x00, 0x00, 0x00, 0xff],
@@ -890,14 +891,14 @@ Video.aEGAByteToDW = [
 ];
 
 Video.aEGADWToByte = [];
-Video.aEGADWToByte[0x00000000] = 0x0;
-Video.aEGADWToByte[0x00000080] = 0x1;
-Video.aEGADWToByte[0x00008000] = 0x2;
-Video.aEGADWToByte[0x00008080] = 0x3;
-Video.aEGADWToByte[0x00800000] = 0x4;
-Video.aEGADWToByte[0x00800080] = 0x5;
-Video.aEGADWToByte[0x00808000] = 0x6;
-Video.aEGADWToByte[0x00808080] = 0x7;
+Video.aEGADWToByte[0x00000000]   = 0x0;
+Video.aEGADWToByte[0x00000080]   = 0x1;
+Video.aEGADWToByte[0x00008000]   = 0x2;
+Video.aEGADWToByte[0x00008080]   = 0x3;
+Video.aEGADWToByte[0x00800000]   = 0x4;
+Video.aEGADWToByte[0x00800080]   = 0x5;
+Video.aEGADWToByte[0x00808000]   = 0x6;
+Video.aEGADWToByte[0x00808080]   = 0x7;
 Video.aEGADWToByte[0x80000000|0] = 0x8;
 Video.aEGADWToByte[0x80000080|0] = 0x9;
 Video.aEGADWToByte[0x80008000|0] = 0xa;
@@ -1107,10 +1108,7 @@ Card.CRTC = {
     INTERLACE_POS:          0x08,
     MAX_SCAN: {
         INDX:               0x09,
-        SCAN_LINE:          0x1f,
-        VBLANK_START_BIT9:  0x20,
-        LINE_COMPARE_BIT9:  0x40,
-        CONVERT400:         0x80
+        MASK:               0x1F
     },
     CURSOR_START: {
         INDX:               0x0A,
@@ -1144,19 +1142,43 @@ Card.CRTC = {
         HRETRACE_END:       0x05,
         VTOTAL:             0x06,
         OVERFLOW: {
-            INDX:               0x07,
-            VTOTAL_BIT8:        0x01,   // bit 8 of register 0x06
-            VDISP_END_BIT8:     0x02,   // bit 8 of register 0x12
-            VRETRACE_START_BIT8:0x04,   // bit 8 of register 0x10
-            VBLANK_START_BIT8:  0x08,   // bit 8 of register 0x15
-            LINE_COMPARE_BIT8:  0x10,   // bit 8 of register 0x18
-            CURSOR_START_BIT8:  0x20,   // bit 8 of register 0x0A (EGA only)
-            VTOTAL_BIT9:        0x20,   // bit 9 of register 0x06 (VGA only)
-            VDISP_END_BIT9:     0x40,   // bit 9 of register 0x12 (VGA only, unused on EGA)
-            VRETRACE_START_BIT9:0x80    // bit 9 of register 0x10 (VGA only, unused on EGA)
+        INDX:               0x07,
+        VTOTAL_BIT8:        0x01,       // bit 8 of register 0x06
+        VDISP_END_BIT8:     0x02,       // bit 8 of register 0x12
+        VRETRACE_START_BIT8:0x04,       // bit 8 of register 0x10
+        VBLANK_START_BIT8:  0x08,       // bit 8 of register 0x15
+        LINE_COMPARE_BIT8:  0x10,       // bit 8 of register 0x18
+        CURSOR_START_BIT8:  0x20,       // bit 8 of register 0x0A (EGA only)
+        VTOTAL_BIT9:        0x20,       // bit 9 of register 0x06 (VGA only)
+        VDISP_END_BIT9:     0x40,       // bit 9 of register 0x12 (VGA only, unused on EGA)
+        VRETRACE_START_BIT9:0x80        // bit 9 of register 0x10 (VGA only, unused on EGA)
         },
         PRESET_SCAN:        0x08,
-        /* EGA/VGA CRTC registers 0x09-0x0F are the same as the MDA/CGA CRTC registers defined above */
+        /*
+         * NOTE: EGA/VGA CRTC registers 0x09-0x0F are the same as the MDA/CGA CRTC registers defined above
+         */
+        MAX_SCAN: {
+        INDX:               0x09,
+        SCAN_LINE:          0x1f,
+        VBLANK_START_BIT9:  0x20,
+        LINE_COMPARE_BIT9:  0x40,
+        CONVERT400:         0x80
+        },
+        CURSOR_START: {
+            INDX:           0x0A,
+            MASK:           0x1F,
+            BLINKON:        0x00,       // (supposedly, 0x04 has the same effect as 0x00)
+            BLINKOFF:       0x20,       // if blinking is disabled, the cursor is effectively hidden
+            BLINKFAST:      0x60        // default is 1/16 of the frame rate; this switches to 1/32 of the frame rate
+        },
+        CURSOR_END: {
+            INDX:           0x0B,
+            MASK:           0x1F
+        },
+        START_ADDR_HI:      0x0C,
+        START_ADDR_LO:      0x0D,
+        CURSOR_ADDR_HI:     0x0E,
+        CURSOR_ADDR_LO:     0x0F,
         VRETRACE_START:     0x10,
         VRETRACE_END:       0x11,
         VDISP_END:          0x12,
@@ -1295,8 +1317,7 @@ Card.ATC = {
 
 if (DEBUGGER) {
     Card.ATC.REGS = ["PAL00","PAL01","PAL02","PAL03","PAL04","PAL05","PAL06","PAL07",
-                     "PAL08","PAL09","PAL0A","PAL0B","PAL0C","PAL0D","PAL0E","PAL0F",
-                     "MODE","OVERSCAN","PLANES","HPAN"];
+                     "PAL08","PAL09","PAL0A","PAL0B","PAL0C","PAL0D","PAL0E","PAL0F", "MODE","OVERSCAN","PLANES","HPAN"];
 }
 
 /*
@@ -1611,12 +1632,11 @@ Card.ACCESS = {
 };
 
 /*
- * Table of older (V1) access values and their corresponding new values; the new values are similar but a little
- * more rational (for example, using common values for all the logical operations across modes).
+ * Table of older (V1) access values and their corresponding new values; the new values are similar but more orthogonal
  */
 Card.ACCESS.V1 = [];
 Card.ACCESS.V1[0x0002] = Card.ACCESS.READ.MODE0;
-Card.ACCESS.V1[0x0003] = Card.ACCESS.READ.MODE0 | Card.ACCESS.READ.EVENODD;
+Card.ACCESS.V1[0x0003] = Card.ACCESS.READ.MODE0  | Card.ACCESS.READ.EVENODD;
 Card.ACCESS.V1[0x0010] = Card.ACCESS.READ.MODE1;
 Card.ACCESS.V1[0x0200] = Card.ACCESS.WRITE.MODE0;
 Card.ACCESS.V1[0x0400] = Card.ACCESS.WRITE.MODE0 | Card.ACCESS.WRITE.ROT;
@@ -1727,15 +1747,15 @@ Card.ACCESS.readByteMode1 = function readByteMode1(off, addr)
  * Supporting Set/Reset means that for every plane for which Set/Reset is enabled, we must
  * replace the corresponding byte in dw with a byte of zeros or ones.  This is accomplished with
  * nSetMapMask, nSetMapData, and nSetMapBits.  nSetMapMask is the inverse of the ESRESET bits,
- * because we use it to mask the processor data, nSetMapData records the desired SRESET bits, and
- * nSetMapBits contains the bits to replace those that we masked in the processor data.
+ * because we use it to mask the processor data, nSetMapData records the desired SRESET bits,
+ * and nSetMapBits contains the bits to replace those that we masked in the processor data.
  *
  * We could have done this:
  *
  *      dw = (dw & this.controller.nSetMapMask) | (this.controller.nSetMapData & ~this.controller.nSetMapMask)
  *
- * but by maintaining nSetMapBits equal to (nSetMapData & ~nSetMapMask), we are able to make the writes
- * slightly more efficient.
+ * but by maintaining nSetMapBits equal to (nSetMapData & ~nSetMapMask), we are able to make
+ * the writes slightly more efficient.
  *
  * @this {Memory}
  * @param {number} off
@@ -1778,11 +1798,11 @@ Card.ACCESS.writeByteMode0 = function writeByteMode0(off, b, addr)
  * because we would be using sequential video buffer locations, instead of multiples of 4, and would match how
  * pixels are stored in "Mode X".  However, I don't think that's how CHAIN4 modes operate (although that still
  * needs to be confirmed, because multiple sources conflict on this point).  TODO: Confirm CHAIN4 operation on
- * actual VGA hardware, including the extent to which ALU and other writeByteMode0() operations need to be
- * folded into this.
+ * actual VGA hardware, including the extent to which ALU and other writeByteMode0() functionality needs to
+ * be folded into this.
  *
- * It probably doesn't matter that much, as long as both the read and write CHAIN4 functions decode their
- * addresses in exactly the same manner; we'd only get into trouble with software that "unchained" or
+ * Address decoding may not matter that much, as long as both the read and write CHAIN4 functions decode their
+ * addresses in exactly the same manner; we'd only get into trouble with software that "unchained" or otherwise
  * reconfigured the planes and then made assumptions about existing data in the video buffer.
  *
  * @this {Memory}
@@ -2495,7 +2515,21 @@ Card.prototype.setMemoryAccess = function(nAccess)
         if (!fnReadByte) {
             if (DEBUG && this.dbg) {
                 this.dbg.message("Card.setMemoryAccess(" + str.toHexWord(nAccess) + "): missing readByte handler");
-                this.dbg.stopCPU();     // let's take a look
+                /*
+                 * I've taken a look, and the cases I've seen so far stem from the order in which the IBM VGA BIOS
+                 * reprograms registers during a mode change: it reprograms the Sequencer registers BEFORE the Graphics
+                 * Controller registers, so if GRC.MODE was set to READ.MODE1 prior to the mode change and the new mode
+                 * clears SEQ.MEMMODE.SEQUENTIAL, we will briefly be in an "odd" (unsupported) state.
+                 *
+                 * This didn't used to occur when we relied on the GRC.MODE register instead of the SEQ.MEMMODE for
+                 * determining the EVENODD state.  But, as explained in getAccess(), we've run into inconsistencies in
+                 * how GRC.MODE.EVENODD is programmed, so we must live with this warning.
+                 *
+                 * The ultimate solution is to provide a EVENODD handler for READ.MODE1, since there is the remote
+                 * possibility of third-party software that relies on that "odd" combination.
+                 *
+                 *      this.dbg.stopCPU();     // let's take a look
+                 */
             }
             if (nReadAccess & Card.ACCESS.READ.EVENODD) {
                 fnReadByte = Card.ACCESS.afn[Card.ACCESS.READ.EVENODD];
@@ -2506,7 +2540,21 @@ Card.prototype.setMemoryAccess = function(nAccess)
         if (!fnWriteByte) {
             if (DEBUG && this.dbg) {
                 this.dbg.message("Card.setMemoryAccess(" + str.toHexWord(nAccess) + "): missing writeByte handler");
-                this.dbg.stopCPU();     // let's take a look
+                /*
+                 * I've taken a look, and the cases I've seen so far stem from the order in which the IBM VGA BIOS
+                 * reprograms registers during a mode change: it reprograms the Sequencer registers BEFORE the Graphics
+                 * Controller registers, so if GRC.MODE was set to WRITE.MODE2 prior to the mode change and the new mode
+                 * clears SEQ.MEMMODE.SEQUENTIAL, we will briefly be in an "odd" (unsupported) state.
+                 *
+                 * This didn't used to occur when we relied on the GRC.MODE register instead of the SEQ.MEMMODE for
+                 * determining the EVENODD state.  But, as explained in getAccess(), we've run into inconsistencies in
+                 * how GRC.MODE.EVENODD is programmed, so we must live with this warning.
+                 *
+                 * The ultimate solution is to provide EVENODD handlers for all modes other than WRITE.MODE0, since there
+                 * is the remote possibility of third-party software that relies on one of those "odd" combinations.
+                 *
+                 *      this.dbg.stopCPU();     // let's take a look
+                 */
             }
             if (nWriteAccess & Card.ACCESS.WRITE.EVENODD) {
                 fnWriteByte = Card.ACCESS.afn[Card.ACCESS.WRITE.EVENODD];
@@ -3981,7 +4029,7 @@ Video.prototype.checkCursor = function()
     var bCursorFlags = this.cardActive.regCRTData[Card.CRTC.CURSOR_START.INDX];
     var bCursorStart = bCursorFlags & Card.CRTC.CURSOR_START.MASK;
     var bCursorEnd = this.cardActive.regCRTData[Card.CRTC.CURSOR_END.INDX] & Card.CRTC.CURSOR_END.MASK;
-    var bCursorMax = this.cardActive.regCRTData[Card.CRTC.MAX_SCAN.INDX] & Card.CRTC.CURSOR_END.MASK;
+    var bCursorMax = this.cardActive.regCRTData[Card.CRTC.MAX_SCAN.INDX] & Card.CRTC.MAX_SCAN.MASK;
 
     /*
      * HACK: The original EGA BIOS has a cursor emulation bug when 43-line mode is enabled, so we attempt to detect
@@ -4254,7 +4302,7 @@ Video.prototype.setDimensions = function()
              * then we'll need to load another MDA font variation, because we only load an 9x14 font for MDA.
              */
             if (this.cardActive === this.cardEGA && this.nFont == Video.FONT.CGA) {
-                if (this.cardEGA.regCRTData[Card.CRTC.MAX_SCAN.INDX] == 7) {
+                if (this.cardEGA.regCRTData[Card.CRTC.EGA.MAX_SCAN.INDX] == 7) {
                     /*
                      * Vertical resolution of 350 divided by 8 (ie, scan lines 0-7) yields 43 whole rows.
                      */
@@ -4264,7 +4312,7 @@ Video.prototype.setDimensions = function()
                  * Since we can also be called before any hardware registers have been initialized,
                  * it may be best to not perform the following test (which is why it's commented out).
                  */
-                else /* if (this.cardEGA.regCRTData[Card.CRTC.MAX_SCAN.INDX] == 13) */ {
+                else /* if (this.cardEGA.regCRTData[Card.CRTC.EGA.MAX_SCAN.INDX] == 13) */ {
                     /*
                      * Vertical resolution of 350 divided by 14 (ie, scan lines 0-13) yields exactly 25 rows.
                      *
@@ -4499,7 +4547,7 @@ Video.prototype.checkMode = function(fForce)
                              * mode) and then which one (ie, 320 wide or 640 wide).
                              */
                             if (card.regGRCData[Card.GRC.MODE.INDX] & Card.GRC.MODE.COLOR256) {
-                                if (card.regCRTData[Card.CRTC.MAX_SCAN.INDX] & Card.CRTC.MAX_SCAN.SCAN_LINE) {
+                                if (card.regCRTData[Card.CRTC.EGA.MAX_SCAN.INDX] & Card.CRTC.EGA.MAX_SCAN.SCAN_LINE) {
                                     if (card.regCRTData[Card.CRTC.EGA.VDISP_END] <= 0x8F) {
                                         nMode = Video.MODE.VGA_320X200;
                                     }
@@ -5769,7 +5817,7 @@ Video.prototype.inSEQData = function(port, addrFrom)
 {
     var b = this.cardEGA.regSEQData[this.cardEGA.regSEQIndx];
     if (!addrFrom || this.messageEnabled()) {
-        this.printMessageIO(Card.SEQ.DATA.PORT, null, addrFrom, "SEQ" + this.cardEGA.asSEQRegs[this.cardEGA.regSEQIndx], b);
+        this.printMessageIO(Card.SEQ.DATA.PORT, null, addrFrom, "SEQ." + this.cardEGA.asSEQRegs[this.cardEGA.regSEQIndx], b);
     }
     return b;
 };
