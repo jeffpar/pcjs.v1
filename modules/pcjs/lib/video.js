@@ -1162,7 +1162,7 @@ Card.CRTC = {
         SCAN_LINE:          0x1f,
         VBLANK_START_BIT9:  0x20,
         LINE_COMPARE_BIT9:  0x40,
-        CONVERT400:         0x80
+        CONVERT400:         0x80        // 200-to-400 scan-line conversion is in effect
         },
         CURSOR_START: {
             INDX:           0x0A,
@@ -2618,7 +2618,7 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
     this.dbg = dbg;
 
     /*
-     * The only time we do NOT want to trap MDA ports is when the model has been specifically set to CGA.
+     * The only time we do NOT want to trap MDA ports is when the model has been explicitly set to CGA.
      */
     if (Video.CARD.NAMES[this.model] != Video.CARD.CGA) {
         bus.addPortInputTable(this, Video.aMDAPortInput);
@@ -2626,7 +2626,7 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
     }
 
     /*
-     * Similarly, the only time we do NOT want to trap CGA ports is when the model has been specifically set to MDA.
+     * Similarly, the only time we do NOT want to trap CGA ports is when the model is explicitly set to MDA.
      */
     if (Video.CARD.NAMES[this.model] != Video.CARD.MDA) {
         bus.addPortInputTable(this, Video.aCGAPortInput);
@@ -2661,8 +2661,8 @@ Video.prototype.initBus = function(cmp, bus, cpu, dbg)
     }
 
     /*
-     * If we have an associated keyboard, then ensure that the keyboard will be notified whenever
-     * the canvas gets focus and receives input.
+     * If we have an associated keyboard, then ensure that the keyboard will be notified whenever the canvas
+     * gets focus and receives input.
      */
     this.kbd = cmp.getComponentByType("Keyboard");
     if (this.kbd && this.canvasScreen) {
@@ -3498,7 +3498,7 @@ Video.prototype.onROMLoad = function(abROM, aParms)
         if (DEBUG) this.printMessage("onROMLoad(): EGA fonts loaded");
         /*
          * For EGA cards, in the absence of any parameters, we assume that we're receiving the original
-         * IBM EGA ROM, which stores its 8x14 font data at 0x2230 as a contiguous stream; the total size
+         * IBM EGA ROM, which stores its 8x14 font data at 0x2230 as one continuous sequence; the total size
          * of the 8x14 font is 0xE00 bytes.
          *
          * At 0x3030, there is an "ALPHA SUPPLEMENT" table, which contains 15 bytes per row instead of 14,
@@ -3716,7 +3716,7 @@ Video.prototype.buildFonts = function()
     var fChanges = false;
 
     /*
-     * There's no point building any fonts if we're in a non-windowed (eg, command-line) environment or no font data was loaded.
+     * There's no point building any fonts if this is a non-windowed (eg, command-line) environment OR no font data was loaded.
      */
     if (window && this.abFontData) {
 
@@ -4522,13 +4522,19 @@ Video.prototype.checkMode = function(fForce)
                 default:
                     break;
                 }
-
+                /*
+                 * TODO: The following mode discrimination code is all a bit haphazard, a byproduct of its slow evolution
+                 * from increasingly greater EGA support to increasingly greater VGA support.  Make it more rational someday,
+                 * so that as support is added for even more modes (eg, "Mode X" variations, monochrome modes, etc), it
+                 * doesn't get totally out of control.
+                 */
                 var fSEQDotClock = (card.regSEQData[Card.SEQ.CLOCKING.INDX] & Card.SEQ.CLOCKING.DOTCLOCK);
                 var nCRTCVertTotal = card.regCRTData[Card.CRTC.EGA.VTOTAL];
                 nCRTCVertTotal |= ((card.regCRTData[Card.CRTC.EGA.OVERFLOW.INDX] & Card.CRTC.EGA.OVERFLOW.VTOTAL_BIT8)? 0x100 : 0);
                 if (card.nCard == Video.CARD.VGA) {
                     nCRTCVertTotal |= ((card.regCRTData[Card.CRTC.EGA.OVERFLOW.INDX] & Card.CRTC.EGA.OVERFLOW.VTOTAL_BIT9)? 0x200 : 0);
                 }
+                var nCRTCMaxScan = card.regCRTData[Card.CRTC.EGA.MAX_SCAN.INDX];
 
                 if (nMode != Video.MODE.UNKNOWN) {
                     if (!(regGRCMisc & Card.GRC.MISC.GRAPHICS)) {
@@ -4536,18 +4542,19 @@ Video.prototype.checkMode = function(fForce)
                     } else {
                         if (card.addrBuffer == 0xB8000) {
                             /*
-                             * Since nMode will have been assigned a default of either 0x02 or 0x03, convert that to either
-                             * 0x05 or 0x04 if we're in a low-res graphics mode, 0x06 otherwise.
+                             * Since nMode will have been assigned a default of either 0x02 or 0x03, convert that to
+                             * either 0x05 or 0x04 if we're in a low-res graphics mode, 0x06 otherwise.
                              */
                             nMode = fSEQDotClock? (7 - nMode) : Video.MODE.CGA_640X200;
                         } else {
                             /*
-                             * card.addrBuffer must be 0xA0000, so we need to discriminate between modes 0x0D and up;
-                             * we've already defaulted to 0x0F or 0x10, so determine if it's 0x0D or 0x0E (ie, a 200-row
-                             * mode) and then which one (ie, 320 wide or 640 wide).
+                             * card.addrBuffer must be 0xA0000, so we need to discriminate among modes 0x0D and up;
+                             * we've already defaulted to either 0x0F or 0x10.  If COLOR256 is set, then select mode
+                             * 0x13 (or greater), else if 200-to-400 scan-line conversion is in effect, select either
+                             * mode 0x0D or 0x0E, else if VGA resolution is set, select either mode 0x11 or 0x12.
                              */
                             if (card.regGRCData[Card.GRC.MODE.INDX] & Card.GRC.MODE.COLOR256) {
-                                if (card.regCRTData[Card.CRTC.EGA.MAX_SCAN.INDX] & Card.CRTC.EGA.MAX_SCAN.SCAN_LINE) {
+                                if (nCRTCMaxScan & Card.CRTC.EGA.MAX_SCAN.SCAN_LINE) {
                                     if (card.regCRTData[Card.CRTC.EGA.VDISP_END] <= 0x8F) {
                                         nMode = Video.MODE.VGA_320X200;
                                     }
@@ -4558,16 +4565,13 @@ Video.prototype.checkMode = function(fForce)
                                     nMode = Video.MODE.VGA_320X400;
                                 }
                             }
-                            else if (nCRTCVertTotal < 500) {
-                                if (nCRTCVertTotal < 350) {
-                                    nMode = (fSEQDotClock? Video.MODE.EGA_320X200 : Video.MODE.EGA_640X200);
-                                }
-                            } else {
+                            else if (nCRTCMaxScan & Card.CRTC.EGA.MAX_SCAN.CONVERT400) {
+                                nMode = (fSEQDotClock? Video.MODE.EGA_320X200 : Video.MODE.EGA_640X200);
+                            } else if (nCRTCVertTotal > 500) {
                                 nMode = (this.nMonitorType == ChipSet.MONITOR.MONO? Video.MODE.VGA_640X480_MONO : Video.MODE.VGA_640X480);
                             }
                             if (DEBUG && this.messageEnabled()) {
                                 this.printMessage("checkMode(): nCRTCVertTotal=" + nCRTCVertTotal + ", mode=" + str.toHexByte(nMode));
-                                this.cpu.stopCPU();
                             }
                         }
                     }
