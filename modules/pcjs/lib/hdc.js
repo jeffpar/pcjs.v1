@@ -251,14 +251,14 @@ HDC.ATC = {
     },
     STATUS: {                   // this.regStatus (read-only; reading clears IRQ.ATC)
         PORT:       0x1F7,
-        BUSY:        0x80,      // if this is set, no other STATUS bits are valid
-        READY:       0x40,      // if this is set (along with the SEEK_OK bit), the drive is ready to read/write/seek again
-        WFAULT:      0x20,      // write fault
-        SEEK_OK:     0x10,      // seek operation complete
-        DATA_REQ:    0x08,      // indicates that "the sector buffer requires servicing during a Read or Write command. If either bit 7 (BUSY) or this bit is active, a command is being executed. Upon receipt of any command, this bit is reset."
-        CORRECTED:   0x04,
+        ERROR:       0x01,      // set when the previous command ended in an error; one or more bits are set in the ERROR register (the next command to the controller resets the ERROR bit)
         INDEX:       0x02,      // set once for every revolution of the disk
-        ERROR:       0x01       // set when the previous command ended in an error; one or more bits are set in the ERROR register (the next command to the controller resets the ERROR bit)
+        CORRECTED:   0x04,
+        DATA_REQ:    0x08,      // indicates that "the sector buffer requires servicing during a Read or Write command. If either bit 7 (BUSY) or this bit is active, a command is being executed. Upon receipt of any command, this bit is reset."
+        SEEK_OK:     0x10,      // seek operation complete
+        WFAULT:      0x20,      // write fault
+        READY:       0x40,      // if this is set (along with the SEEK_OK bit), the drive is ready to read/write/seek again
+        BUSY:        0x80       // if this is set, no other STATUS bits are valid
     },
     COMMAND: {                  // this.regCommand (write-only)
         PORT:       0x1F7,
@@ -266,7 +266,7 @@ HDC.ATC = {
         READ_DATA:   0x20,      // also supports NO_RETRIES and WITH_ECC
         WRITE_DATA:  0x30,      // also supports NO_RETRIES and WITH_ECC
         READ_VERF:   0x40,      // also supports NO_RETRIES
-        FORMAT_TRK:  0x50,
+        FORMAT_TRK:  0x50,      // TODO
         SEEK:        0x70,      // low nibble x 500us equal stepping rate (except for 0, which corresponds to 35us)
         DIAGNOSE:    0x90,
         SETPARMS:    0x91,
@@ -1395,7 +1395,7 @@ HDC.prototype.inATCData = function(port, addrFrom)
          * well, then the caller will get 0xff.
          */
         var hdc = this;
-        bIn = this.readData(this.drive, function(b, fAsync, obj, off) {
+        bIn = this.readData(this.drive, function onATCReadData(b, fAsync, obj, off) {
             hdc.assert(!fAsync);
             if (BACKTRACK) {
                 if (!off && obj.file && hdc.messageEnabled(Messages.DISK)) {
@@ -1413,50 +1413,59 @@ HDC.prototype.inATCData = function(port, addrFrom)
         });
         this.assert(bIn >= 0);
 
-        if (this.drive.ibSector == 1) {
+        if (this.drive.ibSector == 1 || this.drive.ibSector == this.drive.cbSector) {
             /*
-             * printMessageIO() calls, if enabled, can be overwhelming for this port, so limit them to the first byte
-             * of each sector.
+             * printMessageIO() calls, if enabled, can be overwhelming for this port, so limit them to the first
+             * and last bytes of each sector.
              */
             if (this.messageEnabled(Messages.PORT | Messages.HDC)) {
                 this.printMessageIO(port, null, addrFrom, "DATA[" + this.drive.ibSector + "]", bIn);
             }
-        }
-        else if (this.drive.ibSector == this.drive.cbSector) {
-            /*
-             * Now that we've supplied a full sector of data, see if the caller's expecting additional sectors;
-             * if so, prime the pump again.  The caller should not poll us again until another interrupt's been delivered.
-             */
-            if (this.messageEnabled(Messages.DATA | Messages.HDC)) {
-                var sDump = this.drive.disk.dumpSector(this.drive.sector);
-                if (sDump) this.dbg.message(sDump);
-            }
+            if (this.drive.ibSector > 1) {      // in other words, if this.drive.ibSector == this.drive.cbSector...
+                if (this.messageEnabled(Messages.DATA | Messages.HDC)) {
+                    var sDump = this.drive.disk.dumpSector(this.drive.sector);
+                    if (sDump) this.dbg.message(sDump);
+                }
+                /*
+                 * Now that we've supplied a full sector of data, see if the caller's expecting additional sectors;
+                 * if so, prime the pump again.  The caller should not poll us again until another interrupt's delivered.
+                 */
+                this.drive.nBytes -= this.drive.cbSector;
+                this.regSecCnt = (this.regSecCnt - 1) & 0xff;
+                /*
+                 * TODO: If the WITH_ECC bit is set in the READ_DATA command, then we need to support "stuffing" 4
+                 * additional bytes into the inATCData() stream.  And we must first set DATA_REQ in the STATUS register.
+                 */
+                if (this.drive.nBytes >= this.drive.cbSector) {
+                    /*
+                     * FYI, with regard to regStatus, I'm simply aping what the ATC.COMMAND.READ_DATA setup code does
+                     * for the first sector, which may not strictly be necessary for subsequent sectors....
+                     */
+                    hdc.regStatus = HDC.ATC.STATUS.BUSY;
+                    this.readData(this.drive, function onATCReadDataNext(b, fAsync) {
+                        if (b >= 0) {
+                            hdc.setATCIRR();
+                            /*
+                             * FYI, I'm taking a shotgun approach to these status bits: I need to clear STATUS.BUSY and
+                             * set STATUS.DATA_REQ, because otherwise CompaqDeskPro386 reads will fail, and I need to set
+                             * the STATUS.READY and STATUS.SEEK_OK bits, because otherwise MODEL_5170_REV3 reads will fail.
+                             */
+                            hdc.regStatus = HDC.ATC.STATUS.READY | HDC.ATC.STATUS.SEEK_OK | HDC.ATC.STATUS.DATA_REQ;
 
-            this.drive.nBytes -= this.drive.cbSector;
-            this.regSecCnt = (this.regSecCnt - 1) & 0xff;
-            /*
-             * TODO: If the WITH_ECC bit is set in the READ_DATA command, then we need to support "stuffing" 4
-             * additional bytes into the inATCData() stream.  And we must first set DATA_REQ in the STATUS register.
-             */
-            if (this.drive.nBytes >= this.drive.cbSector) {
-                hdc.regStatus = HDC.ATC.STATUS.BUSY | HDC.ATC.STATUS.DATA_REQ;
-                this.readData(this.drive, function(b, fAsync) {
-                    if (b >= 0) {
-                        hdc.setATCIRR();
-                        hdc.regStatus = HDC.ATC.STATUS.READY | HDC.ATC.STATUS.SEEK_OK;
-                    } else {
-                        /*
-                         * TODO: It would be nice to be a bit more specific about the error (if any) that just occurred.
-                         * Consult drive.errorCode (it uses older XTC error codes, but mapping those codes should be trivial).
-                         */
-                         hdc.regStatus = HDC.ATC.STATUS.ERROR;
-                         hdc.regError = HDC.ATC.ERROR.NO_CHS;
-                        if (DEBUG) hdc.printMessage("HDC.inATCData(): read failed");
-                    }
-                }, false);
-            } else {
-                this.assert(!this.drive.nBytes);
-                this.regStatus = HDC.ATC.STATUS.READY | HDC.ATC.STATUS.SEEK_OK;
+                        } else {
+                            /*
+                             * TODO: It would be nice to be a bit more specific about the error (if any) that just occurred.
+                             * Consult drive.errorCode (it uses older XTC error codes, but mapping those codes should be trivial).
+                             */
+                            hdc.regStatus = HDC.ATC.STATUS.ERROR;
+                            hdc.regError = HDC.ATC.ERROR.NO_CHS;
+                            if (DEBUG) hdc.printMessage("HDC.inATCData(): read failed");
+                        }
+                    }, false);
+                } else {
+                    this.assert(!this.drive.nBytes);
+                    this.regStatus = HDC.ATC.STATUS.READY | HDC.ATC.STATUS.SEEK_OK;
+                }
             }
         }
     }
@@ -1486,30 +1495,28 @@ HDC.prototype.outATCData = function(port, bOut, addrFrom)
                     this.printMessage("HDC.outATCData(" + str.toHexByte(bOut) + "): write failed");
                 }
             }
-            else if (this.drive.ibSector == 1) {
+            else if (this.drive.ibSector == 1 || this.drive.ibSector == this.drive.cbSector) {
                 /*
-                 * printMessageIO() calls, if enabled, can be overwhelming for this port, so limit them to the first byte
-                 * of each sector.
+                 * printMessageIO() calls, if enabled, can be overwhelming for this port, so limit them to the first
+                 * and last bytes of each sector.
                  */
                 if (this.messageEnabled(Messages.PORT | Messages.HDC)) {
                     this.printMessageIO(port, bOut, addrFrom, "DATA[" + this.drive.ibSector + "]");
                 }
-            }
-            else if (this.drive.ibSector == this.drive.cbSector) {
-
-                if (this.messageEnabled(Messages.DATA | Messages.HDC)) {
-                    var sDump = this.drive.disk.dumpSector(this.drive.sector);
-                    if (sDump) this.dbg.message(sDump);
-                }
-
-                this.drive.nBytes -= this.drive.cbSector;
-                this.regSecCnt = (this.regSecCnt - 1) & 0xff;
-                this.setATCIRR(true);
-                this.regStatus = HDC.ATC.STATUS.READY | HDC.ATC.STATUS.SEEK_OK;
-                if (this.drive.nBytes >= this.drive.cbSector) {
-                    this.regStatus |= HDC.ATC.STATUS.DATA_REQ;
-                } else {
-                    this.assert(!this.drive.nBytes);
+                if (this.drive.ibSector > 1) {      // in other words, if this.drive.ibSector == this.drive.cbSector...
+                    if (this.messageEnabled(Messages.DATA | Messages.HDC)) {
+                        var sDump = this.drive.disk.dumpSector(this.drive.sector);
+                        if (sDump) this.dbg.message(sDump);
+                    }
+                    this.drive.nBytes -= this.drive.cbSector;
+                    this.regSecCnt = (this.regSecCnt - 1) & 0xff;
+                    this.setATCIRR(true);
+                    this.regStatus = HDC.ATC.STATUS.READY | HDC.ATC.STATUS.SEEK_OK;
+                    if (this.drive.nBytes >= this.drive.cbSector) {
+                        this.regStatus |= HDC.ATC.STATUS.DATA_REQ;
+                    } else {
+                        this.assert(!this.drive.nBytes);
+                    }
                 }
             }
         } else {
@@ -1716,10 +1723,14 @@ HDC.prototype.outATCDrvHd = function(port, bOut, addrFrom)
      *
      * TODO: Dig into the ATC documentation some more, and determine what other situations, if any, regStatus
      * needs to be updated.
+     *
+     * UPDATE: The Compaq DeskPro 386 ROM BIOS requires setting STATUS.SEEK_OK in addition to STATUS.READY;
+     * a quick retest of the MODEL_5170_REV3 BIOS suggests that it's happy with that change, so it's quite likely
+     * that was the appropriate change all along.
      */
     var iDrive = (this.regDrvHd & HDC.ATC.DRVHD.DRIVE_MASK? 1 : 0);
     if (this.aDrives[iDrive]) {
-        this.regStatus |= HDC.ATC.STATUS.READY;
+        this.regStatus |= HDC.ATC.STATUS.READY | HDC.ATC.STATUS.SEEK_OK;
     } else {
         this.regStatus &= ~HDC.ATC.STATUS.READY;
     }
@@ -1851,7 +1862,14 @@ HDC.prototype.doATC = function()
 
     switch (bCmd & HDC.ATC.COMMAND.MASK) {
 
-    case HDC.ATC.COMMAND.READ_DATA:
+    case HDC.ATC.COMMAND.RESTORE:               // 0x10
+        /*
+         * Physically, this retracts the heads to cylinder 0, but logically, there isn't anything to do.
+         */
+        fInterrupt = true;
+        break;
+
+    case HDC.ATC.COMMAND.READ_DATA:             // 0x20
         if (DEBUG && this.messageEnabled(Messages.HDC)) {
             this.printMessage("HDC.doRead(" + iDrive + ',' + drive.wCylinder + ':' + drive.bHead + ':' + drive.bSector + ',' + nSectors + ")", true);
         }
@@ -1859,16 +1877,19 @@ HDC.prototype.doATC = function()
          * We're using a call to readData() that disables auto-increment, so that once we've got the first
          * byte of the next sector, we can signal an interrupt without also consuming the first byte, allowing
          * inATCData() to begin with that byte.
-         *
-         * As with the WRITE_DATA command, I'm not sure which of BUSY and DATA_REQ (or both) should be set here,
-         * so I'm setting both of them for now.  I clear them as soon as I have data.
          */
-        hdc.regStatus = HDC.ATC.STATUS.BUSY | HDC.ATC.STATUS.DATA_REQ;
-
-        this.readData(drive, function(b, fAsync) {
+        hdc.regStatus = HDC.ATC.STATUS.BUSY;
+        this.readData(drive, function onATCReadDataFirst(b, fAsync) {
             if (b >= 0 && hdc.chipset) {
                 hdc.setATCIRR();
-                hdc.regStatus = HDC.ATC.STATUS.READY | HDC.ATC.STATUS.SEEK_OK;
+                /*
+                 * Bytes from the requested sector(s) will now be delivered via inATCData().
+                 *
+                 * FYI, I'm taking a shotgun approach to these status bits: I need to clear STATUS.BUSY and
+                 * set STATUS.DATA_REQ, because otherwise CompaqDeskPro386 reads will fail, and I need to set
+                 * the STATUS.READY and STATUS.SEEK_OK bits, because otherwise MODEL_5170_REV3 reads will fail.
+                 */
+                hdc.regStatus = HDC.ATC.STATUS.READY | HDC.ATC.STATUS.SEEK_OK | HDC.ATC.STATUS.DATA_REQ;
             } else {
                 /*
                  * TODO: It would be nice to be a bit more specific about the error (if any) that just occurred.
@@ -1880,21 +1901,14 @@ HDC.prototype.doATC = function()
         }, false);
         break;
 
-    case HDC.ATC.COMMAND.WRITE_DATA:
+    case HDC.ATC.COMMAND.WRITE_DATA:            // 0x30
         if (DEBUG && this.messageEnabled(Messages.HDC)) {
             this.printMessage("HDC.doWrite(" + iDrive + ',' + drive.wCylinder + ':' + drive.bHead + ':' + drive.bSector + ',' + nSectors + ")", true);
         }
         this.regStatus = HDC.ATC.STATUS.DATA_REQ;
         break;
 
-    case HDC.ATC.COMMAND.RESTORE:
-        /*
-         * Physically, this retracts the heads to cylinder 0, but logically, there isn't anything to do.
-         */
-        fInterrupt = true;
-        break;
-
-    case HDC.ATC.COMMAND.READ_VERF:
+    case HDC.ATC.COMMAND.READ_VERF:             // 0x40
         /*
          * Since the READ VERIFY command returns no data, once again, logically, there isn't much we HAVE to
          * to do, but... TODO: Verify that all the disk parameters are valid, and return an error if they're not.
@@ -1902,12 +1916,21 @@ HDC.prototype.doATC = function()
         fInterrupt = true;
         break;
 
-    case HDC.ATC.COMMAND.DIAGNOSE:
+    case HDC.ATC.COMMAND.SEEK:                  // 0x70
+        /*
+         * Physically, this moves the head(s) to the requested cylinder, but logically, there isn't anything to do;
+         * in fact, we didn't even need this command for the MODEL_5170 ROM BIOS (the Compaq DeskPro 386 ROM BIOS was
+         * another story).
+         */
+        fInterrupt = true;
+        break;
+
+    case HDC.ATC.COMMAND.DIAGNOSE:              // 0x90
         this.regError = HDC.ATC.DIAG.NO_ERROR;
         fInterrupt = true;
         break;
 
-    case HDC.ATC.COMMAND.SETPARMS:
+    case HDC.ATC.COMMAND.SETPARMS:              // 0x91
         /*
          * The documentation implies that the only parameters this command really affects are the number
          * of heads (from regDrvHd) and sectors/track (from regSecCnt) -- this despite the fact that the BIOS
@@ -2109,7 +2132,7 @@ HDC.prototype.doXTC = function()
             break;
 
         case HDC.XTC.DATA.CMD.READ_DATA:        // 0x08
-            this.doDMARead(drive, function(bStatus) {
+            this.doDMARead(drive, function onXTCReadDataCommand(bStatus) {
                 hdc.beginResult(bStatus | bDrive);
             });
             break;
@@ -2120,13 +2143,13 @@ HDC.prototype.doXTC = function()
              * but it is omitted from the HDC.XTC.DATA.CMD.READ_DATA command.  Is that correct?  Note that, as far as the length
              * of the transfer is concerned, we rely exclusively on the DMA controller being programmed with the appropriate byte count.
              */
-            this.doDMAWrite(drive, function(bStatus) {
+            this.doDMAWrite(drive, function onXTCWriteDataCommand(bStatus) {
                 hdc.beginResult(bStatus | bDrive);
             });
             break;
 
         case HDC.XTC.DATA.CMD.WRITE_BUFFER:     // 0x0F
-            this.doDMAWriteBuffer(drive, function(bStatus) {
+            this.doDMAWriteBuffer(drive, function onXTCWriteBufferCommand(bStatus) {
                 hdc.beginResult(bStatus | bDrive);
             });
             break;
@@ -2304,7 +2327,7 @@ HDC.prototype.doDMARead = function(drive, done)
              */
             drive.errorCode = HDC.XTC.DATA.ERR.NONE;
             this.chipset.connectDMA(ChipSet.DMA_HDC, this, 'dmaRead', drive);
-            this.chipset.requestDMA(ChipSet.DMA_HDC, function(fComplete) {
+            this.chipset.requestDMA(ChipSet.DMA_HDC, function onDMAReadRequest(fComplete) {
                 if (!fComplete) {
                     /*
                      * If an incomplete request wasn't triggered by an explicit error, then let's make explicit
@@ -2348,7 +2371,7 @@ HDC.prototype.doDMAWrite = function(drive, done)
              */
             drive.errorCode = HDC.XTC.DATA.ERR.NONE;
             this.chipset.connectDMA(ChipSet.DMA_HDC, this, 'dmaWrite', drive);
-            this.chipset.requestDMA(ChipSet.DMA_HDC, function(fComplete) {
+            this.chipset.requestDMA(ChipSet.DMA_HDC, function onDMAWriteRequest(fComplete) {
                 if (!fComplete) {
                     /*
                      * If an incomplete request wasn't triggered by an explicit error, then let's make explicit
@@ -2399,7 +2422,7 @@ HDC.prototype.doDMAWriteBuffer = function(drive, done)
          */
         drive.errorCode = HDC.XTC.DATA.ERR.NONE;
         this.chipset.connectDMA(ChipSet.DMA_HDC, this, 'dmaWriteBuffer', drive);
-        this.chipset.requestDMA(ChipSet.DMA_HDC, function(fComplete) {
+        this.chipset.requestDMA(ChipSet.DMA_HDC, function onDMAWriteBufferRequest(fComplete) {
             if (!fComplete) {
                 /*
                  * If an incomplete request wasn't triggered by an explicit error, then let's make explicit
@@ -2453,7 +2476,7 @@ HDC.prototype.doDMAFormat = function(drive, done)
             //
             drive.errorCode = HDC.XTC.DATA.ERR.NONE;
             this.chipset.connectDMA(ChipSet.DMA_HDC, this, 'dmaWriteFormat', drive);
-            this.chipset.requestDMA(ChipSet.DMA_HDC, function(fComplete) {
+            this.chipset.requestDMA(ChipSet.DMA_HDC, function onDMAFormat(fComplete) {
                 if (!fComplete) {
                     //
                     // If an incomplete request wasn't triggered by an explicit error, then let's make explicit
@@ -2529,7 +2552,7 @@ HDC.prototype.readData = function(drive, done, fAutoInc)
     if (done) {
         var hdc = this;
         if (drive.disk) {
-            drive.disk.seek(drive.wCylinder, drive.bHead, drive.bSector + drive.bSectorBias, false, function(sector, fAsync) {
+            drive.disk.seek(drive.wCylinder, drive.bHead, drive.bSector + drive.bSectorBias, false, function onReadDataSeek(sector, fAsync) {
                 if ((drive.sector = sector)) {
                     obj = sector;
                     off = drive.ibSector = 0;
@@ -2591,7 +2614,7 @@ HDC.prototype.writeData = function(drive, b)
          * but it seems preferable to keep the image format consistent and controller-independent.
          */
         if (drive.disk) {
-            drive.disk.seek(drive.wCylinder, drive.bHead, drive.bSector + drive.bSectorBias, true, function(sector, fAsync) {
+            drive.disk.seek(drive.wCylinder, drive.bHead, drive.bSector + drive.bSectorBias, true, function onWriteDataSeek(sector, fAsync) {
                 drive.sector = sector;
             });
         }
