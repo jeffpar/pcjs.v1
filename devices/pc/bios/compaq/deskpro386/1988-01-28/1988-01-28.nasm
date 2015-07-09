@@ -2297,52 +2297,55 @@ x91a1:	in	al,0x40			; 000091A1  E440  '.@'
 	pop	ax			; 000091AE  58  'X'
 	ret				; 000091AF  C3  '.'
 
-x91b0:	mov	dx,0x1f6		; 000091B0  BAF601  '...'
-	mov	al,0xa0			; 000091B3  B0A0  '..'
-	out	dx,al			; 000091B5  EE  '.'
-	call	xc5af			; 000091B6  E8F633  '..3'
-	call	x83f9			; 000091B9  E83DF2  '.=.'
-	mov	al,0xa8			; 000091BC  B0A8  '..'
-	out	0x84,al			; 000091BE  E684  '..'
-	sti				; 000091C0  FB  '.'
-	mov	dx,0x3f4		; 000091C1  BAF403  '...'
-	in	al,dx			; 000091C4  EC  '.'
-	std				; 000091C5  FD  '.'
-	std				; 000091C6  FD  '.'
-	std				; 000091C7  FD  '.'
-	std				; 000091C8  FD  '.'
-	std				; 000091C9  FD  '.'
-	std				; 000091CA  FD  '.'
-	cld				; 000091CB  FC  '.'
-	and	al,0xf			; 000091CC  240F  '$.'
-	or	al,al			; 000091CE  0AC0  0x0A,'.'
-	jz	x91d5			; 000091D0  7403  't.'
-	jmp	short x922a		; 000091D2  EB56  '.V'
+;
+;   Here's where the first HDC (Hard Disk Controller) activity occurs during power-up.
+;
+x91b0:	mov	dx,0x1f6		; 000091B0  select the DRVHD (Drive/Head) register
+	mov	al,0xa0			; 000091B3  select Head 0 (bits 0-3) and Drive 0 (bit 4)
+	out	dx,al			; 000091B5  write register
+	call	xc5af			; 000091B6  perform some I/O to the FDR (Fixed Disk Register), port 0x3F6
+	call	x83f9			; 000091B9  TBD (writes 0xA0, 0xA1, 0xA2, 0xA3, 0xA6 to port 0x84)
+	mov	al,0xa8			; 000091BC
+	out	0x84,al			; 000091BE
+	sti				; 000091C0
+	mov	dx,0x3f4		; 000091C1  select the REG_STATUS (Main Status Register) of the FDC
+	in	al,dx			; 000091C4  read register
+	std				; 000091C5
+	std				; 000091C6
+	std				; 000091C7
+	std				; 000091C8
+	std				; 000091C9
+	std				; 000091CA
+	cld				; 000091CB
+	and	al,0xf			; 000091CC  keep only the BUSY bits for drives A,B,C,D
+	or	al,al			; 000091CE  are any of those set?
+	jz	x91d5			; 000091D0  no
+	jmp	short x922a		; 000091D2  yes
+	nop				; 000091D4
 
-	nop				; 000091D4  90  '.'
-x91d5:	sub	sp,byte +0xd		; 000091D5  83EC0D  '..',0x0D
-	mov	bp,sp			; 000091D8  8BEC  '..'
-	xor	ax,ax			; 000091DA  33C0  '3.'
-	mov	ds,ax			; 000091DC  8ED8  '..'
-	les	si,[0x78]		; 000091DE  C4367800  '.6x.'
-	mov	ax,0x40			; 000091E2  B84000  '.@.'
-	mov	ds,ax			; 000091E5  8ED8  '..'
-	mov	byte [0x40],0xff	; 000091E7  C6064000FF  '..@..'
-	call	xca03			; 000091EC  E81438  '..8'
-	mov	byte [bp+0x6],0x0	; 000091EF  C6460600  '.F..'
-	mov	byte [bp+0x7],0x0	; 000091F3  C6460700  '.F..'
-	call	x9293			; 000091F7  E89900  '...'
-	mov	byte [bp+0x6],0x1	; 000091FA  C6460601  '.F..'
-	call	x9293			; 000091FE  E89200  '...'
-	mov	byte [bp+0x5],0x0	; 00009201  C6460500  '.F..'
-	call	xee9c			; 00009205  E8945C  '..\'
-	mov	al,0xaf			; 00009208  B0AF  '..'
-	out	0x84,al			; 0000920A  E684  '..'
-	mov	dx,0x3f2		; 0000920C  BAF203  '...'
-	mov	al,0xc			; 0000920F  B00C  '..'
-	out	dx,al			; 00009211  EE  '.'
-	and	byte [0x3f],0xf0	; 00009212  80263F00F0  '.&?..'
-	add	sp,byte +0xd		; 00009217  83C40D  '..',0x0D
+x91d5:	sub	sp,byte +0xd		; 000091D5
+	mov	bp,sp			; 000091D8
+	xor	ax,ax			; 000091DA
+	mov	ds,ax			; 000091DC
+	les	si,[0x78]		; 000091DE
+	mov	ax,0x40			; 000091E2
+	mov	ds,ax			; 000091E5
+	mov	byte [0x40],0xff	; 000091E7
+	call	xca03			; 000091EC
+	mov	byte [bp+0x6],0x0	; 000091EF
+	mov	byte [bp+0x7],0x0	; 000091F3
+	call	x9293			; 000091F7  this executes a lot of instructions, but no HDC ports are accessed
+	mov	byte [bp+0x6],0x1	; 000091FA
+	call	x9293			; 000091FE  again, this executes a lot of instructions, but no HDC ports are accessed
+	mov	byte [bp+0x5],0x0	; 00009201
+	call	xee9c			; 00009205
+	mov	al,0xaf			; 00009208
+	out	0x84,al			; 0000920A
+	mov	dx,0x3f2		; 0000920C  select the REG_OUTPUT (Digital Output Register) of the FDC
+	mov	al,0xc			; 0000920F  select the ENABLE and INT_ENABLE bits of REG_OUTPUT
+	out	dx,al			; 00009211  update register
+	and	byte [0x3f],0xf0	; 00009212
+	add	sp,byte +0xd		; 00009217
 	mov	al,0xb3			; 0000921A  B0B3  '..'
 	mov	ah,al			; 0000921C  8AE0  '..'
 	call	xb544			; 0000921E  E82323  '.##'
@@ -6670,10 +6673,18 @@ xbd0d:	in	al,0x64			; 0000BD0D  E464  '.d'
 	out	0x60,al			; 0000BD15  E660  '.`'
 	mov	al,0x25			; 0000BD17  B025  '.%'
 	out	0x84,al			; 0000BD19  E684  '..'
-	call	x91b0			; 0000BD1B  E892D4  '...'
-	mov	al,0x26			; 0000BD1E  B026  '.&'
-	out	0x84,al			; 0000BD20  E684  '..'
+;
+;   Perform some FDC initialization
+;
+	call	x91b0			; 0000BD1B
+
+	mov	al,0x26			; 0000BD1E
+	out	0x84,al			; 0000BD20
+;
+;   Perform some HDC initialization
+;
 	call	xc390			; 0000BD22  E86B06  '.k.'
+
 	mov	al,0x27			; 0000BD25  B027  '.',0x27
 	out	0x84,al			; 0000BD27  E684  '..'
 	mov	al,0xec			; 0000BD29  B0EC  '..'
@@ -7410,6 +7421,9 @@ xc388:	pop	si			; 0000C388  5E  '^'
 	shr	ax,cl			; 0000C38D  D3E8  '..'
 	ret				; 0000C38F  C3  '.'
 
+;
+;   HDC initialization
+;
 xc390:	mov	ax,0x40			; 0000C390  B84000  '.@.'
 	mov	ds,ax			; 0000C393  8ED8  '..'
 	mov	al,0xb0			; 0000C395  B0B0  '..'
