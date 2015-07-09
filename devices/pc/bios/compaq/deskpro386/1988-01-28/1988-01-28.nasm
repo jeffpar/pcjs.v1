@@ -6571,6 +6571,7 @@ xbc38:	in	al,0x64			; 0000BC38  E464  '.d'
 	mov	cx,0x1d			; 0000BC43  B91D00  '...'
 	mov	bp,0xbc4c		; 0000BC46  BD4CBC  '.L.'
 	jmp	xc7f7			; 0000BC49  E9AB0B  '...'
+
 xbc4c:	jmp	short xbc4c		; 0000BC4C  Hang the machine
 
 xbc4e:	mov	cx,0x2			; 0000BC4E  B90200  '...'
@@ -7756,6 +7757,9 @@ xc62f:	push	bx			; 0000C62F  53  'S'
 	pop	bx			; 0000C636  5B  '['
 	ret				; 0000C637  C3  '.'
 
+;
+; Wrapper around delay function
+;
 xc638:	push	bp			; 0000C638  55  'U'
 	push	ax			; 0000C639  50  'P'
 	push	cx			; 0000C63A  51  'Q'
@@ -7765,8 +7769,10 @@ xc638:	push	bp			; 0000C638  55  'U'
 	pop	bp			; 0000C640  5D  ']'
 	ret				; 0000C641  C3  '.'
 
+;
+; Delay function (delay based on BX)
+;
 xc642:	mov	cx,bx			; 0000C642  8BCB  '..'
-
 xc644:	pushf				; 0000C644  9C  '.'
 	cli				; 0000C645  FA  '.'
 	mov	al,0x0			; 0000C646  B000  '..'
@@ -7777,14 +7783,10 @@ xc644:	pushf				; 0000C644  9C  '.'
 	push	cs			; 0000C650  0E  '.'
 	call	xc657			; 0000C651  E80300  '...'
 	jmp	short xc658		; 0000C654  EB02  '..'
-
 	nop				; 0000C656  90  '.'
-
 xc657:	iret				; 0000C657  CF  '.'
-
 xc658:	xchg	al,ah			; 0000C658  86C4  '..'
 	mov	bx,ax			; 0000C65A  8BD8  '..'
-
 xc65c:	pushf				; 0000C65C  9C  '.'
 	cli				; 0000C65D  FA  '.'
 	mov	al,0x0			; 0000C65E  B000  '..'
@@ -7795,11 +7797,8 @@ xc65c:	pushf				; 0000C65C  9C  '.'
 	push	cs			; 0000C668  0E  '.'
 	call	xc66f			; 0000C669  E80300  '...'
 	jmp	short xc670		; 0000C66C  EB02  '..'
-
 	nop				; 0000C66E  90  '.'
-
 xc66f:	iret				; 0000C66F  CF  '.'
-
 xc670:	xchg	al,ah			; 0000C670  86C4  '..'
 	push	bx			; 0000C672  53  'S'
 	sub	bx,ax			; 0000C673  2BD8  '+.'

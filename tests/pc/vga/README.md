@@ -78,20 +78,21 @@ List of VGA Samples from [Michael Abrash's Graphics Programming Black Book](http
 
 ---
 
-Also, I've updated the PCjs [Library](/disks/pc/library.xml) disk collection to include a disk image of this directory:
+Also, I've updated the PCjs [Library](/disks/pc/library.xml) disk collection to include a disk containing executables
+built from the sources in this directory:
+
+	<disk path="/tests/pc/vga/VGABIN.json">VGA Tests (Black Book)</disk>
+
+The VGABIN disk image was built with this command:
+
+	diskdump --dir=bin --format=json --output=VGABIN.json
+
+Alternatively, if *path* refers to a directory (ending with a slash) instead of a disk image, the PCjs client will ask
+the PCjs web server to enumerate the contents of that directory and send back a JSON-encoded disk image containing all
+the files in that directory (including any subdirectories) every time that disk is requested.  Since this puts an added
+burden on the server, it's best to do this only when running PCjs from a local PCjs web server.
 
 	<disk path="/tests/pc/vga/">VGA Tests (Black Book)</disk>
-
-When *path* refers to a directory (ending with a slash) instead of a disk image, the PCjs client will ask the PCjs web
-server to enumerate the contents of that directory and send back a JSON-encoded disk image containing all the files in
-that directory (including any subdirectories) every time that disk is requested.  Since this puts an added burden on the
-server, it's best to do this only when running PCjs from a local PCjs web server.
-
-Since the contents of this particular directory will probably be in flux for a while, I've opted for this approach.
-Once things settle down, I'll generate a JSON-encoded disk image containing a snapshot of this directory, using the
-PCjs [DiskDump](/modules/diskdump/) module:
-
-	diskdump --dir=. --format=img --output=TESTVGA.img --overwrite
 
 One advantage of using [DiskDump](/modules/diskdump/) is that it automatically converts linefeeds in known text files
 (including ASM files) into DOS-compatible CR/LF sequences.
@@ -104,5 +105,5 @@ I've updated a [Compaq DeskPro 386 Machine](/devices/pc/machine/compaq/deskpro38
 	     automount='{A: {name: "PC-DOS 3.00 (Disk 1)",
 	                     path: "/disks/pc/dos/ibm/3.00/PCDOS300-DISK1.json"},
 	                 B: {name: "VGA Tests (Black Book)",
-	                     path: "/tests/pc/vga/"}
+	                     path: "/tests/pc/vga/VGABIN.json"}
 	     }' />

@@ -63,21 +63,12 @@ never completed, and this is another related issue that will have to be resolved
 
 ---
 
-Another problem: during IBM VGA ROM initialization, a "missing readByte handler" warning occurs.
-
-	Card.setMemoryAccess(0x1510): missing readByte handler
-	stopped (2351185 ops, 7740201 cycles, 1617 ms, 4786766 hz)
-	EAX=00000204 EBX=0000194A ECX=00000001 EDX=000003C4 
-	ESP=000000C4 EBP=FFFF0000 ESI=00000000 EDI=000003D4 
-	SS=0030 DS=0000 ES=C000 FS=0000 GS=0304 PS=00000002 V0 D0 I0 T0 S0 Z0 A0 P0 C0 
-	C000:1205 FEC0            INC      AL
-
-Before debugging this though, I decided to first make a table of all the register values for most of the modes that
-the IBM VGA supports:
+While debugging and fixing assorted IBM VGA issues, I made a table of all the register values for the video
+modes commonly used on the IBM VGA.  Here's that table:
 
     INT 0x10 Mode Requested:   	0x00 0x01 0x02 0x03 0x04 0x05 0x06 0x0D 0x0E 0x10 0x12 0x13
     
-	BIOSMODE:                   0x01 0x01 0x03 0x03 0x04 0x04 0x06 0x12 0x12 0x12 0x12 0x13
+	BIOSMODE:                   0x01 0x01 0x03 0x03 0x04 0x04 0x06 0x0D 0x0E 0x10 0x12 0x13
 	CRTC[0x00]: HTOTAL     		0x2D 0x2D 0x5F 0x5F 0x2D 0x2D 0x5F 0x2D 0x5F 0x5F 0x5F 0x5F
 	CRTC[0x01]: HDISP_END      	0x27 0x27 0x4F 0x4F 0x27 0x27 0x4F 0x27 0x4F 0x4F 0x4F 0x4F
 	CRTC[0x02]: HBLANK_START   	0x28 0x28 0x50 0x50 0x28 0x28 0x50 0x28 0x50 0x50 0x50 0x50
@@ -138,13 +129,8 @@ the IBM VGA supports:
 	 ATC[0x12]: PLANES          0x0F 0x0F 0x0F 0x0F 0x03 0x03 0x01 0x0F 0x0F 0x0F 0x0F 0x0F
 	 ATC[0x13]: HPAN         	0x08 0x08 0x08 0x08 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
 
-In the process of building this table, I also discovered that INT 0x10 mode 0x0D display is garbled, and that all
-graphics modes &gt;= 0x0D are misdetected as BIOSMODE 0x12.
-
-All these issues are under investigation.
-
-In addition, I've created a [VGA Tests](/tests/pc/vga/) directory to hold VGA test and sample code that I want PCjs
-to run successfully.  See that directory for more details.
+In addition, I've created a [VGA Tests](/tests/pc/vga/) directory to hold VGA test and sample code that PCjs can 
+now successfully run (for the most part).  See that directory for more details.
 
 *[@jeffpar](http://twitter.com/jeffpar)*  
-*June 1, 2015 (Updated July 3, 2015)*
+*June 1, 2015 (Updated July 9, 2015)*
