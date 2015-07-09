@@ -1,6 +1,6 @@
 *.IMG
-*.img
 *.dsk
+*.img
 *.heapsnapshot
 .DS_Store
 .buildpath
