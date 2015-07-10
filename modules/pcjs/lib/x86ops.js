@@ -1432,7 +1432,7 @@ X86.opIMULn = function IMULn()
 X86.opPUSH8 = function PUSH8()
 {
     if (BACKTRACK) this.backTrack.btiMemHi = 0;
-    this.pushWord(this.getIPByte());
+    this.pushWord(this.getIPDisp());
     this.nStepCycles -= this.cycleCounts.nOpCyclesPushReg;
 };
 

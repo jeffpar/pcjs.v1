@@ -889,8 +889,8 @@ X86.fnIDIVw = function IDIVw(dst, src)
  */
 X86.fnIMUL8 = function IMUL8(dst, src)
 {
-    dst = this.getIPByte();
-    var result = (((src << 16) >> 16) * ((dst << 24) >> 24))|0;
+    dst = this.getIPDisp();
+    var result = (((src << 16) >> 16) * dst)|0;
 
     if (result > 32767 || result < -32768) {
         this.setCF(); this.setOF();

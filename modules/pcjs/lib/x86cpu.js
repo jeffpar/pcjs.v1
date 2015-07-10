@@ -3559,7 +3559,16 @@ X86CPU.prototype.popWord = function()
  */
 X86CPU.prototype.pushWord = function(w)
 {
-    this.assert((w & this.dataMask) == w);
+    /*
+     * This assertion is no longer valid, now that we've fixed opPUSH8() to use getIPDisp() instead of getIPByte(),
+     * thus sign-extending the byte as appropriate.  And since sign-extension necessarily affects the entire 32-bit
+     * value, this assertion could fail when dataMask is 16 bits.
+     *
+     *      this.assert((w & this.dataMask) == w);
+     *
+     * setWord() calls setShort() or setLong() as appropriate, and setShort() truncates incoming values, so the fact
+     * that any incoming signed values will not be truncated to 16 bits should not be a concern.
+     */
     this.regLSP = (this.regLSP - (I386? this.dataSize : 2))|0;
     /*
      * Properly comparing regLSP to regLSPLimitLow would normally require coercing both to unsigned
