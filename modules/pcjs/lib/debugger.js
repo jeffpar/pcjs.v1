@@ -166,7 +166,13 @@ function Debugger(parmsDbg)
          * to halt on whenever attempting to execute an instruction at the corresponding address,
          * and aBreakRead and aBreakWrite are lists of addresses to halt on whenever a read or write,
          * respectively, occurs at the corresponding address.
+         *
+         * NOTE: Curiously, after upgrading the Google Closure Compiler from v20141215 to v20150609,
+         * the resulting compiled code would crash in clearBreakpoints(), because the (renamed) aBreakRead
+         * property was already defined.  To eliminate whatever was confusing the Closure Compiler, I've
+         * explicitly initialized all the properties that clearBreakpoints() (re)initializes.
          */
+        this.aBreakExec = this.aBreakRead = this.aBreakWrite = [];
         this.clearBreakpoints();
 
         /*
