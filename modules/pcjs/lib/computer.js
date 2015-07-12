@@ -1010,10 +1010,10 @@ Computer.prototype.queryUserID = function(fPrompt)
         sUserID = web.getLocalStorageItem(Computer.STATE_USERID);
         if (sUserID !== undefined) {
             if (!sUserID && fPrompt) {
-                sUserID = web.promptUser("To save machine states on the pcjs.org server, you need a user ID (email support@pcjs.org).\n\nOnce you have an ID, enter it below.");
+                sUserID = web.promptUser("Saving machine states on the pcjs.org server is currently unsupported.\n\nIf you're running your own server, enter your user ID below.");
                 if (sUserID) {
                     sUserID = this.verifyUserID(sUserID);
-                    if (!sUserID) this.notice("Your user ID has not been approved.");
+                    if (!sUserID) this.notice("The user ID is invalid.");
                 }
             }
         } else if (fPrompt) {
