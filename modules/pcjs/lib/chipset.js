@@ -4013,6 +4013,9 @@ ChipSet.prototype.inPPIB = function(port, addrFrom)
 /**
  * outPPIB(port, bOut, addrFrom)
  *
+ * This is the original (MODEL_5150 and MODEL_5160) handler for port 0x61.  Functionality common
+ * to all models must be placed in updatePPIB().
+ *
  * @this {ChipSet}
  * @param {number} port (0x61)
  * @param {number} bOut
@@ -4022,7 +4025,6 @@ ChipSet.prototype.outPPIB = function(port, bOut, addrFrom)
 {
     this.printMessageIO(port, bOut, addrFrom, "PPI_B");
     this.updatePPIB(bOut);
-    if (this.kbd) this.kbd.setEnabled((bOut & ChipSet.PPI_B.CLEAR_KBD)? false : true, (bOut & ChipSet.PPI_B.CLK_KBD)? true : false);
 };
 
 /**
@@ -4033,6 +4035,11 @@ ChipSet.prototype.outPPIB = function(port, bOut, addrFrom)
  * limit its updates to just those bits, and move any model-specific requirements back into the appropriate I/O
  * handlers (PPIB or 8042RWReg).  We'll see.
  *
+ * UPDATE: The WOLF3D keyboard interrupt handler toggles the CLEAR_KBD bit of port 0x61 (ie, it sets and then
+ * clears the bit) after reading the scan code from port 0x60; assuming that they use the same interrupt handler
+ * for all machine models (which I haven't verified), the clear implication is that updatePPIB() also needs to
+ * support CLEAR_KBD and CLK_KBD, so I've moved that code from outPPIB() to updatePPIB().
+ *
  * @this {ChipSet}
  * @param {number} bOut
  */
@@ -4041,6 +4048,7 @@ ChipSet.prototype.updatePPIB = function(bOut)
     var fNewSpeaker = !!(bOut & ChipSet.PPI_B.SPK_TIMER2);
     var fOldSpeaker = !!(this.bPPIB & ChipSet.PPI_B.SPK_TIMER2);
     this.bPPIB = bOut;
+    if (this.kbd) this.kbd.setEnabled(!(bOut & ChipSet.PPI_B.CLEAR_KBD), !!(bOut & ChipSet.PPI_B.CLK_KBD));
     if (fNewSpeaker != fOldSpeaker) {
         /*
          * Originally, this code didn't catch the "ERROR_BEEP" case @F000:EC34, which first turns both PPI_B.CLK_TIMER2 (0x01)
@@ -4490,7 +4498,6 @@ ChipSet.prototype.out8042InBuffCmd = function(port, bOut, addrFrom)
  */
 ChipSet.prototype.set8042CmdData = function(b)
 {
-    var bClockWasEnabled = !(this.b8042CmdData & ChipSet.KBC.DATA.CMD.NO_CLOCK);
     this.b8042CmdData = b;
     this.assert(ChipSet.KBC.DATA.CMD.SYS_FLAG === ChipSet.KBC.STATUS.SYS_FLAG);
     this.b8042Status = (this.b8042Status & ~ChipSet.KBC.STATUS.SYS_FLAG) | (b & ChipSet.KBC.DATA.CMD.SYS_FLAG);
@@ -4510,8 +4517,7 @@ ChipSet.prototype.set8042CmdData = function(b)
          * powered on, it performs the BAT, and then when the clock and data lines go high, the keyboard sends
          * a completion code (eg, 0xAA for success, or 0xFC or something else for failure).
          */
-        var bClockEnabled = !(b & ChipSet.KBC.DATA.CMD.NO_CLOCK);
-        this.kbd.setEnabled(!!(b & ChipSet.KBC.DATA.CMD.NO_INHIBIT), bClockEnabled);
+        this.kbd.setEnabled(!!(b & ChipSet.KBC.DATA.CMD.NO_INHIBIT), !(b & ChipSet.KBC.DATA.CMD.NO_CLOCK));
     }
 };
 
@@ -4528,8 +4534,8 @@ ChipSet.prototype.set8042CmdData = function(b)
  * version of Unix for PC AT machines) poll the status port only once, immediately giving up if no data is
  * available.
  *
- * TODO: Determine if we can/should invert the fNoDelay default (from false to true) and delay only in
- * specific cases; perhaps only the SELF_TEST command required a delay.
+ * TODO: Determine if we should invert the fNoDelay default (from false to true) and delay only in specific
+ * cases; ie, perhaps only the SELF_TEST command required a delay.
  *
  * @this {ChipSet}
  * @param {number} b
@@ -4546,7 +4552,7 @@ ChipSet.prototype.set8042OutBuff = function(b, fNoDelay)
             this.b8042Status |= ChipSet.KBC.STATUS.OUTBUFF_DELAY;
         }
         if (DEBUG && this.messageEnabled(Messages.KEYBOARD | Messages.PORT)) {
-            this.printMessage("set8042OutBuff(" + str.toHexByte(b) + ")", true);
+            this.printMessage("set8042OutBuff(" + str.toHexByte(b) + ',' + (fNoDelay? "no" : "") + "delay)", true);
         }
     }
 };
@@ -4657,6 +4663,9 @@ ChipSet.prototype.set8042OutPort = function(b)
  */
 ChipSet.prototype.notifyKbdData = function(b)
 {
+    if (DEBUG && this.messageEnabled(Messages.KEYBOARD | Messages.PORT)) {
+        this.printMessage("notifyKbdData(" + str.toHexByte(b) + ')', true);
+    }
     if (this.model < ChipSet.MODEL_5170) {
         /*
          * TODO: Should we be checking bPPI for PPI_B.CLK_KBD on these older machines, before calling setIRR()?

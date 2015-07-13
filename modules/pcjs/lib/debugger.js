@@ -5153,7 +5153,10 @@ if (DEBUGGER) {
                 case X86.OPCODE.GRP4W:
                     if (fCallStep) {
                         var w = this.getWord(dbgAddr) & X86.OPCODE.CALLMASK;
-                        this.fProcStep = ((w == X86.OPCODE.CALLW || w == X86.OPCODE.CALLFDW)? fProcStep : 0);
+                        if (w == X86.OPCODE.CALLW || w == X86.OPCODE.CALLFDW) {
+                            this.fProcStep = fProcStep;
+                            this.getInstruction(dbgAddr);       // advance dbgAddr past this variable-length CALL
+                        }
                     }
                     break;
                 case X86.OPCODE.REPZ:
