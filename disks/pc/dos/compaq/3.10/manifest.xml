@@ -9,10 +9,10 @@
 	<releaseDate/>
 	<machine href="/devices/pc/machine/5170/ega/1152kb/rev3/machine.xml"/>
 	<disk id="disk01" size="368640" chs="40:2:9" img="static/COMPAQ-DOS310-DISK1.img" href="/disks/pc/dos/compaq/3.10/COMPAQ-DOS310-DISK1.json" md5="a2a329b9d06e5bd425050a10e14e2f92" md5json="c212bb6bcd6a4c5853be2c390df66536">
-		<name>COMPAQ DOS 3.10 (1)</name>
+		<name>COMPAQ DOS 3.10 (Disk 1)</name>
 	</disk>
 	<disk id="disk02" size="368640" chs="40:2:9" img="static/COMPAQ-DOS310-DISK2.img" href="/disks/pc/dos/compaq/3.10/COMPAQ-DOS310-DISK2.json" md5="4f6e5ec142fbffc36ea600c262677580" md5json="0770c611514970520b6905223c246ee9">
-		<name>COMPAQ DOS 3.10 (2)</name>
+		<name>COMPAQ DOS 3.10 (Disk 2)</name>
 	</disk>
 	<disk id="disk03" size="1228800" chs="80:2:15" img="static/COMPAQ-DOS310-PERSONAL.img" href="/disks/pc/dos/compaq/3.10/COMPAQ-DOS310-PERSONAL.json" md5="df312165dc2303aab9417677a50df477" md5json="50ed5b7489569d11a9391287259eeda1">
 		<name>COMPAQ DOS 3.10 (Personal)</name>

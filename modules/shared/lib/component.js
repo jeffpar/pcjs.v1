@@ -78,7 +78,7 @@ if (typeof module !== 'undefined') {
  * @param {string} type
  * @param {Object} [parms]
  * @param {Object} [constructor]
- * @param {number} [bitsMessage]
+ * @param {number} [bitsMessage] selects message(s) that the component wants to enable (default is 0)
  */
 function Component(type, parms, constructor, bitsMessage)
 {
@@ -123,7 +123,7 @@ function Component(type, parms, constructor, bitsMessage)
     this.clearError();
     this.bindings = {};
     this.dbg = null;                    // by default, no connection to a Debugger
-    this.bitsMessage = bitsMessage || -1;
+    this.bitsMessage = bitsMessage || 0;
 
     Component.add(this);
 }
@@ -946,7 +946,7 @@ Component.prototype = {
                 bitsMessage = bitsMessage || this.bitsMessage;
             }
             var bitsEnabled = this.dbg.bitsMessage & bitsMessage;
-            return (bitsEnabled === bitsMessage || !!(bitsEnabled & this.dbg.bitsWarning));
+            return (!!bitsMessage && bitsEnabled === bitsMessage || !!(bitsEnabled & this.dbg.bitsWarning));
         }
         return false;
     },

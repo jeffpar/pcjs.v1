@@ -1014,6 +1014,7 @@ X86CPU.prototype.initProcessor = function()
 {
     this.PS_SET = X86.PS_SET_8086;
     this.PS_DIRECT = X86.PS_DIRECT_8086;
+    this.PS_CLEAR_RM = X86.PS.IOPL.MASK | X86.PS.NT;
 
     this.OPFLAG_NOINTR_8086 = X86.OPFLAG.NOINTR;
     this.nShiftCountMask = 0xff;            // on an 8086/8088, all shift counts are used as-is
@@ -1080,6 +1081,13 @@ X86CPU.prototype.initProcessor = function()
 
             if (I386 && this.model >= X86.MODEL_80386) {
                 var bOpcode;
+                /*
+                 * TODO: Determine if the Nested Task (PS.NT) flag should really be cleared in real-mode on an 80386
+                 * (we already know based on the OS/2 CPU test discussed in setPS() that it can't be set in real-mode
+                 * on an 80286); for now, we assume that it should remain clear on all CPUs, to avoid any unexpected
+                 * nested-task weirdness in real-mode.
+                 */
+                this.PS_CLEAR_RM = X86.PS.NT;
                 this.aOps[X86.OPCODE.FS] = X86.opFS;        // 0x64
                 this.aOps[X86.OPCODE.GS] = X86.opGS;        // 0x65
                 this.aOps[X86.OPCODE.OS] = X86.opOS;        // 0x66
@@ -2680,14 +2688,17 @@ X86CPU.prototype.setPS = function(regPS, cpl)
     /*
      * OS/2 1.0 discriminates between an 80286 and an 80386 based on whether an IRET in real-mode that
      * pops 0xF000 into the flags is able to set *any* of flag bits 12-15: if it can, then OS/2 declares
-     * the CPU an 80386.  Therefore, in real-mode, we must zero all incoming bits 12-15.
+     * the CPU an 80386.
      *
-     * This has the added benefit of relieving us from zeroing the effective IOPL (this.nIOPL) whenever
-     * we're in real-mode, since we're zeroing the incoming IOPL bits up front now.
+     * So, if the CPU is an 80286, we zero incoming bits 12-14 in real-mode (bit 15 is never allowed to
+     * be modified, so there's no need to mask it).  And if the CPU is an 80386, we zero only bit 14 (PS.NT),
+     * allowing the IOPL bits to change; however, that should not affect any real-mode operations, since
+     * segCS.cpl will always be zero, making the IOPL setting irrelevant.
+     *
+     * It's still an open question whether an 80386 should also clear the Nested Task (PS.NT) flag in
+     * real-mode; if not, then initProcessor() should set PS_CLEAR_RM to zero.
      */
-    if (!(this.regCR0 & X86.CR0.MSW.PE)) {
-        regPS &= ~(X86.PS.IOPL.MASK | X86.PS.NT | X86.PS.BIT15);
-    }
+    if (!(this.regCR0 & X86.CR0.MSW.PE)) regPS &= ~this.PS_CLEAR_RM;
 
     /*
      * There are some cases (eg, an IRET returning to a less privileged code segment) where the CPL

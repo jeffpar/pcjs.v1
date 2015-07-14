@@ -1285,8 +1285,8 @@ Card.ATC = {
         INDX:               0x10,       // ATC Mode Control Register
         GRAPHICS:           0x01,       // bit 0: set for graphics mode, clear for alphanumeric mode
         MONOEM:             0x02,       // bit 1: set for monochrome emulation mode, clear for color emulation
-        TEXTGRCC:           0x04,       // bit 2: set for line graphics in character codes 0xC0-0xDF, clear otherwise
-        TEXTBLINK:          0x08,       // bit 3: set for text blink attribute, clear for background intensity attribute
+        TEXT_9DOT:          0x04,       // bit 2: set for 9-dot replication in character codes 0xC0-0xDF
+        BLINK_ENABLE:       0x08,       // bit 3: set for text/graphics blink, clear for background intensity
         RESERVED:           0x10,       // bit 4: reserved
         PANCOMPAT:          0x20,       // bit 5: set for pixel-panning compatibility
         PELWIDTH:           0x40,       // bit 6: set for 256-color modes, clear for all other modes
@@ -3904,6 +3904,9 @@ Video.prototype.createFontColor = function(font, iColor, rgbColor, nDouble, offD
                      * This "bit" of logic takes care of those characters (0xC0-0xDF) whose 9th bit must mirror the 8th bit;
                      * in all other cases, any bit past the 8th bit is automatically zero.  It also takes care of embedding a solid
                      * row of bits whenever fUnderline is true.
+                     *
+                     * TODO: For EGA/VGA, replication of the 9th dot needs to be based on the TEXT_9DOT bit of the ATC.MODE
+                     * register, which is particularly important for user-defined fonts that do not want that bit replicated.
                      */
                     var bit = (fUnderline? 1 : (b & (0x80 >> (x >= 8 && iChar >= 0xC0 && iChar <= 0xDF? 7 : x))));
                     var xDst = (x << nDouble);
@@ -5100,7 +5103,13 @@ Video.prototype.updateScreenText = function(addrScreen, addrScreenLimit, iCell, 
     var dataBlink = 0;
     var dataDraw = (Video.ATTRS.DRAW_FGND << 8);
     var dataMask = 0xfffff;
-    if (this.cardActive.regMode & Card.MDA.MODE.BLINK_ENABLE) {
+
+    var fBlinkEnable = (this.cardActive.regMode & Card.MDA.MODE.BLINK_ENABLE);
+    if (this.nCard >= Video.CARD.EGA) {
+        fBlinkEnable = (this.cardActive.regATCData[Card.ATC.MODE.INDX] & Card.ATC.MODE.BLINK_ENABLE);
+    }
+
+    if (fBlinkEnable) {
         dataBlink = (Video.ATTRS.BGND_BLINK << 8);
         dataMask &= ~dataBlink;
         if (!(this.cBlinks & 0x2)) dataMask &= ~dataDraw;
@@ -5222,6 +5231,8 @@ Video.prototype.updateScreenGraphicsCGA = function(addrScreen, addrScreenLimit)
 
 /**
  * updateScreenGraphicsEGA(addrScreen, addrScreenLimit)
+ *
+ * TODO: Add support for blinking graphics (ATC.MODE.BLINK_ENABLE)
  *
  * @param addrScreen
  * @param addrScreenLimit
@@ -5345,6 +5356,8 @@ Video.prototype.updateScreenGraphicsEGA = function(addrScreen, addrScreenLimit)
  * planes, whereas this function takes care of just the 8bpp video modes introduced by the VGA, such as mode 0x13
  * (320x200x256), where each pixel's bits are contained within a single plane.  This is essentially all 256-color
  * modes (CHAIN4, "Mode X", etc), hence the hard-coded call to getCardColors(8).
+ *
+ * TODO: Add support for blinking graphics (ATC.MODE.BLINK_ENABLE)
  *
  * @param addrScreen
  * @param addrScreenLimit

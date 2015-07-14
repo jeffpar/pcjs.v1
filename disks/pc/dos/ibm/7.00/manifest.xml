@@ -22,9 +22,9 @@
 		<name>PC-DOS 7.00 (SETUP Disk 5)</name>
 	</disk>
 	<disk id="disk06" size="1228800" chs="80:2:15" img="static/PCDOS700-1200.img" href="/disks/pc/dos/ibm/7.00/PCDOS700-1200.json" md5="ea7df13867ae2d7838c0f620281aa295" md5json="039a2b79ad43d69bc9b82ba18ad6c10b">
-		<name>PC-DOS 7.00 (1.2Mb Disk)</name>
+		<name>PC-DOS 7.00 (1.2M Disk)</name>
 	</disk>
 	<disk id="disk07" size="1474560" chs="80:2:18" img="static/PCDOS700-1440.img" href="/disks/pc/dos/ibm/7.00/PCDOS700-1440.json" md5="72f453733c6d4a102fdad4366a7daf1f" md5json="fcbc9523367a18ee0efa0dccace722c2">
-		<name>PC-DOS 7.00 (1.44Mb Disk)</name>
+		<name>PC-DOS 7.00 (1.44M Disk)</name>
 	</disk>
 </manifest>

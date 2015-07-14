@@ -431,7 +431,8 @@ X86.BACKTRACK = {
 /*
  * These PS flags are always stored directly in regPS for the 8086/8088, hence the
  * "direct" designation; other processors must adjust these bits accordingly.  The final
- * adjusted value is stored in PS_DIRECT.
+ * adjusted value is stored in PS_DIRECT (ie, 80286 and up also include PS.IOPL.MASK and
+ * PS.NT in PS_DIRECT).
  */
 X86.PS_DIRECT_8086 = (X86.PS.TF | X86.PS.IF | X86.PS.DF);
 

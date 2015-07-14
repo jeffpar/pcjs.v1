@@ -400,7 +400,7 @@ CompaqController.readByte = function readCompaqControllerByte(off, addr)
         b = (off & 0x1)? (this.controller.wRAMSetup >> 8) : (this.controller.wRAMSetup & 0xff);
     }
     if (DEBUG) {
-        this.controller.ram.printMessage("CompaqController.readByte(" + str.toHexWord(off) + ") returned " + str.toHexByte(b), true, true);
+        this.controller.ram.printMessage("CompaqController.readByte(" + str.toHexWord(off) + ") returned " + str.toHexByte(b), 0, true);
         if (MAXDEBUG && DEBUGGER && off >= 0x2) this.dbg.stopCPU();
     }
     return b;
@@ -459,7 +459,7 @@ CompaqController.writeByte = function writeCompaqControllerByte(off, b, addr)
      * All bits in 0x80C00001 and 0x80C00003 are reserved, so we can simply ignore those writes.
      */
     if (DEBUG) {
-        this.controller.ram.printMessage("CompaqController.writeByte(" + str.toHexWord(off) + "," + str.toHexByte(b) + ")", true, true);
+        this.controller.ram.printMessage("CompaqController.writeByte(" + str.toHexWord(off) + "," + str.toHexByte(b) + ")", 0, true);
     }
 };
 

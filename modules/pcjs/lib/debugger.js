@@ -2279,7 +2279,7 @@ if (DEBUGGER) {
             /*
              * For purposes of display only, rewind addr to the address of the responsible "INT n" instruction; we
              * know it's the two-byte "INT n" instruction because that's the only opcode handler that calls checkIntNotify()
-             * at the moment.  If that changes, then this will have to change as well.
+             * at the moment.
              */
             addr -= 2;
             this.message("INT " + str.toHexByte(nInt) + ": AH=" + str.toHexByte(AH) + " @" + this.hexOffset(addr - this.cpu.segCS.base, this.cpu.getCS()) + sFunc);
