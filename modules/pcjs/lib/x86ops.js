@@ -1347,7 +1347,6 @@ X86.opFS = function FS()
     this.opFlags |= X86.OPFLAG.SEG | X86.OPFLAG.NOINTR;
     this.segData = this.segStack = this.segFS;
     this.nStepCycles -= this.cycleCounts.nOpCyclesPrefix;
-    this.stopCPU();
 };
 
 /**
@@ -1364,7 +1363,6 @@ X86.opGS = function GS()
     this.opFlags |= X86.OPFLAG.SEG | X86.OPFLAG.NOINTR;
     this.segData = this.segStack = this.segGS;
     this.nStepCycles -= this.cycleCounts.nOpCyclesPrefix;
-    this.stopCPU();
 };
 
 /**
@@ -1475,7 +1473,7 @@ X86.opINSb = function INSb()
     }
 
     if (nReps--) {
-        var b = this.bus.checkPortInputNotify(this.regEDX, this.regLIP - nDelta - 1);
+        var b = this.bus.checkPortInputNotify(this.regEDX & 0xffff, this.regLIP - nDelta - 1);
         if (BACKTRACK) this.backTrack.btiMemLo = this.backTrack.btiIO;
         this.setSOByte(this.segES, this.regEDI & this.addrMask, b);
         this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + ((this.regPS & X86.PS.DF)? -1 : 1)) & this.addrMask);
@@ -1524,7 +1522,7 @@ X86.opINSw = function INSw()
         var addrFrom = this.regLIP - nDelta - 1;
         var w = 0, shift = 0;
         for (var n = 0; n < this.dataSize; n++) {
-            w |= this.bus.checkPortInputNotify(this.regEDX, addrFrom) << shift;
+            w |= this.bus.checkPortInputNotify(this.regEDX & 0xffff, addrFrom) << shift;
             shift += 8;
             if (BACKTRACK) {
                 if (!n) {
@@ -1581,7 +1579,7 @@ X86.opOUTSb = function OUTSb()
         this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + ((this.regPS & X86.PS.DF)? -1 : 1)) & this.addrMask);
         this.nStepCycles -= nCycles;
         if (BACKTRACK) this.backTrack.btiIO = this.backTrack.btiMemLo;
-        this.bus.checkPortOutputNotify(this.regEDX, b, this.regLIP - nDelta - 1);
+        this.bus.checkPortOutputNotify(this.regEDX & 0xffff, b, this.regLIP - nDelta - 1);
         this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
         if (nReps) {
             if (BUGS_8086) {
@@ -1634,7 +1632,7 @@ X86.opOUTSw = function OUTSw()
                     this.backTrack.btiIO = this.backTrack.btiMemHi;
                 }
             }
-            this.bus.checkPortOutputNotify(this.regEDX, (w >> shift) & 0xff, addrFrom);
+            this.bus.checkPortOutputNotify(this.regEDX & 0xffff, (w >> shift) & 0xff, addrFrom);
             shift += 8;
         }
         this.regECX = (this.regECX & ~this.addrMask) | ((this.regECX - nDelta) & this.addrMask);
@@ -3623,7 +3621,12 @@ X86.opINw = function INw()
     var port = this.getIPByte();
     this.regEAX = this.bus.checkPortInputNotify(port, this.regLIP - 2);
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiIO;
-    this.regEAX |= (this.bus.checkPortInputNotify((port + 1) & 0xffff, this.regLIP - 2) << 8);
+    /*
+     * TODO: Specs are clear that bits 8-15 of the port address for the FIRST byte of I/O will be zero, but
+     * what about the SECOND byte?  If the port is 0xff, will the SECOND byte of I/O use port 0x00 or 0x100?
+     * Our code (below) assumes the latter.  Mask (port + 1) with 0xff if it turns out the former is true.
+     */
+    this.regEAX |= (this.bus.checkPortInputNotify(port + 1, this.regLIP - 2) << 8);
     if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiIO;
     this.nStepCycles -= this.cycleCounts.nOpCyclesInP;
 };
@@ -3649,7 +3652,12 @@ X86.opOUTw = function OUTw()
 {
     var port = this.getIPByte();
     this.bus.checkPortOutputNotify(port, this.regEAX & 0xff, this.regLIP - 2);
-    this.bus.checkPortOutputNotify((port + 1) & 0xffff, this.regEAX >> 8, this.regLIP - 2);
+    /*
+     * TODO: Specs are clear that bits 8-15 of the port address for the FIRST byte of I/O will be zero, but
+     * what about the SECOND byte?  If the port is 0xff, will the SECOND byte of I/O use port 0x00 or 0x100?
+     * Our code (below) assumes the latter.  Mask (port + 1) with 0xff if it turns out the former is true.
+     */
+    this.bus.checkPortOutputNotify(port + 1, this.regEAX >> 8, this.regLIP - 2);
     this.nStepCycles -= this.cycleCounts.nOpCyclesOutP;
 };
 
@@ -3711,7 +3719,7 @@ X86.opJMPs = function JMPs()
  */
 X86.opINDXb = function INDXb()
 {
-    this.regEAX = (this.regEAX & ~0xff) | this.bus.checkPortInputNotify(this.regEDX, this.regLIP - 1);
+    this.regEAX = (this.regEAX & ~0xff) | this.bus.checkPortInputNotify(this.regEDX & 0xffff, this.regLIP - 1);
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiIO;
     this.nStepCycles -= this.cycleCounts.nOpCyclesInDX;
 };
@@ -3723,7 +3731,7 @@ X86.opINDXb = function INDXb()
  */
 X86.opINDXw = function INDXw()
 {
-    this.regEAX = this.bus.checkPortInputNotify(this.regEDX, this.regLIP - 1);
+    this.regEAX = this.bus.checkPortInputNotify(this.regEDX & 0xffff, this.regLIP - 1);
     if (BACKTRACK) this.backTrack.btiAL = this.backTrack.btiIO;
     this.regEAX |= (this.bus.checkPortInputNotify((this.regEDX + 1) & 0xffff, this.regLIP - 1) << 8);
     if (BACKTRACK) this.backTrack.btiAH = this.backTrack.btiIO;
@@ -3738,7 +3746,7 @@ X86.opINDXw = function INDXw()
 X86.opOUTDXb = function OUTDXb()
 {
     if (BACKTRACK) this.backTrack.btiIO = this.backTrack.btiAL;
-    this.bus.checkPortOutputNotify(this.regEDX, this.regEAX & 0xff, this.regLIP - 1);
+    this.bus.checkPortOutputNotify(this.regEDX & 0xffff, this.regEAX & 0xff, this.regLIP - 1);
     this.nStepCycles -= this.cycleCounts.nOpCyclesOutDX;
 };
 
@@ -3750,7 +3758,7 @@ X86.opOUTDXb = function OUTDXb()
 X86.opOUTDXw = function OUTDXw()
 {
     if (BACKTRACK) this.backTrack.btiIO = this.backTrack.btiAL;
-    this.bus.checkPortOutputNotify(this.regEDX, this.regEAX & 0xff, this.regLIP - 1);
+    this.bus.checkPortOutputNotify(this.regEDX & 0xffff, this.regEAX & 0xff, this.regLIP - 1);
     if (BACKTRACK) this.backTrack.btiIO = this.backTrack.btiAH;
     this.bus.checkPortOutputNotify((this.regEDX + 1) & 0xffff, this.regEAX >> 8, this.regLIP - 1);
     this.nStepCycles -= this.cycleCounts.nOpCyclesOutDX;

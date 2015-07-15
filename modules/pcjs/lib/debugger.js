@@ -1241,13 +1241,13 @@ if (DEBUGGER) {
             0x3A: "remove subdirectory $%DS:%DX",
             0x3B: "set current directory $%DS:%DX",
             0x3C: "create or truncate file $%DS:%DX with attributes %CX",
-            0x3D: "open existing file $%DS:%DX with mode %AL",
+            0x3D: "open file $%DS:%DX with mode %AL",
             0x3E: "close file %BX",
             0x3F: "read %CX bytes from file %BX into buffer %DS:%DX",
             0x40: "write %CX bytes to file %BX from buffer %DS:%DX",
             0x41: "delete file $%DS:%DX",
             0x42: "set position %CX:%DX of file %BX relative to %AL",
-            0x43: "get(0)/set(1) attributes %CX of file %DS:%DX (%AL)",
+            0x43: "get(0)/set(1) attributes %CX of file $%DS:%DX (%AL)",
             0x44: "get device information (IOCTL)",
             0x45: "duplicate file handle %BX",
             0x46: "force file handle %CX to duplicate file handle %BX",
@@ -1267,12 +1267,16 @@ if (DEBUGGER) {
             0x54: "get verify flag (AL)",
             0x55: "create child PSP at segment %DX",
             0x56: "rename file $%DS:%DX to $%ES:%DI",
-            0x57: "get(0)/set(1) file date %DX and time %CX (%AL)",
+            0x57: "get(0)/set(1) file %BX date %DX and time %CX (%AL)",
             0x58: "get(0)/set(1) memory allocation strategy (%AL)",                 // DOS 2.11+
             0x59: "get extended error information",                                 // DOS 3.00+
             0x5A: "create temporary file $%DS:%DX with attributes %CX",             // DOS 3.00+
             0x5B: "create file $%DS:%DX with attributes %CX",                       // DOS 3.00+ (doesn't truncate existing files like 0x3C)
-            0x5C: "lock(0)/unlock(1) file %BX region %CX:%DX length %SI:%DI (%AL)"  // DOS 3.00+
+            0x5C: "lock(0)/unlock(1) file %BX region %CX:%DX length %SI:%DI (%AL)", // DOS 3.00+
+            0x5D: "critical error information (%AL)",                               // DOS 3.00+ (undocumented)
+            0x60: "get fully-qualified filename from $%DS:%SI",                     // DOS 3.00+ (undocumented)
+            0x63: "get lead byte table (%AL)",                                      // DOS 2.25 and 3.20+
+            0x6C: "extended open file $%DS:%SI"                                     // DOS 4.00+
         }
     };
 
@@ -2226,7 +2230,7 @@ if (DEBUGGER) {
             sChar = s.substr(i+1, 2);
             b = str.parseInt(sChar, 16);
             if (b != null && b >= 32 && b < 128) {
-                sReplace = '#' + sChar + " '" + String.fromCharCode(b) + "'";
+                sReplace = sChar + " '" + String.fromCharCode(b) + "'";
                 s = s.replace('#' + sChar, sReplace);
                 i += sReplace.length;
                 continue;
@@ -2833,10 +2837,10 @@ if (DEBUGGER) {
                 return true;
             }
             /*
-             * Halt whenever ring 3 code is running with interrupts disabled, because that's likely an
-             * error (TODO: we should also check the IOPL, too, because if IOPL is 3, then this is OK).
+             * Halt if running with interrupts disabled and IOPL < CPL, because that's likely an error
              */
-            if (this.cpu.segCS.cpl == 3 && !(this.cpu.regPS & X86.PS.IF)) {
+            if (!(this.cpu.regPS & X86.PS.IF) && this.cpu.nIOPL < this.cpu.segCS.cpl) {
+                this.printMessage("interrupts disabled at IOPL " + this.cpu.nIOPL + " and CPL " + this.cpu.segCS.cpl, true);
                 return true;
             }
         }
