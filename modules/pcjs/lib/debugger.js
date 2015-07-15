@@ -1159,25 +1159,25 @@ if (DEBUGGER) {
         0x13: {
             0x00: "disk reset",
             0x01: "get status",
-            0x02: "read drive DL (CH:DH:CL,AL) into ES:BX",
-            0x03: "write drive DL (CH:DH:CL,AL) from ES:BX",
-            0x04: "verify drive DL (CH:DH:CL,AL)",
-            0x05: "format drive DL using ES:BX",
-            0x08: "read drive DL parameters into ES:DI",
-            0x15: "get drive DL DASD type",
-            0x16: "get drive DL change line status",
-            0x17: "set drive DL DASD type",
-            0x18: "set drive DL media type"
+            0x02: "read drive %DL (%CH:%DH:%CL,%AL) into %ES:%BX",
+            0x03: "write drive %DL (%CH:%DH:%CL,%AL) from %ES:%BX",
+            0x04: "verify drive %DL (%CH:%DH:%CL,%AL)",
+            0x05: "format drive %DL using %ES:%BX",
+            0x08: "read drive %DL parameters into %ES:%DI",
+            0x15: "get drive %DL DASD type",
+            0x16: "get drive %DL change line status",
+            0x17: "set drive %DL DASD type",
+            0x18: "set drive %DL media type"
         },
         0x15: {
             0x80: "open device",
             0x81: "close device",
             0x82: "program termination",
-            0x83: "wait CX:DXus for event",
+            0x83: "wait %CX:%DXus for event",
             0x84: "joystick support",
             0x85: "SYSREQ pressed",
-            0x86: "wait CX:DXus",
-            0x87: "move block (CX words)",
+            0x86: "wait %CX:%DXus",
+            0x87: "move block (%CX words)",
             0x88: "get extended memory size",
             0x89: "processor to virtual mode",
             0x90: "device busy loop",
@@ -1185,94 +1185,94 @@ if (DEBUGGER) {
         },
         0x21: {
             0x00: "terminate program",
-            0x01: "read character (al) from stdin with echo",
-            0x02: "write character DL to stdout",
-            0x03: "read character (al) from stdaux",                            // eg, COM1
-            0x04: "write character DL to stdaux",                               // eg, COM1
-            0x05: "write character DL to stdprn",                               // eg, LPT1
-            0x06: "direct console output (input if DL=FF)",
+            0x01: "read character (AL) from stdin with echo",
+            0x02: "write character #%DL to stdout",
+            0x03: "read character (AL) from stdaux",                                // eg, COM1
+            0x04: "write character #%DL to stdaux",                                 // eg, COM1
+            0x05: "write character #%DL to stdprn",                                 // eg, LPT1
+            0x06: "direct console output (input if %DL=FF)",
             0x07: "direct console input without echo",
-            0x08: "read character (al) from stdin without echo",
-            0x09: "write $-terminated string DS:DX to stdout",
-            0x0A: "buffered input (ds:dx)",                                     // byte 0 is maximum chars, byte 1 is number of previous characters, byte 2 is number of characters read
+            0x08: "read character (AL) from stdin without echo",
+            0x09: "write string $%DS:%DX to stdout",
+            0x0A: "buffered input (DS:DX)",                                         // byte 0 is maximum chars, byte 1 is number of previous characters, byte 2 is number of characters read
             0x0B: "get stdin status",
-            0x0C: "flush buffer and read stdin",                                // AL is a function # (0x01, 0x06, 0x07, 0x08, or 0x0A)
+            0x0C: "flush buffer and read stdin",                                    // AL is a function # (0x01, 0x06, 0x07, 0x08, or 0x0A)
             0x0D: "disk reset",
-            0x0E: "select default drive DL",                                    // returns # of available drives in AL
-            0x0F: "open file using fcb DS:DX",                                  // DS:DX -> unopened File Control Block
-            0x10: "close file using fcb DS:DX",
-            0x11: "find first matching file using fcb DS:DX",
-            0x12: "find next matching file using fcb DS:DX",
-            0x13: "delete file using fcb DS:DX",
-            0x14: "sequential read from file using fcb DS:DX",
-            0x15: "sequential write to file using fcb DS:DX",
-            0x16: "create or truncate file using fcb DS:DX",
-            0x17: "rename file using fcb DS:DX",
-            0x19: "get current default drive (al)",
-            0x1A: "set disk transfer area (dta) DS:DX",
+            0x0E: "select default drive %DL",                                       // returns # of available drives in AL
+            0x0F: "open file using FCB ^%DS:%DX",                                   // DS:DX -> unopened File Control Block
+            0x10: "close file using FCB ^%DS:%DX",
+            0x11: "find first matching file using FCB ^%DS:%DX",
+            0x12: "find next matching file using FCB ^%DS:%DX",
+            0x13: "delete file using FCB ^%DS:%DX",
+            0x14: "sequential read from file using FCB ^%DS:%DX",
+            0x15: "sequential write to file using FCB ^%DS:%DX",
+            0x16: "create or truncate file using FCB ^%DS:%DX",
+            0x17: "rename file using FCB ^%DS:%DX",
+            0x19: "get current default drive (AL)",
+            0x1A: "set disk transfer area (DTA=%DS:%DX)",
             0x1B: "get allocation information for default drive",
-            0x1C: "get allocation information for specific drive DL",
+            0x1C: "get allocation information for specific drive %DL",
             0x1F: "get drive parameter block for default drive",
-            0x21: "read random record from file using fcb DS:DX",
-            0x22: "write random record to file using fcb DS:DX",
-            0x23: "get file size using fcb DS:DX",
-            0x24: "set random record number for fcb DS:DX",
-            0x25: "set address DS:DX of interrupt vector AL",
-            0x26: "create new program segment prefix (psp) at segment DX",
-            0x27: "random block read from file using fcb DS:DX",
-            0x28: "random block write to file using fcb DS:DX",
-            0x29: "parse filename DS:SI into fcb ES:DI using AL",
-            0x2A: "get system date (year=cx, mon=dh, day=dl)",
-            0x2B: "set system date (year=CX, mon=DH, day=DL)",
-            0x2C: "get system time (hour=ch, min=cl, sec=dh, 100ths=dl)",
-            0x2D: "set system time (hour=CH, min=CL, sec=DH, 100ths=DL)",
-            0x2E: "set verify flag AL",
-            0x2F: "get disk transfer area address (es:bx)",                     // DOS 2.00+
-            0x30: "get DOS version (al=major, ah=minor)",
+            0x21: "read random record from file using FCB ^%DS:%DX",
+            0x22: "write random record to file using FCB ^%DS:%DX",
+            0x23: "get file size using FCB ^%DS:%DX",
+            0x24: "set random record number for FCB ^%DS:%DX",
+            0x25: "set address %DS:%DX of interrupt vector %AL",
+            0x26: "create new PSP at segment %DX",
+            0x27: "random block read from file using FCB ^%DS:%DX",
+            0x28: "random block write to file using FCB ^%DS:%DX",
+            0x29: "parse filename $%DS:%SI into FCB %ES:%DI using %AL",
+            0x2A: "get system date (year=CX, mon=DH, day=DL)",
+            0x2B: "set system date (year=%CX, mon=%DH, day=%DL)",
+            0x2C: "get system time (hour=CH, min=CL, sec=DH, 100ths=DL)",
+            0x2D: "set system time (hour=%CH, min=%CL, sec=%DH, 100ths=%DL)",
+            0x2E: "set verify flag %AL",
+            0x2F: "get disk transfer area (DTA=ES:BX)",                             // DOS 2.00+
+            0x30: "get DOS version (AL=major, AH=minor)",
             0x31: "terminate and stay resident",
-            0x32: "get drive parameter block (dpb=ds:bx) for drive DL",
+            0x32: "get drive parameter block (DPB=DS:BX) for drive %DL",
             0x33: "extended break check",
-            0x34: "get address (es:bx) of InDOS flag",
-            0x35: "get address (es:bx) of interrupt vector AL",
-            0x36: "get free disk space of drive DL",
-            0x37: "get(0)/set(1) switch character DL (AL)",
+            0x34: "get address (ES:BX) of InDOS flag",
+            0x35: "get address (ES:BX) of interrupt vector %AL",
+            0x36: "get free disk space of drive %DL",
+            0x37: "get(0)/set(1) switch character %DL (%AL)",
             0x38: "get country-specific information",
-            0x39: "create subdirectory DS:DX",
-            0x3A: "remove subdirectory DS:DX",
-            0x3B: "set current directory DS:DX",
-            0x3C: "create or truncate file DS:DX with attributes CX",
-            0x3D: "open existing file DS:DX with mode AL",
-            0x3E: "close file BX",
-            0x3F: "read CX bytes from file BX into buffer DS:DX",
-            0x40: "write CX bytes to file BX from buffer DS:DX",
-            0x41: "delete file DS:DX",
-            0x42: "set position CX:DX of file BX relative to AL",
-            0x43: "get(0)/set(1) attributes CX of file DS:DX (AL)",
+            0x39: "create subdirectory $%DS:%DX",
+            0x3A: "remove subdirectory $%DS:%DX",
+            0x3B: "set current directory $%DS:%DX",
+            0x3C: "create or truncate file $%DS:%DX with attributes %CX",
+            0x3D: "open existing file $%DS:%DX with mode %AL",
+            0x3E: "close file %BX",
+            0x3F: "read %CX bytes from file %BX into buffer %DS:%DX",
+            0x40: "write %CX bytes to file %BX from buffer %DS:%DX",
+            0x41: "delete file $%DS:%DX",
+            0x42: "set position %CX:%DX of file %BX relative to %AL",
+            0x43: "get(0)/set(1) attributes %CX of file %DS:%DX (%AL)",
             0x44: "get device information (IOCTL)",
-            0x45: "duplicate file handle BX",
-            0x46: "force file handle CX to duplicate file handle BX",
-            0x47: "get current directory (ds:si) for drive DL",
-            0x48: "allocate memory segment with BX paragraphs",
-            0x49: "free memory segment ES",
-            0x4A: "resize memory segment ES to BX paragraphs",
-            0x4B: "load program DS:DX using parameter block ES:BX",
-            0x4C: "terminate with return code AL",
-            0x4D: "get return code (al)",
-            0x4E: "find first matching file DS:DX with attributes CX",
+            0x45: "duplicate file handle %BX",
+            0x46: "force file handle %CX to duplicate file handle %BX",
+            0x47: "get current directory (DS:SI) for drive %DL",
+            0x48: "allocate memory segment with %BX paragraphs",
+            0x49: "free memory segment %ES",
+            0x4A: "resize memory segment %ES to %BX paragraphs",
+            0x4B: "load program $%DS:%DX using parameter block %ES:%BX",
+            0x4C: "terminate with return code %AL",
+            0x4D: "get return code (AL)",
+            0x4E: "find first matching file $%DS:%DX with attributes %CX",
             0x4F: "find next matching file",
-            0x50: "set current psp BX",
-            0x51: "get current psp (bx)",
-            0x52: "get system variables (es:bx)",
-            0x53: "translate bpb DS:SI to dpb (es:bp)",
-            0x54: "get verify flag (al)",
-            0x55: "create child psp at segment DX",
-            0x56: "rename file DS:DX to name ES:DI",
-            0x57: "get(0)/set(1) file date DX and time CX (AL)",
-            0x58: "get(0)/set(1) memory allocation strategy (AL)",              // DOS 2.11+
-            0x59: "get extended error information",                             // DOS 3.00+
-            0x5A: "create temporary file DS:DX with attributes CX",             // DOS 3.00+
-            0x5B: "create file DS:DX with attributes CX",                       // DOS 3.00+ (doesn't truncate existing files like 0x3C)
-            0x5C: "lock(0)/unlock(1) file BX region CX:DX length SI:DI (AL)"    // DOS 3.00+
+            0x50: "set current PSP %BX",
+            0x51: "get current PSP (bx)",
+            0x52: "get system variables (ES:BX)",
+            0x53: "translate BPB %DS:%SI to DPB (ES:BP)",
+            0x54: "get verify flag (AL)",
+            0x55: "create child PSP at segment %DX",
+            0x56: "rename file $%DS:%DX to $%ES:%DI",
+            0x57: "get(0)/set(1) file date %DX and time %CX (%AL)",
+            0x58: "get(0)/set(1) memory allocation strategy (%AL)",                 // DOS 2.11+
+            0x59: "get extended error information",                                 // DOS 3.00+
+            0x5A: "create temporary file $%DS:%DX with attributes %CX",             // DOS 3.00+
+            0x5B: "create file $%DS:%DX with attributes %CX",                       // DOS 3.00+ (doesn't truncate existing files like 0x3C)
+            0x5C: "lock(0)/unlock(1) file %BX region %CX:%DX length %SI:%DI (%AL)"  // DOS 3.00+
         }
     };
 
@@ -1672,7 +1672,7 @@ if (DEBUGGER) {
      *
      * @this {Debugger}
      * @param {{DbgAddr}} dbgAddr
-     * @param {number|undefined} inc contains value to increment dbgAddr by (default is 1)
+     * @param {number} [inc] contains value to increment dbgAddr by (default is 1)
      */
     Debugger.prototype.incAddr = function(dbgAddr, inc)
     {
@@ -1716,25 +1716,27 @@ if (DEBUGGER) {
     };
 
     /**
-     * dumpSZ(dbgAddr, cchMax)
+     * getSZ(dbgAddr, cchMax)
      *
-     * Dump helper for zero-terminated strings.
+     * Get zero-terminated (aka "ASCIIZ") string from dbgAddr.  It also stops at the first '$', in case this is
+     * a '$'-terminated string -- mainly because I'm lazy and didn't feel like writing a separate get() function.
+     * Yes, a zero-terminated string containing a '$' will be prematurely terminated, and no, I don't care.
      *
      * @this {Debugger}
      * @param {{DbgAddr}} dbgAddr
-     * @param {number} [cchMax]
+     * @param {number} [cchMax] (default is 256)
      * @return {string} (and dbgAddr advanced past the terminating zero)
      */
-    Debugger.prototype.dumpSZ = function(dbgAddr, cchMax)
+    Debugger.prototype.getSZ = function(dbgAddr, cchMax)
     {
-        var sChars = "";
+        var s = "";
         cchMax = cchMax || 256;
-        while (sChars.length < cchMax) {
+        while (s.length < cchMax) {
             var b = this.getByte(dbgAddr, 1);
-            if (!b) break;
-            sChars += (b >= 32 && b < 128? String.fromCharCode(b) : ".");
+            if (!b || b == 0x24) break;
+            s += (b >= 32 && b < 128? String.fromCharCode(b) : ".");
         }
-        return sChars;
+        return s;
     };
 
     /**
@@ -1765,7 +1767,7 @@ if (DEBUGGER) {
             var wPID = this.getShort(dbgAddr, 2);
             var wParas = this.getShort(dbgAddr, 5);
             if (bSig != 0x4D && bSig != 0x5A) break;
-            this.println(this.hexOffset(0, sel) + ": '" + String.fromCharCode(bSig) + "' PID=" + str.toHexWord(wPID) + " LEN=" + str.toHexWord(wParas) + ' "' + this.dumpSZ(dbgAddr, 8) + '"');
+            this.println(this.hexOffset(0, sel) + ": '" + String.fromCharCode(bSig) + "' PID=" + str.toHexWord(wPID) + " LEN=" + str.toHexWord(wParas) + ' "' + this.getSZ(dbgAddr, 8) + '"');
             sel += 1 + wParas;
         }
     };
@@ -2048,10 +2050,14 @@ if (DEBUGGER) {
      *
      * @this {Debugger}
      * @param {string} sReg
-     * @return {number}
+     * @param {number} [off] optional offset into sReg
+     * @return {number} register index, or -1 if not found
      */
-    Debugger.prototype.getRegIndex = function(sReg) {
-        return usr.indexOf(Debugger.REGS, sReg.toUpperCase());
+    Debugger.prototype.getRegIndex = function(sReg, off) {
+        off = off || 0;
+        var i = usr.indexOf(Debugger.REGS, sReg.substr(off, 2).toUpperCase());
+        if (i < 0 && sReg.length > 2) i = usr.indexOf(Debugger.REGS, sReg.substr(off, 3).toUpperCase());
+        return i;
     };
 
     /**
@@ -2200,11 +2206,55 @@ if (DEBUGGER) {
      * @return {string}
      */
     Debugger.prototype.replaceRegs = function(s) {
-        for (var iReg = 0; iReg < Debugger.REGS.length; iReg++) {
-            var sReg = Debugger.REGS[iReg];
-            if (s.indexOf(sReg) >= 0) {
-                s = str.replaceAll(sReg, this.getRegValue(iReg), s);
+        /*
+         * Replace every %XX (or %XXX), where XX (or XXX) is a register, with the register's value.
+         */
+        var i = 0;
+        var b, sChar, sAddr, dbgAddr, sReplace;
+        while ((i = s.indexOf('%', i)) >= 0) {
+            var iReg = this.getRegIndex(s, i+1);
+            if (iReg >= 0) {
+                s = s.replace('%' + Debugger.REGS[iReg], this.getRegValue(iReg));
             }
+            i++;
+        }
+        /*
+         * Replace every #XX, where XX is a hex byte value, with the corresponding ASCII character (if printable).
+         */
+        i = 0;
+        while ((i = s.indexOf('#', i)) >= 0) {
+            sChar = s.substr(i+1, 2);
+            b = str.parseInt(sChar, 16);
+            if (b != null && b >= 32 && b < 128) {
+                sReplace = '#' + sChar + " '" + String.fromCharCode(b) + "'";
+                s = s.replace('#' + sChar, sReplace);
+                i += sReplace.length;
+                continue;
+            }
+            i++;
+        }
+        /*
+         * Replace every $XXXX:XXXX, where XXXX:XXXX is a segmented address, with the zero-terminated string at that address.
+         */
+        i = 0;
+        while ((i = s.indexOf('$', i)) >= 0) {
+            sAddr = s.substr(i+1, 9);
+            dbgAddr = this.parseAddr(sAddr);
+            sReplace = sAddr + ' "' + this.getSZ(dbgAddr) + '"';
+            s = s.replace('$' + sAddr, sReplace);
+            i += sReplace.length;
+        }
+        /*
+         * Replace every ^XXXX:XXXX, where XXXX:XXXX is a segmented address, with the FCB filename stored at that address.
+         */
+        i = 0;
+        while ((i = s.indexOf('^', i)) >= 0) {
+            sAddr = s.substr(i+1, 9);
+            dbgAddr = this.parseAddr(sAddr);
+            this.incAddr(dbgAddr);
+            sReplace = sAddr + ' "' + this.getSZ(dbgAddr, 11) + '"';
+            s = s.replace('^' + sAddr, sReplace);
+            i += sReplace.length;
         }
         return s;
     };
@@ -2277,9 +2327,9 @@ if (DEBUGGER) {
             var sFunc = (aFuncs && aFuncs[AH]) || "";
             if (sFunc) sFunc = ' ' + this.replaceRegs(sFunc);
             /*
-             * For purposes of display only, rewind addr to the address of the responsible "INT n" instruction; we
-             * know it's the two-byte "INT n" instruction because that's the only opcode handler that calls checkIntNotify()
-             * at the moment.
+             * For display purposes only, rewind addr to the address of the responsible "INT n" instruction;
+             * we know it's the two-byte "INT n" instruction because that's the only opcode handler that calls
+             * checkIntNotify() at the moment.
              */
             addr -= 2;
             this.message("INT " + str.toHexByte(nInt) + ": AH=" + str.toHexByte(AH) + " @" + this.hexOffset(addr - this.cpu.segCS.base, this.cpu.getCS()) + sFunc);
@@ -3737,13 +3787,13 @@ if (DEBUGGER) {
      *
      * @this {Debugger}
      * @param {string|undefined} sAddr
-     * @param {number|undefined} type is the address segment type, in case sAddr doesn't specify a segment
+     * @param {number|undefined} [type] is the address segment type, in case sAddr doesn't specify a segment
      * @return {{DbgAddr}}
      */
     Debugger.prototype.parseAddr = function(sAddr, type)
     {
         var dbgAddr;
-        var dbgAddrNext = (type == Debugger.ADDR_DATA? this.dbgAddrNextData : this.dbgAddrNextCode);
+        var dbgAddrNext = (type === Debugger.ADDR_CODE? this.dbgAddrNextCode : this.dbgAddrNextData);
         var off = dbgAddrNext.off, sel = dbgAddrNext.sel, addr = dbgAddrNext.addr;
 
         if (sAddr !== undefined) {

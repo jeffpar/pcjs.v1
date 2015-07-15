@@ -1256,7 +1256,7 @@ X86.fnIRET = function IRET()
     if (DEBUG) this.printMessage(" returning to " + str.toHex(newCS, 4) + ':' + str.toHex(newIP, this.dataSize << 1), this.bitsMessage, true);
     if (this.setCSIP(newIP, newCS, false) != null) {
         this.setPS(newPS, cpl);
-        if (this.cIntReturn) this.checkIntReturn(this.regLIP);
+        if (MAXDEBUG && this.cIntReturn) this.checkIntReturn(this.regLIP);
     }
 };
 
@@ -1290,7 +1290,7 @@ X86.fnJMPFdw = function JMPFdw(dst, src)
         return X86.fnGRPUndefined.call(this, dst, src);
     }
     this.setCSIP(dst, this.getShort(this.regEA + this.dataSize));
-    if (this.cIntReturn) this.checkIntReturn(this.regLIP);
+    if (MAXDEBUG && this.cIntReturn) this.checkIntReturn(this.regLIP);
     this.nStepCycles -= this.cycleCounts.nOpCyclesJmpDM;
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -2169,7 +2169,7 @@ X86.fnRETF = function RETF(n)
             this.segES.load(0);
         }
     }
-    if (n == 2 && this.cIntReturn) this.checkIntReturn(this.regLIP);
+    if (MAXDEBUG && n == 2 && this.cIntReturn) this.checkIntReturn(this.regLIP);
 };
 
 /**

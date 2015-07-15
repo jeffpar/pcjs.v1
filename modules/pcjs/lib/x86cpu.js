@@ -1523,11 +1523,16 @@ X86CPU.prototype.checkIntNotify = function(nInt)
         }
     }
     /*
-     * The enabling of INT messages is one of the criteria that's also included in the Debugger's
-     * checksEnabled() function, and therefore in fDebugCheck, so for maximum speed, we check fDebugCheck first.
+     * The enabling of INT messages is one of the criteria that's also included in the Debugger's checksEnabled()
+     * function, and therefore included in fDebugCheck, so for maximum speed, we check fDebugCheck first.
+     *
+     * NOTE: By wrapping this in MAXDEBUG, we're effectively eliminating the need for any checkIntReturn() calls;
+     * onIntReturn() generates a lot of noise, via dbg.messageIntReturn(), and because there's no way to be be sure
+     * we'll catch the return (or for some interrupts, *whether* they will return), it's safer to disable this
+     * feature unless you really want it.
      */
     if (DEBUGGER && this.aFlags.fDebugCheck) {
-        if (this.messageEnabled(Messages.INT) && this.dbg.messageInt(nInt, this.regLIP)) {
+        if (this.messageEnabled(Messages.INT) && this.dbg.messageInt(nInt, this.regLIP) && MAXDEBUG) {
             this.addIntReturn(this.regLIP, function(cpu, nCycles) {
                 return function onIntReturn(nLevel) {
                     cpu.dbg.messageIntReturn(nInt, nLevel, cpu.getCycles() - nCycles);

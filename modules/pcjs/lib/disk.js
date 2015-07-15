@@ -1279,13 +1279,13 @@ Disk.prototype.updateSector = function(file, pba, off)
     var cylinder, head, sector;
     if ((cylinder = this.aDiskData[iCylinder]) && (head = cylinder[iHead]) && (sector = head[iSector])) {
         this.assert(sector['sector'] == iSector +1);
-        if (sector.file) {
+        if (sector['file']) {
             if (DEBUG && this.messageEnabled()) {
-                this.printMessage('"' + sector.file.sPath + '" cross-linked at offset ' + sector.file.offFile + ' with "' + file.sPath + '" at offset ' + off);
+                this.printMessage('"' + sector['file'].sPath + '" cross-linked at offset ' + sector['file'].offFile + ' with "' + file.sPath + '" at offset ' + off);
             }
             return false;
         }
-        sector.file = file;
+        sector['file'] = file;
         sector.offFile = off;
         return true;
     }
@@ -2114,7 +2114,16 @@ Disk.prototype.restore = function(deltas)
  */
 Disk.prototype.toJSON = function()
 {
-    var s = JSON.stringify(this.aDiskData);
+    var s = JSON.stringify(this.aDiskData, function(key, value) {
+        /*
+         * If BACKTRACK support is enabled, we have to filter out any 'file' properties that may
+         * be attached to the sector objects, lest we risk blowing the stack due to circular references.
+         */
+        if (key == 'file') {
+            return undefined;
+        }
+        return value;
+    });
     s = s.replace(/,"length":512/gm, "").replace(/,"pattern":0/gm, "");
     /*
      * I don't really want to strip quotes from disk image property names, since I would have to put them

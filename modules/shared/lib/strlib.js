@@ -37,19 +37,19 @@ var str = {};
 /**
  * isValidInt(s, base)
  *
- * Since the built-in parseInt() function has the annoying feature of returning a partial value
- * when it encounters an invalid character (eg, parseInt("foo", 16) returns 0xf), use this function
- * to validate the entire string first.
+ * The built-in parseInt() function has the annoying feature of returning a partial value (ie,
+ * up to the point where it encounters an invalid character); eg, parseInt("foo", 16) returns 0xf.
+ * So use this function to validate the entire string.
  *
  * @param {string} s is the string representation of some number
  * @param {number} [base] is the radix of the number represented above (only 10 and 16 are supported)
- * @return {boolean} true if valid (or we're not sure because the base isn't recognized), false if invalid
+ * @return {boolean} true if valid, false if invalid (or the specified base isn't supported)
  */
 str.isValidInt = function(s, base)
 {
     if (!base || base == 10) return s.match(/^[0-9]+$/) !== null;
     if (base == 16) return s.match(/^[0-9a-f]+$/i) !== null;
-    return true;
+    return false;
 };
 
 /**
@@ -105,7 +105,7 @@ str.parseInt = function(s, base)
  * an exception, whereas toHex() will simply return '?' characters.
  *
  * NOTE: The following work-around (adapted from code found on StackOverflow) would be another solution,
- * taking care of negative values, zero-padding, and upper-casing, but not undefined/NaN values:
+ * taking care of negative values, zero-padding, and upper-casing, but not null/undefined/NaN values:
  *
  *      s = (n < 0? n + 0x100000000 : n).toString(16);
  *      s = "00000000".substr(0, 8 - s.length) + s;
@@ -312,7 +312,7 @@ str.replaceArray = function(a, s)
 /**
  * pad(s, cch)
  *
- * Note that the maximum amount of padding currently supported is 40 spaces.
+ * NOTE: the maximum amount of padding currently supported is 40 spaces.
  *
  * @param {string} s is a string
  * @param {number} cch is desired length

@@ -1172,8 +1172,9 @@ FDC.prototype.autoMount = function(fRemount)
                  */
                 var iDrive = sDrive.charCodeAt(0) - 0x41;
                 if (iDrive >= 0 && iDrive < this.aDrives.length) {
-                    if (!this.loadDiskette(iDrive, configDrive['name'], configDrive['path'], true) && fRemount)
+                    if (!this.loadDiskette(iDrive, configDrive['name'], configDrive['path'], true) && fRemount) {
                         this.setReady(false);
+                    }
                     continue;
                 }
             }
