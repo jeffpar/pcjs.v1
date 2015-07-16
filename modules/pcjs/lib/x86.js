@@ -230,7 +230,7 @@ var X86 = {
      * Interrupts beyond 0x10 (up through 0x1F) are reserved for future exceptions.
      *
      * Implementation Detail: For any opcode we know must generate a UD_FAULT interrupt, we invoke opInvalid(),
-     * NOT opUndefined().  UD_FAULT is for INVALID opcodes, Intel's choice of "UD" notwithstanding.
+     * NOT opUndefined().  UD_FAULT is for INVALID opcodes, Intel's choice of term "undefined" notwithstanding.
      *
      * We reserve the term "undefined" for opcodes that require more investigation, and we invoke opUndefined()
      * ONLY until an opcode's behavior has finally been defined, at which point it becomes either valid or invalid.

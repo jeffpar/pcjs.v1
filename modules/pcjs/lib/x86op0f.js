@@ -1332,6 +1332,24 @@ X86.aOps0F[0x06] = X86.opCLTS;
  */
 X86.aOps0F[0x0B] = X86.opInvalid;
 
+/*
+ * NOTE: Any other opcode slots NOT explicitly initialized above with either a dedicated function OR opInvalid()
+ * will be set to opUndefined() when initProcessor() finalizes the opcode tables.  If the processor is an 80386,
+ * initProcessor() will also incorporate all the handlers listed below in aOps0F386.
+ *
+ * A call to opUndefined() implies something serious has occurred that merits our attention (eg, perhaps someone
+ * is using an undocumented opcode that we haven't implemented yet), whereas a call to opInvalid() may or may not.
+ *
+ * For example, when Windows initializes in protected-mode, it sets a DPMI exception handler for UD_FAULT and
+ * then attempts to generate that exception with undefined opcode 0x0F,0xFF.  Apparently, whoever wrote that code
+ * (davidw?) didn't get the Intel memo regarding the preferred invalid opcode (0x0F,0x0B, aka UD2), or perhaps Intel
+ * hadn't written that memo yet -- although if that's the case, then Intel should have followed Microsoft's lead and
+ * selected 0x0F,0xFF instead of 0x0F,0x0B.
+ *
+ * In any case, this means we need to explicitly set the handler for that opcode to opInvalid(), too.
+ */
+X86.aOps0F[0xFF] = X86.opInvalid;
+
 if (I386) {
     X86.aOps0F386 = [];
     X86.aOps0F386[0x20] = X86.opMOVrc;

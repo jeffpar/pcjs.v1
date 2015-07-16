@@ -4017,7 +4017,6 @@ X86.opGRP4w = function GRP4w()
 X86.opInvalid = function opInvalid()
 {
     X86.fnFault.call(this, X86.EXCEPTION.UD_FAULT);
-    this.stopCPU();
 };
 
 /**
