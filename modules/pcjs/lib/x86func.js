@@ -448,9 +448,9 @@ X86.fnDECb = function DECb(dst, src)
  */
 X86.fnDECr = function DECr(w)
 {
-    var result = ((w & this.dataMask) - 1)|0;
-    this.setArithResult(w, 1, result, X86.RESULT.WORD | X86.RESULT.NOTCF, true);
-    this.nStepCycles -= 2;                          // the register form of INC takes 2 cycles on all CPUs
+    var result = (w - 1)|0;
+    this.setArithResult(w, 1, result, this.dataType | X86.RESULT.NOTCF, true);
+    this.nStepCycles -= 2;                          // the register form of DEC takes 2 cycles on all CPUs
     return (w & ~this.dataMask) | (result & this.dataMask);
 };
 
@@ -465,9 +465,9 @@ X86.fnDECr = function DECr(w)
 X86.fnDECw = function DECw(dst, src)
 {
     var w = (dst - 1)|0;
-    this.setArithResult(dst, 1, w, X86.RESULT.WORD | X86.RESULT.NOTCF, true);
+    this.setArithResult(dst, 1, w, this.dataType | X86.RESULT.NOTCF, true);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIncR : this.cycleCounts.nOpCyclesIncM);
-    return w & 0xffff;
+    return w & this.dataMask;
 };
 
 /**
@@ -1168,8 +1168,8 @@ X86.fnINCb = function INCb(dst, src)
  */
 X86.fnINCr = function INCr(w)
 {
-    var result = ((w & this.dataMask) + 1)|0;
-    this.setArithResult(w, 1, result, X86.RESULT.WORD | X86.RESULT.NOTCF);
+    var result = (w + 1)|0;
+    this.setArithResult(w, 1, result, this.dataType | X86.RESULT.NOTCF);
     this.nStepCycles -= 2;                          // the register form of INC takes 2 cycles on all CPUs
     return (w & ~this.dataMask) | (result & this.dataMask);
 };
@@ -1185,9 +1185,9 @@ X86.fnINCr = function INCr(w)
 X86.fnINCw = function INCw(dst, src)
 {
     var w = (dst + 1)|0;
-    this.setArithResult(dst, 1, w, X86.RESULT.WORD | X86.RESULT.NOTCF);
+    this.setArithResult(dst, 1, w, this.dataType | X86.RESULT.NOTCF);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesIncR : this.cycleCounts.nOpCyclesIncM);
-    return w & 0xffff;
+    return w & this.dataMask;
 };
 
 /**
@@ -1858,9 +1858,9 @@ X86.fnNEGb = function NEGb(dst, src)
 X86.fnNEGw = function NEGw(dst, src)
 {
     var w = (-dst)|0;
-    this.setArithResult(0, dst, w, X86.RESULT.WORD | X86.RESULT.ALL, true);
+    this.setArithResult(0, dst, w, this.dataType | X86.RESULT.ALL, true);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesNegR : this.cycleCounts.nOpCyclesNegM);
-    return w & 0xffff;
+    return w & this.dataMask;
 };
 
 /**
@@ -1888,7 +1888,7 @@ X86.fnNOTb = function NOTb(dst, src)
 X86.fnNOTw = function NOTw(dst, src)
 {
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesNegR : this.cycleCounts.nOpCyclesNegM);
-    return dst ^ 0xffff;
+    return dst ^ this.dataMask;
 };
 
 /**
@@ -3169,14 +3169,14 @@ X86.fnSUBw = function SUBw(dst, src)
 };
 
 /**
- * fnTEST8(dst, src)
+ * fnTESTib(dst, src)
  *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src (null; we have to supply the source ourselves)
  * @return {number}
  */
-X86.fnTEST8 = function TEST8(dst, src)
+X86.fnTESTib = function TESTib(dst, src)
 {
     src = this.getIPByte();
     this.setLogicResult(dst & src, X86.RESULT.BYTE);
@@ -3186,17 +3186,17 @@ X86.fnTEST8 = function TEST8(dst, src)
 };
 
 /**
- * fnTEST16(dst, src)
+ * fnTESTiw(dst, src)
  *
  * @this {X86CPU}
  * @param {number} dst
  * @param {number} src (null; we have to supply the source ourselves)
  * @return {number}
  */
-X86.fnTEST16 = function TEST16(dst, src)
+X86.fnTESTiw = function TESTiw(dst, src)
 {
     src = this.getIPWord();
-    this.setLogicResult(dst & src, X86.RESULT.WORD);
+    this.setLogicResult(dst & src, this.dataType);
     this.nStepCycles -= (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesTestRI : this.cycleCounts.nOpCyclesTestMI);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;
@@ -3228,7 +3228,7 @@ X86.fnTESTb = function TESTb(dst, src)
  */
 X86.fnTESTw = function TESTw(dst, src)
 {
-    this.setLogicResult(dst & src, X86.RESULT.WORD);
+    this.setLogicResult(dst & src, this.dataType);
     this.nStepCycles -= (this.regEAWrite === X86.ADDR_INVALID? (this.regEA === X86.ADDR_INVALID? this.cycleCounts.nOpCyclesTestRR : this.cycleCounts.nOpCyclesTestRM) : this.cycleCounts.nOpCyclesTestRM);
     this.opFlags |= X86.OPFLAG.NOWRITE;
     return dst;

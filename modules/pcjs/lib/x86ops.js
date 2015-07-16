@@ -2549,7 +2549,7 @@ X86.opMOVSb = function MOVSb()
     }
     if (nReps--) {
         var nInc = ((this.regPS & X86.PS.DF)? -1 : 1);
-        this.setSOByte(this.segES, this.regEDI & this.addrMask, this.getSOByte(this.segData, this.regESI));
+        this.setSOByte(this.segES, this.regEDI & this.addrMask, this.getSOByte(this.segData, this.regESI & this.addrMask));
         this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + nInc) & this.addrMask);
         this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + nInc) & this.addrMask);
         this.nStepCycles -= nCycles;
@@ -2584,7 +2584,7 @@ X86.opMOVSw = function MOVSw()
     }
     if (nReps--) {
         var nInc = ((this.regPS & X86.PS.DF)? -this.dataSize : this.dataSize);
-        this.setSOWord(this.segES, this.regEDI & this.addrMask, this.getSOWord(this.segData, this.regESI));
+        this.setSOWord(this.segES, this.regEDI & this.addrMask, this.getSOWord(this.segData, this.regESI & this.addrMask));
         this.regESI = (this.regESI & ~this.addrMask) | ((this.regESI + nInc) & this.addrMask);
         this.regEDI = (this.regEDI & ~this.addrMask) | ((this.regEDI + nInc) & this.addrMask);
         this.nStepCycles -= nCycles;
@@ -4210,12 +4210,12 @@ X86.aOpGrp2d = [
 ];
 
 X86.aOpGrp3b = [
-    X86.fnTEST8,            X86.fnGRPUndefined,     X86.fnNOTb,             X86.fnNEGb,             // 0xF6(reg=0x0-0x3)
+    X86.fnTESTib,           X86.fnGRPUndefined,     X86.fnNOTb,             X86.fnNEGb,             // 0xF6(reg=0x0-0x3)
     X86.fnMULb,             X86.fnIMULb,            X86.fnDIVb,             X86.fnIDIVb             // 0xF6(reg=0x4-0x7)
 ];
 
 X86.aOpGrp3w = [
-    X86.fnTEST16,           X86.fnGRPUndefined,     X86.fnNOTw,             X86.fnNEGw,             // 0xF7(reg=0x0-0x3)
+    X86.fnTESTiw,           X86.fnGRPUndefined,     X86.fnNOTw,             X86.fnNEGw,             // 0xF7(reg=0x0-0x3)
     X86.fnMULw,             X86.fnIMULw,            X86.fnDIVw,             X86.fnIDIVw             // 0xF7(reg=0x4-0x7)
 ];
 
