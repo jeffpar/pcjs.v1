@@ -1909,15 +1909,17 @@ if (DEBUGGER) {
     };
 
     /**
-     * dumpHistory(sCount)
+     * dumpHistory(sCount, cLines)
      *
      * @this {Debugger}
-     * @param {string|undefined} sCount is the number of instructions to rewind to (default is 10)
+     * @param {string} [sCount] is the number of instructions to rewind to (default is 10)
+     * @param {number} [cLines] is the number of instructions to print (default is, again, 10)
      */
-    Debugger.prototype.dumpHistory = function(sCount)
+    Debugger.prototype.dumpHistory = function(sCount, cLines)
     {
         var sMore = "";
-        var cLines = 10;
+        cLines = cLines || 10;
+        var cHistory = 0;
         var iHistory = this.iOpcodeHistory;
         var aHistory = this.aOpcodeHistory;
         if (aHistory.length) {
@@ -1960,10 +1962,11 @@ if (DEBUGGER) {
                 }
                 if (iHistory >= aHistory.length) iHistory = 0;
                 this.nextHistory = n;
+                cHistory++;
                 cLines--;
             }
         }
-        if (cLines == 10) {
+        if (!cHistory) {
             this.println("no " + sMore + "history available");
             this.nextHistory = undefined;
         }
@@ -2050,7 +2053,7 @@ if (DEBUGGER) {
     };
 
     /**
-     * getRegIndex(sReg)
+     * getRegIndex(sReg, off)
      *
      * @this {Debugger}
      * @param {string} sReg
@@ -2203,7 +2206,7 @@ if (DEBUGGER) {
     };
 
     /**
-     * replaceRegs()
+     * replaceRegs(s)
      *
      * @this {Debugger}
      * @param {string} s
@@ -4325,8 +4328,10 @@ if (DEBUGGER) {
             this.println("\tdb [a] [#]    dump # bytes at address a");
             this.println("\tdw [a] [#]    dump # words at address a");
             this.println("\tdd [a] [#]    dump # dwords at address a");
-            this.println("\tdh [#]        dump # instructions prior");
-            if (BACKTRACK) this.println("\tdi [a]        dump backtrack info at address a");
+            this.println("\tdh [#] [#]    dump # instructions prior");
+            if (BACKTRACK) {
+                this.println("\tdi [a]        dump backtrack info at address a");
+            }
             if (sDumpers.length) this.println("dump extensions:\n\t" + sDumpers);
             return;
         }
@@ -4338,8 +4343,13 @@ if (DEBUGGER) {
             this.dumpSymbols();
             return;
         }
+        var cLines = 0;
+        if (sLen) {
+            if (sLen.charAt(0) == "l") sLen = sLen.substr(1);
+            cLines = +sLen;
+        }
         if (sCmd == "dh") {
-            this.dumpHistory(sAddr);
+            this.dumpHistory(sAddr, cLines);
             return;
         }
         if (sCmd == "ds") {     // transform a "ds" command into a "d desc" command
@@ -4369,15 +4379,14 @@ if (DEBUGGER) {
             sDump += sInfo || "no information";
         }
         else {
-            var cLines = 0;
             var cBytes = (sCmd == "dd"? 4 : (sCmd == "dw"? 2 : 1));
             var cNumbers = (16 / cBytes)|0;
-            if (sLen) {
-                if (sLen.charAt(0) == "l") sLen = sLen.substr(1);
-                cLines = +sLen;
-                if (cLines) cLines = ((cLines + cNumbers - 1) / cNumbers)|0;
+            if (!cLines) {
+                cLines = 8;
+            } else {
+                cLines = ((cLines + cNumbers - 1) / cNumbers)|0;
+                if (!cLines) cLines = 1;
             }
-            if (!cLines) cLines = 8;
             for (var iLine = 0; iLine < cLines; iLine++) {
                 var data = 0, iByte = 0;
                 var sData = "", sChars = "";

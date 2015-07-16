@@ -2147,9 +2147,18 @@ X86.fnRETF = function RETF(n)
     var newIP = this.popWord();
     var newCS = this.popWord();
     if (DEBUG) this.printMessage(" returning to " + str.toHex(newCS, 4) + ':' + str.toHex(newIP, this.dataSize << 1), this.bitsMessage, true);
+
     n <<= (this.dataSize >> 2);
     if (n) this.setSP(this.getSP() + n);            // TODO: optimize
-    if (this.setCSIP(newIP, newCS, false)) {
+
+    if (this.setCSIP(newIP, newCS, false)) {        // returns true if a stack switch occurred
+        /*
+         * Fool me once, shame on... whatever.  If setCSIP() indicates a stack switch occurred,
+         * make sure we're in protected mode, because automatic stack switches can't occur in real mode,
+         * and adjusting SP again under those circumstances will likely cause great harm.
+         */
+        this.assert(!!(this.regCR0 & X86.CR0.MSW.PE));
+
         if (n) this.setSP(this.getSP() + n);        // TODO: optimize
         /*
          * As per Intel documentation: "If any of [the DS or ES] registers refer to segments whose DPL is

@@ -1037,6 +1037,7 @@ X86Seg.prototype.updateMode = function(fLoad, fProt)
         this.checkWrite = this.checkWriteReal;
         this.cpl = this.dpl = 0;
         this.addrDesc = X86.ADDR_INVALID;
+        this.fStackSwitch = false;
     }
     return fProt;
 };

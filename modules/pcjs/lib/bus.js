@@ -1116,10 +1116,7 @@ Bus.prototype.getBackTrackObject = function(bti)
 {
     if (BACKTRACK) {
         var slot = bti >>> Bus.BACKTRACK.SLOT_SHIFT;
-        if (slot) {
-            var bto = this.abtObjects[slot-1];
-            if (bto) return bto.obj;
-        }
+        if (slot) return this.abtObjects[slot-1];
     }
     return null;
 };
@@ -1152,9 +1149,9 @@ Bus.prototype.getBackTrackInfo = function(bti)
             var file = bto.obj.file;
             if (file) {
                 this.assert(!bto.off);
-                return file.sName + '[' + (bto.obj.offFile + off) + ']';
+                return file.sName + '[' + str.toHexLong(bto.obj.offFile + off) + ']';
             }
-            return bto.obj.idComponent + '[' + (bto.off + off) + ']';
+            return bto.obj.idComponent + '[' + str.toHexLong(bto.off + off) + ']';
         }
     }
     return null;
