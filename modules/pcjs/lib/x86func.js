@@ -3724,7 +3724,7 @@ X86.fnFaultMessage = function(nFault, nError, fHalt)
      * However, the foregoing notwithstanding, if MESSAGE.HALT is enabled along with all the other required
      * MESSAGE bits, then we want to halt regardless.
      */
-    if (this.messageEnabled(bitsMessage | Messages.HALT)) {
+    if (DEBUG && nFault == X86.EXCEPTION.GP_FAULT || this.messageEnabled(bitsMessage | Messages.HALT)) {
         fHalt = true;
     }
 

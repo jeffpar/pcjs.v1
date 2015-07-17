@@ -219,7 +219,7 @@ X86.opPUSHCS = function PUSHCS()
 };
 
 /**
- * op=0x0F (POP CS) (undocumented on 8086/8088; replaced with opInvalid on 80186/80188, and op0F on 80286 and up)
+ * op=0x0F (POP CS) (undocumented on 8086/8088; replaced with opInvalid() on 80186/80188, and op0F() on 80286 and up)
  *
  * @this {X86CPU}
  */
@@ -1375,10 +1375,18 @@ X86.opGS = function GS()
 X86.opOS = function OS()
 {
     if (I386) {
+        /*
+         * See opAS() for a discussion of multiple prefixes, which applies equally to both
+         * operand-size and address-size prefixes.
+         *
+         * The simple fix here is to skip the bulk of the operation if the prefix is redundant.
+         */
         this.opFlags |= X86.OPFLAG.DATASIZE;
-        this.dataSize ^= 0x6;               // that which is 2 shall become 4, and vice versa
-        this.dataMask ^= (0xffff0000|0);    // that which is 0x0000ffff shall become 0xffffffff, and vice versa
-        this.updateDataSize();
+        if (!(this.opPrefixes & X86.OPFLAG.DATASIZE)) {
+            this.dataSize ^= 0x6;               // that which is 2 shall become 4, and vice versa
+            this.dataMask ^= (0xffff0000|0);    // that which is 0x0000ffff shall become 0xffffffff, and vice versa
+            this.updateDataSize();
+        }
         this.nStepCycles -= this.cycleCounts.nOpCyclesPrefix;
     }
 };
@@ -1393,10 +1401,31 @@ X86.opOS = function OS()
 X86.opAS = function AS()
 {
     if (I386) {
+        /*
+         * Live and learn: multiple address-size prefixes can and do occur on a single instruction,
+         * and contrary to my original assumption that the prefixes act independently, they do not.
+         * During Windows 95 SETUP, the following instruction is executed:
+         *
+         *      06AF:1B4D 67672E          CS:
+         *      06AF:1B50 FFA25A1B        JMP      [BP+SI+1B5A]
+         *
+         * which is in fact:
+         *
+         *      06AF:1B4D 67672E          CS:
+         *      06AF:1B50 FFA25A1B0000    JMP      [EDX+00001B5A]
+         *
+         * The other interesting question is: why/how did this instruction get encoded that way?
+         * All I can say is, there were no explicit prefixes in the source (BSG.ASM), so we'll chalk
+         * it up to a glitch in MASM.
+         *
+         * The simple fix here is to skip the bulk of the operation if the prefix is redundant.
+         */
         this.opFlags |= X86.OPFLAG.ADDRSIZE;
-        this.addrSize ^= 0x06;              // that which is 2 shall become 4, and vice versa
-        this.addrMask ^= (0xffff0000|0);    // that which is 0x0000ffff shall become 0xffffffff, and vice versa
-        this.updateAddrSize();
+        if (!(this.opPrefixes & X86.OPFLAG.ADDRSIZE)) {
+            this.addrSize ^= 0x06;              // that which is 2 shall become 4, and vice versa
+            this.addrMask ^= (0xffff0000|0);    // that which is 0x0000ffff shall become 0xffffffff, and vice versa
+            this.updateAddrSize();
+        }
         this.nStepCycles -= this.cycleCounts.nOpCyclesPrefix;
     }
 };

@@ -3228,15 +3228,25 @@ if (DEBUGGER) {
         var bOpcode = this.getByte(dbgAddr, 1);
 
         /*
-         * Incorporate the following prefixes into the current instruction byte stream.
-         * TODO: Determine the actual effect of multiple OS (and/or multiple AS) prefixes.
+         * Incorporate OS and AS prefixes into the current instruction.
+         *
+         * And the verdict is in: redundant OS and AS prefixes must be ignored;
+         * see opOS() and opAS() for details.  We limit the amount of redundancy
+         * to something reasonable (ie, 4).
          */
-        var cMax = 2;           // let's make sure unfortunate memory contents don't screw us
+        var cMax = 4;
+        var fDataPrefix = false, fAddrPrefix = false;
         while ((bOpcode == X86.OPCODE.OS || bOpcode == X86.OPCODE.AS) && cMax--) {
             if (bOpcode == X86.OPCODE.OS) {
-                dbgAddr.fData32 = !dbgAddr.fData32;
+                if (!fDataPrefix) {
+                    dbgAddr.fData32 = !dbgAddr.fData32;
+                    fDataPrefix = true;
+                }
             } else {
-                dbgAddr.fAddr32 = !dbgAddr.fAddr32;
+                if (!fAddrPrefix) {
+                    dbgAddr.fAddr32 = !dbgAddr.fAddr32;
+                    fAddrPrefix = true;
+                }
             }
             bOpcode = this.getByte(dbgAddr, 1);
         }
