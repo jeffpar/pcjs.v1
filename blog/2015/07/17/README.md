@@ -58,12 +58,14 @@ Then I ran into a couple of Windows 95 oddities.  First, some kernel initializat
 executed an invalid opcode (0x0F,0xFF) and expected its DPMI exception (0x06) handler to field the exception; that was
 fixed by flagging the opcode as genuinely invalid.
 
-By default, PCjs marks opcodes as invalid *only* if they are truly invalid.  PCjs considers the vast
-majority of unused/undocumented opcodes to be merely "undefined" until we've seen them in the wild.  An instruction will
-be marked invalid if we either discover that real hardware generates an Invalid Opcode exception *or* that real software
-expects it to.  Here, it was the latter.
+> ** SIDEBAR **
 
-> SIDEBAR: Don't be confused that Intel also refers to the Invalid Opcode exception (0x06) as a #UD or "undefined"
+> By default, PCjs marks opcodes as invalid *only* if they have been confirmed invalid.  PCjs considers the vast
+majority of unused/undocumented opcodes to be merely "undefined" until I've seen them in the wild.  An instruction will
+be marked invalid if I either discover that real hardware treats it as an Invalid Opcode (by throwing the exception)
+*or* that real software expects it to.  For opcode 0x0F,0xFF, it was the latter.
+
+> Don't be confused that Intel also refers to the Invalid Opcode exception (0x06) as the #UD ("Undefined")
 opcode exception.  Every opcode that triggers that exception is, by definition, defined: it's defined as invalid.
 I consider it a misnomer to refer to any invalid instruction as "undefined".
 
@@ -75,7 +77,12 @@ With all of the above changes in place, PCjs v1.18.4 is able to run Windows 95 S
 completion.  If you want to give it a spin yourself, start the machine below (click the "Run" button) and once it has
 finished booting, run SETUP from drive B, where the first Windows 95 diskette is already loaded.
 
-NOTE: This is a pre-release version of Windows 95, as I don't currently have the RTM version on diskette.
+If, when it crashes (and it will), you're interested in examining the instructions that were executed prior to the
+crash, use the "m int on" Debugger command prior to starting the machine.  That will trigger allocation of the instruction
+history buffer, which you can then dump at any time using the Debugger's "dh" command.
+
+NOTE: The diskette images contain a pre-release version of Windows 95, as I don't currently have the RTM version on
+diskette.
 
 To be continued....
 

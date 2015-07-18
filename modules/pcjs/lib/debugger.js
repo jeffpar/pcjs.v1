@@ -586,6 +586,7 @@ if (DEBUGGER) {
     };
 
     Debugger.TRACE_LIMIT = 100000;
+    Debugger.HISTORY_LIMIT = 100000;
 
     /*
      * Opcode 0x0F has a distinguished history:
@@ -2031,6 +2032,7 @@ if (DEBUGGER) {
                 }
             }
         }
+        this.historyInit();     // call this just in case Messages.INT was turned on
     };
 
     /**
@@ -2468,13 +2470,14 @@ if (DEBUGGER) {
     {
         var i;
         if (!this.checksEnabled()) {
+            if (this.aOpcodeHistory && this.aOpcodeHistory.length) this.println("instruction history buffer freed");
             this.iOpcodeHistory = 0;
             this.aOpcodeHistory = [];
             this.aaOpcodeCounts = [];
             return;
         }
         if (!this.aOpcodeHistory || !this.aOpcodeHistory.length) {
-            this.aOpcodeHistory = new Array(10000);
+            this.aOpcodeHistory = new Array(Debugger.HISTORY_LIMIT);
             for (i = 0; i < this.aOpcodeHistory.length; i++) {
                 /*
                  * Preallocate dummy Addr (Array) objects in every history slot, so that
@@ -2483,6 +2486,7 @@ if (DEBUGGER) {
                 this.aOpcodeHistory[i] = this.newAddr();
             }
             this.iOpcodeHistory = 0;
+            this.println("instruction history buffer allocated");
         }
         if (!this.aaOpcodeCounts || !this.aaOpcodeCounts.length) {
             this.aaOpcodeCounts = new Array(256);
@@ -4821,6 +4825,8 @@ if (DEBUGGER) {
         }
 
         this.println((fCriteria !== null? (fCriteria? "messages on:  " : "messages off: ") : "message categories:\n\t") + (sCategories || "none"));
+
+        this.historyInit();     // call this just in case Messages.INT was turned on
     };
 
     /**
