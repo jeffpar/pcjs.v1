@@ -1536,7 +1536,7 @@ ChipSet.prototype.updateRTCTime = function()
      * Step 3: Update the RTC date/time and deal with Update Interrupts
      */
     var nCyclesDelta = nCyclesUpdate - this.nRTCCyclesLastUpdate;
-    this.assert(nCyclesDelta >= 0);
+    // DEBUG: this.assert(nCyclesDelta >= 0);
     var nSecondsDelta = Math.floor(nCyclesDelta / nCyclesPerSecond);
 
     /*
@@ -1546,7 +1546,7 @@ ChipSet.prototype.updateRTCTime = function()
      * (nCyclesDelta % nCyclesPerSecond) back into nRTCCyclesLastUpdate, so that we will eventually
      * see a one-second delta.
      */
-    this.assert(nSecondsDelta <= 1);
+    // DEBUG: this.assert(nSecondsDelta <= 1);
 
     /*
      * Make sure that CMOS.STATUSB.SET isn't set; if it is, then the once-per-second RTC updates must be
@@ -3673,11 +3673,11 @@ ChipSet.prototype.getTimerCycleLimit = function(iTimer, nCycles)
     if (timer.fCounting) {
         var nCyclesUpdate = this.cpu.getCycles(this.fScaleTimers);
         var ticksElapsed = ((nCyclesUpdate - timer.nCyclesStart) / this.nTicksDivisor) | 0;
-        this.assert(ticksElapsed >= 0);
+        // DEBUG: this.assert(ticksElapsed >= 0);
         var countStart = this.getTimerStart(iTimer);
         var count = countStart - ticksElapsed;
         if (timer.mode == ChipSet.PIT_CTRL.MODE3) count -= ticksElapsed;
-        this.assert(count > 0);
+        // DEBUG: this.assert(count > 0);
         var nCyclesRemain = (count * this.nTicksDivisor) | 0;
         if (timer.mode == ChipSet.PIT_CTRL.MODE3) nCyclesRemain >>= 1;
         if (nCycles > nCyclesRemain) nCycles = nCyclesRemain;

@@ -2064,7 +2064,8 @@ X86CPU.prototype.setCSBase = function(addr)
  */
 X86CPU.prototype.advanceIP = function(inc)
 {
-    this.assert(inc > 0);
+    // DEBUG: this.assert(inc > 0);
+
     this.regLIP = (this.regLIP + inc)|0;
     /*
      * Properly comparing regLIP to regLIPLimit would normally require coercing both to unsigned
@@ -2109,7 +2110,8 @@ X86CPU.prototype.advanceIP = function(inc)
  */
 X86CPU.prototype.rewindIP = function(dec)
 {
-    this.assert(dec < 0);
+    // DEBUG: this.assert(dec < 0);
+
     this.regLIP = (this.regLIP + dec)|0;
     /*
      * Since rewindIP() is used only for discrete "intra-instruction" IP adjustments, there should be no need
@@ -3683,7 +3685,8 @@ X86CPU.prototype.pushWord = function(w)
  */
 X86CPU.prototype.checkINTR = function()
 {
-    this.assert(this.intFlags);
+    // DEBUG: this.assert(this.intFlags);
+
     if (!(this.opFlags & X86.OPFLAG.NOINTR)) {
         /*
          * As discussed above, the 8086/8088 give hardware interrupts higher priority than the TRAP interrupt,
@@ -4003,6 +4006,9 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
             nDebugState = 1;
         }
 
+        /*
+         * SAMPLER:
+         *
         if (SAMPLER) {
             if (++this.iSampleFreq >= this.nSampleFreq) {
                 this.iSampleFreq = 0;
@@ -4029,16 +4035,24 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
                 }
             }
         }
+         */
 
         this.opFlags = 0;
 
+        /*
+         * DEBUG || PREFETCH:
+         *
         if (DEBUG || PREFETCH) {
             this.nBusCycles = 0;
             this.nSnapCycles = this.nStepCycles;
         }
+         */
 
         this.aOps[this.getIPByte()].call(this);
 
+        /*
+         * DEBUG || PREFETCH:
+         *
         if (PREFETCH) {
             var nSpareCycles = (this.nSnapCycles - this.nStepCycles) - this.nBusCycles;
             if (nSpareCycles >= 4) {
@@ -4047,9 +4061,9 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
         }
 
         if (DEBUG) {
-            /*
-             * Make sure that every instruction is assessing a cycle cost, and that the cost is a net positive.
-             */
+            //
+            // Make sure that every instruction is assessing a cycle cost, and that the cost is a net positive.
+            //
             if (this.aFlags.fComplete && this.nStepCycles >= this.nSnapCycles && !(this.opFlags & X86.OPFLAG_PREFIXES)) {
                 this.println("cycle miscount: " + (this.nSnapCycles - this.nStepCycles));
                 this.setIP(this.opLIP - this.segCS.base);
@@ -4057,6 +4071,7 @@ X86CPU.prototype.stepCPU = function(nMinCycles)
                 break;
             }
         }
+         */
 
     } while (this.nStepCycles > 0);
 

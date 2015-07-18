@@ -79,7 +79,7 @@ NOTE: This is a pre-release version of Windows 95, as I don't currently have the
 
 To be continued....
 
-[Embedded DeskPro 386](/devices/pc/machine/compaq/deskpro386/vga/4096kb/machine.xml "PCjs:deskpro386-vga-4096k:::debugger")
+[Embedded DeskPro 386](/devices/pc/machine/compaq/deskpro386/vga/4096kb/machine.xml "PCjs:deskpro386-vga-4096k::uncompiled:debugger")
 
 *[@jeffpar](http://twitter.com/jeffpar)*  
 *July 17, 2015*

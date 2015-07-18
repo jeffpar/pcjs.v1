@@ -364,7 +364,8 @@ Memory.prototype = {
          * memory blocks installed at the programmed address, and so we arrived here at a block with
          * no controller AND no data.
          */
-        Component.assert(adw != null);
+        // DEBUG: Component.assert(adw != null);
+
         if (adw && this.size == adw.length << 2) {
             var i;
             if (FATARRAYS) {
@@ -635,7 +636,7 @@ Memory.prototype = {
      * @param {number} addr
      */
     writeShortDefault: function writeShortDefault(off, w, addr) {
-        Component.assert(!(w & ~0xffff));
+        // DEBUG: Component.assert(!(w & ~0xffff));
         this.writeByte(off, w & 0xff, addr);
         this.writeByte(off + 1, w >> 8, addr);
     },
@@ -662,7 +663,7 @@ Memory.prototype = {
      * @return {number}
      */
     readByteMemory: function readByteMemory(off, addr) {
-        Component.assert(off >= 0 && off < this.size);
+        // DEBUG: Component.assert(off >= 0 && off < this.size);
         if (FATARRAYS) {
             return this.ab[off];
         }
@@ -677,7 +678,7 @@ Memory.prototype = {
      * @return {number}
      */
     readShortMemory: function readShortMemory(off, addr) {
-        Component.assert(off >= 0 && off < this.size - 1);
+        // DEBUG: Component.assert(off >= 0 && off < this.size - 1);
         if (FATARRAYS) {
             return this.ab[off] | (this.ab[off + 1] << 8);
         }
@@ -701,7 +702,7 @@ Memory.prototype = {
      * @return {number}
      */
     readLongMemory: function readLongMemory(off, addr) {
-        Component.assert(off >= 0 && off < this.size - 3);
+        // DEBUG: Component.assert(off >= 0 && off < this.size - 3);
         if (FATARRAYS) {
             return this.ab[off] | (this.ab[off + 1] << 8) | (this.ab[off + 2] << 16) | (this.ab[off + 3] << 24);
         }
@@ -723,7 +724,7 @@ Memory.prototype = {
      * @param {number} addr
      */
     writeByteMemory: function writeByteMemory(off, b, addr) {
-        Component.assert(off >= 0 && off < this.size && (b & 0xff) == b);
+        // DEBUG: Component.assert(off >= 0 && off < this.size && (b & 0xff) == b);
         if (FATARRAYS) {
             this.ab[off] = b;
         } else {
@@ -742,7 +743,7 @@ Memory.prototype = {
      * @param {number} addr
      */
     writeShortMemory: function writeShortMemory(off, w, addr) {
-        Component.assert(off >= 0 && off < this.size - 1 && (w & 0xffff) == w);
+        // DEBUG: Component.assert(off >= 0 && off < this.size - 1 && (w & 0xffff) == w);
         if (FATARRAYS) {
             this.ab[off] = (w & 0xff);
             this.ab[off + 1] = (w >> 8);
@@ -768,7 +769,7 @@ Memory.prototype = {
      * @param {number} addr
      */
     writeLongMemory: function writeLongMemory(off, l, addr) {
-        Component.assert(off >= 0 && off < this.size - 3);
+        // DEBUG: Component.assert(off >= 0 && off < this.size - 3);
         if (FATARRAYS) {
             this.ab[off] = (l & 0xff);
             this.ab[off + 1] = (l >> 8) & 0xff;
@@ -1029,7 +1030,7 @@ Memory.prototype = {
      * @return {number}
      */
     readByteBigEndian: function readByteBigEndian(off, addr) {
-        Component.assert(off >= 0 && off < this.size);
+        // DEBUG: Component.assert(off >= 0 && off < this.size);
         return this.ab[off];
     },
     /**
@@ -1041,7 +1042,7 @@ Memory.prototype = {
      * @return {number}
      */
     readByteLittleEndian: function readByteLittleEndian(off, addr) {
-        Component.assert(off >= 0 && off < this.size);
+        // DEBUG: Component.assert(off >= 0 && off < this.size);
         return this.ab[off];
     },
     /**
@@ -1053,7 +1054,7 @@ Memory.prototype = {
      * @return {number}
      */
     readShortBigEndian: function readShortBigEndian(off, addr) {
-        Component.assert(off >= 0 && off < this.size - 1);
+        // DEBUG: Component.assert(off >= 0 && off < this.size - 1);
         return this.dv.getUint16(off, true);
     },
     /**
@@ -1065,7 +1066,7 @@ Memory.prototype = {
      * @return {number}
      */
     readShortLittleEndian: function readShortLittleEndian(off, addr) {
-        Component.assert(off >= 0 && off < this.size - 1);
+        // DEBUG: Component.assert(off >= 0 && off < this.size - 1);
         /*
          * TODO: It remains to be seen if there's any advantage to checking the offset
          * for an aligned read vs. always reading the bytes separately; it seems a safe bet
@@ -1082,7 +1083,7 @@ Memory.prototype = {
      * @return {number}
      */
     readLongBigEndian: function readLongBigEndian(off, addr) {
-        Component.assert(off >= 0 && off < this.size - 3);
+        // DEBUG: Component.assert(off >= 0 && off < this.size - 3);
         return this.dv.getInt32(off, true);
     },
     /**
@@ -1094,7 +1095,7 @@ Memory.prototype = {
      * @return {number}
      */
     readLongLittleEndian: function readLongLittleEndian(off, addr) {
-        Component.assert(off >= 0 && off < this.size - 3);
+        // DEBUG: Component.assert(off >= 0 && off < this.size - 3);
         /*
          * TODO: It remains to be seen if there's any advantage to checking the offset
          * for an aligned read vs. always reading the bytes separately; it seems a safe bet
@@ -1111,7 +1112,7 @@ Memory.prototype = {
      * @param {number} addr
      */
     writeByteBigEndian: function writeByteBigEndian(off, b, addr) {
-        Component.assert(off >= 0 && off < this.size);
+        // DEBUG: Component.assert(off >= 0 && off < this.size);
         this.ab[off] = b;
         this.fDirty = true;
     },
@@ -1124,7 +1125,7 @@ Memory.prototype = {
      * @param {number} b
      */
     writeByteLittleEndian: function writeByteLittleEndian(off, b, addr) {
-        Component.assert(off >= 0 && off < this.size);
+        // DEBUG: Component.assert(off >= 0 && off < this.size);
         this.ab[off] = b;
         this.fDirty = true;
     },
@@ -1137,7 +1138,7 @@ Memory.prototype = {
      * @param {number} w
      */
     writeShortBigEndian: function writeShortBigEndian(off, w, addr) {
-        Component.assert(off >= 0 && off < this.size - 1);
+        // DEBUG: Component.assert(off >= 0 && off < this.size - 1);
         this.dv.setUint16(off, w, true);
         this.fDirty = true;
     },
@@ -1150,7 +1151,7 @@ Memory.prototype = {
      * @param {number} w
      */
     writeShortLittleEndian: function writeShortLittleEndian(off, w, addr) {
-        Component.assert(off >= 0 && off < this.size - 1);
+        // DEBUG: Component.assert(off >= 0 && off < this.size - 1);
         /*
          * TODO: It remains to be seen if there's any advantage to checking the offset
          * for an aligned write vs. always writing the bytes separately; it seems a safe bet
@@ -1173,7 +1174,7 @@ Memory.prototype = {
      * @param {number} addr
      */
     writeLongBigEndian: function writeLongBigEndian(off, l, addr) {
-        Component.assert(off >= 0 && off < this.size - 3);
+        // DEBUG: Component.assert(off >= 0 && off < this.size - 3);
         this.dv.setInt32(off, l, true);
         this.fDirty = true;
     },
@@ -1186,7 +1187,7 @@ Memory.prototype = {
      * @param {number} addr
      */
     writeLongLittleEndian: function writeLongLittleEndian(off, l, addr) {
-        Component.assert(off >= 0 && off < this.size - 3);
+        // DEBUG: Component.assert(off >= 0 && off < this.size - 3);
         /*
          * TODO: It remains to be seen if there's any advantage to checking the offset
          * for an aligned write vs. always writing the bytes separately; it seems a safe bet
@@ -1238,7 +1239,7 @@ Memory.prototype = {
      * @return {number}
      */
     readBackTrackIndex: function readBackTrackIndex(off) {
-        Component.assert(off >= 0 && off < this.size);
+        // DEBUG: Component.assert(off >= 0 && off < this.size);
         return this.abtIndexes[off];
     },
     /**
@@ -1251,7 +1252,7 @@ Memory.prototype = {
      */
     writeBackTrackIndex: function writeBackTrackIndex(off, bti) {
         var btiPrev;
-        Component.assert(off >= 0 && off < this.size);
+        // DEBUG: Component.assert(off >= 0 && off < this.size);
         btiPrev = this.abtIndexes[off];
         this.abtIndexes[off] = bti;
         return btiPrev;

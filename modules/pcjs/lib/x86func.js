@@ -3723,8 +3723,11 @@ X86.fnFaultMessage = function(nFault, nError, fHalt)
     /*
      * However, the foregoing notwithstanding, if MESSAGE.HALT is enabled along with all the other required
      * MESSAGE bits, then we want to halt regardless.
+     *
+     * TODO: Eventually remove the code below that halts on all MODEL_80386 GP_FAULTs; this is just to make it
+     * easier to catch bad faults on DeskPro 386 configurations.
      */
-    if (DEBUG && nFault == X86.EXCEPTION.GP_FAULT || this.messageEnabled(bitsMessage | Messages.HALT)) {
+    if (DEBUGGER && this.model == X86.MODEL_80386 && nFault == X86.EXCEPTION.GP_FAULT || this.messageEnabled(bitsMessage | Messages.HALT)) {
         fHalt = true;
     }
 
