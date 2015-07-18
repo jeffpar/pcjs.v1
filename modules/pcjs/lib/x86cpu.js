@@ -3830,8 +3830,6 @@ X86CPU.prototype.updateStatus = function(fForce)
             this.updateReg("DS", this.getDS());
             this.updateReg("SS", this.getSS());
             this.updateReg("ES", this.getES());
-            this.updateReg("FS", this.getFS());
-            this.updateReg("GS", this.getGS());
             this.updateReg("EIP", this.getIP());
             var regPS = this.getPS();
             this.updateReg("PS", regPS);
@@ -3844,9 +3842,13 @@ X86CPU.prototype.updateStatus = function(fForce)
             this.updateReg("A", (regPS & X86.PS.AF));
             this.updateReg("P", (regPS & X86.PS.PF));
             this.updateReg("C", (regPS & X86.PS.CF));
-            this.updateReg("CR0", this.regCR0);
-            this.updateReg("CR2", this.regCR2);
-            this.updateReg("CR3", this.regCR3);
+            if (this.model == X86.MODEL_80386) {
+                this.updateReg("FS", this.getFS());
+                this.updateReg("GS", this.getGS());
+                this.updateReg("CR0", this.regCR0);
+                this.updateReg("CR2", this.regCR2);
+                this.updateReg("CR3", this.regCR3);
+            }
         }
     }
 
