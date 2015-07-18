@@ -8,7 +8,7 @@
 	<ram id="ramExt" addr="0x100000" size="0x100000" comment="Extended memory at 0x100000"/>
 	<rom id="romEGA" addr="0xc0000" size="0x4000" file="/devices/pc/video/ibm/ega/ibm-ega.json" notify="videoEGA"/>
 	<rom id="romBIOS" addr="0xf8000" size="0x8000" alias="[0xf0000,0xffff0000,0xffff8000]" file="/devices/pc/bios/compaq/deskpro386/1988-01-28/1988-01-28.json"/>
-	<video ref="/devices/pc/video/ibm/ega/ibm-ega-128kb-lock.xml"/>
+	<video ref="/devices/pc/video/ibm/ega/ibm-ega-128kb-autolockfs.xml"/>
 	<keyboard ref="/devices/pc/keyboard/keyboard-minimal-functions.xml"/>
 	<debugger id="debugger" messages="fault|port" commands=""/>
 	<panel ref="/devices/pc/panel/btpanel.xml"/>

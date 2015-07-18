@@ -133,13 +133,28 @@ HDC.DEFAULT_DRIVE_NAME = "Hard Drive";
  *      [3]: total bytes/sector (optional; default is 512)
  *
  * verifyDrive() attempts to confirm that these values agree with the programmed drive characteristics.
+ *
+ * NOTE: For the record, in the world of PCjs, 1Kb is 1 kilobyte aka 1,024 bytes (NOT 1,000), and 1Mb
+ * is 1 megabyte aka 1024*1024 or 1,048,576 bytes (NOT 1,000,000).
+ *
+ * Apparently, in 1998, it was decided that a kilobyte should be 1,000 bytes and a megabyte should be
+ * 1,000,000 bytes, and that if you really meant 2^10 (1,024) or 2^20 (1,048,576), you should use "kibibyte"
+ * (KiB) or "mebibyte" (MiB) instead.  Well, since PCjs simulates machines that pre-date 1998, I feel
+ * perfectly justified in retaining my original understanding of Kb and Mb and completely ignoring the
+ * existence of KiB and MiB.
+ *
+ * Besides, I suspect these changes were nothing more than a self-serving push by hard disk manufacturers,
+ * who wanted to exaggerate their disk capacities by treating Mb as 1,000,000 bytes.
+ *
+ * Also, I capitalize only the first letter of units like Kb and Mb, because kilobyte and megabyte are
+ * single words; if they were two words, or even a pair of hyphenated words, then I might -- but they're not.
  */
 HDC.aDriveTypes = [
     {
         0x00: [306, 2],
         0x01: [375, 8],
         0x02: [306, 6],
-        0x03: [306, 4]         // 10Mb (default XTC drive type)
+        0x03: [306, 4]          // 10Mb (10.16Mb: 306*4*17*512 or 10,653,696 bytes) (default XTC drive type)
     },
     /*
      * Sadly, drive types differ across controller models (XTC drive types don't match ATC drive types),
@@ -167,11 +182,12 @@ HDC.aDriveTypes = [
      *  15  (reserved--all zeros)
      */
     {
-        0x01: [306, 4],         // 10Mb
-        0x02: [615, 4],         // 20Mb (default ATC drive type)
-        0x03: [615, 6],
-        0x04: [940, 8],
-        0x05: [940, 6],
+        0x01: [306, 4],         // 10Mb (10.16Mb:  306*4*17*512 or 10,653,696 bytes)
+        0x02: [615, 4],         // 20Mb (20.42Mb:  615*4*17*512 or 21,411,840 bytes) (default ATC drive type)
+        0x03: [615, 6],         // 31Mb (30.63Mb:  615*6*17*512 or 32,117,760 bytes)
+     // 0x04: [940, 8],         // 62Mb (62.42Mb:  940*8*17*512 or 65,454,080 bytes)
+        0x04: [1023,8],         // 68Mb (67.93Mb: 1023*8*17*512 or 71,233,536 bytes) (this is what a type 4 drive yields on a Compaq DeskPro 386)
+        0x05: [940, 6],         // 47Mb (46.82Mb:  940*6*17*512 or 49,090,560 bytes)
         0x06: [615, 4],
         0x07: [462, 8],
         0x08: [733, 5],

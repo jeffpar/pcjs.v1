@@ -17,6 +17,7 @@
 		<manifest ref="/disks/pc/dos/ibm/7.00/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/dos/microsoft/3.20/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/dos/microsoft/4.0M/manifest.xml" disk="*"/>
+		<manifest ref="/disks/pc/dos/microsoft/5.00/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/dos/compaq/3.10/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/dos/compaq/3.31/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/os2/ibm/1.0/manifest.xml" disk="*"/>
@@ -28,6 +29,7 @@
 		<manifest ref="/disks/pc/windows/1.03a/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/windows/1.04/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/windows/2.03/manifest.xml" disk="*"/>
+		<manifest ref="/disks/pc/windows/win95/build499/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/minix/1.1/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/unix/ibm/pcix/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/unix/microport/system-v/2.3/manifest.xml" disk="*"/>
@@ -37,6 +39,7 @@
 		<manifest ref="/disks/pc/apps/microsoft/word/3.1/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/apps/microsoft/word/5.0/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/apps/microsoft/winword/2.0c/manifest.xml" disk="*"/>
+		<disk path="/disks/pc/games/id/wolf3d/1WOLF14.json">Wolfenstein 3D (v1.4)</disk>
 		<manifest ref="/disks/pc/games/microsoft/flightsim/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/tools/microsoft/basic/manifest.xml" disk="*"/>
 		<manifest ref="/disks/pc/tools/microsoft/c/4.00/manifest.xml" disk="*"/>
