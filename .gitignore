@@ -10,13 +10,13 @@
 index.html
 node_modules
 npm-debug.log
-private
-static
-tmp
 /books
 /notes
-/src
 /states
 /videos
 /web
+private/
+src/
+static/
+tmp/
 .elasticbeanstalk/
