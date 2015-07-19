@@ -8,12 +8,12 @@ At the moment, only a few files are completely agnostic; eg: [strlib.js](strlib.
 One give-away is that neither contain references to any globals (although references to each other
 would be fine).
 
-[netlib.js](netlib.js) is appropriate only for Node modules, because it contains code that relies on Node's
+**netlib.js** is appropriate only for Node modules, because it contains code that relies on Node's
 global *Buffer* object, as indicated by:
 
 	/* global Buffer: false */
 
-And [weblib.js](weblib.js) is appropriate only for client modules, because it contains code that relies on the
+[weblib.js](weblib.js) is appropriate only for client modules, because it contains code that relies on the
 browser's global *window* object, as indicated by:
 
 	/* global window: true */

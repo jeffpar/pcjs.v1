@@ -27,13 +27,13 @@ just ignore it.
 Property names with all UPPER-CASE letters (with optional numbers and/or underscores) represent constants.
 
 I originally adopted this rule in part because it's a popular C language convention, but also because it
-made it easy to write a preprocessing script (see the PCjs Grunt task [prepjs](/modules/grunts/prepjs/))
+made it easy to write a preprocessing script (see the PCjs Grunt task **prepjs** in /modules/grunts/prepjs/)
 that replaced all such property references with the corresponding property values and then removed the original
 property definitions.  Of course, this convention also depended on the properties never being modified *or* enumerated.
   
 I later discovered that Google's Closure Compiler does an excellent job of automatically inlining properties
-that are never modified or enumerated, so the [prepjs](/modules/grunts/prepjs/) preprocessing script is no longer used,
-but I've stuck with the UPPER-CASE convention.
+that are never modified or enumerated, so the **prepjs** preprocessing script is no longer used, but I've stuck
+with the UPPER-CASE convention.
 
 I don't bother with JSDoc *@const* annotations, because 1) the project contains far too many constants, 2)
 all the constants are already effectively annotated by virtue of being UPPER-CASE, and 3) there is no noticeable

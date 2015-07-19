@@ -13,7 +13,7 @@ component, the Color and Rectangle classes of the **Panel** component, etc) do n
 so don't assume that every PCjs object has access to [component.js](../../shared/lib/component.js) methods.
 
 Examples of non-device components include UI components like [panel.js](panel.js) and [debugger.js](debugger.js),
-and sub-components like [x86opxx.js](x86opxx.js) and [x86func.js](x86func.js) that separate the CPU
+and sub-components like [x86ops.js](x86ops.js) and [x86func.js](x86func.js) that separate the CPU
 functionality of [x86.js](x86.js) into more manageable pieces.
 
 These components should always be loaded or compiled in the order listed by the *pcJSFiles* property in

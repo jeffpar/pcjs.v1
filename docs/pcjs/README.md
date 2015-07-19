@@ -133,7 +133,7 @@ All of the demos described above are available for [download](/docs/pcjs/demos/)
 ### Creating PCjs-Compatible Disk Images
 
 If you have (or find) an IMG disk image file on a server, [pcjs.org](http://www.pcjs.org/) provides a
-[DiskDump API](/api/v1/dump) that creates PCjs-compatible disks in JSON:
+**DiskDump API** via endpoint "/api/v1/dump" that creates PCjs-compatible disks in JSON:
 
 	http://www.pcjs.org/api/v1/dump?disk=(file|url)&format=json
 
