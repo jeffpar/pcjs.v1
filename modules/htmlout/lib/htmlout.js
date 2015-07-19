@@ -171,6 +171,7 @@ var asNonDirectories = [
     "COPYING",
     "LICENSE",
     "README",
+    "MAKEFILE",
     "makefile"
 ];
 
