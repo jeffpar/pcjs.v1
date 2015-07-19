@@ -23,6 +23,8 @@ Support is also being added for a few IBM PC-compatible machines, starting with 
 
 ### Model 5160 Machine Configurations
 
+* [IBM PC XT, MDA, 256K, 10Mb Drive](/devices/pc/machine/5160/mda/256kb/)
+* [IBM PC XT, MDA, 256K, 10Mb Drive, Debugger](/devices/pc/machine/5160/mda/256kb/debugger/)
 * [IBM PC XT, CGA, 256K, 10Mb Drive](/devices/pc/machine/5160/cga/256kb/demo/)
 * [IBM PC XT, CGA, 256K, 10Mb Drive, Debugger](/devices/pc/machine/5160/cga/256kb/demo/debugger/)
 * [IBM PC XT, CGA, 256K, Windows 1.01](/devices/pc/machine/5160/cga/256kb/win101/)
