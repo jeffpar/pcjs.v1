@@ -705,7 +705,6 @@ X86CPU.prototype.enablePageBlocks = function()
         }
     }
     this.aBlocksPaged = [];
-    this.stopCPU();
 };
 
 /**

@@ -1454,7 +1454,7 @@ if (DEBUGGER) {
             if (sel === this.cpu.getFS()) return this.cpu.segFS;
             if (sel === this.cpu.getGS()) return this.cpu.segGS;
         }
-        if (this.nBreakSuppress) return null;
+        if (this.nSuppressBreaks) return null;
         var seg = new X86Seg(this.cpu, X86Seg.ID.DEBUG, "DBG");
         /*
          * Note the load() function's fSuppress parameter, which the Debugger should ALWAYS set to true
@@ -1945,27 +1945,33 @@ if (DEBUGGER) {
             if (sCount !== undefined) {
                 this.println(n + " instructions earlier:");
             }
-            while (cLines && iHistory != this.iOpcodeHistory) {
+            this.nSuppressBreaks++;
+            var fData32 = null, fAddr32 = null;
+            while (cLines > 0 && iHistory != this.iOpcodeHistory) {
                 var dbgAddr = aHistory[iHistory++];
                 if (dbgAddr.sel == null) break;
                 /*
-                 * We must create a new dbgAddr from the address we obtained from aHistory, because dbgAddr
-                 * was a reference, not a copy, and we don't want getInstruction() modifying the original.
+                 * We must create a new dbgAddr from the address in aHistory, because dbgAddr was
+                 * a reference, not a copy, and we don't want getInstruction() modifying the original.
                  */
-                dbgAddr = this.newAddr(dbgAddr.off, dbgAddr.sel, dbgAddr.addr);
+                dbgAddr = this.newAddr(dbgAddr.off, dbgAddr.sel, dbgAddr.addr, fData32 == null? dbgAddr.fData32 : fData32, fAddr32 == null? dbgAddr.fAddr32 : fAddr32);
                 this.println(this.getInstruction(dbgAddr, "history", n--));
                 /*
                  * If there was an OPERAND or ADDRESS override on the previous instruction, getInstruction()
                  * will have automatically disassembled the next instruction, so skip one more history entry.
                  */
-                if (dbgAddr.fOverride) {
-                    iHistory++; n--;
+                if (!dbgAddr.fOverride) {
+                    fData32 = fAddr32 = null;
+                } else {
+                    iHistory++; cLines--; n--;
+                    fData32 = dbgAddr.fData32; fAddr32 = dbgAddr.fAddr32;
                 }
                 if (iHistory >= aHistory.length) iHistory = 0;
                 this.nextHistory = n;
                 cHistory++;
                 cLines--;
             }
+            this.nSuppressBreaks--;
         }
         if (!cHistory) {
             this.println("no " + sMore + "history available");
@@ -2867,6 +2873,8 @@ if (DEBUGGER) {
                 dbgAddr.off = this.cpu.getIP();
                 dbgAddr.sel = this.cpu.getCS();
                 dbgAddr.addr = addr;
+                dbgAddr.fData32 = (this.cpu && this.cpu.segCS.dataSize == 4);
+                dbgAddr.fAddr32 = (this.cpu && this.cpu.segCS.addrSize == 4);
                 if (++this.iOpcodeHistory == this.aOpcodeHistory.length) this.iOpcodeHistory = 0;
             }
         }
@@ -2973,11 +2981,11 @@ if (DEBUGGER) {
         }
         this.aBreakWrite = ["write"];
         /*
-         * nBreakSuppress ensures we can't get into an infinite loop where a breakpoint lookup requires
+         * nSuppressBreaks ensures we can't get into an infinite loop where a breakpoint lookup requires
          * reading a segment descriptor via getSegment(), and that triggers more memory reads, which triggers
          * more breakpoint checks.
          */
-        this.nBreakSuppress = 0;
+        this.nSuppressBreaks = 0;
     };
 
     /**
@@ -3165,7 +3173,7 @@ if (DEBUGGER) {
          * or history data (see checkInstruction), since we might not actually execute the current instruction.
          */
         var fBreak = false;
-        if (!this.nBreakSuppress++) {
+        if (!this.nSuppressBreaks++) {
 
             addr = this.mapBreakpoint(addr);
 
@@ -3212,7 +3220,7 @@ if (DEBUGGER) {
                 }
             }
         }
-        this.nBreakSuppress--;
+        this.nSuppressBreaks--;
         return fBreak;
     };
 
@@ -3378,11 +3386,13 @@ if (DEBUGGER) {
 
         var sLine = this.hexAddr(dbgAddrIns) + " ";
         var sBytes = "";
-        do {
-            sBytes += str.toHex(this.getByte(dbgAddrIns, 1), 2);
-        } while (dbgAddrIns.addr != dbgAddr.addr);
+        if (dbgAddrIns.addr != X86.ADDR_INVALID && dbgAddr.addr != X86.ADDR_INVALID) {
+            do {
+                sBytes += str.toHex(this.getByte(dbgAddrIns, 1), 2);
+            } while (dbgAddrIns.addr != dbgAddr.addr);
+        }
 
-        sLine += str.pad(sBytes, 16);
+        sLine += str.pad(sBytes, dbgAddrIns.fAddr32? 22 : 16);
         sLine += str.pad(sOpcode, 8);
         if (sOperands) sLine += " " + sOperands;
 
@@ -3391,7 +3401,7 @@ if (DEBUGGER) {
         }
 
         if (sComment && fNonPrefix) {
-            sLine = str.pad(sLine, 56) + ';' + sComment;
+            sLine = str.pad(sLine, dbgAddrIns.fAddr32? 66 : 56) + ';' + sComment;
             if (!this.cpu.aFlags.fChecksum) {
                 sLine += (nSequence != null? '=' + nSequence.toString() : "");
             } else {
@@ -3400,7 +3410,7 @@ if (DEBUGGER) {
             }
         }
 
-        this.initAddrSize(dbgAddr, fNonPrefix);
+        this.initAddrSize(dbgAddr, fNonPrefix, fDataPrefix || fAddrPrefix);
         return sLine;
     };
 
@@ -5424,18 +5434,19 @@ if (DEBUGGER) {
     };
 
     /**
-     * initAddrSize(dbgAddr, fNonPrefix)
+     * initAddrSize(dbgAddr, fNonPrefix, fOverride)
      *
      * @this {Debugger}
      * @param {{DbgAddr}} dbgAddr
      * @param {boolean} fNonPrefix
+     * @param {boolean} [fOverride]
      */
-    Debugger.prototype.initAddrSize = function(dbgAddr, fNonPrefix)
+    Debugger.prototype.initAddrSize = function(dbgAddr, fNonPrefix, fOverride)
     {
         /*
-         * Use dbgAddr.fOverride to record whether we previously processed any OPERAND or ADDRESS overrides.
+         * Use fOverride to record whether we previously processed any OPERAND or ADDRESS overrides.
          */
-        dbgAddr.fOverride = (dbgAddr.fData32 || dbgAddr.fAddr32);
+        dbgAddr.fOverride = fOverride;
         /*
          * For proper disassembly of instructions preceded by an OPERAND (0x66) size prefix, we set
          * dbgAddr.fData32 to true whenever the operand size is 32-bit; similarly, for an ADDRESS (0x67)
